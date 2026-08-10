@@ -18,10 +18,12 @@ file, so what you collect on an e-reader underlines itself in your browser and b
 | Part | State |
 |---|---|
 | Extension loads in Firefox, bubble appears next to a selection | yes |
-| Translation | no engine bundled yet - the bubble says so |
+| Translation engine | Bergamot, inside the package |
+| Translation models | added by hand from files; downloading them comes next |
+| Settings page | shows the language pair, adds and removes models |
 | Vocabulary database, highlighting saved phrases | not started |
 | Reader mode | not started |
-| Import / export (TSV), settings page | not started |
+| Import / export (TSV) | not started |
 | Chromium | builds, untested |
 
 If you are looking for something to use rather than something to read, come back later.
@@ -56,6 +58,24 @@ read along, or read the source, which is deliberately shipped unminified.
 
 There is nothing else. No `tabs`, no `webRequest`, no `cookies`, no `downloads`.
 
+## What is in the package that is not ours
+
+One thing: the translation engine, [Bergamot](https://github.com/browsermt/bergamot-translator)
+- Marian NMT compiled to WebAssembly, MPL-2.0. It is 5 MB of compiled C++ plus 80 KB of
+generated glue, it is committed to this repository rather than installed, and it is the only
+part of this package nobody reads line by line.
+
+Manifest V3 forbids remotely hosted code and WebAssembly counts, so the engine has to be inside
+the package - which is also why the manifest asks for `'wasm-unsafe-eval'` in its own content
+security policy. Nothing else is relaxed.
+
+What can be checked instead of read is in [`vendor/bergamot/README.md`](vendor/bergamot/README.md):
+which published artifact it is, its SHA-256, and why that version. `tools/check-vendor.sh`
+verifies those sums on every run of the quality gate.
+
+Translation models are not in the package. They are data, they are downloaded or added by hand,
+and they are stored locally in the browser's own database.
+
 ## Requirements
 
 Firefox 142 or newer. Two things set that floor: the CSS Custom Highlight API, which is
@@ -68,7 +88,7 @@ extension uses to declare that it collects no data at all.
 npm install          # once
 npm run build        # dist/firefox
 npm start            # build, then launch Firefox with the extension loaded
-tools/check.sh       # the quality gate: typecheck, tests, build, addons-linter
+tools/check.sh       # the quality gate: vendored engine, typecheck, tests, build, addons-linter
 ```
 
 `tools/check.sh` is exactly what CI runs. There is no step in one that is missing from
@@ -81,13 +101,17 @@ ES modules - and the output is deliberately not minified.
 ```
 src/
   background/    the only context that translates and owns the database
+                 (index.js routes messages, engine.worker.js runs the engine)
   content/       what runs on every page: selection, bubble, highlighting
   reader/        the extension's own reader mode
   options/       settings
   lib/
     translator/  engine facade and its providers
+    models/      translation models: the files they are made of, and where they are kept
     matcher/     tokenisation and phrase matching
     store/       IndexedDB, import and export
+vendor/
+  bergamot/      the engine, committed rather than installed
 ```
 
 ## Licence

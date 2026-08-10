@@ -6,6 +6,9 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
+echo "==> vendored engine"
+tools/check-vendor.sh
+
 echo "==> typecheck"
 npm run --silent typecheck
 

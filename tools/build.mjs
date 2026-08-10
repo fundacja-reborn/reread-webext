@@ -21,6 +21,7 @@ const SRC = join(ROOT, "src");
 /** Entry points, relative to `src/`. Each becomes one bundled file in `dist/`. */
 const ENTRY_POINTS = [
   "background/index.js",
+  "background/engine.worker.js",
   "content/index.js",
   "options/options.js",
   "reader/reader.js",
@@ -28,6 +29,19 @@ const ENTRY_POINTS = [
 
 /** Copied through untouched, relative to `src/`. */
 const STATIC_FILES = ["options/options.html", "reader/reader.html", "assets"];
+
+/**
+ * Third-party binaries, relative to the repository root. The licence and the
+ * note about where they came from travel with them: MPL-2.0 asks for the first,
+ * and an unexplained five-megabyte blob inside an extension is exactly what the
+ * second exists to answer.
+ */
+const VENDOR_FILES = [
+  "vendor/bergamot/bergamot-translator-worker.js",
+  "vendor/bergamot/bergamot-translator-worker.wasm",
+  "vendor/bergamot/LICENSE",
+  "vendor/bergamot/README.md",
+];
 
 const TARGETS = /** @type {const} */ (["firefox", "chromium"]);
 
@@ -83,6 +97,10 @@ async function build(target, watch) {
   const copyStatic = async () => {
     for (const file of STATIC_FILES) {
       await cp(join(SRC, file), join(out, file), { recursive: true });
+    }
+    for (const file of VENDOR_FILES) {
+      await mkdir(dirname(join(out, file)), { recursive: true });
+      await cp(join(ROOT, file), join(out, file));
     }
     const manifest = JSON.parse(await readFile(join(SRC, "manifest.json"), "utf8"));
     await writeFile(
