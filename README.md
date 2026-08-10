@@ -22,7 +22,7 @@ file, so what you collect on an e-reader underlines itself in your browser and b
 | Translation models | downloaded on request, or added by hand from files |
 | Settings page | shows the language pair, downloads, adds and removes models |
 | Keeping a phrase, correcting what it means, marking it learned | yes |
-| Underlining saved phrases on the pages you read | not yet - next |
+| Underlining saved phrases on the pages you read | yes |
 | Reader mode | not started |
 | Import / export (TSV) | not started |
 | Chromium | builds, untested |
@@ -37,6 +37,9 @@ If you are looking for something to use rather than something to read, come back
   is better at it than anything that could be added here.
 - **No inflection handling.** Matching is literal: saving `read` does not underline
   `reading`. A known limit, accepted on purpose.
+- **Nothing inside embedded frames.** The content script runs in the page you opened and
+  not in the advertisements, players and widgets embedded in it. Underlines stop at that
+  boundary, and so does everything else this extension does.
 - **No remote code.** Everything that runs is in the package you installed, which
   Manifest V3 enforces anyway.
 
