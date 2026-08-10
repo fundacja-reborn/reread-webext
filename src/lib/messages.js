@@ -21,9 +21,12 @@ export function describeError(code) {
     case ErrorCode.ENGINE_MISSING:
       return "No translation engine yet - this build cannot translate.";
     case ErrorCode.MODEL_MISSING:
-      return "The model for this language pair is not downloaded.";
+      // Not "not downloaded": a model can just as well have been added from
+      // files, and the sentence has to be true either way. What the reader
+      // needs is where to fix it.
+      return "No model for this language pair on this device - add one in the settings.";
     case ErrorCode.UNSUPPORTED_PAIR:
-      return "There is no model for this language pair.";
+      return "No model exists for this language pair.";
     case ErrorCode.TOO_LONG:
       return "That selection is too long to translate.";
     case ErrorCode.UNKNOWN_MESSAGE:
