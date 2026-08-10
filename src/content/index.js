@@ -73,22 +73,31 @@ function adopt(entries) {
  *     ask the background, whose answer rebuilds it for every page after this.
  */
 async function loadVocabulary() {
-  const stored = await webext().storage.local.get([CONFIG_KEY, MIRROR_KEY]);
-  const config = withDefaults(stored[CONFIG_KEY]);
-  const mirror = asMirror(stored[MIRROR_KEY]);
+  // Nothing here may reject: the console this would land in belongs to the page
+  // being read, and an extension that logs stack traces into it looks exactly
+  // like an extension that broke it.
+  try {
+    const stored = await webext().storage.local.get([CONFIG_KEY, MIRROR_KEY]);
+    const config = withDefaults(stored[CONFIG_KEY]);
+    const mirror = asMirror(stored[MIRROR_KEY]);
 
-  if (mirror === null) {
+    if (mirror === null) {
+      vocabulary = new Map();
+      return;
+    }
+    if (mirrorMatches(mirror, config)) {
+      adopt(mirror.entries);
+      return;
+    }
+
+    /** @type {import("../lib/protocol.js").Result<VocabEntry[]>} */
+    const result = await ask({ kind: Message.LIST_PHRASES });
+    if (result.ok) adopt(result.value);
+  } catch {
+    // Storage unreachable: the page keeps working, nothing is underlined, and
+    // the next change to the vocabulary tries again.
     vocabulary = new Map();
-    return;
   }
-  if (mirrorMatches(mirror, config)) {
-    adopt(mirror.entries);
-    return;
-  }
-
-  /** @type {import("../lib/protocol.js").Result<VocabEntry[]>} */
-  const result = await ask({ kind: Message.LIST_PHRASES });
-  if (result.ok) adopt(result.value);
 }
 
 /**
