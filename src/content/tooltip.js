@@ -36,9 +36,9 @@ const STYLE = `
   :host { all: initial; }
   * { box-sizing: border-box; }
 
-  /* The `hidden` attribute is a rule in the browser's own stylesheet, and any
-     rule of ours beats it - `.editor { display: block }` was enough to leave an
-     empty text box sitting under every translation. */
+  /* The hidden attribute is a rule in the browser's own stylesheet, and any
+     rule of ours beats it: one display on .editor was enough to leave an empty
+     text box sitting under every translation. */
   [hidden] { display: none !important; }
 
   .bubble {
