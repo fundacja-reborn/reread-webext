@@ -40,9 +40,9 @@ const EDGE_PUNCTUATION = /^[\p{P}\p{S}]+|[\p{P}\p{S}]+$/gu;
 /**
  * The phrase as the page had it: original case, with the line breaks taken out.
  *
- * This is what goes to the translation engine, punctuation and all - a trailing
- * full stop is how the engine knows it was given a sentence, and taking it away
- * before translating would cost quality for nothing.
+ * The building block of the two functions below rather than something to use
+ * directly. What a selection turns into - for the engine, for the bubble and
+ * for the database alike - is `trimPhrase`.
  *
  * @param {string} text
  * @returns {string}
@@ -52,9 +52,15 @@ export function collapseWhitespace(text) {
 }
 
 /**
- * The phrase as it is stored and shown: `collapseWhitespace` with the
- * punctuation stripped off both ends. Keeps the case, because that is what a
- * reader wants to see again and what an export to Anki should carry.
+ * The phrase as it is translated, shown and stored: `collapseWhitespace` with
+ * the punctuation stripped off both ends. Keeps the case, because that is what
+ * a reader wants to see again and what an export to Anki should carry.
+ *
+ * The engine gets this and not the raw selection. Dragging over a word catches
+ * the comma after it, and `Pacific,` comes back translated as `Pacyfiku,` -
+ * punctuation nobody selected, kept in the vocabulary and exported onto a
+ * flashcard. A single word without a comma also stands a better chance of
+ * coming back in its dictionary form.
  *
  * @param {string} text
  * @returns {string}
