@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+  # When Actions itself is degraded, GitHub can drop run creation entirely: the
+  # push happens, no run is ever born, and the commit keeps no record of having
+  # been checked. This is the way to ask for a run after the fact without
+  # pushing an empty commit to a protected branch.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: quality gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # CI runs the same script a developer runs, rather than a list of steps
+      # that looks like it. A check that exists only in one of the two places is
+      # a check somebody finds out about from a red main.
+      - name: Quality gate
+        run: tools/check.sh

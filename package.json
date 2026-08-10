@@ -1,0 +1,27 @@
+{
+  "name": "reread-webext",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Learn a language while reading the web. Translation, vocabulary and highlighting, all on your own device.",
+  "license": "AGPL-3.0-or-later",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "node tools/build.mjs",
+    "build:chromium": "node tools/build.mjs --target=chromium",
+    "watch": "node tools/build.mjs --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test \"test/**/*.test.js\"",
+    "lint": "npm run build && web-ext lint --source-dir dist/firefox",
+    "check": "tools/check.sh",
+    "start": "npm run build && web-ext run --source-dir dist/firefox"
+  },
+  "devDependencies": {
+    "@types/node": "^26.2.0",
+    "esbuild": "^0.28.2",
+    "typescript": "^7.0.2",
+    "web-ext": "^10.6.0"
+  }
+}

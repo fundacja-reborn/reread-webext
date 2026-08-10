@@ -1,0 +1,36 @@
+/**
+ * Every error code, said in a sentence a reader can act on.
+ *
+ * Keeping this in one module is what makes the rule in `protocol.js` real: a
+ * new code that nobody can phrase does not get added, because the switch below
+ * stops compiling without it.
+ *
+ * English only for now. When the UI is worth translating, this is the module
+ * that grows a catalogue - `_locales/` and `i18n.getMessage` - and every other
+ * file stays as it is.
+ */
+
+import { ErrorCode } from "./protocol.js";
+
+/**
+ * @param {import("./protocol.js").ErrorCodeValue} code
+ * @returns {string}
+ */
+export function describeError(code) {
+  switch (code) {
+    case ErrorCode.ENGINE_MISSING:
+      return "No translation engine yet - this build cannot translate.";
+    case ErrorCode.MODEL_MISSING:
+      return "The model for this language pair is not downloaded.";
+    case ErrorCode.UNSUPPORTED_PAIR:
+      return "There is no model for this language pair.";
+    case ErrorCode.TOO_LONG:
+      return "That selection is too long to translate.";
+    case ErrorCode.UNKNOWN_MESSAGE:
+      return "The extension sent a request it does not understand.";
+    case ErrorCode.INTERNAL:
+      return "Something went wrong inside the extension.";
+    default:
+      return "Something went wrong inside the extension.";
+  }
+}

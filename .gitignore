@@ -1,0 +1,23 @@
+# Claude Code: local instructions and tooling settings. None of it describes the
+# extension, so it stays out of a repository people clone to read the extension.
+CLAUDE.md
+.claude/
+
+# Working files (scratch, experiments, captured logs)
+tmp/
+
+# Build output and the packages built from it
+dist/
+web-ext-artifacts/
+*.xpi
+*.zip
+
+# Dependencies
+node_modules/
+
+# Signing credentials for `web-ext sign` (AMO API key and secret)
+.web-ext-config.mjs
+.env
+
+# macOS
+.DS_Store
