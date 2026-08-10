@@ -51,14 +51,36 @@ function megabytes(bytes) {
 }
 
 /**
+ * Two places report, because there are two things to report about and they are
+ * a screen apart. A download starts at the list of models, so that is where it
+ * has to say how it went - a sentence about a failed download printed below the
+ * file picker is a sentence nobody scrolls to.
+ *
+ * @param {"model-status" | "file-status"} id
+ * @param {string} text
+ * @param {"idle" | "busy" | "error"} [tone]
+ */
+function say(id, text, tone = "idle") {
+  const element = document.getElementById(id);
+  if (element === null) return;
+  element.textContent = text;
+  element.dataset["tone"] = tone;
+}
+
+/**
  * @param {string} text
  * @param {"idle" | "busy" | "error"} [tone]
  */
 function status(text, tone = "idle") {
-  const element = document.getElementById("model-status");
-  if (element === null) return;
-  element.textContent = text;
-  element.dataset["tone"] = tone;
+  say("model-status", text, tone);
+}
+
+/**
+ * @param {string} text
+ * @param {"idle" | "busy" | "error"} [tone]
+ */
+function fileStatus(text, tone = "idle") {
+  say("file-status", text, tone);
 }
 
 /**
@@ -257,12 +279,12 @@ async function addSelectedModel() {
 
   const classified = classifyModelFiles(chosen.map((file) => file.name));
   if (!classified.ok) {
-    status(describeClassifyProblem(classified.problem, classified.detail), "error");
+    fileStatus(describeClassifyProblem(classified.problem, classified.detail), "error");
     return;
   }
 
   const { pair, from, to, byRole } = classified.value;
-  status(`Reading ${chosen.length} files for ${from} to ${to}...`, "busy");
+  fileStatus(`Reading ${chosen.length} files for ${from} to ${to}...`, "busy");
 
   try {
     /** @param {string} name */
@@ -277,10 +299,10 @@ async function addSelectedModel() {
 
     const meta = await putModel({ pair, model, shortlist, vocabs }, { from, to });
     if (input !== null) input.value = "";
-    status(`Added the ${from} to ${to} model, ${megabytes(meta.bytes)} on this device.`);
+    fileStatus(`Added the ${from} to ${to} model, ${megabytes(meta.bytes)} on this device.`);
     await renderModels();
   } catch (error) {
-    status(`Could not add the model: ${message(error)}`, "error");
+    fileStatus(`Could not add the model: ${message(error)}`, "error");
   }
 }
 
