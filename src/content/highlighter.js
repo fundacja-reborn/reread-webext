@@ -8,29 +8,46 @@
  * and comes back as a bug nobody can reproduce.
  *
  * Clicking an underline is answered with geometry rather than
- * `caretPositionFromPoint`: the ranges are already known, and asking which of
- * their rectangles contains the pointer is both exact and one browser
- * difference less to carry into the Chromium port. A caret position would also
- * answer "the nearest place a cursor could go", which is not the same question
- * as "did they click the underline".
+ * `caretPositionFromPoint`: the ranges are already known, so asking which of
+ * their rectangles contains the pointer is exact, and one browser difference
+ * less to carry into the Chromium port. A caret position answers "the nearest
+ * place a cursor could go", which is not the question.
  *
- * What is deliberately not here yet: matches spanning inline elements (a phrase
- * broken by `<em>`), and a `MutationObserver` for pages that add text after
- * they load. Both are known and planned; neither is an unknown.
+ * Pages that change after they load are followed with a `MutationObserver`, and
+ * only the block that changed is looked at again. The observer exists only
+ * while there is something to underline: with an empty vocabulary this module
+ * registers nothing, walks nothing and watches nothing.
  */
 
-import { buildIndex, findMatches } from "../lib/matcher/index.js";
+import { buildIndex } from "../lib/matcher/index.js";
+import { blockAround, scan } from "./scan.js";
 
 /** Must be the name in `highlight.css`. */
 const NAME = "reread";
 
-/** Text that is not prose: never rendered, or being typed into. */
-const SKIP = new Set(["SCRIPT", "STYLE", "NOSCRIPT", "TEXTAREA", "INPUT", "SELECT", "OPTION"]);
+/** How long a page may go on changing before the underlines are caught up. */
+const IDLE_TIMEOUT = 500;
 
-/** @typedef {{ range: Range, normalized: string }} Painted */
+/**
+ * Past this many changed blocks in one batch, the page is being rebuilt rather
+ * than edited, and walking it once is cheaper than reasoning about the pieces.
+ */
+const RESCAN_EVERYTHING = 40;
+
+/** @typedef {import("./scan.js").Painted} Painted */
 
 /** @type {Painted[]} */
 let painted = [];
+/** The registered highlight. It is live: adding a range to it repaints. */
+/** @type {Highlight | null} */
+let live = null;
+/** @type {import("../lib/matcher/index.js").PhraseIndex} */
+let index = new Map();
+/** @type {MutationObserver | null} */
+let observer = null;
+/** @type {Set<Element>} */
+const pending = new Set();
+let scheduled = false;
 
 /**
  * The API, or nothing at all. Firefox has had it since 140 and the manifest
@@ -50,26 +67,24 @@ export function supported() {
   return registry() !== null;
 }
 
+/**
+ * Everything this module has on the page, taken back: the registration, the
+ * ranges, and the observer that would otherwise keep waking up for a
+ * vocabulary that is empty.
+ */
 export function clear() {
+  observer?.disconnect();
+  observer = null;
+  pending.clear();
   painted = [];
+  live = null;
+  index = new Map();
   registry()?.delete(NAME);
 }
 
 /**
- * @param {Node} node
- * @returns {number}
- */
-function acceptNode(node) {
-  const parent = node.parentElement;
-  if (parent === null || SKIP.has(parent.tagName)) return NodeFilter.FILTER_REJECT;
-  // Text being edited moves under the reader's hands, and a range over it is
-  // stale as soon as they type.
-  if (parent.isContentEditable) return NodeFilter.FILTER_REJECT;
-  return NodeFilter.FILTER_ACCEPT;
-}
-
-/**
- * Paints every saved phrase that occurs on the page.
+ * Paints every saved phrase that occurs on the page, and starts following the
+ * page if it changes.
  *
  * @param {Iterable<string>} keys normalized phrases
  * @returns {number} how many occurrences were painted
@@ -78,36 +93,81 @@ export function paint(keys) {
   const api = registry();
   if (api === null || document.body === null) return 0;
 
-  painted = [];
-  const index = buildIndex(keys);
-  if (index.size === 0) {
-    api.delete(NAME);
-    return 0;
+  clear();
+  index = buildIndex(keys);
+  if (index.size === 0) return 0;
+
+  painted = scan(document.body, index);
+  live = new Highlight();
+  for (const { range } of painted) live.add(range);
+  api.set(NAME, live);
+
+  observer = new MutationObserver(onMutations);
+  observer.observe(document.body, { subtree: true, childList: true, characterData: true });
+
+  return painted.length;
+}
+
+/**
+ * @param {MutationRecord[]} records
+ */
+function onMutations(records) {
+  for (const record of records) {
+    // Always the target's block, whether text was edited in place or children
+    // came and went: the block is what now reads differently, and rescanning it
+    // covers everything that happened inside it.
+    const block = blockAround(record.target);
+    if (block !== null) pending.add(block);
   }
+  if (pending.size === 0 || scheduled) return;
 
-  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, { acceptNode });
-  const highlight = new Highlight();
+  scheduled = true;
+  // Idle rather than immediate: a page loading its own content fires hundreds
+  // of these, and none of them is more urgent than the article being readable.
+  if (typeof requestIdleCallback === "function") {
+    requestIdleCallback(catchUp, { timeout: IDLE_TIMEOUT });
+  } else {
+    setTimeout(catchUp, IDLE_TIMEOUT);
+  }
+}
 
-  for (let node = walker.nextNode(); node !== null; node = walker.nextNode()) {
-    const text = node.nodeValue;
-    if (text === null || text.length === 0) continue;
+/**
+ * The blocks that are not inside another block in the same batch - rescanning a
+ * parent already covers its children, and doing both would paint them twice.
+ *
+ * @param {Element[]} blocks
+ * @returns {Element[]}
+ */
+function outermost(blocks) {
+  return blocks.filter((block) => !blocks.some((other) => other !== block && other.contains(block)));
+}
 
-    for (const match of findMatches(text, index)) {
-      const range = document.createRange();
-      range.setStart(node, match.start);
-      range.setEnd(node, match.end);
-      highlight.add(range);
-      painted.push({ range, normalized: match.normalized });
+function catchUp() {
+  scheduled = false;
+  const api = registry();
+  if (api === null || live === null || document.body === null) return;
+
+  const changed = [...pending].filter((block) => block.isConnected);
+  pending.clear();
+  const scopes = changed.length > RESCAN_EVERYTHING ? [document.body] : outermost(changed);
+  if (scopes.length === 0) return;
+
+  /** @type {Painted[]} */
+  const kept = [];
+  for (const entry of painted) {
+    const container = entry.range.startContainer;
+    const stale = !container.isConnected || scopes.some((scope) => scope.contains(container));
+    if (stale) live.delete(entry.range);
+    else kept.push(entry);
+  }
+  painted = kept;
+
+  for (const scope of scopes) {
+    for (const entry of scan(scope, index)) {
+      live.add(entry.range);
+      painted.push(entry);
     }
   }
-
-  if (painted.length === 0) {
-    api.delete(NAME);
-    return 0;
-  }
-
-  api.set(NAME, highlight);
-  return painted.length;
 }
 
 /**
