@@ -15,7 +15,7 @@
 import { webext } from "../lib/browser.js";
 import { CONFIG_KEY, withDefaults } from "../lib/config.js";
 import { describeError } from "../lib/messages.js";
-import { collapseWhitespace, normalize } from "../lib/normalize.js";
+import { normalize, trimPhrase } from "../lib/normalize.js";
 import { ErrorCode, Message, asResult, fail } from "../lib/protocol.js";
 import { MIRROR_KEY, asMirror, mirrorMatches } from "../lib/store/mirror.js";
 import { clear, paint, phraseAt } from "./highlighter.js";
@@ -119,7 +119,11 @@ function readSelection() {
   const selection = window.getSelection();
   if (selection === null || selection.isCollapsed || selection.rangeCount === 0) return null;
 
-  const text = collapseWhitespace(selection.toString());
+  // Trimmed before anything is done with it, the engine included. Dragging over
+  // a word catches the comma after it, and translating `Pacific,` gives back
+  // `Pacyfiku,` - a comma nobody selected, saved into the vocabulary and
+  // exported onto a flashcard. What is translated has to be what is stored.
+  const text = trimPhrase(selection.toString());
   if (text.length === 0) return null;
 
   const rect = selection.getRangeAt(0).getBoundingClientRect();
