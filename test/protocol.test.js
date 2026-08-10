@@ -18,8 +18,41 @@ describe("asRequest", () => {
     });
   });
 
-  it("accepts an open-reader request", () => {
-    assert.deepEqual(asRequest({ kind: Message.OPEN_READER }), { kind: Message.OPEN_READER });
+  it("accepts the requests that carry nothing", () => {
+    for (const kind of [Message.OPEN_READER, Message.OPEN_SETTINGS, Message.LIST_PHRASES]) {
+      assert.deepEqual(asRequest({ kind }), { kind });
+    }
+  });
+
+  it("accepts a save with its meanings", () => {
+    assert.deepEqual(asRequest({ kind: Message.SAVE_PHRASE, text: "bank", translations: ["bank", "brzeg"] }), {
+      kind: Message.SAVE_PHRASE,
+      text: "bank",
+      translations: ["bank", "brzeg"],
+    });
+  });
+
+  it("rejects a save whose meanings are not a list of strings", () => {
+    for (const translations of [undefined, "brzeg", 7, null, ["brzeg", 7], [{}]]) {
+      assert.equal(
+        asRequest({ kind: Message.SAVE_PHRASE, text: "bank", translations }),
+        null,
+        `should have rejected ${JSON.stringify(translations) ?? "undefined"}`,
+      );
+    }
+  });
+
+  it("rejects a save without the phrase it is about", () => {
+    assert.equal(asRequest({ kind: Message.SAVE_PHRASE, translations: ["brzeg"] }), null);
+  });
+
+  it("accepts forgetting a phrase, and only with the phrase", () => {
+    assert.deepEqual(asRequest({ kind: Message.FORGET_PHRASE, text: "bank" }), {
+      kind: Message.FORGET_PHRASE,
+      text: "bank",
+    });
+    assert.equal(asRequest({ kind: Message.FORGET_PHRASE }), null);
+    assert.equal(asRequest({ kind: Message.FORGET_PHRASE, text: 42 }), null);
   });
 
   it("rejects a translate request without text", () => {

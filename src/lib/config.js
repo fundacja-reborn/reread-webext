@@ -6,8 +6,13 @@
 
 import { webext } from "./browser.js";
 
-/** One key, one object: a versioned shape is easier to migrate than loose keys. */
-const STORAGE_KEY = "config";
+/**
+ * One key, one object: a versioned shape is easier to migrate than loose keys.
+ * Exported because a content script reads the settings and the vocabulary
+ * mirror in the same call, and two reads on every page load would be one too
+ * many.
+ */
+export const CONFIG_KEY = "config";
 
 /**
  * @typedef {object} Config
@@ -48,8 +53,8 @@ export function withDefaults(stored) {
  * @returns {Promise<Config>}
  */
 export async function readConfig() {
-  const stored = await webext().storage.local.get(STORAGE_KEY);
-  return withDefaults(stored[STORAGE_KEY]);
+  const stored = await webext().storage.local.get(CONFIG_KEY);
+  return withDefaults(stored[CONFIG_KEY]);
 }
 
 /**
@@ -58,6 +63,6 @@ export async function readConfig() {
  */
 export async function writeConfig(patch) {
   const next = withDefaults({ ...(await readConfig()), ...patch });
-  await webext().storage.local.set({ [STORAGE_KEY]: next });
+  await webext().storage.local.set({ [CONFIG_KEY]: next });
   return next;
 }

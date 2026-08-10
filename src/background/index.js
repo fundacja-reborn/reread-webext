@@ -13,6 +13,7 @@ import { readConfig } from "../lib/config.js";
 import { ErrorCode, Message, asRequest, fail, ok } from "../lib/protocol.js";
 import { setProvider, translate } from "../lib/translator/index.js";
 import { bergamot } from "../lib/translator/providers/bergamot/index.js";
+import { forgetPhrase, listVocabulary, refreshVocabulary, savePhrase } from "./vocabulary.js";
 
 const READER_PAGE = "reader/reader.html";
 
@@ -21,8 +22,12 @@ const READER_PAGE = "reader/reader.html";
 setProvider(bergamot);
 
 /**
+ * @typedef {string | null | import("../lib/protocol.js").VocabEntry[]} Answer
+ */
+
+/**
  * @param {import("../lib/protocol.js").Request} request
- * @returns {Promise<import("../lib/protocol.js").Result<string | null>>}
+ * @returns {Promise<import("../lib/protocol.js").Result<Answer>>}
  */
 async function handle(request) {
   switch (request.kind) {
@@ -38,6 +43,16 @@ async function handle(request) {
       await openReader();
       return ok(null);
     }
+    case Message.OPEN_SETTINGS: {
+      await webext().runtime.openOptionsPage();
+      return ok(null);
+    }
+    case Message.SAVE_PHRASE:
+      return await savePhrase(request);
+    case Message.FORGET_PHRASE:
+      return await forgetPhrase(request);
+    case Message.LIST_PHRASES:
+      return await listVocabulary();
   }
 }
 
@@ -61,4 +76,11 @@ webext().runtime.onMessage.addListener((message, _sender, sendResponse) => {
 
 webext().action.onClicked.addListener(() => {
   void openReader();
+});
+
+// The copy pages read is written whenever the vocabulary changes. An install or
+// an update is the one moment it can be missing while the database is not, so
+// it is also written here - once, not on every wake.
+webext().runtime.onInstalled.addListener(() => {
+  void refreshVocabulary();
 });
