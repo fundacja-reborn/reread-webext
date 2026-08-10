@@ -21,7 +21,8 @@ file, so what you collect on an e-reader underlines itself in your browser and b
 | Translation engine | Bergamot, inside the package |
 | Translation models | downloaded on request, or added by hand from files |
 | Settings page | shows the language pair, downloads, adds and removes models |
-| Vocabulary database, highlighting saved phrases | not started |
+| Keeping a phrase, correcting what it means, marking it learned | yes |
+| Underlining saved phrases on the pages you read | not yet - next |
 | Reader mode | not started |
 | Import / export (TSV) | not started |
 | Chromium | builds, untested |
