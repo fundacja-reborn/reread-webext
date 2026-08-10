@@ -27,8 +27,17 @@ const ENTRY_POINTS = [
   "reader/reader.js",
 ];
 
-/** Copied through untouched, relative to `src/`. */
-const STATIC_FILES = ["options/options.html", "reader/reader.html", "assets"];
+/**
+ * Copied through untouched, relative to `src/`. The highlight stylesheet is
+ * here rather than in a bundle on purpose: it is what the extension does to
+ * somebody else's page, and it should be readable as one short file.
+ */
+const STATIC_FILES = [
+  "options/options.html",
+  "reader/reader.html",
+  "content/highlight.css",
+  "assets",
+];
 
 /**
  * Third-party binaries, relative to the repository root. The licence and the
