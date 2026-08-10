@@ -1,0 +1,26 @@
+/*
+ * How a saved phrase looks on a page that is not ours.
+ *
+ * This is the entire visual footprint of the extension on a page, and it is a
+ * file rather than a style element injected by script on purpose: the page's
+ * DOM stays exactly as its author wrote it, and what the underline looks like
+ * is something anyone can read in the package instead of finding it in a
+ * bundle.
+ *
+ * `::highlight()` only accepts a handful of properties - colour, background,
+ * text decoration and shadow - which is the same reason the CSS Custom
+ * Highlight API is used here at all: it cannot move anything on the page.
+ *
+ * One colour for both themes rather than a `prefers-color-scheme` pair: that
+ * query answers what the browser is set to, not what the page under the
+ * underline is painted with, and a dark rule on a white article would be worse
+ * than a compromise that reads on both.
+ */
+
+::highlight(reread) {
+  text-decoration-line: underline;
+  text-decoration-style: solid;
+  text-decoration-color: #e07b39;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
+}
