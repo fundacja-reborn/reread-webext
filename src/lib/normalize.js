@@ -6,13 +6,13 @@
  * highlighter, and for import - so changing it after the first release means
  * rewriting stored keys, not just recompiling. Anything added here should be a
  * difference nobody would call a difference: a line break inside a selection, a
- * non-breaking space, a soft hyphen left over from justified text.
+ * non-breaking space, a soft hyphen left over from justified text, the comma a
+ * drag-selection caught on its way past.
  *
  * Deliberately not done here:
- *   - stripping punctuation. Selecting `word,` and selecting `word` really do
- *     produce different keys today. Whether that is worth fixing is an open
- *     question in the docs, not something to sneak in.
  *   - lemmatisation. Out of scope by decision: matching is literal.
+ *   - anything that depends on the language being read. One key function, or
+ *     the same phrase would mean different things in different profiles.
  */
 
 /**
@@ -25,8 +25,24 @@
 const LAYOUT_ARTEFACTS = new RegExp("[\\u00AD\\u200B]", "gu");
 
 /**
- * The phrase as it is shown and stored for display: original case, but with the
- * line breaks of the page taken out.
+ * Punctuation and symbols at either end of a phrase, and only at the ends.
+ *
+ * Selecting by dragging catches a trailing comma or a closing quote about as
+ * often as it does not, and a phrase stored as `word,` would never underline
+ * anything: page text is matched token by token, and no tokeniser produces a
+ * token with a comma in it. So the two selections have to reduce to one key.
+ *
+ * Only the edges. `e-mail`, `don't` and `U.S.A.` are one word each, and a rule
+ * that reached inside them would be inventing words nobody selected.
+ */
+const EDGE_PUNCTUATION = /^[\p{P}\p{S}]+|[\p{P}\p{S}]+$/gu;
+
+/**
+ * The phrase as the page had it: original case, with the line breaks taken out.
+ *
+ * This is what goes to the translation engine, punctuation and all - a trailing
+ * full stop is how the engine knows it was given a sentence, and taking it away
+ * before translating would cost quality for nothing.
  *
  * @param {string} text
  * @returns {string}
@@ -36,15 +52,31 @@ export function collapseWhitespace(text) {
 }
 
 /**
- * The matching key: `collapseWhitespace` plus case folding.
+ * The phrase as it is stored and shown: `collapseWhitespace` with the
+ * punctuation stripped off both ends. Keeps the case, because that is what a
+ * reader wants to see again and what an export to Anki should carry.
+ *
+ * @param {string} text
+ * @returns {string}
+ */
+export function trimPhrase(text) {
+  // Trimmed again afterwards: taking a comma off `word ,` leaves a space behind.
+  return collapseWhitespace(text).replace(EDGE_PUNCTUATION, "").trim();
+}
+
+/**
+ * The matching key: `trimPhrase` plus case folding.
  *
  * `toLowerCase` and not `toLocaleLowerCase`: the key must not depend on the
  * locale of the browser that produced it, or the same phrase saved on a Turkish
  * profile would stop matching itself anywhere else.
  *
+ * An empty answer is meaningful - it says the selection was nothing but
+ * punctuation, and there is no phrase there to save or to look up.
+ *
  * @param {string} text
  * @returns {string}
  */
 export function normalize(text) {
-  return collapseWhitespace(text).toLowerCase();
+  return trimPhrase(text).toLowerCase();
 }
