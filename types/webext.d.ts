@@ -37,6 +37,9 @@ interface WebExtBrowser {
       ) => boolean | undefined
     >;
     onInstalled: WebExtEvent<(details: { reason: string }) => void>;
+    // Opening the settings from the bubble. Needs no permission: it is this
+    // extension's own page.
+    openOptionsPage(): Promise<void>;
   };
   storage: {
     local: {
@@ -44,6 +47,11 @@ interface WebExtBrowser {
       set(items: Record<string, unknown>): Promise<void>;
       remove(keys: string | string[]): Promise<void>;
     };
+    // How a page finds out that the vocabulary changed in another tab, without
+    // anything having to be told which tabs exist.
+    onChanged: WebExtEvent<
+      (changes: Record<string, { oldValue?: unknown; newValue?: unknown }>, areaName: string) => void
+    >;
   };
   tabs: {
     create(properties: { url: string; active?: boolean }): Promise<WebExtTab>;
