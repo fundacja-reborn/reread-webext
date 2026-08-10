@@ -1,13 +1,37 @@
 /**
- * The settings page. What it can do today is the part that matters most on the
- * day everything else fails: put a translation model on this device from files,
- * with no network involved.
+ * The settings page, and the only place in this extension that touches the
+ * network.
+ *
+ * Downloading here rather than in the background is deliberate. Firefox may
+ * suspend the background event page whenever it likes, and a twenty-five
+ * megabyte download that dies halfway through because nothing was on screen is
+ * a bug nobody can reproduce. A page somebody is looking at stays alive for as
+ * long as they are looking at it, which is exactly as long as the download is
+ * meant to last.
+ *
+ * The other half of what this page does needs no network at all: putting a
+ * model here from files on disk. That stays, whatever happens to the download
+ * host - it is the way out on the day it stops answering.
  */
 
 import { webext } from "../lib/browser.js";
 import { readConfig } from "../lib/config.js";
+import { describeDownloadProblem, downloadModel } from "../lib/models/download.js";
 import { classifyModelFiles, describeClassifyProblem, isGzip } from "../lib/models/files.js";
+import { modelRows, registrySource } from "../lib/models/registry.js";
 import { deleteModel, listModels, putModel } from "../lib/models/store.js";
+
+/**
+ * The one download that may be in flight. One at a time on purpose: each holds
+ * its files in memory until they are checked, and two at once would double that
+ * for no gain on a single connection.
+ *
+ * @type {{ pair: string, controller: AbortController } | null}
+ */
+let running = null;
+
+/** @type {{ sourceLang: string, targetLang: string }} */
+let config = { sourceLang: "en", targetLang: "pl" };
 
 /**
  * @param {string} id
@@ -37,45 +61,181 @@ function status(text, tone = "idle") {
   element.dataset["tone"] = tone;
 }
 
-async function renderModels() {
-  const container = document.getElementById("models");
-  if (container === null) return;
-  container.replaceChildren();
+/**
+ * @param {string} tag
+ * @param {string} className
+ * @param {string} [text]
+ * @returns {HTMLElement}
+ */
+function element(tag, className, text) {
+  const created = document.createElement(tag);
+  created.className = className;
+  // Every string on this page is ours, but `textContent` is the habit the rest
+  // of the extension keeps, and habits are what hold when the strings change.
+  if (text !== undefined) created.textContent = text;
+  return created;
+}
 
-  const models = await listModels();
-  if (models.length === 0) {
-    const empty = document.createElement("p");
-    empty.className = "empty";
-    empty.textContent = "No models yet. Nothing can be translated until one is added.";
-    container.append(empty);
-    return;
+/**
+ * @param {import("../lib/models/registry.js").ModelRow} row
+ * @returns {HTMLElement}
+ */
+function renderRow(row) {
+  const container = element("div", "model");
+  const name = element("span", "model-pair", `${row.from} to ${row.to}`);
+  if (row.from === config.sourceLang && row.to === config.targetLang) {
+    name.append(element("span", "badge", "what you are reading"));
   }
+  container.append(name);
 
-  for (const model of models) {
-    const row = document.createElement("div");
-    row.className = "model";
-
-    const name = document.createElement("span");
-    name.className = "model-pair";
-    name.textContent = `${model.from} to ${model.to}`;
-
-    const size = document.createElement("span");
-    size.className = "model-size";
-    size.textContent = megabytes(model.bytes);
+  if (row.installed !== null) {
+    container.append(element("span", "model-size", `${megabytes(row.installed.bytes)} here`));
 
     const remove = document.createElement("button");
     remove.type = "button";
     remove.textContent = "Delete";
-    remove.addEventListener("click", () => {
-      void deleteModel(model.pair).then(() => {
-        status(`Deleted the ${model.from} to ${model.to} model.`);
-        return renderModels();
-      });
-    });
-
-    row.append(name, size, remove);
-    container.append(row);
+    remove.disabled = running !== null;
+    remove.addEventListener("click", () => void removeModel(row));
+    container.append(remove);
+    return container;
   }
+
+  const available = row.available;
+  if (available === null) return container;
+
+  container.append(element("span", "model-size", `${megabytes(available.downloadBytes)} to download`));
+
+  const start = document.createElement("button");
+  start.type = "button";
+  start.textContent = "Download";
+  start.disabled = running !== null;
+  start.addEventListener("click", () => void download(row, available));
+  container.append(start);
+  return container;
+}
+
+/**
+ * Swaps a row into the shape it keeps while downloading, and answers with the
+ * function that moves its progress along. Built once rather than re-rendered
+ * per chunk: a progress bar that is replaced fifty times a second is a progress
+ * bar that flickers and loses the button next to it mid-click.
+ *
+ * @param {HTMLElement} container
+ * @param {import("../lib/models/registry.js").RegistryModel} model
+ * @param {AbortController} controller
+ * @returns {(progress: import("../lib/models/download.js").DownloadProgress) => void}
+ */
+function renderDownloading(container, model, controller) {
+  container.replaceChildren();
+  container.append(element("span", "model-pair", `${model.from} to ${model.to}`));
+
+  const bar = document.createElement("progress");
+  bar.className = "model-progress";
+  bar.max = model.downloadBytes;
+  bar.value = 0;
+
+  const size = element("span", "model-size", `0 of ${megabytes(model.downloadBytes)}`);
+
+  const cancel = document.createElement("button");
+  cancel.type = "button";
+  cancel.textContent = "Cancel";
+  cancel.addEventListener("click", () => {
+    cancel.disabled = true;
+    controller.abort();
+  });
+
+  container.append(bar, size, cancel);
+
+  let shown = "";
+  return ({ received, total }) => {
+    bar.max = total;
+    bar.value = received;
+    // Progress arrives a couple of thousand times over a download and the text
+    // only changes every hundred kilobytes of it. Rewriting it anyway would be
+    // a thousand pointless relayouts during the one operation that should feel
+    // smooth.
+    const text = `${megabytes(received)} of ${megabytes(total)}`;
+    if (text !== shown) {
+      shown = text;
+      size.textContent = text;
+    }
+  };
+}
+
+/**
+ * @param {import("../lib/models/registry.js").ModelRow} row
+ */
+async function removeModel(row) {
+  if (running !== null) return;
+  await deleteModel(row.pair);
+  status(`Deleted the ${row.from} to ${row.to} model.`);
+  await renderModels();
+}
+
+/**
+ * @param {import("../lib/models/registry.js").ModelRow} row
+ * @param {import("../lib/models/registry.js").RegistryModel} model
+ */
+async function download(row, model) {
+  if (running !== null) return;
+
+  const controller = new AbortController();
+  running = { pair: row.pair, controller };
+
+  // Redrawn with the download already claimed, which is what greys out every
+  // other button on the page; then this one row becomes a progress bar.
+  await renderModels();
+  const container = document.getElementById(`model-${row.pair}`);
+  const onProgress = container === null ? undefined : renderDownloading(container, model, controller);
+  status(`Downloading the ${model.from} to ${model.to} model - ${megabytes(model.downloadBytes)}.`, "busy");
+
+  const result = await downloadModel(model, { signal: controller.signal, onProgress });
+  running = null;
+
+  if (!result.ok) {
+    status(describeDownloadProblem(result.problem, result.detail), result.problem === "cancelled" ? "idle" : "error");
+    await renderModels();
+    return;
+  }
+
+  try {
+    const meta = await putModel(result.value, { from: model.from, to: model.to });
+    status(`Downloaded the ${model.from} to ${model.to} model, ${megabytes(meta.bytes)} on this device.`);
+  } catch (error) {
+    // The download was fine; the browser would not keep it. Worth saying apart
+    // from a failed download, because the answer is different - space, or a
+    // second copy of this page holding the database open.
+    status(`The model downloaded but could not be stored: ${message(error)}`, "error");
+  }
+
+  await renderModels();
+}
+
+async function renderModels() {
+  const container = document.getElementById("models");
+  if (container === null) return;
+
+  const rows = modelRows(await listModels());
+  container.replaceChildren();
+
+  if (rows.length === 0) {
+    container.append(element("p", "empty", "No models here, and none to download - this build lists none."));
+    return;
+  }
+
+  for (const row of rows) {
+    const rendered = renderRow(row);
+    rendered.id = `model-${row.pair}`;
+    container.append(rendered);
+  }
+}
+
+/**
+ * @param {unknown} error
+ * @returns {string}
+ */
+function message(error) {
+  return error instanceof Error ? error.message : String(error);
 }
 
 /**
@@ -120,18 +280,31 @@ async function addSelectedModel() {
     status(`Added the ${from} to ${to} model, ${megabytes(meta.bytes)} on this device.`);
     await renderModels();
   } catch (error) {
-    status(`Could not add the model: ${error instanceof Error ? error.message : String(error)}`, "error");
+    status(`Could not add the model: ${message(error)}`, "error");
   }
 }
 
 async function render() {
-  const config = await readConfig();
+  config = await readConfig();
   fill("version", webext().runtime.getManifest().version);
   fill("source-lang", config.sourceLang);
   fill("target-lang", config.targetLang);
+
+  const { source, checkedAt } = registrySource();
+  const host = source === "" ? "" : new URL(source).host;
+  fill("model-host", host);
+  fill("model-checked", checkedAt);
+
   await renderModels();
 }
 
 document.getElementById("add-model")?.addEventListener("click", () => void addSelectedModel());
+
+// A download in flight is the one thing on this page that a reload would leave
+// half-finished, and the browser will not warn about it by itself.
+window.addEventListener("beforeunload", (event) => {
+  if (running === null) return;
+  event.preventDefault();
+});
 
 void render();

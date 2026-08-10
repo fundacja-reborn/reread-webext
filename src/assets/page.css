@@ -90,6 +90,32 @@ h2 {
 .model-size {
   color: var(--page-muted);
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.badge {
+  margin-left: 0.6rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  border: 1px solid var(--page-line);
+  color: var(--page-muted);
+  font-size: 0.75rem;
+}
+
+.model-progress {
+  flex: 1;
+  min-width: 6rem;
+  height: 0.5rem;
+  accent-color: var(--page-accent);
+}
+
+button:disabled {
+  color: var(--page-muted);
+  cursor: default;
+}
+
+button:disabled:hover {
+  border-color: var(--page-line);
 }
 
 .empty {

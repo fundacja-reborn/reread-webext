@@ -21,10 +21,10 @@ export function describeError(code) {
     case ErrorCode.ENGINE_MISSING:
       return "No translation engine yet - this build cannot translate.";
     case ErrorCode.MODEL_MISSING:
-      // Not "not downloaded": a model can just as well have been added from
-      // files, and the sentence has to be true either way. What the reader
-      // needs is where to fix it.
-      return "No model for this language pair on this device - add one in the settings.";
+      // Not "not downloaded": a model can just as well be added from files, and
+      // the sentence has to be true either way. What the reader needs is where
+      // to fix it, and that both ways of fixing it are there.
+      return "No model for this language pair on this device - download or add one in the settings.";
     case ErrorCode.UNSUPPORTED_PAIR:
       return "No model exists for this language pair.";
     case ErrorCode.TOO_LONG:

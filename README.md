@@ -19,8 +19,8 @@ file, so what you collect on an e-reader underlines itself in your browser and b
 |---|---|
 | Extension loads in Firefox, bubble appears next to a selection | yes |
 | Translation engine | Bergamot, inside the package |
-| Translation models | added by hand from files; downloading them comes next |
-| Settings page | shows the language pair, adds and removes models |
+| Translation models | downloaded on request, or added by hand from files |
+| Settings page | shows the language pair, downloads, adds and removes models |
 | Vocabulary database, highlighting saved phrases | not started |
 | Reader mode | not started |
 | Import / export (TSV) | not started |
@@ -76,6 +76,23 @@ verifies those sums on every run of the quality gate.
 Translation models are not in the package. They are data, they are downloaded or added by hand,
 and they are stored locally in the browser's own database.
 
+### Where models come from, and why you do not have to trust the host
+
+Models are Mozilla's, [MPL-2.0](https://github.com/mozilla/translations), published in a Google
+Cloud Storage bucket. What is in this package is a list: which pairs can be downloaded, the exact
+address of each file, how big it is, and its SHA-256 - [`src/lib/models/registry.json`](src/lib/models/registry.json).
+A downloaded file is checked against that sum before it is stored, so a host that served something
+else would be serving it to a checksum that throws it away. Where the address moves, the repair is
+that one file.
+
+The sums are computed here rather than copied: Mozilla publishes one, for one file out of three,
+and of its contents after unpacking - which is why this cannot be Subresource Integrity.
+[`tools/models-registry.mjs`](tools/models-registry.mjs) is what downloads a pair and writes the
+entry, and it refuses to do so if its own sum disagrees with the one Mozilla does publish.
+
+Downloading needs no permission the extension does not already have, and adds nothing to the table
+above. It happens on the settings page, while you watch it, and it can be cancelled.
+
 ## Requirements
 
 Firefox 142 or newer. Two things set that floor: the CSS Custom Highlight API, which is
@@ -89,7 +106,13 @@ npm install          # once
 npm run build        # dist/firefox
 npm start            # build, then launch Firefox with the extension loaded
 tools/check.sh       # the quality gate: vendored engine, typecheck, tests, build, addons-linter
+
+node tools/models-registry.mjs --pairs=en-pl,pl-en   # rewrite the model registry (needs the network)
 ```
+
+`tools/models-registry.mjs` is deliberately outside the gate: it downloads tens of megabytes to
+compute the checksums it writes. It is run by hand when a pair is added or a model is retrained,
+and its output is committed.
 
 `tools/check.sh` is exactly what CI runs. There is no step in one that is missing from
 the other.
@@ -107,7 +130,8 @@ src/
   options/       settings
   lib/
     translator/  engine facade and its providers
-    models/      translation models: the files they are made of, and where they are kept
+    models/      translation models: which ones exist, how they are fetched
+                 and checked, and where they are kept
     matcher/     tokenisation and phrase matching
     store/       IndexedDB, import and export
 vendor/
