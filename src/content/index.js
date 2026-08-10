@@ -18,6 +18,7 @@ import { describeError } from "../lib/messages.js";
 import { collapseWhitespace, normalize } from "../lib/normalize.js";
 import { ErrorCode, Message, asResult, fail } from "../lib/protocol.js";
 import { MIRROR_KEY, asMirror, mirrorMatches } from "../lib/store/mirror.js";
+import { clear, paint, phraseAt } from "./highlighter.js";
 import { createTooltip } from "./tooltip.js";
 
 /** @typedef {import("../lib/protocol.js").VocabEntry} VocabEntry */
@@ -60,6 +61,17 @@ async function ask(request) {
  */
 function adopt(entries) {
   vocabulary = new Map(entries);
+  repaint();
+}
+
+/**
+ * An empty vocabulary is not painted white - it is not walked at all. That is
+ * the difference between an extension that costs something on every page and
+ * one that costs something on the pages of somebody who has saved a word.
+ */
+function repaint() {
+  if (vocabulary.size === 0) clear();
+  else paint(vocabulary.keys());
 }
 
 /**
@@ -82,7 +94,7 @@ async function loadVocabulary() {
     const mirror = asMirror(stored[MIRROR_KEY]);
 
     if (mirror === null) {
-      vocabulary = new Map();
+      adopt([]);
       return;
     }
     if (mirrorMatches(mirror, config)) {
@@ -96,7 +108,7 @@ async function loadVocabulary() {
   } catch {
     // Storage unreachable: the page keeps working, nothing is underlined, and
     // the next change to the vocabulary tries again.
-    vocabulary = new Map();
+    adopt([]);
   }
 }
 
@@ -147,10 +159,33 @@ async function onAction(action, meanings) {
   }
 
   // The mirror will say the same thing in a moment, through the storage event.
-  // Doing it here too is what makes the buttons flip without a wait.
+  // Doing it here too is what makes the buttons flip and the underline appear
+  // without a wait - saving a word and watching it underline itself in the
+  // paragraph you are reading is the whole point of the feature.
   if (action === "save") vocabulary.set(phrase.normalized, meanings);
   else vocabulary.delete(phrase.normalized);
+  repaint();
   tooltip.setActions(action === "save" ? ["learned", "edit"] : ["save", "edit"]);
+}
+
+/**
+ * Nothing is asked of the engine for a phrase already saved: the reader has
+ * decided what it means, and their answer is better than a fresh one - and it
+ * is on the screen with no message and no waiting.
+ *
+ * @param {DOMRect} anchor
+ * @param {string} text as the page has it
+ * @param {string} normalized
+ * @returns {boolean} whether it was known
+ */
+function showSaved(anchor, text, normalized) {
+  const meanings = vocabulary.get(normalized);
+  if (meanings === undefined) return false;
+
+  current = { text, normalized };
+  generation += 1;
+  tooltip.show({ anchor, phrase: text, body: meanings.join("\n"), actions: ["learned", "edit"] });
+  return true;
 }
 
 /**
@@ -161,27 +196,21 @@ function onMouseUp(event) {
 
   const selection = readSelection();
   if (selection === null) {
+    // Nothing selected means a click, and a click may have landed on an
+    // underline - which is the other half of what saving a phrase is for.
+    const hit = phraseAt(event.clientX, event.clientY);
+    if (hit !== null && showSaved(hit.rect, hit.text, hit.normalized)) return;
+
     tooltip.hide();
     current = null;
     return;
   }
 
   const normalized = normalize(selection.text);
+  if (showSaved(selection.rect, selection.text, normalized)) return;
+
   current = { text: selection.text, normalized };
   const mine = ++generation;
-
-  const saved = vocabulary.get(normalized);
-  if (saved !== undefined) {
-    // Nothing is asked of the engine: the reader has already decided what this
-    // means, and their answer is better than a fresh one.
-    tooltip.show({
-      anchor: selection.rect,
-      phrase: selection.text,
-      body: saved.join("\n"),
-      actions: ["learned", "edit"],
-    });
-    return;
-  }
 
   tooltip.show({
     anchor: selection.rect,
