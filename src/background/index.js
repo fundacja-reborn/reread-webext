@@ -11,9 +11,14 @@
 import { webext } from "../lib/browser.js";
 import { readConfig } from "../lib/config.js";
 import { ErrorCode, Message, asRequest, fail, ok } from "../lib/protocol.js";
-import { translate } from "../lib/translator/index.js";
+import { setProvider, translate } from "../lib/translator/index.js";
+import { bergamot } from "../lib/translator/providers/bergamot/index.js";
 
 const READER_PAGE = "reader/reader.html";
+
+// The engine itself starts on the first translation, not here: this module runs
+// every time Firefox wakes the event page, and waking up must stay cheap.
+setProvider(bergamot);
 
 /**
  * @param {import("../lib/protocol.js").Request} request

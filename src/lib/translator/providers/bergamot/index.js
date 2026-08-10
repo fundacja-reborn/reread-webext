@@ -1,0 +1,184 @@
+/**
+ * The provider that puts the engine behind the translator facade.
+ *
+ * Everything expensive lives on the other side of a worker: this file only
+ * knows how to ask it something, how to give it a model it does not have yet,
+ * and how to turn its failures into codes the bubble can say out loud.
+ */
+
+import { webext } from "../../../browser.js";
+import { getModelFiles, getModelMeta } from "../../../models/store.js";
+import { ErrorCode, fail, ok } from "../../../protocol.js";
+
+const WORKER_PATH = "background/engine.worker.js";
+
+/**
+ * @typedef {object} Link
+ * @property {Worker} worker
+ * @property {Map<number, { resolve: (value: any) => void, reject: (error: Error) => void }>} pending
+ */
+
+/** @type {Link | null} */
+let link = null;
+
+let serial = 0;
+
+/**
+ * Calls are run one after another. Translating is synchronous inside the
+ * worker, so there is nothing to win by overlapping - and quite a lot to lose,
+ * because two requests for the same missing model would both load it.
+ */
+let queue = Promise.resolve();
+
+/**
+ * Drops the worker. The next call builds a new one, which is also how this
+ * recovers from a background page that was suspended mid-sentence.
+ *
+ * @param {Error} reason
+ */
+function reset(reason) {
+  const dying = link;
+  link = null;
+  // A new worker starts empty, so what the old one held is no longer true.
+  loadedStamp.clear();
+  if (dying === null) return;
+  for (const { reject } of dying.pending.values()) reject(reason);
+  dying.pending.clear();
+  dying.worker.terminate();
+}
+
+/**
+ * @returns {Link}
+ */
+function connect() {
+  if (link !== null) return link;
+
+  const worker = new Worker(webext().runtime.getURL(WORKER_PATH));
+  /** @type {Link} */
+  const fresh = { worker, pending: new Map() };
+
+  worker.addEventListener("message", (event) => {
+    const { id, result, error } = event.data ?? {};
+    const waiting = fresh.pending.get(id);
+    if (waiting === undefined) return;
+    fresh.pending.delete(id);
+    if (error) waiting.reject(new Error(error.message ?? "engine failed"));
+    else waiting.resolve(result);
+  });
+
+  worker.addEventListener("error", (event) => {
+    reset(new Error(`translation engine failed to start: ${event.message ?? "unknown error"}`));
+  });
+
+  link = fresh;
+  return fresh;
+}
+
+/**
+ * @param {string} name
+ * @param {unknown[]} args
+ * @param {Transferable[]} [transfer]
+ * @returns {Promise<any>}
+ */
+function call(name, args, transfer = []) {
+  const { worker, pending } = connect();
+  const id = ++serial;
+  return new Promise((resolve, reject) => {
+    pending.set(id, { resolve, reject });
+    worker.postMessage({ id, name, args }, transfer);
+  });
+}
+
+/**
+ * @template T
+ * @param {() => Promise<T>} work
+ * @returns {Promise<T>}
+ */
+function serialized(work) {
+  // Runs whether or not the previous call succeeded; a failure is that call's
+  // problem, not the next caller's.
+  const result = queue.then(work, work);
+  queue = result.then(
+    () => undefined,
+    () => undefined,
+  );
+  return result;
+}
+
+/**
+ * Which model, by `addedAt`, this worker was given for a pair. Without it,
+ * replacing a model in the settings page would change nothing until the
+ * background happened to be suspended - the worker would keep translating with
+ * the copy it already had.
+ *
+ * @type {Map<string, number>}
+ */
+const loadedStamp = new Map();
+
+/**
+ * @param {string} from
+ * @param {string} to
+ * @returns {Promise<boolean>} false when there is no such model on this device
+ */
+async function ensureModel(from, to) {
+  const pair = `${from}${to}`;
+
+  // Metadata first, always: it is kilobytes, and it answers both "is there one"
+  // and "is it still the one we loaded" without touching the payload.
+  const meta = await getModelMeta(pair);
+  if (meta === null) return false;
+
+  if (loadedStamp.get(pair) === meta.addedAt && (await call("loaded", [{ from, to }]))) {
+    return true;
+  }
+
+  const stored = await getModelFiles(pair);
+  if (stored === null) return false;
+
+  if (loadedStamp.has(pair)) await call("unload", [{ from, to }]);
+
+  // Transferred rather than copied: these buffers are tens of megabytes, they
+  // came straight out of the database, and nothing here needs them afterwards.
+  // Deduplicated because the same vocabulary buffer is usually listed twice and
+  // transferring one buffer twice throws.
+  const buffers = [stored.model, stored.shortlist, ...stored.vocabs];
+  const transfer = buffers.filter((buffer, index) => buffers.indexOf(buffer) === index);
+
+  await call(
+    "load",
+    [
+      { from, to },
+      {
+        model: stored.model,
+        shortlist: stored.shortlist,
+        vocabs: stored.vocabs,
+        config: stored.config ?? {},
+      },
+    ],
+    transfer,
+  );
+  loadedStamp.set(pair, meta.addedAt);
+  return true;
+}
+
+/** @type {import("../../index.js").Provider} */
+export const bergamot = {
+  id: "bergamot",
+
+  translate({ text, from, to }) {
+    return serialized(async () => {
+      try {
+        if (!(await ensureModel(from, to))) return fail(ErrorCode.MODEL_MISSING);
+
+        const translated = await call("translate", [{ from, to }, [text]]);
+        return ok(Array.isArray(translated) ? (translated[0] ?? "") : "");
+      } catch (error) {
+        // A worker that failed once tends to keep failing. Dropping it costs a
+        // few seconds of reloading and beats an extension that stays broken
+        // until the browser restarts.
+        reset(error instanceof Error ? error : new Error(String(error)));
+        return fail(ErrorCode.INTERNAL);
+      }
+    });
+  },
+};

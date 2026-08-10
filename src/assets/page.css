@@ -70,6 +70,83 @@ h2 {
   font-variant-numeric: tabular-nums;
 }
 
+.models {
+  margin: 1rem 0;
+  border-top: 1px solid var(--page-line);
+}
+
+.model {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--page-line);
+}
+
+.model-pair {
+  flex: 1;
+}
+
+.model-size {
+  color: var(--page-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.empty {
+  color: var(--page-muted);
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--page-line);
+}
+
+.files {
+  color: var(--page-muted);
+  line-height: 1.9;
+}
+
+.files em {
+  color: var(--page-accent);
+  font-style: normal;
+}
+
+button {
+  font: inherit;
+  padding: 0.35rem 0.9rem;
+  border-radius: 6px;
+  border: 1px solid var(--page-line);
+  background: transparent;
+  color: var(--page-fg);
+  cursor: pointer;
+}
+
+button:hover {
+  border-color: var(--page-accent);
+}
+
+input[type="file"] {
+  font: inherit;
+  color: var(--page-muted);
+  max-width: 100%;
+}
+
+.status:empty {
+  display: none;
+}
+
+.status {
+  padding: 0.6rem 0;
+  color: var(--page-muted);
+}
+
+.status[data-tone="error"] {
+  color: #a3341f;
+}
+
+@media (prefers-color-scheme: dark) {
+  .status[data-tone="error"] {
+    color: #f0a83c;
+  }
+}
+
 .note {
   margin-top: 2rem;
   padding: 0.9rem 1rem;

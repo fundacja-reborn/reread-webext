@@ -14,14 +14,42 @@
       <div class="row"><dt>Version</dt><dd id="version">-</dd></div>
       <div class="row"><dt>Reading</dt><dd id="source-lang">-</dd></div>
       <div class="row"><dt>Translating into</dt><dd id="target-lang">-</dd></div>
-      <div class="row"><dt>Translation engine</dt><dd id="engine">-</dd></div>
+      <div class="row"><dt>Engine</dt><dd>Bergamot, inside the package</dd></div>
     </dl>
 
+    <h2>Translation models</h2>
+
+    <p>
+      A model is what turns one language into another, and there is one per direction. Nothing is
+      translated until the model for the pair you are reading is here, on this device.
+    </p>
+
+    <div id="models" class="models"></div>
+
+    <h2>Add a model from files</h2>
+
+    <p>
+      Pick the three files of one direction and they are stored locally. Gzipped files are
+      unpacked here, so the downloads can be used as they come:
+    </p>
+
+    <ul class="files">
+      <li><code>model.<em>enpl</em>.intgemm.alphas.bin</code></li>
+      <li><code>lex.50.50.<em>enpl</em>.s2t.bin</code></li>
+      <li><code>vocab.<em>enpl</em>.spm</code></li>
+    </ul>
+
+    <p>
+      <input type="file" id="model-files" multiple accept=".bin,.spm,.gz" />
+      <button type="button" id="add-model">Add model</button>
+    </p>
+
+    <p id="model-status" class="status" role="status"></p>
+
     <p class="note">
-      <strong>Nothing here is editable yet.</strong> The language pair, model downloads,
-      highlight style, per-site switches and import/export arrive with the settings
-      milestone. What this page proves today is that the extension loaded and can read
-      its own settings.
+      This page stays even once models download themselves: it is the way out on the day the place
+      they are downloaded from stops answering. Nothing here leaves the device, and adding a model
+      makes no network request at all.
     </p>
 
     <script src="options.js" defer></script>
