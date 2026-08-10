@@ -26,6 +26,15 @@
 
     <div id="models" class="models"></div>
 
+    <p class="note">
+      Downloading a model is the only time this extension uses the network, and it is the only
+      request it will ever make. The files come from <strong id="model-host">-</strong>, where
+      Mozilla publishes them, at addresses written down in this package. Every file is checked
+      against a checksum that was recorded here on <strong id="model-checked">-</strong>: anything
+      that does not match is thrown away rather than stored. Nothing about you is sent - the
+      request says which model, and nothing else.
+    </p>
+
     <h2>Add a model from files</h2>
 
     <p>
