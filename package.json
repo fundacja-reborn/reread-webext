@@ -16,7 +16,8 @@
     "test": "node --test \"test/**/*.test.js\"",
     "lint": "npm run build && web-ext lint --source-dir dist/firefox",
     "check": "tools/check.sh",
-    "start": "npm run build && web-ext run --source-dir dist/firefox"
+    "start": "npm run build && web-ext run --source-dir dist/firefox",
+    "start:isolated": "npm run build && web-ext run --source-dir dist/firefox --no-reload"
   },
   "devDependencies": {
     "@types/node": "^26.2.0",
