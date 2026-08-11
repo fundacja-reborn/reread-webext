@@ -23,16 +23,18 @@
  * press (G1). They live in their own elements and not in the body, because the
  * body is what gets saved: anything that leaked into it would end up in the
  * vocabulary and on a flashcard.
+ *
+ * A dictionary line is the one thing down there that is also a button. Pressing
+ * it adds that meaning to the body, which is to say to the vocabulary, and
+ * pressing it again takes it back out - the bubble still does not know what
+ * saving means, it just reports the meanings it is showing the moment they
+ * change.
  */
+
+import { MEANING_SEPARATOR, afterChoosing, toMeanings } from "../lib/gloss.js";
 
 const GAP = 8;
 const VIEWPORT_MARGIN = 8;
-
-/**
- * One line per meaning. A word has more than one, and separating them by
- * anything narrower than a line makes them read as one long sentence.
- */
-const MEANING_SEPARATOR = "\n";
 
 const LABELS = Object.freeze({
   save: "Save",
@@ -112,9 +114,38 @@ const STYLE = `
     text-transform: uppercase;
     letter-spacing: 0.04em;
     opacity: 0.6;
+    /* The border and the padding a meaning below it carries, so the two start
+       at the same place on the screen. */
+    padding-left: 5px;
   }
 
-  .entry-sense { white-space: pre-wrap; }
+  /* A meaning is a line to read first and a choice second, so it keeps the shape
+     of the text around it: a stack of things that look like buttons under a word
+     reads as a form to fill in. What says it can be pressed is the cursor and
+     the tint under it, and what says it was pressed is the mark that stays. */
+  .entry-sense {
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 2px 4px;
+    font: inherit;
+    text-align: left;
+    color: inherit;
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 5px;
+    white-space: pre-wrap;
+    cursor: pointer;
+  }
+  .entry-sense[aria-pressed="false"]:hover:not(:disabled) { background: rgba(0, 0, 0, 0.06); }
+  .entry-sense[aria-pressed="true"] {
+    background: rgba(0, 0, 0, 0.07);
+    border-color: rgba(0, 0, 0, 0.22);
+  }
+  /* Not faded while the edit box is open, unlike every other disabled button
+     here: the entry is still there to be read, it just cannot be chosen for as
+     long as the gloss is being typed by hand. */
+  .entry-sense:disabled { opacity: 1; cursor: default; }
 
   .editor {
     display: block;
@@ -162,6 +193,11 @@ const STYLE = `
     .context, .entries { border-top-color: rgba(255, 255, 255, 0.14); }
     /* A shadow that reads as depth on white reads as nothing on dark. */
     .entries[data-more="true"] { box-shadow: inset 0 -14px 12px -12px rgba(0, 0, 0, 0.6); }
+    .entry-sense[aria-pressed="false"]:hover:not(:disabled) { background: rgba(255, 255, 255, 0.08); }
+    .entry-sense[aria-pressed="true"] {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
     .editor {
       background: rgba(255, 255, 255, 0.06);
       border-color: rgba(255, 255, 255, 0.24);
@@ -184,6 +220,11 @@ const STYLE = `
  * records on purpose - deciding whether a book's name or a headword is worth
  * repeating needs to know what the reader selected, and the bubble does not.
  *
+ * One line is one meaning and therefore one button. The caller guarantees that,
+ * because the caller is where a dictionary's idea of a line stops mattering:
+ * whatever a book packed into one field, what a reader presses here has to be
+ * something that can stand alone as the answer to a word.
+ *
  * @typedef {{ label: string, lines: string[] }} Block
  */
 
@@ -200,17 +241,6 @@ const STYLE = `
  * @property {() => void} escape
  * @property {(target: EventTarget | null) => boolean} owns
  */
-
-/**
- * @param {string} text
- * @returns {string[]} one meaning per line, blank ones dropped
- */
-function toMeanings(text) {
-  return text
-    .split(MEANING_SEPARATOR)
-    .map((line) => line.trim())
-    .filter((line) => line.length > 0);
-}
 
 /**
  * @param {object} options
@@ -243,11 +273,21 @@ export function createTooltip({ onAction }) {
   let restingActions = [];
 
   /**
+   * What the bubble is showing as the gloss - which is the edit box while there
+   * is one, because that is what a save would take.
+   *
+   * @returns {string}
+   */
+  function shownGloss() {
+    if (editing && editor !== null) return editor.value;
+    return bodyElement?.textContent ?? "";
+  }
+
+  /**
    * @returns {string[]}
    */
   function currentMeanings() {
-    if (editing && editor !== null) return toMeanings(editor.value);
-    return toMeanings(bodyElement?.textContent ?? "");
+    return toMeanings(shownGloss());
   }
 
   function build() {
@@ -285,9 +325,16 @@ export function createTooltip({ onAction }) {
 
     // Pressing a button must not take the selection away: the page's own
     // selection is what the bubble is about, and it disappearing under the
-    // cursor reads as the extension breaking the page.
-    actionsElement.addEventListener("mousedown", (event) => event.preventDefault());
-    editor.addEventListener("input", refreshDisabled);
+    // cursor reads as the extension breaking the page. The dictionary entries
+    // are in this for the same reason now that a line of one can be pressed -
+    // the bubble deliberately does not repeat the phrase it is about (D23), so
+    // the selection is the only thing on the screen still saying which word all
+    // of this is an answer to. The price is that text in there cannot be
+    // selected with the mouse, which nothing in the bubble is for.
+    for (const element of [actionsElement, entriesElement]) {
+      element.addEventListener("mousedown", (event) => event.preventDefault());
+    }
+    editor.addEventListener("input", refreshControls);
     editor.addEventListener("keydown", onEditorKeyDown);
     // Typing in this box must not reach the page. Plenty of sites bind single
     // letters as shortcuts, and a correction typed into the bubble that also
@@ -319,11 +366,31 @@ export function createTooltip({ onAction }) {
     }
   }
 
-  function refreshDisabled() {
-    if (actionsElement === null) return;
-    const empty = currentMeanings().length === 0;
-    for (const button of actionsElement.querySelectorAll("button")) {
-      if (button.dataset["action"] === "save") button.disabled = empty;
+  /**
+   * Every control the bubble has, made to agree with what it is showing: there
+   * is nothing to save when there is no meaning left, the chosen dictionary line
+   * is the one the gloss came from, and none of them can be chosen while the
+   * gloss is being typed by hand - a press that overwrote the edit box would
+   * throw away what somebody was in the middle of writing.
+   */
+  function refreshControls() {
+    const shown = new Set(currentMeanings());
+
+    if (actionsElement !== null) {
+      for (const button of actionsElement.querySelectorAll("button")) {
+        if (button.dataset["action"] === "save") button.disabled = shown.size === 0;
+      }
+    }
+
+    if (entriesElement !== null) {
+      for (const sense of entriesElement.querySelectorAll("button")) {
+        sense.disabled = editing;
+        // A line is marked when it is one of the meanings on show - which is
+        // also true of a line the reader typed by hand into the edit box, and
+        // that is honest: what the mark says is "this is in", not "you pressed
+        // this".
+        sense.setAttribute("aria-pressed", shown.has(sense.textContent ?? "") ? "true" : "false");
+      }
     }
   }
 
@@ -354,6 +421,29 @@ export function createTooltip({ onAction }) {
       stopEditing(true);
     }
     onAction(action, meanings);
+  }
+
+  /**
+   * A line of a dictionary entry, pressed.
+   *
+   * It goes out as a save and not as some announcement of its own, because it
+   * means exactly what the Save button means: this is what the phrase means from
+   * now on - one meaning longer, or one shorter. The caller does not have to
+   * know which of the two the reader used, and the day it does, that is a second
+   * callback and not a second rule.
+   *
+   * @param {string} sense
+   */
+  function choose(sense) {
+    if (bodyElement === null) return;
+    const next = afterChoosing(bodyElement.textContent ?? "", sense);
+    // Taking out the last meaning there was. A phrase means something or it is
+    // not kept at all, so this press does nothing rather than emptying it.
+    if (next.length === 0) return;
+
+    setBody(next);
+    place();
+    emit("save");
   }
 
   /**
@@ -409,12 +499,17 @@ export function createTooltip({ onAction }) {
       }
 
       for (const line of block.lines) {
-        const sense = document.createElement("div");
+        const sense = document.createElement("button");
+        sense.type = "button";
         sense.className = "entry-sense";
+        // A toggle, and told as one: pressing it makes this the meaning, and
+        // pressing it again gives back the one it replaced.
+        sense.setAttribute("aria-pressed", "false");
         // Every string here came out of a file somebody downloaded, so it goes
         // in as text and never as markup - the same rule that governs text
         // coming off the page.
         sense.textContent = line;
+        sense.addEventListener("click", () => choose(line));
         entry.append(sense);
       }
 
@@ -422,6 +517,7 @@ export function createTooltip({ onAction }) {
     }
 
     unfold(unfolded);
+    refreshControls();
   }
 
   function startEditing() {
@@ -464,7 +560,7 @@ export function createTooltip({ onAction }) {
       button.addEventListener("click", () => emit(action));
       actionsElement.append(button);
     }
-    refreshDisabled();
+    refreshControls();
   }
 
   function place() {
@@ -506,7 +602,7 @@ export function createTooltip({ onAction }) {
     if (bodyElement === null) return;
     bodyElement.textContent = body;
     bodyElement.dataset["tone"] = tone;
-    refreshDisabled();
+    refreshControls();
   }
 
   function hideBubble() {

@@ -14,6 +14,7 @@
 
 import { webext } from "../lib/browser.js";
 import { CONFIG_KEY, withDefaults } from "../lib/config.js";
+import { choosableLines } from "../lib/gloss.js";
 import { keyTokens } from "../lib/matcher/tokenize.js";
 import { describeError } from "../lib/messages.js";
 import { normalize, trimPhrase } from "../lib/normalize.js";
@@ -300,6 +301,10 @@ function showSaved(anchor, text, normalized) {
  * definition of `watch` under a selection of `watches` has to say so, while one
  * under `watch` would just be repeating the page back (D23).
  *
+ * The lines are the entry's meanings one to a row, which is the same thing the
+ * reader has always seen and now also the thing they can press. Nothing about
+ * the entry moves or disappears; what changes is where one row ends.
+ *
  * @param {import("../lib/protocol.js").DictEntry[]} entries
  * @param {string} normalized what the reader selected, as its key
  * @returns {import("./tooltip.js").Block[]}
@@ -311,7 +316,7 @@ function entryBlocks(entries, normalized) {
     const parts = [];
     if (normalize(entry.headword) !== normalized && entry.headword.length > 0) parts.push(entry.headword);
     if (books > 1 && entry.dictionary.length > 0) parts.push(entry.dictionary);
-    return { label: parts.join(" - "), lines: entry.senses };
+    return { label: parts.join(" - "), lines: choosableLines(entry.senses) };
   });
 }
 

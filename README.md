@@ -113,6 +113,12 @@ request is made for one: you unpack the archive yourself and pick the files on t
 A dictionary is parsed once, when it is added, and stored as text in the browser's own database -
 nothing reads a dictionary file while you are reading a page.
 
+What a dictionary says sits behind **More** in the bubble, and any line of it can be pressed:
+that meaning joins what the phrase is kept under. Press it again to take it back out. This is
+what dictionaries are for here - a model has to pick one of *bank* and *riverbank* with no way to
+ask which you meant, and a word usually means both anyway. Whatever you leave on is what ends up
+on the card.
+
 For English and Polish, [WikDict](https://www.wikdict.com/page/download) (CC BY-SA, built from
 Wiktionary through DBnary) is the one to start with: 66 609 entries, and another 51 721 spellings
 in its `.syn` file, which is what lets `elevations` find `elevation`.
