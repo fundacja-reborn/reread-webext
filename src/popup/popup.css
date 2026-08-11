@@ -20,6 +20,14 @@ body {
   border-bottom: 1px solid var(--page-line);
 }
 
+/* `display: flex` above would silently win over the browser's own
+   `[hidden] { display: none }` - author styles beat UA styles whatever the
+   specificity - and every row the popup decided to hide would show anyway.
+   Said here explicitly so the attribute keeps meaning what it says. */
+.popup-row[hidden] {
+  display: none;
+}
+
 .popup-note {
   margin: 0;
   color: var(--page-muted);
