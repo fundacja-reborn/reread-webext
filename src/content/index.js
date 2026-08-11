@@ -35,9 +35,10 @@ let vocabulary = new Map();
 let current = null;
 
 /**
- * The "More" button, if this phrase has a sentence behind it - kept here rather
- * than read back off the bubble, because saving and forgetting rebuild the
- * buttons and would otherwise drop the second layer along the way.
+ * The "More" button, if this phrase has a sentence or a dictionary entry behind
+ * it - kept here rather than read back off the bubble, because saving and
+ * forgetting rebuild the buttons and would otherwise drop the second layer
+ * along the way.
  *
  * @type {import("./tooltip.js").Action[]}
  */
@@ -268,6 +269,31 @@ function showSaved(anchor, text, normalized) {
 }
 
 /**
+ * Dictionary entries as the bubble takes them: a label, and the lines under it.
+ *
+ * The label is where two things get decided, and both need to know what was
+ * selected - which is why they are decided here and not in the bubble. The
+ * dictionary's name only earns a line when there is more than one to tell
+ * apart, and the headword only when it is not the word the reader selected: a
+ * definition of `watch` under a selection of `watches` has to say so, while one
+ * under `watch` would just be repeating the page back (D23).
+ *
+ * @param {import("../lib/protocol.js").DictEntry[]} entries
+ * @param {string} normalized what the reader selected, as its key
+ * @returns {import("./tooltip.js").Block[]}
+ */
+function entryBlocks(entries, normalized) {
+  const books = new Set(entries.map((entry) => entry.dictionary)).size;
+
+  return entries.map((entry) => {
+    const parts = [];
+    if (normalize(entry.headword) !== normalized && entry.headword.length > 0) parts.push(entry.headword);
+    if (books > 1 && entry.dictionary.length > 0) parts.push(entry.dictionary);
+    return { label: parts.join(" - "), lines: entry.senses };
+  });
+}
+
+/**
  * @param {MouseEvent} event
  */
 function onMouseUp(event) {
@@ -311,12 +337,15 @@ function onMouseUp(event) {
       return;
     }
 
-    const { gloss, sentence } = asTranslation(result.value);
+    const { gloss, sentence, entries } = asTranslation(result.value);
     tooltip.setBody(gloss, "normal");
     // Folded. The reader asked about a word, and G0 is about answering that
-    // word and getting out of the way; the sentence waits for a second press.
+    // word and getting out of the way; the sentence and whatever the
+    // dictionaries said wait for a second press.
     tooltip.setContext(sentence);
-    secondLayer = sentence === null || sentence.length === 0 ? [] : ["more"];
+    const blocks = entryBlocks(entries ?? [], normalized);
+    tooltip.setEntries(blocks);
+    secondLayer = (sentence !== null && sentence.length > 0) || blocks.length > 0 ? ["more"] : [];
 
     // A selection of nothing but punctuation has no key to save it under, and
     // a phrase with no translation has nothing to save.
@@ -351,10 +380,14 @@ document.addEventListener("mouseup", onMouseUp, { capture: true, passive: true }
 document.addEventListener("keydown", onKeyDown, { capture: true, passive: true });
 document.addEventListener(
   "scroll",
-  () => {
+  (event) => {
     // Not while the edit box is open: a wheel nudge is not a reason to throw
-    // away a translation somebody is in the middle of correcting.
-    if (!tooltip.isEditing()) tooltip.hide();
+    // away a translation somebody is in the middle of correcting. And not for a
+    // scroll of the bubble's own second layer, which is a reader working their
+    // way through a long dictionary entry - a scroll event does not cross a
+    // shadow boundary, so this should never fire for one, but the day it does
+    // it must not close the thing being read.
+    if (!tooltip.isEditing() && !tooltip.owns(event.target)) tooltip.hide();
   },
   { capture: true, passive: true },
 );

@@ -53,15 +53,32 @@ export const ErrorCode = Object.freeze({
  */
 
 /**
- * What comes back from a translation: the phrase, and the sentence it was in
- * when there was one worth showing.
+ * One dictionary's answer about a word: which book, how that book spells the
+ * word it found, and what it says. The headword is worth carrying because it is
+ * not always what was selected - a dictionary asked about `watches` answers
+ * about `watch`, and a reader should be able to see that is what happened.
+ *
+ * @typedef {{ dictionary: string, headword: string, senses: string[] }} DictEntry
+ */
+
+/**
+ * What comes back from a translation: the phrase, the sentence it was in when
+ * there was one worth showing, and whatever the installed dictionaries have to
+ * say about it.
  *
  * The gloss is what the bubble shows and what gets saved - always the phrase
  * translated as a phrase, never a piece cut out of the sentence, because this
- * engine cannot say which piece that would be. The sentence is the second
- * layer, shown only when asked for, and it is never stored.
+ * engine cannot say which piece that would be. The sentence and the dictionary
+ * entries are the second layer, shown only when asked for, and neither is ever
+ * stored.
  *
- * @typedef {{ gloss: string, sentence: string | null }} Translation
+ * `entries` is optional here and always present on the wire: a provider
+ * produces a translation and knows nothing about dictionaries, the background
+ * fills them in, and `asTranslation` gives the receiving side an array either
+ * way. That is what keeps "is there a second layer" one question rather than
+ * three states.
+ *
+ * @typedef {{ gloss: string, sentence: string | null, entries?: DictEntry[] }} Translation
  */
 
 /**
@@ -139,8 +156,8 @@ export function asResult(response) {
  * @returns {Translation}
  */
 export function asTranslation(value) {
-  if (typeof value !== "object" || value === null) return { gloss: "", sentence: null };
-  const { gloss, sentence } = /** @type {Record<string, unknown>} */ (value);
+  if (typeof value !== "object" || value === null) return { gloss: "", sentence: null, entries: [] };
+  const { gloss, sentence, entries } = /** @type {Record<string, unknown>} */ (value);
 
   const answer = typeof gloss === "string" ? gloss : "";
   // The sentence is an extra to the gloss, so without a gloss there is nothing
@@ -148,7 +165,42 @@ export function asTranslation(value) {
   // has something behind it is a state nobody should have to make sense of.
   const second = answer.length > 0 && typeof sentence === "string" ? sentence : null;
 
-  return { gloss: answer, sentence: second };
+  return { gloss: answer, sentence: second, entries: answer.length > 0 ? asEntries(entries) : [] };
+}
+
+/**
+ * Dictionary entries as they can be rendered, or none.
+ *
+ * Every field is checked rather than trusted, for the same reason as above and
+ * one more: these strings started life in a file somebody downloaded, and the
+ * gap between "the background sent an array of entries" and "the background is
+ * an older version that sent something else" is exactly where a bubble would
+ * throw into somebody's page.
+ *
+ * @param {unknown} value
+ * @returns {DictEntry[]}
+ */
+function asEntries(value) {
+  if (!Array.isArray(value)) return [];
+
+  /** @type {DictEntry[]} */
+  const entries = [];
+  for (const one of value) {
+    if (typeof one !== "object" || one === null) continue;
+    const { dictionary, headword, senses } = /** @type {Record<string, unknown>} */ (one);
+    if (!Array.isArray(senses)) continue;
+
+    const lines = senses.filter((line) => typeof line === "string" && line.length > 0);
+    if (lines.length === 0) continue;
+
+    entries.push({
+      dictionary: typeof dictionary === "string" ? dictionary : "",
+      headword: typeof headword === "string" ? headword : "",
+      senses: lines,
+    });
+  }
+
+  return entries;
 }
 
 /**
