@@ -243,6 +243,38 @@ const STYLE = `
  */
 
 /**
+ * Puts the bubble's stylesheet into its shadow root, two ways.
+ *
+ * A constructed sheet first, because the bubble also opens on the extension's
+ * own reader page, where the content security policy allows no inline style -
+ * and a sheet built through the CSSOM is not inline style to CSP.
+ *
+ * The `<style>` element second, because a constructed sheet has to cross the
+ * boundary between a content script and the page it runs in, and that is
+ * exactly the kind of thing a browser is allowed to refuse quietly. It is
+ * checked rather than assumed: an assignment that did not take leaves the list
+ * empty, and the fallback is what worked on every page before this. On the
+ * reader page the fallback would be blocked by CSP, which is the right way
+ * round - an unstyled bubble in one place beats an unstyled bubble everywhere.
+ *
+ * @param {ShadowRoot} root
+ */
+function style(root) {
+  try {
+    const sheet = new CSSStyleSheet();
+    sheet.replaceSync(STYLE);
+    root.adoptedStyleSheets = [sheet];
+    if (root.adoptedStyleSheets.length === 1) return;
+  } catch {
+    // Not supported, or refused. Either way there is another way to do it.
+  }
+
+  const element = document.createElement("style");
+  element.textContent = STYLE;
+  root.append(element);
+}
+
+/**
  * @param {object} options
  * @param {(action: ReportedAction, meanings: string[]) => void} options.onAction what the reader pressed, and what the bubble was showing when they did
  * @returns {Tooltip}
@@ -303,8 +335,7 @@ export function createTooltip({ onAction }) {
     host.style.setProperty("left", "0px", "important");
 
     const root = host.attachShadow({ mode: "closed" });
-    const style = document.createElement("style");
-    style.textContent = STYLE;
+    style(root);
 
     bubble = document.createElement("div");
     bubble.className = "bubble";
@@ -345,7 +376,7 @@ export function createTooltip({ onAction }) {
     }
 
     bubble.append(bodyElement, contextElement, entriesElement, editor, actionsElement);
-    root.append(style, bubble);
+    root.append(bubble);
     // `documentElement` and not `body`: single-page applications replace the
     // body, and a bubble that vanishes with a re-render is a bug nobody can
     // reproduce.

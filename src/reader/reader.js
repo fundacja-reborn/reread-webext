@@ -14,6 +14,7 @@
  *     (`src/lib/reader/`), never assigned as `innerHTML`.
  */
 
+import { rescan, start } from "../content/reading.js";
 import { webext } from "../lib/browser.js";
 import { describeError } from "../lib/messages.js";
 import { ErrorCode, Message, asPage, asResult } from "../lib/protocol.js";
@@ -108,6 +109,11 @@ function render(page) {
   article.hidden = false;
   if (notice !== null) notice.hidden = true;
 
+  // The underlines are found again now that there is different text under the
+  // same element. Nothing is asked of storage: the vocabulary did not change,
+  // only what it can be found in.
+  rescan();
+
   if (originalLink instanceof HTMLAnchorElement) {
     originalLink.href = page.url;
     originalLink.target = "_blank";
@@ -145,5 +151,11 @@ webext().storage.onChanged.addListener((changes, area) => {
   if (changes[READER_SOURCE_KEY] === undefined) return;
   void showPage();
 });
+
+// The same reading side as on any other page, scoped to the article: the
+// reader's own heading and links are not text anybody is learning from, and
+// nothing in this document changes unless the code above changes it, so there
+// is nothing for an observer to watch.
+start({ root: article, observe: false });
 
 void showPage();

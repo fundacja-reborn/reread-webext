@@ -1,5 +1,7 @@
 /*
- * How a saved phrase looks on a page that is not ours.
+ * How a saved phrase looks - on a page that is not ours, and in the reader,
+ * which links this same file. One stylesheet, because an underline that looked
+ * different in the two places would be two marks to learn instead of one.
  *
  * This is the entire visual footprint of the extension on a page, and it is a
  * file rather than a style element injected by script on purpose: the page's
