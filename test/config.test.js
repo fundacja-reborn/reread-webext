@@ -123,6 +123,60 @@ describe("writeConfig", () => {
   });
 });
 
+describe("switched-off sites", () => {
+  it("answers an empty list for a profile that predates the switch", () => {
+    assert.deepEqual(withDefaults({ sourceLang: "en" }).disabledHosts, []);
+  });
+
+  it("keeps stored hostnames in their order", () => {
+    assert.deepEqual(withDefaults({ disabledHosts: ["docs.google.com", "example.test"] }).disabledHosts, [
+      "docs.google.com",
+      "example.test",
+    ]);
+  });
+
+  it("keeps the hostnames and drops whatever hand-editing left between them", () => {
+    // Losing the whole list over one broken entry would switch re/read back on
+    // everywhere somebody had switched it off.
+    assert.deepEqual(
+      withDefaults({ disabledHosts: ["a.test", 7, "", null, "b.test", ["c.test"]] }).disabledHosts,
+      ["a.test", "b.test"],
+    );
+  });
+
+  it("folds a duplicate entry, so no writer has to check first", () => {
+    assert.deepEqual(withDefaults({ disabledHosts: ["a.test", "b.test", "a.test"] }).disabledHosts, [
+      "a.test",
+      "b.test",
+    ]);
+  });
+
+  it("treats a list that is not one as empty", () => {
+    for (const disabledHosts of ["a.test", 7, null, {}]) {
+      assert.deepEqual(withDefaults({ disabledHosts }).disabledHosts, []);
+    }
+  });
+
+  it("does not hand out an array shared with the defaults", () => {
+    const result = withDefaults({});
+    result.disabledHosts.push("a.test");
+    assert.deepEqual(DEFAULTS.disabledHosts, []);
+    assert.deepEqual(withDefaults({}).disabledHosts, []);
+  });
+
+  it("writes the list through writeConfig without touching the rest", async () => {
+    const store = installFakeBrowser({ config: { sourceLang: "de", targetLang: "en" } });
+    const written = await writeConfig({ disabledHosts: ["a.test"] });
+
+    assert.deepEqual(written, { ...DEFAULTS, sourceLang: "de", targetLang: "en", disabledHosts: ["a.test"] });
+    assert.deepEqual(/** @type {any} */ (store["config"]).disabledHosts, ["a.test"]);
+
+    // The next patch replaces the list and only the list.
+    const emptied = await writeConfig({ disabledHosts: [] });
+    assert.deepEqual(emptied, { ...DEFAULTS, sourceLang: "de", targetLang: "en" });
+  });
+});
+
 describe("the reader's appearance", () => {
   it("answers the defaults for a profile that predates it", () => {
     // The one real migration: a config stored before this existed has no

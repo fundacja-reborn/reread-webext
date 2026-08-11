@@ -24,7 +24,7 @@ import { readReaderSource } from "../lib/session.js";
 
 /**
  * @typedef {object} ReadPageDeps
- * @property {WebExtBrowser["tabs"]} [tabs]
+ * @property {Pick<WebExtBrowser["tabs"], "sendMessage">} [tabs]
  * @property {WebExtBrowser["storage"]["session"]} [session]
  */
 

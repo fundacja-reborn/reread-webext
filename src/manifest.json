@@ -36,9 +36,18 @@
   ],
   "action": {
     "default_title": "re/read",
+    "default_popup": "popup/index.html",
     "default_icon": {
       "48": "assets/icons/icon.svg",
       "96": "assets/icons/icon.svg"
+    }
+  },
+  "commands": {
+    "open-reader": {
+      "suggested_key": {
+        "default": "Alt+Shift+R"
+      },
+      "description": "Read this page in the reader"
     }
   },
   "options_ui": {

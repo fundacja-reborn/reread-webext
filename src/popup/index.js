@@ -1,0 +1,170 @@
+/**
+ * The toolbar popup: the basic acts on top, the door to the settings at the
+ * bottom, in the place every user already looks for them. Four rows - whether
+ * re/read runs on this site, which pair is being read, this page in the
+ * reader, the settings - and nothing else.
+ *
+ * The popup knows which tab it stands over and nothing more: `tabs.query`
+ * without the `tabs` permission answers with an id and no address, on purpose.
+ * The address never becomes its business either - it asks the tab itself
+ * (`page-info`), and the content script that is already on every ordinary page
+ * answers with its hostname. No answer means a page this extension does not
+ * run on (`about:`, the add-ons site, the PDF viewer), and the row says so
+ * instead of showing a switch; the reader answers "I am the reader", and the
+ * switch and the reader button disappear together, because neither means
+ * anything there.
+ *
+ * The switch and the pair are both one write to the settings, the same write
+ * the settings page makes. Every open tab reacts through `storage.onChanged` -
+ * the toggle tears the page's reading side down or starts it, with no reload
+ * and no message addressed to anybody.
+ */
+
+import { webext } from "../lib/browser.js";
+import { readConfig, writeConfig } from "../lib/config.js";
+import { listModels } from "../lib/models/store.js";
+import { Message, asPageInfo, asResult } from "../lib/protocol.js";
+import { pairChoices } from "./choices.js";
+
+const siteRow = document.getElementById("site-row");
+const siteHost = document.getElementById("site-host");
+const siteNote = document.getElementById("site-note");
+const siteToggle = /** @type {HTMLInputElement | null} */ (document.getElementById("site-toggle"));
+const pairSelect = /** @type {HTMLSelectElement | null} */ (document.getElementById("pair"));
+const readerButton = document.getElementById("open-reader");
+const settingsButton = document.getElementById("open-settings");
+
+/** The tab under the popup, and what it said about itself. */
+/** @type {{ tabId: number | null, hostname: string | null }} */
+const over = { tabId: null, hostname: null };
+
+/** @type {import("./choices.js").PairChoice[]} */
+let choices = [];
+
+/**
+ * @returns {Promise<number | null>}
+ */
+async function currentTabId() {
+  const tabs = await webext().tabs.query({ active: true, currentWindow: true });
+  const id = tabs[0]?.id;
+  return typeof id === "number" ? id : null;
+}
+
+/**
+ * @param {number | null} tabId
+ * @returns {Promise<import("../lib/protocol.js").PageInfo | null>}
+ */
+async function askPage(tabId) {
+  if (tabId === null) return null;
+  try {
+    const answer = asResult(await webext().tabs.sendMessage(tabId, { kind: Message.PAGE_INFO }));
+    return answer.ok ? asPageInfo(answer.value) : null;
+  } catch {
+    // Nothing in the tab is listening - no content script runs there. That is
+    // an answer too, just not one that travels as a message.
+    return null;
+  }
+}
+
+/**
+ * @param {import("../lib/config.js").Config} config
+ */
+function renderPair(config) {
+  if (pairSelect === null) return;
+  pairSelect.replaceChildren();
+  for (const choice of choices) {
+    const option = document.createElement("option");
+    option.value = choice.pair;
+    option.textContent = `${choice.from} to ${choice.to}`;
+    option.selected = choice.from === config.sourceLang && choice.to === config.targetLang;
+    pairSelect.append(option);
+  }
+}
+
+/**
+ * @param {import("../lib/protocol.js").PageInfo | null} info
+ * @param {import("../lib/config.js").Config} config
+ */
+function renderSite(info, config) {
+  if (info?.reader === true) {
+    // On the reader both rows about "this page" go: there is no site behind it
+    // to switch off, and no page behind it to read.
+    if (readerButton !== null) readerButton.hidden = true;
+    return;
+  }
+
+  if (info === null) {
+    if (siteNote !== null) siteNote.hidden = false;
+    return;
+  }
+
+  over.hostname = info.hostname;
+  if (siteHost !== null) siteHost.textContent = info.hostname;
+  if (siteToggle !== null) siteToggle.checked = !config.disabledHosts.includes(info.hostname);
+  if (siteRow !== null) siteRow.hidden = false;
+}
+
+async function toggleSite() {
+  const host = over.hostname;
+  if (host === null || siteToggle === null) return;
+
+  // Read fresh before writing: another surface may have moved the list since
+  // this popup drew itself, and the write must lose only this one entry.
+  const current = await readConfig();
+  const hosts = siteToggle.checked
+    ? current.disabledHosts.filter((one) => one !== host)
+    : [...current.disabledHosts, host];
+  await writeConfig({ disabledHosts: hosts });
+}
+
+async function choosePair() {
+  if (pairSelect === null) return;
+  const choice = choices.find((one) => one.pair === pairSelect.value);
+  if (choice === undefined) return;
+
+  // The same write the settings page makes: every open page notices through
+  // `storage.onChanged` and asks the background for the vocabulary of the new
+  // pair, so nothing here has to tell them.
+  await writeConfig({ sourceLang: choice.from, targetLang: choice.to });
+}
+
+async function openReader() {
+  const request =
+    over.tabId === null
+      ? { kind: Message.OPEN_READER }
+      : { kind: Message.OPEN_READER, sourceTabId: over.tabId };
+  try {
+    await webext().runtime.sendMessage(request);
+  } catch {
+    // The background was mid-restart. The press can be repeated; a popup that
+    // throws instead of closing cannot.
+  }
+  window.close();
+}
+
+async function openSettings() {
+  await webext().runtime.openOptionsPage();
+  window.close();
+}
+
+siteToggle?.addEventListener("change", () => void toggleSite());
+pairSelect?.addEventListener("change", () => void choosePair());
+readerButton?.addEventListener("click", () => void openReader());
+settingsButton?.addEventListener("click", () => void openSettings());
+
+async function render() {
+  const [config, installed, tabId] = await Promise.all([
+    readConfig(),
+    // A database that cannot be opened leaves the popup a select with only the
+    // configured pair in it - poorer than the settings page, still standing.
+    listModels().catch(() => []),
+    currentTabId(),
+  ]);
+
+  over.tabId = tabId;
+  choices = pairChoices(config, installed);
+  renderPair(config);
+  renderSite(await askPage(tabId), config);
+}
+
+void render();

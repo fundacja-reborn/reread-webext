@@ -5,6 +5,7 @@ import {
   ErrorCode,
   Message,
   asPage,
+  asPageInfo,
   asPageRequest,
   asRequest,
   asResult,
@@ -114,6 +115,21 @@ describe("asRequest", () => {
     }
   });
 
+  it("keeps the tab the reader is asked to read", () => {
+    assert.deepEqual(asRequest({ kind: Message.OPEN_READER, sourceTabId: 42 }), {
+      kind: Message.OPEN_READER,
+      sourceTabId: 42,
+    });
+  });
+
+  it("drops a tab id that is not one, rather than refusing the reader", () => {
+    for (const sourceTabId of ["42", null, {}, [42], undefined]) {
+      assert.deepEqual(asRequest({ kind: Message.OPEN_READER, sourceTabId }), {
+        kind: Message.OPEN_READER,
+      });
+    }
+  });
+
   it("accepts a save with its meanings", () => {
     assert.deepEqual(asRequest({ kind: Message.SAVE_PHRASE, text: "bank", translations: ["bank", "brzeg"] }), {
       kind: Message.SAVE_PHRASE,
@@ -174,8 +190,9 @@ describe("asResult", () => {
 });
 
 describe("asPageRequest", () => {
-  it("accepts the one question the background asks a page", () => {
+  it("accepts the two questions a tab is asked", () => {
     assert.deepEqual(asPageRequest({ kind: Message.GRAB_PAGE }), { kind: Message.GRAB_PAGE });
+    assert.deepEqual(asPageRequest({ kind: Message.PAGE_INFO }), { kind: Message.PAGE_INFO });
   });
 
   it("refuses everything addressed to the background", () => {
@@ -195,6 +212,27 @@ describe("asPageRequest", () => {
   it("refuses anything that is not a message", () => {
     for (const message of [null, undefined, 7, "grab-page", [], {}]) {
       assert.equal(asPageRequest(message), null);
+    }
+  });
+});
+
+describe("asPageInfo", () => {
+  it("passes an ordinary page's answer through", () => {
+    assert.deepEqual(asPageInfo({ hostname: "example.test" }), {
+      hostname: "example.test",
+      reader: false,
+    });
+  });
+
+  it("answers for the reader without asking it for a hostname", () => {
+    assert.deepEqual(asPageInfo({ reader: true }), { hostname: "", reader: true });
+  });
+
+  it("treats a page with no hostname like a page that never answered", () => {
+    // `file:` mostly. There is no site to switch off, and the popup says so
+    // the same way it does over `about:`.
+    for (const value of [{ hostname: "" }, { hostname: 7 }, {}, null, undefined, "example.test", 7]) {
+      assert.equal(asPageInfo(value), null, `should have refused ${JSON.stringify(value) ?? "undefined"}`);
     }
   });
 });

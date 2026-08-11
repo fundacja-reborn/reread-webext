@@ -1,0 +1,41 @@
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
+
+import { pairChoices } from "../src/popup/choices.js";
+
+const ENPL = { pair: "enpl", from: "en", to: "pl" };
+const PLEN = { pair: "plen", from: "pl", to: "en" };
+const DEEN = { pair: "deen", from: "de", to: "en" };
+
+describe("the popup's pair choices", () => {
+  it("offers the installed models, sorted by pair", () => {
+    assert.deepEqual(pairChoices({ sourceLang: "en", targetLang: "pl" }, [PLEN, DEEN, ENPL]), [
+      DEEN,
+      ENPL,
+      PLEN,
+    ]);
+  });
+
+  it("offers only what is installed - downloading is the settings page's job", () => {
+    assert.deepEqual(pairChoices({ sourceLang: "en", targetLang: "pl" }, [ENPL]), [ENPL]);
+  });
+
+  it("still offers the configured pair when its model is not here", () => {
+    // A control must never disagree with the settings it shows: swapping in
+    // the first installed pair would claim somebody chose what they did not.
+    assert.deepEqual(pairChoices({ sourceLang: "en", targetLang: "uk" }, [PLEN]), [
+      { pair: "enuk", from: "en", to: "uk" },
+      PLEN,
+    ]);
+  });
+
+  it("offers the configured pair alone when nothing is installed at all", () => {
+    assert.deepEqual(pairChoices({ sourceLang: "en", targetLang: "pl" }, []), [
+      { pair: "enpl", from: "en", to: "pl" },
+    ]);
+  });
+
+  it("does not double the configured pair when its model is installed", () => {
+    assert.deepEqual(pairChoices({ sourceLang: "pl", targetLang: "en" }, [ENPL, PLEN]), [ENPL, PLEN]);
+  });
+});

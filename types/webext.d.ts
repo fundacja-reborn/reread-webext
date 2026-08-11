@@ -70,11 +70,15 @@ interface WebExtBrowser {
     // this finds out. Reading `url` or `title` is what would need `tabs`, and
     // nothing here does.
     update(tabId: number, properties: { active?: boolean }): Promise<WebExtTab>;
-    // Asking a page for itself, which is the only message that travels from the
-    // background to a content script. Needs no permission beyond the host
-    // permission that put the content script there; rejects when there is no
-    // content script to hear it, and that rejection is how the reader finds out
-    // there is nothing to read.
+    // Which tab the popup opened over. Without the `tabs` permission the answer
+    // carries an id and no address - and the id is all that is asked for; which
+    // site the tab is showing is what the tab itself answers (`page-info`).
+    query(queryInfo: { active?: boolean; currentWindow?: boolean }): Promise<WebExtTab[]>;
+    // Asking a page a question - the background for the page itself, the popup
+    // for its hostname; the only messages that travel toward a tab. Needs no
+    // permission beyond the host permission that put the content script there;
+    // rejects when there is no content script to hear it, and that rejection is
+    // itself an answer: nothing to read, nothing to switch off.
     sendMessage(tabId: number, message: unknown): Promise<unknown>;
   };
   windows: {
@@ -82,8 +86,12 @@ interface WebExtBrowser {
     // Needs no permission either.
     update(windowId: number, properties: { focused?: boolean }): Promise<unknown>;
   };
-  action: {
-    onClicked: WebExtEvent<(tab: WebExtTab) => void>;
+  commands: {
+    // The keyboard's way into the reader, `commands` in the manifest - a
+    // manifest key, not a permission. The tab is the one the shortcut was
+    // pressed over: the same tab `action.onClicked` handed over when the button
+    // opened the reader directly, before it opened the popup.
+    onCommand: WebExtEvent<(command: string, tab?: WebExtTab) => void>;
   };
 }
 

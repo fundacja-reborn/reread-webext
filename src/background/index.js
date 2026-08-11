@@ -56,7 +56,11 @@ async function handle(request) {
       return translated.ok ? ok({ ...translated.value, entries }) : translated;
     }
     case Message.OPEN_READER: {
-      await openReader();
+      // The popup passes the tab it stood over, and that is how the reader
+      // knows which page to read. Without an id - a sender that predates one,
+      // or a tab that had none - the reader only comes forward.
+      if (typeof request.sourceTabId === "number") await readInReader({ id: request.sourceTabId });
+      else await openReader();
       return ok(null);
     }
     case Message.OPEN_SETTINGS: {
@@ -88,11 +92,14 @@ webext().runtime.onMessage.addListener((message, _sender, sendResponse) => {
   return true;
 });
 
-// The button says "read this page", so it needs the page: `onClicked` hands
-// over the tab it was pressed on, and that is the only way the background finds
-// out which one it was without the `tabs` permission.
-webext().action.onClicked.addListener((tab) => {
-  void readInReader(tab);
+// The toolbar button opens the popup now, so `action.onClicked` never fires;
+// the keyboard shortcut is what still reaches the reader in one gesture. The
+// command is named after the message because it is the same request by other
+// means, and it brings its tab along - the same tab `onClicked` used to hand
+// over, and the only way to learn it without the `tabs` permission.
+webext().commands.onCommand.addListener((command, tab) => {
+  if (command !== Message.OPEN_READER) return;
+  void (tab === undefined ? openReader() : readInReader(tab));
 });
 
 // The copy pages read is written whenever the vocabulary changes. An install or

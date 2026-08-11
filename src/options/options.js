@@ -15,7 +15,7 @@
  */
 
 import { webext } from "../lib/browser.js";
-import { readConfig, writeConfig } from "../lib/config.js";
+import { CONFIG_KEY, readConfig, withDefaults, writeConfig } from "../lib/config.js";
 import { classifyDictionaryFiles, describeImportProblem, readDictionary } from "../lib/dict/import.js";
 import { toRows } from "../lib/dict/rows.js";
 import {
@@ -40,8 +40,8 @@ import { deleteModel, listModels, putModel } from "../lib/models/store.js";
  */
 let running = null;
 
-/** @type {{ sourceLang: string, targetLang: string }} */
-let config = { sourceLang: "en", targetLang: "pl" };
+/** @type {import("../lib/config.js").Config} */
+let config = withDefaults(undefined);
 
 /**
  * @param {string} id
@@ -310,6 +310,47 @@ async function renderModels() {
     rendered.id = `model-${row.pair}`;
     container.append(rendered);
   }
+}
+
+/**
+ * The sites the popup's switch has turned re/read off on. Listed here because
+ * the popup can only switch the site somebody is standing on - cleaning the
+ * list up must not require visiting every site on it.
+ */
+function renderDisabledHosts() {
+  const container = document.getElementById("disabled-hosts");
+  if (container === null) return;
+  container.replaceChildren();
+
+  if (config.disabledHosts.length === 0) {
+    container.append(element("p", "empty", "No sites are switched off. The toolbar popup is where one is."));
+    return;
+  }
+
+  for (const host of config.disabledHosts) {
+    const row = element("div", "model");
+    row.append(element("span", "model-pair", host));
+
+    const restore = document.createElement("button");
+    restore.type = "button";
+    restore.textContent = "Turn back on";
+    restore.addEventListener("click", () => void restoreHost(host));
+    row.append(restore);
+    container.append(row);
+  }
+}
+
+/**
+ * @param {string} host
+ */
+async function restoreHost(host) {
+  // Read fresh before writing, because the popup writes the same list: the
+  // write must lose exactly this entry, not whatever this page last saw.
+  const current = await readConfig();
+  config = await writeConfig({ disabledHosts: current.disabledHosts.filter((one) => one !== host) });
+  renderDisabledHosts();
+  // Open tabs of that site notice the same write and start on the spot -
+  // nothing here has to find them, which is good, because nothing here could.
 }
 
 /**
@@ -608,6 +649,7 @@ async function render() {
   fill("model-checked", checkedAt);
 
   await renderModels();
+  renderDisabledHosts();
 
   // An import that died with its tab left rows behind that no lookup can see.
   // This is the moment somebody is here to be told about it.
@@ -619,6 +661,26 @@ async function render() {
   }
   await renderDictionaries();
 }
+
+/**
+ * The popup writes the same settings this page shows, and can do it while this
+ * page is open: the pair from its select, the site list from its switch. What
+ * it wrote has to be what this page shows, so both are redrawn - the model
+ * list too, because "what you are reading" rides on the pair. Not while a
+ * download or an import holds the screen: redrawing would replace a live
+ * progress bar, and the next full render comes when it finishes anyway.
+ */
+async function refresh() {
+  config = await readConfig();
+  renderPair(modelRows(await listModels()));
+  renderDisabledHosts();
+  if (running === null && !importing) await renderModels();
+}
+
+webext().storage.onChanged.addListener((changes, area) => {
+  if (area !== "local" || changes[CONFIG_KEY] === undefined) return;
+  void refresh();
+});
 
 document.getElementById("add-model")?.addEventListener("click", () => void addSelectedModel());
 document.getElementById("add-dictionary")?.addEventListener("click", () => void addSelectedDictionary());

@@ -26,7 +26,7 @@ import {
   writeConfig,
 } from "../lib/config.js";
 import { describeError } from "../lib/messages.js";
-import { ErrorCode, Message, asPage, asResult } from "../lib/protocol.js";
+import { ErrorCode, Message, asPage, asPageRequest, asResult, ok } from "../lib/protocol.js";
 import { buildArticle } from "../lib/reader/article.js";
 import { READER_SOURCE_KEY } from "../lib/session.js";
 
@@ -251,6 +251,17 @@ webext().storage.onChanged.addListener((changes, area) => {
   if (area !== "session") return;
   if (changes[READER_SOURCE_KEY] === undefined) return;
   void showPage();
+});
+
+// The popup's one question, and the reader's whole answer: "I am the reader".
+// The popup then hides the per-site switch and the reader button - there is no
+// site here to switch off, and no page behind this one to read. `grab-page` is
+// deliberately not answered: the reader is never a source, and `readInReader`
+// refuses to point it at itself anyway.
+webext().runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  if (asPageRequest(message)?.kind !== Message.PAGE_INFO) return false;
+  sendResponse(ok({ reader: true }));
+  return false;
 });
 
 // The same reading side as on any other page, scoped to the article: the

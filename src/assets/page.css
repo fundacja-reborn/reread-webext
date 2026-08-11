@@ -1,5 +1,6 @@
-/* Shared by the extension's own pages (options, reader). Content scripts do not
-   use this file - what they inject carries its own styles inside a shadow root. */
+/* Shared by the extension's own pages (options, reader, popup). Content scripts
+   do not use this file - what they inject carries its own styles inside a
+   shadow root. */
 
 :root {
   color-scheme: light dark;
