@@ -307,7 +307,7 @@ const STYLE = `
 /** @typedef {"normal" | "pending" | "error"} Tone */
 /** Which of the two bubbles this is. @typedef {"recall" | "save"} Variant */
 /** What the bubble can offer. @typedef {"save" | "learned" | "edit" | "settings" | "more"} Action */
-/** What it reports - editing and unfolding never leave the bubble. @typedef {"save" | "learned" | "settings"} ReportedAction */
+/** What it reports - editing and unfolding never leave the bubble. @typedef {"save" | "choose" | "learned" | "settings"} ReportedAction */
 
 /**
  * One block of the second layer below the sentence: where it came from, and the
@@ -638,7 +638,7 @@ export function createTooltip({ onAction }) {
   }
 
   /**
-   * @param {Action | "cancel"} action
+   * @param {Action | "cancel" | "choose"} action
    */
   function emit(action) {
     // Editing is the bubble's own business: nobody outside needs to know that a
@@ -657,10 +657,11 @@ export function createTooltip({ onAction }) {
     }
 
     const meanings = currentMeanings();
-    if (action === "save") {
+    if (action === "save" || action === "choose") {
       if (meanings.length === 0) return;
       // Optimistic: what was typed is what the bubble shows from now on. The
-      // caller decides what it means, and says so by setting the buttons.
+      // caller decides what it means, and says so by setting the buttons - or
+      // by taking the bubble away.
       stopEditing(true);
     }
     onAction(action, meanings);
@@ -669,11 +670,11 @@ export function createTooltip({ onAction }) {
   /**
    * A line of a dictionary entry, pressed.
    *
-   * It goes out as a save and not as some announcement of its own, because it
-   * means exactly what the Save button means: this is what the phrase means from
-   * now on - one meaning longer, or one shorter. The caller does not have to
-   * know which of the two the reader used, and the day it does, that is a second
-   * callback and not a second rule.
+   * It writes what Save writes: this is what the phrase means from now on - one
+   * meaning longer, or one shorter. It goes out under its own name all the same,
+   * because the two presses end differently. Save is somebody finished with a
+   * phrase and the bubble gets out of the way; a line is somebody assembling
+   * one, and the next line has to still be there to press.
    *
    * @param {string} sense
    */
@@ -686,7 +687,7 @@ export function createTooltip({ onAction }) {
 
     setBody(next);
     place();
-    emit("save");
+    emit("choose");
   }
 
   /**
