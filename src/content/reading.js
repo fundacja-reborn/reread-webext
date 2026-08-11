@@ -22,14 +22,14 @@
 import { webext } from "../lib/browser.js";
 import { CONFIG_KEY, withDefaults } from "../lib/config.js";
 import { choosableLines } from "../lib/gloss.js";
-import { keyTokens } from "../lib/matcher/tokenize.js";
 import { describeError } from "../lib/messages.js";
 import { normalize, trimPhrase } from "../lib/normalize.js";
 import { ErrorCode, Message, asResult, asTranslation, fail } from "../lib/protocol.js";
+import { keeping, madeSelection } from "../lib/selection.js";
 import { sentenceAround } from "../lib/sentence.js";
 import { MIRROR_KEY, asMirror, mirrorMatches } from "../lib/store/mirror.js";
 import { clear, paint, phraseAt } from "./highlighter.js";
-import { blockTextAround } from "./scan.js";
+import { blockTextAround, findable } from "./scan.js";
 import { createTooltip } from "./tooltip.js";
 
 /** @typedef {import("../lib/protocol.js").VocabEntry} VocabEntry */
@@ -38,8 +38,13 @@ import { createTooltip } from "./tooltip.js";
 /** @type {Map<string, string[]>} */
 let vocabulary = new Map();
 
-/** What the bubble is about right now, in the form the page had it. */
-/** @type {{ text: string, normalized: string } | null} */
+/**
+ * What the bubble is about right now, in the form the page had it - and whether
+ * the vocabulary may be written for it at all. A phrase earns that either by
+ * being findable on a page (`findable` in `scan.js`) or by already being saved,
+ * and nothing else gets in: not Save, and not a dictionary line either.
+ */
+/** @type {{ text: string, normalized: string, keepable: boolean } | null} */
 let current = null;
 
 /**
@@ -60,21 +65,27 @@ let secondLayer = [];
  */
 let generation = 0;
 
+/** What the bubble offers for a phrase that is in the vocabulary. */
+/** @type {import("./tooltip.js").Action[]} */
+const KEPT = ["learned", "edit"];
+
 /**
- * How many words a phrase may have before keeping it becomes a decision rather
- * than a consequence.
- *
- * Looking a word up is already the decision: a reader reaches for a translation
- * when the context did not give the meaning away, and that is exactly the word
- * worth meeting again. Asking them to confirm it is asking twice, in the middle
- * of a sentence they were reading.
- *
- * Longer than this and the selection is usually a sentence somebody wanted to
- * read rather than a phrase they wanted to keep - so that one waits for Save.
+ * The three answers of `keeping()` as rows of buttons. The rule is in
+ * `src/lib/selection.js`, where it can be tested; what it looks like is here,
+ * because that is a question about the bubble.
  */
-const AUTO_KEEP_MAX_WORDS = 4;
+const OFFERED = Object.freeze({
+  /** Nothing to keep, so nothing offered - only "More", when there is one. */
+  none: /** @type {import("./tooltip.js").Action[]} */ ([]),
+  ask: /** @type {import("./tooltip.js").Action[]} */ (["save", "edit"]),
+  automatic: KEPT,
+});
 
 const tooltip = createTooltip({ onAction });
+
+/** Where the press this release belongs to started, and whether it was ours. */
+/** @type {{ x: number, y: number, mine: boolean } | null} */
+let press = null;
 
 /** What gets walked for saved phrases. The body, unless a caller says otherwise. */
 /** @type {Element | null} */
@@ -155,7 +166,7 @@ async function loadVocabulary() {
 }
 
 /**
- * @returns {{ text: string, rect: DOMRect, context: string | null } | null}
+ * @returns {{ text: string, normalized: string, rect: DOMRect, context: string | null, findable: boolean } | null}
  */
 function readSelection() {
   const selection = window.getSelection();
@@ -174,7 +185,11 @@ function readSelection() {
   // bubble anchored to nothing lands in the corner of the screen.
   if (rect.width === 0 && rect.height === 0) return null;
 
-  return { text, rect, context: contextOf(range) };
+  const normalized = normalize(text);
+  // Asked here, while the range is the one the reader just made: by the time
+  // the translation comes back the page may have moved on, and whether a phrase
+  // can be found again is a question about the page, not about the answer.
+  return { text, normalized, rect, context: contextOf(range), findable: findable(range, normalized) };
 }
 
 /**
@@ -206,8 +221,26 @@ async function onAction(action, meanings) {
     tooltip.hide();
     return;
   }
-  if (action === "save") await keep(meanings);
-  else await forget();
+  if (action === "learned") {
+    await forget();
+    return;
+  }
+
+  // Both of the remaining two write to the vocabulary, so both answer to the
+  // same rule: a phrase no scan could ever find does not get in - not through
+  // Save, which is not offered for one, and not through the second layer
+  // either, where a dictionary line is a press that saves.
+  if (current !== null && !current.keepable) return;
+
+  // Save closes the bubble, for the reason Learned does: a decision answered
+  // with another question asks it twice (D34). The phrase is kept, the
+  // underline is under it, and there is nothing left here to press.
+  //
+  // Choosing a dictionary line writes exactly the same thing and is exactly not
+  // that: it is somebody assembling a meaning, and the next line has to still
+  // be there to press - as does the same line, to take it back out (D34).
+  if (action === "save") await keep(meanings, null);
+  else await keep(meanings, KEPT);
 }
 
 /**
@@ -253,12 +286,14 @@ async function change(write, remember, next) {
 
 /**
  * @param {string[]} meanings
+ * @param {import("./tooltip.js").Action[] | null} next what the bubble offers
+ *   afterwards, or `null` to close it - see `onAction`
  */
-async function keep(meanings) {
+async function keep(meanings, next) {
   await change(
     (phrase) => ask({ kind: Message.SAVE_PHRASE, text: phrase.text, translations: meanings }),
     (phrase) => vocabulary.set(phrase.normalized, meanings),
-    ["learned", "edit"],
+    next,
   );
 }
 
@@ -272,6 +307,9 @@ async function keep(meanings) {
  *
  * The word is not gone for good either way: selecting it again translates it
  * and, if it is short enough, keeps it again (D22).
+ *
+ * Save ends the same way and for the same reason (`onAction`) - the two are one
+ * rule seen from either side of the vocabulary.
  */
 async function forget() {
   await change(
@@ -295,7 +333,9 @@ function showSaved(anchor, text, normalized) {
   const meanings = vocabulary.get(normalized);
   if (meanings === undefined) return false;
 
-  current = { text, normalized };
+  // In the vocabulary already, which is the whole of what getting here means -
+  // so its meanings may be corrected from anywhere, however it was reached.
+  current = { text, normalized, keepable: true };
   generation += 1;
   // No second layer here, and that is the point: a phrase the reader already
   // kept is answered from the database, without a message and without waking
@@ -304,7 +344,7 @@ function showSaved(anchor, text, normalized) {
   // Recall: the answer, and nothing else until it is asked for (D44). Somebody
   // who clicked an underline wanted to know what the word was, and Learned is a
   // rare press on a decision they have already made - it can wait inside.
-  tooltip.show({ anchor, variant: "recall", body: meanings.join("\n"), actions: ["learned", "edit"] });
+  tooltip.show({ anchor, variant: "recall", body: meanings.join("\n"), actions: KEPT });
   return true;
 }
 
@@ -340,13 +380,32 @@ function entryBlocks(entries, normalized) {
 /**
  * @param {MouseEvent} event
  */
+function onMouseDown(event) {
+  press = { x: event.clientX, y: event.clientY, mine: tooltip.owns(event.target) };
+}
+
+/**
+ * @param {MouseEvent} event
+ */
 function onMouseUp(event) {
   if (tooltip.owns(event.target)) return;
 
-  const selection = readSelection();
+  const from = press;
+  press = null;
+  // A press that began inside the bubble was not about the page: the bubble
+  // swallows its own `mousedown` (D23), so nothing down there moved.
+  if (from?.mine === true) return;
+  // Only the first button. The others open a context menu over the text
+  // somebody is reading, and neither the menu nor the bubble should move for
+  // it - least of all by translating the selection the menu is about to act on.
+  if (event.button !== 0) return;
+
+  const gesture = { from, to: { x: event.clientX, y: event.clientY }, clicks: event.detail };
+  const selection = madeSelection(gesture) ? readSelection() : null;
+
   if (selection === null) {
-    // Nothing selected means a click, and a click may have landed on an
-    // underline - which is the other half of what saving a phrase is for.
+    // No selection made, which means a click - and a click may have landed on
+    // an underline, which is the other half of what saving a phrase is for.
     const hit = phraseAt(event.clientX, event.clientY);
     if (hit !== null && showSaved(hit.rect, hit.text, hit.normalized)) return;
 
@@ -356,10 +415,10 @@ function onMouseUp(event) {
     return;
   }
 
-  const normalized = normalize(selection.text);
-  if (showSaved(selection.rect, selection.text, normalized)) return;
+  const { text, normalized } = selection;
+  if (showSaved(selection.rect, text, normalized)) return;
 
-  current = { text: selection.text, normalized };
+  current = { text, normalized, keepable: selection.findable };
   secondLayer = [];
   const mine = ++generation;
 
@@ -368,8 +427,8 @@ function onMouseUp(event) {
   tooltip.show({ anchor: selection.rect, variant: "save", body: "Translating...", tone: "pending" });
 
   const request = selection.context === null
-    ? { kind: Message.TRANSLATE, text: selection.text }
-    : { kind: Message.TRANSLATE, text: selection.text, context: selection.context };
+    ? { kind: Message.TRANSLATE, text }
+    : { kind: Message.TRANSLATE, text, context: selection.context };
 
   /** @type {Promise<import("../lib/protocol.js").Result<import("../lib/protocol.js").Translation>>} */
   const answer = ask(request);
@@ -393,23 +452,13 @@ function onMouseUp(event) {
     tooltip.setEntries(blocks);
     secondLayer = (sentence !== null && sentence.length > 0) || blocks.length > 0 ? ["more"] : [];
 
-    // A selection of nothing but punctuation has no key to save it under, and
-    // a phrase with no translation has nothing to save.
-    if (normalized.length === 0 || gloss.length === 0) {
-      tooltip.setActions([...secondLayer]);
-      return;
-    }
-
-    if (keyTokens(normalized).length > AUTO_KEEP_MAX_WORDS) {
-      tooltip.setActions(["save", "edit", ...secondLayer]);
-      return;
-    }
+    const decision = keeping({ normalized, gloss, findable: selection.findable });
+    tooltip.setActions([...OFFERED[decision], ...secondLayer]);
 
     // Kept without being asked. The buttons flip first and the write follows,
     // because the write is local and instant, and a bubble that shows no
     // buttons for a moment reads as a bubble that is still thinking.
-    tooltip.setActions(["learned", "edit", ...secondLayer]);
-    void keep([gloss]);
+    if (decision === "automatic") void keep([gloss], KEPT);
   });
 }
 
@@ -433,7 +482,9 @@ export function start(where = {}) {
   if (!started) {
     started = true;
     // Capture phase: pages that stop propagation on their own selection handling
-    // are exactly the pages where this has to keep working.
+    // are exactly the pages where this has to keep working. The press is
+    // listened for only to know what the release means (see `madeSelection`).
+    document.addEventListener("mousedown", onMouseDown, { capture: true, passive: true });
     document.addEventListener("mouseup", onMouseUp, { capture: true, passive: true });
     document.addEventListener("keydown", onKeyDown, { capture: true, passive: true });
     document.addEventListener(

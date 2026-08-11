@@ -10,9 +10,13 @@
  * The walk stops at block boundaries so that two paragraphs never join into a
  * word that is on neither of them, and it never enters script, style, form
  * fields or anything being edited.
+ *
+ * That rule has a second reader: `findable` asks the same walk whether a phrase
+ * somebody just selected could be found at all, which is what decides whether
+ * it may be saved.
  */
 
-import { findMatches } from "../lib/matcher/index.js";
+import { buildIndex, findMatches } from "../lib/matcher/index.js";
 import { joinPieces, locate } from "../lib/matcher/spans.js";
 
 /** Text that is never prose: not rendered, or being typed into. */
@@ -198,4 +202,32 @@ export function scan(root, index) {
   flush();
 
   return found;
+}
+
+/**
+ * Whether a phrase selected here is one a page could ever show underlined.
+ *
+ * The vocabulary is only worth what can be met again. A selection running from
+ * one paragraph into the next - or across a `<br>`, two list items, two cells
+ * of a table - is a phrase that is on none of them: the walk above stops at
+ * every block, so no scan will ever match it. Neither will half a word, because
+ * matching is by whole tokens. Kept, such a phrase is a row in the database, a
+ * line in the export and a card for something the reader will never meet marked
+ * on a page.
+ *
+ * Answered by running the real walk over the block the selection starts in,
+ * rather than by reasoning about where the range begins and ends: this is the
+ * code that decides what gets painted, so it is also the honest answer to
+ * whether anything would be. A whole paragraph taken by a triple click is found
+ * in its block; the same text plus the first word of the next paragraph is not.
+ *
+ * @param {Range} range
+ * @param {string} normalized the key the phrase would be stored under
+ * @returns {boolean}
+ */
+export function findable(range, normalized) {
+  if (normalized.length === 0) return false;
+  const block = blockAround(range.startContainer);
+  if (block === null) return false;
+  return scan(block, buildIndex([normalized])).length > 0;
 }
