@@ -21,6 +21,7 @@ interface WebExtMessageSender {
 interface WebExtTab {
   id?: number;
   url?: string;
+  windowId?: number;
 }
 
 interface WebExtBrowser {
@@ -47,6 +48,15 @@ interface WebExtBrowser {
       set(items: Record<string, unknown>): Promise<void>;
       remove(keys: string | string[]): Promise<void>;
     };
+    // Same shape, different lifetime: cleared when the browser closes. That is
+    // where the reader's tab id lives, because a tab id outliving the browser
+    // would name a different tab. Under the `storage` permission, and out of
+    // reach of content scripts unless an extension says otherwise.
+    session: {
+      get(keys?: string | string[] | null): Promise<Record<string, unknown>>;
+      set(items: Record<string, unknown>): Promise<void>;
+      remove(keys: string | string[]): Promise<void>;
+    };
     // How a page finds out that the vocabulary changed in another tab, without
     // anything having to be told which tabs exist.
     onChanged: WebExtEvent<
@@ -55,6 +65,16 @@ interface WebExtBrowser {
   };
   tabs: {
     create(properties: { url: string; active?: boolean }): Promise<WebExtTab>;
+    // Bringing the reader back instead of opening a second one. Selecting a tab
+    // needs no permission; the call rejects for a tab that is gone, which is how
+    // this finds out. Reading `url` or `title` is what would need `tabs`, and
+    // nothing here does.
+    update(tabId: number, properties: { active?: boolean }): Promise<WebExtTab>;
+  };
+  windows: {
+    // A tab selected in a window nobody is looking at is not a tab anybody sees.
+    // Needs no permission either.
+    update(windowId: number, properties: { focused?: boolean }): Promise<unknown>;
   };
   action: {
     onClicked: WebExtEvent<(tab: WebExtTab) => void>;

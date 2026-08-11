@@ -63,6 +63,12 @@ read along, or read the source, which is deliberately shipped unminified.
 
 There is nothing else. No `tabs`, no `webRequest`, no `cookies`, no `downloads`.
 
+The toolbar button opens the reader in a tab, and pressing it again comes back to that tab
+instead of opening a second one. Neither of those needs the `tabs` permission: opening a tab,
+selecting one and focusing its window are allowed without it, while reading the address or the
+title of a tab is what it is actually for - and nothing here does that. Remembering which tab
+the reader is in lasts until the browser closes, and it is a number.
+
 ## What is in the package that is not ours
 
 Two things, both committed to this repository rather than installed, and both with the licence
