@@ -93,6 +93,14 @@ const STYLE = `
     max-height: 40vh;
     overflow-y: auto;
     overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+
+  /* macOS hides scrollbars until something scrolls, so an entry that runs past
+     the bottom looks exactly like an entry that was cut off - which is how it
+     was first reported. The shadow is the only thing saying there is more. */
+  .entries[data-more="true"] {
+    box-shadow: inset 0 -14px 12px -12px rgba(0, 0, 0, 0.28);
   }
 
   .entry + .entry { margin-top: 8px; }
@@ -152,6 +160,8 @@ const STYLE = `
     }
     .body[data-tone="error"] { color: #f0a83c; }
     .context, .entries { border-top-color: rgba(255, 255, 255, 0.14); }
+    /* A shadow that reads as depth on white reads as nothing on dark. */
+    .entries[data-more="true"] { box-shadow: inset 0 -14px 12px -12px rgba(0, 0, 0, 0.6); }
     .editor {
       background: rgba(255, 255, 255, 0.06);
       border-color: rgba(255, 255, 255, 0.24);
@@ -364,6 +374,10 @@ export function createTooltip({ onAction }) {
     entriesElement.hidden = !unfolded || entriesElement.childElementCount === 0;
     renderActions(editing ? ["save", "cancel"] : restingActions);
     place();
+    // Asked after `place`, because a hidden element has no size to compare and
+    // the bubble is only its final height once it has been positioned.
+    entriesElement.dataset["more"] =
+      !entriesElement.hidden && entriesElement.scrollHeight > entriesElement.clientHeight + 1 ? "true" : "false";
   }
 
   /**

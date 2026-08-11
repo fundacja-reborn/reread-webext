@@ -113,12 +113,18 @@ request is made for one: you unpack the archive yourself and pick the files on t
 A dictionary is parsed once, when it is added, and stored as text in the browser's own database -
 nothing reads a dictionary file while you are reading a page.
 
-Two worth knowing about for English and Polish:
+For English and Polish, [WikDict](https://www.wikdict.com/page/download) (CC BY-SA, built from
+Wiktionary through DBnary) is the one to start with: 66 609 entries, and another 51 721 spellings
+in its `.syn` file, which is what lets `elevations` find `elevation`.
 
-| Where | What | Licence |
-|---|---|---|
-| [WikDict](https://www.wikdict.com/page/download) | built from Wiktionary through DBnary, regenerated regularly | CC BY-SA |
-| [FreeDict](https://freedict.org/downloads/) | `eng-pol`, 16 362 headwords, from a TEI source | GPL |
+[FreeDict](https://freedict.org/downloads/) publishes an `eng-pol` dictionary (GPL) too, and its
+**StarDict build is worth checking before you rely on it**: in release 0.2.1, 13 894 of its 15 817
+entries carry nothing but a phonetic transcription and a part of speech - the Polish is missing
+from the file itself, left as empty list items where the translations should be. Measured here on
+2026-08-11; other FreeDict pairs may well be fine.
+
+A dictionary that shows a pronunciation and a word class and no meaning is not being cut off by
+this extension - it is being shown in full. Nothing here drops part of an entry.
 
 Whatever a dictionary says about its author and origin is kept with it and shown on the settings
 page, which is what CC BY-SA asks for and what makes it possible to tell two of them apart.
