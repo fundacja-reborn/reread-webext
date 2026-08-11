@@ -33,10 +33,10 @@
  * It comes in two variants, and they are two answers rather than one layout
  * with buttons hidden inside it (D44). A phrase already kept is a question -
  * what was this again - so `recall` answers it in one line and offers nothing;
- * the row of actions unfolds only when somebody arrives inside the bubble with
- * a pointer or with the keyboard. A fresh selection is the other way round:
- * what to do with it is the whole of why the bubble is open, so `save` shows
- * everything from the start.
+ * the row of actions unfolds only when somebody arrives inside the bubble, with
+ * a cursor, with a press or with the keyboard. A fresh selection is the other
+ * way round: what to do with it is the whole of why the bubble is open, so
+ * `save` shows everything from the start.
  */
 
 import { MEANING_SEPARATOR, afterChoosing, toMeanings } from "../lib/gloss.js";
@@ -206,24 +206,21 @@ const STYLE = `
     opacity: 0;
     transition: grid-template-rows 150ms ease, opacity 150ms ease;
   }
-  /* Three ways in, and the third is the one that keeps it: a row that folded
+  /* Three ways in, and the class is the one that keeps it: a row that folded
      itself away again on mouseleave would flicker at every brush of the
      bubble's edge, and nothing is gained by taking back an answer somebody has
-     just gone looking for. The bubble closes in one piece soon enough. */
+     just gone looking for. The bubble closes in one piece soon enough.
+
+     No branch for touch screens, and that is deliberate (D44): a finger arrives
+     by pressing, and the press adds the same class every other way in ends at.
+     A media query on hover bought nothing anyway - a hybrid reports hover:hover
+     and would have kept the folding, while its taps emulate :hover and unfold
+     it - so one rule for every device is also the only consistent one. */
   .bubble[data-variant="recall"]:hover .reveal,
   .bubble[data-variant="recall"]:focus-within .reveal,
   .bubble[data-variant="recall"].revealed .reveal {
     grid-template-rows: 1fr;
     opacity: 1;
-  }
-
-  /* Nothing hovers on a touch screen, and a tap on an underline is already the
-     deliberate gesture that arriving with a pointer would have been. */
-  @media (hover: none) {
-    .bubble[data-variant="recall"] .reveal {
-      grid-template-rows: 1fr;
-      opacity: 1;
-    }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -439,6 +436,8 @@ export function createTooltip({ onAction }) {
   let editing = false;
   /** Whether the second layer is unfolded. Folded again for every new phrase. */
   let unfolded = false;
+  /** Whether the click the last press becomes is the one that unfolded the row. */
+  let swallowClick = false;
   /** What the buttons were before the edit box opened, to go back to on cancel. */
   /** @type {Action[]} */
   let restingActions = [];
@@ -520,9 +519,16 @@ export function createTooltip({ onAction }) {
     }
     // Only the half of the unfolding that a stylesheet cannot do (see `reveal`):
     // showing the row is a `:hover` rule, so no cursor is tracked anywhere and
-    // nothing on the page below gains a listener.
+    // nothing on the page below gains a listener. A press is the exception and
+    // has to be a listener, because CSS cannot tell the press that asks for the
+    // row from the press that uses it - and on a touch screen they are the same
+    // gesture twice (see `onPointerDown`).
     bubble.addEventListener("mouseenter", reveal);
     bubble.addEventListener("focusin", reveal);
+    bubble.addEventListener("pointerdown", onPointerDown);
+    // Capture, which is the whole of how a swallowed click is swallowed: stopped
+    // here, it never reaches the button it would have pressed.
+    bubble.addEventListener("click", onClick, { capture: true });
 
     bubble.append(bodyElement, contextElement, entriesElement, editor, revealElement);
     root.append(bubble);
@@ -543,6 +549,50 @@ export function createTooltip({ onAction }) {
    */
   function reveal() {
     bubble?.classList.add("revealed");
+  }
+
+  /**
+   * Whether the row of actions is clipped away to nothing at this moment.
+   *
+   * Asked of the element and not of the variant or of the class, because both
+   * can disagree with the screen: a bubble that opens under a resting cursor is
+   * unfolded by `:hover` alone, with nothing in here ever told about it. What
+   * the callers need to know is whether there is anything to press, and only the
+   * element knows that.
+   *
+   * @returns {boolean}
+   */
+  function folded() {
+    if (actionsElement === null) return false;
+    return actionsElement.clientHeight === 0 && actionsElement.scrollHeight > 0;
+  }
+
+  /**
+   * A press inside the bubble, and on a touch screen the only way in: a finger
+   * cannot arrive anywhere without pressing it.
+   *
+   * So the press unfolds the row, exactly as a cursor arriving would - and then
+   * has to answer for what it unfolded under itself. The finger is still down
+   * where a button is about to be, so the click this press turns into is
+   * swallowed: the gesture that asks for the actions may not also use one.
+   * Touching an underline is a decision about recall, not about managing a
+   * phrase (D22 draws the same line), and Learned is one press further in.
+   *
+   * Every press decides this again, which is also what disarms it: the press
+   * that follows finds the row out and goes through untouched.
+   */
+  function onPointerDown() {
+    swallowClick = folded();
+    reveal();
+  }
+
+  /**
+   * @param {Event} event
+   */
+  function onClick(event) {
+    if (!swallowClick) return;
+    swallowClick = false;
+    event.stopPropagation();
   }
 
   /**
@@ -761,15 +811,16 @@ export function createTooltip({ onAction }) {
    *
    * A folded row is clipped to no height at all, so the bubble measures as if
    * it were not there - and by the time CSS unfolds it, there is nothing here
-   * left to run. Measured rather than worked out from the variant: on a touch
-   * screen there is no folding to begin with, and a bubble whose row is already
-   * out would otherwise have room reserved for it twice.
+   * left to run. Measured rather than worked out from the variant, because a
+   * recall bubble is folded only until somebody looks: once the row is out it
+   * stays out, and a bubble placed again after that would otherwise have room
+   * reserved for a row it is already showing.
    *
    * @returns {number}
    */
   function foldedHeight() {
-    if (actionsElement === null) return 0;
-    return actionsElement.clientHeight === 0 ? actionsElement.scrollHeight : 0;
+    if (actionsElement === null || !folded()) return 0;
+    return actionsElement.scrollHeight;
   }
 
   function place() {
@@ -829,6 +880,7 @@ export function createTooltip({ onAction }) {
     actionsElement = null;
     editing = false;
     unfolded = false;
+    swallowClick = false;
     restingActions = [];
   }
 
@@ -840,8 +892,10 @@ export function createTooltip({ onAction }) {
       if (bubble !== null) {
         bubble.dataset["variant"] = variant;
         // The bubble is reused from phrase to phrase, and a row left out was
-        // out for the last one.
+        // out for the last one. So is a press that never became a click: a
+        // finger dragged back out of the bubble may not eat the next press.
         bubble.classList.remove("revealed");
+        swallowClick = false;
       }
       // Folded again: this is another phrase, and the sentence behind "More"
       // belonged to the last one. Set directly rather than through `unfold`,
