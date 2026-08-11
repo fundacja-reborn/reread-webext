@@ -14,7 +14,8 @@ import { ErrorCode, Message, asRequest, fail, ok } from "../lib/protocol.js";
 import { setProvider, translate } from "../lib/translator/index.js";
 import { bergamot } from "../lib/translator/providers/bergamot/index.js";
 import { lookUp } from "./dictionary.js";
-import { openReader } from "./reader-tab.js";
+import { readPage } from "./page.js";
+import { openReader, readInReader } from "./reader-tab.js";
 import { forgetPhrase, listVocabulary, refreshVocabulary, savePhrase } from "./vocabulary.js";
 
 // The engine itself starts on the first translation, not here: this module runs
@@ -24,7 +25,8 @@ setProvider(bergamot);
 /**
  * @typedef {null
  *   | import("../lib/protocol.js").Translation
- *   | import("../lib/protocol.js").VocabEntry[]} Answer
+ *   | import("../lib/protocol.js").VocabEntry[]
+ *   | import("../lib/protocol.js").Page} Answer
  */
 
 /**
@@ -61,6 +63,8 @@ async function handle(request) {
       await webext().runtime.openOptionsPage();
       return ok(null);
     }
+    case Message.READ_PAGE:
+      return await readPage();
     case Message.SAVE_PHRASE:
       return await savePhrase(request);
     case Message.FORGET_PHRASE:
@@ -84,8 +88,11 @@ webext().runtime.onMessage.addListener((message, _sender, sendResponse) => {
   return true;
 });
 
-webext().action.onClicked.addListener(() => {
-  void openReader();
+// The button says "read this page", so it needs the page: `onClicked` hands
+// over the tab it was pressed on, and that is the only way the background finds
+// out which one it was without the `tabs` permission.
+webext().action.onClicked.addListener((tab) => {
+  void readInReader(tab);
 });
 
 // The copy pages read is written whenever the vocabulary changes. An install or

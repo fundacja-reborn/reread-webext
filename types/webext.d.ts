@@ -70,6 +70,12 @@ interface WebExtBrowser {
     // this finds out. Reading `url` or `title` is what would need `tabs`, and
     // nothing here does.
     update(tabId: number, properties: { active?: boolean }): Promise<WebExtTab>;
+    // Asking a page for itself, which is the only message that travels from the
+    // background to a content script. Needs no permission beyond the host
+    // permission that put the content script there; rejects when there is no
+    // content script to hear it, and that rejection is how the reader finds out
+    // there is nothing to read.
+    sendMessage(tabId: number, message: unknown): Promise<unknown>;
   };
   windows: {
     // A tab selected in a window nobody is looking at is not a tab anybody sees.

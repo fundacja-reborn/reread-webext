@@ -29,6 +29,11 @@ export function describeError(code) {
       return "No model exists for this language pair.";
     case ErrorCode.TOO_LONG:
       return "That selection is too long to translate.";
+    case ErrorCode.NO_PAGE:
+      // Says what to do about it, because there usually is something: this is
+      // what a reader gets after pressing the button on a settings page, a PDF,
+      // or a tab they have since closed.
+      return "There is no page to read here - open an article and press the button again.";
     case ErrorCode.UNKNOWN_MESSAGE:
       return "The extension sent a request it does not understand.";
     case ErrorCode.INTERNAL:

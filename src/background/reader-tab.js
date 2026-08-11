@@ -1,17 +1,17 @@
 /**
- * The reader is one tab, not one tab per press.
+ * The reader is one tab, not one tab per press - and the button that opens it
+ * means "read this page", so it also has to say which page.
  *
- * Opening it is the only thing the toolbar button does, and pressing it three
- * times used to answer with three identical readers - the first thing the smoke
- * test said about that button. So the tab is remembered and the next press goes
- * back to it.
+ * Both halves are here because they are one gesture. Pressing the toolbar
+ * button points the reader at the tab it was pressed on and brings the reader
+ * forward; pressing it again on another page points it somewhere else, in the
+ * same tab. Pressed on the reader itself there is nothing to point at, and it
+ * only comes forward - which is also what happens on a page no content script
+ * runs in, except that the reader says so.
  *
- * Where it is remembered is the part worth reading. A tab id means nothing after
- * a restart: ids start over, so one written to `storage.local` would name
- * somebody else's tab the next morning, and the button would jump to it.
- * `storage.session` lasts exactly as long as tab ids do - that is the whole
- * reason it is the home for this, and it also survives the event page dying,
- * which a variable in this module would not.
+ * Where the tab ids live and why is `src/lib/session.js`. Nothing about what is
+ * being read is written down: the page itself travels as one answer to one
+ * question and is never stored.
  *
  * Nothing here needs the `tabs` permission. Selecting a tab and focusing a
  * window are allowed without it, and so is finding out that a tab is gone: the
@@ -21,11 +21,9 @@
  */
 
 import { webext } from "../lib/browser.js";
+import { readReaderTab, writeReaderSource, writeReaderTab } from "../lib/session.js";
 
 const READER_PAGE = "reader/reader.html";
-
-/** The one key in `storage.session`, and for now the only thing in there. */
-export const READER_TAB_KEY = "readerTabId";
 
 /**
  * @typedef {object} ReaderTabDeps
@@ -33,17 +31,8 @@ export const READER_TAB_KEY = "readerTabId";
  * @property {WebExtBrowser["windows"]} [windows]
  * @property {WebExtBrowser["storage"]["session"]} [session]
  * @property {string} [url]
+ * @property {() => number} [now]
  */
-
-/**
- * @param {WebExtBrowser["storage"]["session"]} session
- * @returns {Promise<number | null>}
- */
-async function rememberedTab(session) {
-  const stored = await session.get(READER_TAB_KEY);
-  const id = stored[READER_TAB_KEY];
-  return typeof id === "number" ? id : null;
-}
 
 /**
  * Bringing a tab back rather than opening another one. Two calls, because they
@@ -90,15 +79,40 @@ export async function openReader(deps = {}) {
   const session = deps.session ?? webext().storage.session;
   const url = deps.url ?? webext().runtime.getURL(READER_PAGE);
 
-  const known = await rememberedTab(session);
+  const known = await readReaderTab(session);
   if (known !== null && (await focusTab(tabs, windows, known))) return;
 
   const opened = await tabs.create({ url });
-  if (typeof opened.id === "number") {
-    await session.set({ [READER_TAB_KEY]: opened.id });
-  } else {
-    // No id means nothing to come back to, and the id we have is the stale one
-    // that just failed. Keeping it would send the next press after a dead tab.
-    await session.remove(READER_TAB_KEY);
+  // No id means nothing to come back to, and the id we have is the stale one
+  // that just failed. Keeping it would send the next press after a dead tab.
+  await writeReaderTab(typeof opened.id === "number" ? opened.id : null, session);
+}
+
+/**
+ * The toolbar button: point the reader at this tab, then bring it forward.
+ *
+ * The source is written before the reader is opened, so that a reader already
+ * standing there sees the change and asks for the new page, while a reader
+ * being opened now finds it waiting. Both paths end in one question from the
+ * reader, and the page is grabbed once, when it is asked for - not here, where
+ * it would have to survive an event page that Firefox may kill in between.
+ *
+ * @param {WebExtTab} tab the tab the button was pressed on
+ * @param {ReaderTabDeps} [deps]
+ * @returns {Promise<void>}
+ */
+export async function readInReader(tab, deps = {}) {
+  const session = deps.session ?? webext().storage.session;
+  const now = deps.now ?? Date.now;
+
+  const known = await readReaderTab(session);
+  // Pressed on the reader itself: there is no page behind it to read, and
+  // pointing the reader at itself would replace an article with the reader.
+  if (typeof tab.id === "number" && tab.id !== known) {
+    // The timestamp is what makes pressing twice on the same tab reach the
+    // reader - an unchanged value is a `storage.onChanged` that never fires.
+    await writeReaderSource({ tabId: tab.id, at: now() }, session);
   }
+
+  await openReader(deps);
 }
