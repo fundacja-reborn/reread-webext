@@ -6,6 +6,12 @@
     <title>re/read - reader</title>
     <link rel="stylesheet" href="../assets/page.css" />
     <link rel="stylesheet" href="reader.css" />
+    <!--
+      The same one file that goes onto every page being read: the underline
+      under a saved phrase has to look identical here, and one stylesheet is how
+      that stays true without anybody remembering to change two.
+    -->
+    <link rel="stylesheet" href="../content/highlight.css" />
   </head>
   <body class="reader">
     <header class="reader-bar">
@@ -16,6 +22,7 @@
     <main id="page">
       <p id="notice" class="note">
         Press the toolbar button on a page you want to read, and the article shows up here.
+        Selecting a phrase works exactly as it does on any other page.
       </p>
 
       <article id="article" hidden>

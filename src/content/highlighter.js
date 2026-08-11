@@ -17,6 +17,11 @@
  * only the block that changed is looked at again. The observer exists only
  * while there is something to underline: with an empty vocabulary this module
  * registers nothing, walks nothing and watches nothing.
+ *
+ * Where it paints is given rather than assumed. On a page being read that is
+ * the whole body; in the reader it is the article, so that the reader's own
+ * heading and links are not underlined - and nothing there changes on its own,
+ * so the observer is not started at all.
  */
 
 import { buildIndex } from "../lib/matcher/index.js";
@@ -45,6 +50,9 @@ let live = null;
 let index = new Map();
 /** @type {MutationObserver | null} */
 let observer = null;
+/** What was painted, and what a mutation is rescanned against. */
+/** @type {Element | null} */
+let scope = null;
 /** @type {Set<Element>} */
 const pending = new Set();
 let scheduled = false;
@@ -78,6 +86,7 @@ export function clear() {
   pending.clear();
   painted = [];
   live = null;
+  scope = null;
   index = new Map();
   registry()?.delete(NAME);
 }
@@ -87,23 +96,31 @@ export function clear() {
  * page if it changes.
  *
  * @param {Iterable<string>} keys normalized phrases
+ * @param {{ root?: Element | null, observe?: boolean }} [where]
  * @returns {number} how many occurrences were painted
  */
-export function paint(keys) {
+export function paint(keys, where = {}) {
   const api = registry();
-  if (api === null || document.body === null) return 0;
+  const root = where.root ?? document.body;
+  if (api === null || root === null) return 0;
 
   clear();
   index = buildIndex(keys);
   if (index.size === 0) return 0;
 
-  painted = scan(document.body, index);
+  scope = root;
+  painted = scan(root, index);
   live = new Highlight();
   for (const { range } of painted) live.add(range);
   api.set(NAME, live);
 
-  observer = new MutationObserver(onMutations);
-  observer.observe(document.body, { subtree: true, childList: true, characterData: true });
+  // Not in the reader: that document is built here and changes only when this
+  // module is asked to paint again, so an observer would be a listener waiting
+  // for something that cannot happen.
+  if (where.observe !== false) {
+    observer = new MutationObserver(onMutations);
+    observer.observe(root, { subtree: true, childList: true, characterData: true });
+  }
 
   return painted.length;
 }
@@ -145,25 +162,25 @@ function outermost(blocks) {
 function catchUp() {
   scheduled = false;
   const api = registry();
-  if (api === null || live === null || document.body === null) return;
+  if (api === null || live === null || scope === null) return;
 
   const changed = [...pending].filter((block) => block.isConnected);
   pending.clear();
-  const scopes = changed.length > RESCAN_EVERYTHING ? [document.body] : outermost(changed);
-  if (scopes.length === 0) return;
+  const areas = changed.length > RESCAN_EVERYTHING ? [scope] : outermost(changed);
+  if (areas.length === 0) return;
 
   /** @type {Painted[]} */
   const kept = [];
   for (const entry of painted) {
     const container = entry.range.startContainer;
-    const stale = !container.isConnected || scopes.some((scope) => scope.contains(container));
+    const stale = !container.isConnected || areas.some((area) => area.contains(container));
     if (stale) live.delete(entry.range);
     else kept.push(entry);
   }
   painted = kept;
 
-  for (const scope of scopes) {
-    for (const entry of scan(scope, index)) {
+  for (const area of areas) {
+    for (const entry of scan(area, index)) {
       live.add(entry.range);
       painted.push(entry);
     }
