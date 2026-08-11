@@ -61,25 +61,36 @@ describe("choosableLines", () => {
 });
 
 describe("afterChoosing", () => {
-  it("puts the chosen line where the gloss was", () => {
-    assert.equal(afterChoosing("brzeg", "bank (instytucja)", "brzeg"), "bank (instytucja)");
+  it("adds the pressed line under what the engine said", () => {
+    assert.equal(afterChoosing("Wystąpienie", "okazja"), "Wystąpienie\nokazja");
   });
 
-  it("gives the gloss back when the same line is pressed again", () => {
-    assert.equal(afterChoosing("bank (instytucja)", "bank (instytucja)", "brzeg"), "brzeg");
+  it("collects several meanings in the order they were pressed", () => {
+    assert.equal(afterChoosing("Wystąpienie\nokazja", "zjawisko"), "Wystąpienie\nokazja\nzjawisko");
   });
 
-  it("replaces one choice with another rather than collecting them", () => {
-    assert.equal(afterChoosing("bank (instytucja)", "ławica", "brzeg"), "ławica");
+  it("takes a meaning back out when its line is pressed again", () => {
+    assert.equal(afterChoosing("Wystąpienie\nokazja\nzjawisko", "okazja"), "Wystąpienie\nzjawisko");
   });
 
-  it("chooses over a gloss the reader has edited by hand", () => {
-    assert.equal(afterChoosing("brzeg rzeki", "bank (instytucja)", "brzeg rzeki"), "bank (instytucja)");
+  it("leaves the rest alone when one of several goes", () => {
+    assert.equal(afterChoosing("Wystąpienie\nokazja", "Wystąpienie"), "okazja");
   });
 
-  it("takes a choice back to the edited gloss and not to the engine's", () => {
-    // An edit is the gloss from then on: `setBody` is what records it, and the
-    // bubble calls that when the edit box closes on a save.
-    assert.equal(afterChoosing("ławica", "ławica", "brzeg rzeki"), "brzeg rzeki");
+  it("adds to a gloss the reader has edited by hand", () => {
+    assert.equal(afterChoosing("brzeg rzeki", "bank (instytucja)"), "brzeg rzeki\nbank (instytucja)");
+  });
+
+  it("does not keep the same meaning twice", () => {
+    // The line is already in - pressing it means taking it out, which is what
+    // the mark under it says. The engine and the dictionary agreeing is exactly
+    // when this happens.
+    assert.equal(afterChoosing("wydarzenie\nokazja", "wydarzenie"), "okazja");
+  });
+
+  it("gives nothing back rather than an empty gloss", () => {
+    // The bubble declines this press: a phrase with no meaning has nothing to
+    // save, and there is no state in which the last line may go.
+    assert.equal(afterChoosing("okazja", "okazja"), "");
   });
 });

@@ -56,20 +56,28 @@ export function choosableLines(senses) {
 /**
  * What the gloss becomes when a reader presses a line of a dictionary entry.
  *
- * Pressing one is choosing it, and the choice replaces the gloss rather than
- * joining it (G1): the reader has just read both answers and decided between
- * them, and a card carrying the rejected one is a worse card.
+ * The line **joins** what is already there, and pressing it again takes it back
+ * out. G1 had this the other way - a choice replacing the gloss - and Michał
+ * reversed it on the first day of using it, which is the right call: a word has
+ * several meanings, `translations` has been a list since the first day for that
+ * exact reason (D21), and until now the only way to put a second one in it was
+ * to type it. What D21 refuses is a machine quietly adding a variant at every
+ * encounter, and a press is nobody's idea of quiet.
  *
- * Pressing the chosen line again gives back the gloss it replaced. That second
- * press is the whole undo and it earns its line: once a dictionary meaning is
- * showing, the engine's answer is nowhere on the screen, so without it the way
- * back would be to forget the phrase and select it again.
+ * The order is the order of pressing, after whatever the engine said. Somebody
+ * who does not want the engine's guess on the card deletes that one line in the
+ * edit box, which is a thing that already exists.
+ *
+ * Removing the last meaning gives back an empty string. That is not a gloss and
+ * the bubble declines it: a phrase with nothing to mean has nothing to save.
  *
  * @param {string} shown the gloss the bubble has right now
  * @param {string} sense the line that was pressed
- * @param {string} given the gloss before any line was chosen
  * @returns {string}
  */
-export function afterChoosing(shown, sense, given) {
-  return shown === sense ? given : sense;
+export function afterChoosing(shown, sense) {
+  const meanings = toMeanings(shown);
+  const without = meanings.filter((meaning) => meaning !== sense);
+  const next = without.length === meanings.length ? [...meanings, sense] : without;
+  return next.join(MEANING_SEPARATOR);
 }

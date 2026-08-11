@@ -25,9 +25,10 @@
  * vocabulary and on a flashcard.
  *
  * A dictionary line is the one thing down there that is also a button. Pressing
- * it moves that meaning into the body, which is to say into the vocabulary - the
- * bubble still does not know what saving means, it just reports the meanings it
- * is showing the moment they change.
+ * it adds that meaning to the body, which is to say to the vocabulary, and
+ * pressing it again takes it back out - the bubble still does not know what
+ * saving means, it just reports the meanings it is showing the moment they
+ * change.
  */
 
 import { MEANING_SEPARATOR, afterChoosing, toMeanings } from "../lib/gloss.js";
@@ -270,12 +271,6 @@ export function createTooltip({ onAction }) {
   /** What the buttons were before the edit box opened, to go back to on cancel. */
   /** @type {Action[]} */
   let restingActions = [];
-  /**
-   * The gloss as it was handed in, which is where a chosen dictionary line goes
-   * back to when it is pressed a second time. Only a real gloss counts: a
-   * "Translating..." or an error is not something to return to.
-   */
-  let givenGloss = "";
 
   /**
    * What the bubble is showing as the gloss - which is the edit box while there
@@ -379,19 +374,22 @@ export function createTooltip({ onAction }) {
    * throw away what somebody was in the middle of writing.
    */
   function refreshControls() {
-    const shown = shownGloss();
+    const shown = new Set(currentMeanings());
 
     if (actionsElement !== null) {
-      const empty = toMeanings(shown).length === 0;
       for (const button of actionsElement.querySelectorAll("button")) {
-        if (button.dataset["action"] === "save") button.disabled = empty;
+        if (button.dataset["action"] === "save") button.disabled = shown.size === 0;
       }
     }
 
     if (entriesElement !== null) {
       for (const sense of entriesElement.querySelectorAll("button")) {
         sense.disabled = editing;
-        sense.setAttribute("aria-pressed", sense.textContent === shown ? "true" : "false");
+        // A line is marked when it is one of the meanings on show - which is
+        // also true of a line the reader typed by hand into the edit box, and
+        // that is honest: what the mark says is "this is in", not "you pressed
+        // this".
+        sense.setAttribute("aria-pressed", shown.has(sense.textContent ?? "") ? "true" : "false");
       }
     }
   }
@@ -430,20 +428,20 @@ export function createTooltip({ onAction }) {
    *
    * It goes out as a save and not as some announcement of its own, because it
    * means exactly what the Save button means: this is what the phrase means from
-   * now on. The caller does not have to know which of the two the reader used,
-   * and the day it does, that is a second callback and not a second rule.
+   * now on - one meaning longer, or one shorter. The caller does not have to
+   * know which of the two the reader used, and the day it does, that is a second
+   * callback and not a second rule.
    *
    * @param {string} sense
    */
   function choose(sense) {
     if (bodyElement === null) return;
-    const next = afterChoosing(bodyElement.textContent ?? "", sense, givenGloss);
-    // Nothing to go back to - a phrase whose gloss never arrived. There are no
-    // entries to press in that state, which is why this is a guard and not a
-    // branch anybody will see.
+    const next = afterChoosing(bodyElement.textContent ?? "", sense);
+    // Taking out the last meaning there was. A phrase means something or it is
+    // not kept at all, so this press does nothing rather than emptying it.
     if (next.length === 0) return;
 
-    showGloss(next);
+    setBody(next);
     place();
     emit("save");
   }
@@ -597,31 +595,14 @@ export function createTooltip({ onAction }) {
   }
 
   /**
-   * What the bubble shows as the gloss, without any claim about where it came
-   * from - a chosen dictionary line goes through here, and it is not something
-   * a later press should be able to go back to.
-   *
-   * @param {string} body
-   * @param {Tone} [tone]
-   */
-  function showGloss(body, tone = "normal") {
-    if (bodyElement === null) return;
-    bodyElement.textContent = body;
-    bodyElement.dataset["tone"] = tone;
-    refreshControls();
-  }
-
-  /**
-   * The gloss as the caller means it, which makes it the one a chosen line is
-   * measured against. A pending line and an error are shown and not remembered:
-   * neither is a meaning, and "take the choice back" has to land on one.
-   *
    * @param {string} body
    * @param {Tone} [tone]
    */
   function setBody(body, tone = "normal") {
-    showGloss(body, tone);
-    if (tone === "normal") givenGloss = body;
+    if (bodyElement === null) return;
+    bodyElement.textContent = body;
+    bodyElement.dataset["tone"] = tone;
+    refreshControls();
   }
 
   function hideBubble() {
@@ -637,7 +618,6 @@ export function createTooltip({ onAction }) {
     editing = false;
     unfolded = false;
     restingActions = [];
-    givenGloss = "";
   }
 
   return {
@@ -645,10 +625,6 @@ export function createTooltip({ onAction }) {
       build();
       anchor = rect;
       editing = false;
-      // The last phrase's gloss is not this one's to go back to. A bubble that
-      // opens on "Translating..." has nothing to put here yet, and it has no
-      // dictionary lines to press either until the answer brings both.
-      givenGloss = "";
       // Folded again: this is another phrase, and the sentence behind "More"
       // belonged to the last one. Set directly rather than through `unfold`,
       // which would render and place a bubble that has no body yet.
