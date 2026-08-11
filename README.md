@@ -23,6 +23,7 @@ file, so what you collect on an e-reader underlines itself in your browser and b
 | Settings page | shows the language pair, downloads, adds and removes models |
 | Keeping a phrase, correcting what it means, marking it learned | yes |
 | Underlining saved phrases on the pages you read | yes |
+| Dictionaries (StarDict) | imported from files and managed on the settings page |
 | Reader mode | not started |
 | Import / export (TSV) | not started |
 | Chromium | builds, untested |
@@ -57,7 +58,7 @@ read along, or read the source, which is deliberately shipped unminified.
 | Permission | Why |
 |---|---|
 | `storage` | The vocabulary and the settings. Browser-local, per extension, never synced. |
-| `unlimitedStorage` | Translation models are tens of megabytes; the default quota is not enough to keep one. |
+| `unlimitedStorage` | Translation models are tens of megabytes and a dictionary can be more; the default quota is not enough to keep one. |
 | `<all_urls>` | The whole point is that saved phrases are underlined on **every** page, not on a list of sites you approved one by one. This is a broad permission and it is honest to say so: it means the extension can read the pages you visit. It reads them to find your saved phrases in the text, in a content script on your machine, and sends nothing. |
 
 There is nothing else. No `tabs`, no `webRequest`, no `cookies`, no `downloads`.
@@ -96,6 +97,31 @@ entry, and it refuses to do so if its own sum disagrees with the one Mozilla doe
 
 Downloading needs no permission the extension does not already have, and adds nothing to the table
 above. It happens on the settings page, while you watch it, and it can be cancelled.
+
+### Dictionaries, and where to get them
+
+A translation has to choose. *Bank* is a riverbank and a place that keeps money, and a model
+picking one of them cannot tell you about the other; a dictionary lists both. So dictionaries are
+a second thing this extension reads, next to the engine and not instead of it.
+
+They are read in **StarDict** format - `.ifo`, `.idx`, `.dict` or `.dict.dz`, and `.syn` when the
+dictionary has one. That is the format [KOReader](https://koreader.rocks/) uses, so a dictionary
+already on your e-reader works here as it is, and the sister project reads the same files.
+
+**Nothing is downloaded, ever.** There is no list of dictionary addresses in this package and no
+request is made for one: you unpack the archive yourself and pick the files on the settings page.
+A dictionary is parsed once, when it is added, and stored as text in the browser's own database -
+nothing reads a dictionary file while you are reading a page.
+
+Two worth knowing about for English and Polish:
+
+| Where | What | Licence |
+|---|---|---|
+| [WikDict](https://www.wikdict.com/page/download) | built from Wiktionary through DBnary, regenerated regularly | CC BY-SA |
+| [FreeDict](https://freedict.org/downloads/) | `eng-pol`, 16 362 headwords, from a TEI source | GPL |
+
+Whatever a dictionary says about its author and origin is kept with it and shown on the settings
+page, which is what CC BY-SA asks for and what makes it possible to tell two of them apart.
 
 ## Requirements
 
@@ -165,6 +191,7 @@ src/
     models/      translation models: which ones exist, how they are fetched
                  and checked, and where they are kept
     matcher/     tokenisation and phrase matching
+    dict/        StarDict dictionaries: reading the files, and where they are kept
     store/       IndexedDB, import and export
 vendor/
   bergamot/      the engine, committed rather than installed

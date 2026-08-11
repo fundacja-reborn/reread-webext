@@ -102,6 +102,40 @@ h2 {
   font-size: 0.75rem;
 }
 
+/* The pair a dictionary answers for, when it is the one being read. */
+.badge-on {
+  border-color: var(--page-accent);
+  color: var(--page-accent);
+}
+
+.dictionary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--page-line);
+}
+
+.dictionary-name {
+  flex: 1 1 12rem;
+}
+
+/* Its own line, below the rest of the row: this is where a dictionary says who
+   made it, and CC BY-SA is the licence most of the good ones carry. */
+.dictionary-credit {
+  flex-basis: 100%;
+  color: var(--page-muted);
+  font-size: 0.85rem;
+}
+
+.inline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .model-progress {
   flex: 1;
   min-width: 6rem;
