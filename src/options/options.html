@@ -23,10 +23,21 @@
 
     <p>
       A model is what turns one language into another, and there is one per direction. Nothing is
-      translated until the model for the pair you are reading is here, on this device.
+      translated until the model for the pair you are reading is here, on this device. Every
+      direction Mozilla publishes is listed; the pair you are reading and anything already stored
+      float to the top.
     </p>
 
-    <div id="models" class="models"></div>
+    <p class="model-filter">
+      <input
+        type="search"
+        id="model-filter"
+        placeholder="Filter by language or code"
+        aria-label="Filter the list of translation models"
+      />
+    </p>
+
+    <div id="models" class="models models-frame"></div>
 
     <p id="model-status" class="status" role="status"></p>
 

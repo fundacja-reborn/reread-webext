@@ -22,6 +22,7 @@
 
 import { webext } from "../lib/browser.js";
 import { readConfig, writeConfig } from "../lib/config.js";
+import { pairLabel } from "../lib/language.js";
 import { listModels } from "../lib/models/store.js";
 import { Message, asPageInfo, asResult } from "../lib/protocol.js";
 import { pairChoices } from "./choices.js";
@@ -75,7 +76,7 @@ function renderPair(config) {
   for (const choice of choices) {
     const option = document.createElement("option");
     option.value = choice.pair;
-    option.textContent = `${choice.from} to ${choice.to}`;
+    option.textContent = pairLabel(choice.from, choice.to);
     option.selected = choice.from === config.sourceLang && choice.to === config.targetLang;
     pairSelect.append(option);
   }

@@ -63,6 +63,21 @@ describe("parseRegistry", () => {
     );
   });
 
+  it("takes the codes Mozilla's index really uses, not only two-letter ones", () => {
+    const { models, problems } = parseRegistry({
+      models: [
+        model({ pair: "hbsen", from: "hbs", to: "en" }),
+        model({ pair: "zh_hanten", from: "zh_hant", to: "en" }),
+        model({ pair: "enzh_hant", from: "en", to: "zh_hant" }),
+      ],
+    });
+    assert.deepEqual(problems, []);
+    assert.deepEqual(
+      models.map((entry) => entry.pair),
+      ["enzh_hant", "hbsen", "zh_hanten"],
+    );
+  });
+
   it("takes both vocabularies when a pair ships one per side", () => {
     const two = model();
     two.files.push(file({ role: "vocab", url: "https://example.test/vocab.2.spm.gz", downloadBytes: 1, bytes: 2 }));
@@ -92,7 +107,9 @@ describe("parseRegistry", () => {
       ["no vocabulary", model({ files: [file(), file({ role: "shortlist" })] })],
       ["two model files", model({ files: [...model().files, file({ url: "https://example.test/other.bin" })] })],
       ["a pair that contradicts its languages", model({ pair: "enfr" })],
-      ["a language that is not a two-letter code", model({ pair: "engpl", from: "eng" })],
+      ["a language of one letter", model({ pair: "epl", from: "e" })],
+      ["a language that is a sentence", model({ pair: "not a codepl", from: "not a code" })],
+      ["a language in upper case", model({ pair: "ENpl", from: "EN" })],
       ["no files at all", model({ files: [] })],
     ];
 
