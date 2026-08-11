@@ -11,16 +11,44 @@
  * text decoration and shadow - which is the same reason the CSS Custom
  * Highlight API is used here at all: it cannot move anything on the page.
  *
- * One colour for both themes rather than a `prefers-color-scheme` pair: that
- * query answers what the browser is set to, not what the page under the
- * underline is painted with, and a dark rule on a white article would be worse
- * than a compromise that reads on both.
+ * **Quiet on purpose.** The method this tool is built around is reading for
+ * comprehension: the reader stays in the text and reaches for a translation
+ * only when the sentence did not give the meaning away. A mark that pulls the
+ * eye works against that - it turns every saved word into an interruption of
+ * the paragraph it is in. So the underline is dotted and thin, and its job is
+ * to be findable when looked for rather than noticed when not: "you had trouble
+ * here once", said quietly enough to read past.
+ *
+ * **The page's own text colour, not one of ours.** A fixed colour has to be a
+ * compromise that reads on white and on black, and a compromise that reads
+ * everywhere is loud somewhere. `prefers-color-scheme` does not fix it either -
+ * that query answers what the browser is set to, not what the page under the
+ * underline is painted with, and a dark rule on a white article would be worse.
+ * `currentColor` answers exactly the right question, and answers it per page.
+ *
+ * One caveat worth knowing when this looks wrong: highlight pseudo-elements
+ * inherit down a chain of their own, so `currentColor` here is the colour the
+ * page sets on its root, not the one on the paragraph. A page whose article
+ * text is a different colour from its root gets an underline in the root's
+ * colour - which is still a colour from that page, and still better than one
+ * of ours.
  */
 
+/*
+ * Two dials, and they are the whole design: how much ink a dot has
+ * (`thickness`) and how far it is from the text colour (the `color-mix`
+ * percentage). Both were lower here and the mark disappeared while reading;
+ * both a step higher is the balance Michał settled on. Anything that has to be
+ * tuned again is one of these two numbers - the style and the colour are not
+ * up for it.
+ */
 ::highlight(reread) {
   text-decoration-line: underline;
-  text-decoration-style: solid;
-  text-decoration-color: #e07b39;
-  text-decoration-thickness: 2px;
+  text-decoration-style: dotted;
+  /* Not the full text colour: at full strength a dotted rule reads as a second
+     row of letters under the word. */
+  text-decoration-color: color-mix(in srgb, currentColor 75%, transparent);
+  text-decoration-thickness: 1.5px;
+  /* Clear of the descenders, so `g` and `y` are still whole letters. */
   text-underline-offset: 2px;
 }
