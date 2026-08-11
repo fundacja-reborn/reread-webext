@@ -111,6 +111,71 @@ function rowsOf(id) {
 }
 
 /**
+ * @typedef {object} DictionaryEntry
+ * @property {string} dictionary the name of the book it came from
+ * @property {string} headword as that dictionary spells it, which is not always what was selected
+ * @property {string[]} senses
+ */
+
+/**
+ * What the dictionaries here have to say about a word.
+ *
+ * One transaction over both stores: which dictionaries are installed, then a
+ * point read per dictionary per candidate form. A dictionary answers at most
+ * once - the first form that hits wins, so `watches` finding `watch` does not
+ * also go looking for `watche`.
+ *
+ * Ordering is import order, which is the only order a reader can predict and
+ * the one they can change by removing a dictionary and adding it again.
+ *
+ * @param {string[]} keys the word, then the forms worth trying instead of it
+ * @param {string} langFrom the language being read
+ * @returns {Promise<DictionaryEntry[]>}
+ */
+export async function lookupEntries(keys, langFrom) {
+  if (keys.length === 0) return [];
+
+  return await withStores([META, ENTRIES], "readonly", async (transaction) => {
+    const installed = /** @type {Dictionary[]} */ (await promisify(transaction.objectStore(META).getAll()));
+    // Matched on the language of the headwords alone. A dictionary explaining
+    // English in English is often the better answer for somebody learning it,
+    // and refusing it because the settings say "into Polish" would refuse a
+    // book the reader deliberately installed.
+    const dictionaries = installed
+      .filter((dictionary) => dictionary.ready && dictionary.langFrom === langFrom)
+      .sort((a, b) => a.addedAt - b.addedAt || a.id.localeCompare(b.id));
+
+    const store = transaction.objectStore(ENTRIES);
+    /** @type {DictionaryEntry[]} */
+    const found = [];
+
+    for (const dictionary of dictionaries) {
+      for (const key of keys) {
+        const row = /** @type {import("./rows.js").DictionaryRow | undefined} */ (
+          await promisify(store.get([dictionary.id, key]))
+        );
+        if (row === undefined) continue;
+
+        // One hop, never two: an alias points at a word, and a word that turned
+        // out to be another alias is a dictionary contradicting itself.
+        const target =
+          row.aliasOf === undefined
+            ? row
+            : /** @type {import("./rows.js").DictionaryRow | undefined} */ (
+                await promisify(store.get([dictionary.id, row.aliasOf]))
+              );
+
+        if (target === undefined || target.senses.length === 0) continue;
+        found.push({ dictionary: dictionary.name, headword: target.headword, senses: target.senses });
+        break;
+      }
+    }
+
+    return found;
+  });
+}
+
+/**
  * @returns {Promise<Dictionary[]>} oldest first, which is the order they are asked in
  */
 export async function listDictionaries() {

@@ -18,10 +18,11 @@
  * pixels away, selected or underlined; printing it again cost a line of the
  * article and gave nothing back. What is left is the gloss and the buttons.
  *
- * The sentence, when there is one, is a second layer behind "More" - one line
- * first, everything else on a deliberate second press (G1). It lives in its own
- * element and not in the body, because the body is what gets saved: a sentence
- * that leaked into it would end up in the vocabulary and on a flashcard.
+ * The sentence and the dictionary entries, when there are any, are a second
+ * layer behind "More" - one line first, everything else on a deliberate second
+ * press (G1). They live in their own elements and not in the body, because the
+ * body is what gets saved: anything that leaked into it would end up in the
+ * vocabulary and on a flashcard.
  */
 
 const GAP = 8;
@@ -81,6 +82,32 @@ const STYLE = `
     opacity: 0.85;
   }
 
+  /* A dictionary entry can be long, and a bubble that grows past the window is
+     a bubble that covers the sentence somebody was reading. It scrolls instead;
+     the page underneath keeps the bubble open while it does. */
+  .entries {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(0, 0, 0, 0.12);
+    font-size: 13px;
+    max-height: 40vh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .entry + .entry { margin-top: 8px; }
+
+  /* Which book this came from, and the word it actually found - the second one
+     matters when the reader selected "watches" and the dictionary knows "watch". */
+  .entry-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    opacity: 0.6;
+  }
+
+  .entry-sense { white-space: pre-wrap; }
+
   .editor {
     display: block;
     width: 100%;
@@ -124,7 +151,7 @@ const STYLE = `
       box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
     }
     .body[data-tone="error"] { color: #f0a83c; }
-    .context { border-top-color: rgba(255, 255, 255, 0.14); }
+    .context, .entries { border-top-color: rgba(255, 255, 255, 0.14); }
     .editor {
       background: rgba(255, 255, 255, 0.06);
       border-color: rgba(255, 255, 255, 0.24);
@@ -142,10 +169,20 @@ const STYLE = `
 /** What it reports - editing and unfolding never leave the bubble. @typedef {"save" | "learned" | "settings"} ReportedAction */
 
 /**
+ * One block of the second layer below the sentence: where it came from, and the
+ * lines it has to show. The bubble is handed labels rather than dictionary
+ * records on purpose - deciding whether a book's name or a headword is worth
+ * repeating needs to know what the reader selected, and the bubble does not.
+ *
+ * @typedef {{ label: string, lines: string[] }} Block
+ */
+
+/**
  * @typedef {object} Tooltip
  * @property {(options: { anchor: DOMRect, body: string, tone?: Tone, actions?: Action[] }) => void} show
  * @property {(body: string, tone?: Tone) => void} setBody
  * @property {(sentence: string | null) => void} setContext
+ * @property {(blocks: Block[]) => void} setEntries
  * @property {(actions: Action[]) => void} setActions
  * @property {() => void} hide
  * @property {() => boolean} isOpen
@@ -179,6 +216,8 @@ export function createTooltip({ onAction }) {
   let bodyElement = null;
   /** @type {HTMLDivElement | null} */
   let contextElement = null;
+  /** @type {HTMLDivElement | null} */
+  let entriesElement = null;
   /** @type {HTMLTextAreaElement | null} */
   let editor = null;
   /** @type {HTMLDivElement | null} */
@@ -224,6 +263,9 @@ export function createTooltip({ onAction }) {
     contextElement = document.createElement("div");
     contextElement.className = "context";
     contextElement.hidden = true;
+    entriesElement = document.createElement("div");
+    entriesElement.className = "entries";
+    entriesElement.hidden = true;
     editor = document.createElement("textarea");
     editor.className = "editor";
     editor.hidden = true;
@@ -245,7 +287,7 @@ export function createTooltip({ onAction }) {
       editor.addEventListener(type, (event) => event.stopPropagation());
     }
 
-    bubble.append(bodyElement, contextElement, editor, actionsElement);
+    bubble.append(bodyElement, contextElement, entriesElement, editor, actionsElement);
     root.append(style, bubble);
     // `documentElement` and not `body`: single-page applications replace the
     // body, and a bubble that vanishes with a re-render is a bug nobody can
@@ -305,12 +347,21 @@ export function createTooltip({ onAction }) {
   }
 
   /**
+   * @returns {boolean} whether the second layer has anything in it
+   */
+  function hasSecondLayer() {
+    if ((contextElement?.textContent ?? "").length > 0) return true;
+    return (entriesElement?.childElementCount ?? 0) > 0;
+  }
+
+  /**
    * @param {boolean} open
    */
   function unfold(open) {
-    if (contextElement === null) return;
-    unfolded = open && (contextElement.textContent ?? "").length > 0;
-    contextElement.hidden = !unfolded;
+    if (contextElement === null || entriesElement === null) return;
+    unfolded = open && hasSecondLayer();
+    contextElement.hidden = !unfolded || (contextElement.textContent ?? "").length === 0;
+    entriesElement.hidden = !unfolded || entriesElement.childElementCount === 0;
     renderActions(editing ? ["save", "cancel"] : restingActions);
     place();
   }
@@ -322,6 +373,40 @@ export function createTooltip({ onAction }) {
     if (contextElement === null) return;
     contextElement.textContent = sentence ?? "";
     // A phrase whose sentence is gone cannot stay unfolded over nothing.
+    unfold(unfolded);
+  }
+
+  /**
+   * @param {Block[]} blocks
+   */
+  function setEntries(blocks) {
+    if (entriesElement === null) return;
+    entriesElement.replaceChildren();
+
+    for (const block of blocks) {
+      const entry = document.createElement("div");
+      entry.className = "entry";
+
+      if (block.label.length > 0) {
+        const label = document.createElement("div");
+        label.className = "entry-label";
+        label.textContent = block.label;
+        entry.append(label);
+      }
+
+      for (const line of block.lines) {
+        const sense = document.createElement("div");
+        sense.className = "entry-sense";
+        // Every string here came out of a file somebody downloaded, so it goes
+        // in as text and never as markup - the same rule that governs text
+        // coming off the page.
+        sense.textContent = line;
+        entry.append(sense);
+      }
+
+      entriesElement.append(entry);
+    }
+
     unfold(unfolded);
   }
 
@@ -417,6 +502,7 @@ export function createTooltip({ onAction }) {
     bubble = null;
     bodyElement = null;
     contextElement = null;
+    entriesElement = null;
     editor = null;
     actionsElement = null;
     editing = false;
@@ -437,6 +523,10 @@ export function createTooltip({ onAction }) {
         contextElement.textContent = "";
         contextElement.hidden = true;
       }
+      if (entriesElement !== null) {
+        entriesElement.replaceChildren();
+        entriesElement.hidden = true;
+      }
       if (editor !== null) editor.hidden = true;
       if (bodyElement !== null) bodyElement.hidden = false;
       setBody(body, tone);
@@ -452,6 +542,11 @@ export function createTooltip({ onAction }) {
 
     setContext(sentence) {
       setContext(sentence);
+      place();
+    },
+
+    setEntries(blocks) {
+      setEntries(blocks);
       place();
     },
 
