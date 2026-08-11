@@ -20,11 +20,14 @@ engine has to be inside the package a user installs.
 ```
 748b2418418a2ffc6e70721aeb10098d8e6fb589ea156b91f4ae8bc3490d8f7a  bergamot-translator-worker.js
 95a2b58dd6773bf1b3f345d71f9149928b9f75f4ec9c9064c0b3e42c298671b2  bergamot-translator-worker.wasm
+1f256ecad192880510e84ad60474eab7589218784b9a50bc7ceee34c2b91f1d5  LICENSE
 ```
 
-`tools/check-vendor.sh` verifies those sums on every run of the quality gate, and also asks
-`WebAssembly.validate()` whether the binary is still a loadable module. A vendored blob nobody
-checks is a vendored blob that quietly rots.
+`tools/check-vendor.sh` verifies those sums on every run of the quality gate, refuses a file in
+this directory that `CHECKSUMS` does not name at all, and also asks `WebAssembly.validate()`
+whether the binary is still a loadable module. A vendored blob nobody checks is a vendored blob
+that quietly rots. The licence is pinned along with the code, because "MPL-2.0, see LICENSE" is
+worth exactly as much as the file it points at.
 
 ## Honesty about what you cannot read
 
