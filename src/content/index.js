@@ -18,8 +18,10 @@ import { keyTokens } from "../lib/matcher/tokenize.js";
 import { describeError } from "../lib/messages.js";
 import { normalize, trimPhrase } from "../lib/normalize.js";
 import { ErrorCode, Message, asResult, fail } from "../lib/protocol.js";
+import { sentenceAround } from "../lib/sentence.js";
 import { MIRROR_KEY, asMirror, mirrorMatches } from "../lib/store/mirror.js";
 import { clear, paint, phraseAt } from "./highlighter.js";
+import { blockTextAround } from "./scan.js";
 import { createTooltip } from "./tooltip.js";
 
 /** @typedef {import("../lib/protocol.js").VocabEntry} VocabEntry */
@@ -31,6 +33,15 @@ let vocabulary = new Map();
 /** What the bubble is about right now, in the form the page had it. */
 /** @type {{ text: string, normalized: string } | null} */
 let current = null;
+
+/**
+ * The "More" button, if this phrase has a sentence behind it - kept here rather
+ * than read back off the bubble, because saving and forgetting rebuild the
+ * buttons and would otherwise drop the second layer along the way.
+ *
+ * @type {import("./tooltip.js").Action[]}
+ */
+let secondLayer = [];
 
 /**
  * Bumped every time the bubble starts being about something else. Selections
@@ -128,7 +139,7 @@ async function loadVocabulary() {
 }
 
 /**
- * @returns {{ text: string, rect: DOMRect } | null}
+ * @returns {{ text: string, rect: DOMRect, context: string | null } | null}
  */
 function readSelection() {
   const selection = window.getSelection();
@@ -141,12 +152,32 @@ function readSelection() {
   const text = trimPhrase(selection.toString());
   if (text.length === 0) return null;
 
-  const rect = selection.getRangeAt(0).getBoundingClientRect();
+  const range = selection.getRangeAt(0);
+  const rect = range.getBoundingClientRect();
   // A range inside a collapsed or hidden element measures as nothing, and a
   // bubble anchored to nothing lands in the corner of the screen.
   if (rect.width === 0 && rect.height === 0) return null;
 
-  return { text, rect };
+  return { text, rect, context: contextOf(range) };
+}
+
+/**
+ * The sentence around a selection, or null when the page does not offer one.
+ *
+ * Wrapped in a catch because it is an extra: a page that makes this throw -
+ * a range whose nodes are being replaced underneath it, say - still gets its
+ * translation, just without a second layer.
+ *
+ * @param {Range} range
+ * @returns {string | null}
+ */
+function contextOf(range) {
+  try {
+    const block = blockTextAround(range);
+    return block === null ? null : sentenceAround(block.text, block.start, block.end);
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -190,7 +221,7 @@ async function change(write, remember, next) {
 
   remember(phrase);
   repaint();
-  tooltip.setActions(next);
+  tooltip.setActions([...next, ...secondLayer]);
 }
 
 /**
@@ -228,6 +259,10 @@ function showSaved(anchor, text, normalized) {
 
   current = { text, normalized };
   generation += 1;
+  // No second layer here, and that is the point: a phrase the reader already
+  // kept is answered from the database, without a message and without waking
+  // the engine. Translating its sentence would undo exactly that.
+  secondLayer = [];
   tooltip.show({ anchor, body: meanings.join("\n"), actions: ["learned", "edit"] });
   return true;
 }
@@ -247,6 +282,7 @@ function onMouseUp(event) {
 
     tooltip.hide();
     current = null;
+    secondLayer = [];
     return;
   }
 
@@ -254,11 +290,19 @@ function onMouseUp(event) {
   if (showSaved(selection.rect, selection.text, normalized)) return;
 
   current = { text: selection.text, normalized };
+  secondLayer = [];
   const mine = ++generation;
 
   tooltip.show({ anchor: selection.rect, body: "Translating...", tone: "pending" });
 
-  void ask({ kind: Message.TRANSLATE, text: selection.text }).then((result) => {
+  const request = selection.context === null
+    ? { kind: Message.TRANSLATE, text: selection.text }
+    : { kind: Message.TRANSLATE, text: selection.text, context: selection.context };
+
+  /** @type {Promise<import("../lib/protocol.js").Result<import("../lib/protocol.js").Translation>>} */
+  const answer = ask(request);
+
+  void answer.then((result) => {
     if (mine !== generation || !tooltip.isOpen()) return;
 
     if (!result.ok) {
@@ -267,25 +311,29 @@ function onMouseUp(event) {
       return;
     }
 
-    const gloss = typeof result.value === "string" ? result.value : "";
+    const { gloss, sentence } = result.value;
     tooltip.setBody(gloss, "normal");
+    // Folded. The reader asked about a word, and G0 is about answering that
+    // word and getting out of the way; the sentence waits for a second press.
+    tooltip.setContext(sentence);
+    secondLayer = sentence === null || sentence.length === 0 ? [] : ["more"];
 
     // A selection of nothing but punctuation has no key to save it under, and
     // a phrase with no translation has nothing to save.
     if (normalized.length === 0 || gloss.length === 0) {
-      tooltip.setActions([]);
+      tooltip.setActions([...secondLayer]);
       return;
     }
 
     if (keyTokens(normalized).length > AUTO_KEEP_MAX_WORDS) {
-      tooltip.setActions(["save", "edit"]);
+      tooltip.setActions(["save", "edit", ...secondLayer]);
       return;
     }
 
     // Kept without being asked. The buttons flip first and the write follows,
     // because the write is local and instant, and a bubble that shows no
     // buttons for a moment reads as a bubble that is still thinking.
-    tooltip.setActions(["learned", "edit"]);
+    tooltip.setActions(["learned", "edit", ...secondLayer]);
     void keep([gloss]);
   });
 }

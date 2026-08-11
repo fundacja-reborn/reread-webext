@@ -53,18 +53,35 @@ export const ErrorCode = Object.freeze({
  */
 
 /**
- * A translate request carries the text and nothing else: the language pair
- * lives in the settings, the settings live in the background, and a content
- * script that never has to look them up is a content script that cannot
- * disagree with the background about which pair is configured. The same is true
- * of every request below - phrases are addressed by their text, and the
- * background is the only side that normalizes it.
+ * What comes back from a translation: the phrase, and the sentence it was in
+ * when there was one worth showing.
+ *
+ * The gloss is what the bubble shows and what gets saved - always the phrase
+ * translated as a phrase, never a piece cut out of the sentence, because this
+ * engine cannot say which piece that would be. The sentence is the second
+ * layer, shown only when asked for, and it is never stored.
+ *
+ * @typedef {{ gloss: string, sentence: string | null }} Translation
+ */
+
+/**
+ * A translate request carries the text, and the sentence around it when the
+ * page had one: the language pair lives in the settings, the settings live in
+ * the background, and a content script that never has to look them up is a
+ * content script that cannot disagree with the background about which pair is
+ * configured. The same is true of every request below - phrases are addressed
+ * by their text, and the background is the only side that normalizes it.
+ *
+ * `context` is the sentence, not a promise about it: the background may ignore
+ * it, and nothing about the answer's shape depends on whether it was sent. It
+ * exists on the wire and nowhere else - no request stores it, which is what O2
+ * decided about context in the database and this does not reopen.
  *
  * Saving replaces the meanings of a phrase with the ones given, which is what
  * makes "the phrase means exactly what the bubble is showing" one rule instead
  * of two messages.
  *
- * @typedef {{ kind: typeof Message.TRANSLATE, text: string }} TranslateRequest
+ * @typedef {{ kind: typeof Message.TRANSLATE, text: string, context?: string }} TranslateRequest
  * @typedef {{ kind: typeof Message.OPEN_READER }} OpenReaderRequest
  * @typedef {{ kind: typeof Message.OPEN_SETTINGS }} OpenSettingsRequest
  * @typedef {{ kind: typeof Message.SAVE_PHRASE, text: string, translations: string[] }} SavePhraseRequest
@@ -126,11 +143,16 @@ export function asRequest(message) {
   if (kind === Message.OPEN_SETTINGS) return { kind: Message.OPEN_SETTINGS };
   if (kind === Message.LIST_PHRASES) return { kind: Message.LIST_PHRASES };
 
-  const { text, translations } = /** @type {Record<string, unknown>} */ (message);
+  const { text, translations, context } = /** @type {Record<string, unknown>} */ (message);
 
   if (kind === Message.TRANSLATE) {
     if (typeof text !== "string") return null;
-    return { kind: Message.TRANSLATE, text };
+    // A context that is not a string is dropped rather than refused: it is an
+    // extra the answer does not depend on, and refusing would cost the reader
+    // the translation over something they cannot see.
+    return typeof context === "string"
+      ? { kind: Message.TRANSLATE, text, context }
+      : { kind: Message.TRANSLATE, text };
   }
 
   if (kind === Message.FORGET_PHRASE) {

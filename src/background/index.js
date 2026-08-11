@@ -22,7 +22,9 @@ const READER_PAGE = "reader/reader.html";
 setProvider(bergamot);
 
 /**
- * @typedef {string | null | import("../lib/protocol.js").VocabEntry[]} Answer
+ * @typedef {null
+ *   | import("../lib/protocol.js").Translation
+ *   | import("../lib/protocol.js").VocabEntry[]} Answer
  */
 
 /**
@@ -35,6 +37,7 @@ async function handle(request) {
       const config = await readConfig();
       return translate({
         text: request.text,
+        context: request.context,
         from: config.sourceLang,
         to: config.targetLang,
       });

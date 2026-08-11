@@ -165,13 +165,23 @@ async function ensureModel(from, to) {
 export const bergamot = {
   id: "bergamot",
 
-  translate({ text, from, to }) {
+  translate({ text, context, from, to }) {
     return serialized(async () => {
       try {
         if (!(await ensureModel(from, to))) return fail(ErrorCode.MODEL_MISSING);
 
-        const translated = await call("translate", [{ from, to }, [text]]);
-        return ok(Array.isArray(translated) ? (translated[0] ?? "") : "");
+        // One batch, not two calls: the engine decides a batch together, and a
+        // sentence next to the phrase is both the second line of the bubble and
+        // the long row that keeps the phrase from coming back cut short - the
+        // job `padding.js` otherwise has to do with a sentence nobody wrote.
+        const texts = context === undefined ? [text] : [text, context];
+        const translated = await call("translate", [{ from, to }, texts]);
+        const rows = Array.isArray(translated) ? translated : [];
+
+        return ok({
+          gloss: rows[0] ?? "",
+          sentence: context === undefined ? null : (rows[1] ?? null),
+        });
       } catch (error) {
         // A worker that failed once tends to keep failing. Dropping it costs a
         // few seconds of reloading and beats an extension that stays broken
