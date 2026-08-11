@@ -13,6 +13,7 @@
  */
 
 import { modelConfigYaml } from "../lib/translator/providers/bergamot/config.js";
+import { companionFor } from "../lib/translator/providers/bergamot/padding.js";
 
 /**
  * The engine imports its matrix multiplication rather than containing it, and
@@ -186,12 +187,19 @@ async function translate(pair, texts) {
   // number nobody could justify.
   service ??= new module.BlockingService({ cacheSize: 0 });
 
+  // Appended last, so what the caller asked for keeps its indices. The engine
+  // translates it, we drop it, and the phrase in front of it comes back whole -
+  // see `padding.js` for what a batch of one short row does otherwise.
+  const companion = companionFor(pair.from, texts);
+  const batch = companion === null ? texts : [...texts, companion];
+
   const input = new module.VectorString();
   const options = new module.VectorResponseOptions();
-  for (const text of texts) {
+  for (const text of batch) {
     input.push_back(text);
     // No HTML and no alignment: the bubble shows plain text, and the reader
-    // mode that will want HTML is a later milestone.
+    // mode that will want HTML is a later milestone. Alignment is not a choice
+    // here anyway - this build exposes no way to read one back.
     options.push_back({ alignment: false, html: false, qualityScores: false });
   }
 
