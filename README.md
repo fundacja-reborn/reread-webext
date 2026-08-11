@@ -65,18 +65,33 @@ There is nothing else. No `tabs`, no `webRequest`, no `cookies`, no `downloads`.
 
 ## What is in the package that is not ours
 
-One thing: the translation engine, [Bergamot](https://github.com/browsermt/bergamot-translator)
-- Marian NMT compiled to WebAssembly, MPL-2.0. It is 5 MB of compiled C++ plus 80 KB of
-generated glue, it is committed to this repository rather than installed, and it is the only
-part of this package nobody reads line by line.
+Two things, both committed to this repository rather than installed, and both with the licence
+and the provenance next to them.
+
+**The translation engine, [Bergamot](https://github.com/browsermt/bergamot-translator)** - Marian
+NMT compiled to WebAssembly, MPL-2.0. 5 MB of compiled C++ plus 80 KB of generated glue, and the
+only part of this package nobody reads line by line.
 
 Manifest V3 forbids remotely hosted code and WebAssembly counts, so the engine has to be inside
 the package - which is also why the manifest asks for `'wasm-unsafe-eval'` in its own content
 security policy. Nothing else is relaxed.
 
 What can be checked instead of read is in [`vendor/bergamot/README.md`](vendor/bergamot/README.md):
-which published artifact it is, its SHA-256, and why that version. `tools/check-vendor.sh`
-verifies those sums on every run of the quality gate.
+which published artifact it is, its SHA-256, and why that version.
+
+**The article extractor, [Readability](https://github.com/mozilla/readability)** - the library
+behind Firefox's own reader view, Apache-2.0, 88 KB of plain JavaScript. It turns a page into an
+article for the reader, and unlike the engine it is code you can read.
+
+It runs on the reader page, on an inert copy of the page parsed by `DOMParser` - never on the
+page you are reading and never in the background. What it produces is HTML built from somebody
+else's page, so it is treated as such: the reader rebuilds it into its own document from a list
+of allowed elements and attributes, and never assigns it as `innerHTML`. Details and the sums:
+[`vendor/readability/README.md`](vendor/readability/README.md), including the fact that the npm
+tarball and the GitHub tag agree byte for byte on the vendored file.
+
+`tools/check-vendor.sh` verifies every one of those sums on every run of the quality gate, and
+refuses a file that appeared in a vendored directory without being pinned.
 
 Translation models are not in the package. They are data, they are downloaded or added by hand,
 and they are stored locally in the browser's own database.

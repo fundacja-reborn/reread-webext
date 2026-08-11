@@ -40,16 +40,23 @@ const STATIC_FILES = [
 ];
 
 /**
- * Third-party binaries, relative to the repository root. The licence and the
- * note about where they came from travel with them: MPL-2.0 asks for the first,
- * and an unexplained five-megabyte blob inside an extension is exactly what the
- * second exists to answer.
+ * Third-party code, relative to the repository root, copied in rather than
+ * bundled. The licence and the note about where each came from travel with
+ * them: MPL-2.0 and Apache-2.0 both ask for the first, and an unexplained
+ * five-megabyte blob inside an extension is exactly what the second answers.
+ *
+ * Copied, not bundled, for a reason that outlives convenience: the file that
+ * ships has to have the same SHA-256 as the file the upstream project
+ * published, and anything esbuild touches no longer does.
  */
 const VENDOR_FILES = [
   "vendor/bergamot/bergamot-translator-worker.js",
   "vendor/bergamot/bergamot-translator-worker.wasm",
   "vendor/bergamot/LICENSE",
   "vendor/bergamot/README.md",
+  "vendor/readability/Readability.js",
+  "vendor/readability/LICENSE",
+  "vendor/readability/README.md",
 ];
 
 const TARGETS = /** @type {const} */ (["firefox", "chromium"]);

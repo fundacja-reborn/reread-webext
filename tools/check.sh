@@ -19,8 +19,10 @@ echo "==> build (firefox)"
 npm run --silent build
 
 echo "==> web-ext lint (addons-linter, the one AMO runs)"
-# web-ext phones home for a version check through a config store it cannot write
-# to here, and prints a box about sudo that has nothing to do with the linting.
-NO_UPDATE_NOTIFIER=1 npx --no-install web-ext lint --source-dir dist/firefox
+# Through `tools/lint.mjs` rather than directly: `web-ext lint` exits 0 for
+# warnings and notices, and this project's rule is 0/0/0. The one exception -
+# two `innerHTML` lines inside vendored Readability - is pinned there with its
+# reason, and anything else yellow fails.
+node tools/lint.mjs --source-dir dist/firefox
 
 echo "==> all green"
