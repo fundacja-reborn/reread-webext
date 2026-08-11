@@ -29,6 +29,14 @@
  * pressing it again takes it back out - the bubble still does not know what
  * saving means, it just reports the meanings it is showing the moment they
  * change.
+ *
+ * It comes in two variants, and they are two answers rather than one layout
+ * with buttons hidden inside it (D44). A phrase already kept is a question -
+ * what was this again - so `recall` answers it in one line and offers nothing;
+ * the row of actions unfolds only when somebody arrives inside the bubble with
+ * a pointer or with the keyboard. A fresh selection is the other way round:
+ * what to do with it is the whole of why the bubble is open, so `save` shows
+ * everything from the start.
  */
 
 import { MEANING_SEPARATOR, afterChoosing, toMeanings } from "../lib/gloss.js";
@@ -59,6 +67,10 @@ const STYLE = `
 
   .bubble {
     color-scheme: light dark;
+    /* A column, so that one row of it can change sides: the actions unfold
+       above the gloss when the bubble stands above the phrase (order below). */
+    display: flex;
+    flex-direction: column;
     font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
     max-width: min(22rem, 90vw);
     padding: 10px 12px;
@@ -69,6 +81,10 @@ const STYLE = `
     box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
     overflow-wrap: break-word;
   }
+
+  /* A flex item does not shrink below its own content unless it is told to, and
+     one long word in a gloss would push the bubble past its maximum width. */
+  .bubble > * { min-width: 0; }
 
   .body { white-space: pre-wrap; }
   .body[data-tone="pending"] { opacity: 0.6; font-style: italic; }
@@ -161,26 +177,105 @@ const STYLE = `
     resize: none;
   }
 
+  /* The row of actions, and the whole of the difference between the two
+     variants (D44): there from the start in "save", folded away in "recall"
+     until somebody looks for it. The fold is a grid row going from zero to one
+     fraction - the one way to animate to a height nobody knows in advance - and
+     the clipped child below is what makes it read as unfolding rather than as
+     text being squeezed. */
+  .reveal {
+    display: grid;
+    grid-template-rows: 1fr;
+  }
+
   .actions {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
     gap: 6px;
-    margin-top: 8px;
+    /* The two pixels on the far side are for a focus ring: a folded row is
+       clipped, and a ring drawn flush with the edge would be clipped with it. */
+    padding: 8px 0 2px;
+    min-height: 0;
+    overflow: hidden;
   }
   .actions:empty { display: none; }
 
-  button {
+  .bubble[data-variant="recall"] .reveal {
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transition: grid-template-rows 150ms ease, opacity 150ms ease;
+  }
+  /* Three ways in, and the third is the one that keeps it: a row that folded
+     itself away again on mouseleave would flicker at every brush of the
+     bubble's edge, and nothing is gained by taking back an answer somebody has
+     just gone looking for. The bubble closes in one piece soon enough. */
+  .bubble[data-variant="recall"]:hover .reveal,
+  .bubble[data-variant="recall"]:focus-within .reveal,
+  .bubble[data-variant="recall"].revealed .reveal {
+    grid-template-rows: 1fr;
+    opacity: 1;
+  }
+
+  /* Nothing hovers on a touch screen, and a tap on an underline is already the
+     deliberate gesture that arriving with a pointer would have been. */
+  @media (hover: none) {
+    .bubble[data-variant="recall"] .reveal {
+      grid-template-rows: 1fr;
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bubble[data-variant="recall"] .reveal { transition: none; }
+  }
+
+  /* Above the gloss when the bubble stands above the phrase. The edge nearest
+     the phrase is pinned (see placement), so a row unfolding underneath the
+     gloss would slide the gloss upwards as it appeared - and the line somebody
+     is reading is the one thing here that may not move. */
+  .bubble[data-variant="recall"][data-grow="up"] .reveal { order: -1; }
+  .bubble[data-variant="recall"][data-grow="up"] .actions { padding: 2px 0 8px; }
+
+  /* An action is a label and not a control. What makes one findable is standing
+     where the reader is already looking; a box around it would make it the
+     loudest thing in a bubble whose whole job is one line of translation. */
+  .actions button {
     font: inherit;
+    font-size: 12px;
+    margin: 0;
+    padding: 2px 4px;
+    color: inherit;
+    background: none;
+    border: 0;
+    border-radius: 4px;
+    opacity: 0.7;
+    cursor: pointer;
+  }
+  /* A label carries padding so that a focus ring has somewhere to go, and the
+     first one gives it back: the row has to start on the same vertical line as
+     the gloss above it. Save brings its own box and needs no pulling. */
+  .actions button:first-child:not([data-action="save"]) { margin-left: -4px; }
+  .actions button:hover:not(:disabled) { opacity: 1; }
+  .actions button:focus-visible {
+    opacity: 1;
+    outline: 1px solid currentColor;
+    outline-offset: 0;
+  }
+  .actions button:disabled { opacity: 0.35; cursor: default; }
+
+  /* The one exception, and the only real call to action in the extension: Save
+     is the press that keeps a phrase which would otherwise be gone. */
+  .actions button[data-action="save"] {
     font-size: 13px;
     padding: 3px 10px;
-    color: inherit;
+    opacity: 1;
     background: rgba(0, 0, 0, 0.05);
     border: 1px solid rgba(0, 0, 0, 0.18);
     border-radius: 6px;
-    cursor: pointer;
   }
-  button:hover:not(:disabled) { background: rgba(0, 0, 0, 0.1); }
-  button:disabled { opacity: 0.45; cursor: default; }
+  .actions button[data-action="save"]:hover:not(:disabled) { background: rgba(0, 0, 0, 0.1); }
+  .actions button[data-action="save"]:disabled { opacity: 0.45; }
 
   @media (prefers-color-scheme: dark) {
     .bubble {
@@ -202,15 +297,18 @@ const STYLE = `
       background: rgba(255, 255, 255, 0.06);
       border-color: rgba(255, 255, 255, 0.24);
     }
-    button {
+    /* The quiet labels need nothing here: they are the bubble's own colour at
+       seven tenths, which lands right on either background. */
+    .actions button[data-action="save"] {
       background: rgba(255, 255, 255, 0.08);
       border-color: rgba(255, 255, 255, 0.2);
     }
-    button:hover:not(:disabled) { background: rgba(255, 255, 255, 0.16); }
+    .actions button[data-action="save"]:hover:not(:disabled) { background: rgba(255, 255, 255, 0.16); }
   }
 `;
 
 /** @typedef {"normal" | "pending" | "error"} Tone */
+/** Which of the two bubbles this is. @typedef {"recall" | "save"} Variant */
 /** What the bubble can offer. @typedef {"save" | "learned" | "edit" | "settings" | "more"} Action */
 /** What it reports - editing and unfolding never leave the bubble. @typedef {"save" | "learned" | "settings"} ReportedAction */
 
@@ -230,7 +328,7 @@ const STYLE = `
 
 /**
  * @typedef {object} Tooltip
- * @property {(options: { anchor: DOMRect, body: string, tone?: Tone, actions?: Action[] }) => void} show
+ * @property {(options: { anchor: DOMRect, variant: Variant, body: string, tone?: Tone, actions?: Action[] }) => void} show
  * @property {(body: string, tone?: Tone) => void} setBody
  * @property {(sentence: string | null) => void} setContext
  * @property {(blocks: Block[]) => void} setEntries
@@ -272,6 +370,47 @@ function style(root) {
   const element = document.createElement("style");
   element.textContent = STYLE;
   root.append(element);
+}
+
+/**
+ * Where the bubble goes, given where the phrase is and how much room there is
+ * around it.
+ *
+ * The answer is one edge and not a rectangle, and that is the point: the bubble
+ * is pinned by the edge nearest the phrase, so everything that makes it taller -
+ * a row of actions unfolding, a sentence arriving - moves the far edge and
+ * leaves the line being read exactly where it was. Above the phrase by
+ * preference, which is to say pinned by its bottom: reading goes downwards, so
+ * the text above has been read and the text below is what comes next (D23).
+ *
+ * Pinning it in CSS rather than placing it again is what lets the row unfold in
+ * the stylesheet: by the time it starts growing there is nothing here left to
+ * run.
+ *
+ * @param {object} where
+ * @param {{ top: number, bottom: number, left: number }} where.anchor the phrase, in viewport coordinates
+ * @param {{ width: number, height: number }} where.size what the bubble measures now
+ * @param {{ width: number, height: number }} where.viewport
+ * @param {number} [where.folded] how much taller it is still going to get on its own
+ * @returns {{ left: number, top: number } | { left: number, bottom: number }}
+ */
+export function placement({ anchor, size, viewport, folded = 0 }) {
+  // The room to look for is the room the bubble may come to need, not the room
+  // it needs now - a folded row unfolds with nobody left to move anything.
+  const height = size.height + folded;
+
+  const maxLeft = Math.max(VIEWPORT_MARGIN, viewport.width - size.width - VIEWPORT_MARGIN);
+  const left = Math.round(Math.min(Math.max(VIEWPORT_MARGIN, anchor.left), maxLeft));
+
+  if (anchor.top - GAP - height >= VIEWPORT_MARGIN) {
+    return { left, bottom: Math.round(viewport.height - (anchor.top - GAP)) };
+  }
+
+  // Below it, and pushed up only by the bottom of the window: the top edge is
+  // the near one now, so this is the same rule the other way round.
+  const below = anchor.bottom + GAP;
+  const room = viewport.height - VIEWPORT_MARGIN - height;
+  return { left, top: Math.round(Math.max(VIEWPORT_MARGIN, Math.min(below, room))) };
 }
 
 /**
@@ -351,8 +490,13 @@ export function createTooltip({ onAction }) {
     editor.className = "editor";
     editor.hidden = true;
     editor.rows = 1;
+    // The row of actions inside the one element that folds. Nothing outside
+    // this function ever needs the wrapper: what unfolds it is a stylesheet.
+    const revealElement = document.createElement("div");
+    revealElement.className = "reveal";
     actionsElement = document.createElement("div");
     actionsElement.className = "actions";
+    revealElement.append(actionsElement);
 
     // Pressing a button must not take the selection away: the page's own
     // selection is what the bubble is about, and it disappearing under the
@@ -374,13 +518,31 @@ export function createTooltip({ onAction }) {
     for (const type of ["keyup", "keypress"]) {
       editor.addEventListener(type, (event) => event.stopPropagation());
     }
+    // Only the half of the unfolding that a stylesheet cannot do (see `reveal`):
+    // showing the row is a `:hover` rule, so no cursor is tracked anywhere and
+    // nothing on the page below gains a listener.
+    bubble.addEventListener("mouseenter", reveal);
+    bubble.addEventListener("focusin", reveal);
 
-    bubble.append(bodyElement, contextElement, entriesElement, editor, actionsElement);
+    bubble.append(bodyElement, contextElement, entriesElement, editor, revealElement);
     root.append(bubble);
     // `documentElement` and not `body`: single-page applications replace the
     // body, and a bubble that vanishes with a re-render is a bug nobody can
     // reproduce.
     document.documentElement.append(host);
+  }
+
+  /**
+   * The row of actions, out and staying out.
+   *
+   * What shows it is a `:hover` rule, and CSS keeps it shown for exactly as long
+   * as the pointer is inside. This is the rest: once somebody has gone looking
+   * for the actions, they are there until the bubble is gone. A class and not a
+   * hover state, because the two disagree the moment the pointer leaves - and
+   * the row winking out mid-reach is the flicker this is here to avoid.
+   */
+  function reveal() {
+    bubble?.classList.add("revealed");
   }
 
   /**
@@ -594,34 +756,53 @@ export function createTooltip({ onAction }) {
     refreshControls();
   }
 
+  /**
+   * How much taller the bubble is going to get without being asked.
+   *
+   * A folded row is clipped to no height at all, so the bubble measures as if
+   * it were not there - and by the time CSS unfolds it, there is nothing here
+   * left to run. Measured rather than worked out from the variant: on a touch
+   * screen there is no folding to begin with, and a bubble whose row is already
+   * out would otherwise have room reserved for it twice.
+   *
+   * @returns {number}
+   */
+  function foldedHeight() {
+    if (actionsElement === null) return 0;
+    return actionsElement.clientHeight === 0 ? actionsElement.scrollHeight : 0;
+  }
+
   function place() {
     if (host === null || bubble === null) return;
 
     host.style.setProperty("visibility", "hidden", "important");
     host.style.setProperty("left", "0px", "important");
     host.style.setProperty("top", "0px", "important");
+    host.style.removeProperty("bottom");
 
     const size = bubble.getBoundingClientRect();
-    const viewportWidth = document.documentElement.clientWidth;
-    const viewportHeight = document.documentElement.clientHeight;
+    const spot = placement({
+      anchor,
+      size,
+      viewport: {
+        width: document.documentElement.clientWidth,
+        height: document.documentElement.clientHeight,
+      },
+      folded: foldedHeight(),
+    });
 
-    // Above the selection by preference, below it only when there is no room.
-    // Reading goes downwards, so the text above a phrase has been read and the
-    // text below it is what comes next: covering the first costs nothing,
-    // covering the second hides the rest of the paragraph.
-    const above = anchor.top - GAP - size.height;
-    const below = anchor.bottom + GAP;
-    const top =
-      above >= VIEWPORT_MARGIN
-        ? above
-        : Math.max(VIEWPORT_MARGIN, Math.min(below, viewportHeight - VIEWPORT_MARGIN - size.height));
-
-    const preferred = anchor.left;
-    const maxLeft = Math.max(VIEWPORT_MARGIN, viewportWidth - size.width - VIEWPORT_MARGIN);
-    const left = Math.min(Math.max(VIEWPORT_MARGIN, preferred), maxLeft);
-
-    host.style.setProperty("left", `${Math.round(left)}px`, "important");
-    host.style.setProperty("top", `${Math.round(top)}px`, "important");
+    host.style.setProperty("left", `${spot.left}px`, "important");
+    // Which edge is pinned decides which way the bubble grows, and the
+    // stylesheet has to know it too: the row unfolds on the far side of the
+    // gloss, or the gloss would be pushed off the line it was read on.
+    if ("top" in spot) {
+      bubble.dataset["grow"] = "down";
+      host.style.setProperty("top", `${spot.top}px`, "important");
+    } else {
+      bubble.dataset["grow"] = "up";
+      host.style.removeProperty("top");
+      host.style.setProperty("bottom", `${spot.bottom}px`, "important");
+    }
     host.style.setProperty("visibility", "visible", "important");
   }
 
@@ -652,10 +833,16 @@ export function createTooltip({ onAction }) {
   }
 
   return {
-    show({ anchor: rect, body, tone = "normal", actions = [] }) {
+    show({ anchor: rect, variant, body, tone = "normal", actions = [] }) {
       build();
       anchor = rect;
       editing = false;
+      if (bubble !== null) {
+        bubble.dataset["variant"] = variant;
+        // The bubble is reused from phrase to phrase, and a row left out was
+        // out for the last one.
+        bubble.classList.remove("revealed");
+      }
       // Folded again: this is another phrase, and the sentence behind "More"
       // belonged to the last one. Set directly rather than through `unfold`,
       // which would render and place a bubble that has no body yet.
