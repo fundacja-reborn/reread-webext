@@ -204,7 +204,8 @@ async function onAction(action, meanings) {
  *
  * @param {(phrase: { text: string, normalized: string }) => Promise<import("../lib/protocol.js").Result<null>>} write
  * @param {(phrase: { text: string, normalized: string }) => void} remember
- * @param {import("./tooltip.js").Action[]} next what the bubble offers once it worked
+ * @param {import("./tooltip.js").Action[] | null} next what the bubble offers once it
+ *   worked, or `null` when the answer was the end of the exchange
  */
 async function change(write, remember, next) {
   const phrase = current;
@@ -215,6 +216,8 @@ async function change(write, remember, next) {
   if (mine !== generation || !tooltip.isOpen()) return;
 
   if (!result.ok) {
+    // A failure keeps the bubble open whatever was asked for: this is the one
+    // moment the reader has to learn that the vocabulary did not change.
     tooltip.setBody(describeError(result.code), "error");
     tooltip.setActions([]);
     return;
@@ -222,6 +225,14 @@ async function change(write, remember, next) {
 
   remember(phrase);
   repaint();
+
+  if (next === null) {
+    tooltip.hide();
+    current = null;
+    secondLayer = [];
+    return;
+  }
+
   tooltip.setActions([...next, ...secondLayer]);
 }
 
@@ -236,11 +247,22 @@ async function keep(meanings) {
   );
 }
 
+/**
+ * Learned closes the bubble, and that is the whole answer to it.
+ *
+ * Offering **Save** afterwards said the opposite of what was just pressed - it
+ * read as "are you sure you learned it?" over a word somebody had settled. The
+ * underline going away is the confirmation, the phrase is out of the
+ * vocabulary, and there is nothing left to do here (G0: answer, then leave).
+ *
+ * The word is not gone for good either way: selecting it again translates it
+ * and, if it is short enough, keeps it again (D22).
+ */
 async function forget() {
   await change(
     (phrase) => ask({ kind: Message.FORGET_PHRASE, text: phrase.text }),
     (phrase) => vocabulary.delete(phrase.normalized),
-    ["save", "edit"],
+    null,
   );
 }
 
