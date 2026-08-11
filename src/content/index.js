@@ -18,7 +18,16 @@ import { choosableLines } from "../lib/gloss.js";
 import { keyTokens } from "../lib/matcher/tokenize.js";
 import { describeError } from "../lib/messages.js";
 import { normalize, trimPhrase } from "../lib/normalize.js";
-import { ErrorCode, Message, asResult, asTranslation, fail } from "../lib/protocol.js";
+import {
+  ErrorCode,
+  MAX_PAGE_HTML,
+  Message,
+  asPageRequest,
+  asResult,
+  asTranslation,
+  fail,
+  ok,
+} from "../lib/protocol.js";
 import { sentenceAround } from "../lib/sentence.js";
 import { MIRROR_KEY, asMirror, mirrorMatches } from "../lib/store/mirror.js";
 import { clear, paint, phraseAt } from "./highlighter.js";
@@ -426,6 +435,28 @@ webext().storage.onChanged.addListener((changes, area) => {
   if (area !== "local") return;
   if (changes[MIRROR_KEY] === undefined && changes[CONFIG_KEY] === undefined) return;
   void loadVocabulary();
+});
+
+// The one thing the background ever asks a page for, and it asks only after
+// somebody pressed the toolbar button on this tab. A listener costs nothing
+// while nobody does: no timer, no observer, and nothing added to the page.
+//
+// The document is serialized as it stands rather than re-downloaded, which is
+// what makes the reader work behind a login and on a page built by scripts -
+// and what keeps the promise that this extension makes no request of its own.
+webext().runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  if (asPageRequest(message) === null) return false;
+
+  const html = document.documentElement.outerHTML;
+  // Answered on the spot, so `return false` rather than the usual `true`:
+  // there is nothing to wait for, and claiming otherwise leaves the background
+  // holding a promise nobody will settle.
+  sendResponse(
+    html.length > MAX_PAGE_HTML
+      ? fail(ErrorCode.TOO_LONG)
+      : ok({ url: location.href, title: document.title, html }),
+  );
+  return false;
 });
 
 void loadVocabulary();

@@ -1,7 +1,17 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { ErrorCode, Message, asRequest, asResult, asTranslation, fail, ok } from "../src/lib/protocol.js";
+import {
+  ErrorCode,
+  Message,
+  asPage,
+  asPageRequest,
+  asRequest,
+  asResult,
+  asTranslation,
+  fail,
+  ok,
+} from "../src/lib/protocol.js";
 
 describe("asTranslation", () => {
   const ENTRY = { dictionary: "Test", headword: "bank", senses: ["brzeg", "instytucja"] };
@@ -159,6 +169,58 @@ describe("asResult", () => {
   it("turns a broken answer into an internal error rather than throwing", () => {
     for (const response of [undefined, null, "ok", 1, {}]) {
       assert.deepEqual(asResult(response), fail(ErrorCode.INTERNAL));
+    }
+  });
+});
+
+describe("asPageRequest", () => {
+  it("accepts the one question the background asks a page", () => {
+    assert.deepEqual(asPageRequest({ kind: Message.GRAB_PAGE }), { kind: Message.GRAB_PAGE });
+  });
+
+  it("refuses everything addressed to the background", () => {
+    // A content script that answered these would be answering questions meant
+    // for the side that has the database and the engine.
+    for (const kind of [
+      Message.TRANSLATE,
+      Message.READ_PAGE,
+      Message.SAVE_PHRASE,
+      Message.LIST_PHRASES,
+      Message.OPEN_READER,
+    ]) {
+      assert.equal(asPageRequest({ kind, text: "word", translations: [] }), null, kind);
+    }
+  });
+
+  it("refuses anything that is not a message", () => {
+    for (const message of [null, undefined, 7, "grab-page", [], {}]) {
+      assert.equal(asPageRequest(message), null);
+    }
+  });
+});
+
+describe("asPage", () => {
+  const page = { url: "https://example.test/a", title: "A", html: "<html></html>" };
+
+  it("passes a page through", () => {
+    assert.deepEqual(asPage(page), page);
+  });
+
+  it("accepts a tab with no title, because the article carries its own", () => {
+    assert.deepEqual(asPage({ ...page, title: undefined }), { ...page, title: "" });
+  });
+
+  it("refuses anything the reader could not parse", () => {
+    for (const value of [
+      null,
+      undefined,
+      "https://example.test/a",
+      { ...page, url: 42 },
+      { ...page, html: 42 },
+      { ...page, html: "" },
+      {},
+    ]) {
+      assert.equal(asPage(value), null, `should have refused ${JSON.stringify(value) ?? "undefined"}`);
     }
   });
 });

@@ -5,27 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>re/read - reader</title>
     <link rel="stylesheet" href="../assets/page.css" />
+    <link rel="stylesheet" href="reader.css" />
   </head>
-  <body>
-    <h1>re/read</h1>
-    <p class="subtitle">Reader</p>
+  <body class="reader">
+    <header class="reader-bar">
+      <span class="reader-mark">re/read</span>
+      <a id="original" class="reader-original" hidden>Open the original</a>
+    </header>
 
-    <p class="note">
-      <strong>The reader is not built yet.</strong> It will take the article off the page
-      you are on, run it through Readability, and render it here - a clean document where
-      highlighting is exact rather than best effort, with typography and themes under this
-      extension's control and no network involved.
-    </p>
+    <main id="page">
+      <p id="notice" class="note">
+        Press the toolbar button on a page you want to read, and the article shows up here.
+      </p>
 
-    <p class="note">
-      Firefox's own reader lives on an <code>about:</code> page, which extensions cannot
-      touch. That is why this page exists rather than a button that opens that one.
-    </p>
+      <article id="article" hidden>
+        <h1 id="title"></h1>
+        <p id="byline" class="reader-byline" hidden></p>
+        <div id="content"></div>
+      </article>
+    </main>
 
-    <dl class="rows">
-      <div class="row"><dt>Version</dt><dd id="version">-</dd></div>
-    </dl>
-
+    <!--
+      The extractor, exactly as its authors published it: vendored byte for byte
+      and loaded as its own file, so what ships hashes to what they released.
+      See vendor/readability/README.md.
+    -->
+    <script src="../vendor/readability/Readability.js"></script>
     <script src="reader.js" defer></script>
   </body>
 </html>

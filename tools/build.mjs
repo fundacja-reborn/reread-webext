@@ -35,6 +35,7 @@ const ENTRY_POINTS = [
 const STATIC_FILES = [
   "options/options.html",
   "reader/reader.html",
+  "reader/reader.css",
   "content/highlight.css",
   "assets",
 ];

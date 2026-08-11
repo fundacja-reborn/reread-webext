@@ -11,7 +11,15 @@
  *    has to be able to say it in a sentence a reader understands.
  */
 
-/** Message kinds. The `kind` field is the discriminator on every request. */
+/**
+ * Message kinds. The `kind` field is the discriminator on every request.
+ *
+ * All of them travel page to background, except the last one: `grab-page` is
+ * the only message that goes the other way, and it exists because the toolbar
+ * button is heard by the background while the page it is about is somewhere
+ * else. `asRequest` narrows the first group, `asPageRequest` the second - one
+ * list of kinds, two directions, and neither validator accepts the other's.
+ */
 export const Message = Object.freeze({
   TRANSLATE: "translate",
   OPEN_READER: "open-reader",
@@ -19,6 +27,8 @@ export const Message = Object.freeze({
   SAVE_PHRASE: "save-phrase",
   FORGET_PHRASE: "forget-phrase",
   LIST_PHRASES: "list-phrases",
+  READ_PAGE: "read-page",
+  GRAB_PAGE: "grab-page",
 });
 
 /** Every way a request can fail, and the whole list of them. */
@@ -31,6 +41,12 @@ export const ErrorCode = Object.freeze({
   UNSUPPORTED_PAIR: "unsupported_pair",
   /** Longer than the tooltip is meant for - a page, not a phrase. */
   TOO_LONG: "too_long",
+  /**
+   * There is nothing for the reader to take: the tab it was pointed at is gone,
+   * or it is a page no content script runs in - `about:`, the PDF viewer, the
+   * add-ons site. Not an error in the sense of something being broken.
+   */
+  NO_PAGE: "no_page",
   /** A request the background does not know. Reaching a user means a bug. */
   UNKNOWN_MESSAGE: "unknown_message",
   /** Anything that got as far as an exception. */
@@ -104,13 +120,37 @@ export const ErrorCode = Object.freeze({
  * @typedef {{ kind: typeof Message.SAVE_PHRASE, text: string, translations: string[] }} SavePhraseRequest
  * @typedef {{ kind: typeof Message.FORGET_PHRASE, text: string }} ForgetPhraseRequest
  * @typedef {{ kind: typeof Message.LIST_PHRASES }} ListPhrasesRequest
+ * @typedef {{ kind: typeof Message.READ_PAGE }} ReadPageRequest
  * @typedef {TranslateRequest
  *   | OpenReaderRequest
  *   | OpenSettingsRequest
  *   | SavePhraseRequest
  *   | ForgetPhraseRequest
- *   | ListPhrasesRequest} Request
+ *   | ListPhrasesRequest
+ *   | ReadPageRequest} Request
  */
+
+/**
+ * A page as the reader gets it: the address, the title the tab had, and the
+ * document serialized as it stands - after scripts have run, which is the whole
+ * reason this comes from the page rather than from a second download.
+ *
+ * It is not stored anywhere at either end. It travels as the answer to one
+ * question, lives in the reader tab for as long as that tab shows it, and that
+ * is the end of it.
+ *
+ * @typedef {{ url: string, title: string, html: string }} Page
+ * @typedef {{ kind: typeof Message.GRAB_PAGE }} GrabPageRequest
+ */
+
+/**
+ * How much serialized HTML may cross the message boundary. Generous on purpose:
+ * a long article with its markup is a few hundred kilobytes, and the pages that
+ * blow past this are applications rather than things to read. Refusing early
+ * beats a structured clone of several megabytes that ends in an article nobody
+ * wanted.
+ */
+export const MAX_PAGE_HTML = 8_000_000;
 
 /**
  * @template T
@@ -217,6 +257,7 @@ export function asRequest(message) {
   if (kind === Message.OPEN_READER) return { kind: Message.OPEN_READER };
   if (kind === Message.OPEN_SETTINGS) return { kind: Message.OPEN_SETTINGS };
   if (kind === Message.LIST_PHRASES) return { kind: Message.LIST_PHRASES };
+  if (kind === Message.READ_PAGE) return { kind: Message.READ_PAGE };
 
   const { text, translations, context } = /** @type {Record<string, unknown>} */ (message);
 
@@ -243,4 +284,37 @@ export function asRequest(message) {
   }
 
   return null;
+}
+
+/**
+ * The other direction, and the whole of it. A content script answers exactly
+ * one question from the background and ignores everything else that arrives -
+ * including every request above, which is addressed to the background and would
+ * otherwise be answered twice by whoever felt like it.
+ *
+ * @param {unknown} message
+ * @returns {GrabPageRequest | null}
+ */
+export function asPageRequest(message) {
+  if (typeof message !== "object" || message === null) return null;
+  const kind = /** @type {{ kind?: unknown }} */ (message).kind;
+  return kind === Message.GRAB_PAGE ? { kind: Message.GRAB_PAGE } : null;
+}
+
+/**
+ * Narrows a page as it came off the wire. The reader is about to hand this to
+ * an HTML parser and then to Readability, so "it is a string" is the difference
+ * between a page that failed to arrive and a stack trace on the reader tab.
+ *
+ * @param {unknown} value
+ * @returns {Page | null}
+ */
+export function asPage(value) {
+  if (typeof value !== "object" || value === null) return null;
+  const { url, title, html } = /** @type {Record<string, unknown>} */ (value);
+  if (typeof url !== "string" || typeof html !== "string") return null;
+  if (html.length === 0) return null;
+  // A tab without a title is ordinary; the article's own heading is what the
+  // reader shows anyway.
+  return { url, title: typeof title === "string" ? title : "", html };
 }
