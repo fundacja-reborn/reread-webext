@@ -154,6 +154,15 @@ input[type="file"] {
   max-width: 100%;
 }
 
+select {
+  font: inherit;
+  padding: 0.2rem 0.4rem;
+  border-radius: 6px;
+  border: 1px solid var(--page-line);
+  background: transparent;
+  color: var(--page-fg);
+}
+
 .status:empty {
   display: none;
 }

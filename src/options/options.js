@@ -15,7 +15,7 @@
  */
 
 import { webext } from "../lib/browser.js";
-import { readConfig } from "../lib/config.js";
+import { readConfig, writeConfig } from "../lib/config.js";
 import { describeDownloadProblem, downloadModel } from "../lib/models/download.js";
 import { classifyModelFiles, describeClassifyProblem, isGzip } from "../lib/models/files.js";
 import { modelRows, registrySource } from "../lib/models/registry.js";
@@ -233,6 +233,54 @@ async function download(row, model) {
   await renderModels();
 }
 
+/**
+ * The pair being read, and the only place it can be changed.
+ *
+ * The choices are the directions this build knows about - what can be
+ * downloaded, plus anything added by hand from files. A pair configured by hand
+ * that matches neither is still offered rather than silently swapped for the
+ * first row: a settings page must never disagree with the settings.
+ *
+ * @param {import("../lib/models/registry.js").ModelRow[]} rows
+ */
+function renderPair(rows) {
+  const select = document.getElementById("pair");
+  if (!(select instanceof HTMLSelectElement)) return;
+
+  const known = rows.some((row) => row.from === config.sourceLang && row.to === config.targetLang);
+  const choices = known
+    ? rows
+    : [{ pair: `${config.sourceLang}${config.targetLang}`, from: config.sourceLang, to: config.targetLang }, ...rows];
+
+  select.replaceChildren();
+  for (const row of choices) {
+    const option = document.createElement("option");
+    option.value = row.pair;
+    option.textContent = `${row.from} to ${row.to}`;
+    option.selected = row.from === config.sourceLang && row.to === config.targetLang;
+    select.append(option);
+  }
+}
+
+/**
+ * @param {string} pair
+ */
+async function choosePair(pair) {
+  const rows = modelRows(await listModels());
+  const row = rows.find((candidate) => candidate.pair === pair);
+  if (row === undefined) return;
+
+  config = await writeConfig({ sourceLang: row.from, targetLang: row.to });
+  // Every open page notices through `storage.onChanged` and asks the background
+  // for the vocabulary of the new pair, so nothing here has to tell them.
+  await renderModels();
+  status(
+    row.installed === null
+      ? `Reading ${row.from}, translating into ${row.to} - and there is no model for this direction here yet.`
+      : `Reading ${row.from}, translating into ${row.to}.`,
+  );
+}
+
 async function renderModels() {
   const container = document.getElementById("models");
   if (container === null) return;
@@ -309,8 +357,7 @@ async function addSelectedModel() {
 async function render() {
   config = await readConfig();
   fill("version", webext().runtime.getManifest().version);
-  fill("source-lang", config.sourceLang);
-  fill("target-lang", config.targetLang);
+  renderPair(modelRows(await listModels()));
 
   const { source, checkedAt } = registrySource();
   const host = source === "" ? "" : new URL(source).host;
@@ -321,6 +368,10 @@ async function render() {
 }
 
 document.getElementById("add-model")?.addEventListener("click", () => void addSelectedModel());
+document.getElementById("pair")?.addEventListener("change", (event) => {
+  const select = event.target;
+  if (select instanceof HTMLSelectElement) void choosePair(select.value);
+});
 
 // A download in flight is the one thing on this page that a reload would leave
 // half-finished, and the browser will not warn about it by itself.
