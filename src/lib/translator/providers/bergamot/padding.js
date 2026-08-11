@@ -15,6 +15,9 @@
  * The extension pays for this where it can afford to: a phrase for the bubble
  * costs a few milliseconds, the companion adds about fifteen, and a selection
  * long enough to stand on its own gets none.
+ *
+ * It rides along with the sentence behind "More" rather than instead of it -
+ * the two do different things, and that is measured below.
  */
 
 /**
@@ -41,8 +44,15 @@ const COMPANIONS = new Map([["en", "The old man wrote a short letter."]]);
 /**
  * The sentence to add to this batch, or `null` when it would buy nothing.
  *
- * A batch that already contains a row at least as long as the companion is a
- * batch the companion cannot lengthen, which is the whole of what it is for.
+ * The question is whether any row is short enough to be at risk - not whether
+ * some other row is already long. A phrase sent together with the sentence it
+ * came from still came back as `Zegark` and `rozliczeć` where the same batch
+ * with this companion in it gave `Zegarek` and `rozliczenie` (2 of 12 phrases,
+ * measured 2026-08-11; the other ten were identical, and none got worse). Length
+ * is evidently not the whole mechanism - the likeliest rest of it is that the
+ * shortlist restricting the output vocabulary is chosen per batch, so an
+ * ordinary sentence puts ordinary words within reach - but the rule is what was
+ * measured, not what explains it.
  *
  * @param {string} from source language of the batch
  * @param {readonly string[]} texts what the caller actually wants translated
@@ -51,6 +61,6 @@ const COMPANIONS = new Map([["en", "The old man wrote a short letter."]]);
 export function companionFor(from, texts) {
   const companion = COMPANIONS.get(from);
   if (companion === undefined || texts.length === 0) return null;
-  if (texts.some((text) => text.trim().length >= companion.length)) return null;
+  if (!texts.some((text) => text.trim().length < companion.length)) return null;
   return companion;
 }

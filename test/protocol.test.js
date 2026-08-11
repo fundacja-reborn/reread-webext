@@ -18,6 +18,23 @@ describe("asRequest", () => {
     });
   });
 
+  it("keeps the sentence a translate request carries", () => {
+    assert.deepEqual(asRequest({ kind: Message.TRANSLATE, text: "bank", context: "The bank was steep." }), {
+      kind: Message.TRANSLATE,
+      text: "bank",
+      context: "The bank was steep.",
+    });
+  });
+
+  it("drops a sentence that is not one, rather than refusing the translation", () => {
+    for (const context of [42, null, {}, ["a"], undefined]) {
+      assert.deepEqual(asRequest({ kind: Message.TRANSLATE, text: "bank", context }), {
+        kind: Message.TRANSLATE,
+        text: "bank",
+      });
+    }
+  });
+
   it("accepts the requests that carry nothing", () => {
     for (const kind of [Message.OPEN_READER, Message.OPEN_SETTINGS, Message.LIST_PHRASES]) {
       assert.deepEqual(asRequest({ kind }), { kind });

@@ -10,10 +10,21 @@ describe("companionFor", () => {
     assert.ok(companion.length > "match".length);
   });
 
-  it("adds nothing to a batch that already has a row of its own length", () => {
+  it("adds nothing when every row can stand on its own", () => {
     const companion = /** @type {string} */ (companionFor("en", ["match"]));
-    assert.equal(companionFor("en", ["x".repeat(companion.length)]), null);
-    assert.equal(companionFor("en", ["match", "x".repeat(companion.length)]), null);
+    const long = "x".repeat(companion.length);
+    assert.equal(companionFor("en", [long]), null);
+    assert.equal(companionFor("en", [long, long]), null);
+  });
+
+  /**
+   * The sentence behind "More" is a long row, and it is not a substitute: a
+   * phrase travelling with its own sentence still came back as `Zegark` where
+   * the same batch with this companion gave `Zegarek`.
+   */
+  it("still helps a short phrase that already travels with a sentence", () => {
+    const companion = /** @type {string} */ (companionFor("en", ["match"]));
+    assert.equal(companionFor("en", ["watch", "My watch is running five minutes slow again."]), companion);
   });
 
   it("counts what the engine will see, not the whitespace around it", () => {

@@ -17,6 +17,11 @@
  * It does not repeat the phrase it is about. The phrase is on the page, a few
  * pixels away, selected or underlined; printing it again cost a line of the
  * article and gave nothing back. What is left is the gloss and the buttons.
+ *
+ * The sentence, when there is one, is a second layer behind "More" - one line
+ * first, everything else on a deliberate second press (G1). It lives in its own
+ * element and not in the body, because the body is what gets saved: a sentence
+ * that leaked into it would end up in the vocabulary and on a flashcard.
  */
 
 const GAP = 8;
@@ -34,7 +39,11 @@ const LABELS = Object.freeze({
   edit: "Edit",
   settings: "Open settings",
   cancel: "Cancel",
+  more: "More",
 });
+
+/** The one button whose label changes with what it will do. */
+const LESS_LABEL = "Less";
 
 const STYLE = `
   :host { all: initial; }
@@ -61,6 +70,16 @@ const STYLE = `
   .body { white-space: pre-wrap; }
   .body[data-tone="pending"] { opacity: 0.6; font-style: italic; }
   .body[data-tone="error"] { color: #a3341f; }
+
+  /* Quieter than the gloss and separated from it: this is the sentence the
+     phrase was in, not another meaning of it. */
+  .context {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(0, 0, 0, 0.12);
+    font-size: 13px;
+    opacity: 0.85;
+  }
 
   .editor {
     display: block;
@@ -105,6 +124,7 @@ const STYLE = `
       box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
     }
     .body[data-tone="error"] { color: #f0a83c; }
+    .context { border-top-color: rgba(255, 255, 255, 0.14); }
     .editor {
       background: rgba(255, 255, 255, 0.06);
       border-color: rgba(255, 255, 255, 0.24);
@@ -118,13 +138,14 @@ const STYLE = `
 `;
 
 /** @typedef {"normal" | "pending" | "error"} Tone */
-/** What the bubble can offer. @typedef {"save" | "learned" | "edit" | "settings"} Action */
-/** What it reports - editing never leaves the bubble. @typedef {"save" | "learned" | "settings"} ReportedAction */
+/** What the bubble can offer. @typedef {"save" | "learned" | "edit" | "settings" | "more"} Action */
+/** What it reports - editing and unfolding never leave the bubble. @typedef {"save" | "learned" | "settings"} ReportedAction */
 
 /**
  * @typedef {object} Tooltip
  * @property {(options: { anchor: DOMRect, body: string, tone?: Tone, actions?: Action[] }) => void} show
  * @property {(body: string, tone?: Tone) => void} setBody
+ * @property {(sentence: string | null) => void} setContext
  * @property {(actions: Action[]) => void} setActions
  * @property {() => void} hide
  * @property {() => boolean} isOpen
@@ -156,6 +177,8 @@ export function createTooltip({ onAction }) {
   let bubble = null;
   /** @type {HTMLDivElement | null} */
   let bodyElement = null;
+  /** @type {HTMLDivElement | null} */
+  let contextElement = null;
   /** @type {HTMLTextAreaElement | null} */
   let editor = null;
   /** @type {HTMLDivElement | null} */
@@ -164,6 +187,8 @@ export function createTooltip({ onAction }) {
   /** Where the bubble is anchored, so it can be placed again when it changes size. */
   let anchor = new DOMRect();
   let editing = false;
+  /** Whether the second layer is unfolded. Folded again for every new phrase. */
+  let unfolded = false;
   /** What the buttons were before the edit box opened, to go back to on cancel. */
   /** @type {Action[]} */
   let restingActions = [];
@@ -196,6 +221,9 @@ export function createTooltip({ onAction }) {
     bubble.className = "bubble";
     bodyElement = document.createElement("div");
     bodyElement.className = "body";
+    contextElement = document.createElement("div");
+    contextElement.className = "context";
+    contextElement.hidden = true;
     editor = document.createElement("textarea");
     editor.className = "editor";
     editor.hidden = true;
@@ -217,7 +245,7 @@ export function createTooltip({ onAction }) {
       editor.addEventListener(type, (event) => event.stopPropagation());
     }
 
-    bubble.append(bodyElement, editor, actionsElement);
+    bubble.append(bodyElement, contextElement, editor, actionsElement);
     root.append(style, bubble);
     // `documentElement` and not `body`: single-page applications replace the
     // body, and a bubble that vanishes with a re-render is a bug nobody can
@@ -261,6 +289,10 @@ export function createTooltip({ onAction }) {
       startEditing();
       return;
     }
+    if (action === "more") {
+      unfold(!unfolded);
+      return;
+    }
 
     const meanings = currentMeanings();
     if (action === "save") {
@@ -270,6 +302,27 @@ export function createTooltip({ onAction }) {
       stopEditing(true);
     }
     onAction(action, meanings);
+  }
+
+  /**
+   * @param {boolean} open
+   */
+  function unfold(open) {
+    if (contextElement === null) return;
+    unfolded = open && (contextElement.textContent ?? "").length > 0;
+    contextElement.hidden = !unfolded;
+    renderActions(editing ? ["save", "cancel"] : restingActions);
+    place();
+  }
+
+  /**
+   * @param {string | null} sentence
+   */
+  function setContext(sentence) {
+    if (contextElement === null) return;
+    contextElement.textContent = sentence ?? "";
+    // A phrase whose sentence is gone cannot stay unfolded over nothing.
+    unfold(unfolded);
   }
 
   function startEditing() {
@@ -308,7 +361,7 @@ export function createTooltip({ onAction }) {
       const button = document.createElement("button");
       button.type = "button";
       button.dataset["action"] = action;
-      button.textContent = LABELS[action];
+      button.textContent = action === "more" && unfolded ? LESS_LABEL : LABELS[action];
       button.addEventListener("click", () => emit(action));
       actionsElement.append(button);
     }
@@ -363,9 +416,11 @@ export function createTooltip({ onAction }) {
     host = null;
     bubble = null;
     bodyElement = null;
+    contextElement = null;
     editor = null;
     actionsElement = null;
     editing = false;
+    unfolded = false;
     restingActions = [];
   }
 
@@ -374,6 +429,14 @@ export function createTooltip({ onAction }) {
       build();
       anchor = rect;
       editing = false;
+      // Folded again: this is another phrase, and the sentence behind "More"
+      // belonged to the last one. Set directly rather than through `unfold`,
+      // which would render and place a bubble that has no body yet.
+      unfolded = false;
+      if (contextElement !== null) {
+        contextElement.textContent = "";
+        contextElement.hidden = true;
+      }
       if (editor !== null) editor.hidden = true;
       if (bodyElement !== null) bodyElement.hidden = false;
       setBody(body, tone);
@@ -384,6 +447,11 @@ export function createTooltip({ onAction }) {
 
     setBody(body, tone = "normal") {
       setBody(body, tone);
+      place();
+    },
+
+    setContext(sentence) {
+      setContext(sentence);
       place();
     },
 
