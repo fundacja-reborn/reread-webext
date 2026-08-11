@@ -14,6 +14,7 @@
 
 import { webext } from "../lib/browser.js";
 import { CONFIG_KEY, withDefaults } from "../lib/config.js";
+import { keyTokens } from "../lib/matcher/tokenize.js";
 import { describeError } from "../lib/messages.js";
 import { normalize, trimPhrase } from "../lib/normalize.js";
 import { ErrorCode, Message, asResult, fail } from "../lib/protocol.js";
@@ -38,6 +39,20 @@ let current = null;
  * moved on.
  */
 let generation = 0;
+
+/**
+ * How many words a phrase may have before keeping it becomes a decision rather
+ * than a consequence.
+ *
+ * Looking a word up is already the decision: a reader reaches for a translation
+ * when the context did not give the meaning away, and that is exactly the word
+ * worth meeting again. Asking them to confirm it is asking twice, in the middle
+ * of a sentence they were reading.
+ *
+ * Longer than this and the selection is usually a sentence somebody wanted to
+ * read rather than a phrase they wanted to keep - so that one waits for Save.
+ */
+const AUTO_KEEP_MAX_WORDS = 4;
 
 const tooltip = createTooltip({ onAction });
 
@@ -144,16 +159,27 @@ async function onAction(action, meanings) {
     tooltip.hide();
     return;
   }
+  if (action === "save") await keep(meanings);
+  else await forget();
+}
 
+/**
+ * Both halves of writing to the vocabulary do the same three things afterwards,
+ * and the reason for the middle one is the point of the feature: the mirror
+ * will say the same thing in a moment through the storage event, but doing it
+ * here too is what makes the underline appear in the paragraph being read
+ * rather than a beat later.
+ *
+ * @param {(phrase: { text: string, normalized: string }) => Promise<import("../lib/protocol.js").Result<null>>} write
+ * @param {(phrase: { text: string, normalized: string }) => void} remember
+ * @param {import("./tooltip.js").Action[]} next what the bubble offers once it worked
+ */
+async function change(write, remember, next) {
   const phrase = current;
   if (phrase === null) return;
   const mine = generation;
 
-  const result =
-    action === "save"
-      ? await ask({ kind: Message.SAVE_PHRASE, text: phrase.text, translations: meanings })
-      : await ask({ kind: Message.FORGET_PHRASE, text: phrase.text });
-
+  const result = await write(phrase);
   if (mine !== generation || !tooltip.isOpen()) return;
 
   if (!result.ok) {
@@ -162,14 +188,28 @@ async function onAction(action, meanings) {
     return;
   }
 
-  // The mirror will say the same thing in a moment, through the storage event.
-  // Doing it here too is what makes the buttons flip and the underline appear
-  // without a wait - saving a word and watching it underline itself in the
-  // paragraph you are reading is the whole point of the feature.
-  if (action === "save") vocabulary.set(phrase.normalized, meanings);
-  else vocabulary.delete(phrase.normalized);
+  remember(phrase);
   repaint();
-  tooltip.setActions(action === "save" ? ["learned", "edit"] : ["save", "edit"]);
+  tooltip.setActions(next);
+}
+
+/**
+ * @param {string[]} meanings
+ */
+async function keep(meanings) {
+  await change(
+    (phrase) => ask({ kind: Message.SAVE_PHRASE, text: phrase.text, translations: meanings }),
+    (phrase) => vocabulary.set(phrase.normalized, meanings),
+    ["learned", "edit"],
+  );
+}
+
+async function forget() {
+  await change(
+    (phrase) => ask({ kind: Message.FORGET_PHRASE, text: phrase.text }),
+    (phrase) => vocabulary.delete(phrase.normalized),
+    ["save", "edit"],
+  );
 }
 
 /**
@@ -188,7 +228,7 @@ function showSaved(anchor, text, normalized) {
 
   current = { text, normalized };
   generation += 1;
-  tooltip.show({ anchor, phrase: text, body: meanings.join("\n"), actions: ["learned", "edit"] });
+  tooltip.show({ anchor, body: meanings.join("\n"), actions: ["learned", "edit"] });
   return true;
 }
 
@@ -216,24 +256,37 @@ function onMouseUp(event) {
   current = { text: selection.text, normalized };
   const mine = ++generation;
 
-  tooltip.show({
-    anchor: selection.rect,
-    phrase: selection.text,
-    body: "Translating...",
-    tone: "pending",
-  });
+  tooltip.show({ anchor: selection.rect, body: "Translating...", tone: "pending" });
 
   void ask({ kind: Message.TRANSLATE, text: selection.text }).then((result) => {
     if (mine !== generation || !tooltip.isOpen()) return;
-    if (result.ok) {
-      tooltip.setBody(typeof result.value === "string" ? result.value : "", "normal");
-      // A selection of nothing but punctuation has no key, so there is nothing
-      // to save it under.
-      tooltip.setActions(normalized.length > 0 ? ["save", "edit"] : []);
-    } else {
+
+    if (!result.ok) {
       tooltip.setBody(describeError(result.code), "error");
       tooltip.setActions(result.code === ErrorCode.MODEL_MISSING ? ["settings"] : []);
+      return;
     }
+
+    const gloss = typeof result.value === "string" ? result.value : "";
+    tooltip.setBody(gloss, "normal");
+
+    // A selection of nothing but punctuation has no key to save it under, and
+    // a phrase with no translation has nothing to save.
+    if (normalized.length === 0 || gloss.length === 0) {
+      tooltip.setActions([]);
+      return;
+    }
+
+    if (keyTokens(normalized).length > AUTO_KEEP_MAX_WORDS) {
+      tooltip.setActions(["save", "edit"]);
+      return;
+    }
+
+    // Kept without being asked. The buttons flip first and the write follows,
+    // because the write is local and instant, and a bubble that shows no
+    // buttons for a moment reads as a bubble that is still thinking.
+    tooltip.setActions(["learned", "edit"]);
+    void keep([gloss]);
   });
 }
 

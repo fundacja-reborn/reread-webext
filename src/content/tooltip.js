@@ -13,6 +13,10 @@
  * The bubble knows nothing about the database. It shows what it is given,
  * offers the buttons it is told to offer, and reports which one was pressed -
  * so what "save" means stays in one place, and that place is not here.
+ *
+ * It does not repeat the phrase it is about. The phrase is on the page, a few
+ * pixels away, selected or underlined; printing it again cost a line of the
+ * article and gave nothing back. What is left is the gloss and the buttons.
  */
 
 const GAP = 8;
@@ -52,11 +56,6 @@ const STYLE = `
     color: #1f2430;
     box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
     overflow-wrap: break-word;
-  }
-
-  .phrase {
-    font-weight: 600;
-    margin-bottom: 4px;
   }
 
   .body { white-space: pre-wrap; }
@@ -124,7 +123,7 @@ const STYLE = `
 
 /**
  * @typedef {object} Tooltip
- * @property {(options: { anchor: DOMRect, phrase: string, body: string, tone?: Tone, actions?: Action[] }) => void} show
+ * @property {(options: { anchor: DOMRect, body: string, tone?: Tone, actions?: Action[] }) => void} show
  * @property {(body: string, tone?: Tone) => void} setBody
  * @property {(actions: Action[]) => void} setActions
  * @property {() => void} hide
@@ -155,8 +154,6 @@ export function createTooltip({ onAction }) {
   let host = null;
   /** @type {HTMLDivElement | null} */
   let bubble = null;
-  /** @type {HTMLDivElement | null} */
-  let phraseElement = null;
   /** @type {HTMLDivElement | null} */
   let bodyElement = null;
   /** @type {HTMLTextAreaElement | null} */
@@ -197,8 +194,6 @@ export function createTooltip({ onAction }) {
 
     bubble = document.createElement("div");
     bubble.className = "bubble";
-    phraseElement = document.createElement("div");
-    phraseElement.className = "phrase";
     bodyElement = document.createElement("div");
     bodyElement.className = "body";
     editor = document.createElement("textarea");
@@ -222,7 +217,7 @@ export function createTooltip({ onAction }) {
       editor.addEventListener(type, (event) => event.stopPropagation());
     }
 
-    bubble.append(phraseElement, bodyElement, editor, actionsElement);
+    bubble.append(bodyElement, editor, actionsElement);
     root.append(style, bubble);
     // `documentElement` and not `body`: single-page applications replace the
     // body, and a bubble that vanishes with a re-render is a bug nobody can
@@ -331,8 +326,16 @@ export function createTooltip({ onAction }) {
     const viewportWidth = document.documentElement.clientWidth;
     const viewportHeight = document.documentElement.clientHeight;
 
-    const belowFits = anchor.bottom + GAP + size.height <= viewportHeight - VIEWPORT_MARGIN;
-    const top = belowFits ? anchor.bottom + GAP : Math.max(VIEWPORT_MARGIN, anchor.top - GAP - size.height);
+    // Above the selection by preference, below it only when there is no room.
+    // Reading goes downwards, so the text above a phrase has been read and the
+    // text below it is what comes next: covering the first costs nothing,
+    // covering the second hides the rest of the paragraph.
+    const above = anchor.top - GAP - size.height;
+    const below = anchor.bottom + GAP;
+    const top =
+      above >= VIEWPORT_MARGIN
+        ? above
+        : Math.max(VIEWPORT_MARGIN, Math.min(below, viewportHeight - VIEWPORT_MARGIN - size.height));
 
     const preferred = anchor.left;
     const maxLeft = Math.max(VIEWPORT_MARGIN, viewportWidth - size.width - VIEWPORT_MARGIN);
@@ -359,7 +362,6 @@ export function createTooltip({ onAction }) {
     host.remove();
     host = null;
     bubble = null;
-    phraseElement = null;
     bodyElement = null;
     editor = null;
     actionsElement = null;
@@ -368,14 +370,12 @@ export function createTooltip({ onAction }) {
   }
 
   return {
-    show({ anchor: rect, phrase, body, tone = "normal", actions = [] }) {
+    show({ anchor: rect, body, tone = "normal", actions = [] }) {
       build();
-      if (phraseElement === null) return;
       anchor = rect;
       editing = false;
       if (editor !== null) editor.hidden = true;
       if (bodyElement !== null) bodyElement.hidden = false;
-      phraseElement.textContent = phrase;
       setBody(body, tone);
       restingActions = actions;
       renderActions(actions);
