@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { LIMITS, fieldText, senses } from "../src/lib/dict/text.js";
+import { LIMITS, about, fieldText, senses } from "../src/lib/dict/text.js";
 
 describe("fieldText", () => {
   it("passes plain text through, tidied", () => {
@@ -83,5 +83,37 @@ describe("senses", () => {
 
   it("has nothing to say about an entry of only pictures", () => {
     assert.deepEqual(senses([{ type: "P", text: "binary" }]), []);
+  });
+});
+
+describe("about", () => {
+  it("turns what a dictionary says about itself into something printable", () => {
+    const ifo =
+      'Publisher: Karl Bartel<br>Licensed under the <a href="https://creativecommons.org/licenses/by-sa/4.0/legalcode">Creative Commons Attribution-ShareAlike 4.0 International</a> license<br>Base data from <a href="https://www.wiktionary.org/">Wiktionary.org</a> via DBnary.';
+
+    assert.equal(
+      about(ifo),
+      "Publisher: Karl Bartel\nLicensed under the Creative Commons Attribution-ShareAlike 4.0 International license\nBase data from Wiktionary.org via DBnary.",
+    );
+  });
+
+  it("cuts a description that is an essay, on a word", () => {
+    const essay = `Publisher: FreeDict<br>${"This dictionary comes to you through nice people. ".repeat(40)}`;
+    const shown = about(essay);
+
+    assert.ok(shown !== null);
+    assert.ok(shown.length <= LIMITS.credit + 3);
+    assert.ok(shown.startsWith("Publisher: FreeDict\n"));
+    assert.ok(shown.endsWith("..."));
+  });
+
+  it("answers null when there is nothing to say, or nothing left after the tags", () => {
+    assert.equal(about(null), null);
+    assert.equal(about(""), null);
+    assert.equal(about("<br><br>"), null);
+  });
+
+  it("takes its own limit, because a name is not a paragraph", () => {
+    assert.equal(about("Nowy <b>Slownik</b>", LIMITS.name), "Nowy Slownik");
   });
 });
