@@ -219,6 +219,11 @@ const STYLE = `
  * records on purpose - deciding whether a book's name or a headword is worth
  * repeating needs to know what the reader selected, and the bubble does not.
  *
+ * One line is one meaning and therefore one button. The caller guarantees that,
+ * because the caller is where a dictionary's idea of a line stops mattering:
+ * whatever a book packed into one field, what a reader presses here has to be
+ * something that can stand alone as the answer to a word.
+ *
  * @typedef {{ label: string, lines: string[] }} Block
  */
 

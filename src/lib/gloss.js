@@ -32,6 +32,28 @@ export function toMeanings(text) {
 }
 
 /**
+ * The lines of a dictionary entry as a reader can choose between them: one row
+ * per meaning, whatever the book packed into one field.
+ *
+ * The unit of choice is the line and not the entry, and the entry that settled
+ * it is WikDict's `nominate` - six pronunciations, `verb`, an English
+ * definition and `nominować`, all one sense with the breaks still in it.
+ * Pressed whole it made a four-line gloss with a transcription in it, which is
+ * everything a flashcard should not be, and left the reader editing afterwards
+ * anyway. Split, the line they wanted is one press.
+ *
+ * No rule about which line is a meaning, and there will not be one: telling a
+ * translation from a part of speech needs a list of parts of speech per
+ * language, and the reader's eyes do it for nothing.
+ *
+ * @param {string[]} senses as the dictionary stored them
+ * @returns {string[]} one meaning each, in the order the entry had them
+ */
+export function choosableLines(senses) {
+  return senses.flatMap(toMeanings);
+}
+
+/**
  * What the gloss becomes when a reader presses a line of a dictionary entry.
  *
  * Pressing one is choosing it, and the choice replaces the gloss rather than

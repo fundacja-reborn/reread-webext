@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { afterChoosing, toMeanings } from "../src/lib/gloss.js";
+import { afterChoosing, choosableLines, toMeanings } from "../src/lib/gloss.js";
 
 describe("toMeanings", () => {
   it("keeps one line as one meaning", () => {
@@ -29,6 +29,34 @@ describe("toMeanings", () => {
 
   it("has nothing to save in an empty box", () => {
     assert.deepEqual(toMeanings("   \n  \n"), []);
+  });
+});
+
+describe("choosableLines", () => {
+  it("leaves an entry that already had a meaning per sense alone", () => {
+    assert.deepEqual(choosableLines(["bank (instytucja)", "brzeg"]), ["bank (instytucja)", "brzeg"]);
+  });
+
+  it("breaks up the one field a dictionary packed a whole entry into", () => {
+    // WikDict's `nominate`, shortened. Pressed whole it made a four-line gloss
+    // with a phonetic transcription in it; the reader wanted the last line.
+    assert.deepEqual(
+      choosableLines(["/ˈnɑ.mə.neɪt/, /ˈnɒm.ɪ.neɪt/\nverb\nto name someone for a particular role\nnominować"]),
+      ["/ˈnɑ.mə.neɪt/, /ˈnɒm.ɪ.neɪt/", "verb", "to name someone for a particular role", "nominować"],
+    );
+  });
+
+  it("gives every row something that can stand alone as a meaning", () => {
+    // What the bubble is promised: press any row and exactly one meaning is
+    // saved, never a row that would turn back into two.
+    const rows = choosableLines(["a\nb\nc", "d", "  \ne  "]);
+    for (const row of rows) assert.equal(toMeanings(row).length, 1);
+    assert.deepEqual(rows, ["a", "b", "c", "d", "e"]);
+  });
+
+  it("has nothing to offer for an entry with nothing in it", () => {
+    assert.deepEqual(choosableLines([]), []);
+    assert.deepEqual(choosableLines(["", "   "]), []);
   });
 });
 
