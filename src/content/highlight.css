@@ -34,13 +34,21 @@
  * of ours.
  */
 
+/*
+ * Two dials, and they are the whole design: how much ink a dot has
+ * (`thickness`) and how far it is from the text colour (the `color-mix`
+ * percentage). Both were lower here and the mark disappeared while reading;
+ * both a step higher is the balance Michał settled on. Anything that has to be
+ * tuned again is one of these two numbers - the style and the colour are not
+ * up for it.
+ */
 ::highlight(reread) {
   text-decoration-line: underline;
   text-decoration-style: dotted;
   /* Not the full text colour: at full strength a dotted rule reads as a second
      row of letters under the word. */
-  text-decoration-color: color-mix(in srgb, currentColor 60%, transparent);
-  text-decoration-thickness: 1px;
+  text-decoration-color: color-mix(in srgb, currentColor 75%, transparent);
+  text-decoration-thickness: 1.5px;
   /* Clear of the descenders, so `g` and `y` are still whole letters. */
   text-underline-offset: 2px;
 }
