@@ -18,7 +18,16 @@
 /** Markup types, in the sense of "has tags that have to come off". */
 const MARKUP = new Set(["h", "g", "x", "w", "k"]);
 
-/** Types worth keeping as text. Everything else is a sound, a picture or a file list. */
+/**
+ * Types worth keeping as text. Everything else is a sound, a picture or a file
+ * list.
+ *
+ * `l` is the format's one non-UTF-8 type - a meaning in whatever encoding the
+ * machine that built the dictionary happened to use, which nothing in the file
+ * names. It is decoded as UTF-8 like everything else and comes out as mojibake
+ * when it was not: a defect visible in the entry, on a type no dictionary
+ * published this century uses, and cheaper than guessing at encodings.
+ */
 const READABLE = new Set(["m", "l", "t", "y", "n", ...MARKUP]);
 
 /**
