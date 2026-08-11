@@ -65,6 +65,55 @@
       makes no network request at all.
     </p>
 
+    <h2>Dictionaries</h2>
+
+    <p>
+      A dictionary answers what a translation cannot. <em>Bank</em> has two entries, and a model
+      has to choose one of them without knowing which you meant; a dictionary shows both. Entries
+      appear in the second layer of the bubble, under the sentence.
+    </p>
+
+    <div id="dictionaries" class="models"></div>
+
+    <p id="dictionary-status" class="status" role="status"></p>
+
+    <h2>Add a dictionary from files</h2>
+
+    <p>
+      Dictionaries are read in <strong>StarDict</strong> format - the same files a KOReader
+      e-reader uses, so a dictionary already on your reader works here unchanged. Unpack the
+      archive it came in and pick the files of one dictionary:
+    </p>
+
+    <ul class="files">
+      <li><code><em>name</em>.ifo</code> - what the dictionary calls itself</li>
+      <li><code><em>name</em>.idx</code> - the index of words</li>
+      <li><code><em>name</em>.dict</code> or <code><em>name</em>.dict.dz</code> - the entries</li>
+      <li><code><em>name</em>.syn</code> - other spellings, when the dictionary has them</li>
+    </ul>
+
+    <p>
+      <input type="file" id="dictionary-files" multiple accept=".ifo,.idx,.dict,.dz,.gz,.syn" />
+    </p>
+
+    <p class="inline">
+      <label for="dictionary-from">Words in</label>
+      <select id="dictionary-from"></select>
+      <label for="dictionary-to">explained in</label>
+      <select id="dictionary-to"></select>
+      <button type="button" id="add-dictionary">Add dictionary</button>
+    </p>
+
+    <p id="dictionary-file-status" class="status" role="status"></p>
+
+    <p class="note">
+      A StarDict file says nothing about which languages it is for, so that part is yours to
+      say. Dictionaries are never downloaded: there is no list of addresses for them anywhere in
+      this package, and adding one makes no network request at all. Two worth knowing about are
+      <strong>WikDict</strong> (from Wiktionary, CC BY-SA) and <strong>FreeDict</strong> (GPL) -
+      both publish StarDict files for English and Polish.
+    </p>
+
     <script src="options.js" defer></script>
   </body>
 </html>
