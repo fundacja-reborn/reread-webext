@@ -110,6 +110,7 @@ npm install          # once
 npm run build        # dist/firefox
 npm start            # build, then launch Firefox with the extension loaded
 tools/check.sh       # the quality gate: vendored engine, typecheck, tests, build, addons-linter
+npm run sign         # gate, then have AMO sign the package (needs credentials, see below)
 
 node tools/models-registry.mjs --pairs=en-pl,pl-en   # rewrite the model registry (needs the network)
 ```
@@ -120,6 +121,29 @@ and its output is committed.
 
 `tools/check.sh` is exactly what CI runs. There is no step in one that is missing from
 the other.
+
+### Installing a build that survives a restart
+
+Firefox only installs a signed package for good; anything loaded through `about:debugging`
+or `web-ext run` is gone by the next restart, and the vocabulary database goes with it.
+`npm run sign` runs the gate and then uploads `dist/firefox` to AMO, which validates it,
+signs it and hands it straight back into `web-ext-artifacts/`.
+
+That channel is **unlisted**, which is a different thing from published: nothing appears
+in the add-on directory, no human review starts, and nobody else can find or install the
+result. It is the same package, with a signature that makes Firefox accept it.
+
+Signing needs an [AMO API key](https://addons.mozilla.org/developers/addon/api/key/) in
+`.env`, which is gitignored:
+
+```
+WEB_EXT_API_KEY=user:12345678:123
+WEB_EXT_API_SECRET=...
+```
+
+AMO keeps every version number it has seen and refuses anything that is not higher than
+the last, so each signed build raises `version` in both `src/manifest.json` and
+`package.json`. Builds are numbered `0.<milestone>.<build>`.
 
 The extension is plain JavaScript with JSDoc types, checked by TypeScript in `--noEmit`
 mode. esbuild bundles it - not to make it smaller, but because content scripts cannot be

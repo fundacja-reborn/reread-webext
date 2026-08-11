@@ -1,6 +1,6 @@
 {
   "name": "reread-webext",
-  "version": "0.0.1",
+  "version": "0.2.0",
   "private": true,
   "description": "Learn a language while reading the web. Translation, vocabulary and highlighting, all on your own device.",
   "license": "AGPL-3.0-or-later",
@@ -16,6 +16,7 @@
     "test": "node --test \"test/**/*.test.js\"",
     "lint": "npm run build && web-ext lint --source-dir dist/firefox",
     "check": "tools/check.sh",
+    "sign": "node tools/sign.mjs",
     "start": "npm run build && web-ext run --source-dir dist/firefox",
     "start:isolated": "npm run build && web-ext run --source-dir dist/firefox --no-reload"
   },
