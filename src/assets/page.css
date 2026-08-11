@@ -122,11 +122,16 @@ h2 {
 }
 
 /* Its own line, below the rest of the row: this is where a dictionary says who
-   made it, and CC BY-SA is the licence most of the good ones carry. */
+   made it, and CC BY-SA is the licence most of the good ones carry. The line
+   breaks are the ones its own description had - they are kept because a licence
+   written as four lines reads as four lines. */
 .dictionary-credit {
   flex-basis: 100%;
+  margin-top: 0.2rem;
   color: var(--page-muted);
   font-size: 0.85rem;
+  line-height: 1.45;
+  white-space: pre-line;
 }
 
 .inline {

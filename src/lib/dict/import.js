@@ -21,7 +21,7 @@
 
 import { isGzip } from "../models/files.js";
 import { parseIdx, parseIfo, parseSyn, readFields } from "./stardict.js";
-import { senses } from "./text.js";
+import { LIMITS, about, senses } from "./text.js";
 
 /**
  * @typedef {"empty" | "missing_ifo" | "missing_idx" | "missing_dict" | "mixed" | "not_stardict" | "unpack" | "no_entries"} ImportProblem
@@ -235,9 +235,14 @@ export async function readDictionary(files, { fallbackName, onProgress } = {}) {
     if (target !== undefined) aliases.push({ headword: synonym.word, target });
   }
 
+  // The .ifo file describes the book in the same HTML its entries are written
+  // in, so it gets the same treatment (D29): what a settings page prints must
+  // be text by the time it is stored, not markup waiting to be dealt with.
+  const name = about(ifo.value.bookname, LIMITS.name) ?? fallbackName ?? "Dictionary";
+
   return {
     ok: true,
-    value: { name: ifo.value.bookname, credit: ifo.value.credit, entries, aliases, skipped },
+    value: { name, credit: about(ifo.value.credit), entries, aliases, skipped },
   };
 }
 
