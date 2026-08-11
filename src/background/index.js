@@ -14,9 +14,8 @@ import { ErrorCode, Message, asRequest, fail, ok } from "../lib/protocol.js";
 import { setProvider, translate } from "../lib/translator/index.js";
 import { bergamot } from "../lib/translator/providers/bergamot/index.js";
 import { lookUp } from "./dictionary.js";
+import { openReader } from "./reader-tab.js";
 import { forgetPhrase, listVocabulary, refreshVocabulary, savePhrase } from "./vocabulary.js";
-
-const READER_PAGE = "reader/reader.html";
 
 // The engine itself starts on the first translation, not here: this module runs
 // every time Firefox wakes the event page, and waking up must stay cheap.
@@ -69,10 +68,6 @@ async function handle(request) {
     case Message.LIST_PHRASES:
       return await listVocabulary();
   }
-}
-
-async function openReader() {
-  await webext().tabs.create({ url: webext().runtime.getURL(READER_PAGE) });
 }
 
 webext().runtime.onMessage.addListener((message, _sender, sendResponse) => {
