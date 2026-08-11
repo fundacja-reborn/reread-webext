@@ -13,6 +13,7 @@ import { readConfig } from "../lib/config.js";
 import { ErrorCode, Message, asRequest, fail, ok } from "../lib/protocol.js";
 import { setProvider, translate } from "../lib/translator/index.js";
 import { bergamot } from "../lib/translator/providers/bergamot/index.js";
+import { lookUp } from "./dictionary.js";
 import { forgetPhrase, listVocabulary, refreshVocabulary, savePhrase } from "./vocabulary.js";
 
 const READER_PAGE = "reader/reader.html";
@@ -35,12 +36,23 @@ async function handle(request) {
   switch (request.kind) {
     case Message.TRANSLATE: {
       const config = await readConfig();
-      return translate({
-        text: request.text,
-        context: request.context,
-        from: config.sourceLang,
-        to: config.targetLang,
-      });
+      // Side by side, not one after the other: the dictionary read is a point
+      // lookup and the translation is the engine, so waiting for them together
+      // costs what the engine costs and nothing more.
+      const [translated, entries] = await Promise.all([
+        translate({
+          text: request.text,
+          context: request.context,
+          from: config.sourceLang,
+          to: config.targetLang,
+        }),
+        lookUp(request.text, config.sourceLang),
+      ]);
+
+      // Dictionary entries ride with a translation and never instead of one: a
+      // failed translation is an error the bubble has to show, and hanging
+      // definitions off it would make an error message into a half-answer.
+      return translated.ok ? ok({ ...translated.value, entries }) : translated;
     }
     case Message.OPEN_READER: {
       await openReader();

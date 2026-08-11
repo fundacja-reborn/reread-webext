@@ -4,15 +4,22 @@ import { describe, it } from "node:test";
 import { ErrorCode, Message, asRequest, asResult, asTranslation, fail, ok } from "../src/lib/protocol.js";
 
 describe("asTranslation", () => {
+  const ENTRY = { dictionary: "Test", headword: "bank", senses: ["brzeg", "instytucja"] };
+
   it("passes a well-formed translation through", () => {
-    assert.deepEqual(asTranslation({ gloss: "bank", sentence: "Brzeg był stromy." }), {
+    assert.deepEqual(asTranslation({ gloss: "bank", sentence: "Brzeg był stromy.", entries: [ENTRY] }), {
       gloss: "bank",
       sentence: "Brzeg był stromy.",
+      entries: [ENTRY],
     });
   });
 
   it("keeps the gloss when there is no sentence", () => {
-    assert.deepEqual(asTranslation({ gloss: "bank", sentence: null }), { gloss: "bank", sentence: null });
+    assert.deepEqual(asTranslation({ gloss: "bank", sentence: null }), {
+      gloss: "bank",
+      sentence: null,
+      entries: [],
+    });
   });
 
   /**
@@ -22,12 +29,40 @@ describe("asTranslation", () => {
    */
   it("turns anything else into an empty translation rather than throwing", () => {
     for (const value of [null, undefined, "bank", 42, [], {}, { gloss: 7 }, { sentence: "only" }]) {
-      assert.deepEqual(asTranslation(value), { gloss: "", sentence: null });
+      assert.deepEqual(asTranslation(value), { gloss: "", sentence: null, entries: [] });
     }
   });
 
   it("drops a sentence that is not a string, keeping the gloss", () => {
-    assert.deepEqual(asTranslation({ gloss: "bank", sentence: 42 }), { gloss: "bank", sentence: null });
+    assert.deepEqual(asTranslation({ gloss: "bank", sentence: 42 }), {
+      gloss: "bank",
+      sentence: null,
+      entries: [],
+    });
+  });
+
+  it("answers with an array of entries whatever arrived in their place", () => {
+    for (const entries of [undefined, null, "brzeg", 42, {}, [null], [{ senses: "brzeg" }], [{ senses: [] }]]) {
+      assert.deepEqual(asTranslation({ gloss: "bank", sentence: null, entries }).entries, []);
+    }
+  });
+
+  it("keeps the entries that are whole and drops the ones that are not", () => {
+    const mixed = asTranslation({
+      gloss: "bank",
+      sentence: null,
+      entries: [ENTRY, { dictionary: "Broken" }, { senses: ["ok", 42, ""] }],
+    });
+
+    assert.deepEqual(mixed.entries, [ENTRY, { dictionary: "", headword: "", senses: ["ok"] }]);
+  });
+
+  it("has no second layer to offer when there is no gloss to offer it with", () => {
+    assert.deepEqual(asTranslation({ gloss: "", sentence: "Brzeg był stromy.", entries: [ENTRY] }), {
+      gloss: "",
+      sentence: null,
+      entries: [],
+    });
   });
 });
 
