@@ -1,7 +1,35 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { ErrorCode, Message, asRequest, asResult, fail, ok } from "../src/lib/protocol.js";
+import { ErrorCode, Message, asRequest, asResult, asTranslation, fail, ok } from "../src/lib/protocol.js";
+
+describe("asTranslation", () => {
+  it("passes a well-formed translation through", () => {
+    assert.deepEqual(asTranslation({ gloss: "bank", sentence: "Brzeg był stromy." }), {
+      gloss: "bank",
+      sentence: "Brzeg był stromy.",
+    });
+  });
+
+  it("keeps the gloss when there is no sentence", () => {
+    assert.deepEqual(asTranslation({ gloss: "bank", sentence: null }), { gloss: "bank", sentence: null });
+  });
+
+  /**
+   * A page can be running a content script from before an update while the
+   * background is already the new one. Whatever comes back, the bubble may not
+   * throw into somebody else's console.
+   */
+  it("turns anything else into an empty translation rather than throwing", () => {
+    for (const value of [null, undefined, "bank", 42, [], {}, { gloss: 7 }, { sentence: "only" }]) {
+      assert.deepEqual(asTranslation(value), { gloss: "", sentence: null });
+    }
+  });
+
+  it("drops a sentence that is not a string, keeping the gloss", () => {
+    assert.deepEqual(asTranslation({ gloss: "bank", sentence: 42 }), { gloss: "bank", sentence: null });
+  });
+});
 
 describe("asRequest", () => {
   it("accepts a translate request", () => {

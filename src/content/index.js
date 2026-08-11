@@ -17,7 +17,7 @@ import { CONFIG_KEY, withDefaults } from "../lib/config.js";
 import { keyTokens } from "../lib/matcher/tokenize.js";
 import { describeError } from "../lib/messages.js";
 import { normalize, trimPhrase } from "../lib/normalize.js";
-import { ErrorCode, Message, asResult, fail } from "../lib/protocol.js";
+import { ErrorCode, Message, asResult, asTranslation, fail } from "../lib/protocol.js";
 import { sentenceAround } from "../lib/sentence.js";
 import { MIRROR_KEY, asMirror, mirrorMatches } from "../lib/store/mirror.js";
 import { clear, paint, phraseAt } from "./highlighter.js";
@@ -311,7 +311,7 @@ function onMouseUp(event) {
       return;
     }
 
-    const { gloss, sentence } = result.value;
+    const { gloss, sentence } = asTranslation(result.value);
     tooltip.setBody(gloss, "normal");
     // Folded. The reader asked about a word, and G0 is about answering that
     // word and getting out of the way; the sentence waits for a second press.

@@ -129,6 +129,29 @@ export function asResult(response) {
 }
 
 /**
+ * Narrows the value of a successful translation. `asResult` checks that an
+ * answer is an answer; this checks that it is the answer to this question -
+ * which matters because a page can be running a content script from before an
+ * update while the background is already the new one, and a bubble that throws
+ * puts a stack trace in the console of somebody else's page.
+ *
+ * @param {unknown} value
+ * @returns {Translation}
+ */
+export function asTranslation(value) {
+  if (typeof value !== "object" || value === null) return { gloss: "", sentence: null };
+  const { gloss, sentence } = /** @type {Record<string, unknown>} */ (value);
+
+  const answer = typeof gloss === "string" ? gloss : "";
+  // The sentence is an extra to the gloss, so without a gloss there is nothing
+  // for it to be extra to: a bubble with an empty first line and a "More" that
+  // has something behind it is a state nobody should have to make sense of.
+  const second = answer.length > 0 && typeof sentence === "string" ? sentence : null;
+
+  return { gloss: answer, sentence: second };
+}
+
+/**
  * Narrows whatever arrived over `runtime.sendMessage` - which is to say,
  * anything at all - to a request this extension sends.
  *
