@@ -133,8 +133,12 @@ That channel is **unlisted**, which is a different thing from published: nothing
 in the add-on directory, no human review starts, and nobody else can find or install the
 result. It is the same package, with a signature that makes Firefox accept it.
 
-Signing needs an [AMO API key](https://addons.mozilla.org/developers/addon/api/key/) in
-`.env`, which is gitignored:
+Signing needs an [AMO API key](https://addons.mozilla.org/developers/addon/api/key/). Copy
+`.env.example` to `.env`, which is gitignored, and fill in the two values:
+
+```bash
+cp .env.example .env
+```
 
 ```
 WEB_EXT_API_KEY=user:12345678:123
