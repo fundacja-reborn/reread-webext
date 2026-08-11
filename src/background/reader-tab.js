@@ -16,8 +16,9 @@
  * Nothing here needs the `tabs` permission. Selecting a tab and focusing a
  * window are allowed without it, and so is finding out that a tab is gone: the
  * call for an id that no longer exists rejects, and that rejection is the test.
- * `tabs.query` is what would need one - our own `moz-extension://` page is not
- * covered by `<all_urls>`.
+ * Finding the reader by asking `tabs.query` for its address is what would need
+ * one - and would not even work, `moz-extension://` pages being outside
+ * `<all_urls>`.
  */
 
 import { webext } from "../lib/browser.js";
@@ -26,8 +27,11 @@ import { readReaderTab, writeReaderSource, writeReaderTab } from "../lib/session
 const READER_PAGE = "reader/reader.html";
 
 /**
+ * Only the calls this module makes, so the test fake has to fake exactly that
+ * much and no more - `query`, say, is the popup's business, not this module's.
+ *
  * @typedef {object} ReaderTabDeps
- * @property {WebExtBrowser["tabs"]} [tabs]
+ * @property {Pick<WebExtBrowser["tabs"], "create" | "update">} [tabs]
  * @property {WebExtBrowser["windows"]} [windows]
  * @property {WebExtBrowser["storage"]["session"]} [session]
  * @property {string} [url]
@@ -41,7 +45,7 @@ const READER_PAGE = "reader/reader.html";
  * already selected and returning `false` here would open the second reader this
  * module exists to prevent.
  *
- * @param {WebExtBrowser["tabs"]} tabs
+ * @param {Pick<WebExtBrowser["tabs"], "update">} tabs
  * @param {WebExtBrowser["windows"]} windows
  * @param {number} id
  * @returns {Promise<boolean>} whether the reader is now in front of the reader

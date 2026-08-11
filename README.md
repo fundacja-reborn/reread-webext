@@ -24,7 +24,8 @@ file, so what you collect on an e-reader underlines itself in your browser and b
 | Keeping a phrase, correcting what it means, marking it learned | yes |
 | Underlining saved phrases on the pages you read | yes |
 | Dictionaries (StarDict) | imported from files and managed on the settings page |
-| Reader mode | not started |
+| Reader mode | turns the page into an article in the extension's own tab |
+| Toolbar popup | per-site switch, language pair, reader, settings |
 | Import / export (TSV) | not started |
 | Chromium | builds, untested |
 
@@ -53,6 +54,10 @@ to send it: the page text, your selections and your vocabulary never leave the d
 That claim is checkable rather than promised - open the network panel in devtools and
 read along, or read the source, which is deliberately shipped unminified.
 
+Switching re/read off for a site writes that site's hostname to the browser's local extension
+storage - one exact host per entry, written only on your own press of the switch, listed and
+removable on the settings page.
+
 ### Permissions, and why each one is needed
 
 | Permission | Why |
@@ -63,11 +68,16 @@ read along, or read the source, which is deliberately shipped unminified.
 
 There is nothing else. No `tabs`, no `webRequest`, no `cookies`, no `downloads`.
 
-The toolbar button opens the reader in a tab, and pressing it again comes back to that tab
-instead of opening a second one. Neither of those needs the `tabs` permission: opening a tab,
-selecting one and focusing its window are allowed without it, while reading the address or the
-title of a tab is what it is actually for - and nothing here does that. Remembering which tab
-the reader is in lasts until the browser closes, and it is a number.
+The toolbar button opens a small popup: a switch for the site you are on, the language pair,
+this page in the reader, and the settings. None of it needs the `tabs` permission. The popup
+learns which site it is standing over by asking the page itself - without the permission a tab
+has an id and no address, so the content script that is already there answers with its
+hostname, and a page this extension does not run on gets a sentence instead of a switch.
+Opening the reader, coming back to the one reader tab instead of opening a second, and focusing
+its window are all allowed without the permission too; reading the address or the title of a
+tab is what it is actually for, and nothing here does that. Remembering which tab the reader is
+in lasts until the browser closes, and it is a number. `Alt+Shift+R` opens the reader without
+going through the popup.
 
 ## What is in the package that is not ours
 

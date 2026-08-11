@@ -24,6 +24,7 @@ const ENTRY_POINTS = [
   "background/engine.worker.js",
   "content/index.js",
   "options/options.js",
+  "popup/index.js",
   "reader/reader.js",
 ];
 
@@ -34,6 +35,8 @@ const ENTRY_POINTS = [
  */
 const STATIC_FILES = [
   "options/options.html",
+  "popup/index.html",
+  "popup/popup.css",
   "reader/reader.html",
   "reader/reader.css",
   "content/highlight.css",

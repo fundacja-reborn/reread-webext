@@ -27,6 +27,10 @@ export const CONFIG_KEY = "config";
  * @property {string} sourceLang Language being read, BCP-47.
  * @property {string} targetLang Language it is translated into, BCP-47.
  * @property {ReaderConfig} reader How the reader looks. Nothing else uses it.
+ * @property {string[]} disabledHosts Sites where re/read stays off. Exact
+ *   hostnames - no port, no scheme, no patterns, no subdomain matching. Every
+ *   entry is one conscious press of the switch in the toolbar popup, and the
+ *   settings page is where the list can be read and emptied.
  */
 
 /** @type {readonly string[]} */
@@ -79,6 +83,7 @@ export const DEFAULTS = Object.freeze({
   sourceLang: "en",
   targetLang: "pl",
   reader: READER_DEFAULTS,
+  disabledHosts: [],
 });
 
 /**
@@ -106,6 +111,26 @@ function text(value, fallback) {
 function within(value, range, fallback) {
   if (typeof value !== "number" || !Number.isFinite(value)) return fallback;
   return Math.min(range.max, Math.max(range.min, Math.round(value)));
+}
+
+/**
+ * The list of switched-off sites, or as much of it as is really a list of
+ * hostnames. Anything else in there was hand-edited; keeping the entries that
+ * make sense beats losing the list over one of them. Duplicates are folded
+ * here, at the door, so no writer has to remember to.
+ *
+ * @param {unknown} value
+ * @returns {string[]}
+ */
+function hostList(value) {
+  if (!Array.isArray(value)) return [];
+
+  /** @type {string[]} */
+  const hosts = [];
+  for (const one of value) {
+    if (typeof one === "string" && one.length > 0 && !hosts.includes(one)) hosts.push(one);
+  }
+  return hosts;
 }
 
 /**
@@ -143,6 +168,7 @@ export function withDefaults(stored) {
     sourceLang: text(raw["sourceLang"], DEFAULTS.sourceLang),
     targetLang: text(raw["targetLang"], DEFAULTS.targetLang),
     reader: readerWithDefaults(raw["reader"]),
+    disabledHosts: hostList(raw["disabledHosts"]),
   };
 }
 
@@ -160,7 +186,7 @@ export async function readConfig() {
  * `{ reader: { theme } }` that dropped the type size would be a setting quietly
  * resetting another one.
  *
- * @param {{ sourceLang?: string, targetLang?: string, reader?: Partial<ReaderConfig> }} patch
+ * @param {{ sourceLang?: string, targetLang?: string, reader?: Partial<ReaderConfig>, disabledHosts?: string[] }} patch
  * @returns {Promise<Config>}
  */
 export async function writeConfig(patch) {

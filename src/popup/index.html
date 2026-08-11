@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>re/read</title>
+    <link rel="stylesheet" href="../assets/page.css" />
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <!--
+      Four rows and nothing else: this site, the pair, the reader, the door to
+      the settings. No counters, no logo - the popup is a hallway, not a room.
+    -->
+    <label class="popup-row popup-site" id="site-row" hidden>
+      <span class="popup-host" id="site-host"></span>
+      <input type="checkbox" id="site-toggle" title="Whether re/read runs on this site" />
+    </label>
+    <p class="popup-row popup-note" id="site-note" hidden>re/read does not work on this page.</p>
+
+    <label class="popup-row popup-pair" id="pair-row">
+      <span>Language pair</span>
+      <select id="pair"></select>
+    </label>
+
+    <button type="button" class="popup-row popup-action" id="open-reader">
+      Read this page in the reader
+    </button>
+    <button type="button" class="popup-row popup-action" id="open-settings">Settings</button>
+
+    <script src="index.js" defer></script>
+  </body>
+</html>

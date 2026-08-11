@@ -14,11 +14,12 @@
 /**
  * Message kinds. The `kind` field is the discriminator on every request.
  *
- * All of them travel page to background, except the last one: `grab-page` is
- * the only message that goes the other way, and it exists because the toolbar
- * button is heard by the background while the page it is about is somewhere
- * else. `asRequest` narrows the first group, `asPageRequest` the second - one
- * list of kinds, two directions, and neither validator accepts the other's.
+ * All of them travel page to background, except the last two, which go the
+ * other way - to a tab, because the side that asks is not the side that knows:
+ * `grab-page` is the background fetching the page the reader was pointed at,
+ * and `page-info` is the popup asking the tab it stands over what it is.
+ * `asRequest` narrows the first group, `asPageRequest` the second - one list
+ * of kinds, two directions, and neither validator accepts the other's.
  */
 export const Message = Object.freeze({
   TRANSLATE: "translate",
@@ -29,6 +30,7 @@ export const Message = Object.freeze({
   LIST_PHRASES: "list-phrases",
   READ_PAGE: "read-page",
   GRAB_PAGE: "grab-page",
+  PAGE_INFO: "page-info",
 });
 
 /** Every way a request can fail, and the whole list of them. */
@@ -114,8 +116,12 @@ export const ErrorCode = Object.freeze({
  * makes "the phrase means exactly what the bubble is showing" one rule instead
  * of two messages.
  *
+ * `open-reader` may say which tab the reader should read - the popup knows,
+ * because it stood over it, and passes the id along. Without one the reader
+ * only comes forward, which is all a press on a page nobody can read can mean.
+ *
  * @typedef {{ kind: typeof Message.TRANSLATE, text: string, context?: string }} TranslateRequest
- * @typedef {{ kind: typeof Message.OPEN_READER }} OpenReaderRequest
+ * @typedef {{ kind: typeof Message.OPEN_READER, sourceTabId?: number }} OpenReaderRequest
  * @typedef {{ kind: typeof Message.OPEN_SETTINGS }} OpenSettingsRequest
  * @typedef {{ kind: typeof Message.SAVE_PHRASE, text: string, translations: string[] }} SavePhraseRequest
  * @typedef {{ kind: typeof Message.FORGET_PHRASE, text: string }} ForgetPhraseRequest
@@ -141,6 +147,18 @@ export const ErrorCode = Object.freeze({
  *
  * @typedef {{ url: string, title: string, html: string }} Page
  * @typedef {{ kind: typeof Message.GRAB_PAGE }} GrabPageRequest
+ */
+
+/**
+ * What a tab says about itself when the popup asks: which site it is, or that
+ * it is the reader. The hostname is the whole answer on an ordinary page - it
+ * is the key the per-site switch writes, and nothing more about the page
+ * travels. The reader answers `reader: true` instead, and the popup hides the
+ * switch and the reader button: switching the reader off on the reader means
+ * nothing.
+ *
+ * @typedef {{ hostname: string, reader: boolean }} PageInfo
+ * @typedef {{ kind: typeof Message.PAGE_INFO }} PageInfoRequest
  */
 
 /**
@@ -254,12 +272,20 @@ export function asRequest(message) {
   if (typeof message !== "object" || message === null) return null;
   const kind = /** @type {{ kind?: unknown }} */ (message).kind;
 
-  if (kind === Message.OPEN_READER) return { kind: Message.OPEN_READER };
   if (kind === Message.OPEN_SETTINGS) return { kind: Message.OPEN_SETTINGS };
   if (kind === Message.LIST_PHRASES) return { kind: Message.LIST_PHRASES };
   if (kind === Message.READ_PAGE) return { kind: Message.READ_PAGE };
 
-  const { text, translations, context } = /** @type {Record<string, unknown>} */ (message);
+  const { text, translations, context, sourceTabId } = /** @type {Record<string, unknown>} */ (message);
+
+  if (kind === Message.OPEN_READER) {
+    // A tab id that is not one is dropped rather than refused, for the reason
+    // `context` is: it is an extra, and the reader opening without it beats
+    // the reader not opening over something nobody can see.
+    return typeof sourceTabId === "number"
+      ? { kind: Message.OPEN_READER, sourceTabId }
+      : { kind: Message.OPEN_READER };
+  }
 
   if (kind === Message.TRANSLATE) {
     if (typeof text !== "string") return null;
@@ -287,18 +313,40 @@ export function asRequest(message) {
 }
 
 /**
- * The other direction, and the whole of it. A content script answers exactly
- * one question from the background and ignores everything else that arrives -
- * including every request above, which is addressed to the background and would
- * otherwise be answered twice by whoever felt like it.
+ * The other direction, and the whole of it. A tab answers exactly two
+ * questions - the background's `grab-page` and the popup's `page-info` - and
+ * ignores everything else that arrives, including every request above, which
+ * is addressed to the background and would otherwise be answered twice by
+ * whoever felt like it.
  *
  * @param {unknown} message
- * @returns {GrabPageRequest | null}
+ * @returns {GrabPageRequest | PageInfoRequest | null}
  */
 export function asPageRequest(message) {
   if (typeof message !== "object" || message === null) return null;
   const kind = /** @type {{ kind?: unknown }} */ (message).kind;
-  return kind === Message.GRAB_PAGE ? { kind: Message.GRAB_PAGE } : null;
+  if (kind === Message.GRAB_PAGE) return { kind: Message.GRAB_PAGE };
+  if (kind === Message.PAGE_INFO) return { kind: Message.PAGE_INFO };
+  return null;
+}
+
+/**
+ * A tab's answer about itself, as the popup can use it, or null when there is
+ * none to be had. On the wire each side says only its half - a page sends its
+ * hostname, the reader sends `reader: true` - and this is where the two become
+ * one shape. A page with no hostname to speak of (`file:`, mostly) answers
+ * null like a page that never answered: there is no site to switch off, and
+ * the popup says so the same way.
+ *
+ * @param {unknown} value
+ * @returns {PageInfo | null}
+ */
+export function asPageInfo(value) {
+  if (typeof value !== "object" || value === null) return null;
+  const { hostname, reader } = /** @type {Record<string, unknown>} */ (value);
+  if (reader === true) return { hostname: "", reader: true };
+  if (typeof hostname !== "string" || hostname.length === 0) return null;
+  return { hostname, reader: false };
 }
 
 /**

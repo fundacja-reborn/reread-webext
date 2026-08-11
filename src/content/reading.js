@@ -113,6 +113,10 @@ async function ask(request) {
  * @param {VocabEntry[]} entries
  */
 function adopt(entries) {
+  // Stopped while the read was in flight - the popup's switch can land between
+  // a page loading and its vocabulary arriving. Painting now would put
+  // underlines, and an observer, on a page that was just switched off.
+  if (!started) return;
   vocabulary = new Map(entries);
   repaint();
 }
@@ -136,13 +140,18 @@ function repaint() {
  *   - a mirror for this language pair: use it, send nothing,
  *   - a mirror for another pair: it was left behind by a settings change, so
  *     ask the background, whose answer rebuilds it for every page after this.
+ *
+ * @param {Record<string, unknown>} [preloaded] the same two keys, already
+ *   read. The content script reads storage once per page and that read decides
+ *   whether this starts at all - handing it in here is what keeps "one read at
+ *   startup" true now that somebody reads before starting.
  */
-async function loadVocabulary() {
+async function loadVocabulary(preloaded) {
   // Nothing here may reject: the console this would land in belongs to the page
   // being read, and an extension that logs stack traces into it looks exactly
   // like an extension that broke it.
   try {
-    const stored = await webext().storage.local.get([CONFIG_KEY, MIRROR_KEY]);
+    const stored = preloaded ?? (await webext().storage.local.get([CONFIG_KEY, MIRROR_KEY]));
     const config = withDefaults(stored[CONFIG_KEY]);
     const mirror = asMirror(stored[MIRROR_KEY]);
 
@@ -470,8 +479,36 @@ function onKeyDown(event) {
 }
 
 /**
- * @param {{ root?: Element | null, observe?: boolean }} [where]
- *   what to underline inside, and whether it can change on its own
+ * @param {Event} event
+ */
+function onScroll(event) {
+  // Not while the edit box is open: a wheel nudge is not a reason to throw
+  // away a translation somebody is in the middle of correcting. And not for
+  // a scroll of the bubble's own second layer, which is a reader working
+  // their way through a long dictionary entry - a scroll event does not
+  // cross a shadow boundary, so this should never fire for one, but the day
+  // it does it must not close the thing being read.
+  if (!tooltip.isEditing() && !tooltip.owns(event.target)) tooltip.hide();
+}
+
+/**
+ * Both keys matter: the vocabulary changing in another tab, and the language
+ * pair changing in the settings - which makes the mirror describe a pair that
+ * is not being read here.
+ *
+ * @param {Record<string, { oldValue?: unknown, newValue?: unknown }>} changes
+ * @param {string} area
+ */
+function onStorageChanged(changes, area) {
+  if (area !== "local") return;
+  if (changes[MIRROR_KEY] === undefined && changes[CONFIG_KEY] === undefined) return;
+  void loadVocabulary();
+}
+
+/**
+ * @param {{ root?: Element | null, observe?: boolean, stored?: Record<string, unknown> }} [where]
+ *   what to underline inside, whether it can change on its own, and the
+ *   startup read of `storage.local` when the caller already made one
  */
 export function start(where = {}) {
   root = where.root ?? null;
@@ -487,31 +524,37 @@ export function start(where = {}) {
     document.addEventListener("mousedown", onMouseDown, { capture: true, passive: true });
     document.addEventListener("mouseup", onMouseUp, { capture: true, passive: true });
     document.addEventListener("keydown", onKeyDown, { capture: true, passive: true });
-    document.addEventListener(
-      "scroll",
-      (event) => {
-        // Not while the edit box is open: a wheel nudge is not a reason to throw
-        // away a translation somebody is in the middle of correcting. And not for
-        // a scroll of the bubble's own second layer, which is a reader working
-        // their way through a long dictionary entry - a scroll event does not
-        // cross a shadow boundary, so this should never fire for one, but the day
-        // it does it must not close the thing being read.
-        if (!tooltip.isEditing() && !tooltip.owns(event.target)) tooltip.hide();
-      },
-      { capture: true, passive: true },
-    );
-
-    // Both keys matter: the vocabulary changing in another tab, and the language
-    // pair changing in the settings - which makes the mirror describe a pair that
-    // is not being read here.
-    webext().storage.onChanged.addListener((changes, area) => {
-      if (area !== "local") return;
-      if (changes[MIRROR_KEY] === undefined && changes[CONFIG_KEY] === undefined) return;
-      void loadVocabulary();
-    });
+    document.addEventListener("scroll", onScroll, { capture: true, passive: true });
+    webext().storage.onChanged.addListener(onStorageChanged);
   }
 
-  void loadVocabulary();
+  void loadVocabulary(where.stored);
+}
+
+/**
+ * Everything `start` put on the page, taken back: the listeners, the bubble,
+ * the underlines with their registry entry and observer (`clear`), and the
+ * held vocabulary. This is what switching re/read off for a site means, and it
+ * has to leave the page as if the extension had never run - the message
+ * listener in `content/index.js` is the one thing that stays, because it is
+ * how the switch can be turned back on without a reload.
+ */
+export function stop() {
+  if (!started) return;
+  started = false;
+
+  document.removeEventListener("mousedown", onMouseDown, { capture: true });
+  document.removeEventListener("mouseup", onMouseUp, { capture: true });
+  document.removeEventListener("keydown", onKeyDown, { capture: true });
+  document.removeEventListener("scroll", onScroll, { capture: true });
+  webext().storage.onChanged.removeListener(onStorageChanged);
+
+  tooltip.hide();
+  current = null;
+  secondLayer = [];
+  press = null;
+  vocabulary = new Map();
+  clear();
 }
 
 /**
