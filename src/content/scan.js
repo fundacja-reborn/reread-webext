@@ -48,6 +48,89 @@ export function blockAround(node) {
 }
 
 /**
+ * The prose of one block, in the pieces it is stored in, with a line break
+ * standing in for every nested block and `<br>`.
+ *
+ * The break matters: `<p>one<br>two</p>` is two lines to the reader, and joining
+ * them would invent a sentence that is on neither of them. `sentenceAround`
+ * treats a line as an ending, so putting one here is all it takes.
+ *
+ * @param {Element} block
+ * @returns {{ node: Text | null, text: string }[]}
+ */
+function partsOf(block) {
+  /** @type {{ node: Text | null, text: string }[]} */
+  const parts = [];
+
+  /**
+   * @param {Node} node
+   */
+  const walk = (node) => {
+    for (let child = node.firstChild; child !== null; child = child.nextSibling) {
+      if (child.nodeType === Node.TEXT_NODE) {
+        const text = /** @type {Text} */ (child);
+        parts.push({ node: text, text: text.data });
+        continue;
+      }
+      if (child.nodeType !== Node.ELEMENT_NODE) continue;
+
+      const element = /** @type {Element} */ (child);
+      if (SKIP.has(element.tagName)) continue;
+      if (element instanceof HTMLElement && element.isContentEditable) continue;
+
+      // A nested block cannot be holding the selection - `blockAround` returns
+      // the nearest block above it - so what is inside belongs to another
+      // sentence, and the break is the whole of what we need from it.
+      if (BLOCK.has(element.tagName)) {
+        parts.push({ node: null, text: "\n" });
+        continue;
+      }
+      walk(element);
+    }
+  };
+
+  walk(block);
+  return parts;
+}
+
+/**
+ * Where a selection sits inside the text of its block: the text the reader sees
+ * as one run, and the two offsets into it.
+ *
+ * Returns null whenever the answer would be a guess - a selection anchored on an
+ * element rather than in text, or one that starts in one block and ends in
+ * another. The caller loses the sentence, not the translation.
+ *
+ * @param {Range} range
+ * @returns {{ text: string, start: number, end: number } | null}
+ */
+export function blockTextAround(range) {
+  const block = blockAround(range.startContainer);
+  if (block === null) return null;
+
+  const parts = partsOf(block);
+  const { text, spans } = joinPieces(parts.map((part) => part.text));
+
+  /**
+   * @param {Node} container
+   * @param {number} offset
+   * @returns {number | null}
+   */
+  const offsetOf = (container, offset) => {
+    const index = parts.findIndex((part) => part.node === container);
+    const span = spans[index];
+    if (index === -1 || span === undefined) return null;
+    return span.start + offset;
+  };
+
+  const start = offsetOf(range.startContainer, range.startOffset);
+  const end = offsetOf(range.endContainer, range.endOffset);
+  if (start === null || end === null) return null;
+
+  return { text, start, end };
+}
+
+/**
  * @param {Text[]} pieces text nodes the reader sees as one run
  * @param {import("../lib/matcher/index.js").PhraseIndex} index
  * @param {Painted[]} into
