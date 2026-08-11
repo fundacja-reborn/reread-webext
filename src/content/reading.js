@@ -301,7 +301,10 @@ function showSaved(anchor, text, normalized) {
   // kept is answered from the database, without a message and without waking
   // the engine. Translating its sentence would undo exactly that.
   secondLayer = [];
-  tooltip.show({ anchor, body: meanings.join("\n"), actions: ["learned", "edit"] });
+  // Recall: the answer, and nothing else until it is asked for (D44). Somebody
+  // who clicked an underline wanted to know what the word was, and Learned is a
+  // rare press on a decision they have already made - it can wait inside.
+  tooltip.show({ anchor, variant: "recall", body: meanings.join("\n"), actions: ["learned", "edit"] });
   return true;
 }
 
@@ -360,7 +363,9 @@ function onMouseUp(event) {
   secondLayer = [];
   const mine = ++generation;
 
-  tooltip.show({ anchor: selection.rect, body: "Translating...", tone: "pending" });
+  // The other variant: a fresh selection is a phrase nothing has been decided
+  // about yet, so what can be done with it is on show from the first frame.
+  tooltip.show({ anchor: selection.rect, variant: "save", body: "Translating...", tone: "pending" });
 
   const request = selection.context === null
     ? { kind: Message.TRANSLATE, text: selection.text }
