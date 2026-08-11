@@ -16,6 +16,15 @@
 
 import { rescan, start } from "../content/reading.js";
 import { webext } from "../lib/browser.js";
+import {
+  CONFIG_KEY,
+  MEASURE,
+  SIZE,
+  isFont,
+  isTheme,
+  readConfig,
+  writeConfig,
+} from "../lib/config.js";
 import { describeError } from "../lib/messages.js";
 import { ErrorCode, Message, asPage, asResult } from "../lib/protocol.js";
 import { buildArticle } from "../lib/reader/article.js";
@@ -32,6 +41,10 @@ const titleElement = document.getElementById("title");
 const bylineElement = document.getElementById("byline");
 const contentElement = document.getElementById("content");
 const originalLink = document.getElementById("original");
+const displayButton = document.getElementById("display");
+const displayPanel = document.getElementById("display-panel");
+const sizeValue = document.getElementById("size-value");
+const measureValue = document.getElementById("measure-value");
 
 /**
  * @param {string} text
@@ -142,6 +155,94 @@ async function showPage() {
   }
   render(page);
 }
+
+/**
+ * Puts the settings onto the document: two lengths as custom properties, the
+ * theme and the typeface as attributes on the root. The stylesheet does the
+ * rest, and this stays the only place that knows the names.
+ *
+ * Setting properties through the CSSOM rather than writing a `<style>` element,
+ * which the content security policy of an extension page does not allow - the
+ * same reason the bubble builds its stylesheet the way it does.
+ *
+ * @param {import("../lib/config.js").ReaderConfig} reader
+ */
+function applyAppearance(reader) {
+  const root = document.documentElement;
+  root.dataset["readerTheme"] = reader.theme;
+  root.dataset["readerFont"] = reader.font;
+  root.style.setProperty("--reader-size", `${reader.fontSize}px`);
+  root.style.setProperty("--reader-measure", `${reader.measure}ch`);
+
+  if (sizeValue !== null) sizeValue.textContent = String(reader.fontSize);
+  if (measureValue !== null) measureValue.textContent = String(reader.measure);
+
+  for (const button of document.querySelectorAll("[data-theme], [data-font]")) {
+    const wanted = button.getAttribute("data-theme") ?? button.getAttribute("data-font");
+    const current = button.hasAttribute("data-theme") ? reader.theme : reader.font;
+    button.setAttribute("aria-pressed", String(wanted === current));
+  }
+}
+
+/**
+ * @param {Event} event
+ */
+async function onDisplayPress(event) {
+  const button = event.target;
+  if (!(button instanceof HTMLButtonElement)) return;
+
+  const theme = button.getAttribute("data-theme");
+  const font = button.getAttribute("data-font");
+  const size = button.getAttribute("data-size");
+  const measure = button.getAttribute("data-measure");
+
+  /** @type {Partial<import("../lib/config.js").ReaderConfig>} */
+  let patch = {};
+  if (isTheme(theme)) patch = { theme };
+  else if (isFont(font)) patch = { font };
+  else if (size !== null || measure !== null) {
+    // Read first, because the buttons step from wherever the setting is now,
+    // and another reader tab may have moved it since this one drew itself.
+    const current = (await readConfig()).reader;
+    if (size !== null) {
+      patch = { fontSize: clamp(current.fontSize + Number(size), SIZE) };
+    } else {
+      patch = { measure: clamp(current.measure + Number(measure), MEASURE) };
+    }
+  } else return;
+
+  // Applied from what was actually stored, not from what was asked for: at
+  // either end of the scale the answer is "it did not move", and the buttons
+  // should show that rather than pretend.
+  applyAppearance((await writeConfig({ reader: patch })).reader);
+}
+
+/**
+ * @param {number} value
+ * @param {{ min: number, max: number }} range
+ * @returns {number}
+ */
+function clamp(value, range) {
+  return Math.min(range.max, Math.max(range.min, value));
+}
+
+displayPanel?.addEventListener("click", (event) => void onDisplayPress(event));
+
+displayButton?.addEventListener("click", () => {
+  if (displayPanel === null) return;
+  displayPanel.hidden = !displayPanel.hidden;
+  displayButton.setAttribute("aria-expanded", String(!displayPanel.hidden));
+});
+
+// The settings can change in another reader tab, and the language pair on the
+// settings page. Reading the whole thing back is cheaper than working out which
+// half moved.
+webext().storage.onChanged.addListener((changes, area) => {
+  if (area !== "local" || changes[CONFIG_KEY] === undefined) return;
+  void readConfig().then((config) => applyAppearance(config.reader));
+});
+
+void readConfig().then((config) => applyAppearance(config.reader));
 
 // Two ways in, and they are the same question. On load, because the reader was
 // probably just opened by the button; on a change to the session key, because

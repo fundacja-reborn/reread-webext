@@ -1,10 +1,13 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
+import { withDefaults } from "../src/lib/config.js";
 import { asMirror, mirrorMatches, mirrorOf } from "../src/lib/store/mirror.js";
 
-/** @type {import("../src/lib/config.js").Config} */
-const CONFIG = { sourceLang: "en", targetLang: "pl" };
+// Through `withDefaults` rather than written out: the mirror cares about the
+// language pair and nothing else, and it should not need editing every time
+// some other setting is added.
+const CONFIG = withDefaults({ sourceLang: "en", targetLang: "pl" });
 
 /**
  * @param {string} normalized

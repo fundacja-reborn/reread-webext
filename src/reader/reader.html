@@ -16,8 +16,54 @@
   <body class="reader">
     <header class="reader-bar">
       <span class="reader-mark">re/read</span>
-      <a id="original" class="reader-original" hidden>Open the original</a>
+      <span class="reader-tools">
+        <a id="original" class="reader-original" hidden>Open the original</a>
+        <button id="display" type="button" aria-expanded="false" title="Type and theme">Aa</button>
+      </span>
     </header>
+
+    <!--
+      Written out here rather than built by script: what the reader can change
+      about its own appearance is a short, fixed list, and a list is easier to
+      read in the package than the code that would have produced it.
+    -->
+    <section id="display-panel" class="reader-panel" hidden aria-label="Type and theme">
+      <div class="reader-setting">
+        <span class="reader-setting-name">Theme</span>
+        <span class="reader-choices" id="theme-choices">
+          <button type="button" data-theme="auto">Auto</button>
+          <button type="button" data-theme="light">Light</button>
+          <button type="button" data-theme="sepia">Sepia</button>
+          <button type="button" data-theme="dark">Dark</button>
+        </span>
+      </div>
+
+      <div class="reader-setting">
+        <span class="reader-setting-name">Type</span>
+        <span class="reader-choices" id="font-choices">
+          <button type="button" data-font="serif">Serif</button>
+          <button type="button" data-font="sans">Sans</button>
+        </span>
+      </div>
+
+      <div class="reader-setting">
+        <span class="reader-setting-name">Size</span>
+        <span class="reader-choices">
+          <button type="button" data-size="-1" title="Smaller">&minus;</button>
+          <output id="size-value">18</output>
+          <button type="button" data-size="1" title="Larger">+</button>
+        </span>
+      </div>
+
+      <div class="reader-setting">
+        <span class="reader-setting-name">Width</span>
+        <span class="reader-choices">
+          <button type="button" data-measure="-5" title="Narrower">&minus;</button>
+          <output id="measure-value">65</output>
+          <button type="button" data-measure="5" title="Wider">+</button>
+        </span>
+      </div>
+    </section>
 
     <main id="page">
       <p id="notice" class="note">
