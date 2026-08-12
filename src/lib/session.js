@@ -71,3 +71,19 @@ export async function readReaderSource(session = webext().storage.session) {
 export async function writeReaderSource(source, session = webext().storage.session) {
   await session.set({ [READER_SOURCE_KEY]: source });
 }
+
+/**
+ * Points the reader at nothing, which is how the reader ends up on its reading
+ * list. Written rather than removed: the reader reacts to the key *changing*,
+ * and removing a key that is already absent is a change nobody hears. The
+ * value fails `readReaderSource`'s validation on purpose - a source with no
+ * tab reads back as no source, and the timestamp is what makes each press an
+ * event of its own.
+ *
+ * @param {() => number} [now]
+ * @param {WebExtBrowser["storage"]["session"]} [session]
+ * @returns {Promise<void>}
+ */
+export async function clearReaderSource(now = Date.now, session = webext().storage.session) {
+  await session.set({ [READER_SOURCE_KEY]: { at: now() } });
+}

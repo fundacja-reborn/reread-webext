@@ -110,9 +110,21 @@ describe("asRequest", () => {
   });
 
   it("accepts the requests that carry nothing", () => {
-    for (const kind of [Message.OPEN_READER, Message.OPEN_SETTINGS, Message.LIST_PHRASES]) {
+    for (const kind of [
+      Message.OPEN_READER,
+      Message.OPEN_LIBRARY,
+      Message.OPEN_SETTINGS,
+      Message.LIST_PHRASES,
+    ]) {
       assert.deepEqual(asRequest({ kind }), { kind });
     }
+  });
+
+  it("lets open-library carry nothing even when something was sent along", () => {
+    // The whole point of the kind is that it is not about any tab.
+    assert.deepEqual(asRequest({ kind: Message.OPEN_LIBRARY, sourceTabId: 42 }), {
+      kind: Message.OPEN_LIBRARY,
+    });
   });
 
   it("keeps the tab the reader is asked to read", () => {

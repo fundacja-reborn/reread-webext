@@ -24,6 +24,7 @@
 export const Message = Object.freeze({
   TRANSLATE: "translate",
   OPEN_READER: "open-reader",
+  OPEN_LIBRARY: "open-library",
   OPEN_SETTINGS: "open-settings",
   SAVE_PHRASE: "save-phrase",
   FORGET_PHRASE: "forget-phrase",
@@ -120,8 +121,16 @@ export const ErrorCode = Object.freeze({
  * because it stood over it, and passes the id along. Without one the reader
  * only comes forward, which is all a press on a page nobody can read can mean.
  *
+ * `open-library` opens the reader on its reading list instead. Its own kind
+ * rather than a flag on `open-reader`, because the two mean opposite things
+ * about tabs: `open-reader` without an id falls back to the tab the message
+ * came from, and on Android the popup is itself a page in a tab - the fallback
+ * would point the reader at the popup. "The list, from anywhere" must not
+ * carry a tab at all.
+ *
  * @typedef {{ kind: typeof Message.TRANSLATE, text: string, context?: string }} TranslateRequest
  * @typedef {{ kind: typeof Message.OPEN_READER, sourceTabId?: number }} OpenReaderRequest
+ * @typedef {{ kind: typeof Message.OPEN_LIBRARY }} OpenLibraryRequest
  * @typedef {{ kind: typeof Message.OPEN_SETTINGS }} OpenSettingsRequest
  * @typedef {{ kind: typeof Message.SAVE_PHRASE, text: string, translations: string[] }} SavePhraseRequest
  * @typedef {{ kind: typeof Message.FORGET_PHRASE, text: string }} ForgetPhraseRequest
@@ -129,6 +138,7 @@ export const ErrorCode = Object.freeze({
  * @typedef {{ kind: typeof Message.READ_PAGE }} ReadPageRequest
  * @typedef {TranslateRequest
  *   | OpenReaderRequest
+ *   | OpenLibraryRequest
  *   | OpenSettingsRequest
  *   | SavePhraseRequest
  *   | ForgetPhraseRequest
@@ -272,6 +282,7 @@ export function asRequest(message) {
   if (typeof message !== "object" || message === null) return null;
   const kind = /** @type {{ kind?: unknown }} */ (message).kind;
 
+  if (kind === Message.OPEN_LIBRARY) return { kind: Message.OPEN_LIBRARY };
   if (kind === Message.OPEN_SETTINGS) return { kind: Message.OPEN_SETTINGS };
   if (kind === Message.LIST_PHRASES) return { kind: Message.LIST_PHRASES };
   if (kind === Message.READ_PAGE) return { kind: Message.READ_PAGE };

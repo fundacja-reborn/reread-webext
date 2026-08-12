@@ -66,10 +66,33 @@
     </section>
 
     <main id="page">
-      <p id="notice" class="note">
-        Press the toolbar button on a page you want to read, and the article shows up here.
-        Selecting a phrase works exactly as it does on any other page.
-      </p>
+      <p id="notice" class="note" hidden></p>
+
+      <!--
+        The reading list: what the reader shows when it was not pointed at a
+        page. Rows are built by script from the articles database; everything
+        static about the view is written out here.
+      -->
+      <section id="library" hidden aria-label="Reading list">
+        <div class="library-segments" id="library-segments">
+          <button type="button" data-segment="unread" aria-pressed="true">To read</button>
+          <button type="button" data-segment="read" aria-pressed="false">Read</button>
+        </div>
+        <p id="library-empty" class="note" hidden></p>
+        <ul id="library-rows" class="library-rows"></ul>
+      </section>
+
+      <!--
+        What can be done with the article on screen. Outside the article
+        element on purpose: the learning code scans everything under it, and
+        these labels are interface, not text anybody is studying.
+      -->
+      <div id="actions" class="reader-actions" hidden>
+        <button id="to-library" type="button" hidden>Reading list</button>
+        <button id="keep" type="button" aria-pressed="false" hidden>Save to reading list</button>
+        <button id="remove" type="button" hidden>Delete from reading list</button>
+        <button id="mark-read" type="button" aria-pressed="false" hidden>Mark as read</button>
+      </div>
 
       <article id="article" hidden>
         <h1 id="title"></h1>

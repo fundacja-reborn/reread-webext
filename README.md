@@ -25,6 +25,7 @@ file, so what you collect on an e-reader underlines itself in your browser and b
 | Underlining saved phrases on the pages you read | yes |
 | Dictionaries (StarDict) | downloaded from the WikDict catalogue or imported from files |
 | Reader mode | turns the page into an article in the extension's own tab |
+| Reading list (offline) | articles saved from the reader, listed and readable with no network at all |
 | Toolbar popup | per-site switch, language pair, reader, settings |
 | Firefox on Android | declared and built, reader-only by default; not yet tested on a phone |
 | Import / export (TSV) | not started |
@@ -60,6 +61,14 @@ read along, or read the source, which is deliberately shipped unminified.
 Switching re/read off for a site writes that site's hostname to the browser's local extension
 storage - one exact host per entry, written only on your own press of the switch, listed and
 removable on the settings page.
+
+Saving an article to the reading list stores its title, address and extracted text in the
+browser's local extension storage, so it can be opened again with no network at all. That is a
+heavier trace than a hostname, and the defence is the same: an entry exists only because you
+pressed Save on that article, nothing is saved by itself, nothing leaves the device, and
+deleting an entry deletes it - there is no archive and no trash to empty. What is stored is the
+article as the reader rebuilt it, not the page itself, and it is filtered through the same
+allowed list again every time it is opened.
 
 ### Permissions, and why each one is needed
 

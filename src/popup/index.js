@@ -1,8 +1,8 @@
 /**
  * The toolbar popup: the basic acts on top, the door to the settings at the
- * bottom, in the place every user already looks for them. Four rows - whether
+ * bottom, in the place every user already looks for them. Five rows - whether
  * re/read runs on this site, which pair is being read, this page in the
- * reader, the settings - and nothing else.
+ * reader, the reading list, the settings - and nothing else.
  *
  * The popup knows which tab it stands over and nothing more: `tabs.query`
  * without the `tabs` permission answers with an id and no address, on purpose.
@@ -33,6 +33,7 @@ const siteNote = document.getElementById("site-note");
 const siteToggle = /** @type {HTMLInputElement | null} */ (document.getElementById("site-toggle"));
 const pairSelect = /** @type {HTMLSelectElement | null} */ (document.getElementById("pair"));
 const readerButton = document.getElementById("open-reader");
+const libraryButton = document.getElementById("open-library");
 const settingsButton = document.getElementById("open-settings");
 const modeLine = document.getElementById("mode-line");
 
@@ -144,6 +145,17 @@ async function openReader() {
   window.close();
 }
 
+async function openLibrary() {
+  try {
+    // Its own message, carrying nothing: the list is not about any tab, least
+    // of all the one this popup happens to live in on Android.
+    await webext().runtime.sendMessage({ kind: Message.OPEN_LIBRARY });
+  } catch {
+    // Same as the reader: repeatable beats stuck.
+  }
+  window.close();
+}
+
 async function openSettings() {
   await webext().runtime.openOptionsPage();
   window.close();
@@ -152,6 +164,7 @@ async function openSettings() {
 siteToggle?.addEventListener("change", () => void toggleSite());
 pairSelect?.addEventListener("change", () => void choosePair());
 readerButton?.addEventListener("click", () => void openReader());
+libraryButton?.addEventListener("click", () => void openLibrary());
 settingsButton?.addEventListener("click", () => void openSettings());
 // The status line is also the shortest way to where the mode is changed.
 modeLine?.addEventListener("click", () => void openSettings());
