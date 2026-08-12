@@ -42,6 +42,9 @@
 
   "popup_site_toggle_title": { "message": "Czy re/read działa w tej witrynie" },
   "popup_no_page": { "message": "re/read nie działa na tej stronie." },
+  "popup_no_model": {
+    "message": "Na tym urządzeniu nie ma jeszcze modelu tłumaczeniowego - naciśnij tutaj i wybierz go w ustawieniach."
+  },
   "popup_mode_reader_only": { "message": "Tryb: tylko w czytniku" },
 
   "vocab_title": { "message": "re/read - zapisane frazy" },
@@ -439,6 +442,22 @@
   "options_title": { "message": "re/read - ustawienia" },
   "options_local_intro": {
     "message": "Wszystko, co robi re/read, dzieje się na tym urządzeniu: tłumaczenie, słownik, czytelnia, zapisane frazy. Nic z tego, co czytasz ani zaznaczasz, nigdzie nie jest wysyłane. Jedyna sieć, po jaką to rozszerzenie sięga, to pobrania na tej stronie - wybrany przez ciebie model tłumaczeniowy albo słownik, nigdy bez twojego kliknięcia."
+  },
+  "options_first_steps_heading": { "message": "Pierwsze kroki" },
+  "options_first_steps_intro": {
+    "message": "Nic się jeszcze nie tłumaczy - modelu, który by to robił, nie ma na tym urządzeniu. Przygotowanie zajmuje minutę:"
+  },
+  "options_first_steps_pair": {
+    "message": "Ustaw parę językową tuż poniżej: język, w którym czytasz, i język, na który ma być tłumaczone."
+  },
+  "options_first_steps_model": {
+    "message": "W sekcji „Modele tłumaczeniowe” naciśnij „Pobierz” przy tej parze. Model zostaje zapisany na tym urządzeniu i odtąd tłumaczy offline."
+  },
+  "options_first_steps_dictionary": {
+    "message": "Warte drugiego naciśnięcia: słownik dla tej samej pary, w sekcji „Zdobądź słownik” - pojedyncze słowa dostają wtedy pełniejsze odpowiedzi niż samo tłumaczenie."
+  },
+  "options_first_steps_pin": {
+    "message": "Na koniec przypnij re/read do paska narzędzi - dopóki tego nie zrobisz, przycisk kryje się za ikoną puzzla. Za przyciskiem: czytnik, czytelnia offline, zapisane frazy i wyłącznik witryny, na której jesteś."
   },
   "options_version": { "message": "Wersja" },
   "options_engine": { "message": "Silnik" },

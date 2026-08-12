@@ -46,6 +46,10 @@
 
   "popup_site_toggle_title": { "message": "Whether re/read runs on this site" },
   "popup_no_page": { "message": "re/read does not work on this page." },
+  "popup_no_model": {
+    "message": "No translation model on this device yet - press here to pick one in the settings.",
+    "description": "Stands in the popup where the pair select would be, while no model is stored. The whole row is a button that opens the settings page."
+  },
   "popup_mode_reader_only": { "message": "Mode: only in the reader" },
 
   "vocab_title": { "message": "re/read - saved phrases" },
@@ -334,6 +338,26 @@
   "options_title": { "message": "re/read - settings" },
   "options_local_intro": {
     "message": "Everything re/read does happens on this device: translating, the dictionary, the reading list, your saved phrases. Nothing you read or select is ever sent anywhere. The only network this extension uses is the downloads on this page - a translation model you chose, or a dictionary, never without your press."
+  },
+  "options_first_steps_heading": { "message": "First steps" },
+  "options_first_steps_intro": {
+    "message": "Nothing translates yet - the model that would do it is not on this device. Setting up takes a minute:",
+    "description": "Opens the first-steps block, shown on the settings page only while no model is stored."
+  },
+  "options_first_steps_pair": {
+    "message": "Set the language pair just below: the language you read, and the language it is translated into."
+  },
+  "options_first_steps_model": {
+    "message": "Under \"Translation models\", press \"Download\" next to that pair. The model is stored on this device and translates offline from then on.",
+    "description": "Quotes the options_models_heading section name and the action_download button - each language quotes its own wording of those keys, so the three must move together."
+  },
+  "options_first_steps_dictionary": {
+    "message": "Worth the second press: a dictionary for the same pair, under \"Get a dictionary\" - single words then get fuller answers than a translation alone.",
+    "description": "Quotes the options_get_dictionary_heading section name - each language quotes its own wording of that key."
+  },
+  "options_first_steps_pin": {
+    "message": "Last, pin re/read to the toolbar - until you do, its button sits behind the puzzle-piece icon. Behind the button: the reader, the offline reading list, your saved phrases and a switch for the site you are on.",
+    "description": "Hidden on Android, where there is no toolbar to pin anything to."
   },
   "options_version": { "message": "Version" },
   "options_engine": { "message": "Engine" },

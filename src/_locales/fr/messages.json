@@ -42,6 +42,9 @@
 
   "popup_site_toggle_title": { "message": "Si re/read fonctionne sur ce site" },
   "popup_no_page": { "message": "re/read ne fonctionne pas sur cette page." },
+  "popup_no_model": {
+    "message": "Aucun modèle de traduction sur cet appareil pour l'instant - appuyez ici pour en choisir un dans les paramètres."
+  },
   "popup_mode_reader_only": { "message": "Mode : seulement dans le lecteur" },
 
   "vocab_title": { "message": "re/read - phrases enregistrées" },
@@ -339,6 +342,22 @@
   "options_title": { "message": "re/read - paramètres" },
   "options_local_intro": {
     "message": "Tout ce que fait re/read se passe sur cet appareil : la traduction, le dictionnaire, la liste de lecture, les phrases enregistrées. Rien de ce que vous lisez ou sélectionnez n'est envoyé nulle part. Le seul réseau que cette extension utilise, ce sont les téléchargements de cette page - un modèle de traduction choisi par vous, ou un dictionnaire, jamais sans votre clic."
+  },
+  "options_first_steps_heading": { "message": "Premiers pas" },
+  "options_first_steps_intro": {
+    "message": "Rien ne se traduit encore - le modèle qui s'en chargerait n'est pas sur cet appareil. La mise en place prend une minute :"
+  },
+  "options_first_steps_pair": {
+    "message": "Réglez la paire de langues juste en dessous : la langue que vous lisez, et la langue vers laquelle elle est traduite."
+  },
+  "options_first_steps_model": {
+    "message": "Sous « Modèles de traduction », appuyez sur « Télécharger » à côté de cette paire. Le modèle est enregistré sur cet appareil et traduit désormais hors ligne."
+  },
+  "options_first_steps_dictionary": {
+    "message": "Le deuxième appui en vaut la peine : un dictionnaire pour la même paire, sous « Obtenir un dictionnaire » - les mots isolés reçoivent alors des réponses plus complètes qu'une traduction seule."
+  },
+  "options_first_steps_pin": {
+    "message": "Enfin, épinglez re/read à la barre d'outils - d'ici là, son bouton se cache derrière l'icône en forme de pièce de puzzle. Derrière le bouton : le lecteur, la liste de lecture hors ligne, vos phrases enregistrées et un interrupteur pour le site où vous êtes."
   },
   "options_version": { "message": "Version" },
   "options_engine": { "message": "Moteur" },

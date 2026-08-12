@@ -36,6 +36,8 @@ const siteRow = document.getElementById("site-row");
 const siteHost = document.getElementById("site-host");
 const siteNote = document.getElementById("site-note");
 const siteToggle = /** @type {HTMLInputElement | null} */ (document.getElementById("site-toggle"));
+const pairRow = document.getElementById("pair-row");
+const setupRow = document.getElementById("setup-row");
 const pairSelect = /** @type {HTMLSelectElement | null} */ (document.getElementById("pair"));
 const readerButton = document.getElementById("open-reader");
 const libraryButton = document.getElementById("open-library");
@@ -184,14 +186,16 @@ readerButton?.addEventListener("click", () => void openReader());
 libraryButton?.addEventListener("click", () => void openLibrary());
 vocabularyButton?.addEventListener("click", () => void openVocabulary());
 settingsButton?.addEventListener("click", () => void openSettings());
+// The signpost is a door to the same place the settings row leads.
+setupRow?.addEventListener("click", () => void openSettings());
 // The status line is also the shortest way to where the mode is changed.
 modeLine?.addEventListener("click", () => void openSettings());
 
 async function render() {
   const [config, installed, tabId, os] = await Promise.all([
     readConfig(),
-    // A database that cannot be opened leaves the popup a select with only the
-    // configured pair in it - poorer than the settings page, still standing.
+    // A database that cannot be opened reads as no models, and the popup then
+    // points at the settings - which is where the truth gets told either way.
     listModels().catch(() => []),
     currentTabId(),
     platformOs(),
@@ -207,6 +211,12 @@ async function render() {
   if (modeLine !== null) modeLine.hidden = !effectiveReaderOnly(config, os);
 
   over.tabId = tabId;
+  // A fresh install has no model at all, and a pair select would promise a
+  // translation nothing can deliver. The signpost stands in the row's place
+  // until the first model lands.
+  const fresh = installed.length === 0;
+  if (pairRow !== null) pairRow.hidden = fresh;
+  if (setupRow !== null) setupRow.hidden = !fresh;
   choices = pairChoices(config, installed);
   renderPair(config);
   renderSite(await askPage(tabId), config);

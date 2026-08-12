@@ -42,6 +42,9 @@
 
   "popup_site_toggle_title": { "message": "Si re/read funciona en este sitio" },
   "popup_no_page": { "message": "re/read no funciona en esta página." },
+  "popup_no_model": {
+    "message": "Todavía no hay ningún modelo de traducción en este dispositivo - pulsa aquí para elegir uno en los ajustes."
+  },
   "popup_mode_reader_only": { "message": "Modo: solo en el lector" },
 
   "vocab_title": { "message": "re/read - frases guardadas" },
@@ -339,6 +342,22 @@
   "options_title": { "message": "re/read - ajustes" },
   "options_local_intro": {
     "message": "Todo lo que hace re/read ocurre en este dispositivo: la traducción, el diccionario, la lista de lectura, tus frases guardadas. Nada de lo que lees o seleccionas se envía a ninguna parte. La única red que usa esta extensión son las descargas de esta página - un modelo de traducción elegido por ti, o un diccionario, nunca sin tu clic."
+  },
+  "options_first_steps_heading": { "message": "Primeros pasos" },
+  "options_first_steps_intro": {
+    "message": "Todavía no se traduce nada - el modelo que lo haría no está en este dispositivo. La puesta en marcha lleva un minuto:"
+  },
+  "options_first_steps_pair": {
+    "message": "Ajusta el par de idiomas justo debajo: el idioma en el que lees y el idioma al que se traduce."
+  },
+  "options_first_steps_model": {
+    "message": "Bajo «Modelos de traducción», pulsa «Descargar» junto a ese par. El modelo queda guardado en este dispositivo y desde entonces traduce sin conexión."
+  },
+  "options_first_steps_dictionary": {
+    "message": "Merece la segunda pulsación: un diccionario para el mismo par, bajo «Conseguir un diccionario» - las palabras sueltas reciben entonces respuestas más completas que una traducción sola."
+  },
+  "options_first_steps_pin": {
+    "message": "Por último, fija re/read a la barra de herramientas - hasta entonces su botón se esconde tras el icono de la pieza de puzle. Tras el botón: el lector, la lista de lectura sin conexión, tus frases guardadas y un interruptor para el sitio en el que estás."
   },
   "options_version": { "message": "Versión" },
   "options_engine": { "message": "Motor" },

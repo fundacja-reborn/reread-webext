@@ -14,7 +14,9 @@
     <!--
       Six rows and nothing else: this site, the pair, the reader, the reading
       list, the saved phrases, the door to the settings. No counters, no logo -
-      the popup is a hallway, not a room.
+      the popup is a hallway, not a room. On a fresh install the pair row
+      yields its place to a signpost, because a pair nothing can translate yet
+      is a promise the popup must not make.
     -->
     <!-- The English in this file is the fallback: `localizePage` swaps every
          `data-i18n`-marked text for the catalogue's language before the popup
@@ -37,6 +39,12 @@
       <span data-i18n="language_pair">Language pair</span>
       <select id="pair"></select>
     </label>
+    <!-- Stands in the pair row's place while no model is stored at all. The
+         whole row is a door: pressing it opens the settings, where the
+         choosing and the downloading happen. -->
+    <button type="button" class="popup-row popup-action popup-setup" id="setup-row" data-i18n="popup_no_model" hidden>
+      No translation model on this device yet - press here to pick one in the settings.
+    </button>
 
     <button type="button" class="popup-row popup-action" id="open-reader" data-i18n="open_reader">
       Read this page in the reader

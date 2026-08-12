@@ -314,6 +314,31 @@ input[type="checkbox"] {
   color: var(--page-fg);
 }
 
+/* The fresh-install signpost on the settings page: the note's frame, the
+   page's full color - it is instructions to act on, not an aside. Shown only
+   while no model is stored, so it earns the room it takes. */
+.first-steps {
+  margin: 1.5rem 0 2rem;
+  color: var(--page-fg);
+}
+
+.first-steps h2 {
+  margin: 0 0 0.35rem;
+}
+
+.first-steps p {
+  margin: 0.35rem 0;
+}
+
+.first-steps ol {
+  margin: 0.35rem 0;
+  padding-left: 1.4rem;
+}
+
+.first-steps li {
+  margin: 0.3rem 0;
+}
+
 a {
   color: var(--page-accent);
 }

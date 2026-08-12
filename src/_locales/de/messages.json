@@ -42,6 +42,9 @@
 
   "popup_site_toggle_title": { "message": "Ob re/read auf dieser Website läuft" },
   "popup_no_page": { "message": "re/read funktioniert auf dieser Seite nicht." },
+  "popup_no_model": {
+    "message": "Auf diesem Gerät gibt es noch kein Übersetzungsmodell - drücken Sie hier und wählen Sie eines in den Einstellungen."
+  },
   "popup_mode_reader_only": { "message": "Modus: nur in der Leseansicht" },
 
   "vocab_title": { "message": "re/read - gespeicherter Wortschatz" },
@@ -323,6 +326,22 @@
   "options_title": { "message": "re/read - Einstellungen" },
   "options_local_intro": {
     "message": "Alles, was re/read tut, geschieht auf diesem Gerät: das Übersetzen, das Wörterbuch, die Leseliste, der gespeicherte Wortschatz. Nichts von dem, was Sie lesen oder auswählen, wird irgendwohin gesendet. Das einzige Netz, das diese Erweiterung nutzt, sind die Downloads auf dieser Seite - ein von Ihnen gewähltes Übersetzungsmodell oder ein Wörterbuch, nie ohne Ihren Klick."
+  },
+  "options_first_steps_heading": { "message": "Erste Schritte" },
+  "options_first_steps_intro": {
+    "message": "Noch übersetzt nichts - das Modell, das es täte, ist nicht auf diesem Gerät. Die Einrichtung dauert eine Minute:"
+  },
+  "options_first_steps_pair": {
+    "message": "Stellen Sie gleich darunter das Sprachpaar ein: die Sprache, die Sie lesen, und die Sprache, in die übersetzt wird."
+  },
+  "options_first_steps_model": {
+    "message": "Drücken Sie unter „Übersetzungsmodelle“ neben diesem Paar auf „Herunterladen“. Das Modell wird auf diesem Gerät gespeichert und übersetzt von da an offline."
+  },
+  "options_first_steps_dictionary": {
+    "message": "Den zweiten Druck wert: ein Wörterbuch für dasselbe Paar, unter „Wörterbuch besorgen“ - einzelne Wörter bekommen dann vollständigere Antworten als eine Übersetzung allein."
+  },
+  "options_first_steps_pin": {
+    "message": "Heften Sie re/read zuletzt an die Symbolleiste - bis dahin sitzt der Knopf hinter dem Puzzleteil-Symbol. Hinter dem Knopf: die Leseansicht, die Offline-Leseliste, Ihr gespeicherter Wortschatz und ein Schalter für die Website, auf der Sie sind."
   },
   "options_version": { "message": "Version" },
   "options_engine": { "message": "Engine" },
