@@ -17,7 +17,10 @@
 import { webext } from "../lib/browser.js";
 import { CONFIG_KEY, readConfig, withDefaults, writeConfig } from "../lib/config.js";
 import { languageName, pairLabel } from "../lib/language.js";
-import { classifyDictionaryFiles, describeImportProblem, readDictionary } from "../lib/dict/import.js";
+import { catalogDictionaries, catalogSource } from "../lib/dict/catalog.js";
+import { describeDictDownloadProblem, downloadArchive } from "../lib/dict/download.js";
+import { classifyDictionaryFiles, describeImportProblem, dictionaryFromZip, readDictionary } from "../lib/dict/import.js";
+import { describeZipProblem, readZip } from "../lib/dict/zip.js";
 import { toRows } from "../lib/dict/rows.js";
 import {
   beginImport,
@@ -68,7 +71,7 @@ function megabytes(bytes) {
  * has to say how it went - a sentence about a failed download printed below the
  * file picker is a sentence nobody scrolls to.
  *
- * @param {"model-status" | "file-status" | "dictionary-status" | "dictionary-file-status"} id
+ * @param {"model-status" | "file-status" | "dictionary-status" | "dictionary-file-status" | "dictionary-get-status"} id
  * @param {string} text
  * @param {"idle" | "busy" | "error"} [tone]
  */
@@ -137,7 +140,9 @@ function renderRow(row) {
   const available = row.available;
   if (available === null) return container;
 
-  container.append(element("span", "model-size", `${megabytes(available.downloadBytes)} to download`));
+  // The size alone: the button beside it already says what pressing it does,
+  // and "to download" was the first thing to overflow a phone-wide row.
+  container.append(element("span", "model-size", megabytes(available.downloadBytes)));
 
   const start = document.createElement("button");
   start.type = "button";
@@ -297,15 +302,21 @@ async function choosePair(pair) {
 }
 
 /**
- * Hides the rows the filter box rules out. Called on every keystroke and after
+ * Hides the rows a filter box rules out. Called on every keystroke and after
  * every re-render, because a render builds all rows and knows nothing of the
  * filter - hiding is a separate, cheaper pass over what is already there.
+ * Two lists filter this way (models and the dictionary catalogue), each with
+ * its own box, which is why the ids travel as arguments.
+ *
+ * @param {string} containerId
+ * @param {string} inputId
+ * @param {string} noneId
  */
-function applyFilter() {
-  const container = document.getElementById("models");
+function applyFilterIn(containerId, inputId, noneId) {
+  const container = document.getElementById(containerId);
   if (container === null) return;
 
-  const input = document.getElementById("model-filter");
+  const input = document.getElementById(inputId);
   const query = input instanceof HTMLInputElement ? input.value : "";
 
   let visible = 0;
@@ -316,8 +327,16 @@ function applyFilter() {
     if (match) visible += 1;
   }
 
-  const none = document.getElementById("model-none");
+  const none = document.getElementById(noneId);
   if (none !== null) none.hidden = visible > 0;
+}
+
+function applyModelFilter() {
+  applyFilterIn("models", "model-filter", "model-none");
+}
+
+function applyCatalogFilter() {
+  applyFilterIn("dictionary-catalog", "dictionary-filter", "dictionary-none");
 }
 
 async function renderModels() {
@@ -346,7 +365,7 @@ async function renderModels() {
   none.hidden = true;
   container.append(none);
 
-  applyFilter();
+  applyModelFilter();
 }
 
 /**
@@ -474,6 +493,14 @@ function dictionaryFileStatus(text, tone = "idle") {
 }
 
 /**
+ * @param {string} text
+ * @param {"idle" | "busy" | "error"} [tone]
+ */
+function dictionaryGetStatus(text, tone = "idle") {
+  say("dictionary-get-status", text, tone);
+}
+
+/**
  * @param {number} count
  * @returns {string}
  */
@@ -598,6 +625,214 @@ async function removeDictionary(dictionary) {
   await renderDictionaries();
 }
 
+/**
+ * @param {import("../lib/dict/catalog.js").CatalogDictionary} entry
+ * @returns {string}
+ */
+function catalogRowId(entry) {
+  return `dictionary-${entry.from}-${entry.to}`;
+}
+
+/**
+ * @param {import("../lib/dict/catalog.js").CatalogDictionary} entry
+ * @returns {HTMLElement}
+ */
+function renderCatalogRow(entry) {
+  const container = element("div", "model");
+  container.append(element("span", "model-pair", pairLabel(entry.from, entry.to)));
+
+  const get = document.createElement("button");
+  get.type = "button";
+  get.textContent = "Download";
+  get.disabled = running !== null || importing;
+  get.addEventListener("click", () => void downloadDictionary(entry));
+  container.append(get);
+  return container;
+}
+
+/**
+ * The catalogue never changes while the page is open - what changes is
+ * whether its buttons are pressable, so this is redrawn at the edges of every
+ * download and import, the way the model list is.
+ */
+function renderCatalog() {
+  const container = document.getElementById("dictionary-catalog");
+  if (container === null) return;
+
+  const entries = sortByLabel(catalogDictionaries());
+  container.replaceChildren();
+
+  if (entries.length === 0) {
+    container.append(element("p", "empty", "No dictionaries to download - this build lists none."));
+    return;
+  }
+
+  for (const entry of entries) {
+    const rendered = renderCatalogRow(entry);
+    rendered.id = catalogRowId(entry);
+    rendered.dataset["search"] = searchableText(entry);
+    container.append(rendered);
+  }
+
+  const none = element("p", "empty", "No dictionary matches that. The filter takes a language name or a code.");
+  none.id = "dictionary-none";
+  none.hidden = true;
+  container.append(none);
+
+  applyCatalogFilter();
+}
+
+/**
+ * The catalogue row while its archive is on the wire. Unlike a model download
+ * there may be no total to promise - the catalogue carries no sizes, so until
+ * the server names one the bar runs without an end.
+ *
+ * @param {HTMLElement} container
+ * @param {import("../lib/dict/catalog.js").CatalogDictionary} entry
+ * @param {AbortController} controller
+ * @returns {(progress: import("../lib/dict/download.js").DictDownloadProgress) => void}
+ */
+function renderFetching(container, entry, controller) {
+  container.replaceChildren();
+  container.append(element("span", "model-pair", pairLabel(entry.from, entry.to)));
+
+  const bar = document.createElement("progress");
+  bar.className = "model-progress";
+
+  const size = element("span", "model-size", "");
+
+  const cancel = document.createElement("button");
+  cancel.type = "button";
+  cancel.textContent = "Cancel";
+  cancel.addEventListener("click", () => {
+    cancel.disabled = true;
+    controller.abort();
+  });
+
+  container.append(bar, size, cancel);
+
+  let shown = "";
+  return ({ received, total }) => {
+    if (total > 0) {
+      bar.max = total;
+      bar.value = received;
+    }
+    const text = total > 0 ? `${megabytes(received)} of ${megabytes(total)}` : megabytes(received);
+    if (text !== shown) {
+      shown = text;
+      size.textContent = text;
+    }
+  };
+}
+
+/**
+ * @param {import("../lib/dict/catalog.js").CatalogDictionary} entry
+ */
+async function downloadDictionary(entry) {
+  if (running !== null || importing) return;
+
+  // One flag for the whole journey - download, unzip, parse, store - because
+  // the memory cost is the same as a file import's and the one-at-a-time rule
+  // exists for memory, not ceremony.
+  importing = true;
+  const controller = new AbortController();
+
+  await renderDictionaries();
+  renderCatalog();
+  const container = document.getElementById(catalogRowId(entry));
+  const onProgress = container === null ? undefined : renderFetching(container, entry, controller);
+  const label = pairLabel(entry.from, entry.to);
+  dictionaryGetStatus(`Downloading the ${label} dictionary...`, "busy");
+
+  try {
+    const result = await downloadArchive(entry.url, { signal: controller.signal, onProgress });
+    if (!result.ok) {
+      dictionaryGetStatus(
+        describeDictDownloadProblem(result.problem, result.detail),
+        result.problem === "cancelled" ? "idle" : "error",
+      );
+      return;
+    }
+
+    const zip = await readZip(result.value);
+    if (!zip.ok) {
+      dictionaryGetStatus(describeZipProblem(zip.problem, zip.detail), "error");
+      return;
+    }
+
+    const sorted = dictionaryFromZip(zip.value);
+    if (!sorted.ok) {
+      dictionaryGetStatus(describeImportProblem(sorted.problem, sorted.detail), "error");
+      return;
+    }
+
+    // The language sides come from the catalogue row, not from a select: a
+    // WikDict archive is one direction, and its name already said which.
+    await storeDictionary(sorted.value.files, {
+      base: sorted.value.base,
+      langFrom: entry.from,
+      langTo: entry.to,
+      say: dictionaryGetStatus,
+    });
+  } finally {
+    importing = false;
+    await renderDictionaries();
+    renderCatalog();
+  }
+}
+
+/**
+ * The half of an import every source shares: parsed files in, a dictionary in
+ * the database or a sentence about why not. The file picker and the catalogue
+ * differ only in where the bytes and the languages come from - and in which
+ * status line they talk to, which is why `say` travels as an argument.
+ *
+ * @param {import("../lib/dict/import.js").DictionaryBytes} files
+ * @param {{ base: string, langFrom: string, langTo: string, say: (text: string, tone?: "idle" | "busy" | "error") => void }} job
+ * @returns {Promise<boolean>} whether a dictionary is now stored
+ */
+async function storeDictionary(files, { base, langFrom, langTo, say }) {
+  try {
+    const parsed = await readDictionary(files, {
+      fallbackName: base,
+      onProgress: ({ done, total }) => say(`Reading ${base} - ${words(done)} of ${total.toLocaleString()}...`, "busy"),
+    });
+
+    if (!parsed.ok) {
+      say(describeImportProblem(parsed.problem, parsed.detail), "error");
+      return false;
+    }
+
+    const dictionary = await beginImport({
+      name: parsed.value.name,
+      langFrom,
+      langTo,
+      credit: parsed.value.credit,
+    });
+
+    const { rows, entryCount, aliasCount, bytes: stored } = toRows(dictionary.id, parsed.value);
+
+    for (let at = 0; at < rows.length; at += ENTRY_BATCH) {
+      await putEntries(rows.slice(at, at + ENTRY_BATCH));
+      say(`Storing ${parsed.value.name} - ${Math.min(at + ENTRY_BATCH, rows.length).toLocaleString()} of ${rows.length.toLocaleString()}...`, "busy");
+    }
+
+    const ready = await finishImport(dictionary.id, { entryCount, aliasCount, bytes: stored });
+
+    const unreadable =
+      parsed.value.skipped === 0 ? "" : ` ${parsed.value.skipped.toLocaleString()} entries could not be read and were left out.`;
+    say(`Added ${ready.name}: ${words(ready.entryCount)}, ${megabytes(ready.bytes)}.${unreadable}`);
+    return true;
+  } catch (error) {
+    // Whatever went wrong, the half-written dictionary is still unready and
+    // therefore invisible; this sweeps it away rather than leaving it to the
+    // next time this page opens.
+    await removeUnfinished().catch(() => []);
+    say(`Could not add the dictionary: ${message(error)}`, "error");
+    return false;
+  }
+}
+
 async function addSelectedDictionary() {
   if (importing || running !== null) return;
 
@@ -616,6 +851,7 @@ async function addSelectedDictionary() {
 
   importing = true;
   await renderDictionaries();
+  renderCatalog();
   dictionaryFileStatus(`Reading ${base}...`, "busy");
 
   try {
@@ -633,45 +869,14 @@ async function addSelectedDictionary() {
       ...(syn === undefined ? {} : { syn: await read(syn) }),
     };
 
-    const parsed = await readDictionary(bytes, {
-      fallbackName: base,
-      onProgress: ({ done, total }) => dictionaryFileStatus(`Reading ${base} - ${words(done)} of ${total.toLocaleString()}...`, "busy"),
-    });
-
-    if (!parsed.ok) {
-      dictionaryFileStatus(describeImportProblem(parsed.problem, parsed.detail), "error");
-      return;
-    }
-
-    const dictionary = await beginImport({
-      name: parsed.value.name,
-      langFrom,
-      langTo,
-      credit: parsed.value.credit,
-    });
-
-    const { rows, entryCount, aliasCount, bytes: stored } = toRows(dictionary.id, parsed.value);
-
-    for (let at = 0; at < rows.length; at += ENTRY_BATCH) {
-      await putEntries(rows.slice(at, at + ENTRY_BATCH));
-      dictionaryFileStatus(`Storing ${parsed.value.name} - ${Math.min(at + ENTRY_BATCH, rows.length).toLocaleString()} of ${rows.length.toLocaleString()}...`, "busy");
-    }
-
-    const ready = await finishImport(dictionary.id, { entryCount, aliasCount, bytes: stored });
-    if (input !== null) input.value = "";
-
-    const unreadable =
-      parsed.value.skipped === 0 ? "" : ` ${parsed.value.skipped.toLocaleString()} entries could not be read and were left out.`;
-    dictionaryFileStatus(`Added ${ready.name}: ${words(ready.entryCount)}, ${megabytes(ready.bytes)}.${unreadable}`);
+    const stored = await storeDictionary(bytes, { base, langFrom, langTo, say: dictionaryFileStatus });
+    if (stored && input !== null) input.value = "";
   } catch (error) {
-    // Whatever went wrong, the half-written dictionary is still unready and
-    // therefore invisible; this sweeps it away rather than leaving it to the
-    // next time this page opens.
-    await removeUnfinished().catch(() => []);
     dictionaryFileStatus(`Could not add the dictionary: ${message(error)}`, "error");
   } finally {
     importing = false;
     await renderDictionaries();
+    renderCatalog();
   }
 }
 
@@ -687,7 +892,12 @@ async function render() {
   fill("model-host", host);
   fill("model-checked", checkedAt);
 
+  const dictionaries = catalogSource();
+  fill("dictionary-host", dictionaries.source === "" ? "" : new URL(dictionaries.source).host);
+  fill("dictionary-checked", dictionaries.checkedAt);
+
   await renderModels();
+  renderCatalog();
   renderDisabledHosts();
 
   // An import that died with its tab left rows behind that no lookup can see.
@@ -722,7 +932,8 @@ webext().storage.onChanged.addListener((changes, area) => {
 });
 
 document.getElementById("add-model")?.addEventListener("click", () => void addSelectedModel());
-document.getElementById("model-filter")?.addEventListener("input", () => applyFilter());
+document.getElementById("model-filter")?.addEventListener("input", () => applyModelFilter());
+document.getElementById("dictionary-filter")?.addEventListener("input", () => applyCatalogFilter());
 document.getElementById("add-dictionary")?.addEventListener("click", () => void addSelectedDictionary());
 document.getElementById("pair")?.addEventListener("change", (event) => {
   const select = event.target;

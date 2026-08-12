@@ -91,8 +91,10 @@ h2 {
   border-bottom: 1px solid var(--page-line);
 }
 
-/* The model list holds every pair Mozilla publishes - a hundred rows - so it
-   scrolls in place instead of owning the page. */
+/* The catalogues (every model Mozilla publishes, every dictionary WikDict
+   builds - hundreds of rows) scroll in place instead of owning the page, and
+   their rows are set smaller than the page around them: they are an index,
+   not prose. */
 .models-frame {
   margin: 0.5rem 0 1rem;
   padding: 0 0.75rem;
@@ -100,11 +102,20 @@ h2 {
   overflow-y: auto;
   border: 1px solid var(--page-line);
   border-radius: 6px;
+  font-size: 0.9rem;
 }
 
+/* Wrapping, not shrinking: on a phone the name takes the line and the size
+   and button drop to the next one - a name broken word by word to fit beside
+   them is what this replaces. */
 .models-frame .model {
-  padding: 0.4rem 0;
-  gap: 0.75rem;
+  padding: 0.35rem 0;
+  gap: 0.25rem 0.6rem;
+  flex-wrap: wrap;
+}
+
+.models-frame .model-pair {
+  flex: 1 1 9rem;
 }
 
 /* The frame's own edge already draws this line. */
@@ -114,7 +125,13 @@ h2 {
 }
 
 .models-frame button {
-  padding: 0.2rem 0.7rem;
+  padding: 0.15rem 0.6rem;
+  font-size: 0.85rem;
+}
+
+.models-frame .badge {
+  font-size: 0.7rem;
+  margin-left: 0.4rem;
 }
 
 .model-filter {
@@ -148,6 +165,8 @@ h2 {
   border: 1px solid var(--page-line);
   color: var(--page-muted);
   font-size: 0.75rem;
+  /* A pill that wraps mid-text stops reading as a pill. */
+  white-space: nowrap;
 }
 
 /* The pair a dictionary answers for, when it is the one being read. */
@@ -160,9 +179,10 @@ h2 {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 1rem;
-  padding: 0.6rem 0;
+  gap: 0.35rem 0.75rem;
+  padding: 0.45rem 0;
   border-bottom: 1px solid var(--page-line);
+  font-size: 0.95rem;
 }
 
 .dictionary-name {

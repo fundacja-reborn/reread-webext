@@ -69,11 +69,17 @@ describe("sortByLabel", () => {
 });
 
 describe("searchableText", () => {
-  it("holds the codes, the pair and the names, lowered", () => {
+  it("holds the codes, both spellings of the pair and the names, lowered", () => {
     const text = searchableText(row("en", "pl"));
-    for (const needle of ["en", "pl", "enpl", "english", "polish"]) {
+    for (const needle of ["en", "pl", "enpl", "en-pl", "english", "polish"]) {
       assert.ok(text.includes(needle), `missing ${needle} in ${text}`);
     }
+  });
+
+  it("builds the pair itself when a row carries none, as catalogue rows do", () => {
+    const text = searchableText({ from: "en", to: "pl" });
+    assert.ok(text.includes("enpl"));
+    assert.ok(text.includes("en-pl"));
   });
 });
 

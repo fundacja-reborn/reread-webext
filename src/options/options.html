@@ -42,12 +42,12 @@
     <p id="model-status" class="status" role="status"></p>
 
     <p class="note">
-      Downloading a model is the only time this extension uses the network, and it is the only
-      request it will ever make. The files come from <strong id="model-host">-</strong>, where
-      Mozilla publishes them, at addresses written down in this package. Every file is checked
-      against a checksum that was recorded here on <strong id="model-checked">-</strong>: anything
-      that does not match is thrown away rather than stored. Nothing about you is sent - the
-      request says which model, and nothing else.
+      Model downloads come from <strong id="model-host">-</strong>, where Mozilla publishes
+      them, at addresses written down in this package. Every file is checked against a checksum
+      that was recorded here on <strong id="model-checked">-</strong>: anything that does not
+      match is thrown away rather than stored. Nothing about you is sent - the request says
+      which model, and nothing else. This host and the dictionary catalogue's below are the
+      only two places this extension ever contacts, and neither before you press Download.
     </p>
 
     <h2>Add a model from files</h2>
@@ -88,6 +88,38 @@
 
     <p id="dictionary-status" class="status" role="status"></p>
 
+    <h2>Get a dictionary</h2>
+
+    <p>
+      <strong>WikDict</strong> builds dictionaries from Wiktionary (CC BY-SA) for every pair
+      below. One press downloads the archive, unpacks it here and stores it; the languages are
+      read off the pair, and the dictionary appears in the list above, ready to answer.
+    </p>
+
+    <p class="model-filter">
+      <input
+        type="search"
+        id="dictionary-filter"
+        placeholder="Filter by language or code"
+        aria-label="Filter the list of dictionaries"
+      />
+    </p>
+
+    <div id="dictionary-catalog" class="models models-frame"></div>
+
+    <p id="dictionary-get-status" class="status" role="status"></p>
+
+    <p class="note">
+      Dictionary downloads come from <strong id="dictionary-host">-</strong>, where WikDict
+      publishes them, at addresses written down in this package - the list was checked here on
+      <strong id="dictionary-checked">-</strong>. Unlike models there is no checksum to hold
+      them to: WikDict rebuilds its files in place, so a sum recorded here would break with
+      every rebuild. What stands in its place: the download must be a plain zip of StarDict
+      files, it is read as warily as any file you would add by hand, and what it becomes is
+      text in the local database - never code. Nothing about you is sent - the request says
+      which dictionary, and nothing else.
+    </p>
+
     <h2>Add a dictionary from files</h2>
 
     <p>
@@ -118,14 +150,13 @@
     <p id="dictionary-file-status" class="status" role="status"></p>
 
     <p class="note">
-      A StarDict file says nothing about which languages it is for, so that part is yours to
-      say. Dictionaries are never downloaded by this extension: there is no list of addresses
-      for them anywhere in this package, and adding one makes no network request at all. The
-      ones worth having are <strong>WikDict</strong>'s (from Wiktionary, CC BY-SA) - StarDict
-      files for dozens of pairs, published at
+      A StarDict file says nothing about which languages it is for, so here that part is yours
+      to say. Adding from files makes no network request at all, and the path stays for the day
+      the catalogue's host stops answering: files from anywhere work, the catalogue's own
+      included - they are published at
       <a href="https://download.wikdict.com/dictionaries/stardict/" target="_blank" rel="noopener"
         >download.wikdict.com/dictionaries/stardict</a
-      >. Download one, unpack it, and pick its files above.
+      >.
     </p>
 
     <h2>Switched-off sites</h2>

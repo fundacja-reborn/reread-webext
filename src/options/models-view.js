@@ -1,11 +1,15 @@
 /**
- * The order and the filtering of the model list, without the DOM.
+ * The order and the filtering of the long lists on the settings page, without
+ * the DOM.
  *
- * The list went from two rows to a hundred the day the registry learned every
- * pair Mozilla publishes, and a hundred rows need two things a short list never
- * did: an order that puts what is yours where you can see it, and a filter that
- * finds a language by name. Both are rules, rules can be wrong quietly, and so
- * both live here, where `node --test` can reach them.
+ * The model list went from two rows to a hundred the day the registry learned
+ * every pair Mozilla publishes, and the dictionary catalogue arrived at five
+ * hundred; lists that long need two things a short list never did: an order
+ * that puts what is yours where you can see it, and a filter that finds a
+ * language by name. Both are rules, rules can be wrong quietly, and so both
+ * live here, where `node --test` can reach them. Everything below the model
+ * ordering works on anything with a `from` and a `to`, because that is all it
+ * ever reads.
  */
 
 import { pairLabel } from "../lib/language.js";
@@ -15,8 +19,12 @@ import { pairLabel } from "../lib/language.js";
  */
 
 /**
- * @param {ModelRow} a
- * @param {ModelRow} b
+ * @typedef {{ from: string, to: string, pair?: string }} Directed anything with two language sides
+ */
+
+/**
+ * @param {Directed} a
+ * @param {Directed} b
  * @returns {number}
  */
 function byLabel(a, b) {
@@ -42,11 +50,12 @@ export function orderForDisplay(rows, reading) {
 }
 
 /**
- * By name only - for the pair select, where nothing is "installed first"
- * because choosing what to read is not managing what is stored.
+ * By name only - for the pair select and the dictionary catalogue, where
+ * nothing is "installed first".
  *
- * @param {ModelRow[]} rows
- * @returns {ModelRow[]}
+ * @template {Directed} T
+ * @param {T[]} rows
+ * @returns {T[]}
  */
 export function sortByLabel(rows) {
   return [...rows].sort(byLabel);
@@ -54,13 +63,17 @@ export function sortByLabel(rows) {
 
 /**
  * Everything a row can be found by: codes for whoever thinks in `pl`, names
- * for whoever thinks in Polish, joined and lowered once at render time.
+ * for whoever thinks in Polish, joined and lowered once at render time. Both
+ * spellings of the pair are in there, because models write `enpl` and
+ * dictionaries write `en-pl`, and nobody filtering should have to know which.
  *
- * @param {ModelRow} row
+ * @param {Directed} row
  * @returns {string}
  */
 export function searchableText(row) {
-  return [row.from, row.to, row.pair, pairLabel(row.from, row.to)].join(" ").toLowerCase();
+  return [row.from, row.to, row.pair ?? `${row.from}${row.to}`, `${row.from}-${row.to}`, pairLabel(row.from, row.to)]
+    .join(" ")
+    .toLowerCase();
 }
 
 /**
