@@ -2,7 +2,7 @@
   "locale_code": { "message": "pl" },
 
   "extension_description": {
-    "message": "Ucz się języka, czytając internet. Tłumaczenie, słownictwo i podkreślenia - wszystko na twoim urządzeniu."
+    "message": "Ucz się języka, czytając internet. Tłumaczenie, słownictwo i czytelnia offline - nic z tego, co czytasz, nie opuszcza urządzenia."
   },
 
   "pair_label": {
@@ -15,7 +15,7 @@
 
   "settings": { "message": "Ustawienia" },
   "language_pair": { "message": "Para językowa" },
-  "reading_list": { "message": "Czytelnia" },
+  "reading_list": { "message": "Czytelnia offline" },
   "open_reader": { "message": "Przeczytaj tę stronę w czytniku" },
   "action_delete": { "message": "Usuń" },
   "action_download": { "message": "Pobierz" },
@@ -70,11 +70,14 @@
   "reader_no_article": { "message": "Na tej stronie nie udało się znaleźć artykułu." },
   "reader_list_write_failed": { "message": "Nie udało się zapisać czytelni." },
   "reader_empty_none": {
-    "message": "Nic jeszcze nie zapisano - otwórz artykuł w czytniku i naciśnij „$BUTTON$”.",
+    "message": "Nic jeszcze nie zapisano - otwórz artykuł w czytniku i naciśnij „$BUTTON$”. Zapisana strona zostaje na tym urządzeniu i otworzy się także bez internetu.",
     "placeholders": { "button": { "content": "$1", "example": "Zapisz w czytelni" } }
   },
   "reader_empty_all_read": { "message": "Nie zostało nic do przeczytania - wszystko, co zapisane, jest oznaczone jako przeczytane." },
   "reader_empty_none_read": { "message": "Nic nie jest jeszcze oznaczone jako przeczytane." },
+  "reader_library_note": {
+    "message": "Wszystko tutaj to kopie zapisane na tym urządzeniu - otwierają się bez internetu i zostają, nawet gdy oryginał zniknie."
+  },
 
   "download_cancelled": { "message": "Pobieranie anulowane. Nic nie zapisano." },
   "download_failed": { "message": "Pobieranie nie dobiegło końca i nic nie zapisano." },
@@ -204,16 +207,19 @@
   },
 
   "options_title": { "message": "re/read - ustawienia" },
+  "options_local_intro": {
+    "message": "Wszystko, co robi re/read, dzieje się na tym urządzeniu: tłumaczenie, słownik, czytelnia, zapisane frazy. Nic z tego, co czytasz ani zaznaczasz, nigdzie nie jest wysyłane. Jedyna sieć, po jaką to rozszerzenie sięga, to pobrania na tej stronie - wybrany przez ciebie model tłumaczeniowy albo słownik, nigdy bez twojego kliknięcia."
+  },
   "options_version": { "message": "Wersja" },
   "options_engine": { "message": "Silnik" },
-  "options_engine_value": { "message": "Bergamot, wewnątrz paczki" },
+  "options_engine_value": { "message": "Bergamot, wewnątrz paczki - tłumaczy offline" },
   "options_reader_only": { "message": "Tylko w czytniku" },
   "options_reader_only_hint": {
     "message": "Gdy to włączone, zaznaczenie na zwykłej stronie proponuje jedno: otwarcie jej w czytniku. Tłumaczenie, zapisywanie i podkreślanie dzieją się tam. Na Androidzie zaczyna włączone - dymek nad zaznaczeniem i systemowe menu kopiowania walczą o to samo miejsce."
   },
   "options_models_heading": { "message": "Modele tłumaczeniowe" },
   "options_models_intro": {
-    "message": "Model to to, co zamienia jeden język w drugi; na każdy kierunek przypada jeden. Nic nie jest tłumaczone, dopóki modelu czytanej pary nie ma tutaj, na tym urządzeniu. Wypisany jest każdy kierunek, który publikuje Mozilla; para, którą czytasz, i wszystko już zapisane wypływają na górę."
+    "message": "Model to to, co zamienia jeden język w drugi; na każdy kierunek przypada jeden. Przygotowuje je i udostępnia Mozilla - to te same modele, którymi Firefox sam tłumaczy strony. Nic nie jest tłumaczone, dopóki modelu czytanej pary nie ma tutaj, na tym urządzeniu. Wypisany jest każdy kierunek, który publikuje Mozilla; para, którą czytasz, i wszystko już zapisane wypływają na górę."
   },
   "options_filter_placeholder": { "message": "Filtruj po języku lub kodzie" },
   "options_filter_models_aria": { "message": "Filtruj listę modeli tłumaczeniowych" },

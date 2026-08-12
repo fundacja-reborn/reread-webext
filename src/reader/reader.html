@@ -89,7 +89,7 @@
         page. Rows are built by script from the articles database; everything
         static about the view is written out here.
       -->
-      <section id="library" hidden aria-label="Reading list" data-i18n-aria-label="reading_list">
+      <section id="library" hidden aria-label="Offline reading list" data-i18n-aria-label="reading_list">
         <div class="library-segments" id="library-segments">
           <button type="button" data-segment="unread" aria-pressed="true" data-i18n="reader_segment_unread">
             To read
@@ -98,6 +98,13 @@
             Read
           </button>
         </div>
+        <!-- The offline promise, written where the saved pages are. Shown only
+             while something is saved: over an empty list the empty sentence
+             below carries the same promise, and two notes would say it twice. -->
+        <p id="library-note" class="note" data-i18n="reader_library_note" hidden>
+          Everything here is a copy stored on this device - it opens without a connection and
+          stays even if the original page goes away.
+        </p>
         <p id="library-empty" class="note" hidden></p>
         <ul id="library-rows" class="library-rows"></ul>
       </section>
@@ -108,7 +115,7 @@
         these labels are interface, not text anybody is studying.
       -->
       <div id="actions" class="reader-actions" hidden>
-        <button id="to-library" type="button" data-i18n="reading_list" hidden>Reading list</button>
+        <button id="to-library" type="button" data-i18n="reading_list" hidden>Offline reading list</button>
         <button id="keep" type="button" aria-pressed="false" data-i18n="reader_save" hidden>
           Save to reading list
         </button>

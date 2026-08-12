@@ -4,12 +4,31 @@ A browser extension for reading in a language you are still learning. Select a w
 phrase, see what it means, keep it. Every phrase you keep is underlined on every page you
 open afterwards, and one click marks it learned and makes the underline go away.
 
-All of it happens on your device. The translation engine runs locally, the vocabulary
-lives in the browser's own storage, and nothing you read or select is ever sent anywhere.
+All of it happens on your device, and it keeps working when the network does not:
+translating, the dictionary and the reading list are local from end to end, and nothing
+you read or select is ever sent anywhere.
 
 Sister project of [offlinetranslate-koplugin](https://github.com/fundacja-reborn/offlinetranslate-koplugin),
 which does the same thing for KOReader. The two exchange vocabulary through the same TSV
 file, so what you collect on an e-reader underlines itself in your browser and back.
+
+## Offline by design
+
+Offline is not a degraded mode here - it is the mode.
+
+- **Translation needs no connection.** The engine is inside the package and the model is
+  on your disk, downloaded once. In airplane mode the bubble answers exactly as it does
+  at home, because translating never involved a server in the first place.
+- **The reading list is a shelf of copies, not a list of links.** Saving an article
+  stores the article itself. It opens with no network, and it keeps opening when the
+  original has moved or disappeared.
+- **The vocabulary is a local database.** No account, no sync, no server that could shut
+  down and take your collection with it.
+
+The only network requests this extension can make at all are the two downloads on the
+settings page - a translation model or a dictionary, each at your press, from addresses
+written into the package. How to verify all of this is a section of its own,
+[below](#privacy-and-how-to-check-it).
 
 ## Status
 
@@ -18,7 +37,7 @@ file, so what you collect on an e-reader underlines itself in your browser and b
 | Part | State |
 |---|---|
 | Extension loads in Firefox, bubble appears next to a selection | yes |
-| Translation engine | Bergamot, inside the package |
+| Translation engine | Bergamot, inside the package - translates offline |
 | Translation models | downloaded on request, or added by hand from files |
 | Settings page | shows the language pair, downloads, adds and removes models |
 | Keeping a phrase, correcting what it means, marking it learned | yes |
@@ -57,7 +76,9 @@ There is nothing else to send and nowhere to send it: the page text, your select
 your vocabulary never leave the device.
 
 That claim is checkable rather than promised - open the network panel in devtools and
-read along, or read the source, which is deliberately shipped unminified.
+read along, or read the source, which is deliberately shipped unminified. Or check it the
+blunt way: turn the network off and keep reading. Translation, dictionary and reading
+list carry on, because none of them ever used it.
 
 Switching re/read off for a site writes that site's hostname to the browser's local extension
 storage - one exact host per entry, written only on your own press of the switch, listed and
@@ -127,8 +148,8 @@ and they are stored locally in the browser's own database.
 
 ### Where models come from, and why you do not have to trust the host
 
-Models are Mozilla's, [MPL-2.0](https://github.com/mozilla/translations), published in a Google
-Cloud Storage bucket. What is in this package is a list: which pairs can be downloaded, the exact
+Models are Mozilla's - the same models Firefox's own page translation runs on -
+[MPL-2.0](https://github.com/mozilla/translations), published in a Google Cloud Storage bucket. What is in this package is a list: which pairs can be downloaded, the exact
 address of each file, how big it is, and its SHA-256 - [`src/lib/models/registry.json`](src/lib/models/registry.json).
 A downloaded file is checked against that sum before it is stored, so a host that served something
 else would be serving it to a checksum that throws it away. Where the address moves, the repair is

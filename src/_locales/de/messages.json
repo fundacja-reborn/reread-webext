@@ -2,7 +2,7 @@
   "locale_code": { "message": "de" },
 
   "extension_description": {
-    "message": "Beim Lesen im Netz eine Sprache lernen. Übersetzung, Wortschatz und Unterstreichungen - alles auf dem eigenen Gerät."
+    "message": "Beim Lesen im Netz eine Sprache lernen. Übersetzung, Wortschatz und Offline-Leseliste - nichts Gelesenes verlässt das Gerät."
   },
 
   "pair_label": {
@@ -15,7 +15,7 @@
 
   "settings": { "message": "Einstellungen" },
   "language_pair": { "message": "Sprachpaar" },
-  "reading_list": { "message": "Leseliste" },
+  "reading_list": { "message": "Offline-Leseliste" },
   "open_reader": { "message": "Diese Seite in der Leseansicht lesen" },
   "action_delete": { "message": "Löschen" },
   "action_download": { "message": "Herunterladen" },
@@ -70,11 +70,14 @@
   "reader_no_article": { "message": "Auf dieser Seite war kein Artikel zu finden." },
   "reader_list_write_failed": { "message": "Die Leseliste konnte nicht geschrieben werden." },
   "reader_empty_none": {
-    "message": "Noch nichts gespeichert - öffnen Sie einen Artikel in der Leseansicht und drücken Sie „$BUTTON$“.",
+    "message": "Noch nichts gespeichert - öffnen Sie einen Artikel in der Leseansicht und drücken Sie „$BUTTON$“. Eine gespeicherte Seite bleibt auf diesem Gerät und öffnet sich auch ohne Internet.",
     "placeholders": { "button": { "content": "$1", "example": "In der Leseliste speichern" } }
   },
   "reader_empty_all_read": { "message": "Nichts mehr zu lesen - alles Gespeicherte ist als gelesen markiert." },
   "reader_empty_none_read": { "message": "Noch nichts ist als gelesen markiert." },
+  "reader_library_note": {
+    "message": "Alles hier ist eine Kopie auf diesem Gerät - sie öffnet sich ohne Verbindung und bleibt, auch wenn die Originalseite verschwindet."
+  },
 
   "download_cancelled": { "message": "Download abgebrochen. Nichts wurde gespeichert." },
   "download_failed": { "message": "Der Download wurde nicht fertig, und nichts wurde gespeichert." },
@@ -188,16 +191,19 @@
   },
 
   "options_title": { "message": "re/read - Einstellungen" },
+  "options_local_intro": {
+    "message": "Alles, was re/read tut, geschieht auf diesem Gerät: das Übersetzen, das Wörterbuch, die Leseliste, der gespeicherte Wortschatz. Nichts von dem, was Sie lesen oder auswählen, wird irgendwohin gesendet. Das einzige Netz, das diese Erweiterung nutzt, sind die Downloads auf dieser Seite - ein von Ihnen gewähltes Übersetzungsmodell oder ein Wörterbuch, nie ohne Ihren Klick."
+  },
   "options_version": { "message": "Version" },
   "options_engine": { "message": "Engine" },
-  "options_engine_value": { "message": "Bergamot, im Paket enthalten" },
+  "options_engine_value": { "message": "Bergamot, im Paket enthalten - übersetzt offline" },
   "options_reader_only": { "message": "Nur in der Leseansicht" },
   "options_reader_only_hint": {
     "message": "Ist dies an, bietet eine Auswahl auf einer gewöhnlichen Seite genau eines an: die Seite in der Leseansicht zu öffnen. Übersetzen, Behalten und Unterstreichen geschehen dort. Auf Android startet es eingeschaltet - eine Blase über der Auswahl und das Kopiermenü des Telefons kämpfen um dieselbe Stelle."
   },
   "options_models_heading": { "message": "Übersetzungsmodelle" },
   "options_models_intro": {
-    "message": "Ein Modell ist das, was eine Sprache in eine andere verwandelt, und je Richtung gibt es eines. Nichts wird übersetzt, solange das Modell des gelesenen Paares nicht hier ist, auf diesem Gerät. Aufgeführt ist jede Richtung, die Mozilla veröffentlicht; das gelesene Paar und alles bereits Gespeicherte steigen nach oben."
+    "message": "Ein Modell ist das, was eine Sprache in eine andere verwandelt, und je Richtung gibt es eines. Mozilla baut und veröffentlicht sie - dieselben Modelle, mit denen Firefox selbst Seiten übersetzt. Nichts wird übersetzt, solange das Modell des gelesenen Paares nicht hier ist, auf diesem Gerät. Aufgeführt ist jede Richtung, die Mozilla veröffentlicht; das gelesene Paar und alles bereits Gespeicherte steigen nach oben."
   },
   "options_filter_placeholder": { "message": "Nach Sprache oder Code filtern" },
   "options_filter_models_aria": { "message": "Die Liste der Übersetzungsmodelle filtern" },

@@ -16,6 +16,16 @@
     <h1>re/read</h1>
     <p class="subtitle" data-i18n="settings">Settings</p>
 
+    <!-- The thesis of the whole extension, stated once, where a curious person
+         goes looking for it. The notes further down say how each download is
+         checked; this says what never happens at all. -->
+    <p data-i18n="options_local_intro">
+      Everything re/read does happens on this device: translating, the dictionary, the reading
+      list, your saved phrases. Nothing you read or select is ever sent anywhere. The only
+      network this extension uses is the downloads on this page - a translation model you chose,
+      or a dictionary, never without your press.
+    </p>
+
     <dl class="rows">
       <div class="row"><dt data-i18n="options_version">Version</dt><dd id="version">-</dd></div>
       <div class="row">
@@ -24,7 +34,7 @@
       </div>
       <div class="row">
         <dt data-i18n="options_engine">Engine</dt>
-        <dd data-i18n="options_engine_value">Bergamot, inside the package</dd>
+        <dd data-i18n="options_engine_value">Bergamot, inside the package - translates offline</dd>
       </div>
       <div class="row">
         <dt><label for="reader-only" data-i18n="options_reader_only">Only in the reader</label></dt>
@@ -41,7 +51,8 @@
     <h2 data-i18n="options_models_heading">Translation models</h2>
 
     <p data-i18n="options_models_intro">
-      A model is what turns one language into another, and there is one per direction. Nothing is
+      A model is what turns one language into another, and there is one per direction. Mozilla
+      builds and publishes them - the same models Firefox itself translates pages with. Nothing is
       translated until the model for the pair you are reading is here, on this device. Every
       direction Mozilla publishes is listed; the pair you are reading and anything already stored
       float to the top.
