@@ -68,8 +68,8 @@
   },
   "vocab_prev": { "message": "Précédente" },
   "vocab_next": { "message": "Suivante" },
-  "vocab_export": { "message": "Exporter" },
-  "vocab_import": { "message": "Importer" },
+  "action_export": { "message": "Exporter" },
+  "action_import": { "message": "Importer" },
   "vocab_transfer_note": {
     "message": "Un fichier .tsv à deux colonnes - le format qu'écrit le plugin KOReader et que lit Anki. L'import ajoute seulement les phrases qui manquent à cette paire ; rien de déjà enregistré n'est modifié."
   },
@@ -149,6 +149,60 @@
   "reader_empty_none_read": { "message": "Rien n'est encore marqué comme lu." },
   "reader_library_note": {
     "message": "Tout ici est une copie gardée sur cet appareil - elle s'ouvre sans connexion et reste, même si la page d'origine disparaît."
+  },
+  "reader_transfer_note": {
+    "message": "Un fichier .json avec tous les articles enregistrés - une sauvegarde, ou le moyen de les emporter dans un autre navigateur. L'import ajoute seulement les articles qui manquent à cette liste ; rien de déjà enregistré n'est modifié."
+  },
+  "reader_import_nothing": { "message": "Ce fichier ne contient aucun article à importer." },
+  "reader_import_summary_one": {
+    "message": "$NAME$ contient $COUNT$ article :",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "name": { "content": "$2", "example": "reread-articles.json" }
+    }
+  },
+  "reader_import_summary_other": {
+    "message": "$NAME$ contient $COUNT$ articles :",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "name": { "content": "$2", "example": "reread-articles.json" }
+    }
+  },
+  "reader_import_added_one": {
+    "message": "$COUNT$ nouvel article ajouté.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "reader_import_added_other": {
+    "message": "$COUNT$ nouveaux articles ajoutés.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_import_skipped_one": {
+    "message": "$COUNT$ déjà enregistré, ignoré.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "reader_import_skipped_other": {
+    "message": "$COUNT$ déjà enregistrés, ignorés.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_import_unreadable_one": {
+    "message": "$COUNT$ entrée n'a pas pu être lue.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "reader_import_unreadable_other": {
+    "message": "$COUNT$ entrées n'ont pas pu être lues.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "2" }
+    }
   },
 
   "download_cancelled": { "message": "Téléchargement annulé. Rien n'a été enregistré." },

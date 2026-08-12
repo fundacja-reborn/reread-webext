@@ -74,8 +74,8 @@
   },
   "vocab_prev": { "message": "Previous" },
   "vocab_next": { "message": "Next" },
-  "vocab_export": { "message": "Export" },
-  "vocab_import": { "message": "Import" },
+  "action_export": { "message": "Export" },
+  "action_import": { "message": "Import" },
   "vocab_transfer_note": {
     "message": "A two-column .tsv file - what the KOReader plugin writes and Anki imports. Importing adds phrases this pair is missing and never touches a saved one."
   },
@@ -156,6 +156,58 @@
   "reader_empty_none_read": { "message": "Nothing is marked as read yet." },
   "reader_library_note": {
     "message": "Everything here is a copy stored on this device - it opens without a connection and stays even if the original page goes away."
+  },
+  "reader_transfer_note": {
+    "message": "One .json file holding every saved article - a backup, or the way to move them to another browser. Importing adds articles this list is missing and never touches a saved one."
+  },
+  "reader_import_nothing": { "message": "There are no articles to import in that file." },
+  "reader_import_summary_one": {
+    "message": "$NAME$ holds $COUNT$ article:",
+    "description": "Plural family over the article count; NAME is the picked file's name. The colon leads into the sample titles shown below.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "name": { "content": "$2", "example": "reread-articles.json" }
+    }
+  },
+  "reader_import_summary_other": {
+    "message": "$NAME$ holds $COUNT$ articles:",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "name": { "content": "$2", "example": "reread-articles.json" }
+    }
+  },
+  "reader_import_added_one": {
+    "message": "Added $COUNT$ new article.",
+    "description": "First sentence of the import report, always shown. A language may bend the counted noun's case to fit its own sentence.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "reader_import_added_other": {
+    "message": "Added $COUNT$ new articles.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_import_skipped_other": {
+    "message": "Skipped $COUNT$ already saved.",
+    "description": "Second sentence of the import report, shown only when something was skipped.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_import_unreadable_one": {
+    "message": "$COUNT$ entry could not be read.",
+    "description": "Last sentence of the import report, shown only when the file held entries that were not articles.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "reader_import_unreadable_other": {
+    "message": "$COUNT$ entries could not be read.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "2" }
+    }
   },
 
   "download_cancelled": { "message": "Download cancelled. Nothing was stored." },

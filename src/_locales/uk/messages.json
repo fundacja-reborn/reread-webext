@@ -68,8 +68,8 @@
   },
   "vocab_prev": { "message": "Попередня" },
   "vocab_next": { "message": "Наступна" },
-  "vocab_export": { "message": "Експортувати" },
-  "vocab_import": { "message": "Імпортувати" },
+  "action_export": { "message": "Експортувати" },
+  "action_import": { "message": "Імпортувати" },
   "vocab_transfer_note": {
     "message": "Файл .tsv із двома колонками - той самий формат пише плагін KOReader, а читає Anki. Імпорт додає лише фрази, яких у цій парі немає; збережених не змінює."
   },
@@ -187,6 +187,110 @@
   "reader_empty_none_read": { "message": "Ще нічого не позначено прочитаним." },
   "reader_library_note": {
     "message": "Усе тут - копії, збережені на цьому пристрої: вони відкриваються без інтернету й залишаються, навіть якщо оригінал зникне."
+  },
+  "reader_transfer_note": {
+    "message": "Один файл .json з усіма збереженими статтями - резервна копія або переїзд до іншого браузера. Імпорт додає лише статті, яких у цьому списку немає; збережених не змінює."
+  },
+  "reader_import_nothing": { "message": "У цьому файлі немає статей для імпорту." },
+  "reader_import_summary_one": {
+    "message": "$NAME$ містить $COUNT$ статтю:",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "name": { "content": "$2", "example": "reread-articles.json" }
+    }
+  },
+  "reader_import_summary_few": {
+    "message": "$NAME$ містить $COUNT$ статті:",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "name": { "content": "$2", "example": "reread-articles.json" }
+    }
+  },
+  "reader_import_summary_many": {
+    "message": "$NAME$ містить $COUNT$ статей:",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "name": { "content": "$2", "example": "reread-articles.json" }
+    }
+  },
+  "reader_import_summary_other": {
+    "message": "$NAME$ містить $COUNT$ статті:",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1,5" },
+      "name": { "content": "$2", "example": "reread-articles.json" }
+    }
+  },
+  "reader_import_added_one": {
+    "message": "Додано $COUNT$ нову статтю.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "reader_import_added_few": {
+    "message": "Додано $COUNT$ нові статті.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_import_added_many": {
+    "message": "Додано $COUNT$ нових статей.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_import_added_other": {
+    "message": "Додано $COUNT$ статті.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1,5" }
+    }
+  },
+  "reader_import_skipped_one": {
+    "message": "Пропущено $COUNT$ вже збережену.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "reader_import_skipped_few": {
+    "message": "Пропущено $COUNT$ вже збережені.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_import_skipped_many": {
+    "message": "Пропущено $COUNT$ вже збережених.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_import_skipped_other": {
+    "message": "Пропущено $COUNT$ вже збереженої.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1,5" }
+    }
+  },
+  "reader_import_unreadable_one": {
+    "message": "Не вдалося прочитати $COUNT$ запис.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "reader_import_unreadable_few": {
+    "message": "Не вдалося прочитати $COUNT$ записи.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_import_unreadable_many": {
+    "message": "Не вдалося прочитати $COUNT$ записів.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_import_unreadable_other": {
+    "message": "Не вдалося прочитати $COUNT$ запису.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1,5" }
+    }
   },
 
   "download_cancelled": { "message": "Завантаження скасовано. Нічого не збережено." },

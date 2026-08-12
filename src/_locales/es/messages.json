@@ -68,8 +68,8 @@
   },
   "vocab_prev": { "message": "Anterior" },
   "vocab_next": { "message": "Siguiente" },
-  "vocab_export": { "message": "Exportar" },
-  "vocab_import": { "message": "Importar" },
+  "action_export": { "message": "Exportar" },
+  "action_import": { "message": "Importar" },
   "vocab_transfer_note": {
     "message": "Un archivo .tsv de dos columnas - el mismo formato que escribe el plugin de KOReader y que lee Anki. La importación solo añade frases que faltan en este par; lo guardado no se toca."
   },
@@ -149,6 +149,60 @@
   "reader_empty_none_read": { "message": "Aún no hay nada marcado como leído." },
   "reader_library_note": {
     "message": "Todo lo de aquí es una copia guardada en este dispositivo - se abre sin conexión y permanece aunque la página original desaparezca."
+  },
+  "reader_transfer_note": {
+    "message": "Un archivo .json con todos los artículos guardados - una copia de seguridad, o la forma de llevarlos a otro navegador. La importación solo añade artículos que faltan en esta lista; lo guardado no se toca."
+  },
+  "reader_import_nothing": { "message": "Ese archivo no contiene artículos para importar." },
+  "reader_import_summary_one": {
+    "message": "$NAME$ contiene $COUNT$ artículo:",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "name": { "content": "$2", "example": "reread-articles.json" }
+    }
+  },
+  "reader_import_summary_other": {
+    "message": "$NAME$ contiene $COUNT$ artículos:",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "name": { "content": "$2", "example": "reread-articles.json" }
+    }
+  },
+  "reader_import_added_one": {
+    "message": "Se añadió $COUNT$ artículo nuevo.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "reader_import_added_other": {
+    "message": "Se añadieron $COUNT$ artículos nuevos.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_import_skipped_one": {
+    "message": "Se omitió $COUNT$ ya guardado.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "reader_import_skipped_other": {
+    "message": "Se omitieron $COUNT$ ya guardados.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_import_unreadable_one": {
+    "message": "No se pudo leer $COUNT$ entrada.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "reader_import_unreadable_other": {
+    "message": "No se pudieron leer $COUNT$ entradas.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "2" }
+    }
   },
 
   "download_cancelled": { "message": "Descarga cancelada. No se guardó nada." },
