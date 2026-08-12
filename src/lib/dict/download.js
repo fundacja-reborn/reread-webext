@@ -17,6 +17,8 @@
  * without an end rather than a bar that lies.
  */
 
+import { aside, t } from "../i18n.js";
+
 /**
  * @typedef {"network" | "http" | "too_big" | "cancelled"} DictDownloadProblem
  */
@@ -151,14 +153,14 @@ export async function downloadArchive(url, options = {}) {
 export function describeDictDownloadProblem(problem, detail) {
   switch (problem) {
     case "network":
-      return `Could not reach the place dictionaries are kept${detail ? ` (${detail})` : ""}. Nothing was stored.`;
+      return t("dict_download_network", aside(detail));
     case "http":
-      return `The download was refused${detail ? `: ${detail}` : ""}. The dictionary may have moved; nothing was stored.`;
+      return t("dict_download_http", aside(detail));
     case "too_big":
-      return `The download is far larger than a dictionary should be${detail ? ` (${detail})` : ""}, so it was stopped. Nothing was stored.`;
+      return t("dict_download_too_big", aside(detail));
     case "cancelled":
-      return "Download cancelled. Nothing was stored.";
+      return t("download_cancelled");
     default:
-      return "The download did not finish, and nothing was stored.";
+      return t("download_failed");
   }
 }

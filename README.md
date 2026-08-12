@@ -27,6 +27,7 @@ file, so what you collect on an e-reader underlines itself in your browser and b
 | Reader mode | turns the page into an article in the extension's own tab |
 | Reading list (offline) | articles saved from the reader, listed and readable with no network at all |
 | Toolbar popup | per-site switch, language pair, reader, settings |
+| UI languages | English, Polish, German, French, Spanish - follows the browser's UI language, English otherwise |
 | Firefox on Android | declared and built, reader-only by default; not yet tested on a phone |
 | Import / export (TSV) | not started |
 | Chromium | builds, untested |

@@ -24,6 +24,7 @@
 
 import { rescan, start } from "../content/reading.js";
 import { webext } from "../lib/browser.js";
+import { localizePage, t } from "../lib/i18n.js";
 import {
   CONFIG_KEY,
   MEASURE,
@@ -51,6 +52,10 @@ import { Segment, emptySentence, listedRows, savedArticle } from "../lib/store/s
 const Readability = /** @type {ReadabilityConstructor} */ (
   /** @type {Record<string, unknown>} */ (globalThis)["Readability"]
 );
+
+// First, so that everything after it - notices, rows, titles - lands on a page
+// already speaking the catalogue's language.
+localizePage();
 
 const notice = document.getElementById("notice");
 const article = document.getElementById("article");
@@ -211,7 +216,7 @@ function renderLive(page) {
   // ever get - never a live one.
   const found = new Readability(parsed).parse();
   if (found === null || typeof found.content !== "string") {
-    showNotice("There was no article to find on that page.");
+    showNotice(t("reader_no_article"));
     if (shown === null) void showLibrary();
     return;
   }
@@ -305,7 +310,7 @@ async function showLibrary() {
   if (actions !== null) actions.hidden = true;
   if (originalLink !== null) originalLink.hidden = true;
   if (library !== null) library.hidden = false;
-  document.title = "re/read - reader";
+  document.title = t("reader_title");
   scrollTo(0, 0);
   await refreshLibrary();
 }
@@ -360,7 +365,7 @@ function libraryRow(meta) {
   remove.type = "button";
   remove.className = "library-delete";
   remove.setAttribute("data-url", meta.url);
-  remove.textContent = "Delete";
+  remove.textContent = t("action_delete");
 
   item.append(open, remove);
   return item;
@@ -388,20 +393,20 @@ async function refreshActions() {
 
   if (keepButton !== null) {
     keepButton.hidden = target.origin !== "live";
-    keepButton.textContent = meta === null ? "Save to reading list" : "In the reading list";
+    keepButton.textContent = meta === null ? t("reader_save") : t("reader_saved");
     keepButton.setAttribute("aria-pressed", String(meta !== null));
   }
 
   if (removeButton !== null) {
     removeButton.hidden = target.origin !== "saved";
     removeButton.removeAttribute("data-armed");
-    removeButton.textContent = "Delete from reading list";
+    removeButton.textContent = t("reader_delete");
   }
 
   if (markReadButton !== null) {
     const read = meta !== null && meta.readAt !== null;
     markReadButton.hidden = meta === null;
-    markReadButton.textContent = read ? "Marked as read" : "Mark as read";
+    markReadButton.textContent = read ? t("reader_marked_read") : t("reader_mark_read");
     markReadButton.setAttribute("aria-pressed", String(read));
   }
 }
@@ -437,7 +442,7 @@ async function onKeepPress() {
       await putArticle(record);
     }
   } catch {
-    showNotice("The reading list could not be written.");
+    showNotice(t("reader_list_write_failed"));
     return;
   }
   if (shown === target) void refreshActions();
@@ -455,14 +460,14 @@ async function onRemovePress() {
 
   if (!removeButton.hasAttribute("data-armed")) {
     removeButton.setAttribute("data-armed", "");
-    removeButton.textContent = "Sure?";
+    removeButton.textContent = t("reader_delete_confirm");
     return;
   }
 
   try {
     await deleteArticle(target.url);
   } catch {
-    showNotice("The reading list could not be written.");
+    showNotice(t("reader_list_write_failed"));
     return;
   }
   if (shown !== target) return;
@@ -483,7 +488,7 @@ async function onMarkReadPress() {
     if (shown !== target || meta === null) return;
     await setReadAt(target.url, meta.readAt === null ? Date.now() : null);
   } catch {
-    showNotice("The reading list could not be written.");
+    showNotice(t("reader_list_write_failed"));
     return;
   }
   if (shown === target) void refreshActions();
@@ -590,11 +595,11 @@ libraryRows?.addEventListener("click", (event) => {
     // the second one deletes the row from the database, not from the screen.
     if (button.hasAttribute("data-armed")) {
       void deleteArticle(url)
-        .catch(() => showNotice("The reading list could not be written."))
+        .catch(() => showNotice(t("reader_list_write_failed")))
         .then(() => refreshLibrary());
     } else {
       button.setAttribute("data-armed", "");
-      button.textContent = "Sure?";
+      button.textContent = t("reader_delete_confirm");
     }
     return;
   }

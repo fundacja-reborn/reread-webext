@@ -8,10 +8,16 @@
  * Mozilla's model index writes `zh_hant`, BCP-47 writes `zh-Hant`, and
  * `Intl.DisplayNames` only reads the latter.
  *
+ * The names follow the catalogue the rest of the page speaks (`uiLocale`), not
+ * the browser's regional settings: a page whose sentences fell back to English
+ * has to call the languages English names too, or it reads as two pages.
+ *
  * A code with no name - malformed, private, or simply unknown to the browser -
  * comes back as itself. A code on screen is poorer than a name, but it is
  * honest, and it still tells apart the two things it needs to tell apart.
  */
+
+import { t, uiLocale } from "./i18n.js";
 
 /** @type {Intl.DisplayNames | null} */
 let names = null;
@@ -21,9 +27,7 @@ let names = null;
  * @returns {string} `"English"`, or the code itself when there is no name for it
  */
 export function languageName(code) {
-  // The pages of this extension are English for now; when locales arrive, the
-  // page language belongs here.
-  names ??= new Intl.DisplayNames(["en"], { type: "language" });
+  names ??= new Intl.DisplayNames([uiLocale()], { type: "language" });
   try {
     return names.of(code.replace(/_/g, "-")) ?? code;
   } catch {
@@ -33,12 +37,13 @@ export function languageName(code) {
 
 /**
  * The one way a direction is written on screen, so every page writes it the
- * same way.
+ * same way. The joining word is the catalogue's: `"English to Polish"` in
+ * English, an arrow where the language's grammar would bend the names.
  *
  * @param {string} from
  * @param {string} to
  * @returns {string}
  */
 export function pairLabel(from, to) {
-  return `${languageName(from)} to ${languageName(to)}`;
+  return t("pair_label", [languageName(from), languageName(to)]);
 }

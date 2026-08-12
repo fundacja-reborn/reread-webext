@@ -34,6 +34,8 @@
  * @typedef {SavedMeta & { content: string, dir: string | null, lang: string | null }} SavedArticle
  */
 
+import { t } from "../i18n.js";
+
 /** The two segments of the list, and the only filter it has. */
 export const Segment = Object.freeze({
   UNREAD: "unread",
@@ -155,9 +157,11 @@ export function listedRows(metas, segment) {
  */
 export function emptySentence(total, segment) {
   if (total === 0) {
-    return 'Nothing is saved yet - open an article in the reader and press "Save to reading list".';
+    // The button it names is `reader_save`, quoted verbatim so the sentence
+    // and the button cannot drift apart in any language.
+    return t("reader_empty_none", t("reader_save"));
   }
   return segment === Segment.READ
-    ? "Nothing is marked as read yet."
-    : "Nothing left to read - everything saved is marked as read.";
+    ? t("reader_empty_none_read")
+    : t("reader_empty_all_read");
 }

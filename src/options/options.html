@@ -3,35 +3,44 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>re/read - settings</title>
+    <title data-i18n="options_title">re/read - settings</title>
     <link rel="stylesheet" href="../assets/page.css" />
   </head>
   <body>
+    <!-- The English in this file is the fallback: `localizePage` swaps every
+         `data-i18n`-marked text for the catalogue's language before the page
+         is seen. A marked element holds text only - which is why the
+         paragraphs around the dynamic <strong> and <a> elements are split into
+         spans, with the separating spaces left between the elements as plain
+         text that no language has to carry. -->
     <h1>re/read</h1>
-    <p class="subtitle">Settings</p>
+    <p class="subtitle" data-i18n="settings">Settings</p>
 
     <dl class="rows">
-      <div class="row"><dt>Version</dt><dd id="version">-</dd></div>
+      <div class="row"><dt data-i18n="options_version">Version</dt><dd id="version">-</dd></div>
       <div class="row">
-        <dt><label for="pair">Language pair</label></dt>
+        <dt><label for="pair" data-i18n="language_pair">Language pair</label></dt>
         <dd><select id="pair"></select></dd>
       </div>
-      <div class="row"><dt>Engine</dt><dd>Bergamot, inside the package</dd></div>
       <div class="row">
-        <dt><label for="reader-only">Only in the reader</label></dt>
+        <dt data-i18n="options_engine">Engine</dt>
+        <dd data-i18n="options_engine_value">Bergamot, inside the package</dd>
+      </div>
+      <div class="row">
+        <dt><label for="reader-only" data-i18n="options_reader_only">Only in the reader</label></dt>
         <dd><input type="checkbox" id="reader-only" /></dd>
       </div>
     </dl>
 
-    <p class="hint">
+    <p class="hint" data-i18n="options_reader_only_hint">
       With this on, selecting on an ordinary page offers one thing: open it in the reader.
       Translating, keeping and underlining happen there. On Android it starts on - a bubble
       over a selection and the phone's own copy menu fight for the same spot.
     </p>
 
-    <h2>Translation models</h2>
+    <h2 data-i18n="options_models_heading">Translation models</h2>
 
-    <p>
+    <p data-i18n="options_models_intro">
       A model is what turns one language into another, and there is one per direction. Nothing is
       translated until the model for the pair you are reading is here, on this device. Every
       direction Mozilla publishes is listed; the pair you are reading and anything already stored
@@ -43,7 +52,9 @@
         type="search"
         id="model-filter"
         placeholder="Filter by language or code"
+        data-i18n-placeholder="options_filter_placeholder"
         aria-label="Filter the list of translation models"
+        data-i18n-aria-label="options_filter_models_aria"
       />
     </p>
 
@@ -52,17 +63,24 @@
     <p id="model-status" class="status" role="status"></p>
 
     <p class="note">
-      Model downloads come from <strong id="model-host">-</strong>, where Mozilla publishes
-      them, at addresses written down in this package. Every file is checked against a checksum
-      that was recorded here on <strong id="model-checked">-</strong>: anything that does not
-      match is thrown away rather than stored. Nothing about you is sent - the request says
-      which model, and nothing else. This host and the dictionary catalogue's below are the
-      only two places this extension ever contacts, and neither before you press Download.
+      <span data-i18n="options_model_note_from">Model downloads come from</span>
+      <strong id="model-host">-</strong>
+      <span data-i18n="options_model_note_checked"
+        >- where Mozilla publishes them - at addresses written down in this package. Every file is
+        checked against a checksum that was recorded here on</span
+      >
+      <strong id="model-checked">-</strong>
+      <span data-i18n="options_model_note_rest"
+        >- anything that does not match is thrown away rather than stored. Nothing about you is
+        sent: the request says which model, and nothing else. This host and the dictionary
+        catalogue's below are the only two places this extension ever contacts, and neither before
+        you press Download.</span
+      >
     </p>
 
-    <h2>Add a model from files</h2>
+    <h2 data-i18n="options_add_model_heading">Add a model from files</h2>
 
-    <p>
+    <p data-i18n="options_add_model_intro">
       Pick the three files of one direction and they are stored locally. Gzipped files are
       unpacked here, so the downloads can be used as they come:
     </p>
@@ -75,35 +93,43 @@
 
     <p>
       <input type="file" id="model-files" multiple accept=".bin,.spm,.gz" />
-      <button type="button" id="add-model">Add model</button>
+      <button type="button" id="add-model" data-i18n="options_add_model_button">Add model</button>
     </p>
 
     <p id="file-status" class="status" role="status"></p>
 
-    <p class="note">
+    <p class="note" data-i18n="options_files_note">
       This page stays even once models download themselves: it is the way out on the day the place
       they are downloaded from stops answering. Nothing here leaves the device, and adding a model
       makes no network request at all.
     </p>
 
-    <h2>Dictionaries</h2>
+    <h2 data-i18n="options_dictionaries_heading">Dictionaries</h2>
 
     <p>
-      A dictionary answers what a translation cannot. <em>Bank</em> has two entries, and a model
-      has to choose one of them without knowing which you meant; a dictionary shows both. Entries
-      appear in the second layer of the bubble, under the sentence.
+      <span data-i18n="options_dictionaries_intro">A dictionary answers what a translation
+        cannot.</span>
+      <em data-i18n="options_dict_example_word">Bank</em>
+      <span data-i18n="options_dictionaries_intro_rest"
+        >has two entries, and a model has to choose one of them without knowing which you meant; a
+        dictionary shows both. Entries appear in the second layer of the bubble, under the
+        sentence.</span
+      >
     </p>
 
     <div id="dictionaries" class="models"></div>
 
     <p id="dictionary-status" class="status" role="status"></p>
 
-    <h2>Get a dictionary</h2>
+    <h2 data-i18n="options_get_dictionary_heading">Get a dictionary</h2>
 
     <p>
-      <strong>WikDict</strong> builds dictionaries from Wiktionary (CC BY-SA) for every pair
-      below. One press downloads the archive, unpacks it here and stores it; the languages are
-      read off the pair, and the dictionary appears in the list above, ready to answer.
+      <strong>WikDict</strong>
+      <span data-i18n="options_wikdict_intro"
+        >builds dictionaries from Wiktionary (CC BY-SA) for every pair below. One press downloads
+        the archive, unpacks it here and stores it; the languages are read off the pair, and the
+        dictionary appears in the list above, ready to answer.</span
+      >
     </p>
 
     <p class="model-filter">
@@ -111,7 +137,9 @@
         type="search"
         id="dictionary-filter"
         placeholder="Filter by language or code"
+        data-i18n-placeholder="options_filter_placeholder"
         aria-label="Filter the list of dictionaries"
+        data-i18n-aria-label="options_filter_dictionaries_aria"
       />
     </p>
 
@@ -120,29 +148,42 @@
     <p id="dictionary-get-status" class="status" role="status"></p>
 
     <p class="note">
-      Dictionary downloads come from <strong id="dictionary-host">-</strong>, where WikDict
-      publishes them, at addresses written down in this package - the list was checked here on
-      <strong id="dictionary-checked">-</strong>. Unlike models there is no checksum to hold
-      them to: WikDict rebuilds its files in place, so a sum recorded here would break with
-      every rebuild. What stands in its place: the download must be a plain zip of StarDict
-      files, it is read as warily as any file you would add by hand, and what it becomes is
-      text in the local database - never code. Nothing about you is sent - the request says
-      which dictionary, and nothing else.
+      <span data-i18n="options_dictionary_note_from">Dictionary downloads come from</span>
+      <strong id="dictionary-host">-</strong>
+      <span data-i18n="options_dictionary_note_checked"
+        >- where WikDict publishes them - at addresses written down in this package; the list was
+        checked here on</span
+      >
+      <strong id="dictionary-checked">-</strong>
+      <span data-i18n="options_dictionary_note_rest"
+        >- unlike models there is no checksum to hold them to: WikDict rebuilds its files in
+        place, so a sum recorded here would break with every rebuild. What stands in its place:
+        the download must be a plain zip of StarDict files, it is read as warily as any file you
+        would add by hand, and what it becomes is text in the local database - never code. Nothing
+        about you is sent: the request says which dictionary, and nothing else.</span
+      >
     </p>
 
-    <h2>Add a dictionary from files</h2>
+    <h2 data-i18n="options_add_dictionary_heading">Add a dictionary from files</h2>
 
     <p>
-      Dictionaries are read in <strong>StarDict</strong> format - the same files a KOReader
-      e-reader uses, so a dictionary already on your reader works here unchanged. Unpack the
-      archive it came in and pick the files of one dictionary:
+      <span data-i18n="options_stardict_intro">Dictionaries are read in the</span>
+      <strong>StarDict</strong>
+      <span data-i18n="options_stardict_intro_rest"
+        >format - the same files a KOReader e-reader uses, so a dictionary already on your reader
+        works here unchanged. Unpack the archive it came in and pick the files of one
+        dictionary:</span
+      >
     </p>
 
     <ul class="files">
-      <li><code><em>name</em>.ifo</code> - what the dictionary calls itself</li>
-      <li><code><em>name</em>.idx</code> - the index of words</li>
-      <li><code><em>name</em>.dict</code> or <code><em>name</em>.dict.dz</code> - the entries</li>
-      <li><code><em>name</em>.syn</code> - other spellings, when the dictionary has them</li>
+      <li><code><em>name</em>.ifo</code> <span data-i18n="options_file_ifo">- what the dictionary calls itself</span></li>
+      <li><code><em>name</em>.idx</code> <span data-i18n="options_file_idx">- the index of words</span></li>
+      <li>
+        <code><em>name</em>.dict</code> <span data-i18n="options_file_dict_or">or</span>
+        <code><em>name</em>.dict.dz</code> <span data-i18n="options_file_dict">- the entries</span>
+      </li>
+      <li><code><em>name</em>.syn</code> <span data-i18n="options_file_syn">- other spellings, when the dictionary has them</span></li>
     </ul>
 
     <p>
@@ -150,28 +191,30 @@
     </p>
 
     <p class="inline">
-      <label for="dictionary-from">Words in</label>
+      <label for="dictionary-from" data-i18n="options_words_in">Words in</label>
       <select id="dictionary-from"></select>
-      <label for="dictionary-to">explained in</label>
+      <label for="dictionary-to" data-i18n="options_explained_in">explained in</label>
       <select id="dictionary-to"></select>
-      <button type="button" id="add-dictionary">Add dictionary</button>
+      <button type="button" id="add-dictionary" data-i18n="options_add_dictionary_button">Add dictionary</button>
     </p>
 
     <p id="dictionary-file-status" class="status" role="status"></p>
 
     <p class="note">
-      A StarDict file says nothing about which languages it is for, so here that part is yours
-      to say. Adding from files makes no network request at all, and the path stays for the day
-      the catalogue's host stops answering: files from anywhere work, the catalogue's own
-      included - they are published at
+      <span data-i18n="options_dict_files_note"
+        >A StarDict file says nothing about which languages it is for, so here that part is yours
+        to say. Adding from files makes no network request at all, and the path stays for the day
+        the catalogue's host stops answering: files from anywhere work, the catalogue's own
+        included - they are published at</span
+      >
       <a href="https://download.wikdict.com/dictionaries/stardict/" target="_blank" rel="noopener"
         >download.wikdict.com/dictionaries/stardict</a
       >.
     </p>
 
-    <h2>Switched-off sites</h2>
+    <h2 data-i18n="options_disabled_heading">Switched-off sites</h2>
 
-    <p>
+    <p data-i18n="options_disabled_intro">
       Sites where re/read stays off - no underlines, no bubble, nothing running. The switch in
       the toolbar popup is what adds a site here; this list is how one is turned back on without
       visiting it.

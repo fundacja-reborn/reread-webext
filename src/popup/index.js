@@ -22,10 +22,14 @@
 
 import { webext } from "../lib/browser.js";
 import { effectiveReaderOnly, platformOs, readConfig, writeConfig } from "../lib/config.js";
+import { localizePage } from "../lib/i18n.js";
 import { pairLabel } from "../lib/language.js";
 import { listModels } from "../lib/models/store.js";
 import { Message, asPageInfo, asResult } from "../lib/protocol.js";
 import { pairChoices } from "./choices.js";
+
+// First, so the rows are already in the catalogue's language when they show.
+localizePage();
 
 const siteRow = document.getElementById("site-row");
 const siteHost = document.getElementById("site-host");

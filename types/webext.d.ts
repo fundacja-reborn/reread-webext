@@ -90,6 +90,14 @@ interface WebExtBrowser {
     // Needs no permission either.
     update(windowId: number, properties: { focused?: boolean }): Promise<unknown>;
   };
+  i18n: {
+    // The one call the whole of localization needs: a key in, the catalogue's
+    // sentence out, `""` for a key no catalogue has. Needs no permission and is
+    // available in every context this extension runs in, content scripts
+    // included; the catalogue is picked by the browser's UI language, with
+    // `default_locale` as the floor.
+    getMessage(messageName: string, substitutions?: string | string[]): string;
+  };
   commands: {
     // The keyboard's way into the reader, `commands` in the manifest - a
     // manifest key, not a permission. The tab is the one the shortcut was

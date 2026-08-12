@@ -20,6 +20,7 @@
  * dictionary that turns out to be something else entirely.
  */
 
+import { aside, t } from "../i18n.js";
 import { isGzip } from "../models/files.js";
 import { parseIdx, parseIfo, parseSyn, readFields } from "./stardict.js";
 import { LIMITS, about, senses } from "./text.js";
@@ -281,7 +282,7 @@ export async function readDictionary(files, { fallbackName, onProgress } = {}) {
   // The .ifo file describes the book in the same HTML its entries are written
   // in, so it gets the same treatment (D29): what a settings page prints must
   // be text by the time it is stored, not markup waiting to be dealt with.
-  const name = about(ifo.value.bookname, LIMITS.name) ?? fallbackName ?? "Dictionary";
+  const name = about(ifo.value.bookname, LIMITS.name) ?? fallbackName ?? t("dict_default_name");
 
   return {
     ok: true,
@@ -298,26 +299,26 @@ export async function readDictionary(files, { fallbackName, onProgress } = {}) {
 export function describeImportProblem(problem, detail) {
   switch (problem) {
     case "empty":
-      return "No files were selected. Nothing was stored.";
+      return t("dict_import_empty");
     case "missing_ifo":
-      return "There is no .ifo file among those, so this is not a StarDict dictionary. Nothing was stored.";
+      return t("dict_import_missing_ifo");
     case "missing_idx":
-      return "The index is missing (.idx or .idx.gz). Nothing was stored.";
+      return t("dict_import_missing_idx");
     case "missing_dict":
-      return "The dictionary body is missing (.dict or .dict.dz). Nothing was stored.";
+      return t("dict_import_missing_dict");
     case "mixed":
-      return `Those files belong to more than one dictionary (${detail ?? ""}). Add one at a time. Nothing was stored.`;
+      return t("dict_import_mixed", detail ?? "");
     case "not_stardict":
       return detail === undefined
-        ? "That .ifo file is not a StarDict dictionary. Nothing was stored."
-        : `That is ${detail}, which this extension cannot read. Nothing was stored.`;
+        ? t("dict_import_not_stardict")
+        : t("dict_import_not_stardict_detail", detail);
     case "unpack":
-      return `The files are compressed in a way that could not be unpacked${detail === undefined ? "" : ` (${detail})`}. Nothing was stored.`;
+      return t("dict_import_unpack", aside(detail));
     case "no_entries":
       return detail === undefined
-        ? "The index is empty - there are no words in this dictionary. Nothing was stored."
-        : `Not one of the ${detail} words in the index could be read, so the files do not belong together. Nothing was stored.`;
+        ? t("dict_import_no_entries")
+        : t("dict_import_no_entries_detail", detail);
     default:
-      return "Those files are not a dictionary this extension can read. Nothing was stored.";
+      return t("dict_import_unreadable");
   }
 }

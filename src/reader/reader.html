@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>re/read - reader</title>
+    <title data-i18n="reader_title">re/read - reader</title>
     <link rel="stylesheet" href="../assets/page.css" />
     <link rel="stylesheet" href="reader.css" />
     <!--
@@ -14,11 +14,21 @@
     <link rel="stylesheet" href="../content/highlight.css" />
   </head>
   <body class="reader">
+    <!-- The English here is the fallback: `localizePage` swaps every marked
+         text for the catalogue's language before anything renders. -->
     <header class="reader-bar">
       <span class="reader-mark">re/read</span>
       <span class="reader-tools">
-        <a id="original" class="reader-original" hidden>Open the original</a>
-        <button id="display" type="button" aria-expanded="false" title="Type and theme">Aa</button>
+        <a id="original" class="reader-original" data-i18n="reader_open_original" hidden>Open the original</a>
+        <button
+          id="display"
+          type="button"
+          aria-expanded="false"
+          title="Type and theme"
+          data-i18n-title="reader_display_title"
+        >
+          Aa
+        </button>
       </span>
     </header>
 
@@ -27,40 +37,46 @@
       about its own appearance is a short, fixed list, and a list is easier to
       read in the package than the code that would have produced it.
     -->
-    <section id="display-panel" class="reader-panel" hidden aria-label="Type and theme">
+    <section
+      id="display-panel"
+      class="reader-panel"
+      hidden
+      aria-label="Type and theme"
+      data-i18n-aria-label="reader_display_title"
+    >
       <div class="reader-setting">
-        <span class="reader-setting-name">Theme</span>
+        <span class="reader-setting-name" data-i18n="reader_theme">Theme</span>
         <span class="reader-choices" id="theme-choices">
-          <button type="button" data-theme="auto">Auto</button>
-          <button type="button" data-theme="light">Light</button>
-          <button type="button" data-theme="sepia">Sepia</button>
-          <button type="button" data-theme="dark">Dark</button>
+          <button type="button" data-theme="auto" data-i18n="reader_theme_auto">Auto</button>
+          <button type="button" data-theme="light" data-i18n="reader_theme_light">Light</button>
+          <button type="button" data-theme="sepia" data-i18n="reader_theme_sepia">Sepia</button>
+          <button type="button" data-theme="dark" data-i18n="reader_theme_dark">Dark</button>
         </span>
       </div>
 
       <div class="reader-setting">
-        <span class="reader-setting-name">Type</span>
+        <span class="reader-setting-name" data-i18n="reader_font">Type</span>
         <span class="reader-choices" id="font-choices">
-          <button type="button" data-font="serif">Serif</button>
-          <button type="button" data-font="sans">Sans</button>
+          <button type="button" data-font="serif" data-i18n="reader_font_serif">Serif</button>
+          <button type="button" data-font="sans" data-i18n="reader_font_sans">Sans</button>
         </span>
       </div>
 
       <div class="reader-setting">
-        <span class="reader-setting-name">Size</span>
+        <span class="reader-setting-name" data-i18n="reader_size">Size</span>
         <span class="reader-choices">
-          <button type="button" data-size="-1" title="Smaller">&minus;</button>
+          <button type="button" data-size="-1" title="Smaller" data-i18n-title="reader_smaller">&minus;</button>
           <output id="size-value">18</output>
-          <button type="button" data-size="1" title="Larger">+</button>
+          <button type="button" data-size="1" title="Larger" data-i18n-title="reader_larger">+</button>
         </span>
       </div>
 
       <div class="reader-setting">
-        <span class="reader-setting-name">Width</span>
+        <span class="reader-setting-name" data-i18n="reader_width">Width</span>
         <span class="reader-choices">
-          <button type="button" data-measure="-5" title="Narrower">&minus;</button>
+          <button type="button" data-measure="-5" title="Narrower" data-i18n-title="reader_narrower">&minus;</button>
           <output id="measure-value">65</output>
-          <button type="button" data-measure="5" title="Wider">+</button>
+          <button type="button" data-measure="5" title="Wider" data-i18n-title="reader_wider">+</button>
         </span>
       </div>
     </section>
@@ -73,10 +89,14 @@
         page. Rows are built by script from the articles database; everything
         static about the view is written out here.
       -->
-      <section id="library" hidden aria-label="Reading list">
+      <section id="library" hidden aria-label="Reading list" data-i18n-aria-label="reading_list">
         <div class="library-segments" id="library-segments">
-          <button type="button" data-segment="unread" aria-pressed="true">To read</button>
-          <button type="button" data-segment="read" aria-pressed="false">Read</button>
+          <button type="button" data-segment="unread" aria-pressed="true" data-i18n="reader_segment_unread">
+            To read
+          </button>
+          <button type="button" data-segment="read" aria-pressed="false" data-i18n="reader_segment_read">
+            Read
+          </button>
         </div>
         <p id="library-empty" class="note" hidden></p>
         <ul id="library-rows" class="library-rows"></ul>
@@ -88,10 +108,14 @@
         these labels are interface, not text anybody is studying.
       -->
       <div id="actions" class="reader-actions" hidden>
-        <button id="to-library" type="button" hidden>Reading list</button>
-        <button id="keep" type="button" aria-pressed="false" hidden>Save to reading list</button>
-        <button id="remove" type="button" hidden>Delete from reading list</button>
-        <button id="mark-read" type="button" aria-pressed="false" hidden>Mark as read</button>
+        <button id="to-library" type="button" data-i18n="reading_list" hidden>Reading list</button>
+        <button id="keep" type="button" aria-pressed="false" data-i18n="reader_save" hidden>
+          Save to reading list
+        </button>
+        <button id="remove" type="button" data-i18n="reader_delete" hidden>Delete from reading list</button>
+        <button id="mark-read" type="button" aria-pressed="false" data-i18n="reader_mark_read" hidden>
+          Mark as read
+        </button>
       </div>
 
       <article id="article" hidden>

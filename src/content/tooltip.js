@@ -40,22 +40,42 @@
  */
 
 import { MEANING_SEPARATOR, afterChoosing, toMeanings } from "../lib/gloss.js";
+import { t } from "../lib/i18n.js";
 
 const GAP = 8;
 const VIEWPORT_MARGIN = 8;
 
-const LABELS = Object.freeze({
-  save: "Save",
-  learned: "Learned",
-  edit: "Edit",
-  settings: "Open settings",
-  cancel: "Cancel",
-  more: "More",
-  reader: "Read in the reader",
-});
+/**
+ * Read when a button is rendered, not when the module loads: this module is
+ * also imported by tests that have no catalogue to ask, and a bubble never
+ * renders there.
+ *
+ * @param {Action | "cancel"} action
+ * @returns {string}
+ */
+function label(action) {
+  switch (action) {
+    case "save":
+      return t("bubble_save");
+    case "learned":
+      return t("bubble_learned");
+    case "edit":
+      return t("bubble_edit");
+    case "settings":
+      return t("bubble_settings");
+    case "cancel":
+      return t("action_cancel");
+    case "more":
+      return t("bubble_more");
+    case "reader":
+      return t("bubble_reader");
+  }
+}
 
 /** The one button whose label changes with what it will do. */
-const LESS_LABEL = "Less";
+function lessLabel() {
+  return t("bubble_less");
+}
 
 const STYLE = `
   :host { all: initial; }
@@ -816,7 +836,7 @@ export function createTooltip({ onAction }) {
       const button = document.createElement("button");
       button.type = "button";
       button.dataset["action"] = action;
-      button.textContent = action === "more" && unfolded ? LESS_LABEL : LABELS[action];
+      button.textContent = action === "more" && unfolded ? lessLabel() : label(action);
       button.addEventListener("click", () => emit(action));
       actionsElement.append(button);
     }

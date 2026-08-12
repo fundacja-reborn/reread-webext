@@ -1,0 +1,403 @@
+{
+  "locale_code": { "message": "fr" },
+
+  "extension_description": {
+    "message": "Apprenez une langue en lisant le web. Traduction, vocabulaire et surlignage, le tout sur votre propre appareil."
+  },
+
+  "pair_label": {
+    "message": "$FROM$ → $TO$",
+    "placeholders": {
+      "from": { "content": "$1", "example": "anglais" },
+      "to": { "content": "$2", "example": "français" }
+    }
+  },
+
+  "settings": { "message": "Paramètres" },
+  "language_pair": { "message": "Paire de langues" },
+  "reading_list": { "message": "Liste de lecture" },
+  "open_reader": { "message": "Lire cette page dans le lecteur" },
+  "action_delete": { "message": "Supprimer" },
+  "action_download": { "message": "Télécharger" },
+  "action_cancel": { "message": "Annuler" },
+
+  "error_engine_missing": { "message": "Pas encore de moteur de traduction - cette version ne peut pas traduire." },
+  "error_model_missing": { "message": "Aucun modèle pour cette paire de langues sur cet appareil - téléchargez-en un ou ajoutez-le dans les paramètres." },
+  "error_unsupported_pair": { "message": "Aucun modèle n'existe pour cette paire de langues." },
+  "error_too_long": { "message": "Cette sélection est trop longue pour être traduite." },
+  "error_no_page": { "message": "Il n'y a pas de page à lire ici - ouvrez un article et appuyez de nouveau sur le bouton." },
+  "error_unknown_message": { "message": "L'extension a envoyé une requête qu'elle ne comprend pas." },
+  "error_internal": { "message": "Quelque chose s'est mal passé dans l'extension." },
+
+  "bubble_save": { "message": "Enregistrer" },
+  "bubble_learned": { "message": "Appris" },
+  "bubble_edit": { "message": "Modifier" },
+  "bubble_settings": { "message": "Ouvrir les paramètres" },
+  "bubble_more": { "message": "Plus" },
+  "bubble_less": { "message": "Moins" },
+  "bubble_reader": { "message": "Lire dans le lecteur" },
+  "bubble_translating": { "message": "Traduction..." },
+
+  "popup_site_toggle_title": { "message": "Si re/read fonctionne sur ce site" },
+  "popup_no_page": { "message": "re/read ne fonctionne pas sur cette page." },
+  "popup_mode_reader_only": { "message": "Mode : seulement dans le lecteur" },
+
+  "reader_title": { "message": "re/read - lecteur" },
+  "reader_open_original": { "message": "Ouvrir l'original" },
+  "reader_display_title": { "message": "Police et thème" },
+  "reader_theme": { "message": "Thème" },
+  "reader_theme_auto": { "message": "Auto" },
+  "reader_theme_light": { "message": "Clair" },
+  "reader_theme_sepia": { "message": "Sépia" },
+  "reader_theme_dark": { "message": "Sombre" },
+  "reader_font": { "message": "Police" },
+  "reader_font_serif": { "message": "Serif" },
+  "reader_font_sans": { "message": "Sans" },
+  "reader_size": { "message": "Taille" },
+  "reader_smaller": { "message": "Plus petit" },
+  "reader_larger": { "message": "Plus grand" },
+  "reader_width": { "message": "Largeur" },
+  "reader_narrower": { "message": "Plus étroite" },
+  "reader_wider": { "message": "Plus large" },
+  "reader_segment_unread": { "message": "À lire" },
+  "reader_segment_read": { "message": "Lus" },
+  "reader_save": { "message": "Enregistrer dans la liste de lecture" },
+  "reader_saved": { "message": "Dans la liste de lecture" },
+  "reader_delete": { "message": "Supprimer de la liste de lecture" },
+  "reader_delete_confirm": { "message": "Sûr ?" },
+  "reader_mark_read": { "message": "Marquer comme lu" },
+  "reader_marked_read": { "message": "Marqué comme lu" },
+  "reader_no_article": { "message": "Aucun article à trouver sur cette page." },
+  "reader_list_write_failed": { "message": "La liste de lecture n'a pas pu être écrite." },
+  "reader_empty_none": {
+    "message": "Rien n'est encore enregistré - ouvrez un article dans le lecteur et appuyez sur « $BUTTON$ ».",
+    "placeholders": { "button": { "content": "$1", "example": "Enregistrer dans la liste de lecture" } }
+  },
+  "reader_empty_all_read": { "message": "Plus rien à lire - tout ce qui est enregistré est marqué comme lu." },
+  "reader_empty_none_read": { "message": "Rien n'est encore marqué comme lu." },
+
+  "download_cancelled": { "message": "Téléchargement annulé. Rien n'a été enregistré." },
+  "download_failed": { "message": "Le téléchargement ne s'est pas terminé, et rien n'a été enregistré." },
+  "model_download_network": {
+    "message": "Impossible d'atteindre l'endroit où sont gardés les modèles$DETAIL$. Rien n'a été enregistré.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "model_download_http": {
+    "message": "Le téléchargement a été refusé$DETAIL$. Le modèle a peut-être été déplacé ; rien n'a été enregistré.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "model_download_size": {
+    "message": "Le téléchargement s'est arrêté trop tôt$DETAIL$ et a été jeté.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "model_download_checksum": {
+    "message": "Ce qui est arrivé n'est pas le modèle que cette version attend$DETAIL$, il a donc été jeté. Réessayez - si cela continue, le fichier à l'autre bout a changé.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "model_download_unpack": {
+    "message": "Le téléchargement n'a pas pu être décompressé$DETAIL$ et a été jeté.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "dict_download_network": {
+    "message": "Impossible d'atteindre l'endroit où sont gardés les dictionnaires$DETAIL$. Rien n'a été enregistré.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "dict_download_http": {
+    "message": "Le téléchargement a été refusé$DETAIL$. Le dictionnaire a peut-être été déplacé ; rien n'a été enregistré.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "dict_download_too_big": {
+    "message": "Le téléchargement est bien plus gros qu'un dictionnaire ne devrait l'être$DETAIL$, il a donc été arrêté. Rien n'a été enregistré.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+
+  "model_files_one_of_them": { "message": "l'un des fichiers" },
+  "model_files_empty": { "message": "Aucun fichier n'a été sélectionné." },
+  "model_files_unknown_file": {
+    "message": "Ne fait pas partie d'un modèle : $FILE$. Les noms attendus commencent par model., lex. et vocab.",
+    "placeholders": { "file": { "content": "$1" } }
+  },
+  "model_files_unknown_pair": {
+    "message": "Impossible de dire pour quelles langues est ce fichier : $FILE$.",
+    "placeholders": { "file": { "content": "$1" } }
+  },
+  "model_files_mixed_pairs": {
+    "message": "Ces fichiers appartiennent à plus d'une paire de langues ($PAIRS$). Chargez une direction à la fois.",
+    "placeholders": { "pairs": { "content": "$1" } }
+  },
+  "model_files_missing_model": { "message": "Le fichier du modèle manque (model.<pair>.intgemm.alphas.bin)." },
+  "model_files_missing_shortlist": { "message": "Le fichier shortlist manque (lex.<pair>.s2t.bin)." },
+  "model_files_missing_vocab": { "message": "Le fichier de vocabulaire manque (vocab.<pair>.spm)." },
+  "model_files_not_a_model": { "message": "Ces fichiers ne sont pas un modèle de traduction." },
+
+  "dict_default_name": { "message": "Dictionnaire" },
+  "dict_import_empty": { "message": "Aucun fichier n'a été sélectionné. Rien n'a été enregistré." },
+  "dict_import_missing_ifo": { "message": "Il n'y a pas de fichier .ifo parmi ceux-là, ce n'est donc pas un dictionnaire StarDict. Rien n'a été enregistré." },
+  "dict_import_missing_idx": { "message": "L'index manque (.idx ou .idx.gz). Rien n'a été enregistré." },
+  "dict_import_missing_dict": { "message": "Le corps du dictionnaire manque (.dict ou .dict.dz). Rien n'a été enregistré." },
+  "dict_import_mixed": {
+    "message": "Ces fichiers appartiennent à plus d'un dictionnaire ($NAMES$). Ajoutez-les un à la fois. Rien n'a été enregistré.",
+    "placeholders": { "names": { "content": "$1" } }
+  },
+  "dict_import_not_stardict": { "message": "Ce fichier .ifo n'est pas un dictionnaire StarDict. Rien n'a été enregistré." },
+  "dict_import_not_stardict_detail": {
+    "message": "C'est $KIND$, que cette extension ne sait pas lire. Rien n'a été enregistré.",
+    "placeholders": { "kind": { "content": "$1" } }
+  },
+  "dict_import_unpack": {
+    "message": "Les fichiers sont compressés d'une façon qui n'a pas pu être décompressée$DETAIL$. Rien n'a été enregistré.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "dict_import_no_entries": { "message": "L'index est vide - il n'y a aucun mot dans ce dictionnaire. Rien n'a été enregistré." },
+  "dict_import_no_entries_detail": {
+    "message": "Aucun des $COUNT$ mots de l'index n'a pu être lu, les fichiers ne vont donc pas ensemble. Rien n'a été enregistré.",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "dict_import_unreadable": { "message": "Ces fichiers ne sont pas un dictionnaire que cette extension sait lire. Rien n'a été enregistré." },
+
+  "zip_not_zip": { "message": "Ce qui est arrivé n'est pas une archive zip. Rien n'a été enregistré." },
+  "zip_unsupported": {
+    "message": "L'archive utilise une fonction que cette extension ne lit pas$DETAIL$. Rien n'a été enregistré.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "zip_too_big": {
+    "message": "L'archive est plus grosse qu'un dictionnaire n'a de raison de l'être$DETAIL$. Rien n'a été enregistré.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "zip_bad": {
+    "message": "L'archive est endommagée$DETAIL$. Rien n'a été enregistré - réessayez le téléchargement.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "zip_unreadable": { "message": "L'archive n'a pas pu être lue. Rien n'a été enregistré." },
+
+  "words_one": {
+    "message": "$COUNT$ mot",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "words_many": {
+    "message": "$COUNT$ mots",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "words_other": {
+    "message": "$COUNT$ mots",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "spellings_one": {
+    "message": "$COUNT$ autre graphie",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "spellings_many": {
+    "message": "$COUNT$ autres graphies",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "spellings_other": {
+    "message": "$COUNT$ autres graphies",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+
+  "options_title": { "message": "re/read - paramètres" },
+  "options_version": { "message": "Version" },
+  "options_engine": { "message": "Moteur" },
+  "options_engine_value": { "message": "Bergamot, dans le paquet" },
+  "options_reader_only": { "message": "Seulement dans le lecteur" },
+  "options_reader_only_hint": {
+    "message": "Quand c'est activé, sélectionner sur une page ordinaire ne propose qu'une chose : l'ouvrir dans le lecteur. Traduire, garder et souligner se passent là. Sur Android c'est activé au départ - une bulle sur la sélection et le menu de copie du téléphone se disputent la même place."
+  },
+  "options_models_heading": { "message": "Modèles de traduction" },
+  "options_models_intro": {
+    "message": "Un modèle est ce qui change une langue en une autre, et il y en a un par direction. Rien n'est traduit tant que le modèle de la paire que vous lisez n'est pas ici, sur cet appareil. Chaque direction publiée par Mozilla est listée ; la paire que vous lisez et tout ce qui est déjà enregistré remontent en haut."
+  },
+  "options_filter_placeholder": { "message": "Filtrer par langue ou par code" },
+  "options_filter_models_aria": { "message": "Filtrer la liste des modèles de traduction" },
+  "options_filter_dictionaries_aria": { "message": "Filtrer la liste des dictionnaires" },
+  "options_model_note_from": { "message": "Les modèles sont téléchargés depuis" },
+  "options_model_note_checked": {
+    "message": "- c'est là que Mozilla les publie - à des adresses écrites dans ce paquet. Chaque fichier est vérifié contre une somme de contrôle relevée ici le"
+  },
+  "options_model_note_rest": {
+    "message": "- tout ce qui ne correspond pas est jeté plutôt qu'enregistré. Rien sur vous n'est envoyé : la requête dit quel modèle, et rien d'autre. Cet hôte et celui du catalogue de dictionnaires plus bas sont les deux seuls endroits que cette extension contacte jamais, et aucun avant que vous n'appuyiez sur Télécharger."
+  },
+  "options_add_model_heading": { "message": "Ajouter un modèle depuis des fichiers" },
+  "options_add_model_intro": {
+    "message": "Choisissez les trois fichiers d'une direction et ils sont enregistrés localement. Les fichiers gzip sont décompressés ici, les téléchargements servent donc tels quels :"
+  },
+  "options_add_model_button": { "message": "Ajouter le modèle" },
+  "options_files_note": {
+    "message": "Cette page reste même quand les modèles se téléchargent tout seuls : c'est la sortie de secours pour le jour où l'endroit d'où ils viennent cesse de répondre. Rien ici ne quitte l'appareil, et ajouter un modèle ne fait aucune requête réseau."
+  },
+  "options_dictionaries_heading": { "message": "Dictionnaires" },
+  "options_dictionaries_intro": { "message": "Un dictionnaire répond là où une traduction ne peut pas." },
+  "options_dict_example_word": { "message": "Avocat" },
+  "options_dictionaries_intro_rest": {
+    "message": "a deux entrées, et un modèle doit en choisir une sans savoir laquelle vous vouliez ; un dictionnaire montre les deux. Les entrées apparaissent dans la deuxième couche de la bulle, sous la phrase."
+  },
+  "options_get_dictionary_heading": { "message": "Obtenir un dictionnaire" },
+  "options_wikdict_intro": {
+    "message": "construit des dictionnaires à partir du Wiktionnaire (CC BY-SA) pour chaque paire ci-dessous. Un appui télécharge l'archive, la décompresse ici et l'enregistre ; les langues se lisent sur la paire, et le dictionnaire apparaît dans la liste au-dessus, prêt à répondre."
+  },
+  "options_dictionary_note_from": { "message": "Les dictionnaires sont téléchargés depuis" },
+  "options_dictionary_note_checked": {
+    "message": "- c'est là que WikDict les publie - à des adresses écrites dans ce paquet ; la liste a été vérifiée ici le"
+  },
+  "options_dictionary_note_rest": {
+    "message": "- contrairement aux modèles, aucune somme de contrôle ne les retient : WikDict reconstruit ses fichiers sur place, une somme relevée ici casserait donc à chaque reconstruction. À sa place : le téléchargement doit être un simple zip de fichiers StarDict, il est lu avec autant de méfiance que n'importe quel fichier ajouté à la main, et ce qu'il devient, c'est du texte dans la base locale - jamais du code. Rien sur vous n'est envoyé : la requête dit quel dictionnaire, et rien d'autre."
+  },
+  "options_add_dictionary_heading": { "message": "Ajouter un dictionnaire depuis des fichiers" },
+  "options_stardict_intro": { "message": "Les dictionnaires se lisent au format" },
+  "options_stardict_intro_rest": {
+    "message": "- les mêmes fichiers qu'une liseuse KOReader utilise ; un dictionnaire déjà sur votre liseuse fonctionne donc ici tel quel. Décompressez l'archive dans laquelle il est arrivé et choisissez les fichiers d'un dictionnaire :"
+  },
+  "options_file_ifo": { "message": "- comment le dictionnaire se nomme" },
+  "options_file_idx": { "message": "- l'index des mots" },
+  "options_file_dict_or": { "message": "ou" },
+  "options_file_dict": { "message": "- les entrées" },
+  "options_file_syn": { "message": "- d'autres graphies, quand le dictionnaire en a" },
+  "options_words_in": { "message": "Mots en" },
+  "options_explained_in": { "message": "expliqués en" },
+  "options_add_dictionary_button": { "message": "Ajouter le dictionnaire" },
+  "options_dict_files_note": {
+    "message": "Un fichier StarDict ne dit rien des langues pour lesquelles il est fait, cette part est donc la vôtre ici. Ajouter depuis des fichiers ne fait aucune requête réseau, et ce chemin reste pour le jour où l'hôte du catalogue cesse de répondre : les fichiers de n'importe où fonctionnent, ceux du catalogue compris - ils sont publiés à"
+  },
+  "options_disabled_heading": { "message": "Sites désactivés" },
+  "options_disabled_intro": {
+    "message": "Les sites où re/read reste éteint - pas de soulignements, pas de bulle, rien qui tourne. C'est l'interrupteur du popup de la barre d'outils qui ajoute un site ici ; cette liste est la façon d'en rallumer un sans le visiter."
+  },
+
+  "options_badge_reading": { "message": "ce que vous lisez" },
+  "options_size_here": {
+    "message": "$SIZE$ ici",
+    "placeholders": { "size": { "content": "$1" } }
+  },
+  "options_progress_of": {
+    "message": "$RECEIVED$ sur $TOTAL$",
+    "placeholders": {
+      "received": { "content": "$1" },
+      "total": { "content": "$2" }
+    }
+  },
+  "options_deleted_model": {
+    "message": "Le modèle $PAIR$ a été supprimé.",
+    "placeholders": { "pair": { "content": "$1" } }
+  },
+  "options_downloading_model": {
+    "message": "Téléchargement du modèle $PAIR$ - $SIZE$.",
+    "placeholders": {
+      "pair": { "content": "$1" },
+      "size": { "content": "$2" }
+    }
+  },
+  "options_downloaded_model": {
+    "message": "Modèle $PAIR$ téléchargé, $SIZE$ sur cet appareil.",
+    "placeholders": {
+      "pair": { "content": "$1" },
+      "size": { "content": "$2" }
+    }
+  },
+  "options_store_failed": {
+    "message": "Le modèle s'est téléchargé mais n'a pas pu être enregistré : $DETAIL$",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "options_reading_pair": {
+    "message": "Lecture en $FROM$, traduction en $TO$.",
+    "placeholders": {
+      "from": { "content": "$1" },
+      "to": { "content": "$2" }
+    }
+  },
+  "options_reading_pair_missing": {
+    "message": "Lecture en $FROM$, traduction en $TO$ - et le modèle de cette direction n'est pas encore ici.",
+    "placeholders": {
+      "from": { "content": "$1" },
+      "to": { "content": "$2" }
+    }
+  },
+  "options_no_models": { "message": "Aucun modèle ici, et aucun à télécharger - cette version n'en liste aucun." },
+  "options_filter_no_match_models": { "message": "Aucune paire ne correspond. Le filtre prend un nom de langue ou un code." },
+  "options_filter_no_match_dictionaries": { "message": "Aucun dictionnaire ne correspond. Le filtre prend un nom de langue ou un code." },
+  "options_no_disabled": { "message": "Aucun site n'est désactivé. C'est dans le popup de la barre d'outils que ça se fait." },
+  "options_turn_back_on": { "message": "Réactiver" },
+  "options_reading_model_files": {
+    "message": "Lecture des fichiers pour $PAIR$...",
+    "placeholders": { "pair": { "content": "$1" } }
+  },
+  "options_file_disappeared": {
+    "message": "$NAME$ a disparu pendant la lecture",
+    "placeholders": { "name": { "content": "$1" } }
+  },
+  "options_added_model": {
+    "message": "Modèle $PAIR$ ajouté, $SIZE$ sur cet appareil.",
+    "placeholders": {
+      "pair": { "content": "$1" },
+      "size": { "content": "$2" }
+    }
+  },
+  "options_add_model_failed": {
+    "message": "Le modèle n'a pas pu être ajouté : $DETAIL$",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "options_no_dictionaries": { "message": "Aucun dictionnaire ici. La bulle montre une traduction et rien d'autre." },
+  "options_deleted_dictionary": {
+    "message": "$NAME$ supprimé.",
+    "placeholders": { "name": { "content": "$1" } }
+  },
+  "options_delete_dictionary_failed": {
+    "message": "$NAME$ n'a pas pu être supprimé : $DETAIL$",
+    "placeholders": {
+      "name": { "content": "$1" },
+      "detail": { "content": "$2" }
+    }
+  },
+  "options_no_catalog": { "message": "Aucun dictionnaire à télécharger - cette version n'en liste aucun." },
+  "options_downloading_dictionary": {
+    "message": "Téléchargement du dictionnaire $PAIR$...",
+    "placeholders": { "pair": { "content": "$1" } }
+  },
+  "options_reading_dictionary_progress": {
+    "message": "Lecture de $NAME$ - $DONE$ sur $TOTAL$...",
+    "placeholders": {
+      "name": { "content": "$1" },
+      "done": { "content": "$2" },
+      "total": { "content": "$3" }
+    }
+  },
+  "options_storing_dictionary": {
+    "message": "Enregistrement de $NAME$ - $DONE$ sur $TOTAL$...",
+    "placeholders": {
+      "name": { "content": "$1" },
+      "done": { "content": "$2" },
+      "total": { "content": "$3" }
+    }
+  },
+  "options_added_dictionary": {
+    "message": "$NAME$ ajouté : $WORDS$, $SIZE$.",
+    "placeholders": {
+      "name": { "content": "$1" },
+      "words": { "content": "$2" },
+      "size": { "content": "$3" }
+    }
+  },
+  "options_skipped_entries_one": {
+    "message": "$COUNT$ entrée n'a pas pu être lue et a été laissée de côté.",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "options_skipped_entries_many": {
+    "message": "$COUNT$ entrées n'ont pas pu être lues et ont été laissées de côté.",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "options_skipped_entries_other": {
+    "message": "$COUNT$ entrées n'ont pas pu être lues et ont été laissées de côté.",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "options_add_dictionary_failed": {
+    "message": "Le dictionnaire n'a pas pu être ajouté : $DETAIL$",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "options_reading_file": {
+    "message": "Lecture de $NAME$...",
+    "placeholders": { "name": { "content": "$1" } }
+  },
+  "options_swept_unfinished": {
+    "message": "Un dictionnaire dont l'import n'a jamais fini a été retiré ($NAMES$).",
+    "placeholders": { "names": { "content": "$1" } }
+  }
+}

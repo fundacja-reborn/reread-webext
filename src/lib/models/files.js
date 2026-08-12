@@ -14,6 +14,8 @@
  * wrong in a way no smoke test would catch, so it is the part with tests.
  */
 
+import { t } from "../i18n.js";
+
 /** @typedef {"model" | "shortlist" | "vocab"} Role */
 
 /**
@@ -122,22 +124,23 @@ export function classifyModelFiles(names) {
  * @returns {string} something to show whoever picked the files
  */
 export function describeClassifyProblem(problem, detail) {
+  const file = detail ?? t("model_files_one_of_them");
   switch (problem) {
     case "empty":
-      return "No files were selected.";
+      return t("model_files_empty");
     case "unknown_file":
-      return `Not part of a model: ${detail ?? "one of the files"}. Expected names starting with model., lex. and vocab.`;
+      return t("model_files_unknown_file", file);
     case "unknown_pair":
-      return `Cannot tell which languages this file is for: ${detail ?? "one of the files"}.`;
+      return t("model_files_unknown_pair", file);
     case "mixed_pairs":
-      return `Those files are for more than one language pair (${detail ?? ""}). Load one direction at a time.`;
+      return t("model_files_mixed_pairs", detail ?? "");
     case "missing_model":
-      return "The model file is missing (model.<pair>.intgemm.alphas.bin).";
+      return t("model_files_missing_model");
     case "missing_shortlist":
-      return "The shortlist file is missing (lex.<pair>.s2t.bin).";
+      return t("model_files_missing_shortlist");
     case "missing_vocab":
-      return "The vocabulary file is missing (vocab.<pair>.spm).";
+      return t("model_files_missing_vocab");
     default:
-      return "Those files are not a translation model.";
+      return t("model_files_not_a_model");
   }
 }

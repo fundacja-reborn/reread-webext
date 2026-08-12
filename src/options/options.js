@@ -16,6 +16,7 @@
 
 import { webext } from "../lib/browser.js";
 import { CONFIG_KEY, effectiveReaderOnly, platformOs, readConfig, withDefaults, writeConfig } from "../lib/config.js";
+import { localizePage, plural, t } from "../lib/i18n.js";
 import { languageName, pairLabel } from "../lib/language.js";
 import { catalogDictionaries, catalogSource } from "../lib/dict/catalog.js";
 import { describeDictDownloadProblem, downloadArchive } from "../lib/dict/download.js";
@@ -44,6 +45,10 @@ import { matchesFilter, orderForDisplay, searchableText, sortByLabel } from "./m
  * @type {{ pair: string, controller: AbortController } | null}
  */
 let running = null;
+
+// First, so every row and status below lands on a page already speaking the
+// catalogue's language.
+localizePage();
 
 /** @type {import("../lib/config.js").Config} */
 let config = withDefaults(undefined);
@@ -77,7 +82,13 @@ function fill(id, value) {
  * @returns {string}
  */
 function megabytes(bytes) {
-  return `${(bytes / 1048576).toFixed(1)} MB`;
+  // The reader's own decimal mark: `12.3` where the browser writes dots,
+  // `12,3` where it writes commas. The unit needs no catalogue.
+  const amount = (bytes / 1048576).toLocaleString(undefined, {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  });
+  return `${amount} MB`;
 }
 
 /**
@@ -136,16 +147,16 @@ function renderRow(row) {
   const container = element("div", "model");
   const name = element("span", "model-pair", pairLabel(row.from, row.to));
   if (row.from === config.sourceLang && row.to === config.targetLang) {
-    name.append(element("span", "badge", "what you are reading"));
+    name.append(element("span", "badge", t("options_badge_reading")));
   }
   container.append(name);
 
   if (row.installed !== null) {
-    container.append(element("span", "model-size", `${megabytes(row.installed.bytes)} here`));
+    container.append(element("span", "model-size", t("options_size_here", megabytes(row.installed.bytes))));
 
     const remove = document.createElement("button");
     remove.type = "button";
-    remove.textContent = "Delete";
+    remove.textContent = t("action_delete");
     remove.disabled = running !== null;
     remove.addEventListener("click", () => void removeModel(row));
     container.append(remove);
@@ -161,7 +172,7 @@ function renderRow(row) {
 
   const start = document.createElement("button");
   start.type = "button";
-  start.textContent = "Download";
+  start.textContent = t("action_download");
   start.disabled = running !== null;
   start.addEventListener("click", () => void download(row, available));
   container.append(start);
@@ -188,11 +199,11 @@ function renderDownloading(container, model, controller) {
   bar.max = model.downloadBytes;
   bar.value = 0;
 
-  const size = element("span", "model-size", `0 of ${megabytes(model.downloadBytes)}`);
+  const size = element("span", "model-size", t("options_progress_of", [megabytes(0), megabytes(model.downloadBytes)]));
 
   const cancel = document.createElement("button");
   cancel.type = "button";
-  cancel.textContent = "Cancel";
+  cancel.textContent = t("action_cancel");
   cancel.addEventListener("click", () => {
     cancel.disabled = true;
     controller.abort();
@@ -208,7 +219,7 @@ function renderDownloading(container, model, controller) {
     // only changes every hundred kilobytes of it. Rewriting it anyway would be
     // a thousand pointless relayouts during the one operation that should feel
     // smooth.
-    const text = `${megabytes(received)} of ${megabytes(total)}`;
+    const text = t("options_progress_of", [megabytes(received), megabytes(total)]);
     if (text !== shown) {
       shown = text;
       size.textContent = text;
@@ -222,7 +233,7 @@ function renderDownloading(container, model, controller) {
 async function removeModel(row) {
   if (running !== null) return;
   await deleteModel(row.pair);
-  status(`Deleted the ${pairLabel(row.from, row.to)} model.`);
+  status(t("options_deleted_model", pairLabel(row.from, row.to)));
   await renderModels();
 }
 
@@ -243,7 +254,7 @@ async function download(row, model) {
   await renderModels();
   const container = document.getElementById(`model-${row.pair}`);
   const onProgress = container === null ? undefined : renderDownloading(container, model, controller);
-  status(`Downloading the ${pairLabel(model.from, model.to)} model - ${megabytes(model.downloadBytes)}.`, "busy");
+  status(t("options_downloading_model", [pairLabel(model.from, model.to), megabytes(model.downloadBytes)]), "busy");
 
   const result = await downloadModel(model, { signal: controller.signal, onProgress });
   running = null;
@@ -256,12 +267,12 @@ async function download(row, model) {
 
   try {
     const meta = await putModel(result.value, { from: model.from, to: model.to });
-    status(`Downloaded the ${pairLabel(model.from, model.to)} model, ${megabytes(meta.bytes)} on this device.`);
+    status(t("options_downloaded_model", [pairLabel(model.from, model.to), megabytes(meta.bytes)]));
   } catch (error) {
     // The download was fine; the browser would not keep it. Worth saying apart
     // from a failed download, because the answer is different - space, or a
     // second copy of this page holding the database open.
-    status(`The model downloaded but could not be stored: ${message(error)}`, "error");
+    status(t("options_store_failed", message(error)), "error");
   }
 
   await renderModels();
@@ -311,8 +322,8 @@ async function choosePair(pair) {
   await renderModels();
   status(
     row.installed === null
-      ? `Reading ${languageName(row.from)}, translating into ${languageName(row.to)} - and there is no model for this direction here yet.`
-      : `Reading ${languageName(row.from)}, translating into ${languageName(row.to)}.`,
+      ? t("options_reading_pair_missing", [languageName(row.from), languageName(row.to)])
+      : t("options_reading_pair", [languageName(row.from), languageName(row.to)]),
   );
 }
 
@@ -362,7 +373,7 @@ async function renderModels() {
   container.replaceChildren();
 
   if (rows.length === 0) {
-    container.append(element("p", "empty", "No models here, and none to download - this build lists none."));
+    container.append(element("p", "empty", t("options_no_models")));
     return;
   }
 
@@ -375,7 +386,7 @@ async function renderModels() {
 
   // Lives inside the scrolled frame so that "the filter matched nothing" is
   // said where the missing rows would have been, not somewhere below the box.
-  const none = element("p", "empty", "No pair matches that. The filter takes a language name or a code.");
+  const none = element("p", "empty", t("options_filter_no_match_models"));
   none.id = "model-none";
   none.hidden = true;
   container.append(none);
@@ -394,7 +405,7 @@ function renderDisabledHosts() {
   container.replaceChildren();
 
   if (config.disabledHosts.length === 0) {
-    container.append(element("p", "empty", "No sites are switched off. The toolbar popup is where one is."));
+    container.append(element("p", "empty", t("options_no_disabled")));
     return;
   }
 
@@ -404,7 +415,7 @@ function renderDisabledHosts() {
 
     const restore = document.createElement("button");
     restore.type = "button";
-    restore.textContent = "Turn back on";
+    restore.textContent = t("options_turn_back_on");
     restore.addEventListener("click", () => void restoreHost(host));
     row.append(restore);
     container.append(row);
@@ -456,13 +467,13 @@ async function addSelectedModel() {
   }
 
   const { pair, from, to, byRole } = classified.value;
-  fileStatus(`Reading ${chosen.length} files for ${from} to ${to}...`, "busy");
+  fileStatus(t("options_reading_model_files", pairLabel(from, to)), "busy");
 
   try {
     /** @param {string} name */
     const read = async (name) => {
       const file = chosen.find((candidate) => candidate.name === name);
-      if (file === undefined) throw new Error(`${name} disappeared while reading`);
+      if (file === undefined) throw new Error(t("options_file_disappeared", name));
       return gunzipIfNeeded(await file.arrayBuffer());
     };
 
@@ -471,10 +482,10 @@ async function addSelectedModel() {
 
     const meta = await putModel({ pair, model, shortlist, vocabs }, { from, to });
     if (input !== null) input.value = "";
-    fileStatus(`Added the ${from} to ${to} model, ${megabytes(meta.bytes)} on this device.`);
+    fileStatus(t("options_added_model", [pairLabel(from, to), megabytes(meta.bytes)]));
     await renderModels();
   } catch (error) {
-    fileStatus(`Could not add the model: ${message(error)}`, "error");
+    fileStatus(t("options_add_model_failed", message(error)), "error");
   }
 }
 
@@ -520,7 +531,7 @@ function dictionaryGetStatus(text, tone = "idle") {
  * @returns {string}
  */
 function words(count) {
-  return `${count.toLocaleString()} ${count === 1 ? "word" : "words"}`;
+  return plural(count, "words");
 }
 
 /**
@@ -580,21 +591,21 @@ function renderDictionary(dictionary) {
   const container = element("div", "dictionary");
 
   const name = element("span", "dictionary-name", dictionary.name);
-  const pair = element("span", "badge", `${dictionary.langFrom} to ${dictionary.langTo}`);
+  const pair = element("span", "badge", pairLabel(dictionary.langFrom, dictionary.langTo));
   if (dictionary.langFrom === config.sourceLang) pair.classList.add("badge-on");
   name.append(pair);
   container.append(name);
 
   const counted =
     dictionary.aliasCount > 0
-      ? `${words(dictionary.entryCount)}, ${dictionary.aliasCount.toLocaleString()} other spellings`
+      ? `${words(dictionary.entryCount)}, ${plural(dictionary.aliasCount, "spellings")}`
       : words(dictionary.entryCount);
   container.append(element("span", "model-size", counted));
   container.append(element("span", "model-size", megabytes(dictionary.bytes)));
 
   const remove = document.createElement("button");
   remove.type = "button";
-  remove.textContent = "Delete";
+  remove.textContent = t("action_delete");
   remove.disabled = importing;
   remove.addEventListener("click", () => void removeDictionary(dictionary));
   container.append(remove);
@@ -618,7 +629,7 @@ async function renderDictionaries() {
 
   if (dictionaries.length === 0) {
     container.append(
-      element("p", "empty", "No dictionaries here. The bubble shows a translation and nothing else."),
+      element("p", "empty", t("options_no_dictionaries")),
     );
     return;
   }
@@ -633,9 +644,9 @@ async function removeDictionary(dictionary) {
   if (importing) return;
   try {
     await deleteDictionary(dictionary.id);
-    dictionaryStatus(`Deleted ${dictionary.name}.`);
+    dictionaryStatus(t("options_deleted_dictionary", dictionary.name));
   } catch (error) {
-    dictionaryStatus(`Could not delete ${dictionary.name}: ${message(error)}`, "error");
+    dictionaryStatus(t("options_delete_dictionary_failed", [dictionary.name, message(error)]), "error");
   }
   await renderDictionaries();
 }
@@ -658,7 +669,7 @@ function renderCatalogRow(entry) {
 
   const get = document.createElement("button");
   get.type = "button";
-  get.textContent = "Download";
+  get.textContent = t("action_download");
   get.disabled = running !== null || importing;
   get.addEventListener("click", () => void downloadDictionary(entry));
   container.append(get);
@@ -678,7 +689,7 @@ function renderCatalog() {
   container.replaceChildren();
 
   if (entries.length === 0) {
-    container.append(element("p", "empty", "No dictionaries to download - this build lists none."));
+    container.append(element("p", "empty", t("options_no_catalog")));
     return;
   }
 
@@ -689,7 +700,7 @@ function renderCatalog() {
     container.append(rendered);
   }
 
-  const none = element("p", "empty", "No dictionary matches that. The filter takes a language name or a code.");
+  const none = element("p", "empty", t("options_filter_no_match_dictionaries"));
   none.id = "dictionary-none";
   none.hidden = true;
   container.append(none);
@@ -718,7 +729,7 @@ function renderFetching(container, entry, controller) {
 
   const cancel = document.createElement("button");
   cancel.type = "button";
-  cancel.textContent = "Cancel";
+  cancel.textContent = t("action_cancel");
   cancel.addEventListener("click", () => {
     cancel.disabled = true;
     controller.abort();
@@ -732,7 +743,7 @@ function renderFetching(container, entry, controller) {
       bar.max = total;
       bar.value = received;
     }
-    const text = total > 0 ? `${megabytes(received)} of ${megabytes(total)}` : megabytes(received);
+    const text = total > 0 ? t("options_progress_of", [megabytes(received), megabytes(total)]) : megabytes(received);
     if (text !== shown) {
       shown = text;
       size.textContent = text;
@@ -757,7 +768,7 @@ async function downloadDictionary(entry) {
   const container = document.getElementById(catalogRowId(entry));
   const onProgress = container === null ? undefined : renderFetching(container, entry, controller);
   const label = pairLabel(entry.from, entry.to);
-  dictionaryGetStatus(`Downloading the ${label} dictionary...`, "busy");
+  dictionaryGetStatus(t("options_downloading_dictionary", label), "busy");
 
   try {
     const result = await downloadArchive(entry.url, { signal: controller.signal, onProgress });
@@ -810,7 +821,7 @@ async function storeDictionary(files, { base, langFrom, langTo, say }) {
   try {
     const parsed = await readDictionary(files, {
       fallbackName: base,
-      onProgress: ({ done, total }) => say(`Reading ${base} - ${words(done)} of ${total.toLocaleString()}...`, "busy"),
+      onProgress: ({ done, total }) => say(t("options_reading_dictionary_progress", [base, words(done), total.toLocaleString()]), "busy"),
     });
 
     if (!parsed.ok) {
@@ -829,21 +840,21 @@ async function storeDictionary(files, { base, langFrom, langTo, say }) {
 
     for (let at = 0; at < rows.length; at += ENTRY_BATCH) {
       await putEntries(rows.slice(at, at + ENTRY_BATCH));
-      say(`Storing ${parsed.value.name} - ${Math.min(at + ENTRY_BATCH, rows.length).toLocaleString()} of ${rows.length.toLocaleString()}...`, "busy");
+      say(t("options_storing_dictionary", [parsed.value.name, Math.min(at + ENTRY_BATCH, rows.length).toLocaleString(), rows.length.toLocaleString()]), "busy");
     }
 
     const ready = await finishImport(dictionary.id, { entryCount, aliasCount, bytes: stored });
 
     const unreadable =
-      parsed.value.skipped === 0 ? "" : ` ${parsed.value.skipped.toLocaleString()} entries could not be read and were left out.`;
-    say(`Added ${ready.name}: ${words(ready.entryCount)}, ${megabytes(ready.bytes)}.${unreadable}`);
+      parsed.value.skipped === 0 ? "" : ` ${plural(parsed.value.skipped, "options_skipped_entries")}`;
+    say(t("options_added_dictionary", [ready.name, words(ready.entryCount), megabytes(ready.bytes)]) + unreadable);
     return true;
   } catch (error) {
     // Whatever went wrong, the half-written dictionary is still unready and
     // therefore invisible; this sweeps it away rather than leaving it to the
     // next time this page opens.
     await removeUnfinished().catch(() => []);
-    say(`Could not add the dictionary: ${message(error)}`, "error");
+    say(t("options_add_dictionary_failed", message(error)), "error");
     return false;
   }
 }
@@ -867,13 +878,13 @@ async function addSelectedDictionary() {
   importing = true;
   await renderDictionaries();
   renderCatalog();
-  dictionaryFileStatus(`Reading ${base}...`, "busy");
+  dictionaryFileStatus(t("options_reading_file", base), "busy");
 
   try {
     /** @param {string} name */
     const read = async (name) => {
       const file = chosen.find((candidate) => candidate.name === name);
-      if (file === undefined) throw new Error(`${name} disappeared while reading`);
+      if (file === undefined) throw new Error(t("options_file_disappeared", name));
       return new Uint8Array(await file.arrayBuffer());
     };
 
@@ -887,7 +898,7 @@ async function addSelectedDictionary() {
     const stored = await storeDictionary(bytes, { base, langFrom, langTo, say: dictionaryFileStatus });
     if (stored && input !== null) input.value = "";
   } catch (error) {
-    dictionaryFileStatus(`Could not add the dictionary: ${message(error)}`, "error");
+    dictionaryFileStatus(t("options_add_dictionary_failed", message(error)), "error");
   } finally {
     importing = false;
     await renderDictionaries();
@@ -922,7 +933,7 @@ async function render() {
   const swept = await removeUnfinished().catch(() => []);
   if (swept.length > 0) {
     dictionaryStatus(
-      `Removed a dictionary that was never finished importing (${swept.map((one) => one.name).join(", ")}).`,
+      t("options_swept_unfinished", swept.map((one) => one.name).join(", ")),
     );
   }
   await renderDictionaries();

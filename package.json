@@ -13,7 +13,7 @@
     "build:chromium": "node tools/build.mjs --target=chromium",
     "watch": "node tools/build.mjs --watch",
     "typecheck": "tsc --noEmit",
-    "test": "node --test \"test/**/*.test.js\"",
+    "test": "node --test --import ./test/i18n-en.js \"test/**/*.test.js\"",
     "lint": "npm run build && web-ext lint --source-dir dist/firefox",
     "check": "tools/check.sh",
     "sign": "node tools/sign.mjs",
