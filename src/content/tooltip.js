@@ -30,13 +30,23 @@
  * saving means, it just reports the meanings it is showing the moment they
  * change.
  *
- * It comes in two variants, and they are two answers rather than one layout
- * with buttons hidden inside it (D44). A phrase already kept is a question -
- * what was this again - so `recall` answers it in one line and offers nothing;
- * the row of actions unfolds only when somebody arrives inside the bubble, with
- * a cursor, with a press or with the keyboard. A fresh selection is the other
- * way round: what to do with it is the whole of why the bubble is open, so
- * `save` shows everything from the start.
+ * Everything in it stands in the order of its distance from the phrase (D44):
+ * the gloss on the nearest edge, the actions behind it, the second layer
+ * farthest - and the whole column mirrors when the bubble has to stand below
+ * the phrase. The near edge belongs to the gloss because that edge is the
+ * eye's way back to the line being read, and what should lie on the way back
+ * is the answer, not a row of buttons. On a touch screen the same rule earns
+ * its keep twice: actions on the far edge are also actions away from the
+ * selection handles and from the browser's own bar, both of which crowd the
+ * phrase.
+ *
+ * It comes in two variants, and they are one column told apart by nothing but
+ * its starting state (D44). A phrase already kept is a question - what was
+ * this again - so `recall` opens folded to one line, and the row of actions
+ * unfolds only when somebody arrives inside the bubble, with a cursor, with a
+ * press or with the keyboard. A fresh selection is the other way round: what
+ * to do with it is the whole of why the bubble is open, so `save` opens with
+ * the row already out.
  */
 
 import { MEANING_SEPARATOR, afterChoosing, toMeanings } from "../lib/gloss.js";
@@ -88,8 +98,9 @@ const STYLE = `
 
   .bubble {
     color-scheme: light dark;
-    /* A column, so that one row of it can change sides: the actions unfold
-       above the gloss when the bubble stands above the phrase (order below). */
+    /* A column in the order of distance from the phrase - gloss, actions,
+       second layer - which the mirror below reverses whole when the bubble
+       stands above the phrase. */
     display: flex;
     flex-direction: column;
     font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -114,12 +125,15 @@ const STYLE = `
      would still cost the row of pixels its line-height reserves. */
   .body:empty { display: none; }
 
-  /* Quieter than the gloss and separated from it: this is the sentence the
-     phrase was in, not another meaning of it. */
+  /* Quieter than the gloss and fenced off from the rest: this is the sentence
+     the phrase was in, not another meaning of it. Style and colour go on every
+     edge but width on one, so that the mirror below can move the line to the
+     other side by widths alone and the colour stays one rule per theme. */
   .context {
     margin-top: 8px;
     padding-top: 8px;
-    border-top: 1px solid rgba(0, 0, 0, 0.12);
+    border: 0 solid rgba(0, 0, 0, 0.12);
+    border-top-width: 1px;
     font-size: 13px;
     opacity: 0.85;
   }
@@ -130,7 +144,8 @@ const STYLE = `
   .entries {
     margin-top: 8px;
     padding-top: 8px;
-    border-top: 1px solid rgba(0, 0, 0, 0.12);
+    border: 0 solid rgba(0, 0, 0, 0.12);
+    border-top-width: 1px;
     font-size: 13px;
     max-height: 40vh;
     overflow-y: auto;
@@ -201,15 +216,18 @@ const STYLE = `
     resize: none;
   }
 
-  /* The row of actions, and the whole of the difference between the two
-     variants (D44): there from the start in "save", folded away in "recall"
-     until somebody looks for it. The fold is a grid row going from zero to one
+  /* The row of actions, folded. The fold is a grid row going from zero to one
      fraction - the one way to animate to a height nobody knows in advance - and
      the clipped child below is what makes it read as unfolding rather than as
-     text being squeezed. */
+     text being squeezed. Folded is where every bubble starts, and the whole of
+     the difference between the variants (D44) is when they leave: "recall"
+     waits for somebody to come looking, everything else opens with the
+     revealed class already on (see show), and the fold is never seen. */
   .reveal {
     display: grid;
-    grid-template-rows: 1fr;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transition: grid-template-rows 150ms ease, opacity 150ms ease;
   }
 
   .actions {
@@ -225,15 +243,6 @@ const STYLE = `
   }
   .actions:empty { display: none; }
 
-  /* The launcher is its one button and nothing else, so the row's padding -
-     which exists to stand the row off a gloss that is not there - goes too. */
-  .bubble[data-variant="launcher"] .actions { padding: 0; }
-
-  .bubble[data-variant="recall"] .reveal {
-    grid-template-rows: 0fr;
-    opacity: 0;
-    transition: grid-template-rows 150ms ease, opacity 150ms ease;
-  }
   /* Three ways in, and the class is the one that keeps it: a row that folded
      itself away again on mouseleave would flicker at every brush of the
      bubble's edge, and nothing is gained by taking back an answer somebody has
@@ -244,23 +253,40 @@ const STYLE = `
      A media query on hover bought nothing anyway - a hybrid reports hover:hover
      and would have kept the folding, while its taps emulate :hover and unfold
      it - so one rule for every device is also the only consistent one. */
-  .bubble[data-variant="recall"]:hover .reveal,
-  .bubble[data-variant="recall"]:focus-within .reveal,
-  .bubble[data-variant="recall"].revealed .reveal {
+  .bubble:hover .reveal,
+  .bubble:focus-within .reveal,
+  .bubble.revealed .reveal {
     grid-template-rows: 1fr;
     opacity: 1;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .bubble[data-variant="recall"] .reveal { transition: none; }
+    .reveal { transition: none; }
   }
 
-  /* Above the gloss when the bubble stands above the phrase. The edge nearest
-     the phrase is pinned (see placement), so a row unfolding underneath the
-     gloss would slide the gloss upwards as it appeared - and the line somebody
-     is reading is the one thing here that may not move. */
-  .bubble[data-variant="recall"][data-grow="up"] .reveal { order: -1; }
-  .bubble[data-variant="recall"][data-grow="up"] .actions { padding: 2px 0 8px; }
+  /* The mirror (D44). The edge nearest the phrase is pinned (see placement),
+     and the gloss has to be the thing lying on it, so everything that appears
+     or grows - the row unfolding, the second layer opening behind "More" -
+     lands on the far side of the gloss and moves only the edge away from the
+     line being read. One rule reverses the whole column, which is what keeps
+     the two variants one layout: the same file of elements, read from the
+     phrase outwards. */
+  .bubble[data-grow="up"] { flex-direction: column-reverse; }
+  .bubble[data-grow="up"] .actions { padding: 2px 0 8px; }
+
+  /* Reversing the column moves no borders: the separators in front of the
+     second layer change sides by width, colour and style stay put. */
+  .bubble[data-grow="up"] .context,
+  .bubble[data-grow="up"] .entries {
+    margin: 0 0 8px;
+    padding: 0 0 8px;
+    border-width: 0 0 1px;
+  }
+
+  /* The launcher is its one button and nothing else, so the row's padding -
+     which exists to stand the row off a gloss that is not there - goes too.
+     After the mirror, whose padding this outranks by standing below it. */
+  .bubble[data-variant="launcher"] .actions { padding: 0; }
 
   /* An action is a label and not a control. What makes one findable is standing
      where the reader is already looking; a box around it would make it the
@@ -315,7 +341,8 @@ const STYLE = `
       box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
     }
     .body[data-tone="error"] { color: #f0a83c; }
-    .context, .entries { border-top-color: rgba(255, 255, 255, 0.14); }
+    /* All edges at once: which one carries the line is the mirror's business. */
+    .context, .entries { border-color: rgba(255, 255, 255, 0.14); }
     /* A shadow that reads as depth on white reads as nothing on dark. */
     .entries[data-more="true"] { box-shadow: inset 0 -14px 12px -12px rgba(0, 0, 0, 0.6); }
     .entry-sense[aria-pressed="false"]:hover:not(:disabled) { background: rgba(255, 255, 255, 0.08); }
@@ -566,7 +593,10 @@ export function createTooltip({ onAction }) {
     // here, it never reaches the button it would have pressed.
     bubble.addEventListener("click", onClick, { capture: true });
 
-    bubble.append(bodyElement, contextElement, entriesElement, editor, revealElement);
+    // In the order of their distance from the phrase, which is the one order
+    // the stylesheet's mirror can reverse whole: the gloss and the box that
+    // edits it, then the actions, then the second layer.
+    bubble.append(bodyElement, editor, revealElement, contextElement, entriesElement);
     root.append(bubble);
     // `documentElement` and not `body`: single-page applications replace the
     // body, and a bubble that vanishes with a re-render is a bug nobody can
@@ -929,9 +959,11 @@ export function createTooltip({ onAction }) {
       if (bubble !== null) {
         bubble.dataset["variant"] = variant;
         // The bubble is reused from phrase to phrase, and a row left out was
-        // out for the last one. So is a press that never became a click: a
-        // finger dragged back out of the bubble may not eat the next press.
-        bubble.classList.remove("revealed");
+        // out for the last one. Only recall starts folded: everywhere else the
+        // row is why the bubble is open, so it starts revealed (D44). A press
+        // that never became a click is cleared the same way: a finger dragged
+        // back out of the bubble may not eat the next press.
+        bubble.classList.toggle("revealed", variant !== "recall");
         swallowClick = false;
       }
       // Folded again: this is another phrase, and the sentence behind "More"
