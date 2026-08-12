@@ -8,10 +8,11 @@
  * gzip file with a random-access table in its header, and a reader that only
  * ever wants all of it can let the table go by.
  *
- * Archives are not opened here. StarDict dictionaries are published as
- * `.tar.xz` and `.zip`, and unpacking one is something the operating system
- * already does better than a page could - so the extension asks for the files,
- * not for the archive, and carries no archive code at all.
+ * Archives arrive here already opened. The catalogue downloads WikDict's
+ * `.zip` files and `zip.js` takes them apart; somebody adding files by hand
+ * unpacks the archive themselves. Either way, what this module sees is a set
+ * of named files - `dictionaryFromZip` below is the whole of the difference,
+ * and the two paths share every check after it.
  *
  * Nothing in this module touches the browser or the database, so `node --test`
  * drives every path through it, including the ones a smoke test could never
@@ -124,6 +125,48 @@ export function classifyDictionaryFiles(names) {
       idx: files.idx,
       dict: files.dict,
       ...(files.syn === undefined ? {} : { syn: files.syn }),
+    },
+  };
+}
+
+/**
+ * Sorts the files inside a downloaded archive into the roles of one
+ * dictionary, and hands their bytes over.
+ *
+ * The junk a zip really carries is dropped before classification: resource
+ * forks and folder metadata (`__MACOSX`, names starting with a dot) would
+ * otherwise read as a second dictionary and fail the one-at-a-time rule for
+ * something nobody chose to put there. Real files keep their full archive
+ * paths, so two dictionaries genuinely zipped together still refuse cleanly.
+ *
+ * @param {import("./zip.js").ZipEntry[]} entries
+ * @returns {{ ok: true, value: { base: string, files: DictionaryBytes } } | { ok: false, problem: ImportProblem, detail?: string }}
+ */
+export function dictionaryFromZip(entries) {
+  const usable = entries.filter((entry) => {
+    const leaf = entry.name.split("/").pop() ?? "";
+    return leaf.length > 0 && !leaf.startsWith(".") && !entry.name.split("/").includes("__MACOSX");
+  });
+
+  const classified = classifyDictionaryFiles(usable.map((entry) => entry.name));
+  if (!classified.ok) return classified;
+  const { base, ifo, idx, dict, syn } = classified.value;
+
+  /** @param {string} name */
+  const bytesOf = (name) => /** @type {Uint8Array} */ (usable.find((entry) => entry.name === name)?.bytes);
+
+  return {
+    ok: true,
+    value: {
+      // The base may still carry the folder the archive wraps its files in;
+      // the leaf is what a status line should call the dictionary.
+      base: base.split("/").pop() || base,
+      files: {
+        ifo: bytesOf(ifo),
+        idx: bytesOf(idx),
+        dict: bytesOf(dict),
+        ...(syn === undefined ? {} : { syn: bytesOf(syn) }),
+      },
     },
   };
 }

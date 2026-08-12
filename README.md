@@ -23,7 +23,7 @@ file, so what you collect on an e-reader underlines itself in your browser and b
 | Settings page | shows the language pair, downloads, adds and removes models |
 | Keeping a phrase, correcting what it means, marking it learned | yes |
 | Underlining saved phrases on the pages you read | yes |
-| Dictionaries (StarDict) | imported from files and managed on the settings page |
+| Dictionaries (StarDict) | downloaded from the WikDict catalogue or imported from files |
 | Reader mode | turns the page into an article in the extension's own tab |
 | Toolbar popup | per-site switch, language pair, reader, settings |
 | Import / export (TSV) | not started |
@@ -47,9 +47,11 @@ If you are looking for something to use rather than something to read, come back
 
 ## Privacy, and how to check it
 
-The only network request this extension will ever make is downloading a translation model
-for a language pair, once, when you ask for it. There is nothing else to send and nowhere
-to send it: the page text, your selections and your vocabulary never leave the device.
+This extension contacts exactly two places, both only when you press Download on the
+settings page: Mozilla's bucket for a translation model, and WikDict for a dictionary.
+Every address it is willing to fetch is written down in the package before it ships.
+There is nothing else to send and nowhere to send it: the page text, your selections and
+your vocabulary never leave the device.
 
 That claim is checkable rather than promised - open the network panel in devtools and
 read along, or read the source, which is deliberately shipped unminified.
@@ -144,10 +146,22 @@ They are read in **StarDict** format - `.ifo`, `.idx`, `.dict` or `.dict.dz`, an
 dictionary has one. That is the format [KOReader](https://koreader.rocks/) uses, so a dictionary
 already on your e-reader works here as it is, and the sister project reads the same files.
 
-**Nothing is downloaded, ever.** There is no list of dictionary addresses in this package and no
-request is made for one: you unpack the archive yourself and pick the files on the settings page.
-A dictionary is parsed once, when it is added, and stored as text in the browser's own database -
-nothing reads a dictionary file while you are reading a page.
+The settings page carries a catalogue of [WikDict](https://www.wikdict.com/)'s five-hundred-odd
+pairs: one press downloads the archive from
+<https://download.wikdict.com/dictionaries/stardict/>, unpacks it in the extension and stores
+it. The addresses are written in the package
+([`src/lib/dict/catalog.json`](src/lib/dict/catalog.json)), the request happens only on your
+press, and files you add by hand keep working exactly as before - that path stays as the way
+out on the day the host stops answering.
+
+Honesty requires one distinction here: unlike models, dictionary downloads carry **no pinned
+checksum**. WikDict rebuilds its files in place, so a sum recorded at release would break with
+every rebuild. What stands in its place is that a dictionary is data, not code: the archive
+must be a plain zip of StarDict files ([`src/lib/dict/zip.js`](src/lib/dict/zip.js) reads
+nothing else and verifies the archive's own sizes and CRCs), it goes through the same
+defensive parser as a hand-picked file, and what comes out is text in the browser's own
+database. A dictionary is parsed once, when it is added - nothing reads a dictionary file
+while you are reading a page.
 
 What a dictionary says sits behind **More** in the bubble, and any line of it can be pressed:
 that meaning joins what the phrase is kept under. Press it again to take it back out. This is
@@ -157,9 +171,9 @@ on the card.
 
 For English and Polish, [WikDict](https://www.wikdict.com/page/download) (CC BY-SA, built from
 Wiktionary through DBnary) is the one to start with: 66 609 entries, and another 51 721 spellings
-in its `.syn` file, which is what lets `elevations` find `elevation`. Its StarDict builds for
-every pair sit at <https://download.wikdict.com/dictionaries/stardict/> - the same address the
-settings page points at.
+in its `.syn` file, which is what lets `elevations` find `elevation`. The settings page
+downloads it for you; the files also sit at
+<https://download.wikdict.com/dictionaries/stardict/> for adding by hand.
 
 [FreeDict](https://freedict.org/downloads/) publishes an `eng-pol` dictionary (GPL) too, and its
 **StarDict build is worth checking before you rely on it**: in release 0.2.1, 13 894 of its 15 817
@@ -189,12 +203,14 @@ tools/check.sh       # the quality gate: vendored engine, typecheck, tests, buil
 npm run sign         # gate, then have AMO sign the package (needs credentials, see below)
 
 node tools/models-registry.mjs --all                 # rewrite the model registry (needs the network)
+node tools/wikdict-catalog.mjs                       # rewrite the dictionary catalogue (needs the network)
 ```
 
 `tools/models-registry.mjs` is deliberately outside the gate: `--all` downloads a couple of
 gigabytes to compute the checksums it writes (`--pairs=en-pl,pl-en` narrows it while working on
 one pair). It is run by hand when Mozilla releases or retrains models, and its output is
-committed.
+committed. `tools/wikdict-catalog.mjs` fetches one directory listing and rewrites
+`src/lib/dict/catalog.json` the same way.
 
 `tools/check.sh` is exactly what CI runs. There is no step in one that is missing from
 the other.
