@@ -16,6 +16,7 @@
 
 import { webext } from "../lib/browser.js";
 import { CONFIG_KEY, readConfig, withDefaults, writeConfig } from "../lib/config.js";
+import { languageName, pairLabel } from "../lib/language.js";
 import { classifyDictionaryFiles, describeImportProblem, readDictionary } from "../lib/dict/import.js";
 import { toRows } from "../lib/dict/rows.js";
 import {
@@ -30,6 +31,7 @@ import { describeDownloadProblem, downloadModel } from "../lib/models/download.j
 import { classifyModelFiles, describeClassifyProblem, isGzip } from "../lib/models/files.js";
 import { modelRows, registryModels, registrySource } from "../lib/models/registry.js";
 import { deleteModel, listModels, putModel } from "../lib/models/store.js";
+import { matchesFilter, orderForDisplay, searchableText, sortByLabel } from "./models-view.js";
 
 /**
  * The one download that may be in flight. One at a time on purpose: each holds
@@ -114,7 +116,7 @@ function element(tag, className, text) {
  */
 function renderRow(row) {
   const container = element("div", "model");
-  const name = element("span", "model-pair", `${row.from} to ${row.to}`);
+  const name = element("span", "model-pair", pairLabel(row.from, row.to));
   if (row.from === config.sourceLang && row.to === config.targetLang) {
     name.append(element("span", "badge", "what you are reading"));
   }
@@ -159,7 +161,7 @@ function renderRow(row) {
  */
 function renderDownloading(container, model, controller) {
   container.replaceChildren();
-  container.append(element("span", "model-pair", `${model.from} to ${model.to}`));
+  container.append(element("span", "model-pair", pairLabel(model.from, model.to)));
 
   const bar = document.createElement("progress");
   bar.className = "model-progress";
@@ -200,7 +202,7 @@ function renderDownloading(container, model, controller) {
 async function removeModel(row) {
   if (running !== null) return;
   await deleteModel(row.pair);
-  status(`Deleted the ${row.from} to ${row.to} model.`);
+  status(`Deleted the ${pairLabel(row.from, row.to)} model.`);
   await renderModels();
 }
 
@@ -221,7 +223,7 @@ async function download(row, model) {
   await renderModels();
   const container = document.getElementById(`model-${row.pair}`);
   const onProgress = container === null ? undefined : renderDownloading(container, model, controller);
-  status(`Downloading the ${model.from} to ${model.to} model - ${megabytes(model.downloadBytes)}.`, "busy");
+  status(`Downloading the ${pairLabel(model.from, model.to)} model - ${megabytes(model.downloadBytes)}.`, "busy");
 
   const result = await downloadModel(model, { signal: controller.signal, onProgress });
   running = null;
@@ -234,7 +236,7 @@ async function download(row, model) {
 
   try {
     const meta = await putModel(result.value, { from: model.from, to: model.to });
-    status(`Downloaded the ${model.from} to ${model.to} model, ${megabytes(meta.bytes)} on this device.`);
+    status(`Downloaded the ${pairLabel(model.from, model.to)} model, ${megabytes(meta.bytes)} on this device.`);
   } catch (error) {
     // The download was fine; the browser would not keep it. Worth saying apart
     // from a failed download, because the answer is different - space, or a
@@ -260,15 +262,16 @@ function renderPair(rows) {
   if (!(select instanceof HTMLSelectElement)) return;
 
   const known = rows.some((row) => row.from === config.sourceLang && row.to === config.targetLang);
+  const sorted = sortByLabel(rows);
   const choices = known
-    ? rows
-    : [{ pair: `${config.sourceLang}${config.targetLang}`, from: config.sourceLang, to: config.targetLang }, ...rows];
+    ? sorted
+    : [{ pair: `${config.sourceLang}${config.targetLang}`, from: config.sourceLang, to: config.targetLang }, ...sorted];
 
   select.replaceChildren();
   for (const row of choices) {
     const option = document.createElement("option");
     option.value = row.pair;
-    option.textContent = `${row.from} to ${row.to}`;
+    option.textContent = pairLabel(row.from, row.to);
     option.selected = row.from === config.sourceLang && row.to === config.targetLang;
     select.append(option);
   }
@@ -288,16 +291,40 @@ async function choosePair(pair) {
   await renderModels();
   status(
     row.installed === null
-      ? `Reading ${row.from}, translating into ${row.to} - and there is no model for this direction here yet.`
-      : `Reading ${row.from}, translating into ${row.to}.`,
+      ? `Reading ${languageName(row.from)}, translating into ${languageName(row.to)} - and there is no model for this direction here yet.`
+      : `Reading ${languageName(row.from)}, translating into ${languageName(row.to)}.`,
   );
+}
+
+/**
+ * Hides the rows the filter box rules out. Called on every keystroke and after
+ * every re-render, because a render builds all rows and knows nothing of the
+ * filter - hiding is a separate, cheaper pass over what is already there.
+ */
+function applyFilter() {
+  const container = document.getElementById("models");
+  if (container === null) return;
+
+  const input = document.getElementById("model-filter");
+  const query = input instanceof HTMLInputElement ? input.value : "";
+
+  let visible = 0;
+  for (const row of container.querySelectorAll(".model")) {
+    if (!(row instanceof HTMLElement)) continue;
+    const match = matchesFilter(row.dataset["search"] ?? "", query);
+    row.hidden = !match;
+    if (match) visible += 1;
+  }
+
+  const none = document.getElementById("model-none");
+  if (none !== null) none.hidden = visible > 0;
 }
 
 async function renderModels() {
   const container = document.getElementById("models");
   if (container === null) return;
 
-  const rows = modelRows(await listModels());
+  const rows = orderForDisplay(modelRows(await listModels()), config);
   container.replaceChildren();
 
   if (rows.length === 0) {
@@ -308,8 +335,18 @@ async function renderModels() {
   for (const row of rows) {
     const rendered = renderRow(row);
     rendered.id = `model-${row.pair}`;
+    rendered.dataset["search"] = searchableText(row);
     container.append(rendered);
   }
+
+  // Lives inside the scrolled frame so that "the filter matched nothing" is
+  // said where the missing rows would have been, not somewhere below the box.
+  const none = element("p", "empty", "No pair matches that. The filter takes a language name or a code.");
+  none.id = "model-none";
+  none.hidden = true;
+  container.append(none);
+
+  applyFilter();
 }
 
 /**
@@ -457,7 +494,9 @@ function knownLanguages() {
     languages.add(model.from);
     languages.add(model.to);
   }
-  return [...languages].sort();
+  // By the name on screen, not the code behind it: the select shows "Basque",
+  // and nobody looks for Basque under e.
+  return [...languages].sort((a, b) => languageName(a).localeCompare(languageName(b)));
 }
 
 /**
@@ -472,7 +511,7 @@ function renderLanguageChoices(id, selected) {
   for (const language of knownLanguages()) {
     const option = document.createElement("option");
     option.value = language;
-    option.textContent = language;
+    option.textContent = languageName(language);
     option.selected = language === selected;
     select.append(option);
   }
@@ -683,6 +722,7 @@ webext().storage.onChanged.addListener((changes, area) => {
 });
 
 document.getElementById("add-model")?.addEventListener("click", () => void addSelectedModel());
+document.getElementById("model-filter")?.addEventListener("input", () => applyFilter());
 document.getElementById("add-dictionary")?.addEventListener("click", () => void addSelectedDictionary());
 document.getElementById("pair")?.addEventListener("change", (event) => {
   const select = event.target;

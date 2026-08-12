@@ -50,6 +50,14 @@ const ROLE_ORDER = /** @type {Role[]} */ (["model", "shortlist", "vocab"]);
 const SHA256 = /^[0-9a-f]{64}$/;
 
 /**
+ * @param {string} code
+ * @returns {boolean}
+ */
+function isLanguageCode(code) {
+  return /^[a-z]{2,3}(_[a-z]{4})?$/.test(code);
+}
+
+/**
  * @param {unknown} value
  * @returns {value is number}
  */
@@ -95,8 +103,11 @@ function parseModel(raw, index) {
   if (typeof raw !== "object" || raw === null) return { ok: false, problem: `${where}: not an object` };
   const { pair, from, to, files } = /** @type {Record<string, unknown>} */ (raw);
 
-  if (typeof from !== "string" || typeof to !== "string" || !/^[a-z]{2}$/.test(from) || !/^[a-z]{2}$/.test(to)) {
-    return { ok: false, problem: `${where}: from and to must be two-letter codes` };
+  // The codes Mozilla's index actually uses: two letters mostly, but also
+  // three (`hbs`) and script-suffixed (`zh_hant`). Anything looser than this
+  // is not a language code and would ride along into database keys.
+  if (typeof from !== "string" || typeof to !== "string" || !isLanguageCode(from) || !isLanguageCode(to)) {
+    return { ok: false, problem: `${where}: from and to must be language codes like en or zh_hant` };
   }
   // The pair is the database key, so it is not allowed to be a second opinion
   // about which languages this is: it has to be the two codes, joined.

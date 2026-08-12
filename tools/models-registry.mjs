@@ -17,6 +17,7 @@
 // Usage:
 //   node tools/models-registry.mjs                     # refresh the pairs already listed
 //   node tools/models-registry.mjs --pairs=en-pl,pl-en
+//   node tools/models-registry.mjs --all               # every pair released upstream
 //   node tools/models-registry.mjs --refresh           # ignore the download cache
 //
 // Behind a proxy (the sandbox this repository is developed in is one), Node
@@ -121,9 +122,21 @@ function unpack(bytes) {
 }
 
 /**
+ * When a pair has two released builds, this is the order they are preferred in.
+ *
+ * The memory variant first, because it is the one Mozilla builds for the
+ * bergamot core on constrained runtimes - and our engine is that same core
+ * compiled to WebAssembly, running with a fixed 128 MB workspace. The desktop
+ * `base` builds are 40-60 MB models tuned for Firefox's native engine; where
+ * they appear at all, a memory variant of the same pair sits next to them.
+ */
+const ARCHITECTURE_PREFERENCE = ["base-memory", "tiny", "base"];
+
+/**
  * One pair can have several entries - a desktop build, an Android build, a
- * nightly. Anything not released is not something to point users at, and a
- * choice between two released ones is a decision, not a default: it stops.
+ * nightly. Anything not released is not something to point users at; between
+ * released ones the architecture preference above decides. Two released builds
+ * of the *same* architecture would be a choice with no rule for it: it stops.
  *
  * @param {any[]} entries
  * @param {string} pair
@@ -132,11 +145,19 @@ function unpack(bytes) {
 function pickEntry(entries, pair) {
   const released = entries.filter((entry) => String(entry.releaseStatus ?? "").startsWith("Release"));
   if (released.length === 0) throw new Error(`${pair}: nothing released upstream`);
-  if (released.length > 1) {
+
+  const rank = (/** @type {any} */ entry) => {
+    const at = ARCHITECTURE_PREFERENCE.indexOf(String(entry.architecture ?? ""));
+    return at === -1 ? ARCHITECTURE_PREFERENCE.length : at;
+  };
+  released.sort((a, b) => rank(a) - rank(b));
+
+  const [first, second] = released;
+  if (second !== undefined && rank(first) === rank(second)) {
     const shapes = released.map((entry) => `${entry.architecture} (${entry.releaseStatus})`);
-    throw new Error(`${pair}: more than one released model, pick one by hand: ${shapes.join(", ")}`);
+    throw new Error(`${pair}: more than one released model of the same kind, pick one by hand: ${shapes.join(", ")}`);
   }
-  return released[0];
+  return first;
 }
 
 /**
@@ -189,13 +210,23 @@ async function describeFiles(entry, baseUrl, pair, refresh) {
 }
 
 /**
- * @param {string[]} pairs
+ * @param {string[] | "all"} pairs `"all"` means every pair released upstream
  * @param {boolean} refresh
  */
 async function generate(pairs, refresh) {
   console.log(`reading ${UPSTREAM}`);
   const upstream = JSON.parse((await get(UPSTREAM)).toString("utf8"));
   const baseUrl = String(upstream.baseUrl).replace(/\/$/, "");
+
+  if (pairs === "all") {
+    pairs = Object.entries(upstream.models ?? {})
+      .filter(([, entries]) =>
+        /** @type {any[]} */ (entries).some((entry) => String(entry.releaseStatus ?? "").startsWith("Release")),
+      )
+      .map(([pair]) => pair)
+      .sort();
+    console.log(`--all: ${pairs.length} released pairs upstream`);
+  }
 
   const models = [];
   for (const pair of pairs) {
@@ -260,6 +291,10 @@ async function pairsFromExistingRegistry() {
 const args = process.argv.slice(2);
 const refresh = args.includes("--refresh");
 const asked = args.find((arg) => arg.startsWith("--pairs="))?.slice("--pairs=".length);
-const pairs = asked ? asked.split(",").filter(Boolean) : await pairsFromExistingRegistry();
+const pairs = args.includes("--all")
+  ? "all"
+  : asked
+    ? asked.split(",").filter(Boolean)
+    : await pairsFromExistingRegistry();
 
 await generate(pairs, refresh);

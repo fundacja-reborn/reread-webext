@@ -126,6 +126,11 @@ and of its contents after unpacking - which is why this cannot be Subresource In
 [`tools/models-registry.mjs`](tools/models-registry.mjs) is what downloads a pair and writes the
 entry, and it refuses to do so if its own sum disagrees with the one Mozilla does publish.
 
+The list carries every pair Mozilla has released - around a hundred. Where upstream releases two
+builds of one pair, the registry takes the memory variant: it is the build Mozilla makes for the
+same bergamot core this extension runs, where the larger desktop variant is tuned for Firefox's
+native engine.
+
 Downloading needs no permission the extension does not already have, and adds nothing to the table
 above. It happens on the settings page, while you watch it, and it can be cancelled.
 
@@ -181,12 +186,13 @@ npm start            # build, then launch Firefox with the extension loaded
 tools/check.sh       # the quality gate: vendored engine, typecheck, tests, build, addons-linter
 npm run sign         # gate, then have AMO sign the package (needs credentials, see below)
 
-node tools/models-registry.mjs --pairs=en-pl,pl-en   # rewrite the model registry (needs the network)
+node tools/models-registry.mjs --all                 # rewrite the model registry (needs the network)
 ```
 
-`tools/models-registry.mjs` is deliberately outside the gate: it downloads tens of megabytes to
-compute the checksums it writes. It is run by hand when a pair is added or a model is retrained,
-and its output is committed.
+`tools/models-registry.mjs` is deliberately outside the gate: `--all` downloads a couple of
+gigabytes to compute the checksums it writes (`--pairs=en-pl,pl-en` narrows it while working on
+one pair). It is run by hand when Mozilla releases or retrains models, and its output is
+committed.
 
 `tools/check.sh` is exactly what CI runs. There is no step in one that is missing from
 the other.

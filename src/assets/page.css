@@ -25,6 +25,13 @@
   box-sizing: border-box;
 }
 
+/* Rows are flex containers, and a flex declared by us outranks the browser's
+   own [hidden] { display: none } - without this line the filter would "hide"
+   rows that stay on screen. */
+[hidden] {
+  display: none !important;
+}
+
 body {
   margin: 0 auto;
   padding: 2.5rem 1.5rem 4rem;
@@ -82,6 +89,46 @@ h2 {
   gap: 1rem;
   padding: 0.6rem 0;
   border-bottom: 1px solid var(--page-line);
+}
+
+/* The model list holds every pair Mozilla publishes - a hundred rows - so it
+   scrolls in place instead of owning the page. */
+.models-frame {
+  margin: 0.5rem 0 1rem;
+  padding: 0 0.75rem;
+  max-height: 19rem;
+  overflow-y: auto;
+  border: 1px solid var(--page-line);
+  border-radius: 6px;
+}
+
+.models-frame .model {
+  padding: 0.4rem 0;
+  gap: 0.75rem;
+}
+
+/* The frame's own edge already draws this line. */
+.models-frame .model:last-of-type,
+.models-frame .empty {
+  border-bottom: none;
+}
+
+.models-frame button {
+  padding: 0.2rem 0.7rem;
+}
+
+.model-filter {
+  margin: 1rem 0 0;
+}
+
+.model-filter input {
+  width: 100%;
+  font: inherit;
+  padding: 0.35rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid var(--page-line);
+  background: transparent;
+  color: var(--page-fg);
 }
 
 .model-pair {
