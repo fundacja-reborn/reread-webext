@@ -69,7 +69,7 @@ const TARGETS = /** @type {const} */ (["firefox", "chromium"]);
 
 /**
  * The manifest is written for Firefox, because Firefox is what the MVP targets.
- * Chromium differs in exactly two places, and both are worth seeing side by
+ * Chromium differs in exactly three places, and all are worth seeing side by
  * side rather than hidden in a second copy of the file that would drift.
  *
  * @param {Record<string, unknown>} manifest
@@ -84,6 +84,10 @@ function forTarget(manifest, target) {
   delete patched["browser_specific_settings"];
   // Firefox MV3 runs an event page; Chromium runs a service worker.
   patched["background"] = { service_worker: "background/index.js" };
+  // Gecko-only: theme-aware toolbar icon variants. Chromium flags the key.
+  const action = { .../** @type {Record<string, unknown>} */ (patched["action"]) };
+  delete action["theme_icons"];
+  patched["action"] = action;
   return patched;
 }
 

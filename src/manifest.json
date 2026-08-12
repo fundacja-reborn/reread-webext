@@ -40,10 +40,19 @@
   "action": {
     "default_title": "re/read",
     "default_popup": "popup/index.html",
-    "default_icon": {
-      "48": "assets/icons/icon.svg",
-      "96": "assets/icons/icon.svg"
-    }
+    "default_icon": "assets/icons/icon.svg",
+    "theme_icons": [
+      {
+        "light": "assets/icons/icon-light.svg",
+        "dark": "assets/icons/icon-dark.svg",
+        "size": 16
+      },
+      {
+        "light": "assets/icons/icon-light.svg",
+        "dark": "assets/icons/icon-dark.svg",
+        "size": 32
+      }
+    ]
   },
   "commands": {
     "open-reader": {
