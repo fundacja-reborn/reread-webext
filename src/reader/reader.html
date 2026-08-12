@@ -107,6 +107,34 @@
         </p>
         <p id="library-empty" class="note" hidden></p>
         <ul id="library-rows" class="library-rows"></ul>
+
+        <!--
+          The list as one file and back: a backup, or the way to another
+          browser. The confirm block is the moment of consent - what the file
+          holds, quoted before anything is written - and import only ever
+          adds; the file's rules live in `lib/store/articles-file.js`.
+        -->
+        <div class="library-transfer">
+          <p class="transfer">
+            <button type="button" id="library-export" data-i18n="action_export">Export</button>
+            <button type="button" id="library-import" data-i18n="action_import">Import</button>
+          </p>
+          <p class="hint" data-i18n="reader_transfer_note">
+            One .json file holding every saved article - a backup, or the way to move them to
+            another browser. Importing adds articles this list is missing and never touches a
+            saved one.
+          </p>
+          <input type="file" id="library-import-file" accept=".json,application/json" hidden />
+          <div id="library-import-confirm" class="import-confirm" hidden>
+            <p id="library-import-summary"></p>
+            <ul id="library-import-sample" class="import-sample"></ul>
+            <p class="transfer">
+              <button type="button" id="library-import-run" data-i18n="action_import">Import</button>
+              <button type="button" id="library-import-cancel" data-i18n="action_cancel">Cancel</button>
+            </p>
+          </div>
+          <p id="library-transfer-status" class="status" role="status"></p>
+        </div>
       </section>
 
       <!--

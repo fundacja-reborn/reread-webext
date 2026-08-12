@@ -68,8 +68,8 @@
   },
   "vocab_prev": { "message": "Poprzednia" },
   "vocab_next": { "message": "Następna" },
-  "vocab_export": { "message": "Eksportuj" },
-  "vocab_import": { "message": "Importuj" },
+  "action_export": { "message": "Eksportuj" },
+  "action_import": { "message": "Importuj" },
   "vocab_transfer_note": {
     "message": "Plik .tsv z dwiema kolumnami - ten sam format zapisuje wtyczka KOReadera, a czyta Anki. Import dodaje tylko frazy, których w tej parze nie ma; zapisanych nie zmienia."
   },
@@ -187,6 +187,110 @@
   "reader_empty_none_read": { "message": "Nic nie jest jeszcze oznaczone jako przeczytane." },
   "reader_library_note": {
     "message": "Wszystko tutaj to kopie zapisane na tym urządzeniu - otwierają się bez internetu i zostają, nawet gdy oryginał zniknie."
+  },
+  "reader_transfer_note": {
+    "message": "Jeden plik .json ze wszystkimi zapisanymi artykułami - kopia zapasowa albo przenosiny do innej przeglądarki. Import dodaje tylko artykuły, których tu brakuje; zapisanych nie zmienia."
+  },
+  "reader_import_nothing": { "message": "W tym pliku nie ma artykułów do zaimportowania." },
+  "reader_import_summary_one": {
+    "message": "$NAME$ zawiera $COUNT$ artykuł:",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "name": { "content": "$2", "example": "reread-articles.json" }
+    }
+  },
+  "reader_import_summary_few": {
+    "message": "$NAME$ zawiera $COUNT$ artykuły:",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "name": { "content": "$2", "example": "reread-articles.json" }
+    }
+  },
+  "reader_import_summary_many": {
+    "message": "$NAME$ zawiera $COUNT$ artykułów:",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "name": { "content": "$2", "example": "reread-articles.json" }
+    }
+  },
+  "reader_import_summary_other": {
+    "message": "$NAME$ zawiera $COUNT$ artykułu:",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1,5" },
+      "name": { "content": "$2", "example": "reread-articles.json" }
+    }
+  },
+  "reader_import_added_one": {
+    "message": "Dodano $COUNT$ nowy artykuł.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "reader_import_added_few": {
+    "message": "Dodano $COUNT$ nowe artykuły.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_import_added_many": {
+    "message": "Dodano $COUNT$ nowych artykułów.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_import_added_other": {
+    "message": "Dodano $COUNT$ nowego artykułu.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1,5" }
+    }
+  },
+  "reader_import_skipped_one": {
+    "message": "Pominięto $COUNT$ już zapisany.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "reader_import_skipped_few": {
+    "message": "Pominięto $COUNT$ już zapisane.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_import_skipped_many": {
+    "message": "Pominięto $COUNT$ już zapisanych.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_import_skipped_other": {
+    "message": "Pominięto $COUNT$ już zapisanego.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1,5" }
+    }
+  },
+  "reader_import_unreadable_one": {
+    "message": "Nie dało się odczytać $COUNT$ wpisu.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "reader_import_unreadable_few": {
+    "message": "Nie dało się odczytać $COUNT$ wpisów.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_import_unreadable_many": {
+    "message": "Nie dało się odczytać $COUNT$ wpisów.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_import_unreadable_other": {
+    "message": "Nie dało się odczytać $COUNT$ wpisu.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1,5" }
+    }
   },
 
   "download_cancelled": { "message": "Pobieranie anulowane. Nic nie zapisano." },

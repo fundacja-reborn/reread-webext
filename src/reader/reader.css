@@ -313,6 +313,43 @@ body.reader {
   padding: 0.2rem 0.7rem;
 }
 
+/* Export and import act on the whole list, so they stand under it rather than
+   by any row - and they are interface, not reading, like the segments. */
+.library-transfer {
+  margin-top: 1.5rem;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 0.85rem;
+}
+
+.library-transfer .transfer {
+  display: flex;
+  gap: 0.4rem;
+  margin: 0;
+}
+
+.library-transfer .transfer button {
+  padding: 0.2rem 0.8rem;
+}
+
+/* The offer a picked file becomes: its size, a taste of its titles, and the
+   two buttons that decide. */
+.import-confirm {
+  margin: 1rem 0 0;
+  padding: 0.25rem 1rem 0.75rem;
+  border: 1px solid var(--page-line);
+  border-radius: 8px;
+}
+
+.import-sample {
+  margin: 0;
+  padding-left: 1.25rem;
+  color: var(--page-muted);
+}
+
+.import-sample li {
+  overflow-wrap: anywhere;
+}
+
 .reader-actions {
   display: flex;
   flex-wrap: wrap;

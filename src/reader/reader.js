@@ -24,7 +24,7 @@
 
 import { rescan, start } from "../content/reading.js";
 import { webext } from "../lib/browser.js";
-import { localizePage, t } from "../lib/i18n.js";
+import { localizePage, plural, t } from "../lib/i18n.js";
 import {
   CONFIG_KEY,
   MEASURE,
@@ -39,9 +39,16 @@ import { ErrorCode, Message, asPage, asPageRequest, asResult, ok } from "../lib/
 import { buildArticle } from "../lib/reader/article.js";
 import { READER_SOURCE_KEY, readReaderSource } from "../lib/session.js";
 import {
+  ARTICLES_FILENAME,
+  fromArticlesFile,
+  toArticlesFile,
+} from "../lib/store/articles-file.js";
+import {
+  allArticles,
   deleteArticle,
   getArticle,
   getArticleMeta,
+  importArticles,
   listArticles,
   putArticle,
   setReadAt,
@@ -72,6 +79,21 @@ const librarySegments = document.getElementById("library-segments");
 const libraryNote = document.getElementById("library-note");
 const libraryEmpty = document.getElementById("library-empty");
 const libraryRows = document.getElementById("library-rows");
+const exportButton = /** @type {HTMLButtonElement | null} */ (
+  document.getElementById("library-export")
+);
+const importButton = document.getElementById("library-import");
+const importInput = /** @type {HTMLInputElement | null} */ (
+  document.getElementById("library-import-file")
+);
+const importConfirm = document.getElementById("library-import-confirm");
+const importSummary = document.getElementById("library-import-summary");
+const importSample = document.getElementById("library-import-sample");
+const importRun = /** @type {HTMLButtonElement | null} */ (
+  document.getElementById("library-import-run")
+);
+const importCancel = document.getElementById("library-import-cancel");
+const transferLine = document.getElementById("library-transfer-status");
 const actions = document.getElementById("actions");
 const toLibraryButton = document.getElementById("to-library");
 const keepButton = document.getElementById("keep");
@@ -104,6 +126,23 @@ let segment = Segment.UNREAD;
 let epoch = 0;
 
 /**
+ * The file waiting for the reader's yes: its name, its articles as parsed,
+ * and how many entries were not articles at all. State rather than DOM for
+ * the same reason the saved-phrases page keeps its offer as state - a list
+ * refresh must not eat it.
+ *
+ * @type {{
+ *   name: string,
+ *   articles: import("../lib/store/saved-article.js").SavedArticle[],
+ *   invalid: number,
+ * } | null}
+ */
+let pendingImport = null;
+
+/** How many titles the confirmation quotes before asking. */
+const SAMPLE_TITLES = 3;
+
+/**
  * @param {string} text
  */
 function showNotice(text) {
@@ -114,6 +153,20 @@ function showNotice(text) {
 
 function hideNotice() {
   if (notice !== null) notice.hidden = true;
+}
+
+/**
+ * The transfer's own status line, under its own buttons - an import report
+ * in the top notice would be an answer far from its question.
+ *
+ * @param {string} text
+ * @param {"error"} [tone]
+ */
+function transferStatus(text, tone) {
+  if (transferLine === null) return;
+  transferLine.textContent = text;
+  if (tone === undefined) delete transferLine.dataset["tone"];
+  else transferLine.dataset["tone"] = tone;
 }
 
 /**
@@ -330,6 +383,10 @@ async function refreshLibrary() {
   // it. Over an empty list the empty sentence carries the same promise.
   if (libraryNote !== null) libraryNote.hidden = metas.length === 0;
 
+  // Exporting nothing would download an empty file; the button says so first.
+  // On whether anything is saved at all, like the note - not on the segment.
+  if (exportButton !== null) exportButton.disabled = metas.length === 0;
+
   if (rows.length === 0) {
     libraryEmpty.textContent = emptySentence(metas.length, segment);
     libraryEmpty.hidden = false;
@@ -375,6 +432,110 @@ function libraryRow(meta) {
 
   item.append(open, remove);
   return item;
+}
+
+/**
+ * The whole list as one file - fresh from the database rather than from the
+ * rows on screen, because the screen shows one segment and an export is the
+ * list, not the view. Downloading is a blob and an anchor; no permission asks
+ * for less.
+ */
+async function exportList() {
+  try {
+    const articles = await allArticles();
+    if (articles.length === 0) return;
+    const url = URL.createObjectURL(
+      new Blob([toArticlesFile(articles)], { type: "application/json" }),
+    );
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = ARTICLES_FILENAME;
+    anchor.click();
+    // The URL has to outlive the click long enough for the download to take
+    // it. A minute is comfortably that, and then the blob can go.
+    setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    transferStatus("");
+  } catch {
+    transferStatus(describeError(ErrorCode.INTERNAL), "error");
+  }
+}
+
+/**
+ * @param {File} file
+ */
+async function offerImport(file) {
+  try {
+    const parsed = fromArticlesFile(await file.text());
+    if (parsed.articles.length === 0) {
+      pendingImport = null;
+      renderImportOffer();
+      transferStatus(t("reader_import_nothing"), "error");
+      return;
+    }
+    pendingImport = { name: file.name, articles: parsed.articles, invalid: parsed.invalid };
+    transferStatus("");
+    renderImportOffer();
+  } catch {
+    pendingImport = null;
+    renderImportOffer();
+    transferStatus(describeError(ErrorCode.INTERNAL), "error");
+  }
+}
+
+/**
+ * The moment of consent: what the file holds, before anything is written.
+ * Titles came from somebody's page once, so they enter as text - the same
+ * `textContent` rule as the rows above.
+ */
+function renderImportOffer() {
+  if (importConfirm === null) return;
+  importConfirm.hidden = pendingImport === null;
+  if (pendingImport === null) return;
+
+  if (importSummary !== null) {
+    importSummary.textContent = plural(pendingImport.articles.length, "reader_import_summary", [
+      pendingImport.name,
+    ]);
+  }
+
+  if (importSample !== null) {
+    importSample.replaceChildren();
+    for (const article of pendingImport.articles.slice(0, SAMPLE_TITLES)) {
+      const item = document.createElement("li");
+      item.textContent = article.title;
+      importSample.append(item);
+    }
+  }
+}
+
+function closeImportOffer() {
+  pendingImport = null;
+  renderImportOffer();
+}
+
+async function runImport() {
+  if (pendingImport === null || importRun === null) return;
+  const offered = pendingImport;
+  importRun.disabled = true;
+  try {
+    const report = await importArticles(offered.articles);
+
+    // "Added 12, skipped 3" is the whole reason to trust an import that
+    // says nothing else - the same report the phrase import gives.
+    const sentences = [plural(report.added, "reader_import_added")];
+    if (report.skipped > 0) sentences.push(plural(report.skipped, "reader_import_skipped"));
+    if (offered.invalid > 0) sentences.push(plural(offered.invalid, "reader_import_unreadable"));
+    transferStatus(sentences.join(" "));
+
+    closeImportOffer();
+    await refreshLibrary();
+  } catch {
+    // The offer stays open: an error must not eat the file the reader
+    // already picked and read.
+    transferStatus(t("reader_list_write_failed"), "error");
+  } finally {
+    importRun.disabled = false;
+  }
 }
 
 /**
@@ -610,6 +771,25 @@ libraryRows?.addEventListener("click", (event) => {
     return;
   }
   void openSaved(url);
+});
+
+exportButton?.addEventListener("click", () => void exportList());
+
+importButton?.addEventListener("click", () => importInput?.click());
+
+importInput?.addEventListener("change", () => {
+  if (importInput === null) return;
+  const file = importInput.files?.[0];
+  // Cleared so that the same file, picked again, fires this again.
+  importInput.value = "";
+  if (file !== undefined) void offerImport(file);
+});
+
+importRun?.addEventListener("click", () => void runImport());
+
+importCancel?.addEventListener("click", () => {
+  closeImportOffer();
+  transferStatus("");
 });
 
 toLibraryButton?.addEventListener("click", () => {

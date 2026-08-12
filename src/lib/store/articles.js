@@ -18,6 +18,7 @@
  * database directly is the same call D14 made for models.
  */
 
+import { importPlan } from "./articles-file.js";
 import { asSavedMeta } from "./saved-article.js";
 
 const DB_NAME = "reread-articles";
@@ -161,6 +162,67 @@ export async function getArticle(url) {
     dir: typeof dir === "string" && dir.length > 0 ? dir : null,
     lang: typeof lang === "string" && lang.length > 0 ? lang : null,
   };
+}
+
+/**
+ * Every saved article whole, for the export file: both stores read in one
+ * readonly transaction and joined by address. A torn row - either half missing
+ * or unreadable - is left out rather than exported half, the same reading
+ * `getArticle` gives one.
+ *
+ * @returns {Promise<SavedArticle[]>}
+ */
+export async function allArticles() {
+  const { metas, stored } = await withStores("readonly", async (metaStore, contentStore) => ({
+    metas: /** @type {unknown[]} */ (await promisify(metaStore.getAll())),
+    stored: /** @type {unknown[]} */ (await promisify(contentStore.getAll())),
+  }));
+
+  /** @type {Map<string, { content: string, dir: string | null, lang: string | null }>} */
+  const contents = new Map();
+  for (const row of stored) {
+    if (typeof row !== "object" || row === null) continue;
+    const { url, content, dir, lang } = /** @type {Record<string, unknown>} */ (row);
+    if (typeof url !== "string" || typeof content !== "string" || content.length === 0) continue;
+    contents.set(url, {
+      content,
+      dir: typeof dir === "string" && dir.length > 0 ? dir : null,
+      lang: typeof lang === "string" && lang.length > 0 ? lang : null,
+    });
+  }
+
+  /** @type {SavedArticle[]} */
+  const articles = [];
+  for (const row of metas) {
+    const meta = asSavedMeta(row);
+    if (meta === null) continue;
+    const held = contents.get(meta.url);
+    if (held !== undefined) articles.push({ ...meta, ...held });
+  }
+  return articles;
+}
+
+/**
+ * Adds a file's worth of articles - and only adds: which rows that means is
+ * `importPlan`'s decision, held down by its own tests. The look at what exists
+ * and the writes share one readwrite transaction, so an article saved from
+ * another tab between the two cannot end up written twice - the database's
+ * one-row-per-address invariant is checked where it is enforced.
+ *
+ * @param {SavedArticle[]} articles
+ * @returns {Promise<{ added: number, skipped: number }>}
+ */
+export async function importArticles(articles) {
+  return await withStores("readwrite", async (metaStore, contentStore) => {
+    const keys = /** @type {IDBValidKey[]} */ (await promisify(metaStore.getAllKeys()));
+    const { toAdd, skipped } = importPlan(keys.map(String), articles);
+    for (const article of toAdd) {
+      const { content, dir, lang, ...meta } = article;
+      await promisify(metaStore.put(meta));
+      await promisify(contentStore.put({ url: article.url, content, dir, lang }));
+    }
+    return { added: toAdd.length, skipped };
+  });
 }
 
 /**
