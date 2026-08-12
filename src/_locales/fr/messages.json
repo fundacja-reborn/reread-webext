@@ -2,7 +2,7 @@
   "locale_code": { "message": "fr" },
 
   "extension_description": {
-    "message": "Apprenez une langue en lisant le web. Traduction, vocabulaire et surlignage, le tout sur votre propre appareil."
+    "message": "Apprenez une langue en lisant le web. Traduction, vocabulaire et liste de lecture hors ligne - rien ne quitte votre appareil."
   },
 
   "pair_label": {
@@ -15,7 +15,7 @@
 
   "settings": { "message": "Paramètres" },
   "language_pair": { "message": "Paire de langues" },
-  "reading_list": { "message": "Liste de lecture" },
+  "reading_list": { "message": "Liste de lecture hors ligne" },
   "open_reader": { "message": "Lire cette page dans le lecteur" },
   "action_delete": { "message": "Supprimer" },
   "action_download": { "message": "Télécharger" },
@@ -70,11 +70,14 @@
   "reader_no_article": { "message": "Aucun article à trouver sur cette page." },
   "reader_list_write_failed": { "message": "La liste de lecture n'a pas pu être écrite." },
   "reader_empty_none": {
-    "message": "Rien n'est encore enregistré - ouvrez un article dans le lecteur et appuyez sur « $BUTTON$ ».",
+    "message": "Rien n'est encore enregistré - ouvrez un article dans le lecteur et appuyez sur « $BUTTON$ ». Une page enregistrée reste sur cet appareil et s'ouvre même sans connexion.",
     "placeholders": { "button": { "content": "$1", "example": "Enregistrer dans la liste de lecture" } }
   },
   "reader_empty_all_read": { "message": "Plus rien à lire - tout ce qui est enregistré est marqué comme lu." },
   "reader_empty_none_read": { "message": "Rien n'est encore marqué comme lu." },
+  "reader_library_note": {
+    "message": "Tout ici est une copie gardée sur cet appareil - elle s'ouvre sans connexion et reste, même si la page d'origine disparaît."
+  },
 
   "download_cancelled": { "message": "Téléchargement annulé. Rien n'a été enregistré." },
   "download_failed": { "message": "Le téléchargement ne s'est pas terminé, et rien n'a été enregistré." },
@@ -196,16 +199,19 @@
   },
 
   "options_title": { "message": "re/read - paramètres" },
+  "options_local_intro": {
+    "message": "Tout ce que fait re/read se passe sur cet appareil : la traduction, le dictionnaire, la liste de lecture, les phrases enregistrées. Rien de ce que vous lisez ou sélectionnez n'est envoyé nulle part. Le seul réseau que cette extension utilise, ce sont les téléchargements de cette page - un modèle de traduction choisi par vous, ou un dictionnaire, jamais sans votre clic."
+  },
   "options_version": { "message": "Version" },
   "options_engine": { "message": "Moteur" },
-  "options_engine_value": { "message": "Bergamot, dans le paquet" },
+  "options_engine_value": { "message": "Bergamot, dans le paquet - traduit hors ligne" },
   "options_reader_only": { "message": "Seulement dans le lecteur" },
   "options_reader_only_hint": {
     "message": "Quand c'est activé, sélectionner sur une page ordinaire ne propose qu'une chose : l'ouvrir dans le lecteur. Traduire, garder et souligner se passent là. Sur Android c'est activé au départ - une bulle sur la sélection et le menu de copie du téléphone se disputent la même place."
   },
   "options_models_heading": { "message": "Modèles de traduction" },
   "options_models_intro": {
-    "message": "Un modèle est ce qui change une langue en une autre, et il y en a un par direction. Rien n'est traduit tant que le modèle de la paire que vous lisez n'est pas ici, sur cet appareil. Chaque direction publiée par Mozilla est listée ; la paire que vous lisez et tout ce qui est déjà enregistré remontent en haut."
+    "message": "Un modèle est ce qui change une langue en une autre, et il y en a un par direction. Mozilla les construit et les publie - les mêmes modèles avec lesquels Firefox lui-même traduit les pages. Rien n'est traduit tant que le modèle de la paire que vous lisez n'est pas ici, sur cet appareil. Chaque direction publiée par Mozilla est listée ; la paire que vous lisez et tout ce qui est déjà enregistré remontent en haut."
   },
   "options_filter_placeholder": { "message": "Filtrer par langue ou par code" },
   "options_filter_models_aria": { "message": "Filtrer la liste des modèles de traduction" },

@@ -6,6 +6,8 @@ open afterwards, and one click marks it learned and makes the underline go away.
 
 All of it happens on your device. The translation engine runs locally, the vocabulary
 lives in the browser's own storage, and nothing you read or select is ever sent anywhere.
+Once a model is here, translating needs no network at all, and pages saved to the reading
+list are full copies - readable offline, even after the original disappears.
 
 Sister project of [offlinetranslate-koplugin](https://github.com/fundacja-reborn/offlinetranslate-koplugin),
 which does the same thing for KOReader. The two exchange vocabulary through the same TSV

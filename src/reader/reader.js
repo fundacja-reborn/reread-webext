@@ -69,6 +69,7 @@ const sizeValue = document.getElementById("size-value");
 const measureValue = document.getElementById("measure-value");
 const library = document.getElementById("library");
 const librarySegments = document.getElementById("library-segments");
+const libraryNote = document.getElementById("library-note");
 const libraryEmpty = document.getElementById("library-empty");
 const libraryRows = document.getElementById("library-rows");
 const actions = document.getElementById("actions");
@@ -323,6 +324,11 @@ async function refreshLibrary() {
   for (const button of librarySegments?.querySelectorAll("button[data-segment]") ?? []) {
     button.setAttribute("aria-pressed", String(button.getAttribute("data-segment") === segment));
   }
+
+  // The offline note hangs on whether anything is saved at all, not on the
+  // tab in view: it describes the place, and switching tabs should not blink
+  // it. Over an empty list the empty sentence carries the same promise.
+  if (libraryNote !== null) libraryNote.hidden = metas.length === 0;
 
   if (rows.length === 0) {
     libraryEmpty.textContent = emptySentence(metas.length, segment);

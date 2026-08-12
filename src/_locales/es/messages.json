@@ -2,7 +2,7 @@
   "locale_code": { "message": "es" },
 
   "extension_description": {
-    "message": "Aprende un idioma mientras lees la web. Traducción, vocabulario y subrayado, todo en tu propio dispositivo."
+    "message": "Aprende un idioma mientras lees la web. Traducción, vocabulario y lista de lectura sin conexión - nada sale de tu dispositivo."
   },
 
   "pair_label": {
@@ -15,7 +15,7 @@
 
   "settings": { "message": "Ajustes" },
   "language_pair": { "message": "Par de idiomas" },
-  "reading_list": { "message": "Lista de lectura" },
+  "reading_list": { "message": "Lista de lectura sin conexión" },
   "open_reader": { "message": "Leer esta página en el lector" },
   "action_delete": { "message": "Eliminar" },
   "action_download": { "message": "Descargar" },
@@ -70,11 +70,14 @@
   "reader_no_article": { "message": "No se encontró ningún artículo en esa página." },
   "reader_list_write_failed": { "message": "No se pudo escribir la lista de lectura." },
   "reader_empty_none": {
-    "message": "Aún no hay nada guardado - abre un artículo en el lector y pulsa «$BUTTON$».",
+    "message": "Aún no hay nada guardado - abre un artículo en el lector y pulsa «$BUTTON$». Una página guardada se queda en este dispositivo y se abre incluso sin conexión.",
     "placeholders": { "button": { "content": "$1", "example": "Guardar en la lista de lectura" } }
   },
   "reader_empty_all_read": { "message": "No queda nada por leer - todo lo guardado está marcado como leído." },
   "reader_empty_none_read": { "message": "Aún no hay nada marcado como leído." },
+  "reader_library_note": {
+    "message": "Todo lo de aquí es una copia guardada en este dispositivo - se abre sin conexión y permanece aunque la página original desaparezca."
+  },
 
   "download_cancelled": { "message": "Descarga cancelada. No se guardó nada." },
   "download_failed": { "message": "La descarga no terminó y no se guardó nada." },
@@ -196,16 +199,19 @@
   },
 
   "options_title": { "message": "re/read - ajustes" },
+  "options_local_intro": {
+    "message": "Todo lo que hace re/read ocurre en este dispositivo: la traducción, el diccionario, la lista de lectura, tus frases guardadas. Nada de lo que lees o seleccionas se envía a ninguna parte. La única red que usa esta extensión son las descargas de esta página - un modelo de traducción elegido por ti, o un diccionario, nunca sin tu clic."
+  },
   "options_version": { "message": "Versión" },
   "options_engine": { "message": "Motor" },
-  "options_engine_value": { "message": "Bergamot, dentro del paquete" },
+  "options_engine_value": { "message": "Bergamot, dentro del paquete - traduce sin conexión" },
   "options_reader_only": { "message": "Solo en el lector" },
   "options_reader_only_hint": {
     "message": "Con esto activado, seleccionar en una página normal ofrece una sola cosa: abrirla en el lector. Traducir, guardar y subrayar pasan allí. En Android empieza activado - una burbuja sobre la selección y el propio menú de copiar del teléfono pelean por el mismo sitio."
   },
   "options_models_heading": { "message": "Modelos de traducción" },
   "options_models_intro": {
-    "message": "Un modelo es lo que convierte un idioma en otro, y hay uno por dirección. No se traduce nada hasta que el modelo del par que estás leyendo esté aquí, en este dispositivo. Se lista cada dirección que publica Mozilla; el par que estás leyendo y lo ya guardado suben arriba."
+    "message": "Un modelo es lo que convierte un idioma en otro, y hay uno por dirección. Mozilla los crea y los publica - los mismos modelos con los que el propio Firefox traduce páginas. No se traduce nada hasta que el modelo del par que estás leyendo esté aquí, en este dispositivo. Se lista cada dirección que publica Mozilla; el par que estás leyendo y lo ya guardado suben arriba."
   },
   "options_filter_placeholder": { "message": "Filtra por idioma o código" },
   "options_filter_models_aria": { "message": "Filtrar la lista de modelos de traducción" },
