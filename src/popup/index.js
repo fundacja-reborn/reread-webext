@@ -21,7 +21,7 @@
  */
 
 import { webext } from "../lib/browser.js";
-import { readConfig, writeConfig } from "../lib/config.js";
+import { effectiveReaderOnly, platformOs, readConfig, writeConfig } from "../lib/config.js";
 import { pairLabel } from "../lib/language.js";
 import { listModels } from "../lib/models/store.js";
 import { Message, asPageInfo, asResult } from "../lib/protocol.js";
@@ -34,6 +34,7 @@ const siteToggle = /** @type {HTMLInputElement | null} */ (document.getElementBy
 const pairSelect = /** @type {HTMLSelectElement | null} */ (document.getElementById("pair"));
 const readerButton = document.getElementById("open-reader");
 const settingsButton = document.getElementById("open-settings");
+const modeLine = document.getElementById("mode-line");
 
 /** The tab under the popup, and what it said about itself. */
 /** @type {{ tabId: number | null, hostname: string | null }} */
@@ -152,15 +153,27 @@ siteToggle?.addEventListener("change", () => void toggleSite());
 pairSelect?.addEventListener("change", () => void choosePair());
 readerButton?.addEventListener("click", () => void openReader());
 settingsButton?.addEventListener("click", () => void openSettings());
+// The status line is also the shortest way to where the mode is changed.
+modeLine?.addEventListener("click", () => void openSettings());
 
 async function render() {
-  const [config, installed, tabId] = await Promise.all([
+  const [config, installed, tabId, os] = await Promise.all([
     readConfig(),
     // A database that cannot be opened leaves the popup a select with only the
     // configured pair in it - poorer than the settings page, still standing.
     listModels().catch(() => []),
     currentTabId(),
+    platformOs(),
   ]);
+
+  // The stylesheet reads the platform off the body: on Android the popup is a
+  // page over the whole window and fills it, on desktop it is a panel that
+  // measures the page. Which is which is runtime knowledge, not a media query.
+  document.body.dataset["os"] = os;
+  // Whether ordinary pages only offer the reader. On Android this popup is the
+  // extension's main surface, so the mode must be readable from it - and the
+  // per-site switch above stays: in this mode it silences the launcher.
+  if (modeLine !== null) modeLine.hidden = !effectiveReaderOnly(config, os);
 
   over.tabId = tabId;
   choices = pairChoices(config, installed);

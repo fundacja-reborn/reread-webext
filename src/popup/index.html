@@ -2,6 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    <!-- On Android the popup opens as a page over the whole window, and a page
+         without this meta is laid out at 980px and shrunk to fit. The desktop
+         panel ignores it. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>re/read</title>
     <link rel="stylesheet" href="../assets/page.css" />
     <link rel="stylesheet" href="popup.css" />
@@ -26,6 +30,13 @@
       Read this page in the reader
     </button>
     <button type="button" class="popup-row popup-action" id="open-settings">Settings</button>
+
+    <!-- Below the four rows, and only while the mode is on: on Android the
+         popup is the extension's main surface, and the mode has to be readable
+         from it. Pressing it leads where the mode is changed. -->
+    <button type="button" class="popup-row popup-action popup-mode" id="mode-line" hidden>
+      Mode: only in the reader
+    </button>
 
     <script src="index.js" defer></script>
   </body>

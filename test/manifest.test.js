@@ -52,4 +52,15 @@ describe("the manifest that gets signed", () => {
       required: ["none"],
     });
   });
+
+  it("declares Android with the same floor as the desktop", async () => {
+    const { browser_specific_settings } = await json("../src/manifest.json");
+    // One floor on purpose: what sets it - the Custom Highlight API and the
+    // data-collection key - is the same on a phone, and two numbers would be
+    // two places for one requirement to rot in.
+    assert.equal(
+      browser_specific_settings.gecko_android.strict_min_version,
+      browser_specific_settings.gecko.strict_min_version,
+    );
+  });
 });

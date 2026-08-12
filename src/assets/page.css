@@ -270,6 +270,19 @@ select {
   color: var(--page-fg);
 }
 
+/* A sentence hanging off the row above it - an explanation, not a status, so
+   it has no tones and never disappears. */
+.hint {
+  margin: 0.5rem 0 0;
+  color: var(--page-muted);
+  font-size: 0.9rem;
+}
+
+input[type="checkbox"] {
+  margin: 0;
+  accent-color: var(--page-accent);
+}
+
 .status:empty {
   display: none;
 }
