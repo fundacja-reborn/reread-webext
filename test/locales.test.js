@@ -16,7 +16,7 @@ import { fileURLToPath } from "node:url";
 import { join } from "node:path";
 
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
-const LOCALES = ["de", "en", "es", "fr", "pl"];
+const LOCALES = ["de", "en", "es", "fr", "pl", "uk"];
 const PLURAL_CATEGORIES = ["one", "few", "many", "other"];
 
 /** @typedef {{ message: string, placeholders?: Record<string, { content: string }> }} Entry */
