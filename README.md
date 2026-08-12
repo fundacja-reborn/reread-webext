@@ -157,7 +157,9 @@ on the card.
 
 For English and Polish, [WikDict](https://www.wikdict.com/page/download) (CC BY-SA, built from
 Wiktionary through DBnary) is the one to start with: 66 609 entries, and another 51 721 spellings
-in its `.syn` file, which is what lets `elevations` find `elevation`.
+in its `.syn` file, which is what lets `elevations` find `elevation`. Its StarDict builds for
+every pair sit at <https://download.wikdict.com/dictionaries/stardict/> - the same address the
+settings page points at.
 
 [FreeDict](https://freedict.org/downloads/) publishes an `eng-pol` dictionary (GPL) too, and its
 **StarDict build is worth checking before you rely on it**: in release 0.2.1, 13 894 of its 15 817
