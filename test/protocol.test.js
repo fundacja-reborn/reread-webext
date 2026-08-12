@@ -113,6 +113,7 @@ describe("asRequest", () => {
     for (const kind of [
       Message.OPEN_READER,
       Message.OPEN_LIBRARY,
+      Message.OPEN_VOCABULARY,
       Message.OPEN_SETTINGS,
       Message.LIST_PHRASES,
     ]) {
@@ -124,6 +125,14 @@ describe("asRequest", () => {
     // The whole point of the kind is that it is not about any tab.
     assert.deepEqual(asRequest({ kind: Message.OPEN_LIBRARY, sourceTabId: 42 }), {
       kind: Message.OPEN_LIBRARY,
+    });
+  });
+
+  it("lets open-vocabulary carry nothing even when something was sent along", () => {
+    // Same rule as the reading list: the page shows the configured pair, and
+    // neither a tab nor a pair may ride in.
+    assert.deepEqual(asRequest({ kind: Message.OPEN_VOCABULARY, sourceTabId: 42, pair: "enpl" }), {
+      kind: Message.OPEN_VOCABULARY,
     });
   });
 

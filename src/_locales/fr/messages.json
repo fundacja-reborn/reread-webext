@@ -16,10 +16,12 @@
   "settings": { "message": "Paramètres" },
   "language_pair": { "message": "Paire de langues" },
   "reading_list": { "message": "Liste de lecture hors ligne" },
+  "saved_phrases": { "message": "Phrases enregistrées" },
   "open_reader": { "message": "Lire cette page dans le lecteur" },
   "action_delete": { "message": "Supprimer" },
   "action_download": { "message": "Télécharger" },
   "action_cancel": { "message": "Annuler" },
+  "action_open": { "message": "Ouvrir" },
 
   "error_engine_missing": { "message": "Pas encore de moteur de traduction - cette version ne peut pas traduire." },
   "error_model_missing": { "message": "Aucun modèle pour cette paire de langues sur cet appareil - téléchargez-en un ou ajoutez-le dans les paramètres." },
@@ -41,6 +43,31 @@
   "popup_site_toggle_title": { "message": "Si re/read fonctionne sur ce site" },
   "popup_no_page": { "message": "re/read ne fonctionne pas sur cette page." },
   "popup_mode_reader_only": { "message": "Mode : seulement dans le lecteur" },
+
+  "vocab_title": { "message": "re/read - phrases enregistrées" },
+  "vocab_intro": {
+    "message": "Toutes les phrases gardées pour cette paire de langues, les plus récentes d'abord - enregistrées pendant la lecture et conservées uniquement sur cet appareil. « $LEARNED$ » supprime une phrase et ses soulignements avec elle ; « $EDIT$ » réécrit ses sens, un par ligne.",
+    "placeholders": {
+      "learned": { "content": "$1", "example": "Appris" },
+      "edit": { "content": "$2", "example": "Modifier" }
+    }
+  },
+  "vocab_filter_placeholder": { "message": "Filtrer par phrase ou par sens" },
+  "vocab_filter_aria": { "message": "Filtrer la liste des phrases enregistrées" },
+  "vocab_empty": {
+    "message": "Rien n'est encore enregistré pour cette paire. Sélectionnez une phrase pendant la lecture et appuyez sur « $BUTTON$ » - elle vous attendra ici.",
+    "placeholders": { "button": { "content": "$1", "example": "Enregistrer" } }
+  },
+  "vocab_filter_no_match": { "message": "Aucune phrase enregistrée ne correspond." },
+  "vocab_page_of": {
+    "message": "Page $PAGE$ sur $PAGES$",
+    "placeholders": {
+      "page": { "content": "$1", "example": "3" },
+      "pages": { "content": "$2", "example": "13" }
+    }
+  },
+  "vocab_prev": { "message": "Précédente" },
+  "vocab_next": { "message": "Suivante" },
 
   "reader_title": { "message": "re/read - lecteur" },
   "reader_open_original": { "message": "Ouvrir l'original" },
@@ -196,6 +223,18 @@
   "spellings_other": {
     "message": "$COUNT$ autres graphies",
     "placeholders": { "count": { "content": "$1" } }
+  },
+  "phrases_one": {
+    "message": "$COUNT$ phrase enregistrée",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "phrases_many": {
+    "message": "$COUNT$ phrases enregistrées",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "phrases_other": {
+    "message": "$COUNT$ phrases enregistrées",
+    "placeholders": { "count": { "content": "$1", "example": "1 243" } }
   },
 
   "options_title": { "message": "re/read - paramètres" },

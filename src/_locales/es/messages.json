@@ -16,10 +16,12 @@
   "settings": { "message": "Ajustes" },
   "language_pair": { "message": "Par de idiomas" },
   "reading_list": { "message": "Lista de lectura sin conexión" },
+  "saved_phrases": { "message": "Frases guardadas" },
   "open_reader": { "message": "Leer esta página en el lector" },
   "action_delete": { "message": "Eliminar" },
   "action_download": { "message": "Descargar" },
   "action_cancel": { "message": "Cancelar" },
+  "action_open": { "message": "Abrir" },
 
   "error_engine_missing": { "message": "Aún no hay motor de traducción - esta versión no puede traducir." },
   "error_model_missing": { "message": "No hay modelo para este par de idiomas en este dispositivo - descárgalo o añádelo en los ajustes." },
@@ -41,6 +43,31 @@
   "popup_site_toggle_title": { "message": "Si re/read funciona en este sitio" },
   "popup_no_page": { "message": "re/read no funciona en esta página." },
   "popup_mode_reader_only": { "message": "Modo: solo en el lector" },
+
+  "vocab_title": { "message": "re/read - frases guardadas" },
+  "vocab_intro": {
+    "message": "Todas las frases que guardaste para este par de idiomas, las más recientes primero - guardadas mientras leías y almacenadas solo en este dispositivo. «$LEARNED$» quita una frase y sus subrayados con ella; «$EDIT$» reescribe sus significados, uno por línea.",
+    "placeholders": {
+      "learned": { "content": "$1", "example": "Aprendida" },
+      "edit": { "content": "$2", "example": "Editar" }
+    }
+  },
+  "vocab_filter_placeholder": { "message": "Filtrar por frase o significado" },
+  "vocab_filter_aria": { "message": "Filtrar la lista de frases guardadas" },
+  "vocab_empty": {
+    "message": "Aún no hay nada guardado para este par. Selecciona una frase mientras lees y pulsa «$BUTTON$» - te estará esperando aquí.",
+    "placeholders": { "button": { "content": "$1", "example": "Guardar" } }
+  },
+  "vocab_filter_no_match": { "message": "Ninguna frase guardada coincide con eso." },
+  "vocab_page_of": {
+    "message": "Página $PAGE$ de $PAGES$",
+    "placeholders": {
+      "page": { "content": "$1", "example": "3" },
+      "pages": { "content": "$2", "example": "13" }
+    }
+  },
+  "vocab_prev": { "message": "Anterior" },
+  "vocab_next": { "message": "Siguiente" },
 
   "reader_title": { "message": "re/read - lector" },
   "reader_open_original": { "message": "Abrir el original" },
@@ -196,6 +223,18 @@
   "spellings_other": {
     "message": "$COUNT$ otras grafías",
     "placeholders": { "count": { "content": "$1" } }
+  },
+  "phrases_one": {
+    "message": "$COUNT$ frase guardada",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "phrases_many": {
+    "message": "$COUNT$ frases guardadas",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "phrases_other": {
+    "message": "$COUNT$ frases guardadas",
+    "placeholders": { "count": { "content": "$1", "example": "1.243" } }
   },
 
   "options_title": { "message": "re/read - ajustes" },

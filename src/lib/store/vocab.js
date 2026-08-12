@@ -11,8 +11,12 @@
  * rather than the primary key, so that a future change to `normalize()` rebuilds
  * an index instead of rewriting the identity of every row (D20).
  *
- * Only the background opens this. Content scripts read a derived copy from
- * `storage.local` (`mirror.js`) and ask the background to write.
+ * Only the background writes this. Content scripts read a derived copy from
+ * `storage.local` (`mirror.js`) and ask the background to write; the
+ * saved-phrases page - an extension page, so the same origin as this
+ * database - reads it directly and writes through the background like
+ * everything else, because a write is two steps (the row, then the mirror)
+ * and `background/vocabulary.js` is where that rule is enforced.
  */
 
 import { resaved } from "./phrase.js";
@@ -154,4 +158,43 @@ export async function listPhrases(pair) {
     )
   );
   return records.sort((a, b) => a.createdAt - b.createdAt || a.id.localeCompare(b.id));
+}
+
+/**
+ * Which pairs have anything saved, and how much. The saved-phrases page offers
+ * these rather than the installed models, because vocabulary outlives its
+ * model: deleting the `enpl` model must not hide the phrases saved with it.
+ *
+ * Distinct pairs come off the index keys (`nextunique`), so nothing here loads
+ * a phrase - the counts are index counts, a handful of point queries in the
+ * same transaction.
+ *
+ * @returns {Promise<Array<Pair & { count: number }>>}
+ */
+export async function listPairs() {
+  return await withPhrases("readonly", async (store) => {
+    const index = store.index(BY_PAIR);
+
+    /** @type {Pair[]} */
+    const pairs = [];
+    await new Promise((resolve, reject) => {
+      const request = index.openKeyCursor(null, "nextunique");
+      request.onerror = () => reject(request.error ?? new Error("Cannot list the saved language pairs"));
+      request.onsuccess = () => {
+        const cursor = request.result;
+        if (cursor === null) {
+          resolve(undefined);
+          return;
+        }
+        const [langFrom, langTo] = /** @type {[string, string]} */ (cursor.key);
+        pairs.push({ langFrom, langTo });
+        cursor.continue();
+      };
+    });
+
+    const counts = await Promise.all(
+      pairs.map((pair) => promisify(index.count([pair.langFrom, pair.langTo]))),
+    );
+    return pairs.map((pair, at) => ({ ...pair, count: counts[at] ?? 0 }));
+  });
 }

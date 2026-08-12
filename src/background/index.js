@@ -16,6 +16,7 @@ import { bergamot } from "../lib/translator/providers/bergamot/index.js";
 import { lookUp } from "./dictionary.js";
 import { readPage } from "./page.js";
 import { openLibrary, openReader, readInReader } from "./reader-tab.js";
+import { openVocabulary } from "./vocab-tab.js";
 import { forgetPhrase, listVocabulary, refreshVocabulary, savePhrase } from "./vocabulary.js";
 
 // The engine itself starts on the first translation, not here: this module runs
@@ -72,6 +73,10 @@ async function handle(request, sender) {
       // No sender fallback on purpose: the reading list is not about any tab,
       // and on Android the popup's own tab is the one the fallback would name.
       await openLibrary();
+      return ok(null);
+    }
+    case Message.OPEN_VOCABULARY: {
+      await openVocabulary();
       return ok(null);
     }
     case Message.OPEN_SETTINGS: {
