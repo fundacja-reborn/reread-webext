@@ -1,80 +1,125 @@
 /**
  * What runs on every page the reader opens.
  *
- * Three things. The first is the whole of it: start the reading side against
- * this page - unless this site has been switched off, in which case starting
- * is exactly what must not happen. Everything about selections, the bubble,
- * keeping a phrase and underlining the ones already kept lives in
- * `reading.js`, because the reader page runs exactly the same code against the
- * article it built (D42).
+ * Three things. The first is deciding which of three states this page is in,
+ * and it is a hierarchy with silence at the top: a site switched off in the
+ * popup gets nothing at all; a page in reader-only mode gets the launcher -
+ * one listener whose whole offer is "read this in the reader" (`launcher.js`);
+ * any other page gets the full reading side - selections, the bubble, keeping
+ * a phrase and underlining the ones already kept, all in `reading.js`, because
+ * the reader page runs exactly the same code against the article it built
+ * (D42). Reader-only is a choice in the settings, and with none made the
+ * platform decides: on Android on, elsewhere off - the background publishes
+ * which platform this is (`PLATFORM_KEY`), because a content script cannot ask.
  *
- * The second is the switch itself. Whether this page runs is a line in the
- * settings, so the settings are what this listens to: the popup writes them,
- * the options page writes them, and every open tab of the site notices through
- * the same storage event - which matters, because neither of those pages could
- * address the tabs of one site without the `tabs` permission this extension
- * does not have. On a switched-off site the whole footprint is this listener
- * and the message listener below: no scan, no observer, nothing on the page.
+ * The second is the deciding itself, kept live. All three inputs live in
+ * `storage.local`, so the settings are what this listens to: the popup writes
+ * them, the options page writes them, and every open tab of the site notices
+ * through the same storage event - which matters, because neither of those
+ * pages could address the tabs of one site without the `tabs` permission this
+ * extension does not have. On a switched-off site the whole footprint is this
+ * listener and the message listener below: no scan, no observer, nothing on
+ * the page.
  *
  * The third is the two questions a tab ever answers - the background asking
  * for the page after the reader was pointed here, and the popup asking which
  * site this is. A message listener costs nothing while nobody asks: no timer,
- * no observer, nothing added to the page. It stays on while the site is
- * switched off, and has to: it is also how the popup knows what to call this
- * site when offering to switch it back on.
+ * no observer, nothing added to the page. It stays on whatever the mode, and
+ * has to: it is also how the popup knows what to call this site when offering
+ * to switch it back on.
  */
 
 import { webext } from "../lib/browser.js";
-import { CONFIG_KEY, withDefaults } from "../lib/config.js";
+import { CONFIG_KEY, PLATFORM_KEY, effectiveReaderOnly, osFrom, withDefaults } from "../lib/config.js";
 import { ErrorCode, MAX_PAGE_HTML, Message, asPageRequest, fail, ok } from "../lib/protocol.js";
 import { MIRROR_KEY } from "../lib/store/mirror.js";
+import { startLauncher, stopLauncher } from "./launcher.js";
 import { start, stop } from "./reading.js";
 
-let running = false;
+/** @typedef {"off" | "launcher" | "reading"} Mode */
+
+/** @type {Mode} */
+let mode = "off";
 /** Whether a settings change already decided, making the startup read stale. */
 let decided = false;
+/** Whether anything has decided yet - what a platform-only event may act on. */
+let ready = false;
+/** The last word on each input, so either changing can re-decide alone. */
+let config = withDefaults(undefined);
+let os = "";
+/** An event beat the startup read to the os; the older read must not undo it. */
+let osKnown = false;
 
 /**
- * @param {unknown} config as stored, defaults not yet applied
- * @returns {boolean}
+ * The hierarchy in one place: host switched off beats everything, reader-only
+ * beats reading, and reading is what is left.
+ *
+ * @returns {Mode}
  */
-function wantedHere(config) {
-  return !withDefaults(config).disabledHosts.includes(location.hostname);
+function decide() {
+  if (config.disabledHosts.includes(location.hostname)) return "off";
+  if (effectiveReaderOnly(config, os)) return "launcher";
+  return "reading";
 }
 
 /**
- * @param {boolean} wanted
+ * @param {Mode} wanted
  * @param {Record<string, unknown>} [stored] the startup read, the one time there is one
  */
 function apply(wanted, stored) {
-  if (wanted === running) return;
-  running = wanted;
+  if (wanted === mode) return;
+  if (mode === "reading") stop();
+  if (mode === "launcher") stopLauncher();
+  mode = wanted;
   // The whole body, and follow it: a page loads its own content, swaps
   // articles under a router and edits text in place, and underlines have to
   // keep up.
-  if (wanted) start({ root: document.body, observe: true, stored });
-  else stop();
+  if (wanted === "reading") start({ root: document.body, observe: true, stored });
+  if (wanted === "launcher") startLauncher();
 }
 
 // One read of `storage.local` at startup, the same one `reading.js` would have
-// made - it decides whether to start at all, and if so, feeds the start.
+// made - it decides what to start, and when that is the reading side, feeds it.
 void webext()
-  .storage.local.get([CONFIG_KEY, MIRROR_KEY])
+  .storage.local.get([CONFIG_KEY, MIRROR_KEY, PLATFORM_KEY])
   .then((stored) => {
-    if (!decided) apply(wantedHere(stored[CONFIG_KEY]), stored);
+    if (decided) return;
+    config = withDefaults(stored[CONFIG_KEY]);
+    if (!osKnown) os = osFrom(stored[PLATFORM_KEY]);
+    ready = true;
+    apply(decide(), stored);
   })
   .catch(() => {
     // Storage unreachable says nothing about this site being switched off, so
     // run: `reading.js` has its own answer to storage being broken.
-    if (!decided) apply(true);
+    if (decided) return;
+    ready = true;
+    apply("reading");
   });
 
 webext().storage.onChanged.addListener((changes, area) => {
   if (area !== "local") return;
-  const change = changes[CONFIG_KEY];
-  if (change === undefined) return;
-  decided = true;
-  apply(wantedHere(change.newValue));
+  const configChange = changes[CONFIG_KEY];
+  const platformChange = changes[PLATFORM_KEY];
+  if (configChange === undefined && platformChange === undefined) return;
+
+  // The platform never changes for a device, but the key can appear once: an
+  // update publishes it under pages that loaded before it existed, and on
+  // Android that arrival is what flips an open page into reader-only mode.
+  if (platformChange !== undefined) {
+    os = osFrom(platformChange.newValue);
+    osKnown = true;
+  }
+  if (configChange !== undefined) {
+    config = withDefaults(configChange.newValue);
+    decided = true;
+    ready = true;
+  }
+  // A platform arriving before the config was ever read may not decide alone:
+  // it would be deciding over the default settings, on a site somebody may
+  // have switched off. It waits the moment the startup read needs, which picks
+  // the fresher os up from here.
+  if (ready) apply(decide());
 });
 
 // The document is serialized as it stands rather than re-downloaded, which is

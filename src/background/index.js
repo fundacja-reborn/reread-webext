@@ -9,7 +9,7 @@
  */
 
 import { webext } from "../lib/browser.js";
-import { readConfig } from "../lib/config.js";
+import { publishPlatform, readConfig } from "../lib/config.js";
 import { ErrorCode, Message, asRequest, fail, ok } from "../lib/protocol.js";
 import { setProvider, translate } from "../lib/translator/index.js";
 import { bergamot } from "../lib/translator/providers/bergamot/index.js";
@@ -31,9 +31,10 @@ setProvider(bergamot);
 
 /**
  * @param {import("../lib/protocol.js").Request} request
+ * @param {WebExtMessageSender} sender
  * @returns {Promise<import("../lib/protocol.js").Result<Answer>>}
  */
-async function handle(request) {
+async function handle(request, sender) {
   switch (request.kind) {
     case Message.TRANSLATE: {
       const config = await readConfig();
@@ -56,10 +57,14 @@ async function handle(request) {
       return translated.ok ? ok({ ...translated.value, entries }) : translated;
     }
     case Message.OPEN_READER: {
-      // The popup passes the tab it stood over, and that is how the reader
-      // knows which page to read. Without an id - a sender that predates one,
-      // or a tab that had none - the reader only comes forward.
-      if (typeof request.sourceTabId === "number") await readInReader({ id: request.sourceTabId });
+      // Two senders, one function. The popup says which tab it stood over,
+      // because it knows and the message can carry it; the launcher bubble in
+      // a page sends no id at all, because a content script does not know its
+      // own tab - the sender does, and that is the same answer by other means.
+      // Without either - the popup over a tab that had no id - the reader only
+      // comes forward.
+      const sourceTabId = request.sourceTabId ?? sender.tab?.id;
+      if (typeof sourceTabId === "number") await readInReader({ id: sourceTabId });
       else await openReader();
       return ok(null);
     }
@@ -78,7 +83,7 @@ async function handle(request) {
   }
 }
 
-webext().runtime.onMessage.addListener((message, _sender, sendResponse) => {
+webext().runtime.onMessage.addListener((message, sender, sendResponse) => {
   const request = asRequest(message);
   if (request === null) {
     sendResponse(fail(ErrorCode.UNKNOWN_MESSAGE));
@@ -88,7 +93,7 @@ webext().runtime.onMessage.addListener((message, _sender, sendResponse) => {
   // `sendResponse` plus `return true` rather than returning the promise:
   // Firefox understands both, Chromium only this one, and the difference is
   // not worth a compatibility branch.
-  handle(request).then(sendResponse, () => sendResponse(fail(ErrorCode.INTERNAL)));
+  handle(request, sender).then(sendResponse, () => sendResponse(fail(ErrorCode.INTERNAL)));
   return true;
 });
 
@@ -104,7 +109,13 @@ webext().commands.onCommand.addListener((command, tab) => {
 
 // The copy pages read is written whenever the vocabulary changes. An install or
 // an update is the one moment it can be missing while the database is not, so
-// it is also written here - once, not on every wake.
+// it is also written here - once, not on every wake. The platform rides along
+// for the same reason: content scripts cannot ask which OS this is, and the
+// answer never changes for a device, so once is exactly enough.
 webext().runtime.onInstalled.addListener(() => {
   void refreshVocabulary();
+  void publishPlatform().catch(() => {
+    // Storage unreachable: pages fall back to the desktop default, and the
+    // next update gets another chance.
+  });
 });

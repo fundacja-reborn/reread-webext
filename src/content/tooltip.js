@@ -51,6 +51,7 @@ const LABELS = Object.freeze({
   settings: "Open settings",
   cancel: "Cancel",
   more: "More",
+  reader: "Read in the reader",
 });
 
 /** The one button whose label changes with what it will do. */
@@ -89,6 +90,9 @@ const STYLE = `
   .body { white-space: pre-wrap; }
   .body[data-tone="pending"] { opacity: 0.6; font-style: italic; }
   .body[data-tone="error"] { color: #a3341f; }
+  /* The launcher has nothing to say above its one button, and an empty line
+     would still cost the row of pixels its line-height reserves. */
+  .body:empty { display: none; }
 
   /* Quieter than the gloss and separated from it: this is the sentence the
      phrase was in, not another meaning of it. */
@@ -201,6 +205,10 @@ const STYLE = `
   }
   .actions:empty { display: none; }
 
+  /* The launcher is its one button and nothing else, so the row's padding -
+     which exists to stand the row off a gloss that is not there - goes too. */
+  .bubble[data-variant="launcher"] .actions { padding: 0; }
+
   .bubble[data-variant="recall"] .reveal {
     grid-template-rows: 0fr;
     opacity: 0;
@@ -251,8 +259,9 @@ const STYLE = `
   }
   /* A label carries padding so that a focus ring has somewhere to go, and the
      first one gives it back: the row has to start on the same vertical line as
-     the gloss above it. Save brings its own box and needs no pulling. */
-  .actions button:first-child:not([data-action="save"]) { margin-left: -4px; }
+     the gloss above it. Save and the launcher bring their own box and need no
+     pulling. */
+  .actions button:first-child:not([data-action="save"]):not([data-action="reader"]) { margin-left: -4px; }
   .actions button:hover:not(:disabled) { opacity: 1; }
   .actions button:focus-visible {
     opacity: 1;
@@ -261,9 +270,12 @@ const STYLE = `
   }
   .actions button:disabled { opacity: 0.35; cursor: default; }
 
-  /* The one exception, and the only real call to action in the extension: Save
-     is the press that keeps a phrase which would otherwise be gone. */
-  .actions button[data-action="save"] {
+  /* The exception, and the only real call to action either bubble has: Save is
+     the press that keeps a phrase which would otherwise be gone, and the
+     launcher's one button is the whole of the bubble it is in - the two never
+     share a screen, so neither outshouts the other. */
+  .actions button[data-action="save"],
+  .actions button[data-action="reader"] {
     font-size: 13px;
     padding: 3px 10px;
     opacity: 1;
@@ -271,7 +283,8 @@ const STYLE = `
     border: 1px solid rgba(0, 0, 0, 0.18);
     border-radius: 6px;
   }
-  .actions button[data-action="save"]:hover:not(:disabled) { background: rgba(0, 0, 0, 0.1); }
+  .actions button[data-action="save"]:hover:not(:disabled),
+  .actions button[data-action="reader"]:hover:not(:disabled) { background: rgba(0, 0, 0, 0.1); }
   .actions button[data-action="save"]:disabled { opacity: 0.45; }
 
   @media (prefers-color-scheme: dark) {
@@ -296,18 +309,21 @@ const STYLE = `
     }
     /* The quiet labels need nothing here: they are the bubble's own colour at
        seven tenths, which lands right on either background. */
-    .actions button[data-action="save"] {
+    .actions button[data-action="save"],
+    .actions button[data-action="reader"] {
       background: rgba(255, 255, 255, 0.08);
       border-color: rgba(255, 255, 255, 0.2);
     }
-    .actions button[data-action="save"]:hover:not(:disabled) { background: rgba(255, 255, 255, 0.16); }
+    .actions button[data-action="save"]:hover:not(:disabled),
+    .actions button[data-action="reader"]:hover:not(:disabled) { background: rgba(255, 255, 255, 0.16); }
   }
 `;
 
 /** @typedef {"normal" | "pending" | "error"} Tone */
-/** Which of the two bubbles this is. @typedef {"recall" | "save"} Variant */
-/** What the bubble can offer. @typedef {"save" | "learned" | "edit" | "settings" | "more"} Action */
-/** What it reports - editing and unfolding never leave the bubble. @typedef {"save" | "choose" | "learned" | "settings"} ReportedAction */
+/** Which of the three bubbles this is. `launcher` is reader-only mode's one
+ *  offer: no gloss, one button. @typedef {"recall" | "save" | "launcher"} Variant */
+/** What the bubble can offer. @typedef {"save" | "learned" | "edit" | "settings" | "more" | "reader"} Action */
+/** What it reports - editing and unfolding never leave the bubble. @typedef {"save" | "choose" | "learned" | "settings" | "reader"} ReportedAction */
 
 /**
  * One block of the second layer below the sentence: where it came from, and the
