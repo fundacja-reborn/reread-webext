@@ -239,3 +239,101 @@ body.reader {
 #content a {
   overflow-wrap: anywhere;
 }
+
+/* The reading list and the article's action row are interface, so they take
+   the interface font, like the bar. Everything below states its changes with
+   text and a border - never a transition or an overlay, because on e-ink
+   every animation is a flash. */
+
+.library-segments {
+  display: flex;
+  gap: 0.4rem;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 0.85rem;
+}
+
+.library-segments button {
+  padding: 0.2rem 0.8rem;
+}
+
+.library-segments button[aria-pressed="true"] {
+  border-color: var(--page-accent);
+  color: var(--page-accent);
+}
+
+.library-rows {
+  list-style: none;
+  margin: 1.25rem 0 0;
+  padding: 0;
+  border-top: 1px solid var(--page-line);
+}
+
+.library-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-bottom: 1px solid var(--page-line);
+}
+
+/* The whole title is the way in: a target for a finger, not a word. It keeps
+   the article typeface - these are articles - while the details under it are
+   interface. */
+.library-open {
+  flex: 1;
+  min-width: 0;
+  padding: 0.8rem 0;
+  border: none;
+  border-radius: 0;
+  background: none;
+  text-align: start;
+  font: inherit;
+}
+
+.library-open:hover .library-item-title {
+  color: var(--page-accent);
+}
+
+.library-item-title {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.library-item-detail {
+  display: block;
+  margin-top: 0.15rem;
+  color: var(--page-muted);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 0.8rem;
+}
+
+.library-delete {
+  flex: none;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 0.85rem;
+  padding: 0.2rem 0.7rem;
+}
+
+.reader-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.75rem;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 0.85rem;
+}
+
+.reader-actions button {
+  padding: 0.25rem 0.8rem;
+}
+
+.reader-actions button[aria-pressed="true"] {
+  border-color: var(--page-accent);
+  color: var(--page-accent);
+}
+
+/* A delete asking "Sure?" - the second press is the confirmation (there is no
+   modal and no undo timer), and the border says which button is asking. */
+button[data-armed] {
+  border-color: var(--page-accent);
+  color: var(--page-accent);
+}
