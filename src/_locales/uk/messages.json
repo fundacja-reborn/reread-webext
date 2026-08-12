@@ -16,10 +16,12 @@
   "settings": { "message": "Налаштування" },
   "language_pair": { "message": "Мовна пара" },
   "reading_list": { "message": "Офлайн-список читання" },
+  "saved_phrases": { "message": "Збережені фрази" },
   "open_reader": { "message": "Читати цю сторінку в читачі" },
   "action_delete": { "message": "Видалити" },
   "action_download": { "message": "Завантажити" },
   "action_cancel": { "message": "Скасувати" },
+  "action_open": { "message": "Відкрити" },
 
   "error_engine_missing": { "message": "Рушія перекладу ще немає - ця збірка не перекладає." },
   "error_model_missing": { "message": "На цьому пристрої немає моделі для цієї мовної пари - завантажте її або додайте в налаштуваннях." },
@@ -41,6 +43,31 @@
   "popup_site_toggle_title": { "message": "Чи працює re/read на цьому сайті" },
   "popup_no_page": { "message": "re/read не працює на цій сторінці." },
   "popup_mode_reader_only": { "message": "Режим: лише в читачі" },
+
+  "vocab_title": { "message": "re/read - збережені фрази" },
+  "vocab_intro": {
+    "message": "Усе, що ви зберегли для цієї мовної пари, найновіше першим - збережене під час читання й лише на цьому пристрої. «$LEARNED$» прибирає фразу разом з її підкресленнями; «$EDIT$» переписує її значення, по одному в рядку.",
+    "placeholders": {
+      "learned": { "content": "$1", "example": "Вивчено" },
+      "edit": { "content": "$2", "example": "Редагувати" }
+    }
+  },
+  "vocab_filter_placeholder": { "message": "Фільтрувати за фразою чи значенням" },
+  "vocab_filter_aria": { "message": "Фільтрувати список збережених фраз" },
+  "vocab_empty": {
+    "message": "Для цієї пари ще нічого не збережено. Виділіть фразу під час читання й натисніть «$BUTTON$» - вона чекатиме тут.",
+    "placeholders": { "button": { "content": "$1", "example": "Зберегти" } }
+  },
+  "vocab_filter_no_match": { "message": "Жодна збережена фраза не підходить." },
+  "vocab_page_of": {
+    "message": "Сторінка $PAGE$ з $PAGES$",
+    "placeholders": {
+      "page": { "content": "$1", "example": "3" },
+      "pages": { "content": "$2", "example": "13" }
+    }
+  },
+  "vocab_prev": { "message": "Попередня" },
+  "vocab_next": { "message": "Наступна" },
 
   "reader_title": { "message": "re/read - читач" },
   "reader_open_original": { "message": "Відкрити оригінал" },
@@ -204,6 +231,22 @@
   "spellings_other": {
     "message": "$COUNT$ іншого написання",
     "placeholders": { "count": { "content": "$1" } }
+  },
+  "phrases_one": {
+    "message": "$COUNT$ збережена фраза",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "phrases_few": {
+    "message": "$COUNT$ збережені фрази",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
+  "phrases_many": {
+    "message": "$COUNT$ збережених фраз",
+    "placeholders": { "count": { "content": "$1", "example": "1 243" } }
+  },
+  "phrases_other": {
+    "message": "$COUNT$ збереженої фрази",
+    "placeholders": { "count": { "content": "$1", "example": "1,5" } }
   },
 
   "options_title": { "message": "re/read - налаштування" },

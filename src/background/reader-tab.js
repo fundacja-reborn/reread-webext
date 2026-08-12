@@ -9,20 +9,15 @@
  * only comes forward - which is also what happens on a page no content script
  * runs in, except that the reader says so.
  *
- * Where the tab ids live and why is `src/lib/session.js`. Nothing about what is
- * being read is written down: the page itself travels as one answer to one
- * question and is never stored.
- *
- * Nothing here needs the `tabs` permission. Selecting a tab and focusing a
- * window are allowed without it, and so is finding out that a tab is gone: the
- * call for an id that no longer exists rejects, and that rejection is the test.
- * Finding the reader by asking `tabs.query` for its address is what would need
- * one - and would not even work, `moz-extension://` pages being outside
- * `<all_urls>`.
+ * Where the tab ids live and why is `src/lib/session.js`; the mechanics of
+ * raising-or-opening are `single-tab.js`, shared with the saved-phrases page.
+ * Nothing about what is being read is written down: the page itself travels as
+ * one answer to one question and is never stored.
  */
 
 import { webext } from "../lib/browser.js";
 import { clearReaderSource, readReaderTab, writeReaderSource, writeReaderTab } from "../lib/session.js";
+import { raiseOrOpen } from "./single-tab.js";
 
 const READER_PAGE = "reader/reader.html";
 
@@ -39,58 +34,19 @@ const READER_PAGE = "reader/reader.html";
  */
 
 /**
- * Bringing a tab back rather than opening another one. Two calls, because they
- * fail for different reasons: a tab that is gone means open a new one, while a
- * window that vanished between the two awaits means nothing at all - the tab is
- * already selected and returning `false` here would open the second reader this
- * module exists to prevent.
- *
- * @param {Pick<WebExtBrowser["tabs"], "update">} tabs
- * @param {WebExtBrowser["windows"]} windows
- * @param {number} id
- * @returns {Promise<boolean>} whether the reader is now in front of the reader
- */
-async function focusTab(tabs, windows, id) {
-  /** @type {WebExtTab} */
-  let tab;
-  try {
-    tab = await tabs.update(id, { active: true });
-  } catch {
-    return false;
-  }
-
-  // Selected in its own window is not the same as looked at: the reader can sit
-  // in a window behind this one, and stopping here would look like the button
-  // did nothing.
-  if (typeof tab.windowId === "number") {
-    try {
-      await windows.update(tab.windowId, { focused: true });
-    } catch {
-      // The window closed while we were selecting a tab in it - or this is
-      // Android, which has no `windows` API at all. Nothing to do either way:
-      // on a phone the selected tab is the visible one already.
-    }
-  }
-  return true;
-}
-
-/**
  * @param {ReaderTabDeps} [deps] injected by the tests; the background passes none
  * @returns {Promise<void>}
  */
 export async function openReader(deps = {}) {
-  const tabs = deps.tabs ?? webext().tabs;
-  const windows = deps.windows ?? webext().windows;
   const session = deps.session ?? webext().storage.session;
-  const url = deps.url ?? webext().runtime.getURL(READER_PAGE);
 
-  const known = await readReaderTab(session);
-  if (known !== null && (await focusTab(tabs, windows, known))) return;
-
-  const opened = await tabs.create({ url });
-  // No id means nothing to come back to, and the id we have is the stale one
-  // that just failed. Keeping it would send the next press after a dead tab.
-  await writeReaderTab(typeof opened.id === "number" ? opened.id : null, session);
+  await raiseOrOpen({
+    tabs: deps.tabs ?? webext().tabs,
+    windows: deps.windows ?? webext().windows,
+    url: deps.url ?? webext().runtime.getURL(READER_PAGE),
+    read: () => readReaderTab(session),
+    write: (tabId) => writeReaderTab(tabId, session),
+  });
 }
 
 /**

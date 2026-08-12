@@ -9,7 +9,7 @@
  * language by name. Both are rules, rules can be wrong quietly, and so both
  * live here, where `node --test` can reach them. Everything below the model
  * ordering works on anything with a `from` and a `to`, because that is all it
- * ever reads.
+ * ever reads - which is why the saved-phrases page borrows it too.
  */
 
 import { pairLabel } from "../lib/language.js";

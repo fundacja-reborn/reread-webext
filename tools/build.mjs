@@ -26,6 +26,7 @@ const ENTRY_POINTS = [
   "options/options.js",
   "popup/index.js",
   "reader/reader.js",
+  "vocab/vocab.js",
 ];
 
 /**
@@ -39,6 +40,8 @@ const STATIC_FILES = [
   "popup/popup.css",
   "reader/reader.html",
   "reader/reader.css",
+  "vocab/vocab.html",
+  "vocab/vocab.css",
   "content/highlight.css",
   "assets",
   "_locales",

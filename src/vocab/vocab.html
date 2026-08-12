@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <!-- On Android this page fills the window, and a page without this meta is
+         laid out at 980px and shrunk to fit. Desktop ignores it. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title data-i18n="vocab_title">re/read - saved phrases</title>
+    <link rel="stylesheet" href="../assets/page.css" />
+    <link rel="stylesheet" href="vocab.css" />
+  </head>
+  <body>
+    <!-- The English in this file is the fallback: `localizePage` swaps every
+         `data-i18n`-marked text for the catalogue's language before the page
+         is seen. A marked element holds text only - the locales test enforces
+         that, because the swap goes through `textContent`. The intro is the
+         one exception: it quotes the bubble's own button labels through
+         placeholders, so vocab.js writes it instead of a marker. -->
+    <h1>re/read</h1>
+    <p class="subtitle" data-i18n="saved_phrases">Saved phrases</p>
+
+    <p id="intro">
+      Every phrase you kept for this language pair, newest first - saved while reading, stored
+      only on this device. Learned removes a phrase and its underlines with it; Edit rewrites
+      what it means, one meaning per line.
+    </p>
+
+    <dl class="rows">
+      <div class="row">
+        <dt><label for="pair" data-i18n="language_pair">Language pair</label></dt>
+        <dd><select id="pair"></select></dd>
+      </div>
+    </dl>
+
+    <p class="hint" id="count" hidden></p>
+
+    <p class="model-filter">
+      <input
+        type="search"
+        id="filter"
+        placeholder="Filter by phrase or meaning"
+        data-i18n-placeholder="vocab_filter_placeholder"
+        aria-label="Filter the list of saved phrases"
+        data-i18n-aria-label="vocab_filter_aria"
+      />
+    </p>
+
+    <div id="list" class="phrases"></div>
+
+    <p id="status" class="status" role="status"></p>
+
+    <nav class="pager" id="pager" hidden>
+      <button type="button" id="prev" data-i18n="vocab_prev">Previous</button>
+      <span class="pager-label" id="page-label"></span>
+      <button type="button" id="next" data-i18n="vocab_next">Next</button>
+    </nav>
+
+    <script src="vocab.js" defer></script>
+  </body>
+</html>

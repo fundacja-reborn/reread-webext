@@ -35,6 +35,7 @@ import { describeDownloadProblem, downloadModel } from "../lib/models/download.j
 import { classifyModelFiles, describeClassifyProblem, isGzip } from "../lib/models/files.js";
 import { modelRows, registryModels, registrySource } from "../lib/models/registry.js";
 import { deleteModel, listModels, putModel } from "../lib/models/store.js";
+import { Message } from "../lib/protocol.js";
 import { matchesFilter, orderForDisplay, searchableText, sortByLabel } from "./models-view.js";
 
 /**
@@ -976,6 +977,12 @@ document.getElementById("add-dictionary")?.addEventListener("click", () => void 
 document.getElementById("pair")?.addEventListener("change", (event) => {
   const select = event.target;
   if (select instanceof HTMLSelectElement) void choosePair(select.value);
+});
+document.getElementById("open-vocabulary")?.addEventListener("click", () => {
+  // The background raises the existing saved-phrases tab or opens one - the
+  // same single tab the popup's row leads to. Nothing to do when it fails
+  // mid-restart: the press can be repeated.
+  void webext().runtime.sendMessage({ kind: Message.OPEN_VOCABULARY }).catch(() => {});
 });
 
 // A download or an import in flight is the one thing on this page that a reload

@@ -45,7 +45,8 @@ written into the package. How to verify all of this is a section of its own,
 | Dictionaries (StarDict) | downloaded from the WikDict catalogue or imported from files |
 | Reader mode | turns the page into an article in the extension's own tab |
 | Reading list (offline) | articles saved from the reader, listed and readable with no network at all |
-| Toolbar popup | per-site switch, language pair, reader, settings |
+| Saved phrases page | every kept phrase for a pair, filterable and paged, with Learned and Edit per row |
+| Toolbar popup | per-site switch, language pair, reader, reading list, saved phrases, settings |
 | UI languages | English, Polish, German, French, Spanish, Ukrainian - follows the browser's UI language, English otherwise |
 | Firefox on Android | declared and built, reader-only by default; not yet tested on a phone |
 | Import / export (TSV) | not started |
@@ -103,15 +104,17 @@ allowed list again every time it is opened.
 There is nothing else. No `tabs`, no `webRequest`, no `cookies`, no `downloads`.
 
 The toolbar button opens a small popup: a switch for the site you are on, the language pair,
-this page in the reader, and the settings. None of it needs the `tabs` permission. The popup
+this page in the reader, the reading list, the saved phrases, and the settings. None of it
+needs the `tabs` permission. The popup
 learns which site it is standing over by asking the page itself - without the permission a tab
 has an id and no address, so the content script that is already there answers with its
 hostname, and a page this extension does not run on gets a sentence instead of a switch.
-Opening the reader, coming back to the one reader tab instead of opening a second, and focusing
+Opening the reader or the saved-phrases page, coming back to the one tab each of them is
+instead of opening a second, and focusing
 its window are all allowed without the permission too; reading the address or the title of a
-tab is what it is actually for, and nothing here does that. Remembering which tab the reader is
-in lasts until the browser closes, and it is a number. `Alt+Shift+R` opens the reader without
-going through the popup.
+tab is what it is actually for, and nothing here does that. Remembering which tab each page is
+in lasts until the browser closes, and it is a number per page. `Alt+Shift+R` opens the reader
+without going through the popup.
 
 ## What is in the package that is not ours
 

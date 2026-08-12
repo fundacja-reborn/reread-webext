@@ -16,10 +16,12 @@
   "settings": { "message": "Ustawienia" },
   "language_pair": { "message": "Para językowa" },
   "reading_list": { "message": "Czytelnia offline" },
+  "saved_phrases": { "message": "Zapisane frazy" },
   "open_reader": { "message": "Przeczytaj tę stronę w czytniku" },
   "action_delete": { "message": "Usuń" },
   "action_download": { "message": "Pobierz" },
   "action_cancel": { "message": "Anuluj" },
+  "action_open": { "message": "Otwórz" },
 
   "error_engine_missing": { "message": "Nie ma jeszcze silnika tłumaczeń - to wydanie nie tłumaczy." },
   "error_model_missing": { "message": "Na tym urządzeniu nie ma modelu dla tej pary językowej - pobierz go lub dodaj w ustawieniach." },
@@ -41,6 +43,31 @@
   "popup_site_toggle_title": { "message": "Czy re/read działa w tej witrynie" },
   "popup_no_page": { "message": "re/read nie działa na tej stronie." },
   "popup_mode_reader_only": { "message": "Tryb: tylko w czytniku" },
+
+  "vocab_title": { "message": "re/read - zapisane frazy" },
+  "vocab_intro": {
+    "message": "Wszystkie frazy zachowane dla tej pary językowej, od najnowszych - zapisane podczas czytania i przechowywane tylko na tym urządzeniu. „$LEARNED$” usuwa frazę razem z jej podkreśleniami; „$EDIT$” pozwala przepisać znaczenia, po jednym w linii.",
+    "placeholders": {
+      "learned": { "content": "$1", "example": "Znam to" },
+      "edit": { "content": "$2", "example": "Edytuj" }
+    }
+  },
+  "vocab_filter_placeholder": { "message": "Filtruj po frazie lub znaczeniu" },
+  "vocab_filter_aria": { "message": "Filtruj listę zapisanych fraz" },
+  "vocab_empty": {
+    "message": "Dla tej pary nie ma jeszcze nic zapisanego. Zaznacz frazę podczas czytania i naciśnij „$BUTTON$” - będzie tu czekać.",
+    "placeholders": { "button": { "content": "$1", "example": "Zapisz" } }
+  },
+  "vocab_filter_no_match": { "message": "Żadna zapisana fraza do tego nie pasuje." },
+  "vocab_page_of": {
+    "message": "Strona $PAGE$ z $PAGES$",
+    "placeholders": {
+      "page": { "content": "$1", "example": "3" },
+      "pages": { "content": "$2", "example": "13" }
+    }
+  },
+  "vocab_prev": { "message": "Poprzednia" },
+  "vocab_next": { "message": "Następna" },
 
   "reader_title": { "message": "re/read - czytnik" },
   "reader_open_original": { "message": "Otwórz oryginał" },
@@ -204,6 +231,22 @@
   "spellings_other": {
     "message": "$COUNT$ innej pisowni",
     "placeholders": { "count": { "content": "$1" } }
+  },
+  "phrases_one": {
+    "message": "$COUNT$ zapisana fraza",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "phrases_few": {
+    "message": "$COUNT$ zapisane frazy",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
+  "phrases_many": {
+    "message": "$COUNT$ zapisanych fraz",
+    "placeholders": { "count": { "content": "$1", "example": "1 243" } }
+  },
+  "phrases_other": {
+    "message": "$COUNT$ zapisanej frazy",
+    "placeholders": { "count": { "content": "$1", "example": "1,5" } }
   },
 
   "options_title": { "message": "re/read - ustawienia" },

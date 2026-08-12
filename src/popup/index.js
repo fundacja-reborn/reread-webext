@@ -1,8 +1,9 @@
 /**
  * The toolbar popup: the basic acts on top, the door to the settings at the
- * bottom, in the place every user already looks for them. Five rows - whether
+ * bottom, in the place every user already looks for them. Six rows - whether
  * re/read runs on this site, which pair is being read, this page in the
- * reader, the reading list, the settings - and nothing else.
+ * reader, the reading list, the saved phrases, the settings - and nothing
+ * else.
  *
  * The popup knows which tab it stands over and nothing more: `tabs.query`
  * without the `tabs` permission answers with an id and no address, on purpose.
@@ -38,6 +39,7 @@ const siteToggle = /** @type {HTMLInputElement | null} */ (document.getElementBy
 const pairSelect = /** @type {HTMLSelectElement | null} */ (document.getElementById("pair"));
 const readerButton = document.getElementById("open-reader");
 const libraryButton = document.getElementById("open-library");
+const vocabularyButton = document.getElementById("open-vocabulary");
 const settingsButton = document.getElementById("open-settings");
 const modeLine = document.getElementById("mode-line");
 
@@ -160,6 +162,17 @@ async function openLibrary() {
   window.close();
 }
 
+async function openVocabulary() {
+  try {
+    // Carries nothing for the reading list's reason: the page shows the pair
+    // from the settings, and no tab is any of its business.
+    await webext().runtime.sendMessage({ kind: Message.OPEN_VOCABULARY });
+  } catch {
+    // Same again: repeatable beats stuck.
+  }
+  window.close();
+}
+
 async function openSettings() {
   await webext().runtime.openOptionsPage();
   window.close();
@@ -169,6 +182,7 @@ siteToggle?.addEventListener("change", () => void toggleSite());
 pairSelect?.addEventListener("change", () => void choosePair());
 readerButton?.addEventListener("click", () => void openReader());
 libraryButton?.addEventListener("click", () => void openLibrary());
+vocabularyButton?.addEventListener("click", () => void openVocabulary());
 settingsButton?.addEventListener("click", () => void openSettings());
 // The status line is also the shortest way to where the mode is changed.
 modeLine?.addEventListener("click", () => void openSettings());

@@ -20,10 +20,12 @@
   "settings": { "message": "Settings" },
   "language_pair": { "message": "Language pair" },
   "reading_list": { "message": "Offline reading list" },
+  "saved_phrases": { "message": "Saved phrases" },
   "open_reader": { "message": "Read this page in the reader" },
   "action_delete": { "message": "Delete" },
   "action_download": { "message": "Download" },
   "action_cancel": { "message": "Cancel" },
+  "action_open": { "message": "Open" },
 
   "error_engine_missing": { "message": "No translation engine yet - this build cannot translate." },
   "error_model_missing": { "message": "No model for this language pair on this device - download or add one in the settings." },
@@ -45,6 +47,33 @@
   "popup_site_toggle_title": { "message": "Whether re/read runs on this site" },
   "popup_no_page": { "message": "re/read does not work on this page." },
   "popup_mode_reader_only": { "message": "Mode: only in the reader" },
+
+  "vocab_title": { "message": "re/read - saved phrases" },
+  "vocab_intro": {
+    "message": "Every phrase you kept for this language pair, newest first - saved while reading, stored only on this device. $LEARNED$ removes a phrase and its underlines with it; $EDIT$ rewrites what it means, one meaning per line.",
+    "description": "The buttons quoted are bubble_learned and bubble_edit, passed in so the three can never drift apart.",
+    "placeholders": {
+      "learned": { "content": "$1", "example": "Learned" },
+      "edit": { "content": "$2", "example": "Edit" }
+    }
+  },
+  "vocab_filter_placeholder": { "message": "Filter by phrase or meaning" },
+  "vocab_filter_aria": { "message": "Filter the list of saved phrases" },
+  "vocab_empty": {
+    "message": "Nothing is saved for this pair yet. Select a phrase while reading and press \"$BUTTON$\" - it will be waiting here.",
+    "description": "The button quoted is bubble_save, passed in so the two can never drift apart.",
+    "placeholders": { "button": { "content": "$1", "example": "Save" } }
+  },
+  "vocab_filter_no_match": { "message": "No saved phrase matches that." },
+  "vocab_page_of": {
+    "message": "Page $PAGE$ of $PAGES$",
+    "placeholders": {
+      "page": { "content": "$1", "example": "3" },
+      "pages": { "content": "$2", "example": "13" }
+    }
+  },
+  "vocab_prev": { "message": "Previous" },
+  "vocab_next": { "message": "Next" },
 
   "reader_title": { "message": "re/read - reader" },
   "reader_open_original": { "message": "Open the original" },
@@ -195,6 +224,14 @@
   "spellings_other": {
     "message": "$COUNT$ other spellings",
     "placeholders": { "count": { "content": "$1" } }
+  },
+  "phrases_one": {
+    "message": "$COUNT$ saved phrase",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "phrases_other": {
+    "message": "$COUNT$ saved phrases",
+    "placeholders": { "count": { "content": "$1", "example": "1,243" } }
   },
 
   "options_title": { "message": "re/read - settings" },

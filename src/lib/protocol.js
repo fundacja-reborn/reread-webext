@@ -25,6 +25,7 @@ export const Message = Object.freeze({
   TRANSLATE: "translate",
   OPEN_READER: "open-reader",
   OPEN_LIBRARY: "open-library",
+  OPEN_VOCABULARY: "open-vocabulary",
   OPEN_SETTINGS: "open-settings",
   SAVE_PHRASE: "save-phrase",
   FORGET_PHRASE: "forget-phrase",
@@ -128,9 +129,15 @@ export const ErrorCode = Object.freeze({
  * would point the reader at the popup. "The list, from anywhere" must not
  * carry a tab at all.
  *
+ * `open-vocabulary` brings the saved-phrases page forward, one tab like the
+ * reader. It carries nothing for the same reason `open-library` carries
+ * nothing: the page shows the vocabulary of the configured pair, and the pair
+ * lives in the settings, not in a message.
+ *
  * @typedef {{ kind: typeof Message.TRANSLATE, text: string, context?: string }} TranslateRequest
  * @typedef {{ kind: typeof Message.OPEN_READER, sourceTabId?: number }} OpenReaderRequest
  * @typedef {{ kind: typeof Message.OPEN_LIBRARY }} OpenLibraryRequest
+ * @typedef {{ kind: typeof Message.OPEN_VOCABULARY }} OpenVocabularyRequest
  * @typedef {{ kind: typeof Message.OPEN_SETTINGS }} OpenSettingsRequest
  * @typedef {{ kind: typeof Message.SAVE_PHRASE, text: string, translations: string[] }} SavePhraseRequest
  * @typedef {{ kind: typeof Message.FORGET_PHRASE, text: string }} ForgetPhraseRequest
@@ -139,6 +146,7 @@ export const ErrorCode = Object.freeze({
  * @typedef {TranslateRequest
  *   | OpenReaderRequest
  *   | OpenLibraryRequest
+ *   | OpenVocabularyRequest
  *   | OpenSettingsRequest
  *   | SavePhraseRequest
  *   | ForgetPhraseRequest
@@ -283,6 +291,7 @@ export function asRequest(message) {
   const kind = /** @type {{ kind?: unknown }} */ (message).kind;
 
   if (kind === Message.OPEN_LIBRARY) return { kind: Message.OPEN_LIBRARY };
+  if (kind === Message.OPEN_VOCABULARY) return { kind: Message.OPEN_VOCABULARY };
   if (kind === Message.OPEN_SETTINGS) return { kind: Message.OPEN_SETTINGS };
   if (kind === Message.LIST_PHRASES) return { kind: Message.LIST_PHRASES };
   if (kind === Message.READ_PAGE) return { kind: Message.READ_PAGE };

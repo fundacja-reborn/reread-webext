@@ -1,0 +1,78 @@
+/* The saved-phrases page: the list rows, the editor a row unfolds into, and
+   the pager. Everything else - typography, the settings rows, the filter box,
+   buttons - is assets/page.css, shared by every page this extension owns. */
+
+.phrases {
+  margin: 1rem 0 0;
+  border-top: 1px solid var(--page-line);
+}
+
+.phrase-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.75rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--page-line);
+}
+
+/* The phrase and its meanings share a line where they fit and wrap where they
+   do not - never truncated, because the meanings are what this page is for. */
+.phrase-word {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.phrase-meanings {
+  flex: 1 1 14rem;
+  color: var(--page-muted);
+  overflow-wrap: anywhere;
+}
+
+.phrase-actions {
+  display: flex;
+  gap: 0.4rem;
+  margin-left: auto;
+}
+
+.phrase-actions button {
+  padding: 0.15rem 0.6rem;
+  font-size: 0.85rem;
+}
+
+/* Editing swaps the meanings for a textarea on its own line: one meaning per
+   line, the bubble's editor by other means. */
+.phrase-edit {
+  flex: 1 1 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.phrase-edit textarea {
+  width: 100%;
+  font: inherit;
+  padding: 0.35rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid var(--page-line);
+  background: transparent;
+  color: var(--page-fg);
+  resize: vertical;
+}
+
+.phrase-edit .phrase-actions {
+  margin-left: 0;
+}
+
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.pager-label {
+  color: var(--page-muted);
+  font-variant-numeric: tabular-nums;
+}

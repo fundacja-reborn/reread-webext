@@ -16,10 +16,12 @@
   "settings": { "message": "Einstellungen" },
   "language_pair": { "message": "Sprachpaar" },
   "reading_list": { "message": "Offline-Leseliste" },
+  "saved_phrases": { "message": "Gespeicherter Wortschatz" },
   "open_reader": { "message": "Diese Seite in der Leseansicht lesen" },
   "action_delete": { "message": "Löschen" },
   "action_download": { "message": "Herunterladen" },
   "action_cancel": { "message": "Abbrechen" },
+  "action_open": { "message": "Öffnen" },
 
   "error_engine_missing": { "message": "Noch keine Übersetzungs-Engine - diese Version kann nicht übersetzen." },
   "error_model_missing": { "message": "Kein Modell für dieses Sprachpaar auf diesem Gerät - in den Einstellungen herunterladen oder aus Dateien hinzufügen." },
@@ -41,6 +43,31 @@
   "popup_site_toggle_title": { "message": "Ob re/read auf dieser Website läuft" },
   "popup_no_page": { "message": "re/read funktioniert auf dieser Seite nicht." },
   "popup_mode_reader_only": { "message": "Modus: nur in der Leseansicht" },
+
+  "vocab_title": { "message": "re/read - gespeicherter Wortschatz" },
+  "vocab_intro": {
+    "message": "Alles, was Sie für dieses Sprachpaar behalten haben, Neuestes zuerst - beim Lesen gespeichert und nur auf diesem Gerät. „$LEARNED$“ entfernt einen Eintrag samt seinen Unterstreichungen; „$EDIT$“ schreibt seine Bedeutungen neu, eine pro Zeile.",
+    "placeholders": {
+      "learned": { "content": "$1", "example": "Gelernt" },
+      "edit": { "content": "$2", "example": "Bearbeiten" }
+    }
+  },
+  "vocab_filter_placeholder": { "message": "Nach Wendung oder Bedeutung filtern" },
+  "vocab_filter_aria": { "message": "Die Liste des gespeicherten Wortschatzes filtern" },
+  "vocab_empty": {
+    "message": "Für dieses Paar ist noch nichts gespeichert. Wählen Sie beim Lesen eine Wendung aus und drücken Sie „$BUTTON$“ - sie wartet dann hier.",
+    "placeholders": { "button": { "content": "$1", "example": "Speichern" } }
+  },
+  "vocab_filter_no_match": { "message": "Kein gespeicherter Eintrag passt darauf." },
+  "vocab_page_of": {
+    "message": "Seite $PAGE$ von $PAGES$",
+    "placeholders": {
+      "page": { "content": "$1", "example": "3" },
+      "pages": { "content": "$2", "example": "13" }
+    }
+  },
+  "vocab_prev": { "message": "Zurück" },
+  "vocab_next": { "message": "Weiter" },
 
   "reader_title": { "message": "re/read - Leseansicht" },
   "reader_open_original": { "message": "Original öffnen" },
@@ -188,6 +215,14 @@
   "spellings_other": {
     "message": "$COUNT$ weitere Schreibweisen",
     "placeholders": { "count": { "content": "$1" } }
+  },
+  "phrases_one": {
+    "message": "$COUNT$ gespeicherter Eintrag",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "phrases_other": {
+    "message": "$COUNT$ gespeicherte Einträge",
+    "placeholders": { "count": { "content": "$1", "example": "1.243" } }
   },
 
   "options_title": { "message": "re/read - Einstellungen" },
