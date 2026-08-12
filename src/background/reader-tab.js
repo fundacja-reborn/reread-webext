@@ -22,7 +22,7 @@
  */
 
 import { webext } from "../lib/browser.js";
-import { readReaderTab, writeReaderSource, writeReaderTab } from "../lib/session.js";
+import { clearReaderSource, readReaderTab, writeReaderSource, writeReaderTab } from "../lib/session.js";
 
 const READER_PAGE = "reader/reader.html";
 
@@ -119,5 +119,26 @@ export async function readInReader(tab, deps = {}) {
     await writeReaderSource({ tabId: tab.id, at: now() }, session);
   }
 
+  await openReader(deps);
+}
+
+/**
+ * The popup's "Reading list": point the reader at nothing, then bring it
+ * forward. A reader already standing on an article hears the source change
+ * and turns to the list; a reader opened by this press finds no source and
+ * shows the list on its own.
+ *
+ * Deliberately blind to where the press came from - on Android the popup is
+ * itself a page in a tab, and "the tab the message came from" would name the
+ * popup, which nobody meant to read.
+ *
+ * @param {ReaderTabDeps} [deps]
+ * @returns {Promise<void>}
+ */
+export async function openLibrary(deps = {}) {
+  const session = deps.session ?? webext().storage.session;
+  const now = deps.now ?? Date.now;
+
+  await clearReaderSource(now, session);
   await openReader(deps);
 }

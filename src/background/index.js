@@ -15,7 +15,7 @@ import { setProvider, translate } from "../lib/translator/index.js";
 import { bergamot } from "../lib/translator/providers/bergamot/index.js";
 import { lookUp } from "./dictionary.js";
 import { readPage } from "./page.js";
-import { openReader, readInReader } from "./reader-tab.js";
+import { openLibrary, openReader, readInReader } from "./reader-tab.js";
 import { forgetPhrase, listVocabulary, refreshVocabulary, savePhrase } from "./vocabulary.js";
 
 // The engine itself starts on the first translation, not here: this module runs
@@ -66,6 +66,12 @@ async function handle(request, sender) {
       const sourceTabId = request.sourceTabId ?? sender.tab?.id;
       if (typeof sourceTabId === "number") await readInReader({ id: sourceTabId });
       else await openReader();
+      return ok(null);
+    }
+    case Message.OPEN_LIBRARY: {
+      // No sender fallback on purpose: the reading list is not about any tab,
+      // and on Android the popup's own tab is the one the fallback would name.
+      await openLibrary();
       return ok(null);
     }
     case Message.OPEN_SETTINGS: {

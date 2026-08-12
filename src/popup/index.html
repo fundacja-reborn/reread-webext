@@ -12,8 +12,9 @@
   </head>
   <body>
     <!--
-      Four rows and nothing else: this site, the pair, the reader, the door to
-      the settings. No counters, no logo - the popup is a hallway, not a room.
+      Five rows and nothing else: this site, the pair, the reader, the reading
+      list, the door to the settings. No counters, no logo - the popup is a
+      hallway, not a room.
     -->
     <label class="popup-row popup-site" id="site-row" hidden>
       <span class="popup-host" id="site-host"></span>
@@ -29,6 +30,9 @@
     <button type="button" class="popup-row popup-action" id="open-reader">
       Read this page in the reader
     </button>
+    <!-- Stays even over the reader itself: there it turns the reader to the
+         list, which is exactly what the press means. -->
+    <button type="button" class="popup-row popup-action" id="open-library">Reading list</button>
     <button type="button" class="popup-row popup-action" id="open-settings">Settings</button>
 
     <!-- Below the four rows, and only while the mode is on: on Android the

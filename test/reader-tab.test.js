@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { openReader, readInReader } from "../src/background/reader-tab.js";
-import { READER_SOURCE_KEY, READER_TAB_KEY } from "../src/lib/session.js";
+import { openLibrary, openReader, readInReader } from "../src/background/reader-tab.js";
+import { READER_SOURCE_KEY, READER_TAB_KEY, readReaderSource } from "../src/lib/session.js";
 import { fakeBrowser } from "./fake-browser.js";
 
 const READER_URL = "moz-extension://uuid/reader/reader.html";
@@ -151,5 +151,40 @@ describe("the toolbar button", () => {
 
     assert.deepEqual(state.created, [READER_URL]);
     assert.equal(READER_SOURCE_KEY in state.stored, false);
+  });
+});
+
+describe("the reading list entry", () => {
+  it("points the reader at nothing, then opens it", async () => {
+    const { state, deps } = reader();
+
+    await openLibrary(deps);
+
+    assert.deepEqual(state.created, [READER_URL]);
+    // Written, not removed - the write is the signal a standing reader hears.
+    assert.deepEqual(state.stored[READER_SOURCE_KEY], { at: 1000 });
+  });
+
+  it("replaces a source the reader was pointed at, and only raises the tab", async () => {
+    const { state, deps } = reader({
+      tabs: [{ id: 7, windowId: 3 }],
+      session: { [READER_TAB_KEY]: 7, [READER_SOURCE_KEY]: { tabId: 4, at: 1 } },
+    });
+
+    await openLibrary(deps);
+
+    assert.deepEqual(state.stored[READER_SOURCE_KEY], { at: 1000 });
+    assert.deepEqual(state.created, []);
+    assert.equal(state.selected, 7);
+  });
+
+  it("writes a value the reader reads back as no source at all", async () => {
+    const { state, deps } = reader();
+
+    await openLibrary(deps);
+
+    assert.equal(await readReaderSource(deps.session), null);
+    // The sentinel still is a change, which a removal of an absent key is not.
+    assert.equal(READER_SOURCE_KEY in state.stored, true);
   });
 });
