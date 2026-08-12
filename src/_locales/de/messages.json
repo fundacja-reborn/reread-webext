@@ -68,6 +68,47 @@
   },
   "vocab_prev": { "message": "Zurück" },
   "vocab_next": { "message": "Weiter" },
+  "vocab_export": { "message": "Exportieren" },
+  "vocab_import": { "message": "Importieren" },
+  "vocab_transfer_note": {
+    "message": "Eine .tsv-Datei mit zwei Spalten - dasselbe Format schreibt das KOReader-Plugin, und Anki liest es. Der Import ergänzt nur Phrasen, die diesem Paar fehlen; Gespeichertes bleibt unberührt."
+  },
+  "vocab_import_into": { "message": "Importieren in" },
+  "vocab_import_nothing": { "message": "In dieser Datei gibt es keine Phrasen zum Importieren." },
+  "vocab_import_summary_one": {
+    "message": "$NAME$ enthält $COUNT$ Zeile:",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "name": { "content": "$2", "example": "reread-en-pl.tsv" }
+    }
+  },
+  "vocab_import_summary_other": {
+    "message": "$NAME$ enthält $COUNT$ Zeilen:",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1.243" },
+      "name": { "content": "$2", "example": "reread-en-pl.tsv" }
+    }
+  },
+  "vocab_import_added_one": {
+    "message": "$COUNT$ neue Phrase hinzugefügt.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "vocab_import_added_other": {
+    "message": "$COUNT$ neue Phrasen hinzugefügt.",
+    "placeholders": { "count": { "content": "$1", "example": "1.243" } }
+  },
+  "vocab_import_skipped_other": {
+    "message": "$COUNT$ bereits gespeicherte übersprungen.",
+    "placeholders": { "count": { "content": "$1", "example": "43" } }
+  },
+  "vocab_import_unreadable_one": {
+    "message": "$COUNT$ Zeile ließ sich nicht lesen.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "vocab_import_unreadable_other": {
+    "message": "$COUNT$ Zeilen ließen sich nicht lesen.",
+    "placeholders": { "count": { "content": "$1", "example": "7" } }
+  },
 
   "reader_title": { "message": "re/read - Leseansicht" },
   "reader_open_original": { "message": "Original öffnen" },

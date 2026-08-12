@@ -17,7 +17,7 @@ import { readConfig } from "../lib/config.js";
 import { ok } from "../lib/protocol.js";
 import { mirrorOf, writeMirror } from "../lib/store/mirror.js";
 import { buildPhrase } from "../lib/store/phrase.js";
-import { deletePhrase, listPhrases, putPhrase } from "../lib/store/vocab.js";
+import { deletePhrase, listPhrases, putMissingPhrases, putPhrase } from "../lib/store/vocab.js";
 
 /**
  * @param {import("../lib/config.js").Config} config
@@ -87,6 +87,46 @@ export async function forgetPhrase(request) {
   // event in every open tab, and every one of them would rebuild for nothing.
   if (forgotten) await rebuildMirror(config);
   return ok(null);
+}
+
+/**
+ * A file's worth of phrases, added to the configured pair - and only added:
+ * a phrase already saved keeps its meanings. Rows the store cannot accept -
+ * too long, or nothing left once normalized - are counted rather than fatal,
+ * because one broken line must not cost the rest of the file.
+ *
+ * `createdAt` steps by one millisecond per row, so the file's order survives
+ * into the next export - which is what keeps oldest-first meaning something
+ * across a roundtrip through another device.
+ *
+ * @param {import("../lib/protocol.js").ImportPhrasesRequest} request
+ * @returns {Promise<import("../lib/protocol.js").Result<import("../lib/protocol.js").ImportReport>>}
+ */
+export async function importPhrases(request) {
+  const config = await readConfig();
+  const now = Date.now();
+
+  /** @type {import("../lib/store/phrase.js").Phrase[]} */
+  const rows = [];
+  let invalid = 0;
+  for (const [at, row] of request.rows.entries()) {
+    const built = buildPhrase({
+      text: row.text,
+      translations: row.translations,
+      langFrom: config.sourceLang,
+      langTo: config.targetLang,
+      id: crypto.randomUUID(),
+      now: now + at,
+    });
+    if (built.ok) rows.push(built.value);
+    else invalid += 1;
+  }
+
+  const { added, skipped } = await putMissingPhrases(rows);
+  // Nothing added means the mirror already tells the truth, and rewriting it
+  // would ping every open tab for nothing - the same restraint as forgetting.
+  if (added > 0) await rebuildMirror(config);
+  return ok({ added, skipped, invalid });
 }
 
 /**

@@ -27,7 +27,7 @@ const PHRASES = "phrases";
 
 /** `(langFrom, langTo, normalized)` - the key from the brief, unique. */
 const BY_KEY = "by_key";
-/** Everything saved for one language pair: the mirror, and later the export. */
+/** Everything saved for one language pair: the mirror, and the export. */
 const BY_PAIR = "by_pair";
 
 /**
@@ -114,6 +114,40 @@ export async function putPhrase(phrase) {
       await promisify(store.index(BY_KEY).get(indexKey(phrase)))
     );
     await promisify(store.put(existing === undefined ? phrase : resaved(existing, phrase)));
+  });
+}
+
+/**
+ * Writes the phrases that are not already saved, and counts both outcomes.
+ *
+ * One transaction for the whole batch, each lookup paired with its write, for
+ * the same reason `putPhrase` pairs them: an import must not race a bubble's
+ * save into a duplicate row, and the unique index would throw where this
+ * counts. A file's own duplicate meets the row its first copy just wrote and
+ * is skipped like anything else already there - the first spelling wins.
+ *
+ * Unlike `putPhrase` this never touches an existing row: an import is
+ * somebody's past, a save is this reader's decision, and the second must not
+ * be overwritten by the first.
+ *
+ * @param {Phrase[]} phrases
+ * @returns {Promise<{ added: number, skipped: number }>}
+ */
+export async function putMissingPhrases(phrases) {
+  return await withPhrases("readwrite", async (store) => {
+    const index = store.index(BY_KEY);
+    let added = 0;
+    let skipped = 0;
+    for (const phrase of phrases) {
+      const existing = await promisify(index.getKey(indexKey(phrase)));
+      if (existing === undefined) {
+        await promisify(store.put(phrase));
+        added += 1;
+      } else {
+        skipped += 1;
+      }
+    }
+    return { added, skipped };
   });
 }
 

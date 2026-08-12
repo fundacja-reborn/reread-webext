@@ -30,6 +30,7 @@ export const Message = Object.freeze({
   SAVE_PHRASE: "save-phrase",
   FORGET_PHRASE: "forget-phrase",
   LIST_PHRASES: "list-phrases",
+  IMPORT_PHRASES: "import-phrases",
   READ_PAGE: "read-page",
   GRAB_PAGE: "grab-page",
   PAGE_INFO: "page-info",
@@ -134,6 +135,13 @@ export const ErrorCode = Object.freeze({
  * nothing: the page shows the vocabulary of the configured pair, and the pair
  * lives in the settings, not in a message.
  *
+ * `import-phrases` adds a file's worth of rows to the configured pair - and
+ * only adds: a phrase already saved keeps its meanings. Like every request
+ * here it names no pair; the page that offers the import switches the
+ * settings first, through the same control the pair select is. The answer
+ * counts what happened, because "added 1200, skipped 43" is the whole reason
+ * to trust an import that says nothing else.
+ *
  * @typedef {{ kind: typeof Message.TRANSLATE, text: string, context?: string }} TranslateRequest
  * @typedef {{ kind: typeof Message.OPEN_READER, sourceTabId?: number }} OpenReaderRequest
  * @typedef {{ kind: typeof Message.OPEN_LIBRARY }} OpenLibraryRequest
@@ -142,6 +150,9 @@ export const ErrorCode = Object.freeze({
  * @typedef {{ kind: typeof Message.SAVE_PHRASE, text: string, translations: string[] }} SavePhraseRequest
  * @typedef {{ kind: typeof Message.FORGET_PHRASE, text: string }} ForgetPhraseRequest
  * @typedef {{ kind: typeof Message.LIST_PHRASES }} ListPhrasesRequest
+ * @typedef {{ text: string, translations: string[] }} ImportRow
+ * @typedef {{ kind: typeof Message.IMPORT_PHRASES, rows: ImportRow[] }} ImportPhrasesRequest
+ * @typedef {{ added: number, skipped: number, invalid: number }} ImportReport
  * @typedef {{ kind: typeof Message.READ_PAGE }} ReadPageRequest
  * @typedef {TranslateRequest
  *   | OpenReaderRequest
@@ -151,6 +162,7 @@ export const ErrorCode = Object.freeze({
  *   | SavePhraseRequest
  *   | ForgetPhraseRequest
  *   | ListPhrasesRequest
+ *   | ImportPhrasesRequest
  *   | ReadPageRequest} Request
  */
 
@@ -296,7 +308,7 @@ export function asRequest(message) {
   if (kind === Message.LIST_PHRASES) return { kind: Message.LIST_PHRASES };
   if (kind === Message.READ_PAGE) return { kind: Message.READ_PAGE };
 
-  const { text, translations, context, sourceTabId } = /** @type {Record<string, unknown>} */ (message);
+  const { text, translations, context, sourceTabId, rows } = /** @type {Record<string, unknown>} */ (message);
 
   if (kind === Message.OPEN_READER) {
     // A tab id that is not one is dropped rather than refused, for the reason
@@ -327,6 +339,24 @@ export function asRequest(message) {
     if (!Array.isArray(translations)) return null;
     if (!translations.every((one) => typeof one === "string")) return null;
     return { kind: Message.SAVE_PHRASE, text, translations };
+  }
+
+  if (kind === Message.IMPORT_PHRASES) {
+    if (!Array.isArray(rows)) return null;
+    // One broken row refuses the message, where `context` would be dropped:
+    // the sender is our own page reading a parsed file, a row that is not one
+    // means a bug, and importing half a file quietly is the worse outcome.
+    /** @type {ImportRow[]} */
+    const clean = [];
+    for (const row of rows) {
+      if (typeof row !== "object" || row === null) return null;
+      const one = /** @type {Record<string, unknown>} */ (row);
+      if (typeof one["text"] !== "string") return null;
+      if (!Array.isArray(one["translations"])) return null;
+      if (!one["translations"].every((meaning) => typeof meaning === "string")) return null;
+      clean.push({ text: one["text"], translations: one["translations"] });
+    }
+    return { kind: Message.IMPORT_PHRASES, rows: clean };
   }
 
   return null;

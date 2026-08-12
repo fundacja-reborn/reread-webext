@@ -17,7 +17,13 @@ import { lookUp } from "./dictionary.js";
 import { readPage } from "./page.js";
 import { openLibrary, openReader, readInReader } from "./reader-tab.js";
 import { openVocabulary } from "./vocab-tab.js";
-import { forgetPhrase, listVocabulary, refreshVocabulary, savePhrase } from "./vocabulary.js";
+import {
+  forgetPhrase,
+  importPhrases,
+  listVocabulary,
+  refreshVocabulary,
+  savePhrase,
+} from "./vocabulary.js";
 
 // The engine itself starts on the first translation, not here: this module runs
 // every time Firefox wakes the event page, and waking up must stay cheap.
@@ -27,6 +33,7 @@ setProvider(bergamot);
  * @typedef {null
  *   | import("../lib/protocol.js").Translation
  *   | import("../lib/protocol.js").VocabEntry[]
+ *   | import("../lib/protocol.js").ImportReport
  *   | import("../lib/protocol.js").Page} Answer
  */
 
@@ -91,6 +98,8 @@ async function handle(request, sender) {
       return await forgetPhrase(request);
     case Message.LIST_PHRASES:
       return await listVocabulary();
+    case Message.IMPORT_PHRASES:
+      return await importPhrases(request);
   }
 }
 

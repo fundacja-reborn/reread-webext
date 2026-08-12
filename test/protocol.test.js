@@ -173,6 +173,58 @@ describe("asRequest", () => {
     assert.equal(asRequest({ kind: Message.SAVE_PHRASE, translations: ["brzeg"] }), null);
   });
 
+  it("accepts an import with its rows", () => {
+    assert.deepEqual(
+      asRequest({ kind: Message.IMPORT_PHRASES, rows: [{ text: "bank", translations: ["brzeg"] }] }),
+      { kind: Message.IMPORT_PHRASES, rows: [{ text: "bank", translations: ["brzeg"] }] },
+    );
+  });
+
+  it("accepts an import with no rows at all - an empty file is not a broken one", () => {
+    assert.deepEqual(asRequest({ kind: Message.IMPORT_PHRASES, rows: [] }), {
+      kind: Message.IMPORT_PHRASES,
+      rows: [],
+    });
+  });
+
+  it("rejects an import whose rows are not a list", () => {
+    for (const rows of [undefined, null, "bank\tbrzeg", 7, {}]) {
+      assert.equal(
+        asRequest({ kind: Message.IMPORT_PHRASES, rows }),
+        null,
+        `should have rejected ${JSON.stringify(rows) ?? "undefined"}`,
+      );
+    }
+  });
+
+  it("rejects the whole import over one broken row rather than importing half a file", () => {
+    for (const row of [
+      null,
+      "bank",
+      { translations: ["brzeg"] },
+      { text: 42, translations: ["brzeg"] },
+      { text: "bank" },
+      { text: "bank", translations: "brzeg" },
+      { text: "bank", translations: ["brzeg", 7] },
+    ]) {
+      assert.equal(
+        asRequest({ kind: Message.IMPORT_PHRASES, rows: [{ text: "ok", translations: ["ok"] }, row] }),
+        null,
+        `should have rejected ${JSON.stringify(row) ?? "undefined"}`,
+      );
+    }
+  });
+
+  it("keeps of an import row only what a row is", () => {
+    assert.deepEqual(
+      asRequest({
+        kind: Message.IMPORT_PHRASES,
+        rows: [{ text: "bank", translations: ["brzeg"], id: "smuggled", createdAt: 7 }],
+      }),
+      { kind: Message.IMPORT_PHRASES, rows: [{ text: "bank", translations: ["brzeg"] }] },
+    );
+  });
+
   it("accepts forgetting a phrase, and only with the phrase", () => {
     assert.deepEqual(asRequest({ kind: Message.FORGET_PHRASE, text: "bank" }), {
       kind: Message.FORGET_PHRASE,
@@ -224,6 +276,7 @@ describe("asPageRequest", () => {
       Message.READ_PAGE,
       Message.SAVE_PHRASE,
       Message.LIST_PHRASES,
+      Message.IMPORT_PHRASES,
       Message.OPEN_READER,
     ]) {
       assert.equal(asPageRequest({ kind, text: "word", translations: [] }), null, kind);
