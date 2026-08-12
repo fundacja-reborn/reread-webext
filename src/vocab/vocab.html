@@ -32,6 +32,33 @@
       </div>
     </dl>
 
+    <p class="transfer">
+      <button type="button" id="export" data-i18n="vocab_export">Export</button>
+      <button type="button" id="import" data-i18n="vocab_import">Import</button>
+    </p>
+    <p class="hint" data-i18n="vocab_transfer_note">
+      A two-column .tsv file - what the KOReader plugin writes and Anki imports. Importing adds
+      phrases this pair is missing and never touches a saved one.
+    </p>
+    <input type="file" id="import-file" accept=".tsv,text/tab-separated-values" hidden />
+
+    <!-- The moment of consent: what the file holds and where it would go,
+         shown before anything is written. vocab.js fills it and keeps it in
+         step with the file the reader picked. -->
+    <div id="import-confirm" class="import-confirm" hidden>
+      <p id="import-summary"></p>
+      <ul id="import-sample" class="import-sample"></ul>
+      <p class="import-pair">
+        <label for="import-pair" data-i18n="vocab_import_into">Import into</label>
+        <select id="import-pair"></select>
+      </p>
+      <p class="transfer">
+        <button type="button" id="import-run" data-i18n="vocab_import">Import</button>
+        <button type="button" id="import-cancel" data-i18n="action_cancel">Cancel</button>
+      </p>
+    </div>
+    <p id="transfer-status" class="status" role="status"></p>
+
     <p class="hint" id="count" hidden></p>
 
     <p class="model-filter">

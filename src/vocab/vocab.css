@@ -64,6 +64,39 @@
   margin-left: 0;
 }
 
+/* Export and import act on the whole pair, so they stand by the pair select
+   rather than by any row. */
+.transfer {
+  display: flex;
+  gap: 0.4rem;
+  margin: 1rem 0 0;
+}
+
+/* The offer a picked file becomes: its size, a taste of its rows, the pair
+   it would land in, and the two buttons that decide. */
+.import-confirm {
+  margin: 1rem 0 0;
+  padding: 0.25rem 1rem 0.75rem;
+  border: 1px solid var(--page-line);
+  border-radius: 8px;
+}
+
+.import-sample {
+  margin: 0;
+  padding-left: 1.25rem;
+  color: var(--page-muted);
+}
+
+.import-sample li {
+  overflow-wrap: anywhere;
+}
+
+.import-pair {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .pager {
   display: flex;
   align-items: center;

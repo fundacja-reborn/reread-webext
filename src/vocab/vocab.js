@@ -27,6 +27,7 @@ import { pairLabel } from "../lib/language.js";
 import { describeError } from "../lib/messages.js";
 import { ErrorCode, Message, asResult, fail } from "../lib/protocol.js";
 import { MIRROR_KEY } from "../lib/store/mirror.js";
+import { exportFilename, fromTsv, pairFromFilename, toTsv } from "../lib/store/tsv.js";
 import { listPairs, listPhrases } from "../lib/store/vocab.js";
 import { listView, newestFirst, pairChoicesFor } from "./list-view.js";
 
@@ -38,6 +39,16 @@ localizePage();
 const pairSelect = /** @type {HTMLSelectElement | null} */ (document.getElementById("pair"));
 const introLine = document.getElementById("intro");
 const countLine = document.getElementById("count");
+const exportButton = /** @type {HTMLButtonElement | null} */ (document.getElementById("export"));
+const importButton = /** @type {HTMLButtonElement | null} */ (document.getElementById("import"));
+const importInput = /** @type {HTMLInputElement | null} */ (document.getElementById("import-file"));
+const importConfirm = document.getElementById("import-confirm");
+const importSummary = document.getElementById("import-summary");
+const importSample = document.getElementById("import-sample");
+const importPairSelect = /** @type {HTMLSelectElement | null} */ (document.getElementById("import-pair"));
+const importRun = /** @type {HTMLButtonElement | null} */ (document.getElementById("import-run"));
+const importCancel = /** @type {HTMLButtonElement | null} */ (document.getElementById("import-cancel"));
+const transferLine = document.getElementById("transfer-status");
 const filterInput = /** @type {HTMLInputElement | null} */ (document.getElementById("filter"));
 const listContainer = document.getElementById("list");
 const statusLine = document.getElementById("status");
@@ -66,6 +77,24 @@ let page = 1;
 /** @type {string | null} */
 let editing = null;
 let draft = "";
+
+/**
+ * The file waiting for the reader's yes: its name, its rows as parsed, and
+ * how many lines were not rows at all. State rather than DOM for the same
+ * reason the editor's draft is - a re-render must not eat it.
+ */
+/** @type {{ name: string, rows: import("../lib/store/tsv.js").TsvRow[], invalid: number } | null} */
+let pending = null;
+
+/**
+ * What the confirmation's pair select offers, kept so the pressed choice can
+ * be looked up the way the header select's is.
+ */
+/** @type {ReturnType<typeof pairChoicesFor>} */
+let importChoices = [];
+
+/** How many rows the confirmation quotes before asking. */
+const SAMPLE_ROWS = 3;
 
 /**
  * @param {string} tag
@@ -100,6 +129,20 @@ function status(text, tone) {
   statusLine.textContent = text;
   if (tone === undefined) delete statusLine.dataset["tone"];
   else statusLine.dataset["tone"] = tone;
+}
+
+/**
+ * The transfer's own status line, under its own buttons: an import report
+ * next to the pager would be an answer far from its question.
+ *
+ * @param {string} text
+ * @param {"error"} [tone]
+ */
+function transferStatus(text, tone) {
+  if (transferLine === null) return;
+  transferLine.textContent = text;
+  if (tone === undefined) delete transferLine.dataset["tone"];
+  else transferLine.dataset["tone"] = tone;
 }
 
 /**
@@ -151,6 +194,8 @@ function render() {
   renderPair();
   renderCount();
   renderList();
+  // Exporting nothing would download an empty file; the button says so first.
+  if (exportButton !== null) exportButton.disabled = phrases.length === 0;
 }
 
 function renderPair() {
@@ -342,6 +387,157 @@ async function saveEdit(phrase) {
   await reload();
 }
 
+/**
+ * The whole pair as a file - fresh from the database rather than from the
+ * page's copy, because the copy is newest first and an export is the
+ * vocabulary, not the view: oldest first, the order that keeps two exports
+ * diffable. Downloading is a blob and an anchor; no permission asks for less.
+ */
+async function exportPhrases() {
+  if (config === null) return;
+  const pair = { langFrom: config.sourceLang, langTo: config.targetLang };
+  try {
+    const list = await listPhrases(pair);
+    if (list.length === 0) return;
+    const url = URL.createObjectURL(new Blob([toTsv(list)], { type: "text/tab-separated-values" }));
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = exportFilename(pair);
+    anchor.click();
+    // The URL has to outlive the click long enough for the download to take
+    // it. A minute is comfortably that, and then the blob can go.
+    setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    transferStatus("");
+  } catch {
+    transferStatus(describeError(ErrorCode.INTERNAL), "error");
+  }
+}
+
+/**
+ * @param {File} file
+ */
+async function offerImport(file) {
+  try {
+    const parsed = fromTsv(await file.text());
+    if (parsed.rows.length === 0) {
+      pending = null;
+      renderImportOffer();
+      transferStatus(t("vocab_import_nothing"), "error");
+      return;
+    }
+    pending = { name: file.name, rows: parsed.rows, invalid: parsed.invalid };
+    transferStatus("");
+    renderImportOffer();
+  } catch {
+    pending = null;
+    renderImportOffer();
+    transferStatus(describeError(ErrorCode.INTERNAL), "error");
+  }
+}
+
+/**
+ * The moment of consent: what the file holds and where it would go, before
+ * anything is written.
+ */
+function renderImportOffer() {
+  if (importConfirm === null) return;
+  importConfirm.hidden = pending === null;
+  if (pending === null) return;
+
+  if (importSummary !== null) {
+    importSummary.textContent = plural(pending.rows.length, "vocab_import_summary", [pending.name]);
+  }
+
+  if (importSample !== null) {
+    importSample.replaceChildren();
+    for (const row of pending.rows.slice(0, SAMPLE_ROWS)) {
+      const item = document.createElement("li");
+      item.textContent = `${row.text} → ${row.translations.join("; ")}`;
+      importSample.append(item);
+    }
+  }
+
+  renderImportPair();
+}
+
+/**
+ * The pair select starts on what the file's name says when it says anything,
+ * and on the pair being shown when it does not - a guess is fine as a
+ * starting point and never as a decision. A named pair with nothing saved
+ * yet is offered too: vocabulary may arrive before its model does.
+ */
+function renderImportPair() {
+  if (importPairSelect === null || config === null || pending === null) return;
+
+  const named = pairFromFilename(pending.name);
+  importChoices = [...choices];
+  if (named !== null && !importChoices.some((one) => one.from === named.langFrom && one.to === named.langTo)) {
+    importChoices.unshift({
+      pair: `${named.langFrom}${named.langTo}`,
+      from: named.langFrom,
+      to: named.langTo,
+      count: 0,
+    });
+  }
+
+  const preferred =
+    named !== null ? `${named.langFrom}${named.langTo}` : `${config.sourceLang}${config.targetLang}`;
+
+  importPairSelect.replaceChildren();
+  for (const choice of importChoices) {
+    const option = document.createElement("option");
+    option.value = choice.pair;
+    option.textContent =
+      choice.count > 0
+        ? `${pairLabel(choice.from, choice.to)} (${choice.count.toLocaleString()})`
+        : pairLabel(choice.from, choice.to);
+    option.selected = choice.pair === preferred;
+    importPairSelect.append(option);
+  }
+}
+
+function closeImportOffer() {
+  pending = null;
+  renderImportOffer();
+}
+
+async function runImport() {
+  if (pending === null || importRun === null || importPairSelect === null) return;
+  const choice = importChoices.find((one) => one.pair === importPairSelect.value);
+  if (choice === undefined) return;
+
+  importRun.disabled = true;
+  try {
+    // The same global switch the select at the top makes, committed by this
+    // press: the import goes to the configured pair, like every message this
+    // page sends, and the page follows the configuration to the result.
+    if (config === null || config.sourceLang !== choice.from || config.targetLang !== choice.to) {
+      await writeConfig({ sourceLang: choice.from, targetLang: choice.to });
+    }
+
+    const offered = pending;
+    const answer = await ask({ kind: Message.IMPORT_PHRASES, rows: offered.rows });
+    if (!answer.ok) {
+      // The offer stays open: an error must not eat the file the reader
+      // already picked and read.
+      transferStatus(describeError(answer.code), "error");
+      return;
+    }
+
+    const report = /** @type {import("../lib/protocol.js").ImportReport} */ (answer.value);
+    const unreadable = report.invalid + offered.invalid;
+    const sentences = [plural(report.added, "vocab_import_added")];
+    if (report.skipped > 0) sentences.push(plural(report.skipped, "vocab_import_skipped"));
+    if (unreadable > 0) sentences.push(plural(unreadable, "vocab_import_unreadable"));
+    transferStatus(sentences.join(" "));
+
+    closeImportOffer();
+    await reload();
+  } finally {
+    importRun.disabled = false;
+  }
+}
+
 pairSelect?.addEventListener("change", () => {
   if (pairSelect === null) return;
   const choice = choices.find((one) => one.pair === pairSelect.value);
@@ -349,6 +545,25 @@ pairSelect?.addEventListener("change", () => {
   // The same write the popup makes. The storage listener below is the render
   // path, so switching here and switching there repaint this page the same way.
   void writeConfig({ sourceLang: choice.from, targetLang: choice.to });
+});
+
+exportButton?.addEventListener("click", () => void exportPhrases());
+
+importButton?.addEventListener("click", () => importInput?.click());
+
+importInput?.addEventListener("change", () => {
+  if (importInput === null) return;
+  const file = importInput.files?.[0];
+  // Cleared so that the same file, picked again, fires this again.
+  importInput.value = "";
+  if (file !== undefined) void offerImport(file);
+});
+
+importRun?.addEventListener("click", () => void runImport());
+
+importCancel?.addEventListener("click", () => {
+  closeImportOffer();
+  transferStatus("");
 });
 
 filterInput?.addEventListener("input", () => {

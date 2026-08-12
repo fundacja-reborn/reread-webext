@@ -74,6 +74,51 @@
   },
   "vocab_prev": { "message": "Previous" },
   "vocab_next": { "message": "Next" },
+  "vocab_export": { "message": "Export" },
+  "vocab_import": { "message": "Import" },
+  "vocab_transfer_note": {
+    "message": "A two-column .tsv file - what the KOReader plugin writes and Anki imports. Importing adds phrases this pair is missing and never touches a saved one."
+  },
+  "vocab_import_into": { "message": "Import into" },
+  "vocab_import_nothing": { "message": "There are no phrases to import in that file." },
+  "vocab_import_summary_one": {
+    "message": "$NAME$ holds $COUNT$ row:",
+    "description": "Plural family over the row count; NAME is the picked file's name. The colon leads into the sample rows shown below.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "name": { "content": "$2", "example": "reread-en-pl.tsv" }
+    }
+  },
+  "vocab_import_summary_other": {
+    "message": "$NAME$ holds $COUNT$ rows:",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1,243" },
+      "name": { "content": "$2", "example": "reread-en-pl.tsv" }
+    }
+  },
+  "vocab_import_added_one": {
+    "message": "Added $COUNT$ new phrase.",
+    "description": "First sentence of the import report, always shown. A language may bend the counted noun's case to fit its own sentence.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "vocab_import_added_other": {
+    "message": "Added $COUNT$ new phrases.",
+    "placeholders": { "count": { "content": "$1", "example": "1,243" } }
+  },
+  "vocab_import_skipped_other": {
+    "message": "Skipped $COUNT$ already saved.",
+    "description": "Second sentence of the import report, shown only when something was skipped.",
+    "placeholders": { "count": { "content": "$1", "example": "43" } }
+  },
+  "vocab_import_unreadable_one": {
+    "message": "$COUNT$ line could not be read.",
+    "description": "Last sentence of the import report, shown only when the file had lines that were not rows of the format.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "vocab_import_unreadable_other": {
+    "message": "$COUNT$ lines could not be read.",
+    "placeholders": { "count": { "content": "$1", "example": "7" } }
+  },
 
   "reader_title": { "message": "re/read - reader" },
   "reader_open_original": { "message": "Open the original" },

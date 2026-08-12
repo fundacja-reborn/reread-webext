@@ -68,6 +68,89 @@
   },
   "vocab_prev": { "message": "Poprzednia" },
   "vocab_next": { "message": "Następna" },
+  "vocab_export": { "message": "Eksportuj" },
+  "vocab_import": { "message": "Importuj" },
+  "vocab_transfer_note": {
+    "message": "Plik .tsv z dwiema kolumnami - ten sam format zapisuje wtyczka KOReadera, a czyta Anki. Import dodaje tylko frazy, których w tej parze nie ma; zapisanych nie zmienia."
+  },
+  "vocab_import_into": { "message": "Importuj do" },
+  "vocab_import_nothing": { "message": "W tym pliku nie ma fraz do zaimportowania." },
+  "vocab_import_summary_one": {
+    "message": "$NAME$ zawiera $COUNT$ wiersz:",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "name": { "content": "$2", "example": "reread-en-pl.tsv" }
+    }
+  },
+  "vocab_import_summary_few": {
+    "message": "$NAME$ zawiera $COUNT$ wiersze:",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "name": { "content": "$2", "example": "reread-en-pl.tsv" }
+    }
+  },
+  "vocab_import_summary_many": {
+    "message": "$NAME$ zawiera $COUNT$ wierszy:",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1243" },
+      "name": { "content": "$2", "example": "reread-en-pl.tsv" }
+    }
+  },
+  "vocab_import_summary_other": {
+    "message": "$NAME$ zawiera $COUNT$ wiersza:",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1,5" },
+      "name": { "content": "$2", "example": "reread-en-pl.tsv" }
+    }
+  },
+  "vocab_import_added_one": {
+    "message": "Dodano $COUNT$ nową frazę.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "vocab_import_added_few": {
+    "message": "Dodano $COUNT$ nowe frazy.",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
+  "vocab_import_added_many": {
+    "message": "Dodano $COUNT$ nowych fraz.",
+    "placeholders": { "count": { "content": "$1", "example": "1243" } }
+  },
+  "vocab_import_added_other": {
+    "message": "Dodano $COUNT$ nowej frazy.",
+    "placeholders": { "count": { "content": "$1", "example": "1,5" } }
+  },
+  "vocab_import_skipped_one": {
+    "message": "Pominięto $COUNT$ już zapisaną.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "vocab_import_skipped_few": {
+    "message": "Pominięto $COUNT$ już zapisane.",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
+  "vocab_import_skipped_many": {
+    "message": "Pominięto $COUNT$ już zapisanych.",
+    "placeholders": { "count": { "content": "$1", "example": "43" } }
+  },
+  "vocab_import_skipped_other": {
+    "message": "Pominięto $COUNT$ już zapisanej.",
+    "placeholders": { "count": { "content": "$1", "example": "1,5" } }
+  },
+  "vocab_import_unreadable_one": {
+    "message": "Nie dało się odczytać $COUNT$ wiersza.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "vocab_import_unreadable_few": {
+    "message": "Nie dało się odczytać $COUNT$ wierszy.",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
+  "vocab_import_unreadable_many": {
+    "message": "Nie dało się odczytać $COUNT$ wierszy.",
+    "placeholders": { "count": { "content": "$1", "example": "7" } }
+  },
+  "vocab_import_unreadable_other": {
+    "message": "Nie dało się odczytać $COUNT$ wiersza.",
+    "placeholders": { "count": { "content": "$1", "example": "1,5" } }
+  },
 
   "reader_title": { "message": "re/read - czytnik" },
   "reader_open_original": { "message": "Otwórz oryginał" },

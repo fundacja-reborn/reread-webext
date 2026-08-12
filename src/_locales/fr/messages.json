@@ -68,6 +68,51 @@
   },
   "vocab_prev": { "message": "Précédente" },
   "vocab_next": { "message": "Suivante" },
+  "vocab_export": { "message": "Exporter" },
+  "vocab_import": { "message": "Importer" },
+  "vocab_transfer_note": {
+    "message": "Un fichier .tsv à deux colonnes - le format qu'écrit le plugin KOReader et que lit Anki. L'import ajoute seulement les phrases qui manquent à cette paire ; rien de déjà enregistré n'est modifié."
+  },
+  "vocab_import_into": { "message": "Importer dans" },
+  "vocab_import_nothing": { "message": "Ce fichier ne contient aucune phrase à importer." },
+  "vocab_import_summary_one": {
+    "message": "$NAME$ contient $COUNT$ ligne :",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "name": { "content": "$2", "example": "reread-en-pl.tsv" }
+    }
+  },
+  "vocab_import_summary_other": {
+    "message": "$NAME$ contient $COUNT$ lignes :",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1 243" },
+      "name": { "content": "$2", "example": "reread-en-pl.tsv" }
+    }
+  },
+  "vocab_import_added_one": {
+    "message": "$COUNT$ nouvelle phrase ajoutée.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "vocab_import_added_other": {
+    "message": "$COUNT$ nouvelles phrases ajoutées.",
+    "placeholders": { "count": { "content": "$1", "example": "1 243" } }
+  },
+  "vocab_import_skipped_one": {
+    "message": "$COUNT$ déjà enregistrée, ignorée.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "vocab_import_skipped_other": {
+    "message": "$COUNT$ déjà enregistrées, ignorées.",
+    "placeholders": { "count": { "content": "$1", "example": "43" } }
+  },
+  "vocab_import_unreadable_one": {
+    "message": "$COUNT$ ligne n'a pas pu être lue.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "vocab_import_unreadable_other": {
+    "message": "$COUNT$ lignes n'ont pas pu être lues.",
+    "placeholders": { "count": { "content": "$1", "example": "7" } }
+  },
 
   "reader_title": { "message": "re/read - lecteur" },
   "reader_open_original": { "message": "Ouvrir l'original" },
