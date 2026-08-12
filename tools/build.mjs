@@ -41,6 +41,7 @@ const STATIC_FILES = [
   "reader/reader.css",
   "content/highlight.css",
   "assets",
+  "_locales",
 ];
 
 /**

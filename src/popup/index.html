@@ -16,29 +16,50 @@
       list, the door to the settings. No counters, no logo - the popup is a
       hallway, not a room.
     -->
+    <!-- The English in this file is the fallback: `localizePage` swaps every
+         `data-i18n`-marked text for the catalogue's language before the popup
+         is seen. A marked element holds text only - the locales test enforces
+         that, because the swap goes through `textContent`. -->
     <label class="popup-row popup-site" id="site-row" hidden>
       <span class="popup-host" id="site-host"></span>
-      <input type="checkbox" id="site-toggle" title="Whether re/read runs on this site" />
+      <input
+        type="checkbox"
+        id="site-toggle"
+        title="Whether re/read runs on this site"
+        data-i18n-title="popup_site_toggle_title"
+      />
     </label>
-    <p class="popup-row popup-note" id="site-note" hidden>re/read does not work on this page.</p>
+    <p class="popup-row popup-note" id="site-note" data-i18n="popup_no_page" hidden>
+      re/read does not work on this page.
+    </p>
 
     <label class="popup-row popup-pair" id="pair-row">
-      <span>Language pair</span>
+      <span data-i18n="language_pair">Language pair</span>
       <select id="pair"></select>
     </label>
 
-    <button type="button" class="popup-row popup-action" id="open-reader">
+    <button type="button" class="popup-row popup-action" id="open-reader" data-i18n="open_reader">
       Read this page in the reader
     </button>
     <!-- Stays even over the reader itself: there it turns the reader to the
          list, which is exactly what the press means. -->
-    <button type="button" class="popup-row popup-action" id="open-library">Reading list</button>
-    <button type="button" class="popup-row popup-action" id="open-settings">Settings</button>
+    <button type="button" class="popup-row popup-action" id="open-library" data-i18n="reading_list">
+      Reading list
+    </button>
+    <button type="button" class="popup-row popup-action" id="open-settings" data-i18n="settings">
+      Settings
+    </button>
 
     <!-- Below the four rows, and only while the mode is on: on Android the
          popup is the extension's main surface, and the mode has to be readable
          from it. Pressing it leads where the mode is changed. -->
-    <button type="button" class="popup-row popup-action popup-mode" id="mode-line" hidden>
+    <button
+      type="button"
+      class="popup-row popup-action popup-mode"
+      id="mode-line"
+      data-i18n="popup_mode_reader_only"
+      hidden
+    >
       Mode: only in the reader
     </button>
 

@@ -37,6 +37,8 @@
  * @typedef {{ ok: true, value: ZipEntry[] } | { ok: false, problem: ZipProblem, detail?: string }} ZipResult
  */
 
+import { aside, t } from "../i18n.js";
+
 /**
  * What a dictionary archive is allowed to be. WikDict's largest is a few
  * megabytes holding four files; the room above that is for other dictionaries,
@@ -243,14 +245,14 @@ export async function readZip(buffer) {
 export function describeZipProblem(problem, detail) {
   switch (problem) {
     case "not_zip":
-      return "What arrived is not a zip archive. Nothing was stored.";
+      return t("zip_not_zip");
     case "zip_unsupported":
-      return `The archive uses a feature this extension does not read${detail === undefined ? "" : ` (${detail})`}. Nothing was stored.`;
+      return t("zip_unsupported", aside(detail));
     case "zip_too_big":
-      return `The archive is larger than a dictionary has any reason to be${detail === undefined ? "" : ` (${detail})`}. Nothing was stored.`;
+      return t("zip_too_big", aside(detail));
     case "zip_bad":
-      return `The archive is damaged${detail === undefined ? "" : ` (${detail})`}. Nothing was stored - try downloading again.`;
+      return t("zip_bad", aside(detail));
     default:
-      return "The archive could not be read. Nothing was stored.";
+      return t("zip_unreadable");
   }
 }

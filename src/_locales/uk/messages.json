@@ -1,0 +1,415 @@
+{
+  "locale_code": { "message": "uk" },
+
+  "extension_description": {
+    "message": "Вивчайте мову, читаючи інтернет. Переклад, словниковий запас і підкреслення - усе на вашому власному пристрої."
+  },
+
+  "pair_label": {
+    "message": "$FROM$ → $TO$",
+    "placeholders": {
+      "from": { "content": "$1", "example": "англійська" },
+      "to": { "content": "$2", "example": "українська" }
+    }
+  },
+
+  "settings": { "message": "Налаштування" },
+  "language_pair": { "message": "Мовна пара" },
+  "reading_list": { "message": "Список читання" },
+  "open_reader": { "message": "Читати цю сторінку в читачі" },
+  "action_delete": { "message": "Видалити" },
+  "action_download": { "message": "Завантажити" },
+  "action_cancel": { "message": "Скасувати" },
+
+  "error_engine_missing": { "message": "Рушія перекладу ще немає - ця збірка не перекладає." },
+  "error_model_missing": { "message": "На цьому пристрої немає моделі для цієї мовної пари - завантажте її або додайте в налаштуваннях." },
+  "error_unsupported_pair": { "message": "Для цієї мовної пари не існує жодної моделі." },
+  "error_too_long": { "message": "Це виділення задовге для перекладу." },
+  "error_no_page": { "message": "Тут немає сторінки для читання - відкрийте статтю й натисніть кнопку ще раз." },
+  "error_unknown_message": { "message": "Розширення надіслало запит, якого само не розуміє." },
+  "error_internal": { "message": "Щось пішло не так усередині розширення." },
+
+  "bubble_save": { "message": "Зберегти" },
+  "bubble_learned": { "message": "Вивчено" },
+  "bubble_edit": { "message": "Редагувати" },
+  "bubble_settings": { "message": "Відкрити налаштування" },
+  "bubble_more": { "message": "Більше" },
+  "bubble_less": { "message": "Менше" },
+  "bubble_reader": { "message": "Читати в читачі" },
+  "bubble_translating": { "message": "Перекладаю..." },
+
+  "popup_site_toggle_title": { "message": "Чи працює re/read на цьому сайті" },
+  "popup_no_page": { "message": "re/read не працює на цій сторінці." },
+  "popup_mode_reader_only": { "message": "Режим: лише в читачі" },
+
+  "reader_title": { "message": "re/read - читач" },
+  "reader_open_original": { "message": "Відкрити оригінал" },
+  "reader_display_title": { "message": "Шрифт і тема" },
+  "reader_theme": { "message": "Тема" },
+  "reader_theme_auto": { "message": "Авто" },
+  "reader_theme_light": { "message": "Світла" },
+  "reader_theme_sepia": { "message": "Сепія" },
+  "reader_theme_dark": { "message": "Темна" },
+  "reader_font": { "message": "Шрифт" },
+  "reader_font_serif": { "message": "Із засічками" },
+  "reader_font_sans": { "message": "Без засічок" },
+  "reader_size": { "message": "Розмір" },
+  "reader_smaller": { "message": "Менший" },
+  "reader_larger": { "message": "Більший" },
+  "reader_width": { "message": "Ширина" },
+  "reader_narrower": { "message": "Вужча" },
+  "reader_wider": { "message": "Ширша" },
+  "reader_segment_unread": { "message": "До прочитання" },
+  "reader_segment_read": { "message": "Прочитане" },
+  "reader_save": { "message": "Зберегти до списку читання" },
+  "reader_saved": { "message": "У списку читання" },
+  "reader_delete": { "message": "Видалити зі списку читання" },
+  "reader_delete_confirm": { "message": "Точно?" },
+  "reader_mark_read": { "message": "Позначити прочитаним" },
+  "reader_marked_read": { "message": "Позначено прочитаним" },
+  "reader_no_article": { "message": "На тій сторінці не вдалося знайти статтю." },
+  "reader_list_write_failed": { "message": "Не вдалося записати список читання." },
+  "reader_empty_none": {
+    "message": "Ще нічого не збережено - відкрийте статтю в читачі й натисніть «$BUTTON$».",
+    "placeholders": { "button": { "content": "$1", "example": "Зберегти до списку читання" } }
+  },
+  "reader_empty_all_read": { "message": "Читати більше нічого - усе збережене позначено прочитаним." },
+  "reader_empty_none_read": { "message": "Ще нічого не позначено прочитаним." },
+
+  "download_cancelled": { "message": "Завантаження скасовано. Нічого не збережено." },
+  "download_failed": { "message": "Завантаження не завершилося, і нічого не збережено." },
+  "model_download_network": {
+    "message": "Не вдалося зв'язатися з місцем, де зберігаються моделі$DETAIL$. Нічого не збережено.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "model_download_http": {
+    "message": "Завантаження відхилено$DETAIL$. Модель, можливо, переїхала; нічого не збережено.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "model_download_size": {
+    "message": "Завантаження обірвалося зарано$DETAIL$, тож файл викинуто.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "model_download_checksum": {
+    "message": "Те, що надійшло, не є моделлю, на яку чекає ця версія$DETAIL$, тож його викинуто. Спробуйте ще раз - якщо повторюватиметься, файл на тому боці змінився.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "model_download_unpack": {
+    "message": "Завантажене не вдалося розпакувати$DETAIL$, тож його викинуто.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "dict_download_network": {
+    "message": "Не вдалося зв'язатися з місцем, де зберігаються словники$DETAIL$. Нічого не збережено.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "dict_download_http": {
+    "message": "Завантаження відхилено$DETAIL$. Словник, можливо, переїхав; нічого не збережено.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "dict_download_too_big": {
+    "message": "Завантаження значно більше, ніж словник має бути$DETAIL$, тож його зупинено. Нічого не збережено.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+
+  "model_files_one_of_them": { "message": "один із файлів" },
+  "model_files_empty": { "message": "Не вибрано жодного файлу." },
+  "model_files_unknown_file": {
+    "message": "Не є частиною моделі: $FILE$. Очікуються назви, що починаються з model., lex. і vocab.",
+    "placeholders": { "file": { "content": "$1" } }
+  },
+  "model_files_unknown_pair": {
+    "message": "Неможливо визначити, для яких мов цей файл: $FILE$.",
+    "placeholders": { "file": { "content": "$1" } }
+  },
+  "model_files_mixed_pairs": {
+    "message": "Ці файли належать більш ніж одній мовній парі ($PAIRS$). Завантажуйте один напрямок за раз.",
+    "placeholders": { "pairs": { "content": "$1" } }
+  },
+  "model_files_missing_model": { "message": "Бракує файлу моделі (model.<pair>.intgemm.alphas.bin)." },
+  "model_files_missing_shortlist": { "message": "Бракує файлу shortlist (lex.<pair>.s2t.bin)." },
+  "model_files_missing_vocab": { "message": "Бракує словникового файлу (vocab.<pair>.spm)." },
+  "model_files_not_a_model": { "message": "Ці файли не є моделлю перекладу." },
+
+  "dict_default_name": { "message": "Словник" },
+  "dict_import_empty": { "message": "Не вибрано жодного файлу. Нічого не збережено." },
+  "dict_import_missing_ifo": { "message": "Серед цих файлів немає .ifo, тож це не словник StarDict. Нічого не збережено." },
+  "dict_import_missing_idx": { "message": "Бракує індексу (.idx або .idx.gz). Нічого не збережено." },
+  "dict_import_missing_dict": { "message": "Бракує тіла словника (.dict або .dict.dz). Нічого не збережено." },
+  "dict_import_mixed": {
+    "message": "Ці файли належать більш ніж одному словнику ($NAMES$). Додавайте по одному. Нічого не збережено.",
+    "placeholders": { "names": { "content": "$1" } }
+  },
+  "dict_import_not_stardict": { "message": "Цей файл .ifo не є словником StarDict. Нічого не збережено." },
+  "dict_import_not_stardict_detail": {
+    "message": "Це $KIND$, чого це розширення не вміє читати. Нічого не збережено.",
+    "placeholders": { "kind": { "content": "$1" } }
+  },
+  "dict_import_unpack": {
+    "message": "Файли стиснуто в спосіб, який не вдалося розпакувати$DETAIL$. Нічого не збережено.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "dict_import_no_entries": { "message": "Індекс порожній - у цьому словнику немає слів. Нічого не збережено." },
+  "dict_import_no_entries_detail": {
+    "message": "Жодного з $COUNT$ слів в індексі не вдалося прочитати, тож ці файли не пасують одне до одного. Нічого не збережено.",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "dict_import_unreadable": { "message": "Ці файли не є словником, який це розширення вміє читати. Нічого не збережено." },
+
+  "zip_not_zip": { "message": "Те, що надійшло, не є zip-архівом. Нічого не збережено." },
+  "zip_unsupported": {
+    "message": "Архів використовує можливість, якої це розширення не читає$DETAIL$. Нічого не збережено.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "zip_too_big": {
+    "message": "Архів більший, ніж словник має будь-яку причину бути$DETAIL$. Нічого не збережено.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "zip_bad": {
+    "message": "Архів пошкоджено$DETAIL$. Нічого не збережено - спробуйте завантажити ще раз.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "zip_unreadable": { "message": "Архів не вдалося прочитати. Нічого не збережено." },
+
+  "words_one": {
+    "message": "$COUNT$ слово",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "words_few": {
+    "message": "$COUNT$ слова",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "words_many": {
+    "message": "$COUNT$ слів",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "words_other": {
+    "message": "$COUNT$ слова",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "spellings_one": {
+    "message": "$COUNT$ інше написання",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "spellings_few": {
+    "message": "$COUNT$ інші написання",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "spellings_many": {
+    "message": "$COUNT$ інших написань",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "spellings_other": {
+    "message": "$COUNT$ іншого написання",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+
+  "options_title": { "message": "re/read - налаштування" },
+  "options_version": { "message": "Версія" },
+  "options_engine": { "message": "Рушій" },
+  "options_engine_value": { "message": "Bergamot, усередині пакета" },
+  "options_reader_only": { "message": "Лише в читачі" },
+  "options_reader_only_hint": {
+    "message": "Коли це ввімкнено, виділення на звичайній сторінці пропонує одне: відкрити її в читачі. Переклад, збереження й підкреслення відбуваються там. На Android воно стартує ввімкненим - бульбашка над виділенням і власне меню копіювання телефона б'ються за те саме місце."
+  },
+  "options_models_heading": { "message": "Моделі перекладу" },
+  "options_models_intro": {
+    "message": "Модель - це те, що перетворює одну мову на іншу; на кожен напрямок є одна. Ніщо не перекладається, доки моделі пари, яку ви читаєте, немає тут, на цьому пристрої. Перелічено кожен напрямок, який публікує Mozilla; пара, яку ви читаєте, і все вже збережене спливають догори."
+  },
+  "options_filter_placeholder": { "message": "Фільтруйте за мовою або кодом" },
+  "options_filter_models_aria": { "message": "Фільтрувати список моделей перекладу" },
+  "options_filter_dictionaries_aria": { "message": "Фільтрувати список словників" },
+  "options_model_note_from": { "message": "Моделі завантажуються з" },
+  "options_model_note_checked": {
+    "message": "- саме там їх публікує Mozilla - за адресами, записаними в цьому пакеті. Кожен файл звіряється з контрольною сумою, занотованою тут"
+  },
+  "options_model_note_rest": {
+    "message": "- усе, що не збігається, викидається, а не зберігається. Про вас нічого не надсилається: запит каже, яка модель, і більш нічого. Цей хост і хост каталогу словників нижче - єдині два місця, з якими це розширення взагалі зв'язується, і з жодним до натискання «Завантажити»."
+  },
+  "options_add_model_heading": { "message": "Додати модель із файлів" },
+  "options_add_model_intro": {
+    "message": "Вкажіть три файли одного напрямку - і їх буде збережено локально. Файли gzip розпаковуються тут-таки, тож завантаження придатні такими, як є:"
+  },
+  "options_add_model_button": { "message": "Додати модель" },
+  "options_files_note": {
+    "message": "Ця сторінка лишається навіть тоді, коли моделі завантажуються самі: це запасний вихід на день, коли місце, звідки вони беруться, перестане відповідати. Ніщо звідси не покидає пристрій, а додавання моделі не робить жодного мережевого запиту."
+  },
+  "options_dictionaries_heading": { "message": "Словники" },
+  "options_dictionaries_intro": { "message": "Словник відповідає там, де переклад не може." },
+  "options_dict_example_word": { "message": "Коса" },
+  "options_dictionaries_intro_rest": {
+    "message": "має два тлумачення, і модель мусить вибрати одне з них, не знаючи, яке ви мали на увазі; словник показує обидва. Тлумачення з'являються в другому шарі бульбашки, під реченням."
+  },
+  "options_get_dictionary_heading": { "message": "Роздобути словник" },
+  "options_wikdict_intro": {
+    "message": "будує словники з Вікісловника (CC BY-SA) для кожної пари нижче. Одне натискання завантажує архів, розпаковує його тут і зберігає; мови зчитуються з пари, і словник з'являється в списку вище, готовий відповідати."
+  },
+  "options_dictionary_note_from": { "message": "Словники завантажуються з" },
+  "options_dictionary_note_checked": {
+    "message": "- саме там їх публікує WikDict - за адресами, записаними в цьому пакеті; список звірено тут"
+  },
+  "options_dictionary_note_rest": {
+    "message": "- на відміну від моделей, немає контрольної суми, яка б їх тримала: WikDict перебудовує свої файли на місці, тож сума, занотована тут, ламалася б із кожною перебудовою. Замість неї стоїть це: завантаження мусить бути простим zip-архівом файлів StarDict, його читають так само недовірливо, як будь-який файл, доданий вручну, а те, чим воно стає, - це текст у локальній базі, ніколи не код. Про вас нічого не надсилається: запит каже, який словник, і більш нічого."
+  },
+  "options_add_dictionary_heading": { "message": "Додати словник із файлів" },
+  "options_stardict_intro": { "message": "Словники читаються у форматі" },
+  "options_stardict_intro_rest": {
+    "message": "- це ті самі файли, які використовує читалка KOReader, тож словник, що вже є на вашій читалці, працює тут без змін. Розпакуйте архів, у якому він прийшов, і вкажіть файли одного словника:"
+  },
+  "options_file_ifo": { "message": "- як словник сам себе називає" },
+  "options_file_idx": { "message": "- індекс слів" },
+  "options_file_dict_or": { "message": "або" },
+  "options_file_dict": { "message": "- тлумачення" },
+  "options_file_syn": { "message": "- інші написання, якщо словник їх має" },
+  "options_words_in": { "message": "Мова слів:" },
+  "options_explained_in": { "message": "мова пояснень:" },
+  "options_add_dictionary_button": { "message": "Додати словник" },
+  "options_dict_files_note": {
+    "message": "Файл StarDict нічого не каже про те, для яких він мов, тож тут ця частина - ваша. Додавання з файлів не робить жодного мережевого запиту, і цей шлях лишається на день, коли хост каталогу перестане відповідати: працюють файли звідусіль, зокрема й власні файли каталогу - їх опубліковано на"
+  },
+  "options_disabled_heading": { "message": "Вимкнені сайти" },
+  "options_disabled_intro": {
+    "message": "Сайти, на яких re/read лишається вимкненим - без підкреслень, без бульбашки, без нічого запущеного. Сайт сюди додає перемикач у спливному вікні панелі інструментів; цей список - спосіб увімкнути його назад, не відвідуючи."
+  },
+
+  "options_badge_reading": { "message": "це ви читаєте" },
+  "options_size_here": {
+    "message": "$SIZE$ на пристрої",
+    "placeholders": { "size": { "content": "$1" } }
+  },
+  "options_progress_of": {
+    "message": "$RECEIVED$ з $TOTAL$",
+    "placeholders": {
+      "received": { "content": "$1" },
+      "total": { "content": "$2" }
+    }
+  },
+  "options_deleted_model": {
+    "message": "Модель $PAIR$ видалено.",
+    "placeholders": { "pair": { "content": "$1" } }
+  },
+  "options_downloading_model": {
+    "message": "Завантаження моделі $PAIR$ - $SIZE$.",
+    "placeholders": {
+      "pair": { "content": "$1" },
+      "size": { "content": "$2" }
+    }
+  },
+  "options_downloaded_model": {
+    "message": "Модель $PAIR$ завантажено, $SIZE$ на пристрої.",
+    "placeholders": {
+      "pair": { "content": "$1" },
+      "size": { "content": "$2" }
+    }
+  },
+  "options_store_failed": {
+    "message": "Модель завантажилася, але її не вдалося зберегти: $DETAIL$",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "options_reading_pair": {
+    "message": "Читаєте: $FROM$, перекладаєте на: $TO$.",
+    "placeholders": {
+      "from": { "content": "$1" },
+      "to": { "content": "$2" }
+    }
+  },
+  "options_reading_pair_missing": {
+    "message": "Читаєте: $FROM$, перекладаєте на: $TO$ - а моделі цього напрямку тут ще немає.",
+    "placeholders": {
+      "from": { "content": "$1" },
+      "to": { "content": "$2" }
+    }
+  },
+  "options_no_models": { "message": "Тут немає моделей і немає чого завантажувати - ця збірка не перелічує жодної." },
+  "options_filter_no_match_models": { "message": "Жодна пара не підходить. Фільтр приймає назву мови або код." },
+  "options_filter_no_match_dictionaries": { "message": "Жоден словник не підходить. Фільтр приймає назву мови або код." },
+  "options_no_disabled": { "message": "Жоден сайт не вимкнено. Вимикають у спливному вікні панелі інструментів." },
+  "options_turn_back_on": { "message": "Увімкнути назад" },
+  "options_reading_model_files": {
+    "message": "Читання файлів для пари $PAIR$...",
+    "placeholders": { "pair": { "content": "$1" } }
+  },
+  "options_file_disappeared": {
+    "message": "$NAME$ зник під час читання",
+    "placeholders": { "name": { "content": "$1" } }
+  },
+  "options_added_model": {
+    "message": "Модель $PAIR$ додано, $SIZE$ на пристрої.",
+    "placeholders": {
+      "pair": { "content": "$1" },
+      "size": { "content": "$2" }
+    }
+  },
+  "options_add_model_failed": {
+    "message": "Не вдалося додати модель: $DETAIL$",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "options_no_dictionaries": { "message": "Тут немає словників. Бульбашка показує переклад і більш нічого." },
+  "options_deleted_dictionary": {
+    "message": "$NAME$ видалено.",
+    "placeholders": { "name": { "content": "$1" } }
+  },
+  "options_delete_dictionary_failed": {
+    "message": "Не вдалося видалити $NAME$: $DETAIL$",
+    "placeholders": {
+      "name": { "content": "$1" },
+      "detail": { "content": "$2" }
+    }
+  },
+  "options_no_catalog": { "message": "Немає словників для завантаження - ця збірка не перелічує жодного." },
+  "options_downloading_dictionary": {
+    "message": "Завантаження словника $PAIR$...",
+    "placeholders": { "pair": { "content": "$1" } }
+  },
+  "options_reading_dictionary_progress": {
+    "message": "Читання $NAME$ - $DONE$ з $TOTAL$...",
+    "placeholders": {
+      "name": { "content": "$1" },
+      "done": { "content": "$2" },
+      "total": { "content": "$3" }
+    }
+  },
+  "options_storing_dictionary": {
+    "message": "Збереження $NAME$ - $DONE$ з $TOTAL$...",
+    "placeholders": {
+      "name": { "content": "$1" },
+      "done": { "content": "$2" },
+      "total": { "content": "$3" }
+    }
+  },
+  "options_added_dictionary": {
+    "message": "Додано $NAME$: $WORDS$, $SIZE$.",
+    "placeholders": {
+      "name": { "content": "$1" },
+      "words": { "content": "$2" },
+      "size": { "content": "$3" }
+    }
+  },
+  "options_skipped_entries_one": {
+    "message": "Не вдалося прочитати $COUNT$ запис - його пропущено.",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "options_skipped_entries_few": {
+    "message": "Не вдалося прочитати $COUNT$ записи - їх пропущено.",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "options_skipped_entries_many": {
+    "message": "Не вдалося прочитати $COUNT$ записів - їх пропущено.",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "options_skipped_entries_other": {
+    "message": "Не вдалося прочитати $COUNT$ запису - його пропущено.",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "options_add_dictionary_failed": {
+    "message": "Не вдалося додати словник: $DETAIL$",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "options_reading_file": {
+    "message": "Читання $NAME$...",
+    "placeholders": { "name": { "content": "$1" } }
+  },
+  "options_swept_unfinished": {
+    "message": "Видалено словник, імпорт якого так і не завершився ($NAMES$).",
+    "placeholders": { "names": { "content": "$1" } }
+  }
+}

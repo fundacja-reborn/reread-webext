@@ -5,11 +5,14 @@
  * new code that nobody can phrase does not get added, because the switch below
  * stops compiling without it.
  *
- * English only for now. When the UI is worth translating, this is the module
- * that grows a catalogue - `_locales/` and `i18n.getMessage` - and every other
- * file stays as it is.
+ * The sentences themselves live in `_locales/` and come back through `t` in
+ * whichever language the browser reads - this module only holds the map from
+ * code to key. A code from a future version of the background falls through to
+ * the `internal` sentence: older pages meeting a newer background is a thing
+ * that happens mid-update, and "something went wrong" is true of it.
  */
 
+import { t } from "./i18n.js";
 import { ErrorCode } from "./protocol.js";
 
 /**
@@ -19,26 +22,26 @@ import { ErrorCode } from "./protocol.js";
 export function describeError(code) {
   switch (code) {
     case ErrorCode.ENGINE_MISSING:
-      return "No translation engine yet - this build cannot translate.";
+      return t("error_engine_missing");
     case ErrorCode.MODEL_MISSING:
       // Not "not downloaded": a model can just as well be added from files, and
       // the sentence has to be true either way. What the reader needs is where
       // to fix it, and that both ways of fixing it are there.
-      return "No model for this language pair on this device - download or add one in the settings.";
+      return t("error_model_missing");
     case ErrorCode.UNSUPPORTED_PAIR:
-      return "No model exists for this language pair.";
+      return t("error_unsupported_pair");
     case ErrorCode.TOO_LONG:
-      return "That selection is too long to translate.";
+      return t("error_too_long");
     case ErrorCode.NO_PAGE:
       // Says what to do about it, because there usually is something: this is
       // what a reader gets after pressing the button on a settings page, a PDF,
       // or a tab they have since closed.
-      return "There is no page to read here - open an article and press the button again.";
+      return t("error_no_page");
     case ErrorCode.UNKNOWN_MESSAGE:
-      return "The extension sent a request it does not understand.";
+      return t("error_unknown_message");
     case ErrorCode.INTERNAL:
-      return "Something went wrong inside the extension.";
+      return t("error_internal");
     default:
-      return "Something went wrong inside the extension.";
+      return t("error_internal");
   }
 }

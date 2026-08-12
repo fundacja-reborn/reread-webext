@@ -1,0 +1,415 @@
+{
+  "locale_code": { "message": "pl" },
+
+  "extension_description": {
+    "message": "Ucz się języka, czytając internet. Tłumaczenie, słownictwo i podkreślenia - wszystko na twoim urządzeniu."
+  },
+
+  "pair_label": {
+    "message": "$FROM$ → $TO$",
+    "placeholders": {
+      "from": { "content": "$1", "example": "angielski" },
+      "to": { "content": "$2", "example": "polski" }
+    }
+  },
+
+  "settings": { "message": "Ustawienia" },
+  "language_pair": { "message": "Para językowa" },
+  "reading_list": { "message": "Czytelnia" },
+  "open_reader": { "message": "Przeczytaj tę stronę w czytniku" },
+  "action_delete": { "message": "Usuń" },
+  "action_download": { "message": "Pobierz" },
+  "action_cancel": { "message": "Anuluj" },
+
+  "error_engine_missing": { "message": "Nie ma jeszcze silnika tłumaczeń - to wydanie nie tłumaczy." },
+  "error_model_missing": { "message": "Na tym urządzeniu nie ma modelu dla tej pary językowej - pobierz go lub dodaj w ustawieniach." },
+  "error_unsupported_pair": { "message": "Dla tej pary językowej nie istnieje żaden model." },
+  "error_too_long": { "message": "To zaznaczenie jest za długie do przetłumaczenia." },
+  "error_no_page": { "message": "Nie ma tu strony do czytania - otwórz artykuł i naciśnij przycisk jeszcze raz." },
+  "error_unknown_message": { "message": "Rozszerzenie wysłało żądanie, którego samo nie rozumie." },
+  "error_internal": { "message": "Coś poszło nie tak wewnątrz rozszerzenia." },
+
+  "bubble_save": { "message": "Zapisz" },
+  "bubble_learned": { "message": "Znam to" },
+  "bubble_edit": { "message": "Edytuj" },
+  "bubble_settings": { "message": "Otwórz ustawienia" },
+  "bubble_more": { "message": "Więcej" },
+  "bubble_less": { "message": "Mniej" },
+  "bubble_reader": { "message": "Czytaj w czytniku" },
+  "bubble_translating": { "message": "Tłumaczę..." },
+
+  "popup_site_toggle_title": { "message": "Czy re/read działa w tej witrynie" },
+  "popup_no_page": { "message": "re/read nie działa na tej stronie." },
+  "popup_mode_reader_only": { "message": "Tryb: tylko w czytniku" },
+
+  "reader_title": { "message": "re/read - czytnik" },
+  "reader_open_original": { "message": "Otwórz oryginał" },
+  "reader_display_title": { "message": "Krój i motyw" },
+  "reader_theme": { "message": "Motyw" },
+  "reader_theme_auto": { "message": "Auto" },
+  "reader_theme_light": { "message": "Jasny" },
+  "reader_theme_sepia": { "message": "Sepia" },
+  "reader_theme_dark": { "message": "Ciemny" },
+  "reader_font": { "message": "Krój" },
+  "reader_font_serif": { "message": "Szeryfowy" },
+  "reader_font_sans": { "message": "Bezszeryfowy" },
+  "reader_size": { "message": "Rozmiar" },
+  "reader_smaller": { "message": "Mniejszy" },
+  "reader_larger": { "message": "Większy" },
+  "reader_width": { "message": "Szerokość" },
+  "reader_narrower": { "message": "Węższa" },
+  "reader_wider": { "message": "Szersza" },
+  "reader_segment_unread": { "message": "Do przeczytania" },
+  "reader_segment_read": { "message": "Przeczytane" },
+  "reader_save": { "message": "Zapisz w czytelni" },
+  "reader_saved": { "message": "W czytelni" },
+  "reader_delete": { "message": "Usuń z czytelni" },
+  "reader_delete_confirm": { "message": "Na pewno?" },
+  "reader_mark_read": { "message": "Oznacz jako przeczytany" },
+  "reader_marked_read": { "message": "Przeczytany" },
+  "reader_no_article": { "message": "Na tej stronie nie udało się znaleźć artykułu." },
+  "reader_list_write_failed": { "message": "Nie udało się zapisać czytelni." },
+  "reader_empty_none": {
+    "message": "Nic jeszcze nie zapisano - otwórz artykuł w czytniku i naciśnij „$BUTTON$”.",
+    "placeholders": { "button": { "content": "$1", "example": "Zapisz w czytelni" } }
+  },
+  "reader_empty_all_read": { "message": "Nie zostało nic do przeczytania - wszystko, co zapisane, jest oznaczone jako przeczytane." },
+  "reader_empty_none_read": { "message": "Nic nie jest jeszcze oznaczone jako przeczytane." },
+
+  "download_cancelled": { "message": "Pobieranie anulowane. Nic nie zapisano." },
+  "download_failed": { "message": "Pobieranie nie dobiegło końca i nic nie zapisano." },
+  "model_download_network": {
+    "message": "Nie udało się połączyć z miejscem, w którym trzymane są modele$DETAIL$. Nic nie zapisano.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "model_download_http": {
+    "message": "Pobieranie zostało odrzucone$DETAIL$. Model mógł zostać przeniesiony; nic nie zapisano.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "model_download_size": {
+    "message": "Pobieranie urwało się przedwcześnie$DETAIL$, więc plik wyrzucono.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "model_download_checksum": {
+    "message": "To, co dotarło, nie jest modelem, którego oczekuje ta wersja$DETAIL$, więc zostało wyrzucone. Spróbuj jeszcze raz - jeśli będzie się powtarzać, plik po drugiej stronie się zmienił.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "model_download_unpack": {
+    "message": "Pobranego pliku nie dało się rozpakować$DETAIL$, więc został wyrzucony.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "dict_download_network": {
+    "message": "Nie udało się połączyć z miejscem, w którym trzymane są słowniki$DETAIL$. Nic nie zapisano.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "dict_download_http": {
+    "message": "Pobieranie zostało odrzucone$DETAIL$. Słownik mógł zostać przeniesiony; nic nie zapisano.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "dict_download_too_big": {
+    "message": "Pobierany plik jest o wiele większy, niż słownik ma prawo być$DETAIL$, więc pobieranie przerwano. Nic nie zapisano.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+
+  "model_files_one_of_them": { "message": "jeden z plików" },
+  "model_files_empty": { "message": "Nie wybrano żadnych plików." },
+  "model_files_unknown_file": {
+    "message": "To nie jest część modelu: $FILE$. Oczekiwane są nazwy zaczynające się od model., lex. i vocab.",
+    "placeholders": { "file": { "content": "$1" } }
+  },
+  "model_files_unknown_pair": {
+    "message": "Nie sposób poznać, dla których języków jest ten plik: $FILE$.",
+    "placeholders": { "file": { "content": "$1" } }
+  },
+  "model_files_mixed_pairs": {
+    "message": "Te pliki należą do więcej niż jednej pary językowej ($PAIRS$). Wczytuj jeden kierunek naraz.",
+    "placeholders": { "pairs": { "content": "$1" } }
+  },
+  "model_files_missing_model": { "message": "Brakuje pliku modelu (model.<pair>.intgemm.alphas.bin)." },
+  "model_files_missing_shortlist": { "message": "Brakuje pliku shortlist (lex.<pair>.s2t.bin)." },
+  "model_files_missing_vocab": { "message": "Brakuje pliku słownictwa (vocab.<pair>.spm)." },
+  "model_files_not_a_model": { "message": "Te pliki nie są modelem tłumaczeniowym." },
+
+  "dict_default_name": { "message": "Słownik" },
+  "dict_import_empty": { "message": "Nie wybrano żadnych plików. Nic nie zapisano." },
+  "dict_import_missing_ifo": { "message": "Wśród tych plików nie ma pliku .ifo, więc to nie jest słownik StarDict. Nic nie zapisano." },
+  "dict_import_missing_idx": { "message": "Brakuje indeksu (.idx lub .idx.gz). Nic nie zapisano." },
+  "dict_import_missing_dict": { "message": "Brakuje treści słownika (.dict lub .dict.dz). Nic nie zapisano." },
+  "dict_import_mixed": {
+    "message": "Te pliki należą do więcej niż jednego słownika ($NAMES$). Dodawaj po jednym. Nic nie zapisano.",
+    "placeholders": { "names": { "content": "$1" } }
+  },
+  "dict_import_not_stardict": { "message": "Ten plik .ifo nie jest słownikiem StarDict. Nic nie zapisano." },
+  "dict_import_not_stardict_detail": {
+    "message": "To jest $KIND$, czego to rozszerzenie nie umie odczytać. Nic nie zapisano.",
+    "placeholders": { "kind": { "content": "$1" } }
+  },
+  "dict_import_unpack": {
+    "message": "Pliki są skompresowane w sposób, którego nie dało się rozpakować$DETAIL$. Nic nie zapisano.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "dict_import_no_entries": { "message": "Indeks jest pusty - w tym słowniku nie ma żadnych słów. Nic nie zapisano." },
+  "dict_import_no_entries_detail": {
+    "message": "Żadnego z $COUNT$ słów w indeksie nie dało się odczytać, więc te pliki do siebie nie pasują. Nic nie zapisano.",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "dict_import_unreadable": { "message": "Te pliki nie są słownikiem, który to rozszerzenie umie odczytać. Nic nie zapisano." },
+
+  "zip_not_zip": { "message": "To, co dotarło, nie jest archiwum zip. Nic nie zapisano." },
+  "zip_unsupported": {
+    "message": "Archiwum używa funkcji, której to rozszerzenie nie odczytuje$DETAIL$. Nic nie zapisano.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "zip_too_big": {
+    "message": "Archiwum jest większe, niż słownik ma jakikolwiek powód być$DETAIL$. Nic nie zapisano.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "zip_bad": {
+    "message": "Archiwum jest uszkodzone$DETAIL$. Nic nie zapisano - spróbuj pobrać jeszcze raz.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "zip_unreadable": { "message": "Nie dało się odczytać archiwum. Nic nie zapisano." },
+
+  "words_one": {
+    "message": "$COUNT$ słowo",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "words_few": {
+    "message": "$COUNT$ słowa",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "words_many": {
+    "message": "$COUNT$ słów",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "words_other": {
+    "message": "$COUNT$ słowa",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "spellings_one": {
+    "message": "$COUNT$ inna pisownia",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "spellings_few": {
+    "message": "$COUNT$ inne pisownie",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "spellings_many": {
+    "message": "$COUNT$ innych pisowni",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "spellings_other": {
+    "message": "$COUNT$ innej pisowni",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+
+  "options_title": { "message": "re/read - ustawienia" },
+  "options_version": { "message": "Wersja" },
+  "options_engine": { "message": "Silnik" },
+  "options_engine_value": { "message": "Bergamot, wewnątrz paczki" },
+  "options_reader_only": { "message": "Tylko w czytniku" },
+  "options_reader_only_hint": {
+    "message": "Gdy to włączone, zaznaczenie na zwykłej stronie proponuje jedno: otwarcie jej w czytniku. Tłumaczenie, zapisywanie i podkreślanie dzieją się tam. Na Androidzie zaczyna włączone - dymek nad zaznaczeniem i systemowe menu kopiowania walczą o to samo miejsce."
+  },
+  "options_models_heading": { "message": "Modele tłumaczeniowe" },
+  "options_models_intro": {
+    "message": "Model to to, co zamienia jeden język w drugi; na każdy kierunek przypada jeden. Nic nie jest tłumaczone, dopóki modelu czytanej pary nie ma tutaj, na tym urządzeniu. Wypisany jest każdy kierunek, który publikuje Mozilla; para, którą czytasz, i wszystko już zapisane wypływają na górę."
+  },
+  "options_filter_placeholder": { "message": "Filtruj po języku lub kodzie" },
+  "options_filter_models_aria": { "message": "Filtruj listę modeli tłumaczeniowych" },
+  "options_filter_dictionaries_aria": { "message": "Filtruj listę słowników" },
+  "options_model_note_from": { "message": "Modele pobierane są z" },
+  "options_model_note_checked": {
+    "message": "- to tam publikuje je Mozilla - spod adresów zapisanych w tej paczce. Każdy plik jest porównywany z sumą kontrolną zanotowaną tutaj dnia"
+  },
+  "options_model_note_rest": {
+    "message": "- wszystko, co się z nią nie zgadza, jest wyrzucane, a nie zapisywane. Nic o tobie nie jest wysyłane: zapytanie mówi, który model, i nic więcej. Ten host i host katalogu słowników poniżej to jedyne dwa miejsca, z którymi to rozszerzenie kiedykolwiek się łączy - i z żadnym przed naciśnięciem Pobierz."
+  },
+  "options_add_model_heading": { "message": "Dodaj model z plików" },
+  "options_add_model_intro": {
+    "message": "Wskaż trzy pliki jednego kierunku, a zostaną zapisane lokalnie. Pliki gzip są rozpakowywane na miejscu, więc pobrane archiwa nadają się takie, jakie są:"
+  },
+  "options_add_model_button": { "message": "Dodaj model" },
+  "options_files_note": {
+    "message": "Ta strona zostaje nawet wtedy, gdy modele pobierają się same: jest wyjściem awaryjnym na dzień, w którym miejsce ich pobierania przestanie odpowiadać. Nic stąd nie opuszcza urządzenia, a dodanie modelu nie wykonuje żadnego zapytania sieciowego."
+  },
+  "options_dictionaries_heading": { "message": "Słowniki" },
+  "options_dictionaries_intro": { "message": "Słownik odpowiada tam, gdzie tłumaczenie nie może." },
+  "options_dict_example_word": { "message": "Zamek" },
+  "options_dictionaries_intro_rest": {
+    "message": "ma dwa hasła, a model musi wybrać jedno z nich, nie wiedząc, o które ci chodziło; słownik pokazuje oba. Hasła pojawiają się w drugiej warstwie dymka, pod zdaniem."
+  },
+  "options_get_dictionary_heading": { "message": "Zdobądź słownik" },
+  "options_wikdict_intro": {
+    "message": "buduje słowniki z Wikisłownika (CC BY-SA) dla każdej pary poniżej. Jedno naciśnięcie pobiera archiwum, rozpakowuje je na miejscu i zapisuje; języki odczytywane są z pary, a słownik pojawia się na liście powyżej, gotów odpowiadać."
+  },
+  "options_dictionary_note_from": { "message": "Słowniki pobierane są z" },
+  "options_dictionary_note_checked": {
+    "message": "- to tam publikuje je WikDict - spod adresów zapisanych w tej paczce; listę sprawdzono tutaj dnia"
+  },
+  "options_dictionary_note_rest": {
+    "message": "- w odróżnieniu od modeli nie ma sumy kontrolnej, która by ich pilnowała: WikDict przebudowuje swoje pliki w miejscu, więc suma zanotowana tutaj psułaby się z każdą przebudową. W jej miejscu stoi to: pobrany plik musi być zwykłym zipem plików StarDict, jest czytany równie nieufnie jak każdy plik dodany ręcznie, a tym, czym się staje, jest tekst w lokalnej bazie - nigdy kod. Nic o tobie nie jest wysyłane: zapytanie mówi, który słownik, i nic więcej."
+  },
+  "options_add_dictionary_heading": { "message": "Dodaj słownik z plików" },
+  "options_stardict_intro": { "message": "Słowniki czytane są w formacie" },
+  "options_stardict_intro_rest": {
+    "message": "- to te same pliki, których używa czytnik KOReader, więc słownik obecny już na twoim czytniku działa tu bez zmian. Rozpakuj archiwum, w którym przyszedł, i wskaż pliki jednego słownika:"
+  },
+  "options_file_ifo": { "message": "- jak słownik sam siebie nazywa" },
+  "options_file_idx": { "message": "- indeks słów" },
+  "options_file_dict_or": { "message": "lub" },
+  "options_file_dict": { "message": "- hasła" },
+  "options_file_syn": { "message": "- inne pisownie, jeśli słownik je ma" },
+  "options_words_in": { "message": "Język haseł:" },
+  "options_explained_in": { "message": "język objaśnień:" },
+  "options_add_dictionary_button": { "message": "Dodaj słownik" },
+  "options_dict_files_note": {
+    "message": "Plik StarDict nie mówi nic o tym, dla których języków jest, więc tutaj ta część należy do ciebie. Dodawanie z plików nie wykonuje żadnego zapytania sieciowego, a ta droga zostaje na dzień, w którym host katalogu przestanie odpowiadać: działają pliki skądkolwiek, w tym własne pliki katalogu - są opublikowane pod"
+  },
+  "options_disabled_heading": { "message": "Wyłączone witryny" },
+  "options_disabled_intro": {
+    "message": "Witryny, na których re/read pozostaje wyłączony - bez podkreśleń, bez dymka, bez niczego. Witrynę dodaje tu przełącznik w dymku paska narzędzi; ta lista pozwala ją włączyć z powrotem bez odwiedzania jej."
+  },
+
+  "options_badge_reading": { "message": "to czytasz" },
+  "options_size_here": {
+    "message": "$SIZE$ na urządzeniu",
+    "placeholders": { "size": { "content": "$1" } }
+  },
+  "options_progress_of": {
+    "message": "$RECEIVED$ z $TOTAL$",
+    "placeholders": {
+      "received": { "content": "$1" },
+      "total": { "content": "$2" }
+    }
+  },
+  "options_deleted_model": {
+    "message": "Usunięto model $PAIR$.",
+    "placeholders": { "pair": { "content": "$1" } }
+  },
+  "options_downloading_model": {
+    "message": "Pobieranie modelu $PAIR$ - $SIZE$.",
+    "placeholders": {
+      "pair": { "content": "$1" },
+      "size": { "content": "$2" }
+    }
+  },
+  "options_downloaded_model": {
+    "message": "Pobrano model $PAIR$, $SIZE$ na urządzeniu.",
+    "placeholders": {
+      "pair": { "content": "$1" },
+      "size": { "content": "$2" }
+    }
+  },
+  "options_store_failed": {
+    "message": "Model się pobrał, ale nie dał się zapisać: $DETAIL$",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "options_reading_pair": {
+    "message": "Czytasz: $FROM$, tłumaczysz na: $TO$.",
+    "placeholders": {
+      "from": { "content": "$1" },
+      "to": { "content": "$2" }
+    }
+  },
+  "options_reading_pair_missing": {
+    "message": "Czytasz: $FROM$, tłumaczysz na: $TO$ - a modelu tego kierunku jeszcze tu nie ma.",
+    "placeholders": {
+      "from": { "content": "$1" },
+      "to": { "content": "$2" }
+    }
+  },
+  "options_no_models": { "message": "Nie ma tu modeli ani niczego do pobrania - to wydanie nie wymienia żadnego." },
+  "options_filter_no_match_models": { "message": "Żadna para nie pasuje. Filtr przyjmuje nazwę języka lub kod." },
+  "options_filter_no_match_dictionaries": { "message": "Żaden słownik nie pasuje. Filtr przyjmuje nazwę języka lub kod." },
+  "options_no_disabled": { "message": "Żadna witryna nie jest wyłączona. Wyłącza się je w dymku paska narzędzi." },
+  "options_turn_back_on": { "message": "Włącz z powrotem" },
+  "options_reading_model_files": {
+    "message": "Czytanie plików dla pary $PAIR$...",
+    "placeholders": { "pair": { "content": "$1" } }
+  },
+  "options_file_disappeared": {
+    "message": "$NAME$ zniknął w trakcie czytania",
+    "placeholders": { "name": { "content": "$1" } }
+  },
+  "options_added_model": {
+    "message": "Dodano model $PAIR$, $SIZE$ na urządzeniu.",
+    "placeholders": {
+      "pair": { "content": "$1" },
+      "size": { "content": "$2" }
+    }
+  },
+  "options_add_model_failed": {
+    "message": "Nie udało się dodać modelu: $DETAIL$",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "options_no_dictionaries": { "message": "Nie ma tu słowników. Dymek pokazuje tłumaczenie i nic więcej." },
+  "options_deleted_dictionary": {
+    "message": "Usunięto $NAME$.",
+    "placeholders": { "name": { "content": "$1" } }
+  },
+  "options_delete_dictionary_failed": {
+    "message": "Nie udało się usunąć $NAME$: $DETAIL$",
+    "placeholders": {
+      "name": { "content": "$1" },
+      "detail": { "content": "$2" }
+    }
+  },
+  "options_no_catalog": { "message": "Nie ma słowników do pobrania - to wydanie nie wymienia żadnego." },
+  "options_downloading_dictionary": {
+    "message": "Pobieranie słownika $PAIR$...",
+    "placeholders": { "pair": { "content": "$1" } }
+  },
+  "options_reading_dictionary_progress": {
+    "message": "Czytanie $NAME$ - $DONE$ z $TOTAL$...",
+    "placeholders": {
+      "name": { "content": "$1" },
+      "done": { "content": "$2" },
+      "total": { "content": "$3" }
+    }
+  },
+  "options_storing_dictionary": {
+    "message": "Zapisywanie $NAME$ - $DONE$ z $TOTAL$...",
+    "placeholders": {
+      "name": { "content": "$1" },
+      "done": { "content": "$2" },
+      "total": { "content": "$3" }
+    }
+  },
+  "options_added_dictionary": {
+    "message": "Dodano $NAME$: $WORDS$, $SIZE$.",
+    "placeholders": {
+      "name": { "content": "$1" },
+      "words": { "content": "$2" },
+      "size": { "content": "$3" }
+    }
+  },
+  "options_skipped_entries_one": {
+    "message": "Nie dało się odczytać $COUNT$ hasła - pominięto je.",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "options_skipped_entries_few": {
+    "message": "Nie dało się odczytać $COUNT$ haseł - pominięto je.",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "options_skipped_entries_many": {
+    "message": "Nie dało się odczytać $COUNT$ haseł - pominięto je.",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "options_skipped_entries_other": {
+    "message": "Nie dało się odczytać $COUNT$ hasła - pominięto je.",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "options_add_dictionary_failed": {
+    "message": "Nie udało się dodać słownika: $DETAIL$",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "options_reading_file": {
+    "message": "Czytanie $NAME$...",
+    "placeholders": { "name": { "content": "$1" } }
+  },
+  "options_swept_unfinished": {
+    "message": "Usunięto słownik, którego importu nigdy nie dokończono ($NAMES$).",
+    "placeholders": { "names": { "content": "$1" } }
+  }
+}

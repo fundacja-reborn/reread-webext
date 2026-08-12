@@ -17,6 +17,7 @@
  * this module something `node --test` can drive with a fake `fetch`.
  */
 
+import { aside, t } from "../i18n.js";
 import { isGzip } from "./files.js";
 
 /**
@@ -257,18 +258,18 @@ export async function downloadModel(model, options = {}) {
 export function describeDownloadProblem(problem, detail) {
   switch (problem) {
     case "network":
-      return `Could not reach the place models are kept${detail ? ` (${detail})` : ""}. Nothing was stored.`;
+      return t("model_download_network", aside(detail));
     case "http":
-      return `The download was refused${detail ? `: ${detail}` : ""}. The model may have moved; nothing was stored.`;
+      return t("model_download_http", aside(detail));
     case "size":
-      return `The download ended early${detail ? ` (${detail})` : ""} and was thrown away.`;
+      return t("model_download_size", aside(detail));
     case "checksum":
-      return `What arrived is not the model this version expects${detail ? ` (${detail})` : ""}, so it was thrown away. Try again - if it keeps happening, the file at the other end has changed.`;
+      return t("model_download_checksum", aside(detail));
     case "unpack":
-      return `The download could not be unpacked${detail ? ` (${detail})` : ""} and was thrown away.`;
+      return t("model_download_unpack", aside(detail));
     case "cancelled":
-      return "Download cancelled. Nothing was stored.";
+      return t("download_cancelled");
     default:
-      return "The download did not finish, and nothing was stored.";
+      return t("download_failed");
   }
 }

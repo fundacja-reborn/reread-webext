@@ -2,7 +2,8 @@
   "manifest_version": 3,
   "name": "re/read",
   "version": "0.2.0",
-  "description": "Learn a language while reading the web. Translation, vocabulary and highlighting, all on your own device.",
+  "description": "__MSG_extension_description__",
+  "default_locale": "en",
   "homepage_url": "https://github.com/fundacja-reborn/reread-webext",
   "browser_specific_settings": {
     "gecko": {
@@ -59,7 +60,7 @@
       "suggested_key": {
         "default": "Alt+Shift+R"
       },
-      "description": "Read this page in the reader"
+      "description": "__MSG_open_reader__"
     }
   },
   "options_ui": {

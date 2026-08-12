@@ -22,6 +22,7 @@
 import { webext } from "../lib/browser.js";
 import { CONFIG_KEY, withDefaults } from "../lib/config.js";
 import { choosableLines } from "../lib/gloss.js";
+import { t } from "../lib/i18n.js";
 import { describeError } from "../lib/messages.js";
 import { normalize, trimPhrase } from "../lib/normalize.js";
 import { ErrorCode, Message, asResult, asTranslation, fail } from "../lib/protocol.js";
@@ -436,7 +437,7 @@ function onMouseUp(event) {
 
   // The other variant: a fresh selection is a phrase nothing has been decided
   // about yet, so what can be done with it is on show from the first frame.
-  tooltip.show({ anchor: selection.rect, variant: "save", body: "Translating...", tone: "pending" });
+  tooltip.show({ anchor: selection.rect, variant: "save", body: t("bubble_translating"), tone: "pending" });
 
   const request = selection.context === null
     ? { kind: Message.TRANSLATE, text }

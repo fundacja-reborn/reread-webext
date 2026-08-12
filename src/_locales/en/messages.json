@@ -1,0 +1,410 @@
+{
+  "locale_code": {
+    "message": "en",
+    "description": "The language this catalogue is written in, as a BCP-47 code. Read by the code to keep Intl.DisplayNames and plural rules on the catalogue's language - must equal the directory name."
+  },
+
+  "extension_description": {
+    "message": "Learn a language while reading the web. Translation, vocabulary and highlighting, all on your own device."
+  },
+
+  "pair_label": {
+    "message": "$FROM$ to $TO$",
+    "description": "How a translation direction reads on screen. Languages whose grammar would bend the names use an arrow instead of a word.",
+    "placeholders": {
+      "from": { "content": "$1", "example": "English" },
+      "to": { "content": "$2", "example": "Polish" }
+    }
+  },
+
+  "settings": { "message": "Settings" },
+  "language_pair": { "message": "Language pair" },
+  "reading_list": { "message": "Reading list" },
+  "open_reader": { "message": "Read this page in the reader" },
+  "action_delete": { "message": "Delete" },
+  "action_download": { "message": "Download" },
+  "action_cancel": { "message": "Cancel" },
+
+  "error_engine_missing": { "message": "No translation engine yet - this build cannot translate." },
+  "error_model_missing": { "message": "No model for this language pair on this device - download or add one in the settings." },
+  "error_unsupported_pair": { "message": "No model exists for this language pair." },
+  "error_too_long": { "message": "That selection is too long to translate." },
+  "error_no_page": { "message": "There is no page to read here - open an article and press the button again." },
+  "error_unknown_message": { "message": "The extension sent a request it does not understand." },
+  "error_internal": { "message": "Something went wrong inside the extension." },
+
+  "bubble_save": { "message": "Save" },
+  "bubble_learned": { "message": "Learned" },
+  "bubble_edit": { "message": "Edit" },
+  "bubble_settings": { "message": "Open settings" },
+  "bubble_more": { "message": "More" },
+  "bubble_less": { "message": "Less" },
+  "bubble_reader": { "message": "Read in the reader" },
+  "bubble_translating": { "message": "Translating..." },
+
+  "popup_site_toggle_title": { "message": "Whether re/read runs on this site" },
+  "popup_no_page": { "message": "re/read does not work on this page." },
+  "popup_mode_reader_only": { "message": "Mode: only in the reader" },
+
+  "reader_title": { "message": "re/read - reader" },
+  "reader_open_original": { "message": "Open the original" },
+  "reader_display_title": { "message": "Type and theme" },
+  "reader_theme": { "message": "Theme" },
+  "reader_theme_auto": { "message": "Auto" },
+  "reader_theme_light": { "message": "Light" },
+  "reader_theme_sepia": { "message": "Sepia" },
+  "reader_theme_dark": { "message": "Dark" },
+  "reader_font": { "message": "Type" },
+  "reader_font_serif": { "message": "Serif" },
+  "reader_font_sans": { "message": "Sans" },
+  "reader_size": { "message": "Size" },
+  "reader_smaller": { "message": "Smaller" },
+  "reader_larger": { "message": "Larger" },
+  "reader_width": { "message": "Width" },
+  "reader_narrower": { "message": "Narrower" },
+  "reader_wider": { "message": "Wider" },
+  "reader_segment_unread": { "message": "To read" },
+  "reader_segment_read": { "message": "Read" },
+  "reader_save": { "message": "Save to reading list" },
+  "reader_saved": { "message": "In the reading list" },
+  "reader_delete": { "message": "Delete from reading list" },
+  "reader_delete_confirm": { "message": "Sure?" },
+  "reader_mark_read": { "message": "Mark as read" },
+  "reader_marked_read": { "message": "Marked as read" },
+  "reader_no_article": { "message": "There was no article to find on that page." },
+  "reader_list_write_failed": { "message": "The reading list could not be written." },
+  "reader_empty_none": {
+    "message": "Nothing is saved yet - open an article in the reader and press \"$BUTTON$\".",
+    "description": "The button quoted is reader_save, passed in so the two can never drift apart.",
+    "placeholders": { "button": { "content": "$1", "example": "Save to reading list" } }
+  },
+  "reader_empty_all_read": { "message": "Nothing left to read - everything saved is marked as read." },
+  "reader_empty_none_read": { "message": "Nothing is marked as read yet." },
+
+  "download_cancelled": { "message": "Download cancelled. Nothing was stored." },
+  "download_failed": { "message": "The download did not finish, and nothing was stored." },
+  "model_download_network": {
+    "message": "Could not reach the place models are kept$DETAIL$. Nothing was stored.",
+    "description": "DETAIL is a ready-made parenthetical aside like \" (timeout)\", or empty - the same for every message that carries it.",
+    "placeholders": { "detail": { "content": "$1", "example": " (timeout)" } }
+  },
+  "model_download_http": {
+    "message": "The download was refused$DETAIL$. The model may have moved; nothing was stored.",
+    "placeholders": { "detail": { "content": "$1", "example": " (404 Not Found)" } }
+  },
+  "model_download_size": {
+    "message": "The download ended early$DETAIL$ and was thrown away.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "model_download_checksum": {
+    "message": "What arrived is not the model this version expects$DETAIL$, so it was thrown away. Try again - if it keeps happening, the file at the other end has changed.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "model_download_unpack": {
+    "message": "The download could not be unpacked$DETAIL$ and was thrown away.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "dict_download_network": {
+    "message": "Could not reach the place dictionaries are kept$DETAIL$. Nothing was stored.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "dict_download_http": {
+    "message": "The download was refused$DETAIL$. The dictionary may have moved; nothing was stored.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "dict_download_too_big": {
+    "message": "The download is far larger than a dictionary should be$DETAIL$, so it was stopped. Nothing was stored.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+
+  "model_files_one_of_them": { "message": "one of the files" },
+  "model_files_empty": { "message": "No files were selected." },
+  "model_files_unknown_file": {
+    "message": "Not part of a model: $FILE$. Expected names starting with model., lex. and vocab.",
+    "placeholders": { "file": { "content": "$1", "example": "notes.txt" } }
+  },
+  "model_files_unknown_pair": {
+    "message": "Cannot tell which languages this file is for: $FILE$.",
+    "placeholders": { "file": { "content": "$1" } }
+  },
+  "model_files_mixed_pairs": {
+    "message": "Those files are for more than one language pair ($PAIRS$). Load one direction at a time.",
+    "placeholders": { "pairs": { "content": "$1", "example": "enpl, plen" } }
+  },
+  "model_files_missing_model": { "message": "The model file is missing (model.<pair>.intgemm.alphas.bin)." },
+  "model_files_missing_shortlist": { "message": "The shortlist file is missing (lex.<pair>.s2t.bin)." },
+  "model_files_missing_vocab": { "message": "The vocabulary file is missing (vocab.<pair>.spm)." },
+  "model_files_not_a_model": { "message": "Those files are not a translation model." },
+
+  "dict_default_name": { "message": "Dictionary" },
+  "dict_import_empty": { "message": "No files were selected. Nothing was stored." },
+  "dict_import_missing_ifo": { "message": "There is no .ifo file among those, so this is not a StarDict dictionary. Nothing was stored." },
+  "dict_import_missing_idx": { "message": "The index is missing (.idx or .idx.gz). Nothing was stored." },
+  "dict_import_missing_dict": { "message": "The dictionary body is missing (.dict or .dict.dz). Nothing was stored." },
+  "dict_import_mixed": {
+    "message": "Those files belong to more than one dictionary ($NAMES$). Add one at a time. Nothing was stored.",
+    "placeholders": { "names": { "content": "$1" } }
+  },
+  "dict_import_not_stardict": { "message": "That .ifo file is not a StarDict dictionary. Nothing was stored." },
+  "dict_import_not_stardict_detail": {
+    "message": "That is $KIND$, which this extension cannot read. Nothing was stored.",
+    "placeholders": { "kind": { "content": "$1", "example": "a Babylon dictionary" } }
+  },
+  "dict_import_unpack": {
+    "message": "The files are compressed in a way that could not be unpacked$DETAIL$. Nothing was stored.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "dict_import_no_entries": { "message": "The index is empty - there are no words in this dictionary. Nothing was stored." },
+  "dict_import_no_entries_detail": {
+    "message": "Not one of the $COUNT$ words in the index could be read, so the files do not belong together. Nothing was stored.",
+    "placeholders": { "count": { "content": "$1", "example": "52,401" } }
+  },
+  "dict_import_unreadable": { "message": "Those files are not a dictionary this extension can read. Nothing was stored." },
+
+  "zip_not_zip": { "message": "What arrived is not a zip archive. Nothing was stored." },
+  "zip_unsupported": {
+    "message": "The archive uses a feature this extension does not read$DETAIL$. Nothing was stored.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "zip_too_big": {
+    "message": "The archive is larger than a dictionary has any reason to be$DETAIL$. Nothing was stored.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "zip_bad": {
+    "message": "The archive is damaged$DETAIL$. Nothing was stored - try downloading again.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "zip_unreadable": { "message": "The archive could not be read. Nothing was stored." },
+
+  "words_one": {
+    "message": "$COUNT$ word",
+    "description": "Plural family: the _one/_few/_many/_other suffixes follow Intl.PluralRules categories; a missing category falls back to _other.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "words_other": {
+    "message": "$COUNT$ words",
+    "placeholders": { "count": { "content": "$1", "example": "52,401" } }
+  },
+  "spellings_one": {
+    "message": "$COUNT$ other spelling",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "spellings_other": {
+    "message": "$COUNT$ other spellings",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+
+  "options_title": { "message": "re/read - settings" },
+  "options_version": { "message": "Version" },
+  "options_engine": { "message": "Engine" },
+  "options_engine_value": { "message": "Bergamot, inside the package" },
+  "options_reader_only": { "message": "Only in the reader" },
+  "options_reader_only_hint": {
+    "message": "With this on, selecting on an ordinary page offers one thing: open it in the reader. Translating, keeping and underlining happen there. On Android it starts on - a bubble over a selection and the phone's own copy menu fight for the same spot."
+  },
+  "options_models_heading": { "message": "Translation models" },
+  "options_models_intro": {
+    "message": "A model is what turns one language into another, and there is one per direction. Nothing is translated until the model for the pair you are reading is here, on this device. Every direction Mozilla publishes is listed; the pair you are reading and anything already stored float to the top."
+  },
+  "options_filter_placeholder": { "message": "Filter by language or code" },
+  "options_filter_models_aria": { "message": "Filter the list of translation models" },
+  "options_filter_dictionaries_aria": { "message": "Filter the list of dictionaries" },
+  "options_model_note_from": {
+    "message": "Model downloads come from",
+    "description": "First third of the note around the host and date, which stand between the parts as page elements. Each part must read on from the last across a plain space - no part starts or ends with whitespace."
+  },
+  "options_model_note_checked": {
+    "message": "- where Mozilla publishes them - at addresses written down in this package. Every file is checked against a checksum that was recorded here on"
+  },
+  "options_model_note_rest": {
+    "message": "- anything that does not match is thrown away rather than stored. Nothing about you is sent: the request says which model, and nothing else. This host and the dictionary catalogue's below are the only two places this extension ever contacts, and neither before you press Download."
+  },
+  "options_add_model_heading": { "message": "Add a model from files" },
+  "options_add_model_intro": {
+    "message": "Pick the three files of one direction and they are stored locally. Gzipped files are unpacked here, so the downloads can be used as they come:"
+  },
+  "options_add_model_button": { "message": "Add model" },
+  "options_files_note": {
+    "message": "This page stays even once models download themselves: it is the way out on the day the place they are downloaded from stops answering. Nothing here leaves the device, and adding a model makes no network request at all."
+  },
+  "options_dictionaries_heading": { "message": "Dictionaries" },
+  "options_dictionaries_intro": { "message": "A dictionary answers what a translation cannot." },
+  "options_dict_example_word": {
+    "message": "Bank",
+    "description": "A word with two unrelated meanings in this catalogue's language - each language picks its own."
+  },
+  "options_dictionaries_intro_rest": {
+    "message": "has two entries, and a model has to choose one of them without knowing which you meant; a dictionary shows both. Entries appear in the second layer of the bubble, under the sentence."
+  },
+  "options_get_dictionary_heading": { "message": "Get a dictionary" },
+  "options_wikdict_intro": {
+    "message": "builds dictionaries from Wiktionary (CC BY-SA) for every pair below. One press downloads the archive, unpacks it here and stores it; the languages are read off the pair, and the dictionary appears in the list above, ready to answer.",
+    "description": "Follows the bolded name WikDict, which stands in the page as its own element."
+  },
+  "options_dictionary_note_from": { "message": "Dictionary downloads come from" },
+  "options_dictionary_note_checked": {
+    "message": "- where WikDict publishes them - at addresses written down in this package; the list was checked here on"
+  },
+  "options_dictionary_note_rest": {
+    "message": "- unlike models there is no checksum to hold them to: WikDict rebuilds its files in place, so a sum recorded here would break with every rebuild. What stands in its place: the download must be a plain zip of StarDict files, it is read as warily as any file you would add by hand, and what it becomes is text in the local database - never code. Nothing about you is sent: the request says which dictionary, and nothing else."
+  },
+  "options_add_dictionary_heading": { "message": "Add a dictionary from files" },
+  "options_stardict_intro": {
+    "message": "Dictionaries are read in the",
+    "description": "Followed by the bolded format name StarDict, then options_stardict_intro_rest."
+  },
+  "options_stardict_intro_rest": {
+    "message": "format - the same files a KOReader e-reader uses, so a dictionary already on your reader works here unchanged. Unpack the archive it came in and pick the files of one dictionary:"
+  },
+  "options_file_ifo": { "message": "- what the dictionary calls itself" },
+  "options_file_idx": { "message": "- the index of words" },
+  "options_file_dict_or": { "message": "or" },
+  "options_file_dict": { "message": "- the entries" },
+  "options_file_syn": { "message": "- other spellings, when the dictionary has them" },
+  "options_words_in": { "message": "Words in" },
+  "options_explained_in": { "message": "explained in" },
+  "options_add_dictionary_button": { "message": "Add dictionary" },
+  "options_dict_files_note": {
+    "message": "A StarDict file says nothing about which languages it is for, so here that part is yours to say. Adding from files makes no network request at all, and the path stays for the day the catalogue's host stops answering: files from anywhere work, the catalogue's own included - they are published at",
+    "description": "Ends just before the address, which stands in the page as a link; the sentence's closing full stop is part of the page."
+  },
+  "options_disabled_heading": { "message": "Switched-off sites" },
+  "options_disabled_intro": {
+    "message": "Sites where re/read stays off - no underlines, no bubble, nothing running. The switch in the toolbar popup is what adds a site here; this list is how one is turned back on without visiting it."
+  },
+
+  "options_badge_reading": { "message": "what you are reading" },
+  "options_size_here": {
+    "message": "$SIZE$ here",
+    "placeholders": { "size": { "content": "$1", "example": "40.2 MB" } }
+  },
+  "options_progress_of": {
+    "message": "$RECEIVED$ of $TOTAL$",
+    "placeholders": {
+      "received": { "content": "$1", "example": "1.2 MB" },
+      "total": { "content": "$2", "example": "40.2 MB" }
+    }
+  },
+  "options_deleted_model": {
+    "message": "Deleted the $PAIR$ model.",
+    "placeholders": { "pair": { "content": "$1", "example": "English to Polish" } }
+  },
+  "options_downloading_model": {
+    "message": "Downloading the $PAIR$ model - $SIZE$.",
+    "placeholders": {
+      "pair": { "content": "$1" },
+      "size": { "content": "$2", "example": "40.2 MB" }
+    }
+  },
+  "options_downloaded_model": {
+    "message": "Downloaded the $PAIR$ model, $SIZE$ on this device.",
+    "placeholders": {
+      "pair": { "content": "$1" },
+      "size": { "content": "$2" }
+    }
+  },
+  "options_store_failed": {
+    "message": "The model downloaded but could not be stored: $DETAIL$",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "options_reading_pair": {
+    "message": "Reading $FROM$, translating into $TO$.",
+    "placeholders": {
+      "from": { "content": "$1", "example": "English" },
+      "to": { "content": "$2", "example": "Polish" }
+    }
+  },
+  "options_reading_pair_missing": {
+    "message": "Reading $FROM$, translating into $TO$ - and there is no model for this direction here yet.",
+    "placeholders": {
+      "from": { "content": "$1" },
+      "to": { "content": "$2" }
+    }
+  },
+  "options_no_models": { "message": "No models here, and none to download - this build lists none." },
+  "options_filter_no_match_models": { "message": "No pair matches that. The filter takes a language name or a code." },
+  "options_filter_no_match_dictionaries": { "message": "No dictionary matches that. The filter takes a language name or a code." },
+  "options_no_disabled": { "message": "No sites are switched off. The toolbar popup is where one is." },
+  "options_turn_back_on": { "message": "Turn back on" },
+  "options_reading_model_files": {
+    "message": "Reading the files for $PAIR$...",
+    "placeholders": { "pair": { "content": "$1", "example": "English to Polish" } }
+  },
+  "options_file_disappeared": {
+    "message": "$NAME$ disappeared while reading",
+    "placeholders": { "name": { "content": "$1", "example": "vocab.enpl.spm" } }
+  },
+  "options_added_model": {
+    "message": "Added the $PAIR$ model, $SIZE$ on this device.",
+    "placeholders": {
+      "pair": { "content": "$1" },
+      "size": { "content": "$2" }
+    }
+  },
+  "options_add_model_failed": {
+    "message": "Could not add the model: $DETAIL$",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "options_no_dictionaries": { "message": "No dictionaries here. The bubble shows a translation and nothing else." },
+  "options_deleted_dictionary": {
+    "message": "Deleted $NAME$.",
+    "placeholders": { "name": { "content": "$1", "example": "WikDict en-pl" } }
+  },
+  "options_delete_dictionary_failed": {
+    "message": "Could not delete $NAME$: $DETAIL$",
+    "placeholders": {
+      "name": { "content": "$1" },
+      "detail": { "content": "$2" }
+    }
+  },
+  "options_no_catalog": { "message": "No dictionaries to download - this build lists none." },
+  "options_downloading_dictionary": {
+    "message": "Downloading the $PAIR$ dictionary...",
+    "placeholders": { "pair": { "content": "$1", "example": "English to Polish" } }
+  },
+  "options_reading_dictionary_progress": {
+    "message": "Reading $NAME$ - $DONE$ of $TOTAL$...",
+    "description": "DONE arrives with its unit already counted (\"12,000 words\"); TOTAL is a bare number.",
+    "placeholders": {
+      "name": { "content": "$1" },
+      "done": { "content": "$2", "example": "12,000 words" },
+      "total": { "content": "$3", "example": "52,401" }
+    }
+  },
+  "options_storing_dictionary": {
+    "message": "Storing $NAME$ - $DONE$ of $TOTAL$...",
+    "placeholders": {
+      "name": { "content": "$1" },
+      "done": { "content": "$2", "example": "5,000" },
+      "total": { "content": "$3", "example": "61,204" }
+    }
+  },
+  "options_added_dictionary": {
+    "message": "Added $NAME$: $WORDS$, $SIZE$.",
+    "placeholders": {
+      "name": { "content": "$1" },
+      "words": { "content": "$2", "example": "52,401 words" },
+      "size": { "content": "$3", "example": "11.9 MB" }
+    }
+  },
+  "options_skipped_entries_one": {
+    "message": "$COUNT$ entry could not be read and was left out.",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "options_skipped_entries_other": {
+    "message": "$COUNT$ entries could not be read and were left out.",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "options_add_dictionary_failed": {
+    "message": "Could not add the dictionary: $DETAIL$",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "options_reading_file": {
+    "message": "Reading $NAME$...",
+    "placeholders": { "name": { "content": "$1", "example": "wikdict-en-pl" } }
+  },
+  "options_swept_unfinished": {
+    "message": "Removed a dictionary that was never finished importing ($NAMES$).",
+    "placeholders": { "names": { "content": "$1" } }
+  }
+}
