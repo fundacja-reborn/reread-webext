@@ -225,6 +225,9 @@ function contextOf(range) {
  * @param {string[]} meanings what the bubble was showing when the button was pressed
  */
 async function onAction(action, meanings) {
+  // The launcher bubble's one button, which this side never offers - the guard
+  // is here so the type can say so without a stray report ever writing.
+  if (action === "reader") return;
   if (action === "settings") {
     void ask({ kind: Message.OPEN_SETTINGS });
     tooltip.hide();

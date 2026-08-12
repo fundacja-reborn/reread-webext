@@ -66,8 +66,9 @@ async function focusTab(tabs, windows, id) {
     try {
       await windows.update(tab.windowId, { focused: true });
     } catch {
-      // The window closed while we were selecting a tab in it. Nothing to do
-      // and nothing lost - the next press will find the tab gone as well.
+      // The window closed while we were selecting a tab in it - or this is
+      // Android, which has no `windows` API at all. Nothing to do either way:
+      // on a phone the selected tab is the visible one already.
     }
   }
   return true;

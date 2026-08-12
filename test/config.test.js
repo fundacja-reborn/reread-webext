@@ -6,6 +6,10 @@ import {
   MEASURE,
   READER_DEFAULTS,
   SIZE,
+  effectiveReaderOnly,
+  osFrom,
+  platformOs,
+  publishPlatform,
   readConfig,
   withDefaults,
   writeConfig,
@@ -13,14 +17,22 @@ import {
 
 /**
  * Enough of the extension API for the settings module: `storage.local` over a
- * plain object, and the `runtime.id` that `webext()` checks for.
+ * plain object, and the `runtime.id` that `webext()` checks for. The platform
+ * answer is optional the way it is in real life - content scripts have no
+ * `getPlatformInfo`, and `platformOs` has to survive its absence.
  *
  * @param {Record<string, unknown>} [initial]
+ * @param {{ os?: string }} [platform]
  */
-function installFakeBrowser(initial = {}) {
+function installFakeBrowser(initial = {}, platform = {}) {
   const store = { ...initial };
   const fake = {
-    runtime: { id: "reread@test" },
+    runtime: {
+      id: "reread@test",
+      ...(platform.os === undefined
+        ? {}
+        : { getPlatformInfo: async () => ({ os: platform.os }) }),
+    },
     storage: {
       local: {
         /** @param {string} key */
@@ -174,6 +186,75 @@ describe("switched-off sites", () => {
     // The next patch replaces the list and only the list.
     const emptied = await writeConfig({ disabledHosts: [] });
     assert.deepEqual(emptied, { ...DEFAULTS, sourceLang: "de", targetLang: "en" });
+  });
+});
+
+describe("reader-only mode", () => {
+  it("answers null for a profile that has never chosen", () => {
+    // Null is a state, not a missing boolean: it is what lets the platform
+    // keep deciding, on this version and on every future one.
+    assert.equal(withDefaults(undefined).readerOnly, null);
+    assert.equal(withDefaults({ sourceLang: "en" }).readerOnly, null);
+  });
+
+  it("keeps a choice somebody made, in both directions", () => {
+    assert.equal(withDefaults({ readerOnly: true }).readerOnly, true);
+    assert.equal(withDefaults({ readerOnly: false }).readerOnly, false);
+  });
+
+  it("treats a hand-edited value of the wrong type as no choice", () => {
+    for (const readerOnly of ["true", 1, null, {}]) {
+      assert.equal(withDefaults({ readerOnly }).readerOnly, null);
+    }
+  });
+
+  it("lets the platform decide only while nobody has chosen", () => {
+    assert.equal(effectiveReaderOnly({ readerOnly: null }, "android"), true);
+    assert.equal(effectiveReaderOnly({ readerOnly: null }, "mac"), false);
+    assert.equal(effectiveReaderOnly({ readerOnly: null }, ""), false);
+    // A choice outlives the default - a future version flipping the platform
+    // rule must not overrule a switch somebody has set.
+    assert.equal(effectiveReaderOnly({ readerOnly: false }, "android"), false);
+    assert.equal(effectiveReaderOnly({ readerOnly: true }, "linux"), true);
+  });
+
+  it("writes a choice through writeConfig and reads it back as one", async () => {
+    const store = installFakeBrowser();
+    await writeConfig({ readerOnly: true });
+    assert.equal(/** @type {any} */ (store["config"]).readerOnly, true);
+    assert.equal((await readConfig()).readerOnly, true);
+
+    // Writing something else must not manufacture a choice along the way.
+    const untouched = installFakeBrowser();
+    await writeConfig({ sourceLang: "de" });
+    assert.equal(/** @type {any} */ (untouched["config"]).readerOnly, null);
+    assert.equal((await readConfig()).readerOnly, null);
+  });
+});
+
+describe("the published platform", () => {
+  it("reads the os back and answers unknown for anything else", () => {
+    assert.equal(osFrom({ os: "android" }), "android");
+    assert.equal(osFrom({ os: "mac" }), "mac");
+    // A fresh install's first page can be faster than `onInstalled` - the key
+    // simply is not there yet, and unknown has to read as the desktop default.
+    for (const stored of [undefined, null, {}, { os: 7 }, "android", 7]) {
+      assert.equal(osFrom(stored), "");
+    }
+  });
+
+  it("publishes what the platform says, where content scripts can read it", async () => {
+    const store = installFakeBrowser({}, { os: "android" });
+    await publishPlatform();
+    assert.deepEqual(store["platform"], { os: "android" });
+    assert.equal(osFrom(store["platform"]), "android");
+  });
+
+  it("answers unknown where the platform cannot be asked", async () => {
+    // A context without `getPlatformInfo` - the call throws, the answer is the
+    // desktop default rather than the exception.
+    installFakeBrowser();
+    assert.equal(await platformOs(), "");
   });
 });
 

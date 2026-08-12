@@ -15,7 +15,7 @@
  */
 
 import { webext } from "../lib/browser.js";
-import { CONFIG_KEY, readConfig, withDefaults, writeConfig } from "../lib/config.js";
+import { CONFIG_KEY, effectiveReaderOnly, platformOs, readConfig, withDefaults, writeConfig } from "../lib/config.js";
 import { languageName, pairLabel } from "../lib/language.js";
 import { catalogDictionaries, catalogSource } from "../lib/dict/catalog.js";
 import { describeDictDownloadProblem, downloadArchive } from "../lib/dict/download.js";
@@ -47,6 +47,21 @@ let running = null;
 
 /** @type {import("../lib/config.js").Config} */
 let config = withDefaults(undefined);
+
+/** Which platform this is - learned once, part of what the mode switch shows. */
+let os = "";
+
+/**
+ * The reader-only switch shows the mode as it acts, not as it is stored: with
+ * nothing chosen the box reflects the platform's default. The first press
+ * stores a real choice, and from then on the platform has no say - which is
+ * the point: a changed default in some future version must not overrule a
+ * switch somebody has set.
+ */
+function renderReaderOnly() {
+  const toggle = document.getElementById("reader-only");
+  if (toggle instanceof HTMLInputElement) toggle.checked = effectiveReaderOnly(config, os);
+}
 
 /**
  * @param {string} id
@@ -882,8 +897,10 @@ async function addSelectedDictionary() {
 
 async function render() {
   config = await readConfig();
+  os = await platformOs();
   fill("version", webext().runtime.getManifest().version);
   renderPair(modelRows(await listModels()));
+  renderReaderOnly();
   renderLanguageChoices("dictionary-from", config.sourceLang);
   renderLanguageChoices("dictionary-to", config.targetLang);
 
@@ -922,6 +939,7 @@ async function render() {
 async function refresh() {
   config = await readConfig();
   renderPair(modelRows(await listModels()));
+  renderReaderOnly();
   renderDisabledHosts();
   if (running === null && !importing) await renderModels();
 }
@@ -931,6 +949,15 @@ webext().storage.onChanged.addListener((changes, area) => {
   void refresh();
 });
 
+document.getElementById("reader-only")?.addEventListener("change", (event) => {
+  const toggle = event.target;
+  if (!(toggle instanceof HTMLInputElement)) return;
+  // Open pages notice through `storage.onChanged` and change modes on the
+  // spot - the launcher appears or the reading side starts, with no reload.
+  void writeConfig({ readerOnly: toggle.checked }).then((written) => {
+    config = written;
+  });
+});
 document.getElementById("add-model")?.addEventListener("click", () => void addSelectedModel());
 document.getElementById("model-filter")?.addEventListener("input", () => applyModelFilter());
 document.getElementById("dictionary-filter")?.addEventListener("input", () => applyCatalogFilter());

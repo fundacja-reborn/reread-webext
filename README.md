@@ -26,6 +26,7 @@ file, so what you collect on an e-reader underlines itself in your browser and b
 | Dictionaries (StarDict) | downloaded from the WikDict catalogue or imported from files |
 | Reader mode | turns the page into an article in the extension's own tab |
 | Toolbar popup | per-site switch, language pair, reader, settings |
+| Firefox on Android | declared and built, reader-only by default; not yet tested on a phone |
 | Import / export (TSV) | not started |
 | Chromium | builds, untested |
 
@@ -192,6 +193,21 @@ page, which is what CC BY-SA asks for and what makes it possible to tell two of 
 Firefox 142 or newer. Two things set that floor: the CSS Custom Highlight API, which is
 how phrases get underlined without touching the page's DOM, and the manifest key this
 extension uses to declare that it collects no data at all.
+
+### Firefox on Android
+
+The same package declares Android support, with the same version floor. The popup lives
+where Android puts every extension - the ⋮ menu, under **Extensions** - and opens over the
+whole window rather than next to a button.
+
+On a phone the extension starts in **reader-only mode**: an ordinary page is left alone,
+and selecting text offers exactly one thing, opening the page in the reader - where
+translation, keeping and underlining work as they do anywhere else. The reason is the
+screen: a translation bubble over a selection and Android's own copy menu fight for the
+same spot. The mode is a switch on the settings page - **Only in the reader** - and it is
+the same switch on every platform; Android only differs in where it starts. Switching it
+off gives a phone the full desktop behaviour, and the popup shows a status line whenever
+the mode is on.
 
 ## Development
 

@@ -1,13 +1,28 @@
 /* The toolbar popup. It rides `page.css` for colors and controls and only
-   overrides what being a popup means: a fixed width instead of a reading
-   column, and rows instead of sections. */
+   overrides what being a popup means: a width instead of a reading column,
+   and rows instead of sections. */
 
 body {
+  /* The desktop panel sizes itself to the page, so the page has to name a
+     width - this is a measure of the panel, not an assumption about screens. */
   width: 19rem;
   margin: 0;
   padding: 0.4rem 0.9rem;
   max-width: none;
   font-size: 14px;
+}
+
+/* On Android there is no panel: the popup opens as a page over the whole
+   window, and a page fills the window it was given. The popup's own script
+   says which case this is - a media query cannot tell a phone from a touch
+   laptop, but `getPlatformInfo` can. Rows get room to be pressed by a finger. */
+body[data-os="android"] {
+  width: auto;
+  font-size: 16px;
+}
+
+body[data-os="android"] .popup-row {
+  padding: 0.8rem 0;
 }
 
 .popup-row {
@@ -67,4 +82,16 @@ body {
 /* The last row is followed by the popup's own edge, which is line enough. */
 #open-settings {
   border-bottom: none;
+}
+
+/* The status line of reader-only mode: a statement first, a door second. It
+   rests quieter than the rows above it and carries its own top line, because
+   the settings row above gave its border up as the last row - which it stops
+   being whenever this one shows. The hover it inherits is what says it can be
+   pressed; pressing it leads to where the mode is changed. */
+.popup-mode {
+  border-top: 1px solid var(--page-line);
+  border-bottom: none;
+  color: var(--page-muted);
+  font-size: 0.9em;
 }
