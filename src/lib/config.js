@@ -31,6 +31,11 @@ export const CONFIG_KEY = "config";
  *   hostnames - no port, no scheme, no patterns, no subdomain matching. Every
  *   entry is one conscious press of the switch in the toolbar popup, and the
  *   settings page is where the list can be read and emptied.
+ * @property {boolean | null} readerOnly Whether ordinary pages only offer the
+ *   reader, never a translation in place. `null` means nobody has chosen, and
+ *   the platform decides at read time (`effectiveReaderOnly`): on Android on,
+ *   elsewhere off. Only a hand-set value is ever stored, so a future change of
+ *   the default reaches every installation that never touched the switch.
  */
 
 /** @type {readonly string[]} */
@@ -84,6 +89,7 @@ export const DEFAULTS = Object.freeze({
   targetLang: "pl",
   reader: READER_DEFAULTS,
   disabledHosts: [],
+  readerOnly: null,
 });
 
 /**
@@ -169,6 +175,9 @@ export function withDefaults(stored) {
     targetLang: text(raw["targetLang"], DEFAULTS.targetLang),
     reader: readerWithDefaults(raw["reader"]),
     disabledHosts: hostList(raw["disabledHosts"]),
+    // Not a boolean means nobody has chosen - which is a state of its own, not
+    // `false`: it is what lets the platform keep deciding (`effectiveReaderOnly`).
+    readerOnly: typeof raw["readerOnly"] === "boolean" ? raw["readerOnly"] : null,
   };
 }
 
@@ -186,7 +195,7 @@ export async function readConfig() {
  * `{ reader: { theme } }` that dropped the type size would be a setting quietly
  * resetting another one.
  *
- * @param {{ sourceLang?: string, targetLang?: string, reader?: Partial<ReaderConfig>, disabledHosts?: string[] }} patch
+ * @param {{ sourceLang?: string, targetLang?: string, reader?: Partial<ReaderConfig>, disabledHosts?: string[], readerOnly?: boolean }} patch
  * @returns {Promise<Config>}
  */
 export async function writeConfig(patch) {
@@ -198,4 +207,73 @@ export async function writeConfig(patch) {
   });
   await webext().storage.local.set({ [CONFIG_KEY]: next });
   return next;
+}
+
+/**
+ * Where the background publishes which platform this is, for the one context
+ * that cannot ask: content scripts get no `runtime.getPlatformInfo`, and the
+ * default of `readerOnly` depends on the answer. A separate key rather than a
+ * field of the config, because the config is what somebody chose and this is a
+ * fact about the device - and because `withDefaults` drops keys it does not
+ * know, so anything smuggled into the config would be erased by the next write.
+ */
+export const PLATFORM_KEY = "platform";
+
+/**
+ * The published platform, read back. Anything that is not a string says the
+ * background has not published yet (a fresh install's first page can be faster
+ * than `onInstalled`), and an empty answer falls back to the desktop default -
+ * wrong for at most the moment it takes the real value to arrive through
+ * `storage.onChanged`.
+ *
+ * @param {unknown} stored value under `PLATFORM_KEY`
+ * @returns {string} the OS as `getPlatformInfo` names it, or `""` when unknown
+ */
+export function osFrom(stored) {
+  if (typeof stored !== "object" || stored === null) return "";
+  const os = /** @type {Record<string, unknown>} */ (stored)["os"];
+  return typeof os === "string" ? os : "";
+}
+
+/**
+ * The one rule about the mode: a hand-set value wins, and with none the
+ * platform decides. On Android the reader is the surface that works on a
+ * phone - the bubble and the system's own selection toolbar fight over the
+ * same spot - so that is where the default flips.
+ *
+ * @param {Pick<Config, "readerOnly">} config
+ * @param {string} os as `getPlatformInfo` or `osFrom` names it
+ * @returns {boolean}
+ */
+export function effectiveReaderOnly(config, os) {
+  return config.readerOnly ?? os === "android";
+}
+
+/**
+ * Which platform this is, asked directly - for extension pages, which may.
+ * Content scripts read `PLATFORM_KEY` instead.
+ *
+ * @returns {Promise<string>}
+ */
+export async function platformOs() {
+  try {
+    const info = await webext().runtime.getPlatformInfo();
+    return info.os;
+  } catch {
+    // No answer reads as the desktop default, which is the harmless direction.
+    return "";
+  }
+}
+
+/**
+ * Asks once and writes the answer down for content scripts. The background
+ * calls this from `onInstalled` - installs and updates are the only moments
+ * the value can be missing, and a write on every wake would fire a storage
+ * event at every open tab for a value that never changes.
+ *
+ * @returns {Promise<void>}
+ */
+export async function publishPlatform() {
+  const os = await platformOs();
+  await webext().storage.local.set({ [PLATFORM_KEY]: { os } });
 }

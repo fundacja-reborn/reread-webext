@@ -41,6 +41,10 @@ interface WebExtBrowser {
     // Opening the settings from the bubble. Needs no permission: it is this
     // extension's own page.
     openOptionsPage(): Promise<void>;
+    // Which OS this is - the whole of how the reader-only default flips on
+    // Android. Needs no permission; not available to content scripts, which is
+    // why the background publishes the answer to storage (`PLATFORM_KEY`).
+    getPlatformInfo(): Promise<{ os: string }>;
   };
   storage: {
     local: {
