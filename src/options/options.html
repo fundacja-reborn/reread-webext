@@ -19,12 +19,12 @@
     <!-- The thesis of the whole extension, stated once, where a curious person
          goes looking for it. The notes further down say how each download is
          checked; this says what never happens at all. -->
-    <p data-i18n="options_local_intro">
+    <p class="explain" data-i18n="options_local_intro">
       Everything re/read does happens on this device: translating, the dictionary, the reading
       list, your saved phrases. Nothing you read or select is ever sent anywhere. The network
-      serves two things, both on this page: the downloads you press - a model or a dictionary -
-      and refreshing the list of models when the page opens. Always from the two addresses
-      written into this package, and nothing else.
+      serves two things, both on this page and both at your press: downloading a model or a
+      dictionary, and updating the list of models. Always from the two addresses written into
+      this package, and nothing else.
     </p>
 
     <!-- The signpost for a fresh install, shown only while not one model is
@@ -88,13 +88,33 @@
 
     <h2 data-i18n="options_models_heading">Translation models</h2>
 
-    <p data-i18n="options_models_intro">
-      A model is what turns one language into another, and there is one per direction. Mozilla
-      builds and publishes them - the same models Firefox itself translates pages with. Nothing is
-      translated until the model for the pair you are reading is here, on this device. Every
-      direction Mozilla publishes is listed; the pair you are reading and anything already stored
-      float to the top.
+    <p class="explain" data-i18n="options_models_intro">
+      The models below are built and published by Mozilla - the same models Firefox itself
+      translates pages with. For re/read to work, download a model for the language pairs you
+      want to translate (for example en -> pl).
     </p>
+
+    <!-- The one fetch this section can make, and the press that makes it: the
+         list below refreshes only here, never by itself - the date says how
+         old what stands under the filter is. The plain wrapper span keeps the
+         sentence in its own column beside the button; it carries no data-i18n
+         itself, so the marked elements inside still hold text only. -->
+    <p class="model-refresh">
+      <button type="button" id="refresh-models" data-i18n="options_update_list">
+        Update the list
+      </button>
+      <span class="model-refresh-text explain">
+        <span data-i18n="options_list_from"
+          >- the list of translation models below is from</span
+        >
+        <strong id="model-checked">-</strong>.
+        <span data-i18n="options_list_refresh_hint"
+          >Press the button to fetch the current list.</span
+        >
+      </span>
+    </p>
+
+    <p id="refresh-status" class="status" role="status"></p>
 
     <p class="model-filter">
       <input
@@ -111,29 +131,19 @@
 
     <p id="model-status" class="status" role="status"></p>
 
-    <p class="note">
+    <p class="note footnote">
       <!-- The host is also a door: the href becomes the address of the very
            index the snapshot was taken from, so a reader can look at the
            source with their own eyes. Their press, their navigation - the
-           extension itself still fetches nothing without Download. -->
+           extension itself still fetches nothing without a press. -->
       <span data-i18n="options_model_note_from">Model downloads come from</span>
       <a id="model-host" target="_blank" rel="noopener">-</a>
-      <span data-i18n="options_model_note_checked"
-        >- where Mozilla publishes them. The list itself comes from the same place: this page asks
-        for a fresh one when it opens, and what you see is the list as of</span
-      >
-      <strong id="model-checked">-</strong>
       <span data-i18n="options_model_note_rest"
-        >- with no network, the last answer stands, dated. A downloaded file is held to everything
-        declared about it - sizes, Mozilla's own checksum where one is published - and then
-        trial-loaded into the translation engine before anything is stored: what fails any of it
-        is thrown away rather than kept. Nothing about you is sent: the requests say which list
-        and which model, and nothing else. This host and the dictionary catalogue's below are the
-        only two places this extension ever contacts.</span
+        >- where Mozilla publishes them. When you update the list, nothing about you is sent - the
+        request only fetches the fresh list of models. This host and the dictionary catalogue's
+        below are the only two places this extension can ever contact - and only when you
+        knowingly press to refresh the list, to download a model or a dictionary.</span
       >
-      <button type="button" id="refresh-models" class="refresh" data-i18n="action_refresh">
-        Refresh
-      </button>
     </p>
 
     <!-- Folded shut by default: the by-hand path is the escape hatch, not the
@@ -141,13 +151,13 @@
          competing way to get a model. The summary says when to open it. -->
     <details class="fold">
       <summary>
-        <h2 data-i18n="options_add_model_heading">Add a model from files</h2>
+        <h3 data-i18n="options_add_model_heading">Add a model from files</h3>
         <span class="fold-hint" data-i18n="options_add_model_summary"
           >To add by hand a model the list above does not offer, load its files here.</span
         >
       </summary>
 
-      <p data-i18n="options_add_model_intro">
+      <p class="explain" data-i18n="options_add_model_intro">
         Pick the three files of one direction and they are stored locally. Gzipped files are
         unpacked here, so the downloads can be used as they come:
       </p>
@@ -165,7 +175,7 @@
 
       <p id="file-status" class="status" role="status"></p>
 
-      <p class="note" data-i18n="options_files_note">
+      <p class="note footnote" data-i18n="options_files_note">
         This page stays even once models download themselves: it is the way out on the day the place
         they are downloaded from stops answering. Nothing here leaves the device, and adding a model
         makes no network request at all.
@@ -174,7 +184,7 @@
 
     <h2 data-i18n="options_dictionaries_heading">Dictionaries</h2>
 
-    <p>
+    <p class="explain">
       <span data-i18n="options_dictionaries_intro">A dictionary answers what a translation
         cannot.</span>
       <em data-i18n="options_dict_example_word">Bank</em>
@@ -189,9 +199,9 @@
 
     <p id="dictionary-status" class="status" role="status"></p>
 
-    <h2 data-i18n="options_get_dictionary_heading">Get a dictionary</h2>
+    <h3 data-i18n="options_get_dictionary_heading">Get a dictionary</h3>
 
-    <p>
+    <p class="explain">
       <strong>WikDict</strong>
       <span data-i18n="options_wikdict_intro"
         >builds dictionaries from Wiktionary (CC BY-SA) for every pair below. One press downloads
@@ -215,7 +225,7 @@
 
     <p id="dictionary-get-status" class="status" role="status"></p>
 
-    <p class="note">
+    <p class="note footnote">
       <span data-i18n="options_dictionary_note_from">Dictionary downloads come from</span>
       <strong id="dictionary-host">-</strong>
       <span data-i18n="options_dictionary_note_checked"
@@ -236,14 +246,14 @@
          the road, this is the door beside it. -->
     <details class="fold">
       <summary>
-        <h2 data-i18n="options_add_dictionary_heading">Add a dictionary from files</h2>
+        <h3 data-i18n="options_add_dictionary_heading">Add a dictionary from files</h3>
         <span class="fold-hint" data-i18n="options_add_dictionary_summary"
           >To add a dictionary from your own files - one from an e-reader works as it is - load
           them here.</span
         >
       </summary>
 
-      <p>
+      <p class="explain">
         <span data-i18n="options_stardict_intro">Dictionaries are read in the</span>
         <strong>StarDict</strong>
         <span data-i18n="options_stardict_intro_rest"
@@ -277,7 +287,7 @@
 
       <p id="dictionary-file-status" class="status" role="status"></p>
 
-      <p class="note">
+      <p class="note footnote">
         <span data-i18n="options_dict_files_note"
           >A StarDict file says nothing about which languages it is for, so here that part is yours
           to say. Adding from files makes no network request at all, and the path stays for the day
@@ -292,7 +302,7 @@
 
     <h2 data-i18n="options_disabled_heading">Switched-off sites</h2>
 
-    <p data-i18n="options_disabled_intro">
+    <p class="explain" data-i18n="options_disabled_intro">
       Sites where re/read stays off - no underlines, no bubble, nothing running. The switch in
       the toolbar popup is what adds a site here; this list is how one is turned back on without
       visiting it.
