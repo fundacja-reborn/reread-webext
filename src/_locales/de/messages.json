@@ -63,15 +63,15 @@
     "placeholders": { "button": { "content": "$1", "example": "Speichern" } }
   },
   "vocab_filter_no_match": { "message": "Kein gespeicherter Eintrag passt darauf." },
-  "vocab_page_of": {
+  "pager_page_of": {
     "message": "Seite $PAGE$ von $PAGES$",
     "placeholders": {
       "page": { "content": "$1", "example": "3" },
       "pages": { "content": "$2", "example": "13" }
     }
   },
-  "vocab_prev": { "message": "Zurück" },
-  "vocab_next": { "message": "Weiter" },
+  "pager_prev": { "message": "Zurück" },
+  "pager_next": { "message": "Weiter" },
   "action_export": { "message": "Exportieren" },
   "action_import": { "message": "Importieren" },
   "vocab_transfer_note": {
@@ -147,6 +147,9 @@
   },
   "reader_empty_all_read": { "message": "Nichts mehr zu lesen - alles Gespeicherte ist als gelesen markiert." },
   "reader_empty_none_read": { "message": "Noch nichts ist als gelesen markiert." },
+  "reader_filter_placeholder": { "message": "Nach Titel oder Website filtern" },
+  "reader_filter_aria": { "message": "Die Leseliste filtern" },
+  "reader_filter_no_match": { "message": "Kein gespeicherter Artikel passt darauf." },
   "reader_library_note": {
     "message": "Alles hier ist eine Kopie auf diesem Gerät - sie öffnet sich ohne Verbindung und bleibt, auch wenn die Originalseite verschwindet."
   },

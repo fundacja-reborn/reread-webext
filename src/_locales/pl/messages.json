@@ -63,15 +63,15 @@
     "placeholders": { "button": { "content": "$1", "example": "Zapisz" } }
   },
   "vocab_filter_no_match": { "message": "Żadna zapisana fraza do tego nie pasuje." },
-  "vocab_page_of": {
+  "pager_page_of": {
     "message": "Strona $PAGE$ z $PAGES$",
     "placeholders": {
       "page": { "content": "$1", "example": "3" },
       "pages": { "content": "$2", "example": "13" }
     }
   },
-  "vocab_prev": { "message": "Poprzednia" },
-  "vocab_next": { "message": "Następna" },
+  "pager_prev": { "message": "Poprzednia" },
+  "pager_next": { "message": "Następna" },
   "action_export": { "message": "Eksportuj" },
   "action_import": { "message": "Importuj" },
   "vocab_transfer_note": {
@@ -189,6 +189,9 @@
   },
   "reader_empty_all_read": { "message": "Nie zostało nic do przeczytania - wszystko, co zapisane, jest oznaczone jako przeczytane." },
   "reader_empty_none_read": { "message": "Nic nie jest jeszcze oznaczone jako przeczytane." },
+  "reader_filter_placeholder": { "message": "Filtruj po tytule lub witrynie" },
+  "reader_filter_aria": { "message": "Filtruj czytelnię" },
+  "reader_filter_no_match": { "message": "Żaden zapisany artykuł do tego nie pasuje." },
   "reader_library_note": {
     "message": "Wszystko tutaj to kopie zapisane na tym urządzeniu - otwierają się bez internetu i zostają, nawet gdy oryginał zniknie."
   },

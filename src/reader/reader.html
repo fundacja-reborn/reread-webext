@@ -105,8 +105,25 @@
           Everything here is a copy stored on this device - it opens without a connection and
           stays even if the original page goes away.
         </p>
+        <!-- Shown while anything is saved at all, like the note: a filter over
+             an empty list would be a control with nothing to hold. -->
+        <p class="model-filter" id="library-filter-line" hidden>
+          <input
+            type="search"
+            id="library-filter"
+            placeholder="Filter by title or site"
+            data-i18n-placeholder="reader_filter_placeholder"
+            aria-label="Filter the reading list"
+            data-i18n-aria-label="reader_filter_aria"
+          />
+        </p>
         <p id="library-empty" class="note" hidden></p>
         <ul id="library-rows" class="library-rows"></ul>
+        <nav class="pager" id="library-pager" hidden>
+          <button type="button" id="library-prev" data-i18n="pager_prev">Previous</button>
+          <span class="pager-label" id="library-page-label"></span>
+          <button type="button" id="library-next" data-i18n="pager_next">Next</button>
+        </nav>
 
         <!--
           The list as one file and back: a backup, or the way to another
@@ -133,7 +150,7 @@
               <button type="button" id="library-import-cancel" data-i18n="action_cancel">Cancel</button>
             </p>
           </div>
-          <p id="library-transfer-status" class="status" role="status"></p>
+          <p id="library-transfer-status" class="status report" role="status"></p>
         </div>
       </section>
 

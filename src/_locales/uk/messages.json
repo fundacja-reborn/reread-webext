@@ -63,15 +63,15 @@
     "placeholders": { "button": { "content": "$1", "example": "Зберегти" } }
   },
   "vocab_filter_no_match": { "message": "Жодна збережена фраза не підходить." },
-  "vocab_page_of": {
+  "pager_page_of": {
     "message": "Сторінка $PAGE$ з $PAGES$",
     "placeholders": {
       "page": { "content": "$1", "example": "3" },
       "pages": { "content": "$2", "example": "13" }
     }
   },
-  "vocab_prev": { "message": "Попередня" },
-  "vocab_next": { "message": "Наступна" },
+  "pager_prev": { "message": "Попередня" },
+  "pager_next": { "message": "Наступна" },
   "action_export": { "message": "Експортувати" },
   "action_import": { "message": "Імпортувати" },
   "vocab_transfer_note": {
@@ -189,6 +189,9 @@
   },
   "reader_empty_all_read": { "message": "Читати більше нічого - усе збережене позначено прочитаним." },
   "reader_empty_none_read": { "message": "Ще нічого не позначено прочитаним." },
+  "reader_filter_placeholder": { "message": "Фільтрувати за назвою чи сайтом" },
+  "reader_filter_aria": { "message": "Фільтрувати список читання" },
+  "reader_filter_no_match": { "message": "Жодна збережена стаття не підходить." },
   "reader_library_note": {
     "message": "Усе тут - копії, збережені на цьому пристрої: вони відкриваються без інтернету й залишаються, навіть якщо оригінал зникне."
   },

@@ -1,5 +1,5 @@
-/* The saved-phrases page: the list rows, the editor a row unfolds into, and
-   the pager. Everything else - typography, the settings rows, the filter box,
+/* The saved-phrases page: the list rows and the editor a row unfolds into.
+   Everything else - typography, the settings rows, the filter box, the pager,
    buttons - is assets/page.css, shared by every page this extension owns. */
 
 .phrases {
@@ -95,17 +95,4 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-}
-
-.pager {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin: 1rem 0;
-}
-
-.pager-label {
-  color: var(--page-muted);
-  font-variant-numeric: tabular-nums;
 }

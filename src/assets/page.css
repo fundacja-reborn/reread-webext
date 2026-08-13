@@ -352,6 +352,36 @@ input[type="checkbox"] {
   }
 }
 
+/* The report of an import or an export: it lands under prose set in the same
+   muted grey, often read after a glance away at a file picker, so it borrows
+   the note's frame to be found at all. The text keeps the page's full color;
+   an error inside the frame keeps its tone. */
+.status.report {
+  margin-top: 1rem;
+  padding: 0.6rem 0.8rem;
+  border-left: 3px solid var(--page-accent);
+  background: color-mix(in srgb, var(--page-accent) 10%, transparent);
+}
+
+.status.report:not([data-tone="error"]) {
+  color: var(--page-fg);
+}
+
+/* One pager for every long list (saved phrases, the reading list): Previous
+   and Next at the ends, the count between them. */
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.pager-label {
+  color: var(--page-muted);
+  font-variant-numeric: tabular-nums;
+}
+
 .note {
   margin-top: 2rem;
   padding: 0.9rem 1rem;

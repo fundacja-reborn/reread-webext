@@ -63,15 +63,15 @@
     "placeholders": { "button": { "content": "$1", "example": "Guardar" } }
   },
   "vocab_filter_no_match": { "message": "Ninguna frase guardada coincide con eso." },
-  "vocab_page_of": {
+  "pager_page_of": {
     "message": "Página $PAGE$ de $PAGES$",
     "placeholders": {
       "page": { "content": "$1", "example": "3" },
       "pages": { "content": "$2", "example": "13" }
     }
   },
-  "vocab_prev": { "message": "Anterior" },
-  "vocab_next": { "message": "Siguiente" },
+  "pager_prev": { "message": "Anterior" },
+  "pager_next": { "message": "Siguiente" },
   "action_export": { "message": "Exportar" },
   "action_import": { "message": "Importar" },
   "vocab_transfer_note": {
@@ -151,6 +151,9 @@
   },
   "reader_empty_all_read": { "message": "No queda nada por leer - todo lo guardado está marcado como leído." },
   "reader_empty_none_read": { "message": "Aún no hay nada marcado como leído." },
+  "reader_filter_placeholder": { "message": "Filtrar por título o sitio" },
+  "reader_filter_aria": { "message": "Filtrar la lista de lectura" },
+  "reader_filter_no_match": { "message": "Ningún artículo guardado coincide con eso." },
   "reader_library_note": {
     "message": "Todo lo de aquí es una copia guardada en este dispositivo - se abre sin conexión y permanece aunque la página original desaparezca."
   },
