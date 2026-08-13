@@ -418,7 +418,7 @@
     "description": "First half of the note around the host, which stands between the parts as a page element. Each part must read on from the last across a plain space - no part starts or ends with whitespace."
   },
   "options_dictionary_note_rest": {
-    "message": "- where WikDict publishes the dictionaries it builds from Wiktionary (CC BY-SA). When you update the list, nothing about you is sent - the request only fetches the fresh list. Unlike models there is no checksum to hold a download to (WikDict rebuilds its files in place); what stands in its place: the download must be a plain zip of StarDict files, it is read as warily as any file you would add by hand, and what it becomes is text in the local database - never code."
+    "message": "- where WikDict publishes the dictionaries it builds from Wiktionary (CC BY-SA). When you update the list, nothing about you is sent - the request only fetches the fresh list."
   },
   "options_add_dictionary_heading": { "message": "Add a dictionary from files" },
   "options_add_dictionary_summary": {

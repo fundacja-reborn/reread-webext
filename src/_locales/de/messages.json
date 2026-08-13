@@ -383,7 +383,7 @@
   },
   "options_dictionary_note_from": { "message": "Wörterbücher kommen von" },
   "options_dictionary_note_rest": {
-    "message": "- dort veröffentlicht WikDict die Wörterbücher, die es aus dem Wiktionary (CC BY-SA) baut. Wenn Sie die Liste aktualisieren, wird nichts über Sie gesendet - die Anfrage holt nur die frische Liste. Anders als bei Modellen gibt es keine Prüfsumme, die einen Download festhält (WikDict baut seine Dateien an Ort und Stelle neu); an ihrer Stelle steht: Der Download muss ein schlichtes Zip aus StarDict-Dateien sein, er wird so misstrauisch gelesen wie jede von Hand hinzugefügte Datei, und was aus ihm wird, ist Text in der lokalen Datenbank - niemals Code."
+    "message": "- dort veröffentlicht WikDict die Wörterbücher, die es aus dem Wiktionary (CC BY-SA) baut. Wenn Sie die Liste aktualisieren, wird nichts über Sie gesendet - die Anfrage holt nur die frische Liste."
   },
   "options_add_dictionary_heading": { "message": "Wörterbuch aus Dateien hinzufügen" },
   "options_add_dictionary_summary": {
