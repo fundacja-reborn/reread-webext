@@ -931,6 +931,8 @@ async function render() {
   const { source, checkedAt } = registrySource();
   const host = source === "" ? "" : new URL(source).host;
   fill("model-host", host);
+  const modelSource = document.getElementById("model-host");
+  if (modelSource instanceof HTMLAnchorElement && source !== "") modelSource.href = source;
   fill("model-checked", checkedAt);
 
   const dictionaries = catalogSource();

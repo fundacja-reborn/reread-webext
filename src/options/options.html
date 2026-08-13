@@ -111,8 +111,12 @@
     <p id="model-status" class="status" role="status"></p>
 
     <p class="note">
+      <!-- The host is also a door: the href becomes the address of the very
+           index the snapshot was taken from, so a reader can look at the
+           source with their own eyes. Their press, their navigation - the
+           extension itself still fetches nothing without Download. -->
       <span data-i18n="options_model_note_from">Model downloads come from</span>
-      <strong id="model-host">-</strong>
+      <a id="model-host" target="_blank" rel="noopener">-</a>
       <span data-i18n="options_model_note_checked"
         >- where Mozilla publishes them - at addresses written down in this package. Every file is
         checked against a checksum that was recorded here on</span
