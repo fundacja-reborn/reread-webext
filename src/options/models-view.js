@@ -34,19 +34,56 @@ function byLabel(a, b) {
 /**
  * The pair being read first, then what is installed, then everything that
  * could be downloaded - by name within each group. The eye goes to the top of
- * a long list for "mine", and to the alphabet for everything else.
+ * a long list for "mine", and to the alphabet for everything else. Models and
+ * dictionaries both order this way, so the rule reads only what both carry.
  *
- * @param {ModelRow[]} rows
+ * @template {Directed & { installed: object | null }} T
+ * @param {T[]} rows
  * @param {{ sourceLang: string, targetLang: string }} reading
- * @returns {ModelRow[]}
+ * @returns {T[]}
  */
 export function orderForDisplay(rows, reading) {
-  /** @param {ModelRow} row */
+  /** @param {T} row */
   const tier = (row) => {
     if (row.from === reading.sourceLang && row.to === reading.targetLang) return 0;
     return row.installed !== null ? 1 : 2;
   };
   return [...rows].sort((a, b) => tier(a) - tier(b) || byLabel(a, b));
+}
+
+/**
+ * @typedef {object} DictionaryRow one line of the dictionary frame
+ * @property {string} from
+ * @property {string} to
+ * @property {import("../lib/dict/store.js").Dictionary | null} installed
+ * @property {import("../lib/dict/catalog.js").CatalogDictionary | null} available
+ */
+
+/**
+ * The dictionary frame's rows: every stored dictionary, then every catalogue
+ * pair not already answered for. One row per stored dictionary rather than per
+ * pair, because two dictionaries of one pair can both be here (a WikDict one
+ * and one added from files) and each needs its own delete button. A catalogue
+ * pair with a stored dictionary is folded away instead of offered again:
+ * downloading it a second time would store a duplicate, and the by-hand fold
+ * below stays open for whoever truly wants two.
+ *
+ * @param {import("../lib/dict/store.js").Dictionary[]} stored
+ * @param {import("../lib/dict/catalog.js").CatalogDictionary[]} catalog
+ * @param {{ sourceLang: string, targetLang: string }} reading
+ * @returns {DictionaryRow[]}
+ */
+export function dictionaryRows(stored, catalog, reading) {
+  const covered = new Set(stored.map((one) => `${one.langFrom}-${one.langTo}`));
+
+  /** @type {DictionaryRow[]} */
+  const rows = [
+    ...stored.map((one) => ({ from: one.langFrom, to: one.langTo, installed: one, available: null })),
+    ...catalog
+      .filter((entry) => !covered.has(`${entry.from}-${entry.to}`))
+      .map((entry) => ({ from: entry.from, to: entry.to, installed: null, available: entry })),
+  ];
+  return orderForDisplay(rows, reading);
 }
 
 /**

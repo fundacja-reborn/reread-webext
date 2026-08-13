@@ -342,7 +342,7 @@
 
   "options_title": { "message": "re/read - ajustes" },
   "options_local_intro": {
-    "message": "Todo lo que hace re/read ocurre en este dispositivo: la traducción, el diccionario, la lista de lectura, tus frases guardadas. Nada de lo que lees o seleccionas se envía a ninguna parte. La red sirve para dos cosas, ambas en esta página y ambas a tu pulsación: descargar un modelo o un diccionario, y actualizar la lista de modelos. Siempre desde las dos direcciones escritas en este paquete, y nada más."
+    "message": "Todo lo que hace re/read ocurre en este dispositivo: la traducción, el diccionario, la lista de lectura, tus frases guardadas. Nada de lo que lees o seleccionas se envía a ninguna parte. La red sirve para dos cosas, ambas en esta página y ambas a tu pulsación: descargar un modelo o un diccionario, y actualizar las listas de modelos y diccionarios. Siempre desde las dos direcciones escritas en este paquete, y nada más."
   },
   "options_first_steps_heading": { "message": "Primeros pasos" },
   "options_first_steps_intro": {
@@ -355,7 +355,7 @@
     "message": "Bajo «Modelos de traducción», pulsa «Descargar» junto a ese par. El modelo queda guardado en este dispositivo y desde entonces traduce sin conexión."
   },
   "options_first_steps_dictionary": {
-    "message": "Merece la segunda pulsación: un diccionario para el mismo par, bajo «Conseguir un diccionario» - las palabras sueltas reciben entonces respuestas más completas que una traducción sola."
+    "message": "Merece la segunda pulsación: un diccionario para el mismo par, bajo «Diccionarios» - las palabras sueltas reciben entonces respuestas más completas que una traducción sola."
   },
   "options_first_steps_pin": {
     "message": "Por último, fija re/read a la barra de herramientas - hasta entonces su botón se esconde tras el icono de la pieza de puzle. Tras el botón: el lector, la lista de lectura sin conexión, tus frases guardadas y un interruptor para el sitio en el que estás."
@@ -373,13 +373,14 @@
   },
   "options_update_list": { "message": "Actualizar la lista" },
   "options_list_from": { "message": "- la lista de modelos de traducción de abajo es del" },
+  "options_dict_list_from": { "message": "- la lista de diccionarios de abajo es del" },
   "options_list_refresh_hint": { "message": "Pulsa el botón para traer la lista actual." },
   "options_filter_placeholder": { "message": "Filtra por idioma o código" },
   "options_filter_models_aria": { "message": "Filtrar la lista de modelos de traducción" },
   "options_filter_dictionaries_aria": { "message": "Filtrar la lista de diccionarios" },
   "options_model_note_from": { "message": "Los modelos se descargan de" },
   "options_model_note_rest": {
-    "message": "- ahí los publica Mozilla. Cuando actualizas la lista, no se envía nada sobre ti - la petición solo trae la lista fresca de modelos. Este host y el del catálogo de diccionarios de abajo son los dos únicos lugares con los que esta extensión puede contactar jamás - y solo cuando pulsas a sabiendas actualizar la lista o descargar un modelo o un diccionario."
+    "message": "- ahí los publica Mozilla. Cuando actualizas la lista, no se envía nada sobre ti - la petición solo trae la lista fresca de modelos. Este host y el del catálogo de diccionarios de abajo son los dos únicos lugares con los que esta extensión puede contactar jamás - y solo cuando pulsas a sabiendas actualizar una lista o descargar un modelo o un diccionario."
   },
   "options_add_model_heading": { "message": "Añadir un modelo desde archivos" },
   "options_add_model_summary": {
@@ -393,21 +394,12 @@
     "message": "Esta página se queda incluso cuando los modelos se descargan solos: es la salida para el día en que el lugar del que se descargan deje de responder. Nada de aquí sale del dispositivo, y añadir un modelo no hace ninguna petición de red."
   },
   "options_dictionaries_heading": { "message": "Diccionarios" },
-  "options_dictionaries_intro": { "message": "Un diccionario responde lo que una traducción no puede." },
-  "options_dict_example_word": { "message": "Banco" },
-  "options_dictionaries_intro_rest": {
-    "message": "tiene dos entradas, y un modelo tiene que elegir una sin saber cuál querías; un diccionario muestra las dos. Las entradas aparecen en la segunda capa de la burbuja, bajo la frase."
-  },
-  "options_get_dictionary_heading": { "message": "Conseguir un diccionario" },
-  "options_wikdict_intro": {
-    "message": "construye diccionarios a partir de Wiktionary (CC BY-SA) para cada par de abajo. Una pulsación descarga el archivo, lo descomprime aquí y lo guarda; los idiomas se leen del par, y el diccionario aparece en la lista de arriba, listo para responder."
+  "options_dictionaries_intro": {
+    "message": "Descarga un diccionario (o varios) para poder consultar los distintos significados de una palabra seleccionada - luego elegirás y guardarás las acepciones que encajen con el contexto."
   },
   "options_dictionary_note_from": { "message": "Los diccionarios se descargan de" },
-  "options_dictionary_note_checked": {
-    "message": "- ahí los publica WikDict - desde direcciones escritas en este paquete; la lista se comprobó aquí el"
-  },
   "options_dictionary_note_rest": {
-    "message": "- a diferencia de los modelos no hay suma de control que los sujete: WikDict reconstruye sus archivos en el sitio, así que una suma anotada aquí se rompería con cada reconstrucción. En su lugar está esto: la descarga tiene que ser un zip simple de archivos StarDict, se lee con tanta desconfianza como cualquier archivo que añadieras a mano, y en lo que se convierte es texto en la base local - nunca código. No se envía nada sobre ti: la petición dice qué diccionario, y nada más."
+    "message": "- ahí publica WikDict los diccionarios que construye a partir de Wiktionary (CC BY-SA). Cuando actualizas la lista, no se envía nada sobre ti - la petición solo trae la lista fresca. A diferencia de los modelos no hay suma de control que sujete una descarga (WikDict reconstruye sus archivos en el sitio); en su lugar está esto: la descarga tiene que ser un zip simple de archivos StarDict, se lee con tanta desconfianza como cualquier archivo que añadieras a mano, y en lo que se convierte es texto en la base local - nunca código."
   },
   "options_add_dictionary_heading": { "message": "Añadir un diccionario desde archivos" },
   "options_add_dictionary_summary": {
@@ -460,6 +452,11 @@
   "options_refreshing_list": { "message": "Refrescando la lista de modelos..." },
   "options_refreshed_list": {
     "message": "La lista de modelos está actualizada a $DATE$.",
+    "placeholders": { "date": { "content": "$1", "example": "2026-08-13" } }
+  },
+  "options_refreshing_dict_list": { "message": "Refrescando la lista de diccionarios..." },
+  "options_refreshed_dict_list": {
+    "message": "La lista de diccionarios está actualizada a $DATE$.",
     "placeholders": { "date": { "content": "$1", "example": "2026-08-13" } }
   },
   "options_refresh_failed": {
@@ -526,7 +523,6 @@
     "message": "No se pudo añadir el modelo: $DETAIL$",
     "placeholders": { "detail": { "content": "$1" } }
   },
-  "options_no_dictionaries": { "message": "No hay diccionarios aquí. La burbuja muestra una traducción y nada más." },
   "options_deleted_dictionary": {
     "message": "$NAME$ eliminado.",
     "placeholders": { "name": { "content": "$1" } }

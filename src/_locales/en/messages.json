@@ -338,7 +338,7 @@
 
   "options_title": { "message": "re/read - settings" },
   "options_local_intro": {
-    "message": "Everything re/read does happens on this device: translating, the dictionary, the reading list, your saved phrases. Nothing you read or select is ever sent anywhere. The network serves two things, both on this page and both at your press: downloading a model or a dictionary, and updating the list of models. Always from the two addresses written into this package, and nothing else."
+    "message": "Everything re/read does happens on this device: translating, the dictionary, the reading list, your saved phrases. Nothing you read or select is ever sent anywhere. The network serves two things, both on this page and both at your press: downloading a model or a dictionary, and updating the lists of models and dictionaries. Always from the two addresses written into this package, and nothing else."
   },
   "options_first_steps_heading": { "message": "First steps" },
   "options_first_steps_intro": {
@@ -353,8 +353,8 @@
     "description": "Quotes the options_models_heading section name and the action_download button - each language quotes its own wording of those keys, so the three must move together."
   },
   "options_first_steps_dictionary": {
-    "message": "Worth the second press: a dictionary for the same pair, under \"Get a dictionary\" - single words then get fuller answers than a translation alone.",
-    "description": "Quotes the options_get_dictionary_heading section name - each language quotes its own wording of that key."
+    "message": "Worth the second press: a dictionary for the same pair, under \"Dictionaries\" - single words then get fuller answers than a translation alone.",
+    "description": "Quotes the options_dictionaries_heading section name - each language quotes its own wording of that key."
   },
   "options_first_steps_pin": {
     "message": "Last, pin re/read to the toolbar - until you do, its button sits behind the puzzle-piece icon. Behind the button: the reader, the offline reading list, your saved phrases and a switch for the site you are on.",
@@ -379,7 +379,14 @@
     "message": "- the list of translation models below is from",
     "description": "Follows the update button; the date stands after this part as its own element, then options_list_refresh_hint. Each part must read on from the last across a plain space - no part starts or ends with whitespace."
   },
-  "options_list_refresh_hint": { "message": "Press the button to fetch the current list." },
+  "options_dict_list_from": {
+    "message": "- the list of dictionaries below is from",
+    "description": "The dictionary list's twin of options_list_from, under the same rules."
+  },
+  "options_list_refresh_hint": {
+    "message": "Press the button to fetch the current list.",
+    "description": "Shared by the model and the dictionary refresh lines - it must name neither."
+  },
   "options_filter_placeholder": { "message": "Filter by language or code" },
   "options_filter_models_aria": { "message": "Filter the list of translation models" },
   "options_filter_dictionaries_aria": { "message": "Filter the list of dictionaries" },
@@ -388,7 +395,7 @@
     "description": "First half of the note around the host, which stands between the parts as a page element. Each part must read on from the last across a plain space - no part starts or ends with whitespace."
   },
   "options_model_note_rest": {
-    "message": "- where Mozilla publishes them. When you update the list, nothing about you is sent - the request only fetches the fresh list of models. This host and the dictionary catalogue's below are the only two places this extension can ever contact - and only when you knowingly press to refresh the list, to download a model or a dictionary."
+    "message": "- where Mozilla publishes them. When you update the list, nothing about you is sent - the request only fetches the fresh list of models. This host and the dictionary catalogue's below are the only two places this extension can ever contact - and only when you knowingly press to refresh a list, to download a model or a dictionary."
   },
   "options_add_model_heading": { "message": "Add a model from files" },
   "options_add_model_summary": {
@@ -403,25 +410,15 @@
     "message": "This page stays even once models download themselves: it is the way out on the day the place they are downloaded from stops answering. Nothing here leaves the device, and adding a model makes no network request at all."
   },
   "options_dictionaries_heading": { "message": "Dictionaries" },
-  "options_dictionaries_intro": { "message": "A dictionary answers what a translation cannot." },
-  "options_dict_example_word": {
-    "message": "Bank",
-    "description": "A word with two unrelated meanings in this catalogue's language - each language picks its own."
+  "options_dictionaries_intro": {
+    "message": "Download a dictionary (or a few) to check the different meanings a selected word can have - you then choose and save the senses that fit the context."
   },
-  "options_dictionaries_intro_rest": {
-    "message": "has two entries, and a model has to choose one of them without knowing which you meant; a dictionary shows both. Entries appear in the second layer of the bubble, under the sentence."
-  },
-  "options_get_dictionary_heading": { "message": "Get a dictionary" },
-  "options_wikdict_intro": {
-    "message": "builds dictionaries from Wiktionary (CC BY-SA) for every pair below. One press downloads the archive, unpacks it here and stores it; the languages are read off the pair, and the dictionary appears in the list above, ready to answer.",
-    "description": "Follows the bolded name WikDict, which stands in the page as its own element."
-  },
-  "options_dictionary_note_from": { "message": "Dictionary downloads come from" },
-  "options_dictionary_note_checked": {
-    "message": "- where WikDict publishes them - at addresses written down in this package; the list was checked here on"
+  "options_dictionary_note_from": {
+    "message": "Dictionary downloads come from",
+    "description": "First half of the note around the host, which stands between the parts as a page element. Each part must read on from the last across a plain space - no part starts or ends with whitespace."
   },
   "options_dictionary_note_rest": {
-    "message": "- unlike models there is no checksum to hold them to: WikDict rebuilds its files in place, so a sum recorded here would break with every rebuild. What stands in its place: the download must be a plain zip of StarDict files, it is read as warily as any file you would add by hand, and what it becomes is text in the local database - never code. Nothing about you is sent: the request says which dictionary, and nothing else."
+    "message": "- where WikDict publishes the dictionaries it builds from Wiktionary (CC BY-SA). When you update the list, nothing about you is sent - the request only fetches the fresh list. Unlike models there is no checksum to hold a download to (WikDict rebuilds its files in place); what stands in its place: the download must be a plain zip of StarDict files, it is read as warily as any file you would add by hand, and what it becomes is text in the local database - never code."
   },
   "options_add_dictionary_heading": { "message": "Add a dictionary from files" },
   "options_add_dictionary_summary": {
@@ -489,6 +486,11 @@
     "message": "The list of models is current as of $DATE$.",
     "placeholders": { "date": { "content": "$1", "example": "2026-08-13" } }
   },
+  "options_refreshing_dict_list": { "message": "Refreshing the list of dictionaries..." },
+  "options_refreshed_dict_list": {
+    "message": "The list of dictionaries is current as of $DATE$.",
+    "placeholders": { "date": { "content": "$1", "example": "2026-08-13" } }
+  },
   "options_refresh_failed": {
     "message": "Could not refresh the list$DETAIL$. The list from $DATE$ stays.",
     "placeholders": {
@@ -549,7 +551,6 @@
     "message": "Could not add the model: $DETAIL$",
     "placeholders": { "detail": { "content": "$1" } }
   },
-  "options_no_dictionaries": { "message": "No dictionaries here. The bubble shows a translation and nothing else." },
   "options_deleted_dictionary": {
     "message": "Deleted $NAME$.",
     "placeholders": { "name": { "content": "$1", "example": "WikDict en-pl" } }

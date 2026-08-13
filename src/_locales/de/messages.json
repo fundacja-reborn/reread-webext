@@ -326,7 +326,7 @@
 
   "options_title": { "message": "re/read - Einstellungen" },
   "options_local_intro": {
-    "message": "Alles, was re/read tut, geschieht auf diesem Gerät: das Übersetzen, das Wörterbuch, die Leseliste, der gespeicherte Wortschatz. Nichts von dem, was Sie lesen oder auswählen, wird irgendwohin gesendet. Das Netz dient zwei Dingen, beiden auf dieser Seite und beiden auf Ihren Klick: dem Herunterladen eines Modells oder Wörterbuchs und dem Aktualisieren der Modellliste. Immer von den zwei Adressen, die in diesem Paket stehen, und nichts sonst."
+    "message": "Alles, was re/read tut, geschieht auf diesem Gerät: das Übersetzen, das Wörterbuch, die Leseliste, der gespeicherte Wortschatz. Nichts von dem, was Sie lesen oder auswählen, wird irgendwohin gesendet. Das Netz dient zwei Dingen, beiden auf dieser Seite und beiden auf Ihren Klick: dem Herunterladen eines Modells oder Wörterbuchs und dem Aktualisieren der Modell- und Wörterbuchliste. Immer von den zwei Adressen, die in diesem Paket stehen, und nichts sonst."
   },
   "options_first_steps_heading": { "message": "Erste Schritte" },
   "options_first_steps_intro": {
@@ -339,7 +339,7 @@
     "message": "Drücken Sie unter „Übersetzungsmodelle“ neben diesem Paar auf „Herunterladen“. Das Modell wird auf diesem Gerät gespeichert und übersetzt von da an offline."
   },
   "options_first_steps_dictionary": {
-    "message": "Den zweiten Druck wert: ein Wörterbuch für dasselbe Paar, unter „Wörterbuch besorgen“ - einzelne Wörter bekommen dann vollständigere Antworten als eine Übersetzung allein."
+    "message": "Den zweiten Druck wert: ein Wörterbuch für dasselbe Paar, unter „Wörterbücher“ - einzelne Wörter bekommen dann vollständigere Antworten als eine Übersetzung allein."
   },
   "options_first_steps_pin": {
     "message": "Heften Sie re/read zuletzt an die Symbolleiste - bis dahin sitzt der Knopf hinter dem Puzzleteil-Symbol. Hinter dem Knopf: die Leseansicht, die Offline-Leseliste, Ihr gespeicherter Wortschatz und ein Schalter für die Website, auf der Sie sind."
@@ -357,13 +357,14 @@
   },
   "options_update_list": { "message": "Liste aktualisieren" },
   "options_list_from": { "message": "- die Liste der Übersetzungsmodelle unten ist vom" },
+  "options_dict_list_from": { "message": "- die Liste der Wörterbücher unten ist vom" },
   "options_list_refresh_hint": { "message": "Klicken Sie auf die Schaltfläche, um die aktuelle Liste zu holen." },
   "options_filter_placeholder": { "message": "Nach Sprache oder Code filtern" },
   "options_filter_models_aria": { "message": "Die Liste der Übersetzungsmodelle filtern" },
   "options_filter_dictionaries_aria": { "message": "Die Liste der Wörterbücher filtern" },
   "options_model_note_from": { "message": "Modelle kommen von" },
   "options_model_note_rest": {
-    "message": "- dort veröffentlicht Mozilla sie. Wenn Sie die Liste aktualisieren, wird nichts über Sie gesendet - die Anfrage holt nur die frische Modellliste. Dieser Host und der des Wörterbuchkatalogs weiter unten sind die einzigen zwei Orte, mit denen sich diese Erweiterung überhaupt verbinden kann - und nur, wenn Sie bewusst das Aktualisieren der Liste oder das Herunterladen eines Modells oder Wörterbuchs anklicken."
+    "message": "- dort veröffentlicht Mozilla sie. Wenn Sie die Liste aktualisieren, wird nichts über Sie gesendet - die Anfrage holt nur die frische Modellliste. Dieser Host und der des Wörterbuchkatalogs weiter unten sind die einzigen zwei Orte, mit denen sich diese Erweiterung überhaupt verbinden kann - und nur, wenn Sie bewusst das Aktualisieren einer Liste oder das Herunterladen eines Modells oder Wörterbuchs anklicken."
   },
   "options_add_model_heading": { "message": "Modell aus Dateien hinzufügen" },
   "options_add_model_summary": {
@@ -377,21 +378,12 @@
     "message": "Diese Seite bleibt, auch wenn Modelle sich selbst herunterladen: Sie ist der Ausweg für den Tag, an dem der Ort, von dem sie kommen, nicht mehr antwortet. Nichts hier verlässt das Gerät, und ein Modell hinzuzufügen stellt keinerlei Netzwerkanfrage."
   },
   "options_dictionaries_heading": { "message": "Wörterbücher" },
-  "options_dictionaries_intro": { "message": "Ein Wörterbuch beantwortet, was eine Übersetzung nicht kann." },
-  "options_dict_example_word": { "message": "Bank" },
-  "options_dictionaries_intro_rest": {
-    "message": "hat zwei Einträge, und ein Modell muss einen davon wählen, ohne zu wissen, welchen Sie meinten; ein Wörterbuch zeigt beide. Einträge erscheinen in der zweiten Ebene der Blase, unter dem Satz."
-  },
-  "options_get_dictionary_heading": { "message": "Wörterbuch besorgen" },
-  "options_wikdict_intro": {
-    "message": "baut aus dem Wiktionary (CC BY-SA) Wörterbücher für jedes Paar unten. Ein Druck lädt das Archiv herunter, entpackt es hier und speichert es; die Sprachen werden am Paar abgelesen, und das Wörterbuch erscheint in der Liste oben, bereit zu antworten."
+  "options_dictionaries_intro": {
+    "message": "Laden Sie ein Wörterbuch (oder mehrere) herunter, um die verschiedenen Bedeutungen eines ausgewählten Wortes nachschlagen zu können - Sie wählen dann die Lesarten, die zum Kontext passen, und speichern sie."
   },
   "options_dictionary_note_from": { "message": "Wörterbücher kommen von" },
-  "options_dictionary_note_checked": {
-    "message": "- dort veröffentlicht WikDict sie - unter Adressen, die in diesem Paket stehen; die Liste wurde hier geprüft am"
-  },
   "options_dictionary_note_rest": {
-    "message": "- anders als bei Modellen gibt es keine Prüfsumme, die sie festhält: WikDict baut seine Dateien an Ort und Stelle neu, eine hier festgehaltene Summe zerbräche also mit jedem Neubau. An ihrer Stelle steht: Der Download muss ein schlichtes Zip aus StarDict-Dateien sein, er wird so misstrauisch gelesen wie jede von Hand hinzugefügte Datei, und was aus ihm wird, ist Text in der lokalen Datenbank - niemals Code. Nichts über Sie wird gesendet: Die Anfrage nennt das Wörterbuch, sonst nichts."
+    "message": "- dort veröffentlicht WikDict die Wörterbücher, die es aus dem Wiktionary (CC BY-SA) baut. Wenn Sie die Liste aktualisieren, wird nichts über Sie gesendet - die Anfrage holt nur die frische Liste. Anders als bei Modellen gibt es keine Prüfsumme, die einen Download festhält (WikDict baut seine Dateien an Ort und Stelle neu); an ihrer Stelle steht: Der Download muss ein schlichtes Zip aus StarDict-Dateien sein, er wird so misstrauisch gelesen wie jede von Hand hinzugefügte Datei, und was aus ihm wird, ist Text in der lokalen Datenbank - niemals Code."
   },
   "options_add_dictionary_heading": { "message": "Wörterbuch aus Dateien hinzufügen" },
   "options_add_dictionary_summary": {
@@ -444,6 +436,11 @@
   "options_refreshing_list": { "message": "Die Modellliste wird aufgefrischt..." },
   "options_refreshed_list": {
     "message": "Die Modellliste ist auf dem Stand vom $DATE$.",
+    "placeholders": { "date": { "content": "$1", "example": "2026-08-13" } }
+  },
+  "options_refreshing_dict_list": { "message": "Die Wörterbuchliste wird aufgefrischt..." },
+  "options_refreshed_dict_list": {
+    "message": "Die Wörterbuchliste ist auf dem Stand vom $DATE$.",
     "placeholders": { "date": { "content": "$1", "example": "2026-08-13" } }
   },
   "options_refresh_failed": {
@@ -510,7 +507,6 @@
     "message": "Das Modell ließ sich nicht hinzufügen: $DETAIL$",
     "placeholders": { "detail": { "content": "$1" } }
   },
-  "options_no_dictionaries": { "message": "Keine Wörterbücher hier. Die Blase zeigt eine Übersetzung und sonst nichts." },
   "options_deleted_dictionary": {
     "message": "$NAME$ wurde gelöscht.",
     "placeholders": { "name": { "content": "$1" } }
