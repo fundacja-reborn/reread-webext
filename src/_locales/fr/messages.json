@@ -22,6 +22,8 @@
   "action_download": { "message": "Télécharger" },
   "action_cancel": { "message": "Annuler" },
   "action_open": { "message": "Ouvrir" },
+  "action_refresh": { "message": "Rafraîchir" },
+  "action_update": { "message": "Mettre à jour" },
 
   "error_engine_missing": { "message": "Pas encore de moteur de traduction - cette version ne peut pas traduire." },
   "error_model_missing": { "message": "Aucun modèle pour cette paire de langues sur cet appareil - téléchargez-en un ou ajoutez-le dans les paramètres." },
@@ -341,7 +343,7 @@
 
   "options_title": { "message": "re/read - paramètres" },
   "options_local_intro": {
-    "message": "Tout ce que fait re/read se passe sur cet appareil : la traduction, le dictionnaire, la liste de lecture, les phrases enregistrées. Rien de ce que vous lisez ou sélectionnez n'est envoyé nulle part. Le seul réseau que cette extension utilise, ce sont les téléchargements de cette page - un modèle de traduction choisi par vous, ou un dictionnaire, jamais sans votre clic."
+    "message": "Tout ce que fait re/read se passe sur cet appareil : la traduction, le dictionnaire, la liste de lecture, les phrases enregistrées. Rien de ce que vous lisez ou sélectionnez n'est envoyé nulle part. Le réseau sert à deux choses, toutes deux sur cette page : les téléchargements que vous cliquez - un modèle ou un dictionnaire - et le rafraîchissement de la liste des modèles à l'ouverture de la page. Toujours depuis les deux adresses écrites dans ce paquet, et rien d'autre."
   },
   "options_first_steps_heading": { "message": "Premiers pas" },
   "options_first_steps_intro": {
@@ -375,10 +377,10 @@
   "options_filter_dictionaries_aria": { "message": "Filtrer la liste des dictionnaires" },
   "options_model_note_from": { "message": "Les modèles sont téléchargés depuis" },
   "options_model_note_checked": {
-    "message": "- c'est là que Mozilla les publie - à des adresses écrites dans ce paquet. Chaque fichier est vérifié contre une somme de contrôle relevée ici le"
+    "message": "- c'est là que Mozilla les publie. La liste elle-même vient du même endroit : cette page en demande une fraîche à l'ouverture, et ce que vous voyez est la liste du"
   },
   "options_model_note_rest": {
-    "message": "- tout ce qui ne correspond pas est jeté plutôt qu'enregistré. Une adresse ici désigne une version publiée d'un modèle, et cette version ne change jamais - quand Mozilla en publie une plus récente, elle paraît à une nouvelle adresse, qui arrive avec une mise à jour de cette extension. Rien sur vous n'est envoyé : la requête dit quel modèle, et rien d'autre. Cet hôte et celui du catalogue de dictionnaires plus bas sont les deux seuls endroits que cette extension contacte jamais, et aucun avant que vous n'appuyiez sur Télécharger."
+    "message": "- sans réseau, la dernière réponse reste, datée. Un fichier téléchargé est tenu à tout ce qui a été déclaré à son sujet - les tailles, la somme de contrôle de Mozilla là où elle en publie une - puis chargé à l'essai dans le moteur de traduction avant que quoi que ce soit ne soit enregistré : ce qui échoue à l'une de ces étapes est jeté plutôt que gardé. Rien sur vous n'est envoyé : les requêtes disent quelle liste et quel modèle, et rien d'autre. Cet hôte et celui du catalogue de dictionnaires plus bas sont les deux seuls endroits que cette extension contacte jamais."
   },
   "options_add_model_heading": { "message": "Ajouter un modèle depuis des fichiers" },
   "options_add_model_summary": {
@@ -448,6 +450,27 @@
     "message": "Le modèle $PAIR$ a été supprimé.",
     "placeholders": { "pair": { "content": "$1" } }
   },
+  "options_checking_model": {
+    "message": "Vérification du modèle $PAIR$ dans le moteur...",
+    "placeholders": { "pair": { "content": "$1", "example": "anglais vers polonais" } }
+  },
+  "options_model_rejected": {
+    "message": "Le moteur n'a pas pu charger ce qui est arrivé$DETAIL$. Rien n'a été enregistré.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "options_refreshing_list": { "message": "Rafraîchissement de la liste des modèles..." },
+  "options_refreshed_list": {
+    "message": "La liste des modèles est à jour au $DATE$.",
+    "placeholders": { "date": { "content": "$1", "example": "2026-08-13" } }
+  },
+  "options_refresh_failed": {
+    "message": "Impossible de rafraîchir la liste$DETAIL$. La liste du $DATE$ reste.",
+    "placeholders": {
+      "detail": { "content": "$1" },
+      "date": { "content": "$2", "example": "2026-08-13" }
+    }
+  },
+  "options_version_unknown": { "message": "version inconnue" },
   "options_downloading_model": {
     "message": "Téléchargement du modèle $PAIR$ - $SIZE$.",
     "placeholders": {

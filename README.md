@@ -25,9 +25,10 @@ Offline is not a degraded mode here - it is the mode.
 - **The vocabulary is a local database.** No account, no sync, no server that could shut
   down and take your collection with it.
 
-The only network requests this extension can make at all are the two downloads on the
-settings page - a translation model or a dictionary, each at your press, from addresses
-written into the package. How to verify all of this is a section of its own,
+The network serves this extension in exactly two ways, both on the settings page: the
+downloads you press - a translation model or a dictionary - and a refresh of the model
+list when that page opens. Both go only to the two addresses written into the package,
+and nowhere else. How to verify all of this is a section of its own,
 [below](#privacy-and-how-to-check-it).
 
 ## Status
@@ -70,11 +71,14 @@ If you are looking for something to use rather than something to read, come back
 
 ## Privacy, and how to check it
 
-This extension contacts exactly two places, both only when you press Download on the
-settings page: Mozilla's bucket for a translation model, and WikDict for a dictionary.
-Every address it is willing to fetch is written down in the package before it ships.
-There is nothing else to send and nowhere to send it: the page text, your selections and
-your vocabulary never leave the device.
+This extension contacts exactly two places: Mozilla's bucket, for the list of models and
+the models themselves, and WikDict, for dictionaries. Downloads happen only at your
+press. The list of models is the one thing asked for without a press - the settings page
+refreshes it when it opens, so an install from a year-old package still shows today's
+models - and an address read off that list is refused unless it sits under the same
+packaged bucket. Every host this extension is willing to talk to is written down in the
+package before it ships. There is nothing else to send and nowhere to send it: the page
+text, your selections and your vocabulary never leave the device.
 
 That claim is checkable rather than promised - open the network panel in devtools and
 read along, or read the source, which is deliberately shipped unminified. Or check it the
@@ -149,24 +153,33 @@ refuses a file that appeared in a vendored directory without being pinned.
 Translation models are not in the package. They are data, they are downloaded or added by hand,
 and they are stored locally in the browser's own database.
 
-### Where models come from, and why you do not have to trust the host
+### Where models come from, and what a download is held to
 
 Models are Mozilla's - the same models Firefox's own page translation runs on -
-[MPL-2.0](https://github.com/mozilla/translations), published in a Google Cloud Storage bucket. What is in this package is a list: which pairs can be downloaded, the exact
-address of each file, how big it is, and its SHA-256 - [`src/lib/models/registry.json`](src/lib/models/registry.json).
-A downloaded file is checked against that sum before it is stored, so a host that served something
-else would be serving it to a checksum that throws it away. Where the address moves, the repair is
-that one file.
+[MPL-2.0](https://github.com/mozilla/translations), published in a Google Cloud Storage bucket.
+The list of what can be downloaded is Mozilla's own index of released models, fetched when the
+settings page opens from an address written into the package, and cached with its date; the
+packaged snapshot [`src/lib/models/registry.json`](src/lib/models/registry.json) is the baseline
+that makes day one work offline, and the way out on the day the index stops answering. An address
+read off the index is refused unless it sits under the packaged bucket - the list can be fresh,
+but where bytes come from is decided by the package.
 
-The sums are computed here rather than copied: Mozilla publishes one, for one file out of three,
-and of its contents after unpacking - which is why this cannot be Subresource Integrity.
-[`tools/models-registry.mjs`](tools/models-registry.mjs) is what downloads a pair and writes the
-entry, and it refuses to do so if its own sum disagrees with the one Mozilla does publish.
+A download is held to everything declared about it, and then asked to prove itself: sizes where
+the index states them, Mozilla's published SHA-256 where one exists (they publish one for the
+model file, of its contents after unpacking), and last a trial load - a fresh copy of the
+translation engine is handed the files and must stand up with them before anything is stored.
+What fails any of those steps is thrown away rather than kept.
 
 The list carries every pair Mozilla has released - around a hundred. Where upstream releases two
-builds of one pair, the registry takes the memory variant: it is the build Mozilla makes for the
-same bergamot core this extension runs, where the larger desktop variant is tuned for Firefox's
-native engine.
+builds of one pair, the memory variant wins: it is the build Mozilla makes for the same bergamot
+core this extension runs, where the larger desktop variant is tuned for Firefox's native engine.
+A model on this device remembers which published build it came from, so when the list starts
+naming a different one, its row offers Update - one press replaces it.
+
+[`tools/models-registry.mjs`](tools/models-registry.mjs) still writes the packaged snapshot: it
+downloads every file of a pair, computes all three sums itself, and refuses an entry whose sums
+disagree with the ones Mozilla publishes - the snapshot's downloads are checked against those
+recorded sums to the byte.
 
 Downloading needs no permission the extension does not already have, and adds nothing to the table
 above. It happens on the settings page, while you watch it, and it can be cancelled.

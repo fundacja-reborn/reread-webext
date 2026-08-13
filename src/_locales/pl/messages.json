@@ -22,6 +22,8 @@
   "action_download": { "message": "Pobierz" },
   "action_cancel": { "message": "Anuluj" },
   "action_open": { "message": "Otwórz" },
+  "action_refresh": { "message": "Odśwież" },
+  "action_update": { "message": "Aktualizuj" },
 
   "error_engine_missing": { "message": "Nie ma jeszcze silnika tłumaczeń - to wydanie nie tłumaczy." },
   "error_model_missing": { "message": "Na tym urządzeniu nie ma modelu dla tej pary językowej - pobierz go lub dodaj w ustawieniach." },
@@ -441,7 +443,7 @@
 
   "options_title": { "message": "re/read - ustawienia" },
   "options_local_intro": {
-    "message": "Wszystko, co robi re/read, dzieje się na tym urządzeniu: tłumaczenie, słownik, czytelnia, zapisane frazy. Nic z tego, co czytasz ani zaznaczasz, nigdzie nie jest wysyłane. Jedyna sieć, po jaką to rozszerzenie sięga, to pobrania na tej stronie - wybrany przez ciebie model tłumaczeniowy albo słownik, nigdy bez twojego kliknięcia."
+    "message": "Wszystko, co robi re/read, dzieje się na tym urządzeniu: tłumaczenie, słownik, czytelnia, zapisane frazy. Nic z tego, co czytasz ani zaznaczasz, nigdzie nie jest wysyłane. Sieć służy dwóm rzeczom, obu na tej stronie: pobraniom, które klikasz - model albo słownik - i odświeżeniu listy modeli przy jej otwarciu. Zawsze spod dwóch adresów zapisanych w paczce, i niczemu więcej."
   },
   "options_first_steps_heading": { "message": "Pierwsze kroki" },
   "options_first_steps_intro": {
@@ -475,10 +477,10 @@
   "options_filter_dictionaries_aria": { "message": "Filtruj listę słowników" },
   "options_model_note_from": { "message": "Modele pobierane są z" },
   "options_model_note_checked": {
-    "message": "- to tam publikuje je Mozilla - spod adresów zapisanych w tej paczce. Każdy plik jest porównywany z sumą kontrolną zanotowaną tutaj dnia"
+    "message": "- to tam publikuje je Mozilla. Sama lista przychodzi z tego samego miejsca: ta strona prosi o świeżą przy otwarciu, a to, co widzisz, to lista z dnia"
   },
   "options_model_note_rest": {
-    "message": "- wszystko, co się z nią nie zgadza, jest wyrzucane, a nie zapisywane. Adres wskazuje tu jedną opublikowaną wersję modelu i ta wersja nigdy się nie zmienia - gdy Mozilla publikuje nowszą, pojawia się ona pod nowym adresem, który przychodzi z aktualizacją tego rozszerzenia. Nic o tobie nie jest wysyłane: zapytanie mówi, który model, i nic więcej. Ten host i host katalogu słowników poniżej to jedyne dwa miejsca, z którymi to rozszerzenie kiedykolwiek się łączy - i z żadnym przed naciśnięciem Pobierz."
+    "message": "- bez sieci zostaje ostatnia odpowiedź, z datą. Pobrany plik jest trzymany za słowo ze wszystkiego, co o nim zadeklarowano - rozmiary, suma kontrolna Mozilli tam, gdzie ją publikują - a potem próbnie ładowany do silnika tłumaczeń, zanim cokolwiek zostanie zapisane: co nie przejdzie któregokolwiek z tych progów, jest wyrzucane, a nie zachowywane. Nic o tobie nie jest wysyłane: zapytania mówią, która lista i który model, i nic więcej. Ten host i host katalogu słowników poniżej to jedyne dwa miejsca, z którymi to rozszerzenie kiedykolwiek się łączy."
   },
   "options_add_model_heading": { "message": "Dodaj model z plików" },
   "options_add_model_summary": {
@@ -548,6 +550,27 @@
     "message": "Usunięto model $PAIR$.",
     "placeholders": { "pair": { "content": "$1" } }
   },
+  "options_checking_model": {
+    "message": "Sprawdzanie modelu $PAIR$ w silniku...",
+    "placeholders": { "pair": { "content": "$1", "example": "angielski na polski" } }
+  },
+  "options_model_rejected": {
+    "message": "Silnik nie zdołał załadować tego, co przyszło$DETAIL$. Nic nie zostało zapisane.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "options_refreshing_list": { "message": "Odświeżanie listy modeli..." },
+  "options_refreshed_list": {
+    "message": "Lista modeli aktualna na dzień $DATE$.",
+    "placeholders": { "date": { "content": "$1", "example": "2026-08-13" } }
+  },
+  "options_refresh_failed": {
+    "message": "Nie udało się odświeżyć listy$DETAIL$. Zostaje lista z dnia $DATE$.",
+    "placeholders": {
+      "detail": { "content": "$1" },
+      "date": { "content": "$2", "example": "2026-08-13" }
+    }
+  },
+  "options_version_unknown": { "message": "wersja nieznana" },
   "options_downloading_model": {
     "message": "Pobieranie modelu $PAIR$ - $SIZE$.",
     "placeholders": {

@@ -358,6 +358,14 @@ input[type="checkbox"] {
   color: var(--page-fg);
 }
 
+/* The one control a note carries: the by-hand way to re-ask for the model
+   list, sized to the note's aside voice rather than the page's. */
+.note .refresh {
+  margin-left: 0.5rem;
+  padding: 0.15rem 0.6rem;
+  font-size: 0.85rem;
+}
+
 /* The fresh-install signpost on the settings page: the note's frame, the
    page's full color - it is instructions to act on, not an aside. Shown only
    while no model is stored, so it earns the room it takes. */

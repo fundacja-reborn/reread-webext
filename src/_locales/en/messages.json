@@ -26,6 +26,8 @@
   "action_download": { "message": "Download" },
   "action_cancel": { "message": "Cancel" },
   "action_open": { "message": "Open" },
+  "action_refresh": { "message": "Refresh" },
+  "action_update": { "message": "Update" },
 
   "error_engine_missing": { "message": "No translation engine yet - this build cannot translate." },
   "error_model_missing": { "message": "No model for this language pair on this device - download or add one in the settings." },
@@ -337,7 +339,7 @@
 
   "options_title": { "message": "re/read - settings" },
   "options_local_intro": {
-    "message": "Everything re/read does happens on this device: translating, the dictionary, the reading list, your saved phrases. Nothing you read or select is ever sent anywhere. The only network this extension uses is the downloads on this page - a translation model you chose, or a dictionary, never without your press."
+    "message": "Everything re/read does happens on this device: translating, the dictionary, the reading list, your saved phrases. Nothing you read or select is ever sent anywhere. The network serves two things, both on this page: the downloads you press - a model or a dictionary - and refreshing the list of models when the page opens. Always from the two addresses written into this package, and nothing else."
   },
   "options_first_steps_heading": { "message": "First steps" },
   "options_first_steps_intro": {
@@ -378,10 +380,10 @@
     "description": "First third of the note around the host and date, which stand between the parts as page elements. Each part must read on from the last across a plain space - no part starts or ends with whitespace."
   },
   "options_model_note_checked": {
-    "message": "- where Mozilla publishes them - at addresses written down in this package. Every file is checked against a checksum that was recorded here on"
+    "message": "- where Mozilla publishes them. The list itself comes from the same place: this page asks for a fresh one when it opens, and what you see is the list as of"
   },
   "options_model_note_rest": {
-    "message": "- anything that does not match is thrown away rather than stored. An address here names one published version of a model, and that version never changes - when Mozilla publishes a newer one, it appears at a new address, which arrives with an update of this extension. Nothing about you is sent: the request says which model, and nothing else. This host and the dictionary catalogue's below are the only two places this extension ever contacts, and neither before you press Download."
+    "message": "- with no network, the last answer stands, dated. A downloaded file is held to everything declared about it - sizes, Mozilla's own checksum where one is published - and then trial-loaded into the translation engine before anything is stored: what fails any of it is thrown away rather than kept. Nothing about you is sent: the requests say which list and which model, and nothing else. This host and the dictionary catalogue's below are the only two places this extension ever contacts."
   },
   "options_add_model_heading": { "message": "Add a model from files" },
   "options_add_model_summary": {
@@ -467,6 +469,31 @@
       "pair": { "content": "$1" },
       "size": { "content": "$2", "example": "40.2 MB" }
     }
+  },
+  "options_checking_model": {
+    "message": "Checking the $PAIR$ model in the engine...",
+    "description": "Shown while a fresh copy of the translation engine trial-loads the downloaded or hand-picked files, before anything is stored.",
+    "placeholders": { "pair": { "content": "$1", "example": "English to Polish" } }
+  },
+  "options_model_rejected": {
+    "message": "The engine could not load what arrived$DETAIL$. Nothing was stored.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "options_refreshing_list": { "message": "Refreshing the list of models..." },
+  "options_refreshed_list": {
+    "message": "The list of models is current as of $DATE$.",
+    "placeholders": { "date": { "content": "$1", "example": "2026-08-13" } }
+  },
+  "options_refresh_failed": {
+    "message": "Could not refresh the list$DETAIL$. The list from $DATE$ stays.",
+    "placeholders": {
+      "detail": { "content": "$1" },
+      "date": { "content": "$2", "example": "2026-08-13" }
+    }
+  },
+  "options_version_unknown": {
+    "message": "version unknown",
+    "description": "Beside an installed model that never recorded which published version it came from - added from files, or stored before sources were recorded. The update check makes no claim about it."
   },
   "options_downloaded_model": {
     "message": "Downloaded the $PAIR$ model, $SIZE$ on this device.",

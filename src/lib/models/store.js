@@ -32,6 +32,9 @@ const FILES = "files";
  * @property {string} to
  * @property {number} bytes total on disk, for saying what a model costs
  * @property {number} addedAt epoch milliseconds; also how a caller notices a model was replaced
+ * @property {string} [sourceUrl] the model file's download address - Mozilla's paths carry the
+ *   training run, so this is the version identity an update check compares. Absent for models
+ *   added from files and for anything stored before it was recorded: about those, no claim.
  */
 
 /**
@@ -99,7 +102,7 @@ async function withStores(stores, mode, work) {
 
 /**
  * @param {ModelFiles} files
- * @param {{ from: string, to: string }} languages
+ * @param {{ from: string, to: string, sourceUrl?: string }} languages
  * @returns {Promise<ModelMeta>}
  */
 export async function putModel(files, languages) {
@@ -109,7 +112,14 @@ export async function putModel(files, languages) {
     files.vocabs.reduce((total, vocab) => total + vocab.byteLength, 0);
 
   /** @type {ModelMeta} */
-  const meta = { pair: files.pair, from: languages.from, to: languages.to, bytes, addedAt: Date.now() };
+  const meta = {
+    pair: files.pair,
+    from: languages.from,
+    to: languages.to,
+    bytes,
+    addedAt: Date.now(),
+    ...(languages.sourceUrl === undefined ? {} : { sourceUrl: languages.sourceUrl }),
+  };
 
   // One transaction over both stores: a `meta` row without its files would be a
   // model the extension claims to have and cannot load.
