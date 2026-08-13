@@ -364,7 +364,7 @@
   "options_engine_value": { "message": "Bergamot, dans le paquet - traduit hors ligne" },
   "options_reader_only": { "message": "Seulement dans le lecteur" },
   "options_reader_only_hint": {
-    "message": "Quand c'est activé, sélectionner sur une page ordinaire ne propose qu'une chose : l'ouvrir dans le lecteur. Traduire, garder et souligner se passent là. Sur Android c'est activé au départ - une bulle sur la sélection et le menu de copie du téléphone se disputent la même place."
+    "message": "Quand c'est activé, sélectionner une phrase ou un mot sur une page ordinaire ne propose qu'une chose : ouvrir la page dans le lecteur. La traduction, l'enregistrement et le soulignement se font là (plus clair et plus lisible). Sur Android, l'option est activée par défaut."
   },
   "options_models_heading": { "message": "Modèles de traduction" },
   "options_models_intro": {

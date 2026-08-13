@@ -364,7 +364,7 @@
   "options_engine_value": { "message": "Bergamot, inside the package - translates offline" },
   "options_reader_only": { "message": "Only in the reader" },
   "options_reader_only_hint": {
-    "message": "With this on, selecting on an ordinary page offers one thing: open it in the reader. Translating, keeping and underlining happen there. On Android it starts on - a bubble over a selection and the phone's own copy menu fight for the same spot."
+    "message": "With this on, selecting a phrase or a word on an ordinary page offers one thing: open the page in the reader. Translating, saving and underlining happen there (cleaner and easier to read). On Android the option is on by default."
   },
   "options_models_heading": { "message": "Translation models" },
   "options_models_intro": {

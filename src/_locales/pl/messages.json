@@ -464,7 +464,7 @@
   "options_engine_value": { "message": "Bergamot, wewnątrz paczki - tłumaczy offline" },
   "options_reader_only": { "message": "Tylko w czytniku" },
   "options_reader_only_hint": {
-    "message": "Gdy to włączone, zaznaczenie na zwykłej stronie proponuje jedno: otwarcie jej w czytniku. Tłumaczenie, zapisywanie i podkreślanie dzieją się tam. Na Androidzie zaczyna włączone - dymek nad zaznaczeniem i systemowe menu kopiowania walczą o to samo miejsce."
+    "message": "Gdy to jest włączone, zaznaczenie frazy lub słowa na zwykłej stronie proponuje jedno: otwarcie jej w czytniku. Tłumaczenie, zapisywanie i podkreślanie dzieją się tam (przejrzyściej i czytelniej). Na Androidzie opcja jest domyślnie włączona."
   },
   "options_models_heading": { "message": "Modele tłumaczeniowe" },
   "options_models_intro": {

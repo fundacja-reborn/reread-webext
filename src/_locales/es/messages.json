@@ -364,7 +364,7 @@
   "options_engine_value": { "message": "Bergamot, dentro del paquete - traduce sin conexión" },
   "options_reader_only": { "message": "Solo en el lector" },
   "options_reader_only_hint": {
-    "message": "Con esto activado, seleccionar en una página normal ofrece una sola cosa: abrirla en el lector. Traducir, guardar y subrayar pasan allí. En Android empieza activado - una burbuja sobre la selección y el propio menú de copiar del teléfono pelean por el mismo sitio."
+    "message": "Con esto activado, seleccionar una frase o una palabra en una página normal ofrece una sola cosa: abrir la página en el lector. Traducir, guardar y subrayar ocurren allí (más claro y más legible). En Android la opción está activada de forma predeterminada."
   },
   "options_models_heading": { "message": "Modelos de traducción" },
   "options_models_intro": {

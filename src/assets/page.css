@@ -78,6 +78,20 @@ h2 {
   font-variant-numeric: tabular-nums;
 }
 
+/* A row that carries its own explanation: label and control keep the first
+   line, the note wraps below them - inside the same borders, so it can never
+   drift away from what it explains. */
+.row-wrap {
+  flex-wrap: wrap;
+}
+
+.row .row-note {
+  flex-basis: 100%;
+  margin: 0.1rem 0 0;
+  color: var(--page-muted);
+  font-size: 0.9rem;
+}
+
 .models {
   margin: 1rem 0;
   border-top: 1px solid var(--page-line);

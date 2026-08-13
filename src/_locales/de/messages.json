@@ -348,7 +348,7 @@
   "options_engine_value": { "message": "Bergamot, im Paket enthalten - übersetzt offline" },
   "options_reader_only": { "message": "Nur in der Leseansicht" },
   "options_reader_only_hint": {
-    "message": "Ist dies an, bietet eine Auswahl auf einer gewöhnlichen Seite genau eines an: die Seite in der Leseansicht zu öffnen. Übersetzen, Behalten und Unterstreichen geschehen dort. Auf Android startet es eingeschaltet - eine Blase über der Auswahl und das Kopiermenü des Telefons kämpfen um dieselbe Stelle."
+    "message": "Ist dies an, bietet das Auswählen einer Wendung oder eines Wortes auf einer gewöhnlichen Seite genau eines an: die Seite in der Leseansicht zu öffnen. Übersetzen, Speichern und Unterstreichen geschehen dort (übersichtlicher und besser lesbar). Auf Android ist die Option standardmäßig eingeschaltet."
   },
   "options_models_heading": { "message": "Übersetzungsmodelle" },
   "options_models_intro": {
