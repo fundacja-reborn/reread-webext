@@ -2,10 +2,12 @@
  * Fetching a model, and refusing anything that is not the model we asked for.
  *
  * The rule this file exists to keep: bytes off the network are not trusted
- * because of where they came from. Every file is checked against the SHA-256 in
- * the package registry before it is stored, so the host can serve us the model
- * or serve us nothing - there is no third outcome in which something else ends
- * up in the database and gets handed to the engine.
+ * because of where they came from. Every claim the entry makes about a file -
+ * a size, a SHA-256 - is enforced before anything is stored. The packaged
+ * registry claims both for every file; an entry read off Mozilla's live index
+ * claims only what Mozilla declares (the model file carries a sum, the other
+ * two do not), and what nobody claimed is caught by the structural checks
+ * here and the engine test-load after - not waved through in silence.
  *
  * Each file is held in memory until it has been checked. Streaming it into
  * storage would be gentler on memory, but WebCrypto has no incremental digest,
@@ -188,12 +190,17 @@ async function fetchFile(file, fetchImpl, onChunk, signal) {
 
   const content = await unpack(received);
 
+  // An empty file is no file, whatever the entry claimed or left unclaimed.
+  if (content.byteLength === 0) {
+    throw new Refused("size", `${fileName(file.url)}: empty`);
+  }
   // Size first: it is free, and "the download stopped early" is a different
-  // thing to tell somebody than "this is not the file we expected".
-  if (content.byteLength !== file.bytes) {
+  // thing to tell somebody than "this is not the file we expected". Zero means
+  // the entry made no claim - there is nothing to hold the file to.
+  if (file.bytes > 0 && content.byteLength !== file.bytes) {
     throw new Refused("size", `${fileName(file.url)}: ${content.byteLength} bytes, expected ${file.bytes}`);
   }
-  if ((await sha256Hex(content)) !== file.sha256) {
+  if (file.sha256 !== null && (await sha256Hex(content)) !== file.sha256) {
     throw new Refused("checksum", fileName(file.url));
   }
 

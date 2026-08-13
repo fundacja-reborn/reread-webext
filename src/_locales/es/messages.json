@@ -22,6 +22,8 @@
   "action_download": { "message": "Descargar" },
   "action_cancel": { "message": "Cancelar" },
   "action_open": { "message": "Abrir" },
+  "action_refresh": { "message": "Refrescar" },
+  "action_update": { "message": "Actualizar" },
 
   "error_engine_missing": { "message": "Aún no hay motor de traducción - esta versión no puede traducir." },
   "error_model_missing": { "message": "No hay modelo para este par de idiomas en este dispositivo - descárgalo o añádelo en los ajustes." },
@@ -341,7 +343,7 @@
 
   "options_title": { "message": "re/read - ajustes" },
   "options_local_intro": {
-    "message": "Todo lo que hace re/read ocurre en este dispositivo: la traducción, el diccionario, la lista de lectura, tus frases guardadas. Nada de lo que lees o seleccionas se envía a ninguna parte. La única red que usa esta extensión son las descargas de esta página - un modelo de traducción elegido por ti, o un diccionario, nunca sin tu clic."
+    "message": "Todo lo que hace re/read ocurre en este dispositivo: la traducción, el diccionario, la lista de lectura, tus frases guardadas. Nada de lo que lees o seleccionas se envía a ninguna parte. La red sirve para dos cosas, ambas en esta página: las descargas que pulsas - un modelo o un diccionario - y refrescar la lista de modelos al abrir la página. Siempre desde las dos direcciones escritas en este paquete, y nada más."
   },
   "options_first_steps_heading": { "message": "Primeros pasos" },
   "options_first_steps_intro": {
@@ -375,10 +377,10 @@
   "options_filter_dictionaries_aria": { "message": "Filtrar la lista de diccionarios" },
   "options_model_note_from": { "message": "Los modelos se descargan de" },
   "options_model_note_checked": {
-    "message": "- ahí los publica Mozilla - desde direcciones escritas en este paquete. Cada archivo se comprueba contra una suma de control anotada aquí el"
+    "message": "- ahí los publica Mozilla. La lista misma viene del mismo lugar: esta página pide una fresca al abrirse, y lo que ves es la lista del"
   },
   "options_model_note_rest": {
-    "message": "- todo lo que no coincide se desecha en vez de guardarse. Una dirección aquí nombra una versión publicada de un modelo, y esa versión no cambia nunca - cuando Mozilla publica una más nueva, aparece en una dirección nueva, que llega con una actualización de esta extensión. No se envía nada sobre ti: la petición dice qué modelo, y nada más. Este host y el del catálogo de diccionarios de abajo son los dos únicos lugares con los que esta extensión contacta jamás, y con ninguno antes de que pulses Descargar."
+    "message": "- sin red, queda la última respuesta, con fecha. Un archivo descargado se mide contra todo lo declarado sobre él - los tamaños, la suma de control de la propia Mozilla donde publica una - y luego se carga a prueba en el motor de traducción antes de guardar nada: lo que falla en cualquiera de esos pasos se desecha en vez de guardarse. No se envía nada sobre ti: las peticiones dicen qué lista y qué modelo, y nada más. Este host y el del catálogo de diccionarios de abajo son los dos únicos lugares con los que esta extensión contacta jamás."
   },
   "options_add_model_heading": { "message": "Añadir un modelo desde archivos" },
   "options_add_model_summary": {
@@ -448,6 +450,27 @@
     "message": "Modelo $PAIR$ eliminado.",
     "placeholders": { "pair": { "content": "$1" } }
   },
+  "options_checking_model": {
+    "message": "Comprobando el modelo $PAIR$ en el motor...",
+    "placeholders": { "pair": { "content": "$1", "example": "inglés a polaco" } }
+  },
+  "options_model_rejected": {
+    "message": "El motor no pudo cargar lo que llegó$DETAIL$. No se guardó nada.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "options_refreshing_list": { "message": "Refrescando la lista de modelos..." },
+  "options_refreshed_list": {
+    "message": "La lista de modelos está actualizada a $DATE$.",
+    "placeholders": { "date": { "content": "$1", "example": "2026-08-13" } }
+  },
+  "options_refresh_failed": {
+    "message": "No se pudo refrescar la lista$DETAIL$. Queda la lista del $DATE$.",
+    "placeholders": {
+      "detail": { "content": "$1" },
+      "date": { "content": "$2", "example": "2026-08-13" }
+    }
+  },
+  "options_version_unknown": { "message": "versión desconocida" },
   "options_downloading_model": {
     "message": "Descargando el modelo $PAIR$ - $SIZE$.",
     "placeholders": {

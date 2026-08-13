@@ -16,7 +16,7 @@
 
 import { webext } from "../lib/browser.js";
 import { CONFIG_KEY, effectiveReaderOnly, platformOs, readConfig, withDefaults, writeConfig } from "../lib/config.js";
-import { localizePage, plural, t } from "../lib/i18n.js";
+import { aside, localizePage, plural, t } from "../lib/i18n.js";
 import { languageName, pairLabel } from "../lib/language.js";
 import { catalogDictionaries, catalogSource } from "../lib/dict/catalog.js";
 import { describeDictDownloadProblem, downloadArchive } from "../lib/dict/download.js";
@@ -33,8 +33,11 @@ import {
 } from "../lib/dict/store.js";
 import { describeDownloadProblem, downloadModel } from "../lib/models/download.js";
 import { classifyModelFiles, describeClassifyProblem, isGzip } from "../lib/models/files.js";
+import { readLiveModels, refreshLiveModels } from "../lib/models/live.js";
 import { modelRows, registryModels, registrySource } from "../lib/models/registry.js";
 import { deleteModel, listModels, putModel } from "../lib/models/store.js";
+import { modelSourceUrl, updateAvailable } from "../lib/models/upstream.js";
+import { testLoadModel } from "../lib/models/validate.js";
 import { Message } from "../lib/protocol.js";
 import { matchesFilter, orderForDisplay, searchableText, sortByLabel } from "./models-view.js";
 
@@ -56,6 +59,67 @@ let config = withDefaults(undefined);
 
 /** Which platform this is - learned once, part of what the mode switch shows. */
 let os = "";
+
+/**
+ * The freshest model list this device has seen - the cache of Mozilla's index,
+ * read at open and refreshed over the network right after. Null until the
+ * first refresh ever succeeds; the packaged registry stands in until then, so
+ * day one works offline.
+ *
+ * @type {import("../lib/models/live.js").LiveModels | null}
+ */
+let liveList = null;
+
+/** One refresh at a time; the page opening and the button can both ask. */
+let refreshing = false;
+
+/**
+ * @returns {import("../lib/models/registry.js").RegistryModel[]}
+ */
+function availableModels() {
+  return liveList?.models ?? registryModels();
+}
+
+/**
+ * @returns {string} the day the list on screen is from
+ */
+function listDate() {
+  return liveList?.fetchedAt ?? registrySource().checkedAt;
+}
+
+/**
+ * Asks the index's host what the list is today, and redraws what changed.
+ *
+ * Quiet by design when the page asked by itself: no network means the dated
+ * cache stands, and a sentence about it would be noise on every offline open.
+ * A pressed button is different - somebody asked, so somebody is answered.
+ *
+ * @param {boolean} manual whether a press asked for this
+ */
+async function refreshList(manual) {
+  if (refreshing) return;
+  refreshing = true;
+  if (manual) status(t("options_refreshing_list"), "busy");
+
+  try {
+    const result = await refreshLiveModels();
+    if (!result.ok) {
+      if (manual) status(t("options_refresh_failed", [aside(result.detail), listDate()]), "error");
+      return;
+    }
+
+    liveList = result.value;
+    fill("model-checked", listDate());
+    if (manual) status(t("options_refreshed_list", listDate()));
+    renderPair(modelRows(await listModels(), availableModels()));
+    // Not while a download or an import holds the screen: redrawing would
+    // replace a live progress bar, and the next full render comes when it
+    // finishes anyway - with this fresher list, because it is read then.
+    if (running === null && !importing) await renderModels();
+  } finally {
+    refreshing = false;
+  }
+}
 
 /**
  * The reader-only switch shows the mode as it acts, not as it is stored: with
@@ -155,6 +219,22 @@ function renderRow(row) {
   if (row.installed !== null) {
     container.append(element("span", "model-size", t("options_size_here", megabytes(row.installed.bytes))));
 
+    // The list names a different training run than the one this device holds:
+    // one press replaces the model in place. A model with no recorded source -
+    // added from files, or stored before sources were recorded - gets an
+    // honest "version unknown" instead of a claim nobody can back.
+    const fresher = row.available;
+    if (fresher !== null && updateAvailable(row.installed, fresher)) {
+      const update = document.createElement("button");
+      update.type = "button";
+      update.textContent = t("action_update");
+      update.disabled = running !== null;
+      update.addEventListener("click", () => void download(row, fresher));
+      container.append(update);
+    } else if (fresher !== null && row.installed.sourceUrl === undefined) {
+      container.append(element("span", "model-size", t("options_version_unknown")));
+    }
+
     const remove = document.createElement("button");
     remove.type = "button";
     remove.textContent = t("action_delete");
@@ -168,8 +248,10 @@ function renderRow(row) {
   if (available === null) return container;
 
   // The size alone: the button beside it already says what pressing it does,
-  // and "to download" was the first thing to overflow a phone-wide row.
-  container.append(element("span", "model-size", megabytes(available.downloadBytes)));
+  // and "to download" was the first thing to overflow a phone-wide row. An
+  // entry off the live index knows only what unpacks, and sometimes nothing.
+  const size = available.downloadBytes > 0 ? available.downloadBytes : available.bytes;
+  if (size > 0) container.append(element("span", "model-size", megabytes(size)));
 
   const start = document.createElement("button");
   start.type = "button";
@@ -195,12 +277,23 @@ function renderDownloading(container, model, controller) {
   container.replaceChildren();
   container.append(element("span", "model-pair", pairLabel(model.from, model.to)));
 
+  // An entry off the live index may not say what crosses the wire; the bar
+  // then runs without an end and the text counts what has arrived, the way a
+  // dictionary download already does.
+  const known = model.downloadBytes > 0;
+
   const bar = document.createElement("progress");
   bar.className = "model-progress";
-  bar.max = model.downloadBytes;
-  bar.value = 0;
+  if (known) {
+    bar.max = model.downloadBytes;
+    bar.value = 0;
+  }
 
-  const size = element("span", "model-size", t("options_progress_of", [megabytes(0), megabytes(model.downloadBytes)]));
+  const size = element(
+    "span",
+    "model-size",
+    known ? t("options_progress_of", [megabytes(0), megabytes(model.downloadBytes)]) : megabytes(0),
+  );
 
   const cancel = document.createElement("button");
   cancel.type = "button";
@@ -214,13 +307,15 @@ function renderDownloading(container, model, controller) {
 
   let shown = "";
   return ({ received, total }) => {
-    bar.max = total;
-    bar.value = received;
+    if (known) {
+      bar.max = total;
+      bar.value = received;
+    }
     // Progress arrives a couple of thousand times over a download and the text
     // only changes every hundred kilobytes of it. Rewriting it anyway would be
     // a thousand pointless relayouts during the one operation that should feel
     // smooth.
-    const text = t("options_progress_of", [megabytes(received), megabytes(total)]);
+    const text = known ? t("options_progress_of", [megabytes(received), megabytes(total)]) : megabytes(received);
     if (text !== shown) {
       shown = text;
       size.textContent = text;
@@ -258,16 +353,34 @@ async function download(row, model) {
   status(t("options_downloading_model", [pairLabel(model.from, model.to), megabytes(model.downloadBytes)]), "busy");
 
   const result = await downloadModel(model, { signal: controller.signal, onProgress });
-  running = null;
 
   if (!result.ok) {
+    running = null;
     status(describeDownloadProblem(result.problem, result.detail), result.problem === "cancelled" ? "idle" : "error");
     await renderModels();
     return;
   }
 
+  // The last rung of the ladder: only the engine can say these bytes are a
+  // model. Still holding the download claim, because the trial load is part
+  // of the one expensive job - and nothing is stored until it says yes.
+  status(t("options_checking_model", pairLabel(model.from, model.to)), "busy");
+  const verdict = await testLoadModel({ from: model.from, to: model.to }, result.value);
+  running = null;
+
+  if (!verdict.ok) {
+    status(t("options_model_rejected", aside(verdict.detail)), "error");
+    await renderModels();
+    return;
+  }
+
   try {
-    const meta = await putModel(result.value, { from: model.from, to: model.to });
+    const source = modelSourceUrl(model);
+    const meta = await putModel(result.value, {
+      from: model.from,
+      to: model.to,
+      ...(source === null ? {} : { sourceUrl: source }),
+    });
     status(t("options_downloaded_model", [pairLabel(model.from, model.to), megabytes(meta.bytes)]));
   } catch (error) {
     // The download was fine; the browser would not keep it. Worth saying apart
@@ -313,7 +426,7 @@ function renderPair(rows) {
  * @param {string} pair
  */
 async function choosePair(pair) {
-  const rows = modelRows(await listModels());
+  const rows = modelRows(await listModels(), availableModels());
   const row = rows.find((candidate) => candidate.pair === pair);
   if (row === undefined) return;
 
@@ -370,7 +483,7 @@ async function renderModels() {
   const container = document.getElementById("models");
   if (container === null) return;
 
-  const rows = orderForDisplay(modelRows(await listModels()), config);
+  const rows = orderForDisplay(modelRows(await listModels(), availableModels()), config);
 
   // The first-steps signpost stands only while not one model is stored -
   // whatever the pair. It is redrawn here because every edge a model crosses
@@ -489,6 +602,15 @@ async function addSelectedModel() {
     const [model, shortlist] = await Promise.all([read(byRole.model[0] ?? ""), read(byRole.shortlist[0] ?? "")]);
     const vocabs = await Promise.all(byRole.vocab.map(read));
 
+    // The same gate a download passes: only the engine can say these files
+    // are a model, and files picked by hand are the likelier ones to not be.
+    fileStatus(t("options_checking_model", pairLabel(from, to)), "busy");
+    const verdict = await testLoadModel({ from, to }, { pair, model, shortlist, vocabs });
+    if (!verdict.ok) {
+      fileStatus(t("options_model_rejected", aside(verdict.detail)), "error");
+      return;
+    }
+
     const meta = await putModel({ pair, model, shortlist, vocabs }, { from, to });
     if (input !== null) input.value = "";
     fileStatus(t("options_added_model", [pairLabel(from, to), megabytes(meta.bytes)]));
@@ -552,7 +674,7 @@ function words(count) {
  */
 function knownLanguages() {
   const languages = new Set([config.sourceLang, config.targetLang]);
-  for (const model of registryModels()) {
+  for (const model of availableModels()) {
     languages.add(model.from);
     languages.add(model.to);
   }
@@ -918,22 +1040,25 @@ async function addSelectedDictionary() {
 async function render() {
   config = await readConfig();
   os = await platformOs();
+  // The dated cache first, so the page never opens blank; the network's
+  // answer, kicked off below, redraws whatever it changes.
+  liveList = await readLiveModels();
   // Android has no toolbar to pin anything to; the step disappears rather
   // than asking for the impossible.
   const pin = document.getElementById("first-steps-pin");
   if (pin !== null) pin.hidden = os === "android";
   fill("version", webext().runtime.getManifest().version);
-  renderPair(modelRows(await listModels()));
+  renderPair(modelRows(await listModels(), availableModels()));
   renderReaderOnly();
   renderLanguageChoices("dictionary-from", config.sourceLang);
   renderLanguageChoices("dictionary-to", config.targetLang);
 
-  const { source, checkedAt } = registrySource();
+  const { source } = registrySource();
   const host = source === "" ? "" : new URL(source).host;
   fill("model-host", host);
   const modelSource = document.getElementById("model-host");
   if (modelSource instanceof HTMLAnchorElement && source !== "") modelSource.href = source;
-  fill("model-checked", checkedAt);
+  fill("model-checked", listDate());
 
   const dictionaries = catalogSource();
   fill("dictionary-host", dictionaries.source === "" ? "" : new URL(dictionaries.source).host);
@@ -952,6 +1077,11 @@ async function render() {
     );
   }
   await renderDictionaries();
+
+  // Last, after the page stands: ask the network what the list is today. Not
+  // awaited - an opening page must not wait on a host, and failure is quiet
+  // by design, because the dated list already on screen is the fallback.
+  void refreshList(false);
 }
 
 /**
@@ -964,7 +1094,7 @@ async function render() {
  */
 async function refresh() {
   config = await readConfig();
-  renderPair(modelRows(await listModels()));
+  renderPair(modelRows(await listModels(), availableModels()));
   renderReaderOnly();
   renderDisabledHosts();
   if (running === null && !importing) await renderModels();
@@ -985,6 +1115,7 @@ document.getElementById("reader-only")?.addEventListener("change", (event) => {
   });
 });
 document.getElementById("add-model")?.addEventListener("click", () => void addSelectedModel());
+document.getElementById("refresh-models")?.addEventListener("click", () => void refreshList(true));
 document.getElementById("model-filter")?.addEventListener("input", () => applyModelFilter());
 document.getElementById("dictionary-filter")?.addEventListener("input", () => applyCatalogFilter());
 document.getElementById("add-dictionary")?.addEventListener("click", () => void addSelectedDictionary());

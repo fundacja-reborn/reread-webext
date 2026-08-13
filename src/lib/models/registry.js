@@ -29,9 +29,11 @@ import registryData from "./registry.json" with { type: "json" };
  * @typedef {object} RegistryFile
  * @property {Role} role
  * @property {string} url
- * @property {number} downloadBytes what crosses the network, gzipped as published
- * @property {number} bytes what is stored, after unpacking - and what `sha256` is of
- * @property {string} sha256 lower-case hex, of the unpacked content
+ * @property {number} downloadBytes what crosses the network, gzipped as published; 0 = unknown
+ * @property {number} bytes what is stored, after unpacking - and what `sha256` is of; 0 = unknown
+ * @property {string | null} sha256 lower-case hex of the unpacked content, or null when nobody
+ *   published one - the packaged registry always carries one, entries read off the live index
+ *   only where Mozilla declares it
  */
 
 /**
@@ -59,18 +61,21 @@ function isLanguageCode(code) {
 
 /**
  * @param {unknown} value
+ * @param {boolean} required whether zero-for-unknown is refused
  * @returns {value is number}
  */
-function isSize(value) {
-  return typeof value === "number" && Number.isSafeInteger(value) && value > 0;
+function isSize(value, required) {
+  if (typeof value !== "number" || !Number.isSafeInteger(value)) return false;
+  return required ? value > 0 : value >= 0;
 }
 
 /**
  * @param {unknown} raw
  * @param {string} where
+ * @param {boolean} requireSums
  * @returns {{ ok: true, value: RegistryFile } | { ok: false, problem: string }}
  */
-function parseFile(raw, where) {
+function parseFile(raw, where, requireSums) {
   if (typeof raw !== "object" || raw === null) return { ok: false, problem: `${where}: not an object` };
   const { role, url, downloadBytes, bytes, sha256 } = /** @type {Record<string, unknown>} */ (raw);
 
@@ -83,22 +88,30 @@ function parseFile(raw, where) {
   if (typeof url !== "string" || !url.startsWith("https://")) {
     return { ok: false, problem: `${where}: url is not https` };
   }
-  if (!isSize(downloadBytes) || !isSize(bytes)) {
-    return { ok: false, problem: `${where}: sizes must be positive whole numbers` };
-  }
-  if (typeof sha256 !== "string" || !SHA256.test(sha256)) {
-    return { ok: false, problem: `${where}: sha256 is not 64 hex characters` };
+  if (!isSize(downloadBytes, requireSums) || !isSize(bytes, requireSums)) {
+    return { ok: false, problem: `${where}: sizes must be whole numbers` };
   }
 
-  return { ok: true, value: { role: /** @type {Role} */ (role), url, downloadBytes, bytes, sha256 } };
+  // The packaged registry must carry a sum for every file - it is hand-edited
+  // data, and a typo silently downgrading a file to "unverified" is exactly
+  // the quiet failure strictness exists to catch. Entries from the live index
+  // carry a sum only where Mozilla declares one, and say so with null.
+  if (typeof sha256 === "string" && SHA256.test(sha256)) {
+    return { ok: true, value: { role: /** @type {Role} */ (role), url, downloadBytes, bytes, sha256 } };
+  }
+  if (requireSums || (sha256 !== null && sha256 !== undefined)) {
+    return { ok: false, problem: `${where}: sha256 is not 64 hex characters` };
+  }
+  return { ok: true, value: { role: /** @type {Role} */ (role), url, downloadBytes, bytes, sha256: null } };
 }
 
 /**
  * @param {unknown} raw
  * @param {number} index
+ * @param {boolean} requireSums
  * @returns {{ ok: true, value: RegistryModel } | { ok: false, problem: string }}
  */
-function parseModel(raw, index) {
+function parseModel(raw, index, requireSums) {
   const where = `model ${index}`;
   if (typeof raw !== "object" || raw === null) return { ok: false, problem: `${where}: not an object` };
   const { pair, from, to, files } = /** @type {Record<string, unknown>} */ (raw);
@@ -121,7 +134,7 @@ function parseModel(raw, index) {
   /** @type {RegistryFile[]} */
   const parsed = [];
   for (const [fileIndex, file] of files.entries()) {
-    const result = parseFile(file, `${where}, file ${fileIndex}`);
+    const result = parseFile(file, `${where}, file ${fileIndex}`, requireSums);
     if (!result.ok) return result;
     parsed.push(result.value);
   }
@@ -155,9 +168,13 @@ function parseModel(raw, index) {
 
 /**
  * @param {unknown} raw
+ * @param {{ requireSums?: boolean }} [options] the packaged file is parsed strictly by
+ *   default; the cache of the live index passes `requireSums: false`, because its entries
+ *   carry only what Mozilla declares
  * @returns {{ models: RegistryModel[], problems: string[] }}
  */
-export function parseRegistry(raw) {
+export function parseRegistry(raw, options = {}) {
+  const requireSums = options.requireSums ?? true;
   if (typeof raw !== "object" || raw === null) return { models: [], problems: ["registry is not an object"] };
 
   const list = /** @type {Record<string, unknown>} */ (raw)["models"];
@@ -171,7 +188,7 @@ export function parseRegistry(raw) {
   const seen = new Set();
 
   for (const [index, entry] of list.entries()) {
-    const result = parseModel(entry, index);
+    const result = parseModel(entry, index, requireSums);
     if (!result.ok) {
       problems.push(result.problem);
       continue;

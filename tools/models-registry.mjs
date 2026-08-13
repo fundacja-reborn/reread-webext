@@ -29,6 +29,8 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { gunzipSync } from "node:zlib";
 
+import { UPSTREAM_ROLES, pickEntry } from "../src/lib/models/upstream.js";
+
 const ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 const OUT = join(ROOT, "src", "lib", "models", "registry.json");
 const CACHE = join(ROOT, "tmp", "models");
@@ -40,19 +42,6 @@ const CACHE = join(ROOT, "tmp", "models");
  * GitHub repository was archived and its LFS objects removed.
  */
 const UPSTREAM = "https://storage.googleapis.com/moz-fx-translations-data--303e-prod-translations-data/db/models.json";
-
-/**
- * Upstream file keys mapped to the roles the engine loads. A pair publishes
- * either one shared vocabulary or one per side; both shapes appear in the
- * index, so both are handled rather than assumed away.
- */
-const ROLES = /** @type {const} */ ({
-  model: "model",
-  lexicalShortlist: "shortlist",
-  vocab: "vocab",
-  srcVocab: "vocab",
-  trgVocab: "vocab",
-});
 
 /** The order the engine wants them in, and the order they are written out in. */
 const ROLE_ORDER = ["model", "shortlist", "vocab"];
@@ -121,44 +110,9 @@ function unpack(bytes) {
   return gzipped ? gunzipSync(bytes) : bytes;
 }
 
-/**
- * When a pair has two released builds, this is the order they are preferred in.
- *
- * The memory variant first, because it is the one Mozilla builds for the
- * bergamot core on constrained runtimes - and our engine is that same core
- * compiled to WebAssembly, running with a fixed 128 MB workspace. The desktop
- * `base` builds are 40-60 MB models tuned for Firefox's native engine; where
- * they appear at all, a memory variant of the same pair sits next to them.
- */
-const ARCHITECTURE_PREFERENCE = ["base-memory", "tiny", "base"];
-
-/**
- * One pair can have several entries - a desktop build, an Android build, a
- * nightly. Anything not released is not something to point users at; between
- * released ones the architecture preference above decides. Two released builds
- * of the *same* architecture would be a choice with no rule for it: it stops.
- *
- * @param {any[]} entries
- * @param {string} pair
- * @returns {any}
- */
-function pickEntry(entries, pair) {
-  const released = entries.filter((entry) => String(entry.releaseStatus ?? "").startsWith("Release"));
-  if (released.length === 0) throw new Error(`${pair}: nothing released upstream`);
-
-  const rank = (/** @type {any} */ entry) => {
-    const at = ARCHITECTURE_PREFERENCE.indexOf(String(entry.architecture ?? ""));
-    return at === -1 ? ARCHITECTURE_PREFERENCE.length : at;
-  };
-  released.sort((a, b) => rank(a) - rank(b));
-
-  const [first, second] = released;
-  if (second !== undefined && rank(first) === rank(second)) {
-    const shapes = released.map((entry) => `${entry.architecture} (${entry.releaseStatus})`);
-    throw new Error(`${pair}: more than one released model of the same kind, pick one by hand: ${shapes.join(", ")}`);
-  }
-  return first;
-}
+// Which entry a pair with several builds resolves to is `pickEntry` in
+// `src/lib/models/upstream.js` - the settings page reads the live index by
+// the same rule, and two copies of a preference are two preferences.
 
 /**
  * @param {any} entry
@@ -171,7 +125,7 @@ async function describeFiles(entry, baseUrl, pair, refresh) {
   const files = [];
 
   for (const [key, published] of Object.entries(entry.files ?? {})) {
-    const role = /** @type {Record<string, string>} */ (ROLES)[key];
+    const role = /** @type {Record<string, string>} */ (UPSTREAM_ROLES)[key];
     if (role === undefined) throw new Error(`${pair}: unknown file "${key}" upstream`);
 
     const path = /** @type {any} */ (published).path;
@@ -235,7 +189,9 @@ async function generate(pairs, refresh) {
       throw new Error(`${pair}: no such pair upstream`);
     }
 
-    const entry = pickEntry(entries, pair);
+    const picked = pickEntry(entries);
+    if (!picked.ok) throw new Error(`${pair}: ${picked.problem}`);
+    const entry = picked.value;
     const [from, to] = pair.split("-");
     console.log(`${pair}: ${entry.architecture}, trained as ${entry.files?.model?.path?.split("/")[2] ?? "?"}`);
 
