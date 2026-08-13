@@ -46,7 +46,15 @@ h1 {
   margin: 0 0 0.25rem;
 }
 
+/* Two heading sizes below the title, because the settings page has two levels:
+   sections (models, dictionaries) and the doors inside them (the by-hand
+   folds, the catalogue). Same size for both levels read as one flat list. */
 h2 {
+  font-size: 1.3rem;
+  margin: 2rem 0 0.5rem;
+}
+
+h3 {
   font-size: 1.05rem;
   margin: 2rem 0 0.5rem;
 }
@@ -310,7 +318,7 @@ select {
 
 /* The heading keeps its size but sits on the marker's line, and the page
    rhythm it usually brings moves onto the fold itself. */
-.fold summary h2 {
+.fold summary h3 {
   display: inline;
   margin: 0;
 }
@@ -358,10 +366,24 @@ input[type="checkbox"] {
   color: var(--page-fg);
 }
 
-/* The update button stands in running text, so it keeps a word's distance
-   from the sentence that explains it. */
+/* The update button and its sentence share one line: the button keeps its
+   width on the left, the text wraps in its own column on the right - never
+   underneath. The tinted fill lifts the one control of this line off the
+   page without shouting like a CTA. */
+.model-refresh {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
 .model-refresh button {
-  margin-right: 0.35rem;
+  flex: none;
+  border-color: var(--page-accent);
+  background: color-mix(in srgb, var(--page-accent) 15%, transparent);
+}
+
+.model-refresh button:hover {
+  background: color-mix(in srgb, var(--page-accent) 25%, transparent);
 }
 
 /* The fresh-install signpost on the settings page: the note's frame, the
@@ -373,6 +395,9 @@ input[type="checkbox"] {
 }
 
 .first-steps h2 {
+  /* The signpost speaks at the card's volume, not a section's - it is
+     instructions in a note frame, gone after the first model. */
+  font-size: 1.05rem;
   margin: 0 0 0.35rem;
 }
 

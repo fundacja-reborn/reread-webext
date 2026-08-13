@@ -96,16 +96,22 @@
 
     <!-- The one fetch this section can make, and the press that makes it: the
          list below refreshes only here, never by itself - the date says how
-         old what stands under the filter is. -->
+         old what stands under the filter is. The plain wrapper span keeps the
+         sentence in its own column beside the button; it carries no data-i18n
+         itself, so the marked elements inside still hold text only. -->
     <p class="model-refresh">
       <button type="button" id="refresh-models" data-i18n="options_update_list">
         Update the list
       </button>
-      <span data-i18n="options_list_from"
-        >- the list of translation models below is from</span
-      >
-      <strong id="model-checked">-</strong>.
-      <span data-i18n="options_list_refresh_hint">Press the button to fetch the current list.</span>
+      <span class="model-refresh-text">
+        <span data-i18n="options_list_from"
+          >- the list of translation models below is from</span
+        >
+        <strong id="model-checked">-</strong>.
+        <span data-i18n="options_list_refresh_hint"
+          >Press the button to fetch the current list.</span
+        >
+      </span>
     </p>
 
     <p id="refresh-status" class="status" role="status"></p>
@@ -145,7 +151,7 @@
          competing way to get a model. The summary says when to open it. -->
     <details class="fold">
       <summary>
-        <h2 data-i18n="options_add_model_heading">Add a model from files</h2>
+        <h3 data-i18n="options_add_model_heading">Add a model from files</h3>
         <span class="fold-hint" data-i18n="options_add_model_summary"
           >To add by hand a model the list above does not offer, load its files here.</span
         >
@@ -193,7 +199,7 @@
 
     <p id="dictionary-status" class="status" role="status"></p>
 
-    <h2 data-i18n="options_get_dictionary_heading">Get a dictionary</h2>
+    <h3 data-i18n="options_get_dictionary_heading">Get a dictionary</h3>
 
     <p>
       <strong>WikDict</strong>
@@ -240,7 +246,7 @@
          the road, this is the door beside it. -->
     <details class="fold">
       <summary>
-        <h2 data-i18n="options_add_dictionary_heading">Add a dictionary from files</h2>
+        <h3 data-i18n="options_add_dictionary_heading">Add a dictionary from files</h3>
         <span class="fold-hint" data-i18n="options_add_dictionary_summary"
           >To add a dictionary from your own files - one from an e-reader works as it is - load
           them here.</span
