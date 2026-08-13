@@ -395,18 +395,28 @@ input[type="checkbox"] {
 }
 
 /* The fresh-install signpost on the settings page: the note's frame, the
-   page's full color - it is instructions to act on, not an aside. Shown only
-   while no model is stored, so it earns the room it takes. */
+   page's full color - it is instructions to act on, not an aside. Open while
+   a model or a dictionary is missing; with both stored it folds to its
+   heading and stays, one line of the note's frame, there to reread. */
 .first-steps {
   margin: 1.5rem 0 2rem;
   color: var(--page-fg);
 }
 
-.first-steps h2 {
-  /* The signpost speaks at the card's volume, not a section's - it is
-     instructions in a note frame, gone after the first model. */
+.first-steps summary {
+  cursor: pointer;
+}
+
+.first-steps summary::marker {
+  color: var(--page-muted);
+}
+
+.first-steps summary h2 {
+  /* The signpost speaks at the card's volume, not a section's - and sits on
+     the marker's line, the way the by-hand folds' headings do. */
+  display: inline;
   font-size: 1.05rem;
-  margin: 0 0 0.35rem;
+  margin: 0;
 }
 
 .first-steps p {

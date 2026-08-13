@@ -1,6 +1,6 @@
 /**
- * The order and the filtering of the long lists on the settings page, without
- * the DOM.
+ * The settings page's rules, without the DOM: the order and the filtering of
+ * its long lists, and the one move of its first-steps fold.
  *
  * The model list went from two rows to a hundred the day the registry learned
  * every pair Mozilla publishes, and the dictionary catalogue arrived at five
@@ -8,8 +8,9 @@
  * that puts what is yours where you can see it, and a filter that finds a
  * language by name. Both are rules, rules can be wrong quietly, and so both
  * live here, where `node --test` can reach them. Everything below the model
- * ordering works on anything with a `from` and a `to`, because that is all it
- * ever reads - which is why the saved-phrases page borrows it too.
+ * ordering, down to the filter, works on anything with a `from` and a `to`,
+ * because that is all it ever reads - which is why the saved-phrases page
+ * borrows it too.
  */
 
 import { pairLabel } from "../lib/language.js";
@@ -125,4 +126,28 @@ export function searchableText(row) {
 export function matchesFilter(searchable, query) {
   const words = query.toLowerCase().split(/\s+/).filter((word) => word.length > 0);
   return words.every((word) => searchable.includes(word));
+}
+
+/**
+ * Which way the first-steps fold should move after a look at the stores.
+ *
+ * Setting up means two downloads, so the fold stands open while a model or a
+ * dictionary is missing, and closes once both are here - but it only moves
+ * when that verdict changes. Between changes `open` is null, and a fold the
+ * reader toggled by hand stays as they left it through every redraw. Losing
+ * the last model or dictionary opens it again: translating truly stopped
+ * working, and the instructions are the answer to that.
+ *
+ * Any model and any dictionary count, not just the reading pair's: the fold
+ * teaches the two moves, and the catalogue has no dictionary for every pair a
+ * model exists for - a demand it cannot meet would hold the fold open forever.
+ *
+ * @param {boolean | null} wasDone the last look's verdict, null before the first
+ * @param {boolean} modelStored whether any model is stored
+ * @param {boolean} dictionaryStored whether any dictionary is stored
+ * @returns {{ done: boolean, open: boolean | null }} the verdict to remember, and the move to make
+ */
+export function firstStepsMove(wasDone, modelStored, dictionaryStored) {
+  const done = modelStored && dictionaryStored;
+  return { done, open: done === wasDone ? null : !done };
 }

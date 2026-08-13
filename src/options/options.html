@@ -27,12 +27,17 @@
       addresses written into this package, and nothing else.
     </p>
 
-    <!-- The signpost for a fresh install, shown only while not one model is
-         stored: this page is long, and the person who just arrived from "no
-         model - open the settings" must not have to guess which of its
-         sections was meant. Gone the moment the first model lands. -->
-    <section id="first-steps" class="note first-steps" hidden>
-      <h2 data-i18n="options_first_steps_heading">First steps</h2>
+    <!-- The signpost for a fresh install: this page is long, and the person
+         who just arrived from "no model - open the settings" must not have to
+         guess which of its sections was meant. Setting up means two downloads,
+         so it stands open while a model or a dictionary is missing - and once
+         both are stored it folds to its heading instead of leaving, so the
+         instructions can be reread at will. Hidden until the page has looked
+         at both stores, so the first paint is already the right shape. -->
+    <details id="first-steps" class="note first-steps" hidden>
+      <summary>
+        <h2 data-i18n="options_first_steps_heading">First steps</h2>
+      </summary>
       <p data-i18n="options_first_steps_intro">
         Nothing translates yet - the model that would do it is not on this device. Setting up
         takes a minute:
@@ -56,7 +61,7 @@
         icon. Behind the button: the reader, the offline reading list, your saved phrases and a
         switch for the site you are on.
       </p>
-    </section>
+    </details>
 
     <dl class="rows">
       <div class="row"><dt data-i18n="options_version">Version</dt><dd id="version">-</dd></div>

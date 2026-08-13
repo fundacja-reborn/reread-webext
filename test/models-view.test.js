@@ -1,7 +1,14 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { dictionaryRows, matchesFilter, orderForDisplay, searchableText, sortByLabel } from "../src/options/models-view.js";
+import {
+  dictionaryRows,
+  firstStepsMove,
+  matchesFilter,
+  orderForDisplay,
+  searchableText,
+  sortByLabel,
+} from "../src/options/models-view.js";
 
 /**
  * @param {string} from
@@ -137,6 +144,32 @@ describe("searchableText", () => {
     const text = searchableText({ from: "en", to: "pl" });
     assert.ok(text.includes("enpl"));
     assert.ok(text.includes("en-pl"));
+  });
+});
+
+describe("firstStepsMove", () => {
+  it("opens the fold on the first look while either download is missing", () => {
+    assert.deepEqual(firstStepsMove(null, false, false), { done: false, open: true });
+    assert.deepEqual(firstStepsMove(null, true, false), { done: false, open: true });
+    assert.deepEqual(firstStepsMove(null, false, true), { done: false, open: true });
+  });
+
+  it("folds on the first look when both are already stored", () => {
+    assert.deepEqual(firstStepsMove(null, true, true), { done: true, open: false });
+  });
+
+  it("folds at the moment the second of the two downloads lands", () => {
+    assert.deepEqual(firstStepsMove(false, true, true), { done: true, open: false });
+  });
+
+  it("opens again when the last model or the last dictionary is deleted", () => {
+    assert.deepEqual(firstStepsMove(true, false, true), { done: false, open: true });
+    assert.deepEqual(firstStepsMove(true, true, false), { done: false, open: true });
+  });
+
+  it("stands still between changes, leaving a hand-toggled fold alone", () => {
+    assert.deepEqual(firstStepsMove(false, true, false), { done: false, open: null });
+    assert.deepEqual(firstStepsMove(true, true, true), { done: true, open: null });
   });
 });
 
