@@ -399,7 +399,7 @@
   },
   "options_dictionary_note_from": { "message": "Les dictionnaires sont téléchargés depuis" },
   "options_dictionary_note_rest": {
-    "message": "- c'est là que WikDict publie les dictionnaires qu'il construit à partir du Wiktionnaire (CC BY-SA). Quand vous mettez la liste à jour, rien sur vous n'est envoyé - la requête ne récupère que la liste fraîche. Contrairement aux modèles, aucune somme de contrôle ne retient un téléchargement (WikDict reconstruit ses fichiers sur place) ; à sa place : le téléchargement doit être un simple zip de fichiers StarDict, il est lu avec autant de méfiance que n'importe quel fichier ajouté à la main, et ce qu'il devient, c'est du texte dans la base locale - jamais du code."
+    "message": "- c'est là que WikDict publie les dictionnaires qu'il construit à partir du Wiktionnaire (CC BY-SA). Quand vous mettez la liste à jour, rien sur vous n'est envoyé - la requête ne récupère que la liste fraîche."
   },
   "options_add_dictionary_heading": { "message": "Ajouter un dictionnaire depuis des fichiers" },
   "options_add_dictionary_summary": {

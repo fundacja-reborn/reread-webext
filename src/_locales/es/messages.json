@@ -399,7 +399,7 @@
   },
   "options_dictionary_note_from": { "message": "Los diccionarios se descargan de" },
   "options_dictionary_note_rest": {
-    "message": "- ahí publica WikDict los diccionarios que construye a partir de Wiktionary (CC BY-SA). Cuando actualizas la lista, no se envía nada sobre ti - la petición solo trae la lista fresca. A diferencia de los modelos no hay suma de control que sujete una descarga (WikDict reconstruye sus archivos en el sitio); en su lugar está esto: la descarga tiene que ser un zip simple de archivos StarDict, se lee con tanta desconfianza como cualquier archivo que añadieras a mano, y en lo que se convierte es texto en la base local - nunca código."
+    "message": "- ahí publica WikDict los diccionarios que construye a partir de Wiktionary (CC BY-SA). Cuando actualizas la lista, no se envía nada sobre ti - la petición solo trae la lista fresca."
   },
   "options_add_dictionary_heading": { "message": "Añadir un diccionario desde archivos" },
   "options_add_dictionary_summary": {

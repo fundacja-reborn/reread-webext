@@ -190,9 +190,13 @@ function catchUp() {
 /**
  * Which saved phrase, if any, is under a point in the viewport.
  *
+ * The range rides along for one reader: the sentence around the phrase is read
+ * off it when the bubble's More goes to translate it. It is the live painted
+ * range, so the caller looks and does not keep it.
+ *
  * @param {number} x
  * @param {number} y
- * @returns {{ normalized: string, text: string, rect: DOMRect } | null}
+ * @returns {{ normalized: string, text: string, rect: DOMRect, range: Range } | null}
  */
 export function phraseAt(x, y) {
   for (const { range, normalized } of painted) {
@@ -201,7 +205,7 @@ export function phraseAt(x, y) {
       // The rectangle of the line that was clicked, not of the whole match: a
       // phrase wrapped across two lines would otherwise anchor its bubble to a
       // box spanning both.
-      return { normalized, text: range.toString(), rect };
+      return { normalized, text: range.toString(), rect, range };
     }
   }
   return null;

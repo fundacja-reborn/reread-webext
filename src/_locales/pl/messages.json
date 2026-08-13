@@ -499,7 +499,7 @@
   },
   "options_dictionary_note_from": { "message": "Słowniki pobierane są z" },
   "options_dictionary_note_rest": {
-    "message": "- to tam WikDict publikuje słowniki, które buduje z Wikisłownika (CC BY-SA). Gdy aktualizujesz listę, nic o tobie nie jest wysyłane - zapytanie pobiera jedynie świeżą listę. W odróżnieniu od modeli nie ma sumy kontrolnej, która by pilnowała pobrania (WikDict przebudowuje swoje pliki w miejscu); w jej miejscu stoi to: pobrany plik musi być zwykłym zipem plików StarDict, jest czytany równie nieufnie jak każdy plik dodany ręcznie, a tym, czym się staje, jest tekst w lokalnej bazie - nigdy kod."
+    "message": "- to tam WikDict publikuje słowniki, które buduje z Wikisłownika (CC BY-SA). Gdy aktualizujesz listę, nic o tobie nie jest wysyłane - zapytanie pobiera jedynie świeżą listę."
   },
   "options_add_dictionary_heading": { "message": "Dodaj słownik z plików" },
   "options_add_dictionary_summary": {

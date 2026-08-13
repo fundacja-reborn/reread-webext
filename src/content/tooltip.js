@@ -138,6 +138,12 @@ const STYLE = `
     opacity: 0.85;
   }
 
+  /* The same tones the body knows, for the one bubble that fetches its second
+     layer on demand: a recalled phrase answers from the database, and the
+     sentence starts being translated only when More asks for it. */
+  .context[data-tone="pending"] { opacity: 0.6; font-style: italic; }
+  .context[data-tone="error"] { color: #a3341f; }
+
   /* A dictionary entry can be long, and a bubble that grows past the window is
      a bubble that covers the sentence somebody was reading. It scrolls instead;
      the page underneath keeps the bubble open while it does. */
@@ -340,7 +346,8 @@ const STYLE = `
       border-color: rgba(255, 255, 255, 0.14);
       box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
     }
-    .body[data-tone="error"] { color: #f0a83c; }
+    .body[data-tone="error"],
+    .context[data-tone="error"] { color: #f0a83c; }
     /* All edges at once: which one carries the line is the mirror's business. */
     .context, .entries { border-color: rgba(255, 255, 255, 0.14); }
     /* A shadow that reads as depth on white reads as nothing on dark. */
@@ -370,7 +377,9 @@ const STYLE = `
 /** Which of the three bubbles this is. `launcher` is reader-only mode's one
  *  offer: no gloss, one button. @typedef {"recall" | "save" | "launcher"} Variant */
 /** What the bubble can offer. @typedef {"save" | "learned" | "edit" | "settings" | "more" | "reader"} Action */
-/** What it reports - editing and unfolding never leave the bubble. @typedef {"save" | "choose" | "learned" | "settings" | "reader"} ReportedAction */
+/** What it reports - editing never leaves the bubble, and More leaves it only
+ *  on the press that opens the layer, so a caller with nothing fetched yet can
+ *  fetch it then. @typedef {"save" | "choose" | "learned" | "settings" | "reader" | "more"} ReportedAction */
 
 /**
  * One block of the second layer below the sentence: where it came from, and the
@@ -390,7 +399,7 @@ const STYLE = `
  * @typedef {object} Tooltip
  * @property {(options: { anchor: DOMRect, variant: Variant, body: string, tone?: Tone, actions?: Action[] }) => void} show
  * @property {(body: string, tone?: Tone) => void} setBody
- * @property {(sentence: string | null) => void} setContext
+ * @property {(sentence: string | null, tone?: Tone) => void} setContext
  * @property {(blocks: Block[]) => void} setEntries
  * @property {(actions: Action[]) => void} setActions
  * @property {() => void} hide
@@ -718,7 +727,13 @@ export function createTooltip({ onAction }) {
       return;
     }
     if (action === "more") {
-      unfold(!unfolded);
+      const opening = !unfolded;
+      unfold(opening);
+      // Only the press that opens the layer is reported, and after the layer
+      // is open: a caller that still has to fetch what goes down there puts a
+      // pending line into a layer already showing, and the press that folds
+      // the layer away must not start a second fetch.
+      if (opening) onAction("more", currentMeanings());
       return;
     }
 
@@ -757,19 +772,17 @@ export function createTooltip({ onAction }) {
   }
 
   /**
-   * @returns {boolean} whether the second layer has anything in it
-   */
-  function hasSecondLayer() {
-    if ((contextElement?.textContent ?? "").length > 0) return true;
-    return (entriesElement?.childElementCount ?? 0) > 0;
-  }
-
-  /**
+   * `open` is the reader's intent, and it is kept even over an empty layer:
+   * a recall bubble fetches its second layer on the press that opens it, so
+   * what the press asked for arrives a moment after the asking - and it has to
+   * land in a layer that is already open. What actually shows is decided per
+   * element, by whether it has anything to say.
+   *
    * @param {boolean} open
    */
   function unfold(open) {
     if (contextElement === null || entriesElement === null) return;
-    unfolded = open && hasSecondLayer();
+    unfolded = open;
     contextElement.hidden = !unfolded || (contextElement.textContent ?? "").length === 0;
     entriesElement.hidden = !unfolded || entriesElement.childElementCount === 0;
     renderActions(editing ? ["save", "cancel"] : restingActions);
@@ -782,11 +795,14 @@ export function createTooltip({ onAction }) {
 
   /**
    * @param {string | null} sentence
+   * @param {Tone} [tone]
    */
-  function setContext(sentence) {
+  function setContext(sentence, tone = "normal") {
     if (contextElement === null) return;
     contextElement.textContent = sentence ?? "";
-    // A phrase whose sentence is gone cannot stay unfolded over nothing.
+    contextElement.dataset["tone"] = tone;
+    // Shown or hidden again by what it now says - a sentence that is gone may
+    // not keep a line of the bubble open over nothing.
     unfold(unfolded);
   }
 
@@ -991,8 +1007,8 @@ export function createTooltip({ onAction }) {
       place();
     },
 
-    setContext(sentence) {
-      setContext(sentence);
+    setContext(sentence, tone = "normal") {
+      setContext(sentence, tone);
       place();
     },
 

@@ -59,6 +59,18 @@ let current = null;
 let secondLayer = [];
 
 /**
+ * What More still has to fetch: the sentence around a recalled phrase, when the
+ * bubble opened straight from the database and no engine has run (D27). Null
+ * whenever there is nothing left to ask for - a fresh selection's layer arrives
+ * with its translation, and a fetched layer stays fetched. The sentence rides
+ * in a wrapper because it can honestly be null with the fetch still worth
+ * making: the dictionaries answer without one.
+ *
+ * @type {{ context: string | null } | null}
+ */
+let unfetched = null;
+
+/**
  * Bumped every time the bubble starts being about something else. Selections
  * come faster than translations and than round trips to the database, and an
  * answer for an older one is dropped rather than painted over a bubble that has
@@ -238,6 +250,10 @@ async function onAction(action, meanings) {
     await forget();
     return;
   }
+  if (action === "more") {
+    await fillSecondLayer();
+    return;
+  }
 
   // Both of the remaining two write to the vocabulary, so both answer to the
   // same rule: a phrase no scan could ever find does not get in - not through
@@ -291,6 +307,7 @@ async function change(write, remember, next) {
     tooltip.hide();
     current = null;
     secondLayer = [];
+    unfetched = null;
     return;
   }
 
@@ -340,9 +357,10 @@ async function forget() {
  * @param {DOMRect} anchor
  * @param {string} text as the page has it
  * @param {string} normalized
+ * @param {string | null} context the sentence around the phrase, when the page has one
  * @returns {boolean} whether it was known
  */
-function showSaved(anchor, text, normalized) {
+function showSaved(anchor, text, normalized, context) {
   const meanings = vocabulary.get(normalized);
   if (meanings === undefined) return false;
 
@@ -350,15 +368,67 @@ function showSaved(anchor, text, normalized) {
   // so its meanings may be corrected from anywhere, however it was reached.
   current = { text, normalized, keepable: true };
   generation += 1;
-  // No second layer here, and that is the point: a phrase the reader already
-  // kept is answered from the database, without a message and without waking
-  // the engine. Translating its sentence would undo exactly that.
-  secondLayer = [];
+  // The layer itself is empty, and stays empty until it is asked for: the
+  // answer comes from the database, without a message and without waking the
+  // engine (D27). More is the press that says the sentence and the
+  // dictionaries are worth an engine ride after all, and only then do they go
+  // to the background (`fillSecondLayer`).
+  secondLayer = ["more"];
+  unfetched = { context };
   // Recall: the answer, and nothing else until it is asked for (D44). Somebody
   // who clicked an underline wanted to know what the word was, and Learned is a
   // rare press on a decision they have already made - it can wait inside.
-  tooltip.show({ anchor, variant: "recall", body: meanings.join("\n"), actions: KEPT });
+  tooltip.show({ anchor, variant: "recall", body: meanings.join("\n"), actions: [...KEPT, ...secondLayer] });
   return true;
+}
+
+/**
+ * The second layer of a recall bubble, fetched on the press that first opens
+ * it. One `translate` round trip brings everything the eager path gets - the
+ * translated sentence and the dictionary entries, side by side (D31) - and the
+ * fresh gloss it also brings is dropped: the reader has decided what the
+ * phrase means, and their answer stays the body.
+ */
+async function fillSecondLayer() {
+  const phrase = current;
+  const wanted = unfetched;
+  if (phrase === null || wanted === null) return;
+  // Taken rather than marked: a second press while this one is in flight finds
+  // nothing left to ask for, and a failure puts it back so More can try again.
+  unfetched = null;
+  const mine = generation;
+
+  tooltip.setContext(t("bubble_translating"), "pending");
+
+  /** @type {Promise<import("../lib/protocol.js").Result<import("../lib/protocol.js").Translation>>} */
+  const answer = ask(
+    wanted.context === null
+      ? { kind: Message.TRANSLATE, text: phrase.text }
+      : { kind: Message.TRANSLATE, text: phrase.text, context: wanted.context },
+  );
+  const result = await answer;
+  if (mine !== generation || !tooltip.isOpen()) return;
+
+  if (!result.ok) {
+    unfetched = wanted;
+    // In the layer, not the body: the saved meanings are still the answer, and
+    // this is only the extra failing to arrive.
+    tooltip.setContext(describeError(result.code), "error");
+    return;
+  }
+
+  const { sentence, entries } = asTranslation(result.value);
+  const blocks = entryBlocks(entries ?? [], phrase.normalized);
+  tooltip.setContext(sentence);
+  tooltip.setEntries(blocks);
+
+  // Nothing behind More after all - no sentence on the page, nothing in the
+  // dictionaries. The button goes, the way it never comes for a fresh
+  // selection with an empty layer.
+  if ((sentence === null || sentence.length === 0) && blocks.length === 0) {
+    secondLayer = [];
+    tooltip.setActions([...KEPT, ...secondLayer]);
+  }
 }
 
 /**
@@ -420,19 +490,21 @@ function onMouseUp(event) {
     // No selection made, which means a click - and a click may have landed on
     // an underline, which is the other half of what saving a phrase is for.
     const hit = phraseAt(event.clientX, event.clientY);
-    if (hit !== null && showSaved(hit.rect, hit.text, hit.normalized)) return;
+    if (hit !== null && showSaved(hit.rect, hit.text, hit.normalized, contextOf(hit.range))) return;
 
     tooltip.hide();
     current = null;
     secondLayer = [];
+    unfetched = null;
     return;
   }
 
   const { text, normalized } = selection;
-  if (showSaved(selection.rect, text, normalized)) return;
+  if (showSaved(selection.rect, text, normalized, selection.context)) return;
 
   current = { text, normalized, keepable: selection.findable };
   secondLayer = [];
+  unfetched = null;
   const mine = ++generation;
 
   // The other variant: a fresh selection is a phrase nothing has been decided
@@ -556,6 +628,7 @@ export function stop() {
   tooltip.hide();
   current = null;
   secondLayer = [];
+  unfetched = null;
   press = null;
   vocabulary = new Map();
   clear();
