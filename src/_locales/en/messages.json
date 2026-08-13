@@ -174,10 +174,29 @@
   "reader_wider": { "message": "Wider" },
   "reader_segment_unread": { "message": "To read" },
   "reader_segment_read": { "message": "Read" },
+  "reader_segment_unread_count": {
+    "message": "To read ($COUNT$)",
+    "description": "Tab label wearing the whole segment's count - the entire half of the list, not the page on screen.",
+    "placeholders": { "count": { "content": "$1", "example": "4" } }
+  },
+  "reader_segment_read_count": {
+    "message": "Read ($COUNT$)",
+    "placeholders": { "count": { "content": "$1", "example": "2" } }
+  },
   "reader_save": { "message": "Save to reading list" },
   "reader_saved": { "message": "In the reading list" },
   "reader_delete": { "message": "Delete from reading list" },
   "reader_delete_confirm": { "message": "Sure?" },
+  "reader_delete_aria": {
+    "message": "Delete the article $TITLE$",
+    "description": "Accessible name of a row's Delete button - a bare \"Delete\" in a list of fifty names nothing.",
+    "placeholders": { "title": { "content": "$1", "example": "Old Chinese" } }
+  },
+  "reader_delete_confirm_aria": {
+    "message": "Confirm deletion: $TITLE$",
+    "description": "The same button, armed and asking; focus stays on it between the two presses.",
+    "placeholders": { "title": { "content": "$1", "example": "Old Chinese" } }
+  },
   "reader_mark_read": { "message": "Mark as read" },
   "reader_marked_read": { "message": "Marked as read" },
   "reader_no_article": { "message": "There was no article to find on that page." },
@@ -190,11 +209,25 @@
   "reader_empty_all_read": { "message": "Nothing left to read - everything saved is marked as read." },
   "reader_empty_none_read": { "message": "Nothing is marked as read yet." },
   "reader_filter_placeholder": { "message": "Filter by title or site" },
-  "reader_filter_aria": { "message": "Filter the reading list" },
-  "reader_filter_no_match": { "message": "No saved article matches that." },
+  "reader_filter_label": { "message": "Filter the reading list" },
+  "reader_filter_no_match": {
+    "message": "No saved article matches \"$QUERY$\".",
+    "placeholders": { "query": { "content": "$1", "example": "wikipedia" } }
+  },
+  "reader_filter_clear": { "message": "Clear the filter" },
+  "reader_filter_count": {
+    "message": "$MATCHING$ of $TOTAL$",
+    "description": "Beside the filter while it is active: rows matching, out of the whole segment on the tab.",
+    "placeholders": {
+      "matching": { "content": "$1", "example": "3" },
+      "total": { "content": "$2", "example": "12" }
+    }
+  },
+  "reader_how_title": { "message": "How it works" },
   "reader_library_note": {
     "message": "Everything here is a copy stored on this device - it opens without a connection and stays even if the original page goes away."
   },
+  "reader_format_title": { "message": "File format" },
   "reader_transfer_note": {
     "message": "One .json file holding every saved article - a backup, or the way to move them to another browser. Importing adds articles this list is missing and never touches a saved one."
   },

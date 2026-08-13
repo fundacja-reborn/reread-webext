@@ -172,10 +172,26 @@
   "reader_wider": { "message": "Más ancha" },
   "reader_segment_unread": { "message": "Por leer" },
   "reader_segment_read": { "message": "Leídos" },
+  "reader_segment_unread_count": {
+    "message": "Por leer ($COUNT$)",
+    "placeholders": { "count": { "content": "$1", "example": "4" } }
+  },
+  "reader_segment_read_count": {
+    "message": "Leídos ($COUNT$)",
+    "placeholders": { "count": { "content": "$1", "example": "2" } }
+  },
   "reader_save": { "message": "Guardar en la lista de lectura" },
   "reader_saved": { "message": "En la lista de lectura" },
   "reader_delete": { "message": "Eliminar de la lista de lectura" },
   "reader_delete_confirm": { "message": "¿Seguro?" },
+  "reader_delete_aria": {
+    "message": "Eliminar el artículo $TITLE$",
+    "placeholders": { "title": { "content": "$1", "example": "Old Chinese" } }
+  },
+  "reader_delete_confirm_aria": {
+    "message": "Confirmar la eliminación: $TITLE$",
+    "placeholders": { "title": { "content": "$1", "example": "Old Chinese" } }
+  },
   "reader_mark_read": { "message": "Marcar como leído" },
   "reader_marked_read": { "message": "Marcado como leído" },
   "reader_no_article": { "message": "No se encontró ningún artículo en esa página." },
@@ -187,11 +203,24 @@
   "reader_empty_all_read": { "message": "No queda nada por leer - todo lo guardado está marcado como leído." },
   "reader_empty_none_read": { "message": "Aún no hay nada marcado como leído." },
   "reader_filter_placeholder": { "message": "Filtrar por título o sitio" },
-  "reader_filter_aria": { "message": "Filtrar la lista de lectura" },
-  "reader_filter_no_match": { "message": "Ningún artículo guardado coincide con eso." },
+  "reader_filter_label": { "message": "Filtrar la lista de lectura" },
+  "reader_filter_no_match": {
+    "message": "Ningún artículo guardado coincide con «$QUERY$».",
+    "placeholders": { "query": { "content": "$1", "example": "wikipedia" } }
+  },
+  "reader_filter_clear": { "message": "Borrar el filtro" },
+  "reader_filter_count": {
+    "message": "$MATCHING$ de $TOTAL$",
+    "placeholders": {
+      "matching": { "content": "$1", "example": "3" },
+      "total": { "content": "$2", "example": "12" }
+    }
+  },
+  "reader_how_title": { "message": "Cómo funciona" },
   "reader_library_note": {
     "message": "Todo lo de aquí es una copia guardada en este dispositivo - se abre sin conexión y permanece aunque la página original desaparezca."
   },
+  "reader_format_title": { "message": "Formato del archivo" },
   "reader_transfer_note": {
     "message": "Un archivo .json con todos los artículos guardados - una copia de seguridad, o la forma de llevarlos a otro navegador. La importación solo añade artículos que faltan en esta lista; lo guardado no se toca."
   },

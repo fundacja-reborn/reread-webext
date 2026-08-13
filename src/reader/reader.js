@@ -77,10 +77,9 @@ const sizeValue = document.getElementById("size-value");
 const measureValue = document.getElementById("measure-value");
 const library = document.getElementById("library");
 const librarySegments = document.getElementById("library-segments");
-const libraryNote = document.getElementById("library-note");
+const libraryCount = document.getElementById("library-count");
 const libraryEmpty = document.getElementById("library-empty");
 const libraryRows = document.getElementById("library-rows");
-const libraryFilterLine = document.getElementById("library-filter-line");
 const libraryFilter = /** @type {HTMLInputElement | null} */ (
   document.getElementById("library-filter")
 );
@@ -397,28 +396,59 @@ async function refreshLibrary() {
   const view = libraryView(metas, { segment, query: libraryQuery, page: libraryPage });
   libraryPage = view.page;
 
+  // Each tab wears its whole segment's count - the entire half of the list,
+  // not the page or the filter's slice, so the two labels always add up to
+  // everything saved.
   for (const button of librarySegments?.querySelectorAll("button[data-segment]") ?? []) {
-    button.setAttribute("aria-pressed", String(button.getAttribute("data-segment") === segment));
+    const which = button.getAttribute("data-segment");
+    button.setAttribute("aria-pressed", String(which === segment));
+    button.textContent =
+      which === Segment.READ
+        ? t("reader_segment_read_count", view.read.toLocaleString())
+        : t("reader_segment_unread_count", view.unread.toLocaleString());
   }
 
-  // The offline note hangs on whether anything is saved at all, not on the
-  // tab in view: it describes the place, and switching tabs should not blink
-  // it. Over an empty list the empty sentence carries the same promise.
-  if (libraryNote !== null) libraryNote.hidden = metas.length === 0;
-
-  // The filter follows the note's rule: over a list with nothing saved it
-  // would be a control with nothing to hold.
-  if (libraryFilterLine !== null) libraryFilterLine.hidden = metas.length === 0;
-
   // Exporting nothing would download an empty file; the button says so first.
-  // On whether anything is saved at all, like the note - not on the segment.
+  // On whether anything is saved at all - not on the segment.
   if (exportButton !== null) exportButton.disabled = metas.length === 0;
 
+  // "3 of 12" while the filter narrows the segment down; the tabs already
+  // carry the whole counts, so with no filter the line says nothing.
+  if (libraryCount !== null) {
+    const filtering = libraryQuery.trim().length > 0;
+    libraryCount.hidden = !filtering;
+    if (filtering) {
+      libraryCount.textContent = t("reader_filter_count", [
+        view.matching.toLocaleString(),
+        view.inSegment.toLocaleString(),
+      ]);
+    }
+  }
+
   if (view.rows.length === 0) {
-    // Two kinds of nothing, two sentences: a segment with nothing in it, or
-    // a filter that ruled everything out.
-    libraryEmpty.textContent =
-      view.inSegment > 0 ? t("reader_filter_no_match") : emptySentence(metas.length, segment);
+    // Two kinds of nothing, two answers: a segment with nothing in it gets a
+    // sentence, a filter that ruled everything out gets the sentence quoting
+    // the query and the one button that undoes it.
+    libraryEmpty.replaceChildren();
+    if (view.inSegment > 0) {
+      const sentence = document.createElement("p");
+      sentence.textContent = t("reader_filter_no_match", libraryQuery);
+      const clear = document.createElement("button");
+      clear.type = "button";
+      clear.textContent = t("reader_filter_clear");
+      clear.addEventListener("click", () => {
+        libraryQuery = "";
+        libraryPage = 1;
+        if (libraryFilter !== null) {
+          libraryFilter.value = "";
+          libraryFilter.focus();
+        }
+        void refreshLibrary();
+      });
+      libraryEmpty.append(sentence, clear);
+    } else {
+      libraryEmpty.textContent = emptySentence(metas.length, segment);
+    }
     libraryEmpty.hidden = false;
   } else {
     libraryEmpty.hidden = true;
@@ -446,8 +476,11 @@ function renderLibraryPager(view) {
 
 /**
  * One row: the title as the way in, the details under it, Delete beside it.
- * Titles came from somebody's page once, so they enter as text - the same
- * `textContent` rule as everywhere else.
+ * The title button's accessible name is the title alone, and a pseudo-element
+ * in the stylesheet stretches its click over the whole text cell - the grid
+ * gap keeps Delete a clear step outside that area, so a finger aiming at one
+ * cannot land in the other. Titles came from somebody's page once, so they
+ * enter as text - the same `textContent` rule as everywhere else.
  *
  * @param {import("../lib/store/saved-article.js").SavedMeta} meta
  */
@@ -455,30 +488,99 @@ function libraryRow(meta) {
   const item = document.createElement("li");
   item.className = "library-row";
 
+  const text = document.createElement("div");
+  text.className = "library-text";
+
   const open = document.createElement("button");
   open.type = "button";
   open.className = "library-open";
   open.setAttribute("data-url", meta.url);
-
-  const title = document.createElement("span");
-  title.className = "library-item-title";
-  title.textContent = meta.title;
+  open.textContent = meta.title;
 
   const detail = document.createElement("span");
   detail.className = "library-item-detail";
   const when = meta.savedAt > 0 ? new Date(meta.savedAt).toLocaleDateString() : "";
   detail.textContent = [meta.hostname, when].filter((part) => part.length > 0).join(" - ");
 
-  open.append(title, detail);
+  text.append(open, detail);
 
   const remove = document.createElement("button");
   remove.type = "button";
   remove.className = "library-delete";
   remove.setAttribute("data-url", meta.url);
   remove.textContent = t("action_delete");
+  // The visible "Delete" repeats fifty times a page; to a screen reader each
+  // one carries its article, and the label follows the armed state below.
+  remove.setAttribute("aria-label", t("reader_delete_aria", meta.title));
 
-  item.append(open, remove);
+  item.append(text, remove);
   return item;
+}
+
+/**
+ * The row's Delete button asking its question, and taking it back. Arming is
+ * only ever one button deep: arming one disarms the other, and a press, a
+ * focus or an Escape anywhere else stands the armed one down - deliberately
+ * no timer, because a button that changes back by itself under a slow finger
+ * is how the wrong article gets deleted.
+ */
+
+/**
+ * @param {HTMLElement} button
+ * @returns {string}
+ */
+function deleteTitle(button) {
+  return button.closest("li")?.querySelector(".library-open")?.textContent ?? "";
+}
+
+function armedDelete() {
+  const armed = libraryRows?.querySelector(".library-delete[data-armed]");
+  return armed instanceof HTMLButtonElement ? armed : null;
+}
+
+function disarmDelete() {
+  const armed = armedDelete();
+  if (armed === null) return;
+  armed.removeAttribute("data-armed");
+  armed.textContent = t("action_delete");
+  armed.setAttribute("aria-label", t("reader_delete_aria", deleteTitle(armed)));
+}
+
+/**
+ * @param {HTMLButtonElement} button
+ */
+function armDelete(button) {
+  disarmDelete();
+  button.setAttribute("data-armed", "");
+  button.textContent = t("reader_delete_confirm");
+  button.setAttribute("aria-label", t("reader_delete_confirm_aria", deleteTitle(button)));
+}
+
+/**
+ * The confirmed press: the row leaves the database, and focus does not fall
+ * to the body with it. Its place in the list, counted first, names the
+ * successor - the next row's Delete, the previous one's after the last row,
+ * the filter once the segment is empty. On a failed write the refresh keeps
+ * the row, and the same count puts focus back on the button that asked.
+ *
+ * @param {HTMLButtonElement} button
+ * @param {string} url
+ */
+async function removeRow(button, url) {
+  const deletes = () =>
+    libraryRows === null ? [] : [...libraryRows.querySelectorAll("button.library-delete")];
+  const at = deletes().indexOf(button);
+
+  try {
+    await deleteArticle(url);
+  } catch {
+    showNotice(t("reader_list_write_failed"));
+  }
+  await refreshLibrary();
+
+  const successor = deletes()[Math.min(at, deletes().length - 1)];
+  if (successor instanceof HTMLButtonElement) successor.focus();
+  else libraryFilter?.focus();
 }
 
 /**
@@ -808,15 +910,21 @@ libraryFilter?.addEventListener("input", () => {
   void refreshLibrary();
 });
 
-libraryPrev?.addEventListener("click", () => {
-  libraryPage -= 1;
-  void refreshLibrary();
-});
+/**
+ * A turned page starts at its top - snapped there, not glided, because on
+ * e-ink every animation is a flash.
+ *
+ * @param {number} step
+ */
+async function turnLibraryPage(step) {
+  libraryPage += step;
+  await refreshLibrary();
+  libraryRows?.scrollIntoView({ behavior: "instant", block: "start" });
+}
 
-libraryNext?.addEventListener("click", () => {
-  libraryPage += 1;
-  void refreshLibrary();
-});
+libraryPrev?.addEventListener("click", () => void turnLibraryPage(-1));
+
+libraryNext?.addEventListener("click", () => void turnLibraryPage(1));
 
 libraryRows?.addEventListener("click", (event) => {
   const target = event.target;
@@ -829,17 +937,31 @@ libraryRows?.addEventListener("click", (event) => {
   if (button.classList.contains("library-delete")) {
     // Two presses on the same spot (D-e), asked with text, answered for real:
     // the second one deletes the row from the database, not from the screen.
-    if (button.hasAttribute("data-armed")) {
-      void deleteArticle(url)
-        .catch(() => showNotice(t("reader_list_write_failed")))
-        .then(() => refreshLibrary());
-    } else {
-      button.setAttribute("data-armed", "");
-      button.textContent = t("reader_delete_confirm");
-    }
+    if (button.hasAttribute("data-armed")) void removeRow(button, url);
+    else armDelete(button);
     return;
   }
   void openSaved(url);
+});
+
+// The armed Delete stands down at any step away from it - a press elsewhere,
+// focus moving on, Escape - and never on a clock. `pointerdown` rather than
+// `click` so that the press that arms another row's Delete finds the previous
+// one already disarmed when its own click handler runs.
+document.addEventListener("pointerdown", (event) => {
+  const armed = armedDelete();
+  if (armed === null) return;
+  if (event.target instanceof Node && armed.contains(event.target)) return;
+  disarmDelete();
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") disarmDelete();
+});
+
+libraryRows?.addEventListener("focusout", (event) => {
+  const armed = armedDelete();
+  if (armed !== null && event.target === armed && event.relatedTarget !== armed) disarmDelete();
 });
 
 exportButton?.addEventListener("click", () => void exportList());

@@ -217,10 +217,26 @@
   "reader_wider": { "message": "Szersza" },
   "reader_segment_unread": { "message": "Do przeczytania" },
   "reader_segment_read": { "message": "Przeczytane" },
+  "reader_segment_unread_count": {
+    "message": "Do przeczytania ($COUNT$)",
+    "placeholders": { "count": { "content": "$1", "example": "4" } }
+  },
+  "reader_segment_read_count": {
+    "message": "Przeczytane ($COUNT$)",
+    "placeholders": { "count": { "content": "$1", "example": "2" } }
+  },
   "reader_save": { "message": "Zapisz w czytelni" },
   "reader_saved": { "message": "W czytelni" },
   "reader_delete": { "message": "Usuń z czytelni" },
   "reader_delete_confirm": { "message": "Na pewno?" },
+  "reader_delete_aria": {
+    "message": "Usuń artykuł $TITLE$",
+    "placeholders": { "title": { "content": "$1", "example": "Old Chinese" } }
+  },
+  "reader_delete_confirm_aria": {
+    "message": "Potwierdź usunięcie: $TITLE$",
+    "placeholders": { "title": { "content": "$1", "example": "Old Chinese" } }
+  },
   "reader_mark_read": { "message": "Oznacz jako przeczytany" },
   "reader_marked_read": { "message": "Przeczytany" },
   "reader_no_article": { "message": "Na tej stronie nie udało się znaleźć artykułu." },
@@ -232,11 +248,24 @@
   "reader_empty_all_read": { "message": "Nie zostało nic do przeczytania - wszystko, co zapisane, jest oznaczone jako przeczytane." },
   "reader_empty_none_read": { "message": "Nic nie jest jeszcze oznaczone jako przeczytane." },
   "reader_filter_placeholder": { "message": "Filtruj po tytule lub witrynie" },
-  "reader_filter_aria": { "message": "Filtruj czytelnię" },
-  "reader_filter_no_match": { "message": "Żaden zapisany artykuł do tego nie pasuje." },
+  "reader_filter_label": { "message": "Filtruj czytelnię" },
+  "reader_filter_no_match": {
+    "message": "Brak artykułów pasujących do „$QUERY$”.",
+    "placeholders": { "query": { "content": "$1", "example": "wikipedia" } }
+  },
+  "reader_filter_clear": { "message": "Wyczyść filtr" },
+  "reader_filter_count": {
+    "message": "$MATCHING$ z $TOTAL$",
+    "placeholders": {
+      "matching": { "content": "$1", "example": "3" },
+      "total": { "content": "$2", "example": "12" }
+    }
+  },
+  "reader_how_title": { "message": "Jak to działa" },
   "reader_library_note": {
     "message": "Wszystko tutaj to kopie zapisane na tym urządzeniu - otwierają się bez internetu i zostają, nawet gdy oryginał zniknie."
   },
+  "reader_format_title": { "message": "Format pliku" },
   "reader_transfer_note": {
     "message": "Jeden plik .json ze wszystkimi zapisanymi artykułami - kopia zapasowa albo przenosiny do innej przeglądarki. Import dodaje tylko artykuły, których tu brakuje; zapisanych nie zmienia."
   },

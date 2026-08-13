@@ -8,7 +8,7 @@
  * the filter box, and which slice of those is the page in view.
  */
 
-import { listedRows } from "../lib/store/saved-article.js";
+import { Segment, listedRows } from "../lib/store/saved-article.js";
 import { matchesFilter } from "../options/models-view.js";
 
 /** @typedef {import("../lib/store/saved-article.js").SavedMeta} SavedMeta */
@@ -43,20 +43,37 @@ export function searchableArticle(meta) {
  * "this segment is empty" from "the filter matched nothing" - two different
  * sentences.
  *
+ * `unread` and `read` count the whole of each segment, filter and pages
+ * notwithstanding: they feed the tab labels, and a tab says how much it
+ * holds, not how much of it happens to be on screen. The two are derived
+ * from one `listedRows` call because the segments partition the list -
+ * counting the other one twice would be a second copy of the rule.
+ *
  * @param {SavedMeta[]} metas as `listArticles` answers, in any order
  * @param {{ segment: SegmentValue, query: string, page: number }} shown
- * @returns {{ rows: SavedMeta[], page: number, pages: number, matching: number, inSegment: number }}
+ * @returns {{
+ *   rows: SavedMeta[],
+ *   page: number,
+ *   pages: number,
+ *   matching: number,
+ *   inSegment: number,
+ *   unread: number,
+ *   read: number,
+ * }}
  */
 export function libraryView(metas, { segment, query, page }) {
   const inSegment = listedRows(metas, segment);
   const matching = inSegment.filter((meta) => matchesFilter(searchableArticle(meta), query));
   const pages = Math.max(1, Math.ceil(matching.length / PAGE_SIZE));
   const current = Math.min(Math.max(1, page), pages);
+  const elsewhere = metas.length - inSegment.length;
   return {
     rows: matching.slice((current - 1) * PAGE_SIZE, current * PAGE_SIZE),
     page: current,
     pages,
     matching: matching.length,
     inSegment: inSegment.length,
+    unread: segment === Segment.UNREAD ? inSegment.length : elsewhere,
+    read: segment === Segment.READ ? inSegment.length : elsewhere,
   };
 }

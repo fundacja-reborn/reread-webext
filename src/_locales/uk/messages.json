@@ -217,10 +217,26 @@
   "reader_wider": { "message": "Ширша" },
   "reader_segment_unread": { "message": "До прочитання" },
   "reader_segment_read": { "message": "Прочитане" },
+  "reader_segment_unread_count": {
+    "message": "До прочитання ($COUNT$)",
+    "placeholders": { "count": { "content": "$1", "example": "4" } }
+  },
+  "reader_segment_read_count": {
+    "message": "Прочитане ($COUNT$)",
+    "placeholders": { "count": { "content": "$1", "example": "2" } }
+  },
   "reader_save": { "message": "Зберегти до списку читання" },
   "reader_saved": { "message": "У списку читання" },
   "reader_delete": { "message": "Видалити зі списку читання" },
   "reader_delete_confirm": { "message": "Точно?" },
+  "reader_delete_aria": {
+    "message": "Видалити статтю $TITLE$",
+    "placeholders": { "title": { "content": "$1", "example": "Old Chinese" } }
+  },
+  "reader_delete_confirm_aria": {
+    "message": "Підтвердити видалення: $TITLE$",
+    "placeholders": { "title": { "content": "$1", "example": "Old Chinese" } }
+  },
   "reader_mark_read": { "message": "Позначити прочитаним" },
   "reader_marked_read": { "message": "Позначено прочитаним" },
   "reader_no_article": { "message": "На тій сторінці не вдалося знайти статтю." },
@@ -232,11 +248,24 @@
   "reader_empty_all_read": { "message": "Читати більше нічого - усе збережене позначено прочитаним." },
   "reader_empty_none_read": { "message": "Ще нічого не позначено прочитаним." },
   "reader_filter_placeholder": { "message": "Фільтрувати за назвою чи сайтом" },
-  "reader_filter_aria": { "message": "Фільтрувати список читання" },
-  "reader_filter_no_match": { "message": "Жодна збережена стаття не підходить." },
+  "reader_filter_label": { "message": "Фільтрувати список читання" },
+  "reader_filter_no_match": {
+    "message": "Жодна збережена стаття не відповідає «$QUERY$».",
+    "placeholders": { "query": { "content": "$1", "example": "wikipedia" } }
+  },
+  "reader_filter_clear": { "message": "Очистити фільтр" },
+  "reader_filter_count": {
+    "message": "$MATCHING$ з $TOTAL$",
+    "placeholders": {
+      "matching": { "content": "$1", "example": "3" },
+      "total": { "content": "$2", "example": "12" }
+    }
+  },
+  "reader_how_title": { "message": "Як це працює" },
   "reader_library_note": {
     "message": "Усе тут - копії, збережені на цьому пристрої: вони відкриваються без інтернету й залишаються, навіть якщо оригінал зникне."
   },
+  "reader_format_title": { "message": "Формат файлу" },
   "reader_transfer_note": {
     "message": "Один файл .json з усіма збереженими статтями - резервна копія або переїзд до іншого браузера. Імпорт додає лише статті, яких у цьому списку немає; збережених не змінює."
   },
