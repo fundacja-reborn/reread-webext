@@ -373,6 +373,16 @@ input[type="checkbox"] {
   color: var(--page-fg);
 }
 
+/* The asides under the lists are footnotes, not calls to attention: they
+   answer "where from, and what leaves this device" for whoever asks, at a
+   footnote's size behind a neutral frame. The accent frame stays on notes
+   that ask to be acted on - the first-steps card, the reader's notices. */
+.note.footnote {
+  border-left-color: var(--page-line);
+  background: color-mix(in srgb, var(--page-fg) 4%, transparent);
+  font-size: 0.85rem;
+}
+
 /* The update button and its sentence share one line: the button keeps its
    width on the left, the text wraps in its own column on the right - never
    underneath. The tinted fill lifts the one control of this line off the
