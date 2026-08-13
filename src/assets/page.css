@@ -300,6 +300,13 @@ select {
   font-size: 0.9rem;
 }
 
+/* The prose that explains a section speaks at the same size as the row
+   hints - one step below the controls it explains, keeping the page's
+   full color. */
+.explain {
+  font-size: 0.9rem;
+}
+
 /* Folded sections: the by-hand paths stand behind a summary, so the page
    reads catalogue-first and each escape hatch says when it is needed.
    Native details/summary - no script, keyboard for free, and the closed
