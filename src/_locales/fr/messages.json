@@ -22,7 +22,6 @@
   "action_download": { "message": "Télécharger" },
   "action_cancel": { "message": "Annuler" },
   "action_open": { "message": "Ouvrir" },
-  "action_refresh": { "message": "Rafraîchir" },
   "action_update": { "message": "Mettre à jour" },
 
   "error_engine_missing": { "message": "Pas encore de moteur de traduction - cette version ne peut pas traduire." },
@@ -343,7 +342,7 @@
 
   "options_title": { "message": "re/read - paramètres" },
   "options_local_intro": {
-    "message": "Tout ce que fait re/read se passe sur cet appareil : la traduction, le dictionnaire, la liste de lecture, les phrases enregistrées. Rien de ce que vous lisez ou sélectionnez n'est envoyé nulle part. Le réseau sert à deux choses, toutes deux sur cette page : les téléchargements que vous cliquez - un modèle ou un dictionnaire - et le rafraîchissement de la liste des modèles à l'ouverture de la page. Toujours depuis les deux adresses écrites dans ce paquet, et rien d'autre."
+    "message": "Tout ce que fait re/read se passe sur cet appareil : la traduction, le dictionnaire, la liste de lecture, les phrases enregistrées. Rien de ce que vous lisez ou sélectionnez n'est envoyé nulle part. Le réseau sert à deux choses, toutes deux sur cette page et toutes deux à votre clic : télécharger un modèle ou un dictionnaire, et mettre à jour la liste des modèles. Toujours depuis les deux adresses écrites dans ce paquet, et rien d'autre."
   },
   "options_first_steps_heading": { "message": "Premiers pas" },
   "options_first_steps_intro": {
@@ -370,17 +369,17 @@
   },
   "options_models_heading": { "message": "Modèles de traduction" },
   "options_models_intro": {
-    "message": "Un modèle est ce qui change une langue en une autre, et il y en a un par direction. Mozilla les construit et les publie - les mêmes modèles avec lesquels Firefox lui-même traduit les pages. Rien n'est traduit tant que le modèle de la paire que vous lisez n'est pas ici, sur cet appareil. Chaque direction publiée par Mozilla est listée ; la paire que vous lisez et tout ce qui est déjà enregistré remontent en haut."
+    "message": "Les modèles ci-dessous sont construits et publiés par Mozilla - les mêmes modèles avec lesquels Firefox lui-même traduit les pages. Pour que re/read fonctionne, téléchargez le modèle des paires de langues que vous voulez traduire (par exemple en -> pl)."
   },
+  "options_update_list": { "message": "Mettre à jour la liste" },
+  "options_list_from": { "message": "- la liste des modèles de traduction ci-dessous date du" },
+  "options_list_refresh_hint": { "message": "Cliquez sur le bouton pour récupérer la liste actuelle." },
   "options_filter_placeholder": { "message": "Filtrer par langue ou par code" },
   "options_filter_models_aria": { "message": "Filtrer la liste des modèles de traduction" },
   "options_filter_dictionaries_aria": { "message": "Filtrer la liste des dictionnaires" },
   "options_model_note_from": { "message": "Les modèles sont téléchargés depuis" },
-  "options_model_note_checked": {
-    "message": "- c'est là que Mozilla les publie. La liste elle-même vient du même endroit : cette page en demande une fraîche à l'ouverture, et ce que vous voyez est la liste du"
-  },
   "options_model_note_rest": {
-    "message": "- sans réseau, la dernière réponse reste, datée. Un fichier téléchargé est tenu à tout ce qui a été déclaré à son sujet - les tailles, la somme de contrôle de Mozilla là où elle en publie une - puis chargé à l'essai dans le moteur de traduction avant que quoi que ce soit ne soit enregistré : ce qui échoue à l'une de ces étapes est jeté plutôt que gardé. Rien sur vous n'est envoyé : les requêtes disent quelle liste et quel modèle, et rien d'autre. Cet hôte et celui du catalogue de dictionnaires plus bas sont les deux seuls endroits que cette extension contacte jamais."
+    "message": "- c'est là que Mozilla les publie. Quand vous mettez la liste à jour, rien sur vous n'est envoyé - la requête ne récupère que la liste fraîche des modèles. Cet hôte et celui du catalogue de dictionnaires plus bas sont les deux seuls endroits que cette extension puisse jamais contacter - et seulement quand vous cliquez sciemment pour rafraîchir la liste ou télécharger un modèle ou un dictionnaire."
   },
   "options_add_model_heading": { "message": "Ajouter un modèle depuis des fichiers" },
   "options_add_model_summary": {

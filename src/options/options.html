@@ -22,9 +22,9 @@
     <p data-i18n="options_local_intro">
       Everything re/read does happens on this device: translating, the dictionary, the reading
       list, your saved phrases. Nothing you read or select is ever sent anywhere. The network
-      serves two things, both on this page: the downloads you press - a model or a dictionary -
-      and refreshing the list of models when the page opens. Always from the two addresses
-      written into this package, and nothing else.
+      serves two things, both on this page and both at your press: downloading a model or a
+      dictionary, and updating the list of models. Always from the two addresses written into
+      this package, and nothing else.
     </p>
 
     <!-- The signpost for a fresh install, shown only while not one model is
@@ -89,12 +89,26 @@
     <h2 data-i18n="options_models_heading">Translation models</h2>
 
     <p data-i18n="options_models_intro">
-      A model is what turns one language into another, and there is one per direction. Mozilla
-      builds and publishes them - the same models Firefox itself translates pages with. Nothing is
-      translated until the model for the pair you are reading is here, on this device. Every
-      direction Mozilla publishes is listed; the pair you are reading and anything already stored
-      float to the top.
+      The models below are built and published by Mozilla - the same models Firefox itself
+      translates pages with. For re/read to work, download a model for the language pairs you
+      want to translate (for example en -> pl).
     </p>
+
+    <!-- The one fetch this section can make, and the press that makes it: the
+         list below refreshes only here, never by itself - the date says how
+         old what stands under the filter is. -->
+    <p class="model-refresh">
+      <button type="button" id="refresh-models" data-i18n="options_update_list">
+        Update the list
+      </button>
+      <span data-i18n="options_list_from"
+        >- the list of translation models below is from</span
+      >
+      <strong id="model-checked">-</strong>.
+      <span data-i18n="options_list_refresh_hint">Press the button to fetch the current list.</span>
+    </p>
+
+    <p id="refresh-status" class="status" role="status"></p>
 
     <p class="model-filter">
       <input
@@ -115,25 +129,15 @@
       <!-- The host is also a door: the href becomes the address of the very
            index the snapshot was taken from, so a reader can look at the
            source with their own eyes. Their press, their navigation - the
-           extension itself still fetches nothing without Download. -->
+           extension itself still fetches nothing without a press. -->
       <span data-i18n="options_model_note_from">Model downloads come from</span>
       <a id="model-host" target="_blank" rel="noopener">-</a>
-      <span data-i18n="options_model_note_checked"
-        >- where Mozilla publishes them. The list itself comes from the same place: this page asks
-        for a fresh one when it opens, and what you see is the list as of</span
-      >
-      <strong id="model-checked">-</strong>
       <span data-i18n="options_model_note_rest"
-        >- with no network, the last answer stands, dated. A downloaded file is held to everything
-        declared about it - sizes, Mozilla's own checksum where one is published - and then
-        trial-loaded into the translation engine before anything is stored: what fails any of it
-        is thrown away rather than kept. Nothing about you is sent: the requests say which list
-        and which model, and nothing else. This host and the dictionary catalogue's below are the
-        only two places this extension ever contacts.</span
+        >- where Mozilla publishes them. When you update the list, nothing about you is sent - the
+        request only fetches the fresh list of models. This host and the dictionary catalogue's
+        below are the only two places this extension can ever contact - and only when you
+        knowingly press to refresh the list, to download a model or a dictionary.</span
       >
-      <button type="button" id="refresh-models" class="refresh" data-i18n="action_refresh">
-        Refresh
-      </button>
     </p>
 
     <!-- Folded shut by default: the by-hand path is the escape hatch, not the

@@ -62,15 +62,15 @@ let os = "";
 
 /**
  * The freshest model list this device has seen - the cache of Mozilla's index,
- * read at open and refreshed over the network right after. Null until the
- * first refresh ever succeeds; the packaged registry stands in until then, so
- * day one works offline.
+ * read at open and refreshed over the network only when the update button is
+ * pressed. Null until the first refresh ever succeeds; the packaged registry
+ * stands in until then, so day one works offline.
  *
  * @type {import("../lib/models/live.js").LiveModels | null}
  */
 let liveList = null;
 
-/** One refresh at a time; the page opening and the button can both ask. */
+/** One refresh at a time - a double press must not race itself. */
 let refreshing = false;
 
 /**
@@ -90,27 +90,26 @@ function listDate() {
 /**
  * Asks the index's host what the list is today, and redraws what changed.
  *
- * Quiet by design when the page asked by itself: no network means the dated
- * cache stands, and a sentence about it would be noise on every offline open.
- * A pressed button is different - somebody asked, so somebody is answered.
- *
- * @param {boolean} manual whether a press asked for this
+ * Only ever called by the update button - the page itself never asks, so the
+ * network stays quiet until somebody knowingly presses. Somebody asked, so
+ * somebody is answered: success, failure and the date all land in the line
+ * beside the button.
  */
-async function refreshList(manual) {
+async function refreshList() {
   if (refreshing) return;
   refreshing = true;
-  if (manual) status(t("options_refreshing_list"), "busy");
+  refreshStatus(t("options_refreshing_list"), "busy");
 
   try {
     const result = await refreshLiveModels();
     if (!result.ok) {
-      if (manual) status(t("options_refresh_failed", [aside(result.detail), listDate()]), "error");
+      refreshStatus(t("options_refresh_failed", [aside(result.detail), listDate()]), "error");
       return;
     }
 
     liveList = result.value;
     fill("model-checked", listDate());
-    if (manual) status(t("options_refreshed_list", listDate()));
+    refreshStatus(t("options_refreshed_list", listDate()));
     renderPair(modelRows(await listModels(), availableModels()));
     // Not while a download or an import holds the screen: redrawing would
     // replace a live progress bar, and the next full render comes when it
@@ -162,7 +161,7 @@ function megabytes(bytes) {
  * has to say how it went - a sentence about a failed download printed below the
  * file picker is a sentence nobody scrolls to.
  *
- * @param {"model-status" | "file-status" | "dictionary-status" | "dictionary-file-status" | "dictionary-get-status"} id
+ * @param {"model-status" | "refresh-status" | "file-status" | "dictionary-status" | "dictionary-file-status" | "dictionary-get-status"} id
  * @param {string} text
  * @param {"idle" | "busy" | "error"} [tone]
  */
@@ -179,6 +178,17 @@ function say(id, text, tone = "idle") {
  */
 function status(text, tone = "idle") {
   say("model-status", text, tone);
+}
+
+/**
+ * The update button's own line, above the list: what a press of it did has to
+ * be said next to it, not below a frame of a hundred rows.
+ *
+ * @param {string} text
+ * @param {"idle" | "busy" | "error"} [tone]
+ */
+function refreshStatus(text, tone = "idle") {
+  say("refresh-status", text, tone);
 }
 
 /**
@@ -1040,8 +1050,9 @@ async function addSelectedDictionary() {
 async function render() {
   config = await readConfig();
   os = await platformOs();
-  // The dated cache first, so the page never opens blank; the network's
-  // answer, kicked off below, redraws whatever it changes.
+  // The dated cache, and nothing asked of the network: the list stays as it
+  // was until the update button is pressed, and the line above it says how
+  // old that is.
   liveList = await readLiveModels();
   // Android has no toolbar to pin anything to; the step disappears rather
   // than asking for the impossible.
@@ -1077,11 +1088,6 @@ async function render() {
     );
   }
   await renderDictionaries();
-
-  // Last, after the page stands: ask the network what the list is today. Not
-  // awaited - an opening page must not wait on a host, and failure is quiet
-  // by design, because the dated list already on screen is the fallback.
-  void refreshList(false);
 }
 
 /**
@@ -1115,7 +1121,7 @@ document.getElementById("reader-only")?.addEventListener("change", (event) => {
   });
 });
 document.getElementById("add-model")?.addEventListener("click", () => void addSelectedModel());
-document.getElementById("refresh-models")?.addEventListener("click", () => void refreshList(true));
+document.getElementById("refresh-models")?.addEventListener("click", () => void refreshList());
 document.getElementById("model-filter")?.addEventListener("input", () => applyModelFilter());
 document.getElementById("dictionary-filter")?.addEventListener("input", () => applyCatalogFilter());
 document.getElementById("add-dictionary")?.addEventListener("click", () => void addSelectedDictionary());

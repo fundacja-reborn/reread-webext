@@ -22,7 +22,6 @@
   "action_download": { "message": "Herunterladen" },
   "action_cancel": { "message": "Abbrechen" },
   "action_open": { "message": "Öffnen" },
-  "action_refresh": { "message": "Auffrischen" },
   "action_update": { "message": "Aktualisieren" },
 
   "error_engine_missing": { "message": "Noch keine Übersetzungs-Engine - diese Version kann nicht übersetzen." },
@@ -327,7 +326,7 @@
 
   "options_title": { "message": "re/read - Einstellungen" },
   "options_local_intro": {
-    "message": "Alles, was re/read tut, geschieht auf diesem Gerät: das Übersetzen, das Wörterbuch, die Leseliste, der gespeicherte Wortschatz. Nichts von dem, was Sie lesen oder auswählen, wird irgendwohin gesendet. Das Netz dient zwei Dingen, beiden auf dieser Seite: den Downloads, die Sie anklicken - ein Modell oder ein Wörterbuch - und dem Auffrischen der Modellliste beim Öffnen der Seite. Immer von den zwei Adressen, die in diesem Paket stehen, und nichts sonst."
+    "message": "Alles, was re/read tut, geschieht auf diesem Gerät: das Übersetzen, das Wörterbuch, die Leseliste, der gespeicherte Wortschatz. Nichts von dem, was Sie lesen oder auswählen, wird irgendwohin gesendet. Das Netz dient zwei Dingen, beiden auf dieser Seite und beiden auf Ihren Klick: dem Herunterladen eines Modells oder Wörterbuchs und dem Aktualisieren der Modellliste. Immer von den zwei Adressen, die in diesem Paket stehen, und nichts sonst."
   },
   "options_first_steps_heading": { "message": "Erste Schritte" },
   "options_first_steps_intro": {
@@ -354,17 +353,17 @@
   },
   "options_models_heading": { "message": "Übersetzungsmodelle" },
   "options_models_intro": {
-    "message": "Ein Modell ist das, was eine Sprache in eine andere verwandelt, und je Richtung gibt es eines. Mozilla baut und veröffentlicht sie - dieselben Modelle, mit denen Firefox selbst Seiten übersetzt. Nichts wird übersetzt, solange das Modell des gelesenen Paares nicht hier ist, auf diesem Gerät. Aufgeführt ist jede Richtung, die Mozilla veröffentlicht; das gelesene Paar und alles bereits Gespeicherte steigen nach oben."
+    "message": "Die Modelle unten baut und veröffentlicht Mozilla - dieselben Modelle, mit denen Firefox selbst Seiten übersetzt. Damit re/read arbeiten kann, laden Sie das Modell für die Sprachpaare herunter, die Sie übersetzen möchten (z. B. en -> pl)."
   },
+  "options_update_list": { "message": "Liste aktualisieren" },
+  "options_list_from": { "message": "- die Liste der Übersetzungsmodelle unten ist vom" },
+  "options_list_refresh_hint": { "message": "Klicken Sie auf die Schaltfläche, um die aktuelle Liste zu holen." },
   "options_filter_placeholder": { "message": "Nach Sprache oder Code filtern" },
   "options_filter_models_aria": { "message": "Die Liste der Übersetzungsmodelle filtern" },
   "options_filter_dictionaries_aria": { "message": "Die Liste der Wörterbücher filtern" },
   "options_model_note_from": { "message": "Modelle kommen von" },
-  "options_model_note_checked": {
-    "message": "- dort veröffentlicht Mozilla sie. Die Liste selbst kommt vom selben Ort: diese Seite bittet beim Öffnen um eine frische, und was Sie sehen, ist die Liste vom"
-  },
   "options_model_note_rest": {
-    "message": "- ohne Netz bleibt die letzte Antwort stehen, datiert. Eine heruntergeladene Datei wird an allem gemessen, was über sie erklärt wurde - Größen, Mozillas eigene Prüfsumme, wo eine veröffentlicht ist - und dann probeweise in die Übersetzungs-Engine geladen, bevor irgendetwas gespeichert wird: was daran scheitert, wird verworfen statt behalten. Nichts über Sie wird gesendet: Die Anfragen nennen die Liste und das Modell, sonst nichts. Dieser Host und der des Wörterbuchkatalogs weiter unten sind die einzigen zwei Orte, die diese Erweiterung je kontaktiert."
+    "message": "- dort veröffentlicht Mozilla sie. Wenn Sie die Liste aktualisieren, wird nichts über Sie gesendet - die Anfrage holt nur die frische Modellliste. Dieser Host und der des Wörterbuchkatalogs weiter unten sind die einzigen zwei Orte, mit denen sich diese Erweiterung überhaupt verbinden kann - und nur, wenn Sie bewusst das Aktualisieren der Liste oder das Herunterladen eines Modells oder Wörterbuchs anklicken."
   },
   "options_add_model_heading": { "message": "Modell aus Dateien hinzufügen" },
   "options_add_model_summary": {

@@ -358,12 +358,10 @@ input[type="checkbox"] {
   color: var(--page-fg);
 }
 
-/* The one control a note carries: the by-hand way to re-ask for the model
-   list, sized to the note's aside voice rather than the page's. */
-.note .refresh {
-  margin-left: 0.5rem;
-  padding: 0.15rem 0.6rem;
-  font-size: 0.85rem;
+/* The update button stands in running text, so it keeps a word's distance
+   from the sentence that explains it. */
+.model-refresh button {
+  margin-right: 0.35rem;
 }
 
 /* The fresh-install signpost on the settings page: the note's frame, the

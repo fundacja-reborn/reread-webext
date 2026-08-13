@@ -25,10 +25,10 @@ Offline is not a degraded mode here - it is the mode.
 - **The vocabulary is a local database.** No account, no sync, no server that could shut
   down and take your collection with it.
 
-The network serves this extension in exactly two ways, both on the settings page: the
-downloads you press - a translation model or a dictionary - and a refresh of the model
-list when that page opens. Both go only to the two addresses written into the package,
-and nowhere else. How to verify all of this is a section of its own,
+The network serves this extension in exactly two ways, both on the settings page and
+both at your press: downloading a translation model or a dictionary, and updating the
+list of models. Both go only to the two addresses written into the package, and nowhere
+else. How to verify all of this is a section of its own,
 [below](#privacy-and-how-to-check-it).
 
 ## Status
@@ -72,11 +72,11 @@ If you are looking for something to use rather than something to read, come back
 ## Privacy, and how to check it
 
 This extension contacts exactly two places: Mozilla's bucket, for the list of models and
-the models themselves, and WikDict, for dictionaries. Downloads happen only at your
-press. The list of models is the one thing asked for without a press - the settings page
-refreshes it when it opens, so an install from a year-old package still shows today's
-models - and an address read off that list is refused unless it sits under the same
-packaged bucket. Every host this extension is willing to talk to is written down in the
+the models themselves, and WikDict, for dictionaries. Nothing is asked for without your
+press: downloads happen when you press them, and the list of models refreshes when you
+press its update button - the settings page says which day the list on screen is from,
+and an address read off a fresh list is refused unless it sits under the same packaged
+bucket. Every host this extension is willing to talk to is written down in the
 package before it ships. There is nothing else to send and nowhere to send it: the page
 text, your selections and your vocabulary never leave the device.
 

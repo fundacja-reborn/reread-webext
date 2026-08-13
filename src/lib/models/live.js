@@ -1,16 +1,16 @@
 /**
  * The freshest list of models this device has seen, and how it gets fresher.
  *
- * The settings page asks for Mozilla's index when it opens and keeps the
- * answer in `storage.local`, so the list somebody sees is the list from the
- * last time the network answered - dated, never blank. Asking is cheap on
- * purpose: the ETag from last time rides along, and an unchanged index costs a
- * 304 and no transfer.
+ * The settings page asks for Mozilla's index when its update button is
+ * pressed - never by itself - and keeps the answer in `storage.local`, so the
+ * list somebody sees is the list from the last time the network answered -
+ * dated, never blank. Asking is cheap on purpose: the ETag from last time
+ * rides along, and an unchanged index costs a 304 and no transfer.
  *
- * Failure is quiet by design. No network, a refused request, an index that
- * does not parse - the cached list (or the packaged registry) simply remains
- * what the page shows. The one thing failure must never do is erase a good
- * cache.
+ * Failure is survivable by design. No network, a refused request, an index
+ * that does not parse - the cached list (or the packaged registry) simply
+ * remains what the page shows, dated. The one thing failure must never do is
+ * erase a good cache.
  *
  * What is stored is re-checked on the way out (`parseRegistry` plus the host
  * guard), not only on the way in: a cache is bytes on disk, and bytes on disk

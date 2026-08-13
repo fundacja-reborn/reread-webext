@@ -22,7 +22,6 @@
   "action_download": { "message": "Pobierz" },
   "action_cancel": { "message": "Anuluj" },
   "action_open": { "message": "Otwórz" },
-  "action_refresh": { "message": "Odśwież" },
   "action_update": { "message": "Aktualizuj" },
 
   "error_engine_missing": { "message": "Nie ma jeszcze silnika tłumaczeń - to wydanie nie tłumaczy." },
@@ -443,7 +442,7 @@
 
   "options_title": { "message": "re/read - ustawienia" },
   "options_local_intro": {
-    "message": "Wszystko, co robi re/read, dzieje się na tym urządzeniu: tłumaczenie, słownik, czytelnia, zapisane frazy. Nic z tego, co czytasz ani zaznaczasz, nigdzie nie jest wysyłane. Sieć służy dwóm rzeczom, obu na tej stronie: pobraniom, które klikasz - model albo słownik - i odświeżeniu listy modeli przy jej otwarciu. Zawsze spod dwóch adresów zapisanych w paczce, i niczemu więcej."
+    "message": "Wszystko, co robi re/read, dzieje się na tym urządzeniu: tłumaczenie, słownik, czytelnia, zapisane frazy. Nic z tego, co czytasz ani zaznaczasz, nigdzie nie jest wysyłane. Sieć służy dwóm rzeczom, obu na tej stronie i obu na twoje kliknięcie: pobraniu modelu albo słownika i aktualizacji listy modeli. Zawsze spod dwóch adresów zapisanych w paczce, i niczemu więcej."
   },
   "options_first_steps_heading": { "message": "Pierwsze kroki" },
   "options_first_steps_intro": {
@@ -470,17 +469,17 @@
   },
   "options_models_heading": { "message": "Modele tłumaczeniowe" },
   "options_models_intro": {
-    "message": "Model to to, co zamienia jeden język w drugi; na każdy kierunek przypada jeden. Przygotowuje je i udostępnia Mozilla - to te same modele, którymi Firefox sam tłumaczy strony. Nic nie jest tłumaczone, dopóki modelu czytanej pary nie ma tutaj, na tym urządzeniu. Wypisany jest każdy kierunek, który publikuje Mozilla; para, którą czytasz, i wszystko już zapisane wypływają na górę."
+    "message": "Poniższe modele przygotowuje i udostępnia Mozilla - to te same modele, którymi Firefox sam tłumaczy strony. Aby rozszerzenie re/read mogło działać - pobierz model dla par języków, które chcesz tłumaczyć (np. en -> pl)."
   },
+  "options_update_list": { "message": "Zaktualizuj listę" },
+  "options_list_from": { "message": "- poniższa lista modeli tłumaczeniowych jest z dnia" },
+  "options_list_refresh_hint": { "message": "Kliknij przycisk, aby pobrać aktualną listę modeli." },
   "options_filter_placeholder": { "message": "Filtruj po języku lub kodzie" },
   "options_filter_models_aria": { "message": "Filtruj listę modeli tłumaczeniowych" },
   "options_filter_dictionaries_aria": { "message": "Filtruj listę słowników" },
   "options_model_note_from": { "message": "Modele pobierane są z" },
-  "options_model_note_checked": {
-    "message": "- to tam publikuje je Mozilla. Sama lista przychodzi z tego samego miejsca: ta strona prosi o świeżą przy otwarciu, a to, co widzisz, to lista z dnia"
-  },
   "options_model_note_rest": {
-    "message": "- bez sieci zostaje ostatnia odpowiedź, z datą. Pobrany plik jest trzymany za słowo ze wszystkiego, co o nim zadeklarowano - rozmiary, suma kontrolna Mozilli tam, gdzie ją publikują - a potem próbnie ładowany do silnika tłumaczeń, zanim cokolwiek zostanie zapisane: co nie przejdzie któregokolwiek z tych progów, jest wyrzucane, a nie zachowywane. Nic o tobie nie jest wysyłane: zapytania mówią, która lista i który model, i nic więcej. Ten host i host katalogu słowników poniżej to jedyne dwa miejsca, z którymi to rozszerzenie kiedykolwiek się łączy."
+    "message": "- to tam publikuje je Mozilla. Gdy aktualizujesz listę, nic o tobie nie jest wysyłane - zapytanie pobiera jedynie świeżą listę modeli. Ten host i host katalogu słowników poniżej to jedyne dwa miejsca, z którymi to rozszerzenie kiedykolwiek może się łączyć - ale tylko gdy świadomie klikniesz odświeżenie listy, pobranie modelu lub słownika."
   },
   "options_add_model_heading": { "message": "Dodaj model z plików" },
   "options_add_model_summary": {

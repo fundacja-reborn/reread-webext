@@ -26,7 +26,6 @@
   "action_download": { "message": "Download" },
   "action_cancel": { "message": "Cancel" },
   "action_open": { "message": "Open" },
-  "action_refresh": { "message": "Refresh" },
   "action_update": { "message": "Update" },
 
   "error_engine_missing": { "message": "No translation engine yet - this build cannot translate." },
@@ -339,7 +338,7 @@
 
   "options_title": { "message": "re/read - settings" },
   "options_local_intro": {
-    "message": "Everything re/read does happens on this device: translating, the dictionary, the reading list, your saved phrases. Nothing you read or select is ever sent anywhere. The network serves two things, both on this page: the downloads you press - a model or a dictionary - and refreshing the list of models when the page opens. Always from the two addresses written into this package, and nothing else."
+    "message": "Everything re/read does happens on this device: translating, the dictionary, the reading list, your saved phrases. Nothing you read or select is ever sent anywhere. The network serves two things, both on this page and both at your press: downloading a model or a dictionary, and updating the list of models. Always from the two addresses written into this package, and nothing else."
   },
   "options_first_steps_heading": { "message": "First steps" },
   "options_first_steps_intro": {
@@ -370,20 +369,26 @@
   },
   "options_models_heading": { "message": "Translation models" },
   "options_models_intro": {
-    "message": "A model is what turns one language into another, and there is one per direction. Mozilla builds and publishes them - the same models Firefox itself translates pages with. Nothing is translated until the model for the pair you are reading is here, on this device. Every direction Mozilla publishes is listed; the pair you are reading and anything already stored float to the top."
+    "message": "The models below are built and published by Mozilla - the same models Firefox itself translates pages with. For re/read to work, download a model for the language pairs you want to translate (for example en -> pl)."
   },
+  "options_update_list": {
+    "message": "Update the list",
+    "description": "The button that fetches today's list of models - the one network request no download makes."
+  },
+  "options_list_from": {
+    "message": "- the list of translation models below is from",
+    "description": "Follows the update button; the date stands after this part as its own element, then options_list_refresh_hint. Each part must read on from the last across a plain space - no part starts or ends with whitespace."
+  },
+  "options_list_refresh_hint": { "message": "Press the button to fetch the current list." },
   "options_filter_placeholder": { "message": "Filter by language or code" },
   "options_filter_models_aria": { "message": "Filter the list of translation models" },
   "options_filter_dictionaries_aria": { "message": "Filter the list of dictionaries" },
   "options_model_note_from": {
     "message": "Model downloads come from",
-    "description": "First third of the note around the host and date, which stand between the parts as page elements. Each part must read on from the last across a plain space - no part starts or ends with whitespace."
-  },
-  "options_model_note_checked": {
-    "message": "- where Mozilla publishes them. The list itself comes from the same place: this page asks for a fresh one when it opens, and what you see is the list as of"
+    "description": "First half of the note around the host, which stands between the parts as a page element. Each part must read on from the last across a plain space - no part starts or ends with whitespace."
   },
   "options_model_note_rest": {
-    "message": "- with no network, the last answer stands, dated. A downloaded file is held to everything declared about it - sizes, Mozilla's own checksum where one is published - and then trial-loaded into the translation engine before anything is stored: what fails any of it is thrown away rather than kept. Nothing about you is sent: the requests say which list and which model, and nothing else. This host and the dictionary catalogue's below are the only two places this extension ever contacts."
+    "message": "- where Mozilla publishes them. When you update the list, nothing about you is sent - the request only fetches the fresh list of models. This host and the dictionary catalogue's below are the only two places this extension can ever contact - and only when you knowingly press to refresh the list, to download a model or a dictionary."
   },
   "options_add_model_heading": { "message": "Add a model from files" },
   "options_add_model_summary": {
