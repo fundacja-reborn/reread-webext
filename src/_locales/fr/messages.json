@@ -378,9 +378,12 @@
     "message": "- c'est là que Mozilla les publie - à des adresses écrites dans ce paquet. Chaque fichier est vérifié contre une somme de contrôle relevée ici le"
   },
   "options_model_note_rest": {
-    "message": "- tout ce qui ne correspond pas est jeté plutôt qu'enregistré. Rien sur vous n'est envoyé : la requête dit quel modèle, et rien d'autre. Cet hôte et celui du catalogue de dictionnaires plus bas sont les deux seuls endroits que cette extension contacte jamais, et aucun avant que vous n'appuyiez sur Télécharger."
+    "message": "- tout ce qui ne correspond pas est jeté plutôt qu'enregistré. Une adresse ici désigne une version publiée d'un modèle, et cette version ne change jamais - quand Mozilla en publie une plus récente, elle paraît à une nouvelle adresse, qui arrive avec une mise à jour de cette extension. Rien sur vous n'est envoyé : la requête dit quel modèle, et rien d'autre. Cet hôte et celui du catalogue de dictionnaires plus bas sont les deux seuls endroits que cette extension contacte jamais, et aucun avant que vous n'appuyiez sur Télécharger."
   },
   "options_add_model_heading": { "message": "Ajouter un modèle depuis des fichiers" },
+  "options_add_model_summary": {
+    "message": "Pour ajouter à la main un modèle que la liste ci-dessus ne propose pas, chargez ses fichiers ici."
+  },
   "options_add_model_intro": {
     "message": "Choisissez les trois fichiers d'une direction et ils sont enregistrés localement. Les fichiers gzip sont décompressés ici, les téléchargements servent donc tels quels :"
   },
@@ -406,6 +409,9 @@
     "message": "- contrairement aux modèles, aucune somme de contrôle ne les retient : WikDict reconstruit ses fichiers sur place, une somme relevée ici casserait donc à chaque reconstruction. À sa place : le téléchargement doit être un simple zip de fichiers StarDict, il est lu avec autant de méfiance que n'importe quel fichier ajouté à la main, et ce qu'il devient, c'est du texte dans la base locale - jamais du code. Rien sur vous n'est envoyé : la requête dit quel dictionnaire, et rien d'autre."
   },
   "options_add_dictionary_heading": { "message": "Ajouter un dictionnaire depuis des fichiers" },
+  "options_add_dictionary_summary": {
+    "message": "Pour ajouter un dictionnaire depuis vos propres fichiers - celui d'une liseuse fonctionne tel quel - chargez-les ici."
+  },
   "options_stardict_intro": { "message": "Les dictionnaires se lisent au format" },
   "options_stardict_intro_rest": {
     "message": "- les mêmes fichiers qu'une liseuse KOReader utilise ; un dictionnaire déjà sur votre liseuse fonctionne donc ici tel quel. Décompressez l'archive dans laquelle il est arrivé et choisissez les fichiers d'un dictionnaire :"

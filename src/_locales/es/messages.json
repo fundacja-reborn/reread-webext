@@ -378,9 +378,12 @@
     "message": "- ahí los publica Mozilla - desde direcciones escritas en este paquete. Cada archivo se comprueba contra una suma de control anotada aquí el"
   },
   "options_model_note_rest": {
-    "message": "- todo lo que no coincide se desecha en vez de guardarse. No se envía nada sobre ti: la petición dice qué modelo, y nada más. Este host y el del catálogo de diccionarios de abajo son los dos únicos lugares con los que esta extensión contacta jamás, y con ninguno antes de que pulses Descargar."
+    "message": "- todo lo que no coincide se desecha en vez de guardarse. Una dirección aquí nombra una versión publicada de un modelo, y esa versión no cambia nunca - cuando Mozilla publica una más nueva, aparece en una dirección nueva, que llega con una actualización de esta extensión. No se envía nada sobre ti: la petición dice qué modelo, y nada más. Este host y el del catálogo de diccionarios de abajo son los dos únicos lugares con los que esta extensión contacta jamás, y con ninguno antes de que pulses Descargar."
   },
   "options_add_model_heading": { "message": "Añadir un modelo desde archivos" },
+  "options_add_model_summary": {
+    "message": "Para añadir a mano un modelo que la lista de arriba no ofrece, carga sus archivos aquí."
+  },
   "options_add_model_intro": {
     "message": "Elige los tres archivos de una dirección y se guardan localmente. Los archivos gzip se descomprimen aquí, así que las descargas sirven tal como vienen:"
   },
@@ -406,6 +409,9 @@
     "message": "- a diferencia de los modelos no hay suma de control que los sujete: WikDict reconstruye sus archivos en el sitio, así que una suma anotada aquí se rompería con cada reconstrucción. En su lugar está esto: la descarga tiene que ser un zip simple de archivos StarDict, se lee con tanta desconfianza como cualquier archivo que añadieras a mano, y en lo que se convierte es texto en la base local - nunca código. No se envía nada sobre ti: la petición dice qué diccionario, y nada más."
   },
   "options_add_dictionary_heading": { "message": "Añadir un diccionario desde archivos" },
+  "options_add_dictionary_summary": {
+    "message": "Para añadir un diccionario desde tus propios archivos - el de un lector de libros electrónicos funciona tal cual - cárgalos aquí."
+  },
   "options_stardict_intro": { "message": "Los diccionarios se leen en el formato" },
   "options_stardict_intro_rest": {
     "message": "- los mismos archivos que usa un lector KOReader, así que un diccionario que ya esté en tu lector funciona aquí sin cambios. Descomprime el archivo en el que vino y elige los archivos de un diccionario:"

@@ -292,6 +292,36 @@ select {
   font-size: 0.9rem;
 }
 
+/* Folded sections: the by-hand paths stand behind a summary, so the page
+   reads catalogue-first and each escape hatch says when it is needed.
+   Native details/summary - no script, keyboard for free, and the closed
+   state needs no memory because closed is what it should return to. */
+.fold {
+  margin: 2rem 0;
+}
+
+.fold summary {
+  cursor: pointer;
+}
+
+.fold summary::marker {
+  color: var(--page-muted);
+}
+
+/* The heading keeps its size but sits on the marker's line, and the page
+   rhythm it usually brings moves onto the fold itself. */
+.fold summary h2 {
+  display: inline;
+  margin: 0;
+}
+
+.fold-hint {
+  display: block;
+  margin: 0.15rem 0 0;
+  color: var(--page-muted);
+  font-size: 0.9rem;
+}
+
 input[type="checkbox"] {
   margin: 0;
   accent-color: var(--page-accent);

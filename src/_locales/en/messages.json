@@ -381,9 +381,13 @@
     "message": "- where Mozilla publishes them - at addresses written down in this package. Every file is checked against a checksum that was recorded here on"
   },
   "options_model_note_rest": {
-    "message": "- anything that does not match is thrown away rather than stored. Nothing about you is sent: the request says which model, and nothing else. This host and the dictionary catalogue's below are the only two places this extension ever contacts, and neither before you press Download."
+    "message": "- anything that does not match is thrown away rather than stored. An address here names one published version of a model, and that version never changes - when Mozilla publishes a newer one, it appears at a new address, which arrives with an update of this extension. Nothing about you is sent: the request says which model, and nothing else. This host and the dictionary catalogue's below are the only two places this extension ever contacts, and neither before you press Download."
   },
   "options_add_model_heading": { "message": "Add a model from files" },
+  "options_add_model_summary": {
+    "message": "To add by hand a model the list above does not offer, load its files here.",
+    "description": "The one visible line of the folded-by-hand section - says when opening it is worth it."
+  },
   "options_add_model_intro": {
     "message": "Pick the three files of one direction and they are stored locally. Gzipped files are unpacked here, so the downloads can be used as they come:"
   },
@@ -413,6 +417,10 @@
     "message": "- unlike models there is no checksum to hold them to: WikDict rebuilds its files in place, so a sum recorded here would break with every rebuild. What stands in its place: the download must be a plain zip of StarDict files, it is read as warily as any file you would add by hand, and what it becomes is text in the local database - never code. Nothing about you is sent: the request says which dictionary, and nothing else."
   },
   "options_add_dictionary_heading": { "message": "Add a dictionary from files" },
+  "options_add_dictionary_summary": {
+    "message": "To add a dictionary from your own files - one from an e-reader works as it is - load them here.",
+    "description": "The one visible line of the folded-by-hand section - says when opening it is worth it."
+  },
   "options_stardict_intro": {
     "message": "Dictionaries are read in the",
     "description": "Followed by the bolded format name StarDict, then options_stardict_intro_rest."

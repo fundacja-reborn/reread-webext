@@ -362,9 +362,12 @@
     "message": "- dort veröffentlicht Mozilla sie - unter Adressen, die in diesem Paket stehen. Jede Datei wird gegen eine Prüfsumme geprüft, die hier festgehalten wurde am"
   },
   "options_model_note_rest": {
-    "message": "- alles, was nicht passt, wird verworfen statt gespeichert. Nichts über Sie wird gesendet: Die Anfrage nennt das Modell, sonst nichts. Dieser Host und der des Wörterbuchkatalogs weiter unten sind die einzigen zwei Orte, die diese Erweiterung je kontaktiert - und keinen davon, bevor Sie Herunterladen drücken."
+    "message": "- alles, was nicht passt, wird verworfen statt gespeichert. Eine Adresse hier benennt eine veröffentlichte Version eines Modells, und diese Version ändert sich nie - veröffentlicht Mozilla eine neuere, erscheint sie unter einer neuen Adresse, die mit einem Update dieser Erweiterung ankommt. Nichts über Sie wird gesendet: Die Anfrage nennt das Modell, sonst nichts. Dieser Host und der des Wörterbuchkatalogs weiter unten sind die einzigen zwei Orte, die diese Erweiterung je kontaktiert - und keinen davon, bevor Sie Herunterladen drücken."
   },
   "options_add_model_heading": { "message": "Modell aus Dateien hinzufügen" },
+  "options_add_model_summary": {
+    "message": "Um von Hand ein Modell hinzuzufügen, das die Liste oben nicht anbietet, laden Sie seine Dateien hier."
+  },
   "options_add_model_intro": {
     "message": "Wählen Sie die drei Dateien einer Richtung, und sie werden lokal gespeichert. Gzip-Dateien werden hier entpackt, die Downloads taugen also so, wie sie kommen:"
   },
@@ -390,6 +393,9 @@
     "message": "- anders als bei Modellen gibt es keine Prüfsumme, die sie festhält: WikDict baut seine Dateien an Ort und Stelle neu, eine hier festgehaltene Summe zerbräche also mit jedem Neubau. An ihrer Stelle steht: Der Download muss ein schlichtes Zip aus StarDict-Dateien sein, er wird so misstrauisch gelesen wie jede von Hand hinzugefügte Datei, und was aus ihm wird, ist Text in der lokalen Datenbank - niemals Code. Nichts über Sie wird gesendet: Die Anfrage nennt das Wörterbuch, sonst nichts."
   },
   "options_add_dictionary_heading": { "message": "Wörterbuch aus Dateien hinzufügen" },
+  "options_add_dictionary_summary": {
+    "message": "Um ein Wörterbuch aus eigenen Dateien hinzuzufügen - eines vom E-Reader funktioniert unverändert - laden Sie sie hier."
+  },
   "options_stardict_intro": { "message": "Wörterbücher werden im Format" },
   "options_stardict_intro_rest": {
     "message": "gelesen - dieselben Dateien, die ein KOReader-Lesegerät verwendet; ein Wörterbuch, das schon auf Ihrem Lesegerät liegt, funktioniert hier also unverändert. Entpacken Sie das Archiv, in dem es kam, und wählen Sie die Dateien eines Wörterbuchs:"
