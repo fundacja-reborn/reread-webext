@@ -314,11 +314,20 @@ body.reader {
 }
 
 /* Export and import act on the whole list, so they stand under it rather than
-   by any row - and they are interface, not reading, like the segments. */
+   by any row - and they are interface, not reading, like the segments. The
+   margin holds them clearly apart from the last row: they belong to the list,
+   not to the article that happens to end it. */
 .library-transfer {
-  margin-top: 1.5rem;
+  margin-top: 2.5rem;
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   font-size: 0.85rem;
+}
+
+/* A footnote to the buttons, not a paragraph of the page: one step below the
+   interface size the block already speaks at. (`page.css` sizes hints in rem,
+   which here would land *above* the block's own size.) */
+.library-transfer .hint {
+  font-size: 0.8rem;
 }
 
 .library-transfer .transfer {

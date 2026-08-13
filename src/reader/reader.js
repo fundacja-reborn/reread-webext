@@ -53,7 +53,8 @@ import {
   putArticle,
   setReadAt,
 } from "../lib/store/articles.js";
-import { Segment, emptySentence, listedRows, savedArticle } from "../lib/store/saved-article.js";
+import { Segment, emptySentence, savedArticle } from "../lib/store/saved-article.js";
+import { libraryView } from "./list-view.js";
 
 /** Vendored, loaded by its own script tag, and the only global this page uses. */
 const Readability = /** @type {ReadabilityConstructor} */ (
@@ -79,6 +80,18 @@ const librarySegments = document.getElementById("library-segments");
 const libraryNote = document.getElementById("library-note");
 const libraryEmpty = document.getElementById("library-empty");
 const libraryRows = document.getElementById("library-rows");
+const libraryFilterLine = document.getElementById("library-filter-line");
+const libraryFilter = /** @type {HTMLInputElement | null} */ (
+  document.getElementById("library-filter")
+);
+const libraryPager = document.getElementById("library-pager");
+const libraryPageLabel = document.getElementById("library-page-label");
+const libraryPrev = /** @type {HTMLButtonElement | null} */ (
+  document.getElementById("library-prev")
+);
+const libraryNext = /** @type {HTMLButtonElement | null} */ (
+  document.getElementById("library-next")
+);
 const exportButton = /** @type {HTMLButtonElement | null} */ (
   document.getElementById("library-export")
 );
@@ -117,6 +130,15 @@ let shown = null;
  * @type {import("../lib/store/saved-article.js").SegmentValue}
  */
 let segment = Segment.UNREAD;
+
+/**
+ * What the filter box holds and which page of the result is in view. The
+ * query is not the hidden state D-h forbids - the box shows it - and the page
+ * clamps itself against the list on every render (`libraryView`), so a delete
+ * or a narrowing filter can never leave a blank page on screen.
+ */
+let libraryQuery = "";
+let libraryPage = 1;
 
 /**
  * Counts the times the view changed. An async entry takes the current count
@@ -372,7 +394,8 @@ async function showLibrary() {
 async function refreshLibrary() {
   if (libraryEmpty === null || libraryRows === null) return;
   const metas = await listArticles();
-  const rows = listedRows(metas, segment);
+  const view = libraryView(metas, { segment, query: libraryQuery, page: libraryPage });
+  libraryPage = view.page;
 
   for (const button of librarySegments?.querySelectorAll("button[data-segment]") ?? []) {
     button.setAttribute("aria-pressed", String(button.getAttribute("data-segment") === segment));
@@ -383,18 +406,42 @@ async function refreshLibrary() {
   // it. Over an empty list the empty sentence carries the same promise.
   if (libraryNote !== null) libraryNote.hidden = metas.length === 0;
 
+  // The filter follows the note's rule: over a list with nothing saved it
+  // would be a control with nothing to hold.
+  if (libraryFilterLine !== null) libraryFilterLine.hidden = metas.length === 0;
+
   // Exporting nothing would download an empty file; the button says so first.
   // On whether anything is saved at all, like the note - not on the segment.
   if (exportButton !== null) exportButton.disabled = metas.length === 0;
 
-  if (rows.length === 0) {
-    libraryEmpty.textContent = emptySentence(metas.length, segment);
+  if (view.rows.length === 0) {
+    // Two kinds of nothing, two sentences: a segment with nothing in it, or
+    // a filter that ruled everything out.
+    libraryEmpty.textContent =
+      view.inSegment > 0 ? t("reader_filter_no_match") : emptySentence(metas.length, segment);
     libraryEmpty.hidden = false;
   } else {
     libraryEmpty.hidden = true;
   }
 
-  libraryRows.replaceChildren(...rows.map(libraryRow));
+  libraryRows.replaceChildren(...view.rows.map(libraryRow));
+  renderLibraryPager(view);
+}
+
+/**
+ * @param {{ page: number, pages: number }} view
+ */
+function renderLibraryPager(view) {
+  if (libraryPager === null) return;
+  libraryPager.hidden = view.pages <= 1;
+  if (libraryPageLabel !== null) {
+    libraryPageLabel.textContent = t("pager_page_of", [
+      view.page.toLocaleString(),
+      view.pages.toLocaleString(),
+    ]);
+  }
+  if (libraryPrev !== null) libraryPrev.disabled = view.page <= 1;
+  if (libraryNext !== null) libraryNext.disabled = view.page >= view.pages;
 }
 
 /**
@@ -745,8 +792,30 @@ librarySegments?.addEventListener("click", (event) => {
   const choice = target.closest("button[data-segment]")?.getAttribute("data-segment");
   if (choice === Segment.UNREAD || choice === Segment.READ) {
     segment = choice;
+    // A different segment is a different list; page three of the old one
+    // would be a position in a list no longer on screen.
+    libraryPage = 1;
     void refreshLibrary();
   }
+});
+
+libraryFilter?.addEventListener("input", () => {
+  if (libraryFilter === null) return;
+  libraryQuery = libraryFilter.value;
+  // Typing means "show me what matches", and that starts at the beginning -
+  // the clamp would only catch a page that no longer exists.
+  libraryPage = 1;
+  void refreshLibrary();
+});
+
+libraryPrev?.addEventListener("click", () => {
+  libraryPage -= 1;
+  void refreshLibrary();
+});
+
+libraryNext?.addEventListener("click", () => {
+  libraryPage += 1;
+  void refreshLibrary();
 });
 
 libraryRows?.addEventListener("click", (event) => {

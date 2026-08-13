@@ -70,15 +70,15 @@
     "placeholders": { "button": { "content": "$1", "example": "Save" } }
   },
   "vocab_filter_no_match": { "message": "No saved phrase matches that." },
-  "vocab_page_of": {
+  "pager_page_of": {
     "message": "Page $PAGE$ of $PAGES$",
     "placeholders": {
       "page": { "content": "$1", "example": "3" },
       "pages": { "content": "$2", "example": "13" }
     }
   },
-  "vocab_prev": { "message": "Previous" },
-  "vocab_next": { "message": "Next" },
+  "pager_prev": { "message": "Previous" },
+  "pager_next": { "message": "Next" },
   "action_export": { "message": "Export" },
   "action_import": { "message": "Import" },
   "vocab_transfer_note": {
@@ -159,6 +159,9 @@
   },
   "reader_empty_all_read": { "message": "Nothing left to read - everything saved is marked as read." },
   "reader_empty_none_read": { "message": "Nothing is marked as read yet." },
+  "reader_filter_placeholder": { "message": "Filter by title or site" },
+  "reader_filter_aria": { "message": "Filter the reading list" },
+  "reader_filter_no_match": { "message": "No saved article matches that." },
   "reader_library_note": {
     "message": "Everything here is a copy stored on this device - it opens without a connection and stays even if the original page goes away."
   },

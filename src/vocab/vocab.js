@@ -261,7 +261,7 @@ function renderPager(view) {
   if (pager === null) return;
   pager.hidden = view.pages <= 1;
   if (pageLabel !== null) {
-    pageLabel.textContent = t("vocab_page_of", [view.page.toLocaleString(), view.pages.toLocaleString()]);
+    pageLabel.textContent = t("pager_page_of", [view.page.toLocaleString(), view.pages.toLocaleString()]);
   }
   if (prevButton !== null) prevButton.disabled = view.page <= 1;
   if (nextButton !== null) nextButton.disabled = view.page >= view.pages;

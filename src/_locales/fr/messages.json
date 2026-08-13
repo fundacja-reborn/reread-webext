@@ -63,15 +63,15 @@
     "placeholders": { "button": { "content": "$1", "example": "Enregistrer" } }
   },
   "vocab_filter_no_match": { "message": "Aucune phrase enregistrée ne correspond." },
-  "vocab_page_of": {
+  "pager_page_of": {
     "message": "Page $PAGE$ sur $PAGES$",
     "placeholders": {
       "page": { "content": "$1", "example": "3" },
       "pages": { "content": "$2", "example": "13" }
     }
   },
-  "vocab_prev": { "message": "Précédente" },
-  "vocab_next": { "message": "Suivante" },
+  "pager_prev": { "message": "Précédente" },
+  "pager_next": { "message": "Suivante" },
   "action_export": { "message": "Exporter" },
   "action_import": { "message": "Importer" },
   "vocab_transfer_note": {
@@ -151,6 +151,9 @@
   },
   "reader_empty_all_read": { "message": "Plus rien à lire - tout ce qui est enregistré est marqué comme lu." },
   "reader_empty_none_read": { "message": "Rien n'est encore marqué comme lu." },
+  "reader_filter_placeholder": { "message": "Filtrer par titre ou par site" },
+  "reader_filter_aria": { "message": "Filtrer la liste de lecture" },
+  "reader_filter_no_match": { "message": "Aucun article enregistré ne correspond." },
   "reader_library_note": {
     "message": "Tout ici est une copie gardée sur cet appareil - elle s'ouvre sans connexion et reste, même si la page d'origine disparaît."
   },
