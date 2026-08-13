@@ -371,6 +371,14 @@ async function renderModels() {
   if (container === null) return;
 
   const rows = orderForDisplay(modelRows(await listModels()), config);
+
+  // The first-steps signpost stands only while not one model is stored -
+  // whatever the pair. It is redrawn here because every edge a model crosses
+  // (downloaded, added from files, deleted) already passes through this
+  // render, and the block must fall with the first arrival.
+  const firstSteps = document.getElementById("first-steps");
+  if (firstSteps !== null) firstSteps.hidden = rows.some((row) => row.installed !== null);
+
   container.replaceChildren();
 
   if (rows.length === 0) {
@@ -910,6 +918,10 @@ async function addSelectedDictionary() {
 async function render() {
   config = await readConfig();
   os = await platformOs();
+  // Android has no toolbar to pin anything to; the step disappears rather
+  // than asking for the impossible.
+  const pin = document.getElementById("first-steps-pin");
+  if (pin !== null) pin.hidden = os === "android";
   fill("version", webext().runtime.getManifest().version);
   renderPair(modelRows(await listModels()));
   renderReaderOnly();
@@ -919,6 +931,8 @@ async function render() {
   const { source, checkedAt } = registrySource();
   const host = source === "" ? "" : new URL(source).host;
   fill("model-host", host);
+  const modelSource = document.getElementById("model-host");
+  if (modelSource instanceof HTMLAnchorElement && source !== "") modelSource.href = source;
   fill("model-checked", checkedAt);
 
   const dictionaries = catalogSource();

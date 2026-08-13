@@ -42,6 +42,9 @@
 
   "popup_site_toggle_title": { "message": "Si re/read fonctionne sur ce site" },
   "popup_no_page": { "message": "re/read ne fonctionne pas sur cette page." },
+  "popup_no_model": {
+    "message": "Aucun modèle de traduction sur cet appareil pour l'instant - appuyez ici pour en choisir un dans les paramètres."
+  },
   "popup_mode_reader_only": { "message": "Mode : seulement dans le lecteur" },
 
   "vocab_title": { "message": "re/read - phrases enregistrées" },
@@ -340,12 +343,28 @@
   "options_local_intro": {
     "message": "Tout ce que fait re/read se passe sur cet appareil : la traduction, le dictionnaire, la liste de lecture, les phrases enregistrées. Rien de ce que vous lisez ou sélectionnez n'est envoyé nulle part. Le seul réseau que cette extension utilise, ce sont les téléchargements de cette page - un modèle de traduction choisi par vous, ou un dictionnaire, jamais sans votre clic."
   },
+  "options_first_steps_heading": { "message": "Premiers pas" },
+  "options_first_steps_intro": {
+    "message": "Rien ne se traduit encore - le modèle qui s'en chargerait n'est pas sur cet appareil. La mise en place prend une minute :"
+  },
+  "options_first_steps_pair": {
+    "message": "Réglez la paire de langues juste en dessous : la langue que vous lisez, et la langue vers laquelle elle est traduite."
+  },
+  "options_first_steps_model": {
+    "message": "Sous « Modèles de traduction », appuyez sur « Télécharger » à côté de cette paire. Le modèle est enregistré sur cet appareil et traduit désormais hors ligne."
+  },
+  "options_first_steps_dictionary": {
+    "message": "Le deuxième appui en vaut la peine : un dictionnaire pour la même paire, sous « Obtenir un dictionnaire » - les mots isolés reçoivent alors des réponses plus complètes qu'une traduction seule."
+  },
+  "options_first_steps_pin": {
+    "message": "Enfin, épinglez re/read à la barre d'outils - d'ici là, son bouton se cache derrière l'icône en forme de pièce de puzzle. Derrière le bouton : le lecteur, la liste de lecture hors ligne, vos phrases enregistrées et un interrupteur pour le site où vous êtes."
+  },
   "options_version": { "message": "Version" },
   "options_engine": { "message": "Moteur" },
   "options_engine_value": { "message": "Bergamot, dans le paquet - traduit hors ligne" },
   "options_reader_only": { "message": "Seulement dans le lecteur" },
   "options_reader_only_hint": {
-    "message": "Quand c'est activé, sélectionner sur une page ordinaire ne propose qu'une chose : l'ouvrir dans le lecteur. Traduire, garder et souligner se passent là. Sur Android c'est activé au départ - une bulle sur la sélection et le menu de copie du téléphone se disputent la même place."
+    "message": "Quand c'est activé, sélectionner une phrase ou un mot sur une page ordinaire ne propose qu'une chose : ouvrir la page dans le lecteur. La traduction, l'enregistrement et le soulignement se font là (plus clair et plus lisible). Sur Android, l'option est activée par défaut."
   },
   "options_models_heading": { "message": "Modèles de traduction" },
   "options_models_intro": {
@@ -359,9 +378,12 @@
     "message": "- c'est là que Mozilla les publie - à des adresses écrites dans ce paquet. Chaque fichier est vérifié contre une somme de contrôle relevée ici le"
   },
   "options_model_note_rest": {
-    "message": "- tout ce qui ne correspond pas est jeté plutôt qu'enregistré. Rien sur vous n'est envoyé : la requête dit quel modèle, et rien d'autre. Cet hôte et celui du catalogue de dictionnaires plus bas sont les deux seuls endroits que cette extension contacte jamais, et aucun avant que vous n'appuyiez sur Télécharger."
+    "message": "- tout ce qui ne correspond pas est jeté plutôt qu'enregistré. Une adresse ici désigne une version publiée d'un modèle, et cette version ne change jamais - quand Mozilla en publie une plus récente, elle paraît à une nouvelle adresse, qui arrive avec une mise à jour de cette extension. Rien sur vous n'est envoyé : la requête dit quel modèle, et rien d'autre. Cet hôte et celui du catalogue de dictionnaires plus bas sont les deux seuls endroits que cette extension contacte jamais, et aucun avant que vous n'appuyiez sur Télécharger."
   },
   "options_add_model_heading": { "message": "Ajouter un modèle depuis des fichiers" },
+  "options_add_model_summary": {
+    "message": "Pour ajouter à la main un modèle que la liste ci-dessus ne propose pas, chargez ses fichiers ici."
+  },
   "options_add_model_intro": {
     "message": "Choisissez les trois fichiers d'une direction et ils sont enregistrés localement. Les fichiers gzip sont décompressés ici, les téléchargements servent donc tels quels :"
   },
@@ -387,6 +409,9 @@
     "message": "- contrairement aux modèles, aucune somme de contrôle ne les retient : WikDict reconstruit ses fichiers sur place, une somme relevée ici casserait donc à chaque reconstruction. À sa place : le téléchargement doit être un simple zip de fichiers StarDict, il est lu avec autant de méfiance que n'importe quel fichier ajouté à la main, et ce qu'il devient, c'est du texte dans la base locale - jamais du code. Rien sur vous n'est envoyé : la requête dit quel dictionnaire, et rien d'autre."
   },
   "options_add_dictionary_heading": { "message": "Ajouter un dictionnaire depuis des fichiers" },
+  "options_add_dictionary_summary": {
+    "message": "Pour ajouter un dictionnaire depuis vos propres fichiers - celui d'une liseuse fonctionne tel quel - chargez-les ici."
+  },
   "options_stardict_intro": { "message": "Les dictionnaires se lisent au format" },
   "options_stardict_intro_rest": {
     "message": "- les mêmes fichiers qu'une liseuse KOReader utilise ; un dictionnaire déjà sur votre liseuse fonctionne donc ici tel quel. Décompressez l'archive dans laquelle il est arrivé et choisissez les fichiers d'un dictionnaire :"

@@ -42,6 +42,9 @@
 
   "popup_site_toggle_title": { "message": "Czy re/read działa w tej witrynie" },
   "popup_no_page": { "message": "re/read nie działa na tej stronie." },
+  "popup_no_model": {
+    "message": "Na tym urządzeniu nie ma jeszcze modelu tłumaczeniowego - naciśnij tutaj i wybierz go w ustawieniach."
+  },
   "popup_mode_reader_only": { "message": "Tryb: tylko w czytniku" },
 
   "vocab_title": { "message": "re/read - zapisane frazy" },
@@ -440,12 +443,28 @@
   "options_local_intro": {
     "message": "Wszystko, co robi re/read, dzieje się na tym urządzeniu: tłumaczenie, słownik, czytelnia, zapisane frazy. Nic z tego, co czytasz ani zaznaczasz, nigdzie nie jest wysyłane. Jedyna sieć, po jaką to rozszerzenie sięga, to pobrania na tej stronie - wybrany przez ciebie model tłumaczeniowy albo słownik, nigdy bez twojego kliknięcia."
   },
+  "options_first_steps_heading": { "message": "Pierwsze kroki" },
+  "options_first_steps_intro": {
+    "message": "Nic się jeszcze nie tłumaczy - modelu, który by to robił, nie ma na tym urządzeniu. Przygotowanie zajmuje minutę:"
+  },
+  "options_first_steps_pair": {
+    "message": "Ustaw parę językową tuż poniżej: język, w którym czytasz, i język, na który ma być tłumaczone."
+  },
+  "options_first_steps_model": {
+    "message": "W sekcji „Modele tłumaczeniowe” naciśnij „Pobierz” przy tej parze. Model zostaje zapisany na tym urządzeniu i odtąd tłumaczy offline."
+  },
+  "options_first_steps_dictionary": {
+    "message": "Warte drugiego naciśnięcia: słownik dla tej samej pary, w sekcji „Pobierz słownik” - pojedyncze słowa dostają wtedy pełniejsze odpowiedzi niż samo tłumaczenie."
+  },
+  "options_first_steps_pin": {
+    "message": "Na koniec przypnij re/read do paska narzędzi - dopóki tego nie zrobisz, przycisk kryje się za ikoną puzzla. Za przyciskiem: czytnik, czytelnia offline, zapisane frazy i wyłącznik witryny, na której jesteś."
+  },
   "options_version": { "message": "Wersja" },
   "options_engine": { "message": "Silnik" },
   "options_engine_value": { "message": "Bergamot, wewnątrz paczki - tłumaczy offline" },
   "options_reader_only": { "message": "Tylko w czytniku" },
   "options_reader_only_hint": {
-    "message": "Gdy to włączone, zaznaczenie na zwykłej stronie proponuje jedno: otwarcie jej w czytniku. Tłumaczenie, zapisywanie i podkreślanie dzieją się tam. Na Androidzie zaczyna włączone - dymek nad zaznaczeniem i systemowe menu kopiowania walczą o to samo miejsce."
+    "message": "Gdy to jest włączone, zaznaczenie frazy lub słowa na zwykłej stronie proponuje jedno: otwarcie jej w czytniku. Tłumaczenie, zapisywanie i podkreślanie dzieją się tam (przejrzyściej i czytelniej). Na Androidzie opcja jest domyślnie włączona."
   },
   "options_models_heading": { "message": "Modele tłumaczeniowe" },
   "options_models_intro": {
@@ -459,9 +478,12 @@
     "message": "- to tam publikuje je Mozilla - spod adresów zapisanych w tej paczce. Każdy plik jest porównywany z sumą kontrolną zanotowaną tutaj dnia"
   },
   "options_model_note_rest": {
-    "message": "- wszystko, co się z nią nie zgadza, jest wyrzucane, a nie zapisywane. Nic o tobie nie jest wysyłane: zapytanie mówi, który model, i nic więcej. Ten host i host katalogu słowników poniżej to jedyne dwa miejsca, z którymi to rozszerzenie kiedykolwiek się łączy - i z żadnym przed naciśnięciem Pobierz."
+    "message": "- wszystko, co się z nią nie zgadza, jest wyrzucane, a nie zapisywane. Adres wskazuje tu jedną opublikowaną wersję modelu i ta wersja nigdy się nie zmienia - gdy Mozilla publikuje nowszą, pojawia się ona pod nowym adresem, który przychodzi z aktualizacją tego rozszerzenia. Nic o tobie nie jest wysyłane: zapytanie mówi, który model, i nic więcej. Ten host i host katalogu słowników poniżej to jedyne dwa miejsca, z którymi to rozszerzenie kiedykolwiek się łączy - i z żadnym przed naciśnięciem Pobierz."
   },
   "options_add_model_heading": { "message": "Dodaj model z plików" },
+  "options_add_model_summary": {
+    "message": "Jeśli chcesz ręcznie dodać inny model niż dostępne na liście powyżej, wczytaj jego pliki tutaj."
+  },
   "options_add_model_intro": {
     "message": "Wskaż trzy pliki jednego kierunku, a zostaną zapisane lokalnie. Pliki gzip są rozpakowywane na miejscu, więc pobrane archiwa nadają się takie, jakie są:"
   },
@@ -475,7 +497,7 @@
   "options_dictionaries_intro_rest": {
     "message": "ma dwa hasła, a model musi wybrać jedno z nich, nie wiedząc, o które ci chodziło; słownik pokazuje oba. Hasła pojawiają się w drugiej warstwie dymka, pod zdaniem."
   },
-  "options_get_dictionary_heading": { "message": "Zdobądź słownik" },
+  "options_get_dictionary_heading": { "message": "Pobierz słownik" },
   "options_wikdict_intro": {
     "message": "buduje słowniki z Wikisłownika (CC BY-SA) dla każdej pary poniżej. Jedno naciśnięcie pobiera archiwum, rozpakowuje je na miejscu i zapisuje; języki odczytywane są z pary, a słownik pojawia się na liście powyżej, gotów odpowiadać."
   },
@@ -487,6 +509,9 @@
     "message": "- w odróżnieniu od modeli nie ma sumy kontrolnej, która by ich pilnowała: WikDict przebudowuje swoje pliki w miejscu, więc suma zanotowana tutaj psułaby się z każdą przebudową. W jej miejscu stoi to: pobrany plik musi być zwykłym zipem plików StarDict, jest czytany równie nieufnie jak każdy plik dodany ręcznie, a tym, czym się staje, jest tekst w lokalnej bazie - nigdy kod. Nic o tobie nie jest wysyłane: zapytanie mówi, który słownik, i nic więcej."
   },
   "options_add_dictionary_heading": { "message": "Dodaj słownik z plików" },
+  "options_add_dictionary_summary": {
+    "message": "Jeśli chcesz dodać słownik z własnych plików - ten z czytnika e-booków zadziała bez zmian - wczytaj je tutaj."
+  },
   "options_stardict_intro": { "message": "Słowniki czytane są w formacie" },
   "options_stardict_intro_rest": {
     "message": "- to te same pliki, których używa czytnik KOReader, więc słownik obecny już na twoim czytniku działa tu bez zmian. Rozpakuj archiwum, w którym przyszedł, i wskaż pliki jednego słownika:"

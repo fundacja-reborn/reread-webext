@@ -42,6 +42,9 @@
 
   "popup_site_toggle_title": { "message": "Si re/read funciona en este sitio" },
   "popup_no_page": { "message": "re/read no funciona en esta página." },
+  "popup_no_model": {
+    "message": "Todavía no hay ningún modelo de traducción en este dispositivo - pulsa aquí para elegir uno en los ajustes."
+  },
   "popup_mode_reader_only": { "message": "Modo: solo en el lector" },
 
   "vocab_title": { "message": "re/read - frases guardadas" },
@@ -340,12 +343,28 @@
   "options_local_intro": {
     "message": "Todo lo que hace re/read ocurre en este dispositivo: la traducción, el diccionario, la lista de lectura, tus frases guardadas. Nada de lo que lees o seleccionas se envía a ninguna parte. La única red que usa esta extensión son las descargas de esta página - un modelo de traducción elegido por ti, o un diccionario, nunca sin tu clic."
   },
+  "options_first_steps_heading": { "message": "Primeros pasos" },
+  "options_first_steps_intro": {
+    "message": "Todavía no se traduce nada - el modelo que lo haría no está en este dispositivo. La puesta en marcha lleva un minuto:"
+  },
+  "options_first_steps_pair": {
+    "message": "Ajusta el par de idiomas justo debajo: el idioma en el que lees y el idioma al que se traduce."
+  },
+  "options_first_steps_model": {
+    "message": "Bajo «Modelos de traducción», pulsa «Descargar» junto a ese par. El modelo queda guardado en este dispositivo y desde entonces traduce sin conexión."
+  },
+  "options_first_steps_dictionary": {
+    "message": "Merece la segunda pulsación: un diccionario para el mismo par, bajo «Conseguir un diccionario» - las palabras sueltas reciben entonces respuestas más completas que una traducción sola."
+  },
+  "options_first_steps_pin": {
+    "message": "Por último, fija re/read a la barra de herramientas - hasta entonces su botón se esconde tras el icono de la pieza de puzle. Tras el botón: el lector, la lista de lectura sin conexión, tus frases guardadas y un interruptor para el sitio en el que estás."
+  },
   "options_version": { "message": "Versión" },
   "options_engine": { "message": "Motor" },
   "options_engine_value": { "message": "Bergamot, dentro del paquete - traduce sin conexión" },
   "options_reader_only": { "message": "Solo en el lector" },
   "options_reader_only_hint": {
-    "message": "Con esto activado, seleccionar en una página normal ofrece una sola cosa: abrirla en el lector. Traducir, guardar y subrayar pasan allí. En Android empieza activado - una burbuja sobre la selección y el propio menú de copiar del teléfono pelean por el mismo sitio."
+    "message": "Con esto activado, seleccionar una frase o una palabra en una página normal ofrece una sola cosa: abrir la página en el lector. Traducir, guardar y subrayar ocurren allí (más claro y más legible). En Android la opción está activada de forma predeterminada."
   },
   "options_models_heading": { "message": "Modelos de traducción" },
   "options_models_intro": {
@@ -359,9 +378,12 @@
     "message": "- ahí los publica Mozilla - desde direcciones escritas en este paquete. Cada archivo se comprueba contra una suma de control anotada aquí el"
   },
   "options_model_note_rest": {
-    "message": "- todo lo que no coincide se desecha en vez de guardarse. No se envía nada sobre ti: la petición dice qué modelo, y nada más. Este host y el del catálogo de diccionarios de abajo son los dos únicos lugares con los que esta extensión contacta jamás, y con ninguno antes de que pulses Descargar."
+    "message": "- todo lo que no coincide se desecha en vez de guardarse. Una dirección aquí nombra una versión publicada de un modelo, y esa versión no cambia nunca - cuando Mozilla publica una más nueva, aparece en una dirección nueva, que llega con una actualización de esta extensión. No se envía nada sobre ti: la petición dice qué modelo, y nada más. Este host y el del catálogo de diccionarios de abajo son los dos únicos lugares con los que esta extensión contacta jamás, y con ninguno antes de que pulses Descargar."
   },
   "options_add_model_heading": { "message": "Añadir un modelo desde archivos" },
+  "options_add_model_summary": {
+    "message": "Para añadir a mano un modelo que la lista de arriba no ofrece, carga sus archivos aquí."
+  },
   "options_add_model_intro": {
     "message": "Elige los tres archivos de una dirección y se guardan localmente. Los archivos gzip se descomprimen aquí, así que las descargas sirven tal como vienen:"
   },
@@ -387,6 +409,9 @@
     "message": "- a diferencia de los modelos no hay suma de control que los sujete: WikDict reconstruye sus archivos en el sitio, así que una suma anotada aquí se rompería con cada reconstrucción. En su lugar está esto: la descarga tiene que ser un zip simple de archivos StarDict, se lee con tanta desconfianza como cualquier archivo que añadieras a mano, y en lo que se convierte es texto en la base local - nunca código. No se envía nada sobre ti: la petición dice qué diccionario, y nada más."
   },
   "options_add_dictionary_heading": { "message": "Añadir un diccionario desde archivos" },
+  "options_add_dictionary_summary": {
+    "message": "Para añadir un diccionario desde tus propios archivos - el de un lector de libros electrónicos funciona tal cual - cárgalos aquí."
+  },
   "options_stardict_intro": { "message": "Los diccionarios se leen en el formato" },
   "options_stardict_intro_rest": {
     "message": "- los mismos archivos que usa un lector KOReader, así que un diccionario que ya esté en tu lector funciona aquí sin cambios. Descomprime el archivo en el que vino y elige los archivos de un diccionario:"

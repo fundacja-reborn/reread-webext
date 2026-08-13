@@ -78,6 +78,20 @@ h2 {
   font-variant-numeric: tabular-nums;
 }
 
+/* A row that carries its own explanation: label and control keep the first
+   line, the note wraps below them - inside the same borders, so it can never
+   drift away from what it explains. */
+.row-wrap {
+  flex-wrap: wrap;
+}
+
+.row .row-note {
+  flex-basis: 100%;
+  margin: 0.1rem 0 0;
+  color: var(--page-muted);
+  font-size: 0.9rem;
+}
+
 .models {
   margin: 1rem 0;
   border-top: 1px solid var(--page-line);
@@ -278,6 +292,36 @@ select {
   font-size: 0.9rem;
 }
 
+/* Folded sections: the by-hand paths stand behind a summary, so the page
+   reads catalogue-first and each escape hatch says when it is needed.
+   Native details/summary - no script, keyboard for free, and the closed
+   state needs no memory because closed is what it should return to. */
+.fold {
+  margin: 2rem 0;
+}
+
+.fold summary {
+  cursor: pointer;
+}
+
+.fold summary::marker {
+  color: var(--page-muted);
+}
+
+/* The heading keeps its size but sits on the marker's line, and the page
+   rhythm it usually brings moves onto the fold itself. */
+.fold summary h2 {
+  display: inline;
+  margin: 0;
+}
+
+.fold-hint {
+  display: block;
+  margin: 0.15rem 0 0;
+  color: var(--page-muted);
+  font-size: 0.9rem;
+}
+
 input[type="checkbox"] {
   margin: 0;
   accent-color: var(--page-accent);
@@ -312,6 +356,31 @@ input[type="checkbox"] {
 
 .note strong {
   color: var(--page-fg);
+}
+
+/* The fresh-install signpost on the settings page: the note's frame, the
+   page's full color - it is instructions to act on, not an aside. Shown only
+   while no model is stored, so it earns the room it takes. */
+.first-steps {
+  margin: 1.5rem 0 2rem;
+  color: var(--page-fg);
+}
+
+.first-steps h2 {
+  margin: 0 0 0.35rem;
+}
+
+.first-steps p {
+  margin: 0.35rem 0;
+}
+
+.first-steps ol {
+  margin: 0.35rem 0;
+  padding-left: 1.4rem;
+}
+
+.first-steps li {
+  margin: 0.3rem 0;
 }
 
 a {

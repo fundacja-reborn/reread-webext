@@ -26,6 +26,37 @@
       or a dictionary, never without your press.
     </p>
 
+    <!-- The signpost for a fresh install, shown only while not one model is
+         stored: this page is long, and the person who just arrived from "no
+         model - open the settings" must not have to guess which of its
+         sections was meant. Gone the moment the first model lands. -->
+    <section id="first-steps" class="note first-steps" hidden>
+      <h2 data-i18n="options_first_steps_heading">First steps</h2>
+      <p data-i18n="options_first_steps_intro">
+        Nothing translates yet - the model that would do it is not on this device. Setting up
+        takes a minute:
+      </p>
+      <ol>
+        <li data-i18n="options_first_steps_pair">
+          Set the language pair just below: the language you read, and the language it is
+          translated into.
+        </li>
+        <li data-i18n="options_first_steps_model">
+          Under "Translation models", press "Download" next to that pair. The model is stored on
+          this device and translates offline from then on.
+        </li>
+        <li data-i18n="options_first_steps_dictionary">
+          Worth the second press: a dictionary for the same pair, under "Get a dictionary" -
+          single words then get fuller answers than a translation alone.
+        </li>
+      </ol>
+      <p id="first-steps-pin" data-i18n="options_first_steps_pin">
+        Last, pin re/read to the toolbar - until you do, its button sits behind the puzzle-piece
+        icon. Behind the button: the reader, the offline reading list, your saved phrases and a
+        switch for the site you are on.
+      </p>
+    </section>
+
     <dl class="rows">
       <div class="row"><dt data-i18n="options_version">Version</dt><dd id="version">-</dd></div>
       <div class="row">
@@ -36,21 +67,23 @@
         <dt data-i18n="options_engine">Engine</dt>
         <dd data-i18n="options_engine_value">Bergamot, inside the package - translates offline</dd>
       </div>
-      <div class="row">
+      <!-- The one row that needs a sentence of explanation carries it inside
+           its own borders: a second dd wrapping below the label and the
+           switch, so the note can never drift away from what it explains. -->
+      <div class="row row-wrap">
         <dt><label for="reader-only" data-i18n="options_reader_only">Only in the reader</label></dt>
         <dd><input type="checkbox" id="reader-only" /></dd>
+        <dd class="row-note" data-i18n="options_reader_only_hint">
+          With this on, selecting a phrase or a word on an ordinary page offers one thing: open
+          the page in the reader. Translating, saving and underlining happen there (cleaner and
+          easier to read). On Android the option is on by default.
+        </dd>
       </div>
       <div class="row">
         <dt data-i18n="saved_phrases">Saved phrases</dt>
         <dd><button type="button" id="open-vocabulary" data-i18n="action_open">Open</button></dd>
       </div>
     </dl>
-
-    <p class="hint" data-i18n="options_reader_only_hint">
-      With this on, selecting on an ordinary page offers one thing: open it in the reader.
-      Translating, keeping and underlining happen there. On Android it starts on - a bubble
-      over a selection and the phone's own copy menu fight for the same spot.
-    </p>
 
     <h2 data-i18n="options_models_heading">Translation models</h2>
 
@@ -78,46 +111,62 @@
     <p id="model-status" class="status" role="status"></p>
 
     <p class="note">
+      <!-- The host is also a door: the href becomes the address of the very
+           index the snapshot was taken from, so a reader can look at the
+           source with their own eyes. Their press, their navigation - the
+           extension itself still fetches nothing without Download. -->
       <span data-i18n="options_model_note_from">Model downloads come from</span>
-      <strong id="model-host">-</strong>
+      <a id="model-host" target="_blank" rel="noopener">-</a>
       <span data-i18n="options_model_note_checked"
         >- where Mozilla publishes them - at addresses written down in this package. Every file is
         checked against a checksum that was recorded here on</span
       >
       <strong id="model-checked">-</strong>
       <span data-i18n="options_model_note_rest"
-        >- anything that does not match is thrown away rather than stored. Nothing about you is
-        sent: the request says which model, and nothing else. This host and the dictionary
-        catalogue's below are the only two places this extension ever contacts, and neither before
-        you press Download.</span
+        >- anything that does not match is thrown away rather than stored. An address here names
+        one published version of a model, and that version never changes - when Mozilla publishes
+        a newer one, it appears at a new address, which arrives with an update of this extension.
+        Nothing about you is sent: the request says which model, and nothing else. This host and
+        the dictionary catalogue's below are the only two places this extension ever contacts, and
+        neither before you press Download.</span
       >
     </p>
 
-    <h2 data-i18n="options_add_model_heading">Add a model from files</h2>
+    <!-- Folded shut by default: the by-hand path is the escape hatch, not the
+         road, and standing open right under the list it read as a second,
+         competing way to get a model. The summary says when to open it. -->
+    <details class="fold">
+      <summary>
+        <h2 data-i18n="options_add_model_heading">Add a model from files</h2>
+        <span class="fold-hint" data-i18n="options_add_model_summary"
+          >To add by hand a model the list above does not offer, load its files here.</span
+        >
+      </summary>
 
-    <p data-i18n="options_add_model_intro">
-      Pick the three files of one direction and they are stored locally. Gzipped files are
-      unpacked here, so the downloads can be used as they come:
-    </p>
+      <p data-i18n="options_add_model_intro">
+        Pick the three files of one direction and they are stored locally. Gzipped files are
+        unpacked here, so the downloads can be used as they come:
+      </p>
 
-    <ul class="files">
-      <li><code>model.<em>enpl</em>.intgemm.alphas.bin</code></li>
-      <li><code>lex.50.50.<em>enpl</em>.s2t.bin</code></li>
-      <li><code>vocab.<em>enpl</em>.spm</code></li>
-    </ul>
+      <ul class="files">
+        <li><code>model.<em>enpl</em>.intgemm.alphas.bin</code></li>
+        <li><code>lex.50.50.<em>enpl</em>.s2t.bin</code></li>
+        <li><code>vocab.<em>enpl</em>.spm</code></li>
+      </ul>
 
-    <p>
-      <input type="file" id="model-files" multiple accept=".bin,.spm,.gz" />
-      <button type="button" id="add-model" data-i18n="options_add_model_button">Add model</button>
-    </p>
+      <p>
+        <input type="file" id="model-files" multiple accept=".bin,.spm,.gz" />
+        <button type="button" id="add-model" data-i18n="options_add_model_button">Add model</button>
+      </p>
 
-    <p id="file-status" class="status" role="status"></p>
+      <p id="file-status" class="status" role="status"></p>
 
-    <p class="note" data-i18n="options_files_note">
-      This page stays even once models download themselves: it is the way out on the day the place
-      they are downloaded from stops answering. Nothing here leaves the device, and adding a model
-      makes no network request at all.
-    </p>
+      <p class="note" data-i18n="options_files_note">
+        This page stays even once models download themselves: it is the way out on the day the place
+        they are downloaded from stops answering. Nothing here leaves the device, and adding a model
+        makes no network request at all.
+      </p>
+    </details>
 
     <h2 data-i18n="options_dictionaries_heading">Dictionaries</h2>
 
@@ -179,53 +228,63 @@
       >
     </p>
 
-    <h2 data-i18n="options_add_dictionary_heading">Add a dictionary from files</h2>
+    <!-- Folded for the same reason as the model files above: the catalogue is
+         the road, this is the door beside it. -->
+    <details class="fold">
+      <summary>
+        <h2 data-i18n="options_add_dictionary_heading">Add a dictionary from files</h2>
+        <span class="fold-hint" data-i18n="options_add_dictionary_summary"
+          >To add a dictionary from your own files - one from an e-reader works as it is - load
+          them here.</span
+        >
+      </summary>
 
-    <p>
-      <span data-i18n="options_stardict_intro">Dictionaries are read in the</span>
-      <strong>StarDict</strong>
-      <span data-i18n="options_stardict_intro_rest"
-        >format - the same files a KOReader e-reader uses, so a dictionary already on your reader
-        works here unchanged. Unpack the archive it came in and pick the files of one
-        dictionary:</span
-      >
-    </p>
+      <p>
+        <span data-i18n="options_stardict_intro">Dictionaries are read in the</span>
+        <strong>StarDict</strong>
+        <span data-i18n="options_stardict_intro_rest"
+          >format - the same files a KOReader e-reader uses, so a dictionary already on your reader
+          works here unchanged. Unpack the archive it came in and pick the files of one
+          dictionary:</span
+        >
+      </p>
 
-    <ul class="files">
-      <li><code><em>name</em>.ifo</code> <span data-i18n="options_file_ifo">- what the dictionary calls itself</span></li>
-      <li><code><em>name</em>.idx</code> <span data-i18n="options_file_idx">- the index of words</span></li>
-      <li>
-        <code><em>name</em>.dict</code> <span data-i18n="options_file_dict_or">or</span>
-        <code><em>name</em>.dict.dz</code> <span data-i18n="options_file_dict">- the entries</span>
-      </li>
-      <li><code><em>name</em>.syn</code> <span data-i18n="options_file_syn">- other spellings, when the dictionary has them</span></li>
-    </ul>
+      <ul class="files">
+        <li><code><em>name</em>.ifo</code> <span data-i18n="options_file_ifo">- what the dictionary calls itself</span></li>
+        <li><code><em>name</em>.idx</code> <span data-i18n="options_file_idx">- the index of words</span></li>
+        <li>
+          <code><em>name</em>.dict</code> <span data-i18n="options_file_dict_or">or</span>
+          <code><em>name</em>.dict.dz</code> <span data-i18n="options_file_dict">- the entries</span>
+        </li>
+        <li><code><em>name</em>.syn</code> <span data-i18n="options_file_syn">- other spellings, when the dictionary has them</span></li>
+      </ul>
 
-    <p>
-      <input type="file" id="dictionary-files" multiple accept=".ifo,.idx,.dict,.dz,.gz,.syn" />
-    </p>
+      <p>
+        <input type="file" id="dictionary-files" multiple accept=".ifo,.idx,.dict,.dz,.gz,.syn" />
+      </p>
 
-    <p class="inline">
-      <label for="dictionary-from" data-i18n="options_words_in">Words in</label>
-      <select id="dictionary-from"></select>
-      <label for="dictionary-to" data-i18n="options_explained_in">explained in</label>
-      <select id="dictionary-to"></select>
-      <button type="button" id="add-dictionary" data-i18n="options_add_dictionary_button">Add dictionary</button>
-    </p>
+      <p class="inline">
+        <label for="dictionary-from" data-i18n="options_words_in">Words in</label>
+        <select id="dictionary-from"></select>
+        <label for="dictionary-to" data-i18n="options_explained_in">explained in</label>
+        <select id="dictionary-to"></select>
+        <button type="button" id="add-dictionary" data-i18n="options_add_dictionary_button">Add dictionary</button>
+      </p>
 
-    <p id="dictionary-file-status" class="status" role="status"></p>
+      <p id="dictionary-file-status" class="status" role="status"></p>
 
-    <p class="note">
-      <span data-i18n="options_dict_files_note"
-        >A StarDict file says nothing about which languages it is for, so here that part is yours
-        to say. Adding from files makes no network request at all, and the path stays for the day
-        the catalogue's host stops answering: files from anywhere work, the catalogue's own
-        included - they are published at</span
-      >
-      <a href="https://download.wikdict.com/dictionaries/stardict/" target="_blank" rel="noopener"
-        >download.wikdict.com/dictionaries/stardict</a
-      >.
-    </p>
+      <p class="note">
+        <span data-i18n="options_dict_files_note"
+          >A StarDict file says nothing about which languages it is for, so here that part is yours
+          to say. Adding from files makes no network request at all, and the path stays for the day
+          the catalogue's host stops answering: files from anywhere work, the catalogue's own
+          included - they are published at</span
+        >
+        <a href="https://download.wikdict.com/dictionaries/stardict/" target="_blank" rel="noopener"
+          >download.wikdict.com/dictionaries/stardict</a
+        >.
+      </p>
+    </details>
 
     <h2 data-i18n="options_disabled_heading">Switched-off sites</h2>
 
