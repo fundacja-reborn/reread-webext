@@ -41,7 +41,10 @@
  * phrase. An error bubble steps outside the order, because it has no answer
  * to lay on the near edge: what lies there instead is its one real button -
  * the way to the settings - which therefore stays under the text whichever
- * way the bubble grows.
+ * way the bubble grows. It is also the one bubble that signs itself: an error
+ * may be the first thing this extension ever shows somebody, and an unsigned
+ * complaint floating over a page reads as the page's own - so a small re/read
+ * line stands at its top.
  *
  * It comes in two variants, and they are one column told apart by nothing but
  * its starting state (D44). A phrase already kept is a question - what was
@@ -306,6 +309,22 @@ const STYLE = `
   .bubble[data-tone="error"][data-grow="up"] .reveal { order: -1; }
   .bubble[data-tone="error"][data-grow="up"] .actions { padding: 8px 0 2px; }
 
+  /* The signature, and only on errors. A translation needs none - the answer
+     is the point, and a header would cost the line D23 saved - but an error
+     may be the first thing this extension ever shows somebody, and an
+     unsigned complaint floating over a page reads as the page's own. */
+  .brand {
+    display: none;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    opacity: 0.6;
+    margin-bottom: 4px;
+  }
+  .bubble[data-tone="error"] .brand { display: block; }
+  /* A signature signs at the top, also when the mirror reverses the column. */
+  .bubble[data-tone="error"][data-grow="up"] .brand { order: 1; }
+
   /* An action is a label and not a control. What makes one findable is standing
      where the reader is already looking; a box around it would make it the
      loudest thing in a bubble whose whole job is one line of translation. */
@@ -566,6 +585,12 @@ export function createTooltip({ onAction }) {
 
     bubble = document.createElement("div");
     bubble.className = "bubble";
+    // Who is talking, for the one bubble that has to say so (see .brand). The
+    // name is the manifest's, written out because a brand is not a message: it
+    // reads re/read in every locale.
+    const brandElement = document.createElement("div");
+    brandElement.className = "brand";
+    brandElement.textContent = "re/read";
     bodyElement = document.createElement("div");
     bodyElement.className = "body";
     contextElement = document.createElement("div");
@@ -621,8 +646,10 @@ export function createTooltip({ onAction }) {
 
     // In the order of their distance from the phrase, which is the one order
     // the stylesheet's mirror can reverse whole: the gloss and the box that
-    // edits it, then the actions, then the second layer.
-    bubble.append(bodyElement, editor, revealElement, contextElement, entriesElement);
+    // edits it, then the actions, then the second layer. The signature stands
+    // before them all and outside the order: only the error tone shows it
+    // (see .brand).
+    bubble.append(brandElement, bodyElement, editor, revealElement, contextElement, entriesElement);
     root.append(bubble);
     // `documentElement` and not `body`: single-page applications replace the
     // body, and a bubble that vanishes with a re-render is a bug nobody can
