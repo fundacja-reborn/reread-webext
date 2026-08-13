@@ -56,13 +56,41 @@
       "edit": { "content": "$2", "example": "Bearbeiten" }
     }
   },
+  "vocab_how_title": { "message": "So funktioniert es" },
+  "vocab_format_title": { "message": "Dateiformat" },
   "vocab_filter_placeholder": { "message": "Nach Wendung oder Bedeutung filtern" },
-  "vocab_filter_aria": { "message": "Die Liste des gespeicherten Wortschatzes filtern" },
+  "vocab_filter_label": { "message": "Die Liste des gespeicherten Wortschatzes filtern" },
+  "vocab_filter_clear": { "message": "Filter leeren" },
+  "vocab_count_filtered_one": {
+    "message": "$MATCHING$ von $TOTAL$ gespeicherten Eintrag",
+    "placeholders": {
+      "total": { "content": "$1", "example": "1" },
+      "matching": { "content": "$2", "example": "0" }
+    }
+  },
+  "vocab_count_filtered_other": {
+    "message": "$MATCHING$ von $TOTAL$ gespeicherten Einträgen",
+    "placeholders": {
+      "total": { "content": "$1", "example": "26" },
+      "matching": { "content": "$2", "example": "8" }
+    }
+  },
+  "vocab_edit_aria": {
+    "message": "Wendung bearbeiten: $PHRASE$",
+    "placeholders": { "phrase": { "content": "$1", "example": "Bank" } }
+  },
+  "vocab_learned_aria": {
+    "message": "Als gelernt markieren: $PHRASE$",
+    "placeholders": { "phrase": { "content": "$1", "example": "Bank" } }
+  },
   "vocab_empty": {
     "message": "Für dieses Paar ist noch nichts gespeichert. Wählen Sie beim Lesen eine Wendung aus und drücken Sie „$BUTTON$“ - sie wartet dann hier.",
     "placeholders": { "button": { "content": "$1", "example": "Speichern" } }
   },
-  "vocab_filter_no_match": { "message": "Kein gespeicherter Eintrag passt darauf." },
+  "vocab_filter_no_match": {
+    "message": "Kein gespeicherter Eintrag passt zu „$QUERY$“.",
+    "placeholders": { "query": { "content": "$1", "example": "Bank" } }
+  },
   "pager_page_of": {
     "message": "Seite $PAGE$ von $PAGES$",
     "placeholders": {

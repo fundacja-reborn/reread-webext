@@ -56,13 +56,48 @@
       "edit": { "content": "$2", "example": "Modifier" }
     }
   },
+  "vocab_how_title": { "message": "Comment ça marche" },
+  "vocab_format_title": { "message": "Format du fichier" },
   "vocab_filter_placeholder": { "message": "Filtrer par phrase ou par sens" },
-  "vocab_filter_aria": { "message": "Filtrer la liste des phrases enregistrées" },
+  "vocab_filter_label": { "message": "Filtrer la liste des phrases enregistrées" },
+  "vocab_filter_clear": { "message": "Effacer le filtre" },
+  "vocab_count_filtered_one": {
+    "message": "$MATCHING$ sur $TOTAL$ phrase enregistrée",
+    "placeholders": {
+      "total": { "content": "$1", "example": "1" },
+      "matching": { "content": "$2", "example": "0" }
+    }
+  },
+  "vocab_count_filtered_many": {
+    "message": "$MATCHING$ sur $TOTAL$ phrases enregistrées",
+    "placeholders": {
+      "total": { "content": "$1", "example": "1 000 000" },
+      "matching": { "content": "$2", "example": "8" }
+    }
+  },
+  "vocab_count_filtered_other": {
+    "message": "$MATCHING$ sur $TOTAL$ phrases enregistrées",
+    "placeholders": {
+      "total": { "content": "$1", "example": "26" },
+      "matching": { "content": "$2", "example": "8" }
+    }
+  },
+  "vocab_edit_aria": {
+    "message": "Modifier la phrase $PHRASE$",
+    "placeholders": { "phrase": { "content": "$1", "example": "banque" } }
+  },
+  "vocab_learned_aria": {
+    "message": "Marquer comme apprise : $PHRASE$",
+    "placeholders": { "phrase": { "content": "$1", "example": "banque" } }
+  },
   "vocab_empty": {
     "message": "Rien n'est encore enregistré pour cette paire. Sélectionnez une phrase pendant la lecture et appuyez sur « $BUTTON$ » - elle vous attendra ici.",
     "placeholders": { "button": { "content": "$1", "example": "Enregistrer" } }
   },
-  "vocab_filter_no_match": { "message": "Aucune phrase enregistrée ne correspond." },
+  "vocab_filter_no_match": {
+    "message": "Aucune phrase enregistrée ne correspond à « $QUERY$ ».",
+    "placeholders": { "query": { "content": "$1", "example": "banque" } }
+  },
   "pager_page_of": {
     "message": "Page $PAGE$ sur $PAGES$",
     "placeholders": {

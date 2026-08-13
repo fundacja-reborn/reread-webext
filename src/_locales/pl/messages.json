@@ -56,13 +56,55 @@
       "edit": { "content": "$2", "example": "Edytuj" }
     }
   },
+  "vocab_how_title": { "message": "Jak to działa" },
+  "vocab_format_title": { "message": "Format pliku" },
   "vocab_filter_placeholder": { "message": "Filtruj po frazie lub znaczeniu" },
-  "vocab_filter_aria": { "message": "Filtruj listę zapisanych fraz" },
+  "vocab_filter_label": { "message": "Filtruj listę zapisanych fraz" },
+  "vocab_filter_clear": { "message": "Wyczyść filtr" },
+  "vocab_count_filtered_one": {
+    "message": "$MATCHING$ z $TOTAL$ zapisanej frazy",
+    "placeholders": {
+      "total": { "content": "$1", "example": "1" },
+      "matching": { "content": "$2", "example": "0" }
+    }
+  },
+  "vocab_count_filtered_few": {
+    "message": "$MATCHING$ z $TOTAL$ zapisanych fraz",
+    "placeholders": {
+      "total": { "content": "$1", "example": "3" },
+      "matching": { "content": "$2", "example": "2" }
+    }
+  },
+  "vocab_count_filtered_many": {
+    "message": "$MATCHING$ z $TOTAL$ zapisanych fraz",
+    "placeholders": {
+      "total": { "content": "$1", "example": "26" },
+      "matching": { "content": "$2", "example": "8" }
+    }
+  },
+  "vocab_count_filtered_other": {
+    "message": "$MATCHING$ z $TOTAL$ zapisanej frazy",
+    "placeholders": {
+      "total": { "content": "$1", "example": "1,5" },
+      "matching": { "content": "$2", "example": "1" }
+    }
+  },
+  "vocab_edit_aria": {
+    "message": "Edytuj frazę $PHRASE$",
+    "placeholders": { "phrase": { "content": "$1", "example": "bank" } }
+  },
+  "vocab_learned_aria": {
+    "message": "Oznacz jako znaną: $PHRASE$",
+    "placeholders": { "phrase": { "content": "$1", "example": "bank" } }
+  },
   "vocab_empty": {
     "message": "Dla tej pary nie ma jeszcze nic zapisanego. Zaznacz frazę podczas czytania i naciśnij „$BUTTON$” - będzie tu czekać.",
     "placeholders": { "button": { "content": "$1", "example": "Zapisz" } }
   },
-  "vocab_filter_no_match": { "message": "Żadna zapisana fraza do tego nie pasuje." },
+  "vocab_filter_no_match": {
+    "message": "Brak fraz pasujących do „$QUERY$”.",
+    "placeholders": { "query": { "content": "$1", "example": "bank" } }
+  },
   "pager_page_of": {
     "message": "Strona $PAGE$ z $PAGES$",
     "placeholders": {

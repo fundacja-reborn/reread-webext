@@ -1,7 +1,14 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { PAGE_SIZE, listView, newestFirst, pairChoicesFor, searchablePhrase } from "../src/vocab/list-view.js";
+import {
+  PAGE_SIZE,
+  listView,
+  markSegments,
+  newestFirst,
+  pairChoicesFor,
+  searchablePhrase,
+} from "../src/vocab/list-view.js";
 
 /**
  * @param {number} at
@@ -117,6 +124,39 @@ describe("listView", () => {
   it("says when nothing matches, with a page to stand on", () => {
     const view = listView([phrase(1)], { query: "nothing like this", page: 1 });
     assert.deepEqual([view.matching, view.pages, view.page], [0, 1, 1]);
+  });
+});
+
+describe("markSegments", () => {
+  it("hands the text back whole when there is no query", () => {
+    assert.deepEqual(markSegments("bank holiday", ""), [{ text: "bank holiday", hit: false }]);
+    assert.deepEqual(markSegments("bank holiday", "   "), [{ text: "bank holiday", hit: false }]);
+  });
+
+  it("marks every occurrence of every word, case-folded", () => {
+    assert.deepEqual(markSegments("Bank am Bankufer", "bank"), [
+      { text: "Bank", hit: true },
+      { text: " am ", hit: false },
+      { text: "Bank", hit: true },
+      { text: "ufer", hit: false },
+    ]);
+  });
+
+  it("merges overlapping words into one marked stretch", () => {
+    assert.deepEqual(markSegments("abc", "ab bc"), [{ text: "abc", hit: true }]);
+  });
+
+  it("always hands back the text it was given, in order", () => {
+    const text = "der Bankangestellte an der Bank";
+    const joined = markSegments(text, "bank an").map((segment) => segment.text).join("");
+    assert.equal(joined, text);
+  });
+
+  it("marks nothing rather than marking wrong when folding shifts letters", () => {
+    // One dotted capital I becomes two code units in lower case; the folded
+    // indexes then stop pointing into the original.
+    assert.equal("İstanbul".toLowerCase().length, "İstanbul".length + 1);
+    assert.deepEqual(markSegments("İstanbul", "istanbul"), [{ text: "İstanbul", hit: false }]);
   });
 });
 

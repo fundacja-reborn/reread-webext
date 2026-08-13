@@ -29,7 +29,7 @@ import { ErrorCode, Message, asResult, fail } from "../lib/protocol.js";
 import { MIRROR_KEY } from "../lib/store/mirror.js";
 import { exportFilename, fromTsv, pairFromFilename, toTsv } from "../lib/store/tsv.js";
 import { listPairs, listPhrases } from "../lib/store/vocab.js";
-import { listView, newestFirst, pairChoicesFor } from "./list-view.js";
+import { listView, markSegments, newestFirst, pairChoicesFor } from "./list-view.js";
 
 // First, so the static text is already the catalogue's language when it shows.
 localizePage();
@@ -192,7 +192,6 @@ async function reload() {
 
 function render() {
   renderPair();
-  renderCount();
   renderList();
   // Exporting nothing would download an empty file; the button says so first.
   if (exportButton !== null) exportButton.disabled = phrases.length === 0;
@@ -204,21 +203,29 @@ function renderPair() {
   for (const choice of choices) {
     const option = document.createElement("option");
     option.value = choice.pair;
-    // The count is part of the choice: which pairs hold anything is exactly
-    // what somebody opening this select wants to know.
-    option.textContent =
-      choice.count > 0
-        ? `${pairLabel(choice.from, choice.to)} (${choice.count.toLocaleString()})`
-        : pairLabel(choice.from, choice.to);
+    // No count in the options: the counter under the title is the one place
+    // this page says how much a pair holds, and two numbers for one list
+    // drift apart in the eye. (The import offer's select keeps its counts -
+    // there they say what a file would land next to.)
+    option.textContent = pairLabel(choice.from, choice.to);
     option.selected = choice.from === config.sourceLang && choice.to === config.targetLang;
     pairSelect.append(option);
   }
 }
 
-function renderCount() {
+/**
+ * The one counter, under the title: the whole pair, or "8 of 26" while the
+ * filter narrows it down.
+ *
+ * @param {number} matching
+ */
+function renderCount(matching) {
   if (countLine === null) return;
   countLine.hidden = phrases.length === 0;
-  countLine.textContent = plural(phrases.length, "phrases");
+  countLine.textContent =
+    query.trim().length > 0
+      ? plural(phrases.length, "vocab_count_filtered", [matching.toLocaleString()])
+      : plural(phrases.length, "phrases");
 }
 
 function renderList() {
@@ -226,6 +233,9 @@ function renderList() {
 
   const view = listView(phrases, { query, page });
   page = view.page;
+  // The counter follows every repaint of the list, so a keystroke in the
+  // filter and a phrase learned on another tab both keep it true.
+  renderCount(view.matching);
 
   // A re-render can land mid-keystroke (a save on another tab rebuilds the
   // mirror); the draft survives as state, and the keyboard should too.
@@ -238,7 +248,7 @@ function renderList() {
   if (phrases.length === 0) {
     listContainer.append(element("p", "empty", t("vocab_empty", t("bubble_save"))));
   } else if (view.matching === 0) {
-    listContainer.append(element("p", "empty", t("vocab_filter_no_match")));
+    listContainer.append(noMatch());
   } else {
     for (const phrase of view.rows) listContainer.append(phraseRow(phrase));
   }
@@ -268,13 +278,60 @@ function renderPager(view) {
 }
 
 /**
+ * The filter's matches lit up inside the text with <mark> - built from text
+ * nodes, never markup, because the strings come from pages this extension
+ * does not trust. With no filter the text goes in whole.
+ *
+ * @param {HTMLElement} node
+ * @param {string} text
+ */
+function fillHighlighted(node, text) {
+  for (const segment of markSegments(text, query)) {
+    if (segment.hit) {
+      const mark = document.createElement("mark");
+      mark.textContent = segment.text;
+      node.append(mark);
+    } else {
+      node.append(segment.text);
+    }
+  }
+}
+
+/**
+ * The filter came up empty: the sentence quotes the query, and the one move
+ * that helps stands under it. Clearing hands focus back to the filter, ready
+ * for a second try.
+ *
+ * @returns {HTMLElement}
+ */
+function noMatch() {
+  const wrap = element("div", "empty no-match");
+  wrap.append(element("p", "no-match-text", t("vocab_filter_no_match", query)));
+
+  const clear = button(t("vocab_filter_clear"));
+  clear.addEventListener("click", () => {
+    query = "";
+    if (filterInput !== null) {
+      filterInput.value = "";
+      filterInput.focus();
+    }
+    renderList();
+  });
+  wrap.append(clear);
+  return wrap;
+}
+
+/**
  * @param {Phrase} phrase
  * @returns {HTMLElement}
  */
 function phraseRow(phrase) {
   const row = element("div", "phrase-row");
+  // How the closed editor finds its row again to hand focus back.
+  row.dataset["key"] = phrase.normalized;
 
-  const word = element("span", "phrase-word", phrase.phrase);
+  const word = element("span", "phrase-word");
+  fillHighlighted(word, phrase.phrase);
   // The day it was kept, on hover: useful now and then, clutter always.
   word.title = new Date(phrase.createdAt).toLocaleDateString(uiLocale());
   row.append(word);
@@ -284,17 +341,27 @@ function phraseRow(phrase) {
     return row;
   }
 
-  row.append(element("span", "phrase-meanings", phrase.translations.join("; ")));
+  const meanings = element("span", "phrase-meanings");
+  fillHighlighted(meanings, phrase.translations.join("; "));
+  row.append(meanings);
 
+  // The buttons speak for themselves to the eye; to a screen reader a bare
+  // "Edit" in a list of a hundred names nothing, so each carries its phrase.
   const edit = button(t("bubble_edit"));
+  edit.className = "quiet";
+  edit.setAttribute("aria-label", t("vocab_edit_aria", phrase.phrase));
   edit.addEventListener("click", () => {
     editing = phrase.normalized;
     draft = phrase.translations.join("\n");
     renderList();
+    // The editor replaced the button that had focus; typing is what it is for.
+    listContainer?.querySelector("textarea")?.focus();
   });
 
   const learned = button(t("bubble_learned"));
-  learned.addEventListener("click", () => void forget(phrase));
+  learned.className = "quiet quiet-learned";
+  learned.setAttribute("aria-label", t("vocab_learned_aria", phrase.phrase));
+  learned.addEventListener("click", () => void forget(phrase, learned));
 
   const actions = element("div", "phrase-actions");
   actions.append(edit, learned);
@@ -344,16 +411,48 @@ function editorFor(phrase) {
   return wrap;
 }
 
+/**
+ * Hands focus back to a row's first button (Edit) after the editor holding
+ * it left the DOM - Escape, Cancel and Save all remove the textarea under
+ * the keyboard, and without this the focus falls to the body.
+ *
+ * @param {string} key the row's normalized phrase
+ */
+function refocusRow(key) {
+  if (listContainer === null) return;
+  for (const row of listContainer.querySelectorAll(".phrase-row")) {
+    if (row instanceof HTMLElement && row.dataset["key"] === key) {
+      row.querySelector("button")?.focus();
+      return;
+    }
+  }
+}
+
 function closeEditor() {
+  const closed = editing;
   editing = null;
   draft = "";
   renderList();
+  if (closed !== null) refocusRow(closed);
 }
 
 /**
+ * Removes the phrase the moment the button is pressed - no dialog, no undo:
+ * a slip is repaired by selecting the phrase while reading, the ordinary
+ * save path.
+ *
  * @param {Phrase} phrase
+ * @param {HTMLButtonElement} trigger the row's own Learned button
  */
-async function forget(phrase) {
+async function forget(phrase, trigger) {
+  // The pressed button is about to leave the DOM, and focus would fall to
+  // the body. Its place in the list, counted first, names the successor:
+  // the next row's Learned, the previous one's after the last row, the
+  // filter once the list is empty.
+  const learnedButtons = () =>
+    listContainer === null ? [] : [...listContainer.querySelectorAll("button.quiet-learned")];
+  const at = learnedButtons().indexOf(trigger);
+
   const answer = await ask({ kind: Message.FORGET_PHRASE, text: phrase.phrase });
   if (!answer.ok) {
     status(describeError(answer.code), "error");
@@ -363,6 +462,11 @@ async function forget(phrase) {
   // The mirror event lands too; reloading here as well makes the row's
   // disappearance a consequence of the answer, not of an event arriving.
   await reload();
+
+  if (at === -1) return;
+  const successor = learnedButtons()[Math.min(at, learnedButtons().length - 1)];
+  if (successor instanceof HTMLButtonElement) successor.focus();
+  else filterInput?.focus();
 }
 
 /**
@@ -385,6 +489,9 @@ async function saveEdit(phrase) {
   editing = null;
   draft = "";
   await reload();
+  // Editing keeps the row's place (the store keeps id and createdAt), so
+  // the button focus returns to is where the eye already is.
+  refocusRow(phrase.normalized);
 }
 
 /**

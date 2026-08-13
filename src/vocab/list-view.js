@@ -66,6 +66,44 @@ export function listView(phrases, { query, page }) {
 }
 
 /**
+ * Where the filter's words sit in a row's text, as segments to render: the
+ * matched stretches marked, everything else plain. The match rule is
+ * `matchesFilter`'s - every word, anywhere, case-folded - so what lights up
+ * is exactly why the row is on screen.
+ *
+ * Case folding can change a string's length (one dotted capital I becomes
+ * two code units); when it does, the folded indexes no longer point into the
+ * original, and the text comes back unmarked rather than marked wrong.
+ *
+ * @param {string} text as the row shows it
+ * @param {string} query as typed into the filter
+ * @returns {Array<{ text: string, hit: boolean }>} the whole text, in order
+ */
+export function markSegments(text, query) {
+  const words = query.toLowerCase().split(/\s+/).filter((word) => word.length > 0);
+  const folded = text.toLowerCase();
+  if (words.length === 0 || folded.length !== text.length) return [{ text, hit: false }];
+
+  const hit = new Array(text.length).fill(false);
+  for (const word of words) {
+    for (let at = folded.indexOf(word); at !== -1; at = folded.indexOf(word, at + 1)) {
+      hit.fill(true, at, at + word.length);
+    }
+  }
+
+  /** @type {Array<{ text: string, hit: boolean }>} */
+  const segments = [];
+  let from = 0;
+  for (let at = 1; at <= text.length; at += 1) {
+    if (at === text.length || hit[at] !== hit[from]) {
+      segments.push({ text: text.slice(from, at), hit: hit[from] === true });
+      from = at;
+    }
+  }
+  return segments;
+}
+
+/**
  * Which pairs the select offers: every pair with anything saved, by name, and
  * the configured pair even when nothing is saved for it yet - a control must
  * never disagree with the settings it shows, which is the popup's rule for the
