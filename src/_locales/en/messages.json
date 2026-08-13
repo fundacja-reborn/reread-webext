@@ -62,14 +62,44 @@
       "edit": { "content": "$2", "example": "Edit" }
     }
   },
+  "vocab_how_title": { "message": "How it works" },
+  "vocab_format_title": { "message": "File format" },
   "vocab_filter_placeholder": { "message": "Filter by phrase or meaning" },
-  "vocab_filter_aria": { "message": "Filter the list of saved phrases" },
+  "vocab_filter_label": { "message": "Filter the list of saved phrases" },
+  "vocab_filter_clear": { "message": "Clear the filter" },
+  "vocab_count_filtered_one": {
+    "message": "$MATCHING$ of $TOTAL$ saved phrase",
+    "description": "The counter while the filter is active. Plural family over the total; the matching count rides along as $2.",
+    "placeholders": {
+      "total": { "content": "$1", "example": "1" },
+      "matching": { "content": "$2", "example": "0" }
+    }
+  },
+  "vocab_count_filtered_other": {
+    "message": "$MATCHING$ of $TOTAL$ saved phrases",
+    "placeholders": {
+      "total": { "content": "$1", "example": "26" },
+      "matching": { "content": "$2", "example": "8" }
+    }
+  },
+  "vocab_edit_aria": {
+    "message": "Edit the phrase $PHRASE$",
+    "description": "Accessible name of a row's Edit button - a bare \"Edit\" in a list of a hundred names nothing.",
+    "placeholders": { "phrase": { "content": "$1", "example": "bank" } }
+  },
+  "vocab_learned_aria": {
+    "message": "Mark as learned: $PHRASE$",
+    "placeholders": { "phrase": { "content": "$1", "example": "bank" } }
+  },
   "vocab_empty": {
     "message": "Nothing is saved for this pair yet. Select a phrase while reading and press \"$BUTTON$\" - it will be waiting here.",
     "description": "The button quoted is bubble_save, passed in so the two can never drift apart.",
     "placeholders": { "button": { "content": "$1", "example": "Save" } }
   },
-  "vocab_filter_no_match": { "message": "No saved phrase matches that." },
+  "vocab_filter_no_match": {
+    "message": "No saved phrase matches \"$QUERY$\".",
+    "placeholders": { "query": { "content": "$1", "example": "bank" } }
+  },
   "pager_page_of": {
     "message": "Page $PAGE$ of $PAGES$",
     "placeholders": {

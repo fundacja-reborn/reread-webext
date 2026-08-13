@@ -56,13 +56,48 @@
       "edit": { "content": "$2", "example": "Editar" }
     }
   },
+  "vocab_how_title": { "message": "Cómo funciona" },
+  "vocab_format_title": { "message": "Formato del archivo" },
   "vocab_filter_placeholder": { "message": "Filtrar por frase o significado" },
-  "vocab_filter_aria": { "message": "Filtrar la lista de frases guardadas" },
+  "vocab_filter_label": { "message": "Filtrar la lista de frases guardadas" },
+  "vocab_filter_clear": { "message": "Borrar el filtro" },
+  "vocab_count_filtered_one": {
+    "message": "$MATCHING$ de $TOTAL$ frase guardada",
+    "placeholders": {
+      "total": { "content": "$1", "example": "1" },
+      "matching": { "content": "$2", "example": "0" }
+    }
+  },
+  "vocab_count_filtered_many": {
+    "message": "$MATCHING$ de $TOTAL$ frases guardadas",
+    "placeholders": {
+      "total": { "content": "$1", "example": "1.000.000" },
+      "matching": { "content": "$2", "example": "8" }
+    }
+  },
+  "vocab_count_filtered_other": {
+    "message": "$MATCHING$ de $TOTAL$ frases guardadas",
+    "placeholders": {
+      "total": { "content": "$1", "example": "26" },
+      "matching": { "content": "$2", "example": "8" }
+    }
+  },
+  "vocab_edit_aria": {
+    "message": "Editar la frase $PHRASE$",
+    "placeholders": { "phrase": { "content": "$1", "example": "banco" } }
+  },
+  "vocab_learned_aria": {
+    "message": "Marcar como aprendida: $PHRASE$",
+    "placeholders": { "phrase": { "content": "$1", "example": "banco" } }
+  },
   "vocab_empty": {
     "message": "Aún no hay nada guardado para este par. Selecciona una frase mientras lees y pulsa «$BUTTON$» - te estará esperando aquí.",
     "placeholders": { "button": { "content": "$1", "example": "Guardar" } }
   },
-  "vocab_filter_no_match": { "message": "Ninguna frase guardada coincide con eso." },
+  "vocab_filter_no_match": {
+    "message": "Ninguna frase guardada coincide con «$QUERY$».",
+    "placeholders": { "query": { "content": "$1", "example": "banco" } }
+  },
   "pager_page_of": {
     "message": "Página $PAGE$ de $PAGES$",
     "placeholders": {

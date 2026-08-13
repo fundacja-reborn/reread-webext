@@ -16,30 +16,48 @@
          that, because the swap goes through `textContent`. The intro is the
          one exception: it quotes the bubble's own button labels through
          placeholders, so vocab.js writes it instead of a marker. -->
-    <h1>re/read</h1>
-    <p class="subtitle" data-i18n="saved_phrases">Saved phrases</p>
-
-    <p id="intro">
-      Every phrase you kept for this language pair, newest first - saved while reading, stored
-      only on this device. Learned removes a phrase and its underlines with it; Edit rewrites
-      what it means, one meaning per line.
-    </p>
-
-    <dl class="rows">
-      <div class="row">
-        <dt><label for="pair" data-i18n="language_pair">Language pair</label></dt>
-        <dd><select id="pair"></select></dd>
+    <header>
+      <p class="brand">re/read</p>
+      <div class="head-row">
+        <h1 data-i18n="saved_phrases">Saved phrases</h1>
+        <label for="pair" class="visually-hidden" data-i18n="language_pair">Language pair</label>
+        <select id="pair"></select>
       </div>
-    </dl>
+      <!-- The one counter this page has; the select's options carry none. -->
+      <p class="hint" id="count" hidden></p>
+      <details class="fold-line">
+        <summary data-i18n="vocab_how_title">How it works</summary>
+        <p id="intro">
+          Every phrase you kept for this language pair, newest first - saved while reading, stored
+          only on this device. Learned removes a phrase and its underlines with it; Edit rewrites
+          what it means, one meaning per line.
+        </p>
+      </details>
+    </header>
 
-    <p class="transfer">
-      <button type="button" id="export" data-i18n="action_export">Export</button>
+    <!-- One line of tools: the filter grows, the two transfer buttons follow.
+         On a narrow screen the line wraps - same HTML, the stylesheet decides. -->
+    <div class="toolbar">
+      <label for="filter" class="visually-hidden" data-i18n="vocab_filter_label">
+        Filter the list of saved phrases
+      </label>
+      <input
+        type="search"
+        id="filter"
+        placeholder="Filter by phrase or meaning"
+        data-i18n-placeholder="vocab_filter_placeholder"
+      />
       <button type="button" id="import" data-i18n="action_import">Import</button>
-    </p>
-    <p class="hint" data-i18n="vocab_transfer_note">
-      A two-column .tsv file - what the KOReader plugin writes and Anki imports. Importing adds
-      phrases this pair is missing and never touches a saved one.
-    </p>
+      <button type="button" id="export" data-i18n="action_export">Export</button>
+    </div>
+
+    <details class="fold-line">
+      <summary data-i18n="vocab_format_title">File format</summary>
+      <p class="hint" data-i18n="vocab_transfer_note">
+        A two-column .tsv file - what the KOReader plugin writes and Anki imports. Importing adds
+        phrases this pair is missing and never touches a saved one.
+      </p>
+    </details>
     <input type="file" id="import-file" accept=".tsv,text/tab-separated-values" hidden />
 
     <!-- The moment of consent: what the file holds and where it would go,
@@ -58,19 +76,6 @@
       </p>
     </div>
     <p id="transfer-status" class="status report" role="status"></p>
-
-    <p class="hint" id="count" hidden></p>
-
-    <p class="model-filter">
-      <input
-        type="search"
-        id="filter"
-        placeholder="Filter by phrase or meaning"
-        data-i18n-placeholder="vocab_filter_placeholder"
-        aria-label="Filter the list of saved phrases"
-        data-i18n-aria-label="vocab_filter_aria"
-      />
-    </p>
 
     <div id="list" class="phrases"></div>
 

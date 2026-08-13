@@ -56,13 +56,55 @@
       "edit": { "content": "$2", "example": "Редагувати" }
     }
   },
+  "vocab_how_title": { "message": "Як це працює" },
+  "vocab_format_title": { "message": "Формат файлу" },
   "vocab_filter_placeholder": { "message": "Фільтрувати за фразою чи значенням" },
-  "vocab_filter_aria": { "message": "Фільтрувати список збережених фраз" },
+  "vocab_filter_label": { "message": "Фільтрувати список збережених фраз" },
+  "vocab_filter_clear": { "message": "Очистити фільтр" },
+  "vocab_count_filtered_one": {
+    "message": "$MATCHING$ з $TOTAL$ збереженої фрази",
+    "placeholders": {
+      "total": { "content": "$1", "example": "21" },
+      "matching": { "content": "$2", "example": "1" }
+    }
+  },
+  "vocab_count_filtered_few": {
+    "message": "$MATCHING$ з $TOTAL$ збережених фраз",
+    "placeholders": {
+      "total": { "content": "$1", "example": "3" },
+      "matching": { "content": "$2", "example": "2" }
+    }
+  },
+  "vocab_count_filtered_many": {
+    "message": "$MATCHING$ з $TOTAL$ збережених фраз",
+    "placeholders": {
+      "total": { "content": "$1", "example": "26" },
+      "matching": { "content": "$2", "example": "8" }
+    }
+  },
+  "vocab_count_filtered_other": {
+    "message": "$MATCHING$ з $TOTAL$ збереженої фрази",
+    "placeholders": {
+      "total": { "content": "$1", "example": "1,5" },
+      "matching": { "content": "$2", "example": "1" }
+    }
+  },
+  "vocab_edit_aria": {
+    "message": "Редагувати фразу $PHRASE$",
+    "placeholders": { "phrase": { "content": "$1", "example": "банк" } }
+  },
+  "vocab_learned_aria": {
+    "message": "Позначити як вивчену: $PHRASE$",
+    "placeholders": { "phrase": { "content": "$1", "example": "банк" } }
+  },
   "vocab_empty": {
     "message": "Для цієї пари ще нічого не збережено. Виділіть фразу під час читання й натисніть «$BUTTON$» - вона чекатиме тут.",
     "placeholders": { "button": { "content": "$1", "example": "Зберегти" } }
   },
-  "vocab_filter_no_match": { "message": "Жодна збережена фраза не підходить." },
+  "vocab_filter_no_match": {
+    "message": "Жодна збережена фраза не відповідає «$QUERY$».",
+    "placeholders": { "query": { "content": "$1", "example": "банк" } }
+  },
   "pager_page_of": {
     "message": "Сторінка $PAGE$ з $PAGES$",
     "placeholders": {
