@@ -32,13 +32,19 @@
  *
  * Everything in it stands in the order of its distance from the phrase (D44):
  * the gloss on the nearest edge, the actions behind it, the second layer
- * farthest - and the whole column mirrors when the bubble has to stand below
- * the phrase. The near edge belongs to the gloss because that edge is the
+ * farthest - and the whole column mirrors when the bubble stands above the
+ * phrase. The near edge belongs to the gloss because that edge is the
  * eye's way back to the line being read, and what should lie on the way back
  * is the answer, not a row of buttons. On a touch screen the same rule earns
  * its keep twice: actions on the far edge are also actions away from the
  * selection handles and from the browser's own bar, both of which crowd the
- * phrase.
+ * phrase. An error bubble steps outside the order, because it has no answer
+ * to lay on the near edge: what lies there instead is its one real button -
+ * the way to the settings - which therefore stays under the text whichever
+ * way the bubble grows. It is also the one bubble that signs itself: an error
+ * may be the first thing this extension ever shows somebody, and an unsigned
+ * complaint floating over a page reads as the page's own - so a small re/read
+ * line stands at its top.
  *
  * It comes in two variants, and they are one column told apart by nothing but
  * its starting state (D44). A phrase already kept is a question - what was
@@ -294,6 +300,31 @@ const STYLE = `
      After the mirror, whose padding this outranks by standing below it. */
   .bubble[data-variant="launcher"] .actions { padding: 0; }
 
+  /* An error bubble is not a translation, and it drops the mirror's rule for
+     the same reason the mirror exists: the near edge belongs to the eye's way
+     back, and when the bubble is an apology with one way out, the way out is
+     what should lie on it. The order moves only the row of actions - a recall
+     bubble whose save failed keeps its second layer where the mirror put it,
+     borders and all. */
+  .bubble[data-tone="error"][data-grow="up"] .reveal { order: -1; }
+  .bubble[data-tone="error"][data-grow="up"] .actions { padding: 8px 0 2px; }
+
+  /* The signature, and only on errors. A translation needs none - the answer
+     is the point, and a header would cost the line D23 saved - but an error
+     may be the first thing this extension ever shows somebody, and an
+     unsigned complaint floating over a page reads as the page's own. */
+  .brand {
+    display: none;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    opacity: 0.6;
+    margin-bottom: 4px;
+  }
+  .bubble[data-tone="error"] .brand { display: block; }
+  /* A signature signs at the top, also when the mirror reverses the column. */
+  .bubble[data-tone="error"][data-grow="up"] .brand { order: 1; }
+
   /* An action is a label and not a control. What makes one findable is standing
      where the reader is already looking; a box around it would make it the
      loudest thing in a bubble whose whole job is one line of translation. */
@@ -311,9 +342,9 @@ const STYLE = `
   }
   /* A label carries padding so that a focus ring has somewhere to go, and the
      first one gives it back: the row has to start on the same vertical line as
-     the gloss above it. Save and the launcher bring their own box and need no
-     pulling. */
-  .actions button:first-child:not([data-action="save"]):not([data-action="reader"]) { margin-left: -4px; }
+     the gloss above it. Save, the launcher and Settings bring their own box
+     and need no pulling. */
+  .actions button:first-child:not([data-action="save"]):not([data-action="reader"]):not([data-action="settings"]) { margin-left: -4px; }
   .actions button:hover:not(:disabled) { opacity: 1; }
   .actions button:focus-visible {
     opacity: 1;
@@ -322,12 +353,14 @@ const STYLE = `
   }
   .actions button:disabled { opacity: 0.35; cursor: default; }
 
-  /* The exception, and the only real call to action either bubble has: Save is
-     the press that keeps a phrase which would otherwise be gone, and the
-     launcher's one button is the whole of the bubble it is in - the two never
-     share a screen, so neither outshouts the other. */
+  /* The exception, and the only real call to action a bubble has: Save is the
+     press that keeps a phrase which would otherwise be gone, the launcher's one
+     button is the whole of the bubble it is in, and Settings is the one thing
+     an error bubble can offer - none of the three ever shares a screen with
+     another, so none outshouts the rest. */
   .actions button[data-action="save"],
-  .actions button[data-action="reader"] {
+  .actions button[data-action="reader"],
+  .actions button[data-action="settings"] {
     font-size: 13px;
     padding: 3px 10px;
     opacity: 1;
@@ -336,7 +369,8 @@ const STYLE = `
     border-radius: 6px;
   }
   .actions button[data-action="save"]:hover:not(:disabled),
-  .actions button[data-action="reader"]:hover:not(:disabled) { background: rgba(0, 0, 0, 0.1); }
+  .actions button[data-action="reader"]:hover:not(:disabled),
+  .actions button[data-action="settings"]:hover:not(:disabled) { background: rgba(0, 0, 0, 0.1); }
   .actions button[data-action="save"]:disabled { opacity: 0.45; }
 
   @media (prefers-color-scheme: dark) {
@@ -364,12 +398,14 @@ const STYLE = `
     /* The quiet labels need nothing here: they are the bubble's own colour at
        seven tenths, which lands right on either background. */
     .actions button[data-action="save"],
-    .actions button[data-action="reader"] {
+    .actions button[data-action="reader"],
+    .actions button[data-action="settings"] {
       background: rgba(255, 255, 255, 0.08);
       border-color: rgba(255, 255, 255, 0.2);
     }
     .actions button[data-action="save"]:hover:not(:disabled),
-    .actions button[data-action="reader"]:hover:not(:disabled) { background: rgba(255, 255, 255, 0.16); }
+    .actions button[data-action="reader"]:hover:not(:disabled),
+    .actions button[data-action="settings"]:hover:not(:disabled) { background: rgba(255, 255, 255, 0.16); }
   }
 `;
 
@@ -549,6 +585,12 @@ export function createTooltip({ onAction }) {
 
     bubble = document.createElement("div");
     bubble.className = "bubble";
+    // Who is talking, for the one bubble that has to say so (see .brand). The
+    // name is the manifest's, written out because a brand is not a message: it
+    // reads re/read in every locale.
+    const brandElement = document.createElement("div");
+    brandElement.className = "brand";
+    brandElement.textContent = "re/read";
     bodyElement = document.createElement("div");
     bodyElement.className = "body";
     contextElement = document.createElement("div");
@@ -604,8 +646,10 @@ export function createTooltip({ onAction }) {
 
     // In the order of their distance from the phrase, which is the one order
     // the stylesheet's mirror can reverse whole: the gloss and the box that
-    // edits it, then the actions, then the second layer.
-    bubble.append(bodyElement, editor, revealElement, contextElement, entriesElement);
+    // edits it, then the actions, then the second layer. The signature stands
+    // before them all and outside the order: only the error tone shows it
+    // (see .brand).
+    bubble.append(brandElement, bodyElement, editor, revealElement, contextElement, entriesElement);
     root.append(bubble);
     // `documentElement` and not `body`: single-page applications replace the
     // body, and a bubble that vanishes with a re-render is a bug nobody can
@@ -948,6 +992,9 @@ export function createTooltip({ onAction }) {
     if (bodyElement === null) return;
     bodyElement.textContent = body;
     bodyElement.dataset["tone"] = tone;
+    // Repeated on the bubble, because the stylesheet lays an error bubble out
+    // differently and a rule cannot look inward from the element it moves.
+    if (bubble !== null) bubble.dataset["tone"] = tone;
     refreshControls();
   }
 
