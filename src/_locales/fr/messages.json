@@ -342,7 +342,7 @@
 
   "options_title": { "message": "re/read - paramètres" },
   "options_local_intro": {
-    "message": "Tout ce que fait re/read se passe sur cet appareil : la traduction, le dictionnaire, la liste de lecture, les phrases enregistrées. Rien de ce que vous lisez ou sélectionnez n'est envoyé nulle part. Le réseau sert à deux choses, toutes deux sur cette page et toutes deux à votre clic : télécharger un modèle ou un dictionnaire, et mettre à jour la liste des modèles. Toujours depuis les deux adresses écrites dans ce paquet, et rien d'autre."
+    "message": "Tout ce que fait re/read se passe sur cet appareil : la traduction, le dictionnaire, la liste de lecture, les phrases enregistrées. Rien de ce que vous lisez ou sélectionnez n'est envoyé nulle part. Le réseau sert à deux choses, toutes deux sur cette page et toutes deux à votre clic : télécharger un modèle ou un dictionnaire, et mettre à jour les listes des modèles et des dictionnaires. Toujours depuis les deux adresses écrites dans ce paquet, et rien d'autre."
   },
   "options_first_steps_heading": { "message": "Premiers pas" },
   "options_first_steps_intro": {
@@ -355,7 +355,7 @@
     "message": "Sous « Modèles de traduction », appuyez sur « Télécharger » à côté de cette paire. Le modèle est enregistré sur cet appareil et traduit désormais hors ligne."
   },
   "options_first_steps_dictionary": {
-    "message": "Le deuxième appui en vaut la peine : un dictionnaire pour la même paire, sous « Obtenir un dictionnaire » - les mots isolés reçoivent alors des réponses plus complètes qu'une traduction seule."
+    "message": "Le deuxième appui en vaut la peine : un dictionnaire pour la même paire, sous « Dictionnaires » - les mots isolés reçoivent alors des réponses plus complètes qu'une traduction seule."
   },
   "options_first_steps_pin": {
     "message": "Enfin, épinglez re/read à la barre d'outils - d'ici là, son bouton se cache derrière l'icône en forme de pièce de puzzle. Derrière le bouton : le lecteur, la liste de lecture hors ligne, vos phrases enregistrées et un interrupteur pour le site où vous êtes."
@@ -373,13 +373,14 @@
   },
   "options_update_list": { "message": "Mettre à jour la liste" },
   "options_list_from": { "message": "- la liste des modèles de traduction ci-dessous date du" },
+  "options_dict_list_from": { "message": "- la liste des dictionnaires ci-dessous date du" },
   "options_list_refresh_hint": { "message": "Cliquez sur le bouton pour récupérer la liste actuelle." },
   "options_filter_placeholder": { "message": "Filtrer par langue ou par code" },
   "options_filter_models_aria": { "message": "Filtrer la liste des modèles de traduction" },
   "options_filter_dictionaries_aria": { "message": "Filtrer la liste des dictionnaires" },
   "options_model_note_from": { "message": "Les modèles sont téléchargés depuis" },
   "options_model_note_rest": {
-    "message": "- c'est là que Mozilla les publie. Quand vous mettez la liste à jour, rien sur vous n'est envoyé - la requête ne récupère que la liste fraîche des modèles. Cet hôte et celui du catalogue de dictionnaires plus bas sont les deux seuls endroits que cette extension puisse jamais contacter - et seulement quand vous cliquez sciemment pour rafraîchir la liste ou télécharger un modèle ou un dictionnaire."
+    "message": "- c'est là que Mozilla les publie. Quand vous mettez la liste à jour, rien sur vous n'est envoyé - la requête ne récupère que la liste fraîche des modèles. Cet hôte et celui du catalogue de dictionnaires plus bas sont les deux seuls endroits que cette extension puisse jamais contacter - et seulement quand vous cliquez sciemment pour rafraîchir une liste ou télécharger un modèle ou un dictionnaire."
   },
   "options_add_model_heading": { "message": "Ajouter un modèle depuis des fichiers" },
   "options_add_model_summary": {
@@ -393,21 +394,12 @@
     "message": "Cette page reste même quand les modèles se téléchargent tout seuls : c'est la sortie de secours pour le jour où l'endroit d'où ils viennent cesse de répondre. Rien ici ne quitte l'appareil, et ajouter un modèle ne fait aucune requête réseau."
   },
   "options_dictionaries_heading": { "message": "Dictionnaires" },
-  "options_dictionaries_intro": { "message": "Un dictionnaire répond là où une traduction ne peut pas." },
-  "options_dict_example_word": { "message": "Avocat" },
-  "options_dictionaries_intro_rest": {
-    "message": "a deux entrées, et un modèle doit en choisir une sans savoir laquelle vous vouliez ; un dictionnaire montre les deux. Les entrées apparaissent dans la deuxième couche de la bulle, sous la phrase."
-  },
-  "options_get_dictionary_heading": { "message": "Obtenir un dictionnaire" },
-  "options_wikdict_intro": {
-    "message": "construit des dictionnaires à partir du Wiktionnaire (CC BY-SA) pour chaque paire ci-dessous. Un appui télécharge l'archive, la décompresse ici et l'enregistre ; les langues se lisent sur la paire, et le dictionnaire apparaît dans la liste au-dessus, prêt à répondre."
+  "options_dictionaries_intro": {
+    "message": "Téléchargez un dictionnaire (ou plusieurs) pour pouvoir consulter les différents sens d'un mot sélectionné - vous choisirez ensuite les sens qui collent au contexte et les enregistrerez."
   },
   "options_dictionary_note_from": { "message": "Les dictionnaires sont téléchargés depuis" },
-  "options_dictionary_note_checked": {
-    "message": "- c'est là que WikDict les publie - à des adresses écrites dans ce paquet ; la liste a été vérifiée ici le"
-  },
   "options_dictionary_note_rest": {
-    "message": "- contrairement aux modèles, aucune somme de contrôle ne les retient : WikDict reconstruit ses fichiers sur place, une somme relevée ici casserait donc à chaque reconstruction. À sa place : le téléchargement doit être un simple zip de fichiers StarDict, il est lu avec autant de méfiance que n'importe quel fichier ajouté à la main, et ce qu'il devient, c'est du texte dans la base locale - jamais du code. Rien sur vous n'est envoyé : la requête dit quel dictionnaire, et rien d'autre."
+    "message": "- c'est là que WikDict publie les dictionnaires qu'il construit à partir du Wiktionnaire (CC BY-SA). Quand vous mettez la liste à jour, rien sur vous n'est envoyé - la requête ne récupère que la liste fraîche. Contrairement aux modèles, aucune somme de contrôle ne retient un téléchargement (WikDict reconstruit ses fichiers sur place) ; à sa place : le téléchargement doit être un simple zip de fichiers StarDict, il est lu avec autant de méfiance que n'importe quel fichier ajouté à la main, et ce qu'il devient, c'est du texte dans la base locale - jamais du code."
   },
   "options_add_dictionary_heading": { "message": "Ajouter un dictionnaire depuis des fichiers" },
   "options_add_dictionary_summary": {
@@ -460,6 +452,11 @@
   "options_refreshing_list": { "message": "Rafraîchissement de la liste des modèles..." },
   "options_refreshed_list": {
     "message": "La liste des modèles est à jour au $DATE$.",
+    "placeholders": { "date": { "content": "$1", "example": "2026-08-13" } }
+  },
+  "options_refreshing_dict_list": { "message": "Rafraîchissement de la liste des dictionnaires..." },
+  "options_refreshed_dict_list": {
+    "message": "La liste des dictionnaires est à jour au $DATE$.",
     "placeholders": { "date": { "content": "$1", "example": "2026-08-13" } }
   },
   "options_refresh_failed": {
@@ -526,7 +523,6 @@
     "message": "Le modèle n'a pas pu être ajouté : $DETAIL$",
     "placeholders": { "detail": { "content": "$1" } }
   },
-  "options_no_dictionaries": { "message": "Aucun dictionnaire ici. La bulle montre une traduction et rien d'autre." },
   "options_deleted_dictionary": {
     "message": "$NAME$ supprimé.",
     "placeholders": { "name": { "content": "$1" } }

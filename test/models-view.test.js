@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { matchesFilter, orderForDisplay, searchableText, sortByLabel } from "../src/options/models-view.js";
+import { dictionaryRows, matchesFilter, orderForDisplay, searchableText, sortByLabel } from "../src/options/models-view.js";
 
 /**
  * @param {string} from
@@ -64,6 +64,63 @@ describe("sortByLabel", () => {
     assert.deepEqual(
       given.map((one) => one.pair),
       ["deen", "euen"],
+    );
+  });
+});
+
+describe("dictionaryRows", () => {
+  const reading = { sourceLang: "en", targetLang: "pl" };
+
+  /**
+   * @param {string} langFrom
+   * @param {string} langTo
+   * @param {string} [name]
+   * @returns {import("../src/lib/dict/store.js").Dictionary}
+   */
+  function stored(langFrom, langTo, name = `dict ${langFrom}-${langTo}`) {
+    return {
+      id: name,
+      name,
+      langFrom,
+      langTo,
+      entryCount: 1,
+      aliasCount: 0,
+      bytes: 1,
+      addedAt: 1,
+      ready: true,
+      credit: null,
+    };
+  }
+
+  /**
+   * @param {string} from
+   * @param {string} to
+   */
+  function offered(from, to) {
+    return { from, to, url: `https://example.invalid/wikdict-${from}-${to}.zip` };
+  }
+
+  it("puts what is stored above the catalogue, and the pair being read on top", () => {
+    const rows = dictionaryRows([stored("de", "en")], [offered("ar", "en"), offered("en", "pl")], reading);
+    assert.deepEqual(
+      rows.map((one) => `${one.from}-${one.to}:${one.installed === null ? "offered" : "stored"}`),
+      ["en-pl:offered", "de-en:stored", "ar-en:offered"],
+    );
+  });
+
+  it("folds away the catalogue row of a pair already answered for", () => {
+    const rows = dictionaryRows([stored("en", "pl")], [offered("en", "pl"), offered("de", "en")], reading);
+    assert.deepEqual(
+      rows.map((one) => `${one.from}-${one.to}:${one.installed === null ? "offered" : "stored"}`),
+      ["en-pl:stored", "de-en:offered"],
+    );
+  });
+
+  it("keeps two stored dictionaries of one pair as two rows", () => {
+    const rows = dictionaryRows([stored("en", "pl", "first"), stored("en", "pl", "second")], [offered("en", "pl")], reading);
+    assert.deepEqual(
+      rows.map((one) => one.installed?.name ?? "offered"),
+      ["first", "second"],
     );
   });
 });

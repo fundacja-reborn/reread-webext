@@ -20,6 +20,7 @@ import { aside, localizePage, plural, t } from "../lib/i18n.js";
 import { languageName, pairLabel } from "../lib/language.js";
 import { catalogDictionaries, catalogSource } from "../lib/dict/catalog.js";
 import { describeDictDownloadProblem, downloadArchive } from "../lib/dict/download.js";
+import { readLiveDictionaries, refreshLiveDictionaries } from "../lib/dict/live.js";
 import { classifyDictionaryFiles, describeImportProblem, dictionaryFromZip, readDictionary } from "../lib/dict/import.js";
 import { describeZipProblem, readZip } from "../lib/dict/zip.js";
 import { toRows } from "../lib/dict/rows.js";
@@ -39,7 +40,7 @@ import { deleteModel, listModels, putModel } from "../lib/models/store.js";
 import { modelSourceUrl, updateAvailable } from "../lib/models/upstream.js";
 import { testLoadModel } from "../lib/models/validate.js";
 import { Message } from "../lib/protocol.js";
-import { matchesFilter, orderForDisplay, searchableText, sortByLabel } from "./models-view.js";
+import { dictionaryRows, matchesFilter, orderForDisplay, searchableText, sortByLabel } from "./models-view.js";
 
 /**
  * The one download that may be in flight. One at a time on purpose: each holds
@@ -74,6 +75,18 @@ let liveList = null;
 let refreshing = false;
 
 /**
+ * The dictionary catalogue's twin of `liveList`: the freshest listing this
+ * device has seen, read at open and refreshed over the network only when its
+ * own update button is pressed. The packaged catalogue stands in until then.
+ *
+ * @type {import("../lib/dict/live.js").LiveDictionaries | null}
+ */
+let liveDictionaries = null;
+
+/** One dictionary-list refresh at a time, for the same reason. */
+let refreshingDictionaries = false;
+
+/**
  * @returns {import("../lib/models/registry.js").RegistryModel[]}
  */
 function availableModels() {
@@ -85,6 +98,20 @@ function availableModels() {
  */
 function listDate() {
   return liveList?.fetchedAt ?? registrySource().checkedAt;
+}
+
+/**
+ * @returns {import("../lib/dict/catalog.js").CatalogDictionary[]}
+ */
+function availableDictionaries() {
+  return liveDictionaries?.dictionaries ?? catalogDictionaries();
+}
+
+/**
+ * @returns {string} the day the dictionary list on screen is from
+ */
+function dictionaryListDate() {
+  return liveDictionaries?.fetchedAt ?? catalogSource().checkedAt;
 }
 
 /**
@@ -117,6 +144,31 @@ async function refreshList() {
     if (running === null && !importing) await renderModels();
   } finally {
     refreshing = false;
+  }
+}
+
+/**
+ * The dictionary list's own update button - the same manners as the model
+ * list's: only ever called by a press, and answered beside the button.
+ */
+async function refreshDictionaryList() {
+  if (refreshingDictionaries) return;
+  refreshingDictionaries = true;
+  dictionaryRefreshStatus(t("options_refreshing_dict_list"), "busy");
+
+  try {
+    const result = await refreshLiveDictionaries();
+    if (!result.ok) {
+      dictionaryRefreshStatus(t("options_refresh_failed", [aside(result.detail), dictionaryListDate()]), "error");
+      return;
+    }
+
+    liveDictionaries = result.value;
+    fill("dictionary-checked", dictionaryListDate());
+    dictionaryRefreshStatus(t("options_refreshed_dict_list", dictionaryListDate()));
+    if (running === null && !importing) await renderCatalog();
+  } finally {
+    refreshingDictionaries = false;
   }
 }
 
@@ -161,7 +213,7 @@ function megabytes(bytes) {
  * has to say how it went - a sentence about a failed download printed below the
  * file picker is a sentence nobody scrolls to.
  *
- * @param {"model-status" | "refresh-status" | "file-status" | "dictionary-status" | "dictionary-file-status" | "dictionary-get-status"} id
+ * @param {"model-status" | "refresh-status" | "file-status" | "dictionary-status" | "dictionary-file-status" | "dictionary-refresh-status"} id
  * @param {string} text
  * @param {"idle" | "busy" | "error"} [tone]
  */
@@ -444,6 +496,7 @@ async function choosePair(pair) {
   // Every open page notices through `storage.onChanged` and asks the background
   // for the vocabulary of the new pair, so nothing here has to tell them.
   await renderModels();
+  await renderCatalog();
   status(
     row.installed === null
       ? t("options_reading_pair_missing", [languageName(row.from), languageName(row.to)])
@@ -660,11 +713,14 @@ function dictionaryFileStatus(text, tone = "idle") {
 }
 
 /**
+ * The dictionary update button's own line, for the same reason the model
+ * one has its own: what a press did has to be said next to the button.
+ *
  * @param {string} text
  * @param {"idle" | "busy" | "error"} [tone]
  */
-function dictionaryGetStatus(text, tone = "idle") {
-  say("dictionary-get-status", text, tone);
+function dictionaryRefreshStatus(text, tone = "idle") {
+  say("dictionary-refresh-status", text, tone);
 }
 
 /**
@@ -725,17 +781,23 @@ function chosenLanguage(id, fallback) {
 }
 
 /**
+ * A stored dictionary's row in the frame - the same line a stored model gets,
+ * plus what only a dictionary carries: its own name (two dictionaries of one
+ * pair must be told apart) and its attribution.
+ *
  * @param {import("../lib/dict/store.js").Dictionary} dictionary
  * @returns {HTMLElement}
  */
 function renderDictionary(dictionary) {
-  const container = element("div", "dictionary");
+  const container = element("div", "model");
 
-  const name = element("span", "dictionary-name", dictionary.name);
-  const pair = element("span", "badge", pairLabel(dictionary.langFrom, dictionary.langTo));
-  if (dictionary.langFrom === config.sourceLang) pair.classList.add("badge-on");
-  name.append(pair);
+  const name = element("span", "model-pair", pairLabel(dictionary.langFrom, dictionary.langTo));
+  if (dictionary.langFrom === config.sourceLang && dictionary.langTo === config.targetLang) {
+    name.append(element("span", "badge", t("options_badge_reading")));
+  }
   container.append(name);
+
+  container.append(element("span", "dictionary-title", dictionary.name));
 
   const counted =
     dictionary.aliasCount > 0
@@ -761,23 +823,6 @@ function renderDictionary(dictionary) {
   return container;
 }
 
-async function renderDictionaries() {
-  const container = document.getElementById("dictionaries");
-  if (container === null) return;
-
-  const dictionaries = await listDictionaries();
-  container.replaceChildren();
-
-  if (dictionaries.length === 0) {
-    container.append(
-      element("p", "empty", t("options_no_dictionaries")),
-    );
-    return;
-  }
-
-  for (const dictionary of dictionaries) container.append(renderDictionary(dictionary));
-}
-
 /**
  * @param {import("../lib/dict/store.js").Dictionary} dictionary
  */
@@ -789,7 +834,7 @@ async function removeDictionary(dictionary) {
   } catch (error) {
     dictionaryStatus(t("options_delete_dictionary_failed", [dictionary.name, message(error)]), "error");
   }
-  await renderDictionaries();
+  await renderCatalog();
 }
 
 /**
@@ -818,26 +863,37 @@ function renderCatalogRow(entry) {
 }
 
 /**
- * The catalogue never changes while the page is open - what changes is
- * whether its buttons are pressable, so this is redrawn at the edges of every
- * download and import, the way the model list is.
+ * The one dictionary frame: what is stored first, each row with its delete
+ * button, then every pair the catalogue offers - the same order the model
+ * frame keeps. Redrawn at the edges of every download, import and delete, and
+ * after a list refresh.
  */
-function renderCatalog() {
+async function renderCatalog() {
   const container = document.getElementById("dictionary-catalog");
   if (container === null) return;
 
-  const entries = sortByLabel(catalogDictionaries());
+  const rows = dictionaryRows(await listDictionaries(), availableDictionaries(), config);
   container.replaceChildren();
 
-  if (entries.length === 0) {
+  if (rows.length === 0) {
     container.append(element("p", "empty", t("options_no_catalog")));
     return;
   }
 
-  for (const entry of entries) {
-    const rendered = renderCatalogRow(entry);
-    rendered.id = catalogRowId(entry);
-    rendered.dataset["search"] = searchableText(entry);
+  for (const row of rows) {
+    /** @type {HTMLElement} */
+    let rendered;
+    if (row.installed !== null) {
+      rendered = renderDictionary(row.installed);
+      // Found by the pair either way it is spelled, and by the book's own name.
+      rendered.dataset["search"] = `${searchableText(row)} ${row.installed.name.toLowerCase()}`;
+    } else if (row.available !== null) {
+      rendered = renderCatalogRow(row.available);
+      rendered.id = catalogRowId(row.available);
+      rendered.dataset["search"] = searchableText(row);
+    } else {
+      continue;
+    }
     container.append(rendered);
   }
 
@@ -904,17 +960,18 @@ async function downloadDictionary(entry) {
   importing = true;
   const controller = new AbortController();
 
-  await renderDictionaries();
-  renderCatalog();
+  // Redrawn with the import already claimed, which greys out the other
+  // buttons of the frame; then this one row becomes a progress bar.
+  await renderCatalog();
   const container = document.getElementById(catalogRowId(entry));
   const onProgress = container === null ? undefined : renderFetching(container, entry, controller);
   const label = pairLabel(entry.from, entry.to);
-  dictionaryGetStatus(t("options_downloading_dictionary", label), "busy");
+  dictionaryStatus(t("options_downloading_dictionary", label), "busy");
 
   try {
     const result = await downloadArchive(entry.url, { signal: controller.signal, onProgress });
     if (!result.ok) {
-      dictionaryGetStatus(
+      dictionaryStatus(
         describeDictDownloadProblem(result.problem, result.detail),
         result.problem === "cancelled" ? "idle" : "error",
       );
@@ -923,13 +980,13 @@ async function downloadDictionary(entry) {
 
     const zip = await readZip(result.value);
     if (!zip.ok) {
-      dictionaryGetStatus(describeZipProblem(zip.problem, zip.detail), "error");
+      dictionaryStatus(describeZipProblem(zip.problem, zip.detail), "error");
       return;
     }
 
     const sorted = dictionaryFromZip(zip.value);
     if (!sorted.ok) {
-      dictionaryGetStatus(describeImportProblem(sorted.problem, sorted.detail), "error");
+      dictionaryStatus(describeImportProblem(sorted.problem, sorted.detail), "error");
       return;
     }
 
@@ -939,12 +996,11 @@ async function downloadDictionary(entry) {
       base: sorted.value.base,
       langFrom: entry.from,
       langTo: entry.to,
-      say: dictionaryGetStatus,
+      say: dictionaryStatus,
     });
   } finally {
     importing = false;
-    await renderDictionaries();
-    renderCatalog();
+    await renderCatalog();
   }
 }
 
@@ -1017,8 +1073,7 @@ async function addSelectedDictionary() {
   const { base, ifo, idx, dict, syn } = classified.value;
 
   importing = true;
-  await renderDictionaries();
-  renderCatalog();
+  await renderCatalog();
   dictionaryFileStatus(t("options_reading_file", base), "busy");
 
   try {
@@ -1042,18 +1097,18 @@ async function addSelectedDictionary() {
     dictionaryFileStatus(t("options_add_dictionary_failed", message(error)), "error");
   } finally {
     importing = false;
-    await renderDictionaries();
-    renderCatalog();
+    await renderCatalog();
   }
 }
 
 async function render() {
   config = await readConfig();
   os = await platformOs();
-  // The dated cache, and nothing asked of the network: the list stays as it
-  // was until the update button is pressed, and the line above it says how
-  // old that is.
+  // The dated caches, and nothing asked of the network: each list stays as
+  // it was until its update button is pressed, and the line above it says
+  // how old that is.
   liveList = await readLiveModels();
+  liveDictionaries = await readLiveDictionaries();
   // Android has no toolbar to pin anything to; the step disappears rather
   // than asking for the impossible.
   const pin = document.getElementById("first-steps-pin");
@@ -1073,21 +1128,25 @@ async function render() {
 
   const dictionaries = catalogSource();
   fill("dictionary-host", dictionaries.source === "" ? "" : new URL(dictionaries.source).host);
-  fill("dictionary-checked", dictionaries.checkedAt);
+  const dictionarySource = document.getElementById("dictionary-host");
+  if (dictionarySource instanceof HTMLAnchorElement && dictionaries.source !== "") {
+    dictionarySource.href = dictionaries.source;
+  }
+  fill("dictionary-checked", dictionaryListDate());
 
   await renderModels();
-  renderCatalog();
   renderDisabledHosts();
 
   // An import that died with its tab left rows behind that no lookup can see.
-  // This is the moment somebody is here to be told about it.
+  // This is the moment somebody is here to be told about it - swept before
+  // the frame first draws, so what draws is already clean.
   const swept = await removeUnfinished().catch(() => []);
   if (swept.length > 0) {
     dictionaryStatus(
       t("options_swept_unfinished", swept.map((one) => one.name).join(", ")),
     );
   }
-  await renderDictionaries();
+  await renderCatalog();
 }
 
 /**
@@ -1103,7 +1162,11 @@ async function refresh() {
   renderPair(modelRows(await listModels(), availableModels()));
   renderReaderOnly();
   renderDisabledHosts();
-  if (running === null && !importing) await renderModels();
+  // Both frames, because "what you are reading" rides on the pair in both.
+  if (running === null && !importing) {
+    await renderModels();
+    await renderCatalog();
+  }
 }
 
 webext().storage.onChanged.addListener((changes, area) => {
@@ -1122,6 +1185,7 @@ document.getElementById("reader-only")?.addEventListener("change", (event) => {
 });
 document.getElementById("add-model")?.addEventListener("click", () => void addSelectedModel());
 document.getElementById("refresh-models")?.addEventListener("click", () => void refreshList());
+document.getElementById("refresh-dictionaries")?.addEventListener("click", () => void refreshDictionaryList());
 document.getElementById("model-filter")?.addEventListener("input", () => applyModelFilter());
 document.getElementById("dictionary-filter")?.addEventListener("input", () => applyCatalogFilter());
 document.getElementById("add-dictionary")?.addEventListener("click", () => void addSelectedDictionary());

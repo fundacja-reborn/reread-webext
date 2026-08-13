@@ -72,12 +72,12 @@ If you are looking for something to use rather than something to read, come back
 ## Privacy, and how to check it
 
 This extension contacts exactly two places: Mozilla's bucket, for the list of models and
-the models themselves, and WikDict, for dictionaries. Nothing is asked for without your
-press: downloads happen when you press them, and the list of models refreshes when you
-press its update button - the settings page says which day the list on screen is from,
-and an address read off a fresh list is refused unless it sits under the same packaged
-bucket. Every host this extension is willing to talk to is written down in the
-package before it ships. There is nothing else to send and nowhere to send it: the page
+the models themselves, and WikDict, for the list of dictionaries and the dictionaries
+themselves. Nothing is asked for without your press: downloads happen when you press them,
+and each list refreshes only when you press its own update button - the settings page says
+which day the list on screen is from, and an address read off a fresh list is refused
+unless it sits under the same packaged source. Every host this extension is willing to
+talk to is written down in the package before it ships. There is nothing else to send and nowhere to send it: the page
 text, your selections and your vocabulary never leave the device.
 
 That claim is checkable rather than promised - open the network panel in devtools and
@@ -198,9 +198,11 @@ The settings page carries a catalogue of [WikDict](https://www.wikdict.com/)'s f
 pairs: one press downloads the archive from
 <https://download.wikdict.com/dictionaries/stardict/>, unpacks it in the extension and stores
 it. The addresses are written in the package
-([`src/lib/dict/catalog.json`](src/lib/dict/catalog.json)), the request happens only on your
-press, and files you add by hand keep working exactly as before - that path stays as the way
-out on the day the host stops answering.
+([`src/lib/dict/catalog.json`](src/lib/dict/catalog.json)) and the catalogue refreshes only
+when you press its update button - the fresh list is read off the same packaged listing, and
+every address is built here from that listing and the archive's name, never taken from the
+page. The request happens only on your press, and files you add by hand keep working exactly
+as before - that path stays as the way out on the day the host stops answering.
 
 Honesty requires one distinction here: unlike models, dictionary downloads carry **no pinned
 checksum**. WikDict rebuilds its files in place, so a sum recorded at release would break with

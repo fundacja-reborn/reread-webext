@@ -191,24 +191,12 @@ h3 {
   white-space: nowrap;
 }
 
-/* The pair a dictionary answers for, when it is the one being read. */
-.badge-on {
-  border-color: var(--page-accent);
-  color: var(--page-accent);
-}
-
-.dictionary {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.35rem 0.75rem;
-  padding: 0.45rem 0;
-  border-bottom: 1px solid var(--page-line);
-  font-size: 0.95rem;
-}
-
-.dictionary-name {
-  flex: 1 1 12rem;
+/* A stored dictionary's own name, beside the pair in the frame: what tells
+   two dictionaries of one pair apart. Muted like the sizes, but allowed to
+   wrap - a book's name can be long, and a row is allowed a second line. */
+.dictionary-title {
+  color: var(--page-muted);
+  overflow-wrap: anywhere;
 }
 
 /* Its own line, below the rest of the row: this is where a dictionary says who
@@ -346,9 +334,12 @@ input[type="checkbox"] {
   display: none;
 }
 
+/* One step below the prose, like the hints: a status is an aside about an
+   action, not a paragraph of the page. */
 .status {
   padding: 0.6rem 0;
   color: var(--page-muted);
+  font-size: 0.9rem;
 }
 
 .status[data-tone="error"] {
