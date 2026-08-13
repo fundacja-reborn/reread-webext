@@ -40,7 +40,7 @@ import { deleteModel, listModels, putModel } from "../lib/models/store.js";
 import { modelSourceUrl, updateAvailable } from "../lib/models/upstream.js";
 import { testLoadModel } from "../lib/models/validate.js";
 import { Message } from "../lib/protocol.js";
-import { dictionaryRows, matchesFilter, orderForDisplay, searchableText, sortByLabel } from "./models-view.js";
+import { dictionaryRows, firstStepsMove, matchesFilter, orderForDisplay, searchableText, sortByLabel } from "./models-view.js";
 
 /**
  * The one download that may be in flight. One at a time on purpose: each holds
@@ -85,6 +85,41 @@ let liveDictionaries = null;
 
 /** One dictionary-list refresh at a time, for the same reason. */
 let refreshingDictionaries = false;
+
+/**
+ * What the first-steps fold needs to know, each half learned by the frame
+ * render that already sees its store. Null is "not looked yet": the fold
+ * stays hidden until both halves have answered, so the first paint is
+ * already the right shape rather than a guess that folds a heartbeat later.
+ *
+ * @type {boolean | null}
+ */
+let modelStored = null;
+
+/** @type {boolean | null} */
+let dictionaryStored = null;
+
+/** The verdict the fold last moved on - see `firstStepsMove`. @type {boolean | null} */
+let setupDone = null;
+
+/**
+ * The fresh-install signpost, standing open while a model or a dictionary is
+ * missing and folded to its heading once both are stored - never gone, so the
+ * instructions can be reread at will. Both frame renders report here, because
+ * every edge a model or a dictionary crosses already passes through one of
+ * them. The fold only moves when the verdict changes, so a fold toggled by
+ * hand keeps the reader's choice through every redraw in between.
+ */
+function renderFirstSteps() {
+  const fold = document.getElementById("first-steps");
+  if (!(fold instanceof HTMLDetailsElement)) return;
+  if (modelStored === null || dictionaryStored === null) return;
+
+  const move = firstStepsMove(setupDone, modelStored, dictionaryStored);
+  setupDone = move.done;
+  if (move.open !== null) fold.open = move.open;
+  fold.hidden = false;
+}
 
 /**
  * @returns {import("../lib/models/registry.js").RegistryModel[]}
@@ -546,14 +581,13 @@ async function renderModels() {
   const container = document.getElementById("models");
   if (container === null) return;
 
-  const rows = orderForDisplay(modelRows(await listModels(), availableModels()), config);
+  const stored = await listModels();
+  const rows = orderForDisplay(modelRows(stored, availableModels()), config);
 
-  // The first-steps signpost stands only while not one model is stored -
-  // whatever the pair. It is redrawn here because every edge a model crosses
-  // (downloaded, added from files, deleted) already passes through this
-  // render, and the block must fall with the first arrival.
-  const firstSteps = document.getElementById("first-steps");
-  if (firstSteps !== null) firstSteps.hidden = rows.some((row) => row.installed !== null);
+  // The model half of the first-steps verdict, from the store itself rather
+  // than the view rows - the rows answer "what to draw", not "what is here".
+  modelStored = stored.length > 0;
+  renderFirstSteps();
 
   container.replaceChildren();
 
@@ -872,7 +906,15 @@ async function renderCatalog() {
   const container = document.getElementById("dictionary-catalog");
   if (container === null) return;
 
-  const rows = dictionaryRows(await listDictionaries(), availableDictionaries(), config);
+  const stored = await listDictionaries();
+  const rows = dictionaryRows(stored, availableDictionaries(), config);
+
+  // The dictionary half of the first-steps verdict. Ready ones only: a
+  // half-imported dictionary answers no lookup, and must not fold the
+  // instructions away.
+  dictionaryStored = stored.some((one) => one.ready);
+  renderFirstSteps();
+
   container.replaceChildren();
 
   if (rows.length === 0) {
