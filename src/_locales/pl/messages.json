@@ -521,20 +521,23 @@
 
   "options_title": { "message": "re/read - ustawienia" },
   "options_local_intro": {
-    "message": "Wszystko, co robi re/read, dzieje się na tym urządzeniu: tłumaczenie, słownik, czytelnia, zapisane frazy. Nic z tego, co czytasz ani zaznaczasz, nigdzie nie jest wysyłane. Sieć służy dwóm rzeczom, obu na tej stronie i obu na twoje kliknięcie: pobraniu modelu albo słownika i aktualizacji list modeli i słowników. Zawsze spod dwóch adresów zapisanych w paczce, i niczemu więcej."
+    "message": "Wszystko, co robi re/read, dzieje się na tym urządzeniu (offline): tłumaczenie, słownik, czytelnia, zapisane frazy. Nic z tego, co czytasz ani zaznaczasz, nigdzie nie jest wysyłane. Sieć służy dwóm rzeczom, obu na tej stronie i obu na twoje kliknięcie: pobraniu modelu albo słownika i aktualizacji list modeli i słowników - i tylko spod dwóch adresów URL podanych jawnie w tych sekcjach."
   },
   "options_first_steps_heading": { "message": "Pierwsze kroki" },
   "options_first_steps_intro": {
-    "message": "Nic się jeszcze nie tłumaczy - modelu, który by to robił, nie ma na tym urządzeniu. Przygotowanie zajmuje minutę:"
+    "message": "Nic się jeszcze nie tłumaczy - modelu, który by to robił, nie ma jeszcze na tym urządzeniu. Przygotowanie zajmuje minutę:"
   },
   "options_first_steps_model": {
     "message": "W sekcji „Modele tłumaczeniowe” znajdź parę językową, której potrzebujesz (najszybciej przez filtr), i naciśnij „Pobierz”. Model zostaje zapisany na tym urządzeniu i odtąd tłumaczy offline - a pierwszy model sam ustawia parę językową powyżej."
   },
   "options_first_steps_dictionary": {
-    "message": "Warte drugiego naciśnięcia: słownik dla tej samej pary, w sekcji „Słowniki” - pojedyncze słowa dostają wtedy pełniejsze odpowiedzi niż samo tłumaczenie."
+    "message": "W sekcji „Słowniki” pobierz słownik dla tej samej pary (to opcjonalne, ale warto) - pojedyncze słowa dostają wtedy pełniejsze odpowiedzi niż samo tłumaczenie (po kliknięciu na „Więcej” w dymku tłumaczenia)."
   },
   "options_first_steps_pin": {
-    "message": "Na koniec przypnij re/read do paska narzędzi - dopóki tego nie zrobisz, przycisk kryje się za ikoną puzzla. Za przyciskiem: widok czytania, czytelnia offline, zapisane frazy i wyłącznik witryny, na której jesteś."
+    "message": "Na koniec przypnij re/read do paska narzędzi: kliknij ikonę puzzla po prawej stronie paska, a przy re/read wybierz koło zębate i „Przypnij do paska narzędzi”. Przycisk re/read daje szybki dostęp do widoku czytania, czytelni offline, zapisanych fraz, zmiany pary językowej i wyłącznika witryny, na której jesteś."
+  },
+  "options_first_steps_pin_android": {
+    "message": "Przycisk re/read znajdziesz w menu przeglądarki (⋮), w sekcji rozszerzeń - daje szybki dostęp do widoku czytania, czytelni offline, zapisanych fraz, zmiany pary językowej i wyłącznika witryny, na której jesteś."
   },
   "options_sections_aria": { "message": "Sekcje tej strony" },
   "options_engine": { "message": "Silnik" },
