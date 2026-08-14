@@ -60,6 +60,14 @@ import { t } from "../lib/i18n.js";
 
 const GAP = 8;
 const VIEWPORT_MARGIN = 8;
+/**
+ * The gap below the phrase when the bubble stands below it by preference.
+ * Under a touch selection hang the browser's drag handles, and they are
+ * browser chrome: a page cannot measure them, move them, or hear them being
+ * dragged - and `GAP` would stand the gloss right on top of them. The number
+ * is an estimate of how far they reach, to be tuned on a device, not a fact.
+ */
+const HANDLE_GAP = 32;
 
 /**
  * Read when a button is rendered, not when the module loads: this module is
@@ -104,6 +112,10 @@ const STYLE = `
 
   .bubble {
     color-scheme: light dark;
+    /* Hanging off the host's line (D77): the host is a full-width strip of no
+       height pinned by top alone, and which way the bubble hangs off it is
+       the data-grow rules below. */
+    position: absolute;
     /* A column in the order of distance from the phrase - gloss, actions,
        second layer - which the mirror below reverses whole when the bubble
        stands above the phrase. */
@@ -113,12 +125,23 @@ const STYLE = `
     max-width: min(22rem, 90vw);
     padding: 10px 12px;
     border-radius: 10px;
-    border: 1px solid rgba(0, 0, 0, 0.12);
+    /* The edge, not the shadow, is what says where the bubble ends: an e-ink
+       panel flattens the shadow into nothing, and it has to say so over any
+       page's colors - so it holds the strength page.css gives a control's
+       border rather than a hairline's. */
+    border: 1px solid rgba(0, 0, 0, 0.35);
     background: #ffffff;
     color: #1f2430;
     box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
     overflow-wrap: break-word;
   }
+
+  /* Which way the bubble hangs. Only ever off the host's top-pinned line,
+     never off a bottom computed from the viewport's height: Android's
+     dynamic toolbar walks bottom-anchored fixed elements up and down with
+     itself, and a bubble pinned that way landed on its own phrase (D77). */
+  .bubble[data-grow="down"] { top: 0; }
+  .bubble[data-grow="up"] { bottom: 0; }
 
   /* A flex item does not shrink below its own content unless it is told to, and
      one long word in a gloss would push the bubble past its maximum width. */
@@ -373,11 +396,36 @@ const STYLE = `
   .actions button[data-action="settings"]:hover:not(:disabled) { background: rgba(0, 0, 0, 0.1); }
   .actions button[data-action="save"]:disabled { opacity: 0.45; }
 
+  /* A hand is not a cursor: where the primary pointer is a finger, the type
+     steps up toward the page's own reading size and the presses grow into
+     targets. Sizing only - the reveal mechanic deliberately has no touch
+     branch (D44), and a hybrid using its mouse loses nothing to bigger type. */
+  @media (pointer: coarse) {
+    .bubble { font-size: 16px; }
+    .context, .entries { font-size: 15px; }
+    .entry-label { font-size: 12px; }
+    .entry-sense { padding: 6px 8px; }
+    .actions { gap: 10px; }
+    .actions button { font-size: 14px; padding: 8px 6px; }
+    .actions button:first-child:not([data-action="save"]):not([data-action="reader"]):not([data-action="settings"]) { margin-left: -6px; }
+    .actions button[data-action="save"],
+    .actions button[data-action="reader"],
+    .actions button[data-action="settings"] {
+      font-size: 15px;
+      padding: 8px 16px;
+    }
+  }
+
   @media (prefers-color-scheme: dark) {
     .bubble {
-      background: #1f2430;
+      /* A step lighter than the dark themes it floats over, because the
+         shadow that separates the planes on glass does not exist on black
+         and quantizes away on e-ink - the background difference and the
+         border have to do it alone (reported from a phone: the bubble sank
+         into the reader's dark theme). */
+      background: #262c3a;
       color: #f2f4f8;
-      border-color: rgba(255, 255, 255, 0.14);
+      border-color: rgba(255, 255, 255, 0.45);
       box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
     }
     .body[data-tone="error"],
@@ -433,7 +481,7 @@ const STYLE = `
 
 /**
  * @typedef {object} Tooltip
- * @property {(options: { anchor: DOMRect, variant: Variant, body: string, tone?: Tone, actions?: Action[] }) => void} show
+ * @property {(options: { anchor: DOMRect, variant: Variant, body: string, tone?: Tone, actions?: Action[], prefer?: "above" | "below" }) => void} show
  * @property {(body: string, tone?: Tone) => void} setBody
  * @property {(sentence: string | null, tone?: Tone) => void} setContext
  * @property {(blocks: Block[]) => void} setEntries
@@ -481,25 +529,37 @@ function style(root) {
  * Where the bubble goes, given where the phrase is and how much room there is
  * around it.
  *
- * The answer is one edge and not a rectangle, and that is the point: the bubble
- * is pinned by the edge nearest the phrase, so everything that makes it taller -
- * a row of actions unfolding, a sentence arriving - moves the far edge and
- * leaves the line being read exactly where it was. Above the phrase by
- * preference, which is to say pinned by its bottom: reading goes downwards, so
- * the text above has been read and the text below is what comes next (D23).
+ * The answer is one line and a direction, not a rectangle, and that is the
+ * point: the bubble is pinned by the edge nearest the phrase, so everything
+ * that makes it taller - a row of actions unfolding, a sentence arriving -
+ * moves the far edge and leaves the line being read exactly where it was.
+ * `top` is where that near edge lies, `grow` is which way the rest of the
+ * bubble hangs off it - and hanging upward is the stylesheet's job (see
+ * `data-grow`), never a `bottom:` computed from the viewport's height:
+ * Firefox on Android walks bottom-anchored fixed elements up and down with
+ * its dynamic toolbar, and a bubble pinned that way landed on the very
+ * phrase it was about whenever the toolbar was away (D77).
  *
- * Pinning it in CSS rather than placing it again is what lets the row unfold in
- * the stylesheet: by the time it starts growing there is nothing here left to
- * run.
+ * Pinning an edge in CSS rather than placing the bubble again is also what
+ * lets the row unfold in the stylesheet: by the time it starts growing there
+ * is nothing here left to run.
+ *
+ * Above the phrase by preference: reading goes downwards, so the text above
+ * has been read and the text below is what comes next (D23). A touch
+ * selection asks for `below` (D74): Android's own selection bar stands over
+ * the phrase - the exact strip D23 would choose - and the system's drag
+ * handles hang beneath it, so the bubble steps below, past the handles, and
+ * leaves the strip above to the bar.
  *
  * @param {object} where
  * @param {{ top: number, bottom: number, left: number }} where.anchor the phrase, in viewport coordinates
  * @param {{ width: number, height: number }} where.size what the bubble measures now
  * @param {{ width: number, height: number }} where.viewport
  * @param {number} [where.folded] how much taller it is still going to get on its own
- * @returns {{ left: number, top: number } | { left: number, bottom: number }}
+ * @param {"above" | "below"} [where.prefer] which side of the phrase to try first
+ * @returns {{ left: number, top: number, grow: "down" | "up" }}
  */
-export function placement({ anchor, size, viewport, folded = 0 }) {
+export function placement({ anchor, size, viewport, folded = 0, prefer = "above" }) {
   // The room to look for is the room the bubble may come to need, not the room
   // it needs now - a folded row unfolds with nobody left to move anything.
   const height = size.height + folded;
@@ -507,15 +567,21 @@ export function placement({ anchor, size, viewport, folded = 0 }) {
   const maxLeft = Math.max(VIEWPORT_MARGIN, viewport.width - size.width - VIEWPORT_MARGIN);
   const left = Math.round(Math.min(Math.max(VIEWPORT_MARGIN, anchor.left), maxLeft));
 
-  if (anchor.top - GAP - height >= VIEWPORT_MARGIN) {
-    return { left, bottom: Math.round(viewport.height - (anchor.top - GAP)) };
+  const gap = prefer === "below" ? HANDLE_GAP : GAP;
+  const fitsAbove = anchor.top - GAP - height >= VIEWPORT_MARGIN;
+  const fitsBelow = anchor.bottom + gap + height <= viewport.height - VIEWPORT_MARGIN;
+
+  if (fitsAbove && (prefer === "above" || !fitsBelow)) {
+    return { left, top: Math.round(anchor.top - GAP), grow: "up" };
+  }
+  if (fitsBelow) {
+    return { left, top: Math.round(anchor.bottom + gap), grow: "down" };
   }
 
-  // Below it, and pushed up only by the bottom of the window: the top edge is
-  // the near one now, so this is the same rule the other way round.
-  const below = anchor.bottom + GAP;
+  // Nowhere fits whole: below the phrase, pushed up only by the bottom of the
+  // window - the most of it that can be on the screen is on the screen.
   const room = viewport.height - VIEWPORT_MARGIN - height;
-  return { left, top: Math.round(Math.max(VIEWPORT_MARGIN, Math.min(below, room))) };
+  return { left, top: Math.round(Math.max(VIEWPORT_MARGIN, Math.min(anchor.bottom + gap, room))), grow: "down" };
 }
 
 /**
@@ -541,6 +607,10 @@ export function createTooltip({ onAction }) {
 
   /** Where the bubble is anchored, so it can be placed again when it changes size. */
   let anchor = new DOMRect();
+  /** Which side of the phrase this bubble prefers, kept with the anchor for
+   *  the same reason: every re-placement has to answer it again. */
+  /** @type {"above" | "below"} */
+  let side = "above";
   let editing = false;
   /** Whether the second layer is unfolded. Folded again for every new phrase. */
   let unfolded = false;
@@ -579,6 +649,11 @@ export function createTooltip({ onAction }) {
     host.style.setProperty("z-index", "2147483647", "important");
     host.style.setProperty("top", "0px", "important");
     host.style.setProperty("left", "0px", "important");
+    // A full-width line of no height, not a box around the bubble: the bubble
+    // hangs off it absolutely (D77) and resolves its width against this
+    // width, and a strip with no height catches no taps meant for the page.
+    host.style.setProperty("width", "100%", "important");
+    host.style.setProperty("height", "0px", "important");
 
     const root = host.attachShadow({ mode: "closed" });
     style(root);
@@ -954,9 +1029,8 @@ export function createTooltip({ onAction }) {
     if (host === null || bubble === null) return;
 
     host.style.setProperty("visibility", "hidden", "important");
-    host.style.setProperty("left", "0px", "important");
     host.style.setProperty("top", "0px", "important");
-    host.style.removeProperty("bottom");
+    bubble.style.left = "0px";
 
     const size = bubble.getBoundingClientRect();
     const spot = placement({
@@ -967,20 +1041,16 @@ export function createTooltip({ onAction }) {
         height: document.documentElement.clientHeight,
       },
       folded: foldedHeight(),
+      prefer: side,
     });
 
-    host.style.setProperty("left", `${spot.left}px`, "important");
-    // Which edge is pinned decides which way the bubble grows, and the
-    // stylesheet has to know it too: the row unfolds on the far side of the
-    // gloss, or the gloss would be pushed off the line it was read on.
-    if ("top" in spot) {
-      bubble.dataset["grow"] = "down";
-      host.style.setProperty("top", `${spot.top}px`, "important");
-    } else {
-      bubble.dataset["grow"] = "up";
-      host.style.removeProperty("top");
-      host.style.setProperty("bottom", `${spot.bottom}px`, "important");
-    }
+    // The host marks the near edge's line; which way the bubble hangs off it
+    // is the stylesheet's business, and it decides the layout too: the row
+    // unfolds on the far side of the gloss, or the gloss would be pushed off
+    // the line it was read on.
+    bubble.style.left = `${spot.left}px`;
+    bubble.dataset["grow"] = spot.grow;
+    host.style.setProperty("top", `${spot.top}px`, "important");
     host.style.setProperty("visibility", "visible", "important");
   }
 
@@ -1015,9 +1085,10 @@ export function createTooltip({ onAction }) {
   }
 
   return {
-    show({ anchor: rect, variant, body, tone = "normal", actions = [] }) {
+    show({ anchor: rect, variant, body, tone = "normal", actions = [], prefer = "above" }) {
       build();
       anchor = rect;
+      side = prefer;
       editing = false;
       if (bubble !== null) {
         bubble.dataset["variant"] = variant;

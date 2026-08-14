@@ -122,6 +122,17 @@ select {
   opacity: 1;
 }
 
+/* A selection is the one mark on these pages that must be unmissable while it
+   lasts - on the reader page it is the phrase a bubble is about to answer.
+   The browser's translucent wash sank into the dark theme's background on an
+   e-ink panel (reported from a Boox), and the surest contrast every theme
+   owns is its own two ends: ink on paper, swapped. Extension pages only -
+   a content script never touches the selection colors of somebody's page. */
+::selection {
+  background: var(--page-fg);
+  color: var(--page-bg);
+}
+
 /* A sentence hanging off the row above it - an explanation, not a status, so
    it has no tones and never disappears. */
 .hint {
