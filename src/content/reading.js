@@ -12,6 +12,11 @@
  * carefully: one read of `storage.local` at startup, and a listener for when the
  * vocabulary changes in another tab. Nothing else happens until there is a
  * selection, and nothing is added to the page until there is a bubble to show.
+ * A touch-capable device pays for two listeners more (D73): a selection made by
+ * long-press and by the system's handles ends in no mouse gesture at all, so
+ * there the document's `selectionchange` is listened to as well, behind a
+ * settle timer and a pointer-type gate - at rest both amount to one comparison
+ * per event, and a mouse-only device does not even install them.
  *
  * Knowing the vocabulary here rather than asking the background for it is what
  * makes a word the reader already kept appear instantly, with no message and no
@@ -99,6 +104,22 @@ const tooltip = createTooltip({ onAction });
 /** Where the press this release belongs to started, and whether it was ours. */
 /** @type {{ x: number, y: number, mine: boolean } | null} */
 let press = null;
+
+/** The last press's pointer type, so the settle path answers touch alone. */
+let lastPointerType = "";
+
+/** The touch path's settle timer, alive only while a selection is moving. */
+/** @type {number | null} */
+let settleTimer = null;
+
+/**
+ * How long a touch selection has to hold still before it is answered - the
+ * launcher's number (`launcher.js`), for the launcher's reason: long enough to
+ * outlast the `selectionchange` storm of a drag, short enough that nobody
+ * waits on it. Here a settling costs an engine run, but the timer starting
+ * over with every change means a drag in motion never pays it.
+ */
+const SETTLE_MS = 300;
 
 /** What gets walked for saved phrases. The body, unless a caller says otherwise. */
 /** @type {Element | null} */
@@ -499,6 +520,19 @@ function onMouseUp(event) {
     return;
   }
 
+  present(selection, true);
+}
+
+/**
+ * A selection, answered: recall when it is already in the vocabulary, a
+ * translation on its way otherwise. Both listeners end here - the mouse
+ * gesture releasing, and a touch selection holding still - and `deliberate`
+ * is the whole of the difference they hand down (see `keeping`).
+ *
+ * @param {NonNullable<ReturnType<typeof readSelection>>} selection
+ * @param {boolean} deliberate whether a gesture ended exactly here
+ */
+function present(selection, deliberate) {
   const { text, normalized } = selection;
   if (showSaved(selection.rect, text, normalized, selection.context)) return;
 
@@ -537,7 +571,7 @@ function onMouseUp(event) {
     tooltip.setEntries(blocks);
     secondLayer = (sentence !== null && sentence.length > 0) || blocks.length > 0 ? ["more"] : [];
 
-    const decision = keeping({ normalized, gloss, findable: selection.findable });
+    const decision = keeping({ normalized, gloss, findable: selection.findable, deliberate });
     tooltip.setActions([...OFFERED[decision], ...secondLayer]);
 
     // Kept without being asked. The buttons flip first and the write follows,
@@ -545,6 +579,47 @@ function onMouseUp(event) {
     // buttons for a moment reads as a bubble that is still thinking.
     if (decision === "automatic") void keep([gloss], KEPT);
   });
+}
+
+/**
+ * @param {PointerEvent} event
+ */
+function onPointerDown(event) {
+  lastPointerType = event.pointerType;
+}
+
+/**
+ * The touch half of listening (D73). The launcher already answers handles with
+ * `selectionchange` behind a settle timer, and D47's terms not applying to
+ * them is argued there (`launcher.js`); this is the same answer with the mouse
+ * kept out of it, because the mouse has a better listener - a gesture with an
+ * end - and reading the document mid-gesture is exactly what D47 is about.
+ */
+function onSelectionChange() {
+  if (lastPointerType !== "touch") return;
+  if (settleTimer !== null) window.clearTimeout(settleTimer);
+  settleTimer = window.setTimeout(settled, SETTLE_MS);
+}
+
+/** The selection as it stands once it has held still under a finger. */
+function settled() {
+  settleTimer = null;
+  // Not over the edit box: caret moves in there fire `selectionchange` too,
+  // and a bubble being retyped must not be swapped for the bubble reopening.
+  if (tooltip.isEditing()) return;
+
+  const selection = readSelection();
+  // Nothing settled - a tap collapsed the selection, and the tap's own
+  // compatibility mouse events already said what that meant. Hiding from here
+  // would close the recall bubble a tap on an underline has just opened.
+  if (selection === null) return;
+
+  // The phrase the bubble is already about, holding still again: the system's
+  // toolbar poking the selection, a change event with nothing behind it.
+  // Answering again would run the engine to repaint what is already shown.
+  if (tooltip.isOpen() && current !== null && current.text === selection.text) return;
+
+  present(selection, false);
 }
 
 /**
@@ -601,6 +676,14 @@ export function start(where = {}) {
     document.addEventListener("mouseup", onMouseUp, { capture: true, passive: true });
     document.addEventListener("keydown", onKeyDown, { capture: true, passive: true });
     document.addEventListener("scroll", onScroll, { capture: true, passive: true });
+    // Only where a finger can select (D73): on a mouse-only device the pair
+    // above already hears every selection there is, and `selectionchange`
+    // fires on every caret move of every text box - a listener that would
+    // never answer has no business costing that.
+    if (navigator.maxTouchPoints > 0) {
+      document.addEventListener("pointerdown", onPointerDown, { capture: true, passive: true });
+      document.addEventListener("selectionchange", onSelectionChange);
+    }
     webext().storage.onChanged.addListener(onStorageChanged);
   }
 
@@ -623,13 +706,21 @@ export function stop() {
   document.removeEventListener("mouseup", onMouseUp, { capture: true });
   document.removeEventListener("keydown", onKeyDown, { capture: true });
   document.removeEventListener("scroll", onScroll, { capture: true });
+  // Removing what was never added is a no-op, so no second capability check.
+  document.removeEventListener("pointerdown", onPointerDown, { capture: true });
+  document.removeEventListener("selectionchange", onSelectionChange);
   webext().storage.onChanged.removeListener(onStorageChanged);
 
+  if (settleTimer !== null) {
+    window.clearTimeout(settleTimer);
+    settleTimer = null;
+  }
   tooltip.hide();
   current = null;
   secondLayer = [];
   unfetched = null;
   press = null;
+  lastPointerType = "";
   vocabulary = new Map();
   clear();
 }
