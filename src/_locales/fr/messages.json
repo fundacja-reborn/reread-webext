@@ -113,6 +113,7 @@
   "pager_next": { "message": "Suivante" },
   "action_export": { "message": "Exporter" },
   "action_import": { "message": "Importer" },
+  "transfer_heading": { "message": "Import et export" },
   "vocab_transfer_note": {
     "message": "Un fichier .tsv à deux colonnes - le format qu'écrit le plugin KOReader et que lit Anki. L'import ajoute seulement les phrases qui manquent à cette paire ; rien de déjà enregistré n'est modifié."
   },

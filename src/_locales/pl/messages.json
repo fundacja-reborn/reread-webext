@@ -120,6 +120,7 @@
   "pager_next": { "message": "Następna" },
   "action_export": { "message": "Eksportuj" },
   "action_import": { "message": "Importuj" },
+  "transfer_heading": { "message": "Import i eksport" },
   "vocab_transfer_note": {
     "message": "Plik .tsv z dwiema kolumnami - ten sam format zapisuje wtyczka KOReadera, a czyta Anki. Import dodaje tylko frazy, których w tej parze nie ma; zapisanych nie zmienia."
   },

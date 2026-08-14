@@ -1,7 +1,8 @@
-/* The saved-phrases page: a compact header, one toolbar line, the list as a
-   grid, and the editor a row unfolds into. Typography, buttons, the pager and
-   the import box lean on assets/page.css, shared by every page this extension
-   owns; everything below is this page's own layout.
+/* The saved-phrases page: a compact header, the filter line, the list as a
+   grid with the editor a row unfolds into, and the transfer section under the
+   pager. Typography, buttons, the pager and the import box lean on
+   assets/page.css, shared by every page this extension owns; everything below
+   is this page's own layout.
 
    Base styles lay the page out for a narrow screen; the one media query at
    the end spreads the same HTML out for a desktop. */
@@ -105,17 +106,52 @@ summary {
   font-size: 0.9rem;
 }
 
-/* --- the toolbar: the filter grows, the transfer buttons follow --- */
+/* --- the fold's line, shared with the anchor to the transfer section --- */
 
-.toolbar {
+/* One line, two quiet doors: the fold on the left, the link to the import
+   and export section on the right - the summary's own muted voice, kept a
+   link by its underline. An opened fold needs the whole line for its prose,
+   so the link steps down to the line below, still on the right. */
+.fold-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  align-items: flex-start;
+  gap: 0 1rem;
+  margin: 0.25rem 0 0;
+}
+
+.fold-row .fold-line {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+}
+
+.fold-row .fold-line[open] {
+  flex-basis: 100%;
+}
+
+.fold-row a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-inline-start: auto;
+  color: var(--page-muted);
+  font-size: 0.9rem;
+}
+
+.fold-row a:hover {
+  color: var(--page-accent);
+}
+
+/* --- the filter line above the list it narrows --- */
+
+.filter-line {
+  display: flex;
   margin: 1rem 0 0;
 }
 
-.toolbar input {
-  flex: 1 1 100%;
+.filter-line input {
+  flex: 1 1 auto;
   min-height: 44px;
   min-width: 0;
   font: inherit;
@@ -124,14 +160,6 @@ summary {
   border: 1px solid var(--page-line);
   background: transparent;
   color: var(--page-fg);
-}
-
-/* On a phone the two secondary buttons share the wrapped line edge to edge;
-   the media query below lets them keep their own width beside the filter. */
-.toolbar button {
-  flex: 1 1 0;
-  min-height: 44px;
-  padding: 0.35rem 1rem;
 }
 
 /* --- the import offer: size, a taste of its rows, the target pair --- */
@@ -308,6 +336,28 @@ button.quiet-learned:focus-visible {
   padding: 0.35rem 1rem;
 }
 
+/* --- the transfer section: import and export, under the list --- */
+
+/* Its own quiet area below the pager, reached by the header's anchor; the
+   scroll margin keeps the landing heading off the viewport's edge. */
+.transfer-section {
+  margin-top: 2rem;
+  border-top: 1px solid var(--page-line);
+  scroll-margin-top: 0.75rem;
+}
+
+/* A small heading: this is a tool shed, not a second page. */
+.transfer-section h2 {
+  margin: 1rem 0 0.25rem;
+  font-size: 1.05rem;
+}
+
+/* On a phone the two buttons share the line edge to edge, like every paired
+   row of buttons here; the media query below gives them their own width. */
+.transfer-section > .transfer button {
+  flex: 1 1 0;
+}
+
 /* --- one breakpoint: the same HTML, spread out for a desktop --- */
 
 @media (min-width: 600px) {
@@ -316,12 +366,7 @@ button.quiet-learned:focus-visible {
     flex: 0 1 auto;
   }
 
-  /* The filter takes the line's slack; the buttons keep their own width. */
-  .toolbar input {
-    flex: 1 1 auto;
-  }
-
-  .toolbar button {
+  .transfer-section > .transfer button {
     flex: none;
   }
 

@@ -116,6 +116,10 @@
   "pager_next": { "message": "Next" },
   "action_export": { "message": "Export" },
   "action_import": { "message": "Import" },
+  "transfer_heading": {
+    "message": "Import and export",
+    "description": "Heading of the transfer section under the saved-phrases and reading lists, and the text of the anchor link that jumps to it - one name for one place."
+  },
   "vocab_transfer_note": {
     "message": "A two-column .tsv file - what the KOReader plugin writes and Anki imports. Importing adds phrases this pair is missing and never touches a saved one."
   },

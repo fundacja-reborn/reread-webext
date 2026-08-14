@@ -25,19 +25,25 @@
       </div>
       <!-- The one counter this page has; the select's options carry none. -->
       <p class="hint" id="count" hidden></p>
-      <details class="fold-line">
-        <summary data-i18n="vocab_how_title">How it works</summary>
-        <p id="intro">
-          Every phrase you kept for this language pair, newest first - saved while reading, stored
-          only on this device. Learned removes a phrase and its underlines with it; Edit rewrites
-          what it means, one meaning per line.
-        </p>
-      </details>
+      <!-- The intro's fold shares its line with a quiet anchor: the transfer
+           section lives under the list, and this link is how it is found
+           without scrolling past a hundred rows. -->
+      <div class="fold-row">
+        <details class="fold-line">
+          <summary data-i18n="vocab_how_title">How it works</summary>
+          <p id="intro">
+            Every phrase you kept for this language pair, newest first - saved while reading, stored
+            only on this device. Learned removes a phrase and its underlines with it; Edit rewrites
+            what it means, one meaning per line.
+          </p>
+        </details>
+        <a href="#transfer" data-i18n="transfer_heading">Import and export</a>
+      </div>
     </header>
 
-    <!-- One line of tools: the filter grows, the two transfer buttons follow.
-         On a narrow screen the line wraps - same HTML, the stylesheet decides. -->
-    <div class="toolbar">
+    <!-- The filter stands alone above the list it narrows; the transfer tools
+         moved into their own section below the pager. -->
+    <div class="filter-line">
       <label for="filter" class="visually-hidden" data-i18n="vocab_filter_label">
         Filter the list of saved phrases
       </label>
@@ -47,35 +53,7 @@
         placeholder="Filter by phrase or meaning"
         data-i18n-placeholder="vocab_filter_placeholder"
       />
-      <button type="button" id="import" data-i18n="action_import">Import</button>
-      <button type="button" id="export" data-i18n="action_export">Export</button>
     </div>
-
-    <details class="fold-line">
-      <summary data-i18n="vocab_format_title">File format</summary>
-      <p class="hint" data-i18n="vocab_transfer_note">
-        A two-column .tsv file - what the KOReader plugin writes and Anki imports. Importing adds
-        phrases this pair is missing and never touches a saved one.
-      </p>
-    </details>
-    <input type="file" id="import-file" accept=".tsv,text/tab-separated-values" hidden />
-
-    <!-- The moment of consent: what the file holds and where it would go,
-         shown before anything is written. vocab.js fills it and keeps it in
-         step with the file the reader picked. -->
-    <div id="import-confirm" class="import-confirm" hidden>
-      <p id="import-summary"></p>
-      <ul id="import-sample" class="import-sample"></ul>
-      <p class="import-pair">
-        <label for="import-pair" data-i18n="vocab_import_into">Import into</label>
-        <select id="import-pair"></select>
-      </p>
-      <p class="transfer">
-        <button type="button" id="import-run" data-i18n="action_import">Import</button>
-        <button type="button" id="import-cancel" data-i18n="action_cancel">Cancel</button>
-      </p>
-    </div>
-    <p id="transfer-status" class="status report" role="status"></p>
 
     <div id="list" class="phrases"></div>
 
@@ -86,6 +64,42 @@
       <span class="pager-label" id="page-label"></span>
       <button type="button" id="next" data-i18n="pager_next">Next</button>
     </nav>
+
+    <!-- Import and export, after the list the way the acts themselves come
+         after the reading: visiting them is a decision, not a toll on the way
+         to the rows, and the anchor in the header is the short way here. -->
+    <section id="transfer" class="transfer-section" aria-labelledby="transfer-title">
+      <h2 id="transfer-title" data-i18n="transfer_heading">Import and export</h2>
+      <p class="transfer">
+        <button type="button" id="import" data-i18n="action_import">Import</button>
+        <button type="button" id="export" data-i18n="action_export">Export</button>
+      </p>
+      <details class="fold-line">
+        <summary data-i18n="vocab_format_title">File format</summary>
+        <p class="hint" data-i18n="vocab_transfer_note">
+          A two-column .tsv file - what the KOReader plugin writes and Anki imports. Importing adds
+          phrases this pair is missing and never touches a saved one.
+        </p>
+      </details>
+      <input type="file" id="import-file" accept=".tsv,text/tab-separated-values" hidden />
+
+      <!-- The moment of consent: what the file holds and where it would go,
+           shown before anything is written. vocab.js fills it and keeps it in
+           step with the file the reader picked. -->
+      <div id="import-confirm" class="import-confirm" hidden>
+        <p id="import-summary"></p>
+        <ul id="import-sample" class="import-sample"></ul>
+        <p class="import-pair">
+          <label for="import-pair" data-i18n="vocab_import_into">Import into</label>
+          <select id="import-pair"></select>
+        </p>
+        <p class="transfer">
+          <button type="button" id="import-run" data-i18n="action_import">Import</button>
+          <button type="button" id="import-cancel" data-i18n="action_cancel">Cancel</button>
+        </p>
+      </div>
+      <p id="transfer-status" class="status report" role="status"></p>
+    </section>
 
     <script src="vocab.js" defer></script>
   </body>
