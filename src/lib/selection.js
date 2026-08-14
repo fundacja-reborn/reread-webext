@@ -77,10 +77,22 @@ export function madeSelection({ from, to, clicks }) {
  * That last one is `findable` in `src/content/scan.js`, and it is what a
  * selection running from one paragraph into the next always is.
  *
- * @param {{ normalized: string, gloss: string, findable: boolean }} phrase
+ * `deliberate` is which of the two listeners this selection came through, and
+ * it decides how far keeping without asking may go (D73). A mouse gesture ends,
+ * and its end asserts the whole selection - the reader let go exactly there. A
+ * selection that merely held still under a settle timer asserts one word at
+ * most: on a touch screen the long-press takes a word, and everything wider is
+ * the system's handles being dragged - a gesture whose end no page event
+ * reports, so the timer answers mid-drag as readily as after it. Writing to
+ * the vocabulary on that answer would keep half-made selections; a Save button
+ * costs one press and keeps only what was meant.
+ *
+ * @param {{ normalized: string, gloss: string, findable: boolean, deliberate?: boolean }} phrase
  * @returns {Keeping}
  */
-export function keeping({ normalized, gloss, findable }) {
+export function keeping({ normalized, gloss, findable, deliberate = true }) {
   if (normalized.length === 0 || gloss.length === 0 || !findable) return "none";
-  return keyTokens(normalized).length > AUTO_KEEP_MAX_WORDS ? "ask" : "automatic";
+  const words = keyTokens(normalized).length;
+  if (words > AUTO_KEEP_MAX_WORDS) return "ask";
+  return deliberate || words === 1 ? "automatic" : "ask";
 }
