@@ -22,8 +22,10 @@
          `data-i18n`-marked text for the catalogue's language before the popup
          is seen. A marked element holds text only - the locales test enforces
          that, because the swap goes through `textContent`. -->
+    <!-- The label text carries the hostname inside it ("Enabled on ..."), so
+         the script builds it from the catalogue; no fallback stands here. -->
     <label class="popup-row popup-site" id="site-row" hidden>
-      <span class="popup-host" id="site-host"></span>
+      <span class="popup-site-label" id="site-label"></span>
       <input
         type="checkbox"
         id="site-toggle"

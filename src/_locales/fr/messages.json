@@ -41,6 +41,10 @@
   "bubble_reader": { "message": "Lire dans le lecteur" },
   "bubble_translating": { "message": "Traduction..." },
 
+  "popup_site_enabled": {
+    "message": "Activé sur $DOMAIN$",
+    "placeholders": { "domain": { "content": "$1" } }
+  },
   "popup_site_toggle_title": { "message": "Si re/read fonctionne sur ce site" },
   "popup_no_page": { "message": "re/read ne fonctionne pas sur cette page." },
   "popup_no_model": {
@@ -490,7 +494,7 @@
   },
   "options_disabled_heading": { "message": "Sites désactivés" },
   "options_disabled_intro": {
-    "message": "Les sites où re/read reste éteint - pas de soulignements, pas de bulle, rien qui tourne. C'est l'interrupteur du popup de la barre d'outils qui ajoute un site ici ; cette liste est la façon d'en rallumer un sans le visiter."
+    "message": "Les sites où re/read reste éteint - pas de soulignements, pas de bulle, rien qui tourne sur la page elle-même ; ouvrir une page à la main dans le lecteur fonctionne toujours. C'est l'interrupteur du popup de la barre d'outils qui ajoute un site ici ; cette liste est la façon d'en rallumer un sans le visiter."
   },
 
   "options_badge_reading": { "message": "ce que vous lisez" },

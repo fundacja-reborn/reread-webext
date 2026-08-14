@@ -31,8 +31,18 @@ body[data-os="android"] .popup-row {
   justify-content: space-between;
   gap: 0.75rem;
   width: 100%;
+  /* The floor every pressable row keeps across the extension's pages: a
+     desktop panel is also a touch surface on a convertible. */
+  min-height: 44px;
   padding: 0.55rem 0;
   border-bottom: 1px solid var(--page-line);
+}
+
+/* The ring the settings page draws too: the browser's own is easy to lose
+   against these quiet rows, and a keyboard has to see where it stands. */
+:is(button, select, input):focus-visible {
+  outline: 2px solid var(--page-accent);
+  outline-offset: 2px;
 }
 
 /* `display: flex` above would silently win over the browser's own
@@ -48,9 +58,10 @@ body[data-os="android"] .popup-row {
   color: var(--page-muted);
 }
 
-/* A hostname is one word that can be longer than the popup; the switch next
-   to it must stay a switch, not a casualty of the wrap. */
-.popup-host {
+/* The label carries the hostname, one word that can be longer than the popup;
+   it wraps, and the switch next to it must stay a switch, not a casualty of
+   the wrap. */
+.popup-site-label {
   overflow-wrap: anywhere;
 }
 
