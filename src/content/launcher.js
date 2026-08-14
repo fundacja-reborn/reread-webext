@@ -15,7 +15,9 @@
  * per answer; here answering costs a bubble and the timer waits for the
  * selection to hold still, so the storm a drag produces collapses into one
  * showing. The timer only ever runs while a selection is being made - at rest
- * this module is one listener and nothing else.
+ * this module is a listener for the selection, one for scroll, and on a
+ * touch-capable device one remembering the pointer's type (D74), and nothing
+ * else.
  *
  * The press sends `open-reader` with no tab id on purpose: a content script
  * does not know which tab it is, but the background can read it off the
@@ -39,6 +41,13 @@ const tooltip = createTooltip({ onAction });
 /** @type {number | null} */
 let timer = null;
 let started = false;
+/** The last press's pointer type: under a finger the offer steps below the
+ *  selection, past the system's drag handles, leaving the strip above to the
+ *  system's own bar (D74). Only ever set where a finger can select - a
+ *  mouse-only device does not pay for the listener. */
+let lastPointerType = "";
+/** The selection the offer is standing under, to stand aside when it moves. */
+let shownText = "";
 
 /**
  * @param {import("./tooltip.js").ReportedAction} action
@@ -73,7 +82,8 @@ function settle() {
     tooltip.hide();
     return;
   }
-  if (selection.toString().trim().length === 0) {
+  const text = selection.toString().trim();
+  if (text.length === 0) {
     tooltip.hide();
     return;
   }
@@ -86,12 +96,38 @@ function settle() {
     return;
   }
 
-  tooltip.show({ anchor: rect, variant: "launcher", body: "", actions: ["reader"] });
+  shownText = text;
+  tooltip.show({
+    anchor: rect,
+    variant: "launcher",
+    body: "",
+    actions: ["reader"],
+    prefer: lastPointerType === "touch" ? "below" : "above",
+  });
 }
 
 function onSelectionChange() {
   if (timer !== null) window.clearTimeout(timer);
   timer = window.setTimeout(settle, SETTLE_MS);
+
+  // The offer stands aside the moment the selection under it moves again
+  // (D75): dragging a system handle sends the page no pointer event, so the
+  // selection changing is the whole signal, and an offer left standing covers
+  // the words the handle is heading for. A ghost change - the system's
+  // toolbar poking a selection that did not move - carries the same text and
+  // falls through; a collapse is the timer's business, as it always was.
+  if (!tooltip.isOpen()) return;
+  const selection = window.getSelection();
+  if (selection === null || selection.isCollapsed || selection.rangeCount === 0) return;
+  if (selection.toString().trim() === shownText) return;
+  tooltip.hide();
+}
+
+/**
+ * @param {PointerEvent} event
+ */
+function onPointerDown(event) {
+  lastPointerType = event.pointerType;
 }
 
 /**
@@ -109,6 +145,12 @@ export function startLauncher() {
   started = true;
   document.addEventListener("selectionchange", onSelectionChange);
   document.addEventListener("scroll", onScroll, { capture: true, passive: true });
+  // Only where a finger can select, for the reason reading.js gives (D73):
+  // on a mouse-only device the answer would never change, and the offer
+  // stands above the phrase as it always has.
+  if (navigator.maxTouchPoints > 0) {
+    document.addEventListener("pointerdown", onPointerDown, { capture: true, passive: true });
+  }
 }
 
 /**
@@ -121,9 +163,13 @@ export function stopLauncher() {
   started = false;
   document.removeEventListener("selectionchange", onSelectionChange);
   document.removeEventListener("scroll", onScroll, { capture: true });
+  // Removing what was never added is a no-op, so no second capability check.
+  document.removeEventListener("pointerdown", onPointerDown, { capture: true });
   if (timer !== null) {
     window.clearTimeout(timer);
     timer = null;
   }
+  lastPointerType = "";
+  shownText = "";
   tooltip.hide();
 }

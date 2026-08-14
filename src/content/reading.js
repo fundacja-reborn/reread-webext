@@ -379,9 +379,10 @@ async function forget() {
  * @param {string} text as the page has it
  * @param {string} normalized
  * @param {string | null} context the sentence around the phrase, when the page has one
+ * @param {"above" | "below"} [prefer] which side of the phrase the bubble stands on
  * @returns {boolean} whether it was known
  */
-function showSaved(anchor, text, normalized, context) {
+function showSaved(anchor, text, normalized, context, prefer = "above") {
   const meanings = vocabulary.get(normalized);
   if (meanings === undefined) return false;
 
@@ -399,7 +400,7 @@ function showSaved(anchor, text, normalized, context) {
   // Recall: the answer, and nothing else until it is asked for (D44). Somebody
   // who clicked an underline wanted to know what the word was, and Learned is a
   // rare press on a decision they have already made - it can wait inside.
-  tooltip.show({ anchor, variant: "recall", body: meanings.join("\n"), actions: [...KEPT, ...secondLayer] });
+  tooltip.show({ anchor, variant: "recall", body: meanings.join("\n"), actions: [...KEPT, ...secondLayer], prefer });
   return true;
 }
 
@@ -534,7 +535,13 @@ function onMouseUp(event) {
  */
 function present(selection, deliberate) {
   const { text, normalized } = selection;
-  if (showSaved(selection.rect, text, normalized, selection.context)) return;
+  // Which side of the phrase to stand on. The settle path only ever answers a
+  // finger (the gate in onSelectionChange), and a finger's selection wears the
+  // system's bar above it and its drag handles beneath - the bubble steps
+  // below, past the handles, and leaves the strip above to the bar (D74). A
+  // mouse gesture keeps D23's above.
+  const prefer = deliberate ? "above" : "below";
+  if (showSaved(selection.rect, text, normalized, selection.context, prefer)) return;
 
   current = { text, normalized, keepable: selection.findable };
   secondLayer = [];
@@ -543,7 +550,7 @@ function present(selection, deliberate) {
 
   // The other variant: a fresh selection is a phrase nothing has been decided
   // about yet, so what can be done with it is on show from the first frame.
-  tooltip.show({ anchor: selection.rect, variant: "save", body: t("bubble_translating"), tone: "pending" });
+  tooltip.show({ anchor: selection.rect, variant: "save", body: t("bubble_translating"), tone: "pending", prefer });
 
   const request = selection.context === null
     ? { kind: Message.TRANSLATE, text }
@@ -599,6 +606,36 @@ function onSelectionChange() {
   if (lastPointerType !== "touch") return;
   if (settleTimer !== null) window.clearTimeout(settleTimer);
   settleTimer = window.setTimeout(settled, SETTLE_MS);
+  yieldToSelection();
+}
+
+/**
+ * An open bubble stands aside the moment the selection under it moves again
+ * (D75). Dragging a system handle sends the page no pointer event at all, so
+ * the selection changing is the only signal there is - and a bubble that
+ * stayed put covered the very words the handle was heading for, which is how
+ * this was reported. The settle timer then answers the selection that ends up
+ * made.
+ *
+ * Two changes fall through on purpose. A ghost - the system's toolbar poking
+ * a selection that did not move - carries the phrase already shown and may
+ * not blink it. A collapse carries no phrase at all, and is the tap's
+ * business: its compatibility mouse events already decide what closing means,
+ * and hiding here would close the recall bubble a tap on an underline just
+ * opened (D73).
+ */
+function yieldToSelection() {
+  if (!tooltip.isOpen() || tooltip.isEditing()) return;
+
+  const selection = window.getSelection();
+  if (selection === null || selection.isCollapsed || selection.rangeCount === 0) return;
+  const text = trimPhrase(selection.toString());
+  if (text.length === 0 || (current !== null && text === current.text)) return;
+
+  tooltip.hide();
+  current = null;
+  secondLayer = [];
+  unfetched = null;
 }
 
 /** The selection as it stands once it has held still under a finger. */
