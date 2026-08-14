@@ -4,12 +4,19 @@
    stylesheet (options.css, reader.css, vocab.css, popup.css); this file keeps
    the palette, the type and the controls they all share. */
 
+/* Two strengths of edge, and neither is faint: e-ink panels quantize the page
+   to 16 greys and flatten near-white hairlines into the background, and WCAG
+   1.4.11 asks 3:1 of a control's boundary. --page-line draws separators and
+   passive frames (about 2.6:1 here - visible, but quieter than any control);
+   --page-border draws the borders of controls (over 4.5:1), keeping the order
+   separator < control edge < text on paper as well as on glass. */
 :root {
   color-scheme: light dark;
   --page-bg: #ffffff;
   --page-fg: #1f2430;
   --page-muted: #5c6478;
-  --page-line: rgba(0, 0, 0, 0.12);
+  --page-line: #99a1b0;
+  --page-border: #6e7583;
   --page-accent: #b8791d;
 }
 
@@ -18,7 +25,8 @@
     --page-bg: #171a21;
     --page-fg: #f2f4f8;
     --page-muted: #98a1b5;
-    --page-line: rgba(255, 255, 255, 0.14);
+    --page-line: #565d6c;
+    --page-border: #767e8f;
     --page-accent: #f0a83c;
   }
 }
@@ -67,7 +75,7 @@ button:disabled {
 }
 
 button:disabled:hover {
-  border-color: var(--page-line);
+  border-color: var(--page-border);
 }
 
 .empty {
@@ -80,7 +88,7 @@ button {
   font: inherit;
   padding: 0.35rem 0.9rem;
   border-radius: 6px;
-  border: 1px solid var(--page-line);
+  border: 1px solid var(--page-border);
   background: transparent;
   color: var(--page-fg);
   cursor: pointer;
@@ -100,9 +108,18 @@ select {
   font: inherit;
   padding: 0.2rem 0.4rem;
   border-radius: 6px;
-  border: 1px solid var(--page-line);
+  border: 1px solid var(--page-border);
   background: transparent;
   color: var(--page-fg);
+}
+
+/* Placeholders say what a field wants, and the browser's translucent default
+   sits under the 4.5:1 floor - so they speak in the page's own muted voice.
+   Explicit opacity, because Firefox dims placeholders with opacity, not
+   color, and would dim this one too. */
+::placeholder {
+  color: var(--page-muted);
+  opacity: 1;
 }
 
 /* A sentence hanging off the row above it - an explanation, not a status, so
@@ -153,7 +170,8 @@ input[type="checkbox"] {
    an error inside the frame keeps its tone. */
 .status.report {
   margin-top: 1rem;
-  padding: 0.6rem 0.8rem;
+  padding: calc(0.6rem - 1px) calc(0.8rem - 1px) calc(0.6rem - 1px) 0.8rem;
+  border: 1px solid var(--page-line);
   border-left: 3px solid var(--page-accent);
   background: color-mix(in srgb, var(--page-accent) 10%, transparent);
 }
@@ -177,9 +195,14 @@ input[type="checkbox"] {
   font-variant-numeric: tabular-nums;
 }
 
+/* On e-ink the tinted wash flattens into the background, so the wash cannot
+   be the block's only boundary: a hairline in the separators' color closes
+   the frame the accent bar begins. The padding hands the frame's pixel back,
+   keeping the box the size it was. */
 .note {
   margin-top: 2rem;
-  padding: 0.9rem 1rem;
+  padding: calc(0.9rem - 1px) calc(1rem - 1px) calc(0.9rem - 1px) 1rem;
+  border: 1px solid var(--page-line);
   border-left: 3px solid var(--page-accent);
   background: color-mix(in srgb, var(--page-accent) 10%, transparent);
   color: var(--page-muted);
