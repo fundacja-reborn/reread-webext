@@ -41,6 +41,10 @@
   "bubble_reader": { "message": "Czytaj w widoku czytania" },
   "bubble_translating": { "message": "Tłumaczę..." },
 
+  "popup_site_enabled": {
+    "message": "Włączony na $DOMAIN$",
+    "placeholders": { "domain": { "content": "$1" } }
+  },
   "popup_site_toggle_title": { "message": "Czy re/read działa w tej witrynie" },
   "popup_no_page": { "message": "re/read nie działa na tej stronie." },
   "popup_no_model": {
@@ -597,7 +601,7 @@
   },
   "options_disabled_heading": { "message": "Wyłączone witryny" },
   "options_disabled_intro": {
-    "message": "Witryny, na których re/read pozostaje wyłączony - bez podkreśleń, bez dymka, bez niczego. Witrynę dodaje tu przełącznik w dymku paska narzędzi; ta lista pozwala ją włączyć z powrotem bez odwiedzania jej."
+    "message": "Witryny, na których re/read pozostaje wyłączony - bez podkreśleń, bez dymka, bez niczego na samej stronie; ręczne otwarcie strony w widoku czytania nadal działa. Witrynę dodaje tu przełącznik w dymku paska narzędzi; ta lista pozwala ją włączyć z powrotem bez odwiedzania jej."
   },
 
   "options_badge_reading": { "message": "to czytasz" },

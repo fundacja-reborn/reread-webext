@@ -41,6 +41,10 @@
   "bubble_reader": { "message": "In der Leseansicht lesen" },
   "bubble_translating": { "message": "Übersetze..." },
 
+  "popup_site_enabled": {
+    "message": "Eingeschaltet auf $DOMAIN$",
+    "placeholders": { "domain": { "content": "$1" } }
+  },
   "popup_site_toggle_title": { "message": "Ob re/read auf dieser Website läuft" },
   "popup_no_page": { "message": "re/read funktioniert auf dieser Seite nicht." },
   "popup_no_model": {
@@ -467,7 +471,7 @@
   },
   "options_disabled_heading": { "message": "Abgeschaltete Websites" },
   "options_disabled_intro": {
-    "message": "Websites, auf denen re/read aus bleibt - keine Unterstreichungen, keine Blase, nichts läuft. Der Schalter im Symbolleisten-Popup fügt eine Website hier hinzu; diese Liste ist der Weg, eine wieder einzuschalten, ohne sie zu besuchen."
+    "message": "Websites, auf denen re/read aus bleibt - keine Unterstreichungen, keine Blase, nichts läuft auf der Seite selbst; von Hand lässt sich eine Seite weiterhin in der Leseansicht öffnen. Der Schalter im Symbolleisten-Popup fügt eine Website hier hinzu; diese Liste ist der Weg, eine wieder einzuschalten, ohne sie zu besuchen."
   },
 
   "options_badge_reading": { "message": "das lesen Sie gerade" },

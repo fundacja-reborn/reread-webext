@@ -23,7 +23,7 @@
 
 import { webext } from "../lib/browser.js";
 import { effectiveReaderOnly, platformOs, readConfig, writeConfig } from "../lib/config.js";
-import { localizePage } from "../lib/i18n.js";
+import { localizePage, t } from "../lib/i18n.js";
 import { pairLabel } from "../lib/language.js";
 import { listModels } from "../lib/models/store.js";
 import { Message, asPageInfo, asResult } from "../lib/protocol.js";
@@ -33,7 +33,7 @@ import { pairChoices } from "./choices.js";
 localizePage();
 
 const siteRow = document.getElementById("site-row");
-const siteHost = document.getElementById("site-host");
+const siteLabel = document.getElementById("site-label");
 const siteNote = document.getElementById("site-note");
 const siteToggle = /** @type {HTMLInputElement | null} */ (document.getElementById("site-toggle"));
 const pairRow = document.getElementById("pair-row");
@@ -110,7 +110,9 @@ function renderSite(info, config) {
   }
 
   over.hostname = info.hostname;
-  if (siteHost !== null) siteHost.textContent = info.hostname;
+  // Named, not just shown: a bare hostname next to a checkbox says nothing
+  // about which way the checkbox points. "Enabled on ..." does.
+  if (siteLabel !== null) siteLabel.textContent = t("popup_site_enabled", info.hostname);
   if (siteToggle !== null) siteToggle.checked = !config.disabledHosts.includes(info.hostname);
   if (siteRow !== null) siteRow.hidden = false;
 }

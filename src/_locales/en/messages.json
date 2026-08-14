@@ -45,6 +45,11 @@
   "bubble_reader": { "message": "Read in the reader" },
   "bubble_translating": { "message": "Translating..." },
 
+  "popup_site_enabled": {
+    "message": "Enabled on $DOMAIN$",
+    "description": "The per-site switch's label; checked means re/read runs there. $1 is the site's hostname.",
+    "placeholders": { "domain": { "content": "$1", "example": "en.wikipedia.org" } }
+  },
   "popup_site_toggle_title": { "message": "Whether re/read runs on this site" },
   "popup_no_page": { "message": "re/read does not work on this page." },
   "popup_no_model": {
@@ -517,7 +522,7 @@
   },
   "options_disabled_heading": { "message": "Switched-off sites" },
   "options_disabled_intro": {
-    "message": "Sites where re/read stays off - no underlines, no bubble, nothing running. The switch in the toolbar popup is what adds a site here; this list is how one is turned back on without visiting it."
+    "message": "Sites where re/read stays off - no underlines, no bubble, nothing running on the page itself; opening a page in the reader by hand still works. The switch in the toolbar popup is what adds a site here; this list is how one is turned back on without visiting it."
   },
 
   "options_badge_reading": { "message": "what you are reading" },
