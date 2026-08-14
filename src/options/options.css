@@ -334,6 +334,16 @@ button.model-delete {
   color: var(--page-fg);
 }
 
+/* A trailing Delete hands its resting padding to the gutter, the way the
+   article actions do on the left edge: its label ends where a bordered
+   button's frame ends, so every row's line closes on the one right edge
+   instead of the quiet rows stopping visibly short of it. The hit box keeps
+   its full size, reaching past the edge. Only the quiet button may hang out
+   there - a bordered Download or Cancel ending the line stays flush. */
+.model-act > .model-delete:last-child {
+  margin-inline-end: calc(-0.8rem - 1px);
+}
+
 /* The bar rides the meta cell; on a phone that cell has the second line to
    itself, so the bar may take what a thumb needs. */
 .model-progress {
