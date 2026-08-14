@@ -3,10 +3,14 @@ import { describe, it } from "node:test";
 
 import {
   dictionaryRows,
+  filterActive,
   firstStepsMove,
   matchesFilter,
   orderForDisplay,
+  pairChoices,
+  rowVisible,
   searchableText,
+  showAllState,
   sortByLabel,
 } from "../src/options/models-view.js";
 
@@ -190,5 +194,83 @@ describe("matchesFilter", () => {
   it("finds a pair by bare code", () => {
     assert.ok(matchesFilter(text, "pl"));
     assert.ok(!matchesFilter(text, "de"));
+  });
+});
+
+describe("filterActive", () => {
+  it("asks nothing on empty and on whitespace alone", () => {
+    assert.ok(!filterActive(""));
+    assert.ok(!filterActive("   "));
+    assert.ok(filterActive(" pl "));
+  });
+});
+
+describe("rowVisible", () => {
+  it("shows only the installed rows while folded with no query", () => {
+    assert.ok(rowVisible({ installed: true, matches: true, expanded: false, query: "" }));
+    assert.ok(!rowVisible({ installed: false, matches: true, expanded: false, query: "" }));
+  });
+
+  it("shows every row once unfolded", () => {
+    assert.ok(rowVisible({ installed: false, matches: true, expanded: true, query: "" }));
+  });
+
+  it("lets a query override the fold in both directions", () => {
+    // A match unfolds past "Show all"; a miss hides even an installed row.
+    assert.ok(rowVisible({ installed: false, matches: true, expanded: false, query: "pl" }));
+    assert.ok(!rowVisible({ installed: true, matches: false, expanded: false, query: "de" }));
+  });
+
+  it("treats a whitespace query as no query at all", () => {
+    assert.ok(!rowVisible({ installed: false, matches: true, expanded: false, query: "   " }));
+  });
+});
+
+describe("showAllState", () => {
+  it("stands under a folded list, wearing the whole count", () => {
+    assert.deepEqual(
+      showAllState({ total: 118, installedCount: 2, expanded: false, query: "" }),
+      { shown: true, count: 118 },
+    );
+  });
+
+  it("leaves once the list is unfolded, and while a query runs it", () => {
+    assert.equal(showAllState({ total: 118, installedCount: 2, expanded: true, query: "" }).shown, false);
+    assert.equal(showAllState({ total: 118, installedCount: 2, expanded: false, query: "pl" }).shown, false);
+  });
+
+  it("has nothing to offer when everything is already on screen", () => {
+    assert.equal(showAllState({ total: 2, installedCount: 2, expanded: false, query: "" }).shown, false);
+    assert.equal(showAllState({ total: 0, installedCount: 0, expanded: false, query: "" }).shown, false);
+  });
+});
+
+describe("pairChoices", () => {
+  const reading = { sourceLang: "en", targetLang: "pl" };
+
+  it("offers only the installed pairs, sorted by the name on screen", () => {
+    const choices = pairChoices(
+      [row("eu", "en", { installed: true }), row("de", "en", { installed: true }), row("en", "pl", { installed: true }), row("ar", "en")],
+      reading,
+    );
+    // Basque before German on screen, and the catalogue-only ar-en not at all.
+    assert.deepEqual(
+      choices.map((one) => one.pair),
+      ["euen", "enpl", "deen"],
+    );
+  });
+
+  it("is empty with nothing installed - the select explains itself instead", () => {
+    assert.deepEqual(pairChoices([row("en", "pl"), row("de", "en")], reading), []);
+  });
+
+  it("keeps the configured pair even with its model gone", () => {
+    // A settings page must never disagree with the settings: the pair stays
+    // choosable (and chosen) until something else is picked.
+    const choices = pairChoices([row("de", "en", { installed: true })], reading);
+    assert.deepEqual(
+      choices.map((one) => one.pair),
+      ["enpl", "deen"],
+    );
   });
 });

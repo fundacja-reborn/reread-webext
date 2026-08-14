@@ -40,7 +40,17 @@ import { deleteModel, listModels, putModel } from "../lib/models/store.js";
 import { modelSourceUrl, updateAvailable } from "../lib/models/upstream.js";
 import { testLoadModel } from "../lib/models/validate.js";
 import { Message } from "../lib/protocol.js";
-import { dictionaryRows, firstStepsMove, matchesFilter, orderForDisplay, searchableText, sortByLabel } from "./models-view.js";
+import {
+  dictionaryRows,
+  filterActive,
+  firstStepsMove,
+  matchesFilter,
+  orderForDisplay,
+  pairChoices,
+  rowVisible,
+  searchableText,
+  showAllState,
+} from "./models-view.js";
 
 /**
  * The one download that may be in flight. One at a time on purpose: each holds
@@ -101,6 +111,16 @@ let dictionaryStored = null;
 
 /** The verdict the fold last moved on - see `firstStepsMove`. @type {boolean | null} */
 let setupDone = null;
+
+/**
+ * Whether each catalogue stands unfolded past its installed rows. A press on
+ * "Show all" is remembered until the page closes; clearing the filter with
+ * the list still folded returns to the installed rows alone.
+ */
+let modelsExpanded = false;
+
+/** @type {boolean} */
+let dictionariesExpanded = false;
 
 /**
  * The fresh-install signpost, standing open while a model or a dictionary is
@@ -171,12 +191,16 @@ async function refreshList() {
 
     liveList = result.value;
     fill("model-checked", listDate());
-    refreshStatus(t("options_refreshed_list", listDate()));
-    renderPair(modelRows(await listModels(), availableModels()));
+    // Success speaks through the date beside the button - a sentence saying
+    // the same thing under it was a duplicate. Failure keeps its sentence,
+    // because the date alone cannot say why nothing changed.
+    refreshStatus("");
     // Not while a download or an import holds the screen: redrawing would
     // replace a live progress bar, and the next full render comes when it
     // finishes anyway - with this fresher list, because it is read then.
+    // The select alone must not wait for that.
     if (running === null && !importing) await renderModels();
+    else renderPair(modelRows(await listModels(), availableModels()));
   } finally {
     refreshing = false;
   }
@@ -200,7 +224,8 @@ async function refreshDictionaryList() {
 
     liveDictionaries = result.value;
     fill("dictionary-checked", dictionaryListDate());
-    dictionaryRefreshStatus(t("options_refreshed_dict_list", dictionaryListDate()));
+    // The same manners as the model list's: the fresh date is the answer.
+    dictionaryRefreshStatus("");
     if (running === null && !importing) await renderCatalog();
   } finally {
     refreshingDictionaries = false;
@@ -288,13 +313,13 @@ function fileStatus(text, tone = "idle") {
 
 /**
  * @param {string} tag
- * @param {string} className
+ * @param {string} className empty for an element the stylesheet reaches by context
  * @param {string} [text]
  * @returns {HTMLElement}
  */
 function element(tag, className, text) {
   const created = document.createElement(tag);
-  created.className = className;
+  if (className.length > 0) created.className = className;
   // Every string on this page is ours, but `textContent` is the habit the rest
   // of the extension keeps, and habits are what hold when the strings change.
   if (text !== undefined) created.textContent = text;
@@ -302,19 +327,113 @@ function element(tag, className, text) {
 }
 
 /**
+ * The one dangerous button of a row, asking with a second press: "Delete",
+ * then "Sure?" in the same spot - the reading list's pattern, brought here
+ * because the cost of a slip is re-downloading tens of megabytes. Arming is
+ * only ever one button deep across the whole page, and a press elsewhere,
+ * focus moving on or Escape stands the armed one down (the listeners at the
+ * bottom of this file) - deliberately no timer, because a button that changes
+ * back by itself under a slow finger is how the wrong thing gets deleted.
+ *
+ * @param {{ name: string, restAria: string, disabled: boolean, onConfirm: (button: HTMLButtonElement) => void }} spec
+ *   `name` is what the aria labels quote; `restAria` the label at rest.
+ * @returns {HTMLButtonElement}
+ */
+function deleteButton({ name, restAria, disabled, onConfirm }) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "model-delete";
+  button.textContent = t("action_delete");
+  button.disabled = disabled;
+  button.dataset["name"] = name;
+  button.dataset["restAria"] = restAria;
+  button.setAttribute("aria-label", restAria);
+  button.addEventListener("click", () => {
+    if (button.hasAttribute("data-armed")) onConfirm(button);
+    else armDelete(button);
+  });
+  return button;
+}
+
+/**
+ * @returns {HTMLButtonElement | null}
+ */
+function armedDelete() {
+  const armed = document.querySelector("button.model-delete[data-armed]");
+  return armed instanceof HTMLButtonElement ? armed : null;
+}
+
+function disarmDelete() {
+  const armed = armedDelete();
+  if (armed === null) return;
+  armed.removeAttribute("data-armed");
+  armed.textContent = t("action_delete");
+  armed.setAttribute("aria-label", armed.dataset["restAria"] ?? "");
+}
+
+/**
+ * @param {HTMLButtonElement} button
+ */
+function armDelete(button) {
+  disarmDelete();
+  button.setAttribute("data-armed", "");
+  button.textContent = t("options_delete_confirm");
+  button.setAttribute("aria-label", t("options_delete_confirm_aria", button.dataset["name"] ?? ""));
+}
+
+/**
+ * @param {string} containerId
+ * @returns {HTMLButtonElement[]}
+ */
+function deleteButtonsIn(containerId) {
+  const container = document.getElementById(containerId);
+  if (container === null) return [];
+  /** @type {HTMLButtonElement[]} */
+  const buttons = [];
+  for (const one of container.querySelectorAll("button.model-delete")) {
+    if (one instanceof HTMLButtonElement) buttons.push(one);
+  }
+  return buttons;
+}
+
+/**
+ * After a delete the redraw took the pressed button with it; focus must not
+ * fall to the body. The place the button held, counted before the delete,
+ * names the successor - the next row's Delete, the previous one's after the
+ * last, the section's filter once none are left.
+ *
+ * @param {string} containerId
+ * @param {string} filterId
+ * @param {number} at
+ */
+function focusDeleteIn(containerId, filterId, at) {
+  const deletes = deleteButtonsIn(containerId);
+  const successor = deletes[Math.min(at, deletes.length - 1)];
+  if (successor !== undefined) successor.focus();
+  else document.getElementById(filterId)?.focus();
+}
+
+/**
+ * One row of the model list, always the same three cells - name, sizes,
+ * actions - so the stylesheet can lay a phone and a desktop out from the one
+ * DOM: one line on a desktop, the name over a right-aligned second line on a
+ * phone.
+ *
  * @param {import("../lib/models/registry.js").ModelRow} row
  * @returns {HTMLElement}
  */
 function renderRow(row) {
   const container = element("div", "model");
-  const name = element("span", "model-pair", pairLabel(row.from, row.to));
+  const name = element("span", "model-name", pairLabel(row.from, row.to));
   if (row.from === config.sourceLang && row.to === config.targetLang) {
     name.append(element("span", "badge", t("options_badge_reading")));
   }
-  container.append(name);
+  const meta = element("span", "model-meta");
+  const act = element("span", "model-act");
+  container.append(name, meta, act);
 
   if (row.installed !== null) {
-    container.append(element("span", "model-size", t("options_size_here", megabytes(row.installed.bytes))));
+    meta.append(element("span", "", t("options_size_here", megabytes(row.installed.bytes))));
 
     // The list names a different training run than the one this device holds:
     // one press replaces the model in place. A model with no recorded source -
@@ -327,17 +446,19 @@ function renderRow(row) {
       update.textContent = t("action_update");
       update.disabled = running !== null;
       update.addEventListener("click", () => void download(row, fresher));
-      container.append(update);
+      act.append(update);
     } else if (fresher !== null && row.installed.sourceUrl === undefined) {
-      container.append(element("span", "model-size", t("options_version_unknown")));
+      meta.append(element("span", "", t("options_version_unknown")));
     }
 
-    const remove = document.createElement("button");
-    remove.type = "button";
-    remove.textContent = t("action_delete");
-    remove.disabled = running !== null;
-    remove.addEventListener("click", () => void removeModel(row));
-    container.append(remove);
+    act.append(
+      deleteButton({
+        name: pairLabel(row.from, row.to),
+        restAria: t("options_delete_model_aria", pairLabel(row.from, row.to)),
+        disabled: running !== null,
+        onConfirm: (button) => void removeModel(row, button),
+      }),
+    );
     return container;
   }
 
@@ -348,14 +469,14 @@ function renderRow(row) {
   // and "to download" was the first thing to overflow a phone-wide row. An
   // entry off the live index knows only what unpacks, and sometimes nothing.
   const size = available.downloadBytes > 0 ? available.downloadBytes : available.bytes;
-  if (size > 0) container.append(element("span", "model-size", megabytes(size)));
+  if (size > 0) meta.append(element("span", "", megabytes(size)));
 
   const start = document.createElement("button");
   start.type = "button";
   start.textContent = t("action_download");
   start.disabled = running !== null;
   start.addEventListener("click", () => void download(row, available));
-  container.append(start);
+  act.append(start);
   return container;
 }
 
@@ -372,7 +493,7 @@ function renderRow(row) {
  */
 function renderDownloading(container, model, controller) {
   container.replaceChildren();
-  container.append(element("span", "model-pair", pairLabel(model.from, model.to)));
+  container.append(element("span", "model-name", pairLabel(model.from, model.to)));
 
   // An entry off the live index may not say what crosses the wire; the bar
   // then runs without an end and the text counts what has arrived, the way a
@@ -388,9 +509,12 @@ function renderDownloading(container, model, controller) {
 
   const size = element(
     "span",
-    "model-size",
+    "",
     known ? t("options_progress_of", [megabytes(0), megabytes(model.downloadBytes)]) : megabytes(0),
   );
+
+  const meta = element("span", "model-meta");
+  meta.append(bar, size);
 
   const cancel = document.createElement("button");
   cancel.type = "button";
@@ -400,7 +524,10 @@ function renderDownloading(container, model, controller) {
     controller.abort();
   });
 
-  container.append(bar, size, cancel);
+  const act = element("span", "model-act");
+  act.append(cancel);
+
+  container.append(meta, act);
 
   let shown = "";
   return ({ received, total }) => {
@@ -421,13 +548,35 @@ function renderDownloading(container, model, controller) {
 }
 
 /**
+ * The confirmed second press of a row's Delete.
+ *
  * @param {import("../lib/models/registry.js").ModelRow} row
+ * @param {HTMLButtonElement} button
  */
-async function removeModel(row) {
+async function removeModel(row, button) {
   if (running !== null) return;
+  const at = deleteButtonsIn("models").indexOf(button);
   await deleteModel(row.pair);
   status(t("options_deleted_model", pairLabel(row.from, row.to)));
   await renderModels();
+  focusDeleteIn("models", "model-filter", at);
+}
+
+/**
+ * The first model on the device brings its pair with it: a fresh install has
+ * nothing meaningful in the pair select yet, and whoever just fetched en->pl
+ * plainly means to read it. Later models change nothing - by then the select
+ * holds a real choice, already made. Called with the store already holding
+ * the new model, from both roads a model arrives by (download and files).
+ *
+ * @param {string} from
+ * @param {string} to
+ */
+async function adoptFirstPair(from, to) {
+  const stored = await listModels();
+  if (stored.length !== 1) return;
+  if (config.sourceLang === from && config.targetLang === to) return;
+  config = await writeConfig({ sourceLang: from, targetLang: to });
 }
 
 /**
@@ -479,6 +628,7 @@ async function download(row, model) {
       ...(source === null ? {} : { sourceUrl: source }),
     });
     status(t("options_downloaded_model", [pairLabel(model.from, model.to), megabytes(meta.bytes)]));
+    await adoptFirstPair(model.from, model.to);
   } catch (error) {
     // The download was fine; the browser would not keep it. Worth saying apart
     // from a failed download, because the answer is different - space, or a
@@ -492,10 +642,11 @@ async function download(row, model) {
 /**
  * The pair being read, and the only place it can be changed.
  *
- * The choices are the directions this build knows about - what can be
- * downloaded, plus anything added by hand from files. A pair configured by hand
- * that matches neither is still offered rather than silently swapped for the
- * first row: a settings page must never disagree with the settings.
+ * The choices are the pairs that can actually translate: the models on this
+ * device (see `pairChoices` for the rules, the configured-but-deleted edge
+ * included). With nothing installed the select explains itself with one
+ * disabled line - the note under it points at the models section either way,
+ * and downloading the first model sets the pair by itself.
  *
  * @param {import("../lib/models/registry.js").ModelRow[]} rows
  */
@@ -503,13 +654,19 @@ function renderPair(rows) {
   const select = document.getElementById("pair");
   if (!(select instanceof HTMLSelectElement)) return;
 
-  const known = rows.some((row) => row.from === config.sourceLang && row.to === config.targetLang);
-  const sorted = sortByLabel(rows);
-  const choices = known
-    ? sorted
-    : [{ pair: `${config.sourceLang}${config.targetLang}`, from: config.sourceLang, to: config.targetLang }, ...sorted];
-
+  const choices = pairChoices(rows, config);
   select.replaceChildren();
+  select.disabled = choices.length === 0;
+
+  if (choices.length === 0) {
+    const option = document.createElement("option");
+    option.value = "";
+    option.textContent = t("options_pair_none");
+    option.selected = true;
+    select.append(option);
+    return;
+  }
+
   for (const row of choices) {
     const option = document.createElement("option");
     option.value = row.pair;
@@ -540,17 +697,22 @@ async function choosePair(pair) {
 }
 
 /**
- * Hides the rows a filter box rules out. Called on every keystroke and after
- * every re-render, because a render builds all rows and knows nothing of the
- * filter - hiding is a separate, cheaper pass over what is already there.
- * Two lists filter this way (models and the dictionary catalogue), each with
- * its own box, which is why the ids travel as arguments.
+ * Decides which rows of a list stand on screen: the installed ones, until
+ * "Show all" unfolds the rest or the filter box asks for something (the rules
+ * live in `rowVisible`). Called on every keystroke, after every re-render and
+ * at every press of "Show all", because a render builds all rows and knows
+ * nothing of the fold or the filter - visibility is a separate, cheaper pass
+ * over what is already there. Two lists work this way (models and the
+ * dictionary catalogue), each with its own box, fold and button, which is why
+ * everything travels as arguments.
  *
  * @param {string} containerId
  * @param {string} inputId
  * @param {string} noneId
+ * @param {string} showAllId
+ * @param {boolean} expanded
  */
-function applyFilterIn(containerId, inputId, noneId) {
+function applyFilterIn(containerId, inputId, noneId, showAllId, expanded) {
   const container = document.getElementById(containerId);
   if (container === null) return;
 
@@ -558,23 +720,57 @@ function applyFilterIn(containerId, inputId, noneId) {
   const query = input instanceof HTMLInputElement ? input.value : "";
 
   let visible = 0;
+  let total = 0;
+  let installedCount = 0;
   for (const row of container.querySelectorAll(".model")) {
     if (!(row instanceof HTMLElement)) continue;
-    const match = matchesFilter(row.dataset["search"] ?? "", query);
-    row.hidden = !match;
-    if (match) visible += 1;
+    total += 1;
+    const installed = row.dataset["installed"] === "true";
+    if (installed) installedCount += 1;
+    const matches = matchesFilter(row.dataset["search"] ?? "", query);
+    const shown = rowVisible({ installed, matches, expanded, query });
+    row.hidden = !shown;
+    if (shown) visible += 1;
   }
 
+  // "The filter matched nothing" is only true of a filter: a folded list
+  // showing none of its rows is answered by "Show all" below, not by this.
   const none = document.getElementById(noneId);
-  if (none !== null) none.hidden = visible > 0;
+  if (none !== null) none.hidden = !filterActive(query) || visible > 0;
+
+  const showAll = document.getElementById(showAllId);
+  if (showAll instanceof HTMLButtonElement) {
+    const state = showAllState({ total, installedCount, expanded, query });
+    showAll.hidden = !state.shown;
+    showAll.textContent = t("options_show_all", state.count.toLocaleString());
+  }
 }
 
 function applyModelFilter() {
-  applyFilterIn("models", "model-filter", "model-none");
+  applyFilterIn("models", "model-filter", "model-none", "models-show-all", modelsExpanded);
 }
 
 function applyCatalogFilter() {
-  applyFilterIn("dictionary-catalog", "dictionary-filter", "dictionary-none");
+  applyFilterIn("dictionary-catalog", "dictionary-filter", "dictionary-none", "dictionaries-show-all", dictionariesExpanded);
+}
+
+/**
+ * The press that unfolds a list past its installed rows. The button dissolves
+ * under the pointer, so focus is walked to the first row it revealed - the
+ * same place the eye went.
+ *
+ * @param {"models" | "dictionary-catalog"} containerId
+ */
+function expandList(containerId) {
+  if (containerId === "models") {
+    modelsExpanded = true;
+    applyModelFilter();
+  } else {
+    dictionariesExpanded = true;
+    applyCatalogFilter();
+  }
+  const first = document.querySelector(`#${containerId} .model[data-installed="false"] button`);
+  if (first instanceof HTMLElement) first.focus();
 }
 
 async function renderModels() {
@@ -583,6 +779,10 @@ async function renderModels() {
 
   const stored = await listModels();
   const rows = orderForDisplay(modelRows(stored, availableModels()), config);
+
+  // The select's choices ride the same read: a download or a delete lands in
+  // the select at the very render that shows it in the list, with no reload.
+  renderPair(rows);
 
   // The model half of the first-steps verdict, from the store itself rather
   // than the view rows - the rows answer "what to draw", not "what is here".
@@ -593,22 +793,22 @@ async function renderModels() {
 
   if (rows.length === 0) {
     container.append(element("p", "empty", t("options_no_models")));
-    return;
-  }
+  } else {
+    for (const row of rows) {
+      const rendered = renderRow(row);
+      rendered.id = `model-${row.pair}`;
+      rendered.dataset["search"] = searchableText(row);
+      rendered.dataset["installed"] = String(row.installed !== null);
+      container.append(rendered);
+    }
 
-  for (const row of rows) {
-    const rendered = renderRow(row);
-    rendered.id = `model-${row.pair}`;
-    rendered.dataset["search"] = searchableText(row);
-    container.append(rendered);
+    // Lives inside the list so that "the filter matched nothing" is said
+    // where the missing rows would have been, not somewhere below them.
+    const none = element("p", "empty", t("options_filter_no_match_models"));
+    none.id = "model-none";
+    none.hidden = true;
+    container.append(none);
   }
-
-  // Lives inside the scrolled frame so that "the filter matched nothing" is
-  // said where the missing rows would have been, not somewhere below the box.
-  const none = element("p", "empty", t("options_filter_no_match_models"));
-  none.id = "model-none";
-  none.hidden = true;
-  container.append(none);
 
   applyModelFilter();
 }
@@ -630,13 +830,15 @@ function renderDisabledHosts() {
 
   for (const host of config.disabledHosts) {
     const row = element("div", "model");
-    row.append(element("span", "model-pair", host));
+    row.append(element("span", "model-name", host));
 
     const restore = document.createElement("button");
     restore.type = "button";
     restore.textContent = t("options_turn_back_on");
     restore.addEventListener("click", () => void restoreHost(host));
-    row.append(restore);
+    const act = element("span", "model-act");
+    act.append(restore);
+    row.append(act);
     container.append(row);
   }
 }
@@ -711,6 +913,7 @@ async function addSelectedModel() {
     const meta = await putModel({ pair, model, shortlist, vocabs }, { from, to });
     if (input !== null) input.value = "";
     fileStatus(t("options_added_model", [pairLabel(from, to), megabytes(meta.bytes)]));
+    await adoptFirstPair(from, to);
     await renderModels();
   } catch (error) {
     fileStatus(t("options_add_model_failed", message(error)), "error");
@@ -815,9 +1018,9 @@ function chosenLanguage(id, fallback) {
 }
 
 /**
- * A stored dictionary's row in the frame - the same line a stored model gets,
- * plus what only a dictionary carries: its own name (two dictionaries of one
- * pair must be told apart) and its attribution.
+ * A stored dictionary's row - the same three cells a stored model gets, plus
+ * what only a dictionary carries: its own name under the pair (two
+ * dictionaries of one pair must be told apart) and its attribution, folded.
  *
  * @param {import("../lib/dict/store.js").Dictionary} dictionary
  * @returns {HTMLElement}
@@ -825,43 +1028,56 @@ function chosenLanguage(id, fallback) {
 function renderDictionary(dictionary) {
   const container = element("div", "model");
 
-  const name = element("span", "model-pair", pairLabel(dictionary.langFrom, dictionary.langTo));
+  const name = element("span", "model-name", pairLabel(dictionary.langFrom, dictionary.langTo));
   if (dictionary.langFrom === config.sourceLang && dictionary.langTo === config.targetLang) {
     name.append(element("span", "badge", t("options_badge_reading")));
   }
+  name.append(element("span", "dictionary-title", dictionary.name));
   container.append(name);
-
-  container.append(element("span", "dictionary-title", dictionary.name));
 
   const counted =
     dictionary.aliasCount > 0
       ? `${words(dictionary.entryCount)}, ${plural(dictionary.aliasCount, "spellings")}`
       : words(dictionary.entryCount);
-  container.append(element("span", "model-size", counted));
-  container.append(element("span", "model-size", megabytes(dictionary.bytes)));
+  const meta = element("span", "model-meta");
+  meta.append(element("span", "", counted));
+  meta.append(element("span", "", megabytes(dictionary.bytes)));
+  container.append(meta);
 
-  const remove = document.createElement("button");
-  remove.type = "button";
-  remove.textContent = t("action_delete");
-  remove.disabled = importing;
-  remove.addEventListener("click", () => void removeDictionary(dictionary));
-  container.append(remove);
+  const act = element("span", "model-act");
+  act.append(
+    deleteButton({
+      name: dictionary.name,
+      restAria: t("options_delete_dictionary_aria", dictionary.name),
+      disabled: importing,
+      onConfirm: (button) => void removeDictionary(dictionary, button),
+    }),
+  );
+  container.append(act);
 
-  // Attribution is why this is on screen at all: the dictionaries worth having
+  // Attribution is why this fold is here at all: the dictionaries worth having
   // are Wiktionary-derived and CC BY-SA, and naming their source is the whole
-  // of what that asks for.
+  // of what that asks for. Folded, not gone - the row stays scannable and the
+  // credit stays, one press away, exactly as the dictionary wrote it.
   if (dictionary.credit !== null) {
-    container.append(element("span", "dictionary-credit", dictionary.credit));
+    const about = element("details", "model-about");
+    about.append(element("summary", "", t("options_about_dictionary")));
+    about.append(element("p", "dictionary-credit", dictionary.credit));
+    container.append(about);
   }
 
   return container;
 }
 
 /**
+ * The confirmed second press of a stored dictionary's Delete.
+ *
  * @param {import("../lib/dict/store.js").Dictionary} dictionary
+ * @param {HTMLButtonElement} button
  */
-async function removeDictionary(dictionary) {
+async function removeDictionary(dictionary, button) {
   if (importing) return;
+  const at = deleteButtonsIn("dictionary-catalog").indexOf(button);
   try {
     await deleteDictionary(dictionary.id);
     dictionaryStatus(t("options_deleted_dictionary", dictionary.name));
@@ -869,6 +1085,7 @@ async function removeDictionary(dictionary) {
     dictionaryStatus(t("options_delete_dictionary_failed", [dictionary.name, message(error)]), "error");
   }
   await renderCatalog();
+  focusDeleteIn("dictionary-catalog", "dictionary-filter", at);
 }
 
 /**
@@ -885,14 +1102,16 @@ function catalogRowId(entry) {
  */
 function renderCatalogRow(entry) {
   const container = element("div", "model");
-  container.append(element("span", "model-pair", pairLabel(entry.from, entry.to)));
+  container.append(element("span", "model-name", pairLabel(entry.from, entry.to)));
 
   const get = document.createElement("button");
   get.type = "button";
   get.textContent = t("action_download");
   get.disabled = running !== null || importing;
   get.addEventListener("click", () => void downloadDictionary(entry));
-  container.append(get);
+  const act = element("span", "model-act");
+  act.append(get);
+  container.append(act);
   return container;
 }
 
@@ -919,30 +1138,30 @@ async function renderCatalog() {
 
   if (rows.length === 0) {
     container.append(element("p", "empty", t("options_no_catalog")));
-    return;
-  }
-
-  for (const row of rows) {
-    /** @type {HTMLElement} */
-    let rendered;
-    if (row.installed !== null) {
-      rendered = renderDictionary(row.installed);
-      // Found by the pair either way it is spelled, and by the book's own name.
-      rendered.dataset["search"] = `${searchableText(row)} ${row.installed.name.toLowerCase()}`;
-    } else if (row.available !== null) {
-      rendered = renderCatalogRow(row.available);
-      rendered.id = catalogRowId(row.available);
-      rendered.dataset["search"] = searchableText(row);
-    } else {
-      continue;
+  } else {
+    for (const row of rows) {
+      /** @type {HTMLElement} */
+      let rendered;
+      if (row.installed !== null) {
+        rendered = renderDictionary(row.installed);
+        // Found by the pair either way it is spelled, and by the book's own name.
+        rendered.dataset["search"] = `${searchableText(row)} ${row.installed.name.toLowerCase()}`;
+      } else if (row.available !== null) {
+        rendered = renderCatalogRow(row.available);
+        rendered.id = catalogRowId(row.available);
+        rendered.dataset["search"] = searchableText(row);
+      } else {
+        continue;
+      }
+      rendered.dataset["installed"] = String(row.installed !== null);
+      container.append(rendered);
     }
-    container.append(rendered);
-  }
 
-  const none = element("p", "empty", t("options_filter_no_match_dictionaries"));
-  none.id = "dictionary-none";
-  none.hidden = true;
-  container.append(none);
+    const none = element("p", "empty", t("options_filter_no_match_dictionaries"));
+    none.id = "dictionary-none";
+    none.hidden = true;
+    container.append(none);
+  }
 
   applyCatalogFilter();
 }
@@ -959,12 +1178,15 @@ async function renderCatalog() {
  */
 function renderFetching(container, entry, controller) {
   container.replaceChildren();
-  container.append(element("span", "model-pair", pairLabel(entry.from, entry.to)));
+  container.append(element("span", "model-name", pairLabel(entry.from, entry.to)));
 
   const bar = document.createElement("progress");
   bar.className = "model-progress";
 
-  const size = element("span", "model-size", "");
+  const size = element("span", "", "");
+
+  const meta = element("span", "model-meta");
+  meta.append(bar, size);
 
   const cancel = document.createElement("button");
   cancel.type = "button";
@@ -974,7 +1196,10 @@ function renderFetching(container, entry, controller) {
     controller.abort();
   });
 
-  container.append(bar, size, cancel);
+  const act = element("span", "model-act");
+  act.append(cancel);
+
+  container.append(meta, act);
 
   let shown = "";
   return ({ received, total }) => {
@@ -1156,7 +1381,6 @@ async function render() {
   const pin = document.getElementById("first-steps-pin");
   if (pin !== null) pin.hidden = os === "android";
   fill("version", webext().runtime.getManifest().version);
-  renderPair(modelRows(await listModels(), availableModels()));
   renderReaderOnly();
   renderLanguageChoices("dictionary-from", config.sourceLang);
   renderLanguageChoices("dictionary-to", config.targetLang);
@@ -1201,13 +1425,16 @@ async function render() {
  */
 async function refresh() {
   config = await readConfig();
-  renderPair(modelRows(await listModels(), availableModels()));
   renderReaderOnly();
   renderDisabledHosts();
-  // Both frames, because "what you are reading" rides on the pair in both.
+  // Both lists, because "what you are reading" rides on the pair in both -
+  // and the select rides `renderModels`. While a download or an import holds
+  // the screen only the select is refreshed, so the popup's writes still land.
   if (running === null && !importing) {
     await renderModels();
     await renderCatalog();
+  } else {
+    renderPair(modelRows(await listModels(), availableModels()));
   }
 }
 
@@ -1230,7 +1457,29 @@ document.getElementById("refresh-models")?.addEventListener("click", () => void 
 document.getElementById("refresh-dictionaries")?.addEventListener("click", () => void refreshDictionaryList());
 document.getElementById("model-filter")?.addEventListener("input", () => applyModelFilter());
 document.getElementById("dictionary-filter")?.addEventListener("input", () => applyCatalogFilter());
+document.getElementById("models-show-all")?.addEventListener("click", () => expandList("models"));
+document.getElementById("dictionaries-show-all")?.addEventListener("click", () => expandList("dictionary-catalog"));
 document.getElementById("add-dictionary")?.addEventListener("click", () => void addSelectedDictionary());
+
+// The armed Delete stands down at any step away from it - a press elsewhere,
+// focus moving on, Escape - and never on a clock. `pointerdown` rather than
+// `click` so that the press that arms another row's Delete finds the previous
+// one already disarmed when its own click handler runs.
+document.addEventListener("pointerdown", (event) => {
+  const armed = armedDelete();
+  if (armed === null) return;
+  if (event.target instanceof Node && armed.contains(event.target)) return;
+  disarmDelete();
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") disarmDelete();
+});
+
+document.addEventListener("focusout", (event) => {
+  const armed = armedDelete();
+  if (armed !== null && event.target === armed && event.relatedTarget !== armed) disarmDelete();
+});
 document.getElementById("pair")?.addEventListener("change", (event) => {
   const select = event.target;
   if (select instanceof HTMLSelectElement) void choosePair(select.value);
@@ -1240,6 +1489,11 @@ document.getElementById("open-vocabulary")?.addEventListener("click", () => {
   // same single tab the popup's row leads to. Nothing to do when it fails
   // mid-restart: the press can be repeated.
   void webext().runtime.sendMessage({ kind: Message.OPEN_VOCABULARY }).catch(() => {});
+});
+document.getElementById("open-library")?.addEventListener("click", () => {
+  // The reading list, by the same door the popup uses: the background raises
+  // the reader tab on its list or opens one.
+  void webext().runtime.sendMessage({ kind: Message.OPEN_LIBRARY }).catch(() => {});
 });
 
 // A download or an import in flight is the one thing on this page that a reload

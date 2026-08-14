@@ -1,6 +1,8 @@
 /* Shared by the extension's own pages (options, reader, popup). Content scripts
    do not use this file - what they inject carries its own styles inside a
-   shadow root. */
+   shadow root. Layout that belongs to one page lives in that page's own
+   stylesheet (options.css, reader.css, vocab.css, popup.css); this file keeps
+   the palette, the type and the controls they all share. */
 
 :root {
   color-scheme: light dark;
@@ -25,9 +27,9 @@
   box-sizing: border-box;
 }
 
-/* Rows are flex containers, and a flex declared by us outranks the browser's
-   own [hidden] { display: none } - without this line the filter would "hide"
-   rows that stay on screen. */
+/* List rows are flex or grid containers, and a display declared by us outranks
+   the browser's own [hidden] { display: none } - without this line a filter
+   would "hide" rows that stay on screen. */
 [hidden] {
   display: none !important;
 }
@@ -59,173 +61,6 @@ h3 {
   margin: 2rem 0 0.5rem;
 }
 
-.subtitle {
-  margin: 0 0 2rem;
-  color: var(--page-muted);
-}
-
-.rows {
-  border-top: 1px solid var(--page-line);
-}
-
-.row {
-  display: flex;
-  gap: 1rem;
-  justify-content: space-between;
-  padding: 0.6rem 0;
-  border-bottom: 1px solid var(--page-line);
-}
-
-.row dt {
-  color: var(--page-muted);
-  margin: 0;
-}
-
-.row dd {
-  margin: 0;
-  font-variant-numeric: tabular-nums;
-}
-
-/* A row that carries its own explanation: label and control keep the first
-   line, the note wraps below them - inside the same borders, so it can never
-   drift away from what it explains. */
-.row-wrap {
-  flex-wrap: wrap;
-}
-
-.row .row-note {
-  flex-basis: 100%;
-  margin: 0.1rem 0 0;
-  color: var(--page-muted);
-  font-size: 0.9rem;
-}
-
-.models {
-  margin: 1rem 0;
-  border-top: 1px solid var(--page-line);
-}
-
-.model {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 0.6rem 0;
-  border-bottom: 1px solid var(--page-line);
-}
-
-/* The catalogues (every model Mozilla publishes, every dictionary WikDict
-   builds - hundreds of rows) scroll in place instead of owning the page, and
-   their rows are set smaller than the page around them: they are an index,
-   not prose. */
-.models-frame {
-  margin: 0.5rem 0 1rem;
-  padding: 0 0.75rem;
-  max-height: 19rem;
-  overflow-y: auto;
-  border: 1px solid var(--page-line);
-  border-radius: 6px;
-  font-size: 0.9rem;
-}
-
-/* Wrapping, not shrinking: on a phone the name takes the line and the size
-   and button drop to the next one - a name broken word by word to fit beside
-   them is what this replaces. */
-.models-frame .model {
-  padding: 0.35rem 0;
-  gap: 0.25rem 0.6rem;
-  flex-wrap: wrap;
-}
-
-.models-frame .model-pair {
-  flex: 1 1 9rem;
-}
-
-/* The frame's own edge already draws this line. */
-.models-frame .model:last-of-type,
-.models-frame .empty {
-  border-bottom: none;
-}
-
-.models-frame button {
-  padding: 0.15rem 0.6rem;
-  font-size: 0.85rem;
-}
-
-.models-frame .badge {
-  font-size: 0.7rem;
-  margin-left: 0.4rem;
-}
-
-.model-filter {
-  margin: 1rem 0 0;
-}
-
-.model-filter input {
-  width: 100%;
-  font: inherit;
-  padding: 0.35rem 0.6rem;
-  border-radius: 6px;
-  border: 1px solid var(--page-line);
-  background: transparent;
-  color: var(--page-fg);
-}
-
-.model-pair {
-  flex: 1;
-}
-
-.model-size {
-  color: var(--page-muted);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-.badge {
-  margin-left: 0.6rem;
-  padding: 0.1rem 0.45rem;
-  border-radius: 999px;
-  border: 1px solid var(--page-line);
-  color: var(--page-muted);
-  font-size: 0.75rem;
-  /* A pill that wraps mid-text stops reading as a pill. */
-  white-space: nowrap;
-}
-
-/* A stored dictionary's own name, beside the pair in the frame: what tells
-   two dictionaries of one pair apart. Muted like the sizes, but allowed to
-   wrap - a book's name can be long, and a row is allowed a second line. */
-.dictionary-title {
-  color: var(--page-muted);
-  overflow-wrap: anywhere;
-}
-
-/* Its own line, below the rest of the row: this is where a dictionary says who
-   made it, and CC BY-SA is the licence most of the good ones carry. The line
-   breaks are the ones its own description had - they are kept because a licence
-   written as four lines reads as four lines. */
-.dictionary-credit {
-  flex-basis: 100%;
-  margin-top: 0.2rem;
-  color: var(--page-muted);
-  font-size: 0.85rem;
-  line-height: 1.45;
-  white-space: pre-line;
-}
-
-.inline {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.model-progress {
-  flex: 1;
-  min-width: 6rem;
-  height: 0.5rem;
-  accent-color: var(--page-accent);
-}
-
 button:disabled {
   color: var(--page-muted);
   cursor: default;
@@ -239,16 +74,6 @@ button:disabled:hover {
   color: var(--page-muted);
   padding: 0.6rem 0;
   border-bottom: 1px solid var(--page-line);
-}
-
-.files {
-  color: var(--page-muted);
-  line-height: 1.9;
-}
-
-.files em {
-  color: var(--page-accent);
-  font-style: normal;
 }
 
 button {
@@ -292,36 +117,6 @@ select {
    hints - one step below the controls it explains, keeping the page's
    full color. */
 .explain {
-  font-size: 0.9rem;
-}
-
-/* Folded sections: the by-hand paths stand behind a summary, so the page
-   reads catalogue-first and each escape hatch says when it is needed.
-   Native details/summary - no script, keyboard for free, and the closed
-   state needs no memory because closed is what it should return to. */
-.fold {
-  margin: 2rem 0;
-}
-
-.fold summary {
-  cursor: pointer;
-}
-
-.fold summary::marker {
-  color: var(--page-muted);
-}
-
-/* The heading keeps its size but sits on the marker's line, and the page
-   rhythm it usually brings moves onto the fold itself. */
-.fold summary h3 {
-  display: inline;
-  margin: 0;
-}
-
-.fold-hint {
-  display: block;
-  margin: 0.15rem 0 0;
-  color: var(--page-muted);
   font-size: 0.9rem;
 }
 
@@ -394,72 +189,15 @@ input[type="checkbox"] {
   color: var(--page-fg);
 }
 
-/* The asides under the lists are footnotes, not calls to attention: they
-   answer "where from, and what leaves this device" for whoever asks, at a
-   footnote's size behind a neutral frame. The accent frame stays on notes
-   that ask to be acted on - the first-steps card, the reader's notices. */
+/* The asides inside the by-hand folds are footnotes, not calls to attention:
+   they answer "where from, and what leaves this device" for whoever asks, at
+   a footnote's size behind a neutral frame. The accent frame stays on notes
+   that ask to be acted on - the first-steps card, the host notes, the
+   reader's notices. */
 .note.footnote {
   border-left-color: var(--page-line);
   background: color-mix(in srgb, var(--page-fg) 4%, transparent);
   font-size: 0.85rem;
-}
-
-/* The update button and its sentence share one line: the button keeps its
-   width on the left, the text wraps in its own column on the right - never
-   underneath. The tinted fill lifts the one control of this line off the
-   page without shouting like a CTA. */
-.model-refresh {
-  display: flex;
-  align-items: center;
-  gap: 0.9rem;
-}
-
-.model-refresh button {
-  flex: none;
-  border-color: var(--page-accent);
-  background: color-mix(in srgb, var(--page-accent) 15%, transparent);
-}
-
-.model-refresh button:hover {
-  background: color-mix(in srgb, var(--page-accent) 25%, transparent);
-}
-
-/* The fresh-install signpost on the settings page: the note's frame, the
-   page's full color - it is instructions to act on, not an aside. Open while
-   a model or a dictionary is missing; with both stored it folds to its
-   heading and stays, one line of the note's frame, there to reread. */
-.first-steps {
-  margin: 1.5rem 0 2rem;
-  color: var(--page-fg);
-}
-
-.first-steps summary {
-  cursor: pointer;
-}
-
-.first-steps summary::marker {
-  color: var(--page-muted);
-}
-
-.first-steps summary h2 {
-  /* The signpost speaks at the card's volume, not a section's - and sits on
-     the marker's line, the way the by-hand folds' headings do. */
-  display: inline;
-  font-size: 1.05rem;
-  margin: 0;
-}
-
-.first-steps p {
-  margin: 0.35rem 0;
-}
-
-.first-steps ol {
-  margin: 0.35rem 0;
-  padding-left: 1.4rem;
-}
-
-.first-steps li {
-  margin: 0.3rem 0;
 }
 
 a {

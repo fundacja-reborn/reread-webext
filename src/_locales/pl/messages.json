@@ -17,7 +17,7 @@
   "language_pair": { "message": "Para językowa" },
   "reading_list": { "message": "Czytelnia offline" },
   "saved_phrases": { "message": "Zapisane frazy" },
-  "open_reader": { "message": "Przeczytaj tę stronę w czytniku" },
+  "open_reader": { "message": "Przeczytaj tę stronę w widoku czytania" },
   "action_delete": { "message": "Usuń" },
   "action_download": { "message": "Pobierz" },
   "action_cancel": { "message": "Anuluj" },
@@ -38,7 +38,7 @@
   "bubble_settings": { "message": "Otwórz ustawienia" },
   "bubble_more": { "message": "Więcej" },
   "bubble_less": { "message": "Mniej" },
-  "bubble_reader": { "message": "Czytaj w czytniku" },
+  "bubble_reader": { "message": "Czytaj w widoku czytania" },
   "bubble_translating": { "message": "Tłumaczę..." },
 
   "popup_site_toggle_title": { "message": "Czy re/read działa w tej witrynie" },
@@ -46,7 +46,7 @@
   "popup_no_model": {
     "message": "Na tym urządzeniu nie ma jeszcze modelu tłumaczeniowego - naciśnij tutaj i wybierz go w ustawieniach."
   },
-  "popup_mode_reader_only": { "message": "Tryb: tylko w czytniku" },
+  "popup_mode_reader_only": { "message": "Tryb: tylko w widoku czytania" },
 
   "vocab_title": { "message": "re/read - zapisane frazy" },
   "vocab_intro": {
@@ -198,7 +198,7 @@
     "placeholders": { "count": { "content": "$1", "example": "1,5" } }
   },
 
-  "reader_title": { "message": "re/read - czytnik" },
+  "reader_title": { "message": "re/read - widok czytania" },
   "reader_open_original": { "message": "Otwórz oryginał" },
   "reader_display_title": { "message": "Krój i motyw" },
   "reader_theme": { "message": "Motyw" },
@@ -242,7 +242,7 @@
   "reader_no_article": { "message": "Na tej stronie nie udało się znaleźć artykułu." },
   "reader_list_write_failed": { "message": "Nie udało się zapisać czytelni." },
   "reader_empty_none": {
-    "message": "Nic jeszcze nie zapisano - otwórz artykuł w czytniku i naciśnij „$BUTTON$”. Zapisana strona zostaje na tym urządzeniu i otworzy się także bez internetu.",
+    "message": "Nic jeszcze nie zapisano - otwórz artykuł w widoku czytania i naciśnij „$BUTTON$”. Zapisana strona zostaje na tym urządzeniu i otworzy się także bez internetu.",
     "placeholders": { "button": { "content": "$1", "example": "Zapisz w czytelni" } }
   },
   "reader_empty_all_read": { "message": "Nie zostało nic do przeczytania - wszystko, co zapisane, jest oznaczone jako przeczytane." },
@@ -522,36 +522,37 @@
   "options_first_steps_intro": {
     "message": "Nic się jeszcze nie tłumaczy - modelu, który by to robił, nie ma na tym urządzeniu. Przygotowanie zajmuje minutę:"
   },
-  "options_first_steps_pair": {
-    "message": "Ustaw parę językową tuż poniżej: język, w którym czytasz, i język, na który ma być tłumaczone."
-  },
   "options_first_steps_model": {
-    "message": "W sekcji „Modele tłumaczeniowe” naciśnij „Pobierz” przy tej parze. Model zostaje zapisany na tym urządzeniu i odtąd tłumaczy offline."
+    "message": "W sekcji „Modele tłumaczeniowe” znajdź parę językową, której potrzebujesz (najszybciej przez filtr), i naciśnij „Pobierz”. Model zostaje zapisany na tym urządzeniu i odtąd tłumaczy offline - a pierwszy model sam ustawia parę językową powyżej."
   },
   "options_first_steps_dictionary": {
     "message": "Warte drugiego naciśnięcia: słownik dla tej samej pary, w sekcji „Słowniki” - pojedyncze słowa dostają wtedy pełniejsze odpowiedzi niż samo tłumaczenie."
   },
   "options_first_steps_pin": {
-    "message": "Na koniec przypnij re/read do paska narzędzi - dopóki tego nie zrobisz, przycisk kryje się za ikoną puzzla. Za przyciskiem: czytnik, czytelnia offline, zapisane frazy i wyłącznik witryny, na której jesteś."
+    "message": "Na koniec przypnij re/read do paska narzędzi - dopóki tego nie zrobisz, przycisk kryje się za ikoną puzzla. Za przyciskiem: widok czytania, czytelnia offline, zapisane frazy i wyłącznik witryny, na której jesteś."
   },
-  "options_version": { "message": "Wersja" },
+  "options_sections_aria": { "message": "Sekcje tej strony" },
   "options_engine": { "message": "Silnik" },
   "options_engine_value": { "message": "Bergamot, wewnątrz paczki - tłumaczy offline" },
-  "options_reader_only": { "message": "Tylko w czytniku" },
+  "options_pair_hint": { "message": "Do wyboru są pary z modelem na tym urządzeniu - po inną parę pobierz jej model w sekcji" },
+  "options_pair_none": { "message": "Nie ma jeszcze modelu - najpierw pobierz go poniżej" },
+  "options_reader_only": { "message": "Tylko w widoku czytania" },
   "options_reader_only_hint": {
-    "message": "Gdy to jest włączone, zaznaczenie frazy lub słowa na zwykłej stronie proponuje jedno: otwarcie jej w czytniku. Tłumaczenie, zapisywanie i podkreślanie dzieją się tam (przejrzyściej i czytelniej). Na Androidzie opcja jest domyślnie włączona."
+    "message": "Gdy to jest włączone, zaznaczenie frazy lub słowa na zwykłej stronie proponuje jedno: otwarcie jej w widoku czytania. Tłumaczenie, zapisywanie i podkreślanie dzieją się tam (przejrzyściej i czytelniej). Na Androidzie opcja jest domyślnie włączona."
   },
   "options_models_heading": { "message": "Modele tłumaczeniowe" },
   "options_models_intro": {
     "message": "Poniższe modele przygotowuje i udostępnia Mozilla - to te same modele, którymi Firefox sam tłumaczy strony. Aby rozszerzenie re/read mogło działać - pobierz model dla par języków, które chcesz tłumaczyć (np. en -> pl)."
   },
   "options_update_list": { "message": "Zaktualizuj listę" },
-  "options_list_from": { "message": "- poniższa lista modeli tłumaczeniowych jest z dnia" },
-  "options_dict_list_from": { "message": "- poniższa lista słowników jest z dnia" },
-  "options_list_refresh_hint": { "message": "Kliknij przycisk, aby pobrać aktualną listę." },
+  "options_list_dated": { "message": "Lista z dnia" },
   "options_filter_placeholder": { "message": "Filtruj po języku lub kodzie" },
-  "options_filter_models_aria": { "message": "Filtruj listę modeli tłumaczeniowych" },
-  "options_filter_dictionaries_aria": { "message": "Filtruj listę słowników" },
+  "options_filter_models_label": { "message": "Filtruj listę modeli tłumaczeniowych" },
+  "options_filter_dictionaries_label": { "message": "Filtruj listę słowników" },
+  "options_show_all": {
+    "message": "Pokaż wszystkie ($COUNT$)",
+    "placeholders": { "count": { "content": "$1" } }
+  },
   "options_model_note_from": { "message": "Modele pobierane są z" },
   "options_model_note_rest": {
     "message": "- to tam publikuje je Mozilla. Gdy aktualizujesz listę, nic o tobie nie jest wysyłane - zapytanie pobiera jedynie świeżą listę modeli. Ten host i host katalogu słowników poniżej to jedyne dwa miejsca, z którymi to rozszerzenie kiedykolwiek może się łączyć - ale tylko gdy świadomie klikniesz odświeżenie listy, pobranie modelu lub słownika."
@@ -577,11 +578,11 @@
   },
   "options_add_dictionary_heading": { "message": "Dodaj słownik z plików" },
   "options_add_dictionary_summary": {
-    "message": "Jeśli chcesz dodać słownik z własnych plików - ten z czytnika e-booków zadziała bez zmian - wczytaj je tutaj."
+    "message": "Jeśli chcesz dodać słownik z własnych plików - ten z KOReadera zadziała bez zmian - wczytaj je tutaj."
   },
   "options_stardict_intro": { "message": "Słowniki czytane są w formacie" },
   "options_stardict_intro_rest": {
-    "message": "- to te same pliki, których używa czytnik KOReader, więc słownik obecny już na twoim czytniku działa tu bez zmian. Rozpakuj archiwum, w którym przyszedł, i wskaż pliki jednego słownika:"
+    "message": "- to te same pliki, których używa KOReader, więc słownik obecny już na twoim urządzeniu działa tu bez zmian. Rozpakuj archiwum, w którym przyszedł, i wskaż pliki jednego słownika:"
   },
   "options_file_ifo": { "message": "- jak słownik sam siebie nazywa" },
   "options_file_idx": { "message": "- indeks słów" },
@@ -600,6 +601,20 @@
   },
 
   "options_badge_reading": { "message": "to czytasz" },
+  "options_delete_confirm": { "message": "Na pewno?" },
+  "options_delete_model_aria": {
+    "message": "Usuń model $PAIR$",
+    "placeholders": { "pair": { "content": "$1" } }
+  },
+  "options_delete_dictionary_aria": {
+    "message": "Usuń słownik $NAME$",
+    "placeholders": { "name": { "content": "$1" } }
+  },
+  "options_delete_confirm_aria": {
+    "message": "Potwierdź usunięcie: $NAME$",
+    "placeholders": { "name": { "content": "$1" } }
+  },
+  "options_about_dictionary": { "message": "O słowniku" },
   "options_size_here": {
     "message": "$SIZE$ na urządzeniu",
     "placeholders": { "size": { "content": "$1" } }
@@ -624,15 +639,7 @@
     "placeholders": { "detail": { "content": "$1" } }
   },
   "options_refreshing_list": { "message": "Odświeżanie listy modeli..." },
-  "options_refreshed_list": {
-    "message": "Lista modeli aktualna na dzień $DATE$.",
-    "placeholders": { "date": { "content": "$1", "example": "2026-08-13" } }
-  },
   "options_refreshing_dict_list": { "message": "Odświeżanie listy słowników..." },
-  "options_refreshed_dict_list": {
-    "message": "Lista słowników aktualna na dzień $DATE$.",
-    "placeholders": { "date": { "content": "$1", "example": "2026-08-13" } }
-  },
   "options_refresh_failed": {
     "message": "Nie udało się odświeżyć listy$DETAIL$. Zostaje lista z dnia $DATE$.",
     "placeholders": {

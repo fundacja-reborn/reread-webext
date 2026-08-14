@@ -17,7 +17,7 @@
   "language_pair": { "message": "Par de idiomas" },
   "reading_list": { "message": "Lista de lectura sin conexión" },
   "saved_phrases": { "message": "Frases guardadas" },
-  "open_reader": { "message": "Leer esta página en el lector" },
+  "open_reader": { "message": "Leer esta página en la vista de lectura" },
   "action_delete": { "message": "Eliminar" },
   "action_download": { "message": "Descargar" },
   "action_cancel": { "message": "Cancelar" },
@@ -38,7 +38,7 @@
   "bubble_settings": { "message": "Abrir ajustes" },
   "bubble_more": { "message": "Más" },
   "bubble_less": { "message": "Menos" },
-  "bubble_reader": { "message": "Leer en el lector" },
+  "bubble_reader": { "message": "Leer en la vista de lectura" },
   "bubble_translating": { "message": "Traduciendo..." },
 
   "popup_site_toggle_title": { "message": "Si re/read funciona en este sitio" },
@@ -46,7 +46,7 @@
   "popup_no_model": {
     "message": "Todavía no hay ningún modelo de traducción en este dispositivo - pulsa aquí para elegir uno en los ajustes."
   },
-  "popup_mode_reader_only": { "message": "Modo: solo en el lector" },
+  "popup_mode_reader_only": { "message": "Modo: solo en la vista de lectura" },
 
   "vocab_title": { "message": "re/read - frases guardadas" },
   "vocab_intro": {
@@ -153,7 +153,7 @@
     "placeholders": { "count": { "content": "$1", "example": "7" } }
   },
 
-  "reader_title": { "message": "re/read - lector" },
+  "reader_title": { "message": "re/read - vista de lectura" },
   "reader_open_original": { "message": "Abrir el original" },
   "reader_display_title": { "message": "Tipografía y tema" },
   "reader_theme": { "message": "Tema" },
@@ -197,7 +197,7 @@
   "reader_no_article": { "message": "No se encontró ningún artículo en esa página." },
   "reader_list_write_failed": { "message": "No se pudo escribir la lista de lectura." },
   "reader_empty_none": {
-    "message": "Aún no hay nada guardado - abre un artículo en el lector y pulsa «$BUTTON$». Una página guardada se queda en este dispositivo y se abre incluso sin conexión.",
+    "message": "Aún no hay nada guardado - abre un artículo en la vista de lectura y pulsa «$BUTTON$». Una página guardada se queda en este dispositivo y se abre incluso sin conexión.",
     "placeholders": { "button": { "content": "$1", "example": "Guardar en la lista de lectura" } }
   },
   "reader_empty_all_read": { "message": "No queda nada por leer - todo lo guardado está marcado como leído." },
@@ -415,36 +415,37 @@
   "options_first_steps_intro": {
     "message": "Todavía no se traduce nada - el modelo que lo haría no está en este dispositivo. La puesta en marcha lleva un minuto:"
   },
-  "options_first_steps_pair": {
-    "message": "Ajusta el par de idiomas justo debajo: el idioma en el que lees y el idioma al que se traduce."
-  },
   "options_first_steps_model": {
-    "message": "Bajo «Modelos de traducción», pulsa «Descargar» junto a ese par. El modelo queda guardado en este dispositivo y desde entonces traduce sin conexión."
+    "message": "Bajo «Modelos de traducción», busca el par de idiomas que necesitas (el filtro es lo más rápido) y pulsa «Descargar». El modelo queda guardado en este dispositivo y desde entonces traduce sin conexión - y el primer modelo ajusta por sí solo el par de idiomas de arriba."
   },
   "options_first_steps_dictionary": {
     "message": "Merece la segunda pulsación: un diccionario para el mismo par, bajo «Diccionarios» - las palabras sueltas reciben entonces respuestas más completas que una traducción sola."
   },
   "options_first_steps_pin": {
-    "message": "Por último, fija re/read a la barra de herramientas - hasta entonces su botón se esconde tras el icono de la pieza de puzle. Tras el botón: el lector, la lista de lectura sin conexión, tus frases guardadas y un interruptor para el sitio en el que estás."
+    "message": "Por último, fija re/read a la barra de herramientas - hasta entonces su botón se esconde tras el icono de la pieza de puzle. Tras el botón: la vista de lectura, la lista de lectura sin conexión, tus frases guardadas y un interruptor para el sitio en el que estás."
   },
-  "options_version": { "message": "Versión" },
+  "options_sections_aria": { "message": "Secciones de esta página" },
   "options_engine": { "message": "Motor" },
   "options_engine_value": { "message": "Bergamot, dentro del paquete - traduce sin conexión" },
-  "options_reader_only": { "message": "Solo en el lector" },
+  "options_pair_hint": { "message": "Se ofrecen los pares con un modelo en este dispositivo - para otro par, descarga su modelo bajo" },
+  "options_pair_none": { "message": "Aún no hay modelo - descarga uno abajo" },
+  "options_reader_only": { "message": "Solo en la vista de lectura" },
   "options_reader_only_hint": {
-    "message": "Con esto activado, seleccionar una frase o una palabra en una página normal ofrece una sola cosa: abrir la página en el lector. Traducir, guardar y subrayar ocurren allí (más claro y más legible). En Android la opción está activada de forma predeterminada."
+    "message": "Con esto activado, seleccionar una frase o una palabra en una página normal ofrece una sola cosa: abrir la página en la vista de lectura. Traducir, guardar y subrayar ocurren allí (más claro y más legible). En Android la opción está activada de forma predeterminada."
   },
   "options_models_heading": { "message": "Modelos de traducción" },
   "options_models_intro": {
     "message": "Los modelos de abajo los crea y publica Mozilla - los mismos modelos con los que el propio Firefox traduce páginas. Para que re/read funcione, descarga el modelo de los pares de idiomas que quieras traducir (por ejemplo en -> pl)."
   },
   "options_update_list": { "message": "Actualizar la lista" },
-  "options_list_from": { "message": "- la lista de modelos de traducción de abajo es del" },
-  "options_dict_list_from": { "message": "- la lista de diccionarios de abajo es del" },
-  "options_list_refresh_hint": { "message": "Pulsa el botón para traer la lista actual." },
+  "options_list_dated": { "message": "Lista del" },
   "options_filter_placeholder": { "message": "Filtra por idioma o código" },
-  "options_filter_models_aria": { "message": "Filtrar la lista de modelos de traducción" },
-  "options_filter_dictionaries_aria": { "message": "Filtrar la lista de diccionarios" },
+  "options_filter_models_label": { "message": "Filtrar la lista de modelos de traducción" },
+  "options_filter_dictionaries_label": { "message": "Filtrar la lista de diccionarios" },
+  "options_show_all": {
+    "message": "Mostrar todos ($COUNT$)",
+    "placeholders": { "count": { "content": "$1" } }
+  },
   "options_model_note_from": { "message": "Los modelos se descargan de" },
   "options_model_note_rest": {
     "message": "- ahí los publica Mozilla. Cuando actualizas la lista, no se envía nada sobre ti - la petición solo trae la lista fresca de modelos. Este host y el del catálogo de diccionarios de abajo son los dos únicos lugares con los que esta extensión puede contactar jamás - y solo cuando pulsas a sabiendas actualizar una lista o descargar un modelo o un diccionario."
@@ -493,6 +494,20 @@
   },
 
   "options_badge_reading": { "message": "lo que estás leyendo" },
+  "options_delete_confirm": { "message": "¿Seguro?" },
+  "options_delete_model_aria": {
+    "message": "Eliminar el modelo $PAIR$",
+    "placeholders": { "pair": { "content": "$1" } }
+  },
+  "options_delete_dictionary_aria": {
+    "message": "Eliminar el diccionario $NAME$",
+    "placeholders": { "name": { "content": "$1" } }
+  },
+  "options_delete_confirm_aria": {
+    "message": "Confirmar la eliminación: $NAME$",
+    "placeholders": { "name": { "content": "$1" } }
+  },
+  "options_about_dictionary": { "message": "Acerca de este diccionario" },
   "options_size_here": {
     "message": "$SIZE$ aquí",
     "placeholders": { "size": { "content": "$1" } }
@@ -517,15 +532,7 @@
     "placeholders": { "detail": { "content": "$1" } }
   },
   "options_refreshing_list": { "message": "Refrescando la lista de modelos..." },
-  "options_refreshed_list": {
-    "message": "La lista de modelos está actualizada a $DATE$.",
-    "placeholders": { "date": { "content": "$1", "example": "2026-08-13" } }
-  },
   "options_refreshing_dict_list": { "message": "Refrescando la lista de diccionarios..." },
-  "options_refreshed_dict_list": {
-    "message": "La lista de diccionarios está actualizada a $DATE$.",
-    "placeholders": { "date": { "content": "$1", "example": "2026-08-13" } }
-  },
   "options_refresh_failed": {
     "message": "No se pudo refrescar la lista$DETAIL$. Queda la lista del $DATE$.",
     "placeholders": {

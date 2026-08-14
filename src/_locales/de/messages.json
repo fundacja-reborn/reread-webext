@@ -392,11 +392,8 @@
   "options_first_steps_intro": {
     "message": "Noch übersetzt nichts - das Modell, das es täte, ist nicht auf diesem Gerät. Die Einrichtung dauert eine Minute:"
   },
-  "options_first_steps_pair": {
-    "message": "Stellen Sie gleich darunter das Sprachpaar ein: die Sprache, die Sie lesen, und die Sprache, in die übersetzt wird."
-  },
   "options_first_steps_model": {
-    "message": "Drücken Sie unter „Übersetzungsmodelle“ neben diesem Paar auf „Herunterladen“. Das Modell wird auf diesem Gerät gespeichert und übersetzt von da an offline."
+    "message": "Suchen Sie unter „Übersetzungsmodelle“ das Sprachpaar, das Sie brauchen (am schnellsten über den Filter), und drücken Sie auf „Herunterladen“. Das Modell wird auf diesem Gerät gespeichert und übersetzt von da an offline - und das erste Modell stellt das Sprachpaar oben von selbst ein."
   },
   "options_first_steps_dictionary": {
     "message": "Den zweiten Druck wert: ein Wörterbuch für dasselbe Paar, unter „Wörterbücher“ - einzelne Wörter bekommen dann vollständigere Antworten als eine Übersetzung allein."
@@ -404,9 +401,11 @@
   "options_first_steps_pin": {
     "message": "Heften Sie re/read zuletzt an die Symbolleiste - bis dahin sitzt der Knopf hinter dem Puzzleteil-Symbol. Hinter dem Knopf: die Leseansicht, die Offline-Leseliste, Ihr gespeicherter Wortschatz und ein Schalter für die Website, auf der Sie sind."
   },
-  "options_version": { "message": "Version" },
+  "options_sections_aria": { "message": "Abschnitte dieser Seite" },
   "options_engine": { "message": "Engine" },
   "options_engine_value": { "message": "Bergamot, im Paket enthalten - übersetzt offline" },
+  "options_pair_hint": { "message": "Angeboten werden die Paare mit einem Modell auf diesem Gerät - das Modell für ein weiteres Paar finden Sie unter" },
+  "options_pair_none": { "message": "Noch kein Modell - laden Sie unten eines herunter" },
   "options_reader_only": { "message": "Nur in der Leseansicht" },
   "options_reader_only_hint": {
     "message": "Ist dies an, bietet das Auswählen einer Wendung oder eines Wortes auf einer gewöhnlichen Seite genau eines an: die Seite in der Leseansicht zu öffnen. Übersetzen, Speichern und Unterstreichen geschehen dort (übersichtlicher und besser lesbar). Auf Android ist die Option standardmäßig eingeschaltet."
@@ -416,12 +415,14 @@
     "message": "Die Modelle unten baut und veröffentlicht Mozilla - dieselben Modelle, mit denen Firefox selbst Seiten übersetzt. Damit re/read arbeiten kann, laden Sie das Modell für die Sprachpaare herunter, die Sie übersetzen möchten (z. B. en -> pl)."
   },
   "options_update_list": { "message": "Liste aktualisieren" },
-  "options_list_from": { "message": "- die Liste der Übersetzungsmodelle unten ist vom" },
-  "options_dict_list_from": { "message": "- die Liste der Wörterbücher unten ist vom" },
-  "options_list_refresh_hint": { "message": "Klicken Sie auf die Schaltfläche, um die aktuelle Liste zu holen." },
+  "options_list_dated": { "message": "Liste vom" },
   "options_filter_placeholder": { "message": "Nach Sprache oder Code filtern" },
-  "options_filter_models_aria": { "message": "Die Liste der Übersetzungsmodelle filtern" },
-  "options_filter_dictionaries_aria": { "message": "Die Liste der Wörterbücher filtern" },
+  "options_filter_models_label": { "message": "Die Liste der Übersetzungsmodelle filtern" },
+  "options_filter_dictionaries_label": { "message": "Die Liste der Wörterbücher filtern" },
+  "options_show_all": {
+    "message": "Alle anzeigen ($COUNT$)",
+    "placeholders": { "count": { "content": "$1" } }
+  },
   "options_model_note_from": { "message": "Modelle kommen von" },
   "options_model_note_rest": {
     "message": "- dort veröffentlicht Mozilla sie. Wenn Sie die Liste aktualisieren, wird nichts über Sie gesendet - die Anfrage holt nur die frische Modellliste. Dieser Host und der des Wörterbuchkatalogs weiter unten sind die einzigen zwei Orte, mit denen sich diese Erweiterung überhaupt verbinden kann - und nur, wenn Sie bewusst das Aktualisieren einer Liste oder das Herunterladen eines Modells oder Wörterbuchs anklicken."
@@ -470,6 +471,20 @@
   },
 
   "options_badge_reading": { "message": "das lesen Sie gerade" },
+  "options_delete_confirm": { "message": "Sicher?" },
+  "options_delete_model_aria": {
+    "message": "Das Modell $PAIR$ löschen",
+    "placeholders": { "pair": { "content": "$1" } }
+  },
+  "options_delete_dictionary_aria": {
+    "message": "Das Wörterbuch $NAME$ löschen",
+    "placeholders": { "name": { "content": "$1" } }
+  },
+  "options_delete_confirm_aria": {
+    "message": "Löschen bestätigen: $NAME$",
+    "placeholders": { "name": { "content": "$1" } }
+  },
+  "options_about_dictionary": { "message": "Über dieses Wörterbuch" },
   "options_size_here": {
     "message": "$SIZE$ hier",
     "placeholders": { "size": { "content": "$1" } }
@@ -494,15 +509,7 @@
     "placeholders": { "detail": { "content": "$1" } }
   },
   "options_refreshing_list": { "message": "Die Modellliste wird aufgefrischt..." },
-  "options_refreshed_list": {
-    "message": "Die Modellliste ist auf dem Stand vom $DATE$.",
-    "placeholders": { "date": { "content": "$1", "example": "2026-08-13" } }
-  },
   "options_refreshing_dict_list": { "message": "Die Wörterbuchliste wird aufgefrischt..." },
-  "options_refreshed_dict_list": {
-    "message": "Die Wörterbuchliste ist auf dem Stand vom $DATE$.",
-    "placeholders": { "date": { "content": "$1", "example": "2026-08-13" } }
-  },
   "options_refresh_failed": {
     "message": "Die Liste ließ sich nicht auffrischen$DETAIL$. Es bleibt die Liste vom $DATE$.",
     "placeholders": {
