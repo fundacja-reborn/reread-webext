@@ -414,7 +414,7 @@
 
   "options_title": { "message": "re/read - paramètres" },
   "options_local_intro": {
-    "message": "Tout ce que fait re/read se passe sur cet appareil (hors ligne) : la traduction, le dictionnaire, la liste de lecture, les phrases enregistrées. Rien de ce que vous lisez ou sélectionnez n'est envoyé nulle part. Le réseau sert à deux choses, toutes deux sur cette page et toutes deux à votre clic : télécharger un modèle ou un dictionnaire, et mettre à jour les listes des modèles et des dictionnaires - et seulement depuis les deux URL affichées ouvertement dans ces sections."
+    "message": "Tout ce que fait re/read se passe sur cet appareil (hors ligne) : la traduction, le dictionnaire, la liste de lecture, les phrases enregistrées. Rien de ce que vous lisez ou sélectionnez n'est envoyé nulle part. Une connexion Internet n'est nécessaire que lorsque vous voulez télécharger un nouveau modèle de traduction ou un dictionnaire - et seulement depuis les deux URL affichées ouvertement dans ces sections."
   },
   "options_first_steps_heading": { "message": "Premiers pas" },
   "options_first_steps_intro": {
@@ -435,7 +435,7 @@
   "options_sections_aria": { "message": "Sections de cette page" },
   "options_engine": { "message": "Moteur" },
   "options_engine_value": { "message": "Bergamot, dans le paquet - traduit hors ligne" },
-  "options_pair_hint": { "message": "Les paires proposées sont celles dont le modèle est sur cet appareil - pour une autre paire, téléchargez son modèle sous" },
+  "options_pair_hint": { "message": "Les paires proposées sont celles dont vous avez téléchargé le modèle de traduction sur cet appareil - si vous voulez traduire dans une autre paire de langues, téléchargez son modèle dans la section" },
   "options_pair_none": { "message": "Pas encore de modèle - téléchargez-en un ci-dessous" },
   "options_reader_only": { "message": "Seulement dans le lecteur" },
   "options_reader_only_hint": {

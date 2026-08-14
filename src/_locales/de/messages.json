@@ -391,7 +391,7 @@
 
   "options_title": { "message": "re/read - Einstellungen" },
   "options_local_intro": {
-    "message": "Alles, was re/read tut, geschieht auf diesem Gerät (offline): das Übersetzen, das Wörterbuch, die Leseliste, der gespeicherte Wortschatz. Nichts von dem, was Sie lesen oder auswählen, wird irgendwohin gesendet. Das Netz dient zwei Dingen, beiden auf dieser Seite und beiden auf Ihren Klick: dem Herunterladen eines Modells oder Wörterbuchs und dem Aktualisieren der Modell- und Wörterbuchliste - und nur von den zwei URLs, die offen in diesen Abschnitten genannt sind."
+    "message": "Alles, was re/read tut, geschieht auf diesem Gerät (offline): das Übersetzen, das Wörterbuch, die Leseliste, der gespeicherte Wortschatz. Nichts von dem, was Sie lesen oder auswählen, wird irgendwohin gesendet. Eine Internetverbindung ist nur nötig, wenn Sie ein neues Übersetzungsmodell oder ein Wörterbuch herunterladen möchten - und nur von den zwei URLs, die offen in diesen Abschnitten genannt sind."
   },
   "options_first_steps_heading": { "message": "Erste Schritte" },
   "options_first_steps_intro": {
@@ -412,7 +412,7 @@
   "options_sections_aria": { "message": "Abschnitte dieser Seite" },
   "options_engine": { "message": "Engine" },
   "options_engine_value": { "message": "Bergamot, im Paket enthalten - übersetzt offline" },
-  "options_pair_hint": { "message": "Angeboten werden die Paare mit einem Modell auf diesem Gerät - das Modell für ein weiteres Paar finden Sie unter" },
+  "options_pair_hint": { "message": "Zur Wahl stehen die Paare, deren Übersetzungsmodelle Sie auf dieses Gerät heruntergeladen haben - wenn Sie in einem anderen Sprachpaar übersetzen möchten, finden Sie sein Modell im Abschnitt" },
   "options_pair_none": { "message": "Noch kein Modell - laden Sie unten eines herunter" },
   "options_reader_only": { "message": "Nur in der Leseansicht" },
   "options_reader_only_hint": {

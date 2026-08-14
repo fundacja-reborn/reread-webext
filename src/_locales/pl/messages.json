@@ -521,7 +521,7 @@
 
   "options_title": { "message": "re/read - ustawienia" },
   "options_local_intro": {
-    "message": "Wszystko, co robi re/read, dzieje się na tym urządzeniu (offline): tłumaczenie, słownik, czytelnia, zapisane frazy. Nic z tego, co czytasz ani zaznaczasz, nigdzie nie jest wysyłane. Sieć służy dwóm rzeczom, obu na tej stronie i obu na twoje kliknięcie: pobraniu modelu albo słownika i aktualizacji list modeli i słowników - i tylko spod dwóch adresów URL podanych jawnie w tych sekcjach."
+    "message": "Wszystko, co robi re/read, dzieje się na tym urządzeniu (offline): tłumaczenie, słownik, czytelnia, zapisane frazy. Nic z tego, co czytasz ani zaznaczasz, nigdzie nie jest wysyłane. Połączenie internetowe jest potrzebne, tylko gdy chcesz pobrać nowy model tłumaczeń lub słownik - i tylko spod dwóch adresów URL podanych jawnie w tych sekcjach."
   },
   "options_first_steps_heading": { "message": "Pierwsze kroki" },
   "options_first_steps_intro": {
@@ -542,7 +542,7 @@
   "options_sections_aria": { "message": "Sekcje tej strony" },
   "options_engine": { "message": "Silnik" },
   "options_engine_value": { "message": "Bergamot, wewnątrz paczki - tłumaczy offline" },
-  "options_pair_hint": { "message": "Do wyboru są pary z modelem na tym urządzeniu - po inną parę pobierz jej model w sekcji" },
+  "options_pair_hint": { "message": "Do wyboru są pary z modelami tłumaczeń, które pobrałeś na to urządzenie - jeśli chcesz tłumaczyć w innej parze językowej, pobierz jej model w sekcji" },
   "options_pair_none": { "message": "Nie ma jeszcze modelu - najpierw pobierz go poniżej" },
   "options_reader_only": { "message": "Tylko w widoku czytania" },
   "options_reader_only_hint": {

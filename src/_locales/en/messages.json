@@ -413,7 +413,7 @@
 
   "options_title": { "message": "re/read - settings" },
   "options_local_intro": {
-    "message": "Everything re/read does happens on this device (offline): translating, the dictionary, the reading list, your saved phrases. Nothing you read or select is ever sent anywhere. The network serves two things, both on this page and both at your press: downloading a model or a dictionary, and updating the lists of models and dictionaries - and only from the two URLs shown openly in those sections."
+    "message": "Everything re/read does happens on this device (offline): translating, the dictionary, the reading list, your saved phrases. Nothing you read or select is ever sent anywhere. An internet connection is needed only when you want to download a new translation model or a dictionary - and only from the two URLs shown openly in those sections."
   },
   "options_first_steps_heading": { "message": "First steps" },
   "options_first_steps_intro": {
@@ -443,7 +443,7 @@
   "options_engine": { "message": "Engine" },
   "options_engine_value": { "message": "Bergamot, inside the package - translates offline" },
   "options_pair_hint": {
-    "message": "The pairs offered are those with a model on this device - for another pair, download its model under",
+    "message": "The pairs offered are those whose translation models you have downloaded to this device - if you want to translate in another language pair, download its model under",
     "description": "Followed by an anchor link wearing the options_models_heading text, then a plain full stop. No part starts or ends with whitespace."
   },
   "options_pair_none": {
