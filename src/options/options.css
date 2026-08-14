@@ -87,9 +87,11 @@ header h1 {
   min-height: 44px;
 }
 
-.jump a:not(:last-child)::after {
+/* The dot rides the link it precedes, so a wrapped line never ends in a
+   lone separator - it starts the next line with its link instead. */
+.jump a + a::before {
   content: "\00B7" / "";
-  margin-left: 0.6rem;
+  margin-right: 0.6rem;
   color: var(--page-muted);
 }
 
@@ -170,9 +172,11 @@ h2 {
   cursor: pointer;
 }
 
+/* Large enough to read as the control it is (~22px); the whole line is the
+   touch target either way. */
 .row-toggle input {
-  width: 1.15rem;
-  height: 1.15rem;
+  width: 1.4rem;
+  height: 1.4rem;
 }
 
 /* --- the refresh line: a quiet button and the list's date --- */
@@ -297,7 +301,15 @@ h2 {
    muted, always visible - touch and e-ink have no hover to reveal it with.
    Nowrap so "Sure?" grows leftward from a fixed right edge and the second
    press lands where the first one did. */
-.model-delete {
+/* The element in the selector, or `.model-act button` above would outweigh
+   this rule and keep its own padding. */
+button.model-delete {
+  /* The reading list's quiet-delete metrics, kept identical on purpose: one
+     pattern across the pages. The touch floor stands on the button itself,
+     not on the cell around it. */
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0.35rem 0.8rem;
   border-color: transparent;
   color: var(--page-muted);
   font-size: 0.85rem;
@@ -330,14 +342,26 @@ h2 {
   accent-color: var(--page-accent);
 }
 
-/* The one visible move of a collapsed list: a full-width quiet row saying how
-   much stands folded under it. */
+/* The one visible move of a collapsed list: a centered quiet line saying how
+   much stands folded under it. The hit area keeps the full row's width; the
+   dressing follows the quiet pattern (no box at rest, wash on hover/focus) -
+   unfolding is a rare act and a bordered bar overstated it. */
 .show-all {
   display: block;
   width: 100%;
   min-height: 44px;
-  margin: 0.75rem 0 0;
+  margin: 0.25rem 0 0;
   padding: 0.35rem 1rem;
+  border-color: transparent;
+  color: var(--page-muted);
+  font-size: 0.9rem;
+}
+
+.show-all:hover,
+.show-all:focus-visible {
+  border-color: var(--page-line);
+  background: color-mix(in srgb, var(--page-fg) 6%, transparent);
+  color: var(--page-fg);
 }
 
 /* --- the attribution fold inside a stored dictionary's row --- */
