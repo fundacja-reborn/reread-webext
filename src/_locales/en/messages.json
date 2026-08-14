@@ -429,8 +429,12 @@
     "description": "Quotes the options_dictionaries_heading section name and the bubble_more button - each language quotes its own wording of those keys, so they must move together."
   },
   "options_first_steps_pin": {
-    "message": "Last, pin re/read to the toolbar - until you do, its button sits behind the extensions puzzle-piece icon. A press on the icon opens the popup, with quick access to the reader, the offline reading list, your saved phrases, the switch for the site you are on and the choice of the active language pair.",
-    "description": "Hidden on Android, where there is no toolbar to pin anything to."
+    "message": "Last, pin re/read to the toolbar: press the puzzle-piece icon at the right end of the bar and, next to re/read, choose the gear and \"Pin to Toolbar\". The re/read button gives quick access to the reader, the offline reading list, your saved phrases, changing the language pair and the switch for the site you are on.",
+    "description": "The desktop wording of the last step; on Android the page swaps in options_first_steps_pin_android instead. Quotes Firefox's own \"Pin to Toolbar\" menu label - each language must quote Firefox's official wording of it, not a translation of its own."
+  },
+  "options_first_steps_pin_android": {
+    "message": "You will find the re/read button in the browser menu (⋮), in the extensions section - it gives quick access to the reader, the offline reading list, your saved phrases, changing the language pair and the switch for the site you are on.",
+    "description": "Replaces options_first_steps_pin on Android, where there is no toolbar to pin anything to - the button already sits in the browser menu."
   },
   "options_sections_aria": {
     "message": "Sections of this page",

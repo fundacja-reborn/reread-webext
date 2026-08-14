@@ -427,7 +427,10 @@
     "message": "Bajo «Diccionarios», descarga un diccionario para el mismo par (opcional, pero merece la pena) - las palabras sueltas reciben entonces respuestas más completas que una traducción sola (tras pulsar «Más» en la burbuja de traducción)."
   },
   "options_first_steps_pin": {
-    "message": "Por último, fija re/read a la barra de herramientas - hasta entonces su botón se esconde tras el icono de la pieza de puzle de las extensiones. Una pulsación en el icono abre el popup, con acceso rápido a la vista de lectura, la lista de lectura sin conexión, tus frases guardadas, el interruptor del sitio en el que estás y el cambio del par de idiomas activo."
+    "message": "Por último, fija re/read a la barra de herramientas: pulsa el icono de la pieza de puzle a la derecha de la barra y, junto a re/read, elige el engranaje y «Fijar a la barra de herramientas». El botón de re/read da acceso rápido a la vista de lectura, la lista de lectura sin conexión, tus frases guardadas, el cambio del par de idiomas y el interruptor del sitio en el que estás."
+  },
+  "options_first_steps_pin_android": {
+    "message": "El botón de re/read está en el menú del navegador (⋮), en la sección de extensiones - da acceso rápido a la vista de lectura, la lista de lectura sin conexión, tus frases guardadas, el cambio del par de idiomas y el interruptor del sitio en el que estás."
   },
   "options_sections_aria": { "message": "Secciones de esta página" },
   "options_engine": { "message": "Motor" },

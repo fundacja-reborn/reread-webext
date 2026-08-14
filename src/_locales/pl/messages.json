@@ -534,7 +534,10 @@
     "message": "W sekcji „Słowniki” pobierz słownik dla tej samej pary (to opcjonalne, ale warto) - pojedyncze słowa dostają wtedy pełniejsze odpowiedzi niż samo tłumaczenie (po kliknięciu na „Więcej” w dymku tłumaczenia)."
   },
   "options_first_steps_pin": {
-    "message": "Na koniec przypnij re/read do paska narzędzi - dopóki tego nie zrobisz, przycisk kryje się za ikoną puzzla rozszerzeń. Po kliknięciu na ikonie rozszerzenia w oknie popup masz szybki dostęp do opcji: widok czytania, czytelnia offline, zapisane frazy, wyłącznik witryny, na której jesteś, czy zmiana aktywnej pary językowej."
+    "message": "Na koniec przypnij re/read do paska narzędzi: kliknij ikonę puzzla po prawej stronie paska, a przy re/read wybierz koło zębate i „Przypnij do paska narzędzi”. Przycisk re/read daje szybki dostęp do widoku czytania, czytelni offline, zapisanych fraz, zmiany pary językowej i wyłącznika witryny, na której jesteś."
+  },
+  "options_first_steps_pin_android": {
+    "message": "Przycisk re/read znajdziesz w menu przeglądarki (⋮), w sekcji rozszerzeń - daje szybki dostęp do widoku czytania, czytelni offline, zapisanych fraz, zmiany pary językowej i wyłącznika witryny, na której jesteś."
   },
   "options_sections_aria": { "message": "Sekcje tej strony" },
   "options_engine": { "message": "Silnik" },

@@ -404,7 +404,10 @@
     "message": "Laden Sie unter „Wörterbücher“ ein Wörterbuch für dasselbe Paar herunter (optional, aber lohnend) - einzelne Wörter bekommen dann vollständigere Antworten als eine Übersetzung allein (nach einem Druck auf „Mehr“ in der Übersetzungsblase)."
   },
   "options_first_steps_pin": {
-    "message": "Heften Sie re/read zuletzt an die Symbolleiste - bis dahin sitzt der Knopf hinter dem Puzzleteil-Symbol der Erweiterungen. Ein Druck auf das Symbol öffnet das Popup mit schnellem Zugriff auf die Leseansicht, die Offline-Leseliste, Ihren gespeicherten Wortschatz, den Schalter für die Website, auf der Sie sind, und die Wahl des aktiven Sprachpaars."
+    "message": "Heften Sie re/read zuletzt an die Symbolleiste: Klicken Sie auf das Puzzleteil-Symbol rechts in der Leiste und wählen Sie neben re/read das Zahnrad und „An Symbolleiste anheften“. Der re/read-Knopf gibt schnellen Zugriff auf die Leseansicht, die Offline-Leseliste, Ihren gespeicherten Wortschatz, den Wechsel des Sprachpaars und den Schalter für die Website, auf der Sie sind."
+  },
+  "options_first_steps_pin_android": {
+    "message": "Den re/read-Knopf finden Sie im Browsermenü (⋮) im Bereich der Erweiterungen - er gibt schnellen Zugriff auf die Leseansicht, die Offline-Leseliste, Ihren gespeicherten Wortschatz, den Wechsel des Sprachpaars und den Schalter für die Website, auf der Sie sind."
   },
   "options_sections_aria": { "message": "Abschnitte dieser Seite" },
   "options_engine": { "message": "Engine" },

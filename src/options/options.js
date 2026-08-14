@@ -1376,10 +1376,14 @@ async function render() {
   // how old that is.
   liveList = await readLiveModels();
   liveDictionaries = await readLiveDictionaries();
-  // Android has no toolbar to pin anything to; the step disappears rather
-  // than asking for the impossible.
+  // Android has no toolbar to pin anything to: the last step says where the
+  // button already lives instead. Settled here, while the fold is still
+  // hidden, so neither platform ever sees the other platform's wording.
   const pin = document.getElementById("first-steps-pin");
-  if (pin !== null) pin.hidden = os === "android";
+  if (pin !== null && os === "android") {
+    pin.setAttribute("data-i18n", "options_first_steps_pin_android");
+    pin.textContent = t("options_first_steps_pin_android");
+  }
   fill("version", webext().runtime.getManifest().version);
   renderReaderOnly();
   renderLanguageChoices("dictionary-from", config.sourceLang);

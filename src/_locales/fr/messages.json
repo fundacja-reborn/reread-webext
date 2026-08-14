@@ -427,7 +427,10 @@
     "message": "Sous « Dictionnaires », téléchargez un dictionnaire pour la même paire (facultatif, mais utile) - les mots isolés reçoivent alors des réponses plus complètes qu'une traduction seule (après un appui sur « Plus » dans la bulle de traduction)."
   },
   "options_first_steps_pin": {
-    "message": "Enfin, épinglez re/read à la barre d'outils - d'ici là, son bouton se cache derrière l'icône en forme de pièce de puzzle des extensions. Un appui sur l'icône ouvre le popup, avec un accès rapide au lecteur, à la liste de lecture hors ligne, à vos phrases enregistrées, à l'interrupteur du site où vous êtes et au choix de la paire de langues active."
+    "message": "Enfin, épinglez re/read à la barre d'outils : cliquez sur l'icône en forme de pièce de puzzle à droite de la barre, puis à côté de re/read choisissez l'engrenage et « Épingler à la barre d’outils ». Le bouton re/read donne un accès rapide au lecteur, à la liste de lecture hors ligne, à vos phrases enregistrées, au changement de paire de langues et à l'interrupteur du site où vous êtes."
+  },
+  "options_first_steps_pin_android": {
+    "message": "Le bouton re/read se trouve dans le menu du navigateur (⋮), dans la section des extensions - il donne un accès rapide au lecteur, à la liste de lecture hors ligne, à vos phrases enregistrées, au changement de paire de langues et à l'interrupteur du site où vous êtes."
   },
   "options_sections_aria": { "message": "Sections de cette page" },
   "options_engine": { "message": "Moteur" },
