@@ -14,8 +14,9 @@ import { placement } from "../src/content/tooltip.js";
  *
  * The numbers below are viewport coordinates, as everything here is: `GAP` is
  * 8 pixels between the phrase and the bubble, `VIEWPORT_MARGIN` another 8 from
- * the edges of the window, and `HANDLE_GAP` of 32 stands a below-preferring
- * bubble clear of the system's selection handles (D74).
+ * the edges of the window, and a touch selection swaps `GAP` for `SYSTEM_GAP`
+ * of 64 on either side - the strip the system's own selection bar and drag
+ * handles live in (D74).
  */
 
 const VIEWPORT = { width: 1000, height: 800 };
@@ -106,61 +107,61 @@ describe("placement", () => {
     assert.deepEqual(spot, { left: 101, top: 392, grow: "up" });
   });
 
-  it("stands below a touch selection, past the system's handles", () => {
-    // Plenty of room on either side, and below still wins: above the phrase
-    // stands the system's own selection bar, and under its last line hang the
-    // drag handles - 32 pixels instead of 8 steps past them (D74).
+  it("stands a system strip above a touch selection", () => {
+    // Same side as a mouse selection, eight times the distance: the strip
+    // between bubble and phrase belongs to the system's own selection bar,
+    // so the two never cover each other (D74).
     const spot = placement({
       anchor: at({ top: 400 }),
       size: { width: 300, height: 60 },
       viewport: VIEWPORT,
-      prefer: "below",
+      touch: true,
     });
 
-    assert.deepEqual(spot, { left: 100, top: 452, grow: "down" });
+    assert.deepEqual(spot, { left: 100, top: 336, grow: "up" });
   });
 
-  it("falls back above when a below-preferring bubble has no room below", () => {
+  it("keeps the strip when a touch bubble falls below the phrase", () => {
+    // No room above once the strip is counted; below, the same distance now
+    // steps past the drag handles hanging under the last line.
     const spot = placement({
-      anchor: at({ top: 700 }),
+      anchor: at({ top: 80 }),
       size: { width: 300, height: 60 },
       viewport: VIEWPORT,
-      prefer: "below",
+      touch: true,
     });
 
-    // The above-position keeps the ordinary gap: there are no handles over a
-    // phrase, only under it.
-    assert.deepEqual(spot, { left: 100, top: 692, grow: "up" });
+    assert.deepEqual(spot, { left: 100, top: 164, grow: "down" });
   });
 
-  it("counts the folded row when it asks whether the bubble fits below", () => {
-    // 60 tall ends at 792 below a phrase at 680, exactly on the margin; with
-    // the row unfolded it would not fit, and above there is room.
-    const anchor = at({ top: 680 });
+  it("counts the folded row against the strip too", () => {
+    // 60 tall clears the strip above a phrase at 140 (140 - 64 - 60 = 16);
+    // with the row unfolded it does not, and the bubble goes below.
+    const anchor = at({ top: 140 });
     const size = { width: 300, height: 60 };
 
-    assert.deepEqual(placement({ anchor, size, viewport: VIEWPORT, prefer: "below" }), {
+    assert.deepEqual(placement({ anchor, size, viewport: VIEWPORT, touch: true }), {
       left: 100,
-      top: 732,
-      grow: "down",
-    });
-    assert.deepEqual(placement({ anchor, size, viewport: VIEWPORT, folded: 10, prefer: "below" }), {
-      left: 100,
-      top: 672,
+      top: 76,
       grow: "up",
+    });
+    assert.deepEqual(placement({ anchor, size, viewport: VIEWPORT, folded: 10, touch: true }), {
+      left: 100,
+      top: 224,
+      grow: "down",
     });
   });
 
-  it("clamps a below-preferring bubble that fits nowhere, like any other", () => {
+  it("clamps a touch bubble that fits nowhere, like any other", () => {
     const spot = placement({
       anchor: at({ top: 380 }),
       size: { width: 300, height: 700 },
       viewport: VIEWPORT,
-      prefer: "below",
+      touch: true,
     });
 
     // 800 less the margin less 700: as much of it on the screen as there is
-    // screen, even over the phrase - the last resort is the same both ways.
+    // screen, even over the phrase - the last resort ignores no strip.
     assert.deepEqual(spot, { left: 100, top: 92, grow: "down" });
   });
 });

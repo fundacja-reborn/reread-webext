@@ -41,10 +41,10 @@ const tooltip = createTooltip({ onAction });
 /** @type {number | null} */
 let timer = null;
 let started = false;
-/** The last press's pointer type: under a finger the offer steps below the
- *  selection, past the system's drag handles, leaving the strip above to the
- *  system's own bar (D74). Only ever set where a finger can select - a
- *  mouse-only device does not pay for the listener. */
+/** The last press's pointer type: a finger's selection wears the system's
+ *  bar and handles around it, and the offer stands a system strip away from
+ *  it (D74). Only ever set where a finger can select - a mouse-only device
+ *  does not pay for the listener. */
 let lastPointerType = "";
 /** The selection the offer is standing under, to stand aside when it moves. */
 let shownText = "";
@@ -102,7 +102,7 @@ function settle() {
     variant: "launcher",
     body: "",
     actions: ["reader"],
-    prefer: lastPointerType === "touch" ? "below" : "above",
+    touch: lastPointerType === "touch",
   });
 }
 
