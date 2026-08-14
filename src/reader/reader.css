@@ -614,11 +614,16 @@ body.reader:has(#library:not([hidden])) {
 
 /* The article's own acts, dressed like the list's quiet actions: no resting
    border, muted, a 44px hit box. A label never breaks inside - on a narrow
-   screen the row wraps whole buttons instead. */
+   screen the row wraps whole buttons instead. The negative start margin gives
+   the first button's padding (and transparent border) back to the column, on
+   every wrapped line: the row's first label starts on the same left edge as
+   the way back above it and the title below it, while the hit boxes keep
+   their full size reaching into the gutter. */
 .article-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
+  margin-inline-start: calc(-0.8rem - 1px);
 }
 
 .article-actions button {
@@ -637,12 +642,15 @@ body.reader:has(#library:not([hidden])) {
   color: var(--page-fg);
 }
 
-/* A held state (saved, marked read) answers in the accent - and stays the
-   accent under the pointer, after the hover rule, so hovering a pressed
-   button keeps saying what is true. */
+/* A held state (saved, marked read) is a pill, not an act: the accent as a
+   border and a wash behind the page's own text color - the tabs' treatment,
+   readable in all four themes where accent-colored text is not, and the only
+   frame any of these buttons wears at rest. After the hover rule, so a
+   pressed button keeps saying what is true under the pointer. */
 .article-actions button[aria-pressed="true"] {
   border-color: var(--page-accent);
-  color: var(--page-accent);
+  background: color-mix(in srgb, var(--page-accent) 12%, transparent);
+  color: var(--page-fg);
 }
 
 /* A delete asking "Sure?" - the second press is the confirmation (there is no

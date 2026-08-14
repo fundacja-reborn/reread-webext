@@ -545,7 +545,9 @@ function disarmDelete() {
   armed.removeAttribute("data-armed");
   if (armed === removeButton) {
     // The article's own Delete speaks for itself at rest - one button, one
-    // article - so standing down also takes the armed aria-label with it.
+    // article - so standing down also takes the armed aria-label and the
+    // held width with it.
+    armed.style.removeProperty("min-width");
     armed.textContent = t("reader_delete");
     armed.removeAttribute("aria-label");
     return;
@@ -725,6 +727,7 @@ async function refreshActions() {
     removeButton.hidden = target.origin !== "saved";
     removeButton.removeAttribute("data-armed");
     removeButton.removeAttribute("aria-label");
+    removeButton.style.removeProperty("min-width");
     removeButton.textContent = t("reader_delete");
   }
 
@@ -786,6 +789,12 @@ async function onRemovePress() {
 
   if (!removeButton.hasAttribute("data-armed")) {
     disarmDelete();
+    // The question must not shrink the target: "Sure?" is shorter than the
+    // verb in every catalogue, and a button that contracts under the finger
+    // turns the second press into a miss that disarms it. Held as min-width,
+    // anchored on the left edge the row aligns to, so a longer question could
+    // still only grow rightward.
+    removeButton.style.minWidth = `${removeButton.offsetWidth}px`;
     removeButton.setAttribute("data-armed", "");
     removeButton.textContent = t("reader_delete_confirm");
     removeButton.setAttribute(
