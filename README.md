@@ -50,7 +50,7 @@ else. How to verify all of this is a section of its own,
 | Toolbar popup | per-site switch, language pair, reader, reading list, saved phrases, settings |
 | UI languages | English, Polish, German, French, Spanish, Ukrainian - follows the browser's UI language, English otherwise |
 | Firefox on Android | declared and built, reader-only by default; not yet tested on a phone |
-| Import / export (TSV) | not started |
+| Import / export | vocabulary as TSV, reading list as JSON - both on the pages that show them |
 | Chromium | builds, untested |
 
 If you are looking for something to use rather than something to read, come back later.
@@ -290,6 +290,13 @@ signs it and hands it straight back into `web-ext-artifacts/`.
 That channel is **unlisted**, which is a different thing from published: nothing appears
 in the add-on directory, no human review starts, and nobody else can find or install the
 result. It is the same package, with a signature that makes Firefox accept it.
+
+The signed file installs on desktop through **about:addons** - the cog, then **Install
+Add-on From File** - or simply by dragging it onto a Firefox window. A phone takes the
+same file: copy the `.xpi` over, unlock the hidden menu by tapping the Firefox logo five
+times in **Settings, About Firefox**, then pick **Install extension from file** near the
+bottom of the settings list. Installing a newer build over an older one keeps the
+vocabulary: the id, and with it the database, stays the same.
 
 Signing needs an [AMO API key](https://addons.mozilla.org/developers/addon/api/key/). Copy
 `.env.example` to `.env`, which is gitignored, and fill in the two values:

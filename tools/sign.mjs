@@ -42,7 +42,7 @@ function stop(message, hint) {
 /**
  * @param {string} command
  * @param {string[]} args
- * @param {{ capture?: boolean, env?: NodeJS.ProcessEnv }} [options]
+ * @param {{ capture?: boolean, env?: NodeJS.ProcessEnv, amoHint?: boolean }} [options]
  * @returns {string}
  */
 function run(command, args, options = {}) {
@@ -54,7 +54,7 @@ function run(command, args, options = {}) {
   });
   if (result.error) stop(`could not run ${command}: ${result.error.message}`);
   if (result.status !== 0) {
-    if (command === "npx") {
+    if (options.amoHint) {
       stop(
         `web-ext sign failed (exit ${result.status})`,
         "If AMO says this version already exists, raise `version` in src/manifest.json and\n" +
@@ -128,28 +128,18 @@ if (skipCheck) {
   run("tools/check.sh", []);
 }
 
-run(
-  "npx",
-  [
-    "--no-install",
-    "web-ext",
-    "sign",
-    "--source-dir",
-    "dist/firefox",
-    "--artifacts-dir",
-    "web-ext-artifacts",
-    "--channel",
-    "unlisted",
-  ],
-  {
-    env: {
-      ...process.env,
-      NO_UPDATE_NOTIFIER: "1",
-      // Node's fetch ignores HTTPS_PROXY unless told; web-ext uploads through it.
-      NODE_USE_ENV_PROXY: "1",
-    },
+// The upload lives in a child process of its own: Node reads
+// NODE_USE_ENV_PROXY once, at startup, so it has to be in the environment
+// before the uploading process exists. tools/sign-upload.mjs is also where
+// the workaround for web-ext's filename handling of "re/read" is explained.
+run(process.execPath, ["tools/sign-upload.mjs"], {
+  amoHint: true,
+  env: {
+    ...process.env,
+    // Node's fetch ignores HTTPS_PROXY unless told; the upload goes through it.
+    NODE_USE_ENV_PROXY: "1",
   },
-);
+});
 
 console.log(
   `\n[sign] ${manifestVersion} signed. The .xpi is in web-ext-artifacts/ - open it in Firefox,\n` +
