@@ -77,22 +77,36 @@ export function madeSelection({ from, to, clicks }) {
  * That last one is `findable` in `src/content/scan.js`, and it is what a
  * selection running from one paragraph into the next always is.
  *
- * `deliberate` is which of the two listeners this selection came through, and
- * it decides how far keeping without asking may go (D73). A mouse gesture ends,
- * and its end asserts the whole selection - the reader let go exactly there. A
- * selection that merely held still under a settle timer asserts one word at
- * most: on a touch screen the long-press takes a word, and everything wider is
- * the system's handles being dragged - a gesture whose end no page event
- * reports, so the timer answers mid-drag as readily as after it. Writing to
- * the vocabulary on that answer would keep half-made selections; a Save button
- * costs one press and keeps only what was meant.
+ * `deliberate` is which of the listeners this selection came through, and only
+ * a deliberate one may write without asking (D73, revised with D80). A mouse
+ * gesture ends, and its end asserts the whole selection - the reader let go
+ * exactly there; the reader page's own touch gesture ends in a `touchend` and
+ * asserts the same. A selection that merely held still under a settle timer
+ * asserts nothing: the system's handles report no end to a page, so the timer
+ * answers mid-drag as readily as after it - and a device round of 0.2.5 showed
+ * the first word of every dragged phrase being kept before the drag got going.
+ * That channel now only ever shows; keeping there costs one press of Save.
  *
  * @param {{ normalized: string, gloss: string, findable: boolean, deliberate?: boolean }} phrase
  * @returns {Keeping}
  */
 export function keeping({ normalized, gloss, findable, deliberate = true }) {
   if (normalized.length === 0 || gloss.length === 0 || !findable) return "none";
-  const words = keyTokens(normalized).length;
-  if (words > AUTO_KEEP_MAX_WORDS) return "ask";
-  return deliberate || words === 1 ? "automatic" : "ask";
+  if (!deliberate) return "ask";
+  return keyTokens(normalized).length > AUTO_KEEP_MAX_WORDS ? "ask" : "automatic";
+}
+
+/**
+ * Whether a pointer type selects the way a finger does.
+ *
+ * A pen is a finger here (D80): on a touch screen the system draws the same
+ * selection bar and handles for both, and a stylus tap means what a fingertip
+ * means. What stands apart is the mouse, whose gesture has an end the page can
+ * hear - every gate that tells the two worlds apart asks this one question.
+ *
+ * @param {string} pointerType as a `PointerEvent` reports it
+ * @returns {boolean}
+ */
+export function touchPointer(pointerType) {
+  return pointerType === "touch" || pointerType === "pen";
 }

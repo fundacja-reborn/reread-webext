@@ -39,6 +39,8 @@
   "bubble_more": { "message": "Plus" },
   "bubble_less": { "message": "Moins" },
   "bubble_reader": { "message": "Lire dans le lecteur" },
+  "bubble_extend_left": { "message": "Étendre la sélection d'un mot vers la gauche" },
+  "bubble_extend_right": { "message": "Étendre la sélection d'un mot vers la droite" },
   "bubble_translating": { "message": "Traduction..." },
 
   "popup_site_enabled": {

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { keeping, madeSelection } from "../src/lib/selection.js";
+import { keeping, madeSelection, touchPointer } from "../src/lib/selection.js";
 
 /**
  * The two rules of the reading side that do not need a page to be true: what a
@@ -86,17 +86,13 @@ describe("keeping", () => {
     assert.equal(answer({ gloss: "" }), "none");
   });
 
-  it("on a settled selection, keeps a single word without asking - the long-press", () => {
-    // A touch selection reaches this through a timer, not a gesture (D73). The
-    // one word is what the long-press itself took, so it is as deliberate as a
-    // double click; it is kept the way D22 keeps any looked-up word.
-    assert.equal(answer({ normalized: "ocean", deliberate: false }), "automatic");
-  });
-
-  it("on a settled selection, asks about anything wider than one word", () => {
-    // Wider means the system's handles were dragged, and the timer cannot tell
-    // a finished drag from a pause in the middle of one. A pause that wrote to
-    // the vocabulary would keep half-made selections - so wide waits for Save.
+  it("on a settled selection, never keeps by itself - not even one word", () => {
+    // The settle timer cannot tell a finished gesture from a pause in the
+    // middle of one (D73), and a device round of 0.2.5 showed what that costs:
+    // dragging a phrase starts on a word, so the first word kept itself every
+    // single time before the drag got going. The channel now only ever shows,
+    // and keeping there is one press of Save (D80 revision of D73).
+    assert.equal(answer({ normalized: "ocean", deliberate: false }), "ask");
     assert.equal(answer({ normalized: "milk bread", deliberate: false }), "ask");
     assert.equal(answer({ normalized: "the four great oceans", deliberate: false }), "ask");
   });
@@ -105,5 +101,22 @@ describe("keeping", () => {
     assert.equal(answer({ normalized: "milk bread", findable: false, deliberate: false }), "none");
     assert.equal(answer({ gloss: "", deliberate: false }), "none");
     assert.equal(answer({ normalized: "all the four great oceans", deliberate: false }), "ask");
+  });
+});
+
+describe("touchPointer", () => {
+  it("takes a finger and a pen for the world of system selection chrome", () => {
+    // A pen is a finger here (D80): the system wraps its selection in the
+    // same bar and handles, and neither ends in a gesture a page can hear.
+    assert.equal(touchPointer("touch"), true);
+    assert.equal(touchPointer("pen"), true);
+  });
+
+  it("keeps the mouse - and the unknown - in the world of gestures", () => {
+    assert.equal(touchPointer("mouse"), false);
+    // An empty type is a pointer this never saw press: claiming it is a
+    // finger would put the system-strip gap under a bubble with no system
+    // chrome to step around.
+    assert.equal(touchPointer(""), false);
   });
 });
