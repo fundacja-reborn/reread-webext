@@ -379,10 +379,10 @@ async function forget() {
  * @param {string} text as the page has it
  * @param {string} normalized
  * @param {string | null} context the sentence around the phrase, when the page has one
- * @param {"above" | "below"} [prefer] which side of the phrase the bubble stands on
+ * @param {boolean} [touch] whether the anchor is a selection made by touch
  * @returns {boolean} whether it was known
  */
-function showSaved(anchor, text, normalized, context, prefer = "above") {
+function showSaved(anchor, text, normalized, context, touch = false) {
   const meanings = vocabulary.get(normalized);
   if (meanings === undefined) return false;
 
@@ -400,7 +400,7 @@ function showSaved(anchor, text, normalized, context, prefer = "above") {
   // Recall: the answer, and nothing else until it is asked for (D44). Somebody
   // who clicked an underline wanted to know what the word was, and Learned is a
   // rare press on a decision they have already made - it can wait inside.
-  tooltip.show({ anchor, variant: "recall", body: meanings.join("\n"), actions: [...KEPT, ...secondLayer], prefer });
+  tooltip.show({ anchor, variant: "recall", body: meanings.join("\n"), actions: [...KEPT, ...secondLayer], touch });
   return true;
 }
 
@@ -535,13 +535,13 @@ function onMouseUp(event) {
  */
 function present(selection, deliberate) {
   const { text, normalized } = selection;
-  // Which side of the phrase to stand on. The settle path only ever answers a
-  // finger (the gate in onSelectionChange), and a finger's selection wears the
-  // system's bar above it and its drag handles beneath - the bubble steps
-  // below, past the handles, and leaves the strip above to the bar (D74). A
-  // mouse gesture keeps D23's above.
-  const prefer = deliberate ? "above" : "below";
-  if (showSaved(selection.rect, text, normalized, selection.context, prefer)) return;
+  // A finger's selection wears the system's bar and handles around it, so the
+  // bubble stands a system strip away on whichever side has the room (D74
+  // revision) - and the settle path is the only way here for a finger (the
+  // gate in onSelectionChange), so `deliberate` already says which world this
+  // is. A mouse gesture keeps D23's close gap.
+  const touch = !deliberate;
+  if (showSaved(selection.rect, text, normalized, selection.context, touch)) return;
 
   current = { text, normalized, keepable: selection.findable };
   secondLayer = [];
@@ -550,7 +550,7 @@ function present(selection, deliberate) {
 
   // The other variant: a fresh selection is a phrase nothing has been decided
   // about yet, so what can be done with it is on show from the first frame.
-  tooltip.show({ anchor: selection.rect, variant: "save", body: t("bubble_translating"), tone: "pending", prefer });
+  tooltip.show({ anchor: selection.rect, variant: "save", body: t("bubble_translating"), tone: "pending", touch });
 
   const request = selection.context === null
     ? { kind: Message.TRANSLATE, text }

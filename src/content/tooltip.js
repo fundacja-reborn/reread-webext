@@ -61,13 +61,21 @@ import { t } from "../lib/i18n.js";
 const GAP = 8;
 const VIEWPORT_MARGIN = 8;
 /**
- * The gap below the phrase when the bubble stands below it by preference.
- * Under a touch selection hang the browser's drag handles, and they are
- * browser chrome: a page cannot measure them, move them, or hear them being
- * dragged - and `GAP` would stand the gloss right on top of them. The number
- * is an estimate of how far they reach, to be tuned on a device, not a fact.
+ * The gap between the phrase and the bubble when the selection was made by
+ * touch, on whichever side the bubble stands. The strip beside a touch
+ * selection belongs to the system: its floating bar (Copy/Search) hovers
+ * over the phrase, its drag handles hang under the last line - all browser
+ * chrome, unmeasurable and unmovable from a page - and a bubble standing at
+ * `GAP` lands on one or the other. One strip's width steps past both; the
+ * number is an estimate to be tuned on a device, not a fact.
  */
-const HANDLE_GAP = 32;
+const SYSTEM_GAP = 64;
+/**
+ * The least the second layer may be squeezed to before the bubble gives up
+ * and covers things (see `place`): below this a dictionary entry stops being
+ * readable at all, and a scroll of nothing helps nobody.
+ */
+const MIN_ENTRIES_HEIGHT = 96;
 
 /**
  * Read when a button is rendered, not when the module loads: this module is
@@ -481,7 +489,7 @@ const STYLE = `
 
 /**
  * @typedef {object} Tooltip
- * @property {(options: { anchor: DOMRect, variant: Variant, body: string, tone?: Tone, actions?: Action[], prefer?: "above" | "below" }) => void} show
+ * @property {(options: { anchor: DOMRect, variant: Variant, body: string, tone?: Tone, actions?: Action[], touch?: boolean }) => void} show
  * @property {(body: string, tone?: Tone) => void} setBody
  * @property {(sentence: string | null, tone?: Tone) => void} setContext
  * @property {(blocks: Block[]) => void} setEntries
@@ -544,22 +552,24 @@ function style(root) {
  * lets the row unfold in the stylesheet: by the time it starts growing there
  * is nothing here left to run.
  *
- * Above the phrase by preference: reading goes downwards, so the text above
- * has been read and the text below is what comes next (D23). A touch
- * selection asks for `below` (D74): Android's own selection bar stands over
- * the phrase - the exact strip D23 would choose - and the system's drag
- * handles hang beneath it, so the bubble steps below, past the handles, and
- * leaves the strip above to the bar.
+ * Above the phrase when there is room: reading goes downwards, so the text
+ * above has been read and the text below is what comes next (D23) - restored
+ * for touch after a round of reading with the bubble below (D74 revision,
+ * Michał's call). What a touch selection changes is the distance, not the
+ * side: the bubble stands a system strip away (`SYSTEM_GAP`), leaving the
+ * space between itself and the phrase to the browser's own selection bar
+ * above it, or to its drag handles below it, so the two never cover each
+ * other.
  *
  * @param {object} where
  * @param {{ top: number, bottom: number, left: number }} where.anchor the phrase, in viewport coordinates
  * @param {{ width: number, height: number }} where.size what the bubble measures now
  * @param {{ width: number, height: number }} where.viewport
  * @param {number} [where.folded] how much taller it is still going to get on its own
- * @param {"above" | "below"} [where.prefer] which side of the phrase to try first
+ * @param {boolean} [where.touch] whether the selection was made by touch
  * @returns {{ left: number, top: number, grow: "down" | "up" }}
  */
-export function placement({ anchor, size, viewport, folded = 0, prefer = "above" }) {
+export function placement({ anchor, size, viewport, folded = 0, touch = false }) {
   // The room to look for is the room the bubble may come to need, not the room
   // it needs now - a folded row unfolds with nobody left to move anything.
   const height = size.height + folded;
@@ -567,21 +577,17 @@ export function placement({ anchor, size, viewport, folded = 0, prefer = "above"
   const maxLeft = Math.max(VIEWPORT_MARGIN, viewport.width - size.width - VIEWPORT_MARGIN);
   const left = Math.round(Math.min(Math.max(VIEWPORT_MARGIN, anchor.left), maxLeft));
 
-  const gap = prefer === "below" ? HANDLE_GAP : GAP;
-  const fitsAbove = anchor.top - GAP - height >= VIEWPORT_MARGIN;
-  const fitsBelow = anchor.bottom + gap + height <= viewport.height - VIEWPORT_MARGIN;
+  const gap = touch ? SYSTEM_GAP : GAP;
 
-  if (fitsAbove && (prefer === "above" || !fitsBelow)) {
-    return { left, top: Math.round(anchor.top - GAP), grow: "up" };
-  }
-  if (fitsBelow) {
-    return { left, top: Math.round(anchor.bottom + gap), grow: "down" };
+  if (anchor.top - gap - height >= VIEWPORT_MARGIN) {
+    return { left, top: Math.round(anchor.top - gap), grow: "up" };
   }
 
-  // Nowhere fits whole: below the phrase, pushed up only by the bottom of the
-  // window - the most of it that can be on the screen is on the screen.
+  // Below it, and pushed up only by the bottom of the window: the most of it
+  // that can be on the screen is on the screen, even over the phrase.
+  const below = anchor.bottom + gap;
   const room = viewport.height - VIEWPORT_MARGIN - height;
-  return { left, top: Math.round(Math.max(VIEWPORT_MARGIN, Math.min(anchor.bottom + gap, room))), grow: "down" };
+  return { left, top: Math.round(Math.max(VIEWPORT_MARGIN, Math.min(below, room))), grow: "down" };
 }
 
 /**
@@ -607,10 +613,9 @@ export function createTooltip({ onAction }) {
 
   /** Where the bubble is anchored, so it can be placed again when it changes size. */
   let anchor = new DOMRect();
-  /** Which side of the phrase this bubble prefers, kept with the anchor for
-   *  the same reason: every re-placement has to answer it again. */
-  /** @type {"above" | "below"} */
-  let side = "above";
+  /** Whether the anchor is a selection made by touch, kept with it for the
+   *  same reason: every re-placement has to answer it again. */
+  let onTouch = false;
   let editing = false;
   /** Whether the second layer is unfolded. Folded again for every new phrase. */
   let unfolded = false;
@@ -1031,18 +1036,41 @@ export function createTooltip({ onAction }) {
     host.style.setProperty("visibility", "hidden", "important");
     host.style.setProperty("top", "0px", "important");
     bubble.style.left = "0px";
+    // Every placement starts over from the stylesheet's own idea of the
+    // second layer's height - a squeeze from the last placement must not
+    // stick to a bubble that has since moved or lost its entries.
+    if (entriesElement !== null) entriesElement.style.maxHeight = "";
 
-    const size = bubble.getBoundingClientRect();
-    const spot = placement({
-      anchor,
-      size,
-      viewport: {
-        width: document.documentElement.clientWidth,
-        height: document.documentElement.clientHeight,
-      },
-      folded: foldedHeight(),
-      prefer: side,
-    });
+    const viewport = {
+      width: document.documentElement.clientWidth,
+      height: document.documentElement.clientHeight,
+    };
+    let size = bubble.getBoundingClientRect();
+    const folded = foldedHeight();
+
+    // The second layer gives way before the bubble covers anything (D79): a
+    // long dictionary entry would otherwise grow the bubble past the room
+    // beside the phrase, and the fallback would put it over the very word it
+    // is about. Squeezed to what the roomier side of the phrase can hold and
+    // no further than readable - whatever still does not fit is the clamp's
+    // business, as always.
+    if (entriesElement !== null && !entriesElement.hidden) {
+      const entriesHeight = entriesElement.clientHeight;
+      if (entriesHeight > MIN_ENTRIES_HEIGHT) {
+        const gap = onTouch ? SYSTEM_GAP : GAP;
+        const room = Math.max(
+          anchor.top - gap - VIEWPORT_MARGIN,
+          viewport.height - VIEWPORT_MARGIN - (anchor.bottom + gap),
+        );
+        const overflow = Math.ceil(size.height + folded - room);
+        if (overflow > 0) {
+          entriesElement.style.maxHeight = `${Math.max(MIN_ENTRIES_HEIGHT, entriesHeight - overflow)}px`;
+          size = bubble.getBoundingClientRect();
+        }
+      }
+    }
+
+    const spot = placement({ anchor, size, viewport, folded, touch: onTouch });
 
     // The host marks the near edge's line; which way the bubble hangs off it
     // is the stylesheet's business, and it decides the layout too: the row
@@ -1085,10 +1113,10 @@ export function createTooltip({ onAction }) {
   }
 
   return {
-    show({ anchor: rect, variant, body, tone = "normal", actions = [], prefer = "above" }) {
+    show({ anchor: rect, variant, body, tone = "normal", actions = [], touch = false }) {
       build();
       anchor = rect;
-      side = prefer;
+      onTouch = touch;
       editing = false;
       if (bubble !== null) {
         bubble.dataset["variant"] = variant;
