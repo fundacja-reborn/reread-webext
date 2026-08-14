@@ -518,11 +518,12 @@ function libraryRow(meta) {
 }
 
 /**
- * The row's Delete button asking its question, and taking it back. Arming is
- * only ever one button deep: arming one disarms the other, and a press, a
- * focus or an Escape anywhere else stands the armed one down - deliberately
- * no timer, because a button that changes back by itself under a slow finger
- * is how the wrong article gets deleted.
+ * A Delete button asking its question, and taking it back - the rows' Delete
+ * and the article's own share the one rule. Arming is only ever one button
+ * deep: arming one disarms the other, and a press, a focus or an Escape
+ * anywhere else stands the armed one down - deliberately no timer, because a
+ * button that changes back by itself under a slow finger is how the wrong
+ * article gets deleted.
  */
 
 /**
@@ -534,7 +535,7 @@ function deleteTitle(button) {
 }
 
 function armedDelete() {
-  const armed = libraryRows?.querySelector(".library-delete[data-armed]");
+  const armed = document.querySelector("button[data-armed]");
   return armed instanceof HTMLButtonElement ? armed : null;
 }
 
@@ -542,6 +543,15 @@ function disarmDelete() {
   const armed = armedDelete();
   if (armed === null) return;
   armed.removeAttribute("data-armed");
+  if (armed === removeButton) {
+    // The article's own Delete speaks for itself at rest - one button, one
+    // article - so standing down also takes the armed aria-label and the
+    // held width with it.
+    armed.style.removeProperty("min-width");
+    armed.textContent = t("reader_delete");
+    armed.removeAttribute("aria-label");
+    return;
+  }
   armed.textContent = t("action_delete");
   armed.setAttribute("aria-label", t("reader_delete_aria", deleteTitle(armed)));
 }
@@ -716,6 +726,8 @@ async function refreshActions() {
   if (removeButton !== null) {
     removeButton.hidden = target.origin !== "saved";
     removeButton.removeAttribute("data-armed");
+    removeButton.removeAttribute("aria-label");
+    removeButton.style.removeProperty("min-width");
     removeButton.textContent = t("reader_delete");
   }
 
@@ -768,15 +780,27 @@ async function onKeepPress() {
  * Delete a saved article from its own view - two presses on the same spot,
  * because this copy is the only copy and offline there is no getting it back.
  * The question is asked by changing the text, not by a dialog or an undo
- * timer: both are flashes on e-ink, and neither is more honest.
+ * timer: both are flashes on e-ink, and neither is more honest. The same
+ * armed state as the rows' Delete, so the same rules stand it down.
  */
 async function onRemovePress() {
   const target = shown;
   if (target === null || target.origin !== "saved" || removeButton === null) return;
 
   if (!removeButton.hasAttribute("data-armed")) {
+    disarmDelete();
+    // The question must not shrink the target: "Sure?" is shorter than the
+    // verb in every catalogue, and a button that contracts under the finger
+    // turns the second press into a miss that disarms it. Held as min-width,
+    // anchored on the left edge the row aligns to, so a longer question could
+    // still only grow rightward.
+    removeButton.style.minWidth = `${removeButton.offsetWidth}px`;
     removeButton.setAttribute("data-armed", "");
     removeButton.textContent = t("reader_delete_confirm");
+    removeButton.setAttribute(
+      "aria-label",
+      t("reader_delete_confirm_aria", titleElement?.textContent ?? ""),
+    );
     return;
   }
 
@@ -944,10 +968,11 @@ libraryRows?.addEventListener("click", (event) => {
   void openSaved(url);
 });
 
-// The armed Delete stands down at any step away from it - a press elsewhere,
-// focus moving on, Escape - and never on a clock. `pointerdown` rather than
-// `click` so that the press that arms another row's Delete finds the previous
-// one already disarmed when its own click handler runs.
+// The armed Delete - a row's or the article's - stands down at any step away
+// from it: a press elsewhere, focus moving on, Escape, and never on a clock.
+// `pointerdown` rather than `click` so that the press that arms another
+// Delete finds the previous one already disarmed when its own click handler
+// runs.
 document.addEventListener("pointerdown", (event) => {
   const armed = armedDelete();
   if (armed === null) return;
@@ -959,7 +984,7 @@ document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") disarmDelete();
 });
 
-libraryRows?.addEventListener("focusout", (event) => {
+document.addEventListener("focusout", (event) => {
   const armed = armedDelete();
   if (armed !== null && event.target === armed && event.relatedTarget !== armed) disarmDelete();
 });

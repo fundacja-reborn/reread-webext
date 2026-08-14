@@ -105,20 +105,22 @@
         </div>
         <!-- The offline promise, folded behind one line the way the phrases
              page folds its intro: there to unfold on the first visit, quiet
-             on every one after. -->
-        <details class="fold-line">
-          <summary data-i18n="reader_how_title">How it works</summary>
-          <p class="hint" data-i18n="reader_library_note">
-            Everything here is a copy stored on this device - it opens without a connection and
-            stays even if the original page goes away.
-          </p>
-        </details>
-        <!-- One line of tools: the filter grows, the two transfer buttons
-             follow - up here rather than under the list, because the list's
-             height turns with its pages and buttons under it would wander.
-             On a narrow screen the line wraps; same HTML, the stylesheet
-             decides. -->
-        <div class="toolbar">
+             on every one after. Its line ends in a quiet anchor: the transfer
+             section lives under the list, and this link is how it is found
+             without scrolling past fifty rows. -->
+        <div class="fold-row">
+          <details class="fold-line">
+            <summary data-i18n="reader_how_title">How it works</summary>
+            <p class="hint" data-i18n="reader_library_note">
+              Everything here is a copy stored on this device - it opens without a connection and
+              stays even if the original page goes away.
+            </p>
+          </details>
+          <a href="#transfer" data-i18n="transfer_heading">Import and export</a>
+        </div>
+        <!-- The filter stands alone above the list it narrows; the transfer
+             tools moved into their own section below the pager. -->
+        <div class="filter-line">
           <label for="library-filter" class="visually-hidden" data-i18n="reader_filter_label">
             Filter the reading list
           </label>
@@ -128,32 +130,7 @@
             placeholder="Filter by title or site"
             data-i18n-placeholder="reader_filter_placeholder"
           />
-          <button type="button" id="library-import" data-i18n="action_import">Import</button>
-          <button type="button" id="library-export" data-i18n="action_export">Export</button>
         </div>
-        <details class="fold-line">
-          <summary data-i18n="reader_format_title">File format</summary>
-          <p class="hint" data-i18n="reader_transfer_note">
-            One .json file holding every saved article - a backup, or the way to move them to
-            another browser. Importing adds articles this list is missing and never touches a
-            saved one.
-          </p>
-        </details>
-        <input type="file" id="library-import-file" accept=".json,application/json" hidden />
-        <!--
-          The moment of consent: what the picked file holds, quoted before
-          anything is written - and import only ever adds; the file's rules
-          live in `lib/store/articles-file.js`.
-        -->
-        <div id="library-import-confirm" class="import-confirm" hidden>
-          <p id="library-import-summary"></p>
-          <ul id="library-import-sample" class="import-sample"></ul>
-          <p class="transfer">
-            <button type="button" id="library-import-run" data-i18n="action_import">Import</button>
-            <button type="button" id="library-import-cancel" data-i18n="action_cancel">Cancel</button>
-          </p>
-        </div>
-        <p id="library-transfer-status" class="status report" role="status"></p>
         <p class="hint" id="library-count" hidden></p>
         <div id="library-empty" class="empty" hidden></div>
         <ul id="library-rows" class="library-rows"></ul>
@@ -162,22 +139,67 @@
           <span class="pager-label" id="library-page-label"></span>
           <button type="button" id="library-next" data-i18n="pager_next">Next</button>
         </nav>
+        <!-- Import and export, after the list the way the acts themselves come
+             after the reading: visiting them is a decision, not a toll on the
+             way to the rows, and the anchor above is the short way here. -->
+        <section id="transfer" class="transfer-section" aria-labelledby="transfer-title">
+          <h2 id="transfer-title" data-i18n="transfer_heading">Import and export</h2>
+          <p class="transfer">
+            <button type="button" id="library-import" data-i18n="action_import">Import</button>
+            <button type="button" id="library-export" data-i18n="action_export">Export</button>
+          </p>
+          <details class="fold-line">
+            <summary data-i18n="reader_format_title">File format</summary>
+            <p class="hint" data-i18n="reader_transfer_note">
+              One .json file holding every saved article - a backup, or the way to move them to
+              another browser. Importing adds articles this list is missing and never touches a
+              saved one.
+            </p>
+          </details>
+          <input type="file" id="library-import-file" accept=".json,application/json" hidden />
+          <!--
+            The moment of consent: what the picked file holds, quoted before
+            anything is written - and import only ever adds; the file's rules
+            live in `lib/store/articles-file.js`.
+          -->
+          <div id="library-import-confirm" class="import-confirm" hidden>
+            <p id="library-import-summary"></p>
+            <ul id="library-import-sample" class="import-sample"></ul>
+            <p class="transfer">
+              <button type="button" id="library-import-run" data-i18n="action_import">Import</button>
+              <button type="button" id="library-import-cancel" data-i18n="action_cancel">Cancel</button>
+            </p>
+          </div>
+          <p id="library-transfer-status" class="status report" role="status"></p>
+        </section>
       </section>
 
       <!--
         What can be done with the article on screen. Outside the article
         element on purpose: the learning code scans everything under it, and
         these labels are interface, not text anybody is studying.
+
+        Two lines, two kinds of act: the way back to the list, dressed as the
+        link it behaves as, and under it the acts on this article as quiet
+        buttons. The arrow is decoration - hidden from a screen reader, which
+        hears the list's one name alone.
       -->
       <div id="actions" class="reader-actions" hidden>
-        <button id="to-library" type="button" data-i18n="reading_list" hidden>Offline reading list</button>
-        <button id="keep" type="button" aria-pressed="false" data-i18n="reader_save" hidden>
-          Save to reading list
-        </button>
-        <button id="remove" type="button" data-i18n="reader_delete" hidden>Delete from reading list</button>
-        <button id="mark-read" type="button" aria-pressed="false" data-i18n="reader_mark_read" hidden>
-          Mark as read
-        </button>
+        <p class="reader-return">
+          <button id="to-library" type="button" hidden>
+            <span aria-hidden="true">←</span>
+            <span data-i18n="reading_list">Offline reading list</span>
+          </button>
+        </p>
+        <div class="article-actions">
+          <button id="keep" type="button" aria-pressed="false" data-i18n="reader_save" hidden>
+            Save to reading list
+          </button>
+          <button id="mark-read" type="button" aria-pressed="false" data-i18n="reader_mark_read" hidden>
+            Mark as read
+          </button>
+          <button id="remove" type="button" data-i18n="reader_delete" hidden>Delete from reading list</button>
+        </div>
       </div>
 
       <article id="article" hidden>

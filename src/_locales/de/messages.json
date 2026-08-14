@@ -106,6 +106,7 @@
   "pager_next": { "message": "Weiter" },
   "action_export": { "message": "Exportieren" },
   "action_import": { "message": "Importieren" },
+  "transfer_heading": { "message": "Import und Export" },
   "vocab_transfer_note": {
     "message": "Eine .tsv-Datei mit zwei Spalten - dasselbe Format schreibt das KOReader-Plugin, und Anki liest es. Der Import ergänzt nur Phrasen, die diesem Paar fehlen; Gespeichertes bleibt unberührt."
   },

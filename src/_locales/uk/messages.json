@@ -120,6 +120,7 @@
   "pager_next": { "message": "Наступна" },
   "action_export": { "message": "Експортувати" },
   "action_import": { "message": "Імпортувати" },
+  "transfer_heading": { "message": "Імпорт та експорт" },
   "vocab_transfer_note": {
     "message": "Файл .tsv із двома колонками - той самий формат пише плагін KOReader, а читає Anki. Імпорт додає лише фрази, яких у цій парі немає; збережених не змінює."
   },
