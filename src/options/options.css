@@ -1,0 +1,482 @@
+/* The settings page: a compact header with a table of contents, settings rows
+   as a grid, and the two catalogues standing in the page's own flow - no box
+   scrolling inside the page. Typography, buttons, notes and statuses lean on
+   assets/page.css, shared by every page this extension owns; everything below
+   is this page's own layout.
+
+   Base styles lay the page out for a narrow screen; the one media query at
+   the end spreads the same HTML out for a desktop. */
+
+/* A touch wider than the shared 44rem: the list rows hold three columns and
+   the extra room goes to the pair names. The tighter top padding is this
+   page's own: with the table of contents and the first-steps card above the
+   rows, the stock padding pushed the models section under a 768px fold. */
+body {
+  max-width: 46rem;
+  padding-top: 1.75rem;
+}
+
+/* Denser prose rhythm for the same reason - this page stacks many short
+   explaining paragraphs, and the default paragraph margins are what stood
+   between the fold and the first section. */
+p.explain {
+  margin: 0.75rem 0;
+}
+
+/* Focus must be findable on every control here - the quiet row buttons erase
+   their resting border, so the browser default cannot be trusted to survive
+   the styling. */
+:is(a, button, select, summary, input):focus-visible {
+  outline: 2px solid var(--page-accent);
+  outline-offset: 2px;
+}
+
+/* Hover feedback eases in; nothing depends on it, and it stops entirely for
+   readers who asked motion to stop. */
+button,
+summary {
+  transition: border-color 120ms ease, background-color 120ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}
+
+/* The clip pattern: real labels for the two filter boxes, read by screen
+   readers, invisible to everyone else. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* --- the header: brand line, title, the table of contents --- */
+
+.brand {
+  margin: 0 0 0.25rem;
+  color: var(--page-muted);
+  font-size: 0.9rem;
+  letter-spacing: 0.04em;
+}
+
+header h1 {
+  margin: 0 0 0.75rem;
+}
+
+/* Plain links in a wrapping line; the dot between them is drawn, not written,
+   so a screen reader hears three links and no punctuation. Each link keeps
+   the touch floor without growing its text. */
+.jump {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 0.6rem;
+  margin: 0.25rem 0 0.5rem;
+}
+
+.jump a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+.jump a:not(:last-child)::after {
+  content: "\00B7" / "";
+  margin-left: 0.6rem;
+  color: var(--page-muted);
+}
+
+/* The anchors' landing pads: a heading flush with the viewport's edge reads
+   as cut off. The margin above sections is a step tighter than the shared
+   default, for the same fold arithmetic as the body padding. */
+h2 {
+  margin-top: 1.5rem;
+  scroll-margin-top: 0.75rem;
+}
+
+/* --- the settings rows: label | control, wrapping where the control needs
+   the width --- */
+
+.rows {
+  border-top: 1px solid var(--page-line);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.25rem 1rem;
+  align-items: center;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--page-line);
+}
+
+/* Labels speak at the page's full color; the notes below them are the quiet
+   ones. The touch floor lives on each row's control (select, button, the
+   toggle line) - a label beside a 44px control needs no height of its own,
+   and the one all-text row may be denser. */
+.row-value {
+  color: var(--page-muted);
+}
+
+.row > :is(select, button, .row-value) {
+  justify-self: end;
+}
+
+.row select {
+  min-height: 44px;
+}
+
+.row button {
+  min-height: 44px;
+  padding: 0.35rem 1rem;
+}
+
+/* An explanation under the row's own line, inside the same borders, so it can
+   never drift away from what it explains - and outside the toggle's label, so
+   brushing against a paragraph on a phone never flips a switch. */
+.row .row-note {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--page-muted);
+  font-size: 0.9rem;
+}
+
+/* The rows whose control wants the whole width on a phone: label above,
+   control below. The media query at the end puts them back on one line. */
+.row-stack {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.row-stack > :is(select, .row-value) {
+  justify-self: stretch;
+}
+
+/* The whole first line is one label: text left, checkbox right, and every
+   point between them flips the switch too. */
+.row-toggle {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 44px;
+  cursor: pointer;
+}
+
+.row-toggle input {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+/* --- the refresh line: a quiet button and the list's date --- */
+
+/* The button keeps the shared secondary look on purpose: refreshing is the
+   rare act of this section, and the accent stays with what the section is
+   for. On a narrow screen the date wraps below the button. */
+.list-refresh {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.9rem;
+  margin: 1rem 0 0;
+}
+
+.list-refresh button {
+  min-height: 44px;
+  padding: 0.35rem 1rem;
+}
+
+.list-dated {
+  margin: 0;
+  color: var(--page-muted);
+  font-size: 0.9rem;
+}
+
+.list-dated strong {
+  color: var(--page-fg);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- the filter boxes --- */
+
+.model-filter {
+  margin: 1rem 0 0;
+}
+
+.model-filter input {
+  width: 100%;
+  min-height: 44px;
+  font: inherit;
+  padding: 0.35rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid var(--page-line);
+  background: transparent;
+  color: var(--page-fg);
+}
+
+/* --- the lists: rows in the page's own flow, no box scrolling inside the
+   page. Name | size | action on a desktop; on a phone the name takes the
+   first line and the rest right-aligns below it. --- */
+
+.models {
+  margin: 0.5rem 0 0;
+  border-top: 1px solid var(--page-line);
+}
+
+.model {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 0.25rem 0.75rem;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--page-line);
+}
+
+.model-name {
+  grid-column: 1 / -1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.model-meta {
+  grid-column: 2;
+  justify-self: end;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.25rem 0.75rem;
+  color: var(--page-muted);
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+
+.model-act {
+  grid-column: 3;
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.model-act button {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0.35rem 0.9rem;
+}
+
+.badge {
+  margin-left: 0.6rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  border: 1px solid var(--page-line);
+  color: var(--page-muted);
+  font-size: 0.75rem;
+  /* A pill that wraps mid-text stops reading as a pill. */
+  white-space: nowrap;
+}
+
+/* A stored dictionary's own name, under the pair: what tells two dictionaries
+   of one pair apart. A book's name can be long, and it may wrap. */
+.dictionary-title {
+  display: block;
+  color: var(--page-muted);
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+
+/* Delete asks with a second press, so it dresses down at rest: no border,
+   muted, always visible - touch and e-ink have no hover to reveal it with.
+   Nowrap so "Sure?" grows leftward from a fixed right edge and the second
+   press lands where the first one did. */
+.model-delete {
+  border-color: transparent;
+  color: var(--page-muted);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.model-delete:hover,
+.model-delete:focus-visible {
+  border-color: var(--page-line);
+  background: color-mix(in srgb, var(--page-fg) 6%, transparent);
+  color: var(--page-fg);
+}
+
+/* The armed state: the accent frames and fills the asking button while the
+   text keeps the page's own color - readable in both themes. Last, so it
+   outranks the quiet hover above. */
+.model-delete[data-armed],
+.model-delete[data-armed]:hover,
+.model-delete[data-armed]:focus-visible {
+  border-color: var(--page-accent);
+  background: color-mix(in srgb, var(--page-accent) 12%, transparent);
+  color: var(--page-fg);
+}
+
+/* The bar rides the meta cell; on a phone that cell has the second line to
+   itself, so the bar may take what a thumb needs. */
+.model-progress {
+  width: clamp(6rem, 40vw, 12rem);
+  height: 0.5rem;
+  accent-color: var(--page-accent);
+}
+
+/* The one visible move of a collapsed list: a full-width quiet row saying how
+   much stands folded under it. */
+.show-all {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  margin: 0.75rem 0 0;
+  padding: 0.35rem 1rem;
+}
+
+/* --- the attribution fold inside a stored dictionary's row --- */
+
+.model-about {
+  grid-column: 1 / -1;
+}
+
+.model-about summary {
+  /* The block padding is the touch target: 0.9rem text alone stands 39px.
+     Default display, because summary loses its fold marker without it. */
+  padding: 0.7rem 0;
+  cursor: pointer;
+  color: var(--page-muted);
+  font-size: 0.9rem;
+}
+
+/* Who made the dictionary, in its own words: the line breaks are the ones its
+   description had - a licence written as four lines reads as four lines. */
+.dictionary-credit {
+  margin: 0 0 0.35rem;
+  color: var(--page-muted);
+  font-size: 0.85rem;
+  line-height: 1.45;
+  white-space: pre-line;
+}
+
+/* --- the folded by-hand sections --- */
+
+.fold {
+  margin: 2rem 0;
+}
+
+.fold summary {
+  padding: 0.55rem 0;
+  cursor: pointer;
+}
+
+/* The heading keeps its size but sits on the marker's line, and the page
+   rhythm it usually brings moves onto the fold itself. */
+.fold summary h3 {
+  display: inline;
+  margin: 0;
+}
+
+.files {
+  color: var(--page-muted);
+  line-height: 1.9;
+}
+
+.files em {
+  color: var(--page-accent);
+  font-style: normal;
+}
+
+.inline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.inline select {
+  min-height: 44px;
+}
+
+.inline button {
+  min-height: 44px;
+  padding: 0.35rem 1rem;
+}
+
+/* --- the fresh-install signpost --- */
+
+/* The note's frame, the page's full color - it is instructions to act on, not
+   an aside. Open while a model or a dictionary is missing; with both stored
+   it folds to its heading and stays, one line of the note's frame, there to
+   reread. */
+.first-steps {
+  margin: 1rem 0 1.25rem;
+  color: var(--page-fg);
+}
+
+.first-steps summary {
+  padding: 0.55rem 0;
+  cursor: pointer;
+}
+
+.first-steps summary h2 {
+  /* The signpost speaks at the card's volume, not a section's - and sits on
+     the marker's line, the way the by-hand folds' headings do. */
+  display: inline;
+  font-size: 1.05rem;
+  margin: 0;
+}
+
+.first-steps p {
+  margin: 0.35rem 0;
+}
+
+.first-steps ol {
+  margin: 0.35rem 0;
+  padding-left: 1.4rem;
+}
+
+.first-steps li {
+  margin: 0.3rem 0;
+}
+
+/* Every summary marker on this page speaks at the same volume. */
+summary::marker {
+  color: var(--page-muted);
+}
+
+/* --- the colophon --- */
+
+.page-end {
+  margin-top: 3rem;
+  color: var(--page-muted);
+  font-size: 0.85rem;
+}
+
+.page-end p {
+  margin: 0;
+}
+
+/* --- one breakpoint: the same HTML, spread out for a desktop --- */
+
+@media (min-width: 600px) {
+  /* The stacked rows return to one line: label left, control right. */
+  .row-stack {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .row-stack > :is(select, .row-value) {
+    justify-self: end;
+  }
+
+  /* List rows on one line: name | size | action. */
+  .model-name {
+    grid-column: 1;
+  }
+}

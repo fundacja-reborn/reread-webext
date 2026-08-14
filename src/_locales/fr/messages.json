@@ -415,11 +415,8 @@
   "options_first_steps_intro": {
     "message": "Rien ne se traduit encore - le modèle qui s'en chargerait n'est pas sur cet appareil. La mise en place prend une minute :"
   },
-  "options_first_steps_pair": {
-    "message": "Réglez la paire de langues juste en dessous : la langue que vous lisez, et la langue vers laquelle elle est traduite."
-  },
   "options_first_steps_model": {
-    "message": "Sous « Modèles de traduction », appuyez sur « Télécharger » à côté de cette paire. Le modèle est enregistré sur cet appareil et traduit désormais hors ligne."
+    "message": "Sous « Modèles de traduction », trouvez la paire de langues qu'il vous faut (le filtre est le plus rapide) et appuyez sur « Télécharger ». Le modèle est enregistré sur cet appareil et traduit désormais hors ligne - et le premier modèle règle de lui-même la paire de langues ci-dessus."
   },
   "options_first_steps_dictionary": {
     "message": "Le deuxième appui en vaut la peine : un dictionnaire pour la même paire, sous « Dictionnaires » - les mots isolés reçoivent alors des réponses plus complètes qu'une traduction seule."
@@ -427,9 +424,11 @@
   "options_first_steps_pin": {
     "message": "Enfin, épinglez re/read à la barre d'outils - d'ici là, son bouton se cache derrière l'icône en forme de pièce de puzzle. Derrière le bouton : le lecteur, la liste de lecture hors ligne, vos phrases enregistrées et un interrupteur pour le site où vous êtes."
   },
-  "options_version": { "message": "Version" },
+  "options_sections_aria": { "message": "Sections de cette page" },
   "options_engine": { "message": "Moteur" },
   "options_engine_value": { "message": "Bergamot, dans le paquet - traduit hors ligne" },
+  "options_pair_hint": { "message": "Les paires proposées sont celles dont le modèle est sur cet appareil - pour une autre paire, téléchargez son modèle sous" },
+  "options_pair_none": { "message": "Pas encore de modèle - téléchargez-en un ci-dessous" },
   "options_reader_only": { "message": "Seulement dans le lecteur" },
   "options_reader_only_hint": {
     "message": "Quand c'est activé, sélectionner une phrase ou un mot sur une page ordinaire ne propose qu'une chose : ouvrir la page dans le lecteur. La traduction, l'enregistrement et le soulignement se font là (plus clair et plus lisible). Sur Android, l'option est activée par défaut."
@@ -439,12 +438,14 @@
     "message": "Les modèles ci-dessous sont construits et publiés par Mozilla - les mêmes modèles avec lesquels Firefox lui-même traduit les pages. Pour que re/read fonctionne, téléchargez le modèle des paires de langues que vous voulez traduire (par exemple en -> pl)."
   },
   "options_update_list": { "message": "Mettre à jour la liste" },
-  "options_list_from": { "message": "- la liste des modèles de traduction ci-dessous date du" },
-  "options_dict_list_from": { "message": "- la liste des dictionnaires ci-dessous date du" },
-  "options_list_refresh_hint": { "message": "Cliquez sur le bouton pour récupérer la liste actuelle." },
+  "options_list_dated": { "message": "Liste du" },
   "options_filter_placeholder": { "message": "Filtrer par langue ou par code" },
-  "options_filter_models_aria": { "message": "Filtrer la liste des modèles de traduction" },
-  "options_filter_dictionaries_aria": { "message": "Filtrer la liste des dictionnaires" },
+  "options_filter_models_label": { "message": "Filtrer la liste des modèles de traduction" },
+  "options_filter_dictionaries_label": { "message": "Filtrer la liste des dictionnaires" },
+  "options_show_all": {
+    "message": "Tout afficher ($COUNT$)",
+    "placeholders": { "count": { "content": "$1" } }
+  },
   "options_model_note_from": { "message": "Les modèles sont téléchargés depuis" },
   "options_model_note_rest": {
     "message": "- c'est là que Mozilla les publie. Quand vous mettez la liste à jour, rien sur vous n'est envoyé - la requête ne récupère que la liste fraîche des modèles. Cet hôte et celui du catalogue de dictionnaires plus bas sont les deux seuls endroits que cette extension puisse jamais contacter - et seulement quand vous cliquez sciemment pour rafraîchir une liste ou télécharger un modèle ou un dictionnaire."
@@ -493,6 +494,20 @@
   },
 
   "options_badge_reading": { "message": "ce que vous lisez" },
+  "options_delete_confirm": { "message": "Sûr ?" },
+  "options_delete_model_aria": {
+    "message": "Supprimer le modèle $PAIR$",
+    "placeholders": { "pair": { "content": "$1" } }
+  },
+  "options_delete_dictionary_aria": {
+    "message": "Supprimer le dictionnaire $NAME$",
+    "placeholders": { "name": { "content": "$1" } }
+  },
+  "options_delete_confirm_aria": {
+    "message": "Confirmer la suppression : $NAME$",
+    "placeholders": { "name": { "content": "$1" } }
+  },
+  "options_about_dictionary": { "message": "À propos de ce dictionnaire" },
   "options_size_here": {
     "message": "$SIZE$ ici",
     "placeholders": { "size": { "content": "$1" } }

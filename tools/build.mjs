@@ -36,6 +36,7 @@ const ENTRY_POINTS = [
  */
 const STATIC_FILES = [
   "options/options.html",
+  "options/options.css",
   "popup/index.html",
   "popup/popup.css",
   "reader/reader.html",

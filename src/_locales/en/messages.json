@@ -411,11 +411,8 @@
     "message": "Nothing translates yet - the model that would do it is not on this device. Setting up takes a minute:",
     "description": "Opens the first-steps block, shown on the settings page only while no model is stored."
   },
-  "options_first_steps_pair": {
-    "message": "Set the language pair just below: the language you read, and the language it is translated into."
-  },
   "options_first_steps_model": {
-    "message": "Under \"Translation models\", press \"Download\" next to that pair. The model is stored on this device and translates offline from then on.",
+    "message": "Under \"Translation models\", find the language pair you need (the filter finds it fastest) and press \"Download\". The model is stored on this device and translates offline from then on - and the first model sets the language pair above by itself.",
     "description": "Quotes the options_models_heading section name and the action_download button - each language quotes its own wording of those keys, so the three must move together."
   },
   "options_first_steps_dictionary": {
@@ -426,9 +423,20 @@
     "message": "Last, pin re/read to the toolbar - until you do, its button sits behind the puzzle-piece icon. Behind the button: the reader, the offline reading list, your saved phrases and a switch for the site you are on.",
     "description": "Hidden on Android, where there is no toolbar to pin anything to."
   },
-  "options_version": { "message": "Version" },
+  "options_sections_aria": {
+    "message": "Sections of this page",
+    "description": "Accessible name of the row of anchor links under the intro."
+  },
   "options_engine": { "message": "Engine" },
   "options_engine_value": { "message": "Bergamot, inside the package - translates offline" },
+  "options_pair_hint": {
+    "message": "The pairs offered are those with a model on this device - for another pair, download its model under",
+    "description": "Followed by an anchor link wearing the options_models_heading text, then a plain full stop. No part starts or ends with whitespace."
+  },
+  "options_pair_none": {
+    "message": "No model yet - download one below",
+    "description": "The only line of the pair select, disabled, while no model is stored on the device."
+  },
   "options_reader_only": { "message": "Only in the reader" },
   "options_reader_only_hint": {
     "message": "With this on, selecting a phrase or a word on an ordinary page offers one thing: open the page in the reader. Translating, saving and underlining happen there (cleaner and easier to read). On Android the option is on by default."
@@ -441,21 +449,18 @@
     "message": "Update the list",
     "description": "The button that fetches today's list of models - the one network request no download makes."
   },
-  "options_list_from": {
-    "message": "- the list of translation models below is from",
-    "description": "Follows the update button; the date stands after this part as its own element, then options_list_refresh_hint. Each part must read on from the last across a plain space - no part starts or ends with whitespace."
-  },
-  "options_dict_list_from": {
-    "message": "- the list of dictionaries below is from",
-    "description": "The dictionary list's twin of options_list_from, under the same rules."
-  },
-  "options_list_refresh_hint": {
-    "message": "Press the button to fetch the current list.",
-    "description": "Shared by the model and the dictionary refresh lines - it must name neither."
+  "options_list_dated": {
+    "message": "List from",
+    "description": "Beside the update button of both catalogues; the date stands after this as its own emphasized element. Must not start or end with whitespace."
   },
   "options_filter_placeholder": { "message": "Filter by language or code" },
-  "options_filter_models_aria": { "message": "Filter the list of translation models" },
-  "options_filter_dictionaries_aria": { "message": "Filter the list of dictionaries" },
+  "options_filter_models_label": { "message": "Filter the list of translation models" },
+  "options_filter_dictionaries_label": { "message": "Filter the list of dictionaries" },
+  "options_show_all": {
+    "message": "Show all ($COUNT$)",
+    "description": "Unfolds a catalogue past its installed rows; the count is the whole list.",
+    "placeholders": { "count": { "content": "$1", "example": "118" } }
+  },
   "options_model_note_from": {
     "message": "Model downloads come from",
     "description": "First half of the note around the host, which stands between the parts as a page element. Each part must read on from the last across a plain space - no part starts or ends with whitespace."
@@ -516,6 +521,28 @@
   },
 
   "options_badge_reading": { "message": "what you are reading" },
+  "options_delete_confirm": {
+    "message": "Sure?",
+    "description": "The armed Delete of a model or dictionary row, asking in place; the second press deletes."
+  },
+  "options_delete_model_aria": {
+    "message": "Delete the $PAIR$ model",
+    "description": "Accessible name of a model row's Delete at rest - a bare \"Delete\" in a list names nothing.",
+    "placeholders": { "pair": { "content": "$1", "example": "English to Polish" } }
+  },
+  "options_delete_dictionary_aria": {
+    "message": "Delete the dictionary $NAME$",
+    "placeholders": { "name": { "content": "$1", "example": "WikDict en-pl" } }
+  },
+  "options_delete_confirm_aria": {
+    "message": "Confirm deletion: $NAME$",
+    "description": "The same button, armed and asking; shared by models (the pair label) and dictionaries (the name).",
+    "placeholders": { "name": { "content": "$1", "example": "English to Polish" } }
+  },
+  "options_about_dictionary": {
+    "message": "About this dictionary",
+    "description": "Summary of the fold holding a stored dictionary's publisher, licence and description."
+  },
   "options_size_here": {
     "message": "$SIZE$ here",
     "placeholders": { "size": { "content": "$1", "example": "40.2 MB" } }

@@ -129,6 +129,80 @@ export function matchesFilter(searchable, query) {
 }
 
 /**
+ * Whether the filter box is asking anything. Whitespace asks nothing: it
+ * matches every row, and a list that unfolds under a stray space would be the
+ * fold deciding by accident.
+ *
+ * @param {string} query as typed
+ * @returns {boolean}
+ */
+export function filterActive(query) {
+  return query.trim().length > 0;
+}
+
+/**
+ * Whether one row of a catalogue is on screen.
+ *
+ * The lists stand folded to what is installed, because that is what somebody
+ * returns to this page for; the hundreds of downloadable rows unfold on
+ * request. A query overrides the fold in both directions - typing searches
+ * the whole list without a press on "Show all", and what it hides it hides
+ * even among the installed.
+ *
+ * @param {{ installed: boolean, matches: boolean, expanded: boolean, query: string }} row
+ * @returns {boolean}
+ */
+export function rowVisible({ installed, matches, expanded, query }) {
+  if (filterActive(query)) return matches;
+  return expanded || installed;
+}
+
+/**
+ * The one control of a folded list: whether "Show all" stands, and the count
+ * it wears. The count is the whole list - the promise of what pressing it
+ * shows, not of what is currently out of sight. Gone while a query runs the
+ * list (the filter already reaches everything) and once everything shows
+ * anyway.
+ *
+ * @param {{ total: number, installedCount: number, expanded: boolean, query: string }} list
+ * @returns {{ shown: boolean, count: number }}
+ */
+export function showAllState({ total, installedCount, expanded, query }) {
+  return { shown: !expanded && !filterActive(query) && total > installedCount, count: total };
+}
+
+/**
+ * What the pair select offers: the pairs whose model is on this device - the
+ * only pairs the engine can serve, and a shorter list than the catalogue's
+ * hundred, which no native dropdown survives. Sorted by label, like every
+ * list on the page.
+ *
+ * The configured pair rides along even with its model gone (deleted, or
+ * configured by hand): a settings page must never disagree with the settings.
+ * Empty means nothing is installed at all - the select then explains itself
+ * with one disabled line instead of offering choices that translate nothing.
+ *
+ * @param {ModelRow[]} rows
+ * @param {{ sourceLang: string, targetLang: string }} reading
+ * @returns {{ pair: string, from: string, to: string }[]}
+ */
+export function pairChoices(rows, reading) {
+  const installed = rows
+    .filter((row) => row.installed !== null)
+    .map((row) => ({ pair: row.pair, from: row.from, to: row.to }));
+  if (installed.length === 0) return [];
+
+  const known = installed.some((row) => row.from === reading.sourceLang && row.to === reading.targetLang);
+  const choices = known
+    ? installed
+    : [
+        { pair: `${reading.sourceLang}${reading.targetLang}`, from: reading.sourceLang, to: reading.targetLang },
+        ...installed,
+      ];
+  return sortByLabel(choices);
+}
+
+/**
  * Which way the first-steps fold should move after a look at the stores.
  *
  * Setting up means two downloads, so the fold stands open while a model or a

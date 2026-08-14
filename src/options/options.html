@@ -2,9 +2,12 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    <!-- On Android this page fills the window, and a page without this meta is
+         laid out at 980px and shrunk to fit. Desktop ignores it. -->
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title data-i18n="options_title">re/read - settings</title>
     <link rel="stylesheet" href="../assets/page.css" />
+    <link rel="stylesheet" href="options.css" />
   </head>
   <body>
     <!-- The English in this file is the fallback: `localizePage` swaps every
@@ -13,8 +16,10 @@
          paragraphs around the dynamic <strong> and <a> elements are split into
          spans, with the separating spaces left between the elements as plain
          text that no language has to carry. -->
-    <h1>re/read</h1>
-    <p class="subtitle" data-i18n="settings">Settings</p>
+    <header>
+      <p class="brand">re/read</p>
+      <h1 data-i18n="settings">Settings</h1>
+    </header>
 
     <!-- The thesis of the whole extension, stated once, where a curious person
          goes looking for it. The notes further down say how each download is
@@ -26,6 +31,15 @@
       dictionary, and updating the lists of models and dictionaries. Always from the two
       addresses written into this package, and nothing else.
     </p>
+
+    <!-- Plain anchor links, one per section below - the page is long and the
+         table of contents is how a phone reaches the far end of it. Not
+         sticky on purpose: pinned elements smear on e-ink at every scroll. -->
+    <nav class="jump" aria-label="Sections of this page" data-i18n-aria-label="options_sections_aria">
+      <a href="#translation-models" data-i18n="options_models_heading">Translation models</a>
+      <a href="#dictionaries" data-i18n="options_dictionaries_heading">Dictionaries</a>
+      <a href="#switched-off-sites" data-i18n="options_disabled_heading">Switched-off sites</a>
+    </nav>
 
     <!-- The signpost for a fresh install: this page is long, and the person
          who just arrived from "no model - open the settings" must not have to
@@ -43,13 +57,10 @@
         takes a minute:
       </p>
       <ol>
-        <li data-i18n="options_first_steps_pair">
-          Set the language pair just below: the language you read, and the language it is
-          translated into.
-        </li>
         <li data-i18n="options_first_steps_model">
-          Under "Translation models", press "Download" next to that pair. The model is stored on
-          this device and translates offline from then on.
+          Under "Translation models", find the language pair you need (the filter finds it
+          fastest) and press "Download". The model is stored on this device and translates
+          offline from then on - and the first model sets the language pair above by itself.
         </li>
         <li data-i18n="options_first_steps_dictionary">
           Worth the second press: a dictionary for the same pair, under "Dictionaries" - single
@@ -63,35 +74,48 @@
       </p>
     </details>
 
-    <dl class="rows">
-      <div class="row"><dt data-i18n="options_version">Version</dt><dd id="version">-</dd></div>
-      <div class="row">
-        <dt><label for="pair" data-i18n="language_pair">Language pair</label></dt>
-        <dd><select id="pair"></select></dd>
+    <div class="rows">
+      <!-- The pair select offers only the pairs whose model is on this device:
+           a pair without one translates nothing, and the full catalogue of a
+           hundred pairs made the select unusable. The line below is the way
+           to the rest; with no model at all the select explains itself with
+           one disabled line. -->
+      <div class="row row-stack">
+        <label class="row-name" for="pair" data-i18n="language_pair">Language pair</label>
+        <select id="pair"></select>
+        <p class="row-note">
+          <span data-i18n="options_pair_hint"
+            >The pairs offered are those with a model on this device - for another pair, download
+            its model under</span
+          >
+          <a href="#translation-models" data-i18n="options_models_heading">Translation models</a>.
+        </p>
       </div>
-      <div class="row">
-        <dt data-i18n="options_engine">Engine</dt>
-        <dd data-i18n="options_engine_value">Bergamot, inside the package - translates offline</dd>
+      <div class="row row-stack">
+        <span class="row-name" data-i18n="options_engine">Engine</span>
+        <span class="row-value" data-i18n="options_engine_value">Bergamot, inside the package - translates offline</span>
       </div>
-      <!-- The one row that needs a sentence of explanation carries it inside
-           its own borders: a second dd wrapping below the label and the
-           switch, so the note can never drift away from what it explains. -->
-      <div class="row row-wrap">
-        <dt><label for="reader-only" data-i18n="options_reader_only">Only in the reader</label></dt>
-        <dd><input type="checkbox" id="reader-only" /></dd>
-        <dd class="row-note" data-i18n="options_reader_only_hint">
+      <!-- The whole first line is the label, so a press anywhere on it flips
+           the switch; the note keeps its own, unclickable line below - a
+           paragraph is too easy to brush against on a phone. -->
+      <div class="row">
+        <label class="row-toggle">
+          <span class="row-name" data-i18n="options_reader_only">Only in the reader</span>
+          <input type="checkbox" id="reader-only" />
+        </label>
+        <p class="row-note" data-i18n="options_reader_only_hint">
           With this on, selecting a phrase or a word on an ordinary page offers one thing: open
           the page in the reader. Translating, saving and underlining happen there (cleaner and
           easier to read). On Android the option is on by default.
-        </dd>
+        </p>
       </div>
       <div class="row">
-        <dt data-i18n="saved_phrases">Saved phrases</dt>
-        <dd><button type="button" id="open-vocabulary" data-i18n="action_open">Open</button></dd>
+        <span class="row-name" data-i18n="saved_phrases">Saved phrases</span>
+        <button type="button" id="open-vocabulary" data-i18n="action_open">Open</button>
       </div>
-    </dl>
+    </div>
 
-    <h2 data-i18n="options_models_heading">Translation models</h2>
+    <h2 id="translation-models" data-i18n="options_models_heading">Translation models</h2>
 
     <p class="explain" data-i18n="options_models_intro">
       The models below are built and published by Mozilla - the same models Firefox itself
@@ -101,42 +125,42 @@
 
     <!-- The one fetch this section can make, and the press that makes it: the
          list below refreshes only here, never by itself - the date says how
-         old what stands under the filter is. The plain wrapper span keeps the
-         sentence in its own column beside the button; it carries no data-i18n
-         itself, so the marked elements inside still hold text only. -->
-    <p class="model-refresh">
+         old what stands under the filter is. A quiet button on purpose: the
+         rare act must not outshine the downloads below. -->
+    <div class="list-refresh">
       <button type="button" id="refresh-models" data-i18n="options_update_list">
         Update the list
       </button>
-      <span class="model-refresh-text explain">
-        <span data-i18n="options_list_from"
-          >- the list of translation models below is from</span
-        >
-        <strong id="model-checked">-</strong>.
-        <span data-i18n="options_list_refresh_hint"
-          >Press the button to fetch the current list.</span
-        >
-      </span>
-    </p>
+      <p class="list-dated">
+        <span data-i18n="options_list_dated">List from</span>
+        <strong id="model-checked">-</strong>
+      </p>
+    </div>
 
     <p id="refresh-status" class="status" role="status"></p>
 
     <p class="model-filter">
+      <label class="visually-hidden" for="model-filter" data-i18n="options_filter_models_label"
+        >Filter the list of translation models</label
+      >
       <input
         type="search"
         id="model-filter"
         placeholder="Filter by language or code"
         data-i18n-placeholder="options_filter_placeholder"
-        aria-label="Filter the list of translation models"
-        data-i18n-aria-label="options_filter_models_aria"
       />
     </p>
 
-    <div id="models" class="models models-frame"></div>
+    <div id="models" class="models"></div>
+
+    <!-- Folded length, not a scrolled box: the list stands in the page's own
+         flow, installed rows first, and this button unfolds the rest. Typing
+         in the filter above searches the whole list either way. -->
+    <button type="button" id="models-show-all" class="show-all" hidden></button>
 
     <p id="model-status" class="status" role="status"></p>
 
-    <p class="note footnote">
+    <p class="note">
       <!-- The host is also a door: the href becomes the address of the very
            index the snapshot was taken from, so a reader can look at the
            source with their own eyes. Their press, their navigation - the
@@ -153,14 +177,16 @@
 
     <!-- Folded shut by default: the by-hand path is the escape hatch, not the
          road, and standing open right under the list it read as a second,
-         competing way to get a model. The summary says when to open it. -->
+         competing way to get a model. Everything it has to say, its one-line
+         invitation included, waits inside the fold. -->
     <details class="fold">
       <summary>
         <h3 data-i18n="options_add_model_heading">Add a model from files</h3>
-        <span class="fold-hint" data-i18n="options_add_model_summary"
-          >To add by hand a model the list above does not offer, load its files here.</span
-        >
       </summary>
+
+      <p class="explain" data-i18n="options_add_model_summary">
+        To add by hand a model the list above does not offer, load its files here.
+      </p>
 
       <p class="explain" data-i18n="options_add_model_intro">
         Pick the three files of one direction and they are stored locally. Gzipped files are
@@ -187,7 +213,7 @@
       </p>
     </details>
 
-    <h2 data-i18n="options_dictionaries_heading">Dictionaries</h2>
+    <h2 id="dictionaries" data-i18n="options_dictionaries_heading">Dictionaries</h2>
 
     <p class="explain" data-i18n="options_dictionaries_intro">
       Download a dictionary (or a few) to check the different meanings a selected word can have -
@@ -197,39 +223,40 @@
     <!-- The dictionary list's twin of the model refresh line: the one fetch
          this section can make besides a download, and the press that makes
          it. The date says how old what stands under the filter is. -->
-    <p class="model-refresh">
+    <div class="list-refresh">
       <button type="button" id="refresh-dictionaries" data-i18n="options_update_list">
         Update the list
       </button>
-      <span class="model-refresh-text explain">
-        <span data-i18n="options_dict_list_from"
-          >- the list of dictionaries below is from</span
-        >
-        <strong id="dictionary-checked">-</strong>.
-        <span data-i18n="options_list_refresh_hint"
-          >Press the button to fetch the current list.</span
-        >
-      </span>
-    </p>
+      <p class="list-dated">
+        <span data-i18n="options_list_dated">List from</span>
+        <strong id="dictionary-checked">-</strong>
+      </p>
+    </div>
 
     <p id="dictionary-refresh-status" class="status" role="status"></p>
 
     <p class="model-filter">
+      <label
+        class="visually-hidden"
+        for="dictionary-filter"
+        data-i18n="options_filter_dictionaries_label"
+        >Filter the list of dictionaries</label
+      >
       <input
         type="search"
         id="dictionary-filter"
         placeholder="Filter by language or code"
         data-i18n-placeholder="options_filter_placeholder"
-        aria-label="Filter the list of dictionaries"
-        data-i18n-aria-label="options_filter_dictionaries_aria"
       />
     </p>
 
-    <div id="dictionary-catalog" class="models models-frame"></div>
+    <div id="dictionary-catalog" class="models"></div>
+
+    <button type="button" id="dictionaries-show-all" class="show-all" hidden></button>
 
     <p id="dictionary-status" class="status" role="status"></p>
 
-    <p class="note footnote">
+    <p class="note">
       <span data-i18n="options_dictionary_note_from">Dictionary downloads come from</span>
       <a id="dictionary-host" target="_blank" rel="noopener">-</a>
       <span data-i18n="options_dictionary_note_rest"
@@ -243,11 +270,12 @@
     <details class="fold">
       <summary>
         <h3 data-i18n="options_add_dictionary_heading">Add a dictionary from files</h3>
-        <span class="fold-hint" data-i18n="options_add_dictionary_summary"
-          >To add a dictionary from your own files - one from an e-reader works as it is - load
-          them here.</span
-        >
       </summary>
+
+      <p class="explain" data-i18n="options_add_dictionary_summary">
+        To add a dictionary from your own files - one from an e-reader works as it is - load
+        them here.
+      </p>
 
       <p class="explain">
         <span data-i18n="options_stardict_intro">Dictionaries are read in the</span>
@@ -296,7 +324,7 @@
       </p>
     </details>
 
-    <h2 data-i18n="options_disabled_heading">Switched-off sites</h2>
+    <h2 id="switched-off-sites" data-i18n="options_disabled_heading">Switched-off sites</h2>
 
     <p class="explain" data-i18n="options_disabled_intro">
       Sites where re/read stays off - no underlines, no bubble, nothing running. The switch in
@@ -305,6 +333,12 @@
     </p>
 
     <div id="disabled-hosts" class="models"></div>
+
+    <!-- A version line is metadata, not a setting: it closes the page the way
+         a colophon closes a book. The brand needs no catalogue. -->
+    <footer class="page-end">
+      <p>re/read <span id="version">-</span></p>
+    </footer>
 
     <script src="options.js" defer></script>
   </body>
