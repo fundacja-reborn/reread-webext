@@ -52,10 +52,10 @@ describe("madeSelection", () => {
 
 describe("keeping", () => {
   /**
-   * @param {{ normalized?: string, gloss?: string, findable?: boolean }} phrase
+   * @param {{ normalized?: string, gloss?: string, findable?: boolean, deliberate?: boolean }} phrase
    */
-  const answer = ({ normalized = "ocean", gloss = "ocean", findable = true }) =>
-    keeping({ normalized, gloss, findable });
+  const answer = ({ normalized = "ocean", gloss = "ocean", findable = true, deliberate = true }) =>
+    keeping({ normalized, gloss, findable, deliberate });
 
   it("keeps a phrase of four words or fewer without being asked", () => {
     assert.equal(answer({ normalized: "ocean" }), "automatic");
@@ -84,5 +84,26 @@ describe("keeping", () => {
   it("keeps nothing when there is no key or no translation", () => {
     assert.equal(answer({ normalized: "" }), "none");
     assert.equal(answer({ gloss: "" }), "none");
+  });
+
+  it("on a settled selection, keeps a single word without asking - the long-press", () => {
+    // A touch selection reaches this through a timer, not a gesture (D73). The
+    // one word is what the long-press itself took, so it is as deliberate as a
+    // double click; it is kept the way D22 keeps any looked-up word.
+    assert.equal(answer({ normalized: "ocean", deliberate: false }), "automatic");
+  });
+
+  it("on a settled selection, asks about anything wider than one word", () => {
+    // Wider means the system's handles were dragged, and the timer cannot tell
+    // a finished drag from a pause in the middle of one. A pause that wrote to
+    // the vocabulary would keep half-made selections - so wide waits for Save.
+    assert.equal(answer({ normalized: "milk bread", deliberate: false }), "ask");
+    assert.equal(answer({ normalized: "the four great oceans", deliberate: false }), "ask");
+  });
+
+  it("keeps the other refusals over a settled selection too", () => {
+    assert.equal(answer({ normalized: "milk bread", findable: false, deliberate: false }), "none");
+    assert.equal(answer({ gloss: "", deliberate: false }), "none");
+    assert.equal(answer({ normalized: "all the four great oceans", deliberate: false }), "ask");
   });
 });
