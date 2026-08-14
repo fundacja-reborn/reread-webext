@@ -98,6 +98,26 @@ function partsOf(block) {
 }
 
 /**
+ * One block's text machinery, handed out whole: the block a node lives in, its
+ * prose in pieces, the pieces joined, and where each piece sits in the joined
+ * text. `blockTextAround` reads it to place a selection; the reader's touch
+ * selection (D80) reads it to turn a tapped point into a word and a span of
+ * words back into a `Range` - the same arithmetic, so the two can never
+ * disagree about where a word begins.
+ *
+ * @typedef {{ node: Text | null, text: string }} BlockPart
+ * @param {Node} node
+ * @returns {{ block: Element, parts: BlockPart[], text: string, spans: import("../lib/matcher/spans.js").Span[] } | null}
+ */
+export function blockPieces(node) {
+  const block = blockAround(node);
+  if (block === null) return null;
+  const parts = partsOf(block);
+  const { text, spans } = joinPieces(parts.map((part) => part.text));
+  return { block, parts, text, spans };
+}
+
+/**
  * Where a selection sits inside the text of its block: the text the reader sees
  * as one run, and the two offsets into it.
  *
@@ -109,11 +129,9 @@ function partsOf(block) {
  * @returns {{ text: string, start: number, end: number } | null}
  */
 export function blockTextAround(range) {
-  const block = blockAround(range.startContainer);
-  if (block === null) return null;
-
-  const parts = partsOf(block);
-  const { text, spans } = joinPieces(parts.map((part) => part.text));
+  const pieces = blockPieces(range.startContainer);
+  if (pieces === null) return null;
+  const { parts, text, spans } = pieces;
 
   /**
    * @param {Node} container

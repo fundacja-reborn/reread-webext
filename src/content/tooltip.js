@@ -101,8 +101,21 @@ function label(action) {
       return t("bubble_more");
     case "reader":
       return t("bubble_reader");
+    case "extend-left":
+      return t("bubble_extend_left");
+    case "extend-right":
+      return t("bubble_extend_right");
   }
 }
+
+/**
+ * The stretch buttons wear a glyph and say their name to a screen reader: the
+ * sentence would crowd a row whose other labels are single words, and the
+ * arrowheads say "one word this way" in every locale at once.
+ *
+ * @type {Partial<Record<Action, string>>}
+ */
+const GLYPHS = { "extend-left": "◀", "extend-right": "▶" };
 
 /** The one button whose label changes with what it will do. */
 function lessLabel() {
@@ -384,6 +397,11 @@ const STYLE = `
   }
   .actions button:disabled { opacity: 0.35; cursor: default; }
 
+  /* The stretch pair (D80): quiet like the labels around them, but a glyph is
+     narrower than a word and a target narrower than a fingertip misses. */
+  .actions button[data-action="extend-left"],
+  .actions button[data-action="extend-right"] { padding: 2px 8px; }
+
   /* The exception, and the only real call to action a bubble has: Save is the
      press that keeps a phrase which would otherwise be gone, the launcher's one
      button is the whole of the bubble it is in, and Settings is the one thing
@@ -415,6 +433,8 @@ const STYLE = `
     .entry-sense { padding: 6px 8px; }
     .actions { gap: 10px; }
     .actions button { font-size: 14px; padding: 8px 6px; }
+    .actions button[data-action="extend-left"],
+    .actions button[data-action="extend-right"] { padding: 8px 14px; }
     .actions button:first-child:not([data-action="save"]):not([data-action="reader"]):not([data-action="settings"]) { margin-left: -6px; }
     .actions button[data-action="save"],
     .actions button[data-action="reader"],
@@ -468,10 +488,13 @@ const STYLE = `
 /** @typedef {"normal" | "pending" | "error"} Tone */
 /** Which of the three bubbles this is. `launcher` is reader-only mode's one
  *  offer: no gloss, one button. @typedef {"recall" | "save" | "launcher"} Variant */
-/** What the bubble can offer. @typedef {"save" | "learned" | "edit" | "settings" | "more" | "reader"} Action */
+/** What the bubble can offer. The stretch pair belongs to the reader's touch
+ *  selection (D80) - one word onto either end of the phrase, for the screens
+ *  where dragging is hard to see or aim.
+ *  @typedef {"save" | "learned" | "edit" | "settings" | "more" | "reader" | "extend-left" | "extend-right"} Action */
 /** What it reports - editing never leaves the bubble, and More leaves it only
  *  on the press that opens the layer, so a caller with nothing fetched yet can
- *  fetch it then. @typedef {"save" | "choose" | "learned" | "settings" | "reader" | "more"} ReportedAction */
+ *  fetch it then. @typedef {"save" | "choose" | "learned" | "settings" | "reader" | "more" | "extend-left" | "extend-right"} ReportedAction */
 
 /**
  * One block of the second layer below the sentence: where it came from, and the
@@ -1006,7 +1029,16 @@ export function createTooltip({ onAction }) {
       const button = document.createElement("button");
       button.type = "button";
       button.dataset["action"] = action;
-      button.textContent = action === "more" && unfolded ? lessLabel() : label(action);
+      const glyph = action === "cancel" ? undefined : GLYPHS[action];
+      if (glyph !== undefined) {
+        button.textContent = glyph;
+        // The glyph is the face, the catalogue's sentence is the name - for
+        // the screen reader and for whoever hovers long enough to wonder.
+        button.setAttribute("aria-label", label(action));
+        button.title = label(action);
+      } else {
+        button.textContent = action === "more" && unfolded ? lessLabel() : label(action);
+      }
       button.addEventListener("click", () => emit(action));
       actionsElement.append(button);
     }

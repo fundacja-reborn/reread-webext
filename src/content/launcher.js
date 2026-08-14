@@ -26,6 +26,7 @@
 
 import { webext } from "../lib/browser.js";
 import { Message } from "../lib/protocol.js";
+import { touchPointer } from "../lib/selection.js";
 import { createTooltip } from "./tooltip.js";
 
 /**
@@ -102,7 +103,8 @@ function settle() {
     variant: "launcher",
     body: "",
     actions: ["reader"],
-    touch: lastPointerType === "touch",
+    // A pen's selection wears the same system bar and handles (D80).
+    touch: touchPointer(lastPointerType),
   });
 }
 

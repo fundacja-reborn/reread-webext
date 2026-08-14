@@ -1050,7 +1050,10 @@ webext().runtime.onMessage.addListener((message, _sender, sendResponse) => {
 // The same reading side as on any other page, scoped to the article: the
 // reader's own heading and links are not text anybody is learning from, and
 // nothing in this document changes unless the code above changes it, so there
-// is nothing for an observer to watch.
-start({ root: article, observe: false });
+// is nothing for an observer to watch. Touch selects through our own gesture
+// here (D80) - this is our page, so refusing the native selection is allowed,
+// and it is the one way to read on a touch screen with no system menu in the
+// way and the bubble landing exactly on the finger lifting.
+start({ root: article, observe: false, touchSelect: true });
 
 void showPage();
