@@ -509,15 +509,7 @@
     "placeholders": { "detail": { "content": "$1" } }
   },
   "options_refreshing_list": { "message": "Die Modellliste wird aufgefrischt..." },
-  "options_refreshed_list": {
-    "message": "Die Modellliste ist auf dem Stand vom $DATE$.",
-    "placeholders": { "date": { "content": "$1", "example": "2026-08-13" } }
-  },
   "options_refreshing_dict_list": { "message": "Die Wörterbuchliste wird aufgefrischt..." },
-  "options_refreshed_dict_list": {
-    "message": "Die Wörterbuchliste ist auf dem Stand vom $DATE$.",
-    "placeholders": { "date": { "content": "$1", "example": "2026-08-13" } }
-  },
   "options_refresh_failed": {
     "message": "Die Liste ließ sich nicht auffrischen$DETAIL$. Es bleibt die Liste vom $DATE$.",
     "placeholders": {

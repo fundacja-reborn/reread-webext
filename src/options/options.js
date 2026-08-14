@@ -191,7 +191,10 @@ async function refreshList() {
 
     liveList = result.value;
     fill("model-checked", listDate());
-    refreshStatus(t("options_refreshed_list", listDate()));
+    // Success speaks through the date beside the button - a sentence saying
+    // the same thing under it was a duplicate. Failure keeps its sentence,
+    // because the date alone cannot say why nothing changed.
+    refreshStatus("");
     // Not while a download or an import holds the screen: redrawing would
     // replace a live progress bar, and the next full render comes when it
     // finishes anyway - with this fresher list, because it is read then.
@@ -221,7 +224,8 @@ async function refreshDictionaryList() {
 
     liveDictionaries = result.value;
     fill("dictionary-checked", dictionaryListDate());
-    dictionaryRefreshStatus(t("options_refreshed_dict_list", dictionaryListDate()));
+    // The same manners as the model list's: the fresh date is the answer.
+    dictionaryRefreshStatus("");
     if (running === null && !importing) await renderCatalog();
   } finally {
     refreshingDictionaries = false;

@@ -575,15 +575,7 @@
     "placeholders": { "detail": { "content": "$1" } }
   },
   "options_refreshing_list": { "message": "Refreshing the list of models..." },
-  "options_refreshed_list": {
-    "message": "The list of models is current as of $DATE$.",
-    "placeholders": { "date": { "content": "$1", "example": "2026-08-13" } }
-  },
   "options_refreshing_dict_list": { "message": "Refreshing the list of dictionaries..." },
-  "options_refreshed_dict_list": {
-    "message": "The list of dictionaries is current as of $DATE$.",
-    "placeholders": { "date": { "content": "$1", "example": "2026-08-13" } }
-  },
   "options_refresh_failed": {
     "message": "Could not refresh the list$DETAIL$. The list from $DATE$ stays.",
     "placeholders": {

@@ -639,15 +639,7 @@
     "placeholders": { "detail": { "content": "$1" } }
   },
   "options_refreshing_list": { "message": "Освіження списку моделей..." },
-  "options_refreshed_list": {
-    "message": "Список моделей станом на $DATE$.",
-    "placeholders": { "date": { "content": "$1", "example": "2026-08-13" } }
-  },
   "options_refreshing_dict_list": { "message": "Освіження списку словників..." },
-  "options_refreshed_dict_list": {
-    "message": "Список словників станом на $DATE$.",
-    "placeholders": { "date": { "content": "$1", "example": "2026-08-13" } }
-  },
   "options_refresh_failed": {
     "message": "Не вдалося освіжити список$DETAIL$. Залишається список від $DATE$.",
     "placeholders": {

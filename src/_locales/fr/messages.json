@@ -532,15 +532,7 @@
     "placeholders": { "detail": { "content": "$1" } }
   },
   "options_refreshing_list": { "message": "Rafraîchissement de la liste des modèles..." },
-  "options_refreshed_list": {
-    "message": "La liste des modèles est à jour au $DATE$.",
-    "placeholders": { "date": { "content": "$1", "example": "2026-08-13" } }
-  },
   "options_refreshing_dict_list": { "message": "Rafraîchissement de la liste des dictionnaires..." },
-  "options_refreshed_dict_list": {
-    "message": "La liste des dictionnaires est à jour au $DATE$.",
-    "placeholders": { "date": { "content": "$1", "example": "2026-08-13" } }
-  },
   "options_refresh_failed": {
     "message": "Impossible de rafraîchir la liste$DETAIL$. La liste du $DATE$ reste.",
     "placeholders": {

@@ -639,15 +639,7 @@
     "placeholders": { "detail": { "content": "$1" } }
   },
   "options_refreshing_list": { "message": "Odświeżanie listy modeli..." },
-  "options_refreshed_list": {
-    "message": "Lista modeli aktualna na dzień $DATE$.",
-    "placeholders": { "date": { "content": "$1", "example": "2026-08-13" } }
-  },
   "options_refreshing_dict_list": { "message": "Odświeżanie listy słowników..." },
-  "options_refreshed_dict_list": {
-    "message": "Lista słowników aktualna na dzień $DATE$.",
-    "placeholders": { "date": { "content": "$1", "example": "2026-08-13" } }
-  },
   "options_refresh_failed": {
     "message": "Nie udało się odświeżyć listy$DETAIL$. Zostaje lista z dnia $DATE$.",
     "placeholders": {
