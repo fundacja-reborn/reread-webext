@@ -17,7 +17,7 @@
   "language_pair": { "message": "Para językowa" },
   "reading_list": { "message": "Czytelnia offline" },
   "saved_phrases": { "message": "Zapisane frazy" },
-  "open_reader": { "message": "Przeczytaj tę stronę w czytniku" },
+  "open_reader": { "message": "Przeczytaj tę stronę w widoku czytania" },
   "action_delete": { "message": "Usuń" },
   "action_download": { "message": "Pobierz" },
   "action_cancel": { "message": "Anuluj" },
@@ -38,7 +38,7 @@
   "bubble_settings": { "message": "Otwórz ustawienia" },
   "bubble_more": { "message": "Więcej" },
   "bubble_less": { "message": "Mniej" },
-  "bubble_reader": { "message": "Czytaj w czytniku" },
+  "bubble_reader": { "message": "Czytaj w widoku czytania" },
   "bubble_translating": { "message": "Tłumaczę..." },
 
   "popup_site_toggle_title": { "message": "Czy re/read działa w tej witrynie" },
@@ -46,7 +46,7 @@
   "popup_no_model": {
     "message": "Na tym urządzeniu nie ma jeszcze modelu tłumaczeniowego - naciśnij tutaj i wybierz go w ustawieniach."
   },
-  "popup_mode_reader_only": { "message": "Tryb: tylko w czytniku" },
+  "popup_mode_reader_only": { "message": "Tryb: tylko w widoku czytania" },
 
   "vocab_title": { "message": "re/read - zapisane frazy" },
   "vocab_intro": {
@@ -198,7 +198,7 @@
     "placeholders": { "count": { "content": "$1", "example": "1,5" } }
   },
 
-  "reader_title": { "message": "re/read - czytnik" },
+  "reader_title": { "message": "re/read - widok czytania" },
   "reader_open_original": { "message": "Otwórz oryginał" },
   "reader_display_title": { "message": "Krój i motyw" },
   "reader_theme": { "message": "Motyw" },
@@ -242,7 +242,7 @@
   "reader_no_article": { "message": "Na tej stronie nie udało się znaleźć artykułu." },
   "reader_list_write_failed": { "message": "Nie udało się zapisać czytelni." },
   "reader_empty_none": {
-    "message": "Nic jeszcze nie zapisano - otwórz artykuł w czytniku i naciśnij „$BUTTON$”. Zapisana strona zostaje na tym urządzeniu i otworzy się także bez internetu.",
+    "message": "Nic jeszcze nie zapisano - otwórz artykuł w widoku czytania i naciśnij „$BUTTON$”. Zapisana strona zostaje na tym urządzeniu i otworzy się także bez internetu.",
     "placeholders": { "button": { "content": "$1", "example": "Zapisz w czytelni" } }
   },
   "reader_empty_all_read": { "message": "Nie zostało nic do przeczytania - wszystko, co zapisane, jest oznaczone jako przeczytane." },
@@ -529,16 +529,16 @@
     "message": "Warte drugiego naciśnięcia: słownik dla tej samej pary, w sekcji „Słowniki” - pojedyncze słowa dostają wtedy pełniejsze odpowiedzi niż samo tłumaczenie."
   },
   "options_first_steps_pin": {
-    "message": "Na koniec przypnij re/read do paska narzędzi - dopóki tego nie zrobisz, przycisk kryje się za ikoną puzzla. Za przyciskiem: czytnik, czytelnia offline, zapisane frazy i wyłącznik witryny, na której jesteś."
+    "message": "Na koniec przypnij re/read do paska narzędzi - dopóki tego nie zrobisz, przycisk kryje się za ikoną puzzla. Za przyciskiem: widok czytania, czytelnia offline, zapisane frazy i wyłącznik witryny, na której jesteś."
   },
   "options_sections_aria": { "message": "Sekcje tej strony" },
   "options_engine": { "message": "Silnik" },
   "options_engine_value": { "message": "Bergamot, wewnątrz paczki - tłumaczy offline" },
   "options_pair_hint": { "message": "Do wyboru są pary z modelem na tym urządzeniu - po inną parę pobierz jej model w sekcji" },
   "options_pair_none": { "message": "Nie ma jeszcze modelu - najpierw pobierz go poniżej" },
-  "options_reader_only": { "message": "Tylko w czytniku" },
+  "options_reader_only": { "message": "Tylko w widoku czytania" },
   "options_reader_only_hint": {
-    "message": "Gdy to jest włączone, zaznaczenie frazy lub słowa na zwykłej stronie proponuje jedno: otwarcie jej w czytniku. Tłumaczenie, zapisywanie i podkreślanie dzieją się tam (przejrzyściej i czytelniej). Na Androidzie opcja jest domyślnie włączona."
+    "message": "Gdy to jest włączone, zaznaczenie frazy lub słowa na zwykłej stronie proponuje jedno: otwarcie jej w widoku czytania. Tłumaczenie, zapisywanie i podkreślanie dzieją się tam (przejrzyściej i czytelniej). Na Androidzie opcja jest domyślnie włączona."
   },
   "options_models_heading": { "message": "Modele tłumaczeniowe" },
   "options_models_intro": {
@@ -578,11 +578,11 @@
   },
   "options_add_dictionary_heading": { "message": "Dodaj słownik z plików" },
   "options_add_dictionary_summary": {
-    "message": "Jeśli chcesz dodać słownik z własnych plików - ten z czytnika e-booków zadziała bez zmian - wczytaj je tutaj."
+    "message": "Jeśli chcesz dodać słownik z własnych plików - ten z KOReadera zadziała bez zmian - wczytaj je tutaj."
   },
   "options_stardict_intro": { "message": "Słowniki czytane są w formacie" },
   "options_stardict_intro_rest": {
-    "message": "- to te same pliki, których używa czytnik KOReader, więc słownik obecny już na twoim czytniku działa tu bez zmian. Rozpakuj archiwum, w którym przyszedł, i wskaż pliki jednego słownika:"
+    "message": "- to te same pliki, których używa KOReader, więc słownik obecny już na twoim urządzeniu działa tu bez zmian. Rozpakuj archiwum, w którym przyszedł, i wskaż pliki jednego słownika:"
   },
   "options_file_ifo": { "message": "- jak słownik sam siebie nazywa" },
   "options_file_idx": { "message": "- indeks słów" },

@@ -1490,6 +1490,11 @@ document.getElementById("open-vocabulary")?.addEventListener("click", () => {
   // mid-restart: the press can be repeated.
   void webext().runtime.sendMessage({ kind: Message.OPEN_VOCABULARY }).catch(() => {});
 });
+document.getElementById("open-library")?.addEventListener("click", () => {
+  // The reading list, by the same door the popup uses: the background raises
+  // the reader tab on its list or opens one.
+  void webext().runtime.sendMessage({ kind: Message.OPEN_LIBRARY }).catch(() => {});
+});
 
 // A download or an import in flight is the one thing on this page that a reload
 // would leave half-finished, and the browser will not warn about it by itself.

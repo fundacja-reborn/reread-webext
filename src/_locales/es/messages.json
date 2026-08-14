@@ -17,7 +17,7 @@
   "language_pair": { "message": "Par de idiomas" },
   "reading_list": { "message": "Lista de lectura sin conexión" },
   "saved_phrases": { "message": "Frases guardadas" },
-  "open_reader": { "message": "Leer esta página en el lector" },
+  "open_reader": { "message": "Leer esta página en la vista de lectura" },
   "action_delete": { "message": "Eliminar" },
   "action_download": { "message": "Descargar" },
   "action_cancel": { "message": "Cancelar" },
@@ -38,7 +38,7 @@
   "bubble_settings": { "message": "Abrir ajustes" },
   "bubble_more": { "message": "Más" },
   "bubble_less": { "message": "Menos" },
-  "bubble_reader": { "message": "Leer en el lector" },
+  "bubble_reader": { "message": "Leer en la vista de lectura" },
   "bubble_translating": { "message": "Traduciendo..." },
 
   "popup_site_toggle_title": { "message": "Si re/read funciona en este sitio" },
@@ -46,7 +46,7 @@
   "popup_no_model": {
     "message": "Todavía no hay ningún modelo de traducción en este dispositivo - pulsa aquí para elegir uno en los ajustes."
   },
-  "popup_mode_reader_only": { "message": "Modo: solo en el lector" },
+  "popup_mode_reader_only": { "message": "Modo: solo en la vista de lectura" },
 
   "vocab_title": { "message": "re/read - frases guardadas" },
   "vocab_intro": {
@@ -153,7 +153,7 @@
     "placeholders": { "count": { "content": "$1", "example": "7" } }
   },
 
-  "reader_title": { "message": "re/read - lector" },
+  "reader_title": { "message": "re/read - vista de lectura" },
   "reader_open_original": { "message": "Abrir el original" },
   "reader_display_title": { "message": "Tipografía y tema" },
   "reader_theme": { "message": "Tema" },
@@ -197,7 +197,7 @@
   "reader_no_article": { "message": "No se encontró ningún artículo en esa página." },
   "reader_list_write_failed": { "message": "No se pudo escribir la lista de lectura." },
   "reader_empty_none": {
-    "message": "Aún no hay nada guardado - abre un artículo en el lector y pulsa «$BUTTON$». Una página guardada se queda en este dispositivo y se abre incluso sin conexión.",
+    "message": "Aún no hay nada guardado - abre un artículo en la vista de lectura y pulsa «$BUTTON$». Una página guardada se queda en este dispositivo y se abre incluso sin conexión.",
     "placeholders": { "button": { "content": "$1", "example": "Guardar en la lista de lectura" } }
   },
   "reader_empty_all_read": { "message": "No queda nada por leer - todo lo guardado está marcado como leído." },
@@ -422,16 +422,16 @@
     "message": "Merece la segunda pulsación: un diccionario para el mismo par, bajo «Diccionarios» - las palabras sueltas reciben entonces respuestas más completas que una traducción sola."
   },
   "options_first_steps_pin": {
-    "message": "Por último, fija re/read a la barra de herramientas - hasta entonces su botón se esconde tras el icono de la pieza de puzle. Tras el botón: el lector, la lista de lectura sin conexión, tus frases guardadas y un interruptor para el sitio en el que estás."
+    "message": "Por último, fija re/read a la barra de herramientas - hasta entonces su botón se esconde tras el icono de la pieza de puzle. Tras el botón: la vista de lectura, la lista de lectura sin conexión, tus frases guardadas y un interruptor para el sitio en el que estás."
   },
   "options_sections_aria": { "message": "Secciones de esta página" },
   "options_engine": { "message": "Motor" },
   "options_engine_value": { "message": "Bergamot, dentro del paquete - traduce sin conexión" },
   "options_pair_hint": { "message": "Se ofrecen los pares con un modelo en este dispositivo - para otro par, descarga su modelo bajo" },
   "options_pair_none": { "message": "Aún no hay modelo - descarga uno abajo" },
-  "options_reader_only": { "message": "Solo en el lector" },
+  "options_reader_only": { "message": "Solo en la vista de lectura" },
   "options_reader_only_hint": {
-    "message": "Con esto activado, seleccionar una frase o una palabra en una página normal ofrece una sola cosa: abrir la página en el lector. Traducir, guardar y subrayar ocurren allí (más claro y más legible). En Android la opción está activada de forma predeterminada."
+    "message": "Con esto activado, seleccionar una frase o una palabra en una página normal ofrece una sola cosa: abrir la página en la vista de lectura. Traducir, guardar y subrayar ocurren allí (más claro y más legible). En Android la opción está activada de forma predeterminada."
   },
   "options_models_heading": { "message": "Modelos de traducción" },
   "options_models_intro": {
