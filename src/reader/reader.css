@@ -341,19 +341,52 @@ body.reader:has(#library:not([hidden])) {
   margin: 0 0 0.75rem;
 }
 
-/* --- the toolbar: the filter grows, the transfer buttons follow --- */
+/* --- the fold's line, shared with the anchor to the transfer section --- */
 
-.toolbar {
+/* One line, two quiet doors: the fold on the left, the link to the import
+   and export section on the right - the summary's own muted voice, kept a
+   link by its underline. An opened fold needs the whole line for its prose,
+   so the link steps down to the line below, still on the right. */
+.fold-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  align-items: flex-start;
+  gap: 0 1rem;
+  margin: 0.25rem 0 0;
+}
+
+.fold-row .fold-line {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+}
+
+.fold-row .fold-line[open] {
+  flex-basis: 100%;
+}
+
+.fold-row a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-inline-start: auto;
+  color: var(--page-muted);
+  font-size: 0.9rem;
+}
+
+.fold-row a:hover {
+  color: var(--page-accent);
+}
+
+/* --- the filter line above the list it narrows --- */
+
+.filter-line {
+  display: flex;
   margin: 0.75rem 0 0;
 }
 
-/* Full width on a phone - the buttons share the wrapped line under it; the
-   media query below pulls all three onto one line. */
-.toolbar input {
-  flex: 1 1 100%;
+.filter-line input {
+  flex: 1 1 auto;
   min-height: 44px;
   min-width: 0;
   font: inherit;
@@ -362,12 +395,6 @@ body.reader:has(#library:not([hidden])) {
   border: 1px solid var(--page-line);
   background: transparent;
   color: var(--page-fg);
-}
-
-.toolbar button {
-  flex: 1 1 0;
-  min-height: 44px;
-  padding: 0.35rem 1rem;
 }
 
 /* The offer a picked file becomes: its size, a taste of its titles, and the
@@ -532,22 +559,88 @@ body.reader:has(#library:not([hidden])) {
   padding: 0.35rem 1rem;
 }
 
-/* --- the article's action row --- */
+/* --- the transfer section: import and export, under the list --- */
+
+/* Its own quiet area below the pager, reached by the anchor beside the fold;
+   the scroll margin keeps the landing heading off the viewport's edge. */
+.transfer-section {
+  margin-top: 2rem;
+  border-top: 1px solid var(--page-line);
+  scroll-margin-top: 0.75rem;
+}
+
+/* A small heading: this is a tool shed, not a second page. */
+.transfer-section h2 {
+  margin: 1rem 0 0.25rem;
+  font-size: 1.05rem;
+}
+
+/* On a phone the two buttons share the line edge to edge, like every paired
+   row of buttons here; the media query below gives them their own width. */
+.transfer-section > .transfer button {
+  flex: 1 1 0;
+}
+
+/* --- the article's bar: the way back, then the acts on this article --- */
 
 .reader-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
   margin-bottom: 1.75rem;
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   font-size: 0.85rem;
 }
 
-.reader-actions button {
-  padding: 0.25rem 0.8rem;
+/* The line back to the list, dressed as the link it behaves as: bare text
+   with the arrow, muted until asked, no frame - the buttons below carry the
+   acts, this only carries the reader away. */
+.reader-return {
+  margin: 0 0 0.25rem;
 }
 
-.reader-actions button[aria-pressed="true"] {
+#to-library {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 44px;
+  padding: 0.35rem 0;
+  border: none;
+  background: none;
+  color: var(--page-muted);
+}
+
+#to-library:hover {
+  color: var(--page-accent);
+  text-decoration: underline;
+}
+
+/* The article's own acts, dressed like the list's quiet actions: no resting
+   border, muted, a 44px hit box. A label never breaks inside - on a narrow
+   screen the row wraps whole buttons instead. */
+.article-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.article-actions button {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0.35rem 0.8rem;
+  border-color: transparent;
+  color: var(--page-muted);
+  white-space: nowrap;
+}
+
+.article-actions button:hover,
+.article-actions button:focus-visible {
+  border-color: var(--page-line);
+  background: color-mix(in srgb, var(--page-fg) 6%, transparent);
+  color: var(--page-fg);
+}
+
+/* A held state (saved, marked read) answers in the accent - and stays the
+   accent under the pointer, after the hover rule, so hovering a pressed
+   button keeps saying what is true. */
+.article-actions button[aria-pressed="true"] {
   border-color: var(--page-accent);
   color: var(--page-accent);
 }
@@ -555,11 +648,14 @@ body.reader:has(#library:not([hidden])) {
 /* A delete asking "Sure?" - the second press is the confirmation (there is no
    modal and no undo timer). The accent frames and fills the asking button
    while the text keeps the page's own color: readable in all four themes.
-   Last, so the armed state outranks the quiet hover above. */
+   Last, so the armed state outranks the quiet hovers above. */
 button[data-armed],
 .library-delete[data-armed],
 .library-delete[data-armed]:hover,
-.library-delete[data-armed]:focus-visible {
+.library-delete[data-armed]:focus-visible,
+.article-actions button[data-armed],
+.article-actions button[data-armed]:hover,
+.article-actions button[data-armed]:focus-visible {
   border-color: var(--page-accent);
   background: color-mix(in srgb, var(--page-accent) 12%, transparent);
   color: var(--page-fg);
@@ -573,12 +669,7 @@ button[data-armed],
     flex: none;
   }
 
-  /* The filter takes the line's slack; the buttons keep their own width. */
-  .toolbar input {
-    flex: 1 1 auto;
-  }
-
-  .toolbar button {
+  .transfer-section > .transfer button {
     flex: none;
   }
 }
