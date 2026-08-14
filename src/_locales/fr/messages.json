@@ -414,20 +414,20 @@
 
   "options_title": { "message": "re/read - paramètres" },
   "options_local_intro": {
-    "message": "Tout ce que fait re/read se passe sur cet appareil : la traduction, le dictionnaire, la liste de lecture, les phrases enregistrées. Rien de ce que vous lisez ou sélectionnez n'est envoyé nulle part. Le réseau sert à deux choses, toutes deux sur cette page et toutes deux à votre clic : télécharger un modèle ou un dictionnaire, et mettre à jour les listes des modèles et des dictionnaires. Toujours depuis les deux adresses écrites dans ce paquet, et rien d'autre."
+    "message": "Tout ce que fait re/read se passe sur cet appareil (hors ligne) : la traduction, le dictionnaire, la liste de lecture, les phrases enregistrées. Rien de ce que vous lisez ou sélectionnez n'est envoyé nulle part. Le réseau sert à deux choses, toutes deux sur cette page et toutes deux à votre clic : télécharger un modèle ou un dictionnaire, et mettre à jour les listes des modèles et des dictionnaires - et seulement depuis les deux URL affichées ouvertement dans ces sections."
   },
   "options_first_steps_heading": { "message": "Premiers pas" },
   "options_first_steps_intro": {
-    "message": "Rien ne se traduit encore - le modèle qui s'en chargerait n'est pas sur cet appareil. La mise en place prend une minute :"
+    "message": "Rien ne se traduit encore - le modèle qui s'en chargerait n'est pas encore sur cet appareil. La mise en place prend une minute :"
   },
   "options_first_steps_model": {
     "message": "Sous « Modèles de traduction », trouvez la paire de langues qu'il vous faut (le filtre est le plus rapide) et appuyez sur « Télécharger ». Le modèle est enregistré sur cet appareil et traduit désormais hors ligne - et le premier modèle règle de lui-même la paire de langues ci-dessus."
   },
   "options_first_steps_dictionary": {
-    "message": "Le deuxième appui en vaut la peine : un dictionnaire pour la même paire, sous « Dictionnaires » - les mots isolés reçoivent alors des réponses plus complètes qu'une traduction seule."
+    "message": "Sous « Dictionnaires », téléchargez un dictionnaire pour la même paire (facultatif, mais utile) - les mots isolés reçoivent alors des réponses plus complètes qu'une traduction seule (après un appui sur « Plus » dans la bulle de traduction)."
   },
   "options_first_steps_pin": {
-    "message": "Enfin, épinglez re/read à la barre d'outils - d'ici là, son bouton se cache derrière l'icône en forme de pièce de puzzle. Derrière le bouton : le lecteur, la liste de lecture hors ligne, vos phrases enregistrées et un interrupteur pour le site où vous êtes."
+    "message": "Enfin, épinglez re/read à la barre d'outils - d'ici là, son bouton se cache derrière l'icône en forme de pièce de puzzle des extensions. Un appui sur l'icône ouvre le popup, avec un accès rapide au lecteur, à la liste de lecture hors ligne, à vos phrases enregistrées, à l'interrupteur du site où vous êtes et au choix de la paire de langues active."
   },
   "options_sections_aria": { "message": "Sections de cette page" },
   "options_engine": { "message": "Moteur" },

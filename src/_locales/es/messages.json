@@ -414,20 +414,20 @@
 
   "options_title": { "message": "re/read - ajustes" },
   "options_local_intro": {
-    "message": "Todo lo que hace re/read ocurre en este dispositivo: la traducción, el diccionario, la lista de lectura, tus frases guardadas. Nada de lo que lees o seleccionas se envía a ninguna parte. La red sirve para dos cosas, ambas en esta página y ambas a tu pulsación: descargar un modelo o un diccionario, y actualizar las listas de modelos y diccionarios. Siempre desde las dos direcciones escritas en este paquete, y nada más."
+    "message": "Todo lo que hace re/read ocurre en este dispositivo (sin conexión): la traducción, el diccionario, la lista de lectura, tus frases guardadas. Nada de lo que lees o seleccionas se envía a ninguna parte. La red sirve para dos cosas, ambas en esta página y ambas a tu pulsación: descargar un modelo o un diccionario, y actualizar las listas de modelos y diccionarios - y solo desde las dos URL mostradas abiertamente en esas secciones."
   },
   "options_first_steps_heading": { "message": "Primeros pasos" },
   "options_first_steps_intro": {
-    "message": "Todavía no se traduce nada - el modelo que lo haría no está en este dispositivo. La puesta en marcha lleva un minuto:"
+    "message": "Todavía no se traduce nada - el modelo que lo haría aún no está en este dispositivo. La puesta en marcha lleva un minuto:"
   },
   "options_first_steps_model": {
     "message": "Bajo «Modelos de traducción», busca el par de idiomas que necesitas (el filtro es lo más rápido) y pulsa «Descargar». El modelo queda guardado en este dispositivo y desde entonces traduce sin conexión - y el primer modelo ajusta por sí solo el par de idiomas de arriba."
   },
   "options_first_steps_dictionary": {
-    "message": "Merece la segunda pulsación: un diccionario para el mismo par, bajo «Diccionarios» - las palabras sueltas reciben entonces respuestas más completas que una traducción sola."
+    "message": "Bajo «Diccionarios», descarga un diccionario para el mismo par (opcional, pero merece la pena) - las palabras sueltas reciben entonces respuestas más completas que una traducción sola (tras pulsar «Más» en la burbuja de traducción)."
   },
   "options_first_steps_pin": {
-    "message": "Por último, fija re/read a la barra de herramientas - hasta entonces su botón se esconde tras el icono de la pieza de puzle. Tras el botón: la vista de lectura, la lista de lectura sin conexión, tus frases guardadas y un interruptor para el sitio en el que estás."
+    "message": "Por último, fija re/read a la barra de herramientas - hasta entonces su botón se esconde tras el icono de la pieza de puzle de las extensiones. Una pulsación en el icono abre el popup, con acceso rápido a la vista de lectura, la lista de lectura sin conexión, tus frases guardadas, el interruptor del sitio en el que estás y el cambio del par de idiomas activo."
   },
   "options_sections_aria": { "message": "Secciones de esta página" },
   "options_engine": { "message": "Motor" },
