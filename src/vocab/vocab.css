@@ -157,7 +157,7 @@ summary {
   font: inherit;
   padding: 0.35rem 0.6rem;
   border-radius: 6px;
-  border: 1px solid var(--page-line);
+  border: 1px solid var(--page-border);
   background: transparent;
   color: var(--page-fg);
 }
@@ -265,7 +265,7 @@ button.quiet {
 
 button.quiet:hover,
 button.quiet:focus-visible {
-  border-color: var(--page-line);
+  border-color: var(--page-border);
   background: color-mix(in srgb, var(--page-fg) 6%, transparent);
   color: var(--page-fg);
 }
@@ -294,7 +294,7 @@ button.quiet-learned:focus-visible {
   font: inherit;
   padding: 0.35rem 0.6rem;
   border-radius: 6px;
-  border: 1px solid var(--page-line);
+  border: 1px solid var(--page-border);
   background: transparent;
   color: var(--page-fg);
   resize: vertical;
