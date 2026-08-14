@@ -112,4 +112,25 @@ describe("libraryView", () => {
     assert.deepEqual([view.matching, view.inSegment], [0, 1]);
     assert.deepEqual(view.rows, []);
   });
+
+  it("counts both whole segments for the tabs, whichever one is showing", () => {
+    const metas = [meta(1), meta(2, { readAt: 9 }), meta(3), meta(4, { readAt: 9 })];
+
+    const unread = libraryView(metas, { segment: Segment.UNREAD, query: "", page: 1 });
+    const read = libraryView(metas, { segment: Segment.READ, query: "", page: 1 });
+    assert.deepEqual([unread.unread, unread.read], [2, 2]);
+    assert.deepEqual([read.unread, read.read], [2, 2]);
+  });
+
+  it("keeps the tab counts whole under a filter and across pages", () => {
+    // The tab labels wear these numbers: a filter or a turned page narrows
+    // the rows on screen, never what the tabs say they hold.
+    const metas = Array.from({ length: PAGE_SIZE + 10 }, (_, at) =>
+      meta(at, at % 2 === 0 ? { readAt: 9 } : {}),
+    );
+
+    const filtered = libraryView(metas, { segment: Segment.UNREAD, query: "article 1", page: 2 });
+    assert.ok(filtered.matching < filtered.inSegment);
+    assert.deepEqual([filtered.unread, filtered.read], [PAGE_SIZE / 2 + 5, PAGE_SIZE / 2 + 5]);
+  });
 });

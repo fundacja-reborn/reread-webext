@@ -89,7 +89,12 @@
         page. Rows are built by script from the articles database; everything
         static about the view is written out here.
       -->
-      <section id="library" hidden aria-label="Offline reading list" data-i18n-aria-label="reading_list">
+      <section id="library" hidden aria-labelledby="library-title">
+        <h1 id="library-title" data-i18n="reading_list">Offline reading list</h1>
+        <!-- Two halves of one list, said with pressed buttons rather than
+             tabs: the pattern the page already speaks (`aria-pressed`), and
+             the labels carry the whole segments' counts once the list is
+             read. -->
         <div class="library-segments" id="library-segments">
           <button type="button" data-segment="unread" aria-pressed="true" data-i18n="reader_segment_unread">
             To read
@@ -98,60 +103,65 @@
             Read
           </button>
         </div>
-        <!-- The offline promise, written where the saved pages are. Shown only
-             while something is saved: over an empty list the empty sentence
-             below carries the same promise, and two notes would say it twice. -->
-        <p id="library-note" class="note" data-i18n="reader_library_note" hidden>
-          Everything here is a copy stored on this device - it opens without a connection and
-          stays even if the original page goes away.
-        </p>
-        <!-- Shown while anything is saved at all, like the note: a filter over
-             an empty list would be a control with nothing to hold. -->
-        <p class="model-filter" id="library-filter-line" hidden>
+        <!-- The offline promise, folded behind one line the way the phrases
+             page folds its intro: there to unfold on the first visit, quiet
+             on every one after. -->
+        <details class="fold-line">
+          <summary data-i18n="reader_how_title">How it works</summary>
+          <p class="hint" data-i18n="reader_library_note">
+            Everything here is a copy stored on this device - it opens without a connection and
+            stays even if the original page goes away.
+          </p>
+        </details>
+        <!-- One line of tools: the filter grows, the two transfer buttons
+             follow - up here rather than under the list, because the list's
+             height turns with its pages and buttons under it would wander.
+             On a narrow screen the line wraps; same HTML, the stylesheet
+             decides. -->
+        <div class="toolbar">
+          <label for="library-filter" class="visually-hidden" data-i18n="reader_filter_label">
+            Filter the reading list
+          </label>
           <input
             type="search"
             id="library-filter"
             placeholder="Filter by title or site"
             data-i18n-placeholder="reader_filter_placeholder"
-            aria-label="Filter the reading list"
-            data-i18n-aria-label="reader_filter_aria"
           />
-        </p>
-        <p id="library-empty" class="note" hidden></p>
+          <button type="button" id="library-import" data-i18n="action_import">Import</button>
+          <button type="button" id="library-export" data-i18n="action_export">Export</button>
+        </div>
+        <details class="fold-line">
+          <summary data-i18n="reader_format_title">File format</summary>
+          <p class="hint" data-i18n="reader_transfer_note">
+            One .json file holding every saved article - a backup, or the way to move them to
+            another browser. Importing adds articles this list is missing and never touches a
+            saved one.
+          </p>
+        </details>
+        <input type="file" id="library-import-file" accept=".json,application/json" hidden />
+        <!--
+          The moment of consent: what the picked file holds, quoted before
+          anything is written - and import only ever adds; the file's rules
+          live in `lib/store/articles-file.js`.
+        -->
+        <div id="library-import-confirm" class="import-confirm" hidden>
+          <p id="library-import-summary"></p>
+          <ul id="library-import-sample" class="import-sample"></ul>
+          <p class="transfer">
+            <button type="button" id="library-import-run" data-i18n="action_import">Import</button>
+            <button type="button" id="library-import-cancel" data-i18n="action_cancel">Cancel</button>
+          </p>
+        </div>
+        <p id="library-transfer-status" class="status report" role="status"></p>
+        <p class="hint" id="library-count" hidden></p>
+        <div id="library-empty" class="empty" hidden></div>
         <ul id="library-rows" class="library-rows"></ul>
         <nav class="pager" id="library-pager" hidden>
           <button type="button" id="library-prev" data-i18n="pager_prev">Previous</button>
           <span class="pager-label" id="library-page-label"></span>
           <button type="button" id="library-next" data-i18n="pager_next">Next</button>
         </nav>
-
-        <!--
-          The list as one file and back: a backup, or the way to another
-          browser. The confirm block is the moment of consent - what the file
-          holds, quoted before anything is written - and import only ever
-          adds; the file's rules live in `lib/store/articles-file.js`.
-        -->
-        <div class="library-transfer">
-          <p class="transfer">
-            <button type="button" id="library-export" data-i18n="action_export">Export</button>
-            <button type="button" id="library-import" data-i18n="action_import">Import</button>
-          </p>
-          <p class="hint" data-i18n="reader_transfer_note">
-            One .json file holding every saved article - a backup, or the way to move them to
-            another browser. Importing adds articles this list is missing and never touches a
-            saved one.
-          </p>
-          <input type="file" id="library-import-file" accept=".json,application/json" hidden />
-          <div id="library-import-confirm" class="import-confirm" hidden>
-            <p id="library-import-summary"></p>
-            <ul id="library-import-sample" class="import-sample"></ul>
-            <p class="transfer">
-              <button type="button" id="library-import-run" data-i18n="action_import">Import</button>
-              <button type="button" id="library-import-cancel" data-i18n="action_cancel">Cancel</button>
-            </p>
-          </div>
-          <p id="library-transfer-status" class="status report" role="status"></p>
-        </div>
       </section>
 
       <!--

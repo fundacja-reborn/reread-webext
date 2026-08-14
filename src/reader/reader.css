@@ -48,6 +48,40 @@ body.reader {
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
+/* Focus must be findable on every control here, in every theme - the list's
+   quiet buttons erase their resting border, so the browser default cannot be
+   trusted to survive the styling. */
+:is(a, button, select, summary, input):focus-visible {
+  outline: 2px solid var(--page-accent);
+  outline-offset: 2px;
+}
+
+/* Hover feedback eases in; nothing depends on it, and it stops entirely for
+   readers who asked motion to stop. */
+button,
+summary {
+  transition: border-color 120ms ease, background-color 120ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}
+
+/* The clip pattern: a real label for the filter, read by screen readers,
+   invisible to everyone else. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 .reader-bar,
 .reader-panel {
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -240,104 +274,100 @@ body.reader {
   overflow-wrap: anywhere;
 }
 
-/* The reading list and the article's action row are interface, so they take
-   the interface font, like the bar. Everything below states its changes with
-   text and a border - never a transition or an overlay, because on e-ink
-   every animation is a flash. */
+/* The reading list is interface, not reading: it speaks the interface font at
+   the interface size, and only the row titles keep the article's face below.
+   Everything here states its changes with text and a border - never an
+   overlay or an animation, because on e-ink every animation is a flash.
+
+   Base styles lay the list out for a narrow screen; the one media query at
+   the end spreads the same HTML out for a desktop. */
+
+/* The list reads at the phrases page's width, not the article's measure: the
+   measure is a choice about prose, and rows of titles are not prose. `:has`
+   rather than a script-set class, so the stylesheet alone owns the switch. */
+body.reader:has(#library:not([hidden])) {
+  max-width: 46rem;
+}
+
+#library {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+/* --- the tabs: two halves of one list, each wearing its whole count --- */
 
 .library-segments {
   display: flex;
-  gap: 0.4rem;
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  font-size: 0.85rem;
+  gap: 0.5rem;
+  margin: 0.75rem 0 0;
 }
 
+/* Two equal halves of the line on a phone; their own width on a desktop. */
 .library-segments button {
-  padding: 0.2rem 0.8rem;
+  flex: 1 1 0;
+  min-height: 44px;
+  padding: 0.35rem 1rem;
 }
 
+/* The tab in view: the accent as a border and a wash behind the page's own
+   text color, so the label stays readable in all four themes. */
 .library-segments button[aria-pressed="true"] {
   border-color: var(--page-accent);
-  color: var(--page-accent);
+  background: color-mix(in srgb, var(--page-accent) 12%, transparent);
 }
 
-.library-rows {
-  list-style: none;
-  margin: 1.25rem 0 0;
-  padding: 0;
-  border-top: 1px solid var(--page-line);
+/* --- disclosure lines: the offline promise and the file-format note --- */
+
+/* Native details/summary: no script, keyboard for free, and closed is the
+   state both should return to. The block padding keeps the summary a
+   comfortable touch target without growing its text. */
+.fold-line {
+  margin: 0.25rem 0 0;
 }
 
-.library-row {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  border-bottom: 1px solid var(--page-line);
-}
-
-/* The whole title is the way in: a target for a finger, not a word. It keeps
-   the article typeface - these are articles - while the details under it are
-   interface. */
-.library-open {
-  flex: 1;
-  min-width: 0;
-  padding: 0.8rem 0;
-  border: none;
-  border-radius: 0;
-  background: none;
-  text-align: start;
-  font: inherit;
-}
-
-.library-open:hover .library-item-title {
-  color: var(--page-accent);
-}
-
-.library-item-title {
-  display: block;
-  overflow-wrap: anywhere;
-}
-
-.library-item-detail {
-  display: block;
-  margin-top: 0.15rem;
+.fold-line summary {
+  padding: 0.7rem 0;
+  cursor: pointer;
   color: var(--page-muted);
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
 }
 
-.library-delete {
-  flex: none;
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  font-size: 0.85rem;
-  padding: 0.2rem 0.7rem;
+.fold-line summary::marker {
+  color: var(--page-muted);
 }
 
-/* Export and import act on the whole list, so they stand under it rather than
-   by any row - and they are interface, not reading, like the segments. The
-   margin holds them clearly apart from the last row: they belong to the list,
-   not to the article that happens to end it. */
-.library-transfer {
-  margin-top: 2.5rem;
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  font-size: 0.85rem;
+.fold-line p {
+  margin: 0 0 0.75rem;
 }
 
-/* A footnote to the buttons, not a paragraph of the page: one step below the
-   interface size the block already speaks at. (`page.css` sizes hints in rem,
-   which here would land *above* the block's own size.) */
-.library-transfer .hint {
-  font-size: 0.8rem;
-}
+/* --- the toolbar: the filter grows, the transfer buttons follow --- */
 
-.library-transfer .transfer {
+.toolbar {
   display: flex;
-  gap: 0.4rem;
-  margin: 0;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.75rem 0 0;
 }
 
-.library-transfer .transfer button {
-  padding: 0.2rem 0.8rem;
+/* Full width on a phone - the buttons share the wrapped line under it; the
+   media query below pulls all three onto one line. */
+.toolbar input {
+  flex: 1 1 100%;
+  min-height: 44px;
+  min-width: 0;
+  font: inherit;
+  padding: 0.35rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid var(--page-line);
+  background: transparent;
+  color: var(--page-fg);
+}
+
+.toolbar button {
+  flex: 1 1 0;
+  min-height: 44px;
+  padding: 0.35rem 1rem;
 }
 
 /* The offer a picked file becomes: its size, a taste of its titles, and the
@@ -359,6 +389,151 @@ body.reader {
   overflow-wrap: anywhere;
 }
 
+.transfer {
+  display: flex;
+  gap: 0.5rem;
+  margin: 1rem 0 0;
+}
+
+.transfer button {
+  min-height: 44px;
+  padding: 0.35rem 1rem;
+}
+
+/* --- the two kinds of nothing: an empty segment, a filter with no match --- */
+
+#library-empty {
+  margin-top: 0.75rem;
+  border-top: 1px solid var(--page-line);
+}
+
+#library-empty p {
+  margin: 0 0 0.75rem;
+}
+
+#library-empty button {
+  min-height: 44px;
+  padding: 0.35rem 1rem;
+}
+
+/* --- the rows: a grid, the whole text cell one target, Delete outside it --- */
+
+.library-rows {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  border-top: 1px solid var(--page-line);
+}
+
+/* The empty states above speak instead; an empty list must not leave a stray
+   rule on the page. */
+.library-rows:empty {
+  display: none;
+}
+
+/* Text | action, one layout at every width. `minmax(0, 1fr)` lets long titles
+   wrap instead of pushing Delete off the row, and the 1rem gap is the moat
+   around Delete: the title's stretched click area ends a clear step before
+   the button begins, so a finger aiming at one cannot land in the other. */
+.library-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0 1rem;
+  border-bottom: 1px solid var(--page-line);
+}
+
+/* The anchor of the title button's stretched ::after: the click area is
+   exactly this cell, padding and all. */
+.library-text {
+  position: relative;
+  min-width: 0;
+  padding: 0.7rem 0;
+}
+
+/* The title is the way in and the row's accessible name: a bare button
+   dressed as text, in the article's own face - these are articles. It
+   follows the reader's type setting the way the article itself does. */
+.library-open {
+  display: block;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: none;
+  color: var(--page-fg);
+  text-align: start;
+  font-family: Georgia, "Iowan Old Style", "Times New Roman", serif;
+  font-size: var(--reader-size, 18px);
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+:root[data-reader-font="sans"] .library-open {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+/* The whole text cell opens the article, not just the words of the title. */
+.library-open::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.library-item-detail {
+  display: block;
+  margin-top: 0.15rem;
+  color: var(--page-muted);
+  font-size: 0.85rem;
+}
+
+/* The row answers the pointer and the keyboard as one thing: a wash from the
+   theme's own ink, and for the keyboard a ring around the row rather than
+   around the title's words - the target it marks is the cell. */
+.library-row:has(.library-open:hover) {
+  background: color-mix(in srgb, var(--page-fg) 5%, transparent);
+}
+
+.library-open:focus-visible {
+  outline: none;
+}
+
+.library-row:has(.library-open:focus-visible) {
+  background: color-mix(in srgb, var(--page-fg) 5%, transparent);
+  outline: 2px solid var(--page-accent);
+  outline-offset: -2px;
+}
+
+/* Delete, always visible but dressed down - touch and e-ink have no hover to
+   reveal it with: no resting border, muted color, a 44px hit box. Aligned to
+   the top of the row and nowrap, so "Sure?" grows leftward from a fixed right
+   edge and the second press lands where the first one did. */
+.library-delete {
+  align-self: start;
+  margin-top: 0.35rem;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0.35rem 0.8rem;
+  border-color: transparent;
+  color: var(--page-muted);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.library-delete:hover,
+.library-delete:focus-visible {
+  border-color: var(--page-line);
+  background: color-mix(in srgb, var(--page-fg) 6%, transparent);
+  color: var(--page-fg);
+}
+
+/* --- the shared pager, held to the same touch floor --- */
+
+.pager button {
+  min-height: 44px;
+  padding: 0.35rem 1rem;
+}
+
+/* --- the article's action row --- */
+
 .reader-actions {
   display: flex;
   flex-wrap: wrap;
@@ -378,8 +553,32 @@ body.reader {
 }
 
 /* A delete asking "Sure?" - the second press is the confirmation (there is no
-   modal and no undo timer), and the border says which button is asking. */
-button[data-armed] {
+   modal and no undo timer). The accent frames and fills the asking button
+   while the text keeps the page's own color: readable in all four themes.
+   Last, so the armed state outranks the quiet hover above. */
+button[data-armed],
+.library-delete[data-armed],
+.library-delete[data-armed]:hover,
+.library-delete[data-armed]:focus-visible {
   border-color: var(--page-accent);
-  color: var(--page-accent);
+  background: color-mix(in srgb, var(--page-accent) 12%, transparent);
+  color: var(--page-fg);
+}
+
+/* --- one breakpoint: the same HTML, spread out for a desktop --- */
+
+@media (min-width: 600px) {
+  /* The tabs keep their own width instead of splitting the line. */
+  .library-segments button {
+    flex: none;
+  }
+
+  /* The filter takes the line's slack; the buttons keep their own width. */
+  .toolbar input {
+    flex: 1 1 auto;
+  }
+
+  .toolbar button {
+    flex: none;
+  }
 }
