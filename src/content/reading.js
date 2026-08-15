@@ -176,6 +176,14 @@ let ttsLang = DEFAULTS.sourceLang;
 /** @type {string | undefined} */
 let ttsVoiceURI = undefined;
 
+/**
+ * How fast the voice reads, mirrored like the rest (D87). One setting for both
+ * places a voice speaks: somebody who set the reader's article to half speed
+ * wants the phrase in the bubble at half speed too, because what is slow is
+ * the language, not the surface.
+ */
+let ttsRate = DEFAULTS.ttsRate;
+
 /** Where the press this release belongs to started, and whether it was ours. */
 /** @type {{ x: number, y: number, mine: boolean } | null} */
 let press = null;
@@ -278,6 +286,7 @@ async function loadVocabulary(preloaded) {
     bubbleScale = config.bubbleScale;
     ttsLang = config.sourceLang;
     ttsVoiceURI = config.ttsVoices[config.sourceLang];
+    ttsRate = config.ttsRate;
 
     if (mirror === null) {
       adopt([]);
@@ -375,7 +384,7 @@ async function onAction(action, meanings) {
     // nothing, so no keepable gate - and what is spoken is the page's own
     // text, never the gloss (D83).
     if (speaking()) stopSpeaking();
-    else if (current !== null) speak(current.text, ttsLang, ttsVoiceURI);
+    else if (current !== null) speak(current.text, ttsLang, ttsVoiceURI, ttsRate / 100);
     return;
   }
   if (action === "learned") {

@@ -162,7 +162,7 @@
 
   "reader_title": { "message": "re/read - vista de lectura" },
   "reader_open_original": { "message": "Abrir el original" },
-  "reader_display_title": { "message": "Tipografía y tema" },
+  "reader_display_title": { "message": "Texto y voz" },
   "reader_theme": { "message": "Tema" },
   "reader_theme_auto": { "message": "Auto" },
   "reader_theme_light": { "message": "Claro" },
@@ -177,6 +177,18 @@
   "reader_width": { "message": "Anchura" },
   "reader_narrower": { "message": "Más estrecha" },
   "reader_wider": { "message": "Más ancha" },
+  "reader_listen": { "message": "Leer en voz alta" },
+  "reader_voice": { "message": "Voz" },
+  "reader_speed": { "message": "Velocidad" },
+  "reader_slower": { "message": "Más lento" },
+  "reader_faster": { "message": "Más rápido" },
+  "reader_speech_bar": { "message": "Lectura en voz alta" },
+  "reader_speech_back": { "message": "Atrás" },
+  "reader_speech_play": { "message": "Reanudar" },
+  "reader_speech_pause": { "message": "Pausa" },
+  "reader_speech_stop": { "message": "Parar" },
+  "reader_speech_forward": { "message": "Adelante" },
+  "reader_speech_failed": { "message": "Este dispositivo no ha podido leer el artículo en voz alta." },
   "reader_segment_unread": { "message": "Por leer" },
   "reader_segment_read": { "message": "Leídos" },
   "reader_segment_unread_count": {
@@ -455,6 +467,10 @@
   "options_tts_listen": { "message": "Escuchar" },
   "options_tts_voice_hint": {
     "message": "El botón del altavoz en la burbuja de traducción lee en voz alta la frase seleccionada, en el idioma que se está leyendo - así se puede oír cómo se pronuncia una palabra. Las voces son las de este dispositivo y su navegador: el habla se genera localmente y la frase no se envía a ninguna parte. Sin elección, el navegador escoge por sí mismo una voz para el idioma."
+  },
+  "options_tts_rate": { "message": "Velocidad de lectura" },
+  "options_tts_rate_hint": {
+    "message": "Un múltiplo de la velocidad normal de la voz. En un idioma que aún estás aprendiendo, prueba primero más despacio: a media velocidad las terminaciones de las palabras dejan de desaparecer."
   },
   "options_models_heading": { "message": "Modelos de traducción" },
   "options_models_intro": {

@@ -162,7 +162,7 @@
 
   "reader_title": { "message": "re/read - lecteur" },
   "reader_open_original": { "message": "Ouvrir l'original" },
-  "reader_display_title": { "message": "Police et thème" },
+  "reader_display_title": { "message": "Texte et voix" },
   "reader_theme": { "message": "Thème" },
   "reader_theme_auto": { "message": "Auto" },
   "reader_theme_light": { "message": "Clair" },
@@ -177,6 +177,18 @@
   "reader_width": { "message": "Largeur" },
   "reader_narrower": { "message": "Plus étroite" },
   "reader_wider": { "message": "Plus large" },
+  "reader_listen": { "message": "Lire à voix haute" },
+  "reader_voice": { "message": "Voix" },
+  "reader_speed": { "message": "Vitesse" },
+  "reader_slower": { "message": "Plus lent" },
+  "reader_faster": { "message": "Plus rapide" },
+  "reader_speech_bar": { "message": "Lecture à voix haute" },
+  "reader_speech_back": { "message": "Reculer" },
+  "reader_speech_play": { "message": "Reprendre" },
+  "reader_speech_pause": { "message": "Pause" },
+  "reader_speech_stop": { "message": "Arrêter" },
+  "reader_speech_forward": { "message": "Avancer" },
+  "reader_speech_failed": { "message": "Cet appareil n'a pas pu lire l'article à voix haute." },
   "reader_segment_unread": { "message": "À lire" },
   "reader_segment_read": { "message": "Lus" },
   "reader_segment_unread_count": {
@@ -455,6 +467,10 @@
   "options_tts_listen": { "message": "Écouter" },
   "options_tts_voice_hint": {
     "message": "Le bouton haut-parleur de la bulle de traduction lit à voix haute la phrase sélectionnée, dans la langue en cours de lecture - de quoi entendre comment un mot se prononce. Les voix sont celles de cet appareil et de son navigateur : la parole est produite localement, et la phrase n'est envoyée nulle part. Sans choix, le navigateur choisit lui-même une voix pour la langue."
+  },
+  "options_tts_rate": { "message": "Vitesse de lecture" },
+  "options_tts_rate_hint": {
+    "message": "Un multiple de la vitesse normale de la voix. Dans une langue que vous apprenez encore, essayez d'abord plus lentement : à mi-vitesse, les terminaisons des mots cessent de disparaître."
   },
   "options_models_heading": { "message": "Modèles de traduction" },
   "options_models_intro": {

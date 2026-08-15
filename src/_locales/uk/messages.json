@@ -207,7 +207,7 @@
 
   "reader_title": { "message": "re/read - режим читання" },
   "reader_open_original": { "message": "Відкрити оригінал" },
-  "reader_display_title": { "message": "Шрифт і тема" },
+  "reader_display_title": { "message": "Текст і голос" },
   "reader_theme": { "message": "Тема" },
   "reader_theme_auto": { "message": "Авто" },
   "reader_theme_light": { "message": "Світла" },
@@ -222,6 +222,18 @@
   "reader_width": { "message": "Ширина" },
   "reader_narrower": { "message": "Вужча" },
   "reader_wider": { "message": "Ширша" },
+  "reader_listen": { "message": "Читати вголос" },
+  "reader_voice": { "message": "Голос" },
+  "reader_speed": { "message": "Швидкість" },
+  "reader_slower": { "message": "Повільніше" },
+  "reader_faster": { "message": "Швидше" },
+  "reader_speech_bar": { "message": "Читання вголос" },
+  "reader_speech_back": { "message": "Назад" },
+  "reader_speech_play": { "message": "Продовжити" },
+  "reader_speech_pause": { "message": "Пауза" },
+  "reader_speech_stop": { "message": "Стоп" },
+  "reader_speech_forward": { "message": "Далі" },
+  "reader_speech_failed": { "message": "Цей пристрій не зміг прочитати статтю вголос." },
   "reader_segment_unread": { "message": "До прочитання" },
   "reader_segment_read": { "message": "Прочитане" },
   "reader_segment_unread_count": {
@@ -562,6 +574,10 @@
   "options_tts_listen": { "message": "Прослухати" },
   "options_tts_voice_hint": {
     "message": "Кнопка з динаміком у бульбашці перекладу читає виділену фразу вголос мовою, яку читаєте - так можна почути, як вимовляється слово. Голоси належать цьому пристрою та його браузеру: мовлення створюється локально, і фраза нікуди не надсилається. Без вибору браузер сам добирає голос для мови."
+  },
+  "options_tts_rate": { "message": "Швидкість читання" },
+  "options_tts_rate_hint": {
+    "message": "Кратність звичайної швидкості голосу. Мовою, яку ви ще вивчаєте, спершу варто спробувати повільніше: на половині швидкості закінчення слів перестають зникати."
   },
   "options_models_heading": { "message": "Моделі перекладу" },
   "options_models_intro": {

@@ -7,6 +7,7 @@ import {
   MEASURE,
   READER_DEFAULTS,
   SIZE,
+  TTS_RATE,
   effectiveReaderOnly,
   osFrom,
   platformOs,
@@ -291,6 +292,38 @@ describe("the bubble scale", () => {
 
     assert.deepEqual(written, { ...DEFAULTS, sourceLang: "de", targetLang: "en", bubbleScale: 130 });
     assert.equal(/** @type {any} */ (store["config"]).bubbleScale, 130);
+  });
+});
+
+describe("the reading speed", () => {
+  it("answers the voice's own speed for profiles old and new", () => {
+    assert.equal(withDefaults(undefined).ttsRate, 100);
+    assert.equal(withDefaults({ sourceLang: "en" }).ttsRate, 100);
+  });
+
+  it("keeps a stored percent and clamps one from outside the scale", () => {
+    assert.equal(withDefaults({ ttsRate: 70 }).ttsRate, 70);
+    assert.equal(withDefaults({ ttsRate: TTS_RATE.min }).ttsRate, TTS_RATE.min);
+    assert.equal(withDefaults({ ttsRate: TTS_RATE.max }).ttsRate, TTS_RATE.max);
+    assert.equal(withDefaults({ ttsRate: 5 }).ttsRate, TTS_RATE.min);
+    assert.equal(withDefaults({ ttsRate: 900 }).ttsRate, TTS_RATE.max);
+    // The percent is the contract, so an engine factor stored by hand reads
+    // as far too slow rather than as itself - and lands on the floor.
+    assert.equal(withDefaults({ ttsRate: 1.5 }).ttsRate, TTS_RATE.min);
+  });
+
+  it("treats a hand-edited value of the wrong type as the default", () => {
+    for (const ttsRate of ["150", null, {}, Number.NaN]) {
+      assert.equal(withDefaults({ ttsRate }).ttsRate, 100);
+    }
+  });
+
+  it("writes the percent through writeConfig without touching the rest", async () => {
+    const store = installFakeBrowser({ config: { sourceLang: "de", targetLang: "en" } });
+    const written = await writeConfig({ ttsRate: 80 });
+
+    assert.deepEqual(written, { ...DEFAULTS, sourceLang: "de", targetLang: "en", ttsRate: 80 });
+    assert.equal(/** @type {any} */ (store["config"]).ttsRate, 80);
   });
 });
 

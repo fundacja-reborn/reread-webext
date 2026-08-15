@@ -18,6 +18,7 @@ import { webext } from "../lib/browser.js";
 import {
   BUBBLE_SCALE,
   CONFIG_KEY,
+  TTS_RATE,
   effectiveReaderOnly,
   platformOs,
   readConfig,
@@ -322,6 +323,27 @@ function renderVoice() {
   select.disabled = !canSpeak();
   const listen = document.getElementById("tts-listen");
   if (listen instanceof HTMLButtonElement) listen.disabled = !canSpeak();
+}
+
+/**
+ * The reading-speed stepper (D87), shown as the factor it means rather than
+ * the percent it is stored as: `1.2x` is how every player says this, and the
+ * percent is an implementation detail of the config. The reader's own panel
+ * has the same two buttons over the same setting - this is where somebody who
+ * only ever uses the bubble's speaker finds it.
+ */
+function renderRate() {
+  const value = document.getElementById("tts-rate-value");
+  if (value !== null) value.textContent = `${(config.ttsRate / 100).toFixed(1)}×`;
+}
+
+/**
+ * @param {number} by
+ */
+async function stepRate(by) {
+  const current = (await readConfig()).ttsRate;
+  config = await writeConfig({ ttsRate: current + by });
+  renderRate();
 }
 
 /**
@@ -1469,6 +1491,7 @@ async function render() {
   renderQuietBubble();
   renderBubbleScale();
   renderVoice();
+  renderRate();
   renderLanguageChoices("dictionary-from", config.sourceLang);
   renderLanguageChoices("dictionary-to", config.targetLang);
 
@@ -1518,6 +1541,7 @@ async function refresh() {
   // The pair may have moved (the popup writes it too), and the pair decides
   // which language's voices the select is about.
   renderVoice();
+  renderRate();
   renderDisabledHosts();
   // Both lists, because "what you are reading" rides on the pair in both -
   // and the select rides `renderModels`. While a download or an import holds
@@ -1582,7 +1606,15 @@ document.getElementById("tts-listen")?.addEventListener("click", () => {
   // trying a voice out before living with it.
   const select = document.getElementById("tts-voice");
   const chosen = select instanceof HTMLSelectElement && select.value !== "" ? select.value : undefined;
-  speak(VOICE_SAMPLE, config.sourceLang, chosen);
+  // At the speed that is set, because that is what living with it will sound
+  // like - a sample read at a speed nobody uses is a sample of nothing.
+  speak(VOICE_SAMPLE, config.sourceLang, chosen, config.ttsRate / 100);
+});
+document.getElementById("tts-rate-down")?.addEventListener("click", () => {
+  void stepRate(-TTS_RATE.step);
+});
+document.getElementById("tts-rate-up")?.addEventListener("click", () => {
+  void stepRate(TTS_RATE.step);
 });
 document.getElementById("add-model")?.addEventListener("click", () => void addSelectedModel());
 document.getElementById("refresh-models")?.addEventListener("click", () => void refreshList());

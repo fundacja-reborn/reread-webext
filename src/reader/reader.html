@@ -20,11 +20,41 @@
       <span class="reader-mark">re/read</span>
       <span class="reader-tools">
         <a id="original" class="reader-original" data-i18n="reader_open_original" hidden>Open the original</a>
+        <!--
+          Reading aloud starts here and is steered from the bar at the bottom of
+          the screen, which only exists while the voice is speaking (D87). The
+          button is drawn rather than written for the reason the bubble's
+          speaker is: one row of tools, six languages, and a speaker needs no
+          label to be understood.
+        -->
+        <button
+          id="listen"
+          type="button"
+          title="Read aloud"
+          data-i18n-title="reader_listen"
+          aria-label="Read aloud"
+          data-i18n-aria-label="reader_listen"
+          hidden
+        >
+          <svg class="reader-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+            <path
+              d="M2.5 6h2.6L8.6 3.1a.6.6 0 0 1 1 .46v8.88a.6.6 0 0 1-1 .46L5.1 10H2.5a.6.6 0 0 1-.6-.6V6.6a.6.6 0 0 1 .6-.6z"
+              fill="currentColor"
+            />
+            <path
+              d="M11.6 5.8a3.2 3.2 0 0 1 0 4.4M13.4 4a5.7 5.7 0 0 1 0 8"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.3"
+              stroke-linecap="round"
+            />
+          </svg>
+        </button>
         <button
           id="display"
           type="button"
           aria-expanded="false"
-          title="Type and theme"
+          title="Text and voice"
           data-i18n-title="reader_display_title"
         >
           Aa
@@ -41,7 +71,7 @@
       id="display-panel"
       class="reader-panel"
       hidden
-      aria-label="Type and theme"
+      aria-label="Text and voice"
       data-i18n-aria-label="reader_display_title"
     >
       <div class="reader-setting">
@@ -77,6 +107,31 @@
           <button type="button" data-measure="-5" title="Narrower" data-i18n-title="reader_narrower">&minus;</button>
           <output id="measure-value">65</output>
           <button type="button" data-measure="5" title="Wider" data-i18n-title="reader_wider">+</button>
+        </span>
+      </div>
+
+      <!--
+        The two knobs of reading aloud (D87), here rather than only in the
+        settings because this is where they are used: the voice is chosen while
+        listening to it, and the speed is changed in the middle of a sentence
+        that went too fast. Both are the same stored settings the bubble's
+        speaker reads, so a choice made here holds everywhere. The rows are
+        hidden outright on a device whose browser cannot speak - an empty voice
+        select would be a promise nothing keeps.
+      -->
+      <div class="reader-setting" id="voice-setting" hidden>
+        <label class="reader-setting-name" for="voice-choice" data-i18n="reader_voice">Voice</label>
+        <span class="reader-choices">
+          <select id="voice-choice"></select>
+        </span>
+      </div>
+
+      <div class="reader-setting" id="rate-setting" hidden>
+        <span class="reader-setting-name" data-i18n="reader_speed">Speed</span>
+        <span class="reader-choices">
+          <button type="button" data-rate="-10" title="Slower" data-i18n-title="reader_slower">&minus;</button>
+          <output id="rate-value">1.0&times;</output>
+          <button type="button" data-rate="10" title="Faster" data-i18n-title="reader_faster">+</button>
         </span>
       </div>
     </section>
@@ -208,6 +263,56 @@
         <div id="content"></div>
       </article>
     </main>
+
+    <!--
+      The bar that steers the voice (D87). It exists only while the article is
+      being read: a transport bar standing over an article nobody is listening
+      to is a row of buttons that mean nothing. Pinned to the bottom of the
+      window because that is where a thumb is on a phone and on an e-reader,
+      and the page gives it room while it is there rather than letting it cover
+      the last lines (the `:has` rule in reader.css).
+
+      Four buttons, drawn and labelled: the icons read at a glance, the words
+      say which sentence the arrows move by. Back is the press this feature
+      exists for - a sentence in a language somebody is learning is regularly
+      worth hearing twice.
+    -->
+    <div
+      id="speech-bar"
+      class="speech-bar"
+      hidden
+      role="group"
+      aria-label="Reading aloud"
+      data-i18n-aria-label="reader_speech_bar"
+    >
+      <button type="button" id="speech-back">
+        <svg class="reader-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <path d="M8.4 3.6v8.8L3.1 8zM13.6 3.6v8.8L8.3 8z" fill="currentColor" />
+        </svg>
+        <span data-i18n="reader_speech_back">Back</span>
+      </button>
+      <button type="button" id="speech-play">
+        <svg class="reader-icon icon-pause" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <path d="M4.4 3h2.7v10H4.4zM8.9 3h2.7v10H8.9z" fill="currentColor" />
+        </svg>
+        <svg class="reader-icon icon-play" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <path d="M4.6 3l8 5-8 5z" fill="currentColor" />
+        </svg>
+        <span id="speech-play-label" data-i18n="reader_speech_pause">Pause</span>
+      </button>
+      <button type="button" id="speech-stop">
+        <svg class="reader-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <path d="M3.6 3.6h8.8v8.8H3.6z" fill="currentColor" />
+        </svg>
+        <span data-i18n="reader_speech_stop">Stop</span>
+      </button>
+      <button type="button" id="speech-forward">
+        <svg class="reader-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <path d="M7.6 3.6v8.8L12.9 8zM2.4 3.6v8.8L7.7 8z" fill="currentColor" />
+        </svg>
+        <span data-i18n="reader_speech_forward">Forward</span>
+      </button>
+    </div>
 
     <!--
       The extractor, exactly as its authors published it: vendored byte for byte

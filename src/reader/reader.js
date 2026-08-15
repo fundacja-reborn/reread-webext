@@ -27,8 +27,10 @@ import { webext } from "../lib/browser.js";
 import { localizePage, plural, t } from "../lib/i18n.js";
 import {
   CONFIG_KEY,
+  DEFAULTS,
   MEASURE,
   SIZE,
+  TTS_RATE,
   isFont,
   isTheme,
   readConfig,
@@ -54,7 +56,17 @@ import {
   setReadAt,
 } from "../lib/store/articles.js";
 import { Segment, emptySentence, savedArticle } from "../lib/store/saved-article.js";
+import { canSpeak, primaryLanguage, voicesFor } from "../lib/tts.js";
 import { libraryView } from "./list-view.js";
+import {
+  configureReading,
+  forgetReading,
+  readingState,
+  readingVoice,
+  skipSentence,
+  stopReading,
+  toggleReading,
+} from "./read-aloud.js";
 
 /** Vendored, loaded by its own script tag, and the only global this page uses. */
 const Readability = /** @type {ReadabilityConstructor} */ (
@@ -75,6 +87,15 @@ const displayButton = document.getElementById("display");
 const displayPanel = document.getElementById("display-panel");
 const sizeValue = document.getElementById("size-value");
 const measureValue = document.getElementById("measure-value");
+const listenButton = /** @type {HTMLButtonElement | null} */ (document.getElementById("listen"));
+const voiceSetting = document.getElementById("voice-setting");
+const voiceChoice = /** @type {HTMLSelectElement | null} */ (
+  document.getElementById("voice-choice")
+);
+const rateSetting = document.getElementById("rate-setting");
+const rateValue = document.getElementById("rate-value");
+const speechBar = document.getElementById("speech-bar");
+const speechPlayLabel = document.getElementById("speech-play-label");
 const library = document.getElementById("library");
 const librarySegments = document.getElementById("library-segments");
 const libraryCount = document.getElementById("library-count");
@@ -145,6 +166,17 @@ let libraryPage = 1;
  * replace the saved article somebody has meanwhile opened.
  */
 let epoch = 0;
+
+/**
+ * The settings as they stand. Held rather than read at every press because
+ * reading aloud (D87) asks three questions of them - which voice, how fast,
+ * which language - at every button and every article, and a round trip to
+ * storage for each would buy nothing: the storage listener below already keeps
+ * this current, in this tab and from any other.
+ *
+ * @type {import("../lib/config.js").Config}
+ */
+let settings = DEFAULTS;
 
 /**
  * The file waiting for the reader's yes: its name, its articles as parsed,
@@ -238,6 +270,10 @@ function setBase(doc, url) {
 function renderArticle(piece) {
   if (article === null || contentElement === null || titleElement === null) return;
   epoch += 1;
+  // Whatever was being read aloud was this element's previous contents, and
+  // they are about to be replaced: the voice stops here rather than reading a
+  // sentence of one article into another (D87).
+  forgetReading();
 
   const rebuilt = buildArticle(piece.source, document, { baseUrl: piece.url });
 
@@ -275,6 +311,10 @@ function renderArticle(piece) {
   document.title = `${piece.title} - re/read`;
 
   shown = { origin: piece.origin, url: piece.url };
+  // The voice follows the article, not the pair: this one may be in another
+  // language, and the select in the panel is about whatever is on screen.
+  applySpeech();
+  updateListen();
   scrollTo(0, 0);
   void refreshActions();
 }
@@ -381,6 +421,10 @@ async function openSaved(url) {
 async function showLibrary() {
   epoch += 1;
   shown = null;
+  // The article being read aloud is leaving the screen, and a voice reading a
+  // page nobody can see is the extension talking to itself.
+  forgetReading();
+  updateListen();
   if (article !== null) article.hidden = true;
   if (actions !== null) actions.hidden = true;
   if (originalLink !== null) originalLink.hidden = true;
@@ -863,11 +907,139 @@ function applyAppearance(reader) {
 }
 
 /**
+ * The language the article is written in, which is what a voice has to be told
+ * (D87): a page that declares one knows better than the language pair does,
+ * and a page that declares none is being read for the pair's sake, so the
+ * source language is the honest guess. The full tag rides through - `en-GB`
+ * picks a British voice where the device has one - while the *choice* of voice
+ * is stored under the primary subtag, so one pick serves every variant and
+ * agrees with the settings page, which only ever knows the pair.
+ *
+ * @returns {string}
+ */
+function speechLang() {
+  const declared = article?.getAttribute("lang") ?? "";
+  return primaryLanguage(declared).length > 0 ? declared : settings.sourceLang;
+}
+
+/**
+ * @returns {import("./read-aloud.js").ReadingVoice}
+ */
+function speechVoice() {
+  const lang = speechLang();
+  return {
+    lang,
+    voiceURI: settings.ttsVoices[primaryLanguage(lang)],
+    // The engine's factor, out of the percent the config stores.
+    rate: settings.ttsRate / 100,
+  };
+}
+
+/**
+ * The voice select in the panel: this device's voices able to read the article
+ * on screen, behind a first line that means "let the browser pick". Redrawn
+ * whenever the language or the settings may have moved, and when the engine's
+ * list arrives - `getVoices` answers nothing until the browser has loaded the
+ * voices, and `voiceschanged` is the only appointment it keeps.
+ */
+function renderVoiceChoice() {
+  if (voiceChoice === null) return;
+  const lang = speechLang();
+  const stored = settings.ttsVoices[primaryLanguage(lang)];
+  const voices = canSpeak() ? voicesFor(speechSynthesis.getVoices(), lang) : [];
+
+  const fallback = document.createElement("option");
+  fallback.value = "";
+  fallback.textContent = t("options_tts_default");
+  fallback.selected = stored === undefined;
+
+  voiceChoice.replaceChildren(
+    fallback,
+    ...voices.map((voice) => {
+      const option = document.createElement("option");
+      option.value = voice.voiceURI;
+      // The voice's own name plus its tag: two voices called "English" differ
+      // only by where they are from, and the name alone would be a coin toss.
+      option.textContent = `${voice.name} (${voice.lang})`;
+      option.selected = voice.voiceURI === stored;
+      return option;
+    }),
+  );
+}
+
+/**
+ * What the settings say about the voice, put where it is read from: the two
+ * controls in the panel, and the reading itself - which starts the current
+ * sentence again when one of them really moved, so a speed changed mid-article
+ * is heard now rather than after the paragraph (`readingVoice`).
+ */
+function applySpeech() {
+  if (rateValue !== null) rateValue.textContent = `${(settings.ttsRate / 100).toFixed(1)}×`;
+  renderVoiceChoice();
+  readingVoice(speechVoice());
+}
+
+/**
+ * One road for everything the settings decide on this page - how it looks and
+ * what the voice does. Fed with what was actually stored rather than with what
+ * was asked for: at either end of a scale the honest answer is "it did not
+ * move", and the controls should show that instead of pretending.
+ *
+ * @param {import("../lib/config.js").Config} config
+ */
+function adoptConfig(config) {
+  settings = config;
+  applyAppearance(config.reader);
+  applySpeech();
+}
+
+/**
+ * Whether reading aloud is on offer, and whether it is happening. The button
+ * is there for an article and only for an article: the reading list has no
+ * text to read, and a device whose browser cannot speak never sees it at all.
+ */
+function updateListen() {
+  if (listenButton === null) return;
+  listenButton.hidden = shown === null || !canSpeak();
+  listenButton.setAttribute("aria-pressed", String(readingState() !== "off"));
+}
+
+/**
+ * The bar is the whole of what the reader sees about the state of the voice:
+ * there while it reads or waits, gone the moment it is neither. Which is also
+ * why nothing else has to be told when the article ends - the end of the
+ * article is `off`, and `off` takes the bar with it.
+ *
+ * @param {import("./read-aloud.js").ReadingState} state
+ */
+function showSpeechBar(state) {
+  if (speechBar !== null) {
+    speechBar.hidden = state === "off";
+    speechBar.dataset["state"] = state;
+  }
+  if (speechPlayLabel !== null) {
+    speechPlayLabel.textContent =
+      state === "paused" ? t("reader_speech_play") : t("reader_speech_pause");
+  }
+  updateListen();
+}
+
+/**
  * @param {Event} event
  */
 async function onDisplayPress(event) {
   const button = event.target;
   if (!(button instanceof HTMLButtonElement)) return;
+
+  // The reading speed is not part of `reader`: it is one setting for both
+  // places a voice speaks (the bubble's phrase and this article), so it lives
+  // beside them in the config rather than inside the reader's appearance.
+  const rate = button.getAttribute("data-rate");
+  if (rate !== null) {
+    const current = (await readConfig()).ttsRate;
+    adoptConfig(await writeConfig({ ttsRate: clamp(current + Number(rate), TTS_RATE) }));
+    return;
+  }
 
   const theme = button.getAttribute("data-theme");
   const font = button.getAttribute("data-font");
@@ -892,7 +1064,7 @@ async function onDisplayPress(event) {
   // Applied from what was actually stored, not from what was asked for: at
   // either end of the scale the answer is "it did not move", and the buttons
   // should show that rather than pretend.
-  applyAppearance((await writeConfig({ reader: patch })).reader);
+  adoptConfig(await writeConfig({ reader: patch }));
 }
 
 /**
@@ -1017,15 +1189,60 @@ keepButton?.addEventListener("click", () => void onKeepPress());
 removeButton?.addEventListener("click", () => void onRemovePress());
 markReadButton?.addEventListener("click", () => void onMarkReadPress());
 
+// Reading aloud (D87). The module keeps the place and the voice; this page
+// owns the two things a reader can see - the bar and the button - and hears
+// about every change in one callback.
+configureReading({
+  article: () => article,
+  onChange: showSpeechBar,
+  // The engine refusing is the one thing reading aloud can do that leaves
+  // nothing on screen to explain itself, so it is said in the page's own
+  // notice line rather than in a bar that has just disappeared.
+  onFail: () => showNotice(t("reader_speech_failed")),
+});
+
+listenButton?.addEventListener("click", () => toggleReading());
+document.getElementById("speech-play")?.addEventListener("click", () => toggleReading());
+document.getElementById("speech-stop")?.addEventListener("click", () => stopReading());
+document.getElementById("speech-back")?.addEventListener("click", () => skipSentence(-1));
+document.getElementById("speech-forward")?.addEventListener("click", () => skipSentence(1));
+
+voiceChoice?.addEventListener("change", () => {
+  if (voiceChoice === null) return;
+  // The whole map is written back (see `writeConfig`), which is what lets the
+  // first line remove the entry rather than store an empty choice. The key is
+  // the article's language, so a German article read inside an en-pl pair
+  // remembers its German voice without disturbing the pair's.
+  const key = primaryLanguage(speechLang());
+  const map = { ...settings.ttsVoices };
+  if (voiceChoice.value === "") delete map[key];
+  else map[key] = voiceChoice.value;
+  void writeConfig({ ttsVoices: map }).then(adoptConfig);
+});
+
+// A tab going away mid-sentence has to take the voice with it: the queue
+// behind `speechSynthesis` belongs to the browser, not to this page, and an
+// utterance left in it goes on talking over a closed tab.
+window.addEventListener("pagehide", () => stopReading());
+
+// The rows exist only where they can do something, and the engine's voice list
+// arrives on its own schedule - after first paint on most platforms, never at
+// all on some (Android speaks anyway, see `lib/tts.js`).
+if (canSpeak()) {
+  if (voiceSetting !== null) voiceSetting.hidden = false;
+  if (rateSetting !== null) rateSetting.hidden = false;
+  speechSynthesis.addEventListener("voiceschanged", renderVoiceChoice);
+}
+
 // The settings can change in another reader tab, and the language pair on the
 // settings page. Reading the whole thing back is cheaper than working out which
 // half moved.
 webext().storage.onChanged.addListener((changes, area) => {
   if (area !== "local" || changes[CONFIG_KEY] === undefined) return;
-  void readConfig().then((config) => applyAppearance(config.reader));
+  void readConfig().then(adoptConfig);
 });
 
-void readConfig().then((config) => applyAppearance(config.reader));
+void readConfig().then(adoptConfig);
 
 // Two ways in, and they are the same question. On load, because the reader was
 // probably just opened by the button; on a change to the session key, because

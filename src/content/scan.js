@@ -98,6 +98,56 @@ function partsOf(block) {
 }
 
 /**
+ * The prose under one root, in the pieces it is stored in, with a line break
+ * standing in for every block boundary crossed on the way.
+ *
+ * `partsOf` above stops at nested blocks because a block is as far as a phrase
+ * may reach; this walks straight through them, because reading an article
+ * aloud (D87) is exactly the thing that has to cross them - the article is one
+ * text, read from its title to its last paragraph. The breaks are what keeps
+ * two paragraphs from being joined into a sentence that is on neither of them:
+ * `endsSentence` counts a line break as an ending, so every block ends an
+ * utterance whether it is punctuated or not.
+ *
+ * The pieces come out in document order and are the same `BlockPart` shape the
+ * matcher joins, so `joinPieces` and `locate` do the offset arithmetic here
+ * too - one way of getting from a character back to the text node it is in.
+ *
+ * @param {Element} root
+ * @returns {BlockPart[]}
+ */
+export function prosePieces(root) {
+  /** @type {BlockPart[]} */
+  const parts = [];
+
+  /**
+   * @param {Node} node
+   */
+  const walk = (node) => {
+    for (let child = node.firstChild; child !== null; child = child.nextSibling) {
+      if (child.nodeType === Node.TEXT_NODE) {
+        const text = /** @type {Text} */ (child);
+        parts.push({ node: text, text: text.data });
+        continue;
+      }
+      if (child.nodeType !== Node.ELEMENT_NODE) continue;
+
+      const element = /** @type {Element} */ (child);
+      if (SKIP.has(element.tagName)) continue;
+      if (element instanceof HTMLElement && element.isContentEditable) continue;
+
+      const boundary = BLOCK.has(element.tagName);
+      if (boundary) parts.push({ node: null, text: "\n" });
+      walk(element);
+      if (boundary) parts.push({ node: null, text: "\n" });
+    }
+  };
+
+  walk(root);
+  return parts;
+}
+
+/**
  * One block's text machinery, handed out whole: the block a node lives in, its
  * prose in pieces, the pieces joined, and where each piece sits in the joined
  * text. `blockTextAround` reads it to place a selection; the reader's touch

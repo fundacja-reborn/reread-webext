@@ -106,6 +106,34 @@ export function speaking() {
 }
 
 /**
+ * Somebody else on this page speaking through the same queue, and able to step
+ * aside for a phrase. Exactly one such reader exists: the reader page reading
+ * a whole article aloud (D87, `reader/read-aloud.js`), which registers itself
+ * here when the page starts.
+ *
+ * The hook is needed because the queue only ever appends. Without it, pressing
+ * the speaker on a word while an article is being read would not speak the
+ * word - it would put it *after* the sentence in flight, and the answer to a
+ * press would arrive several seconds late, in the middle of something else.
+ * With it, the article stands aside at the word it had reached and the phrase
+ * is spoken now.
+ *
+ * A content script never registers anything here, which is the whole of D83's
+ * old promise: on somebody else's page the queue may be theirs, and this
+ * module still takes nothing from it that it did not put there.
+ *
+ * @type {(() => void) | null}
+ */
+let sharing = null;
+
+/**
+ * @param {() => void} yieldQueue what to do before this module speaks
+ */
+export function shareVoice(yieldQueue) {
+  sharing = yieldQueue;
+}
+
+/**
  * Speaks, replacing whatever this module was saying before. The voice list is
  * asked at speak time rather than held: it loads asynchronously and can
  * change, and the chosen voice is looked up when it is needed - or quietly
@@ -114,13 +142,19 @@ export function speaking() {
  * @param {string} text as the page has it - the phrase, never the gloss
  * @param {string} lang BCP-47, the language being read
  * @param {string | undefined} voiceURI the choice stored for that language, if any
+ * @param {number} [rate] the speed the reader set, as the engine's factor
+ *   (1 = the voice's own normal speed); the config stores it as a percent
  */
-export function speak(text, lang, voiceURI) {
+export function speak(text, lang, voiceURI, rate = 1) {
   if (!canSpeak() || text.length === 0) return;
+  // Whoever else is using this queue on this page steps aside first, or the
+  // phrase would be spoken after whatever they are saying (see `shareVoice`).
+  sharing?.();
   stop();
 
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.lang = lang;
+  utterance.rate = rate;
   const voice = chosenVoice(speechSynthesis.getVoices(), voiceURI);
   if (voice !== null) utterance.voice = voice;
 
