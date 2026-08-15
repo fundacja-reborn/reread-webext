@@ -101,21 +101,8 @@ function label(action) {
       return t("bubble_more");
     case "reader":
       return t("bubble_reader");
-    case "extend-left":
-      return t("bubble_extend_left");
-    case "extend-right":
-      return t("bubble_extend_right");
   }
 }
-
-/**
- * The stretch buttons wear a glyph and say their name to a screen reader: the
- * sentence would crowd a row whose other labels are single words, and the
- * arrowheads say "one word this way" in every locale at once.
- *
- * @type {Partial<Record<Action, string>>}
- */
-const GLYPHS = { "extend-left": "◀", "extend-right": "▶" };
 
 /** The one button whose label changes with what it will do. */
 function lessLabel() {
@@ -397,11 +384,6 @@ const STYLE = `
   }
   .actions button:disabled { opacity: 0.35; cursor: default; }
 
-  /* The stretch pair (D80): quiet like the labels around them, but a glyph is
-     narrower than a word and a target narrower than a fingertip misses. */
-  .actions button[data-action="extend-left"],
-  .actions button[data-action="extend-right"] { padding: 2px 8px; }
-
   /* The exception, and the only real call to action a bubble has: Save is the
      press that keeps a phrase which would otherwise be gone, the launcher's one
      button is the whole of the bubble it is in, and Settings is the one thing
@@ -433,8 +415,6 @@ const STYLE = `
     .entry-sense { padding: 6px 8px; }
     .actions { gap: 10px; }
     .actions button { font-size: 14px; padding: 8px 6px; }
-    .actions button[data-action="extend-left"],
-    .actions button[data-action="extend-right"] { padding: 8px 14px; }
     .actions button:first-child:not([data-action="save"]):not([data-action="reader"]):not([data-action="settings"]) { margin-left: -6px; }
     .actions button[data-action="save"],
     .actions button[data-action="reader"],
@@ -488,13 +468,11 @@ const STYLE = `
 /** @typedef {"normal" | "pending" | "error"} Tone */
 /** Which of the three bubbles this is. `launcher` is reader-only mode's one
  *  offer: no gloss, one button. @typedef {"recall" | "save" | "launcher"} Variant */
-/** What the bubble can offer. The stretch pair belongs to the reader's touch
- *  selection (D80) - one word onto either end of the phrase, for the screens
- *  where dragging is hard to see or aim.
- *  @typedef {"save" | "learned" | "edit" | "settings" | "more" | "reader" | "extend-left" | "extend-right"} Action */
+/** What the bubble can offer.
+ *  @typedef {"save" | "learned" | "edit" | "settings" | "more" | "reader"} Action */
 /** What it reports - editing never leaves the bubble, and More leaves it only
  *  on the press that opens the layer, so a caller with nothing fetched yet can
- *  fetch it then. @typedef {"save" | "choose" | "learned" | "settings" | "reader" | "more" | "extend-left" | "extend-right"} ReportedAction */
+ *  fetch it then. @typedef {"save" | "choose" | "learned" | "settings" | "reader" | "more"} ReportedAction */
 
 /**
  * One block of the second layer below the sentence: where it came from, and the
@@ -511,12 +489,27 @@ const STYLE = `
  */
 
 /**
+ * `folded` overrides the variant's own rule for where the row of actions
+ * starts (D44): the reader's touch chain opens even a fresh selection with
+ * the row away, because there the phrase keeps itself and the buttons are an
+ * aside - `reveal()` is the caller's way to bring the row out after all when
+ * one of them turns out to be the point (Save, an error's way to settings).
+ *
+ * `anchored` pins the bubble to the page rather than to the viewport: the
+ * host goes `absolute` at the document coordinates the anchor had when shown,
+ * so scrolling carries the bubble with the phrase it is about - the reader
+ * page's mode, where the bubble is a margin note, not a popup. Placement is
+ * still figured against the viewport of the moment it was shown; later
+ * growth re-places against that same frozen frame, because the phrase has
+ * not moved in the document and the bubble may not wander from it.
+ *
  * @typedef {object} Tooltip
- * @property {(options: { anchor: DOMRect, variant: Variant, body: string, tone?: Tone, actions?: Action[], touch?: boolean }) => void} show
+ * @property {(options: { anchor: DOMRect, variant: Variant, body: string, tone?: Tone, actions?: Action[], touch?: boolean, folded?: boolean, anchored?: boolean }) => void} show
  * @property {(body: string, tone?: Tone) => void} setBody
  * @property {(sentence: string | null, tone?: Tone) => void} setContext
  * @property {(blocks: Block[]) => void} setEntries
  * @property {(actions: Action[]) => void} setActions
+ * @property {() => void} reveal
  * @property {() => void} hide
  * @property {() => boolean} isOpen
  * @property {() => boolean} isEditing
@@ -639,6 +632,16 @@ export function createTooltip({ onAction }) {
   /** Whether the anchor is a selection made by touch, kept with it for the
    *  same reason: every re-placement has to answer it again. */
   let onTouch = false;
+  /**
+   * Where the page stood when the bubble was shown - and the anchored mode's
+   * whole switch: null pins the host to the viewport (`fixed`, every page's
+   * mode), a pair pins it to the document (`absolute`, the reader's), where
+   * the anchor rect and this scroll offset together name a fixed spot in the
+   * text that scrolling never moves.
+   *
+   * @type {{ x: number, y: number } | null}
+   */
+  let page = null;
   let editing = false;
   /** Whether the second layer is unfolded. Folded again for every new phrase. */
   let unfolded = false;
@@ -1029,16 +1032,7 @@ export function createTooltip({ onAction }) {
       const button = document.createElement("button");
       button.type = "button";
       button.dataset["action"] = action;
-      const glyph = action === "cancel" ? undefined : GLYPHS[action];
-      if (glyph !== undefined) {
-        button.textContent = glyph;
-        // The glyph is the face, the catalogue's sentence is the name - for
-        // the screen reader and for whoever hovers long enough to wonder.
-        button.setAttribute("aria-label", label(action));
-        button.title = label(action);
-      } else {
-        button.textContent = action === "more" && unfolded ? lessLabel() : label(action);
-      }
+      button.textContent = action === "more" && unfolded ? lessLabel() : label(action);
       button.addEventListener("click", () => emit(action));
       actionsElement.append(button);
     }
@@ -1107,10 +1101,13 @@ export function createTooltip({ onAction }) {
     // The host marks the near edge's line; which way the bubble hangs off it
     // is the stylesheet's business, and it decides the layout too: the row
     // unfolds on the far side of the gloss, or the gloss would be pushed off
-    // the line it was read on.
-    bubble.style.left = `${spot.left}px`;
+    // the line it was read on. Anchored, the same spot is written in the
+    // coordinates of the document (see `page`), and the scrolling page
+    // carries the bubble along by itself.
+    const offset = page ?? { x: 0, y: 0 };
+    bubble.style.left = `${spot.left + offset.x}px`;
     bubble.dataset["grow"] = spot.grow;
-    host.style.setProperty("top", `${spot.top}px`, "important");
+    host.style.setProperty("top", `${spot.top + offset.y}px`, "important");
     host.style.setProperty("visibility", "visible", "important");
   }
 
@@ -1142,22 +1139,31 @@ export function createTooltip({ onAction }) {
     unfolded = false;
     swallowClick = false;
     restingActions = [];
+    page = null;
   }
 
   return {
-    show({ anchor: rect, variant, body, tone = "normal", actions = [], touch = false }) {
+    show({ anchor: rect, variant, body, tone = "normal", actions = [], touch = false, folded, anchored = false }) {
       build();
       anchor = rect;
       onTouch = touch;
+      page = anchored ? { x: window.scrollX, y: window.scrollY } : null;
       editing = false;
+      if (host !== null) {
+        // Pinned to the document or to the viewport (see `page`), decided per
+        // show: one bubble serves the reader and every other page.
+        host.style.setProperty("position", page === null ? "fixed" : "absolute", "important");
+      }
       if (bubble !== null) {
         bubble.dataset["variant"] = variant;
         // The bubble is reused from phrase to phrase, and a row left out was
         // out for the last one. Only recall starts folded: everywhere else the
-        // row is why the bubble is open, so it starts revealed (D44). A press
-        // that never became a click is cleared the same way: a finger dragged
-        // back out of the bubble may not eat the next press.
-        bubble.classList.toggle("revealed", variant !== "recall");
+        // row is why the bubble is open, so it starts revealed (D44) - unless
+        // the caller says otherwise (`folded`: the touch chain's opening
+        // state, where the phrase keeps itself and the row is an aside). A
+        // press that never became a click is cleared the same way: a finger
+        // dragged back out of the bubble may not eat the next press.
+        bubble.classList.toggle("revealed", folded === undefined ? variant !== "recall" : !folded);
         swallowClick = false;
       }
       // Folded again: this is another phrase, and the sentence behind "More"
@@ -1200,6 +1206,8 @@ export function createTooltip({ onAction }) {
       if (!editing) renderActions(actions);
       place();
     },
+
+    reveal,
 
     hide: hideBubble,
 

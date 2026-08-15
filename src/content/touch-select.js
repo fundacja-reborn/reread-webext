@@ -1,70 +1,94 @@
 /**
- * Selecting by touch on the reader page, without the browser's selection (D80).
+ * Selecting by touch on the reader page, without the browser's selection
+ * (D80, reshaped by D81).
  *
  * On a touch screen the native selection comes wrapped in system chrome - a
  * floating bar over the phrase, drag handles under it - that a page can
  * neither move nor dismiss, and its gestures end in no event a page can hear
  * (D73). Readlang's answer is not to create a native selection at all, and
  * this module is that answer for the reader: while the pointer is a finger or
- * a pen, the article refuses the native selection (`user-select: none`, via an
- * attribute the stylesheet reads), a tap takes the word under it, a drag that
- * starts on the selection stretches it word by word, and the end of the
- * gesture is a `touchend` - unambiguous, so the bubble, the translation and
- * the keeping happen exactly on the finger lifting and never mid-gesture.
+ * a pen, the article refuses the native selection (`user-select: none`, via
+ * an attribute the stylesheet reads), and selecting is one gesture with a
+ * beginning the reader asks for and an end the page can hear. A finger held
+ * still on a word takes it whole; dragging on, finger still down, stretches
+ * the selection word by word; the finger lifting is the one moment the
+ * bubble, the translation and the keeping happen - never mid-gesture.
+ *
+ * The hold is what makes the gesture claimable at all. A tap is the most
+ * overloaded thing on a touch screen - the start of a scroll, a link, a
+ * dismissal - and selecting on taps (the first D80) meant a chain of buttons
+ * and special cases to build a phrase around one. A held finger is neither a
+ * scroll nor a tap, so the page can take it without robbing the article of
+ * anything - and everything after the hold belongs to the gesture, scrolling
+ * included, because a finger that asked to select is not asking to scroll.
+ *
+ * Taps stay what taps are everywhere: while a selection stands, a tap on the
+ * word right next to it grows the phrase by that word (the after-the-fact
+ * refinement, and the e-ink way to extend), and a tap on the selection itself
+ * is a knock on a bubble that may have closed - everything else, links and
+ * underlined phrases and empty space, keeps becoming the compatibility mouse
+ * events the old paths already listen to.
  *
  * Only ever started by the reader page, which is our own page: on somebody
- * else's page the native selection is part of not touching what is being read,
- * and stays.
+ * else's page the native selection is part of not touching what is being
+ * read, and stays.
  *
  * The selection itself is a run of the matcher's own tokens in one block,
  * painted through the highlight registry the way underlines are - no node of
  * the article is touched, and the words selected are exactly words a scan can
  * find again. What the module hands out is the DOM `Range` of that run;
- * everything about bubbles, translating and keeping stays in `reading.js`,
- * which also decides what a tap on an underlined phrase or on empty space
- * means - taps this module does not take keep becoming the compatibility
- * mouse events those paths already listen to.
+ * everything about bubbles, translating and keeping stays in `reading.js`.
  */
 
 import { locate } from "../lib/matcher/spans.js";
 import { tokenize } from "../lib/matcher/tokenize.js";
-import { nearestWordIndex, wordIndexAt } from "../lib/matcher/words.js";
+import { besideSpan, nearestWordIndex, wordIndexAt } from "../lib/matcher/words.js";
 import { touchPointer } from "../lib/selection.js";
-import { phraseAt, supported } from "./highlighter.js";
+import { supported } from "./highlighter.js";
 import { blockPieces } from "./scan.js";
 
 /** Must be the name in `reader.css`. */
 const NAME = "reread-selection";
 
 /**
- * How far a touch may drift and still be a tap. Wider than the mouse's four
- * pixels: a fingertip rolls as it lifts, and a tap read as a tiny scroll
- * would select nothing over and over.
+ * How long a finger has to hold still before the hold becomes a selection.
+ * Android's own long-press timing, so the gesture lands exactly when a hand
+ * trained by the platform expects it to - and a shade before the browser's
+ * own long-press machinery, so ours speaks first.
+ */
+const HOLD_MS = 400;
+
+/**
+ * How far a holding finger may drift and still be holding, and how far a tap
+ * may roll as it lifts and still be a tap. Wider than the mouse's four
+ * pixels: a fingertip is not a point, and a hold read as a tiny scroll would
+ * select nothing over and over.
  */
 const TAP_SLOP = 10;
 
 /**
- * How far outside its own boxes the selection can still be grabbed, and how
- * far off a word a tap still counts as on it. A line of text is thinner than
- * a fingertip; without the margin, starting the stretch gesture would demand
- * pixel aim.
+ * How far off a word a touch still counts as on it, and how far outside its
+ * own boxes the selection still catches the knocking tap. A line of text is
+ * thinner than a fingertip; without the margin, both would demand pixel aim.
  */
 const GRAB_SLOP = 8;
 
 /**
  * How a finished gesture relates to what was selected before it - the whole
  * of what `reading.js` needs in order to keep the vocabulary honest about a
- * phrase built in steps.
+ * phrase built in steps. `press` is the hold-and-drag gesture ending, a fresh
+ * statement of the whole phrase; `extend` is a tap growing the standing
+ * selection by its neighbour; `again` is a tap on the selection itself.
  *
- * @typedef {"tap" | "extend" | "again"} GestureKind
+ * @typedef {"press" | "extend" | "again"} GestureKind
  */
 
 /**
  * @typedef {object} TouchSelectHooks
- * @property {Element} root where taps select - the article, and nothing else
+ * @property {Element} root where holds select - the article, and nothing else
  * @property {(target: EventTarget | null) => boolean} owns whether a target is the bubble's
  * @property {(range: Range, kind: GestureKind) => void} onSelected a gesture ended on this selection
- * @property {() => void} onExtendStart a stretch is moving - whatever is shown is stale
+ * @property {() => void} onSelectStart a hold just took a word - whatever is shown is stale
  */
 
 /** @type {TouchSelectHooks | null} */
@@ -92,11 +116,12 @@ let range = null;
 let highlight = null;
 
 /**
- * The one touch being followed, from start to end. `tap` observes and lets
- * scrolling be scrolling; `extend` has claimed the gesture with
+ * The one touch being followed, from start to end. `hold` observes - a timer
+ * is running toward the selection, and a finger that travels or lifts first
+ * was a scroll or a tap; `select` has claimed the gesture with
  * `preventDefault` and is stretching the selection.
  *
- * @type {{ id: number, x: number, y: number, mode: "tap" | "extend", moved: boolean } | null}
+ * @type {{ id: number, x: number, y: number, target: EventTarget | null, timer: number, mode: "hold" | "select" } | null}
  */
 let gesture = null;
 
@@ -136,9 +161,9 @@ function withinRects(target, x, y) {
 
 /**
  * The caret the browser would put at a point - the same question underline
- * hit-testing deliberately does not ask, asked here on purpose: a tap is not
- * on a known range yet, and the nearest caret is the honest reading of where
- * in the text a finger landed.
+ * hit-testing deliberately does not ask, asked here on purpose: a touch is
+ * not on a known range yet, and the nearest caret is the honest reading of
+ * where in the text a finger landed.
  *
  * @param {number} x
  * @param {number} y
@@ -252,15 +277,79 @@ function onPointerDown(event) {
 }
 
 /**
+ * The word under a point, in the geometry of its own block - the shared first
+ * step of the hold and of the extending tap. Only a point that actually
+ * touches the word's boxes answers: the caret snaps to the nearest text from
+ * anywhere, and a touch in the empty end of a paragraph's last line must not
+ * read as its last word.
+ *
+ * @param {number} x
+ * @param {number} y
+ * @returns {{ geo: Geometry, index: number } | null}
+ */
+function wordAt(x, y) {
+  if (hooks === null) return null;
+  const caret = caretAt(x, y);
+  if (caret === null) return null;
+  const pieces = blockPieces(caret.node);
+  if (pieces === null || !hooks.root.contains(pieces.block)) return null;
+
+  /** @type {Geometry} */
+  const geo = { ...pieces, tokens: tokenize(pieces.text) };
+  const offset = offsetIn(geo, caret.node, caret.offset);
+  if (offset === null) return null;
+  const index = wordIndexAt(geo.tokens, offset);
+  if (index === -1) return null;
+
+  const word = rangeOfSpan(geo, index, index);
+  if (word === null || !withinRects(word, x, y)) return null;
+  return { geo, index };
+}
+
+/**
+ * The hold coming due: the finger is still down and has not travelled, so
+ * this is a selection starting - if there is a word under it to start on.
+ *
+ * A hold on the article's own links is left to the browser, whose long-press
+ * menu (open in new tab, copy link) is part of the article working; a hold on
+ * empty space, an image or another block's text takes nothing and quietly
+ * remains a tap in waiting. An underlined phrase is *not* stepped around the
+ * way the old tap stepped around it: a tap still recalls it whole, and the
+ * hold is now the more deliberate gesture - somebody starting a selection on
+ * a word they happen to already know.
+ */
+function hold() {
+  const active = gesture;
+  if (active === null || active.mode !== "hold" || hooks === null) return;
+
+  const target = active.target;
+  if (target instanceof Element && target.closest("a[href]") !== null) return;
+
+  const word = wordAt(active.x, active.y);
+  if (word === null) return;
+
+  // Whatever bubble is open is about to be about something else (D75's
+  // reason) - it stands aside before the new selection paints over its
+  // phrase, and nothing comes back until the finger lifts.
+  hooks.onSelectStart();
+  if (!select(word.geo, word.index, word.index, word.index)) return;
+  active.mode = "select";
+  // The tick Android's own long-press gives: the sign the hold took, on the
+  // hardware that can make it - an e-ink reader mostly cannot, and there the
+  // painted selection is the answer.
+  if (typeof navigator.vibrate === "function") navigator.vibrate(15);
+}
+
+/**
  * @param {TouchEvent} event
  */
 function onTouchStart(event) {
   if (hooks === null) return;
 
   if (gesture !== null) {
-    // A second finger. A stretch in progress keeps its claim and ignores it;
-    // a tap being watched stops being one - this is a pinch now.
-    if (gesture.mode === "tap") gesture = null;
+    // A second finger. A selection in progress keeps its claim and ignores
+    // it; a hold waiting on its timer stops waiting - this is a pinch now.
+    if (gesture.mode === "hold") cancelGesture();
     return;
   }
   if (event.touches.length > 1) return;
@@ -268,18 +357,22 @@ function onTouchStart(event) {
   if (touch === undefined) return;
   if (hooks.owns(event.target)) return;
 
-  // On the selection: the stretch gesture, claimed whole before the browser
-  // reads it as a scroll - and with it go the compatibility mouse events,
-  // which would have read the same press as "dismiss the bubble".
-  if (range !== null && withinRects(range, touch.clientX, touch.clientY)) {
-    event.preventDefault();
-    gesture = { id: touch.identifier, x: touch.clientX, y: touch.clientY, mode: "extend", moved: false };
-    return;
-  }
-
   const target = event.target;
   if (!(target instanceof Node) || !hooks.root.contains(target)) return;
-  gesture = { id: touch.identifier, x: touch.clientX, y: touch.clientY, mode: "tap", moved: false };
+  gesture = {
+    id: touch.identifier,
+    x: touch.clientX,
+    y: touch.clientY,
+    target,
+    timer: window.setTimeout(hold, HOLD_MS),
+    mode: "hold",
+  };
+}
+
+/** The gesture and its timer, gone - a scroll, a pinch, a system take-back. */
+function cancelGesture() {
+  if (gesture !== null) window.clearTimeout(gesture.timer);
+  gesture = null;
 }
 
 /**
@@ -291,22 +384,20 @@ function onTouchMove(event) {
   const touch = touchById(event.changedTouches, active.id);
   if (touch === null) return;
 
-  if (active.mode === "tap") {
-    // Travelled: a scroll, and the browser is already doing it. Stop watching.
+  if (active.mode === "hold") {
+    // Travelled: a scroll, and the browser is already doing it. Stop waiting.
+    // Drift inside the slop keeps the hold and follows the finger, so the
+    // word the hold takes is the word actually under it when it comes due.
     if (Math.abs(touch.clientX - active.x) > TAP_SLOP || Math.abs(touch.clientY - active.y) > TAP_SLOP) {
-      gesture = null;
+      cancelGesture();
+      return;
     }
+    active.x = touch.clientX;
+    active.y = touch.clientY;
     return;
   }
 
   if (event.cancelable) event.preventDefault();
-  if (!active.moved) {
-    active.moved = true;
-    // Whatever bubble is open is about the selection this is stretching away
-    // from - it stands aside (D75's reason), and nothing comes back until the
-    // finger lifts.
-    hooks?.onExtendStart();
-  }
   extendTo(touch.clientX, touch.clientY);
 }
 
@@ -346,15 +437,15 @@ function onTouchEnd(event) {
   if (active === null || hooks === null) return;
   const touch = touchById(event.changedTouches, active.id);
   if (touch === null) return;
-  gesture = null;
+  cancelGesture();
 
-  if (active.mode === "extend") {
+  if (active.mode === "select") {
+    // The gesture's end is the moment everything is for: the bubble, the
+    // translation and the keeping land exactly here. Claimed, so the lift
+    // does not also become the mouse events that would read it as a click.
     if (event.cancelable) event.preventDefault();
     if (range === null) return;
-    // Moved: a selection stretched, ended exactly here. Still: a tap on the
-    // selection itself, which is a knock on a bubble that may have closed -
-    // `reading.js` answers it again or knows it is already open.
-    hooks.onSelected(range, active.moved ? "extend" : "again");
+    hooks.onSelected(range, "press");
     return;
   }
 
@@ -362,10 +453,10 @@ function onTouchEnd(event) {
 }
 
 /**
- * A touch the system took back - an edge swipe, mostly. The selection as
- * stretched so far is answered like a lifted finger: the reader is left with
- * a bubble about what is on the screen, never with a highlight and nothing
- * to show for it.
+ * A touch the system took back - an edge swipe, mostly. A selection stretched
+ * so far is answered like a lifted finger: the reader is left with a bubble
+ * about what is on the screen, never with a highlight and nothing to show for
+ * it. A hold still waiting was nothing yet, and becomes nothing.
  *
  * @param {TouchEvent} event
  */
@@ -373,81 +464,78 @@ function onTouchCancel(event) {
   const active = gesture;
   if (active === null) return;
   if (touchById(event.changedTouches, active.id) === null) return;
-  gesture = null;
-  if (active.mode === "extend" && active.moved && range !== null) {
-    hooks?.onSelected(range, "extend");
+  cancelGesture();
+  if (active.mode === "select" && range !== null) {
+    hooks?.onSelected(range, "press");
   }
 }
 
 /**
- * A tap, told apart from every tap that is not a word. Links keep navigating,
- * underlined phrases keep recalling, empty space keeps dismissing - all of
- * them by this returning without `preventDefault`, so the tap goes on to
- * become the compatibility mouse events those paths already handle. Only a
- * tap that lands on a plain word claims the event, selects the word, and
- * hands it over on the spot - the finger is up, and this is the moment the
- * bubble is for.
+ * A tap, meaningful only next to a standing selection: on the word right
+ * beside it, the phrase grows by that word; on the selection itself, a knock
+ * on a bubble that may have closed. Both claim the event, so the tap does not
+ * also become the mouse events that would read it as a dismissal.
+ *
+ * Every other tap - and every tap while nothing is selected - returns without
+ * `preventDefault` and goes on to become those compatibility events: links
+ * keep navigating, underlined phrases keep recalling, empty space keeps
+ * dismissing. Selecting itself is no longer a tap's job (D81) - that is what
+ * the hold is for.
  *
  * @param {TouchEvent} event
  * @param {number} x
  * @param {number} y
  */
 function tap(event, x, y) {
-  if (hooks === null) return;
+  const geo = geometry;
+  const at = span;
+  if (hooks === null || geo === null || at === null || range === null) return;
 
-  // The article's own links outrank selecting the words inside them - the
-  // mouse still selects there, and a link that stopped opening would be the
-  // reader breaking the article.
   const target = event.target;
   if (target instanceof Element && target.closest("a[href]") !== null) return;
 
-  // An underlined phrase: recall, which already works by tap and knows the
-  // whole phrase - a one-word selection over it would shadow the better answer.
-  if (phraseAt(x, y) !== null) return;
+  const word = wordAt(x, y);
+  // Not on a word, but on the selection's own boxes - between two selected
+  // words, or in the slop around them: the knock.
+  if (word === null) {
+    if (withinRects(range, x, y)) {
+      event.preventDefault();
+      hooks.onSelected(range, "again");
+    }
+    return;
+  }
 
-  const caret = caretAt(x, y);
-  if (caret === null) return;
-  const pieces = blockPieces(caret.node);
-  if (pieces === null || !hooks.root.contains(pieces.block)) return;
+  // A word of another block can never join this phrase (D45) - the tap keeps
+  // meaning what a tap anywhere means.
+  if (word.geo.block !== geo.block) return;
 
-  /** @type {Geometry} */
-  const geo = { ...pieces, tokens: tokenize(pieces.text) };
-  const offset = offsetIn(geo, caret.node, caret.offset);
-  if (offset === null) return;
-  const index = wordIndexAt(geo.tokens, offset);
-  if (index === -1) return;
-
-  // The caret snaps to the nearest text from anywhere - a tap in the empty
-  // end of a paragraph's last line reads as a caret at its last word. Only a
-  // tap whose point actually touches the word's own boxes selects it; the
-  // rest is somebody tapping past the text, which is a dismissal.
-  const word = rangeOfSpan(geo, index, index);
-  if (word === null || !withinRects(word, x, y)) return;
+  const beside = besideSpan(at, word.index);
+  if (beside === "apart") return;
 
   event.preventDefault();
-  if (select(geo, index, index, index) && range !== null) {
-    hooks.onSelected(range, "tap");
+  if (beside === "within") {
+    hooks.onSelected(range, "again");
+    return;
+  }
+
+  const from = beside === "left" ? at.from - 1 : at.from;
+  const to = beside === "right" ? at.to + 1 : at.to;
+  if (select(geo, from, to, at.anchor) && range !== null) {
+    hooks.onSelected(range, "extend");
   }
 }
 
 /**
- * Stretch the selection one word left or right - the bubble's own buttons, for
- * the screens where a drag is hard to see (e-ink) or hard to aim. Returns the
- * grown range, or null at the block's edge, where there is no word to grow to.
+ * The browser's own long-press answer, stepped in front of: on text that
+ * refuses selection Firefox for Android can still raise a context menu, and
+ * it would land in the middle of the gesture that is already selecting. Only
+ * while our gesture holds the claim - a long-press on a link never gets here,
+ * because a hold on a link never claims.
  *
- * @param {-1 | 1} direction
- * @returns {Range | null}
+ * @param {Event} event
  */
-export function extendTouchSelection(direction) {
-  const geo = geometry;
-  const at = span;
-  if (geo === null || at === null) return null;
-
-  const from = direction < 0 ? at.from - 1 : at.from;
-  const to = direction < 0 ? at.to : at.to + 1;
-  if (from < 0 || to >= geo.tokens.length) return null;
-  if (!select(geo, from, to, at.anchor)) return null;
-  return range;
+function onContextMenu(event) {
+  if (gesture?.mode === "select") event.preventDefault();
 }
 
 /**
@@ -457,14 +545,15 @@ export function startTouchSelect(options) {
   if (started) return;
   started = true;
   hooks = options;
-  // The touch listeners are not passive on purpose: claiming the stretch
-  // gesture and the tap-on-a-word is `preventDefault`, and a passive listener
-  // has none to call. Everything else remains one hit-test per event.
+  // The touch listeners are not passive on purpose: claiming the gesture is
+  // `preventDefault`, and a passive listener has none to call. Everything
+  // else remains one hit-test per event.
   document.addEventListener("pointerdown", onPointerDown, { capture: true, passive: true });
   document.addEventListener("touchstart", onTouchStart, { capture: true, passive: false });
   document.addEventListener("touchmove", onTouchMove, { capture: true, passive: false });
   document.addEventListener("touchend", onTouchEnd, { capture: true, passive: false });
   document.addEventListener("touchcancel", onTouchCancel, { capture: true, passive: true });
+  document.addEventListener("contextmenu", onContextMenu, { capture: true });
 }
 
 /** Everything taken back: listeners, attribute, selection, paint. */
@@ -476,8 +565,9 @@ export function stopTouchSelect() {
   document.removeEventListener("touchmove", onTouchMove, { capture: true });
   document.removeEventListener("touchend", onTouchEnd, { capture: true });
   document.removeEventListener("touchcancel", onTouchCancel, { capture: true });
+  document.removeEventListener("contextmenu", onContextMenu, { capture: true });
   hooks?.root.removeAttribute("data-touch-select");
   hooks = null;
-  gesture = null;
+  cancelGesture();
   clearTouchSelection();
 }

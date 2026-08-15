@@ -39,8 +39,6 @@
   "bubble_more": { "message": "Більше" },
   "bubble_less": { "message": "Менше" },
   "bubble_reader": { "message": "Читати в режимі читання" },
-  "bubble_extend_left": { "message": "Розширити виділення на слово ліворуч" },
-  "bubble_extend_right": { "message": "Розширити виділення на слово праворуч" },
   "bubble_translating": { "message": "Перекладаю..." },
 
   "popup_site_enabled": {

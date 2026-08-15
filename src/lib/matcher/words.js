@@ -8,11 +8,12 @@
  * Same tokens, same boundaries - a phrase selected this way is exactly a
  * phrase the matcher can find again.
  *
- * Two questions, because a tap and a drag are asking differently. A tap wants
- * the word it landed on and nothing else - a tap that touched no word is a
- * dismissal, not a selection. A drag in progress wants the nearest word, so
- * that a finger crossing the gap between two words never makes the selection
- * flicker away.
+ * Three questions, because the gestures ask differently. A touch coming down
+ * wants the word it landed on and nothing else - a touch on no word selects
+ * nothing. A drag in progress wants the nearest word, so that a finger
+ * crossing the gap between two words never makes the selection flicker away.
+ * And a tap beside a standing selection asks where its word stands against
+ * the run - the neighbour grows it, anything farther is just a tap (D81).
  */
 
 /** @typedef {import("./tokenize.js").Token} Token */
@@ -36,6 +37,29 @@ export function wordIndexAt(tokens, offset) {
     if (token !== undefined && offset >= token.start && offset <= token.end) return index;
   }
   return -1;
+}
+
+/**
+ * Where a word stands against a selected run of tokens: inside it, one step
+ * off either end - the word a tap may grow the run by - or apart.
+ *
+ * The one-step rule is the tap-extension's whole grammar (D81): a tap is
+ * also how a reader dismisses things, and only the word right next to the
+ * selection reads unambiguously as "this one too". A word farther out keeps
+ * meaning what a tap anywhere means.
+ *
+ * @param {{ from: number, to: number }} span token indices, ends inclusive
+ * @param {number} index
+ * @returns {"within" | "left" | "right" | "apart"}
+ */
+export function besideSpan(span, index) {
+  // The tokenizer's "no word here" is -1, which a run starting at 0 would
+  // otherwise read as its left neighbour.
+  if (index < 0) return "apart";
+  if (index >= span.from && index <= span.to) return "within";
+  if (index === span.from - 1) return "left";
+  if (index === span.to + 1) return "right";
+  return "apart";
 }
 
 /**

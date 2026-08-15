@@ -43,14 +43,6 @@
   "bubble_more": { "message": "More" },
   "bubble_less": { "message": "Less" },
   "bubble_reader": { "message": "Read in the reader" },
-  "bubble_extend_left": {
-    "message": "Extend the selection one word to the left",
-    "description": "Accessible name of the left stretch glyph in the reader touch-selection bubble"
-  },
-  "bubble_extend_right": {
-    "message": "Extend the selection one word to the right",
-    "description": "Accessible name of the right stretch glyph in the reader touch-selection bubble"
-  },
   "bubble_translating": { "message": "Translating..." },
 
   "popup_site_enabled": {
