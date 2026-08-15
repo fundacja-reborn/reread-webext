@@ -40,6 +40,7 @@ import { deleteModel, listModels, putModel } from "../lib/models/store.js";
 import { modelSourceUrl, updateAvailable } from "../lib/models/upstream.js";
 import { testLoadModel } from "../lib/models/validate.js";
 import { Message } from "../lib/protocol.js";
+import { canSpeak, speak, voicesFor } from "../lib/tts.js";
 import {
   dictionaryRows,
   filterActive,
@@ -248,6 +249,51 @@ function renderReaderOnly() {
 function renderQuietBubble() {
   const toggle = document.getElementById("quiet-bubble");
   if (toggle instanceof HTMLInputElement) toggle.checked = config.hideBubbleActions;
+}
+
+/**
+ * What the Listen button speaks. Digits on purpose: every language the engine
+ * could offer has them and reads them in its own words, so one sample serves
+ * the whole select with no catalogue entry per language - and a voice counting
+ * to three is enough to judge it by.
+ */
+const VOICE_SAMPLE = "1, 2, 3";
+
+/**
+ * The voice select for the pair's source language (D83): the device's voices
+ * able to read it, behind a first line that means "let the browser pick".
+ * Redrawn whenever the config may have moved - the pair decides the filter -
+ * and when the engine's list arrives: `getVoices` answers nothing until the
+ * browser has loaded the voices, and `voiceschanged` is the only appointment
+ * it keeps. On a device that cannot speak at all the row stays, disabled -
+ * an honest sentence about why the bubble shows no speaker there.
+ */
+function renderVoice() {
+  const select = document.getElementById("tts-voice");
+  if (!(select instanceof HTMLSelectElement)) return;
+
+  const stored = config.ttsVoices[config.sourceLang];
+  const voices = canSpeak() ? voicesFor(speechSynthesis.getVoices(), config.sourceLang) : [];
+
+  select.replaceChildren();
+  const fallback = document.createElement("option");
+  fallback.value = "";
+  fallback.textContent = t("options_tts_default");
+  select.append(fallback);
+
+  for (const voice of voices) {
+    const option = document.createElement("option");
+    option.value = voice.voiceURI;
+    // The voice's own name plus its tag: two voices called "English" differ
+    // by exactly the en-US / en-GB the name alone would hide.
+    option.textContent = `${voice.name} (${voice.lang})`;
+    option.selected = voice.voiceURI === stored;
+    select.append(option);
+  }
+
+  select.disabled = !canSpeak();
+  const listen = document.getElementById("tts-listen");
+  if (listen instanceof HTMLButtonElement) listen.disabled = !canSpeak();
 }
 
 /**
@@ -1393,6 +1439,7 @@ async function render() {
   fill("version", webext().runtime.getManifest().version);
   renderReaderOnly();
   renderQuietBubble();
+  renderVoice();
   renderLanguageChoices("dictionary-from", config.sourceLang);
   renderLanguageChoices("dictionary-to", config.targetLang);
 
@@ -1438,6 +1485,9 @@ async function refresh() {
   config = await readConfig();
   renderReaderOnly();
   renderQuietBubble();
+  // The pair may have moved (the popup writes it too), and the pair decides
+  // which language's voices the select is about.
+  renderVoice();
   renderDisabledHosts();
   // Both lists, because "what you are reading" rides on the pair in both -
   // and the select rides `renderModels`. While a download or an import holds
@@ -1454,6 +1504,10 @@ webext().storage.onChanged.addListener((changes, area) => {
   if (area !== "local" || changes[CONFIG_KEY] === undefined) return;
   void refresh();
 });
+
+// The engine's voice list arrives on its own schedule - after first paint on
+// desktop, sometimes never on Android - and the select redraws when it does.
+if (canSpeak()) speechSynthesis.addEventListener("voiceschanged", renderVoice);
 
 document.getElementById("reader-only")?.addEventListener("change", (event) => {
   const toggle = event.target;
@@ -1472,6 +1526,25 @@ document.getElementById("quiet-bubble")?.addEventListener("change", (event) => {
   void writeConfig({ hideBubbleActions: toggle.checked }).then((written) => {
     config = written;
   });
+});
+document.getElementById("tts-voice")?.addEventListener("change", (event) => {
+  const select = event.target;
+  if (!(select instanceof HTMLSelectElement)) return;
+  // The whole map is written back (see `writeConfig`), which is what lets
+  // "browser default" remove the entry rather than store an empty string.
+  const map = { ...config.ttsVoices };
+  if (select.value === "") delete map[config.sourceLang];
+  else map[config.sourceLang] = select.value;
+  void writeConfig({ ttsVoices: map }).then((written) => {
+    config = written;
+  });
+});
+document.getElementById("tts-listen")?.addEventListener("click", () => {
+  // The selection on screen, not the stored one: the point of the button is
+  // trying a voice out before living with it.
+  const select = document.getElementById("tts-voice");
+  const chosen = select instanceof HTMLSelectElement && select.value !== "" ? select.value : undefined;
+  speak(VOICE_SAMPLE, config.sourceLang, chosen);
 });
 document.getElementById("add-model")?.addEventListener("click", () => void addSelectedModel());
 document.getElementById("refresh-models")?.addEventListener("click", () => void refreshList());

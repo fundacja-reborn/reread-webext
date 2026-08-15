@@ -40,6 +40,12 @@ export const CONFIG_KEY = "config";
  *   with its action row folded away, unfolding on a click or tap on the bubble
  *   (D81). Save is the standing exception either way: a phrase that does not
  *   keep itself always shows the way to keep it, and an error its one way out.
+ * @property {Record<string, string>} ttsVoices Which voice reads a language
+ *   aloud (D83): source language to the `voiceURI` chosen for it. Per language
+ *   rather than per pair - the voice picked for `en` serves every pair read in
+ *   English - and no entry means the engine's own default for the language.
+ *   The URIs name this device's voices; a stale one is ignored at speak time
+ *   (`lib/tts.js`), never an error.
  */
 
 /** @type {readonly string[]} */
@@ -95,6 +101,7 @@ export const DEFAULTS = Object.freeze({
   disabledHosts: [],
   readerOnly: null,
   hideBubbleActions: true,
+  ttsVoices: {},
 });
 
 /**
@@ -145,6 +152,27 @@ function hostList(value) {
 }
 
 /**
+ * The voice map, or as much of it as really maps a language to a voice. Both
+ * sides are opaque strings from the platform (a BCP-47ish tag, a `voiceURI`),
+ * so the only rule is: strings, non-empty. Whether a voice still exists is
+ * not this function's business - the list lives on the device and changes
+ * without warning, so existence is checked at speak time, where it can be.
+ *
+ * @param {unknown} value
+ * @returns {Record<string, string>}
+ */
+function voiceMap(value) {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return {};
+
+  /** @type {Record<string, string>} */
+  const map = {};
+  for (const [lang, uri] of Object.entries(value)) {
+    if (lang.length > 0 && typeof uri === "string" && uri.length > 0) map[lang] = uri;
+  }
+  return map;
+}
+
+/**
  * @param {unknown} stored
  * @returns {ReaderConfig}
  */
@@ -185,6 +213,7 @@ export function withDefaults(stored) {
     readerOnly: typeof raw["readerOnly"] === "boolean" ? raw["readerOnly"] : null,
     hideBubbleActions:
       typeof raw["hideBubbleActions"] === "boolean" ? raw["hideBubbleActions"] : DEFAULTS.hideBubbleActions,
+    ttsVoices: voiceMap(raw["ttsVoices"]),
   };
 }
 
@@ -202,7 +231,11 @@ export async function readConfig() {
  * `{ reader: { theme } }` that dropped the type size would be a setting quietly
  * resetting another one.
  *
- * @param {{ sourceLang?: string, targetLang?: string, reader?: Partial<ReaderConfig>, disabledHosts?: string[], readerOnly?: boolean, hideBubbleActions?: boolean }} patch
+ * `ttsVoices` is deliberately not: the patch replaces the whole map, because
+ * the settings page holds the full map and choosing the default voice has to
+ * be able to remove an entry - a per-key merge could only ever add.
+ *
+ * @param {{ sourceLang?: string, targetLang?: string, reader?: Partial<ReaderConfig>, disabledHosts?: string[], readerOnly?: boolean, hideBubbleActions?: boolean, ttsVoices?: Record<string, string> }} patch
  * @returns {Promise<Config>}
  */
 export async function writeConfig(patch) {

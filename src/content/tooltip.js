@@ -101,7 +101,41 @@ function label(action) {
       return t("bubble_more");
     case "reader":
       return t("bubble_reader");
+    case "speak":
+      return t("bubble_speak");
   }
+}
+
+/**
+ * The speaker, drawn with DOM calls: the bubble never parses markup, its own
+ * included, and a handful of `createElementNS` lines keeps that rule without
+ * exceptions. `currentColor` hands the icon the button's text color, so every
+ * theme and every opacity state is already handled by the button's own rules.
+ *
+ * @returns {SVGSVGElement}
+ */
+function speakerIcon() {
+  const NS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  // Decoration to assistive tech - the button's aria-label carries the words.
+  svg.setAttribute("aria-hidden", "true");
+
+  const body = document.createElementNS(NS, "path");
+  body.setAttribute("d", "M4 9.5v5h3.2L12 18.6V5.4L7.2 9.5H4z");
+  body.setAttribute("fill", "currentColor");
+  svg.append(body);
+
+  for (const arc of ["M15 9.2a4.4 4.4 0 0 1 0 5.6", "M17.6 6.8a8 8 0 0 1 0 10.4"]) {
+    const wave = document.createElementNS(NS, "path");
+    wave.setAttribute("d", arc);
+    wave.setAttribute("fill", "none");
+    wave.setAttribute("stroke", "currentColor");
+    wave.setAttribute("stroke-width", "1.8");
+    wave.setAttribute("stroke-linecap", "round");
+    svg.append(wave);
+  }
+  return svg;
 }
 
 /** The one button whose label changes with what it will do. */
@@ -384,6 +418,21 @@ const STYLE = `
   }
   .actions button:disabled { opacity: 0.35; cursor: default; }
 
+  /* The speaker is the row's one picture (D83): universally readable where a
+     "Read aloud" label would push the row past one line on a phone, and an
+     honest signal that it acts on the phrase itself, not on the vocabulary.
+     Inline-flex centers the icon in the same box the text labels get, and the
+     icon matches their cap height, so the row keeps one baseline rhythm. */
+  .actions button[data-action="speak"] {
+    display: inline-flex;
+    align-items: center;
+  }
+  .actions button[data-action="speak"] svg {
+    width: 16px;
+    height: 16px;
+    display: block;
+  }
+
   /* The exception, and the only real call to action a bubble has: Save is the
      press that keeps a phrase which would otherwise be gone, the launcher's one
      button is the whole of the bubble it is in, and Settings is the one thing
@@ -421,6 +470,10 @@ const STYLE = `
     .actions button[data-action="settings"] {
       font-size: 15px;
       padding: 8px 16px;
+    }
+    .actions button[data-action="speak"] svg {
+      width: 20px;
+      height: 20px;
     }
   }
 
@@ -468,11 +521,12 @@ const STYLE = `
 /** @typedef {"normal" | "pending" | "error"} Tone */
 /** Which of the three bubbles this is. `launcher` is reader-only mode's one
  *  offer: no gloss, one button. @typedef {"recall" | "save" | "launcher"} Variant */
-/** What the bubble can offer.
- *  @typedef {"save" | "learned" | "edit" | "settings" | "more" | "reader"} Action */
+/** What the bubble can offer. `speak` is the row's one picture - a speaker
+ *  icon that reads the phrase aloud (D83).
+ *  @typedef {"save" | "learned" | "edit" | "settings" | "more" | "reader" | "speak"} Action */
 /** What it reports - editing never leaves the bubble, and More leaves it only
  *  on the press that opens the layer, so a caller with nothing fetched yet can
- *  fetch it then. @typedef {"save" | "choose" | "learned" | "settings" | "reader" | "more"} ReportedAction */
+ *  fetch it then. @typedef {"save" | "choose" | "learned" | "settings" | "reader" | "more" | "speak"} ReportedAction */
 
 /**
  * One block of the second layer below the sentence: where it came from, and the
@@ -616,9 +670,12 @@ export function placement({ anchor, size, viewport, folded = 0, touch = false })
 /**
  * @param {object} options
  * @param {(action: ReportedAction, meanings: string[]) => void} options.onAction what the reader pressed, and what the bubble was showing when they did
+ * @param {() => void} [options.onHide] told as the bubble leaves the screen,
+ *   whichever door it left by - the caller's chance to stop what only made
+ *   sense while it was up (a phrase being read aloud, D83)
  * @returns {Tooltip}
  */
-export function createTooltip({ onAction }) {
+export function createTooltip({ onAction, onHide }) {
   /** @type {HTMLDivElement | null} */
   let host = null;
   /** @type {HTMLDivElement | null} */
@@ -1045,7 +1102,17 @@ export function createTooltip({ onAction }) {
       const button = document.createElement("button");
       button.type = "button";
       button.dataset["action"] = action;
-      button.textContent = action === "more" && unfolded ? lessLabel() : label(action);
+      if (action === "speak") {
+        // The one label that is a picture: the words go where a screen reader
+        // and a hovering cursor read them, and the icon is built with DOM
+        // calls like everything else here (see `speakerIcon`).
+        const name = label(action);
+        button.setAttribute("aria-label", name);
+        button.title = name;
+        button.append(speakerIcon());
+      } else {
+        button.textContent = action === "more" && unfolded ? lessLabel() : label(action);
+      }
       button.addEventListener("click", () => emit(action));
       actionsElement.append(button);
     }
@@ -1154,6 +1221,7 @@ export function createTooltip({ onAction }) {
     swallowClick = false;
     restingActions = [];
     page = null;
+    onHide?.();
   }
 
   return {

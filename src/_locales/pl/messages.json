@@ -41,6 +41,7 @@
   "bubble_less": { "message": "Mniej" },
   "bubble_reader": { "message": "Czytaj w widoku czytania" },
   "bubble_translating": { "message": "Tłumaczę..." },
+  "bubble_speak": { "message": "Przeczytaj na głos" },
 
   "popup_site_enabled": {
     "message": "Włączony na $DOMAIN$",
@@ -551,6 +552,12 @@
   },
   "options_quiet_bubble_hint": {
     "message": "Gdy to jest włączone, dymek tłumaczenia pokazuje samo tłumaczenie, a przyciski wysuwają się po kliknięciu lub tapnięciu w dymek. Wyjątkiem - niezależnie od ustawienia - jest Zapisz: fraza za długa, by zapisać się sama, zawsze pokazuje przycisk zapisu."
+  },
+  "options_tts_voice": { "message": "Głos lektora" },
+  "options_tts_default": { "message": "Domyślny głos przeglądarki" },
+  "options_tts_listen": { "message": "Posłuchaj" },
+  "options_tts_voice_hint": {
+    "message": "Przycisk z głośnikiem w dymku tłumaczenia czyta zaznaczoną frazę na głos w języku, który czytasz - tak można usłyszeć wymowę słowa. Głosy pochodzą z tego urządzenia i jego przeglądarki: mowa powstaje lokalnie, a fraza nie jest nigdzie wysyłana. Bez wyboru przeglądarka sama dobiera głos do języka."
   },
   "options_models_heading": { "message": "Modele tłumaczeniowe" },
   "options_models_intro": {

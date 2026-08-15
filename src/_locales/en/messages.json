@@ -48,6 +48,10 @@
   "bubble_less": { "message": "Less" },
   "bubble_reader": { "message": "Read in the reader" },
   "bubble_translating": { "message": "Translating..." },
+  "bubble_speak": {
+    "message": "Read aloud",
+    "description": "aria-label and hover title of the speaker icon in the bubble's action row (D83): speaks the selected phrase itself, never the translation."
+  },
 
   "popup_site_enabled": {
     "message": "Enabled on $DOMAIN$",
@@ -460,6 +464,12 @@
   },
   "options_quiet_bubble_hint": {
     "message": "With this on, the translation bubble shows just the translation, and its buttons slide out when you click or tap the bubble. Save is the exception either way: a phrase too long to save itself always shows the button that saves it."
+  },
+  "options_tts_voice": { "message": "Voice for reading aloud" },
+  "options_tts_default": { "message": "Browser default" },
+  "options_tts_listen": { "message": "Listen" },
+  "options_tts_voice_hint": {
+    "message": "The speaker button in the translation bubble reads the selected phrase aloud in the language you are reading - the way to hear how a word is pronounced. The voices are this device's and its browser's own: speech is made locally, and the phrase is not sent anywhere. With no choice made, the browser picks a voice for the language itself."
   },
   "options_models_heading": { "message": "Translation models" },
   "options_models_intro": {

@@ -41,6 +41,7 @@
   "bubble_less": { "message": "Weniger" },
   "bubble_reader": { "message": "In der Leseansicht lesen" },
   "bubble_translating": { "message": "Übersetze..." },
+  "bubble_speak": { "message": "Vorlesen" },
 
   "popup_site_enabled": {
     "message": "Eingeschaltet auf $DOMAIN$",
@@ -421,6 +422,12 @@
   },
   "options_quiet_bubble_hint": {
     "message": "Ist dies an, zeigt die Sprechblase nur die Übersetzung; ihre Schaltflächen erscheinen nach einem Klick oder Tippen auf die Sprechblase. Speichern ist so oder so die Ausnahme: Eine Wendung, die zu lang ist, um sich selbst zu speichern, zeigt die Schaltfläche zum Speichern immer."
+  },
+  "options_tts_voice": { "message": "Vorlesestimme" },
+  "options_tts_default": { "message": "Standardstimme des Browsers" },
+  "options_tts_listen": { "message": "Anhören" },
+  "options_tts_voice_hint": {
+    "message": "Die Lautsprecher-Schaltfläche in der Sprechblase liest die markierte Wendung laut vor, in der Sprache, die gerade gelesen wird - so lässt sich die Aussprache eines Wortes hören. Die Stimmen sind die dieses Geräts und seines Browsers: Die Sprachausgabe entsteht lokal, und die Wendung wird nirgendwohin gesendet. Ohne Auswahl wählt der Browser selbst eine Stimme für die Sprache."
   },
   "options_models_heading": { "message": "Übersetzungsmodelle" },
   "options_models_intro": {

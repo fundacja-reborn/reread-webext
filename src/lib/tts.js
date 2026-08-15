@@ -1,0 +1,146 @@
+/**
+ * Reading a phrase aloud with the browser's own speech synthesis (D83).
+ *
+ * The engine is `speechSynthesis` - a Web API, so no permission, nothing added
+ * to the package, and the same code serves a content script and the reader
+ * page alike. It runs where the button is pressed on purpose: Chromium's
+ * background is a worker without speech, Firefox's can be put to sleep in the
+ * middle of a word, and a page somebody is reading is exactly as alive as the
+ * sentence being spoken.
+ *
+ * The voices belong to the device and change without warning - between
+ * machines, between browsers, sometimes between restarts. Everything here is
+ * therefore forgiving: a stored voice that is gone falls back to the engine's
+ * own default for the language, and an empty voice list is no reason not to
+ * speak - the utterance carries its language, and the engine does the rest.
+ * That last part is Android's clause: there `getVoices()` has been known to
+ * answer nothing while `speak()` works all the same.
+ *
+ * The rules (which voices can read a language, which one was chosen) are pure
+ * functions, tested without a browser; the speaking half stays quiet anywhere
+ * `speechSynthesis` does not exist.
+ */
+
+/**
+ * What the pure half needs to know about a voice - structural, so the tests
+ * can hand in plain objects and the browser's `SpeechSynthesisVoice` passes
+ * as it is.
+ *
+ * @typedef {{ name: string, lang: string, voiceURI: string }} VoiceLike
+ */
+
+/**
+ * @returns {boolean} whether this context can speak at all - false in the
+ *   tests, and on the day a browser ships without the API the button simply
+ *   never appears
+ */
+export function canSpeak() {
+  return typeof globalThis.speechSynthesis !== "undefined";
+}
+
+/**
+ * The primary language subtag, lowercased - the part before any region:
+ * "en-US", "en_US" and "en" all answer "en". The underscore is Android's:
+ * its engines name voices `en_US` where the web writes `en-US`, and a filter
+ * that missed them would offer no voices exactly where choosing one matters
+ * most.
+ *
+ * @param {string} tag
+ * @returns {string}
+ */
+export function primaryLanguage(tag) {
+  return tag.toLowerCase().split(/[-_]/, 1)[0] ?? "";
+}
+
+/**
+ * The voices able to read a language, for the settings page's picker: same
+ * primary subtag, regional variants included - a reader of `en` chooses among
+ * en-US, en-GB and whatever else the device offers. Sorted by tag and then by
+ * name, so variants stand together and the order holds from one open to the
+ * next; the list handed in is left as it was.
+ *
+ * @template {VoiceLike} V
+ * @param {readonly V[]} voices
+ * @param {string} lang
+ * @returns {V[]}
+ */
+export function voicesFor(voices, lang) {
+  const wanted = primaryLanguage(lang);
+  if (wanted === "") return [];
+  return voices
+    .filter((voice) => primaryLanguage(voice.lang) === wanted)
+    .sort((a, b) => a.lang.localeCompare(b.lang) || a.name.localeCompare(b.name));
+}
+
+/**
+ * The stored choice, if this device still has it. Everything else - no choice
+ * made, a voice uninstalled since, a profile carried to another machine -
+ * answers null, and null means the engine's default for the utterance's
+ * language: a stale choice must never mute the button.
+ *
+ * @template {VoiceLike} V
+ * @param {readonly V[]} voices
+ * @param {string | undefined} voiceURI
+ * @returns {V | null}
+ */
+export function chosenVoice(voices, voiceURI) {
+  if (voiceURI === undefined || voiceURI === "") return null;
+  return voices.find((voice) => voice.voiceURI === voiceURI) ?? null;
+}
+
+/**
+ * The utterance this module is playing, if any. Ours and only ours, because
+ * the queue behind `speechSynthesis` is shared with the page being read and
+ * `cancel()` flushes all of it: `stop` may only ever fire while this is set,
+ * so a page speaking on its own never loses its words to our button.
+ *
+ * @type {SpeechSynthesisUtterance | null}
+ */
+let mine = null;
+
+/**
+ * @returns {boolean} whether our utterance is still on its way out loud
+ */
+export function speaking() {
+  return mine !== null;
+}
+
+/**
+ * Speaks, replacing whatever this module was saying before. The voice list is
+ * asked at speak time rather than held: it loads asynchronously and can
+ * change, and the chosen voice is looked up when it is needed - or quietly
+ * not found, which is the fallback described at `chosenVoice`.
+ *
+ * @param {string} text as the page has it - the phrase, never the gloss
+ * @param {string} lang BCP-47, the language being read
+ * @param {string | undefined} voiceURI the choice stored for that language, if any
+ */
+export function speak(text, lang, voiceURI) {
+  if (!canSpeak() || text.length === 0) return;
+  stop();
+
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = lang;
+  const voice = chosenVoice(speechSynthesis.getVoices(), voiceURI);
+  if (voice !== null) utterance.voice = voice;
+
+  const done = () => {
+    // Only if the module has not moved on: a cancelled utterance reports in
+    // after `mine` already names its successor.
+    if (mine === utterance) mine = null;
+  };
+  utterance.addEventListener("end", done);
+  utterance.addEventListener("error", done);
+
+  mine = utterance;
+  speechSynthesis.speak(utterance);
+}
+
+/**
+ * Stops our utterance - and only ever ours, see `mine`.
+ */
+export function stop() {
+  if (mine === null) return;
+  mine = null;
+  speechSynthesis.cancel();
+}
