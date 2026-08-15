@@ -32,6 +32,37 @@ export const CHROMIUM_ICONS = Object.freeze({
 export const MINIMUM_CHROME_VERSION = "128";
 
 /**
+ * What each package carries beyond the shared files - exactly the icons its
+ * manifest or its code names, because an unreferenced file in a package anyone
+ * may audit is a question with no good answer, and a referenced file missing
+ * from it is a console full of ERR_FILE_NOT_FOUND. Firefox reads the SVG mark
+ * and its theme variants; Chromium gets the rasters, including the
+ * dark-toolbar pair that only `action.setIcon` ever names (see
+ * `src/lib/theme-icon.js` - the test suite holds the two lists together).
+ *
+ * Lives here rather than in `build.mjs` so tests can assert on it: importing
+ * the build script would run a build.
+ *
+ * @type {Record<Target, string[]>}
+ */
+export const TARGET_STATIC_FILES = {
+  firefox: [
+    "assets/icons/icon.svg",
+    "assets/icons/icon-dark.svg",
+    "assets/icons/icon-light.svg",
+  ],
+  chromium: [
+    "assets/icons/icon-16.png",
+    "assets/icons/icon-32.png",
+    "assets/icons/icon-48.png",
+    "assets/icons/icon-128.png",
+    "assets/icons/icon-light-16.png",
+    "assets/icons/icon-light-32.png",
+    "offscreen/engine-host.html",
+  ],
+};
+
+/**
  * @param {Record<string, unknown>} manifest
  * @param {Target} target
  * @returns {Record<string, unknown>}

@@ -1,7 +1,13 @@
 import assert from "node:assert/strict";
 import { access, readFile } from "node:fs/promises";
 import { describe, it } from "node:test";
-import { CHROMIUM_ICONS, MINIMUM_CHROME_VERSION, forTarget } from "../tools/manifest-target.mjs";
+import { TOOLBAR_ICONS } from "../src/lib/theme-icon.js";
+import {
+  CHROMIUM_ICONS,
+  MINIMUM_CHROME_VERSION,
+  TARGET_STATIC_FILES,
+  forTarget,
+} from "../tools/manifest-target.mjs";
 
 /**
  * What the build hands Chromium, asserted without running a build. The source
@@ -79,18 +85,28 @@ describe("the manifest Chromium gets", () => {
     }
   });
 
-  it("names only files that exist in src", async () => {
+  it("ships every icon the manifest or the toolbar swap can name", async () => {
     const { patched } = await manifests();
+    const shipped = TARGET_STATIC_FILES.chromium;
     const named = [
       ...Object.values(patched["icons"]),
       ...Object.values(patched["action"]["default_icon"]),
-      // Not in the manifest - reached at runtime - but as load-bearing for
-      // Chromium as anything the manifest names: the page the background
-      // creates, and the dark-toolbar icons `action.setIcon` swaps in.
-      "offscreen/engine-host.html",
+      // Named by `action.setIcon` at runtime, never by the manifest - which
+      // is exactly how a missing one would fail: not on load, but as a
+      // toolbar that quietly stops following the theme (a smoke test found
+      // it as a console full of ERR_FILE_NOT_FOUND).
+      ...Object.values(TOOLBAR_ICONS).flatMap((set) => Object.values(set)),
+    ];
+    for (const path of named) {
+      assert.ok(shipped.includes(String(path)), `"${path}" is named but not in the package list`);
+    }
+  });
+
+  it("names only files that exist in src", async () => {
+    const named = [
+      ...TARGET_STATIC_FILES.chromium,
+      // The host's script rides in through the entry points, not the list.
       "offscreen/engine-host.js",
-      "assets/icons/icon-light-16.png",
-      "assets/icons/icon-light-32.png",
     ];
     for (const path of named) {
       await assert.doesNotReject(

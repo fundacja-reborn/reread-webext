@@ -24,8 +24,13 @@ import { webext } from "./browser.js";
  * The two toolbar sets, by the scheme they serve. Only the action icon can
  * be swapped at runtime; what the manifest's `icons` key feeds - the
  * management page - stays the light-scheme default.
+ *
+ * Exported for one reason: the build has to ship every file named here, and
+ * the test suite holds this list and the package list together - a path that
+ * drifts out of the package is a toolbar that silently stops following the
+ * theme, with nothing but console noise to say so.
  */
-const TOOLBAR_ICONS = Object.freeze({
+export const TOOLBAR_ICONS = Object.freeze({
   light: { 16: "assets/icons/icon-16.png", 32: "assets/icons/icon-32.png" },
   dark: { 16: "assets/icons/icon-light-16.png", 32: "assets/icons/icon-light-32.png" },
 });

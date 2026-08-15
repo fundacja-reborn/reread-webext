@@ -14,7 +14,7 @@ import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import * as esbuild from "esbuild";
-import { TARGETS, forTarget } from "./manifest-target.mjs";
+import { TARGETS, TARGET_STATIC_FILES, forTarget } from "./manifest-target.mjs";
 
 const ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 const SRC = join(ROOT, "src");
@@ -57,34 +57,6 @@ const STATIC_FILES = [
   "assets/page.css",
   "_locales",
 ];
-
-/**
- * Each package carries exactly the icons its manifest names - an unreferenced
- * file in a package anyone may audit is a question with no good answer.
- * Firefox reads the SVG mark and its theme variants; Chromium has never
- * accepted SVG for extension icons and gets the rasters instead, generated
- * from the same drawing by `tools/icon/make-icons.mjs`.
- *
- * @type {Record<Target, string[]>}
- */
-const TARGET_STATIC_FILES = {
-  firefox: [
-    "assets/icons/icon.svg",
-    "assets/icons/icon-dark.svg",
-    "assets/icons/icon-light.svg",
-  ],
-  chromium: [
-    "assets/icons/icon-16.png",
-    "assets/icons/icon-32.png",
-    "assets/icons/icon-48.png",
-    "assets/icons/icon-128.png",
-    // The dark-toolbar set, reached by `action.setIcon` rather than the
-    // manifest (Chrome has no theme-aware manifest icons) - see theme-icon.js.
-    "assets/icons/icon-light-16.png",
-    "assets/icons/icon-light-32.png",
-    "offscreen/engine-host.html",
-  ],
-};
 
 /**
  * Third-party code, relative to the repository root, copied in rather than

@@ -155,6 +155,8 @@ Installing a newer build over an older one keeps the vocabulary — the extensio
 
 Chrome loads the build directly, no signing involved: **chrome://extensions** → enable **Developer mode** → **Load unpacked** → pick `dist/chromium`. The load survives restarts, but Chrome shows a "developer mode extensions" notice on startup; publishing outside developer mode would be a Web Store matter, which this project has not taken up.
 
+Run `npm run build:chromium` immediately before loading or reloading. `dist/` is a build product: the quality gate deletes and rebuilds it on every run, so a reload that races a build - or trails an interrupted one - loads a package with files missing, and the errors (`ERR_FILE_NOT_FOUND` in the console of extension pages) point at the load, not at the code. When in doubt: build, then press reload on **chrome://extensions**.
+
 Signing needs an [AMO API key](https://addons.mozilla.org/developers/addon/api/key/):
 
 ```bash
