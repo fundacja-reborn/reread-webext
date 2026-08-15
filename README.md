@@ -43,6 +43,7 @@ else. How to verify all of this is a section of its own,
 | Settings page | shows the language pair, downloads, adds and removes models |
 | Keeping a phrase, correcting what it means, marking it learned | yes |
 | Reading a phrase aloud | the bubble's speaker button speaks the selection with the browser's own voices; the voice per language is a setting |
+| Reading a whole article aloud | in the reader: the sentence and the word being spoken are marked as it goes, with a bar to pause, resume and step a sentence either way; voice and speed sit in the reader's own panel |
 | Underlining saved phrases on the pages you read | yes |
 | Dictionaries (StarDict) | downloaded from the WikDict catalogue or imported from files |
 | Reader mode | turns the page into an article in the extension's own tab |
@@ -55,6 +56,21 @@ else. How to verify all of this is a section of its own,
 | Chromium | builds, untested |
 
 If you are looking for something to use rather than something to read, come back later.
+
+## Keyboard
+
+| Key | Where | What it does |
+|---|---|---|
+| `Alt`+`Shift`+`R` | any page | opens that page in the reader |
+| `Esc` | any page | closes the translation bubble - or leaves its edit box first, when one is open |
+| `Space` | reader, while it is reading aloud | pauses, and carries on |
+| `←` `→` | reader, while it is reading aloud | a sentence back, a sentence on |
+| `<` `>` | reader, while it is reading aloud | slower, faster |
+
+The reading keys mean this **only while the voice is reading** - the moment it stops, the
+space bar is the page's own again, because scrolling a page with it is how a long article
+gets read. A key pressed into a text field or onto a focused button is left alone, so the
+filter box still takes a space and a button still answers one.
 
 ## What it deliberately does not do
 
