@@ -443,6 +443,14 @@ button.model-delete {
   padding: 0.35rem 1rem;
 }
 
+/* The voice names are the device's own and can run long; the select takes the
+   line's spare width and may shrink below its content, so a long name never
+   pushes the Listen button off the page. */
+#tts-voice {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
 /* --- the fresh-install signpost --- */
 
 /* The note's frame, the page's full color - it is instructions to act on, not

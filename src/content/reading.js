@@ -39,6 +39,7 @@ import { ErrorCode, Message, asResult, asTranslation, fail } from "../lib/protoc
 import { keeping, madeSelection, touchPointer } from "../lib/selection.js";
 import { sentenceAround } from "../lib/sentence.js";
 import { MIRROR_KEY, asMirror, mirrorMatches } from "../lib/store/mirror.js";
+import { canSpeak, speak, speaking, stop as stopSpeaking } from "../lib/tts.js";
 import { clear, paint, phraseAt } from "./highlighter.js";
 import { blockTextAround, findable } from "./scan.js";
 import { clearTouchSelection, startTouchSelect, stopTouchSelect } from "./touch-select.js";
@@ -101,9 +102,19 @@ let generation = 0;
  */
 let anchorRange = null;
 
+/**
+ * The speaker, where the device can speak at all (D83): every row about a
+ * phrase leads with it, because hearing the phrase is about the phrase and
+ * not about the vocabulary - the one action here that never writes. A device
+ * without the API simply never shows the button.
+ *
+ * @type {import("./tooltip.js").Action[]}
+ */
+const SPEAK = canSpeak() ? ["speak"] : [];
+
 /** What the bubble offers for a phrase that is in the vocabulary. */
 /** @type {import("./tooltip.js").Action[]} */
-const KEPT = ["learned", "edit"];
+const KEPT = [...SPEAK, "learned", "edit"];
 
 /**
  * The phrase the current touch-selection chain kept without asking, if any.
@@ -126,13 +137,16 @@ let autoKept = null;
  * because that is a question about the bubble.
  */
 const OFFERED = Object.freeze({
-  /** Nothing to keep, so nothing offered - only "More", when there is one. */
-  none: /** @type {import("./tooltip.js").Action[]} */ ([]),
-  ask: /** @type {import("./tooltip.js").Action[]} */ (["save", "edit"]),
+  /** Nothing to keep, so nothing to write - the speaker still stands, because
+   *  a phrase too long to save is still a phrase worth hearing. */
+  none: SPEAK,
+  ask: /** @type {import("./tooltip.js").Action[]} */ ([...SPEAK, "save", "edit"]),
   automatic: KEPT,
 });
 
-const tooltip = createTooltip({ onAction });
+// A bubble gone is a phrase not worth talking about any more, whichever way
+// it went - and mid-word is exactly when a dismissal should go quiet (D83).
+const tooltip = createTooltip({ onAction, onHide: stopSpeaking });
 
 /**
  * The quiet-bubble setting (D81), mirrored from the config the way the
@@ -141,6 +155,17 @@ const tooltip = createTooltip({ onAction });
  * Save or an error's one button is the point, which no setting may hide.
  */
 let hideActions = DEFAULTS.hideBubbleActions;
+
+/**
+ * The speaker's half of the config (D83), mirrored for the same reason: the
+ * phrase is spoken in the language being read, with the voice chosen for it,
+ * and reading storage at press time would cost a round trip the storage
+ * listener already pays for everybody.
+ */
+let ttsLang = DEFAULTS.sourceLang;
+
+/** @type {string | undefined} */
+let ttsVoiceURI = undefined;
 
 /** Where the press this release belongs to started, and whether it was ours. */
 /** @type {{ x: number, y: number, mine: boolean } | null} */
@@ -241,6 +266,8 @@ async function loadVocabulary(preloaded) {
     // Rides the same read and the same storage listener as the vocabulary:
     // flipping the switch in the popup reaches every open page on the spot.
     hideActions = config.hideBubbleActions;
+    ttsLang = config.sourceLang;
+    ttsVoiceURI = config.ttsVoices[config.sourceLang];
 
     if (mirror === null) {
       adopt([]);
@@ -331,6 +358,14 @@ async function onAction(action, meanings) {
   if (action === "settings") {
     void ask({ kind: Message.OPEN_SETTINGS });
     tooltip.hide();
+    return;
+  }
+  if (action === "speak") {
+    // Start or stop, decided by what is playing: hearing the phrase writes
+    // nothing, so no keepable gate - and what is spoken is the page's own
+    // text, never the gloss (D83).
+    if (speaking()) stopSpeaking();
+    else if (current !== null) speak(current.text, ttsLang, ttsVoiceURI);
     return;
   }
   if (action === "learned") {
@@ -472,6 +507,9 @@ function showSaved(anchor, text, normalized, context, how = {}) {
   const meanings = vocabulary.get(normalized);
   if (meanings === undefined) return false;
 
+  // The bubble is reused from phrase to phrase without passing through hide,
+  // and a voice still reading the last phrase may not talk over this one.
+  stopSpeaking();
   // In the vocabulary already, which is the whole of what getting here means -
   // so its meanings may be corrected from anywhere, however it was reached.
   current = { text, normalized, keepable: true };
@@ -653,6 +691,8 @@ function present(selection, { deliberate, touch, chain = false }) {
   const { text, normalized } = selection;
   if (showSaved(selection.rect, text, normalized, selection.context, { touch, range: selection.range })) return;
 
+  // The same cut `showSaved` makes: this show does not pass through hide either.
+  stopSpeaking();
   current = { text, normalized, keepable: selection.findable };
   secondLayer = [];
   unfetched = null;

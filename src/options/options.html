@@ -97,6 +97,24 @@
         <span class="row-name" data-i18n="options_engine">Engine</span>
         <span class="row-value" data-i18n="options_engine_value">Bergamot, inside the package - translates offline</span>
       </div>
+      <!-- Which voice reads a selection aloud (D83). The choices are the
+           device's own voices for the pair's source language, and the choice
+           is stored per language, so switching pairs keeps it. The sample the
+           Listen button speaks is digits, because digits exist in every
+           language the engine could offer. -->
+      <div class="row row-stack">
+        <label class="row-name" for="tts-voice" data-i18n="options_tts_voice">Voice for reading aloud</label>
+        <p class="inline">
+          <select id="tts-voice"></select>
+          <button type="button" id="tts-listen" data-i18n="options_tts_listen">Listen</button>
+        </p>
+        <p class="row-note" data-i18n="options_tts_voice_hint">
+          The speaker button in the translation bubble reads the selected phrase aloud in the
+          language you are reading - the way to hear how a word is pronounced. The voices are
+          this device's and its browser's own: speech is made locally, and the phrase is not
+          sent anywhere. With no choice made, the browser picks a voice for the language itself.
+        </p>
+      </div>
       <!-- The whole first line is the label, so a press anywhere on it flips
            the switch; the note keeps its own, unclickable line below - a
            paragraph is too easy to brush against on a phone. -->

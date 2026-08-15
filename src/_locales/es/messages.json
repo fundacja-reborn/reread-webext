@@ -41,6 +41,7 @@
   "bubble_less": { "message": "Menos" },
   "bubble_reader": { "message": "Leer en la vista de lectura" },
   "bubble_translating": { "message": "Traduciendo..." },
+  "bubble_speak": { "message": "Leer en voz alta" },
 
   "popup_site_enabled": {
     "message": "Activado en $DOMAIN$",
@@ -444,6 +445,12 @@
   },
   "options_quiet_bubble_hint": {
     "message": "Con esto activado, la burbuja de traducción muestra solo la traducción; sus botones aparecen al hacer clic o tocar la burbuja. Guardar es la excepción en ambos casos: una frase demasiado larga para guardarse sola siempre muestra el botón de guardar."
+  },
+  "options_tts_voice": { "message": "Voz de lectura" },
+  "options_tts_default": { "message": "Voz predeterminada del navegador" },
+  "options_tts_listen": { "message": "Escuchar" },
+  "options_tts_voice_hint": {
+    "message": "El botón del altavoz en la burbuja de traducción lee en voz alta la frase seleccionada, en el idioma que se está leyendo - así se puede oír cómo se pronuncia una palabra. Las voces son las de este dispositivo y su navegador: el habla se genera localmente y la frase no se envía a ninguna parte. Sin elección, el navegador escoge por sí mismo una voz para el idioma."
   },
   "options_models_heading": { "message": "Modelos de traducción" },
   "options_models_intro": {

@@ -41,6 +41,7 @@
   "bubble_less": { "message": "Moins" },
   "bubble_reader": { "message": "Lire dans le lecteur" },
   "bubble_translating": { "message": "Traduction..." },
+  "bubble_speak": { "message": "Lire à voix haute" },
 
   "popup_site_enabled": {
     "message": "Activé sur $DOMAIN$",
@@ -444,6 +445,12 @@
   },
   "options_quiet_bubble_hint": {
     "message": "Quand c'est activé, la bulle de traduction ne montre que la traduction ; ses boutons apparaissent après un clic ou un appui sur la bulle. Enregistrer reste l'exception dans les deux cas : une phrase trop longue pour s'enregistrer seule montre toujours le bouton d'enregistrement."
+  },
+  "options_tts_voice": { "message": "Voix de lecture" },
+  "options_tts_default": { "message": "Voix par défaut du navigateur" },
+  "options_tts_listen": { "message": "Écouter" },
+  "options_tts_voice_hint": {
+    "message": "Le bouton haut-parleur de la bulle de traduction lit à voix haute la phrase sélectionnée, dans la langue en cours de lecture - de quoi entendre comment un mot se prononce. Les voix sont celles de cet appareil et de son navigateur : la parole est produite localement, et la phrase n'est envoyée nulle part. Sans choix, le navigateur choisit lui-même une voix pour la langue."
   },
   "options_models_heading": { "message": "Modèles de traduction" },
   "options_models_intro": {

@@ -42,6 +42,7 @@ else. How to verify all of this is a section of its own,
 | Translation models | downloaded on request, or added by hand from files |
 | Settings page | shows the language pair, downloads, adds and removes models |
 | Keeping a phrase, correcting what it means, marking it learned | yes |
+| Reading a phrase aloud | the bubble's speaker button speaks the selection with the browser's own voices; the voice per language is a setting |
 | Underlining saved phrases on the pages you read | yes |
 | Dictionaries (StarDict) | downloaded from the WikDict catalogue or imported from files |
 | Reader mode | turns the page into an article in the extension's own tab |
@@ -88,6 +89,13 @@ list carry on, because none of them ever used it.
 Switching re/read off for a site writes that site's hostname to the browser's local extension
 storage - one exact host per entry, written only on your own press of the switch, listed and
 removable on the settings page.
+
+Reading a phrase aloud - the speaker in the bubble - uses the browser's own speech
+synthesis, the same standard Web Speech API any page can call. The phrase goes to the
+speech engine of this device and its browser and nowhere else; with the usual system
+voices the speech is synthesized on the device. Which engine actually speaks is the
+browser's and the operating system's setting, not this extension's - the extension
+itself still makes no network request and sends nothing anywhere.
 
 Saving an article to the reading list stores its title, address and extracted text in the
 browser's local extension storage, so it can be opened again with no network at all. That is a

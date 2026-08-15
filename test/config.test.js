@@ -260,6 +260,53 @@ describe("the quiet bubble", () => {
   });
 });
 
+describe("the reading voices", () => {
+  it("answers an empty map for a profile that predates it", () => {
+    assert.deepEqual(withDefaults(undefined).ttsVoices, {});
+    assert.deepEqual(withDefaults({ sourceLang: "en" }).ttsVoices, {});
+  });
+
+  it("keeps a choice per language", () => {
+    assert.deepEqual(withDefaults({ ttsVoices: { en: "urn:alice", pl: "urn:zosia" } }).ttsVoices, {
+      en: "urn:alice",
+      pl: "urn:zosia",
+    });
+  });
+
+  it("keeps the entries that map a language to a voice and drops the rest", () => {
+    // Losing the whole map over one broken entry would silence a choice made
+    // for every other language.
+    assert.deepEqual(
+      withDefaults({ ttsVoices: { en: "urn:alice", de: 7, fr: "", "": "urn:nobody" } }).ttsVoices,
+      { en: "urn:alice" },
+    );
+  });
+
+  it("treats a map that is not one as empty", () => {
+    for (const ttsVoices of ["urn:alice", 7, null, ["urn:alice"]]) {
+      assert.deepEqual(withDefaults({ ttsVoices }).ttsVoices, {});
+    }
+  });
+
+  it("does not hand out a map shared with the defaults", () => {
+    const result = withDefaults({});
+    result.ttsVoices["en"] = "urn:alice";
+    assert.deepEqual(DEFAULTS.ttsVoices, {});
+    assert.deepEqual(withDefaults({}).ttsVoices, {});
+  });
+
+  it("replaces the whole map on write, so choosing the default removes an entry", async () => {
+    const store = installFakeBrowser();
+    await writeConfig({ ttsVoices: { en: "urn:alice", de: "urn:karl" } });
+    const written = await writeConfig({ ttsVoices: { de: "urn:karl" } });
+
+    // A per-key merge could only ever add - the settings page holds the full
+    // map, and what it writes is the whole of what is chosen.
+    assert.deepEqual(written.ttsVoices, { de: "urn:karl" });
+    assert.deepEqual(/** @type {any} */ (store["config"]).ttsVoices, { de: "urn:karl" });
+  });
+});
+
 describe("the published platform", () => {
   it("reads the os back and answers unknown for anything else", () => {
     assert.equal(osFrom({ os: "android" }), "android");
