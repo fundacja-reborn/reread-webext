@@ -105,6 +105,17 @@ interface WebExtBrowser {
     // opened the reader directly, before it opened the popup.
     onCommand: WebExtEvent<(command: string, tab?: WebExtTab) => void>;
   };
+  // Chromium only, under the `offscreen` permission its manifest carries, and
+  // absent on Firefox - which is exactly how the background picks an engine
+  // path (`offscreenApi()` in browser.js). The one page it creates hosts the
+  // translation engine's worker, because a service worker cannot spawn one.
+  offscreen?: {
+    createDocument(parameters: {
+      url: string;
+      reasons: string[];
+      justification: string;
+    }): Promise<void>;
+  };
 }
 
 declare var browser: WebExtBrowser | undefined;

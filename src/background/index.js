@@ -8,11 +8,12 @@
  * megabytes of WebAssembly, loaded once instead of once per tab.
  */
 
-import { webext } from "../lib/browser.js";
+import { offscreenApi, webext } from "../lib/browser.js";
 import { publishPlatform, readConfig } from "../lib/config.js";
 import { ErrorCode, Message, asRequest, fail, ok } from "../lib/protocol.js";
 import { setProvider, translate } from "../lib/translator/index.js";
 import { bergamot } from "../lib/translator/providers/bergamot/index.js";
+import { bergamotViaHost } from "../lib/translator/providers/bergamot/remote.js";
 import { lookUp } from "./dictionary.js";
 import { readPage } from "./page.js";
 import { openLibrary, openReader, readInReader } from "./reader-tab.js";
@@ -26,8 +27,12 @@ import {
 } from "./vocabulary.js";
 
 // The engine itself starts on the first translation, not here: this module runs
-// every time Firefox wakes the event page, and waking up must stay cheap.
-setProvider(bergamot);
+// every time the background wakes, and waking up must stay cheap. Which shape
+// of the provider answers is the one real browser difference in this file: an
+// event page runs the engine's worker itself, a service worker cannot spawn
+// workers and delegates to the offscreen document instead - and "is there an
+// offscreen API" is the whole test.
+setProvider(offscreenApi() === null ? bergamot : bergamotViaHost);
 
 /**
  * @typedef {null
