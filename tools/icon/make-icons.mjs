@@ -19,10 +19,20 @@
 // SVG for extension icons. They are rasterized here rather than by the build,
 // with no image library: the mark is a rounded-rectangle ring and one filled
 // path, both of which a page of geometry can sample - and a generator with no
-// dependencies is one anybody can read next to the files it wrote. A raster
-// cannot follow the toolbar theme the way `icon.svg` does, so the PNGs use
-// one gray between the two tokens, picked to keep at least 3:1 contrast on
-// both Chrome toolbars (measured ~3.6:1 on white, ~3.9:1 on #292a2d).
+// dependencies is one anybody can read next to the files it wrote.
+//
+// The raster is the mark inverted onto a tile: the accent amber fills a
+// rounded square and the page-and-r is drawn in paper white on top. Not the
+// quiet gray line of the SVGs, on purpose twice over. Chrome has no
+// theme-aware manifest icons (`icon_variants` is still a WECG proposal,
+// nothing shipped through Chrome 153), so a toolbar icon must carry its own
+// background to be legible on light and dark chrome alike - and Chrome's
+// toolbar convention is the self-contained brand tile, next to which a thin
+// gray drawing reads as a disabled control (first smoke test said exactly
+// that). The tile is the project's own accent (#b8791d: ~3.6:1 on a white
+// toolbar, ~4:1 on a dark one; the mark on it ~3.5:1), the corner radius is
+// the modern squircle share (~22.5% of the side), and the mark keeps its
+// proportions at 78% of the tile's height.
 //
 // Usage: node tools/icon/make-icons.mjs
 
@@ -117,12 +127,18 @@ const adaptive = svg(
 
 // ---------------------------------------------------------------------------
 // Rasterization. Everything below samples the same two shapes the SVG draws,
-// in the mark's own coordinates: a point is inked when it lies inside the
-// rounded-rectangle ring or inside the glyph. Pixels average a grid of such
-// samples, which is all the anti-aliasing a mark this simple needs.
+// in the mark's own coordinates - a point is inked when it lies inside the
+// rounded-rectangle ring or inside the glyph - plus one more the raster adds:
+// the tile behind them. Pixels average a grid of such samples, which is all
+// the anti-aliasing a mark this simple needs.
 
-/** The one raster color - see the header for how it was picked. */
-const PNG_COLOR = { r: 0x85, g: 0x85, b: 0x8f };
+/** The tile and the mark on it - see the header for how they were picked. */
+const TILE_COLOR = { r: 0xb8, g: 0x79, b: 0x1d };
+const MARK_COLOR = { r: 0xfb, g: 0xfb, b: 0xfe };
+
+/** Corner radius and the mark's height, as shares of the tile's side. */
+const TILE_RADIUS = 0.225;
+const MARK_HEIGHT = 0.78;
 
 /** Raster sizes: manifest `icons` (16/32/48/128), `action.default_icon` (16/32). */
 const PNG_SIZES = [16, 32, 48, 128];
@@ -239,31 +255,55 @@ function inked(px, py) {
 }
 
 /**
- * Coverage-sampled RGBA pixels for one size, mapped the way the SVG maps the
- * mark onto its grid: fit the artboard height, center horizontally.
+ * The tile, tested in pixel space: a rounded square filling the whole raster.
+ *
+ * @param {number} x
+ * @param {number} y
+ * @param {number} size
+ * @returns {boolean}
+ */
+function insideTile(x, y, size) {
+  const half = size / 2;
+  const r = TILE_RADIUS * size;
+  const qx = Math.abs(x - half) - (half - r);
+  const qy = Math.abs(y - half) - (half - r);
+  return Math.min(Math.max(qx, qy), 0) + Math.hypot(Math.max(qx, 0), Math.max(qy, 0)) - r <= 0;
+}
+
+/**
+ * Coverage-sampled RGBA pixels for one size. Each sample is one of three
+ * things - outside the tile, tile, or mark - and a pixel is the average of
+ * what its samples saw, which blends the edges exactly as far as they are
+ * actually crossed.
  *
  * @param {number} size
  * @returns {Uint8Array}
  */
 function rasterize(size) {
-  const scale = size / CANVAS.h;
+  const scale = (size * MARK_HEIGHT) / CANVAS.h;
   const dx = size / 2 - (CANVAS.w / 2) * scale;
+  const dy = size / 2 - (CANVAS.h / 2) * scale;
   const pixels = new Uint8Array(size * size * 4);
   for (let row = 0; row < size; row += 1) {
     for (let col = 0; col < size; col += 1) {
-      let hits = 0;
+      let tile = 0;
+      let mark = 0;
       for (let sy = 0; sy < SAMPLES; sy += 1) {
         for (let sx = 0; sx < SAMPLES; sx += 1) {
-          const px = (col + (sx + 0.5) / SAMPLES - dx) / scale;
-          const py = (row + (sy + 0.5) / SAMPLES) / scale;
-          if (inked(px, py)) hits += 1;
+          const x = col + (sx + 0.5) / SAMPLES;
+          const y = row + (sy + 0.5) / SAMPLES;
+          if (!insideTile(x, y, size)) continue;
+          if (inked((x - dx) / scale, (y - dy) / scale)) mark += 1;
+          else tile += 1;
         }
       }
+      const covered = tile + mark;
       const at = (row * size + col) * 4;
-      pixels[at] = PNG_COLOR.r;
-      pixels[at + 1] = PNG_COLOR.g;
-      pixels[at + 2] = PNG_COLOR.b;
-      pixels[at + 3] = Math.round((hits / (SAMPLES * SAMPLES)) * 255);
+      if (covered === 0) continue;
+      pixels[at] = Math.round((tile * TILE_COLOR.r + mark * MARK_COLOR.r) / covered);
+      pixels[at + 1] = Math.round((tile * TILE_COLOR.g + mark * MARK_COLOR.g) / covered);
+      pixels[at + 2] = Math.round((tile * TILE_COLOR.b + mark * MARK_COLOR.b) / covered);
+      pixels[at + 3] = Math.round((covered / (SAMPLES * SAMPLES)) * 255);
     }
   }
   return pixels;

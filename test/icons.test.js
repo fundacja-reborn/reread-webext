@@ -76,24 +76,23 @@ describe("the rasterized icons", () => {
       assert.deepEqual(header(png), { width: size, height: size, bitDepth: 8, colorType: 6 });
     });
 
-    it(`icon-${size}.png holds a mark, not a blank or a slab`, async () => {
+    it(`icon-${size}.png holds the tile, its corners cut, the mark on it`, async () => {
       const rgba = pixels(await bytes(size), size);
 
       let ink = 0;
       for (let at = 3; at < rgba.length; at += 4) {
         ink += /** @type {number} */ (rgba[at]);
       }
-      // Mean coverage, not a count of touched pixels: anti-aliasing brushes
-      // most of a 16px grid with a little alpha, while the mass of ink the
-      // mark lays down is the same share of the square at every size (~22%).
-      // A blank file has none of it, a rasterizer bug that floods the fill has
-      // nearly all of it. The wide band is on purpose - this guards decoding,
-      // not taste.
+      // The icon is a rounded tile filling the raster, so mean coverage sits
+      // just under full - the corner radius is all that is missing (~4% at a
+      // 22.5% radius). A blank file has none of it; a full square means the
+      // radius stopped being applied. The band is wide on purpose - this
+      // guards decoding, not taste.
       const share = ink / (255 * size * size);
-      assert.ok(share > 0.08, `mean coverage ${(share * 100).toFixed(1)}% - blank?`);
-      assert.ok(share < 0.45, `mean coverage ${(share * 100).toFixed(1)}% - flooded?`);
+      assert.ok(share > 0.7, `mean coverage ${(share * 100).toFixed(1)}% - blank?`);
+      assert.ok(share < 0.98, `mean coverage ${(share * 100).toFixed(1)}% - a square, not a tile?`);
 
-      // The drawing is centered with margins: all four corners stay clear.
+      // The rounding is what keeps the corner pixels clear.
       for (const [x, y] of /** @type {Array<[number, number]>} */ ([
         [0, 0],
         [size - 1, 0],
@@ -102,6 +101,18 @@ describe("the rasterized icons", () => {
       ])) {
         assert.equal(rgba[(y * size + x) * 4 + 3], 0, `corner ${x},${y} is inked`);
       }
+
+      // A point in the tile's left margin at mid-height - inside the rounded
+      // square everywhere, left of the mark (which spans the middle ~71% of
+      // the width): solid, and solid in the accent amber. The channel order
+      // alone catches a swapped or grayscale fill.
+      const tile = ((size >> 1) * size + Math.round(size * 0.08)) * 4;
+      assert.equal(rgba[tile + 3], 255, "tile interior is not opaque");
+      assert.deepEqual(
+        [rgba[tile], rgba[tile + 1], rgba[tile + 2]],
+        [0xb8, 0x79, 0x1d],
+        "tile interior is not the accent amber",
+      );
     });
   }
 });
