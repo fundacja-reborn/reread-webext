@@ -12,11 +12,11 @@
   </head>
   <body>
     <!--
-      Six rows and nothing else: this site, the pair, the reader, the reading
-      list, the saved phrases, the door to the settings. No counters, no logo -
-      the popup is a hallway, not a room. On a fresh install the pair row
-      yields its place to a signpost, because a pair nothing can translate yet
-      is a promise the popup must not make.
+      Seven rows and nothing else: this site, the pair, the quiet bubble, the
+      reader, the reading list, the saved phrases, the door to the settings.
+      No counters, no logo - the popup is a hallway, not a room. On a fresh
+      install the pair row yields its place to a signpost, because a pair
+      nothing can translate yet is a promise the popup must not make.
     -->
     <!-- The English in this file is the fallback: `localizePage` swaps every
          `data-i18n`-marked text for the catalogue's language before the popup
@@ -47,6 +47,15 @@
     <button type="button" class="popup-row popup-action popup-setup" id="setup-row" data-i18n="popup_no_model" hidden>
       No translation model on this device yet - press here to pick one in the settings.
     </button>
+
+    <!-- The quiet-bubble switch (D81), here as well as in the settings: it is
+         a reading preference somebody flips mid-article, and the popup is the
+         surface already in reach. Save shows itself regardless - the hint for
+         that lives on the settings page, where there is room to say it. -->
+    <label class="popup-row popup-quiet" id="quiet-row">
+      <span data-i18n="quiet_bubble">Hide bubble actions by default</span>
+      <input type="checkbox" id="quiet-bubble" />
+    </label>
 
     <button type="button" class="popup-row popup-action" id="open-reader" data-i18n="open_reader">
       Read this page in the reader

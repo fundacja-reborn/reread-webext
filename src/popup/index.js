@@ -1,9 +1,10 @@
 /**
  * The toolbar popup: the basic acts on top, the door to the settings at the
- * bottom, in the place every user already looks for them. Six rows - whether
- * re/read runs on this site, which pair is being read, this page in the
- * reader, the reading list, the saved phrases, the settings - and nothing
- * else.
+ * bottom, in the place every user already looks for them. Seven rows -
+ * whether re/read runs on this site, which pair is being read, whether the
+ * bubble keeps its actions folded (D81 - a reading preference somebody flips
+ * mid-article), this page in the reader, the reading list, the saved
+ * phrases, the settings - and nothing else.
  *
  * The popup knows which tab it stands over and nothing more: `tabs.query`
  * without the `tabs` permission answers with an id and no address, on purpose.
@@ -36,6 +37,7 @@ const siteRow = document.getElementById("site-row");
 const siteLabel = document.getElementById("site-label");
 const siteNote = document.getElementById("site-note");
 const siteToggle = /** @type {HTMLInputElement | null} */ (document.getElementById("site-toggle"));
+const quietToggle = /** @type {HTMLInputElement | null} */ (document.getElementById("quiet-bubble"));
 const pairRow = document.getElementById("pair-row");
 const setupRow = document.getElementById("setup-row");
 const pairSelect = /** @type {HTMLSelectElement | null} */ (document.getElementById("pair"));
@@ -130,6 +132,13 @@ async function toggleSite() {
   await writeConfig({ disabledHosts: hosts });
 }
 
+async function toggleQuietBubble() {
+  if (quietToggle === null) return;
+  // The same write the settings page makes; every open page's bubble follows
+  // through `storage.onChanged`, next selection onwards.
+  await writeConfig({ hideBubbleActions: quietToggle.checked });
+}
+
 async function choosePair() {
   if (pairSelect === null) return;
   const choice = choices.find((one) => one.pair === pairSelect.value);
@@ -183,6 +192,7 @@ async function openSettings() {
 }
 
 siteToggle?.addEventListener("change", () => void toggleSite());
+quietToggle?.addEventListener("change", () => void toggleQuietBubble());
 pairSelect?.addEventListener("change", () => void choosePair());
 readerButton?.addEventListener("click", () => void openReader());
 libraryButton?.addEventListener("click", () => void openLibrary());
@@ -219,6 +229,7 @@ async function render() {
   const fresh = installed.length === 0;
   if (pairRow !== null) pairRow.hidden = fresh;
   if (setupRow !== null) setupRow.hidden = !fresh;
+  if (quietToggle !== null) quietToggle.checked = config.hideBubbleActions;
   choices = pairChoices(config, installed);
   renderPair(config);
   renderSite(await askPage(tabId), config);

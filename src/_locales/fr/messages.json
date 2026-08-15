@@ -18,6 +18,7 @@
   "reading_list": { "message": "Liste de lecture hors ligne" },
   "saved_phrases": { "message": "Phrases enregistrées" },
   "open_reader": { "message": "Lire cette page dans le lecteur" },
+  "quiet_bubble": { "message": "Masquer par défaut les actions de la bulle" },
   "action_delete": { "message": "Supprimer" },
   "action_download": { "message": "Télécharger" },
   "action_cancel": { "message": "Annuler" },
@@ -39,8 +40,6 @@
   "bubble_more": { "message": "Plus" },
   "bubble_less": { "message": "Moins" },
   "bubble_reader": { "message": "Lire dans le lecteur" },
-  "bubble_extend_left": { "message": "Étendre la sélection d'un mot vers la gauche" },
-  "bubble_extend_right": { "message": "Étendre la sélection d'un mot vers la droite" },
   "bubble_translating": { "message": "Traduction..." },
 
   "popup_site_enabled": {
@@ -442,6 +441,9 @@
   "options_reader_only": { "message": "Seulement dans le lecteur" },
   "options_reader_only_hint": {
     "message": "Quand c'est activé, sélectionner une phrase ou un mot sur une page ordinaire ne propose qu'une chose : ouvrir la page dans le lecteur. La traduction, l'enregistrement et le soulignement se font là (plus clair et plus lisible). Sur Android, l'option est activée par défaut."
+  },
+  "options_quiet_bubble_hint": {
+    "message": "Quand c'est activé, la bulle de traduction ne montre que la traduction ; ses boutons apparaissent après un clic ou un appui sur la bulle. Enregistrer reste l'exception dans les deux cas : une phrase trop longue pour s'enregistrer seule montre toujours le bouton d'enregistrement."
   },
   "options_models_heading": { "message": "Modèles de traduction" },
   "options_models_intro": {

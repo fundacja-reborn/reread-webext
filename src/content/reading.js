@@ -17,10 +17,11 @@
  * there the document's `selectionchange` is listened to as well, behind a
  * settle timer and a pointer-type gate - at rest both amount to one comparison
  * per event, and a mouse-only device does not even install them. The reader
- * page alone adds a third way in (D80, `touch-select.js`): its article refuses
- * the native selection on touch and selects through our own gesture, whose end
- * is a `touchend` - so there the bubble, the translation and the keeping land
- * exactly on the finger lifting, with no system menu in the way.
+ * page alone adds a third way in (D80/D81, `touch-select.js`): its article
+ * refuses the native selection on touch and selects through our own gesture -
+ * a finger held on a word, dragged on to stretch - whose end is a `touchend`,
+ * so there the bubble, the translation and the keeping land exactly on the
+ * finger lifting, with no system menu in the way.
  *
  * Knowing the vocabulary here rather than asking the background for it is what
  * makes a word the reader already kept appear instantly, with no message and no
@@ -29,7 +30,7 @@
  */
 
 import { webext } from "../lib/browser.js";
-import { CONFIG_KEY, withDefaults } from "../lib/config.js";
+import { CONFIG_KEY, DEFAULTS, withDefaults } from "../lib/config.js";
 import { choosableLines } from "../lib/gloss.js";
 import { t } from "../lib/i18n.js";
 import { describeError } from "../lib/messages.js";
@@ -40,7 +41,7 @@ import { sentenceAround } from "../lib/sentence.js";
 import { MIRROR_KEY, asMirror, mirrorMatches } from "../lib/store/mirror.js";
 import { clear, paint, phraseAt } from "./highlighter.js";
 import { blockTextAround, findable } from "./scan.js";
-import { clearTouchSelection, extendTouchSelection, startTouchSelect, stopTouchSelect } from "./touch-select.js";
+import { clearTouchSelection, startTouchSelect, stopTouchSelect } from "./touch-select.js";
 import { createTooltip } from "./tooltip.js";
 
 /** @typedef {import("../lib/protocol.js").VocabEntry} VocabEntry */
@@ -92,28 +93,16 @@ let generation = 0;
 /** @type {import("./tooltip.js").Action[]} */
 const KEPT = ["learned", "edit"];
 
-/** The selection tools of the reader's touch selection (D80). */
-/** @type {import("./tooltip.js").Action[]} */
-const EXTEND = ["extend-left", "extend-right"];
-
-/**
- * The selection tools of the bubble now open: `EXTEND` while it stands over
- * the reader's own touch selection, empty everywhere else. Kept beside the
- * other bubble state because every rebuild of the action row - saving,
- * forgetting, the second layer emptying - has to put the same tools back.
- *
- * @type {import("./tooltip.js").Action[]}
- */
-let extendActions = [];
-
 /**
  * The phrase the current touch-selection chain kept without asking, if any.
- * A phrase is built in steps there - tap a word, stretch it out - and every
- * step short enough keeps itself (D22). The step being stretched away from
- * was scaffolding, not a decision, so the stretch takes it back out
- * (`reviseAutoKept`); what survives the chain is only what the last gesture
- * said. Cleared when a chain ends and never set for a phrase that was already
- * in the vocabulary - those the reader put there on purpose.
+ * The chain's opening gesture keeps its phrase when it is short enough (D22),
+ * and the taps that grow the phrase afterwards deliberately do not (D81) -
+ * they offer Save instead, and the Save that lands is what takes this
+ * scaffolding step back out of the vocabulary (`keep`): what survives the
+ * chain is the reader's last answered gesture, never both. Cleared when a
+ * chain ends - a dismissal leaves the kept step standing, because nothing
+ * ever replaced it - and never set for a phrase that was already in the
+ * vocabulary: those the reader put there on purpose.
  *
  * @type {{ text: string, normalized: string } | null}
  */
@@ -132,6 +121,14 @@ const OFFERED = Object.freeze({
 });
 
 const tooltip = createTooltip({ onAction });
+
+/**
+ * The quiet-bubble setting (D81), mirrored from the config the way the
+ * vocabulary is: a fresh bubble opens with its action row folded while this
+ * is on, and the row comes out on a press, on approach - or by itself when
+ * Save or an error's one button is the point, which no setting may hide.
+ */
+let hideActions = DEFAULTS.hideBubbleActions;
 
 /** Where the press this release belongs to started, and whether it was ours. */
 /** @type {{ x: number, y: number, mine: boolean } | null} */
@@ -158,6 +155,14 @@ const SETTLE_MS = 300;
 let root = null;
 /** Whether to follow the document changing. A built document does not. */
 let follow = true;
+/**
+ * Whether bubbles pin to the page rather than to the viewport - the reader's
+ * mode (D81): there a bubble is a margin note that rides with the text when
+ * the page scrolls, and a scroll therefore stops meaning "close". On somebody
+ * else's page the bubble stays a viewport thing, and scrolling away from a
+ * phrase still dismisses it.
+ */
+let anchored = false;
 let started = false;
 
 /**
@@ -220,6 +225,9 @@ async function loadVocabulary(preloaded) {
     const stored = preloaded ?? (await webext().storage.local.get([CONFIG_KEY, MIRROR_KEY]));
     const config = withDefaults(stored[CONFIG_KEY]);
     const mirror = asMirror(stored[MIRROR_KEY]);
+    // Rides the same read and the same storage listener as the vocabulary:
+    // flipping the switch in the popup reaches every open page on the spot.
+    hideActions = config.hideBubbleActions;
 
     if (mirror === null) {
       adopt([]);
@@ -305,14 +313,6 @@ async function onAction(action, meanings) {
   // The launcher bubble's one button, which this side never offers - the guard
   // is here so the type can say so without a stray report ever writing.
   if (action === "reader") return;
-  if (action === "extend-left" || action === "extend-right") {
-    // The bubble's half of the stretch (D80): one word onto whichever end,
-    // then the grown phrase is answered exactly like a finished gesture. At
-    // the block's edge there is nothing to grow to and nothing happens.
-    const grown = extendTouchSelection(action === "extend-left" ? -1 : 1);
-    if (grown !== null) presentTouch(grown, "extend");
-    return;
-  }
   if (action === "settings") {
     void ask({ kind: Message.OPEN_SETTINGS });
     tooltip.hide();
@@ -376,14 +376,19 @@ async function change(write, remember, next) {
   repaint();
 
   if (next === null) {
+    // The answer was the end of the exchange, and it takes the touch
+    // selection with it (D81): the phrase is kept or forgotten, the underline
+    // says which, and a highlight left standing would ask the question again.
     tooltip.hide();
+    clearTouchSelection();
+    autoKept = null;
     current = null;
     secondLayer = [];
     unfetched = null;
     return;
   }
 
-  tooltip.setActions([...extendActions, ...next, ...secondLayer]);
+  tooltip.setActions([...next, ...secondLayer]);
 }
 
 /**
@@ -394,7 +399,20 @@ async function change(write, remember, next) {
 async function keep(meanings, next) {
   await change(
     (phrase) => ask({ kind: Message.SAVE_PHRASE, text: phrase.text, translations: meanings }),
-    (phrase) => vocabulary.set(phrase.normalized, meanings),
+    (phrase) => {
+      // A save that lands replaces the chain's earlier automatic keep (D81):
+      // that step was scaffolding for the phrase it grew into, and leaving it
+      // would put two overlapping entries in the vocabulary and onto the
+      // flashcards. Fire and forget, literally - a failure leaves a word the
+      // reader can Learned away, not worth holding this save for.
+      const kept = autoKept;
+      if (kept !== null && kept.normalized !== phrase.normalized) {
+        autoKept = null;
+        void ask({ kind: Message.FORGET_PHRASE, text: kept.text });
+        vocabulary.delete(kept.normalized);
+      }
+      vocabulary.set(phrase.normalized, meanings);
+    },
     next,
   );
 }
@@ -430,10 +448,8 @@ async function forget() {
  * @param {string} text as the page has it
  * @param {string} normalized
  * @param {string | null} context the sentence around the phrase, when the page has one
- * @param {{ touch?: boolean, extend?: import("./tooltip.js").Action[] }} [how]
- *   whether the anchor is a native selection made by touch, and which
- *   selection tools ride along (the reader's touch selection offers its
- *   stretch buttons even over a phrase already kept)
+ * @param {{ touch?: boolean }} [how]
+ *   whether the anchor is a native selection made by touch
  * @returns {boolean} whether it was known
  */
 function showSaved(anchor, text, normalized, context, how = {}) {
@@ -444,7 +460,6 @@ function showSaved(anchor, text, normalized, context, how = {}) {
   // so its meanings may be corrected from anywhere, however it was reached.
   current = { text, normalized, keepable: true };
   generation += 1;
-  extendActions = how.extend ?? [];
   // The layer itself is empty, and stays empty until it is asked for: the
   // answer comes from the database, without a message and without waking the
   // engine (D27). More is the press that says the sentence and the
@@ -459,8 +474,9 @@ function showSaved(anchor, text, normalized, context, how = {}) {
     anchor,
     variant: "recall",
     body: meanings.join("\n"),
-    actions: [...extendActions, ...KEPT, ...secondLayer],
+    actions: [...KEPT, ...secondLayer],
     touch: how.touch === true,
+    anchored,
   });
   return true;
 }
@@ -510,7 +526,7 @@ async function fillSecondLayer() {
   // selection with an empty layer.
   if ((sentence === null || sentence.length === 0) && blocks.length === 0) {
     secondLayer = [];
-    tooltip.setActions([...extendActions, ...KEPT, ...secondLayer]);
+    tooltip.setActions([...KEPT, ...secondLayer]);
   }
 }
 
@@ -599,29 +615,45 @@ function onMouseUp(event) {
  * @param {NonNullable<ReturnType<typeof fromRange>>} selection
  * @param {object} how
  * @param {boolean} how.deliberate whether a gesture ended exactly here - what
- *   `keeping` may write on (a settled selection never keeps by itself)
+ *   `keeping` may write on (a selection that settled under a timer, and a tap
+ *   growing the reader's touch selection, never keep by themselves)
  * @param {boolean} how.touch whether the anchor is a *native* touch selection,
  *   wearing the system's bar and handles: the bubble then stands a system
  *   strip away (D74). The reader's own touch selection wears nothing and
  *   keeps D23's close gap.
  * @param {boolean} [how.chain] whether this came through the reader's touch
- *   selection, whose bubble carries the stretch buttons and whose automatic
- *   keeps are revised by the next stretch (`autoKept`)
+ *   selection (D81), whose Save revises the chain's automatic keep
+ *   (`autoKept`)
  */
 function present(selection, { deliberate, touch, chain = false }) {
+  // Any other channel answering is a chain ending mid-thought: what the chain
+  // kept stands - its last gesture was deliberate - but nothing about the new
+  // phrase may revise it.
+  if (!chain) autoKept = null;
+
   const { text, normalized } = selection;
-  const extend = chain ? EXTEND : [];
-  if (showSaved(selection.rect, text, normalized, selection.context, { touch, extend })) return;
+  if (showSaved(selection.rect, text, normalized, selection.context, { touch })) return;
 
   current = { text, normalized, keepable: selection.findable };
-  extendActions = extend;
   secondLayer = [];
   unfetched = null;
   const mine = ++generation;
 
   // The other variant: a fresh selection is a phrase nothing has been decided
-  // about yet, so what can be done with it is on show from the first frame.
-  tooltip.show({ anchor: selection.rect, variant: "save", body: t("bubble_translating"), tone: "pending", touch });
+  // about yet, so what can be done with it is on show from the first frame -
+  // unless the quiet-bubble setting says the answer comes first and the row
+  // waits to be asked for (D81), exactly like a recall's. What the setting
+  // never hides is a Save or an error's button: those reveal on their own
+  // when the answer lands (`reveal`).
+  tooltip.show({
+    anchor: selection.rect,
+    variant: "save",
+    body: t("bubble_translating"),
+    tone: "pending",
+    touch,
+    folded: hideActions ? true : undefined,
+    anchored,
+  });
 
   const request = selection.context === null
     ? { kind: Message.TRANSLATE, text }
@@ -636,6 +668,9 @@ function present(selection, { deliberate, touch, chain = false }) {
     if (!result.ok) {
       tooltip.setBody(describeError(result.code), "error");
       tooltip.setActions(result.code === ErrorCode.MODEL_MISSING ? ["settings"] : []);
+      // A chain's bubble opens with the row folded, and an error's one real
+      // button must not be behind a fold nobody knows is there.
+      tooltip.reveal();
       return;
     }
 
@@ -650,13 +685,17 @@ function present(selection, { deliberate, touch, chain = false }) {
     secondLayer = (sentence !== null && sentence.length > 0) || blocks.length > 0 ? ["more"] : [];
 
     const decision = keeping({ normalized, gloss, findable: selection.findable, deliberate });
-    tooltip.setActions([...extendActions, ...OFFERED[decision], ...secondLayer]);
+    tooltip.setActions([...OFFERED[decision], ...secondLayer]);
+    // A phrase that is a question rather than an answer - too long to keep
+    // itself, or grown by a tap (D81) - leads with the asking: Save is the
+    // point of this bubble, so the row it sits in comes out on its own.
+    if (decision === "ask") tooltip.reveal();
 
     // Kept without being asked. The buttons flip first and the write follows,
     // because the write is local and instant, and a bubble that shows no
     // buttons for a moment reads as a bubble that is still thinking. In a
-    // touch chain the keep is also remembered, so that stretching the phrase
-    // further can take this step back out (`reviseAutoKept`) - remembered
+    // touch chain the keep is also remembered, so that the Save of a phrase
+    // grown out of it can take this step back out (`keep`) - remembered
     // before the write lands, because forgetting something that never got
     // written costs nothing and the other order leaks scaffolding.
     if (decision === "automatic") {
@@ -667,9 +706,20 @@ function present(selection, { deliberate, touch, chain = false }) {
 }
 
 /**
- * The reader's touch selection, answered (D80). `tap` starts a chain, `extend`
- * grows the phrase the chain is about, `again` is a tap on the selection
- * itself - a knock on a bubble that may have closed over it.
+ * The reader's touch selection, answered (D80, reshaped by D81). `press` is
+ * the hold-and-drag gesture ending - a fresh statement of the whole phrase,
+ * and the start of a chain; `extend` is a tap growing the standing phrase by
+ * its neighbour; `again` is a tap on the selection itself - a knock on a
+ * bubble that may have closed over it.
+ *
+ * Only the hold's end may keep by itself (`deliberate`): the finger lifted
+ * exactly there, asserting the whole phrase, and D22 does the rest. The taps
+ * that grow the phrase afterwards ask instead - Save, revealed - both
+ * because a tapped-out phrase is exploration that deserves a look before it
+ * lands in the vocabulary, and because each growing tap would otherwise
+ * write a step of its own. The Save that lands takes the chain's automatic
+ * keep back out (`keep`); a chain dismissed instead keeps what its last
+ * answered gesture kept.
  *
  * @param {Range} range the selection as the touch side built it
  * @param {import("./touch-select.js").GestureKind} kind
@@ -682,33 +732,14 @@ function presentTouch(range, kind) {
   // new to answer, and answering would ride the engine to repaint it.
   if (kind !== "extend" && tooltip.isOpen() && current !== null && current.text === selection.text) return;
 
-  if (kind === "tap") autoKept = null;
-  if (kind === "extend") reviseAutoKept(selection.normalized);
+  // A hold starts a chain of its own; whatever the last one kept was its
+  // final word, and stands.
+  if (kind === "press") autoKept = null;
 
   // Never `touch` in the D74 sense: this selection is the reader page's own,
   // no system bar or handles around it, so the bubble may stand close (D23) -
   // which is half the point of having it (D80).
-  present(selection, { deliberate: true, touch: false, chain: true });
-}
-
-/**
- * The last automatic keep of this chain, taken back out: the phrase grew past
- * it, so what it kept was one step of the making, not a decision. Nothing to
- * do when the chain kept nothing - a stretch out of a phrase the reader had
- * saved on purpose leaves it exactly as saved.
- *
- * @param {string} next the normalized phrase replacing it
- */
-function reviseAutoKept(next) {
-  const kept = autoKept;
-  if (kept === null) return;
-  autoKept = null;
-  if (kept.normalized === next) return;
-  // Fire and forget, literally: a failure leaves a word the reader can
-  // Learned away, which is not worth holding the fresh translation for.
-  void ask({ kind: Message.FORGET_PHRASE, text: kept.text });
-  vocabulary.delete(kept.normalized);
-  repaint();
+  present(selection, { deliberate: kind === "press", touch: false, chain: true });
 }
 
 /**
@@ -788,13 +819,25 @@ function settled() {
  * @param {KeyboardEvent} event
  */
 function onKeyDown(event) {
-  if (event.key === "Escape" && tooltip.isOpen()) tooltip.escape();
+  if (event.key !== "Escape" || !tooltip.isOpen()) return;
+  tooltip.escape();
+  // An Escape that closed the bubble - rather than the edit box inside it -
+  // ends the touch chain with it: a highlight left with no bubble would ask
+  // the question the bubble just stopped answering.
+  if (!tooltip.isOpen()) {
+    clearTouchSelection();
+    autoKept = null;
+  }
 }
 
 /**
  * @param {Event} event
  */
 function onScroll(event) {
+  // An anchored bubble (the reader's, D81) is pinned to the page and rides
+  // the scroll with its phrase - scrolling there is how the reader gets back
+  // to the sentence, not a way of saying "close".
+  if (anchored) return;
   // Not while the edit box is open: a wheel nudge is not a reason to throw
   // away a translation somebody is in the middle of correcting. And not for
   // a scroll of the bubble's own second layer, which is a reader working
@@ -819,16 +862,20 @@ function onStorageChanged(changes, area) {
 }
 
 /**
- * @param {{ root?: Element | null, observe?: boolean, stored?: Record<string, unknown>, touchSelect?: boolean }} [where]
+ * @param {{ root?: Element | null, observe?: boolean, stored?: Record<string, unknown>, touchSelect?: boolean, anchored?: boolean }} [where]
  *   what to underline inside, whether it can change on its own, the startup
- *   read of `storage.local` when the caller already made one, and whether
- *   touch selects through our own gesture rather than the browser's (D80) -
- *   the reader page's flag, never a content script's: refusing the native
- *   selection on somebody else's page would be changing how their page works
+ *   read of `storage.local` when the caller already made one, whether touch
+ *   selects through our own gesture rather than the browser's (D80), and
+ *   whether bubbles pin to the page instead of the viewport (D81). The last
+ *   two are the reader page's flags, never a content script's: refusing the
+ *   native selection on somebody else's page would be changing how their
+ *   page works, and pinning to the document trusts a page layout only our
+ *   own page can promise
  */
 export function start(where = {}) {
   root = where.root ?? null;
   follow = where.observe ?? true;
+  anchored = where.anchored ?? false;
 
   // Called again when the reader renders another article, and the listeners
   // must not stack up behind it.
@@ -857,7 +904,7 @@ export function start(where = {}) {
           root: root ?? document.body,
           owns: (target) => tooltip.owns(target),
           onSelected: presentTouch,
-          onExtendStart: () => tooltip.hide(),
+          onSelectStart: () => tooltip.hide(),
         });
       }
     }
@@ -897,10 +944,10 @@ export function stop() {
   current = null;
   secondLayer = [];
   unfetched = null;
-  extendActions = [];
   autoKept = null;
   press = null;
   lastPointerType = "";
+  anchored = false;
   vocabulary = new Map();
   clear();
 }

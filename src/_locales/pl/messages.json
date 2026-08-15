@@ -18,6 +18,7 @@
   "reading_list": { "message": "Czytelnia offline" },
   "saved_phrases": { "message": "Zapisane frazy" },
   "open_reader": { "message": "Przeczytaj tę stronę w widoku czytania" },
+  "quiet_bubble": { "message": "Domyślnie ukrywaj akcje w dymku" },
   "action_delete": { "message": "Usuń" },
   "action_download": { "message": "Pobierz" },
   "action_cancel": { "message": "Anuluj" },
@@ -39,8 +40,6 @@
   "bubble_more": { "message": "Więcej" },
   "bubble_less": { "message": "Mniej" },
   "bubble_reader": { "message": "Czytaj w widoku czytania" },
-  "bubble_extend_left": { "message": "Rozszerz zaznaczenie o słowo w lewo" },
-  "bubble_extend_right": { "message": "Rozszerz zaznaczenie o słowo w prawo" },
   "bubble_translating": { "message": "Tłumaczę..." },
 
   "popup_site_enabled": {
@@ -549,6 +548,9 @@
   "options_reader_only": { "message": "Tylko w widoku czytania" },
   "options_reader_only_hint": {
     "message": "Gdy to jest włączone, zaznaczenie frazy lub słowa na zwykłej stronie proponuje jedno: otwarcie jej w widoku czytania. Tłumaczenie, zapisywanie i podkreślanie dzieją się tam (przejrzyściej i czytelniej). Na Androidzie opcja jest domyślnie włączona."
+  },
+  "options_quiet_bubble_hint": {
+    "message": "Gdy to jest włączone, dymek tłumaczenia pokazuje samo tłumaczenie, a przyciski wysuwają się po kliknięciu lub tapnięciu w dymek. Wyjątkiem - niezależnie od ustawienia - jest Zapisz: fraza za długa, by zapisać się sama, zawsze pokazuje przycisk zapisu."
   },
   "options_models_heading": { "message": "Modele tłumaczeniowe" },
   "options_models_intro": {

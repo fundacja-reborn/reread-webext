@@ -22,6 +22,10 @@
   "reading_list": { "message": "Offline reading list" },
   "saved_phrases": { "message": "Saved phrases" },
   "open_reader": { "message": "Read this page in the reader" },
+  "quiet_bubble": {
+    "message": "Hide bubble actions by default",
+    "description": "Checkbox label in the popup and on the settings page: the translation bubble opens with its buttons folded away (D81)."
+  },
   "action_delete": { "message": "Delete" },
   "action_download": { "message": "Download" },
   "action_cancel": { "message": "Cancel" },
@@ -43,14 +47,6 @@
   "bubble_more": { "message": "More" },
   "bubble_less": { "message": "Less" },
   "bubble_reader": { "message": "Read in the reader" },
-  "bubble_extend_left": {
-    "message": "Extend the selection one word to the left",
-    "description": "Accessible name of the left stretch glyph in the reader touch-selection bubble"
-  },
-  "bubble_extend_right": {
-    "message": "Extend the selection one word to the right",
-    "description": "Accessible name of the right stretch glyph in the reader touch-selection bubble"
-  },
   "bubble_translating": { "message": "Translating..." },
 
   "popup_site_enabled": {
@@ -461,6 +457,9 @@
   "options_reader_only": { "message": "Only in the reader" },
   "options_reader_only_hint": {
     "message": "With this on, selecting a phrase or a word on an ordinary page offers one thing: open the page in the reader. Translating, saving and underlining happen there (cleaner and easier to read). On Android the option is on by default."
+  },
+  "options_quiet_bubble_hint": {
+    "message": "With this on, the translation bubble shows just the translation, and its buttons slide out when you click or tap the bubble. Save is the exception either way: a phrase too long to save itself always shows the button that saves it."
   },
   "options_models_heading": { "message": "Translation models" },
   "options_models_intro": {

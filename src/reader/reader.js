@@ -1051,9 +1051,12 @@ webext().runtime.onMessage.addListener((message, _sender, sendResponse) => {
 // reader's own heading and links are not text anybody is learning from, and
 // nothing in this document changes unless the code above changes it, so there
 // is nothing for an observer to watch. Touch selects through our own gesture
-// here (D80) - this is our page, so refusing the native selection is allowed,
-// and it is the one way to read on a touch screen with no system menu in the
-// way and the bubble landing exactly on the finger lifting.
-start({ root: article, observe: false, touchSelect: true });
+// here (D80/D81) - this is our page, so refusing the native selection is
+// allowed, and it is the one way to read on a touch screen with no system
+// menu in the way and the bubble landing exactly on the finger lifting. For
+// the same reason the bubble pins to the page rather than the viewport
+// (`anchored`): it rides the scroll with its phrase like a margin note,
+// which only a layout we control can promise to survive.
+start({ root: article, observe: false, touchSelect: true, anchored: true });
 
 void showPage();

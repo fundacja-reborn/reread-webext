@@ -244,6 +244,12 @@ function renderReaderOnly() {
   if (toggle instanceof HTMLInputElement) toggle.checked = effectiveReaderOnly(config, os);
 }
 
+/** The quiet-bubble switch (D81) - stored plainly, no platform in the picture. */
+function renderQuietBubble() {
+  const toggle = document.getElementById("quiet-bubble");
+  if (toggle instanceof HTMLInputElement) toggle.checked = config.hideBubbleActions;
+}
+
 /**
  * @param {string} id
  * @param {string} value
@@ -1386,6 +1392,7 @@ async function render() {
   }
   fill("version", webext().runtime.getManifest().version);
   renderReaderOnly();
+  renderQuietBubble();
   renderLanguageChoices("dictionary-from", config.sourceLang);
   renderLanguageChoices("dictionary-to", config.targetLang);
 
@@ -1430,6 +1437,7 @@ async function render() {
 async function refresh() {
   config = await readConfig();
   renderReaderOnly();
+  renderQuietBubble();
   renderDisabledHosts();
   // Both lists, because "what you are reading" rides on the pair in both -
   // and the select rides `renderModels`. While a download or an import holds
@@ -1453,6 +1461,15 @@ document.getElementById("reader-only")?.addEventListener("change", (event) => {
   // Open pages notice through `storage.onChanged` and change modes on the
   // spot - the launcher appears or the reading side starts, with no reload.
   void writeConfig({ readerOnly: toggle.checked }).then((written) => {
+    config = written;
+  });
+});
+document.getElementById("quiet-bubble")?.addEventListener("change", (event) => {
+  const toggle = event.target;
+  if (!(toggle instanceof HTMLInputElement)) return;
+  // Same road as the mode switch: open pages hear it through storage and the
+  // next bubble opens the way the box now says.
+  void writeConfig({ hideBubbleActions: toggle.checked }).then((written) => {
     config = written;
   });
 });
