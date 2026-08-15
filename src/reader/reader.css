@@ -35,10 +35,12 @@
   --reader-speaking-word: color-mix(in srgb, var(--page-accent) 38%, transparent);
 }
 
+/* The ink is dimmed against glare, in step with page.css's auto-dark - see
+   the note there for the numbers; the two blocks are one theme in two homes. */
 :root[data-reader-theme="dark"] {
   color-scheme: dark;
   --page-bg: #171a21;
-  --page-fg: #f2f4f8;
+  --page-fg: #ccd3df;
   --page-muted: #98a1b5;
   --page-line: #565d6c;
   --page-border: #767e8f;
