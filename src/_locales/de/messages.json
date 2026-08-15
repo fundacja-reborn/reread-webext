@@ -190,7 +190,6 @@
   },
   "reader_save": { "message": "In der Leseliste speichern" },
   "reader_saved": { "message": "In der Leseliste" },
-  "reader_delete": { "message": "Aus der Leseliste löschen" },
   "reader_delete_confirm": { "message": "Sicher?" },
   "reader_delete_aria": {
     "message": "Artikel löschen: $TITLE$",

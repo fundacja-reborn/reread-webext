@@ -573,10 +573,14 @@ function libraryRow(meta) {
  */
 
 /**
+ * The title a Delete would take with it: the article's own for the button
+ * above the article, the row's name for a row's.
+ *
  * @param {HTMLElement} button
  * @returns {string}
  */
 function deleteTitle(button) {
+  if (button === removeButton) return titleElement?.textContent ?? "";
   return button.closest("li")?.querySelector(".library-open")?.textContent ?? "";
 }
 
@@ -589,15 +593,10 @@ function disarmDelete() {
   const armed = armedDelete();
   if (armed === null) return;
   armed.removeAttribute("data-armed");
-  if (armed === removeButton) {
-    // The article's own Delete speaks for itself at rest - one button, one
-    // article - so standing down also takes the armed aria-label and the
-    // held width with it.
-    armed.style.removeProperty("min-width");
-    armed.textContent = t("reader_delete");
-    armed.removeAttribute("aria-label");
-    return;
-  }
+  // Every Delete stands down to the same pair of words - the bare verb to
+  // see, the act with its title to hear; only the held width was the article
+  // button's own.
+  if (armed === removeButton) armed.style.removeProperty("min-width");
   armed.textContent = t("action_delete");
   armed.setAttribute("aria-label", t("reader_delete_aria", deleteTitle(armed)));
 }
@@ -772,9 +771,11 @@ async function refreshActions() {
   if (removeButton !== null) {
     removeButton.hidden = target.origin !== "saved";
     removeButton.removeAttribute("data-armed");
-    removeButton.removeAttribute("aria-label");
     removeButton.style.removeProperty("min-width");
-    removeButton.textContent = t("reader_delete");
+    // The rows' pair of words: one visible verb, the act with its title as
+    // the accessible name - a bare "Delete" names nothing over a whole page.
+    removeButton.textContent = t("action_delete");
+    removeButton.setAttribute("aria-label", t("reader_delete_aria", deleteTitle(removeButton)));
   }
 
   if (markReadButton !== null) {
@@ -831,22 +832,17 @@ async function onKeepPress() {
  */
 async function onRemovePress() {
   const target = shown;
-  if (target === null || target.origin !== "saved" || removeButton === null) return;
+  if (target === null || target.origin !== "saved") return;
+  if (!(removeButton instanceof HTMLButtonElement)) return;
 
   if (!removeButton.hasAttribute("data-armed")) {
-    disarmDelete();
-    // The question must not shrink the target: "Sure?" is shorter than the
-    // verb in every catalogue, and a button that contracts under the finger
-    // turns the second press into a miss that disarms it. Held as min-width,
-    // anchored on the left edge the row aligns to, so a longer question could
-    // still only grow rightward.
+    // The question must not move the target out from under the finger. Which
+    // of verb and question runs longer now differs by catalogue ("Usuń" asks
+    // "Na pewno?", "Supprimer" asks "Sûr ?"), so the width is held as
+    // min-width, anchored on the left edge the row aligns to: the button
+    // never shrinks, and can only grow rightward.
     removeButton.style.minWidth = `${removeButton.offsetWidth}px`;
-    removeButton.setAttribute("data-armed", "");
-    removeButton.textContent = t("reader_delete_confirm");
-    removeButton.setAttribute(
-      "aria-label",
-      t("reader_delete_confirm_aria", titleElement?.textContent ?? ""),
-    );
+    armDelete(removeButton);
     return;
   }
 
