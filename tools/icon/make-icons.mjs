@@ -21,17 +21,25 @@
 // path, both of which a page of geometry can sample - and a generator with no
 // dependencies is one anybody can read next to the files it wrote.
 //
-// Two raster sets, the same quiet line as the SVGs in the same two token
-// colors: `icon-N.png` in #5b5b66 for light toolbars - also the manifest
-// default - and `icon-light-N.png` in #fbfbfe for dark ones ("light" names
-// the glyph, matching icon-light.svg). Chrome has no theme-aware manifest
-// icons (`icon_variants` is still a WECG proposal, nothing shipped through
-// Chrome 153), so the extension swaps the toolbar icon itself with
-// `action.setIcon` (`src/lib/theme-icon.js`). A single mid-gray was tried
-// first and read wrong both ways - washed out next to the light toolbar's
-// icons, sunk on the dark one - and a solid brand tile read legibly but not
-// like re/read; the swap keeps the mark the mark on both. What setIcon
-// cannot reach - chrome://extensions - shows the manifest default.
+// Two raster sets, the same quiet line as the SVGs, each colored to sit
+// among Chrome's own toolbar icons rather than in Firefox's tokens:
+// `icon-N.png` in #5b5b66 for light toolbars - also the manifest default,
+// and within a hair of Chrome's measured light-icon gray (#5d6575) - and
+// `icon-light-N.png` in #c0c0c0 for dark ones ("light" names the glyph,
+// matching icon-light.svg). #c0c0c0 is Chrome's own dark-toolbar icon
+// color, sampled off a real toolbar (glyphs #c0c0c0 on #353535, 7.6:1);
+// Firefox's near-white #fbfbfe was tried first and read louder than the
+// browser's own icons - and it also vanished (1.04:1) on a light toolbar
+// in the swap gap below, where #c0c0c0 stays faintly legible (1.6:1).
+//
+// The swap: Chrome has no theme-aware manifest icons (`icon_variants` is
+// still a WECG proposal, nothing shipped through Chrome 153), so the
+// extension swaps the toolbar icon itself with `action.setIcon`
+// (`src/lib/theme-icon.js`). A single mid-gray was tried first and read
+// wrong both ways - washed out next to the light toolbar's icons, sunk on
+// the dark one - and a solid brand tile read legibly but not like re/read;
+// the swap keeps the mark the mark on both. What setIcon cannot reach -
+// chrome://extensions - shows the manifest default.
 //
 // Usage: node tools/icon/make-icons.mjs
 
@@ -138,7 +146,7 @@ const adaptive = svg(
  */
 const PNG_SETS = /** @type {const} */ ([
   { suffix: "", color: { r: 0x5b, g: 0x5b, b: 0x66 }, sizes: [16, 32, 48, 128] },
-  { suffix: "light-", color: { r: 0xfb, g: 0xfb, b: 0xfe }, sizes: [16, 32] },
+  { suffix: "light-", color: { r: 0xc0, g: 0xc0, b: 0xc0 }, sizes: [16, 32] },
 ]);
 
 /** Samples per pixel edge; 8x8 per pixel keeps the 16px icon's curves clean. */

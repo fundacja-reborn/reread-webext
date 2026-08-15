@@ -18,7 +18,9 @@ import { inflateSync } from "node:zlib";
 
 const SETS = [
   { suffix: "", color: [0x5b, 0x5b, 0x66], sizes: [16, 32, 48, 128] },
-  { suffix: "light-", color: [0xfb, 0xfb, 0xfe], sizes: [16, 32] },
+  // Chrome's own dark-toolbar icon gray, sampled - not Firefox's #fbfbfe;
+  // the generator's header carries the measurements.
+  { suffix: "light-", color: [0xc0, 0xc0, 0xc0], sizes: [16, 32] },
 ];
 
 /**
