@@ -41,7 +41,7 @@ import { keeping, madeSelection, touchPointer } from "../lib/selection.js";
 import { sentenceAround } from "../lib/sentence.js";
 import { MIRROR_KEY, asMirror, mirrorMatches } from "../lib/store/mirror.js";
 import { canSpeak, speak, speaking, stop as stopSpeaking } from "../lib/tts.js";
-import { clear, paint, phraseAt } from "./highlighter.js";
+import { clear, mark, paint, phraseAt, unmark } from "./highlighter.js";
 import { blockTextAround, findable } from "./scan.js";
 import { clearSelection, releaseMouse, startSelect, stopSelect } from "./select.js";
 import { createTooltip } from "./tooltip.js";
@@ -147,8 +147,15 @@ const OFFERED = Object.freeze({
 });
 
 // A bubble gone is a phrase not worth talking about any more, whichever way
-// it went - and mid-word is exactly when a dismissal should go quiet (D83).
-const tooltip = createTooltip({ onAction, onHide: stopSpeaking });
+// it went - mid-word is exactly when a dismissal should go quiet (D83), and
+// the mark under the phrase leaves with the bubble it belongs to (D89).
+const tooltip = createTooltip({
+  onAction,
+  onHide: () => {
+    stopSpeaking();
+    unmark();
+  },
+});
 
 /**
  * The quiet-bubble setting (D81), mirrored from the config the way the
@@ -534,6 +541,12 @@ function showSaved(anchor, text, normalized, context, how = {}) {
   current = { text, normalized, keepable: true };
   generation += 1;
   anchorRange = how.range === undefined ? null : how.range.cloneRange();
+  // The page's half of the recall bubble (D89): the bubble does not repeat
+  // its phrase, and a tap on an underline - unlike a fresh selection - leaves
+  // nothing else on the screen saying which word this is the answer to. Where
+  // a live selection does say it, the wash simply disappears beneath it.
+  if (how.range === undefined) unmark();
+  else mark(how.range);
   // The layer itself is empty, and stays empty until it is asked for: the
   // answer comes from the database, without a message and without waking the
   // engine (D27). More is the press that says the sentence and the
@@ -727,6 +740,9 @@ function present(selection, { deliberate, touch, chain = false }) {
 
   // The same cut `showSaved` makes: this show does not pass through hide either.
   stopSpeaking();
+  // A fresh selection marks itself; a recall mark left over from the last
+  // phrase may not keep pointing at it (D89).
+  unmark();
   current = { text, normalized, keepable: selection.findable };
   secondLayer = [];
   unfetched = null;

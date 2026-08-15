@@ -30,6 +30,9 @@ import { blockAround, scan } from "./scan.js";
 /** Must be the name in `highlight.css`. */
 const NAME = "reread";
 
+/** The other name there: the mark under the phrase a recall bubble is about. */
+const ACTIVE = "reread-active";
+
 /** How long a page may go on changing before the underlines are caught up. */
 const IDLE_TIMEOUT = 500;
 
@@ -76,9 +79,39 @@ export function supported() {
 }
 
 /**
- * Everything this module has on the page, taken back: the registration, the
- * ranges, and the observer that would otherwise keep waking up for a
- * vocabulary that is empty.
+ * The mark under the phrase an open recall bubble is about (D89). One range,
+ * marked at showing and taken away with the bubble: the bubble deliberately
+ * does not repeat its phrase, a tap on an underline makes no selection, and
+ * with two underlined neighbours nothing on the page said which one the
+ * bubble answers.
+ *
+ * A registration of its own rather than a range added to `NAME`, because the
+ * two live different lives: `paint` rebuilds the underlines on every
+ * vocabulary change - choosing a dictionary line repaints with the bubble
+ * still open - and the mark may not blink with them.
+ *
+ * @param {Range} range
+ */
+export function mark(range) {
+  const api = registry();
+  if (api === null) return;
+  // Cloned, so the mark keeps meaning this phrase whatever the caller or the
+  // live selection do with the range afterwards.
+  api.set(ACTIVE, new Highlight(range.cloneRange()));
+}
+
+/** The mark taken back - every way a bubble closes ends here. */
+export function unmark() {
+  registry()?.delete(ACTIVE);
+}
+
+/**
+ * Everything this module holds for the *vocabulary*, taken back: the
+ * registration, the ranges, and the observer that would otherwise keep waking
+ * up for a vocabulary that is empty. The recall mark is deliberately not in
+ * this list - `paint` starts by calling this, and a repaint under an open
+ * bubble may not blink the mark away; the mark answers to the bubble's own
+ * lifecycle (`mark`/`unmark`).
  */
 export function clear() {
   observer?.disconnect();
