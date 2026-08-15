@@ -108,6 +108,15 @@ let spoken = 0;
  */
 let mine = null;
 
+/**
+ * The next sentence, waiting out the engine's own event before it is spoken
+ * (see `advance`). Null whenever nothing is waiting - and cleared by `hush`,
+ * so a pause landing in that sliver of a moment really pauses.
+ *
+ * @type {number | null}
+ */
+let pending = null;
+
 /** @type {ReadingState} */
 let state = "off";
 
@@ -403,9 +412,27 @@ function onEnd(utterance) {
   advance();
 }
 
-/** The next sentence, or the end of the article. */
+/**
+ * The next sentence, or the end of the article.
+ *
+ * Two precautions about *how* the next sentence is started, both from one
+ * report (a Boox Page, reading a long article): the sentences themselves came
+ * out fluently, but the gap between them grew with every sentence read, from
+ * nothing to tens of seconds after a dozen or so. Nothing on this side grows -
+ * the work per sentence is one range, one repaint and one string slice - which
+ * leaves the engine's own queue, and there the shape of it fits: an entry that
+ * is never dropped makes every following `speak()` wait behind everything
+ * already said.
+ *
+ * So the queue is emptied before each sentence (`hush`, which is a `cancel()`
+ * of a queue that should already be empty and costs nothing when it is), and
+ * the next `speak()` is made from a task of its own rather than from inside
+ * the engine's own `end` callback - a platform that takes its time about a
+ * call made there is a thing that has been seen before, and a zero-delay timer
+ * is the whole of the workaround.
+ */
 function advance() {
-  mine = null;
+  hush();
   at += 1;
   within = 0;
   spoken = 0;
@@ -413,7 +440,10 @@ function advance() {
     stopReading();
     return;
   }
-  speakChunk();
+  pending = window.setTimeout(() => {
+    pending = null;
+    speakChunk();
+  }, 0);
 }
 
 /**
@@ -445,9 +475,18 @@ function onError(utterance, event) {
   hooks?.onFail();
 }
 
-/** Our voice stops, and the events its cancelling fires answer to nobody. */
+/**
+ * Our voice stops, and the events its cancelling fires answer to nobody. The
+ * sentence waiting on its timer (`advance`) goes with it, so a pause, a stop
+ * or a skip landing in that sliver of a moment is not overtaken by the
+ * sentence it interrupted.
+ */
 function hush() {
   mine = null;
+  if (pending !== null) {
+    window.clearTimeout(pending);
+    pending = null;
+  }
   if (canSpeak()) speechSynthesis.cancel();
 }
 
@@ -463,9 +502,11 @@ function markSentence() {
   if (range === null) return;
   sentenceMark = mark(SENTENCE, sentenceMark, range, 2);
   // The word's mark belongs to the sentence that has gone; leaving it would
-  // show two places at once until the first boundary of the new one.
-  wordMark = null;
-  if (supported()) CSS.highlights.delete(WORD);
+  // show two places at once until the first boundary of the new one. Emptied
+  // rather than thrown away and registered again: two entries in the registry
+  // for the whole reading is less for the engine to keep track of than two
+  // new ones per sentence, and this is a device that reads for an hour.
+  wordMark?.clear();
   keepVisible(range);
 }
 
