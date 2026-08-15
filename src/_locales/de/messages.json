@@ -423,6 +423,10 @@
   "options_quiet_bubble_hint": {
     "message": "Ist dies an, zeigt die Sprechblase nur die Übersetzung; ihre Schaltflächen erscheinen nach einem Klick oder Tippen auf die Sprechblase. Speichern ist so oder so die Ausnahme: Eine Wendung, die zu lang ist, um sich selbst zu speichern, zeigt die Schaltfläche zum Speichern immer."
   },
+  "options_bubble_scale": { "message": "Textgröße der Sprechblase" },
+  "options_bubble_scale_hint": {
+    "message": "Die Größe der Übersetzungs-Sprechblase - ihres Textes und ihrer Schaltflächen - auf normalen Seiten wie in der Leseansicht. Die Sprechblase bestimmt ihre Größe selbst und folgt keinen Schrifteinstellungen der Seite; angepasst wird sie nur hier: Erhöhe den Wert, wenn sie auf diesem Bildschirm zu klein wirkt."
+  },
   "options_tts_voice": { "message": "Vorlesestimme" },
   "options_tts_default": { "message": "Standardstimme des Browsers" },
   "options_tts_listen": { "message": "Anhören" },

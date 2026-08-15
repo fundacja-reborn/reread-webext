@@ -446,6 +446,10 @@
   "options_quiet_bubble_hint": {
     "message": "Con esto activado, la burbuja de traducción muestra solo la traducción; sus botones aparecen al hacer clic o tocar la burbuja. Guardar es la excepción en ambos casos: una frase demasiado larga para guardarse sola siempre muestra el botón de guardar."
   },
+  "options_bubble_scale": { "message": "Tamaño del texto de la burbuja" },
+  "options_bubble_scale_hint": {
+    "message": "El tamaño de la burbuja de traducción - su texto y sus botones - tanto en páginas normales como en la vista de lectura. La burbuja fija su propio tamaño e ignora los ajustes de letra de la página; este es el único lugar para ajustarla: sube el valor si en esta pantalla se ve demasiado pequeña."
+  },
   "options_tts_voice": { "message": "Voz de lectura" },
   "options_tts_default": { "message": "Voz predeterminada del navegador" },
   "options_tts_listen": { "message": "Escuchar" },

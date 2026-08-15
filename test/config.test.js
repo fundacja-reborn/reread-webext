@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { afterEach, describe, it } from "node:test";
 
 import {
+  BUBBLE_SCALE,
   DEFAULTS,
   MEASURE,
   READER_DEFAULTS,
@@ -257,6 +258,39 @@ describe("the quiet bubble", () => {
 
     assert.deepEqual(written, { ...DEFAULTS, sourceLang: "de", targetLang: "en", hideBubbleActions: false });
     assert.equal(/** @type {any} */ (store["config"]).hideBubbleActions, false);
+  });
+});
+
+describe("the bubble scale", () => {
+  it("answers 100% for profiles old and new", () => {
+    assert.equal(withDefaults(undefined).bubbleScale, 100);
+    assert.equal(withDefaults({ sourceLang: "en" }).bubbleScale, 100);
+  });
+
+  it("keeps a stored percent and clamps one from outside the scale", () => {
+    assert.equal(withDefaults({ bubbleScale: 150 }).bubbleScale, 150);
+    assert.equal(withDefaults({ bubbleScale: BUBBLE_SCALE.min }).bubbleScale, BUBBLE_SCALE.min);
+    assert.equal(withDefaults({ bubbleScale: BUBBLE_SCALE.max }).bubbleScale, BUBBLE_SCALE.max);
+    // Clamped rather than dropped: an out-of-range number still says what
+    // somebody wanted - as much of it as this scale has. A factor stored by
+    // hand lands on the floor the same way: the scale is percent by contract.
+    assert.equal(withDefaults({ bubbleScale: 10 }).bubbleScale, BUBBLE_SCALE.min);
+    assert.equal(withDefaults({ bubbleScale: 999 }).bubbleScale, BUBBLE_SCALE.max);
+    assert.equal(withDefaults({ bubbleScale: 1.25 }).bubbleScale, BUBBLE_SCALE.min);
+  });
+
+  it("treats a hand-edited value of the wrong type as the default", () => {
+    for (const bubbleScale of ["150", null, {}, Number.NaN]) {
+      assert.equal(withDefaults({ bubbleScale }).bubbleScale, 100);
+    }
+  });
+
+  it("writes the percent through writeConfig without touching the rest", async () => {
+    const store = installFakeBrowser({ config: { sourceLang: "de", targetLang: "en" } });
+    const written = await writeConfig({ bubbleScale: 130 });
+
+    assert.deepEqual(written, { ...DEFAULTS, sourceLang: "de", targetLang: "en", bubbleScale: 130 });
+    assert.equal(/** @type {any} */ (store["config"]).bubbleScale, 130);
   });
 });
 

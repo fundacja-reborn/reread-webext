@@ -434,6 +434,21 @@ button.model-delete {
   gap: 0.5rem;
 }
 
+/* A minus, a value, a plus - the bubble-size row's control cell. Its own
+   class so the voice row's .inline keeps stretching: this one sits at the
+   row's control edge like every other single control does. */
+.row > .stepper {
+  justify-self: end;
+  margin: 0;
+}
+
+.stepper output {
+  min-width: 4ch;
+  color: var(--page-muted);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
 .inline select {
   min-height: 44px;
 }

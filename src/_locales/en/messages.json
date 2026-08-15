@@ -465,6 +465,10 @@
   "options_quiet_bubble_hint": {
     "message": "With this on, the translation bubble shows just the translation, and its buttons slide out when you click or tap the bubble. Save is the exception either way: a phrase too long to save itself always shows the button that saves it."
   },
+  "options_bubble_scale": { "message": "Bubble text size" },
+  "options_bubble_scale_hint": {
+    "message": "The size of the translation bubble - its text and its buttons - on ordinary pages and in the reader alike. The bubble sizes itself and ignores each page's own type settings, so this is the one place to adjust it: turn it up if it reads too small on this screen."
+  },
   "options_tts_voice": { "message": "Voice for reading aloud" },
   "options_tts_default": { "message": "Browser default" },
   "options_tts_listen": { "message": "Listen" },

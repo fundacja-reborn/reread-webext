@@ -446,6 +446,10 @@
   "options_quiet_bubble_hint": {
     "message": "Quand c'est activé, la bulle de traduction ne montre que la traduction ; ses boutons apparaissent après un clic ou un appui sur la bulle. Enregistrer reste l'exception dans les deux cas : une phrase trop longue pour s'enregistrer seule montre toujours le bouton d'enregistrement."
   },
+  "options_bubble_scale": { "message": "Taille du texte de la bulle" },
+  "options_bubble_scale_hint": {
+    "message": "La taille de la bulle de traduction - son texte et ses boutons - sur les pages ordinaires comme dans le lecteur. La bulle fixe sa taille elle-même et ignore les réglages de police de la page ; c'est donc ici qu'on l'ajuste : augmentez la valeur si elle paraît trop petite sur cet écran."
+  },
   "options_tts_voice": { "message": "Voix de lecture" },
   "options_tts_default": { "message": "Voix par défaut du navigateur" },
   "options_tts_listen": { "message": "Écouter" },

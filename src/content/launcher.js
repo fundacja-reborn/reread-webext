@@ -49,6 +49,20 @@ let started = false;
 let lastPointerType = "";
 /** The selection the offer is standing under, to stand aside when it moves. */
 let shownText = "";
+/**
+ * The bubble-size knob as a plain factor (D85). This module deliberately
+ * listens to nothing at rest, so it does not watch storage either -
+ * `content/index.js` already does, owns the config, and hands the value down
+ * through `setLauncherScale` on every settings change.
+ */
+let scale = 1;
+
+/**
+ * @param {number} factor `1` means "as designed"
+ */
+export function setLauncherScale(factor) {
+  scale = factor;
+}
 
 /**
  * @param {import("./tooltip.js").ReportedAction} action
@@ -105,6 +119,10 @@ function settle() {
     actions: ["reader"],
     // A pen's selection wears the same system bar and handles (D80).
     touch: touchPointer(lastPointerType),
+    // The same pointer also sizes the one button for the finger about to
+    // press it (D84) - the media query alone answers wrong on some devices.
+    coarse: touchPointer(lastPointerType),
+    scale,
   });
 }
 

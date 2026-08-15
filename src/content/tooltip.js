@@ -143,7 +143,31 @@ function lessLabel() {
   return t("bubble_less");
 }
 
-const STYLE = `
+/**
+ * The touch tier of the bubble's sizes - the variables the base \`.bubble\`
+ * rule sets, stepped up for a screen pressed by fingers. One string, spliced
+ * into the stylesheet twice: once behind the media query and once behind the
+ * attribute the gesture sets (D84), so the two ways of saying "touch" can
+ * never drift apart. The em values keep the tier's old pixel geometry at its
+ * own type sizes: 0.57em of a 14px button is the 8px of padding the tier
+ * always had.
+ */
+const TOUCH_SIZES = `
+    --type-body: 16px;
+    --type-second: 15px;
+    --type-label: 12px;
+    --type-action: 14px;
+    --type-cta: 15px;
+    --gap-actions: 0.63em;
+    --pad-sense: 0.4em 0.53em;
+    --pad-action: 0.57em 0.43em;
+    --pull-action: -0.43em;
+    --pad-cta: 0.53em 1.07em;
+    --icon: 1.43em;
+`;
+
+/** Exported for the test that holds the size system together, nothing else. */
+export const STYLE = `
   :host { all: initial; }
   * { box-sizing: border-box; }
 
@@ -163,8 +187,30 @@ const STYLE = `
        stands above the phrase. */
     display: flex;
     flex-direction: column;
-    font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
-    max-width: min(22rem, 90vw);
+    /* Every size the bubble draws its type and its presses at, in two tiers
+       (D84): these desktop values, and TOUCH_SIZES above, spliced in below -
+       by the media query, or by the data-pointer attribute when the gesture
+       that made the selection was a finger or a pen. The attribute exists
+       because the media query can be wrong about a device: an Onyx e-ink
+       tablet reports a fine primary pointer over its touch screen, and the
+       gesture is the ground truth. Lengths that have to grow with the type
+       are written in em; the fonts multiply by --bubble-scale, the reader's
+       own knob over all of it (D85), which show() sets inline here. */
+    --type-body: 14px;
+    --type-second: 13px;
+    --type-label: 11px;
+    --type-action: 12px;
+    --type-cta: 13px;
+    --gap-actions: 0.43em;
+    --pad-sense: 0.15em 0.31em;
+    --pad-action: 0.17em 0.33em;
+    --pull-action: -0.33em;
+    --pad-cta: 0.23em 0.77em;
+    --icon: 1.33em;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: calc(var(--type-body) * var(--bubble-scale, 1));
+    line-height: 1.45;
+    max-width: min(calc(22rem * var(--bubble-scale, 1)), 90vw);
     padding: 10px 12px;
     border-radius: 10px;
     /* The edge, not the shadow, is what says where the bubble ends: an e-ink
@@ -205,7 +251,7 @@ const STYLE = `
     padding-top: 8px;
     border: 0 solid rgba(0, 0, 0, 0.12);
     border-top-width: 1px;
-    font-size: 13px;
+    font-size: calc(var(--type-second) * var(--bubble-scale, 1));
     opacity: 0.85;
   }
 
@@ -223,7 +269,7 @@ const STYLE = `
     padding-top: 8px;
     border: 0 solid rgba(0, 0, 0, 0.12);
     border-top-width: 1px;
-    font-size: 13px;
+    font-size: calc(var(--type-second) * var(--bubble-scale, 1));
     max-height: 40vh;
     overflow-y: auto;
     overscroll-behavior: contain;
@@ -242,7 +288,7 @@ const STYLE = `
   /* Which book this came from, and the word it actually found - the second one
      matters when the reader selected "watches" and the dictionary knows "watch". */
   .entry-label {
-    font-size: 11px;
+    font-size: calc(var(--type-label) * var(--bubble-scale, 1));
     text-transform: uppercase;
     letter-spacing: 0.04em;
     opacity: 0.6;
@@ -259,7 +305,7 @@ const STYLE = `
     display: block;
     width: 100%;
     margin: 0;
-    padding: 2px 4px;
+    padding: var(--pad-sense);
     font: inherit;
     text-align: left;
     color: inherit;
@@ -311,7 +357,7 @@ const STYLE = `
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 6px;
+    gap: var(--gap-actions);
     /* The two pixels on the far side are for a focus ring: a folded row is
        clipped, and a ring drawn flush with the edge would be clipped with it. */
     padding: 8px 0 2px;
@@ -380,7 +426,7 @@ const STYLE = `
      unsigned complaint floating over a page reads as the page's own. */
   .brand {
     display: none;
-    font-size: 11px;
+    font-size: calc(11px * var(--bubble-scale, 1));
     font-weight: 600;
     letter-spacing: 0.03em;
     opacity: 0.6;
@@ -395,9 +441,9 @@ const STYLE = `
      loudest thing in a bubble whose whole job is one line of translation. */
   .actions button {
     font: inherit;
-    font-size: 12px;
+    font-size: calc(var(--type-action) * var(--bubble-scale, 1));
     margin: 0;
-    padding: 2px 4px;
+    padding: var(--pad-action);
     color: inherit;
     background: none;
     border: 0;
@@ -409,7 +455,7 @@ const STYLE = `
      first one gives it back: the row has to start on the same vertical line as
      the gloss above it. Save, the launcher and Settings bring their own box
      and need no pulling. */
-  .actions button:first-child:not([data-action="save"]):not([data-action="reader"]):not([data-action="settings"]) { margin-left: -4px; }
+  .actions button:first-child:not([data-action="save"]):not([data-action="reader"]):not([data-action="settings"]) { margin-left: var(--pull-action); }
   .actions button:hover:not(:disabled) { opacity: 1; }
   .actions button:focus-visible {
     opacity: 1;
@@ -428,8 +474,8 @@ const STYLE = `
     align-items: center;
   }
   .actions button[data-action="speak"] svg {
-    width: 16px;
-    height: 16px;
+    width: var(--icon);
+    height: var(--icon);
     display: block;
   }
 
@@ -441,8 +487,8 @@ const STYLE = `
   .actions button[data-action="save"],
   .actions button[data-action="reader"],
   .actions button[data-action="settings"] {
-    font-size: 13px;
-    padding: 3px 10px;
+    font-size: calc(var(--type-cta) * var(--bubble-scale, 1));
+    padding: var(--pad-cta);
     opacity: 1;
     background: rgba(0, 0, 0, 0.05);
     border: 1px solid rgba(0, 0, 0, 0.18);
@@ -458,24 +504,17 @@ const STYLE = `
      targets. Sizing only - the reveal mechanic deliberately has no touch
      branch (D44), and a hybrid using its mouse loses nothing to bigger type. */
   @media (pointer: coarse) {
-    .bubble { font-size: 16px; }
-    .context, .entries { font-size: 15px; }
-    .entry-label { font-size: 12px; }
-    .entry-sense { padding: 6px 8px; }
-    .actions { gap: 10px; }
-    .actions button { font-size: 14px; padding: 8px 6px; }
-    .actions button:first-child:not([data-action="save"]):not([data-action="reader"]):not([data-action="settings"]) { margin-left: -6px; }
-    .actions button[data-action="save"],
-    .actions button[data-action="reader"],
-    .actions button[data-action="settings"] {
-      font-size: 15px;
-      padding: 8px 16px;
-    }
-    .actions button[data-action="speak"] svg {
-      width: 20px;
-      height: 20px;
-    }
+    .bubble {${TOUCH_SIZES}}
   }
+
+  /* The same tier by the gesture's own word (D84): the pointer that made the
+     selection is the pointer about to press these buttons, and the media
+     query can answer for the wrong device - a Boox e-ink tablet reports a
+     fine primary pointer over its touch screen, and got desktop type on a
+     7-inch slate. Only ever forced up, never down: a mouse selection on a
+     device whose media query says coarse keeps the bigger type, for the
+     hybrid's reason above. */
+  .bubble[data-pointer="coarse"] {${TOUCH_SIZES}}
 
   @media (prefers-color-scheme: dark) {
     .bubble {
@@ -563,8 +602,19 @@ const STYLE = `
  * offset of the last real placement - the anchored mode needs no such call,
  * because the document carries it.
  *
+ * `coarse` says the selection was made by a finger or a pen, and sizes the
+ * bubble for one (D84) - the stylesheet's touch tier, applied over whatever
+ * the pointer media query believes, because on some devices it believes
+ * wrong. It is a separate flag from `touch` on purpose: `touch` means "the
+ * system's bar and handles stand around this selection" and decides distance,
+ * and the reader page's own gesture is exactly the case where a finger
+ * selects with no system furniture at all - coarse without touch.
+ *
+ * `scale` multiplies every size in the bubble - the settings knob (D85),
+ * handed in as a plain factor with 1 meaning "as designed".
+ *
  * @typedef {object} Tooltip
- * @property {(options: { anchor: DOMRect, variant: Variant, body: string, tone?: Tone, actions?: Action[], touch?: boolean, folded?: boolean, anchored?: boolean }) => void} show
+ * @property {(options: { anchor: DOMRect, variant: Variant, body: string, tone?: Tone, actions?: Action[], touch?: boolean, coarse?: boolean, scale?: number, folded?: boolean, anchored?: boolean }) => void} show
  * @property {(body: string, tone?: Tone) => void} setBody
  * @property {(sentence: string | null, tone?: Tone) => void} setContext
  * @property {(blocks: Block[]) => void} setEntries
@@ -1225,7 +1275,18 @@ export function createTooltip({ onAction, onHide }) {
   }
 
   return {
-    show({ anchor: rect, variant, body, tone = "normal", actions = [], touch = false, folded, anchored = false }) {
+    show({
+      anchor: rect,
+      variant,
+      body,
+      tone = "normal",
+      actions = [],
+      touch = false,
+      coarse = false,
+      scale = 1,
+      folded,
+      anchored = false,
+    }) {
       build();
       anchor = rect;
       onTouch = touch;
@@ -1238,6 +1299,18 @@ export function createTooltip({ onAction, onHide }) {
       }
       if (bubble !== null) {
         bubble.dataset["variant"] = variant;
+        // The touch size tier, granted by the gesture itself (D84) - see the
+        // stylesheet, which also answers the media query on its own. Only
+        // ever forced on: taken off, the media query speaks again.
+        if (coarse) bubble.dataset["pointer"] = "coarse";
+        else delete bubble.dataset["pointer"];
+        // The settings knob (D85). A factor that is not a positive number has
+        // said nothing and means "as designed" - the stylesheet's fallback.
+        if (Number.isFinite(scale) && scale > 0 && scale !== 1) {
+          bubble.style.setProperty("--bubble-scale", String(scale));
+        } else {
+          bubble.style.removeProperty("--bubble-scale");
+        }
         // The bubble is reused from phrase to phrase, and a row left out was
         // out for the last one. Only recall starts folded: everywhere else the
         // row is why the bubble is open, so it starts revealed (D44) - unless
