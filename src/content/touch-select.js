@@ -21,6 +21,11 @@
  * scroll nor a tap, so the page can take it without robbing the article of
  * anything - and everything after the hold belongs to the gesture, scrolling
  * included, because a finger that asked to select is not asking to scroll.
+ * The promise runs the other way too: a touch that scrolled - or landed on a
+ * page still gliding from a scroll - never becomes a hold, however long the
+ * finger rests before lifting. Fingers routinely rest at the end of their
+ * scroll, and a word selected there would be the gesture answering a
+ * question nobody asked.
  *
  * Taps stay what taps are everywhere: while a selection stands, a tap on the
  * word right next to it grows the phrase by that word (the after-the-fact
@@ -74,6 +79,15 @@ const TAP_SLOP = 10;
 const GRAB_SLOP = 8;
 
 /**
+ * How long after the page last scrolled a touch still belongs to the scroll.
+ * A finger landing on a page in mid-glide is catching it, not asking about
+ * the word it happens to land on - and the catch often rests longer than the
+ * hold's timer. Scroll events come every frame while anything moves, so the
+ * window only has to outlast one frame's gap, with slack for a slow panel.
+ */
+const SCROLL_TAIL_MS = 100;
+
+/**
  * How a finished gesture relates to what was selected before it - the whole
  * of what `reading.js` needs in order to keep the vocabulary honest about a
  * phrase built in steps. `press` is the hold-and-drag gesture ending, a fresh
@@ -119,11 +133,18 @@ let highlight = null;
  * The one touch being followed, from start to end. `hold` observes - a timer
  * is running toward the selection, and a finger that travels or lifts first
  * was a scroll or a tap; `select` has claimed the gesture with
- * `preventDefault` and is stretching the selection.
+ * `preventDefault` and is stretching the selection. `x`/`y` follow the
+ * finger; `fromX`/`fromY` stay where it landed, because drift is measured
+ * against the landing point and never against the previous event - a slow
+ * scroll moves little between events, and a creeping reference point would
+ * let it pass for a finger holding still.
  *
- * @type {{ id: number, x: number, y: number, target: EventTarget | null, timer: number, mode: "hold" | "select" } | null}
+ * @type {{ id: number, x: number, y: number, fromX: number, fromY: number, target: EventTarget | null, timer: number, mode: "hold" | "select" } | null}
  */
 let gesture = null;
+
+/** When the page last scrolled, `performance.now()` time. See `SCROLL_TAIL_MS`. */
+let scrolledAt = 0;
 
 /**
  * @param {TouchList} touches
@@ -359,10 +380,17 @@ function onTouchStart(event) {
 
   const target = event.target;
   if (!(target instanceof Node) || !hooks.root.contains(target)) return;
+
+  // Landing on a page still gliding from a scroll: the catch, part of the
+  // scrolling and none of ours - it arms no hold, and its end claims no tap.
+  if (performance.now() - scrolledAt < SCROLL_TAIL_MS) return;
+
   gesture = {
     id: touch.identifier,
     x: touch.clientX,
     y: touch.clientY,
+    fromX: touch.clientX,
+    fromY: touch.clientY,
     target,
     timer: window.setTimeout(hold, HOLD_MS),
     mode: "hold",
@@ -385,10 +413,12 @@ function onTouchMove(event) {
   if (touch === null) return;
 
   if (active.mode === "hold") {
-    // Travelled: a scroll, and the browser is already doing it. Stop waiting.
-    // Drift inside the slop keeps the hold and follows the finger, so the
-    // word the hold takes is the word actually under it when it comes due.
-    if (Math.abs(touch.clientX - active.x) > TAP_SLOP || Math.abs(touch.clientY - active.y) > TAP_SLOP) {
+    // Travelled from where it landed: a scroll, and the browser is already
+    // doing it. The gesture is over for good - a finger resting at the end
+    // of its scroll is finishing the scroll, not starting a hold. Drift
+    // inside the slop keeps the hold and follows the finger, so the word
+    // the hold takes is the word actually under it when it comes due.
+    if (Math.abs(touch.clientX - active.fromX) > TAP_SLOP || Math.abs(touch.clientY - active.fromY) > TAP_SLOP) {
       cancelGesture();
       return;
     }
@@ -526,6 +556,22 @@ function tap(event, x, y) {
 }
 
 /**
+ * The page scrolling is the one signal of a scroll that cannot be missed.
+ * The slop check above needs `touchmove` still being delivered, and a
+ * browser that has handed the pan to its compositor may stop delivering it -
+ * while scroll events keep coming, one per moved frame. So every scroll
+ * stamps its time (the gate in `onTouchStart` reads it), and a scroll during
+ * an armed hold ends the hold on the spot: the page moving under a waiting
+ * finger means this touch is a scroll, whatever its own coordinates said.
+ * A claimed selection is deliberately not ended here - its own moves are
+ * `preventDefault`-ed, so a scroll arriving then is not this gesture's.
+ */
+function onScroll() {
+  scrolledAt = performance.now();
+  if (gesture?.mode === "hold") cancelGesture();
+}
+
+/**
  * The browser's own long-press answer, stepped in front of: on text that
  * refuses selection Firefox for Android can still raise a context menu, and
  * it would land in the middle of the gesture that is already selecting. Only
@@ -554,6 +600,9 @@ export function startTouchSelect(options) {
   document.addEventListener("touchend", onTouchEnd, { capture: true, passive: false });
   document.addEventListener("touchcancel", onTouchCancel, { capture: true, passive: true });
   document.addEventListener("contextmenu", onContextMenu, { capture: true });
+  // Capture sees the document's own scrolling; the bubble's inner scrolling
+  // stays behind a shadow boundary scroll events do not cross.
+  document.addEventListener("scroll", onScroll, { capture: true, passive: true });
 }
 
 /** Everything taken back: listeners, attribute, selection, paint. */
@@ -566,8 +615,10 @@ export function stopTouchSelect() {
   document.removeEventListener("touchend", onTouchEnd, { capture: true });
   document.removeEventListener("touchcancel", onTouchCancel, { capture: true });
   document.removeEventListener("contextmenu", onContextMenu, { capture: true });
+  document.removeEventListener("scroll", onScroll, { capture: true });
   hooks?.root.removeAttribute("data-touch-select");
   hooks = null;
+  scrolledAt = 0;
   cancelGesture();
   clearTouchSelection();
 }
