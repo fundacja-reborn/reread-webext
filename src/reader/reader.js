@@ -1026,19 +1026,32 @@ function showSpeechBar(state) {
 }
 
 /**
+ * One step of the reading speed, from wherever the setting is now - read fresh,
+ * because another tab may have moved it since this one drew itself, and applied
+ * from what was actually stored, because at either end of the scale the honest
+ * answer is "it did not move".
+ *
+ * The speed is not part of `reader`: it is one setting for both places a voice
+ * speaks (the bubble's phrase and this article), so it lives beside them in the
+ * config rather than inside the reader's appearance.
+ *
+ * @param {number} by
+ */
+async function stepRate(by) {
+  const current = (await readConfig()).ttsRate;
+  adoptConfig(await writeConfig({ ttsRate: clamp(current + by, TTS_RATE) }));
+}
+
+/**
  * @param {Event} event
  */
 async function onDisplayPress(event) {
   const button = event.target;
   if (!(button instanceof HTMLButtonElement)) return;
 
-  // The reading speed is not part of `reader`: it is one setting for both
-  // places a voice speaks (the bubble's phrase and this article), so it lives
-  // beside them in the config rather than inside the reader's appearance.
   const rate = button.getAttribute("data-rate");
   if (rate !== null) {
-    const current = (await readConfig()).ttsRate;
-    adoptConfig(await writeConfig({ ttsRate: clamp(current + Number(rate), TTS_RATE) }));
+    await stepRate(Number(rate));
     return;
   }
 
@@ -1227,6 +1240,64 @@ voiceChoice?.addEventListener("change", () => {
   else map[key] = voiceChoice.value;
   void writeConfig({ ttsVoices: map }).then(adoptConfig);
 });
+
+/**
+ * The keys a hand at a desk already knows, and **only while the voice is
+ * reading**. That last part is the whole design: the space bar is how a page
+ * is read on a desktop, and taking it away from somebody who is not listening
+ * would be this feature reaching outside itself. While the bar is up the page
+ * scrolls itself anyway, so the key is free to mean what it means in every
+ * player.
+ *
+ *   space          pause, and press again to carry on
+ *   left / right   a sentence back, a sentence on (the bar's own arrows)
+ *   < / >          slower, faster (the step the panel's buttons take)
+ *
+ * A press aimed at something that takes presses is left alone: a focused
+ * button must answer the space bar itself (it is the bar's own buttons that
+ * hold focus after a click, and answering twice would cancel out), and a
+ * filter box must be able to hold a space.
+ *
+ * @param {KeyboardEvent} event
+ */
+function onSpeechKey(event) {
+  if (readingState() === "off") return;
+  if (event.altKey || event.ctrlKey || event.metaKey) return;
+
+  const target = event.target;
+  if (target instanceof HTMLElement) {
+    if (target.isContentEditable) return;
+    if (["INPUT", "TEXTAREA", "SELECT", "BUTTON", "A", "SUMMARY"].includes(target.tagName)) return;
+  }
+
+  switch (event.key) {
+    case " ":
+      toggleReading();
+      break;
+    case "ArrowLeft":
+      skipSentence(-1);
+      break;
+    case "ArrowRight":
+      skipSentence(1);
+      break;
+    // Shift and the comma, shift and the full stop - the speed keys every
+    // video player has, on the two characters that are on the same keys here.
+    case "<":
+      void stepRate(-TTS_RATE.step);
+      break;
+    case ">":
+      void stepRate(TTS_RATE.step);
+      break;
+    default:
+      return;
+  }
+  // Only now, and only for a key that meant something: the space bar keeps
+  // scrolling and the arrows keep doing whatever they do, right up until the
+  // voice is reading.
+  event.preventDefault();
+}
+
+document.addEventListener("keydown", onSpeechKey);
 
 // A tab going away mid-sentence has to take the voice with it: the queue
 // behind `speechSynthesis` belongs to the browser, not to this page, and an

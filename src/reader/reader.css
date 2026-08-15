@@ -6,6 +6,23 @@
    Every theme keeps page.css's two strengths of edge - separators near 2.6:1,
    control borders past 3:1 - so lines survive an e-ink panel's 16 greys. */
 
+/* The two washes reading aloud paints with (D87), theme by theme - see the rule
+   at `::highlight(reread-speaking)` for why one number cannot serve both ends
+   of the range. The pair here is the light one, and it is also what the `auto`
+   theme gets on a browser set to light; the media query below is `auto`'s other
+   half, and the two attribute blocks are the hand-set themes. */
+:root {
+  --reader-speaking: color-mix(in srgb, var(--page-fg) 15%, transparent);
+  --reader-speaking-word: color-mix(in srgb, var(--page-accent) 38%, transparent);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --reader-speaking: color-mix(in srgb, var(--page-fg) 25%, transparent);
+    --reader-speaking-word: color-mix(in srgb, var(--page-accent) 45%, transparent);
+  }
+}
+
 :root[data-reader-theme="light"] {
   color-scheme: light;
   --page-bg: #ffffff;
@@ -14,6 +31,8 @@
   --page-line: #99a1b0;
   --page-border: #6e7583;
   --page-accent: #b8791d;
+  --reader-speaking: color-mix(in srgb, var(--page-fg) 15%, transparent);
+  --reader-speaking-word: color-mix(in srgb, var(--page-accent) 38%, transparent);
 }
 
 :root[data-reader-theme="dark"] {
@@ -24,6 +43,8 @@
   --page-line: #565d6c;
   --page-border: #767e8f;
   --page-accent: #f0a83c;
+  --reader-speaking: color-mix(in srgb, var(--page-fg) 25%, transparent);
+  --reader-speaking-word: color-mix(in srgb, var(--page-accent) 45%, transparent);
 }
 
 /* Paper rather than a dimmed white: the point of sepia is less blue light at
@@ -36,6 +57,8 @@
   --page-line: #a3937a;
   --page-border: #83745a;
   --page-accent: #9a5b16;
+  --reader-speaking: color-mix(in srgb, var(--page-fg) 15%, transparent);
+  --reader-speaking-word: color-mix(in srgb, var(--page-accent) 38%, transparent);
 }
 
 /* The article's font lives on the body so that `ch` means what it should: a
@@ -269,13 +292,23 @@ summary {
    changes weight as the voice passes over it.
 
    Neither mark may change the metrics: `::highlight()` accepts colours and
-   decoration only, which is the same reason this API is used for underlines. */
+   decoration only, which is the same reason this API is used for underlines.
+
+   **How strong each wash is depends on the theme, and one number could not do
+   both** (reported from a Pixel: 8% of the ink was a shade of nothing in the
+   dark theme). A wash of the text colour darkens light paper and lightens dark
+   paper, and the eye is far less sensitive to the second: what reads as a
+   clear band on white disappears on near-black. So the two washes are
+   variables, set per theme below, and the dark theme takes roughly half again
+   as much of both. The ceiling on the dark word is contrast, not taste - the
+   text stays the page's own colour, and at 45% of this accent it still has
+   5.8:1 over the wash. */
 ::highlight(reread-speaking) {
-  background-color: color-mix(in srgb, var(--page-fg) 8%, transparent);
+  background-color: var(--reader-speaking);
 }
 
 ::highlight(reread-speaking-word) {
-  background-color: color-mix(in srgb, var(--page-accent) 38%, transparent);
+  background-color: var(--reader-speaking-word);
 }
 
 #content h1,
@@ -777,7 +810,10 @@ button[data-armed],
   z-index: 2;
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
+  /* Spread across the width while the buttons are bare icons: a thumb aiming
+     at Stop should have nothing else within reach of a miss. They gather back
+     into the middle at the desktop breakpoint, where they carry their words. */
+  justify-content: space-evenly;
   gap: 0.25rem 0.4rem;
   padding: 0.4rem 0.6rem;
   border-top: 1px solid var(--page-border);
@@ -787,12 +823,12 @@ button[data-armed],
 }
 
 /* The last lines of the article stay readable while the bar is up: it covers
-   the foot of the window, so the page gives that much back. Two rows' worth,
-   because on a narrow screen the four buttons wrap onto two. `:has` rather
-   than a class set by script, the way the reading list already switches the
-   column width. */
+   the foot of the window, so the page gives that much back - one row's worth,
+   which is what the bar is at every width now that the words step aside on a
+   narrow screen. `:has` rather than a class set by script, the way the reading
+   list already switches the column width. */
 body.reader:has(#speech-bar:not([hidden])) {
-  padding-bottom: 6rem;
+  padding-bottom: 4.5rem;
 }
 
 /* These four are the point of the bar, so unlike the article's quiet actions
@@ -801,11 +837,29 @@ body.reader:has(#speech-bar:not([hidden])) {
 .speech-bar button {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.35rem;
   min-height: 44px;
   min-width: 44px;
   padding: 0.35rem 0.7rem;
   border-color: transparent;
+  white-space: nowrap;
+}
+
+/* The words step aside on a phone (reported from a Pixel: four labelled
+   buttons wrapped onto two rows, and the second row took another slice of the
+   article with it). Clipped rather than removed, because the label *is* each
+   button's name: a screen reader and voice control still hear "Back", and the
+   icons are the transport symbols every player uses. The desktop breakpoint at
+   the end of this file puts the words back, where there is room for them. */
+.speech-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
   white-space: nowrap;
 }
 
@@ -826,6 +880,22 @@ body.reader:has(#speech-bar:not([hidden])) {
 /* --- one breakpoint: the same HTML, spread out for a desktop --- */
 
 @media (min-width: 600px) {
+  /* The transport buttons say what they do in words again: at this width the
+     four of them and their labels sit on one line with room to spare, gathered
+     in the middle rather than pushed to the corners of a wide window. */
+  .speech-bar {
+    justify-content: center;
+  }
+
+  .speech-label {
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    clip-path: none;
+  }
+
   /* The tabs keep their own width instead of splitting the line. */
   .library-segments button {
     flex: none;
