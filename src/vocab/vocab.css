@@ -49,11 +49,28 @@ summary {
 
 /* --- the header: brand line, title with the pair select, one counter --- */
 
+/* The brand is a button (it opens the settings) dressed as the quiet line it
+   has always been: no frame, no fill, the page's muted voice. The padding is
+   the finger's target and the negative margins hand it back to the layout, so
+   the word stands exactly where it stood - flush with the title below it. */
 .brand {
-  margin: 0 0 0.25rem;
+  /* Inline-block, so the target is the word and its padding - a block would
+     make the whole line a door to the settings. */
+  display: inline-block;
+  margin: -0.35rem 0 0.25rem;
+  margin-inline-start: -0.4rem;
+  padding: 0.35rem 0.4rem;
+  border: none;
+  background: none;
   color: var(--page-muted);
   font-size: 0.9rem;
   letter-spacing: 0.04em;
+}
+
+.brand:hover {
+  border: none;
+  color: var(--page-accent);
+  text-decoration: underline;
 }
 
 .head-row {

@@ -17,7 +17,21 @@
          one exception: it quotes the bubble's own button labels through
          placeholders, so vocab.js writes it instead of a marker. -->
     <header>
-      <p class="brand">re/read</p>
+      <!-- The mark doubles as the door to the settings, exactly as in the
+           reader's bar: it is the one line standing on every view of this
+           page, and a button rather than a link because it opens the settings
+           tab (`runtime.openOptionsPage`) instead of navigating this one. -->
+      <button
+        type="button"
+        id="brand"
+        class="brand"
+        title="Settings"
+        data-i18n-title="settings"
+        aria-label="Settings"
+        data-i18n-aria-label="settings"
+      >
+        re/read
+      </button>
       <div class="head-row">
         <h1 data-i18n="saved_phrases">Saved phrases</h1>
         <label for="pair" class="visually-hidden" data-i18n="language_pair">Language pair</label>

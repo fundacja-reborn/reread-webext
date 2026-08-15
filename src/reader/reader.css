@@ -103,9 +103,24 @@ summary {
   border-bottom: 1px solid var(--page-line);
 }
 
+/* The mark is a button now (it opens the settings) and must go on looking like
+   the quiet line of text it was: no frame, no fill, the page's muted voice.
+   The padding gives it a finger-sized target without moving the word, and the
+   negative start margin hands that padding back to the column, so the mark
+   still begins exactly on the left edge the article and its actions align to. */
 .reader-mark {
+  margin-inline-start: -0.4rem;
+  padding: 0.35rem 0.4rem;
+  border: none;
+  background: none;
   color: var(--page-muted);
   letter-spacing: 0.02em;
+}
+
+.reader-mark:hover {
+  border: none;
+  color: var(--page-accent);
+  text-decoration: underline;
 }
 
 .reader-tools {

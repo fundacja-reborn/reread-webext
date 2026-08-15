@@ -71,6 +71,7 @@ const titleElement = document.getElementById("title");
 const bylineElement = document.getElementById("byline");
 const contentElement = document.getElementById("content");
 const originalLink = document.getElementById("original");
+const brandButton = document.getElementById("brand");
 const displayButton = document.getElementById("display");
 const displayPanel = document.getElementById("display-panel");
 const sizeValue = document.getElementById("size-value");
@@ -1012,6 +1013,13 @@ toLibraryButton?.addEventListener("click", () => {
   hideNotice();
   void showLibrary();
 });
+
+// The mark in the bar is the door to the settings - the one line standing over
+// every view of this page. Its own tab (`openOptionsPage`, which raises the
+// settings tab if one is already open), so the article on screen stays where it
+// is; and asked here rather than through the background, because an extension
+// page may call it itself.
+brandButton?.addEventListener("click", () => void webext().runtime.openOptionsPage());
 
 keepButton?.addEventListener("click", () => void onKeepPress());
 removeButton?.addEventListener("click", () => void onRemovePress());
