@@ -36,6 +36,7 @@ localizePage();
 
 /** @typedef {import("../lib/store/phrase.js").Phrase} Phrase */
 
+const brandButton = document.getElementById("brand");
 const pairSelect = /** @type {HTMLSelectElement | null} */ (document.getElementById("pair"));
 const introLine = document.getElementById("intro");
 const countLine = document.getElementById("count");
@@ -644,6 +645,11 @@ async function runImport() {
     importRun.disabled = false;
   }
 }
+
+// The mark at the top is the door to the settings, the same one the reader's
+// bar carries: its own tab (`openOptionsPage` raises the settings tab if one is
+// already open), so the list on screen stays where it is.
+brandButton?.addEventListener("click", () => void webext().runtime.openOptionsPage());
 
 pairSelect?.addEventListener("change", () => {
   if (pairSelect === null) return;

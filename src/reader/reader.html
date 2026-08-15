@@ -17,7 +17,24 @@
     <!-- The English here is the fallback: `localizePage` swaps every marked
          text for the catalogue's language before anything renders. -->
     <header class="reader-bar">
-      <span class="reader-mark">re/read</span>
+      <!-- The mark is also the way to the settings: on this page and on the
+           saved phrases it is the one thing standing in every view, and the
+           settings were otherwise only reachable through the toolbar popup.
+           A button rather than a link, because pressing it opens the settings
+           tab (`runtime.openOptionsPage`) instead of navigating this one away
+           from the article. Its accessible name is what it does; the visible
+           word stays the brand. -->
+      <button
+        type="button"
+        id="brand"
+        class="reader-mark"
+        title="Settings"
+        data-i18n-title="settings"
+        aria-label="Settings"
+        data-i18n-aria-label="settings"
+      >
+        re/read
+      </button>
       <span class="reader-tools">
         <a id="original" class="reader-original" data-i18n="reader_open_original" hidden>Open the original</a>
         <!--
