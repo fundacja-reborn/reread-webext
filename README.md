@@ -69,8 +69,8 @@ If you are looking for something to use rather than something to read, come back
 
 The reading keys mean this **only while the voice is reading** - the moment it stops, the
 space bar is the page's own again, because scrolling a page with it is how a long article
-gets read. A key pressed into a text field or onto a focused button is left alone, so the
-filter box still takes a space and a button still answers one.
+gets read. A key pressed into a text field is left alone, and so is the space bar when a
+button has been reached with the keyboard: a button answers that key by pressing itself.
 
 ## What it deliberately does not do
 
