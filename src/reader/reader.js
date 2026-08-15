@@ -39,6 +39,7 @@ import {
 import { describeError } from "../lib/messages.js";
 import { ErrorCode, Message, asPage, asPageRequest, asResult, ok } from "../lib/protocol.js";
 import { buildArticle } from "../lib/reader/article.js";
+import { speechAction } from "../lib/reader/keys.js";
 import { READER_SOURCE_KEY, readReaderSource } from "../lib/session.js";
 import {
   ARTICLES_FILENAME,
@@ -1222,11 +1223,35 @@ configureReading({
   onFail: () => showNotice(t("reader_speech_failed")),
 });
 
-listenButton?.addEventListener("click", () => toggleReading());
-document.getElementById("speech-play")?.addEventListener("click", () => toggleReading());
-document.getElementById("speech-stop")?.addEventListener("click", () => stopReading());
-document.getElementById("speech-back")?.addEventListener("click", () => skipSentence(-1));
-document.getElementById("speech-forward")?.addEventListener("click", () => skipSentence(1));
+/**
+ * A press with a pointer leaves no focus behind on the buttons that steer the
+ * voice. While the reading is on, the space bar belongs to the reading - and a
+ * transport button still holding focus from a click would swallow it and press
+ * itself instead. That is exactly what happened: after Forward was clicked,
+ * every space bar stepped another sentence.
+ *
+ * A press from the keyboard keeps its focus, because that is how the button
+ * was reached and the ring is how somebody knows where they are. `detail` is
+ * what tells them apart - zero for a click the keyboard produced, one or more
+ * for a real pointer.
+ *
+ * @param {string} id
+ * @param {() => void} act
+ */
+function onSpeechPress(id, act) {
+  document.getElementById(id)?.addEventListener("click", (event) => {
+    if (event.detail > 0 && event.currentTarget instanceof HTMLElement) {
+      event.currentTarget.blur();
+    }
+    act();
+  });
+}
+
+onSpeechPress("listen", () => toggleReading());
+onSpeechPress("speech-play", () => toggleReading());
+onSpeechPress("speech-stop", () => stopReading());
+onSpeechPress("speech-back", () => skipSentence(-1));
+onSpeechPress("speech-forward", () => skipSentence(1));
 
 voiceChoice?.addEventListener("change", () => {
   if (voiceChoice === null) return;
@@ -1253,45 +1278,31 @@ voiceChoice?.addEventListener("change", () => {
  *   left / right   a sentence back, a sentence on (the bar's own arrows)
  *   < / >          slower, faster (the step the panel's buttons take)
  *
- * A press aimed at something that takes presses is left alone: a focused
- * button must answer the space bar itself (it is the bar's own buttons that
- * hold focus after a click, and answering twice would cancel out), and a
- * filter box must be able to hold a space.
+ * Which press is ours is decided in `lib/reader/keys.js`, where it can be
+ * tested: it was wrong twice, and both times because of what it said no to.
  *
  * @param {KeyboardEvent} event
  */
 function onSpeechKey(event) {
   if (readingState() === "off") return;
-  if (event.altKey || event.ctrlKey || event.metaKey) return;
 
-  const target = event.target;
-  if (target instanceof HTMLElement) {
-    if (target.isContentEditable) return;
-    if (["INPUT", "TEXTAREA", "SELECT", "BUTTON", "A", "SUMMARY"].includes(target.tagName)) return;
-  }
+  const target = event.target instanceof HTMLElement ? event.target : null;
+  const action = speechAction({
+    key: event.key,
+    alt: event.altKey,
+    ctrl: event.ctrlKey,
+    meta: event.metaKey,
+    tag: target?.tagName ?? "",
+    editable: target?.isContentEditable ?? false,
+  });
+  if (action === null) return;
 
-  switch (event.key) {
-    case " ":
-      toggleReading();
-      break;
-    case "ArrowLeft":
-      skipSentence(-1);
-      break;
-    case "ArrowRight":
-      skipSentence(1);
-      break;
-    // Shift and the comma, shift and the full stop - the speed keys every
-    // video player has, on the two characters that are on the same keys here.
-    case "<":
-      void stepRate(-TTS_RATE.step);
-      break;
-    case ">":
-      void stepRate(TTS_RATE.step);
-      break;
-    default:
-      return;
-  }
-  // Only now, and only for a key that meant something: the space bar keeps
+  if (action === "toggle") toggleReading();
+  else if (action === "back") skipSentence(-1);
+  else if (action === "forward") skipSentence(1);
+  else void stepRate(action === "slower" ? -TTS_RATE.step : TTS_RATE.step);
+
+  // Only now, and only for a press that meant something: the space bar keeps
   // scrolling and the arrows keep doing whatever they do, right up until the
   // voice is reading.
   event.preventDefault();
