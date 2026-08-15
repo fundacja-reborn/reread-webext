@@ -361,7 +361,16 @@ export const STYLE = `
     white-space: pre-wrap;
     cursor: pointer;
   }
-  .entry-sense[aria-pressed="false"]:hover:not(:disabled) { background: rgba(0, 0, 0, 0.06); }
+  /* The tint is the cursor's affordance, so it follows only a real mouse:
+     under a finger :hover is an emulation, which paints the line a scroll
+     happens to be passing through and stays on the last line touched after
+     the finger lifts - a mark that reads as a choice nobody made, beside
+     marks that are choices (reported from a Pixel). The media query cannot
+     draw this line - a Boox answers it wrong (D84) - so the gate is the same
+     attribute the gesture sets for the size tiers. A tap loses nothing: its
+     feedback is the border that stays, and on an e-ink panel a transient
+     wash was one more repaint of the list being scrolled. */
+  .bubble:not([data-pointer="coarse"]) .entry-sense[aria-pressed="false"]:hover:not(:disabled) { background: rgba(0, 0, 0, 0.06); }
   /* The mark that stays, and the border is the whole of it where the tint
      cannot be seen: a wash this light is one of the 16 greys an e-ink panel
      rounds back to paper, and which meanings are already in the gloss is not
@@ -594,7 +603,7 @@ export const STYLE = `
     }
     .body[data-tone="error"],
     .context[data-tone="error"] { color: #f0a83c; }
-    .entry-sense[aria-pressed="false"]:hover:not(:disabled) { background: rgba(255, 255, 255, 0.08); }
+    .bubble:not([data-pointer="coarse"]) .entry-sense[aria-pressed="false"]:hover:not(:disabled) { background: rgba(255, 255, 255, 0.08); }
     .entry-sense[aria-pressed="true"] { background: rgba(255, 255, 255, 0.1); }
     .editor { background: rgba(255, 255, 255, 0.06); }
     /* The quiet labels need nothing here: they are the bubble's own colour at

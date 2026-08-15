@@ -54,3 +54,25 @@
   /* Clear of the descenders, so `g` and `y` are still whole letters. */
   text-underline-offset: 2px;
 }
+
+/*
+ * The phrase an open recall bubble is about, marked for exactly as long as the
+ * bubble stands (D89). The bubble deliberately does not repeat its phrase, and
+ * for a fresh selection the selection itself points back at the word - but a
+ * tap on an underline selects nothing, and with two saved words side by side
+ * nothing on the page said which of them the bubble answers (reported from a
+ * Pixel: `handful` beside `entities`, one bubble between them). The mark is
+ * that answer, and every way the bubble closes takes it along.
+ *
+ * A wash of the page's own ink, for the underline's reason above: any colour
+ * of ours is wrong on somebody's page. The percentage is this rule's one dial,
+ * and it has to survive three papers with a single number - a wash lightening
+ * dark paper needs roughly half again as much as one darkening white (the
+ * reader's own washes are calibrated 15% against 25%, reader.css), and an
+ * e-ink panel's 16 greys round a light wash back into the paper. So the dark
+ * calibration for everybody: a mark that means "this one" may not be the
+ * fainter wash on any of the three.
+ */
+::highlight(reread-active) {
+  background-color: color-mix(in srgb, currentColor 25%, transparent);
+}
