@@ -553,6 +553,10 @@
   "options_quiet_bubble_hint": {
     "message": "Gdy to jest włączone, dymek tłumaczenia pokazuje samo tłumaczenie, a przyciski wysuwają się po kliknięciu lub tapnięciu w dymek. Wyjątkiem - niezależnie od ustawienia - jest Zapisz: fraza za długa, by zapisać się sama, zawsze pokazuje przycisk zapisu."
   },
+  "options_bubble_scale": { "message": "Rozmiar tekstu dymka" },
+  "options_bubble_scale_hint": {
+    "message": "Wielkość dymka tłumaczenia - jego tekstu i przycisków - na zwykłych stronach i w widoku czytania. Dymek sam ustala swój rozmiar i nie słucha ustawień czcionki strony, więc to jedyne miejsce, gdzie można go zmienić: podnieś wartość, jeśli na tym ekranie jest za mały."
+  },
   "options_tts_voice": { "message": "Głos lektora" },
   "options_tts_default": { "message": "Domyślny głos przeglądarki" },
   "options_tts_listen": { "message": "Posłuchaj" },

@@ -46,6 +46,11 @@ export const CONFIG_KEY = "config";
  *   English - and no entry means the engine's own default for the language.
  *   The URIs name this device's voices; a stale one is ignored at speak time
  *   (`lib/tts.js`), never an error.
+ * @property {number} bubbleScale How big the bubble's type is, in percent of
+ *   its built-in size (D85). The bubble deliberately ignores the page it
+ *   stands on, so no page setting can reach it - this is its one knob, and it
+ *   exists because built-in sizes land differently on different screens: an
+ *   e-ink tablet can render a CSS pixel visibly smaller than a phone does.
  */
 
 /** @type {readonly string[]} */
@@ -85,6 +90,14 @@ export function isFont(value) {
 export const SIZE = Object.freeze({ min: 14, max: 28, step: 1 });
 export const MEASURE = Object.freeze({ min: 45, max: 85, step: 5 });
 
+/**
+ * What the bubble-size stepper on the settings page can reach, in percent.
+ * The floor keeps the bubble readable at all; the ceiling is double, which
+ * already covers the worst honest case measured (an e-ink tablet whose CSS
+ * pixel is a quarter smaller than a phone's, D84) with room for eyesight.
+ */
+export const BUBBLE_SCALE = Object.freeze({ min: 80, max: 200, step: 10 });
+
 /** @type {Readonly<ReaderConfig>} */
 export const READER_DEFAULTS = Object.freeze({
   theme: "auto",
@@ -102,6 +115,7 @@ export const DEFAULTS = Object.freeze({
   readerOnly: null,
   hideBubbleActions: true,
   ttsVoices: {},
+  bubbleScale: 100,
 });
 
 /**
@@ -214,6 +228,7 @@ export function withDefaults(stored) {
     hideBubbleActions:
       typeof raw["hideBubbleActions"] === "boolean" ? raw["hideBubbleActions"] : DEFAULTS.hideBubbleActions,
     ttsVoices: voiceMap(raw["ttsVoices"]),
+    bubbleScale: within(raw["bubbleScale"], BUBBLE_SCALE, DEFAULTS.bubbleScale),
   };
 }
 
@@ -235,7 +250,7 @@ export async function readConfig() {
  * the settings page holds the full map and choosing the default voice has to
  * be able to remove an entry - a per-key merge could only ever add.
  *
- * @param {{ sourceLang?: string, targetLang?: string, reader?: Partial<ReaderConfig>, disabledHosts?: string[], readerOnly?: boolean, hideBubbleActions?: boolean, ttsVoices?: Record<string, string> }} patch
+ * @param {{ sourceLang?: string, targetLang?: string, reader?: Partial<ReaderConfig>, disabledHosts?: string[], readerOnly?: boolean, hideBubbleActions?: boolean, ttsVoices?: Record<string, string>, bubbleScale?: number }} patch
  * @returns {Promise<Config>}
  */
 export async function writeConfig(patch) {

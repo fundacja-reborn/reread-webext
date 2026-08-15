@@ -157,6 +157,13 @@ const tooltip = createTooltip({ onAction, onHide: stopSpeaking });
 let hideActions = DEFAULTS.hideBubbleActions;
 
 /**
+ * The bubble-size knob (D85), mirrored the same way: every show hands the
+ * bubble a plain factor, and the settings page changing it reaches every open
+ * page through the storage listener already paid for.
+ */
+let bubbleScale = DEFAULTS.bubbleScale;
+
+/**
  * The speaker's half of the config (D83), mirrored for the same reason: the
  * phrase is spoken in the language being read, with the voice chosen for it,
  * and reading storage at press time would cost a round trip the storage
@@ -266,6 +273,7 @@ async function loadVocabulary(preloaded) {
     // Rides the same read and the same storage listener as the vocabulary:
     // flipping the switch in the popup reaches every open page on the spot.
     hideActions = config.hideBubbleActions;
+    bubbleScale = config.bubbleScale;
     ttsLang = config.sourceLang;
     ttsVoiceURI = config.ttsVoices[config.sourceLang];
 
@@ -531,6 +539,11 @@ function showSaved(anchor, text, normalized, context, how = {}) {
     body: meanings.join("\n"),
     actions: [...KEPT, ...secondLayer],
     touch: how.touch === true,
+    // Not `how.touch`, which a tap on an underline honestly lacks - the
+    // system puts no handles around a tap. What sizes the bubble is the
+    // pointer that pressed (D84), whichever way the press came in.
+    coarse: touchPointer(lastPointerType),
+    scale: bubbleScale / 100,
     anchored,
   });
   return true;
@@ -711,6 +724,11 @@ function present(selection, { deliberate, touch, chain = false }) {
     body: t("bubble_translating"),
     tone: "pending",
     touch,
+    // Every way in remembers its pointer (`lastPointerType`), so one answer
+    // serves them all (D84): the reader's own gesture and a settled native
+    // selection size for the finger, a mouse gesture for the desk.
+    coarse: touchPointer(lastPointerType),
+    scale: bubbleScale / 100,
     folded: hideActions ? true : undefined,
     anchored,
   });

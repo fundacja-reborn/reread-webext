@@ -33,7 +33,7 @@ import { webext } from "../lib/browser.js";
 import { CONFIG_KEY, PLATFORM_KEY, effectiveReaderOnly, osFrom, withDefaults } from "../lib/config.js";
 import { ErrorCode, MAX_PAGE_HTML, Message, asPageRequest, fail, ok } from "../lib/protocol.js";
 import { MIRROR_KEY } from "../lib/store/mirror.js";
-import { startLauncher, stopLauncher } from "./launcher.js";
+import { setLauncherScale, startLauncher, stopLauncher } from "./launcher.js";
 import { start, stop } from "./reading.js";
 
 /** @typedef {"off" | "launcher" | "reading"} Mode */
@@ -67,6 +67,11 @@ function decide() {
  * @param {Record<string, unknown>} [stored] the startup read, the one time there is one
  */
 function apply(wanted, stored) {
+  // Before the early return, because this is also how the settings page
+  // reaches a launcher already running (D85): `apply` runs on every settings
+  // change, most of which change no mode. The reading side needs no such
+  // hand-down - it watches storage itself.
+  setLauncherScale(config.bubbleScale / 100);
   if (wanted === mode) return;
   if (mode === "reading") stop();
   if (mode === "launcher") stopLauncher();

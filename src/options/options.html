@@ -140,6 +140,25 @@
           long to save itself always shows the button that saves it.
         </p>
       </div>
+      <!-- The bubble's one size knob (D85): the bubble deliberately ignores
+           every page it stands on, so no page setting can reach it - and
+           built-in sizes land differently on different screens (an e-ink
+           tablet renders a CSS pixel visibly smaller than a phone, D84). -->
+      <div class="row">
+        <span class="row-name" data-i18n="options_bubble_scale">Bubble text size</span>
+        <p class="inline stepper">
+          <button type="button" id="bubble-scale-down" title="Smaller" data-i18n-title="reader_smaller">
+            &minus;
+          </button>
+          <output id="bubble-scale-value">100%</output>
+          <button type="button" id="bubble-scale-up" title="Larger" data-i18n-title="reader_larger">+</button>
+        </p>
+        <p class="row-note" data-i18n="options_bubble_scale_hint">
+          The size of the translation bubble - its text and its buttons - on ordinary pages and in
+          the reader alike. The bubble sizes itself and ignores each page's own type settings, so
+          this is the one place to adjust it: turn it up if it reads too small on this screen.
+        </p>
+      </div>
       <div class="row">
         <span class="row-name" data-i18n="saved_phrases">Saved phrases</span>
         <button type="button" id="open-vocabulary" data-i18n="action_open">Open</button>

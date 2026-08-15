@@ -15,7 +15,15 @@
  */
 
 import { webext } from "../lib/browser.js";
-import { CONFIG_KEY, effectiveReaderOnly, platformOs, readConfig, withDefaults, writeConfig } from "../lib/config.js";
+import {
+  BUBBLE_SCALE,
+  CONFIG_KEY,
+  effectiveReaderOnly,
+  platformOs,
+  readConfig,
+  withDefaults,
+  writeConfig,
+} from "../lib/config.js";
 import { aside, localizePage, plural, t } from "../lib/i18n.js";
 import { languageName, pairLabel } from "../lib/language.js";
 import { catalogDictionaries, catalogSource } from "../lib/dict/catalog.js";
@@ -249,6 +257,26 @@ function renderReaderOnly() {
 function renderQuietBubble() {
   const toggle = document.getElementById("quiet-bubble");
   if (toggle instanceof HTMLInputElement) toggle.checked = config.hideBubbleActions;
+}
+
+/** The bubble-size stepper's value (D85), shown as the percent it is stored as. */
+function renderBubbleScale() {
+  const value = document.getElementById("bubble-scale-value");
+  if (value !== null) value.textContent = `${config.bubbleScale}%`;
+}
+
+/**
+ * One step of the bubble-size stepper. Read fresh first, because the buttons
+ * step from wherever the setting is now and another page may have moved it;
+ * shown from what was actually stored, because at either end of the scale the
+ * honest answer is "it did not move" (`withDefaults` clamps).
+ *
+ * @param {number} by
+ */
+async function stepBubbleScale(by) {
+  const current = (await readConfig()).bubbleScale;
+  config = await writeConfig({ bubbleScale: current + by });
+  renderBubbleScale();
 }
 
 /**
@@ -1439,6 +1467,7 @@ async function render() {
   fill("version", webext().runtime.getManifest().version);
   renderReaderOnly();
   renderQuietBubble();
+  renderBubbleScale();
   renderVoice();
   renderLanguageChoices("dictionary-from", config.sourceLang);
   renderLanguageChoices("dictionary-to", config.targetLang);
@@ -1485,6 +1514,7 @@ async function refresh() {
   config = await readConfig();
   renderReaderOnly();
   renderQuietBubble();
+  renderBubbleScale();
   // The pair may have moved (the popup writes it too), and the pair decides
   // which language's voices the select is about.
   renderVoice();
@@ -1526,6 +1556,14 @@ document.getElementById("quiet-bubble")?.addEventListener("change", (event) => {
   void writeConfig({ hideBubbleActions: toggle.checked }).then((written) => {
     config = written;
   });
+});
+// The same road again (D85): open pages hear the size through storage, and
+// the next bubble opens at it.
+document.getElementById("bubble-scale-down")?.addEventListener("click", () => {
+  void stepBubbleScale(-BUBBLE_SCALE.step);
+});
+document.getElementById("bubble-scale-up")?.addEventListener("click", () => {
+  void stepBubbleScale(BUBBLE_SCALE.step);
 });
 document.getElementById("tts-voice")?.addEventListener("change", (event) => {
   const select = event.target;
