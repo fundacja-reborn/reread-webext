@@ -214,7 +214,6 @@
   },
   "reader_save": { "message": "Save to reading list" },
   "reader_saved": { "message": "In the reading list" },
-  "reader_delete": { "message": "Delete from reading list" },
   "reader_delete_confirm": { "message": "Sure?" },
   "reader_delete_aria": {
     "message": "Delete the article $TITLE$",

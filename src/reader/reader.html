@@ -270,7 +270,12 @@
           <button id="mark-read" type="button" aria-pressed="false" data-i18n="reader_mark_read" hidden>
             Mark as read
           </button>
-          <button id="remove" type="button" data-i18n="reader_delete" hidden>Delete from reading list</button>
+          <!-- One word, the same the list's rows use: "from the reading list"
+               only repeated what the line above and the article below already
+               say, and the spelled-out phrase kept the pair of actions from
+               sharing a phone's line. The full act stays as the accessible
+               name, set with the title by script. -->
+          <button id="remove" type="button" data-i18n="action_delete" hidden>Delete</button>
         </div>
       </div>
 

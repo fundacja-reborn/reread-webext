@@ -246,7 +246,6 @@
   },
   "reader_save": { "message": "Zapisz w czytelni" },
   "reader_saved": { "message": "W czytelni" },
-  "reader_delete": { "message": "Usuń z czytelni" },
   "reader_delete_confirm": { "message": "Na pewno?" },
   "reader_delete_aria": {
     "message": "Usuń artykuł $TITLE$",

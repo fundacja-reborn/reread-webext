@@ -246,7 +246,6 @@
   },
   "reader_save": { "message": "Зберегти до списку читання" },
   "reader_saved": { "message": "У списку читання" },
-  "reader_delete": { "message": "Видалити зі списку читання" },
   "reader_delete_confirm": { "message": "Точно?" },
   "reader_delete_aria": {
     "message": "Видалити статтю $TITLE$",
