@@ -17,11 +17,12 @@
  * there the document's `selectionchange` is listened to as well, behind a
  * settle timer and a pointer-type gate - at rest both amount to one comparison
  * per event, and a mouse-only device does not even install them. The reader
- * page alone adds a third way in (D80/D81, `touch-select.js`): its article
- * refuses the native selection on touch and selects through our own gesture -
- * a finger held on a word, dragged on to stretch - whose end is a `touchend`,
- * so there the bubble, the translation and the keeping land exactly on the
- * finger lifting, with no system menu in the way.
+ * page alone adds a third way in (D80/D81, mouse too since D86, `select.js`):
+ * its article refuses the native selection outright and selects through our
+ * own gesture - a finger held on a word or a mouse press travelling, dragged
+ * on to stretch whole words - whose end the page can hear, so there the
+ * bubble, the translation and the keeping land exactly on the finger or the
+ * button lifting, with no system menu in the way.
  *
  * Knowing the vocabulary here rather than asking the background for it is what
  * makes a word the reader already kept appear instantly, with no message and no
@@ -42,7 +43,7 @@ import { MIRROR_KEY, asMirror, mirrorMatches } from "../lib/store/mirror.js";
 import { canSpeak, speak, speaking, stop as stopSpeaking } from "../lib/tts.js";
 import { clear, paint, phraseAt } from "./highlighter.js";
 import { blockTextAround, findable } from "./scan.js";
-import { clearTouchSelection, startTouchSelect, stopTouchSelect } from "./touch-select.js";
+import { clearSelection, releaseMouse, startSelect, stopSelect } from "./select.js";
 import { createTooltip } from "./tooltip.js";
 
 /** @typedef {import("../lib/protocol.js").VocabEntry} VocabEntry */
@@ -117,10 +118,11 @@ const SPEAK = canSpeak() ? ["speak"] : [];
 const KEPT = [...SPEAK, "learned", "edit"];
 
 /**
- * The phrase the current touch-selection chain kept without asking, if any.
+ * The phrase the current chain of the reader's own selection kept without
+ * asking, if any.
  * The chain's opening gesture keeps its phrase when it is short enough (D22),
- * and the taps that grow the phrase afterwards deliberately do not (D81) -
- * they offer Save instead, and the Save that lands is what takes this
+ * and the taps and clicks that grow the phrase afterwards deliberately do
+ * not (D81) - they offer Save instead, and the Save that lands is what takes this
  * scaffolding step back out of the vocabulary (`keep`): what survives the
  * chain is the reader's last answered gesture, never both. Cleared when a
  * chain ends - a dismissal leaves the kept step standing, because nothing
@@ -438,7 +440,7 @@ async function change(write, remember, next) {
     // selection with it (D81): the phrase is kept or forgotten, the underline
     // says which, and a highlight left standing would ask the question again.
     tooltip.hide();
-    clearTouchSelection();
+    clearSelection();
     autoKept = null;
     current = null;
     secondLayer = [];
@@ -638,6 +640,16 @@ function onMouseDown(event) {
  * @param {MouseEvent} event
  */
 function onMouseUp(event) {
+  // The reader's own selection hears the release first (D86): a drag or a
+  // hold ending gets its bubble there, and a click on the selection's
+  // neighbour grows the phrase - either way this listener's own reading of
+  // the release (a dismissal, an underline, the native selection) must not
+  // also run. A no-op on every page but the reader, where the module starts.
+  if (releaseMouse(event)) {
+    press = null;
+    return;
+  }
+
   if (tooltip.owns(event.target)) return;
 
   const from = press;
@@ -656,9 +668,9 @@ function onMouseUp(event) {
   if (selection === null) {
     // No selection made, which means a click - and a click may have landed on
     // an underline, which is the other half of what saving a phrase is for.
-    // Either way the touch selection's chain is over: a tap that reached the
-    // compatibility mouse events is a tap its own listener stepped aside for.
-    clearTouchSelection();
+    // Either way the reader's own chain is over: a click or a tap that got
+    // this far is one the selection module stepped aside for.
+    clearSelection();
     autoKept = null;
     const hit = phraseAt(event.clientX, event.clientY);
     if (hit !== null && showSaved(hit.rect, hit.text, hit.normalized, contextOf(hit.range), { range: hit.range })) {
@@ -679,20 +691,20 @@ function onMouseUp(event) {
  * A selection, answered: recall when it is already in the vocabulary, a
  * translation on its way otherwise. Every listener ends here - the mouse
  * gesture releasing, a native touch selection holding still, and the reader's
- * own touch gesture lifting (D80) - and `how` is the whole of the difference
+ * own gesture ending (D80, D86) - and `how` is the whole of the difference
  * they hand down.
  *
  * @param {NonNullable<ReturnType<typeof fromRange>>} selection
  * @param {object} how
  * @param {boolean} how.deliberate whether a gesture ended exactly here - what
  *   `keeping` may write on (a selection that settled under a timer, and a tap
- *   growing the reader's touch selection, never keep by themselves)
+ *   or click growing the reader's own selection, never keep by themselves)
  * @param {boolean} how.touch whether the anchor is a *native* touch selection,
  *   wearing the system's bar and handles: the bubble then stands a system
- *   strip away (D74). The reader's own touch selection wears nothing and
+ *   strip away (D74). The reader's own selection wears nothing and
  *   keeps D23's close gap.
- * @param {boolean} [how.chain] whether this came through the reader's touch
- *   selection (D81), whose Save revises the chain's automatic keep
+ * @param {boolean} [how.chain] whether this came through the reader's own
+ *   selection (D81, D86), whose Save revises the chain's automatic keep
  *   (`autoKept`)
  */
 function present(selection, { deliberate, touch, chain = false }) {
@@ -784,25 +796,27 @@ function present(selection, { deliberate, touch, chain = false }) {
 }
 
 /**
- * The reader's touch selection, answered (D80, reshaped by D81). `press` is
- * the hold-and-drag gesture ending - a fresh statement of the whole phrase,
- * and the start of a chain; `extend` is a tap growing the standing phrase by
- * its neighbour; `again` is a tap on the selection itself - a knock on a
- * bubble that may have closed over it.
+ * The reader's own selection, answered (D80, reshaped by D81, the mouse's
+ * too since D86). `press` is the selecting gesture ending - the finger
+ * lifting off a hold-and-drag, the mouse button releasing a drag or a hold,
+ * a double click taking its word - a fresh statement of the whole phrase,
+ * and the start of a chain; `extend` is a tap or click growing the standing
+ * phrase by its neighbour; `again` is one on the selection itself - a knock
+ * on a bubble that may have closed over it.
  *
- * Only the hold's end may keep by itself (`deliberate`): the finger lifted
- * exactly there, asserting the whole phrase, and D22 does the rest. The taps
- * that grow the phrase afterwards ask instead - Save, revealed - both
- * because a tapped-out phrase is exploration that deserves a look before it
- * lands in the vocabulary, and because each growing tap would otherwise
- * write a step of its own. The Save that lands takes the chain's automatic
- * keep back out (`keep`); a chain dismissed instead keeps what its last
- * answered gesture kept.
+ * Only the gesture's end may keep by itself (`deliberate`): the finger or
+ * the button lifted exactly there, asserting the whole phrase, and D22 does
+ * the rest. The taps and clicks that grow the phrase afterwards ask instead
+ * - Save, revealed - both because a phrase built in steps is exploration
+ * that deserves a look before it lands in the vocabulary, and because each
+ * growing step would otherwise write an entry of its own. The Save that
+ * lands takes the chain's automatic keep back out (`keep`); a chain
+ * dismissed instead keeps what its last answered gesture kept.
  *
- * @param {Range} range the selection as the touch side built it
- * @param {import("./touch-select.js").GestureKind} kind
+ * @param {Range} range the selection as the module built it
+ * @param {import("./select.js").GestureKind} kind
  */
-function presentTouch(range, kind) {
+function presentGesture(range, kind) {
   const selection = fromRange(range);
   if (selection === null) return;
 
@@ -810,8 +824,8 @@ function presentTouch(range, kind) {
   // new to answer, and answering would ride the engine to repaint it.
   if (kind !== "extend" && tooltip.isOpen() && current !== null && current.text === selection.text) return;
 
-  // A hold starts a chain of its own; whatever the last one kept was its
-  // final word, and stands.
+  // A fresh statement starts a chain of its own; whatever the last one kept
+  // was its final word, and stands.
   if (kind === "press") autoKept = null;
 
   // Never `touch` in the D74 sense: this selection is the reader page's own,
@@ -900,10 +914,10 @@ function onKeyDown(event) {
   if (event.key !== "Escape" || !tooltip.isOpen()) return;
   tooltip.escape();
   // An Escape that closed the bubble - rather than the edit box inside it -
-  // ends the touch chain with it: a highlight left with no bubble would ask
-  // the question the bubble just stopped answering.
+  // ends the selection chain with it: a highlight left with no bubble would
+  // ask the question the bubble just stopped answering.
   if (!tooltip.isOpen()) {
-    clearTouchSelection();
+    clearSelection();
     autoKept = null;
   }
 }
@@ -961,11 +975,12 @@ function onStorageChanged(changes, area) {
 }
 
 /**
- * @param {{ root?: Element | null, observe?: boolean, stored?: Record<string, unknown>, touchSelect?: boolean, anchored?: boolean }} [where]
+ * @param {{ root?: Element | null, observe?: boolean, stored?: Record<string, unknown>, ownSelection?: boolean, anchored?: boolean }} [where]
  *   what to underline inside, whether it can change on its own, the startup
- *   read of `storage.local` when the caller already made one, whether touch
- *   selects through our own gesture rather than the browser's (D80), and
- *   whether bubbles pin to the page instead of the viewport (D81). The last
+ *   read of `storage.local` when the caller already made one, whether the
+ *   page selects through our own gesture rather than the browser's - every
+ *   pointer's gesture, finger and mouse alike (D80, D86) - and whether
+ *   bubbles pin to the page instead of the viewport (D81). The last
  *   two are the reader page's flags, never a content script's: refusing the
  *   native selection on somebody else's page would be changing how their
  *   page works, and pinning to the document trusts a page layout only our
@@ -994,18 +1009,19 @@ export function start(where = {}) {
     if (navigator.maxTouchPoints > 0) {
       document.addEventListener("pointerdown", onPointerDown, { capture: true, passive: true });
       document.addEventListener("selectionchange", onSelectionChange);
-      // The reader's own gesture (D80). The settle path above stays installed
-      // and naturally silent beside it: while the article refuses the native
-      // selection there is nothing for `selectionchange` to say about a touch,
-      // so no selection ever has two listeners.
-      if (where.touchSelect === true) {
-        startTouchSelect({
-          root: root ?? document.body,
-          owns: (target) => tooltip.owns(target),
-          onSelected: presentTouch,
-          onSelectStart: () => tooltip.hide(),
-        });
-      }
+    }
+    // The reader's own gesture, every pointer's since D86 - which is why it
+    // starts outside the touch gate. The settle path above stays installed
+    // and naturally silent beside it: the article refuses the native
+    // selection, so there is nothing for `selectionchange` to say about it,
+    // and no selection ever has two listeners.
+    if (where.ownSelection === true) {
+      startSelect({
+        root: root ?? document.body,
+        owns: (target) => tooltip.owns(target),
+        onSelected: presentGesture,
+        onSelectStart: () => tooltip.hide(),
+      });
     }
     webext().storage.onChanged.addListener(onStorageChanged);
   }
@@ -1032,7 +1048,7 @@ export function stop() {
   // Removing what was never added is a no-op, so no second capability check.
   document.removeEventListener("pointerdown", onPointerDown, { capture: true });
   document.removeEventListener("selectionchange", onSelectionChange);
-  stopTouchSelect();
+  stopSelect();
   webext().storage.onChanged.removeListener(onStorageChanged);
 
   if (settleTimer !== null) {
@@ -1055,12 +1071,12 @@ export function stop() {
 /**
  * The text under the same root is different now - the reader has rendered
  * another article. The vocabulary has not changed, so nothing is asked of
- * storage; the ranges are simply found again. A touch selection was ranges
- * into the old text and goes with it - its chain too, because the phrase the
- * chain kept belongs to a page that is done being read.
+ * storage; the ranges are simply found again. The reader's own selection was
+ * ranges into the old text and goes with it - its chain too, because the
+ * phrase the chain kept belongs to a page that is done being read.
  */
 export function rescan() {
-  clearTouchSelection();
+  clearSelection();
   autoKept = null;
   repaint();
 }
