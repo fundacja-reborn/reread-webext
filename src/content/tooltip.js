@@ -207,6 +207,19 @@ export const STYLE = `
     --pull-action: -0.33em;
     --pad-cta: 0.23em 0.77em;
     --icon: 1.33em;
+    /* Two strengths of line, the same two page.css gives the extension's own
+       pages and for the same reason: an e-ink panel quantizes the screen to
+       16 greys and rounds a near-white hairline back into the paper, so a
+       tenth of a black is not a faint line there - it is no line at all
+       (reported from a Boox: the separators in the bubble were gone). --line
+       draws the separators, about 2.6:1 against the bubble's paper - visible,
+       and quieter than anything that can be pressed; --edge draws the
+       boundary of the things that can be, past 4.5:1. Solid colors, because
+       nothing here is ever laid over the page: the bubble's own background is
+       painted under its border, so every line in it stands on paper we chose.
+       The dark pair is in the query at the bottom. */
+    --line: #99a1b0;
+    --edge: #6e7583;
     font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
     font-size: calc(var(--type-body) * var(--bubble-scale, 1));
     line-height: 1.45;
@@ -215,9 +228,10 @@ export const STYLE = `
     border-radius: 10px;
     /* The edge, not the shadow, is what says where the bubble ends: an e-ink
        panel flattens the shadow into nothing, and it has to say so over any
-       page's colors - so it holds the strength page.css gives a control's
-       border rather than a hairline's. */
-    border: 1px solid rgba(0, 0, 0, 0.35);
+       page's colors - so it holds --edge, the strength page.css gives a
+       control's border, and not a hairline's. A third of a black said the
+       same thing far too quietly there. */
+    border: 1px solid var(--edge);
     background: #ffffff;
     color: #1f2430;
     box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
@@ -249,7 +263,7 @@ export const STYLE = `
   .context {
     margin-top: 8px;
     padding-top: 8px;
-    border: 0 solid rgba(0, 0, 0, 0.12);
+    border: 0 solid var(--line);
     border-top-width: 1px;
     font-size: calc(var(--type-second) * var(--bubble-scale, 1));
     opacity: 0.85;
@@ -267,20 +281,39 @@ export const STYLE = `
   .entries {
     margin-top: 8px;
     padding-top: 8px;
-    border: 0 solid rgba(0, 0, 0, 0.12);
+    border: 0 solid var(--line);
     border-top-width: 1px;
     font-size: calc(var(--type-second) * var(--bubble-scale, 1));
     max-height: 40vh;
     overflow-y: auto;
     overscroll-behavior: contain;
+    /* Ours, not the platform's, and the colors are what makes it ours: Gecko
+       draws an overlay bar that fades out again where they are the system's,
+       and a bar that is not there says nothing about how much more there is.
+       In a control's strength, because a thumb has to survive 16 greys too. */
     scrollbar-width: thin;
+    scrollbar-color: var(--edge) transparent;
   }
 
-  /* macOS hides scrollbars until something scrolls, so an entry that runs past
-     the bottom looks exactly like an entry that was cut off - which is how it
-     was first reported. The shadow is the only thing saying there is more. */
+  /* Where a list longer than its box was cut, drawn at the strength of a thing
+     that can be acted on rather than a separator's - because that is what it
+     is, the edge of something that scrolls, and not the end of a block. An
+     inset shadow said this first: macOS hides its scrollbars until something
+     moves, so an entry running past the bottom read as an entry that ended
+     there. But a shadow is the one thing an e-ink panel cannot draw - 16 greys
+     turn it into either nothing or a grey smear lying across the very line it
+     was meant to help read (reported from a Boox). A rule is ink on any panel,
+     and a scroll box paints its own borders at its edges without them moving
+     with what is inside it, so nothing here has to be pinned - pinned things
+     smear on e-ink at every scroll.
+
+     One declaration covers both ways the bubble hangs: growing up the mirror
+     has already put a line here, and this only says it louder. The width it
+     adds growing down costs the bubble nothing - a box that scrolls is a box
+     already capped in height, and box-sizing is border-box. */
   .entries[data-more="true"] {
-    box-shadow: inset 0 -14px 12px -12px rgba(0, 0, 0, 0.28);
+    border-bottom-width: 1px;
+    border-bottom-color: var(--edge);
   }
 
   .entry + .entry { margin-top: 8px; }
@@ -316,9 +349,13 @@ export const STYLE = `
     cursor: pointer;
   }
   .entry-sense[aria-pressed="false"]:hover:not(:disabled) { background: rgba(0, 0, 0, 0.06); }
+  /* The mark that stays, and the border is the whole of it where the tint
+     cannot be seen: a wash this light is one of the 16 greys an e-ink panel
+     rounds back to paper, and which meanings are already in the gloss is not
+     something to leave to a wash. */
   .entry-sense[aria-pressed="true"] {
     background: rgba(0, 0, 0, 0.07);
-    border-color: rgba(0, 0, 0, 0.22);
+    border-color: var(--edge);
   }
   /* Not faded while the edit box is open, unlike every other disabled button
      here: the entry is still there to be read, it just cannot be chosen for as
@@ -334,7 +371,7 @@ export const STYLE = `
     font: inherit;
     color: inherit;
     background: rgba(0, 0, 0, 0.04);
-    border: 1px solid rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--edge);
     border-radius: 6px;
     resize: none;
   }
@@ -490,8 +527,12 @@ export const STYLE = `
     font-size: calc(var(--type-cta) * var(--bubble-scale, 1));
     padding: var(--pad-cta);
     opacity: 1;
+    /* What makes these three look pressable is the box, and the box has to be
+       there on paper too: the tint inside it is the first thing an e-ink panel
+       rounds away, and a Save that has lost its frame is one more label in a
+       row of labels. */
     background: rgba(0, 0, 0, 0.05);
-    border: 1px solid rgba(0, 0, 0, 0.18);
+    border: 1px solid var(--edge);
     border-radius: 6px;
   }
   .actions button[data-action="save"]:hover:not(:disabled),
@@ -525,32 +566,27 @@ export const STYLE = `
          into the reader's dark theme). */
       background: #262c3a;
       color: #f2f4f8;
-      border-color: rgba(255, 255, 255, 0.45);
+      /* The same two strengths against this paper instead of white, and a
+         step lighter than page.css uses for the same job, because this
+         paper is a step lighter than the pages': 2.6:1 for a separator,
+         4.6:1 for the edge of anything that can be pressed. Every line in
+         the bubble reads them, so the dark theme is these two lines plus
+         the washes that only glass can show. */
+      --line: #626a7a;
+      --edge: #8d95a6;
+      border-color: var(--edge);
       box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
     }
     .body[data-tone="error"],
     .context[data-tone="error"] { color: #f0a83c; }
-    /* All edges at once: which one carries the line is the mirror's business. */
-    .context, .entries { border-color: rgba(255, 255, 255, 0.14); }
-    /* A shadow that reads as depth on white reads as nothing on dark. */
-    .entries[data-more="true"] { box-shadow: inset 0 -14px 12px -12px rgba(0, 0, 0, 0.6); }
     .entry-sense[aria-pressed="false"]:hover:not(:disabled) { background: rgba(255, 255, 255, 0.08); }
-    .entry-sense[aria-pressed="true"] {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: rgba(255, 255, 255, 0.3);
-    }
-    .editor {
-      background: rgba(255, 255, 255, 0.06);
-      border-color: rgba(255, 255, 255, 0.24);
-    }
+    .entry-sense[aria-pressed="true"] { background: rgba(255, 255, 255, 0.1); }
+    .editor { background: rgba(255, 255, 255, 0.06); }
     /* The quiet labels need nothing here: they are the bubble's own colour at
        seven tenths, which lands right on either background. */
     .actions button[data-action="save"],
     .actions button[data-action="reader"],
-    .actions button[data-action="settings"] {
-      background: rgba(255, 255, 255, 0.08);
-      border-color: rgba(255, 255, 255, 0.2);
-    }
+    .actions button[data-action="settings"] { background: rgba(255, 255, 255, 0.08); }
     .actions button[data-action="save"]:hover:not(:disabled),
     .actions button[data-action="reader"]:hover:not(:disabled),
     .actions button[data-action="settings"]:hover:not(:disabled) { background: rgba(255, 255, 255, 0.16); }
