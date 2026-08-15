@@ -20,10 +20,17 @@
   --page-accent: #b8791d;
 }
 
+/* Dark ink is dimmed on purpose: near-white on near-black (#f2f4f8 measured
+   15.8:1) is glare at paragraph length - light text blooms on an emissive
+   panel in a dark room, and long-form reading is what these pages are for.
+   11.6:1 keeps AAA with a third of the excess gone. The bubble on somebody
+   else's page keeps its own brighter ink: its paper is lighter and its text
+   is two lines, not an article. Keep this value in step with the reader's
+   hand-set dark theme (reader.css) - the two are one theme in two homes. */
 @media (prefers-color-scheme: dark) {
   :root {
     --page-bg: #171a21;
-    --page-fg: #f2f4f8;
+    --page-fg: #ccd3df;
     --page-muted: #98a1b5;
     --page-line: #565d6c;
     --page-border: #767e8f;
