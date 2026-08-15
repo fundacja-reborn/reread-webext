@@ -36,11 +36,24 @@ export const TOOLBAR_ICONS = Object.freeze({
 });
 
 /**
+ * The set as `action.setIcon` must be handed it: absolute extension URLs.
+ * A bare relative path is resolved against whatever document makes the call -
+ * the reader would look under `reader/assets/...`, the background under
+ * `background/...` - and every caller here is in a subdirectory, so every
+ * call would fail with "Could not load action icon" while the file sits in
+ * the package untouched. The first Chromium smoke found exactly that.
+ *
  * @param {boolean} dark - whether the browser's color scheme is dark
  * @returns {Record<number, string>}
  */
 export function toolbarIconFor(dark) {
-  return TOOLBAR_ICONS[dark ? "dark" : "light"];
+  const getURL = webext().runtime.getURL;
+  return Object.fromEntries(
+    Object.entries(TOOLBAR_ICONS[dark ? "dark" : "light"]).map(([size, path]) => [
+      size,
+      getURL(path),
+    ]),
+  );
 }
 
 /**
