@@ -17,7 +17,7 @@
  * there the document's `selectionchange` is listened to as well, behind a
  * settle timer and a pointer-type gate - at rest both amount to one comparison
  * per event, and a mouse-only device does not even install them. The reader
- * page alone adds a third way in (D80/D81, `touch-select.js`): its article
+ * page alone adds a third way in (D80/D81, `select.js`): its article
  * refuses the native selection on touch and selects through our own gesture -
  * a finger held on a word, dragged on to stretch - whose end is a `touchend`,
  * so there the bubble, the translation and the keeping land exactly on the
@@ -42,7 +42,7 @@ import { MIRROR_KEY, asMirror, mirrorMatches } from "../lib/store/mirror.js";
 import { canSpeak, speak, speaking, stop as stopSpeaking } from "../lib/tts.js";
 import { clear, paint, phraseAt } from "./highlighter.js";
 import { blockTextAround, findable } from "./scan.js";
-import { clearTouchSelection, startTouchSelect, stopTouchSelect } from "./touch-select.js";
+import { clearSelection, startSelect, stopSelect } from "./select.js";
 import { createTooltip } from "./tooltip.js";
 
 /** @typedef {import("../lib/protocol.js").VocabEntry} VocabEntry */
@@ -438,7 +438,7 @@ async function change(write, remember, next) {
     // selection with it (D81): the phrase is kept or forgotten, the underline
     // says which, and a highlight left standing would ask the question again.
     tooltip.hide();
-    clearTouchSelection();
+    clearSelection();
     autoKept = null;
     current = null;
     secondLayer = [];
@@ -658,7 +658,7 @@ function onMouseUp(event) {
     // an underline, which is the other half of what saving a phrase is for.
     // Either way the touch selection's chain is over: a tap that reached the
     // compatibility mouse events is a tap its own listener stepped aside for.
-    clearTouchSelection();
+    clearSelection();
     autoKept = null;
     const hit = phraseAt(event.clientX, event.clientY);
     if (hit !== null && showSaved(hit.rect, hit.text, hit.normalized, contextOf(hit.range), { range: hit.range })) {
@@ -800,9 +800,9 @@ function present(selection, { deliberate, touch, chain = false }) {
  * answered gesture kept.
  *
  * @param {Range} range the selection as the touch side built it
- * @param {import("./touch-select.js").GestureKind} kind
+ * @param {import("./select.js").GestureKind} kind
  */
-function presentTouch(range, kind) {
+function presentGesture(range, kind) {
   const selection = fromRange(range);
   if (selection === null) return;
 
@@ -903,7 +903,7 @@ function onKeyDown(event) {
   // ends the touch chain with it: a highlight left with no bubble would ask
   // the question the bubble just stopped answering.
   if (!tooltip.isOpen()) {
-    clearTouchSelection();
+    clearSelection();
     autoKept = null;
   }
 }
@@ -961,7 +961,7 @@ function onStorageChanged(changes, area) {
 }
 
 /**
- * @param {{ root?: Element | null, observe?: boolean, stored?: Record<string, unknown>, touchSelect?: boolean, anchored?: boolean }} [where]
+ * @param {{ root?: Element | null, observe?: boolean, stored?: Record<string, unknown>, ownSelection?: boolean, anchored?: boolean }} [where]
  *   what to underline inside, whether it can change on its own, the startup
  *   read of `storage.local` when the caller already made one, whether touch
  *   selects through our own gesture rather than the browser's (D80), and
@@ -998,11 +998,11 @@ export function start(where = {}) {
       // and naturally silent beside it: while the article refuses the native
       // selection there is nothing for `selectionchange` to say about a touch,
       // so no selection ever has two listeners.
-      if (where.touchSelect === true) {
-        startTouchSelect({
+      if (where.ownSelection === true) {
+        startSelect({
           root: root ?? document.body,
           owns: (target) => tooltip.owns(target),
-          onSelected: presentTouch,
+          onSelected: presentGesture,
           onSelectStart: () => tooltip.hide(),
         });
       }
@@ -1032,7 +1032,7 @@ export function stop() {
   // Removing what was never added is a no-op, so no second capability check.
   document.removeEventListener("pointerdown", onPointerDown, { capture: true });
   document.removeEventListener("selectionchange", onSelectionChange);
-  stopTouchSelect();
+  stopSelect();
   webext().storage.onChanged.removeListener(onStorageChanged);
 
   if (settleTimer !== null) {
@@ -1060,7 +1060,7 @@ export function stop() {
  * chain kept belongs to a page that is done being read.
  */
 export function rescan() {
-  clearTouchSelection();
+  clearSelection();
   autoKept = null;
   repaint();
 }

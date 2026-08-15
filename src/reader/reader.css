@@ -189,7 +189,7 @@ summary {
 }
 
 /* Touch selects through our own gesture here (D80): while the pointer is a
-   finger or a pen - the attribute, flipped per press in touch-select.js -
+   finger or a pen - the attribute, flipped per press in select.js -
    the article refuses the native selection, so the system's menu and handles
    never come to exist. A mouse press takes the attribute off, and a hybrid
    keeps its mouse selection whole. */
@@ -197,7 +197,7 @@ summary {
   user-select: none;
 }
 
-/* What that gesture paints instead, named in touch-select.js: the same
+/* What that gesture paints instead, named in select.js: the same
    inversion the native ::selection wears here (page.css) - ink and paper
    swapped, the one contrast every theme and an e-ink panel are sure to have. */
 ::highlight(reread-selection) {

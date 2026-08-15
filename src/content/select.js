@@ -98,14 +98,14 @@ const SCROLL_TAIL_MS = 100;
  */
 
 /**
- * @typedef {object} TouchSelectHooks
+ * @typedef {object} SelectHooks
  * @property {Element} root where holds select - the article, and nothing else
  * @property {(target: EventTarget | null) => boolean} owns whether a target is the bubble's
  * @property {(range: Range, kind: GestureKind) => void} onSelected a gesture ended on this selection
  * @property {() => void} onSelectStart a hold just took a word - whatever is shown is stale
  */
 
-/** @type {TouchSelectHooks | null} */
+/** @type {SelectHooks | null} */
 let hooks = null;
 let started = false;
 
@@ -277,7 +277,7 @@ function select(geo, from, to, anchor) {
 }
 
 /** The selection and its paint, gone. Safe to call however little is held. */
-export function clearTouchSelection() {
+export function clearSelection() {
   geometry = null;
   span = null;
   range = null;
@@ -585,9 +585,9 @@ function onContextMenu(event) {
 }
 
 /**
- * @param {TouchSelectHooks} options
+ * @param {SelectHooks} options
  */
-export function startTouchSelect(options) {
+export function startSelect(options) {
   if (started) return;
   started = true;
   hooks = options;
@@ -606,7 +606,7 @@ export function startTouchSelect(options) {
 }
 
 /** Everything taken back: listeners, attribute, selection, paint. */
-export function stopTouchSelect() {
+export function stopSelect() {
   if (!started) return;
   started = false;
   document.removeEventListener("pointerdown", onPointerDown, { capture: true });
@@ -620,5 +620,5 @@ export function stopTouchSelect() {
   hooks = null;
   scrolledAt = 0;
   cancelGesture();
-  clearTouchSelection();
+  clearSelection();
 }

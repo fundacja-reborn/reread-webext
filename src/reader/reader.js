@@ -1057,6 +1057,6 @@ webext().runtime.onMessage.addListener((message, _sender, sendResponse) => {
 // the same reason the bubble pins to the page rather than the viewport
 // (`anchored`): it rides the scroll with its phrase like a margin note,
 // which only a layout we control can promise to survive.
-start({ root: article, observe: false, touchSelect: true, anchored: true });
+start({ root: article, observe: false, ownSelection: true, anchored: true });
 
 void showPage();
