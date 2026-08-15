@@ -6,17 +6,20 @@ import { STYLE } from "../src/content/tooltip.js";
 /**
  * Every line the bubble draws - the separators in front of the second layer,
  * the cut where a dictionary entry runs past its box, the frames around the
- * things that can be pressed - goes through two custom properties, and the
- * point of both is a panel nobody here is looking at: an e-ink screen has 16
- * greys, and it rounds a translucent black back into the paper. A hairline
- * written as a tenth of an alpha is not a faint line there, it is no line
- * (reported from a Boox: the bubble's separators were simply gone).
+ * things that can be pressed - goes through one custom property, and the point
+ * of it is a panel nobody here is looking at: an e-ink screen has 16 greys, and
+ * it rounds a translucent black back into the paper. A hairline written as a
+ * tenth of an alpha is not a faint line there, it is no line (reported from a
+ * Boox: the bubble's separators were simply gone). The build after that one had
+ * two strengths, a quiet one for separators and a loud one for edges, as the
+ * extension's own pages do - and read on paper the quiet one still looked like
+ * a mistake beside the loud one, so one strength is what the bubble keeps.
  *
- * That is exactly the kind of regression a smoke test cannot catch, because
- * the screen it is run on shows the faint line perfectly well. What can be
- * held without a browser is the rule itself: borders name the two properties
- * and nothing else, the two carry enough contrast against the bubble's own
- * paper in both themes, and nothing in the bubble is told apart by a shadow.
+ * That is exactly the kind of regression a smoke test cannot catch, because the
+ * screen it is run on shows the faint line perfectly well. What can be held
+ * without a browser is the rule itself: borders name the property and nothing
+ * else, it carries enough contrast against the bubble's own paper in both
+ * themes, and nothing in the bubble is told apart by a shadow.
  */
 
 /**
@@ -76,7 +79,7 @@ const THEMES = [
 ];
 
 describe("the bubble's lines", () => {
-  it("draws every border with the two line properties and never with an alpha", () => {
+  it("draws every border with the line property and never with an alpha", () => {
     for (const [, value] of STYLE.matchAll(/(border(?:-[a-z]+)*)\s*:\s*([^;]+);/g)) {
       const declaration = value ?? "";
       assert.ok(
@@ -87,18 +90,24 @@ describe("the bubble's lines", () => {
   });
 
   for (const theme of THEMES) {
-    it(`keeps both strengths readable on the ${theme.name} bubble's own paper`, () => {
+    it(`keeps the line readable on the ${theme.name} bubble's own paper`, () => {
       const paper = hex(theme.css, "background");
-      const line = hex(theme.css, "--line");
       const edge = hex(theme.css, "--edge");
 
-      // A separator is quieter than a control's edge and still a line: the
-      // two floors are page.css's, and the order between them is the point.
-      assert.ok(contrast(line, paper) >= 2.5, `--line is ${contrast(line, paper).toFixed(2)}:1, under 2.5:1`);
+      // The floor a control's boundary has to clear (WCAG 1.4.11 asks 3:1;
+      // page.css holds its edges past 4.5:1 and so does this).
       assert.ok(contrast(edge, paper) >= 4.5, `--edge is ${contrast(edge, paper).toFixed(2)}:1, under 4.5:1`);
-      assert.ok(contrast(edge, paper) > contrast(line, paper), "a separator is as loud as a control's edge");
     });
   }
+
+  it("marks a list longer than its box with ink, not with a fade", () => {
+    const block = blockAfter('.entries[data-more="true"]');
+    // A hard stop, because a gradient is what an e-ink panel dithers, and the
+    // colour is the bubble's one line - a mark in a colour of its own would
+    // be the alpha problem again, one element further along.
+    assert.match(block, /conic-gradient\([^)]*var\(--edge\) 0 90deg, transparent 0\)/);
+    assert.match(block, /border-bottom-width:\s*1px/);
+  });
 
   it("tells nothing apart by a shadow inside the bubble", () => {
     // The two shadows left are the bubble's own, under its outer edge, and

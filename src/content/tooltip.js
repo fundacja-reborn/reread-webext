@@ -207,18 +207,17 @@ export const STYLE = `
     --pull-action: -0.33em;
     --pad-cta: 0.23em 0.77em;
     --icon: 1.33em;
-    /* Two strengths of line, the same two page.css gives the extension's own
-       pages and for the same reason: an e-ink panel quantizes the screen to
-       16 greys and rounds a near-white hairline back into the paper, so a
-       tenth of a black is not a faint line there - it is no line at all
-       (reported from a Boox: the separators in the bubble were gone). --line
-       draws the separators, about 2.6:1 against the bubble's paper - visible,
-       and quieter than anything that can be pressed; --edge draws the
-       boundary of the things that can be, past 4.5:1. Solid colors, because
-       nothing here is ever laid over the page: the bubble's own background is
-       painted under its border, so every line in it stands on paper we chose.
-       The dark pair is in the query at the bottom. */
-    --line: #99a1b0;
+    /* One strength for every line the bubble draws, past 4.5:1 against its own
+       paper. An e-ink panel quantizes the screen to 16 greys and rounds a
+       near-white hairline back into it, so a tenth of a black is not a faint
+       line there - it is no line at all, which is how the separators went
+       missing on a Boox. The pages get two strengths (page.css: separators
+       quieter than a control's edge), and the bubble had them too for one
+       build - but read on paper the quieter one still looked like a mistake
+       beside the louder, so the bubble keeps the one that survives. A solid
+       color and not an alpha, because nothing here is laid over the page: the
+       bubble's background is painted under its own border, so every line in it
+       stands on paper we chose. The dark value is in the query at the bottom. */
     --edge: #6e7583;
     font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
     font-size: calc(var(--type-body) * var(--bubble-scale, 1));
@@ -263,7 +262,7 @@ export const STYLE = `
   .context {
     margin-top: 8px;
     padding-top: 8px;
-    border: 0 solid var(--line);
+    border: 0 solid var(--edge);
     border-top-width: 1px;
     font-size: calc(var(--type-second) * var(--bubble-scale, 1));
     opacity: 0.85;
@@ -281,39 +280,53 @@ export const STYLE = `
   .entries {
     margin-top: 8px;
     padding-top: 8px;
-    border: 0 solid var(--line);
+    /* The strip the mark below stands in, kept clear of the text whether or
+       not the mark is drawn: reserving it only when the list overflows would
+       reflow the very list somebody is reading down. */
+    padding-right: 0.9em;
+    border: 0 solid var(--edge);
     border-top-width: 1px;
     font-size: calc(var(--type-second) * var(--bubble-scale, 1));
     max-height: 40vh;
     overflow-y: auto;
     overscroll-behavior: contain;
-    /* Ours, not the platform's, and the colors are what makes it ours: Gecko
-       draws an overlay bar that fades out again where they are the system's,
-       and a bar that is not there says nothing about how much more there is.
-       In a control's strength, because a thumb has to survive 16 greys too. */
+    /* Where a bar is drawn at all it is drawn in our ink. It cannot be the
+       thing that says the list scrolls, though: Gecko fades its bar out again
+       when nothing is moving, and on Android it is not there until a finger
+       is (measured on a Boox - the mark below exists because of it). */
     scrollbar-width: thin;
     scrollbar-color: var(--edge) transparent;
   }
 
-  /* Where a list longer than its box was cut, drawn at the strength of a thing
-     that can be acted on rather than a separator's - because that is what it
-     is, the edge of something that scrolls, and not the end of a block. An
-     inset shadow said this first: macOS hides its scrollbars until something
-     moves, so an entry running past the bottom read as an entry that ended
-     there. But a shadow is the one thing an e-ink panel cannot draw - 16 greys
-     turn it into either nothing or a grey smear lying across the very line it
-     was meant to help read (reported from a Boox). A rule is ink on any panel,
-     and a scroll box paints its own borders at its edges without them moving
-     with what is inside it, so nothing here has to be pinned - pinned things
-     smear on e-ink at every scroll.
+  /* A list longer than its box, said twice: the box closes on a line where it
+     was cut, and a small triangle stands in the strip at that corner.
 
-     One declaration covers both ways the bubble hangs: growing up the mirror
-     has already put a line here, and this only says it louder. The width it
-     adds growing down costs the bubble nothing - a box that scrolls is a box
-     already capped in height, and box-sizing is border-box. */
+     An inset shadow said it first - macOS hides its scrollbars until something
+     moves, so an entry running past the bottom read as an entry that ended
+     there - but a shadow is the one thing an e-ink panel cannot draw: 16 greys
+     turn it into either nothing or a grey smear lying across the very line it
+     was meant to help read. The line that replaced it was honest and too
+     quiet: on a Boox a cut and a separator are one and the same line, and a
+     reader with no bar on the screen can miss that there is anything to
+     scroll at all. So the triangle, and it is ink rather than a fade: one
+     conic wedge with a hard stop, nothing for a panel to dither.
+
+     What it says is that the box is cut, not that there is more below this
+     exact spot - which is why it may stand still while the reader scrolls.
+     The list is longer than the box wherever they have got to, and a mark that
+     needs a scroll listener to stop lying would repaint an e-ink panel to say
+     something the edge already said.
+
+     Both ways the bubble hangs are covered: growing up the mirror has put the
+     line here already. The width growing down adds costs the bubble nothing -
+     a box that scrolls is a box already capped in height, and box-sizing is
+     border-box. */
   .entries[data-more="true"] {
     border-bottom-width: 1px;
-    border-bottom-color: var(--edge);
+    background-image: conic-gradient(from -45deg at 50% 100%, var(--edge) 0 90deg, transparent 0);
+    background-size: 0.7em 0.35em;
+    background-position: right 0.1em bottom 0.3em;
+    background-repeat: no-repeat;
   }
 
   .entry + .entry { margin-top: 8px; }
@@ -443,6 +456,10 @@ export const STYLE = `
     border-width: 0 0 1px;
   }
 
+  /* The strip for the scroll mark is not the mirror's business, and the
+     shorthand above would take it away. */
+  .bubble[data-grow="up"] .entries { padding-right: 0.9em; }
+
   /* The launcher is its one button and nothing else, so the row's padding -
      which exists to stand the row off a gloss that is not there - goes too.
      After the mirror, whose padding this outranks by standing below it. */
@@ -566,13 +583,11 @@ export const STYLE = `
          into the reader's dark theme). */
       background: #262c3a;
       color: #f2f4f8;
-      /* The same two strengths against this paper instead of white, and a
-         step lighter than page.css uses for the same job, because this
-         paper is a step lighter than the pages': 2.6:1 for a separator,
-         4.6:1 for the edge of anything that can be pressed. Every line in
-         the bubble reads them, so the dark theme is these two lines plus
-         the washes that only glass can show. */
-      --line: #626a7a;
+      /* The one strength against this paper instead of white, and a step
+         lighter than page.css uses for the same job, because this paper is a
+         step lighter than the pages' - 4.6:1 either way. Every line in the
+         bubble reads it, so the dark theme is this one colour plus the washes
+         that only glass can show. */
       --edge: #8d95a6;
       border-color: var(--edge);
       box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
