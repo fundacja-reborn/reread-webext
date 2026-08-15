@@ -18,6 +18,7 @@
   "reading_list": { "message": "Offline-Leseliste" },
   "saved_phrases": { "message": "Gespeicherter Wortschatz" },
   "open_reader": { "message": "Diese Seite in der Leseansicht lesen" },
+  "quiet_bubble": { "message": "Aktionen der Sprechblase standardmäßig ausblenden" },
   "action_delete": { "message": "Löschen" },
   "action_download": { "message": "Herunterladen" },
   "action_cancel": { "message": "Abbrechen" },
@@ -417,6 +418,9 @@
   "options_reader_only": { "message": "Nur in der Leseansicht" },
   "options_reader_only_hint": {
     "message": "Ist dies an, bietet das Auswählen einer Wendung oder eines Wortes auf einer gewöhnlichen Seite genau eines an: die Seite in der Leseansicht zu öffnen. Übersetzen, Speichern und Unterstreichen geschehen dort (übersichtlicher und besser lesbar). Auf Android ist die Option standardmäßig eingeschaltet."
+  },
+  "options_quiet_bubble_hint": {
+    "message": "Ist dies an, zeigt die Sprechblase nur die Übersetzung; ihre Schaltflächen erscheinen nach einem Klick oder Tippen auf die Sprechblase. Speichern ist so oder so die Ausnahme: Eine Wendung, die zu lang ist, um sich selbst zu speichern, zeigt die Schaltfläche zum Speichern immer."
   },
   "options_models_heading": { "message": "Übersetzungsmodelle" },
   "options_models_intro": {

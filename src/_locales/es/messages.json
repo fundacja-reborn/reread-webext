@@ -18,6 +18,7 @@
   "reading_list": { "message": "Lista de lectura sin conexión" },
   "saved_phrases": { "message": "Frases guardadas" },
   "open_reader": { "message": "Leer esta página en la vista de lectura" },
+  "quiet_bubble": { "message": "Ocultar por defecto las acciones de la burbuja" },
   "action_delete": { "message": "Eliminar" },
   "action_download": { "message": "Descargar" },
   "action_cancel": { "message": "Cancelar" },
@@ -440,6 +441,9 @@
   "options_reader_only": { "message": "Solo en la vista de lectura" },
   "options_reader_only_hint": {
     "message": "Con esto activado, seleccionar una frase o una palabra en una página normal ofrece una sola cosa: abrir la página en la vista de lectura. Traducir, guardar y subrayar ocurren allí (más claro y más legible). En Android la opción está activada de forma predeterminada."
+  },
+  "options_quiet_bubble_hint": {
+    "message": "Con esto activado, la burbuja de traducción muestra solo la traducción; sus botones aparecen al hacer clic o tocar la burbuja. Guardar es la excepción en ambos casos: una frase demasiado larga para guardarse sola siempre muestra el botón de guardar."
   },
   "options_models_heading": { "message": "Modelos de traducción" },
   "options_models_intro": {

@@ -232,6 +232,34 @@ describe("reader-only mode", () => {
   });
 });
 
+describe("the quiet bubble", () => {
+  it("hides the actions by default, on profiles old and new", () => {
+    // The switch shipped after 0.2.6, so a stored config without the key is
+    // every existing profile - and the redesigned default has to reach them.
+    assert.equal(withDefaults(undefined).hideBubbleActions, true);
+    assert.equal(withDefaults({ sourceLang: "en" }).hideBubbleActions, true);
+  });
+
+  it("keeps a choice somebody made, in both directions", () => {
+    assert.equal(withDefaults({ hideBubbleActions: true }).hideBubbleActions, true);
+    assert.equal(withDefaults({ hideBubbleActions: false }).hideBubbleActions, false);
+  });
+
+  it("treats a hand-edited value of the wrong type as the default", () => {
+    for (const hideBubbleActions of ["false", 0, null, {}]) {
+      assert.equal(withDefaults({ hideBubbleActions }).hideBubbleActions, true);
+    }
+  });
+
+  it("writes the choice through writeConfig without touching the rest", async () => {
+    const store = installFakeBrowser({ config: { sourceLang: "de", targetLang: "en" } });
+    const written = await writeConfig({ hideBubbleActions: false });
+
+    assert.deepEqual(written, { ...DEFAULTS, sourceLang: "de", targetLang: "en", hideBubbleActions: false });
+    assert.equal(/** @type {any} */ (store["config"]).hideBubbleActions, false);
+  });
+});
+
 describe("the published platform", () => {
   it("reads the os back and answers unknown for anything else", () => {
     assert.equal(osFrom({ os: "android" }), "android");

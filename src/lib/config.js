@@ -36,6 +36,10 @@ export const CONFIG_KEY = "config";
  *   the platform decides at read time (`effectiveReaderOnly`): on Android on,
  *   elsewhere off. Only a hand-set value is ever stored, so a future change of
  *   the default reaches every installation that never touched the switch.
+ * @property {boolean} hideBubbleActions Whether the translation bubble opens
+ *   with its action row folded away, unfolding on a click or tap on the bubble
+ *   (D81). Save is the standing exception either way: a phrase that does not
+ *   keep itself always shows the way to keep it, and an error its one way out.
  */
 
 /** @type {readonly string[]} */
@@ -90,6 +94,7 @@ export const DEFAULTS = Object.freeze({
   reader: READER_DEFAULTS,
   disabledHosts: [],
   readerOnly: null,
+  hideBubbleActions: true,
 });
 
 /**
@@ -178,6 +183,8 @@ export function withDefaults(stored) {
     // Not a boolean means nobody has chosen - which is a state of its own, not
     // `false`: it is what lets the platform keep deciding (`effectiveReaderOnly`).
     readerOnly: typeof raw["readerOnly"] === "boolean" ? raw["readerOnly"] : null,
+    hideBubbleActions:
+      typeof raw["hideBubbleActions"] === "boolean" ? raw["hideBubbleActions"] : DEFAULTS.hideBubbleActions,
   };
 }
 
@@ -195,7 +202,7 @@ export async function readConfig() {
  * `{ reader: { theme } }` that dropped the type size would be a setting quietly
  * resetting another one.
  *
- * @param {{ sourceLang?: string, targetLang?: string, reader?: Partial<ReaderConfig>, disabledHosts?: string[], readerOnly?: boolean }} patch
+ * @param {{ sourceLang?: string, targetLang?: string, reader?: Partial<ReaderConfig>, disabledHosts?: string[], readerOnly?: boolean, hideBubbleActions?: boolean }} patch
  * @returns {Promise<Config>}
  */
 export async function writeConfig(patch) {

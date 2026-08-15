@@ -490,10 +490,11 @@ const STYLE = `
 
 /**
  * `folded` overrides the variant's own rule for where the row of actions
- * starts (D44): the reader's touch chain opens even a fresh selection with
- * the row away, because there the phrase keeps itself and the buttons are an
- * aside - `reveal()` is the caller's way to bring the row out after all when
- * one of them turns out to be the point (Save, an error's way to settings).
+ * starts (D44): with the quiet-bubble setting on (D81) even a fresh
+ * selection opens with the row away, because the phrase mostly keeps itself
+ * and the buttons are an aside - `reveal()` is the caller's way to bring the
+ * row out after all when one of them turns out to be the point (Save, an
+ * error's way to settings).
  *
  * `anchored` pins the bubble to the page rather than to the viewport: the
  * host goes `absolute` at the document coordinates the anchor had when shown,
@@ -1159,9 +1160,8 @@ export function createTooltip({ onAction }) {
         // The bubble is reused from phrase to phrase, and a row left out was
         // out for the last one. Only recall starts folded: everywhere else the
         // row is why the bubble is open, so it starts revealed (D44) - unless
-        // the caller says otherwise (`folded`: the touch chain's opening
-        // state, where the phrase keeps itself and the row is an aside). A
-        // press that never became a click is cleared the same way: a finger
+        // the caller says otherwise (`folded`: the quiet-bubble setting, D81).
+        // A press that never became a click is cleared the same way: a finger
         // dragged back out of the bubble may not eat the next press.
         bubble.classList.toggle("revealed", folded === undefined ? variant !== "recall" : !folded);
         swallowClick = false;

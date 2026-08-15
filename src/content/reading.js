@@ -30,7 +30,7 @@
  */
 
 import { webext } from "../lib/browser.js";
-import { CONFIG_KEY, withDefaults } from "../lib/config.js";
+import { CONFIG_KEY, DEFAULTS, withDefaults } from "../lib/config.js";
 import { choosableLines } from "../lib/gloss.js";
 import { t } from "../lib/i18n.js";
 import { describeError } from "../lib/messages.js";
@@ -121,6 +121,14 @@ const OFFERED = Object.freeze({
 });
 
 const tooltip = createTooltip({ onAction });
+
+/**
+ * The quiet-bubble setting (D81), mirrored from the config the way the
+ * vocabulary is: a fresh bubble opens with its action row folded while this
+ * is on, and the row comes out on a press, on approach - or by itself when
+ * Save or an error's one button is the point, which no setting may hide.
+ */
+let hideActions = DEFAULTS.hideBubbleActions;
 
 /** Where the press this release belongs to started, and whether it was ours. */
 /** @type {{ x: number, y: number, mine: boolean } | null} */
@@ -217,6 +225,9 @@ async function loadVocabulary(preloaded) {
     const stored = preloaded ?? (await webext().storage.local.get([CONFIG_KEY, MIRROR_KEY]));
     const config = withDefaults(stored[CONFIG_KEY]);
     const mirror = asMirror(stored[MIRROR_KEY]);
+    // Rides the same read and the same storage listener as the vocabulary:
+    // flipping the switch in the popup reaches every open page on the spot.
+    hideActions = config.hideBubbleActions;
 
     if (mirror === null) {
       adopt([]);
@@ -611,9 +622,8 @@ function onMouseUp(event) {
  *   strip away (D74). The reader's own touch selection wears nothing and
  *   keeps D23's close gap.
  * @param {boolean} [how.chain] whether this came through the reader's touch
- *   selection (D81), whose bubble opens with the action row folded - the
- *   phrase keeps itself, the buttons are an aside - and whose Save revises
- *   the chain's automatic keep (`autoKept`)
+ *   selection (D81), whose Save revises the chain's automatic keep
+ *   (`autoKept`)
  */
 function present(selection, { deliberate, touch, chain = false }) {
   // Any other channel answering is a chain ending mid-thought: what the chain
@@ -631,15 +641,17 @@ function present(selection, { deliberate, touch, chain = false }) {
 
   // The other variant: a fresh selection is a phrase nothing has been decided
   // about yet, so what can be done with it is on show from the first frame -
-  // except in the chain, where the short phrase is about to keep itself and
-  // the row waits to be asked for (D81), exactly like a recall's.
+  // unless the quiet-bubble setting says the answer comes first and the row
+  // waits to be asked for (D81), exactly like a recall's. What the setting
+  // never hides is a Save or an error's button: those reveal on their own
+  // when the answer lands (`reveal`).
   tooltip.show({
     anchor: selection.rect,
     variant: "save",
     body: t("bubble_translating"),
     tone: "pending",
     touch,
-    folded: chain ? true : undefined,
+    folded: hideActions ? true : undefined,
     anchored,
   });
 
