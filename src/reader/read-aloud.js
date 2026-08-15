@@ -9,7 +9,10 @@
  *     and keeps the arithmetic to get back out of it (`joinPieces`, `locate` -
  *     the matcher's own, so a character always means the same node here as it
  *     does under an underline);
- *   - speaks the chunks one after another, keeping the place;
+ *   - speaks the chunks one after another, keeping the place - and keeps the
+ *     engine one sentence ahead of itself, because a sentence handed over only
+ *     when the previous one has ended is a sentence the engine has had no time
+ *     to prepare (`queue`);
  *   - paints the sentence being spoken and the word inside it, through the
  *     highlight registry - no node of the article is touched, exactly as with
  *     underlines and the reader's own selection;
@@ -100,13 +103,40 @@ let within = 0;
 let spoken = 0;
 
 /**
- * The utterance this module is playing. Ours and only ours: every handler
- * checks it before answering, so the events a cancelled utterance still fires
- * cannot move a reading that has already gone somewhere else.
+ * What has been handed to the engine and has not finished yet, in the order it
+ * will be spoken. The head is what is being said; behind it stands the next
+ * sentence, already given away.
  *
- * @type {SpeechSynthesisUtterance | null}
+ * **That is the point of this array** (reported from a Boox Page, and from a
+ * Pixel under fast skipping): a sentence handed over only once the previous one
+ * has ended leaves the engine with nothing prepared, and on Android the silence
+ * that opens there ran to tens of seconds. The queue behind `speechSynthesis`
+ * exists exactly so that this does not happen - an engine given the next
+ * sentence while it is still speaking the current one joins them itself. This
+ * module now uses it as intended and stops treating `end` as the cue to think
+ * about what comes next.
+ *
+ * Ours and only ours: every handler looks itself up here before answering, so
+ * the events a cancelled utterance still fires cannot move a reading that has
+ * gone somewhere else.
+ *
+ * @typedef {{ utterance: SpeechSynthesisUtterance, sentence: number, from: number }} Handed
+ * @type {Handed[]}
  */
-let mine = null;
+let queue = [];
+
+/** How many sentences the engine may hold: the one being said, and the next. */
+const DEPTH = 2;
+
+/**
+ * The top-up waiting out the engine's own `end` event before it hands over
+ * another sentence (see `onEnd`). Null whenever nothing is waiting - and
+ * cleared by `hush`, so a pause landing in that sliver of a moment really
+ * pauses.
+ *
+ * @type {number | null}
+ */
+let pending = null;
 
 /** @type {ReadingState} */
 let state = "off";
@@ -148,7 +178,7 @@ export function readingVoice(next) {
   if (moved && state === "playing") {
     within = spoken;
     hush();
-    speakChunk();
+    speakHere();
   }
 }
 
@@ -172,7 +202,7 @@ export function forgetReading() {
  */
 export function toggleReading() {
   if (state === "playing") pauseReading();
-  else if (state === "paused") speakChunk();
+  else if (state === "paused") speakHere();
   else startReading();
 }
 
@@ -193,7 +223,7 @@ export function startReading() {
   hush();
   at = firstVisibleChunk();
   within = 0;
-  speakChunk();
+  speakHere();
 }
 
 /** The place is kept, the voice stops. See the header for why this cancels. */
@@ -246,7 +276,7 @@ export function skipSentence(step) {
   spoken = 0;
   if (state === "playing") {
     hush();
-    speakChunk();
+    speakHere();
     return;
   }
   markSentence();
@@ -329,24 +359,44 @@ function rangeOf(from, to) {
 }
 
 /**
- * Speaks from wherever the place says, and says so. Everything that starts or
- * resumes sound goes through here, so there is one description of what an
- * utterance of ours looks like.
+ * Reading starts, or carries on from where it was left. The place is already
+ * set (`at`, `within`); this is what turns it back into sound.
  */
-function speakChunk() {
-  const chunk = plan?.chunks[at];
-  if (plan === null || chunk === undefined) {
+function speakHere() {
+  // A resume point that landed on the last character of its sentence leaves
+  // nothing to say. The next sentence is the honest answer to that, not the
+  // end of the article.
+  while (plan !== null && at < plan.chunks.length && !hand(at, within)) {
+    at += 1;
+    within = 0;
+  }
+  if (queue.length === 0) {
     stopReading();
     return;
   }
+  state = "playing";
+  adoptHead();
+  announce();
+  topUp();
+}
 
-  const text = plan.text.slice(chunk.start + within, chunk.end);
-  if (text.trim().length === 0) {
-    // Nothing left of this sentence - a resume point that landed on its last
-    // character. The next one is the honest answer, not silence.
-    advance();
-    return;
-  }
+/**
+ * One sentence, handed to the engine and remembered. Nothing about the marks
+ * or the state happens here: this is called both for the sentence about to be
+ * heard and for the one after it, and the second must change nothing on screen.
+ *
+ * @param {number} sentence
+ * @param {number} from offset inside it to start at - the resume point, or 0
+ * @returns {boolean} whether anything was handed over
+ */
+function hand(sentence, from) {
+  const chunk = plan?.chunks[sentence];
+  if (plan === null || chunk === undefined) return false;
+
+  const text = plan.text.slice(chunk.start + from, chunk.end);
+  // Nothing left of this sentence - a resume point that landed on its last
+  // character. Silence would be the wrong answer, so the caller moves on.
+  if (text.trim().length === 0) return false;
 
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.lang = voice.lang;
@@ -354,16 +404,44 @@ function speakChunk() {
   const chosen = chosenVoice(speechSynthesis.getVoices(), voice.voiceURI);
   if (chosen !== null) utterance.voice = chosen;
 
-  utterance.addEventListener("boundary", (event) => onBoundary(utterance, event));
-  utterance.addEventListener("end", () => onEnd(utterance));
-  utterance.addEventListener("error", (event) => onError(utterance, event));
+  /** @type {Handed} */
+  const handed = { utterance, sentence, from };
+  utterance.addEventListener("boundary", (event) => onBoundary(handed, event));
+  utterance.addEventListener("end", () => onEnd(handed));
+  utterance.addEventListener("error", (event) => onError(handed, event));
 
-  mine = utterance;
-  spoken = within;
-  state = "playing";
-  markSentence();
-  announce();
+  queue.push(handed);
   speechSynthesis.speak(utterance);
+  return true;
+}
+
+/**
+ * Keeps the engine one sentence ahead. The sentence after the last one handed
+ * over is the one it gets; an empty sentence (there are none, but the slice
+ * could be) is stepped over rather than left as a gap in the queue.
+ */
+function topUp() {
+  while (queue.length < DEPTH) {
+    const last = queue[queue.length - 1];
+    if (last === undefined || plan === null) return;
+    let next = last.sentence + 1;
+    while (next < plan.chunks.length && !hand(next, 0)) next += 1;
+    if (next >= plan.chunks.length) return;
+  }
+}
+
+/**
+ * The head of the queue is what is being said, so the place and the marks
+ * follow it. Called when a sentence starts being the head - at the beginning,
+ * and at every `end` that shifts one off.
+ */
+function adoptHead() {
+  const head = queue[0];
+  if (head === undefined) return;
+  at = head.sentence;
+  within = head.from;
+  spoken = head.from;
+  markSentence();
 }
 
 /**
@@ -372,18 +450,21 @@ function speakChunk() {
  * device where the sentence stays painted and a pause rewinds to its start -
  * which is the whole degradation, and it is why nothing else depends on them.
  *
- * @param {SpeechSynthesisUtterance} utterance
+ * @param {Handed} handed
  * @param {SpeechSynthesisEvent} event
  */
-function onBoundary(utterance, event) {
-  const chunk = plan?.chunks[at];
-  if (mine !== utterance || plan === null || chunk === undefined) return;
+function onBoundary(handed, event) {
+  // The utterance's own sentence and its own starting offset, not the module's
+  // idea of where the reading is: they agree, and asking the thing that is
+  // speaking is how they go on agreeing.
+  const chunk = plan?.chunks[handed.sentence];
+  if (queue[0] !== handed || plan === null || chunk === undefined) return;
   // Some engines announce sentences as well as words. The sentence is already
   // painted, and taking its first word for the word being spoken would leave
   // the mark sitting there while the voice moved on.
   if (event.name === "sentence") return;
 
-  const base = chunk.start + within;
+  const base = chunk.start + handed.from;
   const length = typeof event.charLength === "number" ? event.charLength : 0;
   const word = wordSpan(plan.text, base + event.charIndex, length);
   if (word === null || word.start >= chunk.end) return;
@@ -396,33 +477,67 @@ function onBoundary(utterance, event) {
 }
 
 /**
- * @param {SpeechSynthesisUtterance} utterance
+ * A sentence finished. The one behind it is already speaking - that is the
+ * whole point of the queue - so this is bookkeeping and marks, not a cue to
+ * start anything: the marks move to the new head, and the engine is given one
+ * more sentence to stay ahead by.
+ *
+ * The topping up waits out the engine's own event in a task of its own. A
+ * platform that takes its time about a `speak()` made from inside `end` is a
+ * thing that has been seen before, and a zero-delay timer costs nothing.
+ *
+ * @param {Handed} handed
  */
-function onEnd(utterance) {
-  if (mine !== utterance) return;
-  advance();
-}
+function onEnd(handed) {
+  if (queue[0] !== handed) return;
+  queue.shift();
 
-/** The next sentence, or the end of the article. */
-function advance() {
-  mine = null;
-  at += 1;
-  within = 0;
-  spoken = 0;
-  if (plan === null || at >= plan.chunks.length) {
+  if (queue.length > 0) {
+    // The next sentence is already being spoken: the marks catch up with it.
+    adoptHead();
+  } else if (more()) {
+    // Nothing in flight, with the article unfinished: the engine dropped what
+    // it was given, or the top-up never landed. The place moves on by hand and
+    // the timer below starts it.
+    at += 1;
+    within = 0;
+    spoken = 0;
+  } else {
     stopReading();
     return;
   }
-  speakChunk();
+
+  if (pending !== null) window.clearTimeout(pending);
+  pending = window.setTimeout(() => {
+    pending = null;
+    if (queue.length === 0) speakHere();
+    else topUp();
+  }, 0);
 }
 
 /**
- * @param {SpeechSynthesisUtterance} utterance
+ * @returns {boolean} whether the article has a sentence after the last one
+ *   handed to the engine
+ */
+function more() {
+  const last = queue[queue.length - 1];
+  const after = last === undefined ? at : last.sentence;
+  return plan !== null && after + 1 < plan.chunks.length;
+}
+
+/**
+ * @param {Handed} handed
  * @param {SpeechSynthesisErrorEvent} event
  */
-function onError(utterance, event) {
-  if (mine !== utterance) return;
-  mine = null;
+function onError(handed, event) {
+  // A cancel from outside errors *everything* in the queue, the sentence
+  // waiting behind the one being spoken included. Only the head answers for
+  // the reading; the rest are dropped where they stand.
+  if (queue[0] !== handed) {
+    queue = queue.filter((one) => one !== handed);
+    return;
+  }
+  queue = [];
 
   // Cancelled from outside: the bubble speaking a phrase flushes the shared
   // queue (D83). That is not a failure and must not read as one - the place
@@ -445,9 +560,18 @@ function onError(utterance, event) {
   hooks?.onFail();
 }
 
-/** Our voice stops, and the events its cancelling fires answer to nobody. */
+/**
+ * Our voice stops - the sentence being said and the one handed over behind it
+ * alike - and the events their cancelling fires answer to nobody. The top-up
+ * waiting on its timer goes too, so a pause, a stop or a skip landing in that
+ * sliver of a moment is not overtaken by the sentence it interrupted.
+ */
 function hush() {
-  mine = null;
+  queue = [];
+  if (pending !== null) {
+    window.clearTimeout(pending);
+    pending = null;
+  }
   if (canSpeak()) speechSynthesis.cancel();
 }
 
@@ -463,9 +587,11 @@ function markSentence() {
   if (range === null) return;
   sentenceMark = mark(SENTENCE, sentenceMark, range, 2);
   // The word's mark belongs to the sentence that has gone; leaving it would
-  // show two places at once until the first boundary of the new one.
-  wordMark = null;
-  if (supported()) CSS.highlights.delete(WORD);
+  // show two places at once until the first boundary of the new one. Emptied
+  // rather than thrown away and registered again: two entries in the registry
+  // for the whole reading is less for the engine to keep track of than two
+  // new ones per sentence, and this is a device that reads for an hour.
+  wordMark?.clear();
   keepVisible(range);
 }
 
