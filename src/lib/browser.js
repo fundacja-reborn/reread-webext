@@ -26,3 +26,17 @@ export function webext() {
   }
   return api;
 }
+
+/**
+ * The offscreen-document API, or null on a browser without one - and that
+ * absence is the real Chromium difference this module exists to hold: on
+ * Firefox the background is an event page that spawns the engine's worker
+ * itself, on Chromium it is a service worker that cannot (the service worker
+ * spec forbids nested workers), so the engine runs in an offscreen document
+ * instead. Callers ask this one question and never which browser they are on.
+ *
+ * @returns {NonNullable<WebExtBrowser["offscreen"]> | null}
+ */
+export function offscreenApi() {
+  return webext().offscreen ?? null;
+}

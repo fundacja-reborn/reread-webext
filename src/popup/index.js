@@ -28,10 +28,14 @@ import { localizePage, t } from "../lib/i18n.js";
 import { pairLabel } from "../lib/language.js";
 import { listModels } from "../lib/models/store.js";
 import { Message, asPageInfo, asResult } from "../lib/protocol.js";
+import { watchToolbarScheme } from "../lib/theme-icon.js";
 import { pairChoices } from "./choices.js";
 
 // First, so the rows are already in the catalogue's language when they show.
 localizePage();
+// The toolbar icon follows the browser's scheme where the manifest cannot
+// say so (Chromium, no theme_icons there) - a no-op on Firefox.
+watchToolbarScheme();
 
 const siteRow = document.getElementById("site-row");
 const siteLabel = document.getElementById("site-label");

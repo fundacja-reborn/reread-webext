@@ -8,11 +8,14 @@
  * megabytes of WebAssembly, loaded once instead of once per tab.
  */
 
-import { webext } from "../lib/browser.js";
+import { offscreenApi, webext } from "../lib/browser.js";
 import { publishPlatform, readConfig } from "../lib/config.js";
 import { ErrorCode, Message, asRequest, fail, ok } from "../lib/protocol.js";
+import { toolbarIconFor } from "../lib/theme-icon.js";
 import { setProvider, translate } from "../lib/translator/index.js";
+import { asSchemeReport } from "../lib/translator/providers/bergamot/host-protocol.js";
 import { bergamot } from "../lib/translator/providers/bergamot/index.js";
+import { bergamotViaHost, raiseEngineHost } from "../lib/translator/providers/bergamot/remote.js";
 import { lookUp } from "./dictionary.js";
 import { readPage } from "./page.js";
 import { openLibrary, openReader, readInReader } from "./reader-tab.js";
@@ -26,8 +29,12 @@ import {
 } from "./vocabulary.js";
 
 // The engine itself starts on the first translation, not here: this module runs
-// every time Firefox wakes the event page, and waking up must stay cheap.
-setProvider(bergamot);
+// every time the background wakes, and waking up must stay cheap. Which shape
+// of the provider answers is the one real browser difference in this file: an
+// event page runs the engine's worker itself, a service worker cannot spawn
+// workers and delegates to the offscreen document instead - and "is there an
+// offscreen API" is the whole test.
+setProvider(offscreenApi() === null ? bergamot : bergamotViaHost);
 
 /**
  * @typedef {null
@@ -104,6 +111,17 @@ async function handle(request, sender) {
 }
 
 webext().runtime.onMessage.addListener((message, sender, sendResponse) => {
+  // The engine host saying which color scheme the browser is in - the one
+  // message on this channel that is not a request and gets no response. It
+  // must be picked off before `asRequest`, whose answer to everything it does
+  // not know is `unknown_message`. Firefox never sends it (its event page
+  // never raises a host) and would ignore it here the same way.
+  const scheme = asSchemeReport(message);
+  if (scheme !== null) {
+    void webext().action.setIcon({ path: toolbarIconFor(scheme.dark) }).catch(() => {});
+    return false;
+  }
+
   const request = asRequest(message);
   if (request === null) {
     sendResponse(fail(ErrorCode.UNKNOWN_MESSAGE));
@@ -138,4 +156,14 @@ webext().runtime.onInstalled.addListener(() => {
     // Storage unreachable: pages fall back to the desktop default, and the
     // next update gets another chance.
   });
+});
+
+// Chromium only: at browser launch the toolbar icon is the manifest default -
+// the light-toolbar mark - because `setIcon` state does not survive a restart
+// and Chrome has no theme-aware manifest icons. Raising the engine host makes
+// it report the color scheme (see the handler above), which is the whole
+// correction; the host then closes itself. Firefox swaps icons natively from
+// `action.theme_icons` and skips all of this.
+webext().runtime.onStartup.addListener(() => {
+  if (offscreenApi() !== null) void raiseEngineHost();
 });

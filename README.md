@@ -35,7 +35,7 @@ The extension uses the network in exactly two cases, both started manually on th
 | UI languages: English, Polish, German, French, Spanish, Ukrainian | ✓ |
 | Import/export: vocabulary as TSV, reading list as JSON | ✓ |
 | Firefox on Android | builds, reader-only by default, not yet tested on a phone |
-| Chromium | builds, untested |
+| Chrome / Chromium (desktop) | ported: service worker background, engine in an offscreen document, raster icons; loads unpacked, not yet smoke-tested |
 
 ## Keyboard shortcuts
 
@@ -81,6 +81,7 @@ Other data stored locally:
 | `storage` | Vocabulary and settings. Browser-local, never synced. |
 | `unlimitedStorage` | Translation models are tens of megabytes and dictionaries can be more; the default quota is not enough. |
 | `<all_urls>` | Saved phrases are underlined on **every** page, so the content script must run everywhere. This is a broad permission: it means the extension can read the pages you visit. It reads them locally to find your saved phrases, and sends nothing. |
+| `offscreen` (Chromium package only) | Chromium runs the extension's background as a service worker, which cannot spawn the Web Worker the translation engine runs in. The one offscreen document hosts that worker; it grants no access to any page or data. Firefox needs no equivalent and its package does not carry this permission. |
 
 There is nothing else — no `tabs`, no `webRequest`, no `cookies`, no `downloads`. The popup learns which site it is on by asking the content script already running there, not through the `tabs` API.
 
@@ -115,6 +116,8 @@ For English–Polish, WikDict is the recommended start: 66 609 entries plus 51 7
 
 Firefox 142 or newer. The floor comes from the CSS Custom Highlight API (used to underline phrases without touching the page's DOM) and the manifest key declaring that the extension collects no data.
 
+Chrome or Chromium 128 or newer. The floor comes from `document.caretPositionFromPoint`, which touch and underline hit-testing stand on.
+
 ### Firefox on Android
 
 The same package works on Android, same version floor. The popup opens from the ⋮ menu, under **Extensions**.
@@ -126,8 +129,9 @@ On a phone the extension starts in **reader-only mode**: ordinary pages are left
 ```bash
 npm install          # once
 npm run build        # dist/firefox
+npm run build:chromium   # dist/chromium
 npm start            # build, then launch Firefox with the extension loaded
-tools/check.sh       # quality gate: vendor checksums, typecheck, tests, build, addons-linter
+tools/check.sh       # quality gate: vendor checksums, typecheck, tests, both builds, addons-linter
 npm run sign         # gate, then AMO signing (needs credentials, see below)
 
 node tools/models-registry.mjs --all   # rewrite the model registry (network; downloads gigabytes, --pairs=en-pl,pl-en narrows it)
@@ -147,6 +151,12 @@ Installing:
 
 Installing a newer build over an older one keeps the vocabulary — the extension id, and with it the database, stays the same.
 
+### Loading in Chrome / Chromium
+
+Chrome loads the build directly, no signing involved: **chrome://extensions** → enable **Developer mode** → **Load unpacked** → pick `dist/chromium`. The load survives restarts, but Chrome shows a "developer mode extensions" notice on startup; publishing outside developer mode would be a Web Store matter, which this project has not taken up.
+
+Run `npm run build:chromium` immediately before loading or reloading. `dist/` is a build product: the quality gate deletes and rebuilds it on every run, so a reload that races a build - or trails an interrupted one - loads a package with files missing, and the errors (`ERR_FILE_NOT_FOUND` in the console of extension pages) point at the load, not at the code. When in doubt: build, then press reload on **chrome://extensions**.
+
 Signing needs an [AMO API key](https://addons.mozilla.org/developers/addon/api/key/):
 
 ```bash
@@ -165,6 +175,7 @@ src/
   content/       what runs on every page: selection, bubble, highlighting
   reader/        the extension's own reader mode
   options/       settings
+  offscreen/     Chromium only: the page hosting the engine's worker
   lib/
     translator/  engine facade and its providers
     models/      translation models: registry, download, verification, storage

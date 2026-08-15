@@ -14,9 +14,12 @@ import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import * as esbuild from "esbuild";
+import { TARGETS, TARGET_STATIC_FILES, forTarget } from "./manifest-target.mjs";
 
 const ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 const SRC = join(ROOT, "src");
+
+/** @typedef {import("./manifest-target.mjs").Target} Target */
 
 /** Entry points, relative to `src/`. Each becomes one bundled file in `dist/`. */
 const ENTRY_POINTS = [
@@ -28,6 +31,13 @@ const ENTRY_POINTS = [
   "reader/reader.js",
   "vocab/vocab.js",
 ];
+
+/**
+ * Chromium-only entry points. The offscreen page exists because a service
+ * worker cannot spawn the engine's worker; Firefox's event page can, so its
+ * package has no reason to carry a file nothing in it ever opens.
+ */
+const CHROMIUM_ENTRY_POINTS = ["offscreen/engine-host.js"];
 
 /**
  * Copied through untouched, relative to `src/`. The highlight stylesheet is
@@ -44,7 +54,7 @@ const STATIC_FILES = [
   "vocab/vocab.html",
   "vocab/vocab.css",
   "content/highlight.css",
-  "assets",
+  "assets/page.css",
   "_locales",
 ];
 
@@ -68,34 +78,6 @@ const VENDOR_FILES = [
   "vendor/readability/README.md",
 ];
 
-const TARGETS = /** @type {const} */ (["firefox", "chromium"]);
-
-/** @typedef {(typeof TARGETS)[number]} Target */
-
-/**
- * The manifest is written for Firefox, because Firefox is what the MVP targets.
- * Chromium differs in exactly three places, and all are worth seeing side by
- * side rather than hidden in a second copy of the file that would drift.
- *
- * @param {Record<string, unknown>} manifest
- * @param {Target} target
- * @returns {Record<string, unknown>}
- */
-function forTarget(manifest, target) {
-  if (target === "firefox") return manifest;
-
-  const patched = { ...manifest };
-  // Gecko-only: extension id, minimum version, data collection disclosure.
-  delete patched["browser_specific_settings"];
-  // Firefox MV3 runs an event page; Chromium runs a service worker.
-  patched["background"] = { service_worker: "background/index.js" };
-  // Gecko-only: theme-aware toolbar icon variants. Chromium flags the key.
-  const action = { .../** @type {Record<string, unknown>} */ (patched["action"]) };
-  delete action["theme_icons"];
-  patched["action"] = action;
-  return patched;
-}
-
 /**
  * @param {Target} target
  * @param {boolean} watch
@@ -105,15 +87,20 @@ async function build(target, watch) {
   await rm(out, { recursive: true, force: true });
   await mkdir(out, { recursive: true });
 
+  const entryPoints = [
+    ...ENTRY_POINTS,
+    ...(target === "chromium" ? CHROMIUM_ENTRY_POINTS : []),
+  ];
+
   /** @type {esbuild.BuildOptions} */
   const options = {
-    entryPoints: ENTRY_POINTS.map((entry) => join(SRC, entry)),
+    entryPoints: entryPoints.map((entry) => join(SRC, entry)),
     outdir: out,
     outbase: SRC,
     bundle: true,
     format: "iife",
     platform: "browser",
-    target: target === "firefox" ? ["firefox140"] : ["chrome120"],
+    target: target === "firefox" ? ["firefox140"] : ["chrome128"],
     // Readable output is a requirement, not a preference: an extension asking
     // for `<all_urls>` should be one anybody can read before trusting it.
     minify: false,
@@ -124,7 +111,7 @@ async function build(target, watch) {
   };
 
   const copyStatic = async () => {
-    for (const file of STATIC_FILES) {
+    for (const file of [...STATIC_FILES, ...TARGET_STATIC_FILES[target]]) {
       await cp(join(SRC, file), join(out, file), { recursive: true });
     }
     for (const file of VENDOR_FILES) {
@@ -148,13 +135,6 @@ async function build(target, watch) {
 
   await esbuild.build(options);
   await copyStatic();
-
-  if (target === "chromium") {
-    // Chromium has never accepted SVG for extension icons. Rasterizing them is
-    // part of the Chromium port, not of a build that would otherwise pretend to
-    // have produced something loadable.
-    console.warn("[build] chromium: icons are SVG and Chromium ignores them - see M5 in the docs");
-  }
   console.log(`[build] ${target} -> dist/${target}`);
 }
 

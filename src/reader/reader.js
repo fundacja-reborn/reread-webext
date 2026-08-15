@@ -57,6 +57,7 @@ import {
   setReadAt,
 } from "../lib/store/articles.js";
 import { Segment, emptySentence, savedArticle } from "../lib/store/saved-article.js";
+import { watchToolbarScheme } from "../lib/theme-icon.js";
 import { canSpeak, primaryLanguage, voicesFor } from "../lib/tts.js";
 import { libraryView } from "./list-view.js";
 import {
@@ -77,6 +78,9 @@ const Readability = /** @type {ReadabilityConstructor} */ (
 // First, so that everything after it - notices, rows, titles - lands on a page
 // already speaking the catalogue's language.
 localizePage();
+// The toolbar icon follows the browser's scheme where the manifest cannot
+// say so (Chromium, no theme_icons there) - a no-op on Firefox.
+watchToolbarScheme();
 
 const notice = document.getElementById("notice");
 const article = document.getElementById("article");

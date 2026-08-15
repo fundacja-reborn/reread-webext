@@ -49,6 +49,7 @@ import { deleteModel, listModels, putModel } from "../lib/models/store.js";
 import { modelSourceUrl, updateAvailable } from "../lib/models/upstream.js";
 import { testLoadModel } from "../lib/models/validate.js";
 import { Message } from "../lib/protocol.js";
+import { watchToolbarScheme } from "../lib/theme-icon.js";
 import { canSpeak, speak, voicesFor } from "../lib/tts.js";
 import {
   dictionaryRows,
@@ -74,6 +75,9 @@ let running = null;
 // First, so every row and status below lands on a page already speaking the
 // catalogue's language.
 localizePage();
+// The toolbar icon follows the browser's scheme where the manifest cannot
+// say so (Chromium, no theme_icons there) - a no-op on Firefox.
+watchToolbarScheme();
 
 /** @type {import("../lib/config.js").Config} */
 let config = withDefaults(undefined);
