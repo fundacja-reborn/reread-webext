@@ -1,15 +1,15 @@
 /**
- * Selecting by touch on the reader page, without the browser's selection
- * (D80, reshaped by D81).
+ * Selecting on the reader page, without the browser's selection (D80,
+ * reshaped by D81, joined by the mouse in D86).
  *
  * On a touch screen the native selection comes wrapped in system chrome - a
  * floating bar over the phrase, drag handles under it - that a page can
  * neither move nor dismiss, and its gestures end in no event a page can hear
  * (D73). Readlang's answer is not to create a native selection at all, and
- * this module is that answer for the reader: while the pointer is a finger or
- * a pen, the article refuses the native selection (`user-select: none`, via
- * an attribute the stylesheet reads), and selecting is one gesture with a
- * beginning the reader asks for and an end the page can hear. A finger held
+ * this module is that answer for the reader: the article refuses the native
+ * selection outright (`user-select: none` in the stylesheet), and selecting
+ * is one gesture with a beginning the reader asks for and an end the page
+ * can hear. A finger held
  * still on a word takes it whole; dragging on, finger still down, stretches
  * the selection word by word; the finger lifting is the one moment the
  * bubble, the translation and the keeping happen - never mid-gesture.
@@ -34,6 +34,26 @@
  * underlined phrases and empty space, keeps becoming the compatibility mouse
  * events the old paths already listen to.
  *
+ * The mouse lives in the same world (D86): the article refuses the native
+ * selection for every pointer, and a mouse gesture selects the same runs of
+ * whole words a finger does. A press that travels is a drag and selects from
+ * the word it pressed on - no hold needed, because a mouse drag is not a
+ * scroll and not anything else; a press that stays put for the hold's 400 ms
+ * takes its word too, so the hand that learned the gesture on glass finds it
+ * at the desk. The release is the gesture's end the way the finger lifting
+ * is. Clicks speak the tap's grammar - the neighbour grows the phrase, the
+ * selection knocks - and a double click still takes a word, the way it does
+ * everywhere. What the desk pays is the native selection itself: article
+ * text cannot be dragged over and copied any more, the price D80 already
+ * named on touch. The release is handed in by `reading.js` (`releaseMouse`)
+ * rather than listened for here: the mouse-up already has an owner there,
+ * deciding between a selection, an underline and a dismissal, and two
+ * listeners would each answer half. A finger's compatibility mouse events
+ * are kept out by time - they arrive on the heels of a touch, and a mouse
+ * event that close to one is a translation, not a hand on a mouse - which is
+ * also what lets a pen with no touch screen under it (a desk tablet) speak
+ * for the mouse here.
+ *
  * Only ever started by the reader page, which is our own page: on somebody
  * else's page the native selection is part of not touching what is being
  * read, and stays.
@@ -48,7 +68,7 @@
 import { locate } from "../lib/matcher/spans.js";
 import { tokenize } from "../lib/matcher/tokenize.js";
 import { besideSpan, nearestWordIndex, wordIndexAt } from "../lib/matcher/words.js";
-import { touchPointer } from "../lib/selection.js";
+import { madeSelection } from "../lib/selection.js";
 import { supported } from "./highlighter.js";
 import { blockPieces } from "./scan.js";
 
@@ -59,7 +79,8 @@ const NAME = "reread-selection";
  * How long a finger has to hold still before the hold becomes a selection.
  * Android's own long-press timing, so the gesture lands exactly when a hand
  * trained by the platform expects it to - and a shade before the browser's
- * own long-press machinery, so ours speaks first.
+ * own long-press machinery, so ours speaks first. The mouse waits the same
+ * time (D86): one number the hand already knows, on glass and at the desk.
  */
 const HOLD_MS = 400;
 
@@ -77,6 +98,23 @@ const TAP_SLOP = 10;
  * thinner than a fingertip; without the margin, both would demand pixel aim.
  */
 const GRAB_SLOP = 8;
+
+/**
+ * The mouse's margin: next to none. A pointer that lands between two lines
+ * or a breath away from the phrase is dismissing, not aiming - given the
+ * finger's slop, those clicks would read as knocks on the selection instead.
+ */
+const MOUSE_SLOP = 2;
+
+/**
+ * How long after a touch a mouse event still belongs to it. A tap the touch
+ * side leaves unclaimed becomes compatibility mouse events on its heels, and
+ * they must not walk the mouse grammar too - a double tap is not a double
+ * click. A real hand on a real mouse is never this close behind a touch, and
+ * a pen with no touch screen under it (a desk tablet) speaks only mouse
+ * events, so this one gate is also what lets it in.
+ */
+const COMPAT_MS = 500;
 
 /**
  * How long after the page last scrolled a touch still belongs to the scroll.
@@ -143,6 +181,27 @@ let highlight = null;
  */
 let gesture = null;
 
+/**
+ * The one mouse press being followed, the touch gesture's shape without the
+ * ambiguity (D86): `hold` is a press that may yet be a click, waiting on the
+ * same timer the finger waits on; `select` has taken a word and is
+ * stretching. There is no scroll to tell a drag from, so travel alone claims
+ * the gesture - and no `preventDefault` either, because the article's
+ * stylesheet already refuses the native selection for everybody.
+ *
+ * @type {{ x: number, y: number, fromX: number, fromY: number, timer: number, mode: "hold" | "select" } | null}
+ */
+let mouse = null;
+
+/**
+ * When a touch last spoke, `performance.now()` time - stamped on every touch
+ * start and end, so the compatibility mouse events a tap turns into are
+ * always inside `COMPAT_MS` of it, however long the finger rested first.
+ * Never, rather than zero: zero is the page loading, and a mouse pressing in
+ * the first half second of it is no less a mouse.
+ */
+let touchedAt = -Infinity;
+
 /** When the page last scrolled, `performance.now()` time. See `SCROLL_TAIL_MS`. */
 let scrolledAt = 0;
 
@@ -159,21 +218,18 @@ function touchById(touches, id) {
 }
 
 /**
- * Whether a point lies in one of a range's boxes, a finger's margin included.
+ * Whether a point lies in one of a range's boxes, the pointer's margin
+ * included - a finger's or a mouse's, whichever asked.
  *
  * @param {Range} target
  * @param {number} x
  * @param {number} y
+ * @param {number} slop
  * @returns {boolean}
  */
-function withinRects(target, x, y) {
+function withinRects(target, x, y, slop) {
   for (const rect of target.getClientRects()) {
-    if (
-      x >= rect.left - GRAB_SLOP &&
-      x <= rect.right + GRAB_SLOP &&
-      y >= rect.top - GRAB_SLOP &&
-      y <= rect.bottom + GRAB_SLOP
-    ) {
+    if (x >= rect.left - slop && x <= rect.right + slop && y >= rect.top - slop && y <= rect.bottom + slop) {
       return true;
     }
   }
@@ -286,29 +342,18 @@ export function clearSelection() {
 }
 
 /**
- * The stylesheet's switch (D80): while the pointer is a finger or a pen the
- * article refuses the native selection, and the moment a mouse presses, it is
- * given back - a hybrid loses nothing. Reading the pointer type off the press
- * is the one way to know which world the next gesture belongs to.
- *
- * @param {PointerEvent} event
- */
-function onPointerDown(event) {
-  hooks?.root.toggleAttribute("data-touch-select", touchPointer(event.pointerType));
-}
-
-/**
  * The word under a point, in the geometry of its own block - the shared first
- * step of the hold and of the extending tap. Only a point that actually
- * touches the word's boxes answers: the caret snaps to the nearest text from
- * anywhere, and a touch in the empty end of a paragraph's last line must not
- * read as its last word.
+ * step of every gesture that starts or grows a selection. Only a point that
+ * actually touches the word's boxes answers: the caret snaps to the nearest
+ * text from anywhere, and a press in the empty end of a paragraph's last line
+ * must not read as its last word.
  *
  * @param {number} x
  * @param {number} y
+ * @param {number} slop the asking pointer's margin
  * @returns {{ geo: Geometry, index: number } | null}
  */
-function wordAt(x, y) {
+function wordAt(x, y, slop) {
   if (hooks === null) return null;
   const caret = caretAt(x, y);
   if (caret === null) return null;
@@ -323,7 +368,7 @@ function wordAt(x, y) {
   if (index === -1) return null;
 
   const word = rangeOfSpan(geo, index, index);
-  if (word === null || !withinRects(word, x, y)) return null;
+  if (word === null || !withinRects(word, x, y, slop)) return null;
   return { geo, index };
 }
 
@@ -346,7 +391,7 @@ function hold() {
   const target = active.target;
   if (target instanceof Element && target.closest("a[href]") !== null) return;
 
-  const word = wordAt(active.x, active.y);
+  const word = wordAt(active.x, active.y, GRAB_SLOP);
   if (word === null) return;
 
   // Whatever bubble is open is about to be about something else (D75's
@@ -365,6 +410,7 @@ function hold() {
  * @param {TouchEvent} event
  */
 function onTouchStart(event) {
+  touchedAt = performance.now();
   if (hooks === null) return;
 
   if (gesture !== null) {
@@ -463,6 +509,7 @@ function extendTo(x, y) {
  * @param {TouchEvent} event
  */
 function onTouchEnd(event) {
+  touchedAt = performance.now();
   const active = gesture;
   if (active === null || hooks === null) return;
   const touch = touchById(event.changedTouches, active.id);
@@ -491,6 +538,7 @@ function onTouchEnd(event) {
  * @param {TouchEvent} event
  */
 function onTouchCancel(event) {
+  touchedAt = performance.now();
   const active = gesture;
   if (active === null) return;
   if (touchById(event.changedTouches, active.id) === null) return;
@@ -501,58 +549,260 @@ function onTouchCancel(event) {
 }
 
 /**
- * A tap, meaningful only next to a standing selection: on the word right
- * beside it, the phrase grows by that word; on the selection itself, a knock
- * on a bubble that may have closed. Both claim the event, so the tap does not
- * also become the mouse events that would read it as a dismissal.
+ * The one grammar a tap and a click share (D81, D86), meaningful only next to
+ * a standing selection: on the word right beside it, the phrase grows by that
+ * word; on the selection itself, a knock on a bubble that may have closed.
+ * True means the gesture was answered here, and the caller keeps it from
+ * meaning anything else - the touch side by `preventDefault`, the mouse side
+ * by claiming the release before `reading.js` reads it as a dismissal.
  *
- * Every other tap - and every tap while nothing is selected - returns without
- * `preventDefault` and goes on to become those compatibility events: links
- * keep navigating, underlined phrases keep recalling, empty space keeps
- * dismissing. Selecting itself is no longer a tap's job (D81) - that is what
- * the hold is for.
+ * Everything else - and everything while nothing is selected - stays free:
+ * links keep navigating, underlined phrases keep recalling, empty space keeps
+ * dismissing. Selecting itself is not this grammar's job (D81) - that is what
+ * the hold and the drag are for.
+ *
+ * @param {EventTarget | null} target what the press landed on
+ * @param {number} x
+ * @param {number} y
+ * @param {number} slop the asking pointer's margin
+ * @returns {boolean} whether the gesture was answered
+ */
+function answerTap(target, x, y, slop) {
+  const geo = geometry;
+  const at = span;
+  if (hooks === null || geo === null || at === null || range === null) return false;
+
+  if (target instanceof Element && target.closest("a[href]") !== null) return false;
+
+  const word = wordAt(x, y, slop);
+  // Not on a word, but on the selection's own boxes - between two selected
+  // words, or in the margin around them: the knock.
+  if (word === null) {
+    if (!withinRects(range, x, y, slop)) return false;
+    hooks.onSelected(range, "again");
+    return true;
+  }
+
+  // A word of another block can never join this phrase (D45) - the press
+  // keeps meaning what a press anywhere means.
+  if (word.geo.block !== geo.block) return false;
+
+  const beside = besideSpan(at, word.index);
+  if (beside === "apart") return false;
+
+  if (beside === "within") {
+    hooks.onSelected(range, "again");
+    return true;
+  }
+
+  const from = beside === "left" ? at.from - 1 : at.from;
+  const to = beside === "right" ? at.to + 1 : at.to;
+  if (!select(geo, from, to, at.anchor) || range === null) return false;
+  hooks.onSelected(range, "extend");
+  return true;
+}
+
+/**
+ * A tap walking the shared grammar. Claiming means `preventDefault`, so an
+ * answered tap does not also become the compatibility mouse events that would
+ * read it as a dismissal.
  *
  * @param {TouchEvent} event
  * @param {number} x
  * @param {number} y
  */
 function tap(event, x, y) {
-  const geo = geometry;
-  const at = span;
-  if (hooks === null || geo === null || at === null || range === null) return;
+  if (answerTap(event.target, x, y, GRAB_SLOP)) event.preventDefault();
+}
+
+/**
+ * Whether this mouse event came from a hand on a mouse. The compatibility
+ * events a touch turns into arrive within a beat of it; anything later is the
+ * desk's own - a mouse, or a pen with no touch screen to speak through.
+ *
+ * @returns {boolean}
+ */
+function realMouse() {
+  return performance.now() - touchedAt > COMPAT_MS;
+}
+
+/** The mouse gesture and its timer, gone - a click after all, or a lost press. */
+function cancelMouse() {
+  if (mouse !== null) window.clearTimeout(mouse.timer);
+  mouse = null;
+}
+
+/**
+ * A press ending where no release will say so - the pointer left the window,
+ * the window lost focus mid-drag. Answered like a lifted finger: a selection
+ * stretched so far gets its bubble, a press that was still nothing becomes
+ * nothing.
+ */
+function endMouse() {
+  const active = mouse;
+  cancelMouse();
+  if (active !== null && active.mode === "select" && range !== null) {
+    hooks?.onSelected(range, "press");
+  }
+}
+
+/**
+ * A mouse press on the article arms the same two futures a touch has: the
+ * hold's timer toward a word, and travel toward a drag. Nothing is claimed
+ * yet - a press that stays put and lifts in time is a click, and clicks
+ * belong to everything else this page does.
+ *
+ * A press on a link stays the link's, clicks and drags alike, for the reason
+ * the hold steps around one: a reader whose links stop working is a broken
+ * article. macOS's control-click is a context menu, not a press.
+ *
+ * @param {MouseEvent} event
+ */
+function onMouseDown(event) {
+  if (hooks === null) return;
+  // Another button mid-gesture changes nothing, the way a second finger
+  // does not: only the first button's presses are this module's to follow.
+  if (event.button !== 0 || event.ctrlKey || !realMouse()) return;
+  // Whatever was armed before this press lost its release somewhere - a
+  // fresh press of the same button is the one sure sign of that.
+  cancelMouse();
+  if (hooks.owns(event.target)) return;
 
   const target = event.target;
+  if (!(target instanceof Node) || !hooks.root.contains(target)) return;
   if (target instanceof Element && target.closest("a[href]") !== null) return;
 
-  const word = wordAt(x, y);
-  // Not on a word, but on the selection's own boxes - between two selected
-  // words, or in the slop around them: the knock.
-  if (word === null) {
-    if (withinRects(range, x, y)) {
-      event.preventDefault();
-      hooks.onSelected(range, "again");
+  mouse = {
+    x: event.clientX,
+    y: event.clientY,
+    fromX: event.clientX,
+    fromY: event.clientY,
+    timer: window.setTimeout(mouseHold, HOLD_MS),
+    mode: "hold",
+  };
+}
+
+/**
+ * The mouse's hold coming due: the button is still down and has not
+ * travelled, so this is the touch hold at the desk - the word under the
+ * pointer, taken whole. A press on no word stays armed and quietly remains a
+ * click in waiting.
+ */
+function mouseHold() {
+  const active = mouse;
+  if (active === null || active.mode !== "hold" || hooks === null) return;
+
+  const word = wordAt(active.x, active.y, MOUSE_SLOP);
+  if (word === null) return;
+
+  hooks.onSelectStart();
+  if (!select(word.geo, word.index, word.index, word.index)) return;
+  active.mode = "select";
+}
+
+/**
+ * The mouse moving: drift under a waiting hold, the claim of a drag, or the
+ * stretch of a claimed one. Travel needs no timer here - a mouse drag is not
+ * a scroll and not anything else, so the moment the press has moved like a
+ * drag (`madeSelection`, the same four pixels the release would measure), the
+ * word it pressed on is taken and the stretch begins. A drag from no word -
+ * empty margin, an image - selects nothing, and the press is done meaning
+ * things.
+ *
+ * @param {MouseEvent} event
+ */
+function onMouseMove(event) {
+  const active = mouse;
+  if (active === null || hooks === null) return;
+
+  // The button is no longer down: the release happened where this page could
+  // not hear it (outside the window, over the browser's own chrome).
+  if ((event.buttons & 1) === 0) {
+    endMouse();
+    return;
+  }
+
+  if (active.mode === "hold") {
+    const from = { x: active.fromX, y: active.fromY };
+    const to = { x: event.clientX, y: event.clientY };
+    if (!madeSelection({ from, to, clicks: 1 })) {
+      // Drift inside the slop keeps the hold and follows the pointer, so the
+      // word the hold takes is the word actually under it when it comes due.
+      active.x = event.clientX;
+      active.y = event.clientY;
+      return;
     }
-    return;
+    const word = wordAt(from.x, from.y, MOUSE_SLOP);
+    if (word === null) {
+      cancelMouse();
+      return;
+    }
+    hooks.onSelectStart();
+    if (!select(word.geo, word.index, word.index, word.index)) {
+      cancelMouse();
+      return;
+    }
+    active.mode = "select";
   }
 
-  // A word of another block can never join this phrase (D45) - the tap keeps
-  // meaning what a tap anywhere means.
-  if (word.geo.block !== geo.block) return;
+  extendTo(event.clientX, event.clientY);
+}
 
-  const beside = besideSpan(at, word.index);
-  if (beside === "apart") return;
+/**
+ * The mouse release, handed in by `reading.js` rather than listened for here:
+ * the release already has an owner there, deciding between a selection, an
+ * underline and a dismissal, and two listeners would each answer half. True
+ * claims it - the gesture or the click was this module's, and the caller's
+ * own reading must not also run.
+ *
+ * A drag or a hold ending is the gesture's end, the moment everything is for
+ * (the touch side's `touchend`). A plain click walks the tap's grammar, with
+ * the mouse's own aim - and a double click still takes a word, the way it
+ * does everywhere; only where the grammar has spoken first does the second
+ * click of a pair mean the grammar instead (a double click beside the phrase
+ * must grow it once and knock, not shrink it to one word).
+ *
+ * @param {MouseEvent} event
+ * @returns {boolean} whether the release was this module's
+ */
+export function releaseMouse(event) {
+  if (hooks === null || event.button !== 0) return false;
 
-  event.preventDefault();
-  if (beside === "within") {
-    hooks.onSelected(range, "again");
-    return;
+  const active = mouse;
+  cancelMouse();
+  // Only a press this module armed can mean anything here: one that began on
+  // the article, first button, no link, no bubble - `onMouseDown` is the
+  // gate, and a release without its press is somebody else's click.
+  if (active === null) return false;
+
+  if (active.mode === "select") {
+    if (range !== null) hooks.onSelected(range, "press");
+    return true;
   }
 
-  const from = beside === "left" ? at.from - 1 : at.from;
-  const to = beside === "right" ? at.to + 1 : at.to;
-  if (select(geo, from, to, at.anchor) && range !== null) {
-    hooks.onSelected(range, "extend");
+  // A click, then - the press never travelled and the hold never took.
+  if (answerTap(event.target, event.clientX, event.clientY, MOUSE_SLOP)) return true;
+
+  if (event.detail >= 2) {
+    const target = event.target;
+    if (target instanceof Element && target.closest("a[href]") !== null) return false;
+    const word = wordAt(event.clientX, event.clientY, MOUSE_SLOP);
+    if (word === null) return false;
+    hooks.onSelectStart();
+    if (!select(word.geo, word.index, word.index, word.index) || range === null) return false;
+    hooks.onSelected(range, "press");
+    return true;
   }
+
+  return false;
+}
+
+/**
+ * The window losing focus mid-press: the release will land in another window,
+ * so the gesture is answered now, the way a system take-back is on touch.
+ */
+function onWindowBlur() {
+  endMouse();
 }
 
 /**
@@ -564,11 +814,15 @@ function tap(event, x, y) {
  * an armed hold ends the hold on the spot: the page moving under a waiting
  * finger means this touch is a scroll, whatever its own coordinates said.
  * A claimed selection is deliberately not ended here - its own moves are
- * `preventDefault`-ed, so a scroll arriving then is not this gesture's.
+ * `preventDefault`-ed, so a scroll arriving then is not this gesture's. The
+ * mouse's armed hold ends here too: a wheel turning under a pressed button
+ * moves the text under the pointer, and the word the hold would take is no
+ * longer the word that was pressed.
  */
 function onScroll() {
   scrolledAt = performance.now();
   if (gesture?.mode === "hold") cancelGesture();
+  if (mouse?.mode === "hold") cancelMouse();
 }
 
 /**
@@ -593,32 +847,38 @@ export function startSelect(options) {
   hooks = options;
   // The touch listeners are not passive on purpose: claiming the gesture is
   // `preventDefault`, and a passive listener has none to call. Everything
-  // else remains one hit-test per event.
-  document.addEventListener("pointerdown", onPointerDown, { capture: true, passive: true });
+  // else remains one hit-test per event - and the mouse pair less than that
+  // at rest, one null check per move while no press is being followed.
   document.addEventListener("touchstart", onTouchStart, { capture: true, passive: false });
   document.addEventListener("touchmove", onTouchMove, { capture: true, passive: false });
   document.addEventListener("touchend", onTouchEnd, { capture: true, passive: false });
   document.addEventListener("touchcancel", onTouchCancel, { capture: true, passive: true });
+  document.addEventListener("mousedown", onMouseDown, { capture: true, passive: true });
+  document.addEventListener("mousemove", onMouseMove, { capture: true, passive: true });
+  window.addEventListener("blur", onWindowBlur);
   document.addEventListener("contextmenu", onContextMenu, { capture: true });
   // Capture sees the document's own scrolling; the bubble's inner scrolling
   // stays behind a shadow boundary scroll events do not cross.
   document.addEventListener("scroll", onScroll, { capture: true, passive: true });
 }
 
-/** Everything taken back: listeners, attribute, selection, paint. */
+/** Everything taken back: listeners, selection, paint. */
 export function stopSelect() {
   if (!started) return;
   started = false;
-  document.removeEventListener("pointerdown", onPointerDown, { capture: true });
   document.removeEventListener("touchstart", onTouchStart, { capture: true });
   document.removeEventListener("touchmove", onTouchMove, { capture: true });
   document.removeEventListener("touchend", onTouchEnd, { capture: true });
   document.removeEventListener("touchcancel", onTouchCancel, { capture: true });
+  document.removeEventListener("mousedown", onMouseDown, { capture: true });
+  document.removeEventListener("mousemove", onMouseMove, { capture: true });
+  window.removeEventListener("blur", onWindowBlur);
   document.removeEventListener("contextmenu", onContextMenu, { capture: true });
   document.removeEventListener("scroll", onScroll, { capture: true });
-  hooks?.root.removeAttribute("data-touch-select");
   hooks = null;
   scrolledAt = 0;
+  touchedAt = -Infinity;
   cancelGesture();
+  cancelMouse();
   clearSelection();
 }
