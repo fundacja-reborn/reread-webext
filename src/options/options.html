@@ -115,6 +115,25 @@
           sent anywhere. With no choice made, the browser picks a voice for the language itself.
         </p>
       </div>
+      <!-- How fast that voice reads (D87), for the phrase in the bubble and for
+           a whole article in the reader alike - one setting, because what is
+           slow is the language being learned, not the surface it is read on.
+           The reader's own panel has the same two buttons over it. -->
+      <div class="row">
+        <span class="row-name" data-i18n="options_tts_rate">Reading speed</span>
+        <p class="inline stepper">
+          <button type="button" id="tts-rate-down" title="Slower" data-i18n-title="reader_slower">
+            &minus;
+          </button>
+          <output id="tts-rate-value">1.0&times;</output>
+          <button type="button" id="tts-rate-up" title="Faster" data-i18n-title="reader_faster">+</button>
+        </p>
+        <p class="row-note" data-i18n="options_tts_rate_hint">
+          A multiple of the voice's own normal speed. Slower is the setting worth trying first in
+          a language you are still learning: half speed is where the endings of words stop
+          disappearing.
+        </p>
+      </div>
       <!-- The whole first line is the label, so a press anywhere on it flips
            the switch; the note keeps its own, unclickable line below - a
            paragraph is too easy to brush against on a phone. -->

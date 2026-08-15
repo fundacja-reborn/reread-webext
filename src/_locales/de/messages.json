@@ -151,7 +151,7 @@
 
   "reader_title": { "message": "re/read - Leseansicht" },
   "reader_open_original": { "message": "Original öffnen" },
-  "reader_display_title": { "message": "Schrift und Farbschema" },
+  "reader_display_title": { "message": "Text und Stimme" },
   "reader_theme": { "message": "Farbschema" },
   "reader_theme_auto": { "message": "Auto" },
   "reader_theme_light": { "message": "Hell" },
@@ -166,6 +166,18 @@
   "reader_width": { "message": "Breite" },
   "reader_narrower": { "message": "Schmaler" },
   "reader_wider": { "message": "Breiter" },
+  "reader_listen": { "message": "Vorlesen" },
+  "reader_voice": { "message": "Stimme" },
+  "reader_speed": { "message": "Tempo" },
+  "reader_slower": { "message": "Langsamer" },
+  "reader_faster": { "message": "Schneller" },
+  "reader_speech_bar": { "message": "Vorlesen" },
+  "reader_speech_back": { "message": "Zurück" },
+  "reader_speech_play": { "message": "Fortsetzen" },
+  "reader_speech_pause": { "message": "Pause" },
+  "reader_speech_stop": { "message": "Stopp" },
+  "reader_speech_forward": { "message": "Vor" },
+  "reader_speech_failed": { "message": "Dieses Gerät konnte den Artikel nicht vorlesen." },
   "reader_segment_unread": { "message": "Zu lesen" },
   "reader_segment_read": { "message": "Gelesen" },
   "reader_segment_unread_count": {
@@ -432,6 +444,10 @@
   "options_tts_listen": { "message": "Anhören" },
   "options_tts_voice_hint": {
     "message": "Die Lautsprecher-Schaltfläche in der Sprechblase liest die markierte Wendung laut vor, in der Sprache, die gerade gelesen wird - so lässt sich die Aussprache eines Wortes hören. Die Stimmen sind die dieses Geräts und seines Browsers: Die Sprachausgabe entsteht lokal, und die Wendung wird nirgendwohin gesendet. Ohne Auswahl wählt der Browser selbst eine Stimme für die Sprache."
+  },
+  "options_tts_rate": { "message": "Lesegeschwindigkeit" },
+  "options_tts_rate_hint": {
+    "message": "Ein Vielfaches der normalen Geschwindigkeit der Stimme. In einer Sprache, die du gerade lernst, lohnt sich zuerst langsamer: bei halbem Tempo hörst du die Wortendungen wieder."
   },
   "options_models_heading": { "message": "Übersetzungsmodelle" },
   "options_models_intro": {

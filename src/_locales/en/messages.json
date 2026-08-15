@@ -174,7 +174,7 @@
 
   "reader_title": { "message": "re/read - reader" },
   "reader_open_original": { "message": "Open the original" },
-  "reader_display_title": { "message": "Type and theme" },
+  "reader_display_title": { "message": "Text and voice" },
   "reader_theme": { "message": "Theme" },
   "reader_theme_auto": { "message": "Auto" },
   "reader_theme_light": { "message": "Light" },
@@ -189,6 +189,18 @@
   "reader_width": { "message": "Width" },
   "reader_narrower": { "message": "Narrower" },
   "reader_wider": { "message": "Wider" },
+  "reader_listen": { "message": "Read aloud" },
+  "reader_voice": { "message": "Voice" },
+  "reader_speed": { "message": "Speed" },
+  "reader_slower": { "message": "Slower" },
+  "reader_faster": { "message": "Faster" },
+  "reader_speech_bar": { "message": "Reading aloud" },
+  "reader_speech_back": { "message": "Back" },
+  "reader_speech_play": { "message": "Resume" },
+  "reader_speech_pause": { "message": "Pause" },
+  "reader_speech_stop": { "message": "Stop" },
+  "reader_speech_forward": { "message": "Forward" },
+  "reader_speech_failed": { "message": "This device could not read the article aloud." },
   "reader_segment_unread": { "message": "To read" },
   "reader_segment_read": { "message": "Read" },
   "reader_segment_unread_count": {
@@ -474,6 +486,10 @@
   "options_tts_listen": { "message": "Listen" },
   "options_tts_voice_hint": {
     "message": "The speaker button in the translation bubble reads the selected phrase aloud in the language you are reading - the way to hear how a word is pronounced. The voices are this device's and its browser's own: speech is made locally, and the phrase is not sent anywhere. With no choice made, the browser picks a voice for the language itself."
+  },
+  "options_tts_rate": { "message": "Reading speed" },
+  "options_tts_rate_hint": {
+    "message": "A multiple of the voice's own normal speed. Slower is the setting worth trying first in a language you are still learning: half speed is where the endings of words stop disappearing."
   },
   "options_models_heading": { "message": "Translation models" },
   "options_models_intro": {

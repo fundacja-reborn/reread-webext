@@ -46,6 +46,13 @@ export const CONFIG_KEY = "config";
  *   English - and no entry means the engine's own default for the language.
  *   The URIs name this device's voices; a stale one is ignored at speak time
  *   (`lib/tts.js`), never an error.
+ * @property {number} ttsRate How fast a voice reads, in percent of its own
+ *   normal speed (D87). Percent rather than the engine's factor for the reason
+ *   `bubbleScale` is one: it is a stepper's value, and an integer survives
+ *   storage, hand-editing and `within`'s clamp without a rounding story. One
+ *   number for both places a voice speaks - the bubble's phrase and the
+ *   reader's article - because how fast a voice is comfortable is a fact about
+ *   the person, not about the surface.
  * @property {number} bubbleScale How big the bubble's type is, in percent of
  *   its built-in size (D85). The bubble deliberately ignores the page it
  *   stands on, so no page setting can reach it - this is its one knob, and it
@@ -98,6 +105,15 @@ export const MEASURE = Object.freeze({ min: 45, max: 85, step: 5 });
  */
 export const BUBBLE_SCALE = Object.freeze({ min: 80, max: 200, step: 10 });
 
+/**
+ * What the reading-speed stepper can reach, in percent of the voice's normal
+ * speed. The floor is half speed - slow enough to follow a language being
+ * learned word by word, and the point below which most engines start to slur
+ * rather than to slow - and the ceiling is double, where a familiar language
+ * still parses and an unfamiliar one long since stopped.
+ */
+export const TTS_RATE = Object.freeze({ min: 50, max: 200, step: 10 });
+
 /** @type {Readonly<ReaderConfig>} */
 export const READER_DEFAULTS = Object.freeze({
   theme: "auto",
@@ -115,6 +131,7 @@ export const DEFAULTS = Object.freeze({
   readerOnly: null,
   hideBubbleActions: true,
   ttsVoices: {},
+  ttsRate: 100,
   bubbleScale: 100,
 });
 
@@ -228,6 +245,7 @@ export function withDefaults(stored) {
     hideBubbleActions:
       typeof raw["hideBubbleActions"] === "boolean" ? raw["hideBubbleActions"] : DEFAULTS.hideBubbleActions,
     ttsVoices: voiceMap(raw["ttsVoices"]),
+    ttsRate: within(raw["ttsRate"], TTS_RATE, DEFAULTS.ttsRate),
     bubbleScale: within(raw["bubbleScale"], BUBBLE_SCALE, DEFAULTS.bubbleScale),
   };
 }
@@ -250,7 +268,7 @@ export async function readConfig() {
  * the settings page holds the full map and choosing the default voice has to
  * be able to remove an entry - a per-key merge could only ever add.
  *
- * @param {{ sourceLang?: string, targetLang?: string, reader?: Partial<ReaderConfig>, disabledHosts?: string[], readerOnly?: boolean, hideBubbleActions?: boolean, ttsVoices?: Record<string, string>, bubbleScale?: number }} patch
+ * @param {{ sourceLang?: string, targetLang?: string, reader?: Partial<ReaderConfig>, disabledHosts?: string[], readerOnly?: boolean, hideBubbleActions?: boolean, ttsVoices?: Record<string, string>, ttsRate?: number, bubbleScale?: number }} patch
  * @returns {Promise<Config>}
  */
 export async function writeConfig(patch) {

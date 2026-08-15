@@ -207,7 +207,7 @@
 
   "reader_title": { "message": "re/read - widok czytania" },
   "reader_open_original": { "message": "Otwórz oryginał" },
-  "reader_display_title": { "message": "Krój i motyw" },
+  "reader_display_title": { "message": "Tekst i głos" },
   "reader_theme": { "message": "Motyw" },
   "reader_theme_auto": { "message": "Auto" },
   "reader_theme_light": { "message": "Jasny" },
@@ -222,6 +222,18 @@
   "reader_width": { "message": "Szerokość" },
   "reader_narrower": { "message": "Węższa" },
   "reader_wider": { "message": "Szersza" },
+  "reader_listen": { "message": "Czytaj na głos" },
+  "reader_voice": { "message": "Głos" },
+  "reader_speed": { "message": "Tempo" },
+  "reader_slower": { "message": "Wolniej" },
+  "reader_faster": { "message": "Szybciej" },
+  "reader_speech_bar": { "message": "Czytanie na głos" },
+  "reader_speech_back": { "message": "Wstecz" },
+  "reader_speech_play": { "message": "Wznów" },
+  "reader_speech_pause": { "message": "Pauza" },
+  "reader_speech_stop": { "message": "Koniec" },
+  "reader_speech_forward": { "message": "Dalej" },
+  "reader_speech_failed": { "message": "To urządzenie nie przeczytało artykułu na głos." },
   "reader_segment_unread": { "message": "Do przeczytania" },
   "reader_segment_read": { "message": "Przeczytane" },
   "reader_segment_unread_count": {
@@ -562,6 +574,10 @@
   "options_tts_listen": { "message": "Posłuchaj" },
   "options_tts_voice_hint": {
     "message": "Przycisk z głośnikiem w dymku tłumaczenia czyta zaznaczoną frazę na głos w języku, który czytasz - tak można usłyszeć wymowę słowa. Głosy pochodzą z tego urządzenia i jego przeglądarki: mowa powstaje lokalnie, a fraza nie jest nigdzie wysyłana. Bez wyboru przeglądarka sama dobiera głos do języka."
+  },
+  "options_tts_rate": { "message": "Tempo czytania" },
+  "options_tts_rate_hint": {
+    "message": "Wielokrotność normalnego tempa głosu. W języku, którego się uczysz, warto najpierw spróbować wolniej: przy połowie tempa końcówki słów przestają znikać."
   },
   "options_models_heading": { "message": "Modele tłumaczeniowe" },
   "options_models_intro": {

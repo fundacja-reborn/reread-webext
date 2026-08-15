@@ -55,11 +55,16 @@ function wordBefore(text, index) {
 /**
  * Whether the character at `index` ends a sentence.
  *
+ * Exported for the reader's reading aloud (D87), which cuts an article into
+ * utterances at exactly these places: one rule, so a full stop that is not an
+ * ending here is not a pause in the voice either. `Mr. Smith` read as two
+ * utterances would put a breath in the middle of a name.
+ *
  * @param {string} text
  * @param {number} index
  * @returns {boolean}
  */
-function endsSentence(text, index) {
+export function endsSentence(text, index) {
   const character = text[index];
   if (character === undefined) return false;
   if (HARD_STOPS.has(character)) return true;

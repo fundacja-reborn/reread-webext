@@ -129,6 +129,30 @@ summary {
   font-family: Georgia, "Times New Roman", serif;
 }
 
+/* Drawn buttons: the speaker in the bar above, the transport icons below. The
+   size follows the text around them (`em`), so the icon grows with the
+   interface font instead of staying a fixed 16 pixels on a dense screen. */
+.reader-icon {
+  width: 1.15em;
+  height: 1.15em;
+  flex: none;
+}
+
+#listen {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.15rem 0.55rem;
+}
+
+/* The button says "the voice is busy" while it is: pressing it again pauses,
+   and a button that looked identical either way would hide that. The tabs'
+   treatment - accent border and a wash - is the page's word for "this is on". */
+#listen[aria-pressed="true"] {
+  border-color: var(--page-accent);
+  background: color-mix(in srgb, var(--page-accent) 12%, transparent);
+}
+
 .reader-panel {
   padding: 0.6rem 0;
   border-bottom: 1px solid var(--page-line);
@@ -172,6 +196,17 @@ summary {
   text-align: center;
 }
 
+/* A voice is called whatever the platform calls it, and some names are a
+   sentence long. The select gives way instead of pushing the panel wider than
+   the article it stands over. */
+#voice-setting .reader-choices {
+  min-width: 0;
+}
+
+#voice-choice {
+  max-width: 100%;
+}
+
 .reader-byline {
   margin: 0 0 2rem;
   color: var(--page-muted);
@@ -204,6 +239,28 @@ summary {
 ::highlight(reread-selection) {
   background-color: var(--page-fg);
   color: var(--page-bg);
+}
+
+/* Reading aloud, in two marks (D87), named in read-aloud.js.
+
+   The sentence is the quiet one: a wash of the page's own ink, faint enough to
+   read straight through and dark enough to find. It is also the only mark a
+   device that sends no word events ever shows, so it has to stand alone.
+
+   The word is the accent, and deliberately not the inversion above: the
+   inversion means "you selected this", and a block of it jumping word by word
+   is the worst thing that can happen to an e-ink panel. A wash leaves the
+   letters in the page's own colour - so nothing about the text moves or
+   changes weight as the voice passes over it.
+
+   Neither mark may change the metrics: `::highlight()` accepts colours and
+   decoration only, which is the same reason this API is used for underlines. */
+::highlight(reread-speaking) {
+  background-color: color-mix(in srgb, var(--page-fg) 8%, transparent);
+}
+
+::highlight(reread-speaking-word) {
+  background-color: color-mix(in srgb, var(--page-accent) 38%, transparent);
 }
 
 #content h1,
@@ -690,6 +747,65 @@ button[data-armed],
   border-color: var(--page-accent);
   background: color-mix(in srgb, var(--page-accent) 12%, transparent);
   color: var(--page-fg);
+}
+
+/* --- the bar that steers the voice, for as long as there is one --- */
+
+/* Pinned to the bottom of the window: a thumb reaches it on a phone and on an
+   e-reader, and it stays where it was found however far the article scrolls.
+   Its own background, because it stands over text - and the page's, so it is
+   the same paper as the article rather than a panel floating above it. */
+.speech-bar {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.25rem 0.4rem;
+  padding: 0.4rem 0.6rem;
+  border-top: 1px solid var(--page-border);
+  background: var(--page-bg);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 0.85rem;
+}
+
+/* The last lines of the article stay readable while the bar is up: it covers
+   the foot of the window, so the page gives that much back. Two rows' worth,
+   because on a narrow screen the four buttons wrap onto two. `:has` rather
+   than a class set by script, the way the reading list already switches the
+   column width. */
+body.reader:has(#speech-bar:not([hidden])) {
+  padding-bottom: 6rem;
+}
+
+/* These four are the point of the bar, so unlike the article's quiet actions
+   they wear the page's full text colour - but still no resting frame, which
+   would draw four boxes under an article somebody is listening to. */
+.speech-bar button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0.35rem 0.7rem;
+  border-color: transparent;
+  white-space: nowrap;
+}
+
+.speech-bar button:hover,
+.speech-bar button:focus-visible {
+  border-color: var(--page-border);
+  background: color-mix(in srgb, var(--page-fg) 6%, transparent);
+}
+
+/* One button, two states, both written out in the markup: the stylesheet
+   shows the icon that matches what pressing it would do, and the script only
+   ever moves the attribute and the word beside it. */
+.speech-bar[data-state="paused"] .icon-pause,
+.speech-bar:not([data-state="paused"]) .icon-play {
+  display: none;
 }
 
 /* --- one breakpoint: the same HTML, spread out for a desktop --- */
