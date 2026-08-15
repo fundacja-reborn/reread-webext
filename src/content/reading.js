@@ -89,6 +89,18 @@ let unfetched = null;
  */
 let generation = 0;
 
+/**
+ * The range of the phrase the open bubble stands by, cloned at showing so it
+ * keeps meaning that phrase whatever the live selection does afterwards. On
+ * the pages where the bubble is a viewport thing it is how the bubble follows
+ * its phrase through a scroll (D82) - the reader's document-pinned bubble
+ * rides without it. Written by every show, read only while the bubble is
+ * open; a closed bubble makes whatever is left here meaningless.
+ *
+ * @type {Range | null}
+ */
+let anchorRange = null;
+
 /** What the bubble offers for a phrase that is in the vocabulary. */
 /** @type {import("./tooltip.js").Action[]} */
 const KEPT = ["learned", "edit"];
@@ -158,9 +170,10 @@ let follow = true;
 /**
  * Whether bubbles pin to the page rather than to the viewport - the reader's
  * mode (D81): there a bubble is a margin note that rides with the text when
- * the page scrolls, and a scroll therefore stops meaning "close". On somebody
- * else's page the bubble stays a viewport thing, and scrolling away from a
- * phrase still dismisses it.
+ * the page scrolls. On somebody else's page the bubble stays a viewport
+ * thing and follows its phrase through a scroll by hand instead
+ * (`onScroll`, D82) - either way a scroll no longer means "close", and only
+ * a deliberate press elsewhere does.
  */
 let anchored = false;
 let started = false;
@@ -252,10 +265,12 @@ async function loadVocabulary(preloaded) {
  * A range read into everything presenting needs, wherever the range came from:
  * the native selection's first range, or the one the reader's touch selection
  * built (D80). Null when there is nothing to present - no text, or nothing on
- * the screen to anchor a bubble to.
+ * the screen to anchor a bubble to. The range itself rides along, because a
+ * bubble that follows its phrase through a scroll (D82) has to ask where the
+ * phrase is now, and only the range can answer that.
  *
  * @param {Range} range
- * @returns {{ text: string, normalized: string, rect: DOMRect, context: string | null, findable: boolean } | null}
+ * @returns {{ text: string, normalized: string, rect: DOMRect, range: Range, context: string | null, findable: boolean } | null}
  */
 function fromRange(range) {
   // Trimmed before anything is done with it, the engine included. Dragging over
@@ -274,7 +289,7 @@ function fromRange(range) {
   // Asked here, while the range is the one the reader just made: by the time
   // the translation comes back the page may have moved on, and whether a phrase
   // can be found again is a question about the page, not about the answer.
-  return { text, normalized, rect, context: contextOf(range), findable: findable(range, normalized) };
+  return { text, normalized, rect, range, context: contextOf(range), findable: findable(range, normalized) };
 }
 
 /**
@@ -448,8 +463,9 @@ async function forget() {
  * @param {string} text as the page has it
  * @param {string} normalized
  * @param {string | null} context the sentence around the phrase, when the page has one
- * @param {{ touch?: boolean }} [how]
- *   whether the anchor is a native selection made by touch
+ * @param {{ touch?: boolean, range?: Range }} [how]
+ *   whether the anchor is a native selection made by touch, and the range the
+ *   anchor rect was measured from - what following a scroll follows (D82)
  * @returns {boolean} whether it was known
  */
 function showSaved(anchor, text, normalized, context, how = {}) {
@@ -460,6 +476,7 @@ function showSaved(anchor, text, normalized, context, how = {}) {
   // so its meanings may be corrected from anywhere, however it was reached.
   current = { text, normalized, keepable: true };
   generation += 1;
+  anchorRange = how.range === undefined ? null : how.range.cloneRange();
   // The layer itself is empty, and stays empty until it is asked for: the
   // answer comes from the database, without a message and without waking the
   // engine (D27). More is the press that says the sentence and the
@@ -593,7 +610,9 @@ function onMouseUp(event) {
     clearTouchSelection();
     autoKept = null;
     const hit = phraseAt(event.clientX, event.clientY);
-    if (hit !== null && showSaved(hit.rect, hit.text, hit.normalized, contextOf(hit.range))) return;
+    if (hit !== null && showSaved(hit.rect, hit.text, hit.normalized, contextOf(hit.range), { range: hit.range })) {
+      return;
+    }
 
     tooltip.hide();
     current = null;
@@ -632,11 +651,12 @@ function present(selection, { deliberate, touch, chain = false }) {
   if (!chain) autoKept = null;
 
   const { text, normalized } = selection;
-  if (showSaved(selection.rect, text, normalized, selection.context, { touch })) return;
+  if (showSaved(selection.rect, text, normalized, selection.context, { touch, range: selection.range })) return;
 
   current = { text, normalized, keepable: selection.findable };
   secondLayer = [];
   unfetched = null;
+  anchorRange = selection.range.cloneRange();
   const mine = ++generation;
 
   // The other variant: a fresh selection is a phrase nothing has been decided
@@ -831,6 +851,9 @@ function onKeyDown(event) {
 }
 
 /**
+ * A scroll with a bubble open keeps the bubble, on every page (D82): in the
+ * reader by construction, everywhere else by hand.
+ *
  * @param {Event} event
  */
 function onScroll(event) {
@@ -838,13 +861,31 @@ function onScroll(event) {
   // the scroll with its phrase - scrolling there is how the reader gets back
   // to the sentence, not a way of saying "close".
   if (anchored) return;
-  // Not while the edit box is open: a wheel nudge is not a reason to throw
-  // away a translation somebody is in the middle of correcting. And not for
-  // a scroll of the bubble's own second layer, which is a reader working
-  // their way through a long dictionary entry - a scroll event does not
-  // cross a shadow boundary, so this should never fire for one, but the day
-  // it does it must not close the thing being read.
-  if (!tooltip.isEditing() && !tooltip.owns(event.target)) tooltip.hide();
+  // Not for a scroll of the bubble's own second layer, which is a reader
+  // working their way through a long dictionary entry - a scroll event does
+  // not cross a shadow boundary, so this should never fire for one, but the
+  // day it does it must not move or close the thing being read.
+  if (!tooltip.isOpen() || tooltip.owns(event.target)) return;
+
+  // A viewport-pinned bubble follows its phrase by asking the range where
+  // the phrase is now (D82) - which answers for every kind of scrolling at
+  // once, the page's own and any scrolling box inside it, and is why this
+  // does not pin to the document the way the reader does: on somebody
+  // else's page there is no promise the document is even the thing that
+  // scrolls. Riding scroll events means riding a step behind the
+  // compositor's own scrolling; the bubble may trail the phrase for a
+  // moment and lands exactly on it the moment the page rests.
+  const rect = anchorRange === null ? null : anchorRange.getBoundingClientRect();
+  if (rect !== null && rect.width > 0 && rect.height > 0) {
+    tooltip.follow(rect);
+    return;
+  }
+
+  // Nothing left to stand by - the phrase's nodes are gone, or a bubble
+  // opened with no range to follow. Leaving is the old answer, except while
+  // the edit box is open: a wheel nudge is not a reason to throw away a
+  // translation somebody is in the middle of correcting.
+  if (!tooltip.isEditing()) tooltip.hide();
 }
 
 /**
@@ -945,6 +986,7 @@ export function stop() {
   secondLayer = [];
   unfetched = null;
   autoKept = null;
+  anchorRange = null;
   press = null;
   lastPointerType = "";
   anchored = false;

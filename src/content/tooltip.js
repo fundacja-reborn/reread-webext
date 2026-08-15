@@ -504,12 +504,18 @@ const STYLE = `
  * growth re-places against that same frozen frame, because the phrase has
  * not moved in the document and the bubble may not wander from it.
  *
+ * `follow` is the viewport-pinned bubble's half of riding a scroll (D82):
+ * handed the anchor's fresh rect, it re-anchors and moves rigidly by the
+ * offset of the last real placement - the anchored mode needs no such call,
+ * because the document carries it.
+ *
  * @typedef {object} Tooltip
  * @property {(options: { anchor: DOMRect, variant: Variant, body: string, tone?: Tone, actions?: Action[], touch?: boolean, folded?: boolean, anchored?: boolean }) => void} show
  * @property {(body: string, tone?: Tone) => void} setBody
  * @property {(sentence: string | null, tone?: Tone) => void} setContext
  * @property {(blocks: Block[]) => void} setEntries
  * @property {(actions: Action[]) => void} setActions
+ * @property {(rect: DOMRect) => void} follow
  * @property {() => void} reveal
  * @property {() => void} hide
  * @property {() => boolean} isOpen
@@ -643,6 +649,12 @@ export function createTooltip({ onAction }) {
    * @type {{ x: number, y: number } | null}
    */
   let page = null;
+  /**
+   * Where the last placement put the bubble, relative to its anchor - what
+   * `follow` preserves: a bubble riding its phrase through a scroll (D82)
+   * moves rigidly with it, never re-deciding sides or clamping mid-motion.
+   */
+  let placedOffset = { top: 0, left: 0 };
   let editing = false;
   /** Whether the second layer is unfolded. Folded again for every new phrase. */
   let unfolded = false;
@@ -1106,6 +1118,7 @@ export function createTooltip({ onAction }) {
     // coordinates of the document (see `page`), and the scrolling page
     // carries the bubble along by itself.
     const offset = page ?? { x: 0, y: 0 };
+    placedOffset = { top: spot.top - anchor.top, left: spot.left - anchor.left };
     bubble.style.left = `${spot.left + offset.x}px`;
     bubble.dataset["grow"] = spot.grow;
     host.style.setProperty("top", `${spot.top + offset.y}px`, "important");
@@ -1205,6 +1218,18 @@ export function createTooltip({ onAction }) {
       restingActions = actions;
       if (!editing) renderActions(actions);
       place();
+    },
+
+    follow(rect) {
+      if (host === null || bubble === null) return;
+      // The phrase moved (a scroll, D82); the bubble keeps its place beside
+      // it - rigidly, by the offset of the last real placement, so nothing
+      // flips sides or slides along the phrase mid-motion. The anchor is
+      // updated too: whatever grows or re-places the bubble next starts
+      // from where the phrase is, not where it was.
+      anchor = rect;
+      bubble.style.left = `${Math.round(rect.left + placedOffset.left)}px`;
+      host.style.setProperty("top", `${Math.round(rect.top + placedOffset.top)}px`, "important");
     },
 
     reveal,
