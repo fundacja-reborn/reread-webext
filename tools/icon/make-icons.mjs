@@ -15,24 +15,23 @@
 // color scheme (default_icon, add-on manager), the fixed-color pair feeds
 // action.theme_icons, where the active theme - not the OS scheme - decides.
 //
-// Four PNG files for a fourth consumer: Chromium, which has never accepted
+// Eight PNG files for a fourth consumer: Chromium, which has never accepted
 // SVG for extension icons. They are rasterized here rather than by the build,
 // with no image library: the mark is a rounded-rectangle ring and one filled
 // path, both of which a page of geometry can sample - and a generator with no
 // dependencies is one anybody can read next to the files it wrote.
 //
-// The raster is the mark inverted onto a tile: the accent amber fills a
-// rounded square and the page-and-r is drawn in paper white on top. Not the
-// quiet gray line of the SVGs, on purpose twice over. Chrome has no
-// theme-aware manifest icons (`icon_variants` is still a WECG proposal,
-// nothing shipped through Chrome 153), so a toolbar icon must carry its own
-// background to be legible on light and dark chrome alike - and Chrome's
-// toolbar convention is the self-contained brand tile, next to which a thin
-// gray drawing reads as a disabled control (first smoke test said exactly
-// that). The tile is the project's own accent (#b8791d: ~3.6:1 on a white
-// toolbar, ~4:1 on a dark one; the mark on it ~3.5:1), the corner radius is
-// the modern squircle share (~22.5% of the side), and the mark keeps its
-// proportions at 78% of the tile's height.
+// Two raster sets, the same quiet line as the SVGs in the same two token
+// colors: `icon-N.png` in #5b5b66 for light toolbars - also the manifest
+// default - and `icon-light-N.png` in #fbfbfe for dark ones ("light" names
+// the glyph, matching icon-light.svg). Chrome has no theme-aware manifest
+// icons (`icon_variants` is still a WECG proposal, nothing shipped through
+// Chrome 153), so the extension swaps the toolbar icon itself with
+// `action.setIcon` (`src/lib/theme-icon.js`). A single mid-gray was tried
+// first and read wrong both ways - washed out next to the light toolbar's
+// icons, sunk on the dark one - and a solid brand tile read legibly but not
+// like re/read; the swap keeps the mark the mark on both. What setIcon
+// cannot reach - chrome://extensions - shows the manifest default.
 //
 // Usage: node tools/icon/make-icons.mjs
 
@@ -127,21 +126,20 @@ const adaptive = svg(
 
 // ---------------------------------------------------------------------------
 // Rasterization. Everything below samples the same two shapes the SVG draws,
-// in the mark's own coordinates - a point is inked when it lies inside the
-// rounded-rectangle ring or inside the glyph - plus one more the raster adds:
-// the tile behind them. Pixels average a grid of such samples, which is all
-// the anti-aliasing a mark this simple needs.
+// in the mark's own coordinates: a point is inked when it lies inside the
+// rounded-rectangle ring or inside the glyph. Pixels average a grid of such
+// samples, which is all the anti-aliasing a mark this simple needs.
 
-/** The tile and the mark on it - see the header for how they were picked. */
-const TILE_COLOR = { r: 0xb8, g: 0x79, b: 0x1d };
-const MARK_COLOR = { r: 0xfb, g: 0xfb, b: 0xfe };
-
-/** Corner radius and the mark's height, as shares of the tile's side. */
-const TILE_RADIUS = 0.225;
-const MARK_HEIGHT = 0.78;
-
-/** Raster sizes: manifest `icons` (16/32/48/128), `action.default_icon` (16/32). */
-const PNG_SIZES = [16, 32, 48, 128];
+/**
+ * The two raster sets - the same tokens the SVGs use, see the header. The
+ * default set carries every size the manifest names (`icons` up to 128); the
+ * dark-toolbar set only the two `action.setIcon` can put on a toolbar - a
+ * size nothing would ever load has no place in a package anyone may audit.
+ */
+const PNG_SETS = /** @type {const} */ ([
+  { suffix: "", color: { r: 0x5b, g: 0x5b, b: 0x66 }, sizes: [16, 32, 48, 128] },
+  { suffix: "light-", color: { r: 0xfb, g: 0xfb, b: 0xfe }, sizes: [16, 32] },
+]);
 
 /** Samples per pixel edge; 8x8 per pixel keeps the 16px icon's curves clean. */
 const SAMPLES = 8;
@@ -255,55 +253,32 @@ function inked(px, py) {
 }
 
 /**
- * The tile, tested in pixel space: a rounded square filling the whole raster.
- *
- * @param {number} x
- * @param {number} y
- * @param {number} size
- * @returns {boolean}
- */
-function insideTile(x, y, size) {
-  const half = size / 2;
-  const r = TILE_RADIUS * size;
-  const qx = Math.abs(x - half) - (half - r);
-  const qy = Math.abs(y - half) - (half - r);
-  return Math.min(Math.max(qx, qy), 0) + Math.hypot(Math.max(qx, 0), Math.max(qy, 0)) - r <= 0;
-}
-
-/**
- * Coverage-sampled RGBA pixels for one size. Each sample is one of three
- * things - outside the tile, tile, or mark - and a pixel is the average of
- * what its samples saw, which blends the edges exactly as far as they are
- * actually crossed.
+ * Coverage-sampled RGBA pixels for one size, mapped the way the SVG maps the
+ * mark onto its grid: fit the artboard height, center horizontally.
  *
  * @param {number} size
+ * @param {{ r: number, g: number, b: number }} color
  * @returns {Uint8Array}
  */
-function rasterize(size) {
-  const scale = (size * MARK_HEIGHT) / CANVAS.h;
+function rasterize(size, color) {
+  const scale = size / CANVAS.h;
   const dx = size / 2 - (CANVAS.w / 2) * scale;
-  const dy = size / 2 - (CANVAS.h / 2) * scale;
   const pixels = new Uint8Array(size * size * 4);
   for (let row = 0; row < size; row += 1) {
     for (let col = 0; col < size; col += 1) {
-      let tile = 0;
-      let mark = 0;
+      let hits = 0;
       for (let sy = 0; sy < SAMPLES; sy += 1) {
         for (let sx = 0; sx < SAMPLES; sx += 1) {
-          const x = col + (sx + 0.5) / SAMPLES;
-          const y = row + (sy + 0.5) / SAMPLES;
-          if (!insideTile(x, y, size)) continue;
-          if (inked((x - dx) / scale, (y - dy) / scale)) mark += 1;
-          else tile += 1;
+          const px = (col + (sx + 0.5) / SAMPLES - dx) / scale;
+          const py = (row + (sy + 0.5) / SAMPLES) / scale;
+          if (inked(px, py)) hits += 1;
         }
       }
-      const covered = tile + mark;
       const at = (row * size + col) * 4;
-      if (covered === 0) continue;
-      pixels[at] = Math.round((tile * TILE_COLOR.r + mark * MARK_COLOR.r) / covered);
-      pixels[at + 1] = Math.round((tile * TILE_COLOR.g + mark * MARK_COLOR.g) / covered);
-      pixels[at + 2] = Math.round((tile * TILE_COLOR.b + mark * MARK_COLOR.b) / covered);
-      pixels[at + 3] = Math.round((covered / (SAMPLES * SAMPLES)) * 255);
+      pixels[at] = color.r;
+      pixels[at + 1] = color.g;
+      pixels[at + 2] = color.b;
+      pixels[at + 3] = Math.round((hits / (SAMPLES * SAMPLES)) * 255);
     }
   }
   return pixels;
@@ -370,8 +345,11 @@ const OUT = new URL("../../src/assets/icons/", import.meta.url);
 await writeFile(new URL("icon.svg", OUT), adaptive);
 await writeFile(new URL("icon-dark.svg", OUT), svg("#5b5b66", ""));
 await writeFile(new URL("icon-light.svg", OUT), svg("#fbfbfe", ""));
-for (const size of PNG_SIZES) {
-  await writeFile(new URL(`icon-${size}.png`, OUT), png(size, rasterize(size)));
+for (const { suffix, color, sizes } of PNG_SETS) {
+  for (const size of sizes) {
+    await writeFile(new URL(`icon-${suffix}${size}.png`, OUT), png(size, rasterize(size, color)));
+  }
 }
-console.log(`wrote icon.svg, icon-dark.svg, icon-light.svg, ${PNG_SIZES.map((s) => `icon-${s}.png`).join(", ")}`);
+const pngNames = PNG_SETS.flatMap(({ suffix, sizes }) => sizes.map((s) => `icon-${suffix}${s}.png`));
+console.log(`wrote icon.svg, icon-dark.svg, icon-light.svg, ${pngNames.join(", ")}`);
 console.log(`scale ${round(S)}, line ${strokeWidth}px, outer ${round(outer.w * S)}x${round(outer.h * S)}`);

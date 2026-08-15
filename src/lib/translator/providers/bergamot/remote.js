@@ -57,6 +57,19 @@ function ensureHost() {
 }
 
 /**
+ * The host, raised for its side effects: standing up, it reports the color
+ * scheme the toolbar icon should match (see `theme-icon.js`), and after five
+ * idle minutes it takes itself down again. The background calls this on
+ * browser startup - the one moment the icon is guaranteed stale and no page
+ * is open to correct it.
+ *
+ * @returns {Promise<void>}
+ */
+export function raiseEngineHost() {
+  return ensureHost().catch(() => {});
+}
+
+/**
  * One send, with "nobody answered" folded into `undefined`: a missing host
  * rejects when no other extension page is open and resolves with nothing when
  * one is, and the caller has to treat both as the same silence.

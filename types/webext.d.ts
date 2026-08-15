@@ -38,6 +38,10 @@ interface WebExtBrowser {
       ) => boolean | undefined
     >;
     onInstalled: WebExtEvent<(details: { reason: string }) => void>;
+    // The browser launching with this profile - the one moment the toolbar
+    // icon is guaranteed stale on Chromium (setIcon state does not survive a
+    // restart) and nothing else is awake to correct it.
+    onStartup: WebExtEvent<() => void>;
     // Opening the settings from the bubble. Needs no permission: it is this
     // extension's own page.
     openOptionsPage(): Promise<void>;
@@ -104,6 +108,13 @@ interface WebExtBrowser {
     // pressed over: the same tab `action.onClicked` handed over when the button
     // opened the reader directly, before it opened the popup.
     onCommand: WebExtEvent<(command: string, tab?: WebExtTab) => void>;
+  };
+  action: {
+    // How the Chromium package matches the toolbar icon to the browser's
+    // color scheme (`src/lib/theme-icon.js`) - Chrome has no theme-aware
+    // manifest icons. Firefox has the API too, but its `theme_icons` makes
+    // calling it unnecessary, and the gating in theme-icon.js never does.
+    setIcon(details: { path: Record<number | string, string> }): Promise<void>;
   };
   // Chromium only, under the `offscreen` permission its manifest carries, and
   // absent on Firefox - which is exactly how the background picks an engine

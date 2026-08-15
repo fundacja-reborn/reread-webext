@@ -7,18 +7,26 @@ import { inflateSync } from "node:zlib";
  * The committed rasters, read back the way a browser will read them. The
  * generator (`tools/icon/make-icons.mjs`) is dependency-free on purpose, which
  * also means nothing ever proof-read its output - so this suite is the second
- * reader: headers say what the manifest promises, and the pixels hold an
- * actual mark rather than a blank or a filled square.
+ * reader: headers say what the manifest promises, and the pixels hold the
+ * line mark in the set's own token color rather than a blank or a slab.
+ *
+ * Two sets because Chrome has no theme-aware manifest icons: the default one
+ * (dark glyph, light toolbars, every size the manifest names) and the
+ * `light-` one (paper glyph, dark toolbars, only the two sizes
+ * `action.setIcon` can put on a toolbar - see `src/lib/theme-icon.js`).
  */
 
-const SIZES = [16, 32, 48, 128];
+const SETS = [
+  { suffix: "", color: [0x5b, 0x5b, 0x66], sizes: [16, 32, 48, 128] },
+  { suffix: "light-", color: [0xfb, 0xfb, 0xfe], sizes: [16, 32] },
+];
 
 /**
- * @param {number} size
+ * @param {string} name
  * @returns {Promise<Buffer>}
  */
-async function bytes(size) {
-  return readFile(new URL(`../src/assets/icons/icon-${size}.png`, import.meta.url));
+async function bytes(name) {
+  return readFile(new URL(`../src/assets/icons/${name}`, import.meta.url));
 }
 
 /**
@@ -69,50 +77,53 @@ function pixels(png, size) {
   return out;
 }
 
-describe("the rasterized icons", () => {
-  for (const size of SIZES) {
-    it(`icon-${size}.png is an 8-bit RGBA square of its name`, async () => {
-      const png = await bytes(size);
-      assert.deepEqual(header(png), { width: size, height: size, bitDepth: 8, colorType: 6 });
-    });
+for (const { suffix, color, sizes } of SETS) {
+  describe(`the ${suffix === "" ? "light-toolbar" : "dark-toolbar"} raster set`, () => {
+    for (const size of sizes) {
+      const name = `icon-${suffix}${size}.png`;
 
-    it(`icon-${size}.png holds the tile, its corners cut, the mark on it`, async () => {
-      const rgba = pixels(await bytes(size), size);
+      it(`${name} is an 8-bit RGBA square of its name`, async () => {
+        const png = await bytes(name);
+        assert.deepEqual(header(png), { width: size, height: size, bitDepth: 8, colorType: 6 });
+      });
 
-      let ink = 0;
-      for (let at = 3; at < rgba.length; at += 4) {
-        ink += /** @type {number} */ (rgba[at]);
-      }
-      // The icon is a rounded tile filling the raster, so mean coverage sits
-      // just under full - the corner radius is all that is missing (~4% at a
-      // 22.5% radius). A blank file has none of it; a full square means the
-      // radius stopped being applied. The band is wide on purpose - this
-      // guards decoding, not taste.
-      const share = ink / (255 * size * size);
-      assert.ok(share > 0.7, `mean coverage ${(share * 100).toFixed(1)}% - blank?`);
-      assert.ok(share < 0.98, `mean coverage ${(share * 100).toFixed(1)}% - a square, not a tile?`);
+      it(`${name} holds the mark in the set's one color`, async () => {
+        const rgba = pixels(await bytes(name), size);
 
-      // The rounding is what keeps the corner pixels clear.
-      for (const [x, y] of /** @type {Array<[number, number]>} */ ([
-        [0, 0],
-        [size - 1, 0],
-        [0, size - 1],
-        [size - 1, size - 1],
-      ])) {
-        assert.equal(rgba[(y * size + x) * 4 + 3], 0, `corner ${x},${y} is inked`);
-      }
+        let ink = 0;
+        for (let at = 0; at < rgba.length; at += 4) {
+          const alpha = /** @type {number} */ (rgba[at + 3]);
+          ink += alpha;
+          if (alpha > 0) {
+            // One color per set, whatever the coverage: a wrong channel here
+            // means a swapped set or a generator that started blending.
+            assert.deepEqual(
+              [rgba[at], rgba[at + 1], rgba[at + 2]],
+              color,
+              `an inked pixel at byte ${at} is not the set's color`,
+            );
+          }
+        }
 
-      // A point in the tile's left margin at mid-height - inside the rounded
-      // square everywhere, left of the mark (which spans the middle ~71% of
-      // the width): solid, and solid in the accent amber. The channel order
-      // alone catches a swapped or grayscale fill.
-      const tile = ((size >> 1) * size + Math.round(size * 0.08)) * 4;
-      assert.equal(rgba[tile + 3], 255, "tile interior is not opaque");
-      assert.deepEqual(
-        [rgba[tile], rgba[tile + 1], rgba[tile + 2]],
-        [0xb8, 0x79, 0x1d],
-        "tile interior is not the accent amber",
-      );
-    });
-  }
-});
+        // Mean coverage, not a count of touched pixels: anti-aliasing brushes
+        // most of a 16px grid with a little alpha, while the mass of ink the
+        // mark lays down is the same share of the square at every size
+        // (~22%). A blank file has none of it, a flood has nearly all. The
+        // wide band is on purpose - this guards decoding, not taste.
+        const share = ink / (255 * size * size);
+        assert.ok(share > 0.08, `mean coverage ${(share * 100).toFixed(1)}% - blank?`);
+        assert.ok(share < 0.45, `mean coverage ${(share * 100).toFixed(1)}% - flooded?`);
+
+        // The drawing is centered with margins: all four corners stay clear.
+        for (const [x, y] of /** @type {Array<[number, number]>} */ ([
+          [0, 0],
+          [size - 1, 0],
+          [0, size - 1],
+          [size - 1, size - 1],
+        ])) {
+          assert.equal(rgba[(y * size + x) * 4 + 3], 0, `corner ${x},${y} is inked`);
+        }
+      });
+    }
+  });
+}

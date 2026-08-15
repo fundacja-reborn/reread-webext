@@ -84,10 +84,13 @@ describe("the manifest Chromium gets", () => {
     const named = [
       ...Object.values(patched["icons"]),
       ...Object.values(patched["action"]["default_icon"]),
-      // Not in the manifest - created by the background at runtime - but as
-      // load-bearing for Chromium as anything the manifest names.
+      // Not in the manifest - reached at runtime - but as load-bearing for
+      // Chromium as anything the manifest names: the page the background
+      // creates, and the dark-toolbar icons `action.setIcon` swaps in.
       "offscreen/engine-host.html",
       "offscreen/engine-host.js",
+      "assets/icons/icon-light-16.png",
+      "assets/icons/icon-light-32.png",
     ];
     for (const path of named) {
       await assert.doesNotReject(

@@ -14,7 +14,7 @@
 
 import { webext } from "../lib/browser.js";
 import { ErrorCode, fail } from "../lib/protocol.js";
-import { asEngineCall } from "../lib/translator/providers/bergamot/host-protocol.js";
+import { asEngineCall, schemeReport } from "../lib/translator/providers/bergamot/host-protocol.js";
 import { bergamot } from "../lib/translator/providers/bergamot/index.js";
 
 /**
@@ -59,3 +59,16 @@ webext().runtime.onMessage.addListener((message, _sender, sendResponse) => {
 });
 
 armIdleClose();
+
+// The host's second, incidental job: it is the one page guaranteed to stand
+// whenever the background works, and a page can ask what a service worker
+// cannot - which color scheme the browser is in. Reported on start (this is
+// how the toolbar icon is right moments after the browser launches, see
+// `runtime.onStartup` in the background) and again if the scheme flips while
+// the engine is warm. Nobody answering is fine: the report is a courtesy.
+const media = matchMedia("(prefers-color-scheme: dark)");
+const reportScheme = () => {
+  void webext().runtime.sendMessage(schemeReport(media.matches)).catch(() => {});
+};
+reportScheme();
+media.addEventListener("change", reportScheme);

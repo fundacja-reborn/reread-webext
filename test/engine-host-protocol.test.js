@@ -3,7 +3,9 @@ import { describe, it } from "node:test";
 import { asPageRequest, asRequest } from "../src/lib/protocol.js";
 import {
   asEngineCall,
+  asSchemeReport,
   engineCall,
+  schemeReport,
 } from "../src/lib/translator/providers/bergamot/host-protocol.js";
 
 describe("the background-to-engine-host channel", () => {
@@ -39,13 +41,41 @@ describe("the background-to-engine-host channel", () => {
     }
   });
 
+  it("round-trips a scheme report, in either polarity", () => {
+    assert.deepEqual(asSchemeReport(schemeReport(true)), { dark: true });
+    assert.deepEqual(asSchemeReport(schemeReport(false)), { dark: false });
+  });
+
+  it("keeps the two directions apart", () => {
+    // One `host` discriminator, two payloads: a call is never a report and a
+    // report is never a call, or the host would translate its own scheme
+    // message and the background would set the icon from a job.
+    assert.equal(asEngineCall(schemeReport(true)), null);
+    assert.equal(asSchemeReport(engineCall({ text: "a", from: "es", to: "en" })), null);
+  });
+
+  it("refuses a report that does not say which scheme", () => {
+    for (const wrong of [
+      { host: "bergamot-host", scheme: {} },
+      { host: "bergamot-host", scheme: { dark: "yes" } },
+      { host: "bergamot-host", scheme: null },
+      { host: "somebody-else", scheme: { dark: true } },
+    ]) {
+      assert.equal(asSchemeReport(wrong), null);
+    }
+  });
+
   it("is invisible to every other listener's narrowing", () => {
     // The load-bearing invariant of the channel: `runtime.sendMessage` reaches
     // every open extension page, and the reader and content scripts answer
     // whatever their narrowing accepts. An engine call slipping through either
     // one would race the host for `sendResponse`.
-    const call = engineCall({ text: "una frase", from: "es", to: "en" });
-    assert.equal(asRequest(call), null);
-    assert.equal(asPageRequest(call), null);
+    for (const message of [
+      engineCall({ text: "una frase", from: "es", to: "en" }),
+      schemeReport(true),
+    ]) {
+      assert.equal(asRequest(message), null);
+      assert.equal(asPageRequest(message), null);
+    }
   });
 });

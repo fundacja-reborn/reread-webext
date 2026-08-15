@@ -29,10 +29,14 @@ import { ErrorCode, Message, asResult, fail } from "../lib/protocol.js";
 import { MIRROR_KEY } from "../lib/store/mirror.js";
 import { exportFilename, fromTsv, pairFromFilename, toTsv } from "../lib/store/tsv.js";
 import { listPairs, listPhrases } from "../lib/store/vocab.js";
+import { watchToolbarScheme } from "../lib/theme-icon.js";
 import { listView, markSegments, newestFirst, pairChoicesFor } from "./list-view.js";
 
 // First, so the static text is already the catalogue's language when it shows.
 localizePage();
+// The toolbar icon follows the browser's scheme where the manifest cannot
+// say so (Chromium, no theme_icons there) - a no-op on Firefox.
+watchToolbarScheme();
 
 /** @typedef {import("../lib/store/phrase.js").Phrase} Phrase */
 

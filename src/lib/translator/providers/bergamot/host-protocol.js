@@ -49,3 +49,34 @@ export function asEngineCall(message) {
   // `asRequest` drops it: it is an extra the answer does not depend on.
   return typeof context === "string" ? { text, from, to, context } : { text, from, to };
 }
+
+/**
+ * The channel's other direction, and the only thing that travels it: the host
+ * telling the background which color scheme the browser is in, because the
+ * host can ask `matchMedia` and a service worker cannot - and the background
+ * is the one that can reach `action.setIcon` while no page is open. Sent
+ * whenever the host stands up and again when the scheme flips under it.
+ *
+ * @typedef {{ host: typeof ENGINE_HOST, scheme: { dark: boolean } }} SchemeReport
+ */
+
+/**
+ * @param {boolean} dark
+ * @returns {SchemeReport}
+ */
+export function schemeReport(dark) {
+  return { host: ENGINE_HOST, scheme: { dark } };
+}
+
+/**
+ * @param {unknown} message
+ * @returns {{ dark: boolean } | null}
+ */
+export function asSchemeReport(message) {
+  if (typeof message !== "object" || message === null) return null;
+  const { host, scheme } = /** @type {Record<string, unknown>} */ (message);
+  if (host !== ENGINE_HOST) return null;
+  if (typeof scheme !== "object" || scheme === null) return null;
+  const { dark } = /** @type {Record<string, unknown>} */ (scheme);
+  return typeof dark === "boolean" ? { dark } : null;
+}

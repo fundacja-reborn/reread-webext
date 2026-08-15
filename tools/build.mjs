@@ -78,6 +78,10 @@ const TARGET_STATIC_FILES = {
     "assets/icons/icon-32.png",
     "assets/icons/icon-48.png",
     "assets/icons/icon-128.png",
+    // The dark-toolbar set, reached by `action.setIcon` rather than the
+    // manifest (Chrome has no theme-aware manifest icons) - see theme-icon.js.
+    "assets/icons/icon-light-16.png",
+    "assets/icons/icon-light-32.png",
     "offscreen/engine-host.html",
   ],
 };
