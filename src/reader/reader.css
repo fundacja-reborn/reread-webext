@@ -720,13 +720,15 @@ body.reader:has(#library:not([hidden])) {
 }
 
 /* The line back to the list, dressed as the link it behaves as: bare text
-   with the arrow, muted until asked, no frame - the buttons below carry the
-   acts, this only carries the reader away. */
+   with the arrow, muted until asked, no frame - the buttons beside it carry
+   the acts, this only carries the reader away. A class rather than the
+   button's id, because the line stands twice: over the article and under
+   its last line. */
 .reader-return {
   margin: 0 0 0.25rem;
 }
 
-#to-library {
+.reader-return button {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
@@ -737,7 +739,7 @@ body.reader:has(#library:not([hidden])) {
   color: var(--page-muted);
 }
 
-#to-library:hover {
+.reader-return button:hover {
   color: var(--page-accent);
   text-decoration: underline;
 }
@@ -772,6 +774,16 @@ body.reader:has(#library:not([hidden])) {
   color: var(--page-fg);
 }
 
+/* Under the last line the act wears its frame at rest: up top a bare word
+   sits in a row of controls, but after an article's end it would read as a
+   stray word - least of all like a button on paper screens, which have no
+   hover to reveal one. Before the pressed rule, so a marked article still
+   turns this button into the pill. */
+.reader-actions-end .article-actions button {
+  border-color: var(--page-border);
+  color: var(--page-fg);
+}
+
 /* A held state (saved, marked read) is a pill, not an act: the accent as a
    border and a wash behind the page's own text color - the tabs' treatment,
    readable in all four themes where accent-colored text is not, and the only
@@ -797,6 +809,30 @@ button[data-armed],
   border-color: var(--page-accent);
   background: color-mix(in srgb, var(--page-accent) 12%, transparent);
   color: var(--page-fg);
+}
+
+/* --- the two acts of finishing, under the article's last line --- */
+
+/* The rule overhead mirrors the line under the bar at the top of the page:
+   the article has ended, the interface resumes. The body's own bottom
+   padding is all the room the page end needs. */
+.reader-actions-end {
+  margin: 3rem 0 0;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--page-line);
+}
+
+/* A framed button aligns by its frame, not its label: the negative start
+   margin that pulls the quiet row's padding into the gutter up top would
+   push a drawn border out of the column down here. */
+.reader-actions-end .article-actions {
+  margin-inline-start: 0;
+}
+
+/* The finishing order: the mark first, the way out hanging under it - the
+   mirror of the top, where the way back hangs over the acts. */
+.reader-actions-end .reader-return {
+  margin: 0.5rem 0 0;
 }
 
 /* --- the bar that steers the voice, for as long as there is one --- */

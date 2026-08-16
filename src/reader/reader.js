@@ -138,6 +138,11 @@ const toLibraryButton = document.getElementById("to-library");
 const keepButton = document.getElementById("keep");
 const removeButton = document.getElementById("remove");
 const markReadButton = document.getElementById("mark-read");
+// The same two acts again under the article's last line - a long article ends
+// far from the bar above, and finishing is done where the finishing happens.
+const actionsEnd = document.getElementById("actions-end");
+const toLibraryEndButton = document.getElementById("to-library-end");
+const markReadEndButton = document.getElementById("mark-read-end");
 
 /**
  * What is on screen: a live page's article, a saved one, or the list (null).
@@ -433,6 +438,7 @@ async function showLibrary() {
   updateListen();
   if (article !== null) article.hidden = true;
   if (actions !== null) actions.hidden = true;
+  if (actionsEnd !== null) actionsEnd.hidden = true;
   if (originalLink !== null) originalLink.hidden = true;
   if (library !== null) library.hidden = false;
   document.title = t("reader_title");
@@ -747,16 +753,18 @@ async function runImport() {
 }
 
 /**
- * The action row above the article, drawn from what the database says right
- * now. Whether this address is saved decides everything on it: the save
- * toggle's state on a live article, and whether there is a read mark to
- * offer at all.
+ * The action rows around the article - the bar above it and the pair of
+ * finishing acts under its last line - drawn from what the database says
+ * right now. Whether this address is saved decides everything on them: the
+ * save toggle's state on a live article, and whether there is a read mark
+ * to offer at all. One function dresses both rows, so they cannot disagree.
  */
 async function refreshActions() {
   if (actions === null) return;
   const target = shown;
   if (target === null) {
     actions.hidden = true;
+    if (actionsEnd !== null) actionsEnd.hidden = true;
     return;
   }
 
@@ -764,7 +772,9 @@ async function refreshActions() {
   if (shown !== target) return;
 
   actions.hidden = false;
+  if (actionsEnd !== null) actionsEnd.hidden = false;
   if (toLibraryButton !== null) toLibraryButton.hidden = false;
+  if (toLibraryEndButton !== null) toLibraryEndButton.hidden = false;
 
   if (keepButton !== null) {
     keepButton.hidden = target.origin !== "live";
@@ -782,11 +792,12 @@ async function refreshActions() {
     removeButton.setAttribute("aria-label", t("reader_delete_aria", deleteTitle(removeButton)));
   }
 
-  if (markReadButton !== null) {
-    const read = meta !== null && meta.readAt !== null;
-    markReadButton.hidden = meta === null;
-    markReadButton.textContent = read ? t("reader_marked_read") : t("reader_mark_read");
-    markReadButton.setAttribute("aria-pressed", String(read));
+  const read = meta !== null && meta.readAt !== null;
+  for (const button of [markReadButton, markReadEndButton]) {
+    if (button === null) continue;
+    button.hidden = meta === null;
+    button.textContent = read ? t("reader_marked_read") : t("reader_mark_read");
+    button.setAttribute("aria-pressed", String(read));
   }
 }
 
@@ -1195,10 +1206,13 @@ importCancel?.addEventListener("click", () => {
   transferStatus("");
 });
 
-toLibraryButton?.addEventListener("click", () => {
-  hideNotice();
-  void showLibrary();
-});
+// One way back, two doors: the line above the article and the one under it.
+for (const button of [toLibraryButton, toLibraryEndButton]) {
+  button?.addEventListener("click", () => {
+    hideNotice();
+    void showLibrary();
+  });
+}
 
 // The mark in the bar is the door to the settings - the one line standing over
 // every view of this page. Its own tab (`openOptionsPage`, which raises the
@@ -1210,6 +1224,7 @@ brandButton?.addEventListener("click", () => void webext().runtime.openOptionsPa
 keepButton?.addEventListener("click", () => void onKeepPress());
 removeButton?.addEventListener("click", () => void onRemovePress());
 markReadButton?.addEventListener("click", () => void onMarkReadPress());
+markReadEndButton?.addEventListener("click", () => void onMarkReadPress());
 
 // Reading aloud (D87). The module keeps the place and the voice; this page
 // owns the two things a reader can see - the bar and the button - and hears
