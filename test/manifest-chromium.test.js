@@ -4,6 +4,7 @@ import { describe, it } from "node:test";
 import { TOOLBAR_ICONS } from "../src/lib/theme-icon.js";
 import {
   CHROMIUM_ICONS,
+  CHROMIUM_STYLE_SRC,
   MINIMUM_CHROME_VERSION,
   TARGET_STATIC_FILES,
   forTarget,
@@ -76,13 +77,28 @@ describe("the manifest Chromium gets", () => {
       "version",
       "description",
       "default_locale",
-      "content_security_policy",
       "content_scripts",
       "commands",
       "options_ui",
     ]) {
       assert.deepEqual(patched[key], source[key], `"${key}" drifted between targets`);
     }
+  });
+
+  it("loosens exactly one CSP directive: inline styles (D94)", async () => {
+    const { source, patched } = await manifests();
+    const before = String(source["content_security_policy"]["extension_pages"]);
+    const after = String(patched["content_security_policy"]["extension_pages"]);
+    // The whole difference between the two policies is the one swap - anything
+    // beyond it is a loosening nobody signed up for. The source manifest (and
+    // with it the Firefox package) keeps the strict directive.
+    assert.equal(after, before.replace("style-src 'self'", CHROMIUM_STYLE_SRC));
+    assert.notEqual(after, before);
+    assert.match(before, /style-src 'self';/);
+    // Scripts are the directive security actually hangs on - locked in both
+    // ('wasm-unsafe-eval' is the engine's WASM, not inline execution).
+    assert.match(after, /script-src 'self' 'wasm-unsafe-eval';/);
+    assert.doesNotMatch(after, /script-src[^;]*'unsafe-inline'/);
   });
 
   it("ships every icon the manifest or the toolbar swap can name", async () => {

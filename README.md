@@ -157,6 +157,8 @@ Chrome loads the build directly, no signing involved: **chrome://extensions** â†
 
 Run `npm run build:chromium` immediately before loading or reloading. `dist/` is a build product: the quality gate deletes and rebuilds it on every run, so a reload that races a build - or trails an interrupted one - loads a package with files missing, and the errors (`ERR_FILE_NOT_FOUND` in the console of extension pages) point at the load, not at the code. When in doubt: build, then press reload on **chrome://extensions**.
 
+One directive of the pages' Content-Security-Policy is looser in the Chromium package: `style-src` allows inline styles (`'unsafe-inline'`, patched in by `tools/manifest-target.mjs`). The reader parses other people's pages with `DOMParser`; the parsed document inherits the policy, and Chromium files a violation report for every inline style it meets there - styles that never take effect, since that document is never rendered and the article builder strips `style` attributes before anything reaches a live page. An unpacked extension collects those reports into a red "Errors" button on the extensions page, which reads as a malfunction where nothing is wrong. Scripts stay locked in both packages, and the Firefox package keeps the strict directive - Firefox files no such reports.
+
 Signing needs an [AMO API key](https://addons.mozilla.org/developers/addon/api/key/):
 
 ```bash
