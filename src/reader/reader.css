@@ -147,6 +147,33 @@ body.reader:has(#article:not([hidden])) .reader-chrome {
   z-index: 2;
 }
 
+/* The strip runs edge to edge while everything in it keeps the column
+   (Michał's report, 2026-08-16: a pill sliding under a column-wide bar
+   looked erased mid-air, not tucked under a toolbar). An underlay rather
+   than margins on the chrome itself, so nothing about the chrome's inner
+   layout moves: it stretches to the window's edges behind the bar, and its
+   line lands on the same pixel row as the bar's own border - or an open
+   panel's - so inside the column the two read as one line that continues
+   to the edges. The halves of the calc overshoot by half a scrollbar;
+   the root's overflow clip below eats the excess. */
+body.reader:has(#article:not([hidden])) .reader-chrome::before {
+  content: "";
+  position: absolute;
+  inset: 0 calc(50% - 50vw);
+  z-index: -1;
+  background: var(--page-bg);
+  border-bottom: 1px solid var(--page-line);
+}
+
+/* What lets the underlay overshoot without summoning a horizontal scrollbar.
+   `clip`, not `hidden`: clipping does not make the root a scroll container,
+   so sticky keeps working against the viewport. The page itself never needs
+   sideways room - the column wraps, and anything wider than it (code, and
+   tables below) scrolls inside its own box. */
+html {
+  overflow-x: clip;
+}
+
 /* Centred, not baseline-aligned: two of the three buttons are drawn glyphs
    with no baseline to speak of, and against them the mark hung visibly low
    (reported from a phone). */
@@ -390,6 +417,14 @@ body.reader:has(#article:not([hidden])) .reader-chrome {
   padding: 0.8rem 1rem;
   border: 1px solid var(--page-line);
   border-radius: 6px;
+}
+
+/* Tables scroll inside their own box for the reason code does - and because
+   the page's sideways overflow is clipped for the sticky strip's sake, a
+   table wider than the column would otherwise have no way to be read. */
+#content table {
+  display: block;
+  overflow-x: auto;
 }
 
 #content code,
