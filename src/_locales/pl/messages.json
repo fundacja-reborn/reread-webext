@@ -211,6 +211,7 @@
 
   "reader_title": { "message": "re/read - widok czytania" },
   "reader_open_original": { "message": "Otwórz oryginał" },
+  "reader_back_to_list": { "message": "Wróć do czytelni" },
   "reader_display_title": { "message": "Tekst i głos" },
   "reader_theme": { "message": "Motyw" },
   "reader_theme_auto": { "message": "Auto" },

@@ -211,6 +211,7 @@
 
   "reader_title": { "message": "re/read - режим читання" },
   "reader_open_original": { "message": "Відкрити оригінал" },
+  "reader_back_to_list": { "message": "Назад до списку читання" },
   "reader_display_title": { "message": "Текст і голос" },
   "reader_theme": { "message": "Тема" },
   "reader_theme_auto": { "message": "Авто" },
