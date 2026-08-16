@@ -626,16 +626,21 @@ async function fillSecondLayer() {
 
   const { sentence, entries } = asTranslation(result.value);
   const blocks = entryBlocks(entries ?? [], phrase.normalized);
+
+  // Nothing behind More after all - no sentence to translate (a selected
+  // phrase that is a whole short sentence, common in a book's dialogue),
+  // nothing in the dictionaries. The layer still answers: this build took
+  // the button away instead, and the bubble snapping shut on the press that
+  // opened it read as the UI breaking. The line stays for as long as the
+  // bubble does, and More goes on folding it like any other layer.
+  if ((sentence === null || sentence.length === 0) && blocks.length === 0) {
+    tooltip.setContext(t("bubble_nothing_more"), "note");
+    tooltip.setEntries([]);
+    return;
+  }
+
   tooltip.setContext(sentence);
   tooltip.setEntries(blocks);
-
-  // Nothing behind More after all - no sentence on the page, nothing in the
-  // dictionaries. The button goes, the way it never comes for a fresh
-  // selection with an empty layer.
-  if ((sentence === null || sentence.length === 0) && blocks.length === 0) {
-    secondLayer = [];
-    tooltip.setActions([...KEPT, ...secondLayer]);
-  }
 }
 
 /**

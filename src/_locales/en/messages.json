@@ -49,6 +49,10 @@
   "bubble_less": { "message": "Less" },
   "bubble_reader": { "message": "Read in the reader" },
   "bubble_translating": { "message": "Translating..." },
+  "bubble_nothing_more": {
+    "message": "No sentence and no dictionary entry to show",
+    "description": "The line behind the bubble's More button when the fetch it started comes back empty - shown instead of the layer closing without a word. It stands where a translated sentence normally would, so it must name the missing things (sentence, dictionary) and read unmistakably as the extension talking, never like a line of the book."
+  },
   "bubble_speak": {
     "message": "Read aloud",
     "description": "aria-label and hover title of the speaker icon in the bubble's action row (D83): speaks the selected phrase itself, never the translation."

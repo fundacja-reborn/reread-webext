@@ -42,6 +42,7 @@
   "bubble_less": { "message": "Moins" },
   "bubble_reader": { "message": "Lire dans le lecteur" },
   "bubble_translating": { "message": "Traduction..." },
+  "bubble_nothing_more": { "message": "Pas de phrase ni d'entrée de dictionnaire à afficher" },
   "bubble_speak": { "message": "Lire à voix haute" },
   "bubble_sentence_collapse": { "message": "Réduire la phrase" },
   "bubble_sentence_expand": { "message": "Développer la phrase" },
