@@ -64,6 +64,10 @@ const BAND = Object.freeze({ top: 0.12, bottom: 0.75, land: 0.3 });
  * @property {() => Element | null} article what to read - asked each time,
  *   because the element is the same one from article to article and only its
  *   contents change
+ * @property {() => number} fold how many pixels of the window's top the page's
+ *   stuck chrome covers (D93) - asked at each measurement, because an open
+ *   panel makes it taller. Text above this line is paper under the bar, not
+ *   text anybody can see
  * @property {(state: ReadingState) => void} onChange the bar's whole job
  * @property {() => void} onFail the engine refused, and the reader has to be
  *   told in words - a silent bar disappearing says nothing
@@ -312,11 +316,15 @@ function buildPlan() {
  */
 function firstVisibleChunk() {
   if (plan === null) return 0;
+  // The fold is not the window's edge: the stuck chrome covers the first
+  // pixels of it, and a sentence behind the bar has been read, exactly like
+  // one scrolled past.
+  const fold = hooks?.fold() ?? 0;
   for (let index = 0; index < plan.chunks.length; index += 1) {
     const rect = rectOf(index);
     // A sliver rather than zero: a sentence whose last pixel row is still
     // above the fold is one the reader has read.
-    if (rect !== null && rect.bottom > 4) return index;
+    if (rect !== null && rect.bottom > fold + 4) return index;
   }
   return 0;
 }
@@ -633,9 +641,16 @@ function keepVisible(range) {
   if (rect.width === 0 && rect.height === 0) return;
 
   const height = window.innerHeight;
-  if (rect.top >= height * BAND.top && rect.bottom <= height * BAND.bottom) return;
+  // The band's ceiling clears the stuck chrome on windows short enough for
+  // the bar to reach below it (a phone held sideways) - a line parked behind
+  // the bar would be being read to nobody. The same floor guards the landing.
+  const fold = hooks?.fold() ?? 0;
+  if (rect.top >= Math.max(height * BAND.top, fold) && rect.bottom <= height * BAND.bottom) return;
 
   // Instant, like every other movement in the reader: on e-ink a smooth scroll
   // is a series of full-screen flashes.
-  window.scrollTo({ top: window.scrollY + rect.top - height * BAND.land, behavior: "instant" });
+  window.scrollTo({
+    top: window.scrollY + rect.top - Math.max(height * BAND.land, fold),
+    behavior: "instant",
+  });
 }

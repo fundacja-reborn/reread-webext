@@ -14,6 +14,7 @@
   },
 
   "settings": { "message": "Налаштування" },
+  "nav_menu": { "message": "Меню" },
   "language_pair": { "message": "Мовна пара" },
   "reading_list": { "message": "Офлайн-список читання" },
   "saved_phrases": { "message": "Збережені фрази" },

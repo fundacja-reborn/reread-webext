@@ -41,6 +41,10 @@ watchToolbarScheme();
 /** @typedef {import("../lib/store/phrase.js").Phrase} Phrase */
 
 const brandButton = document.getElementById("brand");
+const menuButton = document.getElementById("menu");
+const menuPanel = document.getElementById("menu-panel");
+const navLibrary = document.getElementById("nav-library");
+const navSettings = document.getElementById("nav-settings");
 const pairSelect = /** @type {HTMLSelectElement | null} */ (document.getElementById("pair"));
 const introLine = document.getElementById("intro");
 const countLine = document.getElementById("count");
@@ -654,6 +658,40 @@ async function runImport() {
 // bar carries: its own tab (`openOptionsPage` raises the settings tab if one is
 // already open), so the list on screen stays where it is.
 brandButton?.addEventListener("click", () => void webext().runtime.openOptionsPage());
+
+// The menu behind the brand line's drawn button - the reader's, minus the row
+// for this page (D93).
+menuButton?.addEventListener("click", () => {
+  if (menuButton === null || menuPanel === null) return;
+  menuPanel.hidden = !menuPanel.hidden;
+  menuButton.setAttribute("aria-expanded", String(!menuPanel.hidden));
+});
+
+// Every row leaves this tab standing, so each one also puts the menu away -
+// coming back must not find the hallway still open.
+function closeMenu() {
+  if (menuButton === null || menuPanel === null) return;
+  menuPanel.hidden = true;
+  menuButton.setAttribute("aria-expanded", "false");
+}
+
+// The reading-list row goes through the background exactly as the popup's
+// does: `openLibrary` points the reader at nothing and raises its one tab
+// (`reader-tab.js`), while this tab stays the saved-phrases page the tab
+// registry says it is. A rejection means the background was mid-restart -
+// the press can be repeated; the popup's rows make the same bargain.
+navLibrary?.addEventListener("click", () => {
+  closeMenu();
+  void webext()
+    .runtime.sendMessage({ kind: Message.OPEN_LIBRARY })
+    .catch(() => undefined);
+});
+
+// The settings row is the mark's press with a word on it.
+navSettings?.addEventListener("click", () => {
+  closeMenu();
+  void webext().runtime.openOptionsPage();
+});
 
 pairSelect?.addEventListener("change", () => {
   if (pairSelect === null) return;

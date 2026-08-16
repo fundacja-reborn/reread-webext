@@ -73,6 +73,46 @@ summary {
   text-decoration: underline;
 }
 
+/* The brand line with the menu's button at its far end - the two ends of the
+   one line this page always shows. The block margins the mark used to carry
+   move up onto the row, so the mark and the button centre on one line and
+   the page keeps its old vertical rhythm. */
+.brand-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: -0.35rem 0 0.25rem;
+}
+
+.brand-row .brand {
+  margin-block: 0;
+}
+
+/* The drawn ☰, kept to this page's touch floor; the icon follows the text
+   around it (`em`) the way the reader's bar icons do. */
+.menu-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0.15rem 0.55rem;
+}
+
+.menu-icon {
+  width: 1.15em;
+  height: 1.15em;
+  flex: none;
+}
+
+/* The menu's rows carry their own lines (page.css); the top edge is this
+   page's to draw, because nothing above the panel does - the brand line is
+   borderless. */
+#menu-panel {
+  border-top: 1px solid var(--page-line);
+}
+
 .head-row {
   display: flex;
   flex-wrap: wrap;

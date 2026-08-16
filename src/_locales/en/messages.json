@@ -18,6 +18,7 @@
   },
 
   "settings": { "message": "Settings" },
+  "nav_menu": { "message": "Menu" },
   "language_pair": { "message": "Language pair" },
   "reading_list": { "message": "Offline reading list" },
   "saved_phrases": { "message": "Saved phrases" },

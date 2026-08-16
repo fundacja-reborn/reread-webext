@@ -91,6 +91,15 @@ const originalLink = document.getElementById("original");
 const brandButton = document.getElementById("brand");
 const displayButton = document.getElementById("display");
 const displayPanel = document.getElementById("display-panel");
+const menuButton = document.getElementById("menu");
+const menuPanel = document.getElementById("menu-panel");
+const navLibrary = document.getElementById("nav-library");
+const navVocabulary = document.getElementById("nav-vocabulary");
+const navSettings = document.getElementById("nav-settings");
+// The box the bar and its panels stand in - measured, not styled, from here:
+// while an article is on screen it is stuck over the text, and the voice needs
+// to know how much of the window's top it covers.
+const chromeBox = document.querySelector(".reader-chrome");
 const sizeValue = document.getElementById("size-value");
 const measureValue = document.getElementById("measure-value");
 const listenButton = /** @type {HTMLButtonElement | null} */ (document.getElementById("listen"));
@@ -319,6 +328,8 @@ function renderArticle(piece) {
     originalLink.rel = "noreferrer noopener";
     originalLink.hidden = false;
   }
+  // With an article on screen the list is elsewhere, so the menu offers it.
+  if (navLibrary !== null) navLibrary.hidden = false;
   document.title = `${piece.title} - re/read`;
 
   shown = { origin: piece.origin, url: piece.url };
@@ -440,6 +451,9 @@ async function showLibrary() {
   if (actions !== null) actions.hidden = true;
   if (actionsEnd !== null) actionsEnd.hidden = true;
   if (originalLink !== null) originalLink.hidden = true;
+  // The menu must not list the room it stands in: on the list view its list
+  // row hides, leaving the pages that really are elsewhere.
+  if (navLibrary !== null) navLibrary.hidden = true;
   if (library !== null) library.hidden = false;
   document.title = t("reader_title");
   scrollTo(0, 0);
@@ -1104,10 +1118,31 @@ function clamp(value, range) {
 
 displayPanel?.addEventListener("click", (event) => void onDisplayPress(event));
 
+/**
+ * The bar's two disclosure buttons and their panels. One panel at a time:
+ * the chrome must never stand two panels tall over an article, so opening
+ * either one puts the other away.
+ *
+ * @param {HTMLElement | null} button
+ * @param {HTMLElement | null} panel
+ * @param {boolean} open
+ */
+function setPanel(button, panel, open) {
+  if (button === null || panel === null) return;
+  panel.hidden = !open;
+  button.setAttribute("aria-expanded", String(open));
+}
+
 displayButton?.addEventListener("click", () => {
-  if (displayPanel === null) return;
-  displayPanel.hidden = !displayPanel.hidden;
-  displayButton.setAttribute("aria-expanded", String(!displayPanel.hidden));
+  const opening = displayPanel?.hidden === true;
+  setPanel(menuButton, menuPanel, false);
+  setPanel(displayButton, displayPanel, opening);
+});
+
+menuButton?.addEventListener("click", () => {
+  const opening = menuPanel?.hidden === true;
+  setPanel(displayButton, displayPanel, false);
+  setPanel(menuButton, menuPanel, opening);
 });
 
 librarySegments?.addEventListener("click", (event) => {
@@ -1221,6 +1256,34 @@ for (const button of [toLibraryButton, toLibraryEndButton]) {
 // page may call it itself.
 brandButton?.addEventListener("click", () => void webext().runtime.openOptionsPage());
 
+// The menu's rows, each putting the menu away when pressed: a hallway is for
+// passing through, and every one of them leaves this tab standing - coming
+// back must not find the hallway still open. The list row turns this page's
+// own view, the same act as the arrows around the article. The phrases row
+// goes through the background exactly as the popup's does (`vocab-tab.js`):
+// the saved phrases are one tab, and a message is what raises it rather than
+// opening a copy - while the article here stays where it was scrolled to.
+// The settings row is the mark's press with a word on it.
+navLibrary?.addEventListener("click", () => {
+  setPanel(menuButton, menuPanel, false);
+  hideNotice();
+  void showLibrary();
+});
+
+navVocabulary?.addEventListener("click", () => {
+  setPanel(menuButton, menuPanel, false);
+  // A rejection means the background was mid-restart. The press can be
+  // repeated; the popup's rows make the same bargain.
+  void webext()
+    .runtime.sendMessage({ kind: Message.OPEN_VOCABULARY })
+    .catch(() => undefined);
+});
+
+navSettings?.addEventListener("click", () => {
+  setPanel(menuButton, menuPanel, false);
+  void webext().runtime.openOptionsPage();
+});
+
 keepButton?.addEventListener("click", () => void onKeepPress());
 removeButton?.addEventListener("click", () => void onRemovePress());
 markReadButton?.addEventListener("click", () => void onMarkReadPress());
@@ -1231,6 +1294,11 @@ markReadEndButton?.addEventListener("click", () => void onMarkReadPress());
 // about every change in one callback.
 configureReading({
   article: () => article,
+  // How far down the window the stuck chrome reaches (D93): a sentence under
+  // it is covered paper, not visible text, and the voice must neither start
+  // on one nor park the spoken line beneath the bar. Measured at each ask,
+  // because an open panel makes the chrome taller for as long as it is open.
+  fold: () => Math.max(0, chromeBox?.getBoundingClientRect().bottom ?? 0),
   onChange: showSpeechBar,
   // The engine refusing is the one thing reading aloud can do that leaves
   // nothing on screen to explain itself, so it is said in the page's own
