@@ -239,17 +239,18 @@
   },
   "reader_how_title": { "message": "So funktioniert es" },
   "reader_library_note": {
-    "message": "Alles hier ist eine Kopie auf diesem Gerät - sie öffnet sich ohne Verbindung und bleibt, auch wenn die Originalseite verschwindet."
+    "message": "Alles hier sind Textkopien: Webartikel, die in der Leseansicht geöffnet und bewusst gespeichert wurden, sowie Artikel und .epub-Dateien, die über „Importieren\" unten hereingeholt wurden. All das öffnet sich ohne Internet und bleibt auf diesem Gerät, auch wenn die ursprüngliche Seite verschwindet."
   },
   "reader_format_title": { "message": "Dateiformat" },
   "reader_transfer_note": {
-    "message": "Eine .json-Datei mit allen gespeicherten Artikeln - als Sicherung oder für den Umzug in einen anderen Browser. Der Import ergänzt nur Artikel, die dieser Liste fehlen; Gespeichertes bleibt unberührt."
+    "message": ".json - eine Sicherungsdatei mit allen in der Offline-Leseliste von re/read gespeicherten Artikeln, aus diesem oder einem anderen Browser oder Gerät, auf dem re/read benutzt wird. Der Import ergänzt nur Artikel, die hier fehlen, und überschreibt nichts bereits Gespeichertes."
   },
+  "reader_transfer_epub": { "message": ".epub - das E-Book-Format." },
   "reader_transfer_books": {
-    "message": "Bücher bleiben außerhalb dieser Datei: die Sicherungskopie eines Buches ist seine .epub-Datei - ein erneuter Import stellt alles außer der Leseposition wieder her."
+    "message": "Der Export umfasst nur Artikel - Bücher (.epub) werden nicht exportiert. Ein erneuter Import eines Buches stellt alles außer der Leseposition wieder her."
   },
   "reader_transfer_link": { "message": "Import und Export (Artikel oder EPUB)" },
-  "reader_transfer_accepts": { "message": "Der Import erkennt die Datei selbst: die .json-Sicherung der Liste oder ein E-Book (.epub)." },
+  "reader_transfer_accepts": { "message": "Der Import erkennt die Datei selbst: eine Sicherung der re/read-Artikelliste (.json) oder ein E-Book (.epub)." },
   "reader_book_label": { "message": "Buch" },
   "reader_book_part_of": {
     "message": "Teil $PART$ von $PARTS$",

@@ -250,17 +250,18 @@
   },
   "reader_how_title": { "message": "Cómo funciona" },
   "reader_library_note": {
-    "message": "Todo lo de aquí es una copia guardada en este dispositivo - se abre sin conexión y permanece aunque la página original desaparezca."
+    "message": "Todo lo de aquí son copias de texto: artículos de la web abiertos en la vista de lectura y guardados a propósito, y los artículos y archivos .epub importados con Importar más abajo. Todo se abre sin conexión y permanece en este dispositivo, aunque la página original desaparezca."
   },
   "reader_format_title": { "message": "Formato del archivo" },
   "reader_transfer_note": {
-    "message": "Un archivo .json con todos los artículos guardados - una copia de seguridad, o la forma de llevarlos a otro navegador. La importación solo añade artículos que faltan en esta lista; lo guardado no se toca."
+    "message": ".json - un archivo de copia de seguridad con todos los artículos guardados en la lista de lectura sin conexión de re/read, de este u otro navegador o dispositivo donde uses re/read. La importación solo añade los artículos que faltan aquí y nunca sobrescribe uno ya guardado."
   },
+  "reader_transfer_epub": { "message": ".epub - el formato de los libros electrónicos." },
   "reader_transfer_books": {
-    "message": "Los libros quedan fuera de este archivo: la copia de seguridad de un libro es su archivo .epub - volver a importarlo restaura todo salvo la posición de lectura."
+    "message": "La exportación incluye solo artículos - los libros (.epub) no se exportan. Volver a importar un libro restaura todo salvo la posición de lectura."
   },
   "reader_transfer_link": { "message": "Importar y exportar (artículos o EPUB)" },
-  "reader_transfer_accepts": { "message": "La importación reconoce el archivo elegido: la copia .json de la lista o un libro electrónico (.epub)." },
+  "reader_transfer_accepts": { "message": "La importación reconoce el archivo elegido: una copia de seguridad de la lista de artículos de re/read (.json) o un libro electrónico (.epub)." },
   "reader_book_label": { "message": "Libro" },
   "reader_book_part_of": {
     "message": "Parte $PART$ de $PARTS$",

@@ -66,7 +66,7 @@
       "edit": { "content": "$2", "example": "Edytuj" }
     }
   },
-  "vocab_how_title": { "message": "Jak to działa" },
+  "vocab_how_title": { "message": "Jak to działa?" },
   "vocab_format_title": { "message": "Format pliku" },
   "vocab_filter_placeholder": { "message": "Filtruj po frazie lub znaczeniu" },
   "vocab_filter_label": { "message": "Filtruj listę zapisanych fraz" },
@@ -293,19 +293,20 @@
       "total": { "content": "$2", "example": "12" }
     }
   },
-  "reader_how_title": { "message": "Jak to działa" },
+  "reader_how_title": { "message": "Jak to działa?" },
   "reader_library_note": {
-    "message": "Wszystko tutaj to kopie zapisane na tym urządzeniu - otwierają się bez internetu i zostają, nawet gdy oryginał zniknie."
+    "message": "Wszystko tutaj to tekstowe kopie artykułów ze stron www, które otworzyłeś w widoku czytania i świadomie zapisałeś w czytelni, oraz artykuły i pliki .epub, które zaimportowałeś opcją Importuj poniżej. Wszystkie te artykuły i e-booki otwierają się bez internetu i zostają na Twoim urządzeniu, nawet gdy oryginalna strona zniknie."
   },
   "reader_format_title": { "message": "Format pliku" },
   "reader_transfer_note": {
-    "message": "Jeden plik .json ze wszystkimi zapisanymi artykułami - kopia zapasowa albo przenosiny do innej przeglądarki. Import dodaje tylko artykuły, których tu brakuje; zapisanych nie zmienia."
+    "message": ".json - plik kopii (backupu) ze wszystkimi zapisanymi artykułami z czytelni offline re/read, z tej lub z innej Twojej przeglądarki czy urządzenia, na którym korzystasz z re/read. Import dodaje tylko artykuły, których tu brakuje, a już istniejących tu artykułów nie nadpisuje."
   },
+  "reader_transfer_epub": { "message": ".epub - format e-booków." },
   "reader_transfer_books": {
-    "message": "Książki nie wchodzą do tego pliku: kopią zapasową książki jest jej plik .epub - ponowny import przywraca wszystko poza pozycją czytania."
+    "message": "Eksport uwzględnia tylko artykuły, nie eksportuje książek (.epub). Ponowny import przywraca wszystko poza pozycją czytania."
   },
   "reader_transfer_link": { "message": "Import i eksport (artykuły lub EPUB)" },
-  "reader_transfer_accepts": { "message": "Import rozpoznaje podany plik: kopię listy (.json) albo e-booka (.epub)." },
+  "reader_transfer_accepts": { "message": "Import rozpoznaje podany plik: kopię listy artykułów z re/read (.json) albo e-booka (.epub)." },
   "reader_book_label": { "message": "Książka" },
   "reader_book_part_of": {
     "message": "Część $PART$ z $PARTS$",

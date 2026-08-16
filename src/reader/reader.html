@@ -284,8 +284,10 @@
           <details class="fold-line">
             <summary data-i18n="reader_how_title">How it works</summary>
             <p class="hint" data-i18n="reader_library_note">
-              Everything here is a copy stored on this device - it opens without a connection and
-              stays even if the original page goes away.
+              Everything here is a text copy: web articles you opened in the reading view and
+              deliberately saved, and the articles and .epub files you imported with Import below.
+              They all open without a connection and stay on your device, even if the original
+              page goes away.
             </p>
           </details>
           <a href="#transfer" data-i18n="reader_transfer_link">Import and export (articles or EPUB)</a>
@@ -329,17 +331,19 @@
             <button type="button" id="library-export" data-i18n="action_export">Export</button>
           </p>
           <p class="hint" data-i18n="reader_transfer_accepts">
-            Import reads the file it is given: the list's .json backup, or an e-book (.epub).
+            Import reads the file it is given: a backup of the re/read article list (.json), or an
+            e-book (.epub).
           </p>
           <details class="fold-line">
             <summary data-i18n="reader_format_title">File format</summary>
             <p class="hint" data-i18n="reader_transfer_note">
-              One .json file holding every saved article - a backup, or the way to move them to
-              another browser. Importing adds articles this list is missing and never touches a
-              saved one.
+              .json - a backup file holding every article saved in the re/read offline reading
+              list, from this browser or any other browser or device where you use re/read. Import
+              only adds the articles missing here and never overwrites one already saved.
             </p>
+            <p class="hint" data-i18n="reader_transfer_epub">.epub - the e-book format.</p>
             <p class="hint" data-i18n="reader_transfer_books">
-              Books stay out of this file: the backup of a book is its .epub - importing it again
+              Export covers articles only - books (.epub) are not exported. Importing a book again
               brings everything back except the reading position.
             </p>
           </details>
