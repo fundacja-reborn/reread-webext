@@ -355,6 +355,21 @@ function readSelection() {
 }
 
 /**
+ * The height of a range's first line - the one part of a long phrase the
+ * bubble's scroll assist promises to keep on the screen when it cannot keep
+ * every line (D97). A range starting mid-line begins with that line's
+ * fragment, whose height is the line's; zero when the range has nothing on
+ * the screen, which the bubble reads as "keep the whole rect".
+ *
+ * @param {Range} range
+ * @returns {number}
+ */
+function firstLineOf(range) {
+  const first = range.getClientRects()[0];
+  return first === undefined ? 0 : first.height;
+}
+
+/**
  * The sentence around a selection, or null when the page does not offer one.
  *
  * Wrapped in a catch because it is an extra: a page that makes this throw -
@@ -559,6 +574,7 @@ function showSaved(anchor, text, normalized, context, how = {}) {
   // rare press on a decision they have already made - it can wait inside.
   tooltip.show({
     anchor,
+    line: how.range === undefined ? 0 : firstLineOf(how.range),
     variant: "recall",
     body: meanings.join("\n"),
     actions: [...KEPT, ...secondLayer],
@@ -757,6 +773,7 @@ function present(selection, { deliberate, touch, chain = false }) {
   // when the answer lands (`reveal`).
   tooltip.show({
     anchor: selection.rect,
+    line: firstLineOf(selection.range),
     variant: "save",
     body: t("bubble_translating"),
     tone: "pending",

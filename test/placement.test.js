@@ -165,3 +165,84 @@ describe("placement", () => {
     assert.deepEqual(spot, { left: 100, top: 92, grow: "down" });
   });
 });
+
+/**
+ * The anchored mode's ending for a bubble that fits nowhere (D97): instead of
+ * covering the phrase, it stands below it and says how far the page has to
+ * scroll for the two to share the screen. Only the reader's own page ever
+ * passes `assist` - everywhere else the bubble is pinned to the viewport and
+ * the page under it is not ours to move.
+ */
+describe("placement with the scroll assist", () => {
+  it("changes nothing while the bubble has a side to stand on", () => {
+    const size = { width: 300, height: 60 };
+
+    assert.deepEqual(placement({ anchor: at({ top: 400 }), size, viewport: VIEWPORT, assist: true }), {
+      left: 100,
+      top: 392,
+      grow: "up",
+    });
+    assert.deepEqual(placement({ anchor: at({ top: 30 }), size, viewport: VIEWPORT, assist: true }), {
+      left: 100,
+      top: 58,
+      grow: "down",
+    });
+  });
+
+  it("scrolls the page below a phrase instead of covering it", () => {
+    const spot = placement({
+      anchor: at({ top: 380 }),
+      size: { width: 300, height: 700 },
+      viewport: VIEWPORT,
+      assist: true,
+    });
+
+    // Below the whole phrase - the window can hold both - and the page moves
+    // by what the bubble's foot still hangs past the bottom margin: 408 + 700
+    // less 792.
+    assert.deepEqual(spot, { left: 100, top: 408, grow: "down", scroll: 316 });
+  });
+
+  it("keeps the first line of a phrase too long to keep whole", () => {
+    const spot = placement({
+      anchor: at({ top: 300, height: 300 }),
+      size: { width: 300, height: 500 },
+      viewport: VIEWPORT,
+      line: 20,
+      assist: true,
+    });
+
+    // Phrase and bubble together measure 808 against 784 of window, so the
+    // bubble stands under the first line and over the rest of the phrase -
+    // the line the bubble is about is the part that must survive.
+    assert.deepEqual(spot, { left: 100, top: 328, grow: "down", scroll: 36 });
+  });
+
+  it("never scrolls the kept line out through the top", () => {
+    const spot = placement({
+      anchor: at({ top: 300, height: 300 }),
+      // Taller than the window can hold even beside one line: the scroll is
+      // capped where the phrase's top would leave, and the foot stays cut.
+      size: { width: 300, height: 900 },
+      viewport: VIEWPORT,
+      line: 20,
+      assist: true,
+    });
+
+    assert.deepEqual(spot, { left: 100, top: 328, grow: "down", scroll: 292 });
+  });
+
+  it("scrolls back up to a phrase that has left through the top", () => {
+    const spot = placement({
+      anchor: at({ top: -100 }),
+      size: { width: 300, height: 700 },
+      viewport: VIEWPORT,
+      assist: true,
+    });
+
+    // A negative answer: the page moves up until the phrase's line is back at
+    // the margin, and the bubble stays below the phrase rather than being
+    // clamped away from it.
+    assert.deepEqual(spot, { left: 100, top: -72, grow: "down", scroll: -108 });
+  });
+});
