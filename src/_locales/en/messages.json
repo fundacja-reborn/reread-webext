@@ -53,6 +53,14 @@
     "message": "Read aloud",
     "description": "aria-label and hover title of the speaker icon in the bubble's action row (D83): speaks the selected phrase itself, never the translation."
   },
+  "bubble_sentence_collapse": {
+    "message": "Collapse sentence",
+    "description": "aria-label and hover title of the fold in the corner of the bubble's sentence section (D96): clamps the translated sentence to one line so the dictionary entries below get the room."
+  },
+  "bubble_sentence_expand": {
+    "message": "Expand sentence",
+    "description": "The same fold once the sentence is clamped: pressing it brings the full sentence back."
+  },
 
   "popup_site_enabled": {
     "message": "Enabled on $DOMAIN$",
