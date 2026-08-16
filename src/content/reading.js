@@ -351,7 +351,16 @@ function fromRange(range) {
 function readSelection() {
   const selection = window.getSelection();
   if (selection === null || selection.isCollapsed || selection.rangeCount === 0) return null;
-  return fromRange(selection.getRangeAt(0));
+  const range = selection.getRangeAt(0);
+  // A scoped start reads nothing outside its scope. On the reader page the
+  // root is the article - the one text being read - and a native selection
+  // can only exist outside it (the article refuses it, select.js): in the
+  // library list, the bar, the transfer section. Those are somebody using
+  // the page, not reading a text, and answering them translated the page's
+  // own chrome - and quietly kept it (D22). A content script starts
+  // unscoped, so somebody else's page keeps every selection it ever had.
+  if (root !== null && !root.contains(range.commonAncestorContainer)) return null;
+  return fromRange(range);
 }
 
 /**
