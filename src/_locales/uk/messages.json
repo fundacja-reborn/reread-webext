@@ -264,6 +264,8 @@
   },
   "reader_mark_read": { "message": "Позначити прочитаним" },
   "reader_marked_read": { "message": "Позначено прочитаним" },
+  "reader_mark_book_read": { "message": "Позначити книжку прочитаною" },
+  "reader_book_marked_read": { "message": "Книжку позначено прочитаною" },
   "reader_no_article": { "message": "На тій сторінці не вдалося знайти статтю." },
   "reader_list_write_failed": { "message": "Не вдалося записати список читання." },
   "reader_empty_none": {

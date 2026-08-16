@@ -243,6 +243,11 @@
   },
   "reader_mark_read": { "message": "Mark as read" },
   "reader_marked_read": { "message": "Marked as read" },
+  "reader_mark_book_read": {
+    "message": "Mark the book as read",
+    "description": "A book's read mark names the whole book: over 32 parts a bare \"Mark as read\" left open whether the part or the book was being marked."
+  },
+  "reader_book_marked_read": { "message": "Book marked as read" },
   "reader_no_article": { "message": "There was no article to find on that page." },
   "reader_list_write_failed": { "message": "The reading list could not be written." },
   "reader_empty_none": {

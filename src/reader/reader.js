@@ -1219,10 +1219,23 @@ async function refreshActions() {
   }
 
   const read = row !== null && row.readAt !== null;
+  // The read mark belongs to the whole document, and over a book the words
+  // must say so: a bare "Mark as read" at part 3 of 32 left open whether the
+  // part or the book was being marked (Michał's report, 2026-08-16) - it was
+  // always the book. The twin under the text goes further: it stands only
+  // under the LAST part, where "the book is finished" is the thing that just
+  // happened - under any earlier part the honest next act is the pager's,
+  // one row above. The bar's copy stays on every part, because filing a book
+  // already read elsewhere must not cost paging to its end.
+  const book = target.origin === "book";
+  const label = book
+    ? (read ? t("reader_book_marked_read") : t("reader_mark_book_read"))
+    : (read ? t("reader_marked_read") : t("reader_mark_read"));
+  const lastPart = target.origin !== "book" || target.segmentIndex >= target.segmentCount - 1;
   for (const button of [markReadButton, markReadEndButton]) {
     if (button === null) continue;
-    button.hidden = row === null;
-    button.textContent = read ? t("reader_marked_read") : t("reader_mark_read");
+    button.hidden = row === null || (button === markReadEndButton && !lastPart);
+    button.textContent = label;
     button.setAttribute("aria-pressed", String(read));
   }
 }

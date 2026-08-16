@@ -208,6 +208,8 @@
   },
   "reader_mark_read": { "message": "Als gelesen markieren" },
   "reader_marked_read": { "message": "Als gelesen markiert" },
+  "reader_mark_book_read": { "message": "Buch als gelesen markieren" },
+  "reader_book_marked_read": { "message": "Buch als gelesen markiert" },
   "reader_no_article": { "message": "Auf dieser Seite war kein Artikel zu finden." },
   "reader_list_write_failed": { "message": "Die Leseliste konnte nicht geschrieben werden." },
   "reader_empty_none": {
