@@ -93,6 +93,10 @@
     "message": "Als gelernt markieren: $PHRASE$",
     "placeholders": { "phrase": { "content": "$1", "example": "Bank" } }
   },
+  "vocab_speak_aria": {
+    "message": "Vorlesen: $PHRASE$",
+    "placeholders": { "phrase": { "content": "$1", "example": "Bank" } }
+  },
   "vocab_empty": {
     "message": "Für dieses Paar ist noch nichts gespeichert. Wählen Sie beim Lesen eine Wendung aus und drücken Sie „$BUTTON$“ - sie wartet dann hier.",
     "placeholders": { "button": { "content": "$1", "example": "Speichern" } }

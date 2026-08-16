@@ -30,6 +30,7 @@ import { MIRROR_KEY } from "../lib/store/mirror.js";
 import { exportFilename, fromTsv, pairFromFilename, toTsv } from "../lib/store/tsv.js";
 import { listPairs, listPhrases } from "../lib/store/vocab.js";
 import { watchToolbarScheme } from "../lib/theme-icon.js";
+import { canSpeak, speak, speaking, stop as stopSpeaking } from "../lib/tts.js";
 import { listView, markSegments, newestFirst, pairChoicesFor } from "./list-view.js";
 
 // First, so the static text is already the catalogue's language when it shows.
@@ -41,6 +42,9 @@ watchToolbarScheme();
 /** @typedef {import("../lib/store/phrase.js").Phrase} Phrase */
 
 const brandButton = document.getElementById("brand");
+// The bar the header wears: presses inside it are the menu's own business,
+// the way presses inside the reader's chrome are (see the pointerdown below).
+const pageBar = document.querySelector(".page-bar");
 const menuButton = document.getElementById("menu");
 const menuPanel = document.getElementById("menu-panel");
 const navLibrary = document.getElementById("nav-library");
@@ -106,6 +110,16 @@ let importChoices = [];
 const SAMPLE_ROWS = 3;
 
 /**
+ * The row whose phrase is on its way out loud, by its key: pressing that
+ * row's speaker again stops it, pressing any other row's simply speaks - the
+ * engine replaces what was playing. A key gone stale (the utterance ended on
+ * its own) is harmless, because `speaking()` answers for the engine.
+ *
+ * @type {string | null}
+ */
+let sounding = null;
+
+/**
  * @param {string} tag
  * @param {string} className
  * @param {string} [text]
@@ -127,6 +141,57 @@ function button(label) {
   node.type = "button";
   node.textContent = label;
   return node;
+}
+
+/**
+ * The speaker, the bubble's own drawing (`speakerIcon` in
+ * `content/tooltip.js`) by the same DOM calls: `currentColor` hands the icon
+ * the quiet button's text color, so its resting, hover and focus states are
+ * already handled by the button's own rules.
+ *
+ * @returns {SVGSVGElement}
+ */
+function speakerIcon() {
+  const NS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  // Decoration to assistive tech - the button's aria-label carries the words.
+  svg.setAttribute("aria-hidden", "true");
+
+  const body = document.createElementNS(NS, "path");
+  body.setAttribute("d", "M4 9.5v5h3.2L12 18.6V5.4L7.2 9.5H4z");
+  body.setAttribute("fill", "currentColor");
+  svg.append(body);
+
+  for (const arc of ["M15 9.2a4.4 4.4 0 0 1 0 5.6", "M17.6 6.8a8 8 0 0 1 0 10.4"]) {
+    const wave = document.createElementNS(NS, "path");
+    wave.setAttribute("d", arc);
+    wave.setAttribute("fill", "none");
+    wave.setAttribute("stroke", "currentColor");
+    wave.setAttribute("stroke-width", "1.8");
+    wave.setAttribute("stroke-linecap", "round");
+    svg.append(wave);
+  }
+  return svg;
+}
+
+/**
+ * Speaks a row's phrase - the phrase as the page had it, never the meanings
+ * (D83) - or stops it when it is the one already sounding. The language is
+ * the row's own, the voice and the speed are the settings every speaker of
+ * this extension reads (`ttsVoices`, `ttsRate`).
+ *
+ * @param {Phrase} phrase
+ */
+function speakPhrase(phrase) {
+  if (config === null) return;
+  if (speaking() && sounding === phrase.normalized) {
+    stopSpeaking();
+    sounding = null;
+    return;
+  }
+  sounding = phrase.normalized;
+  speak(phrase.phrase, phrase.langFrom, config.ttsVoices[phrase.langFrom], config.ttsRate / 100);
 }
 
 /**
@@ -357,7 +422,7 @@ function phraseRow(phrase) {
   // The buttons speak for themselves to the eye; to a screen reader a bare
   // "Edit" in a list of a hundred names nothing, so each carries its phrase.
   const edit = button(t("bubble_edit"));
-  edit.className = "quiet";
+  edit.className = "quiet quiet-edit";
   edit.setAttribute("aria-label", t("vocab_edit_aria", phrase.phrase));
   edit.addEventListener("click", () => {
     editing = phrase.normalized;
@@ -373,6 +438,18 @@ function phraseRow(phrase) {
   learned.addEventListener("click", () => void forget(phrase, learned));
 
   const actions = element("div", "phrase-actions");
+  // The speaker leads the row where the device can speak at all, the bubble's
+  // own order (D83): hearing the phrase is about the phrase, not about the
+  // vocabulary - the one action here that never writes.
+  if (canSpeak()) {
+    const speaker = button("");
+    speaker.className = "quiet quiet-speak";
+    speaker.setAttribute("aria-label", t("vocab_speak_aria", phrase.phrase));
+    speaker.title = t("bubble_speak");
+    speaker.append(speakerIcon());
+    speaker.addEventListener("click", () => speakPhrase(phrase));
+    actions.append(speaker);
+  }
   actions.append(edit, learned);
   row.append(actions);
   return row;
@@ -421,9 +498,10 @@ function editorFor(phrase) {
 }
 
 /**
- * Hands focus back to a row's first button (Edit) after the editor holding
- * it left the DOM - Escape, Cancel and Save all remove the textarea under
- * the keyboard, and without this the focus falls to the body.
+ * Hands focus back to a row's Edit button - the one that opened the editor -
+ * after the editor holding it left the DOM: Escape, Cancel and Save all
+ * remove the textarea under the keyboard, and without this the focus falls
+ * to the body.
  *
  * @param {string} key the row's normalized phrase
  */
@@ -431,7 +509,8 @@ function refocusRow(key) {
   if (listContainer === null) return;
   for (const row of listContainer.querySelectorAll(".phrase-row")) {
     if (row instanceof HTMLElement && row.dataset["key"] === key) {
-      row.querySelector("button")?.focus();
+      const edit = row.querySelector("button.quiet-edit");
+      if (edit instanceof HTMLButtonElement) edit.focus();
       return;
     }
   }
@@ -694,14 +773,16 @@ navSettings?.addEventListener("click", () => {
 });
 
 // The open menu yields to the page underneath, exactly as the reader's panels
-// do (Michał's report, 2026-08-16): a press anywhere but the menu and its
-// button puts it away, and Escape does the same from the keyboard - handing
-// focus back to the button when it was inside the panel.
+// do (Michał's report, 2026-08-16): a press anywhere but the bar and the menu
+// puts it away, and Escape does the same from the keyboard - handing focus
+// back to the button when it was inside the panel. Presses inside the bar are
+// the menu's own business, the reader's rule for its chrome: the toggle's
+// click handler decides.
 document.addEventListener("pointerdown", (event) => {
   if (menuPanel === null || menuPanel.hidden) return;
   const target = event.target;
   if (!(target instanceof Node)) return;
-  if (menuPanel.contains(target) || menuButton?.contains(target) === true) return;
+  if (menuPanel.contains(target) || pageBar?.contains(target) === true) return;
   closeMenu();
 });
 
