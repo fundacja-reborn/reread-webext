@@ -20,12 +20,16 @@
       <!-- The reading list's bar, worn by this page's header: the mark on the
            leading edge, the drawn tools at the far one, one line under both.
            The dress and the conduct are the reader bar's exactly - the two
-           pages should read as one extension - and only the toolset differs,
-           because this page has one tool: the menu. The mark doubles as the
+           pages should read as one extension - and the toolset is this
+           page's own: the Aa panel (paper, typeface, size, and the voice the
+           speakers in the rows use) and the menu. The mark doubles as the
            door to the settings, a button rather than a link because it opens
            the settings tab (`runtime.openOptionsPage`) instead of navigating
            this one. Not sticky, for the reading list's own reason: everything
-           the bar leads to is already at the top. -->
+           the bar leads to is already at the top. The bar and its two panels
+           are the outside-press boundary: a press inside any of them is the
+           panels' own business (see vocab.js), exactly the reader's
+           `.reader-chrome` rule. -->
       <div class="page-bar">
         <button
           type="button"
@@ -39,6 +43,20 @@
           re/read
         </button>
         <span class="page-tools">
+          <!-- The reader bar's own "Aa", here because this page now has text
+               the panel dresses (the phrases) and a voice the panel steers
+               (the speakers in the rows). Its panel carries only the rows
+               that act on this page - no column width, no links: those are
+               about an article, and only the reader has one. -->
+          <button
+            id="display"
+            type="button"
+            aria-expanded="false"
+            title="Text and voice"
+            data-i18n-title="reader_display_title"
+          >
+            Aa
+          </button>
           <!-- The same drawn menu button as the reader's bar, for the same
                reason: on a phone the toolbar popup that used to be the only
                hallway between these pages is three taps into the browser menu,
@@ -64,6 +82,69 @@
           </button>
         </span>
       </div>
+
+      <!-- The reader's Aa panel, minus the rows about an article's column
+           (width, links): what stays is what acts here - the paper, the
+           typeface and size the phrases wear, and the voice and speed the
+           rows' speakers use. Written out rather than built by script, for
+           the reader page's own reason: a short fixed list is easier to read
+           in the package than the code that would have produced it. Every
+           row writes the same stored settings the reader's panel writes, so
+           a choice made on either page holds on both. -->
+      <section
+        id="display-panel"
+        class="page-panel"
+        hidden
+        aria-label="Text and voice"
+        data-i18n-aria-label="reader_display_title"
+      >
+        <div class="page-setting">
+          <span class="page-setting-name" data-i18n="reader_theme">Theme</span>
+          <span class="page-choices" id="theme-choices">
+            <button type="button" data-theme="auto" data-i18n="reader_theme_auto">Auto</button>
+            <button type="button" data-theme="light" data-i18n="reader_theme_light">Light</button>
+            <button type="button" data-theme="sepia" data-i18n="reader_theme_sepia">Sepia</button>
+            <button type="button" data-theme="dark" data-i18n="reader_theme_dark">Dark</button>
+          </span>
+        </div>
+
+        <div class="page-setting">
+          <span class="page-setting-name" data-i18n="reader_font">Type</span>
+          <span class="page-choices" id="font-choices">
+            <button type="button" data-font="serif" data-i18n="reader_font_serif">Serif</button>
+            <button type="button" data-font="sans" data-i18n="reader_font_sans">Sans</button>
+          </span>
+        </div>
+
+        <div class="page-setting">
+          <span class="page-setting-name" data-i18n="reader_size">Size</span>
+          <span class="page-choices">
+            <button type="button" data-size="-1" title="Smaller" data-i18n-title="reader_smaller">&minus;</button>
+            <output id="size-value">18</output>
+            <button type="button" data-size="1" title="Larger" data-i18n-title="reader_larger">+</button>
+          </span>
+        </div>
+
+        <!-- The voice rows are hidden outright on a device whose browser
+             cannot speak - an empty voice select would be a promise nothing
+             keeps (the reader panel's own clause). -->
+        <div class="page-setting" id="voice-setting" hidden>
+          <label class="page-setting-name" for="voice-choice" data-i18n="reader_voice">Voice</label>
+          <span class="page-choices">
+            <select id="voice-choice"></select>
+          </span>
+        </div>
+
+        <div class="page-setting" id="rate-setting" hidden>
+          <span class="page-setting-name" data-i18n="reader_speed">Speed</span>
+          <span class="page-choices">
+            <button type="button" data-rate="-10" title="Slower" data-i18n-title="reader_slower">&minus;</button>
+            <output id="rate-value">1.0&times;</output>
+            <button type="button" data-rate="10" title="Faster" data-i18n-title="reader_faster">+</button>
+          </span>
+        </div>
+      </section>
+
       <!-- The reader's menu, minus a row for this page - a hallway does not
            list the room it stands in. The list row goes through the background
            exactly as the popup's does (`reader-tab.js`): the reader is one

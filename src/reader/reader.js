@@ -23,6 +23,7 @@
  */
 
 import { rescan, start } from "../content/reading.js";
+import { applyReading } from "../lib/appearance.js";
 import { webext } from "../lib/browser.js";
 import { localizePage, plural, t } from "../lib/i18n.js";
 import { languageName } from "../lib/language.js";
@@ -1373,7 +1374,9 @@ async function onMarkReadPress() {
 /**
  * Puts the settings onto the document: two lengths as custom properties, the
  * theme and the typeface as attributes on the root. The stylesheet does the
- * rest, and this stays the only place that knows the names.
+ * rest. The shared part - paper, typeface, text size - goes through
+ * `lib/appearance.js`, where the names live (D104: the phrases page wears the
+ * same three); the column's measure and the links mode are this page's own.
  *
  * Setting properties through the CSSOM rather than writing a `<style>` element,
  * which the content security policy of an extension page does not allow - the
@@ -1383,10 +1386,8 @@ async function onMarkReadPress() {
  */
 function applyAppearance(reader) {
   const root = document.documentElement;
-  root.dataset["readerTheme"] = reader.theme;
-  root.dataset["readerFont"] = reader.font;
+  applyReading(root, reader);
   root.dataset["readerLinks"] = reader.links;
-  root.style.setProperty("--reader-size", `${reader.fontSize}px`);
   root.style.setProperty("--reader-measure", `${reader.measure}ch`);
 
   if (sizeValue !== null) sizeValue.textContent = String(reader.fontSize);

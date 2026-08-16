@@ -2,9 +2,11 @@
    Two variables carry what the reader can change about the text - its size and
    how many characters fit on a line - and the theme is an attribute on the root
    rather than a third variable, because a theme is six colours moving
-   together. `auto` sets none of them and lets `page.css` answer the browser.
-   Every theme keeps page.css's two strengths of edge - separators near 2.6:1,
-   control borders past 3:1 - so lines survive an e-ink panel's 16 greys. */
+   together. The palettes those attributes swap live in page.css (D104): the
+   theme is every page's paper, and `auto` stamps a value no palette matches,
+   letting the browser answer. Every theme keeps page.css's two strengths of
+   edge - separators near 2.6:1, control borders past 3:1 - so lines survive
+   an e-ink panel's 16 greys. */
 
 /* The two washes reading aloud paints with (D87), theme by theme - see the rule
    at `::highlight(reread-speaking)` for why one number cannot serve both ends
@@ -23,42 +25,21 @@
   }
 }
 
+/* The palettes the same attribute swaps live in page.css since D104 - the
+   theme is every page's paper now, not the reader's alone. What stays here
+   is the reader's own paint: how strong each speaking wash is, per theme,
+   because the wash washes THIS page's ink. */
 :root[data-reader-theme="light"] {
-  color-scheme: light;
-  --page-bg: #ffffff;
-  --page-fg: #1f2430;
-  --page-muted: #5c6478;
-  --page-line: #99a1b0;
-  --page-border: #6e7583;
-  --page-accent: #b8791d;
   --reader-speaking: color-mix(in srgb, var(--page-fg) 15%, transparent);
   --reader-speaking-word: color-mix(in srgb, var(--page-accent) 38%, transparent);
 }
 
-/* The ink is dimmed against glare, in step with page.css's auto-dark - see
-   the note there for the numbers; the two blocks are one theme in two homes. */
 :root[data-reader-theme="dark"] {
-  color-scheme: dark;
-  --page-bg: #171a21;
-  --page-fg: #ccd3df;
-  --page-muted: #98a1b5;
-  --page-line: #565d6c;
-  --page-border: #767e8f;
-  --page-accent: #f0a83c;
   --reader-speaking: color-mix(in srgb, var(--page-fg) 25%, transparent);
   --reader-speaking-word: color-mix(in srgb, var(--page-accent) 45%, transparent);
 }
 
-/* Paper rather than a dimmed white: the point of sepia is less blue light at
-   the same contrast, so the text stays nearly as dark as on white. */
 :root[data-reader-theme="sepia"] {
-  color-scheme: light;
-  --page-bg: #f4ecd8;
-  --page-fg: #322a21;
-  --page-muted: #6b5f4d;
-  --page-line: #a3937a;
-  --page-border: #83745a;
-  --page-accent: #9a5b16;
   --reader-speaking: color-mix(in srgb, var(--page-fg) 15%, transparent);
   --reader-speaking-word: color-mix(in srgb, var(--page-accent) 38%, transparent);
 }

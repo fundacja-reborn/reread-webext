@@ -14,6 +14,7 @@
  * host - it is the way out on the day it stops answering.
  */
 
+import { followTheme } from "../lib/appearance.js";
 import { webext } from "../lib/browser.js";
 import {
   BUBBLE_SCALE,
@@ -78,6 +79,10 @@ localizePage();
 // The toolbar icon follows the browser's scheme where the manifest cannot
 // say so (Chromium, no theme_icons there) - a no-op on Firefox.
 watchToolbarScheme();
+// The paper follows the theme the Aa panels write (D104): this page has no
+// content of its own to dress, but walking here from a sepia article must
+// not flash a white room.
+followTheme();
 
 /** @type {import("../lib/config.js").Config} */
 let config = withDefaults(undefined);
