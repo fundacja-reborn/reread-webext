@@ -259,8 +259,11 @@
           </details>
           <a href="#transfer" data-i18n="transfer_heading">Import and export</a>
         </div>
-        <!-- The filter stands alone above the list it narrows; the transfer
-             tools moved into their own section below the pager. -->
+        <!-- The filter stands above the list it narrows; the transfer tools
+             moved into their own section below the pager. Adding a book sits
+             here rather than down there on purpose (O19): an EPUB is new
+             reading for the list, a first-rank act - the section below is
+             for backups. -->
         <div class="filter-line">
           <label for="library-filter" class="visually-hidden" data-i18n="reader_filter_label">
             Filter the reading list
@@ -271,7 +274,17 @@
             placeholder="Filter by title or site"
             data-i18n-placeholder="reader_filter_placeholder"
           />
+          <button type="button" id="library-add-book" data-i18n="reader_add_book">
+            Add a file (EPUB)
+          </button>
         </div>
+        <input
+          type="file"
+          id="library-book-file"
+          accept=".epub,application/epub+zip"
+          hidden
+        />
+        <p id="book-import-status" class="status report" role="status"></p>
         <p class="hint" id="library-count" hidden></p>
         <div id="library-empty" class="empty" hidden></div>
         <ul id="library-rows" class="library-rows"></ul>
@@ -295,6 +308,10 @@
               One .json file holding every saved article - a backup, or the way to move them to
               another browser. Importing adds articles this list is missing and never touches a
               saved one.
+            </p>
+            <p class="hint" data-i18n="reader_transfer_books">
+              Books stay out of this file: the backup of a book is its .epub - importing it again
+              brings everything back except the reading position.
             </p>
           </details>
           <input type="file" id="library-import-file" accept=".json,application/json" hidden />
@@ -348,11 +365,41 @@
         </div>
       </div>
 
+      <!--
+        The book's language against the current pair (O20): said quietly,
+        once, outside the article element - interface, not text anybody is
+        studying - and never acted on by itself: the settings stay one press
+        away, the pair is never switched behind anybody's back.
+      -->
+      <p id="book-note" class="hint book-note" hidden>
+        <span id="book-note-text"></span>
+        <button type="button" id="book-note-settings" data-i18n="settings">Settings</button>
+      </p>
+
+      <!--
+        A book arrives one segment at a time, and these two rows are the way
+        between segments - the same quiet pager the lists speak, above the
+        text and again under its last line, where finishing a segment leaves
+        the reader. Turning a segment swaps the content of this same page:
+        no navigation, no animation (e-ink).
+      -->
+      <nav id="segment-nav" class="pager segment-nav" hidden aria-label="Book parts" data-i18n-aria-label="reader_book_nav">
+        <button type="button" id="segment-prev" data-i18n="pager_prev">Previous</button>
+        <span class="pager-label" id="segment-label"></span>
+        <button type="button" id="segment-next" data-i18n="pager_next">Next</button>
+      </nav>
+
       <article id="article" hidden>
         <h1 id="title"></h1>
         <p id="byline" class="reader-byline" hidden></p>
         <div id="content"></div>
       </article>
+
+      <nav id="segment-nav-end" class="pager segment-nav" hidden aria-label="Book parts" data-i18n-aria-label="reader_book_nav">
+        <button type="button" id="segment-prev-end" data-i18n="pager_prev">Previous</button>
+        <span class="pager-label" id="segment-label-end"></span>
+        <button type="button" id="segment-next-end" data-i18n="pager_next">Next</button>
+      </nav>
 
       <!--
         The two acts of finishing, again under the last line: whoever has just

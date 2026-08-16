@@ -6,6 +6,12 @@
  * The order and the segment split are the store's own (`listedRows`); this
  * module adds what a list on screen needs on top of them - which rows match
  * the filter box, and which slice of those is the page in view.
+ *
+ * Books share the list with articles by wearing the same fields: the entry
+ * mappers below are the one place that decides how a book answers the
+ * questions the list asks - what is its title, what stands where the site
+ * name stands, where does it sort. Everything downstream (segments, filter,
+ * pages) then treats the two kinds identically, which is the point.
  */
 
 import { Segment, listedRows } from "../lib/store/saved-article.js";
@@ -13,6 +19,18 @@ import { matchesFilter } from "../options/models-view.js";
 
 /** @typedef {import("../lib/store/saved-article.js").SavedMeta} SavedMeta */
 /** @typedef {import("../lib/store/saved-article.js").SegmentValue} SegmentValue */
+/** @typedef {import("../lib/store/book.js").BookMeta} BookMeta */
+/** @typedef {import("../lib/reader/position.js").ReadingPosition} ReadingPosition */
+
+/**
+ * One row of the list, either kind. `url` is the row's key and the way to
+ * open it - a book's id plays the part its address plays for an article.
+ *
+ * @typedef {SavedMeta & {
+ *   kind: "article" | "book",
+ *   progress: { at: number, of: number } | null,
+ * }} LibraryEntry
+ */
 
 /**
  * Fifty rows: an article row is a title over a line of detail, about twice a
@@ -22,8 +40,41 @@ import { matchesFilter } from "../options/models-view.js";
 export const PAGE_SIZE = 50;
 
 /**
- * Everything a row can be found by: the title as it is shown and the site it
- * came from.
+ * @param {SavedMeta} meta
+ * @returns {LibraryEntry}
+ */
+export function articleEntry(meta) {
+  return { ...meta, kind: "article", progress: null };
+}
+
+/**
+ * A book as a row. The author stands where the hostname stands - it is what
+ * the filter searches and the detail line opens with. `savedAt` is when the
+ * book was added, so the one ordering rule serves both kinds. Progress reads
+ * the stored position: a book never opened is honestly at its first part,
+ * and a position pointing past the end (which the anchor rules would refuse
+ * anyway) shows as the last.
+ *
+ * @param {BookMeta} book
+ * @param {ReadingPosition | null} position
+ * @returns {LibraryEntry}
+ */
+export function bookEntry(book, position) {
+  const at = position === null ? 0 : Math.min(position.segmentIndex, book.segmentCount - 1);
+  return {
+    url: book.id,
+    hostname: book.author ?? "",
+    title: book.title,
+    savedAt: book.addedAt,
+    readAt: book.readAt,
+    kind: "book",
+    progress: { at: at + 1, of: book.segmentCount },
+  };
+}
+
+/**
+ * Everything a row can be found by: the title as it is shown, and the site
+ * it came from - or, for a book, its author.
  *
  * @param {SavedMeta} meta
  * @returns {string}
@@ -49,10 +100,11 @@ export function searchableArticle(meta) {
  * from one `listedRows` call because the segments partition the list -
  * counting the other one twice would be a second copy of the rule.
  *
- * @param {SavedMeta[]} metas as `listArticles` answers, in any order
+ * @template {SavedMeta} T
+ * @param {T[]} metas as the stores answer, in any order
  * @param {{ segment: SegmentValue, query: string, page: number }} shown
  * @returns {{
- *   rows: SavedMeta[],
+ *   rows: T[],
  *   page: number,
  *   pages: number,
  *   matching: number,

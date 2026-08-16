@@ -248,6 +248,40 @@
   "reader_transfer_note": {
     "message": "Un archivo .json con todos los artículos guardados - una copia de seguridad, o la forma de llevarlos a otro navegador. La importación solo añade artículos que faltan en esta lista; lo guardado no se toca."
   },
+  "reader_transfer_books": {
+    "message": "Los libros quedan fuera de este archivo: la copia de seguridad de un libro es su archivo .epub - volver a importarlo restaura todo salvo la posición de lectura."
+  },
+  "reader_add_book": { "message": "Añadir un archivo (EPUB)" },
+  "reader_book_label": { "message": "Libro" },
+  "reader_book_part_of": {
+    "message": "Parte $PART$ de $PARTS$",
+    "placeholders": {
+      "part": { "content": "$1", "example": "3" },
+      "parts": { "content": "$2", "example": "12" }
+    }
+  },
+  "reader_book_nav": { "message": "Partes del libro" },
+  "reader_book_importing": {
+    "message": "Añadiendo el libro - parte $PART$",
+    "placeholders": {
+      "part": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_book_added": {
+    "message": "Se añadió «$TITLE$».",
+    "placeholders": {
+      "title": { "content": "$1", "example": "Dracula" }
+    }
+  },
+  "reader_book_drm": { "message": "Este libro está protegido con DRM y no se puede importar." },
+  "reader_book_unreadable": { "message": "No se pudo leer este archivo como libro EPUB." },
+  "reader_book_pair_note": {
+    "message": "Idioma del libro: $BOOK$; el par actual traduce desde: $PAIR$.",
+    "placeholders": {
+      "book": { "content": "$1", "example": "alemán" },
+      "pair": { "content": "$2", "example": "inglés" }
+    }
+  },
   "reader_import_nothing": { "message": "Ese archivo no contiene artículos para importar." },
   "reader_import_summary_one": {
     "message": "$NAME$ contiene $COUNT$ artículo:",

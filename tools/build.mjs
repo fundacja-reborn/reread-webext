@@ -76,6 +76,9 @@ const VENDOR_FILES = [
   "vendor/readability/Readability.js",
   "vendor/readability/LICENSE",
   "vendor/readability/README.md",
+  "vendor/fflate/browser.js",
+  "vendor/fflate/LICENSE",
+  "vendor/fflate/README.md",
 ];
 
 /**
@@ -101,6 +104,11 @@ async function build(target, watch) {
     format: "iife",
     platform: "browser",
     target: target === "firefox" ? ["firefox140"] : ["chrome128"],
+    // The vendored ZIP reader is imported lazily by the reader page and must
+    // stay the copied file, never a bundled copy of it (see VENDOR_FILES):
+    // external keeps the `import()` in the output verbatim, and the specifier
+    // is written for the built layout, where `vendor/` sits beside `reader/`.
+    external: ["../vendor/fflate/browser.js"],
     // Readable output is a requirement, not a preference: an extension asking
     // for `<all_urls>` should be one anybody can read before trusting it.
     minify: false,
