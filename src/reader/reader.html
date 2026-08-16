@@ -16,142 +16,197 @@
   <body class="reader">
     <!-- The English here is the fallback: `localizePage` swaps every marked
          text for the catalogue's language before anything renders. -->
-    <header class="reader-bar">
-      <!-- The mark is also the way to the settings: on this page and on the
-           saved phrases it is the one thing standing in every view, and the
-           settings were otherwise only reachable through the toolbar popup.
-           A button rather than a link, because pressing it opens the settings
-           tab (`runtime.openOptionsPage`) instead of navigating this one away
-           from the article. Its accessible name is what it does; the visible
-           word stays the brand. -->
-      <button
-        type="button"
-        id="brand"
-        class="reader-mark"
-        title="Settings"
-        data-i18n-title="settings"
-        aria-label="Settings"
-        data-i18n-aria-label="settings"
-      >
-        re/read
-      </button>
-      <span class="reader-tools">
-        <a id="original" class="reader-original" data-i18n="reader_open_original" hidden>Open the original</a>
-        <!--
-          Reading aloud starts here and is steered from the bar at the bottom of
-          the screen, which only exists while the voice is speaking (D87). The
-          button is drawn rather than written for the reason the bubble's
-          speaker is: one row of tools, six languages, and a speaker needs no
-          label to be understood.
-        -->
-        <button
-          id="listen"
-          type="button"
-          title="Read aloud"
-          data-i18n-title="reader_listen"
-          aria-label="Read aloud"
-          data-i18n-aria-label="reader_listen"
-          hidden
-        >
-          <svg class="reader-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-            <path
-              d="M2.5 6h2.6L8.6 3.1a.6.6 0 0 1 1 .46v8.88a.6.6 0 0 1-1 .46L5.1 10H2.5a.6.6 0 0 1-.6-.6V6.6a.6.6 0 0 1 .6-.6z"
-              fill="currentColor"
-            />
-            <path
-              d="M11.6 5.8a3.2 3.2 0 0 1 0 4.4M13.4 4a5.7 5.7 0 0 1 0 8"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.3"
-              stroke-linecap="round"
-            />
-          </svg>
-        </button>
-        <button
-          id="display"
-          type="button"
-          aria-expanded="false"
-          title="Text and voice"
-          data-i18n-title="reader_display_title"
-        >
-          Aa
-        </button>
-      </span>
-    </header>
-
     <!--
-      Written out here rather than built by script: what the reader can change
-      about its own appearance is a short, fixed list, and a list is easier to
-      read in the package than the code that would have produced it.
+      The bar and the two panels it opens, held in one box so they can stand
+      still together: while an article is on screen the box is sticky (see
+      reader.css), because the two things it holds are wanted mid-article -
+      the voice starts from the first sentence still on screen, which a button
+      that scrolled away with the top of the page could never mean, and the
+      menu is the way out of an article somebody is done with. On the list
+      view the box scrolls away like any heading: everything it leads to is
+      already at the top.
     -->
-    <section
-      id="display-panel"
-      class="reader-panel"
-      hidden
-      aria-label="Text and voice"
-      data-i18n-aria-label="reader_display_title"
-    >
-      <div class="reader-setting">
-        <span class="reader-setting-name" data-i18n="reader_theme">Theme</span>
-        <span class="reader-choices" id="theme-choices">
-          <button type="button" data-theme="auto" data-i18n="reader_theme_auto">Auto</button>
-          <button type="button" data-theme="light" data-i18n="reader_theme_light">Light</button>
-          <button type="button" data-theme="sepia" data-i18n="reader_theme_sepia">Sepia</button>
-          <button type="button" data-theme="dark" data-i18n="reader_theme_dark">Dark</button>
+    <div class="reader-chrome">
+      <header class="reader-bar">
+        <!-- The mark is also the way to the settings: on this page and on the
+             saved phrases it is the one thing standing in every view. The menu
+             holds the labelled door to the same place - the mark stays because
+             a quiet path costs nothing once it is known.
+             A button rather than a link, because pressing it opens the settings
+             tab (`runtime.openOptionsPage`) instead of navigating this one away
+             from the article. Its accessible name is what it does; the visible
+             word stays the brand. -->
+        <button
+          type="button"
+          id="brand"
+          class="reader-mark"
+          title="Settings"
+          data-i18n-title="settings"
+          aria-label="Settings"
+          data-i18n-aria-label="settings"
+        >
+          re/read
+        </button>
+        <span class="reader-tools">
+          <!--
+            Reading aloud starts here and is steered from the bar at the bottom of
+            the screen, which only exists while the voice is speaking (D87). The
+            button is drawn rather than written for the reason the bubble's
+            speaker is: one row of tools, six languages, and a speaker needs no
+            label to be understood.
+          -->
+          <button
+            id="listen"
+            type="button"
+            title="Read aloud"
+            data-i18n-title="reader_listen"
+            aria-label="Read aloud"
+            data-i18n-aria-label="reader_listen"
+            hidden
+          >
+            <svg class="reader-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+              <path
+                d="M2.5 6h2.6L8.6 3.1a.6.6 0 0 1 1 .46v8.88a.6.6 0 0 1-1 .46L5.1 10H2.5a.6.6 0 0 1-.6-.6V6.6a.6.6 0 0 1 .6-.6z"
+                fill="currentColor"
+              />
+              <path
+                d="M11.6 5.8a3.2 3.2 0 0 1 0 4.4M13.4 4a5.7 5.7 0 0 1 0 8"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.3"
+                stroke-linecap="round"
+              />
+            </svg>
+          </button>
+          <button
+            id="display"
+            type="button"
+            aria-expanded="false"
+            title="Text and voice"
+            data-i18n-title="reader_display_title"
+          >
+            Aa
+          </button>
+          <!-- The other pages of this extension, behind one drawn button: on a
+               phone the toolbar popup that used to be the only hallway is three
+               taps into the browser menu, and this bar is already here. Drawn
+               for the reason the speaker is - the three lines need no label to
+               be understood, and the accessible name says what they open. -->
+          <button
+            id="menu"
+            type="button"
+            aria-expanded="false"
+            title="Menu"
+            data-i18n-title="nav_menu"
+            aria-label="Menu"
+            data-i18n-aria-label="nav_menu"
+          >
+            <svg class="reader-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+              <path
+                d="M2.5 4.25h11M2.5 8h11M2.5 11.75h11"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.3"
+                stroke-linecap="round"
+              />
+            </svg>
+          </button>
         </span>
-      </div>
-
-      <div class="reader-setting">
-        <span class="reader-setting-name" data-i18n="reader_font">Type</span>
-        <span class="reader-choices" id="font-choices">
-          <button type="button" data-font="serif" data-i18n="reader_font_serif">Serif</button>
-          <button type="button" data-font="sans" data-i18n="reader_font_sans">Sans</button>
-        </span>
-      </div>
-
-      <div class="reader-setting">
-        <span class="reader-setting-name" data-i18n="reader_size">Size</span>
-        <span class="reader-choices">
-          <button type="button" data-size="-1" title="Smaller" data-i18n-title="reader_smaller">&minus;</button>
-          <output id="size-value">18</output>
-          <button type="button" data-size="1" title="Larger" data-i18n-title="reader_larger">+</button>
-        </span>
-      </div>
-
-      <div class="reader-setting">
-        <span class="reader-setting-name" data-i18n="reader_width">Width</span>
-        <span class="reader-choices">
-          <button type="button" data-measure="-5" title="Narrower" data-i18n-title="reader_narrower">&minus;</button>
-          <output id="measure-value">65</output>
-          <button type="button" data-measure="5" title="Wider" data-i18n-title="reader_wider">+</button>
-        </span>
-      </div>
+      </header>
 
       <!--
-        The two knobs of reading aloud (D87), here rather than only in the
-        settings because this is where they are used: the voice is chosen while
-        listening to it, and the speed is changed in the middle of a sentence
-        that went too fast. Both are the same stored settings the bubble's
-        speaker reads, so a choice made here holds everywhere. The rows are
-        hidden outright on a device whose browser cannot speak - an empty voice
-        select would be a promise nothing keeps.
+        Written out here rather than built by script: what the reader can change
+        about its own appearance is a short, fixed list, and a list is easier to
+        read in the package than the code that would have produced it.
       -->
-      <div class="reader-setting" id="voice-setting" hidden>
-        <label class="reader-setting-name" for="voice-choice" data-i18n="reader_voice">Voice</label>
-        <span class="reader-choices">
-          <select id="voice-choice"></select>
-        </span>
-      </div>
+      <section
+        id="display-panel"
+        class="reader-panel"
+        hidden
+        aria-label="Text and voice"
+        data-i18n-aria-label="reader_display_title"
+      >
+        <div class="reader-setting">
+          <span class="reader-setting-name" data-i18n="reader_theme">Theme</span>
+          <span class="reader-choices" id="theme-choices">
+            <button type="button" data-theme="auto" data-i18n="reader_theme_auto">Auto</button>
+            <button type="button" data-theme="light" data-i18n="reader_theme_light">Light</button>
+            <button type="button" data-theme="sepia" data-i18n="reader_theme_sepia">Sepia</button>
+            <button type="button" data-theme="dark" data-i18n="reader_theme_dark">Dark</button>
+          </span>
+        </div>
 
-      <div class="reader-setting" id="rate-setting" hidden>
-        <span class="reader-setting-name" data-i18n="reader_speed">Speed</span>
-        <span class="reader-choices">
-          <button type="button" data-rate="-10" title="Slower" data-i18n-title="reader_slower">&minus;</button>
-          <output id="rate-value">1.0&times;</output>
-          <button type="button" data-rate="10" title="Faster" data-i18n-title="reader_faster">+</button>
-        </span>
-      </div>
-    </section>
+        <div class="reader-setting">
+          <span class="reader-setting-name" data-i18n="reader_font">Type</span>
+          <span class="reader-choices" id="font-choices">
+            <button type="button" data-font="serif" data-i18n="reader_font_serif">Serif</button>
+            <button type="button" data-font="sans" data-i18n="reader_font_sans">Sans</button>
+          </span>
+        </div>
+
+        <div class="reader-setting">
+          <span class="reader-setting-name" data-i18n="reader_size">Size</span>
+          <span class="reader-choices">
+            <button type="button" data-size="-1" title="Smaller" data-i18n-title="reader_smaller">&minus;</button>
+            <output id="size-value">18</output>
+            <button type="button" data-size="1" title="Larger" data-i18n-title="reader_larger">+</button>
+          </span>
+        </div>
+
+        <div class="reader-setting">
+          <span class="reader-setting-name" data-i18n="reader_width">Width</span>
+          <span class="reader-choices">
+            <button type="button" data-measure="-5" title="Narrower" data-i18n-title="reader_narrower">&minus;</button>
+            <output id="measure-value">65</output>
+            <button type="button" data-measure="5" title="Wider" data-i18n-title="reader_wider">+</button>
+          </span>
+        </div>
+
+        <!--
+          The two knobs of reading aloud (D87), here rather than only in the
+          settings because this is where they are used: the voice is chosen while
+          listening to it, and the speed is changed in the middle of a sentence
+          that went too fast. Both are the same stored settings the bubble's
+          speaker reads, so a choice made here holds everywhere. The rows are
+          hidden outright on a device whose browser cannot speak - an empty voice
+          select would be a promise nothing keeps.
+        -->
+        <div class="reader-setting" id="voice-setting" hidden>
+          <label class="reader-setting-name" for="voice-choice" data-i18n="reader_voice">Voice</label>
+          <span class="reader-choices">
+            <select id="voice-choice"></select>
+          </span>
+        </div>
+
+        <div class="reader-setting" id="rate-setting" hidden>
+          <span class="reader-setting-name" data-i18n="reader_speed">Speed</span>
+          <span class="reader-choices">
+            <button type="button" data-rate="-10" title="Slower" data-i18n-title="reader_slower">&minus;</button>
+            <output id="rate-value">1.0&times;</output>
+            <button type="button" data-rate="10" title="Faster" data-i18n-title="reader_faster">+</button>
+          </span>
+        </div>
+      </section>
+
+      <!--
+        The menu the bar's three lines open: the extension's other pages, as
+        the rows the popup already speaks in - and through the popup's own
+        doors, because each of those pages is one tab (`single-tab.js`), and a
+        page that navigated itself away would leave the tab registry naming a
+        tab that no longer shows it. The way to the original moved in here
+        from the bar: the rarest press on the bar was also its longest word,
+        and six languages of it decided the bar's width on a phone. The list
+        row only turns this page's own view, so it is the one row that stays
+        put; it hides on the list view - a hallway does not list the room it
+        stands in.
+      -->
+      <nav id="menu-panel" class="nav-menu" hidden aria-label="Menu" data-i18n-aria-label="nav_menu">
+        <a id="original" data-i18n="reader_open_original" hidden>Open the original</a>
+        <button id="nav-library" type="button" data-i18n="reading_list" hidden>Offline reading list</button>
+        <button id="nav-vocabulary" type="button" data-i18n="saved_phrases">Saved phrases</button>
+        <button id="nav-settings" type="button" data-i18n="settings">Settings</button>
+      </nav>
+    </div>
 
     <main id="page">
       <p id="notice" class="note" hidden></p>

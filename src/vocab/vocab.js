@@ -41,6 +41,10 @@ watchToolbarScheme();
 /** @typedef {import("../lib/store/phrase.js").Phrase} Phrase */
 
 const brandButton = document.getElementById("brand");
+const menuButton = document.getElementById("menu");
+const menuPanel = document.getElementById("menu-panel");
+const navLibrary = document.getElementById("nav-library");
+const navSettings = document.getElementById("nav-settings");
 const pairSelect = /** @type {HTMLSelectElement | null} */ (document.getElementById("pair"));
 const introLine = document.getElementById("intro");
 const countLine = document.getElementById("count");
@@ -654,6 +658,59 @@ async function runImport() {
 // bar carries: its own tab (`openOptionsPage` raises the settings tab if one is
 // already open), so the list on screen stays where it is.
 brandButton?.addEventListener("click", () => void webext().runtime.openOptionsPage());
+
+// The menu behind the brand line's drawn button - the reader's, minus the row
+// for this page (D93).
+menuButton?.addEventListener("click", () => {
+  if (menuButton === null || menuPanel === null) return;
+  menuPanel.hidden = !menuPanel.hidden;
+  menuButton.setAttribute("aria-expanded", String(!menuPanel.hidden));
+});
+
+// Every row leaves this tab standing, so each one also puts the menu away -
+// coming back must not find the hallway still open.
+function closeMenu() {
+  if (menuButton === null || menuPanel === null) return;
+  menuPanel.hidden = true;
+  menuButton.setAttribute("aria-expanded", "false");
+}
+
+// The reading-list row goes through the background exactly as the popup's
+// does: `openLibrary` points the reader at nothing and raises its one tab
+// (`reader-tab.js`), while this tab stays the saved-phrases page the tab
+// registry says it is. A rejection means the background was mid-restart -
+// the press can be repeated; the popup's rows make the same bargain.
+navLibrary?.addEventListener("click", () => {
+  closeMenu();
+  void webext()
+    .runtime.sendMessage({ kind: Message.OPEN_LIBRARY })
+    .catch(() => undefined);
+});
+
+// The settings row is the mark's press with a word on it.
+navSettings?.addEventListener("click", () => {
+  closeMenu();
+  void webext().runtime.openOptionsPage();
+});
+
+// The open menu yields to the page underneath, exactly as the reader's panels
+// do (Michał's report, 2026-08-16): a press anywhere but the menu and its
+// button puts it away, and Escape does the same from the keyboard - handing
+// focus back to the button when it was inside the panel.
+document.addEventListener("pointerdown", (event) => {
+  if (menuPanel === null || menuPanel.hidden) return;
+  const target = event.target;
+  if (!(target instanceof Node)) return;
+  if (menuPanel.contains(target) || menuButton?.contains(target) === true) return;
+  closeMenu();
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape" || menuPanel === null || menuPanel.hidden) return;
+  const focus = document.activeElement;
+  if (focus instanceof Node && menuPanel.contains(focus)) menuButton?.focus();
+  closeMenu();
+});
 
 pairSelect?.addEventListener("change", () => {
   if (pairSelect === null) return;

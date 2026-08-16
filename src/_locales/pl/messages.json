@@ -14,6 +14,7 @@
   },
 
   "settings": { "message": "Ustawienia" },
+  "nav_menu": { "message": "Menu" },
   "language_pair": { "message": "Para językowa" },
   "reading_list": { "message": "Czytelnia offline" },
   "saved_phrases": { "message": "Zapisane frazy" },

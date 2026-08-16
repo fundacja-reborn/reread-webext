@@ -17,21 +17,58 @@
          one exception: it quotes the bubble's own button labels through
          placeholders, so vocab.js writes it instead of a marker. -->
     <header>
-      <!-- The mark doubles as the door to the settings, exactly as in the
-           reader's bar: it is the one line standing on every view of this
+      <!-- The brand line, with the way to the rest of the extension at its
+           far end. The mark doubles as the door to the settings, exactly as in
+           the reader's bar: it is the one line standing on every view of this
            page, and a button rather than a link because it opens the settings
            tab (`runtime.openOptionsPage`) instead of navigating this one. -->
-      <button
-        type="button"
-        id="brand"
-        class="brand"
-        title="Settings"
-        data-i18n-title="settings"
-        aria-label="Settings"
-        data-i18n-aria-label="settings"
-      >
-        re/read
-      </button>
+      <div class="brand-row">
+        <button
+          type="button"
+          id="brand"
+          class="brand"
+          title="Settings"
+          data-i18n-title="settings"
+          aria-label="Settings"
+          data-i18n-aria-label="settings"
+        >
+          re/read
+        </button>
+        <!-- The same drawn menu button as the reader's bar, for the same
+             reason: on a phone the toolbar popup that used to be the only
+             hallway between these pages is three taps into the browser menu,
+             and this line is already here. -->
+        <button
+          id="menu"
+          type="button"
+          class="menu-toggle"
+          aria-expanded="false"
+          title="Menu"
+          data-i18n-title="nav_menu"
+          aria-label="Menu"
+          data-i18n-aria-label="nav_menu"
+        >
+          <svg class="menu-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+            <path
+              d="M2.5 4.25h11M2.5 8h11M2.5 11.75h11"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.3"
+              stroke-linecap="round"
+            />
+          </svg>
+        </button>
+      </div>
+      <!-- The reader's menu, minus a row for this page - a hallway does not
+           list the room it stands in. The list row goes through the background
+           exactly as the popup's does (`reader-tab.js`): the reader is one
+           tab, and the message both points it at nothing and raises it, while
+           this tab stays a saved-phrases page - which is what the tab registry
+           says it is. The settings row is the mark's press with a word on it. -->
+      <nav id="menu-panel" class="nav-menu" hidden aria-label="Menu" data-i18n-aria-label="nav_menu">
+        <button id="nav-library" type="button" data-i18n="reading_list">Offline reading list</button>
+        <button id="nav-settings" type="button" data-i18n="settings">Settings</button>
+      </nav>
       <div class="head-row">
         <h1 data-i18n="saved_phrases">Saved phrases</h1>
         <label for="pair" class="visually-hidden" data-i18n="language_pair">Language pair</label>

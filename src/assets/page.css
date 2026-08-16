@@ -244,3 +244,40 @@ input[type="checkbox"] {
 a {
   color: var(--page-accent);
 }
+
+/* The small menu behind a page's drawn ☰ button: the extension's own pages
+   linking to one another. It repeats the toolbar popup's hallway where the
+   popup itself is three taps into the browser menu on a phone, and it speaks
+   in the popup's rows - quiet, full-width, separated by lines, each a
+   finger-sized target. The interface font is said outright because the
+   reader page reads in a serif; the last row's line is the menu's own
+   bottom edge, so the panel needs none. */
+.nav-menu {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.nav-menu a,
+.nav-menu button {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 44px;
+  padding: 0.55rem 0;
+  border: none;
+  border-bottom: 1px solid var(--page-line);
+  border-radius: 0;
+  background: none;
+  color: var(--page-fg);
+  text-align: left;
+  text-decoration: none;
+}
+
+/* The popup's hover, not the framed button's: the text answers, the line
+   underneath stays a separator. */
+.nav-menu a:hover,
+.nav-menu button:hover {
+  border-color: var(--page-line);
+  color: var(--page-accent);
+}

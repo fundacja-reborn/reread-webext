@@ -65,10 +65,13 @@
 
 /* The article's font lives on the body so that `ch` means what it should: a
    column measured in characters has to be measured in the characters it will
-   hold, and the bar and the panel set their own smaller interface font. */
+   hold, and the bar and the panel set their own smaller interface font.
+   Half of the old top padding moved into the chrome box below, so the page
+   opens looking exactly as it did while the box, once stuck, still holds a
+   breath of paper over the bar. */
 body.reader {
   max-width: var(--reader-measure, 65ch);
-  padding-top: 1.5rem;
+  padding-top: 0.75rem;
   font-family: Georgia, "Iowan Old Style", "Times New Roman", serif;
   font-size: var(--reader-size, 18px);
   line-height: 1.65;
@@ -119,9 +122,63 @@ summary {
   line-height: 1.5;
 }
 
+/* The box around the bar and its two panels. Its background is the page's
+   own paper - invisible at rest, and the thing that keeps article text from
+   shining through once the box is stuck. The top padding is the other half
+   of the body's old breathing room (see `body.reader`). */
+.reader-chrome {
+  padding-top: 0.75rem;
+  background: var(--page-bg);
+}
+
+/* Stuck to the top only while an article is on screen: that is when the two
+   things it holds are wanted mid-scroll - the voice that starts from the
+   first visible sentence, and the way out of a finished article. The list
+   view keeps its whole chrome scrolling like any heading. `:has` rather than
+   a class set by script, the way this sheet already switches the column and
+   the speech-bar room. Plain sticky, no hiding on scroll: the simplest thing
+   that can be judged on an e-ink panel, where a bar that moved would flash
+   (D93). */
+body.reader:has(#article:not([hidden])) .reader-chrome {
+  position: sticky;
+  top: 0;
+  /* Over the article's text and its painted highlights; the speech bar at the
+     bottom stands at the same height and the two never meet. */
+  z-index: 2;
+}
+
+/* The strip's paper runs edge to edge while everything visible keeps the
+   column (Michał's reports, 2026-08-16): a pill sliding under a column-wide
+   bar looked erased mid-air, so the background must reach the window's
+   edges and cover whatever scrolls beneath - but the line under the bar
+   stays the bar's own, column-wide, a rule of the text rather than a beam
+   across the window. An underlay rather than margins on the chrome itself,
+   so nothing about the chrome's inner layout moves. The halves of the calc
+   overshoot by half a scrollbar; the root's overflow clip below eats the
+   excess. */
+body.reader:has(#article:not([hidden])) .reader-chrome::before {
+  content: "";
+  position: absolute;
+  inset: 0 calc(50% - 50vw);
+  z-index: -1;
+  background: var(--page-bg);
+}
+
+/* What lets the underlay overshoot without summoning a horizontal scrollbar.
+   `clip`, not `hidden`: clipping does not make the root a scroll container,
+   so sticky keeps working against the viewport. The page itself never needs
+   sideways room - the column wraps, and anything wider than it (code, and
+   tables below) scrolls inside its own box. */
+html {
+  overflow-x: clip;
+}
+
+/* Centred, not baseline-aligned: two of the three buttons are drawn glyphs
+   with no baseline to speak of, and against them the mark hung visibly low
+   (reported from a phone). */
 .reader-bar {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 1rem;
   padding-bottom: 1rem;
@@ -154,18 +211,7 @@ summary {
   gap: 1rem;
 }
 
-.reader-original {
-  color: var(--page-muted);
-  text-decoration: none;
-}
-
-.reader-original:hover {
-  color: var(--page-accent);
-  text-decoration: underline;
-}
-
 #display {
-  padding: 0.15rem 0.55rem;
   font-family: Georgia, "Times New Roman", serif;
 }
 
@@ -178,10 +224,18 @@ summary {
   flex: none;
 }
 
-#listen {
+/* The bar's three buttons share one frame height: two hold drawn glyphs and
+   one holds serif text, and left to their contents their borders came out
+   three sizes (reported from a phone). The floor is set on all of them and
+   the contents centre inside it. */
+#listen,
+#display,
+#menu {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  min-height: 2.1rem;
+  min-width: 2.6rem;
   padding: 0.15rem 0.55rem;
 }
 
@@ -362,6 +416,14 @@ summary {
   padding: 0.8rem 1rem;
   border: 1px solid var(--page-line);
   border-radius: 6px;
+}
+
+/* Tables scroll inside their own box for the reason code does - and because
+   the page's sideways overflow is clipped for the sticky strip's sake, a
+   table wider than the column would otherwise have no way to be read. */
+#content table {
+  display: block;
+  overflow-x: auto;
 }
 
 #content code,
@@ -869,6 +931,15 @@ body.reader:has(#speech-bar:not([hidden])) {
   padding-bottom: 4.5rem;
 }
 
+/* Icon-only on a narrow screen means the icon IS the button: at 1.15em the
+   transport glyphs were specks inside their 44px targets (reported from a
+   phone). The words come back at the desktop breakpoint below, and there the
+   glyphs step down to sit beside them. */
+.speech-bar .reader-icon {
+  width: 1.7em;
+  height: 1.7em;
+}
+
 /* These four are the point of the bar, so unlike the article's quiet actions
    they wear the page's full text colour - but still no resting frame, which
    would draw four boxes under an article somebody is listening to. */
@@ -932,6 +1003,12 @@ body.reader:has(#speech-bar:not([hidden])) {
     margin: 0;
     overflow: visible;
     clip-path: none;
+  }
+
+  /* Beside a word the glyph is an accent, not the whole button. */
+  .speech-bar .reader-icon {
+    width: 1.2em;
+    height: 1.2em;
   }
 
   /* The tabs keep their own width instead of splitting the line. */
