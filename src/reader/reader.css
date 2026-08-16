@@ -147,22 +147,21 @@ body.reader:has(#article:not([hidden])) .reader-chrome {
   z-index: 2;
 }
 
-/* The strip runs edge to edge while everything in it keeps the column
-   (Michał's report, 2026-08-16: a pill sliding under a column-wide bar
-   looked erased mid-air, not tucked under a toolbar). An underlay rather
-   than margins on the chrome itself, so nothing about the chrome's inner
-   layout moves: it stretches to the window's edges behind the bar, and its
-   line lands on the same pixel row as the bar's own border - or an open
-   panel's - so inside the column the two read as one line that continues
-   to the edges. The halves of the calc overshoot by half a scrollbar;
-   the root's overflow clip below eats the excess. */
+/* The strip's paper runs edge to edge while everything visible keeps the
+   column (Michał's reports, 2026-08-16): a pill sliding under a column-wide
+   bar looked erased mid-air, so the background must reach the window's
+   edges and cover whatever scrolls beneath - but the line under the bar
+   stays the bar's own, column-wide, a rule of the text rather than a beam
+   across the window. An underlay rather than margins on the chrome itself,
+   so nothing about the chrome's inner layout moves. The halves of the calc
+   overshoot by half a scrollbar; the root's overflow clip below eats the
+   excess. */
 body.reader:has(#article:not([hidden])) .reader-chrome::before {
   content: "";
   position: absolute;
   inset: 0 calc(50% - 50vw);
   z-index: -1;
   background: var(--page-bg);
-  border-bottom: 1px solid var(--page-line);
 }
 
 /* What lets the underlay overshoot without summoning a horizontal scrollbar.
