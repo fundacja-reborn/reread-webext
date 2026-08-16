@@ -35,6 +35,7 @@ check_vendored() {
 
 check_vendored vendor/bergamot
 check_vendored vendor/readability
+check_vendored vendor/fflate
 
 # A file of the right length and hash could still be something WebAssembly
 # refuses to load - a truncated Git LFS pointer, say, or a checkout that

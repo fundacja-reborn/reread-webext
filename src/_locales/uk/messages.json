@@ -293,6 +293,40 @@
   "reader_transfer_note": {
     "message": "Один файл .json з усіма збереженими статтями - резервна копія або переїзд до іншого браузера. Імпорт додає лише статті, яких у цьому списку немає; збережених не змінює."
   },
+  "reader_transfer_books": {
+    "message": "Книжки не входять до цього файлу: резервною копією книжки є її файл .epub - повторний імпорт відновлює все, крім позиції читання."
+  },
+  "reader_add_book": { "message": "Додати файл (EPUB)" },
+  "reader_book_label": { "message": "Книжка" },
+  "reader_book_part_of": {
+    "message": "Частина $PART$ з $PARTS$",
+    "placeholders": {
+      "part": { "content": "$1", "example": "3" },
+      "parts": { "content": "$2", "example": "12" }
+    }
+  },
+  "reader_book_nav": { "message": "Частини книжки" },
+  "reader_book_importing": {
+    "message": "Додавання книжки - частина $PART$",
+    "placeholders": {
+      "part": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_book_added": {
+    "message": "Додано «$TITLE$».",
+    "placeholders": {
+      "title": { "content": "$1", "example": "Dracula" }
+    }
+  },
+  "reader_book_drm": { "message": "Ця книжка захищена DRM, її не можна імпортувати." },
+  "reader_book_unreadable": { "message": "Не вдалося прочитати цей файл як книжку EPUB." },
+  "reader_book_pair_note": {
+    "message": "Мова книжки: $BOOK$; поточна пара перекладає з: $PAIR$.",
+    "placeholders": {
+      "book": { "content": "$1", "example": "німецька" },
+      "pair": { "content": "$2", "example": "англійська" }
+    }
+  },
   "reader_import_nothing": { "message": "У цьому файлі немає статей для імпорту." },
   "reader_import_summary_one": {
     "message": "$NAME$ містить $COUNT$ статтю:",

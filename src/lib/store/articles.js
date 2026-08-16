@@ -1,113 +1,33 @@
 /**
- * Where saved articles live: the reading list's own database.
+ * Where saved articles live: the articles' half of the reading list's
+ * database (`library-db.js` opens it and says why everything shares it).
  *
- * Its own database rather than a second store in `reread-vocab`, for the
- * reason D13 gave models one: clearing or reimporting one kind of data must
- * never be a way to lose the other, and neither schema constrains the other's
- * upgrades. Its own two stores rather than one, for the reason the model
- * database has two: "what is saved here" has to be answerable without pulling
- * every article's content into memory - IndexedDB cannot read half a row.
+ * Two stores rather than one, for the reason the model database has two:
+ * "what is saved here" has to be answerable without pulling every article's
+ * content into memory - IndexedDB cannot read half a row.
  *
  * The primary key of both stores is the article's `url`. That is decision
  * D-d made schema: saving the same page again *is* overwriting the entry,
  * so one row per address is an invariant the database keeps, not a rule a
  * transaction remembers to check.
  *
- * The third store holds reading positions - where in a document its reader
- * stopped. In this database rather than its own because IndexedDB has no
- * transaction across databases, and a position must leave together with its
- * document: a row about where somebody was in an article that is gone would
- * be an orphan nothing ever cleans. Keyed by `docId` rather than `url`
- * because books, when they come, will keep positions here too under their
- * own ids.
- *
- * Only the reader page opens this. The background never needs an article, no
- * message carries one, and an extension page writing its own origin's
- * database directly is the same call D14 made for models.
+ * Reading positions live here too - where in a document its reader stopped.
+ * Keyed by `docId` rather than `url` because books keep their positions in
+ * the same store under their own ids, and a position must leave together
+ * with its document: a row about where somebody was in an article that is
+ * gone would be an orphan nothing ever cleans.
  */
 
 import { asPosition } from "../reader/position.js";
 import { importPlan } from "./articles-file.js";
+import { promisify, withLibrary } from "./library-db.js";
 import { asSavedMeta } from "./saved-article.js";
-
-const DB_NAME = "reread-articles";
-const DB_VERSION = 2;
-/** The list's half: one light row per article. */
-const META = "meta";
-/** The article's half: the rebuilt markup, read only to render one. */
-const CONTENT = "content";
-/** Where each document's reader stopped: one row per `docId`, or none. */
-const POSITIONS = "positions";
 
 /**
  * @typedef {import("./saved-article.js").SavedMeta} SavedMeta
  * @typedef {import("./saved-article.js").SavedArticle} SavedArticle
  * @typedef {import("../reader/position.js").ReadingPosition} ReadingPosition
  */
-
-/**
- * @template T
- * @param {IDBRequest<T>} request
- * @returns {Promise<T>}
- */
-function promisify(request) {
-  return new Promise((resolve, reject) => {
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error ?? new Error("IndexedDB request failed"));
-  });
-}
-
-/**
- * @returns {Promise<IDBDatabase>}
- */
-function open() {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
-    request.onupgradeneeded = () => {
-      const db = request.result;
-      if (!db.objectStoreNames.contains(META)) db.createObjectStore(META, { keyPath: "url" });
-      if (!db.objectStoreNames.contains(CONTENT)) db.createObjectStore(CONTENT, { keyPath: "url" });
-      // Version 2. Contains-guarded like the others, so the one upgrade path
-      // serves both a fresh install and a database from version 1.
-      if (!db.objectStoreNames.contains(POSITIONS)) {
-        db.createObjectStore(POSITIONS, { keyPath: "docId" });
-      }
-    };
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error ?? new Error("Cannot open the articles database"));
-    request.onblocked = () => reject(new Error("The articles database is in use by another page"));
-  });
-}
-
-/**
- * @template T
- * @param {IDBTransactionMode} mode
- * @param {(
- *   meta: IDBObjectStore,
- *   content: IDBObjectStore,
- *   positions: IDBObjectStore,
- * ) => Promise<T>} work
- * @returns {Promise<T>}
- */
-async function withStores(mode, work) {
-  const db = await open();
-  try {
-    const transaction = db.transaction([META, CONTENT, POSITIONS], mode);
-    const result = await work(
-      transaction.objectStore(META),
-      transaction.objectStore(CONTENT),
-      transaction.objectStore(POSITIONS),
-    );
-    await new Promise((resolve, reject) => {
-      transaction.oncomplete = () => resolve(undefined);
-      transaction.onerror = () => reject(transaction.error ?? new Error("Articles transaction failed"));
-      transaction.onabort = () => reject(transaction.error ?? new Error("Articles transaction aborted"));
-    });
-    return result;
-  } finally {
-    db.close();
-  }
-}
 
 /**
  * Saves an article, replacing whatever was saved under the same address. Both
@@ -123,10 +43,10 @@ async function withStores(mode, work) {
  */
 export async function putArticle(article) {
   const { content, dir, lang, ...meta } = article;
-  await withStores("readwrite", async (metaStore, contentStore, positionsStore) => {
-    await promisify(metaStore.put(meta));
-    await promisify(contentStore.put({ url: article.url, content, dir, lang }));
-    await promisify(positionsStore.delete(article.url));
+  await withLibrary("readwrite", async (stores) => {
+    await promisify(stores.meta.put(meta));
+    await promisify(stores.content.put({ url: article.url, content, dir, lang }));
+    await promisify(stores.positions.delete(article.url));
   });
 }
 
@@ -140,10 +60,10 @@ export async function putArticle(article) {
  * @returns {Promise<void>}
  */
 export async function deleteArticle(url) {
-  await withStores("readwrite", async (metaStore, contentStore, positionsStore) => {
-    await promisify(metaStore.delete(url));
-    await promisify(contentStore.delete(url));
-    await promisify(positionsStore.delete(url));
+  await withLibrary("readwrite", async (stores) => {
+    await promisify(stores.meta.delete(url));
+    await promisify(stores.content.delete(url));
+    await promisify(stores.positions.delete(url));
   });
 }
 
@@ -155,10 +75,28 @@ export async function deleteArticle(url) {
  * @returns {Promise<ReadingPosition | null>}
  */
 export async function getPosition(docId) {
-  const row = await withStores("readonly", (_meta, _content, positionsStore) =>
-    promisify(positionsStore.get(docId)),
-  );
+  const row = await withLibrary("readonly", (stores) => promisify(stores.positions.get(docId)));
   return asPosition(row);
+}
+
+/**
+ * Every position at once, for the list: fifty rows asking one at a time
+ * would be fifty transactions for what one `getAll` answers. Unreadable rows
+ * drop out here, so the list never has to doubt what it was handed.
+ *
+ * @returns {Promise<Map<string, ReadingPosition>>} keyed by `docId`
+ */
+export async function allPositions() {
+  const rows = /** @type {unknown[]} */ (
+    await withLibrary("readonly", (stores) => promisify(stores.positions.getAll()))
+  );
+  /** @type {Map<string, ReadingPosition>} */
+  const positions = new Map();
+  for (const row of rows) {
+    const position = asPosition(row);
+    if (position !== null) positions.set(position.docId, position);
+  }
+  return positions;
 }
 
 /**
@@ -169,8 +107,8 @@ export async function getPosition(docId) {
  * @returns {Promise<void>}
  */
 export async function putPosition(position) {
-  await withStores("readwrite", async (_meta, _content, positionsStore) => {
-    await promisify(positionsStore.put(position));
+  await withLibrary("readwrite", async (stores) => {
+    await promisify(stores.positions.put(position));
   });
 }
 
@@ -182,7 +120,7 @@ export async function putPosition(position) {
  * @returns {Promise<SavedMeta | null>}
  */
 export async function getArticleMeta(url) {
-  const row = await withStores("readonly", (metaStore) => promisify(metaStore.get(url)));
+  const row = await withLibrary("readonly", (stores) => promisify(stores.meta.get(url)));
   return asSavedMeta(row);
 }
 
@@ -194,7 +132,7 @@ export async function getArticleMeta(url) {
  */
 export async function listArticles() {
   const rows = /** @type {unknown[]} */ (
-    await withStores("readonly", (metaStore) => promisify(metaStore.getAll()))
+    await withLibrary("readonly", (stores) => promisify(stores.meta.getAll()))
   );
   return rows.map(asSavedMeta).filter((meta) => meta !== null);
 }
@@ -207,9 +145,9 @@ export async function listArticles() {
  * @returns {Promise<SavedArticle | null>}
  */
 export async function getArticle(url) {
-  const { meta, stored } = await withStores("readonly", async (metaStore, contentStore) => ({
-    meta: asSavedMeta(await promisify(metaStore.get(url))),
-    stored: /** @type {unknown} */ (await promisify(contentStore.get(url))),
+  const { meta, stored } = await withLibrary("readonly", async (stores) => ({
+    meta: asSavedMeta(await promisify(stores.meta.get(url))),
+    stored: /** @type {unknown} */ (await promisify(stores.content.get(url))),
   }));
   if (meta === null || typeof stored !== "object" || stored === null) return null;
 
@@ -233,9 +171,9 @@ export async function getArticle(url) {
  * @returns {Promise<SavedArticle[]>}
  */
 export async function allArticles() {
-  const { metas, stored } = await withStores("readonly", async (metaStore, contentStore) => ({
-    metas: /** @type {unknown[]} */ (await promisify(metaStore.getAll())),
-    stored: /** @type {unknown[]} */ (await promisify(contentStore.getAll())),
+  const { metas, stored } = await withLibrary("readonly", async (stores) => ({
+    metas: /** @type {unknown[]} */ (await promisify(stores.meta.getAll())),
+    stored: /** @type {unknown[]} */ (await promisify(stores.content.getAll())),
   }));
 
   /** @type {Map<string, { content: string, dir: string | null, lang: string | null }>} */
@@ -273,13 +211,13 @@ export async function allArticles() {
  * @returns {Promise<{ added: number, skipped: number }>}
  */
 export async function importArticles(articles) {
-  return await withStores("readwrite", async (metaStore, contentStore) => {
-    const keys = /** @type {IDBValidKey[]} */ (await promisify(metaStore.getAllKeys()));
+  return await withLibrary("readwrite", async (stores) => {
+    const keys = /** @type {IDBValidKey[]} */ (await promisify(stores.meta.getAllKeys()));
     const { toAdd, skipped } = importPlan(keys.map(String), articles);
     for (const article of toAdd) {
       const { content, dir, lang, ...meta } = article;
-      await promisify(metaStore.put(meta));
-      await promisify(contentStore.put({ url: article.url, content, dir, lang }));
+      await promisify(stores.meta.put(meta));
+      await promisify(stores.content.put({ url: article.url, content, dir, lang }));
     }
     return { added: toAdd.length, skipped };
   });
@@ -295,11 +233,11 @@ export async function importArticles(articles) {
  * @returns {Promise<SavedMeta | null>} the row as it stands now
  */
 export async function setReadAt(url, readAt) {
-  return await withStores("readwrite", async (metaStore) => {
-    const row = asSavedMeta(await promisify(metaStore.get(url)));
+  return await withLibrary("readwrite", async (stores) => {
+    const row = asSavedMeta(await promisify(stores.meta.get(url)));
     if (row === null) return null;
     const updated = { ...row, readAt };
-    await promisify(metaStore.put(updated));
+    await promisify(stores.meta.put(updated));
     return updated;
   });
 }

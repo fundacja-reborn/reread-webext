@@ -25,6 +25,7 @@
 import { rescan, start } from "../content/reading.js";
 import { webext } from "../lib/browser.js";
 import { localizePage, plural, t } from "../lib/i18n.js";
+import { languageName } from "../lib/language.js";
 import {
   CONFIG_KEY,
   DEFAULTS,
@@ -55,6 +56,7 @@ import {
 } from "../lib/store/articles-file.js";
 import {
   allArticles,
+  allPositions,
   deleteArticle,
   getArticle,
   getArticleMeta,
@@ -65,10 +67,19 @@ import {
   putPosition,
   setReadAt,
 } from "../lib/store/articles.js";
+import {
+  deleteBook,
+  getBook,
+  getBookSegment,
+  listBooks,
+  setBookReadAt,
+  sweepOrphanSegments,
+} from "../lib/store/books.js";
 import { Segment, emptySentence, savedArticle } from "../lib/store/saved-article.js";
 import { watchToolbarScheme } from "../lib/theme-icon.js";
 import { canSpeak, primaryLanguage, voicesFor } from "../lib/tts.js";
-import { libraryView } from "./list-view.js";
+import { importEpub } from "./import-book.js";
+import { articleEntry, bookEntry, libraryView } from "./list-view.js";
 import {
   configureReading,
   forgetReading,
@@ -151,6 +162,32 @@ const importRun = /** @type {HTMLButtonElement | null} */ (
 );
 const importCancel = document.getElementById("library-import-cancel");
 const transferLine = document.getElementById("library-transfer-status");
+const addBookButton = /** @type {HTMLButtonElement | null} */ (
+  document.getElementById("library-add-book")
+);
+const bookFileInput = /** @type {HTMLInputElement | null} */ (
+  document.getElementById("library-book-file")
+);
+const bookImportLine = document.getElementById("book-import-status");
+const bookNote = document.getElementById("book-note");
+const bookNoteText = document.getElementById("book-note-text");
+const bookNoteSettings = document.getElementById("book-note-settings");
+const segmentNavs = [
+  document.getElementById("segment-nav"),
+  document.getElementById("segment-nav-end"),
+];
+const segmentLabels = [
+  document.getElementById("segment-label"),
+  document.getElementById("segment-label-end"),
+];
+const segmentPrevs = [
+  document.getElementById("segment-prev"),
+  document.getElementById("segment-prev-end"),
+];
+const segmentNexts = [
+  document.getElementById("segment-next"),
+  document.getElementById("segment-next-end"),
+];
 const actions = document.getElementById("actions");
 const toLibraryButton = document.getElementById("to-library");
 const keepButton = document.getElementById("keep");
@@ -163,11 +200,14 @@ const toLibraryEndButton = document.getElementById("to-library-end");
 const markReadEndButton = document.getElementById("mark-read-end");
 
 /**
- * What is on screen: a live page's article, a saved one, or the list (null).
- * A fresh object every time something renders, so a slow answer can tell that
- * the view it was fetched for is gone by identity alone.
+ * What is on screen: a live page's article, a saved one, a book's segment, or
+ * the list (null). A fresh object every time something renders, so a slow
+ * answer can tell that the view it was fetched for is gone by identity alone.
+ * For a book, `url` is its id - the same name it goes by everywhere else.
  *
- * @type {{ origin: "live" | "saved", url: string } | null}
+ * @type {{ origin: "live" | "saved", url: string }
+ *   | { origin: "book", url: string, segmentIndex: number, segmentCount: number }
+ *   | null}
  */
 let shown = null;
 
@@ -287,14 +327,19 @@ function setBase(doc, url) {
  * hand over stored markup without vouching for it.
  *
  * @param {{
- *   origin: "live" | "saved",
+ *   origin: "live" | "saved" | "book",
  *   url: string,
  *   title: string,
  *   credit: string[],
  *   dir: string | null,
  *   lang: string | null,
+ *   link: string | null,
+ *   segment?: { index: number, count: number },
  *   source: Element,
  * }} piece
+ *   `url` is the document's name in the database (a book's id included);
+ *   `link` is the address worth offering as "Open the original", which a
+ *   book does not have.
  */
 function renderArticle(piece) {
   if (article === null || contentElement === null || titleElement === null) return;
@@ -306,6 +351,10 @@ function renderArticle(piece) {
   // they are about to be replaced: the voice stops here rather than reading a
   // sentence of one article into another (D87).
   forgetReading();
+  // The book dressing is put on by `openBook` after this returns; every
+  // other road through here takes it off.
+  showSegmentNav(null);
+  showBookNote(null);
 
   const rebuilt = buildArticle(piece.source, document, { baseUrl: piece.url });
 
@@ -336,16 +385,28 @@ function renderArticle(piece) {
   rescan();
 
   if (originalLink instanceof HTMLAnchorElement) {
-    originalLink.href = piece.url;
-    originalLink.target = "_blank";
-    originalLink.rel = "noreferrer noopener";
-    originalLink.hidden = false;
+    if (piece.link === null) {
+      originalLink.hidden = true;
+    } else {
+      originalLink.href = piece.link;
+      originalLink.target = "_blank";
+      originalLink.rel = "noreferrer noopener";
+      originalLink.hidden = false;
+    }
   }
   // With an article on screen the list is elsewhere, so the menu offers it.
   if (navLibrary !== null) navLibrary.hidden = false;
   document.title = `${piece.title} - re/read`;
 
-  shown = { origin: piece.origin, url: piece.url };
+  shown =
+    piece.origin === "book"
+      ? {
+          origin: "book",
+          url: piece.url,
+          segmentIndex: piece.segment?.index ?? 0,
+          segmentCount: piece.segment?.count ?? 1,
+        }
+      : { origin: piece.origin, url: piece.url };
   // The voice follows the article, not the pair: this one may be in another
   // language, and the select in the panel is about whatever is on screen.
   applySpeech();
@@ -382,6 +443,7 @@ function renderLive(page) {
     credit,
     dir: typeof found.dir === "string" && found.dir !== "" ? found.dir : null,
     lang: typeof found.lang === "string" && found.lang !== "" ? found.lang : null,
+    link: page.url,
     source: new DOMParser().parseFromString(found.content, "text/html").body,
   });
 }
@@ -397,6 +459,7 @@ function renderSaved(saved) {
     credit: [],
     dir: saved.dir,
     lang: saved.lang,
+    link: saved.url,
     // Our own serialized markup - and still not trusted back: parsed inert and
     // rebuilt through the allowed list again, like anything else rendered here.
     source: new DOMParser().parseFromString(saved.content, "text/html").body,
@@ -466,10 +529,13 @@ function savePositionNow() {
     positionTimer = null;
   }
   const target = shown;
-  if (target === null || target.origin !== "saved") return;
+  // Only documents the database holds: a live page has no row for the
+  // position to belong to. A book's place is its segment and the block in it.
+  if (target === null || target.origin === "live") return;
   const at = topBlockIndex();
   if (at === null) return;
-  const record = positionRecord(target.url, 0, at, Date.now());
+  const segment = target.origin === "book" ? target.segmentIndex : 0;
+  const record = positionRecord(target.url, segment, at, Date.now());
   if (record !== null) void putPosition(record).catch(() => undefined);
 }
 
@@ -489,7 +555,7 @@ function flushPosition() {
 window.addEventListener(
   "scroll",
   () => {
-    if (shown === null || shown.origin !== "saved") return;
+    if (shown === null || shown.origin === "live") return;
     if (positionTimer !== null) clearTimeout(positionTimer);
     positionTimer = setTimeout(savePositionNow, POSITION_SAVE_DELAY);
   },
@@ -506,16 +572,18 @@ document.addEventListener("visibilitychange", () => {
 });
 
 /**
- * Puts a just-rendered saved article back where its reader stopped. Nothing
- * to restore - no row, another segment, an index past the end of a document
+ * Puts a just-rendered document back where its reader stopped. Nothing to
+ * restore - no row, another segment, an index past the end of a document
  * since overwritten - means the top, where `renderArticle` already left it.
  *
  * @param {import("../lib/reader/position.js").ReadingPosition | null} position
+ * @param {number} [segmentIndex] the segment on screen - a book's, or an
+ *   article's implicit zero
  */
-function restorePosition(position) {
+function restorePosition(position, segmentIndex = 0) {
   const root = contentRoot();
   if (root === null) return;
-  const at = restoredIndex(position, 0, root.children.length);
+  const at = restoredIndex(position, segmentIndex, root.children.length);
   if (at === null) return;
   root.children[at]?.scrollIntoView({ behavior: "instant", block: "start" });
   // `scrollIntoView` puts the block at the window's very top, which the
@@ -576,6 +644,120 @@ async function openSaved(url) {
   restorePosition(position);
 }
 
+/**
+ * The two rows around a book's text: which part is on screen, and the way to
+ * its neighbours. Or, with null, no rows at all - which is every view that
+ * is not a book.
+ *
+ * @param {{ index: number, count: number } | null} segment
+ */
+function showSegmentNav(segment) {
+  for (const nav of segmentNavs) {
+    if (nav !== null) nav.hidden = segment === null;
+  }
+  if (segment === null) return;
+  for (const label of segmentLabels) {
+    if (label !== null) {
+      label.textContent = t("reader_book_part_of", [
+        (segment.index + 1).toLocaleString(),
+        segment.count.toLocaleString(),
+      ]);
+    }
+  }
+  for (const button of segmentPrevs) {
+    if (button instanceof HTMLButtonElement) button.disabled = segment.index <= 0;
+  }
+  for (const button of segmentNexts) {
+    if (button instanceof HTMLButtonElement) button.disabled = segment.index >= segment.count - 1;
+  }
+}
+
+/**
+ * The quiet line over a book whose language is not what the current pair
+ * translates from (O20): said once, with the settings one press away, and
+ * never acted on by itself. Books that do not declare a language, and books
+ * that match, say nothing.
+ *
+ * @param {import("../lib/store/book.js").BookMeta | null} book
+ */
+function showBookNote(book) {
+  if (bookNote === null || bookNoteText === null) return;
+  const declared = book === null ? "" : primaryLanguage(book.lang ?? "");
+  const mismatch = declared.length > 0 && declared !== primaryLanguage(settings.sourceLang);
+  bookNote.hidden = !mismatch;
+  if (mismatch && book !== null) {
+    bookNoteText.textContent = t("reader_book_pair_note", [
+      languageName(declared),
+      languageName(primaryLanguage(settings.sourceLang)),
+    ]);
+  }
+}
+
+/**
+ * Opens a book at one of its segments - the remembered one when no segment
+ * is asked for, which is what a press in the list means. The same round trip
+ * and epoch guard as a saved article; the render is `renderArticle` whole,
+ * so the panel, the bubble, the underlines and the voice work in a segment
+ * exactly as they do in an article.
+ *
+ * @param {string} id
+ * @param {number} [wanted] a specific segment - the neighbour rows' press
+ */
+async function openBook(id, wanted) {
+  const turn = ++epoch;
+  const [book, position] = await Promise.all([getBook(id), getPosition(id)]);
+  if (turn !== epoch) return;
+  if (book === null) {
+    // Gone under us - deleted from another reader tab. The list knows.
+    await refreshLibrary();
+    return;
+  }
+
+  const remembered =
+    position !== null && position.segmentIndex < book.segmentCount ? position.segmentIndex : 0;
+  const index = Math.min(Math.max(0, wanted ?? remembered), book.segmentCount - 1);
+  const segment = await getBookSegment(id, index);
+  if (turn !== epoch) return;
+  if (segment === null) {
+    // A book whose row outlived its text - torn beyond rendering.
+    showNotice(t("reader_book_unreadable"));
+    if (shown === null) await showLibrary();
+    return;
+  }
+
+  renderArticle({
+    origin: "book",
+    url: id,
+    title: book.title,
+    credit: book.author === null ? [] : [book.author],
+    dir: null,
+    lang: book.lang,
+    link: null,
+    segment: { index, count: book.segmentCount },
+    // Our own rebuilt markup, stored at import - and still not trusted back:
+    // parsed inert and rebuilt through the allowed list again.
+    source: new DOMParser().parseFromString(segment.blocks.join(""), "text/html").body,
+  });
+  showSegmentNav({ index, count: book.segmentCount });
+  showBookNote(book);
+  restorePosition(position, index);
+}
+
+/**
+ * One press on Previous or Next: the neighbouring segment in the same tab,
+ * no navigation and no animation. The position of the segment being left was
+ * flushed by `renderArticle` before its blocks went away.
+ *
+ * @param {number} step
+ */
+function turnSegment(step) {
+  const target = shown;
+  if (target === null || target.origin !== "book") return;
+  const next = target.segmentIndex + step;
+  if (next < 0 || next >= target.segmentCount) return;
+  void openBook(target.url, next);
+}
+
 async function showLibrary() {
   epoch += 1;
   // Before `shown` moves: the pending save is about the article on screen.
@@ -589,6 +771,8 @@ async function showLibrary() {
   if (actions !== null) actions.hidden = true;
   if (actionsEnd !== null) actionsEnd.hidden = true;
   if (originalLink !== null) originalLink.hidden = true;
+  showSegmentNav(null);
+  showBookNote(null);
   // The menu must not list the room it stands in: on the list view its list
   // row hides, leaving the pages that really are elsewhere.
   if (navLibrary !== null) navLibrary.hidden = true;
@@ -600,8 +784,18 @@ async function showLibrary() {
 
 async function refreshLibrary() {
   if (libraryEmpty === null || libraryRows === null) return;
-  const metas = await listArticles();
-  const view = libraryView(metas, { segment, query: libraryQuery, page: libraryPage });
+  // One list, two stores: books enter dressed as rows (`bookEntry`), with
+  // their positions read in bulk - fifty rows must not mean fifty lookups.
+  const [metas, books, positions] = await Promise.all([
+    listArticles(),
+    listBooks(),
+    allPositions(),
+  ]);
+  const entries = [
+    ...metas.map(articleEntry),
+    ...books.map((book) => bookEntry(book, positions.get(book.id) ?? null)),
+  ];
+  const view = libraryView(entries, { segment, query: libraryQuery, page: libraryPage });
   libraryPage = view.page;
 
   // Each tab wears its whole segment's count - the entire half of the list,
@@ -617,7 +811,8 @@ async function refreshLibrary() {
   }
 
   // Exporting nothing would download an empty file; the button says so first.
-  // On whether anything is saved at all - not on the segment.
+  // On whether any *articles* are saved - books stay out of the file, so a
+  // list of books alone still has nothing to export.
   if (exportButton !== null) exportButton.disabled = metas.length === 0;
 
   // "3 of 12" while the filter narrows the segment down; the tabs already
@@ -655,7 +850,7 @@ async function refreshLibrary() {
       });
       libraryEmpty.append(sentence, clear);
     } else {
-      libraryEmpty.textContent = emptySentence(metas.length, segment);
+      libraryEmpty.textContent = emptySentence(entries.length, segment);
     }
     libraryEmpty.hidden = false;
   } else {
@@ -690,9 +885,12 @@ function renderLibraryPager(view) {
  * cannot land in the other. Titles came from somebody's page once, so they
  * enter as text - the same `textContent` rule as everywhere else.
  *
- * @param {import("../lib/store/saved-article.js").SavedMeta} meta
+ * A book's detail line trades the site and the date for what a book has:
+ * its author, the quiet word "Book", and how far in its reader is.
+ *
+ * @param {import("./list-view.js").LibraryEntry} entry
  */
-function libraryRow(meta) {
+function libraryRow(entry) {
   const item = document.createElement("li");
   item.className = "library-row";
 
@@ -702,24 +900,39 @@ function libraryRow(meta) {
   const open = document.createElement("button");
   open.type = "button";
   open.className = "library-open";
-  open.setAttribute("data-url", meta.url);
-  open.textContent = meta.title;
+  open.setAttribute("data-url", entry.url);
+  open.setAttribute("data-kind", entry.kind);
+  open.textContent = entry.title;
 
   const detail = document.createElement("span");
   detail.className = "library-item-detail";
-  const when = meta.savedAt > 0 ? new Date(meta.savedAt).toLocaleDateString() : "";
-  detail.textContent = [meta.hostname, when].filter((part) => part.length > 0).join(" - ");
+  if (entry.kind === "book") {
+    const progress =
+      entry.progress === null
+        ? ""
+        : t("reader_book_part_of", [
+            entry.progress.at.toLocaleString(),
+            entry.progress.of.toLocaleString(),
+          ]);
+    detail.textContent = [entry.hostname, t("reader_book_label"), progress]
+      .filter((part) => part.length > 0)
+      .join(" - ");
+  } else {
+    const when = entry.savedAt > 0 ? new Date(entry.savedAt).toLocaleDateString() : "";
+    detail.textContent = [entry.hostname, when].filter((part) => part.length > 0).join(" - ");
+  }
 
   text.append(open, detail);
 
   const remove = document.createElement("button");
   remove.type = "button";
   remove.className = "library-delete";
-  remove.setAttribute("data-url", meta.url);
+  remove.setAttribute("data-url", entry.url);
+  remove.setAttribute("data-kind", entry.kind);
   remove.textContent = t("action_delete");
   // The visible "Delete" repeats fifty times a page; to a screen reader each
   // one carries its article, and the label follows the armed state below.
-  remove.setAttribute("aria-label", t("reader_delete_aria", meta.title));
+  remove.setAttribute("aria-label", t("reader_delete_aria", entry.title));
 
   item.append(text, remove);
   return item;
@@ -782,14 +995,16 @@ function armDelete(button) {
  *
  * @param {HTMLButtonElement} button
  * @param {string} url
+ * @param {string} kind
  */
-async function removeRow(button, url) {
+async function removeRow(button, url, kind) {
   const deletes = () =>
     libraryRows === null ? [] : [...libraryRows.querySelectorAll("button.library-delete")];
   const at = deletes().indexOf(button);
 
   try {
-    await deleteArticle(url);
+    if (kind === "book") await deleteBook(url);
+    else await deleteArticle(url);
   } catch {
     showNotice(t("reader_list_write_failed"));
   }
@@ -920,7 +1135,12 @@ async function refreshActions() {
     return;
   }
 
-  const meta = await getArticleMeta(target.url).catch(() => null);
+  // The database row behind the view - an article's meta or a book's, both
+  // answering the two questions asked here: is it kept, and is it read.
+  const row =
+    target.origin === "book"
+      ? await getBook(target.url).catch(() => null)
+      : await getArticleMeta(target.url).catch(() => null);
   if (shown !== target) return;
 
   actions.hidden = false;
@@ -930,12 +1150,14 @@ async function refreshActions() {
 
   if (keepButton !== null) {
     keepButton.hidden = target.origin !== "live";
-    keepButton.textContent = meta === null ? t("reader_save") : t("reader_saved");
-    keepButton.setAttribute("aria-pressed", String(meta !== null));
+    keepButton.textContent = row === null ? t("reader_save") : t("reader_saved");
+    keepButton.setAttribute("aria-pressed", String(row !== null));
   }
 
   if (removeButton !== null) {
-    removeButton.hidden = target.origin !== "saved";
+    // Delete stands over everything that lives only in this database: a
+    // saved article, and a book.
+    removeButton.hidden = target.origin === "live" || row === null;
     removeButton.removeAttribute("data-armed");
     removeButton.style.removeProperty("min-width");
     // The rows' pair of words: one visible verb, the act with its title as
@@ -944,10 +1166,10 @@ async function refreshActions() {
     removeButton.setAttribute("aria-label", t("reader_delete_aria", deleteTitle(removeButton)));
   }
 
-  const read = meta !== null && meta.readAt !== null;
+  const read = row !== null && row.readAt !== null;
   for (const button of [markReadButton, markReadEndButton]) {
     if (button === null) continue;
-    button.hidden = meta === null;
+    button.hidden = row === null;
     button.textContent = read ? t("reader_marked_read") : t("reader_mark_read");
     button.setAttribute("aria-pressed", String(read));
   }
@@ -999,7 +1221,7 @@ async function onKeepPress() {
  */
 async function onRemovePress() {
   const target = shown;
-  if (target === null || target.origin !== "saved") return;
+  if (target === null || target.origin === "live") return;
   if (!(removeButton instanceof HTMLButtonElement)) return;
 
   if (!removeButton.hasAttribute("data-armed")) {
@@ -1014,7 +1236,8 @@ async function onRemovePress() {
   }
 
   try {
-    await deleteArticle(target.url);
+    if (target.origin === "book") await deleteBook(target.url);
+    else await deleteArticle(target.url);
   } catch {
     showNotice(t("reader_list_write_failed"));
     return;
@@ -1033,9 +1256,15 @@ async function onMarkReadPress() {
   if (target === null) return;
 
   try {
-    const meta = await getArticleMeta(target.url);
-    if (shown !== target || meta === null) return;
-    await setReadAt(target.url, meta.readAt === null ? Date.now() : null);
+    if (target.origin === "book") {
+      const book = await getBook(target.url);
+      if (shown !== target || book === null) return;
+      await setBookReadAt(target.url, book.readAt === null ? Date.now() : null);
+    } else {
+      const meta = await getArticleMeta(target.url);
+      if (shown !== target || meta === null) return;
+      await setReadAt(target.url, meta.readAt === null ? Date.now() : null);
+    }
   } catch {
     showNotice(t("reader_list_write_failed"));
     return;
@@ -1394,15 +1623,17 @@ libraryRows?.addEventListener("click", (event) => {
   if (!(button instanceof HTMLButtonElement)) return;
   const url = button.getAttribute("data-url") ?? "";
   if (url.length === 0) return;
+  const kind = button.getAttribute("data-kind") ?? "article";
 
   if (button.classList.contains("library-delete")) {
     // Two presses on the same spot (D-e), asked with text, answered for real:
     // the second one deletes the row from the database, not from the screen.
-    if (button.hasAttribute("data-armed")) void removeRow(button, url);
+    if (button.hasAttribute("data-armed")) void removeRow(button, url, kind);
     else armDelete(button);
     return;
   }
-  void openSaved(url);
+  if (kind === "book") void openBook(url);
+  else void openSaved(url);
 });
 
 // The armed Delete - a row's or the article's - stands down at any step away
@@ -1444,6 +1675,73 @@ importCancel?.addEventListener("click", () => {
   closeImportOffer();
   transferStatus("");
 });
+
+/**
+ * The book import's own status line, right under the button that started it
+ * (`.status:empty` keeps it out of the flow while it has nothing to say).
+ *
+ * @param {string} text
+ * @param {"error"} [tone]
+ */
+function bookImportStatus(text, tone) {
+  if (bookImportLine === null) return;
+  bookImportLine.textContent = text;
+  if (tone === undefined) delete bookImportLine.dataset["tone"];
+  else bookImportLine.dataset["tone"] = tone;
+}
+
+/** One import at a time - the disabled button is the whole lock's UI. */
+let importingBook = false;
+
+/**
+ * @param {File} file
+ */
+async function runBookImport(file) {
+  if (importingBook) return;
+  importingBook = true;
+  if (addBookButton !== null) addBookButton.disabled = true;
+  bookImportStatus(t("reader_book_importing", "1"));
+  try {
+    // Progress once per segment written, not per block - every repaint is a
+    // flash on e-ink, and the segment is the honest unit of "saved so far".
+    const outcome = await importEpub(file, (written) =>
+      bookImportStatus(t("reader_book_importing", written.toLocaleString())),
+    );
+    if (outcome.ok) {
+      bookImportStatus(t("reader_book_added", outcome.book.title));
+      await refreshLibrary();
+    } else {
+      bookImportStatus(
+        outcome.reason === "drm" ? t("reader_book_drm") : t("reader_book_unreadable"),
+        "error",
+      );
+    }
+  } finally {
+    importingBook = false;
+    if (addBookButton !== null) addBookButton.disabled = false;
+  }
+}
+
+addBookButton?.addEventListener("click", () => bookFileInput?.click());
+
+bookFileInput?.addEventListener("change", () => {
+  if (bookFileInput === null) return;
+  const file = bookFileInput.files?.[0];
+  // Cleared so that the same file, picked again, fires this again.
+  bookFileInput.value = "";
+  if (file !== undefined) void runBookImport(file);
+});
+
+for (const button of segmentPrevs) button?.addEventListener("click", () => turnSegment(-1));
+for (const button of segmentNexts) button?.addEventListener("click", () => turnSegment(1));
+
+bookNoteSettings?.addEventListener("click", () => void webext().runtime.openOptionsPage());
+
+// The leavings of an import a closed tab cut short, taken out at the door:
+// this page is the only one with a key to the database, so its opening is
+// the only "start" there is (O18). Quiet on failure - orphans are invisible,
+// and the next opening will try again.
+void sweepOrphanSegments().catch(() => undefined);
 
 // One way back, two doors: the line above the article and the one under it.
 for (const button of [toLibraryButton, toLibraryEndButton]) {

@@ -137,9 +137,14 @@ export function asSavedMeta(value) {
  * key, and what a reader means by "my list" is the order they saved it in,
  * backwards.
  *
- * @param {SavedMeta[]} metas
+ * Generic over the row, because the list holds more than articles now: a
+ * book enters dressed in the same fields (`list-view.js`), and whatever else
+ * it carries has to come out the other side.
+ *
+ * @template {SavedMeta} T
+ * @param {T[]} metas
  * @param {SegmentValue} segment
- * @returns {SavedMeta[]}
+ * @returns {T[]}
  */
 export function listedRows(metas, segment) {
   return metas

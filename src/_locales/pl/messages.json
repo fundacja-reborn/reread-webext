@@ -293,6 +293,40 @@
   "reader_transfer_note": {
     "message": "Jeden plik .json ze wszystkimi zapisanymi artykułami - kopia zapasowa albo przenosiny do innej przeglądarki. Import dodaje tylko artykuły, których tu brakuje; zapisanych nie zmienia."
   },
+  "reader_transfer_books": {
+    "message": "Książki nie wchodzą do tego pliku: kopią zapasową książki jest jej plik .epub - ponowny import przywraca wszystko poza pozycją czytania."
+  },
+  "reader_add_book": { "message": "Dodaj plik (EPUB)" },
+  "reader_book_label": { "message": "Książka" },
+  "reader_book_part_of": {
+    "message": "Część $PART$ z $PARTS$",
+    "placeholders": {
+      "part": { "content": "$1", "example": "3" },
+      "parts": { "content": "$2", "example": "12" }
+    }
+  },
+  "reader_book_nav": { "message": "Części książki" },
+  "reader_book_importing": {
+    "message": "Dodawanie książki - część $PART$",
+    "placeholders": {
+      "part": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_book_added": {
+    "message": "Dodano „$TITLE$”.",
+    "placeholders": {
+      "title": { "content": "$1", "example": "Dracula" }
+    }
+  },
+  "reader_book_drm": { "message": "Ta książka ma zabezpieczenie DRM i nie da się jej zaimportować." },
+  "reader_book_unreadable": { "message": "Nie udało się odczytać tego pliku jako książki EPUB." },
+  "reader_book_pair_note": {
+    "message": "Język książki: $BOOK$; bieżąca para tłumaczy z: $PAIR$.",
+    "placeholders": {
+      "book": { "content": "$1", "example": "niemiecki" },
+      "pair": { "content": "$2", "example": "angielski" }
+    }
+  },
   "reader_import_nothing": { "message": "W tym pliku nie ma artykułów do zaimportowania." },
   "reader_import_summary_one": {
     "message": "$NAME$ zawiera $COUNT$ artykuł:",

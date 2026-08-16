@@ -586,6 +586,7 @@ body.reader:has(#library:not([hidden])) {
 
 .filter-line {
   display: flex;
+  gap: 0.5rem;
   margin: 0.75rem 0 0;
 }
 
@@ -599,6 +600,31 @@ body.reader:has(#library:not([hidden])) {
   border: 1px solid var(--page-border);
   background: transparent;
   color: var(--page-fg);
+}
+
+/* Adding a book shares the filter's line (O19): a first-rank act, so it
+   keeps the ordinary button frame - quiet, not hidden. The label never
+   wraps; on a narrow screen the filter is what gives way. */
+.filter-line button {
+  min-height: 44px;
+  padding: 0.35rem 0.8rem;
+  white-space: nowrap;
+}
+
+/* The note over a book whose language is not the pair's source (O20): one
+   muted line with the settings one press away, never a bar and never a
+   dialog. */
+.book-note {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.75rem;
+}
+
+.book-note button {
+  min-height: 44px;
+  padding: 0.35rem 0.8rem;
+  white-space: nowrap;
 }
 
 /* The offer a picked file becomes: its size, a taste of its titles, and the

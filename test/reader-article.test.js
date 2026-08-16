@@ -225,4 +225,11 @@ describe("the allow list itself", () => {
     assert.equal(safeHref(null, BASE), null);
     assert.equal(safeHref("http://[bad", BASE), null);
   });
+
+  it("refuses every link over an empty base - what makes imported books linkless", () => {
+    // The URL constructor parses the base before the value, so no base means
+    // no links at all, absolute ones included. The book import counts on it.
+    assert.equal(safeHref("http://plain.test/", ""), null);
+    assert.equal(safeHref("ch2.xhtml", ""), null);
+  });
 });

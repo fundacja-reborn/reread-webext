@@ -30,6 +30,8 @@ The extension uses the network in exactly two cases, both started manually on th
 | StarDict dictionaries: WikDict catalogue or your own files | ✓ |
 | Reader mode (opens the page as a clean article in the extension's own tab) | ✓ |
 | Offline reading list (articles saved from the reader) | ✓ |
+| Reading position: every saved document reopens where you stopped | ✓ |
+| EPUB books in the reading list (imported from a file, cut into parts, read with the full bubble) | ✓ |
 | Saved phrases page (filter, pagination, edit and Learned per row) | ✓ |
 | Toolbar popup (per-site switch, language pair, reader, reading list, phrases, settings) | ✓ |
 | UI languages: English, Polish, German, French, Spanish, Ukrainian | ✓ |
@@ -56,6 +58,7 @@ The read-aloud keys work only while the voice is reading; otherwise the page beh
 - **No inflection matching.** Matching is literal: saving `read` does not underline `reading`.
 - **Nothing inside embedded frames.** The extension works in the page you opened, not in embedded ads, players or widgets.
 - **No remote code.** Everything that runs ships in the package (Manifest V3 enforces this anyway).
+- **Not an e-book reader.** EPUB import exists so you can read prose with the translation bubble: text only — no images, no publisher styling, no table of contents, no footnote navigation, and no DRM (a protected book is refused with a plain message). Books stay out of the reading-list export; the backup of a book is its `.epub` file.
 
 ## Privacy
 
@@ -87,10 +90,11 @@ There is nothing else — no `tabs`, no `webRequest`, no `cookies`, no `download
 
 ## Third-party code
 
-Two components, both committed to the repository with their licence, provenance and SHA-256 checksums next to them. `tools/check-vendor.sh` verifies the checksums on every run of the quality gate.
+Three components, all committed to the repository with their licence, provenance and SHA-256 checksums next to them. `tools/check-vendor.sh` verifies the checksums on every run of the quality gate.
 
 - **[Bergamot](https://github.com/browsermt/bergamot-translator)** (MPL-2.0) — the translation engine: Marian NMT compiled to WebAssembly. Manifest V3 forbids remotely hosted code, so the engine ships inside the package; this is also why the manifest declares `'wasm-unsafe-eval'` in its content security policy. Details: [`vendor/bergamot/README.md`](vendor/bergamot/README.md).
 - **[Readability](https://github.com/mozilla/readability)** (Apache-2.0) — the article extractor behind Firefox's reader view, used by the reader mode. It runs on an inert copy of the page parsed by `DOMParser`, and its output is rebuilt from a list of allowed elements and attributes (never assigned as `innerHTML`), also every time a saved article is opened. Details: [`vendor/readability/README.md`](vendor/readability/README.md).
+- **[fflate](https://github.com/101arrowz/fflate)** (MIT) — the ZIP reader behind EPUB import, the readable unminified build. Loaded lazily by the reader page the moment a book import starts, and only its synchronous single-entry API is used — chapters are inflated one at a time, and the asynchronous worker-spawning half of the library is never called. Details: [`vendor/fflate/README.md`](vendor/fflate/README.md).
 
 ### Translation models
 

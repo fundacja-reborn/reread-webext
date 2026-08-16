@@ -271,6 +271,48 @@
   "reader_transfer_note": {
     "message": "One .json file holding every saved article - a backup, or the way to move them to another browser. Importing adds articles this list is missing and never touches a saved one."
   },
+  "reader_transfer_books": {
+    "message": "Books stay out of this file: the backup of a book is its .epub - importing it again brings everything back except the reading position."
+  },
+  "reader_add_book": { "message": "Add a file (EPUB)" },
+  "reader_book_label": {
+    "message": "Book",
+    "description": "The quiet tag on a book's row in the reading list."
+  },
+  "reader_book_part_of": {
+    "message": "Part $PART$ of $PARTS$",
+    "description": "A book's place: the segment on screen (or the one reading stopped in) out of how many the book holds.",
+    "placeholders": {
+      "part": { "content": "$1", "example": "3" },
+      "parts": { "content": "$2", "example": "12" }
+    }
+  },
+  "reader_book_nav": {
+    "message": "Book parts",
+    "description": "Accessible name of the two rows that turn a book's segments."
+  },
+  "reader_book_importing": {
+    "message": "Adding the book - part $PART$",
+    "placeholders": {
+      "part": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_book_added": {
+    "message": "Added “$TITLE$”.",
+    "placeholders": {
+      "title": { "content": "$1", "example": "Dracula" }
+    }
+  },
+  "reader_book_drm": { "message": "This book is copy-protected (DRM) and cannot be imported." },
+  "reader_book_unreadable": { "message": "This file could not be read as an EPUB book." },
+  "reader_book_pair_note": {
+    "message": "The book's language is $BOOK$; the current pair translates from $PAIR$.",
+    "description": "The quiet line over a book whose language is not the pair's source. Both names come from Intl.DisplayNames in their base form, so the sentence must not bend them grammatically.",
+    "placeholders": {
+      "book": { "content": "$1", "example": "German" },
+      "pair": { "content": "$2", "example": "English" }
+    }
+  },
   "reader_import_nothing": { "message": "There are no articles to import in that file." },
   "reader_import_summary_one": {
     "message": "$NAME$ holds $COUNT$ article:",
