@@ -284,6 +284,30 @@
         <p id="byline" class="reader-byline" hidden></p>
         <div id="content"></div>
       </article>
+
+      <!--
+        The two acts of finishing, again under the last line: whoever has just
+        read a long article to its end is a whole article away from the bar
+        above. Only these two - saving and deleting are decisions about the
+        article, not parts of finishing it, and one home above is enough for
+        them. Outside the article element for the same reason the bar above
+        stands outside it, and in the finishing order: the mark first, the way
+        out under it. Every state they show is set by the same code that
+        dresses their twins above.
+      -->
+      <div id="actions-end" class="reader-actions reader-actions-end" hidden>
+        <div class="article-actions">
+          <button id="mark-read-end" type="button" aria-pressed="false" data-i18n="reader_mark_read" hidden>
+            Mark as read
+          </button>
+        </div>
+        <p class="reader-return">
+          <button id="to-library-end" type="button" hidden>
+            <span aria-hidden="true">←</span>
+            <span data-i18n="reading_list">Offline reading list</span>
+          </button>
+        </p>
+      </div>
     </main>
 
     <!--
