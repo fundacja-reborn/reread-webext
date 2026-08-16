@@ -248,7 +248,9 @@
              page folds its intro: there to unfold on the first visit, quiet
              on every one after. Its line ends in a quiet anchor: the transfer
              section lives under the list, and this link is how it is found
-             without scrolling past fifty rows. -->
+             without scrolling past fifty rows. The link names both things
+             the section takes, because one of them (a book) is not obvious
+             from "import and export" alone. -->
         <div class="fold-row">
           <details class="fold-line">
             <summary data-i18n="reader_how_title">How it works</summary>
@@ -257,13 +259,13 @@
               stays even if the original page goes away.
             </p>
           </details>
-          <a href="#transfer" data-i18n="transfer_heading">Import and export</a>
+          <a href="#transfer" data-i18n="reader_transfer_link">Import and export (articles or EPUB)</a>
         </div>
-        <!-- The filter stands above the list it narrows; the transfer tools
-             moved into their own section below the pager. Adding a book sits
-             here rather than down there on purpose (O19): an EPUB is new
-             reading for the list, a first-rank act - the section below is
-             for backups. -->
+        <!-- The filter stands alone above the list it narrows, the same line
+             the phrases page draws. Adding a book used to have its own
+             button here (O19); it lives in the Import button below now
+             (Michał's call, 2026-08-16) - one door for every file, and the
+             file itself says which kind it is. -->
         <div class="filter-line">
           <label for="library-filter" class="visually-hidden" data-i18n="reader_filter_label">
             Filter the reading list
@@ -274,17 +276,7 @@
             placeholder="Filter by title or site"
             data-i18n-placeholder="reader_filter_placeholder"
           />
-          <button type="button" id="library-add-book" data-i18n="reader_add_book">
-            Add a file (EPUB)
-          </button>
         </div>
-        <input
-          type="file"
-          id="library-book-file"
-          accept=".epub,application/epub+zip"
-          hidden
-        />
-        <p id="book-import-status" class="status report" role="status"></p>
         <p class="hint" id="library-count" hidden></p>
         <div id="library-empty" class="empty" hidden></div>
         <ul id="library-rows" class="library-rows"></ul>
@@ -295,12 +287,20 @@
         </nav>
         <!-- Import and export, after the list the way the acts themselves come
              after the reading: visiting them is a decision, not a toll on the
-             way to the rows, and the anchor above is the short way here. -->
+             way to the rows, and the anchor above is the short way here.
+             One Import button takes both kinds of file (Michał's call,
+             2026-08-16): the picked file itself says whether it is the
+             list's .json backup or an EPUB book, so nobody has to know
+             which button their file deserves. The line under the buttons
+             says as much, ahead of the folded format details. -->
         <section id="transfer" class="transfer-section" aria-labelledby="transfer-title">
           <h2 id="transfer-title" data-i18n="transfer_heading">Import and export</h2>
           <p class="transfer">
             <button type="button" id="library-import" data-i18n="action_import">Import</button>
             <button type="button" id="library-export" data-i18n="action_export">Export</button>
+          </p>
+          <p class="hint" data-i18n="reader_transfer_accepts">
+            Import reads the file it is given: the list's .json backup, or an e-book (.epub).
           </p>
           <details class="fold-line">
             <summary data-i18n="reader_format_title">File format</summary>
@@ -314,7 +314,12 @@
               brings everything back except the reading position.
             </p>
           </details>
-          <input type="file" id="library-import-file" accept=".json,application/json" hidden />
+          <input
+            type="file"
+            id="library-import-file"
+            accept=".json,application/json,.epub,application/epub+zip"
+            hidden
+          />
           <!--
             The moment of consent: what the picked file holds, quoted before
             anything is written - and import only ever adds; the file's rules
@@ -329,6 +334,10 @@
             </p>
           </div>
           <p id="library-transfer-status" class="status report" role="status"></p>
+          <!-- The book import speaks its own line: its progress ticks per
+               written part while the article import's reports stand still,
+               and the two must not overwrite each other mid-sentence. -->
+          <p id="book-import-status" class="status report" role="status"></p>
         </section>
       </section>
 

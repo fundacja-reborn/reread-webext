@@ -241,7 +241,8 @@
   "reader_transfer_books": {
     "message": "Bücher bleiben außerhalb dieser Datei: die Sicherungskopie eines Buches ist seine .epub-Datei - ein erneuter Import stellt alles außer der Leseposition wieder her."
   },
-  "reader_add_book": { "message": "Datei hinzufügen (EPUB)" },
+  "reader_transfer_link": { "message": "Import und Export (Artikel oder EPUB)" },
+  "reader_transfer_accepts": { "message": "Der Import erkennt die Datei selbst: die .json-Sicherung der Liste oder ein E-Book (.epub)." },
   "reader_book_label": { "message": "Buch" },
   "reader_book_part_of": {
     "message": "Teil $PART$ von $PARTS$",

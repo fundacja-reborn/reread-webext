@@ -602,15 +602,6 @@ body.reader:has(#library:not([hidden])) {
   color: var(--page-fg);
 }
 
-/* Adding a book shares the filter's line (O19): a first-rank act, so it
-   keeps the ordinary button frame - quiet, not hidden. The label never
-   wraps; on a narrow screen the filter is what gives way. */
-.filter-line button {
-  min-height: 44px;
-  padding: 0.35rem 0.8rem;
-  white-space: nowrap;
-}
-
 /* The note over a book whose language is not the pair's source (O20): one
    muted line with the settings one press away, never a bar and never a
    dialog. */
