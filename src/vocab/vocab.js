@@ -20,8 +20,9 @@
  * a bubble on some other tab leaves this list by itself.
  */
 
+import { applyReading } from "../lib/appearance.js";
 import { webext } from "../lib/browser.js";
-import { CONFIG_KEY, readConfig, writeConfig } from "../lib/config.js";
+import { CONFIG_KEY, SIZE, TTS_RATE, isFont, isTheme, readConfig, writeConfig } from "../lib/config.js";
 import { localizePage, plural, t, uiLocale } from "../lib/i18n.js";
 import { pairLabel } from "../lib/language.js";
 import { describeError } from "../lib/messages.js";
@@ -30,7 +31,7 @@ import { MIRROR_KEY } from "../lib/store/mirror.js";
 import { exportFilename, fromTsv, pairFromFilename, toTsv } from "../lib/store/tsv.js";
 import { listPairs, listPhrases } from "../lib/store/vocab.js";
 import { watchToolbarScheme } from "../lib/theme-icon.js";
-import { canSpeak, speak, speaking, stop as stopSpeaking } from "../lib/tts.js";
+import { canSpeak, primaryLanguage, speak, speaking, stop as stopSpeaking, voicesFor } from "../lib/tts.js";
 import { listView, markSegments, newestFirst, pairChoicesFor } from "./list-view.js";
 
 // First, so the static text is already the catalogue's language when it shows.
@@ -42,9 +43,19 @@ watchToolbarScheme();
 /** @typedef {import("../lib/store/phrase.js").Phrase} Phrase */
 
 const brandButton = document.getElementById("brand");
-// The bar the header wears: presses inside it are the menu's own business,
-// the way presses inside the reader's chrome are (see the pointerdown below).
+// The bar the header wears: presses inside it (or inside either panel) are
+// the panels' own business, the way presses inside the reader's chrome are
+// (see the pointerdown below).
 const pageBar = document.querySelector(".page-bar");
+const displayButton = document.getElementById("display");
+const displayPanel = document.getElementById("display-panel");
+const sizeValue = document.getElementById("size-value");
+const voiceSetting = document.getElementById("voice-setting");
+const voiceChoice = /** @type {HTMLSelectElement | null} */ (
+  document.getElementById("voice-choice")
+);
+const rateSetting = document.getElementById("rate-setting");
+const rateValue = document.getElementById("rate-value");
 const menuButton = document.getElementById("menu");
 const menuPanel = document.getElementById("menu-panel");
 const navLibrary = document.getElementById("nav-library");
@@ -191,7 +202,14 @@ function speakPhrase(phrase) {
     return;
   }
   sounding = phrase.normalized;
-  speak(phrase.phrase, phrase.langFrom, config.ttsVoices[phrase.langFrom], config.ttsRate / 100);
+  // The voice is stored under the primary subtag (the rule every speaker of
+  // this extension shares), so the row's language is narrowed the same way.
+  speak(
+    phrase.phrase,
+    phrase.langFrom,
+    config.ttsVoices[primaryLanguage(phrase.langFrom)],
+    config.ttsRate / 100,
+  );
 }
 
 /**
@@ -220,6 +238,106 @@ function transferStatus(text, tone) {
 }
 
 /**
+ * One road for everything the config decides about this page's dress (D104):
+ * the paper, the face and size the phrases wear, the panel's own controls,
+ * and the voice the rows' speakers use. Fed with what was actually stored
+ * rather than with what was asked for - at either end of a scale the honest
+ * answer is "it did not move", and the controls should show that (the
+ * reader's rule).
+ *
+ * @param {import("../lib/config.js").Config} fresh
+ */
+function adoptConfig(fresh) {
+  config = fresh;
+  applyReading(document.documentElement, fresh.reader);
+  if (sizeValue !== null) sizeValue.textContent = String(fresh.reader.fontSize);
+  if (rateValue !== null) rateValue.textContent = `${(fresh.ttsRate / 100).toFixed(1)}×`;
+  for (const button of document.querySelectorAll("[data-theme], [data-font]")) {
+    const wanted = button.getAttribute("data-theme") ?? button.getAttribute("data-font");
+    const current = button.hasAttribute("data-theme") ? fresh.reader.theme : fresh.reader.font;
+    button.setAttribute("aria-pressed", String(wanted === current));
+  }
+  renderVoiceChoice();
+}
+
+/**
+ * The voice select in the panel: this device's voices able to read the
+ * phrases' language - the pair's source - behind a first line that means
+ * "let the browser pick". Redrawn when the settings move and when the
+ * engine's list arrives: `getVoices` answers nothing until the browser has
+ * loaded the voices, and `voiceschanged` is the only appointment it keeps.
+ */
+function renderVoiceChoice() {
+  if (voiceChoice === null || config === null) return;
+  const lang = config.sourceLang;
+  const stored = config.ttsVoices[primaryLanguage(lang)];
+  const voices = canSpeak() ? voicesFor(speechSynthesis.getVoices(), lang) : [];
+
+  const fallback = document.createElement("option");
+  fallback.value = "";
+  fallback.textContent = t("options_tts_default");
+  fallback.selected = stored === undefined;
+
+  voiceChoice.replaceChildren(
+    fallback,
+    ...voices.map((voice) => {
+      const option = document.createElement("option");
+      option.value = voice.voiceURI;
+      // The voice's own name plus its tag: two voices called "English"
+      // differ only by where they are from, and the name alone would be a
+      // coin toss.
+      option.textContent = `${voice.name} (${voice.lang})`;
+      option.selected = voice.voiceURI === stored;
+      return option;
+    }),
+  );
+}
+
+/**
+ * The panel's presses - the reader's handler, minus the rows this page does
+ * not carry (measure, links). The steppers read first and step from wherever
+ * the setting is now, because another page may have moved it since this one
+ * drew itself.
+ *
+ * @param {Event} event
+ */
+async function onDisplayPress(event) {
+  const button = event.target;
+  if (!(button instanceof HTMLButtonElement)) return;
+
+  const rate = button.getAttribute("data-rate");
+  if (rate !== null) {
+    const current = (await readConfig()).ttsRate;
+    adoptConfig(await writeConfig({ ttsRate: clamp(current + Number(rate), TTS_RATE) }));
+    return;
+  }
+
+  const theme = button.getAttribute("data-theme");
+  const font = button.getAttribute("data-font");
+  const size = button.getAttribute("data-size");
+
+  /** @type {Partial<import("../lib/config.js").ReaderConfig>} */
+  let patch = {};
+  if (isTheme(theme)) patch = { theme };
+  else if (isFont(font)) patch = { font };
+  else if (size !== null) {
+    const current = (await readConfig()).reader;
+    patch = { fontSize: clamp(current.fontSize + Number(size), SIZE) };
+  } else return;
+
+  adoptConfig(await writeConfig({ reader: patch }));
+}
+
+/**
+ * @param {number} value
+ * @param {{ min: number, max: number }} range
+ * @returns {number}
+ */
+function clamp(value, range) {
+  return Math.min(range.max, Math.max(range.min, value));
+}
+
+/**
  * @param {import("../lib/protocol.js").Request} request
  * @returns {Promise<import("../lib/protocol.js").Result<unknown>>}
  */
@@ -234,8 +352,9 @@ async function ask(request) {
 
 async function reload() {
   try {
-    config = await readConfig();
-    const pair = `${config.sourceLang}${config.targetLang}`;
+    const fresh = await readConfig();
+    adoptConfig(fresh);
+    const pair = `${fresh.sourceLang}${fresh.targetLang}`;
     // A different pair is a different list, and page 7 of the old one means
     // nothing on it.
     if (pair !== shownPair) {
@@ -245,9 +364,9 @@ async function reload() {
 
     const [saved, list] = await Promise.all([
       listPairs(),
-      listPhrases({ langFrom: config.sourceLang, langTo: config.targetLang }),
+      listPhrases({ langFrom: fresh.sourceLang, langTo: fresh.targetLang }),
     ]);
-    choices = pairChoicesFor(config, saved);
+    choices = pairChoicesFor(fresh, saved);
     phrases = newestFirst(list);
 
     // The phrase being edited can be learned from a bubble on another tab; an
@@ -738,20 +857,67 @@ async function runImport() {
 // already open), so the list on screen stays where it is.
 brandButton?.addEventListener("click", () => void webext().runtime.openOptionsPage());
 
-// The menu behind the brand line's drawn button - the reader's, minus the row
-// for this page (D93).
-menuButton?.addEventListener("click", () => {
-  if (menuButton === null || menuPanel === null) return;
-  menuPanel.hidden = !menuPanel.hidden;
-  menuButton.setAttribute("aria-expanded", String(!menuPanel.hidden));
+/**
+ * The bar's two disclosure buttons and their panels, the reader's rule: one
+ * panel at a time, so the header never stands two panels tall.
+ *
+ * @param {HTMLElement | null} button
+ * @param {HTMLElement | null} panel
+ * @param {boolean} open
+ */
+function setPanel(button, panel, open) {
+  if (button === null || panel === null) return;
+  panel.hidden = !open;
+  button.setAttribute("aria-expanded", String(open));
+}
+
+displayButton?.addEventListener("click", () => {
+  const opening = displayPanel?.hidden === true;
+  setPanel(menuButton, menuPanel, false);
+  setPanel(displayButton, displayPanel, opening);
 });
 
-// Every row leaves this tab standing, so each one also puts the menu away -
-// coming back must not find the hallway still open.
-function closeMenu() {
-  if (menuButton === null || menuPanel === null) return;
-  menuPanel.hidden = true;
-  menuButton.setAttribute("aria-expanded", "false");
+// The menu behind the bar's drawn button - the reader's, minus the row for
+// this page (D93).
+menuButton?.addEventListener("click", () => {
+  const opening = menuPanel?.hidden === true;
+  setPanel(displayButton, displayPanel, false);
+  setPanel(menuButton, menuPanel, opening);
+});
+
+function anyPanelOpen() {
+  return displayPanel?.hidden === false || menuPanel?.hidden === false;
+}
+
+// Every menu row leaves this tab standing, so each one also puts the panels
+// away - coming back must not find the hallway still open.
+function closePanels() {
+  setPanel(displayButton, displayPanel, false);
+  setPanel(menuButton, menuPanel, false);
+}
+
+displayPanel?.addEventListener("click", (event) => void onDisplayPress(event));
+
+// The voice for the phrases' language, the same stored choice the reader's
+// panel writes: the patch replaces the whole map (config.js's rule), and the
+// first line means "no stored choice" - the engine's default for the language.
+voiceChoice?.addEventListener("change", () => {
+  if (voiceChoice === null || config === null) return;
+  const key = primaryLanguage(config.sourceLang);
+  if (key === "") return;
+  const map = { ...config.ttsVoices };
+  if (voiceChoice.value === "") delete map[key];
+  else map[key] = voiceChoice.value;
+  void writeConfig({ ttsVoices: map }).then(adoptConfig);
+});
+
+// The voice rows exist only where they can do something, and the engine's
+// voice list arrives on its own schedule - after first paint on most
+// platforms, never at all on some (Android speaks anyway, see lib/tts.js).
+if (canSpeak()) {
+  if (voiceSetting !== null) voiceSetting.hidden = false;
+  if (rateSetting !== null) rateSetting.hidden = false;
+  speechSynthesis.addEventListener("voiceschanged", renderVoiceChoice);
 }
 
 // The reading-list row goes through the background exactly as the popup's
@@ -760,7 +926,7 @@ function closeMenu() {
 // registry says it is. A rejection means the background was mid-restart -
 // the press can be repeated; the popup's rows make the same bargain.
 navLibrary?.addEventListener("click", () => {
-  closeMenu();
+  closePanels();
   void webext()
     .runtime.sendMessage({ kind: Message.OPEN_LIBRARY })
     .catch(() => undefined);
@@ -768,29 +934,36 @@ navLibrary?.addEventListener("click", () => {
 
 // The settings row is the mark's press with a word on it.
 navSettings?.addEventListener("click", () => {
-  closeMenu();
+  closePanels();
   void webext().runtime.openOptionsPage();
 });
 
-// The open menu yields to the page underneath, exactly as the reader's panels
-// do (Michał's report, 2026-08-16): a press anywhere but the bar and the menu
-// puts it away, and Escape does the same from the keyboard - handing focus
-// back to the button when it was inside the panel. Presses inside the bar are
-// the menu's own business, the reader's rule for its chrome: the toggle's
-// click handler decides.
+// An open panel yields to the page underneath, exactly as the reader's panels
+// do (Michał's report, 2026-08-16): a press anywhere but the bar and the
+// panels puts them away, and Escape does the same from the keyboard - handing
+// focus back to the button whose panel held it. Presses inside the bar and
+// the panels are their own business, the reader's rule for its chrome: the
+// toggles' click handlers decide.
 document.addEventListener("pointerdown", (event) => {
-  if (menuPanel === null || menuPanel.hidden) return;
+  if (!anyPanelOpen()) return;
   const target = event.target;
   if (!(target instanceof Node)) return;
-  if (menuPanel.contains(target) || pageBar?.contains(target) === true) return;
-  closeMenu();
+  if (
+    pageBar?.contains(target) === true ||
+    displayPanel?.contains(target) === true ||
+    menuPanel?.contains(target) === true
+  ) {
+    return;
+  }
+  closePanels();
 });
 
 document.addEventListener("keydown", (event) => {
-  if (event.key !== "Escape" || menuPanel === null || menuPanel.hidden) return;
+  if (event.key !== "Escape" || !anyPanelOpen()) return;
   const focus = document.activeElement;
-  if (focus instanceof Node && menuPanel.contains(focus)) menuButton?.focus();
-  closeMenu();
+  if (focus instanceof Node && displayPanel?.contains(focus) === true) displayButton?.focus();
+  else if (focus instanceof Node && menuPanel?.contains(focus) === true) menuButton?.focus();
+  closePanels();
 });
 
 pairSelect?.addEventListener("change", () => {
@@ -840,10 +1013,21 @@ nextButton?.addEventListener("click", () => {
 
 webext().storage.onChanged.addListener((changes, area) => {
   if (area !== "local") return;
-  // The settings carry the pair; the mirror is how a vocabulary write anywhere
-  // - a bubble on some tab, this page itself - announces itself.
-  if (changes[CONFIG_KEY] === undefined && changes[MIRROR_KEY] === undefined) return;
-  void reload();
+  // The mirror is how a vocabulary write anywhere - a bubble on some tab,
+  // this page itself - announces itself: the list is stale, reload it.
+  if (changes[MIRROR_KEY] !== undefined) {
+    void reload();
+    return;
+  }
+  if (changes[CONFIG_KEY] === undefined) return;
+  // The config carries the pair and the dress. A change that kept the pair
+  // only dressed the page - the rows stand as they are, which on e-ink is
+  // the difference between nothing and a flash per stepper press.
+  void readConfig().then((fresh) => {
+    const pair = `${fresh.sourceLang}${fresh.targetLang}`;
+    adoptConfig(fresh);
+    if (pair !== shownPair) void reload();
+  });
 });
 
 // The intro quotes the bubble's own button labels, so the two can never drift

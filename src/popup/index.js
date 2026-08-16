@@ -22,6 +22,7 @@
  * and no message addressed to anybody.
  */
 
+import { followTheme } from "../lib/appearance.js";
 import { webext } from "../lib/browser.js";
 import { effectiveReaderOnly, platformOs, readConfig, writeConfig } from "../lib/config.js";
 import { localizePage, t } from "../lib/i18n.js";
@@ -36,6 +37,9 @@ localizePage();
 // The toolbar icon follows the browser's scheme where the manifest cannot
 // say so (Chromium, no theme_icons there) - a no-op on Firefox.
 watchToolbarScheme();
+// The paper follows the theme the Aa panels write (D104): a popup opened over
+// a sepia article is part of the same room.
+followTheme();
 
 const siteRow = document.getElementById("site-row");
 const siteLabel = document.getElementById("site-label");

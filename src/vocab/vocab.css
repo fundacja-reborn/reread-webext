@@ -101,7 +101,9 @@ summary {
   flex: none;
 }
 
-/* The drawn ☰ wears the reader bar's frame. */
+/* The bar's buttons wear the reader bar's frame: one floor for a drawn glyph
+   and a serif "Aa", the reason the reader sets it on all of its three. */
+#display,
 #menu {
   display: inline-flex;
   align-items: center;
@@ -109,6 +111,70 @@ summary {
   min-height: 2.1rem;
   min-width: 2.6rem;
   padding: 0.15rem 0.55rem;
+}
+
+#display {
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+/* --- the Aa panel: the reader's, minus the rows about an article's column ---
+
+   The same dress by the same numbers as `.reader-panel` and its settings
+   rows (reader.css) - one panel in two homes, like the bar above it. */
+.page-panel {
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--page-line);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.page-setting {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  padding: 0.35rem 0;
+}
+
+.page-setting-name {
+  flex: 0 0 4rem;
+  color: var(--page-muted);
+}
+
+.page-choices {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.page-choices button {
+  padding: 0.2rem 0.6rem;
+  font-size: 0.85rem;
+}
+
+/* The one that is on, said with the border rather than a fill: the reader
+   panel's own word for "this is chosen". */
+.page-choices button[aria-pressed="true"] {
+  border-color: var(--page-accent);
+  color: var(--page-accent);
+}
+
+.page-choices output {
+  min-width: 2ch;
+  color: var(--page-muted);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+/* A voice is called whatever the platform calls it, and some names are a
+   sentence long. The select gives way instead of pushing the panel wider
+   than the page. */
+#voice-setting .page-choices {
+  min-width: 0;
+}
+
+#voice-choice {
+  max-width: 100%;
 }
 
 /* The title stands the reading list's distance under the bar (the reader's
@@ -280,9 +346,22 @@ summary {
   border-bottom: 1px solid var(--page-line);
 }
 
+/* The phrase is content, not interface (D104): text in the language being
+   learned, so it follows the reading settings the way the reading list's
+   titles do (`.library-open` in reader.css) - the article's face at the Aa
+   panel's size, sans when the reader chose sans. Everything else in the row
+   stays at the interface size: the meanings gloss the phrase, the buttons
+   act on it. */
 .phrase-word {
+  font-family: Georgia, "Iowan Old Style", "Times New Roman", serif;
+  font-size: var(--reader-size, 18px);
+  line-height: 1.45;
   font-weight: 600;
   overflow-wrap: anywhere;
+}
+
+:root[data-reader-font="sans"] .phrase-word {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
 /* A step quieter than the phrase, still above the 4.5:1 contrast floor in
