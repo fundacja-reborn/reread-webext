@@ -147,9 +147,12 @@ body.reader:has(#article:not([hidden])) .reader-chrome {
   z-index: 2;
 }
 
+/* Centred, not baseline-aligned: two of the three buttons are drawn glyphs
+   with no baseline to speak of, and against them the mark hung visibly low
+   (reported from a phone). */
 .reader-bar {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 1rem;
   padding-bottom: 1rem;
@@ -183,7 +186,6 @@ body.reader:has(#article:not([hidden])) .reader-chrome {
 }
 
 #display {
-  padding: 0.15rem 0.55rem;
   font-family: Georgia, "Times New Roman", serif;
 }
 
@@ -196,11 +198,18 @@ body.reader:has(#article:not([hidden])) .reader-chrome {
   flex: none;
 }
 
+/* The bar's three buttons share one frame height: two hold drawn glyphs and
+   one holds serif text, and left to their contents their borders came out
+   three sizes (reported from a phone). The floor is set on all of them and
+   the contents centre inside it. */
 #listen,
+#display,
 #menu {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  min-height: 2.1rem;
+  min-width: 2.6rem;
   padding: 0.15rem 0.55rem;
 }
 
@@ -888,6 +897,15 @@ body.reader:has(#speech-bar:not([hidden])) {
   padding-bottom: 4.5rem;
 }
 
+/* Icon-only on a narrow screen means the icon IS the button: at 1.15em the
+   transport glyphs were specks inside their 44px targets (reported from a
+   phone). The words come back at the desktop breakpoint below, and there the
+   glyphs step down to sit beside them. */
+.speech-bar .reader-icon {
+  width: 1.7em;
+  height: 1.7em;
+}
+
 /* These four are the point of the bar, so unlike the article's quiet actions
    they wear the page's full text colour - but still no resting frame, which
    would draw four boxes under an article somebody is listening to. */
@@ -951,6 +969,12 @@ body.reader:has(#speech-bar:not([hidden])) {
     margin: 0;
     overflow: visible;
     clip-path: none;
+  }
+
+  /* Beside a word the glyph is an accent, not the whole button. */
+  .speech-bar .reader-icon {
+    width: 1.2em;
+    height: 1.2em;
   }
 
   /* The tabs keep their own width instead of splitting the line. */
