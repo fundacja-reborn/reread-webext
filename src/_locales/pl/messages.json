@@ -265,6 +265,8 @@
   },
   "reader_mark_read": { "message": "Oznacz jako przeczytany" },
   "reader_marked_read": { "message": "Przeczytany" },
+  "reader_mark_book_read": { "message": "Oznacz książkę jako przeczytaną" },
+  "reader_book_marked_read": { "message": "Książka przeczytana" },
   "reader_no_article": { "message": "Na tej stronie nie udało się znaleźć artykułu." },
   "reader_list_write_failed": { "message": "Nie udało się zapisać czytelni." },
   "reader_empty_none": {

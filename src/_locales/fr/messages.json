@@ -220,6 +220,8 @@
   },
   "reader_mark_read": { "message": "Marquer comme lu" },
   "reader_marked_read": { "message": "Marqué comme lu" },
+  "reader_mark_book_read": { "message": "Marquer le livre comme lu" },
+  "reader_book_marked_read": { "message": "Livre marqué comme lu" },
   "reader_no_article": { "message": "Aucun article à trouver sur cette page." },
   "reader_list_write_failed": { "message": "La liste de lecture n'a pas pu être écrite." },
   "reader_empty_none": {
