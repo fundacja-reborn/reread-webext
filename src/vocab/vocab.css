@@ -499,10 +499,14 @@ button.quiet-speak svg {
 /* --- the transfer section: import and export, under the list --- */
 
 /* Its own quiet area below the pager, reached by the header's anchor; the
-   scroll margin keeps the landing heading off the viewport's edge. */
+   scroll margin keeps the landing heading off the viewport's edge. No rule
+   of its own: the list's last row already ends in a line, and a second one
+   floating here read as a leftover (Michał, 2026-08-16, same call as the
+   reader library's) - distance alone does the parting. With no border
+   between them, this margin collapses with the heading's, so it carries
+   the whole former gap by itself. */
 .transfer-section {
-  margin-top: 2rem;
-  border-top: 1px solid var(--page-line);
+  margin-top: 3rem;
   scroll-margin-top: 0.75rem;
 }
 
