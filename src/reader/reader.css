@@ -466,6 +466,18 @@ html {
   overflow-wrap: anywhere;
 }
 
+/* Links as plain text (D95, the default): the words stay - they are part of
+   the sentence - but nothing about them invites or answers a press. The main
+   gesture here is selecting a phrase to translate, and a live link under a
+   slightly short hold turns selection into navigation; a link that still
+   looked like one while doing nothing would just look broken. The click and
+   the tab stop are taken away in `reader.js`; this takes the dress. */
+:root[data-reader-links="plain"] #content a {
+  color: inherit;
+  text-decoration: none;
+  cursor: auto;
+}
+
 /* The reading list is interface, not reading: it speaks the interface font at
    the interface size, and only the row titles keep the article's face below.
    Everything here states its changes with text and a border - never an

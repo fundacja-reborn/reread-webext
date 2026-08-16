@@ -163,6 +163,20 @@
         </div>
 
         <!--
+          Whether links in the article answer a press (D95). Plain - the
+          default - keeps their words as ordinary text: the main gesture here
+          is selecting a phrase, and a live link under it turns a slightly
+          short hold into a navigation. The original stays one menu row away.
+        -->
+        <div class="reader-setting">
+          <span class="reader-setting-name" data-i18n="reader_links">Links</span>
+          <span class="reader-choices" id="links-choices">
+            <button type="button" data-links="plain" data-i18n="reader_links_plain">Plain text</button>
+            <button type="button" data-links="active" data-i18n="reader_links_active">Active</button>
+          </span>
+        </div>
+
+        <!--
           The two knobs of reading aloud (D87), here rather than only in the
           settings because this is where they are used: the voice is chosen while
           listening to it, and the speed is changed in the middle of a sentence

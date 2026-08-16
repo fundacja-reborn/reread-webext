@@ -32,6 +32,7 @@ import {
   SIZE,
   TTS_RATE,
   isFont,
+  isLinks,
   isTheme,
   readConfig,
   writeConfig,
@@ -313,6 +314,7 @@ function renderArticle(piece) {
   else article.removeAttribute("lang");
 
   contentElement.replaceChildren(rebuilt);
+  applyLinkStops(settings.reader.links);
   if (library !== null) library.hidden = true;
   article.hidden = false;
   hideNotice();
@@ -920,16 +922,48 @@ function applyAppearance(reader) {
   const root = document.documentElement;
   root.dataset["readerTheme"] = reader.theme;
   root.dataset["readerFont"] = reader.font;
+  root.dataset["readerLinks"] = reader.links;
   root.style.setProperty("--reader-size", `${reader.fontSize}px`);
   root.style.setProperty("--reader-measure", `${reader.measure}ch`);
 
   if (sizeValue !== null) sizeValue.textContent = String(reader.fontSize);
   if (measureValue !== null) measureValue.textContent = String(reader.measure);
+  applyLinkStops(reader.links);
 
-  for (const button of document.querySelectorAll("[data-theme], [data-font]")) {
-    const wanted = button.getAttribute("data-theme") ?? button.getAttribute("data-font");
-    const current = button.hasAttribute("data-theme") ? reader.theme : reader.font;
+  for (const button of document.querySelectorAll("[data-theme], [data-font], [data-links]")) {
+    const wanted =
+      button.getAttribute("data-theme") ??
+      button.getAttribute("data-font") ??
+      button.getAttribute("data-links");
+    const current = button.hasAttribute("data-theme")
+      ? reader.theme
+      : button.hasAttribute("data-font")
+        ? reader.font
+        : reader.links;
     button.setAttribute("aria-pressed", String(wanted === current));
+  }
+}
+
+/**
+ * The two ways an anchor stays a link even dressed as text (D95): the tab
+ * order, where it would catch a focus ring on what reads as body text, and the
+ * browser's link drag, which would eat the word-selection gesture right where
+ * it is most wanted. Both taken away in plain mode, both given back in active.
+ * The stylesheet handles the look and `onArticleLink` the press; this walk
+ * runs again for every article rendered, because the anchors are new each time.
+ *
+ * @param {import("../lib/config.js").ReaderConfig["links"]} links
+ */
+function applyLinkStops(links) {
+  if (contentElement === null) return;
+  for (const anchor of contentElement.querySelectorAll("a[href]")) {
+    if (links === "plain") {
+      anchor.setAttribute("tabindex", "-1");
+      anchor.setAttribute("draggable", "false");
+    } else {
+      anchor.removeAttribute("tabindex");
+      anchor.removeAttribute("draggable");
+    }
   }
 }
 
@@ -1083,6 +1117,7 @@ async function onDisplayPress(event) {
 
   const theme = button.getAttribute("data-theme");
   const font = button.getAttribute("data-font");
+  const links = button.getAttribute("data-links");
   const size = button.getAttribute("data-size");
   const measure = button.getAttribute("data-measure");
 
@@ -1090,6 +1125,7 @@ async function onDisplayPress(event) {
   let patch = {};
   if (isTheme(theme)) patch = { theme };
   else if (isFont(font)) patch = { font };
+  else if (isLinks(links)) patch = { links };
   else if (size !== null || measure !== null) {
     // Read first, because the buttons step from wherever the setting is now,
     // and another reader tab may have moved it since this one drew itself.
@@ -1469,6 +1505,21 @@ webext().runtime.onMessage.addListener((message, _sender, sendResponse) => {
   return false;
 });
 
+// A link set to plain text must not answer a press (D95): the stylesheet took
+// its dress, this takes its click - including the Enter of a focus restored by
+// other means, which arrives here as a click too. `auxclick` besides, because
+// a middle click opens a tab without ever firing `click`. The mode is read at
+// press time, so the switch in the panel needs no rewiring here.
+/** @param {MouseEvent} event */
+function onArticleLink(event) {
+  if (settings.reader.links !== "plain") return;
+  const pressed = event.target instanceof Element ? event.target.closest("a[href]") : null;
+  if (pressed !== null) event.preventDefault();
+}
+
+contentElement?.addEventListener("click", onArticleLink);
+contentElement?.addEventListener("auxclick", onArticleLink);
+
 // The same reading side as on any other page, scoped to the article: the
 // reader's own heading and links are not text anybody is learning from, and
 // nothing in this document changes unless the code above changes it, so there
@@ -1479,7 +1530,15 @@ webext().runtime.onMessage.addListener((message, _sender, sendResponse) => {
 // finger or the button lifting. For the same reason the bubble pins to the
 // page rather than the viewport (`anchored`): it rides the scroll with its
 // phrase like a margin note, which only a layout we control can promise to
-// survive.
-start({ root: article, observe: false, ownSelection: true, anchored: true });
+// survive. `plainLinks` tells the gesture when links are dressed as plain
+// text (D95): then a hold or a press on one selects its word like any other -
+// without this, a word in a link could be neither followed nor selected.
+start({
+  root: article,
+  observe: false,
+  ownSelection: true,
+  anchored: true,
+  plainLinks: () => settings.reader.links === "plain",
+});
 
 void showPage();
