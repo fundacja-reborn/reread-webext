@@ -283,21 +283,25 @@
   },
   "reader_how_title": { "message": "How it works" },
   "reader_library_note": {
-    "message": "Everything here is a copy stored on this device - it opens without a connection and stays even if the original page goes away."
+    "message": "Everything here is a text copy: web articles you opened in the reading view and deliberately saved, and the articles and .epub files you imported with Import below. They all open without a connection and stay on your device, even if the original page goes away."
   },
   "reader_format_title": { "message": "File format" },
   "reader_transfer_note": {
-    "message": "One .json file holding every saved article - a backup, or the way to move them to another browser. Importing adds articles this list is missing and never touches a saved one."
+    "message": ".json - a backup file holding every article saved in the re/read offline reading list, from this browser or any other browser or device where you use re/read. Import only adds the articles missing here and never overwrites one already saved."
+  },
+  "reader_transfer_epub": {
+    "message": ".epub - the e-book format.",
+    "description": "The second line of the file-format fold on the reading list, between the .json and the export notes."
   },
   "reader_transfer_books": {
-    "message": "Books stay out of this file: the backup of a book is its .epub - importing it again brings everything back except the reading position."
+    "message": "Export covers articles only - books (.epub) are not exported. Importing a book again brings everything back except the reading position."
   },
   "reader_transfer_link": {
     "message": "Import and export (articles or EPUB)",
     "description": "The quiet anchor over the reading list that jumps to the transfer section - it names both kinds of file the section takes, because a book is not obvious from the section's own name."
   },
   "reader_transfer_accepts": {
-    "message": "Import reads the file it is given: the list's .json backup, or an e-book (.epub).",
+    "message": "Import reads the file it is given: a backup of the re/read article list (.json), or an e-book (.epub).",
     "description": "The line under the reading list's Import and Export buttons - why there is no separate button for books."
   },
   "reader_book_label": {
