@@ -23,8 +23,11 @@
  * Chapter markup goes through the same `buildArticle` walk as everything
  * else this extension renders: the allowed list decides what survives, and
  * images fall out with it (D3 - `img` has always been on the dropped list).
- * Relative links die naturally - resolved against no base they are not URLs -
- * while absolute web links survive as they do in saved articles.
+ * Links lose their `href` wholesale: with no base URL to resolve against,
+ * `safeHref` refuses every one - internal and external alike - and what
+ * remains is the link's text. Deliberate, not incidental: the brief puts
+ * links-as-mechanism (TOC, footnotes) out of scope, and a book is prose to
+ * read, not a page to leave.
  */
 
 import {
@@ -195,6 +198,8 @@ export async function importEpub(file, onSegment) {
 
       // The HTML parser rather than the XML one: it cannot fail, and the
       // rebuild walks whatever it produces through the allowed list anyway.
+      // The empty base is what strips every link (see the header): `safeHref`
+      // cannot resolve anything against it, so no `href` survives the walk.
       const chapter = new DOMParser().parseFromString(decodeXml(data), "text/html");
       const rebuilt = buildArticle(chapter.body, document, { baseUrl: "" });
       for (const block of Array.from(rebuilt.children)) {
