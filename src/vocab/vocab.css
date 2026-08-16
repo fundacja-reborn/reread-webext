@@ -346,29 +346,36 @@ summary {
   border-bottom: 1px solid var(--page-line);
 }
 
-/* The phrase is content, not interface (D104): text in the language being
-   learned, so it follows the reading settings the way the reading list's
-   titles do (`.library-open` in reader.css) - the article's face at the Aa
-   panel's size, sans when the reader chose sans. Everything else in the row
-   stays at the interface size: the meanings gloss the phrase, the buttons
-   act on it. */
-.phrase-word {
+/* The phrase AND its meanings are content, not interface (D104; the pair
+   confirmed by Michał's report, 2026-08-16): the phrase is text in the
+   language being learned, the meanings are its side of the same lesson, so
+   both follow the reading settings together - the article's face at the Aa
+   panel's size, sans when the reader chose sans - the way the reading
+   list's titles do (`.library-open` in reader.css). A phrase growing while
+   its meaning stood still read as a fault, not a hierarchy: inside the row
+   the hierarchy is weight and color, never size. What stays at the
+   interface size is what acts on the pair - buttons, hints, the bar. */
+.phrase-word,
+.phrase-meanings {
   font-family: Georgia, "Iowan Old Style", "Times New Roman", serif;
   font-size: var(--reader-size, 18px);
   line-height: 1.45;
-  font-weight: 600;
   overflow-wrap: anywhere;
 }
 
-:root[data-reader-font="sans"] .phrase-word {
+:root[data-reader-font="sans"] .phrase-word,
+:root[data-reader-font="sans"] .phrase-meanings {
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.phrase-word {
+  font-weight: 600;
 }
 
 /* A step quieter than the phrase, still above the 4.5:1 contrast floor in
    both themes. */
 .phrase-meanings {
   color: var(--page-muted);
-  overflow-wrap: anywhere;
 }
 
 /* What the filter matched, lit inside the row: the accent as a wash, never
