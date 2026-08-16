@@ -41,6 +41,12 @@ import { describeError } from "../lib/messages.js";
 import { ErrorCode, Message, asPage, asPageRequest, asResult, ok } from "../lib/protocol.js";
 import { buildArticle } from "../lib/reader/article.js";
 import { speechAction } from "../lib/reader/keys.js";
+import {
+  POSITION_SAVE_DELAY,
+  blockAtLine,
+  positionRecord,
+  restoredIndex,
+} from "../lib/reader/position.js";
 import { READER_SOURCE_KEY, readReaderSource } from "../lib/session.js";
 import {
   ARTICLES_FILENAME,
@@ -52,9 +58,11 @@ import {
   deleteArticle,
   getArticle,
   getArticleMeta,
+  getPosition,
   importArticles,
   listArticles,
   putArticle,
+  putPosition,
   setReadAt,
 } from "../lib/store/articles.js";
 import { Segment, emptySentence, savedArticle } from "../lib/store/saved-article.js";
@@ -291,6 +299,9 @@ function setBase(doc, url) {
 function renderArticle(piece) {
   if (article === null || contentElement === null || titleElement === null) return;
   epoch += 1;
+  // The save a scroll had put off is about the article still on screen, and
+  // its blocks are about to be replaced - measured now or never.
+  flushPosition();
   // Whatever was being read aloud was this element's previous contents, and
   // they are about to be replaced: the voice stops here rather than reading a
   // sentence of one article into another (D87).
@@ -392,6 +403,126 @@ function renderSaved(saved) {
   });
 }
 
+/**
+ * The reading position of a saved document: which top-level block was at the
+ * top of the screen, written back to the database so that opening the
+ * document again starts where its reader stopped. Structural rather than a
+ * scroll offset, so a change of font size or measure changes nothing; only
+ * for documents the database holds, because the position row leaves in the
+ * same transaction as its document. No UI anywhere - the behaviour is meant
+ * to be invisible, and losing a position only ever costs starting at the top.
+ */
+
+/** The debounced save a scroll has started, if one is pending. */
+let positionTimer = /** @type {ReturnType<typeof setTimeout> | null} */ (null);
+
+/** The article's rebuilt root: its children are the top-level blocks. */
+function contentRoot() {
+  return contentElement?.firstElementChild ?? null;
+}
+
+/**
+ * How far down the window the stuck chrome reaches. Below this line is the
+ * visible text; the voice keeps its spoken sentence under it, and the
+ * position means the first block still under it. Measured at each ask,
+ * because an open panel makes the chrome taller for as long as it is open.
+ */
+function chromeFold() {
+  return Math.max(0, chromeBox?.getBoundingClientRect().bottom ?? 0);
+}
+
+/**
+ * The block being read: the one at the top of the visible text, just under
+ * the chrome. One `elementFromPoint` and a climb - nothing observes anything
+ * between saves. The point can land on something that is not a block (the
+ * margin between two paragraphs, the bubble standing over the text); then
+ * the blocks' own rects answer instead.
+ *
+ * @returns {number | null}
+ */
+function topBlockIndex() {
+  const root = contentRoot();
+  if (root === null || root.children.length === 0) return null;
+  const line = chromeFold() + 2;
+
+  const hit = document.elementFromPoint(window.innerWidth / 2, line);
+  for (let node = hit; node !== null && node !== root; node = node.parentElement) {
+    if (node.parentElement === root) return Array.prototype.indexOf.call(root.children, node);
+  }
+  return blockAtLine(
+    Array.from(root.children, (block) => block.getBoundingClientRect()),
+    line,
+  );
+}
+
+/**
+ * Writes where the reading stands, now. Quiet on every failure: a position
+ * is a convenience, and nothing about keeping one may interrupt the reading
+ * it is about.
+ */
+function savePositionNow() {
+  if (positionTimer !== null) {
+    clearTimeout(positionTimer);
+    positionTimer = null;
+  }
+  const target = shown;
+  if (target === null || target.origin !== "saved") return;
+  const at = topBlockIndex();
+  if (at === null) return;
+  const record = positionRecord(target.url, 0, at, Date.now());
+  if (record !== null) void putPosition(record).catch(() => undefined);
+}
+
+/**
+ * The save a scroll had put off, taken before the article leaves the screen:
+ * turning back to the list must not lose the last second and a half of
+ * scrolling to the debounce.
+ */
+function flushPosition() {
+  if (positionTimer !== null) savePositionNow();
+}
+
+// Scrolling is the one signal that the place moved - including the scrolls
+// reading aloud makes on its own, which is what keeps the position current
+// while the page reads itself. One cheap read per save, at most every
+// second and a half; nothing runs between scrolls.
+window.addEventListener(
+  "scroll",
+  () => {
+    if (shown === null || shown.origin !== "saved") return;
+    if (positionTimer !== null) clearTimeout(positionTimer);
+    positionTimer = setTimeout(savePositionNow, POSITION_SAVE_DELAY);
+  },
+  { passive: true },
+);
+
+// The tab going away or to the background writes at once: the debounce is
+// for scrolling, not for closing, and `pagehide` is the last word this page
+// gets anywhere.
+window.addEventListener("pagehide", () => savePositionNow());
+
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "hidden") savePositionNow();
+});
+
+/**
+ * Puts a just-rendered saved article back where its reader stopped. Nothing
+ * to restore - no row, another segment, an index past the end of a document
+ * since overwritten - means the top, where `renderArticle` already left it.
+ *
+ * @param {import("../lib/reader/position.js").ReadingPosition | null} position
+ */
+function restorePosition(position) {
+  const root = contentRoot();
+  if (root === null) return;
+  const at = restoredIndex(position, 0, root.children.length);
+  if (at === null) return;
+  root.children[at]?.scrollIntoView({ behavior: "instant", block: "start" });
+  // `scrollIntoView` puts the block at the window's very top, which the
+  // sticky chrome covers; step back so its first line lands under the bar.
+  scrollBy(0, -chromeFold());
+}
+
 async function showPage() {
   const turn = ++epoch;
 
@@ -432,7 +563,9 @@ async function showPage() {
  */
 async function openSaved(url) {
   const turn = ++epoch;
-  const saved = await getArticle(url);
+  // The position rides along in the same round trip; render is synchronous,
+  // so nothing can move between the article appearing and the scroll to it.
+  const [saved, position] = await Promise.all([getArticle(url), getPosition(url)]);
   if (turn !== epoch) return;
   if (saved === null) {
     // Gone under us - deleted from another reader tab. The list knows.
@@ -440,10 +573,13 @@ async function openSaved(url) {
     return;
   }
   renderSaved(saved);
+  restorePosition(position);
 }
 
 async function showLibrary() {
   epoch += 1;
+  // Before `shown` moves: the pending save is about the article on screen.
+  flushPosition();
   shown = null;
   // The article being read aloud is leaving the screen, and a voice reading a
   // page nobody can see is the extension talking to itself.
@@ -1364,9 +1500,9 @@ configureReading({
   article: () => article,
   // How far down the window the stuck chrome reaches (D93): a sentence under
   // it is covered paper, not visible text, and the voice must neither start
-  // on one nor park the spoken line beneath the bar. Measured at each ask,
-  // because an open panel makes the chrome taller for as long as it is open.
-  fold: () => Math.max(0, chromeBox?.getBoundingClientRect().bottom ?? 0),
+  // on one nor park the spoken line beneath the bar. The same line the
+  // position save reads under, measured by the same function.
+  fold: chromeFold,
   onChange: showSpeechBar,
   // The engine refusing is the one thing reading aloud can do that leaves
   // nothing on screen to explain itself, so it is said in the page's own
