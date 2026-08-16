@@ -278,7 +278,14 @@
   "reader_transfer_books": {
     "message": "Books stay out of this file: the backup of a book is its .epub - importing it again brings everything back except the reading position."
   },
-  "reader_add_book": { "message": "Add a file (EPUB)" },
+  "reader_transfer_link": {
+    "message": "Import and export (articles or EPUB)",
+    "description": "The quiet anchor over the reading list that jumps to the transfer section - it names both kinds of file the section takes, because a book is not obvious from the section's own name."
+  },
+  "reader_transfer_accepts": {
+    "message": "Import reads the file it is given: the list's .json backup, or an e-book (.epub).",
+    "description": "The line under the reading list's Import and Export buttons - why there is no separate button for books."
+  },
   "reader_book_label": {
     "message": "Book",
     "description": "The quiet tag on a book's row in the reading list."

@@ -297,7 +297,8 @@
   "reader_transfer_books": {
     "message": "Książki nie wchodzą do tego pliku: kopią zapasową książki jest jej plik .epub - ponowny import przywraca wszystko poza pozycją czytania."
   },
-  "reader_add_book": { "message": "Dodaj plik (EPUB)" },
+  "reader_transfer_link": { "message": "Import i eksport (artykuły lub EPUB)" },
+  "reader_transfer_accepts": { "message": "Import rozpoznaje podany plik: kopię listy (.json) albo e-booka (.epub)." },
   "reader_book_label": { "message": "Książka" },
   "reader_book_part_of": {
     "message": "Część $PART$ z $PARTS$",

@@ -252,7 +252,8 @@
   "reader_transfer_books": {
     "message": "Los libros quedan fuera de este archivo: la copia de seguridad de un libro es su archivo .epub - volver a importarlo restaura todo salvo la posición de lectura."
   },
-  "reader_add_book": { "message": "Añadir un archivo (EPUB)" },
+  "reader_transfer_link": { "message": "Importar y exportar (artículos o EPUB)" },
+  "reader_transfer_accepts": { "message": "La importación reconoce el archivo elegido: la copia .json de la lista o un libro electrónico (.epub)." },
   "reader_book_label": { "message": "Libro" },
   "reader_book_part_of": {
     "message": "Parte $PART$ de $PARTS$",

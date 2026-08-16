@@ -297,7 +297,8 @@
   "reader_transfer_books": {
     "message": "Книжки не входять до цього файлу: резервною копією книжки є її файл .epub - повторний імпорт відновлює все, крім позиції читання."
   },
-  "reader_add_book": { "message": "Додати файл (EPUB)" },
+  "reader_transfer_link": { "message": "Імпорт та експорт (статті або EPUB)" },
+  "reader_transfer_accepts": { "message": "Імпорт розпізнає файл: резервну копію списку (.json) або електронну книжку (.epub)." },
   "reader_book_label": { "message": "Книжка" },
   "reader_book_part_of": {
     "message": "Частина $PART$ з $PARTS$",

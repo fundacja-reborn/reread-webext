@@ -41,6 +41,7 @@ import {
 import { describeError } from "../lib/messages.js";
 import { ErrorCode, Message, asPage, asPageRequest, asResult, ok } from "../lib/protocol.js";
 import { buildArticle } from "../lib/reader/article.js";
+import { importKind } from "../lib/reader/import-kind.js";
 import { speechAction } from "../lib/reader/keys.js";
 import {
   POSITION_SAVE_DELAY,
@@ -164,12 +165,6 @@ const importRun = /** @type {HTMLButtonElement | null} */ (
 );
 const importCancel = document.getElementById("library-import-cancel");
 const transferLine = document.getElementById("library-transfer-status");
-const addBookButton = /** @type {HTMLButtonElement | null} */ (
-  document.getElementById("library-add-book")
-);
-const bookFileInput = /** @type {HTMLInputElement | null} */ (
-  document.getElementById("library-book-file")
-);
 const bookImportLine = document.getElementById("book-import-status");
 const bookNote = document.getElementById("book-note");
 const bookNoteText = document.getElementById("book-note-text");
@@ -1718,12 +1713,33 @@ exportButton?.addEventListener("click", () => void exportList());
 
 importButton?.addEventListener("click", () => importInput?.click());
 
+/**
+ * One picker, two readers: the file itself says which it is (`importKind` -
+ * name, then declared type, then the ZIP magic every EPUB opens with).
+ * Whichever way it goes, the other reader's report goes quiet first: two
+ * sentences about two different imports standing together would read as
+ * one report.
+ *
+ * @param {File} file
+ */
+async function dispatchImport(file) {
+  const head = new Uint8Array(await file.slice(0, 2).arrayBuffer());
+  if (importKind({ name: file.name, type: file.type, head }) === "book") {
+    closeImportOffer();
+    transferStatus("");
+    await runBookImport(file);
+  } else {
+    bookImportStatus("");
+    await offerImport(file);
+  }
+}
+
 importInput?.addEventListener("change", () => {
   if (importInput === null) return;
   const file = importInput.files?.[0];
   // Cleared so that the same file, picked again, fires this again.
   importInput.value = "";
-  if (file !== undefined) void offerImport(file);
+  if (file !== undefined) void dispatchImport(file);
 });
 
 importRun?.addEventListener("click", () => void runImport());
@@ -1734,8 +1750,10 @@ importCancel?.addEventListener("click", () => {
 });
 
 /**
- * The book import's own status line, right under the button that started it
- * (`.status:empty` keeps it out of the flow while it has nothing to say).
+ * The book import's own status line, in the transfer section with the
+ * article import's report (`.status:empty` keeps it out of the flow while
+ * it has nothing to say). Its own line rather than the shared one: this
+ * one ticks per written part, and must not overwrite a standing report.
  *
  * @param {string} text
  * @param {"error"} [tone]
@@ -1756,7 +1774,7 @@ let importingBook = false;
 async function runBookImport(file) {
   if (importingBook) return;
   importingBook = true;
-  if (addBookButton !== null) addBookButton.disabled = true;
+  if (importButton instanceof HTMLButtonElement) importButton.disabled = true;
   bookImportStatus(t("reader_book_importing", "1"));
   try {
     // Progress once per segment written, not per block - every repaint is a
@@ -1775,19 +1793,9 @@ async function runBookImport(file) {
     }
   } finally {
     importingBook = false;
-    if (addBookButton !== null) addBookButton.disabled = false;
+    if (importButton instanceof HTMLButtonElement) importButton.disabled = false;
   }
 }
-
-addBookButton?.addEventListener("click", () => bookFileInput?.click());
-
-bookFileInput?.addEventListener("change", () => {
-  if (bookFileInput === null) return;
-  const file = bookFileInput.files?.[0];
-  // Cleared so that the same file, picked again, fires this again.
-  bookFileInput.value = "";
-  if (file !== undefined) void runBookImport(file);
-});
 
 for (const button of segmentPrevs) button?.addEventListener("click", () => turnSegment(-1));
 for (const button of segmentNexts) button?.addEventListener("click", () => turnSegment(1));
