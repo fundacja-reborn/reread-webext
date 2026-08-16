@@ -693,6 +693,25 @@ navSettings?.addEventListener("click", () => {
   void webext().runtime.openOptionsPage();
 });
 
+// The open menu yields to the page underneath, exactly as the reader's panels
+// do (Michał's report, 2026-08-16): a press anywhere but the menu and its
+// button puts it away, and Escape does the same from the keyboard - handing
+// focus back to the button when it was inside the panel.
+document.addEventListener("pointerdown", (event) => {
+  if (menuPanel === null || menuPanel.hidden) return;
+  const target = event.target;
+  if (!(target instanceof Node)) return;
+  if (menuPanel.contains(target) || menuButton?.contains(target) === true) return;
+  closeMenu();
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape" || menuPanel === null || menuPanel.hidden) return;
+  const focus = document.activeElement;
+  if (focus instanceof Node && menuPanel.contains(focus)) menuButton?.focus();
+  closeMenu();
+});
+
 pairSelect?.addEventListener("change", () => {
   if (pairSelect === null) return;
   const choice = choices.find((one) => one.pair === pairSelect.value);

@@ -1145,6 +1145,38 @@ menuButton?.addEventListener("click", () => {
   setPanel(menuButton, menuPanel, opening);
 });
 
+function anyPanelOpen() {
+  return displayPanel?.hidden === false || menuPanel?.hidden === false;
+}
+
+function closePanels() {
+  setPanel(displayButton, displayPanel, false);
+  setPanel(menuButton, menuPanel, false);
+}
+
+// An open panel yields to the page underneath (Michał's report, 2026-08-16):
+// with the chrome stuck over the article, a panel left open is a curtain, and
+// closing it must not cost a precise press on the button that opened it.
+// `pointerdown`, the armed Delete's moment, so the press that closes the
+// panel can also be the press that starts a selection. Presses inside the
+// chrome are the panels' own business - the toggles' click handlers decide.
+document.addEventListener("pointerdown", (event) => {
+  if (!anyPanelOpen()) return;
+  if (event.target instanceof Node && chromeBox !== null && chromeBox.contains(event.target)) return;
+  closePanels();
+});
+
+// Escape closes the panel the way it stands down the armed Delete - and hands
+// the focus back to the bar if it was inside, rather than dropping it on the
+// body for a keyboard to hunt from the top.
+document.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape" || !anyPanelOpen()) return;
+  const focus = document.activeElement;
+  if (focus instanceof Node && displayPanel?.contains(focus) === true) displayButton?.focus();
+  else if (focus instanceof Node && menuPanel?.contains(focus) === true) menuButton?.focus();
+  closePanels();
+});
+
 librarySegments?.addEventListener("click", (event) => {
   const target = event.target;
   if (!(target instanceof Element)) return;
