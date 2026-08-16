@@ -13,24 +13,36 @@
  * so one row per address is an invariant the database keeps, not a rule a
  * transaction remembers to check.
  *
+ * The third store holds reading positions - where in a document its reader
+ * stopped. In this database rather than its own because IndexedDB has no
+ * transaction across databases, and a position must leave together with its
+ * document: a row about where somebody was in an article that is gone would
+ * be an orphan nothing ever cleans. Keyed by `docId` rather than `url`
+ * because books, when they come, will keep positions here too under their
+ * own ids.
+ *
  * Only the reader page opens this. The background never needs an article, no
  * message carries one, and an extension page writing its own origin's
  * database directly is the same call D14 made for models.
  */
 
+import { asPosition } from "../reader/position.js";
 import { importPlan } from "./articles-file.js";
 import { asSavedMeta } from "./saved-article.js";
 
 const DB_NAME = "reread-articles";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 /** The list's half: one light row per article. */
 const META = "meta";
 /** The article's half: the rebuilt markup, read only to render one. */
 const CONTENT = "content";
+/** Where each document's reader stopped: one row per `docId`, or none. */
+const POSITIONS = "positions";
 
 /**
  * @typedef {import("./saved-article.js").SavedMeta} SavedMeta
  * @typedef {import("./saved-article.js").SavedArticle} SavedArticle
+ * @typedef {import("../reader/position.js").ReadingPosition} ReadingPosition
  */
 
 /**
@@ -55,6 +67,11 @@ function open() {
       const db = request.result;
       if (!db.objectStoreNames.contains(META)) db.createObjectStore(META, { keyPath: "url" });
       if (!db.objectStoreNames.contains(CONTENT)) db.createObjectStore(CONTENT, { keyPath: "url" });
+      // Version 2. Contains-guarded like the others, so the one upgrade path
+      // serves both a fresh install and a database from version 1.
+      if (!db.objectStoreNames.contains(POSITIONS)) {
+        db.createObjectStore(POSITIONS, { keyPath: "docId" });
+      }
     };
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error ?? new Error("Cannot open the articles database"));
@@ -65,14 +82,22 @@ function open() {
 /**
  * @template T
  * @param {IDBTransactionMode} mode
- * @param {(meta: IDBObjectStore, content: IDBObjectStore) => Promise<T>} work
+ * @param {(
+ *   meta: IDBObjectStore,
+ *   content: IDBObjectStore,
+ *   positions: IDBObjectStore,
+ * ) => Promise<T>} work
  * @returns {Promise<T>}
  */
 async function withStores(mode, work) {
   const db = await open();
   try {
-    const transaction = db.transaction([META, CONTENT], mode);
-    const result = await work(transaction.objectStore(META), transaction.objectStore(CONTENT));
+    const transaction = db.transaction([META, CONTENT, POSITIONS], mode);
+    const result = await work(
+      transaction.objectStore(META),
+      transaction.objectStore(CONTENT),
+      transaction.objectStore(POSITIONS),
+    );
     await new Promise((resolve, reject) => {
       transaction.oncomplete = () => resolve(undefined);
       transaction.onerror = () => reject(transaction.error ?? new Error("Articles transaction failed"));
@@ -89,28 +114,63 @@ async function withStores(mode, work) {
  * halves go in one transaction: a row the list shows must never point at
  * content that is not there.
  *
+ * Overwriting also clears the old reading position: the anchor counted blocks
+ * of the text that has just been replaced, and saving a page again puts it
+ * back on the reading pile - the same reset `readAt` gets.
+ *
  * @param {SavedArticle} article
  * @returns {Promise<void>}
  */
 export async function putArticle(article) {
   const { content, dir, lang, ...meta } = article;
-  await withStores("readwrite", async (metaStore, contentStore) => {
+  await withStores("readwrite", async (metaStore, contentStore, positionsStore) => {
     await promisify(metaStore.put(meta));
     await promisify(contentStore.put({ url: article.url, content, dir, lang }));
+    await promisify(positionsStore.delete(article.url));
   });
 }
 
 /**
  * Deletes at both ends, and quietly when there was nothing: the second press
- * of a toggle and a row that is already gone mean the same thing.
+ * of a toggle and a row that is already gone mean the same thing. The reading
+ * position leaves in the same transaction - a place in a document that is
+ * gone is an orphan nothing would ever clean.
  *
  * @param {string} url
  * @returns {Promise<void>}
  */
 export async function deleteArticle(url) {
-  await withStores("readwrite", async (metaStore, contentStore) => {
+  await withStores("readwrite", async (metaStore, contentStore, positionsStore) => {
     await promisify(metaStore.delete(url));
     await promisify(contentStore.delete(url));
+    await promisify(positionsStore.delete(url));
+  });
+}
+
+/**
+ * Where this document's reader stopped, or null for the top - which is also
+ * the answer for a torn row, exactly as `restoredIndex` will read it.
+ *
+ * @param {string} docId
+ * @returns {Promise<ReadingPosition | null>}
+ */
+export async function getPosition(docId) {
+  const row = await withStores("readonly", (_meta, _content, positionsStore) =>
+    promisify(positionsStore.get(docId)),
+  );
+  return asPosition(row);
+}
+
+/**
+ * One row per document, overwritten in place: the position is the latest
+ * word, and its history means nothing.
+ *
+ * @param {ReadingPosition} position
+ * @returns {Promise<void>}
+ */
+export async function putPosition(position) {
+  await withStores("readwrite", async (_meta, _content, positionsStore) => {
+    await promisify(positionsStore.put(position));
   });
 }
 
