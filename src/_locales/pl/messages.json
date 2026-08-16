@@ -43,6 +43,8 @@
   "bubble_reader": { "message": "Czytaj w widoku czytania" },
   "bubble_translating": { "message": "Tłumaczę..." },
   "bubble_speak": { "message": "Przeczytaj na głos" },
+  "bubble_sentence_collapse": { "message": "Zwiń zdanie" },
+  "bubble_sentence_expand": { "message": "Rozwiń zdanie" },
 
   "popup_site_enabled": {
     "message": "Włączony na $DOMAIN$",

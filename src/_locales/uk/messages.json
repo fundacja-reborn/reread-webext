@@ -43,6 +43,8 @@
   "bubble_reader": { "message": "Читати в режимі читання" },
   "bubble_translating": { "message": "Перекладаю..." },
   "bubble_speak": { "message": "Прочитати вголос" },
+  "bubble_sentence_collapse": { "message": "Згорнути речення" },
+  "bubble_sentence_expand": { "message": "Розгорнути речення" },
 
   "popup_site_enabled": {
     "message": "Увімкнено на $DOMAIN$",

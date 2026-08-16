@@ -30,6 +30,17 @@
  * saving means, it just reports the meanings it is showing the moment they
  * change.
  *
+ * Down there the sentence and the dictionary also compete for the same room,
+ * and the sentence always won it: it takes the height it takes, and the
+ * entries' box is what the squeeze (D79) shortens - on a phone, a long
+ * sentence left the dictionary a slot three lines tall. The fold in the
+ * sentence's corner is the reader's own say in that split (D96): one press
+ * clamps the sentence to a single line, and the next placement hands the
+ * freed room to the entries by the same squeeze; pressed again, the sentence
+ * comes back. The control stands only where the contest is real - entries
+ * below, a sentence long enough to wrap - and every new bubble opens with
+ * the sentence whole, because the sentence is what More promises first.
+ *
  * Everything in it stands in the order of its distance from the phrase (D44):
  * the gloss on the nearest edge, the actions behind it, the second layer
  * farthest - and the whole column mirrors when the bubble stands above the
@@ -141,6 +152,61 @@ function speakerIcon() {
 /** The one button whose label changes with what it will do. */
 function lessLabel() {
   return t("bubble_less");
+}
+
+/**
+ * The fold's chevron, drawn like the speaker: DOM calls, `currentColor`, no
+ * markup parsed. It points up while the sentence stands whole - the press
+ * would take its lines away - and the stylesheet mirrors it once clamped.
+ *
+ * @returns {SVGSVGElement}
+ */
+function chevronIcon() {
+  const NS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  // Decoration to assistive tech - the button's aria-label carries the words.
+  svg.setAttribute("aria-hidden", "true");
+  const point = document.createElementNS(NS, "path");
+  point.setAttribute("d", "M6 14.5l6-5 6 5");
+  point.setAttribute("fill", "none");
+  point.setAttribute("stroke", "currentColor");
+  point.setAttribute("stroke-width", "2");
+  point.setAttribute("stroke-linecap", "round");
+  point.setAttribute("stroke-linejoin", "round");
+  svg.append(point);
+  return svg;
+}
+
+/**
+ * The fold's name, by what pressing it would do next.
+ *
+ * @param {boolean} clamped
+ * @returns {string}
+ */
+function foldLabel(clamped) {
+  return clamped ? t("bubble_sentence_expand") : t("bubble_sentence_collapse");
+}
+
+/**
+ * Which of its three states the sentence's fold is in (D96).
+ *
+ * `absent` while there are no dictionary entries: the fold exists to make
+ * room for the dictionary, so with nothing below the sentence it has no
+ * business standing there. `reserved` while the sentence fits one line on
+ * its own - nothing to press, but the column stays, because a control that
+ * popped in and out would rewrap the very sentence whose lines decide its
+ * visibility. `shown` is the one state where a press changes anything.
+ *
+ * The measurements are the caller's business - only a laid-out element knows
+ * where its lines broke. Exported for the test that holds the rule.
+ *
+ * @param {{ entries: boolean, overflows: boolean }} layer
+ * @returns {"absent" | "reserved" | "shown"}
+ */
+export function foldControl({ entries, overflows }) {
+  if (!entries) return "absent";
+  return overflows ? "shown" : "reserved";
 }
 
 /**
@@ -258,8 +324,14 @@ export const STYLE = `
   /* Quieter than the gloss and fenced off from the rest: this is the sentence
      the phrase was in, not another meaning of it. Style and colour go on every
      edge but width on one, so that the mirror below can move the line to the
-     other side by widths alone and the colour stays one rule per theme. */
+     other side by widths alone and the colour stays one rule per theme.
+     Inside, two columns (D96): the text gives way, the fold in the corner
+     keeps its size - and the section's own inside never reorders, whichever
+     way the mirror runs the bubble. */
   .context {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5em;
     margin-top: 8px;
     padding-top: 8px;
     border: 0 solid var(--edge);
@@ -267,12 +339,61 @@ export const STYLE = `
     font-size: calc(var(--type-second) * var(--bubble-scale, 1));
     opacity: 0.85;
   }
+  .context-text {
+    flex: 1;
+    min-width: 0;
+  }
 
   /* The same tones the body knows, for the one bubble that fetches its second
      layer on demand: a recalled phrase answers from the database, and the
      sentence starts being translated only when More asks for it. */
   .context[data-tone="pending"] { opacity: 0.6; font-style: italic; }
   .context[data-tone="error"] { color: #a3341f; }
+
+  /* The clamp the fold buys (D96): one line, cut honestly with an ellipsis.
+     The room it frees reaches the dictionary box through the next placement -
+     the squeeze (D79) starts from scratch every time - not through anything
+     written here. */
+  .context[data-folded="true"] .context-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* The fold itself, dressed as a control on purpose: the triangle under the
+     dictionary list is a passive mark of a cut box, and two identical glyphs
+     of which only one answers a press would teach the wrong lesson about the
+     other. So this one carries the frame pressable things get here - the
+     edge's solid ink, which an e-ink panel can draw - and its chevron turns
+     to point at what the press would do. No transition on the turn: a flip
+     is one repaint, an animation is a smear on paper. */
+  .context-toggle {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 0.25em;
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: 1px solid var(--edge);
+    border-radius: 5px;
+    opacity: 0.7;
+    cursor: pointer;
+  }
+  .context-toggle:hover { opacity: 1; }
+  .context-toggle:focus-visible {
+    opacity: 1;
+    outline: 1px solid currentColor;
+    outline-offset: 0;
+  }
+  .context-toggle svg {
+    width: var(--icon);
+    height: var(--icon);
+    display: block;
+  }
+  .context[data-folded="true"] .context-toggle svg { transform: rotate(180deg); }
 
   /* A dictionary entry can be long, and a bubble that grows past the window is
      a bubble that covers the sentence somebody was reading. It scrolls instead;
@@ -795,6 +916,10 @@ export function createTooltip({ onAction, onHide }) {
   /** @type {HTMLDivElement | null} */
   let contextElement = null;
   /** @type {HTMLDivElement | null} */
+  let contextTextElement = null;
+  /** @type {HTMLButtonElement | null} */
+  let contextToggle = null;
+  /** @type {HTMLDivElement | null} */
   let entriesElement = null;
   /** @type {HTMLTextAreaElement | null} */
   let editor = null;
@@ -825,6 +950,9 @@ export function createTooltip({ onAction, onHide }) {
   let editing = false;
   /** Whether the second layer is unfolded. Folded again for every new phrase. */
   let unfolded = false;
+  /** Whether the sentence is clamped to one line (D96). The reader's choice,
+   *  so it survives re-renders of the layer - but not the next phrase. */
+  let contextFolded = false;
   /** Whether the click the last press becomes is the one that unfolded the row. */
   let swallowClick = false;
   /** What the buttons were before the edit box opened, to go back to on cancel. */
@@ -882,6 +1010,18 @@ export function createTooltip({ onAction, onHide }) {
     contextElement = document.createElement("div");
     contextElement.className = "context";
     contextElement.hidden = true;
+    // Two columns inside the section (D96): the sentence, and the fold in its
+    // corner. Text goes into its own element so that setting it never has to
+    // know the control is there.
+    contextTextElement = document.createElement("div");
+    contextTextElement.className = "context-text";
+    contextToggle = document.createElement("button");
+    contextToggle.type = "button";
+    contextToggle.className = "context-toggle";
+    contextToggle.hidden = true;
+    contextToggle.append(chevronIcon());
+    contextToggle.addEventListener("click", toggleContextFold);
+    contextElement.append(contextTextElement, contextToggle);
     entriesElement = document.createElement("div");
     entriesElement.className = "entries";
     entriesElement.hidden = true;
@@ -904,8 +1044,9 @@ export function createTooltip({ onAction, onHide }) {
     // the bubble deliberately does not repeat the phrase it is about (D23), so
     // the selection is the only thing on the screen still saying which word all
     // of this is an answer to. The price is that text in there cannot be
-    // selected with the mouse, which nothing in the bubble is for.
-    for (const element of [actionsElement, entriesElement]) {
+    // selected with the mouse, which nothing in the bubble is for. The
+    // sentence's section joined when its corner grew the fold (D96).
+    for (const element of [actionsElement, entriesElement, contextElement]) {
       element.addEventListener("mousedown", (event) => event.preventDefault());
     }
     editor.addEventListener("input", refreshControls);
@@ -1102,6 +1243,55 @@ export function createTooltip({ onAction, onHide }) {
   }
 
   /**
+   * What the fold's state looks like on the section, told from what it is.
+   *
+   * The clamp holds only over a sentence: a pending line or an error a retry
+   * put there may not open cut to one line by a fold somebody meant for eight
+   * lines of translation - the choice itself survives, and holds again when
+   * a sentence is back. The control names the press it offers next, in words
+   * for the screen reader and for the hovering cursor alike.
+   */
+  function applyContextFold() {
+    if (contextElement === null || contextToggle === null) return;
+    const clamped = contextFolded && (contextElement.dataset["tone"] ?? "normal") === "normal";
+    contextElement.dataset["folded"] = clamped ? "true" : "false";
+    contextToggle.setAttribute("aria-expanded", clamped ? "false" : "true");
+    const name = foldLabel(clamped);
+    contextToggle.setAttribute("aria-label", name);
+    contextToggle.title = name;
+  }
+
+  /**
+   * The press in the sentence's corner (D96): the clamp flips, and the layer
+   * is laid out again - which is the whole of the mechanism, because every
+   * placement re-squeezes the dictionary box from scratch (D79), so the lines
+   * the sentence gives up arrive down there without another line here.
+   */
+  function toggleContextFold() {
+    contextFolded = !contextFolded;
+    applyContextFold();
+    unfold(unfolded);
+  }
+
+  /**
+   * Whether the fold has anything to do right now. Clamped, "is anything cut"
+   * is the horizontal overflow the ellipsis stands for; whole, "is there
+   * anything to clamp" is a second line box. Asked of the rendered element,
+   * because only a layout knows where the lines broke.
+   *
+   * @returns {boolean}
+   */
+  function sentenceOverflows() {
+    if (contextElement === null || contextTextElement === null) return false;
+    if (contextElement.dataset["folded"] === "true") {
+      return contextTextElement.scrollWidth > contextTextElement.clientWidth + 1;
+    }
+    const lines = document.createRange();
+    lines.selectNodeContents(contextTextElement);
+    return lines.getClientRects().length > 1;
+  }
+
+  /**
    * `open` is the reader's intent, and it is kept even over an empty layer:
    * a recall bubble fetches its second layer on the press that opens it, so
    * what the press asked for arrives a moment after the asking - and it has to
@@ -1113,14 +1303,29 @@ export function createTooltip({ onAction, onHide }) {
   function unfold(open) {
     if (contextElement === null || entriesElement === null) return;
     unfolded = open;
-    contextElement.hidden = !unfolded || (contextElement.textContent ?? "").length === 0;
-    entriesElement.hidden = !unfolded || entriesElement.childElementCount === 0;
+    const entriesThere = entriesElement.childElementCount > 0;
+    contextElement.hidden = !unfolded || (contextTextElement?.textContent ?? "").length === 0;
+    entriesElement.hidden = !unfolded || !entriesThere;
+    // The fold's column comes or goes before placing: its width decides where
+    // the sentence wraps, and the wrapping is measured below. Presence needs
+    // no measurement - `absent` is about the entries alone (D96).
+    if (contextToggle !== null) {
+      contextToggle.hidden = foldControl({ entries: entriesThere, overflows: false }) === "absent";
+    }
     renderActions(editing ? ["save", "cancel"] : restingActions);
     place();
     // Asked after `place`, because a hidden element has no size to compare and
     // the bubble is only its final height once it has been positioned.
     entriesElement.dataset["more"] =
       !entriesElement.hidden && entriesElement.scrollHeight > entriesElement.clientHeight + 1 ? "true" : "false";
+    // The fold shows only where a press would change anything - measured, so
+    // it too has to wait for the layout. Visibility and not display: taking
+    // the column away would rewrap the sentence just measured, and a control
+    // blinking with every re-placement is the reflow this rule avoids.
+    if (contextToggle !== null && !contextToggle.hidden) {
+      contextToggle.style.visibility =
+        foldControl({ entries: entriesThere, overflows: sentenceOverflows() }) === "shown" ? "" : "hidden";
+    }
   }
 
   /**
@@ -1128,9 +1333,12 @@ export function createTooltip({ onAction, onHide }) {
    * @param {Tone} [tone]
    */
   function setContext(sentence, tone = "normal") {
-    if (contextElement === null) return;
-    contextElement.textContent = sentence ?? "";
+    if (contextElement === null || contextTextElement === null) return;
+    contextTextElement.textContent = sentence ?? "";
     contextElement.dataset["tone"] = tone;
+    // The tone has a say in the clamp (see `applyContextFold`), so the fold is
+    // told before the layer is laid out again.
+    applyContextFold();
     // Shown or hidden again by what it now says - a sentence that is gone may
     // not keep a line of the bubble open over nothing.
     unfold(unfolded);
@@ -1323,11 +1531,14 @@ export function createTooltip({ onAction, onHide }) {
     bubble = null;
     bodyElement = null;
     contextElement = null;
+    contextTextElement = null;
+    contextToggle = null;
     entriesElement = null;
     editor = null;
     actionsElement = null;
     editing = false;
     unfolded = false;
+    contextFolded = false;
     swallowClick = false;
     restingActions = [];
     page = null;
@@ -1382,11 +1593,17 @@ export function createTooltip({ onAction, onHide }) {
       }
       // Folded again: this is another phrase, and the sentence behind "More"
       // belonged to the last one. Set directly rather than through `unfold`,
-      // which would render and place a bubble that has no body yet.
+      // which would render and place a bubble that has no body yet. The
+      // sentence's own fold opens too (D96): clamping was a choice about the
+      // last sentence, not about this one.
       unfolded = false;
-      if (contextElement !== null) {
-        contextElement.textContent = "";
+      contextFolded = false;
+      if (contextElement !== null && contextTextElement !== null && contextToggle !== null) {
+        contextTextElement.textContent = "";
         contextElement.hidden = true;
+        contextToggle.hidden = true;
+        contextToggle.style.visibility = "";
+        applyContextFold();
       }
       if (entriesElement !== null) {
         entriesElement.replaceChildren();
