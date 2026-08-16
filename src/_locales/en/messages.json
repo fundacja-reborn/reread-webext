@@ -291,6 +291,13 @@
       "parts": { "content": "$2", "example": "12" }
     }
   },
+  "reader_percent_read": {
+    "message": "$PERCENT$% read",
+    "description": "The tail of an unread row's detail line, shown once some of the document has been read: how much of the whole has passed before the eyes, in percent.",
+    "placeholders": {
+      "percent": { "content": "$1", "example": "34" }
+    }
+  },
   "reader_book_nav": {
     "message": "Book parts",
     "description": "Accessible name of the two rows that turn a book's segments."
