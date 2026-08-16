@@ -132,24 +132,30 @@ export function asSavedMeta(value) {
 }
 
 /**
- * The rows one segment of the list shows, newest saved first. Sorting lives
- * here rather than in the database because the index would order by its own
- * key, and what a reader means by "my list" is the order they saved it in,
- * backwards.
+ * The rows one segment of the list shows, most recent activity first, where
+ * activity is the later of saving and reading (`lastReadAt`, the position
+ * row's clock - a row without one has only its saving to stand on). One axis,
+ * not two groups: the document last touched - opened, read in, or freshly
+ * added - is the one "where was I?" means, and a page saved this morning
+ * should not sink under everything ever opened. Sorting lives here rather
+ * than in the database because the key is derived across two stores, and no
+ * index orders by a maximum.
  *
  * Generic over the row, because the list holds more than articles now: a
  * book enters dressed in the same fields (`list-view.js`), and whatever else
  * it carries has to come out the other side.
  *
- * @template {SavedMeta} T
+ * @template {SavedMeta & { lastReadAt?: number | null }} T
  * @param {T[]} metas
  * @param {SegmentValue} segment
  * @returns {T[]}
  */
 export function listedRows(metas, segment) {
+  /** @param {T} meta @returns {number} */
+  const activity = (meta) => Math.max(meta.savedAt, meta.lastReadAt ?? 0);
   return metas
     .filter((meta) => (segment === Segment.READ ? meta.readAt !== null : meta.readAt === null))
-    .sort((a, b) => b.savedAt - a.savedAt || a.url.localeCompare(b.url));
+    .sort((a, b) => activity(b) - activity(a) || a.url.localeCompare(b.url));
 }
 
 /**
