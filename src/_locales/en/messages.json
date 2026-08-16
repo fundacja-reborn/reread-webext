@@ -187,6 +187,10 @@
 
   "reader_title": { "message": "re/read - reader" },
   "reader_open_original": { "message": "Open the original" },
+  "reader_back_to_list": {
+    "message": "Back to the reading list",
+    "description": "Accessible name and tooltip of the drawn back arrow in the reader's bar, shown while an article is on screen."
+  },
   "reader_display_title": { "message": "Text and voice" },
   "reader_theme": { "message": "Theme" },
   "reader_theme_auto": { "message": "Auto" },

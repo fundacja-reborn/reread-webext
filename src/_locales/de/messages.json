@@ -155,6 +155,7 @@
 
   "reader_title": { "message": "re/read - Leseansicht" },
   "reader_open_original": { "message": "Original öffnen" },
+  "reader_back_to_list": { "message": "Zurück zur Leseliste" },
   "reader_display_title": { "message": "Text und Stimme" },
   "reader_theme": { "message": "Farbschema" },
   "reader_theme_auto": { "message": "Auto" },

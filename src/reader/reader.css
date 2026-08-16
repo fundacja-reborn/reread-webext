@@ -175,14 +175,46 @@ html {
 
 /* Centred, not baseline-aligned: two of the three buttons are drawn glyphs
    with no baseline to speak of, and against them the mark hung visibly low
-   (reported from a phone). */
+   (reported from a phone). The tools push themselves to the far edge; the
+   back arrow and the mark keep the leading one (`space-between` stopped
+   meaning that the moment the bar had three residents). */
 .reader-bar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 1rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid var(--page-line);
+}
+
+/* The way back, in the dress of the platform's own headers: a bare drawn
+   arrow, no frame - the frame is the tools', and back is not one more tool.
+   Muted like the mark beside it, accent when asked. The negative start
+   margin hands the hit padding back to the gutter, so the arrow itself
+   starts on the column edge the mark holds when it stands first; the mark's
+   own negative margin then only trims the gap between them. Drawn a step
+   larger than the tools' glyphs: it is the one control here that navigates,
+   and the old text arrow was reported small. */
+.reader-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.1rem;
+  min-width: 2.6rem;
+  margin-inline-start: -0.7rem;
+  padding: 0.15rem 0.4rem;
+  border: none;
+  background: none;
+  color: var(--page-muted);
+}
+
+.reader-back:hover {
+  border: none;
+  color: var(--page-accent);
+}
+
+.reader-back .reader-icon {
+  width: 1.4em;
+  height: 1.4em;
 }
 
 /* The mark is a button now (it opens the settings) and must go on looking like
@@ -209,6 +241,9 @@ html {
   display: flex;
   align-items: center;
   gap: 1rem;
+  /* To the far edge on its own: the bar's third resident (the back arrow)
+     took `space-between`'s meaning away. */
+  margin-inline-start: auto;
 }
 
 #display {
@@ -802,7 +837,7 @@ body.reader:has(#library:not([hidden])) {
   flex: 1 1 0;
 }
 
-/* --- the article's bar: the way back, then the acts on this article --- */
+/* --- the article's bar: the acts on this article --- */
 
 .reader-actions {
   margin-bottom: 1.75rem;
@@ -810,11 +845,11 @@ body.reader:has(#library:not([hidden])) {
   font-size: 0.85rem;
 }
 
-/* The line back to the list, dressed as the link it behaves as: bare text
-   with the arrow, muted until asked, no frame - the buttons beside it carry
-   the acts, this only carries the reader away. A class rather than the
-   button's id, because the line stands twice: over the article and under
-   its last line. */
+/* The line back to the list, dressed as the link it behaves as: the drawn
+   arrow with the list's name, muted until asked, no frame - the buttons
+   above it carry the acts, this only carries the reader away. Under the
+   article's last line alone since D102: mid-article the same way back
+   stands in the stuck bar. */
 .reader-return {
   margin: 0 0 0.25rem;
 }
@@ -920,8 +955,7 @@ button[data-armed],
   margin-inline-start: 0;
 }
 
-/* The finishing order: the mark first, the way out hanging under it - the
-   mirror of the top, where the way back hangs over the acts. */
+/* The finishing order: the mark first, the way out hanging under it. */
 .reader-actions-end .reader-return {
   margin: 0.5rem 0 0;
 }

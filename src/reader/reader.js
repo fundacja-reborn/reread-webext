@@ -41,6 +41,7 @@ import {
 import { describeError } from "../lib/messages.js";
 import { ErrorCode, Message, asPage, asPageRequest, asResult, ok } from "../lib/protocol.js";
 import { buildArticle } from "../lib/reader/article.js";
+import { asDocState, docState } from "../lib/reader/history-state.js";
 import { importKind } from "../lib/reader/import-kind.js";
 import { speechAction } from "../lib/reader/keys.js";
 import {
@@ -101,6 +102,10 @@ const Readability = /** @type {ReadabilityConstructor} */ (
 // First, so that everything after it - notices, rows, titles - lands on a page
 // already speaking the catalogue's language.
 localizePage();
+// The views own their scroll: the list starts at its top, a document at its
+// remembered place (D98). A browser also restoring offsets on history steps
+// (D102) would fight both - and always a beat late, over a view just rebuilt.
+history.scrollRestoration = "manual";
 // The toolbar icon follows the browser's scheme where the manifest cannot
 // say so (Chromium, no theme_icons there) - a no-op on Firefox.
 watchToolbarScheme();
@@ -622,7 +627,12 @@ function restorePosition(position, segmentIndex = 0) {
   if (fine !== null) scrollTo(0, fine);
 }
 
-async function showPage() {
+/**
+ * @param {boolean} [firstLoad] whether this is the load-time call - the one
+ *   that may find a reloaded or session-restored tab, whose history still
+ *   names the document that was on screen
+ */
+async function showPage(firstLoad = false) {
   const turn = ++epoch;
 
   // Opened with nothing to read - a restored tab after a restart, mostly.
@@ -630,7 +640,25 @@ async function showPage() {
   const source = await readReaderSource();
   if (turn !== epoch) return;
   if (source === null) {
-    await showLibrary();
+    const doc = asDocState(history.state);
+    if (doc === null) {
+      await showLibrary();
+    } else if (firstLoad) {
+      // A reload or a restored session, standing on a document's entry
+      // (D102): reopening that document is what coming back should mean -
+      // its position rides along anyway. If the database no longer holds
+      // it, the opener quietly refreshed the list instead; make that the
+      // view, or the page would stand blank.
+      if (doc.kind === "book") await openBook(doc.url);
+      else await openSaved(doc.url);
+      if (shown === null) await showLibrary();
+    } else {
+      // Asked for the list (the popup's row, D93) while a document's entry
+      // is on top: leave through history, so the next Back over the list
+      // keeps meaning "leave this page", not "reread that article". The
+      // popstate this causes is what shows the list.
+      history.back();
+    }
     return;
   }
 
@@ -813,6 +841,9 @@ async function showLibrary() {
   if (article !== null) article.hidden = true;
   if (actions !== null) actions.hidden = true;
   if (actionsEnd !== null) actionsEnd.hidden = true;
+  // The bar's way back stands outside the action rows, so hiding them does
+  // not take it along - and on the list there is nowhere back to go.
+  if (toLibraryButton !== null) toLibraryButton.hidden = true;
   if (originalLink !== null) originalLink.hidden = true;
   showSegmentNav(null);
   showBookNote(null);
@@ -1174,9 +1205,11 @@ async function runImport() {
 /**
  * The action rows around the article - the bar above it and the pair of
  * finishing acts under its last line - drawn from what the database says
- * right now. Whether this address is saved decides everything on them: the
- * save toggle's state on a live article, and whether there is a read mark
- * to offer at all. One function dresses both rows, so they cannot disagree.
+ * right now, along with the chrome's way back to the list (D102), which
+ * stands in every article view. Whether this address is saved decides
+ * everything on them: the save toggle's state on a live article, and whether
+ * there is a read mark to offer at all. One function dresses all of it, so
+ * the rows cannot disagree.
  */
 async function refreshActions() {
   if (actions === null) return;
@@ -1184,6 +1217,7 @@ async function refreshActions() {
   if (target === null) {
     actions.hidden = true;
     if (actionsEnd !== null) actionsEnd.hidden = true;
+    if (toLibraryButton !== null) toLibraryButton.hidden = true;
     return;
   }
 
@@ -1295,8 +1329,7 @@ async function onRemovePress() {
     return;
   }
   if (shown !== target) return;
-  hideNotice();
-  await showLibrary();
+  leaveArticle();
 }
 
 /**
@@ -1684,6 +1717,10 @@ libraryRows?.addEventListener("click", (event) => {
     else armDelete(button);
     return;
   }
+  // The press writes the step it takes (D102): one entry over the list, for
+  // the way back to retrace. Only here - a book turning its own segments and
+  // the popstate reopenings walk on entries that already exist.
+  history.pushState(docState(kind === "book" ? "book" : "article", url), "");
   if (kind === "book") void openBook(url);
   else void openSaved(url);
 });
@@ -1808,13 +1845,55 @@ bookNoteSettings?.addEventListener("click", () => void webext().runtime.openOpti
 // and the next opening will try again.
 void sweepOrphanSegments().catch(() => undefined);
 
-// One way back, two doors: the line above the article and the one under it.
-for (const button of [toLibraryButton, toLibraryEndButton]) {
-  button?.addEventListener("click", () => {
-    hideNotice();
-    void showLibrary();
-  });
+/**
+ * The one way out of an article into the list (D102). When the article
+ * stands on a history entry this page pushed - a row press put it there -
+ * leaving is a real step back, the same step the browser's Back button,
+ * Alt+Left, a mouse's back button and Android's back gesture take, so every
+ * one of them lands on the same list (the popstate below does the showing).
+ * With no entry beneath - the reader was pointed straight at a live page -
+ * the view just turns, and history is left alone.
+ */
+function leaveArticle() {
+  hideNotice();
+  if (asDocState(history.state) !== null) history.back();
+  else void showLibrary();
 }
+
+// One way back, two doors: the arrow in the bar and the line under the
+// article's last word.
+for (const button of [toLibraryButton, toLibraryEndButton]) {
+  button?.addEventListener("click", () => leaveArticle());
+}
+
+/**
+ * The browser walking its history over this page (D102): Back from an
+ * article, Forward onto one again - by button, keyboard, mouse or the
+ * system's own gesture, which is the whole point of writing entries at all.
+ * A custom swipe was deliberately not built instead: a horizontal drag on
+ * the text is the phrase-selection gesture (D80/D86), and the screen's edges
+ * belong to the system.
+ */
+window.addEventListener("popstate", (event) => {
+  const doc = asDocState(event.state);
+  if (doc === null) {
+    // Back under every entry this page pushed. The list is what lies there -
+    // but only if an article is actually on screen: a fragment jump on the
+    // list view (the transfer anchor) walks through here too, and rebuilding
+    // the list over it would tear the jump away mid-scroll.
+    if (shown !== null) {
+      hideNotice();
+      void showLibrary();
+    }
+    return;
+  }
+  // Forward to a document - or a stale entry naming the one already on
+  // screen, which asks for nothing.
+  if (shown !== null && shown.url === doc.url) return;
+  hideNotice();
+  if (doc.kind === "book") void openBook(doc.url);
+  else void openSaved(doc.url);
+});
 
 // The mark in the bar is the door to the settings - the one line standing over
 // every view of this page. Its own tab (`openOptionsPage`, which raises the
@@ -1833,8 +1912,7 @@ brandButton?.addEventListener("click", () => void webext().runtime.openOptionsPa
 // The settings row is the mark's press with a word on it.
 navLibrary?.addEventListener("click", () => {
   setPanel(menuButton, menuPanel, false);
-  hideNotice();
-  void showLibrary();
+  leaveArticle();
 });
 
 navVocabulary?.addEventListener("click", () => {
@@ -2040,4 +2118,6 @@ start({
   plainLinks: () => settings.reader.links === "plain",
 });
 
-void showPage();
+// The load-time ask is the one that may be a reload standing on a document's
+// history entry - the only caller allowed to reopen from it (D102).
+void showPage(true);

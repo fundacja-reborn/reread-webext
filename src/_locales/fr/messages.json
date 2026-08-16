@@ -166,6 +166,7 @@
 
   "reader_title": { "message": "re/read - lecteur" },
   "reader_open_original": { "message": "Ouvrir l'original" },
+  "reader_back_to_list": { "message": "Retour à la liste de lecture" },
   "reader_display_title": { "message": "Texte et voix" },
   "reader_theme": { "message": "Thème" },
   "reader_theme_auto": { "message": "Auto" },

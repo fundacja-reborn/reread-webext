@@ -19,15 +19,44 @@
     <!--
       The bar and the two panels it opens, held in one box so they can stand
       still together: while an article is on screen the box is sticky (see
-      reader.css), because the two things it holds are wanted mid-article -
-      the voice starts from the first sentence still on screen, which a button
-      that scrolled away with the top of the page could never mean, and the
-      menu is the way out of an article somebody is done with. On the list
-      view the box scrolls away like any heading: everything it leads to is
-      already at the top.
+      reader.css), because what it holds is wanted mid-article - the way back
+      to the list at the leading edge (D102), the voice that starts from the
+      first sentence still on screen, which a button that scrolled away with
+      the top of the page could never mean, and the menu to everywhere else.
+      On the list view the box scrolls away like any heading: everything it
+      leads to is already at the top.
     -->
     <div class="reader-chrome">
       <header class="reader-bar">
+        <!-- The way out of an article, standing where every app puts it: the
+             leading edge of the bar that is stuck over the text - the row a
+             finished reader is looking at wherever the article let them go.
+             Drawn, not written (D102): the same back arrow every header on the
+             platform wears, with the destination as its accessible name. Only
+             in the article view - on the list there is nowhere back to go.
+             It steps back through the history entry a row press pushed, so the
+             browser's own Back means the same thing (see reader.js). -->
+        <button
+          type="button"
+          id="to-library"
+          class="reader-back"
+          title="Back to the reading list"
+          data-i18n-title="reader_back_to_list"
+          aria-label="Back to the reading list"
+          data-i18n-aria-label="reader_back_to_list"
+          hidden
+        >
+          <svg class="reader-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+            <path
+              d="M13.25 8H3.1M7.3 3.8 3.1 8l4.2 4.2"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
         <!-- The mark is also the way to the settings: on this page and on the
              saved phrases it is the one thing standing in every view. The menu
              holds the labelled door to the same place - the mark stays because
@@ -346,18 +375,11 @@
         element on purpose: the learning code scans everything under it, and
         these labels are interface, not text anybody is studying.
 
-        Two lines, two kinds of act: the way back to the list, dressed as the
-        link it behaves as, and under it the acts on this article as quiet
-        buttons. The arrow is decoration - hidden from a screen reader, which
-        hears the list's one name alone.
+        One line of quiet buttons - the acts on this article. The way back to
+        the list used to open this box; it lives in the stuck bar now (D102),
+        where it stays in reach however far the article has scrolled.
       -->
       <div id="actions" class="reader-actions" hidden>
-        <p class="reader-return">
-          <button id="to-library" type="button" hidden>
-            <span aria-hidden="true">←</span>
-            <span data-i18n="reading_list">Offline reading list</span>
-          </button>
-        </p>
         <div class="article-actions">
           <button id="keep" type="button" aria-pressed="false" data-i18n="reader_save" hidden>
             Save to reading list
@@ -428,7 +450,18 @@
         </div>
         <p class="reader-return">
           <button id="to-library-end" type="button" hidden>
-            <span aria-hidden="true">←</span>
+            <!-- The bar's own back arrow, drawn - decoration to a screen
+                 reader, which hears the list's one name alone. -->
+            <svg class="reader-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+              <path
+                d="M13.25 8H3.1M7.3 3.8 3.1 8l4.2 4.2"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.3"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
             <span data-i18n="reading_list">Offline reading list</span>
           </button>
         </p>
