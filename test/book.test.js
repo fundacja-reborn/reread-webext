@@ -87,7 +87,18 @@ describe("library entries", () => {
       kind: "article",
       progress: null,
       percentRead: null,
+      lastReadAt: null,
     });
+  });
+
+  it("the entry carries its position's clock, and a torn clock reads as never", () => {
+    const position = { docId: meta.url, segmentIndex: 0, blockIndex: 7, updatedAt: 777 };
+    assert.equal(articleEntry(meta, position).lastReadAt, 777);
+    // `asPosition` marks a row whose clock is broken with zero; the list must
+    // not mistake that for a reading older than every honest date.
+    assert.equal(articleEntry(meta, { ...position, updatedAt: 0 }).lastReadAt, null);
+    const book = { ...whole, readAt: null };
+    assert.equal(bookEntry(book, { ...position, docId: "b-1" }).lastReadAt, 777);
   });
 
   it("an article's percent read is its position's, as stored", () => {
@@ -110,6 +121,7 @@ describe("library entries", () => {
       kind: "book",
       progress: { at: 1, of: 12 },
       percentRead: null,
+      lastReadAt: null,
     });
   });
 

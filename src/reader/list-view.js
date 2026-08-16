@@ -29,12 +29,15 @@ import { matchesFilter } from "../options/models-view.js";
  * `percentRead` is how much of the whole document has passed before the
  * eyes, 0-100 - or null for a row never opened (or whose position predates
  * the measure). The renderer says it only on unread rows: on a read one the
- * mark has already said more.
+ * mark has already said more. `lastReadAt` is the position row's clock - when
+ * the reader last stood in the document - or null for one never opened; it is
+ * half of the order the list stands in (`listedRows`).
  *
  * @typedef {SavedMeta & {
  *   kind: "article" | "book",
  *   progress: { at: number, of: number } | null,
  *   percentRead: number | null,
+ *   lastReadAt: number | null,
  * }} LibraryEntry
  */
 
@@ -56,7 +59,21 @@ export function articleEntry(meta, position) {
     kind: "article",
     progress: null,
     percentRead: overallPercent(position, 1),
+    lastReadAt: lastReadFrom(position),
   };
+}
+
+/**
+ * When the reader last stood in the document, from its position row. Zero
+ * (the mark `asPosition` puts on a row whose clock is torn) reads as never:
+ * a time nobody can mean must not pin the row to the bottom of the list
+ * below every honest date.
+ *
+ * @param {ReadingPosition | null} position
+ * @returns {number | null}
+ */
+function lastReadFrom(position) {
+  return position !== null && position.updatedAt > 0 ? position.updatedAt : null;
 }
 
 /**
@@ -82,6 +99,7 @@ export function bookEntry(book, position) {
     kind: "book",
     progress: { at: at + 1, of: book.segmentCount },
     percentRead: overallPercent(position, book.segmentCount),
+    lastReadAt: lastReadFrom(position),
   };
 }
 
@@ -113,7 +131,7 @@ export function searchableArticle(meta) {
  * from one `listedRows` call because the segments partition the list -
  * counting the other one twice would be a second copy of the rule.
  *
- * @template {SavedMeta} T
+ * @template {SavedMeta & { lastReadAt?: number | null }} T
  * @param {T[]} metas as the stores answer, in any order
  * @param {{ segment: SegmentValue, query: string, page: number }} shown
  * @returns {{

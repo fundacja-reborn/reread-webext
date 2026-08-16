@@ -5,9 +5,14 @@ import { Segment } from "../src/lib/store/saved-article.js";
 import { PAGE_SIZE, libraryView, searchableArticle } from "../src/reader/list-view.js";
 
 /**
+ * @typedef {import("../src/lib/store/saved-article.js").SavedMeta &
+ *   { lastReadAt?: number | null }} ListedMeta
+ */
+
+/**
  * @param {number} at
- * @param {Partial<import("../src/lib/store/saved-article.js").SavedMeta>} [rest]
- * @returns {import("../src/lib/store/saved-article.js").SavedMeta}
+ * @param {Partial<ListedMeta>} [rest]
+ * @returns {ListedMeta}
  */
 function meta(at, rest = {}) {
   return {
@@ -30,7 +35,7 @@ describe("searchableArticle", () => {
 });
 
 describe("libraryView", () => {
-  it("shows the segment asked for, newest saved first", () => {
+  it("shows the segment asked for, most recent activity first", () => {
     const metas = [meta(1), meta(2, { readAt: 9 }), meta(3)];
 
     const unread = libraryView(metas, { segment: Segment.UNREAD, query: "", page: 1 });
@@ -39,6 +44,22 @@ describe("libraryView", () => {
 
     const read = libraryView(metas, { segment: Segment.READ, query: "", page: 1 });
     assert.deepEqual(read.rows.map((one) => one.savedAt), [2]);
+  });
+
+  it("raises the row read last above rows saved after it, in both segments", () => {
+    const metas = [
+      meta(1, { lastReadAt: 50 }),
+      meta(2),
+      meta(3),
+      meta(4, { readAt: 9, lastReadAt: 40 }),
+      meta(5, { readAt: 9 }),
+    ];
+
+    const unread = libraryView(metas, { segment: Segment.UNREAD, query: "", page: 1 });
+    assert.deepEqual(unread.rows.map((one) => one.savedAt), [1, 3, 2]);
+
+    const read = libraryView(metas, { segment: Segment.READ, query: "", page: 1 });
+    assert.deepEqual(read.rows.map((one) => one.savedAt), [4, 5]);
   });
 
   it("cuts a long segment into pages and says how many there are", () => {

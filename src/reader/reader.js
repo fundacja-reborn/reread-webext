@@ -709,6 +709,12 @@ async function openSaved(url) {
   await refreshActions();
   if (shown !== rendered) return;
   restorePosition(position);
+  // Opening is reading's first act, and the position row's clock is what
+  // orders the list - so the open itself must wind it, or a document read
+  // without a single scroll would never rise. Written after the restore, the
+  // save re-measures the place the restore just took: the same anchor, a
+  // fresh `updatedAt`.
+  savePositionNow();
 }
 
 /**
@@ -813,6 +819,10 @@ async function openBook(id, wanted) {
   await refreshActions();
   if (shown !== rendered) return;
   restorePosition(position, index);
+  // Same reason as `openSaved`: the open winds the position row's clock. For
+  // a book this also writes which part is on screen, so a part reached with
+  // Next and left without a scroll is still the part the book reopens at.
+  savePositionNow();
 }
 
 /**

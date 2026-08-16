@@ -102,6 +102,31 @@ describe("listedRows", () => {
     );
   });
 
+  it("puts the document read last on top, above everything saved since read", () => {
+    const rows = [
+      { url: "https://a.example/1", hostname: "a.example", title: "read long ago", savedAt: 1, readAt: null, lastReadAt: 4 },
+      { url: "https://a.example/2", hostname: "a.example", title: "read yesterday", savedAt: 2, readAt: null, lastReadAt: 8 },
+      { url: "https://a.example/3", hostname: "a.example", title: "never read", savedAt: 5, readAt: null },
+    ];
+    assert.deepEqual(
+      listedRows(rows, Segment.UNREAD).map((meta) => meta.title),
+      ["read yesterday", "never read", "read long ago"],
+    );
+  });
+
+  it("a fresh save outranks an old reading of the same row", () => {
+    // Saving anew is an act too: a re-saved article rises on its new date
+    // even though its position row still carries the earlier reading.
+    const rows = [
+      { url: "https://a.example/1", hostname: "a.example", title: "re-saved", savedAt: 9, readAt: null, lastReadAt: 3 },
+      { url: "https://a.example/2", hostname: "a.example", title: "read after saving", savedAt: 2, readAt: null, lastReadAt: 7 },
+    ];
+    assert.deepEqual(
+      listedRows(rows, Segment.UNREAD).map((meta) => meta.title),
+      ["re-saved", "read after saving"],
+    );
+  });
+
   it("orders ties by address, so the list cannot reshuffle between openings", () => {
     const tied = [
       { url: "https://a.example/b", hostname: "a.example", title: "b", savedAt: 1, readAt: null },
