@@ -42,6 +42,7 @@
   "bubble_less": { "message": "Weniger" },
   "bubble_reader": { "message": "In der Leseansicht lesen" },
   "bubble_translating": { "message": "Übersetze..." },
+  "bubble_nothing_more": { "message": "Kein Satz und kein Wörterbucheintrag vorhanden" },
   "bubble_speak": { "message": "Vorlesen" },
   "bubble_sentence_collapse": { "message": "Satz einklappen" },
   "bubble_sentence_expand": { "message": "Satz ausklappen" },

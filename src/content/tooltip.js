@@ -359,8 +359,11 @@ export const STYLE = `
 
   /* The same tones the body knows, for the one bubble that fetches its second
      layer on demand: a recalled phrase answers from the database, and the
-     sentence starts being translated only when More asks for it. */
-  .context[data-tone="pending"] { opacity: 0.6; font-style: italic; }
+     sentence starts being translated only when More asks for it. A note is
+     the fetch coming back empty-handed - said in the pending line's quiet
+     voice, because both are the layer talking about itself, not a sentence. */
+  .context[data-tone="pending"],
+  .context[data-tone="note"] { opacity: 0.6; font-style: italic; }
   .context[data-tone="error"] { color: #a3341f; }
 
   /* The clamp the fold buys (D96): one line, cut honestly with an ellipsis.
@@ -751,7 +754,8 @@ export const STYLE = `
   }
 `;
 
-/** @typedef {"normal" | "pending" | "error"} Tone */
+/** `note` is an aside in the second layer - the fetch behind More coming back
+ *  with nothing - and never a body's tone. @typedef {"normal" | "pending" | "error" | "note"} Tone */
 /** Which of the three bubbles this is. `launcher` is reader-only mode's one
  *  offer: no gloss, one button. @typedef {"recall" | "save" | "launcher"} Variant */
 /** What the bubble can offer. `speak` is the row's one picture - a speaker

@@ -42,6 +42,7 @@
   "bubble_less": { "message": "Менше" },
   "bubble_reader": { "message": "Читати в режимі читання" },
   "bubble_translating": { "message": "Перекладаю..." },
+  "bubble_nothing_more": { "message": "Немає ні речення, ні словникової статті" },
   "bubble_speak": { "message": "Прочитати вголос" },
   "bubble_sentence_collapse": { "message": "Згорнути речення" },
   "bubble_sentence_expand": { "message": "Розгорнути речення" },
