@@ -141,11 +141,31 @@ const SCROLL_TAIL_MS = 100;
  * @property {(target: EventTarget | null) => boolean} owns whether a target is the bubble's
  * @property {(range: Range, kind: GestureKind) => void} onSelected a gesture ended on this selection
  * @property {() => void} onSelectStart a hold just took a word - whatever is shown is stale
+ * @property {() => boolean} [plainLinks] whether the article's links are dressed
+ *   as plain text right now (D95) - then a press on one is the gesture's, not
+ *   the link's. Asked at press time, so the setting can flip under a page that
+ *   stays open. Absent means links are live and keep every press.
  */
 
 /** @type {SelectHooks | null} */
 let hooks = null;
 let started = false;
+
+/**
+ * Whether a press that landed on a link belongs to the link rather than to
+ * the gesture. On live links it does: a reader whose links stop working is a
+ * broken article (D80), so holds, drags and taps all step around them. With
+ * links set to plain text (D95) nothing steps around - the words read as
+ * ordinary text, and a gesture that still refused them would make them the
+ * one text on the page that can be neither followed nor selected.
+ *
+ * @param {EventTarget | null} target
+ * @returns {boolean}
+ */
+function linkOwns(target) {
+  if (!(target instanceof Element) || target.closest("a[href]") === null) return false;
+  return hooks?.plainLinks?.() !== true;
+}
 
 /**
  * The block the selection lives in, with the machinery to move around it:
@@ -376,9 +396,10 @@ function wordAt(x, y, slop) {
  * The hold coming due: the finger is still down and has not travelled, so
  * this is a selection starting - if there is a word under it to start on.
  *
- * A hold on the article's own links is left to the browser, whose long-press
- * menu (open in new tab, copy link) is part of the article working; a hold on
- * empty space, an image or another block's text takes nothing and quietly
+ * A hold on the article's own live links is left to the browser, whose
+ * long-press menu (open in new tab, copy link) is part of the article working
+ * (`linkOwns` - links dressed as plain text hand the hold back, D95); a hold
+ * on empty space, an image or another block's text takes nothing and quietly
  * remains a tap in waiting. An underlined phrase is *not* stepped around the
  * way the old tap stepped around it: a tap still recalls it whole, and the
  * hold is now the more deliberate gesture - somebody starting a selection on
@@ -388,8 +409,7 @@ function hold() {
   const active = gesture;
   if (active === null || active.mode !== "hold" || hooks === null) return;
 
-  const target = active.target;
-  if (target instanceof Element && target.closest("a[href]") !== null) return;
+  if (linkOwns(active.target)) return;
 
   const word = wordAt(active.x, active.y, GRAB_SLOP);
   if (word === null) return;
@@ -572,7 +592,7 @@ function answerTap(target, x, y, slop) {
   const at = span;
   if (hooks === null || geo === null || at === null || range === null) return false;
 
-  if (target instanceof Element && target.closest("a[href]") !== null) return false;
+  if (linkOwns(target)) return false;
 
   const word = wordAt(x, y, slop);
   // Not on a word, but on the selection's own boxes - between two selected
@@ -652,9 +672,10 @@ function endMouse() {
  * yet - a press that stays put and lifts in time is a click, and clicks
  * belong to everything else this page does.
  *
- * A press on a link stays the link's, clicks and drags alike, for the reason
- * the hold steps around one: a reader whose links stop working is a broken
- * article. macOS's control-click is a context menu, not a press.
+ * A press on a live link stays the link's, clicks and drags alike, for the
+ * reason the hold steps around one: a reader whose links stop working is a
+ * broken article (`linkOwns` - plain-text links give the press up, D95).
+ * macOS's control-click is a context menu, not a press.
  *
  * @param {MouseEvent} event
  */
@@ -670,7 +691,7 @@ function onMouseDown(event) {
 
   const target = event.target;
   if (!(target instanceof Node) || !hooks.root.contains(target)) return;
-  if (target instanceof Element && target.closest("a[href]") !== null) return;
+  if (linkOwns(target)) return;
 
   mouse = {
     x: event.clientX,
@@ -784,8 +805,7 @@ export function releaseMouse(event) {
   if (answerTap(event.target, event.clientX, event.clientY, MOUSE_SLOP)) return true;
 
   if (event.detail >= 2) {
-    const target = event.target;
-    if (target instanceof Element && target.closest("a[href]") !== null) return false;
+    if (linkOwns(event.target)) return false;
     const word = wordAt(event.clientX, event.clientY, MOUSE_SLOP);
     if (word === null) return false;
     hooks.onSelectStart();
@@ -829,8 +849,10 @@ function onScroll() {
  * The browser's own long-press answer, stepped in front of: on text that
  * refuses selection Firefox for Android can still raise a context menu, and
  * it would land in the middle of the gesture that is already selecting. Only
- * while our gesture holds the claim - a long-press on a link never gets here,
- * because a hold on a link never claims.
+ * while our gesture holds the claim - a long-press on a live link never gets
+ * here, because a hold on one never claims (`linkOwns`; a link dressed as
+ * plain text claims like any word, and its menu would be a link's menu on
+ * what reads as text).
  *
  * @param {Event} event
  */

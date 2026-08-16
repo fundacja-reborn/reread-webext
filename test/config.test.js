@@ -443,4 +443,34 @@ describe("the reader's appearance", () => {
     const result = withDefaults({ reader: { theme: "dark", lineHeight: 3 } });
     assert.deepEqual(Object.keys(result.reader).sort(), Object.keys(READER_DEFAULTS).sort());
   });
+
+  it("keeps links plain on profiles old and new", () => {
+    // The switch shipped after 0.2.22, so a stored config without the key is
+    // every existing profile - and the reading-first default has to reach them.
+    assert.equal(withDefaults(undefined).reader.links, "plain");
+    assert.equal(withDefaults({ reader: { theme: "dark" } }).reader.links, "plain");
+  });
+
+  it("keeps a choice about links, in both directions", () => {
+    assert.equal(withDefaults({ reader: { links: "active" } }).reader.links, "active");
+    assert.equal(withDefaults({ reader: { links: "plain" } }).reader.links, "plain");
+  });
+
+  it("treats a hand-edited links value it does not know as the default", () => {
+    for (const links of ["on", "off", true, false, 7, null, {}]) {
+      assert.equal(withDefaults({ reader: { links } }).reader.links, "plain");
+    }
+  });
+
+  it("switches links without resetting the rest of the appearance", async () => {
+    const store = installFakeBrowser();
+    await writeConfig({ reader: { fontSize: 22 } });
+    const written = await writeConfig({ reader: { links: "active" } });
+
+    assert.deepEqual(written.reader, { ...READER_DEFAULTS, fontSize: 22, links: "active" });
+    assert.deepEqual(
+      /** @type {any} */ (store["config"]).reader,
+      { ...READER_DEFAULTS, fontSize: 22, links: "active" },
+    );
+  });
 });

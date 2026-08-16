@@ -1000,16 +1000,18 @@ function onStorageChanged(changes, area) {
 }
 
 /**
- * @param {{ root?: Element | null, observe?: boolean, stored?: Record<string, unknown>, ownSelection?: boolean, anchored?: boolean }} [where]
+ * @param {{ root?: Element | null, observe?: boolean, stored?: Record<string, unknown>, ownSelection?: boolean, anchored?: boolean, plainLinks?: () => boolean }} [where]
  *   what to underline inside, whether it can change on its own, the startup
  *   read of `storage.local` when the caller already made one, whether the
  *   page selects through our own gesture rather than the browser's - every
- *   pointer's gesture, finger and mouse alike (D80, D86) - and whether
- *   bubbles pin to the page instead of the viewport (D81). The last
- *   two are the reader page's flags, never a content script's: refusing the
+ *   pointer's gesture, finger and mouse alike (D80, D86) - whether
+ *   bubbles pin to the page instead of the viewport (D81), and whether the
+ *   article's links are dressed as plain text right now (D95), which hands
+ *   presses on them to the gesture. The last
+ *   three are the reader page's flags, never a content script's: refusing the
  *   native selection on somebody else's page would be changing how their
- *   page works, and pinning to the document trusts a page layout only our
- *   own page can promise
+ *   page works, pinning to the document trusts a page layout only our
+ *   own page can promise, and undressing links changes how a page works too
  */
 export function start(where = {}) {
   root = where.root ?? null;
@@ -1046,6 +1048,7 @@ export function start(where = {}) {
         owns: (target) => tooltip.owns(target),
         onSelected: presentGesture,
         onSelectStart: () => tooltip.hide(),
+        ...(where.plainLinks === undefined ? {} : { plainLinks: where.plainLinks }),
       });
     }
     webext().storage.onChanged.addListener(onStorageChanged);

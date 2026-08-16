@@ -20,6 +20,11 @@ export const CONFIG_KEY = "config";
  * @property {"serif" | "sans"} font
  * @property {number} fontSize In pixels.
  * @property {number} measure Column width in characters.
+ * @property {"active" | "plain"} links Whether links in the article text answer
+ *   a press (D95). The words stay either way - they are part of the sentence -
+ *   but the reader's main gesture is selecting a phrase to translate, and a
+ *   live link under a slightly short hold turns selection into navigation.
+ *   `plain` is the default: reading first, the original is one menu row away.
  */
 
 /**
@@ -64,6 +69,8 @@ export const CONFIG_KEY = "config";
 const THEMES = ["auto", "light", "sepia", "dark"];
 /** @type {readonly string[]} */
 const FONTS = ["serif", "sans"];
+/** @type {readonly string[]} */
+const LINKS = ["active", "plain"];
 
 /**
  * Type guards rather than casts, and exported because the reader needs the
@@ -83,6 +90,14 @@ export function isTheme(value) {
  */
 export function isFont(value) {
   return typeof value === "string" && FONTS.includes(value);
+}
+
+/**
+ * @param {unknown} value
+ * @returns {value is ReaderConfig["links"]}
+ */
+export function isLinks(value) {
+  return typeof value === "string" && LINKS.includes(value);
 }
 
 /**
@@ -120,6 +135,7 @@ export const READER_DEFAULTS = Object.freeze({
   font: "serif",
   fontSize: 18,
   measure: 65,
+  links: "plain",
 });
 
 /** @type {Readonly<Config>} */
@@ -217,6 +233,7 @@ function readerWithDefaults(stored) {
     font: isFont(raw["font"]) ? raw["font"] : READER_DEFAULTS.font,
     fontSize: within(raw["fontSize"], SIZE, READER_DEFAULTS.fontSize),
     measure: within(raw["measure"], MEASURE, READER_DEFAULTS.measure),
+    links: isLinks(raw["links"]) ? raw["links"] : READER_DEFAULTS.links,
   };
 }
 
