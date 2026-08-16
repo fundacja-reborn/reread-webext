@@ -100,6 +100,10 @@
     "message": "Marcar como aprendida: $PHRASE$",
     "placeholders": { "phrase": { "content": "$1", "example": "banco" } }
   },
+  "vocab_speak_aria": {
+    "message": "Leer en voz alta: $PHRASE$",
+    "placeholders": { "phrase": { "content": "$1", "example": "banco" } }
+  },
   "vocab_empty": {
     "message": "Aún no hay nada guardado para este par. Selecciona una frase mientras lees y pulsa «$BUTTON$» - te estará esperando aquí.",
     "placeholders": { "button": { "content": "$1", "example": "Guardar" } }

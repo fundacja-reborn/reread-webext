@@ -107,6 +107,10 @@
     "message": "Позначити як вивчену: $PHRASE$",
     "placeholders": { "phrase": { "content": "$1", "example": "банк" } }
   },
+  "vocab_speak_aria": {
+    "message": "Прочитати вголос: $PHRASE$",
+    "placeholders": { "phrase": { "content": "$1", "example": "банк" } }
+  },
   "vocab_empty": {
     "message": "Для цієї пари ще нічого не збережено. Виділіть фразу під час читання й натисніть «$BUTTON$» - вона чекатиме тут.",
     "placeholders": { "button": { "content": "$1", "example": "Зберегти" } }

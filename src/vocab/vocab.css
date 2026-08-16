@@ -8,9 +8,12 @@
    the end spreads the same HTML out for a desktop. */
 
 /* A touch wider than the shared 44rem: the row grid holds three columns and
-   the extra room goes to the meanings. */
+   the extra room goes to the meanings. The top padding is the reader page's
+   headroom (its body's 0.75rem plus its chrome box's 0.75rem), so the two
+   bars stand at one height when the pages are walked between. */
 body {
   max-width: 46rem;
+  padding-top: 1.5rem;
 }
 
 /* Focus must be findable on every control here - the quiet row buttons erase
@@ -47,77 +50,76 @@ summary {
   white-space: nowrap;
 }
 
-/* --- the header: brand line, title with the pair select, one counter --- */
+/* --- the header: the reader's bar, title with the pair select, a counter --- */
 
-/* The brand is a button (it opens the settings) dressed as the quiet line it
-   has always been: no frame, no fill, the page's muted voice. The padding is
-   the finger's target and the negative margins hand it back to the layout, so
-   the word stands exactly where it stood - flush with the title below it. */
-.brand {
-  /* Inline-block, so the target is the word and its padding - a block would
-     make the whole line a door to the settings. */
-  display: inline-block;
-  margin: -0.35rem 0 0.25rem;
+/* The bar the reading list wears (`.reader-bar` in reader.css), on this
+   page's header: the same dress by the same numbers - keep the two in step,
+   they are one bar in two homes. The line under it is also the menu panel's
+   top edge, exactly as in the reader's chrome. */
+.page-bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--page-line);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+/* The mark is a button (it opens the settings) dressed as the quiet line of
+   text it has always been: no frame, no fill, the page's muted voice. The
+   padding gives it a finger-sized target without moving the word, and the
+   negative start margin hands that padding back to the column, so the mark
+   still begins exactly on the left edge the title below aligns to. */
+.page-mark {
   margin-inline-start: -0.4rem;
   padding: 0.35rem 0.4rem;
   border: none;
   background: none;
   color: var(--page-muted);
-  font-size: 0.9rem;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
 }
 
-.brand:hover {
+.page-mark:hover {
   border: none;
   color: var(--page-accent);
   text-decoration: underline;
 }
 
-/* The brand line with the menu's button at its far end - the two ends of the
-   one line this page always shows. The block margins the mark used to carry
-   move up onto the row, so the mark and the button centre on one line and
-   the page keeps its old vertical rhythm. */
-.brand-row {
+.page-tools {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 1rem;
-  margin: -0.35rem 0 0.25rem;
+  margin-inline-start: auto;
 }
 
-.brand-row .brand {
-  margin-block: 0;
-}
-
-/* The drawn ☰, kept to this page's touch floor; the icon follows the text
-   around it (`em`) the way the reader's bar icons do. */
-.menu-toggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 44px;
-  min-height: 44px;
-  padding: 0.15rem 0.55rem;
-}
-
-.menu-icon {
+/* Drawn button glyphs follow the text around them (`em`), the reader bar's
+   own rule. */
+.page-icon {
   width: 1.15em;
   height: 1.15em;
   flex: none;
 }
 
-/* The menu's rows carry their own lines (page.css); the top edge is this
-   page's to draw, because nothing above the panel does - the brand line is
-   borderless. */
-#menu-panel {
-  border-top: 1px solid var(--page-line);
+/* The drawn ☰ wears the reader bar's frame. */
+#menu {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.1rem;
+  min-width: 2.6rem;
+  padding: 0.15rem 0.55rem;
 }
 
+/* The title stands the reading list's distance under the bar (the reader's
+   `#page` margin); an opened menu panel pushes it down from between the two,
+   as it does there. */
 .head-row {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem 1rem;
+  margin: 2rem 0 0;
 }
 
 .head-row h1 {
@@ -334,6 +336,21 @@ button.quiet-learned:hover,
 button.quiet-learned:focus-visible {
   border-color: var(--page-accent);
   background: color-mix(in srgb, var(--page-accent) 12%, transparent);
+}
+
+/* The speaker leads the row, the bubble's own order (D83): hearing the phrase
+   is about the phrase, not the vocabulary. The icon is the whole label - the
+   words live in the accessible name and the hover title - and it is laid out
+   as inline text on purpose: the row grid aligns its columns by baseline, and
+   a flexed icon would hand the button the icon's bottom edge as its baseline,
+   lifting all three buttons off the phrase's line. Sized to the line box
+   (1.6em = the page's line-height) and dropped half its leading under the
+   baseline, the icon fills exactly the space a text label's line does, so the
+   button keeps a text button's height and baseline. */
+button.quiet-speak svg {
+  width: 1.6em;
+  height: 1.6em;
+  vertical-align: -0.5em;
 }
 
 /* --- the editor a row unfolds into --- */

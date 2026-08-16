@@ -107,6 +107,10 @@
     "message": "Oznacz jako znaną: $PHRASE$",
     "placeholders": { "phrase": { "content": "$1", "example": "bank" } }
   },
+  "vocab_speak_aria": {
+    "message": "Przeczytaj na głos: $PHRASE$",
+    "placeholders": { "phrase": { "content": "$1", "example": "bank" } }
+  },
   "vocab_empty": {
     "message": "Dla tej pary nie ma jeszcze nic zapisanego. Zaznacz frazę podczas czytania i naciśnij „$BUTTON$” - będzie tu czekać.",
     "placeholders": { "button": { "content": "$1", "example": "Zapisz" } }
