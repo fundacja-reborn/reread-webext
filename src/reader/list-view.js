@@ -14,6 +14,7 @@
  * pages) then treats the two kinds identically, which is the point.
  */
 
+import { overallPercent } from "../lib/reader/position.js";
 import { Segment, listedRows } from "../lib/store/saved-article.js";
 import { matchesFilter } from "../options/models-view.js";
 
@@ -25,10 +26,15 @@ import { matchesFilter } from "../options/models-view.js";
 /**
  * One row of the list, either kind. `url` is the row's key and the way to
  * open it - a book's id plays the part its address plays for an article.
+ * `percentRead` is how much of the whole document has passed before the
+ * eyes, 0-100 - or null for a row never opened (or whose position predates
+ * the measure). The renderer says it only on unread rows: on a read one the
+ * mark has already said more.
  *
  * @typedef {SavedMeta & {
  *   kind: "article" | "book",
  *   progress: { at: number, of: number } | null,
+ *   percentRead: number | null,
  * }} LibraryEntry
  */
 
@@ -41,10 +47,16 @@ export const PAGE_SIZE = 50;
 
 /**
  * @param {SavedMeta} meta
+ * @param {ReadingPosition | null} position
  * @returns {LibraryEntry}
  */
-export function articleEntry(meta) {
-  return { ...meta, kind: "article", progress: null };
+export function articleEntry(meta, position) {
+  return {
+    ...meta,
+    kind: "article",
+    progress: null,
+    percentRead: overallPercent(position, 1),
+  };
 }
 
 /**
@@ -69,6 +81,7 @@ export function bookEntry(book, position) {
     readAt: book.readAt,
     kind: "book",
     progress: { at: at + 1, of: book.segmentCount },
+    percentRead: overallPercent(position, book.segmentCount),
   };
 }
 

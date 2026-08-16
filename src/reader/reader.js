@@ -45,6 +45,8 @@ import { speechAction } from "../lib/reader/keys.js";
 import {
   POSITION_SAVE_DELAY,
   blockAtLine,
+  fineScrollTop,
+  measuredPercent,
   positionRecord,
   restoredIndex,
 } from "../lib/reader/position.js";
@@ -412,7 +414,10 @@ function renderArticle(piece) {
   applySpeech();
   updateListen();
   scrollTo(0, 0);
-  void refreshActions();
+  // The action rows are the caller's move, not taken here: the two callers
+  // that restore a position must have them laid out BEFORE the scroll - the
+  // bar stands above the article, and appearing later it would push the
+  // restored block down the exact height it takes.
 }
 
 /**
@@ -446,6 +451,8 @@ function renderLive(page) {
     link: page.url,
     source: new DOMParser().parseFromString(found.content, "text/html").body,
   });
+  // A live page starts at the top, so the action rows may come when they come.
+  void refreshActions();
 }
 
 /**
@@ -535,7 +542,12 @@ function savePositionNow() {
   const at = topBlockIndex();
   if (at === null) return;
   const segment = target.origin === "book" ? target.segmentIndex : 0;
-  const record = positionRecord(target.url, segment, at, Date.now());
+  const percent = measuredPercent(
+    window.scrollY,
+    window.innerHeight,
+    document.documentElement.scrollHeight,
+  );
+  const record = positionRecord(target.url, segment, at, Date.now(), percent);
   if (record !== null) void putPosition(record).catch(() => undefined);
 }
 
@@ -552,14 +564,24 @@ function flushPosition() {
 // reading aloud makes on its own, which is what keeps the position current
 // while the page reads itself. One cheap read per save, at most every
 // second and a half; nothing runs between scrolls.
-window.addEventListener(
+//
+// Listened for on the document in the capture phase, not on `window`: with
+// the root's sideways overflow clipped (the sticky strip's underlay, D93),
+// Firefox hands the viewport's scroll events to an element, and an element's
+// scroll never bubbles - a window listener simply never fires there, and no
+// scroll ever got saved. The capture path is the one road every engine's
+// scroll must take, whichever node it decides to aim at. Scrolls inside an
+// article's own boxes (code, tables) arm the debounce too; the save then
+// re-measures the window and writes the same place - a spare write, never a
+// wrong one.
+document.addEventListener(
   "scroll",
   () => {
     if (shown === null || shown.origin === "live") return;
     if (positionTimer !== null) clearTimeout(positionTimer);
     positionTimer = setTimeout(savePositionNow, POSITION_SAVE_DELAY);
   },
-  { passive: true },
+  { capture: true, passive: true },
 );
 
 // The tab going away or to the background writes at once: the debounce is
@@ -585,10 +607,24 @@ function restorePosition(position, segmentIndex = 0) {
   if (root === null) return;
   const at = restoredIndex(position, segmentIndex, root.children.length);
   if (at === null) return;
-  root.children[at]?.scrollIntoView({ behavior: "instant", block: "start" });
+  const block = root.children[at];
+  if (block === undefined) return;
+  block.scrollIntoView({ behavior: "instant", block: "start" });
   // `scrollIntoView` puts the block at the window's very top, which the
   // sticky chrome covers; step back so its first line lands under the bar.
   scrollBy(0, -chromeFold());
+  // A block taller than the window - one endless paragraph - is the shape
+  // the anchor cannot answer for: its top may be screens away from where
+  // the reading stopped. The stored percent finds the place inside it.
+  const rect = block.getBoundingClientRect();
+  const fine = fineScrollTop(
+    rect.top + window.scrollY,
+    rect.height,
+    window.innerHeight,
+    position?.percent,
+    document.documentElement.scrollHeight,
+  );
+  if (fine !== null) scrollTo(0, fine);
 }
 
 async function showPage() {
@@ -641,6 +677,13 @@ async function openSaved(url) {
     return;
   }
   renderSaved(saved);
+  // The action rows first, the scroll second: they stand above the article,
+  // and a bar appearing after the scroll would shift the restored block by
+  // its own height. Awaited before the epoch check - a row pressed during
+  // the wait means this render is no longer the one on screen.
+  const rendered = shown;
+  await refreshActions();
+  if (shown !== rendered) return;
   restorePosition(position);
 }
 
@@ -740,6 +783,11 @@ async function openBook(id, wanted) {
   });
   showSegmentNav({ index, count: book.segmentCount });
   showBookNote(book);
+  // Same order as `openSaved`, for the same reason: everything that takes
+  // room above the text lays out before the scroll that has to land on it.
+  const rendered = shown;
+  await refreshActions();
+  if (shown !== rendered) return;
   restorePosition(position, index);
 }
 
@@ -792,7 +840,7 @@ async function refreshLibrary() {
     allPositions(),
   ]);
   const entries = [
-    ...metas.map(articleEntry),
+    ...metas.map((meta) => articleEntry(meta, positions.get(meta.url) ?? null)),
     ...books.map((book) => bookEntry(book, positions.get(book.id) ?? null)),
   ];
   const view = libraryView(entries, { segment, query: libraryQuery, page: libraryPage });
@@ -906,6 +954,13 @@ function libraryRow(entry) {
 
   const detail = document.createElement("span");
   detail.className = "library-item-detail";
+  // How far in the reading is, said only where it says anything: on an
+  // unread row that was actually started. A read row's mark has said more,
+  // and "0% read" on a row never opened is noise dressed as a number.
+  const percent =
+    entry.readAt === null && entry.percentRead !== null && entry.percentRead > 0
+      ? t("reader_percent_read", entry.percentRead.toLocaleString())
+      : "";
   if (entry.kind === "book") {
     const progress =
       entry.progress === null
@@ -914,12 +969,14 @@ function libraryRow(entry) {
             entry.progress.at.toLocaleString(),
             entry.progress.of.toLocaleString(),
           ]);
-    detail.textContent = [entry.hostname, t("reader_book_label"), progress]
+    detail.textContent = [entry.hostname, t("reader_book_label"), progress, percent]
       .filter((part) => part.length > 0)
       .join(" - ");
   } else {
     const when = entry.savedAt > 0 ? new Date(entry.savedAt).toLocaleDateString() : "";
-    detail.textContent = [entry.hostname, when].filter((part) => part.length > 0).join(" - ");
+    detail.textContent = [entry.hostname, when, percent]
+      .filter((part) => part.length > 0)
+      .join(" - ");
   }
 
   text.append(open, detail);

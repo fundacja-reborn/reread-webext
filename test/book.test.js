@@ -82,7 +82,21 @@ describe("library entries", () => {
   };
 
   it("an article enters as itself", () => {
-    assert.deepEqual(articleEntry(meta), { ...meta, kind: "article", progress: null });
+    assert.deepEqual(articleEntry(meta, null), {
+      ...meta,
+      kind: "article",
+      progress: null,
+      percentRead: null,
+    });
+  });
+
+  it("an article's percent read is its position's, as stored", () => {
+    const position = { docId: meta.url, segmentIndex: 0, blockIndex: 7, updatedAt: 1, percent: 42 };
+    assert.equal(articleEntry(meta, position).percentRead, 42);
+    // A row from before the percent existed places the article, but has no
+    // number to say - not a zero, which would read as "barely started".
+    const bare = { docId: meta.url, segmentIndex: 0, blockIndex: 7, updatedAt: 1 };
+    assert.equal(articleEntry(meta, bare).percentRead, null);
   });
 
   it("a book wears the list's fields: author for site, added for saved", () => {
@@ -95,7 +109,15 @@ describe("library entries", () => {
       readAt: 9,
       kind: "book",
       progress: { at: 1, of: 12 },
+      percentRead: null,
     });
+  });
+
+  it("a book's percent read counts the parts before the remembered one", () => {
+    const book = { ...whole, readAt: null };
+    // Halfway through part 5 of 12: four whole parts and half of the fifth.
+    const position = { docId: "b-1", segmentIndex: 4, blockIndex: 3, updatedAt: 1, percent: 50 };
+    assert.equal(bookEntry(book, position).percentRead, Math.round((4.5 / 12) * 100));
   });
 
   it("progress reads the stored position, clamped to the book it has", () => {

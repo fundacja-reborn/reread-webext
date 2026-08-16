@@ -250,6 +250,12 @@
       "parts": { "content": "$2", "example": "12" }
     }
   },
+  "reader_percent_read": {
+    "message": "$PERCENT$ % gelesen",
+    "placeholders": {
+      "percent": { "content": "$1", "example": "34" }
+    }
+  },
   "reader_book_nav": { "message": "Buchteile" },
   "reader_book_importing": {
     "message": "Buch wird hinzugefügt - Teil $PART$",

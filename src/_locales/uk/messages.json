@@ -306,6 +306,12 @@
       "parts": { "content": "$2", "example": "12" }
     }
   },
+  "reader_percent_read": {
+    "message": "прочитано $PERCENT$%",
+    "placeholders": {
+      "percent": { "content": "$1", "example": "34" }
+    }
+  },
   "reader_book_nav": { "message": "Частини книжки" },
   "reader_book_importing": {
     "message": "Додавання книжки - частина $PART$",

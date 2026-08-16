@@ -261,6 +261,12 @@
       "parts": { "content": "$2", "example": "12" }
     }
   },
+  "reader_percent_read": {
+    "message": "$PERCENT$ % lu",
+    "placeholders": {
+      "percent": { "content": "$1", "example": "34" }
+    }
+  },
   "reader_book_nav": { "message": "Parties du livre" },
   "reader_book_importing": {
     "message": "Ajout du livre - partie $PART$",
