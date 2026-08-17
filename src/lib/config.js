@@ -5,6 +5,7 @@
  */
 
 import { webext } from "./browser.js";
+import { DEFAULT_MARK_COLOR, isMarkColor } from "./reader/marks.js";
 
 /**
  * One key, one object: a versioned shape is easier to migrate than loose keys.
@@ -25,6 +26,12 @@ export const CONFIG_KEY = "config";
  *   but the reader's main gesture is selecting a phrase to translate, and a
  *   live link under a slightly short hold turns selection into navigation.
  *   `plain` is the default: reading first, the original is one menu row away.
+ * @property {import("./reader/marks.js").MarkColor} markerColor What the
+ *   highlighter draws in (D106). One global choice rather than a picker per
+ *   mark - a pen has one ink at a time, and drawing over a mark repaints it
+ *   in the current one. A name, never a value: the stylesheet holds a wash
+ *   for each name in each theme. Marks already made keep the colour they
+ *   were drawn in; this only says what the next stroke wears.
  */
 
 /**
@@ -136,6 +143,7 @@ export const READER_DEFAULTS = Object.freeze({
   fontSize: 18,
   measure: 65,
   links: "plain",
+  markerColor: DEFAULT_MARK_COLOR,
 });
 
 /** @type {Readonly<Config>} */
@@ -234,6 +242,7 @@ function readerWithDefaults(stored) {
     fontSize: within(raw["fontSize"], SIZE, READER_DEFAULTS.fontSize),
     measure: within(raw["measure"], MEASURE, READER_DEFAULTS.measure),
     links: isLinks(raw["links"]) ? raw["links"] : READER_DEFAULTS.links,
+    markerColor: isMarkColor(raw["markerColor"]) ? raw["markerColor"] : READER_DEFAULTS.markerColor,
   };
 }
 

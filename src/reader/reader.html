@@ -241,6 +241,31 @@
         </div>
 
         <!--
+          What the highlighter draws in (D106): four inks, one chosen for the
+          whole pen - a global setting like everything in this panel. The
+          swatches show the actual wash of the theme on screen, so the choice
+          previews itself; the pressed one wears the panel's own accent
+          frame. Marks already made keep their ink.
+        -->
+        <div class="reader-setting">
+          <span class="reader-setting-name" data-i18n="reader_marker">Highlighter</span>
+          <span class="reader-choices" id="marker-color-choices">
+            <button type="button" data-marker-color="yellow" aria-label="Yellow" data-i18n-aria-label="color_yellow">
+              <span class="marker-swatch" data-swatch="yellow" aria-hidden="true"></span>
+            </button>
+            <button type="button" data-marker-color="green" aria-label="Green" data-i18n-aria-label="color_green">
+              <span class="marker-swatch" data-swatch="green" aria-hidden="true"></span>
+            </button>
+            <button type="button" data-marker-color="blue" aria-label="Blue" data-i18n-aria-label="color_blue">
+              <span class="marker-swatch" data-swatch="blue" aria-hidden="true"></span>
+            </button>
+            <button type="button" data-marker-color="pink" aria-label="Pink" data-i18n-aria-label="color_pink">
+              <span class="marker-swatch" data-swatch="pink" aria-hidden="true"></span>
+            </button>
+          </span>
+        </div>
+
+        <!--
           The two knobs of reading aloud (D87), here rather than only in the
           settings because this is where they are used: the voice is chosen while
           listening to it, and the speed is changed in the middle of a sentence

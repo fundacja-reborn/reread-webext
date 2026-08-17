@@ -16,13 +16,16 @@
 :root {
   --reader-speaking: color-mix(in srgb, var(--page-fg) 15%, transparent);
   --reader-speaking-word: color-mix(in srgb, var(--page-accent) 38%, transparent);
-  /* The highlighter's yellow (D106), a real colour rather than a wash of the
-     ink: a mark means "this, in this colour", and per theme because the same
-     yellow that reads on white drowns on near-black. What the wet stroke
-     wears while being drawn is an alias of the chosen colour, so the preview
-     is the result; today the choice is yellow, and the alias is where a
-     palette will plug in. */
+  /* The highlighter's inks (D106), real colours rather than washes of the
+     text ink: a mark means "this, in this colour", and per theme because the
+     same yellow that reads on white drowns on near-black. What the wet
+     stroke wears while being drawn is an alias of the chosen ink - the Aa
+     panel's pick, written onto the root by the reader - so the preview is
+     the result. */
   --reader-marker-yellow: rgba(250, 205, 0, 0.4);
+  --reader-marker-green: rgba(110, 205, 90, 0.4);
+  --reader-marker-blue: rgba(100, 180, 255, 0.4);
+  --reader-marker-pink: rgba(255, 130, 190, 0.4);
   --reader-marker-current: var(--reader-marker-yellow);
 }
 
@@ -31,6 +34,9 @@
     --reader-speaking: color-mix(in srgb, var(--page-fg) 25%, transparent);
     --reader-speaking-word: color-mix(in srgb, var(--page-accent) 45%, transparent);
     --reader-marker-yellow: rgba(255, 200, 50, 0.3);
+    --reader-marker-green: rgba(120, 210, 100, 0.28);
+    --reader-marker-blue: rgba(110, 185, 255, 0.28);
+    --reader-marker-pink: rgba(255, 130, 200, 0.28);
   }
 }
 
@@ -42,18 +48,27 @@
   --reader-speaking: color-mix(in srgb, var(--page-fg) 15%, transparent);
   --reader-speaking-word: color-mix(in srgb, var(--page-accent) 38%, transparent);
   --reader-marker-yellow: rgba(250, 205, 0, 0.4);
+  --reader-marker-green: rgba(110, 205, 90, 0.4);
+  --reader-marker-blue: rgba(100, 180, 255, 0.4);
+  --reader-marker-pink: rgba(255, 130, 190, 0.4);
 }
 
 :root[data-reader-theme="dark"] {
   --reader-speaking: color-mix(in srgb, var(--page-fg) 25%, transparent);
   --reader-speaking-word: color-mix(in srgb, var(--page-accent) 45%, transparent);
   --reader-marker-yellow: rgba(255, 200, 50, 0.3);
+  --reader-marker-green: rgba(120, 210, 100, 0.28);
+  --reader-marker-blue: rgba(110, 185, 255, 0.28);
+  --reader-marker-pink: rgba(255, 130, 200, 0.28);
 }
 
 :root[data-reader-theme="sepia"] {
   --reader-speaking: color-mix(in srgb, var(--page-fg) 15%, transparent);
   --reader-speaking-word: color-mix(in srgb, var(--page-accent) 38%, transparent);
   --reader-marker-yellow: rgba(214, 165, 0, 0.42);
+  --reader-marker-green: rgba(95, 175, 70, 0.42);
+  --reader-marker-blue: rgba(80, 155, 225, 0.42);
+  --reader-marker-pink: rgba(235, 110, 170, 0.42);
 }
 
 /* The article's font lives on the body so that `ch` means what it should: a
@@ -321,6 +336,31 @@ html {
   text-align: center;
 }
 
+/* The highlighter's inks as themselves (D106): each swatch is the actual
+   wash of the theme on screen, over the page's own paper - the choice
+   previews its result. A hairline of the ink's edge keeps the paler washes
+   from dissolving into the panel. */
+.marker-swatch {
+  display: inline-block;
+  width: 1.1em;
+  height: 1.1em;
+  border: 1px solid var(--page-line);
+  border-radius: 0.25em;
+}
+
+.marker-swatch[data-swatch="yellow"] {
+  background: var(--reader-marker-yellow);
+}
+.marker-swatch[data-swatch="green"] {
+  background: var(--reader-marker-green);
+}
+.marker-swatch[data-swatch="blue"] {
+  background: var(--reader-marker-blue);
+}
+.marker-swatch[data-swatch="pink"] {
+  background: var(--reader-marker-pink);
+}
+
 /* A voice is called whatever the platform calls it, and some names are a
    sentence long. The select gives way instead of pushing the panel wider than
    the article it stands over. */
@@ -406,6 +446,18 @@ html {
    through the alias, so drawing shows exactly what will stay. */
 ::highlight(reread-marker-yellow) {
   background-color: var(--reader-marker-yellow);
+}
+
+::highlight(reread-marker-green) {
+  background-color: var(--reader-marker-green);
+}
+
+::highlight(reread-marker-blue) {
+  background-color: var(--reader-marker-blue);
+}
+
+::highlight(reread-marker-pink) {
+  background-color: var(--reader-marker-pink);
 }
 
 ::highlight(reread-marker-draft) {

@@ -29,17 +29,22 @@
  * stylesheet holds a wash for each name in each theme - and because a name is
  * what can be checked at the door: a stored colour is a registry name in the
  * making, never a string that reaches CSS.
+ *
+ * @typedef {"yellow" | "green" | "blue" | "pink"} MarkColor
  */
+
+/** @type {readonly MarkColor[]} */
 export const MARK_COLORS = Object.freeze(["yellow", "green", "blue", "pink"]);
 
+/** @type {MarkColor} */
 export const DEFAULT_MARK_COLOR = "yellow";
 
 /**
  * @param {unknown} value
- * @returns {value is string}
+ * @returns {value is MarkColor}
  */
 export function isMarkColor(value) {
-  return typeof value === "string" && MARK_COLORS.includes(value);
+  return typeof value === "string" && MARK_COLORS.includes(/** @type {MarkColor} */ (value));
 }
 
 /**
