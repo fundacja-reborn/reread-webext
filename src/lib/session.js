@@ -24,14 +24,15 @@ export const READER_TAB_KEY = "readerTabId";
 export const VOCAB_TAB_KEY = "vocabTabId";
 
 /**
- * Which tab the reader was last pointed at, and when. The timestamp is not
- * decoration: pressing the button twice on the same page has to reach the
- * reader, and a value that did not change is a `storage.onChanged` that never
- * fires.
+ * What the reader was last pointed at, and when: a tab to read, or the
+ * highlights page (the menu's row on the pages that are not the reader). The
+ * timestamp is not decoration: pressing the button twice on the same page has
+ * to reach the reader, and a value that did not change is a
+ * `storage.onChanged` that never fires.
  */
 export const READER_SOURCE_KEY = "readerSource";
 
-/** @typedef {{ tabId: number, at: number }} ReaderSource */
+/** @typedef {{ tabId: number, at: number } | { marks: true, at: number }} ReaderSource */
 
 /**
  * @param {string} key
@@ -97,8 +98,10 @@ export async function readReaderSource(session = webext().storage.session) {
   const stored = await session.get(READER_SOURCE_KEY);
   const source = stored[READER_SOURCE_KEY];
   if (typeof source !== "object" || source === null) return null;
-  const { tabId, at } = /** @type {Record<string, unknown>} */ (source);
-  if (typeof tabId !== "number" || typeof at !== "number") return null;
+  const { tabId, at, marks } = /** @type {Record<string, unknown>} */ (source);
+  if (typeof at !== "number") return null;
+  if (marks === true) return { marks: true, at };
+  if (typeof tabId !== "number") return null;
   return { tabId, at };
 }
 
@@ -125,4 +128,18 @@ export async function writeReaderSource(source, session = webext().storage.sessi
  */
 export async function clearReaderSource(now = Date.now, session = webext().storage.session) {
   await session.set({ [READER_SOURCE_KEY]: { at: now() } });
+}
+
+/**
+ * Points the reader at the highlights page - the menu's Highlights row
+ * pressed anywhere but the reader itself. Written for `clearReaderSource`'s
+ * reason: the write is the signal a standing reader hears, and the timestamp
+ * makes each press its own.
+ *
+ * @param {() => number} [now]
+ * @param {WebExtBrowser["storage"]["session"]} [session]
+ * @returns {Promise<void>}
+ */
+export async function writeMarksSource(now = Date.now, session = webext().storage.session) {
+  await session.set({ [READER_SOURCE_KEY]: { marks: true, at: now() } });
 }

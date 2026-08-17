@@ -23,7 +23,6 @@
   "action_delete": { "message": "Löschen" },
   "action_download": { "message": "Herunterladen" },
   "action_cancel": { "message": "Abbrechen" },
-  "action_open": { "message": "Öffnen" },
   "action_update": { "message": "Aktualisieren" },
 
   "error_engine_missing": { "message": "Noch keine Übersetzungs-Engine - diese Version kann nicht übersetzen." },
@@ -267,7 +266,7 @@
   "reader_marks_filter_label": { "message": "Die Markierungen filtern" },
   "reader_marks_filter_placeholder": { "message": "Nach Zitat oder Titel filtern" },
   "reader_marks_empty": {
-    "message": "Noch ist nichts markiert - nimm den Textmarker in der Leseansicht und markiere eine Passage; sie wartet dann hier."
+    "message": "Noch ist nichts markiert - markiert wird beim Lesen. Öffne etwas aus der Offline-Leseliste, nimm den Textmarker und markiere eine Passage; sie wartet dann hier."
   },
   "reader_marks_empty_doc": { "message": "In diesem Dokument ist noch nichts markiert." },
   "reader_marks_no_match": {
@@ -507,7 +506,7 @@
     "message": "Laden Sie unter „Wörterbücher“ ein Wörterbuch für dasselbe Paar herunter (optional, aber lohnend) - einzelne Wörter bekommen dann vollständigere Antworten als eine Übersetzung allein (nach einem Druck auf „Mehr“ in der Übersetzungsblase)."
   },
   "options_first_steps_pin": {
-    "message": "Heften Sie re/read zuletzt an die Symbolleiste: Klicken Sie auf das Puzzleteil-Symbol rechts in der Leiste und wählen Sie neben re/read das Zahnrad und „An Symbolleiste anheften“. Der re/read-Knopf gibt schnellen Zugriff auf die Leseansicht, die Offline-Leseliste, Ihren gespeicherten Wortschatz, den Wechsel des Sprachpaars und den Schalter für die Website, auf der Sie sind."
+    "message": "Heften Sie re/read zuletzt an die Symbolleiste: Klicken Sie auf das Puzzleteil-Symbol rechts in der Leiste und wählen Sie neben re/read das Zahnrad und „An Symbolleiste anheften“. Der re/read-Knopf gibt schnellen Zugriff auf die Leseansicht, die Offline-Leseliste, Ihre Markierungen, Ihren gespeicherten Wortschatz, den Wechsel des Sprachpaars und den Schalter für die Website, auf der Sie sind."
   },
   "options_first_steps_pin_android": {
     "message": "Den re/read-Knopf finden Sie im Browsermenü (⋮) im Bereich der Erweiterungen - er gibt schnellen Zugriff auf die Leseansicht, die Offline-Leseliste, Ihren gespeicherten Wortschatz, den Wechsel des Sprachpaars und den Schalter für die Website, auf der Sie sind."

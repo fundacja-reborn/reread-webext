@@ -23,7 +23,6 @@
   "action_delete": { "message": "Usuń" },
   "action_download": { "message": "Pobierz" },
   "action_cancel": { "message": "Anuluj" },
-  "action_open": { "message": "Otwórz" },
   "action_update": { "message": "Aktualizuj" },
 
   "error_engine_missing": { "message": "Nie ma jeszcze silnika tłumaczeń - to wydanie nie tłumaczy." },
@@ -323,7 +322,7 @@
   "reader_marks_filter_label": { "message": "Filtruj zakreślenia" },
   "reader_marks_filter_placeholder": { "message": "Filtruj po cytacie lub tytule" },
   "reader_marks_empty": {
-    "message": "Nie ma jeszcze żadnych zakreśleń - weź zakreślacz w widoku czytania i zaznacz fragment; będzie czekał tutaj."
+    "message": "Nie ma jeszcze żadnych zakreśleń - zakreśla się podczas czytania. Otwórz coś z czytelni offline, weź zakreślacz i zaznacz fragment; będzie czekał tutaj."
   },
   "reader_marks_empty_doc": { "message": "W tym dokumencie nie ma jeszcze zakreśleń." },
   "reader_marks_no_match": {
@@ -637,7 +636,7 @@
     "message": "W sekcji „Słowniki” pobierz słownik dla tej samej pary (to opcjonalne, ale warto) - pojedyncze słowa dostają wtedy pełniejsze odpowiedzi niż samo tłumaczenie (po kliknięciu na „Więcej” w dymku tłumaczenia)."
   },
   "options_first_steps_pin": {
-    "message": "Na koniec przypnij re/read do paska narzędzi: kliknij ikonę puzzla po prawej stronie paska, a przy re/read wybierz koło zębate i „Przypnij do paska narzędzi”. Przycisk re/read daje szybki dostęp do widoku czytania, czytelni offline, zapisanych fraz, zmiany pary językowej i wyłącznika witryny, na której jesteś."
+    "message": "Na koniec przypnij re/read do paska narzędzi: kliknij ikonę puzzla po prawej stronie paska, a przy re/read wybierz koło zębate i „Przypnij do paska narzędzi”. Przycisk re/read daje szybki dostęp do widoku czytania, czytelni offline, zakreśleń, zapisanych fraz, zmiany pary językowej i wyłącznika witryny, na której jesteś."
   },
   "options_first_steps_pin_android": {
     "message": "Przycisk re/read znajdziesz w menu przeglądarki (⋮), w sekcji rozszerzeń - daje szybki dostęp do widoku czytania, czytelni offline, zapisanych fraz, zmiany pary językowej i wyłącznika witryny, na której jesteś."

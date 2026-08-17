@@ -23,7 +23,6 @@
   "action_delete": { "message": "Eliminar" },
   "action_download": { "message": "Descargar" },
   "action_cancel": { "message": "Cancelar" },
-  "action_open": { "message": "Abrir" },
   "action_update": { "message": "Actualizar" },
 
   "error_engine_missing": { "message": "Aún no hay motor de traducción - esta versión no puede traducir." },
@@ -278,7 +277,7 @@
   "reader_marks_filter_label": { "message": "Filtrar los resaltados" },
   "reader_marks_filter_placeholder": { "message": "Filtrar por cita o título" },
   "reader_marks_empty": {
-    "message": "Aún no hay nada resaltado - toma el resaltador en la vista de lectura y marca un pasaje; te esperará aquí."
+    "message": "Aún no hay nada resaltado - se resalta mientras se lee. Abre algo de la lista de lectura sin conexión, toma el resaltador y marca un pasaje; te esperará aquí."
   },
   "reader_marks_empty_doc": { "message": "Aún no hay nada resaltado en este documento." },
   "reader_marks_no_match": {
@@ -530,7 +529,7 @@
     "message": "Bajo «Diccionarios», descarga un diccionario para el mismo par (opcional, pero merece la pena) - las palabras sueltas reciben entonces respuestas más completas que una traducción sola (tras pulsar «Más» en la burbuja de traducción)."
   },
   "options_first_steps_pin": {
-    "message": "Por último, fija re/read a la barra de herramientas: pulsa el icono de la pieza de puzle a la derecha de la barra y, junto a re/read, elige el engranaje y «Fijar a la barra de herramientas». El botón de re/read da acceso rápido a la vista de lectura, la lista de lectura sin conexión, tus frases guardadas, el cambio del par de idiomas y el interruptor del sitio en el que estás."
+    "message": "Por último, fija re/read a la barra de herramientas: pulsa el icono de la pieza de puzle a la derecha de la barra y, junto a re/read, elige el engranaje y «Fijar a la barra de herramientas». El botón de re/read da acceso rápido a la vista de lectura, la lista de lectura sin conexión, tus resaltados, tus frases guardadas, el cambio del par de idiomas y el interruptor del sitio en el que estás."
   },
   "options_first_steps_pin_android": {
     "message": "El botón de re/read está en el menú del navegador (⋮), en la sección de extensiones - da acceso rápido a la vista de lectura, la lista de lectura sin conexión, tus frases guardadas, el cambio del par de idiomas y el interruptor del sitio en el que estás."

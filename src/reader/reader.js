@@ -1269,6 +1269,19 @@ async function showPage(firstLoad = false) {
     return;
   }
 
+  // The Highlights row pressed on another of this extension's pages (the
+  // popup, the saved phrases, the settings): the view the menu's own row
+  // opens, every document's quotes, fresh the way any menu visit begins. A
+  // real entry unless one is already on top, so Back keeps meaning "the view
+  // this landed over" - and never stacks two copies of the same room.
+  if ("marks" in source) {
+    hideNotice();
+    const standing = asMarksState(history.state);
+    if (standing === null || standing.scope !== null) history.pushState(marksState(null), "");
+    await showMarks(null, { fresh: true });
+    return;
+  }
+
   const response = await webext().runtime.sendMessage({ kind: Message.READ_PAGE });
   if (turn !== epoch) return;
   const result = /** @type {import("../lib/protocol.js").Result<unknown>} */ (asResult(response));
@@ -1837,9 +1850,20 @@ async function refreshMarks() {
         void refreshMarks();
       });
       marksEmpty.append(sentence, clear);
+    } else if (target.scope === null) {
+      // Nothing highlighted anywhere - and whoever is reading this may have
+      // arrived through a menu on another page, never having held the pen.
+      // The sentence says where highlights are made; the button under it is
+      // the door to that place, by the menu's own walk (`leaveToList`).
+      const sentence = document.createElement("p");
+      sentence.textContent = t("reader_marks_empty");
+      const toList = document.createElement("button");
+      toList.type = "button";
+      toList.textContent = t("reading_list");
+      toList.addEventListener("click", () => leaveToList());
+      marksEmpty.append(sentence, toList);
     } else {
-      marksEmpty.textContent =
-        target.scope === null ? t("reader_marks_empty") : t("reader_marks_empty_doc");
+      marksEmpty.textContent = t("reader_marks_empty_doc");
     }
     marksEmpty.hidden = false;
   } else {

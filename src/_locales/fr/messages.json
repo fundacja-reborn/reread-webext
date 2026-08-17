@@ -23,7 +23,6 @@
   "action_delete": { "message": "Supprimer" },
   "action_download": { "message": "Télécharger" },
   "action_cancel": { "message": "Annuler" },
-  "action_open": { "message": "Ouvrir" },
   "action_update": { "message": "Mettre à jour" },
 
   "error_engine_missing": { "message": "Pas encore de moteur de traduction - cette version ne peut pas traduire." },
@@ -278,7 +277,7 @@
   "reader_marks_filter_label": { "message": "Filtrer les surlignages" },
   "reader_marks_filter_placeholder": { "message": "Filtrer par citation ou par titre" },
   "reader_marks_empty": {
-    "message": "Rien n'est encore surligné - prenez le surligneur dans la vue de lecture et marquez un passage ; il vous attendra ici."
+    "message": "Rien n'est encore surligné - on surligne en lisant. Ouvrez un texte de la liste de lecture hors ligne, prenez le surligneur et marquez un passage ; il vous attendra ici."
   },
   "reader_marks_empty_doc": { "message": "Rien n'est encore surligné dans ce document." },
   "reader_marks_no_match": {
@@ -530,7 +529,7 @@
     "message": "Sous « Dictionnaires », téléchargez un dictionnaire pour la même paire (facultatif, mais utile) - les mots isolés reçoivent alors des réponses plus complètes qu'une traduction seule (après un appui sur « Plus » dans la bulle de traduction)."
   },
   "options_first_steps_pin": {
-    "message": "Enfin, épinglez re/read à la barre d'outils : cliquez sur l'icône en forme de pièce de puzzle à droite de la barre, puis à côté de re/read choisissez l'engrenage et « Épingler à la barre d’outils ». Le bouton re/read donne un accès rapide au lecteur, à la liste de lecture hors ligne, à vos phrases enregistrées, au changement de paire de langues et à l'interrupteur du site où vous êtes."
+    "message": "Enfin, épinglez re/read à la barre d'outils : cliquez sur l'icône en forme de pièce de puzzle à droite de la barre, puis à côté de re/read choisissez l'engrenage et « Épingler à la barre d’outils ». Le bouton re/read donne un accès rapide au lecteur, à la liste de lecture hors ligne, à vos surlignages, à vos phrases enregistrées, au changement de paire de langues et à l'interrupteur du site où vous êtes."
   },
   "options_first_steps_pin_android": {
     "message": "Le bouton re/read se trouve dans le menu du navigateur (⋮), dans la section des extensions - il donne un accès rapide au lecteur, à la liste de lecture hors ligne, à vos phrases enregistrées, au changement de paire de langues et à l'interrupteur du site où vous êtes."

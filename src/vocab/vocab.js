@@ -59,6 +59,7 @@ const rateValue = document.getElementById("rate-value");
 const menuButton = document.getElementById("menu");
 const menuPanel = document.getElementById("menu-panel");
 const navLibrary = document.getElementById("nav-library");
+const navMarks = document.getElementById("nav-marks");
 const navSettings = document.getElementById("nav-settings");
 const pairSelect = /** @type {HTMLSelectElement | null} */ (document.getElementById("pair"));
 const introLine = document.getElementById("intro");
@@ -929,6 +930,15 @@ navLibrary?.addEventListener("click", () => {
   closePanels();
   void webext()
     .runtime.sendMessage({ kind: Message.OPEN_LIBRARY })
+    .catch(() => undefined);
+});
+
+// The highlights row goes the reading list's way: the same one reader tab,
+// turned to the highlights page by the message, while this tab stays put.
+navMarks?.addEventListener("click", () => {
+  closePanels();
+  void webext()
+    .runtime.sendMessage({ kind: Message.OPEN_MARKS })
     .catch(() => undefined);
 });
 

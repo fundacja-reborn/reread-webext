@@ -51,6 +51,7 @@ const setupRow = document.getElementById("setup-row");
 const pairSelect = /** @type {HTMLSelectElement | null} */ (document.getElementById("pair"));
 const readerButton = document.getElementById("open-reader");
 const libraryButton = document.getElementById("open-library");
+const marksButton = document.getElementById("open-marks");
 const vocabularyButton = document.getElementById("open-vocabulary");
 const settingsButton = document.getElementById("open-settings");
 const modeLine = document.getElementById("mode-line");
@@ -183,6 +184,17 @@ async function openLibrary() {
   window.close();
 }
 
+async function openMarks() {
+  try {
+    // The highlights page is the reader tab's own view - the message both
+    // turns it there and raises it, and carries nothing for the list's reason.
+    await webext().runtime.sendMessage({ kind: Message.OPEN_MARKS });
+  } catch {
+    // Same as the reader: repeatable beats stuck.
+  }
+  window.close();
+}
+
 async function openVocabulary() {
   try {
     // Carries nothing for the reading list's reason: the page shows the pair
@@ -204,6 +216,7 @@ quietToggle?.addEventListener("change", () => void toggleQuietBubble());
 pairSelect?.addEventListener("change", () => void choosePair());
 readerButton?.addEventListener("click", () => void openReader());
 libraryButton?.addEventListener("click", () => void openLibrary());
+marksButton?.addEventListener("click", () => void openMarks());
 vocabularyButton?.addEventListener("click", () => void openVocabulary());
 settingsButton?.addEventListener("click", () => void openSettings());
 // The signpost is a door to the same place the settings row leads.

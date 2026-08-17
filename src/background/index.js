@@ -18,7 +18,7 @@ import { bergamot } from "../lib/translator/providers/bergamot/index.js";
 import { bergamotViaHost, raiseEngineHost } from "../lib/translator/providers/bergamot/remote.js";
 import { lookUp } from "./dictionary.js";
 import { readPage } from "./page.js";
-import { openLibrary, openReader, readInReader } from "./reader-tab.js";
+import { openLibrary, openMarks, openReader, readInReader } from "./reader-tab.js";
 import { openVocabulary } from "./vocab-tab.js";
 import {
   forgetPhrase,
@@ -87,6 +87,11 @@ async function handle(request, sender) {
       // No sender fallback on purpose: the reading list is not about any tab,
       // and on Android the popup's own tab is the one the fallback would name.
       await openLibrary();
+      return ok(null);
+    }
+    case Message.OPEN_MARKS: {
+      // The reader's own view by another door: not about any tab either.
+      await openMarks();
       return ok(null);
     }
     case Message.OPEN_VOCABULARY: {

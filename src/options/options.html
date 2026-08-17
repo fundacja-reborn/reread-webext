@@ -17,7 +17,43 @@
          spans, with the separating spaces left between the elements as plain
          text that no language has to carry. -->
     <header>
-      <p class="brand">re/read</p>
+      <!-- The bar the other pages wear (`.page-bar`, assets/page.css), so the
+           walk between them never changes rooms' dress: the mark on the
+           leading edge, the drawn menu at the far one. The mark alone is not
+           a button here - everywhere else it is the door to the settings, and
+           this is the settings. The menu holds the extension's other pages;
+           its own room, by the menus' shared rule, is not on the list. -->
+      <div class="page-bar">
+        <p class="page-mark">re/read</p>
+        <span class="page-tools">
+          <button
+            id="menu"
+            type="button"
+            aria-expanded="false"
+            title="Menu"
+            data-i18n-title="nav_menu"
+            aria-label="Menu"
+            data-i18n-aria-label="nav_menu"
+          >
+            <svg class="page-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+              <path
+                d="M2.5 4.25h11M2.5 8h11M2.5 11.75h11"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.3"
+                stroke-linecap="round"
+              />
+            </svg>
+          </button>
+        </span>
+      </div>
+
+      <nav id="menu-panel" class="nav-menu" hidden aria-label="Menu" data-i18n-aria-label="nav_menu">
+        <button id="nav-library" type="button" data-i18n="reading_list">Offline reading list</button>
+        <button id="nav-marks" type="button" data-i18n="reader_marks_title">Highlights</button>
+        <button id="nav-vocabulary" type="button" data-i18n="saved_phrases">Saved phrases</button>
+      </nav>
+
       <h1 data-i18n="settings">Settings</h1>
     </header>
 
@@ -70,8 +106,8 @@
       <p id="first-steps-pin" data-i18n="options_first_steps_pin">
         Last, pin re/read to the toolbar: press the puzzle-piece icon at the right end of the bar
         and, next to re/read, choose the gear and "Pin to Toolbar". The re/read button gives
-        quick access to the reader, the offline reading list, your saved phrases, changing the
-        language pair and the switch for the site you are on.
+        quick access to the reader, the offline reading list, your highlights, your saved
+        phrases, changing the language pair and the switch for the site you are on.
       </p>
     </details>
 
@@ -177,14 +213,6 @@
           the reader alike. The bubble sizes itself and ignores each page's own type settings, so
           this is the one place to adjust it: turn it up if it reads too small on this screen.
         </p>
-      </div>
-      <div class="row">
-        <span class="row-name" data-i18n="saved_phrases">Saved phrases</span>
-        <button type="button" id="open-vocabulary" data-i18n="action_open">Open</button>
-      </div>
-      <div class="row">
-        <span class="row-name" data-i18n="reading_list">Offline reading list</span>
-        <button type="button" id="open-library" data-i18n="action_open">Open</button>
       </div>
     </div>
 

@@ -30,7 +30,6 @@
   "action_delete": { "message": "Delete" },
   "action_download": { "message": "Download" },
   "action_cancel": { "message": "Cancel" },
-  "action_open": { "message": "Open" },
   "action_update": { "message": "Update" },
 
   "error_engine_missing": { "message": "No translation engine yet - this build cannot translate." },
@@ -329,7 +328,7 @@
   "reader_marks_filter_label": { "message": "Filter the highlights" },
   "reader_marks_filter_placeholder": { "message": "Filter by quote or title" },
   "reader_marks_empty": {
-    "message": "Nothing is highlighted yet - pick up the highlighter in the reading view and mark a passage; it will be waiting here."
+    "message": "Nothing is highlighted yet - highlights are made while reading. Open something from the offline reading list, take the highlighter and mark a passage; it will be waiting here."
   },
   "reader_marks_empty_doc": { "message": "Nothing is highlighted in this document yet." },
   "reader_marks_no_match": {
@@ -592,7 +591,7 @@
     "description": "Quotes the options_dictionaries_heading section name and the bubble_more button - each language quotes its own wording of those keys, so they must move together."
   },
   "options_first_steps_pin": {
-    "message": "Last, pin re/read to the toolbar: press the puzzle-piece icon at the right end of the bar and, next to re/read, choose the gear and \"Pin to Toolbar\". The re/read button gives quick access to the reader, the offline reading list, your saved phrases, changing the language pair and the switch for the site you are on.",
+    "message": "Last, pin re/read to the toolbar: press the puzzle-piece icon at the right end of the bar and, next to re/read, choose the gear and \"Pin to Toolbar\". The re/read button gives quick access to the reader, the offline reading list, your highlights, your saved phrases, changing the language pair and the switch for the site you are on.",
     "description": "The desktop wording of the last step; on Android the page swaps in options_first_steps_pin_android instead. Quotes Firefox's own \"Pin to Toolbar\" menu label - each language must quote Firefox's official wording of it, not a translation of its own."
   },
   "options_first_steps_pin_android": {

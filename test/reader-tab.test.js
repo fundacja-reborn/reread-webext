@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { openLibrary, openReader, readInReader } from "../src/background/reader-tab.js";
+import { openLibrary, openMarks, openReader, readInReader } from "../src/background/reader-tab.js";
 import { READER_SOURCE_KEY, READER_TAB_KEY, readReaderSource } from "../src/lib/session.js";
 import { fakeBrowser } from "./fake-browser.js";
 
@@ -186,5 +186,46 @@ describe("the reading list entry", () => {
     assert.equal(await readReaderSource(deps.session), null);
     // The sentinel still is a change, which a removal of an absent key is not.
     assert.equal(READER_SOURCE_KEY in state.stored, true);
+  });
+});
+
+describe("the highlights entry", () => {
+  it("points the reader at the highlights page, then opens it", async () => {
+    const { state, deps } = reader();
+
+    await openMarks(deps);
+
+    assert.deepEqual(state.stored[READER_SOURCE_KEY], { marks: true, at: 1000 });
+    assert.deepEqual(state.created, [READER_URL]);
+  });
+
+  it("replaces a source the reader was pointed at, and only raises the tab", async () => {
+    const { state, deps } = reader({
+      tabs: [{ id: 7, windowId: 3 }],
+      session: { [READER_TAB_KEY]: 7, [READER_SOURCE_KEY]: { tabId: 4, at: 1 } },
+    });
+
+    await openMarks(deps);
+
+    assert.deepEqual(state.stored[READER_SOURCE_KEY], { marks: true, at: 1000 });
+    assert.deepEqual(state.created, []);
+    assert.equal(state.selected, 7);
+  });
+
+  it("writes a value the reader reads back as the highlights source", async () => {
+    const { deps } = reader();
+
+    await openMarks(deps);
+
+    assert.deepEqual(await readReaderSource(deps.session), { marks: true, at: 1000 });
+  });
+
+  it("reads a marks flag that is not exactly true as no source", async () => {
+    // The union is told apart by `marks: true` alone, so anything else in
+    // that seat must fall out as garbage, not as a tab source.
+    for (const marks of [false, 1, "true", {}]) {
+      const { deps } = reader({ session: { [READER_SOURCE_KEY]: { marks, at: 5 } } });
+      assert.equal(await readReaderSource(deps.session), null);
+    }
   });
 });
