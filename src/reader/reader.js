@@ -22,7 +22,8 @@
  * are held to the new list, not the old one.
  */
 
-import { rescan, start } from "../content/reading.js";
+import { supported as highlightsSupported } from "../content/highlighter.js";
+import { dismiss, rescan, start } from "../content/reading.js";
 import { applyReading } from "../lib/appearance.js";
 import { webext } from "../lib/browser.js";
 import { localizePage, plural, t } from "../lib/i18n.js";
@@ -45,6 +46,13 @@ import { buildArticle } from "../lib/reader/article.js";
 import { asDocState, docState } from "../lib/reader/history-state.js";
 import { importKind } from "../lib/reader/import-kind.js";
 import { speechAction } from "../lib/reader/keys.js";
+import {
+  DEFAULT_MARK_COLOR,
+  markRecord,
+  mergePlan,
+  placeMark,
+  withoutMark,
+} from "../lib/reader/marks.js";
 import {
   POSITION_SAVE_DELAY,
   blockAtLine,
@@ -80,11 +88,13 @@ import {
   setBookReadAt,
   sweepOrphanSegments,
 } from "../lib/store/books.js";
+import { getMarks, putMarks } from "../lib/store/marks.js";
 import { Segment, emptySentence, savedArticle } from "../lib/store/saved-article.js";
 import { watchToolbarScheme } from "../lib/theme-icon.js";
 import { canSpeak, primaryLanguage, voicesFor } from "../lib/tts.js";
 import { importEpub } from "./import-book.js";
 import { articleEntry, bookEntry, libraryView } from "./list-view.js";
+import { anchorOf, clearMarkPaint, markAt, paintMarks, quoteOfSpan } from "./marks-view.js";
 import {
   configureReading,
   forgetReading,
@@ -201,6 +211,11 @@ const markReadButton = document.getElementById("mark-read");
 const actionsEnd = document.getElementById("actions-end");
 const toLibraryEndButton = document.getElementById("to-library-end");
 const markReadEndButton = document.getElementById("mark-read-end");
+// The highlighter (D106): the pen in the bar, and the one-word bubble a tap
+// on a mark raises while the pen is in the hand.
+const markerButton = /** @type {HTMLButtonElement | null} */ (document.getElementById("marker"));
+const markPopover = document.getElementById("mark-popover");
+const markDeleteButton = document.getElementById("mark-delete");
 
 /**
  * What is on screen: a live page's article, a saved one, a book's segment, or
@@ -213,6 +228,29 @@ const markReadEndButton = document.getElementById("mark-read-end");
  *   | null}
  */
 let shown = null;
+
+/**
+ * Whether the highlighter is on (D106) - a tool in the hand, never a setting:
+ * every document opens with the pen away, and nothing about it is stored.
+ */
+let markerOn = false;
+
+/**
+ * The marks of the document on screen, in reading order, as the database has
+ * them - every segment of a book, not just the part showing. Mutated
+ * optimistically: a stroke paints the moment it lands and the write follows,
+ * with `shown`'s identity guarding the answer like every other slow reply.
+ *
+ * @type {import("../lib/reader/marks.js").Mark[]}
+ */
+let docMarks = [];
+
+/**
+ * The mark the delete bubble is about, while it shows.
+ *
+ * @type {import("../lib/reader/marks.js").Mark | null}
+ */
+let popoverMark = null;
 
 /**
  * Which half of the list is showing. Starts on "to read" at every opening of
@@ -354,6 +392,14 @@ function renderArticle(piece) {
   // they are about to be replaced: the voice stops here rather than reading a
   // sentence of one article into another (D87).
   forgetReading();
+  // A different document never inherits the pen (D106): the mode survives
+  // only a book turning its own parts. The paint and the delete bubble go
+  // either way - they stood over blocks about to be replaced - and the marks
+  // themselves are the opener's to reload once the new blocks stand.
+  if (shown === null || shown.url !== piece.url) setMarker(false);
+  hideMarkPopover();
+  docMarks = [];
+  clearMarkPaint();
   // The book dressing is put on by `openBook` after this returns; every
   // other road through here takes it off.
   showSegmentNav(null);
@@ -414,6 +460,7 @@ function renderArticle(piece) {
   // language, and the select in the panel is about whatever is on screen.
   applySpeech();
   updateListen();
+  updateMarker();
   scrollTo(0, 0);
   // The action rows are the caller's move, not taken here: the two callers
   // that restore a position must have them laid out BEFORE the scroll - the
@@ -454,6 +501,16 @@ function renderLive(page) {
   });
   // A live page starts at the top, so the action rows may come when they come.
   void refreshActions();
+  // So may the marks a past reading left under this address (D106): paint
+  // takes no room, so nothing waits on it.
+  const rendered = shown;
+  void getMarks(page.url)
+    .then((marks) => {
+      if (shown !== rendered) return;
+      docMarks = marks;
+      repaintMarks();
+    })
+    .catch(() => undefined);
 }
 
 /**
@@ -629,6 +686,218 @@ function restorePosition(position, segmentIndex = 0) {
 }
 
 /**
+ * The highlighter (D106): the pen in the bar hands the selection gesture to
+ * the marker - a hold and a drag draw a lasting mark, across paragraphs if
+ * the hand goes there - and a tap on a mark, pen in hand, raises the one-word
+ * bubble that takes it back. The gesture itself lives in `select.js`, the
+ * anchors and the paint in `marks-view.js`, the rules in `lib/reader/marks.js`
+ * and the rows in `lib/store/marks.js`; what lives here is the mode, the
+ * bubble, and the writes with their `shown`-identity guards.
+ */
+
+/**
+ * What a new mark is drawn in. One colour today; the Aa panel's palette will
+ * answer from the settings here, and the record has carried its colour since
+ * the first mark ever written - no migration when it does.
+ */
+function currentMarkColor() {
+  return DEFAULT_MARK_COLOR;
+}
+
+/** The segment the marks on screen belong to - a book's part, an article's zero. */
+function shownSegment() {
+  return shown !== null && shown.origin === "book" ? shown.segmentIndex : 0;
+}
+
+/**
+ * The pen offered only where it can write: over a document, on an engine
+ * that has the highlight registry at all - without it the marks could not
+ * even be shown, and a pen that writes invisibly is worse than none.
+ */
+function updateMarker() {
+  if (markerButton === null) return;
+  markerButton.hidden = shown === null || !highlightsSupported();
+  markerButton.setAttribute("aria-pressed", String(markerOn));
+}
+
+/**
+ * Picking the pen up or putting it away. Picking it up stands the bubble and
+ * the selection down (`dismiss`): the pen changes what every gesture means,
+ * and an answer from the old grammar must not outlive the grammar.
+ *
+ * @param {boolean} on
+ */
+function setMarker(on) {
+  if (markerOn !== on) {
+    markerOn = on;
+    hideMarkPopover();
+    if (on) dismiss();
+  }
+  updateMarker();
+}
+
+function repaintMarks() {
+  paintMarks(docMarks, shown === null ? null : contentRoot(), shownSegment());
+}
+
+/**
+ * A finished stroke becoming a mark: anchored against the block order,
+ * merged with whatever standing marks it touched (drawing over a mark is how
+ * a mark grows), painted at once, and then written - with the paint taken
+ * back and the failure said out loud if the write does not land. On a live
+ * page the first mark saves the article first (D106): a mark needs a row to
+ * belong to, and the same door the Save button uses is the honest way in.
+ *
+ * @param {Range} range
+ */
+async function onMarked(range) {
+  const target = shown;
+  const root = contentRoot();
+  if (target === null || root === null) return;
+  hideMarkPopover();
+
+  const span = anchorOf(range, root, shownSegment());
+  if (span === null) return;
+  const plan = mergePlan(docMarks, span);
+  const text = quoteOfSpan(plan.span, root);
+  const mark =
+    text === null
+      ? null
+      : markRecord({ ...plan.span, color: currentMarkColor(), createdAt: Date.now(), text });
+  if (mark === null) return;
+
+  const before = docMarks;
+  docMarks = placeMark(docMarks, plan.absorbed, mark);
+  repaintMarks();
+
+  try {
+    if (target.origin === "live") {
+      const kept = await keptForMarks(target);
+      if (shown !== target) return;
+      if (!kept) throw new Error("The article could not be saved");
+    }
+    await putMarks(target.url, docMarks);
+  } catch {
+    if (shown !== target) return;
+    docMarks = before;
+    repaintMarks();
+    showNotice(t("reader_list_write_failed"));
+  }
+}
+
+/**
+ * The row a live article's marks belong to, made sure of - present already,
+ * or written now through the same path as the Save button. `putArticle`
+ * clears any marks row under the address as it writes (its rule for content
+ * being replaced), which is exactly right here: the caller writes the whole
+ * list right after.
+ *
+ * @param {NonNullable<typeof shown>} target
+ * @returns {Promise<boolean>} whether the row is there to write against
+ */
+async function keptForMarks(target) {
+  const existing = await getArticleMeta(target.url);
+  if (shown !== target) return false;
+  if (existing !== null) return true;
+  if (!(await saveShownLive(target))) return false;
+  if (shown === target) void refreshActions();
+  return true;
+}
+
+/**
+ * A tap while the pen is in the hand: a mark under it raises the delete
+ * bubble beside the tapped line, bare text stands an open one down. That is
+ * the tap's whole grammar in this mode - recall, dismissal and growing by
+ * neighbours belong to the pen being away.
+ *
+ * @param {number} x
+ * @param {number} y
+ */
+function onMarkTap(x, y) {
+  const hit = markAt(x, y);
+  if (hit === null) {
+    hideMarkPopover();
+    return;
+  }
+  showMarkPopover(hit);
+}
+
+/**
+ * @param {{ mark: import("../lib/reader/marks.js").Mark, rect: DOMRect }} hit
+ */
+function showMarkPopover(hit) {
+  if (!(markPopover instanceof HTMLElement)) return;
+  popoverMark = hit.mark;
+  markPopover.hidden = false;
+  // Under the tapped line, in page coordinates so it rides the scroll with
+  // its mark (D81's reason); measured after it shows, held inside the page.
+  const width = markPopover.offsetWidth;
+  const rightmost = window.scrollX + document.documentElement.clientWidth - width - 8;
+  const left = Math.min(Math.max(8, hit.rect.left + window.scrollX), Math.max(8, rightmost));
+  markPopover.style.left = `${Math.round(left)}px`;
+  markPopover.style.top = `${Math.round(hit.rect.bottom + window.scrollY + 6)}px`;
+}
+
+/** The bubble away - and the focus it may hold handed back to the pen. */
+function hideMarkPopover() {
+  if (!(markPopover instanceof HTMLElement)) return;
+  if (!markPopover.hidden && markPopover.contains(document.activeElement)) {
+    markerButton?.focus();
+  }
+  markPopover.hidden = true;
+  popoverMark = null;
+}
+
+/**
+ * The bubble's one word, pressed: the mark leaves the list and the paint,
+ * then the row - with the same take-back as writing one, because a delete
+ * that only looked deleted would be the worse failure.
+ */
+async function onMarkDeletePress() {
+  const target = shown;
+  const mark = popoverMark;
+  hideMarkPopover();
+  if (target === null || mark === null) return;
+
+  const before = docMarks;
+  docMarks = withoutMark(docMarks, mark);
+  if (docMarks.length === before.length) return;
+  repaintMarks();
+
+  try {
+    await putMarks(target.url, docMarks);
+  } catch {
+    if (shown !== target) return;
+    docMarks = before;
+    repaintMarks();
+    showNotice(t("reader_list_write_failed"));
+  }
+}
+
+markerButton?.addEventListener("click", () => setMarker(!markerOn));
+markDeleteButton?.addEventListener("click", () => void onMarkDeletePress());
+
+// The delete bubble stands down at any step away from it - a press elsewhere,
+// Escape - the armed Delete's own protocol. `pointerdown`, so the press that
+// taps another mark finds the bubble already about nothing.
+document.addEventListener("pointerdown", (event) => {
+  if (!(markPopover instanceof HTMLElement) || markPopover.hidden) return;
+  if (event.target instanceof Node && markPopover.contains(event.target)) return;
+  hideMarkPopover();
+});
+
+// Escape walks outward: first the bubble, then the pen itself. Two presses
+// from anywhere back to reading.
+document.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape") return;
+  if (markPopover instanceof HTMLElement && !markPopover.hidden) {
+    hideMarkPopover();
+    return;
+  }
+  if (markerOn) setMarker(false);
+});
+
+/**
  * @param {boolean} [firstLoad] whether this is the load-time call - the one
  *   that may find a reloaded or session-restored tab, whose history still
  *   names the document that was on screen
@@ -691,9 +960,15 @@ async function showPage(firstLoad = false) {
  */
 async function openSaved(url) {
   const turn = ++epoch;
-  // The position rides along in the same round trip; render is synchronous,
-  // so nothing can move between the article appearing and the scroll to it.
-  const [saved, position] = await Promise.all([getArticle(url), getPosition(url)]);
+  // The position and the marks ride along in the same round trip; render is
+  // synchronous, so nothing can move between the article appearing and the
+  // scroll to it. Marks that cannot be read are an empty list, not a failed
+  // opening - the article is the errand here.
+  const [saved, position, marks] = await Promise.all([
+    getArticle(url),
+    getPosition(url),
+    getMarks(url).catch(() => []),
+  ]);
   if (turn !== epoch) return;
   if (saved === null) {
     // Gone under us - deleted from another reader tab. The list knows.
@@ -701,6 +976,8 @@ async function openSaved(url) {
     return;
   }
   renderSaved(saved);
+  docMarks = marks;
+  repaintMarks();
   // The action rows first, the scroll second: they stand above the article,
   // and a bar appearing after the scroll would shift the restored block by
   // its own height. Awaited before the epoch check - a row pressed during
@@ -778,7 +1055,11 @@ function showBookNote(book) {
  */
 async function openBook(id, wanted) {
   const turn = ++epoch;
-  const [book, position] = await Promise.all([getBook(id), getPosition(id)]);
+  const [book, position, marks] = await Promise.all([
+    getBook(id),
+    getPosition(id),
+    getMarks(id).catch(() => []),
+  ]);
   if (turn !== epoch) return;
   if (book === null) {
     // Gone under us - deleted from another reader tab. The list knows.
@@ -813,6 +1094,10 @@ async function openBook(id, wanted) {
   });
   showSegmentNav({ index, count: book.segmentCount });
   showBookNote(book);
+  // The whole book's marks, painted for the part on screen; a turned part
+  // reloads them fresh, which is also what keeps two reader tabs honest.
+  docMarks = marks;
+  repaintMarks();
   // Same order as `openSaved`, for the same reason: everything that takes
   // room above the text lays out before the scroll that has to land on it.
   const rendered = shown;
@@ -849,6 +1134,11 @@ async function showLibrary() {
   // page nobody can see is the extension talking to itself.
   forgetReading();
   updateListen();
+  // The pen goes away with the article: the list has nothing to mark, and
+  // whatever paint stood was about blocks no longer on screen.
+  setMarker(false);
+  docMarks = [];
+  clearMarkPaint();
   if (article !== null) article.hidden = true;
   if (actions !== null) actions.hidden = true;
   if (actionsEnd !== null) actionsEnd.hidden = true;
@@ -1294,7 +1584,6 @@ async function refreshActions() {
 async function onKeepPress() {
   const target = shown;
   if (target === null || target.origin !== "live") return;
-  if (article === null || contentElement === null || titleElement === null) return;
 
   try {
     const existing = await getArticleMeta(target.url);
@@ -1302,24 +1591,43 @@ async function onKeepPress() {
 
     if (existing !== null) {
       await deleteArticle(target.url);
-    } else {
-      const root = contentElement.firstElementChild;
-      const record = savedArticle({
-        url: target.url,
-        title: titleElement.textContent ?? "",
-        content: root === null ? "" : root.innerHTML,
-        dir: article.getAttribute("dir"),
-        lang: article.getAttribute("lang"),
-        savedAt: Date.now(),
-      });
-      if (record === null) return;
-      await putArticle(record);
-    }
+      // The marks were part of the copy that just left (they went with the
+      // row); paint saying otherwise would be showing what is not there.
+      if (shown === target) {
+        docMarks = [];
+        repaintMarks();
+      }
+    } else if (!(await saveShownLive(target))) return;
   } catch {
     showNotice(t("reader_list_write_failed"));
     return;
   }
   if (shown === target) void refreshActions();
+}
+
+/**
+ * The saving half of the toggle above, shared with the highlighter's first
+ * mark on a live page (D106): one door into the database, whoever knocks.
+ * False when there was nothing whole to save - the caller decides whether
+ * that is a quiet end (the button) or a failure (a mark with no row).
+ *
+ * @param {NonNullable<typeof shown>} target
+ * @returns {Promise<boolean>} whether the row is written
+ */
+async function saveShownLive(target) {
+  if (article === null || contentElement === null || titleElement === null) return false;
+  const root = contentElement.firstElementChild;
+  const record = savedArticle({
+    url: target.url,
+    title: titleElement.textContent ?? "",
+    content: root === null ? "" : root.innerHTML,
+    dir: article.getAttribute("dir"),
+    lang: article.getAttribute("lang"),
+    savedAt: Date.now(),
+  });
+  if (record === null) return false;
+  await putArticle(record);
+  return true;
 }
 
 /**
@@ -2140,6 +2448,16 @@ start({
   ownSelection: true,
   anchored: true,
   plainLinks: () => settings.reader.links === "plain",
+  // The highlighter's hooks (D106): whether the pen is in the hand, where
+  // marks may anchor (the rebuilt content - the reader's own title has no
+  // block order to write against), what a finished stroke becomes, and what
+  // a tap means while the pen is up. The delete bubble is ours the way the
+  // translation bubble is - presses on it must not read as the page's.
+  alsoOwns: (target) => target instanceof Node && markPopover?.contains(target) === true,
+  marking: () => markerOn,
+  markRoot: () => contentRoot(),
+  onMarked: (range) => void onMarked(range),
+  onMarkTap,
 });
 
 // The load-time ask is the one that may be a reload standing on a document's

@@ -64,4 +64,35 @@ describe("the marks on the page", () => {
     }
     assert.ok(found >= 2, "the hover tint rules went missing - both themes had one");
   });
+
+  it("names the highlighter's strokes the same in the scripts and in reader.css", async () => {
+    // The same contract one page over (D106): the wet stroke is registered in
+    // select.js, the dried ones per colour in marks-view.js, and reader.css
+    // dresses both - names again, agreed on by files that never import each
+    // other, silently gone on any rename.
+    const sheet = await read("../src/reader/reader.css");
+    const gesture = await read("../src/content/select.js");
+    const view = await read("../src/reader/marks-view.js");
+    const rules = await read("../src/lib/reader/marks.js");
+
+    assert.ok(gesture.includes('"reread-marker-draft"'), "select.js no longer registers the draft");
+    assert.ok(
+      sheet.includes("::highlight(reread-marker-draft)"),
+      "reader.css no longer styles the draft stroke",
+    );
+
+    assert.ok(view.includes('"reread-marker-"'), "marks-view.js no longer prefixes colour names");
+    for (const color of ["yellow"]) {
+      // Only the colours the stylesheet already wears: the palette grows the
+      // list here the day it grows the CSS.
+      assert.ok(
+        rules.includes(`"${color}"`),
+        `lib/reader/marks.js no longer knows the colour "${color}"`,
+      );
+      assert.ok(
+        sheet.includes(`::highlight(reread-marker-${color})`),
+        `reader.css no longer styles ::highlight(reread-marker-${color})`,
+      );
+    }
+  });
 });

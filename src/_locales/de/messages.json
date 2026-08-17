@@ -178,6 +178,8 @@
   "reader_links": { "message": "Links" },
   "reader_links_plain": { "message": "Nur Text" },
   "reader_links_active": { "message": "Aktiv" },
+  "reader_marker": { "message": "Textmarker" },
+  "marker_delete": { "message": "Markierung entfernen" },
   "reader_listen": { "message": "Vorlesen" },
   "reader_voice": { "message": "Stimme" },
   "reader_speed": { "message": "Tempo" },

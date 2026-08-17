@@ -31,6 +31,7 @@ The extension uses the network in exactly two cases, both started manually on th
 | Reader mode (opens the page as a clean article in the extension's own tab) | ✓ |
 | Offline reading list (articles saved from the reader) | ✓ |
 | Reading position: every saved document reopens where you stopped | ✓ |
+| Highlighter in the reader (word-snapped marks, across paragraphs, kept with the saved copy) | ✓ |
 | EPUB books in the reading list (imported from a file, cut into parts, read with the full bubble) | ✓ |
 | Saved phrases page (filter, pagination, edit and Learned per row) | ✓ |
 | Toolbar popup (per-site switch, language pair, reader, reading list, phrases, settings) | ✓ |

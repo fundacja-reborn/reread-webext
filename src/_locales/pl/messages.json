@@ -234,6 +234,8 @@
   "reader_links": { "message": "Linki" },
   "reader_links_plain": { "message": "Zwykły tekst" },
   "reader_links_active": { "message": "Aktywne" },
+  "reader_marker": { "message": "Zakreślacz" },
+  "marker_delete": { "message": "Usuń zakreślenie" },
   "reader_listen": { "message": "Czytaj na głos" },
   "reader_voice": { "message": "Głos" },
   "reader_speed": { "message": "Tempo" },
