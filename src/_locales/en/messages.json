@@ -329,6 +329,11 @@
     "description": "The back arrow's accessible name on a document's own highlights page - the step back leads to the document itself.",
     "placeholders": { "title": { "content": "$1", "example": "Old Chinese" } }
   },
+  "reader_marks_open": {
+    "message": "Open \"$TITLE$\" at this highlight",
+    "description": "A quote row's arrow button - it opens the document in the reading view, scrolled to the mark itself.",
+    "placeholders": { "title": { "content": "$1", "example": "Old Chinese" } }
+  },
   "reader_transfer_link": {
     "message": "Import and export (articles or EPUB)",
     "description": "The quiet anchor over the reading list that jumps to the transfer section - it names both kinds of file the section takes, because a book is not obvious from the section's own name."

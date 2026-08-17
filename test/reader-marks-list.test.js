@@ -97,7 +97,7 @@ describe("markRows", () => {
   });
 
   it("dresses a book's quote in its part, and only when the book has parts", () => {
-    const many = book("book:many", { segmentCount: 12 });
+    const many = book("book:many", { segmentCount: 12, lang: "de" });
     const single = book("book:one", { segmentCount: 1 });
     const marks = new Map([
       [many.id, [mark("deep in", { segmentIndex: 2, createdAt: 30 })]],
@@ -107,6 +107,9 @@ describe("markRows", () => {
     const rows = markRows([], [many, single], marks);
     assert.deepEqual(rows[0]?.part, { at: 3, of: 12 });
     assert.equal(rows[0]?.kind, "book");
+    // The language rides along for the row's speaker - a book declares one,
+    // an article's meta does not (see the null in the orphan test's rows).
+    assert.equal(rows[0]?.lang, "de");
     assert.equal(rows[1]?.part, null);
   });
 

@@ -24,13 +24,16 @@ import { matchesFilter } from "../options/models-view.js";
 /**
  * One quote on the page: the mark itself, and what its document answers when
  * the row is drawn or pressed - the key to open it by, which store answers
- * for it, the title the detail line shows, and for a book of many parts the
- * part the quote stands in.
+ * for it, the title the detail line shows, for a book of many parts the
+ * part the quote stands in, and the language the row's speaker reads in
+ * (a book declares one; an article's meta does not, and null lets the
+ * caller fall back to the pair's source language).
  *
  * @typedef {{
  *   docId: string,
  *   kind: "article" | "book",
  *   title: string,
+ *   lang: string | null,
  *   part: { at: number, of: number } | null,
  *   mark: Mark,
  * }} MarkRow
@@ -55,14 +58,16 @@ export const MARKS_PAGE_SIZE = 25;
  * @returns {MarkRow[]}
  */
 export function markRows(metas, books, marks) {
-  /** @type {Map<string, { kind: "article" | "book", title: string, parts: number }>} */
+  /** @type {Map<string, { kind: "article" | "book", title: string, lang: string | null, parts: number }>} */
   const docs = new Map();
-  for (const meta of metas) docs.set(meta.url, { kind: "article", title: meta.title, parts: 1 });
+  for (const meta of metas) {
+    docs.set(meta.url, { kind: "article", title: meta.title, lang: null, parts: 1 });
+  }
   for (const book of books) {
-    docs.set(book.id, { kind: "book", title: book.title, parts: book.segmentCount });
+    docs.set(book.id, { kind: "book", title: book.title, lang: book.lang, parts: book.segmentCount });
   }
 
-  /** @type {{ docId: string, doc: { kind: "article" | "book", title: string, parts: number }, newest: number, list: Mark[] }[]} */
+  /** @type {{ docId: string, doc: { kind: "article" | "book", title: string, lang: string | null, parts: number }, newest: number, list: Mark[] }[]} */
   const groups = [];
   for (const [docId, list] of marks) {
     const doc = docs.get(docId);
@@ -79,6 +84,7 @@ export function markRows(metas, books, marks) {
       docId,
       kind: doc.kind,
       title: doc.title,
+      lang: doc.lang,
       // Only a book of many parts has a part worth naming; an article's
       // implicit one and a one-part book would be a number saying nothing.
       part:

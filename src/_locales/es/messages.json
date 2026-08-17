@@ -286,6 +286,10 @@
     "message": "Volver a «$TITLE$»",
     "placeholders": { "title": { "content": "$1", "example": "Old Chinese" } }
   },
+  "reader_marks_open": {
+    "message": "Abrir «$TITLE$» en este resaltado",
+    "placeholders": { "title": { "content": "$1", "example": "Old Chinese" } }
+  },
   "reader_transfer_link": { "message": "Importar y exportar (artículos o EPUB)" },
   "reader_transfer_accepts": { "message": "La importación reconoce el archivo elegido: una copia de seguridad de la lista de artículos de re/read (.json) o un libro electrónico (.epub)." },
   "reader_book_label": { "message": "Libro" },

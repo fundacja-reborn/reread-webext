@@ -331,6 +331,10 @@
     "message": "Назад до «$TITLE$»",
     "placeholders": { "title": { "content": "$1", "example": "Old Chinese" } }
   },
+  "reader_marks_open": {
+    "message": "Відкрити «$TITLE$» на цьому позначенні",
+    "placeholders": { "title": { "content": "$1", "example": "Old Chinese" } }
+  },
   "reader_transfer_link": { "message": "Імпорт та експорт (статті або EPUB)" },
   "reader_transfer_accepts": { "message": "Імпорт розпізнає файл: резервну копію списку статей re/read (.json) або електронну книжку (.epub)." },
   "reader_book_label": { "message": "Книжка" },

@@ -94,7 +94,14 @@ import { MARKS_FILENAME, toMarksFile } from "../lib/store/marks-file.js";
 import { allMarks, getMarks, putMarks } from "../lib/store/marks.js";
 import { Segment, emptySentence, savedArticle } from "../lib/store/saved-article.js";
 import { watchToolbarScheme } from "../lib/theme-icon.js";
-import { canSpeak, primaryLanguage, voicesFor } from "../lib/tts.js";
+import {
+  canSpeak,
+  primaryLanguage,
+  speak,
+  speaking,
+  stop as stopTts,
+  voicesFor,
+} from "../lib/tts.js";
 import { importEpub } from "./import-book.js";
 import { articleEntry, bookEntry, libraryView } from "./list-view.js";
 import { markRows, marksListView } from "./marks-list.js";
@@ -217,6 +224,12 @@ const marksExportButton = /** @type {HTMLButtonElement | null} */ (
 );
 const marksCopyIcons = /** @type {HTMLTemplateElement | null} */ (
   document.getElementById("marks-copy-icons")
+);
+const marksOpenIcon = /** @type {HTMLTemplateElement | null} */ (
+  document.getElementById("marks-open-icon")
+);
+const marksSpeakIcon = /** @type {HTMLTemplateElement | null} */ (
+  document.getElementById("marks-speak-icon")
 );
 const bookImportLine = document.getElementById("book-import-status");
 const bookNote = document.getElementById("book-note");
@@ -347,6 +360,16 @@ let marksPage = 1;
 let marksOnScreen = [];
 
 /**
+ * The quote on its way out loud, by the mark's own name - the saved-phrases
+ * page's rule repeated: pressing that row's speaker again stops it, any
+ * other row's simply speaks (the engine replaces what was playing), and a
+ * key gone stale is harmless because `speaking()` answers for the engine.
+ *
+ * @type {string | null}
+ */
+let soundingMark = null;
+
+/**
  * Whether a walk back to the list is in progress (the menu's list row over
  * stacked entries): popstate keeps stepping while the entries are this
  * page's own, and shows the list on the first one that is not.
@@ -473,8 +496,13 @@ function renderArticle(piece) {
   flushPosition();
   // Whatever was being read aloud was this element's previous contents, and
   // they are about to be replaced: the voice stops here rather than reading a
-  // sentence of one article into another (D87).
+  // sentence of one article into another (D87). A quote a row's speaker was
+  // reading goes the same way - its page is leaving the screen.
   forgetReading();
+  stopMarkSpeech();
+  // The column breathes with the text size only under an article (see the
+  // measure rules in reader.css); the attribute is which rule applies.
+  document.body.dataset["view"] = "doc";
   // A different document never inherits the pen (D106): the mode survives
   // only a book turning its own parts. The active mark and the paint go
   // either way - they stood over blocks about to be replaced - and the marks
@@ -1484,8 +1512,11 @@ function leaveDocView() {
   flushPosition();
   shown = null;
   // The article being read aloud is leaving the screen, and a voice reading a
-  // page nobody can see is the extension talking to itself.
+  // page nobody can see is the extension talking to itself. A quote a row's
+  // speaker was reading goes with it when the highlights page is the one
+  // being left.
   forgetReading();
+  stopMarkSpeech();
   updateListen();
   // The pen goes away with the article: the list has nothing to mark, and
   // whatever paint stood was about blocks no longer on screen.
@@ -1505,6 +1536,7 @@ function leaveDocView() {
 
 async function showLibrary() {
   leaveDocView();
+  document.body.dataset["view"] = "list";
   marksShown = null;
   if (marksSection !== null) marksSection.hidden = true;
   // The menu must not list the room it stands in: on the list view its list
@@ -1529,6 +1561,7 @@ async function showLibrary() {
  */
 async function showMarks(scope, { fresh = false } = {}) {
   leaveDocView();
+  document.body.dataset["view"] = "marks";
   marksShown = { scope };
   if (fresh) {
     marksQuery = "";
@@ -1825,12 +1858,38 @@ async function refreshMarks() {
 }
 
 /**
- * One quote as a row (D108): the quote itself as the way in - a press opens
- * its document at the mark - the document named under it, and the copy one
- * step aside, in the reading list's own grid. The quote and the title came
- * off somebody's page once, so both enter as text; the mark's colour enters
- * as an attribute the stylesheet matches by value, a registry name from the
- * checked list and never free text.
+ * One of a quote row's act buttons: a drawn glyph cloned from its template,
+ * the act's name as the accessible words, and the row's index for the one
+ * dispatch below.
+ *
+ * @param {string} act
+ * @param {number} index
+ * @param {string} name
+ * @param {HTMLTemplateElement | null} icon
+ * @returns {HTMLButtonElement}
+ */
+function markActButton(act, index, name, icon) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = `marks-act marks-${act}`;
+  button.setAttribute("data-act", act);
+  button.setAttribute("data-row", String(index));
+  button.title = name;
+  button.setAttribute("aria-label", name);
+  if (icon !== null) button.append(icon.content.cloneNode(true));
+  return button;
+}
+
+/**
+ * One quote as a row (D108): the quote as text - plain prose in the reading
+ * face, not a control (Michał's revision: the whole quote as a button both
+ * hid where the press would lead and stood in the way of the quotes ever
+ * being reading text) - the document named under it, and the acts one step
+ * aside in the reading list's own grid: the arrow that opens the document
+ * at the mark, the speaker that reads the quote aloud, and the copy. The
+ * quote and the title came off somebody's page once, so both enter as
+ * text; the mark's colour enters as an attribute the stylesheet matches by
+ * value, a registry name from the checked list and never free text.
  *
  * @param {import("./marks-list.js").MarkRow} row
  * @param {number} index into `marksOnScreen`, which the press handlers read back
@@ -1844,11 +1903,9 @@ function markRowElement(row, index, withTitle) {
   const text = document.createElement("div");
   text.className = "library-text";
 
-  const open = document.createElement("button");
-  open.type = "button";
-  open.className = "library-open marks-open";
-  open.setAttribute("data-row", String(index));
-  open.textContent = row.mark.text;
+  const quote = document.createElement("div");
+  quote.className = "marks-quote";
+  quote.textContent = row.mark.text;
 
   const detail = document.createElement("span");
   detail.className = "library-item-detail";
@@ -1860,17 +1917,18 @@ function markRowElement(row, index, withTitle) {
   detail.textContent = [withTitle ? row.title : "", part, when]
     .filter((piece) => piece.length > 0)
     .join(" - ");
-  text.append(open, detail);
+  text.append(quote, detail);
 
-  const copy = document.createElement("button");
-  copy.type = "button";
-  copy.className = "marks-copy";
-  copy.setAttribute("data-row", String(index));
-  copy.title = t("marker_copy");
-  copy.setAttribute("aria-label", t("marker_copy"));
-  if (marksCopyIcons !== null) copy.append(marksCopyIcons.content.cloneNode(true));
+  const acts = document.createElement("span");
+  acts.className = "marks-row-acts";
+  acts.append(markActButton("open", index, t("reader_marks_open", row.title), marksOpenIcon));
+  // No speaker on an engine that cannot speak - the voice rows' own rule.
+  if (canSpeak()) {
+    acts.append(markActButton("speak", index, t("reader_listen"), marksSpeakIcon));
+  }
+  acts.append(markActButton("copy", index, t("marker_copy"), marksCopyIcons));
 
-  item.append(text, copy);
+  item.append(text, acts);
   return item;
 }
 
@@ -1922,6 +1980,51 @@ async function copyMarkRow(button, row) {
     button.title = t("marker_copy");
     button.setAttribute("aria-label", t("marker_copy"));
   }, 1500);
+}
+
+/**
+ * The mark's own name across renders, for the speaker's toggle: the same
+ * fields the open press carries, joined - a page turn or a refresh replaces
+ * the row objects, and the quote still sounding must answer to its button.
+ *
+ * @param {import("./marks-list.js").MarkRow} row
+ * @returns {string}
+ */
+function markRowKey(row) {
+  const { mark } = row;
+  return `${row.docId}\n${mark.segmentIndex}:${mark.start.block}:${mark.start.offset}`;
+}
+
+/**
+ * A row's speaker: the quote out loud, the saved-phrases page's own manner -
+ * pressing the sounding row again stops it, any other row simply speaks.
+ * The language is the document's where it declared one (a book's meta);
+ * an article's meta holds none, and the pair's source language stands in -
+ * the assumption the whole extension already makes about what is being read.
+ *
+ * @param {import("./marks-list.js").MarkRow} row
+ */
+function speakMarkRow(row) {
+  const key = markRowKey(row);
+  if (speaking() && soundingMark === key) {
+    stopTts();
+    soundingMark = null;
+    return;
+  }
+  soundingMark = key;
+  const lang = row.lang ?? settings.sourceLang;
+  speak(row.mark.text, lang, settings.ttsVoices[primaryLanguage(lang)], settings.ttsRate / 100);
+}
+
+/**
+ * The row speech stood down - leaving the highlights page takes the voice
+ * with it, exactly as leaving an article takes the read-aloud: a quote
+ * nobody can see is the extension talking to itself.
+ */
+function stopMarkSpeech() {
+  if (soundingMark === null) return;
+  soundingMark = null;
+  stopTts();
 }
 
 /**
@@ -2379,6 +2482,14 @@ function applyAppearance(reader) {
   applyReading(root, reader);
   root.dataset["readerLinks"] = reader.links;
   root.style.setProperty("--reader-measure", `${reader.measure}ch`);
+  // The measure again with the text size cancelled out of it: `ch` scales
+  // with the font, which is right for the article's column (a measure counts
+  // characters) and wrong for the list views, whose width is layout - the
+  // whole page breathed when the size stepped (Michał's report). The same
+  // count re-expressed against the default size stands still however the
+  // text grows; reader.css caps the list and highlights views on this twin.
+  const pinned = (reader.measure * DEFAULTS.reader.fontSize) / reader.fontSize;
+  root.style.setProperty("--reader-measure-pinned", `${pinned.toFixed(2)}ch`);
   // The wet stroke's ink (D106): an alias onto the chosen colour's own
   // per-theme variable, so the draft follows both the pick and the theme.
   root.style.setProperty("--reader-marker-current", `var(--reader-marker-${reader.markerColor})`);
@@ -2754,8 +2865,10 @@ marksRowsList?.addEventListener("click", (event) => {
   if (!(button instanceof HTMLButtonElement)) return;
   const row = marksOnScreen[Number(button.getAttribute("data-row"))];
   if (row === undefined) return;
-  if (button.classList.contains("marks-copy")) void copyMarkRow(button, row);
-  else void openMarkRow(row);
+  const act = button.getAttribute("data-act");
+  if (act === "copy") void copyMarkRow(button, row);
+  else if (act === "speak") speakMarkRow(row);
+  else if (act === "open") void openMarkRow(row);
 });
 
 marksExportButton?.addEventListener("click", () => void exportMarksPage());
@@ -3170,8 +3283,12 @@ document.addEventListener("keydown", onSpeechKey);
 
 // A tab going away mid-sentence has to take the voice with it: the queue
 // behind `speechSynthesis` belongs to the browser, not to this page, and an
-// utterance left in it goes on talking over a closed tab.
-window.addEventListener("pagehide", () => stopReading());
+// utterance left in it goes on talking over a closed tab. The rows' quote
+// speech rides the same queue and leaves the same way.
+window.addEventListener("pagehide", () => {
+  stopReading();
+  stopMarkSpeech();
+});
 
 // The rows exist only where they can do something, and the engine's voice list
 // arrives on its own schedule - after first paint on most platforms, never at

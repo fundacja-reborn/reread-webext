@@ -275,6 +275,10 @@
     "message": "Zurück zu „$TITLE$“",
     "placeholders": { "title": { "content": "$1", "example": "Old Chinese" } }
   },
+  "reader_marks_open": {
+    "message": "„$TITLE$“ an dieser Markierung öffnen",
+    "placeholders": { "title": { "content": "$1", "example": "Old Chinese" } }
+  },
   "reader_transfer_link": { "message": "Import und Export (Artikel oder EPUB)" },
   "reader_transfer_accepts": { "message": "Der Import erkennt die Datei selbst: eine Sicherung der re/read-Artikelliste (.json) oder ein E-Book (.epub)." },
   "reader_book_label": { "message": "Buch" },
