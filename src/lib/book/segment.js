@@ -32,7 +32,12 @@ export const SEGMENT_CHAR_BUDGET = 20000;
  */
 const HEADING_CUT_FROM = 0.75;
 
-/** A final segment shorter than this fraction folds into its neighbour. */
+/**
+ * The line below which a segment is a stub nobody should be handed: a final
+ * segment shorter than this fraction folds into its neighbour, and an open
+ * segment still under it will not close just because an oversized block
+ * arrives.
+ */
 const TAIL_MERGE_BELOW = 0.25;
 
 /** The headings a cut prefers to land before. */
@@ -102,7 +107,12 @@ export function segmenter(budget = SEGMENT_CHAR_BUDGET) {
       const emitted = [];
       if (block.heading && openChars >= budget * HEADING_CUT_FROM) {
         tryClose(emitted);
-      } else if (openChars > 0 && openChars + block.chars > budget) {
+      } else if (openChars >= budget * TAIL_MERGE_BELOW && openChars + block.chars > budget) {
+        // The lower bound keeps a barely-started segment from being stranded
+        // by an oversized incoming block: a part-divider page followed by a
+        // chapter-sized block would otherwise stand alone as a segment of
+        // almost nothing. Under the bound the stub rides along with the big
+        // block instead - over budget, the same trade the tail merge makes.
         tryClose(emitted);
       }
       open.push(block);

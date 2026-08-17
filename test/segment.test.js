@@ -91,6 +91,27 @@ describe("segmenter", () => {
     );
   });
 
+  it("does not strand a barely-started segment before an oversized block", () => {
+    // 10 of 100 open when a chapter-sized block arrives - a part-divider
+    // page, in practice. Closing would hand the reader a segment of almost
+    // nothing, so the stub rides along with the whale instead.
+    const segments = packed([p(10, "titles"), p(250, "whale"), p(40, "b")], 100);
+    assert.deepEqual(
+      segments.map((segment) => segment.blocks),
+      [["titles", "whale"], ["b"]],
+    );
+  });
+
+  it("lets a segment past the stub line stand before an oversized block", () => {
+    // 30 of 100 is a real beginning, not a stub - it closes as usual and the
+    // whale gets its own segment.
+    const segments = packed([p(30, "a"), p(250, "whale")], 100);
+    assert.deepEqual(
+      segments.map((segment) => segment.blocks),
+      [["a"], ["whale"]],
+    );
+  });
+
   it("folds a short tail into its neighbour", () => {
     // The last segment would hold 10 of 100 - under the quarter, so it joins
     // the previous one even though that pushes it over budget.

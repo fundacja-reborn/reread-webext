@@ -30,6 +30,7 @@
  * read, not a page to leave.
  */
 
+import { packableBlocks } from "../lib/book/blocks.js";
 import {
   containerOpfPath,
   decodeXml,
@@ -202,13 +203,22 @@ export async function importEpub(file, onSegment) {
       // cannot resolve anything against it, so no `href` survives the walk.
       const chapter = new DOMParser().parseFromString(decodeXml(data), "text/html");
       const rebuilt = buildArticle(chapter.body, document, { baseUrl: "" });
-      for (const block of Array.from(rebuilt.children)) {
-        const chars = (block.textContent ?? "").length;
-        // Blocks with no text are usually the shadow of a dropped image; the
-        // one kept is the scene break, which is its own meaning.
-        if (chars === 0 && block.localName !== "hr") continue;
+      // `packableBlocks` rather than the root's children: EPUB chapters
+      // usually wrap all their markup in one `<div>`, and packing that as a
+      // single block would put a whole chapter in one segment and a
+      // part-divider page in its own (see `lib/book/blocks.js`).
+      for (const block of packableBlocks(rebuilt)) {
+        const text = block.textContent ?? "";
+        // Blocks with nothing to read are usually the shadow of a dropped
+        // image, or a spacer of non-breaking whitespace; the one kept is the
+        // scene break, which is its own meaning.
+        if (text.trim().length === 0 && block.localName !== "hr") continue;
         await writeSegments(
-          packer.push({ chars, heading: isHeadingTag(block.localName), payload: block.outerHTML }),
+          packer.push({
+            chars: text.length,
+            heading: isHeadingTag(block.localName),
+            payload: block.outerHTML,
+          }),
         );
       }
     }

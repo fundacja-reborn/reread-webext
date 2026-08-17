@@ -1036,6 +1036,14 @@ body.reader:has(#library:not([hidden])) {
   padding: 0.35rem 1rem;
 }
 
+/* The way onward under a segment's last line, pushed off it: finishing a
+   part deserves a breath between the prose and the buttons (Michał,
+   2026-08-17). Distance alone does the parting, as everywhere on this page;
+   the twin above the text keeps the pager's usual rhythm. */
+#segment-nav-end {
+  margin-top: 3rem;
+}
+
 /* --- the transfer section: import and export, under the list --- */
 
 /* Its own quiet area below the pager, reached by the anchor beside the fold;
