@@ -60,7 +60,6 @@
   "popup_no_model": {
     "message": "На цьому пристрої ще немає моделі перекладу - натисніть тут і виберіть її в налаштуваннях."
   },
-  "popup_mode_reader_only": { "message": "Режим: лише в режимі читання" },
 
   "vocab_title": { "message": "re/read - збережені фрази" },
   "vocab_intro": {

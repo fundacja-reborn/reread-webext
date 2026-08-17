@@ -60,7 +60,6 @@
   "popup_no_model": {
     "message": "Na tym urządzeniu nie ma jeszcze modelu tłumaczeniowego - naciśnij tutaj i wybierz go w ustawieniach."
   },
-  "popup_mode_reader_only": { "message": "Tryb: tylko w widoku czytania" },
 
   "vocab_title": { "message": "re/read - zapisane frazy" },
   "vocab_intro": {

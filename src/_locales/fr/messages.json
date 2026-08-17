@@ -60,7 +60,6 @@
   "popup_no_model": {
     "message": "Aucun modèle de traduction sur cet appareil pour l'instant - appuyez ici pour en choisir un dans les paramètres."
   },
-  "popup_mode_reader_only": { "message": "Mode : seulement dans le lecteur" },
 
   "vocab_title": { "message": "re/read - phrases enregistrées" },
   "vocab_intro": {

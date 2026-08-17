@@ -65,9 +65,10 @@ body[data-os="android"] .popup-row {
   overflow-wrap: anywhere;
 }
 
-/* Both checkbox rows: the switch stays a switch, whatever the label does. */
+/* The checkbox rows: the switch stays a switch, whatever the label does. */
 .popup-site input,
-.popup-quiet input {
+.popup-quiet input,
+.popup-reader-only input {
   flex: none;
   margin: 0;
   accent-color: var(--page-accent);
@@ -104,22 +105,11 @@ body[data-os="android"] .popup-row {
   color: var(--page-accent);
 }
 
-/* The status line of reader-only mode: a statement first, a door second. It
-   rests quieter than the rows above it and carries its own top line, because
-   the settings row above gave its border up as the last row - which it stops
-   being whenever this one shows. The hover it inherits is what says it can be
-   pressed; pressing it leads to where the mode is changed. */
-.popup-mode {
-  border-top: 1px solid var(--page-line);
-  border-bottom: none;
-  color: var(--page-muted);
-  font-size: 0.9em;
-}
-
-/* The support row rests at the mode line's volume, for the opposite reason:
-   the mode line is a status, this is an ask, and an ask in a daily hallway
-   must not shout. Left-aligned as one phrase - the row grid's space-between
-   would strand the word at the far edge of its heart. */
+/* The support row rests quieter than the rows above it, and carries its own
+   top line because the settings row gave its border up as the last row of
+   the hallway: this is an ask, and an ask in a daily hallway must not
+   shout. Left-aligned as one phrase - the row grid's space-between would
+   strand the word at the far edge of its heart. */
 .popup-support {
   justify-content: flex-start;
   gap: 0.45rem;

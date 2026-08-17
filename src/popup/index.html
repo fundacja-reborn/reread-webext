@@ -12,11 +12,11 @@
   </head>
   <body>
     <!--
-      Seven rows and nothing else: this site, the pair, the quiet bubble, the
-      reader, the reading list, the saved phrases, the door to the settings.
-      No counters, no logo - the popup is a hallway, not a room. On a fresh
-      install the pair row yields its place to a signpost, because a pair
-      nothing can translate yet is a promise the popup must not make.
+      Ten rows and nothing else: this site and what to do with it first, the
+      three reading preferences, the extension's own pages, and the quiet
+      heart. No counters, no logo - the popup is a hallway, not a room. On a
+      fresh install the pair row yields its place to a signpost, because a
+      pair nothing can translate yet is a promise the popup must not make.
     -->
     <!-- The English in this file is the fallback: `localizePage` swaps every
          `data-i18n`-marked text for the catalogue's language before the popup
@@ -36,6 +36,14 @@
     <p class="popup-row popup-note" id="site-note" data-i18n="popup_no_page" hidden>
       re/read does not work on this page.
     </p>
+
+    <!-- Second from the top (Michał's call, 2026-08-17): the row most presses
+         come for, right under the site it acts on - the preferences can wait
+         below. Stays even over the reader itself: there it turns the reader
+         to the list, which is exactly what the press means. -->
+    <button type="button" class="popup-row popup-action" id="open-reader" data-i18n="open_reader">
+      Read this page in the reader
+    </button>
 
     <label class="popup-row popup-pair" id="pair-row">
       <span data-i18n="language_pair">Language pair</span>
@@ -57,11 +65,17 @@
       <input type="checkbox" id="quiet-bubble" />
     </label>
 
-    <button type="button" class="popup-row popup-action" id="open-reader" data-i18n="open_reader">
-      Read this page in the reader
-    </button>
-    <!-- Stays even over the reader itself: there it turns the reader to the
-         list, which is exactly what the press means. -->
+    <!-- The reader-only switch, for the quiet bubble's reason: a mode flipped
+         depending on what is being read, and the popup is the surface in
+         reach. It replaces the status line that used to stand at the bottom -
+         a switch says the state and changes it in one row, where the line
+         could only point at the settings. The hint stays on the settings
+         page, where there is room to say it. -->
+    <label class="popup-row popup-reader-only" id="reader-only-row">
+      <span data-i18n="options_reader_only">Only in the reader</span>
+      <input type="checkbox" id="reader-only" />
+    </label>
+
     <button type="button" class="popup-row popup-action" id="open-library" data-i18n="reading_list">
       Offline reading list
     </button>
@@ -75,19 +89,6 @@
     </button>
     <button type="button" class="popup-row popup-action" id="open-settings" data-i18n="settings">
       Settings
-    </button>
-
-    <!-- Below the action rows, and only while the mode is on: on Android the
-         popup is the extension's main surface, and the mode has to be readable
-         from it. Pressing it leads where the mode is changed. -->
-    <button
-      type="button"
-      class="popup-row popup-action popup-mode"
-      id="mode-line"
-      data-i18n="popup_mode_reader_only"
-      hidden
-    >
-      Mode: only in the reader
     </button>
 
     <!-- The quietest row, and the last: the one outward door in the popup,

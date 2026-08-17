@@ -60,7 +60,6 @@
   "popup_no_model": {
     "message": "Todavía no hay ningún modelo de traducción en este dispositivo - pulsa aquí para elegir uno en los ajustes."
   },
-  "popup_mode_reader_only": { "message": "Modo: solo en la vista de lectura" },
 
   "vocab_title": { "message": "re/read - frases guardadas" },
   "vocab_intro": {

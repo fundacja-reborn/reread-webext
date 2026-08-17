@@ -62,7 +62,9 @@ const supportButton = document.getElementById("open-support");
  * a press, never a request the extension makes itself.
  */
 const SUPPORT_URL = "https://reapps.eu/#support";
-const modeLine = document.getElementById("mode-line");
+const readerOnlyToggle = /** @type {HTMLInputElement | null} */ (
+  document.getElementById("reader-only")
+);
 
 /** The tab under the popup, and what it said about itself. */
 /** @type {{ tabId: number | null, hostname: string | null }} */
@@ -156,6 +158,15 @@ async function toggleQuietBubble() {
   await writeConfig({ hideBubbleActions: quietToggle.checked });
 }
 
+async function toggleReaderOnly() {
+  if (readerOnlyToggle === null) return;
+  // The settings page's own write: the first press stores a real choice, and
+  // from then on the platform default has no say. Open pages change modes on
+  // the spot through `storage.onChanged` - launcher or reading side, no
+  // reload.
+  await writeConfig({ readerOnly: readerOnlyToggle.checked });
+}
+
 async function choosePair() {
   if (pairSelect === null) return;
   const choice = choices.find((one) => one.pair === pairSelect.value);
@@ -230,6 +241,7 @@ async function openSupport() {
 
 siteToggle?.addEventListener("change", () => void toggleSite());
 quietToggle?.addEventListener("change", () => void toggleQuietBubble());
+readerOnlyToggle?.addEventListener("change", () => void toggleReaderOnly());
 pairSelect?.addEventListener("change", () => void choosePair());
 readerButton?.addEventListener("click", () => void openReader());
 libraryButton?.addEventListener("click", () => void openLibrary());
@@ -239,8 +251,6 @@ settingsButton?.addEventListener("click", () => void openSettings());
 supportButton?.addEventListener("click", () => void openSupport());
 // The signpost is a door to the same place the settings row leads.
 setupRow?.addEventListener("click", () => void openSettings());
-// The status line is also the shortest way to where the mode is changed.
-modeLine?.addEventListener("click", () => void openSettings());
 
 async function render() {
   const [config, installed, tabId, os] = await Promise.all([
@@ -256,10 +266,10 @@ async function render() {
   // page over the whole window and fills it, on desktop it is a panel that
   // measures the page. Which is which is runtime knowledge, not a media query.
   document.body.dataset["os"] = os;
-  // Whether ordinary pages only offer the reader. On Android this popup is the
-  // extension's main surface, so the mode must be readable from it - and the
-  // per-site switch above stays: in this mode it silences the launcher.
-  if (modeLine !== null) modeLine.hidden = !effectiveReaderOnly(config, os);
+  // The reader-only switch shows the mode as it acts, not as it is stored
+  // (the settings page's rule): with nothing chosen, the box reflects the
+  // platform's default - on this Android popup it opens checked.
+  if (readerOnlyToggle !== null) readerOnlyToggle.checked = effectiveReaderOnly(config, os);
 
   over.tabId = tabId;
   // A fresh install has no model at all, and a pair select would promise a

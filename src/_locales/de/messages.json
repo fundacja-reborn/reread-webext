@@ -60,7 +60,6 @@
   "popup_no_model": {
     "message": "Auf diesem Gerät gibt es noch kein Übersetzungsmodell - drücken Sie hier und wählen Sie eines in den Einstellungen."
   },
-  "popup_mode_reader_only": { "message": "Modus: nur in der Leseansicht" },
 
   "vocab_title": { "message": "re/read - gespeicherter Wortschatz" },
   "vocab_intro": {

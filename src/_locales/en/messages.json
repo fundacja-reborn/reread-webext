@@ -96,7 +96,6 @@
     "message": "No translation model on this device yet - press here to pick one in the settings.",
     "description": "Stands in the popup where the pair select would be, while no model is stored. The whole row is a button that opens the settings page."
   },
-  "popup_mode_reader_only": { "message": "Mode: only in the reader" },
 
   "vocab_title": { "message": "re/read - saved phrases" },
   "vocab_intro": {
