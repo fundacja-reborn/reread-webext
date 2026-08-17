@@ -856,7 +856,13 @@ function setMarker(on) {
     markerOn = on;
     deselectMark();
     if (markBar !== null) markBar.hidden = !on;
-    if (on) dismiss();
+    if (on) {
+      // One tool in the hand at a time (Michał's word, 2026-08-17): picking
+      // the pen up stops a reading and takes its bar with it, the way the
+      // voice starting puts the pen away (`showSpeechBar`).
+      stopReading();
+      dismiss();
+    }
   }
   updateMarker();
 }
@@ -2696,9 +2702,11 @@ function updateListen() {
  * @param {import("./read-aloud.js").ReadingState} state
  */
 function showSpeechBar(state) {
-  // The two bars share the window's foot and simply stack (reader.css):
-  // marking while listening is a real way to read, and neither strip has
-  // the right to take the other's tool away.
+  // One tool in the hand at a time (Michał's word, 2026-08-17, repealing
+  // D107's stacked pair): the voice starting puts the pen away, and the pen
+  // picked up stops the voice (`setMarker`) - on a phone two strips stacked
+  // over the window's foot cost more article than either tool was worth.
+  if (state !== "off") setMarker(false);
   if (speechBar !== null) {
     speechBar.hidden = state === "off";
     speechBar.dataset["state"] = state;
