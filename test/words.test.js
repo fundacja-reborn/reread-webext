@@ -2,7 +2,14 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import { tokenize } from "../src/lib/matcher/tokenize.js";
-import { besideSpan, nearestWordIndex, wordIndexAt } from "../src/lib/matcher/words.js";
+import {
+  besideSpan,
+  gluedEnd,
+  gluedStart,
+  nearestWordIndex,
+  wordIndexAt,
+  wordless,
+} from "../src/lib/matcher/words.js";
 
 /**
  * The pure half of the reader's touch selection (D80/D81): a touch becomes a
@@ -114,5 +121,68 @@ describe("besideSpan", () => {
     // The word before index 0 does not exist; the caller sees `apart` for
     // every index below the run, -1 included, and claims nothing.
     assert.equal(besideSpan({ from: 0, to: 1 }, -1), "apart");
+  });
+});
+
+describe("the punctuation glued to a mark's edges (D107)", () => {
+  it("walks the start left over opening punctuation, to the whitespace", () => {
+    const text = 'said: "It was really';
+    const it_ = tokenize(text)[1];
+    assert.ok(it_ !== undefined && text.slice(it_.start, it_.end) === "It");
+    // The quote mark rides in; the colon stands across a space and stays.
+    assert.equal(text.slice(gluedStart(text, it_.start)), '"It was really');
+  });
+
+  it("walks the end right over closing punctuation", () => {
+    const text = "University of Maryland. Next";
+    const maryland = tokenize(text)[2];
+    assert.ok(maryland !== undefined);
+    assert.equal(text.slice(0, gluedEnd(text, maryland.end)), "University of Maryland.");
+  });
+
+  it("takes a whole trailing cluster - comma and quote together", () => {
+    const text = 'of science," said';
+    const science = tokenize(text)[1];
+    assert.ok(science !== undefined);
+    assert.equal(text.slice(0, gluedEnd(text, science.end)), 'of science,"');
+  });
+
+  it("takes nothing across whitespace or into the neighbouring word", () => {
+    const text = "end. word next";
+    const word = tokenize(text)[1];
+    assert.ok(word !== undefined && text.slice(word.start, word.end) === "word");
+    // A space stands between `word` and the sentence before it: the full
+    // stop belongs to that sentence and stays there.
+    assert.equal(gluedStart(text, word.start), word.start);
+    assert.equal(gluedEnd(text, word.end), word.end);
+  });
+
+  it("stops at a word on the far side of glued punctuation", () => {
+    // An em-dash written as its code, per the repo's rule about the literal.
+    const dash = String.fromCodePoint(0x2014);
+    const text = `issues${dash}from HIV`;
+    const from = tokenize(text)[1];
+    assert.ok(from !== undefined && text.slice(from.start, from.end) === "from");
+    // The dash is glued to `from`, so it rides in; `issues` is a word and
+    // ends the walk.
+    assert.equal(text.slice(gluedStart(text, from.start), from.end), `${dash}from`);
+  });
+
+  it("holds the ends of the text", () => {
+    const text = '"quoted."';
+    const quoted = tokenize(text)[0];
+    assert.ok(quoted !== undefined);
+    assert.equal(gluedStart(text, quoted.start), 0);
+    assert.equal(gluedEnd(text, quoted.end), text.length);
+  });
+
+  it("knows a gap with no word in it - the neighbour test", () => {
+    // Between a mark's edge and the tapped word: space and punctuation make
+    // a neighbour, any word in between makes a stranger.
+    assert.ok(wordless(" "));
+    assert.ok(wordless('." ('));
+    assert.ok(wordless(""));
+    assert.ok(!wordless(" one "));
+    assert.ok(!wordless("źdźbło"));
   });
 });

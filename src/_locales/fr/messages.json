@@ -191,6 +191,8 @@
   "reader_links_active": { "message": "Actifs" },
   "reader_marker": { "message": "Surligneur" },
   "marker_delete": { "message": "Supprimer le surlignage" },
+  "marker_copy": { "message": "Copier" },
+  "marker_copied": { "message": "Copié" },
   "color_yellow": { "message": "Jaune" },
   "color_green": { "message": "Vert" },
   "color_blue": { "message": "Bleu" },

@@ -216,6 +216,8 @@
   "reader_links_active": { "message": "Active" },
   "reader_marker": { "message": "Highlighter" },
   "marker_delete": { "message": "Remove highlight" },
+  "marker_copy": { "message": "Copy" },
+  "marker_copied": { "message": "Copied" },
   "color_yellow": { "message": "Yellow" },
   "color_green": { "message": "Green" },
   "color_blue": { "message": "Blue" },

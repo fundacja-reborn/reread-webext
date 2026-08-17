@@ -180,6 +180,8 @@
   "reader_links_active": { "message": "Aktiv" },
   "reader_marker": { "message": "Textmarker" },
   "marker_delete": { "message": "Markierung entfernen" },
+  "marker_copy": { "message": "Kopieren" },
+  "marker_copied": { "message": "Kopiert" },
   "color_yellow": { "message": "Gelb" },
   "color_green": { "message": "Grün" },
   "color_blue": { "message": "Blau" },

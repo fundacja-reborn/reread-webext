@@ -546,17 +546,112 @@
     </main>
 
     <!--
-      The one act on a highlighter mark (D106): a tap on it, pen in hand,
-      raises this bubble beside the tapped line, and the button takes the
-      mark back. Growing a mark needs no bubble - drawing over it is the
-      gesture - so one word is the whole vocabulary here. Absolute in page
-      coordinates, so it rides the scroll with the line it stands under, the
-      way the reader's own bubble does (D81); a press anywhere else stands
-      it down, the armed Delete's rule.
+      The highlighter's toolbar (D107, revised twice on Michał's reports):
+      it stands at the bottom of the window - the speech bar's spot and
+      dress, which is why it wears the speech bar's class - for as long as
+      the pen is in the hand, so the ink can be chosen before the first
+      stroke. Two states, one strip: with no mark active the swatches speak
+      for the pen (the same setting the Aa panel writes) and the copy and
+      the bin stay away, having nothing to act on; a tap on a mark turns
+      the strip to that mark - the swatches recolour it in place, its quote
+      can leave for the clipboard, the bin takes it - and two pins at the
+      mark's ends say which one, in the mark's own true colour (a wash was
+      tried first and read as a darker, wrong ink). A tap on bare text
+      walks outward the way Escape does: the mark stands down first, the
+      pen second.
     -->
-    <div id="mark-popover" class="mark-popover" hidden>
-      <button type="button" id="mark-delete" data-i18n="marker_delete">Remove highlight</button>
+    <div
+      id="mark-bar"
+      class="speech-bar mark-bar"
+      hidden
+      role="toolbar"
+      aria-label="Highlighter"
+      data-i18n-aria-label="reader_marker"
+    >
+      <button type="button" id="mark-copy" hidden>
+        <svg class="reader-icon icon-copy" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <rect
+            x="5.2"
+            y="5.2"
+            width="8"
+            height="8"
+            rx="1.2"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.3"
+          />
+          <path
+            d="M10.8 3.2H4.5a1.3 1.3 0 0 0-1.3 1.3v6.3"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.3"
+            stroke-linecap="round"
+          />
+        </svg>
+        <svg class="reader-icon icon-copied" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <path
+            d="M3.2 8.6 6.6 12l6.2-7.4"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+        <span id="mark-copy-label" class="speech-label" data-i18n="marker_copy">Copy</span>
+      </button>
+      <!-- The mark's own ink, changed in place: the same four swatches the
+           Aa panel offers, only these speak about the tapped mark, not about
+           the pen - so they carry their own attribute and their pressed one
+           follows the mark's stored colour. -->
+      <span class="mark-inks">
+        <button type="button" data-mark-ink="yellow" aria-label="Yellow" data-i18n-aria-label="color_yellow">
+          <span class="marker-swatch" data-swatch="yellow" aria-hidden="true"></span>
+        </button>
+        <button type="button" data-mark-ink="green" aria-label="Green" data-i18n-aria-label="color_green">
+          <span class="marker-swatch" data-swatch="green" aria-hidden="true"></span>
+        </button>
+        <button type="button" data-mark-ink="blue" aria-label="Blue" data-i18n-aria-label="color_blue">
+          <span class="marker-swatch" data-swatch="blue" aria-hidden="true"></span>
+        </button>
+        <button type="button" data-mark-ink="pink" aria-label="Pink" data-i18n-aria-label="color_pink">
+          <span class="marker-swatch" data-swatch="pink" aria-hidden="true"></span>
+        </button>
+      </span>
+      <button
+        type="button"
+        id="mark-delete"
+        hidden
+        title="Remove highlight"
+        data-i18n-title="marker_delete"
+        aria-label="Remove highlight"
+        data-i18n-aria-label="marker_delete"
+      >
+        <svg class="reader-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <path
+            d="M3.2 4.6h9.6M6.4 4.6V3.3a.7.7 0 0 1 .7-.7h1.8a.7.7 0 0 1 .7.7v1.3M4.6 4.6l.6 8.2a1 1 0 0 0 1 .9h3.6a1 1 0 0 0 1-.9l.6-8.2M6.7 7v4.4M9.3 7v4.4"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.3"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+        <span class="speech-label" data-i18n="action_delete">Delete</span>
+      </button>
     </div>
+
+    <!--
+      The two pins that say which mark the toolbar is about (D107): a thin
+      bar with a dot at each end of the mark, the shape every platform's
+      selection handles taught - drawn in the interface accent, so the mark
+      itself keeps its true ink. Indicators only: pointer-events pass
+      through them, so a tap on a pin is a tap on the text under it.
+      Absolute in page coordinates, placed by script, riding the scroll
+      with their mark.
+    -->
+    <div id="mark-pin-start" class="mark-pin mark-pin-start" hidden aria-hidden="true"></div>
+    <div id="mark-pin-end" class="mark-pin mark-pin-end" hidden aria-hidden="true"></div>
 
     <!--
       The bar that steers the voice (D87). It exists only while the article is

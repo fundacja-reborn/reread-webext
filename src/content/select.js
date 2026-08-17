@@ -67,7 +67,13 @@
 
 import { locate } from "../lib/matcher/spans.js";
 import { tokenize } from "../lib/matcher/tokenize.js";
-import { besideSpan, nearestWordIndex, wordIndexAt } from "../lib/matcher/words.js";
+import {
+  besideSpan,
+  gluedEnd,
+  gluedStart,
+  nearestWordIndex,
+  wordIndexAt,
+} from "../lib/matcher/words.js";
 import { madeSelection } from "../lib/selection.js";
 import { supported } from "./highlighter.js";
 import { blockAround, blockPieces } from "./scan.js";
@@ -166,10 +172,15 @@ const SCROLL_TAIL_MS = 100;
  * @property {(range: Range) => void} [onMarked] a marker gesture ended on this
  *   range. The range is handed over, not kept: the stroke's paint is cleared
  *   first, and whatever the mark becomes is the caller's to draw.
- * @property {(x: number, y: number) => void} [onMarkTap] a tap while the
- *   highlighter is on. The caller answers it - a tapped mark grows a delete
- *   bubble, empty space stands one down - and this module only promises the
- *   tap will not also mean what taps mean with the pen away.
+ * @property {() => void} [onMarkStart] a marker stroke just took its first
+ *   word - whatever the caller shows about a standing mark (pins, the
+ *   toolbar's acts) is about to be stale.
+ * @property {(x: number, y: number, word?: Range) => void} [onMarkTap] a tap
+ *   while the highlighter is on. `word` is the glued range of the word under
+ *   the tap, when the tap landed on one inside the markable ground - the
+ *   caller reads it as "this word too" beside an active mark (D107). The
+ *   caller answers the tap either way, and this module only promises it will
+ *   not also mean what taps mean with the pen away.
  */
 
 /** @type {SelectHooks | null} */
@@ -217,7 +228,7 @@ function withinMarkRoot(block) {
  * selection, one block - the matcher stops at block edges, so a phrase across
  * two could never be found again (D45).
  *
- * @typedef {{ block: Element, parts: import("./scan.js").BlockPart[], spans: import("../lib/matcher/spans.js").Span[], tokens: import("../lib/matcher/tokenize.js").Token[] }} Geometry
+ * @typedef {{ block: Element, parts: import("./scan.js").BlockPart[], text: string, spans: import("../lib/matcher/spans.js").Span[], tokens: import("../lib/matcher/tokenize.js").Token[] }} Geometry
  */
 
 /** @type {Geometry | null} */
@@ -461,10 +472,15 @@ function clearInk() {
  * @returns {boolean} whether the stroke now stands
  */
 function inkStart(word) {
-  const built = rangeOfSpan(word.geo, word.index, word.index);
+  // Through `inkRange` even for one word, so the hold's first paint already
+  // wears the glued punctuation the finished mark will (D107).
+  const built = inkRange(word, word);
   if (built === null) return false;
   ink = { anchor: word, range: built };
   paintInk();
+  // After the paint stands, so a caller that reacts by repainting its own
+  // layers never sees a claimed stroke with nothing on screen.
+  hooks?.onMarkStart?.();
   return true;
 }
 
@@ -504,6 +520,14 @@ function inkWordAt(caret) {
  * whichever way the hand went - a mark drawn upward reads the same as one
  * drawn downward.
  *
+ * The words snap the stroke, and the punctuation glued to its edge words
+ * rides in after (D107, Michał's report): a mark is a quote for notes, and
+ * a quotation without its opening quote mark or its own full stop reads
+ * clipped. `gluedStart`/`gluedEnd` stop at the first whitespace or word
+ * character, so nothing beyond the edge words' own punctuation ever enters.
+ * The vocabulary gesture stays word-exact - its key drops punctuation
+ * anyway, and this function is the marker's alone.
+ *
  * @param {Word} a
  * @param {Word} b
  * @returns {Range | null}
@@ -514,11 +538,21 @@ function inkRange(a, b) {
   if (first === null || second === null) return null;
 
   const forward = first.compareBoundaryPoints(Range.START_TO_START, second) <= 0;
-  const from = forward ? first : second;
-  const to = forward ? second : first;
+  const head = forward ? a : b;
+  const tail = forward ? b : a;
+  const headToken = head.geo.tokens[head.index];
+  const tailToken = tail.geo.tokens[tail.index];
+  if (headToken === undefined || tailToken === undefined) return null;
+
+  const from = locate(head.geo.spans, gluedStart(head.geo.text, headToken.start));
+  const to = locate(tail.geo.spans, gluedEnd(tail.geo.text, tailToken.end) - 1);
+  const fromNode = from === null ? null : (head.geo.parts[from.piece]?.node ?? null);
+  const toNode = to === null ? null : (tail.geo.parts[to.piece]?.node ?? null);
+  if (from === null || to === null || fromNode === null || toNode === null) return null;
+
   const built = document.createRange();
-  built.setStart(from.startContainer, from.startOffset);
-  built.setEnd(to.endContainer, to.endOffset);
+  built.setStart(fromNode, from.offset);
+  built.setEnd(toNode, to.offset + 1);
   return built;
 }
 
@@ -843,11 +877,27 @@ function tap(event, x, y) {
     const target = event.target;
     if (linkOwns(target)) return;
     if (!(target instanceof Node) || hooks === null || !hooks.root.contains(target)) return;
-    hooks.onMarkTap?.(x, y);
+    hooks.onMarkTap?.(x, y, tappedWord(x, y, GRAB_SLOP));
     event.preventDefault();
     return;
   }
   if (answerTap(event.target, x, y, GRAB_SLOP)) event.preventDefault();
+}
+
+/**
+ * The glued range of the word a marker tap landed on, if it landed on one
+ * inside the markable ground - what lets the caller grow an active mark by
+ * its neighbour (D107).
+ *
+ * @param {number} x
+ * @param {number} y
+ * @param {number} slop the asking pointer's margin
+ * @returns {Range | undefined}
+ */
+function tappedWord(x, y, slop) {
+  const word = wordAt(x, y, slop);
+  if (word === null || !withinMarkRoot(word.geo.block)) return undefined;
+  return inkRange(word, word) ?? undefined;
 }
 
 /**
@@ -1029,14 +1079,14 @@ export function releaseMouse(event) {
     if (event.detail >= 2) {
       const word = wordAt(event.clientX, event.clientY, MOUSE_SLOP);
       if (word !== null && withinMarkRoot(word.geo.block)) {
-        const one = rangeOfSpan(word.geo, word.index, word.index);
+        const one = inkRange(word, word);
         if (one !== null) {
           hooks.onMarked?.(one);
           return true;
         }
       }
     }
-    hooks.onMarkTap?.(event.clientX, event.clientY);
+    hooks.onMarkTap?.(event.clientX, event.clientY, tappedWord(event.clientX, event.clientY, MOUSE_SLOP));
     return true;
   }
 

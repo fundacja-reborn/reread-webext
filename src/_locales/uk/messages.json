@@ -236,6 +236,8 @@
   "reader_links_active": { "message": "Активні" },
   "reader_marker": { "message": "Маркер" },
   "marker_delete": { "message": "Прибрати позначення" },
+  "marker_copy": { "message": "Копіювати" },
+  "marker_copied": { "message": "Скопійовано" },
   "color_yellow": { "message": "Жовтий" },
   "color_green": { "message": "Зелений" },
   "color_blue": { "message": "Синій" },

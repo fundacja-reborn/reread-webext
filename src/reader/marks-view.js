@@ -224,21 +224,51 @@ export function clearMarkPaint() {
 }
 
 /**
- * Which mark, if any, is under a point in the viewport - the delete bubble's
+ * Which mark, if any, is under a point in the viewport - the mark toolbar's
  * question, answered the way underline hit-testing answers it: the painted
- * ranges are known, so their own boxes decide, and the box of the line that
- * was hit rides along for the bubble to stand under.
+ * ranges are known, so their own boxes decide. The painted range rides along
+ * for one reader - the wash that says which mark the toolbar is about is
+ * painted over it - and the caller looks, never keeps.
  *
  * @param {number} x
  * @param {number} y
- * @returns {{ mark: Mark, rect: DOMRect } | null}
+ * @returns {{ mark: Mark, range: Range, rect: DOMRect } | null}
  */
 export function markAt(x, y) {
   for (const { mark, range } of painted) {
     for (const rect of range.getClientRects()) {
       if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) continue;
-      return { mark, rect };
+      return { mark, range, rect };
     }
   }
   return null;
+}
+
+/**
+ * The painted range of one mark, by identity - how a mark that was just
+ * committed becomes the active one (D107): the pins need its boxes, and the
+ * paint already built them.
+ *
+ * @param {Mark} mark
+ * @returns {Range | null}
+ */
+export function paintedRangeOf(mark) {
+  for (const entry of painted) {
+    if (entry.mark === mark) return entry.range;
+  }
+  return null;
+}
+
+/**
+ * One top-level block's prose, for questions the anchors alone cannot
+ * answer - today: whether the gap between an active mark's edge and a
+ * tapped word holds any word at all (the neighbour test, D107).
+ *
+ * @param {Element} root
+ * @param {number} index
+ * @returns {string | null}
+ */
+export function proseTextOf(root, index) {
+  const block = root.children[index];
+  return block === undefined ? null : blockProse(block).text;
 }

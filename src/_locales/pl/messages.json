@@ -236,6 +236,8 @@
   "reader_links_active": { "message": "Aktywne" },
   "reader_marker": { "message": "Zakreślacz" },
   "marker_delete": { "message": "Usuń zakreślenie" },
+  "marker_copy": { "message": "Kopiuj" },
+  "marker_copied": { "message": "Skopiowano" },
   "color_yellow": { "message": "Żółty" },
   "color_green": { "message": "Zielony" },
   "color_blue": { "message": "Niebieski" },

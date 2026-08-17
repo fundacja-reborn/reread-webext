@@ -1050,7 +1050,7 @@ function onStorageChanged(changes, area) {
 }
 
 /**
- * @param {{ root?: Element | null, observe?: boolean, stored?: Record<string, unknown>, ownSelection?: boolean, anchored?: boolean, plainLinks?: () => boolean, alsoOwns?: (target: EventTarget | null) => boolean, marking?: () => boolean, markRoot?: () => Element | null, onMarked?: (range: Range) => void, onMarkTap?: (x: number, y: number) => void }} [where]
+ * @param {{ root?: Element | null, observe?: boolean, stored?: Record<string, unknown>, ownSelection?: boolean, anchored?: boolean, plainLinks?: () => boolean, alsoOwns?: (target: EventTarget | null) => boolean, marking?: () => boolean, markRoot?: () => Element | null, onMarked?: (range: Range) => void, onMarkStart?: () => void, onMarkTap?: (x: number, y: number, word?: Range) => void }} [where]
  *   what to underline inside, whether it can change on its own, the startup
  *   read of `storage.local` when the caller already made one, whether the
  *   page selects through our own gesture rather than the browser's - every
@@ -1106,6 +1106,7 @@ export function start(where = {}) {
         ...(where.marking === undefined ? {} : { marking: where.marking }),
         ...(where.markRoot === undefined ? {} : { markRoot: where.markRoot }),
         ...(where.onMarked === undefined ? {} : { onMarked: where.onMarked }),
+        ...(where.onMarkStart === undefined ? {} : { onMarkStart: where.onMarkStart }),
         ...(where.onMarkTap === undefined ? {} : { onMarkTap: where.onMarkTap }),
       });
     }

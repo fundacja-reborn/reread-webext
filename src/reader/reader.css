@@ -1025,31 +1025,99 @@ button[data-armed],
   margin: 0.5rem 0 0;
 }
 
-/* --- the highlighter's delete bubble (D106) --- */
+/* --- the toolbar of a tapped mark (D107) --- */
 
-/* Absolute in page coordinates, set by script under the tapped line: it rides
-   the scroll with the mark it is about, the way the reader's own bubble rides
-   (D81). The page's paper and an accent frame, no shadow and no motion -
-   e-ink shows a shadow as a smudge and an animation as a flash. */
-.mark-popover {
-  position: absolute;
-  z-index: 2;
-  padding: 0.25rem;
-  border: 1px solid var(--page-accent);
-  border-radius: 0.5rem;
-  background: var(--page-bg);
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  font-size: 0.85rem;
+/* The strip itself is dressed by `.speech-bar` below - same spot, same
+   paper, same button manners. What is its own: the swatch group holds its
+   buttons shoulder to shoulder (four inks read as one control), and the
+   copy button shows exactly one of its two glyphs - the check stands in for
+   the copy sheet for a beat after a successful copy, because on a narrow
+   screen the label is clipped and the glyph is the only place feedback can
+   live. */
+.mark-inks {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
-/* The one word inside is the whole bubble, so the button carries the touch
-   target: quiet at rest inside the accent frame, which already says "this
-   is an act". */
-.mark-popover button {
-  min-height: 2.1rem;
-  padding: 0.15rem 0.7rem;
-  border: none;
-  background: none;
+/* On the bar the swatch is the whole glyph of its button, so it steps up to
+   the transport icons' size rather than the panel's inline one. */
+.mark-inks .marker-swatch {
+  width: 1.4em;
+  height: 1.4em;
+}
+
+#mark-copy .icon-copied,
+#mark-copy[data-copied] .icon-copy {
+  display: none;
+}
+
+#mark-copy[data-copied] .icon-copied {
+  display: inline-block;
+}
+
+/* The chosen ink needs more than the row's hairline accent border: the
+   swatch fills the button, so a border-colour change reads as nothing
+   (Michał's report from 0.4.7). A ring outside the frame says "this one" at
+   a glance, in the Aa panel and on the mark toolbar alike - drawn as a
+   shadow so no box changes size, and dark enough to survive e-ink. */
+#marker-color-choices button[aria-pressed="true"],
+.mark-inks button[aria-pressed="true"] {
+  box-shadow: 0 0 0 2px var(--page-accent);
+}
+
+/* The toolbar's own glyphs step up beyond the transport icons' desktop size
+   (Michał's report: copy and bin read as specks - the same report the
+   transport icons once got). The rule stands outside the media query, so it
+   is the bar's size at every width; the swatches beside them already hold
+   this line. */
+.mark-bar .reader-icon {
+  width: 1.5em;
+  height: 1.5em;
+}
+
+/* The pins of the active mark: the platform selection-handle shape - a thin
+   stem the height of the line, a dot at the outer end - in the interface
+   accent, so the mark keeps its true ink (a wash over it read as a darker,
+   wrong colour). Pointer events pass through: a tap on a pin means the text
+   under it. */
+.mark-pin {
+  position: absolute;
+  z-index: 2;
+  width: 2px;
+  background: var(--page-accent);
+  pointer-events: none;
+}
+
+.mark-pin::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--page-accent);
+}
+
+.mark-pin-start::after {
+  top: -8px;
+}
+
+.mark-pin-end::after {
+  bottom: -8px;
+}
+
+/* Both bars up at once - marking while listening is a real way to read - and
+   the mark toolbar steps onto the voice bar's shoulders rather than either
+   hiding: the strip heights are one row each, and the page below gives room
+   for the pair. */
+body.reader:has(#speech-bar:not([hidden])) .mark-bar {
+  bottom: 3.9rem;
+}
+
+body.reader:has(#speech-bar:not([hidden])):has(#mark-bar:not([hidden])) {
+  padding-bottom: 8.5rem;
 }
 
 /* --- the bar that steers the voice, for as long as there is one --- */
@@ -1077,12 +1145,14 @@ button[data-armed],
   font-size: 0.85rem;
 }
 
-/* The last lines of the article stay readable while the bar is up: it covers
-   the foot of the window, so the page gives that much back - one row's worth,
-   which is what the bar is at every width now that the words step aside on a
-   narrow screen. `:has` rather than a class set by script, the way the reading
-   list already switches the column width. */
-body.reader:has(#speech-bar:not([hidden])) {
+/* The last lines of the article stay readable while a bar is up - the
+   voice's or the mark's, both live at the foot of the window - so the page
+   gives that much back: one row's worth, which is what either bar is at
+   every width now that the words step aside on a narrow screen. `:has`
+   rather than a class set by script, the way the reading list already
+   switches the column width. */
+body.reader:has(#speech-bar:not([hidden])),
+body.reader:has(#mark-bar:not([hidden])) {
   padding-bottom: 4.5rem;
 }
 
@@ -1164,6 +1234,14 @@ body.reader:has(#speech-bar:not([hidden])) {
   .speech-bar .reader-icon {
     width: 1.2em;
     height: 1.2em;
+  }
+
+  /* Except the mark toolbar's, which hold their size at every width
+     (Michał's report: at the transport icons' desktop size the copy and
+     the bin read as specks beside the swatches). */
+  .mark-bar .reader-icon {
+    width: 1.5em;
+    height: 1.5em;
   }
 
   /* The tabs keep their own width instead of splitting the line. */
