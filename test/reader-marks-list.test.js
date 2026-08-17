@@ -57,6 +57,7 @@ function book(id, rest = {}) {
     totalChars: 1000,
     addedAt: 5,
     readAt: null,
+    toc: null,
     ...rest,
   };
 }

@@ -82,12 +82,14 @@ import {
   putPosition,
   setReadAt,
 } from "../lib/store/articles.js";
+import { cappedToc, headingEntries } from "../lib/book/toc.js";
 import {
   deleteBook,
   getBook,
   getBookSegment,
   listBooks,
   setBookReadAt,
+  setBookToc,
   sweepOrphanSegments,
 } from "../lib/store/books.js";
 import { MARKS_FILENAME, toMarksFile } from "../lib/store/marks-file.js";
@@ -256,6 +258,14 @@ const segmentNexts = [
   document.getElementById("segment-next"),
   document.getElementById("segment-next-end"),
 ];
+// The book's table of contents (D116): the two doors in the pagers, and the
+// dialog they open.
+const tocButtons = [document.getElementById("toc"), document.getElementById("toc-end")];
+const tocDialog = /** @type {HTMLDialogElement | null} */ (
+  document.getElementById("toc-dialog")
+);
+const tocRows = document.getElementById("toc-rows");
+const tocCloseButton = document.getElementById("toc-close");
 const actions = document.getElementById("actions");
 const toLibraryButton = document.getElementById("to-library");
 const keepButton = document.getElementById("keep");
@@ -304,6 +314,25 @@ let markerOn = false;
  * @type {import("../lib/reader/marks.js").Mark[]}
  */
 let docMarks = [];
+
+/**
+ * The table of contents of the book on screen (D116) - empty for a book
+ * without one and for everything that is not a book. What the pagers' TOC
+ * buttons show themselves for and the dialog renders from; follows `shown`
+ * the way the marks do.
+ *
+ * @type {import("../lib/book/toc.js").TocEntry[]}
+ */
+let bookToc = [];
+
+/**
+ * Books whose TOC backfill is running in this page - one scan per book at a
+ * time. A finished scan needs no memory here: the row it wrote is what stops
+ * the next one, and a failed scan should indeed run again.
+ *
+ * @type {Set<string>}
+ */
+const tocScansRunning = new Set();
 
 /**
  * The mark the toolbar is about, while it shows (D107). Which one it is on
@@ -517,9 +546,13 @@ function renderArticle(piece) {
   docMarks = [];
   clearMarkPaint();
   // The book dressing is put on by `openBook` after this returns; every
-  // other road through here takes it off.
+  // other road through here takes it off. The contents dialog too: a Back
+  // can land here with it still standing over a book that is leaving.
   showSegmentNav(null);
   showBookNote(null);
+  bookToc = [];
+  updateTocButtons();
+  closeTocDialog();
 
   const rebuilt = buildArticle(piece.source, document, { baseUrl: piece.url });
 
@@ -1407,6 +1440,143 @@ function showBookNote(book) {
 }
 
 /**
+ * The pagers' doors to the table of contents (D116) - shown only over a book
+ * that has one. Their rows' own `hidden` does the rest: off a book the
+ * pagers are away entirely.
+ */
+function updateTocButtons() {
+  for (const button of tocButtons) {
+    if (button !== null) button.hidden = bookToc.length === 0;
+  }
+}
+
+/**
+ * Where the reading stands in the table of contents: the last row at or
+ * before the part and block on screen, -1 before the first. What the dialog
+ * marks and lands its focus on - opened mid-book it answers "where am I"
+ * before "where next".
+ *
+ * @returns {number}
+ */
+function currentTocRow() {
+  const target = shown;
+  if (target === null || target.origin !== "book") return -1;
+  const block = topBlockIndex() ?? 0;
+  let current = -1;
+  for (const [index, entry] of bookToc.entries()) {
+    if (
+      entry.segmentIndex < target.segmentIndex ||
+      (entry.segmentIndex === target.segmentIndex && entry.blockIndex <= block)
+    ) {
+      current = index;
+    }
+  }
+  return current;
+}
+
+/**
+ * Opens the table of contents over the book: rows built fresh from the
+ * stored list, the titles entering as text only - they are the book's own
+ * words. Depth is measured from the shallowest heading the book uses, so a
+ * book written all in h2 reads flat rather than uniformly indented.
+ */
+function openTocDialog() {
+  if (tocDialog === null || tocRows === null || bookToc.length === 0) return;
+  let shallowest = 3;
+  for (const entry of bookToc) shallowest = Math.min(shallowest, entry.level);
+  const current = currentTocRow();
+  tocRows.replaceChildren(
+    ...bookToc.map((entry, index) => {
+      const row = document.createElement("button");
+      row.type = "button";
+      row.dataset["index"] = String(index);
+      row.dataset["depth"] = String(entry.level - shallowest);
+      row.textContent = entry.title;
+      if (index === current) row.setAttribute("aria-current", "true");
+      return row;
+    }),
+  );
+  tocDialog.showModal();
+  const focus = current >= 0 ? tocRows.children[current] : tocRows.firstElementChild;
+  if (focus instanceof HTMLElement) {
+    // By hand rather than letting focus scroll "nearest": the current
+    // chapter mid-list, not clinging to the box's edge. The offsets share
+    // the dialog as their positioned ancestor, so the difference is the
+    // row's place inside the scrolling rows.
+    focus.focus({ preventScroll: true });
+    tocRows.scrollTop = Math.max(
+      0,
+      focus.offsetTop - tocRows.offsetTop - (tocRows.clientHeight - focus.offsetHeight) / 2,
+    );
+  }
+}
+
+/** Puts the dialog away, wherever the closing came from - a row, the X,
+ *  Esc, the backdrop, or the view changing under it. */
+function closeTocDialog() {
+  if (tocDialog !== null && tocDialog.open) tocDialog.close();
+}
+
+/**
+ * One row pressed: the chapter's part with its heading under the bar. The
+ * part already on screen is landed by scroll alone - a re-render is a
+ * repaint, and on e-ink a repaint is a flash. Any other part takes the same
+ * road as a pressed quote (D108), with the heading's block as the target.
+ *
+ * @param {import("../lib/book/toc.js").TocEntry} entry
+ */
+function jumpToTocEntry(entry) {
+  const target = shown;
+  if (target === null || target.origin !== "book") return;
+  if (entry.segmentIndex === target.segmentIndex) {
+    // The landing is a reading position like any scroll's; written at once,
+    // so a tab closed right after the jump reopens on the chapter.
+    if (scrollToBlock(entry.blockIndex)) savePositionNow();
+    return;
+  }
+  void openBook(target.url, entry.segmentIndex, {
+    segmentIndex: entry.segmentIndex,
+    block: entry.blockIndex,
+  });
+}
+
+/**
+ * Builds the table of contents a book imported before D116 never got, from
+ * the headings that survived in its stored blocks - once, on an open of the
+ * book, and written back so every later open just reads it. The reading is
+ * not held up: every segment fetch is an await, and the part on screen
+ * renders before this starts. `setBookToc` re-reads the row in its own
+ * transaction, so a book deleted mid-scan stays deleted and a faster tab's
+ * scan stands; failure leaves `toc` null, and the next open tries again.
+ *
+ * @param {import("../lib/store/book.js").BookMeta} book
+ */
+async function backfillToc(book) {
+  if (tocScansRunning.has(book.id)) return;
+  tocScansRunning.add(book.id);
+  try {
+    /** @type {import("../lib/book/toc.js").TocEntry[]} */
+    const entries = [];
+    for (let index = 0; index < book.segmentCount; index += 1) {
+      const segment = await getBookSegment(book.id, index);
+      // A torn segment reads as absent; the list keeps what is readable.
+      if (segment !== null) entries.push(...headingEntries(segment.blocks, index));
+    }
+    const toc = cappedToc(entries);
+    if (!(await setBookToc(book.id, toc))) return;
+    if (shown !== null && shown.origin === "book" && shown.url === book.id) {
+      bookToc = toc;
+      updateTocButtons();
+    }
+  } catch {
+    // A closed database or a torn book: no TOC today, another try at the
+    // next open.
+  } finally {
+    tocScansRunning.delete(book.id);
+  }
+}
+
+/**
  * Opens a book at one of its segments - the remembered one when no segment
  * is asked for, which is what a press in the list means. The same round trip
  * and epoch guard as a saved article; the render is `renderArticle` whole,
@@ -1415,9 +1585,10 @@ function showBookNote(book) {
  *
  * @param {string} id
  * @param {number} [wanted] a specific segment - the neighbour rows' press
- * @param {MarkTarget} [target] a mark to land on instead of the reading
- *   position - the highlights page's press (D108), which also asks for the
- *   mark's own segment through `wanted`
+ * @param {MarkTarget | BlockTarget} [target] a spot to land on instead of
+ *   the reading position: a mark for the highlights page's press (D108), a
+ *   block for a table-of-contents row (D116) - each asking for its own
+ *   segment through `wanted` as well
  */
 async function openBook(id, wanted, target) {
   const turn = ++epoch;
@@ -1460,6 +1631,11 @@ async function openBook(id, wanted, target) {
   });
   showSegmentNav({ index, count: book.segmentCount });
   showBookNote(book);
+  bookToc = book.toc ?? [];
+  updateTocButtons();
+  // A row from before the TOC existed is owed its scan (D116) - behind the
+  // reading, never in its way.
+  if (book.toc === null) void backfillToc(book);
   // The whole book's marks, painted for the part on screen; a turned part
   // reloads them fresh, which is also what keeps two reader tabs honest.
   docMarks = marks;
@@ -1469,7 +1645,13 @@ async function openBook(id, wanted, target) {
   const rendered = shown;
   await refreshActions();
   if (shown !== rendered) return;
-  if (target === undefined || !scrollToTargetMark(target)) restorePosition(position, index);
+  const landed =
+    target === undefined
+      ? false
+      : "start" in target
+        ? scrollToTargetMark(target)
+        : scrollToBlock(target.block);
+  if (!landed) restorePosition(position, index);
   // Same reason as `openSaved`: the open winds the position row's clock. For
   // a book this also writes which part is on screen, so a part reached with
   // Next and left without a scroll is still the part the book reopens at.
@@ -1483,6 +1665,14 @@ async function openBook(id, wanted, target) {
  * it: two marks sharing a start cannot survive `placeMark`.
  *
  * @typedef {{ segmentIndex: number, start: { block: number, offset: number } }} MarkTarget
+ */
+
+/**
+ * How a table-of-contents row names its chapter across the part turn (D116):
+ * the block its heading stands in. The shape a mark's target takes when
+ * there is no mark - just a place to land.
+ *
+ * @typedef {{ segmentIndex: number, block: number }} BlockTarget
  */
 
 /**
@@ -1508,6 +1698,23 @@ function scrollToTargetMark(target) {
   if (rect === undefined) return false;
   // The quote's first line under the stuck bar, the position restore's own
   // landing - plus a breath of air, so the wash reads as found, not clipped.
+  scrollTo(0, Math.max(0, rect.top + window.scrollY - chromeFold() - 8));
+  return true;
+}
+
+/**
+ * Scrolls the just-rendered part to one of its blocks - the heading a
+ * table-of-contents row named (D116). The same landing as a found mark: the
+ * block's first line under the stuck bar, plus the same breath of air. False
+ * when the block is not there to land on - a torn row's entry - and the
+ * caller falls back to the reading position.
+ *
+ * @param {number} block
+ * @returns {boolean}
+ */
+function scrollToBlock(block) {
+  const rect = contentRoot()?.children[block]?.getBoundingClientRect();
+  if (rect === undefined) return false;
   scrollTo(0, Math.max(0, rect.top + window.scrollY - chromeFold() - 8));
   return true;
 }
@@ -1558,6 +1765,9 @@ function leaveDocView() {
   if (originalLink !== null) originalLink.hidden = true;
   showSegmentNav(null);
   showBookNote(null);
+  bookToc = [];
+  updateTocButtons();
+  closeTocDialog();
 }
 
 async function showLibrary() {
@@ -3067,6 +3277,22 @@ async function runBookImport(file) {
 
 for (const button of segmentPrevs) button?.addEventListener("click", () => turnSegment(-1));
 for (const button of segmentNexts) button?.addEventListener("click", () => turnSegment(1));
+
+for (const button of tocButtons) button?.addEventListener("click", () => openTocDialog());
+tocCloseButton?.addEventListener("click", () => closeTocDialog());
+// To a click the backdrop is the dialog element itself - everything inside
+// is covered by the header and the rows, which carry the padding.
+tocDialog?.addEventListener("click", (event) => {
+  if (event.target === tocDialog) closeTocDialog();
+});
+tocRows?.addEventListener("click", (event) => {
+  const row = event.target instanceof Element ? event.target.closest("button") : null;
+  if (!(row instanceof HTMLButtonElement) || row.dataset["index"] === undefined) return;
+  const entry = bookToc[Number(row.dataset["index"])];
+  if (entry === undefined) return;
+  closeTocDialog();
+  jumpToTocEntry(entry);
+});
 
 bookNoteSettings?.addEventListener("click", () => void webext().runtime.openOptionsPage());
 

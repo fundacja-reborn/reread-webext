@@ -14,9 +14,15 @@ const whole = {
   addedAt: 1000,
 };
 
+/** @type {import("../src/lib/book/toc.js").TocEntry[]} */
+const chapters = [
+  { title: "Part One", level: 1, segmentIndex: 0, blockIndex: 0 },
+  { title: "Chapter I", level: 2, segmentIndex: 0, blockIndex: 1 },
+];
+
 describe("bookRecord", () => {
   it("builds the row an import writes", () => {
-    assert.deepEqual(bookRecord(whole), { ...whole, readAt: null });
+    assert.deepEqual(bookRecord(whole), { ...whole, readAt: null, toc: [] });
   });
 
   it("keeps only words worth carrying as author and language", () => {
@@ -24,6 +30,17 @@ describe("bookRecord", () => {
     assert.ok(kept);
     assert.equal(kept.author, null);
     assert.equal(kept.lang, null);
+  });
+
+  it("carries the import's table of contents", () => {
+    assert.deepEqual(bookRecord({ ...whole, toc: chapters })?.toc, chapters);
+  });
+
+  it("writes a torn table of contents as scanned-and-empty, never as owed", () => {
+    const torn = /** @type {import("../src/lib/book/toc.js").TocEntry[]} */ (
+      /** @type {unknown} */ ([{ title: "", level: 2, segmentIndex: 0, blockIndex: 0 }])
+    );
+    assert.deepEqual(bookRecord({ ...whole, toc: torn })?.toc, []);
   });
 
   it("refuses what nobody could open: no id, no title, no text", () => {
@@ -47,6 +64,7 @@ describe("asBookMeta", () => {
       totalChars: 0,
       addedAt: 0,
       readAt: 7,
+      toc: null,
     });
   });
 
@@ -54,6 +72,25 @@ describe("asBookMeta", () => {
     assert.equal(asBookMeta(null), null);
     assert.equal(asBookMeta({ title: "x", segmentCount: 3 }), null);
     assert.equal(asBookMeta({ id: "b-1", segmentCount: 0 }), null);
+  });
+
+  it("keeps a stored table of contents, the scanned-and-empty one included", () => {
+    assert.deepEqual(asBookMeta({ ...whole, toc: chapters })?.toc, chapters);
+    assert.deepEqual(asBookMeta({ ...whole, toc: [] })?.toc, []);
+  });
+
+  it("reads a row from before the TOC, or with a torn one, as owed a scan", () => {
+    assert.equal(asBookMeta(whole)?.toc, null);
+    assert.equal(asBookMeta({ ...whole, toc: "x" })?.toc, null);
+    // One torn entry poisons the field - a partial list kept would read as
+    // scanned and never heal.
+    const torn = [...chapters, { title: "x", level: 7, segmentIndex: 0, blockIndex: 0 }];
+    assert.equal(asBookMeta({ ...whole, toc: torn })?.toc, null);
+    assert.equal(
+      asBookMeta({ ...whole, toc: [{ title: "x", level: 2, segmentIndex: -1, blockIndex: 0 }] })
+        ?.toc,
+      null,
+    );
   });
 });
 
@@ -97,7 +134,7 @@ describe("library entries", () => {
     // `asPosition` marks a row whose clock is broken with zero; the list must
     // not mistake that for a reading older than every honest date.
     assert.equal(articleEntry(meta, { ...position, updatedAt: 0 }).lastReadAt, null);
-    const book = { ...whole, readAt: null };
+    const book = { ...whole, readAt: null, toc: null };
     assert.equal(bookEntry(book, { ...position, docId: "b-1" }).lastReadAt, 777);
   });
 
@@ -111,7 +148,7 @@ describe("library entries", () => {
   });
 
   it("a book wears the list's fields: author for site, added for saved", () => {
-    const book = { ...whole, readAt: 9 };
+    const book = { ...whole, readAt: 9, toc: null };
     assert.deepEqual(bookEntry(book, null), {
       url: "b-1",
       hostname: "Bram Stoker",
@@ -126,14 +163,14 @@ describe("library entries", () => {
   });
 
   it("a book's percent read counts the parts before the remembered one", () => {
-    const book = { ...whole, readAt: null };
+    const book = { ...whole, readAt: null, toc: null };
     // Halfway through part 5 of 12: four whole parts and half of the fifth.
     const position = { docId: "b-1", segmentIndex: 4, blockIndex: 3, updatedAt: 1, percent: 50 };
     assert.equal(bookEntry(book, position).percentRead, Math.round((4.5 / 12) * 100));
   });
 
   it("progress reads the stored position, clamped to the book it has", () => {
-    const book = { ...whole, readAt: null };
+    const book = { ...whole, readAt: null, toc: null };
     /** @param {import("../src/lib/reader/position.js").ReadingPosition} position */
     const at = (position) => bookEntry(book, position).progress;
     assert.deepEqual(at({ docId: "b-1", segmentIndex: 4, blockIndex: 0, updatedAt: 1 }), {
@@ -149,7 +186,7 @@ describe("library entries", () => {
   });
 
   it("a book without an author leads with nothing, not with a blank", () => {
-    const entry = bookEntry({ ...whole, author: null, readAt: null }, null);
+    const entry = bookEntry({ ...whole, author: null, readAt: null, toc: null }, null);
     assert.equal(entry.hostname, "");
   });
 });

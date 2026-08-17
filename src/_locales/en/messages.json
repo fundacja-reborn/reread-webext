@@ -383,6 +383,14 @@
     "message": "Book parts",
     "description": "Accessible name of the two rows that turn a book's segments."
   },
+  "reader_book_toc": {
+    "message": "Contents",
+    "description": "The book's table of contents: names the pager button that opens it and titles the dialog itself."
+  },
+  "close": {
+    "message": "Close",
+    "description": "Generic label of a button that puts a dialog away."
+  },
   "reader_book_importing": {
     "message": "Adding the book - part $PART$",
     "placeholders": {
