@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { asDocState, docState } from "../src/lib/reader/history-state.js";
+import { asDocState, asMarksState, docState, marksState } from "../src/lib/reader/history-state.js";
 
 describe("history state", () => {
   it("reads back exactly what it wrote", () => {
@@ -44,5 +44,37 @@ describe("history state", () => {
   it("hands back only the two fields, whatever extra a state carried", () => {
     const state = { reread: "doc", kind: "book", url: "book:9", extra: "noise" };
     assert.deepEqual(asDocState(state), { kind: "book", url: "book:9" });
+  });
+});
+
+describe("highlights history state (D108)", () => {
+  it("reads back exactly what it wrote, scoped and global alike", () => {
+    assert.deepEqual(asMarksState(marksState(null)), { scope: null });
+    assert.deepEqual(asMarksState(marksState("https://example.com/a")), {
+      scope: "https://example.com/a",
+    });
+    assert.deepEqual(asMarksState(marksState("book:1f2e")), { scope: "book:1f2e" });
+  });
+
+  it("answers null for every entry that is not a highlights visit", () => {
+    assert.equal(asMarksState(null), null);
+    assert.equal(asMarksState(undefined), null);
+    assert.equal(asMarksState("marks"), null);
+    assert.equal(asMarksState({}), null);
+    assert.equal(asMarksState({ scope: null }), null);
+    assert.equal(asMarksState({ reread: "list", scope: null }), null);
+  });
+
+  it("refuses a marked entry whose scope does not hold", () => {
+    // A missing scope is not a global visit: an entry can outlive the build
+    // that wrote it, and only the shape this build writes is trusted back.
+    assert.equal(asMarksState({ reread: "marks" }), null);
+    assert.equal(asMarksState({ reread: "marks", scope: "" }), null);
+    assert.equal(asMarksState({ reread: "marks", scope: 7 }), null);
+  });
+
+  it("keeps the two kinds of entry from answering for each other", () => {
+    assert.equal(asDocState(marksState("https://example.com/a")), null);
+    assert.equal(asMarksState(docState("article", "https://example.com/a")), null);
   });
 });

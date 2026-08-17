@@ -270,6 +270,22 @@
   },
   "reader_export_marks": { "message": "Exportar los resaltados" },
   "reader_transfer_marks": { "message": "La exportación de resaltados escribe un archivo de texto .md con los pasajes resaltados, agrupados por documento - pensado para notas, no para importar. Los resaltados viajan entre dispositivos dentro de la copia .json de la lista de artículos." },
+  "reader_marks_title": { "message": "Resaltados" },
+  "reader_marks_filter_label": { "message": "Filtrar los resaltados" },
+  "reader_marks_filter_placeholder": { "message": "Filtrar por cita o título" },
+  "reader_marks_empty": {
+    "message": "Aún no hay nada resaltado - toma el resaltador en la vista de lectura y marca un pasaje; te esperará aquí."
+  },
+  "reader_marks_empty_doc": { "message": "Aún no hay nada resaltado en este documento." },
+  "reader_marks_no_match": {
+    "message": "Ningún resaltado coincide con «$QUERY$».",
+    "placeholders": { "query": { "content": "$1", "example": "wikipedia" } }
+  },
+  "reader_marks_back": { "message": "Volver a los resaltados" },
+  "reader_back_to_doc": {
+    "message": "Volver a «$TITLE$»",
+    "placeholders": { "title": { "content": "$1", "example": "Old Chinese" } }
+  },
   "reader_transfer_link": { "message": "Importar y exportar (artículos o EPUB)" },
   "reader_transfer_accepts": { "message": "La importación reconoce el archivo elegido: una copia de seguridad de la lista de artículos de re/read (.json) o un libro electrónico (.epub)." },
   "reader_book_label": { "message": "Libro" },

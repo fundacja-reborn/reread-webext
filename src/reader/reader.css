@@ -870,6 +870,85 @@ body.reader:has(#library:not([hidden])) {
   color: var(--page-fg);
 }
 
+/* --- the highlights page (D108): quote rows in the list's own dress --- */
+
+/* The row wears its mark's ink on the leading edge - the one place colour
+   can say which pen wrote the quote without washing text nobody selected.
+   The variables are the washes' own, so the stripe answers the theme
+   exactly as the mark it stands for. */
+.marks-row {
+  padding-inline-start: 0.65rem;
+  border-inline-start: 3px solid transparent;
+}
+
+.marks-row[data-color="yellow"] {
+  border-inline-start-color: var(--reader-marker-yellow);
+}
+.marks-row[data-color="green"] {
+  border-inline-start-color: var(--reader-marker-green);
+}
+.marks-row[data-color="blue"] {
+  border-inline-start-color: var(--reader-marker-blue);
+}
+.marks-row[data-color="pink"] {
+  border-inline-start-color: var(--reader-marker-pink);
+}
+
+/* A quote reads like the passage it quotes: block breaks stay breaks. A
+   passage longer than six lines is cut with an ellipsis - the row is an
+   index entry, and both the copy and the opened document carry the whole
+   of it. */
+.marks-open {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 6;
+  overflow: hidden;
+  white-space: pre-line;
+}
+
+/* The copy stands where the list's Delete stands: always visible, dressed
+   down, a 44px hit box - and a glyph rather than a word, the toolbar's own
+   pair, because the check it turns into is the whole feedback. */
+.marks-copy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: start;
+  margin-top: 0.35rem;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0.35rem;
+  border-color: transparent;
+  color: var(--page-muted);
+}
+
+.marks-copy:hover,
+.marks-copy:focus-visible {
+  border-color: var(--page-border);
+  background: color-mix(in srgb, var(--page-fg) 6%, transparent);
+  color: var(--page-fg);
+}
+
+.marks-copy .reader-icon {
+  width: 1.3em;
+  height: 1.3em;
+}
+
+.marks-copy .icon-copied,
+.marks-copy[data-copied] .icon-copy {
+  display: none;
+}
+
+.marks-copy[data-copied] .icon-copied {
+  display: inline-block;
+}
+
+/* The scoped visit's one line saying whose quotes these are, snug under
+   the heading the way the article's byline sits under its title. */
+.marks-doc {
+  margin: -0.25rem 0 0;
+}
+
 /* --- the shared pager, held to the same touch floor --- */
 
 .pager button {

@@ -270,6 +270,22 @@
   },
   "reader_export_marks": { "message": "Exporter les surlignages" },
   "reader_transfer_marks": { "message": "L'export des surlignages écrit un fichier texte .md des passages surlignés, groupés par document - pensé pour les notes, pas pour l'import. Les surlignages voyagent entre appareils dans la sauvegarde .json de la liste d'articles." },
+  "reader_marks_title": { "message": "Surlignages" },
+  "reader_marks_filter_label": { "message": "Filtrer les surlignages" },
+  "reader_marks_filter_placeholder": { "message": "Filtrer par citation ou par titre" },
+  "reader_marks_empty": {
+    "message": "Rien n'est encore surligné - prenez le surligneur dans la vue de lecture et marquez un passage ; il vous attendra ici."
+  },
+  "reader_marks_empty_doc": { "message": "Rien n'est encore surligné dans ce document." },
+  "reader_marks_no_match": {
+    "message": "Aucun surlignage ne correspond à « $QUERY$ ».",
+    "placeholders": { "query": { "content": "$1", "example": "wikipedia" } }
+  },
+  "reader_marks_back": { "message": "Retour aux surlignages" },
+  "reader_back_to_doc": {
+    "message": "Retour à « $TITLE$ »",
+    "placeholders": { "title": { "content": "$1", "example": "Old Chinese" } }
+  },
   "reader_transfer_link": { "message": "Import et export (articles ou EPUB)" },
   "reader_transfer_accepts": { "message": "L'import reconnaît le fichier donné : une sauvegarde de la liste d'articles re/read (.json) ou un livre numérique (.epub)." },
   "reader_book_label": { "message": "Livre" },
