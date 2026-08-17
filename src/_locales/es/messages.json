@@ -191,6 +191,8 @@
   "reader_links_active": { "message": "Activos" },
   "reader_marker": { "message": "Resaltador" },
   "marker_delete": { "message": "Quitar el resaltado" },
+  "marker_copy": { "message": "Copiar" },
+  "marker_copied": { "message": "Copiado" },
   "color_yellow": { "message": "Amarillo" },
   "color_green": { "message": "Verde" },
   "color_blue": { "message": "Azul" },

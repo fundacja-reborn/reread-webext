@@ -63,6 +63,59 @@ export function besideSpan(span, index) {
 }
 
 /**
+ * What a character has to be for the highlighter to drag it in at a mark's
+ * edge (D107): not a word character - the tokenizer's own class, or the two
+ * modules would disagree about where a word ends - and not whitespace. What
+ * is left is punctuation standing glued to the edge word: the quote mark a
+ * quotation opens with, the full stop it closes on, brackets, commas. A
+ * phrase for the vocabulary must not take these (its key drops them anyway);
+ * a mark is a quote for notes, and a quote without its own quotation marks
+ * reads clipped.
+ */
+const WORD_CHARACTER = /[\p{L}\p{N}\p{M}]/u;
+const WHITESPACE = /\s/u;
+
+/**
+ * @param {string} text
+ * @param {number} at
+ * @returns {boolean}
+ */
+function glued(text, at) {
+  const character = text[at];
+  if (character === undefined) return false;
+  return !WHITESPACE.test(character) && !WORD_CHARACTER.test(character);
+}
+
+/**
+ * A mark's start, walked left over the punctuation glued to its first word -
+ * as far as the whitespace or the word before it, whichever comes first.
+ * `"It` starts at the quote mark; `word. Next` starting at `Next` takes
+ * nothing, because a space stands between.
+ *
+ * @param {string} text
+ * @param {number} offset a word's start in `text`
+ * @returns {number}
+ */
+export function gluedStart(text, offset) {
+  while (offset > 0 && glued(text, offset - 1)) offset -= 1;
+  return offset;
+}
+
+/**
+ * A mark's end, walked right over the punctuation glued to its last word:
+ * `Maryland.` ends after the full stop, `science,"` after the comma and the
+ * closing quote.
+ *
+ * @param {string} text
+ * @param {number} offset a word's end in `text`, exclusive
+ * @returns {number}
+ */
+export function gluedEnd(text, offset) {
+  while (glued(text, offset)) offset += 1;
+  return offset;
+}
+
+/**
  * The word nearest an offset - the drag's forgiving question.
  *
  * Distance is measured to the token's edges, zero inside it, and the earlier

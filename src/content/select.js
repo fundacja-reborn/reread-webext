@@ -67,7 +67,13 @@
 
 import { locate } from "../lib/matcher/spans.js";
 import { tokenize } from "../lib/matcher/tokenize.js";
-import { besideSpan, nearestWordIndex, wordIndexAt } from "../lib/matcher/words.js";
+import {
+  besideSpan,
+  gluedEnd,
+  gluedStart,
+  nearestWordIndex,
+  wordIndexAt,
+} from "../lib/matcher/words.js";
 import { madeSelection } from "../lib/selection.js";
 import { supported } from "./highlighter.js";
 import { blockAround, blockPieces } from "./scan.js";
@@ -217,7 +223,7 @@ function withinMarkRoot(block) {
  * selection, one block - the matcher stops at block edges, so a phrase across
  * two could never be found again (D45).
  *
- * @typedef {{ block: Element, parts: import("./scan.js").BlockPart[], spans: import("../lib/matcher/spans.js").Span[], tokens: import("../lib/matcher/tokenize.js").Token[] }} Geometry
+ * @typedef {{ block: Element, parts: import("./scan.js").BlockPart[], text: string, spans: import("../lib/matcher/spans.js").Span[], tokens: import("../lib/matcher/tokenize.js").Token[] }} Geometry
  */
 
 /** @type {Geometry | null} */
@@ -461,7 +467,9 @@ function clearInk() {
  * @returns {boolean} whether the stroke now stands
  */
 function inkStart(word) {
-  const built = rangeOfSpan(word.geo, word.index, word.index);
+  // Through `inkRange` even for one word, so the hold's first paint already
+  // wears the glued punctuation the finished mark will (D107).
+  const built = inkRange(word, word);
   if (built === null) return false;
   ink = { anchor: word, range: built };
   paintInk();
@@ -504,6 +512,14 @@ function inkWordAt(caret) {
  * whichever way the hand went - a mark drawn upward reads the same as one
  * drawn downward.
  *
+ * The words snap the stroke, and the punctuation glued to its edge words
+ * rides in after (D107, Michał's report): a mark is a quote for notes, and
+ * a quotation without its opening quote mark or its own full stop reads
+ * clipped. `gluedStart`/`gluedEnd` stop at the first whitespace or word
+ * character, so nothing beyond the edge words' own punctuation ever enters.
+ * The vocabulary gesture stays word-exact - its key drops punctuation
+ * anyway, and this function is the marker's alone.
+ *
  * @param {Word} a
  * @param {Word} b
  * @returns {Range | null}
@@ -514,11 +530,21 @@ function inkRange(a, b) {
   if (first === null || second === null) return null;
 
   const forward = first.compareBoundaryPoints(Range.START_TO_START, second) <= 0;
-  const from = forward ? first : second;
-  const to = forward ? second : first;
+  const head = forward ? a : b;
+  const tail = forward ? b : a;
+  const headToken = head.geo.tokens[head.index];
+  const tailToken = tail.geo.tokens[tail.index];
+  if (headToken === undefined || tailToken === undefined) return null;
+
+  const from = locate(head.geo.spans, gluedStart(head.geo.text, headToken.start));
+  const to = locate(tail.geo.spans, gluedEnd(tail.geo.text, tailToken.end) - 1);
+  const fromNode = from === null ? null : (head.geo.parts[from.piece]?.node ?? null);
+  const toNode = to === null ? null : (tail.geo.parts[to.piece]?.node ?? null);
+  if (from === null || to === null || fromNode === null || toNode === null) return null;
+
   const built = document.createRange();
-  built.setStart(from.startContainer, from.startOffset);
-  built.setEnd(to.endContainer, to.endOffset);
+  built.setStart(fromNode, from.offset);
+  built.setEnd(toNode, to.offset + 1);
   return built;
 }
 
@@ -1029,7 +1055,7 @@ export function releaseMouse(event) {
     if (event.detail >= 2) {
       const word = wordAt(event.clientX, event.clientY, MOUSE_SLOP);
       if (word !== null && withinMarkRoot(word.geo.block)) {
-        const one = rangeOfSpan(word.geo, word.index, word.index);
+        const one = inkRange(word, word);
         if (one !== null) {
           hooks.onMarked?.(one);
           return true;
