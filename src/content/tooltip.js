@@ -1462,14 +1462,20 @@ export function createTooltip({ onAction, onHide }) {
       stopEditing(false);
       return;
     }
-    if (action === "edit") {
-      startEditing();
-      return;
-    }
     // So is the clipboard (D110): copying writes nothing to the vocabulary,
     // and everything a copy press writes out is already in here.
     if (action === "copy") {
       toggleCopyRow();
+      return;
+    }
+    // Every other press is a turn away from copying, and the clipboard row
+    // steps aside for it (Michał's report: it stayed up over the edit box
+    // and over More's layer). The speaker is the one exception: hearing the
+    // phrase changes nothing the row is about, and closing it would make
+    // listen-then-copy cost an extra press.
+    if (action !== "speak") hideCopyRow();
+    if (action === "edit") {
+      startEditing();
       return;
     }
     if (action === "more") {
