@@ -927,17 +927,24 @@ body.reader:has(#library:not([hidden])) {
 }
 
 /* A quote reads like the passage it quotes: plain prose in the reading
-   face (the body's own font, inherited), block breaks kept as breaks. A
-   passage longer than six lines is cut with an ellipsis - the row is an
-   index entry, and the copy, the speaker and the opened document all carry
-   the whole of it. */
+   face (the body's own font, inherited), and the WHOLE of it - a six-line
+   clamp was tried first and cut every multi-paragraph highlight down to
+   its opening (Michał's report on 0.4.8): a kept passage is kept to be
+   reread, not to be teased. Its block breaks come as paragraphs of their
+   own (the renderer splits on the newlines `quoteOf` wrote at every
+   boundary), with a shade of the article's gap between them - and the
+   same block boundaries the scan respects everywhere else, so a phrase
+   never matches across them here either. */
 .marks-quote {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 6;
-  overflow: hidden;
-  white-space: pre-line;
   overflow-wrap: anywhere;
+}
+
+.marks-quote p {
+  margin: 0 0 0.45em;
+}
+
+.marks-quote p:last-child {
+  margin-bottom: 0;
 }
 
 /* The quote's acts, stacked where the list's Delete stands - the rows are

@@ -1917,7 +1917,15 @@ function markRowElement(row, index, withTitle) {
 
   const quote = document.createElement("div");
   quote.className = "marks-quote";
-  quote.textContent = row.mark.text;
+  // The quote's newlines are the block breaks `quoteOf` wrote at every
+  // boundary; each part becomes a paragraph of its own, so a spanning
+  // quote reads as paragraphs - and the scan keeps its everywhere-else
+  // rule here too: a phrase never matches across a block break.
+  for (const piece of row.mark.text.split("\n")) {
+    const paragraph = document.createElement("p");
+    paragraph.textContent = piece;
+    quote.append(paragraph);
+  }
 
   const detail = document.createElement("span");
   detail.className = "library-item-detail";
