@@ -70,10 +70,18 @@ import { tokenize } from "../lib/matcher/tokenize.js";
 import { besideSpan, nearestWordIndex, wordIndexAt } from "../lib/matcher/words.js";
 import { madeSelection } from "../lib/selection.js";
 import { supported } from "./highlighter.js";
-import { blockPieces } from "./scan.js";
+import { blockAround, blockPieces } from "./scan.js";
 
 /** Must be the name in `reader.css`. */
 const NAME = "reread-selection";
+
+/**
+ * The highlighter's wet stroke, while the gesture that draws it is still
+ * down - also a name in `reader.css`, wearing the marker's own colour so the
+ * preview is the result. Its dried form is painted elsewhere (the reader's
+ * `marks-view.js`); this module only ever holds the stroke being drawn.
+ */
+const DRAFT = "reread-marker-draft";
 
 /**
  * How long a finger has to hold still before the hold becomes a selection.
@@ -145,6 +153,23 @@ const SCROLL_TAIL_MS = 100;
  *   as plain text right now (D95) - then a press on one is the gesture's, not
  *   the link's. Asked at press time, so the setting can flip under a page that
  *   stays open. Absent means links are live and keep every press.
+ * @property {() => boolean} [marking] whether the highlighter is on (D106).
+ *   Asked when a gesture claims, never mid-stretch: the toolbar cannot be
+ *   pressed while a finger is down on the article, so a gesture keeps the ink
+ *   it started with. While it answers true, the hold-and-drag draws a mark
+ *   instead of a selection - the same hand, a different pen - and taps belong
+ *   to the marker too. Absent means never, which is every page but the reader.
+ * @property {() => Element | null} [markRoot] where marks may anchor - the
+ *   article's rebuilt content, narrower than `root` on purpose: the reader's
+ *   own title has no block index for a mark to be written against, so the pen
+ *   simply does not take there.
+ * @property {(range: Range) => void} [onMarked] a marker gesture ended on this
+ *   range. The range is handed over, not kept: the stroke's paint is cleared
+ *   first, and whatever the mark becomes is the caller's to draw.
+ * @property {(x: number, y: number) => void} [onMarkTap] a tap while the
+ *   highlighter is on. The caller answers it - a tapped mark grows a delete
+ *   bubble, empty space stands one down - and this module only promises the
+ *   tap will not also mean what taps mean with the pen away.
  */
 
 /** @type {SelectHooks | null} */
@@ -167,6 +192,25 @@ function linkOwns(target) {
   return hooks?.plainLinks?.() !== true;
 }
 
+/** @returns {boolean} whether the highlighter owns the gestures right now */
+function marking() {
+  return hooks?.marking?.() === true;
+}
+
+/**
+ * Whether a block is ground a mark can anchor into. The pen takes nothing
+ * outside it - a hold there stays a tap in waiting, a stretch past its edge
+ * holds still - because a mark is written against the content's block order,
+ * and text outside the content has no place in that order to be written at.
+ *
+ * @param {Element} block
+ * @returns {boolean}
+ */
+function withinMarkRoot(block) {
+  const root = hooks?.markRoot?.() ?? null;
+  return root !== null && root.contains(block);
+}
+
 /**
  * The block the selection lives in, with the machinery to move around it:
  * its pieces, their places in the joined text, and the text's tokens. One
@@ -186,6 +230,29 @@ let span = null;
 let range = null;
 /** @type {Highlight | null} */
 let highlight = null;
+
+/**
+ * A word in the geometry of its own block - the currency every gesture deals
+ * in, and both ends of a marker stroke.
+ *
+ * @typedef {{ geo: Geometry, index: number }} Word
+ */
+
+/**
+ * The marker stroke being drawn, alive only while its gesture holds the
+ * claim. Unlike the selection it may run across blocks - a mark is not a
+ * phrase and owes the matcher nothing (D45 stays a rule about phrases) - so
+ * the anchor keeps its whole word, and the stretch finds the focus word in
+ * whatever block the pointer is over.
+ *
+ * @type {{ anchor: Word, range: Range } | null}
+ */
+let ink = null;
+/** The last focus block's geometry, so a stretch inside one block walks it once. */
+/** @type {Geometry | null} */
+let inkFocus = null;
+/** @type {Highlight | null} */
+let inkHighlight = null;
 
 /**
  * The one touch being followed, from start to end. `hold` observes - a timer
@@ -359,6 +426,128 @@ export function clearSelection() {
   range = null;
   highlight = null;
   if (supported()) CSS.highlights.delete(NAME);
+  // The wet stroke goes with it: every caller here means "whatever a gesture
+  // was building is over" - a rendered-over article most of all.
+  clearInk();
+}
+
+/**
+ * Painted the way the selection is painted, under the draft name the
+ * stylesheet dresses in the marker's own colour: what the finger sees while
+ * drawing is exactly what will stay. The same priority as the selection -
+ * the two never stand together, and both belong over every dried mark.
+ */
+function paintInk() {
+  if (!supported() || ink === null) return;
+  if (inkHighlight === null) {
+    inkHighlight = new Highlight();
+    inkHighlight.priority = 1;
+    CSS.highlights.set(DRAFT, inkHighlight);
+  }
+  inkHighlight.clear();
+  inkHighlight.add(ink.range);
+}
+
+/** The stroke and its paint, gone - however far it got. */
+function clearInk() {
+  ink = null;
+  inkFocus = null;
+  inkHighlight = null;
+  if (supported()) CSS.highlights.delete(DRAFT);
+}
+
+/**
+ * @param {Word} word
+ * @returns {boolean} whether the stroke now stands
+ */
+function inkStart(word) {
+  const built = rangeOfSpan(word.geo, word.index, word.index);
+  if (built === null) return false;
+  ink = { anchor: word, range: built };
+  paintInk();
+  return true;
+}
+
+/**
+ * The focus word for a stroke: the word nearest the pointer, in the geometry
+ * of whatever block the pointer is over - this is where the marker leaves
+ * the selection's one-block world. Null off the markable ground, which the
+ * stretch reads as "hold still", never as an end.
+ *
+ * @param {{ node: Text, offset: number }} caret
+ * @returns {Word | null}
+ */
+function inkWordAt(caret) {
+  const block = blockAround(caret.node);
+  if (block === null || !withinMarkRoot(block)) return null;
+
+  /** @type {Geometry | null} */
+  let geo = null;
+  if (ink !== null && ink.anchor.geo.block === block) geo = ink.anchor.geo;
+  else if (inkFocus !== null && inkFocus.block === block) geo = inkFocus;
+  else {
+    const pieces = blockPieces(caret.node);
+    if (pieces === null) return null;
+    geo = { ...pieces, tokens: tokenize(pieces.text) };
+    inkFocus = geo;
+  }
+
+  const offset = offsetIn(geo, caret.node, caret.offset);
+  if (offset === null) return null;
+  const index = nearestWordIndex(geo.tokens, offset);
+  if (index === -1) return null;
+  return { geo, index };
+}
+
+/**
+ * The stroke from its anchor word to a focus word, in document order
+ * whichever way the hand went - a mark drawn upward reads the same as one
+ * drawn downward.
+ *
+ * @param {Word} a
+ * @param {Word} b
+ * @returns {Range | null}
+ */
+function inkRange(a, b) {
+  const first = rangeOfSpan(a.geo, a.index, a.index);
+  const second = rangeOfSpan(b.geo, b.index, b.index);
+  if (first === null || second === null) return null;
+
+  const forward = first.compareBoundaryPoints(Range.START_TO_START, second) <= 0;
+  const from = forward ? first : second;
+  const to = forward ? second : first;
+  const built = document.createRange();
+  built.setStart(from.startContainer, from.startOffset);
+  built.setEnd(to.endContainer, to.endOffset);
+  return built;
+}
+
+/**
+ * @param {number} x
+ * @param {number} y
+ */
+function extendInk(x, y) {
+  const active = ink;
+  if (active === null) return;
+  const caret = caretAt(x, y);
+  if (caret === null) return;
+  const focus = inkWordAt(caret);
+  if (focus === null) return;
+  const built = inkRange(active.anchor, focus);
+  if (built === null) return;
+  active.range = built;
+  paintInk();
+}
+
+/**
+ * The stroke's end - the touch lifting, the button releasing, the window
+ * losing the gesture. The wet paint is taken back before the caller hears,
+ * so the dried mark it draws lands in the same frame and nothing blinks.
+ */
+function finishInk() {
+  const done = ink?.range ?? null;
+  clearInk();
+  if (done !== null) hooks?.onMarked?.(done);
 }
 
 /**
@@ -413,12 +602,15 @@ function hold() {
 
   const word = wordAt(active.x, active.y, GRAB_SLOP);
   if (word === null) return;
+  if (marking() && !withinMarkRoot(word.geo.block)) return;
 
   // Whatever bubble is open is about to be about something else (D75's
   // reason) - it stands aside before the new selection paints over its
   // phrase, and nothing comes back until the finger lifts.
   hooks.onSelectStart();
-  if (!select(word.geo, word.index, word.index, word.index)) return;
+  if (marking()) {
+    if (!inkStart(word)) return;
+  } else if (!select(word.geo, word.index, word.index, word.index)) return;
   active.mode = "select";
   // The tick Android's own long-press gives: the sign the hold took, on the
   // hardware that can make it - an e-ink reader mostly cannot, and there the
@@ -508,6 +700,10 @@ function onTouchMove(event) {
  * @param {number} y
  */
 function extendTo(x, y) {
+  if (ink !== null) {
+    extendInk(x, y);
+    return;
+  }
   const geo = geometry;
   const at = span;
   if (geo === null || at === null) return;
@@ -541,6 +737,10 @@ function onTouchEnd(event) {
     // translation and the keeping land exactly here. Claimed, so the lift
     // does not also become the mouse events that would read it as a click.
     if (event.cancelable) event.preventDefault();
+    if (ink !== null) {
+      finishInk();
+      return;
+    }
     if (range === null) return;
     hooks.onSelected(range, "press");
     return;
@@ -563,9 +763,9 @@ function onTouchCancel(event) {
   if (active === null) return;
   if (touchById(event.changedTouches, active.id) === null) return;
   cancelGesture();
-  if (active.mode === "select" && range !== null) {
-    hooks?.onSelected(range, "press");
-  }
+  if (active.mode !== "select") return;
+  if (ink !== null) finishInk();
+  else if (range !== null) hooks?.onSelected(range, "press");
 }
 
 /**
@@ -627,11 +827,26 @@ function answerTap(target, x, y, slop) {
  * answered tap does not also become the compatibility mouse events that would
  * read it as a dismissal.
  *
+ * With the highlighter on, every tap on the article is the marker's instead
+ * (D106): the caller hears where it landed and answers - a delete bubble over
+ * a mark, nothing over bare text - and the claim keeps the tap from walking
+ * the old paths underneath, where it would open a recall bubble in a mode
+ * whose gestures stopped meaning translation. Live links keep their taps for
+ * the reason holds step around them: a broken article helps nobody.
+ *
  * @param {TouchEvent} event
  * @param {number} x
  * @param {number} y
  */
 function tap(event, x, y) {
+  if (marking()) {
+    const target = event.target;
+    if (linkOwns(target)) return;
+    if (!(target instanceof Node) || hooks === null || !hooks.root.contains(target)) return;
+    hooks.onMarkTap?.(x, y);
+    event.preventDefault();
+    return;
+  }
   if (answerTap(event.target, x, y, GRAB_SLOP)) event.preventDefault();
 }
 
@@ -661,9 +876,9 @@ function cancelMouse() {
 function endMouse() {
   const active = mouse;
   cancelMouse();
-  if (active !== null && active.mode === "select" && range !== null) {
-    hooks?.onSelected(range, "press");
-  }
+  if (active === null || active.mode !== "select") return;
+  if (ink !== null) finishInk();
+  else if (range !== null) hooks?.onSelected(range, "press");
 }
 
 /**
@@ -715,9 +930,12 @@ function mouseHold() {
 
   const word = wordAt(active.x, active.y, MOUSE_SLOP);
   if (word === null) return;
+  if (marking() && !withinMarkRoot(word.geo.block)) return;
 
   hooks.onSelectStart();
-  if (!select(word.geo, word.index, word.index, word.index)) return;
+  if (marking()) {
+    if (!inkStart(word)) return;
+  } else if (!select(word.geo, word.index, word.index, word.index)) return;
   active.mode = "select";
 }
 
@@ -754,12 +972,13 @@ function onMouseMove(event) {
       return;
     }
     const word = wordAt(from.x, from.y, MOUSE_SLOP);
-    if (word === null) {
+    if (word === null || (marking() && !withinMarkRoot(word.geo.block))) {
       cancelMouse();
       return;
     }
     hooks.onSelectStart();
-    if (!select(word.geo, word.index, word.index, word.index)) {
+    const took = marking() ? inkStart(word) : select(word.geo, word.index, word.index, word.index);
+    if (!took) {
       cancelMouse();
       return;
     }
@@ -797,11 +1016,30 @@ export function releaseMouse(event) {
   if (active === null) return false;
 
   if (active.mode === "select") {
-    if (range !== null) hooks.onSelected(range, "press");
+    if (ink !== null) finishInk();
+    else if (range !== null) hooks.onSelected(range, "press");
     return true;
   }
 
-  // A click, then - the press never travelled and the hold never took.
+  // A click, then - the press never travelled and the hold never took. With
+  // the highlighter on it is the marker's tap (see `tap`): a double click
+  // still takes a word - as a mark now - and everything else lands on the
+  // caller, claimed so the old paths stay quiet underneath.
+  if (marking()) {
+    if (event.detail >= 2) {
+      const word = wordAt(event.clientX, event.clientY, MOUSE_SLOP);
+      if (word !== null && withinMarkRoot(word.geo.block)) {
+        const one = rangeOfSpan(word.geo, word.index, word.index);
+        if (one !== null) {
+          hooks.onMarked?.(one);
+          return true;
+        }
+      }
+    }
+    hooks.onMarkTap?.(event.clientX, event.clientY);
+    return true;
+  }
+
   if (answerTap(event.target, event.clientX, event.clientY, MOUSE_SLOP)) return true;
 
   if (event.detail >= 2) {

@@ -16,12 +16,21 @@
 :root {
   --reader-speaking: color-mix(in srgb, var(--page-fg) 15%, transparent);
   --reader-speaking-word: color-mix(in srgb, var(--page-accent) 38%, transparent);
+  /* The highlighter's yellow (D106), a real colour rather than a wash of the
+     ink: a mark means "this, in this colour", and per theme because the same
+     yellow that reads on white drowns on near-black. What the wet stroke
+     wears while being drawn is an alias of the chosen colour, so the preview
+     is the result; today the choice is yellow, and the alias is where a
+     palette will plug in. */
+  --reader-marker-yellow: rgba(250, 205, 0, 0.4);
+  --reader-marker-current: var(--reader-marker-yellow);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --reader-speaking: color-mix(in srgb, var(--page-fg) 25%, transparent);
     --reader-speaking-word: color-mix(in srgb, var(--page-accent) 45%, transparent);
+    --reader-marker-yellow: rgba(255, 200, 50, 0.3);
   }
 }
 
@@ -32,16 +41,19 @@
 :root[data-reader-theme="light"] {
   --reader-speaking: color-mix(in srgb, var(--page-fg) 15%, transparent);
   --reader-speaking-word: color-mix(in srgb, var(--page-accent) 38%, transparent);
+  --reader-marker-yellow: rgba(250, 205, 0, 0.4);
 }
 
 :root[data-reader-theme="dark"] {
   --reader-speaking: color-mix(in srgb, var(--page-fg) 25%, transparent);
   --reader-speaking-word: color-mix(in srgb, var(--page-accent) 45%, transparent);
+  --reader-marker-yellow: rgba(255, 200, 50, 0.3);
 }
 
 :root[data-reader-theme="sepia"] {
   --reader-speaking: color-mix(in srgb, var(--page-fg) 15%, transparent);
   --reader-speaking-word: color-mix(in srgb, var(--page-accent) 38%, transparent);
+  --reader-marker-yellow: rgba(214, 165, 0, 0.42);
 }
 
 /* The article's font lives on the body so that `ch` means what it should: a
@@ -240,10 +252,11 @@ html {
   flex: none;
 }
 
-/* The bar's three buttons share one frame height: two hold drawn glyphs and
-   one holds serif text, and left to their contents their borders came out
-   three sizes (reported from a phone). The floor is set on all of them and
-   the contents centre inside it. */
+/* The bar's buttons share one frame height: most hold drawn glyphs and one
+   holds serif text, and left to their contents their borders came out three
+   sizes (reported from a phone). The floor is set on all of them and the
+   contents centre inside it. */
+#marker,
 #listen,
 #display,
 #menu {
@@ -255,10 +268,12 @@ html {
   padding: 0.15rem 0.55rem;
 }
 
-/* The button says "the voice is busy" while it is: pressing it again pauses,
-   and a button that looked identical either way would hide that. The tabs'
-   treatment - accent border and a wash - is the page's word for "this is on". */
-#listen[aria-pressed="true"] {
+/* The button says "the voice is busy" while it is - and the pen says it is
+   in the hand: pressing either again stands it down, and a button that
+   looked identical either way would hide that. The tabs' treatment - accent
+   border and a wash - is the page's word for "this is on". */
+#listen[aria-pressed="true"],
+#marker[aria-pressed="true"] {
   border-color: var(--page-accent);
   background: color-mix(in srgb, var(--page-accent) 12%, transparent);
 }
@@ -381,6 +396,20 @@ html {
 
 ::highlight(reread-speaking-word) {
   background-color: var(--reader-speaking-word);
+}
+
+/* The highlighter's marks (D106): dried strokes named per colour in
+   marks-view.js, the wet one named in select.js. All of them sit at the
+   bottom of the paint order - the selection, the recall wash and the
+   speaking washes are newer news, and the underlines cross freely, being a
+   decoration and not a background. The wet stroke wears the current colour
+   through the alias, so drawing shows exactly what will stay. */
+::highlight(reread-marker-yellow) {
+  background-color: var(--reader-marker-yellow);
+}
+
+::highlight(reread-marker-draft) {
+  background-color: var(--reader-marker-current);
 }
 
 #content h1,
@@ -942,6 +971,33 @@ button[data-armed],
 /* The finishing order: the mark first, the way out hanging under it. */
 .reader-actions-end .reader-return {
   margin: 0.5rem 0 0;
+}
+
+/* --- the highlighter's delete bubble (D106) --- */
+
+/* Absolute in page coordinates, set by script under the tapped line: it rides
+   the scroll with the mark it is about, the way the reader's own bubble rides
+   (D81). The page's paper and an accent frame, no shadow and no motion -
+   e-ink shows a shadow as a smudge and an animation as a flash. */
+.mark-popover {
+  position: absolute;
+  z-index: 2;
+  padding: 0.25rem;
+  border: 1px solid var(--page-accent);
+  border-radius: 0.5rem;
+  background: var(--page-bg);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 0.85rem;
+}
+
+/* The one word inside is the whole bubble, so the button carries the touch
+   target: quiet at rest inside the accent frame, which already says "this
+   is an act". */
+.mark-popover button {
+  min-height: 2.1rem;
+  padding: 0.15rem 0.7rem;
+  border: none;
+  background: none;
 }
 
 /* --- the bar that steers the voice, for as long as there is one --- */

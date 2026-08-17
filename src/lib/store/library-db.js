@@ -10,9 +10,9 @@
  * articles - renaming a database is a migration nobody needs.
  *
  * Versions, so far: 1 - `meta` + `content` (M3b); 2 - `positions` (D98);
- * 3 - `books` + `bookSegments` (EPUB import). Every store is created behind
- * a `contains()` guard, so the one upgrade path serves a fresh install and
- * every older version alike.
+ * 3 - `books` + `bookSegments` (EPUB import); 4 - `marks` (the highlighter).
+ * Every store is created behind a `contains()` guard, so the one upgrade
+ * path serves a fresh install and every older version alike.
  *
  * Only the reader page opens this. The background never needs any of it, no
  * message carries content, and an extension page writing its own origin's
@@ -20,7 +20,7 @@
  */
 
 const DB_NAME = "reread-articles";
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 
 /** The list's half of an article: one light row per saved page. */
 export const META = "meta";
@@ -32,8 +32,10 @@ export const POSITIONS = "positions";
 export const BOOKS = "books";
 /** The text of the books, one row per segment, keyed `[bookId, index]`. */
 export const BOOK_SEGMENTS = "bookSegments";
+/** The highlighter's marks: one row per marked document, keyed `docId`. */
+export const MARKS = "marks";
 
-const ALL_STORES = [META, CONTENT, POSITIONS, BOOKS, BOOK_SEGMENTS];
+const ALL_STORES = [META, CONTENT, POSITIONS, BOOKS, BOOK_SEGMENTS, MARKS];
 
 /**
  * @template T
@@ -64,6 +66,7 @@ function open() {
       if (!db.objectStoreNames.contains(BOOK_SEGMENTS)) {
         db.createObjectStore(BOOK_SEGMENTS, { keyPath: ["bookId", "index"] });
       }
+      if (!db.objectStoreNames.contains(MARKS)) db.createObjectStore(MARKS, { keyPath: "docId" });
     };
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error ?? new Error("Cannot open the articles database"));
@@ -74,7 +77,7 @@ function open() {
 }
 
 /**
- * The five stores of one open transaction, by name.
+ * The six stores of one open transaction, by name.
  *
  * @typedef {{
  *   meta: IDBObjectStore,
@@ -82,6 +85,7 @@ function open() {
  *   positions: IDBObjectStore,
  *   books: IDBObjectStore,
  *   bookSegments: IDBObjectStore,
+ *   marks: IDBObjectStore,
  * }} LibraryStores
  */
 
@@ -108,6 +112,7 @@ export async function withLibrary(mode, work) {
       positions: transaction.objectStore(POSITIONS),
       books: transaction.objectStore(BOOKS),
       bookSegments: transaction.objectStore(BOOK_SEGMENTS),
+      marks: transaction.objectStore(MARKS),
     };
     const result = await work(stores);
     await new Promise((resolve, reject) => {

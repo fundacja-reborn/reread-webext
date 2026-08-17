@@ -78,6 +78,41 @@
         </button>
         <span class="reader-tools">
           <!--
+            The highlighter (D106): a pressed pen changes what the selection
+            gesture means - it draws a lasting mark instead of asking for a
+            translation - and pressing it again gives the gestures back.
+            A mode in the hand, never a setting: every article opens with the
+            pen away. Drawn for the reason the speaker is drawn; only in the
+            article view, like the speaker - the list has nothing to mark.
+          -->
+          <button
+            id="marker"
+            type="button"
+            aria-pressed="false"
+            title="Highlighter"
+            data-i18n-title="reader_marker"
+            aria-label="Highlighter"
+            data-i18n-aria-label="reader_marker"
+            hidden
+          >
+            <svg class="reader-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+              <path
+                d="M10.3 2.8 13.2 5.7 7.2 11.7H4.3V8.8z"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.3"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M3 14.2h10"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.3"
+                stroke-linecap="round"
+              />
+            </svg>
+          </button>
+          <!--
             Reading aloud starts here and is steered from the bar at the bottom of
             the screen, which only exists while the voice is speaking (D87). The
             button is drawn rather than written for the reason the bubble's
@@ -471,6 +506,19 @@
         </p>
       </div>
     </main>
+
+    <!--
+      The one act on a highlighter mark (D106): a tap on it, pen in hand,
+      raises this bubble beside the tapped line, and the button takes the
+      mark back. Growing a mark needs no bubble - drawing over it is the
+      gesture - so one word is the whole vocabulary here. Absolute in page
+      coordinates, so it rides the scroll with the line it stands under, the
+      way the reader's own bubble does (D81); a press anywhere else stands
+      it down, the armed Delete's rule.
+    -->
+    <div id="mark-popover" class="mark-popover" hidden>
+      <button type="button" id="mark-delete" data-i18n="marker_delete">Remove highlight</button>
+    </div>
 
     <!--
       The bar that steers the voice (D87). It exists only while the article is

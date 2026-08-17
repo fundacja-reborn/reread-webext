@@ -189,6 +189,8 @@
   "reader_links": { "message": "Enlaces" },
   "reader_links_plain": { "message": "Texto simple" },
   "reader_links_active": { "message": "Activos" },
+  "reader_marker": { "message": "Resaltador" },
+  "marker_delete": { "message": "Quitar el resaltado" },
   "reader_listen": { "message": "Leer en voz alta" },
   "reader_voice": { "message": "Voz" },
   "reader_speed": { "message": "Velocidad" },

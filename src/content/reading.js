@@ -228,6 +228,25 @@ let anchored = false;
 let started = false;
 
 /**
+ * What else counts as ours besides the bubble - the reader's delete bubble
+ * for a highlighter mark, mostly (D106). Presses on it must read the way
+ * presses on the tooltip read: not the page's, so no dismissal, no recall
+ * hit-test through it, no gesture armed under it. A callback because the
+ * element appears and hides on the reader's own schedule.
+ *
+ * @type {(target: EventTarget | null) => boolean}
+ */
+let alsoOwns = () => false;
+
+/**
+ * @param {EventTarget | null} target
+ * @returns {boolean} whether a press there is ours rather than the page's
+ */
+function owns(target) {
+  return tooltip.owns(target) || alsoOwns(target);
+}
+
+/**
  * @template T
  * @param {import("../lib/protocol.js").Request} request
  * @returns {Promise<import("../lib/protocol.js").Result<T>>}
@@ -685,7 +704,7 @@ function entryBlocks(entries, normalized) {
  * @param {MouseEvent} event
  */
 function onMouseDown(event) {
-  press = { x: event.clientX, y: event.clientY, mine: tooltip.owns(event.target) };
+  press = { x: event.clientX, y: event.clientY, mine: owns(event.target) };
 }
 
 /**
@@ -702,7 +721,7 @@ function onMouseUp(event) {
     return;
   }
 
-  if (tooltip.owns(event.target)) return;
+  if (owns(event.target)) return;
 
   const from = press;
   press = null;
@@ -1031,23 +1050,27 @@ function onStorageChanged(changes, area) {
 }
 
 /**
- * @param {{ root?: Element | null, observe?: boolean, stored?: Record<string, unknown>, ownSelection?: boolean, anchored?: boolean, plainLinks?: () => boolean }} [where]
+ * @param {{ root?: Element | null, observe?: boolean, stored?: Record<string, unknown>, ownSelection?: boolean, anchored?: boolean, plainLinks?: () => boolean, alsoOwns?: (target: EventTarget | null) => boolean, marking?: () => boolean, markRoot?: () => Element | null, onMarked?: (range: Range) => void, onMarkTap?: (x: number, y: number) => void }} [where]
  *   what to underline inside, whether it can change on its own, the startup
  *   read of `storage.local` when the caller already made one, whether the
  *   page selects through our own gesture rather than the browser's - every
  *   pointer's gesture, finger and mouse alike (D80, D86) - whether
  *   bubbles pin to the page instead of the viewport (D81), and whether the
  *   article's links are dressed as plain text right now (D95), which hands
- *   presses on them to the gesture. The last
- *   three are the reader page's flags, never a content script's: refusing the
- *   native selection on somebody else's page would be changing how their
- *   page works, pinning to the document trusts a page layout only our
- *   own page can promise, and undressing links changes how a page works too
+ *   presses on them to the gesture. Everything after `stored` is a reader
+ *   page flag, never a content script's: refusing the native selection on
+ *   somebody else's page would be changing how their page works, pinning to
+ *   the document trusts a page layout only our own page can promise, and
+ *   undressing links changes how a page works too. The last four belong to
+ *   the reader's highlighter (D106) and ride through to `select.js` -
+ *   `alsoOwns` besides names the reader's own floating UI (the mark-delete
+ *   bubble), whose presses must not read as the page's.
  */
 export function start(where = {}) {
   root = where.root ?? null;
   follow = where.observe ?? true;
   anchored = where.anchored ?? false;
+  alsoOwns = where.alsoOwns ?? (() => false);
 
   // Called again when the reader renders another article, and the listeners
   // must not stack up behind it.
@@ -1076,10 +1099,14 @@ export function start(where = {}) {
     if (where.ownSelection === true) {
       startSelect({
         root: root ?? document.body,
-        owns: (target) => tooltip.owns(target),
+        owns: (target) => owns(target),
         onSelected: presentGesture,
         onSelectStart: () => tooltip.hide(),
         ...(where.plainLinks === undefined ? {} : { plainLinks: where.plainLinks }),
+        ...(where.marking === undefined ? {} : { marking: where.marking }),
+        ...(where.markRoot === undefined ? {} : { markRoot: where.markRoot }),
+        ...(where.onMarked === undefined ? {} : { onMarked: where.onMarked }),
+        ...(where.onMarkTap === undefined ? {} : { onMarkTap: where.onMarkTap }),
       });
     }
     webext().storage.onChanged.addListener(onStorageChanged);
@@ -1123,8 +1150,25 @@ export function stop() {
   press = null;
   lastPointerType = "";
   anchored = false;
+  alsoOwns = () => false;
   vocabulary = new Map();
   clear();
+}
+
+/**
+ * The bubble and the selection stood down by the caller rather than by a
+ * gesture - what picking up the highlighter does (D106): the pen changes what
+ * every gesture means, and a bubble left standing would be an answer from the
+ * grammar that just ended. Exactly the dismissal an empty tap performs, minus
+ * the tap.
+ */
+export function dismiss() {
+  clearSelection();
+  autoKept = null;
+  tooltip.hide();
+  current = null;
+  secondLayer = [];
+  unfetched = null;
 }
 
 /**

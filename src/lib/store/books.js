@@ -97,9 +97,10 @@ export async function getBookSegment(bookId, index) {
 }
 
 /**
- * Deletes the book whole: its row, every segment, and its reading position,
- * in one transaction - the copy is the only copy, and nothing of it may
- * survive as an orphan. Quiet when the book is already gone.
+ * Deletes the book whole: its row, every segment, its reading position and
+ * its highlighter marks, in one transaction - the copy is the only copy, and
+ * nothing of it may survive as an orphan. Quiet when the book is already
+ * gone.
  *
  * @param {string} id
  * @returns {Promise<void>}
@@ -109,6 +110,7 @@ export async function deleteBook(id) {
     await promisify(stores.books.delete(id));
     await promisify(stores.bookSegments.delete(segmentRange(id)));
     await promisify(stores.positions.delete(id));
+    await promisify(stores.marks.delete(id));
   });
 }
 
@@ -154,6 +156,7 @@ export async function sweepOrphanSegments() {
     for (const bookId of strays) {
       await promisify(stores.bookSegments.delete(segmentRange(bookId)));
       await promisify(stores.positions.delete(bookId));
+      await promisify(stores.marks.delete(bookId));
     }
   });
 }

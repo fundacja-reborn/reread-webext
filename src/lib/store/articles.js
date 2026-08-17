@@ -15,7 +15,10 @@
  * Keyed by `docId` rather than `url` because books keep their positions in
  * the same store under their own ids, and a position must leave together
  * with its document: a row about where somebody was in an article that is
- * gone would be an orphan nothing ever cleans.
+ * gone would be an orphan nothing ever cleans. The highlighter's marks
+ * (`marks.js`) are rows about a document in the same way, and every rule
+ * about the position row - leaves with the document, cleared by an
+ * overwrite whose content it measured - holds for them below too.
  */
 
 import { asPosition } from "../reader/position.js";
@@ -34,9 +37,10 @@ import { asSavedMeta } from "./saved-article.js";
  * halves go in one transaction: a row the list shows must never point at
  * content that is not there.
  *
- * Overwriting also clears the old reading position: the anchor counted blocks
- * of the text that has just been replaced, and saving a page again puts it
- * back on the reading pile - the same reset `readAt` gets.
+ * Overwriting also clears the old reading position and the old highlighter
+ * marks: both anchored into the text that has just been replaced, and saving
+ * a page again puts it back on the reading pile - the same reset `readAt`
+ * gets.
  *
  * @param {SavedArticle} article
  * @returns {Promise<void>}
@@ -47,14 +51,15 @@ export async function putArticle(article) {
     await promisify(stores.meta.put(meta));
     await promisify(stores.content.put({ url: article.url, content, dir, lang }));
     await promisify(stores.positions.delete(article.url));
+    await promisify(stores.marks.delete(article.url));
   });
 }
 
 /**
  * Deletes at both ends, and quietly when there was nothing: the second press
  * of a toggle and a row that is already gone mean the same thing. The reading
- * position leaves in the same transaction - a place in a document that is
- * gone is an orphan nothing would ever clean.
+ * position and the marks leave in the same transaction - a place in a
+ * document that is gone is an orphan nothing would ever clean.
  *
  * @param {string} url
  * @returns {Promise<void>}
@@ -64,6 +69,7 @@ export async function deleteArticle(url) {
     await promisify(stores.meta.delete(url));
     await promisify(stores.content.delete(url));
     await promisify(stores.positions.delete(url));
+    await promisify(stores.marks.delete(url));
   });
 }
 

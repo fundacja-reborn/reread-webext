@@ -214,6 +214,8 @@
   "reader_links": { "message": "Links" },
   "reader_links_plain": { "message": "Plain text" },
   "reader_links_active": { "message": "Active" },
+  "reader_marker": { "message": "Highlighter" },
+  "marker_delete": { "message": "Remove highlight" },
   "reader_listen": { "message": "Read aloud" },
   "reader_voice": { "message": "Voice" },
   "reader_speed": { "message": "Speed" },
