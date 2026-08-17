@@ -38,11 +38,34 @@
     </p>
 
     <!-- Second from the top (Michał's call, 2026-08-17): the row most presses
-         come for, right under the site it acts on - the preferences can wait
-         below. Stays even over the reader itself: there it turns the reader
-         to the list, which is exactly what the press means. -->
-    <button type="button" class="popup-row popup-action" id="open-reader" data-i18n="open_reader">
-      Read this page in the reader
+         come for, right under the site it acts on - and the one row wearing a
+         drawn glyph (his call too, same day): a page of prose, the reading
+         view's own association, in the accent that says "start here". The
+         glyph stands outside the marked span (`localizePage` swaps text only)
+         and outside the accessible name. Stays even over the reader itself:
+         there it turns the reader to the list, which is exactly what the
+         press means. -->
+    <button type="button" class="popup-row popup-action popup-reader" id="open-reader">
+      <svg class="popup-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+        <rect
+          x="3"
+          y="2.25"
+          width="10"
+          height="11.5"
+          rx="1.5"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.3"
+        />
+        <path
+          d="M5.5 5.5h5M5.5 8h5M5.5 10.5h3"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.3"
+          stroke-linecap="round"
+        />
+      </svg>
+      <span data-i18n="open_reader">Read this page in the reader</span>
     </button>
 
     <label class="popup-row popup-pair" id="pair-row">
@@ -54,6 +77,22 @@
          choosing and the downloading happen. -->
     <button type="button" class="popup-row popup-action popup-setup" id="setup-row" data-i18n="popup_no_model" hidden>
       No translation model on this device yet - press here to pick one in the settings.
+    </button>
+
+    <!-- The extension's rooms right under the pair (Michał's call, second
+         round 2026-08-17): the rows visited often stand above the switches
+         flipped rarely. Settings stays below, at the preferences' side - it
+         is their own room. -->
+    <button type="button" class="popup-row popup-action" id="open-library" data-i18n="reading_list">
+      Offline reading list
+    </button>
+    <!-- The highlights page (D108), by the row the pages' menus carry: the
+         reader tab turned to every kept quote. -->
+    <button type="button" class="popup-row popup-action" id="open-marks" data-i18n="reader_marks_title">
+      Highlights
+    </button>
+    <button type="button" class="popup-row popup-action" id="open-vocabulary" data-i18n="saved_phrases">
+      Saved phrases
     </button>
 
     <!-- The quiet-bubble switch (D81), here as well as in the settings: it is
@@ -76,17 +115,6 @@
       <input type="checkbox" id="reader-only" />
     </label>
 
-    <button type="button" class="popup-row popup-action" id="open-library" data-i18n="reading_list">
-      Offline reading list
-    </button>
-    <!-- The highlights page (D108), by the row the pages' menus carry: the
-         reader tab turned to every kept quote. -->
-    <button type="button" class="popup-row popup-action" id="open-marks" data-i18n="reader_marks_title">
-      Highlights
-    </button>
-    <button type="button" class="popup-row popup-action" id="open-vocabulary" data-i18n="saved_phrases">
-      Saved phrases
-    </button>
     <button type="button" class="popup-row popup-action" id="open-settings" data-i18n="settings">
       Settings
     </button>

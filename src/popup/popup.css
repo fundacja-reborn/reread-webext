@@ -105,14 +105,32 @@ body[data-os="android"] .popup-row {
   color: var(--page-accent);
 }
 
-/* The support row rests quieter than the rows above it, and carries its own
-   top line because the settings row gave its border up as the last row of
-   the hallway: this is an ask, and an ask in a daily hallway must not
-   shout. Left-aligned as one phrase - the row grid's space-between would
-   strand the word at the far edge of its heart. */
+/* The two rows that carry a mark before their word - the reader's glyph at
+   the top, the heart at the bottom: left-aligned as one phrase, because the
+   row grid's space-between would strand the word at the far edge of its
+   mark. */
+.popup-reader,
 .popup-support {
   justify-content: flex-start;
   gap: 0.45rem;
+}
+
+/* The reading view's glyph, drawn like the reader bar's own icons and sized
+   by the text around it; the accent is what says "start here" in a list of
+   quiet rows - the signpost's color, on the row that is the popup's main
+   act. */
+.popup-icon {
+  width: 1.15em;
+  height: 1.15em;
+  flex: none;
+  color: var(--page-accent);
+}
+
+/* The support row rests quieter than the rows above it, and carries its own
+   top line because the settings row gave its border up as the last row of
+   the hallway: this is an ask, and an ask in a daily hallway must not
+   shout. */
+.popup-support {
   border-top: 1px solid var(--page-line);
   border-bottom: none;
   color: var(--page-muted);
