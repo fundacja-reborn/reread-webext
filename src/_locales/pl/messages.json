@@ -307,6 +307,8 @@
   "reader_transfer_books": {
     "message": "Eksport uwzględnia tylko artykuły, nie eksportuje książek (.epub). Ponowny import przywraca wszystko poza pozycją czytania."
   },
+  "reader_export_marks": { "message": "Eksportuj zakreślenia" },
+  "reader_transfer_marks": { "message": "Eksport zakreśleń zapisuje tekstowy plik .md z zakreślonymi fragmentami, pogrupowanymi według dokumentów - do notatek, nie do importu. Zakreślenia przenoszą się między urządzeniami w kopii zapasowej .json listy artykułów." },
   "reader_transfer_link": { "message": "Import i eksport (artykuły lub EPUB)" },
   "reader_transfer_accepts": { "message": "Import rozpoznaje podany plik: kopię listy artykułów z re/read (.json) albo e-booka (.epub)." },
   "reader_book_label": { "message": "Książka" },

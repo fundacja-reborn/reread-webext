@@ -88,7 +88,8 @@ import {
   setBookReadAt,
   sweepOrphanSegments,
 } from "../lib/store/books.js";
-import { getMarks, putMarks } from "../lib/store/marks.js";
+import { MARKS_FILENAME, toMarksFile } from "../lib/store/marks-file.js";
+import { allMarks, getMarks, putMarks } from "../lib/store/marks.js";
 import { Segment, emptySentence, savedArticle } from "../lib/store/saved-article.js";
 import { watchToolbarScheme } from "../lib/theme-icon.js";
 import { canSpeak, primaryLanguage, voicesFor } from "../lib/tts.js";
@@ -168,6 +169,9 @@ const libraryNext = /** @type {HTMLButtonElement | null} */ (
 );
 const exportButton = /** @type {HTMLButtonElement | null} */ (
   document.getElementById("library-export")
+);
+const exportMarksButton = /** @type {HTMLButtonElement | null} */ (
+  document.getElementById("library-export-marks")
 );
 const importButton = document.getElementById("library-import");
 const importInput = /** @type {HTMLInputElement | null} */ (
@@ -1161,10 +1165,13 @@ async function refreshLibrary() {
   if (libraryEmpty === null || libraryRows === null) return;
   // One list, two stores: books enter dressed as rows (`bookEntry`), with
   // their positions read in bulk - fifty rows must not mean fifty lookups.
-  const [metas, books, positions] = await Promise.all([
+  // The marks ride in the same round trip only to answer one button's grey;
+  // unreadable marks must not cost the list, so they read as none.
+  const [metas, books, positions, marks] = await Promise.all([
     listArticles(),
     listBooks(),
     allPositions(),
+    allMarks().catch(() => new Map()),
   ]);
   const entries = [
     ...metas.map((meta) => articleEntry(meta, positions.get(meta.url) ?? null)),
@@ -1187,8 +1194,11 @@ async function refreshLibrary() {
 
   // Exporting nothing would download an empty file; the button says so first.
   // On whether any *articles* are saved - books stay out of the file, so a
-  // list of books alone still has nothing to export.
+  // list of books alone still has nothing to export. The highlights button
+  // reads its own store: a mark anywhere, articles and books alike, is
+  // something to export.
   if (exportButton !== null) exportButton.disabled = metas.length === 0;
+  if (exportMarksButton !== null) exportMarksButton.disabled = marks.size === 0;
 
   // "3 of 12" while the filter narrows the segment down; the tabs already
   // carry the whole counts, so with no filter the line says nothing.
@@ -1407,22 +1417,64 @@ async function removeRow(button, url, kind) {
  */
 async function exportList() {
   try {
-    const articles = await allArticles();
+    const [articles, marks] = await Promise.all([allArticles(), allMarks()]);
     if (articles.length === 0) return;
-    const url = URL.createObjectURL(
-      new Blob([toArticlesFile(articles)], { type: "application/json" }),
-    );
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = ARTICLES_FILENAME;
-    anchor.click();
-    // The URL has to outlive the click long enough for the download to take
-    // it. A minute is comfortably that, and then the blob can go.
-    setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    downloadFile(toArticlesFile(articles, marks), ARTICLES_FILENAME, "application/json");
     transferStatus("");
   } catch {
     transferStatus(describeError(ErrorCode.INTERNAL), "error");
   }
+}
+
+/**
+ * The highlights as one Markdown page (D106): every marked document, articles
+ * and books alike, dressed in what the list knows about it - title, address
+ * or author, the day it entered. The quotes are already in the rows, so no
+ * document's content is ever opened for this.
+ */
+async function exportMarks() {
+  try {
+    const [metas, books, marks] = await Promise.all([listArticles(), listBooks(), allMarks()]);
+
+    /** @type {import("../lib/store/marks-file.js").MarkedDoc[]} */
+    const docs = [];
+    for (const meta of metas) {
+      const kept = marks.get(meta.url);
+      if (kept !== undefined) {
+        docs.push({ title: meta.title, source: meta.url, at: meta.savedAt, marks: kept });
+      }
+    }
+    for (const book of books) {
+      const kept = marks.get(book.id);
+      if (kept !== undefined) {
+        docs.push({ title: book.title, source: book.author, at: book.addedAt, marks: kept });
+      }
+    }
+    if (docs.length === 0) return;
+
+    downloadFile(toMarksFile(docs), MARKS_FILENAME, "text/markdown");
+    transferStatus("");
+  } catch {
+    transferStatus(describeError(ErrorCode.INTERNAL), "error");
+  }
+}
+
+/**
+ * Downloading is a blob and an anchor; no permission asks for less. The URL
+ * has to outlive the click long enough for the download to take it - a
+ * minute is comfortably that, and then the blob can go.
+ *
+ * @param {string} content
+ * @param {string} filename
+ * @param {string} type
+ */
+function downloadFile(content, filename, type) {
+  const url = URL.createObjectURL(new Blob([content], { type }));
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = filename;
+  anchor.click();
+  setTimeout(() => URL.revokeObjectURL(url), 60_000);
 }
 
 /**
@@ -2079,6 +2131,8 @@ document.addEventListener("focusout", (event) => {
 });
 
 exportButton?.addEventListener("click", () => void exportList());
+
+exportMarksButton?.addEventListener("click", () => void exportMarks());
 
 importButton?.addEventListener("click", () => importInput?.click());
 

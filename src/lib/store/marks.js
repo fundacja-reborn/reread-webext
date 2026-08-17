@@ -52,3 +52,31 @@ export async function putMarks(docId, marks) {
     else await promisify(stores.marks.put({ docId, marks }));
   });
 }
+
+/**
+ * Every document's marks at once, for the exports: the article file carries
+ * each article's marks beside it, and the highlights file is nothing but
+ * this map dressed in titles. One `getAll` for the same reason the list
+ * reads positions in bulk. Rows narrow like `getMarks` narrows, and a row
+ * left with nothing readable simply is not in the map.
+ *
+ * @returns {Promise<Map<string, Mark[]>>} keyed by `docId`
+ */
+export async function allMarks() {
+  const rows = /** @type {unknown[]} */ (
+    await withLibrary("readonly", (stores) => promisify(stores.marks.getAll()))
+  );
+  /** @type {Map<string, Mark[]>} */
+  const map = new Map();
+  for (const row of rows) {
+    if (typeof row !== "object" || row === null) continue;
+    const { docId, marks } = /** @type {Record<string, unknown>} */ (row);
+    if (typeof docId !== "string" || docId.length === 0 || !Array.isArray(marks)) continue;
+    const kept = marks
+      .map(asMark)
+      .filter((mark) => mark !== null)
+      .sort(compareMarks);
+    if (kept.length > 0) map.set(docId, kept);
+  }
+  return map;
+}

@@ -213,7 +213,11 @@ export async function allArticles() {
  * another tab between the two cannot end up written twice - the database's
  * one-row-per-address invariant is checked where it is enforced.
  *
- * @param {SavedArticle[]} articles
+ * The marks an entry brought ride in beside it (D106) - and only beside an
+ * entry that is being added: a skipped article keeps its copy untouched in
+ * the whole, marks included.
+ *
+ * @param {import("./articles-file.js").FileArticle[]} articles
  * @returns {Promise<{ added: number, skipped: number }>}
  */
 export async function importArticles(articles) {
@@ -221,9 +225,12 @@ export async function importArticles(articles) {
     const keys = /** @type {IDBValidKey[]} */ (await promisify(stores.meta.getAllKeys()));
     const { toAdd, skipped } = importPlan(keys.map(String), articles);
     for (const article of toAdd) {
-      const { content, dir, lang, ...meta } = article;
+      const { content, dir, lang, marks, ...meta } = article;
       await promisify(stores.meta.put(meta));
       await promisify(stores.content.put({ url: article.url, content, dir, lang }));
+      if (marks !== undefined && marks.length > 0) {
+        await promisify(stores.marks.put({ docId: article.url, marks }));
+      }
     }
     return { added: toAdd.length, skipped };
   });
