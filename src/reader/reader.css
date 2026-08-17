@@ -884,6 +884,15 @@ body.reader:has(#library:not([hidden])) {
 
 /* --- the highlights page (D108): quote rows in the list's own dress --- */
 
+/* The quotes select through our own gesture, exactly as the article does
+   (D80/D86, extended to the rows by D109): the native selection is refused
+   so a hold or a drag selects whole words through select.js and raises the
+   bubble. The named price - drag-to-copy - was already paid here before
+   the gesture arrived: every row carries its copy button. */
+.marks-rows {
+  user-select: none;
+}
+
 /* The row wears its mark's ink on the leading edge - the one place colour
    can say which pen wrote the quote without washing text nobody selected.
    The variables are the washes' own, so the stripe answers the theme

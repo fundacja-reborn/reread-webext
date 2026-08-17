@@ -23,7 +23,7 @@
  */
 
 import { supported as highlightsSupported } from "../content/highlighter.js";
-import { dismiss, rescan, start } from "../content/reading.js";
+import { dismiss, rescan, start, stop as stopReadingSide } from "../content/reading.js";
 import { applyReading } from "../lib/appearance.js";
 import { webext } from "../lib/browser.js";
 import { localizePage, plural, t } from "../lib/i18n.js";
@@ -541,9 +541,11 @@ function renderArticle(piece) {
   article.hidden = false;
   hideNotice();
 
-  // The underlines are found again now that there is different text under the
-  // same element. Nothing is asked of storage: the vocabulary did not change,
-  // only what it can be found in.
+  // The learning side back on the article, if a view moved it elsewhere
+  // (D109), and the underlines found again now that there is different text
+  // under the ground. Nothing is asked of storage: the vocabulary did not
+  // change, only what it can be found in.
+  rootReadingSide(article);
   rescan();
 
   if (originalLink instanceof HTMLAnchorElement) {
@@ -1581,6 +1583,10 @@ async function showMarks(scope, { fresh = false } = {}) {
   if (toLibraryButton !== null) toLibraryButton.hidden = false;
   setBackDoor(t("reader_back_to_list"), t("reading_list"));
   document.title = `${t("reader_marks_title")} - re/read`;
+  // The quotes are reading text (D109): the learning side moves its ground
+  // to the rows, so the underlines, the recall tap and the selection bubble
+  // work on a kept passage exactly as they do in the article it came from.
+  rootReadingSide(marksRowsList);
   scrollTo(0, 0);
   await refreshMarks();
 }
@@ -1840,9 +1846,15 @@ async function refreshMarks() {
     marksEmpty.hidden = true;
   }
 
+  // The rows about to be replaced may hold an open bubble's phrase and the
+  // selection under it - both stand down first (D109), the way a rendered
+  // article drops the previous one's; then the underlines are found again
+  // in the fresh rows.
+  dismiss();
   marksRowsList.replaceChildren(
     ...view.rows.map((row, index) => markRowElement(row, index, target.scope === null)),
   );
+  rescan();
 
   if (marksPager !== null) {
     marksPager.hidden = view.pages <= 1;
@@ -3344,40 +3356,68 @@ function onArticleLink(event) {
 contentElement?.addEventListener("click", onArticleLink);
 contentElement?.addEventListener("auxclick", onArticleLink);
 
-// The same reading side as on any other page, scoped to the article: the
-// reader's own heading and links are not text anybody is learning from, and
-// nothing in this document changes unless the code above changes it, so there
-// is nothing for an observer to watch. Every pointer selects through our own
-// gesture here (D80/D81, the mouse since D86) - this is our page, so refusing
-// the native selection is allowed, and it is the one way to select whole
-// words with no system menu in the way and the bubble landing exactly on the
-// finger or the button lifting. For the same reason the bubble pins to the
-// page rather than the viewport (`anchored`): it rides the scroll with its
-// phrase like a margin note, which only a layout we control can promise to
-// survive. `plainLinks` tells the gesture when links are dressed as plain
-// text (D95): then a hold or a press on one selects its word like any other -
-// without this, a word in a link could be neither followed nor selected.
-start({
-  root: article,
-  observe: false,
-  ownSelection: true,
-  anchored: true,
-  plainLinks: () => settings.reader.links === "plain",
-  // The highlighter's hooks (D106): whether the pen is in the hand, where
-  // marks may anchor (the rebuilt content - the reader's own title has no
-  // block order to write against), what a finished stroke becomes, and what
-  // a tap means while the pen is up. The delete bubble is ours the way the
-  // translation bubble is - presses on it must not read as the page's.
-  alsoOwns: (target) => target instanceof Node && markBar?.contains(target) === true,
-  marking: () => markerOn,
-  markRoot: () => contentRoot(),
-  onMarked: (range) => void onMarked(range),
-  // A stroke taking its first word: whatever mark was active is about to be
-  // stale - its pins would stand over yesterday's outline while the new one
-  // is drawn (Michał's report).
-  onMarkStart: () => deselectMark(),
-  onMarkTap,
-});
+// The same reading side as on any other page, on whichever ground the view
+// stands: the article in the document views, the quote rows on the
+// highlights page (D109) - the quotes are the reader's own kept passages,
+// and rereading them with the underlines and the bubble is exactly what
+// this extension is for. The reader's own heading, the lists' furniture and
+// the links in the menu are not text anybody is learning from, and nothing
+// under either ground changes unless the code above changes it, so there is
+// nothing for an observer to watch. Every pointer selects through our own
+// gesture here (D80/D81, the mouse since D86) - this is our page, so
+// refusing the native selection is allowed, and it is the one way to select
+// whole words with no system menu in the way and the bubble landing exactly
+// on the finger or the button lifting. For the same reason the bubble pins
+// to the page rather than the viewport (`anchored`): it rides the scroll
+// with its phrase like a margin note, which only a layout we control can
+// promise to survive. `plainLinks` tells the gesture when links are dressed
+// as plain text (D95): then a hold or a press on one selects its word like
+// any other - without this, a word in a link could be neither followed nor
+// selected. A quote holds no links, so over the rows the flag simply never
+// answers.
+
+/** The element the learning side stands on right now - null until a view roots it. */
+/** @type {Element | null} */
+let readingGround = null;
+
+/**
+ * Points the learning side at one element's text (D109). Re-rooting is a
+ * full stop-and-start, because the gesture takes its ground once at start;
+ * the same ground asks for nothing - `rescan` already serves new text under
+ * old ground, and the vocabulary held by the running side is not re-read
+ * for no reason. One config for every ground: the highlighter's hooks
+ * consult the pen (D106), and only the document views ever put it in the
+ * hand - over the quote rows `marking()` is always false, so the marker
+ * grammar never wakes there.
+ *
+ * @param {Element | null} ground
+ */
+function rootReadingSide(ground) {
+  if (ground === null || ground === readingGround) return;
+  readingGround = ground;
+  stopReadingSide();
+  start({
+    root: ground,
+    observe: false,
+    ownSelection: true,
+    anchored: true,
+    plainLinks: () => settings.reader.links === "plain",
+    // The highlighter's hooks (D106): whether the pen is in the hand, where
+    // marks may anchor (the rebuilt content - the reader's own title has no
+    // block order to write against), what a finished stroke becomes, and what
+    // a tap means while the pen is up. The delete bubble is ours the way the
+    // translation bubble is - presses on it must not read as the page's.
+    alsoOwns: (target) => target instanceof Node && markBar?.contains(target) === true,
+    marking: () => markerOn,
+    markRoot: () => contentRoot(),
+    onMarked: (range) => void onMarked(range),
+    // A stroke taking its first word: whatever mark was active is about to be
+    // stale - its pins would stand over yesterday's outline while the new one
+    // is drawn (Michał's report).
+    onMarkStart: () => deselectMark(),
+    onMarkTap,
+  });
+}
 
 // The load-time ask is the one that may be a reload standing on a document's
 // history entry - the only caller allowed to reopen from it (D102).
