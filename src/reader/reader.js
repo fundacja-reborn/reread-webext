@@ -857,9 +857,12 @@ async function keptForMarks(target) {
 /**
  * A tap while the pen is in the hand: a mark under it turns the toolbar to
  * that mark; the word right beside the active mark grows it by that word
- * (D107, the translation gesture's own one-step grammar); bare text walks
- * outward the way Escape does - the active mark stands down first, the pen
- * itself second.
+ * (D107, the translation gesture's own one-step grammar); bare text puts
+ * the pen down whole - one tap, active mark or not. An outward ladder was
+ * tried here first and Michał overruled it after living with it: a tap
+ * away means "done marking", and paying two taps for it read as the page
+ * not listening. Escape alone keeps the ladder - stepping outward is what
+ * that key means everywhere.
  *
  * @param {number} x
  * @param {number} y
@@ -872,7 +875,7 @@ function onMarkTap(x, y, word) {
     return;
   }
   if (word !== undefined && growActiveBy(word)) return;
-  stepOut();
+  setMarker(false);
 }
 
 /**
@@ -908,7 +911,7 @@ function growActiveBy(word) {
   return false;
 }
 
-/** One step outward: the active mark down, or - with none - the pen itself. */
+/** Escape's one step outward: the active mark down, or - with none - the pen. */
 function stepOut() {
   if (activeMark !== null) deselectMark();
   else setMarker(false);
@@ -1103,10 +1106,11 @@ markBar?.addEventListener("click", (event) => {
 
 // A press away from the toolbar, while the pen is in the hand. Presses on
 // the article are not decided here - the tap they end resolves through
-// `onMarkTap`, which can tell a mark from bare text; presses on the chrome
-// only stand the active mark down (a panel opened mid-session is not the
-// reader leaving); a press anywhere else - the margins, the action rows -
-// walks outward the way a tap on bare text does.
+// `onMarkTap`, which can tell a mark from a neighbour word from bare text;
+// presses on the chrome only stand the active mark down (a panel opened
+// mid-session is not the reader leaving); a press anywhere else - the
+// margins, the action rows - puts the pen down whole, the bare-text tap's
+// one-step rule.
 document.addEventListener("pointerdown", (event) => {
   if (!markerOn) return;
   const target = event.target;
@@ -1117,11 +1121,12 @@ document.addEventListener("pointerdown", (event) => {
     deselectMark();
     return;
   }
-  stepOut();
+  setMarker(false);
 });
 
-// Escape walks the same ladder as a tap on bare text: the active mark stands
-// down first, the pen second. Two presses from anywhere back to reading.
+// Escape keeps the outward ladder the taps gave up (Michał's call): the
+// active mark stands down first, the pen second - stepping outward is what
+// the key means everywhere else on this page too.
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && markerOn) stepOut();
 });
