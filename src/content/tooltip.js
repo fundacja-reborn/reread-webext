@@ -1769,6 +1769,13 @@ export function createTooltip({ onAction, onHide }) {
 
   function startEditing() {
     if (editor === null || bodyElement === null) return;
+    // The edit box clears the stage (Michał's call, same round as the copy
+    // row's): the second layer folds away, because the row it is folded from
+    // is about to become Save/Cancel - an open layer would hang over the box
+    // with no press left to close it, and every line of it is dead during an
+    // edit anyway (the senses disable, D34). Cancel does not bring it back:
+    // one press of More does, with everything already fetched.
+    unfold(false);
     editing = true;
     editor.value = toMeanings(bodyElement.textContent ?? "").join(MEANING_SEPARATOR);
     editor.hidden = false;
