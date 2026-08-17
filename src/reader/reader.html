@@ -364,6 +364,14 @@
           <p class="transfer">
             <button type="button" id="library-import" data-i18n="action_import">Import</button>
             <button type="button" id="library-export" data-i18n="action_export">Export</button>
+            <!-- The pen's own export (D106): the quotes as notes, one .md for
+                 every marked document - articles and books alike. One way
+                 only, so it stands apart from the backup pair; the format
+                 fold says as much. Greyed while nothing is marked, the
+                 Export button's own rule. -->
+            <button type="button" id="library-export-marks" data-i18n="reader_export_marks">
+              Export highlights
+            </button>
           </p>
           <p class="hint" data-i18n="reader_transfer_accepts">
             Import reads the file it is given: a backup of the re/read article list (.json), or an
@@ -380,6 +388,11 @@
             <p class="hint" data-i18n="reader_transfer_books">
               Export covers articles only - books (.epub) are not exported. Importing a book again
               brings everything back except the reading position.
+            </p>
+            <p class="hint" data-i18n="reader_transfer_marks">
+              Export highlights writes a plain-text .md file of your highlighted passages, grouped
+              by document - made for notes, not for import. Highlights travel between devices
+              inside the article list's .json backup.
             </p>
           </details>
           <input

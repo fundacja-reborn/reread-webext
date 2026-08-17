@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import { MAX_PAGE_HTML } from "../src/lib/protocol.js";
+import { markRecord } from "../src/lib/reader/marks.js";
 import {
   ARTICLES_FILENAME,
   fromArticlesFile,
@@ -26,6 +27,24 @@ function article(path, overrides = {}) {
   });
   assert.ok(built !== null);
   return { ...built, readAt };
+}
+
+/**
+ * @param {Partial<import("../src/lib/reader/marks.js").Mark>} [over]
+ * @returns {import("../src/lib/reader/marks.js").Mark}
+ */
+function mark(over = {}) {
+  const built = markRecord({
+    segmentIndex: 0,
+    start: { block: 0, offset: 0 },
+    end: { block: 0, offset: 4 },
+    color: "yellow",
+    createdAt: 500,
+    text: "Body",
+    ...over,
+  });
+  assert.ok(built !== null);
+  return built;
 }
 
 describe("toArticlesFile", () => {
@@ -61,6 +80,23 @@ describe("toArticlesFile", () => {
     const file = toArticlesFile([]);
     assert.ok(file.endsWith("\n"));
     assert.equal(JSON.parse(file).format, "reread-articles");
+  });
+
+  it("carries an article's marks beside it, and no field at all without them", () => {
+    const marked = article("marked");
+    const bare = article("bare");
+    const marks = new Map([[marked.url, [mark()]]]);
+
+    const parsed = fromArticlesFile(toArticlesFile([marked, bare], marks));
+    assert.equal(parsed.invalid, 0);
+    const back = new Map(parsed.articles.map((one) => [one.url, one]));
+    assert.deepEqual(back.get(marked.url)?.marks, [mark()]);
+    // The file of somebody who never picked up the pen reads exactly as it
+    // always did - not even an empty list.
+    const bareBack = back.get(bare.url);
+    assert.ok(bareBack !== undefined);
+    assert.ok(!("marks" in bareBack));
+    assert.ok(!toArticlesFile([bare]).includes("marks"));
   });
 });
 
@@ -121,6 +157,33 @@ describe("fromArticlesFile", () => {
     );
   });
 
+  it("narrows an entry's marks one by one, never refusing the article over them", () => {
+    const rows = [
+      {
+        url: "https://example.com/marked",
+        title: "t",
+        content: "<p>x</p>",
+        savedAt: 1,
+        marks: [
+          // Out of reading order on purpose - the file's order is not trusted.
+          { ...mark(), start: { block: 2, offset: 0 }, end: { block: 2, offset: 3 } },
+          mark(),
+          { ...mark(), text: "" },
+          "not a mark",
+        ],
+      },
+      { url: "https://example.com/plain", title: "t", content: "<p>x</p>", savedAt: 1, marks: "no" },
+    ];
+    const parsed = fromArticlesFile(JSON.stringify({ format: "reread-articles", articles: rows }));
+    assert.equal(parsed.invalid, 0);
+    const [marked, plain] = parsed.articles;
+    assert.deepEqual(
+      marked?.marks?.map((one) => one.start.block),
+      [0, 2],
+    );
+    assert.ok(plain !== undefined && !("marks" in plain));
+  });
+
   it("refuses an entry bigger than the biggest page the reader can be handed", () => {
     const rows = [
       {
@@ -151,6 +214,12 @@ describe("importPlan", () => {
     const plan = importPlan([], [first, second]);
     assert.deepEqual(plan.toAdd, [first]);
     assert.equal(plan.skipped, 1);
+  });
+
+  it("carries whatever an entry brought - its marks - out the other side", () => {
+    const marked = { ...article("marked"), marks: [mark()] };
+    const plan = importPlan([], [marked]);
+    assert.deepEqual(plan.toAdd, [marked]);
   });
 
   it("adds nothing the second time - importing the same file twice is safe", () => {
