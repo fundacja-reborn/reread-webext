@@ -546,15 +546,19 @@
     </main>
 
     <!--
-      The toolbar of a tapped mark (D107, Michał's request after living with
-      the one-word delete bubble of D106): pen in hand, a tap on a mark opens
-      this strip at the bottom of the window - the speech bar's spot and
-      dress, which is why it wears the speech bar's class - with the acts a
-      standing mark has: its text to the clipboard, its ink, the bin. The
-      bottom rather than a bubble at the finger, because the acts outgrew one
-      word and a strip holds them without covering the line they are about;
-      which mark it is about is said by a wash over the mark itself. A press
-      anywhere else stands it down - the armed Delete's rule.
+      The highlighter's toolbar (D107, revised twice on Michał's reports):
+      it stands at the bottom of the window - the speech bar's spot and
+      dress, which is why it wears the speech bar's class - for as long as
+      the pen is in the hand, so the ink can be chosen before the first
+      stroke. Two states, one strip: with no mark active the swatches speak
+      for the pen (the same setting the Aa panel writes) and the copy and
+      the bin stay away, having nothing to act on; a tap on a mark turns
+      the strip to that mark - the swatches recolour it in place, its quote
+      can leave for the clipboard, the bin takes it - and two pins at the
+      mark's ends say which one, in the mark's own true colour (a wash was
+      tried first and read as a darker, wrong ink). A tap on bare text
+      walks outward the way Escape does: the mark stands down first, the
+      pen second.
     -->
     <div
       id="mark-bar"
@@ -564,7 +568,7 @@
       aria-label="Highlighter"
       data-i18n-aria-label="reader_marker"
     >
-      <button type="button" id="mark-copy">
+      <button type="button" id="mark-copy" hidden>
         <svg class="reader-icon icon-copy" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
           <rect
             x="5.2"
@@ -617,6 +621,7 @@
       <button
         type="button"
         id="mark-delete"
+        hidden
         title="Remove highlight"
         data-i18n-title="marker_delete"
         aria-label="Remove highlight"
@@ -635,6 +640,18 @@
         <span class="speech-label" data-i18n="action_delete">Delete</span>
       </button>
     </div>
+
+    <!--
+      The two pins that say which mark the toolbar is about (D107): a thin
+      bar with a dot at each end of the mark, the shape every platform's
+      selection handles taught - drawn in the interface accent, so the mark
+      itself keeps its true ink. Indicators only: pointer-events pass
+      through them, so a tap on a pin is a tap on the text under it.
+      Absolute in page coordinates, placed by script, riding the scroll
+      with their mark.
+    -->
+    <div id="mark-pin-start" class="mark-pin mark-pin-start" hidden aria-hidden="true"></div>
+    <div id="mark-pin-end" class="mark-pin mark-pin-end" hidden aria-hidden="true"></div>
 
     <!--
       The bar that steers the voice (D87). It exists only while the article is

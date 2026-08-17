@@ -22,11 +22,7 @@
  * are held to the new list, not the old one.
  */
 
-import {
-  mark as washOver,
-  supported as highlightsSupported,
-  unmark as washOff,
-} from "../content/highlighter.js";
+import { supported as highlightsSupported } from "../content/highlighter.js";
 import { dismiss, rescan, start } from "../content/reading.js";
 import { applyReading } from "../lib/appearance.js";
 import { webext } from "../lib/browser.js";
@@ -213,13 +209,16 @@ const markReadButton = document.getElementById("mark-read");
 const actionsEnd = document.getElementById("actions-end");
 const toLibraryEndButton = document.getElementById("to-library-end");
 const markReadEndButton = document.getElementById("mark-read-end");
-// The highlighter (D106): the pen in the bar, and the toolbar a tap on a
-// mark raises at the foot of the window while the pen is in the hand (D107).
+// The highlighter (D106): the pen in the bar, the toolbar standing at the
+// foot of the window for as long as the pen is in the hand (D107), and the
+// two pins that point out the mark the toolbar is about.
 const markerButton = /** @type {HTMLButtonElement | null} */ (document.getElementById("marker"));
 const markBar = document.getElementById("mark-bar");
 const markCopyButton = document.getElementById("mark-copy");
 const markCopyLabel = document.getElementById("mark-copy-label");
 const markDeleteButton = document.getElementById("mark-delete");
+const markPinStart = document.getElementById("mark-pin-start");
+const markPinEnd = document.getElementById("mark-pin-end");
 
 /**
  * What is on screen: a live page's article, a saved one, a book's segment, or
@@ -404,11 +403,11 @@ function renderArticle(piece) {
   // sentence of one article into another (D87).
   forgetReading();
   // A different document never inherits the pen (D106): the mode survives
-  // only a book turning its own parts. The paint and the delete bubble go
+  // only a book turning its own parts. The active mark and the paint go
   // either way - they stood over blocks about to be replaced - and the marks
   // themselves are the opener's to reload once the new blocks stand.
   if (shown === null || shown.url !== piece.url) setMarker(false);
-  hideMarkBar();
+  deselectMark();
   docMarks = [];
   clearMarkPaint();
   // The book dressing is put on by `openBook` after this returns; every
@@ -735,14 +734,18 @@ function updateMarker() {
 /**
  * Picking the pen up or putting it away. Picking it up stands the bubble and
  * the selection down (`dismiss`): the pen changes what every gesture means,
- * and an answer from the old grammar must not outlive the grammar.
+ * and an answer from the old grammar must not outlive the grammar. The
+ * toolbar comes and goes with the pen (D107, Michał's wish: choose the ink
+ * before the first stroke), opening in its pen state - no mark active until
+ * one is tapped.
  *
  * @param {boolean} on
  */
 function setMarker(on) {
   if (markerOn !== on) {
     markerOn = on;
-    hideMarkBar();
+    deselectMark();
+    if (markBar !== null) markBar.hidden = !on;
     if (on) dismiss();
   }
   updateMarker();
@@ -766,7 +769,9 @@ async function onMarked(range) {
   const target = shown;
   const root = contentRoot();
   if (target === null || root === null) return;
-  hideMarkBar();
+  // A fresh stroke means the hand moved on: whatever mark was active stands
+  // down, and the toolbar returns to speaking for the pen.
+  deselectMark();
 
   const span = anchorOf(range, root, shownSegment());
   if (span === null) return;
@@ -817,10 +822,11 @@ async function keptForMarks(target) {
 }
 
 /**
- * A tap while the pen is in the hand: a mark under it raises the mark
- * toolbar at the foot of the window (D107), bare text stands an open one
- * down. That is the tap's whole grammar in this mode - recall, dismissal
- * and growing by neighbours belong to the pen being away.
+ * A tap while the pen is in the hand: a mark under it turns the toolbar to
+ * that mark; bare text walks outward the way Escape does (D107, Michał's
+ * instinct) - the active mark stands down first, the pen itself second.
+ * That is the tap's whole grammar in this mode - recall, dismissal and
+ * growing by neighbours belong to the pen being away.
  *
  * @param {number} x
  * @param {number} y
@@ -828,43 +834,92 @@ async function keptForMarks(target) {
 function onMarkTap(x, y) {
   const hit = markAt(x, y);
   if (hit === null) {
-    hideMarkBar();
+    stepOut();
     return;
   }
-  showMarkBar(hit);
+  activateMark(hit);
+}
+
+/** One step outward: the active mark down, or - with none - the pen itself. */
+function stepOut() {
+  if (activeMark !== null) deselectMark();
+  else setMarker(false);
 }
 
 /**
- * The toolbar up, about this mark: the strip at the bottom holds the acts,
- * and the wash over the mark itself says which mark they act on - a strip
- * at the window's foot cannot point the way a bubble beside the line could.
+ * The toolbar turned to one mark: the pins at its ends say which one, in
+ * the mark's own true ink - a strip at the window's foot cannot point the
+ * way a bubble beside the line could, and the wash tried first read as a
+ * darker, wrong colour over the mark (Michał's report).
  *
  * @param {{ mark: import("../lib/reader/marks.js").Mark, range: Range }} hit
  */
-function showMarkBar(hit) {
-  if (markBar === null) return;
+function activateMark(hit) {
   activeMark = hit.mark;
-  washOver(hit.range);
+  placeMarkPins(hit.range);
   refreshMarkBar();
-  markBar.hidden = false;
 }
 
-/** The toolbar's swatches following the active mark's own ink. */
+/**
+ * The two pins on a mark's first and last line: a stem the line's height
+ * with a dot at the outer end - the shape every platform's selection
+ * handles taught, though these only point (nothing drags). Page
+ * coordinates, so they ride the scroll with their mark.
+ *
+ * @param {Range} range
+ */
+function placeMarkPins(range) {
+  if (markPinStart === null || markPinEnd === null) return;
+  const rects = range.getClientRects();
+  const first = rects[0];
+  const last = rects[rects.length - 1];
+  if (first === undefined || last === undefined) return;
+
+  markPinStart.style.left = `${Math.round(first.left + window.scrollX - 3)}px`;
+  markPinStart.style.top = `${Math.round(first.top + window.scrollY)}px`;
+  markPinStart.style.height = `${Math.round(first.height)}px`;
+  markPinStart.hidden = false;
+
+  markPinEnd.style.left = `${Math.round(last.right + window.scrollX + 1)}px`;
+  markPinEnd.style.top = `${Math.round(last.top + window.scrollY)}px`;
+  markPinEnd.style.height = `${Math.round(last.height)}px`;
+  markPinEnd.hidden = false;
+}
+
+/**
+ * The toolbar dressed for its state (D107): with a mark active the swatches
+ * wear its ink and the copy and the bin stand ready; with none they speak
+ * for the pen - the same setting the Aa panel writes - and the two acts
+ * step away, having nothing to act on.
+ */
 function refreshMarkBar() {
   if (markBar === null) return;
+  const ink = activeMark === null ? settings.reader.markerColor : activeMark.color;
   for (const button of markBar.querySelectorAll("button[data-mark-ink]")) {
-    const ink = button.getAttribute("data-mark-ink");
-    button.setAttribute("aria-pressed", String(ink === activeMark?.color));
+    button.setAttribute("aria-pressed", String(ink === button.getAttribute("data-mark-ink")));
   }
+  if (markCopyButton !== null) markCopyButton.hidden = activeMark === null;
+  if (markDeleteButton !== null) markDeleteButton.hidden = activeMark === null;
 }
 
-/** The toolbar away, its wash with it - and any focus it held handed back to the pen. */
-function hideMarkBar() {
+/**
+ * The active mark stood down - pins away, the toolbar back in its pen
+ * state. The bar itself stays for as long as the pen does; any focus the
+ * departing acts held goes back to the pen's own button rather than to the
+ * body.
+ */
+function deselectMark() {
   activeMark = null;
-  washOff();
-  if (markBar === null || markBar.hidden) return;
-  if (markBar.contains(document.activeElement)) markerButton?.focus();
-  markBar.hidden = true;
+  if (markPinStart !== null) markPinStart.hidden = true;
+  if (markPinEnd !== null) markPinEnd.hidden = true;
+  if (
+    markBar !== null &&
+    document.activeElement instanceof Element &&
+    (document.activeElement === markCopyButton || document.activeElement === markDeleteButton)
+  ) {
+    markerButton?.focus();
+  }
+  refreshMarkBar();
 }
 
 /**
@@ -875,7 +930,7 @@ function hideMarkBar() {
 async function onMarkDeletePress() {
   const target = shown;
   const active = activeMark;
-  hideMarkBar();
+  deselectMark();
   if (target === null || active === null) return;
 
   const before = docMarks;
@@ -924,17 +979,28 @@ async function onMarkCopyPress() {
 }
 
 /**
- * A swatch pressed: this one mark changes its ink, in place - the record is
- * replaced (its colour is part of it), painted, written, and the toolbar
- * stays up so a second thought costs one more press. The pen's own ink
- * (the Aa panel's pick) is not touched: that is what the NEXT stroke wears.
+ * A swatch pressed, and the state says whom for (D107). With no mark active
+ * the swatches ARE the pen: the press writes the same setting the Aa
+ * panel's row writes, so the ink can be chosen right where the marking
+ * happens - Michał's wish behind the always-standing bar. With a mark
+ * active, this one mark changes its ink in place - the record is replaced
+ * (its colour is part of it), painted, written, and the toolbar stays up so
+ * a second thought costs one more press; the pen's own ink is not touched.
  *
  * @param {string} ink
  */
 async function onMarkInkPress(ink) {
   const target = shown;
   const active = activeMark;
-  if (target === null || active === null || !isMarkColor(ink) || active.color === ink) return;
+  if (!isMarkColor(ink)) return;
+
+  if (active === null) {
+    // The pen state: applied from what was actually stored, the panel's own
+    // manner - `adoptConfig` repaints the swatches here and in Aa alike.
+    adoptConfig(await writeConfig({ reader: { markerColor: ink } }));
+    return;
+  }
+  if (target === null || active.color === ink) return;
 
   const next = markRecord({ ...active, color: ink });
   if (next === null) return;
@@ -967,24 +1033,29 @@ markBar?.addEventListener("click", (event) => {
   if (typeof ink === "string") void onMarkInkPress(ink);
 });
 
-// The toolbar stands down at any step away from it - a press elsewhere,
-// Escape - the armed Delete's own protocol. `pointerdown`, so the press that
-// taps another mark finds the bar already about nothing.
+// A press away from the toolbar, while the pen is in the hand. Presses on
+// the article are not decided here - the tap they end resolves through
+// `onMarkTap`, which can tell a mark from bare text; presses on the chrome
+// only stand the active mark down (a panel opened mid-session is not the
+// reader leaving); a press anywhere else - the margins, the action rows -
+// walks outward the way a tap on bare text does.
 document.addEventListener("pointerdown", (event) => {
-  if (markBar === null || markBar.hidden) return;
-  if (event.target instanceof Node && markBar.contains(event.target)) return;
-  hideMarkBar();
-});
-
-// Escape walks outward: first the toolbar, then the pen itself. Two presses
-// from anywhere back to reading.
-document.addEventListener("keydown", (event) => {
-  if (event.key !== "Escape") return;
-  if (markBar !== null && !markBar.hidden) {
-    hideMarkBar();
+  if (!markerOn) return;
+  const target = event.target;
+  if (!(target instanceof Node)) return;
+  if (markBar?.contains(target) === true) return;
+  if (article?.contains(target) === true) return;
+  if (chromeBox?.contains(target) === true) {
+    deselectMark();
     return;
   }
-  if (markerOn) setMarker(false);
+  stepOut();
+});
+
+// Escape walks the same ladder as a tap on bare text: the active mark stands
+// down first, the pen second. Two presses from anywhere back to reading.
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && markerOn) stepOut();
 });
 
 /**
@@ -1870,6 +1941,11 @@ function applyAppearance(reader) {
           : reader.markerColor;
     button.setAttribute("aria-pressed", String(wanted === current));
   }
+
+  // The mark toolbar's swatches speak for the pen while no mark is active
+  // (D107), so a new ink - picked in Aa, on the bar itself, or in another
+  // tab - has to reach them through the same road every setting takes.
+  refreshMarkBar();
 }
 
 /**
@@ -2002,9 +2078,9 @@ function updateListen() {
  * @param {import("./read-aloud.js").ReadingState} state
  */
 function showSpeechBar(state) {
-  // The two bars live on the same spot at the window's foot; the voice
-  // starting takes it, and the mark toolbar quietly stands down (D107).
-  if (state !== "off") hideMarkBar();
+  // The two bars share the window's foot and simply stack (reader.css):
+  // marking while listening is a real way to read, and neither strip has
+  // the right to take the other's tool away.
   if (speechBar !== null) {
     speechBar.hidden = state === "off";
     speechBar.dataset["state"] = state;

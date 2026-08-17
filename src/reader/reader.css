@@ -1066,6 +1066,60 @@ button[data-armed],
   box-shadow: 0 0 0 2px var(--page-accent);
 }
 
+/* The toolbar's own glyphs step up beyond the transport icons' desktop size
+   (Michał's report: copy and bin read as specks - the same report the
+   transport icons once got). The rule stands outside the media query, so it
+   is the bar's size at every width; the swatches beside them already hold
+   this line. */
+.mark-bar .reader-icon {
+  width: 1.5em;
+  height: 1.5em;
+}
+
+/* The pins of the active mark: the platform selection-handle shape - a thin
+   stem the height of the line, a dot at the outer end - in the interface
+   accent, so the mark keeps its true ink (a wash over it read as a darker,
+   wrong colour). Pointer events pass through: a tap on a pin means the text
+   under it. */
+.mark-pin {
+  position: absolute;
+  z-index: 2;
+  width: 2px;
+  background: var(--page-accent);
+  pointer-events: none;
+}
+
+.mark-pin::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--page-accent);
+}
+
+.mark-pin-start::after {
+  top: -8px;
+}
+
+.mark-pin-end::after {
+  bottom: -8px;
+}
+
+/* Both bars up at once - marking while listening is a real way to read - and
+   the mark toolbar steps onto the voice bar's shoulders rather than either
+   hiding: the strip heights are one row each, and the page below gives room
+   for the pair. */
+body.reader:has(#speech-bar:not([hidden])) .mark-bar {
+  bottom: 3.9rem;
+}
+
+body.reader:has(#speech-bar:not([hidden])):has(#mark-bar:not([hidden])) {
+  padding-bottom: 8.5rem;
+}
+
 /* --- the bar that steers the voice, for as long as there is one --- */
 
 /* Pinned to the bottom of the window: a thumb reaches it on a phone and on an
@@ -1180,6 +1234,14 @@ body.reader:has(#mark-bar:not([hidden])) {
   .speech-bar .reader-icon {
     width: 1.2em;
     height: 1.2em;
+  }
+
+  /* Except the mark toolbar's, which hold their size at every width
+     (Michał's report: at the transport icons' desktop size the copy and
+     the bin read as specks beside the swatches). */
+  .mark-bar .reader-icon {
+    width: 1.5em;
+    height: 1.5em;
   }
 
   /* The tabs keep their own width instead of splitting the line. */
