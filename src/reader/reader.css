@@ -1278,13 +1278,18 @@ button[data-armed],
    place on a desktop: Firefox for Android moves bottom-anchored fixed boxes
    together with its dynamic toolbar (the D77 lesson, first paid by the
    bubble), and this bar came up half sunk under the address bar (reported
-   from a Pixel, 2026-08-17). `100svh` is the window's floor with the
-   browser's own bar standing - the one line that is never under it - and
-   the transform hands the bar's own height back, whatever that height is. */
+   from a Pixel, 2026-08-17). `100dvh` is the floor of the viewport as it is
+   right now - above the browser's bar while the bar stands, the glass's own
+   floor once it has slid away - so the strip follows the address bar down
+   and keeps its one visible row either way (Michał's second report: parked
+   on the small viewport's floor it read as a strip three rows tall). The
+   browser settles `dv*` when its bar finishes moving, not frame by frame;
+   for that beat the skirt below holds the paper. The transform hands the
+   bar's own height back, whatever that height is. */
 .speech-bar {
   position: fixed;
   inset-inline: 0;
-  top: 100svh;
+  top: 100dvh;
   transform: translateY(-100%);
   z-index: 2;
   display: flex;
@@ -1301,10 +1306,11 @@ button[data-armed],
   font-size: 0.85rem;
 }
 
-/* The strip the browser's toolbar vacates when it slides away mid-read: the
-   bar above holds its ground (see `top` above), so this much of the page's
-   own paper keeps the article from visibly scrolling past beneath it. Zero
-   on a desktop, where the large and the small viewport are one height. */
+/* The strip the browser's toolbar vacates while `dvh` has not caught up
+   with it (see `top` above): for that beat the bar still stands a step
+   high, and this much of the page's own paper keeps the article from
+   showing through the gap beneath it. Zero on a desktop, where the large
+   and the small viewport are one height. */
 .speech-bar::after {
   content: "";
   position: absolute;
