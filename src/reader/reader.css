@@ -1428,3 +1428,19 @@ body.reader:has(#mark-bar:not([hidden])) {
     flex: none;
   }
 }
+
+/* --- the colophon, only where a room of ours ends --- */
+
+/* The reading list and the highlights end in our own rows and close like
+   any page of this extension (the line lives in reader.html, its dress in
+   page.css); the document view is somebody else's text, and the room
+   disappears around it - no maker's mark under an article. Hidden rather
+   than absent, so one footer serves every view without script moving it. */
+body.reader .page-end {
+  display: none;
+}
+
+body.reader[data-view="list"] .page-end,
+body.reader[data-view="marks"] .page-end {
+  display: block;
+}

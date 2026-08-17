@@ -139,6 +139,11 @@ history.scrollRestoration = "manual";
 // The toolbar icon follows the browser's scheme where the manifest cannot
 // say so (Chromium, no theme_icons there) - a no-op on Firefox.
 watchToolbarScheme();
+// The colophon's version, from the one place that knows it. The line itself
+// shows only over the list views (reader.css) - the document view is somebody
+// else's text and the room disappears around it.
+const versionSpan = document.getElementById("version");
+if (versionSpan !== null) versionSpan.textContent = webext().runtime.getManifest().version;
 
 const notice = document.getElementById("notice");
 const article = document.getElementById("article");
