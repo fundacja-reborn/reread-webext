@@ -37,7 +37,7 @@ import { t } from "../lib/i18n.js";
 import { describeError } from "../lib/messages.js";
 import { normalize, trimPhrase } from "../lib/normalize.js";
 import { ErrorCode, Message, asResult, asTranslation, fail } from "../lib/protocol.js";
-import { keeping, madeSelection, touchPointer } from "../lib/selection.js";
+import { copyCombo, keeping, madeSelection, touchPointer } from "../lib/selection.js";
 import { sentenceAround } from "../lib/sentence.js";
 import { MIRROR_KEY, asMirror, mirrorMatches } from "../lib/store/mirror.js";
 import { canSpeak, speak, speaking, stop as stopSpeaking } from "../lib/tts.js";
@@ -113,9 +113,20 @@ let anchorRange = null;
  */
 const SPEAK = canSpeak() ? ["speak"] : [];
 
+/**
+ * The clipboard's icon (D110), second picture of the row: it opens the copy
+ * row, and copying writes nothing - so it stands wherever there is a finished
+ * gloss to stand over, the unkeepable phrases included. Only the pending and
+ * error states go without, because "copy translation" over "Translating..."
+ * or over an apology would copy the furniture.
+ *
+ * @type {import("./tooltip.js").Action[]}
+ */
+const COPY = ["copy"];
+
 /** What the bubble offers for a phrase that is in the vocabulary. */
 /** @type {import("./tooltip.js").Action[]} */
-const KEPT = [...SPEAK, "learned", "edit"];
+const KEPT = [...SPEAK, ...COPY, "learned", "edit"];
 
 /**
  * The phrase the current chain of the reader's own selection kept without
@@ -139,10 +150,12 @@ let autoKept = null;
  * because that is a question about the bubble.
  */
 const OFFERED = Object.freeze({
-  /** Nothing to keep, so nothing to write - the speaker still stands, because
-   *  a phrase too long to save is still a phrase worth hearing. */
-  none: SPEAK,
-  ask: /** @type {import("./tooltip.js").Action[]} */ ([...SPEAK, "save", "edit"]),
+  /** Nothing to keep, so nothing to write - the speaker and the clipboard
+   *  still stand, because a phrase too long to save is still a phrase worth
+   *  hearing, and a whole translated sentence is exactly what gets copied
+   *  out into notes (D110). */
+  none: [...SPEAK, ...COPY],
+  ask: /** @type {import("./tooltip.js").Action[]} */ ([...SPEAK, ...COPY, "save", "edit"]),
   automatic: KEPT,
 });
 
@@ -237,6 +250,16 @@ let started = false;
  * @type {(target: EventTarget | null) => boolean}
  */
 let alsoOwns = () => false;
+
+/**
+ * Whether Ctrl+C copies the open bubble's phrase - the clipboard bridge
+ * (D110), and only ever the reader page's (`ownSelection`): its article
+ * refuses the native selection (D80, D86), so the chord is dead there unless
+ * the page answers it. On somebody else's page the bubble stands over a live
+ * native selection and the chord already copies it - answering too would be
+ * changing how their page works.
+ */
+let bridgeCopy = false;
 
 /**
  * @param {EventTarget | null} target
@@ -606,6 +629,7 @@ function showSaved(anchor, text, normalized, context, how = {}) {
     variant: "recall",
     body: meanings.join("\n"),
     actions: [...KEPT, ...secondLayer],
+    phrase: text,
     touch: how.touch === true,
     // Not `how.touch`, which a tap on an underline honestly lacks - the
     // system puts no handles around a tap. What sizes the bubble is the
@@ -810,6 +834,7 @@ function present(selection, { deliberate, touch, chain = false }) {
     variant: "save",
     body: t("bubble_translating"),
     tone: "pending",
+    phrase: text,
     touch,
     // Every way in remembers its pointer (`lastPointerType`), so one answer
     // serves them all (D84): the reader's own gesture and a settled native
@@ -983,10 +1008,45 @@ function settled() {
 }
 
 /**
+ * Whether a key press belongs to something being typed or natively copied -
+ * the presses the clipboard bridge must never take (D110). The bubble's own
+ * edit box hides behind its closed shadow root, so it is asked by name; a
+ * standing native selection anywhere on the page (the reader's chrome allows
+ * one - only the article refuses) keeps the chord too, because the platform's
+ * copy of a visible selection is what the hand asked for.
+ *
+ * @param {EventTarget | null} target
+ * @returns {boolean}
+ */
+function chordTaken(target) {
+  if (tooltip.isEditing()) return true;
+  if (target instanceof HTMLElement) {
+    const tag = target.tagName;
+    if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || target.isContentEditable) return true;
+  }
+  const selection = window.getSelection();
+  return selection !== null && !selection.isCollapsed;
+}
+
+/**
  * @param {KeyboardEvent} event
  */
 function onKeyDown(event) {
-  if (event.key !== "Escape" || !tooltip.isOpen()) return;
+  if (!tooltip.isOpen()) return;
+  // The clipboard bridge (D110): on the reader page, the platform's copy
+  // chord copies the phrase the bubble is about - the original, exactly what
+  // a native selection would have given. Fire and forget like the copy row's
+  // own presses: a clipboard that refuses has nothing to show it by.
+  if (
+    bridgeCopy &&
+    current !== null &&
+    copyCombo({ key: event.key, ctrl: event.ctrlKey, meta: event.metaKey, alt: event.altKey, shift: event.shiftKey }) &&
+    !chordTaken(event.target)
+  ) {
+    void navigator.clipboard.writeText(current.text).catch(() => undefined);
+    return;
+  }
+  if (event.key !== "Escape") return;
   tooltip.escape();
   // An Escape that closed the bubble - rather than the edit box inside it -
   // ends the selection chain with it: a highlight left with no bubble would
@@ -1071,6 +1131,9 @@ export function start(where = {}) {
   follow = where.observe ?? true;
   anchored = where.anchored ?? false;
   alsoOwns = where.alsoOwns ?? (() => false);
+  // The page that took the native selection away answers the copy chord
+  // itself (D110) - and only that page.
+  bridgeCopy = where.ownSelection === true;
 
   // Called again when the reader renders another article, and the listeners
   // must not stack up behind it.
@@ -1152,6 +1215,7 @@ export function stop() {
   lastPointerType = "";
   anchored = false;
   alsoOwns = () => false;
+  bridgeCopy = false;
   vocabulary = new Map();
   clear();
 }

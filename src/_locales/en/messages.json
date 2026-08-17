@@ -65,6 +65,22 @@
     "message": "Expand sentence",
     "description": "The same fold once the sentence is clamped: pressing it brings the full sentence back."
   },
+  "bubble_copy": {
+    "message": "Copy",
+    "description": "aria-label and hover title of the copy icon in the bubble's action row (D110): opens a row with the two copy choices below."
+  },
+  "bubble_copy_original": {
+    "message": "Copy original",
+    "description": "The clipboard row's first press (D110): puts the selected phrase itself - the page's own words - onto the clipboard."
+  },
+  "bubble_copy_translation": {
+    "message": "Copy translation",
+    "description": "The clipboard row's second press (D110): puts the translation as shown in the bubble onto the clipboard."
+  },
+  "bubble_copied": {
+    "message": "Copied",
+    "description": "Stands in for a copy press's own label for a moment after the clipboard took the text - the same feedback the reader page's highlighter bar gives."
+  },
 
   "popup_site_enabled": {
     "message": "Enabled on $DOMAIN$",

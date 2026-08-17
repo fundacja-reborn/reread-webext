@@ -106,7 +106,7 @@ const MIN_ENTRIES_HEIGHT = 96;
  * also imported by tests that have no catalogue to ask, and a bubble never
  * renders there.
  *
- * @param {Action | "cancel"} action
+ * @param {Action | CopyChoice | "cancel"} action
  * @returns {string}
  */
 function label(action) {
@@ -127,6 +127,12 @@ function label(action) {
       return t("bubble_reader");
     case "speak":
       return t("bubble_speak");
+    case "copy":
+      return t("bubble_copy");
+    case "copy-original":
+      return t("bubble_copy_original");
+    case "copy-translation":
+      return t("bubble_copy_translation");
   }
 }
 
@@ -159,6 +165,43 @@ function speakerIcon() {
     wave.setAttribute("stroke-linecap", "round");
     svg.append(wave);
   }
+  return svg;
+}
+
+/**
+ * The copy icon, drawn the way the speaker is: DOM calls, `currentColor`, no
+ * markup parsed. Two offset sheets - the shape the reader page's highlighter
+ * bar already taught (D107), scaled onto the speaker's grid so the two
+ * pictures in the row read as one set.
+ *
+ * @returns {SVGSVGElement}
+ */
+function copyIcon() {
+  const NS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  // Decoration to assistive tech - the button's aria-label carries the words.
+  svg.setAttribute("aria-hidden", "true");
+
+  const front = document.createElementNS(NS, "rect");
+  front.setAttribute("x", "8");
+  front.setAttribute("y", "8");
+  front.setAttribute("width", "11.5");
+  front.setAttribute("height", "11.5");
+  front.setAttribute("rx", "1.8");
+  front.setAttribute("fill", "none");
+  front.setAttribute("stroke", "currentColor");
+  front.setAttribute("stroke-width", "1.9");
+  svg.append(front);
+
+  const back = document.createElementNS(NS, "path");
+  back.setAttribute("d", "M16.2 4.9H7a2.1 2.1 0 0 0-2.1 2.1v9.2");
+  back.setAttribute("fill", "none");
+  back.setAttribute("stroke", "currentColor");
+  back.setAttribute("stroke-width", "1.9");
+  back.setAttribute("stroke-linecap", "round");
+  svg.append(back);
+
   return svg;
 }
 
@@ -664,16 +707,51 @@ export const STYLE = `
   }
   .actions button:disabled { opacity: 0.35; cursor: default; }
 
+  /* The clipboard row (D110): an extra row the copy icon opens, so Save never
+     leaves the screen for it. It reads like the action row - quiet labels,
+     one starting line with the gloss - and lives outside the fold: the icon
+     that opens it is inside the fold already, so a visible row implies an
+     unfolded bubble. Put away by the hidden attribute, whose rule above
+     outranks this display. */
+  .copy-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--gap-actions);
+    padding: 2px 0;
+  }
+  .copy-row button {
+    font: inherit;
+    font-size: calc(var(--type-action) * var(--bubble-scale, 1));
+    margin: 0;
+    padding: var(--pad-action);
+    color: inherit;
+    background: none;
+    border: 0;
+    border-radius: 4px;
+    opacity: 0.7;
+    cursor: pointer;
+  }
+  .copy-row button:first-child { margin-left: var(--pull-action); }
+  .copy-row button:hover { opacity: 1; }
+  .copy-row button:focus-visible {
+    opacity: 1;
+    outline: 1px solid currentColor;
+    outline-offset: 0;
+  }
+
   /* The speaker is the row's one picture (D83): universally readable where a
      "Read aloud" label would push the row past one line on a phone, and an
      honest signal that it acts on the phrase itself, not on the vocabulary.
      Inline-flex centers the icon in the same box the text labels get, and the
      icon matches their cap height, so the row keeps one baseline rhythm. */
-  .actions button[data-action="speak"] {
+  .actions button[data-action="speak"],
+  .actions button[data-action="copy"] {
     display: inline-flex;
     align-items: center;
   }
-  .actions button[data-action="speak"] svg {
+  .actions button[data-action="speak"] svg,
+  .actions button[data-action="copy"] svg {
     width: var(--icon);
     height: var(--icon);
     display: block;
@@ -758,9 +836,13 @@ export const STYLE = `
  *  with nothing - and never a body's tone. @typedef {"normal" | "pending" | "error" | "note"} Tone */
 /** Which of the three bubbles this is. `launcher` is reader-only mode's one
  *  offer: no gloss, one button. @typedef {"recall" | "save" | "launcher"} Variant */
-/** What the bubble can offer. `speak` is the row's one picture - a speaker
- *  icon that reads the phrase aloud (D83).
- *  @typedef {"save" | "learned" | "edit" | "settings" | "more" | "reader" | "speak"} Action */
+/** What the bubble can offer. `speak` and `copy` are the row's two pictures -
+ *  a speaker icon that reads the phrase aloud (D83), and a copy icon that
+ *  opens the clipboard row (D110).
+ *  @typedef {"save" | "learned" | "edit" | "settings" | "more" | "reader" | "speak" | "copy"} Action */
+/** The clipboard row's two presses (D110) - the bubble's own business, like
+ *  editing: never offered by a caller, never reported to one.
+ *  @typedef {"copy-original" | "copy-translation"} CopyChoice */
 /** What it reports - editing never leaves the bubble, and More leaves it only
  *  on the press that opens the layer, so a caller with nothing fetched yet can
  *  fetch it then. @typedef {"save" | "choose" | "learned" | "settings" | "reader" | "more" | "speak"} ReportedAction */
@@ -816,8 +898,12 @@ export const STYLE = `
  * `scale` multiplies every size in the bubble - the settings knob (D85),
  * handed in as a plain factor with 1 meaning "as designed".
  *
+ * `phrase` is the selection's text as the page had it, held for the clipboard
+ * row's "copy original" press (D110) and never rendered: what says which
+ * phrase the bubble is about stays the page's own highlight (D23).
+ *
  * @typedef {object} Tooltip
- * @property {(options: { anchor: DOMRect, variant: Variant, body: string, tone?: Tone, actions?: Action[], touch?: boolean, coarse?: boolean, scale?: number, folded?: boolean, anchored?: boolean, line?: number }) => void} show
+ * @property {(options: { anchor: DOMRect, variant: Variant, body: string, tone?: Tone, actions?: Action[], touch?: boolean, coarse?: boolean, scale?: number, folded?: boolean, anchored?: boolean, line?: number, phrase?: string }) => void} show
  * @property {(body: string, tone?: Tone) => void} setBody
  * @property {(sentence: string | null, tone?: Tone) => void} setContext
  * @property {(blocks: Block[]) => void} setEntries
@@ -998,6 +1084,12 @@ export function createTooltip({ onAction, onHide }) {
   let editor = null;
   /** @type {HTMLDivElement | null} */
   let actionsElement = null;
+  /** The clipboard row (D110): two presses that put the phrase or its gloss
+   *  onto the clipboard. Built once and toggled by the copy icon - an extra
+   *  row rather than a swap of the action row, so Save stays on the screen
+   *  and copying is never a step away from keeping. */
+  /** @type {HTMLDivElement | null} */
+  let copyRowElement = null;
 
   /** Where the bubble is anchored, so it can be placed again when it changes size. */
   let anchor = new DOMRect();
@@ -1035,6 +1127,15 @@ export function createTooltip({ onAction, onHide }) {
   /** What the buttons were before the edit box opened, to go back to on cancel. */
   /** @type {Action[]} */
   let restingActions = [];
+  /**
+   * What this bubble's phrase says, as the page had it - the copy row's other
+   * half (D110). Never rendered: the bubble still does not repeat its phrase
+   * (D23), it only holds the string a copy press writes out.
+   */
+  let phraseText = "";
+  /** The clipboard row's feedback timer, and the press it is about (D110). */
+  /** @type {{ timer: number, button: HTMLButtonElement, choice: CopyChoice } | null} */
+  let copied = null;
 
   /**
    * What the bubble is showing as the gloss - which is the edit box while there
@@ -1113,6 +1214,20 @@ export function createTooltip({ onAction, onHide }) {
     actionsElement = document.createElement("div");
     actionsElement.className = "actions";
     revealElement.append(actionsElement);
+    // The clipboard row (D110), built once and toggled by the copy icon. Its
+    // two presses are fixed - what changes between phrases is only the strings
+    // they would write out, and those are read at press time.
+    copyRowElement = document.createElement("div");
+    copyRowElement.className = "copy-row";
+    copyRowElement.hidden = true;
+    for (const choice of /** @type {CopyChoice[]} */ (["copy-original", "copy-translation"])) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.dataset["action"] = choice;
+      button.textContent = label(choice);
+      button.addEventListener("click", () => copyOut(button, choice));
+      copyRowElement.append(button);
+    }
 
     // Pressing a button must not take the selection away: the page's own
     // selection is what the bubble is about, and it disappearing under the
@@ -1122,8 +1237,11 @@ export function createTooltip({ onAction, onHide }) {
     // the selection is the only thing on the screen still saying which word all
     // of this is an answer to. The price is that text in there cannot be
     // selected with the mouse, which nothing in the bubble is for. The
-    // sentence's section joined when its corner grew the fold (D96).
-    for (const element of [actionsElement, entriesElement, contextElement]) {
+    // sentence's section joined when its corner grew the fold (D96). The
+    // clipboard row is in it twice over: copying exists exactly so the phrase
+    // can leave the page, and a press that dropped the selection would take
+    // away the very thing Ctrl+C is about to copy (D110).
+    for (const element of [actionsElement, copyRowElement, entriesElement, contextElement]) {
       element.addEventListener("mousedown", (event) => event.preventDefault());
     }
     editor.addEventListener("input", onEditorInput);
@@ -1150,10 +1268,10 @@ export function createTooltip({ onAction, onHide }) {
 
     // In the order of their distance from the phrase, which is the one order
     // the stylesheet's mirror can reverse whole: the gloss and the box that
-    // edits it, then the actions, then the second layer. The signature stands
-    // before them all and outside the order: only the error tone shows it
-    // (see .brand).
-    bubble.append(brandElement, bodyElement, editor, revealElement, contextElement, entriesElement);
+    // edits it, then the actions with the clipboard row they open (D110),
+    // then the second layer. The signature stands before them all and outside
+    // the order: only the error tone shows it (see .brand).
+    bubble.append(brandElement, bodyElement, editor, revealElement, copyRowElement, contextElement, entriesElement);
     root.append(bubble);
     // `documentElement` and not `body`: single-page applications replace the
     // body, and a bubble that vanishes with a re-render is a bug nobody can
@@ -1261,6 +1379,80 @@ export function createTooltip({ onAction, onHide }) {
   }
 
   /**
+   * The feedback taken back: the pressed button says its own name again, and
+   * the width lock that kept the row from jumping goes with it.
+   */
+  function settleCopy() {
+    if (copied === null) return;
+    window.clearTimeout(copied.timer);
+    copied.button.textContent = label(copied.choice);
+    copied.button.style.minWidth = "";
+    copied = null;
+  }
+
+  /** The disclosure icon, kept honest about the row it toggles. */
+  function syncCopyIcon() {
+    if (actionsElement === null || copyRowElement === null) return;
+    const icon = actionsElement.querySelector('button[data-action="copy"]');
+    icon?.setAttribute("aria-expanded", copyRowElement.hidden ? "false" : "true");
+  }
+
+  /**
+   * The clipboard row, put away - by the icon pressed again, by Escape, and
+   * by every change of what the bubble is about (a new phrase, new buttons):
+   * the row's presses copy what is on show, and a row that outlived the show
+   * would copy something the screen no longer says.
+   */
+  function hideCopyRow() {
+    settleCopy();
+    if (copyRowElement === null || copyRowElement.hidden) return;
+    copyRowElement.hidden = true;
+    syncCopyIcon();
+    place();
+  }
+
+  /** The copy icon pressed: the row comes out, or goes back in. */
+  function toggleCopyRow() {
+    if (copyRowElement === null) return;
+    if (!copyRowElement.hidden) {
+      hideCopyRow();
+      return;
+    }
+    copyRowElement.hidden = false;
+    syncCopyIcon();
+    place();
+  }
+
+  /**
+   * One of the clipboard row's presses (D110). What goes out is what the
+   * bubble is standing over right now: the phrase as the page had it, or the
+   * gloss as shown - the edit box's text while there is one, because that is
+   * what a save would take too. The feedback is the button saying "copied"
+   * for a breath, its width locked so the row does not jump; a clipboard that
+   * refuses (no user activation, a locked-down profile) gets no feedback at
+   * all - the button does not claim a copy it did not make.
+   *
+   * @param {HTMLButtonElement} button
+   * @param {CopyChoice} choice
+   */
+  async function copyOut(button, choice) {
+    const text = choice === "copy-original" ? phraseText : shownGloss();
+    if (text.length === 0) return;
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      return;
+    }
+    // The press may have raced the bubble closing or another copy's feedback;
+    // whatever stood before, this press's word is the one that shows now.
+    settleCopy();
+    if (button.isConnected === false) return;
+    button.style.minWidth = `${button.getBoundingClientRect().width}px`;
+    button.textContent = t("bubble_copied");
+    copied = { timer: window.setTimeout(settleCopy, 1500), button, choice };
+  }
+
+  /**
    * @param {Action | "cancel" | "choose"} action
    */
   function emit(action) {
@@ -1270,6 +1462,18 @@ export function createTooltip({ onAction, onHide }) {
       stopEditing(false);
       return;
     }
+    // So is the clipboard (D110): copying writes nothing to the vocabulary,
+    // and everything a copy press writes out is already in here.
+    if (action === "copy") {
+      toggleCopyRow();
+      return;
+    }
+    // Every other press is a turn away from copying, and the clipboard row
+    // steps aside for it (Michał's report: it stayed up over the edit box
+    // and over More's layer). The speaker is the one exception: hearing the
+    // phrase changes nothing the row is about, and closing it would make
+    // listen-then-copy cost an extra press.
+    if (action !== "speak") hideCopyRow();
     if (action === "edit") {
       startEditing();
       return;
@@ -1462,13 +1666,16 @@ export function createTooltip({ onAction, onHide }) {
   }
 
   /**
-   * The edit box sized to what is actually in it, as laid out. Until D97 the
-   * rows counted meanings, and one meaning wrapping on a narrow screen got a
-   * one-line box showing nothing but its own tail - the caret sits at the end
-   * after `select()`, and the box had scrolled to it. Only a rendered element
-   * knows where its lines broke, so the box is collapsed to one row and asked
-   * how far its content overflows; the cap is what keeps a long gloss from
-   * pushing the Save button off a phone's screen.
+   * The edit box sized to what is actually in it, as laid out - plus one
+   * spare line (Michał's call): a box exactly full reads as a box with no
+   * room, and the spare line is where the second meaning goes (Shift+Enter).
+   * Until D97 the rows counted meanings, and one meaning wrapping on a
+   * narrow screen got a one-line box showing nothing but its own tail - the
+   * caret sits at the end after `select()`, and the box had scrolled to it.
+   * Only a rendered element knows where its lines broke, so the box is
+   * collapsed to one row and asked how far its content overflows; the cap
+   * (the spare line inside it) is what keeps a long gloss from pushing the
+   * Save button off a phone's screen.
    */
   function sizeEditor() {
     if (editor === null) return;
@@ -1478,7 +1685,7 @@ export function createTooltip({ onAction, onHide }) {
     const line = parseFloat(style.lineHeight);
     if (!Number.isFinite(line) || line <= 0) return;
     const lines = Math.round((editor.scrollHeight - padding) / line);
-    editor.rows = Math.min(6, Math.max(1, lines));
+    editor.rows = Math.min(7, Math.max(1, lines) + 1);
   }
 
   /**
@@ -1565,6 +1772,13 @@ export function createTooltip({ onAction, onHide }) {
 
   function startEditing() {
     if (editor === null || bodyElement === null) return;
+    // The edit box clears the stage (Michał's call, same round as the copy
+    // row's): the second layer folds away, because the row it is folded from
+    // is about to become Save/Cancel - an open layer would hang over the box
+    // with no press left to close it, and every line of it is dead during an
+    // edit anyway (the senses disable, D34). Cancel does not bring it back:
+    // one press of More does, with everything already fetched.
+    unfold(false);
     editing = true;
     editor.value = toMeanings(bodyElement.textContent ?? "").join(MEANING_SEPARATOR);
     editor.hidden = false;
@@ -1608,14 +1822,19 @@ export function createTooltip({ onAction, onHide }) {
       const button = document.createElement("button");
       button.type = "button";
       button.dataset["action"] = action;
-      if (action === "speak") {
-        // The one label that is a picture: the words go where a screen reader
-        // and a hovering cursor read them, and the icon is built with DOM
-        // calls like everything else here (see `speakerIcon`).
+      if (action === "speak" || action === "copy") {
+        // The labels that are pictures: the words go where a screen reader
+        // and a hovering cursor read them, and the icons are built with DOM
+        // calls like everything else here (see `speakerIcon`, `copyIcon`).
         const name = label(action);
         button.setAttribute("aria-label", name);
         button.title = name;
-        button.append(speakerIcon());
+        button.append(action === "speak" ? speakerIcon() : copyIcon());
+        // The copy icon is a disclosure: it says so, and keeps saying the
+        // truth when the buttons are rebuilt over an open row.
+        if (action === "copy") {
+          button.setAttribute("aria-expanded", copyRowElement !== null && !copyRowElement.hidden ? "true" : "false");
+        }
       } else {
         button.textContent = action === "more" && unfolded ? lessLabel() : label(action);
       }
@@ -1742,6 +1961,7 @@ export function createTooltip({ onAction, onHide }) {
   function hideBubble() {
     if (host === null) return;
     watchKeyboard(false);
+    settleCopy();
     host.remove();
     host = null;
     bubble = null;
@@ -1752,11 +1972,13 @@ export function createTooltip({ onAction, onHide }) {
     entriesElement = null;
     editor = null;
     actionsElement = null;
+    copyRowElement = null;
     editing = false;
     unfolded = false;
     contextFolded = false;
     swallowClick = false;
     restingActions = [];
+    phraseText = "";
     page = null;
     onHide?.();
   }
@@ -1774,6 +1996,7 @@ export function createTooltip({ onAction, onHide }) {
       folded,
       anchored = false,
       line = 0,
+      phrase = "",
     }) {
       build();
       anchor = rect;
@@ -1781,6 +2004,13 @@ export function createTooltip({ onAction, onHide }) {
       onTouch = touch;
       page = anchored ? { x: window.scrollX, y: window.scrollY } : null;
       editing = false;
+      // The phrase this bubble stands over, held for the copy presses alone
+      // (D110): never rendered - the bubble still does not repeat its phrase
+      // (D23). The clipboard row itself starts put away: it was opened about
+      // the last phrase.
+      phraseText = phrase;
+      settleCopy();
+      if (copyRowElement !== null) copyRowElement.hidden = true;
       if (host !== null) {
         // Pinned to the document or to the viewport (see `page`), decided per
         // show: one bubble serves the reader and every other page.
@@ -1852,6 +2082,13 @@ export function createTooltip({ onAction, onHide }) {
 
     setActions(actions) {
       restingActions = actions;
+      // The clipboard row answered the buttons that opened it, and new
+      // buttons are a new conversation (D110) - put away quietly, the
+      // placement below measures the row's absence along with everything
+      // else. It also keeps the row from standing with no icon left to
+      // close it, which is what an error's empty row would otherwise do.
+      settleCopy();
+      if (copyRowElement !== null) copyRowElement.hidden = true;
       if (!editing) renderActions(actions);
       place();
     },
@@ -1885,9 +2122,11 @@ export function createTooltip({ onAction, onHide }) {
     },
 
     escape() {
-      // One key, two meanings: leave the edit box first, close the bubble only
-      // when there is nothing left to leave.
+      // One key, one step outward each press: leave the edit box first, put
+      // the clipboard row away second, close the bubble only when there is
+      // nothing left to leave - the ladder every Escape in the reader keeps.
       if (editing) stopEditing(false);
+      else if (copyRowElement !== null && !copyRowElement.hidden) hideCopyRow();
       else hideBubble();
     },
 

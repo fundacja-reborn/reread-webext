@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { keeping, madeSelection, touchPointer } from "../src/lib/selection.js";
+import { copyCombo, keeping, madeSelection, touchPointer } from "../src/lib/selection.js";
 
 /**
  * The two rules of the reading side that do not need a page to be true: what a
@@ -101,6 +101,41 @@ describe("keeping", () => {
     assert.equal(answer({ normalized: "milk bread", findable: false, deliberate: false }), "none");
     assert.equal(answer({ gloss: "", deliberate: false }), "none");
     assert.equal(answer({ normalized: "all the four great oceans", deliberate: false }), "ask");
+  });
+});
+
+describe("copyCombo", () => {
+  /**
+   * @param {{ key?: string, ctrl?: boolean, meta?: boolean, alt?: boolean, shift?: boolean }} press
+   */
+  const combo = ({ key = "c", ctrl = false, meta = false, alt = false, shift = false }) =>
+    copyCombo({ key, ctrl, meta, alt, shift });
+
+  it("takes the platform's copy chord, whichever modifier the platform uses", () => {
+    assert.equal(combo({ ctrl: true }), true);
+    assert.equal(combo({ meta: true }), true);
+  });
+
+  it("lets Caps Lock through - the hand asked for the same chord", () => {
+    assert.equal(combo({ key: "C", ctrl: true }), true);
+  });
+
+  it("refuses Shift, whose chord opens the browser's developer tools", () => {
+    assert.equal(combo({ key: "C", ctrl: true, shift: true }), false);
+  });
+
+  it("refuses Alt, which types a different character on some layouts", () => {
+    assert.equal(combo({ ctrl: true, alt: true }), false);
+  });
+
+  it("refuses both modifiers at once, and neither", () => {
+    assert.equal(combo({ ctrl: true, meta: true }), false);
+    assert.equal(combo({}), false);
+  });
+
+  it("answers only to the copy key", () => {
+    assert.equal(combo({ key: "x", ctrl: true }), false);
+    assert.equal(combo({ key: "Control", ctrl: true }), false);
   });
 });
 

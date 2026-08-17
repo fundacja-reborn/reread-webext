@@ -46,6 +46,10 @@
   "bubble_speak": { "message": "Lire à voix haute" },
   "bubble_sentence_collapse": { "message": "Réduire la phrase" },
   "bubble_sentence_expand": { "message": "Développer la phrase" },
+  "bubble_copy": { "message": "Copier" },
+  "bubble_copy_original": { "message": "Copier l'original" },
+  "bubble_copy_translation": { "message": "Copier la traduction" },
+  "bubble_copied": { "message": "Copié" },
 
   "popup_site_enabled": {
     "message": "Activé sur $DOMAIN$",

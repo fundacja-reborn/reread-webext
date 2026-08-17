@@ -46,6 +46,10 @@
   "bubble_speak": { "message": "Vorlesen" },
   "bubble_sentence_collapse": { "message": "Satz einklappen" },
   "bubble_sentence_expand": { "message": "Satz ausklappen" },
+  "bubble_copy": { "message": "Kopieren" },
+  "bubble_copy_original": { "message": "Original kopieren" },
+  "bubble_copy_translation": { "message": "Übersetzung kopieren" },
+  "bubble_copied": { "message": "Kopiert" },
 
   "popup_site_enabled": {
     "message": "Eingeschaltet auf $DOMAIN$",
