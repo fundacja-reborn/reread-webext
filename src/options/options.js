@@ -1657,16 +1657,57 @@ document.getElementById("pair")?.addEventListener("change", (event) => {
   const select = event.target;
   if (select instanceof HTMLSelectElement) void choosePair(select.value);
 });
-document.getElementById("open-vocabulary")?.addEventListener("click", () => {
-  // The background raises the existing saved-phrases tab or opens one - the
-  // same single tab the popup's row leads to. Nothing to do when it fails
-  // mid-restart: the press can be repeated.
+// The bar's menu, the saved-phrases header's conduct exactly: one drawn
+// button, the panel under the bar's line, and every row leaving this tab
+// standing - each goes through the background, which raises the page's one
+// tab or opens it. Nothing to do when a message fails mid-restart: the press
+// can be repeated. There is no display panel here, so "one panel at a time"
+// is just this one.
+const pageBar = document.querySelector(".page-bar");
+const menuButton = document.getElementById("menu");
+const menuPanel = document.getElementById("menu-panel");
+
+/** @param {boolean} open */
+function setMenu(open) {
+  if (menuButton === null || menuPanel === null) return;
+  menuPanel.hidden = !open;
+  menuButton.setAttribute("aria-expanded", String(open));
+}
+
+menuButton?.addEventListener("click", () => {
+  setMenu(menuPanel?.hidden === true);
+});
+
+document.getElementById("nav-library")?.addEventListener("click", () => {
+  setMenu(false);
+  void webext().runtime.sendMessage({ kind: Message.OPEN_LIBRARY }).catch(() => {});
+});
+document.getElementById("nav-marks")?.addEventListener("click", () => {
+  setMenu(false);
+  void webext().runtime.sendMessage({ kind: Message.OPEN_MARKS }).catch(() => {});
+});
+document.getElementById("nav-vocabulary")?.addEventListener("click", () => {
+  setMenu(false);
   void webext().runtime.sendMessage({ kind: Message.OPEN_VOCABULARY }).catch(() => {});
 });
-document.getElementById("open-library")?.addEventListener("click", () => {
-  // The reading list, by the same door the popup uses: the background raises
-  // the reader tab on its list or opens one.
-  void webext().runtime.sendMessage({ kind: Message.OPEN_LIBRARY }).catch(() => {});
+
+// An open menu yields to the page underneath, the other headers' rule: a
+// press anywhere but the bar and the panel puts it away, and Escape does the
+// same from the keyboard - handing focus back to the button whose panel held
+// it.
+document.addEventListener("pointerdown", (event) => {
+  if (menuPanel?.hidden !== false) return;
+  const target = event.target;
+  if (!(target instanceof Node)) return;
+  if (pageBar?.contains(target) === true || menuPanel.contains(target)) return;
+  setMenu(false);
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape" || menuPanel?.hidden !== false) return;
+  const focus = document.activeElement;
+  if (focus instanceof Node && menuPanel.contains(focus)) menuButton?.focus();
+  setMenu(false);
 });
 
 // A download or an import in flight is the one thing on this page that a reload

@@ -25,6 +25,7 @@ export const Message = Object.freeze({
   TRANSLATE: "translate",
   OPEN_READER: "open-reader",
   OPEN_LIBRARY: "open-library",
+  OPEN_MARKS: "open-marks",
   OPEN_VOCABULARY: "open-vocabulary",
   OPEN_SETTINGS: "open-settings",
   SAVE_PHRASE: "save-phrase",
@@ -130,6 +131,11 @@ export const ErrorCode = Object.freeze({
  * would point the reader at the popup. "The list, from anywhere" must not
  * carry a tab at all.
  *
+ * `open-marks` turns the same one reader tab to the highlights page - every
+ * kept quote. It carries nothing for `open-library`'s reason: the view is
+ * not about any tab, and its scoped variant (one document's quotes) exists
+ * only inside the reader, which needs no message to turn its own view.
+ *
  * `open-vocabulary` brings the saved-phrases page forward, one tab like the
  * reader. It carries nothing for the same reason `open-library` carries
  * nothing: the page shows the vocabulary of the configured pair, and the pair
@@ -145,6 +151,7 @@ export const ErrorCode = Object.freeze({
  * @typedef {{ kind: typeof Message.TRANSLATE, text: string, context?: string }} TranslateRequest
  * @typedef {{ kind: typeof Message.OPEN_READER, sourceTabId?: number }} OpenReaderRequest
  * @typedef {{ kind: typeof Message.OPEN_LIBRARY }} OpenLibraryRequest
+ * @typedef {{ kind: typeof Message.OPEN_MARKS }} OpenMarksRequest
  * @typedef {{ kind: typeof Message.OPEN_VOCABULARY }} OpenVocabularyRequest
  * @typedef {{ kind: typeof Message.OPEN_SETTINGS }} OpenSettingsRequest
  * @typedef {{ kind: typeof Message.SAVE_PHRASE, text: string, translations: string[] }} SavePhraseRequest
@@ -157,6 +164,7 @@ export const ErrorCode = Object.freeze({
  * @typedef {TranslateRequest
  *   | OpenReaderRequest
  *   | OpenLibraryRequest
+ *   | OpenMarksRequest
  *   | OpenVocabularyRequest
  *   | OpenSettingsRequest
  *   | SavePhraseRequest
@@ -303,6 +311,7 @@ export function asRequest(message) {
   const kind = /** @type {{ kind?: unknown }} */ (message).kind;
 
   if (kind === Message.OPEN_LIBRARY) return { kind: Message.OPEN_LIBRARY };
+  if (kind === Message.OPEN_MARKS) return { kind: Message.OPEN_MARKS };
   if (kind === Message.OPEN_VOCABULARY) return { kind: Message.OPEN_VOCABULARY };
   if (kind === Message.OPEN_SETTINGS) return { kind: Message.OPEN_SETTINGS };
   if (kind === Message.LIST_PHRASES) return { kind: Message.LIST_PHRASES };

@@ -113,6 +113,7 @@ describe("asRequest", () => {
     for (const kind of [
       Message.OPEN_READER,
       Message.OPEN_LIBRARY,
+      Message.OPEN_MARKS,
       Message.OPEN_VOCABULARY,
       Message.OPEN_SETTINGS,
       Message.LIST_PHRASES,
@@ -125,6 +126,14 @@ describe("asRequest", () => {
     // The whole point of the kind is that it is not about any tab.
     assert.deepEqual(asRequest({ kind: Message.OPEN_LIBRARY, sourceTabId: 42 }), {
       kind: Message.OPEN_LIBRARY,
+    });
+  });
+
+  it("lets open-marks carry nothing even when something was sent along", () => {
+    // The highlights page is not about any tab either; its per-document
+    // variant exists only inside the reader, so no scope may ride in.
+    assert.deepEqual(asRequest({ kind: Message.OPEN_MARKS, sourceTabId: 42, scope: "x" }), {
+      kind: Message.OPEN_MARKS,
     });
   });
 

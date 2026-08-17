@@ -8,12 +8,14 @@
    the end spreads the same HTML out for a desktop. */
 
 /* A touch wider than the shared 44rem: the list rows hold three columns and
-   the extra room goes to the pair names. The tighter top padding is this
-   page's own: with the table of contents and the first-steps card above the
-   rows, the stock padding pushed the models section under a 768px fold. */
+   the extra room goes to the pair names. The top padding is the other pages'
+   headroom (see vocab.css), so the bar stands at one height when the pages
+   are walked between - and tighter than the stock padding anyway: with the
+   table of contents and the first-steps card above the rows, that one pushed
+   the models section under a 768px fold. */
 body {
   max-width: 46rem;
-  padding-top: 1.75rem;
+  padding-top: 1.5rem;
 }
 
 /* Denser prose rhythm for the same reason - this page stacks many short
@@ -57,17 +59,18 @@ summary {
   white-space: nowrap;
 }
 
-/* --- the header: brand line, title, the table of contents --- */
+/* --- the header: the shared bar, title, the table of contents ---
 
-.brand {
-  margin: 0 0 0.25rem;
-  color: var(--page-muted);
-  font-size: 0.9rem;
-  letter-spacing: 0.04em;
-}
+   The bar and its menu (`.page-bar`, `.page-mark`, `.nav-menu`) live in
+   assets/page.css - the dress every header of this extension wears. The
+   mark here is a plain line, not a button: the door it opens elsewhere is
+   this very room. */
 
+/* The title stands clear under the bar's line; an opened menu panel pushes
+   it down from between the two, as on the other pages. A step tighter than
+   the saved phrases' 2rem, for this page's own fold arithmetic. */
 header h1 {
-  margin: 0 0 0.75rem;
+  margin: 1.5rem 0 0.75rem;
 }
 
 /* Plain links in a wrapping line; the dot between them is drawn, not written,
@@ -95,11 +98,29 @@ header h1 {
   color: var(--page-muted);
 }
 
+/* The support section's two doors, one per line - the jump links' touch
+   floor without their separator: these are the section's whole content, not
+   a table of contents. */
+.support-links {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin: 0.75rem 0 0;
+}
+
+.support-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
 /* The anchors' landing pads: a heading flush with the viewport's edge reads
-   as cut off. The margin above sections is a step tighter than the shared
-   default, for the same fold arithmetic as the body padding. */
+   as cut off. The margin above sections is a step wider than the shared
+   default (Michał's request, 2026-08-17): the rows above end dense, and a
+   section heading needs air to read as a new chapter - worth more than the
+   fold arithmetic that once kept it tight. */
 h2 {
-  margin-top: 1.5rem;
+  margin-top: 3rem;
   scroll-margin-top: 0.75rem;
 }
 

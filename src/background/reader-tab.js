@@ -16,7 +16,13 @@
  */
 
 import { webext } from "../lib/browser.js";
-import { clearReaderSource, readReaderTab, writeReaderSource, writeReaderTab } from "../lib/session.js";
+import {
+  clearReaderSource,
+  readReaderTab,
+  writeMarksSource,
+  writeReaderSource,
+  writeReaderTab,
+} from "../lib/session.js";
 import { raiseOrOpen } from "./single-tab.js";
 
 const READER_PAGE = "reader/reader.html";
@@ -96,5 +102,23 @@ export async function openLibrary(deps = {}) {
   const now = deps.now ?? Date.now;
 
   await clearReaderSource(now, session);
+  await openReader(deps);
+}
+
+/**
+ * The menus' "Highlights" row on the pages that are not the reader: point the
+ * reader at the highlights page, then bring it forward. The same bargain as
+ * the reading list's entry - a reader already standing hears the source
+ * change and turns its view, a reader opened by this press finds the source
+ * waiting - and blind to where the press came from for the same reason.
+ *
+ * @param {ReaderTabDeps} [deps]
+ * @returns {Promise<void>}
+ */
+export async function openMarks(deps = {}) {
+  const session = deps.session ?? webext().storage.session;
+  const now = deps.now ?? Date.now;
+
+  await writeMarksSource(now, session);
   await openReader(deps);
 }

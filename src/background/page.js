@@ -36,8 +36,11 @@ export async function readPage(deps = {}) {
   const tabs = deps.tabs ?? webext().tabs;
   const session = deps.session ?? webext().storage.session;
 
+  // A source pointing at the highlights page has no tab behind it either -
+  // and the reader never asks over one; the branch is for the type's sake
+  // and for the stray message that could still arrive.
   const source = await readReaderSource(session);
-  if (source === null) return fail(ErrorCode.NO_PAGE);
+  if (source === null || "marks" in source) return fail(ErrorCode.NO_PAGE);
 
   /** @type {unknown} */
   let answer;

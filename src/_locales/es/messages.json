@@ -14,6 +14,7 @@
   },
 
   "settings": { "message": "Ajustes" },
+  "support": { "message": "Apoyo" },
   "nav_menu": { "message": "Menú" },
   "language_pair": { "message": "Par de idiomas" },
   "reading_list": { "message": "Lista de lectura sin conexión" },
@@ -23,7 +24,6 @@
   "action_delete": { "message": "Eliminar" },
   "action_download": { "message": "Descargar" },
   "action_cancel": { "message": "Cancelar" },
-  "action_open": { "message": "Abrir" },
   "action_update": { "message": "Actualizar" },
 
   "error_engine_missing": { "message": "Aún no hay motor de traducción - esta versión no puede traducir." },
@@ -60,7 +60,6 @@
   "popup_no_model": {
     "message": "Todavía no hay ningún modelo de traducción en este dispositivo - pulsa aquí para elegir uno en los ajustes."
   },
-  "popup_mode_reader_only": { "message": "Modo: solo en la vista de lectura" },
 
   "vocab_title": { "message": "re/read - frases guardadas" },
   "vocab_intro": {
@@ -278,7 +277,7 @@
   "reader_marks_filter_label": { "message": "Filtrar los resaltados" },
   "reader_marks_filter_placeholder": { "message": "Filtrar por cita o título" },
   "reader_marks_empty": {
-    "message": "Aún no hay nada resaltado - toma el resaltador en la vista de lectura y marca un pasaje; te esperará aquí."
+    "message": "Aún no hay nada resaltado - se resalta mientras se lee. Abre algo de la lista de lectura sin conexión, toma el resaltador y marca un pasaje; te esperará aquí."
   },
   "reader_marks_empty_doc": { "message": "Aún no hay nada resaltado en este documento." },
   "reader_marks_no_match": {
@@ -530,7 +529,7 @@
     "message": "Bajo «Diccionarios», descarga un diccionario para el mismo par (opcional, pero merece la pena) - las palabras sueltas reciben entonces respuestas más completas que una traducción sola (tras pulsar «Más» en la burbuja de traducción)."
   },
   "options_first_steps_pin": {
-    "message": "Por último, fija re/read a la barra de herramientas: pulsa el icono de la pieza de puzle a la derecha de la barra y, junto a re/read, elige el engranaje y «Fijar a la barra de herramientas». El botón de re/read da acceso rápido a la vista de lectura, la lista de lectura sin conexión, tus frases guardadas, el cambio del par de idiomas y el interruptor del sitio en el que estás."
+    "message": "Por último, fija re/read a la barra de herramientas: pulsa el icono de la pieza de puzle a la derecha de la barra y, junto a re/read, elige el engranaje y «Fijar a la barra de herramientas». El botón de re/read da acceso rápido a la vista de lectura, la lista de lectura sin conexión, tus resaltados, tus frases guardadas, el cambio del par de idiomas y el interruptor del sitio en el que estás."
   },
   "options_first_steps_pin_android": {
     "message": "El botón de re/read está en el menú del navegador (⋮), en la sección de extensiones - da acceso rápido a la vista de lectura, la lista de lectura sin conexión, tus frases guardadas, el cambio del par de idiomas y el interruptor del sitio en el que estás."
@@ -620,6 +619,11 @@
   "options_disabled_intro": {
     "message": "Sitios donde re/read se queda apagado - sin subrayados, sin burbuja, sin nada corriendo en la propia página; abrir una página a mano en la vista de lectura sigue funcionando. Lo que añade un sitio aquí es el interruptor del popup de la barra de herramientas; esta lista es la forma de volver a encender uno sin visitarlo."
   },
+  "options_support_intro": {
+    "message": "re/read lo desarrolla una fundación sin ánimo de lucro - sin inversores, sin anuncios, sin rastreo. Si te resulta útil y quieres apoyar su desarrollo, cada donación nos ayuda a construir software libre de presiones comerciales."
+  },
+  "options_support_donate": { "message": "Donar con Wise" },
+  "options_support_more": { "message": "Más formas de apoyar" },
 
   "options_badge_reading": { "message": "lo que estás leyendo" },
   "options_delete_confirm": { "message": "¿Seguro?" },
