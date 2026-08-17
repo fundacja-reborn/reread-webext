@@ -172,10 +172,15 @@ const SCROLL_TAIL_MS = 100;
  * @property {(range: Range) => void} [onMarked] a marker gesture ended on this
  *   range. The range is handed over, not kept: the stroke's paint is cleared
  *   first, and whatever the mark becomes is the caller's to draw.
- * @property {(x: number, y: number) => void} [onMarkTap] a tap while the
- *   highlighter is on. The caller answers it - a tapped mark grows a delete
- *   bubble, empty space stands one down - and this module only promises the
- *   tap will not also mean what taps mean with the pen away.
+ * @property {() => void} [onMarkStart] a marker stroke just took its first
+ *   word - whatever the caller shows about a standing mark (pins, the
+ *   toolbar's acts) is about to be stale.
+ * @property {(x: number, y: number, word?: Range) => void} [onMarkTap] a tap
+ *   while the highlighter is on. `word` is the glued range of the word under
+ *   the tap, when the tap landed on one inside the markable ground - the
+ *   caller reads it as "this word too" beside an active mark (D107). The
+ *   caller answers the tap either way, and this module only promises it will
+ *   not also mean what taps mean with the pen away.
  */
 
 /** @type {SelectHooks | null} */
@@ -473,6 +478,9 @@ function inkStart(word) {
   if (built === null) return false;
   ink = { anchor: word, range: built };
   paintInk();
+  // After the paint stands, so a caller that reacts by repainting its own
+  // layers never sees a claimed stroke with nothing on screen.
+  hooks?.onMarkStart?.();
   return true;
 }
 
@@ -869,11 +877,27 @@ function tap(event, x, y) {
     const target = event.target;
     if (linkOwns(target)) return;
     if (!(target instanceof Node) || hooks === null || !hooks.root.contains(target)) return;
-    hooks.onMarkTap?.(x, y);
+    hooks.onMarkTap?.(x, y, tappedWord(x, y, GRAB_SLOP));
     event.preventDefault();
     return;
   }
   if (answerTap(event.target, x, y, GRAB_SLOP)) event.preventDefault();
+}
+
+/**
+ * The glued range of the word a marker tap landed on, if it landed on one
+ * inside the markable ground - what lets the caller grow an active mark by
+ * its neighbour (D107).
+ *
+ * @param {number} x
+ * @param {number} y
+ * @param {number} slop the asking pointer's margin
+ * @returns {Range | undefined}
+ */
+function tappedWord(x, y, slop) {
+  const word = wordAt(x, y, slop);
+  if (word === null || !withinMarkRoot(word.geo.block)) return undefined;
+  return inkRange(word, word) ?? undefined;
 }
 
 /**
@@ -1062,7 +1086,7 @@ export function releaseMouse(event) {
         }
       }
     }
-    hooks.onMarkTap?.(event.clientX, event.clientY);
+    hooks.onMarkTap?.(event.clientX, event.clientY, tappedWord(event.clientX, event.clientY, MOUSE_SLOP));
     return true;
   }
 

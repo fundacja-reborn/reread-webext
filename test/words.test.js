@@ -8,6 +8,7 @@ import {
   gluedStart,
   nearestWordIndex,
   wordIndexAt,
+  wordless,
 } from "../src/lib/matcher/words.js";
 
 /**
@@ -173,5 +174,15 @@ describe("the punctuation glued to a mark's edges (D107)", () => {
     assert.ok(quoted !== undefined);
     assert.equal(gluedStart(text, quoted.start), 0);
     assert.equal(gluedEnd(text, quoted.end), text.length);
+  });
+
+  it("knows a gap with no word in it - the neighbour test", () => {
+    // Between a mark's edge and the tapped word: space and punctuation make
+    // a neighbour, any word in between makes a stranger.
+    assert.ok(wordless(" "));
+    assert.ok(wordless('." ('));
+    assert.ok(wordless(""));
+    assert.ok(!wordless(" one "));
+    assert.ok(!wordless("źdźbło"));
   });
 });

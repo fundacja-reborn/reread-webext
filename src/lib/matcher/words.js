@@ -116,6 +116,20 @@ export function gluedEnd(text, offset) {
 }
 
 /**
+ * Whether a stretch of text holds no word at all - only space and
+ * punctuation. This is what makes a tapped word "the neighbour" of a mark
+ * (D107): between the mark's edge and the word there is nothing a reader
+ * would call text, so growing over the gap grows by exactly one word - the
+ * same one-step reading `besideSpan` gives the translation gesture.
+ *
+ * @param {string} text
+ * @returns {boolean}
+ */
+export function wordless(text) {
+  return !WORD_CHARACTER.test(text);
+}
+
+/**
  * The word nearest an offset - the drag's forgiving question.
  *
  * Distance is measured to the token's edges, zero inside it, and the earlier

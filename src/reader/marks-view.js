@@ -243,3 +243,32 @@ export function markAt(x, y) {
   }
   return null;
 }
+
+/**
+ * The painted range of one mark, by identity - how a mark that was just
+ * committed becomes the active one (D107): the pins need its boxes, and the
+ * paint already built them.
+ *
+ * @param {Mark} mark
+ * @returns {Range | null}
+ */
+export function paintedRangeOf(mark) {
+  for (const entry of painted) {
+    if (entry.mark === mark) return entry.range;
+  }
+  return null;
+}
+
+/**
+ * One top-level block's prose, for questions the anchors alone cannot
+ * answer - today: whether the gap between an active mark's edge and a
+ * tapped word holds any word at all (the neighbour test, D107).
+ *
+ * @param {Element} root
+ * @param {number} index
+ * @returns {string | null}
+ */
+export function proseTextOf(root, index) {
+  const block = root.children[index];
+  return block === undefined ? null : blockProse(block).text;
+}

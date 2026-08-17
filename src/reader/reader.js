@@ -46,7 +46,15 @@ import { buildArticle } from "../lib/reader/article.js";
 import { asDocState, docState } from "../lib/reader/history-state.js";
 import { importKind } from "../lib/reader/import-kind.js";
 import { speechAction } from "../lib/reader/keys.js";
-import { isMarkColor, markRecord, mergePlan, placeMark, withoutMark } from "../lib/reader/marks.js";
+import { wordless } from "../lib/matcher/words.js";
+import {
+  comparePoints,
+  isMarkColor,
+  markRecord,
+  mergePlan,
+  placeMark,
+  withoutMark,
+} from "../lib/reader/marks.js";
 import {
   POSITION_SAVE_DELAY,
   blockAtLine,
@@ -89,7 +97,15 @@ import { watchToolbarScheme } from "../lib/theme-icon.js";
 import { canSpeak, primaryLanguage, voicesFor } from "../lib/tts.js";
 import { importEpub } from "./import-book.js";
 import { articleEntry, bookEntry, libraryView } from "./list-view.js";
-import { anchorOf, clearMarkPaint, markAt, paintMarks, quoteOfSpan } from "./marks-view.js";
+import {
+  anchorOf,
+  clearMarkPaint,
+  markAt,
+  paintMarks,
+  paintedRangeOf,
+  proseTextOf,
+  quoteOfSpan,
+} from "./marks-view.js";
 import {
   configureReading,
   forgetReading,
@@ -766,26 +782,42 @@ function repaintMarks() {
  * @param {Range} range
  */
 async function onMarked(range) {
+  const root = contentRoot();
+  if (root === null) return;
+  const span = anchorOf(range, root, shownSegment());
+  if (span === null) return;
+  await commitSpan(span, currentMarkColor());
+}
+
+/**
+ * A span becoming the standing mark: merged with whatever it touched,
+ * painted, made the active mark - a fresh mark opens with its pins and its
+ * acts ready, because deleting or copying what was just drawn is the next
+ * thing a hand does (D107, Michał's report) - and then written, with the
+ * paint taken back and the failure said out loud if the write does not
+ * land. The colour is the caller's word: the pen's ink for a stroke, the
+ * mark's own for a growth by its neighbour.
+ *
+ * @param {import("../lib/reader/marks.js").MarkSpan} span
+ * @param {string} color
+ */
+async function commitSpan(span, color) {
   const target = shown;
   const root = contentRoot();
   if (target === null || root === null) return;
-  // A fresh stroke means the hand moved on: whatever mark was active stands
-  // down, and the toolbar returns to speaking for the pen.
   deselectMark();
 
-  const span = anchorOf(range, root, shownSegment());
-  if (span === null) return;
   const plan = mergePlan(docMarks, span);
   const text = quoteOfSpan(plan.span, root);
   const mark =
-    text === null
-      ? null
-      : markRecord({ ...plan.span, color: currentMarkColor(), createdAt: Date.now(), text });
+    text === null ? null : markRecord({ ...plan.span, color, createdAt: Date.now(), text });
   if (mark === null) return;
 
   const before = docMarks;
   docMarks = placeMark(docMarks, plan.absorbed, mark);
   repaintMarks();
+  const painted = paintedRangeOf(mark);
+  if (painted !== null) activateMark({ mark, range: painted });
 
   try {
     if (target.origin === "live") {
@@ -797,6 +829,7 @@ async function onMarked(range) {
   } catch {
     if (shown !== target) return;
     docMarks = before;
+    deselectMark();
     repaintMarks();
     showNotice(t("reader_list_write_failed"));
   }
@@ -823,21 +856,56 @@ async function keptForMarks(target) {
 
 /**
  * A tap while the pen is in the hand: a mark under it turns the toolbar to
- * that mark; bare text walks outward the way Escape does (D107, Michał's
- * instinct) - the active mark stands down first, the pen itself second.
- * That is the tap's whole grammar in this mode - recall, dismissal and
- * growing by neighbours belong to the pen being away.
+ * that mark; the word right beside the active mark grows it by that word
+ * (D107, the translation gesture's own one-step grammar); bare text walks
+ * outward the way Escape does - the active mark stands down first, the pen
+ * itself second.
  *
  * @param {number} x
  * @param {number} y
+ * @param {Range} [word] the glued range of the tapped word, when there was one
  */
-function onMarkTap(x, y) {
+function onMarkTap(x, y, word) {
   const hit = markAt(x, y);
-  if (hit === null) {
-    stepOut();
+  if (hit !== null) {
+    activateMark(hit);
     return;
   }
-  activateMark(hit);
+  if (word !== undefined && growActiveBy(word)) return;
+  stepOut();
+}
+
+/**
+ * The active mark grown by a tapped neighbour, when the tap really named
+ * one: the word stands in the same paragraph as the mark's edge, with
+ * nothing wordlike between them - across a paragraph break or past another
+ * word, the tap keeps meaning what a tap on bare text means. The growth
+ * keeps the mark's own ink: this is "this word too", never a repaint.
+ *
+ * @param {Range} word
+ * @returns {boolean} whether the tap was answered here
+ */
+function growActiveBy(word) {
+  const active = activeMark;
+  const root = contentRoot();
+  if (active === null || root === null) return false;
+
+  const span = anchorOf(word, root, shownSegment());
+  if (span === null || span.segmentIndex !== active.segmentIndex) return false;
+
+  if (span.start.block === active.end.block && comparePoints(span.start, active.end) >= 0) {
+    const prose = proseTextOf(root, active.end.block);
+    if (prose === null || !wordless(prose.slice(active.end.offset, span.start.offset))) return false;
+    void commitSpan({ segmentIndex: span.segmentIndex, start: active.start, end: span.end }, active.color);
+    return true;
+  }
+  if (span.end.block === active.start.block && comparePoints(active.start, span.end) >= 0) {
+    const prose = proseTextOf(root, active.start.block);
+    if (prose === null || !wordless(prose.slice(span.end.offset, active.start.offset))) return false;
+    void commitSpan({ segmentIndex: span.segmentIndex, start: span.start, end: active.end }, active.color);
+    return true;
+  }
+  return false;
 }
 
 /** One step outward: the active mark down, or - with none - the pen itself. */
@@ -2686,6 +2754,10 @@ start({
   marking: () => markerOn,
   markRoot: () => contentRoot(),
   onMarked: (range) => void onMarked(range),
+  // A stroke taking its first word: whatever mark was active is about to be
+  // stale - its pins would stand over yesterday's outline while the new one
+  // is drawn (Michał's report).
+  onMarkStart: () => deselectMark(),
   onMarkTap,
 });
 
