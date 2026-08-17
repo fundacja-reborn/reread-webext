@@ -46,13 +46,7 @@ import { buildArticle } from "../lib/reader/article.js";
 import { asDocState, docState } from "../lib/reader/history-state.js";
 import { importKind } from "../lib/reader/import-kind.js";
 import { speechAction } from "../lib/reader/keys.js";
-import {
-  DEFAULT_MARK_COLOR,
-  markRecord,
-  mergePlan,
-  placeMark,
-  withoutMark,
-} from "../lib/reader/marks.js";
+import { isMarkColor, markRecord, mergePlan, placeMark, withoutMark } from "../lib/reader/marks.js";
 import {
   POSITION_SAVE_DELAY,
   blockAtLine,
@@ -700,12 +694,13 @@ function restorePosition(position, segmentIndex = 0) {
  */
 
 /**
- * What a new mark is drawn in. One colour today; the Aa panel's palette will
- * answer from the settings here, and the record has carried its colour since
- * the first mark ever written - no migration when it does.
+ * What a new mark is drawn in: the Aa panel's pick. The record has carried
+ * its colour since the first mark ever written, so the choice only ever
+ * says what the next stroke wears - and repainting an old mark is drawing
+ * over it, which merges and takes the current ink.
  */
 function currentMarkColor() {
-  return DEFAULT_MARK_COLOR;
+  return settings.reader.markerColor;
 }
 
 /** The segment the marks on screen belong to - a book's part, an article's zero. */
@@ -1759,21 +1754,29 @@ function applyAppearance(reader) {
   applyReading(root, reader);
   root.dataset["readerLinks"] = reader.links;
   root.style.setProperty("--reader-measure", `${reader.measure}ch`);
+  // The wet stroke's ink (D106): an alias onto the chosen colour's own
+  // per-theme variable, so the draft follows both the pick and the theme.
+  root.style.setProperty("--reader-marker-current", `var(--reader-marker-${reader.markerColor})`);
 
   if (sizeValue !== null) sizeValue.textContent = String(reader.fontSize);
   if (measureValue !== null) measureValue.textContent = String(reader.measure);
   applyLinkStops(reader.links);
 
-  for (const button of document.querySelectorAll("[data-theme], [data-font], [data-links]")) {
+  for (const button of document.querySelectorAll(
+    "[data-theme], [data-font], [data-links], [data-marker-color]",
+  )) {
     const wanted =
       button.getAttribute("data-theme") ??
       button.getAttribute("data-font") ??
-      button.getAttribute("data-links");
+      button.getAttribute("data-links") ??
+      button.getAttribute("data-marker-color");
     const current = button.hasAttribute("data-theme")
       ? reader.theme
       : button.hasAttribute("data-font")
         ? reader.font
-        : reader.links;
+        : button.hasAttribute("data-links")
+          ? reader.links
+          : reader.markerColor;
     button.setAttribute("aria-pressed", String(wanted === current));
   }
 }
@@ -1952,6 +1955,7 @@ async function onDisplayPress(event) {
   const theme = button.getAttribute("data-theme");
   const font = button.getAttribute("data-font");
   const links = button.getAttribute("data-links");
+  const markerColor = button.getAttribute("data-marker-color");
   const size = button.getAttribute("data-size");
   const measure = button.getAttribute("data-measure");
 
@@ -1960,6 +1964,7 @@ async function onDisplayPress(event) {
   if (isTheme(theme)) patch = { theme };
   else if (isFont(font)) patch = { font };
   else if (isLinks(links)) patch = { links };
+  else if (isMarkColor(markerColor)) patch = { markerColor };
   else if (size !== null || measure !== null) {
     // Read first, because the buttons step from wherever the setting is now,
     // and another reader tab may have moved it since this one drew itself.

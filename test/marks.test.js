@@ -82,9 +82,9 @@ describe("the marks on the page", () => {
     );
 
     assert.ok(view.includes('"reread-marker-"'), "marks-view.js no longer prefixes colour names");
-    for (const color of ["yellow"]) {
-      // Only the colours the stylesheet already wears: the palette grows the
-      // list here the day it grows the CSS.
+    for (const color of ["yellow", "green", "blue", "pink"]) {
+      // Every colour the rules know is a registry name the stylesheet must
+      // dress - a mark in an unstyled colour would paint invisibly.
       assert.ok(
         rules.includes(`"${color}"`),
         `lib/reader/marks.js no longer knows the colour "${color}"`,

@@ -92,6 +92,14 @@ describe("withDefaults", () => {
     result.sourceLang = "de";
     assert.equal(DEFAULTS.sourceLang, "en");
   });
+
+  it("keeps a known marker colour and heals anything else to yellow", () => {
+    assert.equal(withDefaults({ reader: { markerColor: "pink" } }).reader.markerColor, "pink");
+    // A colour the stylesheet does not dress would paint invisibly - a
+    // hand-edited value falls back rather than reaching the registry.
+    assert.equal(withDefaults({ reader: { markerColor: "mauve" } }).reader.markerColor, "yellow");
+    assert.equal(withDefaults({ reader: {} }).reader.markerColor, "yellow");
+  });
 });
 
 describe("readConfig", () => {
