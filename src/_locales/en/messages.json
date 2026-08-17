@@ -18,6 +18,10 @@
   },
 
   "settings": { "message": "Settings" },
+  "support": {
+    "message": "Support",
+    "description": "The support section's heading on the settings page, its link in the page's table of contents, and the popup's heart row - the noun, as in backing the project."
+  },
   "nav_menu": { "message": "Menu" },
   "language_pair": { "message": "Language pair" },
   "reading_list": { "message": "Offline reading list" },
@@ -711,6 +715,11 @@
   "options_disabled_intro": {
     "message": "Sites where re/read stays off - no underlines, no bubble, nothing running on the page itself; opening a page in the reader by hand still works. The switch in the toolbar popup is what adds a site here; this list is how one is turned back on without visiting it."
   },
+  "options_support_intro": {
+    "message": "re/read is built by a non-profit foundation - no investors, no ads, no tracking. If you find it useful and want to support its continued development, every donation helps us build software free from commercial pressure."
+  },
+  "options_support_donate": { "message": "Donate via Wise" },
+  "options_support_more": { "message": "More ways to support" },
 
   "options_badge_reading": { "message": "what you are reading" },
   "options_delete_confirm": {

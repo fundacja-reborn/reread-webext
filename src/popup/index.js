@@ -54,6 +54,14 @@ const libraryButton = document.getElementById("open-library");
 const marksButton = document.getElementById("open-marks");
 const vocabularyButton = document.getElementById("open-vocabulary");
 const settingsButton = document.getElementById("open-settings");
+const supportButton = document.getElementById("open-support");
+
+/**
+ * The one outward address in the popup - the foundation's support page, the
+ * same one the README and the settings' Support section name. Navigation on
+ * a press, never a request the extension makes itself.
+ */
+const SUPPORT_URL = "https://reapps.eu/#support";
 const modeLine = document.getElementById("mode-line");
 
 /** The tab under the popup, and what it said about itself. */
@@ -211,6 +219,15 @@ async function openSettings() {
   window.close();
 }
 
+async function openSupport() {
+  try {
+    await webext().tabs.create({ url: SUPPORT_URL });
+  } catch {
+    // The tab did not open - nothing to do but let the press be repeated.
+  }
+  window.close();
+}
+
 siteToggle?.addEventListener("change", () => void toggleSite());
 quietToggle?.addEventListener("change", () => void toggleQuietBubble());
 pairSelect?.addEventListener("change", () => void choosePair());
@@ -219,6 +236,7 @@ libraryButton?.addEventListener("click", () => void openLibrary());
 marksButton?.addEventListener("click", () => void openMarks());
 vocabularyButton?.addEventListener("click", () => void openVocabulary());
 settingsButton?.addEventListener("click", () => void openSettings());
+supportButton?.addEventListener("click", () => void openSupport());
 // The signpost is a door to the same place the settings row leads.
 setupRow?.addEventListener("click", () => void openSettings());
 // The status line is also the shortest way to where the mode is changed.

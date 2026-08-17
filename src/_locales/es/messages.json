@@ -14,6 +14,7 @@
   },
 
   "settings": { "message": "Ajustes" },
+  "support": { "message": "Apoyo" },
   "nav_menu": { "message": "Menú" },
   "language_pair": { "message": "Par de idiomas" },
   "reading_list": { "message": "Lista de lectura sin conexión" },
@@ -619,6 +620,11 @@
   "options_disabled_intro": {
     "message": "Sitios donde re/read se queda apagado - sin subrayados, sin burbuja, sin nada corriendo en la propia página; abrir una página a mano en la vista de lectura sigue funcionando. Lo que añade un sitio aquí es el interruptor del popup de la barra de herramientas; esta lista es la forma de volver a encender uno sin visitarlo."
   },
+  "options_support_intro": {
+    "message": "re/read lo desarrolla una fundación sin ánimo de lucro - sin inversores, sin anuncios, sin rastreo. Si te resulta útil y quieres apoyar su desarrollo, cada donación nos ayuda a construir software libre de presiones comerciales."
+  },
+  "options_support_donate": { "message": "Donar con Wise" },
+  "options_support_more": { "message": "Más formas de apoyar" },
 
   "options_badge_reading": { "message": "lo que estás leyendo" },
   "options_delete_confirm": { "message": "¿Seguro?" },

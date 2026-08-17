@@ -115,3 +115,20 @@ body[data-os="android"] .popup-row {
   color: var(--page-muted);
   font-size: 0.9em;
 }
+
+/* The support row rests at the mode line's volume, for the opposite reason:
+   the mode line is a status, this is an ask, and an ask in a daily hallway
+   must not shout. Left-aligned as one phrase - the row grid's space-between
+   would strand the word at the far edge of its heart. */
+.popup-support {
+  justify-content: flex-start;
+  gap: 0.45rem;
+  border-top: 1px solid var(--page-line);
+  border-bottom: none;
+  color: var(--page-muted);
+  font-size: 0.9em;
+}
+
+.popup-support .support-heart {
+  color: var(--page-accent);
+}

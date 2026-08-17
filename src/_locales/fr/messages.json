@@ -14,6 +14,7 @@
   },
 
   "settings": { "message": "Paramètres" },
+  "support": { "message": "Soutien" },
   "nav_menu": { "message": "Menu" },
   "language_pair": { "message": "Paire de langues" },
   "reading_list": { "message": "Liste de lecture hors ligne" },
@@ -619,6 +620,11 @@
   "options_disabled_intro": {
     "message": "Les sites où re/read reste éteint - pas de soulignements, pas de bulle, rien qui tourne sur la page elle-même ; ouvrir une page à la main dans le lecteur fonctionne toujours. C'est l'interrupteur du popup de la barre d'outils qui ajoute un site ici ; cette liste est la façon d'en rallumer un sans le visiter."
   },
+  "options_support_intro": {
+    "message": "re/read est développé par une fondation à but non lucratif - sans investisseurs, sans publicité, sans pistage. S'il vous est utile et que vous souhaitez soutenir son développement, chaque don nous aide à construire des logiciels libres de toute pression commerciale."
+  },
+  "options_support_donate": { "message": "Faire un don via Wise" },
+  "options_support_more": { "message": "D'autres façons de soutenir" },
 
   "options_badge_reading": { "message": "ce que vous lisez" },
   "options_delete_confirm": { "message": "Sûr ?" },

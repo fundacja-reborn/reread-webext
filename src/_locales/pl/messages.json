@@ -14,6 +14,7 @@
   },
 
   "settings": { "message": "Ustawienia" },
+  "support": { "message": "Wsparcie" },
   "nav_menu": { "message": "Menu" },
   "language_pair": { "message": "Para językowa" },
   "reading_list": { "message": "Czytelnia offline" },
@@ -726,6 +727,11 @@
   "options_disabled_intro": {
     "message": "Witryny, na których re/read pozostaje wyłączony - bez podkreśleń, bez dymka, bez niczego na samej stronie; ręczne otwarcie strony w widoku czytania nadal działa. Witrynę dodaje tu przełącznik w dymku paska narzędzi; ta lista pozwala ją włączyć z powrotem bez odwiedzania jej."
   },
+  "options_support_intro": {
+    "message": "re/read tworzy fundacja non-profit - bez inwestorów, bez reklam, bez śledzenia. Jeśli rozszerzenie jest ci przydatne i chcesz wesprzeć jego dalszy rozwój, każda darowizna pomaga nam budować oprogramowanie wolne od komercyjnej presji."
+  },
+  "options_support_donate": { "message": "Przekaż darowiznę przez Wise" },
+  "options_support_more": { "message": "Więcej sposobów wsparcia" },
 
   "options_badge_reading": { "message": "to czytasz" },
   "options_delete_confirm": { "message": "Na pewno?" },

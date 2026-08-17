@@ -14,6 +14,7 @@
   },
 
   "settings": { "message": "Einstellungen" },
+  "support": { "message": "Unterstützung" },
   "nav_menu": { "message": "Menü" },
   "language_pair": { "message": "Sprachpaar" },
   "reading_list": { "message": "Offline-Leseliste" },
@@ -596,6 +597,11 @@
   "options_disabled_intro": {
     "message": "Websites, auf denen re/read aus bleibt - keine Unterstreichungen, keine Blase, nichts läuft auf der Seite selbst; von Hand lässt sich eine Seite weiterhin in der Leseansicht öffnen. Der Schalter im Symbolleisten-Popup fügt eine Website hier hinzu; diese Liste ist der Weg, eine wieder einzuschalten, ohne sie zu besuchen."
   },
+  "options_support_intro": {
+    "message": "re/read wird von einer gemeinnützigen Stiftung entwickelt - ohne Investoren, ohne Werbung, ohne Tracking. Wenn es Ihnen nützlich ist und Sie seine Weiterentwicklung unterstützen möchten: Jede Spende hilft uns, Software frei von kommerziellem Druck zu bauen."
+  },
+  "options_support_donate": { "message": "Über Wise spenden" },
+  "options_support_more": { "message": "Weitere Möglichkeiten zu unterstützen" },
 
   "options_badge_reading": { "message": "das lesen Sie gerade" },
   "options_delete_confirm": { "message": "Sicher?" },
