@@ -1666,13 +1666,16 @@ export function createTooltip({ onAction, onHide }) {
   }
 
   /**
-   * The edit box sized to what is actually in it, as laid out. Until D97 the
-   * rows counted meanings, and one meaning wrapping on a narrow screen got a
-   * one-line box showing nothing but its own tail - the caret sits at the end
-   * after `select()`, and the box had scrolled to it. Only a rendered element
-   * knows where its lines broke, so the box is collapsed to one row and asked
-   * how far its content overflows; the cap is what keeps a long gloss from
-   * pushing the Save button off a phone's screen.
+   * The edit box sized to what is actually in it, as laid out - plus one
+   * spare line (Michał's call): a box exactly full reads as a box with no
+   * room, and the spare line is where the second meaning goes (Shift+Enter).
+   * Until D97 the rows counted meanings, and one meaning wrapping on a
+   * narrow screen got a one-line box showing nothing but its own tail - the
+   * caret sits at the end after `select()`, and the box had scrolled to it.
+   * Only a rendered element knows where its lines broke, so the box is
+   * collapsed to one row and asked how far its content overflows; the cap
+   * (the spare line inside it) is what keeps a long gloss from pushing the
+   * Save button off a phone's screen.
    */
   function sizeEditor() {
     if (editor === null) return;
@@ -1682,7 +1685,7 @@ export function createTooltip({ onAction, onHide }) {
     const line = parseFloat(style.lineHeight);
     if (!Number.isFinite(line) || line <= 0) return;
     const lines = Math.round((editor.scrollHeight - padding) / line);
-    editor.rows = Math.min(6, Math.max(1, lines));
+    editor.rows = Math.min(7, Math.max(1, lines) + 1);
   }
 
   /**
