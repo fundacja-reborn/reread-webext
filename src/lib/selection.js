@@ -110,3 +110,23 @@ export function keeping({ normalized, gloss, findable, deliberate = true }) {
 export function touchPointer(pointerType) {
   return pointerType === "touch" || pointerType === "pen";
 }
+
+/**
+ * Whether a key press is the platform's copy chord - the reader page's
+ * clipboard bridge (D110): its article refuses the native selection (D80,
+ * D86), so Ctrl+C has nothing to copy there unless the page answers it.
+ *
+ * Exactly one of Ctrl and Meta, because the platforms disagree on which and
+ * pressing both is no chord anybody's hand means. Shift is refused - Ctrl+
+ * Shift+C is the browser's own door to its developer tools - and Alt turns
+ * the key into a different character on some layouts. The uppercase `C` is
+ * let through on purpose: Caps Lock changes what `key` says, not what the
+ * hand asked for.
+ *
+ * @param {{ key: string, ctrl: boolean, meta: boolean, alt: boolean, shift: boolean }} press
+ * @returns {boolean}
+ */
+export function copyCombo({ key, ctrl, meta, alt, shift }) {
+  if (key !== "c" && key !== "C") return false;
+  return ctrl !== meta && !alt && !shift;
+}

@@ -46,6 +46,10 @@
   "bubble_speak": { "message": "Прочитати вголос" },
   "bubble_sentence_collapse": { "message": "Згорнути речення" },
   "bubble_sentence_expand": { "message": "Розгорнути речення" },
+  "bubble_copy": { "message": "Копіювати" },
+  "bubble_copy_original": { "message": "Копіювати оригінал" },
+  "bubble_copy_translation": { "message": "Копіювати переклад" },
+  "bubble_copied": { "message": "Скопійовано" },
 
   "popup_site_enabled": {
     "message": "Увімкнено на $DOMAIN$",
