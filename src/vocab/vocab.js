@@ -39,6 +39,9 @@ localizePage();
 // The toolbar icon follows the browser's scheme where the manifest cannot
 // say so (Chromium, no theme_icons there) - a no-op on Firefox.
 watchToolbarScheme();
+// The colophon's version, from the one place that knows it.
+const versionSpan = document.getElementById("version");
+if (versionSpan !== null) versionSpan.textContent = webext().runtime.getManifest().version;
 
 /** @typedef {import("../lib/store/phrase.js").Phrase} Phrase */
 

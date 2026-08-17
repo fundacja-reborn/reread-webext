@@ -391,3 +391,24 @@ button.page-mark:hover {
   border-color: var(--page-line);
   color: var(--page-accent);
 }
+
+/* --- the colophon (the settings' first, now every room that ends) --- */
+
+/* The line that closes a page the way one closes a book: name and version,
+   the licence, the maker and its address, the source. One dress here for
+   every room that wears it - the settings, the reading list, the highlights
+   and the saved phrases (Michał's wish, 2026-08-17: the address is meant to
+   be read and remembered wherever a reader reaches an end). The roof of
+   space keeps it from crowding the list above; its own interface family,
+   because the reader's rooms read in serif and the colophon is chrome, not
+   text. */
+.page-end {
+  margin-top: 4rem;
+  color: var(--page-muted);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 0.85rem;
+}
+
+.page-end p {
+  margin: 0;
+}

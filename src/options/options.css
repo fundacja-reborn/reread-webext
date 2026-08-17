@@ -529,17 +529,8 @@ summary::marker {
   color: var(--page-muted);
 }
 
-/* --- the colophon --- */
-
-.page-end {
-  margin-top: 3rem;
-  color: var(--page-muted);
-  font-size: 0.85rem;
-}
-
-.page-end p {
-  margin: 0;
-}
+/* The colophon's dress lives in page.css now - the same line closes the
+   reading list, the highlights and the saved phrases. */
 
 /* --- one breakpoint: the same HTML, spread out for a desktop --- */
 
