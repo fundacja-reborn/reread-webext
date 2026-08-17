@@ -249,6 +249,11 @@ html {
   background: none;
   color: var(--page-muted);
   letter-spacing: 0.02em;
+  /* The name is one word with a slash in it, and a squeezed flex row will
+     happily break a line after a slash: on a phone the mark came apart into
+     "re/" over "read" (reported from a Pixel). The brand holds its line at
+     every width; the bar around it is what gives way (media query below). */
+  white-space: nowrap;
 }
 
 .reader-mark:hover {
@@ -303,6 +308,32 @@ html {
 #marker[aria-pressed="true"] {
   border-color: var(--page-accent);
   background: color-mix(in srgb, var(--page-accent) 12%, transparent);
+}
+
+/* The bar's five residents on one phone-wide row. At the desktop gaps and
+   button floors the article view's bar added up past a Pixel's width once
+   the browser's text zoom grew the rem: the menu slid off the edge and the
+   brand broke in half (reported 2026-08-17). Under this width the bar
+   trades air for fit - tighter gaps, a slimmer floor - and nothing leaves
+   the row. The limit is in rem on purpose: the overflow arrives with the
+   text zoom, and an em-based query grows with the same zoom, so the tight
+   dress comes exactly to the screens that need it. */
+@media (max-width: 30rem) {
+  .reader-bar {
+    gap: 0.5rem;
+  }
+
+  .reader-tools {
+    gap: 0.4rem;
+  }
+
+  #marker,
+  #listen,
+  #display,
+  #menu {
+    min-width: 2.4rem;
+    padding-inline: 0.4rem;
+  }
 }
 
 .reader-panel {
@@ -1236,28 +1267,25 @@ button[data-armed],
   bottom: -8px;
 }
 
-/* Both bars up at once - marking while listening is a real way to read - and
-   the mark toolbar steps onto the voice bar's shoulders rather than either
-   hiding: the strip heights are one row each, and the page below gives room
-   for the pair. */
-body.reader:has(#speech-bar:not([hidden])) .mark-bar {
-  bottom: 3.9rem;
-}
-
-body.reader:has(#speech-bar:not([hidden])):has(#mark-bar:not([hidden])) {
-  padding-bottom: 8.5rem;
-}
-
 /* --- the bar that steers the voice, for as long as there is one --- */
 
 /* Pinned to the bottom of the window: a thumb reaches it on a phone and on an
    e-reader, and it stays where it was found however far the article scrolls.
    Its own background, because it stands over text - and the page's, so it is
-   the same paper as the article rather than a panel floating above it. */
+   the same paper as the article rather than a panel floating above it.
+
+   Anchored by its TOP edge, not by `bottom: 0`, though the two mean the same
+   place on a desktop: Firefox for Android moves bottom-anchored fixed boxes
+   together with its dynamic toolbar (the D77 lesson, first paid by the
+   bubble), and this bar came up half sunk under the address bar (reported
+   from a Pixel, 2026-08-17). `100svh` is the window's floor with the
+   browser's own bar standing - the one line that is never under it - and
+   the transform hands the bar's own height back, whatever that height is. */
 .speech-bar {
   position: fixed;
   inset-inline: 0;
-  bottom: 0;
+  top: 100svh;
+  transform: translateY(-100%);
   z-index: 2;
   display: flex;
   flex-wrap: wrap;
@@ -1271,6 +1299,19 @@ body.reader:has(#speech-bar:not([hidden])):has(#mark-bar:not([hidden])) {
   background: var(--page-bg);
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   font-size: 0.85rem;
+}
+
+/* The strip the browser's toolbar vacates when it slides away mid-read: the
+   bar above holds its ground (see `top` above), so this much of the page's
+   own paper keeps the article from visibly scrolling past beneath it. Zero
+   on a desktop, where the large and the small viewport are one height. */
+.speech-bar::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  inset-inline: 0;
+  height: calc(100lvh - 100svh);
+  background: var(--page-bg);
 }
 
 /* The last lines of the article stay readable while a bar is up - the
@@ -1339,7 +1380,7 @@ body.reader:has(#mark-bar:not([hidden])) {
   display: none;
 }
 
-/* --- one breakpoint: the same HTML, spread out for a desktop --- */
+/* --- the wide breakpoint: the same HTML, spread out for a desktop --- */
 
 @media (min-width: 600px) {
   /* The transport buttons say what they do in words again: at this width the
