@@ -306,6 +306,34 @@
   },
   "reader_export_marks": { "message": "Export highlights" },
   "reader_transfer_marks": { "message": "Export highlights writes a plain-text .md file of your highlighted passages, grouped by document - made for notes, not for import. Highlights travel between devices inside the article list's .json backup." },
+  "reader_marks_title": {
+    "message": "Highlights",
+    "description": "The highlights page (D108) and the menu row that opens it: every kept quote, or one document's when opened from that document's menu."
+  },
+  "reader_marks_filter_label": { "message": "Filter the highlights" },
+  "reader_marks_filter_placeholder": { "message": "Filter by quote or title" },
+  "reader_marks_empty": {
+    "message": "Nothing is highlighted yet - pick up the highlighter in the reading view and mark a passage; it will be waiting here."
+  },
+  "reader_marks_empty_doc": { "message": "Nothing is highlighted in this document yet." },
+  "reader_marks_no_match": {
+    "message": "No highlight matches \"$QUERY$\".",
+    "placeholders": { "query": { "content": "$1", "example": "wikipedia" } }
+  },
+  "reader_marks_back": {
+    "message": "Back to the highlights",
+    "description": "The back arrow's accessible name on an article opened from the highlights page - the step it takes leads there, not to the list."
+  },
+  "reader_back_to_doc": {
+    "message": "Back to \"$TITLE$\"",
+    "description": "The back arrow's accessible name on a document's own highlights page - the step back leads to the document itself.",
+    "placeholders": { "title": { "content": "$1", "example": "Old Chinese" } }
+  },
+  "reader_marks_open": {
+    "message": "Open \"$TITLE$\" at this highlight",
+    "description": "A quote row's arrow button - it opens the document in the reading view, scrolled to the mark itself.",
+    "placeholders": { "title": { "content": "$1", "example": "Old Chinese" } }
+  },
   "reader_transfer_link": {
     "message": "Import and export (articles or EPUB)",
     "description": "The quiet anchor over the reading list that jumps to the transfer section - it names both kinds of file the section takes, because a book is not obvious from the section's own name."

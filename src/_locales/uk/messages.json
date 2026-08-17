@@ -315,6 +315,26 @@
   },
   "reader_export_marks": { "message": "Експортувати позначення" },
   "reader_transfer_marks": { "message": "Експорт позначень записує текстовий файл .md з позначеними фрагментами, згрупованими за документами - для нотаток, не для імпорту. Позначення переносяться між пристроями в резервній копії .json списку статей." },
+  "reader_marks_title": { "message": "Позначення" },
+  "reader_marks_filter_label": { "message": "Фільтрувати позначення" },
+  "reader_marks_filter_placeholder": { "message": "Фільтр за цитатою чи назвою" },
+  "reader_marks_empty": {
+    "message": "Поки що нічого не позначено - візьміть маркер у режимі читання й позначте уривок; він чекатиме тут."
+  },
+  "reader_marks_empty_doc": { "message": "У цьому документі поки що нічого не позначено." },
+  "reader_marks_no_match": {
+    "message": "Жодне позначення не відповідає «$QUERY$».",
+    "placeholders": { "query": { "content": "$1", "example": "wikipedia" } }
+  },
+  "reader_marks_back": { "message": "Назад до позначень" },
+  "reader_back_to_doc": {
+    "message": "Назад до «$TITLE$»",
+    "placeholders": { "title": { "content": "$1", "example": "Old Chinese" } }
+  },
+  "reader_marks_open": {
+    "message": "Відкрити «$TITLE$» на цьому позначенні",
+    "placeholders": { "title": { "content": "$1", "example": "Old Chinese" } }
+  },
   "reader_transfer_link": { "message": "Імпорт та експорт (статті або EPUB)" },
   "reader_transfer_accepts": { "message": "Імпорт розпізнає файл: резервну копію списку статей re/read (.json) або електронну книжку (.epub)." },
   "reader_book_label": { "message": "Книжка" },

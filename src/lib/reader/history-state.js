@@ -59,3 +59,40 @@ export function asDocState(state) {
   if (typeof url !== "string" || url.length === 0) return null;
   return { kind, url };
 }
+
+/**
+ * A history entry standing for one visit to the highlights page (D108):
+ * every document's quotes with `scope` null, one document's when the page
+ * was opened from that document's own menu. An entry per visit for the
+ * same reason a document gets one - Back from a quote's article must land
+ * on the quotes it was opened from.
+ *
+ * @typedef {object} MarksState
+ * @property {string | null} scope a document's key, or null for all of them
+ */
+
+/**
+ * The state a highlights-page entry carries.
+ *
+ * @param {string | null} scope
+ * @returns {MarksState & { [MARK]: "marks" }}
+ */
+export function marksState(scope) {
+  return { [MARK]: "marks", scope };
+}
+
+/**
+ * The highlights visit an entry stands for, or null for every other entry -
+ * validated field by field like a document's, and for the same reason: an
+ * entry can outlive the build that wrote it.
+ *
+ * @param {unknown} state
+ * @returns {MarksState | null}
+ */
+export function asMarksState(state) {
+  if (typeof state !== "object" || state === null) return null;
+  const { [MARK]: mark, scope } = /** @type {Record<string, unknown>} */ (state);
+  if (mark !== "marks") return null;
+  if (scope !== null && (typeof scope !== "string" || scope.length === 0)) return null;
+  return { scope };
+}

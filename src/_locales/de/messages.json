@@ -259,6 +259,26 @@
   },
   "reader_export_marks": { "message": "Markierungen exportieren" },
   "reader_transfer_marks": { "message": "Der Export der Markierungen schreibt eine .md-Textdatei mit den markierten Passagen, nach Dokumenten gruppiert - für Notizen gedacht, nicht für den Import. Markierungen wandern zwischen Geräten in der .json-Sicherung der Artikelliste." },
+  "reader_marks_title": { "message": "Markierungen" },
+  "reader_marks_filter_label": { "message": "Die Markierungen filtern" },
+  "reader_marks_filter_placeholder": { "message": "Nach Zitat oder Titel filtern" },
+  "reader_marks_empty": {
+    "message": "Noch ist nichts markiert - nimm den Textmarker in der Leseansicht und markiere eine Passage; sie wartet dann hier."
+  },
+  "reader_marks_empty_doc": { "message": "In diesem Dokument ist noch nichts markiert." },
+  "reader_marks_no_match": {
+    "message": "Keine Markierung passt zu „$QUERY$“.",
+    "placeholders": { "query": { "content": "$1", "example": "wikipedia" } }
+  },
+  "reader_marks_back": { "message": "Zurück zu den Markierungen" },
+  "reader_back_to_doc": {
+    "message": "Zurück zu „$TITLE$“",
+    "placeholders": { "title": { "content": "$1", "example": "Old Chinese" } }
+  },
+  "reader_marks_open": {
+    "message": "„$TITLE$“ an dieser Markierung öffnen",
+    "placeholders": { "title": { "content": "$1", "example": "Old Chinese" } }
+  },
   "reader_transfer_link": { "message": "Import und Export (Artikel oder EPUB)" },
   "reader_transfer_accepts": { "message": "Der Import erkennt die Datei selbst: eine Sicherung der re/read-Artikelliste (.json) oder ein E-Book (.epub)." },
   "reader_book_label": { "message": "Buch" },

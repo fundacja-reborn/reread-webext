@@ -306,6 +306,10 @@
       <nav id="menu-panel" class="nav-menu" hidden aria-label="Menu" data-i18n-aria-label="nav_menu">
         <a id="original" data-i18n="reader_open_original" hidden>Open the original</a>
         <button id="nav-library" type="button" data-i18n="reading_list" hidden>Offline reading list</button>
+        <!-- The highlights page (D108). Over a document the row opens that
+             document's own quotes; over the list, everybody's. Like the
+             list row it hides in the room it names. -->
+        <button id="nav-marks" type="button" data-i18n="reader_marks_title">Highlights</button>
         <button id="nav-vocabulary" type="button" data-i18n="saved_phrases">Saved phrases</button>
         <button id="nav-settings" type="button" data-i18n="settings">Settings</button>
       </nav>
@@ -446,6 +450,116 @@
           <p id="book-import-status" class="status report" role="status"></p>
         </section>
       </section>
+
+      <!--
+        The highlights page (D108): every quote the highlighter has kept, as
+        one flat list - the whole library's from the list's menu, one
+        document's from that document's own. Rows are built by script from
+        the marks store dressed in the lists' titles; each one opens its
+        document at the quote itself, so the page is an index into the
+        reading, not a copy of it. The rows wear the reading list's own
+        dress, and the filter and pager are the list's pattern repeated.
+      -->
+      <section id="marks" hidden aria-labelledby="marks-title">
+        <h1 id="marks-title" data-i18n="reader_marks_title">Highlights</h1>
+        <!-- The scoped page says whose quotes these are; the global one
+             says it row by row instead. -->
+        <p class="hint marks-doc" id="marks-doc" hidden></p>
+        <div class="filter-line">
+          <label for="marks-filter" class="visually-hidden" data-i18n="reader_marks_filter_label">
+            Filter the highlights
+          </label>
+          <input
+            type="search"
+            id="marks-filter"
+            placeholder="Filter by quote or title"
+            data-i18n-placeholder="reader_marks_filter_placeholder"
+          />
+        </div>
+        <p class="hint" id="marks-count" hidden></p>
+        <div id="marks-empty" class="empty" hidden></div>
+        <ul id="marks-rows" class="library-rows marks-rows"></ul>
+        <nav class="pager" id="marks-pager" hidden>
+          <button type="button" id="marks-prev" data-i18n="pager_prev">Previous</button>
+          <span class="pager-label" id="marks-page-label"></span>
+          <button type="button" id="marks-next" data-i18n="pager_next">Next</button>
+        </nav>
+        <!-- The pen's export again, here where the quotes are: the same .md
+             the reading list offers, cut to this page's documents - one
+             document when the page is scoped. Greyed with nothing to
+             write, the Export buttons' shared rule. -->
+        <p class="transfer marks-transfer">
+          <button type="button" id="marks-export" data-i18n="reader_export_marks">
+            Export highlights
+          </button>
+        </p>
+      </section>
+
+      <!-- A quote row's three acts are cloned from these: the arrow that
+           opens the document at the mark (the back arrow's own stroke,
+           pointing onward), the bar's speaker reading the quote aloud, and
+           the mark toolbar's copy pair - the copy, and the check it turns
+           into for a breath once the quote is on the clipboard. -->
+      <template id="marks-open-icon">
+        <svg class="reader-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <path
+            d="M2.75 8H12.9M8.7 3.8 12.9 8l-4.2 4.2"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.3"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </template>
+
+      <template id="marks-speak-icon">
+        <svg class="reader-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <path
+            d="M2.5 6h2.6L8.6 3.1a.6.6 0 0 1 1 .46v8.88a.6.6 0 0 1-1 .46L5.1 10H2.5a.6.6 0 0 1-.6-.6V6.6a.6.6 0 0 1 .6-.6z"
+            fill="currentColor"
+          />
+          <path
+            d="M11.6 5.8a3.2 3.2 0 0 1 0 4.4M13.4 4a5.7 5.7 0 0 1 0 8"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.3"
+            stroke-linecap="round"
+          />
+        </svg>
+      </template>
+
+      <template id="marks-copy-icons">
+        <svg class="reader-icon icon-copy" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <rect
+            x="5.2"
+            y="5.2"
+            width="8"
+            height="8"
+            rx="1.2"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.3"
+          />
+          <path
+            d="M10.8 3.2H4.5a1.3 1.3 0 0 0-1.3 1.3v6.3"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.3"
+            stroke-linecap="round"
+          />
+        </svg>
+        <svg class="reader-icon icon-copied" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <path
+            d="M3.2 8.6 6.6 12l6.2-7.4"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </template>
 
       <!--
         What can be done with the article on screen. Outside the article

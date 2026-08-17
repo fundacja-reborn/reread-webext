@@ -43,7 +43,7 @@ import {
 import { describeError } from "../lib/messages.js";
 import { ErrorCode, Message, asPage, asPageRequest, asResult, ok } from "../lib/protocol.js";
 import { buildArticle } from "../lib/reader/article.js";
-import { asDocState, docState } from "../lib/reader/history-state.js";
+import { asDocState, asMarksState, docState, marksState } from "../lib/reader/history-state.js";
 import { importKind } from "../lib/reader/import-kind.js";
 import { speechAction } from "../lib/reader/keys.js";
 import { wordless } from "../lib/matcher/words.js";
@@ -94,9 +94,17 @@ import { MARKS_FILENAME, toMarksFile } from "../lib/store/marks-file.js";
 import { allMarks, getMarks, putMarks } from "../lib/store/marks.js";
 import { Segment, emptySentence, savedArticle } from "../lib/store/saved-article.js";
 import { watchToolbarScheme } from "../lib/theme-icon.js";
-import { canSpeak, primaryLanguage, voicesFor } from "../lib/tts.js";
+import {
+  canSpeak,
+  primaryLanguage,
+  speak,
+  speaking,
+  stop as stopTts,
+  voicesFor,
+} from "../lib/tts.js";
 import { importEpub } from "./import-book.js";
 import { articleEntry, bookEntry, libraryView } from "./list-view.js";
+import { markRows, marksListView } from "./marks-list.js";
 import {
   anchorOf,
   clearMarkPaint,
@@ -144,6 +152,7 @@ const displayPanel = document.getElementById("display-panel");
 const menuButton = document.getElementById("menu");
 const menuPanel = document.getElementById("menu-panel");
 const navLibrary = document.getElementById("nav-library");
+const navMarks = document.getElementById("nav-marks");
 const navVocabulary = document.getElementById("nav-vocabulary");
 const navSettings = document.getElementById("nav-settings");
 // The box the bar and its panels stand in - measured, not styled, from here:
@@ -195,6 +204,33 @@ const importRun = /** @type {HTMLButtonElement | null} */ (
 );
 const importCancel = document.getElementById("library-import-cancel");
 const transferLine = document.getElementById("library-transfer-status");
+// The highlights page (D108): the reading list's furniture repeated - a
+// filter, an empty state, the rows, a pager - plus the scoped page's title
+// line, its own export, and the template a row's copy button is cloned from.
+const marksSection = document.getElementById("marks");
+const marksDocLine = document.getElementById("marks-doc");
+const marksFilter = /** @type {HTMLInputElement | null} */ (
+  document.getElementById("marks-filter")
+);
+const marksCount = document.getElementById("marks-count");
+const marksEmpty = document.getElementById("marks-empty");
+const marksRowsList = document.getElementById("marks-rows");
+const marksPager = document.getElementById("marks-pager");
+const marksPageLabel = document.getElementById("marks-page-label");
+const marksPrev = /** @type {HTMLButtonElement | null} */ (document.getElementById("marks-prev"));
+const marksNext = /** @type {HTMLButtonElement | null} */ (document.getElementById("marks-next"));
+const marksExportButton = /** @type {HTMLButtonElement | null} */ (
+  document.getElementById("marks-export")
+);
+const marksCopyIcons = /** @type {HTMLTemplateElement | null} */ (
+  document.getElementById("marks-copy-icons")
+);
+const marksOpenIcon = /** @type {HTMLTemplateElement | null} */ (
+  document.getElementById("marks-open-icon")
+);
+const marksSpeakIcon = /** @type {HTMLTemplateElement | null} */ (
+  document.getElementById("marks-speak-icon")
+);
 const bookImportLine = document.getElementById("book-import-status");
 const bookNote = document.getElementById("book-note");
 const bookNoteText = document.getElementById("book-note-text");
@@ -295,6 +331,50 @@ let segment = Segment.UNREAD;
  */
 let libraryQuery = "";
 let libraryPage = 1;
+
+/**
+ * The highlights page, while it is the view (D108) - null otherwise, the
+ * same way `shown` is null off the documents. `scope` narrows the quotes to
+ * one document's; null shows everybody's.
+ *
+ * @type {{ scope: string | null } | null}
+ */
+let marksShown = null;
+
+/**
+ * The highlights page's filter box and page, the reading list's pair
+ * repeated - and kept across a Back from a quote's article, so the browse
+ * (open a quote, step back, take the next) does not retype its search.
+ * A visit through the menu starts both fresh.
+ */
+let marksQuery = "";
+let marksPage = 1;
+
+/**
+ * The rows on screen, exactly as rendered - the press handlers' lookup:
+ * a row's buttons carry an index into this list rather than dressing the
+ * DOM in offsets.
+ *
+ * @type {import("./marks-list.js").MarkRow[]}
+ */
+let marksOnScreen = [];
+
+/**
+ * The quote on its way out loud, by the mark's own name - the saved-phrases
+ * page's rule repeated: pressing that row's speaker again stops it, any
+ * other row's simply speaks (the engine replaces what was playing), and a
+ * key gone stale is harmless because `speaking()` answers for the engine.
+ *
+ * @type {string | null}
+ */
+let soundingMark = null;
+
+/**
+ * Whether a walk back to the list is in progress (the menu's list row over
+ * stacked entries): popstate keeps stepping while the entries are this
+ * page's own, and shows the list on the first one that is not.
+ */
+let unwindToList = false;
 
 /**
  * Counts the times the view changed. An async entry takes the current count
@@ -416,8 +496,13 @@ function renderArticle(piece) {
   flushPosition();
   // Whatever was being read aloud was this element's previous contents, and
   // they are about to be replaced: the voice stops here rather than reading a
-  // sentence of one article into another (D87).
+  // sentence of one article into another (D87). A quote a row's speaker was
+  // reading goes the same way - its page is leaving the screen.
   forgetReading();
+  stopMarkSpeech();
+  // The column breathes with the text size only under an article (see the
+  // measure rules in reader.css); the attribute is which rule applies.
+  document.body.dataset["view"] = "doc";
   // A different document never inherits the pen (D106): the mode survives
   // only a book turning its own parts. The active mark and the paint go
   // either way - they stood over blocks about to be replaced - and the marks
@@ -451,6 +536,8 @@ function renderArticle(piece) {
   contentElement.replaceChildren(rebuilt);
   applyLinkStops(settings.reader.links);
   if (library !== null) library.hidden = true;
+  if (marksSection !== null) marksSection.hidden = true;
+  marksShown = null;
   article.hidden = false;
   hideNotice();
 
@@ -469,8 +556,13 @@ function renderArticle(piece) {
       originalLink.hidden = false;
     }
   }
-  // With an article on screen the list is elsewhere, so the menu offers it.
+  // With an article on screen the list is elsewhere, so the menu offers it -
+  // and the highlights are always elsewhere from here.
   if (navLibrary !== null) navLibrary.hidden = false;
+  if (navMarks !== null) navMarks.hidden = false;
+  // The back arrow means the list again until a door says otherwise - the
+  // quotes' door relabels it after this render (D108).
+  setBackDoor(t("reader_back_to_list"), t("reading_list"));
   document.title = `${piece.title} - re/read`;
 
   shown =
@@ -1145,22 +1237,31 @@ async function showPage(firstLoad = false) {
   if (turn !== epoch) return;
   if (source === null) {
     const doc = asDocState(history.state);
-    if (doc === null) {
+    const quotes = asMarksState(history.state);
+    if (doc === null && quotes === null) {
       await showLibrary();
     } else if (firstLoad) {
-      // A reload or a restored session, standing on a document's entry
-      // (D102): reopening that document is what coming back should mean -
-      // its position rides along anyway. If the database no longer holds
-      // it, the opener quietly refreshed the list instead; make that the
-      // view, or the page would stand blank.
-      if (doc.kind === "book") await openBook(doc.url);
-      else await openSaved(doc.url);
-      if (shown === null) await showLibrary();
+      // A reload or a restored session, standing on an entry this page
+      // pushed (D102): coming back should mean that entry's view again - a
+      // document with its position riding along, or the highlights page
+      // (D108), fresh the way any visit begins. If the database no longer
+      // holds the document, the opener quietly refreshed the list instead;
+      // make that the view, or the page would stand blank.
+      if (quotes !== null) {
+        await showMarks(quotes.scope, { fresh: true });
+      } else if (doc !== null) {
+        if (doc.kind === "book") await openBook(doc.url);
+        else await openSaved(doc.url);
+        if (shown === null) await showLibrary();
+      }
     } else {
-      // Asked for the list (the popup's row, D93) while a document's entry
-      // is on top: leave through history, so the next Back over the list
-      // keeps meaning "leave this page", not "reread that article". The
-      // popstate this causes is what shows the list.
+      // Asked for the list (the popup's row, D93) while this page's own
+      // entries are on top: leave through history - however many of ours
+      // stand stacked (a document under the highlights under a document),
+      // the walk in popstate steps through all of them, so the next Back
+      // over the list keeps meaning "leave this page", not "reread that
+      // article".
+      unwindToList = true;
       history.back();
     }
     return;
@@ -1191,8 +1292,10 @@ async function showPage(firstLoad = false) {
 
 /**
  * @param {string} url
+ * @param {MarkTarget} [target] a mark to land on instead of the reading
+ *   position - the highlights page's press (D108)
  */
-async function openSaved(url) {
+async function openSaved(url, target) {
   const turn = ++epoch;
   // The position and the marks ride along in the same round trip; render is
   // synchronous, so nothing can move between the article appearing and the
@@ -1219,7 +1322,7 @@ async function openSaved(url) {
   const rendered = shown;
   await refreshActions();
   if (shown !== rendered) return;
-  restorePosition(position);
+  if (target === undefined || !scrollToTargetMark(target)) restorePosition(position);
   // Opening is reading's first act, and the position row's clock is what
   // orders the list - so the open itself must wind it, or a document read
   // without a single scroll would never rise. Written after the restore, the
@@ -1286,8 +1389,11 @@ function showBookNote(book) {
  *
  * @param {string} id
  * @param {number} [wanted] a specific segment - the neighbour rows' press
+ * @param {MarkTarget} [target] a mark to land on instead of the reading
+ *   position - the highlights page's press (D108), which also asks for the
+ *   mark's own segment through `wanted`
  */
-async function openBook(id, wanted) {
+async function openBook(id, wanted, target) {
   const turn = ++epoch;
   const [book, position, marks] = await Promise.all([
     getBook(id),
@@ -1337,11 +1443,47 @@ async function openBook(id, wanted) {
   const rendered = shown;
   await refreshActions();
   if (shown !== rendered) return;
-  restorePosition(position, index);
+  if (target === undefined || !scrollToTargetMark(target)) restorePosition(position, index);
   // Same reason as `openSaved`: the open winds the position row's clock. For
   // a book this also writes which part is on screen, so a part reached with
   // Next and left without a scroll is still the part the book reopens at.
   savePositionNow();
+}
+
+/**
+ * How the highlights page names a mark across the reopen (D108): the fields
+ * that place it, not the object - the list on screen is a different read of
+ * the database than the one the open just made. The start alone identifies
+ * it: two marks sharing a start cannot survive `placeMark`.
+ *
+ * @typedef {{ segmentIndex: number, start: { block: number, offset: number } }} MarkTarget
+ */
+
+/**
+ * Scrolls the just-rendered document to one of its marks. The painted range
+ * knows exactly where the quote sits; a mark the guard refused to paint (or
+ * an engine without the registry) still has its start block to land on. False
+ * when the mark is not in the document's list at all - deleted since its row
+ * was drawn - and the caller falls back to the reading position.
+ *
+ * @param {MarkTarget} target
+ * @returns {boolean}
+ */
+function scrollToTargetMark(target) {
+  const mark = docMarks.find(
+    (one) =>
+      one.segmentIndex === target.segmentIndex && comparePoints(one.start, target.start) === 0,
+  );
+  if (mark === undefined) return false;
+  const range = paintedRangeOf(mark);
+  const rect =
+    range?.getClientRects()[0] ??
+    contentRoot()?.children[mark.start.block]?.getBoundingClientRect();
+  if (rect === undefined) return false;
+  // The quote's first line under the stuck bar, the position restore's own
+  // landing - plus a breath of air, so the wash reads as found, not clipped.
+  scrollTo(0, Math.max(0, rect.top + window.scrollY - chromeFold() - 8));
+  return true;
 }
 
 /**
@@ -1359,14 +1501,22 @@ function turnSegment(step) {
   void openBook(target.url, next);
 }
 
-async function showLibrary() {
+/**
+ * The teardown the list and the highlights page share: whatever document
+ * stood here leaves the screen whole - its pending position save taken, its
+ * voice stopped, its pen put away, its dressing removed.
+ */
+function leaveDocView() {
   epoch += 1;
   // Before `shown` moves: the pending save is about the article on screen.
   flushPosition();
   shown = null;
   // The article being read aloud is leaving the screen, and a voice reading a
-  // page nobody can see is the extension talking to itself.
+  // page nobody can see is the extension talking to itself. A quote a row's
+  // speaker was reading goes with it when the highlights page is the one
+  // being left.
   forgetReading();
+  stopMarkSpeech();
   updateListen();
   // The pen goes away with the article: the list has nothing to mark, and
   // whatever paint stood was about blocks no longer on screen.
@@ -1377,18 +1527,62 @@ async function showLibrary() {
   if (actions !== null) actions.hidden = true;
   if (actionsEnd !== null) actionsEnd.hidden = true;
   // The bar's way back stands outside the action rows, so hiding them does
-  // not take it along - and on the list there is nowhere back to go.
+  // not take it along; the highlights page shows it again on its own terms.
   if (toLibraryButton !== null) toLibraryButton.hidden = true;
   if (originalLink !== null) originalLink.hidden = true;
   showSegmentNav(null);
   showBookNote(null);
+}
+
+async function showLibrary() {
+  leaveDocView();
+  document.body.dataset["view"] = "list";
+  marksShown = null;
+  if (marksSection !== null) marksSection.hidden = true;
   // The menu must not list the room it stands in: on the list view its list
   // row hides, leaving the pages that really are elsewhere.
   if (navLibrary !== null) navLibrary.hidden = true;
+  if (navMarks !== null) navMarks.hidden = false;
   if (library !== null) library.hidden = false;
   document.title = t("reader_title");
   scrollTo(0, 0);
   await refreshLibrary();
+}
+
+/**
+ * The highlights page as the view (D108): the same room-turning the list
+ * does, with the quotes standing where the rows of titles stand. A visit
+ * through a menu row is `fresh` - the filter and the page start over - while
+ * a history step back onto the page keeps both, so browsing quote by quote
+ * does not retype its search.
+ *
+ * @param {string | null} scope one document's quotes, or everybody's
+ * @param {{ fresh?: boolean }} [visit]
+ */
+async function showMarks(scope, { fresh = false } = {}) {
+  leaveDocView();
+  document.body.dataset["view"] = "marks";
+  marksShown = { scope };
+  if (fresh) {
+    marksQuery = "";
+    marksPage = 1;
+    if (marksFilter !== null) marksFilter.value = "";
+  }
+  if (library !== null) library.hidden = true;
+  // The list really is elsewhere from here, so the menu offers it; the
+  // highlights row hides, being the room itself.
+  if (navLibrary !== null) navLibrary.hidden = false;
+  if (navMarks !== null) navMarks.hidden = true;
+  if (marksSection !== null) marksSection.hidden = false;
+  // The way back in the bar: one step through history, to whatever the page
+  // was opened over - the list, or the document whose menu led here. The
+  // label starts as the list and the refresh renames it once the scoped
+  // document's title is read.
+  if (toLibraryButton !== null) toLibraryButton.hidden = false;
+  setBackDoor(t("reader_back_to_list"), t("reading_list"));
+  document.title = `${t("reader_marks_title")} - re/read`;
+  scrollTo(0, 0);
+  await refreshMarks();
 }
 
 async function refreshLibrary() {
@@ -1563,6 +1757,277 @@ function libraryRow(entry) {
 }
 
 /**
+ * The highlights page filled from the stores (D108) - the same three reads
+ * the export makes: the marks, and the two lists that dress them in titles.
+ * No document's content is ever opened for this; the quotes already live in
+ * the marks' own rows. The rules of what shows are `marks-list.js`'s.
+ */
+async function refreshMarks() {
+  if (marksRowsList === null || marksEmpty === null) return;
+  const [metas, books, marks] = await Promise.all([
+    listArticles(),
+    listBooks(),
+    allMarks().catch(() => new Map()),
+  ]);
+  const target = marksShown;
+  // The view moved on while the database answered; the section is hidden,
+  // and filling it would only shout into a closed room.
+  if (target === null) return;
+  const rows = markRows(metas, books, marks);
+  const view = marksListView(rows, { scope: target.scope, query: marksQuery, page: marksPage });
+  marksPage = view.page;
+  marksOnScreen = view.rows;
+
+  // The scoped page says whose quotes these are, and the back arrow names
+  // the same document - the one step it takes leads there. A scope whose
+  // document is gone keeps the arrow on the list, which is where the step
+  // will land anyway once the entry beneath stops answering.
+  const scopeTitle =
+    target.scope === null
+      ? null
+      : (metas.find((meta) => meta.url === target.scope)?.title ??
+        books.find((book) => book.id === target.scope)?.title ??
+        null);
+  if (marksDocLine !== null) {
+    marksDocLine.hidden = scopeTitle === null;
+    marksDocLine.textContent = scopeTitle ?? "";
+  }
+  if (scopeTitle !== null) setBackDoor(t("reader_back_to_doc", scopeTitle), scopeTitle);
+
+  // Exporting nothing would download an empty file; the button says so
+  // first - the transfer section's own rule, over this page's scope.
+  if (marksExportButton !== null) marksExportButton.disabled = view.total === 0;
+
+  // "3 of 12" while the filter narrows the page down, like the list's line.
+  if (marksCount !== null) {
+    const filtering = marksQuery.trim().length > 0;
+    marksCount.hidden = !filtering;
+    if (filtering) {
+      marksCount.textContent = t("reader_filter_count", [
+        view.matching.toLocaleString(),
+        view.total.toLocaleString(),
+      ]);
+    }
+  }
+
+  if (view.rows.length === 0) {
+    // Two kinds of nothing, two answers - the reading list's split: a filter
+    // that ruled everything out quotes itself and offers the undo; a page
+    // with nothing highlighted says so, in the scope's own words.
+    marksEmpty.replaceChildren();
+    if (view.total > 0) {
+      const sentence = document.createElement("p");
+      sentence.textContent = t("reader_marks_no_match", marksQuery);
+      const clear = document.createElement("button");
+      clear.type = "button";
+      clear.textContent = t("reader_filter_clear");
+      clear.addEventListener("click", () => {
+        marksQuery = "";
+        marksPage = 1;
+        if (marksFilter !== null) {
+          marksFilter.value = "";
+          marksFilter.focus();
+        }
+        void refreshMarks();
+      });
+      marksEmpty.append(sentence, clear);
+    } else {
+      marksEmpty.textContent =
+        target.scope === null ? t("reader_marks_empty") : t("reader_marks_empty_doc");
+    }
+    marksEmpty.hidden = false;
+  } else {
+    marksEmpty.hidden = true;
+  }
+
+  marksRowsList.replaceChildren(
+    ...view.rows.map((row, index) => markRowElement(row, index, target.scope === null)),
+  );
+
+  if (marksPager !== null) {
+    marksPager.hidden = view.pages <= 1;
+    if (marksPageLabel !== null) {
+      marksPageLabel.textContent = t("pager_page_of", [
+        view.page.toLocaleString(),
+        view.pages.toLocaleString(),
+      ]);
+    }
+    if (marksPrev !== null) marksPrev.disabled = view.page <= 1;
+    if (marksNext !== null) marksNext.disabled = view.page >= view.pages;
+  }
+}
+
+/**
+ * One of a quote row's act buttons: a drawn glyph cloned from its template,
+ * the act's name as the accessible words, and the row's index for the one
+ * dispatch below.
+ *
+ * @param {string} act
+ * @param {number} index
+ * @param {string} name
+ * @param {HTMLTemplateElement | null} icon
+ * @returns {HTMLButtonElement}
+ */
+function markActButton(act, index, name, icon) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = `marks-act marks-${act}`;
+  button.setAttribute("data-act", act);
+  button.setAttribute("data-row", String(index));
+  button.title = name;
+  button.setAttribute("aria-label", name);
+  if (icon !== null) button.append(icon.content.cloneNode(true));
+  return button;
+}
+
+/**
+ * One quote as a row (D108): the quote as text - plain prose in the reading
+ * face, not a control (Michał's revision: the whole quote as a button both
+ * hid where the press would lead and stood in the way of the quotes ever
+ * being reading text) - the document named under it, and the acts one step
+ * aside in the reading list's own grid: the arrow that opens the document
+ * at the mark, the speaker that reads the quote aloud, and the copy. The
+ * quote and the title came off somebody's page once, so both enter as
+ * text; the mark's colour enters as an attribute the stylesheet matches by
+ * value, a registry name from the checked list and never free text.
+ *
+ * @param {import("./marks-list.js").MarkRow} row
+ * @param {number} index into `marksOnScreen`, which the press handlers read back
+ * @param {boolean} withTitle the global page names each document; the scoped one already has
+ */
+function markRowElement(row, index, withTitle) {
+  const item = document.createElement("li");
+  item.className = "library-row marks-row";
+  item.setAttribute("data-color", row.mark.color);
+
+  const text = document.createElement("div");
+  text.className = "library-text";
+
+  const quote = document.createElement("div");
+  quote.className = "marks-quote";
+  quote.textContent = row.mark.text;
+
+  const detail = document.createElement("span");
+  detail.className = "library-item-detail";
+  const when = row.mark.createdAt > 0 ? new Date(row.mark.createdAt).toLocaleDateString() : "";
+  const part =
+    row.part === null
+      ? ""
+      : t("reader_book_part_of", [row.part.at.toLocaleString(), row.part.of.toLocaleString()]);
+  detail.textContent = [withTitle ? row.title : "", part, when]
+    .filter((piece) => piece.length > 0)
+    .join(" - ");
+  text.append(quote, detail);
+
+  const acts = document.createElement("span");
+  acts.className = "marks-row-acts";
+  acts.append(markActButton("open", index, t("reader_marks_open", row.title), marksOpenIcon));
+  // No speaker on an engine that cannot speak - the voice rows' own rule.
+  if (canSpeak()) {
+    acts.append(markActButton("speak", index, t("reader_listen"), marksSpeakIcon));
+  }
+  acts.append(markActButton("copy", index, t("marker_copy"), marksCopyIcons));
+
+  item.append(text, acts);
+  return item;
+}
+
+/**
+ * A quote pressed: its document opens at the mark itself, with the step
+ * written into history exactly as a list row writes it (D102) - Back lands
+ * on this page again, filter and all. A document that left the database
+ * between the render and the press takes the fresh entry back out, and the
+ * re-entered page reads the loss.
+ *
+ * @param {import("./marks-list.js").MarkRow} row
+ */
+async function openMarkRow(row) {
+  hideNotice();
+  history.pushState(docState(row.kind, row.docId), "");
+  const target = { segmentIndex: row.mark.segmentIndex, start: row.mark.start };
+  if (row.kind === "book") await openBook(row.docId, row.mark.segmentIndex, target);
+  else await openSaved(row.docId, target);
+  if (shown === null) {
+    history.back();
+    return;
+  }
+  // The way back in the bar leads to the quotes now, and its words follow.
+  setBackDoor(t("reader_marks_back"), t("reader_marks_title"));
+}
+
+/**
+ * A row's copy: the quote onto the clipboard, the button a check for a
+ * breath - the mark toolbar's own feedback, repeated per row. A refresh may
+ * replace the rows before the breath is over; the detached button takes the
+ * reset without anybody watching, which costs nothing.
+ *
+ * @param {HTMLButtonElement} button
+ * @param {import("./marks-list.js").MarkRow} row
+ */
+async function copyMarkRow(button, row) {
+  try {
+    await navigator.clipboard.writeText(row.mark.text);
+  } catch {
+    // The clipboard refusing has no state to show: the button simply does
+    // not claim a copy it did not make.
+    return;
+  }
+  button.setAttribute("data-copied", "");
+  button.title = t("marker_copied");
+  button.setAttribute("aria-label", t("marker_copied"));
+  setTimeout(() => {
+    button.removeAttribute("data-copied");
+    button.title = t("marker_copy");
+    button.setAttribute("aria-label", t("marker_copy"));
+  }, 1500);
+}
+
+/**
+ * The mark's own name across renders, for the speaker's toggle: the same
+ * fields the open press carries, joined - a page turn or a refresh replaces
+ * the row objects, and the quote still sounding must answer to its button.
+ *
+ * @param {import("./marks-list.js").MarkRow} row
+ * @returns {string}
+ */
+function markRowKey(row) {
+  const { mark } = row;
+  return `${row.docId}\n${mark.segmentIndex}:${mark.start.block}:${mark.start.offset}`;
+}
+
+/**
+ * A row's speaker: the quote out loud, the saved-phrases page's own manner -
+ * pressing the sounding row again stops it, any other row simply speaks.
+ * The language is the document's where it declared one (a book's meta);
+ * an article's meta holds none, and the pair's source language stands in -
+ * the assumption the whole extension already makes about what is being read.
+ *
+ * @param {import("./marks-list.js").MarkRow} row
+ */
+function speakMarkRow(row) {
+  const key = markRowKey(row);
+  if (speaking() && soundingMark === key) {
+    stopTts();
+    soundingMark = null;
+    return;
+  }
+  soundingMark = key;
+  const lang = row.lang ?? settings.sourceLang;
+  speak(row.mark.text, lang, settings.ttsVoices[primaryLanguage(lang)], settings.ttsRate / 100);
+}
+
+/**
+ * The row speech stood down - leaving the highlights page takes the voice
+ * with it, exactly as leaving an article takes the read-aloud: a quote
+ * nobody can see is the extension talking to itself.
+ */
+function stopMarkSpeech() {
+  if (soundingMark === null) return;
+  soundingMark = null;
+  stopTts();
+}
+
+/**
  * A Delete button asking its question, and taking it back - the rows' Delete
  * and the article's own share the one rule. Arming is only ever one button
  * deep: arming one disarms the other, and a press, a focus or an Escape
@@ -1657,35 +2122,63 @@ async function exportList() {
 }
 
 /**
- * The highlights as one Markdown page (D106): every marked document, articles
- * and books alike, dressed in what the list knows about it - title, address
- * or author, the day it entered. The quotes are already in the rows, so no
- * document's content is ever opened for this.
+ * The highlights' documents dressed in what the lists know about them -
+ * title, address or author, the day each entered - the .md file's input,
+ * cut to one document when the page asking is scoped (D108). The quotes are
+ * already in the marks' own rows, so no document's content is ever opened
+ * for this.
+ *
+ * @param {string | null} scope
+ * @returns {Promise<import("../lib/store/marks-file.js").MarkedDoc[]>}
+ */
+async function markedDocs(scope) {
+  const [metas, books, marks] = await Promise.all([listArticles(), listBooks(), allMarks()]);
+
+  /** @type {import("../lib/store/marks-file.js").MarkedDoc[]} */
+  const docs = [];
+  for (const meta of metas) {
+    const kept = marks.get(meta.url);
+    if (kept !== undefined && (scope === null || meta.url === scope)) {
+      docs.push({ title: meta.title, source: meta.url, at: meta.savedAt, marks: kept });
+    }
+  }
+  for (const book of books) {
+    const kept = marks.get(book.id);
+    if (kept !== undefined && (scope === null || book.id === scope)) {
+      docs.push({ title: book.title, source: book.author, at: book.addedAt, marks: kept });
+    }
+  }
+  return docs;
+}
+
+/**
+ * The highlights as one Markdown page (D106): every marked document,
+ * articles and books alike. The transfer section's button, so failure
+ * speaks in the transfer's own status line.
  */
 async function exportMarks() {
   try {
-    const [metas, books, marks] = await Promise.all([listArticles(), listBooks(), allMarks()]);
-
-    /** @type {import("../lib/store/marks-file.js").MarkedDoc[]} */
-    const docs = [];
-    for (const meta of metas) {
-      const kept = marks.get(meta.url);
-      if (kept !== undefined) {
-        docs.push({ title: meta.title, source: meta.url, at: meta.savedAt, marks: kept });
-      }
-    }
-    for (const book of books) {
-      const kept = marks.get(book.id);
-      if (kept !== undefined) {
-        docs.push({ title: book.title, source: book.author, at: book.addedAt, marks: kept });
-      }
-    }
+    const docs = await markedDocs(null);
     if (docs.length === 0) return;
-
     downloadFile(toMarksFile(docs), MARKS_FILENAME, "text/markdown");
     transferStatus("");
   } catch {
     transferStatus(describeError(ErrorCode.INTERNAL), "error");
+  }
+}
+
+/**
+ * The highlights page's own export (D108): the same file, cut to the page's
+ * scope. Failure speaks in the page notice - the transfer section's status
+ * line lives in the list view, hidden here.
+ */
+async function exportMarksPage() {
+  try {
+    const docs = await markedDocs(marksShown === null ? null : marksShown.scope);
+    if (docs.length === 0) return;
+    downloadFile(toMarksFile(docs), MARKS_FILENAME, "text/markdown");
+  } catch {
+    showNotice(describeError(ErrorCode.INTERNAL));
   }
 }
 
@@ -1943,7 +2436,7 @@ async function onRemovePress() {
     return;
   }
   if (shown !== target) return;
-  leaveArticle();
+  onBackPress();
 }
 
 /**
@@ -1989,6 +2482,14 @@ function applyAppearance(reader) {
   applyReading(root, reader);
   root.dataset["readerLinks"] = reader.links;
   root.style.setProperty("--reader-measure", `${reader.measure}ch`);
+  // The measure again with the text size cancelled out of it: `ch` scales
+  // with the font, which is right for the article's column (a measure counts
+  // characters) and wrong for the list views, whose width is layout - the
+  // whole page breathed when the size stepped (Michał's report). The same
+  // count re-expressed against the default size stands still however the
+  // text grows; reader.css caps the list and highlights views on this twin.
+  const pinned = (reader.measure * DEFAULTS.reader.fontSize) / reader.fontSize;
+  root.style.setProperty("--reader-measure-pinned", `${pinned.toFixed(2)}ch`);
   // The wet stroke's ink (D106): an alias onto the chosen colour's own
   // per-theme variable, so the draft follows both the pick and the theme.
   root.style.setProperty("--reader-marker-current", `var(--reader-marker-${reader.markerColor})`);
@@ -2333,6 +2834,45 @@ libraryPrev?.addEventListener("click", () => void turnLibraryPage(-1));
 
 libraryNext?.addEventListener("click", () => void turnLibraryPage(1));
 
+// The highlights page's own furniture (D108), each piece the list's pattern
+// repeated: typing filters from the first page, a turned page snaps to the
+// rows' top (e-ink), and a press on a row goes through the one lookup - the
+// buttons carry an index into what is rendered, never data of their own.
+marksFilter?.addEventListener("input", () => {
+  if (marksFilter === null) return;
+  marksQuery = marksFilter.value;
+  marksPage = 1;
+  void refreshMarks();
+});
+
+/**
+ * @param {number} step
+ */
+async function turnMarksPage(step) {
+  marksPage += step;
+  await refreshMarks();
+  marksRowsList?.scrollIntoView({ behavior: "instant", block: "start" });
+}
+
+marksPrev?.addEventListener("click", () => void turnMarksPage(-1));
+
+marksNext?.addEventListener("click", () => void turnMarksPage(1));
+
+marksRowsList?.addEventListener("click", (event) => {
+  const target = event.target;
+  if (!(target instanceof Element)) return;
+  const button = target.closest("button[data-row]");
+  if (!(button instanceof HTMLButtonElement)) return;
+  const row = marksOnScreen[Number(button.getAttribute("data-row"))];
+  if (row === undefined) return;
+  const act = button.getAttribute("data-act");
+  if (act === "copy") void copyMarkRow(button, row);
+  else if (act === "speak") speakMarkRow(row);
+  else if (act === "open") void openMarkRow(row);
+});
+
+marksExportButton?.addEventListener("click", () => void exportMarksPage());
+
 libraryRows?.addEventListener("click", (event) => {
   const target = event.target;
   if (!(target instanceof Element)) return;
@@ -2480,24 +3020,58 @@ bookNoteSettings?.addEventListener("click", () => void webext().runtime.openOpti
 void sweepOrphanSegments().catch(() => undefined);
 
 /**
- * The one way out of an article into the list (D102). When the article
- * stands on a history entry this page pushed - a row press put it there -
- * leaving is a real step back, the same step the browser's Back button,
- * Alt+Left, a mouse's back button and Android's back gesture take, so every
- * one of them lands on the same list (the popstate below does the showing).
- * With no entry beneath - the reader was pointed straight at a live page -
- * the view just turns, and history is left alone.
+ * What the way back in the bar claims to lead to: the arrow's accessible
+ * name (a whole sentence) and the word on the door under the article's last
+ * line. The one step back varies its destination now that the highlights
+ * page stands between rooms (D108); the labels follow the door that was
+ * actually taken, and every plain render resets them to the list.
+ *
+ * @param {string} sentence
+ * @param {string} room
  */
-function leaveArticle() {
+function setBackDoor(sentence, room) {
+  if (toLibraryButton !== null) {
+    toLibraryButton.title = sentence;
+    toLibraryButton.setAttribute("aria-label", sentence);
+  }
+  const word = toLibraryEndButton?.querySelector("span");
+  if (word !== undefined && word !== null) word.textContent = room;
+}
+
+/**
+ * The bar's way back (D102, widened by D108): standing on an entry this page
+ * pushed - a document's or the highlights' - leaving is a real step back,
+ * the same step the browser's Back button, Alt+Left, a mouse's back button
+ * and Android's back gesture take, so every one of them lands on the same
+ * view (the popstate below does the showing). With no entry beneath - the
+ * reader was pointed straight at a live page - the view just turns, and
+ * history is left alone.
+ */
+function onBackPress() {
   hideNotice();
-  if (asDocState(history.state) !== null) history.back();
+  if (asDocState(history.state) !== null || asMarksState(history.state) !== null) history.back();
   else void showLibrary();
+}
+
+/**
+ * The menu's list row: to the list however deep this page's own entries
+ * stand - a document under the highlights under a document leaves the row
+ * meaning the same one room. The walk is real history steps (the flag makes
+ * popstate keep stepping over entries of ours), so the Back that follows
+ * still means "leave this page".
+ */
+function leaveToList() {
+  hideNotice();
+  if (asDocState(history.state) !== null || asMarksState(history.state) !== null) {
+    unwindToList = true;
+    history.back();
+  } else void showLibrary();
 }
 
 // One way back, two doors: the arrow in the bar and the line under the
 // article's last word.
 for (const button of [toLibraryButton, toLibraryEndButton]) {
-  button?.addEventListener("click", () => leaveArticle());
+  button?.addEventListener("click", () => onBackPress());
 }
 
 /**
@@ -2510,12 +3084,35 @@ for (const button of [toLibraryButton, toLibraryEndButton]) {
  */
 window.addEventListener("popstate", (event) => {
   const doc = asDocState(event.state);
+  const quotes = asMarksState(event.state);
+  // Mid-walk to the list (the menu's list row over stacked entries, D108):
+  // keep stepping while the entries are this page's own, and show the list
+  // on the first one that is not.
+  if (unwindToList) {
+    if (doc !== null || quotes !== null) {
+      history.back();
+      return;
+    }
+    unwindToList = false;
+    hideNotice();
+    void showLibrary();
+    return;
+  }
+  // Back or Forward onto a highlights visit (D108): the page as it stood -
+  // `showMarks` without `fresh` keeps the filter and the page, so browsing
+  // quote by quote does not retype its search.
+  if (quotes !== null) {
+    hideNotice();
+    void showMarks(quotes.scope);
+    return;
+  }
   if (doc === null) {
     // Back under every entry this page pushed. The list is what lies there -
-    // but only if an article is actually on screen: a fragment jump on the
-    // list view (the transfer anchor) walks through here too, and rebuilding
-    // the list over it would tear the jump away mid-scroll.
-    if (shown !== null) {
+    // but only if an article or the highlights page is actually on screen: a
+    // fragment jump on the list view (the transfer anchor) walks through
+    // here too, and rebuilding the list over it would tear the jump away
+    // mid-scroll.
+    if (shown !== null || marksShown !== null) {
       hideNotice();
       void showLibrary();
     }
@@ -2546,7 +3143,19 @@ brandButton?.addEventListener("click", () => void webext().runtime.openOptionsPa
 // The settings row is the mark's press with a word on it.
 navLibrary?.addEventListener("click", () => {
   setPanel(menuButton, menuPanel, false);
-  leaveArticle();
+  leaveToList();
+});
+
+// The highlights row (D108): over a document it opens that document's own
+// quotes, over the list everybody's - one view either way, told apart by the
+// scope in the entry it pushes (a real step, like a row press writes, so
+// Back retraces it). A menu visit is a fresh one: filter and page start over.
+navMarks?.addEventListener("click", () => {
+  setPanel(menuButton, menuPanel, false);
+  hideNotice();
+  const scope = shown === null ? null : shown.url;
+  history.pushState(marksState(scope), "");
+  void showMarks(scope, { fresh: true });
 });
 
 navVocabulary?.addEventListener("click", () => {
@@ -2674,8 +3283,12 @@ document.addEventListener("keydown", onSpeechKey);
 
 // A tab going away mid-sentence has to take the voice with it: the queue
 // behind `speechSynthesis` belongs to the browser, not to this page, and an
-// utterance left in it goes on talking over a closed tab.
-window.addEventListener("pagehide", () => stopReading());
+// utterance left in it goes on talking over a closed tab. The rows' quote
+// speech rides the same queue and leaves the same way.
+window.addEventListener("pagehide", () => {
+  stopReading();
+  stopMarkSpeech();
+});
 
 // The rows exist only where they can do something, and the engine's voice list
 // arrives on its own schedule - after first paint on most platforms, never at
