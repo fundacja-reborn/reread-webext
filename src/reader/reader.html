@@ -321,6 +321,12 @@
              this bar is stuck, the pagers are not. Hidden when the document
              has no headings to list. -->
         <button id="nav-toc" type="button" data-i18n="reader_book_toc" hidden>Contents</button>
+        <!-- Search inside the open text (D119): every document has it - the
+             map above only shows over one with headings. Hidden on the list
+             and highlights views, which have filters of their own. -->
+        <button id="nav-search" type="button" data-i18n="reader_search_title" hidden>
+          Search in text
+        </button>
         <!-- The highlights page (D108). Over a document the row opens that
              document's own quotes; over the list, everybody's. Like the
              list row it hides in the room it names. -->
@@ -758,6 +764,52 @@
           </button>
         </header>
         <nav id="toc-rows" class="toc-rows" aria-labelledby="toc-title"></nav>
+      </dialog>
+
+      <!--
+        Search inside the open document (D119): the TOC dialog's dress on a
+        form and a list of hits. Scanning starts on Enter or the button,
+        never per keystroke - a book's scan reads every part, and on e-ink
+        a list redrawn letter by letter is a flipbook. Rows are built by
+        script, snippets enter as text only - the words are the document's.
+      -->
+      <dialog id="search-dialog" class="toc-dialog" aria-labelledby="search-title">
+        <header class="toc-head">
+          <h2 id="search-title" data-i18n="reader_search_title">Search in text</h2>
+          <button
+            type="button"
+            id="search-close"
+            class="toc-close"
+            title="Close"
+            data-i18n-title="close"
+            aria-label="Close"
+            data-i18n-aria-label="close"
+          >
+            <svg class="reader-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+              <path
+                d="M4.25 4.25l7.5 7.5M11.75 4.25l-7.5 7.5"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.3"
+                stroke-linecap="round"
+              />
+            </svg>
+          </button>
+        </header>
+        <form id="search-form" class="search-form">
+          <label for="search-input" class="visually-hidden" data-i18n="reader_search_label">
+            The phrase to find
+          </label>
+          <input
+            type="search"
+            id="search-input"
+            placeholder="Find a phrase"
+            data-i18n-placeholder="reader_search_placeholder"
+          />
+          <button type="submit" data-i18n="reader_search_go">Search</button>
+        </form>
+        <p class="hint search-status" id="search-status" hidden></p>
+        <nav id="search-rows" class="toc-rows search-rows" aria-labelledby="search-title"></nav>
       </dialog>
 
       <!--

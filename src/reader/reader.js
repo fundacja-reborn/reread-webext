@@ -65,6 +65,7 @@ import {
   positionRecord,
   restoredIndex,
 } from "../lib/reader/position.js";
+import { hitsInText } from "../lib/reader/search.js";
 import { READER_SOURCE_KEY, readReaderSource } from "../lib/session.js";
 import {
   ARTICLES_FILENAME,
@@ -107,6 +108,12 @@ import {
   stop as stopTts,
   voicesFor,
 } from "../lib/tts.js";
+import {
+  closeDocSearch,
+  configureDocSearch,
+  openDocSearch,
+  resetDocSearch,
+} from "./doc-search.js";
 import { importEpub } from "./import-book.js";
 import { articleEntry, bookEntry, libraryView } from "./list-view.js";
 import { markRows, marksListView } from "./marks-list.js";
@@ -119,6 +126,7 @@ import {
   paintedRangeOf,
   proseTextOf,
   quoteOfSpan,
+  rangeWithin,
 } from "./marks-view.js";
 import {
   configureReading,
@@ -163,6 +171,7 @@ const displayPanel = document.getElementById("display-panel");
 const menuButton = document.getElementById("menu");
 const menuPanel = document.getElementById("menu-panel");
 const navToc = document.getElementById("nav-toc");
+const navSearch = document.getElementById("nav-search");
 const navLibrary = document.getElementById("nav-library");
 const navMarks = document.getElementById("nav-marks");
 const navVocabulary = document.getElementById("nav-vocabulary");
@@ -572,21 +581,27 @@ function renderArticle(piece) {
   // The column breathes with the text size only under an article (see the
   // measure rules in reader.css); the attribute is which rule applies.
   document.body.dataset["view"] = "doc";
-  // A different document never inherits the pen (D106): the mode survives
-  // only a book turning its own parts. The active mark and the paint go
+  // A different document never inherits the pen (D106) or the other one's
+  // search (D119): both survive only a book turning its own parts - a
+  // search's hits are the whole book's. The active mark and the paint go
   // either way - they stood over blocks about to be replaced - and the marks
   // themselves are the opener's to reload once the new blocks stand.
-  if (shown === null || shown.url !== piece.url) setMarker(false);
+  if (shown === null || shown.url !== piece.url) {
+    setMarker(false);
+    resetDocSearch();
+  }
   deselectMark();
   docMarks = [];
   clearMarkPaint();
+  clearSearchWash();
   showNoteBadges();
   // The book dressing is put on by `openBook` after this returns; every
-  // other road through here takes it off. The contents dialog too: a Back
-  // can land here with it still standing over a document that is leaving.
+  // other road through here takes it off. The dialogs too: a Back can land
+  // here with one still standing over a document that is leaving.
   showSegmentNav(null);
   showBookNote(null);
   closeTocDialog();
+  closeDocSearch();
 
   const rebuilt = buildArticle(piece.source, document, { baseUrl: piece.url });
 
@@ -641,9 +656,11 @@ function renderArticle(piece) {
     }
   }
   // With an article on screen the list is elsewhere, so the menu offers it -
-  // and the highlights are always elsewhere from here.
+  // and the highlights are always elsewhere from here. The search row shows
+  // over any document (D119); the list views have filters of their own.
   if (navLibrary !== null) navLibrary.hidden = false;
   if (navMarks !== null) navMarks.hidden = false;
+  if (navSearch !== null) navSearch.hidden = false;
   // The back arrow means the list again until a door says otherwise - the
   // quotes' door relabels it after this render (D108).
   setBackDoor(t("reader_back_to_list"), t("reading_list"));
@@ -1700,8 +1717,9 @@ async function showPage(firstLoad = false) {
 
 /**
  * @param {string} url
- * @param {MarkTarget} [target] a mark to land on instead of the reading
- *   position - the highlights page's press (D108)
+ * @param {MarkTarget | SearchTarget} [target] a spot to land on instead of
+ *   the reading position: a mark for the highlights page's press (D108), a
+ *   found phrase for a search row's (D119)
  */
 async function openSaved(url, target) {
   const turn = ++epoch;
@@ -1730,7 +1748,13 @@ async function openSaved(url, target) {
   const rendered = shown;
   await refreshActions();
   if (shown !== rendered) return;
-  if (target === undefined || !scrollToTargetMark(target)) restorePosition(position);
+  const landed =
+    target === undefined
+      ? false
+      : "folded" in target
+        ? scrollToSearchHit(target)
+        : scrollToTargetMark(target);
+  if (!landed) restorePosition(position);
   // Opening is reading's first act, and the position row's clock is what
   // orders the list - so the open itself must wind it, or a document read
   // without a single scroll would never rise. Written after the restore, the
@@ -1976,10 +2000,11 @@ async function backfillToc(book) {
  *
  * @param {string} id
  * @param {number} [wanted] a specific segment - the neighbour rows' press
- * @param {MarkTarget | BlockTarget} [target] a spot to land on instead of
- *   the reading position: a mark for the highlights page's press (D108), a
- *   block for a table-of-contents row (D116) - each asking for its own
- *   segment through `wanted` as well
+ * @param {MarkTarget | BlockTarget | SearchTarget} [target] a spot to land
+ *   on instead of the reading position: a mark for the highlights page's
+ *   press (D108), a block for a table-of-contents row (D116), a found
+ *   phrase for a search row's (D119) - each asking for its own segment
+ *   through `wanted` as well
  */
 async function openBook(id, wanted, target) {
   const turn = ++epoch;
@@ -2039,9 +2064,11 @@ async function openBook(id, wanted, target) {
   const landed =
     target === undefined
       ? false
-      : "start" in target
-        ? scrollToTargetMark(target)
-        : scrollToBlock(target.block);
+      : "folded" in target
+        ? scrollToSearchHit(target)
+        : "start" in target
+          ? scrollToTargetMark(target)
+          : scrollToBlock(target.block);
   if (!landed) restorePosition(position, index);
   // Same reason as `openSaved`: the open winds the position row's clock. For
   // a book this also writes which part is on screen, so a part reached with
@@ -2065,6 +2092,86 @@ async function openBook(id, wanted, target) {
  *
  * @typedef {{ segmentIndex: number, block: number }} BlockTarget
  */
+
+/**
+ * How a search row names its hit across the reopen (D119): the block in the
+ * reading position's numbering, the span in that block's prose, and the
+ * folded query - the proof the landing holds the text to.
+ *
+ * @typedef {{ segmentIndex: number, block: number, from: number, to: number,
+ *   folded: string }} SearchTarget
+ */
+
+/**
+ * The search wash's registry name (D119), styled in `reader.css`. One range,
+ * worn until the first deliberate act.
+ */
+const SEARCH_WASH = "reread-search";
+
+/**
+ * Disarms the standing wash's one-shot listeners, or nothing to disarm.
+ *
+ * @type {(() => void) | null}
+ */
+let disarmSearchWash = null;
+
+/**
+ * Washes the found phrase and arms its leaving: the first tap or key takes
+ * it away - never a timer, because a fade is a repaint for its own sake, and
+ * on e-ink a flash. The render clears it too, like every paint on this page.
+ *
+ * @param {Range} range
+ */
+function washSearchHit(range) {
+  clearSearchWash();
+  if (!highlightsSupported()) return;
+  CSS.highlights.set(SEARCH_WASH, new Highlight(range));
+  const clear = () => clearSearchWash();
+  window.addEventListener("pointerdown", clear, { once: true, capture: true });
+  window.addEventListener("keydown", clear, { once: true, capture: true });
+  disarmSearchWash = () => {
+    window.removeEventListener("pointerdown", clear, true);
+    window.removeEventListener("keydown", clear, true);
+  };
+}
+
+/** The wash off the registry and its listeners disarmed - idempotent. */
+function clearSearchWash() {
+  if (disarmSearchWash !== null) {
+    disarmSearchWash();
+    disarmSearchWash = null;
+  }
+  if (highlightsSupported()) CSS.highlights.delete(SEARCH_WASH);
+}
+
+/**
+ * Scrolls the just-rendered document to one search hit and washes it - the
+ * mark guard's bargain held the other way around: the hit is re-proven by
+ * finding its own phrase in the prose on screen, and when the text moved
+ * since the scan, the nearest occurrence stands in. A phrase no longer in
+ * its block lands on the block alone, unwashed; false only when even the
+ * block is gone, and the caller falls back to the reading position.
+ *
+ * @param {SearchTarget} target
+ * @returns {boolean}
+ */
+function scrollToSearchHit(target) {
+  const root = contentRoot();
+  const text = root === null ? null : proseTextOf(root, target.block);
+  if (root === null || text === null) return false;
+  /** @type {{ start: number, end: number } | null} */
+  let best = null;
+  for (const span of hitsInText(text, target.folded)) {
+    if (best === null || Math.abs(span.start - target.from) < Math.abs(best.start - target.from)) {
+      best = span;
+    }
+  }
+  if (best === null) return scrollToBlock(target.block);
+  const range = rangeWithin(root, target.block, best.start, best.end);
+  if (range === null) return scrollToBlock(target.block);
+  washSearchHit(range);
+  return scrollToRect(range.getClientRects()[0] ?? range.getBoundingClientRect());
+}
 
 /**
  * Scrolls the just-rendered document to one of its marks. The painted range
@@ -2172,6 +2279,11 @@ function leaveDocView() {
   tocBlocks = [];
   updateTocButtons();
   closeTocDialog();
+  // The search leaves with its document (D119): the wash was over blocks
+  // now gone, and the held hits were that text's.
+  clearSearchWash();
+  closeDocSearch();
+  resetDocSearch();
 }
 
 async function showLibrary() {
@@ -2180,9 +2292,11 @@ async function showLibrary() {
   marksShown = null;
   if (marksSection !== null) marksSection.hidden = true;
   // The menu must not list the room it stands in: on the list view its list
-  // row hides, leaving the pages that really are elsewhere.
+  // row hides, leaving the pages that really are elsewhere. The search row
+  // is the open document's and hides with it - the list has its filter.
   if (navLibrary !== null) navLibrary.hidden = true;
   if (navMarks !== null) navMarks.hidden = false;
+  if (navSearch !== null) navSearch.hidden = true;
   if (library !== null) library.hidden = false;
   document.title = t("reader_title");
   scrollTo(0, 0);
@@ -2210,9 +2324,11 @@ async function showMarks(scope, { fresh = false } = {}) {
   }
   if (library !== null) library.hidden = true;
   // The list really is elsewhere from here, so the menu offers it; the
-  // highlights row hides, being the room itself.
+  // highlights row hides, being the room itself, and the search row hides
+  // with the document it was about - this page has a filter of its own.
   if (navLibrary !== null) navLibrary.hidden = false;
   if (navMarks !== null) navMarks.hidden = true;
+  if (navSearch !== null) navSearch.hidden = true;
   if (marksSection !== null) marksSection.hidden = false;
   // The way back in the bar: one step through history, to whatever the page
   // was opened over - the list, or the document whose menu led here. The
@@ -3858,6 +3974,12 @@ navToc?.addEventListener("click", () => {
   openTocDialog();
 });
 
+// The search row (D119): the dialog over whatever document is on screen.
+navSearch?.addEventListener("click", () => {
+  setPanel(menuButton, menuPanel, false);
+  openDocSearch();
+});
+
 navLibrary?.addEventListener("click", () => {
   setPanel(menuButton, menuPanel, false);
   leaveToList();
@@ -3893,6 +4015,35 @@ keepButton?.addEventListener("click", () => void onKeepPress());
 removeButton?.addEventListener("click", () => void onRemovePress());
 markReadButton?.addEventListener("click", () => void onMarkReadPress());
 markReadEndButton?.addEventListener("click", () => void onMarkReadPress());
+
+// Search in the open document (D119). The module keeps the dialog, the scan
+// and the held results; this page owns the landing, which is the quotes' and
+// the contents' own road: the part on screen by scroll alone, another part
+// through `openBook` with the hit riding as the target.
+configureDocSearch({
+  doc: () => shown,
+  root: contentRoot,
+  toc: () => docToc,
+  onJump: (hit, folded) => {
+    if (shown === null) return;
+    /** @type {SearchTarget} */
+    const target = {
+      segmentIndex: hit.segmentIndex,
+      block: hit.block,
+      from: hit.from,
+      to: hit.to,
+      folded,
+    };
+    if (shown.origin === "book" && hit.segmentIndex !== shown.segmentIndex) {
+      void openBook(shown.url, hit.segmentIndex, target);
+      return;
+    }
+    // The landing is a reading position like any scroll's, written at once
+    // so a tab closed right after the jump reopens on the found place. (A
+    // live page has no row to write, and the save itself knows that.)
+    if (scrollToSearchHit(target)) savePositionNow();
+  },
+});
 
 // Reading aloud (D87). The module keeps the place and the voice; this page
 // owns the two things a reader can see - the bar and the button - and hears

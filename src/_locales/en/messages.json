@@ -391,6 +391,50 @@
     "message": "Contents",
     "description": "The book's table of contents: names the pager button that opens it and titles the dialog itself."
   },
+  "reader_search_title": {
+    "message": "Search in text",
+    "description": "Search inside the open document: names the menu row that opens the dialog and titles the dialog itself."
+  },
+  "reader_search_label": {
+    "message": "The phrase to find",
+    "description": "Invisible label of the search dialog's input, for screen readers."
+  },
+  "reader_search_placeholder": {
+    "message": "Find a phrase",
+    "description": "Placeholder of the search dialog's input."
+  },
+  "reader_search_go": {
+    "message": "Search",
+    "description": "The button that runs the search over the open document."
+  },
+  "reader_search_short": {
+    "message": "Type at least 2 characters.",
+    "description": "Shown instead of results when the query is too short to mean anything."
+  },
+  "reader_search_none": {
+    "message": "Nothing found.",
+    "description": "Shown when the scan finished without a single hit."
+  },
+  "reader_search_count_one": {
+    "message": "$COUNT$ hit found.",
+    "description": "How many places the phrase was found in. A language may bend the counted noun's case to fit its own sentence.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "reader_search_count_other": {
+    "message": "$COUNT$ hits found.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_search_capped": {
+    "message": "Showing the first $COUNT$.",
+    "description": "Follows the count when the scan stopped at its cap.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "200" }
+    }
+  },
   "close": {
     "message": "Close",
     "description": "Generic label of a button that puts a dialog away."

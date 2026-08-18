@@ -184,6 +184,33 @@ function rangeOfMark(mark, root) {
 }
 
 /**
+ * A range over one span of one block's prose - the search jump's landing
+ * (D119), built from the same walk and the same locate arithmetic as a
+ * mark's paint, so an offset measured against the prose reads back onto the
+ * same letters. The end is located at its last character, `rangeOfMark`'s
+ * own trick: an end on a piece boundary stays in the piece the text is in.
+ * Null when the block or either endpoint is not there to stand on.
+ *
+ * @param {Element} root the rebuilt content root, whose children are the blocks
+ * @param {number} blockIndex
+ * @param {number} from
+ * @param {number} to exclusive
+ * @returns {Range | null}
+ */
+export function rangeWithin(root, blockIndex, from, to) {
+  const block = root.children[blockIndex];
+  if (block === undefined || to <= from) return null;
+  const prose = blockProse(block);
+  const start = placeIn(prose, from);
+  const end = placeIn(prose, to - 1);
+  if (start === null || end === null) return null;
+  const range = document.createRange();
+  range.setStart(start.node, start.offset);
+  range.setEnd(end.node, end.offset + 1);
+  return range;
+}
+
+/**
  * Every mark of the segment on screen, painted - and nothing else: the call
  * replaces whatever was painted before, so it is also how a deleted mark
  * disappears. A mark the guard refuses stays in the caller's list and in the

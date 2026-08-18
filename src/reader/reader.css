@@ -507,6 +507,14 @@ html {
   background-color: var(--reader-marker-current);
 }
 
+/* The search landing (D119): the found phrase wears the read-aloud word's
+   accent wash - the same "you are here", and the two are never on screen
+   at once: the wash clears at the first tap or key, and speaking starts
+   with one. Default priority, so it reads over a mark it may land on. */
+::highlight(reread-search) {
+  background-color: var(--reader-speaking-word);
+}
+
 #content h1,
 #content h2,
 #content h3,
@@ -1195,6 +1203,48 @@ body.reader:has(#library:not([hidden])) {
 .toc-rows button[aria-current="true"] {
   color: var(--page-accent);
   font-weight: 600;
+}
+
+/* --- search in the document (D119): the TOC dialog's dress on a form and
+   a list of hits --- */
+
+/* The form under the header, in the filter line's own clothes. */
+.search-form {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--page-line);
+}
+
+.search-form input {
+  flex: 1 1 auto;
+  min-height: 44px;
+  min-width: 0;
+  font: inherit;
+  padding: 0.35rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid var(--page-border);
+  background: transparent;
+  color: var(--page-fg);
+}
+
+.search-status {
+  margin: 0.6rem 1rem 0;
+}
+
+/* A part heading between rows: where a book's hits cross into another part
+   or chapter. Quiet - the rows under it are the news. */
+.search-part {
+  margin: 0.7rem 0 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--page-accent);
+}
+
+/* The phrase inside its snippet: weight, not colour - colour alone dies on
+   an e-ink panel's greys. */
+.search-rows button b {
+  font-weight: 700;
 }
 
 /* --- the note dialog (D118): the TOC dialog's dress on a small form --- */

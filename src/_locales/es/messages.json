@@ -315,6 +315,30 @@
   },
   "reader_book_nav": { "message": "Partes del libro" },
   "reader_book_toc": { "message": "Índice" },
+  "reader_search_title": { "message": "Buscar en el texto" },
+  "reader_search_label": { "message": "La frase que buscar" },
+  "reader_search_placeholder": { "message": "Buscar una frase" },
+  "reader_search_go": { "message": "Buscar" },
+  "reader_search_short": { "message": "Escribe al menos 2 caracteres." },
+  "reader_search_none": { "message": "No se encontró nada." },
+  "reader_search_count_one": {
+    "message": "$COUNT$ coincidencia encontrada.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "reader_search_count_other": {
+    "message": "$COUNT$ coincidencias encontradas.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_search_capped": {
+    "message": "Se muestran las primeras $COUNT$.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "200" }
+    }
+  },
   "close": { "message": "Cerrar" },
   "reader_book_importing": {
     "message": "Añadiendo el libro - parte $PART$",
