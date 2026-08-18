@@ -1360,6 +1360,23 @@ function openNoteDialog(mark, onSave) {
   }
   noteText.value = mark.note ?? "";
   noteDialog.showModal();
+  // After showModal: a closed dialog is display:none, where nothing has a
+  // scrollHeight to measure.
+  sizeNoteBox();
+}
+
+/**
+ * The box grown to the words it holds, so an existing note opens whole
+ * instead of through a five-line slot (Michał's report). Collapsed first,
+ * so a shrinking note shrinks the box too; the dialog's own cap and the
+ * flex shrink bound the growth, and past the cap the box scrolls inside
+ * itself. The two pixels are the borders the global border-box folds into
+ * `height` but `scrollHeight` never counts.
+ */
+function sizeNoteBox() {
+  if (noteText === null) return;
+  noteText.style.height = "auto";
+  noteText.style.height = `${noteText.scrollHeight + 2}px`;
 }
 
 /** The dialog down without saving - every way out except Save. */
@@ -1542,6 +1559,10 @@ noteText?.addEventListener("keydown", (event) => {
     onNoteSavePress();
   }
 });
+
+// The box follows the words as they are typed - growth per line, never a
+// scrollbar before the dialog's cap says so.
+noteText?.addEventListener("input", () => sizeNoteBox());
 
 markBar?.addEventListener("click", (event) => {
   const target = event.target;

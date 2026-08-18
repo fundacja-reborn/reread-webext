@@ -2,7 +2,14 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- `interactive-widget` makes Chromium on Android shrink the layout
+         viewport when the on-screen keyboard rises, the way Firefox does by
+         default - so the note dialog's dvh-capped box, and Save under it,
+         stay above the keys (D118). Ignored everywhere else. -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, interactive-widget=resizes-content"
+    />
     <title data-i18n="reader_title">re/read - reader</title>
     <link rel="stylesheet" href="../assets/page.css" />
     <link rel="stylesheet" href="reader.css" />

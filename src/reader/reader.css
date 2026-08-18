@@ -1200,8 +1200,16 @@ body.reader:has(#library:not([hidden])) {
 
 /* --- the note dialog (D118): the TOC dialog's dress on a small form --- */
 
+/* Anchored near the top rather than centred, and capped in dvh: the box a
+   rising phone keyboard can never reach (Firefox shrinks the layout
+   viewport for the keys by default, Chromium does on the viewport meta's
+   `interactive-widget`), and on a desktop a form this small reads fine
+   high on the page. The open box is a column so the textarea can take the
+   spare height and give it back when the cap bites. */
 .note-dialog {
   width: min(26rem, calc(100vw - 2rem));
+  margin: 4dvh auto auto;
+  max-height: 88dvh;
   padding: 0;
   border: 1px solid var(--page-line);
   border-radius: 6px;
@@ -1216,6 +1224,15 @@ body.reader:has(#library:not([hidden])) {
 
 .note-dialog::backdrop {
   background: rgba(0, 0, 0, 0.3);
+}
+
+/* When the cap bites, the words yield and the frame stands: only the box
+   of text shrinks - the header, the quote line and the acts keep their
+   height, so Save and Cancel are on screen for as long as the dialog is. */
+.note-dialog .toc-head,
+.note-quote,
+.note-acts {
+  flex-shrink: 0;
 }
 
 /* The words being annotated, clamped to a glance - context, not content -
@@ -1249,8 +1266,15 @@ body.reader:has(#library:not([hidden])) {
 }
 
 /* The box itself keeps the interface face: what is typed here is a comment,
-   not the article, and the smaller sans says so while staying readable. */
+   not the article, and the smaller sans says so while staying readable.
+   Script grows its height to the words it holds (`sizeNoteBox`) - an
+   existing note opens whole, not through a five-line slot (Michał's
+   report) - and the flex shrink hands the height back when the dialog's
+   cap bites, the scrollbar returning only then. The floor is the old five
+   rows. */
 .note-text {
+  flex: 0 1 auto;
+  min-height: 7.5em;
   margin: 0.8rem 1rem 0;
   padding: 0.5rem 0.6rem;
   border: 1px solid var(--page-border);
@@ -1260,6 +1284,7 @@ body.reader:has(#library:not([hidden])) {
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   font-size: 0.95rem;
   line-height: 1.5;
+  overflow-y: auto;
   resize: vertical;
 }
 
