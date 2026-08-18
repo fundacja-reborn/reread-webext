@@ -1613,13 +1613,16 @@ button[data-armed],
    and its side padding pushed this strip's seventh off the line by a
    pixel. The words are clipped at this width anyway, so the padding
    served nothing but the wrap; the desktop breakpoint below hands the
-   room back together with the labels. */
-.mark-bar {
+   room back together with the labels. Both classes in the selector on
+   purpose: the `.speech-bar` dress is written LATER in this file, and at
+   equal specificity later wins - the first cut of this fix lost exactly
+   that way (0.4.20: the tightening never applied). */
+.speech-bar.mark-bar {
   gap: 0.25rem;
   padding: 0.4rem;
 }
 
-.mark-bar button {
+.speech-bar.mark-bar button {
   padding: 0.35rem;
 }
 
@@ -1859,13 +1862,14 @@ body.reader:has(#mark-bar:not([hidden])) {
   }
 
   /* With the labels back the mark bar breathes like the transport again -
-     the tight phone dress above was only ever about one line of seven. */
-  .mark-bar {
+     the tight phone dress above was only ever about one line of seven.
+     The doubled selector again: it must outweigh its own base rule. */
+  .speech-bar.mark-bar {
     gap: 0.25rem 0.4rem;
     padding: 0.4rem 0.6rem;
   }
 
-  .mark-bar button {
+  .speech-bar.mark-bar button {
     padding: 0.35rem 0.7rem;
   }
 
