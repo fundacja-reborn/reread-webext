@@ -927,23 +927,37 @@ body.reader:has(#library:not([hidden])) {
 /* The row wears its mark's ink on the leading edge - the one place colour
    can say which pen wrote the quote without washing text nobody selected.
    The variables are the washes' own, so the stripe answers the theme
-   exactly as the mark it stands for. */
+   exactly as the mark it stands for. Drawn as an inset stroke rather than
+   a border: a full-height edge met the row's top and bottom hairlines and
+   the three read as a box missing its fourth side (Michał's report). The
+   stroke hugs the text instead - the offsets are the text cell's own
+   padding (`.marks-row .library-text` below), repeated - so air stands
+   between it and both hairlines and nothing asks for a frame. */
 .marks-row {
-  padding-inline-start: 0.65rem;
-  border-inline-start: 3px solid transparent;
+  position: relative;
+  padding-inline-start: calc(0.65rem + 3px);
 }
 
-.marks-row[data-color="yellow"] {
-  border-inline-start-color: var(--reader-marker-yellow);
+.marks-row::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  top: 1.1em;
+  bottom: 3em;
+  width: 3px;
 }
-.marks-row[data-color="green"] {
-  border-inline-start-color: var(--reader-marker-green);
+
+.marks-row[data-color="yellow"]::before {
+  background: var(--reader-marker-yellow);
 }
-.marks-row[data-color="blue"] {
-  border-inline-start-color: var(--reader-marker-blue);
+.marks-row[data-color="green"]::before {
+  background: var(--reader-marker-green);
 }
-.marks-row[data-color="pink"] {
-  border-inline-start-color: var(--reader-marker-pink);
+.marks-row[data-color="blue"]::before {
+  background: var(--reader-marker-blue);
+}
+.marks-row[data-color="pink"]::before {
+  background: var(--reader-marker-pink);
 }
 
 /* Air between quotes (Michał's request): a quote is a passage, not a list
@@ -1044,6 +1058,15 @@ body.reader:has(#library:not([hidden])) {
    the heading the way the article's byline sits under its title. */
 .marks-doc {
   margin: -0.25rem 0 0;
+}
+
+/* The list has ended, the tool resumes: the export takes the finishing
+   acts' own parting (margin, a breath, a hairline - the `.reader-actions-end`
+   trio) instead of floating in the last row's air (Michał's report). */
+.marks-transfer {
+  margin-top: 3rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--page-line);
 }
 
 /* --- the shared pager, held to the same touch floor --- */
@@ -1504,8 +1527,12 @@ button[data-armed],
    the tail of a noted mark, each the door to its own note. Real buttons -
    focusable, named - but dressed as marginalia: the accent's small sheet,
    no frame. Absolute in page coordinates like the pins; unlike the pins
-   they take the tap. The box is wider than the drawing so a finger on
-   glass has something to land on without covering the words around it. */
+   they take the tap. The box is far wider than the drawing - a thumb
+   target (Michał's ask after the first smoke), one size on every device
+   because the pointer media query lies on e-ink (D84) - while the glyph
+   stays a footnote; the halo shows the true reach only under hover or
+   focus. The named cost: the box can shade the first letters after the
+   mark, and a tap there means the note, not the word. */
 .mark-note-badge {
   position: absolute;
   z-index: 2;
@@ -1513,8 +1540,8 @@ button[data-armed],
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
-  width: 28px;
-  height: 28px;
+  width: 40px;
+  height: 40px;
   padding: 0;
   border: none;
   border-radius: 50%;
@@ -1523,8 +1550,8 @@ button[data-armed],
 }
 
 .mark-note-badge .reader-icon {
-  width: 15px;
-  height: 15px;
+  width: 18px;
+  height: 18px;
 }
 
 .mark-note-badge:hover,

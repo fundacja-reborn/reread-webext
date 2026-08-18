@@ -50,11 +50,13 @@ import { wordless } from "../lib/matcher/words.js";
 import {
   compareMarks,
   comparePoints,
+  headRect,
   isMarkColor,
   markRecord,
   mergePlan,
   mergedNote,
   placeMark,
+  tailRect,
   withoutMark,
 } from "../lib/reader/marks.js";
 import {
@@ -1135,10 +1137,13 @@ function activateMark(hit) {
  */
 function placeMarkPins(range) {
   if (markPinStart === null || markPinEnd === null) return;
+  // Topmost and bottommost boxes by geometry, not by list position: Blink
+  // hands a range's rects grouped by node (the badge stood mid-mark on
+  // exactly that), and the pins read the same list.
   const rects = range.getClientRects();
-  const first = rects[0];
-  const last = rects[rects.length - 1];
-  if (first === undefined || last === undefined) return;
+  const first = headRect(rects);
+  const last = tailRect(rects);
+  if (first === null || last === null) return;
 
   markPinStart.style.left = `${Math.round(first.left + window.scrollX - 3)}px`;
   markPinStart.style.top = `${Math.round(first.top + window.scrollY)}px`;
@@ -1275,9 +1280,10 @@ function showNoteBadges() {
     if (mark.note === undefined) continue;
     const range = paintedRangeOf(mark);
     if (range === null) continue;
-    const rects = range.getClientRects();
-    const last = rects[rects.length - 1];
-    if (last === undefined) continue;
+    // The bottommost box, not the last of the list: Blink hands a range's
+    // rects grouped by node, so the list may end mid-mark (`tailRect`).
+    const last = tailRect(range.getClientRects());
+    if (last === null) continue;
 
     const badge = document.createElement("button");
     badge.type = "button";
@@ -1287,13 +1293,16 @@ function showNoteBadges() {
     if (marksNoteIcon !== null) badge.append(marksNoteIcon.content.cloneNode(true));
     // The footnote's raise past the line's top, just off the mark's last
     // box - and held inside the page, so a mark ending against the right
-    // edge cannot push a scrollbar under the article.
+    // edge cannot push a scrollbar under the article. The offsets centre
+    // the glyph at the box's old spot while the 40px target grows outward
+    // (mostly rightward and into the line gap above, where no word pays
+    // for it).
     const left = Math.min(
       Math.round(last.right + window.scrollX - 6),
-      document.documentElement.clientWidth - 30,
+      document.documentElement.clientWidth - 42,
     );
     badge.style.left = `${left}px`;
-    badge.style.top = `${Math.round(last.top + window.scrollY - 16)}px`;
+    badge.style.top = `${Math.round(last.top + window.scrollY - 22)}px`;
     badge.addEventListener("click", () => onNoteBadgePress(mark));
     badges.push(badge);
   }

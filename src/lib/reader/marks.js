@@ -315,6 +315,60 @@ export function marksInSegment(marks, segmentIndex) {
 }
 
 /**
+ * The shape of a box as the pickers below need it - what a DOMRect already
+ * is, said structurally so the rule can run under `node --test`.
+ *
+ * @typedef {{ top: number, bottom: number, left: number, right: number,
+ *   width: number, height: number }} RectLike
+ */
+
+/**
+ * Which of a painted range's boxes a mark visually begins in, and which it
+ * ends in. Blink does not hand a range's client rects in document order -
+ * boxes arrive grouped by node when the range crosses inline elements, with
+ * zero-size boxes riding along for collapsed whitespace - so "the first
+ * rect" and "the last rect" are not "the first line" and "the last line"
+ * (the note badge stood mid-mark on exactly that; Michał's report from
+ * Brave). Geometry decides instead: the head is the topmost box and the
+ * tail the bottommost, ties broken toward the reading edge, and an empty
+ * box is nobody's line. Null only when nothing has size.
+ *
+ * @param {Iterable<RectLike>} rects
+ * @returns {RectLike | null}
+ */
+export function headRect(rects) {
+  /** @type {RectLike | null} */
+  let best = null;
+  for (const rect of rects) {
+    if (rect.width <= 0 || rect.height <= 0) continue;
+    if (best === null || rect.top < best.top || (rect.top === best.top && rect.left < best.left)) {
+      best = rect;
+    }
+  }
+  return best;
+}
+
+/**
+ * @param {Iterable<RectLike>} rects
+ * @returns {RectLike | null}
+ */
+export function tailRect(rects) {
+  /** @type {RectLike | null} */
+  let best = null;
+  for (const rect of rects) {
+    if (rect.width <= 0 || rect.height <= 0) continue;
+    if (
+      best === null ||
+      rect.bottom > best.bottom ||
+      (rect.bottom === best.bottom && rect.right > best.right)
+    ) {
+      best = rect;
+    }
+  }
+  return best;
+}
+
+/**
  * The text a span covers, read off the blocks' prose - or null when the
  * offsets do not fit the prose they claim to measure, which is the quote
  * guard refusing. `prose` holds the joined text of every block the span

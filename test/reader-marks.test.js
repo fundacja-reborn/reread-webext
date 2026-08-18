@@ -7,6 +7,7 @@ import {
   asMark,
   compareMarks,
   comparePoints,
+  headRect,
   isMarkColor,
   markRecord,
   marksInSegment,
@@ -14,6 +15,7 @@ import {
   mergedNote,
   placeMark,
   quoteOf,
+  tailRect,
   withoutMark,
 } from "../src/lib/reader/marks.js";
 
@@ -280,6 +282,48 @@ describe("placeMark and withoutMark", () => {
     // Identity, not likeness: two marks can quote the same words, and the
     // delete bubble means the one that was tapped.
     assert.deepEqual(left, [a]);
+  });
+});
+
+describe("headRect and tailRect", () => {
+  /**
+   * @param {number} top
+   * @param {number} left
+   * @param {number} [width]
+   * @param {number} [height]
+   */
+  const box = (top, left, width = 100, height = 20) => ({
+    top,
+    left,
+    width,
+    height,
+    right: left + width,
+    bottom: top + height,
+  });
+
+  it("picks the topmost and the bottommost box, wherever the list put them", () => {
+    // Blink hands a range's rects grouped by node, not in document order -
+    // the exact shape that stood the note badge mid-mark (Brave report).
+    const lines = [box(40, 0), box(60, 0, 40), box(0, 0), box(20, 0)];
+    assert.equal(headRect(lines)?.top, 0);
+    assert.equal(tailRect(lines)?.top, 60);
+  });
+
+  it("breaks a shared line toward the reading edge", () => {
+    // Two boxes on one line - split by an inline element - and the tail is
+    // the one the reading ends in: the rightmost.
+    const split = [box(0, 300, 50), box(0, 0, 280)];
+    assert.equal(tailRect(split)?.right, 350);
+    assert.equal(headRect(split)?.left, 0);
+  });
+
+  it("counts no empty box as a line", () => {
+    // Collapsed whitespace rides along as zero-size rects; a badge on one
+    // would stand on nothing.
+    const rects = [box(0, 0), box(50, 200, 0, 20), box(50, 200, 20, 0)];
+    assert.equal(tailRect(rects)?.top, 0);
+    assert.equal(headRect([box(10, 10, 0, 0)]), null);
+    assert.equal(tailRect([]), null);
   });
 });
 
