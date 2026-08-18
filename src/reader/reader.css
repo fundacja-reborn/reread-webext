@@ -1228,7 +1228,7 @@ body.reader:has(#library:not([hidden])) {
   color: var(--page-fg);
 }
 
-.search-status {
+.toc-dialog .search-status {
   margin: 0.6rem 1rem 0;
 }
 
@@ -1245,6 +1245,59 @@ body.reader:has(#library:not([hidden])) {
    an e-ink panel's greys. */
 .search-rows button b {
   font-weight: 700;
+}
+
+/* --- search through the reading list (D119): the checkbox line under the
+   filter, and the results standing where the rows stand --- */
+
+.search-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+/* A finger of height for the checkbox and its words, like every touch
+   target on this page. */
+.search-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 44px;
+}
+
+.search-snippets {
+  margin-top: 0.15rem;
+}
+
+/* A snippet is a quiet row inside its result: full width, no chrome, the
+   page's own ink - the bold phrase inside is the news. */
+.search-snippet {
+  display: block;
+  width: 100%;
+  padding: 0.3rem 0;
+  border: none;
+  border-radius: 0;
+  background: none;
+  color: var(--page-fg);
+  text-align: left;
+  font-size: 0.95rem;
+}
+
+.search-snippet:hover {
+  color: var(--page-accent);
+}
+
+.search-snippet b {
+  font-weight: 700;
+}
+
+.search-more-hits {
+  color: var(--page-accent);
+}
+
+.search-more-line {
+  margin: 0.75rem 0;
 }
 
 /* --- the note dialog (D118): the TOC dialog's dress on a small form --- */

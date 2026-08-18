@@ -339,6 +339,29 @@
       "count": { "content": "$1", "example": "200" }
     }
   },
+  "reader_library_search_toggle": { "message": "Buscar también en los textos" },
+  "reader_search_more": { "message": "Seguir buscando" },
+  "reader_search_progress": {
+    "message": "Buscado en $AT$ de $TOTAL$ documentos.",
+    "placeholders": {
+      "at": { "content": "$1", "example": "12" },
+      "total": { "content": "$2", "example": "80" }
+    }
+  },
+  "reader_search_in_titles": { "message": "En los títulos" },
+  "reader_search_in_text": { "message": "En el texto" },
+  "reader_search_more_hits_one": {
+    "message": "y $COUNT$ coincidencia más",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "reader_search_more_hits_other": {
+    "message": "y $COUNT$ coincidencias más",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
   "close": { "message": "Cerrar" },
   "reader_book_importing": {
     "message": "Añadiendo el libro - parte $PART$",

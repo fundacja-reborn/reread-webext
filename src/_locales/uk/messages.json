@@ -396,6 +396,41 @@
       "count": { "content": "$1", "example": "200" }
     }
   },
+  "reader_library_search_toggle": { "message": "Шукати також у текстах" },
+  "reader_search_more": { "message": "Шукати далі" },
+  "reader_search_progress": {
+    "message": "Переглянуто $AT$ з $TOTAL$ документів.",
+    "placeholders": {
+      "at": { "content": "$1", "example": "12" },
+      "total": { "content": "$2", "example": "80" }
+    }
+  },
+  "reader_search_in_titles": { "message": "У заголовках" },
+  "reader_search_in_text": { "message": "У тексті" },
+  "reader_search_more_hits_one": {
+    "message": "і ще $COUNT$ збіг",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "reader_search_more_hits_few": {
+    "message": "і ще $COUNT$ збіги",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_search_more_hits_many": {
+    "message": "і ще $COUNT$ збігів",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_search_more_hits_other": {
+    "message": "і ще $COUNT$ збігу",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1,5" }
+    }
+  },
   "close": { "message": "Закрити" },
   "reader_book_importing": {
     "message": "Додавання книжки - частина $PART$",

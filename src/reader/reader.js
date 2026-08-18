@@ -65,7 +65,7 @@ import {
   positionRecord,
   restoredIndex,
 } from "../lib/reader/position.js";
-import { hitsInText } from "../lib/reader/search.js";
+import { hitsInText, isSearchableQuery } from "../lib/reader/search.js";
 import { READER_SOURCE_KEY, readReaderSource } from "../lib/session.js";
 import {
   ARTICLES_FILENAME,
@@ -115,6 +115,12 @@ import {
   resetDocSearch,
 } from "./doc-search.js";
 import { importEpub } from "./import-book.js";
+import {
+  configureLibrarySearch,
+  dismissLibrarySearch,
+  librarySearchShown,
+  startLibrarySearch,
+} from "./library-search.js";
 import { articleEntry, bookEntry, libraryView } from "./list-view.js";
 import { markRows, marksListView } from "./marks-list.js";
 import {
@@ -199,6 +205,15 @@ const libraryRows = document.getElementById("library-rows");
 const libraryFilter = /** @type {HTMLInputElement | null} */ (
   document.getElementById("library-filter")
 );
+// The deep search's own furniture (D119): the checkbox line under the
+// filter, and the section its results stand in.
+const librarySearchToggle = /** @type {HTMLInputElement | null} */ (
+  document.getElementById("library-search-toggle")
+);
+const librarySearchGo = /** @type {HTMLButtonElement | null} */ (
+  document.getElementById("library-search-go")
+);
+const librarySearchSection = document.getElementById("library-search");
 const libraryPager = document.getElementById("library-pager");
 const libraryPageLabel = document.getElementById("library-page-label");
 const libraryPrev = /** @type {HTMLButtonElement | null} */ (
@@ -2428,6 +2443,47 @@ async function refreshLibrary() {
 
   libraryRows.replaceChildren(...view.rows.map(libraryRow));
   renderLibraryPager(view);
+  applyLibrarySearchVisibility();
+}
+
+/**
+ * Which furniture the list area shows (D119): the plain list, or the deep
+ * search's results standing in its place. Runs after every list refresh -
+ * the refresh decides the plain elements' own hidden flags, and this hides
+ * them again wholesale while results stand; segments and rows are unhidden
+ * on the way back because no refresh ever touches those two.
+ */
+function applyLibrarySearchVisibility() {
+  const on = librarySearchShown();
+  if (on) {
+    const plain = [librarySegments, libraryCount, libraryEmpty, libraryRows, libraryPager];
+    for (const element of plain) {
+      if (element !== null) element.hidden = true;
+    }
+  } else {
+    if (librarySegments !== null) librarySegments.hidden = false;
+    if (libraryRows !== null) libraryRows.hidden = false;
+  }
+  if (librarySearchSection !== null) librarySearchSection.hidden = !on;
+}
+
+/**
+ * The deep search's two states of the button under the filter (D119): there
+ * only while the checkbox asks for it, pressable only over a phrase worth
+ * scanning for - the same two-characters rule the document dialog keeps.
+ */
+function updateSearchControls() {
+  if (librarySearchGo === null || librarySearchToggle === null) return;
+  librarySearchGo.hidden = !librarySearchToggle.checked;
+  librarySearchGo.disabled = !isSearchableQuery(libraryFilter?.value ?? "");
+}
+
+/** One press on Search, however it came - the button or Enter in the box. */
+async function runLibrarySearch() {
+  const query = libraryFilter?.value ?? "";
+  if (!isSearchableQuery(query)) return;
+  await startLibrarySearch(query);
+  applyLibrarySearchVisibility();
 }
 
 /**
@@ -3619,12 +3675,37 @@ librarySegments?.addEventListener("click", (event) => {
 
 libraryFilter?.addEventListener("input", () => {
   if (libraryFilter === null) return;
+  // An edited box asks a new question: standing deep results are dismissed
+  // (D119) and the plain filter answers live again; the refresh below puts
+  // the list back on screen.
+  if (librarySearchShown()) dismissLibrarySearch();
+  updateSearchControls();
   libraryQuery = libraryFilter.value;
   // Typing means "show me what matches", and that starts at the beginning -
   // the clamp would only catch a page that no longer exists.
   libraryPage = 1;
   void refreshLibrary();
 });
+
+// Enter in the box runs the deep search while the checkbox asks for it -
+// the same press the button makes, for hands that never leave the keys
+// (and for the search key a phone keyboard shows).
+libraryFilter?.addEventListener("keydown", (event) => {
+  if (event.key !== "Enter" || librarySearchToggle?.checked !== true) return;
+  event.preventDefault();
+  void runLibrarySearch();
+});
+
+librarySearchToggle?.addEventListener("change", () => {
+  updateSearchControls();
+  // Unticking the box takes the results with it: they were its question.
+  if (librarySearchToggle?.checked !== true && librarySearchShown()) {
+    dismissLibrarySearch();
+    void refreshLibrary();
+  }
+});
+
+librarySearchGo?.addEventListener("click", () => void runLibrarySearch());
 
 /**
  * A turned page starts at its top - snapped there, not glided, because on
@@ -4042,6 +4123,27 @@ configureDocSearch({
     // so a tab closed right after the jump reopens on the found place. (A
     // live page has no row to write, and the save itself knows that.)
     if (scrollToSearchHit(target)) savePositionNow();
+  },
+});
+
+// Search through the reading list (D119). The module keeps the snapshot,
+// the cursor and the rows; this page owns the two ways out of a result -
+// both the very road a list row's press takes, history entry included, so
+// Back from a found place is the same step back as from any opened row.
+configureLibrarySearch({
+  onOpen: (kind, url, target) => {
+    hideNotice();
+    history.pushState(docState(kind, url), "");
+    if (kind === "book") void openBook(url, target?.segmentIndex, target);
+    else void openSaved(url, target);
+  },
+  onOpenSearch: (kind, url, query) => {
+    hideNotice();
+    history.pushState(docState(kind, url), "");
+    const opened = kind === "book" ? openBook(url) : openSaved(url);
+    // The document's own dialog opens over the landing, the phrase already
+    // in it - the list's "and m more" is a door into the full search.
+    void opened.then(() => openDocSearch(query));
   },
 });
 

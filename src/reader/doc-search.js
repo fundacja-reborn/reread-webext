@@ -107,22 +107,29 @@ export function configureDocSearch(wiring) {
 /**
  * Opens the dialog over the current document, with the last search of this
  * very document still standing in it - stepping out to check a hit and
- * coming back must not cost the scan again.
+ * coming back must not cost the scan again. A prefilled phrase (the list's
+ * "and m more" press, D119) starts its scan at once - unless it is the very
+ * search already held, which is simply shown.
+ *
+ * @param {string} [prefill] a phrase to search for on opening
  */
-export function openDocSearch() {
+export function openDocSearch(prefill) {
   const doc = context?.doc() ?? null;
   if (dialog === null || input === null || doc === null) return;
-  if (held !== null && held.url === doc.url) {
-    input.value = held.query;
+  const remembered = held !== null && held.url === doc.url ? held : null;
+  const rerun = prefill !== undefined && (remembered === null || remembered.query !== prefill);
+  if (remembered !== null && !rerun) {
+    input.value = remembered.query;
     renderResults();
   } else {
     held = null;
-    input.value = "";
+    input.value = prefill ?? "";
     clearResults();
   }
   dialog.showModal();
   input.focus();
   input.select();
+  if (rerun && prefill !== undefined) void runSearch(prefill);
 }
 
 /** Puts the dialog away, wherever the closing came from. The close event
@@ -165,12 +172,13 @@ function sayStatus(text) {
  * the markup parsed inert (a stored block is our own rebuilt markup, and
  * still not trusted back) and walked by the same `prosePieces` the marks
  * and the scan of a rendered article use - one arithmetic, so an offset
- * measured here lands on the letters the render will show.
+ * measured here lands on the letters the render will show. The list's scan
+ * (`library-search.js`) reads book segments through this too.
  *
  * @param {string} html
  * @returns {string}
  */
-function storedBlockText(html) {
+export function storedBlockText(html) {
   const block = new DOMParser().parseFromString(html, "text/html").body.firstElementChild;
   if (block === null) return "";
   return prosePieces(block)
@@ -181,17 +189,19 @@ function storedBlockText(html) {
 /**
  * Every hit of one block's prose, appended until the cap - false when the
  * cap cut the collecting short, which is the scan's cue to stop whole.
+ * Shared with the list's scan, which brings its own, tighter cap.
  *
  * @param {string} text
  * @param {number} segmentIndex
  * @param {number} block
  * @param {string} folded
  * @param {DocHit[]} into
+ * @param {number} cap
  * @returns {boolean} whether there is room to keep collecting
  */
-function collectHits(text, segmentIndex, block, folded, into) {
+export function collectHits(text, segmentIndex, block, folded, into, cap) {
   for (const span of hitsInText(text, folded)) {
-    if (into.length >= DOC_HIT_CAP) return false;
+    if (into.length >= cap) return false;
     into.push({
       segmentIndex,
       block,
@@ -200,7 +210,7 @@ function collectHits(text, segmentIndex, block, folded, into) {
       ...snippetAround(text, span),
     });
   }
-  return into.length < DOC_HIT_CAP;
+  return into.length < cap;
 }
 
 /**
@@ -239,7 +249,8 @@ async function runSearch(query) {
       if (segment === null) continue;
       let room = true;
       for (let block = 0; block < segment.blocks.length && room; block += 1) {
-        room = collectHits(storedBlockText(segment.blocks[block] ?? ""), index, block, folded, hits);
+        const text = storedBlockText(segment.blocks[block] ?? "");
+        room = collectHits(text, index, block, folded, hits, DOC_HIT_CAP);
       }
       if (!room) {
         capped = true;
@@ -252,7 +263,7 @@ async function runSearch(query) {
     let room = true;
     for (let block = 0; block < count && room; block += 1) {
       const text = root === null ? null : proseTextOf(root, block);
-      room = collectHits(text ?? "", 0, block, folded, hits);
+      room = collectHits(text ?? "", 0, block, folded, hits, DOC_HIT_CAP);
     }
     capped = !room;
   }
