@@ -1603,6 +1603,22 @@ button[data-armed],
   height: 1.5em;
 }
 
+/* Seven controls on one phone line (Michał's report from a 360px viewport:
+   the bin wrapped onto a second row). The touch targets keep their 44px;
+   what gives is the air - the speech bar's dress was cut for four buttons,
+   and its side padding pushed this strip's seventh off the line by a
+   pixel. The words are clipped at this width anyway, so the padding
+   served nothing but the wrap; the desktop breakpoint below hands the
+   room back together with the labels. */
+.mark-bar {
+  gap: 0.25rem;
+  padding: 0.4rem;
+}
+
+.mark-bar button {
+  padding: 0.35rem;
+}
+
 /* The pins of the active mark: the platform selection-handle shape - a thin
    stem the height of the line, a dot at the outer end - in the interface
    accent, so the mark keeps its true ink (a wash over it read as a darker,
@@ -1836,6 +1852,17 @@ body.reader:has(#mark-bar:not([hidden])) {
   .mark-bar .reader-icon {
     width: 1.5em;
     height: 1.5em;
+  }
+
+  /* With the labels back the mark bar breathes like the transport again -
+     the tight phone dress above was only ever about one line of seven. */
+  .mark-bar {
+    gap: 0.25rem 0.4rem;
+    padding: 0.4rem 0.6rem;
+  }
+
+  .mark-bar button {
+    padding: 0.35rem 0.7rem;
   }
 
   /* The tabs keep their own width instead of splitting the line. */
