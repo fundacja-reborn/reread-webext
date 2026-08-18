@@ -50,13 +50,11 @@ import { wordless } from "../lib/matcher/words.js";
 import {
   compareMarks,
   comparePoints,
-  headRect,
   isMarkColor,
   markRecord,
   mergePlan,
   mergedNote,
   placeMark,
-  tailRect,
   withoutMark,
 } from "../lib/reader/marks.js";
 import {
@@ -116,6 +114,7 @@ import {
   anchorOf,
   clearMarkPaint,
   markAt,
+  markEdges,
   paintMarks,
   paintedRangeOf,
   proseTextOf,
@@ -1137,12 +1136,10 @@ function activateMark(hit) {
  */
 function placeMarkPins(range) {
   if (markPinStart === null || markPinEnd === null) return;
-  // Topmost and bottommost boxes by geometry, not by list position: Blink
-  // hands a range's rects grouped by node (the badge stood mid-mark on
-  // exactly that), and the pins read the same list.
-  const rects = range.getClientRects();
-  const first = headRect(rects);
-  const last = tailRect(rects);
+  // The boxes of the mark's first and last character (`markEdges`), never
+  // the range's full rect list - Brave's diverges from Chrome's on a range
+  // crossing blocks, and the end pin reads the same geometry the badge does.
+  const { head: first, tail: last } = markEdges(range);
   if (first === null || last === null) return;
 
   markPinStart.style.left = `${Math.round(first.left + window.scrollX - 3)}px`;
@@ -1280,9 +1277,10 @@ function showNoteBadges() {
     if (mark.note === undefined) continue;
     const range = paintedRangeOf(mark);
     if (range === null) continue;
-    // The bottommost box, not the last of the list: Blink hands a range's
-    // rects grouped by node, so the list may end mid-mark (`tailRect`).
-    const last = tailRect(range.getClientRects());
+    // The box of the mark's last character (`markEdges`), never the range's
+    // full rect list - Brave's diverges from Chrome's on a range crossing
+    // blocks, and the badge stood mid-mark on it.
+    const last = markEdges(range).tail;
     if (last === null) continue;
 
     const badge = document.createElement("button");
@@ -1302,7 +1300,7 @@ function showNoteBadges() {
       document.documentElement.clientWidth - 42,
     );
     badge.style.left = `${left}px`;
-    badge.style.top = `${Math.round(last.top + window.scrollY - 22)}px`;
+    badge.style.top = `${Math.round(last.top + window.scrollY - 18)}px`;
     badge.addEventListener("click", () => onNoteBadgePress(mark));
     badges.push(badge);
   }
