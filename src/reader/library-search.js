@@ -353,10 +353,35 @@ function renderSearch() {
 }
 
 /**
- * One result row: the title as the way in (the list row's own press), the
- * detail under it - and, for a text hit, up to a few snippets, each a jump
- * to its place, with "and m more" leading into the document's own search
- * dialog, already filled in. Titles and snippets enter as text only.
+ * The target one hit jumps to - the payload every press in a result row
+ * hands `onOpen`, in the `SearchTarget` shape the reader lands by.
+ *
+ * @param {DocHit} hit
+ * @param {string} folded
+ * @returns {HitTarget}
+ */
+function targetOf(hit, folded) {
+  return {
+    segmentIndex: hit.segmentIndex,
+    block: hit.block,
+    from: hit.from,
+    to: hit.to,
+    folded,
+  };
+}
+
+/**
+ * One result row: the title as the way in, the detail under it - and, for
+ * a text hit, up to a few snippets, each a jump to its place, with "and m
+ * more" leading into the document's own search dialog, already filled in.
+ *
+ * The title of a text row jumps to the FIRST hit rather than opening
+ * plain: the row exists because of the phrase, and the title is what looks
+ * pressable - a reader who came for the phrase must not land on the
+ * reading position wondering where the highlight went (Michał's first
+ * smoke, 2026-08-18). An own-words row has no place in the text to jump
+ * to, so its title opens plain; so does every row of the ordinary list.
+ * Titles and snippets enter as text only.
  *
  * @param {SearchDoc} doc
  * @param {DocHit[] | null} hits null for an own-words row
@@ -375,7 +400,10 @@ function docRow(doc, hits, folded, query) {
   open.type = "button";
   open.className = "library-open";
   open.textContent = doc.title;
-  open.addEventListener("click", () => context?.onOpen(doc.kind, doc.url, undefined));
+  const first = hits === null ? undefined : hits[0];
+  open.addEventListener("click", () =>
+    context?.onOpen(doc.kind, doc.url, first === undefined ? undefined : targetOf(first, folded)),
+  );
 
   const detail = document.createElement("span");
   detail.className = "library-item-detail";
@@ -399,15 +427,7 @@ function docRow(doc, hits, folded, query) {
       const after = document.createElement("span");
       after.textContent = hit.after;
       row.append(before, match, after);
-      row.addEventListener("click", () =>
-        context?.onOpen(doc.kind, doc.url, {
-          segmentIndex: hit.segmentIndex,
-          block: hit.block,
-          from: hit.from,
-          to: hit.to,
-          folded,
-        }),
-      );
+      row.addEventListener("click", () => context?.onOpen(doc.kind, doc.url, targetOf(hit, folded)));
       snippets.append(row);
     }
     if (plan.more > 0) {
