@@ -40,6 +40,32 @@ export const MARK_COLORS = Object.freeze(["yellow", "green", "blue", "pink"]);
 export const DEFAULT_MARK_COLOR = "yellow";
 
 /**
+ * The most a note may hold, in characters. Far above what a margin comment
+ * honestly runs to - the cap exists for the same reason the article file caps
+ * its marks: a hand-made backup must not plant megabytes into a field every
+ * render reads. The editor wears the same number as its `maxlength`, so the
+ * two doors agree.
+ */
+export const MAX_NOTE_LENGTH = 2000;
+
+/**
+ * A note as a mark keeps it, or nothing: trimmed, cut to the cap, and absent
+ * rather than empty - a mark without a note has no field, so "no note" is one
+ * shape everywhere. One narrowing for the record builder and the healer both,
+ * so a note entered by editor and one entered by file read by the same rule.
+ *
+ * @param {unknown} value
+ * @returns {string | undefined}
+ */
+function asNote(value) {
+  if (typeof value !== "string") return undefined;
+  // The trim after the cut keeps the healing idempotent: a cut that lands on
+  // a space must read the same on every later pass through this door.
+  const kept = value.trim().slice(0, MAX_NOTE_LENGTH).trim();
+  return kept.length === 0 ? undefined : kept;
+}
+
+/**
  * @param {unknown} value
  * @returns {value is MarkColor}
  */
@@ -56,6 +82,11 @@ export function isMarkColor(value) {
  */
 
 /**
+ * The optional `note` is the reader's own words about the quote (D118):
+ * absent on a mark nobody annotated - old rows never carried the field, and
+ * absence and emptiness must read the same - and plain text when present,
+ * newlines and all.
+ *
  * @typedef {{
  *   segmentIndex: number,
  *   start: MarkPoint,
@@ -63,6 +94,7 @@ export function isMarkColor(value) {
  *   color: string,
  *   createdAt: number,
  *   text: string,
+ *   note?: string,
  * }} Mark
  */
 
@@ -119,7 +151,9 @@ export function compareMarks(a, b) {
  * not make a mark: a span that does not run forward, an unknown colour, a
  * quote that is not there to guard with. An end offset of zero is refused
  * with the rest - a mark "ending" at the very start of a block really ends in
- * the block before, and the gesture never produces one.
+ * the block before, and the gesture never produces one. The note alone
+ * cannot refuse a record: whatever it holds narrows through `asNote`, and a
+ * mark is a mark with or without one.
  *
  * @param {{
  *   segmentIndex: number,
@@ -128,10 +162,11 @@ export function compareMarks(a, b) {
  *   color: string,
  *   createdAt: number,
  *   text: string,
+ *   note?: string,
  * }} input
  * @returns {Mark | null}
  */
-export function markRecord({ segmentIndex, start, end, color, createdAt, text }) {
+export function markRecord({ segmentIndex, start, end, color, createdAt, text, note }) {
   if (!isIndex(segmentIndex)) return null;
   const from = asPoint(start);
   const to = asPoint(end);
@@ -140,7 +175,16 @@ export function markRecord({ segmentIndex, start, end, color, createdAt, text })
   if (!isMarkColor(color)) return null;
   if (typeof createdAt !== "number" || !Number.isFinite(createdAt)) return null;
   if (typeof text !== "string" || text.length === 0) return null;
-  return { segmentIndex, start: from, end: to, color, createdAt, text };
+  const kept = asNote(note);
+  return {
+    segmentIndex,
+    start: from,
+    end: to,
+    color,
+    createdAt,
+    text,
+    ...(kept === undefined ? {} : { note: kept }),
+  };
 }
 
 /**
@@ -156,7 +200,7 @@ export function markRecord({ segmentIndex, start, end, color, createdAt, text })
  */
 export function asMark(value) {
   if (typeof value !== "object" || value === null) return null;
-  const { segmentIndex, start, end, color, createdAt, text } =
+  const { segmentIndex, start, end, color, createdAt, text, note } =
     /** @type {Record<string, unknown>} */ (value);
   return markRecord({
     segmentIndex: /** @type {number} */ (segmentIndex),
@@ -165,6 +209,7 @@ export function asMark(value) {
     color: isMarkColor(color) ? color : DEFAULT_MARK_COLOR,
     createdAt: typeof createdAt === "number" && Number.isFinite(createdAt) ? createdAt : 0,
     text: /** @type {string} */ (text),
+    note: typeof note === "string" ? note : undefined,
   });
 }
 
@@ -209,6 +254,26 @@ export function mergePlan(marks, span) {
     if (comparePoints(mark.end, end) > 0) end = mark.end;
   }
   return { absorbed, span: { segmentIndex: span.segmentIndex, start, end } };
+}
+
+/**
+ * The note the merged mark inherits: every absorbed note, in reading order,
+ * a blank line between two - because absorbing a mark absorbs somebody's own
+ * words, and a growth gesture silently eating a note would be the one loss
+ * this feature cannot afford. Exact twins collapse to one: the same sentence
+ * twice says nothing the once does not. Undefined when no absorbed mark had
+ * a word to pass on, so the fresh record simply has no field.
+ *
+ * @param {Mark[]} absorbed
+ * @returns {string | undefined}
+ */
+export function mergedNote(absorbed) {
+  /** @type {string[]} */
+  const notes = [];
+  for (const mark of [...absorbed].sort(compareMarks)) {
+    if (mark.note !== undefined && !notes.includes(mark.note)) notes.push(mark.note);
+  }
+  return notes.length === 0 ? undefined : notes.join("\n\n");
 }
 
 /**

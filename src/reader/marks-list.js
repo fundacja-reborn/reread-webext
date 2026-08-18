@@ -97,15 +97,17 @@ export function markRows(metas, books, marks) {
 }
 
 /**
- * Everything a quote can be found by: its own text and its document's title.
- * The title rides along even on the scoped page, where every row shares it -
- * it matches every row alike there, so it changes nothing.
+ * Everything a quote can be found by: its own text, its note when it has one
+ * (D118 - finding a quote by one's own comment is half of why the comment
+ * exists), and its document's title. The title rides along even on the
+ * scoped page, where every row shares it - it matches every row alike there,
+ * so it changes nothing.
  *
  * @param {MarkRow} row
  * @returns {string}
  */
 export function searchableMark(row) {
-  return `${row.mark.text} ${row.title}`.toLowerCase();
+  return `${row.mark.text} ${row.mark.note ?? ""} ${row.title}`.toLowerCase();
 }
 
 /**

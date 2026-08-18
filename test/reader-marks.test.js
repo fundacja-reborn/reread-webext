@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 
 import {
   DEFAULT_MARK_COLOR,
+  MAX_NOTE_LENGTH,
   asMark,
   compareMarks,
   comparePoints,
@@ -10,6 +11,7 @@ import {
   markRecord,
   marksInSegment,
   mergePlan,
+  mergedNote,
   placeMark,
   quoteOf,
   withoutMark,
@@ -104,6 +106,68 @@ describe("markRecord", () => {
       markRecord({ ...mark(), start: { block: 0, offset: 1.5 } }),
       null,
     );
+  });
+});
+
+describe("the note on a mark (D118)", () => {
+  it("keeps a note through the record and through the healer alike", () => {
+    const noted = mark({ note: "worth keeping" });
+    assert.equal(noted.note, "worth keeping");
+    assert.deepEqual(asMark(JSON.parse(JSON.stringify(noted))), noted);
+  });
+
+  it("narrows emptiness into absence - no note is no field", () => {
+    assert.equal("note" in mark(), false);
+    assert.equal("note" in mark({ note: "" }), false);
+    assert.equal("note" in mark({ note: "   \n  " }), false);
+    // A non-string from a hand-made file is not somebody's words either.
+    assert.equal("note" in /** @type {object} */ (asMark({ ...mark(), note: 7 })), false);
+    // And absence and emptiness must read back the same.
+    assert.equal("note" in /** @type {object} */ (asMark({ ...mark() })), false);
+  });
+
+  it("trims and cuts to the cap, and healing twice reads as healing once", () => {
+    assert.equal(mark({ note: "  spaced  " }).note, "spaced");
+    const flood = "x".repeat(MAX_NOTE_LENGTH + 500);
+    const healed = mark({ note: flood }).note;
+    assert.equal(healed?.length, MAX_NOTE_LENGTH);
+    // A cut landing on a space must not read differently on the next pass.
+    const cutOnSpace = "y".repeat(MAX_NOTE_LENGTH - 1) + " z";
+    const once = mark({ note: cutOnSpace }).note ?? "";
+    assert.deepEqual(mark({ note: once }).note, once);
+  });
+
+  it("rides a record rebuilt in place, the colour change's road", () => {
+    const noted = mark({ note: "stays" });
+    assert.equal(markRecord({ ...noted, color: "blue" })?.note, "stays");
+  });
+});
+
+describe("mergedNote", () => {
+  /**
+   * @param {number} block
+   * @param {string} [note]
+   */
+  const at = (block, note) =>
+    mark({
+      start: { block, offset: 0 },
+      end: { block, offset: 3 },
+      ...(note === undefined ? {} : { note }),
+    });
+
+  it("inherits every absorbed note, reading order kept, a blank line between", () => {
+    // Handed out of order on purpose: the growth gesture absorbs by overlap,
+    // not by age, and the notes must still read the way the page does.
+    assert.equal(mergedNote([at(4, "later"), at(1, "sooner")]), "sooner\n\nlater");
+  });
+
+  it("collapses exact twins and passes over marks without words", () => {
+    assert.equal(mergedNote([at(0, "same"), at(2), at(5, "same")]), "same");
+  });
+
+  it("stands aside when nobody wrote - the fresh record gets no field", () => {
+    assert.equal(mergedNote([at(0), at(1)]), undefined);
+    assert.equal(mergedNote([]), undefined);
   });
 });
 

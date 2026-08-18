@@ -978,6 +978,23 @@ body.reader:has(#library:not([hidden])) {
   margin-bottom: 0;
 }
 
+/* The note under its quote (D118): the reader's words under the document's,
+   and dressed apart - the interface face at a step down, the muted voice,
+   its own hairline edge so the two texts cannot be misread as one passage.
+   `pre-wrap`, because the note's own line breaks are the only structure it
+   has and textContent is the only way it enters. */
+.marks-note {
+  margin: 0.7em 0 0;
+  padding-inline-start: 0.65rem;
+  border-inline-start: 2px solid var(--page-line);
+  color: var(--page-muted);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 0.85em;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
 /* The quote's acts, stacked where the list's Delete stands - the rows are
    tall, so a column wastes no width on a phone. Each is the quiet icon
    button the list already speaks: always visible, dressed down, a 44px
@@ -1156,6 +1173,85 @@ body.reader:has(#library:not([hidden])) {
 .toc-rows button[aria-current="true"] {
   color: var(--page-accent);
   font-weight: 600;
+}
+
+/* --- the note dialog (D118): the TOC dialog's dress on a small form --- */
+
+.note-dialog {
+  width: min(26rem, calc(100vw - 2rem));
+  padding: 0;
+  border: 1px solid var(--page-line);
+  border-radius: 6px;
+  background: var(--page-bg);
+  color: var(--page-fg);
+}
+
+.note-dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.note-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+/* The words being annotated, clamped to a glance - context, not content -
+   with the mark's own ink on the leading edge, the quote rows' stripe, so
+   the dialog visibly belongs to the mark it opened over. */
+.note-quote {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  margin: 0.8rem 1rem 0;
+  padding-inline-start: 0.65rem;
+  border-inline-start: 3px solid var(--page-line);
+  color: var(--page-muted);
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+
+.note-quote[data-color="yellow"] {
+  border-inline-start-color: var(--reader-marker-yellow);
+}
+.note-quote[data-color="green"] {
+  border-inline-start-color: var(--reader-marker-green);
+}
+.note-quote[data-color="blue"] {
+  border-inline-start-color: var(--reader-marker-blue);
+}
+.note-quote[data-color="pink"] {
+  border-inline-start-color: var(--reader-marker-pink);
+}
+
+/* The box itself keeps the interface face: what is typed here is a comment,
+   not the article, and the smaller sans says so while staying readable. */
+.note-text {
+  margin: 0.8rem 1rem 0;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--page-border);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--page-fg);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.note-acts {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.8rem 1rem;
+}
+
+/* Save wears the held-state pill: the one press the dialog exists for. */
+.note-save {
+  border-color: var(--page-accent);
+  background: color-mix(in srgb, var(--page-accent) 12%, transparent);
 }
 
 /* --- the transfer section: import and export, under the list --- */
@@ -1387,6 +1483,53 @@ button[data-armed],
 
 .mark-pin-end::after {
   bottom: -8px;
+}
+
+/* The dot saying "this mark carries words" (D118), drawn into the note
+   glyph itself so it rides wherever the icon sits - over the sheet's
+   top-right corner, ringed in the paper so it reads as a badge and not a
+   blot. Hidden until the button says otherwise. */
+#mark-note .note-dot {
+  display: none;
+  fill: var(--page-accent);
+  stroke: var(--page-bg);
+  stroke-width: 1.4;
+}
+
+#mark-note[data-has-note] .note-dot {
+  display: inline;
+}
+
+/* The note badges standing in the article (D118): the footnote's spot at
+   the tail of a noted mark, each the door to its own note. Real buttons -
+   focusable, named - but dressed as marginalia: the accent's small sheet,
+   no frame. Absolute in page coordinates like the pins; unlike the pins
+   they take the tap. The box is wider than the drawing so a finger on
+   glass has something to land on without covering the words around it. */
+.mark-note-badge {
+  position: absolute;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--page-accent);
+}
+
+.mark-note-badge .reader-icon {
+  width: 15px;
+  height: 15px;
+}
+
+.mark-note-badge:hover,
+.mark-note-badge:focus-visible {
+  background: color-mix(in srgb, var(--page-accent) 12%, transparent);
 }
 
 /* --- the bar that steers the voice, for as long as there is one --- */

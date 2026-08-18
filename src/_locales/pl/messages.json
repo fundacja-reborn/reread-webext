@@ -24,6 +24,7 @@
   "action_delete": { "message": "Usuń" },
   "action_download": { "message": "Pobierz" },
   "action_cancel": { "message": "Anuluj" },
+  "action_save": { "message": "Zapisz" },
   "action_update": { "message": "Aktualizuj" },
 
   "error_engine_missing": { "message": "Nie ma jeszcze silnika tłumaczeń - to wydanie nie tłumaczy." },
@@ -241,6 +242,9 @@
   "marker_delete": { "message": "Usuń zakreślenie" },
   "marker_copy": { "message": "Kopiuj" },
   "marker_copied": { "message": "Skopiowano" },
+  "marker_note": { "message": "Notatka" },
+  "marker_note_add": { "message": "Dodaj notatkę" },
+  "marker_note_edit": { "message": "Edytuj notatkę" },
   "color_yellow": { "message": "Żółty" },
   "color_green": { "message": "Zielony" },
   "color_blue": { "message": "Niebieski" },

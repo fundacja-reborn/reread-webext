@@ -24,6 +24,7 @@
   "action_delete": { "message": "Löschen" },
   "action_download": { "message": "Herunterladen" },
   "action_cancel": { "message": "Abbrechen" },
+  "action_save": { "message": "Speichern" },
   "action_update": { "message": "Aktualisieren" },
 
   "error_engine_missing": { "message": "Noch keine Übersetzungs-Engine - diese Version kann nicht übersetzen." },
@@ -185,6 +186,9 @@
   "marker_delete": { "message": "Markierung entfernen" },
   "marker_copy": { "message": "Kopieren" },
   "marker_copied": { "message": "Kopiert" },
+  "marker_note": { "message": "Notiz" },
+  "marker_note_add": { "message": "Notiz hinzufügen" },
+  "marker_note_edit": { "message": "Notiz bearbeiten" },
   "color_yellow": { "message": "Gelb" },
   "color_green": { "message": "Grün" },
   "color_blue": { "message": "Blau" },

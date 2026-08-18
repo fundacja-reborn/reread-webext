@@ -40,6 +40,11 @@ export const MARKS_FILENAME = "reread-highlights.md";
  * quote stays one blockquote to any Markdown reader and one indented passage
  * to a plain-text one.
  *
+ * A mark's note (D118) stands under its quote as plain paragraphs: the quote
+ * is the document's words and wears the quote dress, the note is the
+ * reader's own and wears none - and none means no markup wrapped around
+ * text this module did not write.
+ *
  * @param {MarkedDoc[]} docs only documents that have marks - the caller's cut
  * @returns {string}
  */
@@ -58,6 +63,12 @@ export function toMarksFile(docs) {
     for (const [index, mark] of doc.marks.entries()) {
       if (index > 0) lines.push("");
       for (const line of mark.text.split("\n")) lines.push(`> ${line}`);
+      if (mark.note !== undefined) {
+        // The blank line closes the blockquote, so the note reads as the
+        // reader's own paragraph rather than more of the quote.
+        lines.push("");
+        for (const line of mark.note.split("\n")) lines.push(line);
+      }
     }
   }
   return lines.join("\n") + "\n";

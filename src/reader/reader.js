@@ -48,10 +48,12 @@ import { importKind } from "../lib/reader/import-kind.js";
 import { speechAction } from "../lib/reader/keys.js";
 import { wordless } from "../lib/matcher/words.js";
 import {
+  compareMarks,
   comparePoints,
   isMarkColor,
   markRecord,
   mergePlan,
+  mergedNote,
   placeMark,
   withoutMark,
 } from "../lib/reader/marks.js";
@@ -240,6 +242,9 @@ const marksOpenIcon = /** @type {HTMLTemplateElement | null} */ (
 const marksSpeakIcon = /** @type {HTMLTemplateElement | null} */ (
   document.getElementById("marks-speak-icon")
 );
+const marksNoteIcon = /** @type {HTMLTemplateElement | null} */ (
+  document.getElementById("marks-note-icon")
+);
 const bookImportLine = document.getElementById("book-import-status");
 const bookNote = document.getElementById("book-note");
 const bookNoteText = document.getElementById("book-note-text");
@@ -285,9 +290,21 @@ const markerButton = /** @type {HTMLButtonElement | null} */ (document.getElemen
 const markBar = document.getElementById("mark-bar");
 const markCopyButton = document.getElementById("mark-copy");
 const markCopyLabel = document.getElementById("mark-copy-label");
+const markNoteButton = document.getElementById("mark-note");
 const markDeleteButton = document.getElementById("mark-delete");
 const markPinStart = document.getElementById("mark-pin-start");
 const markPinEnd = document.getElementById("mark-pin-end");
+
+// The note dialog and the badges of the noted marks (D118).
+const markNoteBadges = document.getElementById("mark-note-badges");
+const noteDialog = /** @type {HTMLDialogElement | null} */ (
+  document.getElementById("note-dialog")
+);
+const noteQuote = document.getElementById("note-quote");
+const noteText = /** @type {HTMLTextAreaElement | null} */ (document.getElementById("note-text"));
+const noteSaveButton = document.getElementById("note-save");
+const noteCancelButton = document.getElementById("note-cancel");
+const noteCloseButton = document.getElementById("note-close");
 
 /**
  * What is on screen: a live page's article, a saved one, a book's segment, or
@@ -562,6 +579,7 @@ function renderArticle(piece) {
   deselectMark();
   docMarks = [];
   clearMarkPaint();
+  showNoteBadges();
   // The book dressing is put on by `openBook` after this returns; every
   // other road through here takes it off. The contents dialog too: a Back
   // can land here with it still standing over a document that is leaving.
@@ -932,6 +950,8 @@ function setMarker(on) {
 
 function repaintMarks() {
   paintMarks(docMarks, shown === null ? null : contentRoot(), shownSegment());
+  // The badges stand on the painted ranges, so they follow every repaint.
+  showNoteBadges();
 }
 
 /**
@@ -972,8 +992,19 @@ async function commitSpan(span, color) {
 
   const plan = mergePlan(docMarks, span);
   const text = quoteOfSpan(plan.span, root);
+  // A growth or a merge inherits every absorbed note (`mergedNote`): drawing
+  // over an annotated mark grows the mark, and the words somebody wrote on
+  // it must not be the price.
   const mark =
-    text === null ? null : markRecord({ ...plan.span, color, createdAt: Date.now(), text });
+    text === null
+      ? null
+      : markRecord({
+          ...plan.span,
+          color,
+          createdAt: Date.now(),
+          text,
+          note: mergedNote(plan.absorbed),
+        });
   if (mark === null) return;
 
   const before = docMarks;
@@ -1134,6 +1165,17 @@ function refreshMarkBar() {
   }
   if (markCopyButton !== null) markCopyButton.hidden = activeMark === null;
   if (markDeleteButton !== null) markDeleteButton.hidden = activeMark === null;
+  if (markNoteButton !== null) {
+    markNoteButton.hidden = activeMark === null;
+    if (activeMark !== null) {
+      // The dot on the glyph says "annotated" at a glance; the name says
+      // which act the press really is.
+      const name = activeMark.note === undefined ? t("marker_note_add") : t("marker_note_edit");
+      markNoteButton.title = name;
+      markNoteButton.setAttribute("aria-label", name);
+      markNoteButton.toggleAttribute("data-has-note", activeMark.note !== undefined);
+    }
+  }
 }
 
 /**
@@ -1149,7 +1191,9 @@ function deselectMark() {
   if (
     markBar !== null &&
     document.activeElement instanceof Element &&
-    (document.activeElement === markCopyButton || document.activeElement === markDeleteButton)
+    (document.activeElement === markCopyButton ||
+      document.activeElement === markNoteButton ||
+      document.activeElement === markDeleteButton)
   ) {
     markerButton?.focus();
   }
@@ -1213,6 +1257,210 @@ async function onMarkCopyPress() {
 }
 
 /**
+ * The badges of the noted marks (D118): one small button at the tail of
+ * every painted mark that carries a note - the footnote's spot. The mark's
+ * own text cannot take this tap (a word inside it means "translate this"),
+ * so the note gets a door of its own, standing outside the article the way
+ * the pins do: absolute in page coordinates, riding the scroll with the
+ * text. Rebuilt whole from the painted ranges on every repaint, on resize
+ * and on an Aa change - the boxes they stand on move with any reflow - and
+ * cleared by the same call once nothing is painted. A document without
+ * notes costs exactly nothing here.
+ */
+function showNoteBadges() {
+  if (markNoteBadges === null) return;
+  /** @type {HTMLButtonElement[]} */
+  const badges = [];
+  for (const mark of docMarks) {
+    if (mark.note === undefined) continue;
+    const range = paintedRangeOf(mark);
+    if (range === null) continue;
+    const rects = range.getClientRects();
+    const last = rects[rects.length - 1];
+    if (last === undefined) continue;
+
+    const badge = document.createElement("button");
+    badge.type = "button";
+    badge.className = "mark-note-badge";
+    badge.title = t("marker_note_edit");
+    badge.setAttribute("aria-label", t("marker_note_edit"));
+    if (marksNoteIcon !== null) badge.append(marksNoteIcon.content.cloneNode(true));
+    // The footnote's raise past the line's top, just off the mark's last
+    // box - and held inside the page, so a mark ending against the right
+    // edge cannot push a scrollbar under the article.
+    const left = Math.min(
+      Math.round(last.right + window.scrollX - 6),
+      document.documentElement.clientWidth - 30,
+    );
+    badge.style.left = `${left}px`;
+    badge.style.top = `${Math.round(last.top + window.scrollY - 16)}px`;
+    badge.addEventListener("click", () => onNoteBadgePress(mark));
+    badges.push(badge);
+  }
+  markNoteBadges.replaceChildren(...badges);
+}
+
+/**
+ * A badge pressed: the dialog over that mark. The badge and the toolbar's
+ * note act are two doors to the same room, so the write goes the same way.
+ *
+ * @param {import("../lib/reader/marks.js").Mark} mark
+ */
+function onNoteBadgePress(mark) {
+  const target = shown;
+  if (target === null) return;
+  openNoteDialog(mark, (text) => void applyNoteInDoc(target, mark, text));
+}
+
+/** The toolbar's note act (D118): the dialog over the active mark. */
+function onMarkNotePress() {
+  const target = shown;
+  const active = activeMark;
+  if (target === null || active === null) return;
+  openNoteDialog(active, (text) => void applyNoteInDoc(target, active, text));
+}
+
+/**
+ * What Save should do with the box's text, while the dialog stands - null
+ * while it does not. Cancel, Esc, the X and the backdrop all leave it
+ * unread; only Save collects it.
+ *
+ * @type {((text: string) => void) | null}
+ */
+let noteDialogSave = null;
+
+/**
+ * The note dialog over one mark (D118), whichever door led here: the mark's
+ * quote up top for context, its ink on the stripe, the box holding the note
+ * as it stands. What Save does with the text is the caller's `onSave` - the
+ * document view edits its live list, the highlights page writes through by
+ * anchor. An emptied box saved means the note removed: absence is the only
+ * "no note" there is, and `markRecord` narrows emptiness into absence.
+ *
+ * @param {import("../lib/reader/marks.js").Mark} mark
+ * @param {(text: string) => void} onSave
+ */
+function openNoteDialog(mark, onSave) {
+  if (noteDialog === null || noteText === null) return;
+  noteDialogSave = onSave;
+  if (noteQuote !== null) {
+    // textContent only - the quote came off somebody's page. Its newlines
+    // collapse in the clamped line: this is context, not the passage.
+    noteQuote.textContent = mark.text;
+    noteQuote.setAttribute("data-color", mark.color);
+  }
+  noteText.value = mark.note ?? "";
+  noteDialog.showModal();
+}
+
+/** The dialog down without saving - every way out except Save. */
+function closeNoteDialog() {
+  noteDialogSave = null;
+  if (noteDialog !== null && noteDialog.open) noteDialog.close();
+}
+
+/** Save pressed, or its keyboard twin: the box's text to the opener's door. */
+function onNoteSavePress() {
+  const save = noteDialogSave;
+  noteDialogSave = null;
+  if (noteDialog !== null && noteDialog.open) noteDialog.close();
+  if (save !== null && noteText !== null) save(noteText.value);
+}
+
+/**
+ * The note landing on a mark of the document on screen: the record replaced
+ * in place (a note is part of the mark the way its colour is), the toolbar
+ * and the badges told, the row written - with the take-back and the notice
+ * if the write does not land, the colour change's own manner. When the view
+ * or the list moved while the dialog stood (a history step under the
+ * modal), the edit still lands: it falls through to the anchor door, which
+ * writes against whatever the row holds now.
+ *
+ * @param {NonNullable<typeof shown>} target
+ * @param {import("../lib/reader/marks.js").Mark} mark
+ * @param {string} text
+ */
+async function applyNoteInDoc(target, mark, text) {
+  if (shown !== target || !docMarks.includes(mark)) {
+    if (await writeNoteByAnchor(target.url, mark, text)) {
+      showNotice(t("reader_list_write_failed"));
+    }
+    return;
+  }
+
+  const next = markRecord({ ...mark, note: text });
+  if (next === null || (next.note ?? "") === (mark.note ?? "")) return;
+
+  const before = docMarks;
+  const wasActive = activeMark === mark;
+  docMarks = docMarks.map((one) => (one === mark ? next : one));
+  if (wasActive) activeMark = next;
+  refreshMarkBar();
+  showNoteBadges();
+
+  try {
+    await putMarks(target.url, docMarks);
+  } catch {
+    if (shown !== target) return;
+    docMarks = before;
+    if (activeMark === next) activeMark = mark;
+    refreshMarkBar();
+    showNoteBadges();
+    showNotice(t("reader_list_write_failed"));
+  }
+}
+
+/**
+ * The note written under a document that is not (or no longer) on screen:
+ * fetch the row, find the mark by its anchor - two marks cannot share one
+ * (`placeMark`'s promise), so the anchor is the name that survives a
+ * refetch - replace, write the list back. A mark that left the row
+ * meanwhile is not a failure: the note has nothing to land on, and the
+ * refreshed page will show what stands.
+ *
+ * @param {string} docId
+ * @param {import("../lib/reader/marks.js").Mark} mark
+ * @param {string} text
+ * @returns {Promise<boolean>} whether the write failed and somebody should say so
+ */
+async function writeNoteByAnchor(docId, mark, text) {
+  try {
+    const list = await getMarks(docId);
+    const found = list.find((one) => compareMarks(one, mark) === 0);
+    if (found === undefined) return false;
+    const next = markRecord({ ...found, note: text });
+    if (next === null || (next.note ?? "") === (found.note ?? "")) return false;
+    await putMarks(
+      docId,
+      list.map((one) => (one === found ? next : one)),
+    );
+    return false;
+  } catch {
+    return true;
+  }
+}
+
+/**
+ * A quote row's note act (D118): the dialog over the row's mark, the write
+ * through the anchor door - the rows carry copies from a bulk read, never
+ * the database's own list. The page refreshes either way: the note under
+ * the quote must show what was written, and a mark that vanished meanwhile
+ * should stop being offered.
+ *
+ * @param {import("./marks-list.js").MarkRow} row
+ */
+function noteMarkRow(row) {
+  openNoteDialog(row.mark, (text) => {
+    void (async () => {
+      if (await writeNoteByAnchor(row.docId, row.mark, text)) {
+        showNotice(t("reader_list_write_failed"));
+      }
+      if (marksShown !== null) await refreshMarks();
+    })();
+  });
+}
+
+/**
  * A swatch pressed, and the state says whom for (D107). With no mark active
  * the swatches ARE the pen: the press writes the same setting the Aa
  * panel's row writes, so the ink can be chosen right where the marking
@@ -1258,7 +1506,33 @@ async function onMarkInkPress(ink) {
 
 markerButton?.addEventListener("click", () => setMarker(!markerOn));
 markCopyButton?.addEventListener("click", () => void onMarkCopyPress());
+markNoteButton?.addEventListener("click", () => onMarkNotePress());
 markDeleteButton?.addEventListener("click", () => void onMarkDeletePress());
+
+noteSaveButton?.addEventListener("click", () => onNoteSavePress());
+noteCancelButton?.addEventListener("click", () => closeNoteDialog());
+noteCloseButton?.addEventListener("click", () => closeNoteDialog());
+
+// Esc closes a native dialog on its own; ours is only to drop the pending
+// save with it, whichever way the dialog went down.
+noteDialog?.addEventListener("close", () => {
+  noteDialogSave = null;
+});
+
+// A click that reaches the dialog element itself hit the backdrop - the
+// TOC dialog's own tell (the dialog carries no padding of its own).
+noteDialog?.addEventListener("click", (event) => {
+  if (event.target === noteDialog) closeNoteDialog();
+});
+
+// Ctrl/Cmd+Enter saves from inside the box; Enter alone stays what it is in
+// a textarea - the note's own line break.
+noteText?.addEventListener("keydown", (event) => {
+  if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
+    event.preventDefault();
+    onNoteSavePress();
+  }
+});
 
 markBar?.addEventListener("click", (event) => {
   const target = event.target;
@@ -1279,6 +1553,9 @@ document.addEventListener("pointerdown", (event) => {
   const target = event.target;
   if (!(target instanceof Node)) return;
   if (markBar?.contains(target) === true) return;
+  // A badge press means its note, not "done marking" - the badge's own
+  // click handler answers it.
+  if (markNoteBadges?.contains(target) === true) return;
   if (article?.contains(target) === true) return;
   if (chromeBox?.contains(target) === true) {
     deselectMark();
@@ -1289,10 +1566,18 @@ document.addEventListener("pointerdown", (event) => {
 
 // Escape keeps the outward ladder the taps gave up (Michał's call): the
 // active mark stands down first, the pen second - stepping outward is what
-// the key means everywhere else on this page too.
+// the key means everywhere else on this page too. With the note dialog up,
+// the same press is the dialog's to answer (the keydown still bubbles here
+// while the engine closes it): one Esc, one step.
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape" && markerOn) stepOut();
+  if (event.key === "Escape" && markerOn && noteDialog?.open !== true) stepOut();
 });
+
+// A resize reflows the text the badges are measured against. The paint
+// needs nothing - the highlight registry follows its ranges by itself -
+// but a badge holds a box it read once, so it reads again. Cheap on the
+// common page: a document without notes builds nothing.
+window.addEventListener("resize", () => showNoteBadges());
 
 /**
  * @param {boolean} [firstLoad] whether this is the load-time call - the one
@@ -1834,6 +2119,7 @@ function leaveDocView() {
   setMarker(false);
   docMarks = [];
   clearMarkPaint();
+  showNoteBadges();
   if (article !== null) article.hidden = true;
   if (actions !== null) actions.hidden = true;
   if (actionsEnd !== null) actionsEnd.hidden = true;
@@ -2261,7 +2547,17 @@ function markRowElement(row, index, withTitle) {
   detail.textContent = [withTitle ? row.title : "", part, when]
     .filter((piece) => piece.length > 0)
     .join(" - ");
-  text.append(quote, detail);
+  text.append(quote);
+  // The reader's own words under the document's (D118): under, because the
+  // quote is what the note is about. textContent with `pre-wrap` in the
+  // stylesheet - the note's line breaks are its only structure.
+  if (row.mark.note !== undefined) {
+    const note = document.createElement("p");
+    note.className = "marks-note";
+    note.textContent = row.mark.note;
+    text.append(note);
+  }
+  text.append(detail);
 
   const acts = document.createElement("span");
   acts.className = "marks-row-acts";
@@ -2271,6 +2567,14 @@ function markRowElement(row, index, withTitle) {
     acts.append(markActButton("speak", index, t("reader_listen"), marksSpeakIcon));
   }
   acts.append(markActButton("copy", index, t("marker_copy"), marksCopyIcons));
+  acts.append(
+    markActButton(
+      "note",
+      index,
+      row.mark.note === undefined ? t("marker_note_add") : t("marker_note_edit"),
+      marksNoteIcon,
+    ),
+  );
 
   item.append(text, acts);
   return item;
@@ -2864,6 +3168,9 @@ function applyAppearance(reader) {
   // (D107), so a new ink - picked in Aa, on the bar itself, or in another
   // tab - has to reach them through the same road every setting takes.
   refreshMarkBar();
+  // A size or measure change reflows the article under the note badges;
+  // reading fresh boxes here sees the layout the new variables made.
+  showNoteBadges();
 }
 
 /**
@@ -3215,6 +3522,7 @@ marksRowsList?.addEventListener("click", (event) => {
   if (act === "copy") void copyMarkRow(button, row);
   else if (act === "speak") speakMarkRow(row);
   else if (act === "open") void openMarkRow(row);
+  else if (act === "note") noteMarkRow(row);
 });
 
 marksExportButton?.addEventListener("click", () => void exportMarksPage());

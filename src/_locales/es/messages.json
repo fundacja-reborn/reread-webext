@@ -24,6 +24,7 @@
   "action_delete": { "message": "Eliminar" },
   "action_download": { "message": "Descargar" },
   "action_cancel": { "message": "Cancelar" },
+  "action_save": { "message": "Guardar" },
   "action_update": { "message": "Actualizar" },
 
   "error_engine_missing": { "message": "Aún no hay motor de traducción - esta versión no puede traducir." },
@@ -196,6 +197,9 @@
   "marker_delete": { "message": "Quitar el resaltado" },
   "marker_copy": { "message": "Copiar" },
   "marker_copied": { "message": "Copiado" },
+  "marker_note": { "message": "Nota" },
+  "marker_note_add": { "message": "Añadir nota" },
+  "marker_note_edit": { "message": "Editar nota" },
   "color_yellow": { "message": "Amarillo" },
   "color_green": { "message": "Verde" },
   "color_blue": { "message": "Azul" },

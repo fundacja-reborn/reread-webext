@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { describe, it } from "node:test";
 
 import { STYLE } from "../src/content/tooltip.js";
+import { MAX_NOTE_LENGTH } from "../src/lib/reader/marks.js";
 
 /**
  * The two marks this extension paints on a page it does not own - the underline
@@ -94,5 +95,16 @@ describe("the marks on the page", () => {
         `reader.css no longer styles ::highlight(reread-marker-${color})`,
       );
     }
+  });
+
+  it("holds the note box to the note cap (D118)", async () => {
+    // The same agreement one layer up: the cap lives in lib/reader/marks.js,
+    // the box in reader.html, and the two never import each other. A box
+    // looser than the cap would take words the healer then cuts silently.
+    const page = await read("../src/reader/reader.html");
+    assert.ok(
+      page.includes(`maxlength="${MAX_NOTE_LENGTH}"`),
+      "reader.html's note box no longer wears MAX_NOTE_LENGTH as its maxlength",
+    );
   });
 });

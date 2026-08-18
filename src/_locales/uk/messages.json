@@ -24,6 +24,7 @@
   "action_delete": { "message": "Видалити" },
   "action_download": { "message": "Завантажити" },
   "action_cancel": { "message": "Скасувати" },
+  "action_save": { "message": "Зберегти" },
   "action_update": { "message": "Оновити" },
 
   "error_engine_missing": { "message": "Рушія перекладу ще немає - ця збірка не перекладає." },
@@ -241,6 +242,9 @@
   "marker_delete": { "message": "Прибрати позначення" },
   "marker_copy": { "message": "Копіювати" },
   "marker_copied": { "message": "Скопійовано" },
+  "marker_note": { "message": "Нотатка" },
+  "marker_note_add": { "message": "Додати нотатку" },
+  "marker_note_edit": { "message": "Редагувати нотатку" },
   "color_yellow": { "message": "Жовтий" },
   "color_green": { "message": "Зелений" },
   "color_blue": { "message": "Синій" },
