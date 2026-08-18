@@ -382,11 +382,13 @@ html {
 /* The highlighter's inks as themselves (D106): each swatch is the actual
    wash of the theme on screen, over the page's own paper - the choice
    previews its result. A hairline of the ink's edge keeps the paler washes
-   from dissolving into the panel. */
+   from dissolving into the panel. Sized to the row's own line height, so
+   the colour stands as tall as the words in the buttons beside it (Michał's
+   report from 0.4.21: the ink was a speck inside its frame). */
 .marker-swatch {
   display: inline-block;
-  width: 1.1em;
-  height: 1.1em;
+  width: 1.5em;
+  height: 1.5em;
   border: 1px solid var(--page-line);
   border-radius: 0.25em;
 }
@@ -402,6 +404,18 @@ html {
 }
 .marker-swatch[data-swatch="pink"] {
   background: var(--reader-marker-pink);
+}
+
+/* The ink centred in its frame: as an inline box the swatch hung on the
+   text baseline, a few pixels above centre, and the buttons' worded side
+   padding left the colour swimming in it (Michał's report from 0.4.21).
+   Flex centres the swatch both ways, and the even padding lets the frame
+   hug the colour instead of dressing it. */
+#marker-color-choices button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.2rem;
 }
 
 /* A voice is called whatever the platform calls it, and some names are a
@@ -1571,8 +1585,8 @@ button[data-armed],
   gap: 0.25rem;
 }
 
-/* On the bar the swatch is the whole glyph of its button, so it steps up to
-   the transport icons' size rather than the panel's inline one. */
+/* On the bar the swatch is the whole glyph of its button, so it holds the
+   size of the transport icons it stands among, not the Aa panel's. */
 .mark-inks .marker-swatch {
   width: 1.4em;
   height: 1.4em;
