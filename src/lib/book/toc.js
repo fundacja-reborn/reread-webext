@@ -1,18 +1,23 @@
 /**
- * The table of contents of an imported book (D116), read out of the book's
- * own stored segments: the h1-h3 blocks that `segment.js` already treats as
- * chapter breaks are the chapters. Pure string work, so the same functions
- * serve the import pipeline and the backfill of books imported before the
- * TOC existed - and the whole of it runs under `node --test`.
+ * The table of contents of a document (D116), read off its blocks: the
+ * h1-h3 blocks that `segment.js` already treats as chapter breaks are the
+ * chapters. Two readers of the same rule, because the blocks come in two
+ * shapes: `headingEntries` walks a book segment's *stored* strings (the
+ * import pipeline and the backfill of books from before the TOC existed),
+ * `renderedEntries` walks what a caller read off *rendered* blocks - an
+ * article's map, built fresh from the screen with nothing stored (D117).
+ * Pure either way, so the whole of it runs under `node --test`.
  *
- * The input is exclusively this extension's own rebuilt markup: block
- * strings written by `import-book.js`, each the `outerHTML` of one
- * allowed-list element. That closed format is what licenses parsing by
- * regular expression here. The serializer entity-escapes text (`&` `<` `>`
- * and U+00A0), so raw `<` only ever opens a real tag; the one `>` that can
- * stand anywhere but a tag's edge is inside a quoted attribute value, which
- * the strip pattern reads quotes to step over.
+ * The string reader's input is exclusively this extension's own rebuilt
+ * markup: block strings written by `import-book.js`, each the `outerHTML`
+ * of one allowed-list element. That closed format is what licenses parsing
+ * by regular expression here. The serializer entity-escapes text (`&` `<`
+ * `>` and U+00A0), so raw `<` only ever opens a real tag; the one `>` that
+ * can stand anywhere but a tag's edge is inside a quoted attribute value,
+ * which the strip pattern reads quotes to step over.
  */
+
+import { isHeadingTag } from "./segment.js";
 
 /**
  * One chapter row: the words to show, how deep the heading sits, and the
@@ -51,10 +56,25 @@ const HEADING_BLOCK = /^<h([123])[\s>]/;
 const TAGS = /<[^>"']*(?:"[^"]*"[^>"']*|'[^']*'[^>"']*)*>/g;
 
 /**
- * The words of a heading block, or nothing when there are none to show.
- * Inline markup goes the way of the outer tag; the four entities are the
- * only ones the serializer ever writes into text, and `&amp;` is decoded
- * last so an author's literal "&lt;" survives as itself.
+ * A heading's text made into a row's title, or nothing when there is none
+ * to show: whitespace collapsed, the cap applied - an abused heading is
+ * cut, never refused. The one rule both readers share.
+ *
+ * @param {string} text
+ * @returns {string | null}
+ */
+export function tocTitle(text) {
+  const shown = text.replace(/\s+/g, " ").trim();
+  if (shown.length === 0) return null;
+  if (shown.length <= TOC_TITLE_CAP) return shown;
+  return `${shown.slice(0, TOC_TITLE_CAP - 1).trimEnd()}…`;
+}
+
+/**
+ * The words of a stored heading block. Inline markup goes the way of the
+ * outer tag; the four entities are the only ones the serializer ever writes
+ * into text, and `&amp;` is decoded last so an author's literal "&lt;"
+ * survives as itself.
  *
  * @param {string} block
  * @returns {string | null}
@@ -66,10 +86,7 @@ function titleOf(block) {
     .replace(/&gt;/g, ">")
     .replace(/&nbsp;/g, " ")
     .replace(/&amp;/g, "&");
-  const shown = text.replace(/\s+/g, " ").trim();
-  if (shown.length === 0) return null;
-  if (shown.length <= TOC_TITLE_CAP) return shown;
-  return `${shown.slice(0, TOC_TITLE_CAP - 1).trimEnd()}…`;
+  return tocTitle(text);
 }
 
 /**
@@ -93,6 +110,34 @@ export function headingEntries(blocks, segmentIndex) {
     entries.push({
       title,
       level: /** @type {1 | 2 | 3} */ (Number(heading[1])),
+      segmentIndex,
+      blockIndex,
+    });
+  }
+  return entries;
+}
+
+/**
+ * The chapter rows of a rendered document (D117) - `headingEntries`' twin
+ * for blocks already standing in a DOM, handed over as the two properties
+ * the rule reads (so this stays testable without one). The caller walks the
+ * rendered top-level blocks; the anchors are their indexes, the same ground
+ * the stored reader names.
+ *
+ * @param {Array<{ localName: string, text: string }>} blocks
+ * @param {number} segmentIndex the part they render - an article's zero
+ * @returns {TocEntry[]}
+ */
+export function renderedEntries(blocks, segmentIndex) {
+  /** @type {TocEntry[]} */
+  const entries = [];
+  for (const [blockIndex, block] of blocks.entries()) {
+    if (!isHeadingTag(block.localName)) continue;
+    const title = tocTitle(block.text);
+    if (title === null) continue;
+    entries.push({
+      title,
+      level: /** @type {1 | 2 | 3} */ (Number(block.localName.slice(1))),
       segmentIndex,
       blockIndex,
     });

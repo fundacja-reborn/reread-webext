@@ -6,6 +6,8 @@ import {
   TOC_TITLE_CAP,
   cappedToc,
   headingEntries,
+  renderedEntries,
+  tocTitle,
 } from "../src/lib/book/toc.js";
 
 describe("headingEntries", () => {
@@ -91,6 +93,52 @@ describe("headingEntries", () => {
   it("keeps a title exactly at the cap whole", () => {
     const exact = "x".repeat(TOC_TITLE_CAP);
     assert.equal(headingEntries([`<h2>${exact}</h2>`], 0)[0]?.title, exact);
+  });
+});
+
+describe("renderedEntries", () => {
+  const block = (/** @type {string} */ localName, /** @type {string} */ text) => ({
+    localName,
+    text,
+  });
+
+  it("reads an article's map off its rendered blocks", () => {
+    const blocks = [
+      block("p", "An opening paragraph."),
+      block("h2", "Background"),
+      block("p", "Prose."),
+      block("h3", "The details"),
+      block("hr", ""),
+      block("h2", "Conclusions"),
+    ];
+    assert.deepEqual(renderedEntries(blocks, 0), [
+      { title: "Background", level: 2, segmentIndex: 0, blockIndex: 1 },
+      { title: "The details", level: 3, segmentIndex: 0, blockIndex: 3 },
+      { title: "Conclusions", level: 2, segmentIndex: 0, blockIndex: 5 },
+    ]);
+  });
+
+  it("carries the asked-for segment and skips what is not a chapter", () => {
+    const blocks = [block("h4", "Too deep"), block("h1", "Kept"), block("h2", "   ")];
+    assert.deepEqual(renderedEntries(blocks, 7), [
+      { title: "Kept", level: 1, segmentIndex: 7, blockIndex: 1 },
+    ]);
+  });
+
+  it("applies the shared title rule to rendered text", () => {
+    const [entry] = renderedEntries([block("h2", "  spread \n out ".repeat(20))], 0);
+    assert.ok(entry);
+    assert.ok(entry.title.startsWith("spread out"));
+    assert.ok(entry.title.length <= TOC_TITLE_CAP);
+    assert.ok(entry.title.endsWith("…"));
+  });
+});
+
+describe("tocTitle", () => {
+  it("collapses, trims, and refuses emptiness", () => {
+    assert.equal(tocTitle("  A\n  title "), "A title");
+    assert.equal(tocTitle("   "), null);
+    assert.equal(tocTitle(""), null);
   });
 });
 

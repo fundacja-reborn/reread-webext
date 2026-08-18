@@ -303,13 +303,22 @@
         put; it hides on the list view - a hallway does not list the room it
         stands in.
       -->
+      <!-- The rows run from the nearest to the farthest (D117): inside the
+           open text (its map, its quotes), out to its source, then this
+           extension's own rooms, and the settings last - the door every menu
+           keeps at the bottom. -->
       <nav id="menu-panel" class="nav-menu" hidden aria-label="Menu" data-i18n-aria-label="nav_menu">
-        <a id="original" data-i18n="reader_open_original" hidden>Open the original</a>
-        <button id="nav-library" type="button" data-i18n="reading_list" hidden>Offline reading list</button>
+        <!-- The document's table of contents (D116/D117): the same dialog the
+             book pagers open, reachable here without scrolling to a pager -
+             this bar is stuck, the pagers are not. Hidden when the document
+             has no headings to list. -->
+        <button id="nav-toc" type="button" data-i18n="reader_book_toc" hidden>Contents</button>
         <!-- The highlights page (D108). Over a document the row opens that
              document's own quotes; over the list, everybody's. Like the
              list row it hides in the room it names. -->
         <button id="nav-marks" type="button" data-i18n="reader_marks_title">Highlights</button>
+        <a id="original" data-i18n="reader_open_original" hidden>Open the original</a>
+        <button id="nav-library" type="button" data-i18n="reading_list" hidden>Offline reading list</button>
         <button id="nav-vocabulary" type="button" data-i18n="saved_phrases">Saved phrases</button>
         <button id="nav-settings" type="button" data-i18n="settings">Settings</button>
       </nav>
