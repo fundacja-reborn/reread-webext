@@ -1060,13 +1060,12 @@ body.reader:has(#library:not([hidden])) {
   margin: -0.25rem 0 0;
 }
 
-/* The list has ended, the tool resumes: the export takes the finishing
-   acts' own parting (margin, a breath, a hairline - the `.reader-actions-end`
-   trio) instead of floating in the last row's air (Michał's report). */
+/* The list has ended, the tool resumes: the export stands a clear step
+   under the rows (Michał's report) - margin only, no rule of its own,
+   because the last row already closes the list with its hairline and a
+   second line right above the button read as clutter (his follow-up). */
 .marks-transfer {
   margin-top: 3rem;
-  padding-top: 1.25rem;
-  border-top: 1px solid var(--page-line);
 }
 
 /* --- the shared pager, held to the same touch floor --- */
