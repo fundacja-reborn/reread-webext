@@ -1270,13 +1270,16 @@ body.reader:has(#library:not([hidden])) {
   margin-top: 0.15rem;
 }
 
-/* A snippet is a quiet row inside its result: full width, no chrome, the
-   page's own ink - the bold phrase inside is the news. */
+/* A snippet is a quiet row inside its result: full width, the page's own
+   ink, the bold phrase inside as the news. The left edge is the resting
+   affordance - these lines are doors, and on e-ink there is no hover to
+   say so. */
 .search-snippet {
   display: block;
   width: 100%;
-  padding: 0.3rem 0;
+  padding: 0.3rem 0 0.3rem 0.6rem;
   border: none;
+  border-left: 2px solid var(--page-line);
   border-radius: 0;
   background: none;
   color: var(--page-fg);
@@ -1285,6 +1288,7 @@ body.reader:has(#library:not([hidden])) {
 }
 
 .search-snippet:hover {
+  border-left-color: var(--page-accent);
   color: var(--page-accent);
 }
 
