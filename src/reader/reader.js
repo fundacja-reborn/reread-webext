@@ -1601,11 +1601,17 @@ document.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && markerOn && noteDialog?.open !== true) stepOut();
 });
 
-// A resize reflows the text the badges are measured against. The paint
-// needs nothing - the highlight registry follows its ranges by itself -
-// but a badge holds a box it read once, so it reads again. Cheap on the
-// common page: a document without notes builds nothing.
-window.addEventListener("resize", () => showNoteBadges());
+// A badge holds a box it measured once, and the first render's boxes are
+// not the settled page's: the config lands async and re-wraps the article
+// under its own text size, the action rows unhide once the database
+// answers, the window resizes - each moves the text and left the badge
+// standing mid-mark (Michał's report, twice). Naming every reflow source
+// is a losing game; the body's box changes with all of them, so one
+// observer re-measures on the effect itself. The paint needs nothing -
+// the highlight registry follows its ranges by itself - and the badges
+// are absolute, outside the body's own box, so replacing them cannot
+// ring the observer back. A document without notes re-builds nothing.
+new ResizeObserver(() => showNoteBadges()).observe(document.body);
 
 /**
  * @param {boolean} [firstLoad] whether this is the load-time call - the one
