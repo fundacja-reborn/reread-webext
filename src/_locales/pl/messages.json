@@ -396,6 +396,41 @@
       "count": { "content": "$1", "example": "200" }
     }
   },
+  "reader_library_search_toggle": { "message": "Szukaj też w treści" },
+  "reader_search_more": { "message": "Szukaj dalej" },
+  "reader_search_progress": {
+    "message": "Przeszukano $AT$ z $TOTAL$ dokumentów.",
+    "placeholders": {
+      "at": { "content": "$1", "example": "12" },
+      "total": { "content": "$2", "example": "80" }
+    }
+  },
+  "reader_search_in_titles": { "message": "W tytułach" },
+  "reader_search_in_text": { "message": "W treści" },
+  "reader_search_more_hits_one": {
+    "message": "i $COUNT$ dalsze trafienie",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "reader_search_more_hits_few": {
+    "message": "i $COUNT$ dalsze trafienia",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_search_more_hits_many": {
+    "message": "i $COUNT$ dalszych trafień",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_search_more_hits_other": {
+    "message": "i $COUNT$ dalszego trafienia",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1,5" }
+    }
+  },
   "close": { "message": "Zamknij" },
   "reader_book_importing": {
     "message": "Dodawanie książki - część $PART$",

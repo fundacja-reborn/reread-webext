@@ -3,13 +3,16 @@ import { describe, it } from "node:test";
 
 import {
   MIN_QUERY,
+  SHOWN_SNIPPETS,
   chapterOf,
   findHits,
   foldForSearch,
   foldQuery,
   hitsInText,
   isSearchableQuery,
+  metaMatches,
   snippetAround,
+  snippetPlan,
 } from "../src/lib/reader/search.js";
 
 // The invisibles, written as code so they stay visible in the diff.
@@ -170,6 +173,28 @@ describe("snippetAround", () => {
     const snippet = snippetAround(text, { start: 4, end: 9 }, 3);
     assert.equal(snippet.before, `…${grin}`);
     assert.equal(snippet.after, `${grin}…`);
+  });
+});
+
+describe("metaMatches", () => {
+  it("finds the phrase in a row's own words, folded like the text", () => {
+    assert.equal(metaMatches("The Quick Fox example.com", foldQuery("quick fox")), true);
+    assert.equal(metaMatches(`Hy${SHY}phenated Title`, foldQuery("hyphenated")), true);
+    assert.equal(metaMatches("Some Title example.com", foldQuery("nothing")), false);
+  });
+
+  it("answers nothing for an empty question", () => {
+    assert.equal(metaMatches("Some Title", ""), false);
+  });
+});
+
+describe("snippetPlan", () => {
+  it("shows the first few and counts the rest", () => {
+    assert.deepEqual(snippetPlan(0), { shown: 0, more: 0 });
+    assert.deepEqual(snippetPlan(2), { shown: 2, more: 0 });
+    assert.deepEqual(snippetPlan(SHOWN_SNIPPETS), { shown: SHOWN_SNIPPETS, more: 0 });
+    assert.deepEqual(snippetPlan(50), { shown: SHOWN_SNIPPETS, more: 50 - SHOWN_SNIPPETS });
+    assert.deepEqual(snippetPlan(-1), { shown: 0, more: 0 });
   });
 });
 

@@ -435,6 +435,43 @@
       "count": { "content": "$1", "example": "200" }
     }
   },
+  "reader_library_search_toggle": {
+    "message": "Search in the texts too",
+    "description": "The checkbox under the reading list's filter: with it ticked, the search reads the saved texts themselves, not just titles."
+  },
+  "reader_search_more": {
+    "message": "Search further",
+    "description": "The button that scans the next portion of the list."
+  },
+  "reader_search_progress": {
+    "message": "Searched $AT$ of $TOTAL$ documents.",
+    "description": "How far the list scan has walked.",
+    "placeholders": {
+      "at": { "content": "$1", "example": "12" },
+      "total": { "content": "$2", "example": "80" }
+    }
+  },
+  "reader_search_in_titles": {
+    "message": "In titles",
+    "description": "Heading over results whose title, site or author carries the phrase."
+  },
+  "reader_search_in_text": {
+    "message": "In the text",
+    "description": "Heading over results whose saved text carries the phrase."
+  },
+  "reader_search_more_hits_one": {
+    "message": "and $COUNT$ more hit",
+    "description": "The line under a result's snippets when the document holds more hits than the row shows; pressing it opens the document's own search. A language may bend the counted noun's case to fit its own sentence.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "reader_search_more_hits_other": {
+    "message": "and $COUNT$ more hits",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
   "close": {
     "message": "Close",
     "description": "Generic label of a button that puts a dialog away."

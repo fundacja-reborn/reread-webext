@@ -39,6 +39,23 @@ export const DOC_HIT_CAP = 200;
 /** How much of the block stands on each side of a snippet's match. */
 export const SNIPPET_CONTEXT = 30;
 
+/**
+ * How many hits one press on the reading list's search collects before it
+ * stops and offers to go on - the batch that keeps a scan of the whole
+ * library a portion, not a commitment.
+ */
+export const LIBRARY_BATCH = 20;
+
+/**
+ * The most hits the list's scan collects from one document. Together with
+ * the batch it bounds a portion at a document boundary: a book stuffed with
+ * a common word contributes a row and a count, not a wall.
+ */
+export const DOC_HIT_LIMIT = 50;
+
+/** How many snippets a list result shows before "and m more" stands in. */
+export const SHOWN_SNIPPETS = 3;
+
 /** The two invisibles `normalize.js` also strips - layout, not language. */
 const ARTIFACT = new RegExp("^[\\u00AD\\u200B]+$");
 const COMBINING = new RegExp("^\\p{M}$", "u");
@@ -244,6 +261,32 @@ export function snippetAround(text, span, budget = SNIPPET_CONTEXT) {
     match: onOneLine(text.slice(span.start, span.end)),
     after: onOneLine(after) + (to < text.length ? "…" : ""),
   };
+}
+
+/**
+ * Whether a row's own words - its title, its site or author - carry the
+ * phrase. The same fold as the text scan, so the two groups of the list's
+ * results answer one question two ways, never two questions.
+ *
+ * @param {string} searchable the row's words, joined however the caller keeps them
+ * @param {string} foldedQuery as `foldQuery` built it
+ * @returns {boolean}
+ */
+export function metaMatches(searchable, foldedQuery) {
+  return foldedQuery.length > 0 && foldForSearch(searchable).folded.includes(foldedQuery);
+}
+
+/**
+ * How a list result wears its hits: the first few as snippets, the rest as
+ * one counted line - a document stuffed with a common word is a row, not a
+ * wall.
+ *
+ * @param {number} total how many hits the document gave, within its limit
+ * @returns {{ shown: number, more: number }}
+ */
+export function snippetPlan(total) {
+  const shown = Math.min(Math.max(0, total), SHOWN_SNIPPETS);
+  return { shown, more: Math.max(0, total) - shown };
 }
 
 /**
