@@ -59,7 +59,7 @@ The read-aloud keys work only while the voice is reading; otherwise the page beh
 - **No inflection matching.** Matching is literal: saving `read` does not underline `reading`.
 - **Nothing inside embedded frames.** The extension works in the page you opened, not in embedded ads, players or widgets.
 - **No remote code.** Everything that runs ships in the package (Manifest V3 enforces this anyway).
-- **Not an e-book reader.** EPUB import exists so you can read prose with the translation bubble: text only — no images, no publisher styling, no table of contents, no footnote navigation, and no DRM (a protected book is refused with a plain message). Books stay out of the reading-list export; the backup of a book is its `.epub` file.
+- **Not an e-book reader.** EPUB import exists so you can read prose with the translation bubble: text only — no images, no publisher styling, no footnote navigation, and no DRM (a protected book is refused with a plain message). A table of contents is built from the chapter headings in the text itself; the book's own TOC page and internal links are not followed. Books stay out of the reading-list export; the backup of a book is its `.epub` file.
 
 ## Privacy
 

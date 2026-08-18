@@ -133,6 +133,27 @@ export async function setBookReadAt(id, readAt) {
 }
 
 /**
+ * Writes the table of contents a backfill scan produced (D116) - for books
+ * imported before the TOC existed, whose rows carry `toc: null`. One
+ * readwrite transaction around a fresh read of the row, because the scan
+ * took time and the world may have moved: a book deleted meanwhile must not
+ * be resurrected by this put, and a scan another tab already landed is the
+ * same list - first writer wins, quietly.
+ *
+ * @param {string} id
+ * @param {import("../book/toc.js").TocEntry[]} toc
+ * @returns {Promise<boolean>} whether this call's list is the one stored
+ */
+export async function setBookToc(id, toc) {
+  return await withLibrary("readwrite", async (stores) => {
+    const row = asBookMeta(await promisify(stores.books.get(id)));
+    if (row === null || row.toc !== null) return false;
+    await promisify(stores.books.put({ ...row, toc }));
+    return true;
+  });
+}
+
+/**
  * Removes segments whose book never came to exist - the leavings of an
  * import that a closed tab cut short (the book row is written last). Run
  * when the list opens, because this page is the only one holding a key to

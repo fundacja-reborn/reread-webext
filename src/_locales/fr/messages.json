@@ -310,6 +310,8 @@
     }
   },
   "reader_book_nav": { "message": "Parties du livre" },
+  "reader_book_toc": { "message": "Sommaire" },
+  "close": { "message": "Fermer" },
   "reader_book_importing": {
     "message": "Ajout du livre - partie $PART$",
     "placeholders": {

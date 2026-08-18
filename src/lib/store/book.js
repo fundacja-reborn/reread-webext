@@ -10,6 +10,13 @@
  */
 
 /**
+ * `toc` is the book's table of contents (D116): the h1-h3 rows of its own
+ * segments, riding the metadata because it is read whenever the book is and
+ * is dozens of entries at most (capped at import). Three states, and the
+ * difference between the last two is what drives the backfill: an array is
+ * a scanned book (possibly with nothing found - the empty array), `null` is
+ * a row from before the TOC existed, still owed a scan.
+ *
  * @typedef {{
  *   id: string,
  *   title: string,
@@ -19,6 +26,7 @@
  *   totalChars: number,
  *   addedAt: number,
  *   readAt: number | null,
+ *   toc: import("../book/toc.js").TocEntry[] | null,
  * }} BookMeta
  */
 
@@ -44,6 +52,40 @@ function keptWord(value) {
 }
 
 /**
+ * @param {unknown} value
+ * @returns {value is number}
+ */
+function isIndex(value) {
+  return typeof value === "number" && Number.isInteger(value) && value >= 0;
+}
+
+/**
+ * A table of contents narrowed entry by entry, or nothing. All or nothing
+ * on purpose: one torn entry means the field cannot be trusted, and `null`
+ * is the state the backfill heals - a partial list kept instead would read
+ * as scanned and stand forever.
+ *
+ * @param {unknown} value
+ * @returns {import("../book/toc.js").TocEntry[] | null}
+ */
+function asToc(value) {
+  if (!Array.isArray(value)) return null;
+  /** @type {import("../book/toc.js").TocEntry[]} */
+  const entries = [];
+  for (const entry of value) {
+    if (typeof entry !== "object" || entry === null) return null;
+    const { title, level, segmentIndex, blockIndex } = /** @type {Record<string, unknown>} */ (
+      entry
+    );
+    if (typeof title !== "string" || title.length === 0) return null;
+    if (level !== 1 && level !== 2 && level !== 3) return null;
+    if (!isIndex(segmentIndex) || !isIndex(blockIndex)) return null;
+    entries.push({ title, level, segmentIndex, blockIndex });
+  }
+  return entries;
+}
+
+/**
  * Builds the row an import writes, or nothing when what came out of the file
  * is not a book anybody could open: no id to find it by again, no title to
  * show (the caller falls back to the file's name before asking), or not a
@@ -57,10 +99,11 @@ function keptWord(value) {
  *   segmentCount: number,
  *   totalChars: number,
  *   addedAt: number,
+ *   toc?: import("../book/toc.js").TocEntry[],
  * }} input
  * @returns {BookMeta | null}
  */
-export function bookRecord({ id, title, author, lang, segmentCount, totalChars, addedAt }) {
+export function bookRecord({ id, title, author, lang, segmentCount, totalChars, addedAt, toc }) {
   if (typeof id !== "string" || id.length === 0) return null;
   const shown = typeof title === "string" ? title.trim() : "";
   if (shown.length === 0) return null;
@@ -77,6 +120,10 @@ export function bookRecord({ id, title, author, lang, segmentCount, totalChars, 
     totalChars: Math.floor(totalChars),
     addedAt,
     readAt: null,
+    // An import always scanned - a torn list is written as "scanned, nothing
+    // found", never as the null that would put a fresh book in the backfill
+    // queue for a list the import itself could not produce.
+    toc: asToc(toc) ?? [],
   };
 }
 
@@ -91,7 +138,7 @@ export function bookRecord({ id, title, author, lang, segmentCount, totalChars, 
  */
 export function asBookMeta(value) {
   if (typeof value !== "object" || value === null) return null;
-  const { id, title, author, lang, segmentCount, totalChars, addedAt, readAt } =
+  const { id, title, author, lang, segmentCount, totalChars, addedAt, readAt, toc } =
     /** @type {Record<string, unknown>} */ (value);
   if (typeof id !== "string" || id.length === 0) return null;
   if (!isCount(segmentCount)) return null;
@@ -108,6 +155,9 @@ export function asBookMeta(value) {
         : 0,
     addedAt: typeof addedAt === "number" && Number.isFinite(addedAt) ? addedAt : 0,
     readAt: typeof readAt === "number" && Number.isFinite(readAt) ? readAt : null,
+    // Absent on rows from before D116 and whenever an entry does not narrow;
+    // both read as "still owed a scan", which the next open provides.
+    toc: asToc(toc),
   };
 }
 

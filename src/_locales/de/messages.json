@@ -299,6 +299,8 @@
     }
   },
   "reader_book_nav": { "message": "Buchteile" },
+  "reader_book_toc": { "message": "Inhalt" },
+  "close": { "message": "Schließen" },
   "reader_book_importing": {
     "message": "Buch wird hinzugefügt - Teil $PART$",
     "placeholders": {

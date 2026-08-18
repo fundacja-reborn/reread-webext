@@ -26,8 +26,11 @@
  * Links lose their `href` wholesale: with no base URL to resolve against,
  * `safeHref` refuses every one - internal and external alike - and what
  * remains is the link's text. Deliberate, not incidental: the brief puts
- * links-as-mechanism (TOC, footnotes) out of scope, and a book is prose to
- * read, not a page to leave.
+ * links-as-mechanism (footnotes, the book's own TOC page) out of scope, and
+ * a book is prose to read, not a page to leave. The reader's table of
+ * contents (D116) is not these links: it is built here from the h1-h3
+ * blocks as segments are written - the same headings the segmenter cuts
+ * before - and stored on the book row.
  */
 
 import { packableBlocks } from "../lib/book/blocks.js";
@@ -40,6 +43,7 @@ import {
   resolveZipPath,
 } from "../lib/book/opf.js";
 import { isHeadingTag, segmenter } from "../lib/book/segment.js";
+import { cappedToc, headingEntries } from "../lib/book/toc.js";
 import { buildArticle } from "../lib/reader/article.js";
 import { bookRecord } from "../lib/store/book.js";
 import { deleteBook, putBook, putBookSegment } from "../lib/store/books.js";
@@ -172,6 +176,8 @@ export async function importEpub(file, onSegment) {
     const packer = /** @type {ReturnType<typeof segmenter<string>>} */ (segmenter());
     let written = 0;
     let totalChars = 0;
+    /** @type {import("../lib/book/toc.js").TocEntry[]} */
+    const tocEntries = [];
 
     /** @param {Array<import("../lib/book/segment.js").Segment<string>>} segments */
     const writeSegments = async (segments) => {
@@ -182,6 +188,10 @@ export async function importEpub(file, onSegment) {
           blocks: segment.blocks,
           charCount: segment.charCount,
         });
+        // The table of contents (D116), read off the segment in its final
+        // shape - only here are the packer's cuts and merges all spoken for,
+        // so only here do the anchors name blocks a render will show.
+        tocEntries.push(...headingEntries(segment.blocks, written));
         written += 1;
         totalChars += segment.charCount;
         onSegment(written);
@@ -232,6 +242,7 @@ export async function importEpub(file, onSegment) {
       segmentCount: written,
       totalChars,
       addedAt: Date.now(),
+      toc: cappedToc(tocEntries),
     });
     // No record means no text worth keeping came out - a spine of covers.
     if (book === null) throw new Error("nothing to keep");
