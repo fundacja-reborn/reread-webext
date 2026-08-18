@@ -360,6 +360,42 @@
   },
   "reader_book_nav": { "message": "Części książki" },
   "reader_book_toc": { "message": "Spis treści" },
+  "reader_search_title": { "message": "Szukaj w tekście" },
+  "reader_search_label": { "message": "Szukana fraza" },
+  "reader_search_placeholder": { "message": "Znajdź frazę" },
+  "reader_search_go": { "message": "Szukaj" },
+  "reader_search_short": { "message": "Wpisz co najmniej 2 znaki." },
+  "reader_search_none": { "message": "Niczego nie znaleziono." },
+  "reader_search_count_one": {
+    "message": "Znaleziono $COUNT$ trafienie.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "reader_search_count_few": {
+    "message": "Znaleziono $COUNT$ trafienia.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_search_count_many": {
+    "message": "Znaleziono $COUNT$ trafień.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_search_count_other": {
+    "message": "Znaleziono $COUNT$ trafienia.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1,5" }
+    }
+  },
+  "reader_search_capped": {
+    "message": "Pokazano pierwsze $COUNT$.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "200" }
+    }
+  },
   "close": { "message": "Zamknij" },
   "reader_book_importing": {
     "message": "Dodawanie książki - część $PART$",

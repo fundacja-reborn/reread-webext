@@ -315,6 +315,30 @@
   },
   "reader_book_nav": { "message": "Parties du livre" },
   "reader_book_toc": { "message": "Sommaire" },
+  "reader_search_title": { "message": "Rechercher dans le texte" },
+  "reader_search_label": { "message": "L'expression à trouver" },
+  "reader_search_placeholder": { "message": "Trouver une expression" },
+  "reader_search_go": { "message": "Rechercher" },
+  "reader_search_short": { "message": "Saisissez au moins 2 caractères." },
+  "reader_search_none": { "message": "Aucun résultat." },
+  "reader_search_count_one": {
+    "message": "$COUNT$ occurrence trouvée.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "reader_search_count_other": {
+    "message": "$COUNT$ occurrences trouvées.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_search_capped": {
+    "message": "Les $COUNT$ premières sont affichées.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "200" }
+    }
+  },
   "close": { "message": "Fermer" },
   "reader_book_importing": {
     "message": "Ajout du livre - partie $PART$",
