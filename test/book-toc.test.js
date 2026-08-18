@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
+import { packableBlocks } from "../src/lib/book/blocks.js";
 import {
   TOC_ENTRY_CAP,
   TOC_TITLE_CAP,
@@ -139,6 +140,50 @@ describe("tocTitle", () => {
     assert.equal(tocTitle("  A\n  title "), "A title");
     assert.equal(tocTitle("   "), null);
     assert.equal(tocTitle(""), null);
+  });
+});
+
+describe("an article's map through the dissolving walk", () => {
+  // The regression Michał hit on the first live article: Readability hands
+  // the whole text back inside one wrapper div, so the headings are not
+  // children of the rendered root - only the walk that dissolves packaging
+  // (the book import's own) sees them. This is the reader's composition,
+  // run over fakes carrying what the two pieces read.
+
+  /**
+   * @param {string} localName
+   * @param {object[]} [children]
+   * @param {string} [textContent]
+   */
+  const el = (localName, children = [], textContent = "") => ({
+    nodeType: 1,
+    localName,
+    childNodes: children,
+    textContent,
+  });
+
+  /** @param {string} data */
+  const text = (data) => ({ nodeType: 3, nodeValue: data });
+
+  it("finds the headings a wrapper div was hiding", () => {
+    const article = el("div", [
+      el("div", [
+        text("\n  "),
+        el("p", [text("An opening.")], "An opening."),
+        el("h2", [text("X marks the spot")], "X marks the spot"),
+        el("p", [text("Prose.")], "Prose."),
+        text("\n"),
+      ]),
+    ]);
+    const walked = [
+      ...packableBlocks(/** @type {Element} */ (/** @type {unknown} */ (article))),
+    ].map((block) => ({
+      localName: /** @type {{ localName: string }} */ (block).localName,
+      text: /** @type {{ textContent?: string }} */ (block).textContent ?? "",
+    }));
+    assert.deepEqual(renderedEntries(walked, 0), [
+      { title: "X marks the spot", level: 2, segmentIndex: 0, blockIndex: 1 },
+    ]);
   });
 });
 

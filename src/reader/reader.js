@@ -82,6 +82,7 @@ import {
   putPosition,
   setReadAt,
 } from "../lib/store/articles.js";
+import { packableBlocks } from "../lib/book/blocks.js";
 import { cappedToc, headingEntries, renderedEntries } from "../lib/book/toc.js";
 import {
   deleteBook,
@@ -326,6 +327,20 @@ let docMarks = [];
  * @type {import("../lib/book/toc.js").TocEntry[]}
  */
 let docToc = [];
+
+/**
+ * The rendered blocks an article's TOC entries index into - the dissolved
+ * walk, not `contentRoot().children`: Readability hands back the whole
+ * article inside one wrapper `div` (kept by the sanitizer, a `div` may be
+ * a paragraph), so the headings live a level or two down, and only the
+ * walk that dissolves packaging sees them - the same `packableBlocks` the
+ * book import runs before storing. Empty over a book, whose entries anchor
+ * to stored top-level blocks instead; rebuilt with every render, so no
+ * element here ever outlives the DOM it points into.
+ *
+ * @type {Element[]}
+ */
+let tocBlocks = [];
 
 /**
  * Books whose TOC backfill is running in this page - one scan per book at a
@@ -575,7 +590,12 @@ function renderArticle(piece) {
   // The document's own map (D117), read off the blocks that just stood up.
   // A book's is the stored, whole-book list instead - `openBook` puts it on
   // right after this returns, the way it dresses everything else book-shaped.
-  docToc = piece.origin === "book" ? [] : articleToc();
+  if (piece.origin === "book") {
+    tocBlocks = [];
+    docToc = [];
+  } else {
+    docToc = articleToc();
+  }
   updateTocButtons();
   applyLinkStops(settings.reader.links);
   if (library !== null) library.hidden = true;
@@ -1459,17 +1479,19 @@ function updateTocButtons() {
 /**
  * The map of the document on screen (D117), read off the rendered blocks
  * the moment they stand - nothing stored and nothing asked of storage: for
- * an article the screen is the source, and the anchors are the same block
- * indexes every other landing on this page uses.
+ * an article the screen is the source. The blocks come from the dissolving
+ * walk (see `tocBlocks` for why), and the entries' `blockIndex` names a
+ * place in that walk - resolved back to an element, never to a child of
+ * `contentRoot()`, whose numbering the wrapper makes a different thing.
  *
  * @returns {import("../lib/book/toc.js").TocEntry[]}
  */
 function articleToc() {
   const root = contentRoot();
-  if (root === null) return [];
+  tocBlocks = root === null ? [] : [...packableBlocks(root)];
   return cappedToc(
     renderedEntries(
-      Array.from(root.children, (block) => ({
+      tocBlocks.map((block) => ({
         localName: block.localName,
         text: block.textContent ?? "",
       })),
@@ -1488,6 +1510,19 @@ function articleToc() {
  */
 function currentTocRow() {
   if (shown === null) return -1;
+  if (shown.origin !== "book") {
+    // An article's entries index the dissolved walk, where the top-block
+    // arithmetic of a book's parts says nothing - but every heading is an
+    // element on this very screen, so the headings themselves answer: the
+    // last one that has reached the reading line is the section being read.
+    const line = chromeFold() + 2;
+    let current = -1;
+    for (const [index, entry] of docToc.entries()) {
+      const rect = tocBlocks[entry.blockIndex]?.getBoundingClientRect();
+      if (rect !== undefined && rect.top <= line) current = index;
+    }
+    return current;
+  }
   const part = shownSegment();
   const block = topBlockIndex() ?? 0;
   let current = -1;
@@ -1554,14 +1589,18 @@ function closeTocDialog() {
 function jumpToTocEntry(entry) {
   const target = shown;
   if (target === null) return;
-  if (entry.segmentIndex === shownSegment()) {
-    // The landing is a reading position like any scroll's; written at once,
-    // so a tab closed right after the jump reopens on the chapter. (A live
+  if (target.origin !== "book") {
+    // An article's entry names an element of the dissolved walk; the
+    // landing is a reading position like any scroll's, written at once so
+    // a tab closed right after the jump reopens on the section. (A live
     // page has no row to write, and the save itself knows that.)
+    if (scrollToRect(tocBlocks[entry.blockIndex]?.getBoundingClientRect())) savePositionNow();
+    return;
+  }
+  if (entry.segmentIndex === target.segmentIndex) {
     if (scrollToBlock(entry.blockIndex)) savePositionNow();
     return;
   }
-  if (target.origin !== "book") return;
   void openBook(target.url, entry.segmentIndex, {
     segmentIndex: entry.segmentIndex,
     block: entry.blockIndex,
@@ -1731,20 +1770,31 @@ function scrollToTargetMark(target) {
 }
 
 /**
- * Scrolls the just-rendered part to one of its blocks - the heading a
- * table-of-contents row named (D116). The same landing as a found mark: the
- * block's first line under the stuck bar, plus the same breath of air. False
- * when the block is not there to land on - a torn row's entry - and the
- * caller falls back to the reading position.
+ * The landing every table-of-contents jump shares (D116): the named spot's
+ * first line under the stuck bar, plus the found mark's own breath of air.
+ * False when there is nothing there to land on, and the caller decides what
+ * that falls back to.
+ *
+ * @param {DOMRect | undefined} rect
+ * @returns {boolean}
+ */
+function scrollToRect(rect) {
+  if (rect === undefined) return false;
+  scrollTo(0, Math.max(0, rect.top + window.scrollY - chromeFold() - 8));
+  return true;
+}
+
+/**
+ * Scrolls the just-rendered part to one of its top-level blocks - the
+ * heading a book's table-of-contents row named (D116). False when the block
+ * is not there to land on - a torn row's entry - and the caller falls back
+ * to the reading position.
  *
  * @param {number} block
  * @returns {boolean}
  */
 function scrollToBlock(block) {
-  const rect = contentRoot()?.children[block]?.getBoundingClientRect();
-  if (rect === undefined) return false;
-  scrollTo(0, Math.max(0, rect.top + window.scrollY - chromeFold() - 8));
-  return true;
+  return scrollToRect(contentRoot()?.children[block]?.getBoundingClientRect());
 }
 
 /**
@@ -1794,6 +1844,7 @@ function leaveDocView() {
   showSegmentNav(null);
   showBookNote(null);
   docToc = [];
+  tocBlocks = [];
   updateTocButtons();
   closeTocDialog();
 }
