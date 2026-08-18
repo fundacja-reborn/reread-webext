@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import { MAX_PAGE_HTML } from "../src/lib/protocol.js";
-import { markRecord } from "../src/lib/reader/marks.js";
+import { MAX_NOTE_LENGTH, markRecord } from "../src/lib/reader/marks.js";
 import {
   ARTICLES_FILENAME,
   fromArticlesFile,
@@ -97,6 +97,20 @@ describe("toArticlesFile", () => {
     assert.ok(bareBack !== undefined);
     assert.ok(!("marks" in bareBack));
     assert.ok(!toArticlesFile([bare]).includes("marks"));
+  });
+
+  it("carries a mark's note through the file both ways (D118)", () => {
+    const marked = article("noted");
+    const noted = mark({ note: "why this passage matters" });
+    const parsed = fromArticlesFile(toArticlesFile([marked], new Map([[marked.url, [noted]]])));
+    assert.equal(parsed.invalid, 0);
+    assert.deepEqual(parsed.articles[0]?.marks, [noted]);
+    // A hand-made note heals by the marks' own rule on the way in: flooded
+    // text is cut at the cap rather than costing the mark or the article.
+    const flooded = JSON.parse(toArticlesFile([marked], new Map([[marked.url, [noted]]])));
+    flooded.articles[0].marks[0].note = "x".repeat(5000);
+    const back = fromArticlesFile(JSON.stringify(flooded)).articles[0]?.marks?.[0]?.note;
+    assert.equal(back?.length, MAX_NOTE_LENGTH);
   });
 });
 

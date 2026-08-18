@@ -927,23 +927,37 @@ body.reader:has(#library:not([hidden])) {
 /* The row wears its mark's ink on the leading edge - the one place colour
    can say which pen wrote the quote without washing text nobody selected.
    The variables are the washes' own, so the stripe answers the theme
-   exactly as the mark it stands for. */
+   exactly as the mark it stands for. Drawn as an inset stroke rather than
+   a border: a full-height edge met the row's top and bottom hairlines and
+   the three read as a box missing its fourth side (Michał's report). The
+   stroke hugs the text instead - the offsets are the text cell's own
+   padding (`.marks-row .library-text` below), repeated - so air stands
+   between it and both hairlines and nothing asks for a frame. */
 .marks-row {
-  padding-inline-start: 0.65rem;
-  border-inline-start: 3px solid transparent;
+  position: relative;
+  padding-inline-start: calc(0.65rem + 3px);
 }
 
-.marks-row[data-color="yellow"] {
-  border-inline-start-color: var(--reader-marker-yellow);
+.marks-row::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  top: 1.1em;
+  bottom: 3em;
+  width: 3px;
 }
-.marks-row[data-color="green"] {
-  border-inline-start-color: var(--reader-marker-green);
+
+.marks-row[data-color="yellow"]::before {
+  background: var(--reader-marker-yellow);
 }
-.marks-row[data-color="blue"] {
-  border-inline-start-color: var(--reader-marker-blue);
+.marks-row[data-color="green"]::before {
+  background: var(--reader-marker-green);
 }
-.marks-row[data-color="pink"] {
-  border-inline-start-color: var(--reader-marker-pink);
+.marks-row[data-color="blue"]::before {
+  background: var(--reader-marker-blue);
+}
+.marks-row[data-color="pink"]::before {
+  background: var(--reader-marker-pink);
 }
 
 /* Air between quotes (Michał's request): a quote is a passage, not a list
@@ -976,6 +990,23 @@ body.reader:has(#library:not([hidden])) {
 
 .marks-quote p:last-child {
   margin-bottom: 0;
+}
+
+/* The note under its quote (D118): the reader's words under the document's,
+   and dressed apart - the interface face at a step down, the muted voice,
+   its own hairline edge so the two texts cannot be misread as one passage.
+   `pre-wrap`, because the note's own line breaks are the only structure it
+   has and textContent is the only way it enters. */
+.marks-note {
+  margin: 0.7em 0 0;
+  padding-inline-start: 0.65rem;
+  border-inline-start: 2px solid var(--page-line);
+  color: var(--page-muted);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 0.85em;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 /* The quote's acts, stacked where the list's Delete stands - the rows are
@@ -1027,6 +1058,14 @@ body.reader:has(#library:not([hidden])) {
    the heading the way the article's byline sits under its title. */
 .marks-doc {
   margin: -0.25rem 0 0;
+}
+
+/* The list has ended, the tool resumes: the export stands a clear step
+   under the rows (Michał's report) - margin only, no rule of its own,
+   because the last row already closes the list with its hairline and a
+   second line right above the button read as clutter (his follow-up). */
+.marks-transfer {
+  margin-top: 3rem;
 }
 
 /* --- the shared pager, held to the same touch floor --- */
@@ -1156,6 +1195,110 @@ body.reader:has(#library:not([hidden])) {
 .toc-rows button[aria-current="true"] {
   color: var(--page-accent);
   font-weight: 600;
+}
+
+/* --- the note dialog (D118): the TOC dialog's dress on a small form --- */
+
+/* Anchored near the top rather than centred, and capped in dvh: the box a
+   rising phone keyboard can never reach (Firefox shrinks the layout
+   viewport for the keys by default, Chromium does on the viewport meta's
+   `interactive-widget`), and on a desktop a form this small reads fine
+   high on the page. The open box is a column so the textarea can take the
+   spare height and give it back when the cap bites. */
+.note-dialog {
+  width: min(26rem, calc(100vw - 2rem));
+  margin: 4dvh auto auto;
+  max-height: 88dvh;
+  padding: 0;
+  border: 1px solid var(--page-line);
+  border-radius: 6px;
+  background: var(--page-bg);
+  color: var(--page-fg);
+}
+
+.note-dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.note-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+/* When the cap bites, the words yield and the frame stands: only the box
+   of text shrinks - the header, the quote line and the acts keep their
+   height, so Save and Cancel are on screen for as long as the dialog is. */
+.note-dialog .toc-head,
+.note-quote,
+.note-acts {
+  flex-shrink: 0;
+}
+
+/* The words being annotated, clamped to a glance - context, not content -
+   with the mark's own ink on the leading edge, the quote rows' stripe, so
+   the dialog visibly belongs to the mark it opened over. */
+.note-quote {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  margin: 0.8rem 1rem 0;
+  padding-inline-start: 0.65rem;
+  border-inline-start: 3px solid var(--page-line);
+  color: var(--page-muted);
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+
+.note-quote[data-color="yellow"] {
+  border-inline-start-color: var(--reader-marker-yellow);
+}
+.note-quote[data-color="green"] {
+  border-inline-start-color: var(--reader-marker-green);
+}
+.note-quote[data-color="blue"] {
+  border-inline-start-color: var(--reader-marker-blue);
+}
+.note-quote[data-color="pink"] {
+  border-inline-start-color: var(--reader-marker-pink);
+}
+
+/* The box itself keeps the interface face: what is typed here is a comment,
+   not the article, and the smaller sans says so while staying readable.
+   Script grows its height to the words it holds (`sizeNoteBox`) - an
+   existing note opens whole, not through a five-line slot (Michał's
+   report) - and the flex shrink hands the height back when the dialog's
+   cap bites, the scrollbar returning only then. The floor is the old five
+   rows. */
+.note-text {
+  flex: 0 1 auto;
+  min-height: 7.5em;
+  margin: 0.8rem 1rem 0;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--page-border);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--page-fg);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  overflow-y: auto;
+  resize: vertical;
+}
+
+.note-acts {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.8rem 1rem;
+}
+
+/* Save wears the held-state pill: the one press the dialog exists for. */
+.note-save {
+  border-color: var(--page-accent);
+  background: color-mix(in srgb, var(--page-accent) 12%, transparent);
 }
 
 /* --- the transfer section: import and export, under the list --- */
@@ -1387,6 +1530,57 @@ button[data-armed],
 
 .mark-pin-end::after {
   bottom: -8px;
+}
+
+/* The dot saying "this mark carries words" (D118), drawn into the note
+   glyph itself so it rides wherever the icon sits - over the sheet's
+   top-right corner, ringed in the paper so it reads as a badge and not a
+   blot. Hidden until the button says otherwise. */
+#mark-note .note-dot {
+  display: none;
+  fill: var(--page-accent);
+  stroke: var(--page-bg);
+  stroke-width: 1.4;
+}
+
+#mark-note[data-has-note] .note-dot {
+  display: inline;
+}
+
+/* The note badges standing in the article (D118): the footnote's spot at
+   the tail of a noted mark, each the door to its own note. Real buttons -
+   focusable, named - but dressed as marginalia: the accent's small sheet,
+   no frame. Absolute in page coordinates like the pins; unlike the pins
+   they take the tap. The box is far wider than the drawing - a thumb
+   target (Michał's ask after the first smoke), one size on every device
+   because the pointer media query lies on e-ink (D84) - while the glyph
+   stays a footnote; the halo shows the true reach only under hover or
+   focus. The named cost: the box can shade the first letters after the
+   mark, and a tap there means the note, not the word. */
+.mark-note-badge {
+  position: absolute;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--page-accent);
+}
+
+.mark-note-badge .reader-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.mark-note-badge:hover,
+.mark-note-badge:focus-visible {
+  background: color-mix(in srgb, var(--page-accent) 12%, transparent);
 }
 
 /* --- the bar that steers the voice, for as long as there is one --- */

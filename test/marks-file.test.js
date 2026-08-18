@@ -63,6 +63,23 @@ describe("toMarksFile", () => {
     assert.ok(file.includes("> end of one\n> start of the next"));
   });
 
+  it("stands a note under its quote as the reader's own paragraph (D118)", () => {
+    const file = toMarksFile([
+      {
+        title: "Annotated",
+        source: null,
+        at: 0,
+        marks: [
+          mark("quoted words", { note: "my thought\non two lines" }),
+          mark("unannotated"),
+        ],
+      },
+    ]);
+    // The blank line closes the blockquote: the note is plain text, not more
+    // of the quote - and the next quote starts clean after it.
+    assert.ok(file.includes("> quoted words\n\nmy thought\non two lines\n\n> unannotated"));
+  });
+
   it("says nothing about a source or a day it does not have", () => {
     // A book without an author, a document with no clock: the heading stands
     // alone rather than over an empty line of dashes.

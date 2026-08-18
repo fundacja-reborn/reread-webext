@@ -24,6 +24,7 @@
   "action_delete": { "message": "Supprimer" },
   "action_download": { "message": "Télécharger" },
   "action_cancel": { "message": "Annuler" },
+  "action_save": { "message": "Enregistrer" },
   "action_update": { "message": "Mettre à jour" },
 
   "error_engine_missing": { "message": "Pas encore de moteur de traduction - cette version ne peut pas traduire." },
@@ -196,6 +197,9 @@
   "marker_delete": { "message": "Supprimer le surlignage" },
   "marker_copy": { "message": "Copier" },
   "marker_copied": { "message": "Copié" },
+  "marker_note": { "message": "Note" },
+  "marker_note_add": { "message": "Ajouter une note" },
+  "marker_note_edit": { "message": "Modifier la note" },
   "color_yellow": { "message": "Jaune" },
   "color_green": { "message": "Vert" },
   "color_blue": { "message": "Bleu" },

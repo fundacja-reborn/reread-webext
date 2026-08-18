@@ -143,6 +143,17 @@ describe("searchableMark", () => {
       assert.ok(searchable.includes(word), `misses ${word}`);
     }
   });
+
+  it("finds a quote by the reader's own note (D118)", () => {
+    // Half of why the note exists: the comment is often the memorable part.
+    const [row] = markRows(
+      [meta(1)],
+      [],
+      new Map([[meta(1).url, [mark("plain quote", { note: "compare with Baxter" })]]]),
+    );
+    assert.ok(row !== undefined);
+    assert.ok(searchableMark(row).includes("baxter"));
+  });
 });
 
 describe("marksListView", () => {

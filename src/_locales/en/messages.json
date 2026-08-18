@@ -34,6 +34,7 @@
   "action_delete": { "message": "Delete" },
   "action_download": { "message": "Download" },
   "action_cancel": { "message": "Cancel" },
+  "action_save": { "message": "Save" },
   "action_update": { "message": "Update" },
 
   "error_engine_missing": { "message": "No translation engine yet - this build cannot translate." },
@@ -236,6 +237,9 @@
   "marker_delete": { "message": "Remove highlight" },
   "marker_copy": { "message": "Copy" },
   "marker_copied": { "message": "Copied" },
+  "marker_note": { "message": "Note" },
+  "marker_note_add": { "message": "Add note" },
+  "marker_note_edit": { "message": "Edit note" },
   "color_yellow": { "message": "Yellow" },
   "color_green": { "message": "Green" },
   "color_blue": { "message": "Blue" },

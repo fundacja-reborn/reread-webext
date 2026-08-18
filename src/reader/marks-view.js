@@ -27,7 +27,7 @@
 import { supported } from "../content/highlighter.js";
 import { prosePieces } from "../content/scan.js";
 import { joinPieces, locate } from "../lib/matcher/spans.js";
-import { MARK_COLORS, marksInSegment, quoteOf } from "../lib/reader/marks.js";
+import { MARK_COLORS, headRect, marksInSegment, quoteOf, tailRect } from "../lib/reader/marks.js";
 
 /** @typedef {import("../lib/reader/marks.js").Mark} Mark */
 /** @typedef {import("../lib/reader/marks.js").MarkSpan} MarkSpan */
@@ -257,6 +257,55 @@ export function paintedRangeOf(mark) {
     if (entry.mark === mark) return entry.range;
   }
   return null;
+}
+
+/**
+ * One character of a text node as a box - or null when the character has no
+ * size to offer, or the offsets do not fit the node. A range held inside a
+ * single text node is the one shape every engine measures true; this is the
+ * primitive the mark's edges stand on.
+ *
+ * @param {Node} node
+ * @param {number} from
+ * @param {number} to
+ * @returns {DOMRect | null}
+ */
+function charBox(node, from, to) {
+  const tip = document.createRange();
+  try {
+    tip.setStart(node, from);
+    tip.setEnd(node, to);
+  } catch {
+    return null;
+  }
+  const box = tip.getBoundingClientRect();
+  return box.width > 0 && box.height > 0 ? box : null;
+}
+
+/**
+ * The boxes a painted mark visually begins and ends in - what the pins and
+ * the note badge stand on. Measured off the range's own endpoints, one
+ * character each, NOT off the range's full rect list: Chromium hands that
+ * list grouped by node for a range crossing blocks, and Brave's diverges
+ * further still - the badge and the end pin stood mid-mark on it while
+ * Chrome measured the same build true. The wash painted from this very
+ * range proves its endpoints right, so the endpoints are what is measured;
+ * `rangeOfMark` anchors both in text nodes with the edge character on the
+ * inside, which is what the one-character reach leans on. The geometric
+ * pick over the full list stays as the fallback for a tip with no size.
+ *
+ * @param {Range} range
+ * @returns {{ head: import("../lib/reader/marks.js").RectLike | null,
+ *   tail: import("../lib/reader/marks.js").RectLike | null }}
+ */
+export function markEdges(range) {
+  const head =
+    charBox(range.startContainer, range.startOffset, range.startOffset + 1) ??
+    headRect(range.getClientRects());
+  const tail =
+    charBox(range.endContainer, Math.max(0, range.endOffset - 1), range.endOffset) ??
+    tailRect(range.getClientRects());
+  return { head, tail };
 }
 
 /**
