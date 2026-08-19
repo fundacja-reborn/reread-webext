@@ -373,8 +373,9 @@ export const STYLE = `
   .body { white-space: pre-wrap; }
   .body[data-tone="pending"] { opacity: 0.6; font-style: italic; }
   .body[data-tone="error"] { color: #a3341f; }
-  /* The launcher has nothing to say above its one button, and an empty line
-     would still cost the row of pixels its line-height reserves. */
+  /* The launcher says nothing in its body - its signature is another element -
+     and an empty line would still cost the row of pixels its line-height
+     reserves. */
   .body:empty { display: none; }
 
   /* Quieter than the gloss and fenced off from the rest: this is the sentence
@@ -652,10 +653,11 @@ export const STYLE = `
      shorthand above would take it away. */
   .bubble[data-grow="up"] .entries { padding-right: 0.9em; }
 
-  /* The launcher is its one button and nothing else, so the row's padding -
-     which exists to stand the row off a gloss that is not there - goes too.
-     After the mirror, whose padding this outranks by standing below it. The
-     quiet bubble (D120) is the same shape with two pictures in the row. */
+  /* The launcher is its one button under its signature, so the row's padding -
+     which exists to stand the row off a gloss that is not there - goes too;
+     the signature's own margin is the whole gap above the button. After the
+     mirror, whose padding this outranks by standing below it. The quiet bubble
+     (D120) is the same shape with two pictures in the row. */
   .bubble[data-variant="launcher"] .actions,
   .bubble[data-variant="quiet"] .actions { padding: 0; }
 
@@ -668,10 +670,18 @@ export const STYLE = `
   .bubble[data-tone="error"][data-grow="up"] .reveal { order: -1; }
   .bubble[data-tone="error"][data-grow="up"] .actions { padding: 8px 0 2px; }
 
-  /* The signature, and only on errors. A translation needs none - the answer
-     is the point, and a header would cost the line D23 saved - but an error
-     may be the first thing this extension ever shows somebody, and an
-     unsigned complaint floating over a page reads as the page's own. */
+  /* The signature, on the two bubbles that have to say who is talking. A
+     translation needs none - the answer is the point, and a header would cost
+     the line D23 saved - but an error may be the first thing this extension
+     ever shows somebody, and an unsigned complaint floating over a page reads
+     as the page's own.
+
+     The launcher (D126) has the same problem in a different tense: one
+     unlabelled offer standing over somebody else's page, and on Android it is
+     the default mode, so it is the first thing the extension does at all. The
+     word is the answer to both halves of the question - who is asking, and
+     where the press leads: it is the same word the reader page's own header
+     says, so the offer and its destination sign the same name. */
   .brand {
     display: none;
     font-size: calc(11px * var(--bubble-scale, 1));
@@ -680,9 +690,11 @@ export const STYLE = `
     opacity: 0.6;
     margin-bottom: 4px;
   }
-  .bubble[data-tone="error"] .brand { display: block; }
+  .bubble[data-tone="error"] .brand,
+  .bubble[data-variant="launcher"] .brand { display: block; }
   /* A signature signs at the top, also when the mirror reverses the column. */
-  .bubble[data-tone="error"][data-grow="up"] .brand { order: 1; }
+  .bubble[data-tone="error"][data-grow="up"] .brand,
+  .bubble[data-variant="launcher"][data-grow="up"] .brand { order: 1; }
 
   /* An action is a label and not a control. What makes one findable is standing
      where the reader is already looking; a box around it would make it the

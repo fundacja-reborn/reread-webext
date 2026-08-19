@@ -3,8 +3,10 @@
  * one offer - "Read in the reader" - and nothing else happens. No scan, no
  * underlines, no observer, and nothing ever goes to the engine; the reader is
  * where all of that lives in this mode. The bubble is the same shadow-rooted
- * tooltip the reading side uses, in a variant that is one button with no gloss
- * above it, so its isolation and its lifecycle are the ones already paid for.
+ * tooltip the reading side uses, in a variant that is one button under the
+ * extension's name (D126), so its isolation and its lifecycle are the ones
+ * already paid for - and so an offer appearing unbidden over somebody else's
+ * page says whose it is and where it leads.
  *
  * The selection is listened for through `selectionchange` with a settle timer,
  * not through the mouse gesture the reading side reads (D47). That is not a
