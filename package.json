@@ -11,6 +11,7 @@
   "scripts": {
     "build": "node tools/build.mjs",
     "build:chromium": "node tools/build.mjs --target=chromium",
+    "package": "node tools/package.mjs",
     "watch": "node tools/build.mjs --watch",
     "typecheck": "tsc --noEmit",
     "test": "node --test --import ./test/i18n-en.js \"test/**/*.test.js\"",

@@ -87,6 +87,8 @@ Every request happens only when you click it, on the settings page; each list sh
 
 You can verify this instead of trusting it: watch the network panel in devtools, read the source (shipped unminified), or simply turn the network off - translation, dictionaries and the reading list keep working.
 
+The same in the form the add-on stores ask for, one document, no legalese: [`PRIVACY.md`](PRIVACY.md).
+
 Everything the extension stores - vocabulary, translation models, dictionaries, saved articles and books, settings - lives in the browser's local extension storage (IndexedDB) on your device and is never synced anywhere. In particular:
 
 - Switching re/read off for a site stores that site's hostname locally. Entries are listed and removable on the settings page.
