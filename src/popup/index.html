@@ -78,6 +78,14 @@
     <button type="button" class="popup-row popup-action popup-setup" id="setup-row" data-i18n="popup_no_model" hidden>
       No translation model on this device yet - press here to pick one in the settings.
     </button>
+    <!-- Stands where the pair row would: with translation switched off (D120)
+         this is the popup's one word about why nothing translates, so the
+         state never reads as a breakage. A quiet note, not a switch - the
+         choice is a deliberate one and lives on the settings page. -->
+    <p class="popup-row popup-note" id="translation-off-note" data-i18n="popup_translation_off" hidden>
+      Translation is switched off - re/read is working as a reader. Turn it back on in the
+      settings.
+    </p>
 
     <!-- The extension's rooms right under the pair (Michał's call, second
          round 2026-08-17): the rows visited often stand above the switches

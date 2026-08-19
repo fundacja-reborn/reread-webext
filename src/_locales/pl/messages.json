@@ -61,6 +61,9 @@
   "popup_no_model": {
     "message": "Na tym urządzeniu nie ma jeszcze modelu tłumaczeniowego - naciśnij tutaj i wybierz go w ustawieniach."
   },
+  "popup_translation_off": {
+    "message": "Tłumaczenie jest wyłączone - re/read działa jako czytnik. Włączysz je z powrotem w ustawieniach."
+  },
 
   "vocab_title": { "message": "re/read - zapisane frazy" },
   "vocab_intro": {
@@ -730,6 +733,10 @@
   "options_quiet_bubble_hint": {
     "message": "Gdy to jest włączone, dymek tłumaczenia pokazuje samo tłumaczenie, a przyciski wysuwają się po kliknięciu lub tapnięciu w dymek. Wyjątkiem - niezależnie od ustawienia - jest Zapisz: fraza za długa, by zapisać się sama, zawsze pokazuje przycisk zapisu."
   },
+  "options_no_translation": { "message": "Używaj bez tłumaczenia" },
+  "options_no_translation_hint": {
+    "message": "Do czytania we własnym języku. Gdy to jest włączone, znikają: dymek tłumaczenia, zapisywanie i podkreślanie fraz, strona zapisanych fraz oraz sekcje modeli i słowników; zaznaczenie tekstu na zwykłej stronie proponuje jedno - otwarcie strony w widoku czytania. Widok czytania, czytelnia offline, zakreślacz, czytanie na głos i wyszukiwanie działają dalej. Nic nie jest kasowane: zapisane frazy, modele i słowniki zostają na tym urządzeniu i wracają, gdy tylko to wyłączysz."
+  },
   "options_bubble_scale": { "message": "Rozmiar tekstu dymka" },
   "options_bubble_scale_hint": {
     "message": "Wielkość dymka tłumaczenia - jego tekstu i przycisków - na zwykłych stronach i w widoku czytania. Dymek sam ustala swój rozmiar i nie słucha ustawień czcionki strony, więc to jedyne miejsce, gdzie można go zmienić: podnieś wartość, jeśli na tym ekranie jest za mały."
@@ -796,6 +803,9 @@
   "options_words_in": { "message": "Język haseł:" },
   "options_explained_in": { "message": "język objaśnień:" },
   "options_add_dictionary_button": { "message": "Dodaj słownik" },
+  "options_add_dictionary_mono": {
+    "message": "Zadziała też słownik jednojęzyczny - na przykład angielsko-angielski: wybierz angielski po obu stronach. Jego definicje pokażą się wtedy w dymku pod „Więcej” obok słowników dwujęzycznych języka, który czytasz: słowniki dobierane są po języku haseł, nie po parze."
+  },
   "options_dict_files_note": {
     "message": "Plik StarDict nie mówi nic o tym, dla których języków jest, więc tutaj ta część należy do ciebie. Dodawanie z plików nie wykonuje żadnego zapytania sieciowego, a ta droga zostaje na dzień, w którym host katalogu przestanie odpowiadać: działają pliki skądkolwiek, w tym własne pliki katalogu - są opublikowane pod"
   },

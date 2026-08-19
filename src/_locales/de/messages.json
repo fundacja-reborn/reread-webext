@@ -61,6 +61,9 @@
   "popup_no_model": {
     "message": "Auf diesem Gerät gibt es noch kein Übersetzungsmodell - drücken Sie hier und wählen Sie eines in den Einstellungen."
   },
+  "popup_translation_off": {
+    "message": "Die Übersetzung ist ausgeschaltet - re/read arbeitet als Leseansicht. In den Einstellungen schalten Sie sie wieder ein."
+  },
 
   "vocab_title": { "message": "re/read - gespeicherter Wortschatz" },
   "vocab_intro": {
@@ -576,6 +579,10 @@
   "options_quiet_bubble_hint": {
     "message": "Ist dies an, zeigt die Sprechblase nur die Übersetzung; ihre Schaltflächen erscheinen nach einem Klick oder Tippen auf die Sprechblase. Speichern ist so oder so die Ausnahme: Eine Wendung, die zu lang ist, um sich selbst zu speichern, zeigt die Schaltfläche zum Speichern immer."
   },
+  "options_no_translation": { "message": "Ohne Übersetzung verwenden" },
+  "options_no_translation_hint": {
+    "message": "Zum Lesen in der eigenen Sprache. Ist dies an, verschwinden die Sprechblase, das Speichern und Unterstreichen von Wendungen, die Wortschatz-Seite sowie die Abschnitte für Modelle und Wörterbücher; das Auswählen von Text auf einer gewöhnlichen Seite bietet genau eines an - die Seite in der Leseansicht zu öffnen. Leseansicht, Offline-Leseliste, Textmarker, Vorlesen und Suche funktionieren weiter. Nichts wird gelöscht: Ihr gespeicherter Wortschatz, Ihre Modelle und Wörterbücher bleiben auf diesem Gerät und kehren zurück, sobald Sie dies wieder ausschalten."
+  },
   "options_bubble_scale": { "message": "Textgröße der Sprechblase" },
   "options_bubble_scale_hint": {
     "message": "Die Größe der Übersetzungs-Sprechblase - ihres Textes und ihrer Schaltflächen - auf normalen Seiten wie in der Leseansicht. Die Sprechblase bestimmt ihre Größe selbst und folgt keinen Schrifteinstellungen der Seite; angepasst wird sie nur hier: Erhöhe den Wert, wenn sie auf diesem Bildschirm zu klein wirkt."
@@ -642,6 +649,9 @@
   "options_words_in": { "message": "Wörter auf" },
   "options_explained_in": { "message": "erklärt auf" },
   "options_add_dictionary_button": { "message": "Wörterbuch hinzufügen" },
+  "options_add_dictionary_mono": {
+    "message": "Auch ein einsprachiges Wörterbuch funktioniert - etwa Englisch-Englisch: Wählen Sie auf beiden Seiten Englisch. Seine Definitionen erscheinen dann in der Sprechblase unter „Mehr“ neben den zweisprachigen Wörterbüchern der gelesenen Sprache: Wörterbücher werden nach der Sprache ihrer Stichwörter zugeordnet, nicht nach dem Paar."
+  },
   "options_dict_files_note": {
     "message": "Eine StarDict-Datei sagt nichts darüber, für welche Sprachen sie ist; dieser Teil gehört hier also Ihnen. Aus Dateien hinzuzufügen stellt keinerlei Netzwerkanfrage, und dieser Weg bleibt für den Tag, an dem der Host des Katalogs nicht mehr antwortet: Dateien von überall funktionieren, die eigenen des Katalogs eingeschlossen - sie stehen unter"
   },

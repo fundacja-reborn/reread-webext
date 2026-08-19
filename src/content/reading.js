@@ -179,6 +179,16 @@ const tooltip = createTooltip({
 let hideActions = DEFAULTS.hideBubbleActions;
 
 /**
+ * The translation-off setting (D120), mirrored the same way. On ordinary
+ * pages this module never even starts under it (`pageMode`); on the reader
+ * page it keeps running - the gesture is also the highlighter's, and the
+ * article refuses the native selection - but with the translation half gone:
+ * no vocabulary, no underlines, no engine, and a bubble trimmed to the
+ * phrase's own two acts, hearing it and copying it.
+ */
+let noTranslation = DEFAULTS.translationOff;
+
+/**
  * The bubble-size knob (D85), mirrored the same way: every show hands the
  * bubble a plain factor, and the settings page changing it reaches every open
  * page through the storage listener already paid for.
@@ -336,6 +346,16 @@ async function loadVocabulary(preloaded) {
     ttsLang = config.sourceLang;
     ttsVoiceURI = config.ttsVoices[config.sourceLang];
     ttsRate = config.ttsRate;
+    noTranslation = config.translationOff;
+
+    // With translation off there is no vocabulary to know (D120): nothing is
+    // underlined, no mirror is adopted and the background is never asked.
+    // An empty adopt rather than a plain return, because the switch can flip
+    // over a page already painted - the underlines have to leave with it.
+    if (noTranslation) {
+      adopt([]);
+      return;
+    }
 
     if (mirror === null) {
       adopt([]);
@@ -809,6 +829,37 @@ function present(selection, { deliberate, touch, chain = false }) {
   if (!chain) autoKept = null;
 
   const { text, normalized } = selection;
+
+  // The no-translation trim (D120): the gesture keeps working - on the reader
+  // page it is also the highlighter's, and the article refuses the native
+  // selection (D80/D86), so without a bubble nothing could be copied at all -
+  // but the phrase is not translated, not kept and not looked up. What is
+  // left is the phrase's own two acts: hearing it and copying it. Never
+  // folded, whatever the quiet-bubble setting says - the two buttons are the
+  // bubble's whole content, and folded away they would leave it empty.
+  if (noTranslation) {
+    stopSpeaking();
+    unmark();
+    current = { text, normalized, keepable: false };
+    secondLayer = [];
+    unfetched = null;
+    anchorRange = selection.range.cloneRange();
+    generation += 1;
+    tooltip.show({
+      anchor: selection.rect,
+      line: firstLineOf(selection.range),
+      variant: "quiet",
+      body: "",
+      actions: [...SPEAK, ...COPY],
+      phrase: text,
+      touch,
+      coarse: touchPointer(lastPointerType),
+      scale: bubbleScale / 100,
+      anchored,
+    });
+    return;
+  }
+
   if (showSaved(selection.rect, text, normalized, selection.context, { touch, range: selection.range })) return;
 
   // The same cut `showSaved` makes: this show does not pass through hide either.

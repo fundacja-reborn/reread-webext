@@ -59,6 +59,20 @@ summary {
   white-space: nowrap;
 }
 
+/* The translation-off switch (D120): everything that only serves translation
+   wears this class, and the body wears the mode. Display rather than the
+   `hidden` attribute, because the first-steps fold manages its own `hidden`
+   and must stay away regardless of what its logic decides. */
+body.no-translation .translation-only {
+  display: none;
+}
+
+/* The jump line draws its dot before every link but the first - counting
+   hidden siblings, so without this the row would open on a stray separator. */
+body.no-translation .jump .translation-only + a::before {
+  content: none;
+}
+
 /* --- the header: the shared bar, title, the table of contents ---
 
    The bar and its menu (`.page-bar`, `.page-mark`, `.nav-menu`) live in

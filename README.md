@@ -4,7 +4,7 @@ A browser extension for reading in a language you are learning. Select a word or
 
 Works in Firefox (desktop and Android) and in Chrome/Chromium.
 
-**Contents:** [Features](#features) · [Install](#install) · [Keyboard shortcuts](#keyboard-shortcuts) · [What it does not do](#what-it-deliberately-does-not-do) · [Privacy](#privacy) · [Third-party code](#third-party-code) · [Development](#development) · [Related projects](#related-projects) · [Licence](#licence) · [Support](#support)
+**Contents:** [Features](#features) · [Reading without translation](#reading-without-translation) · [Install](#install) · [Keyboard shortcuts](#keyboard-shortcuts) · [What it does not do](#what-it-deliberately-does-not-do) · [Privacy](#privacy) · [Third-party code](#third-party-code) · [Development](#development) · [Related projects](#related-projects) · [Licence](#licence) · [Support](#support)
 
 ## Features
 
@@ -37,6 +37,10 @@ Works in Firefox (desktop and Android) and in Chrome/Chromium.
 - **Backup.** The reading list exports to a single JSON file, highlights included, and imports without duplicating. Books are not in that file - a book's backup is its `.epub`. Vocabulary travels as TSV.
 - **Toolbar popup.** Per-site off switch, language pair, reader, reading list, saved phrases and settings in one place.
 - **Six UI languages.** English, Polish, German, French, Spanish, Ukrainian.
+
+## Reading without translation
+
+re/read is also a plain reader. If you read in your own language and want just the clean reading view, the offline reading list, the highlighter, read-aloud and search, one switch in the settings - **Use without translation** - turns the translation half off: no bubble on selection, no underlines, no model or dictionary sections. Selecting text on an ordinary page then offers one thing, opening the page in the reader. Nothing is deleted: saved phrases, models and dictionaries stay on the device and come back the moment the switch does.
 
 ## Install
 
@@ -119,6 +123,8 @@ Every download is verified before it is stored: declared sizes, Mozilla's publis
 Supported format: **StarDict** (`.ifo`, `.idx`, `.dict`/`.dict.dz`, optional `.syn`) - the same format [KOReader](https://koreader.rocks/) uses, so dictionaries can be shared between your e-reader and browser.
 
 The settings page carries a catalogue of about five hundred [WikDict](https://www.wikdict.com/) pairs (CC BY-SA, built from Wiktionary); one click downloads and installs a dictionary, and you can also add StarDict files by hand. Dictionary downloads carry no pinned checksum (WikDict rebuilds its files in place), but every archive is validated - a plain zip of StarDict files, with sizes and CRCs checked - and parsed defensively once, when it is added. Attribution is kept and shown on the settings page.
+
+Dictionaries are matched by the language of their headwords, not by the pair - so a monolingual dictionary added from files (English-English, say) shows its definitions under **More** beside the bilingual ones, which is often exactly what a learner wants.
 
 For English-Polish, WikDict is the recommended start: 66,609 entries plus 51,721 alternative spellings in its `.syn` file (which is what lets `elevations` find `elevation`). FreeDict's `eng-pol` StarDict build (release 0.2.1) is mostly missing the Polish translations (checked 2026-08-11); other FreeDict pairs may be fine.
 

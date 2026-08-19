@@ -276,8 +276,21 @@ async function render() {
   // translation nothing can deliver. The signpost stands in the row's place
   // until the first model lands.
   const fresh = installed.length === 0;
-  if (pairRow !== null) pairRow.hidden = fresh;
-  if (setupRow !== null) setupRow.hidden = !fresh;
+  // With translation switched off (D120) everything about translating leaves
+  // the popup - the pair, the setup signpost, the bubble and mode switches
+  // (the trimmed bubble ignores the fold, and every ordinary page is a
+  // launcher page already), and the saved phrases row. One quiet note stands
+  // in their place, so the state never reads as a breakage.
+  const off = config.translationOff;
+  if (pairRow !== null) pairRow.hidden = fresh || off;
+  if (setupRow !== null) setupRow.hidden = !fresh || off;
+  const offNote = document.getElementById("translation-off-note");
+  if (offNote !== null) offNote.hidden = !off;
+  if (vocabularyButton !== null) vocabularyButton.hidden = off;
+  const quietRow = document.getElementById("quiet-row");
+  if (quietRow !== null) quietRow.hidden = off;
+  const readerOnlyRow = document.getElementById("reader-only-row");
+  if (readerOnlyRow !== null) readerOnlyRow.hidden = off;
   if (quietToggle !== null) quietToggle.checked = config.hideBubbleActions;
   choices = pairChoices(config, installed);
   renderPair(config);

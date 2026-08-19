@@ -10,6 +10,7 @@ import {
   TTS_RATE,
   effectiveReaderOnly,
   osFrom,
+  pageMode,
   platformOs,
   publishPlatform,
   readConfig,
@@ -239,6 +240,66 @@ describe("reader-only mode", () => {
     await writeConfig({ sourceLang: "de" });
     assert.equal(/** @type {any} */ (untouched["config"]).readerOnly, null);
     assert.equal((await readConfig()).readerOnly, null);
+  });
+});
+
+describe("translation switched off", () => {
+  it("is off-off by default, on profiles old and new", () => {
+    // The switch shipped after 0.4.22, so a stored config without the key is
+    // every existing profile - and translation has to keep working for them.
+    assert.equal(withDefaults(undefined).translationOff, false);
+    assert.equal(withDefaults({ sourceLang: "en" }).translationOff, false);
+  });
+
+  it("keeps a choice somebody made, in both directions", () => {
+    assert.equal(withDefaults({ translationOff: true }).translationOff, true);
+    assert.equal(withDefaults({ translationOff: false }).translationOff, false);
+  });
+
+  it("treats a hand-edited value of the wrong type as translation on", () => {
+    for (const translationOff of ["true", 1, null, {}]) {
+      assert.equal(withDefaults({ translationOff }).translationOff, false);
+    }
+  });
+
+  it("writes the choice through writeConfig without touching the rest", async () => {
+    const store = installFakeBrowser({ config: { sourceLang: "de", targetLang: "en" } });
+    const written = await writeConfig({ translationOff: true });
+
+    assert.deepEqual(written, { ...DEFAULTS, sourceLang: "de", targetLang: "en", translationOff: true });
+    assert.equal(/** @type {any} */ (store["config"]).translationOff, true);
+  });
+});
+
+describe("pageMode", () => {
+  const base = { disabledHosts: [], readerOnly: null, translationOff: false };
+
+  it("reads by default on the desk, launches by default on Android", () => {
+    assert.equal(pageMode(base, "mac", "example.org"), "reading");
+    assert.equal(pageMode(base, "android", "example.org"), "launcher");
+  });
+
+  it("silences a switched-off site whatever else is set", () => {
+    const off = { ...base, disabledHosts: ["example.org"] };
+    assert.equal(pageMode(off, "mac", "example.org"), "off");
+    assert.equal(pageMode({ ...off, translationOff: true }, "mac", "example.org"), "off");
+    assert.equal(pageMode({ ...off, readerOnly: true }, "android", "example.org"), "off");
+    // The switch names one exact host, and no other host inherits it.
+    assert.equal(pageMode(off, "mac", "www.example.org"), "reading");
+  });
+
+  it("only ever launches with translation off - the reader-only choice has no say", () => {
+    const off = { ...base, translationOff: true };
+    assert.equal(pageMode(off, "mac", "example.org"), "launcher");
+    // Reader-only explicitly off would mean reading - but reading is a
+    // translation in place, and there is none to offer (D120).
+    assert.equal(pageMode({ ...off, readerOnly: false }, "mac", "example.org"), "launcher");
+    assert.equal(pageMode({ ...off, readerOnly: true }, "android", "example.org"), "launcher");
+  });
+
+  it("honours the reader-only choice while translation is on", () => {
+    assert.equal(pageMode({ ...base, readerOnly: true }, "mac", "example.org"), "launcher");
+    assert.equal(pageMode({ ...base, readerOnly: false }, "android", "example.org"), "reading");
   });
 });
 

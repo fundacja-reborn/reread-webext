@@ -3,8 +3,10 @@
  *
  * Three things. The first is deciding which of three states this page is in,
  * and it is a hierarchy with silence at the top: a site switched off in the
- * popup gets nothing at all; a page in reader-only mode gets the launcher -
- * one listener whose whole offer is "read this in the reader" (`launcher.js`);
+ * popup gets nothing at all; a page in reader-only mode - or under the
+ * translation-off setting, whose ordinary pages have nothing else left to
+ * offer - gets the launcher, one listener whose whole offer is "read this in
+ * the reader" (`launcher.js`);
  * any other page gets the full reading side - selections, the bubble, keeping
  * a phrase and underlining the ones already kept, all in `reading.js`, because
  * the reader page runs exactly the same code against the article it built
@@ -30,7 +32,7 @@
  */
 
 import { webext } from "../lib/browser.js";
-import { CONFIG_KEY, PLATFORM_KEY, effectiveReaderOnly, osFrom, withDefaults } from "../lib/config.js";
+import { CONFIG_KEY, PLATFORM_KEY, osFrom, pageMode, withDefaults } from "../lib/config.js";
 import { ErrorCode, MAX_PAGE_HTML, Message, asPageRequest, fail, ok } from "../lib/protocol.js";
 import { MIRROR_KEY } from "../lib/store/mirror.js";
 import { setLauncherScale, startLauncher, stopLauncher } from "./launcher.js";
@@ -51,15 +53,14 @@ let os = "";
 let osKnown = false;
 
 /**
- * The hierarchy in one place: host switched off beats everything, reader-only
- * beats reading, and reading is what is left.
+ * The hierarchy lives in `pageMode` (`lib/config.js`), where `node --test`
+ * reaches it: host switched off beats everything, translation switched off
+ * and reader-only mode each mean the launcher, and reading is what is left.
  *
  * @returns {Mode}
  */
 function decide() {
-  if (config.disabledHosts.includes(location.hostname)) return "off";
-  if (effectiveReaderOnly(config, os)) return "launcher";
-  return "reading";
+  return pageMode(config, os, location.hostname);
 }
 
 /**

@@ -98,7 +98,12 @@ function normalized(text) {
 
 describe("the locale catalogues", () => {
   it("ship exactly the promised languages, each naming itself", () => {
-    const shipped = readdirSync(join(ROOT, "src", "_locales")).sort();
+    // Dot-entries are never locales - they are the desk's own dirt (a
+    // Finder's .DS_Store, a tool's working directory) and must not fail the
+    // promise about languages. Anything else unexpected still does.
+    const shipped = readdirSync(join(ROOT, "src", "_locales"))
+      .filter((entry) => !entry.startsWith("."))
+      .sort();
     assert.deepEqual(shipped, LOCALES);
     for (const locale of LOCALES) {
       assert.equal(catalogues.get(locale)?.["locale_code"]?.message, locale);
