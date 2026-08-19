@@ -331,6 +331,37 @@ describe("the quiet bubble", () => {
   });
 });
 
+describe("the default keep", () => {
+  it("keeps what the reader opens, on profiles old and new", () => {
+    // The switch arrives with D124, so every profile that predates it has a
+    // stored config without the key - and the default has to reach them too:
+    // this is the setting that decides whether opening a page files it.
+    assert.equal(withDefaults(undefined).keepArticles, true);
+    assert.equal(withDefaults({ sourceLang: "en" }).keepArticles, true);
+  });
+
+  it("keeps a choice somebody made, in both directions", () => {
+    assert.equal(withDefaults({ keepArticles: true }).keepArticles, true);
+    // The one that matters: only a stored `false` turns the keeping off, so a
+    // switch somebody set must survive every read.
+    assert.equal(withDefaults({ keepArticles: false }).keepArticles, false);
+  });
+
+  it("treats a hand-edited value of the wrong type as the default", () => {
+    for (const keepArticles of ["false", 0, null, {}]) {
+      assert.equal(withDefaults({ keepArticles }).keepArticles, true);
+    }
+  });
+
+  it("writes the choice through writeConfig without touching the rest", async () => {
+    const store = installFakeBrowser({ config: { sourceLang: "de", targetLang: "en" } });
+    const written = await writeConfig({ keepArticles: false });
+
+    assert.deepEqual(written, { ...DEFAULTS, sourceLang: "de", targetLang: "en", keepArticles: false });
+    assert.equal(/** @type {any} */ (store["config"]).keepArticles, false);
+  });
+});
+
 describe("the bubble scale", () => {
   it("answers 100% for profiles old and new", () => {
     assert.equal(withDefaults(undefined).bubbleScale, 100);

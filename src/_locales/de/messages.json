@@ -576,6 +576,10 @@
   "options_reader_only_hint": {
     "message": "Ist dies an, bietet das Auswählen einer Wendung oder eines Wortes auf einer gewöhnlichen Seite genau eines an: die Seite in der Leseansicht zu öffnen. Übersetzen, Speichern und Unterstreichen geschehen dort (übersichtlicher und besser lesbar). Auf Android ist die Option standardmäßig eingeschaltet."
   },
+  "options_keep_articles": { "message": "Standardmäßig in der Offline-Leseliste speichern" },
+  "options_keep_articles_hint": {
+    "message": "Ist dies eingeschaltet, wird eine in der Leseansicht geöffnete Seite sofort in der Offline-Leseliste gespeichert - ganz ohne Klick - und bleibt so ohne Netz lesbar, auch wenn das Original umgezogen oder verschwunden ist. Eine Seite, die schon in der Liste steht, wird nie überschrieben: Markierungen und Lesestelle bleiben, wie sie waren. Die Schaltfläche über dem Artikel sagt dann „In der Leseliste“, und ein Druck nimmt die Seite wieder heraus."
+  },
   "options_quiet_bubble_hint": {
     "message": "Ist dies an, zeigt die Sprechblase nur die Übersetzung; ihre Schaltflächen erscheinen nach einem Klick oder Tippen auf die Sprechblase. Speichern ist so oder so die Ausnahme: Eine Wendung, die zu lang ist, um sich selbst zu speichern, zeigt die Schaltfläche zum Speichern immer."
   },

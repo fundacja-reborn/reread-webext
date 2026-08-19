@@ -24,7 +24,7 @@ Works in Firefox (desktop and Android) and in Chrome/Chromium.
 **Reader and reading list**
 
 - **Reader mode.** Opens the page as a clean article in the extension's own tab (`Alt`+`Shift`+`R` or the toolbar popup).
-- **Offline reading list.** A saved article is stored in full on your device: it opens with no network and keeps working when the original page has moved or disappeared.
+- **Offline reading list.** A saved article is stored in full on your device: it opens with no network and keeps working when the original page has moved or disappeared. Pages opened in the reader are saved by default - one setting turns that off, and a page already in the list is never written over.
 - **EPUB books.** Import a book into the reading list; long books are cut into parts, and a table of contents is built from the chapter headings.
 - **Reading position.** Every saved document reopens where you stopped.
 - **Highlighter.** Word-snapped marks in a choice of inks, spanning paragraphs, stored with the saved copy. A Highlights page lists every mark, and one click exports them all as a Markdown file of quotes for your notes.

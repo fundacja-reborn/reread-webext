@@ -210,6 +210,22 @@
           easier to read). On Android the option is on by default.
         </p>
       </div>
+      <!-- The default keep (D124). Not `translation-only`: with translation
+           off the reader and its list are the whole extension, which is when
+           this switch matters most. -->
+      <div class="row">
+        <label class="row-toggle">
+          <span class="row-name" data-i18n="options_keep_articles">Save in the offline reading list by default</span>
+          <input type="checkbox" id="keep-articles" />
+        </label>
+        <p class="row-note" data-i18n="options_keep_articles_hint">
+          With this on, a page opened in the reader is saved in the offline reading list straight
+          away - no press needed - so it stays readable with no network and after the original has
+          moved or disappeared. A page already in the list is never written over: your highlights
+          and your reading position stay as they were. The button above the article then reads “In
+          the reading list”, and one press takes the page back out.
+        </p>
+      </div>
       <!-- `translation-only`: the trimmed bubble ignores the fold - its two
            buttons are its whole content - so with translation off this switch
            would move nothing (D120). -->
