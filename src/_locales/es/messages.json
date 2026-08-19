@@ -599,6 +599,10 @@
   "options_reader_only_hint": {
     "message": "Con esto activado, seleccionar una frase o una palabra en una página normal ofrece una sola cosa: abrir la página en la vista de lectura. Traducir, guardar y subrayar ocurren allí (más claro y más legible). En Android la opción está activada de forma predeterminada."
   },
+  "options_keep_articles": { "message": "Guardar de forma predeterminada en la lista de lectura sin conexión" },
+  "options_keep_articles_hint": {
+    "message": "Con esto activado, una página abierta en la vista de lectura se guarda enseguida en la lista de lectura sin conexión - sin pulsar nada - y así se puede leer sin red y cuando el original se haya mudado o desaparecido. Una página que ya está en la lista nunca se sobrescribe: tus subrayados y tu posición de lectura siguen intactos. El botón sobre el artículo dice entonces «En la lista de lectura», y una pulsación la saca de ella."
+  },
   "options_quiet_bubble_hint": {
     "message": "Con esto activado, la burbuja de traducción muestra solo la traducción; sus botones aparecen al hacer clic o tocar la burbuja. Guardar es la excepción en ambos casos: una frase demasiado larga para guardarse sola siempre muestra el botón de guardar."
   },

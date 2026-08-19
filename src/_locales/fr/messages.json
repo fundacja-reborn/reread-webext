@@ -599,6 +599,10 @@
   "options_reader_only_hint": {
     "message": "Quand c'est activé, sélectionner une phrase ou un mot sur une page ordinaire ne propose qu'une chose : ouvrir la page dans le lecteur. La traduction, l'enregistrement et le soulignement se font là (plus clair et plus lisible). Sur Android, l'option est activée par défaut."
   },
+  "options_keep_articles": { "message": "Enregistrer par défaut dans la liste de lecture hors ligne" },
+  "options_keep_articles_hint": {
+    "message": "Avec cette option, une page ouverte dans le lecteur est enregistrée aussitôt dans la liste de lecture hors ligne - sans le moindre clic - et reste donc lisible sans réseau, même si l’original a déménagé ou disparu. Une page déjà présente dans la liste n’est jamais écrasée : vos surlignages et votre position de lecture restent intacts. Le bouton au-dessus de l’article indique alors « Dans la liste de lecture », et une pression l’en ressort."
+  },
   "options_quiet_bubble_hint": {
     "message": "Quand c'est activé, la bulle de traduction ne montre que la traduction ; ses boutons apparaissent après un clic ou un appui sur la bulle. Enregistrer reste l'exception dans les deux cas : une phrase trop longue pour s'enregistrer seule montre toujours le bouton d'enregistrement."
   },

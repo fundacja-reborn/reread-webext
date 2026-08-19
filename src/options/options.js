@@ -281,6 +281,12 @@ function renderQuietBubble() {
   if (toggle instanceof HTMLInputElement) toggle.checked = config.hideBubbleActions;
 }
 
+/** The default-keep switch (D124): whether the reader files what it opens. */
+function renderKeepArticles() {
+  const toggle = document.getElementById("keep-articles");
+  if (toggle instanceof HTMLInputElement) toggle.checked = config.keepArticles;
+}
+
 /**
  * The translation-off switch (D120). The body class is the stylesheet's
  * handle on every `translation-only` part of this page - set at render so a
@@ -1664,6 +1670,7 @@ async function render() {
   fill("version", webext().runtime.getManifest().version);
   renderReaderOnly();
   renderQuietBubble();
+  renderKeepArticles();
   renderNoTranslation();
   renderBubbleScale();
   renderVoice();
@@ -1713,6 +1720,7 @@ async function refresh() {
   config = await readConfig();
   renderReaderOnly();
   renderQuietBubble();
+  renderKeepArticles();
   renderNoTranslation();
   renderBubbleScale();
   // The pair may have moved (the popup writes it too), and the pair decides
@@ -1755,6 +1763,16 @@ document.getElementById("quiet-bubble")?.addEventListener("change", (event) => {
   // Same road as the mode switch: open pages hear it through storage and the
   // next bubble opens the way the box now says.
   void writeConfig({ hideBubbleActions: toggle.checked }).then((written) => {
+    config = written;
+  });
+});
+document.getElementById("keep-articles")?.addEventListener("change", (event) => {
+  const toggle = event.target;
+  if (!(toggle instanceof HTMLInputElement)) return;
+  // The reader reads this fresh as each page opens (D124), so an open reader
+  // tab obeys the new answer from the very next article - nothing to redraw
+  // here, and nothing to reload there.
+  void writeConfig({ keepArticles: toggle.checked }).then((written) => {
     config = written;
   });
 });

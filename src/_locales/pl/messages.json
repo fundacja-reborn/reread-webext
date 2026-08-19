@@ -730,6 +730,10 @@
   "options_reader_only_hint": {
     "message": "Gdy to jest włączone, zaznaczenie frazy lub słowa na zwykłej stronie proponuje jedno: otwarcie jej w widoku czytania. Tłumaczenie, zapisywanie i podkreślanie dzieją się tam (przejrzyściej i czytelniej). Na Androidzie opcja jest domyślnie włączona."
   },
+  "options_keep_articles": { "message": "Zapisuj domyślnie w czytelni offline" },
+  "options_keep_articles_hint": {
+    "message": "Gdy to jest włączone, strona otwarta w widoku czytania od razu trafia do czytelni offline - bez naciskania czegokolwiek - więc daje się czytać bez sieci i wtedy, gdy oryginał się przeprowadzi albo zniknie. Strona już zapisana nigdy nie jest nadpisywana: zakreślenia i miejsce, w którym przerwałeś czytanie, zostają nietknięte. Przycisk nad artykułem mówi wtedy „W czytelni”, a jedno naciśnięcie wyjmuje z niej stronę."
+  },
   "options_quiet_bubble_hint": {
     "message": "Gdy to jest włączone, dymek tłumaczenia pokazuje samo tłumaczenie, a przyciski wysuwają się po kliknięciu lub tapnięciu w dymek. Wyjątkiem - niezależnie od ustawienia - jest Zapisz: fraza za długa, by zapisać się sama, zawsze pokazuje przycisk zapisu."
   },

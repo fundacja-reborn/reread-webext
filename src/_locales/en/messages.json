@@ -716,6 +716,10 @@
   "options_reader_only_hint": {
     "message": "With this on, selecting a phrase or a word on an ordinary page offers one thing: open the page in the reader. Translating, saving and underlining happen there (cleaner and easier to read). On Android the option is on by default."
   },
+  "options_keep_articles": { "message": "Save in the offline reading list by default" },
+  "options_keep_articles_hint": {
+    "message": "With this on, a page opened in the reader is saved in the offline reading list straight away - no press needed - so it stays readable with no network and after the original has moved or disappeared. A page already in the list is never written over: your highlights and your reading position stay as they were. The button above the article then reads “In the reading list”, and one press takes the page back out."
+  },
   "options_quiet_bubble_hint": {
     "message": "With this on, the translation bubble shows just the translation, and its buttons slide out when you click or tap the bubble. Save is the exception either way: a phrase too long to save itself always shows the button that saves it."
   },

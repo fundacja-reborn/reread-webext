@@ -734,11 +734,13 @@ function renderLive(page) {
     link: page.url,
     source: new DOMParser().parseFromString(found.content, "text/html").body,
   });
-  // A live page starts at the top, so the action rows may come when they come.
-  void refreshActions();
-  // So may the marks a past reading left under this address (D106): paint
-  // takes no room, so nothing waits on it.
+  // A live page starts at the top, so the action rows may come when they come
+  // - and with the default keep (D124) they wait for the database to have its
+  // say about this address, rather than saying Save for a moment first.
   const rendered = shown;
+  if (rendered !== null) void openLiveActions(rendered);
+  // The marks a past reading left under this address (D106) arrive on their
+  // own: paint takes no room, so nothing waits on it.
   void getMarks(page.url)
     .then((marks) => {
       if (shown !== rendered) return;
@@ -1053,9 +1055,13 @@ async function commitSpan(span, color) {
 
   try {
     if (target.origin === "live") {
-      const kept = await keptForMarks(target);
+      const kept = await keptRow(target);
       if (shown !== target) return;
       if (!kept) throw new Error("The article could not be saved");
+      // A first mark that had to write the row moves the bar's toggle to
+      // its kept state. Asked after every mark rather than only after a
+      // write: one small read beats carrying "was it me who saved it" back.
+      void refreshActions();
     }
     await putMarks(target.url, docMarks);
   } catch {
@@ -1068,22 +1074,26 @@ async function commitSpan(span, color) {
 }
 
 /**
- * The row a live article's marks belong to, made sure of - present already,
- * or written now through the same path as the Save button. `putArticle`
- * clears any marks row under the address as it writes (its rule for content
- * being replaced), which is exactly right here: the caller writes the whole
- * list right after.
+ * The row a live article belongs to, made sure of - present already, or
+ * written now through the same path the Save button uses. Two hands knock:
+ * the first mark on a live page (D106), which needs a row to hang marks on,
+ * and the default keep as the article opens (D124).
+ *
+ * Never a write over a row that is already there. `putArticle` clears the
+ * marks and the reading position under the address as it writes (its rule
+ * for content being replaced) - which is exactly right for the marks caller,
+ * who writes the whole list right after, and would be a quiet loss for
+ * anybody else. The action rows are the caller's business; both have their
+ * own moment to redraw them.
  *
  * @param {NonNullable<typeof shown>} target
  * @returns {Promise<boolean>} whether the row is there to write against
  */
-async function keptForMarks(target) {
+async function keptRow(target) {
   const existing = await getArticleMeta(target.url);
   if (shown !== target) return false;
   if (existing !== null) return true;
-  if (!(await saveShownLive(target))) return false;
-  if (shown === target) void refreshActions();
-  return true;
+  return saveShownLive(target);
 }
 
 /**
@@ -3272,6 +3282,36 @@ async function saveShownLive(target) {
   if (record === null) return false;
   await putArticle(record);
   return true;
+}
+
+/**
+ * A live article's action rows, drawn once the database has had its say about
+ * this address (D124). With "Save in the offline reading list by default" on
+ * - and it is on unless somebody turned it off - a page opened here is saved
+ * as it opens, so the rows wait for that write: a bar offering Save for a
+ * moment and then saying the page is in the list would be a flicker on e-ink
+ * and wrong for as long as it lasted.
+ *
+ * The keep is only ever on the way in and only when the address is not in the
+ * list yet (`keptRow`): a stored copy carries the highlights and the reading
+ * position, and reopening a page must never be the thing that erases them.
+ *
+ * The setting is read fresh rather than taken from this page's copy: the
+ * first render can outrun the settings load at the foot of this file, and a
+ * default that saves would then save against a switch somebody turned off.
+ *
+ * @param {NonNullable<typeof shown>} target
+ */
+async function openLiveActions(target) {
+  try {
+    const { keepArticles } = await readConfig();
+    if (keepArticles && shown === target) await keptRow(target);
+  } catch {
+    // The same word the Save button uses for a write that did not land. The
+    // rows drawn below will say Save, which is then the truth.
+    showNotice(t("reader_list_write_failed"));
+  }
+  if (shown === target) await refreshActions();
 }
 
 /**

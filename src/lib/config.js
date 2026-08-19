@@ -56,6 +56,15 @@ export const CONFIG_KEY = "config";
  *   bubble keeps the speaker and the clipboard and loses the translation.
  *   Named for the off state so the default (`false`) is the extension as it
  *   has always been, and a stored `true` is always a deliberate press.
+ * @property {boolean} keepArticles Whether a page opened in the reader is kept
+ *   in the offline reading list without being asked (D124). Default `true`:
+ *   the reader's whole point is a copy that survives the original moving,
+ *   and the Save button was one press between reading a page and having it.
+ *   Only ever on the way in, and only when nothing is stored under that
+ *   address yet - a stored copy carries the highlights and the reading
+ *   position, and writing over it would take both, so reopening a page must
+ *   never be what erases them. Live pages only: books and saved articles are
+ *   in the list by definition.
  * @property {boolean} hideBubbleActions Whether the translation bubble opens
  *   with its action row folded away, unfolding on a click or tap on the bubble
  *   (D81). Save is the standing exception either way: a phrase that does not
@@ -162,6 +171,7 @@ export const DEFAULTS = Object.freeze({
   disabledHosts: [],
   readerOnly: null,
   translationOff: false,
+  keepArticles: true,
   hideBubbleActions: true,
   ttsVoices: {},
   ttsRate: 100,
@@ -279,6 +289,10 @@ export function withDefaults(stored) {
     readerOnly: typeof raw["readerOnly"] === "boolean" ? raw["readerOnly"] : null,
     translationOff:
       typeof raw["translationOff"] === "boolean" ? raw["translationOff"] : DEFAULTS.translationOff,
+    // Default `true`, so it reaches profiles that predate the switch as well
+    // as fresh ones: only a stored `false` is somebody having turned it off.
+    keepArticles:
+      typeof raw["keepArticles"] === "boolean" ? raw["keepArticles"] : DEFAULTS.keepArticles,
     hideBubbleActions:
       typeof raw["hideBubbleActions"] === "boolean" ? raw["hideBubbleActions"] : DEFAULTS.hideBubbleActions,
     ttsVoices: voiceMap(raw["ttsVoices"]),
@@ -305,7 +319,7 @@ export async function readConfig() {
  * the settings page holds the full map and choosing the default voice has to
  * be able to remove an entry - a per-key merge could only ever add.
  *
- * @param {{ sourceLang?: string, targetLang?: string, reader?: Partial<ReaderConfig>, disabledHosts?: string[], readerOnly?: boolean, translationOff?: boolean, hideBubbleActions?: boolean, ttsVoices?: Record<string, string>, ttsRate?: number, bubbleScale?: number }} patch
+ * @param {{ sourceLang?: string, targetLang?: string, reader?: Partial<ReaderConfig>, disabledHosts?: string[], readerOnly?: boolean, translationOff?: boolean, keepArticles?: boolean, hideBubbleActions?: boolean, ttsVoices?: Record<string, string>, ttsRate?: number, bubbleScale?: number }} patch
  * @returns {Promise<Config>}
  */
 export async function writeConfig(patch) {
