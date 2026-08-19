@@ -650,7 +650,7 @@
   },
   "options_dictionaries_heading": { "message": "Dictionnaires" },
   "options_dictionaries_intro": {
-    "message": "Téléchargez un dictionnaire (ou plusieurs) pour pouvoir consulter les différents sens d'un mot sélectionné - vous choisirez ensuite les sens qui collent au contexte et les enregistrerez."
+    "message": "Téléchargez un dictionnaire (ou plusieurs) pour pouvoir consulter les différents sens d'un mot sélectionné. Pendant la traduction, vous choisissez et enregistrez les sens qui collent au contexte ; avec la traduction désactivée, les définitions répondent simplement à une sélection dans le lecteur."
   },
   "options_dictionary_note_from": { "message": "Les dictionnaires sont téléchargés depuis" },
   "options_dictionary_note_rest": {
@@ -673,7 +673,7 @@
   "options_explained_in": { "message": "expliqués en" },
   "options_add_dictionary_button": { "message": "Ajouter le dictionnaire" },
   "options_add_dictionary_mono": {
-    "message": "Un dictionnaire monolingue fonctionne aussi - anglais-anglais, par exemple : choisissez l'anglais des deux côtés. Ses définitions apparaissent alors sous « Plus » dans la bulle, à côté des dictionnaires bilingues de la langue que vous lisez : les dictionnaires sont retenus selon la langue de leurs entrées, pas selon la paire."
+    "message": "Un dictionnaire monolingue fonctionne aussi - anglais-anglais, par exemple : choisissez l'anglais des deux côtés. Ses définitions apparaissent alors dans la bulle, à côté des dictionnaires bilingues de la langue que vous lisez - sous « Plus » pendant la traduction, directement avec la traduction désactivée : les dictionnaires sont retenus selon la langue de leurs entrées, pas selon la paire."
   },
   "options_dict_files_note": {
     "message": "Un fichier StarDict ne dit rien des langues pour lesquelles il est fait, cette part est donc la vôtre ici. Ajouter depuis des fichiers ne fait aucune requête réseau, et ce chemin reste pour le jour où l'hôte du catalogue cesse de répondre : les fichiers de n'importe où fonctionnent, ceux du catalogue compris - ils sont publiés à"

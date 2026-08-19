@@ -650,7 +650,7 @@
   },
   "options_dictionaries_heading": { "message": "Diccionarios" },
   "options_dictionaries_intro": {
-    "message": "Descarga un diccionario (o varios) para poder consultar los distintos significados de una palabra seleccionada - luego elegirás y guardarás las acepciones que encajen con el contexto."
+    "message": "Descarga un diccionario (o varios) para poder consultar los distintos significados de una palabra seleccionada. Al traducir eliges y guardas las acepciones que encajen con el contexto; con la traducción desactivada, las definiciones simplemente responden a una selección en la vista de lectura."
   },
   "options_dictionary_note_from": { "message": "Los diccionarios se descargan de" },
   "options_dictionary_note_rest": {
@@ -673,7 +673,7 @@
   "options_explained_in": { "message": "explicadas en" },
   "options_add_dictionary_button": { "message": "Añadir diccionario" },
   "options_add_dictionary_mono": {
-    "message": "Un diccionario monolingüe también funciona - por ejemplo inglés-inglés: elige inglés en ambos lados. Sus definiciones aparecen entonces bajo «Más» en la burbuja, junto a los diccionarios bilingües del idioma que lees: los diccionarios se eligen por el idioma de sus entradas, no por el par."
+    "message": "Un diccionario monolingüe también funciona - por ejemplo inglés-inglés: elige inglés en ambos lados. Sus definiciones aparecen entonces en la burbuja, junto a los diccionarios bilingües del idioma que lees - bajo «Más» al traducir, directamente con la traducción desactivada: los diccionarios se eligen por el idioma de sus entradas, no por el par."
   },
   "options_dict_files_note": {
     "message": "Un archivo StarDict no dice nada de para qué idiomas es, así que aquí esa parte te toca a ti. Añadir desde archivos no hace ninguna petición de red, y este camino se queda para el día en que el host del catálogo deje de responder: sirven archivos de cualquier parte, incluidos los del propio catálogo - están publicados en"

@@ -60,7 +60,7 @@ On a phone the extension starts in **reader-only mode**: ordinary pages are left
 | Key | Where | Action |
 |---|---|---|
 | `Alt`+`Shift`+`R` | any page | open the page in the reader |
-| `Esc` | any page | close the translation bubble |
+| `Esc` | any page | close the bubble |
 | `Space` | reader, during read-aloud | pause / resume |
 | `←` `→` | reader, during read-aloud | previous / next sentence |
 | `<` `>` | reader, during read-aloud | slower / faster |
@@ -124,7 +124,7 @@ Supported format: **StarDict** (`.ifo`, `.idx`, `.dict`/`.dict.dz`, optional `.s
 
 The settings page carries a catalogue of about five hundred [WikDict](https://www.wikdict.com/) pairs (CC BY-SA, built from Wiktionary); one click downloads and installs a dictionary, and you can also add StarDict files by hand. Dictionary downloads carry no pinned checksum (WikDict rebuilds its files in place), but every archive is validated - a plain zip of StarDict files, with sizes and CRCs checked - and parsed defensively once, when it is added. Attribution is kept and shown on the settings page.
 
-Dictionaries are matched by the language of their headwords, not by the pair - so a monolingual dictionary added from files (English-English, say) shows its definitions under **More** beside the bilingual ones, which is often exactly what a learner wants.
+Dictionaries are matched by the language of their headwords, not by the pair - so a monolingual dictionary added from files (English-English, say) answers beside the bilingual ones: under **More** while translating, straight in the bubble with translation switched off.
 
 For English-Polish, WikDict is the recommended start: 66,609 entries plus 51,721 alternative spellings in its `.syn` file (which is what lets `elevations` find `elevation`). FreeDict's `eng-pol` StarDict build (release 0.2.1) is mostly missing the Polish translations (checked 2026-08-11); other FreeDict pairs may be fine.
 

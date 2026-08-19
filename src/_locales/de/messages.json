@@ -627,7 +627,7 @@
   },
   "options_dictionaries_heading": { "message": "Wörterbücher" },
   "options_dictionaries_intro": {
-    "message": "Laden Sie ein Wörterbuch (oder mehrere) herunter, um die verschiedenen Bedeutungen eines ausgewählten Wortes nachschlagen zu können - Sie wählen dann die Lesarten, die zum Kontext passen, und speichern sie."
+    "message": "Laden Sie ein Wörterbuch (oder mehrere) herunter, um die verschiedenen Bedeutungen eines ausgewählten Wortes nachschlagen zu können. Beim Übersetzen wählen und speichern Sie die Lesarten, die zum Kontext passen; bei ausgeschalteter Übersetzung beantworten die Definitionen eine Auswahl in der Leseansicht einfach direkt."
   },
   "options_dictionary_note_from": { "message": "Wörterbücher kommen von" },
   "options_dictionary_note_rest": {
@@ -650,7 +650,7 @@
   "options_explained_in": { "message": "erklärt auf" },
   "options_add_dictionary_button": { "message": "Wörterbuch hinzufügen" },
   "options_add_dictionary_mono": {
-    "message": "Auch ein einsprachiges Wörterbuch funktioniert - etwa Englisch-Englisch: Wählen Sie auf beiden Seiten Englisch. Seine Definitionen erscheinen dann in der Sprechblase unter „Mehr“ neben den zweisprachigen Wörterbüchern der gelesenen Sprache: Wörterbücher werden nach der Sprache ihrer Stichwörter zugeordnet, nicht nach dem Paar."
+    "message": "Auch ein einsprachiges Wörterbuch funktioniert - etwa Englisch-Englisch: Wählen Sie auf beiden Seiten Englisch. Seine Definitionen erscheinen dann in der Sprechblase neben den zweisprachigen Wörterbüchern der gelesenen Sprache - beim Übersetzen unter „Mehr“, bei ausgeschalteter Übersetzung sofort: Wörterbücher werden nach der Sprache ihrer Stichwörter zugeordnet, nicht nach dem Paar."
   },
   "options_dict_files_note": {
     "message": "Eine StarDict-Datei sagt nichts darüber, für welche Sprachen sie ist; dieser Teil gehört hier also Ihnen. Aus Dateien hinzuzufügen stellt keinerlei Netzwerkanfrage, und dieser Weg bleibt für den Tag, an dem der Host des Katalogs nicht mehr antwortet: Dateien von überall funktionieren, die eigenen des Katalogs eingeschlossen - sie stehen unter"

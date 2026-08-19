@@ -778,7 +778,7 @@
   },
   "options_dictionaries_heading": { "message": "Dictionaries" },
   "options_dictionaries_intro": {
-    "message": "Download a dictionary (or a few) to check the different meanings a selected word can have - you then choose and save the senses that fit the context."
+    "message": "Download a dictionary (or a few) to check the different meanings a selected word can have. While translating you choose and save the senses that fit the context; with translation switched off, the definitions simply answer a selection in the reader."
   },
   "options_dictionary_note_from": {
     "message": "Dictionary downloads come from",
@@ -808,7 +808,7 @@
   "options_explained_in": { "message": "explained in" },
   "options_add_dictionary_button": { "message": "Add dictionary" },
   "options_add_dictionary_mono": {
-    "message": "A monolingual dictionary works too - for English-English, say, pick English on both sides. Its definitions then show under \"More\" in the bubble beside any bilingual dictionaries of the language you read: dictionaries are matched by the language of their headwords, not by the pair."
+    "message": "A monolingual dictionary works too - for English-English, say, pick English on both sides. Its definitions then show in the bubble beside any bilingual dictionaries of the language you read - under \"More\" while translating, straight away with translation switched off: dictionaries are matched by the language of their headwords, not by the pair."
   },
   "options_dict_files_note": {
     "message": "A StarDict file says nothing about which languages it is for, so here that part is yours to say. Adding from files makes no network request at all, and the path stays for the day the catalogue's host stops answering: files from anywhere work, the catalogue's own included - they are published at",
