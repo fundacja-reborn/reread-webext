@@ -691,11 +691,11 @@
     "description": "Quotes the options_dictionaries_heading section name and the bubble_more button - each language quotes its own wording of those keys, so they must move together."
   },
   "options_first_steps_pin": {
-    "message": "Last, pin re/read to the toolbar: press the puzzle-piece icon at the right end of the bar and, next to re/read, choose the gear and \"Pin to Toolbar\". The re/read button gives quick access to the reader, the offline reading list, your highlights, your saved phrases, changing the language pair and the switch for the site you are on.",
+    "message": "Last, pin re/read to the toolbar: the puzzle-piece icon at the right end of the bar, then the gear next to re/read and \"Pin to Toolbar\". The button opens the reader, the reading list, your saved phrases and the switch for the site you are on.",
     "description": "The desktop wording of the last step; on Android the page swaps in options_first_steps_pin_android instead. Quotes Firefox's own \"Pin to Toolbar\" menu label - each language must quote Firefox's official wording of it, not a translation of its own."
   },
   "options_first_steps_pin_android": {
-    "message": "You will find the re/read button in the browser menu (⋮), in the extensions section - it gives quick access to the reader, the offline reading list, your saved phrases, changing the language pair and the switch for the site you are on.",
+    "message": "The re/read button is in the browser menu (⋮), under Extensions - it opens the reader, the reading list, your saved phrases and the switch for the site you are on.",
     "description": "Replaces options_first_steps_pin on Android, where there is no toolbar to pin anything to - the button already sits in the browser menu."
   },
   "options_sections_aria": {
@@ -714,33 +714,30 @@
   },
   "options_reader_only": { "message": "Only in the reader" },
   "options_reader_only_hint": {
-    "message": "With this on, selecting a phrase or a word on an ordinary page offers one thing: open the page in the reader. Translating, saving and underlining happen there (cleaner and easier to read). On Android the option is on by default."
+    "message": "With this on, selecting text on an ordinary page offers one thing: open the page in the reader, where translating, saving and underlining happen. On Android it is on by default."
   },
   "options_keep_articles": { "message": "Save in the offline reading list by default" },
   "options_keep_articles_hint": {
-    "message": "With this on, a page opened in the reader is saved in the offline reading list straight away - no press needed - so it stays readable with no network and after the original has moved or disappeared. A page already in the list is never written over: your highlights and your reading position stay as they were. The button above the article then reads “In the reading list”, and one press takes the page back out."
+    "message": "With this on, a page opened in the reader goes straight into the offline reading list, so you can read it with no network - and after the original page has been deleted. Opening the same page again never writes over it: your highlights and the place you stopped reading stay untouched."
   },
   "options_quiet_bubble_hint": {
-    "message": "With this on, the translation bubble shows just the translation, and its buttons slide out when you click or tap the bubble. Save is the exception either way: a phrase too long to save itself always shows the button that saves it."
+    "message": "With this on, the bubble shows just the translation; its buttons slide out when you click or tap it."
   },
   "options_no_translation": { "message": "Use without translation" },
   "options_no_translation_hint": {
-    "message": "For reading in your own language. With this on, the translation bubble, phrase saving and underlining, the saved phrases page and the model section are hidden; selecting text on an ordinary page offers one thing - open the page in the reader. The reader, the offline reading list, the highlighter, reading aloud and search keep working - and so do dictionaries: with one installed for the language you read (a monolingual one works well), selecting a word in the reader shows its definitions. Nothing is deleted: your saved phrases and models stay on this device and come back the moment you switch this off."
+    "message": "For reading in your own language. With this on, the translation bubble, saving and underlining phrases, the saved phrases page and the model section are hidden; selecting text on an ordinary page offers one thing - open the page in the reader. The reader, the offline reading list, the highlighter, reading aloud, search and dictionaries keep working. Nothing is deleted: your phrases and models come back the moment you switch this off."
   },
   "options_bubble_scale": { "message": "Bubble text size" },
   "options_bubble_scale_hint": {
-    "message": "The size of the translation bubble - its text and its buttons - on ordinary pages and in the reader alike. The bubble sizes itself and ignores each page's own type settings, so this is the one place to adjust it: turn it up if it reads too small on this screen."
+    "message": "The size of the translation bubble - its text and its buttons - on ordinary pages and in the reader alike."
   },
   "options_tts_voice": { "message": "Voice for reading aloud" },
   "options_tts_default": { "message": "Browser default" },
   "options_tts_listen": { "message": "Listen" },
   "options_tts_voice_hint": {
-    "message": "The speaker button in the translation bubble reads the selected phrase aloud in the language you are reading - the way to hear how a word is pronounced. The voices are this device's and its browser's own: speech is made locally, and the phrase is not sent anywhere. With no choice made, the browser picks a voice for the language itself."
+    "message": "The voice reads a selected phrase in the bubble and a whole article in the reader. The voices are this device's own: speech is made locally and nothing is sent anywhere."
   },
   "options_tts_rate": { "message": "Reading speed" },
-  "options_tts_rate_hint": {
-    "message": "A multiple of the voice's own normal speed. Slower is the setting worth trying first in a language you are still learning: half speed is where the endings of words stop disappearing."
-  },
   "options_models_heading": { "message": "Translation models" },
   "options_models_intro": {
     "message": "The models below are built and published by Mozilla - the same models Firefox itself translates pages with. For re/read to work, download a model for the language pairs you want to translate (for example en -> pl)."
@@ -766,7 +763,7 @@
     "description": "First half of the note around the host, which stands between the parts as a page element. Each part must read on from the last across a plain space - no part starts or ends with whitespace."
   },
   "options_model_note_rest": {
-    "message": "- where Mozilla publishes them. When you update the list, nothing about you is sent - the request only fetches the fresh list of models. This host and the dictionary catalogue's below are the only two places this extension can ever contact - and only when you knowingly press to refresh a list, to download a model or a dictionary."
+    "message": "- where Mozilla publishes them. Updating the list sends nothing about you; it only fetches the fresh list. This host and the dictionary catalogue's below are the only two this extension ever contacts, and only when you press to refresh a list or to download something."
   },
   "options_add_model_heading": { "message": "Add a model from files" },
   "options_add_model_summary": {
@@ -778,7 +775,7 @@
   },
   "options_add_model_button": { "message": "Add model" },
   "options_files_note": {
-    "message": "This page stays even once models download themselves: it is the way out on the day the place they are downloaded from stops answering. Nothing here leaves the device, and adding a model makes no network request at all."
+    "message": "Adding a model by hand makes no network request, and this page stays the way in on the day the place models are downloaded from stops answering."
   },
   "options_dictionaries_heading": { "message": "Dictionaries" },
   "options_dictionaries_intro": {
@@ -816,15 +813,15 @@
   "options_explained_in": { "message": "explained in" },
   "options_add_dictionary_button": { "message": "Add dictionary" },
   "options_add_dictionary_mono": {
-    "message": "A monolingual dictionary works too - for English-English, say, pick English on both sides. Its definitions then show in the bubble beside any bilingual dictionaries of the language you read - under \"More\" while translating, straight away with translation switched off: dictionaries are matched by the language of their headwords, not by the pair."
+    "message": "A monolingual dictionary works too - for English-English, say, pick English on both sides. Dictionaries are matched by the language of their headwords, not by the pair, so it answers beside the bilingual ones: under \"More\" while translating, straight away with translation off."
   },
   "options_dict_files_note": {
-    "message": "A StarDict file says nothing about which languages it is for, so here that part is yours to say. Adding from files makes no network request at all, and the path stays for the day the catalogue's host stops answering: files from anywhere work, the catalogue's own included - they are published at",
+    "message": "A StarDict file does not say which languages it is for, so that part is yours to fill in. Adding from files makes no network request; files from anywhere work, the catalogue's own included - they are published at",
     "description": "Ends just before the address, which stands in the page as a link; the sentence's closing full stop is part of the page."
   },
   "options_disabled_heading": { "message": "Switched-off sites" },
   "options_disabled_intro": {
-    "message": "Sites where re/read stays off - no underlines, no bubble, nothing running on the page itself; opening a page in the reader by hand still works. The switch in the toolbar popup is what adds a site here; this list is how one is turned back on without visiting it."
+    "message": "Sites where re/read stays off: no underlines, no bubble, nothing running on the page itself; opening a page in the reader by hand still works. The switch in the toolbar popup is what adds a site here; this list is how one comes back on."
   },
   "options_support_intro": {
     "message": "re/read is built by a non-profit foundation - no investors, no ads, no tracking. If you find it useful and want to support its continued development, every donation helps us build software free from commercial pressure."

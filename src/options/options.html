@@ -105,10 +105,9 @@
         </li>
       </ol>
       <p id="first-steps-pin" data-i18n="options_first_steps_pin">
-        Last, pin re/read to the toolbar: press the puzzle-piece icon at the right end of the bar
-        and, next to re/read, choose the gear and "Pin to Toolbar". The re/read button gives
-        quick access to the reader, the offline reading list, your highlights, your saved
-        phrases, changing the language pair and the switch for the site you are on.
+        Last, pin re/read to the toolbar: the puzzle-piece icon at the right end of the bar, then
+        the gear next to re/read and "Pin to Toolbar". The button opens the reader, the reading
+        list, your saved phrases and the switch for the site you are on.
       </p>
     </details>
 
@@ -125,14 +124,12 @@
           <input type="checkbox" id="no-translation" />
         </label>
         <p class="row-note" data-i18n="options_no_translation_hint">
-          For reading in your own language. With this on, the translation bubble, phrase saving
-          and underlining, the saved phrases page and the model section are hidden; selecting
-          text on an ordinary page offers one thing - open the page in the reader. The reader,
-          the offline reading list, the highlighter, reading aloud and search keep working - and
-          so do dictionaries: with one installed for the language you read (a monolingual one
-          works well), selecting a word in the reader shows its definitions. Nothing is deleted:
-          your saved phrases and models stay on this device and come back the moment you switch
-          this off.
+          For reading in your own language. With this on, the translation bubble, saving and
+          underlining phrases, the saved phrases page and the model section are hidden; selecting
+          text on an ordinary page offers one thing - open the page in the reader. The reader, the
+          offline reading list, the highlighter, reading aloud, search and dictionaries keep
+          working. Nothing is deleted: your phrases and models come back the moment you switch this
+          off.
         </p>
       </div>
       <!-- The pair select offers only the pairs whose model is on this device:
@@ -168,10 +165,8 @@
           <button type="button" id="tts-listen" data-i18n="options_tts_listen">Listen</button>
         </p>
         <p class="row-note" data-i18n="options_tts_voice_hint">
-          The speaker button in the translation bubble reads the selected phrase aloud in the
-          language you are reading - the way to hear how a word is pronounced. The voices are
-          this device's and its browser's own: speech is made locally, and the phrase is not
-          sent anywhere. With no choice made, the browser picks a voice for the language itself.
+          The voice reads a selected phrase in the bubble and a whole article in the reader. The
+          voices are this device's own: speech is made locally and nothing is sent anywhere.
         </p>
       </div>
       <!-- How fast that voice reads (D87), for the phrase in the bubble and for
@@ -187,11 +182,6 @@
           <output id="tts-rate-value">1.0&times;</output>
           <button type="button" id="tts-rate-up" title="Faster" data-i18n-title="reader_faster">+</button>
         </p>
-        <p class="row-note" data-i18n="options_tts_rate_hint">
-          A multiple of the voice's own normal speed. Slower is the setting worth trying first in
-          a language you are still learning: half speed is where the endings of words stop
-          disappearing.
-        </p>
       </div>
       <!-- The whole first line is the label, so a press anywhere on it flips
            the switch; the note keeps its own, unclickable line below - a
@@ -205,9 +195,8 @@
           <input type="checkbox" id="reader-only" />
         </label>
         <p class="row-note" data-i18n="options_reader_only_hint">
-          With this on, selecting a phrase or a word on an ordinary page offers one thing: open
-          the page in the reader. Translating, saving and underlining happen there (cleaner and
-          easier to read). On Android the option is on by default.
+          With this on, selecting text on an ordinary page offers one thing: open the page in the
+          reader, where translating, saving and underlining happen. On Android it is on by default.
         </p>
       </div>
       <!-- The default keep (D124). Not `translation-only`: with translation
@@ -219,11 +208,10 @@
           <input type="checkbox" id="keep-articles" />
         </label>
         <p class="row-note" data-i18n="options_keep_articles_hint">
-          With this on, a page opened in the reader is saved in the offline reading list straight
-          away - no press needed - so it stays readable with no network and after the original has
-          moved or disappeared. A page already in the list is never written over: your highlights
-          and your reading position stay as they were. The button above the article then reads “In
-          the reading list”, and one press takes the page back out.
+          With this on, a page opened in the reader goes straight into the offline reading list, so
+          you can read it with no network - and after the original page has been deleted. Opening
+          the same page again never writes over it: your highlights and the place you stopped
+          reading stay untouched.
         </p>
       </div>
       <!-- `translation-only`: the trimmed bubble ignores the fold - its two
@@ -235,9 +223,8 @@
           <input type="checkbox" id="quiet-bubble" />
         </label>
         <p class="row-note" data-i18n="options_quiet_bubble_hint">
-          With this on, the translation bubble shows just the translation, and its buttons slide
-          out when you click or tap the bubble. Save is the exception either way: a phrase too
-          long to save itself always shows the button that saves it.
+          With this on, the bubble shows just the translation; its buttons slide out when you click
+          or tap it.
         </p>
       </div>
       <!-- The bubble's one size knob (D85): the bubble deliberately ignores
@@ -255,8 +242,7 @@
         </p>
         <p class="row-note" data-i18n="options_bubble_scale_hint">
           The size of the translation bubble - its text and its buttons - on ordinary pages and in
-          the reader alike. The bubble sizes itself and ignores each page's own type settings, so
-          this is the one place to adjust it: turn it up if it reads too small on this screen.
+          the reader alike.
         </p>
       </div>
     </div>
@@ -319,10 +305,10 @@
       <span data-i18n="options_model_note_from">Model downloads come from</span>
       <a id="model-host" target="_blank" rel="noopener">-</a>
       <span data-i18n="options_model_note_rest"
-        >- where Mozilla publishes them. When you update the list, nothing about you is sent - the
-        request only fetches the fresh list of models. This host and the dictionary catalogue's
-        below are the only two places this extension can ever contact - and only when you
-        knowingly press to refresh a list, to download a model or a dictionary.</span
+        >- where Mozilla publishes them. Updating the list sends nothing about you; it only fetches
+        the fresh list. This host and the dictionary catalogue's below are the only two this
+        extension ever contacts, and only when you press to refresh a list or to download
+        something.</span
       >
     </p>
 
@@ -358,9 +344,8 @@
       <p id="file-status" class="status" role="status"></p>
 
       <p class="note footnote" data-i18n="options_files_note">
-        This page stays even once models download themselves: it is the way out on the day the place
-        they are downloaded from stops answering. Nothing here leaves the device, and adding a model
-        makes no network request at all.
+        Adding a model by hand makes no network request, and this page stays the way in on the day
+        the place models are downloaded from stops answering.
       </p>
     </details>
     </section>
@@ -477,20 +462,18 @@
            by the full pair - a deliberate rule (see `lookupEntries`), said out
            loud here because nothing else on this page says it. -->
       <p class="explain" data-i18n="options_add_dictionary_mono">
-        A monolingual dictionary works too - for English-English, say, pick English on both
-        sides. Its definitions then show in the bubble beside any bilingual dictionaries of the
-        language you read - under "More" while translating, straight away with translation
-        switched off: dictionaries are matched by the language of their headwords, not by the
-        pair.
+        A monolingual dictionary works too - for English-English, say, pick English on both sides.
+        Dictionaries are matched by the language of their headwords, not by the pair, so it answers
+        beside the bilingual ones: under "More" while translating, straight away with translation
+        off.
       </p>
 
       <p id="dictionary-file-status" class="status" role="status"></p>
 
       <p class="note footnote">
         <span data-i18n="options_dict_files_note"
-          >A StarDict file says nothing about which languages it is for, so here that part is yours
-          to say. Adding from files makes no network request at all, and the path stays for the day
-          the catalogue's host stops answering: files from anywhere work, the catalogue's own
+          >A StarDict file does not say which languages it is for, so that part is yours to fill in.
+          Adding from files makes no network request; files from anywhere work, the catalogue's own
           included - they are published at</span
         >
         <a href="https://download.wikdict.com/dictionaries/stardict/" target="_blank" rel="noopener"
@@ -502,9 +485,9 @@
     <h2 id="switched-off-sites" data-i18n="options_disabled_heading">Switched-off sites</h2>
 
     <p class="explain" data-i18n="options_disabled_intro">
-      Sites where re/read stays off - no underlines, no bubble, nothing running on the page
-      itself; opening a page in the reader by hand still works. The switch in the toolbar popup
-      is what adds a site here; this list is how one is turned back on without visiting it.
+      Sites where re/read stays off: no underlines, no bubble, nothing running on the page itself;
+      opening a page in the reader by hand still works. The switch in the toolbar popup is what
+      adds a site here; this list is how one comes back on.
     </p>
 
     <div id="disabled-hosts" class="models"></div>

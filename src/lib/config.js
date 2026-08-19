@@ -69,6 +69,10 @@ export const CONFIG_KEY = "config";
  *   with its action row folded away, unfolding on a click or tap on the bubble
  *   (D81). Save is the standing exception either way: a phrase that does not
  *   keep itself always shows the way to keep it, and an error its one way out.
+ *   Default `false` since D125: what the bubble is for - saving, hearing,
+ *   editing - should be visible to somebody meeting it for the first time,
+ *   and folding it away is the taste of a reader who already knows it is
+ *   there. The fold stays one press away in the popup.
  * @property {Record<string, string>} ttsVoices Which voice reads a language
  *   aloud (D83): source language to the `voiceURI` chosen for it. Per language
  *   rather than per pair - the voice picked for `en` serves every pair read in
@@ -172,7 +176,7 @@ export const DEFAULTS = Object.freeze({
   readerOnly: null,
   translationOff: false,
   keepArticles: true,
-  hideBubbleActions: true,
+  hideBubbleActions: false,
   ttsVoices: {},
   ttsRate: 100,
   bubbleScale: 100,
