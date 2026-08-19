@@ -303,9 +303,17 @@ html {
 /* The button says "the voice is busy" while it is - and the pen says it is
    in the hand: pressing either again stands it down, and a button that
    looked identical either way would hide that. The tabs' treatment - accent
-   border and a wash - is the page's word for "this is on". */
+   border and a wash - is the page's word for "this is on".
+
+   The two panels wear it too, for their open state (Michał's report,
+   2026-08-19): the row lights whichever tool is in hand, and a panel hanging
+   under an unlit button was the one place in the bar where that promise
+   broke. `aria-expanded` rather than `aria-pressed` because a disclosure is
+   what these two are - the state is the same to the eye. */
 #listen[aria-pressed="true"],
-#marker[aria-pressed="true"] {
+#marker[aria-pressed="true"],
+#display[aria-expanded="true"],
+#menu[aria-expanded="true"] {
   border-color: var(--page-accent);
   background: color-mix(in srgb, var(--page-accent) 12%, transparent);
 }

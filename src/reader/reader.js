@@ -976,6 +976,10 @@ function setMarker(on) {
       // the pen up stops a reading and takes its bar with it, the way the
       // voice starting puts the pen away (`showSpeechBar`).
       stopReading();
+      // The panels are the same rule's other half (D123): the bar lights one
+      // tool, so the pen picked up closes whatever hangs under Aa or the
+      // menu, and opening either puts the pen away (their click handlers).
+      closePanels();
       dismiss();
     }
   }
@@ -1605,10 +1609,10 @@ markBar?.addEventListener("click", (event) => {
 // A press away from the toolbar, while the pen is in the hand. Presses on
 // the article are not decided here - the tap they end resolves through
 // `onMarkTap`, which can tell a mark from a neighbour word from bare text;
-// presses on the chrome only stand the active mark down (a panel opened
-// mid-session is not the reader leaving); a press anywhere else - the
-// margins, the action rows - puts the pen down whole, the bare-text tap's
-// one-step rule.
+// presses on the chrome only stand the active mark down here, leaving what
+// they mean to the button pressed (the two panels put the pen away whole
+// when they open, D123); a press anywhere else - the margins, the action
+// rows - puts the pen down whole, the bare-text tap's one-step rule.
 document.addEventListener("pointerdown", (event) => {
   if (!markerOn) return;
   const target = event.target;
@@ -3626,14 +3630,26 @@ function setPanel(button, panel, open) {
   button.setAttribute("aria-expanded", String(open));
 }
 
+/**
+ * A panel opening is one more tool taken in hand (D123, Michał's report:
+ * pressing Aa with the pen out left both lit and both strips standing), so
+ * it puts the pen away with its toolbar - the rule D113 gave the pen and the
+ * voice, reaching the two disclosures. The voice is deliberately left alone:
+ * the Aa panel is where its voice and its speed are steered from, and a
+ * reading stopped by opening its own controls would be the panel undoing
+ * itself. The panels sit at the head and the speech bar at the foot, so
+ * unlike the pen's strip they never crowd each other.
+ */
 displayButton?.addEventListener("click", () => {
   const opening = displayPanel?.hidden === true;
+  if (opening) setMarker(false);
   setPanel(menuButton, menuPanel, false);
   setPanel(displayButton, displayPanel, opening);
 });
 
 menuButton?.addEventListener("click", () => {
   const opening = menuPanel?.hidden === true;
+  if (opening) setMarker(false);
   setPanel(displayButton, displayPanel, false);
   setPanel(menuButton, menuPanel, opening);
 });
