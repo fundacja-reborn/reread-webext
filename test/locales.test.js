@@ -118,6 +118,21 @@ describe("the locale catalogues", () => {
     }
   });
 
+  it("keep the description inside the Chrome Web Store's limit, in every language", () => {
+    // The manifest description is two things at once: the line under the name
+    // in about:addons, and the Chrome Web Store's "short description", which
+    // the dashboard caps at 132 characters. A catalogue that goes over is a
+    // listing that will not save - discovered in the store's own form, on the
+    // day the package is submitted, in whichever language happens to be long.
+    for (const [locale, catalogue] of catalogues) {
+      const description = catalogue["extension_description"]?.message ?? "";
+      assert.ok(
+        description.length <= 132,
+        `${locale}: the description is ${description.length} characters, over the store's 132`,
+      );
+    }
+  });
+
   it("agree with English about which keys exist", () => {
     const wanted = new Set(Object.keys(english).map(baseOf));
     for (const [locale, catalogue] of catalogues) {
