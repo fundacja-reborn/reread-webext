@@ -1,6 +1,6 @@
 # re/read
 
-A browser extension for reading in a language you are learning. Select a word or phrase to see its translation and save it; saved phrases are underlined on every page you visit, and one click marks a phrase as learned. Any page can be opened in the built-in reader and kept in the offline reading list; EPUB books can be imported and read the same way, translation bubble included. Everything is local: translation, dictionaries, vocabulary and the reading list live in the browser's local database on your device, work with no network, and nothing you read or select is ever sent anywhere.
+A browser extension for reading - especially for reading in a language you are learning. Select a word or phrase to see its translation and save it; saved phrases are underlined on every page you visit, and one click marks a phrase as learned. Any page can be opened in the built-in reader and kept in the offline reading list; EPUB books can be imported and read the same way, translation bubble included. Everything is local: translation, dictionaries, vocabulary and the reading list live in the browser's local database on your device, work with no network, and nothing you read or select is ever sent anywhere.
 
 Works in Firefox (desktop and Android) and in Chrome/Chromium.
 
