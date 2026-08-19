@@ -16,7 +16,7 @@ import { setProvider, translate } from "../lib/translator/index.js";
 import { asSchemeReport } from "../lib/translator/providers/bergamot/host-protocol.js";
 import { bergamot } from "../lib/translator/providers/bergamot/index.js";
 import { bergamotViaHost, raiseEngineHost } from "../lib/translator/providers/bergamot/remote.js";
-import { lookUp } from "./dictionary.js";
+import { lookUp } from "../lib/dict/lookup.js";
 import { readPage } from "./page.js";
 import { openLibrary, openMarks, openReader, readInReader } from "./reader-tab.js";
 import { openVocabulary } from "./vocab-tab.js";

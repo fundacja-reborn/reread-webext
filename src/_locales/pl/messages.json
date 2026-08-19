@@ -735,7 +735,7 @@
   },
   "options_no_translation": { "message": "Używaj bez tłumaczenia" },
   "options_no_translation_hint": {
-    "message": "Do czytania we własnym języku. Gdy to jest włączone, znikają: dymek tłumaczenia, zapisywanie i podkreślanie fraz, strona zapisanych fraz oraz sekcje modeli i słowników; zaznaczenie tekstu na zwykłej stronie proponuje jedno - otwarcie strony w widoku czytania. Widok czytania, czytelnia offline, zakreślacz, czytanie na głos i wyszukiwanie działają dalej. Nic nie jest kasowane: zapisane frazy, modele i słowniki zostają na tym urządzeniu i wracają, gdy tylko to wyłączysz."
+    "message": "Do czytania we własnym języku. Gdy to jest włączone, znikają: dymek tłumaczenia, zapisywanie i podkreślanie fraz, strona zapisanych fraz oraz sekcja modeli; zaznaczenie tekstu na zwykłej stronie proponuje jedno - otwarcie strony w widoku czytania. Widok czytania, czytelnia offline, zakreślacz, czytanie na głos i wyszukiwanie działają dalej - słowniki także: z zainstalowanym słownikiem czytanego języka (jednojęzyczny sprawdza się dobrze) zaznaczenie słowa w widoku czytania pokazuje jego definicje. Nic nie jest kasowane: zapisane frazy i modele zostają na tym urządzeniu i wracają, gdy tylko to wyłączysz."
   },
   "options_bubble_scale": { "message": "Rozmiar tekstu dymka" },
   "options_bubble_scale_hint": {
@@ -781,7 +781,7 @@
   },
   "options_dictionaries_heading": { "message": "Słowniki" },
   "options_dictionaries_intro": {
-    "message": "Pobierz słownik (lub słowniki), aby móc sprawdzać różne znaczenia zaznaczonego słowa (następnie będziesz mógł wybrać i zapisać znaczenia pasujące do kontekstu)."
+    "message": "Pobierz słownik (lub słowniki), aby móc sprawdzać różne znaczenia zaznaczonego słowa. Przy tłumaczeniu wybierasz i zapisujesz znaczenia pasujące do kontekstu; z wyłączonym tłumaczeniem definicje po prostu odpowiadają na zaznaczenie w widoku czytania."
   },
   "options_dictionary_note_from": { "message": "Słowniki pobierane są z" },
   "options_dictionary_note_rest": {
@@ -804,7 +804,7 @@
   "options_explained_in": { "message": "język objaśnień:" },
   "options_add_dictionary_button": { "message": "Dodaj słownik" },
   "options_add_dictionary_mono": {
-    "message": "Zadziała też słownik jednojęzyczny - na przykład angielsko-angielski: wybierz angielski po obu stronach. Jego definicje pokażą się wtedy w dymku pod „Więcej” obok słowników dwujęzycznych języka, który czytasz: słowniki dobierane są po języku haseł, nie po parze."
+    "message": "Zadziała też słownik jednojęzyczny - na przykład angielsko-angielski: wybierz angielski po obu stronach. Jego definicje pokażą się wtedy w dymku obok słowników dwujęzycznych języka, który czytasz - przy tłumaczeniu pod „Więcej”, z wyłączonym tłumaczeniem od razu: słowniki dobierane są po języku haseł, nie po parze."
   },
   "options_dict_files_note": {
     "message": "Plik StarDict nie mówi nic o tym, dla których języków jest, więc tutaj ta część należy do ciebie. Dodawanie z plików nie wykonuje żadnego zapytania sieciowego, a ta droga zostaje na dzień, w którym host katalogu przestanie odpowiadać: działają pliki skądkolwiek, w tym własne pliki katalogu - są opublikowane pod"

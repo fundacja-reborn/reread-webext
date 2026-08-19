@@ -563,6 +563,9 @@ export const STYLE = `
      here: the entry is still there to be read, it just cannot be chosen for as
      long as the gloss is being typed by hand. */
   .entry-sense:disabled { opacity: 1; cursor: default; }
+  /* The quiet bubble's lines are prose, not presses (D121) - the pointer must
+     not promise a choice that does not exist. */
+  .bubble[data-variant="quiet"] .entry-sense { cursor: default; }
 
   .editor {
     display: block;
@@ -1655,7 +1658,19 @@ export function createTooltip({ onAction, onHide }) {
         entry.append(label);
       }
 
+      // In the quiet bubble a line is prose, not a press (D121): choosing a
+      // line writes a meaning (D34), and with translation off nothing writes.
+      // A button that did nothing would read as a breakage, so it is not one.
+      const plain = bubble?.dataset["variant"] === "quiet";
       for (const line of block.lines) {
+        if (plain) {
+          const sense = document.createElement("div");
+          sense.className = "entry-sense";
+          // Text, never markup - the rule below, same reason.
+          sense.textContent = line;
+          entry.append(sense);
+          continue;
+        }
         const sense = document.createElement("button");
         sense.type = "button";
         sense.className = "entry-sense";
@@ -2055,8 +2070,10 @@ export function createTooltip({ onAction, onHide }) {
       // belonged to the last one. Set directly rather than through `unfold`,
       // which would render and place a bubble that has no body yet. The
       // sentence's own fold opens too (D96): clamping was a choice about the
-      // last sentence, not about this one.
-      unfolded = false;
+      // last sentence, not about this one. The quiet bubble is the standing
+      // exception (D121): it has no gloss and no More, so entries handed to
+      // it later are the answer itself and show the moment they land.
+      unfolded = variant === "quiet";
       contextFolded = false;
       if (contextElement !== null && contextTextElement !== null && contextToggle !== null) {
         contextTextElement.textContent = "";

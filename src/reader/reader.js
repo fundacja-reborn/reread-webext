@@ -40,6 +40,7 @@ import {
   readConfig,
   writeConfig,
 } from "../lib/config.js";
+import { lookUp } from "../lib/dict/lookup.js";
 import { describeError } from "../lib/messages.js";
 import { ErrorCode, Message, asPage, asPageRequest, asResult, ok } from "../lib/protocol.js";
 import { buildArticle } from "../lib/reader/article.js";
@@ -4383,6 +4384,18 @@ function rootReadingSide(ground) {
     // is drawn (Michał's report).
     onMarkStart: () => deselectMark(),
     onMarkTap,
+    // The no-translation trim's two hands (D121): the dictionaries and the
+    // voice of the document on screen, both by the rule the voice panel
+    // already lives by (`speechLang`) - the document's own declaration first,
+    // the pair's source as the stand-in. Only over a document: the quote rows
+    // of the highlights page show many documents at once, and a lookup in a
+    // guessed language would find real entries for words nobody asked about.
+    quietLookup: (text) =>
+      shown === null ? Promise.resolve([]) : lookUp(text, primaryLanguage(speechLang())),
+    quietVoice: () =>
+      shown === null
+        ? null
+        : { lang: speechLang(), voiceURI: settings.ttsVoices[primaryLanguage(speechLang())] },
   });
 }
 
