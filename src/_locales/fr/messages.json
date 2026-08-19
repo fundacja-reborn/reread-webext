@@ -604,7 +604,7 @@
   },
   "options_no_translation": { "message": "Utiliser sans traduction" },
   "options_no_translation_hint": {
-    "message": "Pour lire dans votre propre langue. Quand c'est activé, la bulle de traduction, l'enregistrement et le soulignement des phrases, la page des phrases enregistrées ainsi que les sections des modèles et des dictionnaires disparaissent ; sélectionner du texte sur une page ordinaire ne propose qu'une chose - ouvrir la page dans le lecteur. Le lecteur, la liste de lecture hors ligne, le surligneur, la lecture à voix haute et la recherche continuent de fonctionner. Rien n'est supprimé : vos phrases enregistrées, vos modèles et vos dictionnaires restent sur cet appareil et reviennent dès que vous désactivez ceci."
+    "message": "Pour lire dans votre propre langue. Quand c'est activé, la bulle de traduction, l'enregistrement et le soulignement des phrases, la page des phrases enregistrées ainsi que la section des modèles disparaissent ; sélectionner du texte sur une page ordinaire ne propose qu'une chose - ouvrir la page dans le lecteur. Le lecteur, la liste de lecture hors ligne, le surligneur, la lecture à voix haute et la recherche continuent de fonctionner - et les dictionnaires aussi : avec un dictionnaire installé pour la langue que vous lisez (un monolingue convient bien), sélectionner un mot dans le lecteur affiche ses définitions. Rien n'est supprimé : vos phrases enregistrées et vos modèles restent sur cet appareil et reviennent dès que vous désactivez ceci."
   },
   "options_bubble_scale": { "message": "Taille du texte de la bulle" },
   "options_bubble_scale_hint": {

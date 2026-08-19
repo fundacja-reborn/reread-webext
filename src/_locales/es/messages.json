@@ -604,7 +604,7 @@
   },
   "options_no_translation": { "message": "Usar sin traducción" },
   "options_no_translation_hint": {
-    "message": "Para leer en tu propio idioma. Con esto activado desaparecen la burbuja de traducción, el guardado y el subrayado de frases, la página de frases guardadas y las secciones de modelos y diccionarios; seleccionar texto en una página normal ofrece una sola cosa - abrir la página en la vista de lectura. La vista de lectura, la lista de lectura sin conexión, el resaltador, la lectura en voz alta y la búsqueda siguen funcionando. No se borra nada: tus frases guardadas, modelos y diccionarios permanecen en este dispositivo y vuelven en cuanto lo desactives."
+    "message": "Para leer en tu propio idioma. Con esto activado desaparecen la burbuja de traducción, el guardado y el subrayado de frases, la página de frases guardadas y la sección de modelos; seleccionar texto en una página normal ofrece una sola cosa - abrir la página en la vista de lectura. La vista de lectura, la lista de lectura sin conexión, el resaltador, la lectura en voz alta y la búsqueda siguen funcionando - y los diccionarios también: con uno instalado para el idioma que lees (uno monolingüe funciona bien), seleccionar una palabra en la vista de lectura muestra sus definiciones. No se borra nada: tus frases guardadas y modelos permanecen en este dispositivo y vuelven en cuanto lo desactives."
   },
   "options_bubble_scale": { "message": "Tamaño del texto de la burbuja" },
   "options_bubble_scale_hint": {

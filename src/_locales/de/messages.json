@@ -581,7 +581,7 @@
   },
   "options_no_translation": { "message": "Ohne Übersetzung verwenden" },
   "options_no_translation_hint": {
-    "message": "Zum Lesen in der eigenen Sprache. Ist dies an, verschwinden die Sprechblase, das Speichern und Unterstreichen von Wendungen, die Wortschatz-Seite sowie die Abschnitte für Modelle und Wörterbücher; das Auswählen von Text auf einer gewöhnlichen Seite bietet genau eines an - die Seite in der Leseansicht zu öffnen. Leseansicht, Offline-Leseliste, Textmarker, Vorlesen und Suche funktionieren weiter. Nichts wird gelöscht: Ihr gespeicherter Wortschatz, Ihre Modelle und Wörterbücher bleiben auf diesem Gerät und kehren zurück, sobald Sie dies wieder ausschalten."
+    "message": "Zum Lesen in der eigenen Sprache. Ist dies an, verschwinden die Sprechblase, das Speichern und Unterstreichen von Wendungen, die Wortschatz-Seite sowie der Modell-Abschnitt; das Auswählen von Text auf einer gewöhnlichen Seite bietet genau eines an - die Seite in der Leseansicht zu öffnen. Leseansicht, Offline-Leseliste, Textmarker, Vorlesen und Suche funktionieren weiter - und die Wörterbücher auch: Ist eines für die gelesene Sprache installiert (ein einsprachiges eignet sich gut), zeigt das Auswählen eines Wortes in der Leseansicht seine Definitionen. Nichts wird gelöscht: Ihr gespeicherter Wortschatz und Ihre Modelle bleiben auf diesem Gerät und kehren zurück, sobald Sie dies wieder ausschalten."
   },
   "options_bubble_scale": { "message": "Textgröße der Sprechblase" },
   "options_bubble_scale_hint": {

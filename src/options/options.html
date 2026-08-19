@@ -72,7 +72,7 @@
          sticky on purpose: pinned elements smear on e-ink at every scroll. -->
     <nav class="jump" aria-label="Sections of this page" data-i18n-aria-label="options_sections_aria">
       <a class="translation-only" href="#translation-models" data-i18n="options_models_heading">Translation models</a>
-      <a class="translation-only" href="#dictionaries" data-i18n="options_dictionaries_heading">Dictionaries</a>
+      <a href="#dictionaries" data-i18n="options_dictionaries_heading">Dictionaries</a>
       <a href="#switched-off-sites" data-i18n="options_disabled_heading">Switched-off sites</a>
       <a href="#support" data-i18n="support">Support</a>
     </nav>
@@ -126,11 +126,13 @@
         </label>
         <p class="row-note" data-i18n="options_no_translation_hint">
           For reading in your own language. With this on, the translation bubble, phrase saving
-          and underlining, the saved phrases page and the model and dictionary sections are
-          hidden; selecting text on an ordinary page offers one thing - open the page in the
-          reader. The reader, the offline reading list, the highlighter, reading aloud and
-          search keep working. Nothing is deleted: your saved phrases, models and dictionaries
-          stay on this device and come back the moment you switch this off.
+          and underlining, the saved phrases page and the model section are hidden; selecting
+          text on an ordinary page offers one thing - open the page in the reader. The reader,
+          the offline reading list, the highlighter, reading aloud and search keep working - and
+          so do dictionaries: with one installed for the language you read (a monolingual one
+          works well), selecting a word in the reader shows its definitions. Nothing is deleted:
+          your saved phrases and models stay on this device and come back the moment you switch
+          this off.
         </p>
       </div>
       <!-- The pair select offers only the pairs whose model is on this device:
@@ -347,8 +349,9 @@
     </details>
     </section>
 
-    <!-- The dictionaries' twin of the wrapper above (D120). -->
-    <section class="translation-only">
+    <!-- No wrapper here on purpose (D121): dictionaries serve reading without
+         translation too - a monolingual one answers selections in the reader -
+         so this section stands in both modes, unlike the models above. -->
     <h2 id="dictionaries" data-i18n="options_dictionaries_heading">Dictionaries</h2>
 
     <p class="explain" data-i18n="options_dictionaries_intro">
@@ -469,7 +472,6 @@
         >.
       </p>
     </details>
-    </section>
 
     <h2 id="switched-off-sites" data-i18n="options_disabled_heading">Switched-off sites</h2>
 

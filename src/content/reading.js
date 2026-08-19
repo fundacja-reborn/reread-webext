@@ -184,9 +184,26 @@ let hideActions = DEFAULTS.hideBubbleActions;
  * page it keeps running - the gesture is also the highlighter's, and the
  * article refuses the native selection - but with the translation half gone:
  * no vocabulary, no underlines, no engine, and a bubble trimmed to the
- * phrase's own two acts, hearing it and copying it.
+ * phrase's own two acts, hearing it and copying it - plus, since D121,
+ * whatever the installed dictionaries have to say.
  */
 let noTranslation = DEFAULTS.translationOff;
+
+/**
+ * The reader page's two hands into the quiet bubble (D121), null everywhere
+ * else: a dictionary lookup in the language of the document on screen, and
+ * the voice that language should be spoken with. Only the reader can offer
+ * them - the dictionaries' database is the extension's own, out of a content
+ * script's reach, and only the reader knows what language it is showing.
+ * Both are consulted solely in the no-translation trim; the translating
+ * bubble keeps its pair-bound language (D83) and its background ride (D31).
+ *
+ * @type {((text: string) => Promise<import("../lib/protocol.js").DictEntry[]>) | null}
+ */
+let quietLookup = null;
+
+/** @type {(() => { lang: string, voiceURI: string | undefined } | null) | null} */
+let quietVoice = null;
 
 /**
  * The bubble-size knob (D85), mirrored the same way: every show hands the
@@ -475,9 +492,15 @@ async function onAction(action, meanings) {
   if (action === "speak") {
     // Start or stop, decided by what is playing: hearing the phrase writes
     // nothing, so no keepable gate - and what is spoken is the page's own
-    // text, never the gloss (D83).
+    // text, never the gloss (D83). In the no-translation trim the reader
+    // hands down the document's own language and its voice (D121) - there is
+    // no pair being read, so the pair may not choose the voice; everywhere
+    // else the pair-bound language stands.
     if (speaking()) stopSpeaking();
-    else if (current !== null) speak(current.text, ttsLang, ttsVoiceURI, ttsRate / 100);
+    else if (current !== null) {
+      const voice = (noTranslation ? quietVoice?.() : null) ?? { lang: ttsLang, voiceURI: ttsVoiceURI };
+      speak(current.text, voice.lang, voice.voiceURI, ttsRate / 100);
+    }
     return;
   }
   if (action === "learned") {
@@ -844,7 +867,7 @@ function present(selection, { deliberate, touch, chain = false }) {
     secondLayer = [];
     unfetched = null;
     anchorRange = selection.range.cloneRange();
-    generation += 1;
+    const mine = ++generation;
     tooltip.show({
       anchor: selection.rect,
       line: firstLineOf(selection.range),
@@ -857,6 +880,18 @@ function present(selection, { deliberate, touch, chain = false }) {
       scale: bubbleScale / 100,
       anchored,
     });
+    // The dictionaries still answer without the engine (D121): the reader
+    // hands the lookup down, in the language of the document on screen. The
+    // entries land in the bubble the moment they arrive - the quiet variant
+    // keeps no fold, because with no gloss the definitions are not an extra
+    // behind the answer, they are the answer. An empty result changes
+    // nothing: the bubble already stands on its two buttons.
+    if (quietLookup !== null) {
+      void quietLookup(text).then((entries) => {
+        if (mine !== generation || !tooltip.isOpen()) return;
+        if (entries.length > 0) tooltip.setEntries(entryBlocks(entries, normalized));
+      });
+    }
     return;
   }
 
@@ -1161,7 +1196,7 @@ function onStorageChanged(changes, area) {
 }
 
 /**
- * @param {{ root?: Element | null, observe?: boolean, stored?: Record<string, unknown>, ownSelection?: boolean, anchored?: boolean, plainLinks?: () => boolean, alsoOwns?: (target: EventTarget | null) => boolean, marking?: () => boolean, markRoot?: () => Element | null, onMarked?: (range: Range) => void, onMarkStart?: () => void, onMarkTap?: (x: number, y: number, word?: Range) => void }} [where]
+ * @param {{ root?: Element | null, observe?: boolean, stored?: Record<string, unknown>, ownSelection?: boolean, anchored?: boolean, plainLinks?: () => boolean, alsoOwns?: (target: EventTarget | null) => boolean, marking?: () => boolean, markRoot?: () => Element | null, onMarked?: (range: Range) => void, onMarkStart?: () => void, onMarkTap?: (x: number, y: number, word?: Range) => void, quietLookup?: (text: string) => Promise<import("../lib/protocol.js").DictEntry[]>, quietVoice?: () => { lang: string, voiceURI: string | undefined } | null }} [where]
  *   what to underline inside, whether it can change on its own, the startup
  *   read of `storage.local` when the caller already made one, whether the
  *   page selects through our own gesture rather than the browser's - every
@@ -1175,13 +1210,19 @@ function onStorageChanged(changes, area) {
  *   undressing links changes how a page works too. The last four belong to
  *   the reader's highlighter (D106) and ride through to `select.js` -
  *   `alsoOwns` besides names the reader's own floating UI (the mark-delete
- *   bubble), whose presses must not read as the page's.
+ *   bubble), whose presses must not read as the page's. `quietLookup` and
+ *   `quietVoice` are the reader's hands into the no-translation trim (D121):
+ *   the dictionaries and the voice of the document on screen - reader flags
+ *   too, because only an extension page has the database in reach and only
+ *   the reader knows what language it is showing.
  */
 export function start(where = {}) {
   root = where.root ?? null;
   follow = where.observe ?? true;
   anchored = where.anchored ?? false;
   alsoOwns = where.alsoOwns ?? (() => false);
+  quietLookup = where.quietLookup ?? null;
+  quietVoice = where.quietVoice ?? null;
   // The page that took the native selection away answers the copy chord
   // itself (D110) - and only that page.
   bridgeCopy = where.ownSelection === true;
@@ -1266,6 +1307,8 @@ export function stop() {
   lastPointerType = "";
   anchored = false;
   alsoOwns = () => false;
+  quietLookup = null;
+  quietVoice = null;
   bridgeCopy = false;
   vocabulary = new Map();
   clear();

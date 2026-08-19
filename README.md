@@ -40,7 +40,7 @@ Works in Firefox (desktop and Android) and in Chrome/Chromium.
 
 ## Reading without translation
 
-re/read is also a plain reader. If you read in your own language and want just the clean reading view, the offline reading list, the highlighter, read-aloud and search, one switch in the settings - **Use without translation** - turns the translation half off: no bubble on selection, no underlines, no model or dictionary sections. Selecting text on an ordinary page then offers one thing, opening the page in the reader. Nothing is deleted: saved phrases, models and dictionaries stay on the device and come back the moment the switch does.
+re/read is also a plain reader. If you read in your own language and want just the clean reading view, the offline reading list, the highlighter, read-aloud and search, one switch in the settings - **Use without translation** - turns the translation half off: no translation bubble, no underlines, no model section. Dictionaries stay: install one for the language you read - a monolingual dictionary works - and selecting a word in the reader shows its definitions, spoken aloud on request in that language's voice. Selecting text on an ordinary page offers one thing, opening the page in the reader. Nothing is deleted: saved phrases and models stay on the device and come back the moment the switch does.
 
 ## Install
 

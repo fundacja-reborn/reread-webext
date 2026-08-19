@@ -721,7 +721,7 @@
   },
   "options_no_translation": { "message": "Use without translation" },
   "options_no_translation_hint": {
-    "message": "For reading in your own language. With this on, the translation bubble, phrase saving and underlining, the saved phrases page and the model and dictionary sections are hidden; selecting text on an ordinary page offers one thing - open the page in the reader. The reader, the offline reading list, the highlighter, reading aloud and search keep working. Nothing is deleted: your saved phrases, models and dictionaries stay on this device and come back the moment you switch this off."
+    "message": "For reading in your own language. With this on, the translation bubble, phrase saving and underlining, the saved phrases page and the model section are hidden; selecting text on an ordinary page offers one thing - open the page in the reader. The reader, the offline reading list, the highlighter, reading aloud and search keep working - and so do dictionaries: with one installed for the language you read (a monolingual one works well), selecting a word in the reader shows its definitions. Nothing is deleted: your saved phrases and models stay on this device and come back the moment you switch this off."
   },
   "options_bubble_scale": { "message": "Bubble text size" },
   "options_bubble_scale_hint": {
