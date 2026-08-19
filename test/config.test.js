@@ -304,11 +304,13 @@ describe("pageMode", () => {
 });
 
 describe("the quiet bubble", () => {
-  it("hides the actions by default, on profiles old and new", () => {
-    // The switch shipped after 0.2.6, so a stored config without the key is
-    // every existing profile - and the redesigned default has to reach them.
-    assert.equal(withDefaults(undefined).hideBubbleActions, true);
-    assert.equal(withDefaults({ sourceLang: "en" }).hideBubbleActions, true);
+  it("shows the actions by default, on profiles old and new", () => {
+    // Default `false` since D125: the buttons are what the bubble is for, and
+    // somebody meeting it for the first time has to see them. A config without
+    // the key is every profile that never touched the switch, this one
+    // included - the changed default reaches all of them.
+    assert.equal(withDefaults(undefined).hideBubbleActions, false);
+    assert.equal(withDefaults({ sourceLang: "en" }).hideBubbleActions, false);
   });
 
   it("keeps a choice somebody made, in both directions", () => {
@@ -317,8 +319,8 @@ describe("the quiet bubble", () => {
   });
 
   it("treats a hand-edited value of the wrong type as the default", () => {
-    for (const hideBubbleActions of ["false", 0, null, {}]) {
-      assert.equal(withDefaults({ hideBubbleActions }).hideBubbleActions, true);
+    for (const hideBubbleActions of ["true", 1, null, {}]) {
+      assert.equal(withDefaults({ hideBubbleActions }).hideBubbleActions, false);
     }
   });
 

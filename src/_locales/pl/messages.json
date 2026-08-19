@@ -716,10 +716,10 @@
     "message": "W sekcji „Słowniki” pobierz słownik dla tej samej pary (to opcjonalne, ale warto) - pojedyncze słowa dostają wtedy pełniejsze odpowiedzi niż samo tłumaczenie (po kliknięciu na „Więcej” w dymku tłumaczenia)."
   },
   "options_first_steps_pin": {
-    "message": "Na koniec przypnij re/read do paska narzędzi: kliknij ikonę puzzla po prawej stronie paska, a przy re/read wybierz koło zębate i „Przypnij do paska narzędzi”. Przycisk re/read daje szybki dostęp do widoku czytania, czytelni offline, zakreśleń, zapisanych fraz, zmiany pary językowej i wyłącznika witryny, na której jesteś."
+    "message": "Na koniec przypnij re/read do paska narzędzi: ikona puzzla po prawej stronie paska, potem koło zębate przy re/read i „Przypnij do paska narzędzi”. Przycisk otwiera widok czytania, czytelnię, zapisane frazy i wyłącznik witryny, na której jesteś."
   },
   "options_first_steps_pin_android": {
-    "message": "Przycisk re/read znajdziesz w menu przeglądarki (⋮), w sekcji rozszerzeń - daje szybki dostęp do widoku czytania, czytelni offline, zapisanych fraz, zmiany pary językowej i wyłącznika witryny, na której jesteś."
+    "message": "Przycisk re/read znajdziesz w menu przeglądarki (⋮), w sekcji rozszerzeń - otwiera widok czytania, czytelnię, zapisane frazy i wyłącznik witryny, na której jesteś."
   },
   "options_sections_aria": { "message": "Sekcje tej strony" },
   "options_engine": { "message": "Silnik" },
@@ -728,33 +728,30 @@
   "options_pair_none": { "message": "Nie ma jeszcze modelu - najpierw pobierz go poniżej" },
   "options_reader_only": { "message": "Tylko w widoku czytania" },
   "options_reader_only_hint": {
-    "message": "Gdy to jest włączone, zaznaczenie frazy lub słowa na zwykłej stronie proponuje jedno: otwarcie jej w widoku czytania. Tłumaczenie, zapisywanie i podkreślanie dzieją się tam (przejrzyściej i czytelniej). Na Androidzie opcja jest domyślnie włączona."
+    "message": "Gdy to jest włączone, zaznaczenie tekstu na zwykłej stronie proponuje jedno: otwarcie jej w widoku czytania, gdzie dzieje się tłumaczenie, zapisywanie i podkreślanie. Na Androidzie opcja jest domyślnie włączona."
   },
   "options_keep_articles": { "message": "Zapisuj domyślnie w czytelni offline" },
   "options_keep_articles_hint": {
-    "message": "Gdy to jest włączone, strona otwarta w widoku czytania od razu trafia do czytelni offline - bez naciskania czegokolwiek - więc daje się czytać bez sieci i wtedy, gdy oryginał się przeprowadzi albo zniknie. Strona już zapisana nigdy nie jest nadpisywana: zakreślenia i miejsce, w którym przerwałeś czytanie, zostają nietknięte. Przycisk nad artykułem mówi wtedy „W czytelni”, a jedno naciśnięcie wyjmuje z niej stronę."
+    "message": "Gdy to jest włączone, strona otwarta w widoku czytania od razu trafia do czytelni offline, będziesz mógł ją czytać również bez sieci, także wtedy gdy oryginalna strona zostanie np. skasowana. Ponowne otwarcie tej samej strony nie nadpisuje jej - zakreślenia i miejsce, w którym przerwałeś czytanie, zostają nietknięte."
   },
   "options_quiet_bubble_hint": {
-    "message": "Gdy to jest włączone, dymek tłumaczenia pokazuje samo tłumaczenie, a przyciski wysuwają się po kliknięciu lub tapnięciu w dymek. Wyjątkiem - niezależnie od ustawienia - jest Zapisz: fraza za długa, by zapisać się sama, zawsze pokazuje przycisk zapisu."
+    "message": "Gdy to jest włączone, dymek pokazuje samo tłumaczenie, a przyciski wysuwają się po kliknięciu lub tapnięciu w dymek."
   },
   "options_no_translation": { "message": "Używaj bez tłumaczenia" },
   "options_no_translation_hint": {
-    "message": "Do czytania we własnym języku. Gdy to jest włączone, znikają: dymek tłumaczenia, zapisywanie i podkreślanie fraz, strona zapisanych fraz oraz sekcja modeli; zaznaczenie tekstu na zwykłej stronie proponuje jedno - otwarcie strony w widoku czytania. Widok czytania, czytelnia offline, zakreślacz, czytanie na głos i wyszukiwanie działają dalej - słowniki także: z zainstalowanym słownikiem czytanego języka (jednojęzyczny sprawdza się dobrze) zaznaczenie słowa w widoku czytania pokazuje jego definicje. Nic nie jest kasowane: zapisane frazy i modele zostają na tym urządzeniu i wracają, gdy tylko to wyłączysz."
+    "message": "Do czytania we własnym języku. Gdy to jest włączone, znikają: dymek tłumaczenia, zapisywanie i podkreślanie fraz, strona zapisanych fraz oraz sekcja modeli; zaznaczenie tekstu na zwykłej stronie proponuje jedno - otwarcie strony w widoku czytania. Widok czytania, czytelnia offline, zakreślacz, czytanie na głos, wyszukiwanie i słowniki działają dalej. Nic nie jest kasowane: frazy i modele wracają, gdy tylko to wyłączysz."
   },
   "options_bubble_scale": { "message": "Rozmiar tekstu dymka" },
   "options_bubble_scale_hint": {
-    "message": "Wielkość dymka tłumaczenia - jego tekstu i przycisków - na zwykłych stronach i w widoku czytania. Dymek sam ustala swój rozmiar i nie słucha ustawień czcionki strony, więc to jedyne miejsce, gdzie można go zmienić: podnieś wartość, jeśli na tym ekranie jest za mały."
+    "message": "Wielkość dymka tłumaczenia - jego tekstu i przycisków - na zwykłych stronach i w widoku czytania."
   },
   "options_tts_voice": { "message": "Głos lektora" },
   "options_tts_default": { "message": "Domyślny głos przeglądarki" },
   "options_tts_listen": { "message": "Posłuchaj" },
   "options_tts_voice_hint": {
-    "message": "Przycisk z głośnikiem w dymku tłumaczenia czyta zaznaczoną frazę na głos w języku, który czytasz - tak można usłyszeć wymowę słowa. Głosy pochodzą z tego urządzenia i jego przeglądarki: mowa powstaje lokalnie, a fraza nie jest nigdzie wysyłana. Bez wyboru przeglądarka sama dobiera głos do języka."
+    "message": "Głos czyta zaznaczoną frazę w dymku i cały artykuł w widoku czytania. Głosy pochodzą z tego urządzenia: mowa powstaje lokalnie i nic nie jest nigdzie wysyłane."
   },
   "options_tts_rate": { "message": "Tempo czytania" },
-  "options_tts_rate_hint": {
-    "message": "Wielokrotność normalnego tempa głosu. W języku, którego się uczysz, warto najpierw spróbować wolniej: przy połowie tempa końcówki słów przestają znikać."
-  },
   "options_models_heading": { "message": "Modele tłumaczeniowe" },
   "options_models_intro": {
     "message": "Poniższe modele przygotowuje i udostępnia Mozilla - to te same modele, którymi Firefox sam tłumaczy strony. Aby rozszerzenie re/read mogło działać - pobierz model dla par języków, które chcesz tłumaczyć (np. en -> pl)."
@@ -770,7 +767,7 @@
   },
   "options_model_note_from": { "message": "Modele pobierane są z" },
   "options_model_note_rest": {
-    "message": "- to tam publikuje je Mozilla. Gdy aktualizujesz listę, nic o tobie nie jest wysyłane - zapytanie pobiera jedynie świeżą listę modeli. Ten host i host katalogu słowników poniżej to jedyne dwa miejsca, z którymi to rozszerzenie kiedykolwiek może się łączyć - ale tylko gdy świadomie klikniesz odświeżenie listy, pobranie modelu lub słownika."
+    "message": "- to tam publikuje je Mozilla. Aktualizacja listy nie wysyła nic o tobie; pobiera jedynie świeżą listę. Ten host i host katalogu słowników poniżej to jedyne dwa miejsca, z którymi to rozszerzenie się łączy - i tylko wtedy, gdy naciśniesz odświeżenie listy albo pobranie."
   },
   "options_add_model_heading": { "message": "Dodaj model z plików" },
   "options_add_model_summary": {
@@ -781,7 +778,7 @@
   },
   "options_add_model_button": { "message": "Dodaj model" },
   "options_files_note": {
-    "message": "Ta strona zostaje nawet wtedy, gdy modele pobierają się same: jest wyjściem awaryjnym na dzień, w którym miejsce ich pobierania przestanie odpowiadać. Nic stąd nie opuszcza urządzenia, a dodanie modelu nie wykonuje żadnego zapytania sieciowego."
+    "message": "Dodanie modelu z plików nie wykonuje żadnego zapytania sieciowego, a ta strona zostaje wyjściem awaryjnym na dzień, w którym miejsce pobierania modeli przestanie odpowiadać."
   },
   "options_dictionaries_heading": { "message": "Słowniki" },
   "options_dictionaries_intro": {
@@ -811,14 +808,14 @@
   "options_explained_in": { "message": "język objaśnień:" },
   "options_add_dictionary_button": { "message": "Dodaj słownik" },
   "options_add_dictionary_mono": {
-    "message": "Zadziała też słownik jednojęzyczny - na przykład angielsko-angielski: wybierz angielski po obu stronach. Jego definicje pokażą się wtedy w dymku obok słowników dwujęzycznych języka, który czytasz - przy tłumaczeniu pod „Więcej”, z wyłączonym tłumaczeniem od razu: słowniki dobierane są po języku haseł, nie po parze."
+    "message": "Zadziała też słownik jednojęzyczny - na przykład angielsko-angielski: wybierz angielski po obu stronach. Słowniki dobierane są po języku haseł, nie po parze, więc odpowie obok dwujęzycznych: przy tłumaczeniu pod „Więcej”, z wyłączonym tłumaczeniem od razu."
   },
   "options_dict_files_note": {
-    "message": "Plik StarDict nie mówi nic o tym, dla których języków jest, więc tutaj ta część należy do ciebie. Dodawanie z plików nie wykonuje żadnego zapytania sieciowego, a ta droga zostaje na dzień, w którym host katalogu przestanie odpowiadać: działają pliki skądkolwiek, w tym własne pliki katalogu - są opublikowane pod"
+    "message": "Plik StarDict nie mówi nic o tym, dla których języków jest, więc tę część wpisujesz sam. Dodawanie z plików nie wykonuje żadnego zapytania sieciowego; działają pliki skądkolwiek, w tym własne pliki katalogu - są opublikowane pod"
   },
   "options_disabled_heading": { "message": "Wyłączone witryny" },
   "options_disabled_intro": {
-    "message": "Witryny, na których re/read pozostaje wyłączony - bez podkreśleń, bez dymka, bez niczego na samej stronie; ręczne otwarcie strony w widoku czytania nadal działa. Witrynę dodaje tu przełącznik w dymku paska narzędzi; ta lista pozwala ją włączyć z powrotem bez odwiedzania jej."
+    "message": "Witryny, na których re/read pozostaje wyłączony: bez podkreśleń, bez dymka, bez niczego na samej stronie; ręczne otwarcie strony w widoku czytania nadal działa. Witrynę dodaje tu przełącznik w dymku paska narzędzi; ta lista pozwala ją włączyć z powrotem."
   },
   "options_support_intro": {
     "message": "re/read tworzy fundacja non-profit - bez inwestorów, bez reklam, bez śledzenia. Jeśli rozszerzenie jest ci przydatne i chcesz wesprzeć jego dalszy rozwój, każda darowizna pomaga nam budować oprogramowanie wolne od komercyjnej presji."

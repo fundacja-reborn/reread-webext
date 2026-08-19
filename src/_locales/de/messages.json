@@ -562,10 +562,10 @@
     "message": "Laden Sie unter „Wörterbücher“ ein Wörterbuch für dasselbe Paar herunter (optional, aber lohnend) - einzelne Wörter bekommen dann vollständigere Antworten als eine Übersetzung allein (nach einem Druck auf „Mehr“ in der Übersetzungsblase)."
   },
   "options_first_steps_pin": {
-    "message": "Heften Sie re/read zuletzt an die Symbolleiste: Klicken Sie auf das Puzzleteil-Symbol rechts in der Leiste und wählen Sie neben re/read das Zahnrad und „An Symbolleiste anheften“. Der re/read-Knopf gibt schnellen Zugriff auf die Leseansicht, die Offline-Leseliste, Ihre Markierungen, Ihren gespeicherten Wortschatz, den Wechsel des Sprachpaars und den Schalter für die Website, auf der Sie sind."
+    "message": "Heften Sie re/read zuletzt an die Symbolleiste: das Puzzleteil-Symbol rechts in der Leiste, dann neben re/read das Zahnrad und „An Symbolleiste anheften“. Der Knopf öffnet die Leseansicht, die Leseliste, den gespeicherten Wortschatz und den Schalter für die Website, auf der Sie sind."
   },
   "options_first_steps_pin_android": {
-    "message": "Den re/read-Knopf finden Sie im Browsermenü (⋮) im Bereich der Erweiterungen - er gibt schnellen Zugriff auf die Leseansicht, die Offline-Leseliste, Ihren gespeicherten Wortschatz, den Wechsel des Sprachpaars und den Schalter für die Website, auf der Sie sind."
+    "message": "Den re/read-Knopf finden Sie im Browsermenü (⋮) im Bereich der Erweiterungen - er öffnet die Leseansicht, die Leseliste, den gespeicherten Wortschatz und den Schalter für die Website, auf der Sie sind."
   },
   "options_sections_aria": { "message": "Abschnitte dieser Seite" },
   "options_engine": { "message": "Engine" },
@@ -574,33 +574,30 @@
   "options_pair_none": { "message": "Noch kein Modell - laden Sie unten eines herunter" },
   "options_reader_only": { "message": "Nur in der Leseansicht" },
   "options_reader_only_hint": {
-    "message": "Ist dies an, bietet das Auswählen einer Wendung oder eines Wortes auf einer gewöhnlichen Seite genau eines an: die Seite in der Leseansicht zu öffnen. Übersetzen, Speichern und Unterstreichen geschehen dort (übersichtlicher und besser lesbar). Auf Android ist die Option standardmäßig eingeschaltet."
+    "message": "Ist dies an, bietet das Auswählen von Text auf einer gewöhnlichen Seite genau eines an: die Seite in der Leseansicht zu öffnen, wo Übersetzen, Speichern und Unterstreichen geschehen. Auf Android ist die Option standardmäßig eingeschaltet."
   },
   "options_keep_articles": { "message": "Standardmäßig in der Offline-Leseliste speichern" },
   "options_keep_articles_hint": {
-    "message": "Ist dies eingeschaltet, wird eine in der Leseansicht geöffnete Seite sofort in der Offline-Leseliste gespeichert - ganz ohne Klick - und bleibt so ohne Netz lesbar, auch wenn das Original umgezogen oder verschwunden ist. Eine Seite, die schon in der Liste steht, wird nie überschrieben: Markierungen und Lesestelle bleiben, wie sie waren. Die Schaltfläche über dem Artikel sagt dann „In der Leseliste“, und ein Druck nimmt die Seite wieder heraus."
+    "message": "Ist dies an, wandert eine in der Leseansicht geöffnete Seite sofort in die Offline-Leseliste - Sie können sie dann auch ohne Netz lesen, selbst wenn die ursprüngliche Seite gelöscht wird. Ein erneutes Öffnen derselben Seite überschreibt sie nie: Markierungen und die Stelle, an der Sie aufgehört haben, bleiben unberührt."
   },
   "options_quiet_bubble_hint": {
-    "message": "Ist dies an, zeigt die Sprechblase nur die Übersetzung; ihre Schaltflächen erscheinen nach einem Klick oder Tippen auf die Sprechblase. Speichern ist so oder so die Ausnahme: Eine Wendung, die zu lang ist, um sich selbst zu speichern, zeigt die Schaltfläche zum Speichern immer."
+    "message": "Ist dies an, zeigt die Sprechblase nur die Übersetzung; ihre Schaltflächen erscheinen nach einem Klick oder Tippen auf die Sprechblase."
   },
   "options_no_translation": { "message": "Ohne Übersetzung verwenden" },
   "options_no_translation_hint": {
-    "message": "Zum Lesen in der eigenen Sprache. Ist dies an, verschwinden die Sprechblase, das Speichern und Unterstreichen von Wendungen, die Wortschatz-Seite sowie der Modell-Abschnitt; das Auswählen von Text auf einer gewöhnlichen Seite bietet genau eines an - die Seite in der Leseansicht zu öffnen. Leseansicht, Offline-Leseliste, Textmarker, Vorlesen und Suche funktionieren weiter - und die Wörterbücher auch: Ist eines für die gelesene Sprache installiert (ein einsprachiges eignet sich gut), zeigt das Auswählen eines Wortes in der Leseansicht seine Definitionen. Nichts wird gelöscht: Ihr gespeicherter Wortschatz und Ihre Modelle bleiben auf diesem Gerät und kehren zurück, sobald Sie dies wieder ausschalten."
+    "message": "Zum Lesen in der eigenen Sprache. Ist dies an, verschwinden die Sprechblase, das Speichern und Unterstreichen von Wendungen, die Wortschatz-Seite und der Modell-Abschnitt; das Auswählen von Text auf einer gewöhnlichen Seite bietet genau eines an - die Seite in der Leseansicht zu öffnen. Leseansicht, Offline-Leseliste, Textmarker, Vorlesen, Suche und Wörterbücher funktionieren weiter. Nichts wird gelöscht: Wortschatz und Modelle kehren zurück, sobald Sie dies wieder ausschalten."
   },
   "options_bubble_scale": { "message": "Textgröße der Sprechblase" },
   "options_bubble_scale_hint": {
-    "message": "Die Größe der Übersetzungs-Sprechblase - ihres Textes und ihrer Schaltflächen - auf normalen Seiten wie in der Leseansicht. Die Sprechblase bestimmt ihre Größe selbst und folgt keinen Schrifteinstellungen der Seite; angepasst wird sie nur hier: Erhöhe den Wert, wenn sie auf diesem Bildschirm zu klein wirkt."
+    "message": "Die Größe der Übersetzungs-Sprechblase - ihres Textes und ihrer Schaltflächen - auf normalen Seiten wie in der Leseansicht."
   },
   "options_tts_voice": { "message": "Vorlesestimme" },
   "options_tts_default": { "message": "Standardstimme des Browsers" },
   "options_tts_listen": { "message": "Anhören" },
   "options_tts_voice_hint": {
-    "message": "Die Lautsprecher-Schaltfläche in der Sprechblase liest die markierte Wendung laut vor, in der Sprache, die gerade gelesen wird - so lässt sich die Aussprache eines Wortes hören. Die Stimmen sind die dieses Geräts und seines Browsers: Die Sprachausgabe entsteht lokal, und die Wendung wird nirgendwohin gesendet. Ohne Auswahl wählt der Browser selbst eine Stimme für die Sprache."
+    "message": "Die Stimme liest eine markierte Wendung in der Sprechblase und einen ganzen Artikel in der Leseansicht vor. Die Stimmen sind die dieses Geräts: Die Sprachausgabe entsteht lokal, und nichts wird irgendwohin gesendet."
   },
   "options_tts_rate": { "message": "Lesegeschwindigkeit" },
-  "options_tts_rate_hint": {
-    "message": "Ein Vielfaches der normalen Geschwindigkeit der Stimme. In einer Sprache, die du gerade lernst, lohnt sich zuerst langsamer: bei halbem Tempo hörst du die Wortendungen wieder."
-  },
   "options_models_heading": { "message": "Übersetzungsmodelle" },
   "options_models_intro": {
     "message": "Die Modelle unten baut und veröffentlicht Mozilla - dieselben Modelle, mit denen Firefox selbst Seiten übersetzt. Damit re/read arbeiten kann, laden Sie das Modell für die Sprachpaare herunter, die Sie übersetzen möchten (z. B. en -> pl)."
@@ -616,7 +613,7 @@
   },
   "options_model_note_from": { "message": "Modelle kommen von" },
   "options_model_note_rest": {
-    "message": "- dort veröffentlicht Mozilla sie. Wenn Sie die Liste aktualisieren, wird nichts über Sie gesendet - die Anfrage holt nur die frische Modellliste. Dieser Host und der des Wörterbuchkatalogs weiter unten sind die einzigen zwei Orte, mit denen sich diese Erweiterung überhaupt verbinden kann - und nur, wenn Sie bewusst das Aktualisieren einer Liste oder das Herunterladen eines Modells oder Wörterbuchs anklicken."
+    "message": "- dort veröffentlicht Mozilla sie. Das Aktualisieren der Liste sendet nichts über Sie; es holt nur die frische Liste. Dieser Host und der des Wörterbuchkatalogs weiter unten sind die einzigen zwei, mit denen sich diese Erweiterung überhaupt verbindet - und nur auf Ihren Druck hin."
   },
   "options_add_model_heading": { "message": "Modell aus Dateien hinzufügen" },
   "options_add_model_summary": {
@@ -627,7 +624,7 @@
   },
   "options_add_model_button": { "message": "Modell hinzufügen" },
   "options_files_note": {
-    "message": "Diese Seite bleibt, auch wenn Modelle sich selbst herunterladen: Sie ist der Ausweg für den Tag, an dem der Ort, von dem sie kommen, nicht mehr antwortet. Nichts hier verlässt das Gerät, und ein Modell hinzuzufügen stellt keinerlei Netzwerkanfrage."
+    "message": "Ein Modell aus Dateien hinzuzufügen stellt keinerlei Netzwerkanfrage, und diese Seite bleibt der Ausweg für den Tag, an dem der Ort, von dem Modelle kommen, nicht mehr antwortet."
   },
   "options_dictionaries_heading": { "message": "Wörterbücher" },
   "options_dictionaries_intro": {
@@ -657,14 +654,14 @@
   "options_explained_in": { "message": "erklärt auf" },
   "options_add_dictionary_button": { "message": "Wörterbuch hinzufügen" },
   "options_add_dictionary_mono": {
-    "message": "Auch ein einsprachiges Wörterbuch funktioniert - etwa Englisch-Englisch: Wählen Sie auf beiden Seiten Englisch. Seine Definitionen erscheinen dann in der Sprechblase neben den zweisprachigen Wörterbüchern der gelesenen Sprache - beim Übersetzen unter „Mehr“, bei ausgeschalteter Übersetzung sofort: Wörterbücher werden nach der Sprache ihrer Stichwörter zugeordnet, nicht nach dem Paar."
+    "message": "Auch ein einsprachiges Wörterbuch funktioniert - etwa Englisch-Englisch: Wählen Sie auf beiden Seiten Englisch. Wörterbücher werden nach der Sprache ihrer Stichwörter zugeordnet, nicht nach dem Paar, also antwortet es neben den zweisprachigen: beim Übersetzen unter „Mehr“, bei ausgeschalteter Übersetzung sofort."
   },
   "options_dict_files_note": {
-    "message": "Eine StarDict-Datei sagt nichts darüber, für welche Sprachen sie ist; dieser Teil gehört hier also Ihnen. Aus Dateien hinzuzufügen stellt keinerlei Netzwerkanfrage, und dieser Weg bleibt für den Tag, an dem der Host des Katalogs nicht mehr antwortet: Dateien von überall funktionieren, die eigenen des Katalogs eingeschlossen - sie stehen unter"
+    "message": "Eine StarDict-Datei sagt nichts darüber, für welche Sprachen sie ist; diesen Teil tragen Sie hier selbst ein. Aus Dateien hinzuzufügen stellt keinerlei Netzwerkanfrage; Dateien von überall funktionieren, die des Katalogs eingeschlossen - sie stehen unter"
   },
   "options_disabled_heading": { "message": "Abgeschaltete Websites" },
   "options_disabled_intro": {
-    "message": "Websites, auf denen re/read aus bleibt - keine Unterstreichungen, keine Blase, nichts läuft auf der Seite selbst; von Hand lässt sich eine Seite weiterhin in der Leseansicht öffnen. Der Schalter im Symbolleisten-Popup fügt eine Website hier hinzu; diese Liste ist der Weg, eine wieder einzuschalten, ohne sie zu besuchen."
+    "message": "Websites, auf denen re/read aus bleibt: keine Unterstreichungen, keine Blase, nichts läuft auf der Seite selbst; von Hand lässt sich eine Seite weiterhin in der Leseansicht öffnen. Der Schalter im Symbolleisten-Popup fügt eine Website hier hinzu; diese Liste schaltet sie wieder ein."
   },
   "options_support_intro": {
     "message": "re/read wird von einer gemeinnützigen Stiftung entwickelt - ohne Investoren, ohne Werbung, ohne Tracking. Wenn es Ihnen nützlich ist und Sie seine Weiterentwicklung unterstützen möchten: Jede Spende hilft uns, Software frei von kommerziellem Druck zu bauen."
