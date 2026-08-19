@@ -783,6 +783,9 @@
   "options_dictionaries_intro": {
     "message": "Завантажте словник (або кілька), щоб могти перевіряти різні значення виділеного слова. Під час перекладу ви обираєте й зберігаєте значення, що пасують до контексту; з вимкненим перекладом пояснення просто відповідають на виділення в режимі читання."
   },
+  "options_dictionary_order_hint": {
+    "message": "Бульбашка відповідає в порядку, поданому нижче - стрілки переміщують словник вгору або вниз. Відповідають лише словники мови, яку ви читаєте."
+  },
   "options_dictionary_note_from": { "message": "Словники завантажуються з" },
   "options_dictionary_note_rest": {
     "message": "- саме там WikDict публікує словники, які будує з Вікісловника (CC BY-SA). Коли ви оновлюєте список, про вас нічого не надсилається - запит лише отримує свіжий список."
@@ -933,6 +936,26 @@
       "name": { "content": "$1" },
       "detail": { "content": "$2" }
     }
+  },
+  "options_move_dictionary_up_aria": {
+    "message": "Перемістити $NAME$ вгору",
+    "placeholders": { "name": { "content": "$1", "example": "WikDict en-pl" } }
+  },
+  "options_move_dictionary_down_aria": {
+    "message": "Перемістити $NAME$ вниз",
+    "placeholders": { "name": { "content": "$1", "example": "WikDict en-pl" } }
+  },
+  "options_dictionary_moved": {
+    "message": "$NAME$ тепер відповідає як $PLACE$ з $TOTAL$.",
+    "placeholders": {
+      "name": { "content": "$1", "example": "WikDict en-pl" },
+      "place": { "content": "$2", "example": "1" },
+      "total": { "content": "$3", "example": "3" }
+    }
+  },
+  "options_reorder_failed": {
+    "message": "Не вдалося змінити порядок: $DETAIL$",
+    "placeholders": { "detail": { "content": "$1" } }
   },
   "options_no_catalog": { "message": "Немає словників для завантаження - ця збірка не перелічує жодного." },
   "options_downloading_dictionary": {

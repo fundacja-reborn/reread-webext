@@ -780,6 +780,10 @@
   "options_dictionaries_intro": {
     "message": "Download a dictionary (or a few) to check the different meanings a selected word can have. While translating you choose and save the senses that fit the context; with translation switched off, the definitions simply answer a selection in the reader."
   },
+  "options_dictionary_order_hint": {
+    "message": "The bubble answers in the order below - the arrows move a dictionary up or down. Only the dictionaries of the language you are reading answer at all.",
+    "description": "Above the list of dictionaries, shown only once a second one is stored."
+  },
   "options_dictionary_note_from": {
     "message": "Dictionary downloads come from",
     "description": "First half of the note around the host, which stands between the parts as a page element. Each part must read on from the last across a plain space - no part starts or ends with whitespace."
@@ -950,6 +954,28 @@
       "name": { "content": "$1" },
       "detail": { "content": "$2" }
     }
+  },
+  "options_move_dictionary_up_aria": {
+    "message": "Move $NAME$ up",
+    "description": "Accessible name of the up arrow on a stored dictionary's row; the arrow itself is the visible label.",
+    "placeholders": { "name": { "content": "$1", "example": "WikDict en-pl" } }
+  },
+  "options_move_dictionary_down_aria": {
+    "message": "Move $NAME$ down",
+    "placeholders": { "name": { "content": "$1", "example": "WikDict en-pl" } }
+  },
+  "options_dictionary_moved": {
+    "message": "$NAME$ now answers $PLACE$ of $TOTAL$.",
+    "description": "Said after an arrow moves a dictionary; the row that moved may be out of sight, and a screen reader has nothing else to go on.",
+    "placeholders": {
+      "name": { "content": "$1", "example": "WikDict en-pl" },
+      "place": { "content": "$2", "example": "1" },
+      "total": { "content": "$3", "example": "3" }
+    }
+  },
+  "options_reorder_failed": {
+    "message": "Could not change the order: $DETAIL$",
+    "placeholders": { "detail": { "content": "$1" } }
   },
   "options_no_catalog": { "message": "No dictionaries to download - this build lists none." },
   "options_downloading_dictionary": {

@@ -69,7 +69,14 @@ export function orderForDisplay(rows, reading) {
  * downloading it a second time would store a duplicate, and the by-hand fold
  * below stays open for whoever truly wants two.
  *
- * @param {import("../lib/dict/store.js").Dictionary[]} stored
+ * The stored ones keep the order they arrive in, untouched - that order is the
+ * order they answer a lookup in, arranged by hand with the arrows, and a page
+ * that re-sorted it into "the pair being read first" would be showing one
+ * thing while the bubble did another. Only the catalogue below them is put in
+ * display order, where the pair being read is genuinely the useful row to find
+ * first among five hundred.
+ *
+ * @param {import("../lib/dict/store.js").Dictionary[]} stored in answering order
  * @param {import("../lib/dict/catalog.js").CatalogDictionary[]} catalog
  * @param {{ sourceLang: string, targetLang: string }} reading
  * @returns {DictionaryRow[]}
@@ -78,13 +85,19 @@ export function dictionaryRows(stored, catalog, reading) {
   const covered = new Set(stored.map((one) => `${one.langFrom}-${one.langTo}`));
 
   /** @type {DictionaryRow[]} */
-  const rows = [
-    ...stored.map((one) => ({ from: one.langFrom, to: one.langTo, installed: one, available: null })),
-    ...catalog
-      .filter((entry) => !covered.has(`${entry.from}-${entry.to}`))
-      .map((entry) => ({ from: entry.from, to: entry.to, installed: null, available: entry })),
-  ];
-  return orderForDisplay(rows, reading);
+  const installed = stored.map((one) => ({
+    from: one.langFrom,
+    to: one.langTo,
+    installed: one,
+    available: null,
+  }));
+
+  /** @type {DictionaryRow[]} */
+  const offered = catalog
+    .filter((entry) => !covered.has(`${entry.from}-${entry.to}`))
+    .map((entry) => ({ from: entry.from, to: entry.to, installed: null, available: entry }));
+
+  return [...installed, ...orderForDisplay(offered, reading)];
 }
 
 /**

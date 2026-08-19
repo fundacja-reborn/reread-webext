@@ -98,6 +98,9 @@ describe("dictionaryRows", () => {
       aliasCount: 0,
       bytes: 1,
       addedAt: 1,
+      // The rows arrive already in answering order (`answerOrder`), so what
+      // this says is never read here - the view must not re-sort by it.
+      rank: 0,
       ready: true,
       credit: null,
     };
@@ -111,11 +114,25 @@ describe("dictionaryRows", () => {
     return { from, to, url: `https://example.invalid/wikdict-${from}-${to}.zip` };
   }
 
-  it("puts what is stored above the catalogue, and the pair being read on top", () => {
+  it("puts what is stored above the catalogue, and the pair being read on top of the catalogue", () => {
     const rows = dictionaryRows([stored("de", "en")], [offered("ar", "en"), offered("en", "pl")], reading);
     assert.deepEqual(
       rows.map((one) => `${one.from}-${one.to}:${one.installed === null ? "offered" : "stored"}`),
-      ["en-pl:offered", "de-en:stored", "ar-en:offered"],
+      ["de-en:stored", "en-pl:offered", "ar-en:offered"],
+    );
+  });
+
+  it("shows the stored ones in the order they answer in, never re-sorted", () => {
+    // The promise the arrows make: this list is the bubble's list. Sorted by
+    // label, or by the pair being read, `en-pl` would climb over `pl-en`.
+    const rows = dictionaryRows(
+      [stored("pl", "en"), stored("en", "pl"), stored("en", "en")],
+      [offered("ar", "en")],
+      reading,
+    );
+    assert.deepEqual(
+      rows.filter((one) => one.installed !== null).map((one) => `${one.from}-${one.to}`),
+      ["pl-en", "en-pl", "en-en"],
     );
   });
 

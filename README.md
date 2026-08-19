@@ -126,6 +126,8 @@ The settings page carries a catalogue of about five hundred [WikDict](https://ww
 
 Dictionaries are matched by the language of their headwords, not by the pair - so a monolingual dictionary added from files (English-English, say) answers beside the bilingual ones: under **More** while translating, straight in the bubble with translation switched off.
 
+With more than one installed, the bubble answers in the order the settings page lists them, and two arrows on each row change it - put the English-English one above the English-Polish one and that is the order you read them in.
+
 For English-Polish, WikDict is the recommended start: 66,609 entries plus 51,721 alternative spellings in its `.syn` file (which is what lets `elevations` find `elevation`). FreeDict's `eng-pol` StarDict build (release 0.2.1) is mostly missing the Polish translations (checked 2026-08-11); other FreeDict pairs may be fine.
 
 ## Development

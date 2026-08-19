@@ -652,6 +652,9 @@
   "options_dictionaries_intro": {
     "message": "Téléchargez un dictionnaire (ou plusieurs) pour pouvoir consulter les différents sens d'un mot sélectionné. Pendant la traduction, vous choisissez et enregistrez les sens qui collent au contexte ; avec la traduction désactivée, les définitions répondent simplement à une sélection dans le lecteur."
   },
+  "options_dictionary_order_hint": {
+    "message": "La bulle répond dans l'ordre ci-dessous - les flèches déplacent un dictionnaire vers le haut ou vers le bas. Seuls les dictionnaires de la langue que vous lisez répondent."
+  },
   "options_dictionary_note_from": { "message": "Les dictionnaires sont téléchargés depuis" },
   "options_dictionary_note_rest": {
     "message": "- c'est là que WikDict publie les dictionnaires qu'il construit à partir du Wiktionnaire (CC BY-SA). Quand vous mettez la liste à jour, rien sur vous n'est envoyé - la requête ne récupère que la liste fraîche."
@@ -802,6 +805,26 @@
       "name": { "content": "$1" },
       "detail": { "content": "$2" }
     }
+  },
+  "options_move_dictionary_up_aria": {
+    "message": "Déplacer $NAME$ vers le haut",
+    "placeholders": { "name": { "content": "$1", "example": "WikDict en-pl" } }
+  },
+  "options_move_dictionary_down_aria": {
+    "message": "Déplacer $NAME$ vers le bas",
+    "placeholders": { "name": { "content": "$1", "example": "WikDict en-pl" } }
+  },
+  "options_dictionary_moved": {
+    "message": "$NAME$ répond désormais en position $PLACE$ sur $TOTAL$.",
+    "placeholders": {
+      "name": { "content": "$1", "example": "WikDict en-pl" },
+      "place": { "content": "$2", "example": "1" },
+      "total": { "content": "$3", "example": "3" }
+    }
+  },
+  "options_reorder_failed": {
+    "message": "L'ordre n'a pas pu être modifié : $DETAIL$",
+    "placeholders": { "detail": { "content": "$1" } }
   },
   "options_no_catalog": { "message": "Aucun dictionnaire à télécharger - cette version n'en liste aucun." },
   "options_downloading_dictionary": {
