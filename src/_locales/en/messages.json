@@ -97,6 +97,10 @@
     "message": "No translation model on this device yet - press here to pick one in the settings.",
     "description": "Stands in the popup where the pair select would be, while no model is stored. The whole row is a button that opens the settings page."
   },
+  "popup_translation_off": {
+    "message": "Translation is switched off - re/read is working as a reader. Turn it back on in the settings.",
+    "description": "Stands in the popup where the pair row would be while the translation-off setting (D120) is on. A plain note, not a button."
+  },
 
   "vocab_title": { "message": "re/read - saved phrases" },
   "vocab_intro": {
@@ -715,6 +719,10 @@
   "options_quiet_bubble_hint": {
     "message": "With this on, the translation bubble shows just the translation, and its buttons slide out when you click or tap the bubble. Save is the exception either way: a phrase too long to save itself always shows the button that saves it."
   },
+  "options_no_translation": { "message": "Use without translation" },
+  "options_no_translation_hint": {
+    "message": "For reading in your own language. With this on, the translation bubble, phrase saving and underlining, the saved phrases page and the model and dictionary sections are hidden; selecting text on an ordinary page offers one thing - open the page in the reader. The reader, the offline reading list, the highlighter, reading aloud and search keep working. Nothing is deleted: your saved phrases, models and dictionaries stay on this device and come back the moment you switch this off."
+  },
   "options_bubble_scale": { "message": "Bubble text size" },
   "options_bubble_scale_hint": {
     "message": "The size of the translation bubble - its text and its buttons - on ordinary pages and in the reader alike. The bubble sizes itself and ignores each page's own type settings, so this is the one place to adjust it: turn it up if it reads too small on this screen."
@@ -799,6 +807,9 @@
   "options_words_in": { "message": "Words in" },
   "options_explained_in": { "message": "explained in" },
   "options_add_dictionary_button": { "message": "Add dictionary" },
+  "options_add_dictionary_mono": {
+    "message": "A monolingual dictionary works too - for English-English, say, pick English on both sides. Its definitions then show under \"More\" in the bubble beside any bilingual dictionaries of the language you read: dictionaries are matched by the language of their headwords, not by the pair."
+  },
   "options_dict_files_note": {
     "message": "A StarDict file says nothing about which languages it is for, so here that part is yours to say. Adding from files makes no network request at all, and the path stays for the day the catalogue's host stops answering: files from anywhere work, the catalogue's own included - they are published at",
     "description": "Ends just before the address, which stands in the page as a link; the sentence's closing full stop is part of the page."

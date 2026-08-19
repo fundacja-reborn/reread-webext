@@ -51,7 +51,7 @@
       <nav id="menu-panel" class="nav-menu" hidden aria-label="Menu" data-i18n-aria-label="nav_menu">
         <button id="nav-library" type="button" data-i18n="reading_list">Offline reading list</button>
         <button id="nav-marks" type="button" data-i18n="reader_marks_title">Highlights</button>
-        <button id="nav-vocabulary" type="button" data-i18n="saved_phrases">Saved phrases</button>
+        <button id="nav-vocabulary" class="translation-only" type="button" data-i18n="saved_phrases">Saved phrases</button>
       </nav>
 
       <h1 data-i18n="settings">Settings</h1>
@@ -71,8 +71,8 @@
          table of contents is how a phone reaches the far end of it. Not
          sticky on purpose: pinned elements smear on e-ink at every scroll. -->
     <nav class="jump" aria-label="Sections of this page" data-i18n-aria-label="options_sections_aria">
-      <a href="#translation-models" data-i18n="options_models_heading">Translation models</a>
-      <a href="#dictionaries" data-i18n="options_dictionaries_heading">Dictionaries</a>
+      <a class="translation-only" href="#translation-models" data-i18n="options_models_heading">Translation models</a>
+      <a class="translation-only" href="#dictionaries" data-i18n="options_dictionaries_heading">Dictionaries</a>
       <a href="#switched-off-sites" data-i18n="options_disabled_heading">Switched-off sites</a>
       <a href="#support" data-i18n="support">Support</a>
     </nav>
@@ -84,7 +84,7 @@
          both are stored it folds to its heading instead of leaving, so the
          instructions can be reread at will. Hidden until the page has looked
          at both stores, so the first paint is already the right shape. -->
-    <details id="first-steps" class="note first-steps" hidden>
+    <details id="first-steps" class="note first-steps translation-only" hidden>
       <summary>
         <h2 data-i18n="options_first_steps_heading">First steps</h2>
       </summary>
@@ -113,12 +113,32 @@
     </details>
 
     <div class="rows">
+      <!-- The translation-off switch (D120), first because it decides what
+           the rest of this page is: checked, re/read is a pure reader, and
+           everything that only serves translation - marked `translation-only`
+           throughout this file - steps out of the way. The note under it is
+           the promise the switch stands on: presentation only, nothing
+           deleted, everything back on the next press. -->
+      <div class="row">
+        <label class="row-toggle">
+          <span class="row-name" data-i18n="options_no_translation">Use without translation</span>
+          <input type="checkbox" id="no-translation" />
+        </label>
+        <p class="row-note" data-i18n="options_no_translation_hint">
+          For reading in your own language. With this on, the translation bubble, phrase saving
+          and underlining, the saved phrases page and the model and dictionary sections are
+          hidden; selecting text on an ordinary page offers one thing - open the page in the
+          reader. The reader, the offline reading list, the highlighter, reading aloud and
+          search keep working. Nothing is deleted: your saved phrases, models and dictionaries
+          stay on this device and come back the moment you switch this off.
+        </p>
+      </div>
       <!-- The pair select offers only the pairs whose model is on this device:
            a pair without one translates nothing, and the full catalogue of a
            hundred pairs made the select unusable. The line below is the way
            to the rest; with no model at all the select explains itself with
            one disabled line. -->
-      <div class="row row-stack">
+      <div class="row row-stack translation-only">
         <label class="row-name" for="pair" data-i18n="language_pair">Language pair</label>
         <select id="pair"></select>
         <p class="row-note">
@@ -130,7 +150,7 @@
           <a href="#translation-models" data-i18n="options_models_heading">Translation models</a>.
         </p>
       </div>
-      <div class="row row-stack">
+      <div class="row row-stack translation-only">
         <span class="row-name" data-i18n="options_engine">Engine</span>
         <span class="row-value" data-i18n="options_engine_value">Bergamot, inside the package - translates offline</span>
       </div>
@@ -174,7 +194,10 @@
       <!-- The whole first line is the label, so a press anywhere on it flips
            the switch; the note keeps its own, unclickable line below - a
            paragraph is too easy to brush against on a phone. -->
-      <div class="row">
+      <!-- `translation-only`: with translation off every ordinary page is a
+           launcher page already, and a switch with no other side is not a
+           choice - the question this row asks has dissolved (D120). -->
+      <div class="row translation-only">
         <label class="row-toggle">
           <span class="row-name" data-i18n="options_reader_only">Only in the reader</span>
           <input type="checkbox" id="reader-only" />
@@ -185,7 +208,10 @@
           easier to read). On Android the option is on by default.
         </p>
       </div>
-      <div class="row">
+      <!-- `translation-only`: the trimmed bubble ignores the fold - its two
+           buttons are its whole content - so with translation off this switch
+           would move nothing (D120). -->
+      <div class="row translation-only">
         <label class="row-toggle">
           <span class="row-name" data-i18n="quiet_bubble">Hide bubble actions by default</span>
           <input type="checkbox" id="quiet-bubble" />
@@ -217,6 +243,11 @@
       </div>
     </div>
 
+    <!-- The wrapper is the translation-off switch's handle on this whole
+         section (D120); the jump anchor stays on the heading. Managing the
+         stored models while the switch is on means switching it off first -
+         deliberately no side door. -->
+    <section class="translation-only">
     <h2 id="translation-models" data-i18n="options_models_heading">Translation models</h2>
 
     <p class="explain" data-i18n="options_models_intro">
@@ -314,7 +345,10 @@
         makes no network request at all.
       </p>
     </details>
+    </section>
 
+    <!-- The dictionaries' twin of the wrapper above (D120). -->
+    <section class="translation-only">
     <h2 id="dictionaries" data-i18n="options_dictionaries_heading">Dictionaries</h2>
 
     <p class="explain" data-i18n="options_dictionaries_intro">
@@ -411,6 +445,16 @@
         <button type="button" id="add-dictionary" data-i18n="options_add_dictionary_button">Add dictionary</button>
       </p>
 
+      <!-- Lookup matches dictionaries by the language of their headwords, not
+           by the full pair - a deliberate rule (see `lookupEntries`), said out
+           loud here because nothing else on this page says it. -->
+      <p class="explain" data-i18n="options_add_dictionary_mono">
+        A monolingual dictionary works too - for English-English, say, pick English on both
+        sides. Its definitions then show under "More" in the bubble beside any bilingual
+        dictionaries of the language you read: dictionaries are matched by the language of
+        their headwords, not by the pair.
+      </p>
+
       <p id="dictionary-file-status" class="status" role="status"></p>
 
       <p class="note footnote">
@@ -425,6 +469,7 @@
         >.
       </p>
     </details>
+    </section>
 
     <h2 id="switched-off-sites" data-i18n="options_disabled_heading">Switched-off sites</h2>
 

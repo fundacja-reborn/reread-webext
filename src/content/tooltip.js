@@ -651,8 +651,10 @@ export const STYLE = `
 
   /* The launcher is its one button and nothing else, so the row's padding -
      which exists to stand the row off a gloss that is not there - goes too.
-     After the mirror, whose padding this outranks by standing below it. */
-  .bubble[data-variant="launcher"] .actions { padding: 0; }
+     After the mirror, whose padding this outranks by standing below it. The
+     quiet bubble (D120) is the same shape with two pictures in the row. */
+  .bubble[data-variant="launcher"] .actions,
+  .bubble[data-variant="quiet"] .actions { padding: 0; }
 
   /* An error bubble is not a translation, and it drops the mirror's rule for
      the same reason the mirror exists: the near edge belongs to the eye's way
@@ -834,8 +836,11 @@ export const STYLE = `
 
 /** `note` is an aside in the second layer - the fetch behind More coming back
  *  with nothing - and never a body's tone. @typedef {"normal" | "pending" | "error" | "note"} Tone */
-/** Which of the three bubbles this is. `launcher` is reader-only mode's one
- *  offer: no gloss, one button. @typedef {"recall" | "save" | "launcher"} Variant */
+/** Which of the four bubbles this is. `launcher` is reader-only mode's one
+ *  offer: no gloss, one button. `quiet` is the translation-off trim (D120):
+ *  no gloss either, and the row is the speaker and the clipboard - the
+ *  phrase's own two acts, all that is left without an engine.
+ *  @typedef {"recall" | "save" | "launcher" | "quiet"} Variant */
 /** What the bubble can offer. `speak` and `copy` are the row's two pictures -
  *  a speaker icon that reads the phrase aloud (D83), and a copy icon that
  *  opens the clipboard row (D110).
@@ -1418,6 +1423,13 @@ export function createTooltip({ onAction, onHide }) {
       hideCopyRow();
       return;
     }
+    // With nothing shown as the answer there is nothing its press could copy
+    // (`copyOut` would refuse) - a dead button in a two-button row reads as a
+    // breakage, so it steps out. The quiet bubble (D120) is where this stands
+    // every time; an ordinary bubble always has a gloss by the time the icon
+    // is offered at all.
+    const translationButton = copyRowElement.querySelector('button[data-action="copy-translation"]');
+    if (translationButton instanceof HTMLElement) translationButton.hidden = shownGloss().length === 0;
     copyRowElement.hidden = false;
     syncCopyIcon();
     place();

@@ -48,6 +48,14 @@ export const CONFIG_KEY = "config";
  *   the platform decides at read time (`effectiveReaderOnly`): on Android on,
  *   elsewhere off. Only a hand-set value is ever stored, so a future change of
  *   the default reaches every installation that never touched the switch.
+ * @property {boolean} translationOff Whether the translation half of the
+ *   extension is switched off - for reading in one's own language, where the
+ *   reader and the reading list are the whole point. Presentation only:
+ *   nothing stored is deleted, and switching back on restores everything.
+ *   Ordinary pages then only ever offer the reader (`pageMode`); the reader's
+ *   bubble keeps the speaker and the clipboard and loses the translation.
+ *   Named for the off state so the default (`false`) is the extension as it
+ *   has always been, and a stored `true` is always a deliberate press.
  * @property {boolean} hideBubbleActions Whether the translation bubble opens
  *   with its action row folded away, unfolding on a click or tap on the bubble
  *   (D81). Save is the standing exception either way: a phrase that does not
@@ -153,6 +161,7 @@ export const DEFAULTS = Object.freeze({
   reader: READER_DEFAULTS,
   disabledHosts: [],
   readerOnly: null,
+  translationOff: false,
   hideBubbleActions: true,
   ttsVoices: {},
   ttsRate: 100,
@@ -268,6 +277,8 @@ export function withDefaults(stored) {
     // Not a boolean means nobody has chosen - which is a state of its own, not
     // `false`: it is what lets the platform keep deciding (`effectiveReaderOnly`).
     readerOnly: typeof raw["readerOnly"] === "boolean" ? raw["readerOnly"] : null,
+    translationOff:
+      typeof raw["translationOff"] === "boolean" ? raw["translationOff"] : DEFAULTS.translationOff,
     hideBubbleActions:
       typeof raw["hideBubbleActions"] === "boolean" ? raw["hideBubbleActions"] : DEFAULTS.hideBubbleActions,
     ttsVoices: voiceMap(raw["ttsVoices"]),
@@ -294,7 +305,7 @@ export async function readConfig() {
  * the settings page holds the full map and choosing the default voice has to
  * be able to remove an entry - a per-key merge could only ever add.
  *
- * @param {{ sourceLang?: string, targetLang?: string, reader?: Partial<ReaderConfig>, disabledHosts?: string[], readerOnly?: boolean, hideBubbleActions?: boolean, ttsVoices?: Record<string, string>, ttsRate?: number, bubbleScale?: number }} patch
+ * @param {{ sourceLang?: string, targetLang?: string, reader?: Partial<ReaderConfig>, disabledHosts?: string[], readerOnly?: boolean, translationOff?: boolean, hideBubbleActions?: boolean, ttsVoices?: Record<string, string>, ttsRate?: number, bubbleScale?: number }} patch
  * @returns {Promise<Config>}
  */
 export async function writeConfig(patch) {
@@ -346,6 +357,28 @@ export function osFrom(stored) {
  */
 export function effectiveReaderOnly(config, os) {
   return config.readerOnly ?? os === "android";
+}
+
+/**
+ * Which of its three states a page is in - the whole hierarchy of the content
+ * script, with silence at the top: a site switched off in the popup gets
+ * nothing at all; with translation off every other page gets the launcher,
+ * because the one thing left to offer a selection is the reader (the
+ * reader-only question has dissolved - there is no translation in place to
+ * choose against); reader-only mode gets the launcher too; and what remains
+ * gets the full reading side. Here rather than in the content script so the
+ * hierarchy sits under `node --test`.
+ *
+ * @param {Pick<Config, "disabledHosts" | "readerOnly" | "translationOff">} config
+ * @param {string} os as `getPlatformInfo` or `osFrom` names it
+ * @param {string} hostname the page's own, exact - the way `disabledHosts` stores them
+ * @returns {"off" | "launcher" | "reading"}
+ */
+export function pageMode(config, os, hostname) {
+  if (config.disabledHosts.includes(hostname)) return "off";
+  if (config.translationOff) return "launcher";
+  if (effectiveReaderOnly(config, os)) return "launcher";
+  return "reading";
 }
 
 /**

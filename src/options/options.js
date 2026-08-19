@@ -269,6 +269,18 @@ function renderQuietBubble() {
   if (toggle instanceof HTMLInputElement) toggle.checked = config.hideBubbleActions;
 }
 
+/**
+ * The translation-off switch (D120). The body class is the stylesheet's
+ * handle on every `translation-only` part of this page - set at render so a
+ * fresh open is already the right shape, and again whenever the setting
+ * moves, from here or from anywhere else.
+ */
+function renderNoTranslation() {
+  const toggle = document.getElementById("no-translation");
+  if (toggle instanceof HTMLInputElement) toggle.checked = config.translationOff;
+  document.body.classList.toggle("no-translation", config.translationOff);
+}
+
 /** The bubble-size stepper's value (D85), shown as the percent it is stored as. */
 function renderBubbleScale() {
   const value = document.getElementById("bubble-scale-value");
@@ -1498,6 +1510,7 @@ async function render() {
   fill("version", webext().runtime.getManifest().version);
   renderReaderOnly();
   renderQuietBubble();
+  renderNoTranslation();
   renderBubbleScale();
   renderVoice();
   renderRate();
@@ -1546,6 +1559,7 @@ async function refresh() {
   config = await readConfig();
   renderReaderOnly();
   renderQuietBubble();
+  renderNoTranslation();
   renderBubbleScale();
   // The pair may have moved (the popup writes it too), and the pair decides
   // which language's voices the select is about.
@@ -1588,6 +1602,18 @@ document.getElementById("quiet-bubble")?.addEventListener("change", (event) => {
   // next bubble opens the way the box now says.
   void writeConfig({ hideBubbleActions: toggle.checked }).then((written) => {
     config = written;
+  });
+});
+document.getElementById("no-translation")?.addEventListener("change", (event) => {
+  const toggle = event.target;
+  if (!(toggle instanceof HTMLInputElement)) return;
+  // This page reshapes on the spot; open pages hear it through storage the
+  // way every switch travels - ordinary pages swap to the launcher, the
+  // reader trims its bubble and drops its underlines, no reload anywhere
+  // (D120).
+  void writeConfig({ translationOff: toggle.checked }).then((written) => {
+    config = written;
+    renderNoTranslation();
   });
 });
 // The same road again (D85): open pages hear the size through storage, and

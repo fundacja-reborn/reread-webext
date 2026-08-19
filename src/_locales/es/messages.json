@@ -61,6 +61,9 @@
   "popup_no_model": {
     "message": "Todavía no hay ningún modelo de traducción en este dispositivo - pulsa aquí para elegir uno en los ajustes."
   },
+  "popup_translation_off": {
+    "message": "La traducción está desactivada - re/read funciona solo como vista de lectura. Vuelve a activarla en los ajustes."
+  },
 
   "vocab_title": { "message": "re/read - frases guardadas" },
   "vocab_intro": {
@@ -599,6 +602,10 @@
   "options_quiet_bubble_hint": {
     "message": "Con esto activado, la burbuja de traducción muestra solo la traducción; sus botones aparecen al hacer clic o tocar la burbuja. Guardar es la excepción en ambos casos: una frase demasiado larga para guardarse sola siempre muestra el botón de guardar."
   },
+  "options_no_translation": { "message": "Usar sin traducción" },
+  "options_no_translation_hint": {
+    "message": "Para leer en tu propio idioma. Con esto activado desaparecen la burbuja de traducción, el guardado y el subrayado de frases, la página de frases guardadas y las secciones de modelos y diccionarios; seleccionar texto en una página normal ofrece una sola cosa - abrir la página en la vista de lectura. La vista de lectura, la lista de lectura sin conexión, el resaltador, la lectura en voz alta y la búsqueda siguen funcionando. No se borra nada: tus frases guardadas, modelos y diccionarios permanecen en este dispositivo y vuelven en cuanto lo desactives."
+  },
   "options_bubble_scale": { "message": "Tamaño del texto de la burbuja" },
   "options_bubble_scale_hint": {
     "message": "El tamaño de la burbuja de traducción - su texto y sus botones - tanto en páginas normales como en la vista de lectura. La burbuja fija su propio tamaño e ignora los ajustes de letra de la página; este es el único lugar para ajustarla: sube el valor si en esta pantalla se ve demasiado pequeña."
@@ -665,6 +672,9 @@
   "options_words_in": { "message": "Palabras en" },
   "options_explained_in": { "message": "explicadas en" },
   "options_add_dictionary_button": { "message": "Añadir diccionario" },
+  "options_add_dictionary_mono": {
+    "message": "Un diccionario monolingüe también funciona - por ejemplo inglés-inglés: elige inglés en ambos lados. Sus definiciones aparecen entonces bajo «Más» en la burbuja, junto a los diccionarios bilingües del idioma que lees: los diccionarios se eligen por el idioma de sus entradas, no por el par."
+  },
   "options_dict_files_note": {
     "message": "Un archivo StarDict no dice nada de para qué idiomas es, así que aquí esa parte te toca a ti. Añadir desde archivos no hace ninguna petición de red, y este camino se queda para el día en que el host del catálogo deje de responder: sirven archivos de cualquier parte, incluidos los del propio catálogo - están publicados en"
   },

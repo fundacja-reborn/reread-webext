@@ -61,6 +61,9 @@
   "popup_no_model": {
     "message": "Aucun modèle de traduction sur cet appareil pour l'instant - appuyez ici pour en choisir un dans les paramètres."
   },
+  "popup_translation_off": {
+    "message": "La traduction est désactivée - re/read fonctionne comme un lecteur. Réactivez-la dans les paramètres."
+  },
 
   "vocab_title": { "message": "re/read - phrases enregistrées" },
   "vocab_intro": {
@@ -599,6 +602,10 @@
   "options_quiet_bubble_hint": {
     "message": "Quand c'est activé, la bulle de traduction ne montre que la traduction ; ses boutons apparaissent après un clic ou un appui sur la bulle. Enregistrer reste l'exception dans les deux cas : une phrase trop longue pour s'enregistrer seule montre toujours le bouton d'enregistrement."
   },
+  "options_no_translation": { "message": "Utiliser sans traduction" },
+  "options_no_translation_hint": {
+    "message": "Pour lire dans votre propre langue. Quand c'est activé, la bulle de traduction, l'enregistrement et le soulignement des phrases, la page des phrases enregistrées ainsi que les sections des modèles et des dictionnaires disparaissent ; sélectionner du texte sur une page ordinaire ne propose qu'une chose - ouvrir la page dans le lecteur. Le lecteur, la liste de lecture hors ligne, le surligneur, la lecture à voix haute et la recherche continuent de fonctionner. Rien n'est supprimé : vos phrases enregistrées, vos modèles et vos dictionnaires restent sur cet appareil et reviennent dès que vous désactivez ceci."
+  },
   "options_bubble_scale": { "message": "Taille du texte de la bulle" },
   "options_bubble_scale_hint": {
     "message": "La taille de la bulle de traduction - son texte et ses boutons - sur les pages ordinaires comme dans le lecteur. La bulle fixe sa taille elle-même et ignore les réglages de police de la page ; c'est donc ici qu'on l'ajuste : augmentez la valeur si elle paraît trop petite sur cet écran."
@@ -665,6 +672,9 @@
   "options_words_in": { "message": "Mots en" },
   "options_explained_in": { "message": "expliqués en" },
   "options_add_dictionary_button": { "message": "Ajouter le dictionnaire" },
+  "options_add_dictionary_mono": {
+    "message": "Un dictionnaire monolingue fonctionne aussi - anglais-anglais, par exemple : choisissez l'anglais des deux côtés. Ses définitions apparaissent alors sous « Plus » dans la bulle, à côté des dictionnaires bilingues de la langue que vous lisez : les dictionnaires sont retenus selon la langue de leurs entrées, pas selon la paire."
+  },
   "options_dict_files_note": {
     "message": "Un fichier StarDict ne dit rien des langues pour lesquelles il est fait, cette part est donc la vôtre ici. Ajouter depuis des fichiers ne fait aucune requête réseau, et ce chemin reste pour le jour où l'hôte du catalogue cesse de répondre : les fichiers de n'importe où fonctionnent, ceux du catalogue compris - ils sont publiés à"
   },

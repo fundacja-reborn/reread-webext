@@ -1817,7 +1817,12 @@ function showSegmentNav(segment) {
 function showBookNote(book) {
   if (bookNote === null || bookNoteText === null) return;
   const declared = book === null ? "" : primaryLanguage(book.lang ?? "");
-  const mismatch = declared.length > 0 && declared !== primaryLanguage(settings.sourceLang);
+  // With translation off (D120) there is no pair to mismatch: the note would
+  // warn about a translation nobody is getting.
+  const mismatch =
+    !settings.translationOff &&
+    declared.length > 0 &&
+    declared !== primaryLanguage(settings.sourceLang);
   bookNote.hidden = !mismatch;
   if (mismatch && book !== null) {
     bookNoteText.textContent = t("reader_book_pair_note", [
@@ -3492,6 +3497,10 @@ function adoptConfig(config) {
   settings = config;
   applyAppearance(config.reader);
   applySpeech();
+  // With translation off (D120) the saved phrases page loses its door here,
+  // the way it does in the popup and the settings menu - the page itself
+  // stays untouched, and unlocks with the switch.
+  if (navVocabulary !== null) navVocabulary.hidden = config.translationOff;
 }
 
 /**
