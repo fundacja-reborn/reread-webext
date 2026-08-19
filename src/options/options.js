@@ -34,6 +34,7 @@ import { readLiveDictionaries, refreshLiveDictionaries } from "../lib/dict/live.
 import { classifyDictionaryFiles, describeImportProblem, dictionaryFromZip, readDictionary } from "../lib/dict/import.js";
 import { describeZipProblem, readZip } from "../lib/dict/zip.js";
 import { toRows } from "../lib/dict/rows.js";
+import { afterMove } from "../lib/dict/order.js";
 import {
   beginImport,
   deleteDictionary,
@@ -41,6 +42,7 @@ import {
   listDictionaries,
   putEntries,
   removeUnfinished,
+  reorderDictionaries,
 } from "../lib/dict/store.js";
 import { describeDownloadProblem, downloadModel } from "../lib/models/download.js";
 import { classifyModelFiles, describeClassifyProblem, isGzip } from "../lib/models/files.js";
@@ -127,6 +129,16 @@ let modelStored = null;
 
 /** @type {boolean | null} */
 let dictionaryStored = null;
+
+/**
+ * The installed dictionaries as the last render found them, in the order they
+ * answer in. An arrow moves one row within the whole list, so the press has to
+ * know the list - and reading it back off the screen would mean trusting the
+ * screen about what the database holds.
+ *
+ * @type {string[]}
+ */
+let dictionaryOrder = [];
 
 /** The verdict the fold last moved on - see `firstStepsMove`. @type {boolean | null} */
 let setupDone = null;
@@ -1141,14 +1153,53 @@ function chosenLanguage(id, fallback) {
 }
 
 /**
- * A stored dictionary's row - the same three cells a stored model gets, plus
- * what only a dictionary carries: its own name under the pair (two
- * dictionaries of one pair must be told apart) and its attribution, folded.
+ * One arrow of a stored dictionary's row.
+ *
+ * Two buttons rather than a drag: this page is read on a phone, on e-ink and
+ * with a keyboard, and a list that can only be arranged by dragging cannot be
+ * arranged on any of the three. The arrow is the whole label - "up" is not a
+ * word that needs translating on a button this size - and the sentence naming
+ * which dictionary moves rides in the accessible name, where a screen reader
+ * reads it and a pointer finds it as a tooltip.
  *
  * @param {import("../lib/dict/store.js").Dictionary} dictionary
+ * @param {-1 | 1} step
+ * @param {boolean} enabled false at the end of the list it points towards
+ * @returns {HTMLButtonElement}
+ */
+function moveButton(dictionary, step, enabled) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "model-move";
+  button.textContent = step < 0 ? "↑" : "↓";
+  button.disabled = !enabled || importing;
+  // What the redraw after a move finds this button by - the row it belonged to
+  // is gone by then, so the dictionary and the direction are the address.
+  button.dataset["move"] = dictionary.id;
+  button.dataset["step"] = String(step);
+
+  const label =
+    step < 0
+      ? t("options_move_dictionary_up_aria", dictionary.name)
+      : t("options_move_dictionary_down_aria", dictionary.name);
+  button.setAttribute("aria-label", label);
+  button.title = label;
+
+  button.addEventListener("click", () => void moveDictionary(dictionary, step));
+  return button;
+}
+
+/**
+ * A stored dictionary's row - the same three cells a stored model gets, plus
+ * what only a dictionary carries: its own name under the pair (two
+ * dictionaries of one pair must be told apart), the arrows that move it up and
+ * down the answering order, and its attribution, folded.
+ *
+ * @param {import("../lib/dict/store.js").Dictionary} dictionary
+ * @param {{ at: number, total: number }} place among the stored dictionaries
  * @returns {HTMLElement}
  */
-function renderDictionary(dictionary) {
+function renderDictionary(dictionary, place) {
   const container = element("div", "model");
 
   const name = element("span", "model-name", pairLabel(dictionary.langFrom, dictionary.langTo));
@@ -1168,6 +1219,13 @@ function renderDictionary(dictionary) {
   container.append(meta);
 
   const act = element("span", "model-act");
+  // Only where there is something to arrange: one dictionary answers first
+  // whatever the arrows say, and two dead buttons on its row would be a
+  // control that does nothing standing next to one that deletes.
+  if (place.total > 1) {
+    act.append(moveButton(dictionary, -1, place.at > 0));
+    act.append(moveButton(dictionary, 1, place.at < place.total - 1));
+  }
   act.append(
     deleteButton({
       name: dictionary.name,
@@ -1190,6 +1248,92 @@ function renderDictionary(dictionary) {
   }
 
   return container;
+}
+
+/**
+ * The arrow this dictionary wears for one direction, after the redraw that
+ * replaced the one that was pressed.
+ *
+ * Walked rather than selected: an id goes into a `[data-move="..."]` selector
+ * as text, and the day one carries a quote the selector is the bug rather than
+ * the id.
+ *
+ * @param {string} id
+ * @param {number} step
+ * @returns {HTMLButtonElement | null}
+ */
+function moveButtonFor(id, step) {
+  for (const button of document.querySelectorAll("#dictionary-catalog button.model-move")) {
+    if (!(button instanceof HTMLButtonElement)) continue;
+    if (button.dataset["move"] === id && button.dataset["step"] === String(step)) return button;
+  }
+  return null;
+}
+
+/**
+ * Focus after a move, which took the pressed button with it.
+ *
+ * The same arrow of the same dictionary, so a second press keeps moving it -
+ * unless that arrow is now the disabled one at the end of the list, where the
+ * opposite arrow is what a hand that overshot reaches for. Neither found (the
+ * row lost its arrows) leaves focus alone rather than sending it somewhere
+ * surprising.
+ *
+ * @param {string} id
+ * @param {number} step
+ */
+function focusMove(id, step) {
+  const again = moveButtonFor(id, step);
+  if (again !== null && !again.disabled) {
+    again.focus();
+    return;
+  }
+  const back = moveButtonFor(id, -step);
+  if (back !== null && !back.disabled) back.focus();
+}
+
+/**
+ * One press of an arrow: the neighbours swap, the database is renumbered, and
+ * the list redraws in the order the bubble will now answer in.
+ *
+ * Said out loud afterwards, in the section's status line, because the row that
+ * moved is the one place on screen where a screen reader cannot see what
+ * happened - and because "third of three" is the answer to "did that do
+ * anything" on a long page where the row may have moved out of sight.
+ *
+ * @param {import("../lib/dict/store.js").Dictionary} dictionary
+ * @param {-1 | 1} step
+ */
+async function moveDictionary(dictionary, step) {
+  // The same guard the delete keeps: an import is writing to this database,
+  // and its dictionary is the one whose place would be rewritten underneath it.
+  if (importing) return;
+
+  const order = afterMove(dictionaryOrder, dictionary.id, step);
+  if (order === null) return;
+
+  try {
+    await reorderDictionaries(order);
+  } catch (error) {
+    dictionaryStatus(t("options_reorder_failed", message(error)), "error");
+    return;
+  }
+
+  await renderCatalog();
+
+  // From the list the redraw just read, not from the list that was written: a
+  // second page importing at that moment is part of the order now.
+  const at = dictionaryOrder.indexOf(dictionary.id);
+  if (at >= 0) {
+    dictionaryStatus(
+      t("options_dictionary_moved", [
+        dictionary.name,
+        (at + 1).toLocaleString(),
+        dictionaryOrder.length.toLocaleString(),
+      ]),
+    );
+  }
+  focusMove(dictionary.id, step);
 }
 
 /**
@@ -1251,6 +1395,12 @@ async function renderCatalog() {
   const stored = await listDictionaries();
   const rows = dictionaryRows(stored, availableDictionaries(), config);
 
+  // What an arrow press moves within, and what the line above the list is
+  // about - both read from the store, at the one moment the store was read.
+  dictionaryOrder = stored.map((one) => one.id);
+  const hint = document.getElementById("dictionary-order-hint");
+  if (hint !== null) hint.hidden = stored.length < 2;
+
   // The dictionary half of the first-steps verdict. Ready ones only: a
   // half-imported dictionary answers no lookup, and must not fold the
   // instructions away.
@@ -1262,11 +1412,15 @@ async function renderCatalog() {
   if (rows.length === 0) {
     container.append(element("p", "empty", t("options_no_catalog")));
   } else {
+    // Which place among the stored ones this row holds - the arrows need it,
+    // and the rows arrive with the stored ones first, in their own order.
+    let at = 0;
     for (const row of rows) {
       /** @type {HTMLElement} */
       let rendered;
       if (row.installed !== null) {
-        rendered = renderDictionary(row.installed);
+        rendered = renderDictionary(row.installed, { at, total: stored.length });
+        at += 1;
         // Found by the pair either way it is spelled, and by the book's own name.
         rendered.dataset["search"] = `${searchableText(row)} ${row.installed.name.toLowerCase()}`;
       } else if (row.available !== null) {

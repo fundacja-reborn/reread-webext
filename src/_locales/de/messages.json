@@ -629,6 +629,9 @@
   "options_dictionaries_intro": {
     "message": "Laden Sie ein Wörterbuch (oder mehrere) herunter, um die verschiedenen Bedeutungen eines ausgewählten Wortes nachschlagen zu können. Beim Übersetzen wählen und speichern Sie die Lesarten, die zum Kontext passen; bei ausgeschalteter Übersetzung beantworten die Definitionen eine Auswahl in der Leseansicht einfach direkt."
   },
+  "options_dictionary_order_hint": {
+    "message": "Die Sprechblase antwortet in der Reihenfolge unten - die Pfeile verschieben ein Wörterbuch nach oben oder nach unten. Es antworten nur die Wörterbücher der Sprache, die Sie gerade lesen."
+  },
   "options_dictionary_note_from": { "message": "Wörterbücher kommen von" },
   "options_dictionary_note_rest": {
     "message": "- dort veröffentlicht WikDict die Wörterbücher, die es aus dem Wiktionary (CC BY-SA) baut. Wenn Sie die Liste aktualisieren, wird nichts über Sie gesendet - die Anfrage holt nur die frische Liste."
@@ -779,6 +782,26 @@
       "name": { "content": "$1" },
       "detail": { "content": "$2" }
     }
+  },
+  "options_move_dictionary_up_aria": {
+    "message": "$NAME$ nach oben verschieben",
+    "placeholders": { "name": { "content": "$1", "example": "WikDict en-pl" } }
+  },
+  "options_move_dictionary_down_aria": {
+    "message": "$NAME$ nach unten verschieben",
+    "placeholders": { "name": { "content": "$1", "example": "WikDict en-pl" } }
+  },
+  "options_dictionary_moved": {
+    "message": "$NAME$ antwortet jetzt an Stelle $PLACE$ von $TOTAL$.",
+    "placeholders": {
+      "name": { "content": "$1", "example": "WikDict en-pl" },
+      "place": { "content": "$2", "example": "1" },
+      "total": { "content": "$3", "example": "3" }
+    }
+  },
+  "options_reorder_failed": {
+    "message": "Die Reihenfolge ließ sich nicht ändern: $DETAIL$",
+    "placeholders": { "detail": { "content": "$1" } }
   },
   "options_no_catalog": { "message": "Keine Wörterbücher zum Herunterladen - diese Version führt keines auf." },
   "options_downloading_dictionary": {

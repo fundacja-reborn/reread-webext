@@ -332,6 +332,42 @@ h2 {
   overflow-wrap: anywhere;
 }
 
+/* The arrows that arrange the dictionaries: the quiet Delete's dressing (no
+   border at rest, wash on hover and focus), because they sit on the same row
+   and three differently dressed buttons would read as three unrelated
+   controls. Square, so the pair costs one Delete's width on a phone; the
+   element is in the selector for the same reason it is below. */
+button.model-move {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0.35rem;
+  border-color: transparent;
+  color: var(--page-muted);
+  /* The glyph is the label: at the button's own font size it reads as
+     punctuation next to the words around it. */
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+.model-move:hover:not(:disabled),
+.model-move:focus-visible {
+  border-color: var(--page-border);
+  background: color-mix(in srgb, var(--page-fg) 6%, transparent);
+  color: var(--page-fg);
+}
+
+/* At the ends of the list the arrow stays in place rather than vanishing: a
+   row whose buttons come and go moves the Delete under a finger already on
+   its way down. Dimmed enough to read as unavailable, not as missing - and
+   the hover is spelled out because the page's own disabled-button rule would
+   otherwise draw a frame around an arrow that does nothing. */
+.model-move:disabled,
+.model-move:disabled:hover {
+  border-color: transparent;
+  background: none;
+  opacity: 0.35;
+}
+
 /* Delete asks with a second press, so it dresses down at rest: no border,
    muted, always visible - touch and e-ink have no hover to reveal it with.
    Nowrap so "Sure?" grows leftward from a fixed right edge and the second

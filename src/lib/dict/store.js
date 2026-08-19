@@ -22,8 +22,16 @@
  * through a message port).
  */
 
+import { answerOrder, inChosenOrder, nextRank } from "./order.js";
+
 const DB_NAME = "reread-dicts";
-const DB_VERSION = 1;
+
+/**
+ * Version 2 gave every dictionary a `rank`: the place it answers from, which
+ * until then was the order of import and could only be changed by importing
+ * again (see `order.js`).
+ */
+const DB_VERSION = 2;
 const META = "meta";
 const ENTRIES = "entries";
 
@@ -37,6 +45,7 @@ const ENTRIES = "entries";
  * @property {number} aliasCount other spellings from the .syn file
  * @property {number} bytes what the text of it costs
  * @property {number} addedAt epoch milliseconds
+ * @property {number} rank where it stands among the others, 0 first
  * @property {boolean} ready false until every row is in
  * @property {string | null} credit author and source, for attribution
  */
@@ -54,6 +63,29 @@ function promisify(request) {
 }
 
 /**
+ * Writes down the order the dictionaries already answered in.
+ *
+ * The upgrade to version 2 must not shuffle anybody's bubble: what an
+ * unranked store answers in is import order, so import order is what gets
+ * written. `answerOrder` says the same thing for records that carry no rank,
+ * which is why it is asked rather than repeated here - and why running this
+ * twice is a no-op rather than a reshuffle.
+ *
+ * Fired inside the versionchange transaction, so the puts are part of the
+ * upgrade: either the version and the ranks both land, or neither does.
+ *
+ * @param {IDBObjectStore} meta
+ */
+function rankExisting(meta) {
+  const all = meta.getAll();
+  all.onsuccess = () => {
+    answerOrder(/** @type {Dictionary[]} */ (all.result)).forEach((dictionary, at) => {
+      if (dictionary.rank !== at) meta.put({ ...dictionary, rank: at });
+    });
+  };
+}
+
+/**
  * @returns {Promise<IDBDatabase>}
  */
 function open() {
@@ -65,6 +97,11 @@ function open() {
       if (!db.objectStoreNames.contains(ENTRIES)) {
         db.createObjectStore(ENTRIES, { keyPath: ["dictId", "key"] });
       }
+      // Null only where there is no upgrade to do, which cannot happen here -
+      // but the type says so, and a store nobody could reach is not worth a
+      // thrown error inside an event handler.
+      const upgrade = request.transaction;
+      if (upgrade !== null) rankExisting(upgrade.objectStore(META));
     };
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error ?? new Error("Cannot open the dictionary database"));
@@ -125,8 +162,8 @@ function rowsOf(id) {
  * once - the first form that hits wins, so `watches` finding `watch` does not
  * also go looking for `watche`.
  *
- * Ordering is import order, which is the only order a reader can predict and
- * the one they can change by removing a dictionary and adding it again.
+ * Ordering is the reader's own, as the settings page arranged it (`order.js`);
+ * a store nobody has arranged answers in import order, as it always did.
  *
  * @param {string[]} keys the word, then the forms worth trying instead of it
  * @param {string} langFrom the language being read
@@ -141,9 +178,9 @@ export async function lookupEntries(keys, langFrom) {
     // English in English is often the better answer for somebody learning it,
     // and refusing it because the settings say "into Polish" would refuse a
     // book the reader deliberately installed.
-    const dictionaries = installed
-      .filter((dictionary) => dictionary.ready && dictionary.langFrom === langFrom)
-      .sort((a, b) => a.addedAt - b.addedAt || a.id.localeCompare(b.id));
+    const dictionaries = answerOrder(
+      installed.filter((dictionary) => dictionary.ready && dictionary.langFrom === langFrom),
+    );
 
     const store = transaction.objectStore(ENTRIES);
     /** @type {DictionaryEntry[]} */
@@ -176,13 +213,39 @@ export async function lookupEntries(keys, langFrom) {
 }
 
 /**
- * @returns {Promise<Dictionary[]>} oldest first, which is the order they are asked in
+ * @returns {Promise<Dictionary[]>} in the order they are asked in, which is the
+ *   order the settings page has to show them in
  */
 export async function listDictionaries() {
   const records = /** @type {Dictionary[]} */ (
     await withStores([META], "readonly", (transaction) => promisify(transaction.objectStore(META).getAll()))
   );
-  return records.sort((a, b) => a.addedAt - b.addedAt || a.id.localeCompare(b.id));
+  return answerOrder(records);
+}
+
+/**
+ * The order somebody arranged on the settings page, written down.
+ *
+ * Every record is renumbered from zero rather than the moved pair being
+ * swapped: two numbers swapped in a store whose ranks came from anywhere else
+ * (a half-finished write, a dictionary imported by a second page) would leave
+ * the gap that put them in the wrong order still there. Renumbering the whole
+ * short list is one transaction and leaves nothing to reason about.
+ *
+ * @param {string[]} ids the installed dictionaries, in the order they should answer
+ * @returns {Promise<void>}
+ */
+export async function reorderDictionaries(ids) {
+  await withStores([META], "readwrite", async (transaction) => {
+    const store = transaction.objectStore(META);
+    const stored = /** @type {Dictionary[]} */ (await promisify(store.getAll()));
+
+    const ordered = inChosenOrder(stored, ids);
+    for (const [at, dictionary] of ordered.entries()) {
+      if (dictionary.rank === at) continue;
+      await promisify(store.put({ ...dictionary, rank: at }));
+    }
+  });
 }
 
 /**
@@ -197,22 +260,28 @@ export async function listDictionaries() {
  * @returns {Promise<Dictionary>}
  */
 export async function beginImport({ name, langFrom, langTo, credit }) {
-  /** @type {Dictionary} */
-  const dictionary = {
-    id: crypto.randomUUID(),
-    name,
-    langFrom,
-    langTo,
-    entryCount: 0,
-    aliasCount: 0,
-    bytes: 0,
-    addedAt: Date.now(),
-    ready: false,
-    credit,
-  };
+  return await withStores([META], "readwrite", async (transaction) => {
+    const store = transaction.objectStore(META);
+    const stored = /** @type {Dictionary[]} */ (await promisify(store.getAll()));
 
-  await withStores([META], "readwrite", (transaction) => promisify(transaction.objectStore(META).put(dictionary)));
-  return dictionary;
+    /** @type {Dictionary} */
+    const dictionary = {
+      id: crypto.randomUUID(),
+      name,
+      langFrom,
+      langTo,
+      entryCount: 0,
+      aliasCount: 0,
+      bytes: 0,
+      addedAt: Date.now(),
+      rank: nextRank(stored),
+      ready: false,
+      credit,
+    };
+
+    await promisify(store.put(dictionary));
+    return dictionary;
+  });
 }
 
 /**

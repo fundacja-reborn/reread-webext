@@ -12,7 +12,7 @@ Works in Firefox (desktop and Android) and in Chrome/Chromium.
 
 - **Bubble on selection.** Select a word or phrase to see its translation. The engine (Bergamot - the technology behind Firefox's built-in page translation) ships inside the package and runs on your device, so translation works even in airplane mode.
 - **About a hundred language pairs.** Models are downloaded once from the settings page - or added from your own files - and stored locally; an installed pair shows an Update button when Mozilla publishes a new build.
-- **Dictionaries beside the engine.** A translation model has to pick one meaning; a dictionary lists them all. StarDict dictionaries - a catalogue of about five hundred WikDict pairs installable with one click, or your own files - appear in the bubble under **More**, and clicking a line attaches that meaning to the saved phrase.
+- **Dictionaries beside the engine.** A translation model has to pick one meaning; a dictionary lists them all. StarDict dictionaries - a catalogue of about five hundred WikDict pairs installable with one click, or your own files - appear in the bubble under **More**, and clicking a line attaches that meaning to the saved phrase. Install several and two arrows on the settings page decide which of them answers first.
 - **Read aloud.** A phrase from the bubble, or a whole article in the reader - with live highlighting of the word being spoken, pause/resume, sentence skip and speed control. Voices are the browser's own, configurable per language.
 
 **Vocabulary**
@@ -125,6 +125,8 @@ Supported format: **StarDict** (`.ifo`, `.idx`, `.dict`/`.dict.dz`, optional `.s
 The settings page carries a catalogue of about five hundred [WikDict](https://www.wikdict.com/) pairs (CC BY-SA, built from Wiktionary); one click downloads and installs a dictionary, and you can also add StarDict files by hand. Dictionary downloads carry no pinned checksum (WikDict rebuilds its files in place), but every archive is validated - a plain zip of StarDict files, with sizes and CRCs checked - and parsed defensively once, when it is added. Attribution is kept and shown on the settings page.
 
 Dictionaries are matched by the language of their headwords, not by the pair - so a monolingual dictionary added from files (English-English, say) answers beside the bilingual ones: under **More** while translating, straight in the bubble with translation switched off.
+
+With more than one installed, the bubble answers in the order the settings page lists them, and two arrows on each row change it - put the English-English one above the English-Polish one and that is the order you read them in.
 
 For English-Polish, WikDict is the recommended start: 66,609 entries plus 51,721 alternative spellings in its `.syn` file (which is what lets `elevations` find `elevation`). FreeDict's `eng-pol` StarDict build (release 0.2.1) is mostly missing the Polish translations (checked 2026-08-11); other FreeDict pairs may be fine.
 

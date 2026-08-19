@@ -783,6 +783,9 @@
   "options_dictionaries_intro": {
     "message": "Pobierz słownik (lub słowniki), aby móc sprawdzać różne znaczenia zaznaczonego słowa. Przy tłumaczeniu wybierasz i zapisujesz znaczenia pasujące do kontekstu; z wyłączonym tłumaczeniem definicje po prostu odpowiadają na zaznaczenie w widoku czytania."
   },
+  "options_dictionary_order_hint": {
+    "message": "Dymek odpowiada w kolejności z listy poniżej - strzałki przesuwają słownik w górę i w dół. Odpowiadają tylko słowniki języka, który czytasz."
+  },
   "options_dictionary_note_from": { "message": "Słowniki pobierane są z" },
   "options_dictionary_note_rest": {
     "message": "- to tam WikDict publikuje słowniki, które buduje z Wikisłownika (CC BY-SA). Gdy aktualizujesz listę, nic o tobie nie jest wysyłane - zapytanie pobiera jedynie świeżą listę."
@@ -933,6 +936,26 @@
       "name": { "content": "$1" },
       "detail": { "content": "$2" }
     }
+  },
+  "options_move_dictionary_up_aria": {
+    "message": "Przesuń $NAME$ w górę",
+    "placeholders": { "name": { "content": "$1", "example": "WikDict en-pl" } }
+  },
+  "options_move_dictionary_down_aria": {
+    "message": "Przesuń $NAME$ w dół",
+    "placeholders": { "name": { "content": "$1", "example": "WikDict en-pl" } }
+  },
+  "options_dictionary_moved": {
+    "message": "$NAME$ odpowiada teraz jako $PLACE$ z $TOTAL$.",
+    "placeholders": {
+      "name": { "content": "$1", "example": "WikDict en-pl" },
+      "place": { "content": "$2", "example": "1" },
+      "total": { "content": "$3", "example": "3" }
+    }
+  },
+  "options_reorder_failed": {
+    "message": "Nie udało się zmienić kolejności: $DETAIL$",
+    "placeholders": { "detail": { "content": "$1" } }
   },
   "options_no_catalog": { "message": "Nie ma słowników do pobrania - to wydanie nie wymienia żadnego." },
   "options_downloading_dictionary": {
