@@ -9,10 +9,11 @@
  * translated, behind "More".
  *
  * Finding where a sentence starts is a guess dressed as a rule, and the rule
- * here is deliberately small: a full stop ends a sentence unless it is doing
- * another job. Everything it gets wrong costs a slightly longer or shorter piece
- * of context - never a wrong translation of the phrase itself, which is
- * translated on its own either way.
+ * here is deliberately small: a stop ends a sentence unless it is doing another
+ * job, and it may be wearing a closing quotation mark when it does. Everything
+ * it gets wrong costs a slightly longer or shorter piece of context - never a
+ * wrong translation of the phrase itself, which is translated on its own either
+ * way.
  *
  * No DOM in this file: the caller hands over text and two offsets, so all of
  * this is testable without a browser.
@@ -20,8 +21,46 @@
 
 import { trimPhrase } from "./normalize.js";
 
-/** Ends a sentence on its own, wherever it appears. */
-const HARD_STOPS = new Set(["!", "?", "…", "\n"]);
+/**
+ * Ends a sentence on its own, whatever follows it. The one member is the line
+ * break the page's blocks leave behind: a heading has no full stop and is still
+ * the end of what it says.
+ */
+const HARD_STOP = "\n";
+
+/** What a sentence can end with, before whatever closes over it. */
+const STOPS = new Set([".", "!", "?", "…"]);
+
+/**
+ * Marks that may stand between the stop and the space after it and still leave
+ * the stop an ending: the quote the sentence was spoken inside, the bracket it
+ * was written inside. Straight `"` and `'` are listed by hand - Unicode files
+ * them under "other punctuation" together with the apostrophe, so no property
+ * catches them.
+ *
+ * This is what a full stop in quoted prose hides behind, and without it half of
+ * a news article is one sentence: `... negative.” Instead he said ...` has no
+ * ending in it, so the context around a phrase further down the paragraph grows
+ * until it is thrown away for being too long, and the reader gets nothing.
+ */
+const CLOSERS = new RegExp("[\\p{Pf}\\p{Pe}\"']", "u");
+
+/**
+ * A footnote reference, which hangs off a stop exactly like a closing quote:
+ * `... in 1809.[1] He was ...`. Wikipedia is where a reader of a foreign
+ * language spends half their time, and this is how Wikipedia writes.
+ *
+ * Sticky rather than anchored, so it can be tried at a position without
+ * slicing the text first.
+ */
+const FOOTNOTE = new RegExp("\\[\\d+\\]", "yu");
+
+/**
+ * How far past its stop an ending may reach. `.”)` and `.[12]` are the long
+ * ones; the bound is what keeps the walk backwards from every character in a
+ * block from being a walk over the whole block.
+ */
+const LONGEST_ENDING = 8;
 
 /**
  * Abbreviations that end in a full stop and are regularly followed by a capital
@@ -38,8 +77,14 @@ const ABBREVIATIONS = new Set([
  * How long a piece of context may get before it stops being a sentence and
  * starts being a paragraph somebody forgot to punctuate. Past this the reader
  * gets no context rather than a wall of text and the decoding time it costs.
+ *
+ * Six hundred rather than the four hundred it started at: one ordinary
+ * sentence of a news article - a bracketed aside and two quotations in it -
+ * measured 423 characters, and the reader got nothing at all for it. The cost
+ * is paid where a fresh selection is answered, because there the sentence
+ * rides in the same batch as the phrase and the bubble waits for both.
  */
-export const MAX_SENTENCE_LENGTH = 400;
+export const MAX_SENTENCE_LENGTH = 600;
 
 /**
  * @param {string} text
@@ -53,7 +98,53 @@ function wordBefore(text, index) {
 }
 
 /**
- * Whether the character at `index` ends a sentence.
+ * The last character of the ending that begins with the stop at `stop`: the
+ * stop itself, or the last of the marks hung on it. `Really?!`, `over.”`,
+ * `(really.)`, `1809.[1]` all end at their last character rather than at the
+ * punctuation mark in the middle of them.
+ *
+ * @param {string} text
+ * @param {number} stop
+ * @returns {number}
+ */
+function endOfEnding(text, stop) {
+  let at = stop + 1;
+  for (;;) {
+    const character = text[at];
+    if (character === undefined) break;
+    if (STOPS.has(character) || CLOSERS.test(character)) {
+      at += 1;
+      continue;
+    }
+    FOOTNOTE.lastIndex = at;
+    if (FOOTNOTE.test(text)) {
+      at = FOOTNOTE.lastIndex;
+      continue;
+    }
+    break;
+  }
+  return at - 1;
+}
+
+/**
+ * The stop of the ending that finishes at `index`, or null when the character
+ * there is not the last of one.
+ *
+ * @param {string} text
+ * @param {number} index
+ * @returns {number | null}
+ */
+function stopOf(text, index) {
+  for (let at = index; at >= 0 && index - at <= LONGEST_ENDING; at -= 1) {
+    if (STOPS.has(text[at] ?? "") && endOfEnding(text, at) === index) return at;
+  }
+  return null;
+}
+
+/**
+ * Whether the character at `index` ends a sentence - the whole ending, so the
+ * quote a sentence was spoken inside stays with it instead of opening the next
+ * one.
  *
  * Exported for the reader's reading aloud (D87), which cuts an article into
  * utterances at exactly these places: one rule, so a full stop that is not an
@@ -67,23 +158,37 @@ function wordBefore(text, index) {
 export function endsSentence(text, index) {
   const character = text[index];
   if (character === undefined) return false;
-  if (HARD_STOPS.has(character)) return true;
-  if (character !== ".") return false;
+  if (character === HARD_STOP) return true;
+  // The cheap door first: this runs over every character of an article when the
+  // reader is being read to, and only a handful of them can end anything.
+  if (!STOPS.has(character) && !CLOSERS.test(character)) return false;
+
+  const stop = stopOf(text, index);
+  if (stop === null) return false;
 
   const next = text[index + 1];
-  // `3.14` and `example.com`: a full stop with text hard against it is inside
-  // something, not after it.
+  // `3.14`, `example.com` and `Yahoo!Inc`: a stop with text hard against it is
+  // inside something, not after it.
   if (next !== undefined && !/\s/u.test(next)) return false;
 
-  const word = wordBefore(text, index - 1);
-  // One letter before the stop is an initial or `e.g.`, never the end of a
-  // sentence somebody wrote.
-  if (word.length === 1) return false;
-  if (ABBREVIATIONS.has(word)) return false;
+  if (text[stop] === ".") {
+    const word = wordBefore(text, stop - 1);
+    // One letter before the stop is an initial or `e.g.`, never the end of a
+    // sentence somebody wrote.
+    if (word.length === 1) return false;
+    if (ABBREVIATIONS.has(word)) return false;
+  }
 
   // What follows decides the rest. A lower-case letter continues what was
   // already going on, and so does a digit: sentences rarely start with one,
   // while `godz. 15`, `vol. 3` and `p. 40` are everywhere.
+  //
+  // A question mark and an exclamation mark answer to this too, which is the
+  // other half of reading quoted prose: `He said “stop!” and the driver
+  // braked` is one sentence, and taking the `!` for an ending left the reader
+  // a piece of context beginning with a closing quotation mark. What ends a
+  // sentence for real - `“Stop!” The driver braked.` - is followed by a
+  // capital either way.
   const following = text.slice(index + 1).match(/\S/u)?.[0];
   if (following === undefined) return true;
   return !/[\p{Ll}\p{N}]/u.test(following);

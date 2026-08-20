@@ -40,6 +40,18 @@ describe("chunkText", () => {
     assert.deepEqual(spoken(text, chunkText(text)), [text]);
   });
 
+  it("keeps a closing quotation mark with the sentence it ends", () => {
+    // The other half of the shared rule: a voice that stopped at the `!` would
+    // breathe in the middle of `he said`, and start the next utterance on a
+    // quotation mark with nothing in front of it.
+    const text = "He said “stop!” and the driver braked. “It is over.” She left.";
+    assert.deepEqual(spoken(text, chunkText(text)), [
+      "He said “stop!” and the driver braked.",
+      "“It is over.”",
+      "She left.",
+    ]);
+  });
+
   it("ends a chunk at every block boundary, punctuated or not", () => {
     // A heading has no full stop and is still its own utterance: the line
     // break the page's blocks leave behind is an ending.
