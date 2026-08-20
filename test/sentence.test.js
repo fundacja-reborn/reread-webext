@@ -61,6 +61,66 @@ describe("sentenceAround", () => {
     assert.equal(around("He waited… The [door] opened."), "The door opened.");
   });
 
+  it("finds the stop a closing quotation mark hides", () => {
+    // Half of a news article is written like this, and without the rule the
+    // context grows backwards until it is thrown away for being too long -
+    // which the reader sees as a bubble with no sentence in it at all.
+    assert.equal(around("It “ended.” She [walked] away."), "She walked away.");
+    assert.equal(around('It "ended." She [walked] away.'), "She walked away.");
+    assert.equal(around("It ‘ended.’ She [walked] away."), "She walked away.");
+    assert.equal(around("It ended (really.) She [walked] away."), "She walked away.");
+    assert.equal(around("To koniec.” Ona [poszła] sobie."), "Ona poszła sobie.");
+    assert.equal(around("C'est fini.» Elle [partit] sans un mot."), "Elle partit sans un mot.");
+  });
+
+  it("keeps the closing quotation mark with the sentence it closes", () => {
+    assert.equal(
+      around("He wrote, “I think he [should] go.” Nobody replied."),
+      "He wrote, “I think he should go.”",
+    );
+  });
+
+  it("does not break on a question or an exclamation inside a quotation", () => {
+    assert.equal(
+      around("He said “stop!” and the [driver] braked hard."),
+      "He said “stop!” and the driver braked hard.",
+    );
+    assert.equal(
+      around("He asked “why?” and the [driver] shrugged twice."),
+      "He asked “why?” and the driver shrugged twice.",
+    );
+    assert.equal(
+      around("He waited… and the [driver] braked hard at last."),
+      "He waited… and the driver braked hard at last.",
+    );
+  });
+
+  it("breaks after a quoted question or exclamation that did end the sentence", () => {
+    assert.equal(around("He said “stop!” She [walked] away."), "She walked away.");
+    assert.equal(around("He asked “why?” She [walked] away."), "She walked away.");
+  });
+
+  it("steps over the footnote reference a page hangs off the stop", () => {
+    // Offsets by hand: the brackets of a footnote are the brackets this file
+    // marks a selection with.
+    const text = "He was born in 1809.[1] She walked away.";
+    const at = text.indexOf("walked");
+    assert.equal(sentenceAround(text, at, at + 6), "She walked away.");
+  });
+
+  it("does not break on a semicolon, a colon or a dash", () => {
+    assert.equal(around("He came home; the [light] was on."), "He came home; the light was on.");
+    assert.equal(around("One thing was clear: the [driver] had not seen it."), "One thing was clear: the driver had not seen it.");
+    assert.equal(around("The plan - his own - was [simple] enough."), "The plan - his own - was simple enough.");
+  });
+
+  it("still calls a long newspaper sentence a sentence", () => {
+    const text = `The report said ${"that it went on and on ".repeat(20)}until the [end].`;
+    const length = text.length - 2;
+    assert.ok(length > 400 && length < MAX_SENTENCE_LENGTH, `the case is ${length} characters long`);
+    assert.equal(around(text), text.replace("[", "").replace("]", ""));
+  });
+
   it("breaks on a line inside one block", () => {
     assert.equal(around("First line\nThe [second] line"), "The second line");
   });
