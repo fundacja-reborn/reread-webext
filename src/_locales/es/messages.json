@@ -62,7 +62,7 @@
     "message": "Todavía no hay ningún modelo de traducción en este dispositivo - pulsa aquí para elegir uno en los ajustes."
   },
   "popup_translation_off": {
-    "message": "La traducción está desactivada - re/read funciona solo como vista de lectura. Vuelve a activarla en los ajustes."
+    "message": "La traducción está desactivada - re/read funciona solo como vista de lectura."
   },
 
   "vocab_title": { "message": "re/read - frases guardadas" },

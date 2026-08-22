@@ -62,7 +62,7 @@
     "message": "Aucun modèle de traduction sur cet appareil pour l'instant - appuyez ici pour en choisir un dans les paramètres."
   },
   "popup_translation_off": {
-    "message": "La traduction est désactivée - re/read fonctionne comme un lecteur. Réactivez-la dans les paramètres."
+    "message": "La traduction est désactivée - re/read fonctionne comme un lecteur."
   },
 
   "vocab_title": { "message": "re/read - phrases enregistrées" },

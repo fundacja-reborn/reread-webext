@@ -62,7 +62,7 @@
     "message": "Auf diesem Gerät gibt es noch kein Übersetzungsmodell - drücken Sie hier und wählen Sie eines in den Einstellungen."
   },
   "popup_translation_off": {
-    "message": "Die Übersetzung ist ausgeschaltet - re/read arbeitet als Leseansicht. In den Einstellungen schalten Sie sie wieder ein."
+    "message": "Die Übersetzung ist ausgeschaltet - re/read arbeitet als Leseansicht."
   },
 
   "vocab_title": { "message": "re/read - gespeicherter Wortschatz" },

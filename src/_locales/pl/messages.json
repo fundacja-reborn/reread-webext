@@ -62,7 +62,7 @@
     "message": "Na tym urządzeniu nie ma jeszcze modelu tłumaczeniowego - naciśnij tutaj i wybierz go w ustawieniach."
   },
   "popup_translation_off": {
-    "message": "Tłumaczenie jest wyłączone - re/read działa jako czytnik. Włączysz je z powrotem w ustawieniach."
+    "message": "Tłumaczenie jest wyłączone - re/read działa jako czytnik."
   },
 
   "vocab_title": { "message": "re/read - zapisane frazy" },

@@ -1,10 +1,14 @@
 /**
  * The toolbar popup: the basic acts on top, the door to the settings at the
- * bottom, in the place every user already looks for them. Seven rows -
- * whether re/read runs on this site, which pair is being read, whether the
- * bubble keeps its actions folded (D81 - a reading preference somebody flips
- * mid-article), this page in the reader, the reading list, the saved
- * phrases, the settings - and nothing else.
+ * bottom, in the place every user already looks for them. Whether re/read
+ * runs on this site, this page in the reader, which pair is being read, the
+ * extension's own rooms, then the three reading preferences somebody flips
+ * mid-article - the bubble's fold (D81), reader-only mode (D111) and
+ * translation itself (D128) - the settings, and nothing else.
+ *
+ * The order is the popup's one rule: from what is pressed daily down to what
+ * is flipped seldom. Which rows stand at all is `rows.js`, because a fresh
+ * install and the translation-off setting each take some of them away.
  *
  * The popup knows which tab it stands over and nothing more: `tabs.query`
  * without the `tabs` permission answers with an id and no address, on purpose.
@@ -31,6 +35,7 @@ import { listModels } from "../lib/models/store.js";
 import { Message, asPageInfo, asResult } from "../lib/protocol.js";
 import { watchToolbarScheme } from "../lib/theme-icon.js";
 import { pairChoices } from "./choices.js";
+import { popupRows } from "./rows.js";
 
 // First, so the rows are already in the catalogue's language when they show.
 localizePage();
@@ -64,6 +69,9 @@ const supportButton = document.getElementById("open-support");
 const SUPPORT_URL = "https://reapps.eu/#support";
 const readerOnlyToggle = /** @type {HTMLInputElement | null} */ (
   document.getElementById("reader-only")
+);
+const translationToggle = /** @type {HTMLInputElement | null} */ (
+  document.getElementById("no-translation")
 );
 
 /** The tab under the popup, and what it said about itself. */
@@ -158,6 +166,18 @@ async function toggleQuietBubble() {
   await writeConfig({ hideBubbleActions: quietToggle.checked });
 }
 
+async function toggleTranslationOff() {
+  if (translationToggle === null) return;
+  // The settings page's own write, and then the popup redraws itself: this is
+  // the one switch here that changes what the popup is - the pair, the
+  // phrases and the two switches below it come and go with it - and a hallway
+  // left describing the mode before the press would be lying about the press
+  // that was just made. Every open page follows the same write through
+  // `storage.onChanged`, launcher or reading side, no reload.
+  await writeConfig({ translationOff: translationToggle.checked });
+  showRows(await readConfig(), (await installedModels()).length);
+}
+
 async function toggleReaderOnly() {
   if (readerOnlyToggle === null) return;
   // The settings page's own write: the first press stores a real choice, and
@@ -242,6 +262,7 @@ async function openSupport() {
 siteToggle?.addEventListener("change", () => void toggleSite());
 quietToggle?.addEventListener("change", () => void toggleQuietBubble());
 readerOnlyToggle?.addEventListener("change", () => void toggleReaderOnly());
+translationToggle?.addEventListener("change", () => void toggleTranslationOff());
 pairSelect?.addEventListener("change", () => void choosePair());
 readerButton?.addEventListener("click", () => void openReader());
 libraryButton?.addEventListener("click", () => void openLibrary());
@@ -252,12 +273,48 @@ supportButton?.addEventListener("click", () => void openSupport());
 // The signpost is a door to the same place the settings row leads.
 setupRow?.addEventListener("click", () => void openSettings());
 
+/**
+ * The translation models on this device. A database that cannot be opened
+ * reads as none, and the popup then points at the settings - which is where
+ * the truth gets told either way.
+ *
+ * @returns {Promise<import("./choices.js").PairChoice[]>}
+ */
+async function installedModels() {
+  return await listModels().catch(() => []);
+}
+
+/**
+ * @param {Element | null} row
+ * @param {boolean} shown
+ */
+function stand(row, shown) {
+  if (row !== null) row.toggleAttribute("hidden", !shown);
+}
+
+/**
+ * Which rows stand, from the rule in `rows.js` - the whole of what a fresh
+ * install and the translation-off setting (D120) do to this popup. Called on
+ * every draw and again the moment the switch that decides it is flipped.
+ *
+ * @param {import("../lib/config.js").Config} config
+ * @param {number} installed how many models this device holds
+ */
+function showRows(config, installed) {
+  const rows = popupRows({ translationOff: config.translationOff, fresh: installed === 0 });
+  stand(pairRow, rows.pair);
+  stand(setupRow, rows.setup);
+  stand(document.getElementById("translation-off-note"), rows.translationNote);
+  stand(vocabularyButton, rows.vocabulary);
+  stand(document.getElementById("quiet-row"), rows.quiet);
+  stand(document.getElementById("reader-only-row"), rows.readerOnly);
+  stand(document.getElementById("no-translation-row"), rows.translation);
+}
+
 async function render() {
   const [config, installed, tabId, os] = await Promise.all([
     readConfig(),
-    // A database that cannot be opened reads as no models, and the popup then
-    // points at the settings - which is where the truth gets told either way.
-    listModels().catch(() => []),
+    installedModels(),
     currentTabId(),
     platformOs(),
   ]);
@@ -272,26 +329,9 @@ async function render() {
   if (readerOnlyToggle !== null) readerOnlyToggle.checked = effectiveReaderOnly(config, os);
 
   over.tabId = tabId;
-  // A fresh install has no model at all, and a pair select would promise a
-  // translation nothing can deliver. The signpost stands in the row's place
-  // until the first model lands.
-  const fresh = installed.length === 0;
-  // With translation switched off (D120) everything about translating leaves
-  // the popup - the pair, the setup signpost, the bubble and mode switches
-  // (the trimmed bubble ignores the fold, and every ordinary page is a
-  // launcher page already), and the saved phrases row. One quiet note stands
-  // in their place, so the state never reads as a breakage.
-  const off = config.translationOff;
-  if (pairRow !== null) pairRow.hidden = fresh || off;
-  if (setupRow !== null) setupRow.hidden = !fresh || off;
-  const offNote = document.getElementById("translation-off-note");
-  if (offNote !== null) offNote.hidden = !off;
-  if (vocabularyButton !== null) vocabularyButton.hidden = off;
-  const quietRow = document.getElementById("quiet-row");
-  if (quietRow !== null) quietRow.hidden = off;
-  const readerOnlyRow = document.getElementById("reader-only-row");
-  if (readerOnlyRow !== null) readerOnlyRow.hidden = off;
+  showRows(config, installed.length);
   if (quietToggle !== null) quietToggle.checked = config.hideBubbleActions;
+  if (translationToggle !== null) translationToggle.checked = config.translationOff;
   choices = pairChoices(config, installed);
   renderPair(config);
   renderSite(await askPage(tabId), config);
