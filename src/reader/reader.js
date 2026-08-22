@@ -3713,10 +3713,19 @@ async function stepRate(by) {
 }
 
 /**
+ * A press in the panel belongs to the button it landed in, not to the element
+ * that caught it (D132). Two of these rows draw the thing they are about
+ * *inside* their buttons - the highlighter's ink, the underline's own line -
+ * and aiming at that thing, which is the whole reason it is drawn, used to
+ * land on it and be dropped (Michał's report, 2026-08-22: the first press on
+ * an underline swatch did nothing, and only a second one, landing a pixel
+ * off the line, took). The mark bar's inks have always been read this way.
+ *
  * @param {Event} event
  */
 async function onDisplayPress(event) {
-  const button = event.target;
+  const target = event.target;
+  const button = target instanceof Element ? target.closest("button") : null;
   if (!(button instanceof HTMLButtonElement)) return;
 
   const rate = button.getAttribute("data-rate");
