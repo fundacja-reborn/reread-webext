@@ -70,13 +70,18 @@
  * the page the rest of the way, so the phrase - or at least its first line,
  * when it is long - is on the screen saying what the bubble answers.
  *
- * It comes in two variants, and they are one column told apart by nothing but
- * its starting state (D44). A phrase already kept is a question - what was
- * this again - so `recall` opens folded to one line, and the row of actions
- * unfolds only when somebody arrives inside the bubble, with a cursor, with a
- * press or with the keyboard. A fresh selection is the other way round: what
- * to do with it is the whole of why the bubble is open, so `save` opens with
- * the row already out.
+ * It comes in two variants, and they were one column told apart by nothing but
+ * its starting state (D44): a phrase already kept is a question - what was this
+ * again - so `recall` opened folded to one line, while a fresh selection had
+ * what to do with it as the whole reason the bubble was open, and `save`
+ * opened with the row already out.
+ *
+ * Since D131 that starting state is the reader's, not the variant's: the
+ * quiet-bubble setting (D81) says whether a row waits to be asked for, and it
+ * says it about every bubble - the caller passes it, and a bubble told nothing
+ * opens with its row out. The fold itself is unchanged; what changed is who
+ * decides it. What no setting may hide is a Save or an error's one button:
+ * `reveal()` brings the row out when one of them turns out to be the point.
  */
 
 import { MEANING_SEPARATOR, afterChoosing, toMeanings } from "../lib/gloss.js";
@@ -589,10 +594,10 @@ export const STYLE = `
   /* The row of actions, folded. The fold is a grid row going from zero to one
      fraction - the one way to animate to a height nobody knows in advance - and
      the clipped child below is what makes it read as unfolding rather than as
-     text being squeezed. Folded is where every bubble starts, and the whole of
-     the difference between the variants (D44) is when they leave: "recall"
-     waits for somebody to come looking, everything else opens with the
-     revealed class already on (see show), and the fold is never seen. */
+     text being squeezed. Folded is where every bubble starts; whether it is
+     ever seen there is the reader's setting (D81, D131) - with the row asked
+     for, the revealed class is on from the first frame (see show) and the fold
+     is never seen; without it, the row waits for somebody to come looking. */
   .reveal {
     display: grid;
     grid-template-rows: 0fr;
@@ -890,12 +895,12 @@ export const STYLE = `
  */
 
 /**
- * `folded` overrides the variant's own rule for where the row of actions
- * starts (D44): with the quiet-bubble setting on (D81) even a fresh
- * selection opens with the row away, because the phrase mostly keeps itself
- * and the buttons are an aside - `reveal()` is the caller's way to bring the
- * row out after all when one of them turns out to be the point (Save, an
- * error's way to settings).
+ * `folded` is where the row of actions starts, and the whole of that decision
+ * (D131): the caller holds the quiet-bubble setting (D81) and hands it down
+ * on every opening, so one checkbox answers for the bubble over a fresh
+ * selection and the bubble over an underline alike. Said nothing, the row is
+ * out. `reveal()` is the caller's way to bring it out after all when one
+ * button turns out to be the point (Save, an error's way to settings).
  *
  * `anchored` pins the bubble to the page rather than to the viewport: the
  * host goes `absolute` at the document coordinates the anchor had when shown,
@@ -2078,12 +2083,16 @@ export function createTooltip({ onAction, onHide }) {
           bubble.style.removeProperty("--bubble-scale");
         }
         // The bubble is reused from phrase to phrase, and a row left out was
-        // out for the last one. Only recall starts folded: everywhere else the
-        // row is why the bubble is open, so it starts revealed (D44) - unless
-        // the caller says otherwise (`folded`: the quiet-bubble setting, D81).
+        // out for the last one. The caller decides, and only the caller: it is
+        // the one that knows the quiet-bubble setting (D81), and that setting
+        // is a sentence about every bubble (D131). Said nothing, the row is
+        // out - a bubble whose row is why it is open is the ordinary case, and
+        // a variant that folded itself here would be a rule quietly outvoting
+        // the reader's own (which is exactly what D131 came to fix: the recall
+        // bubble folded itself, so half the settings had no effect on it).
         // A press that never became a click is cleared the same way: a finger
         // dragged back out of the bubble may not eat the next press.
-        bubble.classList.toggle("revealed", folded === undefined ? variant !== "recall" : !folded);
+        bubble.classList.toggle("revealed", folded !== true);
         swallowClick = false;
       }
       // Folded again: this is another phrase, and the sentence behind "More"
