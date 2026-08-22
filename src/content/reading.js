@@ -172,9 +172,11 @@ const tooltip = createTooltip({
 
 /**
  * The quiet-bubble setting (D81), mirrored from the config the way the
- * vocabulary is: a fresh bubble opens with its action row folded while this
- * is on, and the row comes out on a press, on approach - or by itself when
- * Save or an error's one button is the point, which no setting may hide.
+ * vocabulary is: while this is on, a bubble opens with its action row folded -
+ * every bubble, the answer to a fresh selection and the answer to a tap on an
+ * underline alike (D131) - and the row comes out on a press, on approach - or
+ * by itself when Save or an error's one button is the point, which no setting
+ * may hide.
  */
 let hideActions = DEFAULTS.hideBubbleActions;
 
@@ -663,9 +665,12 @@ function showSaved(anchor, text, normalized, context, how = {}) {
   // to the background (`fillSecondLayer`).
   secondLayer = ["more"];
   unfetched = { context };
-  // Recall: the answer, and nothing else until it is asked for (D44). Somebody
-  // who clicked an underline wanted to know what the word was, and Learned is a
-  // rare press on a decision they have already made - it can wait inside.
+  // Recall: the answer first, and the row of actions with it or behind a fold,
+  // exactly as the quiet-bubble setting says (D131). D44 made this variant the
+  // folded one on its own - somebody who clicked an underline wanted to know
+  // what the word was, and Learned is a rare press on a decision they have
+  // already made - but that was a rule about one of the two bubbles, and the
+  // setting is a sentence about all of them: with it off, nothing hides.
   tooltip.show({
     anchor,
     line: how.range === undefined ? 0 : firstLineOf(how.range),
@@ -673,6 +678,7 @@ function showSaved(anchor, text, normalized, context, how = {}) {
     body: meanings.join("\n"),
     actions: [...KEPT, ...secondLayer],
     phrase: text,
+    folded: hideActions,
     touch: how.touch === true,
     // Not `how.touch`, which a tap on an underline honestly lacks - the
     // system puts no handles around a tap. What sizes the bubble is the
@@ -911,9 +917,10 @@ function present(selection, { deliberate, touch, chain = false }) {
   // The other variant: a fresh selection is a phrase nothing has been decided
   // about yet, so what can be done with it is on show from the first frame -
   // unless the quiet-bubble setting says the answer comes first and the row
-  // waits to be asked for (D81), exactly like a recall's. What the setting
-  // never hides is a Save or an error's button: those reveal on their own
-  // when the answer lands (`reveal`).
+  // waits to be asked for (D81). The same one answer as the recall bubble's
+  // above (D131): one checkbox, every opening. What the setting never hides
+  // is a Save or an error's button: those reveal on their own when the answer
+  // lands (`reveal`).
   tooltip.show({
     anchor: selection.rect,
     line: firstLineOf(selection.range),
@@ -927,7 +934,7 @@ function present(selection, { deliberate, touch, chain = false }) {
     // selection size for the finger, a mouse gesture for the desk.
     coarse: touchPointer(lastPointerType),
     scale: bubbleScale / 100,
-    folded: hideActions ? true : undefined,
+    folded: hideActions,
     anchored,
   });
 
