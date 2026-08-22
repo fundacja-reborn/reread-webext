@@ -68,7 +68,8 @@ body[data-os="android"] .popup-row {
 /* The checkbox rows: the switch stays a switch, whatever the label does. */
 .popup-site input,
 .popup-quiet input,
-.popup-reader-only input {
+.popup-reader-only input,
+.popup-no-translation input {
   flex: none;
   margin: 0;
   accent-color: var(--page-accent);

@@ -98,8 +98,8 @@
     "description": "Stands in the popup where the pair select would be, while no model is stored. The whole row is a button that opens the settings page."
   },
   "popup_translation_off": {
-    "message": "Translation is switched off - re/read is working as a reader. Turn it back on in the settings.",
-    "description": "Stands in the popup where the pair row would be while the translation-off setting (D120) is on. A plain note, not a button."
+    "message": "Translation is switched off - re/read is working as a reader.",
+    "description": "Stands in the popup where the pair row would be while the translation-off setting (D120) is on. A plain note, not a button - since D128 the switch itself is a few rows below, so the note no longer points at the settings."
   },
 
   "vocab_title": { "message": "re/read - saved phrases" },

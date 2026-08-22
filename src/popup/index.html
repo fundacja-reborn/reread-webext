@@ -12,11 +12,13 @@
   </head>
   <body>
     <!--
-      Ten rows and nothing else: this site and what to do with it first, the
-      three reading preferences, the extension's own pages, and the quiet
+      Eleven rows and nothing else: this site and what to do with it first,
+      the extension's own pages, the three reading preferences, and the quiet
       heart. No counters, no logo - the popup is a hallway, not a room. On a
       fresh install the pair row yields its place to a signpost, because a
-      pair nothing can translate yet is a promise the popup must not make.
+      pair nothing can translate yet is a promise the popup must not make;
+      with translation switched off most of these rows leave altogether
+      (`rows.js` holds the whole rule).
     -->
     <!-- The English in this file is the fallback: `localizePage` swaps every
          `data-i18n`-marked text for the catalogue's language before the popup
@@ -80,11 +82,11 @@
     </button>
     <!-- Stands where the pair row would: with translation switched off (D120)
          this is the popup's one word about why nothing translates, so the
-         state never reads as a breakage. A quiet note, not a switch - the
-         choice is a deliberate one and lives on the settings page. -->
+         state never reads as a breakage. It stopped pointing at the settings
+         when the switch moved into this popup (D128) - the way back is nine
+         rows down, not in another room. -->
     <p class="popup-row popup-note" id="translation-off-note" data-i18n="popup_translation_off" hidden>
-      Translation is switched off - re/read is working as a reader. Turn it back on in the
-      settings.
+      Translation is switched off - re/read is working as a reader.
     </p>
 
     <!-- The extension's rooms right under the pair (Michał's call, second
@@ -121,6 +123,20 @@
     <label class="popup-row popup-reader-only" id="reader-only-row">
       <span data-i18n="options_reader_only">Only in the reader</span>
       <input type="checkbox" id="reader-only" />
+    </label>
+
+    <!-- The translation-off switch (D120), in the popup since D128 and last
+         of the three, right above the settings: it is flipped the rarest of
+         all - an article read in one's own language, an evening of reading
+         rather than of learning - and the popup's order runs from what is
+         pressed daily to what is flipped seldom. The one switch that stays
+         when it is on: it is the way back, and the rows it takes away say
+         their own piece in the note above. The promise it stands on
+         ("nothing is deleted") is too long for a hallway and stays on the
+         settings page, where the same switch keeps its hint. -->
+    <label class="popup-row popup-no-translation" id="no-translation-row">
+      <span data-i18n="options_no_translation">Use without translation</span>
+      <input type="checkbox" id="no-translation" />
     </label>
 
     <button type="button" class="popup-row popup-action" id="open-settings" data-i18n="settings">
