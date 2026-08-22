@@ -34,6 +34,20 @@ describe("the manifest that gets signed", () => {
     assert.match(version, /^\d+\.\d+\.\d+$/, `"${version}" is not <major>.<minor>.<patch>`);
   });
 
+  it("keeps the name inside what the narrower store shows", async () => {
+    const { name, short_name } = await json("../src/manifest.json");
+    // The Chrome Web Store has no title field: the listing is headed by this
+    // string, and Chrome refuses a package whose name runs past 45 characters
+    // (AMO allows 50). Both stores were given the same title on purpose, so a
+    // name edited past the floor here is a rejected upload, not a long heading.
+    assert.ok(
+      name.length <= 45,
+      `the name is ${name.length} characters, over the 45 Chrome accepts`,
+    );
+    // The brand alone, for the places a browser has no room for the tagline.
+    assert.equal(short_name, "re/read");
+  });
+
   it("keeps the extension id the first signature bound", async () => {
     const { browser_specific_settings } = await json("../src/manifest.json");
     assert.equal(browser_specific_settings.gecko.id, "@reread-webext-reapps-eu");
