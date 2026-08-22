@@ -21,6 +21,27 @@ describe("fieldText", () => {
     assert.equal(fieldText({ type: "h", text: "&zzz; &#x110000;" }), "&zzz; &#x110000;");
   });
 
+  it("decodes the marks a book sets its entries in", () => {
+    // Reported from a real entry: `From even +&lrm; handed` reached the bubble
+    // with the ampersand still in it, because the invisible marks were not on
+    // the list. The bidi mark is kept rather than dropped - in an entry quoting
+    // a right-to-left script it is what puts the punctuation in the right place.
+    assert.equal(
+      fieldText({ type: "h", text: "From even +&lrm; handed" }),
+      `From even +${String.fromCodePoint(0x200e)} handed`,
+    );
+    assert.equal(
+      fieldText({ type: "h", text: "sense &mdash; gloss, 1914&ndash;1918, o&rsquo;clock, 40&deg;" }),
+      `sense ${String.fromCodePoint(0x2014)} gloss, 1914${String.fromCodePoint(0x2013)}1918, o’clock, 40°`,
+    );
+  });
+
+  it("tells two entities apart that differ only in case", () => {
+    // `&Prime;` is the double prime of a measurement, `&prime;` the single one;
+    // lower-casing every name would answer the second for both.
+    assert.equal(fieldText({ type: "h", text: "5&prime;7&Prime; &AMP; more" }), "5′7″ & more");
+  });
+
   it("drops the headword XDXF repeats in front of every entry", () => {
     assert.equal(fieldText({ type: "x", text: "<k>bank</k><def>brzeg</def>" }), "brzeg");
   });

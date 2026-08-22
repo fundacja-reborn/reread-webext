@@ -55,6 +55,23 @@ const XDXF_KEY = /<k>[\s\S]*?<\/k>/giu;
 
 const TAG = /<[^>]*>/gu;
 
+/**
+ * The named entities a dictionary actually writes, and nothing beyond them.
+ *
+ * The full HTML table is some two thousand names, which is a table nobody here
+ * would read; this is what turned up in real books. Five markup escapes, the
+ * marks that separate or shape a line, and the punctuation an entry is set in -
+ * `&mdash;` between a sense and its gloss, `&rsquo;` inside an English word,
+ * `&lrm;` in an etymology beside a word from a right-to-left script. That last
+ * one is how this list got longer: `even +&lrm; handed` reached the bubble with
+ * the ampersand still in it, on a screenshot going to a store.
+ *
+ * Invisible marks are decoded rather than dropped, because in an entry quoting
+ * Hebrew or Arabic they are what puts the punctuation on the right side of the
+ * word. They are written by code point for the reason the project writes every
+ * invisible character that way: a literal one is a character nobody sees in the
+ * diff.
+ */
 const NAMED_ENTITIES = Object.freeze({
   amp: "&",
   lt: "<",
@@ -62,6 +79,50 @@ const NAMED_ENTITIES = Object.freeze({
   quot: '"',
   apos: "'",
   nbsp: " ",
+
+  lrm: String.fromCodePoint(0x200e),
+  rlm: String.fromCodePoint(0x200f),
+  zwj: String.fromCodePoint(0x200d),
+  zwnj: String.fromCodePoint(0x200c),
+  shy: String.fromCodePoint(0x00ad),
+  ensp: " ",
+  emsp: " ",
+  thinsp: " ",
+
+  // Written by code point, not as themselves: the house style keeps a literal
+  // em dash out of our own prose, and a dash decoded from a book is the book's
+  // character rather than ours - it has to come out as what the book wrote.
+  mdash: String.fromCodePoint(0x2014),
+  ndash: String.fromCodePoint(0x2013),
+  hellip: "…",
+  lsquo: "‘",
+  rsquo: "’",
+  ldquo: "“",
+  rdquo: "”",
+  sbquo: "‚",
+  bdquo: "„",
+  laquo: "«",
+  raquo: "»",
+  prime: "′",
+  Prime: "″",
+
+  deg: "°",
+  times: "×",
+  divide: "÷",
+  plusmn: "±",
+  middot: "·",
+  bull: "•",
+  dagger: "†",
+  Dagger: "‡",
+  sect: "§",
+  para: "¶",
+  copy: "©",
+  reg: "®",
+  trade: "™",
+  micro: "µ",
+  sup1: "¹",
+  sup2: "²",
+  sup3: "³",
 });
 
 /**
@@ -70,9 +131,15 @@ const NAMED_ENTITIES = Object.freeze({
  */
 function decodeEntities(text) {
   return text.replace(/&(#x?[0-9a-f]+|[a-z]+);/giu, (whole, body) => {
-    const name = String(body).toLowerCase();
-    const named = /** @type {Record<string, string>} */ (NAMED_ENTITIES)[name];
+    const table = /** @type {Record<string, string>} */ (NAMED_ENTITIES);
+    const written = String(body);
+    // The spelling as written comes first: `&Prime;` and `&prime;` are two
+    // different marks, and lower-casing everything would let the second answer
+    // for both. Lower case second, so `&AMP;` still decodes.
+    const named = table[written] ?? table[written.toLowerCase()];
     if (named !== undefined) return named;
+
+    const name = written.toLowerCase();
 
     if (name.startsWith("#")) {
       const code = name.startsWith("#x") ? Number.parseInt(name.slice(2), 16) : Number.parseInt(name.slice(1), 10);
