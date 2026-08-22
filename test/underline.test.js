@@ -58,9 +58,11 @@ function declared(name, property) {
 }
 
 describe("the underline's weights", () => {
-  it("offers three, lightest first, and starts at the line as it always was", () => {
+  it("offers three, lightest first, and starts in the middle", () => {
     assert.deepEqual([...UNDERLINE_WEIGHTS], ["fine", "medium", "strong"]);
-    assert.equal(DEFAULT_UNDERLINE, "fine");
+    // D133, after a day on an e-ink panel: the line the screen swallows is
+    // not the one to hand somebody who has chosen nothing.
+    assert.equal(DEFAULT_UNDERLINE, "medium");
   });
 
   it("has a rule in the stylesheet for every weight", () => {
@@ -117,13 +119,16 @@ describe("the underline's weights", () => {
 });
 
 describe("the underline in the settings", () => {
-  it("is the line as it always was when nothing has been stored", () => {
+  it("is the middle weight when nothing has been stored", () => {
     assert.equal(withDefaults(undefined).underline, DEFAULT_UNDERLINE);
     assert.equal(withDefaults({}).underline, DEFAULT_UNDERLINE);
   });
 
-  it("keeps a weight this version knows", () => {
+  it("keeps a weight this version knows, the old default included", () => {
     assert.equal(withDefaults({ underline: "strong" }).underline, "strong");
+    // The whisper `fine` was the default until D133; a profile that pressed
+    // it keeps it, which is the whole point of storing a press.
+    assert.equal(withDefaults({ underline: "fine" }).underline, "fine");
   });
 
   it("falls back rather than paint under a name nothing styles", () => {

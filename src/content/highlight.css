@@ -48,9 +48,10 @@
  * moves both numbers at once, because the reason to reach for it is a screen,
  * not a taste: an e-ink panel has sixteen greys and rounds a thin faint rule
  * back into the paper, so a thicker line in the same faint ink would still be
- * faint exactly where the change was asked for. `fine` is the line as it has
- * always been drawn, and the one a profile that never touched the setting
- * gets.
+ * faint exactly where the change was asked for. `fine` is the line this
+ * extension drew for a year; **`medium` is what a profile that never touched
+ * the setting gets** (D133), because the first day of `fine` on a Boox Page
+ * settled the question of which of the three is the ordinary one.
  *
  * A rule per weight rather than a custom property, because the property would
  * have to be set on the root of the page being read - and that page keeps

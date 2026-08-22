@@ -1650,8 +1650,16 @@ button[data-armed],
    swatch fills the button, so a border-colour change reads as nothing
    (Michał's report from 0.4.7). A ring outside the frame says "this one" at
    a glance, in the Aa panel and on the mark toolbar alike - drawn as a
-   shadow so no box changes size, and dark enough to survive e-ink. */
+   shadow so no box changes size, and dark enough to survive e-ink.
+
+   The underline's weights joined them (D133, Michał's report from a Boox Page
+   at 0.5.3): a row of drawn swatches has no word to carry the accent into, so
+   the border colour is the whole of what a panel of sixteen greys has to tell
+   the chosen one by - and it tells it nothing. The rule is the swatch rows',
+   not the panel's: Theme, Type and Links say which one is on with their own
+   words in the accent, and a ring around a word would be shouting. */
 #marker-color-choices button[aria-pressed="true"],
+#underline-choices button[aria-pressed="true"],
 .mark-inks button[aria-pressed="true"] {
   box-shadow: 0 0 0 2px var(--page-accent);
 }

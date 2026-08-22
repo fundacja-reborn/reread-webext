@@ -28,11 +28,17 @@ export const UNDERLINE_WEIGHTS = /** @type {readonly UnderlineWeight[]} */ ([
 ]);
 
 /**
- * The line as it has always been drawn. A stored setting is always a
- * deliberate press, and a profile from before this existed looks exactly the
- * way it did.
+ * The middle step, since D133: `fine` is the line this extension drew for a
+ * year, and one day of it on an e-ink panel was enough to say that the line
+ * a screen swallows is not a line that does its job (Michał's call from a
+ * Boox Page). The middle is the one that survives paper without becoming the
+ * loudest thing in the paragraph; `fine` stays one press away for whoever
+ * reads on glass and wants the old whisper.
+ *
+ * The flip reaches every profile that never pressed the row - the setting is
+ * a day old, so in practice all of them - and a stored weight still wins.
  */
-export const DEFAULT_UNDERLINE = "fine";
+export const DEFAULT_UNDERLINE = "medium";
 
 /**
  * @param {unknown} value
