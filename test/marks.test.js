@@ -21,14 +21,18 @@ async function read(path) {
 }
 
 describe("the marks on the page", () => {
-  it("names each highlight the same in the script and in the stylesheet", async () => {
+  it("names the recall mark the same in the script and in the stylesheet", async () => {
     const script = await read("../src/content/highlighter.js");
     const sheet = await read("../src/content/highlight.css");
 
-    for (const name of ["reread", "reread-active"]) {
-      assert.ok(script.includes(`"${name}"`), `highlighter.js no longer registers "${name}"`);
-      assert.ok(sheet.includes(`::highlight(${name})`), `highlight.css no longer styles ::highlight(${name})`);
-    }
+    // The underline's own names are the weights' (D130) and are held to this
+    // same stylesheet in `test/underline.test.js`; this one is the mark under
+    // the phrase an open bubble is about, which has no dial and one name.
+    assert.ok(script.includes('"reread-active"'), 'highlighter.js no longer registers "reread-active"');
+    assert.ok(
+      sheet.includes("::highlight(reread-active)"),
+      "highlight.css no longer styles ::highlight(reread-active)",
+    );
   });
 
   it("washes the recalled phrase in the page's own ink, never in a colour of ours", async () => {

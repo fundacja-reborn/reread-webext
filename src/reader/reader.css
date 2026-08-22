@@ -414,6 +414,43 @@ html {
   background: var(--reader-marker-pink);
 }
 
+/* The underline's weights as themselves (D130), the way the inks above are:
+   each swatch is a rule drawn with the numbers its weight paints with, so the
+   choice previews its result on the panel it will be read on - which is the
+   whole point of the setting, since the reason to reach for it is a screen.
+   A border rather than a text decoration: `::highlight()` cannot be summoned
+   on a swatch, and a dotted border of the same width and colour draws the
+   same dots. `currentColor` for the same reason the underline itself uses it -
+   the swatch is ink on this page's paper, in every theme. */
+.underline-swatch {
+  display: block;
+  width: 1.6em;
+  border-bottom-style: dotted;
+}
+
+.underline-swatch[data-swatch="fine"] {
+  border-bottom-width: 1.5px;
+  border-bottom-color: color-mix(in srgb, currentColor 75%, transparent);
+}
+.underline-swatch[data-swatch="medium"] {
+  border-bottom-width: 2.5px;
+  border-bottom-color: color-mix(in srgb, currentColor 88%, transparent);
+}
+.underline-swatch[data-swatch="strong"] {
+  border-bottom-width: 4px;
+  border-bottom-color: currentColor;
+}
+
+/* The line centred in its frame, the ink's own rule below: without it the
+   swatch would sit on the button's text baseline with the frame around its
+   shoulders. */
+#underline-choices button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.45rem 0.35rem;
+}
+
 /* The ink centred in its frame: as an inline box the swatch hung on the
    text baseline, a few pixels above centre, and the buttons' worded side
    padding left the colour swimming in it (Michał's report from 0.4.21).

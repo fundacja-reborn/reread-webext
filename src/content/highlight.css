@@ -40,11 +40,27 @@
  * Two dials, and they are the whole design: how much ink a dot has
  * (`thickness`) and how far it is from the text colour (the `color-mix`
  * percentage). Both were lower here and the mark disappeared while reading;
- * both a step higher is the balance Michał settled on. Anything that has to be
- * tuned again is one of these two numbers - the style and the colour are not
- * up for it.
+ * both a step higher was the balance Michał settled on, and that balance is
+ * the first of the three rules below. The style and the colour are not up for
+ * tuning - only these two numbers ever were.
+ *
+ * **Three weights, one dial** (D130). The dial is in the reader's Aa panel and
+ * moves both numbers at once, because the reason to reach for it is a screen,
+ * not a taste: an e-ink panel has sixteen greys and rounds a thin faint rule
+ * back into the paper, so a thicker line in the same faint ink would still be
+ * faint exactly where the change was asked for. `fine` is the line as it has
+ * always been drawn, and the one a profile that never touched the setting
+ * gets.
+ *
+ * A rule per weight rather than a custom property, because the property would
+ * have to be set on the root of the page being read - and that page keeps
+ * exactly the DOM its author wrote (`lib/underline.js` says the rest). The
+ * script registers its ranges under one of these three names; the names are
+ * held to this file by `test/underline.test.js`.
  */
-::highlight(reread) {
+::highlight(reread-fine),
+::highlight(reread-medium),
+::highlight(reread-strong) {
   text-decoration-line: underline;
   text-decoration-style: dotted;
   /* Not the full text colour: at full strength a dotted rule reads as a second
@@ -53,6 +69,23 @@
   text-decoration-thickness: 1.5px;
   /* Clear of the descenders, so `g` and `y` are still whole letters. */
   text-underline-offset: 2px;
+}
+
+/* A step up in both numbers, and the offset with them: a thicker dot hangs
+   lower for the same reason the thin one does not have to. */
+::highlight(reread-medium) {
+  text-decoration-color: color-mix(in srgb, currentColor 88%, transparent);
+  text-decoration-thickness: 2.5px;
+  text-underline-offset: 3px;
+}
+
+/* The panel's answer to a mark that vanished into the paper: the page's full
+   ink and a dot an e-ink screen cannot round away. Loud on purpose - it is
+   asked for, never arrived at. */
+::highlight(reread-strong) {
+  text-decoration-color: currentColor;
+  text-decoration-thickness: 4px;
+  text-underline-offset: 4px;
 }
 
 /*

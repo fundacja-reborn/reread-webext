@@ -68,6 +68,7 @@ import {
   restoredIndex,
 } from "../lib/reader/position.js";
 import { hitsInText, isSearchableQuery } from "../lib/reader/search.js";
+import { isUnderlineWeight } from "../lib/underline.js";
 import { READER_SOURCE_KEY, readReaderSource } from "../lib/session.js";
 import {
   ARTICLES_FILENAME,
@@ -195,6 +196,7 @@ const voiceSetting = document.getElementById("voice-setting");
 const voiceChoice = /** @type {HTMLSelectElement | null} */ (
   document.getElementById("voice-choice")
 );
+const underlineSetting = document.getElementById("underline-setting");
 const rateSetting = document.getElementById("rate-setting");
 const rateValue = document.getElementById("rate-value");
 const speechBar = document.getElementById("speech-bar");
@@ -3629,11 +3631,32 @@ function applySpeech() {
 function adoptConfig(config) {
   settings = config;
   applyAppearance(config.reader);
+  applyUnderline(config);
   applySpeech();
   // With translation off (D120) the saved phrases page loses its door here,
   // the way it does in the popup and the settings menu - the page itself
   // stays untouched, and unlocks with the switch.
   if (navVocabulary !== null) navVocabulary.hidden = config.translationOff;
+}
+
+/**
+ * The underline row (D130): which weight is pressed, and whether the row is
+ * on the panel at all. Outside `applyAppearance`, which dresses this page
+ * from `config.reader` - the underline is worn by every page being read, so
+ * it lives a level up in the settings, and the pages wearing it repaint
+ * themselves off the same storage change this handler answers.
+ *
+ * Gone with translation switched off (D120), where nothing is underlined: a
+ * dial over an invisible line is a promise the panel cannot keep.
+ *
+ * @param {import("../lib/config.js").Config} config
+ */
+function applyUnderline(config) {
+  if (underlineSetting !== null) underlineSetting.hidden = config.translationOff;
+  for (const button of document.querySelectorAll("[data-underline]")) {
+    const wanted = button.getAttribute("data-underline");
+    button.setAttribute("aria-pressed", String(wanted === config.underline));
+  }
 }
 
 /**
@@ -3699,6 +3722,16 @@ async function onDisplayPress(event) {
   const rate = button.getAttribute("data-rate");
   if (rate !== null) {
     await stepRate(Number(rate));
+    return;
+  }
+
+  // A setting of the whole extension rather than of this page (D130), so it
+  // is written a level up from `reader` - like the voice and its speed, the
+  // panel's other two knobs that outlive the page they are set on. Every open
+  // page repaints its underlines off the same write.
+  const underline = button.getAttribute("data-underline");
+  if (isUnderlineWeight(underline)) {
+    adoptConfig(await writeConfig({ underline }));
     return;
   }
 

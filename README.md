@@ -17,7 +17,7 @@ Works in Firefox (desktop and Android) and in Chrome/Chromium.
 
 **Vocabulary**
 
-- **Underlines everywhere.** A saved phrase is underlined on every page where it appears; click the underline to see your meaning again. **Learned** removes the phrase and its underline in one click.
+- **Underlines everywhere.** A saved phrase is underlined on every page where it appears; click the underline to see your meaning again. **Learned** removes the phrase and its underline in one click. The line is dotted and quiet on purpose - it should be findable when looked for, not noticed when not - and the reader's **Aa** panel offers three weights for screens that swallow the lightest one.
 - **Saved phrases page.** All your phrases with filtering, pagination, editing and Learned per row.
 - **TSV import and export.** Move vocabulary to Anki or between devices; importing the same file twice never duplicates a phrase.
 

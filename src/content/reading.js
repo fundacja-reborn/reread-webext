@@ -179,6 +179,16 @@ const tooltip = createTooltip({
 let hideActions = DEFAULTS.hideBubbleActions;
 
 /**
+ * How heavily saved phrases are underlined (D130), mirrored the same way. It
+ * decides which highlight registration the paint goes on, so a change here is
+ * a repaint - which is what the storage listener does with every change
+ * anyway.
+ *
+ * @type {import("../lib/underline.js").UnderlineWeight}
+ */
+let underline = DEFAULTS.underline;
+
+/**
  * The translation-off setting (D120), mirrored the same way. On ordinary
  * pages this module never even starts under it (`pageMode`); on the reader
  * page it keeps running - the gesture is also the highlighter's, and the
@@ -330,7 +340,7 @@ function adopt(entries) {
  */
 function repaint() {
   if (vocabulary.size === 0) clear();
-  else paint(vocabulary.keys(), { root: root ?? document.body, observe: follow });
+  else paint(vocabulary.keys(), { root: root ?? document.body, observe: follow, weight: underline });
 }
 
 /**
@@ -359,6 +369,9 @@ async function loadVocabulary(preloaded) {
     // Rides the same read and the same storage listener as the vocabulary:
     // flipping the switch in the popup reaches every open page on the spot.
     hideActions = config.hideBubbleActions;
+    // Repainted below with every other change this read carries: the weight
+    // is a registration name, so a new one is a repaint, not a restyle (D130).
+    underline = config.underline;
     bubbleScale = config.bubbleScale;
     ttsLang = config.sourceLang;
     ttsVoiceURI = config.ttsVoices[config.sourceLang];
