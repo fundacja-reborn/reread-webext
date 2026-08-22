@@ -58,6 +58,7 @@ import {
   placeMark,
   withoutMark,
 } from "../lib/reader/marks.js";
+import { pageStep, pageTurn } from "../lib/reader/paging.js";
 import {
   POSITION_SAVE_DELAY,
   blockAtLine,
@@ -921,6 +922,93 @@ function restorePosition(position, segmentIndex = 0) {
   );
   if (fine !== null) scrollTo(0, fine);
 }
+
+/**
+ * The strip of the window the article is actually read in (D127): under the
+ * stuck chrome, above whichever bar stands at the foot of the window. In
+ * viewport coordinates, measured at each ask - an open panel makes the chrome
+ * taller, and either bar comes and goes.
+ *
+ * The visual viewport rather than the window's own height, for the reason the
+ * bubble's `visibleBox` gives (D97): on Android the browser's address bar
+ * slides in and out of the window's height, and paging by a height that
+ * counts a bar standing over the text would hide the very lines this measures
+ * to keep.
+ *
+ * @returns {{ top: number, bottom: number }}
+ */
+function readableBand() {
+  const view = window.visualViewport;
+  const seen =
+    view === null
+      ? { top: 0, bottom: document.documentElement.clientHeight }
+      : { top: view.offsetTop, bottom: view.offsetTop + view.height };
+
+  let bottom = seen.bottom;
+  for (const bar of [speechBar, markBar]) {
+    if (bar === null || bar.hidden) continue;
+    const edge = bar.getBoundingClientRect().top;
+    // A bar measured at nothing is a bar that is not laid out; taking that
+    // for the floor of the text would page by one line forever.
+    if (edge > 0) bottom = Math.min(bottom, edge);
+  }
+  return { top: Math.max(chromeFold(), seen.top), bottom };
+}
+
+/**
+ * One line of the text being read, which is what a page turn keeps on screen.
+ * Read off the body, where the article's type lives (`reader.css`), so the
+ * overlap grows with the reader's own size setting rather than with a number
+ * written here.
+ *
+ * @returns {number}
+ */
+function readingLine() {
+  const line = Number.parseFloat(getComputedStyle(document.body).lineHeight);
+  return Number.isFinite(line) && line > 0 ? line : 24;
+}
+
+/**
+ * Turning the page with the keyboard (D127) - the hardware page keys of an
+ * e-reader among them, which is where this came from: the browser pages by a
+ * screenful it measures against the whole window, and the reader's chrome is
+ * stuck over the top of that window, so a few lines of every page landed
+ * behind the bar and had to be scrolled back to (reported from a Boox Page).
+ *
+ * Only while an article is on screen, which is the stylesheet's own condition
+ * for sticking the chrome: over the reading list and the highlights page
+ * nothing stands over the text and the browser's own paging is already right.
+ * Which press is ours is decided in `lib/reader/paging.js`, where it can be
+ * tested, and so is how far one goes.
+ *
+ * @param {KeyboardEvent} event
+ */
+function onPageKey(event) {
+  if (article === null || article.hidden) return;
+
+  const target = event.target instanceof HTMLElement ? event.target : null;
+  const turn = pageTurn({
+    key: event.key,
+    shift: event.shiftKey,
+    alt: event.altKey,
+    ctrl: event.ctrlKey,
+    meta: event.metaKey,
+    tag: target?.tagName ?? "",
+    editable: target?.isContentEditable ?? false,
+    reading: readingState() !== "off",
+    dialog: document.querySelector("dialog[open]") !== null,
+  });
+  if (turn === null) return;
+
+  event.preventDefault();
+  const step = pageStep(readableBand(), readingLine());
+  // Instantly, and nothing here says otherwise: a smooth scroll on an e-ink
+  // panel is a page of smeared refreshes. The scroll itself arms the position
+  // save like any other, so where the reading stands follows the keys.
+  scrollBy(0, turn === "down" ? step : -step);
+}
+
+document.addEventListener("keydown", onPageKey);
 
 /**
  * The highlighter (D106): the pen in the bar hands the selection gesture to
