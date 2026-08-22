@@ -4,6 +4,8 @@ A browser extension for reading - especially for reading in a language you are l
 
 Works in Firefox (desktop and Android) and in Chrome/Chromium.
 
+![An article open in re/read's reader with the word "persisted" selected. The bubble under it shows the Polish translation, buttons to hear the phrase, copy it, edit it or mark it Learned, the sentence it stands in, and dictionary entries below that. Phrases saved earlier carry dotted underlines in the text](docs/screenshots/bubble.webp)
+
 **Contents:** [Features](#features) · [Reading without translation](#reading-without-translation) · [Install](#install) · [Keyboard shortcuts](#keyboard-shortcuts) · [What it does not do](#what-it-deliberately-does-not-do) · [Privacy](#privacy) · [Third-party code](#third-party-code) · [Development](#development) · [Related projects](#related-projects) · [Licence](#licence) · [Support](#support)
 
 ## Features
@@ -12,7 +14,7 @@ Works in Firefox (desktop and Android) and in Chrome/Chromium.
 
 - **Bubble on selection.** Select a word or phrase to see its translation. The engine (Bergamot - the technology behind Firefox's built-in page translation) ships inside the package and runs on your device, so translation works even in airplane mode.
 - **About a hundred language pairs.** Models are downloaded once from the settings page - or added from your own files - and stored locally; an installed pair shows an Update button when Mozilla publishes a new build.
-- **Dictionaries beside the engine.** A translation model has to pick one meaning; a dictionary lists them all. StarDict dictionaries - a catalogue of about five hundred WikDict pairs installable with one click, or your own files - appear in the bubble under **More**, and clicking a line attaches that meaning to the saved phrase. Install several and two arrows on the settings page decide which of them answers first.
+- **Dictionaries beside the engine.** A translation model has to pick one meaning; a dictionary lists them all. StarDict dictionaries - a catalogue of more than four hundred WikDict pairs installable with one click, or your own files - appear in the bubble under **More**, and clicking a line attaches that meaning to the saved phrase. Install several and two arrows on the settings page decide which of them answers first.
 - **Read aloud.** A phrase from the bubble, or a whole article in the reader - with live highlighting of the word being spoken, pause/resume, sentence skip and speed control. Voices are the browser's own, configurable per language.
 
 **Vocabulary**
@@ -20,6 +22,8 @@ Works in Firefox (desktop and Android) and in Chrome/Chromium.
 - **Underlines everywhere.** A saved phrase is underlined on every page where it appears; click the underline to see your meaning again. **Learned** removes the phrase and its underline in one click. The line is dotted and quiet on purpose - it should be findable when looked for, not noticed when not - and the reader's **Aa** panel offers three weights for screens that swallow the lightest one.
 - **Saved phrases page.** All your phrases with filtering, pagination, editing and Learned per row.
 - **TSV import and export.** Move vocabulary to Anki or between devices; importing the same file twice never duplicates a phrase.
+
+![The saved phrases page: the language pair, a count, a filter, and one row per phrase - the phrase, its meaning, and buttons to hear it, edit it or mark it Learned](docs/screenshots/saved-phrases.webp)
 
 **Reader and reading list**
 
@@ -30,6 +34,10 @@ Works in Firefox (desktop and Android) and in Chrome/Chromium.
 - **Highlighter.** Word-snapped marks in a choice of inks, spanning paragraphs, stored with the saved copy. A Highlights page lists every mark, and one click exports them all as a Markdown file of quotes for your notes.
 - **Search.** Inside the open document (articles, books part by part, live pages too) and across the whole reading list - in titles and, on request, in the stored texts, with snippets that jump straight to the hit.
 - **Appearance.** Light, sepia and dark themes, serif or sans type, text size and column width; links can be shown as plain text, so a book reads like a book.
+
+![The offline reading list, split into To read and Read: saved articles show their site and the day they were kept, imported EPUB books show which part is open and how much of the book is read. The filter above them can search the stored texts too](docs/screenshots/reading-list.webp)
+
+![The reader's Aa panel open over an article with a paragraph in yellow highlighter: theme, typeface, text size, column width, links as plain text or active, the highlighter's four inks, and the voice that reads aloud with its speed](docs/screenshots/appearance.webp)
 
 **Data and interface**
 
@@ -122,7 +130,7 @@ Every download is verified before it is stored: declared sizes, Mozilla's publis
 
 Supported format: **StarDict** (`.ifo`, `.idx`, `.dict`/`.dict.dz`, optional `.syn`) - the same format [KOReader](https://koreader.rocks/) uses, so dictionaries can be shared between your e-reader and browser.
 
-The settings page carries a catalogue of about five hundred [WikDict](https://www.wikdict.com/) pairs (CC BY-SA, built from Wiktionary); one click downloads and installs a dictionary, and you can also add StarDict files by hand. Dictionary downloads carry no pinned checksum (WikDict rebuilds its files in place), but every archive is validated - a plain zip of StarDict files, with sizes and CRCs checked - and parsed defensively once, when it is added. Attribution is kept and shown on the settings page.
+The settings page carries a catalogue of more than four hundred [WikDict](https://www.wikdict.com/) pairs (CC BY-SA, built from Wiktionary); one click downloads and installs a dictionary, and you can also add StarDict files by hand. Dictionary downloads carry no pinned checksum (WikDict rebuilds its files in place), but every archive is validated - a plain zip of StarDict files, with sizes and CRCs checked - and parsed defensively once, when it is added. Attribution is kept and shown on the settings page.
 
 Dictionaries are matched by the language of their headwords, not by the pair - so a monolingual dictionary added from files (English-English, say) answers beside the bilingual ones: under **More** while translating, straight in the bubble with translation switched off.
 
