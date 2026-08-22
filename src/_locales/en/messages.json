@@ -238,6 +238,13 @@
   "reader_links_plain": { "message": "Plain text" },
   "reader_links_active": { "message": "Active" },
   "reader_marker": { "message": "Highlighter" },
+  "reader_underline": { "message": "Underline" },
+  "underline_fine": {
+    "message": "Fine",
+    "description": "How heavily a saved phrase is underlined (D130) - the accessible name of the lightest of three swatches in the reader's Aa panel. Each swatch draws the line it stands for."
+  },
+  "underline_medium": { "message": "Medium" },
+  "underline_strong": { "message": "Strong" },
   "marker_delete": { "message": "Remove highlight" },
   "marker_copy": { "message": "Copy" },
   "marker_copied": { "message": "Copied" },

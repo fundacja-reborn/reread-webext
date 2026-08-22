@@ -273,6 +273,32 @@
         </div>
 
         <!--
+          How heavily a saved phrase is underlined (D130). Here for the
+          highlighter's reason - it is how a mark on text looks - but unlike
+          everything else in this panel it is worn by every page being read,
+          not only by this one: the reason to reach for it is a screen (an
+          e-ink panel rounds a thin faint rule back into the paper), and the
+          screen is the same on both sides of the reader. Each swatch is the
+          line it stands for, so the choice previews itself. The row is not
+          here at all with translation switched off (D120): nothing is
+          underlined then.
+        -->
+        <div class="reader-setting" id="underline-setting">
+          <span class="reader-setting-name" data-i18n="reader_underline">Underline</span>
+          <span class="reader-choices" id="underline-choices">
+            <button type="button" data-underline="fine" aria-label="Fine" data-i18n-aria-label="underline_fine">
+              <span class="underline-swatch" data-swatch="fine" aria-hidden="true"></span>
+            </button>
+            <button type="button" data-underline="medium" aria-label="Medium" data-i18n-aria-label="underline_medium">
+              <span class="underline-swatch" data-swatch="medium" aria-hidden="true"></span>
+            </button>
+            <button type="button" data-underline="strong" aria-label="Strong" data-i18n-aria-label="underline_strong">
+              <span class="underline-swatch" data-swatch="strong" aria-hidden="true"></span>
+            </button>
+          </span>
+        </div>
+
+        <!--
           The two knobs of reading aloud (D87), here rather than only in the
           settings because this is where they are used: the voice is chosen while
           listening to it, and the speed is changed in the middle of a sentence

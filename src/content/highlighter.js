@@ -25,10 +25,16 @@
  */
 
 import { buildIndex } from "../lib/matcher/index.js";
+import { DEFAULT_UNDERLINE, UNDERLINE_NAMES, underlineName } from "../lib/underline.js";
 import { blockAround, scan } from "./scan.js";
 
-/** Must be the name in `highlight.css`. */
-const NAME = "reread";
+/**
+ * The registration the ranges are painted under right now - one of the names
+ * `highlight.css` styles, chosen by the underline setting (D130). Held rather
+ * than recomputed, because taking the paint back has to reach the name the
+ * paint actually went on.
+ */
+let name = underlineName(DEFAULT_UNDERLINE);
 
 /** The other name there: the mark under the phrase a recall bubble is about. */
 const ACTIVE = "reread-active";
@@ -85,7 +91,8 @@ export function supported() {
  * with two underlined neighbours nothing on the page said which one the
  * bubble answers.
  *
- * A registration of its own rather than a range added to `NAME`, because the
+ * A registration of its own rather than a range added to the underline's,
+ * because the
  * two live different lives: `paint` rebuilds the underlines on every
  * vocabulary change - choosing a dictionary line repaints with the bubble
  * still open - and the mark may not blink with them.
@@ -121,7 +128,10 @@ export function clear() {
   live = null;
   scope = null;
   index = new Map();
-  registry()?.delete(NAME);
+  // Every weight, not just the one in hand: the setting can have moved since
+  // the last paint, and a registration left behind goes on underlining.
+  const api = registry();
+  for (const one of UNDERLINE_NAMES) api?.delete(one);
 }
 
 /**
@@ -129,7 +139,10 @@ export function clear() {
  * page if it changes.
  *
  * @param {Iterable<string>} keys normalized phrases
- * @param {{ root?: Element | null, observe?: boolean }} [where]
+ * @param {{ root?: Element | null, observe?: boolean, weight?: import("../lib/underline.js").UnderlineWeight }} [where]
+ *   where to paint, whether the page can change under it, and how heavy the
+ *   line is drawn (D130 - the caller reads the setting, this module only
+ *   picks the registration it names)
  * @returns {number} how many occurrences were painted
  */
 export function paint(keys, where = {}) {
@@ -138,6 +151,7 @@ export function paint(keys, where = {}) {
   if (api === null || root === null) return 0;
 
   clear();
+  name = underlineName(where.weight ?? DEFAULT_UNDERLINE);
   index = buildIndex(keys);
   if (index.size === 0) return 0;
 
@@ -145,7 +159,7 @@ export function paint(keys, where = {}) {
   painted = scan(root, index);
   live = new Highlight();
   for (const { range } of painted) live.add(range);
-  api.set(NAME, live);
+  api.set(name, live);
 
   // Not in the reader: that document is built here and changes only when this
   // module is asked to paint again, so an observer would be a listener waiting

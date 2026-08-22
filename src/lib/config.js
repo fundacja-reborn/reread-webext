@@ -6,6 +6,7 @@
 
 import { webext } from "./browser.js";
 import { DEFAULT_MARK_COLOR, isMarkColor } from "./reader/marks.js";
+import { DEFAULT_UNDERLINE, isUnderlineWeight } from "./underline.js";
 
 /**
  * One key, one object: a versioned shape is easier to migrate than loose keys.
@@ -91,6 +92,13 @@ export const CONFIG_KEY = "config";
  *   stands on, so no page setting can reach it - this is its one knob, and it
  *   exists because built-in sizes land differently on different screens: an
  *   e-ink tablet can render a CSS pixel visibly smaller than a phone does.
+ * @property {import("./underline.js").UnderlineWeight} underline How heavily
+ *   a saved phrase is underlined (D130). Not in `reader`, though its dial
+ *   sits in the reader's Aa panel: the underline is worn by every page being
+ *   read, and `reader` is the reader page's own appearance. A name, never a
+ *   measurement - the stylesheet holds a rule per name, because reaching
+ *   `::highlight()` with a value would mean setting a property on somebody
+ *   else's document.
  */
 
 /** @type {readonly string[]} */
@@ -180,6 +188,7 @@ export const DEFAULTS = Object.freeze({
   ttsVoices: {},
   ttsRate: 100,
   bubbleScale: 100,
+  underline: DEFAULT_UNDERLINE,
 });
 
 /**
@@ -302,6 +311,10 @@ export function withDefaults(stored) {
     ttsVoices: voiceMap(raw["ttsVoices"]),
     ttsRate: within(raw["ttsRate"], TTS_RATE, DEFAULTS.ttsRate),
     bubbleScale: within(raw["bubbleScale"], BUBBLE_SCALE, DEFAULTS.bubbleScale),
+    // A name the stylesheet knows, or the line as it has always been drawn:
+    // a weight this version never heard of has no rule to paint under, and a
+    // registration nothing styles underlines nothing at all.
+    underline: isUnderlineWeight(raw["underline"]) ? raw["underline"] : DEFAULTS.underline,
   };
 }
 
@@ -323,7 +336,7 @@ export async function readConfig() {
  * the settings page holds the full map and choosing the default voice has to
  * be able to remove an entry - a per-key merge could only ever add.
  *
- * @param {{ sourceLang?: string, targetLang?: string, reader?: Partial<ReaderConfig>, disabledHosts?: string[], readerOnly?: boolean, translationOff?: boolean, keepArticles?: boolean, hideBubbleActions?: boolean, ttsVoices?: Record<string, string>, ttsRate?: number, bubbleScale?: number }} patch
+ * @param {{ sourceLang?: string, targetLang?: string, reader?: Partial<ReaderConfig>, disabledHosts?: string[], readerOnly?: boolean, translationOff?: boolean, keepArticles?: boolean, hideBubbleActions?: boolean, ttsVoices?: Record<string, string>, ttsRate?: number, bubbleScale?: number, underline?: import("./underline.js").UnderlineWeight }} patch
  * @returns {Promise<Config>}
  */
 export async function writeConfig(patch) {
