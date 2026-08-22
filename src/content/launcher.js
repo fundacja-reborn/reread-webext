@@ -1,12 +1,21 @@
 /**
  * Reader-only mode's whole footprint on an ordinary page: a selection shows
- * one offer - "Read in the reader" - and nothing else happens. No scan, no
- * underlines, no observer, and nothing ever goes to the engine; the reader is
- * where all of that lives in this mode. The bubble is the same shadow-rooted
- * tooltip the reading side uses, in a variant that is one button under the
- * extension's name (D126), so its isolation and its lifecycle are the ones
- * already paid for - and so an offer appearing unbidden over somebody else's
- * page says whose it is and where it leads.
+ * two doors - "Read in the reader", and the reading list beside it - and
+ * nothing else happens. No scan, no underlines, no observer, and nothing ever
+ * goes to the engine; the reader is where all of that lives in this mode. The
+ * bubble is the same shadow-rooted tooltip the reading side uses, in a variant
+ * that is that row under the extension's name (D126), so its isolation and its
+ * lifecycle are the ones already paid for - and so an offer appearing unbidden
+ * over somebody else's page says whose it is and where it leads.
+ *
+ * The second door (D129) is there because on Android this bubble is the
+ * shortest way into the extension there is: Fenix gives an add-on no context
+ * menu, no toolbar of its own and no share target, so everything else starts
+ * with the browser's own menu. A hold on any word already opened the page
+ * being read; the same hold now also opens what was read before, without
+ * going through the page at all. It stays a plain label beside the framed
+ * offer: the offer is what the bubble is for, and the list is a room next to
+ * it, not a second answer about this page.
  *
  * The selection is listened for through `selectionchange` with a settle timer,
  * not through the mouse gesture the reading side reads (D47). That is not a
@@ -21,9 +30,8 @@
  * touch-capable device one remembering the pointer's type (D74), and nothing
  * else.
  *
- * The press sends `open-reader` with no tab id on purpose: a content script
- * does not know which tab it is, but the background can read it off the
- * message's sender, and both doors to the reader end in the same function.
+ * What the presses send is in `onAction` below; the short of it is that a
+ * content script does not know which tab it is, and does not have to.
  */
 
 import { webext } from "../lib/browser.js";
@@ -67,16 +75,24 @@ export function setLauncherScale(factor) {
 }
 
 /**
+ * Both doors send one message and wait for nothing: there is nothing here to
+ * render, and the reader tab coming forward is its own confirmation. A
+ * background mid-restart means a press that did nothing, and pressing again
+ * is the repair.
+ *
+ * `open-reader` goes without a tab id on purpose (the background reads it off
+ * the sender); `open-library` carries nothing at all, because the list is
+ * about no tab - the same message the popup's row sends.
+ *
  * @param {import("./tooltip.js").ReportedAction} action
  */
 function onAction(action) {
-  if (action !== "reader") return;
+  const kind =
+    action === "reader" ? Message.OPEN_READER : action === "library" ? Message.OPEN_LIBRARY : null;
+  if (kind === null) return;
   try {
-    // The answer is not waited for: there is nothing to render, and the reader
-    // tab coming forward is its own confirmation. A background mid-restart
-    // means a press that did nothing, and pressing again is the repair.
     void webext()
-      .runtime.sendMessage({ kind: Message.OPEN_READER })
+      .runtime.sendMessage({ kind })
       .catch(() => {});
   } catch {
     // No runtime in this context anymore - the extension was reloaded under
@@ -118,11 +134,11 @@ function settle() {
     anchor: rect,
     variant: "launcher",
     body: "",
-    actions: ["reader"],
+    actions: ["reader", "library"],
     // A pen's selection wears the same system bar and handles (D80).
     touch: touchPointer(lastPointerType),
-    // The same pointer also sizes the one button for the finger about to
-    // press it (D84) - the media query alone answers wrong on some devices.
+    // The same pointer also sizes the row for the finger about to press it
+    // (D84) - the media query alone answers wrong on some devices.
     coarse: touchPointer(lastPointerType),
     scale,
   });

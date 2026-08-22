@@ -125,6 +125,10 @@ function label(action) {
       return t("bubble_more");
     case "reader":
       return t("bubble_reader");
+    case "library":
+      // The name the reading list carries everywhere else - the popup's row,
+      // the reader's menu, its own heading. One room, one name.
+      return t("reading_list");
     case "speak":
       return t("bubble_speak");
     case "copy":
@@ -653,11 +657,11 @@ export const STYLE = `
      shorthand above would take it away. */
   .bubble[data-grow="up"] .entries { padding-right: 0.9em; }
 
-  /* The launcher is its one button under its signature, so the row's padding -
-     which exists to stand the row off a gloss that is not there - goes too;
-     the signature's own margin is the whole gap above the button. After the
-     mirror, whose padding this outranks by standing below it. The quiet bubble
-     (D120) is the same shape with two pictures in the row. */
+  /* The launcher is its row under its signature, so the row's padding - which
+     exists to stand the row off a gloss that is not there - goes too; the
+     signature's own margin is the whole gap above it. After the mirror, whose
+     padding this outranks by standing below it. The quiet bubble (D120) is the
+     same shape with two pictures in the row. */
   .bubble[data-variant="launcher"] .actions,
   .bubble[data-variant="quiet"] .actions { padding: 0; }
 
@@ -775,10 +779,13 @@ export const STYLE = `
   }
 
   /* The exception, and the only real call to action a bubble has: Save is the
-     press that keeps a phrase which would otherwise be gone, the launcher's one
-     button is the whole of the bubble it is in, and Settings is the one thing
-     an error bubble can offer - none of the three ever shares a screen with
-     another, so none outshouts the rest. */
+     press that keeps a phrase which would otherwise be gone, the launcher's
+     offer is what its bubble is for, and Settings is the one thing an error
+     bubble can offer - none of the three ever shares a screen with another, so
+     none outshouts the rest. The launcher's second door (D129) deliberately
+     stays a plain label beside the framed one: it is the way to another room,
+     not another answer to "what do I do with this page", and two frames side
+     by side would make a menu out of an offer. */
   .actions button[data-action="save"],
   .actions button[data-action="reader"],
   .actions button[data-action="settings"] {
@@ -851,21 +858,22 @@ export const STYLE = `
 
 /** `note` is an aside in the second layer - the fetch behind More coming back
  *  with nothing - and never a body's tone. @typedef {"normal" | "pending" | "error" | "note"} Tone */
-/** Which of the four bubbles this is. `launcher` is reader-only mode's one
- *  offer: no gloss, one button. `quiet` is the translation-off trim (D120):
+/** Which of the four bubbles this is. `launcher` is reader-only mode's own
+ *  bubble: no gloss, one framed offer and, beside it, the quiet way to the
+ *  reading list (D129). `quiet` is the translation-off trim (D120):
  *  no gloss either, and the row is the speaker and the clipboard - the
  *  phrase's own two acts, all that is left without an engine.
  *  @typedef {"recall" | "save" | "launcher" | "quiet"} Variant */
 /** What the bubble can offer. `speak` and `copy` are the row's two pictures -
  *  a speaker icon that reads the phrase aloud (D83), and a copy icon that
  *  opens the clipboard row (D110).
- *  @typedef {"save" | "learned" | "edit" | "settings" | "more" | "reader" | "speak" | "copy"} Action */
+ *  @typedef {"save" | "learned" | "edit" | "settings" | "more" | "reader" | "library" | "speak" | "copy"} Action */
 /** The clipboard row's two presses (D110) - the bubble's own business, like
  *  editing: never offered by a caller, never reported to one.
  *  @typedef {"copy-original" | "copy-translation"} CopyChoice */
 /** What it reports - editing never leaves the bubble, and More leaves it only
  *  on the press that opens the layer, so a caller with nothing fetched yet can
- *  fetch it then. @typedef {"save" | "choose" | "learned" | "settings" | "reader" | "more" | "speak"} ReportedAction */
+ *  fetch it then. @typedef {"save" | "choose" | "learned" | "settings" | "reader" | "library" | "more" | "speak"} ReportedAction */
 
 /**
  * One block of the second layer below the sentence: where it came from, and the
