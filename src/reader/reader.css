@@ -708,8 +708,13 @@ body.reader:has(#library:not([hidden])) {
 
 /* --- the tabs: two halves of one list, each wearing its whole count --- */
 
+/* Wrapping for the same reason the transfer row wraps: each tab wears its
+   whole count, and two counted labels under a grown text zoom can outgrow a
+   phone's line. A tab dropping to the line below is cheaper than the page
+   scrolling sideways. */
 .library-segments {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
   margin: 0.75rem 0 0;
 }
@@ -844,8 +849,14 @@ body.reader:has(#library:not([hidden])) {
   overflow-wrap: anywhere;
 }
 
+/* The row wraps. It held two buttons when it was written; the highlights
+   export made three (D106), and three of these labels do not fit a phone's
+   line in any language - unwrapped they ran off the screen's edge and took
+   the whole page's sideways scroll with them (Michał's report from the
+   phone, 2026-08-23). */
 .transfer {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
   margin: 1rem 0 0;
 }
@@ -1140,6 +1151,24 @@ body.reader:has(#library:not([hidden])) {
 .pager button {
   min-height: 44px;
   padding: 0.35rem 1rem;
+}
+
+/* Under a phone's width the row trades air for fit, the same trade the bar
+   makes at the top of this file: two worded buttons and "Page 1 of 3"
+   between them add up past a 400 px screen once the browser's text zoom
+   grows the rem, and `space-between` has nowhere to wrap to that would not
+   read as broken. The floor of 44px is untouched - only the air beside the
+   words goes. The limit is in rem so the tighter dress arrives with the zoom
+   that causes the overflow. The saved phrases page dresses its pager the
+   same way, in `vocab.css`. */
+@media (max-width: 30rem) {
+  .pager {
+    gap: 0.5rem;
+  }
+
+  .pager button {
+    padding-inline: 0.6rem;
+  }
 }
 
 /* The way onward under a segment's last line, pushed off it: finishing a
@@ -1486,10 +1515,20 @@ body.reader:has(#library:not([hidden])) {
   font-size: 1.05rem;
 }
 
-/* On a phone the two buttons share the line edge to edge, like every paired
+/* On a phone the backup pair shares the line edge to edge, like every paired
    row of buttons here; the media query below gives them their own width. */
 .transfer-section > .transfer button {
   flex: 1 1 0;
+}
+
+/* And the third button takes the next line whole. It is the odd one out
+   anyway - a one-way export beside the pair that backs the list up - and its
+   label is the longest of the three in every language we speak, so a third of
+   a phone's line was never going to hold it. A line of its own rather than a
+   share of one: the pair stays a pair, and the layout stops depending on how
+   wide a translated word happens to be. */
+.transfer-section > .transfer #library-export-marks {
+  flex-basis: 100%;
 }
 
 /* --- the article's bar: the acts on this article --- */
@@ -1947,6 +1986,14 @@ body.reader:has(#mark-bar:not([hidden])) {
 
   .transfer-section > .transfer button {
     flex: none;
+  }
+
+  /* Wide enough for all three, so the highlights export rejoins the row at
+     its own width. The same selector as the phone rule on purpose: `flex:
+     none` above carries no id and cannot outweigh it - this one wins by
+     standing later. */
+  .transfer-section > .transfer #library-export-marks {
+    flex-basis: auto;
   }
 }
 
