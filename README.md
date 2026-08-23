@@ -53,7 +53,7 @@ re/read is also a plain reader. If you read in your own language and want just t
 ## Install
 
 - **Chrome or Chromium 128 or newer** - [re/read in the Chrome Web Store](https://chromewebstore.google.com/detail/cdeoicfidedlcapagmimcmmeeoplfcla). Brave and Edge install it from the same page. The floor comes from `document.caretPositionFromPoint`, which touch and underline hit-testing stand on.
-- **Firefox 142 or newer** - the listing is waiting for review on addons.mozilla.org; the link appears here the day it goes public. Until then the extension can be built and loaded from source - see [Development](#development). The floor comes from the CSS Custom Highlight API (used to underline phrases without touching the page's DOM) and the manifest key declaring that the extension collects no data.
+- **Firefox 142 or newer** - [re/read on addons.mozilla.org](https://addons.mozilla.org/firefox/addon/reread/), on desktop and on Android. The floor comes from the CSS Custom Highlight API (used to underline phrases without touching the page's DOM) and the manifest key declaring that the extension collects no data.
 
 ### Firefox on Android
 
