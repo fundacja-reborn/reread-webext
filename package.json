@@ -1,6 +1,6 @@
 {
   "name": "reread-webext",
-  "version": "0.5.10",
+  "version": "0.5.11",
   "private": true,
   "description": "Learn a language while reading the web. Translation, vocabulary and highlighting, all on your own device.",
   "license": "AGPL-3.0-or-later",
