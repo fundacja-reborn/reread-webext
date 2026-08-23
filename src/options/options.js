@@ -1077,6 +1077,16 @@ async function addSelectedModel() {
 let importing = false;
 
 /**
+ * The dictionary being deleted right now, while it still has a row to show it
+ * on. A large dictionary takes the database tens of seconds to let go of, and
+ * a row that just sits there after the press looks like a press that did
+ * nothing - and like a page safe to leave.
+ *
+ * @type {string | null}
+ */
+let deletingId = null;
+
+/**
  * The screen, kept on while an import or a download runs.
  *
  * A dictionary of a million words takes a quarter of an hour to write on a
@@ -1277,6 +1287,15 @@ function renderDictionary(dictionary, place) {
   name.append(element("span", "dictionary-title", dictionary.name));
   container.append(name);
 
+  if (dictionary.id === deletingId) {
+    // Going: the counts give way to the one word that says so, and the
+    // buttons go with them - there is nothing left to press on this row.
+    const meta = element("span", "model-meta");
+    meta.append(element("span", "", t("options_deleting_row")));
+    container.append(meta);
+    return container;
+  }
+
   if (!dictionary.ready) {
     renderUnfinished(container, dictionary);
     return container;
@@ -1461,11 +1480,27 @@ async function moveDictionary(dictionary, step) {
 async function removeDictionary(dictionary, button) {
   if (importing) return;
   const at = deleteButtonsIn("dictionary-catalog").indexOf(button);
+
+  // Held like an import, because it is the same thing to the database: one
+  // writer at a time, the other buttons wait, a reload asks first. Said in
+  // the status line and on the row itself before the first byte goes, since
+  // for a million rows the delete is a transaction of tens of seconds on a
+  // tablet with nothing to show for it until it commits.
+  importing = true;
+  deletingId = dictionary.id;
+  const letGo = holdScreen();
+  dictionaryStatus(t("options_deleting_dictionary", dictionary.name), "busy");
+  await renderCatalog();
+
   try {
     await deleteDictionary(dictionary.id);
     dictionaryStatus(t("options_deleted_dictionary", dictionary.name));
   } catch (error) {
     dictionaryStatus(t("options_delete_dictionary_failed", [dictionary.name, message(error)]), "error");
+  } finally {
+    letGo();
+    deletingId = null;
+    importing = false;
   }
   await renderCatalog();
   focusDeleteIn("dictionary-catalog", "dictionary-filter", at);

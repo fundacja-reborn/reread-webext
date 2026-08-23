@@ -784,6 +784,11 @@
     "message": "$NAME$ wurde gelöscht.",
     "placeholders": { "name": { "content": "$1" } }
   },
+  "options_deleting_dictionary": {
+    "message": "$NAME$ wird gelöscht - bei einem großen Wörterbuch dauert das einen Moment...",
+    "placeholders": { "name": { "content": "$1" } }
+  },
+  "options_deleting_row": { "message": "Wird gelöscht..." },
   "options_delete_dictionary_failed": {
     "message": "$NAME$ ließ sich nicht löschen: $DETAIL$",
     "placeholders": {
