@@ -127,6 +127,7 @@ import {
 import { articleEntry, bookEntry, libraryView } from "./list-view.js";
 import { markRows, marksListView } from "./marks-list.js";
 import {
+  adoptPaintedMark,
   anchorOf,
   clearMarkPaint,
   markAt,
@@ -1555,6 +1556,10 @@ async function applyNoteInDoc(target, mark, text) {
   const before = docMarks;
   const wasActive = activeMark === mark;
   docMarks = docMarks.map((one) => (one === mark ? next : one));
+  // The paint keeps its range - a note moves no endpoint - but must answer
+  // for the new record: the badge about to be shown asks the paint by
+  // identity, and so does the next tap on the mark.
+  adoptPaintedMark(mark, next);
   if (wasActive) activeMark = next;
   refreshMarkBar();
   showNoteBadges();
@@ -1564,6 +1569,7 @@ async function applyNoteInDoc(target, mark, text) {
   } catch {
     if (shown !== target) return;
     docMarks = before;
+    adoptPaintedMark(next, mark);
     if (activeMark === next) activeMark = mark;
     refreshMarkBar();
     showNoteBadges();

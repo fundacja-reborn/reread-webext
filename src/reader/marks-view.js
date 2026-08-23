@@ -287,6 +287,28 @@ export function paintedRangeOf(mark) {
 }
 
 /**
+ * A replaced record adopted by the paint, the range standing as it is - for
+ * an edit that moves no endpoint, which today means a note. The records are
+ * immutable (a failed write rolls back to the untouched list), so an edit
+ * puts a new object in the document's list - but this registry answers by
+ * identity, and left holding the old object it goes quietly stale: the note
+ * badge finds no painted range to stand on until the next full paint, and a
+ * tap's hit-test hands back a record without the note just written. Adopting
+ * the new object is the whole correction; repainting instead would redraw
+ * every mark - a real flash on e-ink - for an edit no pixel of paint cares
+ * about. A colour change replaces the paint itself, so it repaints and never
+ * needs this.
+ *
+ * @param {Mark} previous
+ * @param {Mark} next
+ */
+export function adoptPaintedMark(previous, next) {
+  for (const entry of painted) {
+    if (entry.mark === previous) entry.mark = next;
+  }
+}
+
+/**
  * One character of a text node as a box - or null when the character has no
  * size to offer, or the offsets do not fit the node. A range held inside a
  * single text node is the one shape every engine measures true; this is the
