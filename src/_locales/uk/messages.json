@@ -938,6 +938,11 @@
     "message": "$NAME$ видалено.",
     "placeholders": { "name": { "content": "$1" } }
   },
+  "options_deleting_dictionary": {
+    "message": "Видалення $NAME$ - великий словник забирає трохи часу...",
+    "placeholders": { "name": { "content": "$1" } }
+  },
+  "options_deleting_row": { "message": "Видалення..." },
   "options_delete_dictionary_failed": {
     "message": "Не вдалося видалити $NAME$: $DETAIL$",
     "placeholders": {

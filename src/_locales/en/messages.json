@@ -960,6 +960,13 @@
     "message": "Deleted $NAME$.",
     "placeholders": { "name": { "content": "$1", "example": "WikDict en-pl" } }
   },
+  "options_deleting_dictionary": {
+    "message": "Deleting $NAME$ - a large dictionary takes a while...",
+    "description": "The dictionary section's status line from the moment Delete is confirmed until the database lets the rows go - tens of seconds for a million rows on a tablet.",
+    "placeholders": { "name": { "content": "$1" } }
+  },
+  "options_deleting_row": { "message": "Deleting...",
+    "description": "The meta cell of the row being deleted, in place of its counts; its buttons are gone." },
   "options_delete_dictionary_failed": {
     "message": "Could not delete $NAME$: $DETAIL$",
     "placeholders": {

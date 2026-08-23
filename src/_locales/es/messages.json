@@ -807,6 +807,11 @@
     "message": "$NAME$ eliminado.",
     "placeholders": { "name": { "content": "$1" } }
   },
+  "options_deleting_dictionary": {
+    "message": "Eliminando $NAME$ - un diccionario grande tarda un rato...",
+    "placeholders": { "name": { "content": "$1" } }
+  },
+  "options_deleting_row": { "message": "Eliminando..." },
   "options_delete_dictionary_failed": {
     "message": "No se pudo eliminar $NAME$: $DETAIL$",
     "placeholders": {

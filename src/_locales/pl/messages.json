@@ -938,6 +938,11 @@
     "message": "Usunięto $NAME$.",
     "placeholders": { "name": { "content": "$1" } }
   },
+  "options_deleting_dictionary": {
+    "message": "Usuwanie $NAME$ - duży słownik chwilę to zajmuje...",
+    "placeholders": { "name": { "content": "$1" } }
+  },
+  "options_deleting_row": { "message": "Usuwanie..." },
   "options_delete_dictionary_failed": {
     "message": "Nie udało się usunąć $NAME$: $DETAIL$",
     "placeholders": {
