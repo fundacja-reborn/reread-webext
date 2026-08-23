@@ -677,6 +677,9 @@
   "options_file_dict_or": { "message": "o" },
   "options_file_dict": { "message": "- las entradas" },
   "options_file_syn": { "message": "- otras grafías, cuando el diccionario las tiene" },
+  "options_add_dictionary_steps": {
+    "message": "Dos pasos: elige los archivos y luego ajusta debajo los dos idiomas. Un archivo StarDict no dice para qué idiomas es, así que esa parte la pones tú - y es la que decide cuándo responde este diccionario."
+  },
   "options_words_in": { "message": "Palabras en" },
   "options_explained_in": { "message": "explicadas en" },
   "options_add_dictionary_button": { "message": "Añadir diccionario" },
@@ -684,7 +687,7 @@
     "message": "Un diccionario monolingüe también funciona - por ejemplo inglés-inglés: elige inglés en ambos lados. Los diccionarios se eligen por el idioma de sus entradas, no por el par, así que responde junto a los bilingües: bajo «Más» al traducir, directamente con la traducción desactivada."
   },
   "options_dict_files_note": {
-    "message": "Un archivo StarDict no dice nada de para qué idiomas es, así que aquí esa parte la pones tú. Añadir desde archivos no hace ninguna petición de red; sirven archivos de cualquier parte, incluidos los del catálogo - están publicados en"
+    "message": "Añadir desde archivos no hace ninguna petición de red; sirven archivos de cualquier parte, incluidos los del catálogo - están publicados en"
   },
   "options_disabled_heading": { "message": "Sitios desactivados" },
   "options_disabled_intro": {

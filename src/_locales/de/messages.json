@@ -654,6 +654,9 @@
   "options_file_dict_or": { "message": "oder" },
   "options_file_dict": { "message": "- die Einträge" },
   "options_file_syn": { "message": "- weitere Schreibweisen, wenn das Wörterbuch sie hat" },
+  "options_add_dictionary_steps": {
+    "message": "Zwei Schritte: die Dateien auswählen und darunter die beiden Sprachen einstellen. Eine StarDict-Datei sagt nicht, für welche Sprachen sie ist; diesen Teil tragen Sie selbst ein - und er entscheidet, wann dieses Wörterbuch antwortet."
+  },
   "options_words_in": { "message": "Wörter auf" },
   "options_explained_in": { "message": "erklärt auf" },
   "options_add_dictionary_button": { "message": "Wörterbuch hinzufügen" },
@@ -661,7 +664,7 @@
     "message": "Auch ein einsprachiges Wörterbuch funktioniert - etwa Englisch-Englisch: Wählen Sie auf beiden Seiten Englisch. Wörterbücher werden nach der Sprache ihrer Stichwörter zugeordnet, nicht nach dem Paar, also antwortet es neben den zweisprachigen: beim Übersetzen unter „Mehr“, bei ausgeschalteter Übersetzung sofort."
   },
   "options_dict_files_note": {
-    "message": "Eine StarDict-Datei sagt nichts darüber, für welche Sprachen sie ist; diesen Teil tragen Sie hier selbst ein. Aus Dateien hinzuzufügen stellt keinerlei Netzwerkanfrage; Dateien von überall funktionieren, die des Katalogs eingeschlossen - sie stehen unter"
+    "message": "Aus Dateien hinzuzufügen stellt keinerlei Netzwerkanfrage; Dateien von überall funktionieren, die des Katalogs eingeschlossen - sie stehen unter"
   },
   "options_disabled_heading": { "message": "Abgeschaltete Websites" },
   "options_disabled_intro": {

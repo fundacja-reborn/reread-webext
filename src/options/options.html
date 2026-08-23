@@ -446,6 +446,18 @@
         <li><code><em>name</em>.syn</code> <span data-i18n="options_file_syn">- other spellings, when the dictionary has them</span></li>
       </ul>
 
+      <!-- Adding from files is two acts, and the second one is a decision
+           nobody is prompted for: the picker is obvious, the two selects under
+           it look like settings that are already right. The sentence that
+           explains them used to sit in the footnote below the button, which is
+           to say after the mistake (Michał's report from the phone,
+           2026-08-23). -->
+      <p class="explain" data-i18n="options_add_dictionary_steps">
+        Two steps: pick the files, then set the two languages below them. A StarDict file does not
+        say which languages it holds, so that part is yours to fill in - and it is what decides
+        when this dictionary answers.
+      </p>
+
       <p>
         <input type="file" id="dictionary-files" multiple accept=".ifo,.idx,.dict,.dz,.gz,.syn" />
       </p>
@@ -458,6 +470,8 @@
         <button type="button" id="add-dictionary" data-i18n="options_add_dictionary_button">Add dictionary</button>
       </p>
 
+      <p id="dictionary-file-status" class="status" role="status"></p>
+
       <!-- Lookup matches dictionaries by the language of their headwords, not
            by the full pair - a deliberate rule (see `lookupEntries`), said out
            loud here because nothing else on this page says it. -->
@@ -468,12 +482,9 @@
         off.
       </p>
 
-      <p id="dictionary-file-status" class="status" role="status"></p>
-
       <p class="note footnote">
         <span data-i18n="options_dict_files_note"
-          >A StarDict file does not say which languages it is for, so that part is yours to fill in.
-          Adding from files makes no network request; files from anywhere work, the catalogue's own
+          >Adding from files makes no network request; files from anywhere work, the catalogue's own
           included - they are published at</span
         >
         <a href="https://download.wikdict.com/dictionaries/stardict/" target="_blank" rel="noopener"

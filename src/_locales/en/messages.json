@@ -816,6 +816,10 @@
   "options_file_dict_or": { "message": "or" },
   "options_file_dict": { "message": "- the entries" },
   "options_file_syn": { "message": "- other spellings, when the dictionary has them" },
+  "options_add_dictionary_steps": {
+    "message": "Two steps: pick the files, then set the two languages below them. A StarDict file does not say which languages it holds, so that part is yours to fill in - and it is what decides when this dictionary answers.",
+    "description": "Above the file picker in the fold that adds a dictionary from files: it names the second step, because the two language selects below the picker look like settings that are already right."
+  },
   "options_words_in": { "message": "Words in" },
   "options_explained_in": { "message": "explained in" },
   "options_add_dictionary_button": { "message": "Add dictionary" },
@@ -823,7 +827,7 @@
     "message": "A monolingual dictionary works too - for English-English, say, pick English on both sides. Dictionaries are matched by the language of their headwords, not by the pair, so it answers beside the bilingual ones: under \"More\" while translating, straight away with translation off."
   },
   "options_dict_files_note": {
-    "message": "A StarDict file does not say which languages it is for, so that part is yours to fill in. Adding from files makes no network request; files from anywhere work, the catalogue's own included - they are published at",
+    "message": "Adding from files makes no network request; files from anywhere work, the catalogue's own included - they are published at",
     "description": "Ends just before the address, which stands in the page as a link; the sentence's closing full stop is part of the page."
   },
   "options_disabled_heading": { "message": "Switched-off sites" },
