@@ -878,5 +878,19 @@
   "options_swept_unfinished": {
     "message": "Un dictionnaire dont l'import n'a jamais fini a été retiré ($NAMES$).",
     "placeholders": { "names": { "content": "$1" } }
+  },
+  "options_import_interrupted": {
+    "message": "Interrompu à $DONE$ sur $TOTAL$ - Continuer reprend à cet endroit.",
+    "placeholders": {
+      "done": { "content": "$1" },
+      "total": { "content": "$2" }
+    }
+  },
+  "options_import_interrupted_early": { "message": "Interrompu avant l'enregistrement de la première entrée - Continuer recommence depuis le début." },
+  "options_import_elsewhere": { "message": "Un autre onglet ajoute un dictionnaire en ce moment - attendez qu'il termine." },
+  "options_continue_import": { "message": "Continuer" },
+  "options_continue_import_aria": {
+    "message": "Continuer l'ajout de $NAME$",
+    "placeholders": { "name": { "content": "$1" } }
   }
 }

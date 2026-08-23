@@ -1013,5 +1013,19 @@
   "options_swept_unfinished": {
     "message": "Usunięto słownik, którego importu nigdy nie dokończono ($NAMES$).",
     "placeholders": { "names": { "content": "$1" } }
+  },
+  "options_import_interrupted": {
+    "message": "Przerwane przy $DONE$ z $TOTAL$ - Kontynuuj podejmie od tego miejsca.",
+    "placeholders": {
+      "done": { "content": "$1" },
+      "total": { "content": "$2" }
+    }
+  },
+  "options_import_interrupted_early": { "message": "Przerwane przed zapisaniem pierwszego hasła - Kontynuuj zacznie od nowa." },
+  "options_import_elsewhere": { "message": "Inna karta właśnie dodaje słownik - poczekaj, aż skończy." },
+  "options_continue_import": { "message": "Kontynuuj" },
+  "options_continue_import_aria": {
+    "message": "Kontynuuj dodawanie $NAME$",
+    "placeholders": { "name": { "content": "$1" } }
   }
 }

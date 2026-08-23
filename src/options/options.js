@@ -40,7 +40,7 @@ import {
   openDictionary,
 } from "../lib/dict/import.js";
 import { describeZipProblem, readZip } from "../lib/dict/zip.js";
-import { rowBatches } from "../lib/dict/rows.js";
+import { entriesReadFrom, rowBatches } from "../lib/dict/rows.js";
 import { afterMove } from "../lib/dict/order.js";
 import {
   beginImport,
@@ -48,8 +48,10 @@ import {
   finishImport,
   listDictionaries,
   openWriter,
+  readSources,
   removeUnfinished,
   reorderDictionaries,
+  stageSources,
 } from "../lib/dict/store.js";
 import { describeDownloadProblem, downloadModel } from "../lib/models/download.js";
 import { classifyModelFiles, describeClassifyProblem, isGzip } from "../lib/models/files.js";
@@ -1275,6 +1277,11 @@ function renderDictionary(dictionary, place) {
   name.append(element("span", "dictionary-title", dictionary.name));
   container.append(name);
 
+  if (!dictionary.ready) {
+    renderUnfinished(container, dictionary);
+    return container;
+  }
+
   const counted =
     dictionary.aliasCount > 0
       ? `${words(dictionary.entryCount)}, ${plural(dictionary.aliasCount, "spellings")}`
@@ -1314,6 +1321,49 @@ function renderDictionary(dictionary, place) {
   }
 
   return container;
+}
+
+/**
+ * The rest of the row of a dictionary whose import stopped halfway (D137).
+ *
+ * Where a finished row counts its words, this one says how far it got, and
+ * where the arrows would be there is Continue: the rows already written are
+ * in the database, the files are kept beside them, and pressing it picks the
+ * import up from its last batch. Delete is the other way out. Both wait
+ * while an import runs - on this page, or, for as long as the lock is held,
+ * on another.
+ *
+ * @param {HTMLElement} container
+ * @param {import("../lib/dict/store.js").Dictionary} dictionary
+ */
+function renderUnfinished(container, dictionary) {
+  const progress = dictionary.progress;
+  const standing = importElsewhere
+    ? t("options_import_elsewhere")
+    : progress === undefined
+      ? t("options_import_interrupted_early")
+      : t("options_import_interrupted", [progress.done.toLocaleString(), progress.total.toLocaleString()]);
+  const meta = element("span", "model-meta");
+  meta.append(element("span", "", standing));
+  container.append(meta);
+
+  const act = element("span", "model-act");
+  const go = document.createElement("button");
+  go.type = "button";
+  go.textContent = t("options_continue_import");
+  go.setAttribute("aria-label", t("options_continue_import_aria", dictionary.name));
+  go.disabled = importing || importElsewhere;
+  go.addEventListener("click", () => void resumeImport(dictionary));
+  act.append(go);
+  act.append(
+    deleteButton({
+      name: dictionary.name,
+      restAria: t("options_delete_dictionary_aria", dictionary.name),
+      disabled: importing || importElsewhere,
+      onConfirm: (button) => void removeDictionary(dictionary, button),
+    }),
+  );
+  container.append(act);
 }
 
 /**
@@ -1460,6 +1510,9 @@ async function renderCatalog() {
 
   const stored = await listDictionaries();
   const rows = dictionaryRows(stored, availableDictionaries(), config);
+  // Read once per redraw, for every unfinished row: whether its import is
+  // running somewhere (then its buttons wait) or stopped (then it may go on).
+  importElsewhere = !importing && (await importHeld());
 
   // What an arrow press moves within, and what the line above the list is
   // about - both read from the store, at the one moment the store was read.
@@ -1588,12 +1641,15 @@ async function downloadDictionary(entry) {
 
     // The language sides come from the catalogue row, not from a select: a
     // WikDict archive is one direction, and its name already said which.
-    await storeDictionary(fetched.value.files, {
-      base: fetched.value.base,
-      langFrom: entry.from,
-      langTo: entry.to,
-      say: dictionaryStatus,
+    const ran = await withImportLock(async () => {
+      await storeDictionary(fetched.value.files, {
+        base: fetched.value.base,
+        langFrom: entry.from,
+        langTo: entry.to,
+        say: dictionaryStatus,
+      });
     });
+    if (!ran) dictionaryStatus(t("options_import_elsewhere"), "error");
   } finally {
     letGo();
     importing = false;
@@ -1644,86 +1700,232 @@ function breathe() {
 }
 
 /**
+ * One import at a time across every page of this extension, not just this one.
+ *
+ * The settings page can be open twice, and since D137 an unfinished import is
+ * a row with a Continue button on it: a second page pressing that while the
+ * first is still writing would have two writers on one dictionary. A Web Lock
+ * is held for the length of an import and released by the browser the moment
+ * the page holding it is gone - killed, closed or navigated away - which is
+ * exactly the distinction a resume needs: a lock still held means "being
+ * added somewhere else", a lock free means "nobody is, go on". No permission,
+ * no timer, nothing to go stale. Where the API is missing, imports run
+ * unguarded, as they did before.
+ */
+const IMPORT_LOCK = "reread-dictionary-import";
+
+/**
+ * @param {() => Promise<void>} work
+ * @returns {Promise<boolean>} false when another page holds the lock, and the work did not run
+ */
+async function withImportLock(work) {
+  if (!("locks" in navigator)) {
+    await work();
+    return true;
+  }
+  return await navigator.locks.request(IMPORT_LOCK, { ifAvailable: true }, async (lock) => {
+    if (lock === null) return false;
+    await work();
+    return true;
+  });
+}
+
+/**
+ * @returns {Promise<boolean>} whether some page - this one included - is importing right now
+ */
+async function importHeld() {
+  if (!("locks" in navigator)) return false;
+  const { held = [] } = await navigator.locks.query();
+  return held.some((lock) => lock.name === IMPORT_LOCK);
+}
+
+/** What the last redraw of the dictionary frame found `importHeld` to be. */
+let importElsewhere = false;
+
+/**
+ * @param {import("../lib/dict/import.js").FileSource} source
+ * @returns {Blob} the same bytes as something the database stores as a file
+ */
+function blobOf(source) {
+  if (source instanceof Blob) return source;
+  // Nothing here is backed by shared memory; the narrower type is what a
+  // Blob part has to be.
+  return new Blob([/** @type {Uint8Array<ArrayBuffer> | ArrayBuffer} */ (source)]);
+}
+
+/**
  * The half of an import every source shares: files in, a dictionary in the
  * database or a sentence about why not. The file picker and the catalogue
  * differ only in where the files and the languages come from - and in which
  * status line they talk to, which is why `say` travels as an argument.
  *
- * The dictionary is read and written in step, one batch at a time: a batch
- * is handed to the database, the next one is keyed while the first is being
- * written, and nothing of either outlives its write. Whatever the files
- * weigh, what this page holds is the unpacked .dict file and one batch.
+ * The files are kept in the database before anything is read from them
+ * (D137): an import on a small tablet can be killed at any moment, and what
+ * it needs to go on is the files the page no longer has. The dictionary's row
+ * exists from this moment as well, unready and with a provisional name - its
+ * real one arrives with the first batch.
  *
  * @param {import("../lib/dict/import.js").DictionaryFiles} files
  * @param {{ base: string, langFrom: string, langTo: string, say: (text: string, tone?: "idle" | "busy" | "error") => void }} job
  * @returns {Promise<boolean>} whether a dictionary is now stored
  */
 async function storeDictionary(files, { base, langFrom, langTo, say }) {
+  /** @type {import("../lib/dict/store.js").Dictionary | null} */
+  let dictionary = null;
   try {
     say(t("options_reading_file", base), "busy");
+    dictionary = await beginImport({ name: base, langFrom, langTo, credit: null });
+    await stageSources(dictionary.id, {
+      ifo: blobOf(files.ifo),
+      idx: blobOf(files.idx),
+      dict: blobOf(files.dict),
+      ...(files.syn === undefined ? {} : { syn: blobOf(files.syn) }),
+    });
+
     const opened = await openDictionary(files, { fallbackName: base });
     if (!opened.ok) {
+      await deleteDictionary(dictionary.id);
       say(describeImportProblem(opened.problem, opened.detail), "error");
       return false;
     }
 
-    const { name, credit } = opened.value;
-    const total = (opened.value.words + opened.value.synonyms).toLocaleString();
-    const dictionary = await beginImport({ name, langFrom, langTo, credit });
-
-    const batches = rowBatches(dictionary.id, {
-      entries: entriesOf(opened.value),
-      aliases: aliasesOf(opened.value),
-    });
-
-    const writer = await openWriter();
-    let appended = 0;
-    /** @type {import("../lib/dict/rows.js").RowSummary} */
-    let summary;
-    try {
-      let step = batches.next();
-      while (!step.done) {
-        const writing = writer.put(step.value.rows, step.value.additions);
-        say(t("options_storing_dictionary", [name, step.value.done.toLocaleString(), total]), "busy");
-        // The next batch is keyed while this one is on its way to the disk.
-        step = batches.next();
-        appended += await writing;
-        // Waiting on the write yields too, but not for long enough to be sure
-        // the status line painted; a hidden page has nobody to paint for, and
-        // its timers are throttled to a second each.
-        if (document.visibilityState === "visible") await breathe();
-      }
-      summary = step.value;
-    } finally {
-      writer.close();
-    }
-
-    if (summary.entryCount === 0) {
-      // Every entry pointed past the end of the file, or none had a word in
-      // it: what the index promised turned out to be nothing, and nothing is
-      // what stays.
-      await deleteDictionary(dictionary.id);
-      say(describeImportProblem("no_entries", summary.skipped === 0 ? undefined : `${summary.skipped}`), "error");
-      return false;
-    }
-
-    const ready = await finishImport(dictionary.id, {
-      entryCount: summary.entryCount,
-      aliasCount: summary.aliasCount,
-      bytes: summary.bytes + appended,
-    });
-
-    const unreadable = summary.skipped === 0 ? "" : ` ${plural(summary.skipped, "options_skipped_entries")}`;
-    say(t("options_added_dictionary", [ready.name, words(ready.entryCount), megabytes(ready.bytes)]) + unreadable);
-    return true;
+    return await runImport(opened.value, dictionary, { say, progress: null });
   } catch (error) {
-    // Whatever went wrong, the half-written dictionary is still unready and
-    // therefore invisible; this sweeps it away rather than leaving it to the
-    // next time this page opens.
-    await removeUnfinished().catch(() => []);
+    // Whatever went wrong, the half-written dictionary is invisible and now
+    // also gone, files and all: an import that failed with a sentence is not
+    // one to offer going on with.
+    if (dictionary !== null) await deleteDictionary(dictionary.id).catch(() => undefined);
     say(t("options_add_dictionary_failed", message(error)), "error");
     return false;
   }
+}
+
+/**
+ * Picks an interrupted import up where its last batch stopped.
+ *
+ * The files come back out of the database, the dictionary is opened again,
+ * and the batches resume from the progress its row carries (see `rowBatches`
+ * on what is walked again and what is not). The row keeps its id, its place
+ * in the order and the rows already written.
+ *
+ * @param {import("../lib/dict/store.js").Dictionary} dictionary
+ */
+async function resumeImport(dictionary) {
+  if (importing || running !== null) return;
+
+  importing = true;
+  const letGo = holdScreen();
+  await renderCatalog();
+
+  try {
+    const ran = await withImportLock(async () => {
+      const sources = await readSources(dictionary.id);
+      if (sources === null) {
+        // The files went missing under it - the row is a leftover after all.
+        await deleteDictionary(dictionary.id);
+        dictionaryStatus(t("options_swept_unfinished", dictionary.name));
+        return;
+      }
+
+      dictionaryStatus(t("options_reading_file", dictionary.name), "busy");
+      const opened = await openDictionary(
+        { ifo: sources.ifo, idx: sources.idx, dict: sources.dict, ...(sources.syn === undefined ? {} : { syn: sources.syn }) },
+        { fallbackName: dictionary.name },
+      );
+      if (!opened.ok) {
+        await deleteDictionary(dictionary.id);
+        dictionaryStatus(describeImportProblem(opened.problem, opened.detail), "error");
+        return;
+      }
+
+      // The row as the database has it now, not as the list drew it: the
+      // progress may have moved on since, and it is the mark to go on from.
+      const current = (await listDictionaries()).find((one) => one.id === dictionary.id) ?? dictionary;
+      await runImport(opened.value, current, { say: dictionaryStatus, progress: current.progress ?? null });
+    });
+    if (!ran) dictionaryStatus(t("options_import_elsewhere"), "error");
+  } catch (error) {
+    await deleteDictionary(dictionary.id).catch(() => undefined);
+    dictionaryStatus(t("options_add_dictionary_failed", message(error)), "error");
+  } finally {
+    letGo();
+    importing = false;
+    await renderCatalog();
+  }
+}
+
+/**
+ * The rows, batch after batch, from wherever the import stands.
+ *
+ * The dictionary is read and written in step, one batch at a time: a batch
+ * is handed to the database, the next one is keyed while the first is being
+ * written, and nothing of either outlives its write. Whatever the files
+ * weigh, what this page holds is the unpacked .dict file and one batch. Each
+ * batch lands together with where the import stands after it, so a page
+ * killed between two batches has lost nothing but the batch in flight.
+ *
+ * @param {import("../lib/dict/import.js").OpenDictionary} opened
+ * @param {import("../lib/dict/store.js").Dictionary} dictionary
+ * @param {{ say: (text: string, tone?: "idle" | "busy" | "error") => void, progress: import("../lib/dict/store.js").ImportProgress | null }} job
+ * @returns {Promise<boolean>} whether the dictionary is now stored
+ */
+async function runImport(opened, dictionary, { say, progress }) {
+  const { name, credit } = opened;
+  const total = opened.words + opened.synonyms;
+  const batches = rowBatches(
+    dictionary.id,
+    {
+      entries: entriesOf(opened, { readFrom: entriesReadFrom(progress) }),
+      aliases: aliasesOf(opened),
+    },
+    { resume: progress },
+  );
+
+  const writer = await openWriter(dictionary.id);
+  let appended = progress?.appended ?? 0;
+  /** @type {import("../lib/dict/rows.js").RowSummary} */
+  let summary;
+  try {
+    let step = batches.next();
+    while (!step.done) {
+      const batch = step.value;
+      const writing = writer.put(batch.rows, batch.additions, {
+        name,
+        credit,
+        progress: { ...batch.progress, total, appended },
+      });
+      say(t("options_storing_dictionary", [name, batch.done.toLocaleString(), total.toLocaleString()]), "busy");
+      // The next batch is keyed while this one is on its way to the disk.
+      step = batches.next();
+      appended += await writing;
+      // Waiting on the write yields too, but not for long enough to be sure
+      // the status line painted; a hidden page has nobody to paint for, and
+      // its timers are throttled to a second each.
+      if (document.visibilityState === "visible") await breathe();
+    }
+    summary = step.value;
+  } finally {
+    writer.close();
+  }
+
+  if (summary.entryCount === 0) {
+    // Every entry pointed past the end of the file, or none had a word in
+    // it: what the index promised turned out to be nothing, and nothing is
+    // what stays.
+    await deleteDictionary(dictionary.id);
+    say(describeImportProblem("no_entries", summary.skipped === 0 ? undefined : `${summary.skipped}`), "error");
+    return false;
+  }
+
+  const ready = await finishImport(dictionary.id, {
+    entryCount: summary.entryCount,
+    aliasCount: summary.aliasCount,
+    bytes: summary.bytes + appended,
+  });
+
+  const unreadable = summary.skipped === 0 ? "" : ` ${plural(summary.skipped, "options_skipped_entries")}`;
+  say(t("options_added_dictionary", [ready.name, words(ready.entryCount), megabytes(ready.bytes)]) + unreadable);
+  return true;
 }
 
 async function addSelectedDictionary() {
@@ -1764,7 +1966,11 @@ async function addSelectedDictionary() {
       ...(syn === undefined ? {} : { syn: file(syn) }),
     };
 
-    const stored = await storeDictionary(files, { base, langFrom, langTo, say: dictionaryFileStatus });
+    let stored = false;
+    const ran = await withImportLock(async () => {
+      stored = await storeDictionary(files, { base, langFrom, langTo, say: dictionaryFileStatus });
+    });
+    if (!ran) dictionaryFileStatus(t("options_import_elsewhere"), "error");
     if (stored && input !== null) input.value = "";
   } catch (error) {
     dictionaryFileStatus(t("options_add_dictionary_failed", message(error)), "error");
@@ -1821,8 +2027,9 @@ async function render() {
   renderDisabledHosts();
 
   // An import that died with its tab left rows behind that no lookup can see.
-  // This is the moment somebody is here to be told about it - swept before
-  // the frame first draws, so what draws is already clean.
+  // One that still has its files is a row with Continue on it (D137) and
+  // stays; the rest is swept before the frame first draws, and this is the
+  // moment somebody is here to be told about it.
   const swept = await removeUnfinished().catch(() => []);
   if (swept.length > 0) {
     dictionaryStatus(

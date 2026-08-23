@@ -878,5 +878,19 @@
   "options_swept_unfinished": {
     "message": "Se quitó un diccionario cuya importación nunca terminó ($NAMES$).",
     "placeholders": { "names": { "content": "$1" } }
+  },
+  "options_import_interrupted": {
+    "message": "Interrumpido en $DONE$ de $TOTAL$ - Continuar retoma desde ahí.",
+    "placeholders": {
+      "done": { "content": "$1" },
+      "total": { "content": "$2" }
+    }
+  },
+  "options_import_interrupted_early": { "message": "Interrumpido antes de guardar la primera entrada - Continuar empieza de nuevo." },
+  "options_import_elsewhere": { "message": "Otra pestaña está añadiendo un diccionario ahora mismo - espera a que termine." },
+  "options_continue_import": { "message": "Continuar" },
+  "options_continue_import_aria": {
+    "message": "Continuar añadiendo $NAME$",
+    "placeholders": { "name": { "content": "$1" } }
   }
 }

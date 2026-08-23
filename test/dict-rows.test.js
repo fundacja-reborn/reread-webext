@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { mergeSenses, rowBatches, utf8Length } from "../src/lib/dict/rows.js";
+import { entriesReadFrom, mergeSenses, rowBatches, utf8Length } from "../src/lib/dict/rows.js";
 import { LIMITS } from "../src/lib/dict/text.js";
 
 /**
@@ -292,6 +292,130 @@ describe("rowBatches", () => {
     assert.equal(at(whole.rows, "bank")?.senses.length, LIMITS.senses);
     assert.deepEqual(at(whole.rows, "go")?.senses, ["iść", "jechać"]);
     assert.equal(at(whole.rows, "walked")?.aliasOf, "walk");
+  });
+});
+
+/**
+ * `entriesOf` with `readFrom`, over entries already in memory: the ones before
+ * the boundary come out with their headword only, as the importer would hand
+ * them to a resumed run.
+ *
+ * @param {import("../src/lib/dict/import.js").Entry[]} entries
+ * @param {number} readFrom
+ * @returns {import("../src/lib/dict/import.js").Entry[]}
+ */
+function readFrom(entries, readFrom) {
+  return entries.map((entry) => (entry.position < readFrom ? { ...entry, senses: [] } : entry));
+}
+
+describe("rowBatches, resumed", () => {
+  // A dictionary with every shape the resume has to get right: homographs in
+  // one batch and across batches, an unreadable entry, a punctuation-only
+  // headword, a gap in the positions, synonyms that shadow, point at nothing,
+  // point at an unreadable entry, repeat a spelling, and one plain one.
+  const entries = [
+    { position: 0, headword: "Bank", senses: ["instytucja"] },
+    { position: 1, headword: "go", senses: ["iść"] },
+    { position: 2, headword: "bank", senses: ["brzeg", "instytucja"] },
+    { position: 3, headword: "broken", senses: [] },
+    { position: 4, headword: "---", senses: ["nic"] },
+    { position: 6, headword: "went", senses: ["poszedł"] },
+    { position: 7, headword: "'go'", senses: ["jechać"] },
+    { position: 8, headword: "walk", senses: ["chodzić"] },
+    { position: 9, headword: "\"bank\"", senses: ["ławka"] },
+    { position: 10, headword: "run", senses: ["biec"] },
+    { position: 11, headword: "Run", senses: ["prowadzić"] },
+  ];
+  const aliases = [
+    { headword: "gone", target: 1 },
+    { headword: "went", target: 1 },
+    { headword: "walked", target: 8 },
+    { headword: "walked", target: 1 },
+    { headword: "broke", target: 3 },
+    { headword: "ran", target: 10 },
+    { headword: "Ran", target: 11 },
+    { headword: "runs", target: 99 },
+  ];
+
+  /** The uninterrupted run, and every batch of it with the progress it carried. */
+  const whole = stored("d1", entries, aliases, { batchSize: 1000 });
+  const batches = [...rowBatches("d1", { entries, aliases }, { batchSize: 2 })];
+
+  it("marks where each batch leaves the import", () => {
+    const marks = batches.map((batch) => [batch.progress.phase, batch.progress.next]);
+    // Two rows a batch: `Bank` and `go` fill the first, so the next one has
+    // to start reading at position 2. The last batch filled up at the sixth
+    // synonym; the two after it made no row, so nothing was written after
+    // them and the mark stays at six - a resumed run looks at them again.
+    assert.deepEqual(marks[0], ["entries", 2]);
+    assert.deepEqual(marks[marks.length - 1], ["aliases", 6]);
+    assert.deepEqual(batches[batches.length - 1]?.progress.skipped, [3]);
+    assert.equal(batches[batches.length - 1]?.progress.done, entries.length + 6);
+  });
+
+  it("ends in the same rows from every point it could have stopped at", () => {
+    for (let k = 0; k < batches.length; k += 1) {
+      // What the database holds after batches 0..k landed, and nothing more.
+      /** @type {Map<string, DictionaryRow>} */
+      const table = new Map();
+      let appended = 0;
+      for (const batch of batches.slice(0, k + 1)) {
+        // Copied: the additions below write into the row, and the batches
+        // are read again for every k.
+        for (const row of batch.rows) table.set(row.key, { ...row, senses: [...row.senses] });
+        for (const addition of batch.additions) {
+          const row = table.get(addition.key);
+          assert.ok(row !== undefined);
+          for (const sense of mergeSenses(row.senses, addition.senses)) appended += utf8Length(sense);
+        }
+      }
+
+      const resume = /** @type {import("../src/lib/dict/rows.js").RowProgress} */ (batches[k]?.progress);
+      const resumed = rowBatches(
+        "d1",
+        { entries: readFrom(entries, entriesReadFrom(resume)), aliases },
+        { batchSize: 2, resume },
+      );
+      let step = resumed.next();
+      while (!step.done) {
+        for (const row of step.value.rows) table.set(row.key, row);
+        for (const addition of step.value.additions) {
+          const row = table.get(addition.key);
+          assert.ok(row !== undefined, `resumed at ${k}: an addition for ${addition.key} has no row`);
+          for (const sense of mergeSenses(row.senses, addition.senses)) appended += utf8Length(sense);
+        }
+        step = resumed.next();
+      }
+
+      const rows = [...table.values()].sort((a, b) => a.key.localeCompare(b.key));
+      const expected = [...whole.rows].sort((a, b) => a.key.localeCompare(b.key));
+      assert.deepEqual(rows, expected, `resumed after batch ${k}`);
+      assert.equal(step.value.entryCount, whole.entryCount, `entryCount after ${k}`);
+      assert.equal(step.value.aliasCount, whole.aliasCount, `aliasCount after ${k}`);
+      assert.equal(step.value.skipped, whole.skipped, `skipped after ${k}`);
+      assert.equal(step.value.bytes + appended, whole.bytes, `bytes after ${k}`);
+    }
+  });
+
+  it("reads nothing twice: a resumed run never asks for data before the boundary", () => {
+    const resume = /** @type {import("../src/lib/dict/rows.js").RowProgress} */ (batches[1]?.progress);
+    assert.equal(resume.phase, "entries");
+    // Entries before `next` arrive with no senses and must not count as
+    // skipped, nor turn into rows - their rows are already in.
+    const resumed = [...rowBatches("d1", { entries: readFrom(entries, resume.next), aliases }, { batchSize: 1000, resume })];
+    const keys = resumed.flatMap((batch) => batch.rows.map((row) => row.key));
+    assert.ok(!keys.includes("go"));
+    assert.ok(!keys.includes("walk"));
+    assert.ok(keys.includes("run"));
+    // The word before the boundary had no data to give, and was not skipped for it.
+    assert.equal(resumed[resumed.length - 1]?.progress.skipped.length, 1);
+  });
+
+  it("walks the whole index for keys alone once the synonyms are under way", () => {
+    const last = /** @type {import("../src/lib/dict/rows.js").RowProgress} */ (batches[batches.length - 1]?.progress);
+    assert.equal(last.phase, "aliases");
+    assert.equal(entriesReadFrom(last), Number.POSITIVE_INFINITY);
+    assert.equal(entriesReadFrom(null), 0);
   });
 });
 
