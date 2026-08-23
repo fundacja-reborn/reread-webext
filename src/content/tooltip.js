@@ -846,7 +846,7 @@ export const STYLE = `
       box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
     }
     .body[data-tone="error"],
-    .context[data-tone="error"] { color: #f0a83c; }
+    .context[data-tone="error"] { color: #f09a3e; }
     .bubble:not([data-pointer="coarse"]) .entry-sense[aria-pressed="false"]:hover:not(:disabled) { background: rgba(255, 255, 255, 0.08); }
     .entry-sense[aria-pressed="true"] { background: rgba(255, 255, 255, 0.1); }
     .editor { background: rgba(255, 255, 255, 0.06); }

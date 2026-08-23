@@ -35,8 +35,8 @@
     --page-muted: #98a1b5;
     --page-line: #565d6c;
     --page-border: #767e8f;
-    --page-accent: #f0a83c;
-    --page-error: #f0a83c;
+    --page-accent: #f09a3e;
+    --page-error: #f09a3e;
   }
 }
 
@@ -67,8 +67,8 @@
   --page-muted: #98a1b5;
   --page-line: #565d6c;
   --page-border: #767e8f;
-  --page-accent: #f0a83c;
-  --page-error: #f0a83c;
+  --page-accent: #f09a3e;
+  --page-error: #f09a3e;
 }
 
 /* Paper rather than a dimmed white: the point of sepia is less blue light at
