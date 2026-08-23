@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { parseIdx, parseIfo, parseSyn, readFields } from "../src/lib/dict/stardict.js";
+import { idxEntries, isWord, parseIfo, readFields, synEntries } from "../src/lib/dict/stardict.js";
 import { concat, cstring, ifo, index, syn, u32, u64, utf8 } from "./stardict-fixture.js";
 
 describe("parseIfo", () => {
@@ -59,33 +59,35 @@ describe("parseIfo", () => {
   });
 });
 
-describe("parseIdx", () => {
+describe("idxEntries", () => {
   it("reads word, offset and size", () => {
     const { idx } = index([
       { word: "bank", data: utf8("brzeg") },
       { word: "watch", data: utf8("zegarek") },
     ]);
 
-    const { entries, truncated } = parseIdx(idx, 32);
-    assert.equal(truncated, false);
-    assert.deepEqual(entries, [
-      { word: "bank", offset: 0, size: 5 },
-      { word: "watch", offset: 5, size: 7 },
-    ]);
+    assert.deepEqual(
+      [...idxEntries(idx, 32)],
+      [
+        { word: "bank", offset: 0, size: 5 },
+        { word: "watch", offset: 5, size: 7 },
+      ],
+    );
   });
 
   it("reads 64-bit offsets when the .ifo said so", () => {
     const { idx } = index([{ word: "bank", data: utf8("brzeg") }], { offsetBits: 64 });
-    assert.deepEqual(parseIdx(idx, 64).entries, [{ word: "bank", offset: 0, size: 5 }]);
+    assert.deepEqual([...idxEntries(idx, 64)], [{ word: "bank", offset: 0, size: 5 }]);
   });
 
   it("stops at a truncated tail and keeps what was whole", () => {
-    const { idx } = index([{ word: "bank", data: utf8("brzeg") }]);
+    const { idx } = index([
+      { word: "bank", data: utf8("brzeg") },
+      { word: "watch", data: utf8("zegarek") },
+    ]);
     const cut = idx.slice(0, idx.length - 2);
 
-    const { entries, truncated } = parseIdx(cut, 32);
-    assert.equal(truncated, true);
-    assert.equal(entries.length, 0);
+    assert.deepEqual([...idxEntries(cut, 32)], [{ word: "bank", offset: 0, size: 5 }]);
   });
 
   it("stops rather than inventing words when the offset width is wrong", () => {
@@ -99,11 +101,10 @@ describe("parseIdx", () => {
       { offsetBits: 64 },
     );
 
-    const { entries } = parseIdx(idx, 32);
-    assert.ok(entries.length < 2);
+    assert.ok([...idxEntries(idx, 32)].filter(isWord).length < 2);
   });
 
-  it("skips an empty word and a word with no data", () => {
+  it("yields an empty word and a word with no data, because positions count them", () => {
     const idx = concat([
       cstring(""),
       u32(0),
@@ -116,7 +117,9 @@ describe("parseIdx", () => {
       u32(0),
     ]);
 
-    assert.deepEqual(parseIdx(idx, 32).entries, [{ word: "real", offset: 0, size: 4 }]);
+    const entries = [...idxEntries(idx, 32)];
+    assert.deepEqual(entries.map(isWord), [false, true, false]);
+    assert.deepEqual(entries[1], { word: "real", offset: 0, size: 4 });
   });
 
   it("keeps the same word twice, because homographs are two entries", () => {
@@ -124,13 +127,25 @@ describe("parseIdx", () => {
       { word: "bank", data: utf8("brzeg") },
       { word: "bank", data: utf8("instytucja") },
     ]);
-    assert.equal(parseIdx(idx, 32).entries.length, 2);
+    assert.equal([...idxEntries(idx, 32)].length, 2);
+  });
+
+  it("walks a long index one record at a time, to the end", () => {
+    // The generator is the point: a dictionary of a million words costs one
+    // record of memory at a time, and the walk still ends where the file does.
+    const { idx } = index(Array.from({ length: 1000 }, (_, at) => ({ word: `w${at}`, data: utf8("x") })));
+    let count = 0;
+    for (const entry of idxEntries(idx, 32)) {
+      assert.equal(entry.word, `w${count}`);
+      count += 1;
+    }
+    assert.equal(count, 1000);
   });
 });
 
-describe("parseSyn", () => {
-  it("reads a synonym and the entry it points at", () => {
-    assert.deepEqual(parseSyn(syn([{ word: "went", target: 3 }])), [{ word: "went", target: 3 }]);
+describe("synEntries", () => {
+  it("reads a synonym and the record it points at", () => {
+    assert.deepEqual([...synEntries(syn([{ word: "went", target: 3 }]))], [{ word: "went", target: 3 }]);
   });
 
   it("stops at a truncated tail", () => {
@@ -138,11 +153,11 @@ describe("parseSyn", () => {
       { word: "went", target: 3 },
       { word: "gone", target: 3 },
     ]);
-    assert.deepEqual(parseSyn(whole.slice(0, whole.length - 3)), [{ word: "went", target: 3 }]);
+    assert.deepEqual([...synEntries(whole.slice(0, whole.length - 3))], [{ word: "went", target: 3 }]);
   });
 
   it("is empty for an empty file", () => {
-    assert.deepEqual(parseSyn(new Uint8Array()), []);
+    assert.deepEqual([...synEntries(new Uint8Array())], []);
   });
 });
 

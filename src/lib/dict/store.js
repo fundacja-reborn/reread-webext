@@ -23,6 +23,7 @@
  */
 
 import { answerOrder, inChosenOrder, nextRank } from "./order.js";
+import { mergeSenses, utf8Length } from "./rows.js";
 
 const DB_NAME = "reread-dicts";
 
@@ -121,15 +122,23 @@ async function withStores(stores, mode, work) {
   try {
     const transaction = db.transaction(stores, mode);
     const result = await work(transaction);
-    await new Promise((resolve, reject) => {
-      transaction.oncomplete = () => resolve(undefined);
-      transaction.onerror = () => reject(transaction.error ?? new Error("Dictionary transaction failed"));
-      transaction.onabort = () => reject(transaction.error ?? new Error("Dictionary transaction aborted"));
-    });
+    await completed(transaction);
     return result;
   } finally {
     db.close();
   }
+}
+
+/**
+ * @param {IDBTransaction} transaction
+ * @returns {Promise<void>} settled the way the transaction is
+ */
+function completed(transaction) {
+  return new Promise((resolve, reject) => {
+    transaction.oncomplete = () => resolve(undefined);
+    transaction.onerror = () => reject(transaction.error ?? new Error("Dictionary transaction failed"));
+    transaction.onabort = () => reject(transaction.error ?? new Error("Dictionary transaction aborted"));
+  });
 }
 
 /**
@@ -285,22 +294,76 @@ export async function beginImport({ name, langFrom, langTo, credit }) {
 }
 
 /**
- * One batch of rows.
+ * Senses that belong on rows an earlier batch wrote (see `rowBatches`): each
+ * is a read of the row, the merge `rows.js` would have done had the two
+ * entries been in one batch, and a put of the result - inside the batch's own
+ * transaction, so the batch still lands whole or not at all.
  *
- * The puts are fired without being awaited one by one: IndexedDB queues them on
- * the transaction, and waiting for each in turn would add a round trip through
- * the microtask queue to every one of a few hundred thousand rows. A failure
- * still aborts the transaction, which is what the wait at the end sees.
- *
- * @param {import("./rows.js").DictionaryRow[]} rows
- * @returns {Promise<void>}
+ * @param {IDBObjectStore} store
+ * @param {import("./rows.js").SenseAddition[]} additions
+ * @returns {Promise<number>} how many bytes were added, for the record's count
+ *   of what its text costs
  */
-export async function putEntries(rows) {
-  if (rows.length === 0) return;
-  await withStores([ENTRIES], "readwrite", (transaction) => {
-    const store = transaction.objectStore(ENTRIES);
-    for (const row of rows) store.put(row);
-  });
+async function mergeAdditions(store, additions) {
+  let appended = 0;
+  for (const { dictId, key, senses } of additions) {
+    const row = /** @type {import("./rows.js").DictionaryRow | undefined} */ (
+      await promisify(store.get([dictId, key]))
+    );
+    if (row === undefined) continue;
+    const added = mergeSenses(row.senses, senses);
+    if (added.length === 0) continue;
+    for (const sense of added) appended += utf8Length(sense);
+    store.put(row);
+  }
+  return appended;
+}
+
+/**
+ * A connection held open for the length of one import.
+ *
+ * Every batch is still a transaction of its own - it lands whole or not at
+ * all, and the database is never owned for longer than one batch takes - but
+ * the connection under them is opened once. That is what lets a batch be
+ * handed over and left: `put` queues its rows before it returns, so the page
+ * can go and key the next batch while this one is being written, instead of
+ * waiting first on an `open` that cannot complete until the page yields.
+ *
+ * The puts are fired without being awaited one by one: IndexedDB queues them
+ * on the transaction, and waiting for each in turn would add a round trip
+ * through the microtask queue to every one of a few hundred thousand rows. A
+ * failure still aborts the transaction, which is what the wait at the end sees.
+ *
+ * @typedef {object} DictionaryWriter
+ * @property {(rows: import("./rows.js").DictionaryRow[], additions?: import("./rows.js").SenseAddition[]) => Promise<number>} put
+ *   one batch; resolves, once it is on disk, with how many bytes the additions added
+ * @property {() => void} close
+ */
+
+/**
+ * @returns {Promise<DictionaryWriter>}
+ */
+export async function openWriter() {
+  const db = await open();
+  // Another page asking for an upgrade must not wait on this import: the
+  // connection yields, the batch in flight aborts, and the import fails with
+  // a sentence - rather than the other page hanging without one.
+  db.onversionchange = () => db.close();
+
+  return {
+    put(rows, additions = []) {
+      if (rows.length === 0 && additions.length === 0) return Promise.resolve(0);
+      const transaction = db.transaction([ENTRIES], "readwrite");
+      const store = transaction.objectStore(ENTRIES);
+      for (const row of rows) store.put(row);
+      return Promise.all([mergeAdditions(store, additions), completed(transaction)]).then(
+        ([appended]) => appended,
+      );
+    },
+    close() {
+      db.close();
+    },
+  };
 }
 
 /**

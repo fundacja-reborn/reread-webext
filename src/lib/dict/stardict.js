@@ -20,6 +20,13 @@
  *    dictionary over a handful of bad rows would mean a reader who cannot look
  *    anything up because of a word they will never select - so bad entries are
  *    counted, reported, and skipped.
+ *
+ * The index and the synonym file are walked, not loaded: each is a generator
+ * yielding one record at a time, so a dictionary of a million words costs the
+ * memory of one word while it is being read. The records come out in file
+ * order with nothing left out - a `.syn` file points at its targets by their
+ * position in the index, empty records included, so a reader that dropped one
+ * would shift every synonym after it onto the wrong word.
  */
 
 /** What the format allows a word to be, and a length that says the file is not what it claims. */
@@ -47,7 +54,7 @@ const decoder = new TextDecoder("utf-8");
 
 /**
  * @typedef {object} IdxEntry
- * @property {string} word
+ * @property {string} word empty in a record some tool left behind
  * @property {number} offset into the .dict file
  * @property {number} size
  */
@@ -130,31 +137,39 @@ function zeroAt(bytes, from) {
 }
 
 /**
+ * @param {ArrayBuffer | Uint8Array} data
+ * @returns {Uint8Array}
+ */
+function bytesOf(data) {
+  return data instanceof Uint8Array ? data : new Uint8Array(data);
+}
+
+/**
  * The .idx file: `word\0`, then the offset and size of that word's data.
  *
  * Walked to the end rather than to `wordcount`, and a truncated tail ends the
- * walk instead of throwing: whatever was whole is still a dictionary.
+ * walk instead of throwing: whatever was whole is still a dictionary. Every
+ * record is yielded, the empty ones too - the synonym file counts positions,
+ * and a position has to mean the same thing here as there. Whether a record
+ * is a word is the caller's question (`isWord`).
  *
  * @param {ArrayBuffer | Uint8Array} data
  * @param {32 | 64} offsetBits
- * @returns {{ entries: IdxEntry[], truncated: boolean }}
+ * @returns {Generator<IdxEntry, void, undefined>}
  */
-export function parseIdx(data, offsetBits) {
-  const bytes = data instanceof Uint8Array ? data : new Uint8Array(data);
+export function* idxEntries(data, offsetBits) {
+  const bytes = bytesOf(data);
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   const offsetSize = offsetBits === 64 ? 8 : 4;
-
-  /** @type {IdxEntry[]} */
-  const entries = [];
   let at = 0;
 
   while (at < bytes.length) {
     const end = zeroAt(bytes, at);
-    if (end < 0) return { entries, truncated: true };
+    if (end < 0) return;
     // A word longer than the format allows means the offset width is wrong, or
     // this is not an index at all. Either way the rest is not readable.
-    if (end - at > MAX_WORD_BYTES) return { entries, truncated: true };
-    if (end + 1 + offsetSize + 4 > bytes.length) return { entries, truncated: true };
+    if (end - at > MAX_WORD_BYTES) return;
+    if (end + 1 + offsetSize + 4 > bytes.length) return;
 
     const word = decoder.decode(bytes.subarray(at, end));
     const numbers = end + 1;
@@ -164,42 +179,49 @@ export function parseIdx(data, offsetBits) {
         : view.getUint32(numbers, false);
     const size = view.getUint32(numbers + offsetSize, false);
 
-    // The empty string is not a word, and some tools leave one behind.
-    if (word.length > 0 && size > 0) entries.push({ word, offset, size });
+    yield { word, offset, size };
     at = numbers + offsetSize + 4;
   }
-
-  return { entries, truncated: false };
 }
 
 /**
- * The .syn file: `synonym\0`, then which entry of the .idx file it means.
+ * Whether an index record names a word at all.
+ *
+ * The empty string is not a word, and some tools leave one behind - whole
+ * runs of them, even: an index padded with zeros to twice its length reads as
+ * hundreds of thousands of empty records after the last real one. A word with
+ * no data is not a word either.
+ *
+ * @param {IdxEntry} entry
+ * @returns {boolean}
+ */
+export function isWord(entry) {
+  return entry.word.length > 0 && entry.size > 0;
+}
+
+/**
+ * The .syn file: `synonym\0`, then which record of the .idx file it means.
  *
  * This is where inflected forms live - `went` pointing at `go` - which is the
  * dictionary's own answer to a problem our matching deliberately does not
  * solve. Optional, and absent more often than not.
  *
  * @param {ArrayBuffer | Uint8Array} data
- * @returns {{ word: string, target: number }[]}
+ * @returns {Generator<{ word: string, target: number }, void, undefined>}
  */
-export function parseSyn(data) {
-  const bytes = data instanceof Uint8Array ? data : new Uint8Array(data);
+export function* synEntries(data) {
+  const bytes = bytesOf(data);
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-
-  /** @type {{ word: string, target: number }[]} */
-  const synonyms = [];
   let at = 0;
 
   while (at < bytes.length) {
     const end = zeroAt(bytes, at);
-    if (end < 0 || end - at > MAX_WORD_BYTES || end + 5 > bytes.length) break;
+    if (end < 0 || end - at > MAX_WORD_BYTES || end + 5 > bytes.length) return;
 
     const word = decoder.decode(bytes.subarray(at, end));
-    if (word.length > 0) synonyms.push({ word, target: view.getUint32(end + 1, false) });
+    if (word.length > 0) yield { word, target: view.getUint32(end + 1, false) };
     at = end + 5;
   }
-
-  return synonyms;
 }
 
 /**
@@ -222,7 +244,7 @@ export function parseSyn(data) {
  * @returns {Field[] | null} null when the entry points outside the file
  */
 export function readFields(data, entry, sametypesequence) {
-  const bytes = data instanceof Uint8Array ? data : new Uint8Array(data);
+  const bytes = bytesOf(data);
   const start = entry.offset;
   const end = start + entry.size;
   if (start < 0 || end > bytes.length) return null;

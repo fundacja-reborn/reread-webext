@@ -970,14 +970,6 @@
     "message": "Завантаження словника $PAIR$...",
     "placeholders": { "pair": { "content": "$1" } }
   },
-  "options_reading_dictionary_progress": {
-    "message": "Читання $NAME$ - $DONE$ з $TOTAL$...",
-    "placeholders": {
-      "name": { "content": "$1" },
-      "done": { "content": "$2" },
-      "total": { "content": "$3" }
-    }
-  },
   "options_storing_dictionary": {
     "message": "Збереження $NAME$ - $DONE$ з $TOTAL$...",
     "placeholders": {

@@ -2,9 +2,12 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import {
+  aliasesOf,
   classifyDictionaryFiles,
   describeImportProblem,
-  readDictionary,
+  entriesOf,
+  gunzip,
+  openDictionary,
 } from "../src/lib/dict/import.js";
 import { concat, cstring, gzip, ifo, index, syn, u32, utf8 } from "./stardict-fixture.js";
 
@@ -104,29 +107,42 @@ function withTypeByte(entry) {
   return { word: entry.word, data: concat([utf8("m"), entry.data, [0]]) };
 }
 
-describe("readDictionary", () => {
-  it("reads a dictionary end to end", async () => {
-    const result = await readDictionary(dictionary());
-    assert.equal(result.ok, true);
-    assert.equal(result.value.name, "Test Dictionary");
-    assert.deepEqual(result.value.entries, [
-      { headword: "bank", senses: ["brzeg"] },
-      { headword: "go", senses: ["iść"] },
-      { headword: "watch", senses: ["zegarek"] },
-    ]);
-    assert.deepEqual(result.value.aliases, [{ headword: "went", target: 1 }]);
-    assert.equal(result.value.skipped, 0);
+/**
+ * @param {import("../src/lib/dict/import.js").DictionaryFiles} files
+ * @param {{ fallbackName?: string }} [options]
+ * @returns {Promise<import("../src/lib/dict/import.js").OpenDictionary>}
+ */
+async function opened(files, options) {
+  const result = await openDictionary(files, options);
+  assert.equal(result.ok, true, result.ok ? "" : result.problem);
+  return /** @type {Extract<typeof result, { ok: true }>} */ (result).value;
+}
+
+describe("openDictionary", () => {
+  it("opens a dictionary and hands its words out one at a time", async () => {
+    const book = await opened(dictionary());
+    assert.equal(book.name, "Test Dictionary");
+    assert.equal(book.words, 3);
+    assert.equal(book.synonyms, 1);
+    assert.deepEqual(
+      [...entriesOf(book)],
+      [
+        { position: 0, headword: "bank", senses: ["brzeg"] },
+        { position: 1, headword: "go", senses: ["iść"] },
+        { position: 2, headword: "watch", senses: ["zegarek"] },
+      ],
+    );
+    assert.deepEqual([...aliasesOf(book)], [{ headword: "went", target: 1 }]);
   });
 
   it("reads one with a type byte on every field just the same", async () => {
-    const result = await readDictionary(dictionary({ sametypesequence: "" }));
-    assert.equal(result.ok, true);
-    assert.equal(result.value.entries.length, 3);
+    const book = await opened(dictionary({ sametypesequence: "" }));
+    assert.equal([...entriesOf(book)].length, 3);
   });
 
   it("unpacks whatever arrived compressed, whatever it is called", async () => {
     const files = dictionary();
-    const result = await readDictionary({
+    const book = await opened({
       ifo: await gzip(files.ifo),
       idx: await gzip(files.idx),
       // A .dict.dz is a gzip file, so this is what one looks like from here.
@@ -134,62 +150,132 @@ describe("readDictionary", () => {
       syn: files.syn,
     });
 
-    assert.equal(result.ok, true);
-    assert.equal(result.value.entries.length, 3);
+    assert.equal([...entriesOf(book)].length, 3);
   });
 
-  it("keeps a synonym pointing at the right word after a bad entry is dropped", async () => {
+  it("reads files from a picker as they are, compressed or not", async () => {
+    const files = dictionary();
+    /** @param {Uint8Array} bytes */
+    const blob = (bytes) => new Blob([bytes.slice().buffer]);
+    const book = await opened({
+      ifo: blob(files.ifo),
+      idx: blob(await gzip(files.idx)),
+      dict: blob(await gzip(files.dict)),
+      syn: blob(files.syn),
+    });
+
+    assert.deepEqual(
+      [...entriesOf(book)].map((entry) => entry.headword),
+      ["bank", "go", "watch"],
+    );
+    assert.deepEqual([...aliasesOf(book)], [{ headword: "went", target: 1 }]);
+  });
+
+  it("inflates into a buffer sized by the hint, and survives a hint that is wrong", async () => {
+    // The hint only sizes the buffer: too small costs a copy, too large a
+    // view, and the bytes come out the same either way.
+    const text = utf8("brzeg iść zegarek ".repeat(200));
+    const packed = await gzip(text);
+    for (const hint of [text.length, 1, 0, text.length * 3]) {
+      const stream = new Blob([packed.slice().buffer]).stream();
+      assert.deepEqual(await gunzip(stream, hint), text, `hint ${hint}`);
+    }
+  });
+
+  it("takes the files it was given, so nobody else keeps them", async () => {
+    const files = dictionary();
+    await opened(files);
+    assert.deepEqual(Object.keys(files), []);
+  });
+
+  it("yields a bad entry with no senses, and keeps the positions after it", async () => {
     const files = dictionary();
     // Break the first entry by sending it past the end of the body.
     const broken = concat([cstring("bank"), u32(9000), u32(5), files.idx.subarray(13)]);
 
-    const result = await readDictionary({ ...files, idx: broken });
-    assert.equal(result.ok, true);
-    assert.equal(result.value.skipped, 1);
-    assert.equal(result.value.entries[0]?.headword, "go");
-    // `went` was the second word of the index and is the first of the list now.
-    assert.deepEqual(result.value.aliases, [{ headword: "went", target: 0 }]);
+    const book = await opened({ ...files, idx: broken });
+    const entries = [...entriesOf(book)];
+    assert.deepEqual(entries[0], { position: 0, headword: "bank", senses: [] });
+    assert.equal(entries[1]?.headword, "go");
+    // `went` still means the second record, whatever became of the first.
+    assert.deepEqual([...aliasesOf(book)], [{ headword: "went", target: 1 }]);
+  });
+
+  it("counts a record that is not a word as a position, because the synonym file does", async () => {
+    const files = dictionary();
+    // Some tools leave an empty record behind; the synonym file was written
+    // against the index as it is, empty record and all.
+    const padded = concat([cstring(""), u32(0), u32(0), files.idx]);
+
+    const book = await opened({ ...files, idx: padded, syn: syn([{ word: "went", target: 2 }]) });
+    assert.equal(book.words, 3);
+    assert.deepEqual(
+      [...entriesOf(book)].map((entry) => [entry.position, entry.headword]),
+      [
+        [1, "bank"],
+        [2, "go"],
+        [3, "watch"],
+      ],
+    );
+  });
+
+  it("walks through an index padded with zeros to the real end", async () => {
+    // Seen in the wild: an .idx file twice the size its .ifo claims, the
+    // second half all zeros. Every zero run is an empty record, none is a word.
+    const files = dictionary();
+    const book = await opened({ ...files, idx: concat([files.idx, new Uint8Array(90)]) });
+    assert.equal(book.words, 3);
+    assert.equal([...entriesOf(book)].length, 3);
   });
 
   it("takes the name from the file when the dictionary does not give one", async () => {
     const files = dictionary();
-    const result = await readDictionary(
+    const book = await opened(
       { ...files, ifo: utf8(ifo({ version: "3.0.0", sametypesequence: "m" })) },
       { fallbackName: "wikdict-en-pl" },
     );
-
-    assert.equal(result.ok, true);
-    assert.equal(result.value.name, "wikdict-en-pl");
+    assert.equal(book.name, "wikdict-en-pl");
   });
 
   it("refuses something that is not a StarDict dictionary at all", async () => {
     const files = dictionary();
-    const result = await readDictionary({ ...files, ifo: utf8("# just a text file\n") });
+    const result = await openDictionary({ ...files, ifo: utf8("# just a text file\n") });
     assert.equal(result.ok, false);
     assert.equal(result.problem, "not_stardict");
   });
 
-  it("refuses an index that points nowhere, rather than storing an empty dictionary", async () => {
+  it("refuses before unpacking the rest, when the .ifo already says no", async () => {
     const files = dictionary();
-    const result = await readDictionary({ ...files, dict: new Uint8Array(2) });
+    const result = await openDictionary({
+      ...files,
+      ifo: utf8("# just a text file\n"),
+      // A body that would fail to unpack, had anybody tried.
+      dict: concat([[0x1f, 0x8b], new Uint8Array(10)]),
+    });
     assert.equal(result.ok, false);
-    assert.equal(result.problem, "no_entries");
-    assert.equal(result.detail, "3");
+    assert.equal(result.problem, "not_stardict");
+  });
+
+  it("says when a compressed file cannot be unpacked", async () => {
+    const files = dictionary();
+    const result = await openDictionary({ ...files, dict: concat([[0x1f, 0x8b], new Uint8Array(10)]) });
+    assert.equal(result.ok, false);
+    assert.equal(result.problem, "unpack");
   });
 
   it("refuses an empty index without pretending it was a near miss", async () => {
     const files = dictionary();
-    const result = await readDictionary({ ...files, idx: new Uint8Array() });
+    const result = await openDictionary({ ...files, idx: new Uint8Array() });
     assert.equal(result.ok, false);
     assert.equal(result.problem, "no_entries");
     assert.equal(result.detail, undefined);
   });
 
-  it("reports on the way through a long index", async () => {
-    /** @type {{ done: number, total: number }[]} */
-    const seen = [];
-    await readDictionary(dictionary(), { onProgress: (progress) => seen.push(progress) });
-    assert.deepEqual(seen, [{ done: 3, total: 3 }]);
+  it("reads a dictionary without a synonym file", async () => {
+    const { syn: _, ...files } = dictionary();
+    const book = await opened(files);
+    assert.equal(book.synonyms, 0);
+    assert.deepEqual([...aliasesOf(book)], []);
   });
 });
 

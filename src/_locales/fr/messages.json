@@ -839,14 +839,6 @@
     "message": "Téléchargement du dictionnaire $PAIR$...",
     "placeholders": { "pair": { "content": "$1" } }
   },
-  "options_reading_dictionary_progress": {
-    "message": "Lecture de $NAME$ - $DONE$ sur $TOTAL$...",
-    "placeholders": {
-      "name": { "content": "$1" },
-      "done": { "content": "$2" },
-      "total": { "content": "$3" }
-    }
-  },
   "options_storing_dictionary": {
     "message": "Enregistrement de $NAME$ - $DONE$ sur $TOTAL$...",
     "placeholders": {
