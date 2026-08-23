@@ -31,10 +31,24 @@ const DB_NAME = "reread-dicts";
  * Version 2 gave every dictionary a `rank`: the place it answers from, which
  * until then was the order of import and could only be changed by importing
  * again (see `order.js`).
+ *
+ * Version 3 added the `sources` store, so that an import the browser was
+ * killed in the middle of can go on from where it stopped: the files it was
+ * reading are kept here until the last row is in, and its `meta` row says how
+ * far it got (`progress`) - written in the same transaction as each batch of
+ * rows, so the two can never disagree.
  */
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 const META = "meta";
 const ENTRIES = "entries";
+const SOURCES = "sources";
+
+/**
+ * @typedef {import("./rows.js").RowProgress & { total: number, appended: number }} ImportProgress
+ *   `rows.js`'s own account of where it stands, plus what the page around it
+ *   knows: how many records there are in all, and how many bytes the additions
+ *   merged into earlier rows added - which the rows' own count cannot see
+ */
 
 /**
  * @typedef {object} Dictionary
@@ -49,6 +63,22 @@ const ENTRIES = "entries";
  * @property {number} rank where it stands among the others, 0 first
  * @property {boolean} ready false until every row is in
  * @property {string | null} credit author and source, for attribution
+ * @property {ImportProgress} [progress] while unready: how far the import got,
+ *   absent before its first batch landed
+ */
+
+/**
+ * The files an unfinished import is reading, kept until it is finished.
+ *
+ * Blobs, which IndexedDB stores as files of its own rather than as rows - a
+ * fifty-megabyte archive member costs the disk, not the database.
+ *
+ * @typedef {object} ImportSources
+ * @property {string} id the dictionary's
+ * @property {Blob} ifo
+ * @property {Blob} idx
+ * @property {Blob} dict
+ * @property {Blob} [syn]
  */
 
 /**
@@ -98,6 +128,7 @@ function open() {
       if (!db.objectStoreNames.contains(ENTRIES)) {
         db.createObjectStore(ENTRIES, { keyPath: ["dictId", "key"] });
       }
+      if (!db.objectStoreNames.contains(SOURCES)) db.createObjectStore(SOURCES, { keyPath: "id" });
       // Null only where there is no upgrade to do, which cannot happen here -
       // but the type says so, and a store nobody could reach is not worth a
       // thrown error inside an event handler.
@@ -263,7 +294,11 @@ export async function reorderDictionaries(ids) {
  * The row goes in first and unready, rather than last and complete, because an
  * import that dies halfway - a closed tab, a full disk - would otherwise leave
  * rows behind that nothing knows the name of. Unready means invisible to a
- * lookup and collectable by `removeUnfinished`.
+ * lookup; with its sources kept (`stageSources`) it is an import waiting to go
+ * on, without them it is collectable by `removeUnfinished`.
+ *
+ * The name may be provisional: the files have not been opened yet when this
+ * is called, and what the .ifo calls the book arrives with the first batch.
  *
  * @param {{ name: string, langFrom: string, langTo: string, credit: string | null }} about
  * @returns {Promise<Dictionary>}
@@ -291,6 +326,58 @@ export async function beginImport({ name, langFrom, langTo, credit }) {
     await promisify(store.put(dictionary));
     return dictionary;
   });
+}
+
+/**
+ * Keeps the files of an import, so that it can go on after the page is gone.
+ *
+ * Before a word is read: the moment a browser on a small tablet may be killed
+ * is any moment, and an import that has to start over from a file picker the
+ * page no longer has is an import lost. The files are taken back by
+ * `readSources` and dropped by `finishImport`, or with the dictionary.
+ *
+ * @param {string} id
+ * @param {{ ifo: Blob, idx: Blob, dict: Blob, syn?: Blob }} files
+ * @returns {Promise<void>}
+ */
+export async function stageSources(id, files) {
+  /** @type {ImportSources} */
+  const sources = { id, ifo: files.ifo, idx: files.idx, dict: files.dict, ...(files.syn === undefined ? {} : { syn: files.syn }) };
+  await withStores([SOURCES], "readwrite", async (transaction) => {
+    await promisify(transaction.objectStore(SOURCES).put(sources));
+  });
+}
+
+/**
+ * @param {string} id
+ * @returns {Promise<ImportSources | null>} null when the import has nothing to go on from
+ */
+export async function readSources(id) {
+  const sources = /** @type {ImportSources | undefined} */ (
+    await withStores([SOURCES], "readonly", (transaction) => promisify(transaction.objectStore(SOURCES).get(id)))
+  );
+  return sources ?? null;
+}
+
+/**
+ * @returns {Promise<Set<string>>} the ids of the dictionaries whose files are kept
+ */
+async function stagedIds() {
+  const keys = /** @type {string[]} */ (
+    await withStores([SOURCES], "readonly", (transaction) => promisify(transaction.objectStore(SOURCES).getAllKeys()))
+  );
+  return new Set(keys);
+}
+
+/**
+ * Whether an unfinished dictionary can be picked up where it stopped.
+ *
+ * @param {Dictionary} dictionary
+ * @param {Set<string>} staged from `stagedIds`
+ * @returns {boolean}
+ */
+function resumable(dictionary, staged) {
+  return !dictionary.ready && staged.has(dictionary.id);
 }
 
 /**
@@ -334,31 +421,56 @@ async function mergeAdditions(store, additions) {
  * through the microtask queue to every one of a few hundred thousand rows. A
  * failure still aborts the transaction, which is what the wait at the end sees.
  *
+ * The dictionary's own row rides in the same transaction, carrying where the
+ * import stands once this batch is in (and the book's real name, which the
+ * row may still lack). One transaction, so the database never says "these
+ * rows are in" about rows that are not, or the other way round - which is the
+ * whole of what lets a killed import go on from its last batch.
+ *
+ * @typedef {object} ImportMark
+ * @property {string} name what the .ifo calls the book
+ * @property {string | null} credit
+ * @property {ImportProgress} progress
+ */
+
+/**
  * @typedef {object} DictionaryWriter
- * @property {(rows: import("./rows.js").DictionaryRow[], additions?: import("./rows.js").SenseAddition[]) => Promise<number>} put
+ * @property {(rows: import("./rows.js").DictionaryRow[], additions: import("./rows.js").SenseAddition[], mark: ImportMark) => Promise<number>} put
  *   one batch; resolves, once it is on disk, with how many bytes the additions added
  * @property {() => void} close
  */
 
 /**
+ * @param {string} id the dictionary being written
  * @returns {Promise<DictionaryWriter>}
  */
-export async function openWriter() {
+export async function openWriter(id) {
   const db = await open();
   // Another page asking for an upgrade must not wait on this import: the
   // connection yields, the batch in flight aborts, and the import fails with
   // a sentence - rather than the other page hanging without one.
   db.onversionchange = () => db.close();
 
+  /**
+   * @param {IDBObjectStore} meta
+   * @param {ImportMark} mark
+   */
+  const markProgress = async (meta, mark) => {
+    const existing = /** @type {Dictionary | undefined} */ (await promisify(meta.get(id)));
+    if (existing === undefined) throw new Error("The dictionary was removed while it was being added");
+    meta.put({ ...existing, ...mark });
+  };
+
   return {
-    put(rows, additions = []) {
-      if (rows.length === 0 && additions.length === 0) return Promise.resolve(0);
-      const transaction = db.transaction([ENTRIES], "readwrite");
+    put(rows, additions, mark) {
+      const transaction = db.transaction([ENTRIES, META], "readwrite");
       const store = transaction.objectStore(ENTRIES);
       for (const row of rows) store.put(row);
-      return Promise.all([mergeAdditions(store, additions), completed(transaction)]).then(
-        ([appended]) => appended,
-      );
+      return Promise.all([
+        mergeAdditions(store, additions),
+        markProgress(transaction.objectStore(META), mark),
+        completed(transaction),
+      ]).then(([appended]) => appended);
     },
     close() {
       db.close();
@@ -367,19 +479,24 @@ export async function openWriter() {
 }
 
 /**
+ * The last word on an import: the counts, `ready`, and nothing left to go on
+ * from - the files staged for it are dropped in the same transaction.
+ *
  * @param {string} id
  * @param {{ entryCount: number, aliasCount: number, bytes: number }} counts
  * @returns {Promise<Dictionary>}
  */
 export async function finishImport(id, counts) {
-  return await withStores([META], "readwrite", async (transaction) => {
+  return await withStores([META, SOURCES], "readwrite", async (transaction) => {
     const store = transaction.objectStore(META);
     const existing = /** @type {Dictionary | undefined} */ (await promisify(store.get(id)));
     if (existing === undefined) throw new Error("The dictionary was removed while it was being added");
 
+    const { progress: _, ...rest } = existing;
     /** @type {Dictionary} */
-    const ready = { ...existing, ...counts, ready: true };
+    const ready = { ...rest, ...counts, ready: true };
     await promisify(store.put(ready));
+    transaction.objectStore(SOURCES).delete(id);
     return ready;
   });
 }
@@ -391,22 +508,31 @@ export async function finishImport(id, counts) {
 export async function deleteDictionary(id) {
   // Rows first: a meta row without its rows is a dictionary that answers
   // nothing, while rows without a meta row are invisible and collectable.
-  await withStores([ENTRIES, META], "readwrite", (transaction) => {
+  await withStores([ENTRIES, SOURCES, META], "readwrite", (transaction) => {
     transaction.objectStore(ENTRIES).delete(rowsOf(id));
+    transaction.objectStore(SOURCES).delete(id);
     transaction.objectStore(META).delete(id);
   });
 }
 
 /**
- * Throws away whatever a broken import left behind.
+ * Throws away what a broken import left behind - and only that.
  *
- * Called when the settings page opens and before a new import starts - the two
- * moments when somebody is looking at this page and can be told about it.
+ * An unfinished dictionary whose files are still here is not a leftover, it
+ * is an import waiting to go on (`resumable`), and it stays. What goes is the
+ * rest: a dictionary from before the files were kept, or one whose import
+ * failed outright and was cleared of its files on the way out.
+ *
+ * Called when the settings page opens - the moment somebody is looking at
+ * this page and can be told about it.
  *
  * @returns {Promise<Dictionary[]>} what was removed, so it can be said out loud
  */
 export async function removeUnfinished() {
-  const unfinished = (await listDictionaries()).filter((dictionary) => !dictionary.ready);
-  for (const dictionary of unfinished) await deleteDictionary(dictionary.id);
-  return unfinished;
+  const staged = await stagedIds();
+  const leftovers = (await listDictionaries()).filter(
+    (dictionary) => !dictionary.ready && !resumable(dictionary, staged),
+  );
+  for (const dictionary of leftovers) await deleteDictionary(dictionary.id);
+  return leftovers;
 }

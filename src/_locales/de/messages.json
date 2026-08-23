@@ -851,5 +851,19 @@
   "options_swept_unfinished": {
     "message": "Ein Wörterbuch, dessen Import nie fertig wurde, wurde entfernt ($NAMES$).",
     "placeholders": { "names": { "content": "$1" } }
+  },
+  "options_import_interrupted": {
+    "message": "Unterbrochen bei $DONE$ von $TOTAL$ - Fortsetzen macht dort weiter.",
+    "placeholders": {
+      "done": { "content": "$1" },
+      "total": { "content": "$2" }
+    }
+  },
+  "options_import_interrupted_early": { "message": "Unterbrochen, bevor der erste Eintrag gespeichert war - Fortsetzen beginnt von vorn." },
+  "options_import_elsewhere": { "message": "Ein anderer Tab fügt gerade ein Wörterbuch hinzu - warte, bis er fertig ist." },
+  "options_continue_import": { "message": "Fortsetzen" },
+  "options_continue_import_aria": {
+    "message": "$NAME$ weiter hinzufügen",
+    "placeholders": { "name": { "content": "$1" } }
   }
 }

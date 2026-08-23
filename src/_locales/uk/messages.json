@@ -1013,5 +1013,19 @@
   "options_swept_unfinished": {
     "message": "Видалено словник, імпорт якого так і не завершився ($NAMES$).",
     "placeholders": { "names": { "content": "$1" } }
+  },
+  "options_import_interrupted": {
+    "message": "Перервано на $DONE$ з $TOTAL$ - «Продовжити» підхопить із цього місця.",
+    "placeholders": {
+      "done": { "content": "$1" },
+      "total": { "content": "$2" }
+    }
+  },
+  "options_import_interrupted_early": { "message": "Перервано до збереження першого запису - «Продовжити» почне спочатку." },
+  "options_import_elsewhere": { "message": "Інша вкладка саме додає словник - зачекайте, поки вона закінчить." },
+  "options_continue_import": { "message": "Продовжити" },
+  "options_continue_import_aria": {
+    "message": "Продовжити додавання $NAME$",
+    "placeholders": { "name": { "content": "$1" } }
   }
 }

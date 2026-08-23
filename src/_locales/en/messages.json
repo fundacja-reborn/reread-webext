@@ -1029,5 +1029,23 @@
   "options_swept_unfinished": {
     "message": "Removed a dictionary that was never finished importing ($NAMES$).",
     "placeholders": { "names": { "content": "$1" } }
+  },
+  "options_import_interrupted": {
+    "message": "Interrupted at $DONE$ of $TOTAL$ - Continue picks up from there.",
+    "description": "The meta cell of a stored dictionary whose import stopped halfway (a killed tab); DONE and TOTAL are records, bare numbers. Quotes the options_continue_import button, so the two move together.",
+    "placeholders": {
+      "done": { "content": "$1", "example": "612,000" },
+      "total": { "content": "$2", "example": "1,470,678" }
+    }
+  },
+  "options_import_interrupted_early": { "message": "Interrupted before the first entry was stored - Continue starts it over.",
+    "description": "The same row when the import died before its first batch landed. Quotes options_continue_import." },
+  "options_import_elsewhere": { "message": "Another tab is adding a dictionary right now - wait for it to finish.",
+    "description": "Both the meta cell of an unfinished row while another tab holds the import lock, and the status line when Add or Continue is pressed meanwhile." },
+  "options_continue_import": { "message": "Continue",
+    "description": "The button on an unfinished dictionary's row that picks its import up where it stopped. Quoted by options_import_interrupted and options_import_interrupted_early." },
+  "options_continue_import_aria": {
+    "message": "Continue adding $NAME$",
+    "placeholders": { "name": { "content": "$1" } }
   }
 }

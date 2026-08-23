@@ -21,6 +21,14 @@
  * off - cannot be merged here, so its senses go out as an addition for the
  * writer to fold into the row it already has. The result is the same rows the
  * old one-array-of-everything produced, for a fraction of the memory.
+ *
+ * Every batch also says where the dictionary stands once the batch is in
+ * (`RowProgress`), and a later run can pick up from there: the records before
+ * that point are walked again - cheaply, their words keyed but their data not
+ * read - only to rebuild the two things kept between batches, and the rows
+ * start again where the last written batch stopped. Which entries of that
+ * stretch could not be read is the one fact the walk cannot recover without
+ * reading them, so the progress carries their positions.
  */
 
 import { normalize } from "../normalize.js";
@@ -47,10 +55,25 @@ import { LIMITS } from "./text.js";
  */
 
 /**
+ * Where an import stands once a batch is in - enough to go on from there.
+ *
+ * @typedef {object} RowProgress
+ * @property {"entries" | "aliases"} phase which file the next batch starts in
+ * @property {number} next the index position (entries) or the count of synonym
+ *   records already consumed (aliases) the next batch starts from
+ * @property {number[]} skipped positions of the entries that could not be read
+ * @property {number} done records read so far, words and synonyms together
+ * @property {number} entryCount so far
+ * @property {number} aliasCount so far
+ * @property {number} bytes so far, of the rows yielded
+ */
+
+/**
  * @typedef {object} RowBatch
  * @property {DictionaryRow[]} rows
  * @property {SenseAddition[]} additions
  * @property {number} done records read so far, words and synonyms together
+ * @property {RowProgress} progress where the import stands once this batch is written
  */
 
 /**
@@ -124,6 +147,21 @@ export function mergeSenses(into, more) {
 }
 
 /**
+ * The first index position whose entry a resumed run still has to read.
+ *
+ * Everything before it is walked for its words only (see `entriesOf`): in the
+ * entries phase that is the stretch already written, in the aliases phase the
+ * whole index.
+ *
+ * @param {RowProgress | null} progress
+ * @returns {number}
+ */
+export function entriesReadFrom(progress) {
+  if (progress === null) return 0;
+  return progress.phase === "entries" ? progress.next : Number.POSITIVE_INFINITY;
+}
+
+/**
  * The rows of one dictionary, batch by batch.
  *
  * Words first, then the synonym file: an alias never shadows a word the
@@ -132,15 +170,21 @@ export function mergeSenses(into, more) {
  * answer. A synonym pointing at an entry that could not be read, or at a
  * position the index does not have, points at nothing and is dropped.
  *
+ * Given `resume`, the run starts where a written batch stopped: records before
+ * that point only rebuild the keys (their data is not read - `entriesOf` was
+ * told the same boundary, see `entriesReadFrom`), and `skipped` says which of
+ * them had no row to key. The rows then come out exactly as an uninterrupted
+ * run would have written them from that point on.
+ *
  * Returns (as the generator's final value) the counts the dictionary's record
  * is finished with.
  *
  * @param {string} dictId
  * @param {{ entries: Iterable<import("./import.js").Entry>, aliases: Iterable<import("./import.js").Alias> }} source
- * @param {{ batchSize?: number }} [options]
+ * @param {{ batchSize?: number, resume?: RowProgress | null }} [options]
  * @returns {Generator<RowBatch, RowSummary, undefined>}
  */
-export function* rowBatches(dictId, { entries, aliases }, { batchSize = BATCH_ROWS } = {}) {
+export function* rowBatches(dictId, { entries, aliases }, { batchSize = BATCH_ROWS, resume = null } = {}) {
   /**
    * Where each readable word ended up, for the synonym file to follow: the key
    * at the record's position, and nothing at the positions of records that
@@ -157,17 +201,39 @@ export function* rowBatches(dictId, { entries, aliases }, { batchSize = BATCH_RO
   /** @type {Map<string, SenseAddition>} */
   let additions = new Map();
 
+  // Entries below the first, and synonyms up to the second, were written by
+  // the run being resumed; they are walked for their keys and nothing else.
+  const replayEntriesBelow = entriesReadFrom(resume);
+  const replayAliasesThrough = resume !== null && resume.phase === "aliases" ? resume.next : 0;
+  const skippedBefore = new Set(resume?.skipped ?? []);
+
+  /** @type {"entries" | "aliases"} */
+  let phase = "entries";
+  let lastPosition = -1;
+  let aliasOrdinal = 0;
+
   let done = 0;
-  let entryCount = 0;
-  let aliasCount = 0;
-  let bytes = 0;
-  let skipped = 0;
+  let entryCount = resume?.entryCount ?? 0;
+  let aliasCount = resume?.aliasCount ?? 0;
+  let bytes = resume?.bytes ?? 0;
+  /** @type {number[]} */
+  const skipped = [...(resume?.skipped ?? [])];
 
   /** @returns {RowBatch} */
   const flush = () => {
     const rows = [...batch.values()];
     for (const row of rows) bytes += rowBytes(row);
-    const out = { rows, additions: [...additions.values()], done };
+    /** @type {RowProgress} */
+    const progress = {
+      phase,
+      next: phase === "entries" ? lastPosition + 1 : aliasOrdinal,
+      skipped: [...skipped],
+      done,
+      entryCount,
+      aliasCount,
+      bytes,
+    };
+    const out = { rows, additions: [...additions.values()], done, progress };
     batch = new Map();
     additions = new Map();
     return out;
@@ -175,8 +241,19 @@ export function* rowBatches(dictId, { entries, aliases }, { batchSize = BATCH_RO
 
   for (const entry of entries) {
     done += 1;
+    lastPosition = entry.position;
+
+    if (entry.position < replayEntriesBelow) {
+      if (skippedBefore.has(entry.position)) continue;
+      const key = normalize(entry.headword);
+      if (key.length === 0) continue;
+      keys[entry.position] = key;
+      taken.add(key);
+      continue;
+    }
+
     if (entry.senses.length === 0) {
-      skipped += 1;
+      skipped.push(entry.position);
       continue;
     }
 
@@ -201,16 +278,22 @@ export function* rowBatches(dictId, { entries, aliases }, { batchSize = BATCH_RO
     if (batch.size >= batchSize) yield flush();
   }
 
+  phase = "aliases";
+
   for (const alias of aliases) {
     done += 1;
+    aliasOrdinal += 1;
     const key = normalize(alias.headword);
     if (key.length === 0 || taken.has(key)) continue;
 
     const targetKey = keys[alias.target];
     if (targetKey === undefined || targetKey === key) continue;
 
-    batch.set(key, { dictId, key, headword: alias.headword, senses: [], aliasOf: targetKey });
     taken.add(key);
+    // Written by the run being resumed: its key is taken, its row is there.
+    if (aliasOrdinal <= replayAliasesThrough) continue;
+
+    batch.set(key, { dictId, key, headword: alias.headword, senses: [], aliasOf: targetKey });
     aliasCount += 1;
 
     if (batch.size >= batchSize) yield flush();
@@ -218,5 +301,5 @@ export function* rowBatches(dictId, { entries, aliases }, { batchSize = BATCH_RO
 
   if (batch.size > 0 || additions.size > 0) yield flush();
 
-  return { entryCount, aliasCount, bytes, skipped };
+  return { entryCount, aliasCount, bytes, skipped: skipped.length };
 }

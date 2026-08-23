@@ -271,6 +271,26 @@ describe("openDictionary", () => {
     assert.equal(result.detail, undefined);
   });
 
+  it("hands out the words before the boundary with their headword alone", async () => {
+    const files = dictionary();
+    // A body nothing can be read from: had the first two words been read,
+    // they would come out skipped, and they do not - they were not read.
+    const book = await opened({ ...files, dict: new Uint8Array(2) });
+    assert.deepEqual(
+      [...entriesOf(book, { readFrom: 2 })].map((entry) => [entry.position, entry.headword, entry.senses]),
+      [
+        [0, "bank", []],
+        [1, "go", []],
+        [2, "watch", []],
+      ],
+    );
+    const whole = await opened({ ...dictionary(), dict: files.dict });
+    assert.deepEqual(
+      [...entriesOf(whole, { readFrom: 2 })].map((entry) => entry.senses),
+      [[], [], ["zegarek"]],
+    );
+  });
+
   it("reads a dictionary without a synonym file", async () => {
     const { syn: _, ...files } = dictionary();
     const book = await opened(files);

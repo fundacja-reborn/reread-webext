@@ -403,14 +403,24 @@ export async function openDictionary(files, { fallbackName } = {}) {
  * (see `isWord`) are stepped over, but they still count: `position` is the
  * record's place in the index, which is how a synonym names its target.
  *
+ * Words before `readFrom` come out with their headword and nothing else: a
+ * run picking up an interrupted import needs their keys to rebuild what it
+ * kept between batches, and nothing from their data - reading it would be the
+ * expensive half of the import done twice (see `rowBatches`).
+ *
  * @param {OpenDictionary} opened
+ * @param {{ readFrom?: number }} [options]
  * @returns {Generator<Entry, void, undefined>}
  */
-export function* entriesOf({ idx, dict, offsetBits, sametypesequence }) {
+export function* entriesOf({ idx, dict, offsetBits, sametypesequence }, { readFrom = 0 } = {}) {
   let position = -1;
   for (const entry of idxEntries(idx, offsetBits)) {
     position += 1;
     if (!isWord(entry)) continue;
+    if (position < readFrom) {
+      yield { position, headword: entry.word, senses: [] };
+      continue;
+    }
     const fields = readFields(dict, entry, sametypesequence);
     yield { position, headword: entry.word, senses: fields === null ? [] : senses(fields) };
   }
