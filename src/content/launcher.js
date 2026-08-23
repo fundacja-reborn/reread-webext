@@ -35,6 +35,7 @@
  */
 
 import { webext } from "../lib/browser.js";
+import { t } from "../lib/i18n.js";
 import { Message } from "../lib/protocol.js";
 import { touchPointer } from "../lib/selection.js";
 import { createTooltip } from "./tooltip.js";
@@ -66,12 +67,27 @@ let shownText = "";
  * through `setLauncherScale` on every settings change.
  */
 let scale = 1;
+/**
+ * Whether the offer should add that translation needs a model first (a fresh
+ * install selecting on a page would otherwise learn it only at the end of the
+ * road, in the reader's own bubble). Decided upstairs: `content/index.js`
+ * owns the settings and the published inventory, and hands the verdict down
+ * the way it hands the scale - this module still listens to nothing at rest.
+ */
+let modelHint = false;
 
 /**
  * @param {number} factor `1` means "as designed"
  */
 export function setLauncherScale(factor) {
   scale = factor;
+}
+
+/**
+ * @param {boolean} needed
+ */
+export function setLauncherHint(needed) {
+  modelHint = needed;
 }
 
 /**
@@ -88,7 +104,13 @@ export function setLauncherScale(factor) {
  */
 function onAction(action) {
   const kind =
-    action === "reader" ? Message.OPEN_READER : action === "library" ? Message.OPEN_LIBRARY : null;
+    action === "reader"
+      ? Message.OPEN_READER
+      : action === "library"
+        ? Message.OPEN_LIBRARY
+        : action === "settings"
+          ? Message.OPEN_SETTINGS
+          : null;
   if (kind === null) return;
   try {
     void webext()
@@ -133,8 +155,13 @@ function settle() {
   tooltip.show({
     anchor: rect,
     variant: "launcher",
-    body: "",
-    actions: ["reader", "library"],
+    // With no model to translate with, the offer says so here rather than at
+    // the end of the road in the reader's bubble - the same sentence, the
+    // same tone and the same way out (the settings door) that bubble uses,
+    // so the first selection after a fresh install meets the answer once.
+    body: modelHint ? t("error_model_missing") : "",
+    tone: modelHint ? "error" : "normal",
+    actions: modelHint ? ["reader", "library", "settings"] : ["reader", "library"],
     // A pen's selection wears the same system bar and handles (D80).
     touch: touchPointer(lastPointerType),
     // The same pointer also sizes the row for the finger about to press it

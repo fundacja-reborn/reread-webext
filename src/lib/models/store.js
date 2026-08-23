@@ -20,10 +20,30 @@
  * is a shared module.
  */
 
+import { writeInventory } from "./inventory.js";
+
 const DB_NAME = "reread-models";
 const DB_VERSION = 1;
 const META = "meta";
 const FILES = "files";
+
+/**
+ * The inventory in `storage.local`, refreshed on the way out of every write.
+ * Here rather than in the callers because this module is the one door every
+ * change to the models goes through - the settings page's download and its
+ * folder of files both end in `putModel`, and forgetting the inventory would
+ * mean a launcher hint still telling somebody to install what they just did.
+ * Failing to publish must not fail the write it rides on: the model is the
+ * point, the hint is a courtesy, and the background's `onInstalled`
+ * reconciliation is the standing repair.
+ */
+async function publishInventory() {
+  try {
+    await writeInventory(await listModels());
+  } catch {
+    // Left for the next write or the next update to put right.
+  }
+}
 
 /**
  * @typedef {object} ModelMeta
@@ -128,6 +148,7 @@ export async function putModel(files, languages) {
     await promisify(transaction.objectStore(META).put(meta));
   });
 
+  await publishInventory();
   return meta;
 }
 
@@ -174,4 +195,5 @@ export async function deleteModel(pair) {
     await promisify(transaction.objectStore(FILES).delete(pair));
     await promisify(transaction.objectStore(META).delete(pair));
   });
+  await publishInventory();
 }

@@ -33,9 +33,10 @@
 
 import { webext } from "../lib/browser.js";
 import { CONFIG_KEY, PLATFORM_KEY, osFrom, pageMode, withDefaults } from "../lib/config.js";
+import { MODELS_KEY, asInventory, needsModelHint } from "../lib/models/inventory.js";
 import { ErrorCode, MAX_PAGE_HTML, Message, asPageRequest, fail, ok } from "../lib/protocol.js";
 import { MIRROR_KEY } from "../lib/store/mirror.js";
-import { setLauncherScale, startLauncher, stopLauncher } from "./launcher.js";
+import { setLauncherHint, setLauncherScale, startLauncher, stopLauncher } from "./launcher.js";
 import { start, stop } from "./reading.js";
 
 /** @typedef {"off" | "launcher" | "reading"} Mode */
@@ -51,6 +52,8 @@ let config = withDefaults(undefined);
 let os = "";
 /** An event beat the startup read to the os; the older read must not undo it. */
 let osKnown = false;
+/** Which pairs have a model (`lib/models/inventory.js`); null = nobody has said. */
+let inventory = /** @type {import("../lib/models/inventory.js").ModelInventory | null} */ (null);
 
 /**
  * The hierarchy lives in `pageMode` (`lib/config.js`), where `node --test`
@@ -73,6 +76,10 @@ function apply(wanted, stored) {
   // change, most of which change no mode. The reading side needs no such
   // hand-down - it watches storage itself.
   setLauncherScale(config.bubbleScale / 100);
+  // The same hand-down for the model hint: installing the first model has to
+  // reach a launcher already standing on an open page, or the offer keeps
+  // telling somebody to do what they just did.
+  setLauncherHint(needsModelHint(config, inventory));
   if (wanted === mode) return;
   if (mode === "reading") stop();
   if (mode === "launcher") stopLauncher();
@@ -87,11 +94,12 @@ function apply(wanted, stored) {
 // One read of `storage.local` at startup, the same one `reading.js` would have
 // made - it decides what to start, and when that is the reading side, feeds it.
 void webext()
-  .storage.local.get([CONFIG_KEY, MIRROR_KEY, PLATFORM_KEY])
+  .storage.local.get([CONFIG_KEY, MIRROR_KEY, PLATFORM_KEY, MODELS_KEY])
   .then((stored) => {
     if (decided) return;
     config = withDefaults(stored[CONFIG_KEY]);
     if (!osKnown) os = osFrom(stored[PLATFORM_KEY]);
+    if (inventory === null) inventory = asInventory(stored[MODELS_KEY]);
     ready = true;
     apply(decide(), stored);
   })
@@ -107,7 +115,10 @@ webext().storage.onChanged.addListener((changes, area) => {
   if (area !== "local") return;
   const configChange = changes[CONFIG_KEY];
   const platformChange = changes[PLATFORM_KEY];
-  if (configChange === undefined && platformChange === undefined) return;
+  const modelsChange = changes[MODELS_KEY];
+  if (configChange === undefined && platformChange === undefined && modelsChange === undefined) {
+    return;
+  }
 
   // The platform never changes for a device, but the key can appear once: an
   // update publishes it under pages that loaded before it existed, and on
@@ -116,6 +127,9 @@ webext().storage.onChanged.addListener((changes, area) => {
     os = osFrom(platformChange.newValue);
     osKnown = true;
   }
+  // The model inventory changes the launcher's hint, never the mode - so it
+  // rides the same re-apply and needs none of the platform's bookkeeping.
+  if (modelsChange !== undefined) inventory = asInventory(modelsChange.newValue);
   if (configChange !== undefined) {
     config = withDefaults(configChange.newValue);
     decided = true;
