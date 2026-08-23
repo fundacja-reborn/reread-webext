@@ -40,3 +40,19 @@ export function webext() {
 export function offscreenApi() {
   return webext().offscreen ?? null;
 }
+
+/**
+ * The keyboard-shortcut API, or null on a browser without one. Firefox on
+ * Android has no `commands` at all - phones have no keyboard to press the
+ * shortcut on - and reaching for it unguarded is not a dead feature but a
+ * TypeError partway through the background's top level, which silently costs
+ * every registration after the throwing line (that was the reader-only-mode
+ * bug on fresh Android installs: `onInstalled` never registered, so the
+ * platform was never published for content scripts). Callers ask this one
+ * question and never which platform they are on.
+ *
+ * @returns {NonNullable<WebExtBrowser["commands"]> | null}
+ */
+export function commandsApi() {
+  return webext().commands ?? null;
+}

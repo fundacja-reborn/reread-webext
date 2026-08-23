@@ -102,7 +102,11 @@ interface WebExtBrowser {
     // `default_locale` as the floor.
     getMessage(messageName: string, substitutions?: string | string[]): string;
   };
-  commands: {
+  // Optional because Firefox on Android does not have it - no keyboard, no
+  // API - and the type saying "always there" is what let an unguarded access
+  // slip through `tsc` and throw partway through the background's top level.
+  // Reach it through `commandsApi()` in browser.js, never directly.
+  commands?: {
     // The keyboard's way into the reader, `commands` in the manifest - a
     // manifest key, not a permission. The tab is the one the shortcut was
     // pressed over: the same tab `action.onClicked` handed over when the button

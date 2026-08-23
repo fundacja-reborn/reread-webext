@@ -8,7 +8,7 @@
  * megabytes of WebAssembly, loaded once instead of once per tab.
  */
 
-import { offscreenApi, webext } from "../lib/browser.js";
+import { commandsApi, offscreenApi, webext } from "../lib/browser.js";
 import { publishPlatform, readConfig } from "../lib/config.js";
 import { ErrorCode, Message, asRequest, fail, ok } from "../lib/protocol.js";
 import { toolbarIconFor } from "../lib/theme-icon.js";
@@ -144,8 +144,11 @@ webext().runtime.onMessage.addListener((message, sender, sendResponse) => {
 // the keyboard shortcut is what still reaches the reader in one gesture. The
 // command is named after the message because it is the same request by other
 // means, and it brings its tab along - the same tab `onClicked` used to hand
-// over, and the only way to learn it without the `tabs` permission.
-webext().commands.onCommand.addListener((command, tab) => {
+// over, and the only way to learn it without the `tabs` permission. Guarded
+// through `commandsApi()` because Android has no `commands` API, and an
+// unguarded access here would not just skip the shortcut - it would throw and
+// take every registration below this line with it (`onInstalled` included).
+commandsApi()?.onCommand.addListener((command, tab) => {
   if (command !== Message.OPEN_READER) return;
   void (tab === undefined ? openReader() : readInReader(tab));
 });
