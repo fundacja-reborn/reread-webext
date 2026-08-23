@@ -2,7 +2,7 @@
 
 A browser extension for reading - especially for reading in a language you are learning. Select a word or phrase to see its translation and save it; saved phrases are underlined on every page you visit, and one click marks a phrase as learned. Any page can be opened in the built-in reader and kept in the offline reading list; EPUB books can be imported and read the same way, translation bubble included. Everything is local: translation, dictionaries, vocabulary and the reading list live in the browser's local database on your device, work with no network, and nothing you read or select is ever sent anywhere.
 
-Works in Firefox (desktop and Android) and in Chrome/Chromium.
+Works in Firefox (desktop and Android) and in Chrome/Chromium. **Install it from [Firefox Add-ons](https://addons.mozilla.org/firefox/addon/reread/) or the [Chrome Web Store](https://chromewebstore.google.com/detail/cdeoicfidedlcapagmimcmmeeoplfcla)** (Brave and Edge use the same page); the [Install](#install) section has the details.
 
 ![An article open in re/read's reader with the word "persisted" selected. The bubble under it shows the Polish translation, buttons to hear the phrase, copy it, edit it or mark it Learned, the sentence it stands in, and dictionary entries below that. Phrases saved earlier carry dotted underlines in the text](docs/screenshots/bubble.webp)
 
