@@ -31,16 +31,23 @@ import { languageName, pairLabel } from "../lib/language.js";
 import { catalogDictionaries, catalogSource } from "../lib/dict/catalog.js";
 import { describeDictDownloadProblem, downloadArchive } from "../lib/dict/download.js";
 import { readLiveDictionaries, refreshLiveDictionaries } from "../lib/dict/live.js";
-import { classifyDictionaryFiles, describeImportProblem, dictionaryFromZip, readDictionary } from "../lib/dict/import.js";
+import {
+  aliasesOf,
+  classifyDictionaryFiles,
+  describeImportProblem,
+  dictionaryFromZip,
+  entriesOf,
+  openDictionary,
+} from "../lib/dict/import.js";
 import { describeZipProblem, readZip } from "../lib/dict/zip.js";
-import { toRows } from "../lib/dict/rows.js";
+import { rowBatches } from "../lib/dict/rows.js";
 import { afterMove } from "../lib/dict/order.js";
 import {
   beginImport,
   deleteDictionary,
   finishImport,
   listDictionaries,
-  putEntries,
+  openWriter,
   removeUnfinished,
   reorderDictionaries,
 } from "../lib/dict/store.js";
@@ -731,6 +738,7 @@ async function download(row, model) {
 
   const controller = new AbortController();
   running = { pair: row.pair, controller };
+  const letGo = holdScreen();
 
   // Redrawn with the download already claimed, which is what greys out every
   // other button on the page; then this one row becomes a progress bar.
@@ -743,6 +751,7 @@ async function download(row, model) {
 
   if (!result.ok) {
     running = null;
+    letGo();
     status(describeDownloadProblem(result.problem, result.detail), result.problem === "cancelled" ? "idle" : "error");
     await renderModels();
     return;
@@ -754,6 +763,7 @@ async function download(row, model) {
   status(t("options_checking_model", pairLabel(model.from, model.to)), "busy");
   const verdict = await testLoadModel({ from: model.from, to: model.to }, result.value);
   running = null;
+  letGo();
 
   if (!verdict.ok) {
     status(t("options_model_rejected", aside(verdict.detail)), "error");
@@ -1061,18 +1071,68 @@ async function addSelectedModel() {
   }
 }
 
-/**
- * How many rows go into the database at a time.
- *
- * A dictionary from Wiktionary is a few hundred thousand rows, and one
- * transaction holding all of them is a transaction that owns the database for
- * as long as it takes. Batches let the page say where it is and let the browser
- * breathe between them.
- */
-const ENTRY_BATCH = 5000;
-
 /** Imports, like downloads, happen one at a time. @type {boolean} */
 let importing = false;
+
+/**
+ * The screen, kept on while an import or a download runs.
+ *
+ * A dictionary of a million words takes a quarter of an hour to write on a
+ * tablet, and a tablet whose screen has gone dark is a tablet whose apps
+ * Android feels free to kill - which ends the import and throws away every row
+ * written so far. The Screen Wake Lock API asks the system not to let the
+ * screen time out. The browser drops the lock by itself whenever the page is
+ * hidden, so it is asked for again each time the page comes back into view;
+ * where the API is missing or refuses, nothing changes - the work runs exactly
+ * the same, and the screen follows its own timeout.
+ */
+const wake = {
+  /** whether some work wants the screen on right now */
+  held: false,
+  /** a request in flight, so two visibility changes do not take two locks */
+  requesting: false,
+  /** @type {WakeLockSentinel | null} */
+  lock: null,
+};
+
+async function keepScreenOn() {
+  if (!wake.held || wake.requesting || wake.lock !== null) return;
+  if (document.visibilityState !== "visible" || !("wakeLock" in navigator)) return;
+
+  wake.requesting = true;
+  try {
+    const lock = await navigator.wakeLock.request("screen");
+    if (!wake.held) {
+      await lock.release();
+      return;
+    }
+    wake.lock = lock;
+    lock.addEventListener("release", () => {
+      if (wake.lock === lock) wake.lock = null;
+    });
+  } catch {
+    // Not allowed on this page or not supported here: the import does not
+    // depend on it, so there is nothing to say.
+  } finally {
+    wake.requesting = false;
+  }
+}
+
+/**
+ * @returns {() => void} what to call when the work is done
+ */
+function holdScreen() {
+  wake.held = true;
+  document.addEventListener("visibilitychange", keepScreenOn);
+  void keepScreenOn();
+
+  return () => {
+    wake.held = false;
+    document.removeEventListener("visibilitychange", keepScreenOn);
+    void wake.lock?.release();
+    wake.lock = null;
+  };
+}
 
 /**
  * @param {string} text
@@ -1508,6 +1568,7 @@ async function downloadDictionary(entry) {
   // the memory cost is the same as a file import's and the one-at-a-time rule
   // exists for memory, not ceremony.
   importing = true;
+  const letGo = holdScreen();
   const controller = new AbortController();
 
   // Redrawn with the import already claimed, which greys out the other
@@ -1519,81 +1580,140 @@ async function downloadDictionary(entry) {
   dictionaryStatus(t("options_downloading_dictionary", label), "busy");
 
   try {
-    const result = await downloadArchive(entry.url, { signal: controller.signal, onProgress });
-    if (!result.ok) {
-      dictionaryStatus(
-        describeDictDownloadProblem(result.problem, result.detail),
-        result.problem === "cancelled" ? "idle" : "error",
-      );
-      return;
-    }
-
-    const zip = await readZip(result.value);
-    if (!zip.ok) {
-      dictionaryStatus(describeZipProblem(zip.problem, zip.detail), "error");
-      return;
-    }
-
-    const sorted = dictionaryFromZip(zip.value);
-    if (!sorted.ok) {
-      dictionaryStatus(describeImportProblem(sorted.problem, sorted.detail), "error");
+    const fetched = await fetchDictionaryFiles(entry.url, controller.signal, onProgress);
+    if (!fetched.ok) {
+      dictionaryStatus(fetched.text, fetched.tone);
       return;
     }
 
     // The language sides come from the catalogue row, not from a select: a
     // WikDict archive is one direction, and its name already said which.
-    await storeDictionary(sorted.value.files, {
-      base: sorted.value.base,
+    await storeDictionary(fetched.value.files, {
+      base: fetched.value.base,
       langFrom: entry.from,
       langTo: entry.to,
       say: dictionaryStatus,
     });
   } finally {
+    letGo();
     importing = false;
     await renderCatalog();
   }
 }
 
 /**
- * The half of an import every source shares: parsed files in, a dictionary in
- * the database or a sentence about why not. The file picker and the catalogue
- * differ only in where the bytes and the languages come from - and in which
+ * Downloads an archive and takes the files of one dictionary out of it.
+ *
+ * A function of its own so that what it returns is all that survives it: the
+ * archive and the unpacked members it was cut from live in this frame, and
+ * this frame is gone by the time the dictionary is being written. The caller's
+ * frame lives for the whole import, and an archive held there would be an
+ * archive held in memory for the whole import.
+ *
+ * @param {string} url
+ * @param {AbortSignal} signal
+ * @param {((progress: import("../lib/dict/download.js").DictDownloadProgress) => void) | undefined} onProgress
+ * @returns {Promise<{ ok: true, value: { base: string, files: import("../lib/dict/import.js").DictionaryFiles } } | { ok: false, text: string, tone: "idle" | "error" }>}
+ */
+async function fetchDictionaryFiles(url, signal, onProgress) {
+  const result = await downloadArchive(url, { signal, onProgress });
+  if (!result.ok) {
+    return {
+      ok: false,
+      text: describeDictDownloadProblem(result.problem, result.detail),
+      tone: result.problem === "cancelled" ? "idle" : "error",
+    };
+  }
+
+  const zip = await readZip(result.value);
+  if (!zip.ok) return { ok: false, text: describeZipProblem(zip.problem, zip.detail), tone: "error" };
+
+  const sorted = dictionaryFromZip(zip.value);
+  if (!sorted.ok) {
+    return { ok: false, text: describeImportProblem(sorted.problem, sorted.detail), tone: "error" };
+  }
+
+  return sorted;
+}
+
+/**
+ * @returns {Promise<void>} a turn of the event loop, so the status line can paint
+ */
+function breathe() {
+  return new Promise((resolve) => setTimeout(resolve, 0));
+}
+
+/**
+ * The half of an import every source shares: files in, a dictionary in the
+ * database or a sentence about why not. The file picker and the catalogue
+ * differ only in where the files and the languages come from - and in which
  * status line they talk to, which is why `say` travels as an argument.
  *
- * @param {import("../lib/dict/import.js").DictionaryBytes} files
+ * The dictionary is read and written in step, one batch at a time: a batch
+ * is handed to the database, the next one is keyed while the first is being
+ * written, and nothing of either outlives its write. Whatever the files
+ * weigh, what this page holds is the unpacked .dict file and one batch.
+ *
+ * @param {import("../lib/dict/import.js").DictionaryFiles} files
  * @param {{ base: string, langFrom: string, langTo: string, say: (text: string, tone?: "idle" | "busy" | "error") => void }} job
  * @returns {Promise<boolean>} whether a dictionary is now stored
  */
 async function storeDictionary(files, { base, langFrom, langTo, say }) {
   try {
-    const parsed = await readDictionary(files, {
-      fallbackName: base,
-      onProgress: ({ done, total }) => say(t("options_reading_dictionary_progress", [base, words(done), total.toLocaleString()]), "busy"),
-    });
-
-    if (!parsed.ok) {
-      say(describeImportProblem(parsed.problem, parsed.detail), "error");
+    say(t("options_reading_file", base), "busy");
+    const opened = await openDictionary(files, { fallbackName: base });
+    if (!opened.ok) {
+      say(describeImportProblem(opened.problem, opened.detail), "error");
       return false;
     }
 
-    const dictionary = await beginImport({
-      name: parsed.value.name,
-      langFrom,
-      langTo,
-      credit: parsed.value.credit,
+    const { name, credit } = opened.value;
+    const total = (opened.value.words + opened.value.synonyms).toLocaleString();
+    const dictionary = await beginImport({ name, langFrom, langTo, credit });
+
+    const batches = rowBatches(dictionary.id, {
+      entries: entriesOf(opened.value),
+      aliases: aliasesOf(opened.value),
     });
 
-    const { rows, entryCount, aliasCount, bytes: stored } = toRows(dictionary.id, parsed.value);
-
-    for (let at = 0; at < rows.length; at += ENTRY_BATCH) {
-      await putEntries(rows.slice(at, at + ENTRY_BATCH));
-      say(t("options_storing_dictionary", [parsed.value.name, Math.min(at + ENTRY_BATCH, rows.length).toLocaleString(), rows.length.toLocaleString()]), "busy");
+    const writer = await openWriter();
+    let appended = 0;
+    /** @type {import("../lib/dict/rows.js").RowSummary} */
+    let summary;
+    try {
+      let step = batches.next();
+      while (!step.done) {
+        const writing = writer.put(step.value.rows, step.value.additions);
+        say(t("options_storing_dictionary", [name, step.value.done.toLocaleString(), total]), "busy");
+        // The next batch is keyed while this one is on its way to the disk.
+        step = batches.next();
+        appended += await writing;
+        // Waiting on the write yields too, but not for long enough to be sure
+        // the status line painted; a hidden page has nobody to paint for, and
+        // its timers are throttled to a second each.
+        if (document.visibilityState === "visible") await breathe();
+      }
+      summary = step.value;
+    } finally {
+      writer.close();
     }
 
-    const ready = await finishImport(dictionary.id, { entryCount, aliasCount, bytes: stored });
+    if (summary.entryCount === 0) {
+      // Every entry pointed past the end of the file, or none had a word in
+      // it: what the index promised turned out to be nothing, and nothing is
+      // what stays.
+      await deleteDictionary(dictionary.id);
+      say(describeImportProblem("no_entries", summary.skipped === 0 ? undefined : `${summary.skipped}`), "error");
+      return false;
+    }
 
-    const unreadable =
-      parsed.value.skipped === 0 ? "" : ` ${plural(parsed.value.skipped, "options_skipped_entries")}`;
+    const ready = await finishImport(dictionary.id, {
+      entryCount: summary.entryCount,
+      aliasCount: summary.aliasCount,
+      bytes: summary.bytes + appended,
+    });
+
+    const unreadable = summary.skipped === 0 ? "" : ` ${plural(summary.skipped, "options_skipped_entries")}`;
     say(t("options_added_dictionary", [ready.name, words(ready.entryCount), megabytes(ready.bytes)]) + unreadable);
     return true;
   } catch (error) {
@@ -1623,29 +1743,33 @@ async function addSelectedDictionary() {
   const { base, ifo, idx, dict, syn } = classified.value;
 
   importing = true;
+  const letGo = holdScreen();
   await renderCatalog();
-  dictionaryFileStatus(t("options_reading_file", base), "busy");
 
   try {
+    // The files go as they are: the importer reads each from disk as it needs
+    // it, and unpacks the big one as a stream, so nothing here ever holds a
+    // compressed copy of the dictionary.
     /** @param {string} name */
-    const read = async (name) => {
-      const file = chosen.find((candidate) => candidate.name === name);
-      if (file === undefined) throw new Error(t("options_file_disappeared", name));
-      return new Uint8Array(await file.arrayBuffer());
+    const file = (name) => {
+      const found = chosen.find((candidate) => candidate.name === name);
+      if (found === undefined) throw new Error(t("options_file_disappeared", name));
+      return found;
     };
 
-    const bytes = {
-      ifo: await read(ifo),
-      idx: await read(idx),
-      dict: await read(dict),
-      ...(syn === undefined ? {} : { syn: await read(syn) }),
+    const files = {
+      ifo: file(ifo),
+      idx: file(idx),
+      dict: file(dict),
+      ...(syn === undefined ? {} : { syn: file(syn) }),
     };
 
-    const stored = await storeDictionary(bytes, { base, langFrom, langTo, say: dictionaryFileStatus });
+    const stored = await storeDictionary(files, { base, langFrom, langTo, say: dictionaryFileStatus });
     if (stored && input !== null) input.value = "";
   } catch (error) {
     dictionaryFileStatus(t("options_add_dictionary_failed", message(error)), "error");
   } finally {
+    letGo();
     importing = false;
     await renderCatalog();
   }

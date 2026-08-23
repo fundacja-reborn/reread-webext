@@ -994,15 +994,6 @@
     "message": "Downloading the $PAIR$ dictionary...",
     "placeholders": { "pair": { "content": "$1", "example": "English to Polish" } }
   },
-  "options_reading_dictionary_progress": {
-    "message": "Reading $NAME$ - $DONE$ of $TOTAL$...",
-    "description": "DONE arrives with its unit already counted (\"12,000 words\"); TOTAL is a bare number.",
-    "placeholders": {
-      "name": { "content": "$1" },
-      "done": { "content": "$2", "example": "12,000 words" },
-      "total": { "content": "$3", "example": "52,401" }
-    }
-  },
   "options_storing_dictionary": {
     "message": "Storing $NAME$ - $DONE$ of $TOTAL$...",
     "placeholders": {

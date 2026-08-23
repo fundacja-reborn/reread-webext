@@ -14,6 +14,22 @@
  * of named files - `dictionaryFromZip` below is the whole of the difference,
  * and the two paths share every check after it.
  *
+ * What the database gets is a stream, not a copy. `openDictionary` unpacks the
+ * files and checks the one thing that can be checked up front; `entriesOf` and
+ * `aliasesOf` then hand out one word at a time for `rows.js` to key and batch.
+ * The alternative - parsing the whole book into an array of entries, then into
+ * an array of rows, then writing the rows - held three copies of a dictionary
+ * of 850,000 words at once, over a gigabyte, and on a tablet with three of
+ * them Android killed the settings page halfway through. The unpacked .dict
+ * file is the one thing kept whole, because the index points into it at
+ * random; everything else lives for as long as one word takes to write.
+ *
+ * The sources may be files straight from a picker (a `Blob`, read from disk as
+ * it is unpacked) or bytes already in memory (an archive member). The importer
+ * takes them: each is struck from the object it arrived in as it is read, so
+ * that the page which handed them over is not the one keeping a compressed
+ * copy alive for the rest of the import.
+ *
  * Nothing in this module touches the browser or the database, so `node --test`
  * drives every path through it, including the ones a smoke test could never
  * reach: a truncated index, an entry pointing past the end of the file, a
@@ -22,7 +38,7 @@
 
 import { aside, t } from "../i18n.js";
 import { isGzip } from "../models/files.js";
-import { parseIdx, parseIfo, parseSyn, readFields } from "./stardict.js";
+import { idxEntries, isWord, parseIfo, readFields, synEntries } from "./stardict.js";
 import { LIMITS, about, senses } from "./text.js";
 
 /**
@@ -39,34 +55,51 @@ import { LIMITS, about, senses } from "./text.js";
  */
 
 /**
- * @typedef {object} DictionaryBytes
- * @property {ArrayBuffer | Uint8Array} ifo
- * @property {ArrayBuffer | Uint8Array} idx
- * @property {ArrayBuffer | Uint8Array} dict
- * @property {ArrayBuffer | Uint8Array} [syn]
+ * One dictionary file, as it arrives: a file from a picker, or bytes already
+ * unpacked from an archive. Compressed or not - that is read off the bytes.
+ *
+ * @typedef {Blob | ArrayBuffer | Uint8Array} FileSource
  */
 
 /**
- * @typedef {object} ParsedEntry
- * @property {string} headword as the dictionary spells it
- * @property {string[]} senses plain text
+ * @typedef {object} DictionaryFiles
+ * @property {FileSource} ifo
+ * @property {FileSource} idx
+ * @property {FileSource} dict
+ * @property {FileSource} [syn]
  */
 
 /**
- * @typedef {object} ParsedDictionary
+ * A dictionary unpacked and ready to be walked.
+ *
+ * @typedef {object} OpenDictionary
  * @property {string} name
  * @property {string | null} credit
- * @property {ParsedEntry[]} entries in the order the file has them
- * @property {{ headword: string, target: number }[]} aliases `target` indexes into `entries`
- * @property {number} skipped entries whose data could not be read
+ * @property {Uint8Array} idx
+ * @property {Uint8Array} dict
+ * @property {Uint8Array | null} syn
+ * @property {32 | 64} offsetBits
+ * @property {string} sametypesequence
+ * @property {number} words index records that name a word; what `entriesOf` will yield
+ * @property {number} synonyms records in the synonym file; what `aliasesOf` will yield
  */
 
 /**
- * @typedef {{ ok: true, value: ParsedDictionary } | { ok: false, problem: ImportProblem, detail?: string }} ImportResult
+ * @typedef {object} Entry
+ * @property {number} position of the record in the index, counting every record - what a synonym points at
+ * @property {string} headword as the dictionary spells it
+ * @property {string[]} senses plain text; empty when the entry could not be read
  */
 
-/** How often the parse stops to let a page repaint, in entries. */
-const YIELD_EVERY = 20000;
+/**
+ * @typedef {object} Alias
+ * @property {string} headword another spelling, as the synonym file has it
+ * @property {number} target the position of the entry it means
+ */
+
+/**
+ * @typedef {{ ok: true, value: OpenDictionary } | { ok: false, problem: ImportProblem, detail?: string }} OpenResult
+ */
 
 /**
  * @param {string} name
@@ -141,7 +174,7 @@ export function classifyDictionaryFiles(names) {
  * paths, so two dictionaries genuinely zipped together still refuse cleanly.
  *
  * @param {import("./zip.js").ZipEntry[]} entries
- * @returns {{ ok: true, value: { base: string, files: DictionaryBytes } } | { ok: false, problem: ImportProblem, detail?: string }}
+ * @returns {{ ok: true, value: { base: string, files: DictionaryFiles } } | { ok: false, problem: ImportProblem, detail?: string }}
  */
 export function dictionaryFromZip(entries) {
   const usable = entries.filter((entry) => {
@@ -173,14 +206,81 @@ export function dictionaryFromZip(entries) {
 }
 
 /**
- * @param {ArrayBuffer | Uint8Array} data
- * @returns {ArrayBuffer} without copying, when the view is the whole buffer
+ * Reads one source out of the set and strikes it from there.
+ *
+ * The set is the caller's object, and the caller's frame will keep it for the
+ * whole import; a member left in it is a member that cannot be collected. So
+ * the importer takes what it reads, and after `openDictionary` the object
+ * holds nothing - which is the point, not a side effect.
+ *
+ * @param {DictionaryFiles} files
+ * @param {"ifo" | "idx" | "dict" | "syn"} role
+ * @returns {FileSource | undefined}
  */
-function bufferOf(data) {
-  if (data instanceof ArrayBuffer) return data;
-  const { buffer, byteOffset, byteLength } = data;
-  if (buffer instanceof ArrayBuffer && byteOffset === 0 && byteLength === buffer.byteLength) return buffer;
-  return data.slice().buffer;
+function take(files, role) {
+  const sources = /** @type {Partial<Record<"ifo" | "idx" | "dict" | "syn", FileSource>>} */ (files);
+  const source = sources[role];
+  delete sources[role];
+  return source;
+}
+
+/**
+ * @param {Uint8Array} bytes
+ * @returns {ReadableStream<Uint8Array<ArrayBuffer>>} the bytes as one chunk, without copying them
+ */
+function streamOf(bytes) {
+  return new ReadableStream({
+    start(controller) {
+      // Nothing here is ever backed by shared memory; the narrower type is
+      // what the decompressor's writable side asks for.
+      controller.enqueue(/** @type {Uint8Array<ArrayBuffer>} */ (bytes));
+      controller.close();
+    },
+  });
+}
+
+/**
+ * Inflates a gzip stream into one buffer.
+ *
+ * The buffer is allocated once, at the size the gzip trailer claims, and the
+ * chunks are written straight into it. Collecting them first and joining them
+ * afterwards - what `Response.arrayBuffer()` does - means the whole file twice
+ * over for a moment, and for a .dict file that moment is four hundred
+ * megabytes. The trailer is the size modulo 2^32, so a buffer that turns out
+ * too small grows - a file that large has not been seen, but the cost of being
+ * wrong about that would be a thrown import, not a slow one.
+ *
+ * @param {ReadableStream<Uint8Array<ArrayBuffer>>} stream compressed bytes
+ * @param {number} sizeHint what the trailer says the result is
+ * @returns {Promise<Uint8Array>}
+ */
+export async function gunzip(stream, sizeHint) {
+  const reader = stream.pipeThrough(new DecompressionStream("gzip")).getReader();
+  let out = new Uint8Array(sizeHint);
+  let length = 0;
+
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    if (length + value.length > out.length) {
+      const grown = new Uint8Array(Math.max(out.length * 2, length + value.length));
+      grown.set(out.subarray(0, length));
+      out = grown;
+    }
+    out.set(value, length);
+    length += value.length;
+  }
+
+  return length === out.length ? out : out.subarray(0, length);
+}
+
+/**
+ * @param {Uint8Array} tail the last bytes of a gzip file
+ * @returns {number} the uncompressed size its trailer claims, or 0 when there is no trailer to read
+ */
+function claimedSize(tail) {
+  if (tail.length < 4) return 0;
+  return new DataView(tail.buffer, tail.byteOffset + tail.length - 4, 4).getUint32(0, true);
 }
 
 /**
@@ -192,91 +292,85 @@ function bufferOf(data) {
  * `.gz` and a plain `.dict` that happens to be compressed all arrive, and the
  * name is the one thing a person renaming files is free to change.
  *
- * @param {ArrayBuffer | Uint8Array} data
- * @returns {Promise<Uint8Array>}
+ * A file from a picker is read as a stream, so the compressed bytes never sit
+ * in memory as a whole - only the result does.
+ *
+ * @param {FileSource | undefined} source
+ * @returns {Promise<Uint8Array>} empty when there was nothing to read
  */
-async function unpack(data) {
-  const buffer = bufferOf(data);
-  if (!isGzip(buffer)) return new Uint8Array(buffer);
+async function unpack(source) {
+  if (source === undefined) return new Uint8Array();
 
-  const stream = new Blob([buffer]).stream().pipeThrough(new DecompressionStream("gzip"));
-  return new Uint8Array(await new Response(stream).arrayBuffer());
+  if (source instanceof Blob) {
+    const head = new Uint8Array(await source.slice(0, 2).arrayBuffer());
+    if (!isGzip(head)) return new Uint8Array(await source.arrayBuffer());
+    const tail = new Uint8Array(await source.slice(Math.max(0, source.size - 4)).arrayBuffer());
+    return gunzip(source.stream(), claimedSize(tail));
+  }
+
+  const bytes = source instanceof Uint8Array ? source : new Uint8Array(source);
+  if (!isGzip(bytes)) return bytes;
+  return gunzip(streamOf(bytes), claimedSize(bytes));
 }
 
 /**
- * @returns {Promise<void>} a turn of the event loop, so a page can repaint
- */
-function breathe() {
-  return new Promise((resolve) => setTimeout(resolve, 0));
-}
-
-/**
- * @param {DictionaryBytes} files
+ * Unpacks a dictionary and checks what can be checked before a word is read.
+ *
+ * The .ifo goes first, because it is tiny and it is where a file that is not
+ * a dictionary at all gives itself away - nobody should wait for two hundred
+ * megabytes to inflate to be told that. The index is then counted, so an
+ * empty one is refused here and a real one can say how far along it is.
+ *
+ * @param {DictionaryFiles} files consumed: see `take`
  * @param {object} [options]
  * @param {string} [options.fallbackName] when the .ifo does not name the dictionary
- * @param {(progress: { done: number, total: number }) => void} [options.onProgress]
- * @returns {Promise<ImportResult>}
+ * @returns {Promise<OpenResult>}
  */
-export async function readDictionary(files, { fallbackName, onProgress } = {}) {
-  /** @type {{ ifo: Uint8Array, idx: Uint8Array, dict: Uint8Array, syn?: Uint8Array }} */
-  let unpacked;
+export async function openDictionary(files, { fallbackName } = {}) {
+  /** @type {(error: unknown) => OpenResult} */
+  const unpackFailed = (error) => ({
+    ok: false,
+    problem: "unpack",
+    detail: error instanceof Error ? error.message : String(error),
+  });
+
+  /** @type {Uint8Array} */
+  let ifoBytes;
   try {
-    const [ifo, idx, dict] = await Promise.all([unpack(files.ifo), unpack(files.idx), unpack(files.dict)]);
-    unpacked = { ifo, idx, dict, ...(files.syn === undefined ? {} : { syn: await unpack(files.syn) }) };
+    ifoBytes = await unpack(take(files, "ifo"));
   } catch (error) {
-    return { ok: false, problem: "unpack", detail: error instanceof Error ? error.message : String(error) };
+    return unpackFailed(error);
   }
 
-  const ifo = parseIfo(new TextDecoder("utf-8").decode(unpacked.ifo), fallbackName);
+  const ifo = parseIfo(new TextDecoder("utf-8").decode(ifoBytes), fallbackName);
   if (!ifo.ok) return ifo;
 
-  const { entries: index } = parseIdx(unpacked.idx, ifo.value.offsetBits);
-
-  /** @type {ParsedEntry[]} */
-  const entries = [];
-  /**
-   * Where each index position ended up, for the synonym file to follow. Entries
-   * that could not be read are dropped, so a position in the index and a
-   * position in the list above stop being the same number at the first bad one -
-   * and this is what keeps `went` pointing at `go` rather than at whatever
-   * moved into its place.
-   *
-   * @type {Map<number, number>}
-   */
-  const moved = new Map();
-  let skipped = 0;
-
-  for (const [position, entry] of index.entries()) {
-    const fields = readFields(unpacked.dict, entry, ifo.value.sametypesequence);
-    if (fields === null) {
-      skipped += 1;
-    } else {
-      const meanings = senses(fields);
-      if (meanings.length === 0) {
-        skipped += 1;
-      } else {
-        moved.set(position, entries.length);
-        entries.push({ headword: entry.word, senses: meanings });
-      }
-    }
-
-    if ((position + 1) % YIELD_EVERY === 0) {
-      onProgress?.({ done: position + 1, total: index.length });
-      await breathe();
-    }
+  /** @type {Uint8Array} */
+  let idx;
+  /** @type {Uint8Array} */
+  let dict;
+  /** @type {Uint8Array | null} */
+  let syn;
+  try {
+    idx = await unpack(take(files, "idx"));
+    dict = await unpack(take(files, "dict"));
+    const synSource = take(files, "syn");
+    syn = synSource === undefined ? null : await unpack(synSource);
+  } catch (error) {
+    return unpackFailed(error);
   }
 
-  onProgress?.({ done: index.length, total: index.length });
+  const { offsetBits, sametypesequence } = ifo.value;
 
-  if (entries.length === 0) {
-    return { ok: false, problem: "no_entries", detail: index.length === 0 ? undefined : `${skipped}` };
+  let words = 0;
+  for (const entry of idxEntries(idx, offsetBits)) {
+    if (isWord(entry)) words += 1;
   }
+  if (words === 0) return { ok: false, problem: "no_entries" };
 
-  /** @type {{ headword: string, target: number }[]} */
-  const aliases = [];
-  for (const synonym of unpacked.syn === undefined ? [] : parseSyn(unpacked.syn)) {
-    const target = moved.get(synonym.target);
-    if (target !== undefined) aliases.push({ headword: synonym.word, target });
+  let synonyms = 0;
+  if (syn !== null) {
+    for (const _ of synEntries(syn)) synonyms += 1;
   }
 
   // The .ifo file describes the book in the same HTML its entries are written
@@ -286,8 +380,49 @@ export async function readDictionary(files, { fallbackName, onProgress } = {}) {
 
   return {
     ok: true,
-    value: { name, credit: about(ifo.value.credit), entries, aliases, skipped },
+    value: {
+      name,
+      credit: about(ifo.value.credit),
+      idx,
+      dict,
+      syn,
+      offsetBits,
+      sametypesequence,
+      words,
+      synonyms,
+    },
   };
+}
+
+/**
+ * Every word of the dictionary, one at a time, in the order the index has them.
+ *
+ * An entry that cannot be read - an offset past the end of the file, a field
+ * with nothing readable in it - comes out with no senses rather than not at
+ * all, so that whoever counts the skipped ones can. Records that are not words
+ * (see `isWord`) are stepped over, but they still count: `position` is the
+ * record's place in the index, which is how a synonym names its target.
+ *
+ * @param {OpenDictionary} opened
+ * @returns {Generator<Entry, void, undefined>}
+ */
+export function* entriesOf({ idx, dict, offsetBits, sametypesequence }) {
+  let position = -1;
+  for (const entry of idxEntries(idx, offsetBits)) {
+    position += 1;
+    if (!isWord(entry)) continue;
+    const fields = readFields(dict, entry, sametypesequence);
+    yield { position, headword: entry.word, senses: fields === null ? [] : senses(fields) };
+  }
+}
+
+/**
+ * @param {OpenDictionary} opened
+ * @returns {Generator<Alias, void, undefined>}
+ */
+export function* aliasesOf({ syn }) {
+  if (syn === null) return;
+  for (const { word, target } of synEntries(syn)) yield { headword: word, target };
 }
 
 /**
