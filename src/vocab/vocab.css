@@ -261,8 +261,13 @@ summary {
   min-height: 44px;
 }
 
+/* Two buttons here, not the reader library's three, so this row has room -
+   but it wears the same dress, and a wrapping row is what keeps a grown text
+   zoom from pushing a button off the screen's edge (the reader library's own
+   report, 2026-08-23). */
 .transfer {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
   margin: 1rem 0 0;
 }
@@ -437,6 +442,19 @@ button.quiet-speak svg {
 .pager button {
   min-height: 44px;
   padding: 0.35rem 1rem;
+}
+
+/* Tighter under a phone's width, the twin of the rule in `reader.css`: two
+   worded buttons and "Page 1 of 3" between them add up past a 400 px screen
+   once the text zoom grows the rem. Air goes, the 44px touch floor stays. */
+@media (max-width: 30rem) {
+  .pager {
+    gap: 0.5rem;
+  }
+
+  .pager button {
+    padding-inline: 0.6rem;
+  }
 }
 
 /* --- the transfer section: import and export, under the list --- */
