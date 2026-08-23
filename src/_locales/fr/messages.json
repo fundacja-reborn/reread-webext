@@ -677,6 +677,9 @@
   "options_file_dict_or": { "message": "ou" },
   "options_file_dict": { "message": "- les entrées" },
   "options_file_syn": { "message": "- d'autres graphies, quand le dictionnaire en a" },
+  "options_add_dictionary_steps": {
+    "message": "Deux étapes : choisissez les fichiers, puis réglez les deux langues en dessous. Un fichier StarDict ne dit pas pour quelles langues il est fait : cette part vous revient - et c'est elle qui décide quand ce dictionnaire répond."
+  },
   "options_words_in": { "message": "Mots en" },
   "options_explained_in": { "message": "expliqués en" },
   "options_add_dictionary_button": { "message": "Ajouter le dictionnaire" },
@@ -684,7 +687,7 @@
     "message": "Un dictionnaire monolingue fonctionne aussi - anglais-anglais, par exemple : choisissez l'anglais des deux côtés. Les dictionnaires sont retenus selon la langue de leurs entrées, pas selon la paire ; il répond donc à côté des bilingues : sous « Plus » pendant la traduction, directement avec la traduction désactivée."
   },
   "options_dict_files_note": {
-    "message": "Un fichier StarDict ne dit rien des langues pour lesquelles il est fait : cette part vous revient ici. Ajouter depuis des fichiers ne fait aucune requête réseau ; les fichiers de n'importe où fonctionnent, ceux du catalogue compris - ils sont publiés à"
+    "message": "Ajouter depuis des fichiers ne fait aucune requête réseau ; les fichiers de n'importe où fonctionnent, ceux du catalogue compris - ils sont publiés à"
   },
   "options_disabled_heading": { "message": "Sites désactivés" },
   "options_disabled_intro": {

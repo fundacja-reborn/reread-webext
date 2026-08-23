@@ -808,6 +808,9 @@
   "options_file_dict_or": { "message": "lub" },
   "options_file_dict": { "message": "- hasła" },
   "options_file_syn": { "message": "- inne pisownie, jeśli słownik je ma" },
+  "options_add_dictionary_steps": {
+    "message": "Dwa kroki: wybierz pliki, a potem ustaw pod nimi oba języki. Plik StarDict nie mówi, dla jakich języków jest, więc tę część wpisujesz sam - i to ona decyduje, kiedy ten słownik odpowie."
+  },
   "options_words_in": { "message": "Język haseł:" },
   "options_explained_in": { "message": "język objaśnień:" },
   "options_add_dictionary_button": { "message": "Dodaj słownik" },
@@ -815,7 +818,7 @@
     "message": "Zadziała też słownik jednojęzyczny - na przykład angielsko-angielski: wybierz angielski po obu stronach. Słowniki dobierane są po języku haseł, nie po parze, więc odpowie obok dwujęzycznych: przy tłumaczeniu pod „Więcej”, z wyłączonym tłumaczeniem od razu."
   },
   "options_dict_files_note": {
-    "message": "Plik StarDict nie mówi nic o tym, dla których języków jest, więc tę część wpisujesz sam. Dodawanie z plików nie wykonuje żadnego zapytania sieciowego; działają pliki skądkolwiek, w tym własne pliki katalogu - są opublikowane pod"
+    "message": "Dodawanie z plików nie wykonuje żadnego zapytania sieciowego; działają pliki skądkolwiek, w tym własne pliki katalogu - są opublikowane pod"
   },
   "options_disabled_heading": { "message": "Wyłączone witryny" },
   "options_disabled_intro": {
