@@ -17,15 +17,18 @@
  */
 
 /**
- * @param {{ sourceLang: string, targetLang: string }} config
+ * @param {{ sourceLang: string | null, targetLang: string | null }} config
  * @param {PairChoice[]} installed models on this device, in any order
- * @returns {PairChoice[]} what the select shows, configured pair always included
+ * @returns {PairChoice[]} what the select shows - the configured pair always
+ *   included once there is one; with none chosen, exactly the installed
+ *   models, which on a fresh install is an empty list and an empty select
  */
 export function pairChoices(config, installed) {
   const rows = installed
     .map(({ pair, from, to }) => ({ pair, from, to }))
     .sort((a, b) => a.pair.localeCompare(b.pair));
 
+  if (config.sourceLang === null || config.targetLang === null) return rows;
   const known = rows.some((row) => row.from === config.sourceLang && row.to === config.targetLang);
   if (known) return rows;
 

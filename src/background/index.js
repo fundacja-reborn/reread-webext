@@ -9,7 +9,7 @@
  */
 
 import { commandsApi, offscreenApi, webext } from "../lib/browser.js";
-import { publishPlatform, readConfig } from "../lib/config.js";
+import { chosenPair, publishPlatform, readConfig } from "../lib/config.js";
 import { writeInventory } from "../lib/models/inventory.js";
 import { listModels } from "../lib/models/store.js";
 import { ErrorCode, Message, asRequest, fail, ok } from "../lib/protocol.js";
@@ -55,6 +55,12 @@ async function handle(request, sender) {
   switch (request.kind) {
     case Message.TRANSLATE: {
       const config = await readConfig();
+      // No pair chosen means no model to answer with - the same fact, the
+      // same sentence and the same way out (the settings page) as a pair
+      // whose model is not installed, so the code is reused rather than
+      // minted: the bubble already knows how to show it.
+      const pair = chosenPair(config);
+      if (pair === null) return fail(ErrorCode.MODEL_MISSING);
       // Side by side, not one after the other: the dictionary read is a point
       // lookup and the translation is the engine, so waiting for them together
       // costs what the engine costs and nothing more.
@@ -62,10 +68,10 @@ async function handle(request, sender) {
         translate({
           text: request.text,
           context: request.context,
-          from: config.sourceLang,
-          to: config.targetLang,
+          from: pair.from,
+          to: pair.to,
         }),
-        lookUp(request.text, config.sourceLang),
+        lookUp(request.text, pair.from),
       ]);
 
       // Dictionary entries ride with a translation and never instead of one: a

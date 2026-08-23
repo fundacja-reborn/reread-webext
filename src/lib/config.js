@@ -37,8 +37,15 @@ export const CONFIG_KEY = "config";
 
 /**
  * @typedef {object} Config
- * @property {string} sourceLang Language being read, BCP-47.
- * @property {string} targetLang Language it is translated into, BCP-47.
+ * @property {string | null} sourceLang Language being read, BCP-47. `null`
+ *   means nobody has chosen a pair yet - `readerOnly`'s manner: only a hand
+ *   picked pair is ever stored (the pair selects, the catalogue's press, and
+ *   the first model adopting its own pair), and with none there IS no pair.
+ *   Deliberately no computed default: a fresh install showing en->pl as "what
+ *   you read" was claiming a choice nobody had made (Michał's call). Every
+ *   consumer asks `chosenPair` and has to answer for the null.
+ * @property {string | null} targetLang Language it is translated into,
+ *   BCP-47. Null exactly when `sourceLang` is - the pair is chosen whole.
  * @property {ReaderConfig} reader How the reader looks. Nothing else uses it.
  * @property {string[]} disabledHosts Sites where re/read stays off. Exact
  *   hostnames - no port, no scheme, no patterns, no subdomain matching. Every
@@ -177,8 +184,8 @@ export const READER_DEFAULTS = Object.freeze({
 
 /** @type {Readonly<Config>} */
 export const DEFAULTS = Object.freeze({
-  sourceLang: "en",
-  targetLang: "pl",
+  sourceLang: null,
+  targetLang: null,
   reader: READER_DEFAULTS,
   disabledHosts: [],
   readerOnly: null,
@@ -293,8 +300,25 @@ export function withDefaults(stored) {
   const raw = /** @type {Record<string, unknown>} */ (source);
 
   return {
-    sourceLang: text(raw["sourceLang"], DEFAULTS.sourceLang),
-    targetLang: text(raw["targetLang"], DEFAULTS.targetLang),
+    // A pair only ever exists whole: one leg stored without the other (a
+    // hand-edited file) is no choice, and half a pair downstream would be a
+    // translation into nowhere. Existing installations read as chosen - their
+    // stored strings were written by `writeConfig`, and for the profiles that
+    // predate this rule that is the honest reading available.
+    sourceLang:
+      typeof raw["sourceLang"] === "string" &&
+      raw["sourceLang"].length > 0 &&
+      typeof raw["targetLang"] === "string" &&
+      raw["targetLang"].length > 0
+        ? raw["sourceLang"]
+        : null,
+    targetLang:
+      typeof raw["sourceLang"] === "string" &&
+      raw["sourceLang"].length > 0 &&
+      typeof raw["targetLang"] === "string" &&
+      raw["targetLang"].length > 0
+        ? raw["targetLang"]
+        : null,
     reader: readerWithDefaults(raw["reader"]),
     disabledHosts: hostList(raw["disabledHosts"]),
     // Not a boolean means nobody has chosen - which is a state of its own, not
@@ -316,6 +340,20 @@ export function withDefaults(stored) {
     // registration nothing styles underlines nothing at all.
     underline: isUnderlineWeight(raw["underline"]) ? raw["underline"] : DEFAULTS.underline,
   };
+}
+
+/**
+ * The chosen language pair, or null while nobody has chosen one. The one
+ * door to the pair for everything that translates, mirrors or filters by
+ * it: asking here is what forces each consumer to answer for the state a
+ * fresh install is in, instead of inheriting a pair nobody picked.
+ *
+ * @param {Pick<Config, "sourceLang" | "targetLang">} config
+ * @returns {{ from: string, to: string } | null}
+ */
+export function chosenPair(config) {
+  if (config.sourceLang === null || config.targetLang === null) return null;
+  return { from: config.sourceLang, to: config.targetLang };
 }
 
 /**

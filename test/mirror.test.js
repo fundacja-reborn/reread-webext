@@ -38,6 +38,14 @@ describe("mirrorOf", () => {
   it("is empty rather than absent when the vocabulary is empty", () => {
     assert.deepEqual(mirrorOf(CONFIG, []), { from: "en", to: "pl", entries: [] });
   });
+
+  it("mirrors an unchosen pair as the empty pair", () => {
+    assert.deepEqual(mirrorOf({ ...CONFIG, sourceLang: null, targetLang: null }, []), {
+      from: "",
+      to: "",
+      entries: [],
+    });
+  });
 });
 
 describe("mirrorMatches", () => {
@@ -45,6 +53,15 @@ describe("mirrorMatches", () => {
     assert.equal(mirrorMatches({ from: "en", to: "pl", entries: [] }, CONFIG), true);
     assert.equal(mirrorMatches({ from: "pl", to: "en", entries: [] }, CONFIG), false);
     assert.equal(mirrorMatches({ from: "en", to: "de", entries: [] }, CONFIG), false);
+  });
+
+  it("matches the empty mirror to the unchosen pair - a fresh install must go quiet, not ask", () => {
+    const none = { ...CONFIG, sourceLang: null, targetLang: null };
+    assert.equal(mirrorMatches({ from: "", to: "", entries: [] }, none), true);
+    // A mirror left behind by a chosen pair does not match the pairless
+    // settings - and the pairless mirror answers no chosen pair.
+    assert.equal(mirrorMatches({ from: "en", to: "pl", entries: [] }, none), false);
+    assert.equal(mirrorMatches({ from: "", to: "", entries: [] }, CONFIG), false);
   });
 });
 

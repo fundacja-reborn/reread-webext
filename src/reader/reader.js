@@ -1928,17 +1928,17 @@ function showSegmentNav(segment) {
 function showBookNote(book) {
   if (bookNote === null || bookNoteText === null) return;
   const declared = book === null ? "" : primaryLanguage(book.lang ?? "");
-  // With translation off (D120) there is no pair to mismatch: the note would
-  // warn about a translation nobody is getting.
+  // With translation off (D120) - or no pair chosen at all - there is no
+  // pair to mismatch: the note would warn about a translation nobody is
+  // getting.
+  const source = settings.translationOff ? null : settings.sourceLang;
   const mismatch =
-    !settings.translationOff &&
-    declared.length > 0 &&
-    declared !== primaryLanguage(settings.sourceLang);
+    source !== null && declared.length > 0 && declared !== primaryLanguage(source);
   bookNote.hidden = !mismatch;
-  if (mismatch && book !== null) {
+  if (mismatch && source !== null && book !== null) {
     bookNoteText.textContent = t("reader_book_pair_note", [
       languageName(declared),
-      languageName(primaryLanguage(settings.sourceLang)),
+      languageName(primaryLanguage(source)),
     ]);
   }
 }
@@ -2987,7 +2987,9 @@ function speakMarkRow(row) {
     return;
   }
   soundingMark = key;
-  const lang = row.lang ?? settings.sourceLang;
+  // The row's own language first; with none and no pair, the empty tag reads
+  // in the engine's default voice - `speechLang`'s manner.
+  const lang = row.lang ?? settings.sourceLang ?? "";
   speak(row.mark.text, lang, settings.ttsVoices[primaryLanguage(lang)], settings.ttsRate / 100);
 }
 
@@ -3562,11 +3564,16 @@ function applyLinkStops(links) {
  * is stored under the primary subtag, so one pick serves every variant and
  * agrees with the settings page, which only ever knows the pair.
  *
+ * With no pair chosen and no declaration the answer is `""` - a language
+ * nobody has named. Every caller already has a manner for it: an utterance
+ * with an empty `lang` speaks in the engine's default, and the quiet
+ * lookup's own guard skips a dictionary it cannot name a language for.
+ *
  * @returns {string}
  */
 function speechLang() {
   const declared = article?.getAttribute("lang") ?? "";
-  return primaryLanguage(declared).length > 0 ? declared : settings.sourceLang;
+  return primaryLanguage(declared).length > 0 ? declared : (settings.sourceLang ?? "");
 }
 
 /**

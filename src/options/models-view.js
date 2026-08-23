@@ -40,13 +40,21 @@ function byLabel(a, b) {
  *
  * @template {Directed & { installed: object | null }} T
  * @param {T[]} rows
- * @param {{ sourceLang: string, targetLang: string }} reading
+ * @param {{ sourceLang: string | null, targetLang: string | null }} reading
  * @returns {T[]}
  */
 export function orderForDisplay(rows, reading) {
   /** @param {T} row */
   const tier = (row) => {
-    if (row.from === reading.sourceLang && row.to === reading.targetLang) return 0;
+    // With no pair chosen nothing is "being read", and no row gets the top
+    // tier - installed models first, then the catalogue, both by name.
+    if (
+      reading.sourceLang !== null &&
+      row.from === reading.sourceLang &&
+      row.to === reading.targetLang
+    ) {
+      return 0;
+    }
     return row.installed !== null ? 1 : 2;
   };
   return [...rows].sort((a, b) => tier(a) - tier(b) || byLabel(a, b));
@@ -78,7 +86,7 @@ export function orderForDisplay(rows, reading) {
  *
  * @param {import("../lib/dict/store.js").Dictionary[]} stored in answering order
  * @param {import("../lib/dict/catalog.js").CatalogDictionary[]} catalog
- * @param {{ sourceLang: string, targetLang: string }} reading
+ * @param {{ sourceLang: string | null, targetLang: string | null }} reading
  * @returns {DictionaryRow[]}
  */
 export function dictionaryRows(stored, catalog, reading) {
@@ -196,7 +204,7 @@ export function showAllState({ total, installedCount, expanded, query }) {
  * with one disabled line instead of offering choices that translate nothing.
  *
  * @param {ModelRow[]} rows
- * @param {{ sourceLang: string, targetLang: string }} reading
+ * @param {{ sourceLang: string | null, targetLang: string | null }} reading
  * @returns {{ pair: string, from: string, to: string }[]}
  */
 export function pairChoices(rows, reading) {
@@ -205,14 +213,20 @@ export function pairChoices(rows, reading) {
     .map((row) => ({ pair: row.pair, from: row.from, to: row.to }));
   if (installed.length === 0) return [];
 
-  const known = installed.some((row) => row.from === reading.sourceLang && row.to === reading.targetLang);
-  const choices = known
-    ? installed
-    : [
-        { pair: `${reading.sourceLang}${reading.targetLang}`, from: reading.sourceLang, to: reading.targetLang },
-        ...installed,
-      ];
-  return sortByLabel(choices);
+  // The chosen pair is kept in the list even without its model - a control
+  // must never disagree with the settings it shows. An unchosen pair adds
+  // nothing: the select is exactly the installed models, Michał's rule.
+  const chosen =
+    reading.sourceLang !== null && reading.targetLang !== null
+      ? {
+          pair: `${reading.sourceLang}${reading.targetLang}`,
+          from: reading.sourceLang,
+          to: reading.targetLang,
+        }
+      : null;
+  const known =
+    chosen === null || installed.some((row) => row.from === chosen.from && row.to === chosen.to);
+  return sortByLabel(chosen !== null && !known ? [chosen, ...installed] : installed);
 }
 
 /**

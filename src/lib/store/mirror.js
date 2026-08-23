@@ -37,14 +37,20 @@ import { webext } from "../browser.js";
 export const MIRROR_KEY = "vocabIndex";
 
 /**
+ * An unchosen pair mirrors as the empty string on both sides: the mirror's
+ * shape stays two strings and a list, and a page comparing it against the
+ * pairless settings (`mirrorMatches`) finds them agreeing - so a fresh
+ * install reads one empty mirror and goes quiet, instead of reading a
+ * mismatch and asking the background for a vocabulary that cannot exist.
+ *
  * @param {import("../config.js").Config} config
  * @param {import("./phrase.js").Phrase[]} phrases
  * @returns {VocabMirror}
  */
 export function mirrorOf(config, phrases) {
   return {
-    from: config.sourceLang,
-    to: config.targetLang,
+    from: config.sourceLang ?? "",
+    to: config.targetLang ?? "",
     entries: phrases.map((phrase) => [phrase.normalized, phrase.translations]),
   };
 }
@@ -81,10 +87,12 @@ export function asMirror(stored) {
 /**
  * @param {VocabMirror} mirror
  * @param {import("../config.js").Config} config
- * @returns {boolean} whether it describes the pair that is being read now
+ * @returns {boolean} whether it describes the pair that is being read now -
+ *   an unchosen pair (`null`, mirrored as `""`) matching the empty mirror is
+ *   deliberate, see `mirrorOf`
  */
 export function mirrorMatches(mirror, config) {
-  return mirror.from === config.sourceLang && mirror.to === config.targetLang;
+  return mirror.from === (config.sourceLang ?? "") && mirror.to === (config.targetLang ?? "");
 }
 
 /**

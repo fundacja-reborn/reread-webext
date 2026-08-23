@@ -38,4 +38,12 @@ describe("the popup's pair choices", () => {
   it("does not double the configured pair when its model is installed", () => {
     assert.deepEqual(pairChoices({ sourceLang: "pl", targetLang: "en" }, [ENPL, PLEN]), [ENPL, PLEN]);
   });
+
+  it("offers exactly the installed models while no pair is chosen", () => {
+    const none = { sourceLang: null, targetLang: null };
+    assert.deepEqual(pairChoices(none, [PLEN, ENPL]), [ENPL, PLEN]);
+    // A fresh install: nothing installed, nothing chosen, an empty select -
+    // which the popup never shows, its rows rule swaps it for the setup line.
+    assert.deepEqual(pairChoices(none, []), []);
+  });
 });

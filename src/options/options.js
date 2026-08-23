@@ -349,8 +349,14 @@ function renderVoice() {
   const select = document.getElementById("tts-voice");
   if (!(select instanceof HTMLSelectElement)) return;
 
-  const stored = config.ttsVoices[config.sourceLang];
-  const voices = canSpeak() ? voicesFor(speechSynthesis.getVoices(), config.sourceLang) : [];
+  // The picker chooses a voice for the pair's source language, so with no
+  // pair chosen there is no language to list voices for: the row stands
+  // disabled on the browser default - the "cannot speak at all" manner - and
+  // comes alive with the first pair.
+  const source = config.sourceLang;
+  const stored = source === null ? undefined : config.ttsVoices[source];
+  const voices =
+    canSpeak() && source !== null ? voicesFor(speechSynthesis.getVoices(), source) : [];
 
   select.replaceChildren();
   const fallback = document.createElement("option");
@@ -1189,7 +1195,10 @@ function words(count) {
  * @returns {string[]}
  */
 function knownLanguages() {
-  const languages = new Set([config.sourceLang, config.targetLang]);
+  /** @type {Set<string>} */
+  const languages = new Set();
+  if (config.sourceLang !== null) languages.add(config.sourceLang);
+  if (config.targetLang !== null) languages.add(config.targetLang);
   for (const model of availableModels()) {
     languages.add(model.from);
     languages.add(model.to);
@@ -1975,8 +1984,8 @@ async function addSelectedDictionary() {
     return;
   }
 
-  const langFrom = chosenLanguage("dictionary-from", config.sourceLang);
-  const langTo = chosenLanguage("dictionary-to", config.targetLang);
+  const langFrom = chosenLanguage("dictionary-from", config.sourceLang ?? "");
+  const langTo = chosenLanguage("dictionary-to", config.targetLang ?? "");
   const { base, ifo, idx, dict, syn } = classified.value;
 
   importing = true;
@@ -2040,8 +2049,10 @@ async function render() {
   renderBubbleScale();
   renderVoice();
   renderRate();
-  renderLanguageChoices("dictionary-from", config.sourceLang);
-  renderLanguageChoices("dictionary-to", config.targetLang);
+  // With no pair chosen the selects open on their first language rather than
+  // a preselected one - the import's own selects are still the full list.
+  renderLanguageChoices("dictionary-from", config.sourceLang ?? "");
+  renderLanguageChoices("dictionary-to", config.targetLang ?? "");
 
   const { source } = registrySource();
   const host = source === "" ? "" : new URL(source).host;
@@ -2165,11 +2176,15 @@ document.getElementById("bubble-scale-up")?.addEventListener("click", () => {
 document.getElementById("tts-voice")?.addEventListener("change", (event) => {
   const select = event.target;
   if (!(select instanceof HTMLSelectElement)) return;
+  // A disabled picker fires no change, so this only runs with a pair chosen -
+  // the guard is for the type and for a stale page mid-change.
+  const source = config.sourceLang;
+  if (source === null) return;
   // The whole map is written back (see `writeConfig`), which is what lets
   // "browser default" remove the entry rather than store an empty string.
   const map = { ...config.ttsVoices };
-  if (select.value === "") delete map[config.sourceLang];
-  else map[config.sourceLang] = select.value;
+  if (select.value === "") delete map[source];
+  else map[source] = select.value;
   void writeConfig({ ttsVoices: map }).then((written) => {
     config = written;
   });
@@ -2180,8 +2195,9 @@ document.getElementById("tts-listen")?.addEventListener("click", () => {
   const select = document.getElementById("tts-voice");
   const chosen = select instanceof HTMLSelectElement && select.value !== "" ? select.value : undefined;
   // At the speed that is set, because that is what living with it will sound
-  // like - a sample read at a speed nobody uses is a sample of nothing.
-  speak(VOICE_SAMPLE, config.sourceLang, chosen, config.ttsRate / 100);
+  // like - a sample read at a speed nobody uses is a sample of nothing. With
+  // no pair the empty tag lets the engine's default voice read the sample.
+  speak(VOICE_SAMPLE, config.sourceLang ?? "", chosen, config.ttsRate / 100);
 });
 document.getElementById("tts-rate-down")?.addEventListener("click", () => {
   void stepRate(-TTS_RATE.step);

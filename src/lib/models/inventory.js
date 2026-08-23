@@ -27,6 +27,7 @@
  */
 
 import { webext } from "../browser.js";
+import { chosenPair } from "../config.js";
 
 /** The key in `storage.local`, next to `config`, `vocabIndex` and `platform`. */
 export const MODELS_KEY = "models";
@@ -88,7 +89,13 @@ export function asInventory(stored) {
 export function needsModelHint(config, inventory) {
   if (config.translationOff) return false;
   if (inventory === null) return false;
-  return !inventory.pairs.includes(modelPair(config.sourceLang, config.targetLang));
+  const pair = chosenPair(config);
+  // No pair chosen is the fresh install this hint exists for: nothing to
+  // translate with, and the settings page is where both the pair and its
+  // model come from. Still gated on a written inventory above - the null
+  // inventory keeps meaning "nobody has said anything", never "hint away".
+  if (pair === null) return true;
+  return !inventory.pairs.includes(modelPair(pair.from, pair.to));
 }
 
 /**

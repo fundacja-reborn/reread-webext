@@ -8,6 +8,7 @@ import {
   READER_DEFAULTS,
   SIZE,
   TTS_RATE,
+  chosenPair,
   effectiveReaderOnly,
   osFrom,
   pageMode,
@@ -59,6 +60,17 @@ afterEach(() => {
   globalThis.browser = undefined;
 });
 
+describe("chosenPair", () => {
+  it("answers the chosen pair, and null while nobody has chosen", () => {
+    assert.deepEqual(chosenPair({ sourceLang: "de", targetLang: "pl" }), {
+      from: "de",
+      to: "pl",
+    });
+    assert.equal(chosenPair({ sourceLang: null, targetLang: null }), null);
+    assert.equal(chosenPair(DEFAULTS), null);
+  });
+});
+
 describe("withDefaults", () => {
   it("answers the defaults for a profile that has never stored anything", () => {
     assert.deepEqual(withDefaults(undefined), DEFAULTS);
@@ -75,7 +87,13 @@ describe("withDefaults", () => {
   });
 
   it("fills in only what is missing", () => {
-    assert.deepEqual(withDefaults({ sourceLang: "de" }), { ...DEFAULTS, sourceLang: "de" });
+    assert.deepEqual(withDefaults({ ttsRate: 150 }), { ...DEFAULTS, ttsRate: 150 });
+  });
+
+  it("only ever keeps the pair whole - half a pair is no choice", () => {
+    assert.deepEqual(withDefaults({ sourceLang: "de" }), DEFAULTS);
+    assert.deepEqual(withDefaults({ targetLang: "pl" }), DEFAULTS);
+    assert.deepEqual(withDefaults({ sourceLang: "de", targetLang: 7 }), DEFAULTS);
   });
 
   it("falls back for a hand-edited value of the wrong type or empty", () => {
@@ -91,7 +109,7 @@ describe("withDefaults", () => {
     const result = withDefaults({});
     assert.notEqual(result, DEFAULTS);
     result.sourceLang = "de";
-    assert.equal(DEFAULTS.sourceLang, "en");
+    assert.equal(DEFAULTS.sourceLang, null);
   });
 
   it("keeps a known marker colour and heals anything else to yellow", () => {
@@ -126,9 +144,26 @@ describe("writeConfig", () => {
 
   it("stores a complete object even when the patch is partial", async () => {
     const store = installFakeBrowser();
+    await writeConfig({ ttsRate: 150 });
+
+    assert.deepEqual(store["config"], { ...DEFAULTS, ttsRate: 150 });
+  });
+
+  it("half a pair patched over no pair stays no pair", async () => {
+    // Every real writer sends the pair whole; a half that slips through must
+    // not become a choice - and must not resurrect a default nobody picked.
+    const store = installFakeBrowser();
     await writeConfig({ sourceLang: "fr" });
 
-    assert.deepEqual(store["config"], { ...DEFAULTS, sourceLang: "fr" });
+    assert.deepEqual(store["config"], DEFAULTS);
+  });
+
+  it("half a pair patched over a chosen pair moves that half", async () => {
+    const store = installFakeBrowser();
+    await writeConfig({ sourceLang: "de", targetLang: "pl" });
+    await writeConfig({ sourceLang: "fr" });
+
+    assert.deepEqual(store["config"], { ...DEFAULTS, sourceLang: "fr", targetLang: "pl" });
   });
 
   it("changes one part of the reader's appearance without resetting the others", async () => {
