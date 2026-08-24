@@ -10,6 +10,8 @@
 
 import { commandsApi, offscreenApi, webext } from "../lib/browser.js";
 import { publishPlatform, readConfig } from "../lib/config.js";
+import { writeInventory } from "../lib/models/inventory.js";
+import { listModels } from "../lib/models/store.js";
 import { ErrorCode, Message, asRequest, fail, ok } from "../lib/protocol.js";
 import { toolbarIconFor } from "../lib/theme-icon.js";
 import { setProvider, translate } from "../lib/translator/index.js";
@@ -157,13 +159,23 @@ commandsApi()?.onCommand.addListener((command, tab) => {
 // an update is the one moment it can be missing while the database is not, so
 // it is also written here - once, not on every wake. The platform rides along
 // for the same reason: content scripts cannot ask which OS this is, and the
-// answer never changes for a device, so once is exactly enough.
+// answer never changes for a device, so once is exactly enough. The model
+// inventory too: the settings page keeps it fresh from here on, and this one
+// write is what hands the key to installations that predate it - and to a
+// fresh install, whose first page needs "no models yet" said in storage
+// before the settings page has ever been opened.
 webext().runtime.onInstalled.addListener(() => {
   void refreshVocabulary();
   void publishPlatform().catch(() => {
     // Storage unreachable: pages fall back to the desktop default, and the
     // next update gets another chance.
   });
+  void listModels()
+    .then(writeInventory)
+    .catch(() => {
+      // No inventory written reads as "nobody has said anything", and the
+      // launcher stays quiet about models - the safe direction.
+    });
 });
 
 // Chromium only: at browser launch the toolbar icon is the manifest default -
