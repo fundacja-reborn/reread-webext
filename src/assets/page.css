@@ -311,6 +311,34 @@ a {
    still begins exactly on the left edge the title below aligns to. On the
    settings page the mark is a plain line instead - the door would open the
    room it stands in - and the button rules simply find nothing to dress. */
+/* The way back on the bar's leading edge, before the mark - the reader bar's
+   own arrow (`.reader-back`, reader.css), worn by a page that was walked
+   into from another of this extension's pages (D139). Hidden until the page
+   knows there is somewhere behind to go; the negative start margin hands the
+   finger padding back to the column, the mark's own rule. */
+.page-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.1rem;
+  min-width: 2.6rem;
+  margin-inline-start: -0.7rem;
+  padding: 0.15rem 0.4rem;
+  border: none;
+  background: none;
+  color: var(--page-muted);
+}
+
+.page-back:hover {
+  border: none;
+  color: var(--page-accent);
+}
+
+.page-back .page-icon {
+  width: 1.4em;
+  height: 1.4em;
+}
+
 .page-mark {
   margin-block: 0;
   margin-inline-start: -0.4rem;

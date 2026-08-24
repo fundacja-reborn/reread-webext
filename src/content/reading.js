@@ -301,6 +301,16 @@ let started = false;
 let coveredAbove = () => 0;
 
 /**
+ * The reader page's own way to the settings (D139), for the bubble's
+ * settings button: a walk in the page's one tab, so the way back exists on
+ * a phone. Null everywhere else, where the button asks the background for
+ * the settings tab instead - a content script never navigates its host.
+ *
+ * @type {(() => void) | null}
+ */
+let openSettings = null;
+
+/**
  * What else counts as ours besides the bubble - the reader's delete bubble
  * for a highlighter mark, mostly (D106). Presses on it must read the way
  * presses on the tooltip read: not the page's, so no dismissal, no recall
@@ -521,7 +531,12 @@ async function onAction(action, meanings) {
   // is here so the type can say so without a stray report ever writing.
   if (action === "reader") return;
   if (action === "settings") {
-    void ask({ kind: Message.OPEN_SETTINGS });
+    // The reader page walks to the settings in its own tab (D139) - the way
+    // back must exist on a phone - and hands the walk down; on somebody
+    // else's page the background opens the settings tab instead, because a
+    // content script never navigates the page it is a guest on.
+    if (openSettings !== null) openSettings();
+    else void ask({ kind: Message.OPEN_SETTINGS });
     tooltip.hide();
     return;
   }
@@ -1237,7 +1252,7 @@ function onStorageChanged(changes, area) {
 }
 
 /**
- * @param {{ root?: Element | null, observe?: boolean, stored?: Record<string, unknown>, ownSelection?: boolean, anchored?: boolean, covered?: () => number, plainLinks?: () => boolean, alsoOwns?: (target: EventTarget | null) => boolean, marking?: () => boolean, markRoot?: () => Element | null, onMarked?: (range: Range) => void, onMarkStart?: () => void, onMarkTap?: (x: number, y: number, word?: Range) => void, quietLookup?: (text: string) => Promise<import("../lib/protocol.js").DictEntry[]>, quietVoice?: () => { lang: string, voiceURI: string | undefined } | null }} [where]
+ * @param {{ root?: Element | null, observe?: boolean, stored?: Record<string, unknown>, ownSelection?: boolean, anchored?: boolean, covered?: () => number, openSettings?: () => void, plainLinks?: () => boolean, alsoOwns?: (target: EventTarget | null) => boolean, marking?: () => boolean, markRoot?: () => Element | null, onMarked?: (range: Range) => void, onMarkStart?: () => void, onMarkTap?: (x: number, y: number, word?: Range) => void, quietLookup?: (text: string) => Promise<import("../lib/protocol.js").DictEntry[]>, quietVoice?: () => { lang: string, voiceURI: string | undefined } | null }} [where]
  *   what to underline inside, whether it can change on its own, the startup
  *   read of `storage.local` when the caller already made one, whether the
  *   page selects through our own gesture rather than the browser's - every
@@ -1251,7 +1266,11 @@ function onStorageChanged(changes, area) {
  *   undressing links changes how a page works too. `covered` says how far
  *   down the reader page's own stuck bar reaches (D138), so no placement
  *   and no assist scroll parks anything beneath it - a reader flag as well,
- *   because only our page knows what it stuck over its text. The last four belong to
+ *   because only our page knows what it stuck over its text. `openSettings`
+ *   is the reader page's own walk to the settings (D139), taken by the
+ *   bubble's settings button instead of asking the background for a tab -
+ *   a reader flag too, because navigating away is only ever ours to do on
+ *   our own page. The last four belong to
  *   the reader's highlighter (D106) and ride through to `select.js` -
  *   `alsoOwns` besides names the reader's own floating UI (the mark-delete
  *   bubble), whose presses must not read as the page's. `quietLookup` and
@@ -1265,6 +1284,7 @@ export function start(where = {}) {
   follow = where.observe ?? true;
   anchored = where.anchored ?? false;
   coveredAbove = where.covered ?? (() => 0);
+  openSettings = where.openSettings ?? null;
   alsoOwns = where.alsoOwns ?? (() => false);
   quietLookup = where.quietLookup ?? null;
   quietVoice = where.quietVoice ?? null;
@@ -1352,6 +1372,7 @@ export function stop() {
   lastPointerType = "";
   anchored = false;
   coveredAbove = () => 0;
+  openSettings = null;
   alsoOwns = () => false;
   quietLookup = null;
   quietVoice = null;

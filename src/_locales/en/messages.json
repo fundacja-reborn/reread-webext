@@ -681,6 +681,7 @@
   },
 
   "options_title": { "message": "re/read - settings" },
+  "options_back": {"message": "Back to reading"},
   "options_local_intro": {
     "message": "Everything re/read does happens on this device (offline): translating, the dictionary, the reading list, your saved phrases. Nothing you read or select is ever sent anywhere. An internet connection is needed only when you want to download a new translation model or a dictionary - and only from the two URLs shown openly in those sections."
   },
