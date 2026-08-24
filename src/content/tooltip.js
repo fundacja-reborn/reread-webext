@@ -70,6 +70,16 @@
  * the page the rest of the way, so the phrase - or at least its first line,
  * when it is long - is on the screen saying what the bubble answers.
  *
+ * The reader's page has a third such thing: its own bar, stuck over the top
+ * of the text (D93). D138 teaches every move above where that bar ends - the
+ * caller hands in `covered`, a live measure of how far down it reaches - so
+ * the room to place in starts under the bar and the scroll assist parks the
+ * kept line just below it, not beneath it. And a page moved to make room is
+ * moved back when the bubble leaves: what the assist and the keyboard
+ * reveals scrolled is the bubble's own doing, and hide undoes it - unless
+ * the reader scrolled meanwhile, which is their word on where they want to
+ * be and outranks the tidying.
+ *
  * It comes in two variants, and they were one column told apart by nothing but
  * its starting state (D44): a phrase already kept is a question - what was this
  * again - so `recall` opened folded to one line, while a fresh selection had
@@ -1029,9 +1039,10 @@ function style(root) {
  * @param {boolean} [where.touch] whether the selection was made by touch
  * @param {number} [where.line] the height of the phrase's first line; 0 means unknown, and the whole phrase is kept
  * @param {boolean} [where.assist] whether the page can be scrolled to make room - only ever the reader's anchored mode
+ * @param {number} [where.covered] how far down the window the page's own stuck bar reaches (D138); the usable room starts under it
  * @returns {{ left: number, top: number, grow: "down" | "up", scroll?: number }}
  */
-export function placement({ anchor, size, viewport, folded = 0, touch = false, line = 0, assist = false }) {
+export function placement({ anchor, size, viewport, folded = 0, touch = false, line = 0, assist = false, covered = 0 }) {
   // The room to look for is the room the bubble may come to need, not the room
   // it needs now - a folded row unfolds with nobody left to move anything.
   const height = size.height + folded;
@@ -1041,30 +1052,36 @@ export function placement({ anchor, size, viewport, folded = 0, touch = false, l
 
   const gap = touch ? SYSTEM_GAP : GAP;
 
-  if (anchor.top - gap - height >= VIEWPORT_MARGIN) {
+  // Where the room begins (D138): the window's margin, moved down by whatever
+  // the page's own bar has stuck over the text - a spot beneath the bar is
+  // painted over, for the bubble and for the assist's kept line alike.
+  const ceiling = covered + VIEWPORT_MARGIN;
+
+  if (anchor.top - gap - height >= ceiling) {
     return { left, top: Math.round(anchor.top - gap), grow: "up" };
   }
 
   // Below it, and pushed up only by the bottom of the window: the most of it
   // that can be on the screen is on the screen, even over the phrase. With
   // the assist, "below it" has to hold without the clamps - a spot the clamps
-  // would move is a spot the scroll can honestly reach instead.
+  // would move is a spot the scroll can honestly reach instead, and a phrase
+  // sunk beneath the bar is one the scroll can bring back out.
   const below = anchor.bottom + gap;
   const room = viewport.height - VIEWPORT_MARGIN - height;
-  if (!assist || (below >= VIEWPORT_MARGIN && below <= room)) {
-    return { left, top: Math.round(Math.max(VIEWPORT_MARGIN, Math.min(below, room))), grow: "down" };
+  if (!assist || (below >= ceiling && below <= room)) {
+    return { left, top: Math.round(Math.max(ceiling, Math.min(below, room))), grow: "down" };
   }
 
   // The scroll assist (D97). Below the phrase - or below its first line, when
   // the window cannot hold the bubble and every line of the phrase at once -
   // and the page moves the rest of the way: at least far enough to bring the
   // bubble's foot in, never so far that the line the bubble is about leaves
-  // through the top.
+  // through the top - or under the bar (D138).
   const whole = anchor.bottom - anchor.top;
-  const kept = height + gap + whole <= viewport.height - 2 * VIEWPORT_MARGIN || line <= 0 ? whole : Math.min(line, whole);
+  const kept = height + gap + whole <= viewport.height - VIEWPORT_MARGIN - ceiling || line <= 0 ? whole : Math.min(line, whole);
   const top = anchor.top + kept + gap;
   const need = top + height - (viewport.height - VIEWPORT_MARGIN);
-  const cap = anchor.top - VIEWPORT_MARGIN;
+  const cap = anchor.top - ceiling;
   return { left, top: Math.round(top), grow: "down", scroll: Math.round(Math.min(Math.max(0, need), cap)) };
 }
 
@@ -1091,14 +1108,49 @@ export function revealShift({ must, view }) {
 }
 
 /**
+ * How far back the page goes when the bubble that moved it leaves (D138).
+ *
+ * The scroll assist and the keyboard reveals move the reader's page to make
+ * room (D97), and the reason for that room leaves with the bubble - a page
+ * left where the assist put it strands the reader: the line they were reading
+ * stands where the bubble wanted it, at the very top, under the reader's own
+ * stuck bar. `shown` is where the page stood when the bubble opened, `now`
+ * where it stands as it closes, `carried` the sum of what the bubble itself
+ * scrolled, all as performed. The answer is what to scroll by: back to
+ * `shown` when the whole drift was the bubble's own doing, nothing at all
+ * when the reader has scrolled meanwhile - a hand on the page outranks the
+ * tidying. The tolerance absorbs engines that land scrolls on device pixels;
+ * half-pixel drift is rounding, not a reader.
+ *
+ * A pure rule apart from the scroll that spends it, like the two above.
+ *
+ * @param {{ shown: number, now: number, carried: number }} scrolls
+ * @returns {number}
+ */
+export function settleBack({ shown, now, carried }) {
+  if (carried === 0) return 0;
+  const drift = now - shown;
+  return Math.abs(drift - carried) <= 2 ? -drift : 0;
+}
+
+/**
  * @param {object} options
  * @param {(action: ReportedAction, meanings: string[]) => void} options.onAction what the reader pressed, and what the bubble was showing when they did
  * @param {() => void} [options.onHide] told as the bubble leaves the screen,
  *   whichever door it left by - the caller's chance to stop what only made
  *   sense while it was up (a phrase being read aloud, D83)
+ * @param {() => number} [options.covered] how far down the window the caller's
+ *   own stuck chrome reaches (D138) - the reader's bar. Asked at every
+ *   placement, because panels make the bar taller for as long as they are
+ *   open: the room to place in starts under it, the scroll assist (D97) parks
+ *   the kept line just below it, and the keyboard's reveals count the strip
+ *   as unseen. Absent means nothing stands over the text.
  * @returns {Tooltip}
  */
-export function createTooltip({ onAction, onHide }) {
+export function createTooltip({ onAction, onHide, covered }) {
+  /** The live measure of the caller's stuck chrome (D138), with the
+   *  every-other-page answer standing in when the caller has none. */
+  const coveredAbove = covered ?? (() => 0);
   /** @type {HTMLDivElement | null} */
   let host = null;
   /** @type {HTMLDivElement | null} */
@@ -1149,6 +1201,14 @@ export function createTooltip({ onAction, onHide }) {
    * moves rigidly with it, never re-deciding sides or clamping mid-motion.
    */
   let placedOffset = { top: 0, left: 0 };
+  /**
+   * How far the bubble itself has scrolled the reader's page since it was
+   * shown - the assist rides and the keyboard reveals (D97), summed as
+   * actually performed, clamps and all. What hide undoes (D138): the page
+   * went there to make room for the bubble, and the reason leaves with it.
+   * Only ever nonzero in the anchored mode, the one whose page is ours.
+   */
+  let carried = 0;
   let editing = false;
   /** Whether the second layer is unfolded. Folded again for every new phrase. */
   let unfolded = false;
@@ -1777,12 +1837,17 @@ export function createTooltip({ onAction, onHide }) {
 
   /** The part of the window something can actually be seen in - the visual
    *  viewport when the browser reports one, which is the only thing that
-   *  knows where the software keyboard ends. In viewport coordinates.
+   *  knows where the software keyboard ends, its top pushed down by the
+   *  caller's own stuck chrome (D138): an editor revealed beneath the bar
+   *  would be lit and unseen. In viewport coordinates.
    *  @returns {{ top: number, bottom: number }} */
   function visibleBox() {
     const vv = window.visualViewport;
-    if (vv === null) return { top: 0, bottom: document.documentElement.clientHeight };
-    return { top: vv.offsetTop, bottom: vv.offsetTop + vv.height };
+    const seen =
+      vv === null
+        ? { top: 0, bottom: document.documentElement.clientHeight }
+        : { top: vv.offsetTop, bottom: vv.offsetTop + vv.height };
+    return { top: Math.max(seen.top, coveredAbove()), bottom: seen.bottom };
   }
 
   /**
@@ -1813,7 +1878,11 @@ export function createTooltip({ onAction, onHide }) {
     const shift = revealShift({ must, view });
     if (shift === 0) return;
     if (page !== null) {
+      // Counted as performed, not as asked: a scroll near the document's edge
+      // is clamped, and hide undoes only what actually happened (D138).
+      const before = window.scrollY;
       window.scrollBy(0, -shift);
+      carried += window.scrollY - before;
       return;
     }
     const top = parseFloat(host.style.top);
@@ -1943,6 +2012,8 @@ export function createTooltip({ onAction, onHide }) {
     // and the page under it belongs to somebody else.
     const assist = page !== null;
     const kept = anchorLine > 0 ? Math.min(anchorLine, spotAnchor.bottom - spotAnchor.top) : spotAnchor.bottom - spotAnchor.top;
+    // The stuck bar of right now (D138): panels grow it, other views drop it.
+    const covered = Math.max(0, coveredAbove());
 
     let size = bubble.getBoundingClientRect();
     const folded = foldedHeight();
@@ -1960,10 +2031,10 @@ export function createTooltip({ onAction, onHide }) {
       if (entriesHeight > MIN_ENTRIES_HEIGHT) {
         const gap = onTouch ? SYSTEM_GAP : GAP;
         let room = Math.max(
-          spotAnchor.top - gap - VIEWPORT_MARGIN,
+          spotAnchor.top - gap - VIEWPORT_MARGIN - covered,
           viewport.height - VIEWPORT_MARGIN - (spotAnchor.bottom + gap),
         );
-        if (assist) room = Math.max(room, viewport.height - 2 * VIEWPORT_MARGIN - gap - kept);
+        if (assist) room = Math.max(room, viewport.height - covered - 2 * VIEWPORT_MARGIN - gap - kept);
         const overflow = Math.ceil(size.height + folded - room);
         if (overflow > 0) {
           entriesElement.style.maxHeight = `${Math.max(MIN_ENTRIES_HEIGHT, entriesHeight - overflow)}px`;
@@ -1972,7 +2043,7 @@ export function createTooltip({ onAction, onHide }) {
       }
     }
 
-    const spot = placement({ anchor: spotAnchor, size, viewport, folded, touch: onTouch, line: anchorLine, assist });
+    const spot = placement({ anchor: spotAnchor, size, viewport, folded, touch: onTouch, line: anchorLine, assist, covered });
 
     // The host marks the near edge's line; which way the bubble hangs off it
     // is the stylesheet's business, and it decides the layout too: the row
@@ -1991,7 +2062,13 @@ export function createTooltip({ onAction, onHide }) {
     // the screen together - the reason the page moves is that the reader just
     // asked for more bubble than the screen had room for.
     const ride = spot.scroll ?? 0;
-    if (ride !== 0) window.scrollBy(0, ride);
+    if (ride !== 0) {
+      // Counted as performed (D138): the document's edge may clamp the ask,
+      // and hide undoes only what actually happened.
+      const before = window.scrollY;
+      window.scrollBy(0, ride);
+      carried += window.scrollY - before;
+    }
     // A placement mid-edit answers to the keyboard too, whatever asked for it.
     if (editing) keepEditorVisible();
   }
@@ -2014,6 +2091,17 @@ export function createTooltip({ onAction, onHide }) {
     if (host === null) return;
     watchKeyboard(false);
     settleCopy();
+    // The page put back where the bubble found it (D138): the assist and the
+    // keyboard reveals moved it to make room, and the reason leaves with the
+    // bubble - without this, the line being read was left parked at the very
+    // top of the window, under the reader's own bar, and closing the bubble
+    // meant losing the place. Only the bubble's own scrolling is undone; a
+    // reader who scrolled while it was open has said where they want to be.
+    if (page !== null) {
+      const back = settleBack({ shown: page.y, now: window.scrollY, carried });
+      if (back !== 0) window.scrollBy(0, back);
+    }
+    carried = 0;
     host.remove();
     host = null;
     bubble = null;
@@ -2055,6 +2143,10 @@ export function createTooltip({ onAction, onHide }) {
       anchorLine = line;
       onTouch = touch;
       page = anchored ? { x: window.scrollX, y: window.scrollY } : null;
+      // A bubble reused for a new phrase starts owing the page nothing: the
+      // screen as it stands is the one this phrase was picked from, and hide
+      // will settle back to it, not to the last phrase's (D138).
+      carried = 0;
       editing = false;
       // The phrase this bubble stands over, held for the copy presses alone
       // (D110): never rendered - the bubble still does not repeat its phrase

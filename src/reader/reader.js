@@ -4568,6 +4568,13 @@ function rootReadingSide(ground) {
     observe: false,
     ownSelection: true,
     anchored: true,
+    // How far down the window our own chrome is stuck over the text (D138):
+    // the bubble's placement and its scroll assist stop where the bar
+    // begins, and the assist's kept line parks under the bar, not beneath
+    // it. The same measure the reading position, the voice and the page
+    // keys already live by (D93, D127); over the highlights page the chrome
+    // scrolls away like any heading, and the measure honestly says so.
+    covered: chromeFold,
     plainLinks: () => settings.reader.links === "plain",
     // The highlighter's hooks (D106): whether the pen is in the hand, where
     // marks may anchor (the rebuilt content - the reader's own title has no

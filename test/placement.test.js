@@ -246,3 +246,85 @@ describe("placement with the scroll assist", () => {
     assert.deepEqual(spot, { left: 100, top: -72, grow: "down", scroll: -108 });
   });
 });
+
+/**
+ * The reader page's own bar, stuck over the top of the text (D93), and what
+ * it does to every spot above (D138): `covered` says how far down it reaches,
+ * and the room to place in - or to scroll the kept line to - starts under
+ * it. Without this, the assist parked the very line it kept for the reader
+ * at the window's top margin, which on the reader page is beneath the bar:
+ * the phrase the bubble answers was on the screen and unseeable. Only the
+ * reader ever passes it, like `assist` - a foreign page's bars are as
+ * unknowable as its scroll is untouchable.
+ */
+describe("placement over a stuck bar", () => {
+  it("refuses the spot above when the bar has eaten it", () => {
+    const anchor = at({ top: 90 });
+    const size = { width: 300, height: 60 };
+
+    // 90 - 8 - 60 = 22: past the window's margin, but 40 of bar stand over
+    // it - so the bubble goes below instead of under the bar.
+    assert.deepEqual(placement({ anchor, size, viewport: VIEWPORT, assist: true }), {
+      left: 100,
+      top: 82,
+      grow: "up",
+    });
+    assert.deepEqual(placement({ anchor, size, viewport: VIEWPORT, assist: true, covered: 40 }), {
+      left: 100,
+      top: 118,
+      grow: "down",
+    });
+  });
+
+  it("counts the bar when it asks whether the whole phrase can stay", () => {
+    const anchor = at({ top: 300, height: 100 });
+    const size = { width: 300, height: 640 };
+
+    // Phrase and bubble together measure 748: the bare window holds them
+    // (784), the window less the bar (744) does not - so the bubble stands
+    // under the first line instead of under the whole phrase.
+    assert.deepEqual(placement({ anchor, size, viewport: VIEWPORT, line: 20, assist: true }), {
+      left: 100,
+      top: 408,
+      grow: "down",
+      scroll: 256,
+    });
+    assert.deepEqual(placement({ anchor, size, viewport: VIEWPORT, line: 20, assist: true, covered: 40 }), {
+      left: 100,
+      top: 328,
+      grow: "down",
+      scroll: 176,
+    });
+  });
+
+  it("stops the scroll where the bar ends, not where the window does", () => {
+    const spot = placement({
+      anchor: at({ top: 300, height: 300 }),
+      size: { width: 300, height: 900 },
+      viewport: VIEWPORT,
+      line: 20,
+      assist: true,
+      covered: 40,
+    });
+
+    // The same bubble the bare window caps at 292: the kept line may ride up
+    // only to 48 - the bar and the margin - so the scroll stops at 252 and
+    // the line stays visible under the bar, not beneath it.
+    assert.deepEqual(spot, { left: 100, top: 328, grow: "down", scroll: 252 });
+  });
+
+  it("scrolls a phrase back out from under the bar", () => {
+    const spot = placement({
+      anchor: at({ top: 10 }),
+      size: { width: 300, height: 700 },
+      viewport: VIEWPORT,
+      assist: true,
+      covered: 40,
+    });
+
+    // A phrase at 10 is beneath a bar of 40. Below it is not an honest spot
+    // while it cannot be seen: the page scrolls up by the negative answer
+    // and the phrase's top lands at 48, just under the bar.
+    assert.deepEqual(spot, { left: 100, top: 38, grow: "down", scroll: -38 });
+  });
+});
