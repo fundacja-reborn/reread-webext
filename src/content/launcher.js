@@ -161,7 +161,11 @@ function settle() {
     // so the first selection after a fresh install meets the answer once.
     body: modelHint ? t("error_model_missing") : "",
     tone: modelHint ? "error" : "normal",
-    actions: modelHint ? ["reader", "library", "settings"] : ["reader", "library"],
+    // Settings right under the reader offer, the quiet library label last:
+    // the two framed buttons stand together, and a quiet line between two
+    // frames read as three unrelated things (Michał's report, 0.5.12 on
+    // Android).
+    actions: modelHint ? ["reader", "settings", "library"] : ["reader", "library"],
     // A pen's selection wears the same system bar and handles (D80).
     touch: touchPointer(lastPointerType),
     // The same pointer also sizes the row for the finger about to press it
