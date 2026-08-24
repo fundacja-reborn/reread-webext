@@ -648,8 +648,15 @@ function hold() {
   active.mode = "select";
   // The tick Android's own long-press gives: the sign the hold took, on the
   // hardware that can make it - an e-ink reader mostly cannot, and there the
-  // painted selection is the answer.
-  if (typeof navigator.vibrate === "function") navigator.vibrate(15);
+  // painted selection is the answer. Chromium refuses the call until the
+  // page has a completed tap behind it (sticky activation, granted on
+  // pointerup - so the very first hold after a load is always too early) and
+  // writes the refusal onto the extension's errors page, which must stay
+  // empty (Michał's report from Chrome, 2026-08-24). Where the browser can
+  // say so, it is asked first; an engine too old to answer has no such
+  // refusal to dodge and keeps its buzz.
+  const activated = navigator.userActivation === undefined || navigator.userActivation.hasBeenActive;
+  if (activated && typeof navigator.vibrate === "function") navigator.vibrate(15);
 }
 
 /**
