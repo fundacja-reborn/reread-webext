@@ -69,7 +69,7 @@ import {
 } from "../lib/reader/position.js";
 import { hitsInText, isSearchableQuery } from "../lib/reader/search.js";
 import { isUnderlineWeight } from "../lib/underline.js";
-import { READER_SOURCE_KEY, readReaderSource, writeReaderTab } from "../lib/session.js";
+import { BACK_ROAD_KEY, READER_SOURCE_KEY, readReaderSource, writeReaderTab } from "../lib/session.js";
 import {
   ARTICLES_FILENAME,
   fromArticlesFile,
@@ -4126,7 +4126,7 @@ tocRows?.addEventListener("click", (event) => {
   jumpToTocEntry(entry);
 });
 
-bookNoteSettings?.addEventListener("click", () => void goToSettings());
+bookNoteSettings?.addEventListener("click", () => goToSettings());
 
 // The leavings of an import a closed tab cut short, taken out at the door:
 // this page is the only one with a key to the database, so its opening is
@@ -4252,32 +4252,46 @@ window.addEventListener("popstate", (event) => {
  * `options.js`) - pops the same entry and lands here, where the article and
  * the place in it come back from this page's own history entry (D102).
  *
- * The stored reader-tab id is handed back first: while this tab shows the
- * settings it is not a reader, and the popup's rows must open a real one
- * rather than raise a settings page mid-visit. Quiet on failure - the id
- * going stale was always survivable (`single-tab.js` treats it as gone).
+ * The marker in the tab's own `sessionStorage` is the arrow's licence
+ * (D140): only a tab that walked to the settings from us has a reader entry
+ * behind it, and the tab's own storage is the one store our two pages share
+ * exactly per-tab. The referrer was the first witness and read empty on
+ * both engines - browsers carry referrers only between http(s) documents,
+ * and an extension page's scheme is not one. A tab that refuses its
+ * storage refuses the arrow; the walk itself still works.
  */
-async function goToSettings() {
-  await writeReaderTab(null).catch(() => undefined);
+function goToSettings() {
+  try {
+    sessionStorage.setItem(BACK_ROAD_KEY, "reader");
+  } catch {
+    // The arrow is an enhancement; history carries the gesture regardless.
+  }
   location.assign(webext().runtime.getURL("options/options.html"));
 }
 
-// The other half of handing the id back (D139): this tab is the reader tab
-// for as long as the reader is what it shows, said on every arrival - the
-// first load and every return through history from the settings walk, the
-// back/forward cache included, which is why `pageshow` and not a plain run.
-// Before D139 only the background wrote the id, at the moment it created
-// the tab; a reader come back to by Back was a stranger to its own popup.
+// The reader-tab bookkeeping, both halves (D139/D140): this tab is the
+// reader for exactly as long as the reader is what it shows. Signed in on
+// every arrival - the first load and every return through history, the
+// back/forward cache included, which is why `pageshow` and not a plain run -
+// and signed out on every way out (`pagehide`): the settings walk, a link
+// followed, the tab closing. So the popup's rows raise a real reader, never
+// whatever this tab became. A sign-out the browser drops mid-departure is
+// caught one floor down anyway: the background verifies the stored id
+// against `runtime.getContexts` before raising it (`reader-tab.js`), and
+// the same witness adopts a reader this bookkeeping never met.
 window.addEventListener("pageshow", () => {
   void webext()
     .tabs.getCurrent()
     .then((tab) => (typeof tab?.id === "number" ? writeReaderTab(tab.id) : undefined))
     .catch(() => undefined);
 });
+window.addEventListener("pagehide", () => {
+  void writeReaderTab(null).catch(() => undefined);
+});
 
 // The mark in the bar is the door to the settings - the one line standing over
 // every view of this page. The same walk as the menu row's (D139).
-brandButton?.addEventListener("click", () => void goToSettings());
+brandButton?.addEventListener("click", () => goToSettings());
 
 // The menu's rows, each putting the menu away when pressed: a hallway is for
 // passing through, and every one of them leaves this tab standing - coming
@@ -4329,7 +4343,7 @@ navVocabulary?.addEventListener("click", () => {
 
 navSettings?.addEventListener("click", () => {
   setPanel(menuButton, menuPanel, false);
-  void goToSettings();
+  goToSettings();
 });
 
 keepButton?.addEventListener("click", () => void onKeepPress());
@@ -4609,7 +4623,7 @@ function rootReadingSide(ground) {
     // The bubble's own door to the settings - an error's one button - walks
     // the same road as the bar's mark (D139): this tab, so the way back
     // exists. Everywhere else the bubble keeps asking the background.
-    openSettings: () => void goToSettings(),
+    openSettings: () => goToSettings(),
     plainLinks: () => settings.reader.links === "plain",
     // The highlighter's hooks (D106): whether the pen is in the hand, where
     // marks may anchor (the rebuilt content - the reader's own title has no

@@ -28,6 +28,7 @@ import {
 } from "../lib/config.js";
 import { aside, localizePage, plural, t } from "../lib/i18n.js";
 import { languageName, pairLabel } from "../lib/language.js";
+import { BACK_ROAD_KEY } from "../lib/session.js";
 import { catalogDictionaries, catalogSource } from "../lib/dict/catalog.js";
 import { describeDictDownloadProblem, downloadArchive } from "../lib/dict/download.js";
 import { readLiveDictionaries, refreshLiveDictionaries } from "../lib/dict/live.js";
@@ -2251,14 +2252,23 @@ const menuPanel = document.getElementById("menu-panel");
 // settings by navigating its own tab, and this arrow pops the same history
 // entry as the system's back gesture - so both roads land on the reader,
 // which restores the article and the place in it from its own entry (D102).
-// The referrer is the witness: only a same-tab navigation from one of this
-// extension's pages leaves one of this extension's addresses there, and it
-// survives reloads and the back/forward cache with the document it belongs
-// to. Opened any other way - `openOptionsPage` from the popup, the toolbar,
-// the browser's add-on manager - the referrer is empty, there is nothing
-// behind this tab to go back to, and the bar wears no arrow.
+// The witness is the marker the reader left in this tab's own
+// `sessionStorage` as it walked here (`BACK_ROAD_KEY`, D140): per-tab, ours
+// alone, riding reloads and the back/forward cache with the tab. The
+// referrer could not say it - browsers carry referrers only between http(s)
+// documents, and an extension page's scheme is not one, so it read empty on
+// both engines and the arrow never showed (Michał's report from Chrome).
+// Opened any other way - `openOptionsPage` from the popup, the toolbar, the
+// browser's add-on manager - the tab has no marker, nothing behind it to go
+// back to, and the bar wears no arrow.
 const backButton = document.getElementById("back");
-if (backButton !== null && document.referrer.startsWith(`${location.origin}/`)) {
+let backRoad = false;
+try {
+  backRoad = sessionStorage.getItem(BACK_ROAD_KEY) !== null;
+} catch {
+  // A context that refuses its own storage wears no arrow; Back still works.
+}
+if (backButton !== null && backRoad) {
   backButton.hidden = false;
   backButton.addEventListener("click", () => history.back());
 }

@@ -229,3 +229,72 @@ describe("the highlights entry", () => {
     }
   });
 });
+
+/**
+ * The witness of what the remembered tab shows (D140): a tab id cannot say,
+ * and the reader's own tab can stop being a reader - it walks to the settings
+ * in place (D139). Where the browser can answer (`runtime.getContexts`, faked
+ * here), the stored id counts only while the reader really lives in that tab,
+ * a reader living elsewhere is adopted instead of duplicated, and no answer
+ * at all means the id is trusted the way it always was.
+ */
+describe("the witness of what the remembered tab shows", () => {
+  it("raises the remembered tab while the witness sees the reader in it", async () => {
+    const { state, deps } = reader({ tabs: [{ id: 7, windowId: 3 }], session: { [READER_TAB_KEY]: 7 } });
+
+    await openReader({ ...deps, contexts: async () => [{ contextType: "TAB", documentUrl: READER_URL, tabId: 7 }] });
+
+    assert.deepEqual(state.created, []);
+    assert.equal(state.selected, 7);
+  });
+
+  it("opens a fresh reader when the remembered tab shows something else", async () => {
+    // The tab is alive - raising it would succeed - but the witness says no
+    // reader lives there: it walked to the settings in place (D139) and its
+    // sign-out never landed. Raising it anyway showed the settings page to
+    // every press that asked for the reading list (Michal's report, Chrome).
+    const { state, deps } = reader({ tabs: [{ id: 7, windowId: 3 }], session: { [READER_TAB_KEY]: 7 } });
+
+    await openReader({ ...deps, contexts: async () => [] });
+
+    assert.deepEqual(state.created, [READER_URL]);
+    assert.equal(state.stored[READER_TAB_KEY], 100);
+  });
+
+  it("adopts a reader living in a tab nobody remembered", async () => {
+    const { state, deps } = reader({ tabs: [{ id: 9, windowId: 2 }] });
+
+    await openReader({
+      ...deps,
+      contexts: async () => [{ contextType: "TAB", documentUrl: `${READER_URL}#saved`, tabId: 9 }],
+    });
+
+    assert.deepEqual(state.created, []);
+    assert.equal(state.selected, 9);
+  });
+
+  it("skips the extension's other pages when it looks for a reader", async () => {
+    const { state, deps } = reader({ tabs: [{ id: 5, windowId: 2 }] });
+
+    await openReader({
+      ...deps,
+      contexts: async () => [{ contextType: "TAB", documentUrl: "moz-extension://uuid/options/options.html", tabId: 5 }],
+    });
+
+    assert.deepEqual(state.created, [READER_URL]);
+  });
+
+  it("trusts the remembered id when there is no witness at all", async () => {
+    const { state, deps } = reader({ tabs: [{ id: 7, windowId: 3 }], session: { [READER_TAB_KEY]: 7 } });
+
+    await openReader({
+      ...deps,
+      contexts: async () => {
+        throw new Error("no such API");
+      },
+    });
+
+    assert.deepEqual(state.created, []);
+    assert.equal(state.selected, 7);
+  });
+});
