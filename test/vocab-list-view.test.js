@@ -189,4 +189,14 @@ describe("pairChoicesFor", () => {
       { pair: "enpl", from: "en", to: "pl", count: 0 },
     ]);
   });
+
+  it("offers exactly the pairs that hold phrases while no pair is chosen", () => {
+    const none = { sourceLang: null, targetLang: null };
+    assert.deepEqual(pairChoicesFor(none, [{ langFrom: "de", langTo: "pl", count: 3 }]), [
+      { pair: "depl", from: "de", to: "pl", count: 3 },
+    ]);
+    // Nothing chosen, nothing saved: an empty select behind the page's own
+    // empty state.
+    assert.deepEqual(pairChoicesFor(none, []), []);
+  });
 });

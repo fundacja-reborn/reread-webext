@@ -13,7 +13,9 @@ import { DEFAULTS } from "../src/lib/config.js";
 
 /** @param {Partial<import("../src/lib/config.js").Config>} [over] */
 function config(over = {}) {
-  return { ...DEFAULTS, ...over };
+  // A chosen pair by default: most cases below are about somebody mid-use,
+  // and the fresh install (pair null, DEFAULTS' own state) gets its own test.
+  return { ...DEFAULTS, sourceLang: "en", targetLang: "pl", ...over };
 }
 
 describe("modelPair", () => {
@@ -67,6 +69,15 @@ describe("needsModelHint", () => {
 
   it("stays quiet with no inventory at all - an older background may just not have written one", () => {
     assert.equal(needsModelHint(config(), null), false);
+  });
+
+  it("speaks with no pair chosen - the fresh install this hint exists for", () => {
+    assert.equal(needsModelHint(DEFAULTS, { pairs: [] }), true);
+    // Even with models installed: none of them is chosen to read with.
+    assert.equal(needsModelHint(DEFAULTS, { pairs: ["enpl"] }), true);
+    // But never on an unwritten inventory, and never with translation off.
+    assert.equal(needsModelHint(DEFAULTS, null), false);
+    assert.equal(needsModelHint({ ...DEFAULTS, translationOff: true }, { pairs: [] }), false);
   });
 
   it("stays quiet with translation switched off - the reader was chosen for reading", () => {

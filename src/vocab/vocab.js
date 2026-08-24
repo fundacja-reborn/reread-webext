@@ -22,7 +22,7 @@
 
 import { applyReading } from "../lib/appearance.js";
 import { webext } from "../lib/browser.js";
-import { CONFIG_KEY, SIZE, TTS_RATE, isFont, isTheme, readConfig, writeConfig } from "../lib/config.js";
+import { CONFIG_KEY, SIZE, TTS_RATE, chosenPair, isFont, isTheme, readConfig, writeConfig } from "../lib/config.js";
 import { localizePage, plural, t, uiLocale } from "../lib/i18n.js";
 import { pairLabel } from "../lib/language.js";
 import { describeError } from "../lib/messages.js";
@@ -273,9 +273,12 @@ function adoptConfig(fresh) {
  */
 function renderVoiceChoice() {
   if (voiceChoice === null || config === null) return;
-  const lang = config.sourceLang;
-  const stored = config.ttsVoices[primaryLanguage(lang)];
-  const voices = canSpeak() ? voicesFor(speechSynthesis.getVoices(), lang) : [];
+  // No pair means no language to list voices for: the select stands on the
+  // browser default alone, and the change listener's own guard keeps an
+  // empty key out of the map.
+  const lang = config.sourceLang ?? "";
+  const stored = lang === "" ? undefined : config.ttsVoices[primaryLanguage(lang)];
+  const voices = canSpeak() && lang !== "" ? voicesFor(speechSynthesis.getVoices(), lang) : [];
 
   const fallback = document.createElement("option");
   fallback.value = "";
@@ -358,7 +361,8 @@ async function reload() {
   try {
     const fresh = await readConfig();
     adoptConfig(fresh);
-    const pair = `${fresh.sourceLang}${fresh.targetLang}`;
+    const chosen = chosenPair(fresh);
+    const pair = chosen === null ? "" : `${chosen.from}${chosen.to}`;
     // A different pair is a different list, and page 7 of the old one means
     // nothing on it.
     if (pair !== shownPair) {
@@ -366,9 +370,14 @@ async function reload() {
       page = 1;
     }
 
+    // With no pair chosen there is no current list to show - the page opens
+    // on its empty state, and the select below still offers every pair that
+    // holds phrases.
     const [saved, list] = await Promise.all([
       listPairs(),
-      listPhrases({ langFrom: fresh.sourceLang, langTo: fresh.targetLang }),
+      chosen === null
+        ? Promise.resolve([])
+        : listPhrases({ langFrom: chosen.from, langTo: chosen.to }),
     ]);
     choices = pairChoicesFor(fresh, saved);
     phrases = newestFirst(list);
@@ -713,7 +722,11 @@ async function saveEdit(phrase) {
  */
 async function exportPhrases() {
   if (config === null) return;
-  const pair = { langFrom: config.sourceLang, langTo: config.targetLang };
+  // The export is "the whole current pair as a file"; with no pair chosen
+  // the button has nothing to name - and the list above it is empty anyway.
+  const chosen = chosenPair(config);
+  if (chosen === null) return;
+  const pair = { langFrom: chosen.from, langTo: chosen.to };
   try {
     const list = await listPhrases(pair);
     if (list.length === 0) return;
@@ -798,8 +811,15 @@ function renderImportPair() {
     });
   }
 
+  // The file's own pair first; then the pair being read; with neither, the
+  // empty key matches nothing and the select opens on its first row.
+  const chosen = chosenPair(config);
   const preferred =
-    named !== null ? `${named.langFrom}${named.langTo}` : `${config.sourceLang}${config.targetLang}`;
+    named !== null
+      ? `${named.langFrom}${named.langTo}`
+      : chosen !== null
+        ? `${chosen.from}${chosen.to}`
+        : "";
 
   importPairSelect.replaceChildren();
   for (const choice of importChoices) {
@@ -907,7 +927,7 @@ displayPanel?.addEventListener("click", (event) => void onDisplayPress(event));
 // first line means "no stored choice" - the engine's default for the language.
 voiceChoice?.addEventListener("change", () => {
   if (voiceChoice === null || config === null) return;
-  const key = primaryLanguage(config.sourceLang);
+  const key = primaryLanguage(config.sourceLang ?? "");
   if (key === "") return;
   const map = { ...config.ttsVoices };
   if (voiceChoice.value === "") delete map[key];

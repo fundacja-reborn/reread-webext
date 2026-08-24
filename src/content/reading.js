@@ -229,8 +229,12 @@ let bubbleScale = DEFAULTS.bubbleScale;
  * phrase is spoken in the language being read, with the voice chosen for it,
  * and reading storage at press time would cost a round trip the storage
  * listener already pays for everybody.
+ *
+ * Empty while no pair is chosen: an utterance with an empty `lang` speaks in
+ * the engine's own default, which is the only honest voice for a phrase
+ * whose language nobody has named.
  */
-let ttsLang = DEFAULTS.sourceLang;
+let ttsLang = "";
 
 /** @type {string | undefined} */
 let ttsVoiceURI = undefined;
@@ -375,8 +379,8 @@ async function loadVocabulary(preloaded) {
     // is a registration name, so a new one is a repaint, not a restyle (D130).
     underline = config.underline;
     bubbleScale = config.bubbleScale;
-    ttsLang = config.sourceLang;
-    ttsVoiceURI = config.ttsVoices[config.sourceLang];
+    ttsLang = config.sourceLang ?? "";
+    ttsVoiceURI = config.sourceLang === null ? undefined : config.ttsVoices[config.sourceLang];
     ttsRate = config.ttsRate;
     noTranslation = config.translationOff;
 

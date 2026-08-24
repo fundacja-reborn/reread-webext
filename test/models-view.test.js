@@ -58,6 +58,18 @@ describe("orderForDisplay", () => {
       ["euen", "deen"],
     );
   });
+
+  it("gives no row the top tier while no pair is chosen", () => {
+    const rows = orderForDisplay(
+      [row("en", "pl"), row("de", "en", { installed: true })],
+      { sourceLang: null, targetLang: null },
+    );
+    // Installed first, then the catalogue - nothing is "being read".
+    assert.deepEqual(
+      rows.map((one) => one.pair),
+      ["deen", "enpl"],
+    );
+  });
 });
 
 describe("sortByLabel", () => {
@@ -279,6 +291,17 @@ describe("pairChoices", () => {
 
   it("is empty with nothing installed - the select explains itself instead", () => {
     assert.deepEqual(pairChoices([row("en", "pl"), row("de", "en")], reading), []);
+  });
+
+  it("offers exactly the installed pairs while no pair is chosen", () => {
+    const choices = pairChoices(
+      [row("de", "en", { installed: true }), row("en", "pl")],
+      { sourceLang: null, targetLang: null },
+    );
+    assert.deepEqual(
+      choices.map((one) => one.pair),
+      ["deen"],
+    );
   });
 
   it("keeps the configured pair even with its model gone", () => {

@@ -110,7 +110,7 @@ export function markSegments(text, query) {
  * same select. Counts ride along so the choice reads as "what is where"
  * before it is made.
  *
- * @param {{ sourceLang: string, targetLang: string }} config
+ * @param {{ sourceLang: string | null, targetLang: string | null }} config
  * @param {Array<{ langFrom: string, langTo: string, count: number }>} saved
  * @returns {Array<{ pair: string, from: string, to: string, count: number }>}
  */
@@ -124,6 +124,10 @@ export function pairChoicesFor(config, saved) {
     })),
   );
 
+  // No pair chosen adds no row: the select is exactly the pairs that hold
+  // phrases - on a fresh install, an empty select behind the page's own
+  // empty state.
+  if (config.sourceLang === null || config.targetLang === null) return rows;
   const known = rows.some((row) => row.from === config.sourceLang && row.to === config.targetLang);
   if (known) return rows;
 
