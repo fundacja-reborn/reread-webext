@@ -161,7 +161,13 @@ function settle() {
     // so the first selection after a fresh install meets the answer once.
     body: modelHint ? t("error_model_missing") : "",
     tone: modelHint ? "error" : "normal",
-    actions: modelHint ? ["reader", "library", "settings"] : ["reader", "library"],
+    // With the hint on, the sentence above points at the settings - so the
+    // settings door stands directly under it, the reading-bubble error's own
+    // order, then the reader offer, and the quiet library label closes the
+    // column. The first cut had the quiet label between two framed buttons,
+    // which read as three unrelated things (Michał's report, 0.5.12 on
+    // Android); the order is his too.
+    actions: modelHint ? ["settings", "reader", "library"] : ["reader", "library"],
     // A pen's selection wears the same system bar and handles (D80).
     touch: touchPointer(lastPointerType),
     // The same pointer also sizes the row for the finger about to press it
