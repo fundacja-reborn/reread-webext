@@ -69,7 +69,7 @@ import {
 } from "../lib/reader/position.js";
 import { hitsInText, isSearchableQuery } from "../lib/reader/search.js";
 import { isUnderlineWeight } from "../lib/underline.js";
-import { READER_SOURCE_KEY, readReaderSource } from "../lib/session.js";
+import { READER_SOURCE_KEY, readReaderSource, writeReaderTab } from "../lib/session.js";
 import {
   ARTICLES_FILENAME,
   fromArticlesFile,
@@ -4126,7 +4126,7 @@ tocRows?.addEventListener("click", (event) => {
   jumpToTocEntry(entry);
 });
 
-bookNoteSettings?.addEventListener("click", () => void webext().runtime.openOptionsPage());
+bookNoteSettings?.addEventListener("click", () => void goToSettings());
 
 // The leavings of an import a closed tab cut short, taken out at the door:
 // this page is the only one with a key to the database, so its opening is
@@ -4241,12 +4241,43 @@ window.addEventListener("popstate", (event) => {
   else void openSaved(doc.url);
 });
 
+/**
+ * The road to the settings, walked in this same tab (D139). It used to be
+ * `openOptionsPage` - a tab of its own, so the article stayed on screen - and
+ * on a phone that tab had no way back at all: no gesture, no arrow, and the
+ * article to be dug out again through the menus (Michał's report,
+ * 2026-08-24). A real navigation instead makes the settings a step in this
+ * tab's walk, so every way back the platform offers - the system's back
+ * gesture, the browser's Back, the settings page's own arrow (see
+ * `options.js`) - pops the same entry and lands here, where the article and
+ * the place in it come back from this page's own history entry (D102).
+ *
+ * The stored reader-tab id is handed back first: while this tab shows the
+ * settings it is not a reader, and the popup's rows must open a real one
+ * rather than raise a settings page mid-visit. Quiet on failure - the id
+ * going stale was always survivable (`single-tab.js` treats it as gone).
+ */
+async function goToSettings() {
+  await writeReaderTab(null).catch(() => undefined);
+  location.assign(webext().runtime.getURL("options/options.html"));
+}
+
+// The other half of handing the id back (D139): this tab is the reader tab
+// for as long as the reader is what it shows, said on every arrival - the
+// first load and every return through history from the settings walk, the
+// back/forward cache included, which is why `pageshow` and not a plain run.
+// Before D139 only the background wrote the id, at the moment it created
+// the tab; a reader come back to by Back was a stranger to its own popup.
+window.addEventListener("pageshow", () => {
+  void webext()
+    .tabs.getCurrent()
+    .then((tab) => (typeof tab?.id === "number" ? writeReaderTab(tab.id) : undefined))
+    .catch(() => undefined);
+});
+
 // The mark in the bar is the door to the settings - the one line standing over
-// every view of this page. Its own tab (`openOptionsPage`, which raises the
-// settings tab if one is already open), so the article on screen stays where it
-// is; and asked here rather than through the background, because an extension
-// page may call it itself.
-brandButton?.addEventListener("click", () => void webext().runtime.openOptionsPage());
+// every view of this page. The same walk as the menu row's (D139).
+brandButton?.addEventListener("click", () => void goToSettings());
 
 // The menu's rows, each putting the menu away when pressed: a hallway is for
 // passing through, and every one of them leaves this tab standing - coming
@@ -4298,7 +4329,7 @@ navVocabulary?.addEventListener("click", () => {
 
 navSettings?.addEventListener("click", () => {
   setPanel(menuButton, menuPanel, false);
-  void webext().runtime.openOptionsPage();
+  void goToSettings();
 });
 
 keepButton?.addEventListener("click", () => void onKeepPress());
@@ -4575,6 +4606,10 @@ function rootReadingSide(ground) {
     // keys already live by (D93, D127); over the highlights page the chrome
     // scrolls away like any heading, and the measure honestly says so.
     covered: chromeFold,
+    // The bubble's own door to the settings - an error's one button - walks
+    // the same road as the bar's mark (D139): this tab, so the way back
+    // exists. Everywhere else the bubble keeps asking the background.
+    openSettings: () => void goToSettings(),
     plainLinks: () => settings.reader.links === "plain",
     // The highlighter's hooks (D106): whether the pen is in the hand, where
     // marks may anchor (the rebuilt content - the reader's own title has no

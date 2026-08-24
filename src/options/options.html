@@ -24,6 +24,34 @@
            this is the settings. The menu holds the extension's other pages;
            its own room, by the menus' shared rule, is not on the list. -->
       <div class="page-bar">
+        <!-- The way back from the walk that led here (D139): the reader page
+             steps into the settings by navigating its own tab, and this arrow
+             is that step's other half - the entry the system's back gesture
+             pops, drawn where every app puts it (the reader bar's own arrow).
+             Hidden until the page knows another page of this extension stands
+             behind it in the tab's history (see `options.js`); the settings
+             opened any other way have nowhere back to go. -->
+        <button
+          id="back"
+          type="button"
+          class="page-back"
+          title="Back to reading"
+          data-i18n-title="options_back"
+          aria-label="Back to reading"
+          data-i18n-aria-label="options_back"
+          hidden
+        >
+          <svg class="page-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+            <path
+              d="M13.25 8H3.1M7.3 3.8 3.1 8l4.2 4.2"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
         <p class="page-mark">re/read</p>
         <span class="page-tools">
           <button

@@ -82,6 +82,11 @@ interface WebExtBrowser {
     // carries an id and no address - and the id is all that is asked for; which
     // site the tab is showing is what the tab itself answers (`page-info`).
     query(queryInfo: { active?: boolean; currentWindow?: boolean }): Promise<WebExtTab[]>;
+    // Which tab this extension page itself lives in - how the reader signs its
+    // own tab id back into session storage on every arrival, the returns
+    // through history from the settings walk included (D139). Needs no
+    // permission; answers undefined outside a tab.
+    getCurrent(): Promise<WebExtTab | undefined>;
     // Asking a page a question - the background for the page itself, the popup
     // for its hostname; the only messages that travel toward a tab. Needs no
     // permission beyond the host permission that put the content script there;

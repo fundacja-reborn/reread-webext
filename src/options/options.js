@@ -2247,6 +2247,22 @@ const pageBar = document.querySelector(".page-bar");
 const menuButton = document.getElementById("menu");
 const menuPanel = document.getElementById("menu-panel");
 
+// The way back from the walk that led here (D139): the reader steps into the
+// settings by navigating its own tab, and this arrow pops the same history
+// entry as the system's back gesture - so both roads land on the reader,
+// which restores the article and the place in it from its own entry (D102).
+// The referrer is the witness: only a same-tab navigation from one of this
+// extension's pages leaves one of this extension's addresses there, and it
+// survives reloads and the back/forward cache with the document it belongs
+// to. Opened any other way - `openOptionsPage` from the popup, the toolbar,
+// the browser's add-on manager - the referrer is empty, there is nothing
+// behind this tab to go back to, and the bar wears no arrow.
+const backButton = document.getElementById("back");
+if (backButton !== null && document.referrer.startsWith(`${location.origin}/`)) {
+  backButton.hidden = false;
+  backButton.addEventListener("click", () => history.back());
+}
+
 /** @param {boolean} open */
 function setMenu(open) {
   if (menuButton === null || menuPanel === null) return;
