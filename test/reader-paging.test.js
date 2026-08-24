@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { pageStep, pageTurn } from "../src/lib/reader/paging.js";
+import { foldSnap, pageStep, pageTurn } from "../src/lib/reader/paging.js";
 
 /**
  * A press, with the defaults of the ordinary case: no modifier, nothing
@@ -102,5 +102,41 @@ describe("pageStep", () => {
   it("still moves a line when the strip has been squeezed to nothing", () => {
     assert.equal(pageStep({ top: 400, bottom: 400 }, 30), 30);
     assert.equal(pageStep({ top: 500, bottom: 400 }, 30), 30);
+  });
+});
+
+describe("foldSnap", () => {
+  // A 30px line cut by a fold at 60: fifteen pixels stand behind the bar,
+  // fifteen below it - the shape of the reported screen.
+  const line = { top: 45, bottom: 75 };
+
+  it("gives the cut line back when the page turns down", () => {
+    assert.equal(foldSnap("down", 60, line, 385), -15);
+  });
+
+  it("tucks the cut line behind the bar when the page turns up", () => {
+    assert.equal(foldSnap("up", 60, line, 385), 15);
+  });
+
+  it("leaves a turn that is already square", () => {
+    // Nothing measurable under the fold: a picture, a gap, no text at all.
+    assert.equal(foldSnap("down", 60, null, 385), 0);
+    // The line starts at the fold, or stands wholly below it.
+    assert.equal(foldSnap("down", 45, line, 385), 0);
+    assert.equal(foldSnap("down", 40, line, 385), 0);
+    // The line ends at the fold: behind the bar entirely, nothing cut.
+    assert.equal(foldSnap("up", 75, line, 385), 0);
+  });
+
+  it("calls within a pixel square", () => {
+    assert.equal(foldSnap("down", 45.5, line, 385), 0);
+    assert.equal(foldSnap("up", 74.5, line, 385), 0);
+  });
+
+  it("never nudges further than the limit", () => {
+    // A picture set in the text's own flow can stand taller than the step;
+    // squaring with it would read as the page jumping, not settling.
+    assert.equal(foldSnap("down", 860, { top: 60, bottom: 900 }, 385), 0);
+    assert.equal(foldSnap("up", 100, { top: 60, bottom: 900 }, 385), 0);
   });
 });

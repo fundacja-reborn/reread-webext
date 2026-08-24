@@ -58,7 +58,7 @@ import {
   placeMark,
   withoutMark,
 } from "../lib/reader/marks.js";
-import { pageStep, pageTurn } from "../lib/reader/paging.js";
+import { foldSnap, pageStep, pageTurn } from "../lib/reader/paging.js";
 import {
   POSITION_SAVE_DELAY,
   blockAtLine,
@@ -972,6 +972,34 @@ function readingLine() {
 }
 
 /**
+ * The line box straddling the fold, measured where the article's own text
+ * stands: one caret hit just under the stuck chrome, in the middle of the
+ * text column, and the rect of the character the hit lands on. Null when
+ * there is nothing to measure - the fold in a picture or in the gap between
+ * paragraphs, a bubble standing over the point, an engine without
+ * `caretPositionFromPoint` - and every null leaves the turn where the step
+ * put it, which is where every turn landed before this measured anything.
+ *
+ * @param {number} fold
+ * @returns {{ top: number, bottom: number } | null}
+ */
+function foldLineBox(fold) {
+  if (typeof document.caretPositionFromPoint !== "function") return null;
+  if (contentElement === null) return null;
+  const column = contentElement.getBoundingClientRect();
+  const position = document.caretPositionFromPoint(column.left + column.width / 2, fold + 2);
+  if (position === null) return null;
+  const node = position.offsetNode;
+  if (!(node instanceof Text) || node.length === 0 || !contentElement.contains(node)) return null;
+  const at = Math.min(position.offset, node.length - 1);
+  const range = document.createRange();
+  range.setStart(node, at);
+  range.setEnd(node, at + 1);
+  const rect = range.getBoundingClientRect();
+  return rect.height > 0 ? { top: rect.top, bottom: rect.bottom } : null;
+}
+
+/**
  * Turning the page with the keyboard (D127) - the hardware page keys of an
  * e-reader among them, which is where this came from: the browser pages by a
  * screenful it measures against the whole window, and the reader's chrome is
@@ -982,7 +1010,8 @@ function readingLine() {
  * for sticking the chrome: over the reading list and the highlights page
  * nothing stands over the text and the browser's own paging is already right.
  * Which press is ours is decided in `lib/reader/paging.js`, where it can be
- * tested, and so is how far one goes.
+ * tested; so is how far one goes, and the nudge that squares the landing
+ * with the text so every page opens on a whole first line.
  *
  * @param {KeyboardEvent} event
  */
@@ -1004,11 +1033,17 @@ function onPageKey(event) {
   if (turn === null) return;
 
   event.preventDefault();
-  const step = pageStep(readableBand(), readingLine());
+  const band = readableBand();
+  const step = pageStep(band, readingLine());
   // Instantly, and nothing here says otherwise: a smooth scroll on an e-ink
   // panel is a page of smeared refreshes. The scroll itself arms the position
   // save like any other, so where the reading stands follows the keys.
   scrollBy(0, turn === "down" ? step : -step);
+  // The step lands where it lands; the line it leaves cut at the fold is
+  // measured and given back (or tucked away) before the browser paints, so
+  // even an e-ink panel shows one turn, opening on a whole first line.
+  const nudge = foldSnap(turn, band.top, foldLineBox(band.top), step / 2);
+  if (nudge !== 0) scrollBy(0, nudge);
 }
 
 document.addEventListener("keydown", onPageKey);
