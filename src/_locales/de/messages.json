@@ -552,7 +552,7 @@
   },
 
   "options_title": { "message": "re/read - Einstellungen" },
-  "options_back": {"message": "Zurück zum Lesen"},
+  "back_to_reading": {"message": "Zurück zum Lesen"},
   "options_local_intro": {
     "message": "Alles, was re/read tut, geschieht auf diesem Gerät (offline): das Übersetzen, das Wörterbuch, die Leseliste, der gespeicherte Wortschatz. Nichts von dem, was Sie lesen oder auswählen, wird irgendwohin gesendet. Eine Internetverbindung ist nur nötig, wenn Sie ein neues Übersetzungsmodell oder ein Wörterbuch herunterladen möchten - und nur von den zwei URLs, die offen in diesen Abschnitten genannt sind."
   },

@@ -575,7 +575,7 @@
   },
 
   "options_title": { "message": "re/read - ajustes" },
-  "options_back": {"message": "Volver a la lectura"},
+  "back_to_reading": {"message": "Volver a la lectura"},
   "options_local_intro": {
     "message": "Todo lo que hace re/read ocurre en este dispositivo (sin conexión): la traducción, el diccionario, la lista de lectura, tus frases guardadas. Nada de lo que lees o seleccionas se envía a ninguna parte. La conexión a Internet solo hace falta cuando quieres descargar un nuevo modelo de traducción o un diccionario - y solo desde las dos URL mostradas abiertamente en esas secciones."
   },

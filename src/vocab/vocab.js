@@ -27,6 +27,7 @@ import { localizePage, plural, t, uiLocale } from "../lib/i18n.js";
 import { pairLabel } from "../lib/language.js";
 import { describeError } from "../lib/messages.js";
 import { ErrorCode, Message, asResult, fail } from "../lib/protocol.js";
+import { BACK_ROAD_KEY, writeVocabTab } from "../lib/session.js";
 import { MIRROR_KEY } from "../lib/store/mirror.js";
 import { exportFilename, fromTsv, pairFromFilename, toTsv } from "../lib/store/tsv.js";
 import { listPairs, listPhrases } from "../lib/store/vocab.js";
@@ -880,6 +881,42 @@ async function runImport() {
 // bar carries: its own tab (`openOptionsPage` raises the settings tab if one is
 // already open), so the list on screen stays where it is.
 brandButton?.addEventListener("click", () => void webext().runtime.openOptionsPage());
+
+// The way back from the reader's walk (D141): the reader's menu row
+// navigates its own tab here, and this arrow pops the same history entry as
+// the system's back gesture - back to the article, the place in it restored
+// by the reader's own entry (D102). The witness is the marker the reader
+// left in this tab's sessionStorage as it walked (`BACK_ROAD_KEY`, D140) -
+// the phrases tab raised from the popup or the settings menu has no marker,
+// nothing behind it, and wears no arrow.
+const backButton = document.getElementById("back");
+let backRoad = false;
+try {
+  backRoad = sessionStorage.getItem(BACK_ROAD_KEY) !== null;
+} catch {
+  // A context that refuses its own storage wears no arrow; Back still works.
+}
+if (backButton !== null && backRoad) {
+  backButton.hidden = false;
+  backButton.addEventListener("click", () => history.back());
+}
+
+// The phrases-tab bookkeeping, the reader's exactly (D139/D140, applied here
+// by D141): this tab is the one phrases tab for as long as the phrases are
+// what it shows - signed in on every arrival (`pageshow`, the back/forward
+// cache included), signed out on every way out (`pagehide`). A walked-to
+// page announces itself the same way, so the popup's press raises this tab
+// instead of opening a copy beside it; a write the browser drops is caught
+// by the witness in `vocab-tab.js`.
+window.addEventListener("pageshow", () => {
+  void webext()
+    .tabs.getCurrent()
+    .then((tab) => (typeof tab?.id === "number" ? writeVocabTab(tab.id) : undefined))
+    .catch(() => undefined);
+});
+window.addEventListener("pagehide", () => {
+  void writeVocabTab(null).catch(() => undefined);
+});
 
 /**
  * The bar's two disclosure buttons and their panels, the reader's rule: one

@@ -4253,20 +4253,31 @@ window.addEventListener("popstate", (event) => {
  * the place in it come back from this page's own history entry (D102).
  *
  * The marker in the tab's own `sessionStorage` is the arrow's licence
- * (D140): only a tab that walked to the settings from us has a reader entry
- * behind it, and the tab's own storage is the one store our two pages share
- * exactly per-tab. The referrer was the first witness and read empty on
- * both engines - browsers carry referrers only between http(s) documents,
- * and an extension page's scheme is not one. A tab that refuses its
- * storage refuses the arrow; the walk itself still works.
+ * (D140): only a tab that walked there from us has a reader entry behind
+ * it, and the tab's own storage is the one store our pages share exactly
+ * per-tab. The referrer was the first witness and read empty on both
+ * engines - browsers carry referrers only between http(s) documents, and
+ * an extension page's scheme is not one. A tab that refuses its storage
+ * refuses the arrow; the walk itself still works.
+ *
+ * Two rooms are walked to: the settings, and since D141 the saved phrases
+ * (Michał's call - two neighbouring menu rows must not speak two grammars,
+ * and the reading place must stay one gesture away). The highlights row
+ * needs no walk at all: the highlights are a view of this very page.
+ *
+ * @param {string} page
  */
-function goToSettings() {
+function walkTo(page) {
   try {
     sessionStorage.setItem(BACK_ROAD_KEY, "reader");
   } catch {
     // The arrow is an enhancement; history carries the gesture regardless.
   }
-  location.assign(webext().runtime.getURL("options/options.html"));
+  location.assign(webext().runtime.getURL(page));
+}
+
+function goToSettings() {
+  walkTo("options/options.html");
 }
 
 // The reader-tab bookkeeping, both halves (D139/D140): this tab is the
@@ -4334,11 +4345,13 @@ navMarks?.addEventListener("click", () => {
 
 navVocabulary?.addEventListener("click", () => {
   setPanel(menuButton, menuPanel, false);
-  // A rejection means the background was mid-restart. The press can be
-  // repeated; the popup's rows make the same bargain.
-  void webext()
-    .runtime.sendMessage({ kind: Message.OPEN_VOCABULARY })
-    .catch(() => undefined);
+  // The settings row's walk, not the popup's raise (D141): a message used to
+  // bring the one phrases tab forward, and the article was left behind with
+  // no way back - two neighbouring rows, two grammars (Michał's report). The
+  // popup and the settings menu keep raising: no reading place stands behind
+  // them. The one phrases tab keeps holding: the witness in `vocab-tab.js`
+  // adopts the walked-to page, so a raise finds this tab instead of a copy.
+  walkTo("vocab/vocab.html");
 });
 
 navSettings?.addEventListener("click", () => {
