@@ -28,7 +28,7 @@
   "action_update": { "message": "Mettre à jour" },
 
   "error_engine_missing": { "message": "Pas encore de moteur de traduction - cette version ne peut pas traduire." },
-  "error_model_missing": { "message": "Aucun modèle pour cette paire de langues sur cet appareil - téléchargez-en un ou ajoutez-le dans les paramètres." },
+  "error_model_missing": { "message": "Aucun modèle pour cette paire de langues sur cet appareil - téléchargez-en un ou ajoutez-le dans les paramètres. Et pour lire sans traduction, activez-y « Utiliser sans traduction » - vous pouvez toujours ajouter un dictionnaire monolingue." },
   "error_unsupported_pair": { "message": "Aucun modèle n'existe pour cette paire de langues." },
   "error_too_long": { "message": "Cette sélection est trop longue pour être traduite." },
   "error_no_page": { "message": "Il n'y a pas de page à lire ici - ouvrez un article et appuyez de nouveau sur le bouton." },

@@ -28,7 +28,7 @@
   "action_update": { "message": "Aktualisieren" },
 
   "error_engine_missing": { "message": "Noch keine Übersetzungs-Engine - diese Version kann nicht übersetzen." },
-  "error_model_missing": { "message": "Kein Modell für dieses Sprachpaar auf diesem Gerät - in den Einstellungen herunterladen oder aus Dateien hinzufügen." },
+  "error_model_missing": { "message": "Kein Modell für dieses Sprachpaar auf diesem Gerät - in den Einstellungen herunterladen oder aus Dateien hinzufügen. Und zum Lesen ohne Übersetzung dort „Ohne Übersetzung verwenden“ einschalten - ein einsprachiges Wörterbuch lässt sich weiterhin hinzufügen." },
   "error_unsupported_pair": { "message": "Für dieses Sprachpaar gibt es kein Modell." },
   "error_too_long": { "message": "Diese Auswahl ist zu lang zum Übersetzen." },
   "error_no_page": { "message": "Hier gibt es keine Seite zum Lesen - öffnen Sie einen Artikel und drücken Sie die Taste erneut." },
