@@ -29,6 +29,15 @@ interface WebExtBrowser {
     id: string;
     getURL(path: string): string;
     getManifest(): { name: string; version: string } & Record<string, unknown>;
+    // Which of this extension's own pages are open, and in which tabs - the
+    // background's witness that the tab remembered as "the reader" still
+    // shows the reader before it is raised (D140): a tab id cannot say what
+    // the tab shows, and extension pages sit outside `<all_urls>`, so this is
+    // the one permissionless answer. Optional, because Firefox grew it in
+    // 126; without it the stored id is trusted as before.
+    getContexts?(filter: {
+      contextTypes?: string[];
+    }): Promise<{ contextType: string; documentUrl?: string; tabId: number }[]>;
     sendMessage(message: unknown): Promise<unknown>;
     onMessage: WebExtEvent<
       (

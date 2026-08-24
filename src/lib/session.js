@@ -35,6 +35,19 @@ export const READER_SOURCE_KEY = "readerSource";
 /** @typedef {{ tabId: number, at: number } | { marks: true, at: number }} ReaderSource */
 
 /**
+ * The marker the reader leaves in a tab's own `sessionStorage` as it walks to
+ * the settings in that same tab (D139/D140), and the settings page's licence
+ * to wear its back arrow. Not `storage.session`: the question is "did THIS
+ * tab walk here from us", and the tab's own storage is the one store scoped
+ * exactly like the question - shared by our two pages (same origin),
+ * invisible to every other tab, gone with the tab. The referrer could not be
+ * the witness: browsers carry referrers only between http(s) documents, and
+ * an extension page's scheme is not one, so it reads empty on both engines
+ * (the reason the arrow never showed, Michał's report from Chrome).
+ */
+export const BACK_ROAD_KEY = "reread.backRoad";
+
+/**
  * @param {string} key
  * @param {WebExtBrowser["storage"]["session"]} session
  * @returns {Promise<number | null>}
