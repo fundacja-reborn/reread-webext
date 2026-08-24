@@ -38,7 +38,7 @@
   "action_update": { "message": "Update" },
 
   "error_engine_missing": { "message": "No translation engine yet - this build cannot translate." },
-  "error_model_missing": { "message": "No model for this language pair on this device - download or add one in the settings." },
+  "error_model_missing": { "message": "No model for this language pair on this device - download or add one in the settings. And to read without translation, switch on \"Use without translation\" there - you can still add a monolingual dictionary." },
   "error_unsupported_pair": { "message": "No model exists for this language pair." },
   "error_too_long": { "message": "That selection is too long to translate." },
   "error_no_page": { "message": "There is no page to read here - open an article and press the button again." },

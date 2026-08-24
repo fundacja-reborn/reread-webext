@@ -28,7 +28,7 @@
   "action_update": { "message": "Aktualizuj" },
 
   "error_engine_missing": { "message": "Nie ma jeszcze silnika tłumaczeń - to wydanie nie tłumaczy." },
-  "error_model_missing": { "message": "Na tym urządzeniu nie ma modelu dla tej pary językowej - pobierz go lub dodaj w ustawieniach." },
+  "error_model_missing": { "message": "Na tym urządzeniu nie ma modelu dla tej pary językowej - pobierz go lub dodaj w ustawieniach. A jeśli chcesz czytać bez tłumaczenia, włącz tam „Używaj bez tłumaczenia” - słownik jednojęzyczny nadal możesz dodać." },
   "error_unsupported_pair": { "message": "Dla tej pary językowej nie istnieje żaden model." },
   "error_too_long": { "message": "To zaznaczenie jest za długie do przetłumaczenia." },
   "error_no_page": { "message": "Nie ma tu strony do czytania - otwórz artykuł i naciśnij przycisk jeszcze raz." },
