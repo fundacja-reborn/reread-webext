@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "re/read - read offline, translate and learn",
   "short_name": "re/read",
-  "version": "0.5.16",
+  "version": "0.5.17",
   "description": "__MSG_extension_description__",
   "default_locale": "en",
   "homepage_url": "https://github.com/fundacja-reborn/reread-webext",
