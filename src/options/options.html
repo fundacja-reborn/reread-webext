@@ -24,13 +24,13 @@
            this is the settings. The menu holds the extension's other pages;
            its own room, by the menus' shared rule, is not on the list. -->
       <div class="page-bar">
-        <!-- The way back from the walk that led here (D139): the reader page
-             steps into the settings by navigating its own tab, and this arrow
-             is that step's other half - the entry the system's back gesture
-             pops, drawn where every app puts it (the reader bar's own arrow).
-             Hidden until the page knows another page of this extension stands
-             behind it in the tab's history (see `options.js`); the settings
-             opened any other way have nowhere back to go. -->
+        <!-- The way back to the reading (D139/D142), drawn where every app
+             puts it (the reader bar's own arrow). Walked into in this tab,
+             the arrow pops the entry the system's back gesture pops; raised
+             from the popup or the add-on manager while the reading stands in
+             another tab, it brings that tab forward. Hidden when there is
+             nothing to go back to - the three states live in
+             `lib/back-arrow.js`. -->
         <button
           id="back"
           type="button"

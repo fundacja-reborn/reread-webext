@@ -14,36 +14,7 @@
  * `<all_urls>`.
  */
 
-import { webext } from "../lib/browser.js";
-
-/**
- * The tabs one of this extension's pages really lives in right now, by the
- * browser's own account (`runtime.getContexts`) - or null where nobody can
- * say: an engine without the API (Firefox before 126), a call that failed, an
- * answer of the wrong shape. Null means "no witness", never "no such tabs".
- *
- * @param {string} url the page, as `runtime.getURL` names it
- * @param {(() => Promise<unknown>) | undefined} ask the tests' fake; the live
- *   `runtime.getContexts` otherwise
- * @returns {Promise<number[] | null>}
- */
-async function tabsShowing(url, ask) {
-  try {
-    const query = ask ?? (() => webext().runtime.getContexts?.({ contextTypes: ["TAB"] }));
-    const views = await query();
-    if (!Array.isArray(views)) return null;
-    const tabs = [];
-    for (const view of views) {
-      if (typeof view !== "object" || view === null) continue;
-      const { documentUrl, tabId } = /** @type {Record<string, unknown>} */ (view);
-      if (typeof documentUrl !== "string" || !documentUrl.startsWith(url)) continue;
-      if (typeof tabId === "number" && tabId >= 0) tabs.push(tabId);
-    }
-    return tabs;
-  } catch {
-    return null;
-  }
-}
+import { tabsShowing } from "../lib/own-tabs.js";
 
 /**
  * Which tab is the page's one tab, checked against what this extension's

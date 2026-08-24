@@ -31,13 +31,12 @@
            panels' own business (see vocab.js), exactly the reader's
            `.reader-chrome` rule. -->
       <div class="page-bar">
-        <!-- The way back from the walk that led here (D141): the reader's
-             menu row navigates its own tab to this page, and this arrow is
-             that step's other half - the entry the system's back gesture
-             pops, the settings bar's own arrow (D140). Hidden until the
-             marker in the tab's sessionStorage says a reader stands behind
-             this tab (see vocab.js); the phrases tab raised from the popup
-             or the settings menu has nowhere back to go and wears none. -->
+        <!-- The way back to the reading (D141/D142), the settings bar's own
+             arrow. Walked into in this tab, it pops the entry the system's
+             back gesture pops; raised from the popup or the settings menu
+             while the reading stands in another tab, it brings that tab
+             forward. Hidden when there is nothing to go back to - the three
+             states live in `lib/back-arrow.js`. -->
         <button
           id="back"
           type="button"

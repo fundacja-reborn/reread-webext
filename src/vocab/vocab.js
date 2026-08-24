@@ -26,8 +26,9 @@ import { CONFIG_KEY, SIZE, TTS_RATE, chosenPair, isFont, isTheme, readConfig, wr
 import { localizePage, plural, t, uiLocale } from "../lib/i18n.js";
 import { pairLabel } from "../lib/language.js";
 import { describeError } from "../lib/messages.js";
+import { armBackArrow } from "../lib/back-arrow.js";
 import { ErrorCode, Message, asResult, fail } from "../lib/protocol.js";
-import { BACK_ROAD_KEY, writeVocabTab } from "../lib/session.js";
+import { writeVocabTab } from "../lib/session.js";
 import { MIRROR_KEY } from "../lib/store/mirror.js";
 import { exportFilename, fromTsv, pairFromFilename, toTsv } from "../lib/store/tsv.js";
 import { listPairs, listPhrases } from "../lib/store/vocab.js";
@@ -882,24 +883,12 @@ async function runImport() {
 // already open), so the list on screen stays where it is.
 brandButton?.addEventListener("click", () => void webext().runtime.openOptionsPage());
 
-// The way back from the reader's walk (D141): the reader's menu row
-// navigates its own tab here, and this arrow pops the same history entry as
-// the system's back gesture - back to the article, the place in it restored
-// by the reader's own entry (D102). The witness is the marker the reader
-// left in this tab's sessionStorage as it walked (`BACK_ROAD_KEY`, D140) -
-// the phrases tab raised from the popup or the settings menu has no marker,
-// nothing behind it, and wears no arrow.
-const backButton = document.getElementById("back");
-let backRoad = false;
-try {
-  backRoad = sessionStorage.getItem(BACK_ROAD_KEY) !== null;
-} catch {
-  // A context that refuses its own storage wears no arrow; Back still works.
-}
-if (backButton !== null && backRoad) {
-  backButton.hidden = false;
-  backButton.addEventListener("click", () => history.back());
-}
+// The way back to the reading (D141/D142): walked here from the reader, the
+// arrow pops the same history entry as the system's back gesture; raised
+// here from the popup or the settings menu with the reading standing in
+// another tab, it brings that tab forward. The three states and their order
+// live in `lib/back-arrow.js`, shared with the settings page.
+armBackArrow();
 
 // The phrases-tab bookkeeping, the reader's exactly (D139/D140, applied here
 // by D141): this tab is the one phrases tab for as long as the phrases are
