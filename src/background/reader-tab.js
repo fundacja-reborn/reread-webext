@@ -23,7 +23,7 @@ import {
   writeReaderSource,
   writeReaderTab,
 } from "../lib/session.js";
-import { raiseOrOpen } from "./single-tab.js";
+import { raiseOrOpen, tabOnDuty } from "./single-tab.js";
 
 const READER_PAGE = "reader/reader.html";
 
@@ -42,59 +42,6 @@ const READER_PAGE = "reader/reader.html";
  */
 
 /**
- * The tabs this extension's reader page really lives in right now, by the
- * browser's own account (`runtime.getContexts`) - or null where nobody can
- * say: an engine without the API (Firefox before 126), a call that failed,
- * an answer of the wrong shape. Null means "no witness", never "no readers".
- *
- * @param {ReaderTabDeps} deps
- * @param {string} url
- * @returns {Promise<number[] | null>}
- */
-async function readerTabsSeen(deps, url) {
-  try {
-    const ask = deps.contexts ?? (() => webext().runtime.getContexts?.({ contextTypes: ["TAB"] }));
-    const views = await ask();
-    if (!Array.isArray(views)) return null;
-    const tabs = [];
-    for (const view of views) {
-      if (typeof view !== "object" || view === null) continue;
-      const { documentUrl, tabId } = /** @type {Record<string, unknown>} */ (view);
-      if (typeof documentUrl !== "string" || !documentUrl.startsWith(url)) continue;
-      if (typeof tabId === "number" && tabId >= 0) tabs.push(tabId);
-    }
-    return tabs;
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Which tab is the reader, checked against what this extension's pages
- * actually are (D140). The stored id names a tab, but a tab is not a reader
- * forever: the reader walks to the settings in its own tab (D139), and an id
- * left pointing there made every reading-list press raise the settings page
- * (Michał's report from Chrome) - the page's own sign-out cannot be the only
- * guard, because a page's last write before leaving is exactly the kind of
- * thing a browser may drop. With a witness, the stored id counts only while
- * the reader still lives in that tab, and a reader living in some other tab
- * - opened by hand, or orphaned by a dropped write - is adopted rather than
- * duplicated. Without one, the id is trusted the way it always was.
- *
- * @param {ReaderTabDeps} deps
- * @param {string} url
- * @param {WebExtBrowser["storage"]["session"]} session
- * @returns {Promise<number | null>}
- */
-async function readerTabOnDuty(deps, url, session) {
-  const stored = await readReaderTab(session);
-  const seen = await readerTabsSeen(deps, url);
-  if (seen === null) return stored;
-  if (stored !== null && seen.includes(stored)) return stored;
-  return seen.length > 0 ? (seen[0] ?? null) : null;
-}
-
-/**
  * @param {ReaderTabDeps} [deps] injected by the tests; the background passes none
  * @returns {Promise<void>}
  */
@@ -106,7 +53,11 @@ export async function openReader(deps = {}) {
     tabs: deps.tabs ?? webext().tabs,
     windows: deps.windows ?? webext().windows,
     url,
-    read: () => readerTabOnDuty(deps, url, session),
+    // Not the stored id alone: the witness of what the tab really shows
+    // (D140, `single-tab.js`) - a reader that walked to the settings in
+    // place must not be raised as one, and a reader nobody remembered is
+    // adopted rather than duplicated.
+    read: () => tabOnDuty({ read: () => readReaderTab(session), url, ask: deps.contexts }),
     write: (tabId) => writeReaderTab(tabId, session),
   });
 }

@@ -706,7 +706,7 @@
   },
 
   "options_title": { "message": "re/read - ustawienia" },
-  "options_back": {"message": "Wróć do czytania"},
+  "back_to_reading": {"message": "Wróć do czytania"},
   "options_local_intro": {
     "message": "Wszystko, co robi re/read, dzieje się na tym urządzeniu (offline): tłumaczenie, słownik, czytelnia, zapisane frazy. Nic z tego, co czytasz ani zaznaczasz, nigdzie nie jest wysyłane. Połączenie internetowe jest potrzebne, tylko gdy chcesz pobrać nowy model tłumaczeń lub słownik - i tylko spod dwóch adresów URL podanych jawnie w tych sekcjach."
   },

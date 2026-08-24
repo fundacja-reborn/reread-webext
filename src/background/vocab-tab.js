@@ -10,7 +10,7 @@
 
 import { webext } from "../lib/browser.js";
 import { readVocabTab, writeVocabTab } from "../lib/session.js";
-import { raiseOrOpen } from "./single-tab.js";
+import { raiseOrOpen, tabOnDuty } from "./single-tab.js";
 
 const VOCAB_PAGE = "vocab/vocab.html";
 
@@ -23,6 +23,8 @@ const VOCAB_PAGE = "vocab/vocab.html";
  * @property {WebExtBrowser["windows"]} [windows]
  * @property {WebExtBrowser["storage"]["session"]} [session]
  * @property {string} [url]
+ * @property {() => Promise<unknown>} [contexts] the extension's own open
+ *   contexts, `runtime.getContexts` shaped - injected by the tests
  */
 
 /**
@@ -31,12 +33,18 @@ const VOCAB_PAGE = "vocab/vocab.html";
  */
 export async function openVocabulary(deps = {}) {
   const session = deps.session ?? webext().storage.session;
+  const url = deps.url ?? webext().runtime.getURL(VOCAB_PAGE);
 
   await raiseOrOpen({
     tabs: deps.tabs ?? webext().tabs,
     windows: deps.windows ?? webext().windows,
-    url: deps.url ?? webext().runtime.getURL(VOCAB_PAGE),
-    read: () => readVocabTab(session),
+    url,
+    // The witness, exactly the reader's (D140/D141, `single-tab.js`): since
+    // the reader's menu walks to this page in place, a phrases tab can both
+    // stop being one (it walked on) and start somewhere nobody remembered -
+    // the walked-to page is adopted, so a popup press raises it rather than
+    // opening a copy beside it.
+    read: () => tabOnDuty({ read: () => readVocabTab(session), url, ask: deps.contexts }),
     write: (tabId) => writeVocabTab(tabId, session),
   });
 }

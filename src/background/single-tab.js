@@ -14,6 +14,64 @@
  * `<all_urls>`.
  */
 
+import { webext } from "../lib/browser.js";
+
+/**
+ * The tabs one of this extension's pages really lives in right now, by the
+ * browser's own account (`runtime.getContexts`) - or null where nobody can
+ * say: an engine without the API (Firefox before 126), a call that failed, an
+ * answer of the wrong shape. Null means "no witness", never "no such tabs".
+ *
+ * @param {string} url the page, as `runtime.getURL` names it
+ * @param {(() => Promise<unknown>) | undefined} ask the tests' fake; the live
+ *   `runtime.getContexts` otherwise
+ * @returns {Promise<number[] | null>}
+ */
+async function tabsShowing(url, ask) {
+  try {
+    const query = ask ?? (() => webext().runtime.getContexts?.({ contextTypes: ["TAB"] }));
+    const views = await query();
+    if (!Array.isArray(views)) return null;
+    const tabs = [];
+    for (const view of views) {
+      if (typeof view !== "object" || view === null) continue;
+      const { documentUrl, tabId } = /** @type {Record<string, unknown>} */ (view);
+      if (typeof documentUrl !== "string" || !documentUrl.startsWith(url)) continue;
+      if (typeof tabId === "number" && tabId >= 0) tabs.push(tabId);
+    }
+    return tabs;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Which tab is the page's one tab, checked against what this extension's
+ * pages actually are (D140). The stored id names a tab, but a tab is not that
+ * page forever: the reader walks to the settings and to the saved phrases in
+ * place (D139/D141), and an id left pointing at the walked-away tab made
+ * every raise bring forward the wrong page - the page's own sign-out cannot
+ * be the only guard, because a last write before leaving is exactly the kind
+ * of thing a browser may drop. With a witness, the stored id counts only
+ * while the page still lives in that tab, and the page living in some other
+ * tab - opened by hand, walked to, or orphaned by a dropped write - is
+ * adopted rather than duplicated. Without one, the id is trusted the way it
+ * always was.
+ *
+ * @param {object} where
+ * @param {() => Promise<number | null>} where.read the remembered id
+ * @param {string} where.url the page the tab must be showing
+ * @param {(() => Promise<unknown>) | undefined} where.ask see `tabsShowing`
+ * @returns {Promise<number | null>}
+ */
+export async function tabOnDuty({ read, url, ask }) {
+  const stored = await read();
+  const seen = await tabsShowing(url, ask);
+  if (seen === null) return stored;
+  if (stored !== null && seen.includes(stored)) return stored;
+  return seen.length > 0 ? (seen[0] ?? null) : null;
+}
+
 /**
  * Bringing a tab back rather than opening another one. Two calls, because they
  * fail for different reasons: a tab that is gone means open a new one, while a

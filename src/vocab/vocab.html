@@ -31,6 +31,34 @@
            panels' own business (see vocab.js), exactly the reader's
            `.reader-chrome` rule. -->
       <div class="page-bar">
+        <!-- The way back from the walk that led here (D141): the reader's
+             menu row navigates its own tab to this page, and this arrow is
+             that step's other half - the entry the system's back gesture
+             pops, the settings bar's own arrow (D140). Hidden until the
+             marker in the tab's sessionStorage says a reader stands behind
+             this tab (see vocab.js); the phrases tab raised from the popup
+             or the settings menu has nowhere back to go and wears none. -->
+        <button
+          id="back"
+          type="button"
+          class="page-back"
+          title="Back to reading"
+          data-i18n-title="back_to_reading"
+          aria-label="Back to reading"
+          data-i18n-aria-label="back_to_reading"
+          hidden
+        >
+          <svg class="page-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+            <path
+              d="M13.25 8H3.1M7.3 3.8 3.1 8l4.2 4.2"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
         <button
           type="button"
           id="brand"
