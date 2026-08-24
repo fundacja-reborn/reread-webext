@@ -168,6 +168,9 @@ const tooltip = createTooltip({
     stopSpeaking();
     unmark();
   },
+  // Live, through the module variable: the tooltip is built once, but what
+  // stands over the text is the ground's business and changes with `start`.
+  covered: () => coveredAbove(),
 });
 
 /**
@@ -282,6 +285,20 @@ let follow = true;
  */
 let anchored = false;
 let started = false;
+
+/**
+ * How far down the window the reader page's own bar reaches - stuck over the
+ * text while an article is on screen (D93). The bubble asks on every
+ * placement (D138): the room it may stand in and the scroll assist's ceiling
+ * both start under the bar, or the assist parks the very line it kept for
+ * the reader beneath the one thing on our page that covers text. On every
+ * other page nothing of ours stands over the text, and the answer stays 0 -
+ * a foreign page's sticky bars are as unknowable as its scroll is
+ * untouchable (D97).
+ *
+ * @type {() => number}
+ */
+let coveredAbove = () => 0;
 
 /**
  * What else counts as ours besides the bubble - the reader's delete bubble
@@ -1220,7 +1237,7 @@ function onStorageChanged(changes, area) {
 }
 
 /**
- * @param {{ root?: Element | null, observe?: boolean, stored?: Record<string, unknown>, ownSelection?: boolean, anchored?: boolean, plainLinks?: () => boolean, alsoOwns?: (target: EventTarget | null) => boolean, marking?: () => boolean, markRoot?: () => Element | null, onMarked?: (range: Range) => void, onMarkStart?: () => void, onMarkTap?: (x: number, y: number, word?: Range) => void, quietLookup?: (text: string) => Promise<import("../lib/protocol.js").DictEntry[]>, quietVoice?: () => { lang: string, voiceURI: string | undefined } | null }} [where]
+ * @param {{ root?: Element | null, observe?: boolean, stored?: Record<string, unknown>, ownSelection?: boolean, anchored?: boolean, covered?: () => number, plainLinks?: () => boolean, alsoOwns?: (target: EventTarget | null) => boolean, marking?: () => boolean, markRoot?: () => Element | null, onMarked?: (range: Range) => void, onMarkStart?: () => void, onMarkTap?: (x: number, y: number, word?: Range) => void, quietLookup?: (text: string) => Promise<import("../lib/protocol.js").DictEntry[]>, quietVoice?: () => { lang: string, voiceURI: string | undefined } | null }} [where]
  *   what to underline inside, whether it can change on its own, the startup
  *   read of `storage.local` when the caller already made one, whether the
  *   page selects through our own gesture rather than the browser's - every
@@ -1231,7 +1248,10 @@ function onStorageChanged(changes, area) {
  *   page flag, never a content script's: refusing the native selection on
  *   somebody else's page would be changing how their page works, pinning to
  *   the document trusts a page layout only our own page can promise, and
- *   undressing links changes how a page works too. The last four belong to
+ *   undressing links changes how a page works too. `covered` says how far
+ *   down the reader page's own stuck bar reaches (D138), so no placement
+ *   and no assist scroll parks anything beneath it - a reader flag as well,
+ *   because only our page knows what it stuck over its text. The last four belong to
  *   the reader's highlighter (D106) and ride through to `select.js` -
  *   `alsoOwns` besides names the reader's own floating UI (the mark-delete
  *   bubble), whose presses must not read as the page's. `quietLookup` and
@@ -1244,6 +1264,7 @@ export function start(where = {}) {
   root = where.root ?? null;
   follow = where.observe ?? true;
   anchored = where.anchored ?? false;
+  coveredAbove = where.covered ?? (() => 0);
   alsoOwns = where.alsoOwns ?? (() => false);
   quietLookup = where.quietLookup ?? null;
   quietVoice = where.quietVoice ?? null;
@@ -1330,6 +1351,7 @@ export function stop() {
   press = null;
   lastPointerType = "";
   anchored = false;
+  coveredAbove = () => 0;
   alsoOwns = () => false;
   quietLookup = null;
   quietVoice = null;
