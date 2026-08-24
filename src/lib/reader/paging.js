@@ -100,3 +100,36 @@ export function pageStep(band, overlap) {
   const height = Math.max(0, band.bottom - band.top);
   return Math.max(overlap, height - overlap);
 }
+
+/**
+ * The nudge that squares a turn with the text. The step is the right length,
+ * but blind to where the lines fall: whichever line then straddles the fold -
+ * the lower edge of the stuck chrome - stands on screen cut in half by it.
+ * Turning down, the nudge gives that line back, so a page never opens on half
+ * a sentence; turning up, it tucks the line behind the bar, so the overlap
+ * only ever grows. Either way the new page begins with a whole first line,
+ * which is what a page of paper would do.
+ *
+ * Null stands for no line to square with - the fold in a picture, in the gap
+ * between paragraphs, in nothing at all - and leaves the turn where the step
+ * put it. So does a line taller than `limit` (a picture set in the text's own
+ * flow can be taller than the step): a nudge that big would read as the page
+ * jumping back, not as the turn settling.
+ *
+ * @param {PageTurn} turn
+ * @param {number} fold the lower edge of the stuck chrome, in viewport
+ *   coordinates
+ * @param {{ top: number, bottom: number } | null} line the line box straddling
+ *   the fold after the step, or null when no text stands there
+ * @param {number} limit how far the nudge may reach, in CSS pixels
+ * @returns {number} the signed distance still to scroll by; zero for a turn
+ *   already square
+ */
+export function foldSnap(turn, fold, line, limit) {
+  if (line === null) return 0;
+  // Within a pixel is square: rects come back fractional, and chasing the
+  // fraction would nudge every turn for nothing anyone could see.
+  if (line.top >= fold - 1 || line.bottom <= fold + 1) return 0;
+  const nudge = turn === "down" ? line.top - fold : line.bottom - fold;
+  return Math.abs(nudge) > limit ? 0 : nudge;
+}
