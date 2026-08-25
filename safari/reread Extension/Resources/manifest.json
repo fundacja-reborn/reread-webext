@@ -1,0 +1,65 @@
+{
+  "manifest_version": 3,
+  "name": "re/read - read offline, translate and learn",
+  "short_name": "re/read",
+  "version": "0.5.18",
+  "description": "__MSG_extension_description__",
+  "default_locale": "en",
+  "homepage_url": "https://github.com/fundacja-reborn/reread-webext",
+  "browser_specific_settings": {
+    "safari": {
+      "strict_min_version": "18.2"
+    }
+  },
+  "icons": {
+    "48": "assets/icons/icon.svg",
+    "96": "assets/icons/icon.svg"
+  },
+  "content_security_policy": {
+    "extension_pages": "default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self' https:; object-src 'none'; form-action 'none'"
+  },
+  "permissions": [
+    "storage",
+    "unlimitedStorage"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "scripts": [
+      "background/index.js"
+    ],
+    "persistent": false
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content/index.js"
+      ],
+      "css": [
+        "content/highlight.css"
+      ],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
+  "action": {
+    "default_title": "re/read",
+    "default_popup": "popup/index.html",
+    "default_icon": "assets/icons/icon.svg"
+  },
+  "commands": {
+    "open-reader": {
+      "suggested_key": {
+        "default": "Alt+Shift+R"
+      },
+      "description": "__MSG_open_reader__"
+    }
+  },
+  "options_ui": {
+    "page": "options/options.html"
+  }
+}

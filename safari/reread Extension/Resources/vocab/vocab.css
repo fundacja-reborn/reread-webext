@@ -1,0 +1,512 @@
+/* The saved-phrases page: a compact header, the filter line, the list as a
+   grid with the editor a row unfolds into, and the transfer section under the
+   pager. Typography, buttons, the pager and the import box lean on
+   assets/page.css, shared by every page this extension owns; everything below
+   is this page's own layout.
+
+   Base styles lay the page out for a narrow screen; the one media query at
+   the end spreads the same HTML out for a desktop. */
+
+/* A touch wider than the shared 44rem: the row grid holds three columns and
+   the extra room goes to the meanings. The top padding is the reader page's
+   headroom (its body's 0.75rem plus its chrome box's 0.75rem), so the two
+   bars stand at one height when the pages are walked between. */
+body {
+  max-width: 46rem;
+  padding-top: 1.5rem;
+}
+
+/* Focus must be findable on every control here - the quiet row buttons erase
+   their resting border, so the browser default cannot be trusted to survive
+   the styling. */
+:is(a, button, select, summary, input, textarea):focus-visible {
+  outline: 2px solid var(--page-accent);
+  outline-offset: 2px;
+}
+
+/* Hover feedback eases in; nothing depends on it, and it stops entirely for
+   readers who asked motion to stop. */
+button,
+summary {
+  transition: border-color 120ms ease, background-color 120ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}
+
+/* The clip pattern: real labels for the pair select and the filter, read by
+   screen readers, invisible to everyone else. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* --- the header: the reader's bar, title with the pair select, a counter ---
+
+   The bar itself (`.page-bar`, the mark, the tools and their frame) lives in
+   assets/page.css since the settings page started wearing it too - one bar,
+   one home, however many pages. Only this page's own pieces stay below. */
+
+#display {
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+/* --- the Aa panel: the reader's, minus the rows about an article's column ---
+
+   The same dress by the same numbers as `.reader-panel` and its settings
+   rows (reader.css) - one panel in two homes, like the bar above it. */
+.page-panel {
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--page-line);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.page-setting {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  padding: 0.35rem 0;
+}
+
+.page-setting-name {
+  flex: 0 0 4rem;
+  color: var(--page-muted);
+}
+
+.page-choices {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.page-choices button {
+  padding: 0.2rem 0.6rem;
+  font-size: 0.85rem;
+}
+
+/* The one that is on, said with the border rather than a fill: the reader
+   panel's own word for "this is chosen". */
+.page-choices button[aria-pressed="true"] {
+  border-color: var(--page-accent);
+  color: var(--page-accent);
+}
+
+.page-choices output {
+  min-width: 2ch;
+  color: var(--page-muted);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+/* A voice is called whatever the platform calls it, and some names are a
+   sentence long. The select gives way instead of pushing the panel wider
+   than the page. */
+#voice-setting .page-choices {
+  min-width: 0;
+}
+
+#voice-choice {
+  max-width: 100%;
+}
+
+/* The title stands the reading list's distance under the bar (the reader's
+   `#page` margin); an opened menu panel pushes it down from between the two,
+   as it does there. */
+.head-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  margin: 2rem 0 0;
+}
+
+.head-row h1 {
+  margin: 0;
+  flex: 1 1 auto;
+}
+
+/* Full width under the title on a phone - 44px is the touch floor for every
+   control on this page; the media query below pulls the select up onto the
+   title's line. */
+.head-row select {
+  flex: 1 1 100%;
+  min-height: 44px;
+}
+
+/* --- disclosure lines: the intro and the file-format note, folded --- */
+
+/* Native details/summary: no script, keyboard for free, and closed is the
+   state both should return to. The block padding keeps the summary a
+   comfortable touch target without growing its text. */
+.fold-line {
+  margin: 0.25rem 0 0;
+}
+
+.fold-line summary {
+  padding: 0.7rem 0;
+  cursor: pointer;
+  color: var(--page-muted);
+  font-size: 0.9rem;
+}
+
+.fold-line summary::marker {
+  color: var(--page-muted);
+}
+
+.fold-line p {
+  margin: 0 0 0.75rem;
+}
+
+/* The unfolded intro speaks at the hints' size, in the hints' color. */
+#intro {
+  color: var(--page-muted);
+  font-size: 0.9rem;
+}
+
+/* --- the fold's line, shared with the anchor to the transfer section --- */
+
+/* One line, two quiet doors: the fold on the left, the link to the import
+   and export section on the right - the summary's own muted voice, kept a
+   link by its underline. An opened fold needs the whole line for its prose,
+   so the link steps down to the line below, still on the right. */
+.fold-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0 1rem;
+  margin: 0.25rem 0 0;
+}
+
+.fold-row .fold-line {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+}
+
+.fold-row .fold-line[open] {
+  flex-basis: 100%;
+}
+
+.fold-row a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-inline-start: auto;
+  color: var(--page-muted);
+  font-size: 0.9rem;
+}
+
+.fold-row a:hover {
+  color: var(--page-accent);
+}
+
+/* --- the filter line above the list it narrows --- */
+
+.filter-line {
+  display: flex;
+  margin: 1rem 0 0;
+}
+
+.filter-line input {
+  flex: 1 1 auto;
+  min-height: 44px;
+  min-width: 0;
+  font: inherit;
+  padding: 0.35rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid var(--page-border);
+  background: transparent;
+  color: var(--page-fg);
+}
+
+/* --- the import offer: size, a taste of its rows, the target pair --- */
+
+.import-confirm {
+  margin: 1rem 0 0;
+  padding: 0.25rem 1rem 0.75rem;
+  border: 1px solid var(--page-line);
+  border-radius: 8px;
+}
+
+.import-sample {
+  margin: 0;
+  padding-left: 1.25rem;
+  color: var(--page-muted);
+}
+
+.import-sample li {
+  overflow-wrap: anywhere;
+}
+
+.import-pair {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.import-pair select {
+  flex: 1;
+  min-height: 44px;
+}
+
+/* Two buttons here, not the reader library's three, so this row has room -
+   but it wears the same dress, and a wrapping row is what keeps a grown text
+   zoom from pushing a button off the screen's edge (the reader library's own
+   report, 2026-08-23). */
+.transfer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1rem 0 0;
+}
+
+.transfer button {
+  min-height: 44px;
+  padding: 0.35rem 1rem;
+}
+
+/* --- the list: a grid, so the meanings all start on one vertical line --- */
+
+.phrases {
+  margin: 1rem 0 0;
+  border-top: 1px solid var(--page-line);
+}
+
+/* One phrase per row. On a phone the row stacks: phrase, meanings, and the
+   actions under them on the right. The media query below spreads the same
+   three children over one line. */
+.phrase-row {
+  display: grid;
+  gap: 0.25rem 1rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--page-line);
+}
+
+/* The phrase AND its meanings are content, not interface (D104; the pair
+   confirmed by Michał's report, 2026-08-16): the phrase is text in the
+   language being learned, the meanings are its side of the same lesson, so
+   both follow the reading settings together - the article's face at the Aa
+   panel's size, sans when the reader chose sans - the way the reading
+   list's titles do (`.library-open` in reader.css). A phrase growing while
+   its meaning stood still read as a fault, not a hierarchy: inside the row
+   the hierarchy is weight and color, never size. What stays at the
+   interface size is what acts on the pair - buttons, hints, the bar. */
+.phrase-word,
+.phrase-meanings {
+  font-family: Georgia, "Iowan Old Style", "Times New Roman", serif;
+  font-size: var(--reader-size, 18px);
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+:root[data-reader-font="sans"] .phrase-word,
+:root[data-reader-font="sans"] .phrase-meanings {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.phrase-word {
+  font-weight: 600;
+}
+
+/* A step quieter than the phrase, still above the 4.5:1 contrast floor in
+   both themes. */
+.phrase-meanings {
+  color: var(--page-muted);
+}
+
+/* What the filter matched, lit inside the row: the accent as a wash, never
+   the only signal - the row being on screen at all is the real answer. */
+.phrase-row mark {
+  background: color-mix(in srgb, var(--page-accent) 30%, transparent);
+  color: inherit;
+  border-radius: 2px;
+}
+
+/* --- the row's two quiet actions --- */
+
+.phrase-row > .phrase-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-self: end;
+}
+
+/* Always visible - touch and e-ink have no hover to reveal them with - but
+   dressed down: no resting border, muted color, one type step smaller (never
+   below 13px). The padding is the touch target and the negative block margin
+   gives the room back to the layout: the hit box keeps 44px while the row
+   stays a reading line. The 0.5rem gap holds the two hit boxes 8px apart -
+   Learned has no undo, so a miss must stay improbable. */
+button.quiet {
+  border-color: transparent;
+  color: var(--page-muted);
+  font-size: 0.85rem;
+  padding: 0.7rem 0.8rem;
+  margin-block: -0.45rem;
+}
+
+button.quiet:hover,
+button.quiet:focus-visible {
+  border-color: var(--page-border);
+  background: color-mix(in srgb, var(--page-fg) 6%, transparent);
+  color: var(--page-fg);
+}
+
+/* Learned answers in the page's accent instead of the neutral wash: told
+   apart from Edit at a glance, without an alarm color - it is a frequent,
+   intended act, not a deletion to warn about. */
+button.quiet-learned:hover,
+button.quiet-learned:focus-visible {
+  border-color: var(--page-accent);
+  background: color-mix(in srgb, var(--page-accent) 12%, transparent);
+}
+
+/* The speaker leads the row, the bubble's own order (D83): hearing the phrase
+   is about the phrase, not the vocabulary. The icon is the whole label - the
+   words live in the accessible name and the hover title - and it is laid out
+   as inline text on purpose: the row grid aligns its columns by baseline, and
+   a flexed icon would hand the button the icon's bottom edge as its baseline,
+   lifting all three buttons off the phrase's line. Sized to the line box
+   (1.6em = the page's line-height) and dropped half its leading under the
+   baseline, the icon fills exactly the space a text label's line does, so the
+   button keeps a text button's height and baseline. */
+button.quiet-speak svg {
+  width: 1.6em;
+  height: 1.6em;
+  vertical-align: -0.5em;
+}
+
+/* --- the editor a row unfolds into --- */
+
+/* The meanings swapped for a textarea: one meaning per line, the bubble's
+   editor by other means. */
+.phrase-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.phrase-edit textarea {
+  width: 100%;
+  font: inherit;
+  padding: 0.35rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid var(--page-border);
+  background: transparent;
+  color: var(--page-fg);
+  resize: vertical;
+}
+
+.phrase-edit .phrase-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.phrase-edit button {
+  min-height: 44px;
+  padding: 0.35rem 1rem;
+}
+
+/* --- the two empty states --- */
+
+/* The filter came up empty: the sentence quotes the query, the one button
+   undoes it. */
+.no-match {
+  display: grid;
+  gap: 0.6rem;
+  justify-items: start;
+}
+
+.no-match p {
+  margin: 0;
+}
+
+.no-match button {
+  min-height: 44px;
+  padding: 0.35rem 1rem;
+}
+
+/* --- the shared pager, held to the same touch floor --- */
+
+.pager button {
+  min-height: 44px;
+  padding: 0.35rem 1rem;
+}
+
+/* Tighter under a phone's width, the twin of the rule in `reader.css`: two
+   worded buttons and "Page 1 of 3" between them add up past a 400 px screen
+   once the text zoom grows the rem. Air goes, the 44px touch floor stays. */
+@media (max-width: 30rem) {
+  .pager {
+    gap: 0.5rem;
+  }
+
+  .pager button {
+    padding-inline: 0.6rem;
+  }
+}
+
+/* --- the transfer section: import and export, under the list --- */
+
+/* Its own quiet area below the pager, reached by the header's anchor; the
+   scroll margin keeps the landing heading off the viewport's edge. No rule
+   of its own: the list's last row already ends in a line, and a second one
+   floating here read as a leftover (Michał, 2026-08-16, same call as the
+   reader library's) - distance alone does the parting. With no border
+   between them, this margin collapses with the heading's, so it carries
+   the whole former gap by itself. */
+.transfer-section {
+  margin-top: 3rem;
+  scroll-margin-top: 0.75rem;
+}
+
+/* A small heading: this is a tool shed, not a second page. */
+.transfer-section h2 {
+  margin: 1rem 0 0.25rem;
+  font-size: 1.05rem;
+}
+
+/* On a phone the two buttons share the line edge to edge, like every paired
+   row of buttons here; the media query below gives them their own width. */
+.transfer-section > .transfer button {
+  flex: 1 1 0;
+}
+
+/* --- one breakpoint: the same HTML, spread out for a desktop --- */
+
+@media (min-width: 600px) {
+  /* Title on the left, the pair select on the right of the same line. */
+  .head-row select {
+    flex: 0 1 auto;
+  }
+
+  .transfer-section > .transfer button {
+    flex: none;
+  }
+
+  /* Three columns: phrase, meanings, actions. The meanings all starting on
+     one vertical line is what this grid is for. */
+  .phrase-row {
+    grid-template-columns: minmax(10rem, 1fr) 2fr auto;
+    align-items: baseline;
+  }
+
+  /* The editor takes the meanings' and the actions' room, beside its phrase.
+     Out of the baseline group on purpose: a textarea's baseline sits at its
+     bottom edge, and aligning the phrase to that would drag the row down. */
+  .phrase-edit {
+    grid-column: 2 / -1;
+    align-self: start;
+  }
+}

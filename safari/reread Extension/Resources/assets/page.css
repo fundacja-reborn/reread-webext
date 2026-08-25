@@ -1,0 +1,442 @@
+/* Shared by the extension's own pages (options, reader, popup). Content scripts
+   do not use this file - what they inject carries its own styles inside a
+   shadow root. Layout that belongs to one page lives in that page's own
+   stylesheet (options.css, reader.css, vocab.css, popup.css); this file keeps
+   the palette, the type and the controls they all share. */
+
+/* Two strengths of edge, and neither is faint: e-ink panels quantize the page
+   to 16 greys and flatten near-white hairlines into the background, and WCAG
+   1.4.11 asks 3:1 of a control's boundary. --page-line draws separators and
+   passive frames (about 2.6:1 here - visible, but quieter than any control);
+   --page-border draws the borders of controls (over 4.5:1), keeping the order
+   separator < control edge < text on paper as well as on glass. */
+:root {
+  color-scheme: light dark;
+  --page-bg: #ffffff;
+  --page-fg: #1f2430;
+  --page-muted: #5c6478;
+  --page-line: #99a1b0;
+  --page-border: #6e7583;
+  --page-accent: #b8791d;
+  --page-error: #a3341f;
+}
+
+/* Dark ink is dimmed on purpose: near-white on near-black (#f2f4f8 measured
+   15.8:1) is glare at paragraph length - light text blooms on an emissive
+   panel in a dark room, and long-form reading is what these pages are for.
+   11.6:1 keeps AAA with a third of the excess gone. The bubble on somebody
+   else's page keeps its own brighter ink: its paper is lighter and its text
+   is two lines, not an article. Keep this value in step with the hand-set
+   dark theme below - the two are one theme in two homes. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --page-bg: #171a21;
+    --page-fg: #ccd3df;
+    --page-muted: #98a1b5;
+    --page-line: #565d6c;
+    --page-border: #767e8f;
+    --page-accent: #f09a3e;
+    --page-error: #f09a3e;
+  }
+}
+
+/* The hand-set themes (D104). The reader's Aa panel writes `reader.theme`,
+   `lib/appearance.js` stamps it on a page's root, and these palettes answer -
+   on every page that follows the theme, so sepia chosen over an article is
+   also the paper of the reading list, the saved phrases, the settings and
+   the popup. `auto` stamps a value none of these match, which hands the
+   answer back to the browser (the two blocks above). Higher specificity than
+   the plain `:root` blocks, so a hand-set light beats a dark browser. The
+   reader's speaking washes ride the same attribute in reader.css; the dark
+   ink here is one theme in two homes with the auto-dark block above. */
+:root[data-reader-theme="light"] {
+  color-scheme: light;
+  --page-bg: #ffffff;
+  --page-fg: #1f2430;
+  --page-muted: #5c6478;
+  --page-line: #99a1b0;
+  --page-border: #6e7583;
+  --page-accent: #b8791d;
+  --page-error: #a3341f;
+}
+
+:root[data-reader-theme="dark"] {
+  color-scheme: dark;
+  --page-bg: #171a21;
+  --page-fg: #ccd3df;
+  --page-muted: #98a1b5;
+  --page-line: #565d6c;
+  --page-border: #767e8f;
+  --page-accent: #f09a3e;
+  --page-error: #f09a3e;
+}
+
+/* Paper rather than a dimmed white: the point of sepia is less blue light at
+   the same contrast, so the text stays nearly as dark as on white. */
+:root[data-reader-theme="sepia"] {
+  color-scheme: light;
+  --page-bg: #f4ecd8;
+  --page-fg: #322a21;
+  --page-muted: #6b5f4d;
+  --page-line: #a3937a;
+  --page-border: #83745a;
+  --page-accent: #9a5b16;
+  --page-error: #a3341f;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* List rows are flex or grid containers, and a display declared by us outranks
+   the browser's own [hidden] { display: none } - without this line a filter
+   would "hide" rows that stay on screen. */
+[hidden] {
+  display: none !important;
+}
+
+body {
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 4rem;
+  max-width: 44rem;
+  font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: var(--page-bg);
+  color: var(--page-fg);
+}
+
+h1 {
+  font-size: 1.5rem;
+  margin: 0 0 0.25rem;
+}
+
+/* Two heading sizes below the title, because the settings page has two levels:
+   sections (models, dictionaries) and the doors inside them (the by-hand
+   folds, the catalogue). Same size for both levels read as one flat list. */
+h2 {
+  font-size: 1.3rem;
+  margin: 2rem 0 0.5rem;
+}
+
+h3 {
+  font-size: 1.05rem;
+  margin: 2rem 0 0.5rem;
+}
+
+button:disabled {
+  color: var(--page-muted);
+  cursor: default;
+}
+
+button:disabled:hover {
+  border-color: var(--page-border);
+}
+
+.empty {
+  color: var(--page-muted);
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--page-line);
+}
+
+button {
+  font: inherit;
+  padding: 0.35rem 0.9rem;
+  border-radius: 6px;
+  border: 1px solid var(--page-border);
+  background: transparent;
+  color: var(--page-fg);
+  cursor: pointer;
+}
+
+button:hover {
+  border-color: var(--page-accent);
+}
+
+input[type="file"] {
+  font: inherit;
+  color: var(--page-muted);
+  max-width: 100%;
+}
+
+select {
+  font: inherit;
+  padding: 0.2rem 0.4rem;
+  border-radius: 6px;
+  border: 1px solid var(--page-border);
+  background: transparent;
+  color: var(--page-fg);
+}
+
+/* Placeholders say what a field wants, and the browser's translucent default
+   sits under the 4.5:1 floor - so they speak in the page's own muted voice.
+   Explicit opacity, because Firefox dims placeholders with opacity, not
+   color, and would dim this one too. */
+::placeholder {
+  color: var(--page-muted);
+  opacity: 1;
+}
+
+/* A selection is the one mark on these pages that must be unmissable while it
+   lasts - on the reader page it is the phrase a bubble is about to answer.
+   The browser's translucent wash sank into the dark theme's background on an
+   e-ink panel (reported from a Boox), and the surest contrast every theme
+   owns is its own two ends: ink on paper, swapped. Extension pages only -
+   a content script never touches the selection colors of somebody's page. */
+::selection {
+  background: var(--page-fg);
+  color: var(--page-bg);
+}
+
+/* A sentence hanging off the row above it - an explanation, not a status, so
+   it has no tones and never disappears. */
+.hint {
+  margin: 0.5rem 0 0;
+  color: var(--page-muted);
+  font-size: 0.9rem;
+}
+
+/* The prose that explains a section speaks at the same size as the row
+   hints - one step below the controls it explains, keeping the page's
+   full color. */
+.explain {
+  font-size: 0.9rem;
+}
+
+input[type="checkbox"] {
+  margin: 0;
+  accent-color: var(--page-accent);
+}
+
+.status:empty {
+  display: none;
+}
+
+/* One step below the prose, like the hints: a status is an aside about an
+   action, not a paragraph of the page. */
+.status {
+  padding: 0.6rem 0;
+  color: var(--page-muted);
+  font-size: 0.9rem;
+}
+
+/* A variable rather than two hard-coded blocks, because the hand-set themes
+   must swap it too - a media query alone would leave a dark page with a
+   drowned red the moment dark came from the Aa panel instead of the OS. */
+.status[data-tone="error"] {
+  color: var(--page-error);
+}
+
+/* The report of an import or an export: it lands under prose set in the same
+   muted grey, often read after a glance away at a file picker, so it borrows
+   the note's frame to be found at all. The text keeps the page's full color;
+   an error inside the frame keeps its tone. */
+.status.report {
+  margin-top: 1rem;
+  padding: calc(0.6rem - 1px) calc(0.8rem - 1px) calc(0.6rem - 1px) 0.8rem;
+  border: 1px solid var(--page-line);
+  border-left: 3px solid var(--page-accent);
+  background: color-mix(in srgb, var(--page-accent) 10%, transparent);
+}
+
+.status.report:not([data-tone="error"]) {
+  color: var(--page-fg);
+}
+
+/* One pager for every long list (saved phrases, the reading list): Previous
+   and Next at the ends, the count between them. */
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.pager-label {
+  color: var(--page-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* On e-ink the tinted wash flattens into the background, so the wash cannot
+   be the block's only boundary: a hairline in the separators' color closes
+   the frame the accent bar begins. The padding hands the frame's pixel back,
+   keeping the box the size it was. */
+.note {
+  margin-top: 2rem;
+  padding: calc(0.9rem - 1px) calc(1rem - 1px) calc(0.9rem - 1px) 1rem;
+  border: 1px solid var(--page-line);
+  border-left: 3px solid var(--page-accent);
+  background: color-mix(in srgb, var(--page-accent) 10%, transparent);
+  color: var(--page-muted);
+}
+
+.note strong {
+  color: var(--page-fg);
+}
+
+/* The asides inside the by-hand folds are footnotes, not calls to attention:
+   they answer "where from, and what leaves this device" for whoever asks, at
+   a footnote's size behind a neutral frame. The accent frame stays on notes
+   that ask to be acted on - the first-steps card, the host notes, the
+   reader's notices. */
+.note.footnote {
+  border-left-color: var(--page-line);
+  background: color-mix(in srgb, var(--page-fg) 4%, transparent);
+  font-size: 0.85rem;
+}
+
+a {
+  color: var(--page-accent);
+}
+
+/* The bar the reading list wears (`.reader-bar` in reader.css), as the other
+   pages' headers wear it - the saved phrases and the settings: the mark on
+   the leading edge, the drawn tools at the far one, one line under both. The
+   dress and the conduct are the reader bar's exactly - keep the two in step,
+   they are one bar in two homes. The line under it is also the menu panel's
+   top edge, exactly as in the reader's chrome. */
+.page-bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--page-line);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+/* The mark is a button (it opens the settings) dressed as the quiet line of
+   text it has always been: no frame, no fill, the page's muted voice. The
+   padding gives it a finger-sized target without moving the word, and the
+   negative start margin hands that padding back to the column, so the mark
+   still begins exactly on the left edge the title below aligns to. On the
+   settings page the mark is a plain line instead - the door would open the
+   room it stands in - and the button rules simply find nothing to dress. */
+/* The way back on the bar's leading edge, before the mark - the reader bar's
+   own arrow (`.reader-back`, reader.css), worn by a page that was walked
+   into from another of this extension's pages (D139). Hidden until the page
+   knows there is somewhere behind to go; the negative start margin hands the
+   finger padding back to the column, the mark's own rule. */
+.page-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.1rem;
+  min-width: 2.6rem;
+  margin-inline-start: -0.7rem;
+  padding: 0.15rem 0.4rem;
+  border: none;
+  background: none;
+  color: var(--page-muted);
+}
+
+.page-back:hover {
+  border: none;
+  color: var(--page-accent);
+}
+
+.page-back .page-icon {
+  width: 1.4em;
+  height: 1.4em;
+}
+
+.page-mark {
+  margin-block: 0;
+  margin-inline-start: -0.4rem;
+  padding: 0.35rem 0.4rem;
+  border: none;
+  background: none;
+  color: var(--page-muted);
+  letter-spacing: 0.02em;
+}
+
+button.page-mark:hover {
+  border: none;
+  color: var(--page-accent);
+  text-decoration: underline;
+}
+
+.page-tools {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-inline-start: auto;
+}
+
+/* Drawn button glyphs follow the text around them (`em`), the reader bar's
+   own rule. */
+.page-icon {
+  width: 1.15em;
+  height: 1.15em;
+  flex: none;
+}
+
+/* The bar's buttons wear the reader bar's frame: one floor for a drawn glyph
+   and a serif "Aa", the reason the reader sets it on all of its three.
+   Scoped to the tools span so the reader's own bar, which shares this file,
+   keeps its own numbers. */
+.page-tools > button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.1rem;
+  min-width: 2.6rem;
+  padding: 0.15rem 0.55rem;
+}
+
+/* The small menu behind a page's drawn ☰ button: the extension's own pages
+   linking to one another. It repeats the toolbar popup's hallway where the
+   popup itself is three taps into the browser menu on a phone, and it speaks
+   in the popup's rows - quiet, full-width, separated by lines, each a
+   finger-sized target. The interface font is said outright because the
+   reader page reads in a serif; the last row's line is the menu's own
+   bottom edge, so the panel needs none. */
+.nav-menu {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.nav-menu a,
+.nav-menu button {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 44px;
+  padding: 0.55rem 0;
+  border: none;
+  border-bottom: 1px solid var(--page-line);
+  border-radius: 0;
+  background: none;
+  color: var(--page-fg);
+  text-align: left;
+  text-decoration: none;
+}
+
+/* The popup's hover, not the framed button's: the text answers, the line
+   underneath stays a separator. */
+.nav-menu a:hover,
+.nav-menu button:hover {
+  border-color: var(--page-line);
+  color: var(--page-accent);
+}
+
+/* --- the colophon (the settings' first, now every room that ends) --- */
+
+/* The line that closes a page the way one closes a book: name and version,
+   the licence, the maker and its address, the source. One dress here for
+   every room that wears it - the settings, the reading list, the highlights
+   and the saved phrases (Michał's wish, 2026-08-17: the address is meant to
+   be read and remembered wherever a reader reaches an end). The roof of
+   space keeps it from crowding the list above; its own interface family,
+   because the reader's rooms read in serif and the colophon is chrome, not
+   text. */
+.page-end {
+  margin-top: 4rem;
+  color: var(--page-muted);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 0.85rem;
+}
+
+.page-end p {
+  margin: 0;
+}
