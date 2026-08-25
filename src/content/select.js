@@ -1141,6 +1141,39 @@ function onScroll() {
 }
 
 /**
+ * Whether a native-selection node stands on ground this module has claimed -
+ * the article, while selecting is started. `reading.js` asks before yielding
+ * its bubble to a native selection: on the reader the article refuses the
+ * native selection outright, so one anchored inside it is never somebody
+ * selecting - it is iOS's parallel long-press machinery (the iPad spike,
+ * 2026-08-25), about to be taken back by this module's own listener.
+ *
+ * @param {Node | null} node
+ * @returns {boolean}
+ */
+export function claimsNativeSelection(node) {
+  return started && hooks !== null && node !== null && hooks.root.contains(node);
+}
+
+/**
+ * iOS's own long-press selection machinery runs beside the gesture: the
+ * article refuses the native selection (`user-select: none` in the
+ * stylesheet), and WebKit on iPadOS builds one under a held finger anyway -
+ * drag handles beneath the phrase, the system bar over the bubble, and the
+ * bar's dismissal then swallowing the tap whose mouse events would have
+ * ended the chain, leaving the painted selection orphaned (the iPad spike,
+ * 2026-08-25). The article is never legitimately natively-selected, so a
+ * native selection anchored inside it is that machinery's - taken back the
+ * moment it says so, which also keeps the system bar from ever standing.
+ */
+function onNativeSelection() {
+  const selection = document.getSelection();
+  if (selection === null || selection.isCollapsed || selection.rangeCount === 0) return;
+  if (!claimsNativeSelection(selection.anchorNode)) return;
+  selection.removeAllRanges();
+}
+
+/**
  * The browser's own long-press answer, stepped in front of: on text that
  * refuses selection Firefox for Android can still raise a context menu, and
  * it would land in the middle of the gesture that is already selecting. Only
@@ -1177,6 +1210,7 @@ export function startSelect(options) {
   // Capture sees the document's own scrolling; the bubble's inner scrolling
   // stays behind a shadow boundary scroll events do not cross.
   document.addEventListener("scroll", onScroll, { capture: true, passive: true });
+  document.addEventListener("selectionchange", onNativeSelection);
 }
 
 /** Everything taken back: listeners, selection, paint. */
@@ -1192,6 +1226,7 @@ export function stopSelect() {
   window.removeEventListener("blur", onWindowBlur);
   document.removeEventListener("contextmenu", onContextMenu, { capture: true });
   document.removeEventListener("scroll", onScroll, { capture: true });
+  document.removeEventListener("selectionchange", onNativeSelection);
   hooks = null;
   scrolledAt = 0;
   touchedAt = -Infinity;

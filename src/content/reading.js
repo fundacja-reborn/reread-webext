@@ -43,7 +43,7 @@ import { MIRROR_KEY, asMirror, mirrorMatches } from "../lib/store/mirror.js";
 import { canSpeak, speak, speaking, stop as stopSpeaking } from "../lib/tts.js";
 import { clear, mark, paint, phraseAt, unmark } from "./highlighter.js";
 import { blockTextAround, findable } from "./scan.js";
-import { clearSelection, releaseMouse, startSelect, stopSelect } from "./select.js";
+import { claimsNativeSelection, clearSelection, releaseMouse, startSelect, stopSelect } from "./select.js";
 import { createTooltip } from "./tooltip.js";
 
 /** @typedef {import("../lib/protocol.js").VocabEntry} VocabEntry */
@@ -1119,6 +1119,13 @@ function yieldToSelection() {
 
   const selection = window.getSelection();
   if (selection === null || selection.isCollapsed || selection.rangeCount === 0) return;
+  // On the reader that native selection is nobody's: the article refuses
+  // native selecting, and what appears there anyway is iOS's parallel
+  // long-press machinery, already being taken back by select.js - which
+  // registers after this listener, so the selection still reads as standing
+  // here. Yielding to it would close the bubble over the painted selection
+  // and orphan the paint (the iPad spike's stale wash, 2026-08-25).
+  if (claimsNativeSelection(selection.anchorNode)) return;
   const text = trimPhrase(selection.toString());
   if (text.length === 0 || (current !== null && text === current.text)) return;
 

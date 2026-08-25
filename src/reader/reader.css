@@ -498,6 +498,10 @@ html {
    D80 already paid it on touch. */
 #article {
   user-select: none;
+  /* The prefixed twin: our floor's Safari documents the unprefixed form,
+     yet the iPad spike still watched WebKit build selections here - one
+     more line asks in WebKit's oldest dialect and costs nothing. */
+  -webkit-user-select: none;
 }
 
 /* What that gesture paints instead, named in select.js: the same
@@ -1000,6 +1004,7 @@ body.reader:has(#library:not([hidden])) {
    the gesture arrived: every row carries its copy button. */
 .marks-rows {
   user-select: none;
+  -webkit-user-select: none; /* the belt #article wears, same reason */
 }
 
 /* The row wears its mark's ink on the leading edge - the one place colour
