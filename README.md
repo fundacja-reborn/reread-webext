@@ -146,10 +146,13 @@ Plain JavaScript with JSDoc types (TypeScript as a checker only, `--noEmit`), bu
 npm install
 npm run build            # Firefox package in dist/firefox
 npm run build:chromium   # Chromium package in dist/chromium
-tools/check.sh           # quality gate: vendor checksums, typecheck, tests, both builds, addons-linter
+npm run build:safari     # Safari package in dist/safari, synced into safari/ (see below)
+tools/check.sh           # quality gate: vendor checksums, typecheck, tests, all builds, addons-linter
 ```
 
 `tools/check.sh` is exactly what CI runs. A build loads as a temporary extension in Firefox (`about:debugging`) or an unpacked one in Chrome (`chrome://extensions` → Load unpacked → `dist/chromium`). The practical notes - AMO signing for a build that survives a Firefox restart, quirks of unpacked Chrome loads, regenerating the model registry and the dictionary catalogue, code layout - live in [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md).
+
+**Safari (iOS/iPadOS, experimental - not yet in the App Store):** Safari installs extensions only inside a native app, so `safari/` holds a minimal Xcode wrapper - one screen that says what the extension is and how to turn it on, a required no-op message handler, nothing else. `npm run build:safari` builds the same extension for Safari (the manifest differences live in `tools/manifest-target.mjs`, like Chromium's) and syncs it into the wrapper's gitignored `Resources/` directory; then `safari/reread.xcodeproj` builds and runs it on a device from Xcode. Verified on an iPad Pro (2018); requires Safari 18.2+ for underline tap-detection, older versions degrade softly.
 
 ## Related projects
 

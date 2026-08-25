@@ -8,7 +8,7 @@
 // as it was written.
 //
 // Usage:
-//   node tools/build.mjs [--target=firefox|chromium] [--watch]
+//   node tools/build.mjs [--target=firefox|chromium|safari] [--watch]
 
 import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
@@ -103,7 +103,8 @@ async function build(target, watch) {
     bundle: true,
     format: "iife",
     platform: "browser",
-    target: target === "firefox" ? ["firefox140"] : ["chrome128"],
+    target:
+      target === "firefox" ? ["firefox140"] : target === "safari" ? ["safari18"] : ["chrome128"],
     // The vendored ZIP reader is imported lazily by the reader page and must
     // stay the copied file, never a bundled copy of it (see VENDOR_FILES):
     // external keeps the `import()` in the output verbatim, and the specifier
@@ -144,6 +145,18 @@ async function build(target, watch) {
   await esbuild.build(options);
   await copyStatic();
   console.log(`[build] ${target} -> dist/${target}`);
+
+  // The Safari package does not load from `dist/` the way the other two do:
+  // Xcode bundles whatever sits in the wrapper project's Resources directory
+  // into the app. Syncing it here - and nowhere else - keeps one source of
+  // truth; the directory is gitignored, so the repository never carries a
+  // second copy of the extension.
+  if (target === "safari") {
+    const resources = join(ROOT, "safari", "reread Extension", "Resources");
+    await rm(resources, { recursive: true, force: true });
+    await cp(out, resources, { recursive: true });
+    console.log(`[build] safari resources -> safari/reread Extension/Resources`);
+  }
 }
 
 const args = process.argv.slice(2);

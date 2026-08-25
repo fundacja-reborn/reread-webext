@@ -23,6 +23,14 @@ echo "==> build (chromium)"
 # its own manifest, entry point and icons, and only a build exercises them.
 npm run --silent build:chromium
 
+echo "==> build (safari)"
+# Same reason: the Safari package has its own manifest patch and icon list,
+# and only a build exercises them. This builds the web extension payload and
+# syncs it into the Xcode wrapper's Resources; the app itself is not built
+# here - that takes Xcode and a signing identity, so the wrapper is exercised
+# by Michal's device builds, not by CI.
+npm run --silent build:safari
+
 echo "==> web-ext lint (addons-linter, the one AMO runs)"
 # Through `tools/lint.mjs` rather than directly: `web-ext lint` exits 0 for
 # warnings and notices, and this project's rule is 0/0/0. The one exception -

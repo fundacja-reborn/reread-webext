@@ -1,12 +1,13 @@
 // How the one manifest becomes each browser's manifest.
 //
 // The manifest is written for Firefox, because Firefox is what the MVP targets.
-// Chromium differs in a handful of places, and all of them are worth seeing
-// side by side in one function rather than hidden in a second copy of the file
-// that would drift. Its own module rather than a corner of `build.mjs` so the
-// test suite can assert on the patched shape without running a build.
+// Chromium and Safari differ in a handful of places each, and all of them are
+// worth seeing side by side in one function rather than hidden in second and
+// third copies of the file that would drift. Its own module rather than a
+// corner of `build.mjs` so the test suite can assert on the patched shape
+// without running a build.
 
-export const TARGETS = /** @type {const} */ (["firefox", "chromium"]);
+export const TARGETS = /** @type {const} */ (["firefox", "chromium", "safari"]);
 
 /** @typedef {(typeof TARGETS)[number]} Target */
 
@@ -30,6 +31,15 @@ export const CHROMIUM_ICONS = Object.freeze({
  * `runtime.getContexts` (116), nested workers are not used on Chromium at all.
  */
 export const MINIMUM_CHROME_VERSION = "128";
+
+/**
+ * The floor is set by the same call as on Chromium:
+ * `document.caretPositionFromPoint` arrived in Safari 18.2. Everything else
+ * this extension needs is older - the CSS Custom Highlight API since 17.2,
+ * WASM SIMD since 16.4 - and the code degrades softly where either is
+ * missing, so the floor is a promise about full function, not about loading.
+ */
+export const MINIMUM_SAFARI_VERSION = "18.2";
 
 /**
  * The one loosened directive of the Chromium package (D94). The reader parses
@@ -79,6 +89,10 @@ export const TARGET_STATIC_FILES = {
     "assets/icons/icon-light-32.png",
     "offscreen/engine-host.html",
   ],
+  // Safari reads the SVG mark (the S0 spike showed it rendered in the iPadOS
+  // toolbar), but `theme_icons` is Gecko-only and gone from its manifest, so
+  // the theme variants would be unreferenced files - and those do not ship.
+  safari: ["assets/icons/icon.svg"],
 };
 
 /**
@@ -88,6 +102,36 @@ export const TARGET_STATIC_FILES = {
  */
 export function forTarget(manifest, target) {
   if (target === "firefox") return manifest;
+
+  if (target === "safari") {
+    const patched = { ...manifest };
+    // Gecko-only settings out; Safari reads its own key of the same shape.
+    patched["browser_specific_settings"] = {
+      safari: { strict_min_version: MINIMUM_SAFARI_VERSION },
+    };
+    // Safari runs the same non-persistent background page as Firefox, but
+    // wants it said out loud: without an explicit `persistent: false` the
+    // Xcode converter warns that iOS supports only non-persistent pages
+    // (Firefox's MV3 default is the same value, left implicit). Spelling it
+    // out is also what routes Safari down the Firefox path of the engine -
+    // a page may spawn the engine's worker, so no offscreen document and no
+    // extra permission.
+    patched["background"] = {
+      .../** @type {Record<string, unknown>} */ (manifest["background"]),
+      persistent: false,
+    };
+    // Gecko-only: theme-aware toolbar icon variants. The converter flags it.
+    const action = { .../** @type {Record<string, unknown>} */ (patched["action"]) };
+    delete action["theme_icons"];
+    patched["action"] = action;
+    // Safari does not know `open_in_tab` (the converter flags it) and opens
+    // the options page its own way regardless - as a tab, the S0 spike
+    // showed. The page itself stays.
+    const options = { .../** @type {Record<string, unknown>} */ (patched["options_ui"]) };
+    delete options["open_in_tab"];
+    patched["options_ui"] = options;
+    return patched;
+  }
 
   const patched = { ...manifest };
   // Gecko-only: extension id, minimum version, data collection disclosure.
