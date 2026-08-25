@@ -53,9 +53,10 @@ export const CONFIG_KEY = "config";
  *   settings page is where the list can be read and emptied.
  * @property {boolean | null} readerOnly Whether ordinary pages only offer the
  *   reader, never a translation in place. `null` means nobody has chosen, and
- *   the platform decides at read time (`effectiveReaderOnly`): on Android on,
- *   elsewhere off. Only a hand-set value is ever stored, so a future change of
- *   the default reaches every installation that never touched the switch.
+ *   the platform decides at read time (`effectiveReaderOnly`): on Android,
+ *   iOS and iPadOS on, elsewhere off. Only a hand-set value is ever stored,
+ *   so a future change of the default reaches every installation that never
+ *   touched the switch.
  * @property {boolean} translationOff Whether the translation half of the
  *   extension is switched off - for reading in one's own language, where the
  *   reader and the reading list are the whole point. Presentation only:
@@ -418,14 +419,18 @@ export function osFrom(stored) {
  * The one rule about the mode: a hand-set value wins, and with none the
  * platform decides. On Android the reader is the surface that works on a
  * phone - the bubble and the system's own selection toolbar fight over the
- * same spot - so that is where the default flips.
+ * same spot - and iOS and iPadOS flip for the same reason, seen on the iPad
+ * and asked for by Michal (2026-08-25): Safari's selection bar lands on the
+ * bubble on ordinary pages, and the reader is where reading works. Both
+ * names, because Apple has not said which one `getPlatformInfo` answers on
+ * an iPad - the wrong guess would quietly cost the whole default.
  *
  * @param {Pick<Config, "readerOnly">} config
  * @param {string} os as `getPlatformInfo` or `osFrom` names it
  * @returns {boolean}
  */
 export function effectiveReaderOnly(config, os) {
-  return config.readerOnly ?? os === "android";
+  return config.readerOnly ?? (os === "android" || os === "ios" || os === "ipados");
 }
 
 /**
