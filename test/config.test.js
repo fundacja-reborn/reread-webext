@@ -256,11 +256,17 @@ describe("reader-only mode", () => {
 
   it("lets the platform decide only while nobody has chosen", () => {
     assert.equal(effectiveReaderOnly({ readerOnly: null }, "android"), true);
+    // Michal's ask (2026-08-25): iOS reads like Android - the system
+    // selection bar and the bubble fight over the same spot. Both Apple
+    // names, because getPlatformInfo's answer on an iPad is undocumented.
+    assert.equal(effectiveReaderOnly({ readerOnly: null }, "ios"), true);
+    assert.equal(effectiveReaderOnly({ readerOnly: null }, "ipados"), true);
     assert.equal(effectiveReaderOnly({ readerOnly: null }, "mac"), false);
     assert.equal(effectiveReaderOnly({ readerOnly: null }, ""), false);
     // A choice outlives the default - a future version flipping the platform
     // rule must not overrule a switch somebody has set.
     assert.equal(effectiveReaderOnly({ readerOnly: false }, "android"), false);
+    assert.equal(effectiveReaderOnly({ readerOnly: false }, "ios"), false);
     assert.equal(effectiveReaderOnly({ readerOnly: true }, "linux"), true);
   });
 
