@@ -11,6 +11,7 @@
   "scripts": {
     "build": "node tools/build.mjs",
     "build:chromium": "node tools/build.mjs --target=chromium",
+    "build:safari": "node tools/build.mjs --target=safari",
     "package": "node tools/package.mjs",
     "watch": "node tools/build.mjs --watch",
     "typecheck": "tsc --noEmit",
