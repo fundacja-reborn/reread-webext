@@ -1,0 +1,902 @@
+{
+  "locale_code": { "message": "es" },
+
+  "extension_description": {
+    "message": "Lee artículos web y libros EPUB sin conexión - y aprende el idioma en que los lees. Nada de lo que lees sale de tu dispositivo."
+  },
+
+  "pair_label": {
+    "message": "$FROM$ → $TO$",
+    "placeholders": {
+      "from": { "content": "$1", "example": "inglés" },
+      "to": { "content": "$2", "example": "español" }
+    }
+  },
+
+  "settings": { "message": "Ajustes" },
+  "support": { "message": "Apoyo" },
+  "nav_menu": { "message": "Menú" },
+  "language_pair": { "message": "Par de idiomas" },
+  "reading_list": { "message": "Lista de lectura sin conexión" },
+  "saved_phrases": { "message": "Frases guardadas" },
+  "open_reader": { "message": "Leer esta página en la vista de lectura" },
+  "quiet_bubble": { "message": "Ocultar por defecto las acciones de la burbuja" },
+  "action_delete": { "message": "Eliminar" },
+  "action_download": { "message": "Descargar" },
+  "action_cancel": { "message": "Cancelar" },
+  "action_save": { "message": "Guardar" },
+  "action_update": { "message": "Actualizar" },
+
+  "error_engine_missing": { "message": "Aún no hay motor de traducción - esta versión no puede traducir." },
+  "error_model_missing": { "message": "No hay modelo para este par de idiomas en este dispositivo - descárgalo o añádelo en los ajustes. Y para leer sin traducción, activa allí «Usar sin traducción» - aún puedes añadir un diccionario monolingüe." },
+  "error_unsupported_pair": { "message": "No existe ningún modelo para este par de idiomas." },
+  "error_too_long": { "message": "Esa selección es demasiado larga para traducirla." },
+  "error_no_page": { "message": "Aquí no hay página que leer - abre un artículo y pulsa el botón de nuevo." },
+  "error_unknown_message": { "message": "La extensión envió una petición que no entiende." },
+  "error_internal": { "message": "Algo salió mal dentro de la extensión." },
+
+  "bubble_save": { "message": "Guardar" },
+  "bubble_learned": { "message": "Aprendida" },
+  "bubble_edit": { "message": "Editar" },
+  "bubble_settings": { "message": "Abrir ajustes" },
+  "bubble_more": { "message": "Más" },
+  "bubble_less": { "message": "Menos" },
+  "bubble_reader": { "message": "Leer en la vista de lectura" },
+  "bubble_translating": { "message": "Traduciendo..." },
+  "bubble_nothing_more": { "message": "No hay oración ni entrada de diccionario que mostrar" },
+  "bubble_speak": { "message": "Leer en voz alta" },
+  "bubble_sentence_collapse": { "message": "Contraer la frase" },
+  "bubble_sentence_expand": { "message": "Expandir la frase" },
+  "bubble_copy": { "message": "Copiar" },
+  "bubble_copy_original": { "message": "Copiar el original" },
+  "bubble_copy_translation": { "message": "Copiar la traducción" },
+  "bubble_copied": { "message": "Copiado" },
+
+  "popup_site_enabled": {
+    "message": "Activado en $DOMAIN$",
+    "placeholders": { "domain": { "content": "$1" } }
+  },
+  "popup_site_toggle_title": { "message": "Si re/read funciona en este sitio" },
+  "popup_no_page": { "message": "re/read no funciona en esta página." },
+  "popup_no_model": {
+    "message": "Todavía no hay ningún modelo de traducción en este dispositivo - pulsa aquí para elegir uno en los ajustes."
+  },
+  "popup_translation_off": {
+    "message": "La traducción está desactivada - re/read funciona solo como vista de lectura."
+  },
+
+  "vocab_title": { "message": "re/read - frases guardadas" },
+  "vocab_intro": {
+    "message": "Todas las frases que guardaste para este par de idiomas, las más recientes primero - guardadas mientras leías y almacenadas solo en este dispositivo. «$LEARNED$» quita una frase y sus subrayados con ella; «$EDIT$» reescribe sus significados, uno por línea.",
+    "placeholders": {
+      "learned": { "content": "$1", "example": "Aprendida" },
+      "edit": { "content": "$2", "example": "Editar" }
+    }
+  },
+  "vocab_how_title": { "message": "Cómo funciona" },
+  "vocab_format_title": { "message": "Formato del archivo" },
+  "vocab_filter_placeholder": { "message": "Filtrar por frase o significado" },
+  "vocab_filter_label": { "message": "Filtrar la lista de frases guardadas" },
+  "vocab_filter_clear": { "message": "Borrar el filtro" },
+  "vocab_count_filtered_one": {
+    "message": "$MATCHING$ de $TOTAL$ frase guardada",
+    "placeholders": {
+      "total": { "content": "$1", "example": "1" },
+      "matching": { "content": "$2", "example": "0" }
+    }
+  },
+  "vocab_count_filtered_many": {
+    "message": "$MATCHING$ de $TOTAL$ frases guardadas",
+    "placeholders": {
+      "total": { "content": "$1", "example": "1.000.000" },
+      "matching": { "content": "$2", "example": "8" }
+    }
+  },
+  "vocab_count_filtered_other": {
+    "message": "$MATCHING$ de $TOTAL$ frases guardadas",
+    "placeholders": {
+      "total": { "content": "$1", "example": "26" },
+      "matching": { "content": "$2", "example": "8" }
+    }
+  },
+  "vocab_edit_aria": {
+    "message": "Editar la frase $PHRASE$",
+    "placeholders": { "phrase": { "content": "$1", "example": "banco" } }
+  },
+  "vocab_learned_aria": {
+    "message": "Marcar como aprendida: $PHRASE$",
+    "placeholders": { "phrase": { "content": "$1", "example": "banco" } }
+  },
+  "vocab_speak_aria": {
+    "message": "Leer en voz alta: $PHRASE$",
+    "placeholders": { "phrase": { "content": "$1", "example": "banco" } }
+  },
+  "vocab_empty": {
+    "message": "Aún no hay nada guardado para este par. Selecciona una frase mientras lees y pulsa «$BUTTON$» - te estará esperando aquí.",
+    "placeholders": { "button": { "content": "$1", "example": "Guardar" } }
+  },
+  "vocab_filter_no_match": {
+    "message": "Ninguna frase guardada coincide con «$QUERY$».",
+    "placeholders": { "query": { "content": "$1", "example": "banco" } }
+  },
+  "pager_page_of": {
+    "message": "Página $PAGE$ de $PAGES$",
+    "placeholders": {
+      "page": { "content": "$1", "example": "3" },
+      "pages": { "content": "$2", "example": "13" }
+    }
+  },
+  "pager_prev": { "message": "Anterior" },
+  "pager_next": { "message": "Siguiente" },
+  "action_export": { "message": "Exportar" },
+  "action_import": { "message": "Importar" },
+  "transfer_heading": { "message": "Importar y exportar" },
+  "vocab_transfer_note": {
+    "message": "Un archivo .tsv de dos columnas - el mismo formato que escribe el plugin de KOReader y que lee Anki. La importación solo añade frases que faltan en este par; lo guardado no se toca."
+  },
+  "vocab_import_into": { "message": "Importar a" },
+  "vocab_import_nothing": { "message": "Ese archivo no contiene frases para importar." },
+  "vocab_import_summary_one": {
+    "message": "$NAME$ contiene $COUNT$ fila:",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "name": { "content": "$2", "example": "reread-en-pl.tsv" }
+    }
+  },
+  "vocab_import_summary_other": {
+    "message": "$NAME$ contiene $COUNT$ filas:",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1.243" },
+      "name": { "content": "$2", "example": "reread-en-pl.tsv" }
+    }
+  },
+  "vocab_import_added_one": {
+    "message": "Se añadió $COUNT$ frase nueva.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "vocab_import_added_other": {
+    "message": "Se añadieron $COUNT$ frases nuevas.",
+    "placeholders": { "count": { "content": "$1", "example": "1.243" } }
+  },
+  "vocab_import_skipped_one": {
+    "message": "Se omitió $COUNT$ ya guardada.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "vocab_import_skipped_other": {
+    "message": "Se omitieron $COUNT$ ya guardadas.",
+    "placeholders": { "count": { "content": "$1", "example": "43" } }
+  },
+  "vocab_import_unreadable_one": {
+    "message": "No se pudo leer $COUNT$ fila.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "vocab_import_unreadable_other": {
+    "message": "No se pudieron leer $COUNT$ filas.",
+    "placeholders": { "count": { "content": "$1", "example": "7" } }
+  },
+
+  "reader_title": { "message": "re/read - vista de lectura" },
+  "reader_open_original": { "message": "Abrir el original" },
+  "reader_back_to_list": { "message": "Volver a la lista de lectura" },
+  "reader_display_title": { "message": "Texto y voz" },
+  "reader_theme": { "message": "Tema" },
+  "reader_theme_auto": { "message": "Auto" },
+  "reader_theme_light": { "message": "Claro" },
+  "reader_theme_sepia": { "message": "Sepia" },
+  "reader_theme_dark": { "message": "Oscuro" },
+  "reader_font": { "message": "Tipografía" },
+  "reader_font_serif": { "message": "Serif" },
+  "reader_font_sans": { "message": "Sans" },
+  "reader_size": { "message": "Tamaño" },
+  "reader_smaller": { "message": "Más pequeño" },
+  "reader_larger": { "message": "Más grande" },
+  "reader_width": { "message": "Anchura" },
+  "reader_narrower": { "message": "Más estrecha" },
+  "reader_wider": { "message": "Más ancha" },
+  "reader_links": { "message": "Enlaces" },
+  "reader_links_plain": { "message": "Texto simple" },
+  "reader_links_active": { "message": "Activos" },
+  "reader_marker": { "message": "Resaltador" },
+  "reader_underline": { "message": "Subrayado" },
+  "underline_fine": { "message": "Fino" },
+  "underline_medium": { "message": "Medio" },
+  "underline_strong": { "message": "Marcado" },
+  "marker_delete": { "message": "Quitar el resaltado" },
+  "marker_copy": { "message": "Copiar" },
+  "marker_copied": { "message": "Copiado" },
+  "marker_note": { "message": "Nota" },
+  "marker_note_add": { "message": "Añadir nota" },
+  "marker_note_edit": { "message": "Editar nota" },
+  "color_yellow": { "message": "Amarillo" },
+  "color_green": { "message": "Verde" },
+  "color_blue": { "message": "Azul" },
+  "color_pink": { "message": "Rosa" },
+  "reader_listen": { "message": "Leer en voz alta" },
+  "reader_voice": { "message": "Voz" },
+  "reader_speed": { "message": "Velocidad" },
+  "reader_slower": { "message": "Más lento" },
+  "reader_faster": { "message": "Más rápido" },
+  "reader_speech_bar": { "message": "Lectura en voz alta" },
+  "reader_speech_back": { "message": "Atrás" },
+  "reader_speech_play": { "message": "Reanudar" },
+  "reader_speech_pause": { "message": "Pausa" },
+  "reader_speech_stop": { "message": "Parar" },
+  "reader_speech_forward": { "message": "Adelante" },
+  "reader_speech_failed": { "message": "Este dispositivo no ha podido leer el artículo en voz alta." },
+  "reader_segment_unread": { "message": "Por leer" },
+  "reader_segment_read": { "message": "Leídos" },
+  "reader_segment_unread_count": {
+    "message": "Por leer ($COUNT$)",
+    "placeholders": { "count": { "content": "$1", "example": "4" } }
+  },
+  "reader_segment_read_count": {
+    "message": "Leídos ($COUNT$)",
+    "placeholders": { "count": { "content": "$1", "example": "2" } }
+  },
+  "reader_save": { "message": "Guardar en la lista de lectura" },
+  "reader_saved": { "message": "En la lista de lectura" },
+  "reader_delete_confirm": { "message": "¿Seguro?" },
+  "reader_delete_aria": {
+    "message": "Eliminar el artículo $TITLE$",
+    "placeholders": { "title": { "content": "$1", "example": "Old Chinese" } }
+  },
+  "reader_delete_confirm_aria": {
+    "message": "Confirmar la eliminación: $TITLE$",
+    "placeholders": { "title": { "content": "$1", "example": "Old Chinese" } }
+  },
+  "reader_mark_read": { "message": "Marcar como leído" },
+  "reader_marked_read": { "message": "Marcado como leído" },
+  "reader_mark_book_read": { "message": "Marcar el libro como leído" },
+  "reader_book_marked_read": { "message": "Libro marcado como leído" },
+  "reader_no_article": { "message": "No se encontró ningún artículo en esa página." },
+  "reader_list_write_failed": { "message": "No se pudo escribir la lista de lectura." },
+  "reader_empty_none": {
+    "message": "Aún no hay nada guardado - abre un artículo en la vista de lectura y pulsa «$BUTTON$». Una página guardada se queda en este dispositivo y se abre incluso sin conexión.",
+    "placeholders": { "button": { "content": "$1", "example": "Guardar en la lista de lectura" } }
+  },
+  "reader_empty_all_read": { "message": "No queda nada por leer - todo lo guardado está marcado como leído." },
+  "reader_empty_none_read": { "message": "Aún no hay nada marcado como leído." },
+  "reader_filter_placeholder": { "message": "Filtrar por título o sitio" },
+  "reader_filter_label": { "message": "Filtrar la lista de lectura" },
+  "reader_filter_no_match": {
+    "message": "Ningún artículo guardado coincide con «$QUERY$».",
+    "placeholders": { "query": { "content": "$1", "example": "wikipedia" } }
+  },
+  "reader_filter_clear": { "message": "Borrar el filtro" },
+  "reader_filter_count": {
+    "message": "$MATCHING$ de $TOTAL$",
+    "placeholders": {
+      "matching": { "content": "$1", "example": "3" },
+      "total": { "content": "$2", "example": "12" }
+    }
+  },
+  "reader_how_title": { "message": "Cómo funciona" },
+  "reader_library_note": {
+    "message": "Todo lo de aquí son copias de texto: artículos de la web abiertos en la vista de lectura y guardados a propósito, y los artículos y archivos .epub importados con Importar más abajo. Todo se abre sin conexión y permanece en este dispositivo, aunque la página original desaparezca."
+  },
+  "reader_format_title": { "message": "Formato del archivo" },
+  "reader_transfer_note": {
+    "message": ".json - un archivo de copia de seguridad con todos los artículos guardados en la lista de lectura sin conexión de re/read, de este u otro navegador o dispositivo donde uses re/read. La importación solo añade los artículos que faltan aquí y nunca sobrescribe uno ya guardado."
+  },
+  "reader_transfer_epub": { "message": ".epub - el formato de los libros electrónicos." },
+  "reader_transfer_books": {
+    "message": "La exportación incluye solo artículos - los libros (.epub) no se exportan. Volver a importar un libro restaura todo salvo la posición de lectura."
+  },
+  "reader_export_marks": { "message": "Exportar los resaltados" },
+  "reader_transfer_marks": { "message": "La exportación de resaltados escribe un archivo de texto .md con los pasajes resaltados, agrupados por documento - pensado para notas, no para importar. Los resaltados viajan entre dispositivos dentro de la copia .json de la lista de artículos." },
+  "reader_marks_title": { "message": "Resaltados" },
+  "reader_marks_filter_label": { "message": "Filtrar los resaltados" },
+  "reader_marks_filter_placeholder": { "message": "Filtrar por cita o título" },
+  "reader_marks_empty": {
+    "message": "Aún no hay nada resaltado - se resalta mientras se lee. Abre algo de la lista de lectura sin conexión, toma el resaltador y marca un pasaje; te esperará aquí."
+  },
+  "reader_marks_empty_doc": { "message": "Aún no hay nada resaltado en este documento." },
+  "reader_marks_no_match": {
+    "message": "Ningún resaltado coincide con «$QUERY$».",
+    "placeholders": { "query": { "content": "$1", "example": "wikipedia" } }
+  },
+  "reader_marks_back": { "message": "Volver a los resaltados" },
+  "reader_back_to_doc": {
+    "message": "Volver a «$TITLE$»",
+    "placeholders": { "title": { "content": "$1", "example": "Old Chinese" } }
+  },
+  "reader_marks_open": {
+    "message": "Abrir «$TITLE$» en este resaltado",
+    "placeholders": { "title": { "content": "$1", "example": "Old Chinese" } }
+  },
+  "reader_transfer_link": { "message": "Importar y exportar (artículos o EPUB)" },
+  "reader_transfer_accepts": { "message": "La importación reconoce el archivo elegido: una copia de seguridad de la lista de artículos de re/read (.json) o un libro electrónico (.epub)." },
+  "reader_book_label": { "message": "Libro" },
+  "reader_book_part_of": {
+    "message": "Parte $PART$ de $PARTS$",
+    "placeholders": {
+      "part": { "content": "$1", "example": "3" },
+      "parts": { "content": "$2", "example": "12" }
+    }
+  },
+  "reader_percent_read": {
+    "message": "$PERCENT$ % leído",
+    "placeholders": {
+      "percent": { "content": "$1", "example": "34" }
+    }
+  },
+  "reader_book_nav": { "message": "Partes del libro" },
+  "reader_book_toc": { "message": "Índice" },
+  "reader_search_title": { "message": "Buscar en el texto" },
+  "reader_search_label": { "message": "La frase que buscar" },
+  "reader_search_placeholder": { "message": "Buscar una frase" },
+  "reader_search_go": { "message": "Buscar" },
+  "reader_search_short": { "message": "Escribe al menos 2 caracteres." },
+  "reader_search_none": { "message": "No se encontró nada." },
+  "reader_search_count_one": {
+    "message": "$COUNT$ coincidencia encontrada.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "reader_search_count_other": {
+    "message": "$COUNT$ coincidencias encontradas.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_search_capped": {
+    "message": "Se muestran las primeras $COUNT$.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "200" }
+    }
+  },
+  "reader_library_search_toggle": { "message": "Buscar también en los textos" },
+  "reader_search_more": { "message": "Seguir buscando" },
+  "reader_search_progress": {
+    "message": "Buscado en $AT$ de $TOTAL$ documentos.",
+    "placeholders": {
+      "at": { "content": "$1", "example": "12" },
+      "total": { "content": "$2", "example": "80" }
+    }
+  },
+  "reader_search_in_titles": { "message": "En los títulos" },
+  "reader_search_in_text": { "message": "En el texto" },
+  "reader_search_more_hits_one": {
+    "message": "y $COUNT$ coincidencia más",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "reader_search_more_hits_other": {
+    "message": "y $COUNT$ coincidencias más",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "close": { "message": "Cerrar" },
+  "reader_book_importing": {
+    "message": "Añadiendo el libro - parte $PART$",
+    "placeholders": {
+      "part": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_book_added": {
+    "message": "Se añadió «$TITLE$».",
+    "placeholders": {
+      "title": { "content": "$1", "example": "Dracula" }
+    }
+  },
+  "reader_book_drm": { "message": "Este libro está protegido con DRM y no se puede importar." },
+  "reader_book_unreadable": { "message": "No se pudo leer este archivo como libro EPUB." },
+  "reader_book_pair_note": {
+    "message": "Idioma del libro: $BOOK$; el par actual traduce desde: $PAIR$.",
+    "placeholders": {
+      "book": { "content": "$1", "example": "alemán" },
+      "pair": { "content": "$2", "example": "inglés" }
+    }
+  },
+  "reader_import_nothing": { "message": "Ese archivo no contiene artículos para importar." },
+  "reader_import_summary_one": {
+    "message": "$NAME$ contiene $COUNT$ artículo:",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "name": { "content": "$2", "example": "reread-articles.json" }
+    }
+  },
+  "reader_import_summary_other": {
+    "message": "$NAME$ contiene $COUNT$ artículos:",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "name": { "content": "$2", "example": "reread-articles.json" }
+    }
+  },
+  "reader_import_added_one": {
+    "message": "Se añadió $COUNT$ artículo nuevo.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "reader_import_added_other": {
+    "message": "Se añadieron $COUNT$ artículos nuevos.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_import_skipped_one": {
+    "message": "Se omitió $COUNT$ ya guardado.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "reader_import_skipped_other": {
+    "message": "Se omitieron $COUNT$ ya guardados.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_import_unreadable_one": {
+    "message": "No se pudo leer $COUNT$ entrada.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "reader_import_unreadable_other": {
+    "message": "No se pudieron leer $COUNT$ entradas.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "2" }
+    }
+  },
+
+  "download_cancelled": { "message": "Descarga cancelada. No se guardó nada." },
+  "download_failed": { "message": "La descarga no terminó y no se guardó nada." },
+  "model_download_network": {
+    "message": "No se pudo llegar al lugar donde se guardan los modelos$DETAIL$. No se guardó nada.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "model_download_http": {
+    "message": "La descarga fue rechazada$DETAIL$. Puede que el modelo se haya movido; no se guardó nada.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "model_download_size": {
+    "message": "La descarga terminó antes de tiempo$DETAIL$ y fue desechada.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "model_download_checksum": {
+    "message": "Lo que llegó no es el modelo que esta versión espera$DETAIL$, así que fue desechado. Inténtalo de nuevo - si sigue pasando, el archivo al otro lado ha cambiado.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "model_download_unpack": {
+    "message": "La descarga no se pudo descomprimir$DETAIL$ y fue desechada.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "dict_download_network": {
+    "message": "No se pudo llegar al lugar donde se guardan los diccionarios$DETAIL$. No se guardó nada.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "dict_download_http": {
+    "message": "La descarga fue rechazada$DETAIL$. Puede que el diccionario se haya movido; no se guardó nada.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "dict_download_too_big": {
+    "message": "La descarga es mucho más grande de lo que un diccionario debería ser$DETAIL$, así que se detuvo. No se guardó nada.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+
+  "model_files_one_of_them": { "message": "uno de los archivos" },
+  "model_files_empty": { "message": "No se seleccionó ningún archivo." },
+  "model_files_unknown_file": {
+    "message": "No forma parte de un modelo: $FILE$. Se esperan nombres que empiecen por model., lex. y vocab.",
+    "placeholders": { "file": { "content": "$1" } }
+  },
+  "model_files_unknown_pair": {
+    "message": "No se puede saber para qué idiomas es este archivo: $FILE$.",
+    "placeholders": { "file": { "content": "$1" } }
+  },
+  "model_files_mixed_pairs": {
+    "message": "Esos archivos son de más de un par de idiomas ($PAIRS$). Carga una dirección cada vez.",
+    "placeholders": { "pairs": { "content": "$1" } }
+  },
+  "model_files_missing_model": { "message": "Falta el archivo del modelo (model.<pair>.intgemm.alphas.bin)." },
+  "model_files_missing_shortlist": { "message": "Falta el archivo shortlist (lex.<pair>.s2t.bin)." },
+  "model_files_missing_vocab": { "message": "Falta el archivo de vocabulario (vocab.<pair>.spm)." },
+  "model_files_not_a_model": { "message": "Esos archivos no son un modelo de traducción." },
+
+  "dict_default_name": { "message": "Diccionario" },
+  "dict_import_empty": { "message": "No se seleccionó ningún archivo. No se guardó nada." },
+  "dict_import_missing_ifo": { "message": "Entre esos no hay ningún archivo .ifo, así que esto no es un diccionario StarDict. No se guardó nada." },
+  "dict_import_missing_idx": { "message": "Falta el índice (.idx o .idx.gz). No se guardó nada." },
+  "dict_import_missing_dict": { "message": "Falta el cuerpo del diccionario (.dict o .dict.dz). No se guardó nada." },
+  "dict_import_mixed": {
+    "message": "Esos archivos pertenecen a más de un diccionario ($NAMES$). Añádelos de uno en uno. No se guardó nada.",
+    "placeholders": { "names": { "content": "$1" } }
+  },
+  "dict_import_not_stardict": { "message": "Ese archivo .ifo no es un diccionario StarDict. No se guardó nada." },
+  "dict_import_not_stardict_detail": {
+    "message": "Eso es $KIND$, que esta extensión no sabe leer. No se guardó nada.",
+    "placeholders": { "kind": { "content": "$1" } }
+  },
+  "dict_import_unpack": {
+    "message": "Los archivos están comprimidos de una forma que no se pudo descomprimir$DETAIL$. No se guardó nada.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "dict_import_no_entries": { "message": "El índice está vacío - no hay palabras en este diccionario. No se guardó nada." },
+  "dict_import_no_entries_detail": {
+    "message": "No se pudo leer ni una de las $COUNT$ palabras del índice, así que los archivos no van juntos. No se guardó nada.",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "dict_import_unreadable": { "message": "Esos archivos no son un diccionario que esta extensión sepa leer. No se guardó nada." },
+
+  "zip_not_zip": { "message": "Lo que llegó no es un archivo zip. No se guardó nada." },
+  "zip_unsupported": {
+    "message": "El archivo usa una función que esta extensión no lee$DETAIL$. No se guardó nada.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "zip_too_big": {
+    "message": "El archivo es más grande de lo que un diccionario tiene motivo de ser$DETAIL$. No se guardó nada.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "zip_bad": {
+    "message": "El archivo está dañado$DETAIL$. No se guardó nada - prueba a descargarlo de nuevo.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "zip_unreadable": { "message": "El archivo no se pudo leer. No se guardó nada." },
+
+  "words_one": {
+    "message": "$COUNT$ palabra",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "words_many": {
+    "message": "$COUNT$ palabras",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "words_other": {
+    "message": "$COUNT$ palabras",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "spellings_one": {
+    "message": "$COUNT$ otra grafía",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "spellings_many": {
+    "message": "$COUNT$ otras grafías",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "spellings_other": {
+    "message": "$COUNT$ otras grafías",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "phrases_one": {
+    "message": "$COUNT$ frase guardada",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "phrases_many": {
+    "message": "$COUNT$ frases guardadas",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "phrases_other": {
+    "message": "$COUNT$ frases guardadas",
+    "placeholders": { "count": { "content": "$1", "example": "1.243" } }
+  },
+
+  "options_title": { "message": "re/read - ajustes" },
+  "back_to_reading": {"message": "Volver a la lectura"},
+  "options_local_intro": {
+    "message": "Todo lo que hace re/read ocurre en este dispositivo (sin conexión): la traducción, el diccionario, la lista de lectura, tus frases guardadas. Nada de lo que lees o seleccionas se envía a ninguna parte. La conexión a Internet solo hace falta cuando quieres descargar un nuevo modelo de traducción o un diccionario - y solo desde las dos URL mostradas abiertamente en esas secciones."
+  },
+  "options_first_steps_heading": { "message": "Primeros pasos" },
+  "options_first_steps_intro": {
+    "message": "Todavía no se traduce nada - el modelo que lo haría aún no está en este dispositivo. La puesta en marcha lleva un minuto:"
+  },
+  "options_first_steps_model": {
+    "message": "Bajo «Modelos de traducción», busca el par de idiomas que necesitas (el filtro es lo más rápido) y pulsa «Descargar». El modelo queda guardado en este dispositivo y desde entonces traduce sin conexión - y el primer modelo ajusta por sí solo el par de idiomas de arriba."
+  },
+  "options_first_steps_dictionary": {
+    "message": "Bajo «Diccionarios», descarga un diccionario para el mismo par (opcional, pero merece la pena) - las palabras sueltas reciben entonces respuestas más completas que una traducción sola (tras pulsar «Más» en la burbuja de traducción)."
+  },
+  "options_first_steps_pin": {
+    "message": "Por último, fija re/read a la barra de herramientas: el icono de la pieza de puzle a la derecha de la barra, luego el engranaje junto a re/read y «Fijar a la barra de herramientas». El botón abre la vista de lectura, la lista de lectura, tus frases guardadas y el interruptor del sitio en el que estás."
+  },
+  "options_first_steps_pin_android": {
+    "message": "El botón de re/read está en el menú del navegador (⋮), en la sección de extensiones - abre la vista de lectura, la lista de lectura, tus frases guardadas y el interruptor del sitio en el que estás."
+  },
+  "options_sections_aria": { "message": "Secciones de esta página" },
+  "options_engine": { "message": "Motor" },
+  "options_engine_value": { "message": "Bergamot, dentro del paquete - traduce sin conexión" },
+  "options_pair_hint": { "message": "Se ofrecen los pares cuyos modelos de traducción descargaste en este dispositivo - si quieres traducir en otro par de idiomas, descarga su modelo en la sección" },
+  "options_pair_none": { "message": "Aún no hay modelo - descarga uno abajo" },
+  "options_reader_only": { "message": "Solo en la vista de lectura" },
+  "options_reader_only_hint": {
+    "message": "Con esto activado, seleccionar texto en una página normal ofrece una sola cosa: abrir la página en la vista de lectura, donde ocurren la traducción, el guardado y el subrayado. En Android la opción está activada de forma predeterminada."
+  },
+  "options_keep_articles": { "message": "Guardar de forma predeterminada en la lista de lectura sin conexión" },
+  "options_keep_articles_hint": {
+    "message": "Con esto activado, una página abierta en la vista de lectura pasa enseguida a la lista de lectura sin conexión: podrás leerla sin red, también cuando la página original haya sido borrada. Volver a abrir la misma página nunca la sobrescribe: tus resaltados y el punto donde lo dejaste quedan intactos."
+  },
+  "options_quiet_bubble_hint": {
+    "message": "Con esto activado, la burbuja muestra solo la traducción; sus botones aparecen al hacer clic o tocar la burbuja."
+  },
+  "options_no_translation": { "message": "Usar sin traducción" },
+  "options_no_translation_hint": {
+    "message": "Para leer en tu propio idioma. Con esto activado desaparecen la burbuja de traducción, el guardado y el subrayado de frases, la página de frases guardadas y la sección de modelos; seleccionar texto en una página normal ofrece una sola cosa - abrir la página en la vista de lectura. La vista de lectura, la lista de lectura sin conexión, el resaltador, la lectura en voz alta, la búsqueda y los diccionarios siguen funcionando. No se borra nada: tus frases y modelos vuelven en cuanto lo desactives."
+  },
+  "options_bubble_scale": { "message": "Tamaño del texto de la burbuja" },
+  "options_bubble_scale_hint": {
+    "message": "El tamaño de la burbuja de traducción - su texto y sus botones - tanto en páginas normales como en la vista de lectura."
+  },
+  "options_tts_voice": { "message": "Voz de lectura" },
+  "options_tts_default": { "message": "Voz predeterminada del navegador" },
+  "options_tts_listen": { "message": "Escuchar" },
+  "options_tts_voice_hint": {
+    "message": "La voz lee una frase seleccionada en la burbuja y un artículo entero en la vista de lectura. Las voces son las de este dispositivo: el habla se genera localmente y no se envía nada a ninguna parte."
+  },
+  "options_tts_rate": { "message": "Velocidad de lectura" },
+  "options_models_heading": { "message": "Modelos de traducción" },
+  "options_models_intro": {
+    "message": "Los modelos de abajo los crea y publica Mozilla - los mismos modelos con los que el propio Firefox traduce páginas. Para que re/read funcione, descarga el modelo de los pares de idiomas que quieras traducir (por ejemplo en -> pl)."
+  },
+  "options_update_list": { "message": "Actualizar la lista" },
+  "options_list_dated": { "message": "Lista del" },
+  "options_filter_placeholder": { "message": "Filtra por idioma o código" },
+  "options_filter_models_label": { "message": "Filtrar la lista de modelos de traducción" },
+  "options_filter_dictionaries_label": { "message": "Filtrar la lista de diccionarios" },
+  "options_show_all": {
+    "message": "Mostrar todos ($COUNT$)",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "options_model_note_from": { "message": "Los modelos se descargan de" },
+  "options_model_note_rest": {
+    "message": "- ahí los publica Mozilla. Actualizar la lista no envía nada sobre ti; solo trae la lista fresca. Este host y el del catálogo de diccionarios de abajo son los dos únicos con los que esta extensión contacta, y solo cuando lo pulsas."
+  },
+  "options_add_model_heading": { "message": "Añadir un modelo desde archivos" },
+  "options_add_model_summary": {
+    "message": "Para añadir a mano un modelo que la lista de arriba no ofrece, carga sus archivos aquí."
+  },
+  "options_add_model_intro": {
+    "message": "Elige los tres archivos de una dirección y se guardan localmente. Los archivos gzip se descomprimen aquí, así que las descargas sirven tal como vienen:"
+  },
+  "options_add_model_button": { "message": "Añadir modelo" },
+  "options_files_note": {
+    "message": "Añadir un modelo desde archivos no hace ninguna petición de red, y esta página se queda como salida para el día en que el lugar del que se descargan los modelos deje de responder."
+  },
+  "options_dictionaries_heading": { "message": "Diccionarios" },
+  "options_dictionaries_intro": {
+    "message": "Descarga un diccionario (o varios) para poder consultar los distintos significados de una palabra seleccionada. Al traducir eliges y guardas las acepciones que encajen con el contexto; con la traducción desactivada, las definiciones simplemente responden a una selección en la vista de lectura."
+  },
+  "options_dictionary_order_hint": {
+    "message": "La burbuja responde en el orden de abajo - las flechas suben o bajan un diccionario. Solo responden los diccionarios del idioma que estás leyendo."
+  },
+  "options_dictionary_note_from": { "message": "Los diccionarios se descargan de" },
+  "options_dictionary_note_rest": {
+    "message": "- ahí publica WikDict los diccionarios que construye a partir de Wiktionary (CC BY-SA). Cuando actualizas la lista, no se envía nada sobre ti - la petición solo trae la lista fresca."
+  },
+  "options_add_dictionary_heading": { "message": "Añadir un diccionario desde archivos" },
+  "options_add_dictionary_summary": {
+    "message": "Para añadir un diccionario desde tus propios archivos - el de un lector de libros electrónicos funciona tal cual - cárgalos aquí."
+  },
+  "options_stardict_intro": { "message": "Los diccionarios se leen en el formato" },
+  "options_stardict_intro_rest": {
+    "message": "- los mismos archivos que usa un lector KOReader, así que un diccionario que ya esté en tu lector funciona aquí sin cambios. Descomprime el archivo en el que vino y elige los archivos de un diccionario:"
+  },
+  "options_file_ifo": { "message": "- cómo se llama a sí mismo el diccionario" },
+  "options_file_idx": { "message": "- el índice de palabras" },
+  "options_file_dict_or": { "message": "o" },
+  "options_file_dict": { "message": "- las entradas" },
+  "options_file_syn": { "message": "- otras grafías, cuando el diccionario las tiene" },
+  "options_add_dictionary_steps": {
+    "message": "Dos pasos: elige los archivos y luego ajusta debajo los dos idiomas. Un archivo StarDict no dice para qué idiomas es, así que esa parte la pones tú - y es la que decide cuándo responde este diccionario."
+  },
+  "options_words_in": { "message": "Palabras en" },
+  "options_explained_in": { "message": "explicadas en" },
+  "options_add_dictionary_button": { "message": "Añadir diccionario" },
+  "options_add_dictionary_mono": {
+    "message": "Un diccionario monolingüe también funciona - por ejemplo inglés-inglés: elige inglés en ambos lados. Los diccionarios se eligen por el idioma de sus entradas, no por el par, así que responde junto a los bilingües: bajo «Más» al traducir, directamente con la traducción desactivada."
+  },
+  "options_dict_files_note": {
+    "message": "Añadir desde archivos no hace ninguna petición de red; sirven archivos de cualquier parte, incluidos los del catálogo - están publicados en"
+  },
+  "options_disabled_heading": { "message": "Sitios desactivados" },
+  "options_disabled_intro": {
+    "message": "Sitios donde re/read se queda apagado: sin subrayados, sin burbuja, sin nada corriendo en la propia página; abrir una página a mano en la vista de lectura sigue funcionando. Lo que añade un sitio aquí es el interruptor del popup de la barra de herramientas; esta lista sirve para volver a encenderlo."
+  },
+  "options_support_intro": {
+    "message": "re/read lo desarrolla una fundación sin ánimo de lucro - sin inversores, sin anuncios, sin rastreo. Si te resulta útil y quieres apoyar su desarrollo, cada donación nos ayuda a construir software libre de presiones comerciales."
+  },
+  "options_support_donate": { "message": "Donar con Wise" },
+  "options_support_more": { "message": "Más formas de apoyar" },
+
+  "options_badge_reading": { "message": "lo que estás leyendo" },
+  "options_delete_confirm": { "message": "¿Seguro?" },
+  "options_delete_model_aria": {
+    "message": "Eliminar el modelo $PAIR$",
+    "placeholders": { "pair": { "content": "$1" } }
+  },
+  "options_delete_dictionary_aria": {
+    "message": "Eliminar el diccionario $NAME$",
+    "placeholders": { "name": { "content": "$1" } }
+  },
+  "options_delete_confirm_aria": {
+    "message": "Confirmar la eliminación: $NAME$",
+    "placeholders": { "name": { "content": "$1" } }
+  },
+  "options_about_dictionary": { "message": "Acerca de este diccionario" },
+  "options_size_here": {
+    "message": "$SIZE$ aquí",
+    "placeholders": { "size": { "content": "$1" } }
+  },
+  "options_progress_of": {
+    "message": "$RECEIVED$ de $TOTAL$",
+    "placeholders": {
+      "received": { "content": "$1" },
+      "total": { "content": "$2" }
+    }
+  },
+  "options_deleted_model": {
+    "message": "Modelo $PAIR$ eliminado.",
+    "placeholders": { "pair": { "content": "$1" } }
+  },
+  "options_checking_model": {
+    "message": "Comprobando el modelo $PAIR$ en el motor...",
+    "placeholders": { "pair": { "content": "$1", "example": "inglés a polaco" } }
+  },
+  "options_model_rejected": {
+    "message": "El motor no pudo cargar lo que llegó$DETAIL$. No se guardó nada.",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "options_refreshing_list": { "message": "Refrescando la lista de modelos..." },
+  "options_refreshing_dict_list": { "message": "Refrescando la lista de diccionarios..." },
+  "options_refresh_failed": {
+    "message": "No se pudo refrescar la lista$DETAIL$. Queda la lista del $DATE$.",
+    "placeholders": {
+      "detail": { "content": "$1" },
+      "date": { "content": "$2", "example": "2026-08-13" }
+    }
+  },
+  "options_version_unknown": { "message": "versión desconocida" },
+  "options_downloading_model": {
+    "message": "Descargando el modelo $PAIR$ - $SIZE$.",
+    "placeholders": {
+      "pair": { "content": "$1" },
+      "size": { "content": "$2" }
+    }
+  },
+  "options_downloaded_model": {
+    "message": "Modelo $PAIR$ descargado, $SIZE$ en este dispositivo.",
+    "placeholders": {
+      "pair": { "content": "$1" },
+      "size": { "content": "$2" }
+    }
+  },
+  "options_store_failed": {
+    "message": "El modelo se descargó pero no se pudo guardar: $DETAIL$",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "options_reading_pair": {
+    "message": "Leyendo $FROM$, traduciendo a $TO$.",
+    "placeholders": {
+      "from": { "content": "$1" },
+      "to": { "content": "$2" }
+    }
+  },
+  "options_reading_pair_missing": {
+    "message": "Leyendo $FROM$, traduciendo a $TO$ - y el modelo de esta dirección aún no está aquí.",
+    "placeholders": {
+      "from": { "content": "$1" },
+      "to": { "content": "$2" }
+    }
+  },
+  "options_no_models": { "message": "No hay modelos aquí, y ninguno que descargar - esta versión no lista ninguno." },
+  "options_filter_no_match_models": { "message": "Ningún par coincide con eso. El filtro acepta un nombre de idioma o un código." },
+  "options_filter_no_match_dictionaries": { "message": "Ningún diccionario coincide con eso. El filtro acepta un nombre de idioma o un código." },
+  "options_no_disabled": { "message": "Ningún sitio está desactivado. Donde se hace es en el popup de la barra de herramientas." },
+  "options_turn_back_on": { "message": "Volver a activar" },
+  "options_reading_model_files": {
+    "message": "Leyendo los archivos de $PAIR$...",
+    "placeholders": { "pair": { "content": "$1" } }
+  },
+  "options_file_disappeared": {
+    "message": "$NAME$ desapareció durante la lectura",
+    "placeholders": { "name": { "content": "$1" } }
+  },
+  "options_added_model": {
+    "message": "Modelo $PAIR$ añadido, $SIZE$ en este dispositivo.",
+    "placeholders": {
+      "pair": { "content": "$1" },
+      "size": { "content": "$2" }
+    }
+  },
+  "options_add_model_failed": {
+    "message": "No se pudo añadir el modelo: $DETAIL$",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "options_deleted_dictionary": {
+    "message": "$NAME$ eliminado.",
+    "placeholders": { "name": { "content": "$1" } }
+  },
+  "options_deleting_dictionary": {
+    "message": "Eliminando $NAME$ - un diccionario grande tarda un rato...",
+    "placeholders": { "name": { "content": "$1" } }
+  },
+  "options_deleting_row": { "message": "Eliminando..." },
+  "options_delete_dictionary_failed": {
+    "message": "No se pudo eliminar $NAME$: $DETAIL$",
+    "placeholders": {
+      "name": { "content": "$1" },
+      "detail": { "content": "$2" }
+    }
+  },
+  "options_move_dictionary_up_aria": {
+    "message": "Subir $NAME$",
+    "placeholders": { "name": { "content": "$1", "example": "WikDict en-pl" } }
+  },
+  "options_move_dictionary_down_aria": {
+    "message": "Bajar $NAME$",
+    "placeholders": { "name": { "content": "$1", "example": "WikDict en-pl" } }
+  },
+  "options_dictionary_moved": {
+    "message": "$NAME$ ahora responde en el puesto $PLACE$ de $TOTAL$.",
+    "placeholders": {
+      "name": { "content": "$1", "example": "WikDict en-pl" },
+      "place": { "content": "$2", "example": "1" },
+      "total": { "content": "$3", "example": "3" }
+    }
+  },
+  "options_reorder_failed": {
+    "message": "No se pudo cambiar el orden: $DETAIL$",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "options_no_catalog": { "message": "No hay diccionarios que descargar - esta versión no lista ninguno." },
+  "options_downloading_dictionary": {
+    "message": "Descargando el diccionario $PAIR$...",
+    "placeholders": { "pair": { "content": "$1" } }
+  },
+  "options_storing_dictionary": {
+    "message": "Guardando $NAME$ - $DONE$ de $TOTAL$...",
+    "placeholders": {
+      "name": { "content": "$1" },
+      "done": { "content": "$2" },
+      "total": { "content": "$3" }
+    }
+  },
+  "options_added_dictionary": {
+    "message": "$NAME$ añadido: $WORDS$, $SIZE$.",
+    "placeholders": {
+      "name": { "content": "$1" },
+      "words": { "content": "$2" },
+      "size": { "content": "$3" }
+    }
+  },
+  "options_skipped_entries_one": {
+    "message": "$COUNT$ entrada no se pudo leer y quedó fuera.",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "options_skipped_entries_many": {
+    "message": "$COUNT$ entradas no se pudieron leer y quedaron fuera.",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "options_skipped_entries_other": {
+    "message": "$COUNT$ entradas no se pudieron leer y quedaron fuera.",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "options_add_dictionary_failed": {
+    "message": "No se pudo añadir el diccionario: $DETAIL$",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
+  "options_reading_file": {
+    "message": "Leyendo $NAME$...",
+    "placeholders": { "name": { "content": "$1" } }
+  },
+  "options_swept_unfinished": {
+    "message": "Se quitó un diccionario cuya importación nunca terminó ($NAMES$).",
+    "placeholders": { "names": { "content": "$1" } }
+  },
+  "options_import_interrupted": {
+    "message": "Interrumpido en $DONE$ de $TOTAL$ - Continuar retoma desde ahí.",
+    "placeholders": {
+      "done": { "content": "$1" },
+      "total": { "content": "$2" }
+    }
+  },
+  "options_import_interrupted_early": { "message": "Interrumpido antes de guardar la primera entrada - Continuar empieza de nuevo." },
+  "options_import_elsewhere": { "message": "Otra pestaña está añadiendo un diccionario ahora mismo - espera a que termine." },
+  "options_continue_import": { "message": "Continuar" },
+  "options_continue_import_aria": {
+    "message": "Continuar añadiendo $NAME$",
+    "placeholders": { "name": { "content": "$1" } }
+  }
+}

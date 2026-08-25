@@ -365,11 +365,7 @@
       </ul>
 
       <p>
-        <!-- No `accept` filter on purpose: iOS maps the tokens to registered
-             file types, and `.bin`/`.spm` have none, so the Files picker
-             greyed every model file out (seen on iPad, 2026-08-25). Import
-             validation is the real gate; the picker stays open to anything. -->
-        <input type="file" id="model-files" multiple />
+        <input type="file" id="model-files" multiple accept=".bin,.spm,.gz" />
         <button type="button" id="add-model" data-i18n="options_add_model_button">Add model</button>
       </p>
 
@@ -491,12 +487,7 @@
       </p>
 
       <p>
-        <!-- No `accept` filter on purpose: StarDict extensions
-             (.ifo/.idx/.dict.dz/.syn) have no registered file type on iOS,
-             and a filter the system cannot match greys every file out - the
-             picker opens and nothing is selectable (seen on iPad,
-             2026-08-25). Import validation is the real gate. -->
-        <input type="file" id="dictionary-files" multiple />
+        <input type="file" id="dictionary-files" multiple accept=".ifo,.idx,.dict,.dz,.gz,.syn" />
       </p>
 
       <p class="inline">
