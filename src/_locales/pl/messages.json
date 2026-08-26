@@ -729,6 +729,13 @@
   "options_sections_aria": { "message": "Sekcje tej strony" },
   "options_engine": { "message": "Silnik" },
   "options_engine_value": { "message": "Bergamot, wewnątrz paczki - tłumaczy offline" },
+  "options_storage": { "message": "Dane na tym urządzeniu" },
+  "options_storage_value": {
+    "message": "$SIZE$ - razem modele, słowniki, czytelnia i Twoje frazy",
+    "placeholders": { "size": { "content": "$1", "example": "143,2 MB" } }
+  },
+  "options_storage_persistent": { "message": "Magazyn trwały: przyznany. Przeglądarka obiecała nie kasować tych danych, żeby zrobić miejsce." },
+  "options_storage_at_risk": { "message": "Magazyn trwały: nieprzyznany. Safari kasuje dane witryny po około miesiącu używania bez dotknięcia jej stron, a strony tego rozszerzenia liczą się jak jedna witryna - otwieraj widok czytania albo te ustawienia od czasu do czasu i regularnie eksportuj frazy do pliku." },
   "options_pair_hint": { "message": "Do wyboru są pary z modelami tłumaczeń, które pobrałeś na to urządzenie - jeśli chcesz tłumaczyć w innej parze językowej, pobierz jej model w sekcji" },
   "options_pair_none": { "message": "Nie ma jeszcze modelu - najpierw pobierz go poniżej" },
   "options_reader_only": { "message": "Tylko w widoku czytania" },

@@ -598,6 +598,13 @@
   "options_sections_aria": { "message": "Secciones de esta página" },
   "options_engine": { "message": "Motor" },
   "options_engine_value": { "message": "Bergamot, dentro del paquete - traduce sin conexión" },
+  "options_storage": { "message": "Datos en este dispositivo" },
+  "options_storage_value": {
+    "message": "$SIZE$ - modelos, diccionarios, lista de lectura y tus frases en conjunto",
+    "placeholders": { "size": { "content": "$1", "example": "143,2 MB" } }
+  },
+  "options_storage_persistent": { "message": "Almacenamiento persistente: concedido. El navegador ha prometido no borrar estos datos para hacer sitio." },
+  "options_storage_at_risk": { "message": "Almacenamiento persistente: no concedido. Safari borra los datos de un sitio tras aproximadamente un mes de uso sin tocar sus páginas, y las páginas de esta extensión cuentan como un sitio - abre la vista de lectura o estos ajustes de vez en cuando y exporta tus frases a un archivo con regularidad." },
   "options_pair_hint": { "message": "Se ofrecen los pares cuyos modelos de traducción descargaste en este dispositivo - si quieres traducir en otro par de idiomas, descarga su modelo en la sección" },
   "options_pair_none": { "message": "Aún no hay modelo - descarga uno abajo" },
   "options_reader_only": { "message": "Solo en la vista de lectura" },

@@ -181,6 +181,17 @@
         <span class="row-name" data-i18n="options_engine">Engine</span>
         <span class="row-value" data-i18n="options_engine_value">Bergamot, inside the package - translates offline</span>
       </div>
+      <!-- What the browser holds for this extension and whether it has
+           promised to keep it. The size is everything at once - models,
+           dictionaries, the reading list, the phrases - and the note under
+           it is the one place the extension says out loud that a browser
+           may clear an origin's storage on its own: on WebKit a refused
+           persistence is exactly that risk (`lib/storage-report.js`). -->
+      <div class="row row-stack">
+        <span class="row-name" data-i18n="options_storage">Data on this device</span>
+        <span class="row-value" id="storage-usage"></span>
+        <p class="row-note" id="storage-note" hidden></p>
+      </div>
       <!-- Which voice reads a selection aloud (D83). The choices are the
            device's own voices for the pair's source language, and the choice
            is stored per language, so switching pairs keeps it. The sample the

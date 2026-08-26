@@ -598,6 +598,13 @@
   "options_sections_aria": { "message": "Sections de cette page" },
   "options_engine": { "message": "Moteur" },
   "options_engine_value": { "message": "Bergamot, dans le paquet - traduit hors ligne" },
+  "options_storage": { "message": "Données sur cet appareil" },
+  "options_storage_value": {
+    "message": "$SIZE$ - modèles, dictionnaires, liste de lecture et vos expressions réunis",
+    "placeholders": { "size": { "content": "$1", "example": "143,2 MB" } }
+  },
+  "options_storage_persistent": { "message": "Stockage persistant : accordé. Le navigateur a promis de ne pas effacer ces données pour faire de la place." },
+  "options_storage_at_risk": { "message": "Stockage persistant : refusé. Safari efface les données d'un site après environ un mois d'utilisation sans un toucher sur ses pages, et les pages de cette extension comptent comme un site - ouvrez le lecteur ou ces paramètres de temps en temps, et exportez régulièrement vos expressions dans un fichier." },
   "options_pair_hint": { "message": "Les paires proposées sont celles dont vous avez téléchargé le modèle de traduction sur cet appareil - si vous voulez traduire dans une autre paire de langues, téléchargez son modèle dans la section" },
   "options_pair_none": { "message": "Pas encore de modèle - téléchargez-en un ci-dessous" },
   "options_reader_only": { "message": "Seulement dans le lecteur" },

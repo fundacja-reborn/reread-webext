@@ -62,6 +62,7 @@ import { deleteModel, listModels, putModel } from "../lib/models/store.js";
 import { modelSourceUrl, updateAvailable } from "../lib/models/upstream.js";
 import { testLoadModel } from "../lib/models/validate.js";
 import { Message } from "../lib/protocol.js";
+import { ensurePersistent, isWebKit, persistenceNote, readStorage } from "../lib/storage-report.js";
 import { watchToolbarScheme } from "../lib/theme-icon.js";
 import { canSpeak, speak, voicesFor } from "../lib/tts.js";
 import {
@@ -422,6 +423,27 @@ function megabytes(bytes) {
     maximumFractionDigits: 1,
   });
   return `${amount} MB`;
+}
+
+/**
+ * The storage row: how much the browser holds for this extension and whether
+ * it has promised to keep it. Persistence is asked for here as well as at the
+ * background's start, so a settings page opened right after installing
+ * answers with the promise rather than with the state before anyone asked.
+ * On WebKit the answer doubles as a diagnosis, and the note under the size
+ * says what it means (`lib/storage-report.js`); an engine that will not say
+ * leaves the line blank rather than guessing.
+ */
+async function renderStorage() {
+  await ensurePersistent();
+  const report = await readStorage();
+  fill("storage-usage", report.usage === null ? "" : t("options_storage_value", megabytes(report.usage)));
+  const note = document.getElementById("storage-note");
+  if (note === null) return;
+  const kind = persistenceNote({ persisted: report.persisted, webkit: isWebKit() });
+  note.hidden = kind === null;
+  note.textContent =
+    kind === "granted" ? t("options_storage_persistent") : kind === "at-risk" ? t("options_storage_at_risk") : "";
 }
 
 /**
@@ -2050,6 +2072,9 @@ async function render() {
   renderBubbleScale();
   renderVoice();
   renderRate();
+  // Its own promise: the storage row waits on the engine, and nothing else on
+  // this page should wait with it.
+  void renderStorage();
   // With no pair chosen the selects open on their first language rather than
   // a preselected one - the import's own selects are still the full list.
   renderLanguageChoices("dictionary-from", config.sourceLang ?? "");

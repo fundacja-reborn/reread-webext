@@ -712,6 +712,17 @@
   },
   "options_engine": { "message": "Engine" },
   "options_engine_value": { "message": "Bergamot, inside the package - translates offline" },
+  "options_storage": { "message": "Data on this device" },
+  "options_storage_value": {
+    "message": "$SIZE$ - the models, the dictionaries, the reading list and your phrases together",
+    "description": "The size line of the storage row. $SIZE$ is the amount, already formatted with its unit.",
+    "placeholders": { "size": { "content": "$1", "example": "143.2 MB" } }
+  },
+  "options_storage_persistent": { "message": "Persistent storage: granted. The browser has promised not to clear this data to make room." },
+  "options_storage_at_risk": {
+    "message": "Persistent storage: not granted. Safari clears a site's data after about a month of use without a tap on its pages, and this extension's pages count as one site - open the reader or these settings now and then, and export your phrases to a file regularly.",
+    "description": "Shown only in WebKit browsers, where a refused persistence means the browser may delete the extension's data by itself."
+  },
   "options_pair_hint": {
     "message": "The pairs offered are those whose translation models you have downloaded to this device - if you want to translate in another language pair, download its model under",
     "description": "Followed by an anchor link wearing the options_models_heading text, then a plain full stop. No part starts or ends with whitespace."
