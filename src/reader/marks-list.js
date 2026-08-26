@@ -29,12 +29,18 @@ import { matchesFilter } from "../options/models-view.js";
  * (a book declares one; an article's meta does not, and null lets the
  * caller fall back to the pair's source language).
  *
+ * `missing` marks a quote whose document is gone - the library was emptied
+ * and the marks came back from their copy (`lib/store/marks-backup.js`)
+ * under the title the copy remembered: readable, searchable, but with no
+ * document to open until the same address is saved again.
+ *
  * @typedef {{
  *   docId: string,
  *   kind: "article" | "book",
  *   title: string,
  *   lang: string | null,
  *   part: { at: number, of: number } | null,
+ *   missing: boolean,
  *   mark: Mark,
  * }} MarkRow
  */
@@ -48,30 +54,39 @@ export const MARKS_PAGE_SIZE = 25;
 
 /**
  * Every stored mark as a row, in the page's order. A mark whose document
- * neither store answers for is left out: marks live and die with their
- * document, so such a row is two reads catching the database mid-delete,
- * not a quote anybody can open.
+ * neither store answers for is a quote the copy remembers a title for - it
+ * came back after the library was emptied - or, without one, two reads
+ * catching the database mid-delete, and left out: marks live and die with
+ * their document, and only the copy can outlive one.
  *
  * @param {SavedMeta[]} metas
  * @param {BookMeta[]} books
  * @param {Map<string, Mark[]>} marks keyed by `docId`, each list in reading order
+ * @param {Map<string, import("../lib/store/marks-backup.js").DocTitle>} [kept] the titles the
+ *   copy remembers, for the documents that are gone
  * @returns {MarkRow[]}
  */
-export function markRows(metas, books, marks) {
-  /** @type {Map<string, { kind: "article" | "book", title: string, lang: string | null, parts: number }>} */
+export function markRows(metas, books, marks, kept = new Map()) {
+  /** @typedef {{ kind: "article" | "book", title: string, lang: string | null, parts: number, missing: boolean }} Doc */
+  /** @type {Map<string, Doc>} */
   const docs = new Map();
   for (const meta of metas) {
-    docs.set(meta.url, { kind: "article", title: meta.title, lang: null, parts: 1 });
+    docs.set(meta.url, { kind: "article", title: meta.title, lang: null, parts: 1, missing: false });
   }
   for (const book of books) {
-    docs.set(book.id, { kind: "book", title: book.title, lang: book.lang, parts: book.segmentCount });
+    docs.set(book.id, { kind: "book", title: book.title, lang: book.lang, parts: book.segmentCount, missing: false });
   }
 
-  /** @type {{ docId: string, doc: { kind: "article" | "book", title: string, lang: string | null, parts: number }, newest: number, list: Mark[] }[]} */
+  /** @type {{ docId: string, doc: Doc, newest: number, list: Mark[] }[]} */
   const groups = [];
   for (const [docId, list] of marks) {
-    const doc = docs.get(docId);
-    if (doc === undefined || list.length === 0) continue;
+    let doc = docs.get(docId);
+    if (doc === undefined) {
+      const remembered = kept.get(docId);
+      if (remembered === undefined) continue;
+      doc = { kind: remembered.kind, title: remembered.title, lang: null, parts: 1, missing: true };
+    }
+    if (list.length === 0) continue;
     const newest = Math.max(...list.map((mark) => mark.createdAt));
     groups.push({ docId, doc, newest, list });
   }
@@ -91,6 +106,7 @@ export function markRows(metas, books, marks) {
         doc.kind === "book" && doc.parts > 1
           ? { at: mark.segmentIndex + 1, of: doc.parts }
           : null,
+      missing: doc.missing,
       mark,
     })),
   );

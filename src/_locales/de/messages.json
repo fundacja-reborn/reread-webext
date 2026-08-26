@@ -591,6 +591,16 @@
     "placeholders": { "count": { "content": "$1", "example": "1234" }, "when": { "content": "$2", "example": "26.08.26, 12:41" } }
   },
   "options_storage_backup_none": { "message": "Kopie des Wortschatzes: noch keine - sie entsteht mit der nächsten gespeicherten Phrase." },
+  "options_storage_marks_backup_one": {
+    "message": "Kopie der Markierungen: $COUNT$ Markierung mit Notizen, geschrieben $WHEN$.",
+    "placeholders": { "count": { "content": "$1", "example": "1" }, "when": { "content": "$2", "example": "26.08.26, 12:41" } }
+  },
+  "options_storage_marks_backup_other": {
+    "message": "Kopie der Markierungen: $COUNT$ Markierungen mit Notizen, geschrieben $WHEN$.",
+    "placeholders": { "count": { "content": "$1", "example": "37" }, "when": { "content": "$2", "example": "26.08.26, 12:41" } }
+  },
+  "options_storage_marks_backup_none": { "message": "Kopie der Markierungen: noch keine - sie entsteht mit der nächsten Markierung." },
+  "reader_marks_missing_doc": { "message": "Das Dokument ist nicht mehr gespeichert - dieses Zitat kam aus der Kopie zurück. Öffnen Sie die Seite erneut, und die Markierung ist wieder da." },
   "options_pair_hint": { "message": "Zur Wahl stehen die Paare, deren Übersetzungsmodelle Sie auf dieses Gerät heruntergeladen haben - wenn Sie in einem anderen Sprachpaar übersetzen möchten, finden Sie sein Modell im Abschnitt" },
   "options_pair_none": { "message": "Noch kein Modell - laden Sie unten eines herunter" },
   "options_reader_only": { "message": "Nur in der Leseansicht" },

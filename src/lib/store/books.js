@@ -17,6 +17,7 @@
 
 import { asBookMeta, asSegment } from "./book.js";
 import { promisify, withLibrary } from "./library-db.js";
+import { rebuildMarksBackup } from "./marks.js";
 
 /**
  * @typedef {import("./book.js").BookMeta} BookMeta
@@ -112,6 +113,9 @@ export async function deleteBook(id) {
     await promisify(stores.positions.delete(id));
     await promisify(stores.marks.delete(id));
   });
+  // The marks left with the book, and the copy that outlives the database
+  // follows every write that touches a marks row (`marks-backup.js`).
+  await rebuildMarksBackup();
 }
 
 /**

@@ -753,6 +753,24 @@
     "placeholders": { "count": { "content": "$1", "example": "1,5" }, "when": { "content": "$2", "example": "26.08.2026, 12:41" } }
   },
   "options_storage_backup_none": { "message": "Kopia słownictwa: jeszcze jej nie ma - powstanie przy następnej zapisanej frazie." },
+  "options_storage_marks_backup_one": {
+    "message": "Kopia zakreśleń: $COUNT$ zakreślenie z notatkami, zapisana $WHEN$.",
+    "placeholders": { "count": { "content": "$1", "example": "1" }, "when": { "content": "$2", "example": "26.08.2026, 12:41" } }
+  },
+  "options_storage_marks_backup_few": {
+    "message": "Kopia zakreśleń: $COUNT$ zakreślenia z notatkami, zapisana $WHEN$.",
+    "placeholders": { "count": { "content": "$1", "example": "3" }, "when": { "content": "$2", "example": "26.08.2026, 12:41" } }
+  },
+  "options_storage_marks_backup_many": {
+    "message": "Kopia zakreśleń: $COUNT$ zakreśleń z notatkami, zapisana $WHEN$.",
+    "placeholders": { "count": { "content": "$1", "example": "37" }, "when": { "content": "$2", "example": "26.08.2026, 12:41" } }
+  },
+  "options_storage_marks_backup_other": {
+    "message": "Kopia zakreśleń: $COUNT$ zakreślenia z notatkami, zapisana $WHEN$.",
+    "placeholders": { "count": { "content": "$1", "example": "1,5" }, "when": { "content": "$2", "example": "26.08.2026, 12:41" } }
+  },
+  "options_storage_marks_backup_none": { "message": "Kopia zakreśleń: jeszcze jej nie ma - powstanie przy następnym zakreśleniu." },
+  "reader_marks_missing_doc": { "message": "Ten dokument nie jest już zapisany - cytat wrócił z kopii. Otwórz stronę ponownie, a zakreślenie będzie na miejscu." },
   "options_pair_hint": { "message": "Do wyboru są pary z modelami tłumaczeń, które pobrałeś na to urządzenie - jeśli chcesz tłumaczyć w innej parze językowej, pobierz jej model w sekcji" },
   "options_pair_none": { "message": "Nie ma jeszcze modelu - najpierw pobierz go poniżej" },
   "options_reader_only": { "message": "Tylko w widoku czytania" },

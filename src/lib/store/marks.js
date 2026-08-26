@@ -14,9 +14,17 @@
  */
 
 import { asMark, compareMarks } from "../reader/marks.js";
+import { asBookMeta } from "./book.js";
 import { promisify, withLibrary } from "./library-db.js";
+import {
+  rebuildMarksBackup as rebuildWith,
+  restoreMarks as restoreWith,
+  storageDeps,
+} from "./marks-backup.js";
+import { asSavedMeta } from "./saved-article.js";
 
 /** @typedef {import("../reader/marks.js").Mark} Mark */
+/** @typedef {import("./marks-backup.js").DocTitle} DocTitle */
 
 /**
  * Every mark of one document, in reading order, however the row was written
@@ -47,10 +55,15 @@ export async function getMarks(docId) {
  * @returns {Promise<void>}
  */
 export async function putMarks(docId, marks) {
+  // Settled first, the copy's rule: a library the browser emptied gets its
+  // marks back before this write, so the copy rebuilt below is never built
+  // from this one row alone.
+  await restoreMarks();
   await withLibrary("readwrite", async (stores) => {
     if (marks.length === 0) await promisify(stores.marks.delete(docId));
     else await promisify(stores.marks.put({ docId, marks }));
   });
+  await rebuildMarksBackup();
 }
 
 /**
@@ -66,6 +79,14 @@ export async function allMarks() {
   const rows = /** @type {unknown[]} */ (
     await withLibrary("readonly", (stores) => promisify(stores.marks.getAll()))
   );
+  return narrowRows(rows);
+}
+
+/**
+ * @param {unknown[]} rows
+ * @returns {Map<string, Mark[]>} keyed by `docId`
+ */
+function narrowRows(rows) {
   /** @type {Map<string, Mark[]>} */
   const map = new Map();
   for (const row of rows) {
@@ -79,4 +100,97 @@ export async function allMarks() {
     if (kept.length > 0) map.set(docId, kept);
   }
   return map;
+}
+
+/**
+ * The titles the library can still put to a marks row - every article's and
+ * every book's - as the copy remembers them beside the row.
+ *
+ * @param {unknown[]} metas
+ * @param {unknown[]} books
+ * @returns {Map<string, DocTitle>}
+ */
+function titlesOf(metas, books) {
+  /** @type {Map<string, DocTitle>} */
+  const titles = new Map();
+  for (const row of metas) {
+    const meta = asSavedMeta(row);
+    if (meta !== null) titles.set(meta.url, { kind: "article", title: meta.title });
+  }
+  for (const row of books) {
+    const book = asBookMeta(row);
+    if (book !== null) titles.set(book.id, { kind: "book", title: book.title });
+  }
+  return titles;
+}
+
+/**
+ * The copy's view of this database (`marks-backup.js` holds the rules; this
+ * is the IndexedDB half of them): the snapshot the copy is rebuilt from, the
+ * emptiness the restore asks about, and the rows written back - into an
+ * empty library only, checked again inside the transaction that writes them,
+ * because the count outside it is a gate, not a lock.
+ *
+ * @returns {import("./marks-backup.js").MarksBackupDeps}
+ */
+function backupDeps() {
+  /** @param {import("./library-db.js").LibraryStores} stores */
+  const isEmpty = async (stores) => {
+    const [metas, books, marks] = await Promise.all([
+      promisify(stores.meta.count()),
+      promisify(stores.books.count()),
+      promisify(stores.marks.count()),
+    ]);
+    return metas === 0 && books === 0 && marks === 0;
+  };
+  return {
+    ...storageDeps(),
+    snapshot: async () => {
+      const { rows, metas, books } = await withLibrary("readonly", async (stores) => ({
+        rows: /** @type {unknown[]} */ (await promisify(stores.marks.getAll())),
+        metas: /** @type {unknown[]} */ (await promisify(stores.meta.getAll())),
+        books: /** @type {unknown[]} */ (await promisify(stores.books.getAll())),
+      }));
+      return { marks: narrowRows(rows), titles: titlesOf(metas, books) };
+    },
+    empty: () => withLibrary("readonly", isEmpty),
+    putRows: async (docs) => {
+      await withLibrary("readwrite", async (stores) => {
+        if (!(await isEmpty(stores))) return;
+        for (const doc of docs) await promisify(stores.marks.put({ docId: doc.docId, marks: doc.marks }));
+      });
+    },
+  };
+}
+
+/**
+ * Whatever the browser deleted, back from the copy - the library empty and
+ * the copy not being the one shape that means. Asked by every write to the
+ * marks and by the pages before they read, and quiet on every failure: the
+ * copy is insurance, and a write must not fail because its insurance did.
+ *
+ * @returns {Promise<number>} how many documents' marks came back
+ */
+export async function restoreMarks() {
+  try {
+    return await restoreWith(backupDeps());
+  } catch {
+    return 0;
+  }
+}
+
+/**
+ * The copy rebuilt from the whole store, after every write that touched a
+ * marks row - here, in `articles.js` and in `books.js`. Quiet on failure
+ * for the same reason `restoreMarks` is; the next write rebuilds it again.
+ *
+ * @returns {Promise<boolean>} whether the copy was written
+ */
+export async function rebuildMarksBackup() {
+  try {
+    await rebuildWith(backupDeps());
+    return true;
+  } catch {
+    return false;
+  }
 }

@@ -614,6 +614,16 @@
     "placeholders": { "count": { "content": "$1", "example": "1234" }, "when": { "content": "$2", "example": "26/8/26, 12:41" } }
   },
   "options_storage_backup_none": { "message": "Copia del vocabulario: todavía ninguna - se escribirá con la próxima frase que guardes." },
+  "options_storage_marks_backup_one": {
+    "message": "Copia de los resaltados: $COUNT$ resaltado con sus notas, escrita $WHEN$.",
+    "placeholders": { "count": { "content": "$1", "example": "1" }, "when": { "content": "$2", "example": "26/8/26, 12:41" } }
+  },
+  "options_storage_marks_backup_other": {
+    "message": "Copia de los resaltados: $COUNT$ resaltados con sus notas, escrita $WHEN$.",
+    "placeholders": { "count": { "content": "$1", "example": "37" }, "when": { "content": "$2", "example": "26/8/26, 12:41" } }
+  },
+  "options_storage_marks_backup_none": { "message": "Copia de los resaltados: todavía ninguna - se escribirá con el próximo resaltado." },
+  "reader_marks_missing_doc": { "message": "Su documento ya no está guardado - esta cita volvió de la copia. Abre la página de nuevo y el resaltado estará ahí." },
   "options_pair_hint": { "message": "Se ofrecen los pares cuyos modelos de traducción descargaste en este dispositivo - si quieres traducir en otro par de idiomas, descarga su modelo en la sección" },
   "options_pair_none": { "message": "Aún no hay modelo - descarga uno abajo" },
   "options_reader_only": { "message": "Solo en la vista de lectura" },

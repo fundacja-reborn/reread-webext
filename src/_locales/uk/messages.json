@@ -753,6 +753,24 @@
     "placeholders": { "count": { "content": "$1", "example": "1,5" }, "when": { "content": "$2", "example": "26.08.26, 12:41" } }
   },
   "options_storage_backup_none": { "message": "Копія словника: ще немає - з'явиться з наступною збереженою фразою." },
+  "options_storage_marks_backup_one": {
+    "message": "Копія позначень: $COUNT$ позначення з нотатками, записана $WHEN$.",
+    "placeholders": { "count": { "content": "$1", "example": "1" }, "when": { "content": "$2", "example": "26.08.26, 12:41" } }
+  },
+  "options_storage_marks_backup_few": {
+    "message": "Копія позначень: $COUNT$ позначення з нотатками, записана $WHEN$.",
+    "placeholders": { "count": { "content": "$1", "example": "3" }, "when": { "content": "$2", "example": "26.08.26, 12:41" } }
+  },
+  "options_storage_marks_backup_many": {
+    "message": "Копія позначень: $COUNT$ позначень з нотатками, записана $WHEN$.",
+    "placeholders": { "count": { "content": "$1", "example": "37" }, "when": { "content": "$2", "example": "26.08.26, 12:41" } }
+  },
+  "options_storage_marks_backup_other": {
+    "message": "Копія позначень: $COUNT$ позначення з нотатками, записана $WHEN$.",
+    "placeholders": { "count": { "content": "$1", "example": "1,5" }, "when": { "content": "$2", "example": "26.08.26, 12:41" } }
+  },
+  "options_storage_marks_backup_none": { "message": "Копія позначень: ще немає - з'явиться з наступним позначенням." },
+  "reader_marks_missing_doc": { "message": "Цей документ більше не збережено - цитата повернулася з копії. Відкрийте сторінку знову, і позначення буде на місці." },
   "options_pair_hint": { "message": "Пропонуються пари, моделі перекладу яких ви завантажили на цей пристрій - якщо хочете перекладати в іншій мовній парі, завантажте її модель у розділі" },
   "options_pair_none": { "message": "Моделі ще немає - спершу завантажте її нижче" },
   "options_reader_only": { "message": "Лише в режимі читання" },
