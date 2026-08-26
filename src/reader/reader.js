@@ -22,7 +22,11 @@
  * are held to the new list, not the old one.
  */
 
-import { supported as highlightsSupported, unregister as unregisterHighlight } from "../content/highlighter.js";
+import {
+  refresh as refreshHighlights,
+  supported as highlightsSupported,
+  unregister as unregisterHighlight,
+} from "../content/highlighter.js";
 import { dismiss, rescan, start, stop as stopReadingSide } from "../content/reading.js";
 import { applyReading } from "../lib/appearance.js";
 import { webext } from "../lib/browser.js";
@@ -1720,6 +1724,20 @@ noteCloseButton?.addEventListener("click", () => closeNoteDialog());
 noteDialog?.addEventListener("close", () => {
   noteDialogSave = null;
 });
+
+// The paint settled after every modal dialog on this page - the note, the
+// contents, the search: a modal makes the rest of the document inert, and
+// WebKit up to Safari 18 anchors every highlight in inert text to nothing,
+// so the marks and the underlines step out from under the dialog and did not
+// always step back when it closed (`refreshHighlights` has the story). Two
+// frames rather than one: the close event's task can run before the
+// rendering update that takes the dialog down, and the re-anchoring has to
+// land in the first frame drawn without it.
+for (const dialog of document.querySelectorAll("dialog")) {
+  dialog.addEventListener("close", () => {
+    requestAnimationFrame(() => requestAnimationFrame(() => refreshHighlights()));
+  });
+}
 
 // A click that reaches the dialog element itself hit the backdrop - the
 // TOC dialog's own tell (the dialog carries no padding of its own).
