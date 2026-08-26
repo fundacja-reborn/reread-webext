@@ -733,6 +733,20 @@
     "placeholders": { "count": { "content": "$1", "example": "1234" }, "when": { "content": "$2", "example": "8/26/26, 12:41 PM" } }
   },
   "options_storage_backup_none": { "message": "Copy of the vocabulary: none yet - it is written with the next phrase you save." },
+  "options_storage_marks_backup_one": {
+    "message": "Copy of the highlights: $COUNT$ highlight with its notes, written $WHEN$.",
+    "description": "Plural family over the highlight count; $WHEN$ is a date and time in the reader's own calendar.",
+    "placeholders": { "count": { "content": "$1", "example": "1" }, "when": { "content": "$2", "example": "8/26/26, 12:41 PM" } }
+  },
+  "options_storage_marks_backup_other": {
+    "message": "Copy of the highlights: $COUNT$ highlights with their notes, written $WHEN$.",
+    "placeholders": { "count": { "content": "$1", "example": "37" }, "when": { "content": "$2", "example": "8/26/26, 12:41 PM" } }
+  },
+  "options_storage_marks_backup_none": { "message": "Copy of the highlights: none yet - it is written with the next highlight you make." },
+  "reader_marks_missing_doc": {
+    "message": "Its document is no longer saved - this quote came back from the copy. Open the page again and the highlight will be there.",
+    "description": "Under a quote on the highlights page whose document is gone from the reading list; the quote was restored from the copy kept in storage.local."
+  },
   "options_pair_hint": {
     "message": "The pairs offered are those whose translation models you have downloaded to this device - if you want to translate in another language pair, download its model under",
     "description": "Followed by an anchor link wearing the options_models_heading text, then a plain full stop. No part starts or ends with whitespace."

@@ -82,6 +82,32 @@ describe("markRows", () => {
     );
   });
 
+  it("names a quote whose document is gone after the copy, and drops one nobody remembers", () => {
+    const marks = new Map([
+      [meta(1).url, [mark("still here")]],
+      ["https://example.org/gone", [mark("from the copy", { note: "mine" })]],
+      ["book-gone", [mark("a book's")]],
+      ["https://example.org/forgotten", [mark("mid-delete")]],
+    ]);
+    /** @type {Map<string, import("../src/lib/store/marks-backup.js").DocTitle>} */
+    const kept = new Map([
+      ["https://example.org/gone", { kind: "article", title: "Gone article" }],
+      ["book-gone", { kind: "book", title: "Gone book" }],
+    ]);
+
+    const rows = markRows([meta(1)], [], marks, kept);
+    assert.deepEqual(
+      rows.map((row) => [row.mark.text, row.title, row.kind, row.missing, row.part]),
+      [
+        ["still here", "Article 1", "article", false, null],
+        ["from the copy", "Gone article", "article", true, null],
+        ["a book's", "Gone book", "book", true, null],
+      ],
+      "the remembered ones stand under their copied titles, the unremembered one is left out",
+    );
+    assert.equal(markRows([meta(1)], [], marks).length, 1, "without the copy, only the living document's quote shows");
+  });
+
   it("sinks documents whose clocks were healed to zero, held steady by title", () => {
     const metas = [meta(1, { title: "B" }), meta(2, { title: "A" }), meta(3, { title: "C" })];
     const marks = new Map([

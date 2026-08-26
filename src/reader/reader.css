@@ -1150,6 +1150,17 @@ body.reader:has(#library:not([hidden])) {
   overflow-wrap: anywhere;
 }
 
+/* The line under a quote whose document is gone (it came back from the copy,
+   `marks-backup.js`): the note's quiet voice without the note's rule, because
+   it is the page speaking, not the reader. */
+.marks-missing {
+  margin: 0.5em 0 0;
+  color: var(--page-muted);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 0.85em;
+  line-height: 1.5;
+}
+
 /* The quote's acts, stacked where the list's Delete stands - the rows are
    tall, so a column wastes no width on a phone. Each is the quiet icon
    button the list already speaks: always visible, dressed down, a 44px

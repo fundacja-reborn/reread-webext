@@ -64,6 +64,7 @@ import { testLoadModel } from "../lib/models/validate.js";
 import { Message } from "../lib/protocol.js";
 import { ensurePersistent, isWebKit, persistenceNote, readStorage } from "../lib/storage-report.js";
 import { readBackupSummary } from "../lib/store/backup.js";
+import { marksInBackup, readMarksBackup } from "../lib/store/marks-backup.js";
 import { watchToolbarScheme } from "../lib/theme-icon.js";
 import { canSpeak, speak, voicesFor } from "../lib/tts.js";
 import {
@@ -448,14 +449,23 @@ async function renderStorage() {
 
   // The copy of the vocabulary that outlives the database: its size and its
   // date, in the reader's own calendar - or that there is none yet.
+  /** @param {number} at */
+  const when = (at) => new Date(at).toLocaleString(uiLocale(), { dateStyle: "short", timeStyle: "short" });
   const copy = await readBackupSummary();
   fill(
     "storage-backup",
     copy === null
       ? t("options_storage_backup_none")
-      : plural(copy.count, "options_storage_backup", [
-          new Date(copy.writtenAt).toLocaleString(uiLocale(), { dateStyle: "short", timeStyle: "short" }),
-        ]),
+      : plural(copy.count, "options_storage_backup", [when(copy.writtenAt)]),
+  );
+  // The highlights' copy beside it (`marks-backup.js`) - the other thing
+  // nobody could type in again.
+  const marks = await readMarksBackup();
+  fill(
+    "storage-marks-backup",
+    marks === null
+      ? t("options_storage_marks_backup_none")
+      : plural(marksInBackup(marks), "options_storage_marks_backup", [when(marks.writtenAt)]),
   );
 }
 

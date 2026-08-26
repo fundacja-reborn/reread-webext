@@ -104,7 +104,8 @@ import {
   sweepOrphanSegments,
 } from "../lib/store/books.js";
 import { MARKS_FILENAME, toMarksFile } from "../lib/store/marks-file.js";
-import { allMarks, getMarks, putMarks } from "../lib/store/marks.js";
+import { allMarks, getMarks, putMarks, restoreMarks } from "../lib/store/marks.js";
+import { keptTitles, readMarksBackup } from "../lib/store/marks-backup.js";
 import { Segment, emptySentence, savedArticle } from "../lib/store/saved-article.js";
 import { watchToolbarScheme } from "../lib/theme-icon.js";
 import {
@@ -2531,6 +2532,9 @@ async function showMarks(scope, { fresh = false } = {}) {
 
 async function refreshLibrary() {
   if (libraryEmpty === null || libraryRows === null) return;
+  // Whatever the browser deleted comes back from its copy before the list
+  // reads (`marks-backup.js`) - three counts on every ordinary refresh.
+  await restoreMarks();
   // One list, two stores: books enter dressed as rows (`bookEntry`), with
   // their positions read in bulk - fifty rows must not mean fifty lookups.
   // The marks ride in the same round trip only to answer one button's grey;
@@ -2749,16 +2753,21 @@ function libraryRow(entry) {
  */
 async function refreshMarks() {
   if (marksRowsList === null || marksEmpty === null) return;
-  const [metas, books, marks] = await Promise.all([
+  // Whatever the browser deleted comes back from its copy before the page
+  // reads; the copy is read too, for the titles of the documents that are
+  // gone (`marks-backup.js`).
+  await restoreMarks();
+  const [metas, books, marks, backup] = await Promise.all([
     listArticles(),
     listBooks(),
     allMarks().catch(() => new Map()),
+    readMarksBackup(),
   ]);
   const target = marksShown;
   // The view moved on while the database answered; the section is hidden,
   // and filling it would only shout into a closed room.
   if (target === null) return;
-  const rows = markRows(metas, books, marks);
+  const rows = markRows(metas, books, marks, keptTitles(backup));
   const view = marksListView(rows, { scope: target.scope, query: marksQuery, page: marksPage });
   marksPage = view.page;
   marksOnScreen = view.rows;
@@ -2938,10 +2947,21 @@ function markRowElement(row, index, withTitle) {
     text.append(note);
   }
   text.append(detail);
+  // A quote whose document is gone says so under its detail line - it came
+  // back from the copy, and it has nowhere to open until the same address
+  // is saved again (`marks-backup.js`).
+  if (row.missing) {
+    const missing = document.createElement("p");
+    missing.className = "marks-missing";
+    missing.textContent = t("reader_marks_missing_doc");
+    text.append(missing);
+  }
 
   const acts = document.createElement("span");
   acts.className = "marks-row-acts";
-  acts.append(markActButton("open", index, t("reader_marks_open", row.title), marksOpenIcon));
+  if (!row.missing) {
+    acts.append(markActButton("open", index, t("reader_marks_open", row.title), marksOpenIcon));
+  }
   // No speaker on an engine that cannot speak - the voice rows' own rule.
   if (canSpeak()) {
     acts.append(markActButton("speak", index, t("reader_listen"), marksSpeakIcon));
@@ -3162,7 +3182,12 @@ async function exportList() {
  * @returns {Promise<import("../lib/store/marks-file.js").MarkedDoc[]>}
  */
 async function markedDocs(scope) {
-  const [metas, books, marks] = await Promise.all([listArticles(), listBooks(), allMarks()]);
+  const [metas, books, marks, backup] = await Promise.all([
+    listArticles(),
+    listBooks(),
+    allMarks(),
+    readMarksBackup(),
+  ]);
 
   /** @type {import("../lib/store/marks-file.js").MarkedDoc[]} */
   const docs = [];
@@ -3177,6 +3202,20 @@ async function markedDocs(scope) {
     if (kept !== undefined && (scope === null || book.id === scope)) {
       docs.push({ title: book.title, source: book.author, at: book.addedAt, marks: kept });
     }
+  }
+  // The quotes whose documents are gone, under the titles the copy kept
+  // (`marks-backup.js`): the file is the one place they can still be taken
+  // from whole, and a quote is no less the reader's for having lost its page.
+  const named = new Set([...metas.map((meta) => meta.url), ...books.map((book) => book.id)]);
+  for (const [docId, remembered] of keptTitles(backup)) {
+    const kept = marks.get(docId);
+    if (kept === undefined || named.has(docId) || (scope !== null && docId !== scope)) continue;
+    docs.push({
+      title: remembered.title,
+      source: remembered.kind === "article" ? docId : null,
+      at: 0,
+      marks: kept,
+    });
   }
   return docs;
 }

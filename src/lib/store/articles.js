@@ -24,6 +24,7 @@
 import { asPosition } from "../reader/position.js";
 import { importPlan } from "./articles-file.js";
 import { promisify, withLibrary } from "./library-db.js";
+import { rebuildMarksBackup, restoreMarks } from "./marks.js";
 import { asSavedMeta } from "./saved-article.js";
 
 /**
@@ -40,19 +41,27 @@ import { asSavedMeta } from "./saved-article.js";
  * Overwriting also clears the old reading position and the old highlighter
  * marks: both anchored into the text that has just been replaced, and saving
  * a page again puts it back on the reading pile - the same reset `readAt`
- * gets.
+ * gets. A first save of an address clears nothing: the only marks that can
+ * stand under an address nobody saved are the ones the copy put back after
+ * the browser emptied the library (`marks-backup.js`), and this save is the
+ * page returning to them.
  *
  * @param {SavedArticle} article
  * @returns {Promise<void>}
  */
 export async function putArticle(article) {
+  await restoreMarks();
   const { content, dir, lang, ...meta } = article;
-  await withLibrary("readwrite", async (stores) => {
+  const replaced = await withLibrary("readwrite", async (stores) => {
+    const existing = await promisify(stores.meta.get(article.url));
     await promisify(stores.meta.put(meta));
     await promisify(stores.content.put({ url: article.url, content, dir, lang }));
+    if (existing === undefined) return false;
     await promisify(stores.positions.delete(article.url));
     await promisify(stores.marks.delete(article.url));
+    return true;
   });
+  if (replaced) await rebuildMarksBackup();
 }
 
 /**
@@ -71,6 +80,7 @@ export async function deleteArticle(url) {
     await promisify(stores.positions.delete(url));
     await promisify(stores.marks.delete(url));
   });
+  await rebuildMarksBackup();
 }
 
 /**
@@ -221,7 +231,8 @@ export async function allArticles() {
  * @returns {Promise<{ added: number, skipped: number }>}
  */
 export async function importArticles(articles) {
-  return await withLibrary("readwrite", async (stores) => {
+  await restoreMarks();
+  const report = await withLibrary("readwrite", async (stores) => {
     const keys = /** @type {IDBValidKey[]} */ (await promisify(stores.meta.getAllKeys()));
     const { toAdd, skipped } = importPlan(keys.map(String), articles);
     for (const article of toAdd) {
@@ -234,6 +245,8 @@ export async function importArticles(articles) {
     }
     return { added: toAdd.length, skipped };
   });
+  if (report.added > 0) await rebuildMarksBackup();
+  return report;
 }
 
 /**
