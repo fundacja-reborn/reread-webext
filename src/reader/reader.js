@@ -22,7 +22,7 @@
  * are held to the new list, not the old one.
  */
 
-import { supported as highlightsSupported } from "../content/highlighter.js";
+import { supported as highlightsSupported, unregister as unregisterHighlight } from "../content/highlighter.js";
 import { dismiss, rescan, start, stop as stopReadingSide } from "../content/reading.js";
 import { applyReading } from "../lib/appearance.js";
 import { webext } from "../lib/browser.js";
@@ -2307,7 +2307,7 @@ function clearSearchWash() {
     disarmSearchWash();
     disarmSearchWash = null;
   }
-  if (highlightsSupported()) CSS.highlights.delete(SEARCH_WASH);
+  unregisterHighlight(SEARCH_WASH);
 }
 
 /**

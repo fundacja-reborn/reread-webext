@@ -37,7 +37,7 @@
  * the article stops the bubble's voice the same way. One page, one voice.
  */
 
-import { supported } from "../content/highlighter.js";
+import { supported, unregister } from "../content/highlighter.js";
 import { prosePieces } from "../content/scan.js";
 import { joinPieces, locate } from "../lib/matcher/spans.js";
 import { chunkText, wordSpan } from "../lib/reader/speech.js";
@@ -624,9 +624,8 @@ function mark(name, held, range, priority) {
 function clearMarks() {
   sentenceMark = null;
   wordMark = null;
-  if (!supported()) return;
-  CSS.highlights.delete(SENTENCE);
-  CSS.highlights.delete(WORD);
+  unregister(SENTENCE);
+  unregister(WORD);
 }
 
 /**

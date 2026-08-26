@@ -85,6 +85,27 @@ export function supported() {
 }
 
 /**
+ * A registration taken back so that every engine repaints it. Deleting from
+ * the registry drops the entry without repainting its ranges in WebKit up to
+ * Safari 18 (`HighlightRegistry::remove`; trunk repaints): the paint stays on
+ * the screen until something else happens to repaint that spot - on the iPad
+ * that was the closing bubble's own patch and nothing beside it, the stale
+ * navy wash of the spike's P2 (Michał's screenshots, 2026-08-26). Emptying
+ * the set first goes through `clearFromSetLike`, which repaints every range
+ * on every engine, and the delete after it has nothing left to forget. Every
+ * take-back in this extension comes through here - `test/highlighter.test.js`
+ * pins that no module deletes from the registry on its own.
+ *
+ * @param {string} name
+ */
+export function unregister(name) {
+  const api = registry();
+  if (api === null) return;
+  api.get(name)?.clear();
+  api.delete(name);
+}
+
+/**
  * The mark under the phrase an open recall bubble is about (D89). One range,
  * marked at showing and taken away with the bubble: the bubble deliberately
  * does not repeat its phrase, a tap on an underline makes no selection, and
@@ -109,7 +130,7 @@ export function mark(range) {
 
 /** The mark taken back - every way a bubble closes ends here. */
 export function unmark() {
-  registry()?.delete(ACTIVE);
+  unregister(ACTIVE);
 }
 
 /**
@@ -130,8 +151,7 @@ export function clear() {
   index = new Map();
   // Every weight, not just the one in hand: the setting can have moved since
   // the last paint, and a registration left behind goes on underlining.
-  const api = registry();
-  for (const one of UNDERLINE_NAMES) api?.delete(one);
+  for (const one of UNDERLINE_NAMES) unregister(one);
 }
 
 /**

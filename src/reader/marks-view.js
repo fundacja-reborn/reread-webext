@@ -24,7 +24,7 @@
  * wrong words would cost trust).
  */
 
-import { supported } from "../content/highlighter.js";
+import { supported, unregister } from "../content/highlighter.js";
 import { prosePieces } from "../content/scan.js";
 import { joinPieces, locate } from "../lib/matcher/spans.js";
 import { MARK_COLORS, headRect, marksInSegment, quoteOf, tailRect } from "../lib/reader/marks.js";
@@ -246,8 +246,7 @@ export function paintMarks(marks, root, segmentIndex) {
 /** Every dried stroke off the registry - a view change, or a repaint's first step. */
 export function clearMarkPaint() {
   painted = [];
-  if (!supported()) return;
-  for (const color of MARK_COLORS) CSS.highlights.delete(NAME_PREFIX + color);
+  for (const color of MARK_COLORS) unregister(NAME_PREFIX + color);
 }
 
 /**

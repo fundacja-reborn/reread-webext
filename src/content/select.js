@@ -75,7 +75,7 @@ import {
   wordIndexAt,
 } from "../lib/matcher/words.js";
 import { madeSelection } from "../lib/selection.js";
-import { supported } from "./highlighter.js";
+import { supported, unregister } from "./highlighter.js";
 import { blockAround, blockPieces } from "./scan.js";
 
 /** Must be the name in `reader.css`. */
@@ -436,7 +436,7 @@ export function clearSelection() {
   span = null;
   range = null;
   highlight = null;
-  if (supported()) CSS.highlights.delete(NAME);
+  unregister(NAME);
   // The wet stroke goes with it: every caller here means "whatever a gesture
   // was building is over" - a rendered-over article most of all.
   clearInk();
@@ -464,7 +464,7 @@ function clearInk() {
   ink = null;
   inkFocus = null;
   inkHighlight = null;
-  if (supported()) CSS.highlights.delete(DRAFT);
+  unregister(DRAFT);
 }
 
 /**
@@ -1158,13 +1158,17 @@ export function claimsNativeSelection(node) {
 /**
  * iOS's own long-press selection machinery runs beside the gesture: the
  * article refuses the native selection (`user-select: none` in the
- * stylesheet), and WebKit on iPadOS builds one under a held finger anyway -
+ * stylesheet), and WebKit on iPadOS built one under a held finger anyway -
  * drag handles beneath the phrase, the system bar over the bubble, and the
  * bar's dismissal then swallowing the tap whose mouse events would have
  * ended the chain, leaving the painted selection orphaned (the iPad spike,
- * 2026-08-25). The article is never legitimately natively-selected, so a
- * native selection anchored inside it is that machinery's - taken back the
- * moment it says so, which also keeps the system bar from ever standing.
+ * 2026-08-25). The stylesheet has since learned to refuse iOS in its own
+ * dialect (the `-webkit-touch-callout` block in `reader.css`), so this is
+ * the belt for whatever still slips through - a hold on a live link's text,
+ * an engine that reads the rules differently tomorrow. The article is never
+ * legitimately natively-selected, so a native selection anchored inside it
+ * is nobody's - taken back the moment it says so, which also keeps the
+ * system bar from ever standing.
  */
 function onNativeSelection() {
   const selection = document.getSelection();
