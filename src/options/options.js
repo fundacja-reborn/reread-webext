@@ -26,7 +26,7 @@ import {
   withDefaults,
   writeConfig,
 } from "../lib/config.js";
-import { aside, localizePage, plural, t } from "../lib/i18n.js";
+import { aside, localizePage, plural, t, uiLocale } from "../lib/i18n.js";
 import { armBackArrow } from "../lib/back-arrow.js";
 import { languageName, pairLabel } from "../lib/language.js";
 import { catalogDictionaries, catalogSource } from "../lib/dict/catalog.js";
@@ -62,6 +62,8 @@ import { deleteModel, listModels, putModel } from "../lib/models/store.js";
 import { modelSourceUrl, updateAvailable } from "../lib/models/upstream.js";
 import { testLoadModel } from "../lib/models/validate.js";
 import { Message } from "../lib/protocol.js";
+import { ensurePersistent, isWebKit, persistenceNote, readStorage } from "../lib/storage-report.js";
+import { readBackupSummary } from "../lib/store/backup.js";
 import { watchToolbarScheme } from "../lib/theme-icon.js";
 import { canSpeak, speak, voicesFor } from "../lib/tts.js";
 import {
@@ -422,6 +424,39 @@ function megabytes(bytes) {
     maximumFractionDigits: 1,
   });
   return `${amount} MB`;
+}
+
+/**
+ * The storage row: how much the browser holds for this extension and whether
+ * it has promised to keep it. Persistence is asked for here as well as at the
+ * background's start, so a settings page opened right after installing
+ * answers with the promise rather than with the state before anyone asked.
+ * On WebKit the answer doubles as a diagnosis, and the note under the size
+ * says what it means (`lib/storage-report.js`); an engine that will not say
+ * leaves the line blank rather than guessing.
+ */
+async function renderStorage() {
+  await ensurePersistent();
+  const report = await readStorage();
+  fill("storage-usage", report.usage === null ? "" : t("options_storage_value", megabytes(report.usage)));
+  const note = document.getElementById("storage-note");
+  if (note === null) return;
+  const kind = persistenceNote({ persisted: report.persisted, webkit: isWebKit() });
+  note.hidden = kind === null;
+  note.textContent =
+    kind === "granted" ? t("options_storage_persistent") : kind === "at-risk" ? t("options_storage_at_risk") : "";
+
+  // The copy of the vocabulary that outlives the database: its size and its
+  // date, in the reader's own calendar - or that there is none yet.
+  const copy = await readBackupSummary();
+  fill(
+    "storage-backup",
+    copy === null
+      ? t("options_storage_backup_none")
+      : plural(copy.count, "options_storage_backup", [
+          new Date(copy.writtenAt).toLocaleString(uiLocale(), { dateStyle: "short", timeStyle: "short" }),
+        ]),
+  );
 }
 
 /**
@@ -2050,6 +2085,9 @@ async function render() {
   renderBubbleScale();
   renderVoice();
   renderRate();
+  // Its own promise: the storage row waits on the engine, and nothing else on
+  // this page should wait with it.
+  void renderStorage();
   // With no pair chosen the selects open on their first language rather than
   // a preselected one - the import's own selects are still the full list.
   renderLanguageChoices("dictionary-from", config.sourceLang ?? "");

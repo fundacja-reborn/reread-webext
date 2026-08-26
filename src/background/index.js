@@ -13,6 +13,7 @@ import { chosenPair, publishPlatform, readConfig } from "../lib/config.js";
 import { writeInventory } from "../lib/models/inventory.js";
 import { listModels } from "../lib/models/store.js";
 import { ErrorCode, Message, asRequest, fail, ok } from "../lib/protocol.js";
+import { ensurePersistent } from "../lib/storage-report.js";
 import { toolbarIconFor } from "../lib/theme-icon.js";
 import { setProvider, translate } from "../lib/translator/index.js";
 import { asSchemeReport } from "../lib/translator/providers/bergamot/host-protocol.js";
@@ -193,3 +194,11 @@ webext().runtime.onInstalled.addListener(() => {
 webext().runtime.onStartup.addListener(() => {
   if (offscreenApi() !== null) void raiseEngineHost();
 });
+
+// The one thing asked of the browser about the extension's own storage: to
+// keep it. Firefox grants it to every extension declaring `unlimitedStorage`,
+// Chromium needs no promise, and WebKit's answer is a diagnosis as much as a
+// grant - the settings page shows it (`lib/storage-report.js`). Asked on every
+// wake rather than once at install: an origin already persisted costs one
+// question, and on WebKit the answer can change with what the user did since.
+void ensurePersistent();

@@ -29,6 +29,7 @@ import { describeError } from "../lib/messages.js";
 import { armBackArrow } from "../lib/back-arrow.js";
 import { ErrorCode, Message, asResult, fail } from "../lib/protocol.js";
 import { writeVocabTab } from "../lib/session.js";
+import { restoreVocabulary } from "../lib/store/backup.js";
 import { MIRROR_KEY } from "../lib/store/mirror.js";
 import { exportFilename, fromTsv, pairFromFilename, toTsv } from "../lib/store/tsv.js";
 import { listPairs, listPhrases } from "../lib/store/vocab.js";
@@ -370,6 +371,15 @@ async function reload() {
     if (pair !== shownPair) {
       shownPair = pair;
       page = 1;
+    }
+
+    // A vocabulary the browser deleted comes back from its copy before the
+    // list is read (`backup.js`) - this page reads the store directly, so it
+    // cannot lean on the background having settled it first. What came back
+    // the pages learn through the background's mirror, which LIST_PHRASES
+    // asks it to rebuild.
+    if ((await restoreVocabulary()) > 0) {
+      void webext().runtime.sendMessage({ kind: Message.LIST_PHRASES }).catch(() => {});
     }
 
     // With no pair chosen there is no current list to show - the page opens

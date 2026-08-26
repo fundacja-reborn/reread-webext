@@ -575,6 +575,22 @@
   "options_sections_aria": { "message": "Abschnitte dieser Seite" },
   "options_engine": { "message": "Engine" },
   "options_engine_value": { "message": "Bergamot, im Paket enthalten - übersetzt offline" },
+  "options_storage": { "message": "Daten auf diesem Gerät" },
+  "options_storage_value": {
+    "message": "$SIZE$ - Modelle, Wörterbücher, Leseliste und Ihre Phrasen zusammen",
+    "placeholders": { "size": { "content": "$1", "example": "143,2 MB" } }
+  },
+  "options_storage_persistent": { "message": "Dauerhafter Speicher: gewährt. Der Browser hat zugesagt, diese Daten nicht zu löschen, um Platz zu schaffen." },
+  "options_storage_at_risk": { "message": "Dauerhafter Speicher: nicht gewährt. Safari löscht die Daten einer Website nach etwa einem Monat Nutzung ohne ein Tippen auf ihre Seiten, und die Seiten dieser Erweiterung zählen als eine Website. Ihre Phrasen haben eine Kopie, die das übersteht (Zeile darunter); Modelle, Wörterbücher und Leseliste nicht - öffnen Sie ab und zu die Leseansicht oder diese Einstellungen." },
+  "options_storage_backup_one": {
+    "message": "Kopie des Wortschatzes: $COUNT$ Phrase, geschrieben $WHEN$ - dort, wo der Browser Daten nicht von sich aus löscht.",
+    "placeholders": { "count": { "content": "$1", "example": "1" }, "when": { "content": "$2", "example": "26.08.26, 12:41" } }
+  },
+  "options_storage_backup_other": {
+    "message": "Kopie des Wortschatzes: $COUNT$ Phrasen, geschrieben $WHEN$ - dort, wo der Browser Daten nicht von sich aus löscht.",
+    "placeholders": { "count": { "content": "$1", "example": "1234" }, "when": { "content": "$2", "example": "26.08.26, 12:41" } }
+  },
+  "options_storage_backup_none": { "message": "Kopie des Wortschatzes: noch keine - sie entsteht mit der nächsten gespeicherten Phrase." },
   "options_pair_hint": { "message": "Zur Wahl stehen die Paare, deren Übersetzungsmodelle Sie auf dieses Gerät heruntergeladen haben - wenn Sie in einem anderen Sprachpaar übersetzen möchten, finden Sie sein Modell im Abschnitt" },
   "options_pair_none": { "message": "Noch kein Modell - laden Sie unten eines herunter" },
   "options_reader_only": { "message": "Nur in der Leseansicht" },

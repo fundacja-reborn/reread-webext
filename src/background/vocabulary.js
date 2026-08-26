@@ -2,11 +2,15 @@
  * The background's half of the vocabulary: the database, and the copy pages
  * are allowed to read.
  *
- * Every write here is two steps - the row, then the mirror - and they are in
- * this module rather than in the router so that no future caller can do the
- * first without the second. The mirror is rebuilt in full from what the
- * database just said; a cache that patched itself would be a second version of
- * the truth, and this one is not allowed to have opinions.
+ * Every write here is three steps - the row, then the mirror, then the copy
+ * that outlives the database (`backup.js`) - and they are in this module
+ * rather than in the router so that no future caller can do the first without
+ * the others. Both copies are rebuilt in full from what the database just
+ * said; a cache that patched itself would be a second version of the truth,
+ * and neither is allowed to have opinions. And before every write the store
+ * is settled: a vocabulary the browser deleted comes back from its copy
+ * first, so a save can never land on a freshly emptied store and rebuild the
+ * copy from that one phrase.
  *
  * Nothing here catches: the message router turns an exception into `internal`,
  * and a database that cannot be opened is exactly that.
@@ -15,6 +19,7 @@
 import { normalize } from "../lib/normalize.js";
 import { chosenPair, readConfig } from "../lib/config.js";
 import { ErrorCode, fail, ok } from "../lib/protocol.js";
+import { ensureBackup, rebuildBackup, restoreVocabulary } from "../lib/store/backup.js";
 import { mirrorOf, writeMirror } from "../lib/store/mirror.js";
 import { buildPhrase } from "../lib/store/phrase.js";
 import { deletePhrase, listPhrases, putMissingPhrases, putPhrase } from "../lib/store/vocab.js";
@@ -50,14 +55,56 @@ async function rebuildMirror(config) {
 }
 
 /**
+ * The two copies that follow every write to the database - the pages' mirror
+ * and the copy that outlives the database - both rebuilt in full from what
+ * the database just said.
+ *
+ * @param {import("../lib/config.js").Config} config
+ * @returns {Promise<void>}
+ */
+async function afterWrite(config) {
+  await rebuildMirror(config);
+  await rebuildBackup();
+}
+
+/**
+ * The store settled: whatever the browser deleted is back from its copy
+ * before the caller reads or writes. Asked before every write and not only
+ * at start, because a deletion can land while the background is alive; on
+ * every ordinary call it costs one count. The pages' mirror is the caller's
+ * to rebuild when something came back - the writes rebuild it anyway.
+ *
+ * @returns {Promise<number>} how many phrases came back
+ */
+function settled() {
+  return restoreVocabulary();
+}
+
+/**
+ * Every start of the background: the store settled - with the mirror
+ * rebuilt if something came back, so the pages' underlines return with the
+ * words - and a copy written for a vocabulary that has none yet, which is
+ * every installation that kept its phrases before the copy existed. Quiet on
+ * failure: a start must not hang on it, and the next write asks again.
+ */
+const started = settled()
+  .then(async (restored) => {
+    if (restored > 0) await rebuildMirror(await readConfig());
+    await ensureBackup();
+  })
+  .catch(() => undefined);
+
+/**
  * Kept out of the message path: an install or an update is the one moment the
  * mirror can be missing while the database is not - a new version with a
- * different shape, or storage cleared under a database that survived.
+ * different shape, or storage cleared under a database that survived. The
+ * copy too: an update is what hands it to installations that predate it.
  *
  * @returns {Promise<void>}
  */
 export async function refreshVocabulary() {
-  await rebuildMirror(await readConfig());
+  await started;
+  await afterWrite(await readConfig());
 }
 
 /**
@@ -65,6 +112,8 @@ export async function refreshVocabulary() {
  * @returns {Promise<import("../lib/protocol.js").Result<null>>}
  */
 export async function savePhrase(request) {
+  await started;
+  await settled();
   const config = await readConfig();
   const pair = pairOf(config);
   // Unreachable through the UI - a bubble with no pair shows the model error
@@ -82,7 +131,7 @@ export async function savePhrase(request) {
   if (!built.ok) return built;
 
   await putPhrase(built.value);
-  await rebuildMirror(config);
+  await afterWrite(config);
   return ok(null);
 }
 
@@ -97,6 +146,8 @@ export async function forgetPhrase(request) {
   const normalized = normalize(request.text);
   if (normalized.length === 0) return ok(null);
 
+  await started;
+  const restored = await settled();
   const config = await readConfig();
   const pair = pairOf(config);
   // No pair holds no phrases, so there is nothing to forget - true, not an error.
@@ -104,7 +155,8 @@ export async function forgetPhrase(request) {
   const forgotten = await deletePhrase({ ...pair, normalized });
   // Only when something changed: an untouched mirror written again is a storage
   // event in every open tab, and every one of them would rebuild for nothing.
-  if (forgotten) await rebuildMirror(config);
+  // A restore is a change too - the pages must learn what came back.
+  if (forgotten || restored > 0) await afterWrite(config);
   return ok(null);
 }
 
@@ -122,6 +174,8 @@ export async function forgetPhrase(request) {
  * @returns {Promise<import("../lib/protocol.js").Result<import("../lib/protocol.js").ImportReport>>}
  */
 export async function importPhrases(request) {
+  await started;
+  const restored = await settled();
   const config = await readConfig();
   // An import lands in the configured pair, and with none there is nowhere
   // for it to land - importing into a guessed pair would be data loss wearing
@@ -150,17 +204,21 @@ export async function importPhrases(request) {
   const { added, skipped } = await putMissingPhrases(rows);
   // Nothing added means the mirror already tells the truth, and rewriting it
   // would ping every open tab for nothing - the same restraint as forgetting.
-  if (added > 0) await rebuildMirror(config);
+  // A restore is a change too - the pages must learn what came back.
+  if (added > 0 || restored > 0) await afterWrite(config);
   return ok({ added, skipped, invalid });
 }
 
 /**
  * The repair path. A page asks for this when the mirror it found describes a
  * different language pair than the one being read, and the answer doubles as
- * the rebuild.
+ * the rebuild - settled first, so a page asking after a deletion gets the
+ * vocabulary back rather than an honest nothing.
  *
  * @returns {Promise<import("../lib/protocol.js").Result<import("../lib/protocol.js").VocabEntry[]>>}
  */
 export async function listVocabulary() {
+  await started;
+  await settled();
   return ok(await rebuildMirror(await readConfig()));
 }
