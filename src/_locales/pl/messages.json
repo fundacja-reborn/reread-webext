@@ -734,6 +734,7 @@
     "message": "$SIZE$ - razem modele, słowniki, czytelnia i Twoje frazy",
     "placeholders": { "size": { "content": "$1", "example": "143,2 MB" } }
   },
+  "options_storage_how": { "message": "Tyle zajmują na dysku bazy przeglądarki. Słownik kosztuje trzy-cztery razy więcej niż jego tekst - każde słowo i każda inna pisownia to osobny wiersz; modele i czytelnia kosztują mniej więcej tyle, ile pokazują ich listy." },
   "options_storage_persistent": { "message": "Magazyn trwały: przyznany. Przeglądarka obiecała nie kasować tych danych, żeby zrobić miejsce." },
   "options_storage_at_risk": { "message": "Magazyn trwały: nieprzyznany. Safari kasuje dane witryny po około miesiącu używania bez dotknięcia jej stron, a strony tego rozszerzenia liczą się jak jedna witryna. Frazy mają kopię, która to przetrwa (linijka niżej); modele, słowniki i czytelnia nie - otwieraj widok czytania albo te ustawienia od czasu do czasu." },
   "options_storage_backup_one": {

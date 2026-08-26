@@ -718,6 +718,7 @@
     "description": "The size line of the storage row. $SIZE$ is the amount, already formatted with its unit.",
     "placeholders": { "size": { "content": "$1", "example": "143.2 MB" } }
   },
+  "options_storage_how": { "message": "What the browser's databases take on disk. A dictionary costs three to four times its text - every word and every other spelling is a row of its own; the models and the reading list cost about what their lists say." },
   "options_storage_persistent": { "message": "Persistent storage: granted. The browser has promised not to clear this data to make room." },
   "options_storage_at_risk": {
     "message": "Persistent storage: not granted. Safari clears a site's data after about a month of use without a tap on its pages, and this extension's pages count as one site. Your phrases have a copy that survives this (the line below); the models, the dictionaries and the reading list do not - open the reader or these settings now and then.",
