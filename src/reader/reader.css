@@ -498,10 +498,65 @@ html {
    D80 already paid it on touch. */
 #article {
   user-select: none;
-  /* The prefixed twin: our floor's Safari documents the unprefixed form,
-     yet the iPad spike still watched WebKit build selections here - one
-     more line asks in WebKit's oldest dialect and costs nothing. */
+  /* Not a belt but the only line WebKit reads: Safari 18 has no unprefixed
+     `user-select` at all (WebKit's trunk carries one behind a flag), which
+     is why the iPad spike watched native selections being built under an
+     article that said `user-select: none`. */
   -webkit-user-select: none;
+}
+
+/* iOS's dialect of that refusal, and the one place this stylesheet tells
+   engines apart (`-webkit-touch-callout` exists in WebKit on iOS alone).
+
+   WebKit paints `::highlight()` only through text somebody could select: it
+   walks every highlight range's ends through the same candidate positions a
+   caret may stand on (`Document::updateHighlightPositions`), and a caret may
+   never stand in `user-select: none` text - so the ends slide off to the
+   nearest selectable chrome and nothing paints inside the article: not the
+   selection, not the underlines, not the marks (Michał's iPad, 2026-08-26,
+   the day after the prefixed line above started being read). Gecko and Blink
+   paint regardless and keep the plain rule.
+
+   iOS's long-press selection, on the other hand, asks the element the finger
+   HIT: the loupe is refused when that element's user-select is none, and it
+   never looks at the text underneath (`selectionPositionInformation` in
+   WebKit - a hit test, so it honours pointer-events). So the article's
+   content goes back to being selectable text, which is what lets it be
+   painted, and stops answering pointer events, so every touch on it lands on
+   #article itself, whose `none` refuses the loupe. select.js is untouched by
+   this: its target check is inclusive of the root, and every word it finds
+   comes from `caretPositionFromPoint`, which descends from #article into the
+   text the way it always did. The reader's own `elementFromPoint` climb
+   lands on #article here and takes the rect fallback that function already
+   carries. The same split serves the highlights page's quotes (D109).
+
+   What must still answer a press answers it: live links and their preview,
+   images and media with their own long-press menus, form controls. The
+   non-text ones say `none` themselves, so the loupe keeps refusing on them;
+   a link's text stays selectable so an underline through it can paint.
+   Links dressed as plain text (D95) are text here and pass their presses
+   through - a hold on one selects, a tap on one does nothing, exactly what
+   the dress promises. */
+@supports (-webkit-touch-callout: none) {
+  #article > *,
+  .marks-rows :is(.marks-quote, .marks-note) {
+    -webkit-user-select: text;
+    user-select: text; /* for the day WebKit reads the unprefixed form */
+    pointer-events: none;
+  }
+
+  #article :is(a, img, picture, video, audio, iframe, button, input, select, textarea) {
+    pointer-events: auto;
+  }
+
+  #article :is(img, picture, video, audio, iframe) {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  :root[data-reader-links="plain"] #content a {
+    pointer-events: none;
+  }
 }
 
 /* What that gesture paints instead, named in select.js: the same
@@ -1004,7 +1059,10 @@ body.reader:has(#library:not([hidden])) {
    the gesture arrived: every row carries its copy button. */
 .marks-rows {
   user-select: none;
-  -webkit-user-select: none; /* the belt #article wears, same reason */
+  -webkit-user-select: none; /* the line WebKit reads, as on #article */
+  /* On iOS the quotes themselves are handled with the article, in the
+     `-webkit-touch-callout` block beside #article: selectable for the
+     painter, deaf to the finger, so the loupe meets this rule instead. */
 }
 
 /* The row wears its mark's ink on the leading edge - the one place colour
