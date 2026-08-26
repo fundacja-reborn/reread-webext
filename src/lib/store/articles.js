@@ -225,7 +225,11 @@ export async function allArticles() {
  *
  * The marks an entry brought ride in beside it (D106) - and only beside an
  * entry that is being added: a skipped article keeps its copy untouched in
- * the whole, marks included.
+ * the whole, marks included. And only where no marks row stands under the
+ * address already: the one row that can stand under an address nobody saved
+ * is the copy's (`marks-backup.js`, after the browser emptied the library),
+ * and it is the latest word - newer than any file, which was written before
+ * the marks the reader made since.
  *
  * @param {import("./articles-file.js").FileArticle[]} articles
  * @returns {Promise<{ added: number, skipped: number }>}
@@ -240,7 +244,8 @@ export async function importArticles(articles) {
       await promisify(stores.meta.put(meta));
       await promisify(stores.content.put({ url: article.url, content, dir, lang }));
       if (marks !== undefined && marks.length > 0) {
-        await promisify(stores.marks.put({ docId: article.url, marks }));
+        const standing = await promisify(stores.marks.getKey(article.url));
+        if (standing === undefined) await promisify(stores.marks.put({ docId: article.url, marks }));
       }
     }
     return { added: toAdd.length, skipped };
