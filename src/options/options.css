@@ -594,6 +594,18 @@ summary::marker {
     justify-self: end;
   }
 
+  /* The storage row's value is a sentence, and the `auto` track above would
+     take the label's room and wrap "Data on this device" word by word
+     (Michał's Firefox, 2026-08-26). Here the label keeps its width and the
+     sentence is what wraps - flush right, the way every value stands. */
+  .row-storage {
+    grid-template-columns: max-content minmax(0, 1fr);
+  }
+
+  .row-storage > .row-value {
+    text-align: end;
+  }
+
   /* List rows on one line: name | size | action. */
   .model-name {
     grid-column: 1;
