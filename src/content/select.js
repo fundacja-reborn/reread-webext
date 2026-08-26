@@ -75,7 +75,7 @@ import {
   wordIndexAt,
 } from "../lib/matcher/words.js";
 import { madeSelection } from "../lib/selection.js";
-import { supported } from "./highlighter.js";
+import { supported, unregister } from "./highlighter.js";
 import { blockAround, blockPieces } from "./scan.js";
 
 /** Must be the name in `reader.css`. */
@@ -436,7 +436,7 @@ export function clearSelection() {
   span = null;
   range = null;
   highlight = null;
-  if (supported()) CSS.highlights.delete(NAME);
+  unregister(NAME);
   // The wet stroke goes with it: every caller here means "whatever a gesture
   // was building is over" - a rendered-over article most of all.
   clearInk();
@@ -464,7 +464,7 @@ function clearInk() {
   ink = null;
   inkFocus = null;
   inkHighlight = null;
-  if (supported()) CSS.highlights.delete(DRAFT);
+  unregister(DRAFT);
 }
 
 /**
