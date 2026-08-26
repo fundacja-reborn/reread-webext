@@ -104,6 +104,7 @@ import {
   sweepOrphanSegments,
 } from "../lib/store/books.js";
 import { MARKS_FILENAME, toMarksFile } from "../lib/store/marks-file.js";
+import { restoreLibrary } from "../lib/store/library-copy.js";
 import { allMarks, getMarks, putMarks, restoreMarks } from "../lib/store/marks.js";
 import { keptTitles, readMarksBackup } from "../lib/store/marks-backup.js";
 import { Segment, emptySentence, savedArticle } from "../lib/store/saved-article.js";
@@ -2532,9 +2533,12 @@ async function showMarks(scope, { fresh = false } = {}) {
 
 async function refreshLibrary() {
   if (libraryEmpty === null || libraryRows === null) return;
-  // Whatever the browser deleted comes back from its copy before the list
-  // reads (`marks-backup.js`) - three counts on every ordinary refresh.
+  // Whatever the browser deleted comes back from its copies before the list
+  // reads - the highlights first (`marks-backup.js`, whose rule wants an
+  // empty library), then the reading list itself where its copy is on
+  // (`library-copy.js`). Five counts on every ordinary refresh.
   await restoreMarks();
+  await restoreLibrary();
   // One list, two stores: books enter dressed as rows (`bookEntry`), with
   // their positions read in bulk - fifty rows must not mean fifty lookups.
   // The marks ride in the same round trip only to answer one button's grey;

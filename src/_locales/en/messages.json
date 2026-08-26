@@ -743,6 +743,21 @@
     "placeholders": { "count": { "content": "$1", "example": "37" }, "when": { "content": "$2", "example": "8/26/26, 12:41 PM" } }
   },
   "options_storage_marks_backup_none": { "message": "Copy of the highlights: none yet - it is written with the next highlight you make." },
+  "options_storage_library_copy_one": {
+    "message": "Copy of the reading list: $COUNT$ document, $SIZE$.",
+    "description": "Plural family over the document count; $SIZE$ is a size such as \"12.4 MB\".",
+    "placeholders": { "count": { "content": "$1", "example": "1" }, "size": { "content": "$2", "example": "12.4 MB" } }
+  },
+  "options_storage_library_copy_other": {
+    "message": "Copy of the reading list: $COUNT$ documents, $SIZE$.",
+    "placeholders": { "count": { "content": "$1", "example": "37" }, "size": { "content": "$2", "example": "12.4 MB" } }
+  },
+  "options_storage_library_copy_none": { "message": "Copy of the reading list: none yet - it is written with the next page you save or book you import." },
+  "options_storage_library_copy_off": { "message": "Copy of the reading list: off." },
+  "options_library_copy": { "message": "Copy of the reading list" },
+  "options_library_copy_hint": {
+    "message": "Keeps a second copy of every saved article and book, with the place you stopped reading, in the extension's own storage - the part a browser does not clear when it clears the reading list's database. It doubles the space the reading list takes. On iOS and iPadOS it is on unless you switch it off: Safari may delete the reading list after thirty days without a visit to the extension's pages, and the copy is what brings it back."
+  },
   "reader_marks_missing_doc": {
     "message": "Its document is no longer saved - this quote came back from the copy. Open the page again and the highlight will be there.",
     "description": "Under a quote on the highlights page whose document is gone from the reading list; the quote was restored from the copy kept in storage.local."

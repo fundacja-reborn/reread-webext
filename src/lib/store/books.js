@@ -16,8 +16,9 @@
  */
 
 import { asBookMeta, asSegment } from "./book.js";
+import { copyBook, dropBookCopy, patchBookCopy, restoreLibrary } from "./library-copy.js";
 import { promisify, withLibrary } from "./library-db.js";
-import { rebuildMarksBackup } from "./marks.js";
+import { rebuildMarksBackup, restoreMarks } from "./marks.js";
 
 /**
  * @typedef {import("./book.js").BookMeta} BookMeta
@@ -49,15 +50,23 @@ export async function putBookSegment(segment) {
 }
 
 /**
- * The last write of an import - the row that makes the book exist.
+ * The last write of an import - the row that makes the book exist. Whatever
+ * the browser deleted is asked back first (the highlights' copy, then the
+ * reading list's - `library-copy.js` says why in that order), because this
+ * write is one that fills an empty library and would shut the door on a
+ * restore; and the book goes into the reading list's copy after, whole,
+ * read back from the segments the import wrote before this row.
  *
  * @param {BookMeta} book
  * @returns {Promise<void>}
  */
 export async function putBook(book) {
+  await restoreMarks();
+  await restoreLibrary();
   await withLibrary("readwrite", async (stores) => {
     await promisify(stores.books.put(book));
   });
+  await copyBook(book.id);
 }
 
 /**
@@ -114,8 +123,10 @@ export async function deleteBook(id) {
     await promisify(stores.marks.delete(id));
   });
   // The marks left with the book, and the copy that outlives the database
-  // follows every write that touches a marks row (`marks-backup.js`).
+  // follows every write that touches a marks row (`marks-backup.js`); the
+  // reading list's own copy lets the book go the same way.
   await rebuildMarksBackup();
+  await dropBookCopy(id);
 }
 
 /**
@@ -127,13 +138,15 @@ export async function deleteBook(id) {
  * @returns {Promise<BookMeta | null>} the row as it stands now
  */
 export async function setBookReadAt(id, readAt) {
-  return await withLibrary("readwrite", async (stores) => {
+  const updated = await withLibrary("readwrite", async (stores) => {
     const row = asBookMeta(await promisify(stores.books.get(id)));
     if (row === null) return null;
     const updated = { ...row, readAt };
     await promisify(stores.books.put(updated));
     return updated;
   });
+  if (updated !== null) await patchBookCopy(updated);
+  return updated;
 }
 
 /**
@@ -149,12 +162,15 @@ export async function setBookReadAt(id, readAt) {
  * @returns {Promise<boolean>} whether this call's list is the one stored
  */
 export async function setBookToc(id, toc) {
-  return await withLibrary("readwrite", async (stores) => {
+  const written = await withLibrary("readwrite", async (stores) => {
     const row = asBookMeta(await promisify(stores.books.get(id)));
-    if (row === null || row.toc !== null) return false;
-    await promisify(stores.books.put({ ...row, toc }));
-    return true;
+    if (row === null || row.toc !== null) return null;
+    const updated = { ...row, toc };
+    await promisify(stores.books.put(updated));
+    return updated;
   });
+  if (written !== null) await patchBookCopy(written);
+  return written !== null;
 }
 
 /**

@@ -74,6 +74,15 @@ export const CONFIG_KEY = "config";
  *   position, and writing over it would take both, so reopening a page must
  *   never be what erases them. Live pages only: books and saved articles are
  *   in the list by definition.
+ * @property {boolean | null} libraryCopy Whether the reading list keeps a
+ *   copy of itself in the extension's own storage, where the browser's
+ *   clearing of the database does not reach (`lib/store/library-backup.js`).
+ *   `null` means nobody has chosen, and the platform decides at read time
+ *   (`effectiveLibraryCopy`): on iOS and iPadOS on - Safari may delete the
+ *   database after thirty days without a visit to the extension's pages -
+ *   and elsewhere off, because the copy doubles the space the reading list
+ *   takes and no other browser deletes on its own. Only a hand-set value is
+ *   stored, for the reason `readerOnly` stores only one.
  * @property {boolean} hideBubbleActions Whether the translation bubble opens
  *   with its action row folded away, unfolding on a click or tap on the bubble
  *   (D81). Save is the standing exception either way: a phrase that does not
@@ -192,6 +201,7 @@ export const DEFAULTS = Object.freeze({
   readerOnly: null,
   translationOff: false,
   keepArticles: true,
+  libraryCopy: null,
   hideBubbleActions: false,
   ttsVoices: {},
   ttsRate: 100,
@@ -331,6 +341,9 @@ export function withDefaults(stored) {
     // as fresh ones: only a stored `false` is somebody having turned it off.
     keepArticles:
       typeof raw["keepArticles"] === "boolean" ? raw["keepArticles"] : DEFAULTS.keepArticles,
+    // As `readerOnly`: not a boolean is nobody having chosen, which the
+    // platform then decides (`effectiveLibraryCopy`).
+    libraryCopy: typeof raw["libraryCopy"] === "boolean" ? raw["libraryCopy"] : null,
     hideBubbleActions:
       typeof raw["hideBubbleActions"] === "boolean" ? raw["hideBubbleActions"] : DEFAULTS.hideBubbleActions,
     ttsVoices: voiceMap(raw["ttsVoices"]),
@@ -375,7 +388,7 @@ export async function readConfig() {
  * the settings page holds the full map and choosing the default voice has to
  * be able to remove an entry - a per-key merge could only ever add.
  *
- * @param {{ sourceLang?: string, targetLang?: string, reader?: Partial<ReaderConfig>, disabledHosts?: string[], readerOnly?: boolean, translationOff?: boolean, keepArticles?: boolean, hideBubbleActions?: boolean, ttsVoices?: Record<string, string>, ttsRate?: number, bubbleScale?: number, underline?: import("./underline.js").UnderlineWeight }} patch
+ * @param {{ sourceLang?: string, targetLang?: string, reader?: Partial<ReaderConfig>, disabledHosts?: string[], readerOnly?: boolean, translationOff?: boolean, keepArticles?: boolean, libraryCopy?: boolean, hideBubbleActions?: boolean, ttsVoices?: Record<string, string>, ttsRate?: number, bubbleScale?: number, underline?: import("./underline.js").UnderlineWeight }} patch
  * @returns {Promise<Config>}
  */
 export async function writeConfig(patch) {
@@ -431,6 +444,24 @@ export function osFrom(stored) {
  */
 export function effectiveReaderOnly(config, os) {
   return config.readerOnly ?? (os === "android" || os === "ios" || os === "ipados");
+}
+
+/**
+ * The same rule for the reading list's copy: a hand-set value wins, and with
+ * none the platform decides - on where the browser is known to delete the
+ * database on its own. That is Safari on iOS and iPadOS (its tracking
+ * prevention deletes an origin's storage after thirty days without a visit
+ * to the extension's pages, and the extension cannot ask to be spared - the
+ * probe in `lib/storage-report.js`). Firefox never deletes an extension's
+ * storage and Chromium only under pressure for space, so there the copy is
+ * a choice, and the space it doubles is not spent unasked.
+ *
+ * @param {Pick<Config, "libraryCopy">} config
+ * @param {string} os as `getPlatformInfo` or `osFrom` names it
+ * @returns {boolean}
+ */
+export function effectiveLibraryCopy(config, os) {
+  return config.libraryCopy ?? (os === "ios" || os === "ipados");
 }
 
 /**

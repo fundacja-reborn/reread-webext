@@ -23,6 +23,13 @@
 
 import { asPosition } from "../reader/position.js";
 import { importPlan } from "./articles-file.js";
+import {
+  copyArticle,
+  copyPosition,
+  dropArticleCopy,
+  patchArticleCopy,
+  restoreLibrary,
+} from "./library-copy.js";
 import { promisify, withLibrary } from "./library-db.js";
 import { rebuildMarksBackup, restoreMarks } from "./marks.js";
 import { asSavedMeta } from "./saved-article.js";
@@ -44,13 +51,15 @@ import { asSavedMeta } from "./saved-article.js";
  * gets. A first save of an address clears nothing: the only marks that can
  * stand under an address nobody saved are the ones the copy put back after
  * the browser emptied the library (`marks-backup.js`), and this save is the
- * page returning to them.
+ * page returning to them. The reading list's own copy is asked back first
+ * for the same reason and written after (`library-copy.js`).
  *
  * @param {SavedArticle} article
  * @returns {Promise<void>}
  */
 export async function putArticle(article) {
   await restoreMarks();
+  await restoreLibrary();
   const { content, dir, lang, ...meta } = article;
   const replaced = await withLibrary("readwrite", async (stores) => {
     const existing = await promisify(stores.meta.get(article.url));
@@ -62,6 +71,7 @@ export async function putArticle(article) {
     return true;
   });
   if (replaced) await rebuildMarksBackup();
+  await copyArticle(article, replaced);
 }
 
 /**
@@ -81,6 +91,7 @@ export async function deleteArticle(url) {
     await promisify(stores.marks.delete(url));
   });
   await rebuildMarksBackup();
+  await dropArticleCopy(url);
 }
 
 /**
@@ -126,6 +137,7 @@ export async function putPosition(position) {
   await withLibrary("readwrite", async (stores) => {
     await promisify(stores.positions.put(position));
   });
+  await copyPosition(position);
 }
 
 /**
@@ -236,10 +248,12 @@ export async function allArticles() {
  */
 export async function importArticles(articles) {
   await restoreMarks();
-  const report = await withLibrary("readwrite", async (stores) => {
+  const { added, skipped } = await withLibrary("readwrite", async (stores) => {
     const keys = /** @type {IDBValidKey[]} */ (await promisify(stores.meta.getAllKeys()));
-    const { toAdd, skipped } = importPlan(keys.map(String), articles);
-    for (const article of toAdd) {
+    const plan = importPlan(keys.map(String), articles);
+    /** @type {SavedArticle[]} */
+    const added = [];
+    for (const article of plan.toAdd) {
       const { content, dir, lang, marks, ...meta } = article;
       await promisify(stores.meta.put(meta));
       await promisify(stores.content.put({ url: article.url, content, dir, lang }));
@@ -247,11 +261,13 @@ export async function importArticles(articles) {
         const standing = await promisify(stores.marks.getKey(article.url));
         if (standing === undefined) await promisify(stores.marks.put({ docId: article.url, marks }));
       }
+      added.push({ ...meta, content, dir, lang });
     }
-    return { added: toAdd.length, skipped };
+    return { added, skipped: plan.skipped };
   });
-  if (report.added > 0) await rebuildMarksBackup();
-  return report;
+  if (added.length > 0) await rebuildMarksBackup();
+  for (const article of added) await copyArticle(article, false);
+  return { added: added.length, skipped };
 }
 
 /**
@@ -264,11 +280,13 @@ export async function importArticles(articles) {
  * @returns {Promise<SavedMeta | null>} the row as it stands now
  */
 export async function setReadAt(url, readAt) {
-  return await withLibrary("readwrite", async (stores) => {
+  const updated = await withLibrary("readwrite", async (stores) => {
     const row = asSavedMeta(await promisify(stores.meta.get(url)));
     if (row === null) return null;
     const updated = { ...row, readAt };
     await promisify(stores.meta.put(updated));
     return updated;
   });
+  if (updated !== null) await patchArticleCopy(updated);
+  return updated;
 }

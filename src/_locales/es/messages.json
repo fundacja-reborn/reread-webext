@@ -623,6 +623,20 @@
     "placeholders": { "count": { "content": "$1", "example": "37" }, "when": { "content": "$2", "example": "26/8/26, 12:41" } }
   },
   "options_storage_marks_backup_none": { "message": "Copia de los resaltados: todavía ninguna - se escribirá con el próximo resaltado." },
+  "options_storage_library_copy_one": {
+    "message": "Copia de la lista de lectura: $COUNT$ documento, $SIZE$.",
+    "placeholders": { "count": { "content": "$1", "example": "1" }, "size": { "content": "$2", "example": "12,4 MB" } }
+  },
+  "options_storage_library_copy_other": {
+    "message": "Copia de la lista de lectura: $COUNT$ documentos, $SIZE$.",
+    "placeholders": { "count": { "content": "$1", "example": "37" }, "size": { "content": "$2", "example": "12,4 MB" } }
+  },
+  "options_storage_library_copy_none": { "message": "Copia de la lista de lectura: todavía ninguna - se escribirá con la próxima página guardada o el próximo libro importado." },
+  "options_storage_library_copy_off": { "message": "Copia de la lista de lectura: desactivada." },
+  "options_library_copy": { "message": "Copia de la lista de lectura" },
+  "options_library_copy_hint": {
+    "message": "Guarda una segunda copia de cada artículo y libro guardados, con el punto donde dejaste de leer, en el almacenamiento propio de la extensión - la parte que un navegador no borra junto con la base de datos de la lista de lectura. Duplica el espacio que ocupa la lista de lectura. En iOS y iPadOS está activada mientras no la desactives: Safari puede borrar la lista de lectura tras treinta días sin visitar las páginas de la extensión, y la copia es lo que la devuelve."
+  },
   "reader_marks_missing_doc": { "message": "Su documento ya no está guardado - esta cita volvió de la copia. Abre la página de nuevo y el resaltado estará ahí." },
   "options_pair_hint": { "message": "Se ofrecen los pares cuyos modelos de traducción descargaste en este dispositivo - si quieres traducir en otro par de idiomas, descarga su modelo en la sección" },
   "options_pair_none": { "message": "Aún no hay modelo - descarga uno abajo" },

@@ -631,6 +631,24 @@
     "placeholders": { "count": { "content": "$1", "example": "37" }, "when": { "content": "$2", "example": "26/08/2026 12:41" } }
   },
   "options_storage_marks_backup_none": { "message": "Copie des surlignages : aucune pour l'instant - elle sera écrite avec le prochain surlignage." },
+  "options_storage_library_copy_one": {
+    "message": "Copie de la liste de lecture : $COUNT$ document, $SIZE$.",
+    "placeholders": { "count": { "content": "$1", "example": "1" }, "size": { "content": "$2", "example": "12,4 Mo" } }
+  },
+  "options_storage_library_copy_many": {
+    "message": "Copie de la liste de lecture : $COUNT$ documents, $SIZE$.",
+    "placeholders": { "count": { "content": "$1", "example": "1 000 000" }, "size": { "content": "$2", "example": "12,4 Mo" } }
+  },
+  "options_storage_library_copy_other": {
+    "message": "Copie de la liste de lecture : $COUNT$ documents, $SIZE$.",
+    "placeholders": { "count": { "content": "$1", "example": "37" }, "size": { "content": "$2", "example": "12,4 Mo" } }
+  },
+  "options_storage_library_copy_none": { "message": "Copie de la liste de lecture : aucune pour l'instant - elle sera écrite avec la prochaine page enregistrée ou le prochain livre importé." },
+  "options_storage_library_copy_off": { "message": "Copie de la liste de lecture : désactivée." },
+  "options_library_copy": { "message": "Copie de la liste de lecture" },
+  "options_library_copy_hint": {
+    "message": "Conserve une seconde copie de chaque article et de chaque livre enregistrés, avec l'endroit où vous vous êtes arrêté, dans le stockage propre de l'extension - la partie qu'un navigateur n'efface pas avec la base de données de la liste de lecture. Elle double l'espace occupé par la liste de lecture. Sur iOS et iPadOS, elle est activée tant que vous ne la désactivez pas : Safari peut supprimer la liste de lecture après trente jours sans visite des pages de l'extension, et c'est la copie qui la ramène."
+  },
   "reader_marks_missing_doc": { "message": "Son document n'est plus enregistré - cette citation est revenue de la copie. Rouvrez la page et le surlignage y sera." },
   "options_pair_hint": { "message": "Les paires proposées sont celles dont vous avez téléchargé le modèle de traduction sur cet appareil - si vous voulez traduire dans une autre paire de langues, téléchargez son modèle dans la section" },
   "options_pair_none": { "message": "Pas encore de modèle - téléchargez-en un ci-dessous" },
