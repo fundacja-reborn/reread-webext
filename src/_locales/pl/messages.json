@@ -735,7 +735,24 @@
     "placeholders": { "size": { "content": "$1", "example": "143,2 MB" } }
   },
   "options_storage_persistent": { "message": "Magazyn trwały: przyznany. Przeglądarka obiecała nie kasować tych danych, żeby zrobić miejsce." },
-  "options_storage_at_risk": { "message": "Magazyn trwały: nieprzyznany. Safari kasuje dane witryny po około miesiącu używania bez dotknięcia jej stron, a strony tego rozszerzenia liczą się jak jedna witryna - otwieraj widok czytania albo te ustawienia od czasu do czasu i regularnie eksportuj frazy do pliku." },
+  "options_storage_at_risk": { "message": "Magazyn trwały: nieprzyznany. Safari kasuje dane witryny po około miesiącu używania bez dotknięcia jej stron, a strony tego rozszerzenia liczą się jak jedna witryna. Frazy mają kopię, która to przetrwa (linijka niżej); modele, słowniki i czytelnia nie - otwieraj widok czytania albo te ustawienia od czasu do czasu." },
+  "options_storage_backup_one": {
+    "message": "Kopia słownictwa: $COUNT$ fraza, zapisana $WHEN$ - tam, gdzie przeglądarka nie kasuje danych sama.",
+    "placeholders": { "count": { "content": "$1", "example": "1" }, "when": { "content": "$2", "example": "26.08.2026, 12:41" } }
+  },
+  "options_storage_backup_few": {
+    "message": "Kopia słownictwa: $COUNT$ frazy, zapisana $WHEN$ - tam, gdzie przeglądarka nie kasuje danych sama.",
+    "placeholders": { "count": { "content": "$1", "example": "3" }, "when": { "content": "$2", "example": "26.08.2026, 12:41" } }
+  },
+  "options_storage_backup_many": {
+    "message": "Kopia słownictwa: $COUNT$ fraz, zapisana $WHEN$ - tam, gdzie przeglądarka nie kasuje danych sama.",
+    "placeholders": { "count": { "content": "$1", "example": "1234" }, "when": { "content": "$2", "example": "26.08.2026, 12:41" } }
+  },
+  "options_storage_backup_other": {
+    "message": "Kopia słownictwa: $COUNT$ frazy, zapisana $WHEN$ - tam, gdzie przeglądarka nie kasuje danych sama.",
+    "placeholders": { "count": { "content": "$1", "example": "1,5" }, "when": { "content": "$2", "example": "26.08.2026, 12:41" } }
+  },
+  "options_storage_backup_none": { "message": "Kopia słownictwa: jeszcze jej nie ma - powstanie przy następnej zapisanej frazie." },
   "options_pair_hint": { "message": "Do wyboru są pary z modelami tłumaczeń, które pobrałeś na to urządzenie - jeśli chcesz tłumaczyć w innej parze językowej, pobierz jej model w sekcji" },
   "options_pair_none": { "message": "Nie ma jeszcze modelu - najpierw pobierz go poniżej" },
   "options_reader_only": { "message": "Tylko w widoku czytania" },

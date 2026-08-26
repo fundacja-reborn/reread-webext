@@ -191,6 +191,11 @@
         <span class="row-name" data-i18n="options_storage">Data on this device</span>
         <span class="row-value" id="storage-usage"></span>
         <p class="row-note" id="storage-note" hidden></p>
+        <!-- The copy of the vocabulary that outlives the database
+             (`lib/store/backup.js`): how many phrases it holds and since when,
+             or that there is none yet. Said everywhere, because it is true
+             everywhere; on WebKit it is also the answer to the note above. -->
+        <p class="row-note" id="storage-backup"></p>
       </div>
       <!-- Which voice reads a selection aloud (D83). The choices are the
            device's own voices for the pair's source language, and the choice

@@ -604,7 +604,16 @@
     "placeholders": { "size": { "content": "$1", "example": "143,2 MB" } }
   },
   "options_storage_persistent": { "message": "Almacenamiento persistente: concedido. El navegador ha prometido no borrar estos datos para hacer sitio." },
-  "options_storage_at_risk": { "message": "Almacenamiento persistente: no concedido. Safari borra los datos de un sitio tras aproximadamente un mes de uso sin tocar sus páginas, y las páginas de esta extensión cuentan como un sitio - abre la vista de lectura o estos ajustes de vez en cuando y exporta tus frases a un archivo con regularidad." },
+  "options_storage_at_risk": { "message": "Almacenamiento persistente: no concedido. Safari borra los datos de un sitio tras aproximadamente un mes de uso sin tocar sus páginas, y las páginas de esta extensión cuentan como un sitio. Tus frases tienen una copia que sobrevive a eso (línea de abajo); los modelos, los diccionarios y la lista de lectura no - abre la vista de lectura o estos ajustes de vez en cuando." },
+  "options_storage_backup_one": {
+    "message": "Copia del vocabulario: $COUNT$ frase, escrita $WHEN$ - donde el navegador no borra datos por su cuenta.",
+    "placeholders": { "count": { "content": "$1", "example": "1" }, "when": { "content": "$2", "example": "26/8/26, 12:41" } }
+  },
+  "options_storage_backup_other": {
+    "message": "Copia del vocabulario: $COUNT$ frases, escrita $WHEN$ - donde el navegador no borra datos por su cuenta.",
+    "placeholders": { "count": { "content": "$1", "example": "1234" }, "when": { "content": "$2", "example": "26/8/26, 12:41" } }
+  },
+  "options_storage_backup_none": { "message": "Copia del vocabulario: todavía ninguna - se escribirá con la próxima frase que guardes." },
   "options_pair_hint": { "message": "Se ofrecen los pares cuyos modelos de traducción descargaste en este dispositivo - si quieres traducir en otro par de idiomas, descarga su modelo en la sección" },
   "options_pair_none": { "message": "Aún no hay modelo - descarga uno abajo" },
   "options_reader_only": { "message": "Solo en la vista de lectura" },

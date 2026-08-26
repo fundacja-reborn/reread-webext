@@ -26,7 +26,7 @@ import {
   withDefaults,
   writeConfig,
 } from "../lib/config.js";
-import { aside, localizePage, plural, t } from "../lib/i18n.js";
+import { aside, localizePage, plural, t, uiLocale } from "../lib/i18n.js";
 import { armBackArrow } from "../lib/back-arrow.js";
 import { languageName, pairLabel } from "../lib/language.js";
 import { catalogDictionaries, catalogSource } from "../lib/dict/catalog.js";
@@ -63,6 +63,7 @@ import { modelSourceUrl, updateAvailable } from "../lib/models/upstream.js";
 import { testLoadModel } from "../lib/models/validate.js";
 import { Message } from "../lib/protocol.js";
 import { ensurePersistent, isWebKit, persistenceNote, readStorage } from "../lib/storage-report.js";
+import { readBackupSummary } from "../lib/store/backup.js";
 import { watchToolbarScheme } from "../lib/theme-icon.js";
 import { canSpeak, speak, voicesFor } from "../lib/tts.js";
 import {
@@ -444,6 +445,18 @@ async function renderStorage() {
   note.hidden = kind === null;
   note.textContent =
     kind === "granted" ? t("options_storage_persistent") : kind === "at-risk" ? t("options_storage_at_risk") : "";
+
+  // The copy of the vocabulary that outlives the database: its size and its
+  // date, in the reader's own calendar - or that there is none yet.
+  const copy = await readBackupSummary();
+  fill(
+    "storage-backup",
+    copy === null
+      ? t("options_storage_backup_none")
+      : plural(copy.count, "options_storage_backup", [
+          new Date(copy.writtenAt).toLocaleString(uiLocale(), { dateStyle: "short", timeStyle: "short" }),
+        ]),
+  );
 }
 
 /**

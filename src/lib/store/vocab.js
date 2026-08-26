@@ -232,3 +232,27 @@ export async function listPairs() {
     return pairs.map((pair, at) => ({ ...pair, count: counts[at] ?? 0 }));
   });
 }
+
+/**
+ * Everything saved, every pair, oldest first - what the copy that outlives
+ * the database is made of (`backup.js`). One `getAll` rather than a walk
+ * over the pairs, because the copy wants the rows exactly as they are stored.
+ *
+ * @returns {Promise<Phrase[]>}
+ */
+export async function allPhrases() {
+  const records = /** @type {Phrase[]} */ (
+    await withPhrases("readonly", (store) => promisify(store.getAll()))
+  );
+  return records.sort((a, b) => a.createdAt - b.createdAt || a.id.localeCompare(b.id));
+}
+
+/**
+ * Whether anything at all is saved - the one question a restore asks, and
+ * the cheapest the store can answer: a count, no row loaded.
+ *
+ * @returns {Promise<boolean>}
+ */
+export async function hasPhrases() {
+  return (await withPhrases("readonly", (store) => promisify(store.count()))) > 0;
+}
