@@ -106,6 +106,29 @@ export function unregister(name) {
 }
 
 /**
+ * Every registration re-anchored: each highlight's ranges taken out and put
+ * back, the same objects under the same names. An engine paints a range
+ * between candidate caret positions, and WebKit up to Safari 18 refuses
+ * those in inert text - so for as long as a modal dialog stands, every range
+ * outside it anchors to nothing and paints nowhere, and the frame that takes
+ * the dialog down does not always bring the paint back: the mark and the
+ * underlines under a closed note dialog stayed gone until a scroll (Michał's
+ * iPad, 2026-08-26). Putting the ranges back is the one move every engine
+ * answers with a fresh anchoring and a repaint - `add` repaints a range
+ * wherever it now stands. The registry is walked rather than the modules
+ * asked, because it is the paint that needs settling, whoever made it.
+ */
+export function refresh() {
+  const api = registry();
+  if (api === null) return;
+  for (const [, highlight] of api) {
+    const ranges = [...highlight];
+    highlight.clear();
+    for (const range of ranges) highlight.add(range);
+  }
+}
+
+/**
  * The mark under the phrase an open recall bubble is about (D89). One range,
  * marked at showing and taken away with the bubble: the bubble deliberately
  * does not repeat its phrase, a tap on an underline makes no selection, and
