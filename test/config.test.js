@@ -9,6 +9,7 @@ import {
   SIZE,
   TTS_RATE,
   chosenPair,
+  effectiveLibraryCopy,
   effectiveReaderOnly,
   osFrom,
   pageMode,
@@ -615,5 +616,39 @@ describe("the reader's appearance", () => {
       /** @type {any} */ (store["config"]).reader,
       { ...READER_DEFAULTS, fontSize: 22, links: "active" },
     );
+  });
+});
+
+describe("the reading list's copy", () => {
+  it("answers null for a profile that has never chosen", () => {
+    assert.equal(withDefaults(undefined).libraryCopy, null);
+    assert.equal(withDefaults({ keepArticles: false }).libraryCopy, null);
+  });
+
+  it("keeps a choice somebody made, in both directions", () => {
+    assert.equal(withDefaults({ libraryCopy: true }).libraryCopy, true);
+    assert.equal(withDefaults({ libraryCopy: false }).libraryCopy, false);
+  });
+
+  it("treats a hand-edited value of the wrong type as no choice", () => {
+    for (const libraryCopy of ["true", 1, null, {}]) {
+      assert.equal(withDefaults({ libraryCopy }).libraryCopy, null);
+    }
+  });
+
+  it("is on unasked only where the browser deletes the database on its own", () => {
+    // Safari's tracking prevention deletes the extension's IndexedDB after
+    // thirty days without a visit to its pages (the iPad probe answered
+    // "not persisted", 2026-08-26); Firefox never deletes an extension's
+    // storage, Chromium only under pressure - so the doubled space is a
+    // choice there. Both Apple names, as for the reader-only default.
+    assert.equal(effectiveLibraryCopy({ libraryCopy: null }, "ios"), true);
+    assert.equal(effectiveLibraryCopy({ libraryCopy: null }, "ipados"), true);
+    assert.equal(effectiveLibraryCopy({ libraryCopy: null }, "android"), false);
+    assert.equal(effectiveLibraryCopy({ libraryCopy: null }, "mac"), false);
+    assert.equal(effectiveLibraryCopy({ libraryCopy: null }, ""), false);
+    // A choice outlives the default in both directions.
+    assert.equal(effectiveLibraryCopy({ libraryCopy: false }, "ios"), false);
+    assert.equal(effectiveLibraryCopy({ libraryCopy: true }, "linux"), true);
   });
 });

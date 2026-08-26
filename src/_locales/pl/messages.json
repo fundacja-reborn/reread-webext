@@ -770,6 +770,28 @@
     "placeholders": { "count": { "content": "$1", "example": "1,5" }, "when": { "content": "$2", "example": "26.08.2026, 12:41" } }
   },
   "options_storage_marks_backup_none": { "message": "Kopia zakreśleń: jeszcze jej nie ma - powstanie przy następnym zakreśleniu." },
+  "options_storage_library_copy_one": {
+    "message": "Kopia czytelni: $COUNT$ dokument, $SIZE$.",
+    "placeholders": { "count": { "content": "$1", "example": "1" }, "size": { "content": "$2", "example": "12,4 MB" } }
+  },
+  "options_storage_library_copy_few": {
+    "message": "Kopia czytelni: $COUNT$ dokumenty, $SIZE$.",
+    "placeholders": { "count": { "content": "$1", "example": "3" }, "size": { "content": "$2", "example": "12,4 MB" } }
+  },
+  "options_storage_library_copy_many": {
+    "message": "Kopia czytelni: $COUNT$ dokumentów, $SIZE$.",
+    "placeholders": { "count": { "content": "$1", "example": "37" }, "size": { "content": "$2", "example": "12,4 MB" } }
+  },
+  "options_storage_library_copy_other": {
+    "message": "Kopia czytelni: $COUNT$ dokumentu, $SIZE$.",
+    "placeholders": { "count": { "content": "$1", "example": "1,5" }, "size": { "content": "$2", "example": "12,4 MB" } }
+  },
+  "options_storage_library_copy_none": { "message": "Kopia czytelni: jeszcze jej nie ma - powstanie przy następnej zapisanej stronie albo zaimportowanej książce." },
+  "options_storage_library_copy_off": { "message": "Kopia czytelni: wyłączona." },
+  "options_library_copy": { "message": "Kopia czytelni" },
+  "options_library_copy_hint": {
+    "message": "Trzyma drugą kopię każdego zapisanego artykułu i każdej książki, razem z miejscem, w którym przerwano czytanie, w magazynie samego rozszerzenia - tej jego części, której przeglądarka nie czyści razem z bazą czytelni. Podwaja miejsce zajmowane przez czytelnię. Na iOS i iPadOS jest włączona, dopóki jej nie wyłączysz: Safari może usunąć czytelnię po trzydziestu dniach bez wizyty na stronach rozszerzenia, a z kopii czytelnia wraca."
+  },
   "reader_marks_missing_doc": { "message": "Ten dokument nie jest już zapisany - cytat wrócił z kopii. Otwórz stronę ponownie, a zakreślenie będzie na miejscu." },
   "options_pair_hint": { "message": "Do wyboru są pary z modelami tłumaczeń, które pobrałeś na to urządzenie - jeśli chcesz tłumaczyć w innej parze językowej, pobierz jej model w sekcji" },
   "options_pair_none": { "message": "Nie ma jeszcze modelu - najpierw pobierz go poniżej" },

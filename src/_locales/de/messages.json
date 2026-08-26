@@ -600,6 +600,20 @@
     "placeholders": { "count": { "content": "$1", "example": "37" }, "when": { "content": "$2", "example": "26.08.26, 12:41" } }
   },
   "options_storage_marks_backup_none": { "message": "Kopie der Markierungen: noch keine - sie entsteht mit der nächsten Markierung." },
+  "options_storage_library_copy_one": {
+    "message": "Kopie der Leseliste: $COUNT$ Dokument, $SIZE$.",
+    "placeholders": { "count": { "content": "$1", "example": "1" }, "size": { "content": "$2", "example": "12,4 MB" } }
+  },
+  "options_storage_library_copy_other": {
+    "message": "Kopie der Leseliste: $COUNT$ Dokumente, $SIZE$.",
+    "placeholders": { "count": { "content": "$1", "example": "37" }, "size": { "content": "$2", "example": "12,4 MB" } }
+  },
+  "options_storage_library_copy_none": { "message": "Kopie der Leseliste: noch keine - sie entsteht mit der nächsten gespeicherten Seite oder dem nächsten importierten Buch." },
+  "options_storage_library_copy_off": { "message": "Kopie der Leseliste: aus." },
+  "options_library_copy": { "message": "Kopie der Leseliste" },
+  "options_library_copy_hint": {
+    "message": "Hält eine zweite Kopie jedes gespeicherten Artikels und jedes Buchs, samt der Stelle, an der du aufgehört hast zu lesen, im eigenen Speicher der Erweiterung - dem Teil, den ein Browser nicht zusammen mit der Datenbank der Leseliste löscht. Sie verdoppelt den Platz, den die Leseliste belegt. Auf iOS und iPadOS ist sie eingeschaltet, solange du sie nicht ausschaltest: Safari kann die Leseliste nach dreißig Tagen ohne Besuch der Seiten der Erweiterung löschen, und aus der Kopie kommt sie zurück."
+  },
   "reader_marks_missing_doc": { "message": "Das Dokument ist nicht mehr gespeichert - dieses Zitat kam aus der Kopie zurück. Öffnen Sie die Seite erneut, und die Markierung ist wieder da." },
   "options_pair_hint": { "message": "Zur Wahl stehen die Paare, deren Übersetzungsmodelle Sie auf dieses Gerät heruntergeladen haben - wenn Sie in einem anderen Sprachpaar übersetzen möchten, finden Sie sein Modell im Abschnitt" },
   "options_pair_none": { "message": "Noch kein Modell - laden Sie unten eines herunter" },

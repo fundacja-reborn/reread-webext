@@ -20,6 +20,7 @@ import {
   BUBBLE_SCALE,
   CONFIG_KEY,
   TTS_RATE,
+  effectiveLibraryCopy,
   effectiveReaderOnly,
   platformOs,
   readConfig,
@@ -64,6 +65,7 @@ import { testLoadModel } from "../lib/models/validate.js";
 import { Message } from "../lib/protocol.js";
 import { ensurePersistent, isWebKit, persistenceNote, readStorage } from "../lib/storage-report.js";
 import { readBackupSummary } from "../lib/store/backup.js";
+import { buildLibraryCopy, clearLibraryCopy, readLibraryCopy } from "../lib/store/library-copy.js";
 import { marksInBackup, readMarksBackup } from "../lib/store/marks-backup.js";
 import { watchToolbarScheme } from "../lib/theme-icon.js";
 import { canSpeak, speak, voicesFor } from "../lib/tts.js";
@@ -301,6 +303,15 @@ function renderKeepArticles() {
 }
 
 /**
+ * The reading list's copy switch, shown as it acts rather than as it is
+ * stored - on iOS and iPadOS the unchosen state is on (`effectiveLibraryCopy`).
+ */
+function renderLibraryCopy() {
+  const toggle = document.getElementById("library-copy");
+  if (toggle instanceof HTMLInputElement) toggle.checked = effectiveLibraryCopy(config, os);
+}
+
+/**
  * The translation-off switch (D120). The body class is the stylesheet's
  * handle on every `translation-only` part of this page - set at render so a
  * fresh open is already the right shape, and again whenever the setting
@@ -466,6 +477,17 @@ async function renderStorage() {
     marks === null
       ? t("options_storage_marks_backup_none")
       : plural(marksInBackup(marks), "options_storage_marks_backup", [when(marks.writtenAt)]),
+  );
+  // The reading list's copy (`library-copy.js`): off by the switch, none
+  // yet, or how many documents it holds and what they take.
+  const library = effectiveLibraryCopy(config, os) ? await readLibraryCopy() : "off";
+  fill(
+    "storage-library-copy",
+    library === "off"
+      ? t("options_storage_library_copy_off")
+      : library === null
+        ? t("options_storage_library_copy_none")
+        : plural(library.docs, "options_storage_library_copy", [megabytes(library.bytes)]),
   );
 }
 
@@ -2091,6 +2113,7 @@ async function render() {
   renderReaderOnly();
   renderQuietBubble();
   renderKeepArticles();
+  renderLibraryCopy();
   renderNoTranslation();
   renderBubbleScale();
   renderVoice();
@@ -2147,6 +2170,7 @@ async function refresh() {
   renderReaderOnly();
   renderQuietBubble();
   renderKeepArticles();
+  renderLibraryCopy();
   renderNoTranslation();
   renderBubbleScale();
   // The pair may have moved (the popup writes it too), and the pair decides
@@ -2200,6 +2224,23 @@ document.getElementById("keep-articles")?.addEventListener("change", (event) => 
   // here, and nothing to reload there.
   void writeConfig({ keepArticles: toggle.checked }).then((written) => {
     config = written;
+  });
+});
+document.getElementById("library-copy")?.addEventListener("change", (event) => {
+  const toggle = event.target;
+  if (!(toggle instanceof HTMLInputElement)) return;
+  // The copy follows the switch at once - built from the whole reading list
+  // on the way on, removed on the way off - and the storage row then says
+  // what that left. The switch waits meanwhile: a second press during a
+  // build would race the first.
+  toggle.disabled = true;
+  void (async () => {
+    config = await writeConfig({ libraryCopy: toggle.checked });
+    if (toggle.checked) await buildLibraryCopy();
+    else await clearLibraryCopy();
+    await renderStorage();
+  })().finally(() => {
+    toggle.disabled = false;
   });
 });
 document.getElementById("no-translation")?.addEventListener("change", (event) => {

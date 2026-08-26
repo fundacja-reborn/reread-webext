@@ -197,6 +197,7 @@
              everywhere; on WebKit it is also the answer to the note above. -->
         <p class="row-note" id="storage-backup"></p>
         <p class="row-note" id="storage-marks-backup"></p>
+        <p class="row-note" id="storage-library-copy"></p>
       </div>
       <!-- Which voice reads a selection aloud (D83). The choices are the
            device's own voices for the pair's source language, and the choice
@@ -257,6 +258,26 @@
           you can read it with no network - and after the original page has been deleted. Opening
           the same page again never writes over it: your highlights and the place you stopped
           reading stay untouched.
+        </p>
+      </div>
+      <!-- The copy of the reading list that outlives the database
+           (`lib/store/library-backup.js`). On unasked only where the browser
+           may delete the database on its own - iOS and iPadOS - and a choice
+           everywhere, because it doubles the space the reading list takes.
+           Turning it on builds the copy from the whole list; turning it off
+           removes it; the storage row above says what it holds. -->
+      <div class="row">
+        <label class="row-toggle">
+          <span class="row-name" data-i18n="options_library_copy">Copy of the reading list</span>
+          <input type="checkbox" id="library-copy" />
+        </label>
+        <p class="row-note" data-i18n="options_library_copy_hint">
+          Keeps a second copy of every saved article and book, with the place you stopped
+          reading, in the extension's own storage - the part a browser does not clear when it
+          clears the reading list's database. It doubles the space the reading list takes. On
+          iOS and iPadOS it is on unless you switch it off: Safari may delete the reading list
+          after thirty days without a visit to the extension's pages, and the copy is what
+          brings it back.
         </p>
       </div>
       <!-- `translation-only`: the trimmed bubble ignores the fold - its two

@@ -770,6 +770,28 @@
     "placeholders": { "count": { "content": "$1", "example": "1,5" }, "when": { "content": "$2", "example": "26.08.26, 12:41" } }
   },
   "options_storage_marks_backup_none": { "message": "Копія позначень: ще немає - з'явиться з наступним позначенням." },
+  "options_storage_library_copy_one": {
+    "message": "Копія списку читання: $COUNT$ документ, $SIZE$.",
+    "placeholders": { "count": { "content": "$1", "example": "1" }, "size": { "content": "$2", "example": "12,4 МБ" } }
+  },
+  "options_storage_library_copy_few": {
+    "message": "Копія списку читання: $COUNT$ документи, $SIZE$.",
+    "placeholders": { "count": { "content": "$1", "example": "3" }, "size": { "content": "$2", "example": "12,4 МБ" } }
+  },
+  "options_storage_library_copy_many": {
+    "message": "Копія списку читання: $COUNT$ документів, $SIZE$.",
+    "placeholders": { "count": { "content": "$1", "example": "37" }, "size": { "content": "$2", "example": "12,4 МБ" } }
+  },
+  "options_storage_library_copy_other": {
+    "message": "Копія списку читання: $COUNT$ документа, $SIZE$.",
+    "placeholders": { "count": { "content": "$1", "example": "1,5" }, "size": { "content": "$2", "example": "12,4 МБ" } }
+  },
+  "options_storage_library_copy_none": { "message": "Копія списку читання: ще немає - з'явиться з наступною збереженою сторінкою або імпортованою книгою." },
+  "options_storage_library_copy_off": { "message": "Копія списку читання: вимкнена." },
+  "options_library_copy": { "message": "Копія списку читання" },
+  "options_library_copy_hint": {
+    "message": "Зберігає другу копію кожної збереженої статті та книги, разом із місцем, де ви зупинилися, у власному сховищі розширення - тій його частині, яку браузер не очищує разом із базою даних списку читання. Вона подвоює місце, яке займає список читання. На iOS та iPadOS вона увімкнена, доки ви її не вимкнете: Safari може видалити список читання після тридцяти днів без відвідування сторінок розширення, і саме з копії він повертається."
+  },
   "reader_marks_missing_doc": { "message": "Цей документ більше не збережено - цитата повернулася з копії. Відкрийте сторінку знову, і позначення буде на місці." },
   "options_pair_hint": { "message": "Пропонуються пари, моделі перекладу яких ви завантажили на цей пристрій - якщо хочете перекладати в іншій мовній парі, завантажте її модель у розділі" },
   "options_pair_none": { "message": "Моделі ще немає - спершу завантажте її нижче" },
