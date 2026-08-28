@@ -603,6 +603,7 @@
     "message": "$SIZE$ - modèles, dictionnaires, liste de lecture et vos expressions réunis",
     "placeholders": { "size": { "content": "$1", "example": "143,2 MB" } }
   },
+  "options_storage_how": { "message": "C'est ce que les bases de données du navigateur occupent sur le disque. Un dictionnaire coûte trois à quatre fois la taille de son texte - chaque mot et chaque autre graphie est une ligne à part ; les modèles et la liste de lecture coûtent à peu près ce qu'indiquent leurs listes." },
   "options_storage_persistent": { "message": "Stockage persistant : accordé. Le navigateur a promis de ne pas effacer ces données pour faire de la place." },
   "options_storage_at_risk": { "message": "Stockage persistant : refusé. Safari efface les données d'un site après environ un mois d'utilisation sans un toucher sur ses pages, et les pages de cette extension comptent comme un site. Vos expressions ont une copie qui y survit (ligne ci-dessous) ; les modèles, les dictionnaires et la liste de lecture non - ouvrez le lecteur ou ces paramètres de temps en temps." },
   "options_storage_backup_one": {

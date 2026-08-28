@@ -190,6 +190,16 @@
       <div class="row row-stack row-storage">
         <span class="row-name" data-i18n="options_storage">Data on this device</span>
         <span class="row-value" id="storage-usage"></span>
+        <!-- What the size measures, because the lists above it measure
+             something else: the dictionaries' list says what their text
+             weighs, and on disk a dictionary is one database row per word
+             and per other spelling (`lib/dict/store.js`) - measured on a
+             145 MB dictionary, 705 MB of database. -->
+        <p class="row-note" data-i18n="options_storage_how">
+          What the browser's databases take on disk. A dictionary costs three to four times its
+          text - every word and every other spelling is a row of its own; the models and the
+          reading list cost about what their lists say.
+        </p>
         <p class="row-note" id="storage-note" hidden></p>
         <!-- The copy of the vocabulary that outlives the database
              (`lib/store/backup.js`): how many phrases it holds and since when,
