@@ -692,6 +692,20 @@ summary::marker {
     text-align: end;
   }
 
+  /* The voice row's label keeps its width the storage row's way: its control
+     cell holds two selects and a button, whose content took the whole row
+     and left the label folded on itself under the first select (Michał's
+     smoke, 2026-08-29). The cell is the row's remainder; the voice select
+     grows into it, and what has to wrap wraps at the right edge, where every
+     control of this page stands. */
+  .row-voice {
+    grid-template-columns: max-content minmax(0, 1fr);
+  }
+
+  .row-voice > .inline {
+    justify-content: flex-end;
+  }
+
   /* List rows on one line: name | size | action. */
   .model-name {
     grid-column: 1;
