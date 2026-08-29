@@ -222,6 +222,89 @@
 
   "reader_title": { "message": "re/read - режим читання" },
   "reader_open_original": { "message": "Відкрити оригінал" },
+  "reader_pictures_save": {
+    "message": "Зберегти зображення ($COUNT$)",
+    "placeholders": { "count": { "content": "$1", "example": "12" } }
+  },
+  "reader_pictures_remove": {
+    "message": "Видалити зображення ($SIZE$)",
+    "placeholders": { "size": { "content": "$1", "example": "4,2 MB" } }
+  },
+  "reader_pictures_hint": {
+    "message": "Завантажуються один раз із серверів статті, без cookie, і зберігаються разом зі статтею на цьому пристрої."
+  },
+  "reader_pictures_progress": {
+    "message": "Зображення $DONE$ з $OF$ - $SIZE$",
+    "placeholders": {
+      "done": { "content": "$1", "example": "3" },
+      "of": { "content": "$2", "example": "12" },
+      "size": { "content": "$3", "example": "1,1 MB" }
+    }
+  },
+  "reader_pictures_stop": { "message": "Натисніть рядок, щоб зупинити." },
+  "reader_pictures_done_one": {
+    "message": "Збережено $SAVED$ з $OF$ зображення ($SIZE$)",
+    "placeholders": {
+      "of": { "content": "$1", "example": "1" },
+      "saved": { "content": "$2", "example": "1" },
+      "size": { "content": "$3", "example": "0,3 MB" }
+    }
+  },
+  "reader_pictures_done_few": {
+    "message": "Збережено $SAVED$ з $OF$ зображень ($SIZE$)",
+    "placeholders": {
+      "of": { "content": "$1", "example": "3" },
+      "saved": { "content": "$2", "example": "2" },
+      "size": { "content": "$3", "example": "0,8 MB" }
+    }
+  },
+  "reader_pictures_done_many": {
+    "message": "Збережено $SAVED$ з $OF$ зображень ($SIZE$)",
+    "placeholders": {
+      "of": { "content": "$1", "example": "12" },
+      "saved": { "content": "$2", "example": "11" },
+      "size": { "content": "$3", "example": "4,2 MB" }
+    }
+  },
+  "reader_pictures_done_other": {
+    "message": "Збережено $SAVED$ з $OF$ зображення ($SIZE$)",
+    "placeholders": {
+      "of": { "content": "$1", "example": "12" },
+      "saved": { "content": "$2", "example": "11" },
+      "size": { "content": "$3", "example": "4,2 MB" }
+    }
+  },
+  "reader_pictures_none": { "message": "Не вдалося зберегти жодного зображення." },
+  "reader_pictures_removed": { "message": "Зображення видалено." },
+  "reader_pictures_failed": { "message": "Не вдалося зберегти зображення." },
+  "library_pictures_one": {
+    "message": "$COUNT$ зображення, $SIZE$",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "size": { "content": "$2", "example": "0,3 MB" }
+    }
+  },
+  "library_pictures_few": {
+    "message": "$COUNT$ зображення, $SIZE$",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "size": { "content": "$2", "example": "0,8 MB" }
+    }
+  },
+  "library_pictures_many": {
+    "message": "$COUNT$ зображень, $SIZE$",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "size": { "content": "$2", "example": "4,2 MB" }
+    }
+  },
+  "library_pictures_other": {
+    "message": "$COUNT$ зображення, $SIZE$",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "size": { "content": "$2", "example": "4,2 MB" }
+    }
+  },
   "reader_back_to_list": { "message": "Назад до списку читання" },
   "reader_display_title": { "message": "Текст і голос" },
   "reader_theme": { "message": "Тема" },
@@ -791,7 +874,7 @@
   "options_storage_library_copy_off": { "message": "Копія списку читання: вимкнена." },
   "options_library_copy": { "message": "Копія списку читання" },
   "options_library_copy_hint": {
-    "message": "Зберігає другу копію кожної збереженої статті та книги, разом із місцем, де ви зупинилися, у власному сховищі розширення - тій його частині, яку браузер не очищує разом із базою даних списку читання. Вона подвоює місце, яке займає список читання. На iOS та iPadOS вона увімкнена, доки ви її не вимкнете: Safari може видалити список читання після тридцяти днів без відвідування сторінок розширення, і саме з копії він повертається."
+    "message": "Зберігає другу копію кожної збереженої статті та книги, разом із місцем, де ви зупинилися, у власному сховищі розширення - тій його частині, яку браузер не очищує разом із базою даних списку читання. Вона подвоює місце, яке займає список читання. На iOS та iPadOS вона увімкнена, доки ви її не вимкнете: Safari може видалити список читання після тридцяти днів без відвідування сторінок розширення, і саме з копії він повертається. Зображення, збережені зі статтею, теж копіюються і повертаються під час першого відкриття статті."
   },
   "reader_marks_missing_doc": { "message": "Цей документ більше не збережено - цитата повернулася з копії. Відкрийте сторінку знову, і позначення буде на місці." },
   "options_pair_hint": { "message": "Пропонуються пари, моделі перекладу яких ви завантажили на цей пристрій - якщо хочете перекладати в іншій мовній парі, завантажте її модель у розділі" },

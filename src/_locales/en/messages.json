@@ -215,6 +215,63 @@
 
   "reader_title": { "message": "re/read - reader" },
   "reader_open_original": { "message": "Open the original" },
+  "reader_pictures_save": {
+    "message": "Save pictures ($COUNT$)",
+    "description": "Menu row over a saved article: fetch its pictures and keep them with it. The count is how many the article refers to.",
+    "placeholders": { "count": { "content": "$1", "example": "12" } }
+  },
+  "reader_pictures_remove": {
+    "message": "Remove pictures ($SIZE$)",
+    "placeholders": { "size": { "content": "$1", "example": "4.2 MB" } }
+  },
+  "reader_pictures_hint": {
+    "message": "Downloaded once from the article's own servers, without cookies, and kept with the article on this device."
+  },
+  "reader_pictures_progress": {
+    "message": "Picture $DONE$ of $OF$ - $SIZE$",
+    "description": "The row's label while pictures are being saved; the size is what has been kept so far.",
+    "placeholders": {
+      "done": { "content": "$1", "example": "3" },
+      "of": { "content": "$2", "example": "12" },
+      "size": { "content": "$3", "example": "1.1 MB" }
+    }
+  },
+  "reader_pictures_stop": { "message": "Press the row to stop." },
+  "reader_pictures_done_one": {
+    "message": "$SAVED$ of $OF$ picture saved ($SIZE$)",
+    "placeholders": {
+      "of": { "content": "$1", "example": "1" },
+      "saved": { "content": "$2", "example": "1" },
+      "size": { "content": "$3", "example": "0.3 MB" }
+    }
+  },
+  "reader_pictures_done_other": {
+    "message": "$SAVED$ of $OF$ pictures saved ($SIZE$)",
+    "description": "After a save: how many of the pictures the article asked for are kept, and what they take.",
+    "placeholders": {
+      "of": { "content": "$1", "example": "12" },
+      "saved": { "content": "$2", "example": "11" },
+      "size": { "content": "$3", "example": "4.2 MB" }
+    }
+  },
+  "reader_pictures_none": { "message": "None of the pictures could be saved." },
+  "reader_pictures_removed": { "message": "Pictures removed." },
+  "reader_pictures_failed": { "message": "The pictures could not be written." },
+  "library_pictures_one": {
+    "message": "$COUNT$ picture, $SIZE$",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "size": { "content": "$2", "example": "0.3 MB" }
+    }
+  },
+  "library_pictures_other": {
+    "message": "$COUNT$ pictures, $SIZE$",
+    "description": "In a reading list row: the article's pictures and what they take.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "size": { "content": "$2", "example": "4.2 MB" }
+    }
+  },
   "reader_back_to_list": {
     "message": "Back to the reading list",
     "description": "Accessible name and tooltip of the drawn back arrow in the reader's bar, shown while an article is on screen."
@@ -757,7 +814,7 @@
   "options_storage_library_copy_off": { "message": "Copy of the reading list: off." },
   "options_library_copy": { "message": "Copy of the reading list" },
   "options_library_copy_hint": {
-    "message": "Keeps a second copy of every saved article and book, with the place you stopped reading, in the extension's own storage - the part a browser does not clear when it clears the reading list's database. It doubles the space the reading list takes. On iOS and iPadOS it is on unless you switch it off: Safari may delete the reading list after thirty days without a visit to the extension's pages, and the copy is what brings it back."
+    "message": "Keeps a second copy of every saved article and book, with the place you stopped reading, in the extension's own storage - the part a browser does not clear when it clears the reading list's database. It doubles the space the reading list takes. On iOS and iPadOS it is on unless you switch it off: Safari may delete the reading list after thirty days without a visit to the extension's pages, and the copy is what brings it back. Pictures saved with an article are copied too, and come back the first time the article is opened."
   },
   "reader_marks_missing_doc": {
     "message": "Its document is no longer saved - this quote came back from the copy. Open the page again and the highlight will be there.",

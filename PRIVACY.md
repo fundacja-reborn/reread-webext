@@ -55,9 +55,18 @@ the pages you read. Opening the Settings page makes no request at all - the list
 shown there come from a snapshot inside the package until you press **Update list**,
 and each list shows the date it was last fetched.
 
-There is no third host. No fonts, scripts or images are loaded from a CDN, no crash
-reporter, no A/B testing, no update ping of the extension's own (updates are handled
-by the browser and the add-on store you installed from, under their policies).
+One more request is yours to make, and it is the only one to an address the package
+does not carry: **Save pictures**, a row in the reader's menu over a saved article,
+fetches that article's pictures from the servers the article itself names - once,
+without cookies or referrer, and only when you press it. Those servers see what they
+saw when the page first showed you the pictures: your IP address and your browser's
+user agent, nothing more. Nothing fetches a picture on its own, and a saved article
+stays text until you ask; the same row removes the pictures again.
+
+There is no third host of the extension's own. No fonts, scripts or images are loaded
+from a CDN, no crash reporter, no A/B testing, no update ping of the extension's own
+(updates are handled by the browser and the add-on store you installed from, under
+their policies).
 
 You do not have to take our word for it: watch the network panel in devtools, read
 the source (it ships unminified, exactly as it is in the repository), or simply turn

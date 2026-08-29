@@ -1,10 +1,11 @@
 /**
  * The copy of the reading list that outlives the database: every saved
- * article whole, every book with its text, and where the reader stopped in
- * each. The third copy after the vocabulary's (`backup.js`) and the
- * highlights' (`marks-backup.js`), for the reason those two exist: Safari
- * deletes the origin's IndexedDB after thirty days without a touch on the
- * extension's pages, and `storage.local` is where that does not reach.
+ * article whole, every book with its text, where the reader stopped in
+ * each, and the pictures an article was given (D145). The third copy after
+ * the vocabulary's (`backup.js`) and the highlights' (`marks-backup.js`),
+ * for the reason those two exist: Safari deletes the origin's IndexedDB
+ * after thirty days without a touch on the extension's pages, and
+ * `storage.local` is where that does not reach.
  *
  * Unlike the first two it is a choice (`libraryCopy` in the config). The
  * vocabulary and the marks are the reader's own work - small, and impossible
@@ -20,6 +21,7 @@
  *   - `libraryCopy:article:<url>` - the article whole, as `getArticle` gives it
  *   - `libraryCopy:book:<id>` - the book's row and every segment of its text
  *   - `libraryCopy:position:<docId>` - where the reader stopped in it
+ *   - `libraryCopy:picture:<url>:<index>` - one picture of an article, as base64
  *
  * because one value would mean rewriting tens of megabytes after every saved
  * reading position, and because a row that will not read should cost only its
@@ -28,17 +30,24 @@
  * The index is what makes the rows findable without reading the whole area.
  * `storage.local` can hand out nothing but values, so "every key with the
  * prefix" costs a read of every document - tens of megabytes for one line on
- * the settings page, and every picture the copy will carry (D145) on top.
- * The first version of the copy (#245) had no index and read the whole area
- * instead, which held while the copy was text; `migrateIndex` takes over in
- * the one such read this module still makes, and after it the area is never
- * read whole again. The order of writes keeps the index honest: a document
- * is claimed in the index before its row is written, and its row is removed
- * before the claim is. A page that dies between the two leaves at worst a
- * claim without a row - which restores nothing and clears nothing - and
- * never a row the index does not know, which nothing would ever clear. A
- * position carries no claim of its own: a place belongs to the document it
- * is in, and is written only for one the index holds.
+ * the settings page, and every picture on top. The first version of the copy
+ * (#245) had no index and read the whole area instead, which held while the
+ * copy was text; `migrateIndex` takes over in the one such read this module
+ * still makes, and after it the area is never read whole again. The order of
+ * writes keeps the index honest: a document is claimed in the index before
+ * its row is written, and its row is removed before the claim is. A page
+ * that dies between the two leaves at worst a claim without a row - which
+ * restores nothing and clears nothing - and never a row the index does not
+ * know, which nothing would ever clear. A position carries no claim of its
+ * own: a place belongs to the document it is in, and is written only for
+ * one the index holds. A picture is claimed by its count: the index says how
+ * many an article has, and the keys follow from that.
+ *
+ * Text comes back whole: the moment the library is found empty, every
+ * article and book the index names is read and written back in one
+ * transaction. Pictures come back one article at a time, when that article
+ * is opened (`restorePictures`) - never all at once, since all at once is
+ * the whole-area read by another name.
  *
  * The rules: additions only while the copy is on, removals always (switching
  * off clears the copy, and a stale row must never come back with the switch);
@@ -54,7 +63,9 @@
  * `storage.local`.
  */
 
+import { fromBase64, toBase64 } from "../base64.js";
 import { webext } from "../browser.js";
+import { asPictureRow, asPicturesSummary } from "../reader/pictures.js";
 import { asPosition } from "../reader/position.js";
 import { asBookMeta, asSegment } from "./book.js";
 import { asSavedMeta } from "./saved-article.js";
@@ -64,6 +75,8 @@ import { asSavedMeta } from "./saved-article.js";
  * @typedef {import("./saved-article.js").SavedMeta} SavedMeta
  * @typedef {import("./book.js").BookMeta} BookMeta
  * @typedef {import("../reader/position.js").ReadingPosition} ReadingPosition
+ * @typedef {import("../reader/pictures.js").PictureRow} PictureRow
+ * @typedef {import("../reader/pictures.js").PicturesSummary} PicturesSummary
  * @typedef {{ blocks: string[], charCount: number }} Segment
  */
 
@@ -76,22 +89,38 @@ import { asSavedMeta } from "./saved-article.js";
 
 /**
  * What the copy holds, by the documents' own ids - an article's address, a
- * book's id - each with the bytes its row took when it was written. The
- * settings page's line is a sum over this, never a read of a row.
+ * book's id - each with the bytes its row took when it was written, and by
+ * article the account of its pictures: how many rows stand under it and
+ * what they take. The settings page's line is a sum over this, never a
+ * read of a row.
  *
- * @typedef {{ version: number, articles: Record<string, number>, books: Record<string, number> }} CopyIndex
+ * @typedef {{
+ *   version: number,
+ *   articles: Record<string, number>,
+ *   books: Record<string, number>,
+ *   pictures: Record<string, PicturesSummary>,
+ * }} CopyIndex
  */
 
 /**
  * Everything the copy holds that reads, narrowed from the rows the index
  * names. Positions only of documents that are here: a place in a document
- * the copy does not hold would be a row nothing ever cleans.
+ * the copy does not hold would be a row nothing ever cleans. Pictures as
+ * they stand, whoever they belong to - `migrateIndex` is the one reader,
+ * and it decides which to claim.
  *
- * @typedef {{ keys: string[], articles: SavedArticle[], books: CopiedBook[], positions: ReadingPosition[] }} CopiedLibrary
+ * @typedef {{
+ *   keys: string[],
+ *   articles: SavedArticle[],
+ *   books: CopiedBook[],
+ *   positions: ReadingPosition[],
+ *   pictures: PictureRow[],
+ * }} CopiedLibrary
  */
 
 /**
- * The library as the copy is built from it, whole.
+ * The library as the copy is built from it, whole - its text. The pictures
+ * are asked for one article at a time (`LibraryCopyDeps.pictures`).
  *
  * @typedef {{ articles: SavedArticle[], books: CopiedBook[], positions: ReadingPosition[] }} LibrarySnapshot
  */
@@ -103,6 +132,7 @@ import { asSavedMeta } from "./saved-article.js";
  * @property {(library: CopiedLibrary) => Promise<number>} putRows the documents written back - into an
  *   empty library only, checked again where the write is atomic; answers how many were
  * @property {() => Promise<LibrarySnapshot>} snapshot the whole library, for a build
+ * @property {(url: string) => Promise<PictureRow[]>} pictures one article's pictures, for a build
  * @property {() => Promise<Record<string, unknown>>} readAll everything in the storage area - asked
  *   by `migrateIndex` alone, and by it once
  * @property {(key: string) => Promise<unknown>} read whatever stands under one key
@@ -139,6 +169,14 @@ export function bookKey(id) {
 /** @param {string} docId */
 export function positionKey(docId) {
   return `${LIBRARY_COPY_PREFIX}position:${docId}`;
+}
+
+/**
+ * @param {string} url
+ * @param {number} index
+ */
+export function pictureKey(url, index) {
+  return `${LIBRARY_COPY_PREFIX}picture:${url}:${index}`;
 }
 
 /**
@@ -185,6 +223,18 @@ export function bookRow(book) {
  */
 export function positionRow(position) {
   return { version: VERSION, position };
+}
+
+/**
+ * A picture as the copy carries it: the database's row with its bytes as
+ * base64, because the area holds text - `base64.js` says why in chunks.
+ *
+ * @param {PictureRow} row
+ * @returns {{ version: number, url: string, index: number, src: string, mime: string, width: number, height: number, data: string }}
+ */
+export function pictureRow(row) {
+  const { data, ...rest } = row;
+  return { version: VERSION, ...rest, data: toBase64(data) };
 }
 
 /**
@@ -259,21 +309,40 @@ export function asCopiedPosition(value) {
 }
 
 /**
+ * A picture back from the copy, its bytes decoded, or nothing: a row that
+ * will not read or will not decode is a picture that is not there.
+ *
+ * @param {unknown} value
+ * @returns {PictureRow | null}
+ */
+export function asCopiedPicture(value) {
+  if (typeof value !== "object" || value === null) return null;
+  const { version, data, ...rest } = /** @type {Record<string, unknown>} */ (value);
+  if (version !== VERSION) return null;
+  const bytes = fromBase64(data);
+  if (bytes === null) return null;
+  return asPictureRow({ ...rest, data: bytes.buffer });
+}
+
+/**
  * The index as stored, narrowed field by field, or nothing: an index that
  * will not read is no index, and `migrateIndex` builds one again from the
- * rows - the rows are the copy, the index only says where they are.
+ * rows - the rows are the copy, the index only says where they are. An
+ * index from before pictures (#249) has no account of them, and reads as
+ * one with none.
  *
  * @param {unknown} value
  * @returns {CopyIndex | null}
  */
 export function asIndex(value) {
   if (typeof value !== "object" || value === null) return null;
-  const { version, articles, books } = /** @type {Record<string, unknown>} */ (value);
+  const { version, articles, books, pictures } = /** @type {Record<string, unknown>} */ (value);
   if (version !== VERSION) return null;
   const articleSizes = sizesOf(articles);
   const bookSizes = sizesOf(books);
-  if (articleSizes === null || bookSizes === null) return null;
-  return { version: VERSION, articles: articleSizes, books: bookSizes };
+  const pictureSizes = pictures === undefined ? {} : summariesOf(pictures);
+  if (articleSizes === null || bookSizes === null || pictureSizes === null) return null;
+  return { version: VERSION, articles: articleSizes, books: bookSizes, pictures: pictureSizes };
 }
 
 /**
@@ -291,9 +360,25 @@ function sizesOf(value) {
   return sizes;
 }
 
+/**
+ * @param {unknown} value
+ * @returns {Record<string, PicturesSummary> | null}
+ */
+function summariesOf(value) {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return null;
+  /** @type {Record<string, PicturesSummary>} */
+  const summaries = {};
+  for (const [url, summary] of Object.entries(value)) {
+    const kept = asPicturesSummary(summary);
+    if (kept === null) return null;
+    summaries[url] = kept;
+  }
+  return summaries;
+}
+
 /** @returns {CopyIndex} */
 function emptyIndex() {
-  return { version: VERSION, articles: {}, books: {} };
+  return { version: VERSION, articles: {}, books: {}, pictures: {} };
 }
 
 /**
@@ -314,19 +399,43 @@ export function indexHolds(index, docId) {
 }
 
 /**
- * Every key the index accounts for: each document's row and the place in it
- * - the place's key derived, whether or not a row stands under it, because
- * a position is written only for a document the index holds.
+ * The keys of every document the index accounts for: each one's row and
+ * the place in it - the place's key derived, whether or not a row stands
+ * under it, because a position is written only for a document the index
+ * holds. What a restore reads: the text, never the pictures.
  *
  * @param {CopyIndex} index
  * @returns {string[]}
  */
-export function indexedKeys(index) {
+export function documentKeys(index) {
   /** @type {string[]} */
   const keys = [];
   for (const url of Object.keys(index.articles)) keys.push(articleKey(url), positionKey(url));
   for (const id of Object.keys(index.books)) keys.push(bookKey(id), positionKey(id));
   return keys;
+}
+
+/**
+ * The keys of one article's pictures, from the count the index claims.
+ *
+ * @param {CopyIndex} index
+ * @param {string} url
+ * @returns {string[]}
+ */
+export function pictureKeys(index, url) {
+  const count = index.pictures[url]?.count ?? 0;
+  return Array.from({ length: count }, (_, at) => pictureKey(url, at));
+}
+
+/**
+ * Every key the index accounts for - documents, places and pictures. What
+ * a clear removes and a build sweeps.
+ *
+ * @param {CopyIndex} index
+ * @returns {string[]}
+ */
+export function indexedKeys(index) {
+  return [...documentKeys(index), ...Object.keys(index.pictures).flatMap((url) => pictureKeys(index, url))];
 }
 
 /**
@@ -348,6 +457,8 @@ export function copiedLibrary(rows) {
   const books = [];
   /** @type {ReadingPosition[]} */
   const positions = [];
+  /** @type {PictureRow[]} */
+  const pictures = [];
   for (const [key, value] of Object.entries(rows)) {
     if (!key.startsWith(LIBRARY_COPY_PREFIX)) continue;
     keys.push(key);
@@ -361,6 +472,9 @@ export function copiedLibrary(rows) {
     } else if (kind === "position") {
       const position = asCopiedPosition(value);
       if (position !== null && key === positionKey(position.docId)) positions.push(position);
+    } else if (kind === "picture") {
+      const picture = asCopiedPicture(value);
+      if (picture !== null && key === pictureKey(picture.url, picture.index)) pictures.push(picture);
     }
   }
   const docIds = new Set([...articles.map((article) => article.url), ...books.map((book) => book.meta.id)]);
@@ -369,6 +483,7 @@ export function copiedLibrary(rows) {
     articles: articles.sort((a, b) => a.url.localeCompare(b.url)),
     books: books.sort((a, b) => a.meta.id.localeCompare(b.meta.id)),
     positions: positions.filter((position) => docIds.has(position.docId)),
+    pictures: pictures.sort((a, b) => a.url.localeCompare(b.url) || a.index - b.index),
   };
 }
 
@@ -388,7 +503,9 @@ function bytesOf(value) {
  * The copy in two numbers for the settings page, or null when there is no
  * copy at all - the line then says so, or says the switch is off. A sum
  * over the index: the light row a document was patched with since may be
- * a few bytes off its record, which a line in megabytes never shows.
+ * a few bytes off its record, which a line in megabytes never shows. The
+ * pictures count into the space, not into the documents - they are part
+ * of theirs.
  *
  * @param {CopyIndex | null} index
  * @returns {{ docs: number, bytes: number } | null}
@@ -397,7 +514,8 @@ export function copySummary(index) {
   if (index === null) return null;
   const sizes = [...Object.values(index.articles), ...Object.values(index.books)];
   if (sizes.length === 0) return null;
-  return { docs: sizes.length, bytes: sizes.reduce((sum, bytes) => sum + bytes, 0) };
+  const pictures = Object.values(index.pictures).reduce((sum, summary) => sum + summary.bytes, 0);
+  return { docs: sizes.length, bytes: sizes.reduce((sum, bytes) => sum + bytes, 0) + pictures };
 }
 
 /**
@@ -431,7 +549,8 @@ export function rowsOf(library) {
 }
 
 /**
- * The index a library's rows are claimed under, sizes and all.
+ * The index a library's rows are claimed under, sizes and all - the text's;
+ * the pictures are claimed as a build reaches them.
  *
  * @param {LibrarySnapshot} library
  * @param {Map<string, unknown>} rows as `rowsOf` keyed them
@@ -447,14 +566,28 @@ export function indexOf(library, rows) {
 }
 
 /**
+ * The account an article's picture rows add up to, as the index claims it -
+ * only when they are all there, first to last: a run with a hole is not
+ * what the count says it is, and is swept rather than claimed.
+ *
+ * @param {PictureRow[]} rows one article's, in index order
+ * @returns {PicturesSummary | null}
+ */
+function claimedPictures(rows) {
+  if (rows.length === 0 || rows.some((row, at) => row.index !== at)) return null;
+  return { count: rows.length, bytes: rows.reduce((sum, row) => sum + row.data.byteLength, 0) };
+}
+
+/**
  * The index where the copy has none - the one read of the whole area this
  * module makes, and the one time it is made. Built from the rows the first
  * version of the copy (#245) left behind, or from whatever an index that
  * will not read was standing over. Rows the index cannot account for - torn,
  * under a key that names another document, a place in a document that is
- * not here - are removed: unclaimed, nothing would ever clear them. An area
- * holding no row of the copy gets no index either; the copy is then simply
- * absent, and the first document claimed will write one.
+ * not here, a picture of one, or a run of pictures with a hole - are
+ * removed: unclaimed, nothing would ever clear them. An area holding no
+ * row of the copy gets no index either; the copy is then simply absent, and
+ * the first document claimed will write one.
  *
  * @param {StorageDeps} deps
  * @returns {Promise<CopyIndex | null>} the index in place, or null for no copy
@@ -468,6 +601,10 @@ export async function migrateIndex(deps) {
   const index = emptyIndex();
   for (const article of library.articles) index.articles[article.url] = bytesOf(all[articleKey(article.url)]);
   for (const book of library.books) index.books[book.meta.id] = bytesOf(all[bookKey(book.meta.id)]);
+  for (const url of Object.keys(index.articles)) {
+    const summary = claimedPictures(library.pictures.filter((picture) => picture.url === url));
+    if (summary !== null) index.pictures[url] = summary;
+  }
   const claimed = new Set(indexedKeys(index));
   await deps.remove(library.keys.filter((key) => !claimed.has(key)));
   if (copySummary(index) === null) return null;
@@ -492,8 +629,9 @@ async function claim(kind, docId, bytes, deps) {
 }
 
 /**
- * A document's claim released - after its row is gone, for the same reason
- * `claim` comes first. A document the index never held costs no write.
+ * A document's claim released, with its pictures' - after their rows are
+ * gone, for the same reason `claim` comes first. A document the index never
+ * held costs no write.
  *
  * @param {"article" | "book"} kind
  * @param {string} docId
@@ -504,8 +642,10 @@ async function release(kind, docId, deps) {
   const index = await readIndex(deps);
   if (index === null) return;
   const sizes = kind === "article" ? index.articles : index.books;
-  if (!Object.hasOwn(sizes, docId)) return;
+  const held = Object.hasOwn(sizes, docId) || Object.hasOwn(index.pictures, docId);
+  if (!held) return;
   delete sizes[docId];
+  delete index.pictures[docId];
   await deps.write({ [INDEX_KEY]: index });
 }
 
@@ -513,7 +653,8 @@ async function release(kind, docId, deps) {
  * The library written back from the copy, when - and only when - the
  * library is empty and the copy holds a document. The emptiness is asked
  * first, the index only then, and the rows only when the index names one,
- * so on every ordinary call this costs two counts and nothing else.
+ * so on every ordinary call this costs two counts and nothing else. The
+ * text alone: the pictures wait for their article to be opened.
  *
  * @param {LibraryCopyDeps} deps
  * @returns {Promise<number>} how many documents came back
@@ -522,9 +663,32 @@ export async function restoreLibrary(deps) {
   if (!(await deps.empty())) return 0;
   const index = await readIndex(deps);
   if (index === null || copySummary(index) === null) return 0;
-  const library = copiedLibrary(await deps.readMany(indexedKeys(index)));
+  const library = copiedLibrary(await deps.readMany(documentKeys(index)));
   if (library.articles.length === 0 && library.books.length === 0) return 0;
   return await deps.putRows(library);
+}
+
+/**
+ * One article's pictures back from the copy, one key at a time - never all
+ * of an article's in one read, since one read of seventy pictures is the
+ * message the index exists to avoid. A key the index claims and no row
+ * answers (a save that died between the two writes) is simply not among
+ * them, and so is a row that will not decode.
+ *
+ * @param {string} url
+ * @param {StorageDeps} deps
+ * @returns {Promise<PictureRow[]>}
+ */
+export async function restorePictures(url, deps) {
+  const index = await readIndex(deps);
+  if (index === null) return [];
+  /** @type {PictureRow[]} */
+  const rows = [];
+  for (const key of pictureKeys(index, url)) {
+    const row = asCopiedPicture(await deps.read(key));
+    if (row !== null && row.url === url) rows.push(row);
+  }
+  return rows;
 }
 
 /**
@@ -532,7 +696,8 @@ export async function restoreLibrary(deps) {
  * rows the standing index names and the library no longer does removed -
  * whatever a copy switched off and on again might have kept - then every
  * document claimed, then every document written, one row at a time so no
- * single write carries the whole reading list.
+ * single write carries the whole reading list, and each article's pictures
+ * after its text, claimed by the article before they are written.
  *
  * @param {LibraryCopyDeps} deps
  * @returns {Promise<number>} how many documents the copy now holds
@@ -545,6 +710,14 @@ export async function buildLibraryCopy(deps) {
   if (standing !== null) await deps.remove(indexedKeys(standing).filter((key) => !rows.has(key)));
   await deps.write({ [INDEX_KEY]: index });
   for (const [key, row] of rows) await deps.write({ [key]: row });
+  for (const article of library.articles) {
+    const pictures = await deps.pictures(article.url);
+    const summary = claimedPictures(pictures);
+    if (summary === null) continue;
+    index.pictures[article.url] = summary;
+    await deps.write({ [INDEX_KEY]: index });
+    for (const picture of pictures) await deps.write({ [pictureKey(article.url, picture.index)]: pictureRow(picture) });
+  }
   return library.articles.length + library.books.length;
 }
 
@@ -564,8 +737,8 @@ export async function clearLibraryCopy(deps) {
 
 /**
  * One article into the copy, after its save - and, when the save wrote over
- * an older article, its reading position out of it, the way the database
- * drops the position of text that is gone.
+ * an older article, its reading position and its pictures out of it, the
+ * way the database drops what was anchored into text that is gone.
  *
  * @param {SavedArticle} article
  * @param {boolean} replaced whether the save wrote over an older article
@@ -573,7 +746,10 @@ export async function clearLibraryCopy(deps) {
  * @returns {Promise<boolean>} whether the copy was written
  */
 export async function copyArticle(article, replaced, deps) {
-  if (replaced) await deps.remove([positionKey(article.url)]);
+  if (replaced) {
+    await deps.remove([positionKey(article.url)]);
+    await dropPictures(article.url, deps);
+  }
   if (!(await deps.enabled())) return false;
   const row = articleRow(article);
   await claim("article", article.url, bytesOf(row), deps);
@@ -614,12 +790,53 @@ export async function copyPosition(position, deps) {
 }
 
 /**
+ * One picture into the copy, beside its article and only beside one the
+ * copy holds - claimed by count first, written second, like a document.
+ * The pictures of an article arrive in order, so the count claimed is the
+ * one past this picture's place.
+ *
+ * @param {PictureRow} picture
+ * @param {LibraryCopyDeps} deps
+ * @returns {Promise<boolean>} whether the copy was written
+ */
+export async function copyPicture(picture, deps) {
+  if (!(await deps.enabled())) return false;
+  const index = await readIndex(deps);
+  if (index === null || !Object.hasOwn(index.articles, picture.url)) return false;
+  const before = index.pictures[picture.url] ?? { count: 0, bytes: 0 };
+  index.pictures[picture.url] = {
+    count: Math.max(before.count, picture.index + 1),
+    bytes: before.bytes + picture.data.byteLength,
+  };
+  await deps.write({ [INDEX_KEY]: index });
+  await deps.write({ [pictureKey(picture.url, picture.index)]: pictureRow(picture) });
+  return true;
+}
+
+/**
+ * An article's pictures out of the copy - always, switch or no switch: the
+ * rows first, the claim after. An article the index holds no pictures of
+ * costs one read.
+ *
+ * @param {string} url
+ * @param {LibraryCopyDeps} deps
+ * @returns {Promise<void>}
+ */
+export async function dropPictures(url, deps) {
+  const index = await readIndex(deps);
+  if (index === null || !Object.hasOwn(index.pictures, url)) return;
+  await deps.remove(pictureKeys(index, url));
+  delete index.pictures[url];
+  await deps.write({ [INDEX_KEY]: index });
+}
+
+/**
  * A document's light row changed where it stands - read or unread again, a
- * table of contents found - and nowhere else: without a row under the key
- * there is nothing to patch, which is also what makes the switch unasked
- * here (a copy switched off has no rows). The index keeps the size it
- * recorded: a patch moves a row by a handful of bytes, and the line that
- * sums them is in megabytes.
+ * table of contents found, pictures saved or removed - and nowhere else:
+ * without a row under the key there is nothing to patch, which is also what
+ * makes the switch unasked here (a copy switched off has no rows). The
+ * index keeps the size it recorded: a patch moves a row by a handful of
+ * bytes, and the line that sums them is in megabytes.
  *
  * @param {"article" | "book"} kind
  * @param {string} docId
@@ -636,9 +853,9 @@ export async function patchCopiedMeta(kind, docId, meta, deps) {
 }
 
 /**
- * A document out of the copy, with its position - always, switch or no
- * switch: a row about a document that is gone must not outlive it. The rows
- * go first, the claim after.
+ * A document out of the copy, with its position and its pictures - always,
+ * switch or no switch: a row about a document that is gone must not outlive
+ * it. The rows go first, the claim after.
  *
  * @param {string} docId an article's url or a book's id
  * @param {"article" | "book"} kind
@@ -646,6 +863,11 @@ export async function patchCopiedMeta(kind, docId, meta, deps) {
  * @returns {Promise<void>}
  */
 export async function dropCopied(docId, kind, deps) {
-  await deps.remove([kind === "article" ? articleKey(docId) : bookKey(docId), positionKey(docId)]);
+  const index = await readIndex(deps);
+  await deps.remove([
+    kind === "article" ? articleKey(docId) : bookKey(docId),
+    positionKey(docId),
+    ...(index === null ? [] : pictureKeys(index, docId)),
+  ]);
   await release(kind, docId, deps);
 }

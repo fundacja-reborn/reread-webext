@@ -664,6 +664,45 @@ html {
   margin: 0 0 1.2rem;
 }
 
+/* An article's pictures (D145). A picture stands as a block of its own,
+   never wider than the text and never taller than most of the screen - a
+   photo taller than a page would fight the pager for the fold (D143). Its
+   `width` and `height` come from the database, so the text reserves the
+   room before a byte is decoded and nothing shifts when it is. Without a
+   `src` - the shape of every picture nobody has saved - it takes no room
+   at all, which keeps the elements of an article the same whether its
+   pictures are kept or not. */
+#content img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  max-height: 80vh;
+  object-fit: contain;
+  margin: 0 auto 1.2rem;
+}
+
+#content img:not([src]) {
+  display: none;
+}
+
+/* On dark paper a photograph at full brightness is a lamp in the text;
+   dimmed a little it reads as part of the page. `auto` follows the browser
+   the way the palettes do; a sepia or light page under a dark browser
+   keeps its pictures as they are. */
+:root[data-reader-theme="dark"] #content img {
+  filter: brightness(0.85);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-reader-theme="auto"] #content img {
+    filter: brightness(0.85);
+  }
+}
+
+#content figure > img {
+  margin-bottom: 0.6rem;
+}
+
 #content li {
   margin-bottom: 0.4rem;
 }

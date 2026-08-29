@@ -11,16 +11,20 @@
 import { effectiveLibraryCopy, platformOs, readConfig } from "../config.js";
 import { asPosition } from "../reader/position.js";
 import { asBookMeta } from "./book.js";
+import { asPictureRow } from "../reader/pictures.js";
 import {
   buildLibraryCopy as buildWith,
   clearLibraryCopy as clearWith,
   copyArticle as copyArticleWith,
   copyBook as copyBookWith,
+  copyPicture as copyPictureWith,
   copyPosition as copyPositionWith,
   dropCopied,
+  dropPictures as dropPicturesWith,
   migrateIndex,
   patchCopiedMeta,
   restoreLibrary as restoreWith,
+  restorePictures as restorePicturesWith,
   segmentsOf,
   storageDeps,
   summarizeCopy,
@@ -34,6 +38,7 @@ import { asSavedMeta } from "./saved-article.js";
  * @typedef {import("./library-backup.js").Segment} Segment
  * @typedef {import("./saved-article.js").SavedArticle} SavedArticle
  * @typedef {import("./saved-article.js").SavedMeta} SavedMeta
+ * @typedef {import("../reader/pictures.js").PictureRow} PictureRow
  * @typedef {import("./book.js").BookMeta} BookMeta
  * @typedef {import("../reader/position.js").ReadingPosition} ReadingPosition
  * @typedef {import("./library-db.js").LibraryStores} LibraryStores
@@ -81,6 +86,26 @@ function ready() {
  */
 function segmentRange(bookId) {
   return IDBKeyRange.bound([bookId, 0], [bookId, []]);
+}
+
+/**
+ * One article's pictures as the database holds them, in order - read here
+ * rather than through `articles.js`, which imports this module and must
+ * not be needed by it.
+ *
+ * @param {string} url
+ * @returns {Promise<PictureRow[]>}
+ */
+async function picturesOf(url) {
+  const rows = /** @type {unknown[]} */ (
+    await withLibrary("readonly", (stores) =>
+      promisify(stores.pictures.getAll(IDBKeyRange.bound([url, 0], [url, []]))),
+    )
+  );
+  return rows
+    .map(asPictureRow)
+    .filter((row) => row !== null)
+    .sort((a, b) => a.index - b.index);
 }
 
 /**
@@ -172,6 +197,7 @@ function copyDeps() {
     ...storageDeps(),
     enabled: async () => effectiveLibraryCopy(await readConfig(), await os()),
     empty: () => withLibrary("readonly", isEmpty),
+    pictures: picturesOf,
     snapshot: async () => {
       const { metas, stored, books, segments, positions } = await withLibrary("readonly", async (stores) => ({
         metas: /** @type {unknown[]} */ (await promisify(stores.meta.getAll())),
@@ -305,6 +331,55 @@ export async function copyPosition(position) {
     await copyPositionWith(position, copyDeps());
   } catch {
     // As above.
+  }
+}
+
+/**
+ * One picture into the copy, as it arrives (D145).
+ *
+ * @param {PictureRow} picture
+ * @returns {Promise<void>}
+ */
+export async function copyPicture(picture) {
+  try {
+    await ready();
+    await copyPictureWith(picture, copyDeps());
+  } catch {
+    // As above.
+  }
+}
+
+/**
+ * An article's pictures out of the copy - removed, or their save cut short.
+ *
+ * @param {string} url
+ * @returns {Promise<void>}
+ */
+export async function dropPictureCopies(url) {
+  try {
+    await ready();
+    await dropPicturesWith(url, copyDeps());
+  } catch {
+    // As above.
+  }
+}
+
+/**
+ * One article's pictures back from the copy, for the database to take when
+ * it has none and the light row says there were some (`getPictures`).
+ * Nothing on failure: the article opens without them, as it would have.
+ *
+ * @param {string} url
+ * @param {number} count how many the light row promises - a ceiling for the reads
+ * @returns {Promise<PictureRow[]>}
+ */
+export async function restorePictures(url, count) {
+  try {
+    await ready();
+    const rows = await restorePicturesWith(url, copyDeps());
+    return rows.slice(0, count);
+  } catch {
+    return [];
   }
 }
 

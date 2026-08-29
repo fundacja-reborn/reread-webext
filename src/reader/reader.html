@@ -360,6 +360,18 @@
         <button id="nav-vocabulary" type="button" data-i18n="saved_phrases">Saved phrases</button>
         <button id="nav-library" type="button" data-i18n="reading_list" hidden>Offline reading list</button>
         <a id="original" data-i18n="reader_open_original" hidden>Open the original</a>
+        <!-- The article's pictures (D145): the one row that reaches the
+             network, beside the other door to the article's servers. Over a
+             saved article whose text refers to pictures it offers to fetch
+             them; while it fetches it is the progress and the stop; with
+             pictures kept it removes them. The line under it says where the
+             pictures come from before the press, and how the press went
+             after. Filled by script; hidden over everything else. -->
+        <button id="nav-pictures" type="button" hidden>Save pictures</button>
+        <p id="nav-pictures-hint" class="nav-hint" hidden data-i18n="reader_pictures_hint">
+          Downloaded once from the article's own servers, without cookies, and kept with the
+          article on this device.
+        </p>
         <button id="nav-settings" type="button" data-i18n="settings">Settings</button>
       </nav>
     </div>

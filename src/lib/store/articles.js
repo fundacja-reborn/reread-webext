@@ -21,14 +21,18 @@
  * overwrite whose content it measured - holds for them below too.
  */
 
+import { asPictureRow } from "../reader/pictures.js";
 import { asPosition } from "../reader/position.js";
 import { importPlan } from "./articles-file.js";
 import {
   copyArticle,
+  copyPicture,
   copyPosition,
   dropArticleCopy,
+  dropPictureCopies,
   patchArticleCopy,
   restoreLibrary,
+  restorePictures,
 } from "./library-copy.js";
 import { promisify, withLibrary } from "./library-db.js";
 import { rebuildMarksBackup, restoreMarks } from "./marks.js";
@@ -38,17 +42,30 @@ import { asSavedMeta } from "./saved-article.js";
  * @typedef {import("./saved-article.js").SavedMeta} SavedMeta
  * @typedef {import("./saved-article.js").SavedArticle} SavedArticle
  * @typedef {import("../reader/position.js").ReadingPosition} ReadingPosition
+ * @typedef {import("../reader/pictures.js").PictureRow} PictureRow
+ * @typedef {import("../reader/pictures.js").PicturesSummary} PicturesSummary
  */
+
+/**
+ * Every picture of one article, in the pictures store: the keys are
+ * `[url, index]`, and an array sorts after every number.
+ *
+ * @param {string} url
+ * @returns {IDBKeyRange}
+ */
+function pictureRange(url) {
+  return IDBKeyRange.bound([url, 0], [url, []]);
+}
 
 /**
  * Saves an article, replacing whatever was saved under the same address. Both
  * halves go in one transaction: a row the list shows must never point at
  * content that is not there.
  *
- * Overwriting also clears the old reading position and the old highlighter
- * marks: both anchored into the text that has just been replaced, and saving
- * a page again puts it back on the reading pile - the same reset `readAt`
- * gets. A first save of an address clears nothing: the only marks that can
+ * Overwriting also clears the old reading position, the old highlighter
+ * marks and the old pictures: all anchored into the text that has just been
+ * replaced, and saving a page again puts it back on the reading pile - the
+ * same reset `readAt` gets. A first save of an address clears nothing: the only marks that can
  * stand under an address nobody saved are the ones the copy put back after
  * the browser emptied the library (`marks-backup.js`), and this save is the
  * page returning to them. The reading list's own copy is asked back first
@@ -68,6 +85,7 @@ export async function putArticle(article) {
     if (existing === undefined) return false;
     await promisify(stores.positions.delete(article.url));
     await promisify(stores.marks.delete(article.url));
+    await promisify(stores.pictures.delete(pictureRange(article.url)));
     return true;
   });
   if (replaced) await rebuildMarksBackup();
@@ -89,9 +107,105 @@ export async function deleteArticle(url) {
     await promisify(stores.content.delete(url));
     await promisify(stores.positions.delete(url));
     await promisify(stores.marks.delete(url));
+    await promisify(stores.pictures.delete(pictureRange(url)));
   });
   await rebuildMarksBackup();
   await dropArticleCopy(url);
+}
+
+/**
+ * One picture into an article's rows, and into the copy behind it - written
+ * as it arrives, so an article of seventy pictures never has seventy in
+ * memory (D145). The light row's account is the caller's to settle when the
+ * last one is in (`setPictures`).
+ *
+ * @param {PictureRow} row
+ * @returns {Promise<void>}
+ */
+export async function putPicture(row) {
+  await withLibrary("readwrite", async (stores) => {
+    await promisify(stores.pictures.put(row));
+  });
+  await copyPicture(row);
+}
+
+/**
+ * An article's pictures in their order - or, when the database has none
+ * and the light row says there were some, back from the copy first: the
+ * text of a reading list comes back whole the moment the library is found
+ * empty (`restoreLibrary`), its pictures one article at a time, the first
+ * time each is opened. A picture the copy cannot give back is a picture
+ * that is not there; the account on the light row is not corrected for it,
+ * so the next opening asks again.
+ *
+ * @param {string} url
+ * @returns {Promise<PictureRow[]>}
+ */
+export async function getPictures(url) {
+  const rows = await readPictures(url);
+  if (rows.length > 0) return rows;
+  const meta = await getArticleMeta(url);
+  if (meta === null || meta.pictures === undefined) return [];
+  const restored = await restorePictures(url, meta.pictures.count);
+  if (restored.length === 0) return [];
+  await withLibrary("readwrite", async (stores) => {
+    for (const row of restored) await promisify(stores.pictures.put(row));
+  });
+  return readPictures(url);
+}
+
+/**
+ * @param {string} url
+ * @returns {Promise<PictureRow[]>}
+ */
+async function readPictures(url) {
+  const rows = /** @type {unknown[]} */ (
+    await withLibrary("readonly", (stores) => promisify(stores.pictures.getAll(pictureRange(url))))
+  );
+  return rows
+    .map(asPictureRow)
+    .filter((row) => row !== null)
+    .sort((a, b) => a.index - b.index);
+}
+
+/**
+ * Every picture of an article out - the press of "Remove pictures", and a
+ * save of them cut short, which must leave the article as it was: the rows,
+ * the copy's, and the account on the light row.
+ *
+ * @param {string} url
+ * @returns {Promise<void>}
+ */
+export async function deletePictures(url) {
+  await withLibrary("readwrite", async (stores) => {
+    await promisify(stores.pictures.delete(pictureRange(url)));
+  });
+  await dropPictureCopies(url);
+  await setPictures(url, null);
+}
+
+/**
+ * The light row's account of an article's pictures, settled after they are
+ * all in or all out. A no-op when the article is gone, like every patch of
+ * the light row: an account is never a way to resurrect a row.
+ *
+ * @param {string} url
+ * @param {PicturesSummary | null} pictures
+ * @returns {Promise<SavedMeta | null>} the row as it stands now
+ */
+export async function setPictures(url, pictures) {
+  const updated = await withLibrary("readwrite", async (stores) => {
+    const row = asSavedMeta(await promisify(stores.meta.get(url)));
+    if (row === null) return null;
+    /** @type {SavedMeta} */
+    const updated = { ...row };
+    if (pictures === null || pictures.count === 0) delete updated.pictures;
+    else updated.pictures = pictures;
+    await promisify(stores.meta.put(updated));
+    return updated;
+  });
+  if (updated !== null) await patchArticleCopy(updated);
+  return updated;
 }
 
 /**
