@@ -920,7 +920,7 @@
     "description": "The size line of the storage row. $SIZE$ is the amount, already formatted with its unit.",
     "placeholders": { "size": { "content": "$1", "example": "143.2 MB" } }
   },
-  "options_storage_how": { "message": "What the browser's databases take on disk. A dictionary costs three to four times its text - every word and every other spelling is a row of its own; the models and the reading list cost about what their lists say. Deleting an article or a book removes everything of it - text, pictures, highlights, notes and the reading position - from the database and from the copy alike." },
+  "options_storage_how": { "message": "Disk space used by the extension. Dictionaries take up more space than their file size because of the database structure. Deleting an article or book completely removes its text, images, highlights, notes and reading progress." },
   "options_storage_persistent": { "message": "Persistent storage: granted. The browser has promised not to clear this data to make room." },
   "options_storage_at_risk": {
     "message": "Persistent storage: not granted. Safari clears a site's data after about a month of use without a tap on its pages, and this extension's pages count as one site. Your phrases have a copy that survives this (the line below); the models, the dictionaries and the reading list do not - open the reader or these settings now and then.",
@@ -959,7 +959,7 @@
   "options_storage_library_copy_off": { "message": "Copy of the reading list: off." },
   "options_library_copy": { "message": "Copy of the reading list" },
   "options_library_copy_hint": {
-    "message": "Keeps a second copy of every saved article and book, with the place you stopped reading, in the extension's own storage - a store apart from the reading list's database, which the loss of that database does not reach. It doubles the space the reading list takes. On unless you switch it off: Safari deletes the reading list after thirty days without a visit to the extension's pages, and on any browser a database can be lost to a damaged profile or a cleaning tool - the copy is what brings it back. Pictures saved with an article are copied too, and come back the first time the article is opened."
+    "message": "Creates a backup of your reading list to protect it against automatic browser cleanups and database errors. This doubles the disk space the list takes, but keeps your saved articles safe if the database is lost."
   },
   "reader_marks_delete_all_one": {
     "message": "Delete the $COUNT$ quote of this page",
@@ -979,8 +979,12 @@
     "description": "Under a quote on the highlights page whose document is gone from the reading list; the quote was restored from the copy kept in storage.local."
   },
   "options_pair_hint": {
-    "message": "The pairs offered are those whose translation models you have downloaded to this device - if you want to translate in another language pair, download its model under",
-    "description": "Followed by an anchor link wearing the options_models_heading text, then a plain full stop. No part starts or ends with whitespace."
+    "message": "Shows the language pairs downloaded to this device. To add new languages, download them in the",
+    "description": "Followed by an anchor link wearing the options_models_heading text, then options_pair_hint_rest. No part starts or ends with whitespace."
+  },
+  "options_pair_hint_rest": {
+    "message": "section below.",
+    "description": "The end of the pair hint, after the anchor link that wears the options_models_heading text; closes the sentence with its own full stop. Must not start or end with whitespace."
   },
   "options_pair_none": {
     "message": "No model yet - download one below",
@@ -988,18 +992,18 @@
   },
   "options_reader_only": { "message": "Only in the reader" },
   "options_reader_only_hint": {
-    "message": "With this on, selecting text on an ordinary page offers one thing: open the page in the reader, where translating, saving and underlining happen. On Android it is on by default."
+    "message": "Limits translation to the reader. Selecting text on an ordinary web page will only show an option to open the page in the reader. On Android and iOS it is on by default."
   },
   "options_keep_articles": { "message": "Save in the offline reading list by default" },
   "options_keep_articles_hint": {
-    "message": "With this on, a page opened in the reader goes straight into the offline reading list, so you can read it with no network - and after the original page has been deleted. Opening the same page again never writes over it: your highlights and the place you stopped reading stay untouched."
+    "message": "Automatically saves every page you open in the reader for offline reading. Your saved pages, highlights and reading progress are kept safe even if the original website changes or disappears."
   },
   "options_quiet_bubble_hint": {
-    "message": "With this on, the bubble shows just the translation; its buttons slide out when you click or tap it."
+    "message": "Shows only the translated text in the bubble. The action buttons (such as copy or save) appear only when you click or tap the bubble."
   },
   "options_no_translation": { "message": "Use without translation" },
   "options_no_translation_hint": {
-    "message": "For reading in your own language. With this on, the translation bubble, saving and underlining phrases, the saved phrases page and the model section are hidden; selecting text on an ordinary page offers one thing - open the page in the reader. The reader, the offline reading list, the highlighter, reading aloud, search and dictionaries keep working. Nothing is deleted: your phrases and models come back the moment you switch this off."
+    "message": "Hides translation features (bubble, underlines, saved phrases). Ideal for reading in your native language. The reader, offline reading list, highlighter and dictionaries remain active. Your saved data is not deleted and will return when you turn this off."
   },
   "options_bubble_off": { "message": "No bubble when selecting text" },
   "options_bubble_off_hint": {
@@ -1008,23 +1012,24 @@
   },
   "options_bubble_scale": { "message": "Bubble text size" },
   "options_bubble_scale_hint": {
-    "message": "The size of the translation bubble - its text and its buttons - on ordinary pages and in the reader alike."
+    "message": "Adjusts the text and button size inside the translation bubble across all pages."
   },
   "options_tts": { "message": "Reading aloud" },
   "options_tts_hint": {
-    "message": "With this off, nothing reads aloud: the speaker leaves the bubble and the lists, the Read-aloud button leaves the reader, and the voice and speed rows below fold away - your choices in them are kept.",
-    "description": "Under the reading-aloud switch on the settings page (D148). The two rows it refers to are the voice select and the reading speed, which hide while the switch is off."
+    "message": "Enables the text-to-speech function. Turning this off hides all read-aloud buttons in the bubble, lists, and the reader.",
+    "description": "Under the reading-aloud switch on the settings page (D148). Off, the voice and speed rows below it hide as well."
   },
   "options_tts_voice": { "message": "Voice for reading aloud" },
   "options_tts_default": { "message": "Browser default" },
   "options_tts_listen": { "message": "Listen" },
   "options_tts_voice_hint": {
-    "message": "The voice reads a selected phrase in the bubble and a whole article in the reader. The voices are this device's own: speech is made locally and nothing is sent anywhere."
+    "message": "Select the voice used to read phrases and articles. The voices are built into your system and speak on this device; no data is sent to the internet. Exception: the online voices some browsers add (in Chrome, the voices named \"Google\") send the text to the browser maker's server.",
+    "description": "The exception is real: the voice select does not filter out voices the browser marks as remote (speechSynthesis localService false) - in Chrome the \"Google ...\" voices, which synthesize on Google's servers."
   },
   "options_tts_rate": { "message": "Reading speed" },
   "options_models_heading": { "message": "Translation models" },
   "options_models_intro": {
-    "message": "The models below are built and published by Mozilla - the same models Firefox itself translates pages with. For re/read to work, download a model for the language pairs you want to translate (for example en -> pl)."
+    "message": "Download a translation model here for each language pair you want to translate. These are official Mozilla files that run entirely offline on your device."
   },
   "options_update_list": {
     "message": "Update the list",
@@ -1047,7 +1052,7 @@
     "description": "First half of the note around the host, which stands between the parts as a page element. Each part must read on from the last across a plain space - no part starts or ends with whitespace."
   },
   "options_model_note_rest": {
-    "message": "- where Mozilla publishes them. Updating the list sends nothing about you; it only fetches the fresh list. This host and the dictionary catalogue's below are the only two this extension ever contacts, and only when you press to refresh a list or to download something."
+    "message": "- where Mozilla publishes them. The extension connects to this public server only when you press Update the list or Download. No personal data is ever sent."
   },
   "options_add_model_heading": { "message": "Add a model from files" },
   "options_add_model_summary": {
@@ -1063,10 +1068,10 @@
   },
   "options_dictionaries_heading": { "message": "Dictionaries" },
   "options_dictionaries_intro": {
-    "message": "Download a dictionary (or a few) to check the different meanings a selected word can have. While translating you choose and save the senses that fit the context; with translation switched off, the definitions simply answer a selection in the reader."
+    "message": "Add dictionaries to see detailed word definitions in the translation bubble. You can change the order in which they appear using the arrows."
   },
   "options_dictionary_order_hint": {
-    "message": "The bubble answers in the order below - the arrows move a dictionary up or down. Only the dictionaries of the language you are reading answer at all.",
+    "message": "The bubble answers in the order below. Only the dictionaries of the language you are reading answer.",
     "description": "Above the list of dictionaries, shown only once a second one is stored."
   },
   "options_dictionary_note_from": {
@@ -1074,42 +1079,31 @@
     "description": "First half of the note around the host, which stands between the parts as a page element. Each part must read on from the last across a plain space - no part starts or ends with whitespace."
   },
   "options_dictionary_note_rest": {
-    "message": "- where WikDict publishes the dictionaries it builds from Wiktionary (CC BY-SA). When you update the list, nothing about you is sent - the request only fetches the fresh list."
+    "message": "- where WikDict publishes the dictionaries it builds from Wiktionary (CC BY-SA). The extension connects to this public server only when you press Update the list or Download. No personal data is ever sent."
   },
   "options_add_dictionary_heading": { "message": "Add a dictionary from files" },
   "options_add_dictionary_summary": {
-    "message": "To add a dictionary from your own files - one from an e-reader works as it is - load them here.",
-    "description": "The one visible line of the folded-by-hand section - says when opening it is worth it."
-  },
-  "options_stardict_intro": {
-    "message": "Dictionaries are read in the",
-    "description": "Followed by the bolded format name StarDict, then options_stardict_intro_rest."
-  },
-  "options_stardict_intro_rest": {
-    "message": "format - the same files a KOReader e-reader uses, so a dictionary already on your reader works here unchanged. Unpack the archive it came in and pick the files of one dictionary:"
+    "message": "Import your own dictionaries in the StarDict format. Unpack the archive, select the required files (.ifo, .idx, .dict), choose the languages and press Add dictionary.",
+    "description": "The whole instruction of the fold that adds a dictionary from files; the list of file kinds stands under it."
   },
   "options_file_ifo": { "message": "- what the dictionary calls itself" },
   "options_file_idx": { "message": "- the index of words" },
   "options_file_dict_or": { "message": "or" },
   "options_file_dict": { "message": "- the entries" },
   "options_file_syn": { "message": "- other spellings, when the dictionary has them" },
-  "options_add_dictionary_steps": {
-    "message": "Two steps: pick the files, then set the two languages below them. A StarDict file does not say which languages it holds, so that part is yours to fill in - and it is what decides when this dictionary answers.",
-    "description": "Above the file picker in the fold that adds a dictionary from files: it names the second step, because the two language selects below the picker look like settings that are already right."
-  },
   "options_words_in": { "message": "Words in" },
   "options_explained_in": { "message": "explained in" },
   "options_add_dictionary_button": { "message": "Add dictionary" },
   "options_add_dictionary_mono": {
-    "message": "A monolingual dictionary works too - for English-English, say, pick English on both sides. Dictionaries are matched by the language of their headwords, not by the pair, so it answers beside the bilingual ones: under \"More\" while translating, straight away with translation off."
+    "message": "A monolingual dictionary works too, for example English-English: choose the same language on both sides."
   },
   "options_dict_files_note": {
-    "message": "Adding from files makes no network request; files from anywhere work, the catalogue's own included - they are published at",
+    "message": "Adding from files makes no network request. Any StarDict files work, including the catalogue's own, which are published at",
     "description": "Ends just before the address, which stands in the page as a link; the sentence's closing full stop is part of the page."
   },
   "options_disabled_heading": { "message": "Switched-off sites" },
   "options_disabled_intro": {
-    "message": "Sites where re/read stays off: no underlines, no bubble, nothing running on the page itself; opening a page in the reader by hand still works. The switch in the toolbar popup is what adds a site here; this list is how one comes back on."
+    "message": "A list of websites where the extension is switched off (no translation or underlines). You can add sites here using the extension icon in your browser's toolbar."
   },
   "options_support_intro": {
     "message": "re/read is built by a non-profit foundation - no investors, no ads, no tracking. If you find it useful and want to support its continued development, every donation helps us build software free from commercial pressure."

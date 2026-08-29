@@ -772,7 +772,7 @@
     "message": "$SIZE$ - modèles, dictionnaires, liste de lecture et vos expressions réunis",
     "placeholders": { "size": { "content": "$1", "example": "143,2 MB" } }
   },
-  "options_storage_how": { "message": "C'est ce que les bases de données du navigateur occupent sur le disque. Un dictionnaire coûte trois à quatre fois la taille de son texte - chaque mot et chaque autre graphie est une ligne à part ; les modèles et la liste de lecture coûtent à peu près ce qu'indiquent leurs listes. Supprimer un article ou un livre en retire tout - le texte, les images, les surlignages, les notes et la position de lecture - de la base de données comme de la copie." },
+  "options_storage_how": { "message": "Espace disque utilisé par l'extension. Les dictionnaires prennent plus de place que leur taille initiale en raison de la structure de la base de données. Supprimer un article ou un livre efface définitivement son texte, ses images, ses surlignages, ses notes et votre progression de lecture." },
   "options_storage_persistent": { "message": "Stockage persistant : accordé. Le navigateur a promis de ne pas effacer ces données pour faire de la place." },
   "options_storage_at_risk": { "message": "Stockage persistant : refusé. Safari efface les données d'un site après environ un mois d'utilisation sans un toucher sur ses pages, et les pages de cette extension comptent comme un site. Vos expressions ont une copie qui y survit (ligne ci-dessous) ; les modèles, les dictionnaires et la liste de lecture non - ouvrez le lecteur ou ces paramètres de temps en temps." },
   "options_storage_backup_one": {
@@ -817,7 +817,7 @@
   "options_storage_library_copy_off": { "message": "Copie de la liste de lecture : désactivée." },
   "options_library_copy": { "message": "Copie de la liste de lecture" },
   "options_library_copy_hint": {
-    "message": "Conserve une seconde copie de chaque article et de chaque livre enregistrés, avec l'endroit où vous vous êtes arrêté, dans le stockage propre de l'extension - à part de la base de données de la liste de lecture, hors de portée d'une perte de cette base. Elle double l'espace occupé par la liste de lecture. Elle est activée tant que vous ne la désactivez pas : Safari supprime la liste de lecture après trente jours sans visite des pages de l'extension, et dans tout navigateur un profil endommagé ou un outil de nettoyage peut emporter la base - c'est la copie qui la ramène. Les images enregistrées avec un article sont copiées elles aussi et reviennent à la première ouverture de l'article."
+    "message": "Crée une sauvegarde de votre liste de lecture pour la protéger contre les nettoyages automatiques du navigateur et les erreurs de base de données. Cela double l'espace disque occupé par la liste, mais vos articles enregistrés sont conservés même si la base de données est perdue."
   },
   "reader_marks_delete_all_one": {
     "message": "Supprimer la $COUNT$ citation de cette page",
@@ -829,22 +829,23 @@
   },
   "reader_mark_text_changed": { "message": "Le texte de la page a changé depuis le surlignage, qui ne peut donc pas être affiché ici." },
   "reader_marks_missing_doc": { "message": "Son document n'est plus enregistré - cette citation est revenue de la copie. Rouvrez la page et le surlignage y sera." },
-  "options_pair_hint": { "message": "Les paires proposées sont celles dont vous avez téléchargé le modèle de traduction sur cet appareil - si vous voulez traduire dans une autre paire de langues, téléchargez son modèle dans la section" },
+  "options_pair_hint": { "message": "Affiche les paires de langues téléchargées sur cet appareil. Pour ajouter d'autres langues, téléchargez-les dans la section" },
+  "options_pair_hint_rest": { "message": "ci-dessous." },
   "options_pair_none": { "message": "Pas encore de modèle - téléchargez-en un ci-dessous" },
   "options_reader_only": { "message": "Seulement dans le lecteur" },
   "options_reader_only_hint": {
-    "message": "Quand c'est activé, sélectionner du texte sur une page ordinaire ne propose qu'une chose : ouvrir la page dans le lecteur, où se font la traduction, l'enregistrement et le soulignement. Sur Android, l'option est activée par défaut."
+    "message": "Limite la traduction au lecteur. Sélectionner du texte sur une page web ordinaire proposera uniquement de l'ouvrir dans le lecteur. Sur Android et iOS, l'option est activée par défaut."
   },
   "options_keep_articles": { "message": "Enregistrer par défaut dans la liste de lecture hors ligne" },
   "options_keep_articles_hint": {
-    "message": "Quand c'est activé, une page ouverte dans le lecteur rejoint aussitôt la liste de lecture hors ligne : vous pourrez la lire sans réseau, et même une fois la page d'origine supprimée. Rouvrir la même page ne l'écrase jamais : vos surlignages et l'endroit où vous vous êtes arrêté restent intacts."
+    "message": "Enregistre automatiquement chaque page ouverte dans le lecteur pour la lecture hors ligne. Vos pages enregistrées, vos surlignages et votre progression de lecture sont préservés même si le site d'origine change ou disparaît."
   },
   "options_quiet_bubble_hint": {
-    "message": "Quand c'est activé, la bulle ne montre que la traduction ; ses boutons apparaissent après un clic ou un appui sur la bulle."
+    "message": "Affiche uniquement le texte traduit dans la bulle. Les boutons d'action (copier, enregistrer) n'apparaissent que lorsque vous cliquez ou touchez la bulle."
   },
   "options_no_translation": { "message": "Utiliser sans traduction" },
   "options_no_translation_hint": {
-    "message": "Pour lire dans votre propre langue. Quand c'est activé, la bulle de traduction, l'enregistrement et le soulignement des phrases, la page des phrases enregistrées et la section des modèles disparaissent ; sélectionner du texte sur une page ordinaire ne propose qu'une chose - ouvrir la page dans le lecteur. Le lecteur, la liste de lecture hors ligne, le surligneur, la lecture à voix haute, la recherche et les dictionnaires continuent de fonctionner. Rien n'est supprimé : vos phrases et vos modèles reviennent dès que vous désactivez ceci."
+    "message": "Masque les fonctions de traduction (bulle, soulignements, phrases enregistrées). Idéal pour lire dans votre langue maternelle. Le lecteur, la liste de lecture hors ligne, le surligneur et les dictionnaires restent actifs. Vos données enregistrées ne sont pas supprimées et réapparaîtront quand vous désactiverez cette option."
   },
   "options_bubble_off": { "message": "Pas de bulle à la sélection de texte" },
   "options_bubble_off_hint": {
@@ -852,22 +853,22 @@
   },
   "options_bubble_scale": { "message": "Taille du texte de la bulle" },
   "options_bubble_scale_hint": {
-    "message": "La taille de la bulle de traduction - son texte et ses boutons - sur les pages ordinaires comme dans le lecteur."
+    "message": "Ajuste la taille du texte et des boutons dans la bulle de traduction sur toutes les pages."
   },
   "options_tts": { "message": "Lecture à voix haute" },
   "options_tts_hint": {
-    "message": "Si c'est désactivé, rien n'est lu à voix haute : le haut-parleur disparaît de la bulle et des listes, le bouton « Lire à voix haute » du lecteur, et les lignes de la voix et de la vitesse ci-dessous se replient - les choix qui y sont faits sont conservés."
+    "message": "Active la lecture à voix haute. Désactiver cette option masque tous les boutons de lecture dans la bulle, les listes et le lecteur."
   },
   "options_tts_voice": { "message": "Voix de lecture" },
   "options_tts_default": { "message": "Voix par défaut du navigateur" },
   "options_tts_listen": { "message": "Écouter" },
   "options_tts_voice_hint": {
-    "message": "La voix lit une phrase sélectionnée dans la bulle et un article entier dans le lecteur. Les voix sont celles de cet appareil : la parole est produite localement et rien n'est envoyé nulle part."
+    "message": "Choisissez la voix utilisée pour lire les phrases et les articles. Les voix sont intégrées à votre système et parlent sur cet appareil ; aucune donnée n'est envoyée sur Internet. Exception : les voix en ligne ajoutées par certains navigateurs (dans Chrome, les voix nommées « Google ») envoient le texte au serveur de l'éditeur du navigateur."
   },
   "options_tts_rate": { "message": "Vitesse de lecture" },
   "options_models_heading": { "message": "Modèles de traduction" },
   "options_models_intro": {
-    "message": "Les modèles ci-dessous sont construits et publiés par Mozilla - les mêmes modèles avec lesquels Firefox lui-même traduit les pages. Pour que re/read fonctionne, téléchargez le modèle des paires de langues que vous voulez traduire (par exemple en -> pl)."
+    "message": "Téléchargez ici un modèle de traduction pour chaque paire de langues que vous voulez traduire. Ce sont des fichiers officiels de Mozilla qui fonctionnent entièrement hors ligne sur votre appareil."
   },
   "options_update_list": { "message": "Mettre à jour la liste" },
   "options_list_dated": { "message": "Liste du" },
@@ -880,7 +881,7 @@
   },
   "options_model_note_from": { "message": "Les modèles sont téléchargés depuis" },
   "options_model_note_rest": {
-    "message": "- c'est là que Mozilla les publie. Mettre la liste à jour n'envoie rien sur vous ; la requête ne récupère que la liste fraîche. Cet hôte et celui du catalogue de dictionnaires plus bas sont les deux seuls que cette extension contacte jamais, et seulement quand vous le demandez."
+    "message": "- c'est là que Mozilla les publie. L'extension ne se connecte à ce serveur public que lorsque vous cliquez sur Mettre à jour la liste ou Télécharger. Aucune donnée personnelle n'est transmise."
   },
   "options_add_model_heading": { "message": "Ajouter un modèle depuis des fichiers" },
   "options_add_model_summary": {
@@ -895,43 +896,36 @@
   },
   "options_dictionaries_heading": { "message": "Dictionnaires" },
   "options_dictionaries_intro": {
-    "message": "Téléchargez un dictionnaire (ou plusieurs) pour pouvoir consulter les différents sens d'un mot sélectionné. Pendant la traduction, vous choisissez et enregistrez les sens qui collent au contexte ; avec la traduction désactivée, les définitions répondent simplement à une sélection dans le lecteur."
+    "message": "Ajoutez des dictionnaires pour voir des définitions détaillées des mots dans la bulle de traduction. Vous pouvez modifier leur ordre d'affichage à l'aide des flèches."
   },
   "options_dictionary_order_hint": {
-    "message": "La bulle répond dans l'ordre ci-dessous - les flèches déplacent un dictionnaire vers le haut ou vers le bas. Seuls les dictionnaires de la langue que vous lisez répondent."
+    "message": "La bulle répond dans l'ordre ci-dessous. Seuls les dictionnaires de la langue que vous lisez répondent."
   },
   "options_dictionary_note_from": { "message": "Les dictionnaires sont téléchargés depuis" },
   "options_dictionary_note_rest": {
-    "message": "- c'est là que WikDict publie les dictionnaires qu'il construit à partir du Wiktionnaire (CC BY-SA). Quand vous mettez la liste à jour, rien sur vous n'est envoyé - la requête ne récupère que la liste fraîche."
+    "message": "- c'est là que WikDict publie les dictionnaires qu'il construit à partir du Wiktionnaire (CC BY-SA). L'extension ne se connecte à ce serveur public que lorsque vous cliquez sur Mettre à jour la liste ou Télécharger. Aucune donnée personnelle n'est transmise."
   },
   "options_add_dictionary_heading": { "message": "Ajouter un dictionnaire depuis des fichiers" },
   "options_add_dictionary_summary": {
-    "message": "Pour ajouter un dictionnaire depuis vos propres fichiers - celui d'une liseuse fonctionne tel quel - chargez-les ici."
-  },
-  "options_stardict_intro": { "message": "Les dictionnaires se lisent au format" },
-  "options_stardict_intro_rest": {
-    "message": "- les mêmes fichiers qu'une liseuse KOReader utilise ; un dictionnaire déjà sur votre liseuse fonctionne donc ici tel quel. Décompressez l'archive dans laquelle il est arrivé et choisissez les fichiers d'un dictionnaire :"
+    "message": "Importez vos propres dictionnaires au format StarDict. Décompressez l'archive, sélectionnez les fichiers requis (.ifo, .idx, .dict), choisissez les langues et cliquez sur Ajouter le dictionnaire."
   },
   "options_file_ifo": { "message": "- comment le dictionnaire se nomme" },
   "options_file_idx": { "message": "- l'index des mots" },
   "options_file_dict_or": { "message": "ou" },
   "options_file_dict": { "message": "- les entrées" },
   "options_file_syn": { "message": "- d'autres graphies, quand le dictionnaire en a" },
-  "options_add_dictionary_steps": {
-    "message": "Deux étapes : choisissez les fichiers, puis réglez les deux langues en dessous. Un fichier StarDict ne dit pas pour quelles langues il est fait : cette part vous revient - et c'est elle qui décide quand ce dictionnaire répond."
-  },
   "options_words_in": { "message": "Mots en" },
   "options_explained_in": { "message": "expliqués en" },
   "options_add_dictionary_button": { "message": "Ajouter le dictionnaire" },
   "options_add_dictionary_mono": {
-    "message": "Un dictionnaire monolingue fonctionne aussi - anglais-anglais, par exemple : choisissez l'anglais des deux côtés. Les dictionnaires sont retenus selon la langue de leurs entrées, pas selon la paire ; il répond donc à côté des bilingues : sous « Plus » pendant la traduction, directement avec la traduction désactivée."
+    "message": "Un dictionnaire monolingue fonctionne aussi, par exemple anglais-anglais : choisissez la même langue des deux côtés."
   },
   "options_dict_files_note": {
-    "message": "Ajouter depuis des fichiers ne fait aucune requête réseau ; les fichiers de n'importe où fonctionnent, ceux du catalogue compris - ils sont publiés à"
+    "message": "Ajouter depuis des fichiers ne fait aucune requête réseau. N'importe quels fichiers StarDict fonctionnent, y compris ceux du catalogue, publiés à"
   },
   "options_disabled_heading": { "message": "Sites désactivés" },
   "options_disabled_intro": {
-    "message": "Les sites où re/read reste éteint : pas de soulignements, pas de bulle, rien qui tourne sur la page elle-même ; ouvrir une page à la main dans le lecteur fonctionne toujours. C'est l'interrupteur du popup de la barre d'outils qui ajoute un site ici ; cette liste sert à le rallumer."
+    "message": "Liste des sites web où l'extension est désactivée (pas de traduction ni de soulignements). Vous pouvez en ajouter via l'icône de l'extension dans la barre d'outils du navigateur."
   },
   "options_support_intro": {
     "message": "re/read est développé par une fondation à but non lucratif - sans investisseurs, sans publicité, sans pistage. S'il vous est utile et que vous souhaitez soutenir son développement, chaque don nous aide à construire des logiciels libres de toute pression commerciale."

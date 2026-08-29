@@ -749,7 +749,7 @@
     "message": "$SIZE$ - Modelle, Wörterbücher, Leseliste und Ihre Phrasen zusammen",
     "placeholders": { "size": { "content": "$1", "example": "143,2 MB" } }
   },
-  "options_storage_how": { "message": "So viel belegen die Datenbanken des Browsers auf der Festplatte. Ein Wörterbuch kostet das Drei- bis Vierfache seines Textes - jedes Wort und jede andere Schreibweise ist eine eigene Zeile; die Modelle und die Leseliste kosten ungefähr das, was ihre Listen anzeigen. Das Löschen eines Artikels oder Buchs entfernt alles, was dazugehört - Text, Bilder, Markierungen, Notizen und die Leseposition - aus der Datenbank wie aus der Kopie." },
+  "options_storage_how": { "message": "Speicherplatz, der von der Erweiterung belegt wird. Wörterbücher benötigen aufgrund der Datenbankstruktur mehr Platz als ihre Dateigröße. Das Löschen eines Artikels oder Buchs entfernt dessen Text, Bilder, Markierungen, Notizen und Lesefortschritt vollständig." },
   "options_storage_persistent": { "message": "Dauerhafter Speicher: gewährt. Der Browser hat zugesagt, diese Daten nicht zu löschen, um Platz zu schaffen." },
   "options_storage_at_risk": { "message": "Dauerhafter Speicher: nicht gewährt. Safari löscht die Daten einer Website nach etwa einem Monat Nutzung ohne ein Tippen auf ihre Seiten, und die Seiten dieser Erweiterung zählen als eine Website. Ihre Phrasen haben eine Kopie, die das übersteht (Zeile darunter); Modelle, Wörterbücher und Leseliste nicht - öffnen Sie ab und zu die Leseansicht oder diese Einstellungen." },
   "options_storage_backup_one": {
@@ -782,7 +782,7 @@
   "options_storage_library_copy_off": { "message": "Kopie der Leseliste: aus." },
   "options_library_copy": { "message": "Kopie der Leseliste" },
   "options_library_copy_hint": {
-    "message": "Hält eine zweite Kopie jedes gespeicherten Artikels und jedes Buchs, samt der Stelle, an der du aufgehört hast zu lesen, im eigenen Speicher der Erweiterung - getrennt von der Datenbank der Leseliste, sodass ein Verlust dieser Datenbank ihn nicht erreicht. Sie verdoppelt den Platz, den die Leseliste belegt. Sie ist eingeschaltet, solange du sie nicht ausschaltest: Safari löscht die Leseliste nach dreißig Tagen ohne Besuch der Seiten der Erweiterung, und in jedem Browser kann ein beschädigtes Profil oder ein Aufräumprogramm die Datenbank mitnehmen - aus der Kopie kommt sie zurück. Mit einem Artikel gespeicherte Bilder werden ebenfalls kopiert und kommen beim ersten Öffnen des Artikels zurück."
+    "message": "Erstellt ein Backup Ihrer Leseliste zum Schutz vor automatischen Browser-Bereinigungen und Datenbankfehlern. Das verdoppelt den Speicherplatz, den die Leseliste belegt, hält Ihre gespeicherten Artikel aber sicher, falls die Datenbank verloren geht."
   },
   "reader_marks_delete_all_one": {
     "message": "Das $COUNT$ Zitat dieser Seite löschen",
@@ -794,22 +794,23 @@
   },
   "reader_mark_text_changed": { "message": "Der Text der Seite hat sich seit der Markierung geändert, daher lässt sie sich hier nicht zeigen." },
   "reader_marks_missing_doc": { "message": "Das Dokument ist nicht mehr gespeichert - dieses Zitat kam aus der Kopie zurück. Öffnen Sie die Seite erneut, und die Markierung ist wieder da." },
-  "options_pair_hint": { "message": "Zur Wahl stehen die Paare, deren Übersetzungsmodelle Sie auf dieses Gerät heruntergeladen haben - wenn Sie in einem anderen Sprachpaar übersetzen möchten, finden Sie sein Modell im Abschnitt" },
+  "options_pair_hint": { "message": "Zeigt die auf dieses Gerät heruntergeladenen Sprachpaare an. Um neue Sprachen hinzuzufügen, laden Sie diese unten im Abschnitt" },
+  "options_pair_hint_rest": { "message": "herunter." },
   "options_pair_none": { "message": "Noch kein Modell - laden Sie unten eines herunter" },
   "options_reader_only": { "message": "Nur in der Leseansicht" },
   "options_reader_only_hint": {
-    "message": "Ist dies an, bietet das Auswählen von Text auf einer gewöhnlichen Seite genau eines an: die Seite in der Leseansicht zu öffnen, wo Übersetzen, Speichern und Unterstreichen geschehen. Auf Android ist die Option standardmäßig eingeschaltet."
+    "message": "Beschränkt die Übersetzung auf die Leseansicht. Das Markieren von Text auf einer gewöhnlichen Webseite zeigt nur die Option, die Seite in der Leseansicht zu öffnen. Auf Android und iOS ist die Option standardmäßig eingeschaltet."
   },
   "options_keep_articles": { "message": "Standardmäßig in der Offline-Leseliste speichern" },
   "options_keep_articles_hint": {
-    "message": "Ist dies an, wandert eine in der Leseansicht geöffnete Seite sofort in die Offline-Leseliste - Sie können sie dann auch ohne Netz lesen, selbst wenn die ursprüngliche Seite gelöscht wird. Ein erneutes Öffnen derselben Seite überschreibt sie nie: Markierungen und die Stelle, an der Sie aufgehört haben, bleiben unberührt."
+    "message": "Speichert jede in der Leseansicht geöffnete Seite automatisch zum Offline-Lesen. Ihre gespeicherten Seiten, Markierungen und der Lesefortschritt bleiben erhalten, auch wenn die ursprüngliche Website sich ändert oder verschwindet."
   },
   "options_quiet_bubble_hint": {
-    "message": "Ist dies an, zeigt die Sprechblase nur die Übersetzung; ihre Schaltflächen erscheinen nach einem Klick oder Tippen auf die Sprechblase."
+    "message": "Zeigt nur den übersetzten Text in der Sprechblase an. Die Aktionsschaltflächen (wie Kopieren oder Speichern) erscheinen erst, wenn Sie auf die Sprechblase klicken oder tippen."
   },
   "options_no_translation": { "message": "Ohne Übersetzung verwenden" },
   "options_no_translation_hint": {
-    "message": "Zum Lesen in der eigenen Sprache. Ist dies an, verschwinden die Sprechblase, das Speichern und Unterstreichen von Wendungen, die Wortschatz-Seite und der Modell-Abschnitt; das Auswählen von Text auf einer gewöhnlichen Seite bietet genau eines an - die Seite in der Leseansicht zu öffnen. Leseansicht, Offline-Leseliste, Textmarker, Vorlesen, Suche und Wörterbücher funktionieren weiter. Nichts wird gelöscht: Wortschatz und Modelle kehren zurück, sobald Sie dies wieder ausschalten."
+    "message": "Verbirgt die Übersetzungsfunktionen (Sprechblase, Unterstreichungen, gespeicherter Wortschatz). Ideal zum Lesen in der Muttersprache. Leseansicht, Offline-Leseliste, Textmarker und Wörterbücher bleiben aktiv. Ihre gespeicherten Daten werden nicht gelöscht und kehren zurück, wenn Sie dies ausschalten."
   },
   "options_bubble_off": { "message": "Keine Sprechblase beim Auswählen von Text" },
   "options_bubble_off_hint": {
@@ -817,22 +818,22 @@
   },
   "options_bubble_scale": { "message": "Textgröße der Sprechblase" },
   "options_bubble_scale_hint": {
-    "message": "Die Größe der Übersetzungs-Sprechblase - ihres Textes und ihrer Schaltflächen - auf normalen Seiten wie in der Leseansicht."
+    "message": "Passt die Größe von Text und Schaltflächen in der Sprechblase auf allen Seiten an."
   },
   "options_tts": { "message": "Vorlesen" },
   "options_tts_hint": {
-    "message": "Ist dies aus, liest nichts vor: der Lautsprecher verschwindet aus der Sprechblase und den Listen, die Schaltfläche „Vorlesen“ aus der Leseansicht, und die Zeilen für Stimme und Tempo darunter klappen ein - die Auswahl darin bleibt erhalten."
+    "message": "Aktiviert die Vorlesefunktion (Text-to-Speech). Ist sie ausgeschaltet, werden alle Vorlese-Schaltflächen in der Sprechblase, in den Listen und in der Leseansicht ausgeblendet."
   },
   "options_tts_voice": { "message": "Vorlesestimme" },
   "options_tts_default": { "message": "Standardstimme des Browsers" },
   "options_tts_listen": { "message": "Anhören" },
   "options_tts_voice_hint": {
-    "message": "Die Stimme liest eine markierte Wendung in der Sprechblase und einen ganzen Artikel in der Leseansicht vor. Die Stimmen sind die dieses Geräts: Die Sprachausgabe entsteht lokal, und nichts wird irgendwohin gesendet."
+    "message": "Wählen Sie die Stimme zum Vorlesen von Phrasen und Artikeln. Die Stimmen sind in Ihrem System integriert und sprechen auf diesem Gerät; es werden keine Daten ins Internet gesendet. Ausnahme: Online-Stimmen, die manche Browser hinzufügen (in Chrome die Stimmen namens „Google“), senden den Text an den Server des Browserherstellers."
   },
   "options_tts_rate": { "message": "Lesegeschwindigkeit" },
   "options_models_heading": { "message": "Übersetzungsmodelle" },
   "options_models_intro": {
-    "message": "Die Modelle unten baut und veröffentlicht Mozilla - dieselben Modelle, mit denen Firefox selbst Seiten übersetzt. Damit re/read arbeiten kann, laden Sie das Modell für die Sprachpaare herunter, die Sie übersetzen möchten (z. B. en -> pl)."
+    "message": "Laden Sie hier für jedes Sprachpaar, das Sie übersetzen möchten, ein Übersetzungsmodell herunter. Es handelt sich um offizielle Mozilla-Dateien, die vollständig offline auf Ihrem Gerät laufen."
   },
   "options_update_list": { "message": "Liste aktualisieren" },
   "options_list_dated": { "message": "Liste vom" },
@@ -845,7 +846,7 @@
   },
   "options_model_note_from": { "message": "Modelle kommen von" },
   "options_model_note_rest": {
-    "message": "- dort veröffentlicht Mozilla sie. Das Aktualisieren der Liste sendet nichts über Sie; es holt nur die frische Liste. Dieser Host und der des Wörterbuchkatalogs weiter unten sind die einzigen zwei, mit denen sich diese Erweiterung überhaupt verbindet - und nur auf Ihren Druck hin."
+    "message": "- dort veröffentlicht Mozilla sie. Die Erweiterung verbindet sich mit diesem öffentlichen Server nur, wenn Sie auf Liste aktualisieren oder Herunterladen klicken. Es werden keine persönlichen Daten gesendet."
   },
   "options_add_model_heading": { "message": "Modell aus Dateien hinzufügen" },
   "options_add_model_summary": {
@@ -860,43 +861,36 @@
   },
   "options_dictionaries_heading": { "message": "Wörterbücher" },
   "options_dictionaries_intro": {
-    "message": "Laden Sie ein Wörterbuch (oder mehrere) herunter, um die verschiedenen Bedeutungen eines ausgewählten Wortes nachschlagen zu können. Beim Übersetzen wählen und speichern Sie die Lesarten, die zum Kontext passen; bei ausgeschalteter Übersetzung beantworten die Definitionen eine Auswahl in der Leseansicht einfach direkt."
+    "message": "Fügen Sie Wörterbücher hinzu, um detaillierte Wortdefinitionen in der Sprechblase zu sehen. Die Reihenfolge, in der sie erscheinen, können Sie mit den Pfeilen ändern."
   },
   "options_dictionary_order_hint": {
-    "message": "Die Sprechblase antwortet in der Reihenfolge unten - die Pfeile verschieben ein Wörterbuch nach oben oder nach unten. Es antworten nur die Wörterbücher der Sprache, die Sie gerade lesen."
+    "message": "Die Sprechblase antwortet in der Reihenfolge unten. Es antworten nur die Wörterbücher der Sprache, die Sie gerade lesen."
   },
   "options_dictionary_note_from": { "message": "Wörterbücher kommen von" },
   "options_dictionary_note_rest": {
-    "message": "- dort veröffentlicht WikDict die Wörterbücher, die es aus dem Wiktionary (CC BY-SA) baut. Wenn Sie die Liste aktualisieren, wird nichts über Sie gesendet - die Anfrage holt nur die frische Liste."
+    "message": "- dort veröffentlicht WikDict die Wörterbücher, die es aus dem Wiktionary (CC BY-SA) baut. Die Erweiterung verbindet sich mit diesem öffentlichen Server nur, wenn Sie auf Liste aktualisieren oder Herunterladen klicken. Es werden keine persönlichen Daten gesendet."
   },
   "options_add_dictionary_heading": { "message": "Wörterbuch aus Dateien hinzufügen" },
   "options_add_dictionary_summary": {
-    "message": "Um ein Wörterbuch aus eigenen Dateien hinzuzufügen - eines vom E-Reader funktioniert unverändert - laden Sie sie hier."
-  },
-  "options_stardict_intro": { "message": "Wörterbücher werden im Format" },
-  "options_stardict_intro_rest": {
-    "message": "gelesen - dieselben Dateien, die ein KOReader-Lesegerät verwendet; ein Wörterbuch, das schon auf Ihrem Lesegerät liegt, funktioniert hier also unverändert. Entpacken Sie das Archiv, in dem es kam, und wählen Sie die Dateien eines Wörterbuchs:"
+    "message": "Importieren Sie Ihre eigenen Wörterbücher im StarDict-Format. Entpacken Sie das Archiv, wählen Sie die erforderlichen Dateien (.ifo, .idx, .dict), stellen Sie die Sprachen ein und klicken Sie auf Wörterbuch hinzufügen."
   },
   "options_file_ifo": { "message": "- wie das Wörterbuch sich selbst nennt" },
   "options_file_idx": { "message": "- der Index der Wörter" },
   "options_file_dict_or": { "message": "oder" },
   "options_file_dict": { "message": "- die Einträge" },
   "options_file_syn": { "message": "- weitere Schreibweisen, wenn das Wörterbuch sie hat" },
-  "options_add_dictionary_steps": {
-    "message": "Zwei Schritte: die Dateien auswählen und darunter die beiden Sprachen einstellen. Eine StarDict-Datei sagt nicht, für welche Sprachen sie ist; diesen Teil tragen Sie selbst ein - und er entscheidet, wann dieses Wörterbuch antwortet."
-  },
   "options_words_in": { "message": "Wörter auf" },
   "options_explained_in": { "message": "erklärt auf" },
   "options_add_dictionary_button": { "message": "Wörterbuch hinzufügen" },
   "options_add_dictionary_mono": {
-    "message": "Auch ein einsprachiges Wörterbuch funktioniert - etwa Englisch-Englisch: Wählen Sie auf beiden Seiten Englisch. Wörterbücher werden nach der Sprache ihrer Stichwörter zugeordnet, nicht nach dem Paar, also antwortet es neben den zweisprachigen: beim Übersetzen unter „Mehr“, bei ausgeschalteter Übersetzung sofort."
+    "message": "Auch ein einsprachiges Wörterbuch funktioniert, etwa Englisch-Englisch: Wählen Sie auf beiden Seiten dieselbe Sprache."
   },
   "options_dict_files_note": {
-    "message": "Aus Dateien hinzuzufügen stellt keinerlei Netzwerkanfrage; Dateien von überall funktionieren, die des Katalogs eingeschlossen - sie stehen unter"
+    "message": "Aus Dateien hinzuzufügen stellt keine Netzwerkanfrage. Beliebige StarDict-Dateien funktionieren, auch die des Katalogs, veröffentlicht unter"
   },
   "options_disabled_heading": { "message": "Abgeschaltete Websites" },
   "options_disabled_intro": {
-    "message": "Websites, auf denen re/read aus bleibt: keine Unterstreichungen, keine Blase, nichts läuft auf der Seite selbst; von Hand lässt sich eine Seite weiterhin in der Leseansicht öffnen. Der Schalter im Symbolleisten-Popup fügt eine Website hier hinzu; diese Liste schaltet sie wieder ein."
+    "message": "Eine Liste von Websites, auf denen die Erweiterung abgeschaltet ist (keine Übersetzung, keine Unterstreichungen). Websites fügen Sie hier über das Symbol der Erweiterung in der Symbolleiste Ihres Browsers hinzu."
   },
   "options_support_intro": {
     "message": "re/read wird von einer gemeinnützigen Stiftung entwickelt - ohne Investoren, ohne Werbung, ohne Tracking. Wenn es Ihnen nützlich ist und Sie seine Weiterentwicklung unterstützen möchten: Jede Spende hilft uns, Software frei von kommerziellem Druck zu bauen."

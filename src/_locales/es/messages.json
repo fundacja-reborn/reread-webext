@@ -772,7 +772,7 @@
     "message": "$SIZE$ - modelos, diccionarios, lista de lectura y tus frases en conjunto",
     "placeholders": { "size": { "content": "$1", "example": "143,2 MB" } }
   },
-  "options_storage_how": { "message": "Es lo que ocupan en disco las bases de datos del navegador. Un diccionario cuesta tres o cuatro veces el tamaño de su texto - cada palabra y cada otra grafía es una fila propia; los modelos y la lista de lectura cuestan más o menos lo que muestran sus listas. Eliminar un artículo o un libro borra todo lo suyo - el texto, las imágenes, los resaltados, las notas y la posición de lectura - de la base de datos y de la copia por igual." },
+  "options_storage_how": { "message": "Espacio en disco utilizado por la extensión. Los diccionarios ocupan más espacio que su tamaño original debido a la estructura de la base de datos. Eliminar un artículo o libro borra por completo su texto, imágenes, resaltados, notas y progreso de lectura." },
   "options_storage_persistent": { "message": "Almacenamiento persistente: concedido. El navegador ha prometido no borrar estos datos para hacer sitio." },
   "options_storage_at_risk": { "message": "Almacenamiento persistente: no concedido. Safari borra los datos de un sitio tras aproximadamente un mes de uso sin tocar sus páginas, y las páginas de esta extensión cuentan como un sitio. Tus frases tienen una copia que sobrevive a eso (línea de abajo); los modelos, los diccionarios y la lista de lectura no - abre la vista de lectura o estos ajustes de vez en cuando." },
   "options_storage_backup_one": {
@@ -805,7 +805,7 @@
   "options_storage_library_copy_off": { "message": "Copia de la lista de lectura: desactivada." },
   "options_library_copy": { "message": "Copia de la lista de lectura" },
   "options_library_copy_hint": {
-    "message": "Guarda una segunda copia de cada artículo y libro guardados, con el punto donde dejaste de leer, en el almacenamiento propio de la extensión - aparte de la base de datos de la lista de lectura, donde la pérdida de esa base no llega. Duplica el espacio que ocupa la lista de lectura. Está activada mientras no la desactives: Safari borra la lista de lectura tras treinta días sin visitar las páginas de la extensión, y en cualquier navegador un perfil dañado o una herramienta de limpieza puede llevarse la base - la copia es lo que la devuelve. Las imágenes guardadas con un artículo también se copian y vuelven la primera vez que se abre el artículo."
+    "message": "Crea una copia de seguridad de tu lista de lectura para protegerla frente a limpiezas automáticas del navegador y errores de la base de datos. Ocupa el doble de espacio en disco, pero tus artículos guardados se conservan aunque la base de datos se pierda."
   },
   "reader_marks_delete_all_one": {
     "message": "Eliminar la $COUNT$ cita de esta página",
@@ -817,22 +817,23 @@
   },
   "reader_mark_text_changed": { "message": "El texto de la página ha cambiado desde que se hizo el resaltado, así que no se puede mostrar aquí." },
   "reader_marks_missing_doc": { "message": "Su documento ya no está guardado - esta cita volvió de la copia. Abre la página de nuevo y el resaltado estará ahí." },
-  "options_pair_hint": { "message": "Se ofrecen los pares cuyos modelos de traducción descargaste en este dispositivo - si quieres traducir en otro par de idiomas, descarga su modelo en la sección" },
+  "options_pair_hint": { "message": "Muestra los pares de idiomas descargados en este dispositivo. Para añadir nuevos idiomas, descárgalos en la sección" },
+  "options_pair_hint_rest": { "message": "de abajo." },
   "options_pair_none": { "message": "Aún no hay modelo - descarga uno abajo" },
   "options_reader_only": { "message": "Solo en la vista de lectura" },
   "options_reader_only_hint": {
-    "message": "Con esto activado, seleccionar texto en una página normal ofrece una sola cosa: abrir la página en la vista de lectura, donde ocurren la traducción, el guardado y el subrayado. En Android la opción está activada de forma predeterminada."
+    "message": "Limita la traducción a la vista de lectura. Seleccionar texto en una página web normal solo mostrará la opción de abrirla en la vista de lectura. En Android e iOS la opción está activada de forma predeterminada."
   },
   "options_keep_articles": { "message": "Guardar de forma predeterminada en la lista de lectura sin conexión" },
   "options_keep_articles_hint": {
-    "message": "Con esto activado, una página abierta en la vista de lectura pasa enseguida a la lista de lectura sin conexión: podrás leerla sin red, también cuando la página original haya sido borrada. Volver a abrir la misma página nunca la sobrescribe: tus resaltados y el punto donde lo dejaste quedan intactos."
+    "message": "Guarda automáticamente cada página abierta en la vista de lectura para leerla sin conexión. Tus páginas guardadas, resaltados y progreso de lectura se conservan aunque el sitio web original cambie o desaparezca."
   },
   "options_quiet_bubble_hint": {
-    "message": "Con esto activado, la burbuja muestra solo la traducción; sus botones aparecen al hacer clic o tocar la burbuja."
+    "message": "Muestra solo el texto traducido en la burbuja. Los botones de acción (copiar, guardar) aparecerán únicamente al hacer clic o tocar la burbuja."
   },
   "options_no_translation": { "message": "Usar sin traducción" },
   "options_no_translation_hint": {
-    "message": "Para leer en tu propio idioma. Con esto activado desaparecen la burbuja de traducción, el guardado y el subrayado de frases, la página de frases guardadas y la sección de modelos; seleccionar texto en una página normal ofrece una sola cosa - abrir la página en la vista de lectura. La vista de lectura, la lista de lectura sin conexión, el resaltador, la lectura en voz alta, la búsqueda y los diccionarios siguen funcionando. No se borra nada: tus frases y modelos vuelven en cuanto lo desactives."
+    "message": "Oculta las funciones de traducción (burbuja, subrayados, frases guardadas). Ideal para leer en tu idioma materno. La vista de lectura, la lista de lectura sin conexión, el resaltador y los diccionarios siguen activos. Tus datos guardados no se eliminan y volverán al desactivar esta opción."
   },
   "options_bubble_off": { "message": "Sin burbuja al seleccionar texto" },
   "options_bubble_off_hint": {
@@ -840,22 +841,22 @@
   },
   "options_bubble_scale": { "message": "Tamaño del texto de la burbuja" },
   "options_bubble_scale_hint": {
-    "message": "El tamaño de la burbuja de traducción - su texto y sus botones - tanto en páginas normales como en la vista de lectura."
+    "message": "Ajusta el tamaño del texto y de los botones dentro de la burbuja de traducción en todas las páginas."
   },
   "options_tts": { "message": "Lectura en voz alta" },
   "options_tts_hint": {
-    "message": "Con esto desactivado, nada se lee en voz alta: el altavoz desaparece de la burbuja y de las listas, el botón «Leer en voz alta» de la vista de lectura, y las filas de voz y velocidad de abajo se pliegan - las elecciones hechas en ellas se conservan."
+    "message": "Activa la función de lectura en voz alta. Desactivar esta opción oculta todos los botones de lectura en la burbuja, las listas y la vista de lectura."
   },
   "options_tts_voice": { "message": "Voz de lectura" },
   "options_tts_default": { "message": "Voz predeterminada del navegador" },
   "options_tts_listen": { "message": "Escuchar" },
   "options_tts_voice_hint": {
-    "message": "La voz lee una frase seleccionada en la burbuja y un artículo entero en la vista de lectura. Las voces son las de este dispositivo: el habla se genera localmente y no se envía nada a ninguna parte."
+    "message": "Selecciona la voz para leer frases y artículos. Las voces están integradas en tu sistema y hablan en este dispositivo; no se envía ningún dato a internet. Excepción: las voces en línea que añaden algunos navegadores (en Chrome, las voces llamadas «Google») envían el texto al servidor del fabricante del navegador."
   },
   "options_tts_rate": { "message": "Velocidad de lectura" },
   "options_models_heading": { "message": "Modelos de traducción" },
   "options_models_intro": {
-    "message": "Los modelos de abajo los crea y publica Mozilla - los mismos modelos con los que el propio Firefox traduce páginas. Para que re/read funcione, descarga el modelo de los pares de idiomas que quieras traducir (por ejemplo en -> pl)."
+    "message": "Descarga aquí un modelo de traducción para cada par de idiomas que quieras traducir. Son archivos oficiales de Mozilla que funcionan totalmente sin conexión en tu dispositivo."
   },
   "options_update_list": { "message": "Actualizar la lista" },
   "options_list_dated": { "message": "Lista del" },
@@ -868,7 +869,7 @@
   },
   "options_model_note_from": { "message": "Los modelos se descargan de" },
   "options_model_note_rest": {
-    "message": "- ahí los publica Mozilla. Actualizar la lista no envía nada sobre ti; solo trae la lista fresca. Este host y el del catálogo de diccionarios de abajo son los dos únicos con los que esta extensión contacta, y solo cuando lo pulsas."
+    "message": "- ahí los publica Mozilla. La extensión se conecta a este servidor público solo cuando pulsas Actualizar la lista o Descargar. No se envía ningún dato personal."
   },
   "options_add_model_heading": { "message": "Añadir un modelo desde archivos" },
   "options_add_model_summary": {
@@ -883,43 +884,36 @@
   },
   "options_dictionaries_heading": { "message": "Diccionarios" },
   "options_dictionaries_intro": {
-    "message": "Descarga un diccionario (o varios) para poder consultar los distintos significados de una palabra seleccionada. Al traducir eliges y guardas las acepciones que encajen con el contexto; con la traducción desactivada, las definiciones simplemente responden a una selección en la vista de lectura."
+    "message": "Añade diccionarios para ver definiciones detalladas de las palabras en la burbuja de traducción. Puedes cambiar el orden en que aparecen usando las flechas."
   },
   "options_dictionary_order_hint": {
-    "message": "La burbuja responde en el orden de abajo - las flechas suben o bajan un diccionario. Solo responden los diccionarios del idioma que estás leyendo."
+    "message": "La burbuja responde en el orden de abajo. Solo responden los diccionarios del idioma que estás leyendo."
   },
   "options_dictionary_note_from": { "message": "Los diccionarios se descargan de" },
   "options_dictionary_note_rest": {
-    "message": "- ahí publica WikDict los diccionarios que construye a partir de Wiktionary (CC BY-SA). Cuando actualizas la lista, no se envía nada sobre ti - la petición solo trae la lista fresca."
+    "message": "- ahí publica WikDict los diccionarios que construye a partir de Wiktionary (CC BY-SA). La extensión se conecta a este servidor público solo cuando pulsas Actualizar la lista o Descargar. No se envía ningún dato personal."
   },
   "options_add_dictionary_heading": { "message": "Añadir un diccionario desde archivos" },
   "options_add_dictionary_summary": {
-    "message": "Para añadir un diccionario desde tus propios archivos - el de un lector de libros electrónicos funciona tal cual - cárgalos aquí."
-  },
-  "options_stardict_intro": { "message": "Los diccionarios se leen en el formato" },
-  "options_stardict_intro_rest": {
-    "message": "- los mismos archivos que usa un lector KOReader, así que un diccionario que ya esté en tu lector funciona aquí sin cambios. Descomprime el archivo en el que vino y elige los archivos de un diccionario:"
+    "message": "Importa tus propios diccionarios en formato StarDict. Descomprime el archivo, selecciona los archivos necesarios (.ifo, .idx, .dict), elige los idiomas y pulsa Añadir diccionario."
   },
   "options_file_ifo": { "message": "- cómo se llama a sí mismo el diccionario" },
   "options_file_idx": { "message": "- el índice de palabras" },
   "options_file_dict_or": { "message": "o" },
   "options_file_dict": { "message": "- las entradas" },
   "options_file_syn": { "message": "- otras grafías, cuando el diccionario las tiene" },
-  "options_add_dictionary_steps": {
-    "message": "Dos pasos: elige los archivos y luego ajusta debajo los dos idiomas. Un archivo StarDict no dice para qué idiomas es, así que esa parte la pones tú - y es la que decide cuándo responde este diccionario."
-  },
   "options_words_in": { "message": "Palabras en" },
   "options_explained_in": { "message": "explicadas en" },
   "options_add_dictionary_button": { "message": "Añadir diccionario" },
   "options_add_dictionary_mono": {
-    "message": "Un diccionario monolingüe también funciona - por ejemplo inglés-inglés: elige inglés en ambos lados. Los diccionarios se eligen por el idioma de sus entradas, no por el par, así que responde junto a los bilingües: bajo «Más» al traducir, directamente con la traducción desactivada."
+    "message": "Un diccionario monolingüe también funciona, por ejemplo inglés-inglés: elige el mismo idioma en ambos lados."
   },
   "options_dict_files_note": {
-    "message": "Añadir desde archivos no hace ninguna petición de red; sirven archivos de cualquier parte, incluidos los del catálogo - están publicados en"
+    "message": "Añadir desde archivos no hace ninguna petición de red. Sirve cualquier archivo StarDict, incluidos los del catálogo, publicados en"
   },
   "options_disabled_heading": { "message": "Sitios desactivados" },
   "options_disabled_intro": {
-    "message": "Sitios donde re/read se queda apagado: sin subrayados, sin burbuja, sin nada corriendo en la propia página; abrir una página a mano en la vista de lectura sigue funcionando. Lo que añade un sitio aquí es el interruptor del popup de la barra de herramientas; esta lista sirve para volver a encenderlo."
+    "message": "Lista de sitios web donde la extensión está desactivada (sin traducción ni subrayados). Puedes añadir sitios usando el icono de la extensión en la barra de herramientas del navegador."
   },
   "options_support_intro": {
     "message": "re/read lo desarrolla una fundación sin ánimo de lucro - sin inversores, sin anuncios, sin rastreo. Si te resulta útil y quieres apoyar su desarrollo, cada donación nos ayuda a construir software libre de presiones comerciales."
