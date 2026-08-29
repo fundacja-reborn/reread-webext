@@ -406,11 +406,21 @@ const VOICE_SAMPLE = "1, 2, 3";
 let voiceLang = null;
 
 /**
+ * @returns {string} the browser's own language, the voice row's default
+ *   without a pair (D155, Michał's rule) - English where the browser names
+ *   none, as `voiceLanguage` itself falls back to it
+ */
+function browserLanguage() {
+  const language = primaryLanguage(navigator.language);
+  return language === "" ? "en" : language;
+}
+
+/**
  * The languages the voice row offers, by their names in the reader's own
  * language: every language this device reads offline, and the pair's source
  * language even without a voice for it - that is the one the bubble reads
  * in, and the row must be able to say it has no voice. On a device that
- * lists no voices and has no pair, the extension's own language stands in:
+ * lists no voices and has no pair, the browser's own language stands in:
  * the engine may still speak there (Android's clause), and a row with no
  * language at all could not even name its default line.
  *
@@ -419,7 +429,7 @@ let voiceLang = null;
 function voiceLanguages() {
   const offered = new Set(canSpeak() ? offlineLanguages(speechSynthesis.getVoices()) : []);
   if (config.sourceLang !== null) offered.add(primaryLanguage(config.sourceLang));
-  if (offered.size === 0) offered.add(primaryLanguage(document.documentElement.lang));
+  if (offered.size === 0) offered.add(browserLanguage());
   // By the name on screen, not the code behind it, the dictionary selects'
   // rule: nobody looks for Basque under e.
   return [...offered].sort((a, b) => languageName(a).localeCompare(languageName(b)));
@@ -437,9 +447,10 @@ function voiceRowLanguage() {
 /**
  * The voice row (D83, D155): a language, the device's offline voices able to
  * read it behind a first line that means "the device's default", and Listen.
- * The language is the pair's source unless a hand picked another here - a
- * fresh install without a pair still reads articles aloud, and its settings
- * page had nothing to list until it could name a language (Michał's smoke,
+ * The language is the pair's source unless a hand picked another here, and
+ * without a pair the browser's own, else English (Michał's rule) - a fresh
+ * install without a pair still reads articles aloud, and its settings page
+ * had nothing to list until it could name a language (Michał's smoke,
  * 2026-08-29). Redrawn whenever the config may have moved and when the
  * engine's list arrives: `getVoices` answers nothing until the browser has
  * loaded the voices, and `voiceschanged` is the only appointment it keeps.
@@ -457,8 +468,7 @@ function renderVoice() {
   const language = voiceLanguage(offered, {
     picked: voiceLang,
     source: config.sourceLang === null ? null : primaryLanguage(config.sourceLang),
-    stored: Object.keys(config.ttsVoices),
-    ui: primaryLanguage(document.documentElement.lang),
+    browser: browserLanguage(),
   });
 
   languageSelect.replaceChildren();

@@ -238,20 +238,18 @@ export function offlineLanguages(voices) {
 }
 
 /**
- * Which language the settings page's voice row is about (D155): the one
- * picked on the page while it is on offer, else the pair's source language
- * (translation on means reading in it), else a language a voice was already
- * chosen for (the reader's Aa panel chooses per article, and a fresh install
- * without a pair has read something before it opens the settings), else the
- * language the extension itself speaks, else the first on offer. Null only
- * with nothing on offer at all.
+ * Which language the settings page's voice row is about (D155, Michał's
+ * rule): the one picked on the page while it is on offer, else the pair's
+ * source language (translation on means reading in it), else the browser's
+ * own language, else English - the language most devices have a voice for -
+ * else the first on offer. Null only with nothing on offer at all.
  *
  * @param {readonly string[]} offered primary subtags, the row's choices
- * @param {{ picked: string | null, source: string | null, stored: readonly string[], ui: string }} of
+ * @param {{ picked: string | null, source: string | null, browser: string }} of
  * @returns {string | null}
  */
 export function voiceLanguage(offered, of) {
-  for (const candidate of [of.picked, of.source, ...of.stored, of.ui]) {
+  for (const candidate of [of.picked, of.source, of.browser, "en"]) {
     if (candidate !== null && offered.includes(candidate)) return candidate;
   }
   return offered[0] ?? null;

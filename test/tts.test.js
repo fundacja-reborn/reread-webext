@@ -185,22 +185,23 @@ describe("voiceLanguage", () => {
   const offered = ["de", "en", "pl"];
 
   it("follows the pick made on the page while it is on offer", () => {
-    assert.equal(voiceLanguage(offered, { picked: "de", source: "en", stored: [], ui: "pl" }), "de");
+    assert.equal(voiceLanguage(offered, { picked: "de", source: "en", browser: "pl" }), "de");
     // A pick the device no longer offers (a language pack removed) is no pick.
-    assert.equal(voiceLanguage(offered, { picked: "uk", source: "en", stored: [], ui: "pl" }), "en");
+    assert.equal(voiceLanguage(offered, { picked: "uk", source: "en", browser: "pl" }), "en");
   });
 
-  it("stands on the pair's source language, else on a language a voice was chosen for", () => {
-    assert.equal(voiceLanguage(offered, { picked: null, source: "en", stored: ["de"], ui: "pl" }), "en");
-    // A fresh install without a pair, whose reader has already chosen a voice
-    // for the articles it read (D155): that language, not the interface's.
-    assert.equal(voiceLanguage(offered, { picked: null, source: null, stored: ["de"], ui: "pl" }), "de");
+  it("stands on the pair's source language while a pair is chosen", () => {
+    assert.equal(voiceLanguage(offered, { picked: null, source: "de", browser: "pl" }), "de");
   });
 
-  it("falls back to the interface's language, then to the first on offer", () => {
-    assert.equal(voiceLanguage(offered, { picked: null, source: null, stored: [], ui: "pl" }), "pl");
-    assert.equal(voiceLanguage(offered, { picked: null, source: null, stored: ["uk"], ui: "fr" }), "de");
-    assert.equal(voiceLanguage([], { picked: null, source: null, stored: [], ui: "en" }), null);
+  it("without a pair takes the browser's language, else English, else the first on offer", () => {
+    // Michał's rule (2026-08-29): a fresh install reads in its own language
+    // until it says otherwise, and English is the language most devices have
+    // a voice for.
+    assert.equal(voiceLanguage(offered, { picked: null, source: null, browser: "pl" }), "pl");
+    assert.equal(voiceLanguage(offered, { picked: null, source: null, browser: "fr" }), "en");
+    assert.equal(voiceLanguage(["de", "pl"], { picked: null, source: null, browser: "fr" }), "de");
+    assert.equal(voiceLanguage([], { picked: null, source: null, browser: "en" }), null);
   });
 });
 
