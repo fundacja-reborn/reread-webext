@@ -711,6 +711,14 @@
   "options_library_copy_hint": {
     "message": "Hält eine zweite Kopie jedes gespeicherten Artikels und jedes Buchs, samt der Stelle, an der du aufgehört hast zu lesen, im eigenen Speicher der Erweiterung - getrennt von der Datenbank der Leseliste, sodass ein Verlust dieser Datenbank ihn nicht erreicht. Sie verdoppelt den Platz, den die Leseliste belegt. Sie ist eingeschaltet, solange du sie nicht ausschaltest: Safari löscht die Leseliste nach dreißig Tagen ohne Besuch der Seiten der Erweiterung, und in jedem Browser kann ein beschädigtes Profil oder ein Aufräumprogramm die Datenbank mitnehmen - aus der Kopie kommt sie zurück. Mit einem Artikel gespeicherte Bilder werden ebenfalls kopiert und kommen beim ersten Öffnen des Artikels zurück."
   },
+  "reader_marks_delete_all_one": {
+    "message": "Das $COUNT$ Zitat dieser Seite löschen",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_marks_delete_all_other": {
+    "message": "Alle $COUNT$ Zitate dieser Seite löschen",
+    "placeholders": { "count": { "content": "$1", "example": "5" } }
+  },
   "reader_marks_missing_doc": { "message": "Das Dokument ist nicht mehr gespeichert - dieses Zitat kam aus der Kopie zurück. Öffnen Sie die Seite erneut, und die Markierung ist wieder da." },
   "options_pair_hint": { "message": "Zur Wahl stehen die Paare, deren Übersetzungsmodelle Sie auf dieses Gerät heruntergeladen haben - wenn Sie in einem anderen Sprachpaar übersetzen möchten, finden Sie sein Modell im Abschnitt" },
   "options_pair_none": { "message": "Noch kein Modell - laden Sie unten eines herunter" },

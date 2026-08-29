@@ -734,6 +734,14 @@
   "options_library_copy_hint": {
     "message": "Guarda una segunda copia de cada artículo y libro guardados, con el punto donde dejaste de leer, en el almacenamiento propio de la extensión - aparte de la base de datos de la lista de lectura, donde la pérdida de esa base no llega. Duplica el espacio que ocupa la lista de lectura. Está activada mientras no la desactives: Safari borra la lista de lectura tras treinta días sin visitar las páginas de la extensión, y en cualquier navegador un perfil dañado o una herramienta de limpieza puede llevarse la base - la copia es lo que la devuelve. Las imágenes guardadas con un artículo también se copian y vuelven la primera vez que se abre el artículo."
   },
+  "reader_marks_delete_all_one": {
+    "message": "Eliminar la $COUNT$ cita de esta página",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_marks_delete_all_other": {
+    "message": "Eliminar las $COUNT$ citas de esta página",
+    "placeholders": { "count": { "content": "$1", "example": "5" } }
+  },
   "reader_marks_missing_doc": { "message": "Su documento ya no está guardado - esta cita volvió de la copia. Abre la página de nuevo y el resaltado estará ahí." },
   "options_pair_hint": { "message": "Se ofrecen los pares cuyos modelos de traducción descargaste en este dispositivo - si quieres traducir en otro par de idiomas, descarga su modelo en la sección" },
   "options_pair_none": { "message": "Aún no hay modelo - descarga uno abajo" },

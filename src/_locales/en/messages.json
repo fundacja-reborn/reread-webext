@@ -863,6 +863,15 @@
   "options_library_copy_hint": {
     "message": "Keeps a second copy of every saved article and book, with the place you stopped reading, in the extension's own storage - a store apart from the reading list's database, which the loss of that database does not reach. It doubles the space the reading list takes. On unless you switch it off: Safari deletes the reading list after thirty days without a visit to the extension's pages, and on any browser a database can be lost to a damaged profile or a cleaning tool - the copy is what brings it back. Pictures saved with an article are copied too, and come back the first time the article is opened."
   },
+  "reader_marks_delete_all_one": {
+    "message": "Delete the $COUNT$ quote of this page",
+    "description": "Plural family; the quiet text act under the missing-document note on the highlights page (D150), naming how many quotes the document-wide deletion takes. Shown only for more than one quote - the one-form is the family's formality.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_marks_delete_all_other": {
+    "message": "Delete all $COUNT$ quotes of this page",
+    "placeholders": { "count": { "content": "$1", "example": "5" } }
+  },
   "reader_marks_missing_doc": {
     "message": "Its document is no longer saved - this quote came back from the copy. Open the page again and the highlight will be there.",
     "description": "Under a quote on the highlights page whose document is gone from the reading list; the quote was restored from the copy kept in storage.local."
