@@ -57,7 +57,7 @@ shown there come from a snapshot inside the package until you press **Update lis
 and each list shows the date it was last fetched.
 
 One more request is yours to make, and it is the only one to an address the package
-does not carry: **Save pictures**, a row in the reader's menu over a saved article,
+does not carry: **Download pictures**, a row in the reader's menu over a saved article,
 fetches that article's pictures from the servers the article itself names - once,
 without cookies or referrer, and only when you press it. Those servers see what they
 saw when the page first showed you the pictures: your IP address and your browser's

@@ -151,6 +151,28 @@ summary {
   background: var(--page-bg);
 }
 
+/* The page under an open panel, dimmed: without it the menu's rows and the
+   article's lines share one paper and read as one text (Michał's report,
+   2026-08-29). Under the chrome (which stands at 2), over the article and
+   its highlights. Ink rather than paper, so it dims every theme the same
+   way; a little more of it on dark paper, where a thin wash disappears. */
+.panel-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  background: rgb(0 0 0 / 0.22);
+}
+
+:root[data-reader-theme="dark"] .panel-scrim {
+  background: rgb(0 0 0 / 0.45);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-reader-theme="auto"] .panel-scrim {
+    background: rgb(0 0 0 / 0.45);
+  }
+}
+
 /* Stuck to the top only while an article is on screen: that is when the two
    things it holds are wanted mid-scroll - the voice that starts from the
    first visible sentence, and the way out of a finished article. The list

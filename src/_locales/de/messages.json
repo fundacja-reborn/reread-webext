@@ -167,7 +167,7 @@
   "reader_title": { "message": "re/read - Leseansicht" },
   "reader_open_original": { "message": "Original öffnen" },
   "reader_pictures_save": {
-    "message": "Bilder speichern ($COUNT$)",
+    "message": "Bilder herunterladen ($COUNT$)",
     "placeholders": { "count": { "content": "$1", "example": "12" } }
   },
   "reader_pictures_remove": {
@@ -187,7 +187,7 @@
   },
   "reader_pictures_stop": { "message": "Zum Abbrechen die Zeile antippen." },
   "reader_pictures_done_one": {
-    "message": "$SAVED$ von $OF$ Bild gespeichert ($SIZE$)",
+    "message": "$SAVED$ von $OF$ Bild heruntergeladen ($SIZE$)",
     "placeholders": {
       "of": { "content": "$1", "example": "1" },
       "saved": { "content": "$2", "example": "1" },
@@ -195,14 +195,14 @@
     }
   },
   "reader_pictures_done_other": {
-    "message": "$SAVED$ von $OF$ Bildern gespeichert ($SIZE$)",
+    "message": "$SAVED$ von $OF$ Bildern heruntergeladen ($SIZE$)",
     "placeholders": {
       "of": { "content": "$1", "example": "12" },
       "saved": { "content": "$2", "example": "11" },
       "size": { "content": "$3", "example": "4,2 MB" }
     }
   },
-  "reader_pictures_none": { "message": "Kein Bild konnte gespeichert werden." },
+  "reader_pictures_none": { "message": "Kein Bild konnte heruntergeladen werden." },
   "reader_pictures_removed": { "message": "Bilder entfernt." },
   "reader_pictures_failed": { "message": "Die Bilder konnten nicht gespeichert werden." },
   "library_pictures_one": {
@@ -321,7 +321,7 @@
     "message": ".json - eine Sicherungsdatei mit allen in der Offline-Leseliste von re/read gespeicherten Artikeln, aus diesem oder einem anderen Browser oder Gerät, auf dem re/read benutzt wird. Der Import ergänzt nur Artikel, die hier fehlen, und überschreibt nichts bereits Gespeichertes. Mit Bildern ist die Sicherung eine .zip-Datei mit derselben .json und den Bildern daneben."
   },
   "reader_export_pictures": {
-    "message": "Bilder einschließen ($COUNT$, $SIZE$)",
+    "message": "Export mit Bildern ($COUNT$, $SIZE$)",
     "placeholders": {
       "count": { "content": "$1", "example": "34" },
       "size": { "content": "$2", "example": "12,4 MB" }

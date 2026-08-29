@@ -204,6 +204,7 @@ const displayButton = document.getElementById("display");
 const displayPanel = document.getElementById("display-panel");
 const menuButton = document.getElementById("menu");
 const menuPanel = document.getElementById("menu-panel");
+const panelScrim = document.getElementById("panel-scrim");
 const navToc = document.getElementById("nav-toc");
 const navSearch = document.getElementById("nav-search");
 const navLibrary = document.getElementById("nav-library");
@@ -421,6 +422,44 @@ let picturesNote = null;
  * @type {string[]}
  */
 let shownPictures = [];
+
+/**
+ * The addresses whose reader said no in this tab: deleted from the list, or
+ * taken out with the Save button. The default keep (D124) is only ever on
+ * the way in - and this tab's way in is the live page, which Back and a
+ * reload render again. Without this the page would be kept again the
+ * moment after it was deleted (Michał's report, 2026-08-29: Delete, then
+ * Back, and the article stood on the list again). Kept in `sessionStorage`
+ * so a reload of the tab remembers; a new tab is a new way in, and keeps.
+ * Pressing Save by hand takes an address off the list: that is a yes.
+ */
+const DECLINED_KEEPS = "reread:declined-keeps";
+
+/** @returns {Set<string>} */
+function declinedKeeps() {
+  try {
+    const stored = JSON.parse(sessionStorage.getItem(DECLINED_KEEPS) ?? "[]");
+    return new Set(Array.isArray(stored) ? stored.filter((url) => typeof url === "string") : []);
+  } catch {
+    return new Set();
+  }
+}
+
+/**
+ * @param {string} url
+ * @param {boolean} declined
+ */
+function setKeepDeclined(url, declined) {
+  const urls = declinedKeeps();
+  if (declined) urls.add(url);
+  else urls.delete(url);
+  try {
+    sessionStorage.setItem(DECLINED_KEEPS, JSON.stringify([...urls]));
+  } catch {
+    // Storage that will not take it forgets the no; the keep is a default
+    // the reader can undo again, not a loss.
+  }
+}
 
 /**
  * The table of contents of the document on screen (D116/D117) - a book's
@@ -3280,6 +3319,8 @@ async function removeRow(button, url, kind) {
   try {
     if (kind === "book") await deleteBook(url);
     else await deleteArticle(url);
+    // This tab may be the live page's own: Back onto it must not keep it again.
+    if (kind !== "book") setKeepDeclined(url, true);
   } catch {
     showNotice(t("reader_list_write_failed"));
   }
@@ -3771,13 +3812,18 @@ async function onKeepPress() {
 
     if (existing !== null) {
       await deleteArticle(target.url);
+      setKeepDeclined(target.url, true);
       // The marks were part of the copy that just left (they went with the
       // row); paint saying otherwise would be showing what is not there.
       if (shown === target) {
         docMarks = [];
         repaintMarks();
       }
-    } else if (!(await saveShownLive(target))) return;
+    } else if (!(await saveShownLive(target))) {
+      return;
+    } else {
+      setKeepDeclined(target.url, false);
+    }
   } catch {
     showNotice(t("reader_list_write_failed"));
     return;
@@ -3831,7 +3877,7 @@ async function saveShownLive(target) {
 async function openLiveActions(target) {
   try {
     const { keepArticles } = await readConfig();
-    if (keepArticles && shown === target) await keptRow(target);
+    if (keepArticles && shown === target && !declinedKeeps().has(target.url)) await keptRow(target);
   } catch {
     // The same word the Save button uses for a write that did not land. The
     // rows drawn below will say Save, which is then the truth.
@@ -3870,6 +3916,8 @@ async function onRemovePress() {
     showNotice(t("reader_list_write_failed"));
     return;
   }
+  // Back may land on this tab's live page: the deletion must outlive it.
+  if (target.origin !== "book") setKeepDeclined(target.url, true);
   if (shown !== target) return;
   onBackPress();
 }
@@ -4239,6 +4287,8 @@ function setPanel(button, panel, open) {
   if (button === null || panel === null) return;
   panel.hidden = !open;
   button.setAttribute("aria-expanded", String(open));
+  // The page dims under whichever panel is open, and clears with the last.
+  if (panelScrim !== null) panelScrim.hidden = !anyPanelOpen();
 }
 
 /**

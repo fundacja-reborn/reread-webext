@@ -223,7 +223,7 @@
   "reader_title": { "message": "re/read - режим читання" },
   "reader_open_original": { "message": "Відкрити оригінал" },
   "reader_pictures_save": {
-    "message": "Зберегти зображення ($COUNT$)",
+    "message": "Завантажити зображення ($COUNT$)",
     "placeholders": { "count": { "content": "$1", "example": "12" } }
   },
   "reader_pictures_remove": {
@@ -243,7 +243,7 @@
   },
   "reader_pictures_stop": { "message": "Натисніть рядок, щоб зупинити." },
   "reader_pictures_done_one": {
-    "message": "Збережено $SAVED$ з $OF$ зображення ($SIZE$)",
+    "message": "Завантажено $SAVED$ з $OF$ зображення ($SIZE$)",
     "placeholders": {
       "of": { "content": "$1", "example": "1" },
       "saved": { "content": "$2", "example": "1" },
@@ -251,7 +251,7 @@
     }
   },
   "reader_pictures_done_few": {
-    "message": "Збережено $SAVED$ з $OF$ зображень ($SIZE$)",
+    "message": "Завантажено $SAVED$ з $OF$ зображень ($SIZE$)",
     "placeholders": {
       "of": { "content": "$1", "example": "3" },
       "saved": { "content": "$2", "example": "2" },
@@ -259,7 +259,7 @@
     }
   },
   "reader_pictures_done_many": {
-    "message": "Збережено $SAVED$ з $OF$ зображень ($SIZE$)",
+    "message": "Завантажено $SAVED$ з $OF$ зображень ($SIZE$)",
     "placeholders": {
       "of": { "content": "$1", "example": "12" },
       "saved": { "content": "$2", "example": "11" },
@@ -267,14 +267,14 @@
     }
   },
   "reader_pictures_done_other": {
-    "message": "Збережено $SAVED$ з $OF$ зображення ($SIZE$)",
+    "message": "Завантажено $SAVED$ з $OF$ зображення ($SIZE$)",
     "placeholders": {
       "of": { "content": "$1", "example": "12" },
       "saved": { "content": "$2", "example": "11" },
       "size": { "content": "$3", "example": "4,2 MB" }
     }
   },
-  "reader_pictures_none": { "message": "Не вдалося зберегти жодного зображення." },
+  "reader_pictures_none": { "message": "Не вдалося завантажити жодного зображення." },
   "reader_pictures_removed": { "message": "Зображення видалено." },
   "reader_pictures_failed": { "message": "Не вдалося зберегти зображення." },
   "library_pictures_one": {
@@ -407,7 +407,7 @@
     "message": ".json - файл резервної копії з усіма статтями, збереженими в офлайн-читальні re/read, із цього чи іншого браузера або пристрою, де використовується re/read. Імпорт додає лише статті, яких тут бракує, і ніколи не перезаписує вже збережених. Із зображеннями резервна копія - це .zip із тим самим .json і зображеннями поруч."
   },
   "reader_export_pictures": {
-    "message": "Додати зображення ($COUNT$, $SIZE$)",
+    "message": "Експорт із зображеннями ($COUNT$, $SIZE$)",
     "placeholders": {
       "count": { "content": "$1", "example": "34" },
       "size": { "content": "$2", "example": "12,4 MB" }

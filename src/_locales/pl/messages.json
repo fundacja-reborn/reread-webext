@@ -223,7 +223,7 @@
   "reader_title": { "message": "re/read - widok czytania" },
   "reader_open_original": { "message": "Otwórz oryginał" },
   "reader_pictures_save": {
-    "message": "Zapisz obrazki ($COUNT$)",
+    "message": "Pobierz obrazki ($COUNT$)",
     "placeholders": { "count": { "content": "$1", "example": "12" } }
   },
   "reader_pictures_remove": {
@@ -243,7 +243,7 @@
   },
   "reader_pictures_stop": { "message": "Naciśnij wiersz, żeby przerwać." },
   "reader_pictures_done_one": {
-    "message": "Zapisano $SAVED$ z $OF$ obrazka ($SIZE$)",
+    "message": "Pobrano $SAVED$ z $OF$ obrazka ($SIZE$)",
     "placeholders": {
       "of": { "content": "$1", "example": "1" },
       "saved": { "content": "$2", "example": "1" },
@@ -251,7 +251,7 @@
     }
   },
   "reader_pictures_done_few": {
-    "message": "Zapisano $SAVED$ z $OF$ obrazków ($SIZE$)",
+    "message": "Pobrano $SAVED$ z $OF$ obrazków ($SIZE$)",
     "placeholders": {
       "of": { "content": "$1", "example": "3" },
       "saved": { "content": "$2", "example": "2" },
@@ -259,7 +259,7 @@
     }
   },
   "reader_pictures_done_many": {
-    "message": "Zapisano $SAVED$ z $OF$ obrazków ($SIZE$)",
+    "message": "Pobrano $SAVED$ z $OF$ obrazków ($SIZE$)",
     "placeholders": {
       "of": { "content": "$1", "example": "12" },
       "saved": { "content": "$2", "example": "11" },
@@ -267,14 +267,14 @@
     }
   },
   "reader_pictures_done_other": {
-    "message": "Zapisano $SAVED$ z $OF$ obrazka ($SIZE$)",
+    "message": "Pobrano $SAVED$ z $OF$ obrazka ($SIZE$)",
     "placeholders": {
       "of": { "content": "$1", "example": "12" },
       "saved": { "content": "$2", "example": "11" },
       "size": { "content": "$3", "example": "4,2 MB" }
     }
   },
-  "reader_pictures_none": { "message": "Nie udało się zapisać żadnego obrazka." },
+  "reader_pictures_none": { "message": "Nie udało się pobrać żadnego obrazka." },
   "reader_pictures_removed": { "message": "Obrazki usunięte." },
   "reader_pictures_failed": { "message": "Nie udało się zapisać obrazków." },
   "library_pictures_one": {
@@ -407,7 +407,7 @@
     "message": ".json - plik kopii (backupu) ze wszystkimi zapisanymi artykułami z czytelni offline re/read, z tej lub z innej Twojej przeglądarki czy urządzenia, na którym korzystasz z re/read. Import dodaje tylko artykuły, których tu brakuje, a już istniejących tu artykułów nie nadpisuje. Z obrazkami kopia jest plikiem .zip z tym samym .json i obrazkami obok."
   },
   "reader_export_pictures": {
-    "message": "Dołącz obrazki ($COUNT$, $SIZE$)",
+    "message": "Eksport z obrazkami ($COUNT$, $SIZE$)",
     "placeholders": {
       "count": { "content": "$1", "example": "34" },
       "size": { "content": "$2", "example": "12,4 MB" }
