@@ -23,7 +23,7 @@
 import { applyReading } from "../lib/appearance.js";
 import { webext } from "../lib/browser.js";
 import { CONFIG_KEY, SIZE, TTS_RATE, chosenPair, isFont, isTheme, readConfig, writeConfig } from "../lib/config.js";
-import { localizePage, plural, t, uiLocale } from "../lib/i18n.js";
+import { fileSize, localizePage, plural, t, uiLocale } from "../lib/i18n.js";
 import { pairLabel } from "../lib/language.js";
 import { describeError } from "../lib/messages.js";
 import { armBackArrow } from "../lib/back-arrow.js";
@@ -759,7 +759,8 @@ async function exportPhrases() {
   try {
     const list = await listPhrases(pair);
     if (list.length === 0) return;
-    const url = URL.createObjectURL(new Blob([toTsv(list)], { type: "text/tab-separated-values" }));
+    const blob = new Blob([toTsv(list)], { type: "text/tab-separated-values" });
+    const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
     anchor.href = url;
     anchor.download = exportFilename(pair);
@@ -767,7 +768,12 @@ async function exportPhrases() {
     // The URL has to outlive the click long enough for the download to take
     // it. A minute is comfortably that, and then the blob can go.
     setTimeout(() => URL.revokeObjectURL(url), 60_000);
-    transferStatus("");
+    // The export says what it wrote (D153): a download is a quiet thing, and
+    // a press nobody meant would otherwise go unnoticed - the name, the count
+    // and the size, in the section's own status line, the reading list's way.
+    transferStatus(
+      plural(list.length, "vocab_export_done", [exportFilename(pair), fileSize(blob.size)]),
+    );
   } catch {
     transferStatus(describeError(ErrorCode.INTERNAL), "error");
   }

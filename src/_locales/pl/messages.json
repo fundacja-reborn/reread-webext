@@ -495,6 +495,102 @@
       "count": { "content": "$1", "example": "3" }
     }
   },
+  "reader_export_done_one": {
+    "message": "Wyeksportowano $COUNT$ artykuł do $FILE$ ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "file": { "content": "$2", "example": "reread-articles.json" },
+      "size": { "content": "$3", "example": "38 KB" }
+    }
+  },
+  "reader_export_done_few": {
+    "message": "Wyeksportowano $COUNT$ artykuły do $FILE$ ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "file": { "content": "$2", "example": "reread-articles.json" },
+      "size": { "content": "$3", "example": "120 KB" }
+    }
+  },
+  "reader_export_done_many": {
+    "message": "Wyeksportowano $COUNT$ artykułów do $FILE$ ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "file": { "content": "$2", "example": "reread-articles.zip" },
+      "size": { "content": "$3", "example": "2,1 MB" }
+    }
+  },
+  "reader_export_done_other": {
+    "message": "Wyeksportowano $COUNT$ artykułu do $FILE$ ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1,5" },
+      "file": { "content": "$2", "example": "reread-articles.json" },
+      "size": { "content": "$3", "example": "38 KB" }
+    }
+  },
+  "reader_export_marks_done_one": {
+    "message": "Wyeksportowano zakreślenia z $COUNT$ dokumentu do $FILE$ ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "file": { "content": "$2", "example": "reread-highlights.md" },
+      "size": { "content": "$3", "example": "4 KB" }
+    }
+  },
+  "reader_export_marks_done_few": {
+    "message": "Wyeksportowano zakreślenia z $COUNT$ dokumentów do $FILE$ ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "file": { "content": "$2", "example": "reread-highlights.md" },
+      "size": { "content": "$3", "example": "12 KB" }
+    }
+  },
+  "reader_export_marks_done_many": {
+    "message": "Wyeksportowano zakreślenia z $COUNT$ dokumentów do $FILE$ ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "15" },
+      "file": { "content": "$2", "example": "reread-highlights.md" },
+      "size": { "content": "$3", "example": "60 KB" }
+    }
+  },
+  "reader_export_marks_done_other": {
+    "message": "Wyeksportowano zakreślenia z $COUNT$ dokumentu do $FILE$ ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1,5" },
+      "file": { "content": "$2", "example": "reread-highlights.md" },
+      "size": { "content": "$3", "example": "4 KB" }
+    }
+  },
+  "vocab_export_done_one": {
+    "message": "Wyeksportowano $COUNT$ frazę do $FILE$ ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "file": { "content": "$2", "example": "reread-en-pl.tsv" },
+      "size": { "content": "$3", "example": "1 KB" }
+    }
+  },
+  "vocab_export_done_few": {
+    "message": "Wyeksportowano $COUNT$ frazy do $FILE$ ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "file": { "content": "$2", "example": "reread-en-pl.tsv" },
+      "size": { "content": "$3", "example": "1 KB" }
+    }
+  },
+  "vocab_export_done_many": {
+    "message": "Wyeksportowano $COUNT$ fraz do $FILE$ ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "240" },
+      "file": { "content": "$2", "example": "reread-en-pl.tsv" },
+      "size": { "content": "$3", "example": "19 KB" }
+    }
+  },
+  "vocab_export_done_other": {
+    "message": "Wyeksportowano $COUNT$ frazy do $FILE$ ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1,5" },
+      "file": { "content": "$2", "example": "reread-en-pl.tsv" },
+      "size": { "content": "$3", "example": "1 KB" }
+    }
+  },
   "reader_marks_title": { "message": "Zakreślenia" },
   "reader_marks_title_all": { "message": "Wszystkie zakreślenia" },
   "reader_marks_title_article": { "message": "Zakreślenia w tym artykule" },

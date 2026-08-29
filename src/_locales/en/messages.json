@@ -469,6 +469,57 @@
       "count": { "content": "$1", "example": "3" }
     }
   },
+  "reader_export_done_one": {
+    "message": "Exported $COUNT$ article to $FILE$ ($SIZE$).",
+    "description": "Status line after the reading list's export (D153): a download is quiet, so the page says what it wrote - the count, the file's name and its size.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "file": { "content": "$2", "example": "reread-articles.json" },
+      "size": { "content": "$3", "example": "38 KB" }
+    }
+  },
+  "reader_export_done_other": {
+    "message": "Exported $COUNT$ articles to $FILE$ ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "file": { "content": "$2", "example": "reread-articles.zip" },
+      "size": { "content": "$3", "example": "2.1 MB" }
+    }
+  },
+  "reader_export_marks_done_one": {
+    "message": "Exported the highlights of $COUNT$ document to $FILE$ ($SIZE$).",
+    "description": "Notice after the highlights page's export (D153): how many documents' quotes the .md holds.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "file": { "content": "$2", "example": "reread-highlights.md" },
+      "size": { "content": "$3", "example": "4 KB" }
+    }
+  },
+  "reader_export_marks_done_other": {
+    "message": "Exported the highlights of $COUNT$ documents to $FILE$ ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "file": { "content": "$2", "example": "reread-highlights.md" },
+      "size": { "content": "$3", "example": "12 KB" }
+    }
+  },
+  "vocab_export_done_one": {
+    "message": "Exported $COUNT$ phrase to $FILE$ ($SIZE$).",
+    "description": "Status line after the saved phrases' TSV export (D153).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "file": { "content": "$2", "example": "reread-en-pl.tsv" },
+      "size": { "content": "$3", "example": "1 KB" }
+    }
+  },
+  "vocab_export_done_other": {
+    "message": "Exported $COUNT$ phrases to $FILE$ ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "240" },
+      "file": { "content": "$2", "example": "reread-en-pl.tsv" },
+      "size": { "content": "$3", "example": "19 KB" }
+    }
+  },
   "reader_marks_title": {
     "message": "Highlights",
     "description": "The menu row that opens the highlights page (D108), and the page's name before the script says which page it is (the three keys below)."

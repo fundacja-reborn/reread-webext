@@ -1292,7 +1292,11 @@ body.reader:has(#library:not([hidden])) {
   align-items: end;
   gap: 0.25rem;
   align-self: start;
-  margin-top: 0.9em;
+  /* Air under the column as well as over it: under a short quote the five
+     acts are what gives the row its height, and without it the last one -
+     the trash, or the "Sure?" it turns into - sat on the row's bottom rule
+     (Michał's smoke, 2026-08-29). */
+  margin-block: 0.9em 1.1em;
 }
 
 .marks-act {

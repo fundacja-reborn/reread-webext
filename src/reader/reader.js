@@ -30,7 +30,7 @@ import {
 import { dismiss, rescan, start, stop as stopReadingSide } from "../content/reading.js";
 import { applyReading } from "../lib/appearance.js";
 import { webext } from "../lib/browser.js";
-import { localizePage, megabytes, plural, t } from "../lib/i18n.js";
+import { fileSize, localizePage, megabytes, plural, t } from "../lib/i18n.js";
 import { languageName } from "../lib/language.js";
 import {
   CONFIG_KEY,
@@ -3763,6 +3763,8 @@ async function exportList() {
     // back from the copy where the database has lost them.
     const withPictures =
       exportPictures !== null && !exportPicturesRow?.hidden && exportPictures.checked;
+    /** @type {number} */
+    let size;
     if (withPictures) {
       /** @type {Map<string, import("../lib/reader/pictures.js").PictureRow[]>} */
       const pictures = new Map();
@@ -3772,11 +3774,20 @@ async function exportList() {
         if (rows.length > 0) pictures.set(article.url, rows);
       }
       const archive = await packArchive(archiveEntries(articles, marks, pictures));
-      downloadFile(archive, ARCHIVE_FILENAME, "application/zip");
+      size = downloadFile(archive, ARCHIVE_FILENAME, "application/zip");
     } else {
-      downloadFile(toArticlesFile(articles, marks), ARTICLES_FILENAME, "application/json");
+      size = downloadFile(toArticlesFile(articles, marks), ARTICLES_FILENAME, "application/json");
     }
-    transferStatus("");
+    // The export says what it wrote (D153): a download is a quiet thing - a
+    // file in a folder, an arrow that blinks once - and a press nobody meant
+    // would otherwise go unnoticed (Michał's smoke, 2026-08-29). The name,
+    // the count and the size, in the section's own status line.
+    transferStatus(
+      plural(articles.length, "reader_export_done", [
+        withPictures ? ARCHIVE_FILENAME : ARTICLES_FILENAME,
+        fileSize(size),
+      ]),
+    );
   } catch {
     transferStatus(describeError(ErrorCode.INTERNAL), "error");
   }
@@ -3844,7 +3855,11 @@ async function exportMarksPage() {
     const scope = marksShown === null ? null : marksShown.scope;
     const docs = await markedDocs((docId) => scope === null || docId === scope);
     if (docs.length === 0) return;
-    downloadFile(toMarksFile(docs), MARKS_FILENAME, "text/markdown");
+    const size = downloadFile(toMarksFile(docs), MARKS_FILENAME, "text/markdown");
+    // What was written, said in the notice (D153): the page has no status
+    // line of its own, and the notice stands under the bar wherever the
+    // press came from - the link over the rows or the button under them.
+    showNotice(plural(docs.length, "reader_export_marks_done", [MARKS_FILENAME, fileSize(size)]));
   } catch {
     showNotice(describeError(ErrorCode.INTERNAL));
   }
@@ -3858,14 +3873,17 @@ async function exportMarksPage() {
  * @param {string | Uint8Array<ArrayBuffer>} content text, or the bytes of an archive (D145)
  * @param {string} filename
  * @param {string} type
+ * @returns {number} the file's size in bytes, for the line that says what was written
  */
 function downloadFile(content, filename, type) {
-  const url = URL.createObjectURL(new Blob([content], { type }));
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   anchor.href = url;
   anchor.download = filename;
   anchor.click();
   setTimeout(() => URL.revokeObjectURL(url), 60_000);
+  return blob.size;
 }
 
 /**

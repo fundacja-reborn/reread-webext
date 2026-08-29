@@ -383,6 +383,54 @@
       "count": { "content": "$1", "example": "3" }
     }
   },
+  "reader_export_done_one": {
+    "message": "$COUNT$ Artikel nach $FILE$ exportiert ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "file": { "content": "$2", "example": "reread-articles.json" },
+      "size": { "content": "$3", "example": "38 KB" }
+    }
+  },
+  "reader_export_done_other": {
+    "message": "$COUNT$ Artikel nach $FILE$ exportiert ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "file": { "content": "$2", "example": "reread-articles.zip" },
+      "size": { "content": "$3", "example": "2,1 MB" }
+    }
+  },
+  "reader_export_marks_done_one": {
+    "message": "Markierungen aus $COUNT$ Dokument nach $FILE$ exportiert ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "file": { "content": "$2", "example": "reread-highlights.md" },
+      "size": { "content": "$3", "example": "4 KB" }
+    }
+  },
+  "reader_export_marks_done_other": {
+    "message": "Markierungen aus $COUNT$ Dokumenten nach $FILE$ exportiert ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "file": { "content": "$2", "example": "reread-highlights.md" },
+      "size": { "content": "$3", "example": "12 KB" }
+    }
+  },
+  "vocab_export_done_one": {
+    "message": "$COUNT$ Eintrag nach $FILE$ exportiert ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "file": { "content": "$2", "example": "reread-en-de.tsv" },
+      "size": { "content": "$3", "example": "1 KB" }
+    }
+  },
+  "vocab_export_done_other": {
+    "message": "$COUNT$ Einträge nach $FILE$ exportiert ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "240" },
+      "file": { "content": "$2", "example": "reread-en-de.tsv" },
+      "size": { "content": "$3", "example": "19 KB" }
+    }
+  },
   "reader_marks_title": { "message": "Markierungen" },
   "reader_marks_title_all": { "message": "Alle Markierungen" },
   "reader_marks_title_article": { "message": "Markierungen in diesem Artikel" },
