@@ -4974,6 +4974,20 @@ marksRowsList?.addEventListener("click", (event) => {
 
 marksExportButton?.addEventListener("click", () => void exportMarksPage());
 
+// The link over the rows leads to the export by scrolling, not by its
+// fragment: a fragment jump writes a history entry with no state of ours,
+// and the popstate that follows reads that as Back under the highlights -
+// onto the list, which is where the press landed (Michał's smoke,
+// 2026-08-29). The href stays for what a link is; focus lands on the button
+// the link is about, the way a same-page link's does.
+marksTransferLink?.addEventListener("click", (event) => {
+  event.preventDefault();
+  document
+    .getElementById("marks-transfer")
+    ?.scrollIntoView({ behavior: "instant", block: "start" });
+  marksExportButton?.focus({ preventScroll: true });
+});
+
 noticeClose?.addEventListener("click", () => hideNotice());
 
 noticeAct?.addEventListener("click", () => {
