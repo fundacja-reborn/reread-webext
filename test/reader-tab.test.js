@@ -6,13 +6,14 @@ import { READER_SOURCE_KEY, READER_TAB_KEY, readReaderSource } from "../src/lib/
 import { fakeBrowser } from "./fake-browser.js";
 
 const READER_URL = "moz-extension://uuid/reader/reader.html";
+const ROOMS = [READER_URL, "moz-extension://uuid/vocab/vocab.html", "moz-extension://uuid/options/options.html"];
 
 /**
  * @param {{ tabs?: import("./fake-browser.js").FakeTab[], session?: Record<string, unknown> }} [initial]
  */
 function reader(initial) {
   const { state, api } = fakeBrowser(initial);
-  return { state, deps: { ...api, url: READER_URL, now: () => 1000 } };
+  return { state, deps: { ...api, url: READER_URL, rooms: ROOMS, now: () => 1000 } };
 }
 
 describe("opening the reader", () => {
@@ -273,7 +274,7 @@ describe("the witness of what the remembered tab shows", () => {
     assert.equal(state.selected, 9);
   });
 
-  it("skips the extension's other pages when it looks for a reader", async () => {
+  it("never mistakes the extension's other pages for a reader", async () => {
     const { state, deps } = reader({ tabs: [{ id: 5, windowId: 2 }] });
 
     await openReader({
@@ -281,7 +282,10 @@ describe("the witness of what the remembered tab shows", () => {
       contexts: async () => [{ contextType: "TAB", documentUrl: "moz-extension://uuid/options/options.html", tabId: 5 }],
     });
 
-    assert.deepEqual(state.created, [READER_URL]);
+    // Not raised as a reader - turned into one (D147), which is the next
+    // suite's business; what matters here is that no reader was found.
+    assert.deepEqual(state.turned, [{ tabId: 5, url: READER_URL }]);
+    assert.deepEqual(state.created, []);
   });
 
   it("trusts the remembered id when there is no witness at all", async () => {
@@ -296,5 +300,95 @@ describe("the witness of what the remembered tab shows", () => {
 
     assert.deepEqual(state.created, []);
     assert.equal(state.selected, 7);
+  });
+});
+
+/**
+ * No reader anywhere: a tab showing another room of ours is turned into one
+ * before a fresh tab is opened (D147). The reader walks to the settings and
+ * the phrases in place (D139/D141), so the tab it left is the natural one
+ * to come back to - and every raise that opened a fresh reader beside it
+ * instead left one more settings tab standing (eight in Michał's tab bar,
+ * 2026-08-29).
+ */
+describe("turning a tab of ours into the reader", () => {
+  it("turns the remembered tab that walked away, and remembers it again", async () => {
+    const { state, deps } = reader({
+      tabs: [{ id: 7, windowId: 3 }, { id: 8, windowId: 3 }],
+      session: { [READER_TAB_KEY]: 7 },
+    });
+
+    await openReader({
+      ...deps,
+      contexts: async () => [
+        { contextType: "TAB", documentUrl: "moz-extension://uuid/vocab/vocab.html", tabId: 8 },
+        { contextType: "TAB", documentUrl: "moz-extension://uuid/options/options.html", tabId: 7 },
+      ],
+    });
+
+    assert.deepEqual(state.turned, [{ tabId: 7, url: READER_URL }]);
+    assert.deepEqual(state.created, []);
+    assert.equal(state.selected, 7);
+    assert.equal(state.focusedWindow, 3);
+    assert.equal(state.stored[READER_TAB_KEY], 7);
+  });
+
+  it("turns the tab the press came from before the one remembered", async () => {
+    // The settings' "Offline reading list" row: this very tab becomes the
+    // reader, the settings one Back away - even while the tab the reader
+    // once left stands elsewhere.
+    const { state, deps } = reader({
+      tabs: [{ id: 5, windowId: 1 }, { id: 7, windowId: 2 }],
+      session: { [READER_TAB_KEY]: 7 },
+    });
+
+    await openLibrary({
+      ...deps,
+      from: 5,
+      contexts: async () => [
+        { contextType: "TAB", documentUrl: "moz-extension://uuid/vocab/vocab.html", tabId: 7 },
+        { contextType: "TAB", documentUrl: "moz-extension://uuid/options/options.html", tabId: 5 },
+      ],
+    });
+
+    assert.deepEqual(state.turned, [{ tabId: 5, url: READER_URL }]);
+    assert.equal(state.stored[READER_TAB_KEY], 5);
+    // The list is what the turned tab shows: the source was pointed at
+    // nothing before the turn.
+    assert.deepEqual(state.stored[READER_SOURCE_KEY], { at: 1000 });
+  });
+
+  it("raises a standing reader rather than turning the tab the press came from", async () => {
+    const { state, deps } = reader({ tabs: [{ id: 5, windowId: 1 }, { id: 9, windowId: 2 }] });
+
+    await openMarks({
+      ...deps,
+      from: 5,
+      contexts: async () => [
+        { contextType: "TAB", documentUrl: "moz-extension://uuid/options/options.html", tabId: 5 },
+        { contextType: "TAB", documentUrl: READER_URL, tabId: 9 },
+      ],
+    });
+
+    assert.deepEqual(state.turned, []);
+    assert.equal(state.selected, 9);
+  });
+
+  it("turns no tab that is not a room of ours", async () => {
+    // The launcher's press comes from the web page under it, the popup's on
+    // Android from the popup's own tab: neither is a tab to hand the reader.
+    const { state, deps } = reader({ tabs: [{ id: 4, windowId: 1 }, { id: 6, windowId: 1 }] });
+
+    await readInReader(
+      { id: 4 },
+      {
+        ...deps,
+        from: 4,
+        contexts: async () => [{ contextType: "TAB", documentUrl: "moz-extension://uuid/popup/index.html", tabId: 6 }],
+      },
+    );
+
+    assert.deepEqual(state.turned, []);
+    assert.deepEqual(state.created, [READER_URL]);
   });
 });

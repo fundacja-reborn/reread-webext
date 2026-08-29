@@ -5,16 +5,18 @@
  * save that succeeded must not turn into an error because its insurance
  * did. `articles.js` and `books.js` call these after their writes and
  * before the writes that could fill an empty library; the reader's list
- * asks the restore before it reads; the settings page moves the switch.
+ * asks the restore before it reads, and the completion after it; the
+ * settings page moves the switch and asks the completion before its line.
  */
 
-import { effectiveLibraryCopy, platformOs, readConfig } from "../config.js";
+import { effectiveLibraryCopy, readConfig } from "../config.js";
 import { asPosition } from "../reader/position.js";
 import { asBookMeta } from "./book.js";
 import { asPictureRow } from "../reader/pictures.js";
 import {
   buildLibraryCopy as buildWith,
   clearLibraryCopy as clearWith,
+  completeLibraryCopy as completeWith,
   copyArticle as copyArticleWith,
   copyBook as copyBookWith,
   copyPicture as copyPictureWith,
@@ -43,16 +45,6 @@ import { asSavedMeta } from "./saved-article.js";
  * @typedef {import("../reader/position.js").ReadingPosition} ReadingPosition
  * @typedef {import("./library-db.js").LibraryStores} LibraryStores
  */
-
-/** The platform, asked once: it does not change under a running page. */
-/** @type {Promise<string> | null} */
-let platform = null;
-
-/** @returns {Promise<string>} */
-function os() {
-  platform ??= platformOs();
-  return platform;
-}
 
 /**
  * The index in place before anything on this page touches the copy - once
@@ -195,8 +187,17 @@ function booksOf(rows, segmentRows) {
 function copyDeps() {
   return {
     ...storageDeps(),
-    enabled: async () => effectiveLibraryCopy(await readConfig(), await os()),
+    enabled: async () => effectiveLibraryCopy(await readConfig()),
     empty: () => withLibrary("readonly", isEmpty),
+    // The ids alone, from the two key lists: what the completion compares
+    // against the index on every list, without a byte of content read.
+    documents: async () => {
+      const { articles, books } = await withLibrary("readonly", async (stores) => ({
+        articles: /** @type {IDBValidKey[]} */ (await promisify(stores.meta.getAllKeys())),
+        books: /** @type {IDBValidKey[]} */ (await promisify(stores.books.getAllKeys())),
+      }));
+      return { articles: articles.map(String), books: books.map(String) };
+    },
     pictures: picturesOf,
     snapshot: async () => {
       const { metas, stored, books, segments, positions } = await withLibrary("readonly", async (stores) => ({
@@ -249,6 +250,31 @@ export async function restoreLibrary() {
   } catch {
     return 0;
   }
+}
+
+/**
+ * Whatever the library holds and the copy does not, copied - once per page,
+ * because after it every document is claimed and every later one is
+ * claimed as it is written. What it costs on every other page is the two
+ * key lists and one small key; what it costs once is the documents that
+ * were saved while the copy was off or before it was on by default (D146).
+ * Asked by the reader's list after the restore and by the settings page
+ * before its line. A completion that fails is forgotten, so the next page
+ * tries again - and the caller goes on regardless.
+ *
+ * @type {Promise<number> | null}
+ */
+let completed = null;
+
+/** @returns {Promise<number>} how many documents the copy gained */
+export function completeLibraryCopy() {
+  completed ??= ready()
+    .then(() => completeWith(copyDeps()))
+    .catch(() => {
+      completed = null;
+      return 0;
+    });
+  return completed;
 }
 
 /**

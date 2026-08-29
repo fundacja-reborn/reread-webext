@@ -1,6 +1,6 @@
 /**
  * Everything this extension keeps for the length of a browser session, which is
- * three numbers and nothing else.
+ * four numbers and nothing else.
  *
  * `storage.local` holds what has to survive a restart - the settings and the
  * copy of the vocabulary pages read. `storage.session` holds what must *not*:
@@ -22,6 +22,13 @@ export const READER_TAB_KEY = "readerTabId";
 
 /** Which tab the saved-phrases page is, for the same reason. */
 export const VOCAB_TAB_KEY = "vocabTabId";
+
+/**
+ * Which tab the settings are, for the same reason - since D147, when the
+ * settings stopped being the browser's `openOptionsPage` and joined the
+ * other two pages under one rule.
+ */
+export const SETTINGS_TAB_KEY = "settingsTabId";
 
 /**
  * What the reader was last pointed at, and when: a tab to read, or the
@@ -101,6 +108,23 @@ export async function readVocabTab(session = webext().storage.session) {
  */
 export async function writeVocabTab(tabId, session = webext().storage.session) {
   await writeTabId(VOCAB_TAB_KEY, tabId, session);
+}
+
+/**
+ * @param {WebExtBrowser["storage"]["session"]} [session]
+ * @returns {Promise<number | null>}
+ */
+export async function readSettingsTab(session = webext().storage.session) {
+  return readTabId(SETTINGS_TAB_KEY, session);
+}
+
+/**
+ * @param {number | null} tabId
+ * @param {WebExtBrowser["storage"]["session"]} [session]
+ * @returns {Promise<void>}
+ */
+export async function writeSettingsTab(tabId, session = webext().storage.session) {
+  await writeTabId(SETTINGS_TAB_KEY, tabId, session);
 }
 
 /**

@@ -388,8 +388,7 @@ button.page-mark:hover {
    popup itself is three taps into the browser menu on a phone, and it speaks
    in the popup's rows - quiet, full-width, separated by lines, each a
    finger-sized target. The interface font is said outright because the
-   reader page reads in a serif; the last row's line is the menu's own
-   bottom edge, so the panel needs none. */
+   reader page reads in a serif. */
 .nav-menu {
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   font-size: 0.95rem;
@@ -410,6 +409,18 @@ button.page-mark:hover {
   color: var(--page-fg);
   text-align: left;
   text-decoration: none;
+}
+
+/* The row that closes the menu draws no line. The last row's line used to
+   be the menu's bottom edge; since the panel stands on paper of its own
+   with a shadow under it (the scrim, #255), a line on the paper's last
+   pixel read as an edge drawn twice (Michał's smoke, 2026-08-29). The
+   closing row is the last one showing, not the last one written: a menu
+   row hides by its attribute, and the settings' phrases row by the body's
+   translation-off class. */
+.nav-menu > :is(a, button):not(:has(~ :is(a, button):not([hidden]))),
+body.no-translation .nav-menu > :is(a, button):not(:has(~ :is(a, button):not([hidden], .translation-only))) {
+  border-bottom: none;
 }
 
 /* The popup's hover, not the framed button's: the text answers, the line

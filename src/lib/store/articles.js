@@ -355,7 +355,10 @@ export async function allArticles() {
  * address already: the one row that can stand under an address nobody saved
  * is the copy's (`marks-backup.js`, after the browser emptied the library),
  * and it is the latest word - newer than any file, which was written before
- * the marks the reader made since.
+ * the marks the reader made since. The reading list's own copy is asked back
+ * before the writes for the same reason `putArticle` asks: this is a write
+ * that fills an empty library, and a library filled first would shut the
+ * door on what the copy holds.
  *
  * The addresses actually added come back with the counts: an archive with
  * pictures (`articles-archive.js`) writes them for those articles and no
@@ -367,6 +370,7 @@ export async function allArticles() {
  */
 export async function importArticles(articles) {
   await restoreMarks();
+  await restoreLibrary();
   const { added, skipped } = await withLibrary("readwrite", async (stores) => {
     const keys = /** @type {IDBValidKey[]} */ (await promisify(stores.meta.getAllKeys()));
     const plan = importPlan(keys.map(String), articles);

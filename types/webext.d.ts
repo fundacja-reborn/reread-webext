@@ -85,8 +85,11 @@ interface WebExtBrowser {
     // Bringing the reader back instead of opening a second one. Selecting a tab
     // needs no permission; the call rejects for a tab that is gone, which is how
     // this finds out. Reading `url` or `title` is what would need `tabs`, and
-    // nothing here does.
-    update(tabId: number, properties: { active?: boolean }): Promise<WebExtTab>;
+    // nothing here does. Turning a tab to another page of this extension
+    // (`url`, D147) needs none either: an extension may navigate a tab to its
+    // own pages on both engines, and the only address ever passed is one of
+    // them.
+    update(tabId: number, properties: { active?: boolean; url?: string }): Promise<WebExtTab>;
     // Which tab the popup opened over. Without the `tabs` permission the answer
     // carries an id and no address - and the id is all that is asked for; which
     // site the tab is showing is what the tab itself answers (`page-info`).

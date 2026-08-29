@@ -7,12 +7,14 @@
  * after thirty days without a touch on the extension's pages, and
  * `storage.local` is where that does not reach.
  *
- * Unlike the first two it is a choice (`libraryCopy` in the config). The
- * vocabulary and the marks are the reader's own work - small, and impossible
- * to type in again - so they are copied everywhere. The reading list is
- * large (the copy doubles the space it takes) and mostly findable again, so
- * it is copied where the risk is real - iOS and iPadOS, unless switched off -
- * and on request elsewhere (`effectiveLibraryCopy`).
+ * Unlike the first two it can be switched off (`libraryCopy` in the config).
+ * The vocabulary and the marks are the reader's own work - small, and
+ * impossible to type in again - so they are copied unasked. The reading
+ * list is large (the copy doubles the space it takes) and mostly findable
+ * again, so the switch exists; it began as off outside iOS and iPadOS and
+ * is on everywhere since D146 (`effectiveLibraryCopy` says why), with the
+ * copy completed from the library where the default found one already
+ * saved (`completeLibraryCopy`).
  *
  * And unlike them it is not one value but one key per document, under one
  * index:
@@ -129,6 +131,8 @@ import { asSavedMeta } from "./saved-article.js";
  * @typedef {object} LibraryCopyDeps
  * @property {() => Promise<boolean>} enabled whether the copy is on, as the switch and the platform decide
  * @property {() => Promise<boolean>} empty whether the library holds no article and no book
+ * @property {() => Promise<{ articles: string[], books: string[] }>} documents the ids of every
+ *   article and book the library holds - the two key lists, no content - for a completion
  * @property {(library: CopiedLibrary) => Promise<number>} putRows the documents written back - into an
  *   empty library only, checked again where the write is atomic; answers how many were
  * @property {() => Promise<LibrarySnapshot>} snapshot the whole library, for a build
@@ -692,22 +696,20 @@ export async function restorePictures(url, deps) {
 }
 
 /**
- * The copy made whole from the library, when the switch is turned on: the
- * rows the standing index names and the library no longer does removed -
- * whatever a copy switched off and on again might have kept - then every
- * document claimed, then every document written, one row at a time so no
- * single write carries the whole reading list, and each article's pictures
- * after its text, claimed by the article before they are written.
+ * A set of documents into the copy under an index that claims them: the
+ * index first, with every one of them, then every document written, one
+ * row at a time so no single write carries the whole reading list, and
+ * each article's pictures after its text, claimed by the article before
+ * they are written. The whole library on a build, the missing part on a
+ * completion.
  *
+ * @param {LibrarySnapshot} library the documents to write, with their positions
+ * @param {CopyIndex} index the index as it will stand, the documents claimed in it already
  * @param {LibraryCopyDeps} deps
- * @returns {Promise<number>} how many documents the copy now holds
+ * @returns {Promise<void>}
  */
-export async function buildLibraryCopy(deps) {
-  const library = await deps.snapshot();
+async function writeDocuments(library, index, deps) {
   const rows = rowsOf(library);
-  const index = indexOf(library, rows);
-  const standing = await readIndex(deps);
-  if (standing !== null) await deps.remove(indexedKeys(standing).filter((key) => !rows.has(key)));
   await deps.write({ [INDEX_KEY]: index });
   for (const [key, row] of rows) await deps.write({ [key]: row });
   for (const article of library.articles) {
@@ -718,7 +720,64 @@ export async function buildLibraryCopy(deps) {
     await deps.write({ [INDEX_KEY]: index });
     for (const picture of pictures) await deps.write({ [pictureKey(article.url, picture.index)]: pictureRow(picture) });
   }
+}
+
+/**
+ * The copy made whole from the library, when the switch is turned on: the
+ * rows the standing index names and the library no longer does removed -
+ * whatever a copy switched off and on again might have kept - then every
+ * document claimed and written (`writeDocuments`).
+ *
+ * @param {LibraryCopyDeps} deps
+ * @returns {Promise<number>} how many documents the copy now holds
+ */
+export async function buildLibraryCopy(deps) {
+  const library = await deps.snapshot();
+  const rows = rowsOf(library);
+  const index = indexOf(library, rows);
+  const standing = await readIndex(deps);
+  if (standing !== null) await deps.remove(indexedKeys(standing).filter((key) => !rows.has(key)));
+  await writeDocuments(library, index, deps);
   return library.articles.length + library.books.length;
+}
+
+/**
+ * The copy completed: every document the library holds and the index does
+ * not, copied - with its position and its pictures - and nothing else
+ * touched. Where the documents come from: a reading list saved while the
+ * copy was off, and then the copy switched on by a default rather than by
+ * the press that builds it (D146: on everywhere, for an install that never
+ * chose); a claim that failed quietly, once. Asked on every list, so the
+ * question is asked of the two key lists and the index alone, and the
+ * library is read whole only when there is something to copy - which, for
+ * one install, is once.
+ *
+ * @param {LibraryCopyDeps} deps
+ * @returns {Promise<number>} how many documents the copy gained
+ */
+export async function completeLibraryCopy(deps) {
+  if (!(await deps.enabled())) return 0;
+  const index = (await readIndex(deps)) ?? emptyIndex();
+  const held = await deps.documents();
+  const wantedArticles = new Set(held.articles.filter((url) => !Object.hasOwn(index.articles, url)));
+  const wantedBooks = new Set(held.books.filter((id) => !Object.hasOwn(index.books, id)));
+  if (wantedArticles.size === 0 && wantedBooks.size === 0) return 0;
+  const whole = await deps.snapshot();
+  /** @type {LibrarySnapshot} */
+  const missing = {
+    articles: whole.articles.filter((article) => wantedArticles.has(article.url)),
+    books: whole.books.filter((book) => wantedBooks.has(book.meta.id)),
+    positions: whole.positions.filter(
+      (position) => wantedArticles.has(position.docId) || wantedBooks.has(position.docId),
+    ),
+  };
+  if (missing.articles.length === 0 && missing.books.length === 0) return 0;
+  const rows = rowsOf(missing);
+  const claimed = indexOf(missing, rows);
+  index.articles = { ...index.articles, ...claimed.articles };
+  index.books = { ...index.books, ...claimed.books };
+  await writeDocuments(missing, index, deps);
+  return missing.articles.length + missing.books.length;
 }
 
 /**
