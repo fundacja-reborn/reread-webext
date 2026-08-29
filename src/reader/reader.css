@@ -1280,9 +1280,15 @@ a.marks-act {
    place in the acts column says "control", but under a paragraph of the
    same face and colour a quiet button read as a third line of the note
    (Michał's smoke, 2026-08-29). The frame is thin and grey; the armed state
-   below turns it the accent, so the two states stay apart. */
+   below turns it the accent, so the two states stay apart. A block on a line
+   of its own, never trailing the sentence: inline, the shorter "Sure?" fitted
+   at the end of the note's last line and the armed button jumped up beside
+   the text, away from the finger that had just pressed it; the script holds
+   the width meanwhile, so the box shrinks to nothing either. */
 .marks-delete-all {
-  display: inline-block;
+  display: block;
+  width: max-content;
+  max-width: 100%;
   margin-top: 0.5rem;
   min-height: 44px;
   padding: 0.35rem 0.8rem;

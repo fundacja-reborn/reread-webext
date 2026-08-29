@@ -3426,6 +3426,7 @@ function disarmDelete() {
   }
   if (act === "delete-all") {
     const label = armed.getAttribute("data-label") ?? "";
+    armed.style.removeProperty("min-width");
     armed.textContent = label;
     armed.setAttribute("aria-label", label);
     return;
@@ -4627,9 +4628,16 @@ marksRowsList?.addEventListener("click", (event) => {
   else if (act === "note") noteMarkRow(row);
   else if (act === "delete" || act === "delete-all") {
     // The two deletions ask first (D150): the list's own two presses, the
-    // second one on the very spot the first one landed.
+    // second one on the very spot the first one landed. The trash keeps that
+    // promise by growing leftward from the column's right edge; the counted
+    // words under the note hold their width the article's Delete way - the
+    // question is shorter than the label, and a box that shrank to it would
+    // leave the finger over paper (Michał's smoke, 2026-08-29).
     if (button.hasAttribute("data-armed")) void deleteMarkRow(button, row, act === "delete-all");
-    else armDelete(button);
+    else {
+      if (act === "delete-all") button.style.minWidth = `${button.offsetWidth}px`;
+      armDelete(button);
+    }
   }
 });
 
