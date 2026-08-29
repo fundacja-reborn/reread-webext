@@ -2,12 +2,14 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import {
+  INDEX_KEY,
   LIBRARY_COPY_PREFIX,
   articleKey,
   articleRow,
   asCopiedArticle,
   asCopiedBook,
   asCopiedPosition,
+  asIndex,
   bookKey,
   bookRow,
   buildLibraryCopy,
@@ -18,27 +20,33 @@ import {
   copyPosition,
   copySummary,
   dropCopied,
+  indexOf,
+  indexedKeys,
+  migrateIndex,
   patchCopiedMeta,
   positionKey,
   positionRow,
   restoreLibrary,
   rowsOf,
   segmentsOf,
+  summarizeCopy,
 } from "../src/lib/store/library-backup.js";
 
 /** @typedef {import("../src/lib/store/library-backup.js").LibraryCopyDeps} LibraryCopyDeps */
 /** @typedef {import("../src/lib/store/library-backup.js").CopiedBook} CopiedBook */
 /** @typedef {import("../src/lib/store/library-backup.js").CopiedLibrary} CopiedLibrary */
+/** @typedef {import("../src/lib/store/library-backup.js").CopyIndex} CopyIndex */
 /** @typedef {import("../src/lib/store/library-backup.js").LibrarySnapshot} LibrarySnapshot */
 /** @typedef {import("../src/lib/store/saved-article.js").SavedArticle} SavedArticle */
 /** @typedef {import("../src/lib/reader/position.js").ReadingPosition} ReadingPosition */
 
 /**
  * The copy of the reading list, held to the rules the other two copies keep
- * and to its own: one key per document found by its prefix, additions only
+ * and to its own: one key per document under one index, additions only
  * while the switch is on, removals always, restored only into a library with
- * nothing in it. No browser runs in CI - the library and the storage area
- * are stand-ins that remember what was asked of them.
+ * nothing in it - and the whole area read once, to put the index over a copy
+ * from before it, and never again. No browser runs in CI - the library and
+ * the storage area are stand-ins that remember what was asked of them.
  */
 
 /**
@@ -93,6 +101,19 @@ function position(docId) {
   return { docId, segmentIndex: 0, blockIndex: 3, updatedAt: 3000, percent: 40 };
 }
 
+/** @param {unknown} row */
+const bytes = (row) => new TextEncoder().encode(JSON.stringify(row)).length;
+
+/**
+ * The index a library's documents stand under, as a build would write it.
+ *
+ * @param {LibrarySnapshot} library
+ * @returns {CopyIndex}
+ */
+function indexFor(library) {
+  return indexOf(library, rowsOf(library));
+}
+
 /**
  * @param {{ enabled?: boolean, empty?: boolean, area?: Record<string, unknown>, snapshot?: LibrarySnapshot }} [script]
  */
@@ -129,6 +150,10 @@ function standIn(script = {}) {
     read: async (key) => {
       asked.push(`read ${key}`);
       return area[key];
+    },
+    readMany: async (keys) => {
+      asked.push(`readMany ${keys.join(",")}`);
+      return Object.fromEntries(keys.filter((key) => key in area).map((key) => [key, area[key]]));
     },
     write: async (items) => {
       asked.push(`write ${Object.keys(items).join(",")}`);
@@ -189,7 +214,7 @@ describe("the copy of the reading list", () => {
     assert.equal(asCopiedPosition({ version: 3, position: place }), null);
   });
 
-  it("finds the copy in the whole area by its prefix, and keeps only what opens", () => {
+  it("finds the copy among rows by its prefix, and keeps only what opens", () => {
     const kept = article("https://a.example/kept");
     const shelf = book("b1", 1);
     const area = {
@@ -220,61 +245,179 @@ describe("the copy of the reading list", () => {
     ]);
   });
 
-  it("restores only into an empty library, and reads the area only then", async () => {
+  it("reads the index as stored, and refuses one that will not read", () => {
+    const index = { version: 1, articles: { "https://a.example/p": 120 }, books: { b1: 3000 } };
+    assert.deepEqual(asIndex(throughJson(index)), index);
+    assert.deepEqual(asIndex({ version: 1, articles: {}, books: {} }), { version: 1, articles: {}, books: {} });
+    assert.equal(asIndex(undefined), null);
+    assert.equal(asIndex({ version: 2, articles: {}, books: {} }), null);
+    assert.equal(asIndex({ version: 1, articles: [], books: {} }), null);
+    assert.equal(asIndex({ version: 1, articles: { u: "big" }, books: {} }), null);
+    assert.equal(asIndex({ version: 1, articles: { u: -1 }, books: {} }), null);
+    assert.equal(asIndex({ version: 1, articles: {} }), null);
+
+    // Every document's row and the place in it - the place's key derived,
+    // row or no row under it.
+    assert.deepEqual(indexedKeys(index), [
+      articleKey("https://a.example/p"),
+      positionKey("https://a.example/p"),
+      bookKey("b1"),
+      positionKey("b1"),
+    ]);
+  });
+
+  it("puts the index over a copy from before it in one read of the whole area, and sweeps what it cannot claim", async () => {
+    const kept = article("https://a.example/kept");
+    const shelf = book("b1", 2);
+    const legacy = standIn({
+      area: {
+        vocabBackup: { version: 1, phrases: [] },
+        [articleKey(kept.url)]: articleRow(kept),
+        [bookKey("b1")]: bookRow(shelf),
+        [positionKey(kept.url)]: positionRow(position(kept.url)),
+        [positionKey("https://a.example/gone")]: positionRow(position("https://a.example/gone")),
+        [articleKey("https://a.example/other")]: articleRow(article("https://a.example/elsewhere")),
+        [`${LIBRARY_COPY_PREFIX}article:https://a.example/torn`]: { version: 1 },
+      },
+    });
+    const index = await migrateIndex(legacy.deps);
+    assert.deepEqual(index, {
+      version: 1,
+      articles: { [kept.url]: bytes(articleRow(kept)) },
+      books: { b1: bytes(bookRow(shelf)) },
+    });
+    assert.deepEqual(legacy.area[INDEX_KEY], index);
+    // The documents that read stay, with their places; the orphan place,
+    // the row under the wrong key and the torn row go - unclaimed, nothing
+    // would ever clear them.
+    assert.deepEqual(Object.keys(legacy.area).sort(), [
+      articleKey(kept.url),
+      bookKey("b1"),
+      INDEX_KEY,
+      positionKey(kept.url),
+      "vocabBackup",
+    ]);
+    assert.deepEqual(legacy.asked, [
+      `read ${INDEX_KEY}`,
+      "readAll",
+      `remove ${articleKey("https://a.example/other")},${LIBRARY_COPY_PREFIX}article:https://a.example/torn,${positionKey("https://a.example/gone")}`,
+      `write ${INDEX_KEY}`,
+    ]);
+
+    // An index in place is the end of it: one read of a small key.
+    assert.deepEqual(await migrateIndex(legacy.deps), index);
+    assert.deepEqual(legacy.asked.slice(4), [`read ${INDEX_KEY}`]);
+
+    // No row of the copy at all: no index either, and nothing written.
+    const none = standIn({ area: { vocabBackup: { version: 1 } } });
+    assert.equal(await migrateIndex(none.deps), null);
+    assert.deepEqual(Object.keys(none.area), ["vocabBackup"]);
+
+    // Only rows that will not read: swept, and still no index.
+    const torn = standIn({ area: { [`${LIBRARY_COPY_PREFIX}book:torn`]: "not a row" } });
+    assert.equal(await migrateIndex(torn.deps), null);
+    assert.deepEqual(Object.keys(torn.area), []);
+
+    // An index that will not read is no index: built again from the rows,
+    // and the unreadable one is one of the keys the read cannot claim.
+    const broken = standIn({
+      area: { [INDEX_KEY]: { version: 9 }, [articleKey(kept.url)]: articleRow(kept) },
+    });
+    assert.deepEqual(await migrateIndex(broken.deps), {
+      version: 1,
+      articles: { [kept.url]: bytes(articleRow(kept)) },
+      books: {},
+    });
+    assert.deepEqual(broken.area[INDEX_KEY], { version: 1, articles: { [kept.url]: bytes(articleRow(kept)) }, books: {} });
+  });
+
+  it("restores only into an empty library, and reads the rows the index names only then", async () => {
     const full = standIn({ empty: false, area: { [articleKey("u")]: articleRow(article("u")) } });
     assert.equal(await restoreLibrary(full.deps), 0);
     assert.deepEqual(full.asked, ["empty"]);
 
     const nothingToRestore = standIn({ empty: true, area: { vocabBackup: {} } });
     assert.equal(await restoreLibrary(nothingToRestore.deps), 0);
-    assert.deepEqual(nothingToRestore.asked, ["empty", "readAll"]);
+    assert.deepEqual(nothingToRestore.asked, ["empty", `read ${INDEX_KEY}`]);
 
     const kept = article("https://a.example/p");
+    const library = { articles: [kept], books: [book("b1", 2)], positions: [position("b1")] };
+    const index = indexFor(library);
     const emptied = standIn({
       empty: true,
       area: {
+        [INDEX_KEY]: index,
         [articleKey(kept.url)]: articleRow(kept),
         [bookKey("b1")]: bookRow(book("b1", 2)),
         [positionKey("b1")]: positionRow(position("b1")),
       },
     });
     assert.equal(await restoreLibrary(emptied.deps), 2);
-    assert.deepEqual(emptied.asked, ["empty", "readAll", "putRows 2"]);
+    assert.deepEqual(emptied.asked, [
+      "empty",
+      `read ${INDEX_KEY}`,
+      `readMany ${indexedKeys(index).join(",")}`,
+      "putRows 2",
+    ]);
     const put = emptied.put();
     assert.ok(put !== null);
     assert.deepEqual(put.articles, [kept]);
     assert.deepEqual(put.books, [book("b1", 2)]);
     assert.deepEqual(put.positions, [position("b1")]);
+
+    // A claim without a row - a page that died between the two writes -
+    // restores nothing for that document, and the rest comes back.
+    const ghost = standIn({
+      empty: true,
+      area: {
+        [INDEX_KEY]: { ...index, articles: { ...index.articles, "https://a.example/ghost": 50 } },
+        [articleKey(kept.url)]: articleRow(kept),
+        [bookKey("b1")]: bookRow(book("b1", 2)),
+      },
+    });
+    assert.equal(await restoreLibrary(ghost.deps), 2);
+    assert.deepEqual(ghost.put()?.articles, [kept]);
   });
 
-  it("builds the copy from the whole library and sweeps the rows it no longer names", async () => {
+  it("builds the copy from the whole library, claims before it writes, and sweeps the rows it no longer names", async () => {
     const kept = article("https://a.example/kept");
     const shelf = book("b1", 2);
+    const deleted = article("https://a.example/deleted");
+    const library = {
+      articles: [kept],
+      books: [shelf],
+      positions: [position(kept.url), position("https://a.example/orphan")],
+    };
     const stand = standIn({
-      snapshot: {
-        articles: [kept],
-        books: [shelf],
-        positions: [position(kept.url), position("https://a.example/orphan")],
-      },
+      snapshot: library,
       area: {
         vocabBackup: { version: 1 },
-        [articleKey("https://a.example/deleted")]: articleRow(article("https://a.example/deleted")),
-        [positionKey("https://a.example/deleted")]: positionRow(position("https://a.example/deleted")),
+        // What a copy switched off and on again might have kept: a document
+        // the library no longer has, claimed by the index that stood.
+        [INDEX_KEY]: indexFor({ articles: [deleted], books: [], positions: [] }),
+        [articleKey(deleted.url)]: articleRow(deleted),
+        [positionKey(deleted.url)]: positionRow(position(deleted.url)),
       },
     });
     assert.equal(await buildLibraryCopy(stand.deps), 2);
     assert.deepEqual(Object.keys(stand.area).sort(), [
       articleKey(kept.url),
       bookKey("b1"),
+      INDEX_KEY,
       positionKey(kept.url),
       "vocabBackup",
     ]);
+    assert.deepEqual(stand.area[INDEX_KEY], indexFor(library));
     assert.deepEqual(stand.area[bookKey("b1")], bookRow(shelf));
-    // One document per write, never the whole reading list in one.
-    assert.deepEqual(
-      stand.asked.filter((step) => step.startsWith("write")),
-      [`write ${articleKey(kept.url)}`, `write ${bookKey("b1")}`, `write ${positionKey(kept.url)}`],
-    );
+    // The stale rows go first, the index claims every document next, and
+    // then one document per write - never the whole reading list in one.
+    assert.deepEqual(stand.asked.slice(2), [
+      `remove ${articleKey(deleted.url)},${positionKey(deleted.url)}`,
+      `write ${INDEX_KEY}`,
+      `write ${articleKey(kept.url)}`,
+      `write ${bookKey("b1")}`,
+      `write ${positionKey(kept.url)}`,
+    ]);
   });
 
   it("keys every document of a library, and a position only beside its document", () => {
@@ -286,20 +429,27 @@ describe("the copy of the reading list", () => {
     assert.deepEqual([...rows.keys()], [articleKey("u"), bookKey("b"), positionKey("u"), positionKey("b")]);
   });
 
-  it("clears every key of the copy and nothing else", async () => {
+  it("clears every key the index accounts for, and nothing else", async () => {
+    const library = { articles: [article("u")], books: [book("b", 1)], positions: [position("u")] };
     const stand = standIn({
       area: {
         vocabBackup: { version: 1 },
         marksBackup: { version: 1 },
+        [INDEX_KEY]: indexFor(library),
         [articleKey("u")]: articleRow(article("u")),
-        [`${LIBRARY_COPY_PREFIX}book:torn`]: "not a row",
+        [bookKey("b")]: bookRow(book("b", 1)),
+        [positionKey("u")]: positionRow(position("u")),
       },
     });
     assert.equal(await clearLibraryCopy(stand.deps), 2);
     assert.deepEqual(Object.keys(stand.area).sort(), ["marksBackup", "vocabBackup"]);
+    // No index, no copy: nothing to clear and nothing read for it.
+    const none = standIn({ area: { vocabBackup: { version: 1 } } });
+    assert.equal(await clearLibraryCopy(none.deps), 0);
+    assert.deepEqual(none.asked, [`read ${INDEX_KEY}`]);
   });
 
-  it("writes a document only while the switch is on", async () => {
+  it("writes a document only while the switch is on, and claims it before its row", async () => {
     const off = standIn({ enabled: false });
     assert.equal(await copyArticle(article("u"), false, off.deps), false);
     assert.equal(await copyBook(book("b", 1), off.deps), false);
@@ -310,8 +460,39 @@ describe("the copy of the reading list", () => {
     assert.equal(await copyArticle(article("u"), false, on.deps), true);
     assert.equal(await copyBook(book("b", 1), on.deps), true);
     assert.equal(await copyPosition(position("u"), on.deps), true);
-    assert.deepEqual(Object.keys(on.area).sort(), [articleKey("u"), bookKey("b"), positionKey("u")]);
+    assert.deepEqual(Object.keys(on.area).sort(), [articleKey("u"), bookKey("b"), INDEX_KEY, positionKey("u")]);
     assert.deepEqual(on.area[articleKey("u")], articleRow(article("u")));
+    assert.deepEqual(on.area[INDEX_KEY], {
+      version: 1,
+      articles: { u: bytes(articleRow(article("u"))) },
+      books: { b: bytes(bookRow(book("b", 1))) },
+    });
+    // The claim is written before the row it claims, every time; a place
+    // needs no claim of its own, only a document to belong to.
+    assert.deepEqual(
+      on.asked.filter((step) => step.startsWith("write")),
+      [
+        `write ${INDEX_KEY}`,
+        `write ${articleKey("u")}`,
+        `write ${INDEX_KEY}`,
+        `write ${bookKey("b")}`,
+        `write ${positionKey("u")}`,
+      ],
+    );
+  });
+
+  it("writes a place only beside a document the copy holds", async () => {
+    const nothing = standIn({ enabled: true });
+    assert.equal(await copyPosition(position("u"), nothing.deps), false);
+    assert.deepEqual(Object.keys(nothing.area), []);
+
+    const holding = standIn({
+      enabled: true,
+      area: { [INDEX_KEY]: indexFor({ articles: [], books: [book("b", 1)], positions: [] }) },
+    });
+    assert.equal(await copyPosition(position("u"), holding.deps), false);
+    assert.equal(await copyPosition(position("b"), holding.deps), true);
+    assert.deepEqual(Object.keys(holding.area).sort(), [INDEX_KEY, positionKey("b")]);
   });
 
   it("drops the old place when a save writes over an article, switch or no switch", async () => {
@@ -327,19 +508,25 @@ describe("the copy of the reading list", () => {
 
   it("patches a light row where one stands, and nowhere else", async () => {
     const saved = article("u");
-    const stand = standIn({ area: { [articleKey("u")]: articleRow(saved) } });
+    const index = indexFor({ articles: [saved], books: [], positions: [] });
+    const stand = standIn({ area: { [INDEX_KEY]: index, [articleKey("u")]: articleRow(saved) } });
     const read = { ...articleRow(saved).meta, readAt: 9000 };
-    assert.equal(await patchCopiedMeta(articleKey("u"), read, stand.deps), true);
+    assert.equal(await patchCopiedMeta("article", "u", read, stand.deps), true);
     assert.deepEqual(stand.area[articleKey("u")], { ...articleRow(saved), meta: read });
+    // The index keeps the size it recorded - a patch is a handful of bytes
+    // under a line written in megabytes.
+    assert.deepEqual(stand.area[INDEX_KEY], index);
     // No row, no write - which is also what makes the switch unasked here.
-    assert.equal(await patchCopiedMeta(articleKey("elsewhere"), read, stand.deps), false);
-    assert.deepEqual(Object.keys(stand.area), [articleKey("u")]);
+    assert.equal(await patchCopiedMeta("article", "elsewhere", read, stand.deps), false);
+    assert.deepEqual(Object.keys(stand.area).sort(), [articleKey("u"), INDEX_KEY]);
     assert.ok(!stand.asked.includes("enabled"));
   });
 
-  it("drops a document with its place", async () => {
+  it("drops a document with its place, and lets the claim go last", async () => {
+    const library = { articles: [article("u")], books: [book("b", 1)], positions: [position("u"), position("b")] };
     const stand = standIn({
       area: {
+        [INDEX_KEY]: indexFor(library),
         [articleKey("u")]: articleRow(article("u")),
         [positionKey("u")]: positionRow(position("u")),
         [bookKey("b")]: bookRow(book("b", 1)),
@@ -347,21 +534,57 @@ describe("the copy of the reading list", () => {
       },
     });
     await dropCopied("u", "article", stand.deps);
-    assert.deepEqual(Object.keys(stand.area).sort(), [bookKey("b"), positionKey("b")]);
+    assert.deepEqual(Object.keys(stand.area).sort(), [bookKey("b"), INDEX_KEY, positionKey("b")]);
+    assert.deepEqual(stand.area[INDEX_KEY], indexFor({ articles: [], books: [book("b", 1)], positions: [] }));
+    assert.deepEqual(stand.asked, [
+      `remove ${articleKey("u")},${positionKey("u")}`,
+      `read ${INDEX_KEY}`,
+      `write ${INDEX_KEY}`,
+    ]);
     await dropCopied("b", "book", stand.deps);
-    assert.deepEqual(Object.keys(stand.area), []);
+    assert.deepEqual(Object.keys(stand.area), [INDEX_KEY]);
+    assert.deepEqual(stand.area[INDEX_KEY], { version: 1, articles: {}, books: {} });
+
+    // A document the index never held costs the removes and no write.
+    const stranger = standIn({ area: { [INDEX_KEY]: indexFor(library) } });
+    await dropCopied("nobody", "article", stranger.deps);
+    assert.deepEqual(stranger.asked, [`remove ${articleKey("nobody")},${positionKey("nobody")}`, `read ${INDEX_KEY}`]);
   });
 
-  it("sums the copy for the settings page", () => {
-    assert.equal(copySummary({ vocabBackup: { version: 1 } }), null);
-    const area = {
-      [articleKey("u")]: articleRow(article("u")),
-      [bookKey("b")]: bookRow(book("b", 2)),
-      [positionKey("u")]: positionRow(position("u")),
-    };
-    const summary = copySummary(area);
+  it("sums the copy from the index for the settings page", async () => {
+    assert.equal(copySummary(null), null);
+    assert.equal(copySummary({ version: 1, articles: {}, books: {} }), null);
+    const library = { articles: [article("u")], books: [book("b", 2)], positions: [position("u")] };
+    const index = indexFor(library);
+    const summary = copySummary(index);
     assert.ok(summary !== null);
     assert.equal(summary.docs, 2);
-    assert.equal(summary.bytes, Object.values(area).reduce((sum, row) => sum + JSON.stringify(row).length, 0));
+    assert.equal(summary.bytes, bytes(articleRow(article("u"))) + bytes(bookRow(book("b", 2))));
+
+    // The line reads one key, never a row.
+    const stand = standIn({ area: { [INDEX_KEY]: index, [articleKey("u")]: articleRow(article("u")) } });
+    assert.deepEqual(await summarizeCopy(stand.deps), summary);
+    assert.deepEqual(stand.asked, [`read ${INDEX_KEY}`]);
+  });
+
+  it("never reads the whole area once the index stands", async () => {
+    const kept = article("https://a.example/kept");
+    const stand = standIn({
+      enabled: true,
+      empty: true,
+      snapshot: { articles: [kept, article("u")], books: [], positions: [] },
+      area: { [articleKey(kept.url)]: articleRow(kept) },
+    });
+    await migrateIndex(stand.deps);
+    await restoreLibrary(stand.deps);
+    await copyArticle(article("u"), false, stand.deps);
+    await copyPosition(position("u"), stand.deps);
+    await patchCopiedMeta("article", "u", { ...articleRow(article("u")).meta, readAt: 1 }, stand.deps);
+    await dropCopied(kept.url, "article", stand.deps);
+    await buildLibraryCopy(stand.deps);
+    await summarizeCopy(stand.deps);
+    await clearLibraryCopy(stand.deps);
+    assert.equal(stand.asked.filter((step) => step === "readAll").length, 1);
+    assert.deepEqual(Object.keys(stand.area), []);
   });
 });

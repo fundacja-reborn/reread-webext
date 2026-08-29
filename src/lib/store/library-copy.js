@@ -12,19 +12,18 @@ import { effectiveLibraryCopy, platformOs, readConfig } from "../config.js";
 import { asPosition } from "../reader/position.js";
 import { asBookMeta } from "./book.js";
 import {
-  articleKey,
-  bookKey,
   buildLibraryCopy as buildWith,
   clearLibraryCopy as clearWith,
   copyArticle as copyArticleWith,
   copyBook as copyBookWith,
   copyPosition as copyPositionWith,
-  copySummary,
   dropCopied,
+  migrateIndex,
   patchCopiedMeta,
   restoreLibrary as restoreWith,
   segmentsOf,
   storageDeps,
+  summarizeCopy,
 } from "./library-backup.js";
 import { promisify, withLibrary } from "./library-db.js";
 import { asSavedMeta } from "./saved-article.js";
@@ -48,6 +47,30 @@ let platform = null;
 function os() {
   platform ??= platformOs();
   return platform;
+}
+
+/**
+ * The index in place before anything on this page touches the copy - once
+ * per page, since after it every write goes through the index and there is
+ * nothing left to migrate. What it costs is one read of a small key; the
+ * one time it finds a copy from before the index (#245), it reads the area
+ * whole and never again. A migration that fails is forgotten, so the next
+ * call tries again - and the call that needed it goes on regardless, quiet
+ * like everything here.
+ *
+ * @type {Promise<void> | null}
+ */
+let migrated = null;
+
+/** @returns {Promise<void>} */
+function ready() {
+  migrated ??= migrateIndex(storageDeps()).then(
+    () => undefined,
+    () => {
+      migrated = null;
+    },
+  );
+  return migrated;
 }
 
 /**
@@ -195,6 +218,7 @@ function copyDeps() {
  */
 export async function restoreLibrary() {
   try {
+    await ready();
     return await restoreWith(copyDeps());
   } catch {
     return 0;
@@ -208,6 +232,7 @@ export async function restoreLibrary() {
  */
 export async function buildLibraryCopy() {
   try {
+    await ready();
     await buildWith(copyDeps());
     return true;
   } catch {
@@ -222,6 +247,7 @@ export async function buildLibraryCopy() {
  */
 export async function clearLibraryCopy() {
   try {
+    await ready();
     await clearWith(copyDeps());
     return true;
   } catch {
@@ -236,6 +262,7 @@ export async function clearLibraryCopy() {
  */
 export async function copyArticle(article, replaced) {
   try {
+    await ready();
     await copyArticleWith(article, replaced, copyDeps());
   } catch {
     // Insurance, not a transaction: the article is saved either way.
@@ -252,6 +279,7 @@ export async function copyArticle(article, replaced) {
  */
 export async function copyBook(id) {
   try {
+    await ready();
     const deps = copyDeps();
     if (!(await deps.enabled())) return;
     const { row, rows } = await withLibrary("readonly", async (stores) => ({
@@ -273,6 +301,7 @@ export async function copyBook(id) {
  */
 export async function copyPosition(position) {
   try {
+    await ready();
     await copyPositionWith(position, copyDeps());
   } catch {
     // As above.
@@ -285,7 +314,8 @@ export async function copyPosition(position) {
  */
 export async function patchArticleCopy(meta) {
   try {
-    await patchCopiedMeta(articleKey(meta.url), meta, copyDeps());
+    await ready();
+    await patchCopiedMeta("article", meta.url, meta, copyDeps());
   } catch {
     // As above.
   }
@@ -297,7 +327,8 @@ export async function patchArticleCopy(meta) {
  */
 export async function patchBookCopy(meta) {
   try {
-    await patchCopiedMeta(bookKey(meta.id), meta, copyDeps());
+    await ready();
+    await patchCopiedMeta("book", meta.id, meta, copyDeps());
   } catch {
     // As above.
   }
@@ -309,6 +340,7 @@ export async function patchBookCopy(meta) {
  */
 export async function dropArticleCopy(url) {
   try {
+    await ready();
     await dropCopied(url, "article", copyDeps());
   } catch {
     // As above.
@@ -321,6 +353,7 @@ export async function dropArticleCopy(url) {
  */
 export async function dropBookCopy(id) {
   try {
+    await ready();
     await dropCopied(id, "book", copyDeps());
   } catch {
     // As above.
@@ -330,13 +363,15 @@ export async function dropBookCopy(id) {
 /**
  * The copy in two numbers for the settings page: how many documents, how
  * much space - or null for no copy at all, and null when the area will not
- * answer, which the line reads the same way.
+ * answer, which the line reads the same way. From the index alone: the line
+ * costs one small key, not a read of every document.
  *
  * @returns {Promise<{ docs: number, bytes: number } | null>}
  */
 export async function readLibraryCopy() {
   try {
-    return copySummary(await storageDeps().readAll());
+    await ready();
+    return await summarizeCopy(storageDeps());
   } catch {
     return null;
   }
