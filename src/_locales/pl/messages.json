@@ -461,6 +461,41 @@
   },
   "reader_export_marks": { "message": "Eksportuj zakreślenia" },
   "reader_transfer_marks": { "message": "Eksport zakreśleń zapisuje tekstowy plik .md z zakreślonymi fragmentami, pogrupowanymi według dokumentów - do notatek, nie do importu. Zakreślenia przenoszą się między urządzeniami w kopii zapasowej .json listy artykułów." },
+  "reader_transfer_pick": { "message": "Żeby wyeksportować tylko niektóre artykuły, naciśnij „Zaznacz” nad listą i zaznacz je." },
+  "reader_pick_start": { "message": "Zaznacz" },
+  "reader_pick_done": { "message": "Gotowe" },
+  "reader_pick_all": { "message": "Zaznacz wszystkie" },
+  "reader_pick_count_one": {
+    "message": "Zaznaczono $COUNT$ artykuł",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "reader_pick_count_few": {
+    "message": "Zaznaczono $COUNT$ artykuły",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_pick_count_many": {
+    "message": "Zaznaczono $COUNT$ artykułów",
+    "placeholders": {
+      "count": { "content": "$1", "example": "5" }
+    }
+  },
+  "reader_pick_count_other": {
+    "message": "Zaznaczono $COUNT$ artykułu",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1,5" }
+    }
+  },
+  "reader_export_selected": {
+    "message": "Eksportuj zaznaczone ($COUNT$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_export_marks_selected": { "message": "Eksportuj ich zakreślenia" },
   "reader_marks_title": { "message": "Zakreślenia" },
   "reader_marks_filter_label": { "message": "Filtruj zakreślenia" },
   "reader_marks_filter_placeholder": { "message": "Filtruj po cytacie lub tytule" },

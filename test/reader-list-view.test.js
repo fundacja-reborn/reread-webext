@@ -2,11 +2,18 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import { Segment } from "../src/lib/store/saved-article.js";
-import { PAGE_SIZE, libraryView, searchableArticle } from "../src/reader/list-view.js";
+import {
+  PAGE_SIZE,
+  keptPicks,
+  libraryView,
+  pickedState,
+  searchableArticle,
+  withAllPicked,
+} from "../src/reader/list-view.js";
 
 /**
  * @typedef {import("../src/lib/store/saved-article.js").SavedMeta &
- *   { lastReadAt?: number | null }} ListedMeta
+ *   { lastReadAt?: number | null, kind?: "article" | "book" }} ListedMeta
  */
 
 /**
@@ -153,5 +160,66 @@ describe("libraryView", () => {
     const filtered = libraryView(metas, { segment: Segment.UNREAD, query: "article 1", page: 2 });
     assert.ok(filtered.matching < filtered.inSegment);
     assert.deepEqual([filtered.unread, filtered.read], [PAGE_SIZE / 2 + 5, PAGE_SIZE / 2 + 5]);
+  });
+
+  it("offers Select all the segment as filtered, every page of it, and never a book", () => {
+    // The selection's "all" (D152) is what the reader narrowed the list to,
+    // not what happens to fit on one screen - and a book cannot be exported,
+    // so it is not offered a tick.
+    // 120 rows: the odd ones unread, the even ones read, every fourth a book.
+    const metas = Array.from({ length: 120 }, (_, at) =>
+      meta(at, { kind: at % 4 === 0 ? "book" : "article", readAt: at % 2 === 0 ? 9 : null }),
+    );
+
+    // Sixty unread articles over two pages: every one of them, not the ten
+    // on the page in view.
+    const unread = libraryView(metas, { segment: Segment.UNREAD, query: "", page: 2 });
+    assert.equal(unread.selectable.length, 60);
+    assert.ok(unread.selectable.length > unread.rows.length);
+
+    // The read half holds the thirty books, and none of them is offered.
+    const read = libraryView(metas, { segment: Segment.READ, query: "", page: 1 });
+    assert.equal(read.selectable.length, 30);
+    assert.ok(read.selectable.every((url) => Number(url.split("/").at(-1)) % 4 !== 0));
+
+    // Under a filter, exactly the rows the filter left, in their order.
+    const filtered = libraryView(metas, { segment: Segment.UNREAD, query: "article 1", page: 1 });
+    assert.ok(filtered.matching > 0 && filtered.matching < unread.matching);
+    assert.deepEqual(
+      filtered.selectable,
+      filtered.rows.map((one) => one.url),
+    );
+  });
+});
+
+describe("the selection (D152)", () => {
+  const covered = ["a", "b", "c"];
+
+  it("shows Select all clear, half-ticked or ticked over the rows it covers", () => {
+    assert.equal(pickedState(covered, new Set()), "none");
+    assert.equal(pickedState(covered, new Set(["b"])), "some");
+    assert.equal(pickedState(covered, new Set(["a", "b", "c"])), "all");
+    // A tick elsewhere is not one of these rows.
+    assert.equal(pickedState(covered, new Set(["z"])), "none");
+    assert.equal(pickedState([], new Set(["a"])), "none");
+  });
+
+  it("ticks and clears only the rows Select all covers, keeping the others", () => {
+    // A tick made on the other segment or under another filter was the
+    // reader's own; the box over this view must not take it away.
+    const ticked = withAllPicked(new Set(["z"]), covered, true);
+    assert.deepEqual([...ticked].sort(), ["a", "b", "c", "z"]);
+
+    const cleared = withAllPicked(ticked, covered, false);
+    assert.deepEqual([...cleared], ["z"]);
+  });
+
+  it("drops a tick whose article is gone, and never holds a book", () => {
+    const entries = [
+      { url: "a", kind: /** @type {const} */ ("article") },
+      { url: "book:1", kind: /** @type {const} */ ("book") },
+    ];
+    const kept = keptPicks(new Set(["a", "deleted", "book:1"]), entries);
+    assert.deepEqual([...kept], ["a"]);
   });
 });

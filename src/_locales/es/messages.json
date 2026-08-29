@@ -372,6 +372,29 @@
   },
   "reader_export_marks": { "message": "Exportar los resaltados" },
   "reader_transfer_marks": { "message": "La exportación de resaltados escribe un archivo de texto .md con los pasajes resaltados, agrupados por documento - pensado para notas, no para importar. Los resaltados viajan entre dispositivos dentro de la copia .json de la lista de artículos." },
+  "reader_transfer_pick": { "message": "Para exportar solo algunos artículos, pulsa «Seleccionar» encima de la lista y márcalos." },
+  "reader_pick_start": { "message": "Seleccionar" },
+  "reader_pick_done": { "message": "Listo" },
+  "reader_pick_all": { "message": "Seleccionar todo" },
+  "reader_pick_count_one": {
+    "message": "$COUNT$ artículo seleccionado",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "reader_pick_count_other": {
+    "message": "$COUNT$ artículos seleccionados",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_export_selected": {
+    "message": "Exportar seleccionados ($COUNT$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_export_marks_selected": { "message": "Exportar sus resaltados" },
   "reader_marks_title": { "message": "Resaltados" },
   "reader_marks_filter_label": { "message": "Filtrar los resaltados" },
   "reader_marks_filter_placeholder": { "message": "Filtrar por cita o título" },

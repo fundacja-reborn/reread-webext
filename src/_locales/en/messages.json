@@ -434,6 +434,45 @@
   },
   "reader_export_marks": { "message": "Export highlights" },
   "reader_transfer_marks": { "message": "Export highlights writes a plain-text .md file of your highlighted passages, grouped by document - made for notes, not for import. Highlights travel between devices inside the article list's .json backup." },
+  "reader_transfer_pick": {
+    "message": "To export only some of the articles, press Select above the list and tick them.",
+    "description": "Hint under the Import/Export buttons (D152): the Select button stands above the list, fifty rows up, and a reader about to press Export expects the choice here."
+  },
+  "reader_pick_start": {
+    "message": "Select",
+    "description": "Button beside the reading list's filter (D152): opens the selection - every article row grows a checkbox, and Export takes the ticked ones."
+  },
+  "reader_pick_done": {
+    "message": "Done",
+    "description": "The same button inside the selection: closes it and drops the ticks."
+  },
+  "reader_pick_all": {
+    "message": "Select all",
+    "description": "Checkbox over the rows inside the selection: ticks every article the current tab and filter show, on every page; half-ticked while only some of them are."
+  },
+  "reader_pick_count_one": {
+    "message": "$COUNT$ article selected",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "reader_pick_count_other": {
+    "message": "$COUNT$ articles selected",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_export_selected": {
+    "message": "Export selected ($COUNT$)",
+    "description": "The Export button inside the selection: says how many ticked articles the file will hold.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_export_marks_selected": {
+    "message": "Export their highlights",
+    "description": "The Export highlights button inside the selection, read right after 'Export selected (N)': the .md holds the ticked articles' highlights only."
+  },
   "reader_marks_title": {
     "message": "Highlights",
     "description": "The highlights page (D108) and the menu row that opens it: every kept quote, or one document's when opened from that document's menu."

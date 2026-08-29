@@ -461,6 +461,41 @@
   },
   "reader_export_marks": { "message": "Експортувати позначення" },
   "reader_transfer_marks": { "message": "Експорт позначень записує текстовий файл .md з позначеними фрагментами, згрупованими за документами - для нотаток, не для імпорту. Позначення переносяться між пристроями в резервній копії .json списку статей." },
+  "reader_transfer_pick": { "message": "Щоб експортувати лише частину статей, натисніть «Вибрати» над списком і позначте їх." },
+  "reader_pick_start": { "message": "Вибрати" },
+  "reader_pick_done": { "message": "Готово" },
+  "reader_pick_all": { "message": "Вибрати все" },
+  "reader_pick_count_one": {
+    "message": "Вибрано $COUNT$ статтю",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "reader_pick_count_few": {
+    "message": "Вибрано $COUNT$ статті",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_pick_count_many": {
+    "message": "Вибрано $COUNT$ статей",
+    "placeholders": {
+      "count": { "content": "$1", "example": "5" }
+    }
+  },
+  "reader_pick_count_other": {
+    "message": "Вибрано $COUNT$ статті",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1,5" }
+    }
+  },
+  "reader_export_selected": {
+    "message": "Експортувати вибрані ($COUNT$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_export_marks_selected": { "message": "Експортувати їхні позначення" },
   "reader_marks_title": { "message": "Позначення" },
   "reader_marks_filter_label": { "message": "Фільтрувати позначення" },
   "reader_marks_filter_placeholder": { "message": "Фільтр за цитатою чи назвою" },

@@ -478,6 +478,35 @@
             placeholder="Filter by title or site"
             data-i18n-placeholder="reader_filter_placeholder"
           />
+          <!-- The selection's door (D152): a mode over the list in which the
+               rows wear boxes and the export takes what is ticked. Beside
+               the filter because it is the filter's kind of act - a way of
+               saying which rows - and on the right, where a reader's feedback
+               asked for it. Inside the mode the word turns to Done and the
+               glyph steps aside; the ticks are dropped on the way out. -->
+          <button type="button" id="library-pick" class="pick-toggle">
+            <svg class="reader-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+              <rect
+                x="2.5"
+                y="2.5"
+                width="11"
+                height="11"
+                rx="2"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.3"
+              />
+              <path
+                d="M5.2 8.3l2 2 3.8-4.4"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.3"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            <span id="library-pick-label" data-i18n="reader_pick_start">Select</span>
+          </button>
         </div>
         <!-- The deeper search (D119): with the box ticked, Enter or the
              button scans the saved texts themselves for the typed phrase -
@@ -491,6 +520,17 @@
           <button type="button" id="library-search-go" data-i18n="reader_search_go" hidden>
             Search
           </button>
+        </div>
+        <!-- The selection's own line (D152), there only inside the mode:
+             Select all over the rows the tab and the filter leave - every
+             page of them, in three states - and how many articles are
+             ticked in all, across tabs, filters and pages. Filled by script. -->
+        <div class="pick-line" id="library-pick-line" hidden>
+          <label class="search-toggle">
+            <input type="checkbox" id="library-pick-all" />
+            <span data-i18n="reader_pick_all">Select all</span>
+          </label>
+          <span class="hint" id="library-pick-count"></span>
         </div>
         <!-- What the deeper search found, standing where the rows stand:
              rows whose own words match first (known before any text is
@@ -550,6 +590,12 @@
           <p class="hint" data-i18n="reader_transfer_accepts">
             Import reads the file it is given: a backup of the re/read article list (.json, or .zip
             with pictures), or an e-book (.epub).
+          </p>
+          <!-- The way to a partial export (D152), said where a reader about
+               to press Export expects the choice - the button that offers
+               it stands fifty rows up. -->
+          <p class="hint" data-i18n="reader_transfer_pick">
+            To export only some of the articles, press Select above the list and tick them.
           </p>
           <details class="fold-line">
             <summary data-i18n="reader_format_title">File format</summary>

@@ -1587,6 +1587,104 @@ a.marks-act {
   min-height: 44px;
 }
 
+/* --- the selection (D152): the mode's button beside the filter, its line
+   over the rows, and the rows wearing boxes --- */
+
+/* The button shares the filter's line at the filter's height, its glyph
+   beside its word; inside the mode the word alone says Done. `flex: none`
+   so the filter, not the button, gives way on a phone. */
+.pick-toggle {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 44px;
+  padding: 0.35rem 0.8rem;
+  white-space: nowrap;
+}
+
+.pick-toggle[data-picking] .reader-icon {
+  display: none;
+}
+
+/* Select all on the left, the count on the right: the search line's shape
+   one line down, so the list's controls read as one block. */
+.pick-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+/* The count is a hint by voice, not by place: a flex item takes the hint's
+   top margin as a real one, and the words would sit below the box's line. */
+.pick-line .hint {
+  margin: 0;
+}
+
+/* A row in the selection: box | text, the Delete column gone with the act
+   it served - the mode is for choosing, and a Delete beside every box is
+   one mis-tap from a loss. The box sits centred on the title's first line,
+   whatever type size the reader chose; the whole text cell is its label,
+   so a finger has the row to aim at, not the box. */
+.library-row-pick {
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0 0.75rem;
+}
+
+.library-row-pick > .library-text {
+  grid-column: 2;
+}
+
+.library-pick {
+  align-self: start;
+  width: 1.15rem;
+  height: 1.15rem;
+  margin-top: calc(0.7rem + (var(--reader-size, 18px) * 1.45 - 1.15rem) / 2);
+}
+
+/* The title as a label toggles on a press and, unlike the button it stands
+   in for, would select its words on a long one - refused, the way the
+   article's own title is a button and not a passage. */
+.library-row-pick .library-open {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* A ticked row says so with a wash of the accent, not the tick alone: the
+   tick is small, and on e-ink a filled box and an empty one are two greys
+   a glance apart. */
+.library-row:has(.library-pick:checked) {
+  background: color-mix(in srgb, var(--page-accent) 10%, transparent);
+}
+
+/* The keyboard's ring around the row, the article rows' own rule: the
+   target it marks is the cell the label stretches over, not the box. */
+.library-pick:focus-visible {
+  outline: none;
+}
+
+.library-row:has(.library-pick:focus-visible) {
+  background: color-mix(in srgb, var(--page-fg) 5%, transparent);
+  outline: 2px solid var(--page-accent);
+  outline-offset: -2px;
+}
+
+/* A book in the selection: not exported, so no box - dimmed, its title
+   plain text with no door behind it. The stretched click area and the
+   hover wash would promise one, so both stand down. */
+.library-row-still {
+  opacity: 0.55;
+}
+
+.library-row-still .library-open::after {
+  content: none;
+}
+
+.library-row-still:has(.library-open:hover) {
+  background: none;
+}
+
 .search-snippets {
   margin-top: 0.15rem;
 }
