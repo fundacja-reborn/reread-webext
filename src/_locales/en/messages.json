@@ -620,6 +620,15 @@
       "name": { "content": "$2", "example": "reread-articles.json" }
     }
   },
+  "reader_import_more_one": {
+    "message": "and $COUNT$ more article",
+    "description": "Plural family; the last line of the sample of titles the import confirmation shows, counting the titles it left out.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_import_more_other": {
+    "message": "and $COUNT$ more articles",
+    "placeholders": { "count": { "content": "$1", "example": "297" } }
+  },
   "reader_import_added_one": {
     "message": "Added $COUNT$ new article.",
     "description": "First sentence of the import report, always shown. A language may bend the counted noun's case to fit its own sentence.",

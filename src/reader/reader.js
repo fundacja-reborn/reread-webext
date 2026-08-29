@@ -616,7 +616,12 @@ let settings = DEFAULTS;
  */
 let pendingImport = null;
 
-/** How many titles the confirmation quotes before asking. */
+/**
+ * How many titles the confirmation quotes before asking - a sample to
+ * recognise the file by, never the whole list: a backup of a few hundred
+ * articles would push the two buttons off the screen. The rest is counted
+ * in one line under the sample, so the sample never reads as the total.
+ */
 const SAMPLE_TITLES = 3;
 
 /**
@@ -3568,6 +3573,15 @@ function renderImportOffer() {
       const item = document.createElement("li");
       item.textContent = article.title;
       importSample.append(item);
+    }
+    // The titles above are a sample; the line under them says how much of
+    // the file they leave out, so three names never read as three articles.
+    const rest = pendingImport.articles.length - SAMPLE_TITLES;
+    if (rest > 0) {
+      const more = document.createElement("li");
+      more.className = "import-more";
+      more.textContent = plural(rest, "reader_import_more");
+      importSample.append(more);
     }
   }
 }
