@@ -1032,7 +1032,8 @@ body.reader:has(#library:not([hidden])) {
    export made three (D106), and three of these labels do not fit a phone's
    line in any language - unwrapped they ran off the screen's edge and took
    the whole page's sideways scroll with them (Michał's report from the
-   phone, 2026-08-23). */
+   phone, 2026-08-23). The third moved to the highlights page in D152; the
+   wrap stays, for the counted label the selection puts on Export. */
 .transfer {
   display: flex;
   flex-wrap: wrap;
@@ -1606,6 +1607,31 @@ a.marks-act {
   margin: 0;
 }
 
+/* A quiet act dressed as a link, at the line's right end: the highlights
+   page's export over its rows (D152). A button rather than an anchor,
+   because the file is made on the press; dressed as a link, because a
+   download is what a link does - the reading list's fold-row anchor, on a
+   button, at the same finger of height. */
+.quiet-link {
+  display: inline-flex;
+  align-items: center;
+  margin-inline-start: auto;
+  min-height: 44px;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: none;
+  color: var(--page-muted);
+  font-size: 0.9rem;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.quiet-link:hover,
+.quiet-link:focus-visible {
+  color: var(--page-accent);
+}
+
 /* The glyph beside its word, and the right end of the line whether or not
    the count stands on the left. */
 .pick-toggle {
@@ -1668,6 +1694,11 @@ a.marks-act {
 .library-row-pick {
   grid-template-columns: auto minmax(0, 1fr);
   gap: 0 0.75rem;
+  /* The box stands in from the row's edge by the bar's own padding and
+     border, so the rows' boxes line up under the Select all box - and the
+     ticked row's wash has air before the box instead of an edge on it
+     (Michał's second smoke). A little air at the far end too. */
+  padding-inline: calc(0.6rem + 1px) 0.5rem;
 }
 
 .library-row-pick > .library-text {
@@ -1893,16 +1924,6 @@ a.marks-act {
    row of buttons here; the media query below gives them their own width. */
 .transfer-section > .transfer button {
   flex: 1 1 0;
-}
-
-/* And the third button takes the next line whole. It is the odd one out
-   anyway - a one-way export beside the pair that backs the list up - and its
-   label is the longest of the three in every language we speak, so a third of
-   a phone's line was never going to hold it. A line of its own rather than a
-   share of one: the pair stays a pair, and the layout stops depending on how
-   wide a translated word happens to be. */
-.transfer-section > .transfer #library-export-marks {
-  flex-basis: 100%;
 }
 
 /* --- the article's bar: the acts on this article --- */
@@ -2365,14 +2386,6 @@ body.reader:has(#mark-bar:not([hidden])) {
 
   .transfer-section > .transfer button {
     flex: none;
-  }
-
-  /* Wide enough for all three, so the highlights export rejoins the row at
-     its own width. The same selector as the phone rule on purpose: `flex:
-     none` above carries no id and cannot outweigh it - this one wins by
-     standing later. */
-  .transfer-section > .transfer #library-export-marks {
-    flex-basis: auto;
   }
 }
 

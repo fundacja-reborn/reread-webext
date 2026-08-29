@@ -371,7 +371,7 @@
     "message": "L'export ne couvre que les articles - les livres (.epub) ne sont pas exportés. Réimporter un livre restaure tout sauf la position de lecture."
   },
   "reader_export_marks": { "message": "Exporter les surlignages" },
-  "reader_transfer_marks": { "message": "L'export des surlignages écrit un fichier texte .md des passages surlignés, groupés par document - pensé pour les notes, pas pour l'import. Les surlignages voyagent entre appareils dans la sauvegarde .json de la liste d'articles." },
+  "reader_transfer_marks": { "message": "Les surlignages voyagent avec leurs articles dans la sauvegarde .json. Pour les écrire sous forme de notes - un fichier texte .md groupé par document - utilisez « Exporter les surlignages » sur la page des surlignages." },
   "reader_transfer_pick": { "message": "Pour n'exporter que certains articles, appuyez sur « Sélectionner » au-dessus de la liste et cochez-les." },
   "reader_pick_start": { "message": "Sélectionner" },
   "reader_pick_close": { "message": "Fermer la sélection" },
@@ -394,8 +394,10 @@
       "count": { "content": "$1", "example": "3" }
     }
   },
-  "reader_export_marks_selected": { "message": "Exporter leurs surlignages" },
   "reader_marks_title": { "message": "Surlignages" },
+  "reader_marks_title_all": { "message": "Tous les surlignages" },
+  "reader_marks_title_article": { "message": "Surlignages dans cet article" },
+  "reader_marks_title_book": { "message": "Surlignages dans ce livre" },
   "reader_marks_filter_label": { "message": "Filtrer les surlignages" },
   "reader_marks_filter_placeholder": { "message": "Filtrer par citation ou par titre" },
   "reader_marks_empty": {

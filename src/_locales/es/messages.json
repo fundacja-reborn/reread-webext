@@ -371,7 +371,7 @@
     "message": "La exportación incluye solo artículos - los libros (.epub) no se exportan. Volver a importar un libro restaura todo salvo la posición de lectura."
   },
   "reader_export_marks": { "message": "Exportar los resaltados" },
-  "reader_transfer_marks": { "message": "La exportación de resaltados escribe un archivo de texto .md con los pasajes resaltados, agrupados por documento - pensado para notas, no para importar. Los resaltados viajan entre dispositivos dentro de la copia .json de la lista de artículos." },
+  "reader_transfer_marks": { "message": "Los resaltados viajan con sus artículos dentro de la copia .json. Para guardarlos como notas - un archivo de texto .md agrupado por documento - usa «Exportar los resaltados» en la página de resaltados." },
   "reader_transfer_pick": { "message": "Para exportar solo algunos artículos, pulsa «Seleccionar» encima de la lista y márcalos." },
   "reader_pick_start": { "message": "Seleccionar" },
   "reader_pick_close": { "message": "Cerrar la selección" },
@@ -394,8 +394,10 @@
       "count": { "content": "$1", "example": "3" }
     }
   },
-  "reader_export_marks_selected": { "message": "Exportar sus resaltados" },
   "reader_marks_title": { "message": "Resaltados" },
+  "reader_marks_title_all": { "message": "Todos los resaltados" },
+  "reader_marks_title_article": { "message": "Resaltados en este artículo" },
+  "reader_marks_title_book": { "message": "Resaltados en este libro" },
   "reader_marks_filter_label": { "message": "Filtrar los resaltados" },
   "reader_marks_filter_placeholder": { "message": "Filtrar por cita o título" },
   "reader_marks_empty": {

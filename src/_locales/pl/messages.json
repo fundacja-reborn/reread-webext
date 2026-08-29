@@ -460,7 +460,7 @@
     "message": "Eksport uwzględnia tylko artykuły, nie eksportuje książek (.epub). Ponowny import przywraca wszystko poza pozycją czytania."
   },
   "reader_export_marks": { "message": "Eksportuj zakreślenia" },
-  "reader_transfer_marks": { "message": "Eksport zakreśleń zapisuje tekstowy plik .md z zakreślonymi fragmentami, pogrupowanymi według dokumentów - do notatek, nie do importu. Zakreślenia przenoszą się między urządzeniami w kopii zapasowej .json listy artykułów." },
+  "reader_transfer_marks": { "message": "Zakreślenia przenoszą się razem z artykułami w kopii zapasowej .json. Żeby zapisać je jako notatki - tekstowy plik .md pogrupowany według dokumentów - użyj „Eksportuj zakreślenia” na stronie Zakreśleń." },
   "reader_transfer_pick": { "message": "Żeby wyeksportować tylko niektóre artykuły, naciśnij „Zaznacz” nad listą i zaznacz je." },
   "reader_pick_start": { "message": "Zaznacz" },
   "reader_pick_close": { "message": "Zamknij zaznaczanie" },
@@ -495,8 +495,10 @@
       "count": { "content": "$1", "example": "3" }
     }
   },
-  "reader_export_marks_selected": { "message": "Eksportuj ich zakreślenia" },
   "reader_marks_title": { "message": "Zakreślenia" },
+  "reader_marks_title_all": { "message": "Wszystkie zakreślenia" },
+  "reader_marks_title_article": { "message": "Zakreślenia w tym artykule" },
+  "reader_marks_title_book": { "message": "Zakreślenia w tej książce" },
   "reader_marks_filter_label": { "message": "Filtruj zakreślenia" },
   "reader_marks_filter_placeholder": { "message": "Filtruj po cytacie lub tytule" },
   "reader_marks_empty": {

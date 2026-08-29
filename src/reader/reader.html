@@ -512,29 +512,35 @@
              takes what is ticked. A line of its own, apart from the filter
              and the search: beside the filter the button read as the
              search's own (Michał's smoke, 2026-08-29). The ticks are dropped
-             on the way out. -->
+             on the way out. The glyph is a list with empty boxes: a ticked
+             box read as a state already reached, not an act to take (his
+             second smoke). -->
         <div class="list-tools">
           <p class="hint" id="library-count" hidden></p>
           <button type="button" id="library-pick" class="pick-toggle">
             <svg class="reader-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
               <rect
-                x="2.5"
+                x="2"
                 y="2.5"
-                width="11"
-                height="11"
-                rx="2"
+                width="4.5"
+                height="4.5"
+                rx="1"
                 fill="none"
                 stroke="currentColor"
                 stroke-width="1.3"
               />
-              <path
-                d="M5.2 8.3l2 2 3.8-4.4"
+              <path d="M9 4.75h5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+              <rect
+                x="2"
+                y="9"
+                width="4.5"
+                height="4.5"
+                rx="1"
                 fill="none"
                 stroke="currentColor"
                 stroke-width="1.3"
-                stroke-linecap="round"
-                stroke-linejoin="round"
               />
+              <path d="M9 11.25h5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
             </svg>
             <span data-i18n="reader_pick_start">Select</span>
           </button>
@@ -592,14 +598,10 @@
           <p class="transfer">
             <button type="button" id="library-import" data-i18n="action_import">Import</button>
             <button type="button" id="library-export" data-i18n="action_export">Export</button>
-            <!-- The pen's own export (D106): the quotes as notes, one .md for
-                 every marked document - articles and books alike. One way
-                 only, so it stands apart from the backup pair; the format
-                 fold says as much. Greyed while nothing is marked, the
-                 Export button's own rule. -->
-            <button type="button" id="library-export-marks" data-i18n="reader_export_marks">
-              Export highlights
-            </button>
+            <!-- The pen's own export (D106) stood here as a third button
+                 until D152: it lives on the highlights page now, where the
+                 quotes are (Michał's call), and the format fold below points
+                 there. -->
           </p>
           <!-- The pictures kept with articles (D145) ride in the backup only
                when asked: with them the file is a .zip - the same .json and
@@ -637,9 +639,9 @@
               brings everything back except the reading position.
             </p>
             <p class="hint" data-i18n="reader_transfer_marks">
-              Export highlights writes a plain-text .md file of your highlighted passages, grouped
-              by document - made for notes, not for import. Highlights travel between devices
-              inside the article list's .json backup.
+              Highlights travel with their articles inside the .json backup. To write them out as
+              notes - a plain-text .md file grouped by document - use Export highlights on the
+              Highlights page.
             </p>
           </details>
           <input
@@ -694,7 +696,17 @@
             data-i18n-placeholder="reader_marks_filter_placeholder"
           />
         </div>
-        <p class="hint" id="marks-count" hidden></p>
+        <!-- The page's own line over the rows, the reading list's shape: the
+             filter's count on the left while there is one, and on the right
+             the export the short way (D152, Michał's call) - the button under
+             the rows is a page away once the list is long. A quiet link,
+             there only while there is something to write. -->
+        <div class="list-tools">
+          <p class="hint" id="marks-count" hidden></p>
+          <button type="button" id="marks-export-top" class="quiet-link" data-i18n="reader_export_marks" hidden>
+            Export highlights
+          </button>
+        </div>
         <div id="marks-empty" class="empty" hidden></div>
         <ul id="marks-rows" class="library-rows marks-rows"></ul>
         <nav class="pager" id="marks-pager" hidden>

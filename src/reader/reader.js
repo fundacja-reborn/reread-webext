@@ -286,9 +286,6 @@ const libraryPickClose = document.getElementById("library-pick-close");
 const exportButton = /** @type {HTMLButtonElement | null} */ (
   document.getElementById("library-export")
 );
-const exportMarksButton = /** @type {HTMLButtonElement | null} */ (
-  document.getElementById("library-export-marks")
-);
 const importButton = document.getElementById("library-import");
 const importInput = /** @type {HTMLInputElement | null} */ (
   document.getElementById("library-import-file")
@@ -324,6 +321,12 @@ const marksNext = /** @type {HTMLButtonElement | null} */ (document.getElementBy
 const marksExportButton = /** @type {HTMLButtonElement | null} */ (
   document.getElementById("marks-export")
 );
+// The same export the short way, over the rows (D152), and the heading that
+// says whose quotes the page holds.
+const marksExportTop = /** @type {HTMLButtonElement | null} */ (
+  document.getElementById("marks-export-top")
+);
+const marksTitle = document.getElementById("marks-title");
 const marksCopyIcons = /** @type {HTMLTemplateElement | null} */ (
   document.getElementById("marks-copy-icons")
 );
@@ -578,13 +581,9 @@ let picked = new Set();
  * without rebuilding the rows, which would take the focus off the box just
  * pressed and flash the whole list on e-ink.
  *
- * @type {{
- *   selectable: string[],
- *   metas: SavedMeta[],
- *   marks: Map<string, import("../lib/store/marks.js").Mark[]>,
- * }}
+ * @type {{ selectable: string[], metas: SavedMeta[] }}
  */
-let libraryShown = { selectable: [], metas: [], marks: new Map() };
+let libraryShown = { selectable: [], metas: [] };
 
 /**
  * The highlights page, while it is the view (D108) - null otherwise, the
@@ -2834,13 +2833,10 @@ async function refreshLibrary() {
   await completeLibraryCopy();
   // One list, two stores: books enter dressed as rows (`bookEntry`), with
   // their positions read in bulk - fifty rows must not mean fifty lookups.
-  // The marks ride in the same round trip only to answer one button's grey;
-  // unreadable marks must not cost the list, so they read as none.
-  const [metas, books, positions, marks] = await Promise.all([
+  const [metas, books, positions] = await Promise.all([
     listArticles(),
     listBooks(),
     allPositions(),
-    allMarks().catch(() => new Map()),
   ]);
   const entries = [
     ...metas.map((meta) => articleEntry(meta, positions.get(meta.url) ?? null)),
@@ -2851,7 +2847,7 @@ async function refreshLibrary() {
   // The selection held to the list as it stands (D152), and what this read
   // found kept for the ticks that follow it.
   picked = keptPicks(picked, entries);
-  libraryShown = { selectable: view.selectable, metas, marks };
+  libraryShown = { selectable: view.selectable, metas };
 
   // Each tab wears its whole segment's count - the entire half of the list,
   // not the page or the filter's slice, so the two labels always add up to
@@ -2941,36 +2937,25 @@ function renderPickLine() {
 }
 
 /**
- * The export buttons and the pictures row under the list, over what they
+ * The Export button and the pictures row under the list, over what they
  * will take: the whole list, or - inside the selection (D152) - the ticked
  * articles, which the button then counts in its own words.
  *
- * Exporting nothing would download an empty file; the buttons say so first.
- * Export greys on whether any *articles* are there - books stay out of the
- * file, so a list of books alone still has nothing to export. The highlights
- * button reads the marks: outside the selection a mark anywhere, articles
- * and books alike, is something to export; inside it, a mark on a ticked
- * article is. The pictures kept with articles (D145) ride in the backup only
- * when asked: the row stands while some article going has any, and says how
- * many and what they take - the size the file will grow by, before the
- * press.
+ * Exporting nothing would download an empty file; the button says so first,
+ * on whether any *articles* are going - books stay out of the file, so a
+ * list of books alone still has nothing to export. The pictures kept with
+ * articles (D145) ride in the backup only when asked: the row stands while
+ * some article going has any, and says how many and what they take - the
+ * size the file will grow by, before the press.
  */
 function renderExportControls() {
-  const { metas, marks } = libraryShown;
+  const { metas } = libraryShown;
   const going = picking ? metas.filter((meta) => picked.has(meta.url)) : metas;
   if (exportButton !== null) {
     exportButton.disabled = going.length === 0;
     exportButton.textContent = picking
       ? t("reader_export_selected", going.length.toLocaleString())
       : t("action_export");
-  }
-  if (exportMarksButton !== null) {
-    exportMarksButton.disabled = picking
-      ? !going.some((meta) => marks.has(meta.url))
-      : marks.size === 0;
-    exportMarksButton.textContent = picking
-      ? t("reader_export_marks_selected")
-      : t("reader_export_marks");
   }
   const kept = going.reduce(
     (sum, meta) =>
@@ -3204,7 +3189,8 @@ async function refreshMarks() {
   // The view moved on while the database answered; the section is hidden,
   // and filling it would only shout into a closed room.
   if (target === null) return;
-  const rows = markRows(metas, books, marks, keptTitles(backup));
+  const kept = keptTitles(backup);
+  const rows = markRows(metas, books, marks, kept);
   const view = marksListView(rows, { scope: target.scope, query: marksQuery, page: marksPage });
   marksPage = view.page;
   marksOnScreen = view.rows;
@@ -3225,9 +3211,34 @@ async function refreshMarks() {
   }
   if (scopeTitle !== null) setBackDoor(t("reader_back_to_doc", scopeTitle), scopeTitle);
 
+  // The heading says which page this is (Michał's smoke, 2026-08-29): every
+  // document's quotes, or one article's or one book's - the title line under
+  // it then names the one. A scope nobody can name any more reads as an
+  // article, the kind an address is.
+  const scopeKind =
+    target.scope === null
+      ? null
+      : metas.some((meta) => meta.url === target.scope)
+        ? "article"
+        : books.some((book) => book.id === target.scope)
+          ? "book"
+          : (kept.get(target.scope)?.kind ?? "article");
+  const heading =
+    scopeKind === null
+      ? t("reader_marks_title_all")
+      : scopeKind === "book"
+        ? t("reader_marks_title_book")
+        : t("reader_marks_title_article");
+  if (marksTitle !== null) marksTitle.textContent = heading;
+  document.title = `${heading} - re/read`;
+
   // Exporting nothing would download an empty file; the button says so
-  // first - the transfer section's own rule, over this page's scope.
+  // first - the transfer section's own rule, over this page's scope. The
+  // link over the rows (D152) is the same act the short way - a long list
+  // puts the button a page away - and stands only while there is something
+  // to write.
   if (marksExportButton !== null) marksExportButton.disabled = view.total === 0;
+  if (marksExportTop !== null) marksExportTop.hidden = view.total === 0;
 
   // "3 of 12" while the filter narrows the page down, like the list's line.
   if (marksCount !== null) {
@@ -3775,9 +3786,8 @@ async function exportList() {
  * The highlights' documents dressed in what the lists know about them -
  * title, address or author, the day each entered - the .md file's input,
  * cut to the documents `wanted` says yes to: one, when the page asking is
- * scoped (D108); the ticked articles, inside the list's selection (D152);
- * everybody's otherwise. The quotes are already in the marks' own rows, so
- * no document's content is ever opened for this.
+ * scoped (D108); everybody's otherwise. The quotes are already in the
+ * marks' own rows, so no document's content is ever opened for this.
  *
  * @param {(docId: string) => boolean} wanted
  * @returns {Promise<import("../lib/store/marks-file.js").MarkedDoc[]>}
@@ -3822,26 +3832,12 @@ async function markedDocs(wanted) {
 }
 
 /**
- * The highlights as one Markdown page (D106): every marked document,
- * articles and books alike - or, inside the list's selection (D152), the
- * ticked articles' alone, the button having said so. The transfer section's
- * button, so failure speaks in the transfer's own status line.
- */
-async function exportMarks() {
-  try {
-    const docs = await markedDocs((docId) => !picking || picked.has(docId));
-    if (docs.length === 0) return;
-    downloadFile(toMarksFile(docs), MARKS_FILENAME, "text/markdown");
-    transferStatus("");
-  } catch {
-    transferStatus(describeError(ErrorCode.INTERNAL), "error");
-  }
-}
-
-/**
- * The highlights page's own export (D108): the same file, cut to the page's
- * scope. Failure speaks in the page notice - the transfer section's status
- * line lives in the list view, hidden here.
+ * The highlights as one Markdown page (D106), from the highlights page alone
+ * since D152 (it stood in the list's transfer section too, a third button
+ * there; the quotes' own page is where the act belongs - Michał's call): the
+ * button under the rows and the link over them write the same file, cut to
+ * the page's scope (D108). Failure speaks in the page notice - the transfer
+ * section's status line lives in the list view, hidden here.
  */
 async function exportMarksPage() {
   try {
@@ -4944,6 +4940,8 @@ marksRowsList?.addEventListener("click", (event) => {
 
 marksExportButton?.addEventListener("click", () => void exportMarksPage());
 
+marksExportTop?.addEventListener("click", () => void exportMarksPage());
+
 noticeClose?.addEventListener("click", () => hideNotice());
 
 noticeAct?.addEventListener("click", () => {
@@ -5004,8 +5002,6 @@ document.addEventListener("focusout", (event) => {
 });
 
 exportButton?.addEventListener("click", () => void exportList());
-
-exportMarksButton?.addEventListener("click", () => void exportMarks());
 
 importButton?.addEventListener("click", () => importInput?.click());
 

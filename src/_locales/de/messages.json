@@ -360,7 +360,7 @@
     "message": "Der Export umfasst nur Artikel - Bücher (.epub) werden nicht exportiert. Ein erneuter Import eines Buches stellt alles außer der Leseposition wieder her."
   },
   "reader_export_marks": { "message": "Markierungen exportieren" },
-  "reader_transfer_marks": { "message": "Der Export der Markierungen schreibt eine .md-Textdatei mit den markierten Passagen, nach Dokumenten gruppiert - für Notizen gedacht, nicht für den Import. Markierungen wandern zwischen Geräten in der .json-Sicherung der Artikelliste." },
+  "reader_transfer_marks": { "message": "Markierungen wandern mit ihren Artikeln in der .json-Sicherung. Um sie als Notizen zu speichern - eine .md-Textdatei, nach Dokumenten gruppiert - nutzen Sie „Markierungen exportieren“ auf der Seite der Markierungen." },
   "reader_transfer_pick": { "message": "Um nur einige Artikel zu exportieren, drücken Sie über der Liste auf „Auswählen“ und haken Sie sie ab." },
   "reader_pick_start": { "message": "Auswählen" },
   "reader_pick_close": { "message": "Auswahl schließen" },
@@ -383,8 +383,10 @@
       "count": { "content": "$1", "example": "3" }
     }
   },
-  "reader_export_marks_selected": { "message": "Deren Markierungen exportieren" },
   "reader_marks_title": { "message": "Markierungen" },
+  "reader_marks_title_all": { "message": "Alle Markierungen" },
+  "reader_marks_title_article": { "message": "Markierungen in diesem Artikel" },
+  "reader_marks_title_book": { "message": "Markierungen in diesem Buch" },
   "reader_marks_filter_label": { "message": "Die Markierungen filtern" },
   "reader_marks_filter_placeholder": { "message": "Nach Zitat oder Titel filtern" },
   "reader_marks_empty": {

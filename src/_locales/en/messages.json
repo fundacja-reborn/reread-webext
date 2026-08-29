@@ -433,7 +433,7 @@
     "message": "Export covers articles only - books (.epub) are not exported. Importing a book again brings everything back except the reading position."
   },
   "reader_export_marks": { "message": "Export highlights" },
-  "reader_transfer_marks": { "message": "Export highlights writes a plain-text .md file of your highlighted passages, grouped by document - made for notes, not for import. Highlights travel between devices inside the article list's .json backup." },
+  "reader_transfer_marks": { "message": "Highlights travel with their articles inside the .json backup. To write them out as notes - a plain-text .md file grouped by document - use Export highlights on the Highlights page." },
   "reader_transfer_pick": {
     "message": "To export only some of the articles, press Select above the list and tick them.",
     "description": "Hint under the Import/Export buttons (D152): the Select button stands above the list, fifty rows up, and a reader about to press Export expects the choice here."
@@ -469,13 +469,21 @@
       "count": { "content": "$1", "example": "3" }
     }
   },
-  "reader_export_marks_selected": {
-    "message": "Export their highlights",
-    "description": "The Export highlights button inside the selection, read right after 'Export selected (N)': the .md holds the ticked articles' highlights only."
-  },
   "reader_marks_title": {
     "message": "Highlights",
-    "description": "The highlights page (D108) and the menu row that opens it: every kept quote, or one document's when opened from that document's menu."
+    "description": "The menu row that opens the highlights page (D108), and the page's name before the script says which page it is (the three keys below)."
+  },
+  "reader_marks_title_all": {
+    "message": "All highlights",
+    "description": "The highlights page's heading when it holds every document's quotes (D152, Michał's call: the heading itself tells the two pages apart)."
+  },
+  "reader_marks_title_article": {
+    "message": "Highlights in this article",
+    "description": "The heading when the page holds one article's quotes; the article's title stands on the line under it."
+  },
+  "reader_marks_title_book": {
+    "message": "Highlights in this book",
+    "description": "The heading when the page holds one book's quotes; the book's title stands on the line under it."
   },
   "reader_marks_filter_label": { "message": "Filter the highlights" },
   "reader_marks_filter_placeholder": { "message": "Filter by quote or title" },
