@@ -177,6 +177,59 @@
 
   "reader_title": { "message": "re/read - vista de lectura" },
   "reader_open_original": { "message": "Abrir el original" },
+  "reader_pictures_save": {
+    "message": "Guardar imágenes ($COUNT$)",
+    "placeholders": { "count": { "content": "$1", "example": "12" } }
+  },
+  "reader_pictures_remove": {
+    "message": "Quitar imágenes ($SIZE$)",
+    "placeholders": { "size": { "content": "$1", "example": "4,2 MB" } }
+  },
+  "reader_pictures_hint": {
+    "message": "Se descargan una vez de los servidores del artículo, sin cookies, y se guardan con el artículo en este dispositivo."
+  },
+  "reader_pictures_progress": {
+    "message": "Imagen $DONE$ de $OF$ - $SIZE$",
+    "placeholders": {
+      "done": { "content": "$1", "example": "3" },
+      "of": { "content": "$2", "example": "12" },
+      "size": { "content": "$3", "example": "1,1 MB" }
+    }
+  },
+  "reader_pictures_stop": { "message": "Pulsa la fila para detener." },
+  "reader_pictures_done_one": {
+    "message": "Guardadas $SAVED$ de $OF$ imagen ($SIZE$)",
+    "placeholders": {
+      "of": { "content": "$1", "example": "1" },
+      "saved": { "content": "$2", "example": "1" },
+      "size": { "content": "$3", "example": "0,3 MB" }
+    }
+  },
+  "reader_pictures_done_other": {
+    "message": "Guardadas $SAVED$ de $OF$ imágenes ($SIZE$)",
+    "placeholders": {
+      "of": { "content": "$1", "example": "12" },
+      "saved": { "content": "$2", "example": "11" },
+      "size": { "content": "$3", "example": "4,2 MB" }
+    }
+  },
+  "reader_pictures_none": { "message": "No se pudo guardar ninguna imagen." },
+  "reader_pictures_removed": { "message": "Imágenes quitadas." },
+  "reader_pictures_failed": { "message": "No se pudieron guardar las imágenes." },
+  "library_pictures_one": {
+    "message": "$COUNT$ imagen, $SIZE$",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "size": { "content": "$2", "example": "0,3 MB" }
+    }
+  },
+  "library_pictures_other": {
+    "message": "$COUNT$ imágenes, $SIZE$",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "size": { "content": "$2", "example": "4,2 MB" }
+    }
+  },
   "reader_back_to_list": { "message": "Volver a la lista de lectura" },
   "reader_display_title": { "message": "Texto y voz" },
   "reader_theme": { "message": "Tema" },
@@ -636,7 +689,7 @@
   "options_storage_library_copy_off": { "message": "Copia de la lista de lectura: desactivada." },
   "options_library_copy": { "message": "Copia de la lista de lectura" },
   "options_library_copy_hint": {
-    "message": "Guarda una segunda copia de cada artículo y libro guardados, con el punto donde dejaste de leer, en el almacenamiento propio de la extensión - la parte que un navegador no borra junto con la base de datos de la lista de lectura. Duplica el espacio que ocupa la lista de lectura. En iOS y iPadOS está activada mientras no la desactives: Safari puede borrar la lista de lectura tras treinta días sin visitar las páginas de la extensión, y la copia es lo que la devuelve."
+    "message": "Guarda una segunda copia de cada artículo y libro guardados, con el punto donde dejaste de leer, en el almacenamiento propio de la extensión - la parte que un navegador no borra junto con la base de datos de la lista de lectura. Duplica el espacio que ocupa la lista de lectura. En iOS y iPadOS está activada mientras no la desactives: Safari puede borrar la lista de lectura tras treinta días sin visitar las páginas de la extensión, y la copia es lo que la devuelve. Las imágenes guardadas con un artículo también se copian y vuelven la primera vez que se abre el artículo."
   },
   "reader_marks_missing_doc": { "message": "Su documento ya no está guardado - esta cita volvió de la copia. Abre la página de nuevo y el resaltado estará ahí." },
   "options_pair_hint": { "message": "Se ofrecen los pares cuyos modelos de traducción descargaste en este dispositivo - si quieres traducir en otro par de idiomas, descarga su modelo en la sección" },

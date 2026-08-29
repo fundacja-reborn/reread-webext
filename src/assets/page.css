@@ -420,6 +420,23 @@ button.page-mark:hover {
   color: var(--page-accent);
 }
 
+/* A line under a row that says where its press reaches, or how it went -
+   the pictures row is the one with something to say (D145). Quieter than
+   the rows, and closing on the same separator, so it reads as the row's
+   footnote rather than as a row of its own. */
+.nav-menu .nav-hint {
+  margin: 0;
+  padding: 0.35rem 0 0.6rem;
+  border-bottom: 1px solid var(--page-line);
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: var(--page-muted);
+}
+
+.nav-menu button + .nav-hint {
+  margin-top: -1px;
+}
+
 /* --- the colophon (the settings' first, now every room that ends) --- */
 
 /* The line that closes a page the way one closes a book: name and version,

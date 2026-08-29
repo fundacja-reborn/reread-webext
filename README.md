@@ -84,12 +84,14 @@ The read-aloud keys work only while the voice is reading; otherwise the page beh
 
 ## Privacy
 
-The extension connects to exactly two hosts, both written into the package:
+The extension connects to two hosts written into the package:
 
 - Mozilla's storage bucket - the list of translation models and the models themselves,
 - WikDict - the list of dictionaries and the dictionaries themselves.
 
-Every request happens only when you click it, on the settings page; each list shows the date it was fetched, and download addresses are always taken from the packaged sources, never from the page. Page text, your selections and your vocabulary never leave the device.
+Every request to them happens only when you click it, on the settings page; each list shows the date it was fetched, and download addresses are always taken from the packaged sources, never from the page.
+
+The one request to an address the package does not carry is yours to make: **Save pictures**, a row in the reader's menu over a saved article, fetches that article's pictures from the article's own servers - once, without cookies or referrer, and only when you press it. Nothing fetches a picture on its own; a saved article is text until you ask. Page text, your selections and your vocabulary never leave the device.
 
 You can verify this instead of trusting it: watch the network panel in devtools, read the source (shipped unminified), or simply turn the network off - translation, dictionaries and the reading list keep working.
 
@@ -98,7 +100,7 @@ The same in the form the add-on stores ask for, one document, no legalese: [`PRI
 Everything the extension stores - vocabulary, translation models, dictionaries, saved articles and books, settings - lives in the browser's local extension storage (IndexedDB) on your device and is never synced anywhere. In particular:
 
 - Switching re/read off for a site stores that site's hostname locally. Entries are listed and removable on the settings page.
-- Saving an article stores its title, address and extracted text, so it opens with no network. Deleting an entry removes it completely.
+- Saving an article stores its title, address and extracted text, so it opens with no network. Its pictures are stored only when you press **Save pictures** in the reader's menu - scaled down to screen size where that saves space - and leave again from the same row; the list says how many an article keeps and what they take. Deleting an entry removes it completely, pictures included.
 - Reading aloud uses the browser's own speech synthesis (the standard Web Speech API). Which engine speaks is a browser/OS setting; the extension itself makes no network request for it.
 
 ### Permissions

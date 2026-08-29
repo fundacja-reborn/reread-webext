@@ -105,6 +105,22 @@ export function aside(detail) {
 }
 
 /**
+ * A size in megabytes, to one decimal, in the reader's own decimal mark:
+ * `12.3` where the browser writes dots, `12,3` where it writes commas. The
+ * unit needs no catalogue.
+ *
+ * @param {number} bytes
+ * @returns {string}
+ */
+export function megabytes(bytes) {
+  const amount = (bytes / 1048576).toLocaleString(undefined, {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  });
+  return `${amount} MB`;
+}
+
+/**
  * Swaps the English written in an extension page for the catalogue's language.
  *
  * The pages ship readable English in their markup and mark what is

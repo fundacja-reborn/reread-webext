@@ -27,7 +27,7 @@ import {
   withDefaults,
   writeConfig,
 } from "../lib/config.js";
-import { aside, localizePage, plural, t, uiLocale } from "../lib/i18n.js";
+import { aside, localizePage, megabytes, plural, t, uiLocale } from "../lib/i18n.js";
 import { armBackArrow } from "../lib/back-arrow.js";
 import { languageName, pairLabel } from "../lib/language.js";
 import { catalogDictionaries, catalogSource } from "../lib/dict/catalog.js";
@@ -422,20 +422,6 @@ async function stepRate(by) {
 function fill(id, value) {
   const element = document.getElementById(id);
   if (element !== null) element.textContent = value;
-}
-
-/**
- * @param {number} bytes
- * @returns {string}
- */
-function megabytes(bytes) {
-  // The reader's own decimal mark: `12.3` where the browser writes dots,
-  // `12,3` where it writes commas. The unit needs no catalogue.
-  const amount = (bytes / 1048576).toLocaleString(undefined, {
-    minimumFractionDigits: 1,
-    maximumFractionDigits: 1,
-  });
-  return `${amount} MB`;
 }
 
 /**

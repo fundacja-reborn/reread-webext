@@ -78,6 +78,20 @@ describe("asSavedMeta", () => {
     assert.equal(asSavedMeta({ title: "no address" }), null);
   });
 
+  it("carries the pictures' account only where there is one", () => {
+    const row = { url: "https://example.com/a", hostname: "example.com", title: "A", savedAt: 1, readAt: null };
+    assert.deepEqual(asSavedMeta({ ...row, pictures: { count: 3, bytes: 4096 } }), {
+      ...row,
+      pictures: { count: 3, bytes: 4096 },
+    });
+    // No pictures, none claimed, or an account that will not read: no field.
+    assert.deepEqual(asSavedMeta(row), row);
+    assert.deepEqual(asSavedMeta({ ...row, pictures: { count: 0, bytes: 0 } }), row);
+    assert.deepEqual(asSavedMeta({ ...row, pictures: "three" }), row);
+    // A fresh save starts without any.
+    assert.equal("pictures" in (build({}) ?? {}), false);
+  });
+
   it("passes a whole row through unchanged", () => {
     const row = { url: "https://example.com/a", hostname: "example.com", title: "A", savedAt: 5, readAt: 9 };
     assert.deepEqual(asSavedMeta(row), row);

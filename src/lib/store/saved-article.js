@@ -17,12 +17,19 @@
  * means still to be read. It is set and cleared only by hand, from the article
  * view - opening an article is not reading it.
  *
+ * `pictures` is the row's account of the article's pictures (D145) - how
+ * many and how much they take - so that the list and the menu can say so
+ * without reading a byte of them. Absent for an article that has none,
+ * which is every article saved before pictures and every one whose reader
+ * never asked for them.
+ *
  * @typedef {{
  *   url: string,
  *   hostname: string,
  *   title: string,
  *   savedAt: number,
  *   readAt: number | null,
+ *   pictures?: import("../reader/pictures.js").PicturesSummary,
  * }} SavedMeta
  */
 
@@ -35,6 +42,7 @@
  */
 
 import { t } from "../i18n.js";
+import { asPicturesSummary } from "../reader/pictures.js";
 
 /** The two segments of the list, and the only filter it has. */
 export const Segment = Object.freeze({
@@ -116,11 +124,14 @@ function keptWord(value) {
  */
 export function asSavedMeta(value) {
   if (typeof value !== "object" || value === null) return null;
-  const { url, hostname, title, savedAt, readAt } = /** @type {Record<string, unknown>} */ (value);
+  const { url, hostname, title, savedAt, readAt, pictures } = /** @type {Record<string, unknown>} */ (
+    value
+  );
   if (typeof url !== "string" || url.length === 0) return null;
 
   const host = typeof hostname === "string" ? hostname : "";
   const shown = typeof title === "string" && title.length > 0 ? title : host.length > 0 ? host : url;
+  const kept = asPicturesSummary(pictures);
 
   return {
     url,
@@ -128,6 +139,9 @@ export function asSavedMeta(value) {
     title: shown,
     savedAt: typeof savedAt === "number" && Number.isFinite(savedAt) ? savedAt : 0,
     readAt: typeof readAt === "number" && Number.isFinite(readAt) ? readAt : null,
+    // The field stands only where there are pictures: a row without it is
+    // one shape everywhere, and a row from before pictures reads as one.
+    ...(kept === null ? {} : { pictures: kept }),
   };
 }
 

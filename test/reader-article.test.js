@@ -197,12 +197,95 @@ describe("rebuilding an article", () => {
   });
 });
 
+/**
+ * The rebuild with the caller's word on pictures.
+ *
+ * @param {object} source
+ * @param {import("../src/lib/reader/article.js").Pictures | undefined} pictures
+ * @param {string} [baseUrl]
+ */
+function rebuildWith(source, pictures, baseUrl = BASE) {
+  return serialize(
+    buildArticle(
+      /** @type {Element} */ (/** @type {unknown} */ (source)),
+      /** @type {Document} */ (/** @type {unknown} */ (fakeDocument())),
+      { baseUrl, pictures },
+    ),
+  );
+}
+
+/**
+ * The elements alone, attributes stripped - what the highlighter's marks and
+ * the reading position count.
+ *
+ * @param {string} serialized
+ */
+const shape = (serialized) => serialized.replace(/<([a-z0-9]+)[^>]*>/g, "<$1>");
+
+describe("pictures in the rebuild (D145)", () => {
+  const source = el("body", {}, [
+    el("p", {}, [text("before")]),
+    el("figure", {}, [
+      el("picture", {}, [
+        el("source", { srcset: "https://cdn.test/photo.avif" }),
+        el("img", { src: "/images/photo.jpg", alt: "A photo" }),
+      ]),
+      el("figcaption", {}, [text("Figure 1")]),
+    ]),
+    el("img", { src: "http://cdn.test/plain.jpg" }),
+    el("img", { src: "data:image/gif;base64,R0lGODlh" }),
+    el("img", { src: "javascript:alert(1)" }),
+    el("img", { "data-src": "https://cdn.test/stored.png", alt: "" }),
+    el("p", {}, [text("after")]),
+  ]);
+
+  it("keeps a picture's address where nothing loads from, and only an https one", () => {
+    assert.equal(
+      rebuildWith(source, true),
+      "<div><p>before</p>" +
+        '<figure><img data-src="https://example.test/images/photo.jpg" alt="A photo"></img>' +
+        "<figcaption>Figure 1</figcaption></figure>" +
+        '<img data-src="https://cdn.test/stored.png"></img>' +
+        "<p>after</p></div>",
+    );
+  });
+
+  it("drops pictures altogether for the callers that never show one", () => {
+    assert.equal(
+      rebuildWith(source, undefined),
+      "<div><p>before</p><figure><figcaption>Figure 1</figcaption></figure><p>after</p></div>",
+    );
+    // A book has no base to resolve against, so no picture has an address.
+    assert.equal(
+      rebuildWith(source, true, ""),
+      "<div><p>before</p><figure><figcaption>Figure 1</figcaption></figure><p>after</p></div>",
+    );
+  });
+
+  it("shows only the pictures the database holds, and keeps the same elements either way", () => {
+    /** @type {import("../src/lib/reader/article.js").Pictures} */
+    const stored = (src) =>
+      src === "https://example.test/images/photo.jpg" ? { url: "blob:page/1", width: 800, height: 600 } : null;
+    const shown = rebuildWith(source, stored);
+    assert.equal(
+      shown,
+      "<div><p>before</p>" +
+        '<figure><img data-src="https://example.test/images/photo.jpg" alt="A photo" src="blob:page/1" width="800" height="600"></img>' +
+        "<figcaption>Figure 1</figcaption></figure>" +
+        '<img data-src="https://cdn.test/stored.png"></img>' +
+        "<p>after</p></div>",
+    );
+    assert.equal(shape(shown), shape(rebuildWith(source, true)));
+  });
+});
+
 describe("the allow list itself", () => {
   it("answers one of three things about an element", () => {
     assert.equal(decide("P"), "keep");
     assert.equal(decide("blockquote"), "keep");
     assert.equal(decide("SCRIPT"), "drop");
-    assert.equal(decide("img"), "drop");
+    assert.equal(decide("img"), "image");
+    assert.equal(decide("picture"), "unwrap");
     assert.equal(decide("section"), "unwrap");
     assert.equal(decide("some-custom-element"), "unwrap");
   });

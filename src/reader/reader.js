@@ -30,7 +30,7 @@ import {
 import { dismiss, rescan, start, stop as stopReadingSide } from "../content/reading.js";
 import { applyReading } from "../lib/appearance.js";
 import { webext } from "../lib/browser.js";
-import { localizePage, plural, t } from "../lib/i18n.js";
+import { localizePage, megabytes, plural, t } from "../lib/i18n.js";
 import { languageName } from "../lib/language.js";
 import {
   CONFIG_KEY,
@@ -48,6 +48,7 @@ import { lookUp } from "../lib/dict/lookup.js";
 import { describeError } from "../lib/messages.js";
 import { ErrorCode, Message, asPage, asPageRequest, asResult, ok } from "../lib/protocol.js";
 import { buildArticle } from "../lib/reader/article.js";
+import { pictureSources } from "../lib/reader/pictures.js";
 import { asDocState, asMarksState, docState, marksState } from "../lib/reader/history-state.js";
 import { importKind } from "../lib/reader/import-kind.js";
 import { speechAction } from "../lib/reader/keys.js";
@@ -83,8 +84,10 @@ import {
   allArticles,
   allPositions,
   deleteArticle,
+  deletePictures,
   getArticle,
   getArticleMeta,
+  getPictures,
   getPosition,
   importArticles,
   listArticles,
@@ -92,6 +95,9 @@ import {
   putPosition,
   setReadAt,
 } from "../lib/store/articles.js";
+import { savePictures } from "./pictures.js";
+
+/** @typedef {import("../lib/store/saved-article.js").SavedMeta} SavedMeta */
 import { packableBlocks } from "../lib/book/blocks.js";
 import { cappedToc, headingEntries, renderedEntries } from "../lib/book/toc.js";
 import {
@@ -192,6 +198,8 @@ const navLibrary = document.getElementById("nav-library");
 const navMarks = document.getElementById("nav-marks");
 const navVocabulary = document.getElementById("nav-vocabulary");
 const navSettings = document.getElementById("nav-settings");
+const navPictures = document.getElementById("nav-pictures");
+const navPicturesHint = document.getElementById("nav-pictures-hint");
 // The box the bar and its panels stand in - measured, not styled, from here:
 // while an article is on screen it is stuck over the text, and the voice needs
 // to know how much of the window's top it covers.
@@ -369,6 +377,33 @@ let markerOn = false;
  * @type {import("../lib/reader/marks.js").Mark[]}
  */
 let docMarks = [];
+
+/**
+ * The save of pictures under way, if one is (D145): which article's, the
+ * handle that stops it, and the row's label as of the last picture - kept
+ * here because the row is redrawn whenever the actions are, and a redraw
+ * during a save must show where the save stands.
+ *
+ * @type {{ url: string, controller: AbortController, label: string } | null}
+ */
+let picturesTask = null;
+
+/**
+ * What the last press of the pictures row came to - "11 of 12 pictures
+ * saved", "Pictures removed" - shown under the row for the article it was
+ * about, until another one is on screen.
+ *
+ * @type {{ url: string, text: string } | null}
+ */
+let picturesNote = null;
+
+/**
+ * The `blob:` addresses the pictures on screen are shown through, revoked
+ * when the article leaves the screen (`renderArticle`).
+ *
+ * @type {string[]}
+ */
+let shownPictures = [];
 
 /**
  * The table of contents of the document on screen (D116/D117) - a book's
@@ -587,10 +622,13 @@ function setBase(doc, url) {
  *   link: string | null,
  *   segment?: { index: number, count: number },
  *   source: Element,
+ *   pictures?: import("../lib/reader/article.js").Pictures,
  * }} piece
  *   `url` is the document's name in the database (a book's id included);
  *   `link` is the address worth offering as "Open the original", which a
- *   book does not have.
+ *   book does not have; `pictures` is how the saved pictures are shown
+ *   (D145) - absent, an article keeps its pictures' addresses and shows
+ *   none, and a book has none to keep.
  */
 function renderArticle(piece) {
   if (article === null || contentElement === null || titleElement === null) return;
@@ -628,8 +666,18 @@ function renderArticle(piece) {
   showBookNote(null);
   closeTocDialog();
   closeDocSearch();
+  // A save of pictures belongs to the article it was pressed on (D145): a
+  // different document on screen is the stop. The pictures shown so far
+  // were reached through addresses of this page's making, given back now
+  // that nothing on screen will ask for them.
+  if (picturesTask !== null && picturesTask.url !== piece.url) picturesTask.controller.abort();
+  for (const address of shownPictures) URL.revokeObjectURL(address);
+  shownPictures = [];
 
-  const rebuilt = buildArticle(piece.source, document, { baseUrl: piece.url });
+  const rebuilt = buildArticle(piece.source, document, {
+    baseUrl: piece.url,
+    pictures: piece.origin === "book" ? undefined : (piece.pictures ?? true),
+  });
 
   titleElement.textContent = piece.title;
   if (bylineElement !== null) {
@@ -762,8 +810,10 @@ function renderLive(page) {
 
 /**
  * @param {import("../lib/store/saved-article.js").SavedArticle} saved
+ * @param {import("../lib/reader/article.js").Pictures} [pictures] the saved
+ *   pictures, by the addresses the text asks for
  */
-function renderSaved(saved) {
+function renderSaved(saved, pictures) {
   renderArticle({
     origin: "saved",
     url: saved.url,
@@ -775,7 +825,32 @@ function renderSaved(saved) {
     // Our own serialized markup - and still not trusted back: parsed inert and
     // rebuilt through the allowed list again, like anything else rendered here.
     source: new DOMParser().parseFromString(saved.content, "text/html").body,
+    pictures,
   });
+}
+
+/**
+ * The saved pictures as the rebuild shows them (D145): each one behind a
+ * `blob:` address of this page's making, found by the address the text
+ * asks for. The addresses are the caller's to remember - they are revoked
+ * when the article leaves the screen, and a render made before they stand
+ * would revoke them first.
+ *
+ * @param {import("../lib/reader/pictures.js").PictureRow[]} rows
+ * @returns {{ resolve: import("../lib/reader/article.js").Pictures, addresses: string[] }}
+ */
+function shownPictureSet(rows) {
+  /** @type {Map<string, { url: string, width: number, height: number }>} */
+  const bySource = new Map();
+  /** @type {string[]} */
+  const addresses = [];
+  for (const row of rows) {
+    if (bySource.has(row.src)) continue;
+    const address = URL.createObjectURL(new Blob([row.data], { type: row.mime }));
+    addresses.push(address);
+    bySource.set(row.src, { url: address, width: row.width, height: row.height });
+  }
+  return { resolve: (src) => bySource.get(src) ?? null, addresses };
 }
 
 /**
@@ -1908,10 +1983,14 @@ async function openSaved(url, target) {
   // synchronous, so nothing can move between the article appearing and the
   // scroll to it. Marks that cannot be read are an empty list, not a failed
   // opening - the article is the errand here.
-  const [saved, position, marks] = await Promise.all([
+  // The pictures too (D145): an article without any costs one range query,
+  // and one that cannot read its pictures opens without them, as it would
+  // have before they were saved.
+  const [saved, position, marks, pictures] = await Promise.all([
     getArticle(url),
     getPosition(url),
     getMarks(url).catch(() => []),
+    getPictures(url).catch(() => []),
   ]);
   if (turn !== epoch) return;
   if (saved === null) {
@@ -1919,7 +1998,9 @@ async function openSaved(url, target) {
     await refreshLibrary();
     return;
   }
-  renderSaved(saved);
+  const shownSet = shownPictureSet(pictures);
+  renderSaved(saved, shownSet.resolve);
+  shownPictures = shownSet.addresses;
   docMarks = marks;
   repaintMarks();
   // The action rows first, the scroll second: they stand above the article,
@@ -2439,6 +2520,11 @@ function leaveDocView() {
   // Before `shown` moves: the pending save is about the article on screen.
   flushPosition();
   shown = null;
+  // A save of pictures was pressed on the article leaving the screen, and
+  // is stopped with it (D145); the pictures it showed are given back.
+  if (picturesTask !== null) picturesTask.controller.abort();
+  for (const address of shownPictures) URL.revokeObjectURL(address);
+  shownPictures = [];
   // The article being read aloud is leaving the screen, and a voice reading a
   // page nobody can see is the extension talking to itself. A quote a row's
   // speaker was reading goes with it when the highlights page is the one
@@ -2728,7 +2814,13 @@ function libraryRow(entry) {
       .join(" - ");
   } else {
     const when = entry.savedAt > 0 ? new Date(entry.savedAt).toLocaleDateString() : "";
-    detail.textContent = [entry.hostname, when, percent]
+    // The pictures kept with the article and what they take (D145) - the
+    // one place the space an article costs is said before it is opened.
+    const pictures =
+      entry.pictures === undefined
+        ? ""
+        : plural(entry.pictures.count, "library_pictures", [megabytes(entry.pictures.bytes)]);
+    detail.textContent = [entry.hostname, when, pictures, percent]
       .filter((part) => part.length > 0)
       .join(" - ");
   }
@@ -3367,6 +3459,8 @@ async function refreshActions() {
     actions.hidden = true;
     if (actionsEnd !== null) actionsEnd.hidden = true;
     if (toLibraryButton !== null) toLibraryButton.hidden = true;
+    if (navPictures !== null) navPictures.hidden = true;
+    if (navPicturesHint !== null) navPicturesHint.hidden = true;
     return;
   }
 
@@ -3421,6 +3515,115 @@ async function refreshActions() {
     button.textContent = label;
     button.setAttribute("aria-pressed", String(read));
   }
+
+  refreshPicturesRow(target, book ? null : /** @type {SavedMeta | null} */ (row));
+}
+
+/**
+ * The pictures row of the menu (D145), over the article on screen. Three
+ * states, told apart by the database's light row and the save under way:
+ * the offer, with how many pictures the text asks for; the save, with its
+ * progress and the stop; the removal, with what the pictures take. Nothing
+ * over a book, a page not yet saved, or an article whose text asks for no
+ * picture - the articles saved before pictures among them, since their
+ * text kept no address to ask for.
+ *
+ * @param {NonNullable<typeof shown>} target
+ * @param {SavedMeta | null} row
+ */
+function refreshPicturesRow(target, row) {
+  if (navPictures === null || navPicturesHint === null) return;
+  const task = picturesTask;
+  if (task !== null && task.url === target.url) {
+    navPictures.textContent = task.label;
+    navPicturesHint.textContent = t("reader_pictures_stop");
+    navPictures.hidden = false;
+    navPicturesHint.hidden = false;
+    return;
+  }
+  const root = contentRoot();
+  const asked = row === null || root === null ? 0 : pictureSources(root).length;
+  const kept = row?.pictures;
+  if (row === null || (kept === undefined && asked === 0)) {
+    navPictures.hidden = true;
+    navPicturesHint.hidden = true;
+    return;
+  }
+  navPictures.textContent =
+    kept !== undefined
+      ? t("reader_pictures_remove", megabytes(kept.bytes))
+      : t("reader_pictures_save", asked.toLocaleString());
+  navPicturesHint.textContent =
+    picturesNote !== null && picturesNote.url === target.url ? picturesNote.text : t("reader_pictures_hint");
+  navPictures.hidden = false;
+  navPicturesHint.hidden = false;
+}
+
+/**
+ * The pictures row pressed: the stop of a save under way, the removal of
+ * pictures kept, or the save of the ones the text asks for - one press,
+ * the same row, what it says decided by `refreshPicturesRow`. The article
+ * is opened again from the database when the press has done its work, so
+ * what is on screen is what is stored, pictures included or not; the
+ * reading position rides through the reopening like through any other.
+ */
+async function onPicturesPress() {
+  const target = shown;
+  if (target === null || target.origin === "book") return;
+  if (picturesTask !== null) {
+    if (picturesTask.url === target.url) picturesTask.controller.abort();
+    return;
+  }
+  const meta = await getArticleMeta(target.url).catch(() => null);
+  if (shown !== target || meta === null) return;
+
+  if (meta.pictures !== undefined) {
+    try {
+      await deletePictures(target.url);
+      picturesNote = { url: target.url, text: t("reader_pictures_removed") };
+    } catch {
+      picturesNote = { url: target.url, text: t("reader_pictures_failed") };
+    }
+    if (shown === target) await openSaved(target.url);
+    return;
+  }
+
+  const root = contentRoot();
+  const sources = root === null ? [] : pictureSources(root);
+  if (sources.length === 0) return;
+  const controller = new AbortController();
+  /** @param {number} done @param {number} bytes */
+  const progress = (done, bytes) =>
+    t("reader_pictures_progress", [done.toLocaleString(), sources.length.toLocaleString(), megabytes(bytes)]);
+  picturesTask = { url: target.url, controller, label: progress(0, 0) };
+  refreshPicturesRow(target, meta);
+  try {
+    const result = await savePictures(target.url, sources, {
+      signal: controller.signal,
+      onProgress: ({ done, bytes }) => {
+        if (picturesTask?.controller !== controller) return;
+        picturesTask.label = progress(done, bytes);
+        if (shown?.url === target.url && navPictures !== null) navPictures.textContent = picturesTask.label;
+      },
+    });
+    picturesNote = result.aborted
+      ? null
+      : {
+          url: target.url,
+          text:
+            result.saved === 0
+              ? t("reader_pictures_none")
+              : plural(result.of, "reader_pictures_done", [
+                  result.saved.toLocaleString(),
+                  megabytes(result.bytes),
+                ]),
+        };
+  } catch {
+    picturesNote = { url: target.url, text: t("reader_pictures_failed") };
+  } finally {
+    if (picturesTask?.controller === controller) picturesTask = null;
+  }
+  if (shown === target) await openSaved(target.url);
 }
 
 /**
@@ -4425,6 +4628,12 @@ navSearch?.addEventListener("click", () => {
 navLibrary?.addEventListener("click", () => {
   setPanel(menuButton, menuPanel, false);
   leaveToList();
+});
+
+// The pictures row (D145) keeps the panel open: what it starts is watched
+// from where it was started - the row is the progress and the stop.
+navPictures?.addEventListener("click", () => {
+  void onPicturesPress();
 });
 
 // The highlights row (D108): over a document it opens that document's own

@@ -10,7 +10,8 @@
  * articles - renaming a database is a migration nobody needs.
  *
  * Versions, so far: 1 - `meta` + `content` (M3b); 2 - `positions` (D98);
- * 3 - `books` + `bookSegments` (EPUB import); 4 - `marks` (the highlighter).
+ * 3 - `books` + `bookSegments` (EPUB import); 4 - `marks` (the highlighter);
+ * 5 - `pictures` (an article's pictures, D145).
  * Every store is created behind a `contains()` guard, so the one upgrade
  * path serves a fresh install and every older version alike.
  *
@@ -20,7 +21,7 @@
  */
 
 const DB_NAME = "reread-articles";
-const DB_VERSION = 4;
+const DB_VERSION = 5;
 
 /** The list's half of an article: one light row per saved page. */
 export const META = "meta";
@@ -34,8 +35,14 @@ export const BOOKS = "books";
 export const BOOK_SEGMENTS = "bookSegments";
 /** The highlighter's marks: one row per marked document, keyed `docId`. */
 export const MARKS = "marks";
+/**
+ * An article's pictures (D145): one row per picture, keyed `[url, index]`,
+ * read only to show that one article - the light row carries their count
+ * and size, so the list never touches a byte of them.
+ */
+export const PICTURES = "pictures";
 
-const ALL_STORES = [META, CONTENT, POSITIONS, BOOKS, BOOK_SEGMENTS, MARKS];
+const ALL_STORES = [META, CONTENT, POSITIONS, BOOKS, BOOK_SEGMENTS, MARKS, PICTURES];
 
 /**
  * @template T
@@ -67,6 +74,9 @@ function open() {
         db.createObjectStore(BOOK_SEGMENTS, { keyPath: ["bookId", "index"] });
       }
       if (!db.objectStoreNames.contains(MARKS)) db.createObjectStore(MARKS, { keyPath: "docId" });
+      if (!db.objectStoreNames.contains(PICTURES)) {
+        db.createObjectStore(PICTURES, { keyPath: ["url", "index"] });
+      }
     };
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error ?? new Error("Cannot open the articles database"));
@@ -77,7 +87,7 @@ function open() {
 }
 
 /**
- * The six stores of one open transaction, by name.
+ * The seven stores of one open transaction, by name.
  *
  * @typedef {{
  *   meta: IDBObjectStore,
@@ -86,6 +96,7 @@ function open() {
  *   books: IDBObjectStore,
  *   bookSegments: IDBObjectStore,
  *   marks: IDBObjectStore,
+ *   pictures: IDBObjectStore,
  * }} LibraryStores
  */
 
@@ -113,6 +124,7 @@ export async function withLibrary(mode, work) {
       books: transaction.objectStore(BOOKS),
       bookSegments: transaction.objectStore(BOOK_SEGMENTS),
       marks: transaction.objectStore(MARKS),
+      pictures: transaction.objectStore(PICTURES),
     };
     const result = await work(stores);
     await new Promise((resolve, reject) => {

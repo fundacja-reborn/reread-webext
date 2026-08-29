@@ -23,7 +23,7 @@
     "96": "assets/icons/icon.svg"
   },
   "content_security_policy": {
-    "extension_pages": "default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self' https:; object-src 'none'; form-action 'none'"
+    "extension_pages": "default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self'; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https:; object-src 'none'; form-action 'none'"
   },
   "permissions": ["storage", "unlimitedStorage"],
   "host_permissions": ["<all_urls>"],

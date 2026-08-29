@@ -36,14 +36,18 @@ const KEPT = new Set([
  *   - anything whose text is not text for reading - `head`, `style`, and
  *     `noscript`, whose content is markup the browser deliberately did not use.
  *
- * `img` is here on purpose (D41): a picture from the article's own CDN is still
- * a network request made by this extension, and there is exactly one of those
- * in its life.
+ * `img` is not here, and not on the kept list either: it is the one element
+ * with a fourth answer (D145). A picture is never loaded from where the page
+ * had it - the reader's policy forbids every remote picture, and this
+ * extension fetches one only on the press of "Save pictures" - but its
+ * address is kept, in an attribute nothing loads from (`article.js`), so
+ * that the press has something to ask for. `picture` is left to unwrap: its
+ * `<source>` variants go, its `<img>` stays.
  */
 const DROPPED = new Set([
   "script", "style", "noscript", "template", "head", "title", "meta", "link", "base",
   "iframe", "frame", "frameset", "object", "embed", "applet", "portal",
-  "canvas", "svg", "math", "video", "audio", "source", "track", "img", "picture", "map", "area",
+  "canvas", "svg", "math", "video", "audio", "source", "track", "map", "area",
   "form", "input", "button", "select", "textarea", "option", "optgroup", "label",
   "fieldset", "legend", "dialog", "menu", "slot",
 ]);
@@ -63,6 +67,8 @@ const ATTRIBUTES = new Map([
   ["li", ["value"]],
   ["blockquote", ["cite"]],
   ["q", ["cite"]],
+  // Its address is not an attribute copied but a decision made (`safeSrc`).
+  ["img", ["alt"]],
 ]);
 
 /** Kept on anything, because both are about reading the text, not styling it. */
@@ -75,20 +81,22 @@ const EVERYWHERE = ["lang", "dir"];
  */
 const SAFE_SCHEMES = new Set(["http:", "https:", "mailto:"]);
 
-/** @typedef {"keep" | "drop" | "unwrap"} Decision */
+/** @typedef {"keep" | "drop" | "unwrap" | "image"} Decision */
 
 /**
- * Three answers, not two. Unwrapping is what keeps an article whose paragraphs
+ * Four answers, not two. Unwrapping is what keeps an article whose paragraphs
  * live inside `<article>`, `<section>` or some site's own custom element: the
  * element goes, its children stay. Dropping that instead would lose the text
  * for no gain, since the element itself carries nothing once its attributes are
- * gone.
+ * gone. The fourth is `img` alone: kept as a picture, which is neither a copy
+ * of the element nor nothing - `article.js` decides what of it stands.
  *
  * @param {string} tagName as the DOM spells it, any case
  * @returns {Decision}
  */
 export function decide(tagName) {
   const name = tagName.toLowerCase();
+  if (name === "img") return "image";
   if (DROPPED.has(name)) return "drop";
   if (KEPT.has(name)) return "keep";
   return "unwrap";
@@ -121,6 +129,29 @@ export function safeHref(value, base) {
     return SAFE_SCHEMES.has(url.protocol) ? url.href : null;
   } catch {
     // Not a URL at all, which is a link nobody can follow either way.
+    return null;
+  }
+}
+
+/**
+ * A picture's address, made absolute, or nothing - and `https:` alone. The
+ * reader page may connect to nothing else (`connect-src`), so any other
+ * scheme is a picture "Save pictures" could never fetch; `data:` in
+ * particular would be the picture's bytes riding in the text of every save,
+ * asked for or not. Absolute for the reason `safeHref` gives, and with no
+ * base to resolve against (a book) every address fails - a book's pictures
+ * are not on any server.
+ *
+ * @param {unknown} value the `src` as written in the page
+ * @param {string} base the address the page came from
+ * @returns {string | null}
+ */
+export function safeSrc(value, base) {
+  if (typeof value !== "string" || value.length === 0) return null;
+  try {
+    const url = new URL(value, base);
+    return url.protocol === "https:" ? url.href : null;
+  } catch {
     return null;
   }
 }
