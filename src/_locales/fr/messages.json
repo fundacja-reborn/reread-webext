@@ -754,6 +754,7 @@
     "message": "Supprimer les $COUNT$ citations de cette page",
     "placeholders": { "count": { "content": "$1", "example": "5" } }
   },
+  "reader_mark_text_changed": { "message": "Le texte de la page a changé depuis le surlignage, qui ne peut donc pas être affiché ici. Il reste sur la page des surlignages, où il peut être supprimé." },
   "reader_marks_missing_doc": { "message": "Son document n'est plus enregistré - cette citation est revenue de la copie. Rouvrez la page et le surlignage y sera." },
   "options_pair_hint": { "message": "Les paires proposées sont celles dont vous avez téléchargé le modèle de traduction sur cet appareil - si vous voulez traduire dans une autre paire de langues, téléchargez son modèle dans la section" },
   "options_pair_none": { "message": "Pas encore de modèle - téléchargez-en un ci-dessous" },

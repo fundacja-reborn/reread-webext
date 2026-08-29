@@ -2527,6 +2527,15 @@ function scrollToSearchHit(target) {
  * when the mark is not in the document's list at all - deleted since its row
  * was drawn - and the caller falls back to the reading position.
  *
+ * A refusal is said out loud (D151): the arrow promised a wash, and a reader
+ * landing on plain prose has to hear why - the page's text no longer reads
+ * the quote at its anchor, the way a page corrected since it was highlighted
+ * does not (Michał's T625: a price changed under the quote). The notice
+ * stands in the stuck chrome, so it is read here and not at a top of the
+ * page the landing has just scrolled away from; it is raised before the
+ * landing is measured, because `chromeFold` grows by its height. An engine
+ * without the registry promised no wash and is told nothing.
+ *
  * @param {MarkTarget} target
  * @returns {boolean}
  */
@@ -2536,10 +2545,13 @@ function scrollToTargetMark(target) {
       one.segmentIndex === target.segmentIndex && comparePoints(one.start, target.start) === 0,
   );
   if (mark === undefined) return false;
+  const root = contentRoot();
   const range = paintedRangeOf(mark);
+  if (range === null && root !== null && quoteOfSpan(mark, root) !== mark.text) {
+    showNotice(t("reader_mark_text_changed"));
+  }
   const rect =
-    range?.getClientRects()[0] ??
-    contentRoot()?.children[mark.start.block]?.getBoundingClientRect();
+    range?.getClientRects()[0] ?? root?.children[mark.start.block]?.getBoundingClientRect();
   if (rect === undefined) return false;
   // The quote's first line under the stuck bar, the position restore's own
   // landing - plus a breath of air, so the wash reads as found, not clipped.
@@ -3094,7 +3106,8 @@ function markActButton(act, index, name, icon) {
  * hid where the press would lead and stood in the way of the quotes ever
  * being reading text) - the document named under it, and the acts one step
  * aside in the reading list's own grid: the arrow that opens the document
- * at the mark, the speaker that reads the quote aloud, and the copy. The
+ * at the mark, the speaker that reads the quote aloud, the copy, the note
+ * and the trash. The
  * quote and the title came off somebody's page once, so both enter as
  * text; the mark's colour enters as an attribute the stylesheet matches by
  * value, a registry name from the checked list and never free text.
@@ -3196,16 +3209,16 @@ function markRowElement(row, index, withTitle) {
       marksNoteIcon,
     ),
   );
-  // The row's own trash (D150): only where the document is gone - a quote
-  // with a document is taken out in the document, over the mark itself,
-  // where what goes is in sight - and last, after everything that keeps the
-  // quote. Armed like the list's Delete: the first press asks, the second
-  // answers, on the same spot.
-  if (row.missing) {
-    const trash = markActButton("delete", index, t("marker_delete"), marksDeleteIcon);
-    trash.setAttribute("data-title", row.title);
-    acts.append(trash);
-  }
+  // The row's own trash, last, after everything that keeps the quote. D150
+  // gave it to the orphan rows alone - a quote with a document is taken out
+  // in the document, over the mark itself, where what goes is in sight - and
+  // D151 to every row: a mark the guard refused to paint has no wash there
+  // to tap, and this row is its one way down (Michał's remark after T625).
+  // Armed like the list's Delete: the first press asks, the second answers,
+  // on the same spot.
+  const trash = markActButton("delete", index, t("marker_delete"), marksDeleteIcon);
+  trash.setAttribute("data-title", row.title);
+  acts.append(trash);
 
   item.append(text, acts);
   return item;

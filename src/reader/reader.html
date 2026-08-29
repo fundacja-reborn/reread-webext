@@ -382,10 +382,19 @@
         </button>
         <button id="nav-settings" type="button" data-i18n="settings">Settings</button>
       </nav>
+
+      <!--
+        The page's one notice - a failed write, a page with no article, a
+        highlight that could not be painted (D151) - inside the chrome rather
+        than at the top of the page: in the article view the chrome is stuck,
+        so a sentence about what is on screen is read where the reader is and
+        not at a top they have scrolled away from. `chromeFold` measures the
+        box, so the landing arithmetic counts the notice in by itself.
+      -->
+      <p id="notice" class="note" hidden></p>
     </div>
 
     <main id="page">
-      <p id="notice" class="note" hidden></p>
 
       <!--
         The reading list: what the reader shows when it was not pointed at a

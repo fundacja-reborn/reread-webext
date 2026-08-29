@@ -872,6 +872,10 @@
     "message": "Delete all $COUNT$ quotes of this page",
     "placeholders": { "count": { "content": "$1", "example": "5" } }
   },
+  "reader_mark_text_changed": {
+    "message": "The page's text has changed since this was highlighted, so the highlight cannot be shown here. It stays on the highlights page, where it can be removed.",
+    "description": "The notice under the bar when the highlights page's arrow lands on a mark the quote guard refused to paint: the saved page no longer reads the quote at its anchor (D151)."
+  },
   "reader_marks_missing_doc": {
     "message": "Its document is no longer saved - this quote came back from the copy. Open the page again and the highlight will be there.",
     "description": "Under a quote on the highlights page whose document is gone from the reading list; the quote was restored from the copy kept in storage.local."

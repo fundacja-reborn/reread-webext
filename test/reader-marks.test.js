@@ -361,4 +361,19 @@ describe("quoteOf", () => {
     assert.equal(quoteOf([], { block: 0, offset: 0 }, { block: 0, offset: 1 }), null);
     assert.equal(quoteOf(["ab"], { block: 0, offset: 0 }, { block: 0, offset: 0 }), null);
   });
+
+  it("reads the page as it stands, so a page corrected under a mark no longer reads its quote", () => {
+    // Michał's T625: the quote was written when the page said $899; the page
+    // saved again says $1100 in the same place. The guard compares what the
+    // anchor reads today with the quote it was written with, exactly - one
+    // changed figure is a different quote, and the mark stays unpainted
+    // rather than washing words that were never highlighted.
+    const written = "costs substantially more at $899 and offers";
+    const before = ["That's the MovinkPad Pro 14, which costs substantially more at $899 and offers a number of upgrades."];
+    const after = ["That's the MovinkPad Pro 14, which costs substantially more at $1100 and offers a number of upgrades."];
+    const start = { block: 0, offset: 35 };
+    const end = { block: 0, offset: 35 + written.length };
+    assert.equal(quoteOf(before, start, end), written);
+    assert.notEqual(quoteOf(after, start, end), written);
+  });
 });

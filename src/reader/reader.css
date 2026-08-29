@@ -158,6 +158,13 @@ summary {
   z-index: 2;
 }
 
+/* The page's notice, in the chrome under the bar (D151) - and under an open
+   panel, which stands in flow above it. `page.css` gives a note a heading's
+   breathing room above; here the bar's own rule is the room. */
+.reader-chrome .note {
+  margin: 0.75rem 0 0;
+}
+
 /* Stuck to the top only while an article is on screen: that is when the two
    things it holds are wanted mid-scroll - the voice that starts from the
    first visible sentence, and the way out of a finished article. The list
