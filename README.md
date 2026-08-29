@@ -15,7 +15,7 @@ Works in Firefox (desktop and Android) and in Chrome/Chromium. **Install it from
 - **Bubble on selection.** Select a word or phrase to see its translation. The engine (Bergamot - the technology behind Firefox's built-in page translation) ships inside the package and runs on your device, so translation works even in airplane mode.
 - **About a hundred language pairs.** Models are downloaded once from the settings page - or added from your own files - and stored locally; an installed pair shows an Update button when Mozilla publishes a new build.
 - **Dictionaries beside the engine.** A translation model has to pick one meaning; a dictionary lists them all. StarDict dictionaries - a catalogue of more than four hundred WikDict pairs installable with one click, or your own files - appear in the bubble under **More**, and clicking a line attaches that meaning to the saved phrase. Install several and two arrows on the settings page decide which of them answers first.
-- **Read aloud.** A phrase from the bubble, or a whole article in the reader - with live highlighting of the word being spoken, pause/resume, sentence skip and speed control. Voices are the browser's own, configurable per language. A switch in the settings turns reading aloud off altogether - no speaker in the bubble, no Read-aloud button in the reader.
+- **Read aloud.** A phrase from the bubble, or a whole article in the reader - with live highlighting of the word being spoken, pause/resume, sentence skip and speed control. Voices are the device's own offline voices, configurable per language - the online voices some browsers add are never offered or used. A switch in the settings turns reading aloud off altogether - no speaker in the bubble, no Read-aloud button in the reader.
 
 **Vocabulary**
 
@@ -103,7 +103,7 @@ Everything the extension stores - vocabulary, translation models, dictionaries, 
 
 - Switching re/read off for a site stores that site's hostname locally. Entries are listed and removable on the settings page.
 - Saving an article stores its title, address and extracted text, so it opens with no network. Its pictures are stored only when you press **Download pictures** in the reader's menu - scaled down to screen size where that saves space - and leave again from the same row; the list says how many an article keeps and what they take. Deleting an entry removes everything stored for it - text, pictures, highlights and notes, reading position - from the database and from the reading list's safety copy alike.
-- Reading aloud uses the browser's own speech synthesis (the standard Web Speech API). Which engine speaks is a browser/OS setting; the extension itself makes no network request for it.
+- Reading aloud uses the browser's own speech synthesis (the standard Web Speech API), and only its offline voices: a voice the browser would send the text away to be spoken (Chrome's "Google ..." voices, Edge's "... Online" ones - `localService: false`) is kept out of every picker and never speaks. Which engine speaks is a browser/OS setting; the extension itself makes no network request for it.
 
 ### Permissions
 

@@ -3,23 +3,35 @@ import { afterEach, describe, it } from "node:test";
 
 import {
   canSpeak,
+  canSpeakLang,
   chosenVoice,
+  offlineAvailable,
+  offlineLanguages,
+  offlineVoice,
   primaryLanguage,
   setSpeechOff,
+  speak,
   speechSupported,
+  stop,
+  voiceLanguage,
   voicesFor,
 } from "../src/lib/tts.js";
 
 /**
- * A voice as the pure half sees one - the three fields `VoiceLike` names.
+ * A voice as the pure half sees one - the three fields `VoiceLike` names, and
+ * the engine's two flags where a test is about them.
  *
  * @param {string} name
  * @param {string} lang
  * @param {string} [voiceURI]
+ * @param {{ localService?: boolean, default?: boolean }} [flags]
  */
-function voice(name, lang, voiceURI = name) {
-  return { name, lang, voiceURI };
+function voice(name, lang, voiceURI = name, flags = {}) {
+  return { name, lang, voiceURI, ...flags };
 }
+
+/** A network voice the browser adds beside the system's (D155). */
+const REMOTE = { localService: false };
 
 describe("primaryLanguage", () => {
   it("answers the part before any region, lowercased", () => {
@@ -80,6 +92,179 @@ describe("voicesFor", () => {
       given.map((one) => one.name),
       ["B", "A"],
     );
+  });
+
+  it("keeps the browser's network voices out (D155)", () => {
+    // Chrome lists Google's voices next to the system's; each would send the
+    // text to Google to be spoken. The settings page promises nothing is sent
+    // anywhere, so they are never on offer.
+    const chrome = [
+      voice("Google US English", "en-US", "urn:google", REMOTE),
+      voice("Alice", "en-US"),
+      voice("Google polski", "pl-PL", "urn:google-pl", REMOTE),
+    ];
+    assert.deepEqual(
+      voicesFor(chrome, "en").map((one) => one.name),
+      ["Alice"],
+    );
+    assert.deepEqual(voicesFor(chrome, "pl"), []);
+  });
+});
+
+describe("offlineAvailable", () => {
+  it("is true where an offline voice reads the language", () => {
+    assert.equal(offlineAvailable([voice("Alice", "en-US")], "en"), true);
+  });
+
+  it("is false where only the browser's network voices read it", () => {
+    const chrome = [voice("Google polski", "pl-PL", "urn:google", REMOTE), voice("Alice", "en-US")];
+    assert.equal(offlineAvailable(chrome, "pl"), false);
+    assert.equal(offlineAvailable(chrome, "uk"), false);
+  });
+
+  it("is true where the device lists no voices at all (Android's clause)", () => {
+    // Android's engines have been known to list nothing while speaking all
+    // the same, from the system's own voices; a refusal there would mute
+    // every phone.
+    assert.equal(offlineAvailable([], "pl"), true);
+  });
+
+  it("with no language named, asks for any offline voice", () => {
+    assert.equal(offlineAvailable([voice("Alice", "en-US")], ""), true);
+    assert.equal(offlineAvailable([voice("Google US English", "en-US", "urn:g", REMOTE)], ""), false);
+  });
+});
+
+describe("offlineVoice", () => {
+  const device = [
+    voice("Google US English", "en-US", "urn:google", { ...REMOTE, default: true }),
+    voice("Brian", "en-GB", "urn:brian"),
+    voice("Alice", "en-US", "urn:alice", { default: true }),
+    voice("Zosia", "pl-PL", "urn:zosia"),
+  ];
+
+  it("gives the stored choice while the device still has it offline", () => {
+    assert.equal(offlineVoice(device, "en", "urn:brian")?.name, "Brian");
+  });
+
+  it("moves a choice of a network voice to the device's offline default", () => {
+    // A choice stored before network voices were kept out must neither mute
+    // the button nor send anything anywhere.
+    assert.equal(offlineVoice(device, "en", "urn:google")?.name, "Alice");
+  });
+
+  it("gives the device's default among the language's offline voices, else the first", () => {
+    assert.equal(offlineVoice(device, "en", undefined)?.name, "Alice");
+    assert.equal(offlineVoice(device, "pl", "urn:gone")?.name, "Zosia");
+  });
+
+  it("gives an offline voice of any language when none is named", () => {
+    assert.equal(offlineVoice(device, "", undefined)?.name, "Alice");
+  });
+
+  it("answers null where nothing offline reads the language, and where nothing is listed", () => {
+    assert.equal(offlineVoice(device, "uk", undefined), null);
+    assert.equal(offlineVoice([], "en", "urn:alice"), null);
+  });
+});
+
+describe("offlineLanguages", () => {
+  it("names each language of the offline voices once, and none of the network ones", () => {
+    const device = [
+      voice("Alice", "en-US"),
+      voice("Brian", "en_GB"),
+      voice("Zosia", "pl-PL"),
+      voice("Google Deutsch", "de-DE", "urn:google", REMOTE),
+    ];
+    assert.deepEqual(offlineLanguages(device).sort(), ["en", "pl"]);
+    assert.deepEqual(offlineLanguages([]), []);
+  });
+});
+
+describe("voiceLanguage", () => {
+  const offered = ["de", "en", "pl"];
+
+  it("follows the pick made on the page while it is on offer", () => {
+    assert.equal(voiceLanguage(offered, { picked: "de", source: "en", browser: "pl" }), "de");
+    // A pick the device no longer offers (a language pack removed) is no pick.
+    assert.equal(voiceLanguage(offered, { picked: "uk", source: "en", browser: "pl" }), "en");
+  });
+
+  it("stands on the pair's source language while a pair is chosen", () => {
+    assert.equal(voiceLanguage(offered, { picked: null, source: "de", browser: "pl" }), "de");
+  });
+
+  it("without a pair takes the browser's language, else English, else the first on offer", () => {
+    // Michał's rule (2026-08-29): a fresh install reads in its own language
+    // until it says otherwise, and English is the language most devices have
+    // a voice for.
+    assert.equal(voiceLanguage(offered, { picked: null, source: null, browser: "pl" }), "pl");
+    assert.equal(voiceLanguage(offered, { picked: null, source: null, browser: "fr" }), "en");
+    assert.equal(voiceLanguage(["de", "pl"], { picked: null, source: null, browser: "fr" }), "de");
+    assert.equal(voiceLanguage([], { picked: null, source: null, browser: "en" }), null);
+  });
+});
+
+describe("speak", () => {
+  /**
+   * A stand-in engine: the voices it lists, and what it was told to say.
+   *
+   * @param {ReturnType<typeof voice>[]} voices
+   * @returns {{ voice: { name: string } | null }[]}
+   */
+  function engine(voices) {
+    /** @type {{ voice: { name: string } | null }[]} */
+    const spoken = [];
+    globalThis.speechSynthesis = /** @type {any} */ ({
+      getVoices: () => voices,
+      speak: (/** @type {{ voice: { name: string } | null }} */ utterance) => spoken.push(utterance),
+      cancel: () => {},
+    });
+    globalThis.SpeechSynthesisUtterance = /** @type {any} */ (
+      class {
+        /** @param {string} text */
+        constructor(text) {
+          this.text = text;
+          this.voice = null;
+        }
+        addEventListener() {}
+      }
+    );
+    return spoken;
+  }
+
+  afterEach(() => {
+    // The stand-in never ends an utterance, so the module still holds the one
+    // it spoke: stood down here, while the stand-in is there to take the
+    // cancel, or the next test's engine without one would be asked for it.
+    stop();
+    setSpeechOff(false);
+    globalThis.speechSynthesis = /** @type {any} */ (undefined);
+    globalThis.SpeechSynthesisUtterance = /** @type {any} */ (undefined);
+  });
+
+  it("gives the utterance an offline voice of its language, never a network one", () => {
+    const spoken = engine([
+      voice("Google US English", "en-US", "urn:google", { ...REMOTE, default: true }),
+      voice("Alice", "en-US", "urn:alice"),
+    ]);
+    assert.equal(canSpeakLang("en"), true);
+    assert.equal(speak("hello", "en", undefined), true);
+    assert.equal(spoken[0]?.voice?.name, "Alice");
+  });
+
+  it("refuses where the device has voices but none reads the language offline", () => {
+    const spoken = engine([voice("Google polski", "pl-PL", "urn:google", REMOTE)]);
+    assert.equal(canSpeakLang("pl"), false);
+    assert.equal(speak("cześć", "pl", "urn:google"), false);
+    assert.equal(spoken.length, 0);
+  });
+
+  it("still speaks on a device that lists no voices at all, leaving the pick to the engine", () => {
+    const spoken = engine([]);
+    assert.equal(canSpeakLang("pl"), true);
+    assert.equal(speak("cześć", "pl", undefined), true);
+    assert.equal(spoken[0]?.voice, null);
   });
 });
 

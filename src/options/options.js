@@ -74,7 +74,17 @@ import {
 } from "../lib/store/library-copy.js";
 import { marksInBackup, readMarksBackup } from "../lib/store/marks-backup.js";
 import { watchToolbarScheme } from "../lib/theme-icon.js";
-import { canSpeak, setSpeechOff, speak, speechSupported, voicesFor } from "../lib/tts.js";
+import {
+  canSpeak,
+  canSpeakLang,
+  offlineLanguages,
+  primaryLanguage,
+  setSpeechOff,
+  speak,
+  speechSupported,
+  voiceLanguage,
+  voicesFor,
+} from "../lib/tts.js";
 import {
   dictionaryRows,
   filterActive,
@@ -99,6 +109,10 @@ let running = null;
 // First, so every row and status below lands on a page already speaking the
 // catalogue's language.
 localizePage();
+// Then the descriptions fold (D155) - after the catalogue's text is in them,
+// because whether a note overflows its two lines is a question about the
+// text it has now.
+foldNotes();
 // The toolbar icon follows the browser's scheme where the manifest cannot
 // say so (Chromium, no theme_icons there) - a no-op on Firefox.
 watchToolbarScheme();
@@ -383,26 +397,92 @@ async function stepBubbleScale(by) {
 const VOICE_SAMPLE = "1, 2, 3";
 
 /**
- * The voice select for the pair's source language (D83): the device's voices
- * able to read it, behind a first line that means "let the browser pick".
- * Redrawn whenever the config may have moved - the pair decides the filter -
- * and when the engine's list arrives: `getVoices` answers nothing until the
- * browser has loaded the voices, and `voiceschanged` is the only appointment
- * it keeps. On a device that cannot speak at all the row stays, disabled -
- * an honest sentence about why the bubble shows no speaker there.
+ * The language picked on this page for the voice row, for as long as the page
+ * lives (D155): null until a hand picks one, and `voiceLanguage` answers for
+ * the null. Not stored - the stored thing is the voice per language.
+ *
+ * @type {string | null}
+ */
+let voiceLang = null;
+
+/**
+ * @returns {string} the browser's own language, the voice row's default
+ *   without a pair (D155, Michał's rule) - English where the browser names
+ *   none, as `voiceLanguage` itself falls back to it
+ */
+function browserLanguage() {
+  const language = primaryLanguage(navigator.language);
+  return language === "" ? "en" : language;
+}
+
+/**
+ * The languages the voice row offers, by their names in the reader's own
+ * language: every language this device reads offline, and the pair's source
+ * language even without a voice for it - that is the one the bubble reads
+ * in, and the row must be able to say it has no voice. On a device that
+ * lists no voices and has no pair, the browser's own language stands in:
+ * the engine may still speak there (Android's clause), and a row with no
+ * language at all could not even name its default line.
+ *
+ * @returns {string[]}
+ */
+function voiceLanguages() {
+  const offered = new Set(canSpeak() ? offlineLanguages(speechSynthesis.getVoices()) : []);
+  if (config.sourceLang !== null) offered.add(primaryLanguage(config.sourceLang));
+  if (offered.size === 0) offered.add(browserLanguage());
+  // By the name on screen, not the code behind it, the dictionary selects'
+  // rule: nobody looks for Basque under e.
+  return [...offered].sort((a, b) => languageName(a).localeCompare(languageName(b)));
+}
+
+/**
+ * @returns {string | null} the language the voice row is about right now,
+ *   read off its own select - the answer `renderVoice` last gave it
+ */
+function voiceRowLanguage() {
+  const select = document.getElementById("tts-lang");
+  return select instanceof HTMLSelectElement && select.value !== "" ? select.value : null;
+}
+
+/**
+ * The voice row (D83, D155): a language, the device's offline voices able to
+ * read it behind a first line that means "the device's default", and Listen.
+ * The language is the pair's source unless a hand picked another here, and
+ * without a pair the browser's own, else English (Michał's rule) - a fresh
+ * install without a pair still reads articles aloud, and its settings page
+ * had nothing to list until it could name a language (Michał's smoke,
+ * 2026-08-29). Redrawn whenever the config may have moved and when the
+ * engine's list arrives: `getVoices` answers nothing until the browser has
+ * loaded the voices, and `voiceschanged` is the only appointment it keeps.
+ * On a device that cannot speak at all the row stays, disabled - an honest
+ * sentence about why the bubble shows no speaker there.
  */
 function renderVoice() {
+  const languageSelect = document.getElementById("tts-lang");
   const select = document.getElementById("tts-voice");
-  if (!(select instanceof HTMLSelectElement)) return;
+  if (!(languageSelect instanceof HTMLSelectElement) || !(select instanceof HTMLSelectElement)) {
+    return;
+  }
 
-  // The picker chooses a voice for the pair's source language, so with no
-  // pair chosen there is no language to list voices for: the row stands
-  // disabled on the browser default - the "cannot speak at all" manner - and
-  // comes alive with the first pair.
-  const source = config.sourceLang;
-  const stored = source === null ? undefined : config.ttsVoices[source];
+  const offered = voiceLanguages();
+  const language = voiceLanguage(offered, {
+    picked: voiceLang,
+    source: config.sourceLang === null ? null : primaryLanguage(config.sourceLang),
+    browser: browserLanguage(),
+  });
+
+  languageSelect.replaceChildren();
+  for (const one of offered) {
+    const option = document.createElement("option");
+    option.value = one;
+    option.textContent = languageName(one);
+    option.selected = one === language;
+    languageSelect.append(option);
+  }
+
+  const stored = language === null ? undefined : config.ttsVoices[language];
   const voices =
-    canSpeak() && source !== null ? voicesFor(speechSynthesis.getVoices(), source) : [];
+    canSpeak() && language !== null ? voicesFor(speechSynthesis.getVoices(), language) : [];
 
   select.replaceChildren();
   const fallback = document.createElement("option");
@@ -420,9 +500,95 @@ function renderVoice() {
     select.append(option);
   }
 
+  // The device lists voices, and none of them reads this language offline
+  // (D155) - the pair's language, listed without a voice exactly so this can
+  // be said: the picker has its default line alone, the sentence under the
+  // note says why, and Listen - which would be refused - waits.
+  const mute = canSpeak() && language !== null && !canSpeakLang(language);
+  const voiceStatus = document.getElementById("tts-voice-status");
+  if (voiceStatus !== null) {
+    voiceStatus.textContent = mute ? t("speech_no_offline_voice") : "";
+    voiceStatus.hidden = !mute;
+  }
+
+  languageSelect.disabled = !canSpeak();
   select.disabled = !canSpeak();
   const listen = document.getElementById("tts-listen");
-  if (listen instanceof HTMLButtonElement) listen.disabled = !canSpeak();
+  if (listen instanceof HTMLButtonElement) listen.disabled = !canSpeak() || mute;
+}
+
+/**
+ * The descriptions under the rows fold to two lines (D155): a settings page
+ * is a list to scan, and a whole paragraph under every switch made it a page
+ * to read. Each note marked `data-fold` is boxed with a chevron cloned from
+ * the page's template; the box opens and closes on a press anywhere in it
+ * (a link inside keeps its own meaning), the chevron is the button a keyboard
+ * and a screen reader get, and it stands only where the text really overflows
+ * its two lines - measured, and measured again whenever the note's size moves
+ * (a resize, a row shown by a switch, a font arriving), because a chevron over
+ * a note that fits promises more where there is none. Screen readers hear the
+ * whole text either way: the fold is a clip, not a removal.
+ */
+function foldNotes() {
+  const chevron = document.getElementById("note-chevron");
+  const observer =
+    typeof ResizeObserver === "function"
+      ? new ResizeObserver((entries) => {
+          for (const entry of entries) judgeFold(entry.target);
+        })
+      : null;
+
+  let count = 0;
+  for (const note of document.querySelectorAll("p.row-note[data-fold]")) {
+    if (!(note instanceof HTMLParagraphElement) || note.parentElement === null) continue;
+    count += 1;
+    // The chevron names what it opens; a note without an id gets one.
+    if (note.id === "") note.id = `note-${count}`;
+
+    const box = element("div", "note-fold");
+    box.dataset["folded"] = "";
+    note.parentElement.insertBefore(box, note);
+    box.append(note);
+
+    const toggle = element("button", "note-toggle");
+    toggle.setAttribute("type", "button");
+    toggle.hidden = true;
+    toggle.setAttribute("aria-expanded", "false");
+    toggle.setAttribute("aria-controls", note.id);
+    toggle.setAttribute("aria-label", t("options_note_more"));
+    if (chevron instanceof HTMLTemplateElement) toggle.append(chevron.content.cloneNode(true));
+    box.append(toggle);
+
+    box.addEventListener("click", (event) => {
+      // A link inside the note is a door of its own, not a handle on the fold.
+      if (event.target instanceof Element && event.target.closest("a") !== null) return;
+      if (!("long" in box.dataset)) return;
+      const opening = "folded" in box.dataset;
+      if (opening) delete box.dataset["folded"];
+      else box.dataset["folded"] = "";
+      toggle.setAttribute("aria-expanded", String(opening));
+      judgeFold(note);
+    });
+
+    observer?.observe(note);
+    judgeFold(note);
+  }
+}
+
+/**
+ * Whether a folded note holds more than its two lines show, and the chevron
+ * with it. An open note is left alone - it is judged again when it folds.
+ *
+ * @param {Element} note
+ */
+function judgeFold(note) {
+  const box = note.parentElement;
+  if (box === null || !("folded" in box.dataset)) return;
+  const long = note.scrollHeight > note.clientHeight + 1;
+  if (long) box.dataset["long"] = "";
+  else delete box.dataset["long"];
+  const toggle = box.querySelector(".note-toggle");
+  if (toggle instanceof HTMLElement) toggle.hidden = !long;
 }
 
 /**
@@ -2311,18 +2477,26 @@ document.getElementById("bubble-scale-down")?.addEventListener("click", () => {
 document.getElementById("bubble-scale-up")?.addEventListener("click", () => {
   void stepBubbleScale(BUBBLE_SCALE.step);
 });
+document.getElementById("tts-lang")?.addEventListener("change", (event) => {
+  const select = event.target;
+  if (!(select instanceof HTMLSelectElement)) return;
+  // The page's own pick, for as long as the page lives (D155); the voice
+  // select beside it redraws for the language.
+  voiceLang = select.value;
+  renderVoice();
+});
 document.getElementById("tts-voice")?.addEventListener("change", (event) => {
   const select = event.target;
   if (!(select instanceof HTMLSelectElement)) return;
-  // A disabled picker fires no change, so this only runs with a pair chosen -
-  // the guard is for the type and for a stale page mid-change.
-  const source = config.sourceLang;
-  if (source === null) return;
+  // The language the row is about, off its own select - the guard is for the
+  // type and for a stale page mid-change.
+  const language = voiceRowLanguage();
+  if (language === null) return;
   // The whole map is written back (see `writeConfig`), which is what lets
-  // "browser default" remove the entry rather than store an empty string.
+  // "default voice" remove the entry rather than store an empty string.
   const map = { ...config.ttsVoices };
-  if (select.value === "") delete map[source];
-  else map[source] = select.value;
+  if (select.value === "") delete map[language];
+  else map[language] = select.value;
   void writeConfig({ ttsVoices: map }).then((written) => {
     config = written;
   });
@@ -2333,9 +2507,10 @@ document.getElementById("tts-listen")?.addEventListener("click", () => {
   const select = document.getElementById("tts-voice");
   const chosen = select instanceof HTMLSelectElement && select.value !== "" ? select.value : undefined;
   // At the speed that is set, because that is what living with it will sound
-  // like - a sample read at a speed nobody uses is a sample of nothing. With
-  // no pair the empty tag lets the engine's default voice read the sample.
-  speak(VOICE_SAMPLE, config.sourceLang ?? "", chosen, config.ttsRate / 100);
+  // like - a sample read at a speed nobody uses is a sample of nothing. In the
+  // language the row is about; with none the empty tag lets the device's
+  // default offline voice read the sample.
+  speak(VOICE_SAMPLE, voiceRowLanguage() ?? "", chosen, config.ttsRate / 100);
 });
 document.getElementById("tts-rate-down")?.addEventListener("click", () => {
   void stepRate(-TTS_RATE.step);

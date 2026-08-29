@@ -41,7 +41,14 @@ import { supported, unregister } from "../content/highlighter.js";
 import { prosePieces } from "../content/scan.js";
 import { joinPieces, locate } from "../lib/matcher/spans.js";
 import { chunkText, wordSpan } from "../lib/reader/speech.js";
-import { canSpeak, chosenVoice, shareVoice, speechSupported, stop as stopPhrase } from "../lib/tts.js";
+import {
+  canSpeak,
+  offlineAvailable,
+  offlineVoice,
+  shareVoice,
+  speechSupported,
+  stop as stopPhrase,
+} from "../lib/tts.js";
 
 /** Must be the names in `reader.css`. */
 const SENTENCE = "reread-speaking";
@@ -71,6 +78,9 @@ const BAND = Object.freeze({ top: 0.12, bottom: 0.75, land: 0.3 });
  * @property {(state: ReadingState) => void} onChange the bar's whole job
  * @property {() => void} onFail the engine refused, and the reader has to be
  *   told in words - a silent bar disappearing says nothing
+ * @property {() => void} onNoVoice the device lists voices, but none reads
+ *   the article's language offline (D155, `lib/tts.js`): nothing was started,
+ *   and the reader is told why in the same words as `onFail`
  *
  * @typedef {"off" | "playing" | "paused"} ReadingState
  *
@@ -371,6 +381,16 @@ function rangeOf(from, to) {
  * set (`at`, `within`); this is what turns it back into sound.
  */
 function speakHere() {
+  // Offline voices only (D155): a language this device could read only
+  // through the browser's network voices is not read. Asked here, on every
+  // start, resume, skip and voice change alike, so no road into the engine
+  // goes around it - and said in words, because a bar that never appears
+  // says nothing.
+  if (!offlineAvailable(speechSynthesis.getVoices(), voice.lang)) {
+    stopReading();
+    hooks?.onNoVoice();
+    return;
+  }
   // A resume point that landed on the last character of its sentence leaves
   // nothing to say. The next sentence is the honest answer to that, not the
   // end of the article.
@@ -409,7 +429,10 @@ function hand(sentence, from) {
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.lang = voice.lang;
   utterance.rate = voice.rate;
-  const chosen = chosenVoice(speechSynthesis.getVoices(), voice.voiceURI);
+  // The stored choice, or the device's offline default for the language -
+  // never a network voice (D155); `speakHere` has already made sure there is
+  // one to give, or that the engine lists none and picks by itself.
+  const chosen = offlineVoice(speechSynthesis.getVoices(), voice.lang, voice.voiceURI);
   if (chosen !== null) utterance.voice = chosen;
 
   /** @type {Handed} */

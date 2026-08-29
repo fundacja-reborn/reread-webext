@@ -158,18 +158,21 @@
            throughout this file - steps out of the way. The note under it is
            the promise the switch stands on: presentation only, nothing
            deleted, everything back on the next press. -->
+      <!-- `data-fold` on this note and on every row note below it (D155):
+           the page shows two lines of each with a chevron, and the whole
+           text one press away - `foldNotes` in options.js boxes them, with
+           the glyph from the template at the end of this file. The status
+           lines the page fills itself are not marked: they are short, and
+           they are answers, not descriptions. -->
       <div class="row">
         <label class="row-toggle">
           <span class="row-name" data-i18n="options_no_translation">Use without translation</span>
           <input type="checkbox" id="no-translation" />
         </label>
-        <p class="row-note" data-i18n="options_no_translation_hint">
-          For reading in your own language. With this on, the translation bubble, saving and
-          underlining phrases, the saved phrases page and the model section are hidden; selecting
-          text on an ordinary page offers one thing - open the page in the reader. The reader, the
-          offline reading list, the highlighter, reading aloud, search and dictionaries keep
-          working. Nothing is deleted: your phrases and models come back the moment you switch this
-          off.
+        <p class="row-note" data-fold data-i18n="options_no_translation_hint">
+          Hides translation features (bubble, underlines, saved phrases). Ideal for reading in your
+          native language. The reader, offline reading list, highlighter and dictionaries remain
+          active. Your saved data is not deleted and will return when you turn this off.
         </p>
       </div>
       <!-- The switch's one sub-option (D149), shown only while it is on
@@ -185,7 +188,7 @@
           <span class="row-name" data-i18n="options_bubble_off">No bubble when selecting text</span>
           <input type="checkbox" id="bubble-off" />
         </label>
-        <p class="row-note" data-i18n="options_bubble_off_hint">
+        <p class="row-note" data-fold data-i18n="options_bubble_off_hint">
           With this on, selecting text on an ordinary page does nothing at all - open a page in the
           reader from re/read's button or with Alt+Shift+R. In the reader a selection is only a
           highlight for the moment: no bubble opens, a tap or Escape clears it, and Ctrl+C or Cmd+C
@@ -200,13 +203,13 @@
       <div class="row row-stack translation-only">
         <label class="row-name" for="pair" data-i18n="language_pair">Language pair</label>
         <select id="pair"></select>
-        <p class="row-note">
+        <p class="row-note" data-fold>
           <span data-i18n="options_pair_hint"
-            >The pairs offered are those whose translation models you have downloaded to this
-            device - if you want to translate in another language pair, download its model
-            under</span
+            >Shows the language pairs downloaded to this device. To add new languages, download
+            them in the</span
           >
-          <a href="#translation-models" data-i18n="options_models_heading">Translation models</a>.
+          <a href="#translation-models" data-i18n="options_models_heading">Translation models</a>
+          <span data-i18n="options_pair_hint_rest">section below.</span>
         </p>
       </div>
       <div class="row row-stack translation-only">
@@ -227,12 +230,10 @@
              weighs, and on disk a dictionary is one database row per word
              and per other spelling (`lib/dict/store.js`) - measured on a
              145 MB dictionary, 705 MB of database. -->
-        <p class="row-note" data-i18n="options_storage_how">
-          What the browser's databases take on disk. A dictionary costs three to four times its
-          text - every word and every other spelling is a row of its own; the models and the
-          reading list cost about what their lists say. Deleting an article or a book removes
-          everything of it - text, pictures, highlights, notes and the reading position - from the
-          database and from the copy alike.
+        <p class="row-note" data-fold data-i18n="options_storage_how">
+          Disk space used by the extension. Dictionaries take up more space than their file size
+          because of the database structure. Deleting an article or book completely removes its
+          text, images, highlights, notes and reading progress.
         </p>
         <p class="row-note" id="storage-note" hidden></p>
         <!-- The copy of the vocabulary that outlives the database
@@ -257,27 +258,43 @@
           <span class="row-name" data-i18n="options_tts">Reading aloud</span>
           <input type="checkbox" id="tts" />
         </label>
-        <p class="row-note" data-i18n="options_tts_hint">
-          With this off, nothing reads aloud: the speaker leaves the bubble and the lists, the
-          Read-aloud button leaves the reader, and the voice and speed rows below fold away - your
-          choices in them are kept.
+        <p class="row-note" data-fold data-i18n="options_tts_hint">
+          Enables the text-to-speech function. Turning this off hides all read-aloud buttons in the
+          bubble, lists, and the reader.
         </p>
       </div>
-      <!-- Which voice reads a selection aloud (D83). The choices are the
-           device's own voices for the pair's source language, and the choice
-           is stored per language, so switching pairs keeps it. The sample the
+      <!-- Which voice reads a selection aloud (D83). The first select names
+           the language - the pair's source by default, without a pair the
+           browser's own or else English, any language the device reads
+           offline by hand (D155: a fresh install without a pair reads
+           articles aloud all the same, and had nothing to list here) -
+           the second the device's offline voices for it, and the choice is
+           stored per language, so switching pairs keeps it. The sample the
            Listen button speaks is digits, because digits exist in every
-           language the engine could offer. -->
-      <div class="row row-stack tts-only">
+           language the engine could offer. Offline voices only (D155):
+           `voicesFor` keeps the engine's network voices out of the list, and
+           the status line under the note says when that leaves nothing for
+           the language. -->
+      <div class="row row-stack row-voice tts-only">
         <label class="row-name" for="tts-voice" data-i18n="options_tts_voice">Voice for reading aloud</label>
         <p class="inline">
+          <select
+            id="tts-lang"
+            aria-label="Language of the voice"
+            data-i18n-aria-label="options_tts_lang"
+          ></select>
           <select id="tts-voice"></select>
           <button type="button" id="tts-listen" data-i18n="options_tts_listen">Listen</button>
         </p>
-        <p class="row-note" data-i18n="options_tts_voice_hint">
-          The voice reads a selected phrase in the bubble and a whole article in the reader. The
-          voices are this device's own: speech is made locally and nothing is sent anywhere.
+        <p class="row-note" data-fold data-i18n="options_tts_voice_hint">
+          Select the voice used to read phrases and articles in each language. Only voices that
+          speak offline are offered: speech is made on this device and nothing is sent to the
+          internet.
         </p>
+        <!-- Filled only where it is true (D155): the device lists voices and
+             none of them reads the pair's language offline - the picker above
+             has its default line alone, and Listen is disabled. -->
+        <p class="row-note" id="tts-voice-status" hidden></p>
       </div>
       <!-- How fast that voice reads (D87), for the phrase in the bubble and for
            a whole article in the reader alike - one setting, because what is
@@ -304,9 +321,9 @@
           <span class="row-name" data-i18n="options_reader_only">Only in the reader</span>
           <input type="checkbox" id="reader-only" />
         </label>
-        <p class="row-note" data-i18n="options_reader_only_hint">
-          With this on, selecting text on an ordinary page offers one thing: open the page in the
-          reader, where translating, saving and underlining happen. On Android it is on by default.
+        <p class="row-note" data-fold data-i18n="options_reader_only_hint">
+          Limits translation to the reader. Selecting text on an ordinary web page will only show an
+          option to open the page in the reader. On Android and iOS it is on by default.
         </p>
       </div>
       <!-- The default keep (D124). Not `translation-only`: with translation
@@ -317,11 +334,10 @@
           <span class="row-name" data-i18n="options_keep_articles">Save in the offline reading list by default</span>
           <input type="checkbox" id="keep-articles" />
         </label>
-        <p class="row-note" data-i18n="options_keep_articles_hint">
-          With this on, a page opened in the reader goes straight into the offline reading list, so
-          you can read it with no network - and after the original page has been deleted. Opening
-          the same page again never writes over it: your highlights and the place you stopped
-          reading stay untouched.
+        <p class="row-note" data-fold data-i18n="options_keep_articles_hint">
+          Automatically saves every page you open in the reader for offline reading. Your saved
+          pages, highlights and reading progress are kept safe even if the original website changes
+          or disappears.
         </p>
       </div>
       <!-- The copy of the reading list that outlives the database
@@ -335,15 +351,10 @@
           <span class="row-name" data-i18n="options_library_copy">Copy of the reading list</span>
           <input type="checkbox" id="library-copy" />
         </label>
-        <p class="row-note" data-i18n="options_library_copy_hint">
-          Keeps a second copy of every saved article and book, with the place you stopped
-          reading, in the extension's own storage - a store apart from the reading list's
-          database, which the loss of that database does not reach. It doubles the space the
-          reading list takes. On unless you switch it off: Safari deletes the reading list after
-          thirty days without a visit to the extension's pages, and on any browser a database
-          can be lost to a damaged profile or a cleaning tool - the copy is what brings it back.
-          Pictures saved with an article are copied too, and come back the first time the
-          article is opened.
+        <p class="row-note" data-fold data-i18n="options_library_copy_hint">
+          Creates a backup of your reading list to protect it against automatic browser cleanups
+          and database errors. This doubles the disk space the list takes, but keeps your saved
+          articles safe if the database is lost.
         </p>
       </div>
       <!-- `translation-only`: the trimmed bubble ignores the fold - its two
@@ -354,9 +365,9 @@
           <span class="row-name" data-i18n="quiet_bubble">Hide bubble actions by default</span>
           <input type="checkbox" id="quiet-bubble" />
         </label>
-        <p class="row-note" data-i18n="options_quiet_bubble_hint">
-          With this on, the bubble shows just the translation; its buttons slide out when you click
-          or tap it.
+        <p class="row-note" data-fold data-i18n="options_quiet_bubble_hint">
+          Shows only the translated text in the bubble. The action buttons (such as copy or save)
+          appear only when you click or tap the bubble.
         </p>
       </div>
       <!-- The bubble's one size knob (D85): the bubble deliberately ignores
@@ -372,9 +383,8 @@
           <output id="bubble-scale-value">100%</output>
           <button type="button" id="bubble-scale-up" title="Larger" data-i18n-title="reader_larger">+</button>
         </p>
-        <p class="row-note" data-i18n="options_bubble_scale_hint">
-          The size of the translation bubble - its text and its buttons - on ordinary pages and in
-          the reader alike.
+        <p class="row-note" data-fold data-i18n="options_bubble_scale_hint">
+          Adjusts the text and button size inside the translation bubble across all pages.
         </p>
       </div>
     </div>
@@ -387,9 +397,8 @@
     <h2 id="translation-models" data-i18n="options_models_heading">Translation models</h2>
 
     <p class="explain" data-i18n="options_models_intro">
-      The models below are built and published by Mozilla - the same models Firefox itself
-      translates pages with. For re/read to work, download a model for the language pairs you
-      want to translate (for example en -> pl).
+      Download a translation model here for each language pair you want to translate. These are
+      official Mozilla files that run entirely offline on your device.
     </p>
 
     <!-- The one fetch this section can make, and the press that makes it: the
@@ -437,10 +446,8 @@
       <span data-i18n="options_model_note_from">Model downloads come from</span>
       <a id="model-host" target="_blank" rel="noopener">-</a>
       <span data-i18n="options_model_note_rest"
-        >- where Mozilla publishes them. Updating the list sends nothing about you; it only fetches
-        the fresh list. This host and the dictionary catalogue's below are the only two this
-        extension ever contacts, and only when you press to refresh a list or to download
-        something.</span
+        >- where Mozilla publishes them. The extension connects to this public server only when you
+        press Update the list or Download. No personal data is ever sent.</span
       >
     </p>
 
@@ -492,9 +499,8 @@
     <h2 id="dictionaries" data-i18n="options_dictionaries_heading">Dictionaries</h2>
 
     <p class="explain" data-i18n="options_dictionaries_intro">
-      Download a dictionary (or a few) to check the different meanings a selected word can have.
-      While translating you choose and save the senses that fit the context; with translation
-      switched off, the definitions simply answer a selection in the reader.
+      Add dictionaries to see detailed word definitions in the translation bubble. You can change
+      the order in which they appear using the arrows.
     </p>
 
     <!-- The dictionary list's twin of the model refresh line: the one fetch
@@ -529,10 +535,11 @@
 
     <!-- Only worth saying with two dictionaries here, so the page hides it
          until there are (see renderCatalog); it stands above the list because
-         it is about the list's own order, which the arrows change. -->
+         it is about the list's own order. The arrows that change it are the
+         intro's business, said once up there. -->
     <p id="dictionary-order-hint" class="explain" data-i18n="options_dictionary_order_hint" hidden>
-      The bubble answers in the order below - the arrows move a dictionary up or down. Only the
-      dictionaries of the language you are reading answer at all.
+      The bubble answers in the order below. Only the dictionaries of the language you are reading
+      answer.
     </p>
 
     <div id="dictionary-catalog" class="models"></div>
@@ -545,8 +552,9 @@
       <span data-i18n="options_dictionary_note_from">Dictionary downloads come from</span>
       <a id="dictionary-host" target="_blank" rel="noopener">-</a>
       <span data-i18n="options_dictionary_note_rest"
-        >- where WikDict publishes the dictionaries it builds from Wiktionary (CC BY-SA). When you
-        update the list, nothing about you is sent - the request only fetches the fresh list.</span
+        >- where WikDict publishes the dictionaries it builds from Wiktionary (CC BY-SA). The
+        extension connects to this public server only when you press Update the list or Download.
+        No personal data is ever sent.</span
       >
     </p>
 
@@ -557,19 +565,14 @@
         <h3 data-i18n="options_add_dictionary_heading">Add a dictionary from files</h3>
       </summary>
 
+      <!-- One paragraph for the whole by-hand path (Michał's texts,
+           2026-08-29). It names the language step on purpose: the two selects
+           under the picker look like settings that are already right, and
+           the step used to be missed (Michał's report from the phone,
+           2026-08-23). The list under it says what each file is. -->
       <p class="explain" data-i18n="options_add_dictionary_summary">
-        To add a dictionary from your own files - one from an e-reader works as it is - load
-        them here.
-      </p>
-
-      <p class="explain">
-        <span data-i18n="options_stardict_intro">Dictionaries are read in the</span>
-        <strong>StarDict</strong>
-        <span data-i18n="options_stardict_intro_rest"
-          >format - the same files a KOReader e-reader uses, so a dictionary already on your reader
-          works here unchanged. Unpack the archive it came in and pick the files of one
-          dictionary:</span
-        >
+        Import your own dictionaries in the StarDict format. Unpack the archive, select the required
+        files (.ifo, .idx, .dict), choose the languages and press Add dictionary.
       </p>
 
       <ul class="files">
@@ -581,18 +584,6 @@
         </li>
         <li><code><em>name</em>.syn</code> <span data-i18n="options_file_syn">- other spellings, when the dictionary has them</span></li>
       </ul>
-
-      <!-- Adding from files is two acts, and the second one is a decision
-           nobody is prompted for: the picker is obvious, the two selects under
-           it look like settings that are already right. The sentence that
-           explains them used to sit in the footnote below the button, which is
-           to say after the mistake (Michał's report from the phone,
-           2026-08-23). -->
-      <p class="explain" data-i18n="options_add_dictionary_steps">
-        Two steps: pick the files, then set the two languages below them. A StarDict file does not
-        say which languages it holds, so that part is yours to fill in - and it is what decides
-        when this dictionary answers.
-      </p>
 
       <p>
         <!-- No `accept` filter on purpose: StarDict extensions
@@ -614,19 +605,17 @@
       <p id="dictionary-file-status" class="status" role="status"></p>
 
       <!-- Lookup matches dictionaries by the language of their headwords, not
-           by the full pair - a deliberate rule (see `lookupEntries`), said out
-           loud here because nothing else on this page says it. -->
+           by the full pair (see `lookupEntries`) - which is why the same
+           language on both sides is all a monolingual dictionary needs. -->
       <p class="explain" data-i18n="options_add_dictionary_mono">
-        A monolingual dictionary works too - for English-English, say, pick English on both sides.
-        Dictionaries are matched by the language of their headwords, not by the pair, so it answers
-        beside the bilingual ones: under "More" while translating, straight away with translation
-        off.
+        A monolingual dictionary works too, for example English-English: choose the same language on
+        both sides.
       </p>
 
       <p class="note footnote">
         <span data-i18n="options_dict_files_note"
-          >Adding from files makes no network request; files from anywhere work, the catalogue's own
-          included - they are published at</span
+          >Adding from files makes no network request. Any StarDict files work, including the
+          catalogue's own, which are published at</span
         >
         <a href="https://download.wikdict.com/dictionaries/stardict/" target="_blank" rel="noopener"
           >download.wikdict.com/dictionaries/stardict</a
@@ -637,9 +626,8 @@
     <h2 id="switched-off-sites" data-i18n="options_disabled_heading">Switched-off sites</h2>
 
     <p class="explain" data-i18n="options_disabled_intro">
-      Sites where re/read stays off: no underlines, no bubble, nothing running on the page itself;
-      opening a page in the reader by hand still works. The switch in the toolbar popup is what
-      adds a site here; this list is how one comes back on.
+      A list of websites where the extension is switched off (no translation or underlines). You
+      can add sites here using the extension icon in your browser's toolbar.
     </p>
 
     <div id="disabled-hosts" class="models"></div>
@@ -690,6 +678,23 @@
         >
       </p>
     </footer>
+
+    <!-- The chevron every folded description wears (D155), cloned into its
+         button by `foldNotes` in options.js - drawn once here so the markup
+         says what the buttons look like. Points down while the note is
+         folded; the stylesheet turns it up while the note is open. -->
+    <template id="note-chevron">
+      <svg class="page-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+        <path
+          d="M3.5 6 8 10.5 12.5 6"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.3"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+    </template>
 
     <script src="options.js" defer></script>
   </body>

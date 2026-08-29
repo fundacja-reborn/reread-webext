@@ -3636,9 +3636,20 @@ function speakMarkRow(row) {
   }
   soundingMark = key;
   // The row's own language first; with none and no pair, the empty tag reads
-  // in the engine's default voice - `speechLang`'s manner.
+  // in the device's default offline voice - `speechLang`'s manner.
   const lang = row.lang ?? settings.sourceLang ?? "";
-  speak(row.mark.text, lang, settings.ttsVoices[primaryLanguage(lang)], settings.ttsRate / 100);
+  const spoke = speak(
+    row.mark.text,
+    lang,
+    settings.ttsVoices[primaryLanguage(lang)],
+    settings.ttsRate / 100,
+  );
+  // Refused for want of an offline voice (D155): the row's speaker has no bar
+  // of its own to say so, so the page's notice line does.
+  if (!spoke) {
+    soundingMark = null;
+    showNotice(t("speech_no_offline_voice"));
+  }
 }
 
 /**
@@ -5498,6 +5509,9 @@ configureReading({
   // nothing on screen to explain itself, so it is said in the page's own
   // notice line rather than in a bar that has just disappeared.
   onFail: () => showNotice(t("reader_speech_failed")),
+  // The same line for the one refusal that is ours, not the engine's (D155):
+  // the device has voices, and none of them reads this language offline.
+  onNoVoice: () => showNotice(t("speech_no_offline_voice")),
 });
 
 /**

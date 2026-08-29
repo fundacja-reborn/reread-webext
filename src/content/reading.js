@@ -40,7 +40,7 @@ import { ErrorCode, Message, asResult, asTranslation, fail } from "../lib/protoc
 import { copyCombo, keeping, madeSelection, touchPointer } from "../lib/selection.js";
 import { sentenceAround } from "../lib/sentence.js";
 import { MIRROR_KEY, asMirror, mirrorMatches } from "../lib/store/mirror.js";
-import { canSpeak, setSpeechOff, speak, speaking, stop as stopSpeaking } from "../lib/tts.js";
+import { canSpeakLang, setSpeechOff, speak, speaking, stop as stopSpeaking } from "../lib/tts.js";
 import { clear, mark, paint, phraseAt, unmark } from "./highlighter.js";
 import { blockTextAround, findable } from "./scan.js";
 import { claimsNativeSelection, clearSelection, releaseMouse, startSelect, stopSelect } from "./select.js";
@@ -110,12 +110,17 @@ let anchorRange = null;
  * every opening rather than once at startup: a device without the API never
  * shows the button, and neither does a reader who switched reading aloud off
  * in the settings (D148) - a flip that reaches an open page through the same
- * storage read as everything else here (`loadVocabulary`).
+ * storage read as everything else here (`loadVocabulary`) - nor a device
+ * whose only voices for the language are the browser's network ones (D155).
+ * That last question is asked of the language the press would read in, the
+ * way the press decides it: the document's own in the no-translation trim,
+ * the pair's otherwise.
  *
  * @returns {import("./tooltip.js").Action[]}
  */
 function speakActions() {
-  return canSpeak() ? ["speak"] : [];
+  const lang = (noTranslation ? quietVoice?.()?.lang : undefined) ?? ttsLang;
+  return canSpeakLang(lang) ? ["speak"] : [];
 }
 
 /**
