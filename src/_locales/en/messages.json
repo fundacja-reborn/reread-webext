@@ -885,6 +885,11 @@
   "options_bubble_scale_hint": {
     "message": "The size of the translation bubble - its text and its buttons - on ordinary pages and in the reader alike."
   },
+  "options_tts": { "message": "Reading aloud" },
+  "options_tts_hint": {
+    "message": "With this off, nothing reads aloud: the speaker leaves the bubble and the lists, the Read-aloud button leaves the reader, and the voice and speed rows below fold away - your choices in them are kept.",
+    "description": "Under the reading-aloud switch on the settings page (D148). The two rows it refers to are the voice select and the reading speed, which hide while the switch is off."
+  },
   "options_tts_voice": { "message": "Voice for reading aloud" },
   "options_tts_default": { "message": "Browser default" },
   "options_tts_listen": { "message": "Listen" },

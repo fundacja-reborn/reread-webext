@@ -760,6 +760,10 @@
   "options_bubble_scale_hint": {
     "message": "La taille de la bulle de traduction - son texte et ses boutons - sur les pages ordinaires comme dans le lecteur."
   },
+  "options_tts": { "message": "Lecture à voix haute" },
+  "options_tts_hint": {
+    "message": "Si c'est désactivé, rien n'est lu à voix haute : le haut-parleur disparaît de la bulle et des listes, le bouton « Lire à voix haute » du lecteur, et les lignes de la voix et de la vitesse ci-dessous se replient - les choix qui y sont faits sont conservés."
+  },
   "options_tts_voice": { "message": "Voix de lecture" },
   "options_tts_default": { "message": "Voix par défaut du navigateur" },
   "options_tts_listen": { "message": "Écouter" },

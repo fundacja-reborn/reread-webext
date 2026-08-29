@@ -15,7 +15,7 @@ Works in Firefox (desktop and Android) and in Chrome/Chromium. **Install it from
 - **Bubble on selection.** Select a word or phrase to see its translation. The engine (Bergamot - the technology behind Firefox's built-in page translation) ships inside the package and runs on your device, so translation works even in airplane mode.
 - **About a hundred language pairs.** Models are downloaded once from the settings page - or added from your own files - and stored locally; an installed pair shows an Update button when Mozilla publishes a new build.
 - **Dictionaries beside the engine.** A translation model has to pick one meaning; a dictionary lists them all. StarDict dictionaries - a catalogue of more than four hundred WikDict pairs installable with one click, or your own files - appear in the bubble under **More**, and clicking a line attaches that meaning to the saved phrase. Install several and two arrows on the settings page decide which of them answers first.
-- **Read aloud.** A phrase from the bubble, or a whole article in the reader - with live highlighting of the word being spoken, pause/resume, sentence skip and speed control. Voices are the browser's own, configurable per language.
+- **Read aloud.** A phrase from the bubble, or a whole article in the reader - with live highlighting of the word being spoken, pause/resume, sentence skip and speed control. Voices are the browser's own, configurable per language. A switch in the settings turns reading aloud off altogether - no speaker in the bubble, no Read-aloud button in the reader.
 
 **Vocabulary**
 

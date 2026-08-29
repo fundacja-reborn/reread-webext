@@ -30,12 +30,43 @@
  */
 
 /**
- * @returns {boolean} whether this context can speak at all - false in the
- *   tests, and on the day a browser ships without the API the button simply
- *   never appears
+ * @returns {boolean} whether this context has the API at all - false in the
+ *   tests, and on the day a browser ships without it nothing here is ever
+ *   asked to speak
+ */
+export function speechSupported() {
+  return typeof globalThis.speechSynthesis !== "undefined";
+}
+
+/**
+ * The reading-aloud switch (D148), mirrored from the settings by every page
+ * that speaks: the content script, the reader, the saved phrases and the
+ * settings page each hand the stored value down as they read their config.
+ * Here rather than in each of them, because the one question every speaker
+ * already asks is `canSpeak`, and a switch folded into that question reaches
+ * every button, every row and every key at once - and `speak` itself, so
+ * nothing left over on a screen drawn before the flip can talk.
+ */
+let switchedOff = false;
+
+/**
+ * @param {boolean} off whether reading aloud is switched off in the settings
+ */
+export function setSpeechOff(off) {
+  switchedOff = off;
+  // A voice mid-phrase when the switch lands is a voice that was just asked
+  // to be quiet.
+  if (off) stop();
+}
+
+/**
+ * @returns {boolean} whether this context may speak: the API exists and the
+ *   reader has not switched reading aloud off. What every speaker, button
+ *   and row asks before it offers a voice; `speechSupported` is the bare
+ *   API question, for the listeners that only ever watch the engine.
  */
 export function canSpeak() {
-  return typeof globalThis.speechSynthesis !== "undefined";
+  return speechSupported() && !switchedOff;
 }
 
 /**

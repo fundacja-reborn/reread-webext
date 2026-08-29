@@ -748,6 +748,10 @@
   "options_bubble_scale_hint": {
     "message": "El tamaño de la burbuja de traducción - su texto y sus botones - tanto en páginas normales como en la vista de lectura."
   },
+  "options_tts": { "message": "Lectura en voz alta" },
+  "options_tts_hint": {
+    "message": "Con esto desactivado, nada se lee en voz alta: el altavoz desaparece de la burbuja y de las listas, el botón «Leer en voz alta» de la vista de lectura, y las filas de voz y velocidad de abajo se pliegan - las elecciones hechas en ellas se conservan."
+  },
   "options_tts_voice": { "message": "Voz de lectura" },
   "options_tts_default": { "message": "Voz predeterminada del navegador" },
   "options_tts_listen": { "message": "Escuchar" },

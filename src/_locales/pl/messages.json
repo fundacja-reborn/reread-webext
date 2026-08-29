@@ -947,6 +947,10 @@
   "options_bubble_scale_hint": {
     "message": "Wielkość dymka tłumaczenia - jego tekstu i przycisków - na zwykłych stronach i w widoku czytania."
   },
+  "options_tts": { "message": "Czytanie na głos" },
+  "options_tts_hint": {
+    "message": "Gdy to jest wyłączone, nic nie czyta na głos: głośnik znika z dymka i z list, przycisk „Czytaj na głos” z widoku czytania, a wiersze głosu i tempa poniżej się zwijają - wybory w nich zostają."
+  },
   "options_tts_voice": { "message": "Głos lektora" },
   "options_tts_default": { "message": "Domyślny głos przeglądarki" },
   "options_tts_listen": { "message": "Posłuchaj" },

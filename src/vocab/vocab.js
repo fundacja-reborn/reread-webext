@@ -34,7 +34,16 @@ import { MIRROR_KEY } from "../lib/store/mirror.js";
 import { exportFilename, fromTsv, pairFromFilename, toTsv } from "../lib/store/tsv.js";
 import { listPairs, listPhrases } from "../lib/store/vocab.js";
 import { watchToolbarScheme } from "../lib/theme-icon.js";
-import { canSpeak, primaryLanguage, speak, speaking, stop as stopSpeaking, voicesFor } from "../lib/tts.js";
+import {
+  canSpeak,
+  primaryLanguage,
+  setSpeechOff,
+  speak,
+  speaking,
+  speechSupported,
+  stop as stopSpeaking,
+  voicesFor,
+} from "../lib/tts.js";
 import { listView, markSegments, newestFirst, pairChoicesFor } from "./list-view.js";
 
 // First, so the static text is already the catalogue's language when it shows.
@@ -257,6 +266,13 @@ function transferStatus(text, tone) {
  */
 function adoptConfig(fresh) {
   config = fresh;
+  // The reading-aloud switch (D148), before anything below asks `canSpeak`:
+  // the two voice rows fold with it, a phrase being read falls silent, and
+  // the rows' speakers follow on the next draw (the storage listener redraws
+  // the list when the answer moved).
+  setSpeechOff(fresh.ttsOff);
+  if (voiceSetting !== null) voiceSetting.hidden = !canSpeak();
+  if (rateSetting !== null) rateSetting.hidden = !canSpeak();
   applyReading(document.documentElement, fresh.reader);
   if (sizeValue !== null) sizeValue.textContent = String(fresh.reader.fontSize);
   if (rateValue !== null) rateValue.textContent = `${(fresh.ttsRate / 100).toFixed(1)}×`;
@@ -992,14 +1008,11 @@ voiceChoice?.addEventListener("change", () => {
   void writeConfig({ ttsVoices: map }).then(adoptConfig);
 });
 
-// The voice rows exist only where they can do something, and the engine's
-// voice list arrives on its own schedule - after first paint on most
-// platforms, never at all on some (Android speaks anyway, see lib/tts.js).
-if (canSpeak()) {
-  if (voiceSetting !== null) voiceSetting.hidden = false;
-  if (rateSetting !== null) rateSetting.hidden = false;
-  speechSynthesis.addEventListener("voiceschanged", renderVoiceChoice);
-}
+// The engine's voice list arrives on its own schedule - after first paint on
+// most platforms, never at all on some (Android speaks anyway, see
+// lib/tts.js). The bare API question, not `canSpeak`: the listener watches
+// the engine, and the voice rows follow the settings (`adoptConfig`).
+if (speechSupported()) speechSynthesis.addEventListener("voiceschanged", renderVoiceChoice);
 
 // The reading-list row goes through the background exactly as the popup's
 // does: `openLibrary` points the reader at nothing and raises its one tab
@@ -1117,8 +1130,12 @@ webext().storage.onChanged.addListener((changes, area) => {
   // the difference between nothing and a flash per stepper press.
   void readConfig().then((fresh) => {
     const pair = `${fresh.sourceLang}${fresh.targetLang}`;
+    const spoke = canSpeak();
     adoptConfig(fresh);
     if (pair !== shownPair) void reload();
+    // The rows draw their speakers as they are made: the reading-aloud switch
+    // moving (D148) is the one dress change worth a redraw.
+    else if (spoke !== canSpeak()) renderList();
   });
 });
 
