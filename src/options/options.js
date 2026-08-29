@@ -74,7 +74,7 @@ import {
 } from "../lib/store/library-copy.js";
 import { marksInBackup, readMarksBackup } from "../lib/store/marks-backup.js";
 import { watchToolbarScheme } from "../lib/theme-icon.js";
-import { canSpeak, setSpeechOff, speak, speechSupported, voicesFor } from "../lib/tts.js";
+import { canSpeak, canSpeakLang, setSpeechOff, speak, speechSupported, voicesFor } from "../lib/tts.js";
 import {
   dictionaryRows,
   filterActive,
@@ -99,6 +99,10 @@ let running = null;
 // First, so every row and status below lands on a page already speaking the
 // catalogue's language.
 localizePage();
+// Then the descriptions fold (D155) - after the catalogue's text is in them,
+// because whether a note overflows its two lines is a question about the
+// text it has now.
+foldNotes();
 // The toolbar icon follows the browser's scheme where the manifest cannot
 // say so (Chromium, no theme_icons there) - a no-op on Firefox.
 watchToolbarScheme();
@@ -420,9 +424,93 @@ function renderVoice() {
     select.append(option);
   }
 
+  // The device lists voices, and none of them reads the pair's language
+  // offline (D155): the picker has its default line alone, the sentence
+  // under the note says why, and Listen - which would be refused - waits.
+  const mute = canSpeak() && source !== null && !canSpeakLang(source);
+  const voiceStatus = document.getElementById("tts-voice-status");
+  if (voiceStatus !== null) {
+    voiceStatus.textContent = mute ? t("speech_no_offline_voice") : "";
+    voiceStatus.hidden = !mute;
+  }
+
   select.disabled = !canSpeak();
   const listen = document.getElementById("tts-listen");
-  if (listen instanceof HTMLButtonElement) listen.disabled = !canSpeak();
+  if (listen instanceof HTMLButtonElement) listen.disabled = !canSpeak() || mute;
+}
+
+/**
+ * The descriptions under the rows fold to two lines (D155): a settings page
+ * is a list to scan, and a whole paragraph under every switch made it a page
+ * to read. Each note marked `data-fold` is boxed with a chevron cloned from
+ * the page's template; the box opens and closes on a press anywhere in it
+ * (a link inside keeps its own meaning), the chevron is the button a keyboard
+ * and a screen reader get, and it stands only where the text really overflows
+ * its two lines - measured, and measured again whenever the note's size moves
+ * (a resize, a row shown by a switch, a font arriving), because a chevron over
+ * a note that fits promises more where there is none. Screen readers hear the
+ * whole text either way: the fold is a clip, not a removal.
+ */
+function foldNotes() {
+  const chevron = document.getElementById("note-chevron");
+  const observer =
+    typeof ResizeObserver === "function"
+      ? new ResizeObserver((entries) => {
+          for (const entry of entries) judgeFold(entry.target);
+        })
+      : null;
+
+  let count = 0;
+  for (const note of document.querySelectorAll("p.row-note[data-fold]")) {
+    if (!(note instanceof HTMLParagraphElement) || note.parentElement === null) continue;
+    count += 1;
+    // The chevron names what it opens; a note without an id gets one.
+    if (note.id === "") note.id = `note-${count}`;
+
+    const box = element("div", "note-fold");
+    box.dataset["folded"] = "";
+    note.parentElement.insertBefore(box, note);
+    box.append(note);
+
+    const toggle = element("button", "note-toggle");
+    toggle.setAttribute("type", "button");
+    toggle.hidden = true;
+    toggle.setAttribute("aria-expanded", "false");
+    toggle.setAttribute("aria-controls", note.id);
+    toggle.setAttribute("aria-label", t("options_note_more"));
+    if (chevron instanceof HTMLTemplateElement) toggle.append(chevron.content.cloneNode(true));
+    box.append(toggle);
+
+    box.addEventListener("click", (event) => {
+      // A link inside the note is a door of its own, not a handle on the fold.
+      if (event.target instanceof Element && event.target.closest("a") !== null) return;
+      if (!("long" in box.dataset)) return;
+      const opening = "folded" in box.dataset;
+      if (opening) delete box.dataset["folded"];
+      else box.dataset["folded"] = "";
+      toggle.setAttribute("aria-expanded", String(opening));
+      judgeFold(note);
+    });
+
+    observer?.observe(note);
+    judgeFold(note);
+  }
+}
+
+/**
+ * Whether a folded note holds more than its two lines show, and the chevron
+ * with it. An open note is left alone - it is judged again when it folds.
+ *
+ * @param {Element} note
+ */
+function judgeFold(note) {
+  const box = note.parentElement;
+  if (box === null || !("folded" in box.dataset)) return;
+  const long = note.scrollHeight > note.clientHeight + 1;
+  if (long) box.dataset["long"] = "";
+  else delete box.dataset["long"];
+  const toggle = box.querySelector(".note-toggle");
+  if (toggle instanceof HTMLElement) toggle.hidden = !long;
 }
 
 /**

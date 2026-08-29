@@ -158,12 +158,18 @@
            throughout this file - steps out of the way. The note under it is
            the promise the switch stands on: presentation only, nothing
            deleted, everything back on the next press. -->
+      <!-- `data-fold` on this note and on every row note below it (D155):
+           the page shows two lines of each with a chevron, and the whole
+           text one press away - `foldNotes` in options.js boxes them, with
+           the glyph from the template at the end of this file. The status
+           lines the page fills itself are not marked: they are short, and
+           they are answers, not descriptions. -->
       <div class="row">
         <label class="row-toggle">
           <span class="row-name" data-i18n="options_no_translation">Use without translation</span>
           <input type="checkbox" id="no-translation" />
         </label>
-        <p class="row-note" data-i18n="options_no_translation_hint">
+        <p class="row-note" data-fold data-i18n="options_no_translation_hint">
           Hides translation features (bubble, underlines, saved phrases). Ideal for reading in your
           native language. The reader, offline reading list, highlighter and dictionaries remain
           active. Your saved data is not deleted and will return when you turn this off.
@@ -182,7 +188,7 @@
           <span class="row-name" data-i18n="options_bubble_off">No bubble when selecting text</span>
           <input type="checkbox" id="bubble-off" />
         </label>
-        <p class="row-note" data-i18n="options_bubble_off_hint">
+        <p class="row-note" data-fold data-i18n="options_bubble_off_hint">
           With this on, selecting text on an ordinary page does nothing at all - open a page in the
           reader from re/read's button or with Alt+Shift+R. In the reader a selection is only a
           highlight for the moment: no bubble opens, a tap or Escape clears it, and Ctrl+C or Cmd+C
@@ -197,7 +203,7 @@
       <div class="row row-stack translation-only">
         <label class="row-name" for="pair" data-i18n="language_pair">Language pair</label>
         <select id="pair"></select>
-        <p class="row-note">
+        <p class="row-note" data-fold>
           <span data-i18n="options_pair_hint"
             >Shows the language pairs downloaded to this device. To add new languages, download
             them in the</span
@@ -224,7 +230,7 @@
              weighs, and on disk a dictionary is one database row per word
              and per other spelling (`lib/dict/store.js`) - measured on a
              145 MB dictionary, 705 MB of database. -->
-        <p class="row-note" data-i18n="options_storage_how">
+        <p class="row-note" data-fold data-i18n="options_storage_how">
           Disk space used by the extension. Dictionaries take up more space than their file size
           because of the database structure. Deleting an article or book completely removes its
           text, images, highlights, notes and reading progress.
@@ -252,7 +258,7 @@
           <span class="row-name" data-i18n="options_tts">Reading aloud</span>
           <input type="checkbox" id="tts" />
         </label>
-        <p class="row-note" data-i18n="options_tts_hint">
+        <p class="row-note" data-fold data-i18n="options_tts_hint">
           Enables the text-to-speech function. Turning this off hides all read-aloud buttons in the
           bubble, lists, and the reader.
         </p>
@@ -261,21 +267,24 @@
            device's voices for the pair's source language, and the choice is
            stored per language, so switching pairs keeps it. The sample the
            Listen button speaks is digits, because digits exist in every
-           language the engine could offer. The note's exception is honest:
-           `voicesFor` filters by language only, so in Chrome the list also
-           carries Google's network voices (localService false). -->
+           language the engine could offer. Offline voices only (D155):
+           `voicesFor` keeps the engine's network voices out of the list, and
+           the status line under the note says when that leaves nothing for
+           the language. -->
       <div class="row row-stack tts-only">
         <label class="row-name" for="tts-voice" data-i18n="options_tts_voice">Voice for reading aloud</label>
         <p class="inline">
           <select id="tts-voice"></select>
           <button type="button" id="tts-listen" data-i18n="options_tts_listen">Listen</button>
         </p>
-        <p class="row-note" data-i18n="options_tts_voice_hint">
-          Select the voice used to read phrases and articles. The voices are built into your system
-          and speak on this device; no data is sent to the internet. Exception: the online voices
-          some browsers add (in Chrome, the voices named "Google") send the text to the browser
-          maker's server.
+        <p class="row-note" data-fold data-i18n="options_tts_voice_hint">
+          Select the voice used to read phrases and articles. Only voices that speak offline are
+          offered: speech is made on this device and nothing is sent to the internet.
         </p>
+        <!-- Filled only where it is true (D155): the device lists voices and
+             none of them reads the pair's language offline - the picker above
+             has its default line alone, and Listen is disabled. -->
+        <p class="row-note" id="tts-voice-status" hidden></p>
       </div>
       <!-- How fast that voice reads (D87), for the phrase in the bubble and for
            a whole article in the reader alike - one setting, because what is
@@ -302,7 +311,7 @@
           <span class="row-name" data-i18n="options_reader_only">Only in the reader</span>
           <input type="checkbox" id="reader-only" />
         </label>
-        <p class="row-note" data-i18n="options_reader_only_hint">
+        <p class="row-note" data-fold data-i18n="options_reader_only_hint">
           Limits translation to the reader. Selecting text on an ordinary web page will only show an
           option to open the page in the reader. On Android and iOS it is on by default.
         </p>
@@ -315,7 +324,7 @@
           <span class="row-name" data-i18n="options_keep_articles">Save in the offline reading list by default</span>
           <input type="checkbox" id="keep-articles" />
         </label>
-        <p class="row-note" data-i18n="options_keep_articles_hint">
+        <p class="row-note" data-fold data-i18n="options_keep_articles_hint">
           Automatically saves every page you open in the reader for offline reading. Your saved
           pages, highlights and reading progress are kept safe even if the original website changes
           or disappears.
@@ -332,7 +341,7 @@
           <span class="row-name" data-i18n="options_library_copy">Copy of the reading list</span>
           <input type="checkbox" id="library-copy" />
         </label>
-        <p class="row-note" data-i18n="options_library_copy_hint">
+        <p class="row-note" data-fold data-i18n="options_library_copy_hint">
           Creates a backup of your reading list to protect it against automatic browser cleanups
           and database errors. This doubles the disk space the list takes, but keeps your saved
           articles safe if the database is lost.
@@ -346,7 +355,7 @@
           <span class="row-name" data-i18n="quiet_bubble">Hide bubble actions by default</span>
           <input type="checkbox" id="quiet-bubble" />
         </label>
-        <p class="row-note" data-i18n="options_quiet_bubble_hint">
+        <p class="row-note" data-fold data-i18n="options_quiet_bubble_hint">
           Shows only the translated text in the bubble. The action buttons (such as copy or save)
           appear only when you click or tap the bubble.
         </p>
@@ -364,7 +373,7 @@
           <output id="bubble-scale-value">100%</output>
           <button type="button" id="bubble-scale-up" title="Larger" data-i18n-title="reader_larger">+</button>
         </p>
-        <p class="row-note" data-i18n="options_bubble_scale_hint">
+        <p class="row-note" data-fold data-i18n="options_bubble_scale_hint">
           Adjusts the text and button size inside the translation bubble across all pages.
         </p>
       </div>
@@ -659,6 +668,23 @@
         >
       </p>
     </footer>
+
+    <!-- The chevron every folded description wears (D155), cloned into its
+         button by `foldNotes` in options.js - drawn once here so the markup
+         says what the buttons look like. Points down while the note is
+         folded; the stylesheet turns it up while the note is open. -->
+    <template id="note-chevron">
+      <svg class="page-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+        <path
+          d="M3.5 6 8 10.5 12.5 6"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.3"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+    </template>
 
     <script src="options.js" defer></script>
   </body>

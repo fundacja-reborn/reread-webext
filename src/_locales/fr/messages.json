@@ -855,16 +855,18 @@
   "options_bubble_scale_hint": {
     "message": "Ajuste la taille du texte et des boutons dans la bulle de traduction sur toutes les pages."
   },
+  "options_note_more": { "message": "Afficher la description complète" },
   "options_tts": { "message": "Lecture à voix haute" },
   "options_tts_hint": {
     "message": "Active la lecture à voix haute. Désactiver cette option masque tous les boutons de lecture dans la bulle, les listes et le lecteur."
   },
   "options_tts_voice": { "message": "Voix de lecture" },
-  "options_tts_default": { "message": "Voix par défaut du navigateur" },
+  "options_tts_default": { "message": "Voix par défaut" },
   "options_tts_listen": { "message": "Écouter" },
   "options_tts_voice_hint": {
-    "message": "Choisissez la voix utilisée pour lire les phrases et les articles. Les voix sont intégrées à votre système et parlent sur cet appareil ; aucune donnée n'est envoyée sur Internet. Exception : les voix en ligne ajoutées par certains navigateurs (dans Chrome, les voix nommées « Google ») envoient le texte au serveur de l'éditeur du navigateur."
+    "message": "Choisissez la voix utilisée pour lire les phrases et les articles. Seules les voix qui parlent hors ligne sont proposées : la parole est produite sur cet appareil et rien n'est envoyé sur Internet."
   },
+  "speech_no_offline_voice": { "message": "Cet appareil n'a pas de voix hors ligne pour cette langue." },
   "options_tts_rate": { "message": "Vitesse de lecture" },
   "options_models_heading": { "message": "Modèles de traduction" },
   "options_models_intro": {

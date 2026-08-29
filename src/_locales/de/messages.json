@@ -820,16 +820,18 @@
   "options_bubble_scale_hint": {
     "message": "Passt die Größe von Text und Schaltflächen in der Sprechblase auf allen Seiten an."
   },
+  "options_note_more": { "message": "Die ganze Beschreibung anzeigen" },
   "options_tts": { "message": "Vorlesen" },
   "options_tts_hint": {
     "message": "Aktiviert die Vorlesefunktion (Text-to-Speech). Ist sie ausgeschaltet, werden alle Vorlese-Schaltflächen in der Sprechblase, in den Listen und in der Leseansicht ausgeblendet."
   },
   "options_tts_voice": { "message": "Vorlesestimme" },
-  "options_tts_default": { "message": "Standardstimme des Browsers" },
+  "options_tts_default": { "message": "Standardstimme" },
   "options_tts_listen": { "message": "Anhören" },
   "options_tts_voice_hint": {
-    "message": "Wählen Sie die Stimme zum Vorlesen von Phrasen und Artikeln. Die Stimmen sind in Ihrem System integriert und sprechen auf diesem Gerät; es werden keine Daten ins Internet gesendet. Ausnahme: Online-Stimmen, die manche Browser hinzufügen (in Chrome die Stimmen namens „Google“), senden den Text an den Server des Browserherstellers."
+    "message": "Wählen Sie die Stimme zum Vorlesen von Phrasen und Artikeln. Angeboten werden nur Stimmen, die offline sprechen: Die Sprache entsteht auf diesem Gerät, und nichts wird ins Internet gesendet."
   },
+  "speech_no_offline_voice": { "message": "Dieses Gerät hat keine Offline-Stimme für diese Sprache." },
   "options_tts_rate": { "message": "Lesegeschwindigkeit" },
   "options_models_heading": { "message": "Übersetzungsmodelle" },
   "options_models_intro": {

@@ -1118,16 +1118,18 @@
   "options_bubble_scale_hint": {
     "message": "Zmienia rozmiar tekstu i przycisków w dymku tłumaczenia na wszystkich stronach."
   },
+  "options_note_more": { "message": "Pokaż cały opis" },
   "options_tts": { "message": "Czytanie na głos" },
   "options_tts_hint": {
     "message": "Włącza funkcję czytania na głos. Wyłączenie tej opcji ukrywa wszystkie przyciski czytania w dymku, na listach i w widoku czytania."
   },
   "options_tts_voice": { "message": "Głos lektora" },
-  "options_tts_default": { "message": "Domyślny głos przeglądarki" },
+  "options_tts_default": { "message": "Głos domyślny" },
   "options_tts_listen": { "message": "Posłuchaj" },
   "options_tts_voice_hint": {
-    "message": "Wybierz głos do czytania fraz i artykułów. Głosy są wbudowane w Twój system i mówią na tym urządzeniu; żadne dane nie są wysyłane do internetu. Wyjątek: głosy sieciowe dodawane przez niektóre przeglądarki (w Chrome głosy o nazwie „Google”) wysyłają tekst na serwer producenta przeglądarki."
+    "message": "Wybierz głos do czytania fraz i artykułów. Do wyboru są tylko głosy działające offline: mowa powstaje na tym urządzeniu i nic nie jest wysyłane do internetu."
   },
+  "speech_no_offline_voice": { "message": "To urządzenie nie ma głosu offline dla tego języka." },
   "options_tts_rate": { "message": "Tempo czytania" },
   "options_models_heading": { "message": "Modele tłumaczeniowe" },
   "options_models_intro": {

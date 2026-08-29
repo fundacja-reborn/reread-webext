@@ -232,6 +232,67 @@ h2 {
   height: 1.4rem;
 }
 
+/* --- the folded descriptions (D155) --- */
+
+/* A note's box: the text, clipped to two lines while folded, and the chevron
+   beside it. The box takes the note's place in the row's grid; the note
+   itself keeps `.row-note`'s dress. A press anywhere in the box opens or
+   closes it - but only a box with something folded away is a handle, and
+   only that one says so with the pointer. */
+.note-fold {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.25rem;
+}
+
+.note-fold[data-long] {
+  cursor: pointer;
+}
+
+.note-fold > .row-note {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* The clip: the first two lines and an ellipsis. Visual only - the text is
+   all there for a screen reader, and `scrollHeight` still measures it, which
+   is how the page knows whether the chevron has anything to promise. */
+.note-fold[data-folded] > .row-note {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+/* The chevron: the quiet dressing of the row buttons, a touch target as tall
+   as the two lines it stands beside, its glyph at the row's right edge the
+   way the checkboxes stand (the hit box reaches past it). Down while folded,
+   up while open - turned, not swapped, and without a transition: an e-ink
+   panel draws a turn as a smear. The element is in the selector so this
+   outranks `.row button` above. */
+button.note-toggle {
+  flex: none;
+  min-width: 44px;
+  min-height: 44px;
+  margin: 0 -0.85rem 0 0;
+  padding: 0;
+  border-color: transparent;
+  color: var(--page-muted);
+  transition: none;
+}
+
+.note-toggle:hover,
+.note-toggle:focus-visible {
+  border-color: var(--page-border);
+  background: color-mix(in srgb, var(--page-fg) 6%, transparent);
+  color: var(--page-fg);
+}
+
+.note-fold:not([data-folded]) .note-toggle .page-icon {
+  transform: rotate(180deg);
+}
+
 /* --- the refresh line: a quiet button and the list's date --- */
 
 /* The button keeps the shared secondary look on purpose: refreshing is the

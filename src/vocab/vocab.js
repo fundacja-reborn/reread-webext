@@ -223,12 +223,18 @@ function speakPhrase(phrase) {
   sounding = phrase.normalized;
   // The voice is stored under the primary subtag (the rule every speaker of
   // this extension shares), so the row's language is narrowed the same way.
-  speak(
+  const spoke = speak(
     phrase.phrase,
     phrase.langFrom,
     config.ttsVoices[primaryLanguage(phrase.langFrom)],
     config.ttsRate / 100,
   );
+  // Refused for want of an offline voice (D155): said in the page's own
+  // status line, because a speaker that does nothing says nothing.
+  if (!spoke) {
+    sounding = null;
+    status(t("speech_no_offline_voice"), "error");
+  }
 }
 
 /**

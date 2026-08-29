@@ -1014,17 +1014,25 @@
   "options_bubble_scale_hint": {
     "message": "Adjusts the text and button size inside the translation bubble across all pages."
   },
+  "options_note_more": {
+    "message": "Show the full description",
+    "description": "The accessible name of the chevron that opens a folded description on the settings page (D155); `aria-expanded` carries the state."
+  },
   "options_tts": { "message": "Reading aloud" },
   "options_tts_hint": {
     "message": "Enables the text-to-speech function. Turning this off hides all read-aloud buttons in the bubble, lists, and the reader.",
     "description": "Under the reading-aloud switch on the settings page (D148). Off, the voice and speed rows below it hide as well."
   },
   "options_tts_voice": { "message": "Voice for reading aloud" },
-  "options_tts_default": { "message": "Browser default" },
+  "options_tts_default": { "message": "Default voice" },
   "options_tts_listen": { "message": "Listen" },
   "options_tts_voice_hint": {
-    "message": "Select the voice used to read phrases and articles. The voices are built into your system and speak on this device; no data is sent to the internet. Exception: the online voices some browsers add (in Chrome, the voices named \"Google\") send the text to the browser maker's server.",
-    "description": "The exception is real: the voice select does not filter out voices the browser marks as remote (speechSynthesis localService false) - in Chrome the \"Google ...\" voices, which synthesize on Google's servers."
+    "message": "Select the voice used to read phrases and articles. Only voices that speak offline are offered: speech is made on this device and nothing is sent to the internet.",
+    "description": "Under the voice select on the settings page. True by construction (D155): `voicesFor` in lib/tts.js keeps out every voice the engine marks as remote (localService false), and nothing speaks through one."
+  },
+  "speech_no_offline_voice": {
+    "message": "This device has no offline voice for this language.",
+    "description": "Where a speaker was refused for want of an offline voice (D155): the device lists voices, and none of them reads the language without the network. Under the voice select on the settings page, in the reader's notice line, in the saved phrases page's status line."
   },
   "options_tts_rate": { "message": "Reading speed" },
   "options_models_heading": { "message": "Translation models" },
