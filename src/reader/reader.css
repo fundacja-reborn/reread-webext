@@ -1273,26 +1273,27 @@ a.marks-act {
   white-space: nowrap;
 }
 
-/* The document-wide deletion in the missing-document note (D150): a quiet
-   text act on its own line under the sentence that names and counts the
-   document - words, because "all" is a scope no glyph can carry. The same
-   dress as the list's Delete: no resting frame, muted, a 44px hit box. */
+/* The document-wide deletion in the missing-document note (D150): a text
+   act on its own line under the sentence that names and counts the document
+   - words, because "all" is a scope no glyph can carry. Framed at rest, in
+   the page's own button dress: the list's Delete may go quiet because its
+   place in the acts column says "control", but under a paragraph of the
+   same face and colour a quiet button read as a third line of the note
+   (Michał's smoke, 2026-08-29). The frame is thin and grey; the armed state
+   below turns it the accent, so the two states stay apart. A block on a line
+   of its own, never trailing the sentence: inline, the shorter "Sure?" fitted
+   at the end of the note's last line and the armed button jumped up beside
+   the text, away from the finger that had just pressed it; the script holds
+   the width meanwhile, so the box shrinks to nothing either. */
 .marks-delete-all {
-  display: inline-block;
-  margin-top: 0.35rem;
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  margin-top: 0.5rem;
   min-height: 44px;
   padding: 0.35rem 0.8rem;
-  border-color: transparent;
-  color: var(--page-muted);
   font: inherit;
   white-space: nowrap;
-}
-
-.marks-delete-all:hover,
-.marks-delete-all:focus-visible {
-  border-color: var(--page-border);
-  background: color-mix(in srgb, var(--page-fg) 6%, transparent);
-  color: var(--page-fg);
 }
 
 .marks-copy .icon-copied,
