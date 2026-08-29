@@ -390,6 +390,9 @@ button.page-mark:hover {
    finger-sized target. The interface font is said outright because the
    reader page reads in a serif. */
 .nav-menu {
+  /* Air under the last row: its line is gone (below), and the panel's paper
+     ended right at the row's foot (Michał's smoke, 2026-08-29). */
+  padding-bottom: 0.5rem;
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   font-size: 0.95rem;
   line-height: 1.5;
@@ -525,6 +528,19 @@ body:not(.reader):has(.panel-scrim:not([hidden])) :is(.nav-menu, .page-panel)::b
 
 :root:has(.panel-scrim:not([hidden])) {
   overflow-x: clip;
+}
+
+/* The bar and its panels stay in view while a panel is open (D153, Michał's
+   smoke, 2026-08-29): the dimmed page still scrolls, and the menu scrolled
+   away with it. Stuck for as long as the panel stands and not a moment
+   longer - these pages' bars are otherwise not sticky, for the reading
+   list's own reason (everything they lead to is at the top). The box is a
+   stacking context of its own once stuck, so it carries the lift above the
+   scrim itself; the reader's chrome does the same in reader.css. */
+body:not(.reader):has(.panel-scrim:not([hidden])) .page-chrome {
+  position: sticky;
+  top: 0;
+  z-index: 2;
 }
 
 /* --- the colophon (the settings' first, now every room that ends) --- */

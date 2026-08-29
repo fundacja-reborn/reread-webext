@@ -614,6 +614,28 @@
               <span id="library-export-pictures-label"></span>
             </label>
           </p>
+          <!--
+            The moment of consent: what the picked file holds, quoted before
+            anything is written - and import only ever adds; the file's rules
+            live in `lib/store/articles-file.js`. Right under the buttons,
+            with the two report lines after it, ahead of the prose (D153):
+            what a press did must be said where the press was - under the
+            hints and the fold a report stood a screen away from the button
+            (Michał's smoke, 2026-08-29).
+          -->
+          <div id="library-import-confirm" class="import-confirm" hidden>
+            <p id="library-import-summary"></p>
+            <ul id="library-import-sample" class="import-sample"></ul>
+            <p class="transfer">
+              <button type="button" id="library-import-run" data-i18n="action_import">Import</button>
+              <button type="button" id="library-import-cancel" data-i18n="action_cancel">Cancel</button>
+            </p>
+          </div>
+          <p id="library-transfer-status" class="status report" role="status"></p>
+          <!-- The book import speaks its own line: its progress ticks per
+               written part while the article import's reports stand still,
+               and the two must not overwrite each other mid-sentence. -->
+          <p id="book-import-status" class="status report" role="status"></p>
           <p class="hint" data-i18n="reader_transfer_accepts">
             Import reads the file it is given: a backup of the re/read article list (.json, or .zip
             with pictures), or an e-book (.epub).
@@ -650,24 +672,6 @@
             accept=".json,application/json,.zip,application/zip,.epub,application/epub+zip"
             hidden
           />
-          <!--
-            The moment of consent: what the picked file holds, quoted before
-            anything is written - and import only ever adds; the file's rules
-            live in `lib/store/articles-file.js`.
-          -->
-          <div id="library-import-confirm" class="import-confirm" hidden>
-            <p id="library-import-summary"></p>
-            <ul id="library-import-sample" class="import-sample"></ul>
-            <p class="transfer">
-              <button type="button" id="library-import-run" data-i18n="action_import">Import</button>
-              <button type="button" id="library-import-cancel" data-i18n="action_cancel">Cancel</button>
-            </p>
-          </div>
-          <p id="library-transfer-status" class="status report" role="status"></p>
-          <!-- The book import speaks its own line: its progress ticks per
-               written part while the article import's reports stand still,
-               and the two must not overwrite each other mid-sentence. -->
-          <p id="book-import-status" class="status report" role="status"></p>
         </section>
       </section>
 
@@ -698,14 +702,17 @@
         </div>
         <!-- The page's own line over the rows, the reading list's shape: the
              filter's count on the left while there is one, and on the right
-             the export the short way (D152, Michał's call) - the button under
-             the rows is a page away once the list is long. A quiet link,
-             there only while there is something to write. -->
+             the way down to the export (D152/D153) - the button stands under
+             the rows, a page away once the list is long; the reading list's
+             fold-row anchor, on the tools line. An anchor, not a second
+             button: two exports on one page put the report under the bar,
+             a page from the lower button (Michał's smoke, 2026-08-29).
+             Hidden with nothing to write, as the button greys. -->
         <div class="list-tools">
           <p class="hint" id="marks-count" hidden></p>
-          <button type="button" id="marks-export-top" class="quiet-link" data-i18n="reader_export_marks" hidden>
+          <a href="#marks-transfer" class="quiet-link" id="marks-transfer-link" data-i18n="reader_export_marks" hidden>
             Export highlights
-          </button>
+          </a>
         </div>
         <div id="marks-empty" class="empty" hidden></div>
         <ul id="marks-rows" class="library-rows marks-rows"></ul>
@@ -714,15 +721,20 @@
           <span class="pager-label" id="marks-page-label"></span>
           <button type="button" id="marks-next" data-i18n="pager_next">Next</button>
         </nav>
-        <!-- The pen's export again, here where the quotes are: the same .md
-             the reading list offers, cut to this page's documents - one
-             document when the page is scoped. Greyed with nothing to
-             write, the Export buttons' shared rule. -->
-        <p class="transfer marks-transfer">
-          <button type="button" id="marks-export" data-i18n="reader_export_marks">
-            Export highlights
-          </button>
-        </p>
+        <!-- The pen's export, here where the quotes are (the reading list's
+             transfer section offered it too until D152): the .md cut to this
+             page's documents - one document when the page is scoped. Greyed
+             with nothing to write, the Export buttons' shared rule. The line
+             under it says what the export wrote (D153) - right under the
+             press, where the transfer sections say it too. -->
+        <div id="marks-transfer" class="marks-transfer">
+          <p class="transfer">
+            <button type="button" id="marks-export" data-i18n="reader_export_marks">
+              Export highlights
+            </button>
+          </p>
+          <p id="marks-transfer-status" class="status report" role="status"></p>
+        </div>
       </section>
 
       <!-- A quote row's acts are cloned from these: the arrow that opens

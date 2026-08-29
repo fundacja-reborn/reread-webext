@@ -234,6 +234,15 @@ body.reader:has(#article:not([hidden])) .reader-chrome {
   z-index: 2;
 }
 
+/* And in the list and the highlights views, stuck for as long as a panel is
+   open (D153, Michał's smoke, 2026-08-29): the dimmed page still scrolls,
+   and the menu scrolled away with it. The other pages' `.page-chrome` does
+   the same in page.css. */
+body.reader:has(.panel-scrim:not([hidden])) .reader-chrome {
+  position: sticky;
+  top: 0;
+}
+
 /* The strip's paper runs edge to edge while everything visible keeps the
    column (Michał's reports, 2026-08-16): a pill sliding under a column-wide
    bar looked erased mid-air, so the background must reach the window's
@@ -1382,6 +1391,13 @@ a.marks-act {
    second line right above the button read as clutter (his follow-up). */
 .marks-transfer {
   margin-top: 3rem;
+  /* The anchor over the rows lands here (D153); the same room the list's
+     transfer section keeps under the window's edge. */
+  scroll-margin-top: 0.75rem;
+}
+
+.marks-transfer > .transfer {
+  margin-top: 0;
 }
 
 /* --- the shared pager, held to the same touch floor --- */
@@ -1611,11 +1627,9 @@ a.marks-act {
   margin: 0;
 }
 
-/* A quiet act dressed as a link, at the line's right end: the highlights
-   page's export over its rows (D152). A button rather than an anchor,
-   because the file is made on the press; dressed as a link, because a
-   download is what a link does - the reading list's fold-row anchor, on a
-   button, at the same finger of height. */
+/* A quiet link at the line's right end: the highlights page's way down to
+   its export (D152/D153) - the reading list's fold-row anchor, on the tools
+   line, at the same finger of height. */
 .quiet-link {
   display: inline-flex;
   align-items: center;

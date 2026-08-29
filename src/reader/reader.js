@@ -321,11 +321,11 @@ const marksNext = /** @type {HTMLButtonElement | null} */ (document.getElementBy
 const marksExportButton = /** @type {HTMLButtonElement | null} */ (
   document.getElementById("marks-export")
 );
-// The same export the short way, over the rows (D152), and the heading that
-// says whose quotes the page holds.
-const marksExportTop = /** @type {HTMLButtonElement | null} */ (
-  document.getElementById("marks-export-top")
-);
+// The way down to the export over the rows (D152/D153), the line under the
+// export button that says what it wrote, and the heading that says whose
+// quotes the page holds.
+const marksTransferLink = document.getElementById("marks-transfer-link");
+const marksTransferLine = document.getElementById("marks-transfer-status");
 const marksTitle = document.getElementById("marks-title");
 const marksCopyIcons = /** @type {HTMLTemplateElement | null} */ (
   document.getElementById("marks-copy-icons")
@@ -764,6 +764,22 @@ function transferStatus(text, tone) {
   transferLine.textContent = text;
   if (tone === undefined) delete transferLine.dataset["tone"];
   else transferLine.dataset["tone"] = tone;
+}
+
+/**
+ * The highlights page's own status line, under its export button (D153):
+ * what the export wrote, or why it could not - beside the press, the way
+ * the transfer sections' lines are. A notice under the bar stood a page
+ * away from the button (Michał's smoke, 2026-08-29).
+ *
+ * @param {string} text
+ * @param {"error"} [tone]
+ */
+function marksStatus(text, tone) {
+  if (marksTransferLine === null) return;
+  marksTransferLine.textContent = text;
+  if (tone === undefined) delete marksTransferLine.dataset["tone"];
+  else marksTransferLine.dataset["tone"] = tone;
 }
 
 /**
@@ -2791,6 +2807,9 @@ async function showMarks(scope, { fresh = false } = {}) {
   leaveDocView();
   document.body.dataset["view"] = "marks";
   marksShown = { scope };
+  // A report of the last visit's export is that visit's; the line starts
+  // clear, the transfer sections' way.
+  marksStatus("");
   if (fresh) {
     marksQuery = "";
     marksPage = 1;
@@ -3234,11 +3253,11 @@ async function refreshMarks() {
 
   // Exporting nothing would download an empty file; the button says so
   // first - the transfer section's own rule, over this page's scope. The
-  // link over the rows (D152) is the same act the short way - a long list
-  // puts the button a page away - and stands only while there is something
-  // to write.
+  // link over the rows leads down to the button (D152/D153) - a long list
+  // puts it a page away - and stands only while there is something to
+  // write.
   if (marksExportButton !== null) marksExportButton.disabled = view.total === 0;
-  if (marksExportTop !== null) marksExportTop.hidden = view.total === 0;
+  if (marksTransferLink !== null) marksTransferLink.hidden = view.total === 0;
 
   // "3 of 12" while the filter narrows the page down, like the list's line.
   if (marksCount !== null) {
@@ -3846,9 +3865,9 @@ async function markedDocs(wanted) {
  * The highlights as one Markdown page (D106), from the highlights page alone
  * since D152 (it stood in the list's transfer section too, a third button
  * there; the quotes' own page is where the act belongs - Michał's call): the
- * button under the rows and the link over them write the same file, cut to
- * the page's scope (D108). Failure speaks in the page notice - the transfer
- * section's status line lives in the list view, hidden here.
+ * button under the rows writes the file, cut to the page's scope (D108), and
+ * the link over the rows leads to the button. What was written, or why it
+ * could not be, is said in the line under the button (D153).
  */
 async function exportMarksPage() {
   try {
@@ -3856,12 +3875,9 @@ async function exportMarksPage() {
     const docs = await markedDocs((docId) => scope === null || docId === scope);
     if (docs.length === 0) return;
     const size = downloadFile(toMarksFile(docs), MARKS_FILENAME, "text/markdown");
-    // What was written, said in the notice (D153): the page has no status
-    // line of its own, and the notice stands under the bar wherever the
-    // press came from - the link over the rows or the button under them.
-    showNotice(plural(docs.length, "reader_export_marks_done", [MARKS_FILENAME, fileSize(size)]));
+    marksStatus(plural(docs.length, "reader_export_marks_done", [MARKS_FILENAME, fileSize(size)]));
   } catch {
-    showNotice(describeError(ErrorCode.INTERNAL));
+    marksStatus(describeError(ErrorCode.INTERNAL), "error");
   }
 }
 
@@ -4957,8 +4973,6 @@ marksRowsList?.addEventListener("click", (event) => {
 });
 
 marksExportButton?.addEventListener("click", () => void exportMarksPage());
-
-marksExportTop?.addEventListener("click", () => void exportMarksPage());
 
 noticeClose?.addEventListener("click", () => hideNotice());
 
