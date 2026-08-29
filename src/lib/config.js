@@ -65,6 +65,15 @@ export const CONFIG_KEY = "config";
  *   bubble keeps the speaker and the clipboard and loses the translation.
  *   Named for the off state so the default (`false`) is the extension as it
  *   has always been, and a stored `true` is always a deliberate press.
+ * @property {boolean} bubbleOff Whether, with translation off, selecting text
+ *   shows no bubble at all (D149): ordinary pages get nothing - not even the
+ *   launcher - and the reader's selection is a highlight for the moment and
+ *   nothing else. Only ever read under `translationOff`, exactly as the
+ *   settings page shows it: a sub-option of that switch, because with
+ *   translation on the bubble is the product, and a stored value under a
+ *   hidden row must never act. Asked for by a reader who selects text to keep
+ *   their place on the page, not to do anything with the words. Named for
+ *   the off state for `translationOff`'s reason.
  * @property {boolean} keepArticles Whether a page opened in the reader is kept
  *   in the offline reading list without being asked (D124). Default `true`:
  *   the reader's whole point is a copy that survives the original moving,
@@ -209,6 +218,7 @@ export const DEFAULTS = Object.freeze({
   disabledHosts: [],
   readerOnly: null,
   translationOff: false,
+  bubbleOff: false,
   keepArticles: true,
   libraryCopy: null,
   hideBubbleActions: false,
@@ -347,6 +357,7 @@ export function withDefaults(stored) {
     readerOnly: typeof raw["readerOnly"] === "boolean" ? raw["readerOnly"] : null,
     translationOff:
       typeof raw["translationOff"] === "boolean" ? raw["translationOff"] : DEFAULTS.translationOff,
+    bubbleOff: typeof raw["bubbleOff"] === "boolean" ? raw["bubbleOff"] : DEFAULTS.bubbleOff,
     // Default `true`, so it reaches profiles that predate the switch as well
     // as fresh ones: only a stored `false` is somebody having turned it off.
     keepArticles:
@@ -409,6 +420,7 @@ export async function readConfig() {
  * @property {string[]} [disabledHosts]
  * @property {boolean} [readerOnly]
  * @property {boolean} [translationOff]
+ * @property {boolean} [bubbleOff]
  * @property {boolean} [keepArticles]
  * @property {boolean} [libraryCopy]
  * @property {boolean} [hideBubbleActions]
@@ -508,18 +520,24 @@ export function effectiveLibraryCopy(config) {
  * nothing at all; with translation off every other page gets the launcher,
  * because the one thing left to offer a selection is the reader (the
  * reader-only question has dissolved - there is no translation in place to
- * choose against); reader-only mode gets the launcher too; and what remains
- * gets the full reading side. Here rather than in the content script so the
- * hierarchy sits under `node --test`.
+ * choose against) - or, with the bubble switched off as well (D149), nothing
+ * at all; reader-only mode gets the launcher too; and what remains gets the
+ * full reading side. Here rather than in the content script so the hierarchy
+ * sits under `node --test`.
  *
- * @param {Pick<Config, "disabledHosts" | "readerOnly" | "translationOff">} config
+ * @param {Pick<Config, "disabledHosts" | "readerOnly" | "translationOff" | "bubbleOff">} config
  * @param {string} os as `getPlatformInfo` or `osFrom` names it
  * @param {string} hostname the page's own, exact - the way `disabledHosts` stores them
  * @returns {"off" | "launcher" | "reading"}
  */
 export function pageMode(config, os, hostname) {
   if (config.disabledHosts.includes(hostname)) return "off";
-  if (config.translationOff) return "launcher";
+  // The no-bubble sub-option (D149) is the ladder's last rung: with nothing
+  // to offer a selection, the page is left entirely alone - the same silence
+  // a switched-off site gets - and the reader opens from the toolbar button
+  // or its keyboard shortcut instead. Read only under the trim, exactly as
+  // the settings page shows it: a stored value under a hidden row never acts.
+  if (config.translationOff) return config.bubbleOff ? "off" : "launcher";
   if (effectiveReaderOnly(config, os)) return "launcher";
   return "reading";
 }

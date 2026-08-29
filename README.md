@@ -50,6 +50,8 @@ Works in Firefox (desktop and Android) and in Chrome/Chromium. **Install it from
 
 re/read is also a plain reader. If you read in your own language and want just the clean reading view, the offline reading list, the highlighter, read-aloud and search, one switch in the settings - **Use without translation** - turns the translation half off: no translation bubble, no underlines, no model section. Dictionaries stay: install one for the language you read - a monolingual dictionary works - and selecting a word in the reader shows its definitions, spoken aloud on request in that language's voice. Selecting text on an ordinary page offers one thing, opening the page in the reader. Nothing is deleted: saved phrases and models stay on the device and come back the moment the switch does.
 
+A sub-option under that switch, **No bubble when selecting text**, goes one step further for people who select text to keep their place while reading: ordinary pages are left entirely alone - the reader opens from the toolbar button or with `Alt`+`Shift`+`R` - and in the reader a selection is only a highlight for the moment: no bubble, a tap or `Esc` clears it, `Ctrl`+`C` copies it.
+
 ## Install
 
 - **Chrome or Chromium 128 or newer** - [re/read in the Chrome Web Store](https://chromewebstore.google.com/detail/cdeoicfidedlcapagmimcmmeeoplfcla). Brave and Edge install it from the same page. The floor comes from `document.caretPositionFromPoint`, which touch and underline hit-testing stand on.

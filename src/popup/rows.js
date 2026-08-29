@@ -15,6 +15,7 @@
 
 /**
  * @typedef {object} PopupRows
+ * @property {boolean} site the switch for the site the popup opened over
  * @property {boolean} pair the language pair select
  * @property {boolean} setup the signpost that stands in the pair's place on a
  *   device with no model at all
@@ -27,12 +28,17 @@
  */
 
 /**
- * @param {{ translationOff: boolean, fresh: boolean }} state the setting, and
- *   whether this device holds no translation model at all
+ * @param {{ translationOff: boolean, bubbleOff: boolean, fresh: boolean }} state the two
+ *   settings, and whether this device holds no translation model at all
  * @returns {PopupRows}
  */
-export function popupRows({ translationOff, fresh }) {
+export function popupRows({ translationOff, bubbleOff, fresh }) {
   return {
+    // With the bubble switched off under the trim (D149) every ordinary page
+    // is left alone already, so a switch that could only leave it alone too
+    // has no other side - the row goes; a site's own entry, if any, stays
+    // readable in the settings' list.
+    site: !(translationOff && bubbleOff),
     pair: !translationOff && !fresh,
     setup: !translationOff && fresh,
     translationNote: translationOff,

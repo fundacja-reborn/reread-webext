@@ -881,6 +881,11 @@
   "options_no_translation_hint": {
     "message": "For reading in your own language. With this on, the translation bubble, saving and underlining phrases, the saved phrases page and the model section are hidden; selecting text on an ordinary page offers one thing - open the page in the reader. The reader, the offline reading list, the highlighter, reading aloud, search and dictionaries keep working. Nothing is deleted: your phrases and models come back the moment you switch this off."
   },
+  "options_bubble_off": { "message": "No bubble when selecting text" },
+  "options_bubble_off_hint": {
+    "message": "With this on, selecting text on an ordinary page does nothing at all - open a page in the reader from re/read's button or with Alt+Shift+R. In the reader a selection is only a highlight for the moment: no bubble opens, a tap or Escape clears it, and Ctrl+C or Cmd+C copies it (on a touch screen nothing can be copied).",
+    "description": "Under the sub-option of the translation-off switch on the settings page (D149); the row shows only while that switch is on. Alt+Shift+R is the extension's keyboard shortcut for opening the reader."
+  },
   "options_bubble_scale": { "message": "Bubble text size" },
   "options_bubble_scale_hint": {
     "message": "The size of the translation bubble - its text and its buttons - on ordinary pages and in the reader alike."
