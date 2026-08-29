@@ -742,7 +742,7 @@
     "message": "Eliminar las $COUNT$ citas de esta página",
     "placeholders": { "count": { "content": "$1", "example": "5" } }
   },
-  "reader_mark_text_changed": { "message": "El texto de la página ha cambiado desde que se hizo el resaltado, así que no se puede mostrar aquí. Sigue en la página de resaltados, donde se puede quitar." },
+  "reader_mark_text_changed": { "message": "El texto de la página ha cambiado desde que se hizo el resaltado, así que no se puede mostrar aquí." },
   "reader_marks_missing_doc": { "message": "Su documento ya no está guardado - esta cita volvió de la copia. Abre la página de nuevo y el resaltado estará ahí." },
   "options_pair_hint": { "message": "Se ofrecen los pares cuyos modelos de traducción descargaste en este dispositivo - si quieres traducir en otro par de idiomas, descarga su modelo en la sección" },
   "options_pair_none": { "message": "Aún no hay modelo - descarga uno abajo" },

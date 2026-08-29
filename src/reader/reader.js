@@ -196,6 +196,9 @@ const versionSpan = document.getElementById("version");
 if (versionSpan !== null) versionSpan.textContent = webext().runtime.getManifest().version;
 
 const notice = document.getElementById("notice");
+const noticeText = document.getElementById("notice-text");
+const noticeAct = /** @type {HTMLButtonElement | null} */ (document.getElementById("notice-act"));
+const noticeClose = document.getElementById("notice-close");
 const article = document.getElementById("article");
 const titleElement = document.getElementById("title");
 const bylineElement = document.getElementById("byline");
@@ -631,16 +634,80 @@ let pendingImport = null;
 const SAMPLE_TITLES = 3;
 
 /**
+ * The mark the notice's act would take out - the one the landing could not
+ * paint (D151) - and null under every other sentence.
+ *
+ * @type {import("../lib/reader/marks.js").Mark | null}
+ */
+let noticeMark = null;
+
+/**
  * @param {string} text
  */
 function showNotice(text) {
-  if (notice === null) return;
-  notice.textContent = text;
+  if (notice === null || noticeText === null) return;
+  noticeText.textContent = text;
+  offerMarkRemoval(null);
   notice.hidden = false;
 }
 
 function hideNotice() {
-  if (notice !== null) notice.hidden = true;
+  if (notice === null) return;
+  notice.hidden = true;
+  offerMarkRemoval(null);
+}
+
+/**
+ * The act under the notice's sentence (D151, Michał's smoke: a sentence
+ * stuck over the text with nothing to do about it): the highlight the page
+ * no longer reads, taken out right here - the reader was just told it
+ * cannot be shown, and the trash for it stood a trip away on the highlights
+ * page. Null takes the act off: every other sentence, and the notice
+ * leaving. Armed like every Delete of this page (`armDelete`), and back to
+ * its own words on the way down - the document-wide act's road, through
+ * `data-label`. The quote is the title the armed question names.
+ *
+ * @param {import("../lib/reader/marks.js").Mark | null} mark
+ */
+function offerMarkRemoval(mark) {
+  noticeMark = mark;
+  if (noticeAct === null) return;
+  if (noticeAct.hasAttribute("data-armed")) disarmDelete();
+  noticeAct.hidden = mark === null;
+  if (mark === null) return;
+  const label = t("marker_delete");
+  noticeAct.setAttribute("data-label", label);
+  noticeAct.setAttribute("data-title", mark.text);
+  noticeAct.style.removeProperty("min-width");
+  noticeAct.textContent = label;
+  noticeAct.setAttribute("aria-label", label);
+}
+
+/**
+ * The confirmed press on the notice's act: the mark leaves the document's
+ * list and the database, and the sentence leaves with it - there is nothing
+ * left to say. Matched by position, `deleteMarkRow`'s way, because the
+ * object the landing held may have been replaced under it by a later edit
+ * of the list. Optimistic like the toolbar's own Delete, rolled back when
+ * the write fails, the failure standing where the sentence stood.
+ */
+async function removeNoticeMark() {
+  const target = shown;
+  const mark = noticeMark;
+  hideNotice();
+  if (target === null || mark === null) return;
+  const before = docMarks;
+  docMarks = docMarks.filter((one) => compareMarks(one, mark) !== 0);
+  if (docMarks.length === before.length) return;
+  repaintMarks();
+  try {
+    await putMarks(target.url, docMarks);
+  } catch {
+    if (shown !== target) return;
+    docMarks = before;
+    repaintMarks();
+    showNotice(t("reader_list_write_failed"));
+  }
 }
 
 /**
@@ -2549,6 +2616,7 @@ function scrollToTargetMark(target) {
   const range = paintedRangeOf(mark);
   if (range === null && root !== null && quoteOfSpan(mark, root) !== mark.text) {
     showNotice(t("reader_mark_text_changed"));
+    offerMarkRemoval(mark);
   }
   const rect =
     range?.getClientRects()[0] ?? root?.children[mark.start.block]?.getBoundingClientRect();
@@ -3437,7 +3505,9 @@ function disarmDelete() {
     armed.setAttribute("aria-label", t("marker_delete"));
     return;
   }
-  if (act === "delete-all") {
+  // The notice's act (D151) stands down the same road: its own words are
+  // in `data-label` too.
+  if (act === "delete-all" || act === "remove-mark") {
     const label = armed.getAttribute("data-label") ?? "";
     armed.style.removeProperty("min-width");
     armed.textContent = label;
@@ -4655,6 +4725,20 @@ marksRowsList?.addEventListener("click", (event) => {
 });
 
 marksExportButton?.addEventListener("click", () => void exportMarksPage());
+
+noticeClose?.addEventListener("click", () => hideNotice());
+
+noticeAct?.addEventListener("click", () => {
+  if (noticeAct === null) return;
+  if (noticeAct.hasAttribute("data-armed")) void removeNoticeMark();
+  else {
+    // The width held for "Sure?", the document-wide act's way: the question
+    // is shorter than the words, and the second press must land where the
+    // first one did.
+    noticeAct.style.minWidth = `${noticeAct.offsetWidth}px`;
+    armDelete(noticeAct);
+  }
+});
 
 libraryRows?.addEventListener("click", (event) => {
   const target = event.target;

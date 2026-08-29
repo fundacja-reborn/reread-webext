@@ -391,7 +391,36 @@
         not at a top they have scrolled away from. `chromeFold` measures the
         box, so the landing arithmetic counts the notice in by itself.
       -->
-      <p id="notice" class="note" hidden></p>
+      <div id="notice" class="note notice" hidden>
+        <p id="notice-text"></p>
+        <!-- The act a sentence may offer under itself (D151, after Michał's
+             smoke): today the one the landing raises - the highlight whose
+             words the page no longer has, taken out right here, the trash
+             for it standing a trip away otherwise. Armed like every Delete
+             of this page; hidden under every other sentence. -->
+        <button type="button" id="notice-act" class="notice-act" data-act="remove-mark" hidden></button>
+        <!-- Every notice closes: stuck in the chrome, a sentence with no
+             door would sit over the text for the whole read. -->
+        <button
+          type="button"
+          id="notice-close"
+          class="notice-close"
+          title="Close"
+          data-i18n-title="close"
+          aria-label="Close"
+          data-i18n-aria-label="close"
+        >
+          <svg class="reader-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+            <path
+              d="M4.25 4.25l7.5 7.5M11.75 4.25l-7.5 7.5"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.3"
+              stroke-linecap="round"
+            />
+          </svg>
+        </button>
+      </div>
     </div>
 
     <main id="page">
