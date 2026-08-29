@@ -15,7 +15,7 @@ Works in Firefox (desktop and Android) and in Chrome/Chromium. **Install it from
 - **Bubble on selection.** Select a word or phrase to see its translation. The engine (Bergamot - the technology behind Firefox's built-in page translation) ships inside the package and runs on your device, so translation works even in airplane mode.
 - **About a hundred language pairs.** Models are downloaded once from the settings page - or added from your own files - and stored locally; an installed pair shows an Update button when Mozilla publishes a new build.
 - **Dictionaries beside the engine.** A translation model has to pick one meaning; a dictionary lists them all. StarDict dictionaries - a catalogue of more than four hundred WikDict pairs installable with one click, or your own files - appear in the bubble under **More**, and clicking a line attaches that meaning to the saved phrase. Install several and two arrows on the settings page decide which of them answers first.
-- **Read aloud.** A phrase from the bubble, or a whole article in the reader - with live highlighting of the word being spoken, pause/resume, sentence skip and speed control. Voices are the device's own offline voices, configurable per language - the online voices some browsers add are never offered or used. A switch in the settings turns reading aloud off altogether - no speaker in the bubble, no Read-aloud button in the reader.
+- **Read aloud.** A phrase from the bubble, or a whole article in the reader - with live highlighting of the word being spoken, pause/resume, sentence skip and speed control. Only the device's offline voices are used: the online voices some browsers add (Chrome's "Google ..." voices, for example) are never listed and never speak, and when the device has no offline voice for a language, nothing is read and the page says so. The settings page lets you choose a voice for each language. A switch in the settings turns reading aloud off altogether - no speaker in the bubble, no Read-aloud button in the reader.
 
 **Vocabulary**
 
@@ -28,10 +28,10 @@ Works in Firefox (desktop and Android) and in Chrome/Chromium. **Install it from
 **Reader and reading list**
 
 - **Reader mode.** Opens the page as a clean article in the extension's own tab (`Alt`+`Shift`+`R` or the toolbar popup).
-- **Offline reading list.** A saved article is stored in full on your device: it opens with no network and keeps working when the original page has moved or disappeared. Pages opened in the reader are saved by default - one setting turns that off, and a page already in the list is never written over.
+- **Offline reading list.** A saved article is stored in full on your device: it opens with no network and keeps working when the original page has moved or disappeared. Pages opened in the reader are saved by default - one setting turns that off, and a page already in the list is never written over. Pictures are not saved by default: **Download pictures** in the reader's menu stores an article's pictures with it, on one press, and the list shows how many pictures an article keeps and how much space they take.
 - **EPUB books.** Import a book into the reading list; long books are cut into parts, and a table of contents is built from the chapter headings.
 - **Reading position.** Every saved document reopens where you stopped.
-- **Highlighter.** Word-snapped marks in a choice of inks, spanning paragraphs, stored with the saved copy. A Highlights page lists every mark, and one click exports them all as a Markdown file of quotes for your notes.
+- **Highlighter.** Word-snapped marks in a choice of inks, spanning paragraphs, stored with the saved copy. A Highlights page lists every mark with its note; each row can be read aloud, copied, opened in its document or deleted, and one click exports them all as a Markdown file of quotes for your notes. If a page's text has changed since you highlighted it, the reader says so instead of marking the wrong words. A highlight whose article is no longer in the reading list is kept: you can open the original page, delete the highlight, or delete all highlights of that page.
 - **Search.** Inside the open document (articles, books part by part, live pages too) and across the whole reading list - in titles and, on request, in the stored texts, with snippets that jump straight to the hit.
 - **Appearance.** Light, sepia and dark themes, serif or sans type, text size and column width; links can be shown as plain text, so a book reads like a book.
 
@@ -42,8 +42,9 @@ Works in Firefox (desktop and Android) and in Chrome/Chromium. **Install it from
 **Data and interface**
 
 - **Local database.** Vocabulary, models, dictionaries, articles and books live in the browser's local extension storage (IndexedDB) on your device - no account, no sync, no server.
-- **Backup.** The reading list exports to a single JSON file - or, when you ask for the pictures too, a `.zip` holding the same JSON with the pictures beside it - highlights included, and imports without duplicating. Books are not in that file - a book's backup is its `.epub`. Vocabulary travels as TSV.
-- **Toolbar popup.** Per-site off switch, language pair, reader, reading list, saved phrases and settings in one place.
+- **Safety copies.** Your saved phrases, your highlights with their notes and the reading list keep a second copy in the extension's own storage. If the browser ever clears the databases, they come back by themselves. The copy of the reading list doubles the space the list takes, so one setting turns it off.
+- **Backup.** The reading list exports to a single JSON file - or, when you ask for the pictures too, a `.zip` holding the same JSON with the pictures beside it - highlights included, and imports without duplicating. Export everything, or press **Select**, tick the articles you want and export only those. After every export a line under the button says how many items went into which file, and its size. Books are not in that file - a book's backup is its `.epub`. Vocabulary travels as TSV.
+- **Toolbar popup.** Per-site off switch, language pair, reader, reading list, saved phrases and settings in one place. The extension's own pages - reader, reading list, highlights, saved phrases, settings - share one tab instead of opening a new one each time.
 - **Six UI languages.** English, Polish, German, French, Spanish, Ukrainian.
 
 ## Reading without translation
