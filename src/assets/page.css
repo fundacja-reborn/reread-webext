@@ -470,6 +470,25 @@ button.page-mark:hover {
   z-index: 2;
 }
 
+/* Paper under the lifted bar and panel while the page is dimmed, from one
+   edge of the window to the other - the reader chrome's own trick
+   (reader.css): lifted alone, a column-wide bar reads as a white card
+   dropped on the dimmed page; edge to edge it reads as the bar it is. The
+   halves of the calc overshoot by half a scrollbar, and the root clips
+   sideways for as long as the scrim stands, so no scrollbar appears for
+   it (`clip`, not `hidden`: clipping makes no scroll container). */
+body:has(.panel-scrim:not([hidden])) :is(.page-bar, .nav-menu, #display-panel)::before {
+  content: "";
+  position: absolute;
+  inset: 0 calc(50% - 50vw);
+  z-index: -1;
+  background: var(--page-bg);
+}
+
+:root:has(.panel-scrim:not([hidden])) {
+  overflow-x: clip;
+}
+
 /* --- the colophon (the settings' first, now every room that ends) --- */
 
 /* The line that closes a page the way one closes a book: name and version,

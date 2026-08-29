@@ -183,13 +183,18 @@ body.reader:has(#article:not([hidden])) .reader-chrome {
    so nothing about the chrome's inner layout moves. The halves of the calc
    overshoot by half a scrollbar; the root's overflow clip below eats the
    excess. */
-body.reader:has(#article:not([hidden])) .reader-chrome::before {
+body.reader:has(#article:not([hidden])) .reader-chrome::before,
+body.reader:has(.panel-scrim:not([hidden])) .reader-chrome::before {
   content: "";
   position: absolute;
   inset: 0 calc(50% - 50vw);
   z-index: -1;
   background: var(--page-bg);
 }
+/* The same paper under an open panel in the views where the chrome is not
+   stuck (the list, the highlights): lifted above the scrim, a column-wide
+   chrome read as a white card dropped on the dimmed page (Michał's smoke,
+   2026-08-29); edge to edge it reads as the bar it is. */
 
 /* What lets the underlay overshoot without summoning a horizontal scrollbar.
    `clip`, not `hidden`: clipping does not make the root a scroll container,
