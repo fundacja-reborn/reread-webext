@@ -471,7 +471,7 @@ button.page-mark:hover {
 
 .page-bar,
 .nav-menu,
-#display-panel {
+.page-panel {
   position: relative;
   z-index: 2;
 }
@@ -483,7 +483,7 @@ button.page-mark:hover {
    halves of the calc overshoot by half a scrollbar, and the root clips
    sideways for as long as the scrim stands, so no scrollbar appears for
    it (`clip`, not `hidden`: clipping makes no scroll container). */
-body:not(.reader):has(.panel-scrim:not([hidden])) :is(.page-bar, .nav-menu, #display-panel)::before {
+body:not(.reader):has(.panel-scrim:not([hidden])) :is(.page-bar, .nav-menu, .page-panel)::before {
   content: "";
   position: absolute;
   inset: 0 calc(50% - 50vw);
@@ -500,7 +500,7 @@ body:not(.reader):has(.panel-scrim:not([hidden])) .page-bar::before {
   top: -100vh;
 }
 
-body:not(.reader):has(.panel-scrim:not([hidden])) :is(.nav-menu, #display-panel)::before {
+body:not(.reader):has(.panel-scrim:not([hidden])) :is(.nav-menu, .page-panel)::before {
   box-shadow: 0 10px 24px -8px rgb(0 0 0 / 0.35);
 }
 
