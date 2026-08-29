@@ -30,7 +30,8 @@ import {
 import { dismiss, rescan, start, stop as stopReadingSide } from "../content/reading.js";
 import { applyReading } from "../lib/appearance.js";
 import { webext } from "../lib/browser.js";
-import { localizePage, megabytes, plural, t } from "../lib/i18n.js";
+import { holdChrome } from "../lib/chrome-hold.js";
+import { fileSize, localizePage, megabytes, plural, t } from "../lib/i18n.js";
 import { languageName } from "../lib/language.js";
 import {
   CONFIG_KEY,
@@ -150,7 +151,14 @@ import {
   librarySearchShown,
   startLibrarySearch,
 } from "./library-search.js";
-import { articleEntry, bookEntry, libraryView } from "./list-view.js";
+import {
+  articleEntry,
+  bookEntry,
+  keptPicks,
+  libraryView,
+  pickedState,
+  withAllPicked,
+} from "./list-view.js";
 import { markRows, marksListView } from "./marks-list.js";
 import {
   adoptPaintedMark,
@@ -264,11 +272,20 @@ const libraryPrev = /** @type {HTMLButtonElement | null} */ (
 const libraryNext = /** @type {HTMLButtonElement | null} */ (
   document.getElementById("library-next")
 );
+// The selection's furniture (D152): the Select button on the list's line
+// over the rows, and the bar that stands in that line's place inside the
+// mode - the Select all box, the count, and the cross that closes it.
+const libraryPickToggle = /** @type {HTMLButtonElement | null} */ (
+  document.getElementById("library-pick")
+);
+const libraryPickLine = document.getElementById("library-pick-line");
+const libraryPickAll = /** @type {HTMLInputElement | null} */ (
+  document.getElementById("library-pick-all")
+);
+const libraryPickCount = document.getElementById("library-pick-count");
+const libraryPickClose = document.getElementById("library-pick-close");
 const exportButton = /** @type {HTMLButtonElement | null} */ (
   document.getElementById("library-export")
-);
-const exportMarksButton = /** @type {HTMLButtonElement | null} */ (
-  document.getElementById("library-export-marks")
 );
 const importButton = document.getElementById("library-import");
 const importInput = /** @type {HTMLInputElement | null} */ (
@@ -305,6 +322,12 @@ const marksNext = /** @type {HTMLButtonElement | null} */ (document.getElementBy
 const marksExportButton = /** @type {HTMLButtonElement | null} */ (
   document.getElementById("marks-export")
 );
+// The way down to the export over the rows (D152/D153), the line under the
+// export button that says what it wrote, and the heading that says whose
+// quotes the page holds.
+const marksTransferLink = document.getElementById("marks-transfer-link");
+const marksTransferLine = document.getElementById("marks-transfer-status");
+const marksTitle = document.getElementById("marks-title");
 const marksCopyIcons = /** @type {HTMLTemplateElement | null} */ (
   document.getElementById("marks-copy-icons")
 );
@@ -544,6 +567,26 @@ let libraryQuery = "";
 let libraryPage = 1;
 
 /**
+ * The selection over the list (D152): whether the rows wear boxes, and the
+ * articles ticked so far - by address, across tabs, filters and pages, until
+ * Done. Held in memory only: a selection is a moment's intent, not state to
+ * outlive the page, and the box beside every row shows all of it.
+ */
+let picking = false;
+/** @type {Set<string>} */
+let picked = new Set();
+
+/**
+ * What the last refresh read, kept so a tick can redraw the selection's
+ * furniture and the export buttons without reading the stores again - and
+ * without rebuilding the rows, which would take the focus off the box just
+ * pressed and flash the whole list on e-ink.
+ *
+ * @type {{ selectable: string[], metas: SavedMeta[] }}
+ */
+let libraryShown = { selectable: [], metas: [] };
+
+/**
  * The highlights page, while it is the view (D108) - null otherwise, the
  * same way `shown` is null off the documents. `scope` narrows the quotes to
  * one document's; null shows everybody's.
@@ -722,6 +765,22 @@ function transferStatus(text, tone) {
   transferLine.textContent = text;
   if (tone === undefined) delete transferLine.dataset["tone"];
   else transferLine.dataset["tone"] = tone;
+}
+
+/**
+ * The highlights page's own status line, under its export button (D153):
+ * what the export wrote, or why it could not - beside the press, the way
+ * the transfer sections' lines are. A notice under the bar stood a page
+ * away from the button (Michał's smoke, 2026-08-29).
+ *
+ * @param {string} text
+ * @param {"error"} [tone]
+ */
+function marksStatus(text, tone) {
+  if (marksTransferLine === null) return;
+  marksTransferLine.textContent = text;
+  if (tone === undefined) delete marksTransferLine.dataset["tone"];
+  else marksTransferLine.dataset["tone"] = tone;
 }
 
 /**
@@ -2749,6 +2808,9 @@ async function showMarks(scope, { fresh = false } = {}) {
   leaveDocView();
   document.body.dataset["view"] = "marks";
   marksShown = { scope };
+  // A report of the last visit's export is that visit's; the line starts
+  // clear, the transfer sections' way.
+  marksStatus("");
   if (fresh) {
     marksQuery = "";
     marksPage = 1;
@@ -2791,13 +2853,10 @@ async function refreshLibrary() {
   await completeLibraryCopy();
   // One list, two stores: books enter dressed as rows (`bookEntry`), with
   // their positions read in bulk - fifty rows must not mean fifty lookups.
-  // The marks ride in the same round trip only to answer one button's grey;
-  // unreadable marks must not cost the list, so they read as none.
-  const [metas, books, positions, marks] = await Promise.all([
+  const [metas, books, positions] = await Promise.all([
     listArticles(),
     listBooks(),
     allPositions(),
-    allMarks().catch(() => new Map()),
   ]);
   const entries = [
     ...metas.map((meta) => articleEntry(meta, positions.get(meta.url) ?? null)),
@@ -2805,6 +2864,10 @@ async function refreshLibrary() {
   ];
   const view = libraryView(entries, { segment, query: libraryQuery, page: libraryPage });
   libraryPage = view.page;
+  // The selection held to the list as it stands (D152), and what this read
+  // found kept for the ticks that follow it.
+  picked = keptPicks(picked, entries);
+  libraryShown = { selectable: view.selectable, metas };
 
   // Each tab wears its whole segment's count - the entire half of the list,
   // not the page or the filter's slice, so the two labels always add up to
@@ -2816,31 +2879,6 @@ async function refreshLibrary() {
       which === Segment.READ
         ? t("reader_segment_read_count", view.read.toLocaleString())
         : t("reader_segment_unread_count", view.unread.toLocaleString());
-  }
-
-  // Exporting nothing would download an empty file; the button says so first.
-  // On whether any *articles* are saved - books stay out of the file, so a
-  // list of books alone still has nothing to export. The highlights button
-  // reads its own store: a mark anywhere, articles and books alike, is
-  // something to export.
-  if (exportButton !== null) exportButton.disabled = metas.length === 0;
-  if (exportMarksButton !== null) exportMarksButton.disabled = marks.size === 0;
-  // The pictures kept with articles (D145) ride in the backup only when
-  // asked: the row stands while some article has any, and says how many
-  // and what they take - the size the file will grow by, before the press.
-  const kept = metas.reduce(
-    (sum, meta) =>
-      meta.pictures === undefined
-        ? sum
-        : { count: sum.count + meta.pictures.count, bytes: sum.bytes + meta.pictures.bytes },
-    { count: 0, bytes: 0 },
-  );
-  if (exportPicturesRow !== null) exportPicturesRow.hidden = kept.count === 0;
-  if (exportPicturesLabel !== null) {
-    exportPicturesLabel.textContent = t("reader_export_pictures", [
-      kept.count.toLocaleString(),
-      megabytes(kept.bytes),
-    ]);
   }
 
   // "3 of 12" while the filter narrows the segment down; the tabs already
@@ -2886,8 +2924,73 @@ async function refreshLibrary() {
   }
 
   libraryRows.replaceChildren(...view.rows.map(libraryRow));
+  renderPickLine();
   renderLibraryPager(view);
   applyLibrarySearchVisibility();
+}
+
+/**
+ * The selection's furniture drawn from what is held (D152): the Select
+ * button, or in its place the bar - the Select all box in one of its three
+ * states over the rows it covers, and the count of everything ticked - and
+ * the export buttons under the list, which say what they will take. Called
+ * by the refresh and by every tick; no store is read here.
+ */
+function renderPickLine() {
+  if (libraryPickToggle !== null) {
+    // The bar stands where the button stood; nothing to choose from greys
+    // the button, the way Export greys over an empty list.
+    libraryPickToggle.hidden = picking;
+    libraryPickToggle.disabled = libraryShown.metas.length === 0;
+  }
+  if (libraryPickLine !== null) libraryPickLine.hidden = !picking;
+  if (libraryPickAll !== null) {
+    const state = pickedState(libraryShown.selectable, picked);
+    libraryPickAll.checked = state === "all";
+    libraryPickAll.indeterminate = state === "some";
+    libraryPickAll.disabled = libraryShown.selectable.length === 0;
+  }
+  if (libraryPickCount !== null) {
+    libraryPickCount.textContent = plural(picked.size, "reader_pick_count");
+  }
+  renderExportControls();
+}
+
+/**
+ * The Export button and the pictures row under the list, over what they
+ * will take: the whole list, or - inside the selection (D152) - the ticked
+ * articles, which the button then counts in its own words.
+ *
+ * Exporting nothing would download an empty file; the button says so first,
+ * on whether any *articles* are going - books stay out of the file, so a
+ * list of books alone still has nothing to export. The pictures kept with
+ * articles (D145) ride in the backup only when asked: the row stands while
+ * some article going has any, and says how many and what they take - the
+ * size the file will grow by, before the press.
+ */
+function renderExportControls() {
+  const { metas } = libraryShown;
+  const going = picking ? metas.filter((meta) => picked.has(meta.url)) : metas;
+  if (exportButton !== null) {
+    exportButton.disabled = going.length === 0;
+    exportButton.textContent = picking
+      ? t("reader_export_selected", going.length.toLocaleString())
+      : t("action_export");
+  }
+  const kept = going.reduce(
+    (sum, meta) =>
+      meta.pictures === undefined
+        ? sum
+        : { count: sum.count + meta.pictures.count, bytes: sum.bytes + meta.pictures.bytes },
+    { count: 0, bytes: 0 },
+  );
+  if (exportPicturesRow !== null) exportPicturesRow.hidden = kept.count === 0;
+  if (exportPicturesLabel !== null) {
+    exportPicturesLabel.textContent = t("reader_export_pictures", [
+      kept.count.toLocaleString(),
+      megabytes(kept.bytes),
+    ]);
+  }
 }
 
 /**
@@ -2900,13 +3003,27 @@ async function refreshLibrary() {
 function applyLibrarySearchVisibility() {
   const on = librarySearchShown();
   if (on) {
-    const plain = [librarySegments, libraryCount, libraryEmpty, libraryRows, libraryPager];
+    // The selection's door and line (D152) go with the rows: the results
+    // wear no boxes, and a mode with nothing to tick would only confuse.
+    // Whatever is ticked already waits for the rows to come back.
+    const plain = [
+      librarySegments,
+      libraryCount,
+      libraryEmpty,
+      libraryRows,
+      libraryPager,
+      libraryPickToggle,
+      libraryPickLine,
+    ];
     for (const element of plain) {
       if (element !== null) element.hidden = true;
     }
   } else {
     if (librarySegments !== null) librarySegments.hidden = false;
     if (libraryRows !== null) libraryRows.hidden = false;
+    // The button comes back only outside the mode: inside it the bar has
+    // its place, and the refresh has just said which of the two stands.
+    if (libraryPickToggle !== null) libraryPickToggle.hidden = picking;
   }
   if (librarySearchSection !== null) librarySearchSection.hidden = !on;
 }
@@ -2957,6 +3074,12 @@ function renderLibraryPager(view) {
  * A book's detail line trades the site and the date for what a book has:
  * its author, the quiet word "Book", and how far in its reader is.
  *
+ * Inside the selection (D152) the row is a box and its label instead: the
+ * title, stretched over the same cell, ticks the box - the whole row is the
+ * target, which a finger needs more than a box does - and Delete steps
+ * away with the act it served. A book, which the export does not take,
+ * gets no box: its row stands still and dimmed, the title plain text.
+ *
  * @param {import("./list-view.js").LibraryEntry} entry
  */
 function libraryRow(entry) {
@@ -2966,6 +3089,32 @@ function libraryRow(entry) {
   const text = document.createElement("div");
   text.className = "library-text";
 
+  if (picking) {
+    item.classList.add("library-row-pick");
+    if (entry.kind === "book") {
+      item.classList.add("library-row-still");
+      const still = document.createElement("span");
+      still.className = "library-open";
+      still.textContent = entry.title;
+      text.append(still, detailLine(entry));
+    } else {
+      const box = document.createElement("input");
+      box.type = "checkbox";
+      box.className = "library-pick";
+      box.id = `library-pick-${pickBoxes++}`;
+      box.setAttribute("data-url", entry.url);
+      box.checked = picked.has(entry.url);
+      const label = document.createElement("label");
+      label.className = "library-open";
+      label.htmlFor = box.id;
+      label.textContent = entry.title;
+      text.append(label, detailLine(entry));
+      item.append(box);
+    }
+    item.append(text);
+    return item;
+  }
+
   const open = document.createElement("button");
   open.type = "button";
   open.className = "library-open";
@@ -2973,6 +3122,36 @@ function libraryRow(entry) {
   open.setAttribute("data-kind", entry.kind);
   open.textContent = entry.title;
 
+  text.append(open, detailLine(entry));
+
+  const remove = document.createElement("button");
+  remove.type = "button";
+  remove.className = "library-delete";
+  remove.setAttribute("data-url", entry.url);
+  remove.setAttribute("data-kind", entry.kind);
+  remove.textContent = t("action_delete");
+  // The visible "Delete" repeats fifty times a page; to a screen reader each
+  // one carries its article, and the label follows the armed state below.
+  remove.setAttribute("aria-label", t("reader_delete_aria", entry.title));
+
+  item.append(text, remove);
+  return item;
+}
+
+/**
+ * Ids for the boxes of the selection (D152), one per rendered row and never
+ * reused: a label finds its box by id, and the rows are rebuilt on every
+ * refresh.
+ */
+let pickBoxes = 0;
+
+/**
+ * The line under a row's title: where it came from and when, what it
+ * costs in pictures, how far in the reading is.
+ *
+ * @param {import("./list-view.js").LibraryEntry} entry
+ */
+function detailLine(entry) {
   const detail = document.createElement("span");
   detail.className = "library-item-detail";
   // How far in the reading is, said only where it says anything: on an
@@ -3005,21 +3184,7 @@ function libraryRow(entry) {
       .filter((part) => part.length > 0)
       .join(" - ");
   }
-
-  text.append(open, detail);
-
-  const remove = document.createElement("button");
-  remove.type = "button";
-  remove.className = "library-delete";
-  remove.setAttribute("data-url", entry.url);
-  remove.setAttribute("data-kind", entry.kind);
-  remove.textContent = t("action_delete");
-  // The visible "Delete" repeats fifty times a page; to a screen reader each
-  // one carries its article, and the label follows the armed state below.
-  remove.setAttribute("aria-label", t("reader_delete_aria", entry.title));
-
-  item.append(text, remove);
-  return item;
+  return detail;
 }
 
 /**
@@ -3044,7 +3209,8 @@ async function refreshMarks() {
   // The view moved on while the database answered; the section is hidden,
   // and filling it would only shout into a closed room.
   if (target === null) return;
-  const rows = markRows(metas, books, marks, keptTitles(backup));
+  const kept = keptTitles(backup);
+  const rows = markRows(metas, books, marks, kept);
   const view = marksListView(rows, { scope: target.scope, query: marksQuery, page: marksPage });
   marksPage = view.page;
   marksOnScreen = view.rows;
@@ -3065,9 +3231,34 @@ async function refreshMarks() {
   }
   if (scopeTitle !== null) setBackDoor(t("reader_back_to_doc", scopeTitle), scopeTitle);
 
+  // The heading says which page this is (Michał's smoke, 2026-08-29): every
+  // document's quotes, or one article's or one book's - the title line under
+  // it then names the one. A scope nobody can name any more reads as an
+  // article, the kind an address is.
+  const scopeKind =
+    target.scope === null
+      ? null
+      : metas.some((meta) => meta.url === target.scope)
+        ? "article"
+        : books.some((book) => book.id === target.scope)
+          ? "book"
+          : (kept.get(target.scope)?.kind ?? "article");
+  const heading =
+    scopeKind === null
+      ? t("reader_marks_title_all")
+      : scopeKind === "book"
+        ? t("reader_marks_title_book")
+        : t("reader_marks_title_article");
+  if (marksTitle !== null) marksTitle.textContent = heading;
+  document.title = `${heading} - re/read`;
+
   // Exporting nothing would download an empty file; the button says so
-  // first - the transfer section's own rule, over this page's scope.
+  // first - the transfer section's own rule, over this page's scope. The
+  // link over the rows leads down to the button (D152/D153) - a long list
+  // puts it a page away - and stands only while there is something to
+  // write.
   if (marksExportButton !== null) marksExportButton.disabled = view.total === 0;
+  if (marksTransferLink !== null) marksTransferLink.hidden = view.total === 0;
 
   // "3 of 12" while the filter narrows the page down, like the list's line.
   if (marksCount !== null) {
@@ -3564,20 +3755,36 @@ async function removeRow(button, url, kind) {
 }
 
 /**
- * The whole list as one file - fresh from the database rather than from the
- * rows on screen, because the screen shows one segment and an export is the
- * list, not the view. Downloading is a blob and an anchor; no permission asks
- * for less.
+ * What the export takes (D152): the whole list, or - inside the selection -
+ * the articles ticked, each read whole by its address. A row torn or gone
+ * since its tick is left out, the reading `getArticle` gives one.
+ *
+ * @returns {Promise<import("../lib/store/saved-article.js").SavedArticle[]>}
+ */
+async function articlesToExport() {
+  if (!picking) return allArticles();
+  const read = await Promise.all([...picked].map((url) => getArticle(url)));
+  return read.filter((article) => article !== null);
+}
+
+/**
+ * The list as one file - fresh from the database rather than from the rows
+ * on screen, because the screen shows one segment and an export is the
+ * list, not the view; inside the selection (D152), the ticked articles,
+ * which likewise stand on every tab and page. Downloading is a blob and an
+ * anchor; no permission asks for less.
  */
 async function exportList() {
   try {
-    const [articles, marks] = await Promise.all([allArticles(), allMarks()]);
+    const [articles, marks] = await Promise.all([articlesToExport(), allMarks()]);
     if (articles.length === 0) return;
     // With pictures (D145) the file is an archive: the same .json inside,
     // and one entry per picture beside it - read one article at a time,
     // back from the copy where the database has lost them.
     const withPictures =
       exportPictures !== null && !exportPicturesRow?.hidden && exportPictures.checked;
+    /** @type {number} */
+    let size;
     if (withPictures) {
       /** @type {Map<string, import("../lib/reader/pictures.js").PictureRow[]>} */
       const pictures = new Map();
@@ -3587,11 +3794,20 @@ async function exportList() {
         if (rows.length > 0) pictures.set(article.url, rows);
       }
       const archive = await packArchive(archiveEntries(articles, marks, pictures));
-      downloadFile(archive, ARCHIVE_FILENAME, "application/zip");
+      size = downloadFile(archive, ARCHIVE_FILENAME, "application/zip");
     } else {
-      downloadFile(toArticlesFile(articles, marks), ARTICLES_FILENAME, "application/json");
+      size = downloadFile(toArticlesFile(articles, marks), ARTICLES_FILENAME, "application/json");
     }
-    transferStatus("");
+    // The export says what it wrote (D153): a download is a quiet thing - a
+    // file in a folder, an arrow that blinks once - and a press nobody meant
+    // would otherwise go unnoticed (Michał's smoke, 2026-08-29). The name,
+    // the count and the size, in the section's own status line.
+    transferStatus(
+      plural(articles.length, "reader_export_done", [
+        withPictures ? ARCHIVE_FILENAME : ARTICLES_FILENAME,
+        fileSize(size),
+      ]),
+    );
   } catch {
     transferStatus(describeError(ErrorCode.INTERNAL), "error");
   }
@@ -3600,14 +3816,14 @@ async function exportList() {
 /**
  * The highlights' documents dressed in what the lists know about them -
  * title, address or author, the day each entered - the .md file's input,
- * cut to one document when the page asking is scoped (D108). The quotes are
- * already in the marks' own rows, so no document's content is ever opened
- * for this.
+ * cut to the documents `wanted` says yes to: one, when the page asking is
+ * scoped (D108); everybody's otherwise. The quotes are already in the
+ * marks' own rows, so no document's content is ever opened for this.
  *
- * @param {string | null} scope
+ * @param {(docId: string) => boolean} wanted
  * @returns {Promise<import("../lib/store/marks-file.js").MarkedDoc[]>}
  */
-async function markedDocs(scope) {
+async function markedDocs(wanted) {
   const [metas, books, marks, backup] = await Promise.all([
     listArticles(),
     listBooks(),
@@ -3619,13 +3835,13 @@ async function markedDocs(scope) {
   const docs = [];
   for (const meta of metas) {
     const kept = marks.get(meta.url);
-    if (kept !== undefined && (scope === null || meta.url === scope)) {
+    if (kept !== undefined && wanted(meta.url)) {
       docs.push({ title: meta.title, source: meta.url, at: meta.savedAt, marks: kept });
     }
   }
   for (const book of books) {
     const kept = marks.get(book.id);
-    if (kept !== undefined && (scope === null || book.id === scope)) {
+    if (kept !== undefined && wanted(book.id)) {
       docs.push({ title: book.title, source: book.author, at: book.addedAt, marks: kept });
     }
   }
@@ -3635,7 +3851,7 @@ async function markedDocs(scope) {
   const named = new Set([...metas.map((meta) => meta.url), ...books.map((book) => book.id)]);
   for (const [docId, remembered] of keptTitles(backup)) {
     const kept = marks.get(docId);
-    if (kept === undefined || named.has(docId) || (scope !== null && docId !== scope)) continue;
+    if (kept === undefined || named.has(docId) || !wanted(docId)) continue;
     docs.push({
       title: remembered.title,
       source: remembered.kind === "article" ? docId : null,
@@ -3647,33 +3863,22 @@ async function markedDocs(scope) {
 }
 
 /**
- * The highlights as one Markdown page (D106): every marked document,
- * articles and books alike. The transfer section's button, so failure
- * speaks in the transfer's own status line.
- */
-async function exportMarks() {
-  try {
-    const docs = await markedDocs(null);
-    if (docs.length === 0) return;
-    downloadFile(toMarksFile(docs), MARKS_FILENAME, "text/markdown");
-    transferStatus("");
-  } catch {
-    transferStatus(describeError(ErrorCode.INTERNAL), "error");
-  }
-}
-
-/**
- * The highlights page's own export (D108): the same file, cut to the page's
- * scope. Failure speaks in the page notice - the transfer section's status
- * line lives in the list view, hidden here.
+ * The highlights as one Markdown page (D106), from the highlights page alone
+ * since D152 (it stood in the list's transfer section too, a third button
+ * there; the quotes' own page is where the act belongs - Michał's call): the
+ * button under the rows writes the file, cut to the page's scope (D108), and
+ * the link over the rows leads to the button. What was written, or why it
+ * could not be, is said in the line under the button (D153).
  */
 async function exportMarksPage() {
   try {
-    const docs = await markedDocs(marksShown === null ? null : marksShown.scope);
+    const scope = marksShown === null ? null : marksShown.scope;
+    const docs = await markedDocs((docId) => scope === null || docId === scope);
     if (docs.length === 0) return;
-    downloadFile(toMarksFile(docs), MARKS_FILENAME, "text/markdown");
+    const size = downloadFile(toMarksFile(docs), MARKS_FILENAME, "text/markdown");
+    marksStatus(plural(docs.length, "reader_export_marks_done", [MARKS_FILENAME, fileSize(size)]));
   } catch {
-    showNotice(describeError(ErrorCode.INTERNAL));
+    marksStatus(describeError(ErrorCode.INTERNAL), "error");
   }
 }
 
@@ -3685,14 +3890,17 @@ async function exportMarksPage() {
  * @param {string | Uint8Array<ArrayBuffer>} content text, or the bytes of an archive (D145)
  * @param {string} filename
  * @param {string} type
+ * @returns {number} the file's size in bytes, for the line that says what was written
  */
 function downloadFile(content, filename, type) {
-  const url = URL.createObjectURL(new Blob([content], { type }));
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   anchor.href = url;
   anchor.download = filename;
   anchor.click();
   setTimeout(() => URL.revokeObjectURL(url), 60_000);
+  return blob.size;
 }
 
 /**
@@ -4550,8 +4758,12 @@ function setPanel(button, panel, open) {
   if (button === null || panel === null) return;
   panel.hidden = !open;
   button.setAttribute("aria-expanded", String(open));
-  // The page dims under whichever panel is open, and clears with the last.
-  if (panelScrim !== null) panelScrim.hidden = !anyPanelOpen();
+  // The page dims under whichever panel is open, and clears with the last;
+  // the chrome holds where it stands for as long as the dimming lasts
+  // (D153, `chrome-hold.js`).
+  const dimmed = anyPanelOpen();
+  if (panelScrim !== null) panelScrim.hidden = !dimmed;
+  holdChrome(chromeBox, dimmed);
 }
 
 /**
@@ -4673,6 +4885,47 @@ libraryPrev?.addEventListener("click", () => void turnLibraryPage(-1));
 
 libraryNext?.addEventListener("click", () => void turnLibraryPage(1));
 
+// The selection (D152): Select opens it, the bar's cross closes it, and the
+// ticks are dropped on the way out - closing means the mode is over, not
+// that the choice is kept for a next time nobody can see. The rows are
+// rebuilt either way, with or without their boxes. Focus follows the door:
+// onto the cross on the way in (the button it stood on is gone), back onto
+// the button on the way out.
+libraryPickToggle?.addEventListener("click", () => {
+  picking = true;
+  picked = new Set();
+  void refreshLibrary().then(() => libraryPickClose?.focus());
+});
+
+libraryPickClose?.addEventListener("click", () => {
+  picking = false;
+  picked = new Set();
+  void refreshLibrary().then(() => libraryPickToggle?.focus());
+});
+
+// Select all over the rows it covers: the boxes on screen follow without
+// a rebuild - the rows stand, only their ticks change.
+libraryPickAll?.addEventListener("change", () => {
+  if (libraryPickAll === null) return;
+  picked = withAllPicked(picked, libraryShown.selectable, libraryPickAll.checked);
+  for (const box of libraryRows?.querySelectorAll("input.library-pick") ?? []) {
+    if (box instanceof HTMLInputElement) box.checked = picked.has(box.getAttribute("data-url") ?? "");
+  }
+  renderPickLine();
+});
+
+// One row's box, ticked by itself or through its title: the address joins
+// or leaves the selection, and the furniture says so.
+libraryRows?.addEventListener("change", (event) => {
+  const box = event.target;
+  if (!(box instanceof HTMLInputElement) || !box.classList.contains("library-pick")) return;
+  const url = box.getAttribute("data-url") ?? "";
+  if (url.length === 0) return;
+  if (box.checked) picked.add(url);
+  else picked.delete(url);
+  renderPickLine();
+});
+
 // The highlights page's own furniture (D108), each piece the list's pattern
 // repeated: typing filters from the first page, a turned page snaps to the
 // rows' top (e-ink), and a press on a row goes through the one lookup - the
@@ -4725,6 +4978,20 @@ marksRowsList?.addEventListener("click", (event) => {
 });
 
 marksExportButton?.addEventListener("click", () => void exportMarksPage());
+
+// The link over the rows leads to the export by scrolling, not by its
+// fragment: a fragment jump writes a history entry with no state of ours,
+// and the popstate that follows reads that as Back under the highlights -
+// onto the list, which is where the press landed (Michał's smoke,
+// 2026-08-29). The href stays for what a link is; focus lands on the button
+// the link is about, the way a same-page link's does.
+marksTransferLink?.addEventListener("click", (event) => {
+  event.preventDefault();
+  document
+    .getElementById("marks-transfer")
+    ?.scrollIntoView({ behavior: "instant", block: "start" });
+  marksExportButton?.focus({ preventScroll: true });
+});
 
 noticeClose?.addEventListener("click", () => hideNotice());
 
@@ -4786,8 +5053,6 @@ document.addEventListener("focusout", (event) => {
 });
 
 exportButton?.addEventListener("click", () => void exportList());
-
-exportMarksButton?.addEventListener("click", () => void exportMarks());
 
 importButton?.addEventListener("click", () => importInput?.click());
 

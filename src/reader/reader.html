@@ -506,7 +506,78 @@
             </button>
           </p>
         </section>
-        <p class="hint" id="library-count" hidden></p>
+        <!-- The list's own line over the rows (D152): the filter's count on
+             the left while there is one, and on the right the door into the
+             selection - a mode in which the rows wear boxes and the export
+             takes what is ticked. A line of its own, apart from the filter
+             and the search: beside the filter the button read as the
+             search's own (Michał's smoke, 2026-08-29). The ticks are dropped
+             on the way out. The glyph is a list with empty boxes: a ticked
+             box read as a state already reached, not an act to take (his
+             second smoke). -->
+        <div class="list-tools">
+          <p class="hint" id="library-count" hidden></p>
+          <button type="button" id="library-pick" class="pick-toggle">
+            <svg class="reader-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+              <rect
+                x="2"
+                y="2.5"
+                width="4.5"
+                height="4.5"
+                rx="1"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.3"
+              />
+              <path d="M9 4.75h5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+              <rect
+                x="2"
+                y="9"
+                width="4.5"
+                height="4.5"
+                rx="1"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.3"
+              />
+              <path d="M9 11.25h5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+            </svg>
+            <span data-i18n="reader_pick_start">Select</span>
+          </button>
+        </div>
+        <!-- Inside the selection, its bar stands where the line above stood:
+             Select all over the rows the tab and the filter leave - every
+             page of them, in three states - how many articles are ticked in
+             all, across tabs, filters and pages, and the cross that closes
+             the selection: the page's one glyph for closing a thing
+             (dialogs, notes), on the spot the Select button held, so the
+             way out is where the way in was. Filled by script. -->
+        <div class="pick-bar" id="library-pick-line" hidden>
+          <label class="search-toggle">
+            <input type="checkbox" id="library-pick-all" />
+            <span data-i18n="reader_pick_all">Select all</span>
+          </label>
+          <span class="hint" id="library-pick-count"></span>
+          <button
+            type="button"
+            id="library-pick-close"
+            class="pick-close"
+            title="Close the selection"
+            data-i18n-title="reader_pick_close"
+            aria-label="Close the selection"
+            data-i18n-aria-label="reader_pick_close"
+          >
+            <svg class="reader-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+              <path
+                d="M4.25 4.25l7.5 7.5M11.75 4.25l-7.5 7.5"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.3"
+                stroke-linecap="round"
+              />
+            </svg>
+          </button>
+        </div>
         <div id="library-empty" class="empty" hidden></div>
         <ul id="library-rows" class="library-rows"></ul>
         <nav class="pager" id="library-pager" hidden>
@@ -527,14 +598,10 @@
           <p class="transfer">
             <button type="button" id="library-import" data-i18n="action_import">Import</button>
             <button type="button" id="library-export" data-i18n="action_export">Export</button>
-            <!-- The pen's own export (D106): the quotes as notes, one .md for
-                 every marked document - articles and books alike. One way
-                 only, so it stands apart from the backup pair; the format
-                 fold says as much. Greyed while nothing is marked, the
-                 Export button's own rule. -->
-            <button type="button" id="library-export-marks" data-i18n="reader_export_marks">
-              Export highlights
-            </button>
+            <!-- The pen's own export (D106) stood here as a third button
+                 until D152: it lives on the highlights page now, where the
+                 quotes are (Michał's call), and the format fold below points
+                 there. -->
           </p>
           <!-- The pictures kept with articles (D145) ride in the backup only
                when asked: with them the file is a .zip - the same .json and
@@ -547,9 +614,37 @@
               <span id="library-export-pictures-label"></span>
             </label>
           </p>
+          <!--
+            The moment of consent: what the picked file holds, quoted before
+            anything is written - and import only ever adds; the file's rules
+            live in `lib/store/articles-file.js`. Right under the buttons,
+            with the two report lines after it, ahead of the prose (D153):
+            what a press did must be said where the press was - under the
+            hints and the fold a report stood a screen away from the button
+            (Michał's smoke, 2026-08-29).
+          -->
+          <div id="library-import-confirm" class="import-confirm" hidden>
+            <p id="library-import-summary"></p>
+            <ul id="library-import-sample" class="import-sample"></ul>
+            <p class="transfer">
+              <button type="button" id="library-import-run" data-i18n="action_import">Import</button>
+              <button type="button" id="library-import-cancel" data-i18n="action_cancel">Cancel</button>
+            </p>
+          </div>
+          <p id="library-transfer-status" class="status report" role="status"></p>
+          <!-- The book import speaks its own line: its progress ticks per
+               written part while the article import's reports stand still,
+               and the two must not overwrite each other mid-sentence. -->
+          <p id="book-import-status" class="status report" role="status"></p>
           <p class="hint" data-i18n="reader_transfer_accepts">
             Import reads the file it is given: a backup of the re/read article list (.json, or .zip
             with pictures), or an e-book (.epub).
+          </p>
+          <!-- The way to a partial export (D152), said where a reader about
+               to press Export expects the choice - the button that offers
+               it stands fifty rows up. -->
+          <p class="hint" data-i18n="reader_transfer_pick">
+            To export only some of the articles, press Select above the list and tick them.
           </p>
           <details class="fold-line">
             <summary data-i18n="reader_format_title">File format</summary>
@@ -566,9 +661,9 @@
               brings everything back except the reading position.
             </p>
             <p class="hint" data-i18n="reader_transfer_marks">
-              Export highlights writes a plain-text .md file of your highlighted passages, grouped
-              by document - made for notes, not for import. Highlights travel between devices
-              inside the article list's .json backup.
+              Highlights travel with their articles inside the .json backup. To write them out as
+              notes - a plain-text .md file grouped by document - use Export highlights on the
+              Highlights page.
             </p>
           </details>
           <input
@@ -577,24 +672,6 @@
             accept=".json,application/json,.zip,application/zip,.epub,application/epub+zip"
             hidden
           />
-          <!--
-            The moment of consent: what the picked file holds, quoted before
-            anything is written - and import only ever adds; the file's rules
-            live in `lib/store/articles-file.js`.
-          -->
-          <div id="library-import-confirm" class="import-confirm" hidden>
-            <p id="library-import-summary"></p>
-            <ul id="library-import-sample" class="import-sample"></ul>
-            <p class="transfer">
-              <button type="button" id="library-import-run" data-i18n="action_import">Import</button>
-              <button type="button" id="library-import-cancel" data-i18n="action_cancel">Cancel</button>
-            </p>
-          </div>
-          <p id="library-transfer-status" class="status report" role="status"></p>
-          <!-- The book import speaks its own line: its progress ticks per
-               written part while the article import's reports stand still,
-               and the two must not overwrite each other mid-sentence. -->
-          <p id="book-import-status" class="status report" role="status"></p>
         </section>
       </section>
 
@@ -623,7 +700,20 @@
             data-i18n-placeholder="reader_marks_filter_placeholder"
           />
         </div>
-        <p class="hint" id="marks-count" hidden></p>
+        <!-- The page's own line over the rows, the reading list's shape: the
+             filter's count on the left while there is one, and on the right
+             the way down to the export (D152/D153) - the button stands under
+             the rows, a page away once the list is long; the reading list's
+             fold-row anchor, on the tools line. An anchor, not a second
+             button: two exports on one page put the report under the bar,
+             a page from the lower button (Michał's smoke, 2026-08-29).
+             Hidden with nothing to write, as the button greys. -->
+        <div class="list-tools">
+          <p class="hint" id="marks-count" hidden></p>
+          <a href="#marks-transfer" class="quiet-link" id="marks-transfer-link" data-i18n="reader_export_marks" hidden>
+            Export highlights
+          </a>
+        </div>
         <div id="marks-empty" class="empty" hidden></div>
         <ul id="marks-rows" class="library-rows marks-rows"></ul>
         <nav class="pager" id="marks-pager" hidden>
@@ -631,15 +721,20 @@
           <span class="pager-label" id="marks-page-label"></span>
           <button type="button" id="marks-next" data-i18n="pager_next">Next</button>
         </nav>
-        <!-- The pen's export again, here where the quotes are: the same .md
-             the reading list offers, cut to this page's documents - one
-             document when the page is scoped. Greyed with nothing to
-             write, the Export buttons' shared rule. -->
-        <p class="transfer marks-transfer">
-          <button type="button" id="marks-export" data-i18n="reader_export_marks">
-            Export highlights
-          </button>
-        </p>
+        <!-- The pen's export, here where the quotes are (the reading list's
+             transfer section offered it too until D152): the .md cut to this
+             page's documents - one document when the page is scoped. Greyed
+             with nothing to write, the Export buttons' shared rule. The line
+             under it says what the export wrote (D153) - right under the
+             press, where the transfer sections say it too. -->
+        <div id="marks-transfer" class="marks-transfer">
+          <p class="transfer">
+            <button type="button" id="marks-export" data-i18n="reader_export_marks">
+              Export highlights
+            </button>
+          </p>
+          <p id="marks-transfer-status" class="status report" role="status"></p>
+        </div>
       </section>
 
       <!-- A quote row's acts are cloned from these: the arrow that opens

@@ -131,7 +131,13 @@ export function searchableArticle(meta) {
  * from one `listedRows` call because the segments partition the list -
  * counting the other one twice would be a second copy of the rule.
  *
- * @template {SavedMeta & { lastReadAt?: number | null }} T
+ * `selectable` is what a "Select all" covers (D152): the segment as the
+ * filter left it, every page of it - the filter is how a reader says
+ * "these", and a page is only how many fit on a screen. Articles only: a
+ * book is not exported, so a tick the export could not honour is not
+ * offered.
+ *
+ * @template {SavedMeta & { lastReadAt?: number | null, kind?: "article" | "book" }} T
  * @param {T[]} metas as the stores answer, in any order
  * @param {{ segment: SegmentValue, query: string, page: number }} shown
  * @returns {{
@@ -142,6 +148,7 @@ export function searchableArticle(meta) {
  *   inSegment: number,
  *   unread: number,
  *   read: number,
+ *   selectable: string[],
  * }}
  */
 export function libraryView(metas, { segment, query, page }) {
@@ -158,5 +165,59 @@ export function libraryView(metas, { segment, query, page }) {
     inSegment: inSegment.length,
     unread: segment === Segment.UNREAD ? inSegment.length : elsewhere,
     read: segment === Segment.READ ? inSegment.length : elsewhere,
+    selectable: matching.filter((meta) => meta.kind !== "book").map((meta) => meta.url),
   };
+}
+
+/**
+ * The state the "Select all" box shows over the rows it covers (D152):
+ * every one of them picked, some of them, or none - ticked, half-ticked or
+ * clear. Over no rows at all (an empty segment, a filter that matched
+ * nothing) there is nothing to tick, which reads as none.
+ *
+ * @param {readonly string[]} selectable the urls a Select all covers
+ * @param {ReadonlySet<string>} picked
+ * @returns {"all" | "some" | "none"}
+ */
+export function pickedState(selectable, picked) {
+  const count = selectable.filter((url) => picked.has(url)).length;
+  if (count === 0) return "none";
+  return count === selectable.length ? "all" : "some";
+}
+
+/**
+ * The selection after a press on "Select all" (D152): ticked, every row it
+ * covers joins what was picked; cleared, those rows leave it. Only those
+ * rows - a tick made on the other segment, or under another filter, was
+ * the reader's own and stays.
+ *
+ * @param {ReadonlySet<string>} picked
+ * @param {readonly string[]} selectable
+ * @param {boolean} on
+ * @returns {Set<string>}
+ */
+export function withAllPicked(picked, selectable, on) {
+  const next = new Set(picked);
+  for (const url of selectable) {
+    if (on) next.add(url);
+    else next.delete(url);
+  }
+  return next;
+}
+
+/**
+ * The selection held to the list as it stands (D152): an article deleted
+ * since its tick - from another tab, or by the browser - leaves the
+ * selection with it, so the count says what the export will take. Books
+ * never enter it, so a book's id among the ticks leaves the same way.
+ *
+ * @param {ReadonlySet<string>} picked
+ * @param {readonly { url: string, kind?: "article" | "book" }[]} entries
+ * @returns {Set<string>}
+ */
+export function keptPicks(picked, entries) {
+  const present = new Set(
+    entries.filter((entry) => entry.kind !== "book").map((entry) => entry.url),
+  );
+  return new Set([...picked].filter((url) => present.has(url)));
 }

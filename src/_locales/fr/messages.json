@@ -371,8 +371,81 @@
     "message": "L'export ne couvre que les articles - les livres (.epub) ne sont pas exportés. Réimporter un livre restaure tout sauf la position de lecture."
   },
   "reader_export_marks": { "message": "Exporter les surlignages" },
-  "reader_transfer_marks": { "message": "L'export des surlignages écrit un fichier texte .md des passages surlignés, groupés par document - pensé pour les notes, pas pour l'import. Les surlignages voyagent entre appareils dans la sauvegarde .json de la liste d'articles." },
+  "reader_transfer_marks": { "message": "Les surlignages voyagent avec leurs articles dans la sauvegarde .json. Pour les écrire sous forme de notes - un fichier texte .md groupé par document - utilisez « Exporter les surlignages » sur la page des surlignages." },
+  "reader_transfer_pick": { "message": "Pour n'exporter que certains articles, appuyez sur « Sélectionner » au-dessus de la liste et cochez-les." },
+  "reader_pick_start": { "message": "Sélectionner" },
+  "reader_pick_close": { "message": "Fermer la sélection" },
+  "reader_pick_all": { "message": "Tout sélectionner" },
+  "reader_pick_count_one": {
+    "message": "$COUNT$ article sélectionné",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "reader_pick_count_other": {
+    "message": "$COUNT$ articles sélectionnés",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_export_selected": {
+    "message": "Exporter la sélection ($COUNT$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_export_done_one": {
+    "message": "$COUNT$ article exporté vers $FILE$ ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "file": { "content": "$2", "example": "reread-articles.json" },
+      "size": { "content": "$3", "example": "38 KB" }
+    }
+  },
+  "reader_export_done_other": {
+    "message": "$COUNT$ articles exportés vers $FILE$ ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "file": { "content": "$2", "example": "reread-articles.zip" },
+      "size": { "content": "$3", "example": "2,1 MB" }
+    }
+  },
+  "reader_export_marks_done_one": {
+    "message": "Surlignages de $COUNT$ document exportés vers $FILE$ ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "file": { "content": "$2", "example": "reread-highlights.md" },
+      "size": { "content": "$3", "example": "4 KB" }
+    }
+  },
+  "reader_export_marks_done_other": {
+    "message": "Surlignages de $COUNT$ documents exportés vers $FILE$ ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "file": { "content": "$2", "example": "reread-highlights.md" },
+      "size": { "content": "$3", "example": "12 KB" }
+    }
+  },
+  "vocab_export_done_one": {
+    "message": "$COUNT$ phrase exportée vers $FILE$ ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "file": { "content": "$2", "example": "reread-en-fr.tsv" },
+      "size": { "content": "$3", "example": "1 KB" }
+    }
+  },
+  "vocab_export_done_other": {
+    "message": "$COUNT$ phrases exportées vers $FILE$ ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "240" },
+      "file": { "content": "$2", "example": "reread-en-fr.tsv" },
+      "size": { "content": "$3", "example": "19 KB" }
+    }
+  },
   "reader_marks_title": { "message": "Surlignages" },
+  "reader_marks_title_all": { "message": "Tous les surlignages" },
+  "reader_marks_title_article": { "message": "Surlignages dans cet article" },
+  "reader_marks_title_book": { "message": "Surlignages dans ce livre" },
   "reader_marks_filter_label": { "message": "Filtrer les surlignages" },
   "reader_marks_filter_placeholder": { "message": "Filtrer par citation ou par titre" },
   "reader_marks_empty": {

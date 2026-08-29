@@ -460,8 +460,141 @@
     "message": "Eksport uwzględnia tylko artykuły, nie eksportuje książek (.epub). Ponowny import przywraca wszystko poza pozycją czytania."
   },
   "reader_export_marks": { "message": "Eksportuj zakreślenia" },
-  "reader_transfer_marks": { "message": "Eksport zakreśleń zapisuje tekstowy plik .md z zakreślonymi fragmentami, pogrupowanymi według dokumentów - do notatek, nie do importu. Zakreślenia przenoszą się między urządzeniami w kopii zapasowej .json listy artykułów." },
+  "reader_transfer_marks": { "message": "Zakreślenia przenoszą się razem z artykułami w kopii zapasowej .json. Żeby zapisać je jako notatki - tekstowy plik .md pogrupowany według dokumentów - użyj „Eksportuj zakreślenia” na stronie Zakreśleń." },
+  "reader_transfer_pick": { "message": "Żeby wyeksportować tylko niektóre artykuły, naciśnij „Zaznacz” nad listą i zaznacz je." },
+  "reader_pick_start": { "message": "Zaznacz" },
+  "reader_pick_close": { "message": "Zamknij zaznaczanie" },
+  "reader_pick_all": { "message": "Zaznacz wszystkie" },
+  "reader_pick_count_one": {
+    "message": "Zaznaczono $COUNT$ artykuł",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "reader_pick_count_few": {
+    "message": "Zaznaczono $COUNT$ artykuły",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_pick_count_many": {
+    "message": "Zaznaczono $COUNT$ artykułów",
+    "placeholders": {
+      "count": { "content": "$1", "example": "5" }
+    }
+  },
+  "reader_pick_count_other": {
+    "message": "Zaznaczono $COUNT$ artykułu",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1,5" }
+    }
+  },
+  "reader_export_selected": {
+    "message": "Eksportuj zaznaczone ($COUNT$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_export_done_one": {
+    "message": "Wyeksportowano $COUNT$ artykuł do $FILE$ ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "file": { "content": "$2", "example": "reread-articles.json" },
+      "size": { "content": "$3", "example": "38 KB" }
+    }
+  },
+  "reader_export_done_few": {
+    "message": "Wyeksportowano $COUNT$ artykuły do $FILE$ ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "file": { "content": "$2", "example": "reread-articles.json" },
+      "size": { "content": "$3", "example": "120 KB" }
+    }
+  },
+  "reader_export_done_many": {
+    "message": "Wyeksportowano $COUNT$ artykułów do $FILE$ ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "file": { "content": "$2", "example": "reread-articles.zip" },
+      "size": { "content": "$3", "example": "2,1 MB" }
+    }
+  },
+  "reader_export_done_other": {
+    "message": "Wyeksportowano $COUNT$ artykułu do $FILE$ ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1,5" },
+      "file": { "content": "$2", "example": "reread-articles.json" },
+      "size": { "content": "$3", "example": "38 KB" }
+    }
+  },
+  "reader_export_marks_done_one": {
+    "message": "Wyeksportowano zakreślenia z $COUNT$ dokumentu do $FILE$ ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "file": { "content": "$2", "example": "reread-highlights.md" },
+      "size": { "content": "$3", "example": "4 KB" }
+    }
+  },
+  "reader_export_marks_done_few": {
+    "message": "Wyeksportowano zakreślenia z $COUNT$ dokumentów do $FILE$ ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "file": { "content": "$2", "example": "reread-highlights.md" },
+      "size": { "content": "$3", "example": "12 KB" }
+    }
+  },
+  "reader_export_marks_done_many": {
+    "message": "Wyeksportowano zakreślenia z $COUNT$ dokumentów do $FILE$ ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "15" },
+      "file": { "content": "$2", "example": "reread-highlights.md" },
+      "size": { "content": "$3", "example": "60 KB" }
+    }
+  },
+  "reader_export_marks_done_other": {
+    "message": "Wyeksportowano zakreślenia z $COUNT$ dokumentu do $FILE$ ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1,5" },
+      "file": { "content": "$2", "example": "reread-highlights.md" },
+      "size": { "content": "$3", "example": "4 KB" }
+    }
+  },
+  "vocab_export_done_one": {
+    "message": "Wyeksportowano $COUNT$ frazę do $FILE$ ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "file": { "content": "$2", "example": "reread-en-pl.tsv" },
+      "size": { "content": "$3", "example": "1 KB" }
+    }
+  },
+  "vocab_export_done_few": {
+    "message": "Wyeksportowano $COUNT$ frazy do $FILE$ ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "file": { "content": "$2", "example": "reread-en-pl.tsv" },
+      "size": { "content": "$3", "example": "1 KB" }
+    }
+  },
+  "vocab_export_done_many": {
+    "message": "Wyeksportowano $COUNT$ fraz do $FILE$ ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "240" },
+      "file": { "content": "$2", "example": "reread-en-pl.tsv" },
+      "size": { "content": "$3", "example": "19 KB" }
+    }
+  },
+  "vocab_export_done_other": {
+    "message": "Wyeksportowano $COUNT$ frazy do $FILE$ ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1,5" },
+      "file": { "content": "$2", "example": "reread-en-pl.tsv" },
+      "size": { "content": "$3", "example": "1 KB" }
+    }
+  },
   "reader_marks_title": { "message": "Zakreślenia" },
+  "reader_marks_title_all": { "message": "Wszystkie zakreślenia" },
+  "reader_marks_title_article": { "message": "Zakreślenia w tym artykule" },
+  "reader_marks_title_book": { "message": "Zakreślenia w tej książce" },
   "reader_marks_filter_label": { "message": "Filtruj zakreślenia" },
   "reader_marks_filter_placeholder": { "message": "Filtruj po cytacie lub tytule" },
   "reader_marks_empty": {

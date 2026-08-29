@@ -121,6 +121,20 @@ export function megabytes(bytes) {
 }
 
 /**
+ * A file's size the way the line after an export says it (D153): whole
+ * kilobytes under a megabyte, `megabytes` from there - "0.0 MB" for a
+ * forty-kilobyte file would say nothing. Never under one kilobyte: a file
+ * that exists is not "0 KB".
+ *
+ * @param {number} bytes
+ * @returns {string}
+ */
+export function fileSize(bytes) {
+  if (bytes >= 1048576) return megabytes(bytes);
+  return `${Math.max(1, Math.round(bytes / 1024)).toLocaleString()} KB`;
+}
+
+/**
  * Swaps the English written in an extension page for the catalogue's language.
  *
  * The pages ship readable English in their markup and mark what is

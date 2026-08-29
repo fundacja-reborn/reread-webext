@@ -21,8 +21,8 @@
          that, because the swap goes through `textContent`. The intro is the
          one exception: it quotes the bubble's own button labels through
          placeholders, so vocab.js writes it instead of a marker. -->
-    <header>
-      <!-- The reading list's bar, worn by this page's header: the mark on the
+    <div class="page-chrome">
+      <!-- The reading list's bar, worn over this page's header: the mark on the
            leading edge, the drawn tools at the far one, one line under both.
            The dress and the conduct are the reader bar's exactly - the two
            pages should read as one extension - and the toolset is this
@@ -35,7 +35,12 @@
            the bar leads to is already at the top. The bar and its two panels
            are the outside-press boundary: a press inside any of them is the
            panels' own business (see vocab.js), exactly the reader's
-           `.reader-chrome` rule. -->
+           `.reader-chrome` rule. The box around the bar and its panels is
+           what sticks while a panel is open (D153, page.css): the dimmed
+           page still scrolls, and the menu must not scroll away with it. A
+           child of the body, not of the header: a stuck box never leaves its
+           parent's box, and inside the short header it slid away with it
+           (Michał's smoke, 2026-08-29). -->
       <div class="page-bar">
         <!-- The way back to the reading (D141/D142), the settings bar's own
              arrow. Walked into in this tab, it pops the entry the system's
@@ -192,6 +197,8 @@
         <button id="nav-marks" type="button" data-i18n="reader_marks_title">Highlights</button>
         <button id="nav-settings" type="button" data-i18n="settings">Settings</button>
       </nav>
+    </div>
+    <header>
       <div class="head-row">
         <h1 data-i18n="saved_phrases">Saved phrases</h1>
         <label for="pair" class="visually-hidden" data-i18n="language_pair">Language pair</label>
@@ -248,18 +255,13 @@
         <button type="button" id="import" data-i18n="action_import">Import</button>
         <button type="button" id="export" data-i18n="action_export">Export</button>
       </p>
-      <details class="fold-line">
-        <summary data-i18n="vocab_format_title">File format</summary>
-        <p class="hint" data-i18n="vocab_transfer_note">
-          A two-column .tsv file - what the KOReader plugin writes and Anki imports. Importing adds
-          phrases this pair is missing and never touches a saved one.
-        </p>
-      </details>
-      <input type="file" id="import-file" accept=".tsv,text/tab-separated-values" hidden />
-
       <!-- The moment of consent: what the file holds and where it would go,
            shown before anything is written. vocab.js fills it and keeps it in
-           step with the file the reader picked. -->
+           step with the file the reader picked. Right under the buttons, with
+           the report line after it and the format fold last (D153): what a
+           press did must be said where the press was - under the fold a
+           report stood away from the button, and an opened fold pushed it
+           further (Michał's smoke, 2026-08-29). -->
       <div id="import-confirm" class="import-confirm" hidden>
         <p id="import-summary"></p>
         <ul id="import-sample" class="import-sample"></ul>
@@ -273,6 +275,14 @@
         </p>
       </div>
       <p id="transfer-status" class="status report" role="status"></p>
+      <details class="fold-line">
+        <summary data-i18n="vocab_format_title">File format</summary>
+        <p class="hint" data-i18n="vocab_transfer_note">
+          A two-column .tsv file - what the KOReader plugin writes and Anki imports. Importing adds
+          phrases this pair is missing and never touches a saved one.
+        </p>
+      </details>
+      <input type="file" id="import-file" accept=".tsv,text/tab-separated-values" hidden />
     </section>
 
     <!-- The colophon the settings page closes with, here because this room

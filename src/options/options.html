@@ -21,13 +21,19 @@
          paragraphs around the dynamic <strong> and <a> elements are split into
          spans, with the separating spaces left between the elements as plain
          text that no language has to carry. -->
-    <header>
+    <div class="page-chrome">
       <!-- The bar the other pages wear (`.page-bar`, assets/page.css), so the
            walk between them never changes rooms' dress: the mark on the
            leading edge, the drawn menu at the far one. The mark alone is not
            a button here - everywhere else it is the door to the settings, and
            this is the settings. The menu holds the extension's other pages;
            its own room, by the menus' shared rule, is not on the list. -->
+      <!-- The box around the bar and its menu (`.page-chrome`) sticks while
+           the menu is open (D153, page.css): the dimmed page still scrolls,
+           and the menu must not scroll away with it. A child of the body,
+           not of the header: a stuck box never leaves its parent's box, and
+           inside the short header it slid away with it (Michał's smoke,
+           2026-08-29). -->
       <div class="page-bar">
         <!-- The way back to the reading (D139/D142), drawn where every app
              puts it (the reader bar's own arrow). Walked into in this tab,
@@ -86,7 +92,8 @@
         <button id="nav-marks" type="button" data-i18n="reader_marks_title">Highlights</button>
         <button id="nav-vocabulary" class="translation-only" type="button" data-i18n="saved_phrases">Saved phrases</button>
       </nav>
-
+    </div>
+    <header>
       <h1 data-i18n="settings">Settings</h1>
     </header>
 

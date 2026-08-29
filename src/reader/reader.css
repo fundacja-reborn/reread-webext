@@ -234,6 +234,19 @@ body.reader:has(#article:not([hidden])) .reader-chrome {
   z-index: 2;
 }
 
+/* And in the list and the highlights views, stuck for as long as a panel is
+   open (D153, Michał's smoke, 2026-08-29): the dimmed page still scrolls,
+   and the menu scrolled away with it. Stuck at its own offset, not at the
+   window's top: at zero it first slid up by the page's top padding, a small
+   scroll of an open menu on its way to being stuck - the script measures
+   the offset on the press (`lib/chrome-hold.js`). The article view keeps
+   its plain stuck bar (D93), so this rule stands down there. The other
+   pages' `.page-chrome` does the same in page.css. */
+body.reader:not(:has(#article:not([hidden]))):has(.panel-scrim:not([hidden])) .reader-chrome {
+  position: sticky;
+  top: var(--chrome-hold, 0px);
+}
+
 /* The strip's paper runs edge to edge while everything visible keeps the
    column (Michał's reports, 2026-08-16): a pill sliding under a column-wide
    bar looked erased mid-air, so the background must reach the window's
@@ -1032,7 +1045,8 @@ body.reader:has(#library:not([hidden])) {
    export made three (D106), and three of these labels do not fit a phone's
    line in any language - unwrapped they ran off the screen's edge and took
    the whole page's sideways scroll with them (Michał's report from the
-   phone, 2026-08-23). */
+   phone, 2026-08-23). The third moved to the highlights page in D152; the
+   wrap stays, for the counted label the selection puts on Export. */
 .transfer {
   display: flex;
   flex-wrap: wrap;
@@ -1291,7 +1305,11 @@ body.reader:has(#library:not([hidden])) {
   align-items: end;
   gap: 0.25rem;
   align-self: start;
-  margin-top: 0.9em;
+  /* Air under the column as well as over it: under a short quote the five
+     acts are what gives the row its height, and without it the last one -
+     the trash, or the "Sure?" it turns into - sat on the row's bottom rule
+     (Michał's smoke, 2026-08-29). */
+  margin-block: 0.9em 1.1em;
 }
 
 .marks-act {
@@ -1377,6 +1395,13 @@ a.marks-act {
    second line right above the button read as clutter (his follow-up). */
 .marks-transfer {
   margin-top: 3rem;
+  /* The anchor over the rows lands here (D153); the same room the list's
+     transfer section keeps under the window's edge. */
+  scroll-margin-top: 0.75rem;
+}
+
+.marks-transfer > .transfer {
+  margin-top: 0;
 }
 
 /* --- the shared pager, held to the same touch floor --- */
@@ -1587,6 +1612,175 @@ a.marks-act {
   min-height: 44px;
 }
 
+/* --- the selection (D152): the list's line over the rows, the bar that
+   stands in its place inside the mode, and the rows wearing boxes --- */
+
+/* The list's own line: the filter's count on the left when there is one,
+   the Select button on the right. A line of its own, apart from the filter
+   and the search line - beside the filter the button read as the search's
+   own (Michał's smoke, 2026-08-29). The count is a hint by voice, not by
+   place: as a flex item it would take the hint's top margin as a real one. */
+.list-tools {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.25rem 0 0;
+}
+
+.list-tools .hint {
+  margin: 0;
+}
+
+/* A quiet link at the line's right end: the highlights page's way down to
+   its export (D152/D153) - the reading list's fold-row anchor, on the tools
+   line, at the same finger of height. */
+.quiet-link {
+  display: inline-flex;
+  align-items: center;
+  margin-inline-start: auto;
+  min-height: 44px;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: none;
+  color: var(--page-muted);
+  font-size: 0.9rem;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.quiet-link:hover,
+.quiet-link:focus-visible {
+  color: var(--page-accent);
+}
+
+/* The glyph beside its word, and the right end of the line whether or not
+   the count stands on the left. */
+.pick-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-inline-start: auto;
+  min-height: 44px;
+  padding: 0.35rem 0.8rem;
+  white-space: nowrap;
+}
+
+/* Inside the selection, its bar: Select all, the count, and the cross
+   that closes it, where the Select button stood. Framed and washed a
+   shade, so the mode is seen to be a mode and not a line of hints; the
+   wash is the page's own ink, not the accent - the accent is what a
+   ticked row wears below, and the bar must not compete with it. Wraps on
+   a phone rather than run off its edge: the count steps down a line. */
+.pick-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 0.75rem;
+  margin: 0.25rem 0 0;
+  padding: 0 0.25rem 0 0.6rem;
+  border: 1px solid var(--page-line);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--page-fg) 4%, transparent);
+}
+
+.pick-bar .hint {
+  margin: 0;
+  margin-inline-start: auto;
+}
+
+/* The cross in the note's dress: quiet at rest, a 44px hit box, the page's
+   ink on hover and on the keyboard. */
+.pick-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0.35rem;
+  border-color: transparent;
+  color: var(--page-muted);
+}
+
+.pick-close:hover,
+.pick-close:focus-visible {
+  border-color: var(--page-border);
+  color: var(--page-fg);
+}
+
+/* A row in the selection: box | text, the Delete column gone with the act
+   it served - the mode is for choosing, and a Delete beside every box is
+   one mis-tap from a loss. The box sits centred on the title's first line,
+   whatever type size the reader chose; the whole text cell is its label,
+   so a finger has the row to aim at, not the box. */
+.library-row-pick {
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0 0.75rem;
+  /* The box stands in from the row's edge by the bar's own padding and
+     border, so the rows' boxes line up under the Select all box - and the
+     ticked row's wash has air before the box instead of an edge on it
+     (Michał's second smoke). A little air at the far end too. */
+  padding-inline: calc(0.6rem + 1px) 0.5rem;
+}
+
+.library-row-pick > .library-text {
+  grid-column: 2;
+}
+
+/* Two classes deep on purpose: the page's own `input[type="checkbox"]`
+   rule zeroes every box's margin, and a single class loses to it - the
+   box then sat on the row's top rule (Michał's smoke, 2026-08-29). */
+.library-row-pick > .library-pick {
+  align-self: start;
+  width: 1.15rem;
+  height: 1.15rem;
+  margin-top: calc(0.7rem + (var(--reader-size, 18px) * 1.45 - 1.15rem) / 2);
+}
+
+/* The title as a label toggles on a press and, unlike the button it stands
+   in for, would select its words on a long one - refused, the way the
+   article's own title is a button and not a passage. */
+.library-row-pick .library-open {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* The keyboard's ring around the row, the article rows' own rule: the
+   target it marks is the cell the label stretches over, not the box. */
+.library-pick:focus-visible {
+  outline: none;
+}
+
+.library-row:has(.library-pick:focus-visible) {
+  background: color-mix(in srgb, var(--page-fg) 5%, transparent);
+  outline: 2px solid var(--page-accent);
+  outline-offset: -2px;
+}
+
+/* A ticked row says so with a wash of the accent, not the tick alone: the
+   tick is small, and on e-ink a filled box and an empty one are two greys
+   a glance apart. After the focus rule, so a ticked row keeps its wash
+   under the ring - the tick is the state, the ring only where the keys
+   are. */
+.library-row:has(.library-pick:checked) {
+  background: color-mix(in srgb, var(--page-accent) 10%, transparent);
+}
+
+/* A book in the selection: not exported, so no box - dimmed, its title
+   plain text with no door behind it. The stretched click area and the
+   hover wash would promise one, so both stand down. */
+.library-row-still {
+  opacity: 0.55;
+}
+
+.library-row-still .library-open::after {
+  content: none;
+}
+
+.library-row-still:has(.library-open:hover) {
+  background: none;
+}
+
 .search-snippets {
   margin-top: 0.15rem;
 }
@@ -1752,16 +1946,6 @@ a.marks-act {
    row of buttons here; the media query below gives them their own width. */
 .transfer-section > .transfer button {
   flex: 1 1 0;
-}
-
-/* And the third button takes the next line whole. It is the odd one out
-   anyway - a one-way export beside the pair that backs the list up - and its
-   label is the longest of the three in every language we speak, so a third of
-   a phone's line was never going to hold it. A line of its own rather than a
-   share of one: the pair stays a pair, and the layout stops depending on how
-   wide a translated word happens to be. */
-.transfer-section > .transfer #library-export-marks {
-  flex-basis: 100%;
 }
 
 /* --- the article's bar: the acts on this article --- */
@@ -2224,14 +2408,6 @@ body.reader:has(#mark-bar:not([hidden])) {
 
   .transfer-section > .transfer button {
     flex: none;
-  }
-
-  /* Wide enough for all three, so the highlights export rejoins the row at
-     its own width. The same selector as the phone rule on purpose: `flex:
-     none` above carries no id and cannot outweigh it - this one wins by
-     standing later. */
-  .transfer-section > .transfer #library-export-marks {
-    flex-basis: auto;
   }
 }
 

@@ -360,8 +360,81 @@
     "message": "Der Export umfasst nur Artikel - Bücher (.epub) werden nicht exportiert. Ein erneuter Import eines Buches stellt alles außer der Leseposition wieder her."
   },
   "reader_export_marks": { "message": "Markierungen exportieren" },
-  "reader_transfer_marks": { "message": "Der Export der Markierungen schreibt eine .md-Textdatei mit den markierten Passagen, nach Dokumenten gruppiert - für Notizen gedacht, nicht für den Import. Markierungen wandern zwischen Geräten in der .json-Sicherung der Artikelliste." },
+  "reader_transfer_marks": { "message": "Markierungen wandern mit ihren Artikeln in der .json-Sicherung. Um sie als Notizen zu speichern - eine .md-Textdatei, nach Dokumenten gruppiert - nutzen Sie „Markierungen exportieren“ auf der Seite der Markierungen." },
+  "reader_transfer_pick": { "message": "Um nur einige Artikel zu exportieren, drücken Sie über der Liste auf „Auswählen“ und haken Sie sie ab." },
+  "reader_pick_start": { "message": "Auswählen" },
+  "reader_pick_close": { "message": "Auswahl schließen" },
+  "reader_pick_all": { "message": "Alle auswählen" },
+  "reader_pick_count_one": {
+    "message": "$COUNT$ Artikel ausgewählt",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "reader_pick_count_other": {
+    "message": "$COUNT$ Artikel ausgewählt",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_export_selected": {
+    "message": "Ausgewählte exportieren ($COUNT$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_export_done_one": {
+    "message": "$COUNT$ Artikel nach $FILE$ exportiert ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "file": { "content": "$2", "example": "reread-articles.json" },
+      "size": { "content": "$3", "example": "38 KB" }
+    }
+  },
+  "reader_export_done_other": {
+    "message": "$COUNT$ Artikel nach $FILE$ exportiert ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "file": { "content": "$2", "example": "reread-articles.zip" },
+      "size": { "content": "$3", "example": "2,1 MB" }
+    }
+  },
+  "reader_export_marks_done_one": {
+    "message": "Markierungen aus $COUNT$ Dokument nach $FILE$ exportiert ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "file": { "content": "$2", "example": "reread-highlights.md" },
+      "size": { "content": "$3", "example": "4 KB" }
+    }
+  },
+  "reader_export_marks_done_other": {
+    "message": "Markierungen aus $COUNT$ Dokumenten nach $FILE$ exportiert ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "file": { "content": "$2", "example": "reread-highlights.md" },
+      "size": { "content": "$3", "example": "12 KB" }
+    }
+  },
+  "vocab_export_done_one": {
+    "message": "$COUNT$ Eintrag nach $FILE$ exportiert ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "file": { "content": "$2", "example": "reread-en-de.tsv" },
+      "size": { "content": "$3", "example": "1 KB" }
+    }
+  },
+  "vocab_export_done_other": {
+    "message": "$COUNT$ Einträge nach $FILE$ exportiert ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "240" },
+      "file": { "content": "$2", "example": "reread-en-de.tsv" },
+      "size": { "content": "$3", "example": "19 KB" }
+    }
+  },
   "reader_marks_title": { "message": "Markierungen" },
+  "reader_marks_title_all": { "message": "Alle Markierungen" },
+  "reader_marks_title_article": { "message": "Markierungen in diesem Artikel" },
+  "reader_marks_title_book": { "message": "Markierungen in diesem Buch" },
   "reader_marks_filter_label": { "message": "Die Markierungen filtern" },
   "reader_marks_filter_placeholder": { "message": "Nach Zitat oder Titel filtern" },
   "reader_marks_empty": {
