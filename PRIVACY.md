@@ -35,7 +35,8 @@ articles and books (**Delete**), models and dictionaries (their sections in
 Settings), and the per-site off switches (Settings, **Switched-off sites**).
 
 Your data can be exported at any time to files you choose the location of: vocabulary
-as TSV, the reading list as JSON, highlights as Markdown. Those files are written by
+as TSV, the reading list as JSON (or as a `.zip` with its pictures), highlights as
+Markdown. Those files are written by
 the browser's own download mechanism to your disk; they are not uploaded anywhere.
 
 ## What leaves your device
