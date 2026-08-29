@@ -437,6 +437,39 @@ button.page-mark:hover {
   margin-top: -1px;
 }
 
+/* The page under an open panel, dimmed - every page with the bar's menu
+   (Michał's reports, 2026-08-29: first the reader, where the menu's rows
+   read as lines of the article they stood over; then the list, the
+   phrases and the settings, where the wash either covered the menu or was
+   missing). One fixed sheet under the bar and its panels, over everything
+   else: the bar and the panels are lifted above it here, and the reader's
+   chrome lifts itself (reader.css). Ink rather than paper, so it dims every
+   theme the same way; a little more of it on dark paper, where a thin wash
+   disappears. `auto` follows the browser the way the palettes above do. */
+.panel-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  background: rgb(0 0 0 / 0.22);
+}
+
+:root[data-reader-theme="dark"] .panel-scrim {
+  background: rgb(0 0 0 / 0.45);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-reader-theme="light"]):not([data-reader-theme="sepia"]) .panel-scrim {
+    background: rgb(0 0 0 / 0.45);
+  }
+}
+
+.page-bar,
+.nav-menu,
+#display-panel {
+  position: relative;
+  z-index: 2;
+}
+
 /* --- the colophon (the settings' first, now every room that ends) --- */
 
 /* The line that closes a page the way one closes a book: name and version,

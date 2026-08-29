@@ -10,6 +10,11 @@
     <link rel="stylesheet" href="vocab.css" />
   </head>
   <body>
+    <!-- The page dimmed under an open panel, the reader's rule (PR #253, then
+         every page with the menu - Michał's smoke, 2026-08-29). Under the bar
+         and its panels, over the rest; a press on it closes the panels as any
+         press outside them does. Shown by `setPanel`. -->
+    <div id="panel-scrim" class="panel-scrim" hidden></div>
     <!-- The English in this file is the fallback: `localizePage` swaps every
          `data-i18n`-marked text for the catalogue's language before the page
          is seen. A marked element holds text only - the locales test enforces

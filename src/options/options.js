@@ -2322,6 +2322,7 @@ document.getElementById("pair")?.addEventListener("change", (event) => {
 const pageBar = document.querySelector(".page-bar");
 const menuButton = document.getElementById("menu");
 const menuPanel = document.getElementById("menu-panel");
+const panelScrim = document.getElementById("panel-scrim");
 
 // The way back to the reading (D139-D142): walked here from the reader, the
 // arrow pops the same history entry as the system's back gesture; raised
@@ -2335,6 +2336,8 @@ function setMenu(open) {
   if (menuButton === null || menuPanel === null) return;
   menuPanel.hidden = !open;
   menuButton.setAttribute("aria-expanded", String(open));
+  // The page dims under the open menu, and clears with it.
+  if (panelScrim !== null) panelScrim.hidden = !open;
 }
 
 menuButton?.addEventListener("click", () => {
