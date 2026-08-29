@@ -149,28 +149,13 @@ summary {
 .reader-chrome {
   padding-top: 0.75rem;
   background: var(--page-bg);
-}
-
-/* The page under an open panel, dimmed: without it the menu's rows and the
-   article's lines share one paper and read as one text (Michał's report,
-   2026-08-29). Under the chrome (which stands at 2), over the article and
-   its highlights. Ink rather than paper, so it dims every theme the same
-   way; a little more of it on dark paper, where a thin wash disappears. */
-.panel-scrim {
-  position: fixed;
-  inset: 0;
-  z-index: 1;
-  background: rgb(0 0 0 / 0.22);
-}
-
-:root[data-reader-theme="dark"] .panel-scrim {
-  background: rgb(0 0 0 / 0.45);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root[data-reader-theme="auto"] .panel-scrim {
-    background: rgb(0 0 0 / 0.45);
-  }
+  /* Above the page's scrim (page.css) in every view - the list and the
+     highlights too, where the chrome is not stuck and used to have no
+     stacking of its own, so the wash covered the menu it was meant to set
+     off (Michał's smoke, 2026-08-29). The article view's rule below keeps
+     the same height and makes the position sticky. */
+  position: relative;
+  z-index: 2;
 }
 
 /* Stuck to the top only while an article is on screen: that is when the two
@@ -198,12 +183,26 @@ body.reader:has(#article:not([hidden])) .reader-chrome {
    so nothing about the chrome's inner layout moves. The halves of the calc
    overshoot by half a scrollbar; the root's overflow clip below eats the
    excess. */
-body.reader:has(#article:not([hidden])) .reader-chrome::before {
+body.reader:has(#article:not([hidden])) .reader-chrome::before,
+body.reader:has(.panel-scrim:not([hidden])) .reader-chrome::before {
   content: "";
   position: absolute;
-  inset: 0 calc(50% - 50vw);
+  /* Up past the page's top padding to the window's edge, so at the top of
+     the page no dimmed strip stands over the bar; scrolled, or stuck, the
+     reach is off-screen and paper on paper is invisible. */
+  inset: -100vh calc(50% - 50vw) 0;
   z-index: -1;
   background: var(--page-bg);
+}
+/* The same paper under an open panel in the views where the chrome is not
+   stuck (the list, the highlights): lifted above the scrim, a column-wide
+   chrome read as a white card dropped on the dimmed page (Michał's smoke,
+   2026-08-29); edge to edge it reads as the bar it is. And while a panel
+   is open, a shadow under the sheet's one edge that is not the window's -
+   never under the plain stuck bar, which stays the simplest thing an e-ink
+   panel can be asked to redraw (D93). */
+body.reader:has(.panel-scrim:not([hidden])) .reader-chrome::before {
+  box-shadow: 0 10px 24px -8px rgb(0 0 0 / 0.35);
 }
 
 /* What lets the underlay overshoot without summoning a horizontal scrollbar.

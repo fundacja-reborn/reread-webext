@@ -425,16 +425,95 @@ button.page-mark:hover {
    the rows, and closing on the same separator, so it reads as the row's
    footnote rather than as a row of its own. */
 .nav-menu .nav-hint {
-  margin: 0;
-  padding: 0.35rem 0 0.6rem;
-  border-bottom: 1px solid var(--page-line);
+  display: block;
+  margin: 0.1rem 0 0.15rem;
   font-size: 0.85rem;
   line-height: 1.4;
   color: var(--page-muted);
 }
 
-.nav-menu button + .nav-hint {
-  margin-top: -1px;
+/* A row with a second line inside it - the pictures row (D145): the label
+   and, under it, where the press reaches or how it went. One button, one
+   press target, one separator under both; a hint standing outside the row
+   behind its own line read as a second, dead row (Michał's smoke,
+   2026-08-29). */
+.nav-menu button.nav-row-hinted {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+/* The page under an open panel, dimmed - every page with the bar's menu
+   (Michał's reports, 2026-08-29: first the reader, where the menu's rows
+   read as lines of the article they stood over; then the list, the
+   phrases and the settings, where the wash either covered the menu or was
+   missing). One fixed sheet under the bar and its panels, over everything
+   else: the bar and the panels are lifted above it here, and the reader's
+   chrome lifts itself (reader.css). Ink rather than paper, so it dims every
+   theme the same way; a little more of it on dark paper, where a thin wash
+   disappears. `auto` follows the browser the way the palettes above do. */
+.panel-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  background: rgb(0 0 0 / 0.22);
+}
+
+:root[data-reader-theme="dark"] .panel-scrim {
+  background: rgb(0 0 0 / 0.45);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-reader-theme="light"]):not([data-reader-theme="sepia"]) .panel-scrim {
+    background: rgb(0 0 0 / 0.45);
+  }
+}
+
+.page-bar,
+.nav-menu,
+.page-panel {
+  position: relative;
+  z-index: 2;
+}
+
+/* Paper under the lifted bar and panel while the page is dimmed, from one
+   edge of the window to the other - the reader chrome's own trick
+   (reader.css): lifted alone, a column-wide bar reads as a white card
+   dropped on the dimmed page; edge to edge it reads as the bar it is. The
+   halves of the calc overshoot by half a scrollbar, and the root clips
+   sideways for as long as the scrim stands, so no scrollbar appears for
+   it (`clip`, not `hidden`: clipping makes no scroll container). */
+body:not(.reader):has(.panel-scrim:not([hidden])) :is(.page-bar, .nav-menu, .page-panel)::before {
+  content: "";
+  position: absolute;
+  inset: 0 calc(50% - 50vw);
+  z-index: -1;
+  background: var(--page-bg);
+}
+
+/* The bar's paper reaches up past the page's top padding to the window's
+   edge, so at the top of the page no dimmed strip stands over the bar
+   (Michał's smoke, 2026-08-29); scrolled, the reach is off-screen. The
+   panel's paper casts a shadow on the page under it, the one edge of the
+   sheet that is not the window's. */
+body:not(.reader):has(.panel-scrim:not([hidden])) .page-bar::before {
+  top: -100vh;
+  /* Down over the bar's own bottom rule as well: the paper stops at the
+     padding box, the rule lies under it, and beside the column that one
+     pixel between this paper and the panel's showed the dimmed page as a
+     line across the window (Michał's smoke, 2026-08-29). */
+  bottom: -1px;
+}
+
+body:not(.reader):has(.panel-scrim:not([hidden])) :is(.nav-menu, .page-panel)::before {
+  box-shadow: 0 10px 24px -8px rgb(0 0 0 / 0.35);
+  /* The shadow falls on the page below alone; its blur would otherwise
+     bleed upward and tint the bar's foot. */
+  clip-path: inset(0 0 -64px 0);
+}
+
+:root:has(.panel-scrim:not([hidden])) {
+  overflow-x: clip;
 }
 
 /* --- the colophon (the settings' first, now every room that ends) --- */
