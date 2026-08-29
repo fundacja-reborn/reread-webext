@@ -187,14 +187,23 @@ body.reader:has(#article:not([hidden])) .reader-chrome::before,
 body.reader:has(.panel-scrim:not([hidden])) .reader-chrome::before {
   content: "";
   position: absolute;
-  inset: 0 calc(50% - 50vw);
+  /* Up past the page's top padding to the window's edge, so at the top of
+     the page no dimmed strip stands over the bar; scrolled, or stuck, the
+     reach is off-screen and paper on paper is invisible. */
+  inset: -100vh calc(50% - 50vw) 0;
   z-index: -1;
   background: var(--page-bg);
 }
 /* The same paper under an open panel in the views where the chrome is not
    stuck (the list, the highlights): lifted above the scrim, a column-wide
    chrome read as a white card dropped on the dimmed page (Michał's smoke,
-   2026-08-29); edge to edge it reads as the bar it is. */
+   2026-08-29); edge to edge it reads as the bar it is. And while a panel
+   is open, a shadow under the sheet's one edge that is not the window's -
+   never under the plain stuck bar, which stays the simplest thing an e-ink
+   panel can be asked to redraw (D93). */
+body.reader:has(.panel-scrim:not([hidden])) .reader-chrome::before {
+  box-shadow: 0 10px 24px -8px rgb(0 0 0 / 0.35);
+}
 
 /* What lets the underlay overshoot without summoning a horizontal scrollbar.
    `clip`, not `hidden`: clipping does not make the root a scroll container,

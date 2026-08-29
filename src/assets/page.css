@@ -425,16 +425,22 @@ button.page-mark:hover {
    the rows, and closing on the same separator, so it reads as the row's
    footnote rather than as a row of its own. */
 .nav-menu .nav-hint {
-  margin: 0;
-  padding: 0.35rem 0 0.6rem;
-  border-bottom: 1px solid var(--page-line);
+  display: block;
+  margin: 0.1rem 0 0.15rem;
   font-size: 0.85rem;
   line-height: 1.4;
   color: var(--page-muted);
 }
 
-.nav-menu button + .nav-hint {
-  margin-top: -1px;
+/* A row with a second line inside it - the pictures row (D145): the label
+   and, under it, where the press reaches or how it went. One button, one
+   press target, one separator under both; a hint standing outside the row
+   behind its own line read as a second, dead row (Michał's smoke,
+   2026-08-29). */
+.nav-menu button.nav-row-hinted {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
 }
 
 /* The page under an open panel, dimmed - every page with the bar's menu
@@ -477,12 +483,25 @@ button.page-mark:hover {
    halves of the calc overshoot by half a scrollbar, and the root clips
    sideways for as long as the scrim stands, so no scrollbar appears for
    it (`clip`, not `hidden`: clipping makes no scroll container). */
-body:has(.panel-scrim:not([hidden])) :is(.page-bar, .nav-menu, #display-panel)::before {
+body:not(.reader):has(.panel-scrim:not([hidden])) :is(.page-bar, .nav-menu, #display-panel)::before {
   content: "";
   position: absolute;
   inset: 0 calc(50% - 50vw);
   z-index: -1;
   background: var(--page-bg);
+}
+
+/* The bar's paper reaches up past the page's top padding to the window's
+   edge, so at the top of the page no dimmed strip stands over the bar
+   (Michał's smoke, 2026-08-29); scrolled, the reach is off-screen. The
+   panel's paper casts a shadow on the page under it, the one edge of the
+   sheet that is not the window's. */
+body:not(.reader):has(.panel-scrim:not([hidden])) .page-bar::before {
+  top: -100vh;
+}
+
+body:not(.reader):has(.panel-scrim:not([hidden])) :is(.nav-menu, #display-panel)::before {
+  box-shadow: 0 10px 24px -8px rgb(0 0 0 / 0.35);
 }
 
 :root:has(.panel-scrim:not([hidden])) {

@@ -212,6 +212,11 @@ const navMarks = document.getElementById("nav-marks");
 const navVocabulary = document.getElementById("nav-vocabulary");
 const navSettings = document.getElementById("nav-settings");
 const navPictures = document.getElementById("nav-pictures");
+// The row's two lines live inside the button (Michał's smoke, 2026-08-29: a
+// hint standing under the row behind its own separator read as a second,
+// dead row): the label, and the line that says where the press reaches or
+// how it went.
+const navPicturesLabel = document.getElementById("nav-pictures-label");
 const navPicturesHint = document.getElementById("nav-pictures-hint");
 // The box the bar and its panels stand in - measured, not styled, from here:
 // while an article is on screen it is stuck over the text, and the voice needs
@@ -3702,10 +3707,10 @@ async function refreshActions() {
  * @param {SavedMeta | null} row
  */
 function refreshPicturesRow(target, row) {
-  if (navPictures === null || navPicturesHint === null) return;
+  if (navPictures === null || navPicturesLabel === null || navPicturesHint === null) return;
   const task = picturesTask;
   if (task !== null && task.url === target.url) {
-    navPictures.textContent = task.label;
+    navPicturesLabel.textContent = task.label;
     navPicturesHint.textContent = t("reader_pictures_stop");
     navPictures.hidden = false;
     navPicturesHint.hidden = false;
@@ -3719,7 +3724,7 @@ function refreshPicturesRow(target, row) {
     navPicturesHint.hidden = true;
     return;
   }
-  navPictures.textContent =
+  navPicturesLabel.textContent =
     kept !== undefined
       ? t("reader_pictures_remove", megabytes(kept.bytes))
       : t("reader_pictures_save", asked.toLocaleString());
@@ -3773,7 +3778,9 @@ async function onPicturesPress() {
       onProgress: ({ done, bytes }) => {
         if (picturesTask?.controller !== controller) return;
         picturesTask.label = progress(done, bytes);
-        if (shown?.url === target.url && navPictures !== null) navPictures.textContent = picturesTask.label;
+        if (shown?.url === target.url && navPicturesLabel !== null) {
+          navPicturesLabel.textContent = picturesTask.label;
+        }
       },
     });
     picturesNote = result.aborted
