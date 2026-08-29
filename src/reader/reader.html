@@ -490,16 +490,29 @@
               Export highlights
             </button>
           </p>
+          <!-- The pictures kept with articles (D145) ride in the backup only
+               when asked: with them the file is a .zip - the same .json and
+               the pictures beside it - and it can be many times the size.
+               The row stands only while some article has pictures; the
+               label says how many and what they take. Filled by script. -->
+          <p class="hint transfer-option" id="library-export-pictures-row" hidden>
+            <label>
+              <input type="checkbox" id="library-export-pictures" />
+              <span id="library-export-pictures-label"></span>
+            </label>
+          </p>
           <p class="hint" data-i18n="reader_transfer_accepts">
-            Import reads the file it is given: a backup of the re/read article list (.json), or an
-            e-book (.epub).
+            Import reads the file it is given: a backup of the re/read article list (.json, or .zip
+            with pictures), or an e-book (.epub).
           </p>
           <details class="fold-line">
             <summary data-i18n="reader_format_title">File format</summary>
             <p class="hint" data-i18n="reader_transfer_note">
               .json - a backup file holding every article saved in the re/read offline reading
               list, from this browser or any other browser or device where you use re/read. Import
-              only adds the articles missing here and never overwrites one already saved.
+              only adds the articles missing here and never overwrites one already saved. With
+              pictures included, the backup is a .zip holding the same .json and the pictures beside
+              it.
             </p>
             <p class="hint" data-i18n="reader_transfer_epub">.epub - the e-book format.</p>
             <p class="hint" data-i18n="reader_transfer_books">

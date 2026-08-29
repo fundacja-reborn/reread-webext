@@ -47,45 +47,16 @@ import { cappedToc, headingEntries } from "../lib/book/toc.js";
 import { buildArticle } from "../lib/reader/article.js";
 import { bookRecord } from "../lib/store/book.js";
 import { deleteBook, putBook, putBookSegment } from "../lib/store/books.js";
+import { loadFflate } from "./zip.js";
 
 /**
  * The slice of fflate this pipeline uses - the synchronous single-entry
- * reads, nothing else. In particular none of the asynchronous API, which is
- * the part that spawns workers (see `vendor/fflate/README.md`).
+ * reads, nothing else (`zip.js` loads the vendored file and says what of
+ * it is ever called).
  *
- * @typedef {{ name: string, size: number, originalSize: number }} ZipEntryInfo
- * @typedef {{
- *   unzipSync: (
- *     data: Uint8Array,
- *     opts?: { filter?: (file: ZipEntryInfo) => boolean },
- *   ) => Record<string, Uint8Array>,
- * }} FflateModule
+ * @typedef {import("./zip.js").ZipEntryInfo} ZipEntryInfo
+ * @typedef {import("./zip.js").FflateModule} FflateModule
  */
-
-/** @type {FflateModule | null} */
-let fflate = null;
-
-/**
- * The vendored ZIP reader, loaded the first time a book is actually
- * imported - the reader page in its usual life never pays for it. A dynamic
- * import of the copied file rather than a bundled one, so what runs is
- * byte-for-byte what `vendor/fflate/CHECKSUMS` pins. The specifier is
- * written for the built package, where `vendor/` stands beside `reader/`;
- * the build marks it external so it survives bundling verbatim.
- *
- * @returns {Promise<FflateModule>}
- */
-async function loadFflate() {
-  if (fflate === null) {
-    fflate = /** @type {FflateModule} */ (
-      // @ts-expect-error - the path exists only in the built package (the
-      // vendored file is copied, never bundled), so the checker cannot
-      // resolve it from the source tree.
-      await import("../vendor/fflate/browser.js")
-    );
-  }
-  return fflate;
-}
 
 /** @typedef {"drm" | "unreadable"} ImportFailure */
 

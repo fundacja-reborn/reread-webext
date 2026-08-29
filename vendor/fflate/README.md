@@ -47,12 +47,15 @@ loads it before then.
 
 ## What is used, and what is not
 
-The import pipeline calls **`unzipSync` only**, always with a `filter`, which is what makes
-it decompress single ZIP entries on demand - the central directory is scanned, and only the
-entry asked for is inflated. Nothing else is called. In particular the **asynchronous API is
-never touched**: that path (visible near the top of the file) spins up Web Workers from
-`Blob` URLs, which is exactly the kind of dynamic code an auditor should be able to rule
-out - and can, by checking that no `unzip(`/`zip(`/`Async` call sites exist in `src/`.
+Two synchronous functions, both through `src/reader/zip.js`: **`unzipSync`**, always with a
+`filter`, which is what makes it decompress single ZIP entries on demand - the central
+directory is scanned, and only the entry asked for is inflated (the book import's reads, and
+since D145 the listing and the picture entries of the reading list's `.zip` backup) - and
+**`zipSync`**, which writes that backup when the export is asked to include pictures. Nothing
+else is called. In particular the **asynchronous API is never touched**: that path (visible
+near the top of the file) spins up Web Workers from `Blob` URLs, which is exactly the kind of
+dynamic code an auditor should be able to rule out - and can, by checking that no
+`unzip(`/`zip(`/`Async` call sites exist in `src/`.
 
 ## The licence, precisely
 

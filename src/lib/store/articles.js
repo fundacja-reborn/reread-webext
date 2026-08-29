@@ -357,8 +357,13 @@ export async function allArticles() {
  * and it is the latest word - newer than any file, which was written before
  * the marks the reader made since.
  *
+ * The addresses actually added come back with the counts: an archive with
+ * pictures (`articles-archive.js`) writes them for those articles and no
+ * other - an article already saved keeps its copy whole, pictures included
+ * or not.
+ *
  * @param {import("./articles-file.js").FileArticle[]} articles
- * @returns {Promise<{ added: number, skipped: number }>}
+ * @returns {Promise<{ added: number, skipped: number, urls: string[] }>}
  */
 export async function importArticles(articles) {
   await restoreMarks();
@@ -381,7 +386,7 @@ export async function importArticles(articles) {
   });
   if (added.length > 0) await rebuildMarksBackup();
   for (const article of added) await copyArticle(article, false);
-  return { added: added.length, skipped };
+  return { added: added.length, skipped, urls: added.map((article) => article.url) };
 }
 
 /**

@@ -385,7 +385,45 @@
   },
   "reader_format_title": { "message": "File format" },
   "reader_transfer_note": {
-    "message": ".json - a backup file holding every article saved in the re/read offline reading list, from this browser or any other browser or device where you use re/read. Import only adds the articles missing here and never overwrites one already saved."
+    "message": ".json - a backup file holding every article saved in the re/read offline reading list, from this browser or any other browser or device where you use re/read. Import only adds the articles missing here and never overwrites one already saved. With pictures included, the backup is a .zip holding the same .json and the pictures beside it."
+  },
+  "reader_export_pictures": {
+    "message": "Include pictures ($COUNT$, $SIZE$)",
+    "description": "Checkbox beside Export: the backup becomes a .zip with the pictures kept with articles.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "34" },
+      "size": { "content": "$2", "example": "12.4 MB" }
+    }
+  },
+  "reader_import_pictures_one": {
+    "message": "With $COUNT$ picture ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "size": { "content": "$2", "example": "0.3 MB" }
+    }
+  },
+  "reader_import_pictures_other": {
+    "message": "With $COUNT$ pictures ($SIZE$).",
+    "description": "Second sentence of the import offer for a .zip backup: how many pictures it carries and what they take.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "34" },
+      "size": { "content": "$2", "example": "12.4 MB" }
+    }
+  },
+  "reader_import_pictures_added_one": {
+    "message": "Pictures added: $COUNT$ ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "size": { "content": "$2", "example": "0.3 MB" }
+    }
+  },
+  "reader_import_pictures_added_other": {
+    "message": "Pictures added: $COUNT$ ($SIZE$).",
+    "description": "In the import report, after the added and skipped counts.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "34" },
+      "size": { "content": "$2", "example": "12.4 MB" }
+    }
   },
   "reader_transfer_epub": {
     "message": ".epub - the e-book format.",
@@ -429,7 +467,7 @@
     "description": "The quiet anchor over the reading list that jumps to the transfer section - it names both kinds of file the section takes, because a book is not obvious from the section's own name."
   },
   "reader_transfer_accepts": {
-    "message": "Import reads the file it is given: a backup of the re/read article list (.json), or an e-book (.epub).",
+    "message": "Import reads the file it is given: a backup of the re/read article list (.json, or .zip with pictures), or an e-book (.epub).",
     "description": "The line under the reading list's Import and Export buttons - why there is no separate button for books."
   },
   "reader_book_label": {

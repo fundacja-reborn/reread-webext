@@ -404,7 +404,56 @@
   },
   "reader_format_title": { "message": "Формат файлу" },
   "reader_transfer_note": {
-    "message": ".json - файл резервної копії з усіма статтями, збереженими в офлайн-читальні re/read, із цього чи іншого браузера або пристрою, де використовується re/read. Імпорт додає лише статті, яких тут бракує, і ніколи не перезаписує вже збережених."
+    "message": ".json - файл резервної копії з усіма статтями, збереженими в офлайн-читальні re/read, із цього чи іншого браузера або пристрою, де використовується re/read. Імпорт додає лише статті, яких тут бракує, і ніколи не перезаписує вже збережених. Із зображеннями резервна копія - це .zip із тим самим .json і зображеннями поруч."
+  },
+  "reader_export_pictures": {
+    "message": "Додати зображення ($COUNT$, $SIZE$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "34" },
+      "size": { "content": "$2", "example": "12,4 MB" }
+    }
+  },
+  "reader_import_pictures_one": {
+    "message": "Із $COUNT$ зображенням ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "size": { "content": "$2", "example": "0,3 MB" }
+    }
+  },
+  "reader_import_pictures_few": {
+    "message": "Із $COUNT$ зображеннями ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "size": { "content": "$2", "example": "0,8 MB" }
+    }
+  },
+  "reader_import_pictures_many": {
+    "message": "Із $COUNT$ зображеннями ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "34" },
+      "size": { "content": "$2", "example": "12,4 MB" }
+    }
+  },
+  "reader_import_pictures_other": {
+    "message": "Із $COUNT$ зображеннями ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "34" },
+      "size": { "content": "$2", "example": "12,4 MB" }
+    }
+  },
+  "reader_import_pictures_added_one": {
+    "message": "Додано зображень: $COUNT$ ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "size": { "content": "$2", "example": "0,3 MB" }
+    }
+  },
+  "reader_import_pictures_added_other": {
+    "message": "Додано зображень: $COUNT$ ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "34" },
+      "size": { "content": "$2", "example": "12,4 MB" }
+    }
   },
   "reader_transfer_epub": { "message": ".epub - формат електронних книжок." },
   "reader_transfer_books": {
@@ -433,7 +482,7 @@
     "placeholders": { "title": { "content": "$1", "example": "Old Chinese" } }
   },
   "reader_transfer_link": { "message": "Імпорт та експорт (статті або EPUB)" },
-  "reader_transfer_accepts": { "message": "Імпорт розпізнає файл: резервну копію списку статей re/read (.json) або електронну книжку (.epub)." },
+  "reader_transfer_accepts": { "message": "Імпорт розпізнає файл: резервну копію списку статей re/read (.json або .zip із зображеннями) або електронну книжку (.epub)." },
   "reader_book_label": { "message": "Книжка" },
   "reader_book_part_of": {
     "message": "Частина $PART$ з $PARTS$",

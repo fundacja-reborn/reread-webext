@@ -48,7 +48,15 @@ import { lookUp } from "../lib/dict/lookup.js";
 import { describeError } from "../lib/messages.js";
 import { ErrorCode, Message, asPage, asPageRequest, asResult, ok } from "../lib/protocol.js";
 import { buildArticle } from "../lib/reader/article.js";
-import { pictureSources } from "../lib/reader/pictures.js";
+import { MAX_DOWNLOAD_BYTES, pictureSources, picturesSummary } from "../lib/reader/pictures.js";
+import {
+  ARCHIVE_FILENAME,
+  ARTICLES_ENTRY,
+  archiveAccount,
+  archiveEntries,
+  archivePictures,
+  fromArchiveText,
+} from "../lib/store/articles-archive.js";
 import { asDocState, asMarksState, docState, marksState } from "../lib/reader/history-state.js";
 import { importKind } from "../lib/reader/import-kind.js";
 import { speechAction } from "../lib/reader/keys.js";
@@ -92,12 +100,16 @@ import {
   importArticles,
   listArticles,
   putArticle,
+  putPicture,
   putPosition,
+  setPictures,
   setReadAt,
 } from "../lib/store/articles.js";
 import { savePictures } from "./pictures.js";
+import { entryReader, listEntries, packArchive } from "./zip.js";
 
 /** @typedef {import("../lib/store/saved-article.js").SavedMeta} SavedMeta */
+/** @typedef {import("../lib/store/articles-archive.js").PictureRef} PictureRef */
 import { packableBlocks } from "../lib/book/blocks.js";
 import { cappedToc, headingEntries, renderedEntries } from "../lib/book/toc.js";
 import {
@@ -259,6 +271,11 @@ const importRun = /** @type {HTMLButtonElement | null} */ (
 );
 const importCancel = document.getElementById("library-import-cancel");
 const transferLine = document.getElementById("library-transfer-status");
+const exportPicturesRow = document.getElementById("library-export-pictures-row");
+const exportPictures = /** @type {HTMLInputElement | null} */ (
+  document.getElementById("library-export-pictures")
+);
+const exportPicturesLabel = document.getElementById("library-export-pictures-label");
 // The highlights page (D108): the reading list's furniture repeated - a
 // filter, an empty state, the rows, a pager - plus the scoped page's title
 // line, its own export, and the template a row's copy button is cloned from.
@@ -539,10 +556,16 @@ let settings = DEFAULTS;
  * the same reason the saved-phrases page keeps its offer as state - a list
  * refresh must not eat it.
  *
+ * A `.zip` backup (D145) keeps its bytes here too, with the pictures each
+ * article names and what they come to: the pictures are read out of the
+ * archive only for the articles the import actually adds, after the
+ * consent, one entry at a time.
+ *
  * @type {{
  *   name: string,
  *   articles: import("../lib/store/saved-article.js").SavedArticle[],
  *   invalid: number,
+ *   pictures?: { bytes: Uint8Array, refs: Map<string, PictureRef[]>, account: { count: number, bytes: number } },
  * } | null}
  */
 let pendingImport = null;
@@ -2661,6 +2684,23 @@ async function refreshLibrary() {
   // something to export.
   if (exportButton !== null) exportButton.disabled = metas.length === 0;
   if (exportMarksButton !== null) exportMarksButton.disabled = marks.size === 0;
+  // The pictures kept with articles (D145) ride in the backup only when
+  // asked: the row stands while some article has any, and says how many
+  // and what they take - the size the file will grow by, before the press.
+  const kept = metas.reduce(
+    (sum, meta) =>
+      meta.pictures === undefined
+        ? sum
+        : { count: sum.count + meta.pictures.count, bytes: sum.bytes + meta.pictures.bytes },
+    { count: 0, bytes: 0 },
+  );
+  if (exportPicturesRow !== null) exportPicturesRow.hidden = kept.count === 0;
+  if (exportPicturesLabel !== null) {
+    exportPicturesLabel.textContent = t("reader_export_pictures", [
+      kept.count.toLocaleString(),
+      megabytes(kept.bytes),
+    ]);
+  }
 
   // "3 of 12" while the filter narrows the segment down; the tabs already
   // carry the whole counts, so with no filter the line says nothing.
@@ -3260,7 +3300,24 @@ async function exportList() {
   try {
     const [articles, marks] = await Promise.all([allArticles(), allMarks()]);
     if (articles.length === 0) return;
-    downloadFile(toArticlesFile(articles, marks), ARTICLES_FILENAME, "application/json");
+    // With pictures (D145) the file is an archive: the same .json inside,
+    // and one entry per picture beside it - read one article at a time,
+    // back from the copy where the database has lost them.
+    const withPictures =
+      exportPictures !== null && !exportPicturesRow?.hidden && exportPictures.checked;
+    if (withPictures) {
+      /** @type {Map<string, import("../lib/reader/pictures.js").PictureRow[]>} */
+      const pictures = new Map();
+      for (const article of articles) {
+        if (article.pictures === undefined) continue;
+        const rows = await getPictures(article.url);
+        if (rows.length > 0) pictures.set(article.url, rows);
+      }
+      const archive = await packArchive(archiveEntries(articles, marks, pictures));
+      downloadFile(archive, ARCHIVE_FILENAME, "application/zip");
+    } else {
+      downloadFile(toArticlesFile(articles, marks), ARTICLES_FILENAME, "application/json");
+    }
     transferStatus("");
   } catch {
     transferStatus(describeError(ErrorCode.INTERNAL), "error");
@@ -3352,7 +3409,7 @@ async function exportMarksPage() {
  * has to outlive the click long enough for the download to take it - a
  * minute is comfortably that, and then the blob can go.
  *
- * @param {string} content
+ * @param {string | Uint8Array<ArrayBuffer>} content text, or the bytes of an archive (D145)
  * @param {string} filename
  * @param {string} type
  */
@@ -3371,20 +3428,61 @@ function downloadFile(content, filename, type) {
 async function offerImport(file) {
   try {
     const parsed = fromArticlesFile(await file.text());
-    if (parsed.articles.length === 0) {
-      pendingImport = null;
-      renderImportOffer();
-      transferStatus(t("reader_import_nothing"), "error");
-      return;
-    }
-    pendingImport = { name: file.name, articles: parsed.articles, invalid: parsed.invalid };
-    transferStatus("");
-    renderImportOffer();
+    offerParsed(file.name, parsed);
   } catch {
     pendingImport = null;
     renderImportOffer();
     transferStatus(describeError(ErrorCode.INTERNAL), "error");
   }
+}
+
+/**
+ * The `.zip` backup (D145) offered the way the `.json` is: its
+ * `articles.json` read and parsed, the pictures it names counted from the
+ * directory - no picture entry is opened before the consent.
+ *
+ * @param {File} file
+ * @param {Uint8Array} bytes the whole archive, read once
+ * @param {import("./zip.js").ZipEntryInfo[]} entries its directory
+ */
+async function offerArchive(file, bytes, entries) {
+  try {
+    const read = await entryReader(bytes);
+    const text = read(ARTICLES_ENTRY, Number.POSITIVE_INFINITY);
+    const parsed = fromArchiveText(text === null ? "" : new TextDecoder().decode(text));
+    const account = archiveAccount(parsed.refs, entries);
+    offerParsed(
+      file.name,
+      parsed,
+      account.count === 0 ? undefined : { bytes, refs: parsed.refs, account },
+    );
+  } catch {
+    pendingImport = null;
+    renderImportOffer();
+    transferStatus(describeError(ErrorCode.INTERNAL), "error");
+  }
+}
+
+/**
+ * @param {string} name
+ * @param {import("../lib/store/articles-file.js").ArticlesFile} parsed
+ * @param {NonNullable<typeof pendingImport>["pictures"]} [pictures]
+ */
+function offerParsed(name, parsed, pictures) {
+  if (parsed.articles.length === 0) {
+    pendingImport = null;
+    renderImportOffer();
+    transferStatus(t("reader_import_nothing"), "error");
+    return;
+  }
+  pendingImport = {
+    name,
+    articles: parsed.articles,
+    invalid: parsed.invalid,
+    ...(pictures === undefined ? {} : { pictures }),
+  };
+  transferStatus("");
+  renderImportOffer();
 }
 
 /**
@@ -3398,9 +3496,18 @@ function renderImportOffer() {
   if (pendingImport === null) return;
 
   if (importSummary !== null) {
-    importSummary.textContent = plural(pendingImport.articles.length, "reader_import_summary", [
-      pendingImport.name,
-    ]);
+    const sentences = [
+      plural(pendingImport.articles.length, "reader_import_summary", [pendingImport.name]),
+    ];
+    // A `.zip` backup says what its pictures come to (D145) before the
+    // press: the one number that decides whether the space is wanted.
+    const pictures = pendingImport.pictures;
+    if (pictures !== undefined) {
+      sentences.push(
+        plural(pictures.account.count, "reader_import_pictures", [megabytes(pictures.account.bytes)]),
+      );
+    }
+    importSummary.textContent = sentences.join(" ");
   }
 
   if (importSample !== null) {
@@ -3425,11 +3532,33 @@ async function runImport() {
   try {
     const report = await importArticles(offered.articles);
 
+    // The pictures of a `.zip` backup (D145), for the articles just added
+    // and no other - an article already saved keeps its copy whole - read
+    // out of the archive one entry at a time and written one row at a
+    // time, the way a save writes them.
+    let pictured = { count: 0, bytes: 0 };
+    if (offered.pictures !== undefined) {
+      const read = await entryReader(offered.pictures.bytes);
+      for (const url of report.urls) {
+        const refs = offered.pictures.refs.get(url);
+        if (refs === undefined) continue;
+        const rows = archivePictures(url, refs, (name) => read(name, MAX_DOWNLOAD_BYTES));
+        if (rows.length === 0) continue;
+        for (const row of rows) await putPicture(row);
+        const summary = picturesSummary(rows);
+        await setPictures(url, summary);
+        pictured = { count: pictured.count + summary.count, bytes: pictured.bytes + summary.bytes };
+      }
+    }
+
     // "Added 12, skipped 3" is the whole reason to trust an import that
     // says nothing else - the same report the phrase import gives.
     const sentences = [plural(report.added, "reader_import_added")];
     if (report.skipped > 0) sentences.push(plural(report.skipped, "reader_import_skipped"));
     if (offered.invalid > 0) sentences.push(plural(offered.invalid, "reader_import_unreadable"));
+    if (pictured.count > 0) {
+      sentences.push(plural(pictured.count, "reader_import_pictures_added", [megabytes(pictured.bytes)]));
+    }
     transferStatus(sentences.join(" "));
 
     closeImportOffer();
@@ -4333,14 +4462,30 @@ importButton?.addEventListener("click", () => importInput?.click());
  */
 async function dispatchImport(file) {
   const head = new Uint8Array(await file.slice(0, 2).arrayBuffer());
-  if (importKind({ name: file.name, type: file.type, head }) === "book") {
+  const kind = importKind({ name: file.name, type: file.type, head });
+  if (kind === "book") {
     closeImportOffer();
     transferStatus("");
     await runBookImport(file);
-  } else {
-    bookImportStatus("");
-    await offerImport(file);
+    return;
   }
+  if (kind === "archive") {
+    // A ZIP nobody has named: its directory says whether it is the list's
+    // backup with pictures (D145) or a book - `articles.json` is the word.
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    const entries = await listEntries(bytes).catch(() => []);
+    if (entries.some((entry) => entry.name === ARTICLES_ENTRY)) {
+      bookImportStatus("");
+      await offerArchive(file, bytes, entries);
+    } else {
+      closeImportOffer();
+      transferStatus("");
+      await runBookImport(file);
+    }
+    return;
+  }
+  bookImportStatus("");
+  await offerImport(file);
 }
 
 importInput?.addEventListener("change", () => {

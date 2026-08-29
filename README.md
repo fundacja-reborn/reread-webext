@@ -42,7 +42,7 @@ Works in Firefox (desktop and Android) and in Chrome/Chromium. **Install it from
 **Data and interface**
 
 - **Local database.** Vocabulary, models, dictionaries, articles and books live in the browser's local extension storage (IndexedDB) on your device - no account, no sync, no server.
-- **Backup.** The reading list exports to a single JSON file, highlights included, and imports without duplicating. Books are not in that file - a book's backup is its `.epub`. Vocabulary travels as TSV.
+- **Backup.** The reading list exports to a single JSON file - or, when you ask for the pictures too, a `.zip` holding the same JSON with the pictures beside it - highlights included, and imports without duplicating. Books are not in that file - a book's backup is its `.epub`. Vocabulary travels as TSV.
 - **Toolbar popup.** Per-site off switch, language pair, reader, reading list, saved phrases and settings in one place.
 - **Six UI languages.** English, Polish, German, French, Spanish, Ukrainian.
 
