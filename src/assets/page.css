@@ -498,10 +498,18 @@ body:not(.reader):has(.panel-scrim:not([hidden])) :is(.page-bar, .nav-menu, .pag
    sheet that is not the window's. */
 body:not(.reader):has(.panel-scrim:not([hidden])) .page-bar::before {
   top: -100vh;
+  /* Down over the bar's own bottom rule as well: the paper stops at the
+     padding box, the rule lies under it, and beside the column that one
+     pixel between this paper and the panel's showed the dimmed page as a
+     line across the window (Michał's smoke, 2026-08-29). */
+  bottom: -1px;
 }
 
 body:not(.reader):has(.panel-scrim:not([hidden])) :is(.nav-menu, .page-panel)::before {
   box-shadow: 0 10px 24px -8px rgb(0 0 0 / 0.35);
+  /* The shadow falls on the page below alone; its blur would otherwise
+     bleed upward and tint the bar's foot. */
+  clip-path: inset(0 0 -64px 0);
 }
 
 :root:has(.panel-scrim:not([hidden])) {
