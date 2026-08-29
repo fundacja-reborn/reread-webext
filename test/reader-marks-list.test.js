@@ -140,6 +140,27 @@ describe("markRows", () => {
     assert.equal(rows[1]?.part, null);
   });
 
+  it("counts a document's quotes on every one of its rows (D150)", () => {
+    // The number a document-wide deletion names: every quote of the
+    // document, whichever page or filter the row is seen through.
+    const marks = new Map([
+      [meta(1).url, [mark("one of two", { createdAt: 3 }), mark("two of two", { createdAt: 4 })]],
+      ["https://example.org/gone", [mark("alone", { createdAt: 1 })]],
+    ]);
+    /** @type {Map<string, import("../src/lib/store/marks-backup.js").DocTitle>} */
+    const kept = new Map([["https://example.org/gone", { kind: "article", title: "Gone" }]]);
+
+    const rows = markRows([meta(1)], [], marks, kept);
+    assert.deepEqual(
+      rows.map((row) => [row.mark.text, row.count]),
+      [
+        ["one of two", 2],
+        ["two of two", 2],
+        ["alone", 1],
+      ],
+    );
+  });
+
   it("leaves out marks whose document neither list answers for", () => {
     // Marks live and die with their document; a row without one is two
     // reads catching the database mid-delete, not a quote anybody can open.

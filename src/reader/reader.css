@@ -1257,6 +1257,44 @@ body.reader:has(#library:not([hidden])) {
   height: 1.3em;
 }
 
+/* The orphan row's door to its page (D150) is an anchor in the acts' dress:
+   no underline, the icon's own colour, the same 44px box. */
+a.marks-act {
+  text-decoration: none;
+}
+
+/* A trash asking "Sure?" (D150): the glyph makes way for the word, and the
+   box grows leftward from the column's right edge - the list's Delete way,
+   so the second press lands where the first one did. */
+.marks-act[data-armed] {
+  padding: 0.35rem 0.8rem;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+/* The document-wide deletion in the missing-document note (D150): a quiet
+   text act on its own line under the sentence that names and counts the
+   document - words, because "all" is a scope no glyph can carry. The same
+   dress as the list's Delete: no resting frame, muted, a 44px hit box. */
+.marks-delete-all {
+  display: inline-block;
+  margin-top: 0.35rem;
+  min-height: 44px;
+  padding: 0.35rem 0.8rem;
+  border-color: transparent;
+  color: var(--page-muted);
+  font: inherit;
+  white-space: nowrap;
+}
+
+.marks-delete-all:hover,
+.marks-delete-all:focus-visible {
+  border-color: var(--page-border);
+  background: color-mix(in srgb, var(--page-fg) 6%, transparent);
+  color: var(--page-fg);
+}
+
 .marks-copy .icon-copied,
 .marks-copy[data-copied] .icon-copy {
   display: none;

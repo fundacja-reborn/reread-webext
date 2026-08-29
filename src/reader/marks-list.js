@@ -32,7 +32,9 @@ import { matchesFilter } from "../options/models-view.js";
  * `missing` marks a quote whose document is gone - the library was emptied
  * and the marks came back from their copy (`lib/store/marks-backup.js`)
  * under the title the copy remembered: readable, searchable, but with no
- * document to open until the same address is saved again.
+ * document to open until the same address is saved again. `count` is how
+ * many quotes the document has in all, on this page or off it - the number
+ * a document-wide deletion names before it is confirmed (D150).
  *
  * @typedef {{
  *   docId: string,
@@ -41,6 +43,7 @@ import { matchesFilter } from "../options/models-view.js";
  *   lang: string | null,
  *   part: { at: number, of: number } | null,
  *   missing: boolean,
+ *   count: number,
  *   mark: Mark,
  * }} MarkRow
  */
@@ -107,6 +110,7 @@ export function markRows(metas, books, marks, kept = new Map()) {
           ? { at: mark.segmentIndex + 1, of: doc.parts }
           : null,
       missing: doc.missing,
+      count: list.length,
       mark,
     })),
   );

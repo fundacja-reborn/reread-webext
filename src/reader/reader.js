@@ -314,6 +314,12 @@ const marksSpeakIcon = /** @type {HTMLTemplateElement | null} */ (
 const marksNoteIcon = /** @type {HTMLTemplateElement | null} */ (
   document.getElementById("marks-note-icon")
 );
+const marksOriginalIcon = /** @type {HTMLTemplateElement | null} */ (
+  document.getElementById("marks-original-icon")
+);
+const marksDeleteIcon = /** @type {HTMLTemplateElement | null} */ (
+  document.getElementById("marks-delete-icon")
+);
 const bookImportLine = document.getElementById("book-import-status");
 const bookNote = document.getElementById("book-note");
 const bookNoteText = document.getElementById("book-note-text");
@@ -3135,11 +3141,27 @@ function markRowElement(row, index, withTitle) {
   text.append(detail);
   // A quote whose document is gone says so under its detail line - it came
   // back from the copy, and it has nowhere to open until the same address
-  // is saved again (`marks-backup.js`).
+  // is saved again (`marks-backup.js`). The document-wide deletion (D150)
+  // stands in that very sentence, where the document is named and counted:
+  // a quiet text act, because "all" is a scope only words can carry - and
+  // only where there is more than the one quote the row's own trash takes.
   if (row.missing) {
     const missing = document.createElement("p");
     missing.className = "marks-missing";
     missing.textContent = t("reader_marks_missing_doc");
+    if (row.count > 1) {
+      const all = document.createElement("button");
+      all.type = "button";
+      all.className = "marks-delete-all";
+      all.setAttribute("data-act", "delete-all");
+      all.setAttribute("data-row", String(index));
+      all.setAttribute("data-title", row.title);
+      // Its own words kept aside, for the way back from "Sure?".
+      const label = plural(row.count, "reader_marks_delete_all");
+      all.setAttribute("data-label", label);
+      all.textContent = label;
+      missing.append(" ", all);
+    }
     text.append(missing);
   }
 
@@ -3147,6 +3169,14 @@ function markRowElement(row, index, withTitle) {
   acts.className = "marks-row-acts";
   if (!row.missing) {
     acts.append(markActButton("open", index, t("reader_marks_open", row.title), marksOpenIcon));
+  } else if (row.kind === "article" && webAddress(row.docId)) {
+    // Where the arrow would stand: the original page, the one door a quote
+    // whose document is gone still has (D150) - exactly what the note under
+    // it asks for. A real link, so the browser's own gestures (a middle
+    // click, "copy link") work and no permission is asked; opening it does
+    // not save the page by itself - the toolbar button does that, and the
+    // first save adopts the quotes (`articles.js`).
+    acts.append(markOriginalLink(row.docId));
   }
   // No speaker on an engine that cannot speak - the voice rows' own rule.
   if (canSpeak()) {
@@ -3161,9 +3191,55 @@ function markRowElement(row, index, withTitle) {
       marksNoteIcon,
     ),
   );
+  // The row's own trash (D150): only where the document is gone - a quote
+  // with a document is taken out in the document, over the mark itself,
+  // where what goes is in sight - and last, after everything that keeps the
+  // quote. Armed like the list's Delete: the first press asks, the second
+  // answers, on the same spot.
+  if (row.missing) {
+    const trash = markActButton("delete", index, t("marker_delete"), marksDeleteIcon);
+    trash.setAttribute("data-title", row.title);
+    acts.append(trash);
+  }
 
   item.append(text, acts);
   return item;
+}
+
+/**
+ * Whether a document id is an address a browser may open in a tab - the
+ * orphan row's link is built from the stored id, and only the web's two
+ * schemes belong in an `href` the reader hands out.
+ *
+ * @param {string} docId
+ * @returns {boolean}
+ */
+function webAddress(docId) {
+  try {
+    const protocol = new URL(docId).protocol;
+    return protocol === "https:" || protocol === "http:";
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * The orphan row's door to its page (D150): an anchor dressed as the acts'
+ * quiet icon button, so it stands in the column where the arrow would.
+ *
+ * @param {string} url
+ * @returns {HTMLAnchorElement}
+ */
+function markOriginalLink(url) {
+  const link = document.createElement("a");
+  link.className = "marks-act marks-original";
+  link.href = url;
+  link.target = "_blank";
+  link.rel = "noreferrer noopener";
+  link.title = t("reader_open_original");
+  link.setAttribute("aria-label", t("reader_open_original"));
+  if (marksOriginalIcon !== null) link.append(marksOriginalIcon.content.cloneNode(true));
+  return link;
 }
 
 /**
@@ -3187,6 +3263,42 @@ async function openMarkRow(row) {
   }
   // The way back in the bar leads to the quotes now, and its words follow.
   setBackDoor(t("reader_marks_back"), t("reader_marks_title"));
+}
+
+/**
+ * The confirmed press on a quote whose document is gone (D150): this one
+ * quote, or every quote of its document, out of the marks store. The store
+ * is read fresh rather than trusted from the screen - another tab may have
+ * moved it - and matched by position, the row's own key, because the
+ * objects on screen are not the store's. With the write the copy is rebuilt
+ * (`putMarks`), so a document whose last quote goes leaves the copy too,
+ * title and all: nothing is left to come back. The page redraws from the
+ * database, and focus lands on the next trash the way the list's Delete
+ * hands it on - or on the filter when none is left.
+ *
+ * @param {HTMLButtonElement} button the armed act that was pressed
+ * @param {import("./marks-list.js").MarkRow} row
+ * @param {boolean} whole every quote of the document rather than this one
+ */
+async function deleteMarkRow(button, row, whole) {
+  const trashes = () =>
+    marksRowsList === null
+      ? []
+      : [...marksRowsList.querySelectorAll("button[data-act='delete']")];
+  const at = Math.max(0, trashes().indexOf(button));
+
+  try {
+    const standing = await getMarks(row.docId);
+    const kept = whole ? [] : standing.filter((one) => compareMarks(one, row.mark) !== 0);
+    if (kept.length !== standing.length || whole) await putMarks(row.docId, kept);
+  } catch {
+    showNotice(t("reader_list_write_failed"));
+  }
+  await refreshMarks();
+
+  const successor = trashes()[Math.min(at, trashes().length - 1)];
+  if (successor instanceof HTMLButtonElement) successor.focus();
+  else marksFilter?.focus();
 }
 
 /**
@@ -3281,6 +3393,10 @@ function stopMarkSpeech() {
  */
 function deleteTitle(button) {
   if (button === removeButton) return titleElement?.textContent ?? "";
+  // A quote row's acts carry their document's title themselves (D150): the
+  // row names it in a detail line, not in a button of its own.
+  const own = button.getAttribute("data-title");
+  if (own !== null) return own;
   return button.closest("li")?.querySelector(".library-open")?.textContent ?? "";
 }
 
@@ -3293,9 +3409,25 @@ function disarmDelete() {
   const armed = armedDelete();
   if (armed === null) return;
   armed.removeAttribute("data-armed");
-  // Every Delete stands down to the same pair of words - the bare verb to
-  // see, the act with its title to hear; only the held width was the article
-  // button's own.
+  // A quote row's two acts (D150) stand down to what they were: the trash to
+  // its glyph, the document-wide act to its own counted words.
+  const act = armed.getAttribute("data-act");
+  if (act === "delete") {
+    armed.replaceChildren();
+    if (marksDeleteIcon !== null) armed.append(marksDeleteIcon.content.cloneNode(true));
+    armed.title = t("marker_delete");
+    armed.setAttribute("aria-label", t("marker_delete"));
+    return;
+  }
+  if (act === "delete-all") {
+    const label = armed.getAttribute("data-label") ?? "";
+    armed.textContent = label;
+    armed.setAttribute("aria-label", label);
+    return;
+  }
+  // Every other Delete stands down to the same pair of words - the bare verb
+  // to see, the act with its title to hear; only the held width was the
+  // article button's own.
   if (armed === removeButton) armed.style.removeProperty("min-width");
   armed.textContent = t("action_delete");
   armed.setAttribute("aria-label", t("reader_delete_aria", deleteTitle(armed)));
@@ -4479,6 +4611,12 @@ marksRowsList?.addEventListener("click", (event) => {
   else if (act === "speak") speakMarkRow(row);
   else if (act === "open") void openMarkRow(row);
   else if (act === "note") noteMarkRow(row);
+  else if (act === "delete" || act === "delete-all") {
+    // The two deletions ask first (D150): the list's own two presses, the
+    // second one on the very spot the first one landed.
+    if (button.hasAttribute("data-armed")) void deleteMarkRow(button, row, act === "delete-all");
+    else armDelete(button);
+  }
 });
 
 marksExportButton?.addEventListener("click", () => void exportMarksPage());

@@ -925,6 +925,22 @@
   "options_library_copy_hint": {
     "message": "Trzyma drugą kopię każdego zapisanego artykułu i każdej książki, razem z miejscem, w którym przerwano czytanie, w magazynie samego rozszerzenia - osobnym od bazy czytelni, więc utrata tej bazy go nie sięga. Podwaja miejsce zajmowane przez czytelnię. Jest włączona, dopóki jej nie wyłączysz: Safari usuwa czytelnię po trzydziestu dniach bez wizyty na stronach rozszerzenia, a w każdej przeglądarce bazę może zabrać uszkodzony profil albo narzędzie do czyszczenia - z kopii czytelnia wraca. Obrazki zapisane z artykułem też są kopiowane i wracają przy pierwszym otwarciu artykułu."
   },
+  "reader_marks_delete_all_one": {
+    "message": "Usuń $COUNT$ cytat z tej strony",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_marks_delete_all_few": {
+    "message": "Usuń wszystkie $COUNT$ cytaty z tej strony",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
+  "reader_marks_delete_all_many": {
+    "message": "Usuń wszystkie $COUNT$ cytatów z tej strony",
+    "placeholders": { "count": { "content": "$1", "example": "5" } }
+  },
+  "reader_marks_delete_all_other": {
+    "message": "Usuń wszystkie $COUNT$ cytatów z tej strony",
+    "placeholders": { "count": { "content": "$1", "example": "5" } }
+  },
   "reader_marks_missing_doc": { "message": "Ten dokument nie jest już zapisany - cytat wrócił z kopii. Otwórz stronę ponownie, a zakreślenie będzie na miejscu." },
   "options_pair_hint": { "message": "Do wyboru są pary z modelami tłumaczeń, które pobrałeś na to urządzenie - jeśli chcesz tłumaczyć w innej parze językowej, pobierz jej model w sekcji" },
   "options_pair_none": { "message": "Nie ma jeszcze modelu - najpierw pobierz go poniżej" },
