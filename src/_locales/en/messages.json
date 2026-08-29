@@ -852,7 +852,7 @@
   "options_storage_library_copy_off": { "message": "Copy of the reading list: off." },
   "options_library_copy": { "message": "Copy of the reading list" },
   "options_library_copy_hint": {
-    "message": "Keeps a second copy of every saved article and book, with the place you stopped reading, in the extension's own storage - the part a browser does not clear when it clears the reading list's database. It doubles the space the reading list takes. On iOS and iPadOS it is on unless you switch it off: Safari may delete the reading list after thirty days without a visit to the extension's pages, and the copy is what brings it back. Pictures saved with an article are copied too, and come back the first time the article is opened."
+    "message": "Keeps a second copy of every saved article and book, with the place you stopped reading, in the extension's own storage - a store apart from the reading list's database, which the loss of that database does not reach. It doubles the space the reading list takes. On unless you switch it off: Safari deletes the reading list after thirty days without a visit to the extension's pages, and on any browser a database can be lost to a damaged profile or a cleaning tool - the copy is what brings it back. Pictures saved with an article are copied too, and come back the first time the article is opened."
   },
   "reader_marks_missing_doc": {
     "message": "Its document is no longer saved - this quote came back from the copy. Open the page again and the highlight will be there.",

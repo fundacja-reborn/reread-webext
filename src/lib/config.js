@@ -75,14 +75,13 @@ export const CONFIG_KEY = "config";
  *   never be what erases them. Live pages only: books and saved articles are
  *   in the list by definition.
  * @property {boolean | null} libraryCopy Whether the reading list keeps a
- *   copy of itself in the extension's own storage, where the browser's
- *   clearing of the database does not reach (`lib/store/library-backup.js`).
- *   `null` means nobody has chosen, and the platform decides at read time
- *   (`effectiveLibraryCopy`): on iOS and iPadOS on - Safari may delete the
- *   database after thirty days without a visit to the extension's pages -
- *   and elsewhere off, because the copy doubles the space the reading list
- *   takes and no other browser deletes on its own. Only a hand-set value is
- *   stored, for the reason `readerOnly` stores only one.
+ *   copy of itself in the extension's own storage, where the loss of the
+ *   database does not reach (`lib/store/library-backup.js`). `null` means
+ *   nobody has chosen, and the default decides at read time
+ *   (`effectiveLibraryCopy`): on, everywhere, since D146 - before it only on
+ *   iOS and iPadOS. Only a hand-set value is stored, for the reason
+ *   `readerOnly` stores only one: the default can move under an install
+ *   that never touched the switch, and D146 is exactly that move.
  * @property {boolean} hideBubbleActions Whether the translation bubble opens
  *   with its action row folded away, unfolding on a click or tap on the bubble
  *   (D81). Save is the standing exception either way: a phrase that does not
@@ -447,21 +446,27 @@ export function effectiveReaderOnly(config, os) {
 }
 
 /**
- * The same rule for the reading list's copy: a hand-set value wins, and with
- * none the platform decides - on where the browser is known to delete the
- * database on its own. That is Safari on iOS and iPadOS (its tracking
- * prevention deletes an origin's storage after thirty days without a visit
- * to the extension's pages, and the extension cannot ask to be spared - the
- * probe in `lib/storage-report.js`). Firefox never deletes an extension's
- * storage and Chromium only under pressure for space, so there the copy is
- * a choice, and the space it doubles is not spent unasked.
+ * The same shape of rule for the reading list's copy - a hand-set value
+ * wins - with a default that no longer asks the platform: on, everywhere
+ * (D146). The copy began as a choice outside iOS and iPadOS, where Safari's
+ * tracking prevention deletes an origin's storage after thirty days without
+ * a visit to the extension's pages (the probe in `lib/storage-report.js`),
+ * on the reasoning that no other browser deletes an extension's database on
+ * its own. Neither does clearing the browsing data: Chrome's dialog removes
+ * web origins only and Firefox's clears `http`, `https` and `file`, never
+ * `moz-extension` (both read in their sources, 2026-08-29). But a database
+ * is one set of files, and one set of files is what a damaged profile, a
+ * cleaning tool or a hand in the developer tools takes - Michał's own test
+ * emptied it and found nothing to come back from. The copy lives in a
+ * second store the same loss does not reach, and the space it doubles is
+ * cheap next to a reading list gone. Off stays one press away, and a
+ * profile that pressed it before keeps its answer.
  *
  * @param {Pick<Config, "libraryCopy">} config
- * @param {string} os as `getPlatformInfo` or `osFrom` names it
  * @returns {boolean}
  */
-export function effectiveLibraryCopy(config, os) {
-  return config.libraryCopy ?? (os === "ios" || os === "ipados");
+export function effectiveLibraryCopy(config) {
+  return config.libraryCopy ?? true;
 }
 
 /**

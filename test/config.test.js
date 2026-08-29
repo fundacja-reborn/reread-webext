@@ -636,19 +636,17 @@ describe("the reading list's copy", () => {
     }
   });
 
-  it("is on unasked only where the browser deletes the database on its own", () => {
-    // Safari's tracking prevention deletes the extension's IndexedDB after
-    // thirty days without a visit to its pages (the iPad probe answered
-    // "not persisted", 2026-08-26); Firefox never deletes an extension's
-    // storage, Chromium only under pressure - so the doubled space is a
-    // choice there. Both Apple names, as for the reader-only default.
-    assert.equal(effectiveLibraryCopy({ libraryCopy: null }, "ios"), true);
-    assert.equal(effectiveLibraryCopy({ libraryCopy: null }, "ipados"), true);
-    assert.equal(effectiveLibraryCopy({ libraryCopy: null }, "android"), false);
-    assert.equal(effectiveLibraryCopy({ libraryCopy: null }, "mac"), false);
-    assert.equal(effectiveLibraryCopy({ libraryCopy: null }, ""), false);
+  it("is on unasked, everywhere", () => {
+    // D146: the copy began as a choice outside iOS and iPadOS (Safari's
+    // tracking prevention deletes the extension's IndexedDB after thirty
+    // days without a visit to its pages; no other browser deletes it on its
+    // own). But one database is one set of files, and a damaged profile, a
+    // cleaning tool or a hand in the developer tools takes it on any
+    // platform - Michał's own test emptied it and found nothing to come
+    // back from. The default no longer asks the platform at all.
+    assert.equal(effectiveLibraryCopy({ libraryCopy: null }), true);
     // A choice outlives the default in both directions.
-    assert.equal(effectiveLibraryCopy({ libraryCopy: false }, "ios"), false);
-    assert.equal(effectiveLibraryCopy({ libraryCopy: true }, "linux"), true);
+    assert.equal(effectiveLibraryCopy({ libraryCopy: false }), false);
+    assert.equal(effectiveLibraryCopy({ libraryCopy: true }), true);
   });
 });

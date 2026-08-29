@@ -15,6 +15,7 @@ import {
   bookRow,
   buildLibraryCopy,
   clearLibraryCopy,
+  completeLibraryCopy,
   copiedLibrary,
   copyArticle,
   copyBook,
@@ -149,6 +150,7 @@ function indexFor(library) {
  *   empty?: boolean,
  *   area?: Record<string, unknown>,
  *   snapshot?: LibrarySnapshot,
+ *   documents?: { articles: string[], books: string[] },
  *   pictures?: Record<string, PictureRow[]>,
  * }} [script]
  */
@@ -168,6 +170,16 @@ function standIn(script = {}) {
     empty: async () => {
       asked.push("empty");
       return script.empty ?? false;
+    },
+    documents: async () => {
+      asked.push("documents");
+      const snapshot = script.snapshot ?? { articles: [], books: [], positions: [] };
+      return (
+        script.documents ?? {
+          articles: snapshot.articles.map((article) => article.url),
+          books: snapshot.books.map((book) => book.meta.id),
+        }
+      );
     },
     putRows: async (library) => {
       asked.push(`putRows ${library.articles.length + library.books.length}`);
@@ -782,6 +794,96 @@ describe("the copy of the reading list", () => {
     assert.deepEqual(stand.asked, [`read ${INDEX_KEY}`]);
   });
 
+  it("completes the copy with what the library holds and the index does not, and touches nothing else", async () => {
+    // The shape D146 leaves behind: a reading list saved while the copy was
+    // off - one article the copy already holds, one it does not, a book -
+    // and then the copy on by default, with no press to build it.
+    const held = article("https://a.example/held");
+    const missing = article("https://a.example/missing", { pictures: { count: 1, bytes: 16 } });
+    const shelf = book("b1", 2);
+    const library = {
+      articles: [held, missing],
+      books: [shelf],
+      positions: [position(held.url), position(missing.url), position("b1")],
+    };
+    const heldRow = articleRow(held);
+    const stand = standIn({
+      snapshot: library,
+      pictures: { [held.url]: [picture(held.url, 0)], [missing.url]: [picture(missing.url, 0)] },
+      area: { [INDEX_KEY]: indexFor({ articles: [held], books: [], positions: [] }), [articleKey(held.url)]: heldRow },
+    });
+    assert.equal(await completeLibraryCopy(stand.deps), 2);
+    // The index claims the newcomers beside what it held, with their
+    // pictures; the row it held is the very object it was, unrewritten.
+    assert.deepEqual(stand.area[INDEX_KEY], {
+      ...indexFor(library),
+      pictures: { [missing.url]: { count: 1, bytes: 16 } },
+    });
+    assert.equal(stand.area[articleKey(held.url)], heldRow);
+    assert.deepEqual(Object.keys(stand.area).sort(), [
+      articleKey(held.url),
+      articleKey(missing.url),
+      bookKey("b1"),
+      INDEX_KEY,
+      pictureKey(missing.url, 0),
+      positionKey("b1"),
+      positionKey(missing.url),
+    ]);
+    // The question costs the two key lists and the index; the library is
+    // read whole only because there was something to copy, and the held
+    // article's pictures are never asked for.
+    assert.deepEqual(stand.asked, [
+      "enabled",
+      `read ${INDEX_KEY}`,
+      "documents",
+      "snapshot",
+      `write ${INDEX_KEY}`,
+      `write ${articleKey(missing.url)}`,
+      `write ${bookKey("b1")}`,
+      `write ${positionKey(missing.url)}`,
+      `write ${positionKey("b1")}`,
+      `pictures ${missing.url}`,
+      `write ${INDEX_KEY}`,
+      `write ${pictureKey(missing.url, 0)}`,
+    ]);
+  });
+
+  it("completes nothing where the switch is off, the index holds everything, or the library is empty", async () => {
+    const off = standIn({ enabled: false, snapshot: { articles: [article("u")], books: [], positions: [] } });
+    assert.equal(await completeLibraryCopy(off.deps), 0);
+    assert.deepEqual(off.asked, ["enabled"]);
+
+    const library = { articles: [article("u")], books: [book("b1", 1)], positions: [] };
+    const whole = standIn({ snapshot: library, area: { [INDEX_KEY]: indexFor(library) } });
+    assert.equal(await completeLibraryCopy(whole.deps), 0);
+    // The ordinary cost, on every list: never the library whole.
+    assert.deepEqual(whole.asked, ["enabled", `read ${INDEX_KEY}`, "documents"]);
+
+    // A fresh install: nothing to copy and no index written for it - the
+    // first document claimed writes one.
+    const bare = standIn();
+    assert.equal(await completeLibraryCopy(bare.deps), 0);
+    assert.deepEqual(Object.keys(bare.area), []);
+  });
+
+  it("builds the copy whole where the default found a reading list and no copy at all", async () => {
+    const kept = article("https://a.example/kept");
+    const library = { articles: [kept], books: [book("b1", 2)], positions: [position(kept.url)] };
+    const stand = standIn({ snapshot: library, pictures: { [kept.url]: [picture(kept.url, 0, 10)] } });
+    assert.equal(await completeLibraryCopy(stand.deps), 2);
+    assert.deepEqual(stand.area[INDEX_KEY], {
+      ...indexFor(library),
+      pictures: { [kept.url]: { count: 1, bytes: 10 } },
+    });
+    assert.deepEqual(Object.keys(stand.area).sort(), [
+      articleKey(kept.url),
+      bookKey("b1"),
+      INDEX_KEY,
+      pictureKey(kept.url, 0),
+      positionKey(kept.url),
+    ]);
+  });
+
   it("never reads the whole area once the index stands", async () => {
     const kept = article("https://a.example/kept");
     const stand = standIn({
@@ -801,6 +903,7 @@ describe("the copy of the reading list", () => {
     await dropPictures("u", stand.deps);
     await dropCopied(kept.url, "article", stand.deps);
     await buildLibraryCopy(stand.deps);
+    await completeLibraryCopy(stand.deps);
     await summarizeCopy(stand.deps);
     await clearLibraryCopy(stand.deps);
     assert.equal(stand.asked.filter((step) => step === "readAll").length, 1);

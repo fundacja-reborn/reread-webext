@@ -65,7 +65,12 @@ import { testLoadModel } from "../lib/models/validate.js";
 import { Message } from "../lib/protocol.js";
 import { ensurePersistent, isWebKit, persistenceNote, readStorage } from "../lib/storage-report.js";
 import { readBackupSummary } from "../lib/store/backup.js";
-import { buildLibraryCopy, clearLibraryCopy, readLibraryCopy } from "../lib/store/library-copy.js";
+import {
+  buildLibraryCopy,
+  clearLibraryCopy,
+  completeLibraryCopy,
+  readLibraryCopy,
+} from "../lib/store/library-copy.js";
 import { marksInBackup, readMarksBackup } from "../lib/store/marks-backup.js";
 import { watchToolbarScheme } from "../lib/theme-icon.js";
 import { canSpeak, speak, voicesFor } from "../lib/tts.js";
@@ -304,11 +309,11 @@ function renderKeepArticles() {
 
 /**
  * The reading list's copy switch, shown as it acts rather than as it is
- * stored - on iOS and iPadOS the unchosen state is on (`effectiveLibraryCopy`).
+ * stored - the unchosen state is on (`effectiveLibraryCopy`, D146).
  */
 function renderLibraryCopy() {
   const toggle = document.getElementById("library-copy");
-  if (toggle instanceof HTMLInputElement) toggle.checked = effectiveLibraryCopy(config, os);
+  if (toggle instanceof HTMLInputElement) toggle.checked = effectiveLibraryCopy(config);
 }
 
 /**
@@ -465,8 +470,11 @@ async function renderStorage() {
       : plural(marksInBackup(marks), "options_storage_marks_backup", [when(marks.writtenAt)]),
   );
   // The reading list's copy (`library-copy.js`): off by the switch, none
-  // yet, or how many documents it holds and what they take.
-  const library = effectiveLibraryCopy(config, os) ? await readLibraryCopy() : "off";
+  // yet, or how many documents it holds and what they take - completed
+  // first, so a reading list saved before the copy was on by default (D146)
+  // is counted here rather than promised for the next save.
+  await completeLibraryCopy();
+  const library = effectiveLibraryCopy(config) ? await readLibraryCopy() : "off";
   fill(
     "storage-library-copy",
     library === "off"
@@ -2314,11 +2322,12 @@ document.getElementById("pair")?.addEventListener("change", (event) => {
   if (select instanceof HTMLSelectElement) void choosePair(select.value);
 });
 // The bar's menu, the saved-phrases header's conduct exactly: one drawn
-// button, the panel under the bar's line, and every row leaving this tab
-// standing - each goes through the background, which raises the page's one
-// tab or opens it. Nothing to do when a message fails mid-restart: the press
-// can be repeated. There is no display panel here, so "one panel at a time"
-// is just this one.
+// button, the panel under the bar's line, and every row going through the
+// background, which raises the page's one tab if it stands - or, since
+// D147, turns this very tab into the page, the settings one Back away, so
+// no press ever opens a copy of a page beside one. Nothing to do when a
+// message fails mid-restart: the press can be repeated. There is no
+// display panel here, so "one panel at a time" is just this one.
 const pageBar = document.querySelector(".page-bar");
 const menuButton = document.getElementById("menu");
 const menuPanel = document.getElementById("menu-panel");
