@@ -246,7 +246,14 @@ async function openVocabulary() {
 }
 
 async function openSettings() {
-  await webext().runtime.openOptionsPage();
+  try {
+    // Through the background like the other three rows (D147): the settings
+    // tab raised if one stands, a tab of ours turned to it otherwise, a
+    // fresh one last - where `openOptionsPage` knew only the first.
+    await webext().runtime.sendMessage({ kind: Message.OPEN_SETTINGS });
+  } catch {
+    // Same as the others: repeatable beats stuck.
+  }
   window.close();
 }
 

@@ -10,9 +10,10 @@
  * runs in, except that the reader says so.
  *
  * Where the tab ids live and why is `src/lib/session.js`; the mechanics of
- * raising-or-opening are `single-tab.js`, shared with the saved-phrases page.
- * Nothing about what is being read is written down: the page itself travels as
- * one answer to one question and is never stored.
+ * raising-or-opening are `single-tab.js`, shared with the saved-phrases page
+ * and the settings (`room-tab.js`). Nothing about what is being read is
+ * written down: the page itself travels as one answer to one question and is
+ * never stored.
  */
 
 import { webext } from "../lib/browser.js";
@@ -23,7 +24,7 @@ import {
   writeReaderSource,
   writeReaderTab,
 } from "../lib/session.js";
-import { raiseOrOpen, tabOnDuty } from "./single-tab.js";
+import { ROOM_PAGES, adoptable, raiseOrOpen, tabOnDuty } from "./single-tab.js";
 
 const READER_PAGE = "reader/reader.html";
 
@@ -36,6 +37,10 @@ const READER_PAGE = "reader/reader.html";
  * @property {WebExtBrowser["windows"]} [windows]
  * @property {WebExtBrowser["storage"]["session"]} [session]
  * @property {string} [url]
+ * @property {string[]} [rooms] the extension's rooms, as `runtime.getURL` names
+ *   them - injected by the tests
+ * @property {number} [from] the tab the press came from, when it came from a
+ *   page of this extension: the first tab worth turning to the reader (D147)
  * @property {() => number} [now]
  * @property {() => Promise<unknown>} [contexts] the extension's own open
  *   contexts, `runtime.getContexts` shaped - injected by the tests
@@ -48,6 +53,7 @@ const READER_PAGE = "reader/reader.html";
 export async function openReader(deps = {}) {
   const session = deps.session ?? webext().storage.session;
   const url = deps.url ?? webext().runtime.getURL(READER_PAGE);
+  const rooms = deps.rooms ?? ROOM_PAGES.map((page) => webext().runtime.getURL(page));
 
   await raiseOrOpen({
     tabs: deps.tabs ?? webext().tabs,
@@ -58,6 +64,12 @@ export async function openReader(deps = {}) {
     // place must not be raised as one, and a reader nobody remembered is
     // adopted rather than duplicated.
     read: () => tabOnDuty({ read: () => readReaderTab(session), url, ask: deps.contexts }),
+    // No reader anywhere: a tab showing another room of ours is turned into
+    // one before a fresh tab is opened (D147) - the tab the press came from
+    // first, then the one that walked away from the reader and now shows
+    // the settings or the phrases, then any other.
+    adopt: async () =>
+      adoptable({ preferred: [deps.from, await readReaderTab(session)], rooms, ask: deps.contexts }),
     write: (tabId) => writeReaderTab(tabId, session),
   });
 }

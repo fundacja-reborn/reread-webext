@@ -28,7 +28,7 @@ import { pairLabel } from "../lib/language.js";
 import { describeError } from "../lib/messages.js";
 import { armBackArrow } from "../lib/back-arrow.js";
 import { ErrorCode, Message, asResult, fail } from "../lib/protocol.js";
-import { writeVocabTab } from "../lib/session.js";
+import { BACK_ROAD_KEY, writeVocabTab } from "../lib/session.js";
 import { restoreVocabulary } from "../lib/store/backup.js";
 import { MIRROR_KEY } from "../lib/store/mirror.js";
 import { exportFilename, fromTsv, pairFromFilename, toTsv } from "../lib/store/tsv.js";
@@ -890,9 +890,27 @@ async function runImport() {
 }
 
 // The mark at the top is the door to the settings, the same one the reader's
-// bar carries: its own tab (`openOptionsPage` raises the settings tab if one is
-// already open), so the list on screen stays where it is.
-brandButton?.addEventListener("click", () => void webext().runtime.openOptionsPage());
+// bar carries, and since D147 it goes the way the reader's does: through
+// the background, which raises the settings tab if one stands and turns
+// this tab to the settings otherwise - a walk in place, with this page one
+// Back away. The marker in this tab's own `sessionStorage` is what tells
+// the settings page so (D140): it wears its arrow, and the arrow pops the
+// entry the system's back gesture pops. Turned or not, the marker stays
+// true: it is read only by a settings page that arrives in this tab, and
+// one that arrives here always has this page behind it. A background
+// mid-restart answers nothing; then the walk is made here, as it was.
+function goToSettings() {
+  try {
+    sessionStorage.setItem(BACK_ROAD_KEY, "vocab");
+  } catch {
+    // The arrow is an enhancement; the walk works without it.
+  }
+  void webext()
+    .runtime.sendMessage({ kind: Message.OPEN_SETTINGS })
+    .catch(() => location.assign(webext().runtime.getURL("options/options.html")));
+}
+
+brandButton?.addEventListener("click", () => goToSettings());
 
 // The way back to the reading (D141/D142): walked here from the reader, the
 // arrow pops the same history entry as the system's back gesture; raised
@@ -985,9 +1003,10 @@ if (canSpeak()) {
 
 // The reading-list row goes through the background exactly as the popup's
 // does: `openLibrary` points the reader at nothing and raises its one tab
-// (`reader-tab.js`), while this tab stays the saved-phrases page the tab
-// registry says it is. A rejection means the background was mid-restart -
-// the press can be repeated; the popup's rows make the same bargain.
+// (`reader-tab.js`) - or, when no reader stands anywhere, turns this very
+// tab into one (D147), the list one Back away from these phrases. A
+// rejection means the background was mid-restart - the press can be
+// repeated; the popup's rows make the same bargain.
 navLibrary?.addEventListener("click", () => {
   closePanels();
   void webext()
@@ -996,7 +1015,8 @@ navLibrary?.addEventListener("click", () => {
 });
 
 // The highlights row goes the reading list's way: the same one reader tab,
-// turned to the highlights page by the message, while this tab stays put.
+// turned to the highlights page by the message - this tab, if no reader
+// stands.
 navMarks?.addEventListener("click", () => {
   closePanels();
   void webext()
@@ -1007,7 +1027,7 @@ navMarks?.addEventListener("click", () => {
 // The settings row is the mark's press with a word on it.
 navSettings?.addEventListener("click", () => {
   closePanels();
-  void webext().runtime.openOptionsPage();
+  goToSettings();
 });
 
 // An open panel yields to the page underneath, exactly as the reader's panels

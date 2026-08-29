@@ -22,7 +22,7 @@ import { bergamotViaHost, raiseEngineHost } from "../lib/translator/providers/be
 import { lookUp } from "../lib/dict/lookup.js";
 import { readPage } from "./page.js";
 import { openLibrary, openMarks, openReader, readInReader } from "./reader-tab.js";
-import { openVocabulary } from "./vocab-tab.js";
+import { openSettings, openVocabulary } from "./room-tab.js";
 import {
   forgetPhrase,
   importPhrases,
@@ -88,27 +88,39 @@ async function handle(request, sender) {
       // Without either - the popup over a tab that had no id - the reader only
       // comes forward.
       const sourceTabId = request.sourceTabId ?? sender.tab?.id;
-      if (typeof sourceTabId === "number") await readInReader({ id: sourceTabId });
-      else await openReader();
+      if (typeof sourceTabId === "number") await readInReader({ id: sourceTabId }, { from: sender.tab?.id });
+      else await openReader({ from: sender.tab?.id });
       return ok(null);
     }
+    // The sender's tab travels with every door below as `from` - not as the
+    // page to read, only as the first tab worth turning to the page asked
+    // for when none shows it (D147): a menu row pressed in a page of ours
+    // turns that page's tab, the way the reader's rows have walked in place
+    // since D139. A tab that is not one of our rooms - a web page under the
+    // launcher, the popup's own tab on Android - is never turned.
     case Message.OPEN_LIBRARY: {
-      // No sender fallback on purpose: the reading list is not about any tab,
-      // and on Android the popup's own tab is the one the fallback would name.
-      await openLibrary();
+      // No sender fallback into the *source* on purpose: the reading list is
+      // not about any tab, and on Android the popup's own tab is the one the
+      // fallback would name.
+      await openLibrary({ from: sender.tab?.id });
       return ok(null);
     }
     case Message.OPEN_MARKS: {
       // The reader's own view by another door: not about any tab either.
-      await openMarks();
+      await openMarks({ from: sender.tab?.id });
       return ok(null);
     }
     case Message.OPEN_VOCABULARY: {
-      await openVocabulary();
+      await openVocabulary({ from: sender.tab?.id });
       return ok(null);
     }
     case Message.OPEN_SETTINGS: {
-      await webext().runtime.openOptionsPage();
+      // Since D147 the settings are a room like the other two, not the
+      // browser's `openOptionsPage`: that call raises an open settings tab
+      // but cannot turn a tab of ours to it, and the reader's walk to the
+      // settings in place (D139) left a settings tab behind every time the
+      // reader was next raised elsewhere.
+      await openSettings({ from: sender.tab?.id });
       return ok(null);
     }
     case Message.READ_PAGE:

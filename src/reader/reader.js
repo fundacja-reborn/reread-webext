@@ -122,7 +122,7 @@ import {
   sweepOrphanSegments,
 } from "../lib/store/books.js";
 import { MARKS_FILENAME, toMarksFile } from "../lib/store/marks-file.js";
-import { restoreLibrary } from "../lib/store/library-copy.js";
+import { completeLibraryCopy, restoreLibrary } from "../lib/store/library-copy.js";
 import { allMarks, getMarks, putMarks, restoreMarks } from "../lib/store/marks.js";
 import { keptTitles, readMarksBackup } from "../lib/store/marks-backup.js";
 import { Segment, emptySentence, savedArticle } from "../lib/store/saved-article.js";
@@ -2689,9 +2689,13 @@ async function refreshLibrary() {
   // Whatever the browser deleted comes back from its copies before the list
   // reads - the highlights first (`marks-backup.js`, whose rule wants an
   // empty library), then the reading list itself where its copy is on
-  // (`library-copy.js`). Five counts on every ordinary refresh.
+  // (`library-copy.js`). Five counts on every ordinary refresh - and, once
+  // per page, the copy completed with whatever the library holds that the
+  // copy does not (D146): a reading list saved while the copy was off, or
+  // before it was on by default.
   await restoreMarks();
   await restoreLibrary();
+  await completeLibraryCopy();
   // One list, two stores: books enter dressed as rows (`bookEntry`), with
   // their positions read in bulk - fifty rows must not mean fifty lookups.
   // The marks ride in the same round trip only to answer one button's grey;
@@ -4766,19 +4770,33 @@ window.addEventListener("popstate", (event) => {
  * and the reading place must stay one gesture away). The highlights row
  * needs no walk at all: the highlights are a view of this very page.
  *
+ * Since D147 the walk goes through the background, like every other door
+ * to a room of ours: the room's own tab is raised if one stands, and this
+ * tab is turned to the room otherwise - which is the walk exactly, history
+ * entry and all, since the background navigates this tab the way
+ * `location.assign` did. What changes is the first case: a settings tab
+ * already open no longer gets a twin. The marker is set before the message
+ * either way; it is read only by a settings or phrases page arriving in
+ * this tab, and one that arrives here always has this entry behind it. A
+ * background mid-restart answers nothing - then the walk is made here, as
+ * it was.
+ *
  * @param {string} page
+ * @param {typeof Message.OPEN_SETTINGS | typeof Message.OPEN_VOCABULARY} kind
  */
-function walkTo(page) {
+function walkTo(page, kind) {
   try {
     sessionStorage.setItem(BACK_ROAD_KEY, "reader");
   } catch {
     // The arrow is an enhancement; history carries the gesture regardless.
   }
-  location.assign(webext().runtime.getURL(page));
+  void webext()
+    .runtime.sendMessage({ kind })
+    .catch(() => location.assign(webext().runtime.getURL(page)));
 }
 
 function goToSettings() {
-  walkTo("options/options.html");
+  walkTo("options/options.html", Message.OPEN_SETTINGS);
 }
 
 // The reader-tab bookkeeping, both halves (D139/D140): this tab is the
@@ -4858,7 +4876,7 @@ navVocabulary?.addEventListener("click", () => {
   // popup and the settings menu keep raising: no reading place stands behind
   // them. The one phrases tab keeps holding: the witness in `vocab-tab.js`
   // adopts the walked-to page, so a raise finds this tab instead of a copy.
-  walkTo("vocab/vocab.html");
+  walkTo("vocab/vocab.html", Message.OPEN_VOCABULARY);
 });
 
 navSettings?.addEventListener("click", () => {

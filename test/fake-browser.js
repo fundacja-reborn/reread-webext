@@ -29,6 +29,8 @@ export function fakeBrowser(initial = {}) {
   const state = {
     stored,
     created: /** @type {string[]} */ ([]),
+    /** The tabs turned to a page of ours, and to which (D147). */
+    turned: /** @type {Array<{ tabId: number, url: string }>} */ ([]),
     asked: /** @type {Array<{ tabId: number, message: unknown }>} */ ([]),
     selected: /** @type {number | null} */ (null),
     focusedWindow: /** @type {number | null} */ (null),
@@ -52,13 +54,14 @@ export function fakeBrowser(initial = {}) {
       },
       /**
        * @param {number} tabId
-       * @param {{ active?: boolean }} _properties
+       * @param {{ active?: boolean, url?: string }} properties
        */
-      async update(tabId, _properties) {
+      async update(tabId, properties) {
         const tab = tabs.get(tabId);
         // What the browser does for an id that is no longer a tab, and the only
         // way this can be learned without the `tabs` permission.
         if (tab === undefined) throw new Error(`Invalid tab ID: ${tabId}`);
+        if (typeof properties.url === "string") state.turned.push({ tabId, url: properties.url });
         state.selected = tabId;
         return tab;
       },
