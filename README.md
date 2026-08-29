@@ -6,7 +6,7 @@ Works in Firefox (desktop and Android) and in Chrome/Chromium. **Install it from
 
 ![An article open in re/read's reader with the word "persisted" selected. The bubble under it shows the Polish translation, buttons to hear the phrase, copy it, edit it or mark it Learned, the sentence it stands in, and dictionary entries below that. Phrases saved earlier carry dotted underlines in the text](docs/screenshots/bubble.webp)
 
-**Contents:** [Features](#features) · [Reading without translation](#reading-without-translation) · [Install](#install) · [Keyboard shortcuts](#keyboard-shortcuts) · [What it does not do](#what-it-deliberately-does-not-do) · [Privacy](#privacy) · [Third-party code](#third-party-code) · [Development](#development) · [Related projects](#related-projects) · [Licence](#licence) · [Support](#support)
+**Contents:** [Features](#features) · [Reading without translation](#reading-without-translation) · [Install](#install) · [Keyboard shortcuts](#keyboard-shortcuts) · [What it does not do](#what-it-deliberately-does-not-do) · [Privacy](#privacy) · [Third-party code](#third-party-code) · [Development](#development) · [Related projects](#related-projects) · [Licence](#licence) · [Feedback](#feedback) · [Support](#support)
 
 ## Features
 
@@ -99,10 +99,10 @@ You can verify this instead of trusting it: watch the network panel in devtools,
 
 The same in the form the add-on stores ask for, one document, no legalese: [`PRIVACY.md`](PRIVACY.md).
 
-Everything the extension stores - vocabulary, translation models, dictionaries, saved articles and books, settings - lives in the browser's local extension storage (IndexedDB) on your device and is never synced anywhere. In particular:
+Everything the extension stores - vocabulary, translation models, dictionaries, saved articles and books, settings - lives in the browser's local extension storage on your device and is never synced anywhere: four IndexedDB databases (`reread-vocab`, `reread-articles`, `reread-dicts`, `reread-models`) and the extension's `storage.local`, which holds the settings and the safety copies of the vocabulary, the highlights and the reading list. You can look at all of it in the browser's developer tools, under the extension's own origin (Firefox: Storage; Chrome: Application). In particular:
 
 - Switching re/read off for a site stores that site's hostname locally. Entries are listed and removable on the settings page.
-- Saving an article stores its title, address and extracted text, so it opens with no network. Its pictures are stored only when you press **Download pictures** in the reader's menu - scaled down to screen size where that saves space - and leave again from the same row; the list says how many an article keeps and what they take. Deleting an entry removes it completely, pictures included.
+- Saving an article stores its title, address and extracted text, so it opens with no network. Its pictures are stored only when you press **Download pictures** in the reader's menu - scaled down to screen size where that saves space - and leave again from the same row; the list says how many an article keeps and what they take. Deleting an entry removes everything stored for it - text, pictures, highlights and notes, reading position - from the database and from the reading list's safety copy alike.
 - Reading aloud uses the browser's own speech synthesis (the standard Web Speech API). Which engine speaks is a browser/OS setting; the extension itself makes no network request for it.
 
 ### Permissions
@@ -168,6 +168,10 @@ By the same foundation:
 ## Licence
 
 [AGPL-3.0-or-later](LICENSE), the same as the KOReader plugin it exchanges files with.
+
+## Feedback
+
+Found a bug, missing something, or want to say how re/read works for you? [Open an issue](https://github.com/fundacja-reborn/reread-webext/issues), or write to [@reapps_eu on Mastodon](https://mastodon.social/@reapps_eu). Both reach the people who make it - the switches that turn off reading aloud and the bubble came from exactly such a message.
 
 ## Support
 

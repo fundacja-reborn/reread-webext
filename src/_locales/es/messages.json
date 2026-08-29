@@ -691,7 +691,7 @@
     "message": "$SIZE$ - modelos, diccionarios, lista de lectura y tus frases en conjunto",
     "placeholders": { "size": { "content": "$1", "example": "143,2 MB" } }
   },
-  "options_storage_how": { "message": "Es lo que ocupan en disco las bases de datos del navegador. Un diccionario cuesta tres o cuatro veces el tamaño de su texto - cada palabra y cada otra grafía es una fila propia; los modelos y la lista de lectura cuestan más o menos lo que muestran sus listas." },
+  "options_storage_how": { "message": "Es lo que ocupan en disco las bases de datos del navegador. Un diccionario cuesta tres o cuatro veces el tamaño de su texto - cada palabra y cada otra grafía es una fila propia; los modelos y la lista de lectura cuestan más o menos lo que muestran sus listas. Eliminar un artículo o un libro borra todo lo suyo - el texto, las imágenes, los resaltados, las notas y la posición de lectura - de la base de datos y de la copia por igual." },
   "options_storage_persistent": { "message": "Almacenamiento persistente: concedido. El navegador ha prometido no borrar estos datos para hacer sitio." },
   "options_storage_at_risk": { "message": "Almacenamiento persistente: no concedido. Safari borra los datos de un sitio tras aproximadamente un mes de uso sin tocar sus páginas, y las páginas de esta extensión cuentan como un sitio. Tus frases tienen una copia que sobrevive a eso (línea de abajo); los modelos, los diccionarios y la lista de lectura no - abre la vista de lectura o estos ajustes de vez en cuando." },
   "options_storage_backup_one": {
