@@ -73,6 +73,12 @@ body.no-translation .jump .translation-only + a::before {
   content: none;
 }
 
+/* The reading-aloud switch (D148): the two voice rows wear this class and
+   fold away with it, the translation-off manner. */
+body.no-tts .tts-only {
+  display: none;
+}
+
 /* --- the header: the shared bar, title, the table of contents ---
 
    The bar and its menu (`.page-bar`, `.page-mark`, `.nav-menu`) live in

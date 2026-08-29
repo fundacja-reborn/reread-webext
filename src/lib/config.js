@@ -103,6 +103,16 @@ export const CONFIG_KEY = "config";
  *   number for both places a voice speaks - the bubble's phrase and the
  *   reader's article - because how fast a voice is comfortable is a fact about
  *   the person, not about the surface.
+ * @property {boolean} ttsOff Whether reading aloud is switched off (D148): no
+ *   speaker in the bubble or on any list, no Read-aloud button in the reader,
+ *   and the voice and speed rows folded away. Presentation only - `ttsVoices`
+ *   and `ttsRate` stay stored, and switching back on finds them. A choice of
+ *   its own rather than a corner of `translationOff`: the voice serves the
+ *   trimmed bubble and the reader alike, and the reasons for wanting it gone
+ *   - a browser whose engine has no voices, a speaker pressed by accident in
+ *   a quiet room - have nothing to do with translating. Named for the off
+ *   state for `translationOff`'s reason: the default is the extension as it
+ *   has always been, and a stored `true` is always a deliberate press.
  * @property {number} bubbleScale How big the bubble's type is, in percent of
  *   its built-in size (D85). The bubble deliberately ignores the page it
  *   stands on, so no page setting can reach it - this is its one knob, and it
@@ -204,6 +214,7 @@ export const DEFAULTS = Object.freeze({
   hideBubbleActions: false,
   ttsVoices: {},
   ttsRate: 100,
+  ttsOff: false,
   bubbleScale: 100,
   underline: DEFAULT_UNDERLINE,
 });
@@ -347,6 +358,9 @@ export function withDefaults(stored) {
       typeof raw["hideBubbleActions"] === "boolean" ? raw["hideBubbleActions"] : DEFAULTS.hideBubbleActions,
     ttsVoices: voiceMap(raw["ttsVoices"]),
     ttsRate: within(raw["ttsRate"], TTS_RATE, DEFAULTS.ttsRate),
+    // As `translationOff`: only a stored boolean is a choice, and a profile
+    // from before the switch keeps its voice.
+    ttsOff: typeof raw["ttsOff"] === "boolean" ? raw["ttsOff"] : DEFAULTS.ttsOff,
     bubbleScale: within(raw["bubbleScale"], BUBBLE_SCALE, DEFAULTS.bubbleScale),
     // A name the stylesheet knows, or the line as it has always been drawn:
     // a weight this version never heard of has no rule to paint under, and a
@@ -387,7 +401,26 @@ export async function readConfig() {
  * the settings page holds the full map and choosing the default voice has to
  * be able to remove an entry - a per-key merge could only ever add.
  *
- * @param {{ sourceLang?: string, targetLang?: string, reader?: Partial<ReaderConfig>, disabledHosts?: string[], readerOnly?: boolean, translationOff?: boolean, keepArticles?: boolean, libraryCopy?: boolean, hideBubbleActions?: boolean, ttsVoices?: Record<string, string>, ttsRate?: number, bubbleScale?: number, underline?: import("./underline.js").UnderlineWeight }} patch
+ * @typedef {object} ConfigPatch What one write may change - every field of
+ *   the config but the pair's halves, which only ever travel together.
+ * @property {string} [sourceLang]
+ * @property {string} [targetLang]
+ * @property {Partial<ReaderConfig>} [reader]
+ * @property {string[]} [disabledHosts]
+ * @property {boolean} [readerOnly]
+ * @property {boolean} [translationOff]
+ * @property {boolean} [keepArticles]
+ * @property {boolean} [libraryCopy]
+ * @property {boolean} [hideBubbleActions]
+ * @property {Record<string, string>} [ttsVoices]
+ * @property {number} [ttsRate]
+ * @property {boolean} [ttsOff]
+ * @property {number} [bubbleScale]
+ * @property {import("./underline.js").UnderlineWeight} [underline]
+ */
+
+/**
+ * @param {ConfigPatch} patch
  * @returns {Promise<Config>}
  */
 export async function writeConfig(patch) {

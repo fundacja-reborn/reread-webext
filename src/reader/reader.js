@@ -130,8 +130,10 @@ import { watchToolbarScheme } from "../lib/theme-icon.js";
 import {
   canSpeak,
   primaryLanguage,
+  setSpeechOff,
   speak,
   speaking,
+  speechSupported,
   stop as stopTts,
   voicesFor,
 } from "../lib/tts.js";
@@ -4115,6 +4117,11 @@ function renderVoiceChoice() {
  * is heard now rather than after the paragraph (`readingVoice`).
  */
 function applySpeech() {
+  // The two rows stand only where a voice can be had - not on an engine
+  // without the API, and not with reading aloud switched off (D148): an
+  // empty voice select would be a promise nothing keeps.
+  if (voiceSetting !== null) voiceSetting.hidden = !canSpeak();
+  if (rateSetting !== null) rateSetting.hidden = !canSpeak();
   if (rateValue !== null) rateValue.textContent = `${(settings.ttsRate / 100).toFixed(1)}×`;
   renderVoiceChoice();
   readingVoice(speechVoice());
@@ -4129,10 +4136,25 @@ function applySpeech() {
  * @param {import("../lib/config.js").Config} config
  */
 function adoptConfig(config) {
+  const spoke = canSpeak();
   settings = config;
+  // The reading-aloud switch (D148) lands before anything below asks
+  // `canSpeak`: the panel's rows, the bar's button and the quotes' speakers
+  // all read their answer from it. Off takes the article's voice and a
+  // quote's with it - a voice mid-sentence when the switch lands is a voice
+  // that was just asked to be quiet.
+  setSpeechOff(config.ttsOff);
+  if (config.ttsOff) {
+    stopReading();
+    stopMarkSpeech();
+  }
   applyAppearance(config.reader);
   applyUnderline(config);
   applySpeech();
+  updateListen();
+  // The highlights page draws its speakers row by row: a flip while it is on
+  // screen redraws it, so no row keeps a button that would do nothing.
+  if (spoke !== canSpeak() && marksShown !== null) void refreshMarks();
   // With translation off (D120) the saved phrases page loses its door here,
   // the way it does in the popup and the settings menu - the page itself
   // stays untouched, and unlocks with the switch.
@@ -5052,14 +5074,11 @@ window.addEventListener("pagehide", () => {
   stopMarkSpeech();
 });
 
-// The rows exist only where they can do something, and the engine's voice list
-// arrives on its own schedule - after first paint on most platforms, never at
-// all on some (Android speaks anyway, see `lib/tts.js`).
-if (canSpeak()) {
-  if (voiceSetting !== null) voiceSetting.hidden = false;
-  if (rateSetting !== null) rateSetting.hidden = false;
-  speechSynthesis.addEventListener("voiceschanged", renderVoiceChoice);
-}
+// The engine's voice list arrives on its own schedule - after first paint on
+// most platforms, never at all on some (Android speaks anyway, see
+// `lib/tts.js`). The bare API question, not `canSpeak`: the listener watches
+// the engine, and the rows it redraws follow the settings (`applySpeech`).
+if (speechSupported()) speechSynthesis.addEventListener("voiceschanged", renderVoiceChoice);
 
 // The settings can change in another reader tab, and the language pair on the
 // settings page. Reading the whole thing back is cheaper than working out which

@@ -40,7 +40,7 @@ import { ErrorCode, Message, asResult, asTranslation, fail } from "../lib/protoc
 import { copyCombo, keeping, madeSelection, touchPointer } from "../lib/selection.js";
 import { sentenceAround } from "../lib/sentence.js";
 import { MIRROR_KEY, asMirror, mirrorMatches } from "../lib/store/mirror.js";
-import { canSpeak, speak, speaking, stop as stopSpeaking } from "../lib/tts.js";
+import { canSpeak, setSpeechOff, speak, speaking, stop as stopSpeaking } from "../lib/tts.js";
 import { clear, mark, paint, phraseAt, unmark } from "./highlighter.js";
 import { blockTextAround, findable } from "./scan.js";
 import { claimsNativeSelection, clearSelection, releaseMouse, startSelect, stopSelect } from "./select.js";
@@ -104,14 +104,19 @@ let generation = 0;
 let anchorRange = null;
 
 /**
- * The speaker, where the device can speak at all (D83): every row about a
- * phrase leads with it, because hearing the phrase is about the phrase and
- * not about the vocabulary - the one action here that never writes. A device
- * without the API simply never shows the button.
+ * The speaker, where a voice is on offer (D83): every row about a phrase
+ * leads with it, because hearing the phrase is about the phrase and not
+ * about the vocabulary - the one action here that never writes. Asked at
+ * every opening rather than once at startup: a device without the API never
+ * shows the button, and neither does a reader who switched reading aloud off
+ * in the settings (D148) - a flip that reaches an open page through the same
+ * storage read as everything else here (`loadVocabulary`).
  *
- * @type {import("./tooltip.js").Action[]}
+ * @returns {import("./tooltip.js").Action[]}
  */
-const SPEAK = canSpeak() ? ["speak"] : [];
+function speakActions() {
+  return canSpeak() ? ["speak"] : [];
+}
 
 /**
  * The clipboard's icon (D110), second picture of the row: it opens the copy
@@ -124,9 +129,14 @@ const SPEAK = canSpeak() ? ["speak"] : [];
  */
 const COPY = ["copy"];
 
-/** What the bubble offers for a phrase that is in the vocabulary. */
-/** @type {import("./tooltip.js").Action[]} */
-const KEPT = [...SPEAK, ...COPY, "learned", "edit"];
+/**
+ * What the bubble offers for a phrase that is in the vocabulary.
+ *
+ * @returns {import("./tooltip.js").Action[]}
+ */
+function kept() {
+  return [...speakActions(), ...COPY, "learned", "edit"];
+}
 
 /**
  * The phrase the current chain of the reader's own selection kept without
@@ -148,16 +158,24 @@ let autoKept = null;
  * The three answers of `keeping()` as rows of buttons. The rule is in
  * `src/lib/selection.js`, where it can be tested; what it looks like is here,
  * because that is a question about the bubble.
+ *
+ * @param {ReturnType<typeof keeping>} decision
+ * @returns {import("./tooltip.js").Action[]}
  */
-const OFFERED = Object.freeze({
-  /** Nothing to keep, so nothing to write - the speaker and the clipboard
-   *  still stand, because a phrase too long to save is still a phrase worth
-   *  hearing, and a whole translated sentence is exactly what gets copied
-   *  out into notes (D110). */
-  none: [...SPEAK, ...COPY],
-  ask: /** @type {import("./tooltip.js").Action[]} */ ([...SPEAK, ...COPY, "save", "edit"]),
-  automatic: KEPT,
-});
+function offered(decision) {
+  switch (decision) {
+    // Nothing to keep, so nothing to write - the speaker and the clipboard
+    // still stand, because a phrase too long to save is still a phrase worth
+    // hearing, and a whole translated sentence is exactly what gets copied
+    // out into notes (D110).
+    case "none":
+      return [...speakActions(), ...COPY];
+    case "ask":
+      return [...speakActions(), ...COPY, "save", "edit"];
+    default:
+      return kept();
+  }
+}
 
 // A bubble gone is a phrase not worth talking about any more, whichever way
 // it went - mid-word is exactly when a dismissal should go quiet (D83), and
@@ -409,6 +427,10 @@ async function loadVocabulary(preloaded) {
     ttsLang = config.sourceLang ?? "";
     ttsVoiceURI = config.sourceLang === null ? undefined : config.ttsVoices[config.sourceLang];
     ttsRate = config.ttsRate;
+    // The reading-aloud switch (D148), handed to the one question every
+    // speaker asks: the next bubble opens without its speaker, and a phrase
+    // being read when the flip lands falls silent.
+    setSpeechOff(config.ttsOff);
     noTranslation = config.translationOff;
 
     // With translation off there is no vocabulary to know (D120): nothing is
@@ -577,7 +599,7 @@ async function onAction(action, meanings) {
   // that: it is somebody assembling a meaning, and the next line has to still
   // be there to press - as does the same line, to take it back out (D34).
   if (action === "save") await keep(meanings, null);
-  else await keep(meanings, KEPT);
+  else await keep(meanings, kept());
 }
 
 /**
@@ -725,7 +747,7 @@ function showSaved(anchor, text, normalized, context, how = {}) {
     line: how.range === undefined ? 0 : firstLineOf(how.range),
     variant: "recall",
     body: meanings.join("\n"),
-    actions: [...KEPT, ...secondLayer],
+    actions: [...kept(), ...secondLayer],
     phrase: text,
     folded: hideActions,
     touch: how.touch === true,
@@ -928,7 +950,7 @@ function present(selection, { deliberate, touch, chain = false }) {
       line: firstLineOf(selection.range),
       variant: "quiet",
       body: "",
-      actions: [...SPEAK, ...COPY],
+      actions: [...speakActions(), ...COPY],
       phrase: text,
       touch,
       coarse: touchPointer(lastPointerType),
@@ -1017,7 +1039,7 @@ function present(selection, { deliberate, touch, chain = false }) {
     secondLayer = (sentence !== null && sentence.length > 0) || blocks.length > 0 ? ["more"] : [];
 
     const decision = keeping({ normalized, gloss, findable: selection.findable, deliberate });
-    tooltip.setActions([...OFFERED[decision], ...secondLayer]);
+    tooltip.setActions([...offered(decision), ...secondLayer]);
     // A phrase that is a question rather than an answer - too long to keep
     // itself, or grown by a tap (D81) - leads with the asking: Save is the
     // point of this bubble, so the row it sits in comes out on its own.
@@ -1032,7 +1054,7 @@ function present(selection, { deliberate, touch, chain = false }) {
     // written costs nothing and the other order leaks scaffolding.
     if (decision === "automatic") {
       if (chain) autoKept = { text, normalized };
-      void keep([gloss], KEPT);
+      void keep([gloss], kept());
     }
   });
 }

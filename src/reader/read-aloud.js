@@ -41,7 +41,7 @@ import { supported, unregister } from "../content/highlighter.js";
 import { prosePieces } from "../content/scan.js";
 import { joinPieces, locate } from "../lib/matcher/spans.js";
 import { chunkText, wordSpan } from "../lib/reader/speech.js";
-import { canSpeak, chosenVoice, shareVoice, stop as stopPhrase } from "../lib/tts.js";
+import { canSpeak, chosenVoice, shareVoice, speechSupported, stop as stopPhrase } from "../lib/tts.js";
 
 /** Must be the names in `reader.css`. */
 const SENTENCE = "reread-speaking";
@@ -580,7 +580,10 @@ function hush() {
     window.clearTimeout(pending);
     pending = null;
   }
-  if (canSpeak()) speechSynthesis.cancel();
+  // The bare API question, not `canSpeak`: the reading-aloud switch landing
+  // mid-article (D148) is exactly the moment this runs, and a cancel that
+  // asked the switch first would leave the voice talking.
+  if (speechSupported()) speechSynthesis.cancel();
 }
 
 function announce() {

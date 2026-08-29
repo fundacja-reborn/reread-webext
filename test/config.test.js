@@ -313,6 +313,45 @@ describe("translation switched off", () => {
   });
 });
 
+describe("reading aloud switched off", () => {
+  it("is on by default, on profiles old and new", () => {
+    // The switch shipped after 0.5.25 (D148): a stored config without the key
+    // is every existing profile, and its voice has to stay.
+    assert.equal(withDefaults(undefined).ttsOff, false);
+    assert.equal(withDefaults({ sourceLang: "en" }).ttsOff, false);
+  });
+
+  it("keeps a choice somebody made, in both directions", () => {
+    assert.equal(withDefaults({ ttsOff: true }).ttsOff, true);
+    assert.equal(withDefaults({ ttsOff: false }).ttsOff, false);
+  });
+
+  it("treats a hand-edited value of the wrong type as reading aloud on", () => {
+    for (const ttsOff of ["true", 1, null, {}]) {
+      assert.equal(withDefaults({ ttsOff }).ttsOff, false);
+    }
+  });
+
+  it("writes the choice through writeConfig, the voice and the speed untouched", async () => {
+    const store = installFakeBrowser({
+      config: { sourceLang: "de", targetLang: "en", ttsVoices: { de: "Anna" }, ttsRate: 80 },
+    });
+    const written = await writeConfig({ ttsOff: true });
+
+    // Presentation only: switching the voice off keeps the voice chosen for
+    // the day it comes back.
+    assert.deepEqual(written, {
+      ...DEFAULTS,
+      sourceLang: "de",
+      targetLang: "en",
+      ttsVoices: { de: "Anna" },
+      ttsRate: 80,
+      ttsOff: true,
+    });
+    assert.equal(/** @type {any} */ (store["config"]).ttsOff, true);
+  });
+});
+
 describe("pageMode", () => {
   const base = { disabledHosts: [], readerOnly: null, translationOff: false };
 

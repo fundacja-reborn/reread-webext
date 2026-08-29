@@ -214,12 +214,32 @@
         <p class="row-note" id="storage-marks-backup"></p>
         <p class="row-note" id="storage-library-copy"></p>
       </div>
+      <!-- The reading-aloud switch (D148), the head of the two voice rows
+           under it: off, the speaker leaves the bubble and every list, the
+           Read-aloud button leaves the reader, and the two rows fold away
+           (`tts-only`) - a voice for a speaker that is gone would be a setting
+           with no other side. Its own row rather than a corner of the
+           translation-off switch: the voice serves the trimmed bubble and the
+           reader alike, and the reasons for wanting it gone (an engine with
+           no voices, a speaker pressed by accident) have nothing to do with
+           translating. Presentation only: the voice and the speed stay. -->
+      <div class="row">
+        <label class="row-toggle">
+          <span class="row-name" data-i18n="options_tts">Reading aloud</span>
+          <input type="checkbox" id="tts" />
+        </label>
+        <p class="row-note" data-i18n="options_tts_hint">
+          With this off, nothing reads aloud: the speaker leaves the bubble and the lists, the
+          Read-aloud button leaves the reader, and the voice and speed rows below fold away - your
+          choices in them are kept.
+        </p>
+      </div>
       <!-- Which voice reads a selection aloud (D83). The choices are the
            device's own voices for the pair's source language, and the choice
            is stored per language, so switching pairs keeps it. The sample the
            Listen button speaks is digits, because digits exist in every
            language the engine could offer. -->
-      <div class="row row-stack">
+      <div class="row row-stack tts-only">
         <label class="row-name" for="tts-voice" data-i18n="options_tts_voice">Voice for reading aloud</label>
         <p class="inline">
           <select id="tts-voice"></select>
@@ -234,7 +254,7 @@
            a whole article in the reader alike - one setting, because what is
            slow is the language being learned, not the surface it is read on.
            The reader's own panel has the same two buttons over it. -->
-      <div class="row">
+      <div class="row tts-only">
         <span class="row-name" data-i18n="options_tts_rate">Reading speed</span>
         <p class="inline stepper">
           <button type="button" id="tts-rate-down" title="Slower" data-i18n-title="reader_slower">

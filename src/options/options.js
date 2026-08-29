@@ -73,7 +73,7 @@ import {
 } from "../lib/store/library-copy.js";
 import { marksInBackup, readMarksBackup } from "../lib/store/marks-backup.js";
 import { watchToolbarScheme } from "../lib/theme-icon.js";
-import { canSpeak, speak, voicesFor } from "../lib/tts.js";
+import { canSpeak, setSpeechOff, speak, speechSupported, voicesFor } from "../lib/tts.js";
 import {
   dictionaryRows,
   filterActive,
@@ -326,6 +326,20 @@ function renderNoTranslation() {
   const toggle = document.getElementById("no-translation");
   if (toggle instanceof HTMLInputElement) toggle.checked = config.translationOff;
   document.body.classList.toggle("no-translation", config.translationOff);
+}
+
+/**
+ * The reading-aloud switch (D148): the head of the two voice rows, which the
+ * body class folds away with it (`tts-only`). The switch is handed to
+ * `lib/tts.js` here too, so the voice select and the Listen button answer
+ * for it the way every other speaker does - and it lands before `renderVoice`
+ * asks, on every road that redraws this page.
+ */
+function renderTts() {
+  const toggle = document.getElementById("tts");
+  if (toggle instanceof HTMLInputElement) toggle.checked = !config.ttsOff;
+  document.body.classList.toggle("no-tts", config.ttsOff);
+  setSpeechOff(config.ttsOff);
 }
 
 /** The bubble-size stepper's value (D85), shown as the percent it is stored as. */
@@ -2110,6 +2124,7 @@ async function render() {
   renderLibraryCopy();
   renderNoTranslation();
   renderBubbleScale();
+  renderTts();
   renderVoice();
   renderRate();
   // Its own promise: the storage row waits on the engine, and nothing else on
@@ -2167,6 +2182,7 @@ async function refresh() {
   renderLibraryCopy();
   renderNoTranslation();
   renderBubbleScale();
+  renderTts();
   // The pair may have moved (the popup writes it too), and the pair decides
   // which language's voices the select is about.
   renderVoice();
@@ -2190,7 +2206,9 @@ webext().storage.onChanged.addListener((changes, area) => {
 
 // The engine's voice list arrives on its own schedule - after first paint on
 // desktop, sometimes never on Android - and the select redraws when it does.
-if (canSpeak()) speechSynthesis.addEventListener("voiceschanged", renderVoice);
+// The bare API question: the listener watches the engine, whatever the switch
+// says (D148), and the select it redraws asks `canSpeak` itself.
+if (speechSupported()) speechSynthesis.addEventListener("voiceschanged", renderVoice);
 
 document.getElementById("reader-only")?.addEventListener("change", (event) => {
   const toggle = event.target;
@@ -2247,6 +2265,20 @@ document.getElementById("no-translation")?.addEventListener("change", (event) =>
   void writeConfig({ translationOff: toggle.checked }).then((written) => {
     config = written;
     renderNoTranslation();
+  });
+});
+document.getElementById("tts")?.addEventListener("change", (event) => {
+  const toggle = event.target;
+  if (!(toggle instanceof HTMLInputElement)) return;
+  // Stored for the off state (`ttsOff`), shown as the feature: a checked box
+  // is a voice on offer. This page folds its two voice rows on the spot;
+  // every open page hears it through storage - the next bubble opens without
+  // its speaker, the reader's button leaves its bar, a voice mid-sentence
+  // falls silent (D148).
+  void writeConfig({ ttsOff: !toggle.checked }).then((written) => {
+    config = written;
+    renderTts();
+    renderVoice();
   });
 });
 // The same road again (D85): open pages hear the size through storage, and

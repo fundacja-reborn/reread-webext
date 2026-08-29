@@ -1,7 +1,14 @@
 import assert from "node:assert/strict";
-import { describe, it } from "node:test";
+import { afterEach, describe, it } from "node:test";
 
-import { canSpeak, chosenVoice, primaryLanguage, voicesFor } from "../src/lib/tts.js";
+import {
+  canSpeak,
+  chosenVoice,
+  primaryLanguage,
+  setSpeechOff,
+  speechSupported,
+  voicesFor,
+} from "../src/lib/tts.js";
 
 /**
  * A voice as the pure half sees one - the three fields `VoiceLike` names.
@@ -97,7 +104,29 @@ describe("chosenVoice", () => {
 });
 
 describe("canSpeak", () => {
+  afterEach(() => {
+    setSpeechOff(false);
+    globalThis.speechSynthesis = /** @type {any} */ (undefined);
+  });
+
   it("is false under node, where the speaking half stays quiet", () => {
+    assert.equal(speechSupported(), false);
     assert.equal(canSpeak(), false);
+  });
+
+  it("follows the reading-aloud switch where the engine exists (D148)", () => {
+    // Enough of an engine for the question: the module only asks whether it
+    // is there, and a switch landing while nothing speaks cancels nothing.
+    globalThis.speechSynthesis = /** @type {any} */ ({});
+    assert.equal(canSpeak(), true);
+
+    setSpeechOff(true);
+    assert.equal(canSpeak(), false);
+    // The bare API question does not move with the switch: the listeners
+    // that watch the engine's voice list keep watching.
+    assert.equal(speechSupported(), true);
+
+    setSpeechOff(false);
+    assert.equal(canSpeak(), true);
   });
 });

@@ -725,6 +725,10 @@
   "options_bubble_scale_hint": {
     "message": "Die Größe der Übersetzungs-Sprechblase - ihres Textes und ihrer Schaltflächen - auf normalen Seiten wie in der Leseansicht."
   },
+  "options_tts": { "message": "Vorlesen" },
+  "options_tts_hint": {
+    "message": "Ist dies aus, liest nichts vor: der Lautsprecher verschwindet aus der Sprechblase und den Listen, die Schaltfläche „Vorlesen“ aus der Leseansicht, und die Zeilen für Stimme und Tempo darunter klappen ein - die Auswahl darin bleibt erhalten."
+  },
   "options_tts_voice": { "message": "Vorlesestimme" },
   "options_tts_default": { "message": "Standardstimme des Browsers" },
   "options_tts_listen": { "message": "Anhören" },
