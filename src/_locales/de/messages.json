@@ -363,7 +363,7 @@
   "reader_transfer_marks": { "message": "Der Export der Markierungen schreibt eine .md-Textdatei mit den markierten Passagen, nach Dokumenten gruppiert - für Notizen gedacht, nicht für den Import. Markierungen wandern zwischen Geräten in der .json-Sicherung der Artikelliste." },
   "reader_transfer_pick": { "message": "Um nur einige Artikel zu exportieren, drücken Sie über der Liste auf „Auswählen“ und haken Sie sie ab." },
   "reader_pick_start": { "message": "Auswählen" },
-  "reader_pick_done": { "message": "Fertig" },
+  "reader_pick_close": { "message": "Auswahl schließen" },
   "reader_pick_all": { "message": "Alle auswählen" },
   "reader_pick_count_one": {
     "message": "$COUNT$ Artikel ausgewählt",

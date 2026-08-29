@@ -440,11 +440,11 @@
   },
   "reader_pick_start": {
     "message": "Select",
-    "description": "Button beside the reading list's filter (D152): opens the selection - every article row grows a checkbox, and Export takes the ticked ones."
+    "description": "Button on the reading list's own line over the rows (D152): opens the selection - every article row grows a checkbox, and Export takes the ticked ones."
   },
-  "reader_pick_done": {
-    "message": "Done",
-    "description": "The same button inside the selection: closes it and drops the ticks."
+  "reader_pick_close": {
+    "message": "Close the selection",
+    "description": "Name and tooltip of the cross at the end of the selection's bar: closes the selection and drops the ticks."
   },
   "reader_pick_all": {
     "message": "Select all",

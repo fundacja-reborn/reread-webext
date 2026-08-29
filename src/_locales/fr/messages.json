@@ -374,7 +374,7 @@
   "reader_transfer_marks": { "message": "L'export des surlignages écrit un fichier texte .md des passages surlignés, groupés par document - pensé pour les notes, pas pour l'import. Les surlignages voyagent entre appareils dans la sauvegarde .json de la liste d'articles." },
   "reader_transfer_pick": { "message": "Pour n'exporter que certains articles, appuyez sur « Sélectionner » au-dessus de la liste et cochez-les." },
   "reader_pick_start": { "message": "Sélectionner" },
-  "reader_pick_done": { "message": "Terminé" },
+  "reader_pick_close": { "message": "Fermer la sélection" },
   "reader_pick_all": { "message": "Tout sélectionner" },
   "reader_pick_count_one": {
     "message": "$COUNT$ article sélectionné",

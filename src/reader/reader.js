@@ -271,18 +271,18 @@ const libraryPrev = /** @type {HTMLButtonElement | null} */ (
 const libraryNext = /** @type {HTMLButtonElement | null} */ (
   document.getElementById("library-next")
 );
-// The selection's furniture (D152): the button beside the filter that opens
-// and closes the mode, the word on it, and the line over the rows with the
-// Select all box and the count.
+// The selection's furniture (D152): the Select button on the list's line
+// over the rows, and the bar that stands in that line's place inside the
+// mode - the Select all box, the count, and the cross that closes it.
 const libraryPickToggle = /** @type {HTMLButtonElement | null} */ (
   document.getElementById("library-pick")
 );
-const libraryPickLabel = document.getElementById("library-pick-label");
 const libraryPickLine = document.getElementById("library-pick-line");
 const libraryPickAll = /** @type {HTMLInputElement | null} */ (
   document.getElementById("library-pick-all")
 );
 const libraryPickCount = document.getElementById("library-pick-count");
+const libraryPickClose = document.getElementById("library-pick-close");
 const exportButton = /** @type {HTMLButtonElement | null} */ (
   document.getElementById("library-export")
 );
@@ -2914,21 +2914,18 @@ async function refreshLibrary() {
 }
 
 /**
- * The selection's furniture drawn from what is held (D152): the word on the
- * toggle, the line over the rows - the Select all box in one of its three
+ * The selection's furniture drawn from what is held (D152): the Select
+ * button, or in its place the bar - the Select all box in one of its three
  * states over the rows it covers, and the count of everything ticked - and
  * the export buttons under the list, which say what they will take. Called
  * by the refresh and by every tick; no store is read here.
  */
 function renderPickLine() {
   if (libraryPickToggle !== null) {
-    libraryPickToggle.toggleAttribute("data-picking", picking);
-    // Nothing to choose from greys the door, the way Export greys over an
-    // empty list; Done stays pressable whatever the list became.
-    libraryPickToggle.disabled = !picking && libraryShown.metas.length === 0;
-  }
-  if (libraryPickLabel !== null) {
-    libraryPickLabel.textContent = picking ? t("reader_pick_done") : t("reader_pick_start");
+    // The bar stands where the button stood; nothing to choose from greys
+    // the button, the way Export greys over an empty list.
+    libraryPickToggle.hidden = picking;
+    libraryPickToggle.disabled = libraryShown.metas.length === 0;
   }
   if (libraryPickLine !== null) libraryPickLine.hidden = !picking;
   if (libraryPickAll !== null) {
@@ -3019,7 +3016,9 @@ function applyLibrarySearchVisibility() {
   } else {
     if (librarySegments !== null) librarySegments.hidden = false;
     if (libraryRows !== null) libraryRows.hidden = false;
-    if (libraryPickToggle !== null) libraryPickToggle.hidden = false;
+    // The button comes back only outside the mode: inside it the bar has
+    // its place, and the refresh has just said which of the two stands.
+    if (libraryPickToggle !== null) libraryPickToggle.hidden = picking;
   }
   if (librarySearchSection !== null) librarySearchSection.hidden = !on;
 }
@@ -4851,14 +4850,22 @@ libraryPrev?.addEventListener("click", () => void turnLibraryPage(-1));
 
 libraryNext?.addEventListener("click", () => void turnLibraryPage(1));
 
-// The selection (D152): one button in and out, the ticks dropped on the way
-// out - Done means the mode is over, not that the choice is kept for a next
-// time nobody can see. The rows are rebuilt either way, with or without
-// their boxes.
+// The selection (D152): Select opens it, the bar's cross closes it, and the
+// ticks are dropped on the way out - closing means the mode is over, not
+// that the choice is kept for a next time nobody can see. The rows are
+// rebuilt either way, with or without their boxes. Focus follows the door:
+// onto the cross on the way in (the button it stood on is gone), back onto
+// the button on the way out.
 libraryPickToggle?.addEventListener("click", () => {
-  picking = !picking;
+  picking = true;
   picked = new Set();
-  void refreshLibrary();
+  void refreshLibrary().then(() => libraryPickClose?.focus());
+});
+
+libraryPickClose?.addEventListener("click", () => {
+  picking = false;
+  picked = new Set();
+  void refreshLibrary().then(() => libraryPickToggle?.focus());
 });
 
 // Select all over the rows it covers: the boxes on screen follow without

@@ -1587,39 +1587,77 @@ a.marks-act {
   min-height: 44px;
 }
 
-/* --- the selection (D152): the mode's button beside the filter, its line
-   over the rows, and the rows wearing boxes --- */
+/* --- the selection (D152): the list's line over the rows, the bar that
+   stands in its place inside the mode, and the rows wearing boxes --- */
 
-/* The button shares the filter's line at the filter's height, its glyph
-   beside its word; inside the mode the word alone says Done. `flex: none`
-   so the filter, not the button, gives way on a phone. */
+/* The list's own line: the filter's count on the left when there is one,
+   the Select button on the right. A line of its own, apart from the filter
+   and the search line - beside the filter the button read as the search's
+   own (Michał's smoke, 2026-08-29). The count is a hint by voice, not by
+   place: as a flex item it would take the hint's top margin as a real one. */
+.list-tools {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.25rem 0 0;
+}
+
+.list-tools .hint {
+  margin: 0;
+}
+
+/* The glyph beside its word, and the right end of the line whether or not
+   the count stands on the left. */
 .pick-toggle {
   display: inline-flex;
-  flex: none;
   align-items: center;
   gap: 0.4rem;
+  margin-inline-start: auto;
   min-height: 44px;
   padding: 0.35rem 0.8rem;
   white-space: nowrap;
 }
 
-.pick-toggle[data-picking] .reader-icon {
-  display: none;
-}
-
-/* Select all on the left, the count on the right: the search line's shape
-   one line down, so the list's controls read as one block. */
-.pick-line {
+/* Inside the selection, its bar: Select all, the count, and the cross
+   that closes it, where the Select button stood. Framed and washed a
+   shade, so the mode is seen to be a mode and not a line of hints; the
+   wash is the page's own ink, not the accent - the accent is what a
+   ticked row wears below, and the bar must not compete with it. Wraps on
+   a phone rather than run off its edge: the count steps down a line. */
+.pick-bar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
+  gap: 0 0.75rem;
+  margin: 0.25rem 0 0;
+  padding: 0 0.25rem 0 0.6rem;
+  border: 1px solid var(--page-line);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--page-fg) 4%, transparent);
 }
 
-/* The count is a hint by voice, not by place: a flex item takes the hint's
-   top margin as a real one, and the words would sit below the box's line. */
-.pick-line .hint {
+.pick-bar .hint {
   margin: 0;
+  margin-inline-start: auto;
+}
+
+/* The cross in the note's dress: quiet at rest, a 44px hit box, the page's
+   ink on hover and on the keyboard. */
+.pick-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0.35rem;
+  border-color: transparent;
+  color: var(--page-muted);
+}
+
+.pick-close:hover,
+.pick-close:focus-visible {
+  border-color: var(--page-border);
+  color: var(--page-fg);
 }
 
 /* A row in the selection: box | text, the Delete column gone with the act
@@ -1636,7 +1674,10 @@ a.marks-act {
   grid-column: 2;
 }
 
-.library-pick {
+/* Two classes deep on purpose: the page's own `input[type="checkbox"]`
+   rule zeroes every box's margin, and a single class loses to it - the
+   box then sat on the row's top rule (Michał's smoke, 2026-08-29). */
+.library-row-pick > .library-pick {
   align-self: start;
   width: 1.15rem;
   height: 1.15rem;
@@ -1651,13 +1692,6 @@ a.marks-act {
   user-select: none;
 }
 
-/* A ticked row says so with a wash of the accent, not the tick alone: the
-   tick is small, and on e-ink a filled box and an empty one are two greys
-   a glance apart. */
-.library-row:has(.library-pick:checked) {
-  background: color-mix(in srgb, var(--page-accent) 10%, transparent);
-}
-
 /* The keyboard's ring around the row, the article rows' own rule: the
    target it marks is the cell the label stretches over, not the box. */
 .library-pick:focus-visible {
@@ -1668,6 +1702,15 @@ a.marks-act {
   background: color-mix(in srgb, var(--page-fg) 5%, transparent);
   outline: 2px solid var(--page-accent);
   outline-offset: -2px;
+}
+
+/* A ticked row says so with a wash of the accent, not the tick alone: the
+   tick is small, and on e-ink a filled box and an empty one are two greys
+   a glance apart. After the focus rule, so a ticked row keeps its wash
+   under the ring - the tick is the state, the ring only where the keys
+   are. */
+.library-row:has(.library-pick:checked) {
+  background: color-mix(in srgb, var(--page-accent) 10%, transparent);
 }
 
 /* A book in the selection: not exported, so no box - dimmed, its title
