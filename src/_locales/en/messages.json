@@ -216,8 +216,8 @@
   "reader_title": { "message": "re/read - reader" },
   "reader_open_original": { "message": "Open the original" },
   "reader_pictures_save": {
-    "message": "Save pictures ($COUNT$)",
-    "description": "Menu row over a saved article: fetch its pictures and keep them with it. The count is how many the article refers to.",
+    "message": "Download pictures ($COUNT$)",
+    "description": "Menu row over a saved article: fetch its pictures from the article's servers and keep them with it. The count is how many the article refers to. 'Download' rather than 'Save' - it names the network act (Michał, 2026-08-29).",
     "placeholders": { "count": { "content": "$1", "example": "12" } }
   },
   "reader_pictures_remove": {
@@ -238,7 +238,7 @@
   },
   "reader_pictures_stop": { "message": "Press the row to stop." },
   "reader_pictures_done_one": {
-    "message": "$SAVED$ of $OF$ picture saved ($SIZE$)",
+    "message": "$SAVED$ of $OF$ picture downloaded ($SIZE$)",
     "placeholders": {
       "of": { "content": "$1", "example": "1" },
       "saved": { "content": "$2", "example": "1" },
@@ -246,15 +246,15 @@
     }
   },
   "reader_pictures_done_other": {
-    "message": "$SAVED$ of $OF$ pictures saved ($SIZE$)",
-    "description": "After a save: how many of the pictures the article asked for are kept, and what they take.",
+    "message": "$SAVED$ of $OF$ pictures downloaded ($SIZE$)",
+    "description": "After a download: how many of the pictures the article asked for are kept, and what they take.",
     "placeholders": {
       "of": { "content": "$1", "example": "12" },
       "saved": { "content": "$2", "example": "11" },
       "size": { "content": "$3", "example": "4.2 MB" }
     }
   },
-  "reader_pictures_none": { "message": "None of the pictures could be saved." },
+  "reader_pictures_none": { "message": "None of the pictures could be downloaded." },
   "reader_pictures_removed": { "message": "Pictures removed." },
   "reader_pictures_failed": { "message": "The pictures could not be written." },
   "library_pictures_one": {
@@ -388,8 +388,8 @@
     "message": ".json - a backup file holding every article saved in the re/read offline reading list, from this browser or any other browser or device where you use re/read. Import only adds the articles missing here and never overwrites one already saved. With pictures included, the backup is a .zip holding the same .json and the pictures beside it."
   },
   "reader_export_pictures": {
-    "message": "Include pictures ($COUNT$, $SIZE$)",
-    "description": "Checkbox beside Export: the backup becomes a .zip with the pictures kept with articles.",
+    "message": "Export with pictures ($COUNT$, $SIZE$)",
+    "description": "Checkbox under the Import/Export buttons: names Export outright, so nobody reads it as an import option (Michał, 2026-08-29). Checked, the backup becomes a .zip with the pictures kept with articles.",
     "placeholders": {
       "count": { "content": "$1", "example": "34" },
       "size": { "content": "$2", "example": "12.4 MB" }

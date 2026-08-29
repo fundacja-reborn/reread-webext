@@ -178,7 +178,7 @@
   "reader_title": { "message": "re/read - vista de lectura" },
   "reader_open_original": { "message": "Abrir el original" },
   "reader_pictures_save": {
-    "message": "Guardar imágenes ($COUNT$)",
+    "message": "Descargar imágenes ($COUNT$)",
     "placeholders": { "count": { "content": "$1", "example": "12" } }
   },
   "reader_pictures_remove": {
@@ -198,7 +198,7 @@
   },
   "reader_pictures_stop": { "message": "Pulsa la fila para detener." },
   "reader_pictures_done_one": {
-    "message": "Guardadas $SAVED$ de $OF$ imagen ($SIZE$)",
+    "message": "Descargadas $SAVED$ de $OF$ imagen ($SIZE$)",
     "placeholders": {
       "of": { "content": "$1", "example": "1" },
       "saved": { "content": "$2", "example": "1" },
@@ -206,14 +206,14 @@
     }
   },
   "reader_pictures_done_other": {
-    "message": "Guardadas $SAVED$ de $OF$ imágenes ($SIZE$)",
+    "message": "Descargadas $SAVED$ de $OF$ imágenes ($SIZE$)",
     "placeholders": {
       "of": { "content": "$1", "example": "12" },
       "saved": { "content": "$2", "example": "11" },
       "size": { "content": "$3", "example": "4,2 MB" }
     }
   },
-  "reader_pictures_none": { "message": "No se pudo guardar ninguna imagen." },
+  "reader_pictures_none": { "message": "No se pudo descargar ninguna imagen." },
   "reader_pictures_removed": { "message": "Imágenes quitadas." },
   "reader_pictures_failed": { "message": "No se pudieron guardar las imágenes." },
   "library_pictures_one": {
@@ -332,7 +332,7 @@
     "message": ".json - un archivo de copia de seguridad con todos los artículos guardados en la lista de lectura sin conexión de re/read, de este u otro navegador o dispositivo donde uses re/read. La importación solo añade los artículos que faltan aquí y nunca sobrescribe uno ya guardado. Con las imágenes, la copia es un .zip con el mismo .json y las imágenes al lado."
   },
   "reader_export_pictures": {
-    "message": "Incluir imágenes ($COUNT$, $SIZE$)",
+    "message": "Exportar con imágenes ($COUNT$, $SIZE$)",
     "placeholders": {
       "count": { "content": "$1", "example": "34" },
       "size": { "content": "$2", "example": "12,4 MB" }

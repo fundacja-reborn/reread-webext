@@ -53,8 +53,12 @@ describe("file inputs vs the iOS picker", () => {
     const [input, ...rest] = fileInputs(await html("reader/reader.html"));
     assert.ok(input, "expected the reading-list transfer input");
     assert.equal(rest.length, 0, "expected exactly one file input");
-    // JSON and EPUB both have system-registered types (public.json,
-    // org.idpf.epub-container), so this filter may stay too.
-    assert.match(input, /accept="\.json,application\/json,\.epub,application\/epub\+zip"/);
+    // JSON, ZIP and EPUB all have system-registered types (public.json,
+    // public.zip-archive, org.idpf.epub-container), so this filter may stay
+    // too. The ZIP is the backup with pictures (D145).
+    assert.match(
+      input,
+      /accept="\.json,application\/json,\.zip,application\/zip,\.epub,application\/epub\+zip"/,
+    );
   });
 });
