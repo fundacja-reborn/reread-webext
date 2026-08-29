@@ -621,6 +621,22 @@
       "name": { "content": "$2", "example": "reread-articles.json" }
     }
   },
+  "reader_import_more_one": {
+    "message": "і ще $COUNT$ стаття",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_import_more_few": {
+    "message": "і ще $COUNT$ статті",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
+  "reader_import_more_many": {
+    "message": "і ще $COUNT$ статей",
+    "placeholders": { "count": { "content": "$1", "example": "297" } }
+  },
+  "reader_import_more_other": {
+    "message": "і ще $COUNT$ статті",
+    "placeholders": { "count": { "content": "$1", "example": "297" } }
+  },
   "reader_import_added_one": {
     "message": "Додано $COUNT$ нову статтю.",
     "placeholders": {

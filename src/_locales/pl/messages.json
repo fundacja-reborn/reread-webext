@@ -621,6 +621,22 @@
       "name": { "content": "$2", "example": "reread-articles.json" }
     }
   },
+  "reader_import_more_one": {
+    "message": "i jeszcze $COUNT$ artykuł",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_import_more_few": {
+    "message": "i jeszcze $COUNT$ artykuły",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
+  "reader_import_more_many": {
+    "message": "i jeszcze $COUNT$ artykułów",
+    "placeholders": { "count": { "content": "$1", "example": "297" } }
+  },
+  "reader_import_more_other": {
+    "message": "i jeszcze $COUNT$ artykułów",
+    "placeholders": { "count": { "content": "$1", "example": "297" } }
+  },
   "reader_import_added_one": {
     "message": "Dodano $COUNT$ nowy artykuł.",
     "placeholders": {

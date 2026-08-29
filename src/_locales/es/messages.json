@@ -494,6 +494,14 @@
       "name": { "content": "$2", "example": "reread-articles.json" }
     }
   },
+  "reader_import_more_one": {
+    "message": "y $COUNT$ artículo más",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_import_more_other": {
+    "message": "y $COUNT$ artículos más",
+    "placeholders": { "count": { "content": "$1", "example": "297" } }
+  },
   "reader_import_added_one": {
     "message": "Se añadió $COUNT$ artículo nuevo.",
     "placeholders": {
