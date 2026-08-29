@@ -85,12 +85,18 @@ Read-aloud uses the browser's own speech synthesis (the standard Web Speech API)
 extension hands the text to the browser and nothing else; it makes no network request
 for speech.
 
-One honest caveat, because it is outside the extension's control: which voice speaks
-is a browser and operating system setting, and on some systems a system voice is a
-cloud voice - the operating system may send the text it is asked to speak to its own
-service. That behaviour belongs to your OS and its privacy policy, not to re/read,
-and it applies to every application that speaks on that system. If it matters to you,
-choose a voice your system marks as offline or on-device in the **Voice** setting.
+Some browsers add online voices to that engine - Chrome's "Google ..." voices, Edge's
+"... Online" voices - which send the text to the browser maker's server to be spoken.
+The browser marks them as such, and re/read leaves them out: they never appear in a
+voice list and are never used. When the device has no offline voice for a language,
+re/read does not read it aloud and says so, instead of letting the browser pick an
+online voice.
+
+One caveat remains, because it is outside the extension's control: an operating-system
+voice that the browser reports as offline can still be synthesized by the system over
+the network, if the system is set up that way. That behaviour belongs to your OS and
+its privacy policy, not to re/read, and it applies to every application that speaks on
+that system.
 
 ## Page content
 
