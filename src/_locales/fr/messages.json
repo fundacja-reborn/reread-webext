@@ -756,6 +756,10 @@
   "options_no_translation_hint": {
     "message": "Pour lire dans votre propre langue. Quand c'est activé, la bulle de traduction, l'enregistrement et le soulignement des phrases, la page des phrases enregistrées et la section des modèles disparaissent ; sélectionner du texte sur une page ordinaire ne propose qu'une chose - ouvrir la page dans le lecteur. Le lecteur, la liste de lecture hors ligne, le surligneur, la lecture à voix haute, la recherche et les dictionnaires continuent de fonctionner. Rien n'est supprimé : vos phrases et vos modèles reviennent dès que vous désactivez ceci."
   },
+  "options_bubble_off": { "message": "Pas de bulle à la sélection de texte" },
+  "options_bubble_off_hint": {
+    "message": "Quand c'est activé, sélectionner du texte sur une page ordinaire ne fait rien du tout - ouvrez une page dans le lecteur avec le bouton de re/read ou avec Alt+Maj+R. Dans le lecteur, une sélection n'est qu'un surlignage passager : aucune bulle ne s'ouvre, un appui ou Échap l'efface, et Ctrl+C ou Cmd+C la copie (sur un écran tactile, rien ne peut être copié)."
+  },
   "options_bubble_scale": { "message": "Taille du texte de la bulle" },
   "options_bubble_scale_hint": {
     "message": "La taille de la bulle de traduction - son texte et ses boutons - sur les pages ordinaires comme dans le lecteur."

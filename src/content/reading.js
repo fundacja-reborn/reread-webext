@@ -223,6 +223,19 @@ let underline = DEFAULTS.underline;
 let noTranslation = DEFAULTS.translationOff;
 
 /**
+ * The no-bubble sub-option (D149), mirrored the same way and only ever true
+ * under the trim - the settings page shows it there and nowhere else, and a
+ * stored value under a hidden row must never act. On ordinary pages this
+ * module never starts under it (`pageMode` says "off"); on the reader page a
+ * selection is then a highlight for the moment and nothing else: no bubble,
+ * no lookup, no voice. The gesture itself stays, because the highlighter's
+ * pen rides on it and the article refuses the native selection - and the two
+ * things a bubble did for the selection, clearing it on Escape and copying it
+ * on the chord, `onKeyDown` does for the bare selection instead.
+ */
+let noBubble = DEFAULTS.translationOff && DEFAULTS.bubbleOff;
+
+/**
  * The reader page's two hands into the quiet bubble (D121), null everywhere
  * else: a dictionary lookup in the language of the document on screen, and
  * the voice that language should be spoken with. Only the reader can offer
@@ -432,6 +445,12 @@ async function loadVocabulary(preloaded) {
     // being read when the flip lands falls silent.
     setSpeechOff(config.ttsOff);
     noTranslation = config.translationOff;
+    // Only under the trim, as the settings page shows the switch (D149). A
+    // bubble standing when the flip lands goes: the selection under it is the
+    // whole answer from now on.
+    const silent = config.translationOff && config.bubbleOff;
+    if (silent && !noBubble && tooltip.isOpen()) tooltip.hide();
+    noBubble = silent;
 
     // With translation off there is no vocabulary to know (D120): nothing is
     // underlined, no mirror is adopted and the background is never asked.
@@ -944,6 +963,11 @@ function present(selection, { deliberate, touch, chain = false }) {
     secondLayer = [];
     unfetched = null;
     anchorRange = selection.range.cloneRange();
+    // The bubble-less selection (D149): the wash the gesture painted is the
+    // whole answer, and it stands until the next tap, click or Escape takes
+    // it - exactly what somebody selecting to keep their place asked for.
+    // `current` still names the phrase, for the copy chord.
+    if (noBubble) return;
     const mine = ++generation;
     tooltip.show({
       anchor: selection.rect,
@@ -1203,7 +1227,9 @@ function chordTaken(target) {
  * @param {KeyboardEvent} event
  */
 function onKeyDown(event) {
-  if (!tooltip.isOpen()) return;
+  // The bubble-less selection (D149) keeps the two keys a bubble answered
+  // for it: the chord copies the phrase, Escape clears the wash.
+  if (!tooltip.isOpen() && !(noBubble && current !== null)) return;
   // The clipboard bridge (D110): on the reader page, the platform's copy
   // chord copies the phrase the bubble is about - the original, exactly what
   // a native selection would have given. Fire and forget like the copy row's
@@ -1225,6 +1251,9 @@ function onKeyDown(event) {
   if (!tooltip.isOpen()) {
     clearSelection();
     autoKept = null;
+    // With no bubble the phrase had nothing else naming it (D149): the wash
+    // gone, the chord has nothing left to copy.
+    if (noBubble) current = null;
   }
 }
 

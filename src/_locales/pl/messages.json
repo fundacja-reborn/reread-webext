@@ -943,6 +943,10 @@
   "options_no_translation_hint": {
     "message": "Do czytania we własnym języku. Gdy to jest włączone, znikają: dymek tłumaczenia, zapisywanie i podkreślanie fraz, strona zapisanych fraz oraz sekcja modeli; zaznaczenie tekstu na zwykłej stronie proponuje jedno - otwarcie strony w widoku czytania. Widok czytania, czytelnia offline, zakreślacz, czytanie na głos, wyszukiwanie i słowniki działają dalej. Nic nie jest kasowane: frazy i modele wracają, gdy tylko to wyłączysz."
   },
+  "options_bubble_off": { "message": "Bez dymka po zaznaczeniu tekstu" },
+  "options_bubble_off_hint": {
+    "message": "Gdy to jest włączone, zaznaczenie tekstu na zwykłej stronie nie robi nic - stronę otwierasz w widoku czytania przyciskiem re/read albo skrótem Alt+Shift+R. W widoku czytania zaznaczenie jest tylko chwilowym podświetleniem: dymek się nie otwiera, tapnięcie albo Escape je zdejmuje, a Ctrl+C lub Cmd+C je kopiuje (na ekranie dotykowym nie da się skopiować)."
+  },
   "options_bubble_scale": { "message": "Rozmiar tekstu dymka" },
   "options_bubble_scale_hint": {
     "message": "Wielkość dymka tłumaczenia - jego tekstu i przycisków - na zwykłych stronach i w widoku czytania."

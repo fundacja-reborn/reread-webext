@@ -78,6 +78,13 @@ const translationToggle = /** @type {HTMLInputElement | null} */ (
 /** @type {{ tabId: number | null, hostname: string | null }} */
 const over = { tabId: null, hostname: null };
 
+/**
+ * Whether the site row may stand at all (`rows.js`, D149): written by
+ * `showRows`, read by `renderSite`, because the page answers which site this
+ * is after the rows have been decided.
+ */
+let siteStands = true;
+
 /** @type {import("./choices.js").PairChoice[]} */
 let choices = [];
 
@@ -143,7 +150,7 @@ function renderSite(info, config) {
   // about which way the checkbox points. "Enabled on ..." does.
   if (siteLabel !== null) siteLabel.textContent = t("popup_site_enabled", info.hostname);
   if (siteToggle !== null) siteToggle.checked = !config.disabledHosts.includes(info.hostname);
-  if (siteRow !== null) siteRow.hidden = false;
+  if (siteRow !== null) siteRow.hidden = !siteStands;
 }
 
 async function toggleSite() {
@@ -308,7 +315,17 @@ function stand(row, shown) {
  * @param {number} installed how many models this device holds
  */
 function showRows(config, installed) {
-  const rows = popupRows({ translationOff: config.translationOff, fresh: installed === 0 });
+  const rows = popupRows({
+    translationOff: config.translationOff,
+    bubbleOff: config.bubbleOff,
+    fresh: installed === 0,
+  });
+  // The site row is revealed by the page's own answer (`renderSite`), which
+  // arrives after this; the rule is kept for it - and applied here too, for
+  // the switch pressed after that answer, which has to be able to take the
+  // row away again.
+  siteStands = rows.site;
+  if (over.hostname !== null) stand(siteRow, rows.site);
   stand(pairRow, rows.pair);
   stand(setupRow, rows.setup);
   stand(document.getElementById("translation-off-note"), rows.translationNote);

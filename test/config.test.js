@@ -352,8 +352,34 @@ describe("reading aloud switched off", () => {
   });
 });
 
+describe("bubble switched off under the trim", () => {
+  it("is off by default, on profiles old and new", () => {
+    assert.equal(withDefaults(undefined).bubbleOff, false);
+    assert.equal(withDefaults({ translationOff: true }).bubbleOff, false);
+  });
+
+  it("keeps a choice somebody made, in both directions", () => {
+    assert.equal(withDefaults({ bubbleOff: true }).bubbleOff, true);
+    assert.equal(withDefaults({ bubbleOff: false }).bubbleOff, false);
+  });
+
+  it("treats a hand-edited value of the wrong type as the bubble on", () => {
+    for (const bubbleOff of ["true", 1, null, {}]) {
+      assert.equal(withDefaults({ bubbleOff }).bubbleOff, false);
+    }
+  });
+
+  it("writes the choice through writeConfig without touching the rest", async () => {
+    const store = installFakeBrowser({ config: { translationOff: true } });
+    const written = await writeConfig({ bubbleOff: true });
+
+    assert.deepEqual(written, { ...DEFAULTS, translationOff: true, bubbleOff: true });
+    assert.equal(/** @type {any} */ (store["config"]).bubbleOff, true);
+  });
+});
+
 describe("pageMode", () => {
-  const base = { disabledHosts: [], readerOnly: null, translationOff: false };
+  const base = { disabledHosts: [], readerOnly: null, translationOff: false, bubbleOff: false };
 
   it("reads by default on the desk, launches by default on Android", () => {
     assert.equal(pageMode(base, "mac", "example.org"), "reading");
@@ -381,6 +407,19 @@ describe("pageMode", () => {
   it("honours the reader-only choice while translation is on", () => {
     assert.equal(pageMode({ ...base, readerOnly: true }, "mac", "example.org"), "launcher");
     assert.equal(pageMode({ ...base, readerOnly: false }, "android", "example.org"), "reading");
+  });
+
+  it("falls silent with the bubble switched off under the trim - and only there (D149)", () => {
+    const silent = { ...base, translationOff: true, bubbleOff: true };
+    assert.equal(pageMode(silent, "mac", "example.org"), "off");
+    assert.equal(pageMode(silent, "android", "example.org"), "off");
+    assert.equal(pageMode({ ...silent, readerOnly: false }, "mac", "example.org"), "off");
+    // The settings page shows the sub-option only under the switch, and a
+    // stored value under a hidden row never acts: with translation on the
+    // page reads or launches exactly as if the sub-option were not there.
+    assert.equal(pageMode({ ...base, bubbleOff: true }, "mac", "example.org"), "reading");
+    assert.equal(pageMode({ ...base, bubbleOff: true, readerOnly: true }, "mac", "example.org"), "launcher");
+    assert.equal(pageMode({ ...base, bubbleOff: true }, "android", "example.org"), "launcher");
   });
 });
 

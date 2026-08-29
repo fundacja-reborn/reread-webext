@@ -326,6 +326,17 @@ function renderNoTranslation() {
   const toggle = document.getElementById("no-translation");
   if (toggle instanceof HTMLInputElement) toggle.checked = config.translationOff;
   document.body.classList.toggle("no-translation", config.translationOff);
+  renderBubbleOff();
+}
+
+/**
+ * The switch's sub-option (D149). Its row comes and goes with the body class
+ * `renderNoTranslation` sets - which is why this rides in it - and the box
+ * shows the stored value whenever the row is on the page.
+ */
+function renderBubbleOff() {
+  const toggle = document.getElementById("bubble-off");
+  if (toggle instanceof HTMLInputElement) toggle.checked = config.bubbleOff;
 }
 
 /**
@@ -2265,6 +2276,16 @@ document.getElementById("no-translation")?.addEventListener("change", (event) =>
   void writeConfig({ translationOff: toggle.checked }).then((written) => {
     config = written;
     renderNoTranslation();
+  });
+});
+document.getElementById("bubble-off")?.addEventListener("change", (event) => {
+  const toggle = event.target;
+  if (!(toggle instanceof HTMLInputElement)) return;
+  // Open pages hear it through storage (D149): every ordinary page falls
+  // silent or gets its launcher back on the spot, and the reader's next
+  // selection is a bare highlight or a bubble again - no reload anywhere.
+  void writeConfig({ bubbleOff: toggle.checked }).then((written) => {
+    config = written;
   });
 });
 document.getElementById("tts")?.addEventListener("change", (event) => {

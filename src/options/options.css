@@ -79,6 +79,18 @@ body.no-tts .tts-only {
   display: none;
 }
 
+/* The translation-off switch's sub-option (D149): the mirror of
+   `translation-only` - on the page only while the switch is on. */
+body:not(.no-translation) .no-translation-only {
+  display: none;
+}
+
+/* A sub-option stands indented under the switch it belongs to: the indent is
+   the whole of what says "this one depends on the row above". */
+.row-sub {
+  padding-left: 1.5rem;
+}
+
 /* --- the header: the shared bar, title, the table of contents ---
 
    The bar and its menu (`.page-bar`, `.page-mark`, `.nav-menu`) live in

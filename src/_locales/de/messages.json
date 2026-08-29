@@ -721,6 +721,10 @@
   "options_no_translation_hint": {
     "message": "Zum Lesen in der eigenen Sprache. Ist dies an, verschwinden die Sprechblase, das Speichern und Unterstreichen von Wendungen, die Wortschatz-Seite und der Modell-Abschnitt; das Auswählen von Text auf einer gewöhnlichen Seite bietet genau eines an - die Seite in der Leseansicht zu öffnen. Leseansicht, Offline-Leseliste, Textmarker, Vorlesen, Suche und Wörterbücher funktionieren weiter. Nichts wird gelöscht: Wortschatz und Modelle kehren zurück, sobald Sie dies wieder ausschalten."
   },
+  "options_bubble_off": { "message": "Keine Sprechblase beim Auswählen von Text" },
+  "options_bubble_off_hint": {
+    "message": "Ist dies an, tut das Auswählen von Text auf einer gewöhnlichen Seite gar nichts - eine Seite öffnen Sie in der Leseansicht über die Schaltfläche von re/read oder mit Alt+Umschalt+R. In der Leseansicht ist eine Auswahl nur eine Hervorhebung für den Moment: keine Sprechblase öffnet sich, ein Tippen oder Escape nimmt sie weg, und Strg+C oder Cmd+C kopiert sie (auf einem Touchscreen lässt sich nichts kopieren)."
+  },
   "options_bubble_scale": { "message": "Textgröße der Sprechblase" },
   "options_bubble_scale_hint": {
     "message": "Die Größe der Übersetzungs-Sprechblase - ihres Textes und ihrer Schaltflächen - auf normalen Seiten wie in der Leseansicht."

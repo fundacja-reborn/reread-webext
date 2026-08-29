@@ -165,6 +165,26 @@
           off.
         </p>
       </div>
+      <!-- The switch's one sub-option (D149), shown only while it is on
+           (`no-translation-only`, the mirror of `translation-only`): with
+           translation on the bubble is the product, so "no bubble" is only a
+           choice under the trim - and a stored value under a hidden row never
+           acts (`pageMode`, `reading.js`). Ordinary pages then get nothing at
+           all, not even the launcher; the reader keeps its gesture, because the
+           highlighter's pen rides on it, and a selection there is a highlight
+           for the moment. -->
+      <div class="row row-sub no-translation-only">
+        <label class="row-toggle">
+          <span class="row-name" data-i18n="options_bubble_off">No bubble when selecting text</span>
+          <input type="checkbox" id="bubble-off" />
+        </label>
+        <p class="row-note" data-i18n="options_bubble_off_hint">
+          With this on, selecting text on an ordinary page does nothing at all - open a page in the
+          reader from re/read's button or with Alt+Shift+R. In the reader a selection is only a
+          highlight for the moment: no bubble opens, a tap or Escape clears it, and Ctrl+C or Cmd+C
+          copies it (on a touch screen nothing can be copied).
+        </p>
+      </div>
       <!-- The pair select offers only the pairs whose model is on this device:
            a pair without one translates nothing, and the full catalogue of a
            hundred pairs made the select unusable. The line below is the way
