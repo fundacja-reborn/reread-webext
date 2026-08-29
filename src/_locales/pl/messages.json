@@ -404,7 +404,56 @@
   },
   "reader_format_title": { "message": "Format pliku" },
   "reader_transfer_note": {
-    "message": ".json - plik kopii (backupu) ze wszystkimi zapisanymi artykułami z czytelni offline re/read, z tej lub z innej Twojej przeglądarki czy urządzenia, na którym korzystasz z re/read. Import dodaje tylko artykuły, których tu brakuje, a już istniejących tu artykułów nie nadpisuje."
+    "message": ".json - plik kopii (backupu) ze wszystkimi zapisanymi artykułami z czytelni offline re/read, z tej lub z innej Twojej przeglądarki czy urządzenia, na którym korzystasz z re/read. Import dodaje tylko artykuły, których tu brakuje, a już istniejących tu artykułów nie nadpisuje. Z obrazkami kopia jest plikiem .zip z tym samym .json i obrazkami obok."
+  },
+  "reader_export_pictures": {
+    "message": "Dołącz obrazki ($COUNT$, $SIZE$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "34" },
+      "size": { "content": "$2", "example": "12,4 MB" }
+    }
+  },
+  "reader_import_pictures_one": {
+    "message": "Z $COUNT$ obrazkiem ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "size": { "content": "$2", "example": "0,3 MB" }
+    }
+  },
+  "reader_import_pictures_few": {
+    "message": "Z $COUNT$ obrazkami ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "size": { "content": "$2", "example": "0,8 MB" }
+    }
+  },
+  "reader_import_pictures_many": {
+    "message": "Z $COUNT$ obrazkami ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "34" },
+      "size": { "content": "$2", "example": "12,4 MB" }
+    }
+  },
+  "reader_import_pictures_other": {
+    "message": "Z $COUNT$ obrazkami ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "34" },
+      "size": { "content": "$2", "example": "12,4 MB" }
+    }
+  },
+  "reader_import_pictures_added_one": {
+    "message": "Dodano obrazków: $COUNT$ ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "size": { "content": "$2", "example": "0,3 MB" }
+    }
+  },
+  "reader_import_pictures_added_other": {
+    "message": "Dodano obrazków: $COUNT$ ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "34" },
+      "size": { "content": "$2", "example": "12,4 MB" }
+    }
   },
   "reader_transfer_epub": { "message": ".epub - format e-booków." },
   "reader_transfer_books": {
@@ -433,7 +482,7 @@
     "placeholders": { "title": { "content": "$1", "example": "Old Chinese" } }
   },
   "reader_transfer_link": { "message": "Import i eksport (artykuły lub EPUB)" },
-  "reader_transfer_accepts": { "message": "Import rozpoznaje podany plik: kopię listy artykułów z re/read (.json) albo e-booka (.epub)." },
+  "reader_transfer_accepts": { "message": "Import rozpoznaje podany plik: kopię listy artykułów z re/read (.json albo .zip z obrazkami) albo e-booka (.epub)." },
   "reader_book_label": { "message": "Książka" },
   "reader_book_part_of": {
     "message": "Część $PART$ z $PARTS$",

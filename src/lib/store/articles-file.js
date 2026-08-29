@@ -71,19 +71,36 @@ export const ARTICLES_FILENAME = "reread-articles.json";
  */
 
 /**
- * The whole file, as one string. Articles are written oldest saved first with
- * the address as the tie, so two exports of the same list are the same file -
- * diffable, like the vocabulary's. Indented because the point of the file is
- * that somebody can open it and see their reading. An article with marks
- * carries them; one without carries no field at all, so the file of somebody
- * who never picked up the pen reads exactly as it always did.
+ * An article as the file writes it - the stored row without the light
+ * row's account of its pictures, which the archive (D145) states in its own
+ * way and the plain file not at all.
+ *
+ * @typedef {{
+ *   url: string,
+ *   title: string,
+ *   savedAt: number,
+ *   readAt: number | null,
+ *   content: string,
+ *   dir: string | null,
+ *   lang: string | null,
+ *   marks?: Mark[],
+ * }} FileRow
+ */
+
+/**
+ * The rows the file carries, in file order: oldest saved first with the
+ * address as the tie, so two exports of the same list are the same file -
+ * diffable, like the vocabulary's. An article with marks carries them; one
+ * without carries no field at all, so the file of somebody who never picked
+ * up the pen reads exactly as it always did. The archive with pictures
+ * (`articles-archive.js`) starts from these same rows.
  *
  * @param {SavedArticle[]} articles
  * @param {Map<string, Mark[]>} [marks] each article's marks, keyed by `url`
- * @returns {string}
+ * @returns {FileRow[]}
  */
-export function toArticlesFile(articles, marks = new Map()) {
-  const rows = [...articles]
+export function fileRows(articles, marks = new Map()) {
+  return [...articles]
     .sort((a, b) => a.savedAt - b.savedAt || a.url.localeCompare(b.url))
     .map(({ url, title, savedAt, readAt, content, dir, lang }) => {
       const kept = marks.get(url);
@@ -98,7 +115,28 @@ export function toArticlesFile(articles, marks = new Map()) {
         ...(kept === undefined || kept.length === 0 ? {} : { marks: kept }),
       };
     });
+}
+
+/**
+ * The file as one string around its rows. Indented because the point of the
+ * file is that somebody can open it and see their reading.
+ *
+ * @param {object[]} rows
+ * @returns {string}
+ */
+export function fileText(rows) {
   return JSON.stringify({ format: FORMAT, version: VERSION, articles: rows }, null, 2) + "\n";
+}
+
+/**
+ * The whole file, as one string.
+ *
+ * @param {SavedArticle[]} articles
+ * @param {Map<string, Mark[]>} [marks] each article's marks, keyed by `url`
+ * @returns {string}
+ */
+export function toArticlesFile(articles, marks = new Map()) {
+  return fileText(fileRows(articles, marks));
 }
 
 /**
