@@ -66,8 +66,8 @@ over a saved article, downloads that article's pictures from the site the articl
 from - once, without cookies or referrer, and only when you press it. That site sees what
 it saw when the page first showed you the pictures: your IP address and your browser's
 user agent, nothing more. The extension never downloads a picture on its own; a saved
-article contains only text until you press that row, and the same row removes the
-pictures again.
+article contains only text until you press that row. Once the pictures are downloaded,
+the same menu row changes to **Remove pictures**, which deletes them again.
 
 There is no third server of the extension's own. No fonts, scripts or images are loaded
 from outside the extension, there is no crash reporting, no A/B testing and no update
