@@ -1,6 +1,6 @@
 # Privacy policy for re/read
 
-Last updated: 19 August 2026. This document lives in the extension's repository, so
+Last updated: 29 August 2026. This document lives in the extension's repository, so
 every change to it is a commit anyone can read: [`PRIVACY.md`](https://github.com/fundacja-reborn/reread-webext/blob/main/PRIVACY.md).
 
 ## The short version
@@ -15,9 +15,12 @@ beyond what the add-on stores themselves report to us.
 
 ## What re/read stores, and where
 
-Everything the extension keeps lives in your browser's own local extension storage
-(IndexedDB and `storage.local`) on your device. None of it is synced to any account,
-and none of it is readable by the pages you visit.
+Everything the extension keeps lives in your browser's own local extension storage on
+your device: four IndexedDB databases (`reread-vocab`, `reread-articles`, `reread-dicts`,
+`reread-models`) and the extension's `storage.local`, which holds the settings and the
+safety copies of the vocabulary, the highlights and the reading list. None of it is synced
+to any account, and none of it is readable by the pages you visit; you can inspect all of
+it in the browser's developer tools, under the extension's own origin.
 
 | What | Why it is stored |
 |---|---|
@@ -32,7 +35,9 @@ Uninstalling the extension deletes all of it, because the browser deletes an
 extension's storage together with the extension. You can also remove any part of it
 from inside the extension itself: individual phrases (**Learned**), individual
 articles and books (**Delete**), models and dictionaries (their sections in
-Settings), and the per-site off switches (Settings, **Switched-off sites**).
+Settings), and the per-site off switches (Settings, **Switched-off sites**). Deleting an
+article or a book removes everything stored for it - text, pictures, highlights, notes and
+the reading position - from the database and from the copy in `storage.local` alike.
 
 Your data can be exported at any time to files you choose the location of: vocabulary
 as TSV, the reading list as JSON (or as a `.zip` with its pictures), highlights as

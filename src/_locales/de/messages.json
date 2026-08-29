@@ -668,7 +668,7 @@
     "message": "$SIZE$ - Modelle, Wörterbücher, Leseliste und Ihre Phrasen zusammen",
     "placeholders": { "size": { "content": "$1", "example": "143,2 MB" } }
   },
-  "options_storage_how": { "message": "So viel belegen die Datenbanken des Browsers auf der Festplatte. Ein Wörterbuch kostet das Drei- bis Vierfache seines Textes - jedes Wort und jede andere Schreibweise ist eine eigene Zeile; die Modelle und die Leseliste kosten ungefähr das, was ihre Listen anzeigen." },
+  "options_storage_how": { "message": "So viel belegen die Datenbanken des Browsers auf der Festplatte. Ein Wörterbuch kostet das Drei- bis Vierfache seines Textes - jedes Wort und jede andere Schreibweise ist eine eigene Zeile; die Modelle und die Leseliste kosten ungefähr das, was ihre Listen anzeigen. Das Löschen eines Artikels oder Buchs entfernt alles, was dazugehört - Text, Bilder, Markierungen, Notizen und die Leseposition - aus der Datenbank wie aus der Kopie." },
   "options_storage_persistent": { "message": "Dauerhafter Speicher: gewährt. Der Browser hat zugesagt, diese Daten nicht zu löschen, um Platz zu schaffen." },
   "options_storage_at_risk": { "message": "Dauerhafter Speicher: nicht gewährt. Safari löscht die Daten einer Website nach etwa einem Monat Nutzung ohne ein Tippen auf ihre Seiten, und die Seiten dieser Erweiterung zählen als eine Website. Ihre Phrasen haben eine Kopie, die das übersteht (Zeile darunter); Modelle, Wörterbücher und Leseliste nicht - öffnen Sie ab und zu die Leseansicht oder diese Einstellungen." },
   "options_storage_backup_one": {
