@@ -158,6 +158,66 @@ summary {
   z-index: 2;
 }
 
+/* The page's notice, in the chrome under the bar (D151) - and under an open
+   panel, which stands in flow above it. `page.css` gives a note a heading's
+   breathing room above; here the bar's own rule is the room. In the
+   interface's face and size, the panels' own (`.reader-panel`), not the
+   article's: set in the reading face at the reading size it read as a
+   paragraph of the text it stood over, until a scroll showed it stuck
+   (Michał's smoke, 2026-08-29). */
+.reader-chrome .note {
+  margin: 0.75rem 0 0;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+/* The notice's two doors (D151, after Michał's smoke: a sentence stuck over
+   the text with no way to close it): the close in the top corner, in the
+   dialogs' own dress (`.toc-close`), and the act a sentence may offer on a
+   line of its own under it - the missing-document note's framed text act
+   (`.marks-delete-all`), accent when armed like every Delete. The sentence
+   keeps clear of the close by its own right padding. */
+.notice {
+  position: relative;
+  padding-right: 3rem;
+}
+
+.notice p {
+  margin: 0;
+}
+
+.notice-close {
+  position: absolute;
+  top: 0.15rem;
+  right: 0.15rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0.35rem;
+  border: none;
+  background: none;
+  color: var(--page-muted);
+}
+
+.notice-close:hover,
+.notice-close:focus-visible {
+  color: var(--page-fg);
+}
+
+.notice-act {
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  margin-top: 0.5rem;
+  min-height: 44px;
+  padding: 0.35rem 0.8rem;
+  font: inherit;
+  white-space: nowrap;
+}
+
 /* Stuck to the top only while an article is on screen: that is when the two
    things it holds are wanted mid-scroll - the voice that starts from the
    first visible sentence, and the way out of a finished article. The list

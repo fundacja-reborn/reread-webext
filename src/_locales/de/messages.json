@@ -719,6 +719,7 @@
     "message": "Alle $COUNT$ Zitate dieser Seite löschen",
     "placeholders": { "count": { "content": "$1", "example": "5" } }
   },
+  "reader_mark_text_changed": { "message": "Der Text der Seite hat sich seit der Markierung geändert, daher lässt sie sich hier nicht zeigen." },
   "reader_marks_missing_doc": { "message": "Das Dokument ist nicht mehr gespeichert - dieses Zitat kam aus der Kopie zurück. Öffnen Sie die Seite erneut, und die Markierung ist wieder da." },
   "options_pair_hint": { "message": "Zur Wahl stehen die Paare, deren Übersetzungsmodelle Sie auf dieses Gerät heruntergeladen haben - wenn Sie in einem anderen Sprachpaar übersetzen möchten, finden Sie sein Modell im Abschnitt" },
   "options_pair_none": { "message": "Noch kein Modell - laden Sie unten eines herunter" },

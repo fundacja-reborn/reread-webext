@@ -957,6 +957,7 @@
     "message": "Usuń wszystkie $COUNT$ cytatów z tej strony",
     "placeholders": { "count": { "content": "$1", "example": "5" } }
   },
+  "reader_mark_text_changed": { "message": "Tekst strony zmienił się od czasu zakreślenia, więc zakreślenia nie da się tu pokazać." },
   "reader_marks_missing_doc": { "message": "Ten dokument nie jest już zapisany - cytat wrócił z kopii. Otwórz stronę ponownie, a zakreślenie będzie na miejscu." },
   "options_pair_hint": { "message": "Do wyboru są pary z modelami tłumaczeń, które pobrałeś na to urządzenie - jeśli chcesz tłumaczyć w innej parze językowej, pobierz jej model w sekcji" },
   "options_pair_none": { "message": "Nie ma jeszcze modelu - najpierw pobierz go poniżej" },
