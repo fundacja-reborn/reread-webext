@@ -30,6 +30,7 @@ import {
 import { dismiss, rescan, start, stop as stopReadingSide } from "../content/reading.js";
 import { applyReading } from "../lib/appearance.js";
 import { webext } from "../lib/browser.js";
+import { holdChrome } from "../lib/chrome-hold.js";
 import { fileSize, localizePage, megabytes, plural, t } from "../lib/i18n.js";
 import { languageName } from "../lib/language.js";
 import {
@@ -4757,8 +4758,12 @@ function setPanel(button, panel, open) {
   if (button === null || panel === null) return;
   panel.hidden = !open;
   button.setAttribute("aria-expanded", String(open));
-  // The page dims under whichever panel is open, and clears with the last.
-  if (panelScrim !== null) panelScrim.hidden = !anyPanelOpen();
+  // The page dims under whichever panel is open, and clears with the last;
+  // the chrome holds where it stands for as long as the dimming lasts
+  // (D153, `chrome-hold.js`).
+  const dimmed = anyPanelOpen();
+  if (panelScrim !== null) panelScrim.hidden = !dimmed;
+  holdChrome(chromeBox, dimmed);
 }
 
 /**

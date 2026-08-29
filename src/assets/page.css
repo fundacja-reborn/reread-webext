@@ -523,10 +523,13 @@ body:not(.reader):has(.panel-scrim:not([hidden])) .page-chrome::before {
    these pages' bars are otherwise not sticky, for the reading list's own
    reason (everything they lead to is at the top). A child of the body, not
    of the page's header: a stuck box never leaves its parent's box, and
-   inside the short header it slid away with it. */
+   inside the short header it slid away with it. Stuck at its own offset,
+   not at the window's top: at zero it first slid up by the page's top
+   padding, a small scroll of an open menu on its way to being stuck - the
+   script measures the offset on the press (`lib/chrome-hold.js`). */
 body:not(.reader):has(.panel-scrim:not([hidden])) .page-chrome {
   position: sticky;
-  top: 0;
+  top: var(--chrome-hold, 0px);
 }
 
 :root:has(.panel-scrim:not([hidden])) {

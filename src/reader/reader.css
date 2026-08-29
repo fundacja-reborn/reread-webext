@@ -236,11 +236,15 @@ body.reader:has(#article:not([hidden])) .reader-chrome {
 
 /* And in the list and the highlights views, stuck for as long as a panel is
    open (D153, Michał's smoke, 2026-08-29): the dimmed page still scrolls,
-   and the menu scrolled away with it. The other pages' `.page-chrome` does
-   the same in page.css. */
-body.reader:has(.panel-scrim:not([hidden])) .reader-chrome {
+   and the menu scrolled away with it. Stuck at its own offset, not at the
+   window's top: at zero it first slid up by the page's top padding, a small
+   scroll of an open menu on its way to being stuck - the script measures
+   the offset on the press (`lib/chrome-hold.js`). The article view keeps
+   its plain stuck bar (D93), so this rule stands down there. The other
+   pages' `.page-chrome` does the same in page.css. */
+body.reader:not(:has(#article:not([hidden]))):has(.panel-scrim:not([hidden])) .reader-chrome {
   position: sticky;
-  top: 0;
+  top: var(--chrome-hold, 0px);
 }
 
 /* The strip's paper runs edge to edge while everything visible keeps the

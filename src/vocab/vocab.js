@@ -23,6 +23,7 @@
 import { applyReading } from "../lib/appearance.js";
 import { webext } from "../lib/browser.js";
 import { CONFIG_KEY, SIZE, TTS_RATE, chosenPair, isFont, isTheme, readConfig, writeConfig } from "../lib/config.js";
+import { holdChrome } from "../lib/chrome-hold.js";
 import { fileSize, localizePage, plural, t, uiLocale } from "../lib/i18n.js";
 import { pairLabel } from "../lib/language.js";
 import { describeError } from "../lib/messages.js";
@@ -74,6 +75,7 @@ const rateValue = document.getElementById("rate-value");
 const menuButton = document.getElementById("menu");
 const menuPanel = document.getElementById("menu-panel");
 const panelScrim = document.getElementById("panel-scrim");
+const pageChrome = document.querySelector(".page-chrome");
 const navLibrary = document.getElementById("nav-library");
 const navMarks = document.getElementById("nav-marks");
 const navSettings = document.getElementById("nav-settings");
@@ -970,8 +972,12 @@ function setPanel(button, panel, open) {
   if (button === null || panel === null) return;
   panel.hidden = !open;
   button.setAttribute("aria-expanded", String(open));
-  // The page dims under whichever panel is open, and clears with the last.
-  if (panelScrim !== null) panelScrim.hidden = !anyPanelOpen();
+  // The page dims under whichever panel is open, and clears with the last;
+  // the chrome holds where it stands for as long as the dimming lasts
+  // (D153, `chrome-hold.js`).
+  const dimmed = anyPanelOpen();
+  if (panelScrim !== null) panelScrim.hidden = !dimmed;
+  holdChrome(pageChrome, dimmed);
 }
 
 displayButton?.addEventListener("click", () => {
