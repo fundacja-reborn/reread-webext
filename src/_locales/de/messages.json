@@ -826,10 +826,11 @@
     "message": "Aktiviert die Vorlesefunktion (Text-to-Speech). Ist sie ausgeschaltet, werden alle Vorlese-Schaltflächen in der Sprechblase, in den Listen und in der Leseansicht ausgeblendet."
   },
   "options_tts_voice": { "message": "Vorlesestimme" },
+  "options_tts_lang": { "message": "Sprache der Stimme" },
   "options_tts_default": { "message": "Standardstimme" },
   "options_tts_listen": { "message": "Anhören" },
   "options_tts_voice_hint": {
-    "message": "Wählen Sie die Stimme zum Vorlesen von Phrasen und Artikeln. Angeboten werden nur Stimmen, die offline sprechen: Die Sprache entsteht auf diesem Gerät, und nichts wird ins Internet gesendet."
+    "message": "Wählen Sie für jede Sprache die Stimme zum Vorlesen von Phrasen und Artikeln. Angeboten werden nur Stimmen, die offline sprechen: Die Sprache entsteht auf diesem Gerät, und nichts wird ins Internet gesendet."
   },
   "speech_no_offline_voice": { "message": "Dieses Gerät hat keine Offline-Stimme für diese Sprache." },
   "options_tts_rate": { "message": "Lesegeschwindigkeit" },

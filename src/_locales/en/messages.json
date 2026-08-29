@@ -1024,10 +1024,14 @@
     "description": "Under the reading-aloud switch on the settings page (D148). Off, the voice and speed rows below it hide as well."
   },
   "options_tts_voice": { "message": "Voice for reading aloud" },
+  "options_tts_lang": {
+    "message": "Language of the voice",
+    "description": "The accessible name of the language select in the voice row of the settings page (D155): which language the voice beside it is chosen for. The options are language names, so the select carries no visible label of its own."
+  },
   "options_tts_default": { "message": "Default voice" },
   "options_tts_listen": { "message": "Listen" },
   "options_tts_voice_hint": {
-    "message": "Select the voice used to read phrases and articles. Only voices that speak offline are offered: speech is made on this device and nothing is sent to the internet.",
+    "message": "Select the voice used to read phrases and articles in each language. Only voices that speak offline are offered: speech is made on this device and nothing is sent to the internet.",
     "description": "Under the voice select on the settings page. True by construction (D155): `voicesFor` in lib/tts.js keeps out every voice the engine marks as remote (localService false), and nothing speaks through one."
   },
   "speech_no_offline_voice": {

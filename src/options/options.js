@@ -74,7 +74,17 @@ import {
 } from "../lib/store/library-copy.js";
 import { marksInBackup, readMarksBackup } from "../lib/store/marks-backup.js";
 import { watchToolbarScheme } from "../lib/theme-icon.js";
-import { canSpeak, canSpeakLang, setSpeechOff, speak, speechSupported, voicesFor } from "../lib/tts.js";
+import {
+  canSpeak,
+  canSpeakLang,
+  offlineLanguages,
+  primaryLanguage,
+  setSpeechOff,
+  speak,
+  speechSupported,
+  voiceLanguage,
+  voicesFor,
+} from "../lib/tts.js";
 import {
   dictionaryRows,
   filterActive,
@@ -387,26 +397,82 @@ async function stepBubbleScale(by) {
 const VOICE_SAMPLE = "1, 2, 3";
 
 /**
- * The voice select for the pair's source language (D83): the device's voices
- * able to read it, behind a first line that means "let the browser pick".
- * Redrawn whenever the config may have moved - the pair decides the filter -
- * and when the engine's list arrives: `getVoices` answers nothing until the
- * browser has loaded the voices, and `voiceschanged` is the only appointment
- * it keeps. On a device that cannot speak at all the row stays, disabled -
- * an honest sentence about why the bubble shows no speaker there.
+ * The language picked on this page for the voice row, for as long as the page
+ * lives (D155): null until a hand picks one, and `voiceLanguage` answers for
+ * the null. Not stored - the stored thing is the voice per language.
+ *
+ * @type {string | null}
+ */
+let voiceLang = null;
+
+/**
+ * The languages the voice row offers, by their names in the reader's own
+ * language: every language this device reads offline, and the pair's source
+ * language even without a voice for it - that is the one the bubble reads
+ * in, and the row must be able to say it has no voice. On a device that
+ * lists no voices and has no pair, the extension's own language stands in:
+ * the engine may still speak there (Android's clause), and a row with no
+ * language at all could not even name its default line.
+ *
+ * @returns {string[]}
+ */
+function voiceLanguages() {
+  const offered = new Set(canSpeak() ? offlineLanguages(speechSynthesis.getVoices()) : []);
+  if (config.sourceLang !== null) offered.add(primaryLanguage(config.sourceLang));
+  if (offered.size === 0) offered.add(primaryLanguage(document.documentElement.lang));
+  // By the name on screen, not the code behind it, the dictionary selects'
+  // rule: nobody looks for Basque under e.
+  return [...offered].sort((a, b) => languageName(a).localeCompare(languageName(b)));
+}
+
+/**
+ * @returns {string | null} the language the voice row is about right now,
+ *   read off its own select - the answer `renderVoice` last gave it
+ */
+function voiceRowLanguage() {
+  const select = document.getElementById("tts-lang");
+  return select instanceof HTMLSelectElement && select.value !== "" ? select.value : null;
+}
+
+/**
+ * The voice row (D83, D155): a language, the device's offline voices able to
+ * read it behind a first line that means "the device's default", and Listen.
+ * The language is the pair's source unless a hand picked another here - a
+ * fresh install without a pair still reads articles aloud, and its settings
+ * page had nothing to list until it could name a language (Michał's smoke,
+ * 2026-08-29). Redrawn whenever the config may have moved and when the
+ * engine's list arrives: `getVoices` answers nothing until the browser has
+ * loaded the voices, and `voiceschanged` is the only appointment it keeps.
+ * On a device that cannot speak at all the row stays, disabled - an honest
+ * sentence about why the bubble shows no speaker there.
  */
 function renderVoice() {
+  const languageSelect = document.getElementById("tts-lang");
   const select = document.getElementById("tts-voice");
-  if (!(select instanceof HTMLSelectElement)) return;
+  if (!(languageSelect instanceof HTMLSelectElement) || !(select instanceof HTMLSelectElement)) {
+    return;
+  }
 
-  // The picker chooses a voice for the pair's source language, so with no
-  // pair chosen there is no language to list voices for: the row stands
-  // disabled on the browser default - the "cannot speak at all" manner - and
-  // comes alive with the first pair.
-  const source = config.sourceLang;
-  const stored = source === null ? undefined : config.ttsVoices[source];
+  const offered = voiceLanguages();
+  const language = voiceLanguage(offered, {
+    picked: voiceLang,
+    source: config.sourceLang === null ? null : primaryLanguage(config.sourceLang),
+    stored: Object.keys(config.ttsVoices),
+    ui: primaryLanguage(document.documentElement.lang),
+  });
+
+  languageSelect.replaceChildren();
+  for (const one of offered) {
+    const option = document.createElement("option");
+    option.value = one;
+    option.textContent = languageName(one);
+    option.selected = one === language;
+    languageSelect.append(option);
+  }
+
+  const stored = language === null ? undefined : config.ttsVoices[language];
   const voices =
-    canSpeak() && source !== null ? voicesFor(speechSynthesis.getVoices(), source) : [];
+    canSpeak() && language !== null ? voicesFor(speechSynthesis.getVoices(), language) : [];
 
   select.replaceChildren();
   const fallback = document.createElement("option");
@@ -424,16 +490,18 @@ function renderVoice() {
     select.append(option);
   }
 
-  // The device lists voices, and none of them reads the pair's language
-  // offline (D155): the picker has its default line alone, the sentence
-  // under the note says why, and Listen - which would be refused - waits.
-  const mute = canSpeak() && source !== null && !canSpeakLang(source);
+  // The device lists voices, and none of them reads this language offline
+  // (D155) - the pair's language, listed without a voice exactly so this can
+  // be said: the picker has its default line alone, the sentence under the
+  // note says why, and Listen - which would be refused - waits.
+  const mute = canSpeak() && language !== null && !canSpeakLang(language);
   const voiceStatus = document.getElementById("tts-voice-status");
   if (voiceStatus !== null) {
     voiceStatus.textContent = mute ? t("speech_no_offline_voice") : "";
     voiceStatus.hidden = !mute;
   }
 
+  languageSelect.disabled = !canSpeak();
   select.disabled = !canSpeak();
   const listen = document.getElementById("tts-listen");
   if (listen instanceof HTMLButtonElement) listen.disabled = !canSpeak() || mute;
@@ -2399,18 +2467,26 @@ document.getElementById("bubble-scale-down")?.addEventListener("click", () => {
 document.getElementById("bubble-scale-up")?.addEventListener("click", () => {
   void stepBubbleScale(BUBBLE_SCALE.step);
 });
+document.getElementById("tts-lang")?.addEventListener("change", (event) => {
+  const select = event.target;
+  if (!(select instanceof HTMLSelectElement)) return;
+  // The page's own pick, for as long as the page lives (D155); the voice
+  // select beside it redraws for the language.
+  voiceLang = select.value;
+  renderVoice();
+});
 document.getElementById("tts-voice")?.addEventListener("change", (event) => {
   const select = event.target;
   if (!(select instanceof HTMLSelectElement)) return;
-  // A disabled picker fires no change, so this only runs with a pair chosen -
-  // the guard is for the type and for a stale page mid-change.
-  const source = config.sourceLang;
-  if (source === null) return;
+  // The language the row is about, off its own select - the guard is for the
+  // type and for a stale page mid-change.
+  const language = voiceRowLanguage();
+  if (language === null) return;
   // The whole map is written back (see `writeConfig`), which is what lets
-  // "browser default" remove the entry rather than store an empty string.
+  // "default voice" remove the entry rather than store an empty string.
   const map = { ...config.ttsVoices };
-  if (select.value === "") delete map[source];
-  else map[source] = select.value;
+  if (select.value === "") delete map[language];
+  else map[language] = select.value;
   void writeConfig({ ttsVoices: map }).then((written) => {
     config = written;
   });
@@ -2421,9 +2497,10 @@ document.getElementById("tts-listen")?.addEventListener("click", () => {
   const select = document.getElementById("tts-voice");
   const chosen = select instanceof HTMLSelectElement && select.value !== "" ? select.value : undefined;
   // At the speed that is set, because that is what living with it will sound
-  // like - a sample read at a speed nobody uses is a sample of nothing. With
-  // no pair the empty tag lets the engine's default voice read the sample.
-  speak(VOICE_SAMPLE, config.sourceLang ?? "", chosen, config.ttsRate / 100);
+  // like - a sample read at a speed nobody uses is a sample of nothing. In the
+  // language the row is about; with none the empty tag lets the device's
+  // default offline voice read the sample.
+  speak(VOICE_SAMPLE, voiceRowLanguage() ?? "", chosen, config.ttsRate / 100);
 });
 document.getElementById("tts-rate-down")?.addEventListener("click", () => {
   void stepRate(-TTS_RATE.step);

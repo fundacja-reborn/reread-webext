@@ -861,10 +861,11 @@
     "message": "Active la lecture à voix haute. Désactiver cette option masque tous les boutons de lecture dans la bulle, les listes et le lecteur."
   },
   "options_tts_voice": { "message": "Voix de lecture" },
+  "options_tts_lang": { "message": "Langue de la voix" },
   "options_tts_default": { "message": "Voix par défaut" },
   "options_tts_listen": { "message": "Écouter" },
   "options_tts_voice_hint": {
-    "message": "Choisissez la voix utilisée pour lire les phrases et les articles. Seules les voix qui parlent hors ligne sont proposées : la parole est produite sur cet appareil et rien n'est envoyé sur Internet."
+    "message": "Choisissez, pour chaque langue, la voix utilisée pour lire les phrases et les articles. Seules les voix qui parlent hors ligne sont proposées : la parole est produite sur cet appareil et rien n'est envoyé sur Internet."
   },
   "speech_no_offline_voice": { "message": "Cet appareil n'a pas de voix hors ligne pour cette langue." },
   "options_tts_rate": { "message": "Vitesse de lecture" },

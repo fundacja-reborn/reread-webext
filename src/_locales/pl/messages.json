@@ -1124,10 +1124,11 @@
     "message": "Włącza funkcję czytania na głos. Wyłączenie tej opcji ukrywa wszystkie przyciski czytania w dymku, na listach i w widoku czytania."
   },
   "options_tts_voice": { "message": "Głos lektora" },
+  "options_tts_lang": { "message": "Język głosu" },
   "options_tts_default": { "message": "Głos domyślny" },
   "options_tts_listen": { "message": "Posłuchaj" },
   "options_tts_voice_hint": {
-    "message": "Wybierz głos do czytania fraz i artykułów. Do wyboru są tylko głosy działające offline: mowa powstaje na tym urządzeniu i nic nie jest wysyłane do internetu."
+    "message": "Wybierz głos do czytania fraz i artykułów w każdym z języków. Do wyboru są tylko głosy działające offline: mowa powstaje na tym urządzeniu i nic nie jest wysyłane do internetu."
   },
   "speech_no_offline_voice": { "message": "To urządzenie nie ma głosu offline dla tego języka." },
   "options_tts_rate": { "message": "Tempo czytania" },

@@ -849,10 +849,11 @@
     "message": "Activa la función de lectura en voz alta. Desactivar esta opción oculta todos los botones de lectura en la burbuja, las listas y la vista de lectura."
   },
   "options_tts_voice": { "message": "Voz de lectura" },
+  "options_tts_lang": { "message": "Idioma de la voz" },
   "options_tts_default": { "message": "Voz predeterminada" },
   "options_tts_listen": { "message": "Escuchar" },
   "options_tts_voice_hint": {
-    "message": "Selecciona la voz para leer frases y artículos. Solo se ofrecen voces que hablan sin conexión: la voz se genera en este dispositivo y no se envía nada a internet."
+    "message": "Selecciona, para cada idioma, la voz para leer frases y artículos. Solo se ofrecen voces que hablan sin conexión: la voz se genera en este dispositivo y no se envía nada a internet."
   },
   "speech_no_offline_voice": { "message": "Este dispositivo no tiene una voz sin conexión para este idioma." },
   "options_tts_rate": { "message": "Velocidad de lectura" },

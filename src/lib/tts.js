@@ -219,6 +219,45 @@ export function canSpeakLang(lang) {
 }
 
 /**
+ * The languages this device reads offline: the primary subtags of its offline
+ * voices, each once, in the order the engine lists them - the settings page
+ * sorts them by their names in the reader's own language.
+ *
+ * @param {readonly VoiceLike[]} voices
+ * @returns {string[]}
+ */
+export function offlineLanguages(voices) {
+  /** @type {Set<string>} */
+  const languages = new Set();
+  for (const voice of voices) {
+    if (!offline(voice)) continue;
+    const language = primaryLanguage(voice.lang);
+    if (language !== "") languages.add(language);
+  }
+  return [...languages];
+}
+
+/**
+ * Which language the settings page's voice row is about (D155): the one
+ * picked on the page while it is on offer, else the pair's source language
+ * (translation on means reading in it), else a language a voice was already
+ * chosen for (the reader's Aa panel chooses per article, and a fresh install
+ * without a pair has read something before it opens the settings), else the
+ * language the extension itself speaks, else the first on offer. Null only
+ * with nothing on offer at all.
+ *
+ * @param {readonly string[]} offered primary subtags, the row's choices
+ * @param {{ picked: string | null, source: string | null, stored: readonly string[], ui: string }} of
+ * @returns {string | null}
+ */
+export function voiceLanguage(offered, of) {
+  for (const candidate of [of.picked, of.source, ...of.stored, of.ui]) {
+    if (candidate !== null && offered.includes(candidate)) return candidate;
+  }
+  return offered[0] ?? null;
+}
+
+/**
  * The utterance this module is playing, if any. Ours and only ours, because
  * the queue behind `speechSynthesis` is shared with the page being read and
  * `cancel()` flushes all of it: `stop` may only ever fire while this is set,

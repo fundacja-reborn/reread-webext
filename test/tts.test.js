@@ -6,12 +6,14 @@ import {
   canSpeakLang,
   chosenVoice,
   offlineAvailable,
+  offlineLanguages,
   offlineVoice,
   primaryLanguage,
   setSpeechOff,
   speak,
   speechSupported,
   stop,
+  voiceLanguage,
   voicesFor,
 } from "../src/lib/tts.js";
 
@@ -163,6 +165,42 @@ describe("offlineVoice", () => {
   it("answers null where nothing offline reads the language, and where nothing is listed", () => {
     assert.equal(offlineVoice(device, "uk", undefined), null);
     assert.equal(offlineVoice([], "en", "urn:alice"), null);
+  });
+});
+
+describe("offlineLanguages", () => {
+  it("names each language of the offline voices once, and none of the network ones", () => {
+    const device = [
+      voice("Alice", "en-US"),
+      voice("Brian", "en_GB"),
+      voice("Zosia", "pl-PL"),
+      voice("Google Deutsch", "de-DE", "urn:google", REMOTE),
+    ];
+    assert.deepEqual(offlineLanguages(device).sort(), ["en", "pl"]);
+    assert.deepEqual(offlineLanguages([]), []);
+  });
+});
+
+describe("voiceLanguage", () => {
+  const offered = ["de", "en", "pl"];
+
+  it("follows the pick made on the page while it is on offer", () => {
+    assert.equal(voiceLanguage(offered, { picked: "de", source: "en", stored: [], ui: "pl" }), "de");
+    // A pick the device no longer offers (a language pack removed) is no pick.
+    assert.equal(voiceLanguage(offered, { picked: "uk", source: "en", stored: [], ui: "pl" }), "en");
+  });
+
+  it("stands on the pair's source language, else on a language a voice was chosen for", () => {
+    assert.equal(voiceLanguage(offered, { picked: null, source: "en", stored: ["de"], ui: "pl" }), "en");
+    // A fresh install without a pair, whose reader has already chosen a voice
+    // for the articles it read (D155): that language, not the interface's.
+    assert.equal(voiceLanguage(offered, { picked: null, source: null, stored: ["de"], ui: "pl" }), "de");
+  });
+
+  it("falls back to the interface's language, then to the first on offer", () => {
+    assert.equal(voiceLanguage(offered, { picked: null, source: null, stored: [], ui: "pl" }), "pl");
+    assert.equal(voiceLanguage(offered, { picked: null, source: null, stored: ["uk"], ui: "fr" }), "de");
+    assert.equal(voiceLanguage([], { picked: null, source: null, stored: [], ui: "en" }), null);
   });
 });
 

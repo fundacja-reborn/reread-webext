@@ -616,6 +616,13 @@ button.model-delete {
   min-width: 0;
 }
 
+/* The language before it keeps to its content - a language's name is short -
+   and gives way last. */
+#tts-lang {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
 /* --- the fresh-install signpost --- */
 
 /* The note's frame, the page's full color - it is instructions to act on, not
