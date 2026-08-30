@@ -62,12 +62,14 @@ const FIREFOX_STYLE_SRC = "style-src 'self'";
 
 /**
  * What each package carries beyond the shared files - exactly the icons its
- * manifest or its code names, because an unreferenced file in a package anyone
- * may audit is a question with no good answer, and a referenced file missing
- * from it is a console full of ERR_FILE_NOT_FOUND. Firefox reads the SVG mark
- * and its theme variants; Chromium gets the rasters, including the
- * dark-toolbar pair that only `action.setIcon` ever names (see
- * `src/lib/theme-icon.js` - the test suite holds the two lists together).
+ * manifest, its code or its pages name, because an unreferenced file in a
+ * package anyone may audit is a question with no good answer, and a referenced
+ * file missing from it is a console full of ERR_FILE_NOT_FOUND. Firefox reads
+ * the SVG mark and its theme variants; Chromium gets the rasters, including
+ * the dark-toolbar pair that only `action.setIcon` ever names (see
+ * `src/lib/theme-icon.js` - the test suite holds the two lists together),
+ * and the SVG mark as well, because the pages name it as their tab icon
+ * (`test/tab-icon.test.js`).
  *
  * Lives here rather than in `build.mjs` so tests can assert on it: importing
  * the build script would run a build.
@@ -87,6 +89,12 @@ export const TARGET_STATIC_FILES = {
     "assets/icons/icon-128.png",
     "assets/icons/icon-light-16.png",
     "assets/icons/icon-light-32.png",
+    // The tab icon the pages name in <link rel="icon">, one HTML for every
+    // target. Chrome would give a page of an extension the manifest's icon on
+    // its own; the link is there for Firefox, which has no such rule - and a
+    // link to a file the package does not carry is ERR_FILE_NOT_FOUND in the
+    // extension's error panel.
+    "assets/icons/icon.svg",
     "offscreen/engine-host.html",
   ],
   // Safari reads the SVG mark (the S0 spike showed it rendered in the iPadOS
