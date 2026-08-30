@@ -225,7 +225,7 @@
     "placeholders": { "size": { "content": "$1", "example": "4.2 MB" } }
   },
   "reader_pictures_hint": {
-    "message": "Downloaded once from the article's own servers, without cookies, and kept with the article on this device."
+    "message": "Downloaded once from the article's own servers, without cookies, and kept with the article on this device. After the download they are shown in the article."
   },
   "reader_pictures_progress": {
     "message": "Picture $DONE$ of $OF$ - $SIZE$",

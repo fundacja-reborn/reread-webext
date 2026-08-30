@@ -231,7 +231,7 @@
     "placeholders": { "size": { "content": "$1", "example": "4,2 MB" } }
   },
   "reader_pictures_hint": {
-    "message": "Pobierane raz z serwerów artykułu, bez ciasteczek, i zapisywane razem z artykułem na tym urządzeniu."
+    "message": "Pobierane raz z serwerów artykułu, bez ciasteczek, i zapisywane razem z artykułem na tym urządzeniu. Po pobraniu są wyświetlane w artykule."
   },
   "reader_pictures_progress": {
     "message": "Obrazek $DONE$ z $OF$ - $SIZE$",
