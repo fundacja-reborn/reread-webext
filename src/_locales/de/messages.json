@@ -18,7 +18,7 @@
   "nav_menu": { "message": "Menü" },
   "language_pair": { "message": "Sprachpaar" },
   "reading_list": { "message": "Offline-Leseliste" },
-  "private_browsing_note": { "message": "Sie sind im privaten Modus. re/read sieht hier eine eigene, leere Datenbank, die der Browser am Ende der privaten Sitzung verwirft: Nichts von dem, was Sie gespeichert haben, wird hier angezeigt, und was Sie hier speichern oder importieren, bleibt nicht erhalten. Öffnen Sie re/read in einem normalen Tab - dort ist alles da." },
+  "private_browsing_note": { "message": "Sie sind im privaten Modus. Der Browser verwendet hier für re/read eine eigene, leere Datenbank und löscht sie am Ende der privaten Sitzung: Nichts von dem, was Sie gespeichert haben, ist hier, und was Sie hier speichern oder importieren, bleibt nicht erhalten. Öffnen Sie re/read in einem normalen Tab - dort ist alles da." },
   "saved_phrases": { "message": "Gespeicherter Wortschatz" },
   "open_reader": { "message": "Diese Seite in der Leseansicht lesen" },
   "quiet_bubble": { "message": "Aktionen der Sprechblase standardmäßig ausblenden" },
