@@ -64,6 +64,10 @@ The same package works on Android, same version floor. The popup opens from the 
 
 On a phone the extension starts in **reader-only mode**: ordinary pages are left alone, and selecting text offers one action - opening the page in the reader, where translation, saving and underlining work as usual. The reason: the translation bubble and Android's own copy menu compete for the same spot on screen. The mode is a regular setting (**Only in the reader**) and can be switched off for the full desktop behaviour.
 
+**Getting to the reading list.** Press and hold on the text of any page and choose **Offline reading list** in the bubble, or open the popup (⋮ menu, **Extensions**, re/read). For a one-tap door, open the reading list and choose **Add to shortcuts** in the Firefox menu: a tile on Firefox's start page - the page a new tab opens with - then leads straight to it; a bookmark to the reading list page works the same way. **Add to Home screen** does not work for any extension's pages: the shortcut on the phone's home screen either never appears or says the app is not installed. That is a Firefox for Android limitation ([bug 1875695](https://bugzilla.mozilla.org/show_bug.cgi?id=1875695), open since 2024) - Firefox accepts only `http` and `https` addresses in home-screen shortcuts - and not something an extension can change. The tile and the bookmark keep the extension's internal address, which survives updates but not a reinstall.
+
+**Private tabs.** In a private tab the extension's pages - reading list, reader, saved phrases - look at a separate, empty database that Firefox discards when the private session ends: the reading list shows nothing, and an article saved or a book imported there disappears with the session. Nothing is lost - the database of your normal tabs is untouched - so if the list is suddenly empty, check that the tab is not private (Firefox shows a mask icon in private mode) and open re/read from a normal tab again.
+
 ## Keyboard shortcuts
 
 | Key | Where | Action |
