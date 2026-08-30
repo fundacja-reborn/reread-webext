@@ -186,7 +186,7 @@
     "placeholders": { "size": { "content": "$1", "example": "4,2 MB" } }
   },
   "reader_pictures_hint": {
-    "message": "Téléchargées une fois depuis les serveurs de l'article, sans cookies, et conservées avec l'article sur cet appareil."
+    "message": "Téléchargées une fois depuis les serveurs de l'article, sans cookies, et conservées avec l'article sur cet appareil. Une fois téléchargées, elles sont affichées dans l'article."
   },
   "reader_pictures_progress": {
     "message": "Image $DONE$ sur $OF$ - $SIZE$",

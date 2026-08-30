@@ -216,34 +216,6 @@
         <span class="row-name" data-i18n="options_engine">Engine</span>
         <span class="row-value" data-i18n="options_engine_value">Bergamot, inside the package - translates offline</span>
       </div>
-      <!-- What the browser holds for this extension and whether it has
-           promised to keep it. The size is everything at once - models,
-           dictionaries, the reading list, the phrases - and the note under
-           it is the one place the extension says out loud that a browser
-           may clear an origin's storage on its own: on WebKit a refused
-           persistence is exactly that risk (`lib/storage-report.js`). -->
-      <div class="row row-stack row-storage">
-        <span class="row-name" data-i18n="options_storage">Data on this device</span>
-        <span class="row-value" id="storage-usage"></span>
-        <!-- What the size measures, because the lists above it measure
-             something else: the dictionaries' list says what their text
-             weighs, and on disk a dictionary is one database row per word
-             and per other spelling (`lib/dict/store.js`) - measured on a
-             145 MB dictionary, 705 MB of database. -->
-        <p class="row-note" data-fold data-i18n="options_storage_how">
-          Disk space used by the extension. Dictionaries take up more space than their file size
-          because of the database structure. Deleting an article or book completely removes its
-          text, images, highlights, notes and reading progress.
-        </p>
-        <p class="row-note" id="storage-note" hidden></p>
-        <!-- The copy of the vocabulary that outlives the database
-             (`lib/store/backup.js`): how many phrases it holds and since when,
-             or that there is none yet. Said everywhere, because it is true
-             everywhere; on WebKit it is also the answer to the note above. -->
-        <p class="row-note" id="storage-backup"></p>
-        <p class="row-note" id="storage-marks-backup"></p>
-        <p class="row-note" id="storage-library-copy"></p>
-      </div>
       <!-- The reading-aloud switch (D148), the head of the two voice rows
            under it: off, the speaker leaves the bubble and every list, the
            Read-aloud button leaves the reader, and the two rows fold away
@@ -340,23 +312,6 @@
           or disappears.
         </p>
       </div>
-      <!-- The copy of the reading list that outlives the database
-           (`lib/store/library-backup.js`). On unasked only where the browser
-           may delete the database on its own - iOS and iPadOS - and a choice
-           everywhere, because it doubles the space the reading list takes.
-           Turning it on builds the copy from the whole list; turning it off
-           removes it; the storage row above says what it holds. -->
-      <div class="row">
-        <label class="row-toggle">
-          <span class="row-name" data-i18n="options_library_copy">Copy of the reading list</span>
-          <input type="checkbox" id="library-copy" />
-        </label>
-        <p class="row-note" data-fold data-i18n="options_library_copy_hint">
-          Creates a backup of your reading list to protect it against automatic browser cleanups
-          and database errors. This doubles the disk space the list takes, but keeps your saved
-          articles safe if the database is lost.
-        </p>
-      </div>
       <!-- `translation-only`: the trimmed bubble ignores the fold - its two
            buttons are its whole content - so with translation off this switch
            would move nothing (D120). -->
@@ -386,6 +341,54 @@
         <p class="row-note" data-fold data-i18n="options_bubble_scale_hint">
           Adjusts the text and button size inside the translation bubble across all pages.
         </p>
+      </div>
+      <!-- The copy of the reading list that outlives the database
+           (`lib/store/library-backup.js`). On unasked only where the browser
+           may delete the database on its own - iOS and iPadOS - and a choice
+           everywhere, because it doubles the space the reading list takes.
+           Turning it on builds the copy from the whole list; turning it off
+           removes it; the storage row under it says what it holds. -->
+      <div class="row">
+        <label class="row-toggle">
+          <span class="row-name" data-i18n="options_library_copy">Copy of the reading list</span>
+          <input type="checkbox" id="library-copy" />
+        </label>
+        <p class="row-note" data-fold data-i18n="options_library_copy_hint">
+          Creates a backup of your reading list to protect it against automatic browser cleanups
+          and database errors. This doubles the disk space the list takes, but keeps your saved
+          articles safe if the database is lost.
+        </p>
+      </div>
+      <!-- What the browser holds for this extension and whether it has
+           promised to keep it. The last row, because it is a report on the
+           choices above it rather than a choice (Michał, 2026-08-30), with
+           the copy switch right over the line that answers for it. The size
+           is everything at once - models, dictionaries, the reading list,
+           the phrases - and the note under it is the one place the extension
+           says out loud that a browser may clear an origin's storage on its
+           own: on WebKit a refused persistence is exactly that risk
+           (`lib/storage-report.js`). -->
+      <div class="row row-stack row-storage">
+        <span class="row-name" data-i18n="options_storage">Data on this device</span>
+        <span class="row-value" id="storage-usage"></span>
+        <!-- What the size measures, because the lists below it measure
+             something else: the dictionaries' list says what their text
+             weighs, and on disk a dictionary is one database row per word
+             and per other spelling (`lib/dict/store.js`) - measured on a
+             145 MB dictionary, 705 MB of database. -->
+        <p class="row-note" data-fold data-i18n="options_storage_how">
+          Disk space used by the extension. Dictionaries take up more space than their file size
+          because of the database structure. Deleting an article or book completely removes its
+          text, images, highlights, notes and reading progress.
+        </p>
+        <p class="row-note" id="storage-note" hidden></p>
+        <!-- The copy of the vocabulary that outlives the database
+             (`lib/store/backup.js`): how many phrases it holds and since when,
+             or that there is none yet. Said everywhere, because it is true
+             everywhere; on WebKit it is also the answer to the note above. -->
+        <p class="row-note" id="storage-backup"></p>
+        <p class="row-note" id="storage-marks-backup"></p>
+        <p class="row-note" id="storage-library-copy"></p>
       </div>
     </div>
 
