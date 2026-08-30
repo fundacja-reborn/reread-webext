@@ -29,6 +29,7 @@ import {
   writeConfig,
 } from "../lib/config.js";
 import { aside, localizePage, megabytes, plural, t, uiLocale } from "../lib/i18n.js";
+import { privateNote } from "../lib/private-note.js";
 import { armBackArrow } from "../lib/back-arrow.js";
 import { languageName, pairLabel } from "../lib/language.js";
 import { catalogDictionaries, catalogSource } from "../lib/dict/catalog.js";
@@ -109,6 +110,10 @@ let running = null;
 // First, so every row and status below lands on a page already speaking the
 // catalogue's language.
 localizePage();
+// Then the private-browsing sentence, when this page runs in one: what an
+// empty list would otherwise say wrongly, said first and in the catalogue's
+// words (`private-note.js`).
+privateNote();
 // Then the descriptions fold (D155) - after the catalogue's text is in them,
 // because whether a note overflows its two lines is a question about the
 // text it has now.

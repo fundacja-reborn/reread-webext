@@ -225,6 +225,12 @@
         <a href="#transfer" data-i18n="transfer_heading">Import and export</a>
       </div>
     </header>
+    <!-- What a private window sees (`private-note.js`): its own, empty
+         database, gone with the session. Filled and shown by script only
+         there; hidden everywhere else. First on the page, so an emptied
+         list explains itself before it is read wrongly. -->
+    <p id="private-note" class="note private-note" hidden></p>
+
 
     <!-- The filter stands alone above the list it narrows; the transfer tools
          moved into their own section below the pager. -->

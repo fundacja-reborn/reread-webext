@@ -18,6 +18,7 @@
   "nav_menu": { "message": "Menú" },
   "language_pair": { "message": "Par de idiomas" },
   "reading_list": { "message": "Lista de lectura sin conexión" },
+  "private_browsing_note": { "message": "Estás en navegación privada. Aquí re/read ve una base de datos aparte y vacía, que el navegador descarta al terminar la sesión privada: no aparece nada de lo que has guardado, y lo que guardes o importes aquí no se conserva. Abre re/read en una pestaña normal - allí está todo." },
   "saved_phrases": { "message": "Frases guardadas" },
   "open_reader": { "message": "Leer esta página en la vista de lectura" },
   "quiet_bubble": { "message": "Ocultar por defecto las acciones de la burbuja" },

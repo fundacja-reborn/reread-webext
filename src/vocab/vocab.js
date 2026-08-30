@@ -25,6 +25,7 @@ import { webext } from "../lib/browser.js";
 import { CONFIG_KEY, SIZE, TTS_RATE, chosenPair, isFont, isTheme, readConfig, writeConfig } from "../lib/config.js";
 import { holdChrome } from "../lib/chrome-hold.js";
 import { fileSize, localizePage, plural, t, uiLocale } from "../lib/i18n.js";
+import { privateNote } from "../lib/private-note.js";
 import { pairLabel } from "../lib/language.js";
 import { describeError } from "../lib/messages.js";
 import { armBackArrow } from "../lib/back-arrow.js";
@@ -49,6 +50,10 @@ import { listView, markSegments, newestFirst, pairChoicesFor } from "./list-view
 
 // First, so the static text is already the catalogue's language when it shows.
 localizePage();
+// Then the private-browsing sentence, when this page runs in one: what an
+// empty list would otherwise say wrongly, said first and in the catalogue's
+// words (`private-note.js`).
+privateNote();
 // The toolbar icon follows the browser's scheme where the manifest cannot
 // say so (Chromium, no theme_icons there) - a no-op on Firefox.
 watchToolbarScheme();

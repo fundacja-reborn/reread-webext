@@ -32,6 +32,7 @@ import { applyReading } from "../lib/appearance.js";
 import { webext } from "../lib/browser.js";
 import { holdChrome } from "../lib/chrome-hold.js";
 import { fileSize, localizePage, megabytes, plural, t } from "../lib/i18n.js";
+import { privateNote } from "../lib/private-note.js";
 import { languageName } from "../lib/language.js";
 import {
   CONFIG_KEY,
@@ -190,6 +191,10 @@ const Readability = /** @type {ReadabilityConstructor} */ (
 // First, so that everything after it - notices, rows, titles - lands on a page
 // already speaking the catalogue's language.
 localizePage();
+// Then the private-browsing sentence, when this page runs in one: what an
+// empty list would otherwise say wrongly, said first and in the catalogue's
+// words (`private-note.js`).
+privateNote();
 // The views own their scroll: the list starts at its top, a document at its
 // remembered place (D98). A browser also restoring offsets on history steps
 // (D102) would fight both - and always a beat late, over a view just rebuilt.

@@ -18,6 +18,7 @@
   "nav_menu": { "message": "Menu" },
   "language_pair": { "message": "Paire de langues" },
   "reading_list": { "message": "Liste de lecture hors ligne" },
+  "private_browsing_note": { "message": "Vous êtes en navigation privée. Ici, re/read voit une base de données séparée et vide, que le navigateur efface à la fin de la session privée : rien de ce que vous avez enregistré n'apparaît ici, et ce que vous enregistrez ou importez ici n'est pas conservé. Ouvrez re/read dans un onglet normal - tout y est." },
   "saved_phrases": { "message": "Phrases enregistrées" },
   "open_reader": { "message": "Lire cette page dans le lecteur" },
   "quiet_bubble": { "message": "Masquer par défaut les actions de la bulle" },

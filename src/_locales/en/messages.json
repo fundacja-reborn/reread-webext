@@ -25,6 +25,10 @@
   "nav_menu": { "message": "Menu" },
   "language_pair": { "message": "Language pair" },
   "reading_list": { "message": "Offline reading list" },
+  "private_browsing_note": {
+    "message": "You are in private browsing. Here re/read sees a separate, empty database that the browser discards when the private session ends: nothing you have saved shows here, and nothing saved or imported here stays. Open re/read from a normal tab - everything is there.",
+    "description": "The sentence at the top of the extension's pages (reading list, reader, highlights, saved phrases, settings) when the page runs in a private window or tab: Firefox gives it a separate, in-memory database. Never shown on Chromium, whose extension pages share one database in both modes."
+  },
   "saved_phrases": { "message": "Saved phrases" },
   "open_reader": { "message": "Read this page in the reader" },
   "quiet_bubble": {

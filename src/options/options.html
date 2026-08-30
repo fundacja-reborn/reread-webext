@@ -100,6 +100,12 @@
     <header>
       <h1 data-i18n="settings">Settings</h1>
     </header>
+    <!-- What a private window sees (`private-note.js`): its own, empty
+         database, gone with the session. Filled and shown by script only
+         there; hidden everywhere else. First on the page, so an emptied
+         list explains itself before it is read wrongly. -->
+    <p id="private-note" class="note private-note" hidden></p>
+
 
     <!-- The thesis of the whole extension, stated once, where a curious person
          goes looking for it. The notes further down say how each download is

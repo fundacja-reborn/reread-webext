@@ -18,6 +18,7 @@
   "nav_menu": { "message": "Menu" },
   "language_pair": { "message": "Para językowa" },
   "reading_list": { "message": "Czytelnia offline" },
+  "private_browsing_note": { "message": "Jesteś w trybie prywatnym. re/read widzi tu osobną, pustą bazę, którą przeglądarka kasuje po zakończeniu sesji prywatnej: nie widać tu nic z tego, co masz zapisane, a to, co tu zapiszesz albo zaimportujesz, nie zostanie. Otwórz re/read w zwykłej karcie - wszystko tam jest." },
   "saved_phrases": { "message": "Zapisane frazy" },
   "open_reader": { "message": "Przeczytaj tę stronę w widoku czytania" },
   "quiet_bubble": { "message": "Domyślnie ukrywaj akcje w dymku" },
