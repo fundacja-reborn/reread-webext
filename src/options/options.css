@@ -282,6 +282,19 @@ button.note-toggle {
   transition: none;
 }
 
+/* A note that fits its two lines shows no chevron - but keeps the chevron's
+   column. The verdict is measured on the note, and a column that came and
+   went with the verdict moved the note's width, which re-measured the note
+   in the same frame: the "ResizeObserver loop" Chrome lists among the
+   extension's errors. So every note wraps at the same edge whatever the
+   verdict, and the button only stops being drawn - and, undrawn, stops
+   asking for its two lines of height, so a short note keeps its own. */
+.note-fold:not([data-long]) > .note-toggle {
+  visibility: hidden;
+  height: 0;
+  min-height: 0;
+}
+
 .note-toggle:hover,
 .note-toggle:focus-visible {
   border-color: var(--page-border);

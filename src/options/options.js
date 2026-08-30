@@ -526,8 +526,13 @@ function renderVoice() {
  * and a screen reader get, and it stands only where the text really overflows
  * its two lines - measured, and measured again whenever the note's size moves
  * (a resize, a row shown by a switch, a font arriving), because a chevron over
- * a note that fits promises more where there is none. Screen readers hear the
- * whole text either way: the fold is a clip, not a removal.
+ * a note that fits promises more where there is none. The verdict must not
+ * move what it measures: the chevron's column stays whether the chevron is
+ * drawn or not (`.note-toggle` in options.css), so the note is as wide after
+ * the verdict as before it - a chevron that took its column only when needed
+ * narrowed the note, which re-measured it in the same frame, and Chrome
+ * reported the ResizeObserver loop as an error of the extension. Screen
+ * readers hear the whole text either way: the fold is a clip, not a removal.
  */
 function foldNotes() {
   const chevron = document.getElementById("note-chevron");
@@ -552,7 +557,6 @@ function foldNotes() {
 
     const toggle = element("button", "note-toggle");
     toggle.setAttribute("type", "button");
-    toggle.hidden = true;
     toggle.setAttribute("aria-expanded", "false");
     toggle.setAttribute("aria-controls", note.id);
     toggle.setAttribute("aria-label", t("options_note_more"));
@@ -576,8 +580,10 @@ function foldNotes() {
 }
 
 /**
- * Whether a folded note holds more than its two lines show, and the chevron
- * with it. An open note is left alone - it is judged again when it folds.
+ * Whether a folded note holds more than its two lines show. The box's
+ * `data-long` is the whole verdict - the stylesheet draws the chevron and
+ * turns the pointer on it, and nothing here changes a size the observer
+ * watches. An open note is left alone - it is judged again when it folds.
  *
  * @param {Element} note
  */
@@ -587,8 +593,6 @@ function judgeFold(note) {
   const long = note.scrollHeight > note.clientHeight + 1;
   if (long) box.dataset["long"] = "";
   else delete box.dataset["long"];
-  const toggle = box.querySelector(".note-toggle");
-  if (toggle instanceof HTMLElement) toggle.hidden = !long;
 }
 
 /**
