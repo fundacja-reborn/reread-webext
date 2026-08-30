@@ -59,6 +59,13 @@ interface WebExtBrowser {
     // why the background publishes the answer to storage (`PLATFORM_KEY`).
     getPlatformInfo(): Promise<{ os: string }>;
   };
+  // Whether this page sits in a private window or tab. Firefox gives an
+  // extension page there its own storage partition - an IndexedDB in memory,
+  // empty, gone with the private session - while the background keeps the
+  // real one; the pages say so at their top (`private-note.js`). Optional:
+  // Chromium's extension pages share one database in both modes and answer
+  // false, which is the right answer there. Needs no permission.
+  extension?: { inIncognitoContext: boolean };
   storage: {
     local: {
       get(keys?: string | string[] | null): Promise<Record<string, unknown>>;

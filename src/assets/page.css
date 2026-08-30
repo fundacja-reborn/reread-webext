@@ -284,6 +284,13 @@ input[type="checkbox"] {
   font-size: 0.85rem;
 }
 
+/* The private-browsing sentence (`private-note.js`) stands first on its page,
+   so it wears the note's frame without the note's distance from what came
+   before it - nothing did. */
+.note.private-note {
+  margin: 0 0 1.5rem;
+}
+
 a {
   color: var(--page-accent);
 }

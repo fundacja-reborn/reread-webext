@@ -56,3 +56,19 @@ export function offscreenApi() {
 export function commandsApi() {
   return webext().commands ?? null;
 }
+
+/**
+ * Whether this page sits in a private window or tab. It matters because the
+ * pages open their databases themselves, and Firefox gives an extension page
+ * in a private window its own storage partition: an IndexedDB in memory,
+ * empty, and discarded with the private session - while the background,
+ * never private, keeps the real one. Chromium keeps extension pages out of
+ * the incognito process in its default ("spanning") mode, so they share one
+ * database in both modes and answer false here, which is the right answer.
+ * Needs no permission; false on a browser that never says.
+ *
+ * @returns {boolean}
+ */
+export function inPrivateContext() {
+  return webext().extension?.inIncognitoContext === true;
+}
