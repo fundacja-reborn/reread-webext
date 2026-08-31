@@ -828,7 +828,18 @@
   "reader_marks_missing_doc": { "message": "Su documento ya no está guardado - esta cita volvió de la copia. Abre la página de nuevo y el resaltado estará ahí." },
   "options_pair_hint": { "message": "Muestra los pares de idiomas descargados en este dispositivo. Para añadir nuevos idiomas, descárgalos en la sección" },
   "options_pair_hint_rest": { "message": "de abajo." },
-  "options_pair_none": { "message": "Aún no hay modelo - descarga uno abajo" },
+  "options_pair_none": { "message": "Aún no hay modelo ni diccionario - añade uno abajo" },
+  "options_pair_dictionary_only": {
+    "message": "$PAIR$ (diccionario)",
+    "placeholders": { "pair": { "content": "$1", "example": "inglés → inglés" } }
+  },
+  "options_pair_hint_quiet": {
+    "message": "Con la traducción desactivada, el par indica en qué idioma lees y dónde se guardan las frases. Los pares vienen de los modelos y diccionarios instalados."
+  },
+  "options_reading_pair_quiet": {
+    "message": "Lees en $FROM$ - la traducción está desactivada y las frases guardadas pertenecen a este par.",
+    "placeholders": { "from": { "content": "$1", "example": "inglés" } }
+  },
   "options_reader_only": { "message": "Solo en la vista de lectura" },
   "options_reader_only_hint": {
     "message": "Limita la traducción a la vista de lectura. Seleccionar texto en una página web normal solo mostrará la opción de abrirla en la vista de lectura. En Android e iOS la opción está activada de forma predeterminada."

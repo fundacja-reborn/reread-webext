@@ -51,12 +51,15 @@ describe("where the bubble's actions start", () => {
   it("hands the setting to every opening that has a row to fold", async () => {
     const source = await readFile(new URL("reading.js", ROOT), "utf8");
     const calls = openings(source);
-    assert.equal(calls.length, 3, "the reading side opens the bubble somewhere new");
+    // Four: recall, the translating fresh selection, and the trim's two -
+    // without a vocabulary (D120) and with one (D158, the quiet pair).
+    assert.equal(calls.length, 4, "the reading side opens the bubble somewhere new");
 
     for (const call of calls) {
-      // The trimmed bubble (D120) is the standing exception: with no gloss,
-      // the speaker and the clipboard are the bubble's whole content, and a
-      // row folded away would leave it empty.
+      // The trimmed bubbles (D120, D158) are the standing exception: no
+      // gloss to stand in front of the row, and in the quiet pair's bubble
+      // Save is the point - a Save may never hide (D131), and a row folded
+      // away would leave the trimmed bubble empty.
       if (call.includes('variant: "quiet"')) continue;
       assert.match(
         call,
