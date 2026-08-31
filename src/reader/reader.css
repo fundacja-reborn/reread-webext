@@ -80,7 +80,7 @@
 body.reader {
   max-width: var(--reader-measure, 65ch);
   padding-top: 0.75rem;
-  font-family: Georgia, "Iowan Old Style", "Times New Roman", serif;
+  font-family: var(--reader-font-lead, var(--reader-font-stack));
   font-size: var(--reader-size, 18px);
   line-height: 1.65;
 }
@@ -95,10 +95,6 @@ body.reader {
 body.reader[data-view="list"],
 body.reader[data-view="marks"] {
   max-width: var(--reader-measure-pinned, 65ch);
-}
-
-:root[data-reader-font="sans"] body.reader {
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
 /* Focus must be findable on every control here, in every theme - the list's
@@ -245,6 +241,68 @@ body.reader:has(#article:not([hidden])) .reader-chrome {
 body.reader:not(:has(#article:not([hidden]))):has(.panel-scrim:not([hidden])) .reader-chrome {
   position: sticky;
   top: var(--chrome-hold, 0px);
+}
+
+/* The bookmark tab (Michał's design, after a mobileread request asked for a
+   way to minimize the bar): a ribbon hanging off the bar's far edge, the one
+   hand on the bar's visibility. Absolute, so the ribbon never adds to the
+   chrome's height - `chromeFold` keeps measuring the bar alone, and with
+   the bar folded it honestly measures next to nothing. Only a press ever
+   moves it: the bar never hides on a scroll (D93 - on e-ink a bar that
+   moved would flash), so each flip is one deliberate repaint. */
+.chrome-tab {
+  position: absolute;
+  top: 100%;
+  inset-inline-end: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.4rem;
+  height: 1.25rem;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--page-line);
+  border-top: none;
+  border-radius: 0 0 7px 7px;
+  background: var(--page-bg);
+  color: var(--page-muted);
+  cursor: pointer;
+}
+
+/* A ribbon-sized picture is not a finger-sized target: the halo grows the
+   press without growing the ribbon. */
+.chrome-tab::before {
+  content: "";
+  position: absolute;
+  inset: -0.5rem;
+}
+
+.chrome-tab:hover {
+  color: var(--page-fg);
+  border-color: var(--page-border);
+}
+
+.chrome-tab-icon {
+  width: 0.85em;
+  height: 0.85em;
+}
+
+/* Folded away (the stored choice, stamped by `applyAppearance`): everything
+   in the chrome goes but the ribbon, which stays stuck at the window's top
+   edge with its chevron turned to say "pull out". Scoped to the article
+   view the way the stuck bar is - the list always keeps its whole chrome.
+   The chrome's padding goes too: an empty strip of paper stuck over the
+   text would be the bar's ghost. */
+:root[data-reader-chrome="hidden"] body.reader:has(#article:not([hidden])) .reader-chrome {
+  padding-top: 0;
+}
+
+:root[data-reader-chrome="hidden"] body.reader:has(#article:not([hidden])) .reader-chrome > :not(.chrome-tab) {
+  display: none;
+}
+
+:root[data-reader-chrome="hidden"] body.reader:has(#article:not([hidden])) .chrome-tab-icon {
+  transform: rotate(180deg);
 }
 
 /* The strip's paper runs edge to edge while everything visible keeps the
@@ -479,6 +537,21 @@ html {
   color: var(--page-muted);
   font-variant-numeric: tabular-nums;
   text-align: center;
+}
+
+/* The typed font's field, in the panel's own quiet dress: the interface
+   face and size, page tokens for the frame - and it grows to the room the
+   row has, because font names run long ("Iowan Old Style"). */
+.reader-font-custom {
+  flex: 1 1 8rem;
+  min-width: 0;
+  padding: 0.2rem 0.5rem;
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--page-fg);
+  background: transparent;
+  border: 1px solid var(--page-border);
+  border-radius: 6px;
 }
 
 /* The highlighter's inks as themselves (D106): each swatch is the actual
@@ -1120,14 +1193,10 @@ body.reader:has(#library:not([hidden])) {
   background: none;
   color: var(--page-fg);
   text-align: start;
-  font-family: Georgia, "Iowan Old Style", "Times New Roman", serif;
+  font-family: var(--reader-font-lead, var(--reader-font-stack));
   font-size: var(--reader-size, 18px);
   line-height: 1.45;
   overflow-wrap: anywhere;
-}
-
-:root[data-reader-font="sans"] .library-open {
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
 /* The whole text cell opens the article, not just the words of the title. */

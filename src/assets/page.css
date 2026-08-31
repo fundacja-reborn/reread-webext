@@ -84,6 +84,24 @@
   --page-error: #a3341f;
 }
 
+/* The two hands on the content typeface (the article, the reading list's
+   titles, the saved phrases): the Aa panel's serif/sans pair picks which
+   preset stack this variable holds, and a font the reader typed the name of
+   rides in front of it - `--reader-font-lead` is written by
+   `lib/appearance.js` as either the stack alone or `"Name", ` the stack, so
+   the presets stay the fallback for every character the named font lacks.
+   Here and not in reader.css, because the saved phrases wear the content
+   face too and never load that sheet. Use as
+   `font-family: var(--reader-font-lead, var(--reader-font-stack))` - the
+   fallback covers a page nothing has dressed yet. */
+:root {
+  --reader-font-stack: Georgia, "Iowan Old Style", "Times New Roman", serif;
+}
+
+:root[data-reader-font="sans"] {
+  --reader-font-stack: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
 * {
   box-sizing: border-box;
 }

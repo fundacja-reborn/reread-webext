@@ -195,6 +195,37 @@
         </span>
       </header>
 
+      <!-- The bookmark tab (Michał's design, after a mobileread request): a
+           ribbon hanging off the bar's far edge, the one hand on the bar's
+           visibility. A press folds the bar away and leaves the ribbon; a
+           press on the ribbon brings it back. Never a scroll - D93 stands:
+           on e-ink a bar that moved would flash, and a deliberate press is
+           one repaint. Article view only, like the pen - the list keeps its
+           whole chrome (reader.js shows it per view, the stylesheet folds
+           within the same scope). -->
+      <button
+        type="button"
+        id="chrome-tab"
+        class="chrome-tab"
+        aria-expanded="true"
+        title="Hide the bar"
+        data-i18n-title="reader_bar_hide"
+        aria-label="Hide the bar"
+        data-i18n-aria-label="reader_bar_hide"
+        hidden
+      >
+        <svg class="chrome-tab-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <path
+            d="M4 9.8 8 6l4 3.8"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.3"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </button>
+
       <!--
         Written out here rather than built by script: what the reader can change
         about its own appearance is a short, fixed list, and a list is easier to
@@ -223,6 +254,28 @@
             <button type="button" data-font="serif" data-i18n="reader_font_serif">Serif</button>
             <button type="button" data-font="sans" data-i18n="reader_font_sans">Sans</button>
           </span>
+        </div>
+
+        <!--
+          A font the reader types the name of (mobileread request): the name
+          leads the chosen preset's stack, and the presets stay the fallback
+          for whatever the named font lacks. A field and not a list, because
+          enumerating installed fonts is a permission and a fingerprint
+          (queryLocalFonts, Chromium-only) - a typed name costs nothing and
+          works in every browser. Empty means the presets alone.
+        -->
+        <div class="reader-setting">
+          <label class="reader-setting-name" for="font-custom" data-i18n="reader_font_custom">Own font</label>
+          <input
+            id="font-custom"
+            class="reader-font-custom"
+            type="text"
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck="false"
+            placeholder="Font name"
+            data-i18n-placeholder="reader_font_custom_hint"
+          />
         </div>
 
         <div class="reader-setting">

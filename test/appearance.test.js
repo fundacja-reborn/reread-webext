@@ -49,9 +49,34 @@ describe("applyReading", () => {
     applyReading(root, { ...READER_DEFAULTS, theme: "dark", font: "sans", fontSize: 21 });
     assert.equal(root.dataset["readerTheme"], "dark");
     assert.equal(root.dataset["readerFont"], "sans");
-    assert.deepEqual(root.properties, { "--reader-size": "21px" });
+    assert.deepEqual(root.properties, {
+      "--reader-size": "21px",
+      "--reader-font-lead": "var(--reader-font-stack)",
+    });
     // The column's measure and the links mode are the reader page's own; a
     // list page handed them here by mistake must not start wearing them.
     assert.equal(root.dataset["readerLinks"], undefined);
+  });
+
+  it("puts a typed font in front of the stack, quoted", () => {
+    // The name arrives clean from the config (quotes and control characters
+    // already out), so the quoting here is just quoting - and the preset
+    // stack stays behind it for every character the named font lacks.
+    const root = fakeRoot();
+    applyReading(root, { ...READER_DEFAULTS, fontFamily: "Iowan Old Style" });
+    assert.equal(
+      root.properties["--reader-font-lead"],
+      '"Iowan Old Style", var(--reader-font-stack)',
+    );
+  });
+
+  it("hands the property back to the stack when the field empties", () => {
+    // Always written, never removed: RootLike has no removeProperty, and a
+    // stale lead surviving an emptied field would be a setting that cannot
+    // be undone.
+    const root = fakeRoot();
+    applyReading(root, { ...READER_DEFAULTS, fontFamily: "Atkinson Hyperlegible" });
+    applyReading(root, READER_DEFAULTS);
+    assert.equal(root.properties["--reader-font-lead"], "var(--reader-font-stack)");
   });
 });

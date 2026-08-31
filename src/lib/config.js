@@ -20,6 +20,21 @@ export const CONFIG_KEY = "config";
  * @typedef {object} ReaderConfig
  * @property {"auto" | "light" | "sepia" | "dark"} theme `auto` follows the browser.
  * @property {"serif" | "sans"} font
+ * @property {string} fontFamily A font the reader typed the name of, leading
+ *   the chosen preset's stack - the presets stay the fallback for every
+ *   character the named font lacks. Empty means the presets alone, which is
+ *   the extension as it has always been. A name and never an enumeration:
+ *   asking the browser for the installed fonts is a permission and a
+ *   fingerprint (`queryLocalFonts` is also Chromium-only), while a typed name
+ *   costs nothing and works everywhere (mobileread request). Stored clean -
+ *   quotes, backslashes and control characters out, length capped - so the
+ *   stylesheet side can quote it without looking inside.
+ * @property {boolean} chromeHidden Whether the reader's bar is folded away
+ *   behind its bookmark tab (the ribbon at the bar's far edge). A press on
+ *   the tab flips it; nothing else does - the bar never hides on a scroll
+ *   (D93: a bar that moved would flash on e-ink). Stored because the point
+ *   is a lasting choice about the reading surface, not a per-article whim
+ *   (mobileread request, the tab is Michał's design).
  * @property {number} fontSize In pixels.
  * @property {number} measure Column width in characters.
  * @property {"active" | "plain"} links Whether links in the article text answer
@@ -204,6 +219,8 @@ export const TTS_RATE = Object.freeze({ min: 50, max: 200, step: 10 });
 export const READER_DEFAULTS = Object.freeze({
   theme: "auto",
   font: "serif",
+  fontFamily: "",
+  chromeHidden: false,
   fontSize: 18,
   measure: 65,
   links: "plain",
@@ -309,11 +326,34 @@ function readerWithDefaults(stored) {
   return {
     theme: isTheme(raw["theme"]) ? raw["theme"] : READER_DEFAULTS.theme,
     font: isFont(raw["font"]) ? raw["font"] : READER_DEFAULTS.font,
+    fontFamily: cleanFontFamily(raw["fontFamily"]),
+    chromeHidden: raw["chromeHidden"] === true,
     fontSize: within(raw["fontSize"], SIZE, READER_DEFAULTS.fontSize),
     measure: within(raw["measure"], MEASURE, READER_DEFAULTS.measure),
     links: isLinks(raw["links"]) ? raw["links"] : READER_DEFAULTS.links,
     markerColor: isMarkColor(raw["markerColor"]) ? raw["markerColor"] : READER_DEFAULTS.markerColor,
   };
+}
+
+/** More than any real font's name, less than an essay in the settings file. */
+const FONT_FAMILY_LIMIT = 100;
+
+/**
+ * The typed font name, clean enough to quote: no quotes or backslashes to
+ * break out of the quoting, no control characters, no surrounding space, and
+ * a cap. The name goes into a stylesheet value through `style.setProperty`,
+ * which cannot execute anything - this is about the quoted string staying
+ * exactly a string, not about danger.
+ *
+ * @param {unknown} value
+ * @returns {string}
+ */
+function cleanFontFamily(value) {
+  if (typeof value !== "string") return READER_DEFAULTS.fontFamily;
+  return value
+    .replace(new RegExp('["\\\\\\u0000-\\u001f\\u007f]', "g"), "")
+    .trim()
+    .slice(0, FONT_FAMILY_LIMIT);
 }
 
 /**

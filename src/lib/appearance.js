@@ -43,6 +43,13 @@ export function applyTheme(root, theme) {
  * The content dress: paper plus typeface and text size, for pages whose rows
  * hold text being read (the reader itself, the saved phrases).
  *
+ * The typeface is two hands on one property: the serif/sans attribute picks
+ * which preset stack `--reader-font-stack` holds, and a typed font name
+ * (mobileread request) rides in front of it through `--reader-font-lead` -
+ * always set, so the stylesheets can say `var(--reader-font-lead)` and be
+ * done. The name arrives clean from the config (quotes and control
+ * characters already out), so quoting it here is just quoting.
+ *
  * @param {RootLike} root
  * @param {import("./config.js").ReaderConfig} reader
  */
@@ -50,6 +57,11 @@ export function applyReading(root, reader) {
   applyTheme(root, reader.theme);
   root.dataset["readerFont"] = reader.font;
   root.style.setProperty("--reader-size", `${reader.fontSize}px`);
+  const stack = "var(--reader-font-stack)";
+  root.style.setProperty(
+    "--reader-font-lead",
+    reader.fontFamily.length > 0 ? `"${reader.fontFamily}", ${stack}` : stack,
+  );
 }
 
 /**
