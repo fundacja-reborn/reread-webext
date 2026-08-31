@@ -877,6 +877,34 @@ html {
   cursor: auto;
 }
 
+/* Footnote marks: the one press in the prose, in both link modes - a mark
+   is not a link (nothing leaves the page, the note opens in place), so the
+   plain-text dress above must not undress it. The accent and the cursor
+   are its whole invitation; the mark's own <sup> keeps doing the raising. */
+#content a[data-note],
+:root[data-reader-links="plain"] #content a[data-note] {
+  color: var(--page-accent);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* The note itself: the pages' note dress on a floating card - the border
+   does the separating (a shadow quantizes away on e-ink), no animation,
+   opened and closed in one repaint each. It rides the document (absolute),
+   so a scroll carries note and mark together. */
+.note-popover {
+  position: absolute;
+  z-index: 3;
+  max-width: min(28rem, calc(100vw - 1.5rem));
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--page-line);
+  border-left: 3px solid var(--page-accent);
+  border-radius: 8px;
+  background: var(--page-bg);
+  font-size: 0.85em;
+  line-height: 1.5;
+}
+
 /* The reading list is interface, not reading: it speaks the interface font at
    the interface size, and only the row titles keep the article's face below.
    Everything here states its changes with text and a border - never an

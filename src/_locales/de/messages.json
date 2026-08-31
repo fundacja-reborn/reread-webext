@@ -254,6 +254,10 @@
   "color_green": { "message": "Grün" },
   "color_blue": { "message": "Blau" },
   "color_pink": { "message": "Rosa" },
+  "reader_footnote_aria": {
+    "message": "Fußnote $MARK$",
+    "placeholders": { "mark": { "content": "$1", "example": "1" } }
+  },
   "reader_listen": { "message": "Vorlesen" },
   "reader_voice": { "message": "Stimme" },
   "reader_speed": { "message": "Tempo" },

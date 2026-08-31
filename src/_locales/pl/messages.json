@@ -340,6 +340,10 @@
   "color_green": { "message": "Zielony" },
   "color_blue": { "message": "Niebieski" },
   "color_pink": { "message": "Różowy" },
+  "reader_footnote_aria": {
+    "message": "Przypis $MARK$",
+    "placeholders": { "mark": { "content": "$1", "example": "1" } }
+  },
   "reader_listen": { "message": "Czytaj na głos" },
   "reader_voice": { "message": "Głos" },
   "reader_speed": { "message": "Tempo" },

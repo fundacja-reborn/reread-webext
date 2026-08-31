@@ -58,7 +58,13 @@ const DROPPED = new Set([
  * reader's typography the reader's: a page cannot bring its own layout in.
  */
 const ATTRIBUTES = new Map([
-  ["a", ["href"]],
+  // `data-note` is our own footnote carrier (book/notes.js): the note's text,
+  // resolved at book import, shown by the reader in a popover through
+  // `textContent` and nothing else. Letting it through is a deliberate
+  // widening of this boundary - the value is inert prose by construction,
+  // never parsed, never an address - and the article rebuild caps its length
+  // (`article.js`), so no page can ride an oversized value through here.
+  ["a", ["href", "data-note"]],
   ["abbr", ["title"]],
   ["time", ["datetime"]],
   ["th", ["colspan", "rowspan", "scope"]],

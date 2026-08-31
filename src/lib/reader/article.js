@@ -13,6 +13,7 @@
  * even read.
  */
 
+import { NOTE_TEXT_LIMIT } from "../book/notes.js";
 import { SOURCE_ATTRIBUTE } from "./pictures.js";
 import { allowedAttributes, decide, safeHref, safeSrc } from "./sanitize.js";
 
@@ -160,6 +161,13 @@ function copyAttributes(source, rebuilt, name, baseUrl) {
     if (URL_ATTRIBUTES.has(attribute)) {
       const href = safeHref(value, baseUrl);
       if (href !== null) rebuilt.setAttribute(attribute, href);
+      continue;
+    }
+    // The footnote carrier is capped on every pass, not only at book import:
+    // this walk also rebuilds live pages and stored copies, and the cap is
+    // the sanitizer's half of letting the attribute through at all.
+    if (attribute === "data-note") {
+      rebuilt.setAttribute(attribute, value.slice(0, NOTE_TEXT_LIMIT));
       continue;
     }
     rebuilt.setAttribute(attribute, value);

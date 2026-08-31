@@ -340,6 +340,10 @@
   "color_green": { "message": "Зелений" },
   "color_blue": { "message": "Синій" },
   "color_pink": { "message": "Рожевий" },
+  "reader_footnote_aria": {
+    "message": "Виноска $MARK$",
+    "placeholders": { "mark": { "content": "$1", "example": "1" } }
+  },
   "reader_listen": { "message": "Читати вголос" },
   "reader_voice": { "message": "Голос" },
   "reader_speed": { "message": "Швидкість" },
