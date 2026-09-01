@@ -248,34 +248,19 @@
           </span>
         </div>
 
+        <!-- The third choice (D163) stands for the font named in the
+             settings - that is where the name is typed, since a name is
+             typed once and this panel is for knobs turned mid-reading.
+             Hidden while no name is set (a choice of nothing), and wearing
+             the name itself as its title. Choosing a preset keeps the name
+             for the way back. -->
         <div class="reader-setting">
           <span class="reader-setting-name" data-i18n="reader_font">Type</span>
           <span class="reader-choices" id="font-choices">
             <button type="button" data-font="serif" data-i18n="reader_font_serif">Serif</button>
             <button type="button" data-font="sans" data-i18n="reader_font_sans">Sans</button>
+            <button type="button" id="font-own" data-font="custom" data-i18n="reader_font_own" hidden>Custom</button>
           </span>
-        </div>
-
-        <!--
-          A font the reader types the name of (mobileread request): the name
-          leads the chosen preset's stack, and the presets stay the fallback
-          for whatever the named font lacks. A field and not a list, because
-          enumerating installed fonts is a permission and a fingerprint
-          (queryLocalFonts, Chromium-only) - a typed name costs nothing and
-          works in every browser. Empty means the presets alone.
-        -->
-        <div class="reader-setting">
-          <label class="reader-setting-name" for="font-custom" data-i18n="reader_font_custom">Own font</label>
-          <input
-            id="font-custom"
-            class="reader-font-custom"
-            type="text"
-            autocomplete="off"
-            autocapitalize="off"
-            spellcheck="false"
-            placeholder="Font name"
-            data-i18n-placeholder="reader_font_custom_hint"
-          />
         </div>
 
         <div class="reader-setting">

@@ -19,16 +19,23 @@ export const CONFIG_KEY = "config";
 /**
  * @typedef {object} ReaderConfig
  * @property {"auto" | "light" | "sepia" | "dark"} theme `auto` follows the browser.
- * @property {"serif" | "sans"} font
- * @property {string} fontFamily A font the reader typed the name of, leading
- *   the chosen preset's stack - the presets stay the fallback for every
- *   character the named font lacks. Empty means the presets alone, which is
- *   the extension as it has always been. A name and never an enumeration:
- *   asking the browser for the installed fonts is a permission and a
- *   fingerprint (`queryLocalFonts` is also Chromium-only), while a typed name
- *   costs nothing and works everywhere (mobileread request). Stored clean -
- *   quotes, backslashes and control characters out, length capped - so the
- *   stylesheet side can quote it without looking inside.
+ * @property {"serif" | "sans" | "custom"} font `custom` puts the typed name
+ *   (`fontFamily`) in the lead, with the default serif stack as the fallback
+ *   for every character it lacks; the presets are themselves. A third choice
+ *   rather than "a name wins whenever set" (the first cut), so the Type row
+ *   can offer all three honestly and switching to a preset keeps the name
+ *   for the way back. Healed to `serif` when there is no name to lead with.
+ * @property {string} fontFamily A font the reader typed the name of, in the
+ *   settings page since D163 (the panel is for knobs turned mid-reading, a
+ *   name is typed once - and on a phone the field summoned the keyboard over
+ *   the article). Applied only while `font` is `custom`. A name and never an
+ *   enumeration: asking the browser for the installed fonts is a permission
+ *   and a fingerprint (`queryLocalFonts` is also Chromium-only), while a
+ *   typed name costs nothing and works everywhere (mobileread request).
+ *   Stored clean - quotes, backslashes and control characters out, length
+ *   capped - so the stylesheet side can quote it without looking inside,
+ *   and nothing typed here can break out of the quoted CSS string it lands
+ *   in (`applyReading`).
  * @property {boolean} chromeHidden Whether the reader's bar is folded away
  *   behind its bookmark tab (the ribbon at the bar's far edge). A press on
  *   the tab flips it; nothing else does - the bar never hides on a scroll
@@ -154,7 +161,7 @@ export const CONFIG_KEY = "config";
 /** @type {readonly string[]} */
 const THEMES = ["auto", "light", "sepia", "dark"];
 /** @type {readonly string[]} */
-const FONTS = ["serif", "sans"];
+const FONTS = ["serif", "sans", "custom"];
 /** @type {readonly string[]} */
 const LINKS = ["active", "plain"];
 
@@ -323,10 +330,15 @@ function readerWithDefaults(stored) {
     typeof stored === "object" && stored !== null ? stored : {}
   );
 
+  const fontFamily = cleanFontFamily(raw["fontFamily"]);
+  const font = isFont(raw["font"]) ? raw["font"] : READER_DEFAULTS.font;
+
   return {
     theme: isTheme(raw["theme"]) ? raw["theme"] : READER_DEFAULTS.theme,
-    font: isFont(raw["font"]) ? raw["font"] : READER_DEFAULTS.font,
-    fontFamily: cleanFontFamily(raw["fontFamily"]),
+    // A custom face with no name to lead with is a dead state - clearing the
+    // name in the settings hands the Type row back to the default preset.
+    font: font === "custom" && fontFamily.length === 0 ? "serif" : font,
+    fontFamily,
     chromeHidden: raw["chromeHidden"] === true,
     fontSize: within(raw["fontSize"], SIZE, READER_DEFAULTS.fontSize),
     measure: within(raw["measure"], MEASURE, READER_DEFAULTS.measure),
@@ -343,12 +355,14 @@ const FONT_FAMILY_LIMIT = 100;
  * break out of the quoting, no control characters, no surrounding space, and
  * a cap. The name goes into a stylesheet value through `style.setProperty`,
  * which cannot execute anything - this is about the quoted string staying
- * exactly a string, not about danger.
+ * exactly a string, not about danger. Exported for the settings page, whose
+ * field previews itself in the typed face through the same cleaning - the
+ * raw value never reaches a style, there or here.
  *
  * @param {unknown} value
  * @returns {string}
  */
-function cleanFontFamily(value) {
+export function cleanFontFamily(value) {
   if (typeof value !== "string") return READER_DEFAULTS.fontFamily;
   return value
     .replace(new RegExp('["\\\\\\u0000-\\u001f\\u007f]', "g"), "")

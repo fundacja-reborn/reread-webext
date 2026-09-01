@@ -621,6 +621,23 @@ button.model-delete {
   padding: 0.35rem 1rem;
 }
 
+/* The font name's field (D163), in the filter fields' quiet dress - and
+   wide enough for a real name ("Atkinson Hyperlegible"), capped so an
+   empty field is not a line across the page. Its inline font-family is the
+   preview: options.js sets it from the cleaned name. */
+#font-custom {
+  flex: 1 1 12rem;
+  max-width: 22rem;
+  min-width: 0;
+  min-height: 44px;
+  font: inherit;
+  padding: 0.35rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid var(--page-border);
+  background: transparent;
+  color: var(--page-fg);
+}
+
 /* The voice names are the device's own and can run long; the select takes the
    line's spare width and may shrink below its content, so a long name never
    pushes the Listen button off the page. */

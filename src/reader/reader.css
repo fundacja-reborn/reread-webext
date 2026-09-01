@@ -560,21 +560,6 @@ html {
   text-align: center;
 }
 
-/* The typed font's field, in the panel's own quiet dress: the interface
-   face and size, page tokens for the frame - and it grows to the room the
-   row has, because font names run long ("Iowan Old Style"). */
-.reader-font-custom {
-  flex: 1 1 8rem;
-  min-width: 0;
-  padding: 0.2rem 0.5rem;
-  font: inherit;
-  font-size: 0.85rem;
-  color: var(--page-fg);
-  background: transparent;
-  border: 1px solid var(--page-border);
-  border-radius: 6px;
-}
-
 /* The highlighter's inks as themselves (D106): each swatch is the actual
    wash of the theme on screen, over the page's own paper - the choice
    previews its result. A hairline of the ink's edge keeps the paler washes

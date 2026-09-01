@@ -241,8 +241,7 @@
   "reader_font": { "message": "Police" },
   "reader_font_serif": { "message": "Serif" },
   "reader_font_sans": { "message": "Sans" },
-  "reader_font_custom": { "message": "Police personnelle" },
-  "reader_font_custom_hint": { "message": "Nom de la police" },
+  "reader_font_own": { "message": "Personnalisée" },
   "reader_bar_hide": { "message": "Masquer la barre" },
   "reader_bar_show": { "message": "Afficher la barre" },
   "reader_size": { "message": "Taille" },
@@ -859,6 +858,10 @@
   "options_keep_articles": { "message": "Enregistrer par défaut dans la liste de lecture hors ligne" },
   "options_keep_articles_hint": {
     "message": "Enregistre automatiquement chaque page ouverte dans le lecteur pour la lecture hors ligne. Vos pages enregistrées, vos surlignages et votre progression de lecture sont préservés même si le site d'origine change ou disparaît."
+  },
+  "options_font_custom": { "message": "Police personnelle" },
+  "options_font_custom_hint": {
+    "message": "Saisissez le nom d'une police installée sur cet appareil, par exemple Georgia ou OpenDyslexic. La ligne Police du lecteur la proposera alors comme Personnalisée. Laissez le champ vide pour n'utiliser que les polices intégrées."
   },
   "options_quiet_bubble_hint": {
     "message": "Affiche uniquement le texte traduit dans la bulle. Les boutons d'action (copier, enregistrer) n'apparaissent que lorsque vous cliquez ou touchez la bulle."

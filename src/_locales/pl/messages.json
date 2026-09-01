@@ -316,8 +316,7 @@
   "reader_font": { "message": "Krój" },
   "reader_font_serif": { "message": "Szeryfowy" },
   "reader_font_sans": { "message": "Bezszeryfowy" },
-  "reader_font_custom": { "message": "Własna czcionka" },
-  "reader_font_custom_hint": { "message": "Nazwa czcionki" },
+  "reader_font_own": { "message": "Własny" },
   "reader_bar_hide": { "message": "Schowaj pasek" },
   "reader_bar_show": { "message": "Pokaż pasek" },
   "reader_size": { "message": "Rozmiar" },
@@ -1122,6 +1121,10 @@
   "options_keep_articles": { "message": "Zapisuj domyślnie w czytelni offline" },
   "options_keep_articles_hint": {
     "message": "Automatycznie zapisuje każdą stronę otwartą w widoku czytania do czytania offline. Twoje zapisane strony, zakreślenia i postęp czytania są bezpieczne, nawet jeśli oryginalna strona internetowa zmieni się lub zniknie."
+  },
+  "options_font_custom": { "message": "Własna czcionka" },
+  "options_font_custom_hint": {
+    "message": "Wpisz nazwę czcionki zainstalowanej na tym urządzeniu, np. Georgia albo OpenDyslexic. W widoku czytania, w wierszu Krój, pojawi się wybór Własny. Zostaw pole puste, aby używać tylko wbudowanych krojów."
   },
   "options_quiet_bubble_hint": {
     "message": "Pokazuje w dymku tylko tekst tłumaczenia. Przyciski akcji (np. kopiowanie lub zapis) pojawią się dopiero po kliknięciu w dymek."

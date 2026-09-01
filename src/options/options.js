@@ -21,6 +21,7 @@ import {
   BUBBLE_SCALE,
   CONFIG_KEY,
   TTS_RATE,
+  cleanFontFamily,
   effectiveLibraryCopy,
   effectiveReaderOnly,
   platformOs,
@@ -325,6 +326,31 @@ function renderQuietBubble() {
 function renderKeepArticles() {
   const toggle = document.getElementById("keep-articles");
   if (toggle instanceof HTMLInputElement) toggle.checked = config.keepArticles;
+}
+
+/**
+ * The field previewing itself in the face it names: the one place a typed
+ * value reaches a style, and it goes there cleaned and quoted - through the
+ * same cleaning the config applies before storing (`cleanFontFamily`), so
+ * nothing typed can carry quotes, backslashes or control characters into
+ * the declaration. `style.fontFamily` is CSSOM, not a stylesheet string: an
+ * invalid value is dropped whole, never parsed into something else.
+ *
+ * @param {HTMLInputElement} field
+ */
+function previewFontFamily(field) {
+  const name = cleanFontFamily(field.value);
+  field.style.fontFamily = name.length > 0 ? `"${name}"` : "";
+}
+
+/** The reading font's name (D163) - the field shows what is stored. */
+function renderFontCustom() {
+  const field = document.getElementById("font-custom");
+  if (!(field instanceof HTMLInputElement)) return;
+  // Not while it is the thing being typed in: another page's write must not
+  // eat a half-typed name.
+  if (document.activeElement !== field) field.value = config.reader.fontFamily;
+  previewFontFamily(field);
 }
 
 /**
@@ -2348,6 +2374,7 @@ async function render() {
   renderQuietBubble();
   renderKeepArticles();
   renderLibraryCopy();
+  renderFontCustom();
   renderNoTranslation();
   renderBubbleScale();
   renderTts();
@@ -2406,6 +2433,7 @@ async function refresh() {
   renderQuietBubble();
   renderKeepArticles();
   renderLibraryCopy();
+  renderFontCustom();
   renderNoTranslation();
   renderBubbleScale();
   renderTts();
@@ -2463,6 +2491,33 @@ document.getElementById("keep-articles")?.addEventListener("change", (event) => 
   void writeConfig({ keepArticles: toggle.checked }).then((written) => {
     config = written;
   });
+});
+// The reading font's name (D163), committed on change - blur or Enter - and
+// not per keystroke: a storage write per letter would ping every open page
+// for nothing. Typing a name is choosing it, so a non-empty name also sets
+// the Type row's choice to Custom; an emptied field lets the config heal
+// that choice back to the default preset. The name is cleaned before the
+// write (the config would clean it again anyway), and what was actually
+// stored comes back into the field.
+document.getElementById("font-custom")?.addEventListener("change", (event) => {
+  const field = event.target;
+  if (!(field instanceof HTMLInputElement)) return;
+  const name = cleanFontFamily(field.value);
+  void writeConfig({
+    reader: name.length > 0 ? { fontFamily: name, font: "custom" } : { fontFamily: name },
+  }).then((written) => {
+    config = written;
+    renderFontCustom();
+  });
+});
+// The preview follows every keystroke; only the stored value waits for the
+// change. Enter commits the way it does everywhere: by leaving the field.
+document.getElementById("font-custom")?.addEventListener("input", (event) => {
+  const field = event.target;
+  if (field instanceof HTMLInputElement) previewFontFamily(field);
+});
+document.getElementById("font-custom")?.addEventListener("keydown", (event) => {
+  if (event.key === "Enter" && event.target instanceof HTMLElement) event.target.blur();
 });
 document.getElementById("library-copy")?.addEventListener("change", (event) => {
   const toggle = event.target;

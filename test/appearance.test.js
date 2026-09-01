@@ -58,25 +58,36 @@ describe("applyReading", () => {
     assert.equal(root.dataset["readerLinks"], undefined);
   });
 
-  it("puts a typed font in front of the stack, quoted", () => {
-    // The name arrives clean from the config (quotes and control characters
-    // already out), so the quoting here is just quoting - and the preset
-    // stack stays behind it for every character the named font lacks.
+  it("puts the typed font in front of the stack, quoted, only when chosen", () => {
+    // Since D163 the name leads only while the Type row says `custom`: a set
+    // name no longer overrides a preset choice - it waits, kept, for the row
+    // to ask. The name arrives clean from the config (quotes, backslashes
+    // and control characters already out), so the quoting here is just
+    // quoting - and the stack stays behind it for every character the named
+    // font lacks.
     const root = fakeRoot();
-    applyReading(root, { ...READER_DEFAULTS, fontFamily: "Iowan Old Style" });
+    applyReading(root, { ...READER_DEFAULTS, font: "custom", fontFamily: "Iowan Old Style" });
+    assert.equal(root.dataset["readerFont"], "custom");
     assert.equal(
       root.properties["--reader-font-lead"],
       '"Iowan Old Style", var(--reader-font-stack)',
     );
+
+    applyReading(root, { ...READER_DEFAULTS, font: "serif", fontFamily: "Iowan Old Style" });
+    assert.equal(root.properties["--reader-font-lead"], "var(--reader-font-stack)");
   });
 
-  it("hands the property back to the stack when the field empties", () => {
+  it("hands the property back to the stack when the choice leaves", () => {
     // Always written, never removed: RootLike has no removeProperty, and a
-    // stale lead surviving an emptied field would be a setting that cannot
-    // be undone.
+    // stale lead surviving the choice would be a setting that cannot be
+    // undone. A `custom` that somehow arrives with no name (the config heals
+    // it away, but this function may be called directly) leads nothing.
     const root = fakeRoot();
-    applyReading(root, { ...READER_DEFAULTS, fontFamily: "Atkinson Hyperlegible" });
+    applyReading(root, { ...READER_DEFAULTS, font: "custom", fontFamily: "Atkinson Hyperlegible" });
     applyReading(root, READER_DEFAULTS);
+    assert.equal(root.properties["--reader-font-lead"], "var(--reader-font-stack)");
+
+    applyReading(root, { ...READER_DEFAULTS, font: "custom", fontFamily: "" });
     assert.equal(root.properties["--reader-font-lead"], "var(--reader-font-stack)");
   });
 });

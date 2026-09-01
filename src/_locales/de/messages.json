@@ -230,8 +230,7 @@
   "reader_font": { "message": "Schrift" },
   "reader_font_serif": { "message": "Serifen" },
   "reader_font_sans": { "message": "Serifenlos" },
-  "reader_font_custom": { "message": "Eigene Schrift" },
-  "reader_font_custom_hint": { "message": "Schriftname" },
+  "reader_font_own": { "message": "Eigene" },
   "reader_bar_hide": { "message": "Leiste ausblenden" },
   "reader_bar_show": { "message": "Leiste einblenden" },
   "reader_size": { "message": "Größe" },
@@ -824,6 +823,10 @@
   "options_keep_articles": { "message": "Standardmäßig in der Offline-Leseliste speichern" },
   "options_keep_articles_hint": {
     "message": "Speichert jede in der Leseansicht geöffnete Seite automatisch zum Offline-Lesen. Ihre gespeicherten Seiten, Markierungen und der Lesefortschritt bleiben erhalten, auch wenn die ursprüngliche Website sich ändert oder verschwindet."
+  },
+  "options_font_custom": { "message": "Eigene Schrift" },
+  "options_font_custom_hint": {
+    "message": "Geben Sie den Namen einer auf diesem Gerät installierten Schrift ein, zum Beispiel Georgia oder OpenDyslexic. Die Zeile Schrift in der Leseansicht bietet sie dann als Eigene an. Lassen Sie das Feld leer, um nur die mitgelieferten Schriften zu verwenden."
   },
   "options_quiet_bubble_hint": {
     "message": "Zeigt nur den übersetzten Text in der Sprechblase an. Die Aktionsschaltflächen (wie Kopieren oder Speichern) erscheinen erst, wenn Sie auf die Sprechblase klicken oder tippen."
