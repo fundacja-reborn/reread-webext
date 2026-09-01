@@ -56,6 +56,44 @@ const XDXF_KEY = /<k>[\s\S]*?<\/k>/giu;
 const TAG = /<[^>]*>/gu;
 
 /**
+ * WikDict's source annotations, which are not markup and not content.
+ *
+ * Wiktionary's pronunciation lines carry references and qualifiers, and the
+ * WikDict build writes them into the field as ENTITIES - `&lt;ref:&lt;&lt;
+ * name:Dobson&gt;&gt;&gt;`, `&lt;a:obsolete&gt;`, sometimes a whole wiki
+ * template (`&lt;ref:{{R:en:Dobson:1957|II|334|986}}&gt;`). The tag strip
+ * cannot touch them (they are not tags yet), and decoding is what makes them
+ * visible - `/ʃuːld/<ref:<<name:Dobson>>>/` reached a bubble on Michał's
+ * screenshot. Only these two names, and only with the colon: a stray `<`
+ * a dictionary honestly writes (an entry about `a < b`) matches nothing here.
+ *
+ * The inside allows `<<...>>` pairs, `{{...}}` templates and anything that is
+ * not an angle bracket, so a nested reference is eaten whole rather than to
+ * its first `>`.
+ */
+const SOURCE_NOTE = "<(?:ref|a):(?:<<[^<>]*>>|\\{\\{[^{}]*\\}\\}|[^<>])*>";
+
+/**
+ * A note standing between two slashes of a transcription - the common case:
+ * `/ʃuːld/<ref:...>/, /ʃəd/`. Dropping the note alone would leave `//`, so
+ * the slash it leans on goes with it and the next one stays.
+ */
+const NOTED_SLASH = new RegExp(`/(?:${SOURCE_NOTE})+(?=/)`, "gu");
+
+const SOURCE_NOTES = new RegExp(SOURCE_NOTE, "gu");
+
+/**
+ * The annotations out, wherever the decoding surfaced them - and in a plain
+ * `m` field, where a build may write them as themselves.
+ *
+ * @param {string} text
+ * @returns {string}
+ */
+function stripSourceNotes(text) {
+  return text.replace(NOTED_SLASH, "").replace(SOURCE_NOTES, "");
+}
+
+/**
  * The named entities a dictionary actually writes, and nothing beyond them.
  *
  * The full HTML table is some two thousand names, which is a table nobody here
@@ -210,7 +248,7 @@ export function about(text, limit = LIMITS.credit) {
  */
 export function fieldText({ type, text }) {
   if (!READABLE.has(type)) return "";
-  if (!MARKUP.has(type)) return tidy(text);
+  if (!MARKUP.has(type)) return tidy(stripSourceNotes(text));
 
   // Everything that separates one line of an entry from the next is a line
   // break by now, so what is left is inline - `<b>`, `<font>`, the `<a>` around
@@ -221,7 +259,9 @@ export function fieldText({ type, text }) {
     .replace(LINE_BREAKS, "\n")
     .replace(TAG, "");
 
-  return tidy(decodeEntities(withoutMarkup));
+  // The source annotations after the decoding, because the decoding is what
+  // surfaces them (see SOURCE_NOTE).
+  return tidy(stripSourceNotes(decodeEntities(withoutMarkup)));
 }
 
 /**
