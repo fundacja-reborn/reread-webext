@@ -107,6 +107,38 @@ function offline(voice) {
 }
 
 /**
+ * One entry per voice, where the engine listed a voice twice.
+ *
+ * `voiceURI` names one voice, so two entries sharing it are one voice seen
+ * twice - and one of them can be a decoy. Brave's fingerprinting shield
+ * (brave-core, `chromium_src/.../speech/speech_synthesis.cc`) adds a fake
+ * voice to every site's list: a clone of the engine's default voice under a
+ * made-up name drawn per site ("Hubert", "Vernon", "Alva"...), with the URI
+ * left as it was. A pick by URI could land on the clone, and did: Chromium's
+ * browser side matches an utterance's voice by NAME, nothing is named
+ * Hubert, and macOS then reads with the voice of the SYSTEM language - an
+ * English word came out in Polish, on exactly the sites whose made-up name
+ * sorted before the real one (Michał's report, 2026-09-01). Kept per URI:
+ * the entry whose name is its own URI (how Chromium lists the platform's
+ * voices), else the engine's default, else the one listed first.
+ *
+ * @template {VoiceLike} V
+ * @param {readonly V[]} voices
+ * @returns {V[]}
+ */
+function oneOfEach(voices) {
+  /** @param {V} voice */
+  const genuine = (voice) => (voice.name === voice.voiceURI ? 2 : voice.default === true ? 1 : 0);
+  /** @type {Map<string, V>} */
+  const kept = new Map();
+  for (const voice of voices) {
+    const before = kept.get(voice.voiceURI);
+    if (before === undefined || genuine(voice) > genuine(before)) kept.set(voice.voiceURI, voice);
+  }
+  return [...kept.values()];
+}
+
+/**
  * Variants together, and the same order from one open to the next.
  *
  * @param {VoiceLike} a
@@ -132,9 +164,9 @@ function byTagAndName(a, b) {
 export function voicesFor(voices, lang) {
   const wanted = primaryLanguage(lang);
   if (wanted === "") return [];
-  return voices
-    .filter((voice) => offline(voice) && primaryLanguage(voice.lang) === wanted)
-    .sort(byTagAndName);
+  return oneOfEach(voices.filter((voice) => offline(voice) && primaryLanguage(voice.lang) === wanted)).sort(
+    byTagAndName,
+  );
 }
 
 /**
@@ -151,7 +183,7 @@ export function voicesFor(voices, lang) {
  */
 function offlinePool(voices, lang) {
   if (primaryLanguage(lang) !== "") return voicesFor(voices, lang);
-  return voices.filter(offline).sort(byTagAndName);
+  return oneOfEach(voices.filter(offline)).sort(byTagAndName);
 }
 
 /**
