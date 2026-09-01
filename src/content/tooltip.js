@@ -688,7 +688,12 @@ export const STYLE = `
      padding this outranks by standing below it. The quiet bubble (D120) is the
      same shape with two pictures in the row. */
   .bubble[data-variant="launcher"] .actions,
-  .bubble[data-variant="quiet"] .actions { padding: 0; }
+  /* Only the pairless trim keeps the zeroed row: two icons are its whole
+     content, and the padding was pure emptiness around them. With a pair the
+     quiet row carries Edit and Save - and turns into Save/Cancel over the
+     edit box - so it needs the ordinary row's breathing room (Michał's
+     report: the buttons sat flush against the box). */
+  .bubble[data-variant="quiet"]:not([data-choosable="true"]) .actions { padding: 0; }
 
   /* An error bubble is not a translation, and it drops the mirror's rule for
      the same reason the mirror exists: the near edge belongs to the eye's way
@@ -1201,9 +1206,14 @@ export function settleBack({ shown, now, carried }) {
  *   open: the room to place in starts under it, the scroll assist (D97) parks
  *   the kept line just below it, and the keyboard's reveals count the strip
  *   as unseen. Absent means nothing stands over the text.
+ * @param {() => void} [options.onEditing] told as the edit box opens - the
+ *   caller's chance to keep the phrase visible: the focus moving into the box
+ *   takes the page's own blue selection with it, and a box editing a phrase
+ *   nobody can see is a box over nothing (Michał's report, D162's first
+ *   smoke).
  * @returns {Tooltip}
  */
-export function createTooltip({ onAction, onHide, covered }) {
+export function createTooltip({ onAction, onHide, covered, onEditing }) {
   /** The live measure of the caller's stuck chrome (D138), with the
    *  every-other-page answer standing in when the caller has none. */
   const coveredAbove = covered ?? (() => 0);
@@ -1971,8 +1981,12 @@ export function createTooltip({ onAction, onHide, covered }) {
     // is about to become Save/Cancel - an open layer would hang over the box
     // with no press left to close it, and every line of it is dead during an
     // edit anyway (the senses disable, D34). Cancel does not bring it back:
-    // one press of More does, with everything already fetched.
+    // one press of More does, with everything already fetched - except in
+    // the quiet bubble, which has no More; `stopEditing` unfolds it back.
     unfold(false);
+    // Before the focus below takes the page's own selection: the caller may
+    // want to dress the phrase so the box is visibly about something.
+    onEditing?.();
     editing = true;
     editor.value = toMeanings(bodyElement.textContent ?? "").join(MEANING_SEPARATOR);
     editor.hidden = false;
@@ -2003,6 +2017,11 @@ export function createTooltip({ onAction, onHide, covered }) {
     editor.hidden = true;
     bodyElement.hidden = false;
     renderActions(restingActions);
+    // The quiet bubble has no More to bring the layer back (D121/D162): its
+    // entries are the answer itself, so the stage clears only for as long as
+    // the box is open - a Cancel that ate the definitions read as a loss
+    // (Michał's report).
+    if (bubble?.dataset["variant"] === "quiet") unfold(true);
     place();
   }
 
