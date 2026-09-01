@@ -2297,7 +2297,19 @@ async function runImport(opened, dictionary, { say, progress }) {
  */
 async function adoptDictionaryPair(from, to) {
   if (config.sourceLang !== null) return;
-  config = await writeConfig({ sourceLang: from, targetLang: to });
+  // A monolingual book adopts its own pair only as the last resort (D166):
+  // where a model or another book already reads its language into another,
+  // that pair is the shelf, and the monolingual book answers under it. The
+  // select's own rule says which - the pair it offers for the language.
+  const shelf =
+    from === to
+      ? pairChoices(modelRows(await listModels(), availableModels()), config, await listDictionaries()).find(
+          (choice) => choice.from === from && choice.to !== from,
+        )
+      : undefined;
+  config = await writeConfig(
+    shelf === undefined ? { sourceLang: from, targetLang: to } : { sourceLang: shelf.from, targetLang: shelf.to },
+  );
 }
 
 async function addSelectedDictionary() {

@@ -57,4 +57,19 @@ describe("the popup's pair choices", () => {
     // Handed nothing extra - the model-on popup - nothing changes.
     assert.deepEqual(pairChoices({ sourceLang: "en", targetLang: "pl" }, [ENPL], []), [ENPL]);
   });
+
+  it("offers a monolingual book's pair only as the last resort for its language (D166)", () => {
+    const ENEN = { pair: "enen", from: "en", to: "en" };
+    const PLPL = { pair: "plpl", from: "pl", to: "pl" };
+    // Michał's popup: en -> en and pl -> pl beside en -> pl and pl -> en -
+    // second shelves for languages that have one. Gone.
+    assert.deepEqual(pairChoices({ sourceLang: "en", targetLang: "pl" }, [], [ENEN, ENPL, PLEN, PLPL]), [
+      ENPL,
+      PLEN,
+    ]);
+    // The only book for English: its pair is the one shelf there is.
+    assert.deepEqual(pairChoices({ sourceLang: null, targetLang: null }, [], [ENEN]), [ENEN]);
+    // Standing on the monolingual shelf, it stays listed while chosen.
+    assert.deepEqual(pairChoices({ sourceLang: "en", targetLang: "en" }, [ENPL], [ENEN]), [ENEN, ENPL]);
+  });
 });

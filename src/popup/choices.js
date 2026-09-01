@@ -12,6 +12,8 @@
  * rule is worth a test, and `node --test` has no popup to open.
  */
 
+import { monolingualLastResort } from "../lib/pairs.js";
+
 /**
  * @typedef {{ pair: string, from: string, to: string }} PairChoice
  */
@@ -33,7 +35,10 @@ export function pairChoices(config, installed, extra = []) {
   for (const { pair, from, to } of [...installed, ...extra]) {
     if (!byPair.has(pair)) byPair.set(pair, { pair, from, to });
   }
-  const rows = [...byPair.values()].sort((a, b) => a.pair.localeCompare(b.pair));
+  // A monolingual book's pair only as the last resort for its language
+  // (D166, `lib/pairs.js`); the configured pair is put back below whatever
+  // the rule said, so the shelf somebody stands on never vanishes.
+  const rows = monolingualLastResort([...byPair.values()]).sort((a, b) => a.pair.localeCompare(b.pair));
 
   if (config.sourceLang === null || config.targetLang === null) return rows;
   const known = rows.some((row) => row.from === config.sourceLang && row.to === config.targetLang);

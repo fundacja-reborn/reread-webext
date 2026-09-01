@@ -324,6 +324,34 @@ describe("pairChoices", () => {
     assert.deepEqual(choices, [{ pair: "enen", from: "en", to: "en", dictionaryOnly: true }]);
   });
 
+  it("offers a monolingual book's pair only as the last resort for its language (D166)", () => {
+    // Michał's doubt: en -> en beside en -> pl is a second shelf for English,
+    // and the en-en book already answers under en -> pl. A model reading the
+    // language counts the same as a bilingual book.
+    const none = { sourceLang: null, targetLang: null };
+    const books = [
+      { langFrom: "en", langTo: "en", ready: true },
+      { langFrom: "pl", langTo: "en", ready: true },
+      { langFrom: "pl", langTo: "pl", ready: true },
+    ];
+    assert.deepEqual(
+      pairChoices([row("en", "pl", { installed: true })], none, books).map((one) => one.pair),
+      ["enpl", "plen"],
+    );
+    assert.deepEqual(
+      pairChoices([], none, books).map((one) => one.pair),
+      ["enen", "plen"],
+    );
+    // The shelf somebody stands on never vanishes: chosen, the monolingual
+    // pair stays listed even beside the bilingual one that outranks it.
+    assert.deepEqual(
+      pairChoices([row("en", "pl", { installed: true })], { sourceLang: "en", targetLang: "en" }, books).map(
+        (one) => one.pair,
+      ),
+      ["enen", "enpl", "plen"],
+    );
+  });
+
   it("lets the model's line win over the same pair's dictionary", () => {
     // Under the model's line both halves of the extension work, so the pair
     // is not the dictionary's to mark - and it appears once, not twice.

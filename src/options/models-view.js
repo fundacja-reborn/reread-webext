@@ -14,6 +14,7 @@
  */
 
 import { pairLabel } from "../lib/language.js";
+import { monolingualLastResort } from "../lib/pairs.js";
 
 /**
  * @typedef {import("../lib/models/registry.js").ModelRow} ModelRow
@@ -238,7 +239,12 @@ export function pairChoices(rows, reading, dictionaries = []) {
     });
   }
 
-  const offered = [...installed, ...fromBooks];
+  // A monolingual book's pair only as the last resort for its language
+  // (D166, `lib/pairs.js`): where a model or another book reads the same
+  // language into another, that pair is the shelf and the monolingual book
+  // answers under it - it already does, lookups go by the headwords' language
+  // alone. The chosen pair is put back below, whatever the rule said.
+  const offered = monolingualLastResort([...installed, ...fromBooks]);
   if (offered.length === 0) return [];
 
   // The chosen pair is kept in the list even without its stores - a control
