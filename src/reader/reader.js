@@ -3659,7 +3659,7 @@ function markRowKey(row) {
  *
  * @param {import("./marks-list.js").MarkRow} row
  */
-function speakMarkRow(row) {
+async function speakMarkRow(row) {
   const key = markRowKey(row);
   if (speaking() && soundingMark === key) {
     stopTts();
@@ -3670,7 +3670,7 @@ function speakMarkRow(row) {
   // The row's own language first; with none and no pair, the empty tag reads
   // in the device's default offline voice - `speechLang`'s manner.
   const lang = row.lang ?? settings.sourceLang ?? "";
-  const spoke = speak(
+  const spoke = await speak(
     row.mark.text,
     lang,
     settings.ttsVoices[primaryLanguage(lang)],
@@ -5029,7 +5029,7 @@ marksRowsList?.addEventListener("click", (event) => {
   if (row === undefined) return;
   const act = button.getAttribute("data-act");
   if (act === "copy") void copyMarkRow(button, row);
-  else if (act === "speak") speakMarkRow(row);
+  else if (act === "speak") void speakMarkRow(row);
   else if (act === "open") void openMarkRow(row);
   else if (act === "note") noteMarkRow(row);
   else if (act === "delete" || act === "delete-all") {

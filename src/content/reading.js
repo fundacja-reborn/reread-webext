@@ -650,7 +650,7 @@ async function onAction(action, meanings) {
     if (speaking()) stopSpeaking();
     else if (current !== null) {
       const voice = (noTranslation ? quietVoice?.() : null) ?? { lang: ttsLang, voiceURI: ttsVoiceURI };
-      speak(current.text, voice.lang, voice.voiceURI, ttsRate / 100);
+      void speak(current.text, voice.lang, voice.voiceURI, ttsRate / 100);
     }
     return;
   }
