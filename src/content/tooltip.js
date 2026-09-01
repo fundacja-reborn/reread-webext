@@ -38,8 +38,11 @@
  * clamps the sentence to a single line, and the next placement hands the
  * freed room to the entries by the same squeeze; pressed again, the sentence
  * comes back. The control stands only where the contest is real - entries
- * below, a sentence long enough to wrap - and every new bubble opens with
- * the sentence whole, because the sentence is what More promises first.
+ * below, a sentence long enough to wrap. Over a dictionary the sentence
+ * opens already clamped (`foldStart`, Michał's ask): whoever pressed More
+ * on a phrase the dictionary knows is usually there for the dictionary,
+ * and the sentence taking its height first squeezed the answer to a strip.
+ * A sentence alone still opens whole - it is all More has to show.
  *
  * Everything in it stands in the order of its distance from the phrase (D44):
  * the gloss on the nearest edge, the actions behind it, the second layer
@@ -282,6 +285,23 @@ function foldLabel(clamped) {
 export function foldControl({ entries, overflows }) {
   if (!entries) return "absent";
   return overflows ? "shown" : "reserved";
+}
+
+/**
+ * Where the sentence's fold starts for a new phrase (D96, revised on
+ * Michał's ask): clamped whenever dictionary entries stand below, whole
+ * when the sentence is alone. The sentence used to open whole every time,
+ * and over a dictionary that meant the part most readers came down for
+ * arrived squeezed to a strip (D79) under eight lines of translation.
+ * Only a starting state: the reader's own press outranks it for as long
+ * as the bubble stands on its phrase. Exported for the test that holds
+ * the rule.
+ *
+ * @param {{ entries: boolean }} layer
+ * @returns {boolean} whether the sentence opens clamped
+ */
+export function foldStart({ entries }) {
+  return entries;
 }
 
 /**
@@ -1278,9 +1298,13 @@ export function createTooltip({ onAction, onHide, covered, onEditing }) {
   let editing = false;
   /** Whether the second layer is unfolded. Folded again for every new phrase. */
   let unfolded = false;
-  /** Whether the sentence is clamped to one line (D96). The reader's choice,
-   *  so it survives re-renders of the layer - but not the next phrase. */
+  /** Whether the sentence is clamped to one line (D96): the starting state
+   *  follows the entries (`foldStart`) until the reader presses the fold. */
   let contextFolded = false;
+  /** Whether the clamp is the reader's own press rather than the starting
+   *  state - their word survives re-renders of the layer, and content
+   *  arriving late may not overrule it. Forgotten with the next phrase. */
+  let contextChosen = false;
   /** Whether the click the last press becomes is the one that unfolded the row. */
   let swallowClick = false;
   /** What the buttons were before the edit box opened, to go back to on cancel. */
@@ -1715,6 +1739,7 @@ export function createTooltip({ onAction, onHide, covered, onEditing }) {
    * the sentence gives up arrive down there without another line here.
    */
   function toggleContextFold() {
+    contextChosen = true;
     contextFolded = !contextFolded;
     applyContextFold();
     unfold(unfolded);
@@ -1751,6 +1776,17 @@ export function createTooltip({ onAction, onHide, covered, onEditing }) {
     if (contextElement === null || entriesElement === null) return;
     unfolded = open;
     const entriesThere = entriesElement.childElementCount > 0;
+    // Until the reader presses the fold, its state follows the content
+    // (`foldStart`): entries landing a beat after the sentence clamp it, a
+    // dictionary with nothing to say hands the lines back. Stamped before
+    // placing, so the squeeze below measures the sentence it will show.
+    if (!contextChosen) {
+      const start = foldStart({ entries: entriesThere });
+      if (start !== contextFolded) {
+        contextFolded = start;
+        applyContextFold();
+      }
+    }
     contextElement.hidden = !unfolded || (contextTextElement?.textContent ?? "").length === 0;
     entriesElement.hidden = !unfolded || !entriesThere;
     // The fold's column comes or goes before placing: its width decides where
@@ -2208,6 +2244,7 @@ export function createTooltip({ onAction, onHide, covered, onEditing }) {
     editing = false;
     unfolded = false;
     contextFolded = false;
+    contextChosen = false;
     swallowClick = false;
     restingActions = [];
     phraseText = "";
@@ -2295,12 +2332,15 @@ export function createTooltip({ onAction, onHide, covered, onEditing }) {
       // Folded again: this is another phrase, and the sentence behind "More"
       // belonged to the last one. Set directly rather than through `unfold`,
       // which would render and place a bubble that has no body yet. The
-      // sentence's own fold opens too (D96): clamping was a choice about the
-      // last sentence, not about this one. The quiet bubble is the standing
-      // exception (D121): it has no gloss and no More, so entries handed to
-      // it later are the answer itself and show the moment they land.
+      // sentence's own fold is handed back to the content too (D96): the
+      // clamp was about the last phrase - the reader's press or its
+      // dictionary - and this phrase's layer decides afresh (`foldStart`)
+      // as it fills. The quiet bubble is the standing exception (D121): it
+      // has no gloss and no More, so entries handed to it later are the
+      // answer itself and show the moment they land.
       unfolded = variant === "quiet";
       contextFolded = false;
+      contextChosen = false;
       if (contextElement !== null && contextTextElement !== null && contextToggle !== null) {
         contextTextElement.textContent = "";
         contextElement.hidden = true;
