@@ -29,7 +29,7 @@
   "action_update": { "message": "Aktualizuj" },
 
   "error_engine_missing": { "message": "Nie ma jeszcze silnika tłumaczeń - to wydanie nie tłumaczy." },
-  "error_model_missing": { "message": "Na tym urządzeniu nie ma modelu dla tej pary językowej - pobierz go lub dodaj w ustawieniach. A jeśli chcesz czytać bez tłumaczenia, włącz tam „Używaj bez tłumaczenia” - słownik jednojęzyczny nadal możesz dodać." },
+  "error_model_missing": { "message": "Na tym urządzeniu nie ma modelu dla tej pary językowej - pobierz go lub dodaj w ustawieniach. A żeby czytać bez tłumaczenia maszynowego, włącz tam „Używaj bez modelu tłumaczenia” - słowniki nadal odpowiadają, a frazy zapisujesz z ich znaczeń." },
   "error_unsupported_pair": { "message": "Dla tej pary językowej nie istnieje żaden model." },
   "error_too_long": { "message": "To zaznaczenie jest za długie do przetłumaczenia." },
   "error_no_page": { "message": "Nie ma tu strony do czytania - otwórz artykuł i naciśnij przycisk jeszcze raz." },
@@ -63,7 +63,7 @@
     "message": "Na tym urządzeniu nie ma jeszcze modelu tłumaczeniowego - naciśnij tutaj i wybierz go w ustawieniach."
   },
   "popup_translation_off": {
-    "message": "Tłumaczenie jest wyłączone - re/read działa jako czytnik."
+    "message": "Tłumaczenie maszynowe jest wyłączone - czytnik i słowniki działają dalej."
   },
 
   "vocab_title": { "message": "re/read - zapisane frazy" },
@@ -1109,15 +1109,15 @@
     "placeholders": { "pair": { "content": "$1", "example": "angielski → angielski" } }
   },
   "options_pair_hint_quiet": {
-    "message": "Przy wyłączonym tłumaczeniu para mówi, w jakim języku czytasz i gdzie trzymane są zapisane frazy. Pary pochodzą z zainstalowanych modeli i słowników."
+    "message": "Bez modelu tłumaczenia para mówi, w jakim języku czytasz i gdzie trzymane są zapisane frazy. Pary pochodzą z zainstalowanych modeli i słowników."
   },
   "options_reading_pair_quiet": {
-    "message": "Czytasz w języku: $FROM$ - tłumaczenie jest wyłączone, a zapisane frazy trafiają do tej pary.",
+    "message": "Czytasz w języku: $FROM$ - tłumaczenie maszynowe jest wyłączone, a zapisane frazy trafiają do tej pary.",
     "placeholders": { "from": { "content": "$1", "example": "angielski" } }
   },
   "options_reader_only": { "message": "Tylko w widoku czytania" },
   "options_reader_only_hint": {
-    "message": "Ogranicza tłumaczenie do widoku czytania. Zaznaczenie tekstu na zwykłej stronie pokaże jedynie przycisk do otwarcia jej w widoku czytania. Na Androidzie i iOS opcja jest domyślnie włączona."
+    "message": "Ogranicza dymek do widoku czytania. Zaznaczenie tekstu na zwykłej stronie pokaże jedynie przycisk do otwarcia jej w widoku czytania. Na Androidzie i iOS opcja jest domyślnie włączona."
   },
   "options_keep_articles": { "message": "Zapisuj domyślnie w czytelni offline" },
   "options_keep_articles_hint": {
@@ -1126,9 +1126,9 @@
   "options_quiet_bubble_hint": {
     "message": "Pokazuje w dymku tylko tekst tłumaczenia. Przyciski akcji (np. kopiowanie lub zapis) pojawią się dopiero po kliknięciu w dymek."
   },
-  "options_no_translation": { "message": "Używaj bez tłumaczenia" },
+  "options_no_translation": { "message": "Używaj bez modelu tłumaczenia" },
   "options_no_translation_hint": {
-    "message": "Ukrywa funkcje tłumaczenia (dymek, podkreślenia, zapisane frazy). Opcja idealna do czytania w ojczystym języku. Widok czytania, czytelnia offline, zakreślacz i słowniki pozostają aktywne. Twoje zapisane dane nie są usuwane i wrócą po wyłączeniu tej opcji."
+    "message": "Wyłącza tłumaczenie maszynowe (model). Widok czytania, czytelnia offline i zakreślacz działają dalej. Przy wybranej parze językowej dymek nadal pokazuje znaczenia ze słowników, a frazy można zapisywać i widzieć ich podkreślenia. Idealne do czytania ze słownikami albo w ojczystym języku. Zapisane dane nie są usuwane i wracają po wyłączeniu tej opcji."
   },
   "options_bubble_off": { "message": "Bez dymka po zaznaczeniu tekstu" },
   "options_bubble_off_hint": {

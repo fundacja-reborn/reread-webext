@@ -28,11 +28,13 @@
  */
 
 /**
- * @param {{ translationOff: boolean, bubbleOff: boolean, fresh: boolean }} state the two
- *   settings, and whether this device holds no translation model at all
+ * @param {{ translationOff: boolean, bubbleOff: boolean, fresh: boolean, pair: boolean }} state
+ *   the two settings, whether this device holds no translation model at all,
+ *   and whether a language pair is chosen (D162: with one, the quiet
+ *   vocabulary works on ordinary pages, and the rows that serve it stand)
  * @returns {PopupRows}
  */
-export function popupRows({ translationOff, bubbleOff, fresh }) {
+export function popupRows({ translationOff, bubbleOff, fresh, pair }) {
   return {
     // With the bubble switched off under the trim (D149) every ordinary page
     // is left alone already, so a switch that could only leave it alone too
@@ -42,12 +44,17 @@ export function popupRows({ translationOff, bubbleOff, fresh }) {
     pair: !translationOff && !fresh,
     setup: !translationOff && fresh,
     translationNote: translationOff,
-    vocabulary: !translationOff,
-    // The bubble's fold means nothing when the bubble is trimmed to a phrase
-    // and a speaker, and reader-only means nothing when every ordinary page
-    // is a launcher page already.
+    // The saved phrases live wherever a pair is chosen - the quiet
+    // vocabulary writes them without the engine (D158/D162) - so their door
+    // goes only when there is truly nothing behind it.
+    vocabulary: !translationOff || pair,
+    // The bubble's fold means nothing when the trimmed bubble never folds.
     quiet: !translationOff,
-    readerOnly: !translationOff,
+    // Reader-only keeps its say under the trim now (D162): with a pair the
+    // ordinary pages read again, and this is the switch that decides. It
+    // still goes when every page is a launcher (no pair) or left alone
+    // entirely (the no-bubble sub-option).
+    readerOnly: !translationOff || (pair && !bubbleOff),
     // Always, and it is the one switch that stays: it is the way back, and a
     // mode with no way out of it in the surface that turned it on would be a
     // trap. The row it sits in is the last before the settings, where the

@@ -42,7 +42,7 @@
   "action_update": { "message": "Update" },
 
   "error_engine_missing": { "message": "No translation engine yet - this build cannot translate." },
-  "error_model_missing": { "message": "No model for this language pair on this device - download or add one in the settings. And to read without translation, switch on \"Use without translation\" there - you can still add a monolingual dictionary." },
+  "error_model_missing": { "message": "No model for this language pair on this device - download or add one in the settings. And to read without machine translation, switch on \"Use without a translation model\" there - your dictionaries still answer, and you save phrases from their meanings." },
   "error_unsupported_pair": { "message": "No model exists for this language pair." },
   "error_too_long": { "message": "That selection is too long to translate." },
   "error_no_page": { "message": "There is no page to read here - open an article and press the button again." },
@@ -102,7 +102,7 @@
     "description": "Stands in the popup where the pair select would be, while no model is stored. The whole row is a button that opens the settings page."
   },
   "popup_translation_off": {
-    "message": "Translation is switched off - re/read is working as a reader.",
+    "message": "Machine translation is off - the reader and your dictionaries keep working.",
     "description": "Stands in the popup where the pair row would be while the translation-off setting (D120) is on. A plain note, not a button - since D128 the switch itself is a few rows below, so the note no longer points at the settings."
   },
 
@@ -1008,17 +1008,17 @@
     "description": "A pair-select line whose pair only an installed dictionary vouches for - no model on the device serves it."
   },
   "options_pair_hint_quiet": {
-    "message": "With translation off, the pair says which language you are reading and where saved phrases are kept. Pairs come from installed models and dictionaries.",
+    "message": "Without a translation model, the pair says which language you are reading and where saved phrases are kept. Pairs come from installed models and dictionaries.",
     "description": "The pair row's hint while translation is switched off, replacing options_pair_hint."
   },
   "options_reading_pair_quiet": {
-    "message": "Reading $FROM$ - translation is off, and saved phrases are kept under this pair.",
+    "message": "Reading $FROM$ - machine translation is off, and saved phrases are kept under this pair.",
     "placeholders": { "from": { "content": "$1", "example": "English" } },
     "description": "Status line after choosing a pair while translation is switched off."
   },
   "options_reader_only": { "message": "Only in the reader" },
   "options_reader_only_hint": {
-    "message": "Limits translation to the reader. Selecting text on an ordinary web page will only show an option to open the page in the reader. On Android and iOS it is on by default."
+    "message": "Limits the bubble to the reader. Selecting text on an ordinary web page will only show an option to open the page in the reader. On Android and iOS it is on by default."
   },
   "options_keep_articles": { "message": "Save in the offline reading list by default" },
   "options_keep_articles_hint": {
@@ -1027,9 +1027,9 @@
   "options_quiet_bubble_hint": {
     "message": "Shows only the translated text in the bubble. The action buttons (such as copy or save) appear only when you click or tap the bubble."
   },
-  "options_no_translation": { "message": "Use without translation" },
+  "options_no_translation": { "message": "Use without a translation model" },
   "options_no_translation_hint": {
-    "message": "Hides translation features (bubble, underlines, saved phrases). Ideal for reading in your native language. The reader, offline reading list, highlighter and dictionaries remain active. Your saved data is not deleted and will return when you turn this off."
+    "message": "Turns off machine translation (the model). The reader, the offline reading list and the highlighter keep working. With a language pair chosen, the bubble still shows dictionary meanings, and you can save phrases and see their underlines. Ideal for reading with dictionaries or in your native language. Your saved data is not deleted and returns when you turn this off."
   },
   "options_bubble_off": { "message": "No bubble when selecting text" },
   "options_bubble_off_hint": {

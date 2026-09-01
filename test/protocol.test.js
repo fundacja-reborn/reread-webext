@@ -4,6 +4,7 @@ import { describe, it } from "node:test";
 import {
   ErrorCode,
   Message,
+  asDictEntries,
   asPage,
   asPageInfo,
   asPageRequest,
@@ -13,6 +14,29 @@ import {
   fail,
   ok,
 } from "../src/lib/protocol.js";
+
+describe("asDictEntries", () => {
+  it("keeps the entries that can be rendered and drops the rest", () => {
+    // The `look-up` answer's own door (D162) - the same narrowing the
+    // translation's entries have always gone through, exported for it.
+    const kept = asDictEntries([
+      { dictionary: "WikDict", headword: "watch", senses: ["zegarek"] },
+      { dictionary: 7, headword: null, senses: ["still shown"] },
+      { dictionary: "broken", headword: "x", senses: [] },
+      { dictionary: "broken", headword: "x" },
+      "not an entry",
+    ]);
+    assert.deepEqual(kept, [
+      { dictionary: "WikDict", headword: "watch", senses: ["zegarek"] },
+      { dictionary: "", headword: "", senses: ["still shown"] },
+    ]);
+  });
+
+  it("answers nothing for a shape that is not a list", () => {
+    assert.deepEqual(asDictEntries(undefined), []);
+    assert.deepEqual(asDictEntries({ dictionary: "x" }), []);
+  });
+});
 
 describe("asTranslation", () => {
   const ENTRY = { dictionary: "Test", headword: "bank", senses: ["brzeg", "instytucja"] };
@@ -241,6 +265,15 @@ describe("asRequest", () => {
     });
     assert.equal(asRequest({ kind: Message.FORGET_PHRASE }), null);
     assert.equal(asRequest({ kind: Message.FORGET_PHRASE, text: 42 }), null);
+  });
+
+  it("accepts a look-up, and only with the text (D162)", () => {
+    assert.deepEqual(asRequest({ kind: Message.LOOK_UP, text: "bank" }), {
+      kind: Message.LOOK_UP,
+      text: "bank",
+    });
+    assert.equal(asRequest({ kind: Message.LOOK_UP }), null);
+    assert.equal(asRequest({ kind: Message.LOOK_UP, text: 42 }), null);
   });
 
   it("rejects a translate request without text", () => {

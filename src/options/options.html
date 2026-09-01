@@ -176,13 +176,15 @@
            they are answers, not descriptions. -->
       <div class="row">
         <label class="row-toggle">
-          <span class="row-name" data-i18n="options_no_translation">Use without translation</span>
+          <span class="row-name" data-i18n="options_no_translation">Use without a translation model</span>
           <input type="checkbox" id="no-translation" />
         </label>
         <p class="row-note" data-fold data-i18n="options_no_translation_hint">
-          Hides translation features (bubble, underlines, saved phrases). Ideal for reading in your
-          native language. The reader, offline reading list, highlighter and dictionaries remain
-          active. Your saved data is not deleted and will return when you turn this off.
+          Turns off machine translation (the model). The reader, the offline reading list and the
+          highlighter keep working. With a language pair chosen, the bubble still shows dictionary
+          meanings, and you can save phrases and see their underlines. Ideal for reading with
+          dictionaries or in your native language. Your saved data is not deleted and returns when
+          you turn this off.
         </p>
       </div>
       <!-- The switch's one sub-option (D149), shown only while it is on
@@ -226,7 +228,7 @@
           <span data-i18n="options_pair_hint_rest">section below.</span>
         </p>
         <p class="row-note no-translation-only" data-i18n="options_pair_hint_quiet">
-          With translation off, the pair says which language you are reading and where saved
+          Without a translation model, the pair says which language you are reading and where saved
           phrases are kept. Pairs come from installed models and dictionaries.
         </p>
       </div>
@@ -303,16 +305,17 @@
       <!-- The whole first line is the label, so a press anywhere on it flips
            the switch; the note keeps its own, unclickable line below - a
            paragraph is too easy to brush against on a phone. -->
-      <!-- `translation-only`: with translation off every ordinary page is a
-           launcher page already, and a switch with no other side is not a
-           choice - the question this row asks has dissolved (D120). -->
-      <div class="row translation-only">
+      <!-- Not `translation-only` any more (D162): with the model switched off
+           the bubble still works wherever a pair is chosen - the dictionaries
+           answer - so the question this row asks stands in both modes, and
+           hiding it was what overrode it. -->
+      <div class="row">
         <label class="row-toggle">
           <span class="row-name" data-i18n="options_reader_only">Only in the reader</span>
           <input type="checkbox" id="reader-only" />
         </label>
         <p class="row-note" data-fold data-i18n="options_reader_only_hint">
-          Limits translation to the reader. Selecting text on an ordinary web page will only show an
+          Limits the bubble to the reader. Selecting text on an ordinary web page will only show an
           option to open the page in the reader. On Android and iOS it is on by default.
         </p>
       </div>

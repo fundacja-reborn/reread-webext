@@ -23,6 +23,7 @@
  */
 export const Message = Object.freeze({
   TRANSLATE: "translate",
+  LOOK_UP: "look-up",
   OPEN_READER: "open-reader",
   OPEN_LIBRARY: "open-library",
   OPEN_MARKS: "open-marks",
@@ -116,6 +117,13 @@ export const ErrorCode = Object.freeze({
  * exists on the wire and nowhere else - no request stores it, which is what O2
  * decided about context in the database and this does not reopen.
  *
+ * `look-up` is the dictionaries alone (D162): what the quiet vocabulary asks
+ * from a page that has no database in reach - the reader page reads its own.
+ * It carries the text and nothing else, for `translate`'s reason: the pair
+ * lives in the settings, and the background answers in its source language.
+ * The answer is `DictEntry[]`; no pair chosen answers an honest empty list,
+ * not an error - the bubble it feeds stands on its own two buttons either way.
+ *
  * Saving replaces the meanings of a phrase with the ones given, which is what
  * makes "the phrase means exactly what the bubble is showing" one rule instead
  * of two messages.
@@ -149,6 +157,7 @@ export const ErrorCode = Object.freeze({
  * to trust an import that says nothing else.
  *
  * @typedef {{ kind: typeof Message.TRANSLATE, text: string, context?: string }} TranslateRequest
+ * @typedef {{ kind: typeof Message.LOOK_UP, text: string }} LookUpRequest
  * @typedef {{ kind: typeof Message.OPEN_READER, sourceTabId?: number }} OpenReaderRequest
  * @typedef {{ kind: typeof Message.OPEN_LIBRARY }} OpenLibraryRequest
  * @typedef {{ kind: typeof Message.OPEN_MARKS }} OpenMarksRequest
@@ -162,6 +171,7 @@ export const ErrorCode = Object.freeze({
  * @typedef {{ added: number, skipped: number, invalid: number }} ImportReport
  * @typedef {{ kind: typeof Message.READ_PAGE }} ReadPageRequest
  * @typedef {TranslateRequest
+ *   | LookUpRequest
  *   | OpenReaderRequest
  *   | OpenLibraryRequest
  *   | OpenMarksRequest
@@ -261,7 +271,7 @@ export function asTranslation(value) {
   // has something behind it is a state nobody should have to make sense of.
   const second = answer.length > 0 && typeof sentence === "string" ? sentence : null;
 
-  return { gloss: answer, sentence: second, entries: answer.length > 0 ? asEntries(entries) : [] };
+  return { gloss: answer, sentence: second, entries: answer.length > 0 ? asDictEntries(entries) : [] };
 }
 
 /**
@@ -273,10 +283,14 @@ export function asTranslation(value) {
  * an older version that sent something else" is exactly where a bubble would
  * throw into somebody's page.
  *
+ * Exported since D162: a `look-up` answer is exactly this list, and the
+ * content script receiving one narrows it here - the same door the
+ * translation's entries have always come through.
+ *
  * @param {unknown} value
  * @returns {DictEntry[]}
  */
-function asEntries(value) {
+export function asDictEntries(value) {
   if (!Array.isArray(value)) return [];
 
   /** @type {DictEntry[]} */
@@ -336,6 +350,11 @@ export function asRequest(message) {
     return typeof context === "string"
       ? { kind: Message.TRANSLATE, text, context }
       : { kind: Message.TRANSLATE, text };
+  }
+
+  if (kind === Message.LOOK_UP) {
+    if (typeof text !== "string") return null;
+    return { kind: Message.LOOK_UP, text };
   }
 
   if (kind === Message.FORGET_PHRASE) {

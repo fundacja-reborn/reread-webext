@@ -28,7 +28,7 @@
 
 import { followTheme } from "../lib/appearance.js";
 import { webext } from "../lib/browser.js";
-import { effectiveReaderOnly, platformOs, readConfig, writeConfig } from "../lib/config.js";
+import { chosenPair, effectiveReaderOnly, platformOs, readConfig, writeConfig } from "../lib/config.js";
 import { localizePage, t } from "../lib/i18n.js";
 import { pairLabel } from "../lib/language.js";
 import { listModels } from "../lib/models/store.js";
@@ -319,6 +319,7 @@ function showRows(config, installed) {
     translationOff: config.translationOff,
     bubbleOff: config.bubbleOff,
     fresh: installed === 0,
+    pair: chosenPair(config) !== null,
   });
   // The site row is revealed by the page's own answer (`renderSite`), which
   // arrives after this; the rule is kept for it - and applied here too, for
