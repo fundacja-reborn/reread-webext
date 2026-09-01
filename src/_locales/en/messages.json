@@ -1017,7 +1017,7 @@
   },
   "options_reader_only": { "message": "Only in the reader" },
   "options_reader_only_hint": {
-    "message": "Limits the bubble to the reader. Selecting text on an ordinary web page will only show an option to open the page in the reader. On Android and iOS it is on by default."
+    "message": "Limits the underlining of saved phrases and the translation bubble to the reader. Selecting text on an ordinary web page will only show an option to open the page in the reader. On Android and iOS it is on by default."
   },
   "options_keep_articles": { "message": "Save in the offline reading list by default" },
   "options_keep_articles_hint": {

@@ -1116,7 +1116,7 @@
   },
   "options_reader_only": { "message": "Tylko w widoku czytania" },
   "options_reader_only_hint": {
-    "message": "Ogranicza dymek do widoku czytania. Zaznaczenie tekstu na zwykłej stronie pokaże jedynie przycisk do otwarcia jej w widoku czytania. Na Androidzie i iOS opcja jest domyślnie włączona."
+    "message": "Ogranicza podkreślenia zapisanych fraz i dymek tłumaczenia do widoku czytania. Zaznaczenie tekstu na zwykłej stronie pokaże jedynie przycisk do otwarcia jej w widoku czytania. Na Androidzie i iOS opcja jest domyślnie włączona."
   },
   "options_keep_articles": { "message": "Zapisuj domyślnie w czytelni offline" },
   "options_keep_articles_hint": {
