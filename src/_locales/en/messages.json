@@ -320,6 +320,10 @@
   "color_green": { "message": "Green" },
   "color_blue": { "message": "Blue" },
   "color_pink": { "message": "Pink" },
+  "reader_footnote_aria": {
+    "message": "Footnote $MARK$",
+    "placeholders": { "mark": { "content": "$1", "example": "1" } }
+  },
   "reader_listen": { "message": "Read aloud" },
   "reader_voice": { "message": "Voice" },
   "reader_speed": { "message": "Speed" },

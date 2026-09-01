@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
+import { NOTE_TEXT_LIMIT } from "../src/lib/book/notes.js";
 import { buildArticle } from "../src/lib/reader/article.js";
 import { allowedAttributes, decide, safeHref } from "../src/lib/reader/sanitize.js";
 
@@ -190,6 +191,22 @@ describe("rebuilding an article", () => {
     assert.equal(rebuild(source), "<div><a>click me</a><a>or me</a></div>");
   });
 
+  it("carries the footnote's text through, capped on every pass", () => {
+    // `data-note` is the one attribute of our own making (book/notes.js):
+    // inert prose the popover shows through textContent. The cap here is the
+    // boundary's half of letting it through at all - the rebuild also walks
+    // live pages, and no page may ride an oversized value into the reader.
+    const source = el("body", {}, [
+      el("p", {}, [el("a", { "data-note": "The note's text." }, [text("1")])]),
+      el("p", {}, [el("a", { "data-note": "y".repeat(NOTE_TEXT_LIMIT * 2) }, [text("2")])]),
+    ]);
+
+    const rebuilt = rebuild(source);
+    assert.ok(rebuilt.includes("<a data-note=\"The note's text.\">1</a>"));
+    const capped = /data-note="(y+)"/.exec(rebuilt);
+    assert.equal(capped?.[1]?.length, NOTE_TEXT_LIMIT);
+  });
+
   it("ignores comments and empty text", () => {
     const source = el("body", {}, [comment(), text(""), el("p", {}, [text("kept")])]);
 
@@ -292,7 +309,9 @@ describe("the allow list itself", () => {
 
   it("offers lang and dir on anything, and the rest per element", () => {
     assert.deepEqual(allowedAttributes("p"), ["lang", "dir"]);
-    assert.deepEqual(allowedAttributes("A"), ["href", "lang", "dir"]);
+    // `data-note` is the footnote carrier, ours and inert (book/notes.js) -
+    // the one attribute on this list the web did not define.
+    assert.deepEqual(allowedAttributes("A"), ["href", "data-note", "lang", "dir"]);
     assert.ok(allowedAttributes("td").includes("colspan"));
   });
 

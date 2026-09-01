@@ -919,6 +919,10 @@ function renderArticle(piece) {
   }
   updateTocButtons();
   applyLinkStops(settings.reader.links);
+  // The footnote marks of the text that just stood up - and whatever note
+  // was open belonged to the text that just left.
+  hideNotePopover();
+  applyNoteMarks();
   if (library !== null) library.hidden = true;
   if (marksSection !== null) marksSection.hidden = true;
   marksShown = null;
@@ -2776,6 +2780,8 @@ function leaveDocView() {
   stopMarkSpeech();
   updateListen();
   updateChromeTab();
+  // An open footnote was about the text leaving the screen.
+  hideNotePopover();
   // The pen goes away with the article: the list has nothing to mark, and
   // whatever paint stood was about blocks no longer on screen.
   setMarker(false);
@@ -5704,6 +5710,103 @@ webext().runtime.onMessage.addListener((message, _sender, sendResponse) => {
   return false;
 });
 
+// Footnotes (mobileread request, accepted plan): a book's noterefs arrive as
+// `a[data-note]` - the note's text resolved at import (import-book.js), no
+// href, no navigation. A press opens the text in a small popover beside the
+// mark; the next press, a press anywhere else, or Escape takes it away.
+// One popover, reused - created on first use, filled through textContent
+// alone, absolutely positioned so it rides the document with its mark.
+
+/** @type {HTMLElement | null} */
+let notePopover = null;
+/** The mark the popover stands by; its aria-expanded is the state. */
+/** @type {Element | null} */
+let noteMarkShown = null;
+
+function hideNotePopover() {
+  if (notePopover !== null) notePopover.hidden = true;
+  noteMarkShown?.setAttribute("aria-expanded", "false");
+  noteMarkShown = null;
+}
+
+/** @param {Element} mark */
+function showNotePopover(mark) {
+  if (notePopover === null) {
+    notePopover = document.createElement("div");
+    notePopover.className = "note-popover";
+    // Plain prose, announced as a note; focus stays on the mark, whose
+    // aria-expanded says what happened.
+    notePopover.setAttribute("role", "note");
+    document.body.append(notePopover);
+  }
+  noteMarkShown?.setAttribute("aria-expanded", "false");
+  notePopover.textContent = mark.getAttribute("data-note") ?? "";
+  notePopover.hidden = false;
+  noteMarkShown = mark;
+  mark.setAttribute("aria-expanded", "true");
+
+  // Placed after the text is in, because width decides height. Below the
+  // mark, clamped to the window's edges; above it only when below would
+  // run off the screen and above actually fits.
+  const rect = mark.getBoundingClientRect();
+  notePopover.style.left = "0px";
+  notePopover.style.top = "0px";
+  const box = notePopover.getBoundingClientRect();
+  const width = document.documentElement.clientWidth;
+  const left = Math.max(8, Math.min(rect.left, width - box.width - 8));
+  let top = rect.bottom + 6;
+  if (top + box.height > window.innerHeight && rect.top - 6 - box.height > 0) {
+    top = rect.top - 6 - box.height;
+  }
+  notePopover.style.left = `${left + window.scrollX}px`;
+  notePopover.style.top = `${top + window.scrollY}px`;
+}
+
+/** @param {Element} mark */
+function toggleNotePopover(mark) {
+  if (noteMarkShown === mark) hideNotePopover();
+  else showNotePopover(mark);
+}
+
+/**
+ * The marks dressed for the hand and the keyboard, after every render: an
+ * anchor without an href is not focusable on its own, and a screen reader
+ * should hear what the little number does.
+ */
+function applyNoteMarks() {
+  if (contentElement === null) return;
+  for (const mark of contentElement.querySelectorAll("a[data-note]")) {
+    mark.setAttribute("tabindex", "0");
+    mark.setAttribute("role", "button");
+    mark.setAttribute("aria-expanded", "false");
+    mark.setAttribute("aria-label", t("reader_footnote_aria", (mark.textContent ?? "").trim()));
+  }
+}
+
+// A press anywhere else puts the note away - except on the mark itself,
+// whose click is about to toggle it (closing here would reopen it there).
+document.addEventListener("pointerdown", (event) => {
+  if (noteMarkShown === null) return;
+  const target = event.target;
+  if (target instanceof Node && notePopover?.contains(target) === true) return;
+  if (target instanceof Node && noteMarkShown.contains(target)) return;
+  hideNotePopover();
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && noteMarkShown !== null) hideNotePopover();
+});
+
+// The keyboard's press on a mark: role=button promises Enter and Space, and
+// an anchor without an href delivers neither on its own.
+contentElement?.addEventListener("keydown", (event) => {
+  if (event.key !== "Enter" && event.key !== " ") return;
+  const mark = event.target instanceof Element ? event.target.closest("a[data-note]") : null;
+  if (mark === null) return;
+  event.preventDefault();
+  toggleNotePopover(mark);
+});
+
 // A link set to plain text must not answer a press (D95): the stylesheet took
 // its dress, this takes its click - including the Enter of a focus restored by
 // other means, which arrives here as a click too. `auxclick` besides, because
@@ -5711,6 +5814,14 @@ webext().runtime.onMessage.addListener((message, _sender, sendResponse) => {
 // press time, so the switch in the panel needs no rewiring here.
 /** @param {MouseEvent} event */
 function onArticleLink(event) {
+  // A footnote mark answers in place, whatever the links mode says - it is
+  // not a link any more, and nothing about it navigates.
+  const mark = event.target instanceof Element ? event.target.closest("a[data-note]") : null;
+  if (mark !== null) {
+    event.preventDefault();
+    if (event.type === "click" && event.button === 0) toggleNotePopover(mark);
+    return;
+  }
   if (settings.reader.links !== "plain") return;
   const pressed = event.target instanceof Element ? event.target.closest("a[href]") : null;
   if (pressed !== null) event.preventDefault();

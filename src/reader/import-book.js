@@ -26,14 +26,23 @@
  * Links lose their `href` wholesale: with no base URL to resolve against,
  * `safeHref` refuses every one - internal and external alike - and what
  * remains is the link's text. Deliberate, not incidental: the brief puts
- * links-as-mechanism (footnotes, the book's own TOC page) out of scope, and
- * a book is prose to read, not a page to leave. The reader's table of
- * contents (D116) is not these links: it is built here from the h1-h3
- * blocks as segments are written - the same headings the segmenter cuts
- * before - and stored on the book row.
+ * links-as-mechanism (the book's own TOC page, cross-references) out of
+ * scope, and a book is prose to read, not a page to leave. The reader's
+ * table of contents (D116) is not these links: it is built here from the
+ * h1-h3 blocks as segments are written - the same headings the segmenter
+ * cuts before - and stored on the book row.
+ *
+ * Footnotes are the one exception now (mobileread request, accepted plan):
+ * a reference recognized as one (`lib/book/notes.js` holds the rules) gets
+ * its note's text resolved RIGHT HERE and carried on the marker as
+ * `data-note` - still no href, no id, no navigation; the render turns the
+ * mark into a small popover. Resolved at import because the segments cut
+ * the book apart and the sanitizer strips every id: by render time there is
+ * nothing left to follow, so the text has to ride along now.
  */
 
 import { packableBlocks } from "../lib/book/blocks.js";
+import { cleanNoteText, internalTarget, isNoteref } from "../lib/book/notes.js";
 import {
   containerOpfPath,
   decodeXml,
@@ -81,6 +90,49 @@ function parseXml(text) {
 /** A breath for the event loop between spine entries. */
 function yieldToUi() {
   return new Promise((resolve) => setTimeout(resolve, 0));
+}
+
+/**
+ * The block whose text stands for a note: the target itself when it is a
+ * block, otherwise the nearest one around it - a note's id often sits on a
+ * `<sup>` or an empty anchor inside the paragraph that IS the note.
+ */
+const NOTE_BLOCKS = "p, li, dd, aside, blockquote, td, div, section, footer";
+
+/**
+ * Footnote references of one chapter, resolved to their notes' text and
+ * carried as `data-note` on the marker (see the header). The walk runs on
+ * the parsed chapter BEFORE `buildArticle`, because the rebuild is what
+ * strips the hrefs and ids this needs to read.
+ *
+ * The rules are `lib/book/notes.js`'s; this is only the DOM around them.
+ * Recognition is checked before any target is materialized, so the book's
+ * own TOC page - hundreds of internal links whose text is words - never
+ * costs a single extra parse.
+ *
+ * @param {Document} chapter parsed, inert (DOMParser has no browsing context)
+ * @param {string} chapterPath the chapter's own path inside the archive
+ * @param {(path: string | null) => Document | null} readDoc another file of
+ *   the book, parsed - cached by the caller, null for a path the archive
+ *   does not hold
+ */
+function annotateNoterefs(chapter, chapterPath, readDoc) {
+  const chapterDir = opfDirectory(chapterPath);
+  for (const anchor of chapter.querySelectorAll("a[href]")) {
+    if (!isNoteref(anchor.getAttribute("epub:type"), anchor.textContent ?? "")) continue;
+    const target = internalTarget(anchor.getAttribute("href"));
+    if (target === null) continue;
+
+    const resolved = target.path === null ? chapterPath : resolveZipPath(chapterDir, target.path);
+    const where = resolved === chapterPath ? chapter : readDoc(resolved);
+    const found = where === null ? null : where.getElementById(target.id);
+    if (found === null) continue;
+
+    const block = found.closest(NOTE_BLOCKS) ?? found;
+    const text = cleanNoteText(block.textContent ?? "");
+    if (text.length === 0) continue;
+    anchor.setAttribute("data-note", text);
+  }
 }
 
 /**
@@ -145,6 +197,28 @@ export async function importEpub(file, onSegment) {
 
     const baseDir = opfDirectory(opfPath);
     const packer = /** @type {ReturnType<typeof segmenter<string>>} */ (segmenter());
+
+    // Other files of the book, parsed for footnote targets - most books keep
+    // every note in one or two files, so the cache is tiny; capped all the
+    // same, because this pipeline's shape is streaming and a book that
+    // scatters targets must not pull itself whole into memory.
+    /** @type {Map<string, Document | null>} */
+    const noteDocs = new Map();
+    /** @param {string | null} path */
+    const readNoteDoc = (path) => {
+      if (path === null) return null;
+      const held = noteDocs.get(path);
+      if (held !== undefined) return held;
+      if (noteDocs.size >= 4) {
+        const oldest = noteDocs.keys().next().value;
+        if (oldest !== undefined) noteDocs.delete(oldest);
+      }
+      const bytes = entry(path);
+      const doc =
+        bytes === null ? null : new DOMParser().parseFromString(decodeXml(bytes), "text/html");
+      noteDocs.set(path, doc);
+      return doc;
+    };
     let written = 0;
     let totalChars = 0;
     /** @type {import("../lib/book/toc.js").TocEntry[]} */
@@ -176,13 +250,16 @@ export async function importEpub(file, onSegment) {
       // A spine that names an entry the archive does not hold is a broken
       // book; importing it minus a chapter would be corruption dressed as
       // success.
-      if (data === null) throw new Error(`spine entry missing: ${href}`);
+      if (path === null || data === null) throw new Error(`spine entry missing: ${href}`);
 
       // The HTML parser rather than the XML one: it cannot fail, and the
       // rebuild walks whatever it produces through the allowed list anyway.
       // The empty base is what strips every link (see the header): `safeHref`
       // cannot resolve anything against it, so no `href` survives the walk.
       const chapter = new DOMParser().parseFromString(decodeXml(data), "text/html");
+      // Before the rebuild, while the hrefs and the targets' ids still exist
+      // (see the header): the footnotes' text onto their markers.
+      annotateNoterefs(chapter, path, readNoteDoc);
       const rebuilt = buildArticle(chapter.body, document, { baseUrl: "" });
       // `packableBlocks` rather than the root's children: EPUB chapters
       // usually wrap all their markup in one `<div>`, and packing that as a
