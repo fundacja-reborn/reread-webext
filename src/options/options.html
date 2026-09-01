@@ -210,16 +210,24 @@
            hundred pairs made the select unusable. The line below is the way
            to the rest; with no model at all the select explains itself with
            one disabled line. -->
-      <div class="row row-stack translation-only">
+      <!-- Not `translation-only` any more (D158): with translation off the
+           pair is still where saved phrases are filed and what the
+           dictionaries answer for, so the row stays - only its hint swaps
+           for the quiet one below. -->
+      <div class="row row-stack">
         <label class="row-name" for="pair" data-i18n="language_pair">Language pair</label>
         <select id="pair"></select>
-        <p class="row-note" data-fold>
+        <p class="row-note translation-only" data-fold>
           <span data-i18n="options_pair_hint"
             >Shows the language pairs downloaded to this device. To add new languages, download
             them in the</span
           >
           <a href="#translation-models" data-i18n="options_models_heading">Translation models</a>
           <span data-i18n="options_pair_hint_rest">section below.</span>
+        </p>
+        <p class="row-note no-translation-only" data-i18n="options_pair_hint_quiet">
+          With translation off, the pair says which language you are reading and where saved
+          phrases are kept. Pairs come from installed models and dictionaries.
         </p>
       </div>
       <div class="row row-stack translation-only">

@@ -271,7 +271,7 @@ async function refreshList() {
     // finishes anyway - with this fresher list, because it is read then.
     // The select alone must not wait for that.
     if (running === null && !importing) await renderModels();
-    else renderPair(modelRows(await listModels(), availableModels()));
+    else await renderPair(modelRows(await listModels(), availableModels()));
   } finally {
     refreshing = false;
   }
@@ -1064,19 +1064,23 @@ async function download(row, model) {
 /**
  * The pair being read, and the only place it can be changed.
  *
- * The choices are the pairs that can actually translate: the models on this
- * device (see `pairChoices` for the rules, the configured-but-deleted edge
- * included). With nothing installed the select explains itself with one
- * disabled line - the note under it points at the models section either way,
- * and downloading the first model sets the pair by itself.
+ * The choices are the pairs a phrase can be filed and answered under: the
+ * models on this device, and the installed dictionaries' pairs (D158 - with
+ * translation off the vocabulary lives on the dictionaries alone, so their
+ * pairs must be choosable; see `pairChoices` for the rules, the
+ * configured-but-deleted edge included). A pair only a dictionary vouches
+ * for says so on its own line. With nothing installed the select explains
+ * itself with one disabled line - the notes under it point at the sections
+ * below either way, and the first model or dictionary sets the pair by
+ * itself.
  *
  * @param {import("../lib/models/registry.js").ModelRow[]} rows
  */
-function renderPair(rows) {
+async function renderPair(rows) {
   const select = document.getElementById("pair");
   if (!(select instanceof HTMLSelectElement)) return;
 
-  const choices = pairChoices(rows, config);
+  const choices = pairChoices(rows, config, await listDictionaries());
   select.replaceChildren();
   select.disabled = choices.length === 0;
 
@@ -1092,7 +1096,9 @@ function renderPair(rows) {
   for (const row of choices) {
     const option = document.createElement("option");
     option.value = row.pair;
-    option.textContent = pairLabel(row.from, row.to);
+    option.textContent = row.dictionaryOnly
+      ? t("options_pair_dictionary_only", pairLabel(row.from, row.to))
+      : pairLabel(row.from, row.to);
     option.selected = row.from === config.sourceLang && row.to === config.targetLang;
     select.append(option);
   }
@@ -1103,7 +1109,9 @@ function renderPair(rows) {
  */
 async function choosePair(pair) {
   const rows = modelRows(await listModels(), availableModels());
-  const row = rows.find((candidate) => candidate.pair === pair);
+  const row = pairChoices(rows, config, await listDictionaries()).find(
+    (candidate) => candidate.pair === pair,
+  );
   if (row === undefined) return;
 
   config = await writeConfig({ sourceLang: row.from, targetLang: row.to });
@@ -1111,10 +1119,18 @@ async function choosePair(pair) {
   // for the vocabulary of the new pair, so nothing here has to tell them.
   await renderModels();
   await renderCatalog();
+  const modelHere = rows.some(
+    (candidate) => candidate.pair === pair && candidate.installed !== null,
+  );
+  // With translation off the missing model is not missing anything - the
+  // trim never asks the engine, and a warning about it would send somebody
+  // to a section the switch has folded away.
   status(
-    row.installed === null
-      ? t("options_reading_pair_missing", [languageName(row.from), languageName(row.to)])
-      : t("options_reading_pair", [languageName(row.from), languageName(row.to)]),
+    config.translationOff
+      ? t("options_reading_pair_quiet", languageName(row.from))
+      : modelHere
+        ? t("options_reading_pair", [languageName(row.from), languageName(row.to)])
+        : t("options_reading_pair_missing", [languageName(row.from), languageName(row.to)]),
   );
 }
 
@@ -1204,7 +1220,7 @@ async function renderModels() {
 
   // The select's choices ride the same read: a download or a delete lands in
   // the select at the very render that shows it in the list, with no reload.
-  renderPair(rows);
+  await renderPair(rows);
 
   // The model half of the first-steps verdict, from the store itself rather
   // than the view rows - the rows answer "what to draw", not "what is here".
@@ -1775,6 +1791,9 @@ async function removeDictionary(dictionary, button) {
     importing = false;
   }
   await renderCatalog();
+  // The pair select lists the dictionaries' pairs too (D158), and one of
+  // them may have just left with its last book.
+  await renderPair(modelRows(await listModels(), availableModels()));
   focusDeleteIn("dictionary-catalog", "dictionary-filter", at);
 }
 
@@ -2232,7 +2251,27 @@ async function runImport(opened, dictionary, { say, progress }) {
 
   const unreadable = summary.skipped === 0 ? "" : ` ${plural(summary.skipped, "options_skipped_entries")}`;
   say(t("options_added_dictionary", [ready.name, words(ready.entryCount), megabytes(ready.bytes)]) + unreadable);
+  await adoptDictionaryPair(ready.langFrom, ready.langTo);
+  // The pair select lists the dictionaries' pairs too (D158): a fresh pair
+  // lands in it with the book that brought it.
+  await renderPair(modelRows(await listModels(), availableModels()));
   return true;
+}
+
+/**
+ * A dictionary arriving on a device with no pair chosen brings its pair,
+ * the way the first model does (`adoptFirstPair`): whoever just imported an
+ * en->en dictionary plainly means to read English, and the quiet vocabulary
+ * (D158) needs a pair to file phrases under before anything can be saved
+ * without the engine. A chosen pair is never touched - by then it is a real
+ * choice, already made.
+ *
+ * @param {string} from
+ * @param {string} to
+ */
+async function adoptDictionaryPair(from, to) {
+  if (config.sourceLang !== null) return;
+  config = await writeConfig({ sourceLang: from, targetLang: to });
 }
 
 async function addSelectedDictionary() {
@@ -2382,7 +2421,7 @@ async function refresh() {
     await renderModels();
     await renderCatalog();
   } else {
-    renderPair(modelRows(await listModels(), availableModels()));
+    await renderPair(modelRows(await listModels(), availableModels()));
   }
 }
 

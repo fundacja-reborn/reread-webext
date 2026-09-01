@@ -1103,7 +1103,18 @@
   "reader_marks_missing_doc": { "message": "Ten dokument nie jest już zapisany - cytat wrócił z kopii. Otwórz stronę ponownie, a zakreślenie będzie na miejscu." },
   "options_pair_hint": { "message": "Pokazuje pary językowe pobrane na to urządzenie. Aby dodać nowe języki, pobierz je w sekcji" },
   "options_pair_hint_rest": { "message": "poniżej." },
-  "options_pair_none": { "message": "Nie ma jeszcze modelu - najpierw pobierz go poniżej" },
+  "options_pair_none": { "message": "Nie ma jeszcze modelu ani słownika - dodaj któryś poniżej" },
+  "options_pair_dictionary_only": {
+    "message": "$PAIR$ (słownik)",
+    "placeholders": { "pair": { "content": "$1", "example": "angielski → angielski" } }
+  },
+  "options_pair_hint_quiet": {
+    "message": "Przy wyłączonym tłumaczeniu para mówi, w jakim języku czytasz i gdzie trzymane są zapisane frazy. Pary pochodzą z zainstalowanych modeli i słowników."
+  },
+  "options_reading_pair_quiet": {
+    "message": "Czytasz w języku: $FROM$ - tłumaczenie jest wyłączone, a zapisane frazy trafiają do tej pary.",
+    "placeholders": { "from": { "content": "$1", "example": "angielski" } }
+  },
   "options_reader_only": { "message": "Tylko w widoku czytania" },
   "options_reader_only_hint": {
     "message": "Ogranicza tłumaczenie do widoku czytania. Zaznaczenie tekstu na zwykłej stronie pokaże jedynie przycisk do otwarcia jej w widoku czytania. Na Androidzie i iOS opcja jest domyślnie włączona."

@@ -40,6 +40,7 @@ import {
   MEASURE,
   SIZE,
   TTS_RATE,
+  chosenPair,
   isFont,
   isLinks,
   isTheme,
@@ -4647,8 +4648,12 @@ function adoptConfig(config) {
   if (spoke !== canSpeak() && marksShown !== null) void refreshMarks();
   // With translation off (D120) the saved phrases page loses its door here,
   // the way it does in the popup and the settings menu - the page itself
-  // stays untouched, and unlocks with the switch.
-  if (navVocabulary !== null) navVocabulary.hidden = config.translationOff;
+  // stays untouched, and unlocks with the switch. Unless a pair is chosen:
+  // then the quiet vocabulary lives on this very page (D158), and a
+  // vocabulary being written needs its door.
+  if (navVocabulary !== null) {
+    navVocabulary.hidden = config.translationOff && chosenPair(config) === null;
+  }
 }
 
 /**

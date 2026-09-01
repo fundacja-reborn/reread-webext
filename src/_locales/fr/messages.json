@@ -840,7 +840,18 @@
   "reader_marks_missing_doc": { "message": "Son document n'est plus enregistré - cette citation est revenue de la copie. Rouvrez la page et le surlignage y sera." },
   "options_pair_hint": { "message": "Affiche les paires de langues téléchargées sur cet appareil. Pour ajouter d'autres langues, téléchargez-les dans la section" },
   "options_pair_hint_rest": { "message": "ci-dessous." },
-  "options_pair_none": { "message": "Pas encore de modèle - téléchargez-en un ci-dessous" },
+  "options_pair_none": { "message": "Pas encore de modèle ni de dictionnaire - ajoutez-en un ci-dessous" },
+  "options_pair_dictionary_only": {
+    "message": "$PAIR$ (dictionnaire)",
+    "placeholders": { "pair": { "content": "$1", "example": "anglais → anglais" } }
+  },
+  "options_pair_hint_quiet": {
+    "message": "Traduction désactivée : la paire indique la langue que vous lisez et où sont rangées les phrases enregistrées. Les paires viennent des modèles et des dictionnaires installés."
+  },
+  "options_reading_pair_quiet": {
+    "message": "Vous lisez $FROM$ - la traduction est désactivée, les phrases enregistrées appartiennent à cette paire.",
+    "placeholders": { "from": { "content": "$1", "example": "anglais" } }
+  },
   "options_reader_only": { "message": "Seulement dans le lecteur" },
   "options_reader_only_hint": {
     "message": "Limite la traduction au lecteur. Sélectionner du texte sur une page web ordinaire proposera uniquement de l'ouvrir dans le lecteur. Sur Android et iOS, l'option est activée par défaut."

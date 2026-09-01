@@ -31,7 +31,7 @@
  */
 
 import { webext } from "../lib/browser.js";
-import { CONFIG_KEY, DEFAULTS, withDefaults } from "../lib/config.js";
+import { CONFIG_KEY, DEFAULTS, chosenPair, withDefaults } from "../lib/config.js";
 import { entryBlocks } from "../lib/gloss.js";
 import { t } from "../lib/i18n.js";
 import { describeError } from "../lib/messages.js";
@@ -268,6 +268,18 @@ let quietVoice = null;
 let bubbleScheme = null;
 
 /**
+ * Whether the vocabulary lives without the engine (D158): the trim is on, a
+ * pair is chosen to file phrases under, and this is the reader's page - the
+ * one place with the dictionaries in reach (`quietLookup` is the reader's
+ * hand, D121). Then the mirror is adopted, saved phrases underline and
+ * recall, dictionary lines are presses again and the pencil takes a
+ * hand-typed meaning - all without a model. On somebody else's page the trim
+ * keeps its whole silence (D120): that quiet is what the content script
+ * pays for `<all_urls>` with, and it stands.
+ */
+let quietVocabulary = false;
+
+/**
  * The bubble-size knob (D85), mirrored the same way: every show hands the
  * bubble a plain factor, and the settings page changing it reaches every open
  * page through the storage listener already paid for.
@@ -472,7 +484,11 @@ async function loadVocabulary(preloaded) {
     // underlined, no mirror is adopted and the background is never asked.
     // An empty adopt rather than a plain return, because the switch can flip
     // over a page already painted - the underlines have to leave with it.
-    if (noTranslation) {
+    // The reader page with a chosen pair is the standing exception (D158):
+    // there the vocabulary lives without the engine, and everything below -
+    // the mirror, the underlines, the recall - answers for it as usual.
+    quietVocabulary = noTranslation && quietLookup !== null && chosenPair(config) !== null;
+    if (noTranslation && !quietVocabulary) {
       adopt([]);
       return;
     }
@@ -813,6 +829,24 @@ async function fillSecondLayer() {
   unfetched = null;
   const mine = generation;
 
+  // The quiet vocabulary's second layer (D158): there is no engine to ride,
+  // so More holds no sentence - the reader's own dictionaries are the whole
+  // extra, asked through the same hand the quiet bubble uses (D121). No
+  // pending line either: the lookup is a local read, not a round trip.
+  if (noTranslation) {
+    const entries = quietLookup === null ? [] : await quietLookup(phrase.text);
+    if (mine !== generation || !tooltip.isOpen()) return;
+    const blocks = entryBlocks(entries, phrase.normalized);
+    if (blocks.length === 0) {
+      tooltip.setContext(t("bubble_nothing_more"), "note");
+      tooltip.setEntries([]);
+      return;
+    }
+    tooltip.setContext(null);
+    tooltip.setEntries(blocks);
+    return;
+  }
+
   tooltip.setContext(t("bubble_translating"), "pending");
 
   /** @type {Promise<import("../lib/protocol.js").Result<import("../lib/protocol.js").Translation>>} */
@@ -944,7 +978,9 @@ function present(selection, { deliberate, touch, chain = false }) {
   // left is the phrase's own two acts: hearing it and copying it. Never
   // folded, whatever the quiet-bubble setting says - the two buttons are the
   // bubble's whole content, and folded away they would leave it empty.
-  if (noTranslation) {
+  // With a pair chosen on the reader page the vocabulary lives after all
+  // (D158) - that path runs below, past the recall.
+  if (noTranslation && !quietVocabulary) {
     stopSpeaking();
     unmark();
     current = { text, normalized, keepable: false };
@@ -986,6 +1022,54 @@ function present(selection, { deliberate, touch, chain = false }) {
   }
 
   if (showSaved(selection.rect, text, normalized, selection.context, { touch, range: selection.range })) return;
+
+  // The quiet vocabulary's fresh selection (D158): the same trimmed bubble,
+  // with the vocabulary's hands back - the dictionary lines are presses, the
+  // pencil takes a hand-typed meaning for the phrases no dictionary knows
+  // (they hold one- or two-word headwords), and Save stands disabled until
+  // a meaning exists. No engine ride and no automatic keep (D22 stays the
+  // translating bubble's): what lands in the vocabulary here is only ever a
+  // pressed line or a typed gloss - a person's own word, which is the trim's
+  // whole spirit. Never folded, like the trim above: Save may not hide
+  // (D131), and the entries are the answer itself.
+  if (noTranslation) {
+    stopSpeaking();
+    unmark();
+    current = { text, normalized, keepable: selection.findable };
+    secondLayer = [];
+    unfetched = null;
+    anchorRange = selection.range.cloneRange();
+    const mine = ++generation;
+    tooltip.show({
+      anchor: selection.rect,
+      line: firstLineOf(selection.range),
+      variant: "quiet",
+      body: "",
+      actions: [
+        ...speakActions(),
+        ...COPY,
+        .../** @type {import("./tooltip.js").Action[]} */ (
+          selection.findable ? ["edit", "save"] : []
+        ),
+      ],
+      phrase: text,
+      touch,
+      coarse: touchPointer(lastPointerType),
+      scale: bubbleScale / 100,
+      anchored,
+      scheme: bubbleScheme?.() ?? null,
+      // The lines write only what could be found again: an unfindable phrase
+      // gets its entries as prose, exactly the rule Save answers to.
+      choosable: selection.findable,
+    });
+    if (quietLookup !== null) {
+      void quietLookup(text).then((entries) => {
+        if (mine !== generation || !tooltip.isOpen()) return;
+        if (entries.length > 0) tooltip.setEntries(entryBlocks(entries, normalized));
+      });
+    }
+    return;
+  }
 
   // The same cut `showSaved` makes: this show does not pass through hide either.
   stopSpeaking();

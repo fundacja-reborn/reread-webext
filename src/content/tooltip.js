@@ -592,8 +592,10 @@ export const STYLE = `
      long as the gloss is being typed by hand. */
   .entry-sense:disabled { opacity: 1; cursor: default; }
   /* The quiet bubble's lines are prose, not presses (D121) - the pointer must
-     not promise a choice that does not exist. */
-  .bubble[data-variant="quiet"] .entry-sense { cursor: default; }
+     not promise a choice that does not exist. With a chosen pair the choice
+     exists after all (D158, data-choosable), and the buttons' own cursor
+     stands. */
+  .bubble[data-variant="quiet"]:not([data-choosable="true"]) .entry-sense { cursor: default; }
 
   .editor {
     display: block;
@@ -916,6 +918,9 @@ export const STYLE = `
  *  reading list (D129). `quiet` is the translation-off trim (D120):
  *  no gloss either, and the row is the speaker and the clipboard - the
  *  phrase's own two acts, all that is left without an engine.
+ *  With a pair chosen the reader hands `choosable` in and the quiet bubble
+ *  grows the vocabulary's hands back: the lines become presses and the row
+ *  carries the pencil and Save - the engine stays out of it either way.
  *  @typedef {"recall" | "save" | "launcher" | "quiet"} Variant */
 /** What the bubble can offer. `speak` and `copy` are the row's two pictures -
  *  a speaker icon that reads the phrase aloud (D83), and a copy icon that
@@ -997,7 +1002,7 @@ export const STYLE = `
  * phrase the bubble is about stays the page's own highlight (D23).
  *
  * @typedef {object} Tooltip
- * @property {(options: { anchor: DOMRect, variant: Variant, body: string, tone?: Tone, actions?: Action[], touch?: boolean, coarse?: boolean, scale?: number, folded?: boolean, anchored?: boolean, line?: number, phrase?: string, scheme?: "light" | "sepia" | "dark" | null }) => void} show
+ * @property {(options: { anchor: DOMRect, variant: Variant, body: string, tone?: Tone, actions?: Action[], touch?: boolean, coarse?: boolean, scale?: number, folded?: boolean, anchored?: boolean, line?: number, phrase?: string, scheme?: "light" | "sepia" | "dark" | null, choosable?: boolean }) => void} show
  * @property {(body: string, tone?: Tone) => void} setBody
  * @property {(sentence: string | null, tone?: Tone) => void} setContext
  * @property {(blocks: Block[]) => void} setEntries
@@ -1811,7 +1816,10 @@ export function createTooltip({ onAction, onHide, covered }) {
       // In the quiet bubble a line is prose, not a press (D121): choosing a
       // line writes a meaning (D34), and with translation off nothing writes.
       // A button that did nothing would read as a breakage, so it is not one.
-      const plain = bubble?.dataset["variant"] === "quiet";
+      // Unless the caller said the lines are choosable (D158): with a pair
+      // chosen the quiet bubble has a vocabulary to write after all.
+      const plain =
+        bubble?.dataset["variant"] === "quiet" && bubble?.dataset["choosable"] !== "true";
       for (const line of block.lines) {
         if (plain) {
           const sense = document.createElement("div");
@@ -2203,6 +2211,7 @@ export function createTooltip({ onAction, onHide, covered }) {
       line = 0,
       phrase = "",
       scheme = null,
+      choosable = false,
     }) {
       build();
       anchor = rect;
@@ -2233,6 +2242,12 @@ export function createTooltip({ onAction, onHide, covered }) {
         // reader page would dress a bubble on somebody else's page.
         if (scheme === null) delete bubble.dataset["scheme"];
         else bubble.dataset["scheme"] = scheme;
+        // Whether a quiet bubble's dictionary lines are presses (D158): the
+        // caller says so only when it has a vocabulary to write - a pair
+        // chosen, on the reader's page. Cleared for the reused bubble's sake,
+        // like the scheme above.
+        if (choosable) bubble.dataset["choosable"] = "true";
+        else delete bubble.dataset["choosable"];
         // The touch size tier, granted by the gesture itself (D84) - see the
         // stylesheet, which also answers the media query on its own. Only
         // ever forced on: taken off, the media query speaks again.

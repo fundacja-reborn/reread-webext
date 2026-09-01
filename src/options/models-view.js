@@ -193,40 +193,69 @@ export function showAllState({ total, installedCount, expanded, query }) {
 }
 
 /**
- * What the pair select offers: the pairs whose model is on this device - the
- * only pairs the engine can serve, and a shorter list than the catalogue's
- * hundred, which no native dropdown survives. Sorted by label, like every
- * list on the page.
+ * What the pair select offers: the pairs a phrase can actually be filed and
+ * answered under on this device - the installed models' (the only ones the
+ * engine can serve), and the installed dictionaries' (D158: with translation
+ * off the vocabulary lives on the dictionaries alone, and it still needs a
+ * pair to file under). A shorter list than the catalogue's hundred, which no
+ * native dropdown survives; sorted by label, like every list on the page.
  *
- * The configured pair rides along even with its model gone (deleted, or
+ * A pair only a dictionary vouches for is marked `dictionaryOnly`, so the
+ * select can say where it came from - choosing it with translation on means
+ * the model error until a model arrives, and the label should not promise
+ * otherwise.
+ *
+ * The configured pair rides along even with its stores gone (deleted, or
  * configured by hand): a settings page must never disagree with the settings.
  * Empty means nothing is installed at all - the select then explains itself
- * with one disabled line instead of offering choices that translate nothing.
+ * with one disabled line instead of offering choices that serve nothing.
  *
  * @param {ModelRow[]} rows
  * @param {{ sourceLang: string | null, targetLang: string | null }} reading
- * @returns {{ pair: string, from: string, to: string }[]}
+ * @param {Array<{ langFrom: string, langTo: string, ready: boolean }>} [dictionaries]
+ * @returns {{ pair: string, from: string, to: string, dictionaryOnly: boolean }[]}
  */
-export function pairChoices(rows, reading) {
+export function pairChoices(rows, reading, dictionaries = []) {
   const installed = rows
     .filter((row) => row.installed !== null)
-    .map((row) => ({ pair: row.pair, from: row.from, to: row.to }));
-  if (installed.length === 0) return [];
+    .map((row) => ({ pair: row.pair, from: row.from, to: row.to, dictionaryOnly: false }));
 
-  // The chosen pair is kept in the list even without its model - a control
+  // The dictionaries' pairs, minus the ones a model already offers - the
+  // model's line wins, because under it both halves of the extension work.
+  /** @type {{ pair: string, from: string, to: string, dictionaryOnly: boolean }[]} */
+  const fromBooks = [];
+  for (const book of dictionaries) {
+    if (!book.ready) continue;
+    const covered =
+      installed.some((row) => row.from === book.langFrom && row.to === book.langTo) ||
+      fromBooks.some((row) => row.from === book.langFrom && row.to === book.langTo);
+    if (covered) continue;
+    fromBooks.push({
+      pair: `${book.langFrom}${book.langTo}`,
+      from: book.langFrom,
+      to: book.langTo,
+      dictionaryOnly: true,
+    });
+  }
+
+  const offered = [...installed, ...fromBooks];
+  if (offered.length === 0) return [];
+
+  // The chosen pair is kept in the list even without its stores - a control
   // must never disagree with the settings it shows. An unchosen pair adds
-  // nothing: the select is exactly the installed models, Michał's rule.
+  // nothing: the select is exactly what is installed, Michał's rule.
   const chosen =
     reading.sourceLang !== null && reading.targetLang !== null
       ? {
           pair: `${reading.sourceLang}${reading.targetLang}`,
           from: reading.sourceLang,
           to: reading.targetLang,
+          dictionaryOnly: false,
         }
       : null;
   const known =
-    chosen === null || installed.some((row) => row.from === chosen.from && row.to === chosen.to);
-  return sortByLabel(chosen !== null && !known ? [chosen, ...installed] : installed);
+    chosen === null || offered.some((row) => row.from === chosen.from && row.to === chosen.to);
+  return sortByLabel(chosen !== null && !known ? [chosen, ...offered] : offered);
 }
 
 /**

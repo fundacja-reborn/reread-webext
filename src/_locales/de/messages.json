@@ -805,7 +805,18 @@
   "reader_marks_missing_doc": { "message": "Das Dokument ist nicht mehr gespeichert - dieses Zitat kam aus der Kopie zurück. Öffnen Sie die Seite erneut, und die Markierung ist wieder da." },
   "options_pair_hint": { "message": "Zeigt die auf dieses Gerät heruntergeladenen Sprachpaare an. Um neue Sprachen hinzuzufügen, laden Sie diese unten im Abschnitt" },
   "options_pair_hint_rest": { "message": "herunter." },
-  "options_pair_none": { "message": "Noch kein Modell - laden Sie unten eines herunter" },
+  "options_pair_none": { "message": "Noch kein Modell und kein Wörterbuch - fügen Sie unten eines hinzu" },
+  "options_pair_dictionary_only": {
+    "message": "$PAIR$ (Wörterbuch)",
+    "placeholders": { "pair": { "content": "$1", "example": "Englisch → Englisch" } }
+  },
+  "options_pair_hint_quiet": {
+    "message": "Bei ausgeschalteter Übersetzung sagt das Paar, in welcher Sprache Sie lesen und wo gespeicherte Phrasen abgelegt sind. Paare kommen aus installierten Modellen und Wörterbüchern."
+  },
+  "options_reading_pair_quiet": {
+    "message": "Sie lesen $FROM$ - die Übersetzung ist aus, gespeicherte Phrasen gehören zu diesem Paar.",
+    "placeholders": { "from": { "content": "$1", "example": "Englisch" } }
+  },
   "options_reader_only": { "message": "Nur in der Leseansicht" },
   "options_reader_only_hint": {
     "message": "Beschränkt die Übersetzung auf die Leseansicht. Das Markieren von Text auf einer gewöhnlichen Webseite zeigt nur die Option, die Seite in der Leseansicht zu öffnen. Auf Android und iOS ist die Option standardmäßig eingeschaltet."

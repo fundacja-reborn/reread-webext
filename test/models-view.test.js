@@ -313,4 +313,35 @@ describe("pairChoices", () => {
       ["enpl", "deen"],
     );
   });
+
+  it("offers a ready dictionary's pair, marked as the dictionary's (D158)", () => {
+    // The quiet vocabulary files under a pair, and with no model at all the
+    // dictionaries are the only ones that can vouch for one.
+    const choices = pairChoices([], { sourceLang: null, targetLang: null }, [
+      { langFrom: "en", langTo: "en", ready: true },
+      { langFrom: "de", langTo: "pl", ready: false },
+    ]);
+    assert.deepEqual(choices, [{ pair: "enen", from: "en", to: "en", dictionaryOnly: true }]);
+  });
+
+  it("lets the model's line win over the same pair's dictionary", () => {
+    // Under the model's line both halves of the extension work, so the pair
+    // is not the dictionary's to mark - and it appears once, not twice.
+    const choices = pairChoices(
+      [row("de", "en", { installed: true })],
+      { sourceLang: null, targetLang: null },
+      [
+        { langFrom: "de", langTo: "en", ready: true },
+        { langFrom: "de", langTo: "en", ready: true },
+        { langFrom: "en", langTo: "en", ready: true },
+      ],
+    );
+    assert.deepEqual(
+      choices.map((one) => [one.pair, one.dictionaryOnly]),
+      [
+        ["enen", true],
+        ["deen", false],
+      ],
+    );
+  });
 });
