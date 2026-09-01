@@ -291,7 +291,12 @@ input[type="checkbox"] {
   margin: 0 0 1.5rem;
 }
 
-a {
+/* Only a link that goes somewhere wears the accent. An anchor without an
+   href is prose that kept its element - the reader strips every address out
+   of an imported book on purpose (import-book.js) - and dressed in the
+   accent it promises a click it cannot answer (mobileread report: an EPUB's
+   dead links under "Links: Active"). */
+a[href] {
   color: var(--page-accent);
 }
 

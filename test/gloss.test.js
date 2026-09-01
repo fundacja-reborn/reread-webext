@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { afterChoosing, choosableLines, toMeanings } from "../src/lib/gloss.js";
+import { afterChoosing, choosableLines, entryBlocks, toMeanings } from "../src/lib/gloss.js";
 
 describe("toMeanings", () => {
   it("keeps one line as one meaning", () => {
@@ -92,5 +92,50 @@ describe("afterChoosing", () => {
     // The bubble declines this press: a phrase with no meaning has nothing to
     // save, and there is no state in which the last line may go.
     assert.equal(afterChoosing("okazja", "okazja"), "");
+  });
+});
+
+describe("entryBlocks", () => {
+  /**
+   * @param {string} dictionary
+   * @param {string} headword
+   * @returns {import("../src/lib/protocol.js").DictEntry}
+   */
+  const entry = (dictionary, headword) => ({ dictionary, headword, senses: ["a meaning"] });
+
+  it("prints neither half when the entry only repeats the page back", () => {
+    // One book, and it found exactly what was selected: a label would say
+    // nothing the page and the list do not already say.
+    const [block] = entryBlocks([entry("WikDict", "watch")], "watch");
+    assert.deepEqual(block, { headword: "", dictionary: "", lines: ["a meaning"] });
+  });
+
+  it("names the found form when it is not what was selected", () => {
+    // The selection was "watches", the book knows "watch" - the label has to
+    // say which word the definition is of. The comparison runs through the
+    // key, so a difference of case or accent alone stays quiet.
+    const [inflected] = entryBlocks([entry("WikDict", "watch")], "watches");
+    assert.equal(inflected?.headword, "watch");
+    const [cased] = entryBlocks([entry("WikDict", "Watch")], "watch");
+    assert.equal(cased?.headword, "");
+  });
+
+  it("names the book only when there are books to tell apart", () => {
+    const alone = entryBlocks([entry("WikDict", "watch")], "watch");
+    assert.equal(alone[0]?.dictionary, "");
+
+    const crowd = entryBlocks([entry("WikDict", "watch"), entry("PONS", "watch")], "watch");
+    assert.deepEqual(
+      crowd.map((block) => block.dictionary),
+      ["WikDict", "PONS"],
+    );
+  });
+
+  it("splits an entry's senses into one line per meaning", () => {
+    const [block] = entryBlocks(
+      [{ dictionary: "WikDict", headword: "watch", senses: ["verb\nobserwować", "zegarek"] }],
+      "watch",
+    );
+    assert.deepEqual(block?.lines, ["verb", "obserwować", "zegarek"]);
   });
 });

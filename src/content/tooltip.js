@@ -532,16 +532,24 @@ export const STYLE = `
   .entry + .entry { margin-top: 8px; }
 
   /* Which book this came from, and the word it actually found - the second one
-     matters when the reader selected "watches" and the dictionary knows "watch". */
+     matters when the reader selected "watches" and the dictionary knows
+     "watch". Three quarters and not six tenths: small uppercase at 0.6 was
+     too faint to read at all (mobileread report), and on an e-ink panel's
+     16 greys fainter still. */
   .entry-label {
     font-size: calc(var(--type-label) * var(--bubble-scale, 1));
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    opacity: 0.6;
+    opacity: 0.75;
     /* The border and the padding a meaning below it carries, so the two start
        at the same place on the screen. */
     padding-left: 5px;
   }
+  /* The book's name is what somebody with several dictionaries scans the
+     list by, so it is the half with weight. Weight and not a frame or a
+     tint per book: the entries are prose, and a wash quantizes away on
+     e-ink anyway. */
+  .entry-label .entry-dict { font-weight: 600; }
 
   /* A meaning is a line to read first and a choice second, so it keeps the shape
      of the text around it: a stack of things that look like buttons under a word
@@ -838,7 +846,7 @@ export const STYLE = `
   .bubble[data-pointer="coarse"] {${TOUCH_SIZES}}
 
   @media (prefers-color-scheme: dark) {
-    .bubble {
+    .bubble:not([data-scheme]) {
       /* A step lighter than the dark themes it floats over, because the
          shadow that separates the planes on glass does not exist on black
          and quantizes away on e-ink - the background difference and the
@@ -855,19 +863,49 @@ export const STYLE = `
       border-color: var(--edge);
       box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
     }
-    .body[data-tone="error"],
-    .context[data-tone="error"] { color: #f09a3e; }
-    .bubble:not([data-pointer="coarse"]) .entry-sense[aria-pressed="false"]:hover:not(:disabled) { background: rgba(255, 255, 255, 0.08); }
-    .entry-sense[aria-pressed="true"] { background: rgba(255, 255, 255, 0.1); }
-    .editor { background: rgba(255, 255, 255, 0.06); }
+    .bubble:not([data-scheme]) :is(.body, .context)[data-tone="error"] { color: #f09a3e; }
+    .bubble:not([data-pointer="coarse"]):not([data-scheme]) .entry-sense[aria-pressed="false"]:hover:not(:disabled) { background: rgba(255, 255, 255, 0.08); }
+    .bubble:not([data-scheme]) .entry-sense[aria-pressed="true"] { background: rgba(255, 255, 255, 0.1); }
+    .bubble:not([data-scheme]) .editor { background: rgba(255, 255, 255, 0.06); }
     /* The quiet labels need nothing here: they are the bubble's own colour at
        seven tenths, which lands right on either background. */
-    .actions button[data-action="save"],
-    .actions button[data-action="reader"],
-    .actions button[data-action="settings"] { background: rgba(255, 255, 255, 0.08); }
-    .actions button[data-action="save"]:hover:not(:disabled),
-    .actions button[data-action="reader"]:hover:not(:disabled),
-    .actions button[data-action="settings"]:hover:not(:disabled) { background: rgba(255, 255, 255, 0.16); }
+    .bubble:not([data-scheme]) .actions :is(button[data-action="save"], button[data-action="reader"], button[data-action="settings"]) { background: rgba(255, 255, 255, 0.08); }
+    .bubble:not([data-scheme]) .actions :is(button[data-action="save"], button[data-action="reader"], button[data-action="settings"]):hover:not(:disabled) { background: rgba(255, 255, 255, 0.16); }
+  }
+
+  /* The reader's own paper, by name: the reader hands its theme down with
+     every show, because a dark or sepia article must not get a white bubble
+     just because the system is set to light (mobileread report). A named
+     scheme outranks the system - the query's block above steps aside for
+     [data-scheme] - and no name means a page that is not ours, where the
+     query stays the only signal. Values are kept in step with page.css's
+     palettes by hand, a step off the page's paper each (the dark comment
+     above says why the bubble never sits exactly on it). */
+  .bubble[data-scheme="light"] { color-scheme: light; }
+  .bubble[data-scheme="dark"] {
+    color-scheme: dark;
+    background: #262c3a;
+    color: #f2f4f8;
+    --edge: #8d95a6;
+    border-color: var(--edge);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+  }
+  .bubble[data-scheme="dark"] :is(.body, .context)[data-tone="error"] { color: #f09a3e; }
+  .bubble:not([data-pointer="coarse"])[data-scheme="dark"] .entry-sense[aria-pressed="false"]:hover:not(:disabled) { background: rgba(255, 255, 255, 0.08); }
+  .bubble[data-scheme="dark"] .entry-sense[aria-pressed="true"] { background: rgba(255, 255, 255, 0.1); }
+  .bubble[data-scheme="dark"] .editor { background: rgba(255, 255, 255, 0.06); }
+  .bubble[data-scheme="dark"] .actions :is(button[data-action="save"], button[data-action="reader"], button[data-action="settings"]) { background: rgba(255, 255, 255, 0.08); }
+  .bubble[data-scheme="dark"] .actions :is(button[data-action="save"], button[data-action="reader"], button[data-action="settings"]):hover:not(:disabled) { background: rgba(255, 255, 255, 0.16); }
+  /* Sepia is the one paper the system query never dresses. A step lighter
+     than the page's #f4ecd8 - the light bubble's manner, it floats - with
+     the sepia ink, and an edge holding the 4.5:1 the lines test asks of
+     every scheme. The light washes underneath already read on it. */
+  .bubble[data-scheme="sepia"] {
+    color-scheme: light;
+    background: #fbf5e7;
+    color: #322a21;
+    --edge: #7a6c55;
+    border-color: var(--edge);
   }
 `;
 
@@ -892,16 +930,21 @@ export const STYLE = `
 
 /**
  * One block of the second layer below the sentence: where it came from, and the
- * lines it has to show. The bubble is handed labels rather than dictionary
- * records on purpose - deciding whether a book's name or a headword is worth
- * repeating needs to know what the reader selected, and the bubble does not.
+ * lines it has to show. The bubble is handed the label's two halves rather
+ * than dictionary records on purpose - deciding whether a book's name or a
+ * headword is worth repeating needs to know what the reader selected, and the
+ * bubble does not. They arrive as halves and not as one string because they
+ * dress differently: the book's name is what somebody with several
+ * dictionaries scans the list by, so it carries weight the headword does not
+ * (mobileread report: one grey line was too faint to tell the books apart).
+ * An empty half is a half not worth printing.
  *
  * One line is one meaning and therefore one button. The caller guarantees that,
  * because the caller is where a dictionary's idea of a line stops mattering:
  * whatever a book packed into one field, what a reader presses here has to be
  * something that can stand alone as the answer to a word.
  *
- * @typedef {{ label: string, lines: string[] }} Block
+ * @typedef {{ headword: string, dictionary: string, lines: string[] }} Block
  */
 
 /**
@@ -941,12 +984,20 @@ export const STYLE = `
  * `scale` multiplies every size in the bubble - the settings knob (D85),
  * handed in as a plain factor with 1 meaning "as designed".
  *
+ * `scheme` is the paper the bubble dresses for, named by the caller: the
+ * reader page knows what theme its own paper is painted in and hands it down,
+ * so a dark or sepia article gets a bubble on matching paper instead of the
+ * system's guess (reported from ungoogled Chromium via mobileread: reader
+ * dark, system light, black-on-white bubble). Absent or null, the
+ * `prefers-color-scheme` query decides - which is every page that is not
+ * ours, where the system's preference is the only signal there is.
+ *
  * `phrase` is the selection's text as the page had it, held for the clipboard
  * row's "copy original" press (D110) and never rendered: what says which
  * phrase the bubble is about stays the page's own highlight (D23).
  *
  * @typedef {object} Tooltip
- * @property {(options: { anchor: DOMRect, variant: Variant, body: string, tone?: Tone, actions?: Action[], touch?: boolean, coarse?: boolean, scale?: number, folded?: boolean, anchored?: boolean, line?: number, phrase?: string }) => void} show
+ * @property {(options: { anchor: DOMRect, variant: Variant, body: string, tone?: Tone, actions?: Action[], touch?: boolean, coarse?: boolean, scale?: number, folded?: boolean, anchored?: boolean, line?: number, phrase?: string, scheme?: "light" | "sepia" | "dark" | null }) => void} show
  * @property {(body: string, tone?: Tone) => void} setBody
  * @property {(sentence: string | null, tone?: Tone) => void} setContext
  * @property {(blocks: Block[]) => void} setEntries
@@ -1736,10 +1787,24 @@ export function createTooltip({ onAction, onHide, covered }) {
       const entry = document.createElement("div");
       entry.className = "entry";
 
-      if (block.label.length > 0) {
+      if (block.headword.length > 0 || block.dictionary.length > 0) {
         const label = document.createElement("div");
         label.className = "entry-label";
-        label.textContent = block.label;
+        // Halves as their own elements so the book's name can carry its
+        // weight (see `Block`); text always through textContent - both
+        // halves came out of a file somebody downloaded.
+        if (block.headword.length > 0) {
+          const headword = document.createElement("span");
+          headword.textContent = block.headword;
+          label.append(headword);
+        }
+        if (block.headword.length > 0 && block.dictionary.length > 0) label.append(" - ");
+        if (block.dictionary.length > 0) {
+          const dictionary = document.createElement("span");
+          dictionary.className = "entry-dict";
+          dictionary.textContent = block.dictionary;
+          label.append(dictionary);
+        }
         entry.append(label);
       }
 
@@ -2137,6 +2202,7 @@ export function createTooltip({ onAction, onHide, covered }) {
       anchored = false,
       line = 0,
       phrase = "",
+      scheme = null,
     }) {
       build();
       anchor = rect;
@@ -2162,6 +2228,11 @@ export function createTooltip({ onAction, onHide, covered }) {
       }
       if (bubble !== null) {
         bubble.dataset["variant"] = variant;
+        // The paper the caller named (the reader's theme). Cleared rather
+        // than left, because the bubble is reused: a scheme kept from the
+        // reader page would dress a bubble on somebody else's page.
+        if (scheme === null) delete bubble.dataset["scheme"];
+        else bubble.dataset["scheme"] = scheme;
         // The touch size tier, granted by the gesture itself (D84) - see the
         // stylesheet, which also answers the media query on its own. Only
         // ever forced on: taken off, the media query speaks again.

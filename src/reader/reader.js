@@ -5723,6 +5723,11 @@ function rootReadingSide(ground) {
     // exists. Everywhere else the bubble keeps asking the background.
     openSettings: () => goToSettings(),
     plainLinks: () => settings.reader.links === "plain",
+    // The bubble dresses for the paper it stands on: the reader's theme by
+    // name, asked live because the Aa panel can change it mid-session.
+    // `auto` names nothing - the browser answers there, and so does the
+    // bubble's own media query.
+    scheme: () => (settings.reader.theme === "auto" ? null : settings.reader.theme),
     // The highlighter's hooks (D106): whether the pen is in the hand, where
     // marks may anchor (the rebuilt content - the reader's own title has no
     // block order to write against), what a finished stroke becomes, and what
