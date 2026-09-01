@@ -1532,8 +1532,20 @@ a.marks-act {
   scroll-margin-top: 0.75rem;
 }
 
-.marks-transfer > .transfer {
+/* The first row of buttons stands right under the rows, whichever half shows
+   first (D168): the backup's on the page of all highlights, the notes' under
+   the sentence that points there on one document's page. The notes half
+   keeps a breath from the backup's report above it. */
+.marks-transfer > div > .transfer:first-child {
   margin-top: 0;
+}
+
+.marks-notes {
+  margin-top: 1.5rem;
+}
+
+#marks-copy-elsewhere {
+  margin: 0 0 1.25rem;
 }
 
 /* --- the shared pager, held to the same touch floor --- */

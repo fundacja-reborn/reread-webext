@@ -451,10 +451,118 @@
     "description": "The second line of the file-format fold on the reading list, between the .json and the export notes."
   },
   "reader_transfer_books": {
-    "message": "Export covers articles only - books (.epub) are not exported. Importing a book again brings everything back except the reading position."
+    "message": "Export covers articles only - books (.epub) are not exported. A book imported again has no reading position and no highlights: export the highlights on the Highlights page (.json) before deleting the book, and import that file after importing the same book again."
   },
   "reader_export_marks": { "message": "Export highlights" },
-  "reader_transfer_marks": { "message": "Highlights travel with their articles inside the .json backup. To write them out as notes - a plain-text .md file grouped by document - use Export highlights on the Highlights page." },
+  "reader_marks_export_copy": {
+    "message": "Export a backup (.json)",
+    "description": "Button on the page of all highlights (D168): writes reread-highlights.json, the file the Import button beside it reads back."
+  },
+  "reader_marks_import": {
+    "message": "Import (.json)",
+    "description": "Button beside the backup export on the page of all highlights: picks a reread-highlights.json file."
+  },
+  "reader_marks_copy_hint": {
+    "message": "The .json file is a backup of the highlights and their notes. Import adds the highlights from such a file to the same articles, and to a book imported again from the same .epub file. Nothing already here is changed or removed.",
+    "description": "Hint under the backup's two buttons. Plain and literal: what the file is, what Import does with it, what it never does."
+  },
+  "reader_marks_copy_elsewhere": {
+    "message": "A backup that can be imported (.json) is exported and imported on the page of all highlights.",
+    "description": "On one document's highlights page, where the backup's buttons do not stand; the link that follows leads to the page of all highlights."
+  },
+  "reader_marks_all_link": {
+    "message": "All highlights",
+    "description": "The link after reader_marks_copy_elsewhere: opens the page of all highlights."
+  },
+  "reader_marks_export_notes": {
+    "message": "Export as notes (.md)",
+    "description": "Button under the backup's half, and alone on one document's page: writes reread-highlights.md, the quotes for reading."
+  },
+  "reader_marks_notes_hint": {
+    "message": "The .md file is a plain-text list of the quotes and notes, grouped by document - for reading and for your own notes. It cannot be imported.",
+    "description": "Hint under the notes export."
+  },
+  "reader_marks_import_summary_one": {
+    "message": "$NAME$ holds the highlights of $COUNT$ document:",
+    "description": "Plural family over the file's document count; NAME is the picked file's name. The colon leads into the rows below, one per document of the reading list that receives highlights.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "name": { "content": "$2", "example": "reread-highlights.json" }
+    }
+  },
+  "reader_marks_import_summary_other": {
+    "message": "$NAME$ holds the highlights of $COUNT$ documents:",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "name": { "content": "$2", "example": "reread-highlights.json" }
+    }
+  },
+  "reader_marks_import_row_one": {
+    "message": "$TITLE$ - $COUNT$ highlight to add",
+    "description": "One row of the import offer: a document of the reading list and how many of the file's highlights it receives.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "title": { "content": "$2", "example": "A Novel" }
+    }
+  },
+  "reader_marks_import_row_other": {
+    "message": "$TITLE$ - $COUNT$ highlights to add",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "title": { "content": "$2", "example": "A Novel" }
+    }
+  },
+  "reader_marks_import_missing_one": {
+    "message": "$COUNT$ document is not in the reading list: $TITLES$. Import it first - a book from its .epub file, an article from the reading list's backup - then import this file again.",
+    "description": "Under the offer's rows, only when the file names documents the reading list does not hold. TITLES is a comma-separated sample of their titles.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "titles": { "content": "$2", "example": "A Novel" }
+    }
+  },
+  "reader_marks_import_missing_other": {
+    "message": "$COUNT$ documents are not in the reading list: $TITLES$. Import them first - books from their .epub files, articles from the reading list's backup - then import this file again.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "2" },
+      "titles": { "content": "$2", "example": "A Novel, An article" }
+    }
+  },
+  "reader_marks_import_twins_one": {
+    "message": "$COUNT$ highlight is already here.",
+    "description": "In the offer and in the report: the file's highlights that stand here already and are left out.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_marks_import_twins_other": {
+    "message": "$COUNT$ highlights are already here.",
+    "placeholders": { "count": { "content": "$1", "example": "12" } }
+  },
+  "reader_marks_import_overlap_one": {
+    "message": "$COUNT$ highlight overlaps a highlight already here and is left out.",
+    "description": "In the offer and in the report: a highlight of the file meeting one that stands here is neither merged (that needs the document's text) nor added.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_marks_import_overlap_other": {
+    "message": "$COUNT$ highlights overlap highlights already here and are left out.",
+    "placeholders": { "count": { "content": "$1", "example": "2" } }
+  },
+  "reader_marks_import_done_one": {
+    "message": "Added $COUNT$ highlight.",
+    "description": "First sentence of the report after the highlights import.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_marks_import_done_other": {
+    "message": "Added $COUNT$ highlights.",
+    "placeholders": { "count": { "content": "$1", "example": "12" } }
+  },
+  "reader_marks_import_nothing": {
+    "message": "There are no highlights to import in that file.",
+    "description": "The picked file is not a highlights backup, or holds no highlights."
+  },
+  "reader_import_marks_elsewhere": {
+    "message": "That is a highlights file. Import it on the Highlights page.",
+    "description": "The reading list's Import was handed reread-highlights.json: that file is read on the Highlights page."
+  },
+  "reader_transfer_marks": { "message": "Highlights are included with their articles in the .json backup. The Highlights page exports them on their own: as a .json backup that can be imported - for books too - or as .md notes." },
   "reader_transfer_pick": {
     "message": "To export only some of the articles, press Select above the list and tick them.",
     "description": "Hint under the Import/Export buttons (D152): the Select button stands above the list, fifty rows up, and a reader about to press Export expects the choice here."

@@ -475,10 +475,151 @@
   },
   "reader_transfer_epub": { "message": ".epub - формат електронних книжок." },
   "reader_transfer_books": {
-    "message": "Експорт охоплює лише статті - книжки (.epub) не експортуються. Повторний імпорт книжки відновлює все, крім позиції читання."
+    "message": "Експорт охоплює лише статті - книжки (.epub) не експортуються. Повторно імпортована книжка не має ні позиції читання, ні позначень: експортуйте позначення на сторінці позначень (.json) перед видаленням книжки, а цей файл імпортуйте після повторного імпорту тієї самої книжки."
   },
   "reader_export_marks": { "message": "Експортувати позначення" },
-  "reader_transfer_marks": { "message": "Позначення переносяться разом зі статтями в резервній копії .json. Щоб записати їх як нотатки - текстовий файл .md, згрупований за документами - скористайтеся «Експортувати позначення» на сторінці позначень." },
+  "reader_marks_export_copy": { "message": "Експортувати копію (.json)" },
+  "reader_marks_import": { "message": "Імпортувати (.json)" },
+  "reader_marks_copy_hint": { "message": "Файл .json - це резервна копія позначень та їхніх нотаток. Імпорт додає позначення з такого файлу до тих самих статей і до книжки, імпортованої знову з того самого файлу .epub. Нічого з того, що вже є тут, не змінюється й не видаляється." },
+  "reader_marks_copy_elsewhere": { "message": "Резервну копію, яку можна імпортувати (.json), експортують та імпортують на сторінці всіх позначень." },
+  "reader_marks_all_link": { "message": "Усі позначення" },
+  "reader_marks_export_notes": { "message": "Експортувати як нотатки (.md)" },
+  "reader_marks_notes_hint": { "message": "Файл .md - це текстовий список цитат і нотаток, згрупованих за документами - для читання та для власних нотаток. Його не можна імпортувати." },
+  "reader_marks_import_summary_one": {
+    "message": "$NAME$ містить позначення $COUNT$ документа:",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "name": { "content": "$2", "example": "reread-highlights.json" }
+    }
+  },
+  "reader_marks_import_summary_few": {
+    "message": "$NAME$ містить позначення $COUNT$ документів:",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "name": { "content": "$2", "example": "reread-highlights.json" }
+    }
+  },
+  "reader_marks_import_summary_many": {
+    "message": "$NAME$ містить позначення $COUNT$ документів:",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "name": { "content": "$2", "example": "reread-highlights.json" }
+    }
+  },
+  "reader_marks_import_summary_other": {
+    "message": "$NAME$ містить позначення $COUNT$ документа:",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1,5" },
+      "name": { "content": "$2", "example": "reread-highlights.json" }
+    }
+  },
+  "reader_marks_import_row_one": {
+    "message": "$TITLE$ - $COUNT$ позначення до додавання",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "title": { "content": "$2", "example": "Роман" }
+    }
+  },
+  "reader_marks_import_row_few": {
+    "message": "$TITLE$ - $COUNT$ позначення до додавання",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "title": { "content": "$2", "example": "Роман" }
+    }
+  },
+  "reader_marks_import_row_many": {
+    "message": "$TITLE$ - $COUNT$ позначень до додавання",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "title": { "content": "$2", "example": "Роман" }
+    }
+  },
+  "reader_marks_import_row_other": {
+    "message": "$TITLE$ - $COUNT$ позначення до додавання",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1,5" },
+      "title": { "content": "$2", "example": "Роман" }
+    }
+  },
+  "reader_marks_import_missing_one": {
+    "message": "$COUNT$ документа немає в списку читання: $TITLES$. Спершу імпортуйте його - книжку з її файлу .epub, статтю з резервної копії списку читання - а потім ще раз цей файл.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "titles": { "content": "$2", "example": "Роман" }
+    }
+  },
+  "reader_marks_import_missing_few": {
+    "message": "$COUNT$ документів немає в списку читання: $TITLES$. Спершу імпортуйте їх - книжки з їхніх файлів .epub, статті з резервної копії списку читання - а потім ще раз цей файл.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "2" },
+      "titles": { "content": "$2", "example": "Роман, Стаття" }
+    }
+  },
+  "reader_marks_import_missing_many": {
+    "message": "$COUNT$ документів немає в списку читання: $TITLES$. Спершу імпортуйте їх - книжки з їхніх файлів .epub, статті з резервної копії списку читання - а потім ще раз цей файл.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "titles": { "content": "$2", "example": "Роман, Стаття, ..." }
+    }
+  },
+  "reader_marks_import_missing_other": {
+    "message": "$COUNT$ документів немає в списку читання: $TITLES$. Спершу імпортуйте їх - книжки з їхніх файлів .epub, статті з резервної копії списку читання - а потім ще раз цей файл.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1,5" },
+      "titles": { "content": "$2", "example": "Роман" }
+    }
+  },
+  "reader_marks_import_twins_one": {
+    "message": "$COUNT$ позначення вже є тут.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_marks_import_twins_few": {
+    "message": "$COUNT$ позначення вже є тут.",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
+  "reader_marks_import_twins_many": {
+    "message": "$COUNT$ позначень уже є тут.",
+    "placeholders": { "count": { "content": "$1", "example": "12" } }
+  },
+  "reader_marks_import_twins_other": {
+    "message": "$COUNT$ позначення вже є тут.",
+    "placeholders": { "count": { "content": "$1", "example": "1,5" } }
+  },
+  "reader_marks_import_overlap_one": {
+    "message": "$COUNT$ позначення перекриває позначення, яке вже є тут, і пропускається.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_marks_import_overlap_few": {
+    "message": "$COUNT$ позначення перекривають позначення, які вже є тут, і пропускаються.",
+    "placeholders": { "count": { "content": "$1", "example": "2" } }
+  },
+  "reader_marks_import_overlap_many": {
+    "message": "$COUNT$ позначень перекривають позначення, які вже є тут, і пропускаються.",
+    "placeholders": { "count": { "content": "$1", "example": "12" } }
+  },
+  "reader_marks_import_overlap_other": {
+    "message": "$COUNT$ позначення перекривають позначення, які вже є тут, і пропускаються.",
+    "placeholders": { "count": { "content": "$1", "example": "1,5" } }
+  },
+  "reader_marks_import_done_one": {
+    "message": "Додано $COUNT$ позначення.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_marks_import_done_few": {
+    "message": "Додано $COUNT$ позначення.",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
+  "reader_marks_import_done_many": {
+    "message": "Додано $COUNT$ позначень.",
+    "placeholders": { "count": { "content": "$1", "example": "12" } }
+  },
+  "reader_marks_import_done_other": {
+    "message": "Додано $COUNT$ позначення.",
+    "placeholders": { "count": { "content": "$1", "example": "1,5" } }
+  },
+  "reader_marks_import_nothing": { "message": "У цьому файлі немає позначень для імпорту." },
+  "reader_import_marks_elsewhere": { "message": "Це файл позначень. Імпортуйте його на сторінці позначень." },
+  "reader_transfer_marks": { "message": "Позначення зберігаються разом зі статтями в резервній копії .json. Сторінка позначень експортує їх окремо: як копію .json, яку можна імпортувати - також для книжок - або як нотатки .md." },
   "reader_transfer_pick": { "message": "Щоб експортувати лише частину статей, натисніть «Вибрати» над списком і позначте їх." },
   "reader_pick_start": { "message": "Вибрати" },
   "reader_pick_close": { "message": "Закрити вибір" },

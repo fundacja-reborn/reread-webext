@@ -704,13 +704,15 @@
             </p>
             <p class="hint" data-i18n="reader_transfer_epub">.epub - the e-book format.</p>
             <p class="hint" data-i18n="reader_transfer_books">
-              Export covers articles only - books (.epub) are not exported. Importing a book again
-              brings everything back except the reading position.
+              Export covers articles only - books (.epub) are not exported. A book imported again
+              has no reading position and no highlights: export the highlights on the Highlights
+              page (.json) before deleting the book, and import that file after importing the same
+              book again.
             </p>
             <p class="hint" data-i18n="reader_transfer_marks">
-              Highlights travel with their articles inside the .json backup. To write them out as
-              notes - a plain-text .md file grouped by document - use Export highlights on the
-              Highlights page.
+              Highlights are included with their articles in the .json backup. The Highlights page
+              exports them on their own: as a .json backup that can be imported - for books too - or
+              as .md notes.
             </p>
           </details>
           <input
@@ -768,19 +770,68 @@
           <span class="pager-label" id="marks-page-label"></span>
           <button type="button" id="marks-next" data-i18n="pager_next">Next</button>
         </nav>
-        <!-- The pen's export, here where the quotes are (the reading list's
-             transfer section offered it too until D152): the .md cut to this
-             page's documents - one document when the page is scoped. Greyed
-             with nothing to write, the Export buttons' shared rule. The line
-             under it says what the export wrote (D153) - right under the
-             press, where the transfer sections say it too. -->
+        <!-- The transfer block under the quotes, here where the quotes are
+             (the reading list's transfer section offered the export too
+             until D152). Two halves. The highlights' own backup (D168): the
+             .json, exported and imported on the page of all highlights alone
+             - an import on one document's page would have to answer for
+             another document's marks, and a sentence with the way there
+             answers better (Michał's call, 2026-09-01). And the pen's notes
+             export: the .md cut to this page's documents - one document when
+             the page is scoped - on both pages. Each half's report stands
+             right under its own press (D153); the export buttons grey with
+             nothing to write, their shared rule. -->
         <div id="marks-transfer" class="marks-transfer">
-          <p class="transfer">
-            <button type="button" id="marks-export" data-i18n="reader_export_marks">
-              Export highlights
-            </button>
+          <div id="marks-copy">
+            <p class="transfer">
+              <button type="button" id="marks-export-copy" data-i18n="reader_marks_export_copy">
+                Export a backup (.json)
+              </button>
+              <button type="button" id="marks-import" data-i18n="reader_marks_import">
+                Import (.json)
+              </button>
+            </p>
+            <p class="hint" data-i18n="reader_marks_copy_hint">
+              The .json file is a backup of the highlights and their notes. Import adds the
+              highlights from such a file to the same articles, and to a book imported again from
+              the same .epub file. Nothing already here is changed or removed.
+            </p>
+            <!-- The moment of consent: what the picked file holds and where
+                 every mark lands, before anything is written; the rules live
+                 in `lib/store/marks-copy.js`. -->
+            <div id="marks-import-confirm" class="import-confirm" hidden>
+              <p id="marks-import-summary"></p>
+              <ul id="marks-import-sample" class="import-sample"></ul>
+              <p id="marks-import-note" class="hint" hidden></p>
+              <p class="transfer">
+                <button type="button" id="marks-import-run" data-i18n="action_import">Import</button>
+                <button type="button" id="marks-import-cancel" data-i18n="action_cancel">Cancel</button>
+              </p>
+            </div>
+            <p id="marks-transfer-status" class="status report" role="status"></p>
+            <input type="file" id="marks-import-file" accept=".json,application/json" hidden />
+          </div>
+          <p class="hint" id="marks-copy-elsewhere" hidden>
+            <span data-i18n="reader_marks_copy_elsewhere">
+              A backup that can be imported (.json) is exported and imported on the page of all
+              highlights.
+            </span>
+            <a href="#" id="marks-all-link" class="quiet-link" data-i18n="reader_marks_all_link">
+              All highlights
+            </a>
           </p>
-          <p id="marks-transfer-status" class="status report" role="status"></p>
+          <div class="marks-notes">
+            <p class="transfer">
+              <button type="button" id="marks-export" data-i18n="reader_marks_export_notes">
+                Export as notes (.md)
+              </button>
+            </p>
+            <p class="hint" data-i18n="reader_marks_notes_hint">
+              The .md file is a plain-text list of the quotes and notes, grouped by document - for
+              reading and for your own notes. It cannot be imported.
+            </p>
+            <p id="marks-notes-status" class="status report" role="status"></p>
+          </div>
         </div>
       </section>
 

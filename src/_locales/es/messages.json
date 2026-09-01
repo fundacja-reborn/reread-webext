@@ -386,10 +386,85 @@
   },
   "reader_transfer_epub": { "message": ".epub - el formato de los libros electrónicos." },
   "reader_transfer_books": {
-    "message": "La exportación incluye solo artículos - los libros (.epub) no se exportan. Volver a importar un libro restaura todo salvo la posición de lectura."
+    "message": "La exportación incluye solo artículos - los libros (.epub) no se exportan. Un libro importado de nuevo no tiene posición de lectura ni resaltados: exporta los resaltados en la página de resaltados (.json) antes de eliminar el libro e importa ese archivo después de importar el mismo libro otra vez."
   },
   "reader_export_marks": { "message": "Exportar los resaltados" },
-  "reader_transfer_marks": { "message": "Los resaltados viajan con sus artículos dentro de la copia .json. Para guardarlos como notas - un archivo de texto .md agrupado por documento - usa «Exportar los resaltados» en la página de resaltados." },
+  "reader_marks_export_copy": { "message": "Exportar una copia (.json)" },
+  "reader_marks_import": { "message": "Importar (.json)" },
+  "reader_marks_copy_hint": { "message": "El archivo .json es una copia de seguridad de los resaltados y sus notas. Importar añade los resaltados de un archivo así a los mismos artículos y a un libro importado de nuevo desde el mismo archivo .epub. Nada de lo que ya está aquí se cambia ni se elimina." },
+  "reader_marks_copy_elsewhere": { "message": "Una copia que se puede importar (.json) se exporta y se importa en la página de todos los resaltados." },
+  "reader_marks_all_link": { "message": "Todos los resaltados" },
+  "reader_marks_export_notes": { "message": "Exportar como notas (.md)" },
+  "reader_marks_notes_hint": { "message": "El archivo .md es una lista en texto plano de las citas y las notas, agrupadas por documento - para leer y para tus propias notas. No se puede importar." },
+  "reader_marks_import_summary_one": {
+    "message": "$NAME$ contiene los resaltados de $COUNT$ documento:",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "name": { "content": "$2", "example": "reread-highlights.json" }
+    }
+  },
+  "reader_marks_import_summary_other": {
+    "message": "$NAME$ contiene los resaltados de $COUNT$ documentos:",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "name": { "content": "$2", "example": "reread-highlights.json" }
+    }
+  },
+  "reader_marks_import_row_one": {
+    "message": "$TITLE$ - $COUNT$ resaltado por añadir",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "title": { "content": "$2", "example": "Una novela" }
+    }
+  },
+  "reader_marks_import_row_other": {
+    "message": "$TITLE$ - $COUNT$ resaltados por añadir",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "title": { "content": "$2", "example": "Una novela" }
+    }
+  },
+  "reader_marks_import_missing_one": {
+    "message": "$COUNT$ documento no está en la lista de lectura: $TITLES$. Impórtalo primero - un libro desde su archivo .epub, un artículo desde la copia de la lista de lectura - y luego importa este archivo otra vez.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "titles": { "content": "$2", "example": "Una novela" }
+    }
+  },
+  "reader_marks_import_missing_other": {
+    "message": "$COUNT$ documentos no están en la lista de lectura: $TITLES$. Impórtalos primero - los libros desde sus archivos .epub, los artículos desde la copia de la lista de lectura - y luego importa este archivo otra vez.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "2" },
+      "titles": { "content": "$2", "example": "Una novela, Un artículo" }
+    }
+  },
+  "reader_marks_import_twins_one": {
+    "message": "$COUNT$ resaltado ya está aquí.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_marks_import_twins_other": {
+    "message": "$COUNT$ resaltados ya están aquí.",
+    "placeholders": { "count": { "content": "$1", "example": "12" } }
+  },
+  "reader_marks_import_overlap_one": {
+    "message": "$COUNT$ resaltado se solapa con uno que ya está aquí y se omite.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_marks_import_overlap_other": {
+    "message": "$COUNT$ resaltados se solapan con otros que ya están aquí y se omiten.",
+    "placeholders": { "count": { "content": "$1", "example": "2" } }
+  },
+  "reader_marks_import_done_one": {
+    "message": "Se añadió $COUNT$ resaltado.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_marks_import_done_other": {
+    "message": "Se añadieron $COUNT$ resaltados.",
+    "placeholders": { "count": { "content": "$1", "example": "12" } }
+  },
+  "reader_marks_import_nothing": { "message": "En ese archivo no hay resaltados que importar." },
+  "reader_import_marks_elsewhere": { "message": "Es un archivo de resaltados. Impórtalo en la página de resaltados." },
+  "reader_transfer_marks": { "message": "Los resaltados se incluyen con sus artículos en la copia .json. La página de resaltados los exporta por separado: como copia .json, que se puede importar - también para libros - o como notas .md." },
   "reader_transfer_pick": { "message": "Para exportar solo algunos artículos, pulsa «Seleccionar» encima de la lista y márcalos." },
   "reader_pick_start": { "message": "Seleccionar" },
   "reader_pick_close": { "message": "Cerrar la selección" },

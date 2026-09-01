@@ -67,6 +67,26 @@ export async function putMarks(docId, marks) {
 }
 
 /**
+ * Several documents' marks replaced whole in one transaction - `putMarks`
+ * for a list, the highlights import's write (D168): the copy's rule settled
+ * once before, the copy rebuilt once after, and no document written while
+ * another is not.
+ *
+ * @param {{ docId: string, marks: Mark[] }[]} rows
+ * @returns {Promise<void>}
+ */
+export async function putMarksRows(rows) {
+  await restoreMarks();
+  await withLibrary("readwrite", async (stores) => {
+    for (const { docId, marks } of rows) {
+      if (marks.length === 0) await promisify(stores.marks.delete(docId));
+      else await promisify(stores.marks.put({ docId, marks }));
+    }
+  });
+  await rebuildMarksBackup();
+}
+
+/**
  * Every document's marks at once, for the exports: the article file carries
  * each article's marks beside it, and the highlights file is nothing but
  * this map dressed in titles. One `getAll` for the same reason the list
