@@ -841,7 +841,7 @@
   },
   "options_reader_only": { "message": "Solo en la vista de lectura" },
   "options_reader_only_hint": {
-    "message": "Limita la burbuja a la vista de lectura. Seleccionar texto en una página web normal solo mostrará la opción de abrirla en la vista de lectura. En Android e iOS la opción está activada de forma predeterminada."
+    "message": "Limita el subrayado de las frases guardadas y la burbuja de traducción a la vista de lectura. Seleccionar texto en una página web normal solo mostrará la opción de abrirla en la vista de lectura. En Android e iOS la opción está activada de forma predeterminada."
   },
   "options_keep_articles": { "message": "Guardar de forma predeterminada en la lista de lectura sin conexión" },
   "options_keep_articles_hint": {

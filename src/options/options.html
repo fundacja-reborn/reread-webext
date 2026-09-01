@@ -207,6 +207,44 @@
           copies it (on a touch screen nothing can be copied).
         </p>
       </div>
+      <!-- The two daily switches ahead of the machinery (Michał's call,
+           2026-09-01): where the bubble lives and whether pages are kept
+           are the choices a reader actually revisits, and the second one
+           also pairs this row with the bubble-off sub-option above - the
+           two controls of the bubble's whereabouts (D162) side by side.
+           The pair, the engine and the voices below are set once. -->
+      <!-- The whole first line is the label, so a press anywhere on it flips
+           the switch; the note keeps its own, unclickable line below - a
+           paragraph is too easy to brush against on a phone. -->
+      <!-- Not `translation-only` any more (D162): with the model switched off
+           the bubble still works wherever a pair is chosen - the dictionaries
+           answer - so the question this row asks stands in both modes, and
+           hiding it was what overrode it. -->
+      <div class="row">
+        <label class="row-toggle">
+          <span class="row-name" data-i18n="options_reader_only">Only in the reader</span>
+          <input type="checkbox" id="reader-only" />
+        </label>
+        <p class="row-note" data-fold data-i18n="options_reader_only_hint">
+          Limits the underlining of saved phrases and the translation bubble to the reader.
+          Selecting text on an ordinary web page will only show an option to open the page in the
+          reader. On Android and iOS it is on by default.
+        </p>
+      </div>
+      <!-- The default keep (D124). Not `translation-only`: with translation
+           off the reader and its list are the whole extension, which is when
+           this switch matters most. -->
+      <div class="row">
+        <label class="row-toggle">
+          <span class="row-name" data-i18n="options_keep_articles">Save in the offline reading list by default</span>
+          <input type="checkbox" id="keep-articles" />
+        </label>
+        <p class="row-note" data-fold data-i18n="options_keep_articles_hint">
+          Automatically saves every page you open in the reader for offline reading. Your saved
+          pages, highlights and reading progress are kept safe even if the original website changes
+          or disappears.
+        </p>
+      </div>
       <!-- The pair select offers only the pairs whose model is on this device:
            a pair without one translates nothing, and the full catalogue of a
            hundred pairs made the select unusable. The line below is the way
@@ -300,37 +338,6 @@
           </button>
           <output id="tts-rate-value">1.0&times;</output>
           <button type="button" id="tts-rate-up" title="Faster" data-i18n-title="reader_faster">+</button>
-        </p>
-      </div>
-      <!-- The whole first line is the label, so a press anywhere on it flips
-           the switch; the note keeps its own, unclickable line below - a
-           paragraph is too easy to brush against on a phone. -->
-      <!-- Not `translation-only` any more (D162): with the model switched off
-           the bubble still works wherever a pair is chosen - the dictionaries
-           answer - so the question this row asks stands in both modes, and
-           hiding it was what overrode it. -->
-      <div class="row">
-        <label class="row-toggle">
-          <span class="row-name" data-i18n="options_reader_only">Only in the reader</span>
-          <input type="checkbox" id="reader-only" />
-        </label>
-        <p class="row-note" data-fold data-i18n="options_reader_only_hint">
-          Limits the bubble to the reader. Selecting text on an ordinary web page will only show an
-          option to open the page in the reader. On Android and iOS it is on by default.
-        </p>
-      </div>
-      <!-- The default keep (D124). Not `translation-only`: with translation
-           off the reader and its list are the whole extension, which is when
-           this switch matters most. -->
-      <div class="row">
-        <label class="row-toggle">
-          <span class="row-name" data-i18n="options_keep_articles">Save in the offline reading list by default</span>
-          <input type="checkbox" id="keep-articles" />
-        </label>
-        <p class="row-note" data-fold data-i18n="options_keep_articles_hint">
-          Automatically saves every page you open in the reader for offline reading. Your saved
-          pages, highlights and reading progress are kept safe even if the original website changes
-          or disappears.
         </p>
       </div>
       <!-- The reading font's name (D163, moved out of the Aa panel: a name
