@@ -43,12 +43,18 @@ export function applyTheme(root, theme) {
  * The content dress: paper plus typeface and text size, for pages whose rows
  * hold text being read (the reader itself, the saved phrases).
  *
- * The typeface is two hands on one property: the serif/sans attribute picks
- * which preset stack `--reader-font-stack` holds, and a typed font name
- * (mobileread request) rides in front of it through `--reader-font-lead` -
- * always set, so the stylesheets can say `var(--reader-font-lead)` and be
- * done. The name arrives clean from the config (quotes and control
- * characters already out), so quoting it here is just quoting.
+ * The typeface is the Type row's one choice (D163): the attribute picks
+ * which preset stack `--reader-font-stack` holds - `custom` names no stack
+ * of its own, so the serif default on the bare root stands behind it as the
+ * fallback for every character the named font lacks - and only the `custom`
+ * choice puts the typed name (mobileread request) in front of it through
+ * `--reader-font-lead`. Until D163 a set name led whatever the row said,
+ * which made the row a liar; now the name waits, kept, for the row to ask.
+ * The lead is always set, so the stylesheets can say
+ * `var(--reader-font-lead)` and be done. The name arrives clean from the
+ * config (quotes, backslashes and control characters already out, capped),
+ * so quoting it here is just quoting - nothing typed can close the quote
+ * and write CSS of its own.
  *
  * @param {RootLike} root
  * @param {import("./config.js").ReaderConfig} reader
@@ -60,7 +66,7 @@ export function applyReading(root, reader) {
   const stack = "var(--reader-font-stack)";
   root.style.setProperty(
     "--reader-font-lead",
-    reader.fontFamily.length > 0 ? `"${reader.fontFamily}", ${stack}` : stack,
+    reader.font === "custom" && reader.fontFamily.length > 0 ? `"${reader.fontFamily}", ${stack}` : stack,
   );
 }
 

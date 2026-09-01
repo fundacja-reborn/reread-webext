@@ -244,7 +244,7 @@ const chromeBox = document.querySelector(".reader-chrome");
 const chromeTab = document.getElementById("chrome-tab");
 const sizeValue = document.getElementById("size-value");
 const measureValue = document.getElementById("measure-value");
-const fontCustom = /** @type {HTMLInputElement | null} */ (document.getElementById("font-custom"));
+const fontOwn = /** @type {HTMLButtonElement | null} */ (document.getElementById("font-own"));
 const listenButton = /** @type {HTMLButtonElement | null} */ (document.getElementById("listen"));
 const voiceSetting = document.getElementById("voice-setting");
 const voiceChoice = /** @type {HTMLSelectElement | null} */ (
@@ -4473,10 +4473,12 @@ function applyAppearance(reader) {
 
   if (sizeValue !== null) sizeValue.textContent = String(reader.fontSize);
   if (measureValue !== null) measureValue.textContent = String(reader.measure);
-  // The typed font, shown as stored - unless the field is the thing being
-  // typed in right now: another tab's write must not eat a half-typed name.
-  if (fontCustom !== null && document.activeElement !== fontCustom) {
-    fontCustom.value = reader.fontFamily;
+  // The Custom choice stands only while the settings hold a name (D163) -
+  // a choice of nothing would be a button that does nothing - and wears the
+  // name itself as its title, so a hover says which font "Custom" means.
+  if (fontOwn !== null) {
+    fontOwn.hidden = reader.fontFamily.length === 0;
+    fontOwn.title = reader.fontFamily;
   }
   // The bar folded or out (the bookmark tab's stored choice), stamped for
   // the stylesheet - which folds it only over an article, the same scope
@@ -4856,18 +4858,6 @@ chromeTab?.addEventListener("click", async () => {
   const folding = !settings.reader.chromeHidden;
   if (folding) closePanels();
   adoptConfig(await writeConfig({ reader: { chromeHidden: folding } }));
-});
-
-// The typed font (mobileread request), committed on change - blur or Enter -
-// and not per keystroke: a storage write per letter would ping every open
-// page for nothing. An empty field is the presets alone; the config's read
-// side cleans the name, and what was actually stored comes back through
-// `adoptConfig` into the field.
-fontCustom?.addEventListener("change", async () => {
-  adoptConfig(await writeConfig({ reader: { fontFamily: fontCustom.value } }));
-});
-fontCustom?.addEventListener("keydown", (event) => {
-  if (event.key === "Enter") fontCustom.blur();
 });
 
 function anyPanelOpen() {

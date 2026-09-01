@@ -241,8 +241,7 @@
   "reader_font": { "message": "Tipografía" },
   "reader_font_serif": { "message": "Serif" },
   "reader_font_sans": { "message": "Sans" },
-  "reader_font_custom": { "message": "Fuente propia" },
-  "reader_font_custom_hint": { "message": "Nombre de la fuente" },
+  "reader_font_own": { "message": "Personalizada" },
   "reader_bar_hide": { "message": "Ocultar la barra" },
   "reader_bar_show": { "message": "Mostrar la barra" },
   "reader_size": { "message": "Tamaño" },
@@ -847,6 +846,10 @@
   "options_keep_articles": { "message": "Guardar de forma predeterminada en la lista de lectura sin conexión" },
   "options_keep_articles_hint": {
     "message": "Guarda automáticamente cada página abierta en la vista de lectura para leerla sin conexión. Tus páginas guardadas, resaltados y progreso de lectura se conservan aunque el sitio web original cambie o desaparezca."
+  },
+  "options_font_custom": { "message": "Fuente propia" },
+  "options_font_custom_hint": {
+    "message": "Escribe el nombre de una fuente instalada en este dispositivo, por ejemplo Georgia u OpenDyslexic. La fila Tipografía de la vista de lectura la ofrecerá entonces como Personalizada. Deja el campo vacío para usar solo las fuentes integradas."
   },
   "options_quiet_bubble_hint": {
     "message": "Muestra solo el texto traducido en la burbuja. Los botones de acción (copiar, guardar) aparecerán únicamente al hacer clic o tocar la burbuja."

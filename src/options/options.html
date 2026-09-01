@@ -333,6 +333,28 @@
           or disappears.
         </p>
       </div>
+      <!-- The reading font's name (D163, moved out of the Aa panel: a name
+           is typed once, and on a phone the panel's field summoned the
+           keyboard over the article). The field previews itself in the
+           typed face - options.js sets its font-family from the cleaned
+           name, never the raw value. -->
+      <div class="row row-stack">
+        <label class="row-name" for="font-custom" data-i18n="options_font_custom">Own font</label>
+        <p class="inline">
+          <input
+            id="font-custom"
+            type="text"
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck="false"
+          />
+        </p>
+        <p class="row-note" data-fold data-i18n="options_font_custom_hint">
+          Type the name of a font installed on this device, for example Georgia or OpenDyslexic.
+          The reading view's Type row will then offer it as Custom. Leave the field empty to use
+          the built-in typefaces only.
+        </p>
+      </div>
       <!-- `translation-only`: the trimmed bubble ignores the fold - its two
            buttons are its whole content - so with translation off this switch
            would move nothing (D120). -->

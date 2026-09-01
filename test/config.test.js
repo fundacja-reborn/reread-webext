@@ -135,6 +135,38 @@ describe("withDefaults", () => {
     assert.equal(clean("x".repeat(300)).length, 100);
   });
 
+  it("lets nothing typed into the field escape the quoted CSS string", () => {
+    // The reader asked for this in so many words (Michał, 2026-09-01): the
+    // font field must shrug off injection attempts. The name's one sink is a
+    // double-quoted CSS string, and inside one only `"`, `\` and newlines
+    // mean anything - exactly the characters the cleaning removes, however
+    // they arrive. What remains may be a nonsense name; a nonsense name
+    // matches no font and the presets stand in.
+    /** @param {unknown} value */
+    const clean = (value) => withDefaults({ reader: { fontFamily: value } }).reader.fontFamily;
+    const attempt = 'serif"; background: url(https://evil.example/x)';
+    assert.equal(clean(attempt), "serif; background: url(https://evil.example/x)");
+    assert.doesNotMatch(clean(attempt), /["\\]/u);
+    assert.equal(
+      clean('a\\"b' + String.fromCodePoint(0x0a) + "}body{display:none" + String.fromCodePoint(0x00)),
+      "ab}body{display:none",
+    );
+    assert.doesNotMatch(clean("x".repeat(50) + '"\\' + String.fromCodePoint(0x1f)), /["\\\u0000-\u001f\u007f]/u);
+  });
+
+  it("keeps the custom type only while there is a name to lead with", () => {
+    const reader = (/** @type {object} */ value) => withDefaults({ reader: value }).reader;
+    assert.equal(reader({ font: "custom", fontFamily: "OpenDyslexic" }).font, "custom");
+    // A custom face with no name would be a dead state: the Type row's pill
+    // is hidden without a name, so nothing could ever switch back.
+    assert.equal(reader({ font: "custom", fontFamily: "" }).font, "serif");
+    assert.equal(reader({ font: "custom" }).font, "serif");
+    // The name itself survives a preset choice - it is the way back.
+    const kept = reader({ font: "sans", fontFamily: "OpenDyslexic" });
+    assert.equal(kept.font, "sans");
+    assert.equal(kept.fontFamily, "OpenDyslexic");
+  });
+
   it("folds the bar only on a stored true", () => {
     assert.equal(withDefaults({ reader: { chromeHidden: true } }).reader.chromeHidden, true);
     assert.equal(withDefaults({ reader: { chromeHidden: "yes" } }).reader.chromeHidden, false);
