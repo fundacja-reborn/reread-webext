@@ -246,10 +246,13 @@ body.reader:not(:has(#article:not([hidden]))):has(.panel-scrim:not([hidden])) .r
 /* The bookmark tab (Michał's design, after a mobileread request asked for a
    way to minimize the bar): a ribbon hanging off the bar's far edge, the one
    hand on the bar's visibility. Absolute, so the ribbon never adds to the
-   chrome's height - `chromeFold` keeps measuring the bar alone, and with
-   the bar folded it honestly measures next to nothing. Only a press ever
-   moves it: the bar never hides on a scroll (D93 - on e-ink a bar that
-   moved would flash), so each flip is one deliberate repaint. */
+   chrome's height; `chromeFold` counts its lower edge all the same, because
+   the ribbon is opaque and hangs over the end of the first line under the
+   bar - and, with the bar folded, over the first line at the window's edge
+   (a turned page lost its first line's last word behind it; measured
+   2026-09-01). Only a press ever moves it: the bar never hides on a scroll
+   (D93 - on e-ink a bar that moved would flash), so each flip is one
+   deliberate repaint. */
 .chrome-tab {
   position: absolute;
   top: 100%;

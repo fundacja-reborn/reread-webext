@@ -1092,12 +1092,24 @@ function contentRoot() {
 
 /**
  * How far down the window the stuck chrome reaches. Below this line is the
- * visible text; the voice keeps its spoken sentence under it, and the
- * position means the first block still under it. Measured at each ask,
- * because an open panel makes the chrome taller for as long as it is open.
+ * visible text; the voice keeps its spoken sentence under it, the position
+ * means the first block still under it, and a turned page opens under it.
+ * Measured at each ask, because an open panel makes the chrome taller for
+ * as long as it is open.
+ *
+ * The bookmark tab (D160) hangs under the box's edge - and stands alone at
+ * the window's edge once the bar is folded, when the box measures nothing -
+ * so its lower edge is the fold wherever it reaches lower than the box's:
+ * the tab is opaque, and a first line landed under it lost its last word
+ * behind it (measured 2026-09-01, bar shown and folded alike). Over the
+ * list the tab is hidden and counts for nothing, like the rest of the
+ * chrome, which does not stick there.
  */
 function chromeFold() {
-  return Math.max(0, chromeBox?.getBoundingClientRect().bottom ?? 0);
+  const box = chromeBox?.getBoundingClientRect().bottom ?? 0;
+  const tab =
+    chromeTab === null || chromeTab.hidden ? 0 : chromeTab.getBoundingClientRect().bottom;
+  return Math.max(0, box, tab);
 }
 
 /**
