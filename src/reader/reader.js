@@ -1431,9 +1431,29 @@ function setMarker(on) {
 }
 
 function repaintMarks() {
-  paintMarks(docMarks, shown === null ? null : contentRoot(), shownSegment());
+  const healed = paintMarks(docMarks, shown === null ? null : contentRoot(), shownSegment());
+  if (healed.length > 0) adoptHealedMarks(healed);
   // The badges stand on the painted ranges, so they follow every repaint.
   showNoteBadges();
+}
+
+/**
+ * Marks the paint found again by their quotes (D169), adopted into the
+ * document's list under the anchors they stand at now and written back - so
+ * the next open finds them without a search, the highlights page's arrow
+ * lands on them, and the copy in `storage.local` carries them healed. Quiet
+ * on a failed write: the paint is right regardless, and the next paint
+ * heals them again.
+ *
+ * @param {{ from: import("../lib/reader/marks.js").Mark, to: import("../lib/reader/marks.js").Mark }[]} healed
+ */
+function adoptHealedMarks(healed) {
+  const target = shown;
+  if (target === null) return;
+  docMarks = docMarks.map((one) => healed.find((pair) => pair.from === one)?.to ?? one);
+  const active = healed.find((pair) => pair.from === activeMark);
+  if (active !== undefined) activeMark = active.to;
+  void putMarks(target.url, docMarks).catch(() => undefined);
 }
 
 /**
@@ -2584,7 +2604,7 @@ async function openBook(id, wanted, target) {
  * the database than the one the open just made. The start alone identifies
  * it: two marks sharing a start cannot survive `placeMark`.
  *
- * @typedef {{ segmentIndex: number, start: { block: number, offset: number } }} MarkTarget
+ * @typedef {{ segmentIndex: number, start: { block: number, offset: number }, text?: string }} MarkTarget
  */
 
 /**
@@ -2695,10 +2715,20 @@ function scrollToSearchHit(target) {
  * @returns {boolean}
  */
 function scrollToTargetMark(target) {
-  const mark = docMarks.find(
-    (one) =>
-      one.segmentIndex === target.segmentIndex && comparePoints(one.start, target.start) === 0,
-  );
+  const mark =
+    docMarks.find(
+      (one) =>
+        one.segmentIndex === target.segmentIndex && comparePoints(one.start, target.start) === 0,
+    ) ??
+    // A mark healed since its row was drawn (D169) stands at another anchor
+    // now; its quote is the same, and the heal paints one quote of a segment
+    // only where it stands once.
+    docMarks.find(
+      (one) =>
+        target.text !== undefined &&
+        one.segmentIndex === target.segmentIndex &&
+        one.text === target.text,
+    );
   if (mark === undefined) return false;
   const root = contentRoot();
   const range = paintedRangeOf(mark);
@@ -3563,7 +3593,9 @@ function markOriginalLink(url) {
 async function openMarkRow(row) {
   hideNotice();
   history.pushState(docState(row.kind, row.docId), "");
-  const target = { segmentIndex: row.mark.segmentIndex, start: row.mark.start };
+  // The quote rides along for a mark the paint heals on the way (D169): its
+  // anchor moves, its words do not.
+  const target = { segmentIndex: row.mark.segmentIndex, start: row.mark.start, text: row.mark.text };
   if (row.kind === "book") await openBook(row.docId, row.mark.segmentIndex, target);
   else await openSaved(row.docId, target);
   if (shown === null) {

@@ -395,3 +395,52 @@ export function quoteOf(prose, start, end) {
   if (prose.length === 1) return first.slice(start.offset, end.offset);
   return [first.slice(start.offset), ...prose.slice(1, -1), last.slice(0, end.offset)].join("\n");
 }
+
+/**
+ * Where a quote stands in a segment's prose when it stands in exactly one
+ * place - the healed anchor of a mark the guard refused (D169: a paragraph
+ * added above, a sanitizer that tightened, a book cut again from its own
+ * file). The prose is the blocks' texts as `quoteOf` joins them - a line
+ * break at every boundary - so a quote written by `quoteOf` is looked for in
+ * the very text it was read from, and read back through `quoteOf` before it
+ * is believed. One hit and no other: a quote standing twice is nobody's to
+ * choose between, and painting the wrong one would cost what the guard
+ * protects. Null for none, for two or more, and for a quote whose ends fall
+ * on a boundary no record can name.
+ *
+ * @param {string[]} prose every block of the segment, in order
+ * @param {string} quote
+ * @returns {{ start: MarkPoint, end: MarkPoint } | null}
+ */
+export function findQuote(prose, quote) {
+  if (quote.length === 0 || prose.length === 0) return null;
+  const joined = prose.join("\n");
+  const at = joined.indexOf(quote);
+  if (at === -1 || joined.indexOf(quote, at + 1) !== -1) return null;
+
+  const start = pointAt(prose, at);
+  const last = pointAt(prose, at + quote.length - 1);
+  if (start === null || last === null) return null;
+  const end = { block: last.block, offset: last.offset + 1 };
+  const read = quoteOf(prose.slice(start.block, end.block + 1), start, end);
+  return read === quote ? { start, end } : null;
+}
+
+/**
+ * The block and offset a position in the joined prose falls in - or null on
+ * a line break between blocks, a place no character of any block owns, and
+ * past the end.
+ *
+ * @param {string[]} prose
+ * @param {number} index into `prose.join("\n")`
+ * @returns {MarkPoint | null}
+ */
+function pointAt(prose, index) {
+  let from = 0;
+  for (const [block, text] of prose.entries()) {
+    if (index < from + text.length) return { block, offset: index - from };
+    if (index === from + text.length) return null;
+    from += text.length + 1;
+  }
+  return null;
+}
