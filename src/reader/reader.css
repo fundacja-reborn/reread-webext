@@ -305,6 +305,19 @@ body.reader:not(:has(#article:not([hidden]))):has(.panel-scrim:not([hidden])) .r
   padding-top: 0;
 }
 
+/* The room over the text (`#page`) must not be a margin while the box is
+   folded: with everything in it hidden the box is empty, adjoining margins
+   collapse straight through an empty box, and the page's 2rem then stands
+   ABOVE it - once the body's padding no longer walled it off, it carried
+   the ribbon 2rem down the window (Michał's second smoke, 2026-09-01;
+   the first smoke's 0.75rem was the body's half, this was the rest). The
+   same room as padding collapses through nothing, so the box - and the
+   ribbon on it - stays on the window's edge and the text keeps its air. */
+:root[data-reader-chrome="hidden"] body.reader:has(#article:not([hidden])) #page {
+  margin-top: 0;
+  padding-top: 2rem;
+}
+
 :root[data-reader-chrome="hidden"] body.reader:has(#article:not([hidden])) .reader-chrome > :not(.chrome-tab) {
   display: none;
 }
