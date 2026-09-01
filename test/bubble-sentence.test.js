@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { STYLE, foldControl } from "../src/content/tooltip.js";
+import { STYLE, foldControl, foldStart } from "../src/content/tooltip.js";
 
 /**
  * The fold in the sentence's corner (D96) is a rule and a stylesheet contract,
@@ -39,6 +39,15 @@ describe("the sentence's fold", () => {
     // so the sentence never rewraps, but there is nothing to press.
     assert.equal(foldControl({ entries: true, overflows: false }), "reserved");
     assert.equal(foldControl({ entries: true, overflows: true }), "shown");
+  });
+
+  it("opens clamped over a dictionary, whole when the sentence is alone", () => {
+    // Michał's ask (2026-09-01): whoever pressed More on a phrase the
+    // dictionary knows is usually there for the dictionary, and the sentence
+    // taking its height first squeezed the answer to a strip. Only a starting
+    // state - the reader's own press outranks it for the phrase's lifetime.
+    assert.equal(foldStart({ entries: true }), true);
+    assert.equal(foldStart({ entries: false }), false);
   });
 
   it("clamps with all three declarations a one-line cut needs", () => {
