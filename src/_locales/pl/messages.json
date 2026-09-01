@@ -45,6 +45,16 @@
   "bubble_reader": { "message": "Czytaj w widoku czytania" },
   "bubble_translating": { "message": "Tłumaczę..." },
   "bubble_nothing_more": { "message": "Nie ma ani zdania, ani wpisu ze słownika" },
+  "bubble_whole_words": { "message": "Zaznacz całe słowa" },
+  "bubble_not_in_dictionary": { "message": "Nie ma tego w słownikach" },
+  "bubble_no_dictionary": {
+    "message": "Brak słownika dla języka: $LANGUAGE$ - dodaj go w ustawieniach",
+    "placeholders": { "language": { "content": "$1", "example": "angielski" } }
+  },
+  "bubble_saves_under": {
+    "message": "Zapis trafi do pary $PAIR$",
+    "placeholders": { "pair": { "content": "$1", "example": "angielski → polski" } }
+  },
   "bubble_speak": { "message": "Przeczytaj na głos" },
   "bubble_sentence_collapse": { "message": "Zwiń zdanie" },
   "bubble_sentence_expand": { "message": "Rozwiń zdanie" },

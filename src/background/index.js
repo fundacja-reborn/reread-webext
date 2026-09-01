@@ -19,7 +19,7 @@ import { setProvider, translate } from "../lib/translator/index.js";
 import { asSchemeReport } from "../lib/translator/providers/bergamot/host-protocol.js";
 import { bergamot } from "../lib/translator/providers/bergamot/index.js";
 import { bergamotViaHost, raiseEngineHost } from "../lib/translator/providers/bergamot/remote.js";
-import { lookUp } from "../lib/dict/lookup.js";
+import { lookUp, lookUpAnswer } from "../lib/dict/lookup.js";
 import { readPage } from "./page.js";
 import { openLibrary, openMarks, openReader, readInReader } from "./reader-tab.js";
 import { openSettings, openVocabulary } from "./room-tab.js";
@@ -43,6 +43,7 @@ setProvider(offscreenApi() === null ? bergamot : bergamotViaHost);
  * @typedef {null
  *   | import("../lib/protocol.js").Translation
  *   | import("../lib/protocol.js").DictEntry[]
+ *   | import("../lib/protocol.js").LookUp
  *   | import("../lib/protocol.js").VocabEntry[]
  *   | import("../lib/protocol.js").ImportReport
  *   | import("../lib/protocol.js").Page} Answer
@@ -85,11 +86,16 @@ async function handle(request, sender) {
       // The quiet vocabulary's hand on somebody else's page (D162): the
       // dictionaries live in the extension's own storage, out of a content
       // script's reach, so the page asks here - the reader page keeps
-      // reading its own database directly (D121). No pair chosen means no
-      // language to ask in: an honest empty list rather than an error,
-      // because the bubble this feeds stands on its own two buttons anyway.
-      const pair = chosenPair(await readConfig());
-      return ok(pair === null ? [] : await lookUp(request.text, pair.from));
+      // reading its own database directly (D121). The answer carries the
+      // entries and how many dictionaries were asked (D164), so the bubble
+      // can say which silence it met. Read in the page's own language where
+      // it declared one (D165) - a Polish page with a pl-en dictionary is
+      // read in Polish whatever the pair says - and in the pair's source
+      // where it did not. Neither means no language to ask in: no answer
+      // (null) rather than an error - the bubble says nothing on it, and a
+      // fault must never read as a missing dictionary.
+      const lang = request.lang ?? chosenPair(await readConfig())?.from ?? null;
+      return ok(lang === null ? null : await lookUpAnswer(request.text, lang));
     }
     case Message.OPEN_READER: {
       // Two senders, one function. The popup says which tab it stood over,

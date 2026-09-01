@@ -82,6 +82,12 @@ export const ErrorCode = Object.freeze({
  * about `watch`, and a reader should be able to see that is what happened.
  *
  * @typedef {{ dictionary: string, headword: string, senses: string[] }} DictEntry
+ *
+ * What the dictionaries said about a phrase and how many of them were asked
+ * (D164): `dictionaries` counts the installed dictionaries that answer for
+ * the language, zero saying there is none - the one fact that tells "not in
+ * your dictionaries" from "no dictionary for this language" in the bubble.
+ * @typedef {{ entries: DictEntry[], dictionaries: number }} LookUp
  */
 
 /**
@@ -119,10 +125,17 @@ export const ErrorCode = Object.freeze({
  *
  * `look-up` is the dictionaries alone (D162): what the quiet vocabulary asks
  * from a page that has no database in reach - the reader page reads its own.
- * It carries the text and nothing else, for `translate`'s reason: the pair
- * lives in the settings, and the background answers in its source language.
- * The answer is `DictEntry[]`; no pair chosen answers an honest empty list,
- * not an error - the bubble it feeds stands on its own two buttons either way.
+ * It carries the text, and since D165 the language the page declares for it
+ * (`lang`, absent when the page says nothing): under the trim a page is read
+ * in its own language, the way the reader page reads its document, and the
+ * pair in the settings is the stand-in for a page that declares none - the
+ * background applies that rule, so the pair stays its business alone.
+ * The answer is a `LookUp` (D164): the entries, and how many dictionaries
+ * were asked - the bubble says "not in your dictionaries" or "no dictionary
+ * for this language" by the count, which a bare list could never tell it.
+ * No pair chosen, or a database that would not open, answers `null`: no
+ * answer rather than an error, and the bubble says nothing on it - a note
+ * sending somebody to the settings has to be about a dictionary, not a fault.
  *
  * Saving replaces the meanings of a phrase with the ones given, which is what
  * makes "the phrase means exactly what the bubble is showing" one rule instead
@@ -157,7 +170,7 @@ export const ErrorCode = Object.freeze({
  * to trust an import that says nothing else.
  *
  * @typedef {{ kind: typeof Message.TRANSLATE, text: string, context?: string }} TranslateRequest
- * @typedef {{ kind: typeof Message.LOOK_UP, text: string }} LookUpRequest
+ * @typedef {{ kind: typeof Message.LOOK_UP, text: string, lang?: string }} LookUpRequest
  * @typedef {{ kind: typeof Message.OPEN_READER, sourceTabId?: number }} OpenReaderRequest
  * @typedef {{ kind: typeof Message.OPEN_LIBRARY }} OpenLibraryRequest
  * @typedef {{ kind: typeof Message.OPEN_MARKS }} OpenMarksRequest
@@ -283,9 +296,9 @@ export function asTranslation(value) {
  * an older version that sent something else" is exactly where a bubble would
  * throw into somebody's page.
  *
- * Exported since D162: a `look-up` answer is exactly this list, and the
- * content script receiving one narrows it here - the same door the
- * translation's entries have always come through.
+ * Exported since D162 for the `look-up` answer, whose entries come through
+ * this same door as the translation's always have (`asLookUp` below wraps it
+ * since D164, when the answer grew a count).
  *
  * @param {unknown} value
  * @returns {DictEntry[]}
@@ -311,6 +324,24 @@ export function asDictEntries(value) {
   }
 
   return entries;
+}
+
+/**
+ * The `look-up` answer narrowed the way every answer is (D164): the entries
+ * through `asDictEntries`, the count a whole number. Anything else - null,
+ * an older background's bare list, a count that is not one - is no answer,
+ * and the bubble says nothing rather than something wrong: a "no dictionary"
+ * line off a malformed count would send somebody to the settings for nothing.
+ *
+ * @param {unknown} value
+ * @returns {LookUp | null}
+ */
+export function asLookUp(value) {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return null;
+  const { entries, dictionaries } = /** @type {Record<string, unknown>} */ (value);
+  if (!Array.isArray(entries) || typeof dictionaries !== "number") return null;
+  if (!Number.isInteger(dictionaries) || dictionaries < 0) return null;
+  return { entries: asDictEntries(entries), dictionaries };
 }
 
 /**
@@ -354,7 +385,12 @@ export function asRequest(message) {
 
   if (kind === Message.LOOK_UP) {
     if (typeof text !== "string") return null;
-    return { kind: Message.LOOK_UP, text };
+    // The page's own language, when it declared one (D165); anything else
+    // is "the page said nothing", and the background falls back to the pair.
+    const lang = /** @type {Record<string, unknown>} */ (message)["lang"];
+    return typeof lang === "string" && lang.length > 0
+      ? { kind: Message.LOOK_UP, text, lang }
+      : { kind: Message.LOOK_UP, text };
   }
 
   if (kind === Message.FORGET_PHRASE) {

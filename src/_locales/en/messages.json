@@ -61,6 +61,16 @@
     "message": "No sentence and no dictionary entry to show",
     "description": "The line behind the bubble's More button when the fetch it started comes back empty - shown instead of the layer closing without a word. It stands where a translated sentence normally would, so it must name the missing things (sentence, dictionary) and read unmistakably as the extension talking, never like a line of the book."
   },
+  "bubble_whole_words": { "message": "Select whole words" },
+  "bubble_not_in_dictionary": { "message": "Not in your dictionaries" },
+  "bubble_no_dictionary": {
+    "message": "No dictionary for $LANGUAGE$ yet - add one in the settings",
+    "placeholders": { "language": { "content": "$1", "example": "English" } }
+  },
+  "bubble_saves_under": {
+    "message": "Will be saved under $PAIR$",
+    "placeholders": { "pair": { "content": "$1", "example": "English → Polish" } }
+  },
   "bubble_speak": {
     "message": "Read aloud",
     "description": "aria-label and hover title of the speaker icon in the bubble's action row (D83): speaks the selected phrase itself, never the translation."

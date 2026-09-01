@@ -30,6 +30,16 @@ describe("the popup's rows", () => {
     assert.equal(shown.readerOnly, false);
   });
 
+  it("keeps the pair select under the trim with a pair, models or not (D165)", () => {
+    // The pair still decides where saved phrases go and which language the
+    // dictionaries answer in where a page declares none; a select that hid
+    // while deciding both made the trim read as pairless (Michał's report).
+    assert.equal(rows({ translationOff: true, pair: true }).pair, true);
+    assert.equal(rows({ translationOff: true, pair: true, fresh: true }).pair, true);
+    // The signpost is about a missing model, which the trim does not miss.
+    assert.equal(rows({ translationOff: true, pair: true, fresh: true }).setup, false);
+  });
+
   it("keeps the quiet vocabulary's rows under the trim with a pair (D162)", () => {
     // The switch turns off the model, not the bubble: with a pair the saved
     // phrases live and the ordinary pages read again, so their door and the
