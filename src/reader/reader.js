@@ -240,8 +240,10 @@ const navPicturesHint = document.getElementById("nav-pictures-hint");
 // while an article is on screen it is stuck over the text, and the voice needs
 // to know how much of the window's top it covers.
 const chromeBox = document.querySelector(".reader-chrome");
+const chromeTab = document.getElementById("chrome-tab");
 const sizeValue = document.getElementById("size-value");
 const measureValue = document.getElementById("measure-value");
+const fontCustom = /** @type {HTMLInputElement | null} */ (document.getElementById("font-custom"));
 const listenButton = /** @type {HTMLButtonElement | null} */ (document.getElementById("listen"));
 const voiceSetting = document.getElementById("voice-setting");
 const voiceChoice = /** @type {HTMLSelectElement | null} */ (
@@ -969,6 +971,7 @@ function renderArticle(piece) {
   applySpeech();
   updateListen();
   updateMarker();
+  updateChromeTab();
   scrollTo(0, 0);
   // The action rows are the caller's move, not taken here: the two callers
   // that restore a position must have them laid out BEFORE the scroll - the
@@ -1378,6 +1381,22 @@ function updateMarker() {
   if (markerButton === null) return;
   markerButton.hidden = shown === null || !highlightsSupported();
   markerButton.setAttribute("aria-pressed", String(markerOn));
+}
+
+/**
+ * The bookmark tab offered only where the bar can fold: over a document. The
+ * list always keeps its whole chrome (the stylesheet scopes the folding the
+ * same way), so over it the ribbon would be a control with nothing to
+ * control. The chevron's word and the ARIA state follow the stored choice.
+ */
+function updateChromeTab() {
+  if (chromeTab === null) return;
+  chromeTab.hidden = shown === null;
+  const folded = settings.reader.chromeHidden;
+  chromeTab.setAttribute("aria-expanded", String(!folded));
+  const label = folded ? t("reader_bar_show") : t("reader_bar_hide");
+  chromeTab.title = label;
+  chromeTab.setAttribute("aria-label", label);
 }
 
 /**
@@ -2760,6 +2779,7 @@ function leaveDocView() {
   forgetReading();
   stopMarkSpeech();
   updateListen();
+  updateChromeTab();
   // An open footnote was about the text leaving the screen.
   hideNotePopover();
   // The pen goes away with the article: the list has nothing to mark, and
@@ -4452,6 +4472,16 @@ function applyAppearance(reader) {
 
   if (sizeValue !== null) sizeValue.textContent = String(reader.fontSize);
   if (measureValue !== null) measureValue.textContent = String(reader.measure);
+  // The typed font, shown as stored - unless the field is the thing being
+  // typed in right now: another tab's write must not eat a half-typed name.
+  if (fontCustom !== null && document.activeElement !== fontCustom) {
+    fontCustom.value = reader.fontFamily;
+  }
+  // The bar folded or out (the bookmark tab's stored choice), stamped for
+  // the stylesheet - which folds it only over an article, the same scope
+  // the stuck bar lives by.
+  root.dataset["readerChrome"] = reader.chromeHidden ? "hidden" : "shown";
+  updateChromeTab();
   applyLinkStops(reader.links);
 
   for (const button of document.querySelectorAll(
@@ -4810,6 +4840,29 @@ menuButton?.addEventListener("click", () => {
   if (opening) setMarker(false);
   setPanel(displayButton, displayPanel, false);
   setPanel(menuButton, menuPanel, opening);
+});
+
+// The bookmark tab (Michał's design, after a mobileread request): fold the
+// bar away, bring it back - a stored choice about the reading surface, so it
+// rides the config like every appearance knob and survives the article.
+// Folding closes the panels first: they live in the bar being folded, and a
+// panel left open under a bar that is gone would be a curtain with no rod.
+chromeTab?.addEventListener("click", async () => {
+  const folding = !settings.reader.chromeHidden;
+  if (folding) closePanels();
+  adoptConfig(await writeConfig({ reader: { chromeHidden: folding } }));
+});
+
+// The typed font (mobileread request), committed on change - blur or Enter -
+// and not per keystroke: a storage write per letter would ping every open
+// page for nothing. An empty field is the presets alone; the config's read
+// side cleans the name, and what was actually stored comes back through
+// `adoptConfig` into the field.
+fontCustom?.addEventListener("change", async () => {
+  adoptConfig(await writeConfig({ reader: { fontFamily: fontCustom.value } }));
+});
+fontCustom?.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") fontCustom.blur();
 });
 
 function anyPanelOpen() {
@@ -5834,6 +5887,11 @@ function rootReadingSide(ground) {
     // exists. Everywhere else the bubble keeps asking the background.
     openSettings: () => goToSettings(),
     plainLinks: () => settings.reader.links === "plain",
+    // The bubble dresses for the paper it stands on: the reader's theme by
+    // name, asked live because the Aa panel can change it mid-session.
+    // `auto` names nothing - the browser answers there, and so does the
+    // bubble's own media query.
+    scheme: () => (settings.reader.theme === "auto" ? null : settings.reader.theme),
     // The highlighter's hooks (D106): whether the pen is in the hand, where
     // marks may anchor (the rebuilt content - the reader's own title has no
     // block order to write against), what a finished stroke becomes, and what

@@ -32,7 +32,7 @@
 
 import { webext } from "../lib/browser.js";
 import { CONFIG_KEY, DEFAULTS, withDefaults } from "../lib/config.js";
-import { choosableLines } from "../lib/gloss.js";
+import { entryBlocks } from "../lib/gloss.js";
 import { t } from "../lib/i18n.js";
 import { describeError } from "../lib/messages.js";
 import { normalize, trimPhrase } from "../lib/normalize.js";
@@ -255,6 +255,17 @@ let quietLookup = null;
 
 /** @type {(() => { lang: string, voiceURI: string | undefined } | null) | null} */
 let quietVoice = null;
+
+/**
+ * The paper the bubble dresses for, and one more thing only the reader can
+ * offer: its page knows the theme its paper is painted in, and asks live
+ * because the Aa panel can change it under a running session. Null everywhere
+ * else - on somebody else's page the system's preference is the only signal,
+ * and the bubble's own media query already reads it.
+ *
+ * @type {(() => "light" | "sepia" | "dark" | null) | null}
+ */
+let bubbleScheme = null;
 
 /**
  * The bubble-size knob (D85), mirrored the same way: every show hands the
@@ -781,6 +792,7 @@ function showSaved(anchor, text, normalized, context, how = {}) {
     coarse: touchPointer(lastPointerType),
     scale: bubbleScale / 100,
     anchored,
+    scheme: bubbleScheme?.() ?? null,
   });
   return true;
 }
@@ -837,35 +849,6 @@ async function fillSecondLayer() {
 
   tooltip.setContext(sentence);
   tooltip.setEntries(blocks);
-}
-
-/**
- * Dictionary entries as the bubble takes them: a label, and the lines under it.
- *
- * The label is where two things get decided, and both need to know what was
- * selected - which is why they are decided here and not in the bubble. The
- * dictionary's name only earns a line when there is more than one to tell
- * apart, and the headword only when it is not the word the reader selected: a
- * definition of `watch` under a selection of `watches` has to say so, while one
- * under `watch` would just be repeating the page back (D23).
- *
- * The lines are the entry's meanings one to a row, which is the same thing the
- * reader has always seen and now also the thing they can press. Nothing about
- * the entry moves or disappears; what changes is where one row ends.
- *
- * @param {import("../lib/protocol.js").DictEntry[]} entries
- * @param {string} normalized what the reader selected, as its key
- * @returns {import("./tooltip.js").Block[]}
- */
-function entryBlocks(entries, normalized) {
-  const books = new Set(entries.map((entry) => entry.dictionary)).size;
-
-  return entries.map((entry) => {
-    const parts = [];
-    if (normalize(entry.headword) !== normalized && entry.headword.length > 0) parts.push(entry.headword);
-    if (books > 1 && entry.dictionary.length > 0) parts.push(entry.dictionary);
-    return { label: parts.join(" - "), lines: choosableLines(entry.senses) };
-  });
 }
 
 /**
@@ -985,6 +968,7 @@ function present(selection, { deliberate, touch, chain = false }) {
       coarse: touchPointer(lastPointerType),
       scale: bubbleScale / 100,
       anchored,
+      scheme: bubbleScheme?.() ?? null,
     });
     // The dictionaries still answer without the engine (D121): the reader
     // hands the lookup down, in the language of the document on screen. The
@@ -1036,6 +1020,7 @@ function present(selection, { deliberate, touch, chain = false }) {
     scale: bubbleScale / 100,
     folded: hideActions,
     anchored,
+    scheme: bubbleScheme?.() ?? null,
   });
 
   const request = selection.context === null
@@ -1315,7 +1300,7 @@ function onStorageChanged(changes, area) {
 }
 
 /**
- * @param {{ root?: Element | null, observe?: boolean, stored?: Record<string, unknown>, ownSelection?: boolean, anchored?: boolean, covered?: () => number, openSettings?: () => void, plainLinks?: () => boolean, alsoOwns?: (target: EventTarget | null) => boolean, marking?: () => boolean, markRoot?: () => Element | null, onMarked?: (range: Range) => void, onMarkStart?: () => void, onMarkTap?: (x: number, y: number, word?: Range) => void, quietLookup?: (text: string) => Promise<import("../lib/protocol.js").DictEntry[]>, quietVoice?: () => { lang: string, voiceURI: string | undefined } | null }} [where]
+ * @param {{ root?: Element | null, observe?: boolean, stored?: Record<string, unknown>, ownSelection?: boolean, anchored?: boolean, covered?: () => number, openSettings?: () => void, plainLinks?: () => boolean, alsoOwns?: (target: EventTarget | null) => boolean, marking?: () => boolean, markRoot?: () => Element | null, onMarked?: (range: Range) => void, onMarkStart?: () => void, onMarkTap?: (x: number, y: number, word?: Range) => void, quietLookup?: (text: string) => Promise<import("../lib/protocol.js").DictEntry[]>, quietVoice?: () => { lang: string, voiceURI: string | undefined } | null, scheme?: () => "light" | "sepia" | "dark" | null }} [where]
  *   what to underline inside, whether it can change on its own, the startup
  *   read of `storage.local` when the caller already made one, whether the
  *   page selects through our own gesture rather than the browser's - every
@@ -1340,7 +1325,9 @@ function onStorageChanged(changes, area) {
  *   `quietVoice` are the reader's hands into the no-translation trim (D121):
  *   the dictionaries and the voice of the document on screen - reader flags
  *   too, because only an extension page has the database in reach and only
- *   the reader knows what language it is showing.
+ *   the reader knows what language it is showing. `scheme` names the paper
+ *   the bubble dresses for - a reader flag for the same reason: only our
+ *   page knows what theme it painted itself in.
  */
 export function start(where = {}) {
   root = where.root ?? null;
@@ -1351,6 +1338,7 @@ export function start(where = {}) {
   alsoOwns = where.alsoOwns ?? (() => false);
   quietLookup = where.quietLookup ?? null;
   quietVoice = where.quietVoice ?? null;
+  bubbleScheme = where.scheme ?? null;
   // The page that took the native selection away answers the copy chord
   // itself (D110) - and only that page.
   bridgeCopy = where.ownSelection === true;

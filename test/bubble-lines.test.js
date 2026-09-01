@@ -76,6 +76,11 @@ function contrast(one, other) {
 const THEMES = [
   { name: "light", css: blockAfter(".bubble {") },
   { name: "dark", css: blockAfter("@media (prefers-color-scheme: dark)") },
+  // The reader-named papers: the reader hands its theme down with every show,
+  // so these two blocks dress the bubble whatever the system prefers - the
+  // same 4.5:1 floor holds on each.
+  { name: "reader dark", css: blockAfter('.bubble[data-scheme="dark"]') },
+  { name: "reader sepia", css: blockAfter('.bubble[data-scheme="sepia"]') },
 ];
 
 describe("the bubble's lines", () => {

@@ -1,10 +1,12 @@
 /**
  * The gloss: what the bubble shows about a phrase, and what gets saved.
  *
- * The two rules here need no bubble to hold them, so they live where
+ * The rules here need no bubble to hold them, so they live where
  * `node --test` can reach them - the same reason `store/phrase.js` is kept apart
  * from the database it writes to.
  */
+
+import { normalize } from "./normalize.js";
 
 /**
  * One line per meaning. A word has more than one, and separating them by
@@ -51,6 +53,38 @@ export function toMeanings(text) {
  */
 export function choosableLines(senses) {
   return senses.flatMap(toMeanings);
+}
+
+/**
+ * Dictionary entries as the bubble takes them: the label's two halves, and the
+ * lines under them.
+ *
+ * The label is where two things get decided, and both need to know what was
+ * selected - which is why they are decided here and not in the bubble. The
+ * dictionary's name only earns its half when there is more than one book to
+ * tell apart, and the headword only when it is not the word the reader
+ * selected: a definition of `watch` under a selection of `watches` has to say
+ * so, while one under `watch` would just be repeating the page back (D23).
+ * They stay halves all the way into the bubble, because they dress
+ * differently there (see `Block` in `content/tooltip.js`).
+ *
+ * The lines are the entry's meanings one to a row, which is the same thing the
+ * reader has always seen and now also the thing they can press. Nothing about
+ * the entry moves or disappears; what changes is where one row ends.
+ *
+ * @param {import("./protocol.js").DictEntry[]} entries
+ * @param {string} normalized what the reader selected, as its key
+ * @returns {Array<{ headword: string, dictionary: string, lines: string[] }>}
+ */
+export function entryBlocks(entries, normalized) {
+  const books = new Set(entries.map((entry) => entry.dictionary)).size;
+
+  return entries.map((entry) => ({
+    headword:
+      entry.headword.length > 0 && normalize(entry.headword) !== normalized ? entry.headword : "",
+    dictionary: books > 1 && entry.dictionary.length > 0 ? entry.dictionary : "",
+    lines: choosableLines(entry.senses),
+  }));
 }
 
 /**

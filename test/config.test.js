@@ -120,6 +120,26 @@ describe("withDefaults", () => {
     assert.equal(withDefaults({ reader: { markerColor: "mauve" } }).reader.markerColor, "yellow");
     assert.equal(withDefaults({ reader: {} }).reader.markerColor, "yellow");
   });
+
+  it("stores the typed font name clean enough to quote", () => {
+    // The stylesheet side wraps the stored name in double quotes without
+    // looking inside, so quotes, backslashes and control characters must
+    // never survive the read - and neither may an essay-length "name".
+    /** @param {unknown} value */
+    const clean = (value) => withDefaults({ reader: { fontFamily: value } }).reader.fontFamily;
+    assert.equal(clean("Iowan Old Style"), "Iowan Old Style");
+    assert.equal(clean('  "Iowan\\ Old Style" '), "Iowan Old Style");
+    assert.equal(clean("New" + String.fromCodePoint(7) + " Roman"), "New Roman");
+    assert.equal(clean(42), "");
+    assert.equal(clean(undefined), "");
+    assert.equal(clean("x".repeat(300)).length, 100);
+  });
+
+  it("folds the bar only on a stored true", () => {
+    assert.equal(withDefaults({ reader: { chromeHidden: true } }).reader.chromeHidden, true);
+    assert.equal(withDefaults({ reader: { chromeHidden: "yes" } }).reader.chromeHidden, false);
+    assert.equal(withDefaults({ reader: {} }).reader.chromeHidden, false);
+  });
 });
 
 describe("readConfig", () => {
