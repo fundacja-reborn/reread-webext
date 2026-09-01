@@ -517,9 +517,12 @@ html {
   }
 }
 
+/* No line under the panel: the scrim dims the page beneath an open panel
+   (2026-08-29), so the panel's own edge is where the paper stops being
+   lit - a rule on top of that read as clutter (Michał's smoke,
+   2026-09-01). */
 .reader-panel {
   padding: 0.6rem 0;
-  border-bottom: 1px solid var(--page-line);
 }
 
 .reader-setting {
