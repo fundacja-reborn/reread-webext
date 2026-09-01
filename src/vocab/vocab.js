@@ -218,7 +218,7 @@ function speakerIcon() {
  *
  * @param {Phrase} phrase
  */
-function speakPhrase(phrase) {
+async function speakPhrase(phrase) {
   if (config === null) return;
   if (speaking() && sounding === phrase.normalized) {
     stopSpeaking();
@@ -228,7 +228,7 @@ function speakPhrase(phrase) {
   sounding = phrase.normalized;
   // The voice is stored under the primary subtag (the rule every speaker of
   // this extension shares), so the row's language is narrowed the same way.
-  const spoke = speak(
+  const spoke = await speak(
     phrase.phrase,
     phrase.langFrom,
     config.ttsVoices[primaryLanguage(phrase.langFrom)],
@@ -621,7 +621,7 @@ function phraseRow(phrase) {
     speaker.setAttribute("aria-label", t("vocab_speak_aria", phrase.phrase));
     speaker.title = t("bubble_speak");
     speaker.append(speakerIcon());
-    speaker.addEventListener("click", () => speakPhrase(phrase));
+    speaker.addEventListener("click", () => void speakPhrase(phrase));
     actions.append(speaker);
   }
   actions.append(edit, learned);

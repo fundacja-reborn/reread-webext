@@ -2613,7 +2613,7 @@ document.getElementById("tts-listen")?.addEventListener("click", () => {
   // like - a sample read at a speed nobody uses is a sample of nothing. In the
   // language the row is about; with none the empty tag lets the device's
   // default offline voice read the sample.
-  speak(VOICE_SAMPLE, voiceRowLanguage() ?? "", chosen, config.ttsRate / 100);
+  void speak(VOICE_SAMPLE, voiceRowLanguage() ?? "", chosen, config.ttsRate / 100);
 });
 document.getElementById("tts-rate-down")?.addEventListener("click", () => {
   void stepRate(-TTS_RATE.step);

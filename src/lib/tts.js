@@ -301,24 +301,55 @@ export function shareVoice(yieldQueue) {
 }
 
 /**
+ * The engine's voice list, awaited where a fresh context answers empty.
+ * Chromium loads the list lazily per page: the first `getVoices()` answers
+ * an empty array and the real list arrives with `voiceschanged` a moment
+ * later (measured on nytimes.com: 0 voices on the first ask, 227 after the
+ * event). Speaking inside that gap sent the utterance out with no voice
+ * object, and the engine's own default read it - an English word in the
+ * system's Polish voice (Michał's report). One short wait, one shot: a
+ * device that truly lists nothing (Android's clause in the header) settles
+ * by the timer and the utterance goes out by `lang` alone, as it always
+ * has.
+ *
+ * @returns {Promise<SpeechSynthesisVoice[]>}
+ */
+function voicesSoon() {
+  const now = speechSynthesis.getVoices();
+  if (now.length > 0) return Promise.resolve(now);
+  return new Promise((resolve) => {
+    const settle = () => {
+      clearTimeout(timer);
+      speechSynthesis.removeEventListener("voiceschanged", settle);
+      resolve(speechSynthesis.getVoices());
+    };
+    const timer = setTimeout(settle, 1500);
+    speechSynthesis.addEventListener("voiceschanged", settle);
+  });
+}
+
+/**
  * Speaks, replacing whatever this module was saying before. The voice list is
  * asked at speak time rather than held: it loads asynchronously and can
  * change, and the voice is picked when it is needed - the stored choice, or
- * the fallback described at `offlineVoice`.
+ * the fallback described at `offlineVoice` - waiting out the empty answer a
+ * fresh page gives first (`voicesSoon`).
  *
  * @param {string} text as the page has it - the phrase, never the gloss
  * @param {string} lang BCP-47, the language being read
  * @param {string | undefined} voiceURI the choice stored for that language, if any
  * @param {number} [rate] the speed the reader set, as the engine's factor
  *   (1 = the voice's own normal speed); the config stores it as a percent
- * @returns {boolean} whether anything was handed to the engine - false with
- *   nothing to say, with speech off, and where the device has voices but no
- *   offline one for the language (the caller says so; this module only
- *   refuses)
+ * @returns {Promise<boolean>} whether anything was handed to the engine -
+ *   false with nothing to say, with speech off, and where the device has
+ *   voices but no offline one for the language (the caller says so; this
+ *   module only refuses)
  */
-export function speak(text, lang, voiceURI, rate = 1) {
+export async function speak(text, lang, voiceURI, rate = 1) {
   if (!canSpeak() || text.length === 0) return false;
-  const voices = speechSynthesis.getVoices();
+  const voices = await voicesSoon();
+  // The switch may have flipped while the list was loading.
+  if (!canSpeak()) return false;
   // The settings page's promise (D155): a language this device could only
   // read through the browser's network voices is a language it does not
   // read. Asked before anybody is told to step aside - a refusal must not

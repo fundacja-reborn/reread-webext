@@ -208,17 +208,29 @@ describe("voiceLanguage", () => {
 describe("speak", () => {
   /**
    * A stand-in engine: the voices it lists, and what it was told to say.
+   * Like the real one, it may start empty and deliver the list with a
+   * `voiceschanged` a moment later - `arriving` is what that event brings
+   * (the event fires either way, as it does on a device that never lists
+   * anything).
    *
    * @param {ReturnType<typeof voice>[]} voices
+   * @param {ReturnType<typeof voice>[]} [arriving]
    * @returns {{ voice: { name: string } | null }[]}
    */
-  function engine(voices) {
+  function engine(voices, arriving) {
     /** @type {{ voice: { name: string } | null }[]} */
     const spoken = [];
     globalThis.speechSynthesis = /** @type {any} */ ({
       getVoices: () => voices,
       speak: (/** @type {{ voice: { name: string } | null }} */ utterance) => spoken.push(utterance),
       cancel: () => {},
+      addEventListener: (/** @type {string} */ _type, /** @type {() => void} */ handler) => {
+        queueMicrotask(() => {
+          if (arriving !== undefined) voices = arriving;
+          handler();
+        });
+      },
+      removeEventListener: () => {},
     });
     globalThis.SpeechSynthesisUtterance = /** @type {any} */ (
       class {
@@ -243,28 +255,45 @@ describe("speak", () => {
     globalThis.SpeechSynthesisUtterance = /** @type {any} */ (undefined);
   });
 
-  it("gives the utterance an offline voice of its language, never a network one", () => {
+  it("gives the utterance an offline voice of its language, never a network one", async () => {
     const spoken = engine([
       voice("Google US English", "en-US", "urn:google", { ...REMOTE, default: true }),
       voice("Alice", "en-US", "urn:alice"),
     ]);
     assert.equal(canSpeakLang("en"), true);
-    assert.equal(speak("hello", "en", undefined), true);
+    assert.equal(await speak("hello", "en", undefined), true);
     assert.equal(spoken[0]?.voice?.name, "Alice");
   });
 
-  it("refuses where the device has voices but none reads the language offline", () => {
+  it("refuses where the device has voices but none reads the language offline", async () => {
     const spoken = engine([voice("Google polski", "pl-PL", "urn:google", REMOTE)]);
     assert.equal(canSpeakLang("pl"), false);
-    assert.equal(speak("cześć", "pl", "urn:google"), false);
+    assert.equal(await speak("cześć", "pl", "urn:google"), false);
     assert.equal(spoken.length, 0);
   });
 
-  it("still speaks on a device that lists no voices at all, leaving the pick to the engine", () => {
+  it("still speaks on a device that lists no voices at all, leaving the pick to the engine", async () => {
     const spoken = engine([]);
     assert.equal(canSpeakLang("pl"), true);
-    assert.equal(speak("cześć", "pl", undefined), true);
+    assert.equal(await speak("cześć", "pl", undefined), true);
     assert.equal(spoken[0]?.voice, null);
+  });
+
+  it("waits out the empty list a fresh page answers, so the system default never wins", async () => {
+    // Michał's report from nytimes.com: a fresh page's first `getVoices()` is
+    // empty (the real list arrives with `voiceschanged`), the utterance went
+    // out with no voice object, and the engine's own default - the system's
+    // Polish voice - read an English word. Waited out, the language's own
+    // voice wins over the default flag on the wrong language.
+    const spoken = engine(
+      [],
+      [
+        voice("Zosia", "pl-PL", "urn:zosia", { default: true }),
+        voice("Alice", "en-US", "urn:alice"),
+      ],
+    );
+    assert.equal(await speak("hello", "en", undefined), true);
+    assert.equal(spoken[0]?.voice?.name, "Alice");
   });
 });
 
