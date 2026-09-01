@@ -988,15 +988,24 @@ html {
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
   font-size: 0.85em;
   line-height: 1.5;
+  /* A footnote is frequently a reference with an address in it, and an
+     unbreakable URL ran straight out of the card (Michał's screenshot,
+     2026-09-01) - the same rule the bubble wears. */
+  overflow-wrap: break-word;
 }
 
+/* On dark paper a black shadow falls on near-black and says nothing, so a
+   faint light halo does the separating - the card reads as backlit, a step
+   off the page (Michał's call, 2026-09-01). The black drop stays for the
+   card's passes over lighter content. Kept in step with the bubble's dark
+   shadow in tooltip.js by hand. */
 :root[data-reader-theme="dark"] .note-popover {
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5), 0 0 18px rgba(255, 255, 255, 0.1);
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-reader-theme="light"]):not([data-reader-theme="sepia"]) .note-popover {
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5), 0 0 18px rgba(255, 255, 255, 0.1);
   }
 }
 

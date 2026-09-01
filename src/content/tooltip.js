@@ -874,11 +874,15 @@ export const STYLE = `
 
   @media (prefers-color-scheme: dark) {
     .bubble:not([data-scheme]) {
-      /* A step lighter than the dark themes it floats over, because the
-         shadow that separates the planes on glass does not exist on black
-         and quantizes away on e-ink - the background difference and the
-         border have to do it alone (reported from a phone: the bubble sank
-         into the reader's dark theme). */
+      /* A step lighter than the dark themes it floats over, because a black
+         shadow does not exist on black and quantizes away on e-ink - the
+         background difference and the border carry the separation (reported
+         from a phone: the bubble sank into the reader's dark theme). The
+         faint light halo in the shadow below joins them on glass (Michał's
+         call, 2026-09-01: on dark paper the lifting shadow should be
+         lighter than the page): the card reads as backlit, while the black
+         drop stays for passes over lighter content. The reader's footnote
+         card wears the same pair - kept in step by hand. */
       background: #262c3a;
       color: #f2f4f8;
       /* The one strength against this paper instead of white, and a step
@@ -888,7 +892,7 @@ export const STYLE = `
          that only glass can show. */
       --edge: #8d95a6;
       border-color: var(--edge);
-      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5), 0 0 18px rgba(255, 255, 255, 0.1);
     }
     .bubble:not([data-scheme]) :is(.body, .context)[data-tone="error"] { color: #f09a3e; }
     .bubble:not([data-pointer="coarse"]):not([data-scheme]) .entry-sense[aria-pressed="false"]:hover:not(:disabled) { background: rgba(255, 255, 255, 0.08); }
@@ -915,7 +919,7 @@ export const STYLE = `
     color: #f2f4f8;
     --edge: #8d95a6;
     border-color: var(--edge);
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5), 0 0 18px rgba(255, 255, 255, 0.1);
   }
   .bubble[data-scheme="dark"] :is(.body, .context)[data-tone="error"] { color: #f09a3e; }
   .bubble:not([data-pointer="coarse"])[data-scheme="dark"] .entry-sense[aria-pressed="false"]:hover:not(:disabled) { background: rgba(255, 255, 255, 0.08); }
