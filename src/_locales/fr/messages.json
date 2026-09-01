@@ -29,7 +29,7 @@
   "action_update": { "message": "Mettre à jour" },
 
   "error_engine_missing": { "message": "Pas encore de moteur de traduction - cette version ne peut pas traduire." },
-  "error_model_missing": { "message": "Aucun modèle pour cette paire de langues sur cet appareil - téléchargez-en un ou ajoutez-le dans les paramètres. Et pour lire sans traduction, activez-y « Utiliser sans traduction » - vous pouvez toujours ajouter un dictionnaire monolingue." },
+  "error_model_missing": { "message": "Aucun modèle pour cette paire de langues sur cet appareil - téléchargez-en un ou ajoutez-le dans les paramètres. Et pour lire sans traduction automatique, activez-y « Utiliser sans modèle de traduction » - les dictionnaires répondent toujours, et vous enregistrez des phrases à partir de leurs sens." },
   "error_unsupported_pair": { "message": "Aucun modèle n'existe pour cette paire de langues." },
   "error_too_long": { "message": "Cette sélection est trop longue pour être traduite." },
   "error_no_page": { "message": "Il n'y a pas de page à lire ici - ouvrez un article et appuyez de nouveau sur le bouton." },
@@ -63,7 +63,7 @@
     "message": "Aucun modèle de traduction sur cet appareil pour l'instant - appuyez ici pour en choisir un dans les paramètres."
   },
   "popup_translation_off": {
-    "message": "La traduction est désactivée - re/read fonctionne comme un lecteur."
+    "message": "La traduction automatique est désactivée - le lecteur et les dictionnaires continuent de fonctionner."
   },
 
   "vocab_title": { "message": "re/read - phrases enregistrées" },
@@ -846,15 +846,15 @@
     "placeholders": { "pair": { "content": "$1", "example": "anglais → anglais" } }
   },
   "options_pair_hint_quiet": {
-    "message": "Traduction désactivée : la paire indique la langue que vous lisez et où sont rangées les phrases enregistrées. Les paires viennent des modèles et des dictionnaires installés."
+    "message": "Sans modèle de traduction, la paire indique la langue que vous lisez et où sont rangées les phrases enregistrées. Les paires viennent des modèles et des dictionnaires installés."
   },
   "options_reading_pair_quiet": {
-    "message": "Vous lisez $FROM$ - la traduction est désactivée, les phrases enregistrées appartiennent à cette paire.",
+    "message": "Vous lisez $FROM$ - la traduction automatique est désactivée, les phrases enregistrées appartiennent à cette paire.",
     "placeholders": { "from": { "content": "$1", "example": "anglais" } }
   },
   "options_reader_only": { "message": "Seulement dans le lecteur" },
   "options_reader_only_hint": {
-    "message": "Limite la traduction au lecteur. Sélectionner du texte sur une page web ordinaire proposera uniquement de l'ouvrir dans le lecteur. Sur Android et iOS, l'option est activée par défaut."
+    "message": "Limite la bulle au lecteur. Sélectionner du texte sur une page web ordinaire proposera uniquement de l'ouvrir dans le lecteur. Sur Android et iOS, l'option est activée par défaut."
   },
   "options_keep_articles": { "message": "Enregistrer par défaut dans la liste de lecture hors ligne" },
   "options_keep_articles_hint": {
@@ -863,9 +863,9 @@
   "options_quiet_bubble_hint": {
     "message": "Affiche uniquement le texte traduit dans la bulle. Les boutons d'action (copier, enregistrer) n'apparaissent que lorsque vous cliquez ou touchez la bulle."
   },
-  "options_no_translation": { "message": "Utiliser sans traduction" },
+  "options_no_translation": { "message": "Utiliser sans modèle de traduction" },
   "options_no_translation_hint": {
-    "message": "Masque les fonctions de traduction (bulle, soulignements, phrases enregistrées). Idéal pour lire dans votre langue maternelle. Le lecteur, la liste de lecture hors ligne, le surligneur et les dictionnaires restent actifs. Vos données enregistrées ne sont pas supprimées et réapparaîtront quand vous désactiverez cette option."
+    "message": "Désactive la traduction automatique (le modèle). Le lecteur, la liste de lecture hors ligne et le surligneur continuent de fonctionner. Avec une paire de langues choisie, la bulle affiche toujours les sens des dictionnaires, et vous pouvez enregistrer des phrases et voir leurs soulignements. Idéal pour lire avec des dictionnaires ou dans votre langue maternelle. Vos données enregistrées ne sont pas supprimées et reviennent quand vous désactivez cette option."
   },
   "options_bubble_off": { "message": "Pas de bulle à la sélection de texte" },
   "options_bubble_off_hint": {

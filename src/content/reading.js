@@ -36,7 +36,7 @@ import { entryBlocks } from "../lib/gloss.js";
 import { t } from "../lib/i18n.js";
 import { describeError } from "../lib/messages.js";
 import { normalize, trimPhrase } from "../lib/normalize.js";
-import { ErrorCode, Message, asResult, asTranslation, fail } from "../lib/protocol.js";
+import { ErrorCode, Message, asDictEntries, asResult, asTranslation, fail } from "../lib/protocol.js";
 import { copyCombo, keeping, madeSelection, touchPointer } from "../lib/selection.js";
 import { sentenceAround } from "../lib/sentence.js";
 import { MIRROR_KEY, asMirror, mirrorMatches } from "../lib/store/mirror.js";
@@ -268,16 +268,35 @@ let quietVoice = null;
 let bubbleScheme = null;
 
 /**
- * Whether the vocabulary lives without the engine (D158): the trim is on, a
- * pair is chosen to file phrases under, and this is the reader's page - the
- * one place with the dictionaries in reach (`quietLookup` is the reader's
- * hand, D121). Then the mirror is adopted, saved phrases underline and
- * recall, dictionary lines are presses again and the pencil takes a
- * hand-typed meaning - all without a model. On somebody else's page the trim
- * keeps its whole silence (D120): that quiet is what the content script
- * pays for `<all_urls>` with, and it stands.
+ * Whether the vocabulary lives without the engine (D158, everywhere since
+ * D162): the trim is on and a pair is chosen to file phrases under. Then the
+ * mirror is adopted, saved phrases underline and recall, dictionary lines
+ * are presses again and the pencil takes a hand-typed meaning - all without
+ * a model, on the reader page and on ordinary pages alike (which pages see a
+ * bubble at all stays the reader-only and no-bubble settings' say, through
+ * `pageMode`). The entries come through `lookupEntries` below: the reader's
+ * own hand where it offered one, the background otherwise. The trim without
+ * a pair keeps D120's whole silence on ordinary pages - nothing to look up,
+ * nothing to save, so the launcher is the whole offer.
  */
 let quietVocabulary = false;
+
+/**
+ * The dictionaries' answer for a phrase, from wherever this page can reach
+ * them: the reader page reads its own database (`quietLookup`, D121), an
+ * ordinary page asks the background (D162) - the same wire discipline as
+ * every other ask, narrowed on arrival because the background may be an
+ * older version mid-update. A refusal reads as no entries: the bubble it
+ * feeds never hangs an error off the second layer's absence.
+ *
+ * @param {string} text as the page has it
+ * @returns {Promise<import("../lib/protocol.js").DictEntry[]>}
+ */
+async function lookupEntries(text) {
+  if (quietLookup !== null) return quietLookup(text);
+  const result = await ask({ kind: Message.LOOK_UP, text });
+  return result.ok ? asDictEntries(result.value) : [];
+}
 
 /**
  * The bubble-size knob (D85), mirrored the same way: every show hands the
@@ -480,14 +499,15 @@ async function loadVocabulary(preloaded) {
     if (silent && !noBubble && tooltip.isOpen()) tooltip.hide();
     noBubble = silent;
 
-    // With translation off there is no vocabulary to know (D120): nothing is
-    // underlined, no mirror is adopted and the background is never asked.
-    // An empty adopt rather than a plain return, because the switch can flip
-    // over a page already painted - the underlines have to leave with it.
-    // The reader page with a chosen pair is the standing exception (D158):
-    // there the vocabulary lives without the engine, and everything below -
-    // the mirror, the underlines, the recall - answers for it as usual.
-    quietVocabulary = noTranslation && quietLookup !== null && chosenPair(config) !== null;
+    // With translation off and no pair there is no vocabulary to know
+    // (D120): nothing is underlined, no mirror is adopted and the background
+    // is never asked. An empty adopt rather than a plain return, because the
+    // switch can flip over a page already painted - the underlines have to
+    // leave with it. With a pair chosen the vocabulary lives without the
+    // engine (D158) - on every page since D162, the reader's and ordinary
+    // ones alike - and everything below (the mirror, the underlines, the
+    // recall) answers for it as usual.
+    quietVocabulary = noTranslation && chosenPair(config) !== null;
     if (noTranslation && !quietVocabulary) {
       adopt([]);
       return;
@@ -830,11 +850,11 @@ async function fillSecondLayer() {
   const mine = generation;
 
   // The quiet vocabulary's second layer (D158): there is no engine to ride,
-  // so More holds no sentence - the reader's own dictionaries are the whole
-  // extra, asked through the same hand the quiet bubble uses (D121). No
-  // pending line either: the lookup is a local read, not a round trip.
+  // so More holds no sentence - the dictionaries are the whole extra, from
+  // wherever this page reaches them (`lookupEntries`). No pending line: the
+  // read is quick, and a flash of furniture would outlive its usefulness.
   if (noTranslation) {
-    const entries = quietLookup === null ? [] : await quietLookup(phrase.text);
+    const entries = await lookupEntries(phrase.text);
     if (mine !== generation || !tooltip.isOpen()) return;
     const blocks = entryBlocks(entries, phrase.normalized);
     if (blocks.length === 0) {
@@ -1006,18 +1026,16 @@ function present(selection, { deliberate, touch, chain = false }) {
       anchored,
       scheme: bubbleScheme?.() ?? null,
     });
-    // The dictionaries still answer without the engine (D121): the reader
-    // hands the lookup down, in the language of the document on screen. The
-    // entries land in the bubble the moment they arrive - the quiet variant
-    // keeps no fold, because with no gloss the definitions are not an extra
-    // behind the answer, they are the answer. An empty result changes
-    // nothing: the bubble already stands on its two buttons.
-    if (quietLookup !== null) {
-      void quietLookup(text).then((entries) => {
-        if (mine !== generation || !tooltip.isOpen()) return;
-        if (entries.length > 0) tooltip.setEntries(entryBlocks(entries, normalized));
-      });
-    }
+    // The dictionaries still answer without the engine (D121, from any page
+    // since D162): the reader hands the lookup down, an ordinary page asks
+    // the background. The entries land in the bubble the moment they arrive -
+    // the quiet variant keeps no fold, because with no gloss the definitions
+    // are not an extra behind the answer, they are the answer. An empty
+    // result changes nothing: the bubble already stands on its two buttons.
+    void lookupEntries(text).then((entries) => {
+      if (mine !== generation || !tooltip.isOpen()) return;
+      if (entries.length > 0) tooltip.setEntries(entryBlocks(entries, normalized));
+    });
     return;
   }
 
@@ -1062,12 +1080,10 @@ function present(selection, { deliberate, touch, chain = false }) {
       // gets its entries as prose, exactly the rule Save answers to.
       choosable: selection.findable,
     });
-    if (quietLookup !== null) {
-      void quietLookup(text).then((entries) => {
-        if (mine !== generation || !tooltip.isOpen()) return;
-        if (entries.length > 0) tooltip.setEntries(entryBlocks(entries, normalized));
-      });
-    }
+    void lookupEntries(text).then((entries) => {
+      if (mine !== generation || !tooltip.isOpen()) return;
+      if (entries.length > 0) tooltip.setEntries(entryBlocks(entries, normalized));
+    });
     return;
   }
 

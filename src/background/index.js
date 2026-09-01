@@ -42,6 +42,7 @@ setProvider(offscreenApi() === null ? bergamot : bergamotViaHost);
 /**
  * @typedef {null
  *   | import("../lib/protocol.js").Translation
+ *   | import("../lib/protocol.js").DictEntry[]
  *   | import("../lib/protocol.js").VocabEntry[]
  *   | import("../lib/protocol.js").ImportReport
  *   | import("../lib/protocol.js").Page} Answer
@@ -79,6 +80,16 @@ async function handle(request, sender) {
       // failed translation is an error the bubble has to show, and hanging
       // definitions off it would make an error message into a half-answer.
       return translated.ok ? ok({ ...translated.value, entries }) : translated;
+    }
+    case Message.LOOK_UP: {
+      // The quiet vocabulary's hand on somebody else's page (D162): the
+      // dictionaries live in the extension's own storage, out of a content
+      // script's reach, so the page asks here - the reader page keeps
+      // reading its own database directly (D121). No pair chosen means no
+      // language to ask in: an honest empty list rather than an error,
+      // because the bubble this feeds stands on its own two buttons anyway.
+      const pair = chosenPair(await readConfig());
+      return ok(pair === null ? [] : await lookUp(request.text, pair.from));
     }
     case Message.OPEN_READER: {
       // Two senders, one function. The popup says which tab it stood over,

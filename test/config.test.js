@@ -399,7 +399,16 @@ describe("bubble switched off under the trim", () => {
 });
 
 describe("pageMode", () => {
-  const base = { disabledHosts: [], readerOnly: null, translationOff: false, bubbleOff: false };
+  const base = {
+    disabledHosts: [],
+    readerOnly: null,
+    translationOff: false,
+    bubbleOff: false,
+    sourceLang: /** @type {string | null} */ (null),
+    targetLang: /** @type {string | null} */ (null),
+  };
+  /** The trim with a pair chosen - the quiet vocabulary's state (D162). */
+  const paired = { ...base, translationOff: true, sourceLang: "en", targetLang: "pl" };
 
   it("reads by default on the desk, launches by default on Android", () => {
     assert.equal(pageMode(base, "mac", "example.org"), "reading");
@@ -415,13 +424,24 @@ describe("pageMode", () => {
     assert.equal(pageMode(off, "mac", "www.example.org"), "reading");
   });
 
-  it("only ever launches with translation off - the reader-only choice has no say", () => {
+  it("only ever launches under the trim without a pair - nothing else is on offer", () => {
     const off = { ...base, translationOff: true };
     assert.equal(pageMode(off, "mac", "example.org"), "launcher");
-    // Reader-only explicitly off would mean reading - but reading is a
-    // translation in place, and there is none to offer (D120).
+    // Reader-only explicitly off would mean reading - but with no pair there
+    // is nothing to look up and nothing to save (D120), so the launcher is
+    // the whole page whatever the choice says.
     assert.equal(pageMode({ ...off, readerOnly: false }, "mac", "example.org"), "launcher");
     assert.equal(pageMode({ ...off, readerOnly: true }, "android", "example.org"), "launcher");
+  });
+
+  it("reads under the trim with a pair, and the reader-only choice keeps its say (D162)", () => {
+    // The switch turns off the model, not the bubble: with a pair chosen the
+    // dictionaries answer through the background, so an ordinary page reads
+    // exactly as it would with the engine - platform default and all.
+    assert.equal(pageMode(paired, "mac", "example.org"), "reading");
+    assert.equal(pageMode(paired, "android", "example.org"), "launcher");
+    assert.equal(pageMode({ ...paired, readerOnly: true }, "mac", "example.org"), "launcher");
+    assert.equal(pageMode({ ...paired, readerOnly: false }, "android", "example.org"), "reading");
   });
 
   it("honours the reader-only choice while translation is on", () => {
@@ -434,6 +454,8 @@ describe("pageMode", () => {
     assert.equal(pageMode(silent, "mac", "example.org"), "off");
     assert.equal(pageMode(silent, "android", "example.org"), "off");
     assert.equal(pageMode({ ...silent, readerOnly: false }, "mac", "example.org"), "off");
+    // The sub-option outranks the pair: no bubble means no bubble (D149).
+    assert.equal(pageMode({ ...paired, bubbleOff: true }, "mac", "example.org"), "off");
     // The settings page shows the sub-option only under the switch, and a
     // stored value under a hidden row never acts: with translation on the
     // page reads or launches exactly as if the sub-option were not there.

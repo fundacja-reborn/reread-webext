@@ -29,7 +29,7 @@
   "action_update": { "message": "Aktualisieren" },
 
   "error_engine_missing": { "message": "Noch keine Übersetzungs-Engine - diese Version kann nicht übersetzen." },
-  "error_model_missing": { "message": "Kein Modell für dieses Sprachpaar auf diesem Gerät - in den Einstellungen herunterladen oder aus Dateien hinzufügen. Und zum Lesen ohne Übersetzung dort „Ohne Übersetzung verwenden“ einschalten - ein einsprachiges Wörterbuch lässt sich weiterhin hinzufügen." },
+  "error_model_missing": { "message": "Kein Modell für dieses Sprachpaar auf diesem Gerät - in den Einstellungen herunterladen oder aus Dateien hinzufügen. Und zum Lesen ohne maschinelle Übersetzung dort „Ohne Übersetzungsmodell verwenden“ einschalten - Wörterbücher antworten weiterhin, und Phrasen speichern Sie aus ihren Bedeutungen." },
   "error_unsupported_pair": { "message": "Für dieses Sprachpaar gibt es kein Modell." },
   "error_too_long": { "message": "Diese Auswahl ist zu lang zum Übersetzen." },
   "error_no_page": { "message": "Hier gibt es keine Seite zum Lesen - öffnen Sie einen Artikel und drücken Sie die Taste erneut." },
@@ -63,7 +63,7 @@
     "message": "Auf diesem Gerät gibt es noch kein Übersetzungsmodell - drücken Sie hier und wählen Sie eines in den Einstellungen."
   },
   "popup_translation_off": {
-    "message": "Die Übersetzung ist ausgeschaltet - re/read arbeitet als Leseansicht."
+    "message": "Die maschinelle Übersetzung ist aus - Leseansicht und Wörterbücher funktionieren weiter."
   },
 
   "vocab_title": { "message": "re/read - gespeicherter Wortschatz" },
@@ -811,15 +811,15 @@
     "placeholders": { "pair": { "content": "$1", "example": "Englisch → Englisch" } }
   },
   "options_pair_hint_quiet": {
-    "message": "Bei ausgeschalteter Übersetzung sagt das Paar, in welcher Sprache Sie lesen und wo gespeicherte Phrasen abgelegt sind. Paare kommen aus installierten Modellen und Wörterbüchern."
+    "message": "Ohne Übersetzungsmodell sagt das Paar, in welcher Sprache Sie lesen und wo gespeicherte Phrasen abgelegt sind. Paare kommen aus installierten Modellen und Wörterbüchern."
   },
   "options_reading_pair_quiet": {
-    "message": "Sie lesen $FROM$ - die Übersetzung ist aus, gespeicherte Phrasen gehören zu diesem Paar.",
+    "message": "Sie lesen $FROM$ - die maschinelle Übersetzung ist aus, gespeicherte Phrasen gehören zu diesem Paar.",
     "placeholders": { "from": { "content": "$1", "example": "Englisch" } }
   },
   "options_reader_only": { "message": "Nur in der Leseansicht" },
   "options_reader_only_hint": {
-    "message": "Beschränkt die Übersetzung auf die Leseansicht. Das Markieren von Text auf einer gewöhnlichen Webseite zeigt nur die Option, die Seite in der Leseansicht zu öffnen. Auf Android und iOS ist die Option standardmäßig eingeschaltet."
+    "message": "Beschränkt die Sprechblase auf die Leseansicht. Das Markieren von Text auf einer gewöhnlichen Webseite zeigt nur die Option, die Seite in der Leseansicht zu öffnen. Auf Android und iOS ist die Option standardmäßig eingeschaltet."
   },
   "options_keep_articles": { "message": "Standardmäßig in der Offline-Leseliste speichern" },
   "options_keep_articles_hint": {
@@ -828,9 +828,9 @@
   "options_quiet_bubble_hint": {
     "message": "Zeigt nur den übersetzten Text in der Sprechblase an. Die Aktionsschaltflächen (wie Kopieren oder Speichern) erscheinen erst, wenn Sie auf die Sprechblase klicken oder tippen."
   },
-  "options_no_translation": { "message": "Ohne Übersetzung verwenden" },
+  "options_no_translation": { "message": "Ohne Übersetzungsmodell verwenden" },
   "options_no_translation_hint": {
-    "message": "Verbirgt die Übersetzungsfunktionen (Sprechblase, Unterstreichungen, gespeicherter Wortschatz). Ideal zum Lesen in der Muttersprache. Leseansicht, Offline-Leseliste, Textmarker und Wörterbücher bleiben aktiv. Ihre gespeicherten Daten werden nicht gelöscht und kehren zurück, wenn Sie dies ausschalten."
+    "message": "Schaltet die maschinelle Übersetzung (das Modell) aus. Leseansicht, Offline-Leseliste und Textmarker funktionieren weiter. Mit einem gewählten Sprachpaar zeigt die Sprechblase weiterhin Bedeutungen aus Wörterbüchern, und Phrasen lassen sich speichern und unterstreichen. Ideal zum Lesen mit Wörterbüchern oder in der Muttersprache. Gespeicherte Daten werden nicht gelöscht und kehren zurück, wenn Sie die Option ausschalten."
   },
   "options_bubble_off": { "message": "Keine Sprechblase beim Auswählen von Text" },
   "options_bubble_off_hint": {

@@ -565,7 +565,7 @@ export function effectiveLibraryCopy(config) {
  * full reading side. Here rather than in the content script so the hierarchy
  * sits under `node --test`.
  *
- * @param {Pick<Config, "disabledHosts" | "readerOnly" | "translationOff" | "bubbleOff">} config
+ * @param {Pick<Config, "disabledHosts" | "readerOnly" | "translationOff" | "bubbleOff" | "sourceLang" | "targetLang">} config
  * @param {string} os as `getPlatformInfo` or `osFrom` names it
  * @param {string} hostname the page's own, exact - the way `disabledHosts` stores them
  * @returns {"off" | "launcher" | "reading"}
@@ -577,7 +577,16 @@ export function pageMode(config, os, hostname) {
   // a switched-off site gets - and the reader opens from the toolbar button
   // or its keyboard shortcut instead. Read only under the trim, exactly as
   // the settings page shows it: a stored value under a hidden row never acts.
-  if (config.translationOff) return config.bubbleOff ? "off" : "launcher";
+  if (config.translationOff && config.bubbleOff) return "off";
+  // The trim without a pair has nothing to offer a selection but the reader,
+  // so the launcher is the whole page. With a pair chosen the quiet
+  // vocabulary works here too (D162): the dictionaries answer through the
+  // background, the page reads exactly as it would with the engine - and the
+  // reader-only choice below keeps its say, instead of being overridden the
+  // way it was when the trim's ordinary pages had nothing else left (Michał's
+  // call: the switch turns off the model, not the bubble - the bubble has
+  // its own two controls).
+  if (config.translationOff && chosenPair(config) === null) return "launcher";
   if (effectiveReaderOnly(config, os)) return "launcher";
   return "reading";
 }

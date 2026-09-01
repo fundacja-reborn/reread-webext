@@ -29,7 +29,7 @@
   "action_update": { "message": "Actualizar" },
 
   "error_engine_missing": { "message": "Aún no hay motor de traducción - esta versión no puede traducir." },
-  "error_model_missing": { "message": "No hay modelo para este par de idiomas en este dispositivo - descárgalo o añádelo en los ajustes. Y para leer sin traducción, activa allí «Usar sin traducción» - aún puedes añadir un diccionario monolingüe." },
+  "error_model_missing": { "message": "No hay modelo para este par de idiomas en este dispositivo - descárgalo o añádelo en los ajustes. Y para leer sin traducción automática, activa allí «Usar sin modelo de traducción» - los diccionarios siguen respondiendo, y guardas frases con sus significados." },
   "error_unsupported_pair": { "message": "No existe ningún modelo para este par de idiomas." },
   "error_too_long": { "message": "Esa selección es demasiado larga para traducirla." },
   "error_no_page": { "message": "Aquí no hay página que leer - abre un artículo y pulsa el botón de nuevo." },
@@ -63,7 +63,7 @@
     "message": "Todavía no hay ningún modelo de traducción en este dispositivo - pulsa aquí para elegir uno en los ajustes."
   },
   "popup_translation_off": {
-    "message": "La traducción está desactivada - re/read funciona solo como vista de lectura."
+    "message": "La traducción automática está desactivada - la vista de lectura y los diccionarios siguen funcionando."
   },
 
   "vocab_title": { "message": "re/read - frases guardadas" },
@@ -834,15 +834,15 @@
     "placeholders": { "pair": { "content": "$1", "example": "inglés → inglés" } }
   },
   "options_pair_hint_quiet": {
-    "message": "Con la traducción desactivada, el par indica en qué idioma lees y dónde se guardan las frases. Los pares vienen de los modelos y diccionarios instalados."
+    "message": "Sin modelo de traducción, el par indica en qué idioma lees y dónde se guardan las frases. Los pares vienen de los modelos y diccionarios instalados."
   },
   "options_reading_pair_quiet": {
-    "message": "Lees en $FROM$ - la traducción está desactivada y las frases guardadas pertenecen a este par.",
+    "message": "Lees en $FROM$ - la traducción automática está desactivada y las frases guardadas pertenecen a este par.",
     "placeholders": { "from": { "content": "$1", "example": "inglés" } }
   },
   "options_reader_only": { "message": "Solo en la vista de lectura" },
   "options_reader_only_hint": {
-    "message": "Limita la traducción a la vista de lectura. Seleccionar texto en una página web normal solo mostrará la opción de abrirla en la vista de lectura. En Android e iOS la opción está activada de forma predeterminada."
+    "message": "Limita la burbuja a la vista de lectura. Seleccionar texto en una página web normal solo mostrará la opción de abrirla en la vista de lectura. En Android e iOS la opción está activada de forma predeterminada."
   },
   "options_keep_articles": { "message": "Guardar de forma predeterminada en la lista de lectura sin conexión" },
   "options_keep_articles_hint": {
@@ -851,9 +851,9 @@
   "options_quiet_bubble_hint": {
     "message": "Muestra solo el texto traducido en la burbuja. Los botones de acción (copiar, guardar) aparecerán únicamente al hacer clic o tocar la burbuja."
   },
-  "options_no_translation": { "message": "Usar sin traducción" },
+  "options_no_translation": { "message": "Usar sin modelo de traducción" },
   "options_no_translation_hint": {
-    "message": "Oculta las funciones de traducción (burbuja, subrayados, frases guardadas). Ideal para leer en tu idioma materno. La vista de lectura, la lista de lectura sin conexión, el resaltador y los diccionarios siguen activos. Tus datos guardados no se eliminan y volverán al desactivar esta opción."
+    "message": "Desactiva la traducción automática (el modelo). La vista de lectura, la lista de lectura sin conexión y el marcador siguen funcionando. Con un par de idiomas elegido, la burbuja sigue mostrando significados de los diccionarios, y puedes guardar frases y ver sus subrayados. Ideal para leer con diccionarios o en tu idioma materno. Tus datos guardados no se borran y vuelven al desactivar esta opción."
   },
   "options_bubble_off": { "message": "Sin burbuja al seleccionar texto" },
   "options_bubble_off_hint": {
