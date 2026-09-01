@@ -21,6 +21,38 @@ describe("fieldText", () => {
     assert.equal(fieldText({ type: "h", text: "&zzz; &#x110000;" }), "&zzz; &#x110000;");
   });
 
+  it("takes WikDict's source annotations out of a pronunciation line", () => {
+    // Straight from the wikdict-en-pl build (Michał's screenshot): the
+    // references and qualifiers ride as entities, so the tag strip cannot
+    // touch them and the decoding is what surfaced them in the bubble. The
+    // slash the note leans on goes with it, so no `//` is left behind.
+    assert.equal(
+      fieldText({
+        type: "h",
+        text:
+          '/<font color="gray">ʃuːld/&lt;ref:&lt;&lt;name:Dobson&gt;&gt;&gt;</font>/, ' +
+          '/<font color="gray">ʃəd</font>/',
+      }),
+      "/ʃuːld/, /ʃəd/",
+    );
+    assert.equal(
+      fieldText({
+        type: "h",
+        text:
+          "/ˈdænəl/&lt;a:obsolete&gt;&lt;ref:{{R:en:Dobson:1957|II|334|986}} !!! " +
+          "{{R:Hall PGSMS|2|3}}&gt;/",
+      }),
+      "/ˈdænəl/",
+    );
+    // A plain field may carry the notation as itself.
+    assert.equal(fieldText({ type: "m", text: "/wʊd/<a:Early Modern,weak form>/" }), "/wʊd/");
+  });
+
+  it("never mistakes an honest angle bracket for an annotation", () => {
+    assert.equal(fieldText({ type: "h", text: "a &lt; b, and &lt;i&gt; stays" }), "a < b, and <i> stays");
+    assert.equal(fieldText({ type: "m", text: "compare a < b" }), "compare a < b");
+  });
+
   it("decodes the marks a book sets its entries in", () => {
     // Reported from a real entry: `From even +&lrm; handed` reached the bubble
     // with the ampersand still in it, because the invisible marks were not on
