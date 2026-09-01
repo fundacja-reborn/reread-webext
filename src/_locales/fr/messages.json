@@ -45,6 +45,12 @@
   "bubble_reader": { "message": "Lire dans le lecteur" },
   "bubble_translating": { "message": "Traduction..." },
   "bubble_nothing_more": { "message": "Pas de phrase ni d'entrée de dictionnaire à afficher" },
+  "bubble_whole_words": { "message": "Sélectionnez des mots entiers" },
+  "bubble_not_in_dictionary": { "message": "Absent de vos dictionnaires" },
+  "bubble_no_dictionary": {
+    "message": "Pas encore de dictionnaire pour la langue : $LANGUAGE$ - ajoutez-en un dans les paramètres",
+    "placeholders": { "language": { "content": "$1", "example": "anglais" } }
+  },
   "bubble_speak": { "message": "Lire à voix haute" },
   "bubble_sentence_collapse": { "message": "Réduire la phrase" },
   "bubble_sentence_expand": { "message": "Développer la phrase" },

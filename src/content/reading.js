@@ -32,15 +32,16 @@
 
 import { webext } from "../lib/browser.js";
 import { CONFIG_KEY, DEFAULTS, chosenPair, withDefaults } from "../lib/config.js";
-import { entryBlocks } from "../lib/gloss.js";
+import { entryBlocks, quietNote } from "../lib/gloss.js";
 import { t } from "../lib/i18n.js";
+import { languageName } from "../lib/language.js";
 import { describeError } from "../lib/messages.js";
 import { normalize, trimPhrase } from "../lib/normalize.js";
-import { ErrorCode, Message, asDictEntries, asResult, asTranslation, fail } from "../lib/protocol.js";
+import { ErrorCode, Message, asLookUp, asResult, asTranslation, fail } from "../lib/protocol.js";
 import { copyCombo, keeping, madeSelection, touchPointer } from "../lib/selection.js";
 import { sentenceAround } from "../lib/sentence.js";
 import { MIRROR_KEY, asMirror, mirrorMatches } from "../lib/store/mirror.js";
-import { canSpeakLang, setSpeechOff, speak, speaking, stop as stopSpeaking } from "../lib/tts.js";
+import { canSpeakLang, primaryLanguage, setSpeechOff, speak, speaking, stop as stopSpeaking } from "../lib/tts.js";
 import { clear, mark, paint, phraseAt, unmark } from "./highlighter.js";
 import { blockTextAround, findable } from "./scan.js";
 import { claimsNativeSelection, clearSelection, releaseMouse, startSelect, stopSelect } from "./select.js";
@@ -119,8 +120,7 @@ let anchorRange = null;
  * @returns {import("./tooltip.js").Action[]}
  */
 function speakActions() {
-  const lang = (noTranslation ? quietVoice?.()?.lang : undefined) ?? ttsLang;
-  return canSpeakLang(lang) ? ["speak"] : [];
+  return canSpeakLang(readingLanguage()) ? ["speak"] : [];
 }
 
 /**
@@ -256,7 +256,7 @@ let noBubble = DEFAULTS.translationOff && DEFAULTS.bubbleOff;
  * Both are consulted solely in the no-translation trim; the translating
  * bubble keeps its pair-bound language (D83) and its background ride (D31).
  *
- * @type {((text: string) => Promise<import("../lib/protocol.js").DictEntry[]>) | null}
+ * @type {((text: string) => Promise<import("../lib/protocol.js").LookUp | null>) | null}
  */
 let quietLookup = null;
 
@@ -281,7 +281,7 @@ let bubbleScheme = null;
  * are presses again and the pencil takes a hand-typed meaning - all without
  * a model, on the reader page and on ordinary pages alike (which pages see a
  * bubble at all stays the reader-only and no-bubble settings' say, through
- * `pageMode`). The entries come through `lookupEntries` below: the reader's
+ * `pageMode`). The entries come through `lookUpQuiet` below: the reader's
  * own hand where it offered one, the background otherwise. The trim without
  * a pair keeps D120's whole silence on ordinary pages - nothing to look up,
  * nothing to save, so the launcher is the whole offer.
@@ -293,16 +293,63 @@ let quietVocabulary = false;
  * them: the reader page reads its own database (`quietLookup`, D121), an
  * ordinary page asks the background (D162) - the same wire discipline as
  * every other ask, narrowed on arrival because the background may be an
- * older version mid-update. A refusal reads as no entries: the bubble it
- * feeds never hangs an error off the second layer's absence.
+ * older version mid-update. Null is no answer at all - a refusal, a
+ * malformed reply, a database that would not open - and the bubble says
+ * nothing on it: it never hangs an error off the second layer's absence, and
+ * a "no dictionary" line must be about a dictionary, never about a fault.
  *
  * @param {string} text as the page has it
- * @returns {Promise<import("../lib/protocol.js").DictEntry[]>}
+ * @returns {Promise<import("../lib/protocol.js").LookUp | null>}
  */
-async function lookupEntries(text) {
+async function lookUpQuiet(text) {
   if (quietLookup !== null) return quietLookup(text);
   const result = await ask({ kind: Message.LOOK_UP, text });
-  return result.ok ? asDictEntries(result.value) : [];
+  return result.ok ? asLookUp(result.value) : null;
+}
+
+/**
+ * The language a press reads in, the way the speaker has always decided it
+ * (D121): the document's own in the no-translation trim, the pair's
+ * otherwise. Empty while nobody has named one.
+ *
+ * @returns {string} BCP-47
+ */
+function readingLanguage() {
+  return (noTranslation ? quietVoice?.()?.lang : undefined) ?? ttsLang;
+}
+
+/**
+ * The sentence for what the dictionaries did not say (D164). The missing
+ * dictionary is named by the language being read, in the catalogue's own
+ * names (`languageName`), the way the settings page names languages.
+ *
+ * @param {"no-dictionary" | "whole-words" | "not-in-dictionary"} note
+ * @returns {string}
+ */
+function quietSentence(note) {
+  if (note === "whole-words") return t("bubble_whole_words");
+  if (note === "not-in-dictionary") return t("bubble_not_in_dictionary");
+  return t("bubble_no_dictionary", languageName(primaryLanguage(readingLanguage())));
+}
+
+/**
+ * What the dictionaries said, landed in the quiet bubble: the entries where
+ * there are any - the quiet variant keeps no fold, because with no gloss the
+ * definitions are not an extra behind the answer, they are the answer - and
+ * otherwise one muted line saying which silence this is (D164, `quietNote`).
+ * Until D164 an empty answer changed nothing, and a bubble standing on two
+ * icons and no word read as a bubble that had not finished loading (Michał's
+ * screenshot, 2026-09-01).
+ *
+ * @param {import("../lib/protocol.js").LookUp | null} answer
+ * @param {string} normalized the key the phrase would be stored under
+ * @param {boolean} findable whether the phrase could ever be found on a page again
+ */
+function landQuietAnswer(answer, normalized, findable) {
+  if (answer === null) return;
+  const note = quietNote({ entries: answer.entries.length, dictionaries: answer.dictionaries, findable });
+  if (note === null) tooltip.setEntries(entryBlocks(answer.entries, normalized));
+  else tooltip.setContext(quietSentence(note), "note");
 }
 
 /**
@@ -858,10 +905,10 @@ async function fillSecondLayer() {
 
   // The quiet vocabulary's second layer (D158): there is no engine to ride,
   // so More holds no sentence - the dictionaries are the whole extra, from
-  // wherever this page reaches them (`lookupEntries`). No pending line: the
+  // wherever this page reaches them (`lookUpQuiet`). No pending line: the
   // read is quick, and a flash of furniture would outlive its usefulness.
   if (noTranslation) {
-    const entries = await lookupEntries(phrase.text);
+    const entries = (await lookUpQuiet(phrase.text))?.entries ?? [];
     if (mine !== generation || !tooltip.isOpen()) return;
     const blocks = entryBlocks(entries, phrase.normalized);
     if (blocks.length === 0) {
@@ -1035,13 +1082,12 @@ function present(selection, { deliberate, touch, chain = false }) {
     });
     // The dictionaries still answer without the engine (D121, from any page
     // since D162): the reader hands the lookup down, an ordinary page asks
-    // the background. The entries land in the bubble the moment they arrive -
-    // the quiet variant keeps no fold, because with no gloss the definitions
-    // are not an extra behind the answer, they are the answer. An empty
-    // result changes nothing: the bubble already stands on its two buttons.
-    void lookupEntries(text).then((entries) => {
+    // the background. What they say lands in the bubble the moment it
+    // arrives - the entries, or the one line saying why there are none
+    // (D164, `landQuietAnswer`).
+    void lookUpQuiet(text).then((answer) => {
       if (mine !== generation || !tooltip.isOpen()) return;
-      if (entries.length > 0) tooltip.setEntries(entryBlocks(entries, normalized));
+      landQuietAnswer(answer, normalized, selection.findable);
     });
     return;
   }
@@ -1087,9 +1133,9 @@ function present(selection, { deliberate, touch, chain = false }) {
       // gets its entries as prose, exactly the rule Save answers to.
       choosable: selection.findable,
     });
-    void lookupEntries(text).then((entries) => {
+    void lookUpQuiet(text).then((answer) => {
       if (mine !== generation || !tooltip.isOpen()) return;
-      if (entries.length > 0) tooltip.setEntries(entryBlocks(entries, normalized));
+      landQuietAnswer(answer, normalized, selection.findable);
     });
     return;
   }
@@ -1407,7 +1453,7 @@ function onStorageChanged(changes, area) {
 }
 
 /**
- * @param {{ root?: Element | null, observe?: boolean, stored?: Record<string, unknown>, ownSelection?: boolean, anchored?: boolean, covered?: () => number, openSettings?: () => void, plainLinks?: () => boolean, alsoOwns?: (target: EventTarget | null) => boolean, marking?: () => boolean, markRoot?: () => Element | null, onMarked?: (range: Range) => void, onMarkStart?: () => void, onMarkTap?: (x: number, y: number, word?: Range) => void, quietLookup?: (text: string) => Promise<import("../lib/protocol.js").DictEntry[]>, quietVoice?: () => { lang: string, voiceURI: string | undefined } | null, scheme?: () => "light" | "sepia" | "dark" | null }} [where]
+ * @param {{ root?: Element | null, observe?: boolean, stored?: Record<string, unknown>, ownSelection?: boolean, anchored?: boolean, covered?: () => number, openSettings?: () => void, plainLinks?: () => boolean, alsoOwns?: (target: EventTarget | null) => boolean, marking?: () => boolean, markRoot?: () => Element | null, onMarked?: (range: Range) => void, onMarkStart?: () => void, onMarkTap?: (x: number, y: number, word?: Range) => void, quietLookup?: (text: string) => Promise<import("../lib/protocol.js").LookUp | null>, quietVoice?: () => { lang: string, voiceURI: string | undefined } | null, scheme?: () => "light" | "sepia" | "dark" | null }} [where]
  *   what to underline inside, whether it can change on its own, the startup
  *   read of `storage.local` when the caller already made one, whether the
  *   page selects through our own gesture rather than the browser's - every

@@ -47,7 +47,7 @@ import {
   readConfig,
   writeConfig,
 } from "../lib/config.js";
-import { lookUp } from "../lib/dict/lookup.js";
+import { lookUpAnswer } from "../lib/dict/lookup.js";
 import { describeError } from "../lib/messages.js";
 import { ErrorCode, Message, asPage, asPageRequest, asResult, ok } from "../lib/protocol.js";
 import { buildArticle } from "../lib/reader/article.js";
@@ -5908,7 +5908,7 @@ function rootReadingSide(ground) {
     // of the highlights page show many documents at once, and a lookup in a
     // guessed language would find real entries for words nobody asked about.
     quietLookup: (text) =>
-      shown === null ? Promise.resolve([]) : lookUp(text, primaryLanguage(speechLang())),
+      shown === null ? Promise.resolve(null) : lookUpAnswer(text, primaryLanguage(speechLang())),
     quietVoice: () =>
       shown === null
         ? null

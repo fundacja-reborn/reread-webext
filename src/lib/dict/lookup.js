@@ -61,17 +61,37 @@ export function lookupKeys(text, langFrom) {
 }
 
 /**
+ * What the dictionaries have on a phrase - and how many of them were asked,
+ * because "nothing in your dictionaries" and "no dictionary for this language"
+ * are different sentences for a bubble to say (D164). The count comes out of
+ * the read the lookup makes anyway, and is asked even for a phrase that is
+ * not a dictionary question (a sentence, an empty selection): the bubble
+ * still has to know which of the two silences it met. Null is no answer at
+ * all - a database that would not open - and the bubble says nothing on it,
+ * by the header's rule: extras do not get to break answers, and neither do
+ * they get to send anybody to the settings for a dictionary that is there.
+ *
+ * @param {string} text as the page had it
+ * @param {string} langFrom the language being read
+ * @returns {Promise<import("../protocol.js").LookUp | null>}
+ */
+export async function lookUpAnswer(text, langFrom) {
+  const keys = lookupKeys(text, langFrom) ?? [];
+  try {
+    return await lookupEntries(keys, langFrom);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * The entries alone, for the translating bubble's second layer (D31), where
+ * the sentence stands whether or not a dictionary answered.
+ *
  * @param {string} text as the page had it
  * @param {string} langFrom the language being read
  * @returns {Promise<import("../protocol.js").DictEntry[]>}
  */
 export async function lookUp(text, langFrom) {
-  const keys = lookupKeys(text, langFrom);
-  if (keys === null) return [];
-
-  try {
-    return await lookupEntries(keys, langFrom);
-  } catch {
-    return [];
-  }
+  return (await lookUpAnswer(text, langFrom))?.entries ?? [];
 }

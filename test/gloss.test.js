@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { afterChoosing, choosableLines, entryBlocks, toMeanings } from "../src/lib/gloss.js";
+import { afterChoosing, choosableLines, entryBlocks, quietNote, toMeanings } from "../src/lib/gloss.js";
 
 describe("toMeanings", () => {
   it("keeps one line as one meaning", () => {
@@ -137,5 +137,22 @@ describe("entryBlocks", () => {
       "watch",
     );
     assert.deepEqual(block?.lines, ["verb", "obserwować", "zegarek"]);
+  });
+});
+
+describe("quietNote", () => {
+  it("says nothing while there are entries to show", () => {
+    assert.equal(quietNote({ entries: 2, dictionaries: 1, findable: true }), null);
+    assert.equal(quietNote({ entries: 1, dictionaries: 1, findable: false }), null);
+  });
+
+  it("names the missing dictionary first, then the gesture, then the miss", () => {
+    // Michał's screenshot (2026-09-01): a fragment of a word, model off, and
+    // the bubble stood on two icons and no word. The missing dictionary
+    // outranks the gesture - it is the one state that outlasts this phrase.
+    assert.equal(quietNote({ entries: 0, dictionaries: 0, findable: true }), "no-dictionary");
+    assert.equal(quietNote({ entries: 0, dictionaries: 0, findable: false }), "no-dictionary");
+    assert.equal(quietNote({ entries: 0, dictionaries: 1, findable: false }), "whole-words");
+    assert.equal(quietNote({ entries: 0, dictionaries: 3, findable: true }), "not-in-dictionary");
   });
 });

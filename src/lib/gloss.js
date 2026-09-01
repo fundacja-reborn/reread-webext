@@ -115,3 +115,25 @@ export function afterChoosing(shown, sense) {
   const next = without.length === meanings.length ? [...meanings, sense] : without;
   return next.join(MEANING_SEPARATOR);
 }
+
+/**
+ * What the quiet bubble says when the dictionaries said nothing (D164): one
+ * sentence, by the cause - or none while there are entries to show. The
+ * missing dictionary comes first: it is the one state that outlasts this
+ * phrase, and a reader told to select whole words would only meet it on the
+ * next try. A selection the matcher could never find again (a fragment of a
+ * word, a paragraph and a half) is told what to select, because that is also
+ * why it has no pencil; whole words that no book knows are told so, with the
+ * pencil standing beside the sentence as the way to type a meaning.
+ *
+ * @param {{ entries: number, dictionaries: number, findable: boolean }} of
+ *   how many entries came back, how many dictionaries were asked, and whether
+ *   the phrase could ever be found on a page again
+ * @returns {"no-dictionary" | "whole-words" | "not-in-dictionary" | null}
+ */
+export function quietNote({ entries, dictionaries, findable }) {
+  if (entries > 0) return null;
+  if (dictionaries === 0) return "no-dictionary";
+  if (!findable) return "whole-words";
+  return "not-in-dictionary";
+}

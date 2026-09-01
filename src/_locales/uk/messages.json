@@ -45,6 +45,12 @@
   "bubble_reader": { "message": "Читати в режимі читання" },
   "bubble_translating": { "message": "Перекладаю..." },
   "bubble_nothing_more": { "message": "Немає ні речення, ні словникової статті" },
+  "bubble_whole_words": { "message": "Виділіть цілі слова" },
+  "bubble_not_in_dictionary": { "message": "Немає у ваших словниках" },
+  "bubble_no_dictionary": {
+    "message": "Ще немає словника для мови: $LANGUAGE$ - додайте його в налаштуваннях",
+    "placeholders": { "language": { "content": "$1", "example": "англійська" } }
+  },
   "bubble_speak": { "message": "Прочитати вголос" },
   "bubble_sentence_collapse": { "message": "Згорнути речення" },
   "bubble_sentence_expand": { "message": "Розгорнути речення" },

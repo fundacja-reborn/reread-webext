@@ -205,13 +205,17 @@ function rowsOf(id) {
  * Ordering is the reader's own, as the settings page arranged it (`order.js`);
  * a store nobody has arranged answers in import order, as it always did.
  *
+ * Answered with how many dictionaries were asked, out of the same read (D164):
+ * "nothing in three dictionaries" and "no dictionary for this language" are
+ * different sentences for a bubble to say, and a bare list cannot tell them
+ * apart. Asked even with no keys - a selection that is not a dictionary
+ * question still has to learn which of the two silences it met.
+ *
  * @param {string[]} keys the word, then the forms worth trying instead of it
  * @param {string} langFrom the language being read
- * @returns {Promise<DictionaryEntry[]>}
+ * @returns {Promise<{ entries: DictionaryEntry[], dictionaries: number }>}
  */
 export async function lookupEntries(keys, langFrom) {
-  if (keys.length === 0) return [];
-
   return await withStores([META, ENTRIES], "readonly", async (transaction) => {
     const installed = /** @type {Dictionary[]} */ (await promisify(transaction.objectStore(META).getAll()));
     // Matched on the language of the headwords alone. A dictionary explaining
@@ -248,7 +252,7 @@ export async function lookupEntries(keys, langFrom) {
       }
     }
 
-    return found;
+    return { entries: found, dictionaries: dictionaries.length };
   });
 }
 
