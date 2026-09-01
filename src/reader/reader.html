@@ -811,14 +811,16 @@
             <p id="marks-transfer-status" class="status report" role="status"></p>
             <input type="file" id="marks-import-file" accept=".json,application/json" hidden />
           </div>
+          <!-- A plain link inside the sentence, not the tools line's quiet
+               anchor: that one is an inline-flex box of a finger's height,
+               which inside a paragraph lifted its whole line (Michał's
+               smoke, 2026-09-01). -->
           <p class="hint" id="marks-copy-elsewhere" hidden>
             <span data-i18n="reader_marks_copy_elsewhere">
               A backup that can be imported (.json) is exported and imported on the page of all
               highlights.
             </span>
-            <a href="#" id="marks-all-link" class="quiet-link" data-i18n="reader_marks_all_link">
-              All highlights
-            </a>
+            <a href="#" id="marks-all-link" data-i18n="reader_marks_all_link">All highlights</a>
           </p>
           <div class="marks-notes">
             <p class="transfer">
