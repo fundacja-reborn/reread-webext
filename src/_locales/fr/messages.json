@@ -946,7 +946,7 @@
   },
   "options_font_custom": { "message": "Police personnelle" },
   "options_font_custom_hint": {
-    "message": "Saisissez le nom d'une police installée sur cet appareil, par exemple Georgia ou OpenDyslexic. La ligne Police du lecteur la proposera alors comme Personnalisée. Laissez le champ vide pour n'utiliser que les polices intégrées."
+    "message": "Saisissez le nom d'une police installée sur cet appareil, par exemple Georgia ou Noto Serif. La ligne Police du lecteur la proposera alors comme Personnalisée. Laissez le champ vide pour n'utiliser que les polices intégrées."
   },
   "options_quiet_bubble_hint": {
     "message": "Affiche uniquement le texte traduit dans la bulle. Les boutons d'action (copier, enregistrer) n'apparaissent que lorsque vous cliquez ou touchez la bulle."

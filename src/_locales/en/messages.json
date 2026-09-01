@@ -1143,7 +1143,7 @@
   },
   "options_font_custom": { "message": "Own font" },
   "options_font_custom_hint": {
-    "message": "Type the name of a font installed on this device, for example Georgia or OpenDyslexic. The reading view's Type row will then offer it as Custom. Leave the field empty to use the built-in typefaces only."
+    "message": "Type the name of a font installed on this device, for example Georgia or Noto Serif. The reading view's Type row will then offer it as Custom. Leave the field empty to use the built-in typefaces only."
   },
   "options_quiet_bubble_hint": {
     "message": "Shows only the translated text in the bubble. The action buttons (such as copy or save) appear only when you click or tap the bubble."

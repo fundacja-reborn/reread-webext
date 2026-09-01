@@ -1275,7 +1275,7 @@
   },
   "options_font_custom": { "message": "Własna czcionka" },
   "options_font_custom_hint": {
-    "message": "Wpisz nazwę czcionki zainstalowanej na tym urządzeniu, np. Georgia albo OpenDyslexic. W widoku czytania, w wierszu Krój, pojawi się wybór Własny. Zostaw pole puste, aby używać tylko wbudowanych krojów."
+    "message": "Wpisz nazwę czcionki zainstalowanej na tym urządzeniu, np. Georgia albo Noto Serif. W widoku czytania, w wierszu Krój, pojawi się wybór Własny. Zostaw pole puste, aby używać tylko wbudowanych krojów."
   },
   "options_quiet_bubble_hint": {
     "message": "Pokazuje w dymku tylko tekst tłumaczenia. Przyciski akcji (np. kopiowanie lub zapis) pojawią się dopiero po kliknięciu w dymek."

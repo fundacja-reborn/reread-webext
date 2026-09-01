@@ -911,7 +911,7 @@
   },
   "options_font_custom": { "message": "Eigene Schrift" },
   "options_font_custom_hint": {
-    "message": "Geben Sie den Namen einer auf diesem Gerät installierten Schrift ein, zum Beispiel Georgia oder OpenDyslexic. Die Zeile Schrift in der Leseansicht bietet sie dann als Eigene an. Lassen Sie das Feld leer, um nur die mitgelieferten Schriften zu verwenden."
+    "message": "Geben Sie den Namen einer auf diesem Gerät installierten Schrift ein, zum Beispiel Georgia oder Noto Serif. Die Zeile Schrift in der Leseansicht bietet sie dann als Eigene an. Lassen Sie das Feld leer, um nur die mitgelieferten Schriften zu verwenden."
   },
   "options_quiet_bubble_hint": {
     "message": "Zeigt nur den übersetzten Text in der Sprechblase an. Die Aktionsschaltflächen (wie Kopieren oder Speichern) erscheinen erst, wenn Sie auf die Sprechblase klicken oder tippen."
