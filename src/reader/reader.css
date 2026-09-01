@@ -967,10 +967,15 @@ html {
   cursor: pointer;
 }
 
-/* The note itself: the pages' note dress on a floating card - the border
-   does the separating (a shadow quantizes away on e-ink), no animation,
-   opened and closed in one repaint each. It rides the document (absolute),
-   so a scroll carries note and mark together. */
+/* The note itself: the pages' note dress on a floating card. The border
+   does the separating everywhere; the translation bubble's own shadow
+   (Michał's call, 2026-09-01: the note reads better lifted a step off the
+   text) joins it for the screens that can paint one - on e-ink it
+   quantizes away to nothing, harmlessly, being paint and not motion, and
+   the two things floating over an article now wear the same elevation.
+   Deeper on dark paper, like the bubble's, where a thin shadow disappears.
+   No animation, opened and closed in one repaint each. It rides the
+   document (absolute), so a scroll carries note and mark together. */
 .note-popover {
   position: absolute;
   z-index: 3;
@@ -980,8 +985,19 @@ html {
   border-left: 3px solid var(--page-accent);
   border-radius: 8px;
   background: var(--page-bg);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
   font-size: 0.85em;
   line-height: 1.5;
+}
+
+:root[data-reader-theme="dark"] .note-popover {
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-reader-theme="light"]):not([data-reader-theme="sepia"]) .note-popover {
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+  }
 }
 
 /* The reading list is interface, not reading: it speaks the interface font at
