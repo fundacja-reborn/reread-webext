@@ -291,10 +291,31 @@ body.reader:not(:has(#article:not([hidden]))):has(.panel-scrim:not([hidden])) .r
    in the chrome goes but the ribbon, which stays stuck at the window's top
    edge with its chevron turned to say "pull out". Scoped to the article
    view the way the stuck bar is - the list always keeps its whole chrome.
-   The chrome's padding goes too: an empty strip of paper stuck over the
-   text would be the bar's ghost. */
+   Both halves of the breathing room go too - the chrome's padding and the
+   body's half above it (see `body.reader`): an empty strip of paper stuck
+   over the text would be the bar's ghost, and the body's half kept the
+   ribbon 0.75rem off the window's edge until a scroll ate it (Michał's
+   smoke, 2026-09-01: sticky only holds the box from `top: 0`, and on an
+   unscrolled page it stands at its flow position). */
+:root[data-reader-chrome="hidden"] body.reader:has(#article:not([hidden])) {
+  padding-top: 0;
+}
+
 :root[data-reader-chrome="hidden"] body.reader:has(#article:not([hidden])) .reader-chrome {
   padding-top: 0;
+}
+
+/* The room over the text (`#page`) must not be a margin while the box is
+   folded: with everything in it hidden the box is empty, adjoining margins
+   collapse straight through an empty box, and the page's 2rem then stands
+   ABOVE it - once the body's padding no longer walled it off, it carried
+   the ribbon 2rem down the window (Michał's second smoke, 2026-09-01;
+   the first smoke's 0.75rem was the body's half, this was the rest). The
+   same room as padding collapses through nothing, so the box - and the
+   ribbon on it - stays on the window's edge and the text keeps its air. */
+:root[data-reader-chrome="hidden"] body.reader:has(#article:not([hidden])) #page {
+  margin-top: 0;
+  padding-top: 2rem;
 }
 
 :root[data-reader-chrome="hidden"] body.reader:has(#article:not([hidden])) .reader-chrome > :not(.chrome-tab) {
