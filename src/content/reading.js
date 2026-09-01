@@ -191,6 +191,13 @@ const tooltip = createTooltip({
     stopSpeaking();
     unmark();
   },
+  // The edit box opening: the focus it takes summons the keyboard and eats
+  // the page's own blue selection, so the phrase puts the recall wash on
+  // (D89's mark) - the box is visibly about something for as long as the
+  // bubble stands, and `onHide` above sweeps the wash with everything else.
+  onEditing: () => {
+    if (anchorRange !== null) mark(anchorRange);
+  },
   // Live, through the module variable: the tooltip is built once, but what
   // stands over the text is the ground's business and changes with `start`.
   covered: () => coveredAbove(),
