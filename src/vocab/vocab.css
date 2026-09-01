@@ -305,15 +305,10 @@ summary {
    interface size is what acts on the pair - buttons, hints, the bar. */
 .phrase-word,
 .phrase-meanings {
-  font-family: Georgia, "Iowan Old Style", "Times New Roman", serif;
+  font-family: var(--reader-font-lead, var(--reader-font-stack));
   font-size: var(--reader-size, 18px);
   line-height: 1.45;
   overflow-wrap: anywhere;
-}
-
-:root[data-reader-font="sans"] .phrase-word,
-:root[data-reader-font="sans"] .phrase-meanings {
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
 .phrase-word {
