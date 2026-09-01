@@ -934,7 +934,7 @@
   },
   "options_font_custom": { "message": "Fuente propia" },
   "options_font_custom_hint": {
-    "message": "Escribe el nombre de una fuente instalada en este dispositivo, por ejemplo Georgia u OpenDyslexic. La fila Tipografía de la vista de lectura la ofrecerá entonces como Personalizada. Deja el campo vacío para usar solo las fuentes integradas."
+    "message": "Escribe el nombre de una fuente instalada en este dispositivo, por ejemplo Georgia o Noto Serif. La fila Tipografía de la vista de lectura la ofrecerá entonces como Personalizada. Deja el campo vacío para usar solo las fuentes integradas."
   },
   "options_quiet_bubble_hint": {
     "message": "Muestra solo el texto traducido en la burbuja. Los botones de acción (copiar, guardar) aparecerán únicamente al hacer clic o tocar la burbuja."
