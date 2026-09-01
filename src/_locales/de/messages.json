@@ -375,10 +375,85 @@
   },
   "reader_transfer_epub": { "message": ".epub - das E-Book-Format." },
   "reader_transfer_books": {
-    "message": "Der Export umfasst nur Artikel - Bücher (.epub) werden nicht exportiert. Ein erneuter Import eines Buches stellt alles außer der Leseposition wieder her."
+    "message": "Der Export umfasst nur Artikel - Bücher (.epub) werden nicht exportiert. Ein erneut importiertes Buch hat keine Leseposition und keine Markierungen: Exportieren Sie die Markierungen auf der Seite der Markierungen (.json), bevor Sie das Buch löschen, und importieren Sie diese Datei nach dem erneuten Import desselben Buches."
   },
   "reader_export_marks": { "message": "Markierungen exportieren" },
-  "reader_transfer_marks": { "message": "Markierungen wandern mit ihren Artikeln in der .json-Sicherung. Um sie als Notizen zu speichern - eine .md-Textdatei, nach Dokumenten gruppiert - nutzen Sie „Markierungen exportieren“ auf der Seite der Markierungen." },
+  "reader_marks_export_copy": { "message": "Sicherung exportieren (.json)" },
+  "reader_marks_import": { "message": "Importieren (.json)" },
+  "reader_marks_copy_hint": { "message": "Die .json-Datei ist eine Sicherung der Markierungen und ihrer Notizen. Import fügt die Markierungen aus einer solchen Datei denselben Artikeln hinzu - und einem Buch, das erneut aus derselben .epub-Datei importiert wurde. Nichts, was bereits hier ist, wird geändert oder entfernt." },
+  "reader_marks_copy_elsewhere": { "message": "Eine Sicherung, die importiert werden kann (.json), wird auf der Seite aller Markierungen exportiert und importiert." },
+  "reader_marks_all_link": { "message": "Alle Markierungen" },
+  "reader_marks_export_notes": { "message": "Als Notizen exportieren (.md)" },
+  "reader_marks_notes_hint": { "message": "Die .md-Datei ist eine Textliste der Zitate und Notizen, nach Dokumenten gruppiert - zum Lesen und für eigene Notizen. Sie kann nicht importiert werden." },
+  "reader_marks_import_summary_one": {
+    "message": "$NAME$ enthält die Markierungen von $COUNT$ Dokument:",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "name": { "content": "$2", "example": "reread-highlights.json" }
+    }
+  },
+  "reader_marks_import_summary_other": {
+    "message": "$NAME$ enthält die Markierungen von $COUNT$ Dokumenten:",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "name": { "content": "$2", "example": "reread-highlights.json" }
+    }
+  },
+  "reader_marks_import_row_one": {
+    "message": "$TITLE$ - $COUNT$ Markierung hinzuzufügen",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "title": { "content": "$2", "example": "Ein Roman" }
+    }
+  },
+  "reader_marks_import_row_other": {
+    "message": "$TITLE$ - $COUNT$ Markierungen hinzuzufügen",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "title": { "content": "$2", "example": "Ein Roman" }
+    }
+  },
+  "reader_marks_import_missing_one": {
+    "message": "$COUNT$ Dokument ist nicht in der Leseliste: $TITLES$. Importieren Sie es zuerst - ein Buch aus seiner .epub-Datei, einen Artikel aus der Sicherung der Leseliste - und danach diese Datei erneut.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "titles": { "content": "$2", "example": "Ein Roman" }
+    }
+  },
+  "reader_marks_import_missing_other": {
+    "message": "$COUNT$ Dokumente sind nicht in der Leseliste: $TITLES$. Importieren Sie sie zuerst - Bücher aus ihren .epub-Dateien, Artikel aus der Sicherung der Leseliste - und danach diese Datei erneut.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "2" },
+      "titles": { "content": "$2", "example": "Ein Roman, Ein Artikel" }
+    }
+  },
+  "reader_marks_import_twins_one": {
+    "message": "$COUNT$ Markierung ist bereits hier.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_marks_import_twins_other": {
+    "message": "$COUNT$ Markierungen sind bereits hier.",
+    "placeholders": { "count": { "content": "$1", "example": "12" } }
+  },
+  "reader_marks_import_overlap_one": {
+    "message": "$COUNT$ Markierung überschneidet sich mit einer bereits vorhandenen und wird ausgelassen.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_marks_import_overlap_other": {
+    "message": "$COUNT$ Markierungen überschneiden sich mit bereits vorhandenen und werden ausgelassen.",
+    "placeholders": { "count": { "content": "$1", "example": "2" } }
+  },
+  "reader_marks_import_done_one": {
+    "message": "$COUNT$ Markierung hinzugefügt.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_marks_import_done_other": {
+    "message": "$COUNT$ Markierungen hinzugefügt.",
+    "placeholders": { "count": { "content": "$1", "example": "12" } }
+  },
+  "reader_marks_import_nothing": { "message": "In dieser Datei gibt es keine Markierungen zum Importieren." },
+  "reader_import_marks_elsewhere": { "message": "Das ist eine Datei mit Markierungen. Importieren Sie sie auf der Seite der Markierungen." },
+  "reader_transfer_marks": { "message": "Markierungen sind zusammen mit ihren Artikeln in der .json-Sicherung enthalten. Die Seite der Markierungen exportiert sie gesondert: als .json-Sicherung, die importiert werden kann - auch für Bücher - oder als .md-Notizen." },
   "reader_transfer_pick": { "message": "Um nur einige Artikel zu exportieren, drücken Sie über der Liste auf „Auswählen“ und haken Sie sie ab." },
   "reader_pick_start": { "message": "Auswählen" },
   "reader_pick_close": { "message": "Auswahl schließen" },

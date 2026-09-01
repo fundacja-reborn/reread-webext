@@ -124,9 +124,16 @@ import {
   setBookToc,
   sweepOrphanSegments,
 } from "../lib/store/books.js";
+import {
+  MARKS_COPY_FILENAME,
+  fromMarksCopy,
+  isMarksCopy,
+  marksImportPlan,
+  toMarksCopy,
+} from "../lib/store/marks-copy.js";
 import { MARKS_FILENAME, toMarksFile } from "../lib/store/marks-file.js";
 import { completeLibraryCopy, restoreLibrary } from "../lib/store/library-copy.js";
-import { allMarks, getMarks, putMarks, restoreMarks } from "../lib/store/marks.js";
+import { allMarks, getMarks, putMarks, putMarksRows, restoreMarks } from "../lib/store/marks.js";
 import { keptTitles, readMarksBackup } from "../lib/store/marks-backup.js";
 import { Segment, emptySentence, savedArticle } from "../lib/store/saved-article.js";
 import { watchToolbarScheme } from "../lib/theme-icon.js";
@@ -336,6 +343,30 @@ const marksExportButton = /** @type {HTMLButtonElement | null} */ (
 const marksTransferLink = document.getElementById("marks-transfer-link");
 const marksTransferLine = document.getElementById("marks-transfer-status");
 const marksTitle = document.getElementById("marks-title");
+// The highlights' own backup (D168), on the page of all highlights alone:
+// the .json export and import, the offer a picked file becomes and the line
+// under them; the notes export with a line of its own (each report under
+// its own press, D153); and, on one document's page, the sentence that says
+// where the backup is, with the way there.
+const marksCopy = document.getElementById("marks-copy");
+const marksExportCopyButton = /** @type {HTMLButtonElement | null} */ (
+  document.getElementById("marks-export-copy")
+);
+const marksImportButton = document.getElementById("marks-import");
+const marksImportInput = /** @type {HTMLInputElement | null} */ (
+  document.getElementById("marks-import-file")
+);
+const marksImportConfirm = document.getElementById("marks-import-confirm");
+const marksImportSummary = document.getElementById("marks-import-summary");
+const marksImportSample = document.getElementById("marks-import-sample");
+const marksImportNote = document.getElementById("marks-import-note");
+const marksImportRun = /** @type {HTMLButtonElement | null} */ (
+  document.getElementById("marks-import-run")
+);
+const marksImportCancel = document.getElementById("marks-import-cancel");
+const marksNotesLine = document.getElementById("marks-notes-status");
+const marksCopyElsewhere = document.getElementById("marks-copy-elsewhere");
+const marksAllLink = document.getElementById("marks-all-link");
 const marksCopyIcons = /** @type {HTMLTemplateElement | null} */ (
   document.getElementById("marks-copy-icons")
 );
@@ -677,6 +708,20 @@ let settings = DEFAULTS;
 let pendingImport = null;
 
 /**
+ * The highlights file picked on the highlights page, waiting for the press
+ * that writes it (D168): the plan of where every mark lands, made before
+ * consent so the offer can say it, and the counts the file came with.
+ *
+ * @type {{
+ *   name: string,
+ *   documents: number,
+ *   invalid: number,
+ *   plan: import("../lib/store/marks-copy.js").MarksImportPlan,
+ * } | null}
+ */
+let pendingMarksImport = null;
+
+/**
  * How many titles the confirmation quotes before asking - a sample to
  * recognise the file by, never the whole list: a backup of a few hundred
  * articles would push the two buttons off the screen. The rest is counted
@@ -789,6 +834,20 @@ function marksStatus(text, tone) {
   marksTransferLine.textContent = text;
   if (tone === undefined) delete marksTransferLine.dataset["tone"];
   else marksTransferLine.dataset["tone"] = tone;
+}
+
+/**
+ * The line under the notes export - its own, so a report about the .md
+ * never stands under the backup's buttons, nor the other way round (D153).
+ *
+ * @param {string} text
+ * @param {"error"} [tone]
+ */
+function marksNotesStatus(text, tone) {
+  if (marksNotesLine === null) return;
+  marksNotesLine.textContent = text;
+  if (tone === undefined) delete marksNotesLine.dataset["tone"];
+  else marksNotesLine.dataset["tone"] = tone;
 }
 
 /**
@@ -2840,9 +2899,19 @@ async function showMarks(scope, { fresh = false } = {}) {
   leaveDocView();
   document.body.dataset["view"] = "marks";
   marksShown = { scope };
-  // A report of the last visit's export is that visit's; the line starts
-  // clear, the transfer sections' way.
+  // A report of the last visit's export is that visit's; the lines start
+  // clear, the transfer sections' way - and a file offered on the last
+  // visit is not offered on this one.
   marksStatus("");
+  marksNotesStatus("");
+  closeMarksImportOffer();
+  // The backup (D168) is exported and imported on the page of all
+  // highlights alone: an import on one document's page would have to
+  // answer what to do with another document's marks, and a sentence with
+  // the way there is the better answer (Michał's call, 2026-09-01). The
+  // notes export stands on both.
+  if (marksCopy !== null) marksCopy.hidden = scope !== null;
+  if (marksCopyElsewhere !== null) marksCopyElsewhere.hidden = scope === null;
   if (fresh) {
     marksQuery = "";
     marksPage = 1;
@@ -3290,6 +3359,7 @@ async function refreshMarks() {
   // puts it a page away - and stands only while there is something to
   // write.
   if (marksExportButton !== null) marksExportButton.disabled = view.total === 0;
+  if (marksExportCopyButton !== null) marksExportCopyButton.disabled = view.total === 0;
   if (marksTransferLink !== null) marksTransferLink.hidden = view.total === 0;
 
   // "3 of 12" while the filter narrows the page down, like the list's line.
@@ -3857,16 +3927,28 @@ async function exportList() {
 }
 
 /**
- * The highlights' documents dressed in what the lists know about them -
- * title, address or author, the day each entered - the .md file's input,
- * cut to the documents `wanted` says yes to: one, when the page asking is
- * scoped (D108); everybody's otherwise. The quotes are already in the
- * marks' own rows, so no document's content is ever opened for this.
+ * One document of the highlights as the lists know it - its kind and key,
+ * its title, a book's author, the day it entered - and its marks: the input
+ * of both files the page writes, cut to the documents `wanted` says yes to:
+ * one, when the page asking is scoped (D108); everybody's otherwise. The
+ * quotes are already in the marks' own rows, so no document's content is
+ * ever opened for this.
  *
- * @param {(docId: string) => boolean} wanted
- * @returns {Promise<import("../lib/store/marks-file.js").MarkedDoc[]>}
+ * @typedef {{
+ *   docId: string,
+ *   kind: "article" | "book",
+ *   title: string,
+ *   author: string | null,
+ *   at: number,
+ *   marks: import("../lib/reader/marks.js").Mark[],
+ * }} MarksDoc
  */
-async function markedDocs(wanted) {
+
+/**
+ * @param {(docId: string) => boolean} wanted
+ * @returns {Promise<MarksDoc[]>}
+ */
+async function marksDocs(wanted) {
   const [metas, books, marks, backup] = await Promise.all([
     listArticles(),
     listBooks(),
@@ -3874,35 +3956,73 @@ async function markedDocs(wanted) {
     readMarksBackup(),
   ]);
 
-  /** @type {import("../lib/store/marks-file.js").MarkedDoc[]} */
+  /** @type {MarksDoc[]} */
   const docs = [];
   for (const meta of metas) {
     const kept = marks.get(meta.url);
     if (kept !== undefined && wanted(meta.url)) {
-      docs.push({ title: meta.title, source: meta.url, at: meta.savedAt, marks: kept });
+      docs.push({
+        docId: meta.url,
+        kind: "article",
+        title: meta.title,
+        author: null,
+        at: meta.savedAt,
+        marks: kept,
+      });
     }
   }
   for (const book of books) {
     const kept = marks.get(book.id);
     if (kept !== undefined && wanted(book.id)) {
-      docs.push({ title: book.title, source: book.author, at: book.addedAt, marks: kept });
+      docs.push({
+        docId: book.id,
+        kind: "book",
+        title: book.title,
+        author: book.author,
+        at: book.addedAt,
+        marks: kept,
+      });
     }
   }
   // The quotes whose documents are gone, under the titles the copy kept
-  // (`marks-backup.js`): the file is the one place they can still be taken
+  // (`marks-backup.js`): the files are the one place they can still be taken
   // from whole, and a quote is no less the reader's for having lost its page.
   const named = new Set([...metas.map((meta) => meta.url), ...books.map((book) => book.id)]);
   for (const [docId, remembered] of keptTitles(backup)) {
     const kept = marks.get(docId);
     if (kept === undefined || named.has(docId) || !wanted(docId)) continue;
-    docs.push({
-      title: remembered.title,
-      source: remembered.kind === "article" ? docId : null,
-      at: 0,
-      marks: kept,
-    });
+    docs.push({ docId, kind: remembered.kind, title: remembered.title, author: null, at: 0, marks: kept });
   }
   return docs;
+}
+
+/**
+ * A document as the notes file wants it: its source is an article's address
+ * or a book's author, whichever it has.
+ *
+ * @param {MarksDoc} doc
+ * @returns {import("../lib/store/marks-file.js").MarkedDoc}
+ */
+function notesDocOf(doc) {
+  return {
+    title: doc.title,
+    source: doc.kind === "article" ? doc.docId : doc.author,
+    at: doc.at,
+    marks: doc.marks,
+  };
+}
+
+/**
+ * A document as the backup wants it (D168): what it is found by again - an
+ * article's address, which is its key, a book's title and author.
+ *
+ * @param {MarksDoc} doc
+ * @returns {import("../lib/store/marks-copy.js").CopyDoc}
+ */
+function copyDocOf(doc) {
+  return doc.kind === "article"
+    ? { kind: "article", url: doc.docId, title: doc.title, marks: doc.marks }
+    : { kind: "book", title: doc.title, author: doc.author, marks: doc.marks };
 }
 
 /**
@@ -3916,12 +4036,159 @@ async function markedDocs(wanted) {
 async function exportMarksPage() {
   try {
     const scope = marksShown === null ? null : marksShown.scope;
-    const docs = await markedDocs((docId) => scope === null || docId === scope);
+    const docs = await marksDocs((docId) => scope === null || docId === scope);
     if (docs.length === 0) return;
-    const size = downloadFile(toMarksFile(docs), MARKS_FILENAME, "text/markdown");
-    marksStatus(plural(docs.length, "reader_export_marks_done", [MARKS_FILENAME, fileSize(size)]));
+    const size = downloadFile(toMarksFile(docs.map(notesDocOf)), MARKS_FILENAME, "text/markdown");
+    marksNotesStatus(
+      plural(docs.length, "reader_export_marks_done", [MARKS_FILENAME, fileSize(size)]),
+    );
+  } catch {
+    marksNotesStatus(describeError(ErrorCode.INTERNAL), "error");
+  }
+}
+
+/**
+ * The highlights as their own backup (D168): every document's marks in the
+ * file `marks-copy.js` reads back. From the page of all highlights alone
+ * (`showMarks` hides the half on a scoped page), so the cut is everybody's.
+ */
+async function exportMarksCopy() {
+  try {
+    const docs = await marksDocs(() => true);
+    if (docs.length === 0) return;
+    const size = downloadFile(
+      toMarksCopy(docs.map(copyDocOf)),
+      MARKS_COPY_FILENAME,
+      "application/json",
+    );
+    marksStatus(plural(docs.length, "reader_export_marks_done", [MARKS_COPY_FILENAME, fileSize(size)]));
   } catch {
     marksStatus(describeError(ErrorCode.INTERNAL), "error");
+  }
+}
+
+/**
+ * A highlights file picked (D168): read, narrowed, and laid against the
+ * library, so the offer can say where every mark would land before anything
+ * is written. Nothing of the file is written here. Whatever the browser
+ * deleted comes back from its copy before the library is read, the page's
+ * own rule (`refreshMarks`).
+ *
+ * @param {File} file
+ */
+async function offerMarksImport(file) {
+  try {
+    const { documents, invalid } = fromMarksCopy(await file.text());
+    if (documents.length === 0) {
+      closeMarksImportOffer();
+      marksStatus(t("reader_marks_import_nothing"), "error");
+      return;
+    }
+    await restoreMarks();
+    const [articles, books, marks] = await Promise.all([listArticles(), listBooks(), allMarks()]);
+    const plan = marksImportPlan(documents, { articles, books, marks });
+    // Nothing to write - the file's marks all stand here already, or their
+    // documents do not: the sentences that say which are the whole answer,
+    // and an offer with nothing to accept would be a frame around a Cancel
+    // (Michał's smoke, 2026-09-01).
+    if (plan.added === 0) {
+      closeMarksImportOffer();
+      marksStatus(marksImportNotes(plan, invalid).join(" "));
+      return;
+    }
+    pendingMarksImport = { name: file.name, documents: documents.length, invalid, plan };
+    marksStatus("");
+    renderMarksImportOffer();
+  } catch {
+    closeMarksImportOffer();
+    marksStatus(describeError(ErrorCode.INTERNAL), "error");
+  }
+}
+
+/**
+ * The moment of consent (D168): what the file holds and where its marks
+ * land, before anything is written - one row per document that receives
+ * some, and under them what is left out and why. Titles came from
+ * somebody's page or book once, so they enter as text - the rows' own rule.
+ */
+function renderMarksImportOffer() {
+  if (marksImportConfirm === null) return;
+  marksImportConfirm.hidden = pendingMarksImport === null;
+  if (pendingMarksImport === null) return;
+  const { name, documents, invalid, plan } = pendingMarksImport;
+
+  if (marksImportSummary !== null) {
+    marksImportSummary.textContent = plural(documents, "reader_marks_import_summary", [name]);
+  }
+  if (marksImportSample !== null) {
+    marksImportSample.replaceChildren();
+    for (const target of plan.targets) {
+      const item = document.createElement("li");
+      item.textContent = plural(target.added, "reader_marks_import_row", [target.title]);
+      marksImportSample.append(item);
+    }
+  }
+  if (marksImportNote !== null) {
+    const sentences = marksImportNotes(plan, invalid);
+    marksImportNote.textContent = sentences.join(" ");
+    marksImportNote.hidden = sentences.length === 0;
+  }
+}
+
+/**
+ * What a file's import leaves out and why, as sentences: the documents the
+ * reading list does not hold (a sample of their titles - the count says how
+ * many there are, and a file of hundreds must not become a paragraph), the
+ * marks standing here already, the marks meeting one, the entries that were
+ * not marks. Under the offer's rows - and alone, in the report line, when
+ * the file has nothing else to say.
+ *
+ * @param {import("../lib/store/marks-copy.js").MarksImportPlan} plan
+ * @param {number} invalid
+ * @returns {string[]}
+ */
+function marksImportNotes(plan, invalid) {
+  /** @type {string[]} */
+  const sentences = [];
+  if (plan.missing.length > 0) {
+    const titles = plan.missing.slice(0, SAMPLE_TITLES).map((doc) => doc.title);
+    if (plan.missing.length > SAMPLE_TITLES) titles.push("...");
+    sentences.push(plural(plan.missing.length, "reader_marks_import_missing", [titles.join(", ")]));
+  }
+  if (plan.twins > 0) sentences.push(plural(plan.twins, "reader_marks_import_twins"));
+  if (plan.overlapping > 0) sentences.push(plural(plan.overlapping, "reader_marks_import_overlap"));
+  if (invalid > 0) sentences.push(plural(invalid, "reader_import_unreadable"));
+  return sentences;
+}
+
+function closeMarksImportOffer() {
+  pendingMarksImport = null;
+  renderMarksImportOffer();
+}
+
+/**
+ * The press that writes the plan (D168) - every receiving document's row
+ * whole, in one transaction - and says what it did, the import report's
+ * way: what was added, and what was left out and why.
+ */
+async function runMarksImport() {
+  if (pendingMarksImport === null || marksImportRun === null) return;
+  const { plan } = pendingMarksImport;
+  marksImportRun.disabled = true;
+  try {
+    await putMarksRows(plan.targets.map(({ docId, marks }) => ({ docId, marks })));
+    const sentences = [plural(plan.added, "reader_marks_import_done")];
+    if (plan.twins > 0) sentences.push(plural(plan.twins, "reader_marks_import_twins"));
+    if (plan.overlapping > 0) sentences.push(plural(plan.overlapping, "reader_marks_import_overlap"));
+    marksStatus(sentences.join(" "));
+    closeMarksImportOffer();
+    await refreshMarks();
+  } catch {
+    // The offer stays open: an error must not eat the file the reader
+    // already picked and read.
+    marksStatus(t("reader_list_write_failed"), "error");
+  } finally {
+    marksImportRun.disabled = false;
   }
 }
 
@@ -3951,7 +4218,17 @@ function downloadFile(content, filename, type) {
  */
 async function offerImport(file) {
   try {
-    const parsed = fromArticlesFile(await file.text());
+    const text = await file.text();
+    // The highlights' own backup (D168) is a .json too: named for what it
+    // is and sent to the page that reads it, rather than reported as a
+    // backup holding no articles.
+    if (isMarksCopy(text)) {
+      pendingImport = null;
+      renderImportOffer();
+      transferStatus(t("reader_import_marks_elsewhere"), "error");
+      return;
+    }
+    const parsed = fromArticlesFile(text);
     offerParsed(file.name, parsed);
   } catch {
     pendingImport = null;
@@ -5049,6 +5326,37 @@ marksRowsList?.addEventListener("click", (event) => {
 
 marksExportButton?.addEventListener("click", () => void exportMarksPage());
 
+// The highlights' own backup (D168): the export, the picker behind the
+// Import button - cleared so that the same file, picked again, offers again
+// - and the two presses that decide the offer.
+marksExportCopyButton?.addEventListener("click", () => void exportMarksCopy());
+
+marksImportButton?.addEventListener("click", () => marksImportInput?.click());
+
+marksImportInput?.addEventListener("change", () => {
+  if (marksImportInput === null) return;
+  const file = marksImportInput.files?.[0];
+  marksImportInput.value = "";
+  if (file !== undefined) void offerMarksImport(file);
+});
+
+marksImportRun?.addEventListener("click", () => void runMarksImport());
+
+marksImportCancel?.addEventListener("click", () => {
+  closeMarksImportOffer();
+  marksStatus("");
+});
+
+// On one document's page the backup is a sentence away: the way to the page
+// of all highlights - a real step, like the menu's row writes, so Back
+// retraces it - fresh the way any visit begins.
+marksAllLink?.addEventListener("click", (event) => {
+  event.preventDefault();
+  hideNotice();
+  history.pushState(marksState(null), "");
+  void showMarks(null, { fresh: true });
+});
+
 // The link over the rows leads to the export by scrolling, not by its
 // fragment: a fragment jump writes a history entry with no state of ours,
 // and the popstate that follows reads that as Back under the highlights -
@@ -5060,7 +5368,9 @@ marksTransferLink?.addEventListener("click", (event) => {
   document
     .getElementById("marks-transfer")
     ?.scrollIntoView({ behavior: "instant", block: "start" });
-  marksExportButton?.focus({ preventScroll: true });
+  (marksCopy !== null && !marksCopy.hidden ? marksExportCopyButton : marksExportButton)?.focus({
+    preventScroll: true,
+  });
 });
 
 noticeClose?.addEventListener("click", () => hideNotice());

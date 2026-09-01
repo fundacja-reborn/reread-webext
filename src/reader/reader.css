@@ -1530,10 +1530,30 @@ a.marks-act {
   /* The anchor over the rows lands here (D153); the same room the list's
      transfer section keeps under the window's edge. */
   scroll-margin-top: 0.75rem;
+  /* Chrome, not text: the buttons, hints, offer and reports wear the
+     interface's face and size - the reading list's own (`#library`) - where
+     the quotes above them read in the Aa face. Under the page's reading
+     face they stood in it too, at the reading size (Michał's smoke,
+     2026-09-01: "Aa is for the texts"). */
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
 }
 
-.marks-transfer > .transfer {
+/* The first row of buttons stands right under the rows, whichever half shows
+   first (D168): the backup's on the page of all highlights, the notes' under
+   the sentence that points there on one document's page. The notes half
+   keeps a breath from the backup's report above it. */
+.marks-transfer > div > .transfer:first-child {
   margin-top: 0;
+}
+
+.marks-notes {
+  margin-top: 1.5rem;
+}
+
+#marks-copy-elsewhere {
+  margin: 0 0 1.25rem;
 }
 
 /* --- the shared pager, held to the same touch floor --- */

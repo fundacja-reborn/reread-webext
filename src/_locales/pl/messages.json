@@ -475,10 +475,151 @@
   },
   "reader_transfer_epub": { "message": ".epub - format e-booków." },
   "reader_transfer_books": {
-    "message": "Eksport uwzględnia tylko artykuły, nie eksportuje książek (.epub). Ponowny import przywraca wszystko poza pozycją czytania."
+    "message": "Eksport uwzględnia tylko artykuły, nie eksportuje książek (.epub). Ponownie zaimportowana książka nie ma pozycji czytania ani zakreśleń: zakreślenia wyeksportuj na stronie Zakreśleń (.json) przed usunięciem książki, a ten plik zaimportuj po ponownym imporcie tej samej książki."
   },
   "reader_export_marks": { "message": "Eksportuj zakreślenia" },
-  "reader_transfer_marks": { "message": "Zakreślenia przenoszą się razem z artykułami w kopii zapasowej .json. Żeby zapisać je jako notatki - tekstowy plik .md pogrupowany według dokumentów - użyj „Eksportuj zakreślenia” na stronie Zakreśleń." },
+  "reader_marks_export_copy": { "message": "Eksportuj kopię (.json)" },
+  "reader_marks_import": { "message": "Importuj (.json)" },
+  "reader_marks_copy_hint": { "message": "Plik .json to kopia zapasowa zakreśleń i ich notatek. Import dodaje zakreślenia z takiego pliku do tych samych artykułów oraz do książki zaimportowanej ponownie z tego samego pliku .epub. Nic, co już tu jest, nie zostaje zmienione ani usunięte." },
+  "reader_marks_copy_elsewhere": { "message": "Kopię zapasową, którą można zaimportować (.json), eksportuje się i importuje na stronie wszystkich zakreśleń." },
+  "reader_marks_all_link": { "message": "Wszystkie zakreślenia" },
+  "reader_marks_export_notes": { "message": "Eksportuj jako notatki (.md)" },
+  "reader_marks_notes_hint": { "message": "Plik .md to tekstowa lista cytatów i notatek pogrupowana według dokumentów - do czytania i do własnych notatek. Nie da się go zaimportować." },
+  "reader_marks_import_summary_one": {
+    "message": "$NAME$ zawiera zakreślenia $COUNT$ dokumentu:",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "name": { "content": "$2", "example": "reread-highlights.json" }
+    }
+  },
+  "reader_marks_import_summary_few": {
+    "message": "$NAME$ zawiera zakreślenia $COUNT$ dokumentów:",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "name": { "content": "$2", "example": "reread-highlights.json" }
+    }
+  },
+  "reader_marks_import_summary_many": {
+    "message": "$NAME$ zawiera zakreślenia $COUNT$ dokumentów:",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "name": { "content": "$2", "example": "reread-highlights.json" }
+    }
+  },
+  "reader_marks_import_summary_other": {
+    "message": "$NAME$ zawiera zakreślenia $COUNT$ dokumentu:",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1,5" },
+      "name": { "content": "$2", "example": "reread-highlights.json" }
+    }
+  },
+  "reader_marks_import_row_one": {
+    "message": "$TITLE$ - $COUNT$ zakreślenie do dodania",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "title": { "content": "$2", "example": "Lalka" }
+    }
+  },
+  "reader_marks_import_row_few": {
+    "message": "$TITLE$ - $COUNT$ zakreślenia do dodania",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "title": { "content": "$2", "example": "Lalka" }
+    }
+  },
+  "reader_marks_import_row_many": {
+    "message": "$TITLE$ - $COUNT$ zakreśleń do dodania",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "title": { "content": "$2", "example": "Lalka" }
+    }
+  },
+  "reader_marks_import_row_other": {
+    "message": "$TITLE$ - $COUNT$ zakreślenia do dodania",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1,5" },
+      "title": { "content": "$2", "example": "Lalka" }
+    }
+  },
+  "reader_marks_import_missing_one": {
+    "message": "$COUNT$ dokumentu nie ma w czytelni: $TITLES$. Najpierw zaimportuj go - książkę z jej pliku .epub, artykuł z kopii zapasowej czytelni - a potem jeszcze raz ten plik.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "titles": { "content": "$2", "example": "Lalka" }
+    }
+  },
+  "reader_marks_import_missing_few": {
+    "message": "$COUNT$ dokumentów nie ma w czytelni: $TITLES$. Najpierw zaimportuj je - książki z ich plików .epub, artykuły z kopii zapasowej czytelni - a potem jeszcze raz ten plik.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "2" },
+      "titles": { "content": "$2", "example": "Lalka, Pewien artykuł" }
+    }
+  },
+  "reader_marks_import_missing_many": {
+    "message": "$COUNT$ dokumentów nie ma w czytelni: $TITLES$. Najpierw zaimportuj je - książki z ich plików .epub, artykuły z kopii zapasowej czytelni - a potem jeszcze raz ten plik.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "titles": { "content": "$2", "example": "Lalka, Pewien artykuł, ..." }
+    }
+  },
+  "reader_marks_import_missing_other": {
+    "message": "$COUNT$ dokumentów nie ma w czytelni: $TITLES$. Najpierw zaimportuj je - książki z ich plików .epub, artykuły z kopii zapasowej czytelni - a potem jeszcze raz ten plik.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1,5" },
+      "titles": { "content": "$2", "example": "Lalka" }
+    }
+  },
+  "reader_marks_import_twins_one": {
+    "message": "$COUNT$ zakreślenie już tu jest.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_marks_import_twins_few": {
+    "message": "$COUNT$ zakreślenia już tu są.",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
+  "reader_marks_import_twins_many": {
+    "message": "$COUNT$ zakreśleń już tu jest.",
+    "placeholders": { "count": { "content": "$1", "example": "12" } }
+  },
+  "reader_marks_import_twins_other": {
+    "message": "$COUNT$ zakreślenia już tu jest.",
+    "placeholders": { "count": { "content": "$1", "example": "1,5" } }
+  },
+  "reader_marks_import_overlap_one": {
+    "message": "$COUNT$ zakreślenie nachodzi na zakreślenie, które już tu jest, i zostaje pominięte.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_marks_import_overlap_few": {
+    "message": "$COUNT$ zakreślenia nachodzą na zakreślenia, które już tu są, i zostają pominięte.",
+    "placeholders": { "count": { "content": "$1", "example": "2" } }
+  },
+  "reader_marks_import_overlap_many": {
+    "message": "$COUNT$ zakreśleń nachodzi na zakreślenia, które już tu są, i zostaje pominiętych.",
+    "placeholders": { "count": { "content": "$1", "example": "12" } }
+  },
+  "reader_marks_import_overlap_other": {
+    "message": "$COUNT$ zakreślenia nachodzi na zakreślenia, które już tu są, i zostaje pominięte.",
+    "placeholders": { "count": { "content": "$1", "example": "1,5" } }
+  },
+  "reader_marks_import_done_one": {
+    "message": "Dodano $COUNT$ zakreślenie.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_marks_import_done_few": {
+    "message": "Dodano $COUNT$ zakreślenia.",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
+  "reader_marks_import_done_many": {
+    "message": "Dodano $COUNT$ zakreśleń.",
+    "placeholders": { "count": { "content": "$1", "example": "12" } }
+  },
+  "reader_marks_import_done_other": {
+    "message": "Dodano $COUNT$ zakreślenia.",
+    "placeholders": { "count": { "content": "$1", "example": "1,5" } }
+  },
+  "reader_marks_import_nothing": { "message": "W tym pliku nie ma zakreśleń do zaimportowania." },
+  "reader_import_marks_elsewhere": { "message": "To plik zakreśleń. Zaimportuj go na stronie Zakreśleń." },
+  "reader_transfer_marks": { "message": "Zakreślenia są zapisane razem z artykułami w kopii zapasowej .json. Strona Zakreśleń eksportuje je osobno: jako kopię .json, którą można zaimportować - także dla książek - albo jako notatki .md." },
   "reader_transfer_pick": { "message": "Żeby wyeksportować tylko niektóre artykuły, naciśnij „Zaznacz” nad listą i zaznacz je." },
   "reader_pick_start": { "message": "Zaznacz" },
   "reader_pick_close": { "message": "Zamknij zaznaczanie" },

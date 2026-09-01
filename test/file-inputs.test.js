@@ -49,16 +49,19 @@ describe("file inputs vs the iOS picker", () => {
     assert.match(input, /accept="\.tsv,text\/tab-separated-values"/);
   });
 
-  it("reader page: transfer filter names only types iOS registers", async () => {
-    const [input, ...rest] = fileInputs(await html("reader/reader.html"));
-    assert.ok(input, "expected the reading-list transfer input");
-    assert.equal(rest.length, 0, "expected exactly one file input");
+  it("reader page: both filters name only types iOS registers", async () => {
+    const [transfer, highlights, ...rest] = fileInputs(await html("reader/reader.html"));
+    assert.ok(transfer, "expected the reading-list transfer input");
+    assert.ok(highlights, "expected the highlights page's import input (D168)");
+    assert.equal(rest.length, 0, "expected exactly two file inputs");
     // JSON, ZIP and EPUB all have system-registered types (public.json,
     // public.zip-archive, org.idpf.epub-container), so this filter may stay
     // too. The ZIP is the backup with pictures (D145).
     assert.match(
-      input,
+      transfer,
       /accept="\.json,application\/json,\.zip,application\/zip,\.epub,application\/epub\+zip"/,
     );
+    // The highlights backup is JSON alone (D168).
+    assert.match(highlights, /accept="\.json,application\/json"/);
   });
 });

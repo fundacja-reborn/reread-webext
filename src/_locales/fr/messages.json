@@ -386,10 +386,85 @@
   },
   "reader_transfer_epub": { "message": ".epub - le format des livres numériques." },
   "reader_transfer_books": {
-    "message": "L'export ne couvre que les articles - les livres (.epub) ne sont pas exportés. Réimporter un livre restaure tout sauf la position de lecture."
+    "message": "L'export ne couvre que les articles - les livres (.epub) ne sont pas exportés. Un livre réimporté n'a ni position de lecture ni surlignages : exportez les surlignages sur la page des surlignages (.json) avant de supprimer le livre, et importez ce fichier après avoir réimporté le même livre."
   },
   "reader_export_marks": { "message": "Exporter les surlignages" },
-  "reader_transfer_marks": { "message": "Les surlignages voyagent avec leurs articles dans la sauvegarde .json. Pour les écrire sous forme de notes - un fichier texte .md groupé par document - utilisez « Exporter les surlignages » sur la page des surlignages." },
+  "reader_marks_export_copy": { "message": "Exporter une sauvegarde (.json)" },
+  "reader_marks_import": { "message": "Importer (.json)" },
+  "reader_marks_copy_hint": { "message": "Le fichier .json est une sauvegarde des surlignages et de leurs notes. Importer ajoute les surlignages d'un tel fichier aux mêmes articles, et à un livre réimporté depuis le même fichier .epub. Rien de ce qui est déjà ici n'est modifié ni supprimé." },
+  "reader_marks_copy_elsewhere": { "message": "Une sauvegarde qui peut être importée (.json) s'exporte et s'importe sur la page de tous les surlignages." },
+  "reader_marks_all_link": { "message": "Tous les surlignages" },
+  "reader_marks_export_notes": { "message": "Exporter comme notes (.md)" },
+  "reader_marks_notes_hint": { "message": "Le fichier .md est une liste en texte brut des citations et des notes, groupées par document - pour la lecture et pour vos propres notes. Il ne peut pas être importé." },
+  "reader_marks_import_summary_one": {
+    "message": "$NAME$ contient les surlignages de $COUNT$ document :",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "name": { "content": "$2", "example": "reread-highlights.json" }
+    }
+  },
+  "reader_marks_import_summary_other": {
+    "message": "$NAME$ contient les surlignages de $COUNT$ documents :",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "name": { "content": "$2", "example": "reread-highlights.json" }
+    }
+  },
+  "reader_marks_import_row_one": {
+    "message": "$TITLE$ - $COUNT$ surlignage à ajouter",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "title": { "content": "$2", "example": "Un roman" }
+    }
+  },
+  "reader_marks_import_row_other": {
+    "message": "$TITLE$ - $COUNT$ surlignages à ajouter",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "title": { "content": "$2", "example": "Un roman" }
+    }
+  },
+  "reader_marks_import_missing_one": {
+    "message": "$COUNT$ document n'est pas dans la liste de lecture : $TITLES$. Importez-le d'abord - un livre depuis son fichier .epub, un article depuis la sauvegarde de la liste de lecture - puis importez ce fichier à nouveau.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "titles": { "content": "$2", "example": "Un roman" }
+    }
+  },
+  "reader_marks_import_missing_other": {
+    "message": "$COUNT$ documents ne sont pas dans la liste de lecture : $TITLES$. Importez-les d'abord - les livres depuis leurs fichiers .epub, les articles depuis la sauvegarde de la liste de lecture - puis importez ce fichier à nouveau.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "2" },
+      "titles": { "content": "$2", "example": "Un roman, Un article" }
+    }
+  },
+  "reader_marks_import_twins_one": {
+    "message": "$COUNT$ surlignage est déjà ici.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_marks_import_twins_other": {
+    "message": "$COUNT$ surlignages sont déjà ici.",
+    "placeholders": { "count": { "content": "$1", "example": "12" } }
+  },
+  "reader_marks_import_overlap_one": {
+    "message": "$COUNT$ surlignage chevauche un surlignage déjà présent et est laissé de côté.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_marks_import_overlap_other": {
+    "message": "$COUNT$ surlignages chevauchent des surlignages déjà présents et sont laissés de côté.",
+    "placeholders": { "count": { "content": "$1", "example": "2" } }
+  },
+  "reader_marks_import_done_one": {
+    "message": "$COUNT$ surlignage ajouté.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_marks_import_done_other": {
+    "message": "$COUNT$ surlignages ajoutés.",
+    "placeholders": { "count": { "content": "$1", "example": "12" } }
+  },
+  "reader_marks_import_nothing": { "message": "Ce fichier ne contient aucun surlignage à importer." },
+  "reader_import_marks_elsewhere": { "message": "C'est un fichier de surlignages. Importez-le sur la page des surlignages." },
+  "reader_transfer_marks": { "message": "Les surlignages sont inclus avec leurs articles dans la sauvegarde .json. La page des surlignages les exporte à part : comme sauvegarde .json, qui peut être importée - pour les livres aussi - ou comme notes .md." },
   "reader_transfer_pick": { "message": "Pour n'exporter que certains articles, appuyez sur « Sélectionner » au-dessus de la liste et cochez-les." },
   "reader_pick_start": { "message": "Sélectionner" },
   "reader_pick_close": { "message": "Fermer la sélection" },
