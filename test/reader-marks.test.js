@@ -7,6 +7,7 @@ import {
   asMark,
   compareMarks,
   comparePoints,
+  findQuote,
   headRect,
   isMarkColor,
   markRecord,
@@ -375,5 +376,57 @@ describe("quoteOf", () => {
     const end = { block: 0, offset: 35 + written.length };
     assert.equal(quoteOf(before, start, end), written);
     assert.notEqual(quoteOf(after, start, end), written);
+  });
+});
+
+describe("findQuote (D169)", () => {
+  it("finds a quote standing once in one block, as the anchor quoteOf reads back", () => {
+    const prose = ["The quick brown fox", "jumps over the lazy dog"];
+    const span = findQuote(prose, "quick brown");
+    assert.deepEqual(span, { start: { block: 0, offset: 4 }, end: { block: 0, offset: 15 } });
+    assert.ok(span !== null);
+    assert.equal(quoteOf(prose.slice(0, 1), span.start, span.end), "quick brown");
+  });
+
+  it("finds a quote across blocks - the line break is the boundary, as quoteOf writes it", () => {
+    const prose = ["end of one", "the middle", "start of the next"];
+    const span = findQuote(prose, "of one\nthe middle\nstart");
+    assert.deepEqual(span, { start: { block: 0, offset: 4 }, end: { block: 2, offset: 5 } });
+    assert.ok(span !== null);
+    assert.equal(quoteOf(prose, span.start, span.end), "of one\nthe middle\nstart");
+  });
+
+  it("heals the backlog's own case: a paragraph added above moves every block by one", () => {
+    // The mark was written at block 1; a paragraph inserted before it puts
+    // the quote in block 2, where the guard refuses the old anchor.
+    const written = mark({ start: { block: 1, offset: 0 }, end: { block: 1, offset: 5 }, text: "quote" });
+    const after = ["A new paragraph.", "First paragraph.", "quote, and the rest."];
+    assert.equal(quoteOf([after[1] ?? ""], written.start, written.end), "First");
+    assert.deepEqual(findQuote(after, written.text), {
+      start: { block: 2, offset: 0 },
+      end: { block: 2, offset: 5 },
+    });
+  });
+
+  it("refuses a quote it cannot find, and one it finds twice", () => {
+    const prose = ["the fox and the fox", "another fox"];
+    assert.equal(findQuote(prose, "the dog"), null);
+    assert.equal(findQuote(prose, "fox"), null);
+    // Once is once, however the twice-standing word around it reads.
+    assert.deepEqual(findQuote(prose, "another"), {
+      start: { block: 1, offset: 0 },
+      end: { block: 1, offset: 7 },
+    });
+  });
+
+  it("refuses a quote ending on a block boundary, and nothing at all", () => {
+    const prose = ["one", "two"];
+    assert.equal(findQuote(prose, "one\n"), null);
+    assert.equal(findQuote(prose, "\ntwo"), null);
+    assert.equal(findQuote(prose, ""), null);
+    assert.equal(findQuote([], "one"), null);
+    // The text changed under the quote (T625, D151): still refused - a
+    // heal finds words, never guesses at them.
+    assert.equal(findQuote(["costs $1100 and offers"], "costs $899 and offers"), null);
   });
 });

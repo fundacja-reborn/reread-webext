@@ -27,7 +27,15 @@
 import { supported, unregister } from "../content/highlighter.js";
 import { prosePieces } from "../content/scan.js";
 import { joinPieces, locate } from "../lib/matcher/spans.js";
-import { MARK_COLORS, headRect, marksInSegment, quoteOf, tailRect } from "../lib/reader/marks.js";
+import {
+  MARK_COLORS,
+  findQuote,
+  headRect,
+  markRecord,
+  marksInSegment,
+  quoteOf,
+  tailRect,
+} from "../lib/reader/marks.js";
 
 /** @typedef {import("../lib/reader/marks.js").Mark} Mark */
 /** @typedef {import("../lib/reader/marks.js").MarkSpan} MarkSpan */
@@ -213,22 +221,46 @@ export function rangeWithin(root, blockIndex, from, to) {
 /**
  * Every mark of the segment on screen, painted - and nothing else: the call
  * replaces whatever was painted before, so it is also how a deleted mark
- * disappears. A mark the guard refuses stays in the caller's list and in the
- * database; it just has no paint today.
+ * disappears.
+ *
+ * A mark the guard refuses is looked for by its quote before it is given up
+ * on (D169): the segment's prose is searched, and a quote standing in
+ * exactly one place is where the mark now is - painted there, read back
+ * through the same guard first, and handed to the caller as a healed record
+ * to put in the document's list and write. What the search cannot find, or
+ * finds twice, stays in the caller's list and in the database unpainted,
+ * the guard's bargain as it always was.
  *
  * @param {Mark[]} marks the document's marks, every segment
  * @param {Element | null} root
  * @param {number} segmentIndex
+ * @returns {{ from: Mark, to: Mark }[]} the marks healed by this paint, the
+ *   record each stood as and the record it stands as now
  */
 export function paintMarks(marks, root, segmentIndex) {
   clearMarkPaint();
-  if (!supported() || root === null) return;
+  /** @type {{ from: Mark, to: Mark }[]} */
+  const healed = [];
+  if (!supported() || root === null) return healed;
 
+  // The segment's prose, read once - and only once a mark needs it: the
+  // ordinary paint of marks that all still fit costs no extra walk.
+  /** @type {string[] | null} */
+  let prose = null;
   /** @type {Map<string, Highlight>} */
   const groups = new Map();
-  for (const mark of marksInSegment(marks, segmentIndex)) {
-    const range = rangeOfMark(mark, root);
-    if (range === null) continue;
+  for (const stored of marksInSegment(marks, segmentIndex)) {
+    let mark = stored;
+    let range = rangeOfMark(mark, root);
+    if (range === null) {
+      prose ??= Array.from(root.children, (block) => blockProse(block).text);
+      const span = findQuote(prose, mark.text);
+      const found = span === null ? null : markRecord({ ...mark, ...span });
+      range = found === null ? null : rangeOfMark(found, root);
+      if (found === null || range === null) continue;
+      healed.push({ from: stored, to: found });
+      mark = found;
+    }
     let group = groups.get(mark.color);
     if (group === undefined) {
       group = new Highlight();
@@ -241,6 +273,7 @@ export function paintMarks(marks, root, segmentIndex) {
     painted.push({ mark, range });
   }
   for (const [color, group] of groups) CSS.highlights.set(NAME_PREFIX + color, group);
+  return healed;
 }
 
 /** Every dried stroke off the registry - a view change, or a repaint's first step. */
