@@ -31,6 +31,7 @@ import { webext } from "../lib/browser.js";
 import { chosenPair, effectiveReaderOnly, platformOs, readConfig, writeConfig } from "../lib/config.js";
 import { localizePage, t } from "../lib/i18n.js";
 import { pairLabel } from "../lib/language.js";
+import { listDictionaries } from "../lib/dict/store.js";
 import { listModels } from "../lib/models/store.js";
 import { Message, asPageInfo, asResult } from "../lib/protocol.js";
 import { watchToolbarScheme } from "../lib/theme-icon.js";
@@ -182,7 +183,13 @@ async function toggleTranslationOff() {
   // that was just made. Every open page follows the same write through
   // `storage.onChanged`, launcher or reading side, no reload.
   await writeConfig({ translationOff: translationToggle.checked });
-  showRows(await readConfig(), (await installedModels()).length);
+  const config = await readConfig();
+  const installed = await installedModels();
+  showRows(config, installed.length);
+  // The select's offer changes with the mode too (D165): under the trim the
+  // dictionaries' pairs join the models', and leave with it.
+  choices = await choicesFor(config, installed);
+  renderPair(config);
 }
 
 async function toggleReaderOnly() {
@@ -336,6 +343,36 @@ function showRows(config, installed) {
   stand(document.getElementById("no-translation-row"), rows.translation);
 }
 
+/**
+ * The pairs the dictionaries offer (D165), for the select under the trim -
+ * there they are what works. A dictionary still importing is not one yet,
+ * and a store that will not open offers nothing rather than an error: the
+ * popup is a hallway, not the place to explain a database.
+ *
+ * @returns {Promise<import("./choices.js").PairChoice[]>}
+ */
+async function dictionaryPairs() {
+  try {
+    return (await listDictionaries())
+      .filter((dictionary) => dictionary.ready)
+      .map(({ langFrom, langTo }) => ({ pair: `${langFrom}${langTo}`, from: langFrom, to: langTo }));
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * What the pair select offers: the models, and under the trim the
+ * dictionaries' pairs beside them (`pairChoices`).
+ *
+ * @param {import("../lib/config.js").Config} config
+ * @param {import("./choices.js").PairChoice[]} installed
+ * @returns {Promise<import("./choices.js").PairChoice[]>}
+ */
+async function choicesFor(config, installed) {
+  return pairChoices(config, installed, config.translationOff ? await dictionaryPairs() : []);
+}
+
 async function render() {
   const [config, installed, tabId, os] = await Promise.all([
     readConfig(),
@@ -357,7 +394,7 @@ async function render() {
   showRows(config, installed.length);
   if (quietToggle !== null) quietToggle.checked = config.hideBubbleActions;
   if (translationToggle !== null) translationToggle.checked = config.translationOff;
-  choices = pairChoices(config, installed);
+  choices = await choicesFor(config, installed);
   renderPair(config);
   renderSite(await askPage(tabId), config);
 }

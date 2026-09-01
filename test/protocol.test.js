@@ -298,6 +298,21 @@ describe("asRequest", () => {
     });
     assert.equal(asRequest({ kind: Message.LOOK_UP }), null);
     assert.equal(asRequest({ kind: Message.LOOK_UP, text: 42 }), null);
+    // The page's own language rides along when it declared one (D165);
+    // anything else is "the page said nothing" and the pair stands in.
+    assert.deepEqual(asRequest({ kind: Message.LOOK_UP, text: "notatki", lang: "pl" }), {
+      kind: Message.LOOK_UP,
+      text: "notatki",
+      lang: "pl",
+    });
+    assert.deepEqual(asRequest({ kind: Message.LOOK_UP, text: "bank", lang: "" }), {
+      kind: Message.LOOK_UP,
+      text: "bank",
+    });
+    assert.deepEqual(asRequest({ kind: Message.LOOK_UP, text: "bank", lang: 7 }), {
+      kind: Message.LOOK_UP,
+      text: "bank",
+    });
   });
 
   it("rejects a translate request without text", () => {

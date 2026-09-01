@@ -125,8 +125,11 @@ export const ErrorCode = Object.freeze({
  *
  * `look-up` is the dictionaries alone (D162): what the quiet vocabulary asks
  * from a page that has no database in reach - the reader page reads its own.
- * It carries the text and nothing else, for `translate`'s reason: the pair
- * lives in the settings, and the background answers in its source language.
+ * It carries the text, and since D165 the language the page declares for it
+ * (`lang`, absent when the page says nothing): under the trim a page is read
+ * in its own language, the way the reader page reads its document, and the
+ * pair in the settings is the stand-in for a page that declares none - the
+ * background applies that rule, so the pair stays its business alone.
  * The answer is a `LookUp` (D164): the entries, and how many dictionaries
  * were asked - the bubble says "not in your dictionaries" or "no dictionary
  * for this language" by the count, which a bare list could never tell it.
@@ -167,7 +170,7 @@ export const ErrorCode = Object.freeze({
  * to trust an import that says nothing else.
  *
  * @typedef {{ kind: typeof Message.TRANSLATE, text: string, context?: string }} TranslateRequest
- * @typedef {{ kind: typeof Message.LOOK_UP, text: string }} LookUpRequest
+ * @typedef {{ kind: typeof Message.LOOK_UP, text: string, lang?: string }} LookUpRequest
  * @typedef {{ kind: typeof Message.OPEN_READER, sourceTabId?: number }} OpenReaderRequest
  * @typedef {{ kind: typeof Message.OPEN_LIBRARY }} OpenLibraryRequest
  * @typedef {{ kind: typeof Message.OPEN_MARKS }} OpenMarksRequest
@@ -382,7 +385,12 @@ export function asRequest(message) {
 
   if (kind === Message.LOOK_UP) {
     if (typeof text !== "string") return null;
-    return { kind: Message.LOOK_UP, text };
+    // The page's own language, when it declared one (D165); anything else
+    // is "the page said nothing", and the background falls back to the pair.
+    const lang = /** @type {Record<string, unknown>} */ (message)["lang"];
+    return typeof lang === "string" && lang.length > 0
+      ? { kind: Message.LOOK_UP, text, lang }
+      : { kind: Message.LOOK_UP, text };
   }
 
   if (kind === Message.FORGET_PHRASE) {

@@ -19,14 +19,21 @@
 /**
  * @param {{ sourceLang: string | null, targetLang: string | null }} config
  * @param {PairChoice[]} installed models on this device, in any order
+ * @param {PairChoice[]} [extra] the pairs the dictionaries offer, handed in
+ *   under the trim alone (D165): there they are what works, and a Polish
+ *   page with a pl-en dictionary is read under pl -> en without a walk to
+ *   the settings. A pair both a model and a dictionary offer is one row.
  * @returns {PairChoice[]} what the select shows - the configured pair always
  *   included once there is one; with none chosen, exactly the installed
  *   models, which on a fresh install is an empty list and an empty select
  */
-export function pairChoices(config, installed) {
-  const rows = installed
-    .map(({ pair, from, to }) => ({ pair, from, to }))
-    .sort((a, b) => a.pair.localeCompare(b.pair));
+export function pairChoices(config, installed, extra = []) {
+  /** @type {Map<string, PairChoice>} */
+  const byPair = new Map();
+  for (const { pair, from, to } of [...installed, ...extra]) {
+    if (!byPair.has(pair)) byPair.set(pair, { pair, from, to });
+  }
+  const rows = [...byPair.values()].sort((a, b) => a.pair.localeCompare(b.pair));
 
   if (config.sourceLang === null || config.targetLang === null) return rows;
   const known = rows.some((row) => row.from === config.sourceLang && row.to === config.targetLang);

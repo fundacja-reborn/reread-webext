@@ -46,4 +46,15 @@ describe("the popup's pair choices", () => {
     // which the popup never shows, its rows rule swaps it for the setup line.
     assert.deepEqual(pairChoices(none, []), []);
   });
+
+  it("lists the dictionaries' pairs beside the models when handed them (D165)", () => {
+    // Under the trim the dictionaries are what works: a Polish page with a
+    // pl-en dictionary is read under pl -> en without a walk to the settings.
+    // A pair both a model and a dictionary offer is one row, and the
+    // configured pair is still never doubled.
+    assert.deepEqual(pairChoices({ sourceLang: "en", targetLang: "pl" }, [ENPL], [PLEN, ENPL]), [ENPL, PLEN]);
+    assert.deepEqual(pairChoices({ sourceLang: "pl", targetLang: "en" }, [], [PLEN]), [PLEN]);
+    // Handed nothing extra - the model-on popup - nothing changes.
+    assert.deepEqual(pairChoices({ sourceLang: "en", targetLang: "pl" }, [ENPL], []), [ENPL]);
+  });
 });

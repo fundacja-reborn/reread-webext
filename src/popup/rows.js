@@ -41,7 +41,13 @@ export function popupRows({ translationOff, bubbleOff, fresh, pair }) {
     // has no other side - the row goes; a site's own entry, if any, stays
     // readable in the settings' list.
     site: !(translationOff && bubbleOff),
-    pair: !translationOff && !fresh,
+    // Under the trim the pair still has a say - which language the
+    // dictionaries answer in where a page declares none, and where saved
+    // phrases are filed (D158/D165) - and a select that hid while deciding
+    // both made the trim read as pairless (Michał, 2026-09-01). So it stands
+    // whenever a pair is chosen, models or not; with the model on, a fresh
+    // device gets the signpost in its place instead.
+    pair: translationOff ? pair : !fresh,
     setup: !translationOff && fresh,
     translationNote: translationOff,
     // The saved phrases live wherever a pair is chosen - the quiet

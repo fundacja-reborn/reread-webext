@@ -59,7 +59,7 @@ let vocabulary = new Map();
  * being findable on a page (`findable` in `scan.js`) or by already being saved,
  * and nothing else gets in: not Save, and not a dictionary line either.
  */
-/** @type {{ text: string, normalized: string, keepable: boolean } | null} */
+/** @type {{ text: string, normalized: string, keepable: boolean, lang: string } | null} */
 let current = null;
 
 /**
@@ -298,24 +298,37 @@ let quietVocabulary = false;
  * nothing on it: it never hangs an error off the second layer's absence, and
  * a "no dictionary" line must be about a dictionary, never about a fault.
  *
+ * The page's own language rides along (D165): what it declares for the
+ * phrase, empty for nothing - the background reads in it, and falls back to
+ * the pair where the page is silent. The reader's hand knows its document
+ * and needs no telling.
+ *
  * @param {string} text as the page has it
+ * @param {string} lang the language the page declares for it, empty for none
  * @returns {Promise<import("../lib/protocol.js").LookUp | null>}
  */
-async function lookUpQuiet(text) {
+async function lookUpQuiet(text, lang) {
   if (quietLookup !== null) return quietLookup(text);
-  const result = await ask({ kind: Message.LOOK_UP, text });
+  const result = await ask(
+    lang.length > 0 ? { kind: Message.LOOK_UP, text, lang } : { kind: Message.LOOK_UP, text },
+  );
   return result.ok ? asLookUp(result.value) : null;
 }
 
 /**
- * The language a press reads in, the way the speaker has always decided it
- * (D121): the document's own in the no-translation trim, the pair's
- * otherwise. Empty while nobody has named one.
+ * The language a press reads in. With the model on, the pair's: it is the
+ * language somebody chose to translate from. In the no-translation trim, the
+ * document's own - the reader page's hand where it offers one (D121), what
+ * the page declares for the phrase everywhere else (D165, `declaredLanguage`)
+ * - and the pair only as the stand-in where the page is silent. Empty while
+ * nobody has named one at all.
  *
  * @returns {string} BCP-47
  */
 function readingLanguage() {
-  return (noTranslation ? quietVoice?.()?.lang : undefined) ?? ttsLang;
+  if (!noTranslation) return ttsLang;
+  const declared = quietVoice !== null ? (quietVoice()?.lang ?? "") : (current?.lang ?? "");
+  return declared.length > 0 ? declared : ttsLang;
 }
 
 /**
@@ -371,8 +384,14 @@ let bubbleScale = DEFAULTS.bubbleScale;
  */
 let ttsLang = "";
 
-/** @type {string | undefined} */
-let ttsVoiceURI = undefined;
+/**
+ * The voice stored per language (D83), read at the press by the language
+ * being read - which under the trim is the page's own (D165), so the map is
+ * mirrored whole rather than one entry of it.
+ *
+ * @type {Record<string, string>}
+ */
+let ttsVoices = {};
 
 /**
  * How fast the voice reads, mirrored like the rest (D87). One setting for both
@@ -539,7 +558,7 @@ async function loadVocabulary(preloaded) {
     underline = config.underline;
     bubbleScale = config.bubbleScale;
     ttsLang = config.sourceLang ?? "";
-    ttsVoiceURI = config.sourceLang === null ? undefined : config.ttsVoices[config.sourceLang];
+    ttsVoices = config.ttsVoices;
     ttsRate = config.ttsRate;
     // The reading-aloud switch (D148), handed to the one question every
     // speaker asks: the next bubble opens without its speaker, and a phrase
@@ -595,7 +614,7 @@ async function loadVocabulary(preloaded) {
  * phrase is now, and only the range can answer that.
  *
  * @param {Range} range
- * @returns {{ text: string, normalized: string, rect: DOMRect, range: Range, context: string | null, findable: boolean } | null}
+ * @returns {{ text: string, normalized: string, rect: DOMRect, range: Range, context: string | null, findable: boolean, lang: string } | null}
  */
 function fromRange(range) {
   // Trimmed before anything is done with it, the engine included. Dragging over
@@ -614,7 +633,34 @@ function fromRange(range) {
   // Asked here, while the range is the one the reader just made: by the time
   // the translation comes back the page may have moved on, and whether a phrase
   // can be found again is a question about the page, not about the answer.
-  return { text, normalized, rect, range, context: contextOf(range), findable: findable(range, normalized) };
+  return {
+    text,
+    normalized,
+    rect,
+    range,
+    context: contextOf(range),
+    findable: findable(range, normalized),
+    lang: declaredLanguage(range),
+  };
+}
+
+/**
+ * The language the page declares for a place in it (D165): the nearest
+ * `lang` attribute above the selection - `<html lang>` included, as the last
+ * ancestor - narrowed to its primary subtag. Empty when the page says nothing.
+ * The nearest and not the root, because a page can quote a paragraph in
+ * another language and say so on that paragraph alone. What the trim reads
+ * in, the way the reader page has always read its document (D121): the
+ * dictionaries, the voice and the "no dictionary for..." line all follow it,
+ * and the pair stands in only where the page is silent.
+ *
+ * @param {Range} range
+ * @returns {string}
+ */
+function declaredLanguage(range) {
+  const start = range.startContainer;
+  const element = start instanceof Element ? start : start.parentElement;
+  return primaryLanguage(element?.closest("[lang]")?.getAttribute("lang") ?? "");
 }
 
 /**
@@ -690,14 +736,16 @@ async function onAction(action, meanings) {
   if (action === "speak") {
     // Start or stop, decided by what is playing: hearing the phrase writes
     // nothing, so no keepable gate - and what is spoken is the page's own
-    // text, never the gloss (D83). In the no-translation trim the reader
-    // hands down the document's own language and its voice (D121) - there is
-    // no pair being read, so the pair may not choose the voice; everywhere
-    // else the pair-bound language stands.
+    // text, never the gloss (D83). The language is the one being read
+    // (`readingLanguage`): the document's own in the no-translation trim -
+    // the reader's hand (D121) or the page's declaration (D165) - the pair's
+    // otherwise; the voice is the one stored for that language.
     if (speaking()) stopSpeaking();
     else if (current !== null) {
-      const voice = (noTranslation ? quietVoice?.() : null) ?? { lang: ttsLang, voiceURI: ttsVoiceURI };
-      void speak(current.text, voice.lang, voice.voiceURI, ttsRate / 100);
+      const lang = readingLanguage();
+      const voiceURI =
+        (noTranslation ? quietVoice?.()?.voiceURI : undefined) ?? ttsVoices[primaryLanguage(lang)];
+      void speak(current.text, lang, voiceURI, ttsRate / 100);
     }
     return;
   }
@@ -845,7 +893,12 @@ function showSaved(anchor, text, normalized, context, how = {}) {
   stopSpeaking();
   // In the vocabulary already, which is the whole of what getting here means -
   // so its meanings may be corrected from anywhere, however it was reached.
-  current = { text, normalized, keepable: true };
+  current = {
+    text,
+    normalized,
+    keepable: true,
+    lang: how.range === undefined ? "" : declaredLanguage(how.range),
+  };
   generation += 1;
   anchorRange = how.range === undefined ? null : how.range.cloneRange();
   // The page's half of the recall bubble (D89): the bubble does not repeat
@@ -908,7 +961,7 @@ async function fillSecondLayer() {
   // wherever this page reaches them (`lookUpQuiet`). No pending line: the
   // read is quick, and a flash of furniture would outlive its usefulness.
   if (noTranslation) {
-    const entries = (await lookUpQuiet(phrase.text))?.entries ?? [];
+    const entries = (await lookUpQuiet(phrase.text, phrase.lang))?.entries ?? [];
     if (mine !== generation || !tooltip.isOpen()) return;
     const blocks = entryBlocks(entries, phrase.normalized);
     if (blocks.length === 0) {
@@ -1057,7 +1110,7 @@ function present(selection, { deliberate, touch, chain = false }) {
   if (noTranslation && !quietVocabulary) {
     stopSpeaking();
     unmark();
-    current = { text, normalized, keepable: false };
+    current = { text, normalized, keepable: false, lang: selection.lang };
     secondLayer = [];
     unfetched = null;
     anchorRange = selection.range.cloneRange();
@@ -1085,7 +1138,7 @@ function present(selection, { deliberate, touch, chain = false }) {
     // the background. What they say lands in the bubble the moment it
     // arrives - the entries, or the one line saying why there are none
     // (D164, `landQuietAnswer`).
-    void lookUpQuiet(text).then((answer) => {
+    void lookUpQuiet(text, selection.lang).then((answer) => {
       if (mine !== generation || !tooltip.isOpen()) return;
       landQuietAnswer(answer, normalized, selection.findable);
     });
@@ -1106,7 +1159,7 @@ function present(selection, { deliberate, touch, chain = false }) {
   if (noTranslation) {
     stopSpeaking();
     unmark();
-    current = { text, normalized, keepable: selection.findable };
+    current = { text, normalized, keepable: selection.findable, lang: selection.lang };
     secondLayer = [];
     unfetched = null;
     anchorRange = selection.range.cloneRange();
@@ -1133,7 +1186,7 @@ function present(selection, { deliberate, touch, chain = false }) {
       // gets its entries as prose, exactly the rule Save answers to.
       choosable: selection.findable,
     });
-    void lookUpQuiet(text).then((answer) => {
+    void lookUpQuiet(text, selection.lang).then((answer) => {
       if (mine !== generation || !tooltip.isOpen()) return;
       landQuietAnswer(answer, normalized, selection.findable);
     });
@@ -1145,7 +1198,7 @@ function present(selection, { deliberate, touch, chain = false }) {
   // A fresh selection marks itself; a recall mark left over from the last
   // phrase may not keep pointing at it (D89).
   unmark();
-  current = { text, normalized, keepable: selection.findable };
+  current = { text, normalized, keepable: selection.findable, lang: selection.lang };
   secondLayer = [];
   unfetched = null;
   anchorRange = selection.range.cloneRange();
