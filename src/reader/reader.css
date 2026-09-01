@@ -973,7 +973,8 @@ html {
    text) joins it for the screens that can paint one - on e-ink it
    quantizes away to nothing, harmlessly, being paint and not motion, and
    the two things floating over an article now wear the same elevation.
-   Deeper on dark paper, like the bubble's, where a thin shadow disappears.
+   Deeper on dark paper, like the bubble's - though there a shadow barely
+   exists at all, which is what the dark rules below are really about.
    No animation, opened and closed in one repaint each. It rides the
    document (absolute), so a scroll carries note and mark together. */
 .note-popover {
@@ -988,14 +989,26 @@ html {
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
   font-size: 0.85em;
   line-height: 1.5;
+  /* A footnote is frequently a reference with an address in it, and an
+     unbreakable URL ran straight out of the card (Michał's screenshot,
+     2026-09-01) - the same rule the bubble wears. */
+  overflow-wrap: break-word;
 }
 
+/* On dark paper a black shadow falls on near-black and barely says a thing,
+   so the card's own paper steps a shade lighter than the page instead
+   (Michał's correction, 2026-09-01: not a lighter shadow - a lighter card)
+   - the bubble's dark paper, kept in step with tooltip.js by hand, and the
+   same lesson the bubble learned when it sank into the reader's dark theme.
+   The deepened drop stays for the card's passes over lighter content. */
 :root[data-reader-theme="dark"] .note-popover {
+  background: #262c3a;
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-reader-theme="light"]):not([data-reader-theme="sepia"]) .note-popover {
+    background: #262c3a;
     box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
   }
 }
