@@ -109,6 +109,37 @@ describe("voicesFor", () => {
     );
     assert.deepEqual(voicesFor(chrome, "pl"), []);
   });
+
+  it("lists a voice once, the genuine entry over a shield's decoy", () => {
+    // Brave's fingerprinting shield adds a clone of the engine's default
+    // voice under a made-up name, URI untouched (brave-core's
+    // speech_synthesis.cc). Picked by URI it sorted first and won - and
+    // Chromium, matching by name, found no "Hubert" and let macOS read an
+    // English word in the system's Polish (Michał's report, 2026-09-01).
+    const brave = [
+      voice("Samantha (Enhanced)", "en-US", "Samantha (Enhanced)", { default: true }),
+      voice("Albert", "en-US", "Albert"),
+      voice("Zosia", "pl-PL", "Zosia"),
+      voice("Hubert", "en-US", "Samantha (Enhanced)"),
+    ];
+    assert.deepEqual(
+      voicesFor(brave, "en").map((one) => one.name),
+      ["Albert", "Samantha (Enhanced)"],
+    );
+    assert.equal(offlineVoice(brave, "en", "Samantha (Enhanced)")?.name, "Samantha (Enhanced)");
+    // With no default flagged among the language's voices (the system voice
+    // is Polish), the name that is its own URI still tells the real one.
+    const polishSystem = [
+      voice("Zosia", "pl-PL", "Zosia", { default: true }),
+      voice("Samantha", "en-US", "Samantha"),
+      voice("Alva", "en-US", "Samantha"),
+    ];
+    assert.deepEqual(
+      voicesFor(polishSystem, "en").map((one) => one.name),
+      ["Samantha"],
+    );
+    assert.equal(offlineVoice(polishSystem, "en", undefined)?.name, "Samantha");
+  });
 });
 
 describe("offlineAvailable", () => {
@@ -294,6 +325,18 @@ describe("speak", () => {
     );
     assert.equal(await speak("hello", "en", undefined), true);
     assert.equal(spoken[0]?.voice?.name, "Alice");
+  });
+
+  it("hands the engine the real voice, never a shield's decoy of it", async () => {
+    // The list as Brave shows it to a site: the real default voice and its
+    // clone under a made-up name that sorts first. The stored choice is the
+    // default voice's URI, which both carry.
+    const spoken = engine([
+      voice("Samantha (Enhanced)", "en-US", "Samantha (Enhanced)", { default: true }),
+      voice("Hubert", "en-US", "Samantha (Enhanced)"),
+    ]);
+    assert.equal(await speak("hello", "en", "Samantha (Enhanced)"), true);
+    assert.equal(spoken[0]?.voice?.name, "Samantha (Enhanced)");
   });
 });
 
