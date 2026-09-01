@@ -67,6 +67,10 @@
     "message": "No dictionary for $LANGUAGE$ yet - add one in the settings",
     "placeholders": { "language": { "content": "$1", "example": "English" } }
   },
+  "bubble_saves_under": {
+    "message": "Will be saved under $PAIR$",
+    "placeholders": { "pair": { "content": "$1", "example": "English → Polish" } }
+  },
   "bubble_speak": {
     "message": "Read aloud",
     "description": "aria-label and hover title of the speaker icon in the bubble's action row (D83): speaks the selected phrase itself, never the translation."

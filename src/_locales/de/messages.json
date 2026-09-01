@@ -51,6 +51,10 @@
     "message": "Noch kein Wörterbuch für $LANGUAGE$ - fügen Sie eines in den Einstellungen hinzu",
     "placeholders": { "language": { "content": "$1", "example": "Englisch" } }
   },
+  "bubble_saves_under": {
+    "message": "Wird unter $PAIR$ gespeichert",
+    "placeholders": { "pair": { "content": "$1", "example": "Englisch → Polnisch" } }
+  },
   "bubble_speak": { "message": "Vorlesen" },
   "bubble_sentence_collapse": { "message": "Satz einklappen" },
   "bubble_sentence_expand": { "message": "Satz ausklappen" },

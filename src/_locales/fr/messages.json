@@ -51,6 +51,10 @@
     "message": "Pas encore de dictionnaire pour la langue : $LANGUAGE$ - ajoutez-en un dans les paramètres",
     "placeholders": { "language": { "content": "$1", "example": "anglais" } }
   },
+  "bubble_saves_under": {
+    "message": "Sera enregistré sous $PAIR$",
+    "placeholders": { "pair": { "content": "$1", "example": "anglais → polonais" } }
+  },
   "bubble_speak": { "message": "Lire à voix haute" },
   "bubble_sentence_collapse": { "message": "Réduire la phrase" },
   "bubble_sentence_expand": { "message": "Développer la phrase" },

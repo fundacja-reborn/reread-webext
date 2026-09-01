@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { afterChoosing, choosableLines, entryBlocks, quietNote, toMeanings } from "../src/lib/gloss.js";
+import { afterChoosing, choosableLines, entryBlocks, filingWarning, quietNote, toMeanings } from "../src/lib/gloss.js";
 
 describe("toMeanings", () => {
   it("keeps one line as one meaning", () => {
@@ -154,5 +154,23 @@ describe("quietNote", () => {
     assert.equal(quietNote({ entries: 0, dictionaries: 0, findable: false }), "no-dictionary");
     assert.equal(quietNote({ entries: 0, dictionaries: 1, findable: false }), "whole-words");
     assert.equal(quietNote({ entries: 0, dictionaries: 3, findable: true }), "not-in-dictionary");
+  });
+});
+
+describe("filingWarning", () => {
+  it("warns only where the page's language and a dictionary of it agree (D167)", () => {
+    // Michał's rule: lang=pl on the page and the word found in a Polish
+    // book - then Save filing under en -> pl is worth a sentence.
+    assert.equal(filingWarning({ entries: 2, findable: true, reading: "pl", pairFrom: "en" }), true);
+    // One signal alone cries wolf: nothing found in Polish books may mean an
+    // English quote on a Polish page, where en -> pl is the right shelf.
+    assert.equal(filingWarning({ entries: 0, findable: true, reading: "pl", pairFrom: "en" }), false);
+    // Same language, no mismatch to speak of.
+    assert.equal(filingWarning({ entries: 2, findable: true, reading: "en", pairFrom: "en" }), false);
+    // No Save on offer, nothing to warn about.
+    assert.equal(filingWarning({ entries: 2, findable: false, reading: "pl", pairFrom: "en" }), false);
+    // Nobody named a language on either side.
+    assert.equal(filingWarning({ entries: 2, findable: true, reading: "", pairFrom: "en" }), false);
+    assert.equal(filingWarning({ entries: 2, findable: true, reading: "pl", pairFrom: "" }), false);
   });
 });

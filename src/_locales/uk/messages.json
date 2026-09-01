@@ -51,6 +51,10 @@
     "message": "Ще немає словника для мови: $LANGUAGE$ - додайте його в налаштуваннях",
     "placeholders": { "language": { "content": "$1", "example": "англійська" } }
   },
+  "bubble_saves_under": {
+    "message": "Буде збережено в парі $PAIR$",
+    "placeholders": { "pair": { "content": "$1", "example": "англійська → польська" } }
+  },
   "bubble_speak": { "message": "Прочитати вголос" },
   "bubble_sentence_collapse": { "message": "Згорнути речення" },
   "bubble_sentence_expand": { "message": "Розгорнути речення" },

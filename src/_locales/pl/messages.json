@@ -51,6 +51,10 @@
     "message": "Brak słownika dla języka: $LANGUAGE$ - dodaj go w ustawieniach",
     "placeholders": { "language": { "content": "$1", "example": "angielski" } }
   },
+  "bubble_saves_under": {
+    "message": "Zapis trafi do pary $PAIR$",
+    "placeholders": { "pair": { "content": "$1", "example": "angielski → polski" } }
+  },
   "bubble_speak": { "message": "Przeczytaj na głos" },
   "bubble_sentence_collapse": { "message": "Zwiń zdanie" },
   "bubble_sentence_expand": { "message": "Rozwiń zdanie" },

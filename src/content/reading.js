@@ -32,9 +32,9 @@
 
 import { webext } from "../lib/browser.js";
 import { CONFIG_KEY, DEFAULTS, chosenPair, withDefaults } from "../lib/config.js";
-import { entryBlocks, quietNote } from "../lib/gloss.js";
+import { entryBlocks, filingWarning, quietNote } from "../lib/gloss.js";
 import { t } from "../lib/i18n.js";
-import { languageName } from "../lib/language.js";
+import { languageName, pairLabel } from "../lib/language.js";
 import { describeError } from "../lib/messages.js";
 import { normalize, trimPhrase } from "../lib/normalize.js";
 import { ErrorCode, Message, asLookUp, asResult, asTranslation, fail } from "../lib/protocol.js";
@@ -346,10 +346,34 @@ function quietSentence(note) {
 }
 
 /**
+ * Where a press on Save would file this phrase, when that is worth a
+ * sentence (D167, `filingWarning`): the page is read in another language
+ * than the pair's (D165) and a dictionary of that language knew the word -
+ * so a Polish word on a Polish page is told it would land on the English
+ * shelf, before the press and not after. Null everywhere else, the pair's
+ * own pages included.
+ *
+ * @param {number} entries how many the page-language lookup returned
+ * @param {boolean} findable whether Save stands at all
+ * @returns {string | null}
+ */
+function filingNote(entries, findable) {
+  const warn = filingWarning({
+    entries,
+    findable,
+    reading: primaryLanguage(readingLanguage()),
+    pairFrom: primaryLanguage(ttsLang),
+  });
+  return warn && quietVocabulary ? t("bubble_saves_under", pairLabel(ttsLang, pairTarget)) : null;
+}
+
+/**
  * What the dictionaries said, landed in the quiet bubble: the entries where
  * there are any - the quiet variant keeps no fold, because with no gloss the
  * definitions are not an extra behind the answer, they are the answer - and
  * otherwise one muted line saying which silence this is (D164, `quietNote`).
+ * With entries, the one line the bubble may still carry is where Save would
+ * file the phrase (D167, `filingNote`).
  * Until D164 an empty answer changed nothing, and a bubble standing on two
  * icons and no word read as a bubble that had not finished loading (Michał's
  * screenshot, 2026-09-01).
@@ -361,8 +385,13 @@ function quietSentence(note) {
 function landQuietAnswer(answer, normalized, findable) {
   if (answer === null) return;
   const note = quietNote({ entries: answer.entries.length, dictionaries: answer.dictionaries, findable });
-  if (note === null) tooltip.setEntries(entryBlocks(answer.entries, normalized));
-  else tooltip.setContext(quietSentence(note), "note");
+  if (note !== null) {
+    tooltip.setContext(quietSentence(note), "note");
+    return;
+  }
+  tooltip.setEntries(entryBlocks(answer.entries, normalized));
+  const filing = filingNote(answer.entries.length, findable);
+  if (filing !== null) tooltip.setContext(filing, "note");
 }
 
 /**
@@ -383,6 +412,12 @@ let bubbleScale = DEFAULTS.bubbleScale;
  * whose language nobody has named.
  */
 let ttsLang = "";
+
+/**
+ * The pair's other half, mirrored for one sentence: where Save would file a
+ * phrase read in another language (D167, `filingNote`). Empty without a pair.
+ */
+let pairTarget = "";
 
 /**
  * The voice stored per language (D83), read at the press by the language
@@ -558,6 +593,7 @@ async function loadVocabulary(preloaded) {
     underline = config.underline;
     bubbleScale = config.bubbleScale;
     ttsLang = config.sourceLang ?? "";
+    pairTarget = config.targetLang ?? "";
     ttsVoices = config.ttsVoices;
     ttsRate = config.ttsRate;
     // The reading-aloud switch (D148), handed to the one question every

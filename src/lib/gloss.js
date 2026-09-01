@@ -137,3 +137,21 @@ export function quietNote({ entries, dictionaries, findable }) {
   if (!findable) return "whole-words";
   return "not-in-dictionary";
 }
+
+/**
+ * Whether the quiet bubble should say where Save would file this phrase
+ * (D167, Michał's rule): only where two signals agree that the page is not
+ * in the pair's language - the page declares another one, AND a dictionary
+ * of that language knew the word (entries came back from a lookup made in
+ * it). One signal alone would cry wolf: a page mis-tagged, an English quote
+ * on a Polish page - there the pair's shelf may be exactly the right one.
+ * And only where Save stands at all (a findable phrase).
+ *
+ * @param {{ entries: number, findable: boolean, reading: string, pairFrom: string }} of
+ *   how many entries the page-language lookup returned, whether Save is
+ *   offered, the primary subtag being read and the pair's source subtag
+ * @returns {boolean}
+ */
+export function filingWarning({ entries, findable, reading, pairFrom }) {
+  return entries > 0 && findable && reading.length > 0 && pairFrom.length > 0 && reading !== pairFrom;
+}
