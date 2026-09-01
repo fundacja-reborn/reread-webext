@@ -4087,6 +4087,15 @@ async function offerMarksImport(file) {
     await restoreMarks();
     const [articles, books, marks] = await Promise.all([listArticles(), listBooks(), allMarks()]);
     const plan = marksImportPlan(documents, { articles, books, marks });
+    // Nothing to write - the file's marks all stand here already, or their
+    // documents do not: the sentences that say which are the whole answer,
+    // and an offer with nothing to accept would be a frame around a Cancel
+    // (Michał's smoke, 2026-09-01).
+    if (plan.added === 0) {
+      closeMarksImportOffer();
+      marksStatus(marksImportNotes(plan, invalid).join(" "));
+      return;
+    }
     pendingMarksImport = { name: file.name, documents: documents.length, invalid, plan };
     marksStatus("");
     renderMarksImportOffer();
@@ -4120,25 +4129,36 @@ function renderMarksImportOffer() {
     }
   }
   if (marksImportNote !== null) {
-    /** @type {string[]} */
-    const sentences = [];
-    if (plan.missing.length > 0) {
-      // A sample of the titles, the offer's own measure: the count says how
-      // many there are, and a file of hundreds must not become a paragraph.
-      const titles = plan.missing.slice(0, SAMPLE_TITLES).map((doc) => doc.title);
-      if (plan.missing.length > SAMPLE_TITLES) titles.push("...");
-      sentences.push(plural(plan.missing.length, "reader_marks_import_missing", [titles.join(", ")]));
-    }
-    if (plan.twins > 0) sentences.push(plural(plan.twins, "reader_marks_import_twins"));
-    if (plan.overlapping > 0) sentences.push(plural(plan.overlapping, "reader_marks_import_overlap"));
-    if (invalid > 0) sentences.push(plural(invalid, "reader_import_unreadable"));
+    const sentences = marksImportNotes(plan, invalid);
     marksImportNote.textContent = sentences.join(" ");
     marksImportNote.hidden = sentences.length === 0;
   }
-  // Nothing to write - the file's marks all stand here already, or their
-  // documents do not; the sentences above say which - and the press that
-  // would write nothing does not stand.
-  if (marksImportRun !== null) marksImportRun.hidden = plan.added === 0;
+}
+
+/**
+ * What a file's import leaves out and why, as sentences: the documents the
+ * reading list does not hold (a sample of their titles - the count says how
+ * many there are, and a file of hundreds must not become a paragraph), the
+ * marks standing here already, the marks meeting one, the entries that were
+ * not marks. Under the offer's rows - and alone, in the report line, when
+ * the file has nothing else to say.
+ *
+ * @param {import("../lib/store/marks-copy.js").MarksImportPlan} plan
+ * @param {number} invalid
+ * @returns {string[]}
+ */
+function marksImportNotes(plan, invalid) {
+  /** @type {string[]} */
+  const sentences = [];
+  if (plan.missing.length > 0) {
+    const titles = plan.missing.slice(0, SAMPLE_TITLES).map((doc) => doc.title);
+    if (plan.missing.length > SAMPLE_TITLES) titles.push("...");
+    sentences.push(plural(plan.missing.length, "reader_marks_import_missing", [titles.join(", ")]));
+  }
+  if (plan.twins > 0) sentences.push(plural(plan.twins, "reader_marks_import_twins"));
+  if (plan.overlapping > 0) sentences.push(plural(plan.overlapping, "reader_marks_import_overlap"));
+  if (invalid > 0) sentences.push(plural(invalid, "reader_import_unreadable"));
+  return sentences;
 }
 
 function closeMarksImportOffer() {

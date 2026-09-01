@@ -1530,6 +1530,14 @@ a.marks-act {
   /* The anchor over the rows lands here (D153); the same room the list's
      transfer section keeps under the window's edge. */
   scroll-margin-top: 0.75rem;
+  /* Chrome, not text: the buttons, hints, offer and reports wear the
+     interface's face and size - the reading list's own (`#library`) - where
+     the quotes above them read in the Aa face. Under the page's reading
+     face they stood in it too, at the reading size (Michał's smoke,
+     2026-09-01: "Aa is for the texts"). */
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
 }
 
 /* The first row of buttons stands right under the rows, whichever half shows
