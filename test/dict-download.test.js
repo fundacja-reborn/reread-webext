@@ -57,6 +57,18 @@ describe("downloadArchive", () => {
     assert.match(result.detail ?? "", /404/);
   });
 
+  it("refuses an archive the host redirected elsewhere, before reading a byte of it (D171)", async () => {
+    const result = await downloadArchive(URL_UNDER_TEST, {
+      // Only the answer's address is looked at before the refusal.
+      fetch: /** @type {typeof fetch} */ (
+        /** @type {unknown} */ (async () => ({ url: "https://mirror.example/wikdict-en-pl.zip", ok: true, status: 200 }))
+      ),
+    });
+    assert.ok(!result.ok);
+    assert.equal(result.problem, "http");
+    assert.match(result.detail ?? "", /another host/);
+  });
+
   it("turns a dead network into a problem, not an exception", async () => {
     const result = await downloadArchive(URL_UNDER_TEST, {
       fetch: async () => {

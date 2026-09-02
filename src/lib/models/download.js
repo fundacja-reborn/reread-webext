@@ -20,6 +20,7 @@
  */
 
 import { aside, t } from "../i18n.js";
+import { answeredByHost } from "../same-host.js";
 import { isGzip } from "./files.js";
 
 /**
@@ -92,22 +93,56 @@ export async function sha256Hex(buffer) {
 }
 
 /**
+ * The most a model file may unpack to when the entry does not say (D171):
+ * the live index declares the unpacked size of the model file and not of
+ * the other two. The largest published model is under a hundred megabytes;
+ * this is room for several, and a ceiling under what gzip's thousand-to-one
+ * packing could otherwise fill memory with.
+ */
+export const MAX_UNPACKED_BYTES = 512 * 1024 * 1024;
+
+/**
  * Model files are published gzipped. Whether a particular one is compressed is
  * read off its first two bytes rather than its name, because the name is the
  * one thing a mirror is free to change.
  *
+ * Unpacked in chunks with a ceiling on the total (D171): the size the entry
+ * claims where it claims one, the cap above otherwise. Checking the size after
+ * the fact would check it after the memory was gone.
+ *
  * @param {Uint8Array} bytes
+ * @param {number} limit the most the result may be
  * @returns {Promise<ArrayBuffer>}
  */
-async function unpack(bytes) {
+async function unpack(bytes, limit) {
   const buffer = toArrayBuffer(bytes);
   if (!isGzip(buffer)) return buffer;
+  const reader = new Blob([buffer]).stream().pipeThrough(new DecompressionStream("gzip")).getReader();
+  /** @type {Uint8Array[]} */
+  const chunks = [];
+  let size = 0;
   try {
-    const stream = new Blob([buffer]).stream().pipeThrough(new DecompressionStream("gzip"));
-    return await new Response(stream).arrayBuffer();
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      size += value.byteLength;
+      if (size > limit) {
+        await reader.cancel().catch(() => undefined);
+        throw new Refused("size", `unpacks to more than ${limit} bytes`);
+      }
+      chunks.push(value);
+    }
   } catch (error) {
+    if (error instanceof Refused) throw error;
     throw new Refused("unpack", error instanceof Error ? error.message : String(error));
   }
+  const all = new Uint8Array(size);
+  let at = 0;
+  for (const chunk of chunks) {
+    all.set(chunk, at);
+    at += chunk.byteLength;
+  }
+  return all.buffer;
 }
 
 /**
@@ -169,10 +204,18 @@ async function fetchFile(file, fetchImpl, onChunk, signal) {
   try {
     // `no-store`: these are checked by content, so a stale copy in the HTTP
     // cache would save nothing and could only confuse a retry after a failure.
-    response = await fetchImpl(file.url, { signal, cache: "no-store", redirect: "follow" });
+    // `omit`: a download carries nothing of the reader's - said here rather
+    // than left to the default, so the promise can be read off the call (D171).
+    response = await fetchImpl(file.url, { signal, cache: "no-store", credentials: "omit", redirect: "follow" });
   } catch (error) {
     if (signal?.aborted) throw new Refused("cancelled");
     throw new Refused("network", `${fileName(file.url)}: ${error instanceof Error ? error.message : String(error)}`);
+  }
+
+  // Answered by the host it was asked of, or not at all (D171): a redirect
+  // elsewhere would make the bytes come from a server the package never named.
+  if (!answeredByHost(response, file.url)) {
+    throw new Refused("http", `${fileName(file.url)}: answered from another host`);
   }
 
   if (!response.ok) {
@@ -188,7 +231,14 @@ async function fetchFile(file, fetchImpl, onChunk, signal) {
     throw new Refused("network", `${fileName(file.url)}: ${error instanceof Error ? error.message : String(error)}`);
   }
 
-  const content = await unpack(received);
+  /** @type {ArrayBuffer} */
+  let content;
+  try {
+    content = await unpack(received, file.bytes > 0 ? file.bytes : MAX_UNPACKED_BYTES);
+  } catch (error) {
+    if (error instanceof Refused) throw new Refused(error.problem, `${fileName(file.url)}: ${error.detail ?? error.problem}`);
+    throw error;
+  }
 
   // An empty file is no file, whatever the entry claimed or left unclaimed.
   if (content.byteLength === 0) {

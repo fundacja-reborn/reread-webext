@@ -148,6 +148,13 @@ describe("refreshLiveDictionaries", () => {
       throw new Error("offline");
     });
     assert.equal((await refreshLiveDictionaries({ fetch: dead, today: "2026-08-14" })).ok, false);
+    // A listing the host redirected elsewhere is nobody's listing (D171) -
+    // refused before its body is read, so the stand-in has no body.
+    /** @type {typeof fetch} */
+    const elsewhere = /** @type {any} */ (async () => ({ url: "https://mirror.example/stardict/", ok: true, status: 200 }));
+    const redirected = await refreshLiveDictionaries({ fetch: elsewhere, today: "2026-08-14" });
+    assert.equal(redirected.ok, false);
+    assert.match(redirected.ok ? "" : redirected.detail, /another host/);
 
     const read = await readLiveDictionaries();
     assert.equal(read?.fetchedAt, "2026-08-13", "a failure must not move the date");

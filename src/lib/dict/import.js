@@ -240,6 +240,14 @@ function streamOf(bytes) {
 }
 
 /**
+ * The most a dictionary file may unpack to (D171). The largest .dict seen is
+ * a few hundred megabytes; this is room for several of those, and the
+ * ceiling gzip's thousand-to-one packing would otherwise let a small file
+ * reach - tens of gigabytes, and the settings page gone with them.
+ */
+export const MAX_UNPACKED_BYTES = 1024 * 1024 * 1024;
+
+/**
  * Inflates a gzip stream into one buffer.
  *
  * The buffer is allocated once, at the size the gzip trailer claims, and the
@@ -250,20 +258,31 @@ function streamOf(bytes) {
  * too small grows - a file that large has not been seen, but the cost of being
  * wrong about that would be a thrown import, not a slow one.
  *
+ * Past the cap the read stops and the import fails with a sentence (D171):
+ * the trailer is what the file says about itself, and a file that unpacks to
+ * far more than it claims - or to more than any dictionary is - is not a
+ * dictionary. The cap holds the first allocation too, so a trailer claiming
+ * four gigabytes costs a refusal, not the allocation.
+ *
  * @param {ReadableStream<Uint8Array<ArrayBuffer>>} stream compressed bytes
  * @param {number} sizeHint what the trailer says the result is
+ * @param {number} [limit] the most the result may be; the cap by default
  * @returns {Promise<Uint8Array>}
  */
-export async function gunzip(stream, sizeHint) {
+export async function gunzip(stream, sizeHint, limit = MAX_UNPACKED_BYTES) {
   const reader = stream.pipeThrough(new DecompressionStream("gzip")).getReader();
-  let out = new Uint8Array(sizeHint);
+  let out = new Uint8Array(Math.min(sizeHint, limit));
   let length = 0;
 
   for (;;) {
     const { done, value } = await reader.read();
     if (done) break;
+    if (length + value.length > limit) {
+      await reader.cancel().catch(() => undefined);
+      throw new Error(`unpacks to more than ${limit} bytes`);
+    }
     if (length + value.length > out.length) {
-      const grown = new Uint8Array(Math.max(out.length * 2, length + value.length));
+      const grown = new Uint8Array(Math.min(limit, Math.max(out.length * 2, length + value.length)));
       grown.set(out.subarray(0, length));
       out = grown;
     }

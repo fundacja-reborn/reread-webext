@@ -35,12 +35,18 @@ const READABLE = new Set(["m", "l", "t", "y", "n", ...MARKUP]);
  * dictionary may say about itself.
  *
  * A dictionary entry can be an encyclopaedia article; the bubble is twenty-two
- * rem wide and sits over somebody's reading. The last two are for the settings
+ * rem wide and sits over somebody's reading. The next two are for the settings
  * page: a dictionary's own description is often a licence, a history and a
  * thank-you note, and the row it sits in is a row, not a page. All four are
  * deliberately generous enough that a normal dictionary never notices them.
+ *
+ * `field` is how much of one raw field is read at all (D171): the markup is
+ * stripped with regular expressions that walk to the end of the text for
+ * every `<` they meet, so a field of megabytes with no `>` in it would cost
+ * a quadratic hang before the clamp below ever saw it. Sixty-four kilobytes
+ * is far more markup than the first thousand characters of any meaning need.
  */
-export const LIMITS = Object.freeze({ senseLength: 1000, senses: 10, name: 120, credit: 400 });
+export const LIMITS = Object.freeze({ senseLength: 1000, senses: 10, name: 120, credit: 400, field: 65536 });
 
 /**
  * Elements that start or end a line for a reader, whatever they are in the
@@ -48,12 +54,19 @@ export const LIMITS = Object.freeze({ senseLength: 1000, senses: 10, name: 120, 
  * that writes `</p>` between them should read the same afterwards, and a blank
  * line either way costs nothing because empty lines are dropped.
  */
-const LINE_BREAKS = /<\s*\/?\s*(?:br|p|div|li|tr|td|th|table|ul|ol|dl|dt|dd|blockquote|h[1-6])\b[^>]*>/giu;
+const LINE_BREAKS = /<\s*\/?\s*(?:br|p|div|li|tr|td|th|table|ul|ol|dl|dt|dd|blockquote|h[1-6])\b[^<>]*>/giu;
 
 /** XDXF wraps the headword in `<k>`, and the row already knows its headword. */
 const XDXF_KEY = /<k>[\s\S]*?<\/k>/giu;
 
-const TAG = /<[^>]*>/gu;
+/**
+ * A tag runs to the first `>` and never across another `<` (D171). With
+ * `[^>]*` a field of `<` signs with no `>` after them made every one of them
+ * walk to the end of the field and back - quadratic in the field, which is
+ * the kind of field a hostile dictionary would write. A `<` inside a tag is
+ * not markup any dictionary writes, so nothing honest reads differently.
+ */
+const TAG = /<[^<>]*>/gu;
 
 /**
  * WikDict's source annotations, which are not markup and not content.
@@ -246,8 +259,11 @@ export function about(text, limit = LIMITS.credit) {
  * @param {import("./stardict.js").Field} field
  * @returns {string} plain text, empty when this field has nothing to show
  */
-export function fieldText({ type, text }) {
+export function fieldText({ type, text: raw }) {
   if (!READABLE.has(type)) return "";
+  // Cut before any expression runs over it (see LIMITS.field); what the cut
+  // leaves is clamped again, to a sentence's length, at the end.
+  const text = raw.length > LIMITS.field ? raw.slice(0, LIMITS.field) : raw;
   if (!MARKUP.has(type)) return tidy(stripSourceNotes(text));
 
   // Everything that separates one line of an entry from the next is a line

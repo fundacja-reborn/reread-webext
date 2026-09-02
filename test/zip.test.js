@@ -150,6 +150,9 @@ describe("readZip", () => {
       ["a zip64 size marker", buildZip([{ name: "a.ifo", data: text("x"), uncompressedSize: 0xffffffff }]), "zip_unsupported"],
       ["a checksum that does not match", buildZip([{ name: "a.ifo", data: text("x"), crc: 1 }]), "zip_bad"],
       ["a size the data contradicts", buildZip([{ name: "a.ifo", data: text("x"), uncompressedSize: 999 }]), "zip_bad"],
+      // A megabyte of zeros deflates to a kilobyte; the directory says eight
+      // bytes, and the inflate stops there rather than at the megabyte (D171).
+      ["an entry that unpacks past the size the directory claims", buildZip([{ name: "a.dict", data: new Uint8Array(1 << 20), uncompressedSize: 8 }]), "zip_bad"],
       ["an empty archive", buildZip([], { count: 0 }), "zip_bad"],
       ["only directories inside", buildZip([{ name: "folder/", data: new Uint8Array(0), method: 0 }]), "zip_bad"],
       ["a count past the room a dictionary needs", buildZip(Array.from({ length: 65 }, (_, index) => ({ name: `f${index}.txt`, data: text("x") }))), "zip_too_big"],

@@ -18,6 +18,7 @@
  */
 
 import { aside, t } from "../i18n.js";
+import { answeredByHost } from "../same-host.js";
 
 /**
  * @typedef {"network" | "http" | "too_big" | "cancelled"} DictDownloadProblem
@@ -71,10 +72,17 @@ export async function downloadArchive(url, options = {}) {
   try {
     // `no-store` for the same reason models use it: these bytes are judged by
     // content, so a stale copy in the HTTP cache could only confuse a retry.
-    response = await fetchImpl(url, { signal, cache: "no-store", redirect: "follow" });
+    // `omit` for the models' reason too: nothing of the reader's rides along,
+    // and the call says so (D171).
+    response = await fetchImpl(url, { signal, cache: "no-store", credentials: "omit", redirect: "follow" });
   } catch (error) {
     if (signal?.aborted) return { ok: false, problem: "cancelled" };
     return { ok: false, problem: "network", detail: `${fileName(url)}: ${error instanceof Error ? error.message : String(error)}` };
+  }
+
+  // Answered by the host it was asked of, or not at all (D171).
+  if (!answeredByHost(response, url)) {
+    return { ok: false, problem: "http", detail: `${fileName(url)}: answered from another host` };
   }
 
   if (!response.ok) {

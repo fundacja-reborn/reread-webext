@@ -132,6 +132,13 @@ describe("refreshLiveModels", () => {
       throw new Error("offline");
     });
     assert.equal((await refreshLiveModels({ fetch: dead, today: "2026-08-14" })).ok, false);
+    // An index the host redirected elsewhere is nobody's index (D171) - and
+    // it is refused before its body is read, so the stand-in has no body.
+    /** @type {typeof fetch} */
+    const elsewhere = /** @type {any} */ (async () => ({ url: "https://mirror.example/models.json", ok: true, status: 200 }));
+    const redirected = await refreshLiveModels({ fetch: elsewhere, today: "2026-08-14" });
+    assert.equal(redirected.ok, false);
+    assert.match(redirected.ok ? "" : redirected.detail, /another host/);
 
     const read = await readLiveModels();
     assert.equal(read?.fetchedAt, "2026-08-13", "a failure must not move the date");
