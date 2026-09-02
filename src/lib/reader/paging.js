@@ -27,6 +27,8 @@
  * @property {boolean} alt
  * @property {boolean} ctrl
  * @property {boolean} meta
+ * @property {boolean} mac whether this is an Apple platform, where Option
+ *   with an arrow is the system's own paging pair
  * @property {string} tag the tag name of what had focus, upper case, or `""`
  * @property {boolean} editable whether what had focus is being typed into
  * @property {boolean} reading whether the voice is reading right now
@@ -54,17 +56,34 @@ const PAGE_ITSELF = new Set(["", "BODY", "HTML"]);
  *
  * Shift is not in the list of modifiers that rule a press out: shift and the
  * space bar is how a page goes back, which is the pair every browser already
- * has. Alt, Control and Meta are the browser's and the system's.
+ * has. Alt, Control and Meta are the browser's and the system's - with one
+ * exception: on the Mac, Option with an arrow is the platform's own way of
+ * paging, so there the chord is exactly this feature's business.
  *
  * @param {Press} press
  * @returns {PageTurn | null}
  */
 export function pageTurn(press) {
-  if (press.alt || press.ctrl || press.meta) return null;
   // A dialog over the article - the contents, the search - pages its own
   // list. The article behind it is not what the press is about.
   if (press.dialog) return null;
   if (press.editable || TYPING.has(press.tag)) return null;
+
+  // The Mac's own paging pair, for the keyboards that have no page keys
+  // (reported from a K380, D170): Option with an arrow is how the platform
+  // itself pages - Blink maps Alt-Up/Down to PageUp/Down on the Mac and
+  // nowhere else (elsewhere an Alt-chord is a system key and is suppressed),
+  // Gecko does the same through Cocoa's standard key bindings. Left to the
+  // browser, the chord paged by the window and cut a line at the fold - the
+  // very scroll D127 took the page keys back from. Bare Alt only: with
+  // Shift the chord extends a selection, and off the Mac the modifier rule
+  // below goes on holding.
+  if (press.mac && press.alt && !press.shift && !press.ctrl && !press.meta) {
+    if (press.key === "ArrowDown") return "down";
+    if (press.key === "ArrowUp") return "up";
+  }
+
+  if (press.alt || press.ctrl || press.meta) return null;
 
   switch (press.key) {
     case "PageDown":

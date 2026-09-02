@@ -17,6 +17,7 @@ function press(key, about = {}) {
     alt: false,
     ctrl: false,
     meta: false,
+    mac: false,
     tag: "BODY",
     editable: false,
     reading: false,
@@ -81,6 +82,38 @@ describe("pageTurn", () => {
   it("pages with no focus at all", () => {
     // What `event.target` says on a page nobody has clicked into yet.
     assert.equal(press(" ", { tag: "" }), "down");
+  });
+
+  it("pages with the Mac's own Option+Arrow pair", () => {
+    // The report behind D170: a keyboard with no page keys, and the chord
+    // the platform pages with going to the browser's window-blind scroll.
+    assert.equal(press("ArrowDown", { mac: true, alt: true }), "down");
+    assert.equal(press("ArrowUp", { mac: true, alt: true }), "up");
+    // Like the page keys, the chord stays ours while the voice reads.
+    assert.equal(press("ArrowDown", { mac: true, alt: true, reading: true }), "down");
+  });
+
+  it("leaves Option+Arrow alone off the Mac", () => {
+    // Off the Mac an Alt-chord is a system key (Blink suppresses it there),
+    // so the modifier rule keeps standing.
+    assert.equal(press("ArrowDown", { alt: true }), null);
+    assert.equal(press("ArrowUp", { alt: true }), null);
+  });
+
+  it("keeps the chord bare and the plain arrows free", () => {
+    // With Shift the chord extends a selection; plain arrows scroll by
+    // line, which the browser already does right (D127).
+    assert.equal(press("ArrowDown", { mac: true, alt: true, shift: true }), null);
+    assert.equal(press("ArrowDown", { mac: true, alt: true, ctrl: true }), null);
+    assert.equal(press("ArrowDown", { mac: true, alt: true, meta: true }), null);
+    assert.equal(press("ArrowDown", { mac: true }), null);
+    assert.equal(press("ArrowUp", { mac: true }), null);
+  });
+
+  it("gives the chord away the way it gives every page key", () => {
+    assert.equal(press("ArrowDown", { mac: true, alt: true, tag: "INPUT" }), null);
+    assert.equal(press("ArrowDown", { mac: true, alt: true, editable: true }), null);
+    assert.equal(press("ArrowDown", { mac: true, alt: true, dialog: true }), null);
   });
 });
 
