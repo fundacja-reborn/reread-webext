@@ -49,6 +49,18 @@ export const DEFAULT_MARK_COLOR = "yellow";
 export const MAX_NOTE_LENGTH = 2000;
 
 /**
+ * The most a mark's quote may hold when it arrives from a file or the
+ * database, in characters (D171). A mark is a quote, and the longest honest
+ * one - a stretch of pages dragged over in one gesture - stays far under
+ * this; what the cap keeps out is a hand-made backup planting a document
+ * behind one row. A quote is never cut, because a cut quote would anchor
+ * nowhere (D169 finds a mark by its quote): a mark past the cap is refused
+ * whole. The gesture's own records never meet it - they come from the text
+ * on screen.
+ */
+export const MAX_MARK_TEXT_LENGTH = 100_000;
+
+/**
  * A note as a mark keeps it, or nothing: trimmed, cut to the cap, and absent
  * rather than empty - a mark without a note has no field, so "no note" is one
  * shape everywhere. One narrowing for the record builder and the healer both,
@@ -202,6 +214,7 @@ export function asMark(value) {
   if (typeof value !== "object" || value === null) return null;
   const { segmentIndex, start, end, color, createdAt, text, note } =
     /** @type {Record<string, unknown>} */ (value);
+  if (typeof text === "string" && text.length > MAX_MARK_TEXT_LENGTH) return null;
   return markRecord({
     segmentIndex: /** @type {number} */ (segmentIndex),
     start: /** @type {MarkPoint} */ (start),

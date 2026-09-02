@@ -58,6 +58,17 @@ describe("savedArticle", () => {
     assert.equal(build({ content: "" }), null);
     assert.equal(build({ savedAt: Number.NaN }), null);
   });
+
+  it("takes only an address a page is read from: http, https or a file (D171)", () => {
+    // The address becomes an `href` the reader hands out, and a backup file
+    // is data anybody can write - `javascript:` parses as a URL and must not
+    // get through on that account.
+    assert.equal(build({ url: "http://a.example/page" })?.hostname, "a.example");
+    assert.equal(build({ url: "file:///home/me/page.html" })?.hostname, "");
+    for (const url of ["javascript:alert(1)", "data:text/html,hi", "blob:https://a.example/x", "mailto:a@b.c"]) {
+      assert.equal(build({ url }), null, `should refuse ${url}`);
+    }
+  });
 });
 
 describe("asSavedMeta", () => {

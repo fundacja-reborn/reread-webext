@@ -132,13 +132,15 @@ describe("fromArticlesFile", () => {
       articles: [
         { url: "https://example.com/good", title: "Good", content: "<p>x</p>", savedAt: 1 },
         { url: "not a url", title: "Bad address", content: "<p>x</p>", savedAt: 1 },
+        // Parses as a URL and would become the "Open original" link (D171).
+        { url: "javascript:alert(1)", title: "A script for an address", content: "<p>x</p>", savedAt: 1 },
         { url: "https://example.com/empty", title: "No content", content: "", savedAt: 1 },
         { url: "https://example.com/when", title: "No date", content: "<p>x</p>" },
         "not an entry",
       ],
     });
     const parsed = fromArticlesFile(file);
-    assert.equal(parsed.invalid, 4);
+    assert.equal(parsed.invalid, 5);
     assert.deepEqual(
       parsed.articles.map((one) => one.url),
       ["https://example.com/good"],
