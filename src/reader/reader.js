@@ -1359,6 +1359,15 @@ function foldLineBox(fold) {
 }
 
 /**
+ * Whether this is an Apple platform, where Option with an arrow is the
+ * system's own paging pair (D170): Blink maps Alt-Up/Down to PageUp/Down on
+ * the Mac alone, Gecko does the same through Cocoa's key bindings, and an
+ * iPad with a hardware keyboard pages like the Mac it reports itself as
+ * (`MacIntel`) - the `iP` prefix catches the ones that still say `iPad`.
+ */
+const macPaging = navigator.platform.startsWith("Mac") || navigator.platform.startsWith("iP");
+
+/**
  * Turning the page with the keyboard (D127) - the hardware page keys of an
  * e-reader among them, which is where this came from: the browser pages by a
  * screenful it measures against the whole window, and the reader's chrome is
@@ -1384,6 +1393,7 @@ function onPageKey(event) {
     alt: event.altKey,
     ctrl: event.ctrlKey,
     meta: event.metaKey,
+    mac: macPaging,
     tag: target?.tagName ?? "",
     editable: target?.isContentEditable ?? false,
     reading: readingState() !== "off",

@@ -76,11 +76,14 @@ On a phone the extension starts in **reader-only mode**: ordinary pages are left
 |---|---|---|
 | `Alt`+`Shift`+`R` | any page | open the page in the reader |
 | `Esc` | any page | close the bubble |
+| `PgDn` / `PgUp` | reader | turn the page: a screenful of text with the last line kept on top, whole lines under the bar |
+| `⌥`+`↓` / `⌥`+`↑` | reader, macOS | the same page turn, for keyboards without page keys |
+| `Space` / `Shift`+`Space` | reader, voice off | the same page turn |
 | `Space` | reader, during read-aloud | pause / resume |
 | `←` `→` | reader, during read-aloud | previous / next sentence |
 | `<` `>` | reader, during read-aloud | slower / faster |
 
-The read-aloud keys work only while the voice is reading; otherwise the page behaves normally (Space scrolls as usual). Keys pressed inside text fields or on focused buttons are left alone.
+The read-aloud keys work only while the voice is reading; with the voice off, Space turns the page like `PgDn`. Keys pressed inside text fields, in open dialogs or on focused buttons are left alone.
 
 ## What it deliberately does not do
 
