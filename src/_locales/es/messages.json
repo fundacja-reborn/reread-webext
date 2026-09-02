@@ -18,7 +18,7 @@
   "nav_menu": { "message": "Menú" },
   "language_pair": { "message": "Par de idiomas" },
   "reading_list": { "message": "Lista de lectura sin conexión" },
-  "private_browsing_note": { "message": "Estás en navegación privada. Aquí el navegador usa para re/read una base de datos aparte y vacía, y la borra al terminar la sesión privada: no hay nada de lo que has guardado, y lo que guardes o importes aquí no se conserva. Abre re/read en una pestaña normal - allí está todo." },
+  "private_browsing_note": { "message": "Estás en navegación privada. El navegador usa para esta página una base de datos aparte y la borra al terminar la sesión privada: la lista de lectura y los resaltados que ves aquí vienen de sus copias, y un artículo guardado, un libro importado, un resaltado hecho o cualquier cosa borrada aquí se pierde con la sesión. La única excepción son las frases guardadas: esas se conservan. Para todo lo demás, abre re/read en una pestaña normal." },
   "saved_phrases": { "message": "Frases guardadas" },
   "open_reader": { "message": "Leer esta página en la vista de lectura" },
   "quiet_bubble": { "message": "Ocultar por defecto las acciones de la burbuja" },
@@ -926,7 +926,7 @@
   },
   "options_reader_only": { "message": "Solo en la vista de lectura" },
   "options_reader_only_hint": {
-    "message": "Limita el subrayado de las frases guardadas y la burbuja de traducción a la vista de lectura. Seleccionar texto en una página web normal solo mostrará la opción de abrirla en la vista de lectura. En Android e iOS la opción está activada de forma predeterminada."
+    "message": "Limita el subrayado de las frases guardadas y la burbuja de traducción a la vista de lectura. Seleccionar texto en una página web normal solo mostrará la opción de abrirla en la vista de lectura. Con la opción activada, ninguna página web puede saber cuáles de sus palabras has guardado. En Android e iOS la opción está activada de forma predeterminada."
   },
   "options_keep_articles": { "message": "Guardar de forma predeterminada en la lista de lectura sin conexión" },
   "options_keep_articles_hint": {

@@ -26,8 +26,8 @@
   "language_pair": { "message": "Language pair" },
   "reading_list": { "message": "Offline reading list" },
   "private_browsing_note": {
-    "message": "You are in private browsing. Here the browser uses a separate, empty database for re/read and deletes it when the private session ends: nothing you have saved is here, and nothing you save or import here is kept. Open re/read from a normal tab - everything is there.",
-    "description": "The sentence at the top of the extension's pages (reading list, reader, highlights, saved phrases, settings) when the page runs in a private window or tab: Firefox gives it a separate, in-memory database. Never shown on Chromium, whose extension pages share one database in both modes."
+    "message": "You are in private browsing. The browser gives this page a separate database and deletes it when the private session ends: the reading list and the highlights you see here come from their copies, and an article saved, a book imported, a highlight made or anything deleted here goes with the session. Saved phrases are the one exception - they are kept. Open re/read from a normal tab for everything else.",
+    "description": "The sentence at the top of the extension's pages (reading list, reader, highlights, saved phrases, settings) when the page runs in a private window or tab: Firefox gives it a separate, in-memory database, filled from the copies in the extension's storage, which a private session may read but never writes (D171). Saved phrases go through the background, which is never private, so they are kept. Never shown on Chromium, whose extension pages share one database in both modes."
   },
   "saved_phrases": { "message": "Saved phrases" },
   "open_reader": { "message": "Read this page in the reader" },
@@ -1135,7 +1135,7 @@
   },
   "options_reader_only": { "message": "Only in the reader" },
   "options_reader_only_hint": {
-    "message": "Limits the underlining of saved phrases and the translation bubble to the reader. Selecting text on an ordinary web page will only show an option to open the page in the reader. On Android and iOS it is on by default."
+    "message": "Limits the underlining of saved phrases and the translation bubble to the reader. Selecting text on an ordinary web page will only show an option to open the page in the reader. With it on, no web page can tell which of its words you have saved. On Android and iOS it is on by default."
   },
   "options_keep_articles": { "message": "Save in the offline reading list by default" },
   "options_keep_articles_hint": {

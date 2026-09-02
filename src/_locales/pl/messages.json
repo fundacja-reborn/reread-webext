@@ -18,7 +18,7 @@
   "nav_menu": { "message": "Menu" },
   "language_pair": { "message": "Para językowa" },
   "reading_list": { "message": "Czytelnia offline" },
-  "private_browsing_note": { "message": "Jesteś w trybie prywatnym. Przeglądarka używa tu dla re/read osobnej, pustej bazy danych i kasuje ją po zakończeniu sesji prywatnej: nie ma tu nic z tego, co masz zapisane, a to, co tu zapiszesz albo zaimportujesz, nie zostanie zachowane. Otwórz re/read w zwykłej karcie - wszystko tam jest." },
+  "private_browsing_note": { "message": "Jesteś w trybie prywatnym. Przeglądarka używa tu dla tej strony osobnej bazy danych i kasuje ją po zakończeniu sesji prywatnej: czytelnia i zakreślenia, które tu widzisz, pochodzą z ich kopii, a artykuł zapisany, książka zaimportowana, zakreślenie zrobione albo cokolwiek usuniętego w tym oknie przepada razem z sesją. Jedyny wyjątek to zapisane frazy - te są zachowywane. Na wszystko inne otwórz re/read w zwykłej karcie." },
   "saved_phrases": { "message": "Zapisane frazy" },
   "open_reader": { "message": "Przeczytaj tę stronę w widoku czytania" },
   "quiet_bubble": { "message": "Domyślnie ukrywaj akcje w dymku" },
@@ -1267,7 +1267,7 @@
   },
   "options_reader_only": { "message": "Tylko w widoku czytania" },
   "options_reader_only_hint": {
-    "message": "Ogranicza podkreślenia zapisanych fraz i dymek tłumaczenia do widoku czytania. Zaznaczenie tekstu na zwykłej stronie pokaże jedynie przycisk do otwarcia jej w widoku czytania. Na Androidzie i iOS opcja jest domyślnie włączona."
+    "message": "Ogranicza podkreślenia zapisanych fraz i dymek tłumaczenia do widoku czytania. Zaznaczenie tekstu na zwykłej stronie pokaże jedynie przycisk do otwarcia jej w widoku czytania. Przy włączonej opcji żadna strona nie może stwierdzić, które z jej słów masz zapisane. Na Androidzie i iOS opcja jest domyślnie włączona."
   },
   "options_keep_articles": { "message": "Zapisuj domyślnie w czytelni offline" },
   "options_keep_articles_hint": {
