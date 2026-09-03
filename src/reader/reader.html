@@ -510,11 +510,18 @@
           </details>
           <a href="#transfer" data-i18n="reader_transfer_link">Import and export (articles or EPUB)</a>
         </div>
-        <!-- The filter stands alone above the list it narrows, the same line
-             the phrases page draws. Adding a book used to have its own
-             button here (O19); it lives in the Import button below now
-             (Michał's call, 2026-08-16) - one door for every file, and the
-             file itself says which kind it is. -->
+        <!-- The filter stands above the list it narrows, the same line the
+             phrases page draws. Adding a book used to have its own button
+             here (O19); it lives in the Import button below now (Michał's
+             call, 2026-08-16) - one door for every file, and the file itself
+             says which kind it is. The deeper search's button stands at the
+             field's end (D119; moved here 2026-09-03): it runs the words in
+             the field over the saved texts, and a button beside a field
+             reads as that field's own - the document dialog's form is the
+             same shape. On the checkbox line, at the far right, it appeared
+             between the field and Select and could go unnoticed (Michał's
+             screenshots). There only while the box below asks for it: the
+             plain filter needs no press. -->
         <div class="filter-line">
           <label for="library-filter" class="visually-hidden" data-i18n="reader_filter_label">
             Filter the reading list
@@ -525,19 +532,19 @@
             placeholder="Filter by title or site"
             data-i18n-placeholder="reader_filter_placeholder"
           />
+          <button type="button" id="library-search-go" data-i18n="reader_search_go" hidden>
+            Search
+          </button>
         </div>
         <!-- The deeper search (D119): with the box ticked, Enter or the
-             button scans the saved texts themselves for the typed phrase -
-             on a press, never per keystroke: this reads whole books. The
-             plain filter above keeps working either way. -->
+             button at the field's end scans the saved texts themselves for
+             the typed phrase - on a press, never per keystroke: this reads
+             whole books. The plain filter keeps working either way. -->
         <div class="search-line">
           <label class="search-toggle">
             <input type="checkbox" id="library-search-toggle" />
             <span data-i18n="reader_library_search_toggle">Search in the texts too</span>
           </label>
-          <button type="button" id="library-search-go" data-i18n="reader_search_go" hidden>
-            Search
-          </button>
         </div>
         <!-- What the deeper search found, standing where the rows stand:
              rows whose own words match first (known before any text is
