@@ -55,6 +55,7 @@
     "message": "Буде збережено в парі $PAIR$",
     "placeholders": { "pair": { "content": "$1", "example": "англійська → польська" } }
   },
+  "bubble_choose_meaning": { "message": "Натисніть на значення, щоб зберегти його" },
   "bubble_speak": { "message": "Прочитати вголос" },
   "bubble_sentence_collapse": { "message": "Згорнути речення" },
   "bubble_sentence_expand": { "message": "Розгорнути речення" },

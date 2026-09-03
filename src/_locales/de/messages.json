@@ -55,6 +55,7 @@
     "message": "Wird unter $PAIR$ gespeichert",
     "placeholders": { "pair": { "content": "$1", "example": "Englisch → Polnisch" } }
   },
+  "bubble_choose_meaning": { "message": "Wählen Sie eine Bedeutung aus, um sie zu speichern" },
   "bubble_speak": { "message": "Vorlesen" },
   "bubble_sentence_collapse": { "message": "Satz einklappen" },
   "bubble_sentence_expand": { "message": "Satz ausklappen" },

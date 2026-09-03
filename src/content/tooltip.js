@@ -97,7 +97,7 @@
  * `reveal()` brings the row out when one of them turns out to be the point.
  */
 
-import { MEANING_SEPARATOR, afterChoosing, toMeanings } from "../lib/gloss.js";
+import { MEANING_SEPARATOR, afterChoosing, savePress, toMeanings } from "../lib/gloss.js";
 import { t } from "../lib/i18n.js";
 
 const GAP = 8;
@@ -864,10 +864,15 @@ export const STYLE = `
     border: 1px solid var(--edge);
     border-radius: 6px;
   }
-  .actions button[data-action="save"]:hover:not(:disabled),
+  .actions button[data-action="save"]:hover:not(:disabled):not([aria-disabled="true"]),
   .actions button[data-action="reader"]:hover:not(:disabled),
   .actions button[data-action="settings"]:hover:not(:disabled) { background: rgba(0, 0, 0, 0.1); }
-  .actions button[data-action="save"]:disabled { opacity: 0.45; }
+  /* Dimmed two ways that look the same: disabled, when there is nothing a
+     press could do, and aria-disabled, when a press has one thing to say -
+     the note line's sentence about pressing a dictionary line (D175). A
+     disabled button swallows its clicks, and the reader whose press met
+     silence is the reason the sentence exists. */
+  .actions button[data-action="save"]:is(:disabled, [aria-disabled="true"]) { opacity: 0.45; }
 
   /* A hand is not a cursor: where the primary pointer is a finger, the type
      steps up toward the page's own reading size and the presses grow into
@@ -911,7 +916,7 @@ export const STYLE = `
     /* The quiet labels need nothing here: they are the bubble's own colour at
        seven tenths, which lands right on either background. */
     .bubble:not([data-scheme]) .actions :is(button[data-action="save"], button[data-action="reader"], button[data-action="settings"]) { background: rgba(255, 255, 255, 0.08); }
-    .bubble:not([data-scheme]) .actions :is(button[data-action="save"], button[data-action="reader"], button[data-action="settings"]):hover:not(:disabled) { background: rgba(255, 255, 255, 0.16); }
+    .bubble:not([data-scheme]) .actions :is(button[data-action="save"], button[data-action="reader"], button[data-action="settings"]):hover:not(:disabled):not([aria-disabled="true"]) { background: rgba(255, 255, 255, 0.16); }
   }
 
   /* The reader's own paper, by name: the reader hands its theme down with
@@ -936,7 +941,7 @@ export const STYLE = `
   .bubble[data-scheme="dark"] .entry-sense[aria-pressed="true"] { background: rgba(255, 255, 255, 0.1); }
   .bubble[data-scheme="dark"] .editor { background: rgba(255, 255, 255, 0.06); }
   .bubble[data-scheme="dark"] .actions :is(button[data-action="save"], button[data-action="reader"], button[data-action="settings"]) { background: rgba(255, 255, 255, 0.08); }
-  .bubble[data-scheme="dark"] .actions :is(button[data-action="save"], button[data-action="reader"], button[data-action="settings"]):hover:not(:disabled) { background: rgba(255, 255, 255, 0.16); }
+  .bubble[data-scheme="dark"] .actions :is(button[data-action="save"], button[data-action="reader"], button[data-action="settings"]):hover:not(:disabled):not([aria-disabled="true"]) { background: rgba(255, 255, 255, 0.16); }
   /* Sepia is the one paper the system query never dresses. A step lighter
      than the page's #f4ecd8 - the light bubble's manner, it floats - with
      the sepia ink, and an edge holding the 4.5:1 the lines test asks of
@@ -1310,6 +1315,14 @@ export function createTooltip({ onAction, onHide, covered, onEditing }) {
    */
   let carried = 0;
   let editing = false;
+  /** Whether the note line is saying what Save is waiting for (D175): raised
+   *  by a press of Save with nothing chosen, lowered by whatever changes the
+   *  answer - a line chosen, the edit box, a new phrase. */
+  let prompting = false;
+  /** What the caller last put into the note line, kept while the prompt
+   *  stands in front of it, so the line can give it back afterwards. */
+  /** @type {{ sentence: string, tone: Tone }} */
+  let standing = { sentence: "", tone: "normal" };
   /** Whether the second layer is unfolded. Folded again for every new phrase. */
   let unfolded = false;
   /** Whether the sentence is clamped to one line (D96): the starting state
@@ -1557,10 +1570,24 @@ export function createTooltip({ onAction, onHide, covered, onEditing }) {
   function refreshControls() {
     const shown = new Set(currentMeanings());
 
+    // What Save can do right now (D175): keep, say what it is waiting for, or
+    // nothing. Two of the three look the same - dimmed - and differ in
+    // whether a press gets through: `disabled` swallows it, `aria-disabled`
+    // lets it reach `emit`, where the sentence is.
+    const press = savePress({ meanings: shown.size, lines: pressableLines(), editing });
     if (actionsElement !== null) {
       for (const button of actionsElement.querySelectorAll("button")) {
-        if (button.dataset["action"] === "save") button.disabled = shown.size === 0;
+        if (button.dataset["action"] !== "save") continue;
+        button.disabled = press === "nothing";
+        if (press === "prompt") button.setAttribute("aria-disabled", "true");
+        else button.removeAttribute("aria-disabled");
       }
+    }
+    // The sentence goes the moment a press would do something else - a line
+    // was chosen, the box opened - and the note line gets its own words back.
+    if (prompting && press !== "prompt") {
+      prompting = false;
+      renderContext();
     }
 
     if (entriesElement !== null) {
@@ -1695,7 +1722,16 @@ export function createTooltip({ onAction, onHide, covered, onEditing }) {
 
     const meanings = currentMeanings();
     if (action === "save" || action === "choose") {
-      if (meanings.length === 0) return;
+      if (meanings.length === 0) {
+        // Save pressed over an empty gloss (D175): the one press that does
+        // not go out, because there is nothing to send. It answers here, with
+        // the sentence, where the lines it points at are. A choose never
+        // arrives empty - `choose` declines to empty the gloss.
+        if (action === "save" && savePress({ meanings: 0, lines: pressableLines(), editing }) === "prompt") {
+          startPrompt();
+        }
+        return;
+      }
       // Optimistic: what was typed is what the bubble shows from now on. The
       // caller decides what it means, and says so by setting the buttons - or
       // by taking the bubble away.
@@ -1830,15 +1866,46 @@ export function createTooltip({ onAction, onHide, covered, onEditing }) {
    * @param {Tone} [tone]
    */
   function setContext(sentence, tone = "normal") {
+    standing = { sentence: sentence ?? "", tone };
+    renderContext();
+  }
+
+  /**
+   * The note line as it should read: the prompt (D175) while it stands, and
+   * otherwise what the caller last said. The tone is told to the fold first,
+   * because it has a say in the clamp (see `applyContextFold`), and then the
+   * line is shown or hidden by what it says - a sentence that is gone may not
+   * keep a line of the bubble open over nothing.
+   */
+  function renderContext() {
     if (contextElement === null || contextTextElement === null) return;
-    contextTextElement.textContent = sentence ?? "";
-    contextElement.dataset["tone"] = tone;
-    // The tone has a say in the clamp (see `applyContextFold`), so the fold is
-    // told before the layer is laid out again.
+    /** @type {{ sentence: string, tone: Tone }} */
+    const shown = prompting ? { sentence: t("bubble_choose_meaning"), tone: "note" } : standing;
+    contextTextElement.textContent = shown.sentence;
+    contextElement.dataset["tone"] = shown.tone;
     applyContextFold();
-    // Shown or hidden again by what it now says - a sentence that is gone may
-    // not keep a line of the bubble open over nothing.
     unfold(unfolded);
+  }
+
+  /**
+   * How many dictionary lines are presses right now: the buttons among the
+   * senses. The quiet bubble without a vocabulary renders its lines as prose
+   * (D121), and prose is nothing to point a reader at.
+   */
+  function pressableLines() {
+    return entriesElement?.querySelectorAll("button").length ?? 0;
+  }
+
+  /**
+   * The answer to Save pressed with nothing to save (D175): the note line says
+   * that a dictionary line is what to press, in front of whatever it was
+   * saying, until the answer changes - `refreshControls` lowers it the moment
+   * a press of Save would do something else.
+   */
+  function startPrompt() {
+    if (prompting) return;
+    prompting = true;
+    renderContext();
   }
 
   /**
@@ -2256,6 +2323,8 @@ export function createTooltip({ onAction, onHide, covered, onEditing }) {
     actionsElement = null;
     copyRowElement = null;
     editing = false;
+    prompting = false;
+    standing = { sentence: "", tone: "normal" };
     unfolded = false;
     contextFolded = false;
     contextChosen = false;
@@ -2355,6 +2424,10 @@ export function createTooltip({ onAction, onHide, covered, onEditing }) {
       unfolded = variant === "quiet";
       contextFolded = false;
       contextChosen = false;
+      // The note line starts empty for this phrase, and so does the prompt
+      // (D175): both were about the last one.
+      prompting = false;
+      standing = { sentence: "", tone: "normal" };
       if (contextElement !== null && contextTextElement !== null && contextToggle !== null) {
         contextTextElement.textContent = "";
         contextElement.hidden = true;

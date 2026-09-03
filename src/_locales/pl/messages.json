@@ -55,6 +55,7 @@
     "message": "Zapis trafi do pary $PAIR$",
     "placeholders": { "pair": { "content": "$1", "example": "angielski → polski" } }
   },
+  "bubble_choose_meaning": { "message": "Naciśnij znaczenie, żeby je zapisać" },
   "bubble_speak": { "message": "Przeczytaj na głos" },
   "bubble_sentence_collapse": { "message": "Zwiń zdanie" },
   "bubble_sentence_expand": { "message": "Rozwiń zdanie" },
