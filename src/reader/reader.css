@@ -73,7 +73,9 @@
 
 /* The article's font lives on the body so that `ch` means what it should: a
    column measured in characters has to be measured in the characters it will
-   hold, and the bar and the panel set their own smaller interface font.
+   hold. That is the ONLY thing the body's font is for - nothing standing on
+   the body reads in it (the rule after the next one dresses the page in
+   the interface, and the texts take the reading face back by name).
    Half of the old top padding moved into the chrome box below, so the page
    opens looking exactly as it did while the box, once stuck, still holds a
    breath of paper over the bar. */
@@ -95,6 +97,33 @@ body.reader {
 body.reader[data-view="list"],
 body.reader[data-view="marks"] {
   max-width: var(--reader-measure-pinned, 65ch);
+}
+
+/* Everything on the page is interface unless it is a text. The Aa panel's
+   face and size dress the texts - the article, the list's titles, the
+   quotes (D104: "the size dresses the list's items, not the elements of
+   the interface") - and the controls around them wear what every other
+   page of this extension wears: the interface family at the interface
+   size, the reading list's own dress since it was built. Said ONCE, on the
+   three boxes that stand on the body - the page under the chrome, the
+   chrome, and the note dialog that stands outside the page - so a control
+   has to opt IN to the reading face by name rather than remember to opt
+   out. Opting out was the old order, and it leaked: the notice (D151), the
+   transfer block under the quotes (D168, Michał: "Aa is for the texts")
+   and then the book's pager, the note over a book's language, the
+   highlights page's own chrome and the dialogs' heads, all found standing
+   in the reading face at the reading size - on a phone the pager's words
+   outgrew the column and its label wrapped into the Next button (Michał's
+   screenshot, 2026-09-03). What takes the reading face back, each by
+   name: `#article`, `.library-open`, `.marks-quote`, `.toc-rows button`,
+   `.search-snippet` and `.note-quote` - the texts, and the words of the
+   texts. */
+#page,
+.reader-chrome,
+.note-dialog {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
 }
 
 /* Focus must be findable on every control here, in every theme - the list's
@@ -131,9 +160,11 @@ summary {
   white-space: nowrap;
 }
 
+/* The bar and its panels speak a step below the page's interface size: they
+   stand over an article and should not be the loudest thing on it. The
+   family is the chrome's (`.reader-chrome`, above). */
 .reader-bar,
 .reader-panel {
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   font-size: 0.85rem;
   line-height: 1.5;
 }
@@ -156,14 +187,13 @@ summary {
 
 /* The page's notice, in the chrome under the bar (D151) - and under an open
    panel, which stands in flow above it. `page.css` gives a note a heading's
-   breathing room above; here the bar's own rule is the room. In the
-   interface's face and size, the panels' own (`.reader-panel`), not the
-   article's: set in the reading face at the reading size it read as a
-   paragraph of the text it stood over, until a scroll showed it stuck
-   (Michał's smoke, 2026-08-29). */
+   breathing room above; here the bar's own rule is the room. At the
+   panels' own size (`.reader-panel`), not the article's: set in the
+   reading face at the reading size it read as a paragraph of the text it
+   stood over, until a scroll showed it stuck (Michał's smoke,
+   2026-08-29) - the reason the chrome now wears the interface as a whole. */
 .reader-chrome .note {
   margin: 0.75rem 0 0;
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   font-size: 0.85rem;
   line-height: 1.5;
 }
@@ -282,9 +312,12 @@ body.reader:not(:has(#article:not([hidden]))):has(.panel-scrim:not([hidden])) .r
   border-color: var(--page-border);
 }
 
+/* In rem, not em: the chrome wears the interface size now, and the chevron
+   sized against it would have stepped down from the size it was tuned to
+   when the ribbon still inherited the reading size (0.85 of 18px). */
 .chrome-tab-icon {
-  width: 0.85em;
-  height: 0.85em;
+  width: 0.95rem;
+  height: 0.95rem;
 }
 
 /* Folded away (the stored choice, stamped by `applyAppearance`): everything
@@ -666,13 +699,21 @@ html {
   margin: 0 0 0.75rem;
 }
 
-/* The article selects through our own gesture for every pointer (D80, the
-   mouse since D86), so the native selection is refused outright: on touch
-   the system's menu and handles never come to exist, and at the desk a drag
+/* The article is THE text: the Aa panel's face and size, taken back from the
+   page's interface dress by name (see `#page` at the top of this file),
+   with the article's own leading. The title and the byline inside it
+   follow in `em`.
+
+   It selects through our own gesture for every pointer (D80, the mouse
+   since D86), so the native selection is refused outright: on touch the
+   system's menu and handles never come to exist, and at the desk a drag
    selects whole words through select.js instead of characters through the
    browser. The named price is copying article text by dragging over it -
    D80 already paid it on touch. */
 #article {
+  font-family: var(--reader-font-lead, var(--reader-font-stack));
+  font-size: var(--reader-size, 18px);
+  line-height: 1.65;
   user-select: none;
   /* Not a belt but the only line WebKit reads: Safari 18 has no unprefixed
      `user-select` at all (WebKit's trunk carries one behind a flag), which
@@ -1016,8 +1057,10 @@ html {
   }
 }
 
-/* The reading list is interface, not reading: it speaks the interface font at
-   the interface size, and only the row titles keep the article's face below.
+/* The reading list is interface, not reading: it speaks the page's interface
+   font at the interface size (the `#page` rule at the top of this file -
+   the list was the first room to wear it, and the whole page wears its
+   dress now), and only the row titles keep the article's face below.
    Everything here states its changes with text and a border - never an
    overlay or an animation, because on e-ink every animation is a flash.
 
@@ -1029,12 +1072,6 @@ html {
    rather than a script-set class, so the stylesheet alone owns the switch. */
 body.reader:has(#library:not([hidden])) {
   max-width: 46rem;
-}
-
-#library {
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  font-size: 1rem;
-  line-height: 1.6;
 }
 
 /* --- the tabs: two halves of one list, each wearing its whole count --- */
@@ -1352,8 +1389,8 @@ body.reader:has(#library:not([hidden])) {
   content: "";
   position: absolute;
   inset-inline-start: 0;
-  top: 1.1em;
-  bottom: 3em;
+  top: calc(var(--reader-size, 18px) * 1.1);
+  bottom: calc(var(--reader-size, 18px) * 3);
   width: 3px;
 }
 
@@ -1372,25 +1409,32 @@ body.reader:has(#library:not([hidden])) {
 
 /* Air between quotes (Michał's request): a quote is a passage, not a list
    row, and passages need paper around them - a couple of text lines' worth
-   under each, in the text's own em so the air breathes with the size. */
+   under each, measured in the reading size so the air breathes with the
+   text. The cell itself is interface (the note's line, the detail line),
+   so the size is named rather than taken from an `em` - the stripe above
+   repeats the same two numbers. */
 .marks-row .library-text {
-  padding: 1.1em 0 3em;
+  padding: calc(var(--reader-size, 18px) * 1.1) 0 calc(var(--reader-size, 18px) * 3);
 }
 
 .marks-row .library-item-detail {
   margin-top: 0.6em;
 }
 
-/* A quote reads like the passage it quotes: plain prose in the reading
-   face (the body's own font, inherited), and the WHOLE of it - a six-line
-   clamp was tried first and cut every multi-paragraph highlight down to
-   its opening (Michał's report on 0.4.8): a kept passage is kept to be
-   reread, not to be teased. Its block breaks come as paragraphs of their
-   own (the renderer splits on the newlines `quoteOf` wrote at every
+/* A quote reads like the passage it quotes: plain prose in the reading face
+   at the reading size, taken back from the page's interface dress by name
+   (`#page`), with the article's own leading - and the WHOLE of it: a
+   six-line clamp was tried first and cut every multi-paragraph highlight
+   down to its opening (Michał's report on 0.4.8): a kept passage is kept
+   to be reread, not to be teased. Its block breaks come as paragraphs of
+   their own (the renderer splits on the newlines `quoteOf` wrote at every
    boundary), with a shade of the article's gap between them - and the
    same block boundaries the scan respects everywhere else, so a phrase
    never matches across them here either. */
 .marks-quote {
+  font-family: var(--reader-font-lead, var(--reader-font-stack));
+  font-size: var(--reader-size, 18px);
+  line-height: 1.65;
   overflow-wrap: anywhere;
 }
 
@@ -1403,8 +1447,10 @@ body.reader:has(#library:not([hidden])) {
 }
 
 /* The note under its quote (D118): the reader's words under the document's,
-   and dressed apart - the interface face at a step down, the muted voice,
-   its own hairline edge so the two texts cannot be misread as one passage.
+   and dressed apart - the interface face (the cell's own) at a step down
+   from the quote's size, so a note is a text that grows with the Aa size
+   yet never passes for the passage it stands under; the muted voice, its
+   own hairline edge so the two texts cannot be misread as one passage.
    `pre-wrap`, because the note's own line breaks are the only structure it
    has and textContent is the only way it enters. */
 .marks-note {
@@ -1412,21 +1458,19 @@ body.reader:has(#library:not([hidden])) {
   padding-inline-start: 0.65rem;
   border-inline-start: 2px solid var(--page-line);
   color: var(--page-muted);
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  font-size: 0.85em;
+  font-size: calc(var(--reader-size, 18px) * 0.85);
   line-height: 1.5;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
 
 /* The line under a quote whose document is gone (it came back from the copy,
-   `marks-backup.js`): the note's quiet voice without the note's rule, because
-   it is the page speaking, not the reader. */
+   `marks-backup.js`): the page speaking, not the reader - a hint's size in
+   the cell's interface face, the muted voice, no rule of its own. */
 .marks-missing {
-  margin: 0.5em 0 0;
+  margin: 0.5rem 0 0;
   color: var(--page-muted);
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  font-size: 0.85em;
+  font-size: 0.9rem;
   line-height: 1.5;
 }
 
@@ -1443,8 +1487,9 @@ body.reader:has(#library:not([hidden])) {
   /* Air under the column as well as over it: under a short quote the five
      acts are what gives the row its height, and without it the last one -
      the trash, or the "Sure?" it turns into - sat on the row's bottom rule
-     (Michał's smoke, 2026-08-29). */
-  margin-block: 0.9em 1.1em;
+     (Michał's smoke, 2026-08-29). In rem: the column is interface, and
+     these are the numbers it had at the default reading size. */
+  margin-block: 1rem 1.25rem;
 }
 
 .marks-act {
@@ -1465,9 +1510,13 @@ body.reader:has(#library:not([hidden])) {
   color: var(--page-fg);
 }
 
+/* The glyphs at the size they were tuned to by eye (Michał's reports on
+   specks): 1.3em of the reading size they used to inherit is 1.45em of
+   the interface size the column wears now - and interface it is, so the
+   glyphs stand still while the Aa size moves the quotes. */
 .marks-act .reader-icon {
-  width: 1.3em;
-  height: 1.3em;
+  width: 1.45em;
+  height: 1.45em;
 }
 
 /* The orphan row's door to its page (D150) is an anchor in the acts' dress:
@@ -1481,7 +1530,6 @@ a.marks-act {
    so the second press lands where the first one did. */
 .marks-act[data-armed] {
   padding: 0.35rem 0.8rem;
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   font-size: 0.85rem;
   white-space: nowrap;
 }
@@ -1533,14 +1581,11 @@ a.marks-act {
   /* The anchor over the rows lands here (D153); the same room the list's
      transfer section keeps under the window's edge. */
   scroll-margin-top: 0.75rem;
-  /* Chrome, not text: the buttons, hints, offer and reports wear the
-     interface's face and size - the reading list's own (`#library`) - where
-     the quotes above them read in the Aa face. Under the page's reading
-     face they stood in it too, at the reading size (Michał's smoke,
-     2026-09-01: "Aa is for the texts"). */
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  font-size: 1rem;
-  line-height: 1.6;
+  /* Chrome, not text: the buttons, hints, offer and reports wear the page's
+     interface dress (`#page`) where the quotes above them read in the Aa
+     face. This block was the second to have to say so for itself (Michał's
+     smoke, 2026-09-01: "Aa is for the texts") - the reason the page says
+     it once for everything now. */
 }
 
 /* The first row of buttons stands right under the rows, whichever half shows
@@ -1559,29 +1604,16 @@ a.marks-act {
   margin: 0 0 1.25rem;
 }
 
-/* --- the shared pager, held to the same touch floor --- */
+/* --- the book's pager: the shared one (`.pager`, page.css), in the article
+   view's own voice --- */
 
-.pager button {
-  min-height: 44px;
-  padding: 0.35rem 1rem;
-}
-
-/* Under a phone's width the row trades air for fit, the same trade the bar
-   makes at the top of this file: two worded buttons and "Page 1 of 3"
-   between them add up past a 400 px screen once the browser's text zoom
-   grows the rem, and `space-between` has nowhere to wrap to that would not
-   read as broken. The floor of 44px is untouched - only the air beside the
-   words goes. The limit is in rem so the tighter dress arrives with the zoom
-   that causes the overflow. The saved phrases page dresses its pager the
-   same way, in `vocab.css`. */
-@media (max-width: 30rem) {
-  .pager {
-    gap: 0.5rem;
-  }
-
-  .pager button {
-    padding-inline: 0.6rem;
-  }
+/* Under the article's quiet action row and over its title, the pager speaks
+   at the size the article view's chrome speaks - the bar, the panels, the
+   actions, the notice - not the lists' full interface size: a row of
+   controls a step louder than the bar over it read as part of the text.
+   Its label is the pager's muted count, like every pager's. */
+.segment-nav {
+  font-size: 0.85rem;
 }
 
 /* The way onward under a segment's last line, pushed off it: finishing a
@@ -1663,9 +1695,19 @@ a.marks-act {
   background: none;
 }
 
+/* The cross at the size it had while the dialogs still inherited the
+   reading size: 1.15em of 18px is 1.3em of the interface size they wear
+   now. */
+.toc-close .reader-icon {
+  width: 1.3em;
+  height: 1.3em;
+}
+
 /* The chapters, in the menu's quiet rows: full width, a hairline under
-   each, a finger of height. The titles are the book's words and keep the
-   page's reading face. */
+   each, a finger of height. The titles are the book's words and take the
+   reading face and size back by name - list items of the text, dressed
+   like the reading list's titles (D104) - inside a dialog whose head is
+   interface. The search dialog's hit rows below wear the same rule. */
 .toc-rows {
   overflow-y: auto;
   padding: 0 1rem 0.5rem;
@@ -1681,6 +1723,8 @@ a.marks-act {
   border-radius: 0;
   background: none;
   color: var(--page-fg);
+  font-family: var(--reader-font-lead, var(--reader-font-stack));
+  font-size: var(--reader-size, 18px);
   text-align: left;
 }
 
@@ -1941,9 +1985,10 @@ a.marks-act {
 }
 
 /* A snippet is a quiet row inside its result: full width, the page's own
-   ink, the bold phrase inside as the news. The left edge is the resting
-   affordance - these lines are doors, and on e-ink there is no hover to
-   say so. */
+   ink, the bold phrase inside as the news. The words are the text's own,
+   so they wear the reading face - at a glance's size, not the reading
+   size: context, not content. The left edge is the resting affordance -
+   these lines are doors, and on e-ink there is no hover to say so. */
 .search-snippet {
   display: block;
   width: 100%;
@@ -1954,6 +1999,7 @@ a.marks-act {
   background: none;
   color: var(--page-fg);
   text-align: left;
+  font-family: var(--reader-font-lead, var(--reader-font-stack));
   font-size: 0.95rem;
 }
 
@@ -2012,8 +2058,10 @@ a.marks-act {
 }
 
 /* The words being annotated, clamped to a glance - context, not content -
-   with the mark's own ink on the leading edge, the quote rows' stripe, so
-   the dialog visibly belongs to the mark it opened over. */
+   in the reading face (they are the text's words, in a dialog that is
+   otherwise interface) at a glance's size, with the mark's own ink on the
+   leading edge, the quote rows' stripe, so the dialog visibly belongs to
+   the mark it opened over. */
 .note-quote {
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -2024,6 +2072,7 @@ a.marks-act {
   padding-inline-start: 0.65rem;
   border-inline-start: 3px solid var(--page-line);
   color: var(--page-muted);
+  font-family: var(--reader-font-lead, var(--reader-font-stack));
   font-size: 0.9rem;
   overflow-wrap: anywhere;
 }
@@ -2105,9 +2154,10 @@ a.marks-act {
 
 /* --- the article's bar: the acts on this article --- */
 
+/* At the bar's size, a step under the page's interface: quiet acts over a
+   text, in the chrome's voice. */
 .reader-actions {
   margin-bottom: 1.75rem;
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   font-size: 0.85rem;
 }
 

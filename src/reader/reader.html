@@ -627,10 +627,39 @@
         </div>
         <div id="library-empty" class="empty" hidden></div>
         <ul id="library-rows" class="library-rows"></ul>
+        <!-- The shared pager (page.css): a drawn chevron at each end with its
+             word beside it. Under a phone's width the word steps aside and
+             the chevron is the button, the transport bar's way - the word
+             stays the button's name. The highlights' pager, the book's two
+             and the saved phrases page's are this markup again. -->
         <nav class="pager" id="library-pager" hidden>
-          <button type="button" id="library-prev" data-i18n="pager_prev">Previous</button>
+          <button type="button" id="library-prev">
+            <svg class="pager-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+              <path
+                d="M10.1 3.8 5.9 8l4.2 4.2"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.3"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            <span class="pager-word" data-i18n="pager_prev">Previous</span>
+          </button>
           <span class="pager-label" id="library-page-label"></span>
-          <button type="button" id="library-next" data-i18n="pager_next">Next</button>
+          <button type="button" id="library-next">
+            <span class="pager-word" data-i18n="pager_next">Next</span>
+            <svg class="pager-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+              <path
+                d="M5.9 3.8 10.1 8l-4.2 4.2"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.3"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
         </nav>
         <!-- Import and export, after the list the way the acts themselves come
              after the reading: visiting them is a decision, not a toll on the
@@ -766,9 +795,33 @@
         <div id="marks-empty" class="empty" hidden></div>
         <ul id="marks-rows" class="library-rows marks-rows"></ul>
         <nav class="pager" id="marks-pager" hidden>
-          <button type="button" id="marks-prev" data-i18n="pager_prev">Previous</button>
+          <button type="button" id="marks-prev">
+            <svg class="pager-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+              <path
+                d="M10.1 3.8 5.9 8l4.2 4.2"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.3"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            <span class="pager-word" data-i18n="pager_prev">Previous</span>
+          </button>
           <span class="pager-label" id="marks-page-label"></span>
-          <button type="button" id="marks-next" data-i18n="pager_next">Next</button>
+          <button type="button" id="marks-next">
+            <span class="pager-word" data-i18n="pager_next">Next</span>
+            <svg class="pager-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+              <path
+                d="M5.9 3.8 10.1 8l-4.2 4.2"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.3"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
         </nav>
         <!-- The transfer block under the quotes, here where the quotes are
              (the reading list's transfer section offered the export too
@@ -1028,13 +1081,26 @@
 
       <!--
         A book arrives one segment at a time, and these two rows are the way
-        between segments - the same quiet pager the lists speak, above the
-        text and again under its last line, where finishing a segment leaves
-        the reader. Turning a segment swaps the content of this same page:
-        no navigation, no animation (e-ink).
+        between segments - the same quiet pager the lists speak (the chevrons
+        and their words, see the reading list's), above the text and again
+        under its last line, where finishing a segment leaves the reader.
+        Turning a segment swaps the content of this same page: no
+        navigation, no animation (e-ink).
       -->
       <nav id="segment-nav" class="pager segment-nav" hidden aria-label="Book parts" data-i18n-aria-label="reader_book_nav">
-        <button type="button" id="segment-prev" data-i18n="pager_prev">Previous</button>
+        <button type="button" id="segment-prev">
+          <svg class="pager-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+            <path
+              d="M10.1 3.8 5.9 8l4.2 4.2"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          <span class="pager-word" data-i18n="pager_prev">Previous</span>
+        </button>
         <!-- The way to the map of parts (D116), an icon beside the part it
              locates - a word here would decide the row's width in six
              languages. Hidden for a book without one. -->
@@ -1064,7 +1130,19 @@
           </button>
           <span class="pager-label" id="segment-label"></span>
         </span>
-        <button type="button" id="segment-next" data-i18n="pager_next">Next</button>
+        <button type="button" id="segment-next">
+          <span class="pager-word" data-i18n="pager_next">Next</span>
+          <svg class="pager-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+            <path
+              d="M5.9 3.8 10.1 8l-4.2 4.2"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
       </nav>
 
       <article id="article" hidden>
@@ -1074,7 +1152,19 @@
       </article>
 
       <nav id="segment-nav-end" class="pager segment-nav" hidden aria-label="Book parts" data-i18n-aria-label="reader_book_nav">
-        <button type="button" id="segment-prev-end" data-i18n="pager_prev">Previous</button>
+        <button type="button" id="segment-prev-end">
+          <svg class="pager-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+            <path
+              d="M10.1 3.8 5.9 8l4.2 4.2"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          <span class="pager-word" data-i18n="pager_prev">Previous</span>
+        </button>
         <span class="segment-middle">
           <button
             type="button"
@@ -1101,7 +1191,19 @@
           </button>
           <span class="pager-label" id="segment-label-end"></span>
         </span>
-        <button type="button" id="segment-next-end" data-i18n="pager_next">Next</button>
+        <button type="button" id="segment-next-end">
+          <span class="pager-word" data-i18n="pager_next">Next</span>
+          <svg class="pager-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+            <path
+              d="M5.9 3.8 10.1 8l-4.2 4.2"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
       </nav>
 
       <!--
