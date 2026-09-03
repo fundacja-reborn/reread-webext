@@ -18,10 +18,16 @@ jobs:
   check:
     name: quality gate
     runs-on: ubuntu-latest
+    # The two actions are pinned to commits, not to tags: a tag can be moved
+    # to point at other code, a commit cannot, and this workflow runs with the
+    # repository checked out. The comment beside each pin names the release
+    # the commit is; bumping means resolving the new tag to its commit
+    # (`git ls-remote --tags https://github.com/actions/checkout.git v5`) and
+    # updating both the pin and the comment.
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version-file: .nvmrc
           cache: npm
