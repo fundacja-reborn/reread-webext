@@ -549,7 +549,21 @@ export const STYLE = `
     background-repeat: no-repeat;
   }
 
-  .entry + .entry { margin-top: 8px; }
+  /* A line between one book and the next, with about a line of the entries'
+     own text around it. The 8px gap that stood here alone was half a line at
+     desktop size and a quarter once the bubble was scaled up on an e-ink
+     tablet, and the label above each book is small and quiet by design - so a
+     reader with three dictionaries saw one long list even after the book's
+     name got its weight (D157; mobileread report, D174). The line is how the
+     bubble already sets off its layers - the sentence, this list - and it is
+     ink, which a 16-grey panel draws. A frame or a wash per book is what the
+     report's own patch did, and stays rejected: the entries are prose. In em,
+     so it grows with the tier and with --bubble-scale. */
+  .entry + .entry {
+    margin-top: 0.6em;
+    padding-top: 0.6em;
+    border-top: 1px solid var(--edge);
+  }
 
   /* Which book this came from, and the word it actually found - the second one
      matters when the reader selected "watches" and the dictionary knows
