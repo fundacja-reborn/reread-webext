@@ -1048,6 +1048,10 @@
   "options_custom_css_refused": {
     "message": "Non enregistré : les règles ont été refusées. Les règles qui chargent quoi que ce soit depuis le réseau (url(), @import, @font-face) ne sont pas autorisées."
   },
+  "options_custom_css_example": {
+    "message": "Exemple : .entry-label { color: darkorange; } met en orange l'étiquette au-dessus d'une entrée de dictionnaire."
+  },
+  "options_custom_css_cleared": { "message": "Enregistré : aucune règle, donc l'apparence par défaut." },
   "options_support_intro": {
     "message": "re/read est développé par une fondation à but non lucratif - sans investisseurs, sans publicité, sans pistage. S'il vous est utile et que vous souhaitez soutenir son développement, chaque don nous aide à construire des logiciels libres de toute pression commerciale."
   },

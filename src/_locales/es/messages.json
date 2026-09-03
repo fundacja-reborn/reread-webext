@@ -1036,6 +1036,10 @@
   "options_custom_css_refused": {
     "message": "No se ha guardado: las reglas se han rechazado. No se permiten reglas que carguen algo desde la red (url(), @import, @font-face)."
   },
+  "options_custom_css_example": {
+    "message": "Ejemplo: .entry-label { color: darkorange; } pone en naranja la etiqueta sobre una entrada del diccionario."
+  },
+  "options_custom_css_cleared": { "message": "Guardado: sin reglas, así que el aspecto predeterminado." },
   "options_support_intro": {
     "message": "re/read lo desarrolla una fundación sin ánimo de lucro - sin inversores, sin anuncios, sin rastreo. Si te resulta útil y quieres apoyar su desarrollo, cada donación nos ayuda a construir software libre de presiones comerciales."
   },

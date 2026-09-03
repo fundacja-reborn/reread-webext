@@ -345,14 +345,18 @@ function previewFontFamily(field) {
 }
 
 /**
- * The reader's own rules (D176) - the field shows what is stored, unless it
- * is the thing being typed in: another page's write must not eat a half-typed
- * sheet. The status line is the press's own and is not touched here.
+ * The reader's own rules (D176) - the field shows what is stored, unless
+ * somebody has typed into it since: another page's write, or this page's own
+ * refresh on any setting changing, must not eat a half-written sheet. Typed
+ * is remembered by the input event rather than read off the focus, because
+ * the focus leaves the field long before the press on Save.
  */
+let customCssTyped = false;
+
 function renderCustomCss() {
   const field = document.getElementById("custom-css-text");
   if (!(field instanceof HTMLTextAreaElement)) return;
-  if (document.activeElement !== field) field.value = config.customCss;
+  if (!customCssTyped) field.value = config.customCss;
 }
 
 /** The reading font's name (D163) - the field shows what is stored. */
@@ -2552,7 +2556,12 @@ document.getElementById("font-custom")?.addEventListener("keydown", (event) => {
 // anything is refused whole, said so under the field, and nothing is stored.
 // What is stored is the text as typed - the screen runs again wherever the
 // rules are applied - and an emptied field stores nothing, which is the
-// default look back.
+// default look back, said in its own words: a Save over an empty field once
+// read as a rule saved (Michał's smoke, 2026-09-03 - the example then stood
+// in the field as a placeholder, and looked typed).
+document.getElementById("custom-css-text")?.addEventListener("input", () => {
+  customCssTyped = true;
+});
 document.getElementById("custom-css-save")?.addEventListener("click", () => {
   const field = document.getElementById("custom-css-text");
   const status = document.getElementById("custom-css-status");
@@ -2565,8 +2574,11 @@ document.getElementById("custom-css-save")?.addEventListener("click", () => {
   }
   void writeConfig({ customCss: text }).then((written) => {
     config = written;
+    customCssTyped = false;
     renderCustomCss();
-    if (status !== null) status.textContent = t("options_custom_css_saved");
+    if (status !== null) {
+      status.textContent = text.length > 0 ? t("options_custom_css_saved") : t("options_custom_css_cleared");
+    }
   });
 });
 document.getElementById("library-copy")?.addEventListener("change", (event) => {

@@ -1377,6 +1377,10 @@
   "options_custom_css_refused": {
     "message": "Nie zapisano: reguły zostały odrzucone. Reguły pobierające cokolwiek z sieci (url(), @import, @font-face) nie są dozwolone."
   },
+  "options_custom_css_example": {
+    "message": "Przykład: .entry-label { color: darkorange; } koloruje na pomarańczowo etykietę nad wpisem słownika."
+  },
+  "options_custom_css_cleared": { "message": "Zapisano: bez reguł, czyli wygląd domyślny." },
   "options_support_intro": {
     "message": "re/read tworzy fundacja non-profit - bez inwestorów, bez reklam, bez śledzenia. Jeśli rozszerzenie jest ci przydatne i chcesz wesprzeć jego dalszy rozwój, każda darowizna pomaga nam budować oprogramowanie wolne od komercyjnej presji."
   },

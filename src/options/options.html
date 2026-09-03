@@ -692,8 +692,10 @@
          read, and never this page, where a rule that hid these controls
          could not be undone. Last among the settings on purpose (Michał's
          call): a handful of people will use it, and the jump link at the
-         top is how they reach it. The field is labelled by the heading; the
-         placeholder is a rule, which needs no translation. -->
+         top is how they reach it. The field is labelled by the heading. The
+         example stands under the field as a sentence and not as a placeholder:
+         an example in a code face read as text already typed, and a Save
+         pressed over it stored nothing (Michał's smoke, 2026-09-03). -->
     <h2 id="custom-css" data-i18n="options_custom_css_heading">Custom CSS</h2>
 
     <p class="explain" data-i18n="options_custom_css_intro">
@@ -712,11 +714,14 @@
         autocapitalize="off"
         autocomplete="off"
         aria-labelledby="custom-css"
-        placeholder=".entry-label { color: darkorange; }"
       ></textarea>
       <p class="inline">
         <button type="button" id="custom-css-save" data-i18n="options_custom_css_save">Save</button>
         <output id="custom-css-status" class="row-value" aria-live="polite"></output>
+      </p>
+      <p class="row-note" data-i18n="options_custom_css_example">
+        Example: .entry-label { color: darkorange; } colours the label above a dictionary entry
+        orange.
       </p>
     </div>
 

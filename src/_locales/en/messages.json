@@ -1277,6 +1277,10 @@
   "options_custom_css_refused": {
     "message": "Not saved: the rules were refused. Rules that load anything from the network (url(), @import, @font-face) are not allowed."
   },
+  "options_custom_css_example": {
+    "message": "Example: .entry-label { color: darkorange; } colours the label above a dictionary entry orange."
+  },
+  "options_custom_css_cleared": { "message": "Saved: no rules, so the default look." },
   "options_support_intro": {
     "message": "re/read is built by a non-profit foundation - no investors, no ads, no tracking. If you find it useful and want to support its continued development, every donation helps us build software free from commercial pressure."
   },
