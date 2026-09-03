@@ -402,13 +402,13 @@
   },
   "reader_empty_all_read": { "message": "Читати більше нічого - усе збережене позначено прочитаним." },
   "reader_empty_none_read": { "message": "Ще нічого не позначено прочитаним." },
-  "reader_filter_placeholder": { "message": "Фільтрувати за назвою чи сайтом" },
-  "reader_filter_label": { "message": "Фільтрувати список читання" },
+  "reader_filter_placeholder": { "message": "Шукати за назвою чи сайтом" },
+  "reader_filter_label": { "message": "Шукати у списку читання" },
   "reader_filter_no_match": {
     "message": "Жодна збережена стаття не відповідає «$QUERY$».",
     "placeholders": { "query": { "content": "$1", "example": "wikipedia" } }
   },
-  "reader_filter_clear": { "message": "Очистити фільтр" },
+  "reader_filter_clear": { "message": "Очистити пошук" },
   "reader_filter_count": {
     "message": "$MATCHING$ з $TOTAL$",
     "placeholders": {

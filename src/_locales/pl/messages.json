@@ -402,13 +402,13 @@
   },
   "reader_empty_all_read": { "message": "Nie zostało nic do przeczytania - wszystko, co zapisane, jest oznaczone jako przeczytane." },
   "reader_empty_none_read": { "message": "Nic nie jest jeszcze oznaczone jako przeczytane." },
-  "reader_filter_placeholder": { "message": "Filtruj po tytule lub witrynie" },
-  "reader_filter_label": { "message": "Filtruj czytelnię" },
+  "reader_filter_placeholder": { "message": "Szukaj po tytule lub witrynie" },
+  "reader_filter_label": { "message": "Szukaj w czytelni" },
   "reader_filter_no_match": {
     "message": "Brak artykułów pasujących do „$QUERY$”.",
     "placeholders": { "query": { "content": "$1", "example": "wikipedia" } }
   },
-  "reader_filter_clear": { "message": "Wyczyść filtr" },
+  "reader_filter_clear": { "message": "Wyczyść wyszukiwanie" },
   "reader_filter_count": {
     "message": "$MATCHING$ z $TOTAL$",
     "placeholders": {

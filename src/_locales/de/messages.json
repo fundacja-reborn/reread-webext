@@ -316,13 +316,13 @@
   },
   "reader_empty_all_read": { "message": "Nichts mehr zu lesen - alles Gespeicherte ist als gelesen markiert." },
   "reader_empty_none_read": { "message": "Noch nichts ist als gelesen markiert." },
-  "reader_filter_placeholder": { "message": "Nach Titel oder Website filtern" },
-  "reader_filter_label": { "message": "Die Leseliste filtern" },
+  "reader_filter_placeholder": { "message": "Nach Titel oder Website suchen" },
+  "reader_filter_label": { "message": "Die Leseliste durchsuchen" },
   "reader_filter_no_match": {
     "message": "Kein gespeicherter Artikel passt zu „$QUERY$“.",
     "placeholders": { "query": { "content": "$1", "example": "wikipedia" } }
   },
-  "reader_filter_clear": { "message": "Filter leeren" },
+  "reader_filter_clear": { "message": "Suche leeren" },
   "reader_filter_count": {
     "message": "$MATCHING$ von $TOTAL$",
     "placeholders": {

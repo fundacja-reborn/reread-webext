@@ -327,13 +327,13 @@
   },
   "reader_empty_all_read": { "message": "No queda nada por leer - todo lo guardado está marcado como leído." },
   "reader_empty_none_read": { "message": "Aún no hay nada marcado como leído." },
-  "reader_filter_placeholder": { "message": "Filtrar por título o sitio" },
-  "reader_filter_label": { "message": "Filtrar la lista de lectura" },
+  "reader_filter_placeholder": { "message": "Buscar por título o sitio" },
+  "reader_filter_label": { "message": "Buscar en la lista de lectura" },
   "reader_filter_no_match": {
     "message": "Ningún artículo guardado coincide con «$QUERY$».",
     "placeholders": { "query": { "content": "$1", "example": "wikipedia" } }
   },
-  "reader_filter_clear": { "message": "Borrar el filtro" },
+  "reader_filter_clear": { "message": "Borrar la búsqueda" },
   "reader_filter_count": {
     "message": "$MATCHING$ de $TOTAL$",
     "placeholders": {

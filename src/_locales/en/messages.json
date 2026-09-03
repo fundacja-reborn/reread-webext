@@ -385,13 +385,13 @@
   },
   "reader_empty_all_read": { "message": "Nothing left to read - everything saved is marked as read." },
   "reader_empty_none_read": { "message": "Nothing is marked as read yet." },
-  "reader_filter_placeholder": { "message": "Filter by title or site" },
-  "reader_filter_label": { "message": "Filter the reading list" },
+  "reader_filter_placeholder": { "message": "Search by title or site" },
+  "reader_filter_label": { "message": "Search the reading list" },
   "reader_filter_no_match": {
     "message": "No saved article matches \"$QUERY$\".",
     "placeholders": { "query": { "content": "$1", "example": "wikipedia" } }
   },
-  "reader_filter_clear": { "message": "Clear the filter" },
+  "reader_filter_clear": { "message": "Clear the search" },
   "reader_filter_count": {
     "message": "$MATCHING$ of $TOTAL$",
     "description": "Beside the filter while it is active: rows matching, out of the whole segment on the tab.",

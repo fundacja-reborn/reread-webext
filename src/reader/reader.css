@@ -1180,6 +1180,27 @@ body.reader:has(#library:not([hidden])) {
   border: 1px solid var(--page-border);
   background: transparent;
   color: var(--page-fg);
+  /* The placeholder runs long in some languages, and the field gives up a
+     button's width while the deeper search is on: cut with an ellipsis
+     rather than mid-letter. */
+  text-overflow: ellipsis;
+}
+
+/* The Search button at the field's end (D119, D173): the document dialog's
+   form shape - the field and its button on one line, the button as tall as
+   the field by the row's stretch. Always there, since nothing narrows the
+   list without it; greyed while a press would do nothing, and lit with the
+   accent - the note dialog's Save, the page's word for "this is the one
+   press" - while the field holds words the list on screen was not narrowed
+   by. Its word never breaks. */
+.filter-line button {
+  padding: 0.35rem 1rem;
+  white-space: nowrap;
+}
+
+.filter-line button[data-stale] {
+  border-color: var(--page-accent);
+  background: color-mix(in srgb, var(--page-accent) 12%, transparent);
 }
 
 /* The note over a book whose language is not the pair's source (O20): one
@@ -1795,11 +1816,12 @@ a.marks-act {
 /* --- search through the reading list (D119): the checkbox line under the
    filter, and the results standing where the rows stand --- */
 
+/* The checkbox alone: its Search button stood at this line's far end until
+   2026-09-03 and went unseen there, between the field and Select (Michał's
+   screenshots); it stands at the field's end now (`.filter-line`). */
 .search-line {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
 }
 
 /* A finger of height for the checkbox and its words, like every touch
