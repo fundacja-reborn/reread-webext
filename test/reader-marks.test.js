@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 
 import {
   DEFAULT_MARK_COLOR,
+  MAX_MARK_TEXT_LENGTH,
   MAX_NOTE_LENGTH,
   asMark,
   compareMarks,
@@ -189,6 +190,13 @@ describe("asMark", () => {
     assert.equal(asMark({ ...mark(), start: undefined }), null);
     assert.equal(asMark({ ...mark(), end: { block: 0 } }), null);
     assert.equal(asMark({ ...mark(), text: 7 }), null);
+  });
+
+  it("refuses a quote past the cap whole rather than cutting it (D171)", () => {
+    // A cut quote would anchor nowhere; a quote this long is not a mark but
+    // a file planting a document behind one row.
+    assert.equal(asMark({ ...mark(), text: "x".repeat(MAX_MARK_TEXT_LENGTH) })?.text.length, MAX_MARK_TEXT_LENGTH);
+    assert.equal(asMark({ ...mark(), text: "x".repeat(MAX_MARK_TEXT_LENGTH + 1) }), null);
   });
 });
 

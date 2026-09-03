@@ -25,6 +25,7 @@
 
 import { webext } from "../browser.js";
 import { underPrefix } from "../models/upstream.js";
+import { answeredByHost } from "../same-host.js";
 import { catalogSource, parseCatalog } from "./catalog.js";
 
 /** The one key this module owns in `storage.local`. */
@@ -131,12 +132,18 @@ export async function refreshLiveDictionaries(options = {}) {
       // The conditional request is the whole economy of this refresh; the
       // browser's own cache underneath it would only blur whose answer this is.
       cache: "no-store",
+      // Nothing of the reader's rides along - said rather than defaulted (D171).
+      credentials: "omit",
       redirect: "follow",
       ...(cached?.etag ? { headers: { "If-None-Match": cached.etag } } : {}),
     });
   } catch (error) {
     return { ok: false, detail: error instanceof Error ? error.message : String(error) };
   }
+
+  // The listing from its own host or from nobody (D171): an answer redirected
+  // elsewhere is not WikDict's directory, whatever it lists.
+  if (!answeredByHost(response, source)) return { ok: false, detail: "answered from another host" };
 
   if (response.status === 304 && cached !== null) {
     // Unchanged upstream. The date still moves: it answers "when did the

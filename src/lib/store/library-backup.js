@@ -56,9 +56,12 @@
  * a document's light row is patched where it stands and written nowhere it
  * does not; restored only into an empty library - no article, no book -
  * asked before the writes that make one and before the list reads, always
- * after the highlights' own restore, whose rule wants no marks either; and
- * quiet in every failure, because the copy is insurance and a save must not
- * fail for its insurance (`library-copy.js` binds it so).
+ * after the highlights' own restore, whose rule wants no marks either;
+ * neither added to nor removed from in a private window, where the area is
+ * shared with the normal ones and a session that leaves no trace may only
+ * read (D171, `private-copies.js`); and quiet in every failure, because the
+ * copy is insurance and a save must not fail for its insurance
+ * (`library-copy.js` binds it so).
  *
  * The store and the storage arrive as parameters so the rules can be tested
  * against stand-ins; `library-copy.js` supplies IndexedDB, the config and
@@ -66,10 +69,11 @@
  */
 
 import { fromBase64, toBase64 } from "../base64.js";
-import { webext } from "../browser.js";
+import { inPrivateContext, webext } from "../browser.js";
 import { asPictureRow, asPicturesSummary } from "../reader/pictures.js";
 import { asPosition } from "../reader/position.js";
 import { asBookMeta, asSegment } from "./book.js";
+import { copiesWritable } from "./private-copies.js";
 import { asSavedMeta } from "./saved-article.js";
 
 /**
@@ -184,18 +188,26 @@ export function pictureKey(url, index) {
 }
 
 /**
- * The storage half of the dependencies, the same on every page.
+ * The storage half of the dependencies, the same on every page - except
+ * that in a private window the writing half does nothing (D171,
+ * `private-copies.js`): the area is shared with the normal windows, and a
+ * private session may read the copy but must not leave anything in it, nor
+ * take anything out of it.
  *
+ * @param {() => boolean} [isPrivate] for tests; the browser's answer by default
  * @returns {StorageDeps}
  */
-export function storageDeps() {
+export function storageDeps(isPrivate = inPrivateContext) {
+  const writable = copiesWritable(isPrivate);
   return {
     readAll: () => webext().storage.local.get(null),
     read: async (key) => (await webext().storage.local.get(key))[key],
     readMany: async (keys) => (keys.length > 0 ? await webext().storage.local.get(keys) : {}),
-    write: (items) => webext().storage.local.set(items),
+    write: async (items) => {
+      if (writable) await webext().storage.local.set(items);
+    },
     remove: async (keys) => {
-      if (keys.length > 0) await webext().storage.local.remove(keys);
+      if (writable && keys.length > 0) await webext().storage.local.remove(keys);
     },
   };
 }

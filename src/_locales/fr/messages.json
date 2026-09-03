@@ -18,7 +18,7 @@
   "nav_menu": { "message": "Menu" },
   "language_pair": { "message": "Paire de langues" },
   "reading_list": { "message": "Liste de lecture hors ligne" },
-  "private_browsing_note": { "message": "Vous êtes en navigation privée. Ici, le navigateur utilise pour re/read une base de données séparée et vide, qu'il supprime à la fin de la session privée : rien de ce que vous avez enregistré ne s'y trouve, et ce que vous enregistrez ou importez ici n'est pas conservé. Ouvrez re/read dans un onglet normal - tout y est." },
+  "private_browsing_note": { "message": "Vous êtes en navigation privée. Le navigateur utilise pour cette page une base de données séparée, qu'il supprime à la fin de la session privée : la liste de lecture et les surlignages que vous voyez ici proviennent de leurs copies, et un article enregistré, un livre importé, un surlignage fait ou tout ce qui est supprimé ici disparaît avec la session. Seule exception : les phrases enregistrées, qui sont conservées. Pour tout le reste, ouvrez re/read dans un onglet normal." },
   "saved_phrases": { "message": "Phrases enregistrées" },
   "open_reader": { "message": "Lire cette page dans le lecteur" },
   "quiet_bubble": { "message": "Masquer par défaut les actions de la bulle" },
@@ -938,7 +938,7 @@
   },
   "options_reader_only": { "message": "Seulement dans le lecteur" },
   "options_reader_only_hint": {
-    "message": "Limite le soulignement des phrases enregistrées et la bulle de traduction au lecteur. Sélectionner du texte sur une page web ordinaire proposera uniquement de l'ouvrir dans le lecteur. Sur Android et iOS, l'option est activée par défaut."
+    "message": "Limite le soulignement des phrases enregistrées et la bulle de traduction au lecteur. Sélectionner du texte sur une page web ordinaire proposera uniquement de l'ouvrir dans le lecteur. Lorsqu'elle est activée, aucune page web ne peut savoir lesquels de ses mots vous avez enregistrés. Sur Android et iOS, l'option est activée par défaut."
   },
   "options_keep_articles": { "message": "Enregistrer par défaut dans la liste de lecture hors ligne" },
   "options_keep_articles_hint": {

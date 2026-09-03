@@ -31,8 +31,9 @@
  * `storage.local`.
  */
 
-import { webext } from "../browser.js";
+import { inPrivateContext, webext } from "../browser.js";
 import { asMark, compareMarks } from "../reader/marks.js";
+import { copiesWritable } from "./private-copies.js";
 
 /** @typedef {import("../reader/marks.js").Mark} Mark */
 
@@ -82,15 +83,21 @@ const VERSION = 1;
 const MAX_MARKS_PER_DOC = 1000;
 
 /**
- * The storage half of the dependencies, the same on every page.
+ * The storage half of the dependencies, the same on every page - except
+ * that in a private window the write does nothing (D171,
+ * `private-copies.js`): the area is shared with the normal windows, and a
+ * rebuild there would carry the private session's marks - and the absence
+ * of the ones it deleted - into the copy the normal windows restore from.
  *
+ * @param {() => boolean} [isPrivate] for tests; the browser's answer by default
  * @returns {Pick<MarksBackupDeps, "read" | "write" | "now">}
  */
-export function storageDeps() {
+export function storageDeps(isPrivate = inPrivateContext) {
+  const writable = copiesWritable(isPrivate);
   return {
     read: async () => (await webext().storage.local.get(MARKS_BACKUP_KEY))[MARKS_BACKUP_KEY],
     write: async (backup) => {
-      await webext().storage.local.set({ [MARKS_BACKUP_KEY]: backup });
+      if (writable) await webext().storage.local.set({ [MARKS_BACKUP_KEY]: backup });
     },
     now: () => Date.now(),
   };

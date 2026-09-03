@@ -32,6 +32,7 @@ import {
   summarizeCopy,
 } from "./library-backup.js";
 import { promisify, withLibrary } from "./library-db.js";
+import { copiesWritable } from "./private-copies.js";
 import { asSavedMeta } from "./saved-article.js";
 
 /**
@@ -187,7 +188,10 @@ function booksOf(rows, segmentRows) {
 function copyDeps() {
   return {
     ...storageDeps(),
-    enabled: async () => effectiveLibraryCopy(await readConfig()),
+    // Off in a private window as well as by the switch (D171): the copy's
+    // writers are no-ops there anyway, and saying so here spares a
+    // completion the read of the whole library it would then throw away.
+    enabled: async () => copiesWritable() && effectiveLibraryCopy(await readConfig()),
     empty: () => withLibrary("readonly", isEmpty),
     // The ids alone, from the two key lists: what the completion compares
     // against the index on every list, without a byte of content read.
@@ -283,6 +287,9 @@ export function completeLibraryCopy() {
  * @returns {Promise<boolean>} whether the copy was built
  */
 export async function buildLibraryCopy() {
+  // Not from a private window (D171): the switch there moves the setting,
+  // and the build follows on the first normal page (`completeLibraryCopy`).
+  if (!copiesWritable()) return false;
   try {
     await ready();
     await buildWith(copyDeps());
@@ -298,6 +305,9 @@ export async function buildLibraryCopy() {
  * @returns {Promise<boolean>} whether the copy was cleared
  */
 export async function clearLibraryCopy() {
+  // As above: a private window may not take the copy away from the normal
+  // ones. The setting is off, so nothing is added until it is on again.
+  if (!copiesWritable()) return false;
   try {
     await ready();
     await clearWith(copyDeps());

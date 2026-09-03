@@ -99,12 +99,42 @@ function findEndOfCentralDirectory(view) {
 }
 
 /**
+ * Inflates one entry, and stops the moment it grows past what the directory
+ * said it would (D171). Deflate packs a thousand to one, so an archive under
+ * the download cap can still unpack to tens of gigabytes - a size check after
+ * the fact would come after the memory was gone. Read in chunks with the
+ * ceiling held to every one, an entry that lies about its size costs its
+ * declared size and not a byte more.
+ *
  * @param {Uint8Array<ArrayBuffer>} compressed a view into the downloaded archive
- * @returns {Promise<Uint8Array>}
+ * @param {number} limit the size the central directory declared
+ * @returns {Promise<Uint8Array | null>} the bytes, or null past the limit
  */
-async function inflateRaw(compressed) {
-  const stream = new Blob([compressed]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
-  return new Uint8Array(await new Response(stream).arrayBuffer());
+async function inflateRaw(compressed, limit) {
+  const reader = new Blob([compressed])
+    .stream()
+    .pipeThrough(new DecompressionStream("deflate-raw"))
+    .getReader();
+  /** @type {Uint8Array[]} */
+  const chunks = [];
+  let size = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    size += value.byteLength;
+    if (size > limit) {
+      await reader.cancel().catch(() => undefined);
+      return null;
+    }
+    chunks.push(value);
+  }
+  const all = new Uint8Array(size);
+  let at = 0;
+  for (const chunk of chunks) {
+    all.set(chunk, at);
+    at += chunk.byteLength;
+  }
+  return all;
 }
 
 /**
@@ -216,11 +246,17 @@ export async function readZip(buffer) {
     if (entry.method === 0) {
       bytes = compressed.slice();
     } else {
+      /** @type {Uint8Array | null} */
+      let inflated;
       try {
-        bytes = await inflateRaw(compressed);
+        inflated = await inflateRaw(compressed, entry.uncompressedSize);
       } catch {
         return refuse("zip_bad", `${entry.name}: does not decompress`);
       }
+      if (inflated === null) {
+        return refuse("zip_bad", `${entry.name}: unpacks to more than the ${entry.uncompressedSize} bytes the archive said`);
+      }
+      bytes = inflated;
     }
 
     if (bytes.byteLength !== entry.uncompressedSize) {

@@ -185,6 +185,34 @@ describe("downloadModel", () => {
     assert.equal(result.problem, "size");
   });
 
+  it("stops unpacking a file that grows past the size the entry claims (D171)", async () => {
+    const { model, served } = fixture();
+    const file = model.files[0];
+    assert.ok(file !== undefined);
+    // A megabyte of zeros gzips to a kilobyte; the entry claims what a model
+    // of this fixture's size claims, and the inflate stops at that claim.
+    served[file.url] = new Uint8Array(gzipSync(new Uint8Array(1 << 20)));
+    const result = await downloadModel(model, { fetch: server(served) });
+
+    assert.ok(!result.ok);
+    assert.equal(result.problem, "size");
+    assert.match(result.detail ?? "", /unpacks to more than/);
+  });
+
+  it("refuses a file the host redirected elsewhere, before reading a byte of it (D171)", async () => {
+    const { model } = fixture();
+    // Only the answer's address is looked at before the refusal, so the
+    // stand-in needs nothing else - a body read here would be the bug.
+    const elsewhere = /** @type {typeof fetch} */ (
+      /** @type {unknown} */ (async () => ({ url: "https://mirror.example/model.bin.gz", ok: true, status: 200 }))
+    );
+    const result = await downloadModel(model, { fetch: elsewhere });
+
+    assert.ok(!result.ok);
+    assert.equal(result.problem, "http");
+    assert.match(result.detail ?? "", /another host/);
+  });
+
   it("says what the server answered when it will not serve the file", async () => {
     const { model } = fixture();
     const result = await downloadModel(model, { fetch: server({}) });

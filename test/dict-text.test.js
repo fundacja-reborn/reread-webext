@@ -87,6 +87,24 @@ describe("fieldText", () => {
       assert.equal(fieldText({ type, text: "whatever" }), "");
     }
   });
+
+  it("reads only so much of a field, and never walks a hostile one twice over (D171)", () => {
+    // A field of nothing but `<` used to cost every one of them a walk to the
+    // end and back; now the tag expression stops at the next `<`, and the
+    // field is cut before any expression sees it. Both together make this
+    // return at once - a test that hung would be the failure.
+    const started = Date.now();
+    const hostile = fieldText({ type: "h", text: "<".repeat(LIMITS.field * 4) });
+    assert.equal(hostile.length, LIMITS.field);
+    assert.ok(Date.now() - started < 2000, "took a walk over the whole field");
+    // The cut lands before the clamp, on plain fields too: what is past it is
+    // never read, and what is before it reads as before.
+    const long = fieldText({ type: "m", text: `${"word ".repeat(LIMITS.field)}tail` });
+    assert.ok(long.length <= LIMITS.field && long.startsWith("word word") && !long.includes("tail"));
+    // A `<` inside a tag is not markup any dictionary writes; a tag is stripped
+    // to its first `>` as before.
+    assert.equal(fieldText({ type: "h", text: "a <b>bold</b> b" }), "a bold b");
+  });
 });
 
 describe("senses", () => {

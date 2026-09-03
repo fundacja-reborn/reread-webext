@@ -182,6 +182,20 @@ describe("openDictionary", () => {
     }
   });
 
+  it("stops at the cap rather than inflating past it (D171)", async () => {
+    const text = utf8("a".repeat(64 * 1024));
+    const packed = await gzip(text);
+    // The cap holds the read, whatever the trailer claims - and it holds the
+    // first allocation too: a trailer claiming four gigabytes does not get
+    // four gigabytes allocated on its word.
+    for (const hint of [text.length, 4 * 1024 * 1024 * 1024]) {
+      const stream = new Blob([packed.slice().buffer]).stream();
+      await assert.rejects(gunzip(stream, hint, 1024), /unpacks to more than 1024 bytes/);
+    }
+    // Under the cap nothing changes.
+    assert.deepEqual(await gunzip(new Blob([packed.slice().buffer]).stream(), text.length, text.length), text);
+  });
+
   it("takes the files it was given, so nobody else keeps them", async () => {
     const files = dictionary();
     await opened(files);

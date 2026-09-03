@@ -198,6 +198,10 @@ function onSelectionChange() {
  * @param {PointerEvent} event
  */
 function onPointerDown(event) {
+  // A page's own script can dispatch one of these; only the browser's count
+  // (D171, the reading side's rule). `selectionchange` stays ungated - the
+  // offer this module makes is only ever an offer.
+  if (event.isTrusted !== true) return;
   lastPointerType = event.pointerType;
 }
 

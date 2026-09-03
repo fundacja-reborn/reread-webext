@@ -53,6 +53,16 @@ export const Segment = Object.freeze({
 /** @typedef {(typeof Segment)[keyof typeof Segment]} SegmentValue */
 
 /**
+ * The schemes an article's address may have: the web's two, and a file on
+ * this device. An article is a page somebody read, and those are the places
+ * a page is read from - anything else (`javascript:`, `data:`, `blob:`) is
+ * no address to come back to, and the reader puts the address into a link
+ * (D171): what a hand-made backup file names must not become an `href` the
+ * reader would hand out.
+ */
+const ARTICLE_SCHEMES = new Set(["http:", "https:", "file:"]);
+
+/**
  * Builds the record a save press writes, or nothing when there is nothing
  * worth writing - no address to come back to, or no content to keep.
  *
@@ -79,7 +89,9 @@ export function savedArticle({ url, title, content, dir, lang, savedAt }) {
   /** @type {string} */
   let hostname;
   try {
-    hostname = new URL(url).hostname;
+    const address = new URL(url);
+    if (!ARTICLE_SCHEMES.has(address.protocol)) return null;
+    hostname = address.hostname;
   } catch {
     // Not an address anybody could return to - not an article to keep.
     return null;

@@ -997,7 +997,11 @@ function renderArticle(piece) {
   rescan();
 
   if (originalLink instanceof HTMLAnchorElement) {
-    if (piece.link === null) {
+    // The same door the orphan rows' links go through (D150, `webAddress`):
+    // a stored address is data, and only the web's two schemes belong in an
+    // `href` this page hands out (D171) - a `file:` page cannot be opened
+    // from here anyway, and anything stranger has no business being a link.
+    if (piece.link === null || !webAddress(piece.link)) {
       originalLink.hidden = true;
     } else {
       originalLink.href = piece.link;

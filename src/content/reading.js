@@ -1049,9 +1049,27 @@ async function fillSecondLayer() {
 }
 
 /**
+ * Whether an event came from a hand rather than from a script (D171). The
+ * page's own scripts can dispatch a `mouseup` with any coordinates over a
+ * selection they made themselves, and until D171 that opened the bubble,
+ * ran the engine and - for a short phrase - kept it (D22) without anybody
+ * having selected anything. Only the browser sets `isTrusted`; this
+ * extension dispatches no events of its own, so nothing genuine is lost.
+ * The `selectionchange` listeners stay ungated: a page is allowed to move
+ * the selection, and that path only ever shows and asks, never keeps.
+ *
+ * @param {Event} event
+ * @returns {boolean}
+ */
+function synthetic(event) {
+  return event.isTrusted !== true;
+}
+
+/**
  * @param {MouseEvent} event
  */
 function onMouseDown(event) {
+  if (synthetic(event)) return;
   press = { x: event.clientX, y: event.clientY, mine: owns(event.target) };
 }
 
@@ -1059,6 +1077,7 @@ function onMouseDown(event) {
  * @param {MouseEvent} event
  */
 function onMouseUp(event) {
+  if (synthetic(event)) return;
   // The reader's own selection hears the release first (D86): a drag or a
   // hold ending gets its bubble there, and a click on the selection's
   // neighbour grows the phrase - either way this listener's own reading of
@@ -1358,6 +1377,7 @@ function presentGesture(range, kind) {
  * @param {PointerEvent} event
  */
 function onPointerDown(event) {
+  if (synthetic(event)) return;
   lastPointerType = event.pointerType;
 }
 
@@ -1459,6 +1479,7 @@ function chordTaken(target) {
  * @param {KeyboardEvent} event
  */
 function onKeyDown(event) {
+  if (synthetic(event)) return;
   // The bubble-less selection (D149) keeps the two keys a bubble answered
   // for it: the chord copies the phrase, Escape clears the wash.
   if (!tooltip.isOpen() && !(noBubble && current !== null)) return;
