@@ -250,10 +250,38 @@
 
     <p id="status" class="status" role="status"></p>
 
+    <!-- The shared pager (page.css): a drawn chevron at each end with its
+         word beside it; under a phone's width the word steps aside and the
+         chevron is the button, the word staying its name. The reading
+         list's pager is the same markup. -->
     <nav class="pager" id="pager" hidden>
-      <button type="button" id="prev" data-i18n="pager_prev">Previous</button>
+      <button type="button" id="prev">
+        <svg class="pager-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <path
+            d="M10.1 3.8 5.9 8l4.2 4.2"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.3"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+        <span class="pager-word" data-i18n="pager_prev">Previous</span>
+      </button>
       <span class="pager-label" id="page-label"></span>
-      <button type="button" id="next" data-i18n="pager_next">Next</button>
+      <button type="button" id="next">
+        <span class="pager-word" data-i18n="pager_next">Next</span>
+        <svg class="pager-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <path
+            d="M5.9 3.8 10.1 8l-4.2 4.2"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.3"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </button>
     </nav>
 
     <!-- Import and export, after the list the way the acts themselves come

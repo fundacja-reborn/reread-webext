@@ -432,25 +432,9 @@ button.quiet-speak svg {
   padding: 0.35rem 1rem;
 }
 
-/* --- the shared pager, held to the same touch floor --- */
-
-.pager button {
-  min-height: 44px;
-  padding: 0.35rem 1rem;
-}
-
-/* Tighter under a phone's width, the twin of the rule in `reader.css`: two
-   worded buttons and "Page 1 of 3" between them add up past a 400 px screen
-   once the text zoom grows the rem. Air goes, the 44px touch floor stays. */
-@media (max-width: 30rem) {
-  .pager {
-    gap: 0.5rem;
-  }
-
-  .pager button {
-    padding-inline: 0.6rem;
-  }
-}
+/* The pager is the shared one (`.pager`, page.css): the chevrons with their
+   words, the words stepping aside under a phone's width, the 44px floor -
+   nothing of its own here. */
 
 /* --- the transfer section: import and export, under the list --- */
 

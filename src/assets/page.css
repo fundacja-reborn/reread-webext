@@ -260,8 +260,10 @@ input[type="checkbox"] {
   color: var(--page-fg);
 }
 
-/* One pager for every long list (saved phrases, the reading list): Previous
-   and Next at the ends, the count between them. */
+/* One pager for every long list (saved phrases, the reading list, the
+   highlights) and for a book's parts: Previous and Next at the ends, the
+   count between them. Each end is a drawn chevron with its word beside it,
+   at the page's touch floor. */
 .pager {
   display: flex;
   align-items: center;
@@ -270,9 +272,67 @@ input[type="checkbox"] {
   margin: 1rem 0;
 }
 
+.pager button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0.35rem 0.9rem;
+  white-space: nowrap;
+}
+
+/* The chevron follows the text around it (`em`), the drawn buttons' rule
+   everywhere on these pages. */
+.pager-icon {
+  width: 1.15em;
+  height: 1.15em;
+  flex: none;
+}
+
 .pager-label {
   color: var(--page-muted);
   font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+/* Under a phone's width the words step aside and the chevrons are the
+   buttons - the transport bar's own manners (`.speech-label`, reader.css).
+   Two worded buttons and "Page 1 of 3" between them add up past a phone's
+   column once the browser's text zoom grows the rem: a Pixel at 125%, in
+   Polish, wanted 380px of a 350px column, and the book's "Part 1 of 26"
+   wrapped into the Next button (Michał's screenshot, 2026-09-03). Clipped
+   rather than removed, because the word IS the button's name: a screen
+   reader still hears "Previous". The 44px floor is untouched; the glyph
+   steps up, since icon-only means the icon is the button. The limit is in
+   rem on purpose: the overflow arrives with the text zoom, and an em-based
+   query grows with the same zoom, so the tight dress comes exactly to the
+   screens that need it. */
+@media (max-width: 30rem) {
+  .pager {
+    gap: 0.5rem;
+  }
+
+  .pager button {
+    padding-inline: 0.5rem;
+  }
+
+  .pager-word {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .pager-icon {
+    width: 1.5em;
+    height: 1.5em;
+  }
 }
 
 /* On e-ink the tinted wash flattens into the background, so the wash cannot
