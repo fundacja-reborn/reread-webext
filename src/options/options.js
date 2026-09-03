@@ -2559,6 +2559,24 @@ document.getElementById("font-custom")?.addEventListener("keydown", (event) => {
 // default look back, said in its own words: a Save over an empty field once
 // read as a rule saved (Michał's smoke, 2026-09-03 - the example then stood
 // in the field as a placeholder, and looked typed).
+/**
+ * The field's own status line. A refusal wears the report's frame and the
+ * error tone, because it lands under a tall field, and a line in the muted
+ * grey there was read as no answer at all (Michał's smoke, 2026-09-03); what
+ * was saved says so quietly, the way every status on this page does.
+ *
+ * @param {HTMLElement | null} status
+ * @param {string} text
+ * @param {"idle" | "error"} tone
+ */
+function tellCustomCss(status, text, tone) {
+  if (status === null) return;
+  status.hidden = false;
+  status.className = tone === "error" ? "status report" : "status";
+  status.dataset["tone"] = tone;
+  status.textContent = text;
+}
+
 document.getElementById("custom-css-text")?.addEventListener("input", () => {
   customCssTyped = true;
 });
@@ -2569,16 +2587,14 @@ document.getElementById("custom-css-save")?.addEventListener("click", () => {
   const text = field.value.trim().length > 0 ? field.value : "";
   const compiled = text.length > 0 ? compileUserCss(text) : null;
   if (compiled !== null && !compiled.ok) {
-    if (status !== null) status.textContent = t("options_custom_css_refused");
+    tellCustomCss(status, t("options_custom_css_refused"), "error");
     return;
   }
   void writeConfig({ customCss: text }).then((written) => {
     config = written;
     customCssTyped = false;
     renderCustomCss();
-    if (status !== null) {
-      status.textContent = text.length > 0 ? t("options_custom_css_saved") : t("options_custom_css_cleared");
-    }
+    tellCustomCss(status, text.length > 0 ? t("options_custom_css_saved") : t("options_custom_css_cleared"), "idle");
   });
 });
 document.getElementById("library-copy")?.addEventListener("change", (event) => {

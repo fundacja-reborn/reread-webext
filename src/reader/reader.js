@@ -4992,9 +4992,33 @@ function applyUserCss(text) {
   if (text === userDress.text) return;
   const others = document.adoptedStyleSheets.filter((sheet) => sheet !== userDress.sheet);
   const compiled = text.length > 0 ? compileUserCss(text) : null;
-  const sheet = compiled !== null && compiled.ok ? compiled.sheet : null;
-  userDress = { text, sheet };
-  document.adoptedStyleSheets = sheet !== null ? [...others, sheet] : others;
+  userDress = { text, sheet: compiled !== null && compiled.ok ? scopedToArticle(compiled.css) : null };
+  document.adoptedStyleSheets = userDress.sheet !== null ? [...others, userDress.sheet] : others;
+}
+
+/**
+ * The screened rules fenced into the article: `@scope` puts every selector
+ * under `#article`, so a rule reaches the text being read and never the bar,
+ * the panels, the reading list or the highlights page. A `button { display:
+ * none }` typed to try the field took the whole library page down with it
+ * (Michał's smoke T720, 2026-09-03), and the reader's chrome is how an
+ * article is left - it stays out of reach, like the settings page, which is
+ * always the way back. The bubble keeps the rules whole: a room of its own.
+ *
+ * Wrapping parses nothing new: the text is the serialization the screen
+ * handed back, balanced and free of anything that loads.
+ *
+ * @param {string} css
+ * @returns {CSSStyleSheet | null}
+ */
+function scopedToArticle(css) {
+  try {
+    const sheet = new CSSStyleSheet();
+    sheet.replaceSync(`@scope (#article) {\n${css}\n}`);
+    return sheet;
+  } catch {
+    return null;
+  }
 }
 
 /**

@@ -1006,7 +1006,7 @@
   },
   "options_custom_css_heading": { "message": "Eigenes CSS" },
   "options_custom_css_intro": {
-    "message": "Für alle, die das Aussehen der Sprechblase und der Leseansicht mit eigenen CSS-Regeln ändern möchten. Die Regeln gelten in der Übersetzungs-Sprechblase und auf der Seite der Leseansicht, nie auf den gelesenen Seiten und nicht auf dieser Seite. Regeln, die etwas aus dem Netz laden würden (url(), @import, @font-face), werden abgelehnt. Die Namen der Elemente können sich von Version zu Version ändern; diese Einstellung kommt ohne Garantie."
+    "message": "Für alle, die das Aussehen der Sprechblase und der Leseansicht mit eigenen CSS-Regeln ändern möchten. Die Regeln gelten in der Übersetzungs-Sprechblase und im Text eines Artikels in der Leseansicht, nie in deren Leiste und Listen, auf den gelesenen Seiten oder auf dieser Seite. Regeln, die etwas aus dem Netz laden würden (url(), @import, @font-face), werden abgelehnt. Die Namen der Elemente können sich von Version zu Version ändern; diese Einstellung kommt ohne Garantie."
   },
   "options_custom_css_save": { "message": "Speichern" },
   "options_custom_css_saved": { "message": "Gespeichert" },

@@ -1029,7 +1029,7 @@
   },
   "options_custom_css_heading": { "message": "CSS personalizado" },
   "options_custom_css_intro": {
-    "message": "Para cambiar el aspecto de la burbuja y de la vista de lectura con tus propias reglas CSS. Las reglas se aplican dentro de la burbuja de traducción y en la página de la vista de lectura, nunca en las páginas que lees ni en esta página. Las reglas que cargarían algo desde la red (url(), @import, @font-face) se rechazan. Los nombres de los elementos pueden cambiar entre versiones, así que este ajuste no tiene garantía."
+    "message": "Para cambiar el aspecto de la burbuja y de la vista de lectura con tus propias reglas CSS. Las reglas se aplican dentro de la burbuja de traducción y al texto de un artículo en la vista de lectura, nunca a su barra y sus listas, a las páginas que lees ni a esta página. Las reglas que cargarían algo desde la red (url(), @import, @font-face) se rechazan. Los nombres de los elementos pueden cambiar entre versiones, así que este ajuste no tiene garantía."
   },
   "options_custom_css_save": { "message": "Guardar" },
   "options_custom_css_saved": { "message": "Guardado" },

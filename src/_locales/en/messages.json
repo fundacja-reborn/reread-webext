@@ -1270,7 +1270,7 @@
   },
   "options_custom_css_heading": { "message": "Custom CSS" },
   "options_custom_css_intro": {
-    "message": "For changing how the bubble and the reader look with CSS rules of your own. The rules apply inside the translation bubble and on the reader page, never on the pages you read and not on this page. Rules that would load anything from the network (url(), @import, @font-face) are refused. The names of the elements can change between versions, so this setting comes without a guarantee."
+    "message": "For changing how the bubble and the reader look with CSS rules of your own. The rules apply inside the translation bubble and to the text of an article in the reader, never to the reader's bar and lists, to the pages you read or to this page. Rules that would load anything from the network (url(), @import, @font-face) are refused. The names of the elements can change between versions, so this setting comes without a guarantee."
   },
   "options_custom_css_save": { "message": "Save" },
   "options_custom_css_saved": { "message": "Saved" },

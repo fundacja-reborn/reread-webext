@@ -107,7 +107,7 @@ The only request to an address that is not built in happens when you ask for it:
 
 You can check this instead of trusting it: watch the network panel in the browser's developer tools, read the source code (published unminified), or simply turn the network off - translation, dictionaries and the reading list keep working. A test in the repository (`test/network-sinks.test.js`) lists every place in the code that can reach the network and fails the build when one is added.
 
-The **Custom CSS** field on the settings page is not a way around this: the rules you type dress only the extension's own bubble and reader page, never the page you are reading, and a rule that would load anything from the network (`url()`, `@import`, `@font-face`) is refused before it is stored.
+The **Custom CSS** field on the settings page is not a way around this: the rules you type dress only the extension's own bubble and the text of an article in its reader, never the page you are reading, and a rule that would load anything from the network (`url()`, `@import`, `@font-face`) is refused before it is stored.
 
 One thing a web page can see: on a page where your saved phrases are underlined, the page's own scripts can tell that re/read is installed and which of the page's words are underlined - the underlines are drawn with the browser's highlight registry, which the page shares. Nothing else is visible to it: not your vocabulary, not the bubble, not what you save. The **Only in the reader** setting keeps ordinary pages free of underlines altogether, so with it on no page can tell.
 

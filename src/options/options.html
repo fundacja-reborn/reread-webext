@@ -700,10 +700,10 @@
 
     <p class="explain" data-i18n="options_custom_css_intro">
       For changing how the bubble and the reader look with CSS rules of your own. The rules
-      apply inside the translation bubble and on the reader page, never on the pages you read
-      and not on this page. Rules that would load anything from the network (url(), @import,
-      @font-face) are refused. The names of the elements can change between versions, so this
-      setting comes without a guarantee.
+      apply inside the translation bubble and to the text of an article in the reader, never
+      to the reader's bar and lists, to the pages you read or to this page. Rules that would
+      load anything from the network (url(), @import, @font-face) are refused. The names of
+      the elements can change between versions, so this setting comes without a guarantee.
     </p>
 
     <div class="custom-css">
@@ -717,8 +717,8 @@
       ></textarea>
       <p class="inline">
         <button type="button" id="custom-css-save" data-i18n="options_custom_css_save">Save</button>
-        <output id="custom-css-status" class="row-value" aria-live="polite"></output>
       </p>
+      <output id="custom-css-status" class="status" aria-live="polite" hidden></output>
       <p class="row-note" data-i18n="options_custom_css_example">
         Example: .entry-label { color: darkorange; } colours the label above a dictionary entry
         orange.

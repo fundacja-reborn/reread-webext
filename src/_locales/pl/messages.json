@@ -1370,7 +1370,7 @@
   },
   "options_custom_css_heading": { "message": "Własny CSS" },
   "options_custom_css_intro": {
-    "message": "Dla osób, które chcą zmienić wygląd dymka i czytnika własnymi regułami CSS. Reguły działają w dymku tłumaczenia i na stronie czytnika, nigdy na czytanych stronach ani na tej stronie. Reguły, które pobierałyby cokolwiek z sieci (url(), @import, @font-face), są odrzucane. Nazwy elementów mogą się zmieniać między wersjami, więc to ustawienie jest bez gwarancji."
+    "message": "Dla osób, które chcą zmienić wygląd dymka i czytnika własnymi regułami CSS. Reguły działają w dymku tłumaczenia i w tekście artykułu w czytniku, nigdy w pasku i na listach czytnika, na czytanych stronach ani na tej stronie. Reguły, które pobierałyby cokolwiek z sieci (url(), @import, @font-face), są odrzucane. Nazwy elementów mogą się zmieniać między wersjami, więc to ustawienie jest bez gwarancji."
   },
   "options_custom_css_save": { "message": "Zapisz" },
   "options_custom_css_saved": { "message": "Zapisano" },

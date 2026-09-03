@@ -660,6 +660,12 @@ button.model-delete {
   margin-top: 0.5rem;
 }
 
+/* The status is an output element, inline by nature; here it is a line of
+   its own under the button, and a refusal wears the report's frame. */
+.custom-css output {
+  display: block;
+}
+
 /* The voice names are the device's own and can run long; the select takes the
    line's spare width and may shrink below its content, so a long name never
    pushes the Listen button off the page. */
