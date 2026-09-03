@@ -71,6 +71,10 @@
     "message": "Will be saved under $PAIR$",
     "placeholders": { "pair": { "content": "$1", "example": "English → Polish" } }
   },
+  "bubble_choose_meaning": {
+    "message": "Press a meaning to save it",
+    "description": "The bubble's note line after Save is pressed while no meaning is chosen yet (the dictionaries-only bubble): a line of a dictionary entry is the thing to press. Neutral about the pointer - it is read under a finger and under a mouse alike - and short, because the note line is one line also with the bubble text enlarged."
+  },
   "bubble_speak": {
     "message": "Read aloud",
     "description": "aria-label and hover title of the speaker icon in the bubble's action row (D83): speaks the selected phrase itself, never the translation."

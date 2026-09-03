@@ -155,3 +155,29 @@ export function quietNote({ entries, dictionaries, findable }) {
 export function filingWarning({ entries, findable, reading, pairFrom }) {
   return entries > 0 && findable && reading.length > 0 && pairFrom.length > 0 && reading !== pairFrom;
 }
+
+/**
+ * What a press of Save does while the gloss is empty (D175): with dictionary
+ * lines standing there to be pressed, it says so - one sentence in the
+ * bubble's note line, the place where the quiet bubble already speaks (D164,
+ * D167) - and otherwise it is the button that stays out of reach, as before.
+ *
+ * The sentence exists because a dimmed button explained nothing: a reader who
+ * expected Save to keep the word with every entry pressed it, saw nothing
+ * happen, and took some time to find that a line is the thing to press
+ * (mobileread report, 2026-09-03). It is said only on the press, never up
+ * front - a bubble that instructed every time would cost everybody a line for
+ * one reader's first day - and it is not said over an open edit box: whoever
+ * is typing knows what Save is waiting for. With no lines to press there is
+ * nothing to point at, and the note line is already saying why (D164).
+ *
+ * @param {{ meanings: number, lines: number, editing: boolean }} of
+ *   how many meanings the gloss has, how many dictionary lines can be pressed,
+ *   and whether the edit box is open
+ * @returns {"save" | "prompt" | "nothing"}
+ */
+export function savePress({ meanings, lines, editing }) {
+  if (meanings > 0) return "save";
+  if (editing || lines === 0) return "nothing";
+  return "prompt";
+}

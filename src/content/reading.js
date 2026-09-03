@@ -1205,8 +1205,9 @@ function present(selection, { deliberate, touch, chain = false }) {
   // The quiet vocabulary's fresh selection (D158): the same trimmed bubble,
   // with the vocabulary's hands back - the dictionary lines are presses, the
   // pencil takes a hand-typed meaning for the phrases no dictionary knows
-  // (they hold one- or two-word headwords), and Save stands disabled until
-  // a meaning exists. No engine ride and no automatic keep (D22 stays the
+  // (they hold one- or two-word headwords), and Save stands dimmed until a
+  // meaning exists - pressed anyway, it says in the note line that a line is
+  // what to press (D175). No engine ride and no automatic keep (D22 stays the
   // translating bubble's): what lands in the vocabulary here is only ever a
   // pressed line or a typed gloss - a person's own word, which is the trim's
   // whole spirit. Never folded, like the trim above: Save may not hide

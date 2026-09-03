@@ -55,6 +55,7 @@
     "message": "Sera enregistré sous $PAIR$",
     "placeholders": { "pair": { "content": "$1", "example": "anglais → polonais" } }
   },
+  "bubble_choose_meaning": { "message": "Appuyez sur un sens pour l'enregistrer" },
   "bubble_speak": { "message": "Lire à voix haute" },
   "bubble_sentence_collapse": { "message": "Réduire la phrase" },
   "bubble_sentence_expand": { "message": "Développer la phrase" },

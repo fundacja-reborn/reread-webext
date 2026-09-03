@@ -1,7 +1,15 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { afterChoosing, choosableLines, entryBlocks, filingWarning, quietNote, toMeanings } from "../src/lib/gloss.js";
+import {
+  afterChoosing,
+  choosableLines,
+  entryBlocks,
+  filingWarning,
+  quietNote,
+  savePress,
+  toMeanings,
+} from "../src/lib/gloss.js";
 
 describe("toMeanings", () => {
   it("keeps one line as one meaning", () => {
@@ -172,5 +180,22 @@ describe("filingWarning", () => {
     // Nobody named a language on either side.
     assert.equal(filingWarning({ entries: 2, findable: true, reading: "", pairFrom: "en" }), false);
     assert.equal(filingWarning({ entries: 2, findable: true, reading: "pl", pairFrom: "" }), false);
+  });
+});
+
+describe("savePress", () => {
+  it("keeps whenever there is a meaning to keep", () => {
+    assert.equal(savePress({ meanings: 1, lines: 0, editing: false }), "save");
+    assert.equal(savePress({ meanings: 2, lines: 4, editing: true }), "save");
+  });
+
+  it("answers an empty press with the sentence while there are lines to press", () => {
+    assert.equal(savePress({ meanings: 0, lines: 3, editing: false }), "prompt");
+    assert.equal(savePress({ meanings: 0, lines: 1, editing: false }), "prompt");
+  });
+
+  it("stays out of reach with no line to point at, and over an open edit box", () => {
+    assert.equal(savePress({ meanings: 0, lines: 0, editing: false }), "nothing");
+    assert.equal(savePress({ meanings: 0, lines: 3, editing: true }), "nothing");
   });
 });
