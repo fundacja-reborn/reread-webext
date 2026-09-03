@@ -46,6 +46,9 @@ articles and books (**Delete**), models and dictionaries (their sections in
 Settings), and the per-site off switches (Settings, **Switched-off sites**). Deleting an
 article or a book removes everything stored for it - text, pictures, highlights, notes and
 the reading position - from the database and from the safety copy in `storage.local`.
+Saved phrases are not part of an article: a phrase you saved while reading it is stored in
+your vocabulary, without any record of where it came from, and stays there until you mark
+it **Learned** - deleting the article does not delete the phrase.
 
 You can export your data at any time to files on your disk: vocabulary as TSV, the
 reading list as JSON (or as a `.zip` with its pictures), highlights as Markdown. The
