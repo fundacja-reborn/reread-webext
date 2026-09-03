@@ -260,6 +260,21 @@ input[type="checkbox"] {
   color: var(--page-fg);
 }
 
+/* An error is the one status that has to be found (Michał's call, 2026-09-03:
+   statuses "look like plain text", easy to miss): every error-toned status
+   wears the report's frame, with the bar and the wash in the error's own
+   colour - under a tall field or a long list, a line in red alone was read as
+   no answer at all. On e-ink the wash quantizes away and the bar and the frame
+   remain, which is why it is a frame and not only a tint. After the report's
+   rule on purpose: an error inside a report gets this bar too. An empty status
+   stays hidden (above), so a cleared error leaves no empty frame behind. */
+.status[data-tone="error"] {
+  padding: calc(0.6rem - 1px) calc(0.8rem - 1px) calc(0.6rem - 1px) 0.8rem;
+  border: 1px solid var(--page-line);
+  border-left: 3px solid var(--page-error);
+  background: color-mix(in srgb, var(--page-error) 8%, transparent);
+}
+
 /* One pager for every long list (saved phrases, the reading list, the
    highlights) and for a book's parts: Previous and Next at the ends, the
    count between them. Each end is a drawn chevron with its word beside it,
