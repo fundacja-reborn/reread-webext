@@ -327,13 +327,13 @@
   },
   "reader_empty_all_read": { "message": "Plus rien à lire - tout ce qui est enregistré est marqué comme lu." },
   "reader_empty_none_read": { "message": "Rien n'est encore marqué comme lu." },
-  "reader_filter_placeholder": { "message": "Filtrer par titre ou par site" },
-  "reader_filter_label": { "message": "Filtrer la liste de lecture" },
+  "reader_filter_placeholder": { "message": "Rechercher par titre ou par site" },
+  "reader_filter_label": { "message": "Rechercher dans la liste de lecture" },
   "reader_filter_no_match": {
     "message": "Aucun article enregistré ne correspond à « $QUERY$ ».",
     "placeholders": { "query": { "content": "$1", "example": "wikipedia" } }
   },
-  "reader_filter_clear": { "message": "Effacer le filtre" },
+  "reader_filter_clear": { "message": "Effacer la recherche" },
   "reader_filter_count": {
     "message": "$MATCHING$ sur $TOTAL$",
     "placeholders": {

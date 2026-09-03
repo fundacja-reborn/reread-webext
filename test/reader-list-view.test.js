@@ -7,6 +7,7 @@ import {
   keptPicks,
   libraryView,
   pickedState,
+  searchButtonState,
   searchableArticle,
   withAllPicked,
 } from "../src/reader/list-view.js";
@@ -221,5 +222,49 @@ describe("the selection (D152)", () => {
     ];
     const kept = keptPicks(new Set(["a", "deleted", "book:1"]), entries);
     assert.deepEqual([...kept], ["a"]);
+  });
+});
+
+describe("searchButtonState", () => {
+  it("has nothing to press over an empty box, whichever the scope", () => {
+    for (const texts of [false, true]) {
+      assert.deepEqual(
+        searchButtonState({ query: "", applied: "", texts }),
+        { enabled: false, stale: false },
+      );
+    }
+  });
+
+  it("takes any word over the titles, but two characters over the texts", () => {
+    assert.deepEqual(searchButtonState({ query: "t", applied: "", texts: false }), {
+      enabled: true,
+      stale: true,
+    });
+    assert.deepEqual(searchButtonState({ query: "t", applied: "", texts: true }), {
+      enabled: false,
+      stale: false,
+    });
+    assert.equal(searchButtonState({ query: "te", applied: "", texts: true }).enabled, true);
+  });
+
+  it("is lit while the box holds words the list was not narrowed by", () => {
+    assert.equal(searchButtonState({ query: "test", applied: "", texts: false }).stale, true);
+    assert.equal(searchButtonState({ query: "testy", applied: "test", texts: true }).stale, true);
+    assert.equal(searchButtonState({ query: "test", applied: "test", texts: false }).stale, false);
+    assert.equal(searchButtonState({ query: "test", applied: "test", texts: true }).stale, false);
+  });
+
+  it("does not light up over trailing air", () => {
+    assert.equal(searchButtonState({ query: "test ", applied: "test", texts: false }).stale, false);
+    assert.equal(searchButtonState({ query: " test", applied: "test ", texts: true }).stale, false);
+  });
+
+  it("never lights a greyed button", () => {
+    // A single character over the texts: not pressable, so not a cue either,
+    // even though the list stands narrowed by something else.
+    assert.deepEqual(searchButtonState({ query: "t", applied: "test", texts: true }), {
+      enabled: false,
+      stale: false,
+    });
   });
 });

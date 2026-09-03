@@ -35,7 +35,7 @@ Works in Firefox (desktop and Android) and in Chrome/Chromium. **Install it from
 - **Search.** Inside the open document (articles, books part by part, live pages too) and across the whole reading list - in titles and, on request, in the stored texts, with snippets; clicking a snippet opens the document at that place.
 - **Appearance.** Light, sepia and dark themes, serif or sans type - or any font installed on the device, typed by name in the settings and offered as **Custom** in the reader's **Type** row - text size and column width; links can be shown as plain text, so a book is shown without blue links. A small tab at the edge of the reader's bar hides the bar; the tab stays at the window's edge, and pressing it again brings the bar back.
 
-![The offline reading list, split into To read and Read: saved articles show their site and the day they were kept, imported EPUB books show which part is open and how much of the book is read. The filter above them can search the stored texts too](docs/screenshots/reading-list.webp)
+![The offline reading list, split into To read and Read: saved articles show their site and the day they were kept, imported EPUB books show which part is open and how much of the book is read. The search box above them can look in the stored texts too](docs/screenshots/reading-list.webp)
 
 ![The reader's Aa panel open over an article with a paragraph in yellow highlighter: theme, typeface, text size, column width, links as plain text or active, the highlighter's four inks, and the voice that reads aloud with its speed](docs/screenshots/appearance.webp)
 

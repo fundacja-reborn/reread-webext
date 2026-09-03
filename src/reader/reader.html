@@ -510,36 +510,41 @@
           </details>
           <a href="#transfer" data-i18n="reader_transfer_link">Import and export (articles or EPUB)</a>
         </div>
-        <!-- The filter stands above the list it narrows, the same line the
-             phrases page draws. Adding a book used to have its own button
-             here (O19); it lives in the Import button below now (Michał's
-             call, 2026-08-16) - one door for every file, and the file itself
-             says which kind it is. The deeper search's button stands at the
-             field's end (D119; moved here 2026-09-03): it runs the words in
-             the field over the saved texts, and a button beside a field
-             reads as that field's own - the document dialog's form is the
-             same shape. On the checkbox line, at the far right, it appeared
-             between the field and Select and could go unnoticed (Michał's
-             screenshots). There only while the box below asks for it: the
-             plain filter needs no press. -->
+        <!-- The search line above the list (D173, Michał's call 2026-09-03):
+             the field asks, the press answers. Nothing narrows the list
+             while the words are typed - the button at the field's end (or
+             Enter, or a phone keyboard's search key) applies them, over the
+             titles and sites alone or, with the box below ticked, over the
+             saved texts too; and the box flips the scope of the results
+             already on screen. Until D173 the field filtered titles live
+             and the button appeared with the box, so a ticked box could
+             stand over a list that had never been asked about the texts
+             (Michał's screenshots). A button beside a field reads as that
+             field's own - the document dialog's form is the same shape -
+             which is also why Select stays off this line (D152). The button
+             is lit while the field holds words the list was not narrowed by
+             and greyed while a press would do nothing; an emptied field
+             brings the whole list back by itself. Adding a book used to
+             have its own button here (O19); it lives in the Import button
+             below now (Michał's call, 2026-08-16) - one door for every file,
+             and the file itself says which kind it is. -->
         <div class="filter-line">
           <label for="library-filter" class="visually-hidden" data-i18n="reader_filter_label">
-            Filter the reading list
+            Search the reading list
           </label>
           <input
             type="search"
             id="library-filter"
-            placeholder="Filter by title or site"
+            placeholder="Search by title or site"
             data-i18n-placeholder="reader_filter_placeholder"
           />
-          <button type="button" id="library-search-go" data-i18n="reader_search_go" hidden>
+          <button type="button" id="library-search-go" data-i18n="reader_search_go" disabled>
             Search
           </button>
         </div>
-        <!-- The deeper search (D119): with the box ticked, Enter or the
-             button at the field's end scans the saved texts themselves for
-             the typed phrase - on a press, never per keystroke: this reads
-             whole books. The plain filter keeps working either way. -->
+        <!-- The deeper search (D119): with the box ticked, the press scans
+             the saved texts themselves for the typed phrase - never per
+             keystroke: this reads whole books. -->
         <div class="search-line">
           <label class="search-toggle">
             <input type="checkbox" id="library-search-toggle" />

@@ -15,6 +15,7 @@
  */
 
 import { overallPercent } from "../lib/reader/position.js";
+import { isSearchableQuery } from "../lib/reader/search.js";
 import { Segment, listedRows } from "../lib/store/saved-article.js";
 import { matchesFilter } from "../options/models-view.js";
 
@@ -220,4 +221,25 @@ export function keptPicks(picked, entries) {
     entries.filter((entry) => entry.kind !== "book").map((entry) => entry.url),
   );
   return new Set([...picked].filter((url) => present.has(url)));
+}
+
+/**
+ * The Search button's two states beside the field (D173): whether a press
+ * would do anything, and whether the list on screen stands behind what the
+ * field says. Nothing narrows the list until the button is pressed - the
+ * field asks, the press answers - so "stale" is the button's cue to be
+ * pressed: lit while the words in the field are not the words the list was
+ * narrowed by. A press over the texts wants a phrase worth scanning for (the
+ * document dialog's two-character rule); a press over titles takes any word.
+ * Trailing air is not a new question.
+ *
+ * @param {{ query: string, applied: string, texts: boolean }} state `query`
+ *   as typed, `applied` the words the list stands narrowed by, `texts`
+ *   whether the box asks for the saved texts too
+ * @returns {{ enabled: boolean, stale: boolean }}
+ */
+export function searchButtonState({ query, applied, texts }) {
+  const typed = query.trim();
+  const enabled = texts ? isSearchableQuery(typed) : typed.length > 0;
+  return { enabled, stale: enabled && typed !== applied.trim() };
 }

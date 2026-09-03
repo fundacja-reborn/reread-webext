@@ -166,6 +166,7 @@ import {
   keptPicks,
   libraryView,
   pickedState,
+  searchButtonState,
   withAllPicked,
 } from "./list-view.js";
 import { markRows, marksListView } from "./marks-list.js";
@@ -3058,6 +3059,7 @@ async function refreshLibrary() {
           libraryFilter.focus();
         }
         void refreshLibrary();
+        updateSearchControls();
       });
       libraryEmpty.append(sentence, clear);
     } else {
@@ -3174,22 +3176,48 @@ function applyLibrarySearchVisibility() {
 }
 
 /**
- * The deep search's two states of the button under the filter (D119): there
- * only while the checkbox asks for it, pressable only over a phrase worth
- * scanning for - the same two-characters rule the document dialog keeps.
+ * The Search button beside the field (D173): always there, since nothing
+ * narrows the list without a press; greyed while a press would do nothing,
+ * lit while the list stands behind the field's words - the cue that a press
+ * is wanted. The rule itself lives in `list-view.js`, under test.
  */
 function updateSearchControls() {
   if (librarySearchGo === null || librarySearchToggle === null) return;
-  librarySearchGo.hidden = !librarySearchToggle.checked;
-  librarySearchGo.disabled = !isSearchableQuery(libraryFilter?.value ?? "");
+  const { enabled, stale } = searchButtonState({
+    query: libraryFilter?.value ?? "",
+    applied: libraryQuery,
+    texts: librarySearchToggle.checked,
+  });
+  librarySearchGo.disabled = !enabled;
+  if (stale) librarySearchGo.setAttribute("data-stale", "");
+  else librarySearchGo.removeAttribute("data-stale");
 }
 
-/** One press on Search, however it came - the button or Enter in the box. */
-async function runLibrarySearch() {
+/**
+ * One press on Search, however it came - the button, Enter in the box, or
+ * the box ticked over a phrase (D173): the field's words become the list's,
+ * over the titles and sites alone or over the saved texts too.
+ */
+async function pressLibrarySearch() {
   const query = libraryFilter?.value ?? "";
-  if (!isSearchableQuery(query)) return;
-  await startLibrarySearch(query);
-  applyLibrarySearchVisibility();
+  if (librarySearchToggle?.checked === true) {
+    if (!isSearchableQuery(query)) return;
+    // The plain list under the results narrows to the same words, so
+    // unticking the box lands on the titles' answer to the same question.
+    libraryQuery = query;
+    libraryPage = 1;
+    await startLibrarySearch(query);
+    applyLibrarySearchVisibility();
+  } else {
+    if (query.trim().length === 0) return;
+    if (librarySearchShown()) dismissLibrarySearch();
+    libraryQuery = query;
+    // A new question starts at the beginning - the clamp would only catch
+    // a page that no longer exists.
+    libraryPage = 1;
+    await refreshLibrary();
+  }
+  updateSearchControls();
 }
 
 /**
@@ -5228,39 +5256,48 @@ librarySegments?.addEventListener("click", (event) => {
   }
 });
 
+// Typing asks nothing yet (D173, Michał's call: until then the field filtered
+// titles live and the button appeared with the box, so a ticked box could
+// stand over a list that had never been asked about the texts): the list
+// stands as it is until Search is pressed, and the button lights up
+// meanwhile. An emptied box is the one exception - taking the question back
+// needs no press: the deep results go and the whole list comes back at once.
 libraryFilter?.addEventListener("input", () => {
   if (libraryFilter === null) return;
-  // An edited box asks a new question: standing deep results are dismissed
-  // (D119) and the plain filter answers live again; the refresh below puts
-  // the list back on screen.
-  if (librarySearchShown()) dismissLibrarySearch();
+  if (libraryFilter.value.trim().length === 0 && (libraryQuery.length > 0 || librarySearchShown())) {
+    if (librarySearchShown()) dismissLibrarySearch();
+    libraryQuery = "";
+    libraryPage = 1;
+    void refreshLibrary();
+  }
   updateSearchControls();
-  libraryQuery = libraryFilter.value;
-  // Typing means "show me what matches", and that starts at the beginning -
-  // the clamp would only catch a page that no longer exists.
-  libraryPage = 1;
-  void refreshLibrary();
 });
 
-// Enter in the box runs the deep search while the checkbox asks for it -
-// the same press the button makes, for hands that never leave the keys
-// (and for the search key a phone keyboard shows).
+// Enter in the box is the button's press, whichever the scope - for hands
+// that never leave the keys, and for the search key a phone keyboard shows.
 libraryFilter?.addEventListener("keydown", (event) => {
-  if (event.key !== "Enter" || librarySearchToggle?.checked !== true) return;
+  if (event.key !== "Enter") return;
   event.preventDefault();
-  void runLibrarySearch();
+  void pressLibrarySearch();
 });
 
+// The box changes the scope of the question on screen, not only of the next
+// one (D173): ticked over a phrase worth scanning for it runs the deep
+// search now, so it never stands over a list that was asked about titles
+// alone; unticked it takes the results back to the titles' answer to the
+// same words (the list under them narrowed to those at the press).
 librarySearchToggle?.addEventListener("change", () => {
-  updateSearchControls();
-  // Unticking the box takes the results with it: they were its question.
-  if (librarySearchToggle?.checked !== true && librarySearchShown()) {
+  if (librarySearchToggle?.checked === true) {
+    if (isSearchableQuery(libraryFilter?.value ?? "")) void pressLibrarySearch();
+  } else if (librarySearchShown()) {
     dismissLibrarySearch();
     void refreshLibrary();
   }
+  updateSearchControls();
 });
 
-librarySearchGo?.addEventListener("click", () => void runLibrarySearch());
+librarySearchGo?.addEventListener("click", () => void pressLibrarySearch());
+updateSearchControls();
 
 /**
  * A turned page starts at its top - snapped there, not glided, because on

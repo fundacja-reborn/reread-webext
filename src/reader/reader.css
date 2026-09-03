@@ -1149,14 +1149,21 @@ body.reader:has(#library:not([hidden])) {
   text-overflow: ellipsis;
 }
 
-/* The deeper search's button at the field's end (D119): the document
-   dialog's form shape - the field and its button on one line, the button
-   as tall as the field by the row's stretch. Here only while the checkbox
-   under the field asks for it, greyed until there is a phrase worth
-   scanning for; its word never breaks. */
+/* The Search button at the field's end (D119, D173): the document dialog's
+   form shape - the field and its button on one line, the button as tall as
+   the field by the row's stretch. Always there, since nothing narrows the
+   list without it; greyed while a press would do nothing, and lit with the
+   accent - the note dialog's Save, the page's word for "this is the one
+   press" - while the field holds words the list on screen was not narrowed
+   by. Its word never breaks. */
 .filter-line button {
   padding: 0.35rem 1rem;
   white-space: nowrap;
+}
+
+.filter-line button[data-stale] {
+  border-color: var(--page-accent);
+  background: color-mix(in srgb, var(--page-accent) 12%, transparent);
 }
 
 /* The note over a book whose language is not the pair's source (O20): one
