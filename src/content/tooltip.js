@@ -1140,9 +1140,13 @@ function style(root) {
  * @param {number} [where.line] the height of the phrase's first line; 0 means unknown, and the whole phrase is kept
  * @param {boolean} [where.assist] whether the page can be scrolled to make room - only ever the reader's anchored mode
  * @param {number} [where.covered] how far down the window the page's own stuck bar reaches (D138); the usable room starts under it
+ * @param {"up" | "down"} [where.prefer] the side the bubble already stands on (D177): held for as
+ *   long as it fits there, because a bubble that changes sides under a press - a line chosen,
+ *   Save answered - takes the reader's place in the text with it. `down` is never left for a
+ *   spot above that has come free; `up` is left only when the bubble no longer fits above
  * @returns {{ left: number, top: number, grow: "down" | "up", scroll?: number }}
  */
-export function placement({ anchor, size, viewport, folded = 0, touch = false, line = 0, assist = false, covered = 0 }) {
+export function placement({ anchor, size, viewport, folded = 0, touch = false, line = 0, assist = false, covered = 0, prefer }) {
   // The room to look for is the room the bubble may come to need, not the room
   // it needs now - a folded row unfolds with nobody left to move anything.
   const height = size.height + folded;
@@ -1157,7 +1161,7 @@ export function placement({ anchor, size, viewport, folded = 0, touch = false, l
   // painted over, for the bubble and for the assist's kept line alike.
   const ceiling = covered + VIEWPORT_MARGIN;
 
-  if (anchor.top - gap - height >= ceiling) {
+  if (prefer !== "down" && anchor.top - gap - height >= ceiling) {
     return { left, top: Math.round(anchor.top - gap), grow: "up" };
   }
 
@@ -1323,6 +1327,11 @@ export function createTooltip({ onAction, onHide, covered, onEditing }) {
    *  stands in front of it, so the line can give it back afterwards. */
   /** @type {{ sentence: string, tone: Tone }} */
   let standing = { sentence: "", tone: "normal" };
+  /** Whether the side the bubble stands on is held (D177): from the first press
+   *  inside the bubble on, so that nothing the press adds flips the bubble to
+   *  the other side of the phrase. Off for a new phrase, and for the one press
+   *  that asks for new content - More opening its layer decides afresh. */
+  let holdSide = false;
   /** Whether the second layer is unfolded. Folded again for every new phrase. */
   let unfolded = false;
   /** Whether the sentence is clamped to one line (D96): the starting state
@@ -1687,6 +1696,10 @@ export function createTooltip({ onAction, onHide, covered, onEditing }) {
    * @param {Action | "cancel" | "choose"} action
    */
   function emit(action) {
+    // A press inside the bubble holds its side from here on (D177) - except the
+    // one that opens More: what that press asks for has not arrived yet, and
+    // the layer landing decides where the bubble can stand at all.
+    if (!(action === "more" && !unfolded)) holdSide = true;
     // Editing is the bubble's own business: nobody outside needs to know that a
     // text box opened, only what it said when the reader was done with it.
     if (action === "cancel") {
@@ -1753,6 +1766,7 @@ export function createTooltip({ onAction, onHide, covered, onEditing }) {
    */
   function choose(sense) {
     if (bodyElement === null) return;
+    holdSide = true;
     const next = afterChoosing(bodyElement.textContent ?? "", sense);
     // Taking out the last meaning there was. A phrase means something or it is
     // not kept at all, so this press does nothing rather than emptying it.
@@ -1790,6 +1804,7 @@ export function createTooltip({ onAction, onHide, covered, onEditing }) {
    */
   function toggleContextFold() {
     contextChosen = true;
+    holdSide = true;
     contextFolded = !contextFolded;
     applyContextFold();
     unfold(unfolded);
@@ -2224,8 +2239,26 @@ export function createTooltip({ onAction, onHide, covered, onEditing }) {
     // The stuck bar of right now (D138): panels grow it, other views drop it.
     const covered = Math.max(0, coveredAbove());
 
+    // The side the bubble already stands on, held once the reader has pressed
+    // something in it (D177): a line chosen or Save answered used to make
+    // the bubble taller, and a bubble above the phrase that no longer fit
+    // there went below it - on the reader page with the whole page scrolled
+    // to make room. The room to squeeze the entries into is then the held
+    // side's alone, and the placement is told to stay. Held only while it
+    // can be: a bubble that would not fit the held side even with its
+    // entries at their smallest is let go, and decides afresh.
+    const gap = onTouch ? SYSTEM_GAP : GAP;
+    const above = spotAnchor.top - gap - VIEWPORT_MARGIN - covered;
+    const beneath = viewport.height - VIEWPORT_MARGIN - (spotAnchor.bottom + gap);
+    const reachable = assist ? viewport.height - covered - 2 * VIEWPORT_MARGIN - gap - kept : beneath;
+    let held = holdSide ? bubble.dataset["grow"] : undefined;
+    const entriesHeight = entriesElement !== null && !entriesElement.hidden ? entriesElement.clientHeight : 0;
     let size = bubble.getBoundingClientRect();
     const folded = foldedHeight();
+    if (held === "up" || held === "down") {
+      const least = size.height + folded - Math.max(0, entriesHeight - MIN_ENTRIES_HEIGHT);
+      if (least > (held === "up" ? above : Math.max(beneath, reachable))) held = undefined;
+    }
 
     // The second layer gives way before the bubble covers anything (D79): a
     // long dictionary entry would otherwise grow the bubble past the room
@@ -2234,25 +2267,29 @@ export function createTooltip({ onAction, onHide, covered, onEditing }) {
     // no further than readable - whatever still does not fit is the clamp's
     // business, as always. Where the page can be scrolled (D97), the room to
     // squeeze into is what the window can hold beside the phrase's first
-    // line, wherever the phrase happens to stand right now.
-    if (entriesElement !== null && !entriesElement.hidden) {
-      const entriesHeight = entriesElement.clientHeight;
-      if (entriesHeight > MIN_ENTRIES_HEIGHT) {
-        const gap = onTouch ? SYSTEM_GAP : GAP;
-        let room = Math.max(
-          spotAnchor.top - gap - VIEWPORT_MARGIN - covered,
-          viewport.height - VIEWPORT_MARGIN - (spotAnchor.bottom + gap),
-        );
-        if (assist) room = Math.max(room, viewport.height - covered - 2 * VIEWPORT_MARGIN - gap - kept);
-        const overflow = Math.ceil(size.height + folded - room);
-        if (overflow > 0) {
-          entriesElement.style.maxHeight = `${Math.max(MIN_ENTRIES_HEIGHT, entriesHeight - overflow)}px`;
-          size = bubble.getBoundingClientRect();
-        }
+    // line, wherever the phrase happens to stand right now. A held side is
+    // the one side there is.
+    if (entriesElement !== null && entriesHeight > MIN_ENTRIES_HEIGHT) {
+      const room =
+        held === "up" ? above : held === "down" ? Math.max(beneath, reachable) : Math.max(above, beneath, reachable);
+      const overflow = Math.ceil(size.height + folded - room);
+      if (overflow > 0) {
+        entriesElement.style.maxHeight = `${Math.max(MIN_ENTRIES_HEIGHT, entriesHeight - overflow)}px`;
+        size = bubble.getBoundingClientRect();
       }
     }
 
-    const spot = placement({ anchor: spotAnchor, size, viewport, folded, touch: onTouch, line: anchorLine, assist, covered });
+    const spot = placement({
+      anchor: spotAnchor,
+      size,
+      viewport,
+      folded,
+      touch: onTouch,
+      line: anchorLine,
+      assist,
+      covered,
+      ...(held === "up" || held === "down" ? { prefer: held } : {}),
+    });
 
     // The host marks the near edge's line; which way the bubble hangs off it
     // is the stylesheet's business, and it decides the layout too: the row
@@ -2325,6 +2362,7 @@ export function createTooltip({ onAction, onHide, covered, onEditing }) {
     editing = false;
     prompting = false;
     standing = { sentence: "", tone: "normal" };
+    holdSide = false;
     unfolded = false;
     contextFolded = false;
     contextChosen = false;
@@ -2428,6 +2466,8 @@ export function createTooltip({ onAction, onHide, covered, onEditing }) {
       // (D175): both were about the last one.
       prompting = false;
       standing = { sentence: "", tone: "normal" };
+      // A new phrase stands where it stands: the side is decided afresh (D177).
+      holdSide = false;
       if (contextElement !== null && contextTextElement !== null && contextToggle !== null) {
         contextTextElement.textContent = "";
         contextElement.hidden = true;
