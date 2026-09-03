@@ -114,28 +114,73 @@ function kindOf(rule) {
 }
 
 /**
- * The typed text as a sheet the bubble's shadow root and the reader page can
- * adopt, or the reason it was refused. Parsed by the engine that will apply
- * it, screened, and handed back together with the serialization the
- * `<style>` fallback uses where a constructed sheet cannot be adopted
- * (`content/tooltip.js`).
+ * A rule that stands in front of the text while a document parses it, so that
+ * an `@import` in the text is invalid where it stands - imports are only valid
+ * before every other rule - and is dropped by the parser without being loaded.
+ * A constructed sheet drops imports on its own; a `<style>` element would try
+ * to load them, and this is what stops it at the parser (Gecko also refuses
+ * every load out of a data document, `nsDataDocumentContentPolicy` - two
+ * locks on the one door). Taken back off the parsed rules before the screen
+ * sees them.
+ */
+const LEAD = ":root{}";
+
+/**
+ * The text parsed by the browser that will apply it, two ways.
+ *
+ * A constructed sheet first: it is what the bubble and the reader page adopt,
+ * and it drops `@import` on its own. Where there is no constructor - a content
+ * script in Firefox runs in a sandbox that is not a window, and the
+ * constructor wants a window's document (`StyleSheet::Constructor` throws
+ * NotSupportedError) - a `<style>` in a document made by script parses the
+ * text instead: no browsing context, so nothing renders and no value is ever
+ * loaded, and the lead rule above keeps an import from loading at parse time.
+ * That way hands back no sheet to adopt, only the rules for the serialization
+ * - which is what the `<style>` fallback in `content/tooltip.js` applies, and
+ * the only way that works where the constructor does not.
+ *
+ * @param {string} text
+ * @returns {{ sheet: CSSStyleSheet | null, rules: RuleLike[] } | null} null
+ *   when neither way could parse the text
+ */
+function parse(text) {
+  try {
+    const sheet = new CSSStyleSheet();
+    sheet.replaceSync(text);
+    return { sheet, rules: describeRules(sheet.cssRules) };
+  } catch {
+    // No constructor here; the document below is the other way to parse.
+  }
+  try {
+    const inert = document.implementation.createHTMLDocument("");
+    const element = inert.createElement("style");
+    element.textContent = `${LEAD}\n${text}`;
+    inert.head.append(element);
+    const sheet = element.sheet;
+    if (sheet === null) return null;
+    return { sheet: null, rules: describeRules(sheet.cssRules).slice(1) };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * The typed text screened, as a sheet the bubble's shadow root and the reader
+ * page can adopt where the browser hands one out, and always as the
+ * serialization the `<style>` fallback uses where a constructed sheet cannot
+ * be had or adopted (`content/tooltip.js`) - or the reason it was refused.
+ * Parsed by the engine that will apply it (`parse`), screened, handed back.
  *
  * Nothing is thrown: the settings page turns a refusal into a sentence, the
  * bubble and the reader into the default look.
  *
  * @param {string} text
- * @returns {{ ok: true, sheet: CSSStyleSheet, css: string } | { ok: false, reason: Refusal }}
+ * @returns {{ ok: true, sheet: CSSStyleSheet | null, css: string } | { ok: false, reason: Refusal }}
  */
 export function compileUserCss(text) {
-  /** @type {CSSStyleSheet} */
-  let sheet;
-  try {
-    sheet = new CSSStyleSheet();
-    sheet.replaceSync(text);
-  } catch {
-    return { ok: false, reason: "unparsed" };
-  }
-  const screened = screenRules(describeRules(sheet.cssRules));
+  const parsed = parse(text);
+  if (parsed === null) return { ok: false, reason: "unparsed" };
+  const screened = screenRules(parsed.rules);
   if (!screened.ok) return screened;
-  return { ok: true, sheet, css: screened.css };
+  return { ok: true, sheet: parsed.sheet, css: screened.css };
 }

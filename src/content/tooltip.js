@@ -1081,24 +1081,32 @@ export const STYLE = `
  * what "own rules" means - and, on the fallback, as the parser's serialization
  * appended to the text. Never the typed text: `compileUserCss` has already
  * refused anything that would load, and what it hands back is what it read.
+ * Firefox's content scripts are where the fallback is the road (a sandbox is
+ * not a window, and the sheet's constructor wants one - the same reason the
+ * rules arrive there as a serialization and no sheet), and a serialization
+ * with no sheet beside an adopted base is the one mixed case, kept for
+ * completeness: the base stays adopted and the rules get a `<style>` of
+ * their own.
  *
  * @param {ShadowRoot} root
  * @param {{ sheet: CSSStyleSheet | null, css: string }} dress the reader's
  *   own rules as compiled, or nothing to add
  */
 function style(root, dress) {
+  let adopted = false;
   try {
     const sheet = new CSSStyleSheet();
     sheet.replaceSync(STYLE);
     const sheets = dress.sheet !== null ? [sheet, dress.sheet] : [sheet];
     root.adoptedStyleSheets = sheets;
-    if (root.adoptedStyleSheets.length === sheets.length) return;
+    adopted = root.adoptedStyleSheets.length === sheets.length;
   } catch {
     // Not supported, or refused. Either way there is another way to do it.
   }
+  if (adopted && (dress.sheet !== null || dress.css.length === 0)) return;
 
   const element = document.createElement("style");
-  element.textContent = dress.css.length > 0 ? `${STYLE}\n${dress.css}` : STYLE;
+  element.textContent = adopted ? dress.css : dress.css.length > 0 ? `${STYLE}\n${dress.css}` : STYLE;
   root.append(element);
 }
 
