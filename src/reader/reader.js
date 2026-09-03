@@ -29,6 +29,7 @@ import {
 } from "../content/highlighter.js";
 import { dismiss, rescan, start, stop as stopReadingSide } from "../content/reading.js";
 import { applyReading } from "../lib/appearance.js";
+import { compileUserCss } from "../lib/user-css.js";
 import { webext } from "../lib/browser.js";
 import { holdChrome } from "../lib/chrome-hold.js";
 import { fileSize, localizePage, megabytes, plural, t } from "../lib/i18n.js";
@@ -4972,6 +4973,31 @@ function applySpeech() {
 }
 
 /**
+ * The reader's own rules (D176) on this page, as a sheet adopted beside the
+ * page's own stylesheets - after them, so theirs win on equal specificity.
+ * Compiled by `compileUserCss`, which refuses the whole text at the first
+ * rule that would load anything, so a refused text takes the previous sheet
+ * away and adds nothing. Through the CSSOM like everything this page styles
+ * at runtime: the extension pages' content security policy allows no inline
+ * style, and a constructed sheet is not inline style to it.
+ *
+ * @type {{ text: string, sheet: CSSStyleSheet | null }}
+ */
+let userDress = { text: "", sheet: null };
+
+/**
+ * @param {string} text
+ */
+function applyUserCss(text) {
+  if (text === userDress.text) return;
+  const others = document.adoptedStyleSheets.filter((sheet) => sheet !== userDress.sheet);
+  const compiled = text.length > 0 ? compileUserCss(text) : null;
+  const sheet = compiled !== null && compiled.ok ? compiled.sheet : null;
+  userDress = { text, sheet };
+  document.adoptedStyleSheets = sheet !== null ? [...others, sheet] : others;
+}
+
+/**
  * One road for everything the settings decide on this page - how it looks and
  * what the voice does. Fed with what was actually stored rather than with what
  * was asked for: at either end of a scale the honest answer is "it did not
@@ -4993,6 +5019,7 @@ function adoptConfig(config) {
     stopMarkSpeech();
   }
   applyAppearance(config.reader);
+  applyUserCss(config.customCss);
   applyUnderline(config);
   applySpeech();
   updateListen();

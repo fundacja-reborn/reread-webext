@@ -30,6 +30,7 @@ import {
   writeConfig,
 } from "../lib/config.js";
 import { aside, localizePage, megabytes, plural, t, uiLocale } from "../lib/i18n.js";
+import { compileUserCss } from "../lib/user-css.js";
 import { privateNote } from "../lib/private-note.js";
 import { armBackArrow } from "../lib/back-arrow.js";
 import { languageName, pairLabel } from "../lib/language.js";
@@ -341,6 +342,17 @@ function renderKeepArticles() {
 function previewFontFamily(field) {
   const name = cleanFontFamily(field.value);
   field.style.fontFamily = name.length > 0 ? `"${name}"` : "";
+}
+
+/**
+ * The reader's own rules (D176) - the field shows what is stored, unless it
+ * is the thing being typed in: another page's write must not eat a half-typed
+ * sheet. The status line is the press's own and is not touched here.
+ */
+function renderCustomCss() {
+  const field = document.getElementById("custom-css-text");
+  if (!(field instanceof HTMLTextAreaElement)) return;
+  if (document.activeElement !== field) field.value = config.customCss;
 }
 
 /** The reading font's name (D163) - the field shows what is stored. */
@@ -2387,6 +2399,7 @@ async function render() {
   renderKeepArticles();
   renderLibraryCopy();
   renderFontCustom();
+  renderCustomCss();
   renderNoTranslation();
   renderBubbleScale();
   renderTts();
@@ -2446,6 +2459,7 @@ async function refresh() {
   renderKeepArticles();
   renderLibraryCopy();
   renderFontCustom();
+  renderCustomCss();
   renderNoTranslation();
   renderBubbleScale();
   renderTts();
@@ -2530,6 +2544,30 @@ document.getElementById("font-custom")?.addEventListener("input", (event) => {
 });
 document.getElementById("font-custom")?.addEventListener("keydown", (event) => {
   if (event.key === "Enter" && event.target instanceof HTMLElement) event.target.blur();
+});
+// The reader's own rules (D176), stored on the press and not per keystroke:
+// a stylesheet is finished when its author says so, and every write pings
+// every open page. Screened before the write by the same parser that will
+// apply the rules (`compileUserCss`): a text with a rule that would load
+// anything is refused whole, said so under the field, and nothing is stored.
+// What is stored is the text as typed - the screen runs again wherever the
+// rules are applied - and an emptied field stores nothing, which is the
+// default look back.
+document.getElementById("custom-css-save")?.addEventListener("click", () => {
+  const field = document.getElementById("custom-css-text");
+  const status = document.getElementById("custom-css-status");
+  if (!(field instanceof HTMLTextAreaElement)) return;
+  const text = field.value.trim().length > 0 ? field.value : "";
+  const compiled = text.length > 0 ? compileUserCss(text) : null;
+  if (compiled !== null && !compiled.ok) {
+    if (status !== null) status.textContent = t("options_custom_css_refused");
+    return;
+  }
+  void writeConfig({ customCss: text }).then((written) => {
+    config = written;
+    renderCustomCss();
+    if (status !== null) status.textContent = t("options_custom_css_saved");
+  });
 });
 document.getElementById("library-copy")?.addEventListener("change", (event) => {
   const toggle = event.target;

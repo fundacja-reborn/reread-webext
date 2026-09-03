@@ -1039,6 +1039,15 @@
   "options_disabled_intro": {
     "message": "Liste des sites web où l'extension est désactivée (pas de traduction ni de soulignements). Vous pouvez en ajouter via l'icône de l'extension dans la barre d'outils du navigateur."
   },
+  "options_custom_css_heading": { "message": "CSS personnalisé" },
+  "options_custom_css_intro": {
+    "message": "Pour modifier l'apparence de la bulle et du lecteur avec vos propres règles CSS. Les règles s'appliquent dans la bulle de traduction et sur la page du lecteur, jamais sur les pages que vous lisez ni sur cette page. Les règles qui chargeraient quoi que ce soit depuis le réseau (url(), @import, @font-face) sont refusées. Les noms des éléments peuvent changer d'une version à l'autre : ce réglage est fourni sans garantie."
+  },
+  "options_custom_css_save": { "message": "Enregistrer" },
+  "options_custom_css_saved": { "message": "Enregistré" },
+  "options_custom_css_refused": {
+    "message": "Non enregistré : les règles ont été refusées. Les règles qui chargent quoi que ce soit depuis le réseau (url(), @import, @font-face) ne sont pas autorisées."
+  },
   "options_support_intro": {
     "message": "re/read est développé par une fondation à but non lucratif - sans investisseurs, sans publicité, sans pistage. S'il vous est utile et que vous souhaitez soutenir son développement, chaque don nous aide à construire des logiciels libres de toute pression commerciale."
   },

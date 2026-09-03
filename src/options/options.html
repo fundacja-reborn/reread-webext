@@ -124,6 +124,7 @@
       <a class="translation-only" href="#translation-models" data-i18n="options_models_heading">Translation models</a>
       <a href="#dictionaries" data-i18n="options_dictionaries_heading">Dictionaries</a>
       <a href="#switched-off-sites" data-i18n="options_disabled_heading">Switched-off sites</a>
+      <a href="#custom-css" data-i18n="options_custom_css_heading">Custom CSS</a>
       <a href="#support" data-i18n="support">Support</a>
     </nav>
 
@@ -685,6 +686,39 @@
     </p>
 
     <div id="disabled-hosts" class="models"></div>
+
+    <!-- The tinkerer's door (D176): rules of the reader's own for the bubble
+         and the reader page, and for nothing else - never the page being
+         read, and never this page, where a rule that hid these controls
+         could not be undone. Last among the settings on purpose (Michał's
+         call): a handful of people will use it, and the jump link at the
+         top is how they reach it. The field is labelled by the heading; the
+         placeholder is a rule, which needs no translation. -->
+    <h2 id="custom-css" data-i18n="options_custom_css_heading">Custom CSS</h2>
+
+    <p class="explain" data-i18n="options_custom_css_intro">
+      For changing how the bubble and the reader look with CSS rules of your own. The rules
+      apply inside the translation bubble and on the reader page, never on the pages you read
+      and not on this page. Rules that would load anything from the network (url(), @import,
+      @font-face) are refused. The names of the elements can change between versions, so this
+      setting comes without a guarantee.
+    </p>
+
+    <div class="custom-css">
+      <textarea
+        id="custom-css-text"
+        rows="8"
+        spellcheck="false"
+        autocapitalize="off"
+        autocomplete="off"
+        aria-labelledby="custom-css"
+        placeholder=".entry-label { color: darkorange; }"
+      ></textarea>
+      <p class="inline">
+        <button type="button" id="custom-css-save" data-i18n="options_custom_css_save">Save</button>
+        <output id="custom-css-status" class="row-value" aria-live="polite"></output>
+      </p>
+    </div>
 
     <!-- The one section that is not a setting: who builds this and how to
          help them keep building it. The links are doors, not requests - the

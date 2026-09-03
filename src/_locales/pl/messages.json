@@ -1368,6 +1368,15 @@
   "options_disabled_intro": {
     "message": "Lista stron internetowych, na których rozszerzenie jest wyłączone (bez tłumaczenia i podkreśleń). Strony dodaje się do tej listy za pomocą ikony rozszerzenia na pasku przeglądarki."
   },
+  "options_custom_css_heading": { "message": "Własny CSS" },
+  "options_custom_css_intro": {
+    "message": "Dla osób, które chcą zmienić wygląd dymka i czytnika własnymi regułami CSS. Reguły działają w dymku tłumaczenia i na stronie czytnika, nigdy na czytanych stronach ani na tej stronie. Reguły, które pobierałyby cokolwiek z sieci (url(), @import, @font-face), są odrzucane. Nazwy elementów mogą się zmieniać między wersjami, więc to ustawienie jest bez gwarancji."
+  },
+  "options_custom_css_save": { "message": "Zapisz" },
+  "options_custom_css_saved": { "message": "Zapisano" },
+  "options_custom_css_refused": {
+    "message": "Nie zapisano: reguły zostały odrzucone. Reguły pobierające cokolwiek z sieci (url(), @import, @font-face) nie są dozwolone."
+  },
   "options_support_intro": {
     "message": "re/read tworzy fundacja non-profit - bez inwestorów, bez reklam, bez śledzenia. Jeśli rozszerzenie jest ci przydatne i chcesz wesprzeć jego dalszy rozwój, każda darowizna pomaga nam budować oprogramowanie wolne od komercyjnej presji."
   },
