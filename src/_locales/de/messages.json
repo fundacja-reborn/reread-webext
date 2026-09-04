@@ -217,6 +217,8 @@
   "reader_pictures_none": { "message": "Kein Bild konnte heruntergeladen werden." },
   "reader_pictures_removed": { "message": "Bilder entfernt." },
   "reader_pictures_failed": { "message": "Die Bilder konnten nicht gespeichert werden." },
+  "reader_fullscreen": { "message": "Vollbild" },
+  "reader_fullscreen_exit": { "message": "Vollbild beenden" },
   "library_pictures_one": {
     "message": "$COUNT$ Bild, $SIZE$",
     "placeholders": {

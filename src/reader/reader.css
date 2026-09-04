@@ -524,6 +524,15 @@ html {
   background: color-mix(in srgb, var(--page-accent) 12%, transparent);
 }
 
+/* The full-screen row says what a press would do (D180): both labels are
+   in the markup, and the root's `:fullscreen` picks the one to show. The
+   state lives in the browser - entered by this row, left by Back or Esc -
+   so the stylesheet reads it from there and no script mirrors it. */
+:root:fullscreen #nav-fullscreen .fullscreen-enter,
+:root:not(:fullscreen) #nav-fullscreen .fullscreen-exit {
+  display: none;
+}
+
 /* The bar's five residents on one phone-wide row. At the desktop gaps and
    button floors the article view's bar added up past a Pixel's width once
    the browser's text zoom grew the rem: the menu slid off the edge and the

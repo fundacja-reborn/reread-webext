@@ -228,6 +228,8 @@
   "reader_pictures_none": { "message": "Aucune image n'a pu être téléchargée." },
   "reader_pictures_removed": { "message": "Images supprimées." },
   "reader_pictures_failed": { "message": "Les images n'ont pas pu être enregistrées." },
+  "reader_fullscreen": { "message": "Plein écran" },
+  "reader_fullscreen_exit": { "message": "Quitter le plein écran" },
   "library_pictures_one": {
     "message": "$COUNT$ image, $SIZE$",
     "placeholders": {

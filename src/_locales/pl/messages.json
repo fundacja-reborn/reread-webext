@@ -289,6 +289,8 @@
   "reader_pictures_none": { "message": "Nie udało się pobrać żadnego obrazka." },
   "reader_pictures_removed": { "message": "Obrazki usunięte." },
   "reader_pictures_failed": { "message": "Nie udało się zapisać obrazków." },
+  "reader_fullscreen": { "message": "Pełny ekran" },
+  "reader_fullscreen_exit": { "message": "Wyjdź z pełnego ekranu" },
   "library_pictures_one": {
     "message": "$COUNT$ obrazek, $SIZE$",
     "placeholders": {

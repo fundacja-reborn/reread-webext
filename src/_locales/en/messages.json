@@ -275,6 +275,14 @@
   "reader_pictures_none": { "message": "None of the pictures could be downloaded." },
   "reader_pictures_removed": { "message": "Pictures removed." },
   "reader_pictures_failed": { "message": "The pictures could not be written." },
+  "reader_fullscreen": {
+    "message": "Full screen",
+    "description": "The reader menu's row that asks the browser for the whole screen: Firefox for Android hides its address bar and Android its status bar."
+  },
+  "reader_fullscreen_exit": {
+    "message": "Exit full screen",
+    "description": "The same row while the page has the whole screen: the press that gives the browser's bars back (Back or Esc do the same)."
+  },
   "library_pictures_one": {
     "message": "$COUNT$ picture, $SIZE$",
     "placeholders": {
