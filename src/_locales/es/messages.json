@@ -1037,7 +1037,7 @@
     "message": "No se ha guardado: las reglas se han rechazado. No se permiten reglas que carguen algo desde la red (url(), @import, @font-face)."
   },
   "options_custom_css_example": {
-    "message": "Ejemplo: .entry-label { color: darkorange; } pone en naranja la etiqueta sobre una entrada del diccionario."
+    "message": "Ejemplo: .bubble { outline: 3px solid darkorange; } dibuja un contorno naranja alrededor de cada burbuja."
   },
   "options_custom_css_cleared": { "message": "Guardado: sin reglas, así que el aspecto predeterminado." },
   "options_support_intro": {
