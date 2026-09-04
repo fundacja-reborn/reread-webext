@@ -1385,7 +1385,7 @@
     "message": "Nie zapisano: reguły zostały odrzucone. Reguły pobierające cokolwiek z sieci (url(), @import, @font-face) nie są dozwolone."
   },
   "options_custom_css_example": {
-    "message": "Przykład: .entry-label { color: darkorange; } koloruje na pomarańczowo etykietę nad wpisem słownika."
+    "message": "Przykład: .bubble { outline: 3px solid darkorange; } rysuje pomarańczową obwódkę wokół każdego dymka."
   },
   "options_custom_css_cleared": { "message": "Zapisano: bez reguł, czyli wygląd domyślny." },
   "options_support_intro": {

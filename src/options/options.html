@@ -765,9 +765,13 @@
         <button type="button" id="custom-css-save" data-i18n="options_custom_css_save">Save</button>
       </p>
       <output id="custom-css-status" class="status" aria-live="polite" hidden></output>
-      <p class="row-note" data-i18n="options_custom_css_example">
-        Example: .entry-label { color: darkorange; } colours the label above a dictionary entry
-        orange.
+      <!-- A hint and not a row note: the note's size lives under `.row`, and this
+           paragraph stands outside one (it came out a size too big). The example
+           is one every bubble shows at once - the label it first named appears
+           only where a dictionary's headword differs from the selection. -->
+      <p class="hint" data-i18n="options_custom_css_example">
+        Example: .bubble { outline: 3px solid darkorange; } draws an orange line around every
+        bubble.
       </p>
     </div>
 
