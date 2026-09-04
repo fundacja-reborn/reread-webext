@@ -240,6 +240,7 @@ const navMarks = document.getElementById("nav-marks");
 const navVocabulary = document.getElementById("nav-vocabulary");
 const navSettings = document.getElementById("nav-settings");
 const navPictures = document.getElementById("nav-pictures");
+const navFullscreen = document.getElementById("nav-fullscreen");
 // The row's two lines live inside the button (Michał's smoke, 2026-08-29: a
 // hint standing under the row behind its own separator read as a second,
 // dead row): the label, and the line that says where the press reaches or
@@ -5900,6 +5901,27 @@ navVocabulary?.addEventListener("click", () => {
 navSettings?.addEventListener("click", () => {
   setPanel(menuButton, menuPanel, false);
   goToSettings();
+});
+
+// The full-screen row (D180). Firefox for Android folds its address bar
+// only under a finger scrolling down and brings it back with every scroll
+// up - and never moves it for the page keys an e-reader turns pages with
+// (`NestedGeckoView` hands the toolbar touch moves and nothing else), so on
+// a Boox the bar stood over the article for good (Michał's photo,
+// 2026-09-04). The Fullscreen API is the one door a browser leaves open to
+// a page: Fenix takes its toolbar and Android's status bar away and gives
+// them back on Back, a desktop on Esc. The request has to ride a press of
+// the reader's own - a browser refuses one made on load - so the row is the
+// whole mechanism: no setting remembers the choice, and a reloaded tab asks
+// again. The root, not the body, so the fixed bars keep their viewport.
+// Hidden where the browser has no full screen to give (the API absent, or
+// switched off); a request refused after that is the browser's word in its
+// own console, and nothing the page could add to.
+if (navFullscreen !== null) navFullscreen.hidden = !document.fullscreenEnabled;
+navFullscreen?.addEventListener("click", () => {
+  setPanel(menuButton, menuPanel, false);
+  if (document.fullscreenElement !== null) void document.exitFullscreen();
+  else document.documentElement.requestFullscreen().catch(() => {});
 });
 
 keepButton?.addEventListener("click", () => void onKeepPress());

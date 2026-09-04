@@ -422,6 +422,20 @@
             article on this device. After the download they are shown in the article.
           </span>
         </button>
+        <!-- The whole screen for the page (D180). Firefox for Android folds
+             its address bar only under a finger scrolling down, brings it
+             back with every scroll up, and never moves it for the page keys
+             an e-reader turns pages with - so the reader asks the browser
+             for the screen itself. Both labels stand in the markup and the
+             stylesheet shows the one that says what a press would do
+             (`:fullscreen` on the root, the speech bar's play-and-pause
+             manner); hidden where the browser has no full screen to give.
+             Next to the settings, not among the rooms: it is about the
+             window, not about what is read in it. -->
+        <button id="nav-fullscreen" type="button" hidden>
+          <span class="fullscreen-enter" data-i18n="reader_fullscreen">Full screen</span>
+          <span class="fullscreen-exit" data-i18n="reader_fullscreen_exit">Exit full screen</span>
+        </button>
         <button id="nav-settings" type="button" data-i18n="settings">Settings</button>
       </nav>
 

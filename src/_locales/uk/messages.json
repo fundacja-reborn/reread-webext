@@ -289,6 +289,8 @@
   "reader_pictures_none": { "message": "Не вдалося завантажити жодного зображення." },
   "reader_pictures_removed": { "message": "Зображення видалено." },
   "reader_pictures_failed": { "message": "Не вдалося зберегти зображення." },
+  "reader_fullscreen": { "message": "На весь екран" },
+  "reader_fullscreen_exit": { "message": "Вийти з повноекранного режиму" },
   "library_pictures_one": {
     "message": "$COUNT$ зображення, $SIZE$",
     "placeholders": {

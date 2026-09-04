@@ -228,6 +228,8 @@
   "reader_pictures_none": { "message": "No se pudo descargar ninguna imagen." },
   "reader_pictures_removed": { "message": "Imágenes quitadas." },
   "reader_pictures_failed": { "message": "No se pudieron guardar las imágenes." },
+  "reader_fullscreen": { "message": "Pantalla completa" },
+  "reader_fullscreen_exit": { "message": "Salir de pantalla completa" },
   "library_pictures_one": {
     "message": "$COUNT$ imagen, $SIZE$",
     "placeholders": {
