@@ -1270,8 +1270,15 @@
   },
   "options_custom_css_heading": { "message": "Custom CSS" },
   "options_custom_css_intro": {
-    "message": "For changing how the bubble and the reader look with CSS rules of your own. The rules apply inside the translation bubble and to the text of an article in the reader, never to the reader's bar and lists, to the pages you read or to this page. Rules that would load anything from the network (url(), @import, @font-face) are refused. The names of the elements can change between versions, so this setting comes without a guarantee."
+    "message": "For changing how the extension's own pages look with CSS rules of your own. The rules apply inside the translation bubble, on the reader page and in the toolbar button's window - never on the pages you read, and never on this page: the settings stay out of reach, so a rule can always be undone here. A wrong rule can break the look or the controls of those places; to undo it, clear the field and save."
   },
+  "options_custom_css_rules": {
+    "message": "Rules that would load anything from the network (url(), @import, @font-face) are refused. The names of the elements are kept from version to version where possible; when one has to change, the release notes say so. The names come from these files:"
+  },
+  "options_custom_css_source_bubble": { "message": "the bubble's stylesheet (tooltip.js)" },
+  "options_custom_css_source_reader": { "message": "the reader's stylesheet (reader.css)" },
+  "options_custom_css_source_popup": { "message": "the popup's stylesheet (popup.css)" },
+  "options_custom_css_source_shared": { "message": "the styles every page shares (page.css)" },
   "options_custom_css_save": { "message": "Save" },
   "options_custom_css_saved": { "message": "Saved" },
   "options_custom_css_refused": {

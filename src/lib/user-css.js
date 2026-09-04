@@ -184,3 +184,29 @@ export function compileUserCss(text) {
   if (!screened.ok) return screened;
   return { ok: true, sheet: parsed.sheet, css: screened.css };
 }
+
+/**
+ * A page's dressing in the reader's own rules (D176): the sheet adopted beside
+ * the page's stylesheets - after them, so theirs win on equal specificity -
+ * and taken back out for the next text. One per document: the reader page and
+ * the popup each keep theirs. A refused text takes the previous sheet away and
+ * adds nothing. Through the CSSOM like everything the extension's pages style
+ * at runtime: their content security policy allows no inline style, and a
+ * constructed sheet is not inline style to it. Never the settings page, which
+ * is where a rule is undone.
+ *
+ * @param {{ adoptedStyleSheets: CSSStyleSheet[] }} target the document to dress
+ * @returns {(text: string) => void}
+ */
+export function dresser(target) {
+  /** @type {{ text: string, sheet: CSSStyleSheet | null }} */
+  let worn = { text: "", sheet: null };
+  return (text) => {
+    if (text === worn.text) return;
+    const others = target.adoptedStyleSheets.filter((sheet) => sheet !== worn.sheet);
+    const compiled = text.length > 0 ? compileUserCss(text) : null;
+    const sheet = compiled !== null && compiled.ok ? compiled.sheet : null;
+    worn = { text, sheet };
+    target.adoptedStyleSheets = sheet !== null ? [...others, sheet] : others;
+  };
+}

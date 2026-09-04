@@ -1006,8 +1006,15 @@
   },
   "options_custom_css_heading": { "message": "Eigenes CSS" },
   "options_custom_css_intro": {
-    "message": "Für alle, die das Aussehen der Sprechblase und der Leseansicht mit eigenen CSS-Regeln ändern möchten. Die Regeln gelten in der Übersetzungs-Sprechblase und im Text eines Artikels in der Leseansicht, nie in deren Leiste und Listen, auf den gelesenen Seiten oder auf dieser Seite. Regeln, die etwas aus dem Netz laden würden (url(), @import, @font-face), werden abgelehnt. Die Namen der Elemente können sich von Version zu Version ändern; diese Einstellung kommt ohne Garantie."
+    "message": "Für alle, die das Aussehen der eigenen Seiten der Erweiterung mit eigenen CSS-Regeln ändern möchten. Die Regeln gelten in der Übersetzungs-Sprechblase, auf der Seite der Leseansicht und im Fenster der Schaltfläche in der Symbolleiste - nie auf den gelesenen Seiten und nie auf dieser Seite: die Einstellungen bleiben außer Reichweite, damit sich eine Regel hier immer zurücknehmen lässt. Eine falsche Regel kann das Aussehen oder die Bedienung dieser Orte stören; zum Zurücknehmen das Feld leeren und speichern."
   },
+  "options_custom_css_rules": {
+    "message": "Regeln, die etwas aus dem Netz laden würden (url(), @import, @font-face), werden abgelehnt. Die Namen der Elemente bleiben von Version zu Version nach Möglichkeit gleich; muss sich einer ändern, steht es in den Versionshinweisen. Die Namen stammen aus diesen Dateien:"
+  },
+  "options_custom_css_source_bubble": { "message": "das Stylesheet der Sprechblase (tooltip.js)" },
+  "options_custom_css_source_reader": { "message": "das Stylesheet der Leseansicht (reader.css)" },
+  "options_custom_css_source_popup": { "message": "das Stylesheet des Fensters der Symbolleisten-Schaltfläche (popup.css)" },
+  "options_custom_css_source_shared": { "message": "die Stile, die alle Seiten teilen (page.css)" },
   "options_custom_css_save": { "message": "Speichern" },
   "options_custom_css_saved": { "message": "Gespeichert" },
   "options_custom_css_refused": {

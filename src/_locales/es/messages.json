@@ -1029,8 +1029,15 @@
   },
   "options_custom_css_heading": { "message": "CSS personalizado" },
   "options_custom_css_intro": {
-    "message": "Para cambiar el aspecto de la burbuja y de la vista de lectura con tus propias reglas CSS. Las reglas se aplican dentro de la burbuja de traducción y al texto de un artículo en la vista de lectura, nunca a su barra y sus listas, a las páginas que lees ni a esta página. Las reglas que cargarían algo desde la red (url(), @import, @font-face) se rechazan. Los nombres de los elementos pueden cambiar entre versiones, así que este ajuste no tiene garantía."
+    "message": "Para cambiar el aspecto de las páginas de la extensión con tus propias reglas CSS. Las reglas se aplican dentro de la burbuja de traducción, en la página de la vista de lectura y en la ventana del botón de la barra de herramientas - nunca en las páginas que lees, ni en esta página: los ajustes quedan fuera de su alcance, así que una regla siempre se puede deshacer aquí. Una regla equivocada puede romper el aspecto o los controles de esos lugares; para deshacerla, vacía el campo y guarda."
   },
+  "options_custom_css_rules": {
+    "message": "Las reglas que cargarían algo desde la red (url(), @import, @font-face) se rechazan. Los nombres de los elementos se mantienen de una versión a otra siempre que es posible; cuando alguno tiene que cambiar, las notas de la versión lo dicen. Los nombres vienen de estos archivos:"
+  },
+  "options_custom_css_source_bubble": { "message": "la hoja de estilos de la burbuja (tooltip.js)" },
+  "options_custom_css_source_reader": { "message": "la hoja de estilos de la vista de lectura (reader.css)" },
+  "options_custom_css_source_popup": { "message": "la hoja de estilos de la ventana del botón de la barra de herramientas (popup.css)" },
+  "options_custom_css_source_shared": { "message": "los estilos comunes a todas las páginas (page.css)" },
   "options_custom_css_save": { "message": "Guardar" },
   "options_custom_css_saved": { "message": "Guardado" },
   "options_custom_css_refused": {

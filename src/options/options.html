@@ -699,11 +699,57 @@
     <h2 id="custom-css" data-i18n="options_custom_css_heading">Custom CSS</h2>
 
     <p class="explain" data-i18n="options_custom_css_intro">
-      For changing how the bubble and the reader look with CSS rules of your own. The rules
-      apply inside the translation bubble and to the text of an article in the reader, never
-      to the reader's bar and lists, to the pages you read or to this page. Rules that would
-      load anything from the network (url(), @import, @font-face) are refused. The names of
-      the elements can change between versions, so this setting comes without a guarantee.
+      For changing how the extension's own pages look with CSS rules of your own. The rules
+      apply inside the translation bubble, on the reader page and in the toolbar button's
+      window - never on the pages you read, and never on this page: the settings stay out of
+      reach, so a rule can always be undone here. A wrong rule can break the look or the
+      controls of those places; to undo it, clear the field and save.
+    </p>
+
+    <p class="explain" data-i18n="options_custom_css_rules">
+      Rules that would load anything from the network (url(), @import, @font-face) are refused.
+      The names of the elements are kept from version to version where possible; when one has
+      to change, the release notes say so. The names come from these files:
+    </p>
+
+    <!-- Doors to the stylesheets the rules address, at the installed version:
+         options.js rewrites the hrefs to the release tag (`linkSources`), and
+         the static main is what a development build falls back to. Reader's
+         navigation, not a request of the extension's - the support links' rule.
+         The support links' dress: one door per line, the touch floor. -->
+    <p class="support-links">
+      <a
+        href="https://github.com/fundacja-reborn/reread-webext/blob/main/src/content/tooltip.js"
+        data-source="src/content/tooltip.js"
+        target="_blank"
+        rel="noopener"
+        data-i18n="options_custom_css_source_bubble"
+        >the bubble's stylesheet (tooltip.js)</a
+      >
+      <a
+        href="https://github.com/fundacja-reborn/reread-webext/blob/main/src/reader/reader.css"
+        data-source="src/reader/reader.css"
+        target="_blank"
+        rel="noopener"
+        data-i18n="options_custom_css_source_reader"
+        >the reader's stylesheet (reader.css)</a
+      >
+      <a
+        href="https://github.com/fundacja-reborn/reread-webext/blob/main/src/popup/popup.css"
+        data-source="src/popup/popup.css"
+        target="_blank"
+        rel="noopener"
+        data-i18n="options_custom_css_source_popup"
+        >the popup's stylesheet (popup.css)</a
+      >
+      <a
+        href="https://github.com/fundacja-reborn/reread-webext/blob/main/src/assets/page.css"
+        data-source="src/assets/page.css"
+        target="_blank"
+        rel="noopener"
+        data-i18n="options_custom_css_source_shared"
+        >the styles every page shares (page.css)</a
+      >
     </p>
 
     <div class="custom-css">

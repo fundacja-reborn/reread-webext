@@ -1370,8 +1370,15 @@
   },
   "options_custom_css_heading": { "message": "Własny CSS" },
   "options_custom_css_intro": {
-    "message": "Dla osób, które chcą zmienić wygląd dymka i czytnika własnymi regułami CSS. Reguły działają w dymku tłumaczenia i w tekście artykułu w czytniku, nigdy w pasku i na listach czytnika, na czytanych stronach ani na tej stronie. Reguły, które pobierałyby cokolwiek z sieci (url(), @import, @font-face), są odrzucane. Nazwy elementów mogą się zmieniać między wersjami, więc to ustawienie jest bez gwarancji."
+    "message": "Dla osób, które chcą zmienić wygląd stron rozszerzenia własnymi regułami CSS. Reguły działają w dymku tłumaczenia, na stronie czytnika i w okienku przycisku na pasku narzędzi - nigdy na czytanych stronach ani na tej stronie: ustawienia pozostają poza zasięgiem, więc regułę zawsze da się tu cofnąć. Zła reguła może zepsuć wygląd albo obsługę tych miejsc; żeby ją cofnąć, wyczyść pole i zapisz."
   },
+  "options_custom_css_rules": {
+    "message": "Reguły, które pobierałyby cokolwiek z sieci (url(), @import, @font-face), są odrzucane. Nazwy elementów staramy się zachowywać między wersjami; gdy któraś musi się zmienić, mówi o tym nota wydania. Nazwy pochodzą z tych plików:"
+  },
+  "options_custom_css_source_bubble": { "message": "arkusz stylów dymka (tooltip.js)" },
+  "options_custom_css_source_reader": { "message": "arkusz stylów czytnika (reader.css)" },
+  "options_custom_css_source_popup": { "message": "arkusz stylów okienka przycisku paska (popup.css)" },
+  "options_custom_css_source_shared": { "message": "style wspólne dla wszystkich stron (page.css)" },
   "options_custom_css_save": { "message": "Zapisz" },
   "options_custom_css_saved": { "message": "Zapisano" },
   "options_custom_css_refused": {
