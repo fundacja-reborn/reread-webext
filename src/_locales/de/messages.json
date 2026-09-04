@@ -1004,6 +1004,19 @@
   "options_disabled_intro": {
     "message": "Eine Liste von Websites, auf denen die Erweiterung abgeschaltet ist (keine Übersetzung, keine Unterstreichungen). Websites fügen Sie hier über das Symbol der Erweiterung in der Symbolleiste Ihres Browsers hinzu."
   },
+  "options_custom_css_heading": { "message": "Eigenes CSS" },
+  "options_custom_css_intro": {
+    "message": "Für alle, die das Aussehen der Sprechblase und der Leseansicht mit eigenen CSS-Regeln ändern möchten. Die Regeln gelten in der Übersetzungs-Sprechblase und im Text eines Artikels in der Leseansicht, nie in deren Leiste und Listen, auf den gelesenen Seiten oder auf dieser Seite. Regeln, die etwas aus dem Netz laden würden (url(), @import, @font-face), werden abgelehnt. Die Namen der Elemente können sich von Version zu Version ändern; diese Einstellung kommt ohne Garantie."
+  },
+  "options_custom_css_save": { "message": "Speichern" },
+  "options_custom_css_saved": { "message": "Gespeichert" },
+  "options_custom_css_refused": {
+    "message": "Nicht gespeichert: die Regeln wurden abgelehnt. Regeln, die etwas aus dem Netz laden (url(), @import, @font-face), sind nicht erlaubt."
+  },
+  "options_custom_css_example": {
+    "message": "Beispiel: .entry-label { color: darkorange; } färbt die Beschriftung über einem Wörterbucheintrag orange."
+  },
+  "options_custom_css_cleared": { "message": "Gespeichert: keine Regeln, also das Standardaussehen." },
   "options_support_intro": {
     "message": "re/read wird von einer gemeinnützigen Stiftung entwickelt - ohne Investoren, ohne Werbung, ohne Tracking. Wenn es Ihnen nützlich ist und Sie seine Weiterentwicklung unterstützen möchten: Jede Spende hilft uns, Software frei von kommerziellem Druck zu bauen."
   },

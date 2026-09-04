@@ -201,6 +201,9 @@ const tooltip = createTooltip({
   // Live, through the module variable: the tooltip is built once, but what
   // stands over the text is the ground's business and changes with `start`.
   covered: () => coveredAbove(),
+  // The reader's own rules (D176), live for the same reason: the next bubble
+  // wears what the settings say now.
+  userCss: () => customCss,
 });
 
 /**
@@ -402,6 +405,13 @@ function landQuietAnswer(answer, normalized, findable) {
 let bubbleScale = DEFAULTS.bubbleScale;
 
 /**
+ * The reader's own rules (D176), mirrored the same way and handed to the
+ * bubble live: every bubble is built afresh and asks for them as it is, so
+ * a change on the settings page reaches the next bubble on every open page.
+ */
+let customCss = DEFAULTS.customCss;
+
+/**
  * The speaker's half of the config (D83), mirrored for the same reason: the
  * phrase is spoken in the language being read, with the voice chosen for it,
  * and reading storage at press time would cost a round trip the storage
@@ -592,6 +602,7 @@ async function loadVocabulary(preloaded) {
     // is a registration name, so a new one is a repaint, not a restyle (D130).
     underline = config.underline;
     bubbleScale = config.bubbleScale;
+    customCss = config.customCss;
     ttsLang = config.sourceLang ?? "";
     pairTarget = config.targetLang ?? "";
     ttsVoices = config.ttsVoices;

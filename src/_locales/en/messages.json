@@ -1268,6 +1268,19 @@
   "options_disabled_intro": {
     "message": "A list of websites where the extension is switched off (no translation or underlines). You can add sites here using the extension icon in your browser's toolbar."
   },
+  "options_custom_css_heading": { "message": "Custom CSS" },
+  "options_custom_css_intro": {
+    "message": "For changing how the bubble and the reader look with CSS rules of your own. The rules apply inside the translation bubble and to the text of an article in the reader, never to the reader's bar and lists, to the pages you read or to this page. Rules that would load anything from the network (url(), @import, @font-face) are refused. The names of the elements can change between versions, so this setting comes without a guarantee."
+  },
+  "options_custom_css_save": { "message": "Save" },
+  "options_custom_css_saved": { "message": "Saved" },
+  "options_custom_css_refused": {
+    "message": "Not saved: the rules were refused. Rules that load anything from the network (url(), @import, @font-face) are not allowed."
+  },
+  "options_custom_css_example": {
+    "message": "Example: .entry-label { color: darkorange; } colours the label above a dictionary entry orange."
+  },
+  "options_custom_css_cleared": { "message": "Saved: no rules, so the default look." },
   "options_support_intro": {
     "message": "re/read is built by a non-profit foundation - no investors, no ads, no tracking. If you find it useful and want to support its continued development, every donation helps us build software free from commercial pressure."
   },

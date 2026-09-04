@@ -30,6 +30,7 @@ import {
   writeConfig,
 } from "../lib/config.js";
 import { aside, localizePage, megabytes, plural, t, uiLocale } from "../lib/i18n.js";
+import { compileUserCss } from "../lib/user-css.js";
 import { privateNote } from "../lib/private-note.js";
 import { armBackArrow } from "../lib/back-arrow.js";
 import { languageName, pairLabel } from "../lib/language.js";
@@ -341,6 +342,21 @@ function renderKeepArticles() {
 function previewFontFamily(field) {
   const name = cleanFontFamily(field.value);
   field.style.fontFamily = name.length > 0 ? `"${name}"` : "";
+}
+
+/**
+ * The reader's own rules (D176) - the field shows what is stored, unless
+ * somebody has typed into it since: another page's write, or this page's own
+ * refresh on any setting changing, must not eat a half-written sheet. Typed
+ * is remembered by the input event rather than read off the focus, because
+ * the focus leaves the field long before the press on Save.
+ */
+let customCssTyped = false;
+
+function renderCustomCss() {
+  const field = document.getElementById("custom-css-text");
+  if (!(field instanceof HTMLTextAreaElement)) return;
+  if (!customCssTyped) field.value = config.customCss;
 }
 
 /** The reading font's name (D163) - the field shows what is stored. */
@@ -2387,6 +2403,7 @@ async function render() {
   renderKeepArticles();
   renderLibraryCopy();
   renderFontCustom();
+  renderCustomCss();
   renderNoTranslation();
   renderBubbleScale();
   renderTts();
@@ -2446,6 +2463,7 @@ async function refresh() {
   renderKeepArticles();
   renderLibraryCopy();
   renderFontCustom();
+  renderCustomCss();
   renderNoTranslation();
   renderBubbleScale();
   renderTts();
@@ -2530,6 +2548,54 @@ document.getElementById("font-custom")?.addEventListener("input", (event) => {
 });
 document.getElementById("font-custom")?.addEventListener("keydown", (event) => {
   if (event.key === "Enter" && event.target instanceof HTMLElement) event.target.blur();
+});
+// The reader's own rules (D176), stored on the press and not per keystroke:
+// a stylesheet is finished when its author says so, and every write pings
+// every open page. Screened before the write by the same parser that will
+// apply the rules (`compileUserCss`): a text with a rule that would load
+// anything is refused whole, said so under the field, and nothing is stored.
+// What is stored is the text as typed - the screen runs again wherever the
+// rules are applied - and an emptied field stores nothing, which is the
+// default look back, said in its own words: a Save over an empty field once
+// read as a rule saved (Michał's smoke, 2026-09-03 - the example then stood
+// in the field as a placeholder, and looked typed).
+/**
+ * The field's own status line. A refusal wears the report's frame and the
+ * error tone, because it lands under a tall field, and a line in the muted
+ * grey there was read as no answer at all (Michał's smoke, 2026-09-03); what
+ * was saved says so quietly, the way every status on this page does.
+ *
+ * @param {HTMLElement | null} status
+ * @param {string} text
+ * @param {"idle" | "error"} tone
+ */
+function tellCustomCss(status, text, tone) {
+  if (status === null) return;
+  status.hidden = false;
+  status.className = tone === "error" ? "status report" : "status";
+  status.dataset["tone"] = tone;
+  status.textContent = text;
+}
+
+document.getElementById("custom-css-text")?.addEventListener("input", () => {
+  customCssTyped = true;
+});
+document.getElementById("custom-css-save")?.addEventListener("click", () => {
+  const field = document.getElementById("custom-css-text");
+  const status = document.getElementById("custom-css-status");
+  if (!(field instanceof HTMLTextAreaElement)) return;
+  const text = field.value.trim().length > 0 ? field.value : "";
+  const compiled = text.length > 0 ? compileUserCss(text) : null;
+  if (compiled !== null && !compiled.ok) {
+    tellCustomCss(status, t("options_custom_css_refused"), "error");
+    return;
+  }
+  void writeConfig({ customCss: text }).then((written) => {
+    config = written;
+    customCssTyped = false;
+    renderCustomCss();
+    tellCustomCss(status, text.length > 0 ? t("options_custom_css_saved") : t("options_custom_css_cleared"), "idle");
+  });
 });
 document.getElementById("library-copy")?.addEventListener("change", (event) => {
   const toggle = event.target;

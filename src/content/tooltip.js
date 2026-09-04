@@ -99,6 +99,7 @@
 
 import { MEANING_SEPARATOR, afterChoosing, savePress, toMeanings } from "../lib/gloss.js";
 import { t } from "../lib/i18n.js";
+import { compileUserCss } from "../lib/user-css.js";
 
 const GAP = 8;
 const VIEWPORT_MARGIN = 8;
@@ -1075,20 +1076,37 @@ export const STYLE = `
  * reader page the fallback would be blocked by CSP, which is the right way
  * round - an unstyled bubble in one place beats an unstyled bubble everywhere.
  *
+ * The reader's own rules (D176) ride along both ways: as a second adopted
+ * sheet after the bubble's own, so theirs win on equal specificity - that is
+ * what "own rules" means - and, on the fallback, as the parser's serialization
+ * appended to the text. Never the typed text: `compileUserCss` has already
+ * refused anything that would load, and what it hands back is what it read.
+ * Firefox's content scripts are where the fallback is the road (a sandbox is
+ * not a window, and the sheet's constructor wants one - the same reason the
+ * rules arrive there as a serialization and no sheet), and a serialization
+ * with no sheet beside an adopted base is the one mixed case, kept for
+ * completeness: the base stays adopted and the rules get a `<style>` of
+ * their own.
+ *
  * @param {ShadowRoot} root
+ * @param {{ sheet: CSSStyleSheet | null, css: string }} dress the reader's
+ *   own rules as compiled, or nothing to add
  */
-function style(root) {
+function style(root, dress) {
+  let adopted = false;
   try {
     const sheet = new CSSStyleSheet();
     sheet.replaceSync(STYLE);
-    root.adoptedStyleSheets = [sheet];
-    if (root.adoptedStyleSheets.length === 1) return;
+    const sheets = dress.sheet !== null ? [sheet, dress.sheet] : [sheet];
+    root.adoptedStyleSheets = sheets;
+    adopted = root.adoptedStyleSheets.length === sheets.length;
   } catch {
     // Not supported, or refused. Either way there is another way to do it.
   }
+  if (adopted && (dress.sheet !== null || dress.css.length === 0)) return;
 
   const element = document.createElement("style");
-  element.textContent = STYLE;
+  element.textContent = adopted ? dress.css : dress.css.length > 0 ? `${STYLE}\n${dress.css}` : STYLE;
   root.append(element);
 }
 
@@ -1250,12 +1268,40 @@ export function settleBack({ shown, now, carried }) {
  *   takes the page's own blue selection with it, and a box editing a phrase
  *   nobody can see is a box over nothing (Michał's report, D162's first
  *   smoke).
+ * @param {() => string} [options.userCss] the reader's own rules (D176), asked
+ *   for as every bubble is built: the settings page can change them while a
+ *   page stands open, and the next bubble should wear the new ones. Screened
+ *   here as well as there (`compileUserCss`) - what dresses the bubble is the
+ *   parser's serialization of rules that load nothing, and a text refused at
+ *   this end dresses nothing at all.
  * @returns {Tooltip}
  */
-export function createTooltip({ onAction, onHide, covered, onEditing }) {
+export function createTooltip({ onAction, onHide, covered, onEditing, userCss }) {
   /** The live measure of the caller's stuck chrome (D138), with the
    *  every-other-page answer standing in when the caller has none. */
   const coveredAbove = covered ?? (() => 0);
+  /**
+   * The reader's own rules (D176), compiled once per text: every bubble is
+   * built afresh, and the same sheet dresses each one built while the text
+   * stands. A text the screen refuses is remembered as refused, so no bubble
+   * re-parses it on every show.
+   *
+   * @type {{ text: string, sheet: CSSStyleSheet | null, css: string }}
+   */
+  let dressed = { text: "", sheet: null, css: "" };
+
+  /** @returns {{ sheet: CSSStyleSheet | null, css: string }} */
+  function userDress() {
+    const text = userCss?.() ?? "";
+    if (text !== dressed.text) {
+      const compiled = text.length > 0 ? compileUserCss(text) : null;
+      dressed =
+        compiled !== null && compiled.ok
+          ? { text, sheet: compiled.sheet, css: compiled.css }
+          : { text, sheet: null, css: "" };
+    }
+    return dressed;
+  }
   /** @type {HTMLDivElement | null} */
   let host = null;
   /** @type {HTMLDivElement | null} */
@@ -1383,7 +1429,7 @@ export function createTooltip({ onAction, onHide, covered, onEditing }) {
     host.style.setProperty("height", "0px", "important");
 
     const root = host.attachShadow({ mode: "closed" });
-    style(root);
+    style(root, userDress());
 
     bubble = document.createElement("div");
     bubble.className = "bubble";

@@ -156,6 +156,17 @@ export const CONFIG_KEY = "config";
  *   measurement - the stylesheet holds a rule per name, because reaching
  *   `::highlight()` with a value would mean setting a property on somebody
  *   else's document.
+ * @property {string} customCss Rules somebody typed into the settings (D176)
+ *   to dress the bubble and the reader page - and nothing else: never the
+ *   page being read, never the settings page (a rule that hid its controls
+ *   could not be undone from there). Stored as typed, line breaks and all,
+ *   because the screen runs where the rules are applied, not here: the
+ *   browser's own parser reads them and refuses the whole sheet at the first
+ *   rule that would load anything (`lib/user-css.js`), so PRIVACY.md's
+ *   promise that nothing loads from outside the package holds for typed
+ *   rules too. The names the rules address are the bubble's own classes and
+ *   the reader page's, with no promise between versions; the settings page
+ *   says so.
  */
 
 /** @type {readonly string[]} */
@@ -251,6 +262,7 @@ export const DEFAULTS = Object.freeze({
   ttsOff: false,
   bubbleScale: 100,
   underline: DEFAULT_UNDERLINE,
+  customCss: "",
 });
 
 /**
@@ -431,6 +443,10 @@ export function withDefaults(stored) {
     // a weight this version never heard of has no rule to paint under, and a
     // registration nothing styles underlines nothing at all.
     underline: isUnderlineWeight(raw["underline"]) ? raw["underline"] : DEFAULTS.underline,
+    // As typed, or nothing: a value of another type is a hand-edited file,
+    // and the screen at the point of use is what decides whether the text
+    // dresses anything (D176).
+    customCss: typeof raw["customCss"] === "string" ? raw["customCss"] : DEFAULTS.customCss,
   };
 }
 
@@ -483,6 +499,7 @@ export async function readConfig() {
  * @property {boolean} [ttsOff]
  * @property {number} [bubbleScale]
  * @property {import("./underline.js").UnderlineWeight} [underline]
+ * @property {string} [customCss]
  */
 
 /**

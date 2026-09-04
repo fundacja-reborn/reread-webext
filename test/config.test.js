@@ -802,3 +802,34 @@ describe("the reading list's copy", () => {
     assert.equal(effectiveLibraryCopy({ libraryCopy: true }), true);
   });
 });
+
+describe("custom CSS", () => {
+  it("is empty for profiles old and new", () => {
+    assert.equal(withDefaults(undefined).customCss, "");
+    assert.equal(withDefaults({ sourceLang: "en" }).customCss, "");
+  });
+
+  it("keeps the text as typed, line breaks and all - the screen runs where it is applied", () => {
+    const typed = ".entry-label { color: darkorange; }\n\n.entry + .entry {\n\tmargin-top: 1.5em;\n}";
+    assert.equal(withDefaults({ customCss: typed }).customCss, typed);
+  });
+
+  it("treats a hand-edited value of the wrong type as none", () => {
+    for (const customCss of [null, 12, {}, ["a"], true]) {
+      assert.equal(withDefaults({ customCss }).customCss, "");
+    }
+  });
+
+  it("writes the text through writeConfig without touching the rest", async () => {
+    const store = installFakeBrowser({ config: { sourceLang: "de", targetLang: "en" } });
+    const written = await writeConfig({ customCss: ".bubble { border-width: 2px; }" });
+
+    assert.deepEqual(written, {
+      ...DEFAULTS,
+      sourceLang: "de",
+      targetLang: "en",
+      customCss: ".bubble { border-width: 2px; }",
+    });
+    assert.equal(/** @type {any} */ (store["config"]).customCss, ".bubble { border-width: 2px; }");
+  });
+});

@@ -638,6 +638,34 @@ button.model-delete {
   color: var(--page-fg);
 }
 
+/* The reader's own rules (D176): a code field in the same quiet dress, but
+   monospace, the width of the column and tall enough for a handful of rules.
+   It grows by hand (resize) and never by itself - a stylesheet is typed, not
+   read, and a field growing under the fingers would move the Save button. */
+.custom-css textarea {
+  display: block;
+  width: 100%;
+  min-height: 9rem;
+  padding: 0.5rem 0.6rem;
+  font: 0.9rem/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color: var(--page-fg);
+  background: transparent;
+  border: 1px solid var(--page-border);
+  border-radius: 6px;
+  resize: vertical;
+  tab-size: 2;
+}
+
+.custom-css .inline {
+  margin-top: 0.5rem;
+}
+
+/* The status is an output element, inline by nature; here it is a line of
+   its own under the button, and a refusal wears the report's frame. */
+.custom-css output {
+  display: block;
+}
+
 /* The voice names are the device's own and can run long; the select takes the
    line's spare width and may shrink below its content, so a long name never
    pushes the Listen button off the page. */

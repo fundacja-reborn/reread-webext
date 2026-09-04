@@ -87,7 +87,9 @@ from outside the extension, there is no crash reporting, no A/B testing and no u
 check of the extension's own (updates are handled by the browser and the add-on store you
 installed from, under their policies). A download that a server redirects to another host
 is refused rather than followed, so the two addresses above are the only ones the
-extension's downloads can come from.
+extension's downloads can come from. The custom CSS you can type on the settings page is
+checked before it is stored, and a rule that would load anything (url(), @import, @font-face)
+is refused - so it cannot become a third address either.
 
 You do not have to take our word for it: watch the network panel in the browser's
 developer tools, read the source code (the extension is published unminified, exactly as it
