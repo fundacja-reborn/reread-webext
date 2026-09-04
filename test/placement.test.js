@@ -328,3 +328,54 @@ describe("placement over a stuck bar", () => {
     assert.deepEqual(spot, { left: 100, top: 38, grow: "down", scroll: -38 });
   });
 });
+
+describe("placement holding its side (D177)", () => {
+  it("stays below the phrase when told to, even where the spot above has come free", () => {
+    const spot = placement({
+      anchor: at({ top: 400 }),
+      size: { width: 300, height: 60 },
+      viewport: VIEWPORT,
+      prefer: "down",
+    });
+
+    assert.deepEqual(spot, { left: 100, top: 428, grow: "down" });
+  });
+
+  it("stays above the phrase when told to and it still fits", () => {
+    const spot = placement({
+      anchor: at({ top: 400 }),
+      size: { width: 300, height: 60 },
+      viewport: VIEWPORT,
+      prefer: "up",
+    });
+
+    assert.deepEqual(spot, { left: 100, top: 392, grow: "up" });
+  });
+
+  it("lets go of the side above when the bubble no longer fits there", () => {
+    // 400 tall above a phrase at 300 does not fit (300 - 8 - 400 < 8), and a
+    // side that cannot hold the bubble is no side to hold.
+    const spot = placement({
+      anchor: at({ top: 300 }),
+      size: { width: 300, height: 400 },
+      viewport: VIEWPORT,
+      prefer: "up",
+    });
+
+    assert.equal(spot.grow, "down");
+  });
+
+  it("holds the side below through the scroll assist as well", () => {
+    // Above would fit; below needs the page to move, and moves it.
+    const spot = placement({
+      anchor: at({ top: 600 }),
+      size: { width: 300, height: 400 },
+      viewport: VIEWPORT,
+      assist: true,
+      prefer: "down",
+    });
+
+    assert.equal(spot.grow, "down");
+    assert.ok((spot.scroll ?? 0) > 0);
+  });
+});
