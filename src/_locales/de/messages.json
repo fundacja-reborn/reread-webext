@@ -1008,7 +1008,7 @@
   "options_custom_css_intro": {
     "message": "Für alle, die das Aussehen der Sprechblase, der Leseansicht und des Fensters der Symbolleisten-Schaltfläche mit eigenen CSS-Regeln ändern möchten. Diese Seite bleibt außer Reichweite der Regeln, damit sich eine falsche Regel hier immer zurücknehmen lässt: Feld leeren und speichern."
   },
-  "options_custom_css_more": { "message": "Mehr zu den Regeln und den Namen" },
+  "options_custom_css_more": { "message": "Mehr zu den CSS-Regeln und den Namen" },
   "options_custom_css_reach": {
     "message": "Die Regeln gelten in der Übersetzungs-Sprechblase, auf der Seite der Leseansicht - Leiste und Listen eingeschlossen - und im Fenster der Schaltfläche in der Symbolleiste, nie auf den gelesenen Seiten. Eine falsche Regel kann das Aussehen oder die Bedienung dieser Orte stören, bis das Feld geleert wird."
   },

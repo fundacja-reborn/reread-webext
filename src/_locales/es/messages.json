@@ -1031,7 +1031,7 @@
   "options_custom_css_intro": {
     "message": "Para cambiar el aspecto de la burbuja, de la página de la vista de lectura y de la ventana del botón de la barra de herramientas con tus propias reglas CSS. Esta página queda fuera de su alcance, así que una regla equivocada siempre se puede deshacer aquí: vacía el campo y guarda."
   },
-  "options_custom_css_more": { "message": "Más sobre las reglas y los nombres" },
+  "options_custom_css_more": { "message": "Más sobre las reglas CSS y los nombres" },
   "options_custom_css_reach": {
     "message": "Las reglas se aplican dentro de la burbuja de traducción, en la página de la vista de lectura - barra y listas incluidas - y en la ventana del botón de la barra de herramientas, nunca en las páginas que lees. Una regla equivocada puede romper el aspecto o los controles de esos lugares hasta que se vacíe el campo."
   },
