@@ -666,6 +666,18 @@ button.model-delete {
   display: block;
 }
 
+/* The custom CSS section's fold stands under the field, tighter than the
+   by-hand sections' folds: a footnote to a field, not a section of its own.
+   The source files inside it share one wrapping line with the jump links'
+   dots - four doors one under the other took a screen (Michał's smoke). */
+.fold-tight {
+  margin: 0.75rem 0 0;
+}
+
+.sources {
+  margin-top: 0.25rem;
+}
+
 /* The voice names are the device's own and can run long; the select takes the
    line's spare width and may shrink below its content, so a long name never
    pushes the Listen button off the page. */

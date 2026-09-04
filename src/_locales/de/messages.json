@@ -1006,8 +1006,19 @@
   },
   "options_custom_css_heading": { "message": "Eigenes CSS" },
   "options_custom_css_intro": {
-    "message": "Für alle, die das Aussehen der Sprechblase und der Leseansicht mit eigenen CSS-Regeln ändern möchten. Die Regeln gelten in der Übersetzungs-Sprechblase und im Text eines Artikels in der Leseansicht, nie in deren Leiste und Listen, auf den gelesenen Seiten oder auf dieser Seite. Regeln, die etwas aus dem Netz laden würden (url(), @import, @font-face), werden abgelehnt. Die Namen der Elemente können sich von Version zu Version ändern; diese Einstellung kommt ohne Garantie."
+    "message": "Für alle, die das Aussehen der Sprechblase, der Leseansicht und des Fensters der Symbolleisten-Schaltfläche mit eigenen CSS-Regeln ändern möchten. Diese Seite bleibt außer Reichweite der Regeln, damit sich eine falsche Regel hier immer zurücknehmen lässt: Feld leeren und speichern."
   },
+  "options_custom_css_more": { "message": "Mehr zu den Regeln und den Namen" },
+  "options_custom_css_reach": {
+    "message": "Die Regeln gelten in der Übersetzungs-Sprechblase, auf der Seite der Leseansicht - Leiste und Listen eingeschlossen - und im Fenster der Schaltfläche in der Symbolleiste, nie auf den gelesenen Seiten. Eine falsche Regel kann das Aussehen oder die Bedienung dieser Orte stören, bis das Feld geleert wird."
+  },
+  "options_custom_css_rules": {
+    "message": "Regeln, die etwas aus dem Netz laden würden (url(), @import, @font-face), werden abgelehnt. Die Namen der Elemente bleiben von Version zu Version nach Möglichkeit gleich; muss sich einer ändern, steht es in den Versionshinweisen. Die Namen stammen aus diesen Dateien:"
+  },
+  "options_custom_css_source_bubble": { "message": "tooltip.js (Sprechblase)" },
+  "options_custom_css_source_reader": { "message": "reader.css (Leseansicht)" },
+  "options_custom_css_source_popup": { "message": "popup.css (Schaltflächenfenster)" },
+  "options_custom_css_source_shared": { "message": "page.css (alle Seiten)" },
   "options_custom_css_save": { "message": "Speichern" },
   "options_custom_css_saved": { "message": "Gespeichert" },
   "options_custom_css_refused": {

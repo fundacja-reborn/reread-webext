@@ -46,6 +46,7 @@ Works in Firefox (desktop and Android) and in Chrome/Chromium. **Install it from
 - **Backup.** The reading list exports to a single JSON file - or, when you ask for the pictures too, a `.zip` holding the same JSON with the pictures beside it - highlights included, and imports without duplicating. Export everything, or press **Select**, tick the articles you want and export only those. After every export a line under the button says how many items went into which file, and its size. Books are not in that file - a book's backup is its `.epub`, and its highlights are exported and imported on the Highlights page. Vocabulary is exported as TSV.
 - **Toolbar popup.** Per-site off switch, language pair, reader, reading list, saved phrases and settings in one place. The extension's own pages - reader, reading list, highlights, saved phrases, settings - share one tab instead of opening a new one each time.
 - **Six UI languages.** English, Polish, German, French, Spanish, Ukrainian.
+- **Custom CSS.** A field at the end of the settings page takes CSS rules of your own for the bubble, the reader page and the toolbar popup - never for the pages you read, and never for the settings page itself, so a wrong rule can always be undone there: clear the field and save. Rules that would load anything from the network are refused. The names come from the stylesheets in this repository (`src/content/tooltip.js` for the bubble, `src/reader/reader.css`, `src/popup/popup.css`, `src/assets/page.css`), which the settings page links to at the installed version; they are kept from version to version where possible, and a change is announced in the release notes.
 
 ## Reading without translation
 
@@ -107,7 +108,7 @@ The only request to an address that is not built in happens when you ask for it:
 
 You can check this instead of trusting it: watch the network panel in the browser's developer tools, read the source code (published unminified), or simply turn the network off - translation, dictionaries and the reading list keep working. A test in the repository (`test/network-sinks.test.js`) lists every place in the code that can reach the network and fails the build when one is added.
 
-The **Custom CSS** field on the settings page is not a way around this: the rules you type dress only the extension's own bubble and the text of an article in its reader, never the page you are reading, and a rule that would load anything from the network (`url()`, `@import`, `@font-face`) is refused before it is stored.
+The **Custom CSS** field on the settings page is not a way around this: the rules you type dress only the extension's own pages - the bubble, the reader and the toolbar popup - never the page you are reading, and a rule that would load anything from the network (`url()`, `@import`, `@font-face`) is refused before it is stored.
 
 One thing a web page can see: on a page where your saved phrases are underlined, the page's own scripts can tell that re/read is installed and which of the page's words are underlined - the underlines are drawn with the browser's highlight registry, which the page shares. Nothing else is visible to it: not your vocabulary, not the bubble, not what you save. The **Only in the reader** setting keeps ordinary pages free of underlines altogether, so with it on no page can tell.
 

@@ -31,6 +31,7 @@ import { webext } from "../lib/browser.js";
 import { chosenPair, effectiveReaderOnly, platformOs, readConfig, writeConfig } from "../lib/config.js";
 import { localizePage, t } from "../lib/i18n.js";
 import { pairLabel } from "../lib/language.js";
+import { dresser } from "../lib/user-css.js";
 import { listDictionaries } from "../lib/dict/store.js";
 import { listModels } from "../lib/models/store.js";
 import { Message, asPageInfo, asResult } from "../lib/protocol.js";
@@ -46,6 +47,9 @@ watchToolbarScheme();
 // The paper follows the theme the Aa panels write (D104): a popup opened over
 // a sepia article is part of the same room.
 followTheme();
+// The reader's own rules (D176) dress this window too, read with the rest of
+// the config below: a popup is opened fresh every time, so once is every time.
+const dressPopup = dresser(document);
 
 const siteRow = document.getElementById("site-row");
 const siteLabel = document.getElementById("site-label");
@@ -385,6 +389,7 @@ async function render() {
   // page over the whole window and fills it, on desktop it is a panel that
   // measures the page. Which is which is runtime knowledge, not a media query.
   document.body.dataset["os"] = os;
+  dressPopup(config.customCss);
   // The reader-only switch shows the mode as it acts, not as it is stored
   // (the settings page's rule): with nothing chosen, the box reflects the
   // platform's default - on this Android popup it opens checked.

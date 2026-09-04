@@ -353,6 +353,22 @@ function previewFontFamily(field) {
  */
 let customCssTyped = false;
 
+/**
+ * The stylesheets the reader's own rules address (D176), at the installed
+ * version: the names can differ between versions, and a link to main would
+ * show somebody a stylesheet they do not have. Releases are tagged `v<version>`;
+ * a build whose version no tag names yet keeps the page's static href, main.
+ *
+ * @param {string} version
+ */
+function linkSources(version) {
+  if (!/^\d+\.\d+\.\d+$/.test(version)) return;
+  for (const link of document.querySelectorAll("a[data-source]")) {
+    if (!(link instanceof HTMLAnchorElement)) continue;
+    link.href = `https://github.com/fundacja-reborn/reread-webext/blob/v${version}/${link.dataset["source"] ?? ""}`;
+  }
+}
+
 function renderCustomCss() {
   const field = document.getElementById("custom-css-text");
   if (!(field instanceof HTMLTextAreaElement)) return;
@@ -2398,6 +2414,7 @@ async function render() {
     pin.textContent = t("options_first_steps_pin_android");
   }
   fill("version", webext().runtime.getManifest().version);
+  linkSources(webext().runtime.getManifest().version);
   renderReaderOnly();
   renderQuietBubble();
   renderKeepArticles();
