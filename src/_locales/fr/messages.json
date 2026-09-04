@@ -1043,7 +1043,7 @@
   "options_custom_css_intro": {
     "message": "Pour modifier l'apparence de la bulle, de la page du lecteur et de la fenêtre du bouton de la barre d'outils avec vos propres règles CSS. Cette page reste hors de leur portée, pour qu'une mauvaise règle puisse toujours être annulée ici : videz le champ et enregistrez."
   },
-  "options_custom_css_more": { "message": "En savoir plus sur les règles et les noms" },
+  "options_custom_css_more": { "message": "En savoir plus sur les règles CSS et les noms" },
   "options_custom_css_reach": {
     "message": "Les règles s'appliquent dans la bulle de traduction, sur la page du lecteur - barre et listes comprises - et dans la fenêtre du bouton de la barre d'outils, jamais sur les pages que vous lisez. Une mauvaise règle peut casser l'apparence ou les commandes de ces endroits jusqu'à ce que le champ soit vidé."
   },

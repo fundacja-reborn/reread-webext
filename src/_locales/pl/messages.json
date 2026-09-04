@@ -1372,7 +1372,7 @@
   "options_custom_css_intro": {
     "message": "Dla osób, które chcą zmienić wygląd dymka, strony czytnika i okienka przycisku na pasku własnymi regułami CSS. Ta strona pozostaje poza ich zasięgiem, więc złą regułę zawsze da się tu cofnąć: wyczyść pole i zapisz."
   },
-  "options_custom_css_more": { "message": "Więcej o regułach i nazwach" },
+  "options_custom_css_more": { "message": "Więcej o regułach CSS i nazwach" },
   "options_custom_css_reach": {
     "message": "Reguły działają w dymku tłumaczenia, na stronie czytnika - także w pasku i na listach - oraz w okienku przycisku na pasku narzędzi, nigdy na czytanych stronach. Zła reguła może zepsuć wygląd albo obsługę tych miejsc, dopóki pole nie zostanie wyczyszczone."
   },

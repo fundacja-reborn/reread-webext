@@ -1272,7 +1272,7 @@
   "options_custom_css_intro": {
     "message": "For changing how the bubble, the reader page and the toolbar popup look with CSS rules of your own. This page stays out of their reach, so a wrong rule can always be undone here: clear the field and save."
   },
-  "options_custom_css_more": { "message": "More about the rules and the names" },
+  "options_custom_css_more": { "message": "More about the CSS rules and the names" },
   "options_custom_css_reach": {
     "message": "The rules apply inside the translation bubble, on the reader page - its bar and lists included - and in the toolbar button's window, never on the pages you read. A wrong rule can break the look or the controls of those places until the field is cleared."
   },
