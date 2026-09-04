@@ -1270,15 +1270,19 @@
   },
   "options_custom_css_heading": { "message": "Custom CSS" },
   "options_custom_css_intro": {
-    "message": "For changing how the extension's own pages look with CSS rules of your own. The rules apply inside the translation bubble, on the reader page and in the toolbar button's window - never on the pages you read, and never on this page: the settings stay out of reach, so a rule can always be undone here. A wrong rule can break the look or the controls of those places; to undo it, clear the field and save."
+    "message": "For changing how the bubble, the reader page and the toolbar popup look with CSS rules of your own. This page stays out of their reach, so a wrong rule can always be undone here: clear the field and save."
+  },
+  "options_custom_css_more": { "message": "More about the rules and the names" },
+  "options_custom_css_reach": {
+    "message": "The rules apply inside the translation bubble, on the reader page - its bar and lists included - and in the toolbar button's window, never on the pages you read. A wrong rule can break the look or the controls of those places until the field is cleared."
   },
   "options_custom_css_rules": {
     "message": "Rules that would load anything from the network (url(), @import, @font-face) are refused. The names of the elements are kept from version to version where possible; when one has to change, the release notes say so. The names come from these files:"
   },
-  "options_custom_css_source_bubble": { "message": "the bubble's stylesheet (tooltip.js)" },
-  "options_custom_css_source_reader": { "message": "the reader's stylesheet (reader.css)" },
-  "options_custom_css_source_popup": { "message": "the popup's stylesheet (popup.css)" },
-  "options_custom_css_source_shared": { "message": "the styles every page shares (page.css)" },
+  "options_custom_css_source_bubble": { "message": "tooltip.js (the bubble)" },
+  "options_custom_css_source_reader": { "message": "reader.css (the reader)" },
+  "options_custom_css_source_popup": { "message": "popup.css (the popup)" },
+  "options_custom_css_source_shared": { "message": "page.css (shared by every page)" },
   "options_custom_css_save": { "message": "Save" },
   "options_custom_css_saved": { "message": "Saved" },
   "options_custom_css_refused": {

@@ -699,57 +699,9 @@
     <h2 id="custom-css" data-i18n="options_custom_css_heading">Custom CSS</h2>
 
     <p class="explain" data-i18n="options_custom_css_intro">
-      For changing how the extension's own pages look with CSS rules of your own. The rules
-      apply inside the translation bubble, on the reader page and in the toolbar button's
-      window - never on the pages you read, and never on this page: the settings stay out of
-      reach, so a rule can always be undone here. A wrong rule can break the look or the
-      controls of those places; to undo it, clear the field and save.
-    </p>
-
-    <p class="explain" data-i18n="options_custom_css_rules">
-      Rules that would load anything from the network (url(), @import, @font-face) are refused.
-      The names of the elements are kept from version to version where possible; when one has
-      to change, the release notes say so. The names come from these files:
-    </p>
-
-    <!-- Doors to the stylesheets the rules address, at the installed version:
-         options.js rewrites the hrefs to the release tag (`linkSources`), and
-         the static main is what a development build falls back to. Reader's
-         navigation, not a request of the extension's - the support links' rule.
-         The support links' dress: one door per line, the touch floor. -->
-    <p class="support-links">
-      <a
-        href="https://github.com/fundacja-reborn/reread-webext/blob/main/src/content/tooltip.js"
-        data-source="src/content/tooltip.js"
-        target="_blank"
-        rel="noopener"
-        data-i18n="options_custom_css_source_bubble"
-        >the bubble's stylesheet (tooltip.js)</a
-      >
-      <a
-        href="https://github.com/fundacja-reborn/reread-webext/blob/main/src/reader/reader.css"
-        data-source="src/reader/reader.css"
-        target="_blank"
-        rel="noopener"
-        data-i18n="options_custom_css_source_reader"
-        >the reader's stylesheet (reader.css)</a
-      >
-      <a
-        href="https://github.com/fundacja-reborn/reread-webext/blob/main/src/popup/popup.css"
-        data-source="src/popup/popup.css"
-        target="_blank"
-        rel="noopener"
-        data-i18n="options_custom_css_source_popup"
-        >the popup's stylesheet (popup.css)</a
-      >
-      <a
-        href="https://github.com/fundacja-reborn/reread-webext/blob/main/src/assets/page.css"
-        data-source="src/assets/page.css"
-        target="_blank"
-        rel="noopener"
-        data-i18n="options_custom_css_source_shared"
-        >the styles every page shares (page.css)</a
-      >
+      For changing how the bubble, the reader page and the toolbar popup look with CSS rules of
+      your own. This page stays out of their reach, so a wrong rule can always be undone here:
+      clear the field and save.
     </p>
 
     <div class="custom-css">
@@ -774,6 +726,68 @@
         bubble.
       </p>
     </div>
+
+    <!-- The rest of what there is to say, folded under the field (Michał's
+         call: two paragraphs and four doors took a screen): where the rules
+         reach and what a wrong one costs, what is refused, the promise about
+         the names (D179), and the four stylesheets the names come from - in
+         one wrapping line with the jump links' dots. The hrefs point at the
+         installed version: options.js rewrites them to the release tag
+         (`linkSources`), and a development build keeps main. Reader's
+         navigation, not a request of the extension's - the support links'
+         rule. -->
+    <details class="fold fold-tight">
+      <summary>
+        <h3 data-i18n="options_custom_css_more">More about the rules and the names</h3>
+      </summary>
+
+      <p class="explain" data-i18n="options_custom_css_reach">
+        The rules apply inside the translation bubble, on the reader page - its bar and lists
+        included - and in the toolbar button's window, never on the pages you read. A wrong rule
+        can break the look or the controls of those places until the field is cleared.
+      </p>
+
+      <p class="explain" data-i18n="options_custom_css_rules">
+        Rules that would load anything from the network (url(), @import, @font-face) are refused.
+        The names of the elements are kept from version to version where possible; when one has
+        to change, the release notes say so. The names come from these files:
+      </p>
+
+      <p class="jump sources">
+        <a
+          href="https://github.com/fundacja-reborn/reread-webext/blob/main/src/content/tooltip.js"
+          data-source="src/content/tooltip.js"
+          target="_blank"
+          rel="noopener"
+          data-i18n="options_custom_css_source_bubble"
+          >tooltip.js (the bubble)</a
+        >
+        <a
+          href="https://github.com/fundacja-reborn/reread-webext/blob/main/src/reader/reader.css"
+          data-source="src/reader/reader.css"
+          target="_blank"
+          rel="noopener"
+          data-i18n="options_custom_css_source_reader"
+          >reader.css (the reader)</a
+        >
+        <a
+          href="https://github.com/fundacja-reborn/reread-webext/blob/main/src/popup/popup.css"
+          data-source="src/popup/popup.css"
+          target="_blank"
+          rel="noopener"
+          data-i18n="options_custom_css_source_popup"
+          >popup.css (the popup)</a
+        >
+        <a
+          href="https://github.com/fundacja-reborn/reread-webext/blob/main/src/assets/page.css"
+          data-source="src/assets/page.css"
+          target="_blank"
+          rel="noopener"
+          data-i18n="options_custom_css_source_shared"
+          >page.css (shared by every page)</a
+        >
+      </p>
+    </details>
 
     <!-- The one section that is not a setting: who builds this and how to
          help them keep building it. The links are doors, not requests - the

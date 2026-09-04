@@ -1041,15 +1041,19 @@
   },
   "options_custom_css_heading": { "message": "CSS personnalisé" },
   "options_custom_css_intro": {
-    "message": "Pour modifier l'apparence des pages de l'extension avec vos propres règles CSS. Les règles s'appliquent dans la bulle de traduction, sur la page du lecteur et dans la fenêtre du bouton de la barre d'outils - jamais sur les pages que vous lisez, ni sur cette page : les paramètres restent hors de portée, pour qu'une règle puisse toujours être annulée ici. Une mauvaise règle peut casser l'apparence ou les commandes de ces endroits ; pour l'annuler, videz le champ et enregistrez."
+    "message": "Pour modifier l'apparence de la bulle, de la page du lecteur et de la fenêtre du bouton de la barre d'outils avec vos propres règles CSS. Cette page reste hors de leur portée, pour qu'une mauvaise règle puisse toujours être annulée ici : videz le champ et enregistrez."
+  },
+  "options_custom_css_more": { "message": "En savoir plus sur les règles et les noms" },
+  "options_custom_css_reach": {
+    "message": "Les règles s'appliquent dans la bulle de traduction, sur la page du lecteur - barre et listes comprises - et dans la fenêtre du bouton de la barre d'outils, jamais sur les pages que vous lisez. Une mauvaise règle peut casser l'apparence ou les commandes de ces endroits jusqu'à ce que le champ soit vidé."
   },
   "options_custom_css_rules": {
     "message": "Les règles qui chargeraient quoi que ce soit depuis le réseau (url(), @import, @font-face) sont refusées. Les noms des éléments sont conservés d'une version à l'autre autant que possible ; quand l'un doit changer, les notes de version le disent. Les noms viennent de ces fichiers :"
   },
-  "options_custom_css_source_bubble": { "message": "la feuille de style de la bulle (tooltip.js)" },
-  "options_custom_css_source_reader": { "message": "la feuille de style du lecteur (reader.css)" },
-  "options_custom_css_source_popup": { "message": "la feuille de style de la fenêtre du bouton de la barre d'outils (popup.css)" },
-  "options_custom_css_source_shared": { "message": "les styles communs à toutes les pages (page.css)" },
+  "options_custom_css_source_bubble": { "message": "tooltip.js (la bulle)" },
+  "options_custom_css_source_reader": { "message": "reader.css (le lecteur)" },
+  "options_custom_css_source_popup": { "message": "popup.css (la fenêtre du bouton)" },
+  "options_custom_css_source_shared": { "message": "page.css (toutes les pages)" },
   "options_custom_css_save": { "message": "Enregistrer" },
   "options_custom_css_saved": { "message": "Enregistré" },
   "options_custom_css_refused": {

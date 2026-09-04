@@ -1370,15 +1370,19 @@
   },
   "options_custom_css_heading": { "message": "Własny CSS" },
   "options_custom_css_intro": {
-    "message": "Dla osób, które chcą zmienić wygląd stron rozszerzenia własnymi regułami CSS. Reguły działają w dymku tłumaczenia, na stronie czytnika i w okienku przycisku na pasku narzędzi - nigdy na czytanych stronach ani na tej stronie: ustawienia pozostają poza zasięgiem, więc regułę zawsze da się tu cofnąć. Zła reguła może zepsuć wygląd albo obsługę tych miejsc; żeby ją cofnąć, wyczyść pole i zapisz."
+    "message": "Dla osób, które chcą zmienić wygląd dymka, strony czytnika i okienka przycisku na pasku własnymi regułami CSS. Ta strona pozostaje poza ich zasięgiem, więc złą regułę zawsze da się tu cofnąć: wyczyść pole i zapisz."
+  },
+  "options_custom_css_more": { "message": "Więcej o regułach i nazwach" },
+  "options_custom_css_reach": {
+    "message": "Reguły działają w dymku tłumaczenia, na stronie czytnika - także w pasku i na listach - oraz w okienku przycisku na pasku narzędzi, nigdy na czytanych stronach. Zła reguła może zepsuć wygląd albo obsługę tych miejsc, dopóki pole nie zostanie wyczyszczone."
   },
   "options_custom_css_rules": {
     "message": "Reguły, które pobierałyby cokolwiek z sieci (url(), @import, @font-face), są odrzucane. Nazwy elementów staramy się zachowywać między wersjami; gdy któraś musi się zmienić, mówi o tym nota wydania. Nazwy pochodzą z tych plików:"
   },
-  "options_custom_css_source_bubble": { "message": "arkusz stylów dymka (tooltip.js)" },
-  "options_custom_css_source_reader": { "message": "arkusz stylów czytnika (reader.css)" },
-  "options_custom_css_source_popup": { "message": "arkusz stylów okienka przycisku paska (popup.css)" },
-  "options_custom_css_source_shared": { "message": "style wspólne dla wszystkich stron (page.css)" },
+  "options_custom_css_source_bubble": { "message": "tooltip.js (dymek)" },
+  "options_custom_css_source_reader": { "message": "reader.css (czytnik)" },
+  "options_custom_css_source_popup": { "message": "popup.css (okienko przycisku)" },
+  "options_custom_css_source_shared": { "message": "page.css (wspólne dla stron)" },
   "options_custom_css_save": { "message": "Zapisz" },
   "options_custom_css_saved": { "message": "Zapisano" },
   "options_custom_css_refused": {

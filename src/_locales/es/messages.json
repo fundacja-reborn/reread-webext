@@ -1029,15 +1029,19 @@
   },
   "options_custom_css_heading": { "message": "CSS personalizado" },
   "options_custom_css_intro": {
-    "message": "Para cambiar el aspecto de las páginas de la extensión con tus propias reglas CSS. Las reglas se aplican dentro de la burbuja de traducción, en la página de la vista de lectura y en la ventana del botón de la barra de herramientas - nunca en las páginas que lees, ni en esta página: los ajustes quedan fuera de su alcance, así que una regla siempre se puede deshacer aquí. Una regla equivocada puede romper el aspecto o los controles de esos lugares; para deshacerla, vacía el campo y guarda."
+    "message": "Para cambiar el aspecto de la burbuja, de la página de la vista de lectura y de la ventana del botón de la barra de herramientas con tus propias reglas CSS. Esta página queda fuera de su alcance, así que una regla equivocada siempre se puede deshacer aquí: vacía el campo y guarda."
+  },
+  "options_custom_css_more": { "message": "Más sobre las reglas y los nombres" },
+  "options_custom_css_reach": {
+    "message": "Las reglas se aplican dentro de la burbuja de traducción, en la página de la vista de lectura - barra y listas incluidas - y en la ventana del botón de la barra de herramientas, nunca en las páginas que lees. Una regla equivocada puede romper el aspecto o los controles de esos lugares hasta que se vacíe el campo."
   },
   "options_custom_css_rules": {
     "message": "Las reglas que cargarían algo desde la red (url(), @import, @font-face) se rechazan. Los nombres de los elementos se mantienen de una versión a otra siempre que es posible; cuando alguno tiene que cambiar, las notas de la versión lo dicen. Los nombres vienen de estos archivos:"
   },
-  "options_custom_css_source_bubble": { "message": "la hoja de estilos de la burbuja (tooltip.js)" },
-  "options_custom_css_source_reader": { "message": "la hoja de estilos de la vista de lectura (reader.css)" },
-  "options_custom_css_source_popup": { "message": "la hoja de estilos de la ventana del botón de la barra de herramientas (popup.css)" },
-  "options_custom_css_source_shared": { "message": "los estilos comunes a todas las páginas (page.css)" },
+  "options_custom_css_source_bubble": { "message": "tooltip.js (la burbuja)" },
+  "options_custom_css_source_reader": { "message": "reader.css (vista de lectura)" },
+  "options_custom_css_source_popup": { "message": "popup.css (la ventana del botón)" },
+  "options_custom_css_source_shared": { "message": "page.css (todas las páginas)" },
   "options_custom_css_save": { "message": "Guardar" },
   "options_custom_css_saved": { "message": "Guardado" },
   "options_custom_css_refused": {
