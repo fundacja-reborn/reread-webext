@@ -1378,7 +1378,7 @@
     "message": "Не збережено: правила відхилено. Правила, які завантажують щось із мережі (url(), @import, @font-face), не дозволені."
   },
   "options_custom_css_example": {
-    "message": "Приклад: .entry-label { color: darkorange; } робить помаранчевою позначку над записом словника."
+    "message": "Приклад: .bubble { outline: 3px solid darkorange; } малює помаранчеву рамку навколо кожної бульбашки."
   },
   "options_custom_css_cleared": { "message": "Збережено: без правил, отже стандартний вигляд." },
   "options_support_intro": {
