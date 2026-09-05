@@ -1073,13 +1073,17 @@
         element on purpose: the learning code scans everything under it, and
         these labels are interface, not text anybody is studying.
 
-        One line of quiet buttons - the acts on this article. The way back to
-        the list used to open this box; it lives in the stuck bar now (D102),
-        where it stays in reach however far the article has scrolled.
+        One line of quiet buttons - the acts on this article. Which of them
+        stand is the database's say, not the door's (D185): a page in the
+        list offers Delete and the read mark whether it was opened from the
+        list or from a live tab, and a live page not in the list offers Save.
+        The way back to the list used to open this box; it lives in the stuck
+        bar now (D102), where it stays in reach however far the article has
+        scrolled.
       -->
       <div id="actions" class="reader-actions" hidden>
         <div class="article-actions">
-          <button id="keep" type="button" aria-pressed="false" data-i18n="reader_save" hidden>
+          <button id="keep" type="button" data-i18n="reader_save" hidden>
             Save to reading list
           </button>
           <button id="mark-read" type="button" aria-pressed="false" data-i18n="reader_mark_read" hidden>
@@ -1313,20 +1317,23 @@
       </dialog>
 
       <!--
-        The two acts of finishing, again under the last line: whoever has just
+        The acts of finishing, again under the last line: whoever has just
         read a long article to its end is a whole article away from the bar
-        above. Only these two - saving and deleting are decisions about the
-        article, not parts of finishing it, and one home above is enough for
-        them. Outside the article element for the same reason the bar above
-        stands outside it, and in the finishing order: the mark first, the way
-        out under it. Every state they show is set by the same code that
-        dresses their twins above.
+        above. The read mark and Delete - the two ways of being done with a
+        document, keeping it as read or letting it go (D185; Delete joined
+        the mark down here on Michał's call, 2026-09-05). Saving is not among
+        them: it is a decision on the way in, and one home above is enough
+        for it. Outside the article element for the same reason the bar above
+        stands outside it, and in the finishing order: the acts first, the
+        way out under them. Every state they show is set by the same code
+        that dresses their twins above.
       -->
       <div id="actions-end" class="reader-actions reader-actions-end" hidden>
         <div class="article-actions">
           <button id="mark-read-end" type="button" aria-pressed="false" data-i18n="reader_mark_read" hidden>
             Mark as read
           </button>
+          <button id="remove-end" type="button" data-i18n="action_delete" hidden>Delete</button>
         </div>
         <p class="reader-return">
           <button id="to-library-end" type="button" hidden>
