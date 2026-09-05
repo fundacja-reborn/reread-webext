@@ -68,11 +68,13 @@ import { wordless } from "../lib/matcher/words.js";
 import {
   compareMarks,
   comparePoints,
+  handleAt,
   isMarkColor,
   markRecord,
   mergePlan,
   mergedNote,
   placeMark,
+  reshapePlan,
   withoutMark,
 } from "../lib/reader/marks.js";
 import { foldSnap, pageStep, pageTurn } from "../lib/reader/paging.js";
@@ -585,6 +587,17 @@ const tocScansRunning = new Set();
  * @type {import("../lib/reader/marks.js").Mark | null}
  */
 let activeMark = null;
+
+/**
+ * The mark a handle drag is reshaping (D181), from the drag taking to its
+ * end: painted by nothing while it lasts - the wet stroke stands in for it,
+ * and a shrink could not show under its own dried paint - and rewritten to
+ * the stroke's range when the drag ends. Apart from `activeMark`, which
+ * stays what the toolbar is about throughout.
+ *
+ * @type {import("../lib/reader/marks.js").Mark | null}
+ */
+let reshaping = null;
 
 /** The copy button's feedback standing down, if a copy just happened. */
 /** @type {ReturnType<typeof setTimeout> | null} */
@@ -1507,7 +1520,10 @@ function setMarker(on) {
 }
 
 function repaintMarks() {
-  const healed = paintMarks(docMarks, shown === null ? null : contentRoot(), shownSegment());
+  // A mark under a handle drag is the wet stroke's to show (D181): its own
+  // dried paint would stand over a shrink.
+  const marks = reshaping === null ? docMarks : withoutMark(docMarks, reshaping);
+  const healed = paintMarks(marks, shown === null ? null : contentRoot(), shownSegment());
   if (healed.length > 0) adoptHealedMarks(healed);
   // The badges stand on the painted ranges, so they follow every repaint.
   showNoteBadges();
@@ -1557,29 +1573,34 @@ async function onMarked(range) {
  * thing a hand does (D107, Michał's report) - and then written, with the
  * paint taken back and the failure said out loud if the write does not
  * land. The colour is the caller's word: the pen's ink for a stroke, the
- * mark's own for a growth by its neighbour.
+ * mark's own for a growth by its neighbour - and for a handle drag, whose
+ * `reshaped` mark the span replaces whatever it covers (D181): its day and
+ * its note ride into the record the way its ink does, and the old outline
+ * is never unioned back in, or no mark could ever get shorter.
  *
  * @param {import("../lib/reader/marks.js").MarkSpan} span
  * @param {string} color
+ * @param {import("../lib/reader/marks.js").Mark} [reshaped]
  */
-async function commitSpan(span, color) {
+async function commitSpan(span, color, reshaped) {
   const target = shown;
   const root = contentRoot();
   if (target === null || root === null) return;
   deselectMark();
 
-  const plan = mergePlan(docMarks, span);
+  const plan = reshaped === undefined ? mergePlan(docMarks, span) : reshapePlan(docMarks, reshaped, span);
   const text = quoteOfSpan(plan.span, root);
   // A growth or a merge inherits every absorbed note (`mergedNote`): drawing
   // over an annotated mark grows the mark, and the words somebody wrote on
-  // it must not be the price.
+  // it must not be the price. The reshaped mark counts as absorbed, so its
+  // own note rides the same way.
   const mark =
     text === null
       ? null
       : markRecord({
           ...plan.span,
           color,
-          createdAt: Date.now(),
+          createdAt: reshaped === undefined ? Date.now() : reshaped.createdAt,
           text,
           note: mergedNote(plan.absorbed),
         });
@@ -1649,6 +1670,10 @@ async function keptRow(target) {
  * @param {Range} [word] the glued range of the tapped word, when there was one
  */
 function onMarkTap(x, y, word) {
+  // A tap on a pin's own drawing is the handle's and means nothing (D181):
+  // a grab that never travelled must not put the pen down, and the pins are
+  // transparent to the pointer, so the text under them would have answered.
+  if (onPin(x, y, PIN_TAP_REACH)) return;
   const hit = markAt(x, y);
   if (hit !== null) {
     activateMark(hit);
@@ -1714,8 +1739,9 @@ function activateMark(hit) {
 /**
  * The two pins on a mark's first and last line: a stem the line's height
  * with a dot at the outer end - the shape every platform's selection
- * handles taught, though these only point (nothing drags). Page
- * coordinates, so they ride the scroll with their mark.
+ * handles taught, and since D181 handles in fact: a press that travels
+ * from one drags that end of the mark (`markHandleAt`). Page coordinates,
+ * so they ride the scroll with their mark.
  *
  * @param {Range} range
  */
@@ -1736,6 +1762,141 @@ function placeMarkPins(range) {
   markPinEnd.style.top = `${Math.round(last.top + window.scrollY)}px`;
   markPinEnd.style.height = `${Math.round(last.height)}px`;
   markPinEnd.hidden = false;
+}
+
+/**
+ * How far around a pin's stem a press still takes the pin for a drag: the
+ * note badge's own reach (D118), a thumb's - one size on every device,
+ * because the pointer media query lies on e-ink (D84). The named cost is
+ * the badge's too: a drag begun on the mark's first or last word, or on
+ * the strip of the lines above and below its ends, is the handle's. A tap
+ * there still means the text - only a tap on the pin's own drawing
+ * (`PIN_TAP_REACH`, the dot and a fingertip's slack) means nothing, so the
+ * word beside the mark keeps its tap and the growth it asks for (D107).
+ */
+const PIN_DRAG_REACH = 20;
+const PIN_TAP_REACH = 8;
+
+/**
+ * Which pin of the active mark a point lies on, if either, from `reach`
+ * around its stem - null too while the pins are down: with no mark active,
+ * or one the guard left unpainted, there is nothing to grab.
+ *
+ * @param {number} x
+ * @param {number} y
+ * @param {number} reach
+ * @returns {"start" | "end" | null}
+ */
+function pinAt(x, y, reach) {
+  if (activeMark === null || markPinStart === null || markPinEnd === null || markPinStart.hidden) return null;
+  return handleAt(x, y, markPinStart.getBoundingClientRect(), markPinEnd.getBoundingClientRect(), reach);
+}
+
+/**
+ * @param {number} x
+ * @param {number} y
+ * @param {number} reach
+ * @returns {boolean}
+ */
+function onPin(x, y, reach) {
+  return pinAt(x, y, reach) !== null;
+}
+
+/**
+ * Which pin of the active mark a press lands on, if either (D181) - the
+ * gesture's question before it decides what a press on the article is.
+ * Answered by geometry, the way underlines and marks are hit-tested: the
+ * pins stay transparent to the pointer, so a tap on one keeps meaning what
+ * a tap there means.
+ *
+ * @param {number} x
+ * @param {number} y
+ * @returns {{ edge: "start" | "end", range: Range } | null}
+ */
+function markHandleAt(x, y) {
+  const active = activeMark;
+  const edge = active === null ? null : pinAt(x, y, PIN_DRAG_REACH);
+  const range = active === null || edge === null ? null : paintedRangeOf(active);
+  return edge === null || range === null ? null : { edge, range };
+}
+
+/**
+ * A handle's drag taking (D181): the mark's dried paint comes off - the wet
+ * stroke stands in for it, and a shrink could not show through it - and
+ * the stroke wears the mark's own ink rather than the pen's, because what
+ * it will become is this mark. The pins stay up and ride the stroke
+ * (`onMarkStretch`): the first cut took them down for the drag, and Michał
+ * asked from Chrome whether showing them would not be better - it is, the
+ * way every platform's handles stay under the finger and say where the
+ * end will land before it lifts. The toolbar stays about the mark:
+ * nothing about its ink, its note or its acts changes under a drag.
+ */
+function onMarkResizeStart() {
+  const active = activeMark;
+  if (active === null) return;
+  reshaping = active;
+  wearDraftInk(active.color);
+  repaintMarks();
+}
+
+/**
+ * The stroke of a handle's drag moved to another word (D181): the pins
+ * follow it, the dragged one under the finger, the other standing where
+ * the mark's far end stays. The wet stroke's range has the same shape the
+ * paint's has - both edge characters on the inside - so the pins measure
+ * it the way they measure a painted mark.
+ *
+ * @param {Range} range
+ */
+function onMarkStretch(range) {
+  if (reshaping === null) return;
+  placeMarkPins(range);
+}
+
+/**
+ * A handle's drag ended (D181): the mark rewritten to the stroke's range,
+ * its ink, its note and its day kept - a drag says "this far", it makes no
+ * new mark - and whatever other mark the new outline reaches absorbed the
+ * way a stroke absorbs it. A drag that came back to where it started
+ * writes nothing, and a range that cannot anchor leaves the mark as it
+ * was; either way the paint and the pins return.
+ *
+ * @param {Range} range
+ */
+async function onMarkResized(range) {
+  const mark = reshaping;
+  reshaping = null;
+  wearDraftInk(settings.reader.markerColor);
+  if (mark === null) return;
+  const root = contentRoot();
+  const span = root === null ? null : anchorOf(range, root, shownSegment());
+  const unchanged =
+    span !== null &&
+    span.segmentIndex === mark.segmentIndex &&
+    comparePoints(span.start, mark.start) === 0 &&
+    comparePoints(span.end, mark.end) === 0;
+  if (span === null || unchanged || !docMarks.includes(mark)) {
+    repaintMarks();
+    const painted = paintedRangeOf(mark);
+    if (painted !== null && activeMark === mark) placeMarkPins(painted);
+    return;
+  }
+  await commitSpan(span, mark.color, mark);
+  // A commit that did not land - the quote refused, a write rolled back -
+  // leaves the mark in the list, and the list is what gets painted.
+  if (docMarks.includes(mark)) repaintMarks();
+}
+
+/**
+ * The ink the wet stroke wears: an alias onto the chosen colour's own
+ * per-theme variable, so the draft follows the pick and the theme alike -
+ * the pen's ink while drawing (D106), the mark's own under a handle drag
+ * (D181), because the preview is the result.
+ *
+ * @param {string} color
+ */
+function wearDraftInk(color) {
+  document.documentElement.style.setProperty("--reader-marker-current", `var(--reader-marker-${color})`);
 }
 
 /**
@@ -4820,9 +4981,9 @@ function applyAppearance(reader) {
   // text grows; reader.css caps the list and highlights views on this twin.
   const pinned = (reader.measure * DEFAULTS.reader.fontSize) / reader.fontSize;
   root.style.setProperty("--reader-measure-pinned", `${pinned.toFixed(2)}ch`);
-  // The wet stroke's ink (D106): an alias onto the chosen colour's own
-  // per-theme variable, so the draft follows both the pick and the theme.
-  root.style.setProperty("--reader-marker-current", `var(--reader-marker-${reader.markerColor})`);
+  // The wet stroke's ink (D106): the pen's, until a handle drag borrows the
+  // mark's own for its duration (D181).
+  wearDraftInk(reader.markerColor);
 
   if (sizeValue !== null) sizeValue.textContent = String(reader.fontSize);
   if (measureValue !== null) measureValue.textContent = String(reader.measure);
@@ -6327,6 +6488,12 @@ function rootReadingSide(ground) {
     // is drawn (Michał's report).
     onMarkStart: () => deselectMark(),
     onMarkTap,
+    // The active mark's pins as handles (D181): where a press finds one,
+    // what the drag taking lifts, and what its end rewrites.
+    markHandleAt,
+    onMarkResizeStart,
+    onMarkStretch,
+    onMarkResized: (range) => void onMarkResized(range),
     // The no-translation trim's two hands (D121): the dictionaries and the
     // voice of the document on screen, both by the rule the voice panel
     // already lives by (`speechLang`) - the document's own declaration first,

@@ -1575,7 +1575,7 @@ function onStorageChanged(changes, area) {
 }
 
 /**
- * @param {{ root?: Element | null, observe?: boolean, stored?: Record<string, unknown>, ownSelection?: boolean, anchored?: boolean, covered?: () => number, openSettings?: () => void, plainLinks?: () => boolean, alsoOwns?: (target: EventTarget | null) => boolean, marking?: () => boolean, markRoot?: () => Element | null, onMarked?: (range: Range) => void, onMarkStart?: () => void, onMarkTap?: (x: number, y: number, word?: Range) => void, quietLookup?: (text: string) => Promise<import("../lib/protocol.js").LookUp | null>, quietVoice?: () => { lang: string, voiceURI: string | undefined } | null, scheme?: () => "light" | "sepia" | "dark" | null }} [where]
+ * @param {{ root?: Element | null, observe?: boolean, stored?: Record<string, unknown>, ownSelection?: boolean, anchored?: boolean, covered?: () => number, openSettings?: () => void, plainLinks?: () => boolean, alsoOwns?: (target: EventTarget | null) => boolean, marking?: () => boolean, markRoot?: () => Element | null, onMarked?: (range: Range) => void, onMarkStart?: () => void, onMarkTap?: (x: number, y: number, word?: Range) => void, markHandleAt?: (x: number, y: number) => { edge: "start" | "end", range: Range } | null, onMarkResizeStart?: () => void, onMarkStretch?: (range: Range) => void, onMarkResized?: (range: Range) => void, quietLookup?: (text: string) => Promise<import("../lib/protocol.js").LookUp | null>, quietVoice?: () => { lang: string, voiceURI: string | undefined } | null, scheme?: () => "light" | "sepia" | "dark" | null }} [where]
  *   what to underline inside, whether it can change on its own, the startup
  *   read of `storage.local` when the caller already made one, whether the
  *   page selects through our own gesture rather than the browser's - every
@@ -1593,10 +1593,11 @@ function onStorageChanged(changes, area) {
  *   is the reader page's own walk to the settings (D139), taken by the
  *   bubble's settings button instead of asking the background for a tab -
  *   a reader flag too, because navigating away is only ever ours to do on
- *   our own page. The last four belong to
- *   the reader's highlighter (D106) and ride through to `select.js` -
- *   `alsoOwns` besides names the reader's own floating UI (the mark-delete
- *   bubble), whose presses must not read as the page's. `quietLookup` and
+ *   our own page. The `mark*` hooks belong to
+ *   the reader's highlighter (D106; the pins as handles, D181) and ride
+ *   through to `select.js` - `alsoOwns` besides names the reader's own
+ *   floating UI (the mark-delete bubble), whose presses must not read as
+ *   the page's. `quietLookup` and
  *   `quietVoice` are the reader's hands into the no-translation trim (D121):
  *   the dictionaries and the voice of the document on screen - reader flags
  *   too, because only an extension page has the database in reach and only
@@ -1654,6 +1655,10 @@ export function start(where = {}) {
         ...(where.onMarked === undefined ? {} : { onMarked: where.onMarked }),
         ...(where.onMarkStart === undefined ? {} : { onMarkStart: where.onMarkStart }),
         ...(where.onMarkTap === undefined ? {} : { onMarkTap: where.onMarkTap }),
+        ...(where.markHandleAt === undefined ? {} : { markHandleAt: where.markHandleAt }),
+        ...(where.onMarkResizeStart === undefined ? {} : { onMarkResizeStart: where.onMarkResizeStart }),
+        ...(where.onMarkStretch === undefined ? {} : { onMarkStretch: where.onMarkStretch }),
+        ...(where.onMarkResized === undefined ? {} : { onMarkResized: where.onMarkResized }),
       });
     }
     webext().storage.onChanged.addListener(onStorageChanged);

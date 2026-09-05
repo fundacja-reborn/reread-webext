@@ -156,3 +156,32 @@ export function nearestWordIndex(tokens, offset) {
   }
   return best;
 }
+
+/**
+ * The word a mark's edge stands on, read the way the edge means it (D181):
+ * for a start, the first word at or after the offset; for an end, the last
+ * word at or before it - an end's offset being its last character, the way
+ * a painted range holds it. The nearest word would answer wrong at exactly
+ * the edges the highlighter makes: a mark's own glued punctuation (D107)
+ * stands as close to the word beside the mark as to the word it belongs to,
+ * and `nearestWordIndex` breaks that tie toward the first token it meets.
+ *
+ * @param {import("./tokenize.js").Token[]} tokens
+ * @param {number} offset
+ * @param {"start" | "end"} edge
+ * @returns {number} index into `tokens`, or -1 when no word stands on that side
+ */
+export function edgeWordIndex(tokens, offset, edge) {
+  if (edge === "start") {
+    for (let index = 0; index < tokens.length; index += 1) {
+      const token = tokens[index];
+      if (token !== undefined && token.end > offset) return index;
+    }
+    return -1;
+  }
+  for (let index = tokens.length - 1; index >= 0; index -= 1) {
+    const token = tokens[index];
+    if (token !== undefined && token.start <= offset) return index;
+  }
+  return -1;
+}

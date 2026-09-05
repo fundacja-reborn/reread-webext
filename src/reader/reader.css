@@ -2366,30 +2366,44 @@ button[data-armed],
   height: 1.5em;
 }
 
-/* Seven controls on one phone line (Michał's report from a 360px viewport:
-   the bin wrapped onto a second row). The touch targets keep their 44px;
-   what gives is the air - the speech bar's dress was cut for four buttons,
-   and its side padding pushed this strip's seventh off the line by a
-   pixel. The words are clipped at this width anyway, so the padding
-   served nothing but the wrap; the desktop breakpoint below hands the
-   room back together with the labels. Both classes in the selector on
-   purpose: the `.speech-bar` dress is written LATER in this file, and at
-   equal specificity later wins - the first cut of this fix lost exactly
-   that way (0.4.20: the tightening never applied). */
+/* Seven controls on one phone line, in the header's own dress. The first
+   cut (0.4.20, from a 360px viewport) kept the 44px floors and only cut
+   the air, and that held until Firefox for Android's font-size setting:
+   a full zoom, not a text zoom (`browser.display.os-zoom-behavior` is 1
+   by default: the OS font scale "affects full zoom - dpi, effectively"),
+   so at 125% the pixel grows with the rem, the row on a Pixel 8a is 329
+   CSS px wide, and seven 44px buttons do not fit whatever the air. The bin wrapped under the row again, and the ring around a swatch
+   stood a size larger than the bar's buttons in the header (Michał's
+   report, 2026-09-05). So the buttons take the header tools' floors -
+   2.4rem by 2.1rem, the narrow dress of #marker and its siblings - and
+   read as one family with them; the glyphs keep their size inside. Below
+   that they give way before they wrap: the preferred width is the floor,
+   and a row too narrow even for that shrinks each toward its glyph
+   (`min-width: auto`, the content's own minimum) before anything drops
+   to a second line. The desktop breakpoint below hands the 44px floors
+   back with the labels. Both classes in the selector on purpose: the
+   `.speech-bar` dress is written LATER in this file, and at equal
+   specificity later wins - the first cut lost exactly that way (0.4.20:
+   the tightening never applied). */
 .speech-bar.mark-bar {
   gap: 0.25rem;
   padding: 0.4rem;
 }
 
 .speech-bar.mark-bar button {
-  padding: 0.35rem;
+  flex: 0 1 2.4rem;
+  min-width: auto;
+  min-height: 2.1rem;
+  padding: 0.15rem 0.4rem;
 }
 
 /* The pins of the active mark: the platform selection-handle shape - a thin
    stem the height of the line, a dot at the outer end - in the interface
    accent, so the mark keeps its true ink (a wash over it read as a darker,
    wrong colour). Pointer events pass through: a tap on a pin means the text
-   under it. Level 0, like the badges below: over the text and its paint,
+   under it, and a press that travels from one is the handle's drag (D181) -
+   found by the script's own hit-test around the pin, not by the element,
+   which is what keeps the tap free. Level 0, like the badges below: over the text and its paint,
    under the scrim (1) and the chrome, the panels and the bars (2) - a pin
    or a badge that scrolled under the stuck bar painted over it and over
    the open menu (Michał's report, 2026-08-29). */
@@ -2626,14 +2640,18 @@ body.reader:has(#mark-bar:not([hidden])) {
   }
 
   /* With the labels back the mark bar breathes like the transport again -
-     the tight phone dress above was only ever about one line of seven.
-     The doubled selector again: it must outweigh its own base rule. */
+     the tight phone dress above was only ever about one line of seven -
+     and its buttons stand on the transport's 44px floors. The doubled
+     selector again: it must outweigh its own base rule. */
   .speech-bar.mark-bar {
     gap: 0.25rem 0.4rem;
     padding: 0.4rem 0.6rem;
   }
 
   .speech-bar.mark-bar button {
+    flex: none;
+    min-width: 44px;
+    min-height: 44px;
     padding: 0.35rem 0.7rem;
   }
 
