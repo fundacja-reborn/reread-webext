@@ -202,6 +202,10 @@ const SCROLL_TAIL_MS = 100;
  *   stroke now stands where the mark stands and is about to move, so the
  *   mark's own paint has to come off under it - a shrink could not show
  *   through it.
+ * @property {(range: Range) => void} [onMarkStretch] a handle's drag moved
+ *   its end: the stroke now covers this range, and the caller's pins may
+ *   follow it the way the platforms' handles follow the finger. Heard only
+ *   when the range actually changed, after its paint moved.
  * @property {(range: Range) => void} [onMarkResized] a handle's drag ended
  *   on this range: the mark it moved is the one to rewrite to it. Like
  *   `onMarked`, the range is handed over with the stroke's paint already
@@ -687,8 +691,17 @@ function extendInk(x, y) {
   if (active.edge === "end" && precedes(focus, active.anchor)) focus = active.anchor;
   const built = inkRange(active.anchor, focus);
   if (built === null) return;
+  // The pointer moved, the words did not: nothing to repaint, nobody to
+  // tell - a finger crossing one word sends many moves.
+  if (
+    built.compareBoundaryPoints(Range.START_TO_START, active.range) === 0 &&
+    built.compareBoundaryPoints(Range.END_TO_END, active.range) === 0
+  ) {
+    return;
+  }
   active.range = built;
   paintInk();
+  if (active.edge !== undefined) hooks?.onMarkStretch?.(built);
 }
 
 /**

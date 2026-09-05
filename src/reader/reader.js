@@ -1822,20 +1822,35 @@ function markHandleAt(x, y) {
 
 /**
  * A handle's drag taking (D181): the mark's dried paint comes off - the wet
- * stroke stands in for it, and a shrink could not show through it - the
- * pins step down for the drag's duration, and the stroke wears the mark's
- * own ink rather than the pen's, because what it will become is this mark.
- * The toolbar stays about the mark: nothing about its ink, its note or its
- * acts changes under a drag.
+ * stroke stands in for it, and a shrink could not show through it - and
+ * the stroke wears the mark's own ink rather than the pen's, because what
+ * it will become is this mark. The pins stay up and ride the stroke
+ * (`onMarkStretch`): the first cut took them down for the drag, and Michał
+ * asked from Chrome whether showing them would not be better - it is, the
+ * way every platform's handles stay under the finger and say where the
+ * end will land before it lifts. The toolbar stays about the mark:
+ * nothing about its ink, its note or its acts changes under a drag.
  */
 function onMarkResizeStart() {
   const active = activeMark;
   if (active === null) return;
   reshaping = active;
-  if (markPinStart !== null) markPinStart.hidden = true;
-  if (markPinEnd !== null) markPinEnd.hidden = true;
   wearDraftInk(active.color);
   repaintMarks();
+}
+
+/**
+ * The stroke of a handle's drag moved to another word (D181): the pins
+ * follow it, the dragged one under the finger, the other standing where
+ * the mark's far end stays. The wet stroke's range has the same shape the
+ * paint's has - both edge characters on the inside - so the pins measure
+ * it the way they measure a painted mark.
+ *
+ * @param {Range} range
+ */
+function onMarkStretch(range) {
+  if (reshaping === null) return;
+  placeMarkPins(range);
 }
 
 /**
@@ -6477,6 +6492,7 @@ function rootReadingSide(ground) {
     // what the drag taking lifts, and what its end rewrites.
     markHandleAt,
     onMarkResizeStart,
+    onMarkStretch,
     onMarkResized: (range) => void onMarkResized(range),
     // The no-translation trim's two hands (D121): the dictionaries and the
     // voice of the document on screen, both by the rule the voice panel

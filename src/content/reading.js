@@ -1575,7 +1575,7 @@ function onStorageChanged(changes, area) {
 }
 
 /**
- * @param {{ root?: Element | null, observe?: boolean, stored?: Record<string, unknown>, ownSelection?: boolean, anchored?: boolean, covered?: () => number, openSettings?: () => void, plainLinks?: () => boolean, alsoOwns?: (target: EventTarget | null) => boolean, marking?: () => boolean, markRoot?: () => Element | null, onMarked?: (range: Range) => void, onMarkStart?: () => void, onMarkTap?: (x: number, y: number, word?: Range) => void, markHandleAt?: (x: number, y: number) => { edge: "start" | "end", range: Range } | null, onMarkResizeStart?: () => void, onMarkResized?: (range: Range) => void, quietLookup?: (text: string) => Promise<import("../lib/protocol.js").LookUp | null>, quietVoice?: () => { lang: string, voiceURI: string | undefined } | null, scheme?: () => "light" | "sepia" | "dark" | null }} [where]
+ * @param {{ root?: Element | null, observe?: boolean, stored?: Record<string, unknown>, ownSelection?: boolean, anchored?: boolean, covered?: () => number, openSettings?: () => void, plainLinks?: () => boolean, alsoOwns?: (target: EventTarget | null) => boolean, marking?: () => boolean, markRoot?: () => Element | null, onMarked?: (range: Range) => void, onMarkStart?: () => void, onMarkTap?: (x: number, y: number, word?: Range) => void, markHandleAt?: (x: number, y: number) => { edge: "start" | "end", range: Range } | null, onMarkResizeStart?: () => void, onMarkStretch?: (range: Range) => void, onMarkResized?: (range: Range) => void, quietLookup?: (text: string) => Promise<import("../lib/protocol.js").LookUp | null>, quietVoice?: () => { lang: string, voiceURI: string | undefined } | null, scheme?: () => "light" | "sepia" | "dark" | null }} [where]
  *   what to underline inside, whether it can change on its own, the startup
  *   read of `storage.local` when the caller already made one, whether the
  *   page selects through our own gesture rather than the browser's - every
@@ -1657,6 +1657,7 @@ export function start(where = {}) {
         ...(where.onMarkTap === undefined ? {} : { onMarkTap: where.onMarkTap }),
         ...(where.markHandleAt === undefined ? {} : { markHandleAt: where.markHandleAt }),
         ...(where.onMarkResizeStart === undefined ? {} : { onMarkResizeStart: where.onMarkResizeStart }),
+        ...(where.onMarkStretch === undefined ? {} : { onMarkStretch: where.onMarkStretch }),
         ...(where.onMarkResized === undefined ? {} : { onMarkResized: where.onMarkResized }),
       });
     }
