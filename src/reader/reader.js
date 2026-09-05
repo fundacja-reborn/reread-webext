@@ -4951,10 +4951,13 @@ async function openLiveActions(target) {
  * undo timer: both are flashes on e-ink, and neither is more honest. The same
  * armed state as the rows' Delete, so the same rules stand it down. Two
  * spots ask it - the bar and the row under the last line - and either leads
- * to the list, over a live page too (Michał's call, 2026-09-05): the press
- * was about the copy, and once it is gone the list is where the reader
- * expects to stand, not on the page just declined. The tab's live page
- * stays declined (D124), so Back onto it does not keep it again.
+ * to the list: over a live page too, and from however deep this page's own
+ * entries stand, the walk the menu's list row takes (Michał's calls,
+ * 2026-09-05 - a plain step back from a document opened off its own
+ * highlights page landed on the highlights of a document that was no longer
+ * there). The press was about the copy, and once it is gone the list is
+ * where the reader expects to stand. The tab's live page stays declined
+ * (D124), so Back onto it does not keep it again.
  *
  * @param {HTMLElement | null} button the Delete that was pressed
  */
@@ -4983,7 +4986,7 @@ async function onRemovePress(button) {
   }
   if (target.origin !== "book") setKeepDeclined(target.url, true);
   if (shown !== target) return;
-  onBackPress();
+  leaveToList();
 }
 
 /**
