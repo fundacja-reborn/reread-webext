@@ -43,6 +43,7 @@
   "bubble_more": { "message": "Більше" },
   "bubble_less": { "message": "Менше" },
   "bubble_reader": { "message": "Читати в режимі читання" },
+  "bubble_library": { "message": "Відкрити офлайн-список читання" },
   "bubble_translating": { "message": "Перекладаю..." },
   "bubble_nothing_more": { "message": "Немає ні речення, ні словникової статті" },
   "bubble_whole_words": { "message": "Виділіть цілі слова" },

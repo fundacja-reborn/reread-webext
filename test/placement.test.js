@@ -173,6 +173,54 @@ describe("placement", () => {
  * passes `assist` - everywhere else the bubble is pinned to the viewport and
  * the page under it is not ours to move.
  */
+describe("placement under the phrase (D182)", () => {
+  // The launcher on a touch selection: the system's bar hovers over the
+  // phrase, so the bubble goes under it - a system strip past the handles.
+  it("stands under the phrase while it fits there", () => {
+    const spot = placement({
+      anchor: at({ top: 400 }),
+      size: { width: 300, height: 60 },
+      viewport: VIEWPORT,
+      touch: true,
+      below: true,
+    });
+    assert.deepEqual(spot, { left: 100, top: 484, grow: "down" });
+  });
+
+  it("goes above the phrase only when the room below has run out", () => {
+    // 720 + 20 + 64 + 60 = 864, past the window's 792: above it is.
+    const spot = placement({
+      anchor: at({ top: 720 }),
+      size: { width: 300, height: 60 },
+      viewport: VIEWPORT,
+      touch: true,
+      below: true,
+    });
+    assert.deepEqual(spot, { left: 100, top: 656, grow: "up" });
+  });
+
+  it("clamps like anybody when neither side has the room", () => {
+    const spot = placement({
+      anchor: at({ top: 380, height: 40 }),
+      size: { width: 300, height: 700 },
+      viewport: VIEWPORT,
+      touch: true,
+      below: true,
+    });
+    assert.deepEqual(spot, { left: 100, top: 92, grow: "down" });
+  });
+
+  it("changes nothing for a bubble that did not ask", () => {
+    const spot = placement({
+      anchor: at({ top: 400 }),
+      size: { width: 300, height: 60 },
+      viewport: VIEWPORT,
+      touch: true,
+    });
+    assert.deepEqual(spot, { left: 100, top: 336, grow: "up" });
+  });
+});
+
 describe("placement with the scroll assist", () => {
   it("changes nothing while the bubble has a side to stand on", () => {
     const size = { width: 300, height: 60 };

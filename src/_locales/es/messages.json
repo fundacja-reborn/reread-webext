@@ -43,6 +43,7 @@
   "bubble_more": { "message": "Más" },
   "bubble_less": { "message": "Menos" },
   "bubble_reader": { "message": "Leer en la vista de lectura" },
+  "bubble_library": { "message": "Abrir la lista de lectura sin conexión" },
   "bubble_translating": { "message": "Traduciendo..." },
   "bubble_nothing_more": { "message": "No hay oración ni entrada de diccionario que mostrar" },
   "bubble_whole_words": { "message": "Selecciona palabras enteras" },

@@ -13,9 +13,14 @@
  * menu, no toolbar of its own and no share target, so everything else starts
  * with the browser's own menu. A hold on any word already opened the page
  * being read; the same hold now also opens what was read before, without
- * going through the page at all. It stays a plain label beside the framed
- * offer: the offer is what the bubble is for, and the list is a room next to
- * it, not a second answer about this page.
+ * going through the page at all. Since D182 it is a door in its own right:
+ * the plain label it began as read as a caption under the offer, and a room
+ * nobody could see the door to was a room nobody entered. The two are one
+ * component told apart by weight - the door into this page filled, the door
+ * into the list outlined - so the bubble reads as a menu of two ways in, and
+ * the hierarchy is still said. Escape puts the menu away, and on a touch
+ * selection it stands under the phrase rather than over it, clear of the
+ * system's floating bar.
  *
  * The selection is listened for through `selectionchange` with a settle timer,
  * not through the mouse gesture the reading side reads (D47). That is not a
@@ -48,7 +53,7 @@ import { createTooltip } from "./tooltip.js";
  */
 const SETTLE_MS = 300;
 
-const tooltip = createTooltip({ onAction });
+const tooltip = createTooltip({ onAction, onHide: onOfferHidden });
 
 /** @type {number | null} */
 let timer = null;
@@ -75,6 +80,8 @@ let scale = 1;
  * the way it hands the scale - this module still listens to nothing at rest.
  */
 let modelHint = false;
+/** Whether the Escape listener stands - only ever while the offer does. */
+let escapeListening = false;
 
 /**
  * @param {number} factor `1` means "as designed"
@@ -124,6 +131,32 @@ function onAction(action) {
 }
 
 /**
+ * Escape puts the offer away (D182), listened for only while it stands: the
+ * module keeps its rest silent, and the key that means "not this" has to
+ * reach a bubble whose doors the keyboard can tab into. The selection stays
+ * what it is - the offer comes back with the next change to it - and the key
+ * is not claimed: a page that answers Escape itself keeps its answer.
+ *
+ * @param {KeyboardEvent} event
+ */
+function onKeyDown(event) {
+  if (event.key === "Escape") tooltip.hide();
+}
+
+function listenForEscape() {
+  if (escapeListening) return;
+  escapeListening = true;
+  document.addEventListener("keydown", onKeyDown, { capture: true });
+}
+
+/** The offer went away, by whichever door: the key listener goes with it. */
+function onOfferHidden() {
+  if (!escapeListening) return;
+  escapeListening = false;
+  document.removeEventListener("keydown", onKeyDown, { capture: true });
+}
+
+/**
  * The selection as it stands once it has held still, turned into the offer or
  * into the bubble going away. Reading the document's state rather than a
  * gesture is safe here for the reason the module comment gives: showing this
@@ -170,11 +203,19 @@ function settle() {
     actions: modelHint ? ["settings", "reader", "library"] : ["reader", "library"],
     // A pen's selection wears the same system bar and handles (D80).
     touch: touchPointer(lastPointerType),
+    // Under the phrase on a touch selection (D182): the system's floating bar
+    // (Copy, Search) hovers over the phrase, and the offer standing above it
+    // had the bar over its own foot (Michał's screenshot from a Pixel);
+    // under the phrase there are only the drag handles, which the strip
+    // steps past. The same pointer memory as `touch`, not a media query -
+    // the query lies on e-ink (D84).
+    below: touchPointer(lastPointerType),
     // The same pointer also sizes the row for the finger about to press it
     // (D84) - the media query alone answers wrong on some devices.
     coarse: touchPointer(lastPointerType),
     scale,
   });
+  listenForEscape();
 }
 
 function onSelectionChange() {
