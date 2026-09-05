@@ -4,6 +4,7 @@ import { describe, it } from "node:test";
 import { tokenize } from "../src/lib/matcher/tokenize.js";
 import {
   besideSpan,
+  edgeWordIndex,
   gluedEnd,
   gluedStart,
   nearestWordIndex,
@@ -184,5 +185,33 @@ describe("the punctuation glued to a mark's edges (D107)", () => {
     assert.ok(wordless(""));
     assert.ok(!wordless(" one "));
     assert.ok(!wordless("źdźbło"));
+  });
+});
+
+describe("the word a mark's edge stands on (D181)", () => {
+  // Tokens: noted [0,5), E [7,8), paper [9,14), monitors [15,23), Next [26,30).
+  const text = 'noted "E-paper monitors." Next';
+  const tokens = tokenize(text);
+
+  it("reads a start at the mark's first word, its glued quote mark and all", () => {
+    // The mark begins on the opening quote, one character from `E` and one
+    // from `noted` - and `noted` is not in the mark at all.
+    assert.equal(edgeWordIndex(tokens, text.indexOf('"'), "start"), 1);
+    assert.equal(edgeWordIndex(tokens, text.indexOf("E"), "start"), 1);
+    assert.equal(edgeWordIndex(tokens, text.indexOf("paper") + 2, "start"), 2);
+  });
+
+  it("reads an end at the mark's last word, full stop and quote included", () => {
+    // The range holds its last character: the closing quote, right after
+    // the full stop right after `monitors` - and `Next` is a space away.
+    assert.equal(edgeWordIndex(tokens, text.indexOf('."') + 1, "end"), 3);
+    assert.equal(edgeWordIndex(tokens, text.indexOf("."), "end"), 3);
+    assert.equal(edgeWordIndex(tokens, text.indexOf("monitors") + 3, "end"), 3);
+  });
+
+  it("finds no word on the empty side of the text", () => {
+    assert.equal(edgeWordIndex(tokens, text.length, "start"), -1);
+    assert.equal(edgeWordIndex(tokens, -1, "end"), -1);
+    assert.equal(edgeWordIndex([], 0, "start"), -1);
   });
 });

@@ -2389,7 +2389,9 @@ button[data-armed],
    stem the height of the line, a dot at the outer end - in the interface
    accent, so the mark keeps its true ink (a wash over it read as a darker,
    wrong colour). Pointer events pass through: a tap on a pin means the text
-   under it. Level 0, like the badges below: over the text and its paint,
+   under it, and a press that travels from one is the handle's drag (D181) -
+   found by the script's own hit-test around the pin, not by the element,
+   which is what keeps the tap free. Level 0, like the badges below: over the text and its paint,
    under the scrim (1) and the chrome, the panels and the bars (2) - a pin
    or a badge that scrolled under the stuck bar painted over it and over
    the open menu (Michał's report, 2026-08-29). */

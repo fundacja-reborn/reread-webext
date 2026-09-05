@@ -270,6 +270,25 @@ export function mergePlan(marks, span) {
 }
 
 /**
+ * What reshaping one standing mark to a new span means - a handle dragged
+ * (D181). The mark itself is replaced whatever the span covers, so it is
+ * absorbed by construction and never unioned back in: a trim must not grow
+ * to its old outline, which is exactly what `mergePlan` would make of it.
+ * Every OTHER mark the span reaches is absorbed the way a stroke absorbs
+ * it - the end dragged over a neighbour leaves one mark, as drawing over
+ * it would.
+ *
+ * @param {Mark[]} marks
+ * @param {Mark} mark the one being reshaped - an element of `marks`
+ * @param {MarkSpan} span
+ * @returns {{ absorbed: Mark[], span: MarkSpan }}
+ */
+export function reshapePlan(marks, mark, span) {
+  const plan = mergePlan(withoutMark(marks, mark), span);
+  return { absorbed: [mark, ...plan.absorbed], span: plan.span };
+}
+
+/**
  * The note the merged mark inherits: every absorbed note, in reading order,
  * a blank line between two - because absorbing a mark absorbs somebody's own
  * words, and a growth gesture silently eating a note would be the one loss
@@ -379,6 +398,44 @@ export function tailRect(rects) {
     }
   }
   return best;
+}
+
+/**
+ * Which of an active mark's two pins a press lands on, if either (D181):
+ * each pin takes the press from `reach` around its stem - a thumb's margin,
+ * the note badge's own - which also covers the dot drawn beyond one end of
+ * the stem. A mark of one word stands its pins a few pixels apart and a
+ * press can land on both; the dots tell them apart - the start's above the
+ * line, the end's below it - so the nearer dot answers.
+ *
+ * @param {number} x
+ * @param {number} y
+ * @param {RectLike} start the start pin's stem
+ * @param {RectLike} end the end pin's stem
+ * @param {number} reach
+ * @returns {"start" | "end" | null}
+ */
+export function handleAt(x, y, start, end, reach) {
+  const onStart = withinReach(start, x, y, reach);
+  const onEnd = withinReach(end, x, y, reach);
+  if (onStart && onEnd) {
+    const toStart = Math.hypot(x - (start.left + start.right) / 2, y - start.top);
+    const toEnd = Math.hypot(x - (end.left + end.right) / 2, y - end.bottom);
+    return toStart <= toEnd ? "start" : "end";
+  }
+  if (onStart) return "start";
+  return onEnd ? "end" : null;
+}
+
+/**
+ * @param {RectLike} box
+ * @param {number} x
+ * @param {number} y
+ * @param {number} reach
+ * @returns {boolean}
+ */
+function withinReach(box, x, y, reach) {
+  return x >= box.left - reach && x <= box.right + reach && y >= box.top - reach && y <= box.bottom + reach;
 }
 
 /**

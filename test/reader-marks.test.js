@@ -9,6 +9,7 @@ import {
   compareMarks,
   comparePoints,
   findQuote,
+  handleAt,
   headRect,
   isMarkColor,
   markRecord,
@@ -17,6 +18,7 @@ import {
   mergedNote,
   placeMark,
   quoteOf,
+  reshapePlan,
   tailRect,
   withoutMark,
 } from "../src/lib/reader/marks.js";
@@ -270,6 +272,65 @@ describe("mergePlan", () => {
     });
     // One offset short of touching: still two marks, and the seam is real.
     assert.equal(plan.absorbed.length, 0);
+  });
+});
+
+describe("reshapePlan (D181)", () => {
+  const standing = () => [
+    mark({ start: { block: 1, offset: 10 }, end: { block: 1, offset: 20 }, text: "one" }),
+    mark({ start: { block: 1, offset: 24 }, end: { block: 1, offset: 30 }, text: "two" }),
+  ];
+
+  it("keeps a trim as drawn - the old outline is never unioned back in", () => {
+    // The end pin dragged inward: a stroke over the same words would merge
+    // into the standing mark and change nothing, which was the bug.
+    const marks = standing();
+    const trimmed = { segmentIndex: 0, start: { block: 1, offset: 10 }, end: { block: 1, offset: 15 } };
+    const plan = reshapePlan(marks, /** @type {import("../src/lib/reader/marks.js").Mark} */ (marks[0]), trimmed);
+    assert.deepEqual(plan.span, trimmed);
+    // Absorbed by construction: the record is replaced whatever the span.
+    assert.deepEqual(plan.absorbed, [marks[0]]);
+  });
+
+  it("absorbs the other marks the new outline reaches, and only those", () => {
+    // The end pin dragged past the neighbour: one mark, the way a stroke
+    // over both would leave one.
+    const marks = standing();
+    const plan = reshapePlan(marks, /** @type {import("../src/lib/reader/marks.js").Mark} */ (marks[0]), {
+      segmentIndex: 0,
+      start: { block: 1, offset: 10 },
+      end: { block: 1, offset: 26 },
+    });
+    assert.deepEqual(plan.absorbed, [marks[0], marks[1]]);
+    assert.deepEqual(plan.span.end, { block: 1, offset: 30 });
+  });
+});
+
+describe("handleAt (D181)", () => {
+  // Two pins as the page draws them: a two-pixel stem the line's height,
+  // the start's dot above it, the end's below.
+  const start = { top: 100, bottom: 130, left: 40, right: 42, width: 2, height: 30 };
+  const end = { top: 250, bottom: 280, left: 300, right: 302, width: 2, height: 30 };
+
+  it("takes a press on a pin from a thumb's reach around it", () => {
+    assert.equal(handleAt(41, 96, start, end, 20), "start");
+    assert.equal(handleAt(58, 148, start, end, 20), "start");
+    assert.equal(handleAt(301, 285, start, end, 20), "end");
+    assert.equal(handleAt(284, 232, start, end, 20), "end");
+  });
+
+  it("answers nobody off both pins - the text between them is the text's", () => {
+    assert.equal(handleAt(150, 115, start, end, 20), null);
+    assert.equal(handleAt(41, 160, start, end, 20), null);
+    assert.equal(handleAt(64, 115, start, end, 20), null);
+  });
+
+  it("tells the pins of a one-word mark apart by their dots", () => {
+    // Both stems a few pixels apart on one line: a press above the line's
+    // middle is nearer the start's dot, one below nearer the end's.
+    const near = { top: 100, bottom: 130, left: 70, right: 72, width: 2, height: 30 };
+    assert.equal(handleAt(55, 105, start, near, 20), "start");
+    assert.equal(handleAt(55, 126, start, near, 20), "end");
   });
 });
 

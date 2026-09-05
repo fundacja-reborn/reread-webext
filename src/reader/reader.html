@@ -1487,10 +1487,11 @@
       The two pins that say which mark the toolbar is about (D107): a thin
       bar with a dot at each end of the mark, the shape every platform's
       selection handles taught - drawn in the interface accent, so the mark
-      itself keeps its true ink. Indicators only: pointer-events pass
-      through them, so a tap on a pin is a tap on the text under it.
-      Absolute in page coordinates, placed by script, riding the scroll
-      with their mark.
+      itself keeps its true ink. Handles by geometry, not by element (D181):
+      pointer-events pass through them, so a tap on a pin is a tap on the
+      text under it, while a press that travels from one is the script's
+      own hit-test's to read as dragging that end of the mark. Absolute in
+      page coordinates, placed by script, riding the scroll with their mark.
     -->
     <div id="mark-pin-start" class="mark-pin mark-pin-start" hidden aria-hidden="true"></div>
     <div id="mark-pin-end" class="mark-pin mark-pin-end" hidden aria-hidden="true"></div>

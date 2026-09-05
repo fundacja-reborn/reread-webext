@@ -34,6 +34,17 @@
  * underlined phrases and empty space, keeps becoming the compatibility mouse
  * events the old paths already listen to.
  *
+ * The highlighter's active mark adds one more claimable press (D181): its
+ * two pins are handles, the way their shape promises. A press on one is the
+ * handle's from its first move - no hold, the way the platforms' own handles
+ * take a finger - and the drag moves that end of the mark word by word,
+ * inward or outward, across paragraphs, never past the other end; the
+ * pointer lifting rewrites the mark. A press that lifts without travelling
+ * stays the tap it would have been on the text under the pin. The pins are
+ * found by geometry (`markHandleAt`, the reader's own hit-test), never as
+ * elements - they stay transparent to the pointer - so nothing about where
+ * a tap lands changed when they learned to drag.
+ *
  * The mouse lives in the same world (D86): the article refuses the native
  * selection for every pointer, and a mouse gesture selects the same runs of
  * whole words a finger does. A press that travels is a drag and selects from
@@ -69,6 +80,7 @@ import { locate } from "../lib/matcher/spans.js";
 import { tokenize } from "../lib/matcher/tokenize.js";
 import {
   besideSpan,
+  edgeWordIndex,
   gluedEnd,
   gluedStart,
   nearestWordIndex,
@@ -181,6 +193,26 @@ const SCROLL_TAIL_MS = 100;
  *   caller reads it as "this word too" beside an active mark (D107). The
  *   caller answers the tap either way, and this module only promises it will
  *   not also mean what taps mean with the pen away.
+ * @property {(x: number, y: number) => MarkHandle | null} [markHandleAt] the
+ *   active mark's pin under a point, while the highlighter is on (D181):
+ *   which end of the mark it is, and the mark's painted range - the drag
+ *   starts from that range and moves that end. Null off both pins, which is
+ *   every press but a handle's. Absent means the pins only point.
+ * @property {() => void} [onMarkResizeStart] a handle's drag just took: the
+ *   stroke now stands where the mark stands and is about to move, so the
+ *   mark's own paint has to come off under it - a shrink could not show
+ *   through it.
+ * @property {(range: Range) => void} [onMarkResized] a handle's drag ended
+ *   on this range: the mark it moved is the one to rewrite to it. Like
+ *   `onMarked`, the range is handed over with the stroke's paint already
+ *   cleared.
+ */
+
+/**
+ * One of the active mark's pins, as the reader hands it to a press (D181):
+ * which end of the mark, and the mark's painted range.
+ *
+ * @typedef {{ edge: "start" | "end", range: Range }} MarkHandle
  */
 
 /** @type {SelectHooks | null} */
@@ -254,9 +286,11 @@ let highlight = null;
  * claim. Unlike the selection it may run across blocks - a mark is not a
  * phrase and owes the matcher nothing (D45 stays a rule about phrases) - so
  * the anchor keeps its whole word, and the stretch finds the focus word in
- * whatever block the pointer is over.
+ * whatever block the pointer is over. `edge` names the end a handle drag
+ * moves (D181), and its absence a stroke: the two end in different hands
+ * (`finishInk`), and only the handle's is clamped at its anchor.
  *
- * @type {{ anchor: Word, range: Range } | null}
+ * @type {{ anchor: Word, range: Range, edge?: "start" | "end" } | null}
  */
 let ink = null;
 /** The last focus block's geometry, so a stretch inside one block walks it once. */
@@ -273,9 +307,12 @@ let inkHighlight = null;
  * finger; `fromX`/`fromY` stay where it landed, because drift is measured
  * against the landing point and never against the previous event - a slow
  * scroll moves little between events, and a creeping reference point would
- * let it pass for a finger holding still.
+ * let it pass for a finger holding still. `handle` is the pin the touch
+ * landed on, if one (D181): then the mode is `handle` - claimed from the
+ * first move, waiting on travel rather than on the timer, which is not
+ * armed - until the travel takes the mark's outline as the stroke.
  *
- * @type {{ id: number, x: number, y: number, fromX: number, fromY: number, target: EventTarget | null, timer: number, mode: "hold" | "select" } | null}
+ * @type {{ id: number, x: number, y: number, fromX: number, fromY: number, target: EventTarget | null, timer: number, mode: "hold" | "select" | "handle", handle: MarkHandle | null } | null}
  */
 let gesture = null;
 
@@ -285,9 +322,11 @@ let gesture = null;
  * same timer the finger waits on; `select` has taken a word and is
  * stretching. There is no scroll to tell a drag from, so travel alone claims
  * the gesture - and no `preventDefault` either, because the article's
- * stylesheet already refuses the native selection for everybody.
+ * stylesheet already refuses the native selection for everybody. `handle`
+ * and the `handle` mode are the touch gesture's (D181): a press on a pin
+ * waits on travel alone, and the travel takes the mark's outline.
  *
- * @type {{ x: number, y: number, fromX: number, fromY: number, timer: number, mode: "hold" | "select" } | null}
+ * @type {{ x: number, y: number, fromX: number, fromY: number, timer: number, mode: "hold" | "select" | "handle", handle: MarkHandle | null } | null}
  */
 let mouse = null;
 
@@ -485,6 +524,26 @@ function inkStart(word) {
 }
 
 /**
+ * The geometry of a block a stroke reaches, walked once per block: the
+ * anchor's own rides with the stroke, the last focus block's beside it, so
+ * a stretch inside one block walks it once. Null for a node in no piece of
+ * any block.
+ *
+ * @param {Element} block
+ * @param {Text} node a text node of the block
+ * @returns {Geometry | null}
+ */
+function inkGeometry(block, node) {
+  if (ink !== null && ink.anchor.geo.block === block) return ink.anchor.geo;
+  if (inkFocus !== null && inkFocus.block === block) return inkFocus;
+  const pieces = blockPieces(node);
+  if (pieces === null) return null;
+  const geo = { ...pieces, tokens: tokenize(pieces.text) };
+  inkFocus = geo;
+  return geo;
+}
+
+/**
  * The focus word for a stroke: the word nearest the pointer, in the geometry
  * of whatever block the pointer is over - this is where the marker leaves
  * the selection's one-block world. Null off the markable ground, which the
@@ -496,23 +555,76 @@ function inkStart(word) {
 function inkWordAt(caret) {
   const block = blockAround(caret.node);
   if (block === null || !withinMarkRoot(block)) return null;
-
-  /** @type {Geometry | null} */
-  let geo = null;
-  if (ink !== null && ink.anchor.geo.block === block) geo = ink.anchor.geo;
-  else if (inkFocus !== null && inkFocus.block === block) geo = inkFocus;
-  else {
-    const pieces = blockPieces(caret.node);
-    if (pieces === null) return null;
-    geo = { ...pieces, tokens: tokenize(pieces.text) };
-    inkFocus = geo;
-  }
-
+  const geo = inkGeometry(block, caret.node);
+  if (geo === null) return null;
   const offset = offsetIn(geo, caret.node, caret.offset);
   if (offset === null) return null;
   const index = nearestWordIndex(geo.tokens, offset);
-  if (index === -1) return null;
-  return { geo, index };
+  return index === -1 ? null : { geo, index };
+}
+
+/**
+ * The word a painted mark's edge stands on (D181): a handle drag is
+ * anchored at the word of the far edge and starts its stretch from the
+ * near one. The range holds its edge characters on the inside (the paint's
+ * own promise), so an end is read at its last character - and each edge is
+ * read as an edge (`edgeWordIndex`), because the punctuation glued to a
+ * mark (D107) stands as close to the word beside the mark as to its own.
+ *
+ * @param {Range} range
+ * @param {"start" | "end"} edge
+ * @returns {Word | null}
+ */
+function markEdgeWord(range, edge) {
+  const node = edge === "start" ? range.startContainer : range.endContainer;
+  const offset = edge === "start" ? range.startOffset : Math.max(0, range.endOffset - 1);
+  if (!(node instanceof Text)) return null;
+  const block = blockAround(node);
+  if (block === null || !withinMarkRoot(block)) return null;
+  const geo = inkGeometry(block, node);
+  if (geo === null) return null;
+  const at = offsetIn(geo, node, offset);
+  if (at === null) return null;
+  const index = edgeWordIndex(geo.tokens, at, edge);
+  return index === -1 ? null : { geo, index };
+}
+
+/**
+ * A handle drag taking (D181): the stroke stands exactly where the mark
+ * stands - anchored at the mark's far end, its near end the word under the
+ * handle - and the stretch moves the near end from there. Nothing changes
+ * on screen until the pointer reaches another word, which is what lets a
+ * drag that goes nowhere leave the mark as it was.
+ *
+ * @param {MarkHandle} handle
+ * @returns {boolean} whether the stroke now stands
+ */
+function inkResize(handle) {
+  const anchor = markEdgeWord(handle.range, handle.edge === "start" ? "end" : "start");
+  const near = markEdgeWord(handle.range, handle.edge);
+  if (anchor === null || near === null) return false;
+  const built = inkRange(anchor, near);
+  if (built === null) return false;
+  ink = { anchor, range: built, edge: handle.edge };
+  paintInk();
+  // After the paint stands, for the reason `inkStart` waits: the caller
+  // takes the mark's own paint off in answer, and the stroke has to be
+  // there to stand in for it.
+  hooks?.onMarkResizeStart?.();
+  return true;
+}
+
+/**
+ * Whether one word stands before another in the document - the handle
+ * drag's clamp (D181): its end may reach the other end and never pass it.
+ *
+ * @param {Word} a
+ * @param {Word} b
+ * @returns {boolean}
+ */
+function precedes(a, b) {
+  if (a.geo.block === b.geo.block) return a.index < b.index;
+  return (a.geo.block.compareDocumentPosition(b.geo.block) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0;
 }
 
 /**
@@ -565,8 +677,14 @@ function extendInk(x, y) {
   if (active === null) return;
   const caret = caretAt(x, y);
   if (caret === null) return;
-  const focus = inkWordAt(caret);
+  let focus = inkWordAt(caret);
   if (focus === null) return;
+  // A handle stops at the other end (D181): the start dragged past the end,
+  // or the end past the start, leaves the mark one word long rather than
+  // turning it inside out under the finger - the platforms' handles that
+  // swap roles when they cross are exactly the surprise this refuses.
+  if (active.edge === "start" && precedes(active.anchor, focus)) focus = active.anchor;
+  if (active.edge === "end" && precedes(focus, active.anchor)) focus = active.anchor;
   const built = inkRange(active.anchor, focus);
   if (built === null) return;
   active.range = built;
@@ -577,11 +695,15 @@ function extendInk(x, y) {
  * The stroke's end - the touch lifting, the button releasing, the window
  * losing the gesture. The wet paint is taken back before the caller hears,
  * so the dried mark it draws lands in the same frame and nothing blinks.
+ * A handle's drag ends in the other hand (D181): its range is a mark's new
+ * outline, not a stroke to merge.
  */
 function finishInk() {
-  const done = ink?.range ?? null;
+  const done = ink;
   clearInk();
-  if (done !== null) hooks?.onMarked?.(done);
+  if (done === null) return;
+  if (done.edge === undefined) hooks?.onMarked?.(done.range);
+  else hooks?.onMarkResized?.(done.range);
 }
 
 /**
@@ -684,6 +806,12 @@ function onTouchStart(event) {
   // scrolling and none of ours - it arms no hold, and its end claims no tap.
   if (performance.now() - scrolledAt < SCROLL_TAIL_MS) return;
 
+  // A press on one of the active mark's pins is the handle's (D181): no
+  // timer, because the drag needs no hold - its first move past the slop
+  // takes it, and a lift before that is the tap it always was. A live
+  // link keeps its presses here as it does from the mouse and the hold.
+  const handle =
+    marking() && !linkOwns(target) ? (hooks.markHandleAt?.(touch.clientX, touch.clientY) ?? null) : null;
   gesture = {
     id: touch.identifier,
     x: touch.clientX,
@@ -691,8 +819,9 @@ function onTouchStart(event) {
     fromX: touch.clientX,
     fromY: touch.clientY,
     target,
-    timer: window.setTimeout(hold, HOLD_MS),
-    mode: "hold",
+    timer: handle === null ? window.setTimeout(hold, HOLD_MS) : 0,
+    mode: handle === null ? "hold" : "handle",
+    handle,
   };
 }
 
@@ -724,6 +853,21 @@ function onTouchMove(event) {
     active.x = touch.clientX;
     active.y = touch.clientY;
     return;
+  }
+
+  if (active.mode === "handle") {
+    // Claimed from the first move, travelled or not: a finger on a handle
+    // is never scrolling, and a scroll the browser had begun under an
+    // unclaimed move could not be refused by a later one.
+    if (event.cancelable) event.preventDefault();
+    if (Math.abs(touch.clientX - active.fromX) <= TAP_SLOP && Math.abs(touch.clientY - active.fromY) <= TAP_SLOP) {
+      return;
+    }
+    if (active.handle === null || !inkResize(active.handle)) {
+      cancelGesture();
+      return;
+    }
+    active.mode = "select";
   }
 
   if (event.cancelable) event.preventDefault();
@@ -947,7 +1091,9 @@ function endMouse() {
  * A press on a live link stays the link's, clicks and drags alike, for the
  * reason the hold steps around one: a reader whose links stop working is a
  * broken article (`linkOwns` - plain-text links give the press up, D95).
- * macOS's control-click is a context menu, not a press.
+ * macOS's control-click is a context menu, not a press. A press on one of
+ * the active mark's pins arms the handle's drag instead (D181): travel
+ * alone takes it, and a press that lifts in place is a click like any.
  *
  * @param {MouseEvent} event
  */
@@ -965,13 +1111,15 @@ function onMouseDown(event) {
   if (!(target instanceof Node) || !hooks.root.contains(target)) return;
   if (linkOwns(target)) return;
 
+  const handle = marking() ? (hooks.markHandleAt?.(event.clientX, event.clientY) ?? null) : null;
   mouse = {
     x: event.clientX,
     y: event.clientY,
     fromX: event.clientX,
     fromY: event.clientY,
-    timer: window.setTimeout(mouseHold, HOLD_MS),
-    mode: "hold",
+    timer: handle === null ? window.setTimeout(mouseHold, HOLD_MS) : 0,
+    mode: handle === null ? "hold" : "handle",
+    handle,
   };
 }
 
@@ -1003,7 +1151,8 @@ function mouseHold() {
  * drag (`madeSelection`, the same four pixels the release would measure), the
  * word it pressed on is taken and the stretch begins. A drag from no word -
  * empty margin, an image - selects nothing, and the press is done meaning
- * things.
+ * things. A press on a handle claims by the same travel and takes the
+ * mark's own outline as its stroke (D181).
  *
  * @param {MouseEvent} event
  */
@@ -1018,7 +1167,7 @@ function onMouseMove(event) {
     return;
   }
 
-  if (active.mode === "hold") {
+  if (active.mode !== "select") {
     const from = { x: active.fromX, y: active.fromY };
     const to = { x: event.clientX, y: event.clientY };
     if (!madeSelection({ from, to, clicks: 1 })) {
@@ -1028,13 +1177,7 @@ function onMouseMove(event) {
       active.y = event.clientY;
       return;
     }
-    const word = wordAt(from.x, from.y, MOUSE_SLOP);
-    if (word === null || (marking() && !withinMarkRoot(word.geo.block))) {
-      cancelMouse();
-      return;
-    }
-    hooks.onSelectStart();
-    const took = marking() ? inkStart(word) : select(word.geo, word.index, word.index, word.index);
+    const took = active.handle === null ? takeAt(from.x, from.y) : inkResize(active.handle);
     if (!took) {
       cancelMouse();
       return;
@@ -1043,6 +1186,23 @@ function onMouseMove(event) {
   }
 
   extendTo(event.clientX, event.clientY);
+}
+
+/**
+ * The mouse drag's claim of the word it pressed on: taken as a selection,
+ * or as a stroke's first word with the pen in the hand. False from no word
+ * - empty margin, an image - and from ground the pen cannot write on.
+ *
+ * @param {number} x
+ * @param {number} y
+ * @returns {boolean}
+ */
+function takeAt(x, y) {
+  if (hooks === null) return false;
+  const word = wordAt(x, y, MOUSE_SLOP);
+  if (word === null || (marking() && !withinMarkRoot(word.geo.block))) return false;
+  hooks.onSelectStart();
+  return marking() ? inkStart(word) : select(word.geo, word.index, word.index, word.index);
 }
 
 /**
@@ -1128,6 +1288,8 @@ function onWindowBlur() {
  * stamps its time (the gate in `onTouchStart` reads it), and a scroll during
  * an armed hold ends the hold on the spot: the page moving under a waiting
  * finger means this touch is a scroll, whatever its own coordinates said.
+ * A pressed handle ends the same way (D181): the page moving has carried
+ * the pin away from under the finger, and no drag was taken yet.
  * A claimed selection is deliberately not ended here - its own moves are
  * `preventDefault`-ed, so a scroll arriving then is not this gesture's. The
  * mouse's armed hold ends here too: a wheel turning under a pressed button
@@ -1136,8 +1298,8 @@ function onWindowBlur() {
  */
 function onScroll() {
   scrolledAt = performance.now();
-  if (gesture?.mode === "hold") cancelGesture();
-  if (mouse?.mode === "hold") cancelMouse();
+  if (gesture !== null && gesture.mode !== "select") cancelGesture();
+  if (mouse !== null && mouse.mode !== "select") cancelMouse();
 }
 
 /**
