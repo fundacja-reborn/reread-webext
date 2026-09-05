@@ -426,11 +426,13 @@ const toLibraryButton = document.getElementById("to-library");
 const keepButton = document.getElementById("keep");
 const removeButton = document.getElementById("remove");
 const markReadButton = document.getElementById("mark-read");
-// The same two acts again under the article's last line - a long article ends
-// far from the bar above, and finishing is done where the finishing happens.
+// The finishing acts again under the article's last line - a long article
+// ends far from the bar above, and finishing is done where the finishing
+// happens: the read mark, and since D185 Delete beside it.
 const actionsEnd = document.getElementById("actions-end");
 const toLibraryEndButton = document.getElementById("to-library-end");
 const markReadEndButton = document.getElementById("mark-read-end");
+const removeEndButton = document.getElementById("remove-end");
 // The highlighter (D106): the pen in the bar, the toolbar standing at the
 // foot of the window for as long as the pen is in the hand (D107), and the
 // two pins that point out the mark the toolbar is about.
@@ -510,22 +512,45 @@ let picturesNote = null;
 let shownPictures = [];
 
 /**
- * The addresses whose reader said no in this tab: deleted from the list, or
- * taken out with the Save button. The default keep (D124) is only ever on
- * the way in - and this tab's way in is the live page, which Back and a
- * reload render again. Without this the page would be kept again the
- * moment after it was deleted (Michał's report, 2026-08-29: Delete, then
- * Back, and the article stood on the list again). Kept in `sessionStorage`
- * so a reload of the tab remembers; a new tab is a new way in, and keeps.
- * Pressing Save by hand takes an address off the list: that is a yes.
+ * The addresses whose reader said no on this way in: deleted from the
+ * article, or from the list. The default keep (D124) is only ever on the way
+ * in - and this tab's way in is the live page, which a reload of the tab, or
+ * Back onto it from the settings walk, renders again. Without this the page
+ * would be kept again the moment after it was deleted (Michał's report,
+ * 2026-08-29: Delete, then Back, and the article stood on the list again).
+ * Kept in `sessionStorage` so a reload of the tab remembers.
+ *
+ * A no is about one way in, not about the address for good: the press that
+ * pointed the reader here is stamped (`ReaderSource.at` - the same stamp
+ * that makes a second press on the same tab reach the reader at all), and
+ * the no is stored under that stamp. A reload replays the same press and
+ * finds the no; a new press is a new way in, with the keep by default the
+ * setting promises. The first cut (#253) remembered the no for the tab's
+ * whole life, and a reader who deleted a page and then opened it again by
+ * hand was refused a save nobody had declined (Michał's report,
+ * 2026-09-05). A new tab was always a new way in, and keeps. Pressing Save
+ * by hand takes an address off the list: that is a yes.
  */
 const DECLINED_KEEPS = "reread:declined-keeps";
 
-/** @returns {Set<string>} */
+/**
+ * The stamp of the press this page stands on (`ReaderSource.at`), or 0 when
+ * it stands on no source - the list opened for its own sake, which renders
+ * no live page and keeps nothing.
+ */
+let sourceAt = 0;
+
+/** @returns {Set<string>} the addresses declined on this way in */
 function declinedKeeps() {
   try {
-    const stored = JSON.parse(sessionStorage.getItem(DECLINED_KEEPS) ?? "[]");
-    return new Set(Array.isArray(stored) ? stored.filter((url) => typeof url === "string") : []);
+    /** @type {unknown} */
+    const stored = JSON.parse(sessionStorage.getItem(DECLINED_KEEPS) ?? "null");
+    if (typeof stored !== "object" || stored === null) return new Set();
+    const { at, urls } = /** @type {Record<string, unknown>} */ (stored);
+    // Another press's declines are not this one's - and the array the first
+    // cut wrote, a tab that lived across the update, reads as nobody's.
+    if (at !== sourceAt || !Array.isArray(urls)) return new Set();
+    return new Set(urls.filter((url) => typeof url === "string"));
   } catch {
     return new Set();
   }
@@ -540,7 +565,7 @@ function setKeepDeclined(url, declined) {
   if (declined) urls.add(url);
   else urls.delete(url);
   try {
-    sessionStorage.setItem(DECLINED_KEEPS, JSON.stringify([...urls]));
+    sessionStorage.setItem(DECLINED_KEEPS, JSON.stringify({ at: sourceAt, urls: [...urls] }));
   } catch {
     // Storage that will not take it forgets the no; the keep is a default
     // the reader can undo again, not a loss.
@@ -2401,6 +2426,10 @@ async function showPage(firstLoad = false) {
   // That is not an error, it is the reading list's whole cue (D-c).
   const source = await readReaderSource();
   if (turn !== epoch) return;
+  // The press this visit stands on: the stamp the declines of the default
+  // keep are filed under (D124), so a reload finds them and a new press
+  // does not.
+  sourceAt = source?.at ?? 0;
   if (source === null) {
     const doc = asDocState(history.state);
     const quotes = asMarksState(history.state);
@@ -4041,7 +4070,7 @@ function stopMarkSpeech() {
  * @returns {string}
  */
 function deleteTitle(button) {
-  if (button === removeButton) return titleElement?.textContent ?? "";
+  if (button === removeButton || button === removeEndButton) return titleElement?.textContent ?? "";
   // A quote row's acts carry their document's title themselves (D150): the
   // row names it in a detail line, not in a button of its own.
   const own = button.getAttribute("data-title");
@@ -4079,8 +4108,8 @@ function disarmDelete() {
   }
   // Every other Delete stands down to the same pair of words - the bare verb
   // to see, the act with its title to hear; only the held width was the
-  // article button's own.
-  if (armed === removeButton) armed.style.removeProperty("min-width");
+  // article buttons' own.
+  if (armed === removeButton || armed === removeEndButton) armed.style.removeProperty("min-width");
   armed.textContent = t("action_delete");
   armed.setAttribute("aria-label", t("reader_delete_aria", deleteTitle(armed)));
 }
@@ -4642,13 +4671,17 @@ async function runImport() {
 }
 
 /**
- * The action rows around the article - the bar above it and the pair of
- * finishing acts under its last line - drawn from what the database says
- * right now, along with the chrome's way back to the list (D102), which
- * stands in every article view. Whether this address is saved decides
- * everything on them: the save toggle's state on a live article, and whether
- * there is a read mark to offer at all. One function dresses all of it, so
- * the rows cannot disagree.
+ * The action rows around the article - the bar above it and the finishing
+ * acts under its last line - drawn from what the database says right now,
+ * along with the chrome's way back to the list (D102), which stands in every
+ * article view. Whether this address is in the list decides everything on
+ * them, and the door it came through decides nothing (D185): a page in the
+ * list offers Delete and the read mark whether it was opened from the list
+ * or from a live tab, and a live page not in the list offers Save. The
+ * toggle that used to stand over a saved live page - "In the reading list",
+ * a second press taking the copy out in one go - read as a state, not an
+ * act, and nobody looked under it for Delete (Michał's report, 2026-09-05).
+ * One function dresses all of it, so the rows cannot disagree.
  */
 async function refreshActions() {
   if (actions === null) return;
@@ -4675,38 +4708,44 @@ async function refreshActions() {
   if (toLibraryButton !== null) toLibraryButton.hidden = false;
   if (toLibraryEndButton !== null) toLibraryEndButton.hidden = false;
 
+  // Save is an offer to a live page the list does not have yet - a plain
+  // verb, one press; the copy it writes is undone by Delete, not by a second
+  // press here.
   if (keepButton !== null) {
-    keepButton.hidden = target.origin !== "live";
-    keepButton.textContent = row === null ? t("reader_save") : t("reader_saved");
-    keepButton.setAttribute("aria-pressed", String(row !== null));
+    keepButton.hidden = target.origin !== "live" || row !== null;
+    keepButton.textContent = t("reader_save");
   }
 
-  if (removeButton !== null) {
-    // Delete stands over everything that lives only in this database: a
-    // saved article, and a book.
-    removeButton.hidden = target.origin === "live" || row === null;
-    removeButton.removeAttribute("data-armed");
-    removeButton.style.removeProperty("min-width");
+  const book = target.origin === "book";
+  // The twins under the text stand only where the document finishes: under
+  // an article's last line, and under a book's LAST part - under any earlier
+  // part the honest next act is the pager's, one row above. The bar's copies
+  // stay on every part, because filing or dropping a book must not cost
+  // paging to its end.
+  const lastPart = !book || target.segmentIndex >= target.segmentCount - 1;
+
+  // Delete stands over everything that lives only in this database - a
+  // saved article, whichever door it came through, and a book - and under
+  // the last line as the other way of being done with a document (D185).
+  for (const button of [removeButton, removeEndButton]) {
+    if (button === null) continue;
+    button.hidden = row === null || (button === removeEndButton && !lastPart);
+    button.removeAttribute("data-armed");
+    button.style.removeProperty("min-width");
     // The rows' pair of words: one visible verb, the act with its title as
     // the accessible name - a bare "Delete" names nothing over a whole page.
-    removeButton.textContent = t("action_delete");
-    removeButton.setAttribute("aria-label", t("reader_delete_aria", deleteTitle(removeButton)));
+    button.textContent = t("action_delete");
+    button.setAttribute("aria-label", t("reader_delete_aria", deleteTitle(button)));
   }
 
   const read = row !== null && row.readAt !== null;
   // The read mark belongs to the whole document, and over a book the words
   // must say so: a bare "Mark as read" at part 3 of 32 left open whether the
   // part or the book was being marked (Michał's report, 2026-08-16) - it was
-  // always the book. The twin under the text goes further: it stands only
-  // under the LAST part, where "the book is finished" is the thing that just
-  // happened - under any earlier part the honest next act is the pager's,
-  // one row above. The bar's copy stays on every part, because filing a book
-  // already read elsewhere must not cost paging to its end.
-  const book = target.origin === "book";
+  // always the book.
   const label = book
     ? (read ? t("reader_book_marked_read") : t("reader_mark_book_read"))
     : (read ? t("reader_marked_read") : t("reader_mark_read"));
-  const lastPart = target.origin !== "book" || target.segmentIndex >= target.segmentCount - 1;
   for (const button of [markReadButton, markReadEndButton]) {
     if (button === null) continue;
     button.hidden = row === null || (button === markReadEndButton && !lastPart);
@@ -4846,31 +4885,28 @@ async function onPicturesPress() {
 }
 
 /**
- * Save this article, or take it back out - one press, no confirmation in
- * either direction (D-i): the source is a live page, and the same button puts
- * it straight back. What gets written is the rebuilt tree exactly as it is on
- * screen, serialized by reading it back - nothing here ever assigns markup.
+ * Save this live page - one press, no confirmation: a copy written is
+ * nothing lost. Taking it out again is Delete's act, with its two presses,
+ * the same over this page as over a copy opened from the list (D185): the
+ * second press of the toggle that once stood here dropped the copy with its
+ * highlights in one go, while the same copy asked "Sure?" from the list.
+ * What gets written is the rebuilt tree exactly as it is on screen,
+ * serialized by reading it back - nothing here ever assigns markup. The press
+ * is a yes that outlives the row: the address comes off this tab's declined
+ * list (D124).
  */
 async function onKeepPress() {
   const target = shown;
   if (target === null || target.origin !== "live") return;
 
   try {
+    // Never over an existing row: the copy carries highlights and the
+    // reading position, and rewriting it would take them (D124). A row that
+    // got here first only means the bar is behind - it catches up below.
     const existing = await getArticleMeta(target.url);
     if (shown !== target) return;
-
-    if (existing !== null) {
-      await deleteArticle(target.url);
-      setKeepDeclined(target.url, true);
-      // The marks were part of the copy that just left (they went with the
-      // row); paint saying otherwise would be showing what is not there.
-      if (shown === target) {
-        docMarks = [];
-        repaintMarks();
-      }
-    } else if (!(await saveShownLive(target))) {
-      return;
-    } else {
+    if (existing === null) {
+      if (!(await saveShownLive(target))) return;
       setKeepDeclined(target.url, false);
     }
   } catch {
@@ -4910,8 +4946,8 @@ async function saveShownLive(target) {
  * this address (D124). With "Save in the offline reading list by default" on
  * - and it is on unless somebody turned it off - a page opened here is saved
  * as it opens, so the rows wait for that write: a bar offering Save for a
- * moment and then saying the page is in the list would be a flicker on e-ink
- * and wrong for as long as it lasted.
+ * moment and then Delete and the read mark would be a flicker on e-ink and
+ * wrong for as long as it lasted.
  *
  * The keep is only ever on the way in and only when the address is not in the
  * list yet (`keptRow`): a stored copy carries the highlights and the reading
@@ -4936,25 +4972,35 @@ async function openLiveActions(target) {
 }
 
 /**
- * Delete a saved article from its own view - two presses on the same spot,
- * because this copy is the only copy and offline there is no getting it back.
- * The question is asked by changing the text, not by a dialog or an undo
- * timer: both are flashes on e-ink, and neither is more honest. The same
- * armed state as the rows' Delete, so the same rules stand it down.
+ * Delete the document on screen from its own view - two presses on the same
+ * spot, because this copy is the only copy and offline there is no getting
+ * it back. The question is asked by changing the text, not by a dialog or an
+ * undo timer: both are flashes on e-ink, and neither is more honest. The same
+ * armed state as the rows' Delete, so the same rules stand it down. Two
+ * spots ask it - the bar and the row under the last line - and either leads
+ * to the list: over a live page too, and from however deep this page's own
+ * entries stand, the walk the menu's list row takes (Michał's calls,
+ * 2026-09-05 - a plain step back from a document opened off its own
+ * highlights page landed on the highlights of a document that was no longer
+ * there). The press was about the copy, and once it is gone the list is
+ * where the reader expects to stand. The tab's live page stays declined
+ * (D124), so Back onto it does not keep it again.
+ *
+ * @param {HTMLElement | null} button the Delete that was pressed
  */
-async function onRemovePress() {
+async function onRemovePress(button) {
   const target = shown;
-  if (target === null || target.origin === "live") return;
-  if (!(removeButton instanceof HTMLButtonElement)) return;
+  if (target === null) return;
+  if (!(button instanceof HTMLButtonElement)) return;
 
-  if (!removeButton.hasAttribute("data-armed")) {
+  if (!button.hasAttribute("data-armed")) {
     // The question must not move the target out from under the finger. Which
     // of verb and question runs longer now differs by catalogue ("Usuń" asks
     // "Na pewno?", "Supprimer" asks "Sûr ?"), so the width is held as
     // min-width, anchored on the left edge the row aligns to: the button
     // never shrinks, and can only grow rightward.
-    removeButton.style.minWidth = `${removeButton.offsetWidth}px`;
-    armDelete(removeButton);
+    button.style.minWidth = `${button.offsetWidth}px`;
+    armDelete(button);
     return;
   }
 
@@ -4965,10 +5011,9 @@ async function onRemovePress() {
     showNotice(t("reader_list_write_failed"));
     return;
   }
-  // Back may land on this tab's live page: the deletion must outlive it.
   if (target.origin !== "book") setKeepDeclined(target.url, true);
   if (shown !== target) return;
-  onBackPress();
+  leaveToList();
 }
 
 /**
@@ -6145,7 +6190,9 @@ navFullscreen?.addEventListener("click", () => {
 });
 
 keepButton?.addEventListener("click", () => void onKeepPress());
-removeButton?.addEventListener("click", () => void onRemovePress());
+for (const button of [removeButton, removeEndButton]) {
+  button?.addEventListener("click", () => void onRemovePress(button));
+}
 markReadButton?.addEventListener("click", () => void onMarkReadPress());
 markReadEndButton?.addEventListener("click", () => void onMarkReadPress());
 

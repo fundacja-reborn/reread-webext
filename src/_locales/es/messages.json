@@ -312,7 +312,6 @@
     "placeholders": { "count": { "content": "$1", "example": "2" } }
   },
   "reader_save": { "message": "Guardar en la lista de lectura" },
-  "reader_saved": { "message": "En la lista de lectura" },
   "reader_delete_confirm": { "message": "¿Seguro?" },
   "reader_delete_aria": {
     "message": "Eliminar el artículo $TITLE$",
