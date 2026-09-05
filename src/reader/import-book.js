@@ -21,8 +21,7 @@
  * half-imported book be opened.
  *
  * Chapter markup goes through the same `buildArticle` walk as everything
- * else this extension renders: the allowed list decides what survives, and
- * images fall out with it (D3 - `img` has always been on the dropped list).
+ * else this extension renders: the allowed list decides what survives.
  * Links lose their `href` wholesale: with no base URL to resolve against,
  * `safeHref` refuses every one - internal and external alike - and what
  * remains is the link's text. Deliberate, not incidental: the brief puts
@@ -31,6 +30,18 @@
  * table of contents (D116) is not these links: it is built here from the
  * h1-h3 blocks as segments are written - the same headings the segmenter
  * cuts before - and stored on the book row.
+ *
+ * Pictures stay (D183; they fell out with the allowed list until then).
+ * A chapter's `<img>` keeps its address as a path inside the archive
+ * (`archiveSrc`, resolved against the chapter), and the picture behind it
+ * is read out of the archive right here, decided on by the rules an
+ * article's pictures follow, and written as a row under the book's id -
+ * one at a time, as the blocks are met, so that a book of plates never has
+ * its plates in memory at once. A picture that cannot be kept leaves its
+ * block; a block with nothing left to read leaves the book. What the
+ * cover pages of the presses wrap in an SVG frame is unwrapped first
+ * (`framePictures`), because the sanitizer drops `svg` whole. Nothing here
+ * touches the network: a book's pictures are in the file, or nowhere.
  *
  * Footnotes are the one exception now (mobileread request, accepted plan):
  * a reference recognized as one (`lib/book/notes.js` holds the rules) gets
@@ -51,11 +62,13 @@ import {
   opfPackage,
   resolveZipPath,
 } from "../lib/book/opf.js";
+import { framedPictureHref, packedChars } from "../lib/book/pictures.js";
 import { isHeadingTag, segmenter } from "../lib/book/segment.js";
 import { cappedToc, headingEntries } from "../lib/book/toc.js";
 import { buildArticle } from "../lib/reader/article.js";
 import { bookRecord } from "../lib/store/book.js";
 import { deleteBook, putBook, putBookSegment } from "../lib/store/books.js";
+import { archivePictures, pictureKeeper } from "./book-pictures.js";
 import { loadFflate } from "./zip.js";
 
 /**
@@ -72,6 +85,37 @@ import { loadFflate } from "./zip.js";
 /**
  * @typedef {{ ok: true, book: import("../lib/store/book.js").BookMeta }
  *   | { ok: false, reason: ImportFailure }} ImportOutcome
+ */
+
+/**
+ * The one failure sentence the reader gets, with its cause left where
+ * somebody looking for it will find it: the reader page's console. The
+ * sentence covers everything from "not a ZIP" to a database that would not
+ * take a row, and a cause swallowed whole is a report nobody can act on -
+ * the first import of a book with pictures failed with the sentence alone
+ * (2026-09-05), and the file turned out to be the question.
+ *
+ * @param {string} what
+ * @param {unknown} [error]
+ * @returns {ImportOutcome}
+ */
+function unreadable(what, error) {
+  console.warn(`re/read: this file cannot be imported as an EPUB - ${what}`, ...(error === undefined ? [] : [error]));
+  return { ok: false, reason: "unreadable" };
+}
+
+/**
+ * Where an import stands: how many parts are written, how many pictures
+ * are kept and what they take (D183).
+ *
+ * @typedef {{ segments: number, pictures: number, bytes: number }} ImportProgress
+ */
+
+/**
+ * A block as the packer carries it: its markup, and the rows of the book's
+ * pictures it shows (D183), so the segment it lands in can name them.
+ *
+ * @typedef {{ html: string, pictures: number[] }} PackedBlock
  */
 
 /**
@@ -136,15 +180,38 @@ function annotateNoterefs(chapter, chapterPath, readDoc) {
 }
 
 /**
+ * The pictures the presses wrap in an SVG frame - a cover page is
+ * `<svg><image href="cover.jpg"/></svg>` more often than not - unwrapped
+ * into the `<img>` they are, before the rebuild drops the frame with every
+ * other SVG. The rule is `lib/book/pictures.js`'s (`framedPictureHref`);
+ * this is only the DOM around it. The parsed chapter is inert
+ * (`DOMParser` has no browsing context), so the new element loads nothing.
+ *
+ * @param {Document} chapter
+ */
+function framePictures(chapter) {
+  for (const svg of Array.from(chapter.querySelectorAll("svg"))) {
+    const href = framedPictureHref(svg);
+    if (href === null) continue;
+    const image = chapter.createElement("img");
+    image.setAttribute("src", href);
+    const alt = svg.querySelector("title")?.textContent?.trim() ?? "";
+    if (alt.length > 0) image.setAttribute("alt", alt);
+    svg.replaceWith(image);
+  }
+}
+
+/**
  * The whole import of one file. Progress is reported once per segment
- * written - not per block, not per chapter - which is deliberately coarse:
- * every report is a repaint, and on e-ink a repaint is a flash.
+ * written and once per picture kept - not per block, not per chapter -
+ * which is deliberately coarse: every report is a repaint, and on e-ink a
+ * repaint is a flash.
  *
  * @param {File} file
- * @param {(segments: number) => void} onSegment
+ * @param {(progress: ImportProgress) => void} onProgress
  * @returns {Promise<ImportOutcome>}
  */
-export async function importEpub(file, onSegment) {
+export async function importEpub(file, onProgress) {
   /** @type {Uint8Array} */
   let bytes;
   /** @type {FflateModule["unzipSync"]} */
@@ -152,8 +219,8 @@ export async function importEpub(file, onSegment) {
   try {
     bytes = new Uint8Array(await file.arrayBuffer());
     ({ unzipSync } = await loadFflate());
-  } catch {
-    return { ok: false, reason: "unreadable" };
+  } catch (error) {
+    return unreadable("the file could not be read, or the ZIP reader could not load", error);
   }
 
   /**
@@ -177,9 +244,9 @@ export async function importEpub(file, onSegment) {
         return false;
       },
     });
-  } catch {
+  } catch (error) {
     // Not a ZIP at all - a renamed PDF, a truncated download.
-    return { ok: false, reason: "unreadable" };
+    return unreadable("not a ZIP archive", error);
   }
   if (hasEncryption(names)) return { ok: false, reason: "drm" };
 
@@ -190,13 +257,25 @@ export async function importEpub(file, onSegment) {
     const opfPath = containerDoc === null ? null : containerOpfPath(containerDoc.documentElement);
     const opfBytes = opfPath === null ? null : entry(opfPath);
     const opfDoc = opfBytes === null ? null : parseXml(decodeXml(opfBytes));
-    if (opfPath === null || opfDoc === null) return { ok: false, reason: "unreadable" };
+    // The usual shape of a "book" that is not one: a folder zipped with
+    // its own name in front of every entry, so nothing stands at the root.
+    if (containerDoc === null) return unreadable("META-INF/container.xml is missing at the root, or will not parse");
+    if (opfPath === null) return unreadable("META-INF/container.xml names no package document");
+    if (opfDoc === null) return unreadable(`the package document ${opfPath} is missing, or will not parse`);
 
     const pkg = opfPackage(opfDoc.documentElement);
-    if (pkg.spineHrefs.length === 0) return { ok: false, reason: "unreadable" };
+    if (pkg.spineHrefs.length === 0) return unreadable("the spine names no XHTML entry");
 
     const baseDir = opfDirectory(opfPath);
-    const packer = /** @type {ReturnType<typeof segmenter<string>>} */ (segmenter());
+    const packer = /** @type {ReturnType<typeof segmenter<PackedBlock>>} */ (segmenter());
+    /** @type {ImportProgress} */
+    const progress = { segments: 0, pictures: 0, bytes: 0 };
+    // The book's pictures, kept as the blocks that show them are met (D183).
+    const keeper = pictureKeeper(bookId, archivePictures(unzipSync, bytes), (kept, size) => {
+      progress.pictures = kept;
+      progress.bytes = size;
+      onProgress({ ...progress });
+    });
 
     // Other files of the book, parsed for footnote targets - most books keep
     // every note in one or two files, so the cache is tiny; capped all the
@@ -224,22 +303,31 @@ export async function importEpub(file, onSegment) {
     /** @type {import("../lib/book/toc.js").TocEntry[]} */
     const tocEntries = [];
 
-    /** @param {Array<import("../lib/book/segment.js").Segment<string>>} segments */
+    /** @param {Array<import("../lib/book/segment.js").Segment<PackedBlock>>} segments */
     const writeSegments = async (segments) => {
       for (const segment of segments) {
+        const blocks = segment.blocks.map((block) => block.html);
+        // The rows of pictures this segment shows, each named once (D183):
+        // what an opening of the part reads, and nothing of the book's other
+        // parts.
+        const pictures = [...new Set(segment.blocks.flatMap((block) => block.pictures))].sort(
+          (a, b) => a - b,
+        );
         await putBookSegment({
           bookId,
           index: written,
-          blocks: segment.blocks,
+          blocks,
           charCount: segment.charCount,
+          pictures,
         });
         // The table of contents (D116), read off the segment in its final
         // shape - only here are the packer's cuts and merges all spoken for,
         // so only here do the anchors name blocks a render will show.
-        tocEntries.push(...headingEntries(segment.blocks, written));
+        tocEntries.push(...headingEntries(blocks, written));
         written += 1;
         totalChars += segment.charCount;
-        onSegment(written);
+        progress.segments = written;
+        onProgress({ ...progress });
       }
     };
 
@@ -258,24 +346,36 @@ export async function importEpub(file, onSegment) {
       // cannot resolve anything against it, so no `href` survives the walk.
       const chapter = new DOMParser().parseFromString(decodeXml(data), "text/html");
       // Before the rebuild, while the hrefs and the targets' ids still exist
-      // (see the header): the footnotes' text onto their markers.
+      // (see the header): the footnotes' text onto their markers, and the
+      // framed pictures out of their frames.
       annotateNoterefs(chapter, path, readNoteDoc);
-      const rebuilt = buildArticle(chapter.body, document, { baseUrl: "" });
+      framePictures(chapter);
+      // Pictures kept, addressed by their path in the archive, resolved
+      // against this chapter's directory (D183).
+      const rebuilt = buildArticle(chapter.body, document, {
+        baseUrl: "",
+        pictures: true,
+        archive: opfDirectory(path),
+      });
       // `packableBlocks` rather than the root's children: EPUB chapters
       // usually wrap all their markup in one `<div>`, and packing that as a
       // single block would put a whole chapter in one segment and a
       // part-divider page in its own (see `lib/book/blocks.js`).
       for (const block of packableBlocks(rebuilt)) {
+        // The block's pictures first, out of the archive and into the
+        // database; what could not be kept has left the block by now.
+        const pictures = await keeper.keep(block);
         const text = block.textContent ?? "";
-        // Blocks with nothing to read are usually the shadow of a dropped
-        // image, or a spacer of non-breaking whitespace; the one kept is the
-        // scene break, which is its own meaning.
-        if (text.trim().length === 0 && block.localName !== "hr") continue;
+        // Blocks with nothing to read are usually the shadow of a picture
+        // nobody kept, or a spacer of non-breaking whitespace; the ones kept
+        // are the scene break, which is its own meaning, and a picture
+        // standing on its own.
+        if (text.trim().length === 0 && block.localName !== "hr" && pictures.length === 0) continue;
         await writeSegments(
           packer.push({
-            chars: text.length,
+            chars: packedChars(text.length, pictures.length),
             heading: isHeadingTag(block.localName),
-            payload: block.outerHTML,
+            payload: { html: block.outerHTML, pictures },
           }),
         );
       }
@@ -291,16 +391,18 @@ export async function importEpub(file, onSegment) {
       totalChars,
       addedAt: Date.now(),
       toc: cappedToc(tocEntries),
+      pictures: keeper.summary(),
     });
     // No record means no text worth keeping came out - a spine of covers.
     if (book === null) throw new Error("nothing to keep");
 
     await putBook(book);
     return { ok: true, book };
-  } catch {
+  } catch (error) {
     // Leave nothing behind: the book row was never written, and this takes
-    // the segments (best-effort - the orphan sweep covers a failure here).
+    // the segments and the pictures (best-effort - the orphan sweep covers
+    // a failure here).
     await deleteBook(bookId).catch(() => undefined);
-    return { ok: false, reason: "unreadable" };
+    return unreadable("the import failed part-way", error);
   }
 }

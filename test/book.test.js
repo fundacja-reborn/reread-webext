@@ -50,6 +50,13 @@ describe("bookRecord", () => {
     assert.equal(bookRecord({ ...whole, totalChars: 0 }), null);
     assert.equal(bookRecord({ ...whole, segmentCount: 2.5 }), null);
   });
+
+  it("carries the account of the book's pictures only where there are any (D183)", () => {
+    const pictured = bookRecord({ ...whole, pictures: { count: 14, bytes: 5_000_000 } });
+    assert.deepEqual(pictured?.pictures, { count: 14, bytes: 5_000_000 });
+    assert.equal("pictures" in (bookRecord({ ...whole, pictures: null }) ?? {}), false);
+    assert.equal("pictures" in (bookRecord({ ...whole, pictures: { count: 0, bytes: 0 } }) ?? {}), false);
+  });
 });
 
 describe("asBookMeta", () => {
@@ -107,6 +114,17 @@ describe("asSegment", () => {
     assert.equal(asSegment({ blocks: [] }), null);
     assert.equal(asSegment({ blocks: ["<p>a</p>", 5] }), null);
   });
+
+  it("names the pictures its blocks show, each once and in order, or none (D183)", () => {
+    const row = { blocks: ['<img data-src="OEBPS/a.jpg">'], charCount: 2000 };
+    assert.deepEqual(asSegment({ ...row, pictures: [3, 0, 3] }), { ...row, pictures: [0, 3] });
+    // A list that will not read, or an empty one, is one shape with absent:
+    // the part opens with its pictures hidden, never torn.
+    assert.deepEqual(asSegment({ ...row, pictures: [] }), row);
+    assert.deepEqual(asSegment({ ...row, pictures: [0, -1] }), row);
+    assert.deepEqual(asSegment({ ...row, pictures: [0, "1"] }), row);
+    assert.deepEqual(asSegment({ ...row, pictures: "0" }), row);
+  });
 });
 
 describe("library entries", () => {
@@ -160,6 +178,13 @@ describe("library entries", () => {
       percentRead: null,
       lastReadAt: null,
     });
+  });
+
+  it("a book's row says what its pictures take, as an article's does (D183)", () => {
+    const pictures = { count: 3, bytes: 900_000 };
+    const book = { ...whole, readAt: null, toc: [], pictures };
+    assert.deepEqual(bookEntry(book, null).pictures, pictures);
+    assert.equal("pictures" in bookEntry({ ...whole, readAt: null, toc: [] }, null), false);
   });
 
   it("a book's percent read counts the parts before the remembered one", () => {

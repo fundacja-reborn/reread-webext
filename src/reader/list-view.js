@@ -101,6 +101,10 @@ export function bookEntry(book, position) {
     progress: { at: at + 1, of: book.segmentCount },
     percentRead: overallPercent(position, book.segmentCount),
     lastReadAt: lastReadFrom(position),
+    // The pictures kept with the book (D183), said on its row as on an
+    // article's - the one place the space a document costs is said before
+    // it is opened.
+    ...(book.pictures === undefined ? {} : { pictures: book.pictures }),
   };
 }
 

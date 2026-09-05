@@ -80,7 +80,8 @@ Each of those servers sees what it saw when the page first showed you the pictur
 IP address and your browser's user agent, nothing more. The extension never downloads a
 picture on its own; a saved article contains only text until you press that row. Once
 the pictures are downloaded, the same menu row changes to **Remove pictures**, which
-deletes them again.
+deletes them again. The pictures of a book come from the `.epub` file you import and
+are stored with the book at that moment; no request is made for them, ever.
 
 There is no third server of the extension's own. No fonts, scripts or images are loaded
 from outside the extension, there is no crash reporting, no A/B testing and no update

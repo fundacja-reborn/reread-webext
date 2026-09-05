@@ -296,6 +296,69 @@ describe("pictures in the rebuild (D145)", () => {
   });
 });
 
+describe("a book's pictures in the rebuild (D183)", () => {
+  /**
+   * The rebuild of a chapter inside an archive: addresses are paths in it,
+   * resolved against the chapter's directory.
+   *
+   * @param {object} source
+   * @param {import("../src/lib/reader/article.js").Pictures | undefined} pictures
+   * @param {string} archive
+   */
+  const rebuildInArchive = (source, pictures, archive) =>
+    serialize(
+      buildArticle(
+        /** @type {Element} */ (/** @type {unknown} */ (source)),
+        /** @type {Document} */ (/** @type {unknown} */ (fakeDocument())),
+        { baseUrl: "", pictures, archive },
+      ),
+    );
+
+  const chapter = el("body", {}, [
+    el("div", {}, [el("img", { src: "../images/cover.jpg", alt: "Cover" })]),
+    el("p", {}, [text("A paragraph "), el("img", { src: "ornament.png" }), text(" with an ornament.")]),
+    el("img", { src: "https://cdn.test/remote.jpg" }),
+    el("img", { src: "data:image/gif;base64,R0lGODlh" }),
+    // Two levels up is the archive's root, still inside it; three is out.
+    el("img", { src: "../../root.jpg" }),
+    el("img", { src: "../../../outside.jpg" }),
+  ]);
+
+  it("keeps a picture's path in the archive, resolved against the chapter, and nothing that is not in the file", () => {
+    assert.equal(
+      rebuildInArchive(chapter, true, "OEBPS/xhtml"),
+      '<div><div><img data-src="OEBPS/images/cover.jpg" alt="Cover"></img></div>' +
+        '<p>A paragraph <img data-src="OEBPS/xhtml/ornament.png"></img> with an ornament.</p>' +
+        '<img data-src="root.jpg"></img></div>',
+    );
+  });
+
+  it("shows the pictures the database holds, by their path, and keeps the same elements either way", () => {
+    /** @type {import("../src/lib/reader/article.js").Pictures} */
+    const stored = (src) =>
+      src === "OEBPS/images/cover.jpg" ? { url: "blob:page/7", width: 600, height: 900 } : null;
+    // At render the stored address is whole: resolved against the root.
+    const stored_ = el("body", {}, [
+      el("div", {}, [el("img", { "data-src": "OEBPS/images/cover.jpg", alt: "Cover" })]),
+      el("p", {}, [text("A paragraph "), el("img", { "data-src": "OEBPS/xhtml/ornament.png" }), text(" with an ornament.")]),
+    ]);
+    const shown = rebuildInArchive(stored_, stored, "");
+    assert.equal(
+      shown,
+      '<div><div><img data-src="OEBPS/images/cover.jpg" alt="Cover" src="blob:page/7" width="600" height="900"></img></div>' +
+        '<p>A paragraph <img data-src="OEBPS/xhtml/ornament.png"></img> with an ornament.</p></div>',
+    );
+    assert.equal(shape(shown), shape(rebuildInArchive(stored_, true, "")));
+  });
+
+  it("still drops every picture for a caller that passes none", () => {
+    assert.equal(
+      rebuildInArchive(chapter, undefined, "OEBPS/xhtml"),
+      "<div><div></div><p>A paragraph  with an ornament.</p></div>",
+    );
+  });
+});
+
 describe("the allow list itself", () => {
   it("answers one of three things about an element", () => {
     assert.equal(decide("P"), "keep");

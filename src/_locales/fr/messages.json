@@ -201,6 +201,9 @@
   "reader_pictures_hint": {
     "message": "Téléchargées une fois depuis les serveurs de l'article, sans cookies, et conservées avec l'article sur cet appareil. Une fois téléchargées, elles sont affichées dans l'article."
   },
+  "reader_pictures_book_hint": {
+    "message": "Les images proviennent du fichier du livre et ont été enregistrées avec lui lors de l'ajout. Cette ligne ne supprime que les images - le livre reste, et les images ne reviennent qu'en ajoutant à nouveau le fichier."
+  },
   "reader_pictures_progress": {
     "message": "Image $DONE$ sur $OF$ - $SIZE$",
     "placeholders": {
@@ -632,6 +635,14 @@
     "message": "Ajout du livre - partie $PART$",
     "placeholders": {
       "part": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_book_importing_pictures": {
+    "message": "Ajout du livre - partie $PART$, image $PICTURE$ ($SIZE$)",
+    "placeholders": {
+      "part": { "content": "$1", "example": "3" },
+      "picture": { "content": "$2", "example": "12" },
+      "size": { "content": "$3", "example": "4,2 Mo" }
     }
   },
   "reader_book_added": {

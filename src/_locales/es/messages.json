@@ -201,6 +201,9 @@
   "reader_pictures_hint": {
     "message": "Se descargan una vez de los servidores del artículo, sin cookies, y se guardan con el artículo en este dispositivo. Una vez descargadas, se muestran en el artículo."
   },
+  "reader_pictures_book_hint": {
+    "message": "Las imágenes provienen del archivo del libro y se guardaron con él al añadirlo. Esta fila quita solo las imágenes - el libro se queda, y las imágenes solo vuelven al añadir el archivo de nuevo."
+  },
   "reader_pictures_progress": {
     "message": "Imagen $DONE$ de $OF$ - $SIZE$",
     "placeholders": {
@@ -632,6 +635,14 @@
     "message": "Añadiendo el libro - parte $PART$",
     "placeholders": {
       "part": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_book_importing_pictures": {
+    "message": "Añadiendo el libro - parte $PART$, imagen $PICTURE$ ($SIZE$)",
+    "placeholders": {
+      "part": { "content": "$1", "example": "3" },
+      "picture": { "content": "$2", "example": "12" },
+      "size": { "content": "$3", "example": "4,2 MB" }
     }
   },
   "reader_book_added": {

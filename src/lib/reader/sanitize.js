@@ -14,6 +14,8 @@
  * loses its element - never its text.
  */
 
+import { resolveZipPath } from "../book/opf.js";
+
 /**
  * Elements copied as themselves: the shape of a text, and nothing that loads,
  * runs, submits or plays.
@@ -145,8 +147,8 @@ export function safeHref(value, base) {
  * scheme is a picture "Save pictures" could never fetch; `data:` in
  * particular would be the picture's bytes riding in the text of every save,
  * asked for or not. Absolute for the reason `safeHref` gives, and with no
- * base to resolve against (a book) every address fails - a book's pictures
- * are not on any server.
+ * base to resolve against every address fails - which is what a book's
+ * pictures would meet here, and why they take `archiveSrc` instead.
  *
  * @param {unknown} value the `src` as written in the page
  * @param {string} base the address the page came from
@@ -160,4 +162,26 @@ export function safeSrc(value, base) {
   } catch {
     return null;
   }
+}
+
+/** An address that names its scheme - `https:`, `data:`, `javascript:` - rather than a path. */
+const SCHEME = /^[a-z][a-z0-9+.-]*:/i;
+
+/**
+ * A picture's place inside a book's archive (D183), or nothing. A book's
+ * pictures are not on any server: they sit in the file the book came from,
+ * and their address is the entry's path in that archive - resolved at
+ * import against the chapter that shows them, and at render against the
+ * root, where the stored address is already whole. `resolveZipPath` settles
+ * the path and refuses one that climbs out of the archive; an address with
+ * a scheme is refused before it: a remote picture in a book is not in the
+ * file, and `data:` would be the picture's bytes riding in the text.
+ *
+ * @param {unknown} value the `src` as the chapter writes it, or as stored
+ * @param {string} directory the archive directory the address is written against
+ * @returns {string | null}
+ */
+export function archiveSrc(value, directory) {
+  if (typeof value !== "string" || value.length === 0 || SCHEME.test(value)) return null;
+  return resolveZipPath(directory, value);
 }

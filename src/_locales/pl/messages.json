@@ -246,6 +246,9 @@
   "reader_pictures_hint": {
     "message": "Pobierane raz z serwerów artykułu, bez ciasteczek, i zapisywane razem z artykułem na tym urządzeniu. Po pobraniu są wyświetlane w artykule."
   },
+  "reader_pictures_book_hint": {
+    "message": "Obrazki pochodzą z pliku książki i zostały zapisane razem z nią przy dodawaniu. Ten wiersz usuwa same obrazki - książka zostaje, a obrazki wrócą dopiero po ponownym dodaniu pliku."
+  },
   "reader_pictures_progress": {
     "message": "Obrazek $DONE$ z $OF$ - $SIZE$",
     "placeholders": {
@@ -871,6 +874,14 @@
     "message": "Dodawanie książki - część $PART$",
     "placeholders": {
       "part": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_book_importing_pictures": {
+    "message": "Dodawanie książki - część $PART$, obrazek $PICTURE$ ($SIZE$)",
+    "placeholders": {
+      "part": { "content": "$1", "example": "3" },
+      "picture": { "content": "$2", "example": "12" },
+      "size": { "content": "$3", "example": "4,2 MB" }
     }
   },
   "reader_book_added": {

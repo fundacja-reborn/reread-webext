@@ -249,6 +249,10 @@
   "reader_pictures_hint": {
     "message": "Downloaded once from the article's own servers, without cookies, and kept with the article on this device. After the download they are shown in the article."
   },
+  "reader_pictures_book_hint": {
+    "message": "The pictures come from the book file and were saved with the book when it was added. This row removes only the pictures - the book stays, and the pictures come back only when you add the file again.",
+    "description": "Under the 'Remove pictures' row over a book: where its pictures came from (the file, no network), that the row takes the pictures alone, and that they are not back without a new import. Deleting the book removes its pictures too, which PRIVACY.md says."
+  },
   "reader_pictures_progress": {
     "message": "Picture $DONE$ of $OF$ - $SIZE$",
     "description": "The row's label while pictures are being saved; the size is what has been kept so far.",
@@ -829,6 +833,15 @@
     "message": "Adding the book - part $PART$",
     "placeholders": {
       "part": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_book_importing_pictures": {
+    "message": "Adding the book - part $PART$, picture $PICTURE$ ($SIZE$)",
+    "description": "The import's status line once a picture has been kept: which part is being written, how many pictures stand so far and what they take.",
+    "placeholders": {
+      "part": { "content": "$1", "example": "3" },
+      "picture": { "content": "$2", "example": "12" },
+      "size": { "content": "$3", "example": "4.2 MB" }
     }
   },
   "reader_book_added": {
