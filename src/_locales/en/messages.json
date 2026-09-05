@@ -56,6 +56,10 @@
   "bubble_more": { "message": "More" },
   "bubble_less": { "message": "Less" },
   "bubble_reader": { "message": "Read in the reader" },
+  "bubble_library": {
+    "message": "Open the offline reading list",
+    "description": "The second door of the reader-only bubble on an ordinary page, under \"Read in the reader\": a verb phrase, like that one, opening the offline reading list. The list keeps its own name (reading_list) everywhere else."
+  },
   "bubble_translating": { "message": "Translating..." },
   "bubble_nothing_more": {
     "message": "No sentence and no dictionary entry to show",

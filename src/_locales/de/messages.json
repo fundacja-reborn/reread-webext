@@ -43,6 +43,7 @@
   "bubble_more": { "message": "Mehr" },
   "bubble_less": { "message": "Weniger" },
   "bubble_reader": { "message": "In der Leseansicht lesen" },
+  "bubble_library": { "message": "Offline-Leseliste öffnen" },
   "bubble_translating": { "message": "Übersetze..." },
   "bubble_nothing_more": { "message": "Kein Satz und kein Wörterbucheintrag vorhanden" },
   "bubble_whole_words": { "message": "Markieren Sie ganze Wörter" },

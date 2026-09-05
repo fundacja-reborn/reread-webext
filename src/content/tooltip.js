@@ -145,9 +145,9 @@ function label(action) {
     case "reader":
       return t("bubble_reader");
     case "library":
-      // The name the reading list carries everywhere else - the popup's row,
-      // the reader's menu, its own heading. One room, one name.
-      return t("reading_list");
+      // A verb, like the door beside it (D182): the room's name alone read
+      // as a caption. The room keeps its name everywhere else (`reading_list`).
+      return t("bubble_library");
     case "speak":
       return t("bubble_speak");
     case "copy":
@@ -224,6 +224,89 @@ function copyIcon() {
   back.setAttribute("stroke-width", "1.9");
   back.setAttribute("stroke-linecap", "round");
   svg.append(back);
+
+  return svg;
+}
+
+/**
+ * A page of prose - the popup's own glyph for the reading view (its
+ * `#open-reader` row), redrawn on the speaker's grid: the door into this
+ * page carries the picture its destination already wears (D182). DOM calls,
+ * `currentColor`, no markup parsed, like every picture here.
+ *
+ * @returns {SVGSVGElement}
+ */
+function readerIcon() {
+  const NS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  // Decoration to assistive tech - the button's words carry the meaning.
+  svg.setAttribute("aria-hidden", "true");
+
+  const sheet = document.createElementNS(NS, "rect");
+  sheet.setAttribute("x", "4.5");
+  sheet.setAttribute("y", "3.4");
+  sheet.setAttribute("width", "15");
+  sheet.setAttribute("height", "17.2");
+  sheet.setAttribute("rx", "2.2");
+  sheet.setAttribute("fill", "none");
+  sheet.setAttribute("stroke", "currentColor");
+  sheet.setAttribute("stroke-width", "1.9");
+  svg.append(sheet);
+
+  const lines = document.createElementNS(NS, "path");
+  lines.setAttribute("d", "M8.3 8.3h7.4M8.3 12h7.4M8.3 15.7h4.4");
+  lines.setAttribute("fill", "none");
+  lines.setAttribute("stroke", "currentColor");
+  lines.setAttribute("stroke-width", "1.9");
+  lines.setAttribute("stroke-linecap", "round");
+  svg.append(lines);
+
+  return svg;
+}
+
+/**
+ * Books on a shelf, for the door into the reading list (D182): two standing
+ * and one leaning on them, the shelf under all three - a library, where the
+ * other door's picture is one page. Drawn like the rest.
+ *
+ * @returns {SVGSVGElement}
+ */
+function libraryIcon() {
+  const NS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  // Decoration to assistive tech - the button's words carry the meaning.
+  svg.setAttribute("aria-hidden", "true");
+
+  for (const x of ["3.6", "9.6"]) {
+    const book = document.createElementNS(NS, "rect");
+    book.setAttribute("x", x);
+    book.setAttribute("y", "4.6");
+    book.setAttribute("width", "4.4");
+    book.setAttribute("height", "15");
+    book.setAttribute("rx", "1");
+    book.setAttribute("fill", "none");
+    book.setAttribute("stroke", "currentColor");
+    book.setAttribute("stroke-width", "1.9");
+    svg.append(book);
+  }
+
+  const leaning = document.createElementNS(NS, "path");
+  leaning.setAttribute("d", "M15.6 6.6l3.6-1.1 3.6 13.4-3.6 1.1z");
+  leaning.setAttribute("fill", "none");
+  leaning.setAttribute("stroke", "currentColor");
+  leaning.setAttribute("stroke-width", "1.9");
+  leaning.setAttribute("stroke-linejoin", "round");
+  svg.append(leaning);
+
+  const shelf = document.createElementNS(NS, "path");
+  shelf.setAttribute("d", "M2.4 21.4h19.6");
+  shelf.setAttribute("fill", "none");
+  shelf.setAttribute("stroke", "currentColor");
+  shelf.setAttribute("stroke-width", "1.9");
+  shelf.setAttribute("stroke-linecap", "round");
+  svg.append(shelf);
 
   return svg;
 }
@@ -326,6 +409,8 @@ const TOUCH_SIZES = `
     --pull-action: -0.43em;
     --pad-cta: 0.53em 1.07em;
     --icon: 1.43em;
+    --type-door: 16px;
+    --icon-door: 20px;
 `;
 
 /** Exported for the test that holds the size system together, nothing else. */
@@ -369,6 +454,17 @@ export const STYLE = `
     --pull-action: -0.33em;
     --pad-cta: 0.23em 0.77em;
     --icon: 1.33em;
+    /* The launcher's two doors (D182): their type never under 15px - the
+       words are the meaning, and a door is read at arm's length - and their
+       pictures between 16 and 20. Both step up on the touch tier. */
+    --type-door: 15px;
+    --icon-door: 18px;
+    /* The ink and the paper the doors are drawn in: the bubble's own text
+       and background, named so that the dark and the reader's schemes can
+       hand the doors their own pair below. The filled door is ink on which
+       the paper's colour writes; the outlined door is a line of ink. */
+    --door-ink: #1f2430;
+    --door-paper: #ffffff;
     /* One strength for every line the bubble draws, past 4.5:1 against its own
        paper. An e-ink panel quantizes the screen to 16 greys and rounds a
        near-white hairline back into it, so a tenth of a black is not a faint
@@ -764,6 +860,15 @@ export const STYLE = `
   /* A signature signs at the top, also when the mirror reverses the column. */
   .bubble[data-tone="error"][data-grow="up"] .brand,
   .bubble[data-variant="launcher"][data-grow="up"] .brand { order: 1; }
+  /* Over the launcher's doors the signature is a small label of the brand
+     and no more (D182): a size up from the error's, at a strength past
+     4.5:1 rather than a caption's, and one small gap under it - the bubble
+     reads as one menu of two ways in, not as a heading over a section. */
+  .bubble[data-variant="launcher"] .brand {
+    font-size: calc(12px * var(--bubble-scale, 1));
+    opacity: 0.7;
+    margin-bottom: 6px;
+  }
 
   /* An action is a label and not a control. What makes one findable is standing
      where the reader is already looking; a box around it would make it the
@@ -847,10 +952,9 @@ export const STYLE = `
      press that keeps a phrase which would otherwise be gone, the launcher's
      offer is what its bubble is for, and Settings is the one thing an error
      bubble can offer - none of the three ever shares a screen with another, so
-     none outshouts the rest. The launcher's second door (D129) deliberately
-     stays a plain label beside the framed one: it is the way to another room,
-     not another answer to "what do I do with this page", and two frames side
-     by side would make a menu out of an offer. */
+     none outshouts the rest. The launcher's own doors are dressed further
+     down (D182): its offer is one of two presses there, and the pair has its
+     own component. */
   .actions button[data-action="save"],
   .actions button[data-action="reader"],
   .actions button[data-action="settings"] {
@@ -874,6 +978,78 @@ export const STYLE = `
      disabled button swallows its clicks, and the reader whose press met
      silence is the reason the sentence exists. */
   .actions button[data-action="save"]:is(:disabled, [aria-disabled="true"]) { opacity: 0.45; }
+
+  /* The launcher's two doors (D182): a menu of two presses, not an offer
+     with a label beside it. Both are one component - the bubble's full
+     width, one under the other, a finger's height - told apart by weight
+     alone: the door into THIS page is filled, the door into the reading
+     list is outlined in the same ink. The first cut (D129) kept the second
+     door a plain label so that two frames would not make a menu of the
+     offer, and readers took the label for a caption - a room nobody could
+     see the door to was a room nobody entered. Ink and paper are the
+     bubble's own text and background (the variables above), so on an e-ink
+     panel the filled door rounds to black and the outline to a black line:
+     drawn at the text's own strength, because a tint is the first thing
+     sixteen greys round away (page.css's lesson). */
+  .bubble[data-variant="launcher"] {
+    min-width: 240px;
+    max-width: min(320px, 90vw);
+  }
+  .bubble[data-variant="launcher"] .actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    /* The focus ring stands two pixels off a door, and the row's clip - the
+       fold's, which this bubble never uses - would cut it. */
+    overflow: visible;
+  }
+  .bubble[data-variant="launcher"] .actions button {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    width: 100%;
+    min-height: 44px;
+    margin: 0;
+    padding: 0.5em 0.8em;
+    font-size: calc(var(--type-door) * var(--bubble-scale, 1));
+    font-weight: 600;
+    line-height: 1.3;
+    text-align: left;
+    color: var(--door-ink);
+    background: transparent;
+    border: 1px solid var(--door-ink);
+    border-radius: 8px;
+    opacity: 1;
+  }
+  .bubble[data-variant="launcher"] .actions button svg {
+    width: calc(var(--icon-door) * var(--bubble-scale, 1));
+    height: calc(var(--icon-door) * var(--bubble-scale, 1));
+    flex: none;
+  }
+  .bubble[data-variant="launcher"] .actions button[data-action="reader"] {
+    color: var(--door-paper);
+    background: var(--door-ink);
+  }
+  .bubble[data-variant="launcher"] .actions button:focus-visible {
+    outline: 2px solid var(--door-ink);
+    outline-offset: 2px;
+  }
+  .bubble[data-variant="launcher"] .actions button:active {
+    background: color-mix(in srgb, var(--door-ink) 12%, transparent);
+  }
+  .bubble[data-variant="launcher"] .actions button[data-action="reader"]:active {
+    background: color-mix(in srgb, var(--door-ink) 82%, var(--door-paper));
+  }
+  /* Hover only where a pointer can hover: a finger's tap must not leave a
+     door looking pressed until the next tap somewhere else. */
+  @media (hover: hover) {
+    .bubble[data-variant="launcher"] .actions button:hover {
+      background: color-mix(in srgb, var(--door-ink) 8%, transparent);
+    }
+    .bubble[data-variant="launcher"] .actions button[data-action="reader"]:hover {
+      background: color-mix(in srgb, var(--door-ink) 88%, var(--door-paper));
+    }
+  }
 
   /* A hand is not a cursor: where the primary pointer is a finger, the type
      steps up toward the page's own reading size and the presses grow into
@@ -909,6 +1085,9 @@ export const STYLE = `
       --edge: #8d95a6;
       border-color: var(--edge);
       box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+      /* The doors swap ink and paper with the bubble (D182). */
+      --door-ink: #f2f4f8;
+      --door-paper: #262c3a;
     }
     .bubble:not([data-scheme]) :is(.body, .context)[data-tone="error"] { color: #f09a3e; }
     .bubble:not([data-pointer="coarse"]):not([data-scheme]) .entry-sense[aria-pressed="false"]:hover:not(:disabled) { background: rgba(255, 255, 255, 0.08); }
@@ -916,8 +1095,9 @@ export const STYLE = `
     .bubble:not([data-scheme]) .editor { background: rgba(255, 255, 255, 0.06); }
     /* The quiet labels need nothing here: they are the bubble's own colour at
        seven tenths, which lands right on either background. */
-    .bubble:not([data-scheme]) .actions :is(button[data-action="save"], button[data-action="reader"], button[data-action="settings"]) { background: rgba(255, 255, 255, 0.08); }
-    .bubble:not([data-scheme]) .actions :is(button[data-action="save"], button[data-action="reader"], button[data-action="settings"]):hover:not(:disabled):not([aria-disabled="true"]) { background: rgba(255, 255, 255, 0.16); }
+    /* Not the launcher's: its doors carry their own ink and paper (D182). */
+    .bubble:not([data-scheme]):not([data-variant="launcher"]) .actions :is(button[data-action="save"], button[data-action="reader"], button[data-action="settings"]) { background: rgba(255, 255, 255, 0.08); }
+    .bubble:not([data-scheme]):not([data-variant="launcher"]) .actions :is(button[data-action="save"], button[data-action="reader"], button[data-action="settings"]):hover:not(:disabled):not([aria-disabled="true"]) { background: rgba(255, 255, 255, 0.16); }
   }
 
   /* The reader's own paper, by name: the reader hands its theme down with
@@ -936,13 +1116,15 @@ export const STYLE = `
     --edge: #8d95a6;
     border-color: var(--edge);
     box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+    --door-ink: #f2f4f8;
+    --door-paper: #262c3a;
   }
   .bubble[data-scheme="dark"] :is(.body, .context)[data-tone="error"] { color: #f09a3e; }
   .bubble:not([data-pointer="coarse"])[data-scheme="dark"] .entry-sense[aria-pressed="false"]:hover:not(:disabled) { background: rgba(255, 255, 255, 0.08); }
   .bubble[data-scheme="dark"] .entry-sense[aria-pressed="true"] { background: rgba(255, 255, 255, 0.1); }
   .bubble[data-scheme="dark"] .editor { background: rgba(255, 255, 255, 0.06); }
-  .bubble[data-scheme="dark"] .actions :is(button[data-action="save"], button[data-action="reader"], button[data-action="settings"]) { background: rgba(255, 255, 255, 0.08); }
-  .bubble[data-scheme="dark"] .actions :is(button[data-action="save"], button[data-action="reader"], button[data-action="settings"]):hover:not(:disabled):not([aria-disabled="true"]) { background: rgba(255, 255, 255, 0.16); }
+  .bubble[data-scheme="dark"]:not([data-variant="launcher"]) .actions :is(button[data-action="save"], button[data-action="reader"], button[data-action="settings"]) { background: rgba(255, 255, 255, 0.08); }
+  .bubble[data-scheme="dark"]:not([data-variant="launcher"]) .actions :is(button[data-action="save"], button[data-action="reader"], button[data-action="settings"]):hover:not(:disabled):not([aria-disabled="true"]) { background: rgba(255, 255, 255, 0.16); }
   /* Sepia is the one paper the system query never dresses. A step lighter
      than the page's #f4ecd8 - the light bubble's manner, it floats - with
      the sepia ink, and an edge holding the 4.5:1 the lines test asks of
@@ -953,6 +1135,8 @@ export const STYLE = `
     color: #322a21;
     --edge: #7a6c55;
     border-color: var(--edge);
+    --door-ink: #322a21;
+    --door-paper: #fbf5e7;
   }
 `;
 
@@ -1047,7 +1231,7 @@ export const STYLE = `
  * phrase the bubble is about stays the page's own highlight (D23).
  *
  * @typedef {object} Tooltip
- * @property {(options: { anchor: DOMRect, variant: Variant, body: string, tone?: Tone, actions?: Action[], touch?: boolean, coarse?: boolean, scale?: number, folded?: boolean, anchored?: boolean, line?: number, phrase?: string, scheme?: "light" | "sepia" | "dark" | null, choosable?: boolean }) => void} show
+ * @property {(options: { anchor: DOMRect, variant: Variant, body: string, tone?: Tone, actions?: Action[], touch?: boolean, below?: boolean, coarse?: boolean, scale?: number, folded?: boolean, anchored?: boolean, line?: number, phrase?: string, scheme?: "light" | "sepia" | "dark" | null, choosable?: boolean }) => void} show
  * @property {(body: string, tone?: Tone) => void} setBody
  * @property {(sentence: string | null, tone?: Tone) => void} setContext
  * @property {(blocks: Block[]) => void} setEntries
@@ -1158,13 +1342,18 @@ function style(root, dress) {
  * @param {number} [where.line] the height of the phrase's first line; 0 means unknown, and the whole phrase is kept
  * @param {boolean} [where.assist] whether the page can be scrolled to make room - only ever the reader's anchored mode
  * @param {number} [where.covered] how far down the window the page's own stuck bar reaches (D138); the usable room starts under it
+ * @param {boolean} [where.below] under the phrase when it fits there, above it otherwise - the
+ *   launcher's order on a touch selection (D182), the reverse of the reading bubble's: the
+ *   system's floating bar hovers over the phrase, and a bubble above it had the bar over its
+ *   own foot; under the phrase there are only the drag handles, and the strip steps past them.
+ *   Never with `assist`, whose scrolled answer already stands below
  * @param {"up" | "down"} [where.prefer] the side the bubble already stands on (D177): held for as
  *   long as it fits there, because a bubble that changes sides under a press - a line chosen,
  *   Save answered - takes the reader's place in the text with it. `down` is never left for a
  *   spot above that has come free; `up` is left only when the bubble no longer fits above
  * @returns {{ left: number, top: number, grow: "down" | "up", scroll?: number }}
  */
-export function placement({ anchor, size, viewport, folded = 0, touch = false, line = 0, assist = false, covered = 0, prefer }) {
+export function placement({ anchor, size, viewport, folded = 0, touch = false, line = 0, assist = false, covered = 0, below = false, prefer }) {
   // The room to look for is the room the bubble may come to need, not the room
   // it needs now - a folded row unfolds with nobody left to move anything.
   const height = size.height + folded;
@@ -1179,7 +1368,17 @@ export function placement({ anchor, size, viewport, folded = 0, touch = false, l
   // painted over, for the bubble and for the assist's kept line alike.
   const ceiling = covered + VIEWPORT_MARGIN;
 
-  if (prefer !== "down" && anchor.top - gap - height >= ceiling) {
+  const fitsAbove = anchor.top - gap - height >= ceiling;
+  const under = anchor.bottom + gap;
+  const room = viewport.height - VIEWPORT_MARGIN - height;
+  if (below && !assist) {
+    // The launcher's order (D182): under the phrase while it fits there,
+    // above it otherwise - and only then the clamp below, like anybody's.
+    if (prefer !== "up" && under >= ceiling && under <= room) {
+      return { left, top: Math.round(under), grow: "down" };
+    }
+    if (fitsAbove) return { left, top: Math.round(anchor.top - gap), grow: "up" };
+  } else if (prefer !== "down" && fitsAbove) {
     return { left, top: Math.round(anchor.top - gap), grow: "up" };
   }
 
@@ -1188,10 +1387,8 @@ export function placement({ anchor, size, viewport, folded = 0, touch = false, l
   // the assist, "below it" has to hold without the clamps - a spot the clamps
   // would move is a spot the scroll can honestly reach instead, and a phrase
   // sunk beneath the bar is one the scroll can bring back out.
-  const below = anchor.bottom + gap;
-  const room = viewport.height - VIEWPORT_MARGIN - height;
-  if (!assist || (below >= ceiling && below <= room)) {
-    return { left, top: Math.round(Math.max(ceiling, Math.min(below, room))), grow: "down" };
+  if (!assist || (under >= ceiling && under <= room)) {
+    return { left, top: Math.round(Math.max(ceiling, Math.min(under, room))), grow: "down" };
   }
 
   // The scroll assist (D97). Below the phrase - or below its first line, when
@@ -1340,6 +1537,9 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
   /** Whether the anchor is a selection made by touch, kept with it for the
    *  same reason: every re-placement has to answer it again. */
   let onTouch = false;
+  /** Whether this bubble asked to stand under its phrase (D182) - the
+   *  launcher's on a touch selection; held for every placing of it. */
+  let onBelow = false;
   /**
    * Where the page stood when the bubble was shown - and the anchored mode's
    * whole switch: null pins the host to the viewport (`fixed`, every page's
@@ -2226,6 +2426,14 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
         if (action === "copy") {
           button.setAttribute("aria-expanded", copyRowElement !== null && !copyRowElement.hidden ? "true" : "false");
         }
+      } else if (action === "reader" || action === "library") {
+        // The launcher's two doors (D182): a picture beside the words - the
+        // page the reading view opens, the shelf the list is - so the two
+        // tell "this page" from "the library" at a glance. The words stay
+        // the meaning: an icon alone would ask a reader to learn one.
+        const words = document.createElement("span");
+        words.textContent = label(action);
+        button.append(action === "reader" ? readerIcon() : libraryIcon(), words);
       } else {
         button.textContent = action === "more" && unfolded ? lessLabel() : label(action);
       }
@@ -2331,6 +2539,7 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
       viewport,
       folded,
       touch: onTouch,
+      below: onBelow,
       line: anchorLine,
       assist,
       covered,
@@ -2427,6 +2636,7 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
       tone = "normal",
       actions = [],
       touch = false,
+      below = false,
       coarse = false,
       scale = 1,
       folded,
@@ -2440,6 +2650,7 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
       anchor = rect;
       anchorLine = line;
       onTouch = touch;
+      onBelow = below;
       page = anchored ? { x: window.scrollX, y: window.scrollY } : null;
       // A bubble reused for a new phrase starts owing the page nothing: the
       // screen as it stands is the one this phrase was picked from, and hide
