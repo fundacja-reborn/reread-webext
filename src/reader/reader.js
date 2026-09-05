@@ -3078,6 +3078,13 @@ function leaveDocView() {
   // not take it along; the highlights page shows it again on its own terms.
   if (toLibraryButton !== null) toLibraryButton.hidden = true;
   if (originalLink !== null) originalLink.hidden = true;
+  // The menu's pictures row (D145) is the document's as well, and stands
+  // outside the action rows like the bar's way back: over the list and the
+  // highlights page there is nothing to download or remove (Michał's
+  // report, 2026-09-05 - the row of the article just left stood over the
+  // list, count and all).
+  if (navPictures !== null) navPictures.hidden = true;
+  if (navPicturesHint !== null) navPicturesHint.hidden = true;
   showSegmentNav(null);
   showBookNote(null);
   docToc = [];
