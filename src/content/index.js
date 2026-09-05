@@ -35,6 +35,7 @@ import { webext } from "../lib/browser.js";
 import { CONFIG_KEY, PLATFORM_KEY, osFrom, pageMode, withDefaults } from "../lib/config.js";
 import { MODELS_KEY, asInventory, needsModelHint } from "../lib/models/inventory.js";
 import { ErrorCode, MAX_PAGE_HTML, Message, asPageRequest, fail, ok } from "../lib/protocol.js";
+import { pageHtml } from "../lib/reader/page-html.js";
 import { MIRROR_KEY } from "../lib/store/mirror.js";
 import { setLauncherHint, setLauncherScale, startLauncher, stopLauncher } from "./launcher.js";
 import { start, stop } from "./reading.js";
@@ -156,7 +157,10 @@ webext().runtime.onMessage.addListener((message, _sender, sendResponse) => {
     return false;
   }
 
-  const html = document.documentElement.outerHTML;
+  // Not the bare `outerHTML`: a page with scripting on keeps `<noscript>` as
+  // raw text, which the reader's scriptless parser would read as markup - and
+  // one fallback nested in another then swallows the article (`page-html.js`).
+  const html = pageHtml(document);
   // Answered on the spot, so `return false` rather than the usual `true`:
   // there is nothing to wait for, and claiming otherwise leaves the background
   // holding a promise nobody will settle.
