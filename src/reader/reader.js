@@ -512,22 +512,45 @@ let picturesNote = null;
 let shownPictures = [];
 
 /**
- * The addresses whose reader said no in this tab: deleted from the list, or
- * taken out with the Save button. The default keep (D124) is only ever on
- * the way in - and this tab's way in is the live page, which Back and a
- * reload render again. Without this the page would be kept again the
- * moment after it was deleted (Michał's report, 2026-08-29: Delete, then
- * Back, and the article stood on the list again). Kept in `sessionStorage`
- * so a reload of the tab remembers; a new tab is a new way in, and keeps.
- * Pressing Save by hand takes an address off the list: that is a yes.
+ * The addresses whose reader said no on this way in: deleted from the
+ * article, or from the list. The default keep (D124) is only ever on the way
+ * in - and this tab's way in is the live page, which a reload of the tab, or
+ * Back onto it from the settings walk, renders again. Without this the page
+ * would be kept again the moment after it was deleted (Michał's report,
+ * 2026-08-29: Delete, then Back, and the article stood on the list again).
+ * Kept in `sessionStorage` so a reload of the tab remembers.
+ *
+ * A no is about one way in, not about the address for good: the press that
+ * pointed the reader here is stamped (`ReaderSource.at` - the same stamp
+ * that makes a second press on the same tab reach the reader at all), and
+ * the no is stored under that stamp. A reload replays the same press and
+ * finds the no; a new press is a new way in, with the keep by default the
+ * setting promises. The first cut (#253) remembered the no for the tab's
+ * whole life, and a reader who deleted a page and then opened it again by
+ * hand was refused a save nobody had declined (Michał's report,
+ * 2026-09-05). A new tab was always a new way in, and keeps. Pressing Save
+ * by hand takes an address off the list: that is a yes.
  */
 const DECLINED_KEEPS = "reread:declined-keeps";
 
-/** @returns {Set<string>} */
+/**
+ * The stamp of the press this page stands on (`ReaderSource.at`), or 0 when
+ * it stands on no source - the list opened for its own sake, which renders
+ * no live page and keeps nothing.
+ */
+let sourceAt = 0;
+
+/** @returns {Set<string>} the addresses declined on this way in */
 function declinedKeeps() {
   try {
-    const stored = JSON.parse(sessionStorage.getItem(DECLINED_KEEPS) ?? "[]");
-    return new Set(Array.isArray(stored) ? stored.filter((url) => typeof url === "string") : []);
+    /** @type {unknown} */
+    const stored = JSON.parse(sessionStorage.getItem(DECLINED_KEEPS) ?? "null");
+    if (typeof stored !== "object" || stored === null) return new Set();
+    const { at, urls } = /** @type {Record<string, unknown>} */ (stored);
+    // Another press's declines are not this one's - and the array the first
+    // cut wrote, a tab that lived across the update, reads as nobody's.
+    if (at !== sourceAt || !Array.isArray(urls)) return new Set();
+    return new Set(urls.filter((url) => typeof url === "string"));
   } catch {
     return new Set();
   }
@@ -542,7 +565,7 @@ function setKeepDeclined(url, declined) {
   if (declined) urls.add(url);
   else urls.delete(url);
   try {
-    sessionStorage.setItem(DECLINED_KEEPS, JSON.stringify([...urls]));
+    sessionStorage.setItem(DECLINED_KEEPS, JSON.stringify({ at: sourceAt, urls: [...urls] }));
   } catch {
     // Storage that will not take it forgets the no; the keep is a default
     // the reader can undo again, not a loss.
@@ -2403,6 +2426,10 @@ async function showPage(firstLoad = false) {
   // That is not an error, it is the reading list's whole cue (D-c).
   const source = await readReaderSource();
   if (turn !== epoch) return;
+  // The press this visit stands on: the stamp the declines of the default
+  // keep are filed under (D124), so a reload finds them and a new press
+  // does not.
+  sourceAt = source?.at ?? 0;
   if (source === null) {
     const doc = asDocState(history.state);
     const quotes = asMarksState(history.state);
