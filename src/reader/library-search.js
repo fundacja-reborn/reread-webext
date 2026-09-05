@@ -271,7 +271,10 @@ async function scanDoc(doc, folded) {
   const article = await getArticle(doc.url);
   if (article === null) return hits;
   const source = new DOMParser().parseFromString(article.content, "text/html").body;
-  const root = buildArticle(source, document, { baseUrl: doc.url });
+  // With its pictures as elements (D145): the render keeps every `<img>`
+  // whether or not a picture is shown, and a picture standing as a block of
+  // its own would otherwise be a block the screen has and this count lacks.
+  const root = buildArticle(source, document, { baseUrl: doc.url, pictures: true });
   for (let block = 0; block < root.children.length && room; block += 1) {
     const element = root.children[block];
     const text =

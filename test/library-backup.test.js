@@ -260,6 +260,16 @@ describe("the copy of the reading list", () => {
     assert.equal(asCopiedBook({ ...row, segments: row.segments.slice(1) }), null);
     assert.equal(asCopiedBook({ ...row, segments: [...row.segments.slice(0, 2), { blocks: [] }] }), null);
     assert.equal(asCopiedBook({ ...row, version: 0 }), null);
+
+    // A segment's pictures (D183) ride the copy with the segment: the part
+    // that comes back names the rows it shows, or the restored pictures
+    // would stand under a text that asks for none of them.
+    const pictured = book("b2", 1);
+    const shown = pictured.segments[0];
+    assert.ok(shown);
+    pictured.segments[0] = { ...shown, pictures: [0, 2] };
+    pictured.meta.pictures = { count: 3, bytes: 48 };
+    assert.deepEqual(asCopiedBook(throughJson(bookRow(pictured))), pictured);
   });
 
   it("copies where the reader stopped, and refuses half a place", () => {
@@ -410,14 +420,16 @@ describe("the copy of the reading list", () => {
     assert.deepEqual(Object.keys(torn.area), []);
 
     // An index that will not read is no index: built again from the rows,
-    // pictures claimed where their run is whole, swept where it has a hole
-    // or belongs to nobody here.
+    // pictures claimed where their run is whole - a book's as an article's
+    // (D183) - swept where it has a hole or belongs to nobody here.
     const broken = standIn({
       area: {
         [INDEX_KEY]: { version: 9 },
         [articleKey(kept.url)]: articleRow(kept),
         [pictureKey(kept.url, 0)]: pictureRow(picture(kept.url, 0, 10)),
         [pictureKey(kept.url, 1)]: pictureRow(picture(kept.url, 1, 20)),
+        [bookKey("b1")]: bookRow(shelf),
+        [pictureKey("b1", 0)]: pictureRow(picture("b1", 0, 5)),
         [articleKey("https://a.example/holed")]: articleRow(article("https://a.example/holed")),
         [pictureKey("https://a.example/holed", 1)]: pictureRow(picture("https://a.example/holed", 1)),
         [pictureKey("https://a.example/nobody", 0)]: pictureRow(picture("https://a.example/nobody", 0)),
@@ -429,13 +441,15 @@ describe("the copy of the reading list", () => {
         "https://a.example/holed": bytes(articleRow(article("https://a.example/holed"))),
         [kept.url]: bytes(articleRow(kept)),
       },
-      books: {},
-      pictures: { [kept.url]: { count: 2, bytes: 30 } },
+      books: { b1: bytes(bookRow(shelf)) },
+      pictures: { [kept.url]: { count: 2, bytes: 30 }, b1: { count: 1, bytes: 5 } },
     });
     assert.deepEqual(Object.keys(broken.area).sort(), [
       articleKey("https://a.example/holed"),
       articleKey(kept.url),
+      bookKey("b1"),
       INDEX_KEY,
+      pictureKey("b1", 0),
       pictureKey(kept.url, 0),
       pictureKey(kept.url, 1),
     ]);
@@ -529,7 +543,11 @@ describe("the copy of the reading list", () => {
     };
     const stand = standIn({
       snapshot: library,
-      pictures: { [kept.url]: [picture(kept.url, 0, 10), picture(kept.url, 1, 20)] },
+      // The article's two pictures, and the book's one (D183).
+      pictures: {
+        [kept.url]: [picture(kept.url, 0, 10), picture(kept.url, 1, 20)],
+        b1: [picture("b1", 0, 5)],
+      },
       area: {
         vocabBackup: { version: 1 },
         // What a copy switched off and on again might have kept: a document
@@ -549,6 +567,7 @@ describe("the copy of the reading list", () => {
       articleKey(kept.url),
       bookKey("b1"),
       INDEX_KEY,
+      pictureKey("b1", 0),
       pictureKey(kept.url, 0),
       pictureKey(kept.url, 1),
       positionKey(kept.url),
@@ -556,13 +575,14 @@ describe("the copy of the reading list", () => {
     ]);
     assert.deepEqual(stand.area[INDEX_KEY], {
       ...indexFor(library),
-      pictures: { [kept.url]: { count: 2, bytes: 30 } },
+      pictures: { [kept.url]: { count: 2, bytes: 30 }, b1: { count: 1, bytes: 5 } },
     });
     assert.deepEqual(stand.area[bookKey("b1")], bookRow(shelf));
     assert.deepEqual(stand.area[pictureKey(kept.url, 1)], pictureRow(picture(kept.url, 1, 20)));
+    assert.deepEqual(stand.area[pictureKey("b1", 0)], pictureRow(picture("b1", 0, 5)));
     // The stale rows go first, the index claims every document next, then
     // one document per write - never the whole reading list in one - and
-    // each article's pictures after the text, claimed before written.
+    // each document's pictures after the text, claimed before written.
     assert.deepEqual(stand.asked.slice(2), [
       `remove ${articleKey(deleted.url)},${positionKey(deleted.url)},${pictureKey(deleted.url, 0)}`,
       `write ${INDEX_KEY}`,
@@ -573,6 +593,9 @@ describe("the copy of the reading list", () => {
       `write ${INDEX_KEY}`,
       `write ${pictureKey(kept.url, 0)}`,
       `write ${pictureKey(kept.url, 1)}`,
+      "pictures b1",
+      `write ${INDEX_KEY}`,
+      `write ${pictureKey("b1", 0)}`,
     ]);
   });
 
@@ -654,7 +677,7 @@ describe("the copy of the reading list", () => {
     assert.deepEqual(Object.keys(holding.area).sort(), [INDEX_KEY, positionKey("b")]);
   });
 
-  it("copies a picture beside its article, claimed by count first, and only beside an article the copy holds", async () => {
+  it("copies a picture beside its document, claimed by count first, and only beside a document the copy holds", async () => {
     const stranger = standIn({ enabled: true, area: { [INDEX_KEY]: indexFor({ articles: [], books: [], positions: [] }) } });
     assert.equal(await copyPicture(picture("u", 0), stranger.deps), false);
     assert.deepEqual(Object.keys(stranger.area), [INDEX_KEY]);
@@ -674,6 +697,18 @@ describe("the copy of the reading list", () => {
       docs: 1,
       bytes: bytes(articleRow(article("u"))) + 30,
     });
+
+    // A book's pictures (D183) stand under its id the way an article's
+    // stand under its address - and only once the book's row is claimed,
+    // which is why the import sends them after the row.
+    const shelf = book("b1", 1);
+    const shelved = { articles: [], books: [shelf], positions: [] };
+    const late = standIn({ enabled: true, area: { [INDEX_KEY]: indexFor({ articles: [], books: [], positions: [] }) } });
+    assert.equal(await copyPicture(picture("b1", 0, 10), late.deps), false);
+    const claimed = standIn({ enabled: true, area: { [INDEX_KEY]: indexFor(shelved), [bookKey("b1")]: bookRow(shelf) } });
+    assert.equal(await copyPicture(picture("b1", 0, 10), claimed.deps), true);
+    assert.deepEqual(claimed.area[INDEX_KEY], { ...indexFor(shelved), pictures: { b1: { count: 1, bytes: 10 } } });
+    assert.deepEqual(claimed.area[pictureKey("b1", 0)], pictureRow(picture("b1", 0, 10)));
   });
 
   it("drops an article's pictures on request and on a save that writes over it - rows first, claim after", async () => {
@@ -831,7 +866,8 @@ describe("the copy of the reading list", () => {
     ]);
     // The question costs the two key lists and the index; the library is
     // read whole only because there was something to copy, and the held
-    // article's pictures are never asked for.
+    // article's pictures are never asked for. The book's are (D183), and
+    // it has none to write.
     assert.deepEqual(stand.asked, [
       "enabled",
       `read ${INDEX_KEY}`,
@@ -845,6 +881,7 @@ describe("the copy of the reading list", () => {
       `pictures ${missing.url}`,
       `write ${INDEX_KEY}`,
       `write ${pictureKey(missing.url, 0)}`,
+      "pictures b1",
     ]);
   });
 

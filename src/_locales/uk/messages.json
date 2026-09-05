@@ -246,6 +246,9 @@
   "reader_pictures_hint": {
     "message": "Завантажуються один раз із серверів статті, без cookie, і зберігаються разом зі статтею на цьому пристрої. Після завантаження вони відображаються в статті."
   },
+  "reader_pictures_book_hint": {
+    "message": "Зображення походять із файлу книжки і були збережені разом із нею під час додавання. Цей рядок видаляє лише зображення - книжка залишається, а зображення повернуться лише після повторного додавання файлу."
+  },
   "reader_pictures_progress": {
     "message": "Зображення $DONE$ з $OF$ - $SIZE$",
     "placeholders": {
@@ -871,6 +874,14 @@
     "message": "Додавання книжки - частина $PART$",
     "placeholders": {
       "part": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_book_importing_pictures": {
+    "message": "Додавання книжки - частина $PART$, зображення $PICTURE$ ($SIZE$)",
+    "placeholders": {
+      "part": { "content": "$1", "example": "3" },
+      "picture": { "content": "$2", "example": "12" },
+      "size": { "content": "$3", "example": "4,2 МБ" }
     }
   },
   "reader_book_added": {

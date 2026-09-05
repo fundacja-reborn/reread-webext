@@ -15,7 +15,7 @@
 
 import { NOTE_TEXT_LIMIT } from "../book/notes.js";
 import { SOURCE_ATTRIBUTE } from "./pictures.js";
-import { allowedAttributes, decide, safeHref, safeSrc } from "./sanitize.js";
+import { allowedAttributes, archiveSrc, decide, safeHref, safeSrc } from "./sanitize.js";
 
 const ELEMENT_NODE = 1;
 const TEXT_NODE = 3;
@@ -34,8 +34,11 @@ const URL_ATTRIBUTES = new Set(["href", "cite"]);
 /**
  * What the rebuild does with a picture (D145), decided by the caller:
  *
- *   - nothing passed - the picture goes, element and all. The callers that
- *     never show one: a book's chapters, the search over stored texts;
+ *   - nothing passed - the picture goes, element and all: a shape for a
+ *     caller that reads words and numbers no blocks. Every caller that
+ *     renders or numbers blocks passes one of the two below (a book's
+ *     import and the search over stored texts included), so that their
+ *     elements agree with the screen's;
  *   - `true` - the picture stands as `<img>` with its address kept in
  *     `data-src` and nothing in `src`: the shape of an article as it is
  *     stored and as it is read before any picture is saved, invisible under
@@ -51,9 +54,21 @@ const URL_ATTRIBUTES = new Set(["href", "cite"]);
  */
 
 /**
+ * What the rebuild is told: the address the page came from, which every
+ * link and every picture's address is made absolute against; what to do
+ * with pictures; and, for a book (D183), the directory inside its archive
+ * that a picture's address is resolved against instead - the chapter's at
+ * import, the root (`""`) at render, where the stored address is already
+ * whole. With `archive` set, no address is ever a URL: a book's pictures
+ * are entries of the file it came from, and `archiveSrc` decides them.
+ *
+ * @typedef {{ baseUrl: string, pictures?: Pictures, archive?: string }} RebuildOptions
+ */
+
+/**
  * @param {Element} source the article's root, as parsed
  * @param {Document} target the document that will own the result
- * @param {{ baseUrl: string, pictures?: Pictures }} options
+ * @param {RebuildOptions} options
  * @returns {Element} a `<div>` holding the rebuilt article
  */
 export function buildArticle(source, target, options) {
@@ -66,7 +81,7 @@ export function buildArticle(source, target, options) {
  * @param {Element} source
  * @param {Element} into
  * @param {Document} target
- * @param {{ baseUrl: string, pictures?: Pictures }} options
+ * @param {RebuildOptions} options
  */
 function appendChildren(source, into, target, options) {
   for (const child of Array.from(source.childNodes)) {
@@ -78,7 +93,7 @@ function appendChildren(source, into, target, options) {
  * @param {Node} node
  * @param {Element} into
  * @param {Document} target
- * @param {{ baseUrl: string, pictures?: Pictures }} options
+ * @param {RebuildOptions} options
  */
 function appendNode(node, into, target, options) {
   if (node.nodeType === TEXT_NODE) {
@@ -117,20 +132,22 @@ function appendNode(node, into, target, options) {
  * Readability leaves it after undoing lazy loading), the second is how the
  * stored article carries it back here. A picture with no address worth
  * asking for is no picture - the same decision in every shape, so the
- * shapes that show keep the same elements.
+ * shapes that show keep the same elements. Inside a book the address is a
+ * path in its archive rather than a URL (`RebuildOptions`).
  *
  * @param {Element} source
  * @param {Element} into
  * @param {Document} target
- * @param {{ baseUrl: string, pictures?: Pictures }} options
+ * @param {RebuildOptions} options
  */
 function appendPicture(source, into, target, options) {
   const pictures = options.pictures;
   if (pictures === undefined) return;
-  const src = safeSrc(
-    source.getAttribute("src") ?? source.getAttribute(SOURCE_ATTRIBUTE),
-    options.baseUrl,
-  );
+  const written = source.getAttribute("src") ?? source.getAttribute(SOURCE_ATTRIBUTE);
+  const src =
+    options.archive === undefined
+      ? safeSrc(written, options.baseUrl)
+      : archiveSrc(written, options.archive);
   if (src === null) return;
 
   const rebuilt = target.createElement("img");

@@ -3,7 +3,9 @@
  * decoding and drawing that follow the rules in `lib/reader/pictures.js`,
  * where every number and every decision lives and is tested. This file is
  * the part that needs a browser - `fetch`, an `<img>` to decode with, a
- * canvas to draw on - and it makes no decision of its own.
+ * canvas to draw on - and it makes no decision of its own. The decoding
+ * and drawing serve a book's pictures too (`keptPicture`, D183): what
+ * differs there is only where the bytes come from.
  *
  * The shape of the work is one picture at a time, written the moment it is
  * ready: an article of seventy pictures never has seventy in memory, and
@@ -118,6 +120,28 @@ async function fetchPicture(url, index, src, signal) {
     if (Number.isFinite(declared) && declared > MAX_DOWNLOAD_BYTES) return null;
     const bytes = await readCapped(response.body, MAX_DOWNLOAD_BYTES);
     if (bytes === null) return null;
+    return await keptPicture(url, index, src, bytes);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * The bytes of a picture - a download's, or an entry's of a book's archive
+ * (D183) - decided on and made into a row, or nothing: not a picture by
+ * its first bytes, one too small, one that will not decode. The rules are
+ * `lib/reader/pictures.js`'s, the same for every source; this is the part
+ * that needs a decoder and a canvas. Never throws: nothing here is an
+ * error anybody has to see, the picture is simply not there.
+ *
+ * @param {string} url the document the row belongs to - an article's address, a book's id
+ * @param {number} index the row's place among the document's pictures
+ * @param {string} src the address the document's text asks for it by
+ * @param {Uint8Array<ArrayBuffer>} bytes the whole file, within `MAX_DOWNLOAD_BYTES`
+ * @returns {Promise<PictureRow | null>}
+ */
+export async function keptPicture(url, index, src, bytes) {
+  try {
     const type = sniffPictureType(bytes.subarray(0, SNIFF_BYTES));
     if (type === null) return null;
 

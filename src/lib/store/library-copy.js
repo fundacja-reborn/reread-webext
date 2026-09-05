@@ -82,9 +82,10 @@ function segmentRange(bookId) {
 }
 
 /**
- * One article's pictures as the database holds them, in order - read here
- * rather than through `articles.js`, which imports this module and must
- * not be needed by it.
+ * One document's pictures as the database holds them, in order - an
+ * article's under its address, a book's under its id - read here rather
+ * than through `articles.js` or `books.js`, which import this module and
+ * must not be needed by it.
  *
  * @param {string} url
  * @returns {Promise<PictureRow[]>}
@@ -334,7 +335,9 @@ export async function copyArticle(article, replaced) {
 /**
  * The book just written, read back whole for the copy: the row and every
  * segment, which the import wrote before the row - so a book with a row has
- * all of its text, or `segmentsOf` refuses it.
+ * all of its text, or `segmentsOf` refuses it. Its pictures right behind
+ * (D183): the import wrote them before the row too, and the copy takes a
+ * picture only beside a document it holds, so they go one by one, after.
  *
  * @param {string} id
  * @returns {Promise<void>}
@@ -351,7 +354,10 @@ export async function copyBook(id) {
     const meta = asBookMeta(row);
     if (meta === null) return;
     const segments = segmentsOf(meta, rows);
-    if (segments !== null) await copyBookWith({ meta, segments }, deps);
+    if (segments === null) return;
+    await copyBookWith({ meta, segments }, deps);
+    if (meta.pictures === undefined) return;
+    for (const picture of await picturesOf(id)) await copyPictureWith(picture, deps);
   } catch {
     // As above.
   }
@@ -371,7 +377,8 @@ export async function copyPosition(position) {
 }
 
 /**
- * One picture into the copy, as it arrives (D145).
+ * One picture into the copy, as it arrives (D145) - an article's; a book's
+ * go through `copyBook`, behind the row that claims them.
  *
  * @param {PictureRow} picture
  * @returns {Promise<void>}
@@ -386,9 +393,9 @@ export async function copyPicture(picture) {
 }
 
 /**
- * An article's pictures out of the copy - removed, or their save cut short.
+ * A document's pictures out of the copy - removed, or their save cut short.
  *
- * @param {string} url
+ * @param {string} url an article's address or a book's id
  * @returns {Promise<void>}
  */
 export async function dropPictureCopies(url) {
@@ -401,11 +408,12 @@ export async function dropPictureCopies(url) {
 }
 
 /**
- * One article's pictures back from the copy, for the database to take when
- * it has none and the light row says there were some (`getPictures`).
- * Nothing on failure: the article opens without them, as it would have.
+ * One document's pictures back from the copy, for the database to take when
+ * it has none and the light row says there were some (`getPictures`,
+ * `getBookPictures`). Nothing on failure: the document opens without them,
+ * as it would have.
  *
- * @param {string} url
+ * @param {string} url an article's address or a book's id
  * @param {number} count how many the light row promises - a ceiling for the reads
  * @returns {Promise<PictureRow[]>}
  */

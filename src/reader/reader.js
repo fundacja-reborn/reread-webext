@@ -115,12 +115,15 @@ import { savePictures } from "./pictures.js";
 import { entryReader, listEntries, packArchive } from "./zip.js";
 
 /** @typedef {import("../lib/store/saved-article.js").SavedMeta} SavedMeta */
+/** @typedef {import("../lib/store/book.js").BookMeta} BookMeta */
 /** @typedef {import("../lib/store/articles-archive.js").PictureRef} PictureRef */
 import { packableBlocks } from "../lib/book/blocks.js";
 import { cappedToc, headingEntries, renderedEntries } from "../lib/book/toc.js";
 import {
   deleteBook,
+  deleteBookPictures,
   getBook,
+  getBookPictures,
   getBookSegment,
   listBooks,
   setBookReadAt,
@@ -916,8 +919,8 @@ function setBase(doc, url) {
  *   `url` is the document's name in the database (a book's id included);
  *   `link` is the address worth offering as "Open the original", which a
  *   book does not have; `pictures` is how the saved pictures are shown
- *   (D145) - absent, an article keeps its pictures' addresses and shows
- *   none, and a book has none to keep.
+ *   (D145, and a book's, D183) - absent, the text keeps its pictures'
+ *   addresses and shows none.
  */
 function renderArticle(piece) {
   if (article === null || contentElement === null || titleElement === null) return;
@@ -965,7 +968,10 @@ function renderArticle(piece) {
 
   const rebuilt = buildArticle(piece.source, document, {
     baseUrl: piece.url,
-    pictures: piece.origin === "book" ? undefined : (piece.pictures ?? true),
+    pictures: piece.pictures ?? true,
+    // A book's pictures are addressed inside its archive (D183), and the
+    // stored address is whole already - resolved against the root.
+    ...(piece.origin === "book" ? { archive: "" } : {}),
   });
 
   titleElement.textContent = piece.title;
@@ -2790,7 +2796,14 @@ async function openBook(id, wanted, target) {
     if (shown === null) await showLibrary();
     return;
   }
+  // This part's pictures and no other's (D183): a part without any costs
+  // nothing, and one that cannot read its pictures opens without them.
+  const pictures = await getBookPictures(id, segment.pictures ?? [], book.pictures ?? null).catch(
+    () => [],
+  );
+  if (turn !== epoch) return;
 
+  const shownSet = shownPictureSet(pictures);
   renderArticle({
     origin: "book",
     url: id,
@@ -2803,7 +2816,9 @@ async function openBook(id, wanted, target) {
     // Our own rebuilt markup, stored at import - and still not trusted back:
     // parsed inert and rebuilt through the allowed list again.
     source: new DOMParser().parseFromString(segment.blocks.join(""), "text/html").body,
+    pictures: shownSet.resolve,
   });
+  shownPictures = shownSet.addresses;
   showSegmentNav({ index, count: book.segmentCount });
   showBookNote(book);
   docToc = book.toc ?? [];
@@ -3497,6 +3512,12 @@ function detailLine(entry) {
     entry.readAt === null && entry.percentRead !== null && entry.percentRead > 0
       ? t("reader_percent_read", entry.percentRead.toLocaleString())
       : "";
+  // The pictures kept with the document and what they take (D145, D183) -
+  // the one place the space a document costs is said before it is opened.
+  const pictures =
+    entry.pictures === undefined
+      ? ""
+      : plural(entry.pictures.count, "library_pictures", [megabytes(entry.pictures.bytes)]);
   if (entry.kind === "book") {
     const progress =
       entry.progress === null
@@ -3505,17 +3526,11 @@ function detailLine(entry) {
             entry.progress.at.toLocaleString(),
             entry.progress.of.toLocaleString(),
           ]);
-    detail.textContent = [entry.hostname, t("reader_book_label"), progress, percent]
+    detail.textContent = [entry.hostname, t("reader_book_label"), progress, pictures, percent]
       .filter((part) => part.length > 0)
       .join(" - ");
   } else {
     const when = entry.savedAt > 0 ? new Date(entry.savedAt).toLocaleDateString() : "";
-    // The pictures kept with the article and what they take (D145) - the
-    // one place the space an article costs is said before it is opened.
-    const pictures =
-      entry.pictures === undefined
-        ? ""
-        : plural(entry.pictures.count, "library_pictures", [megabytes(entry.pictures.bytes)]);
     detail.textContent = [entry.hostname, when, pictures, percent]
       .filter((part) => part.length > 0)
       .join(" - ");
@@ -4692,20 +4707,21 @@ async function refreshActions() {
     button.setAttribute("aria-pressed", String(read));
   }
 
-  refreshPicturesRow(target, book ? null : /** @type {SavedMeta | null} */ (row));
+  refreshPicturesRow(target, row);
 }
 
 /**
- * The pictures row of the menu (D145), over the article on screen. Three
+ * The pictures row of the menu (D145), over the document on screen. Three
  * states, told apart by the database's light row and the save under way:
  * the offer, with how many pictures the text asks for; the save, with its
  * progress and the stop; the removal, with what the pictures take. Nothing
- * over a book, a page not yet saved, or an article whose text asks for no
- * picture - the articles saved before pictures among them, since their
- * text kept no address to ask for.
+ * over a page not yet saved, or an article whose text asks for no picture -
+ * the articles saved before pictures among them, since their text kept no
+ * address to ask for. Over a book (D183) only the third state: its
+ * pictures came with the file, and the file is not here to ask again.
  *
  * @param {NonNullable<typeof shown>} target
- * @param {SavedMeta | null} row
+ * @param {SavedMeta | BookMeta | null} row
  */
 function refreshPicturesRow(target, row) {
   if (navPictures === null || navPicturesLabel === null || navPicturesHint === null) return;
@@ -4717,8 +4733,9 @@ function refreshPicturesRow(target, row) {
     navPicturesHint.hidden = false;
     return;
   }
+  const book = target.origin === "book";
   const root = contentRoot();
-  const asked = row === null || root === null ? 0 : pictureSources(root).length;
+  const asked = book || row === null || root === null ? 0 : pictureSources(root).length;
   const kept = row?.pictures;
   if (row === null || (kept === undefined && asked === 0)) {
     navPictures.hidden = true;
@@ -4730,7 +4747,11 @@ function refreshPicturesRow(target, row) {
       ? t("reader_pictures_remove", megabytes(kept.bytes))
       : t("reader_pictures_save", asked.toLocaleString());
   navPicturesHint.textContent =
-    picturesNote !== null && picturesNote.url === target.url ? picturesNote.text : t("reader_pictures_hint");
+    picturesNote !== null && picturesNote.url === target.url
+      ? picturesNote.text
+      : book
+        ? t("reader_pictures_book_hint")
+        : t("reader_pictures_hint");
   navPictures.hidden = false;
   navPicturesHint.hidden = false;
 }
@@ -4738,14 +4759,27 @@ function refreshPicturesRow(target, row) {
 /**
  * The pictures row pressed: the stop of a save under way, the removal of
  * pictures kept, or the save of the ones the text asks for - one press,
- * the same row, what it says decided by `refreshPicturesRow`. The article
+ * the same row, what it says decided by `refreshPicturesRow`. The document
  * is opened again from the database when the press has done its work, so
  * what is on screen is what is stored, pictures included or not; the
- * reading position rides through the reopening like through any other.
+ * reading position rides through the reopening like through any other -
+ * a book at the part that was on screen.
  */
 async function onPicturesPress() {
   const target = shown;
-  if (target === null || target.origin === "book") return;
+  if (target === null) return;
+  if (target.origin === "book") {
+    const book = await getBook(target.url).catch(() => null);
+    if (shown !== target || book === null || book.pictures === undefined) return;
+    try {
+      await deleteBookPictures(target.url);
+      picturesNote = { url: target.url, text: t("reader_pictures_removed") };
+    } catch {
+      picturesNote = { url: target.url, text: t("reader_pictures_failed") };
+    }
+    if (shown === target) await openBook(target.url, target.segmentIndex);
+    return;
+  }
   if (picturesTask !== null) {
     if (picturesTask.url === target.url) picturesTask.controller.abort();
     return;
@@ -5772,13 +5806,31 @@ async function runBookImport(file) {
   if (importButton instanceof HTMLButtonElement) importButton.disabled = true;
   bookImportStatus(t("reader_book_importing", "1"));
   try {
-    // Progress once per segment written, not per block - every repaint is a
-    // flash on e-ink, and the segment is the honest unit of "saved so far".
-    const outcome = await importEpub(file, (written) =>
-      bookImportStatus(t("reader_book_importing", written.toLocaleString())),
-    );
+    // Progress once per segment written and once per picture kept, not per
+    // block - every repaint is a flash on e-ink, and those two are the
+    // honest units of "saved so far".
+    const outcome = await importEpub(file, ({ segments, pictures, bytes }) => {
+      const part = Math.max(1, segments).toLocaleString();
+      bookImportStatus(
+        pictures === 0
+          ? t("reader_book_importing", part)
+          : t("reader_book_importing_pictures", [part, pictures.toLocaleString(), megabytes(bytes)]),
+      );
+    });
     if (outcome.ok) {
-      bookImportStatus(t("reader_book_added", outcome.book.title));
+      // With its pictures, where the file held any (D183): the one place
+      // the space the book costs is said before its row is opened.
+      const kept = outcome.book.pictures;
+      bookImportStatus(
+        [
+          t("reader_book_added", outcome.book.title),
+          kept === undefined
+            ? ""
+            : plural(kept.count, "reader_import_pictures", [megabytes(kept.bytes)]),
+        ]
+          .filter((sentence) => sentence.length > 0)
+          .join(" "),
+      );
       await refreshLibrary();
     } else {
       bookImportStatus(

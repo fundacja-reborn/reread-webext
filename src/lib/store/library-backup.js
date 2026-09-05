@@ -23,7 +23,8 @@
  *   - `libraryCopy:article:<url>` - the article whole, as `getArticle` gives it
  *   - `libraryCopy:book:<id>` - the book's row and every segment of its text
  *   - `libraryCopy:position:<docId>` - where the reader stopped in it
- *   - `libraryCopy:picture:<url>:<index>` - one picture of an article, as base64
+ *   - `libraryCopy:picture:<url>:<index>` - one picture of an article or a book
+ *     (under the book's id, D183), as base64
  *
  * because one value would mean rewriting tens of megabytes after every saved
  * reading position, and because a row that will not read should cost only its
@@ -43,13 +44,13 @@
  * know, which nothing would ever clear. A position carries no claim of its
  * own: a place belongs to the document it is in, and is written only for
  * one the index holds. A picture is claimed by its count: the index says how
- * many an article has, and the keys follow from that.
+ * many a document has, and the keys follow from that.
  *
  * Text comes back whole: the moment the library is found empty, every
  * article and book the index names is read and written back in one
- * transaction. Pictures come back one article at a time, when that article
- * is opened (`restorePictures`) - never all at once, since all at once is
- * the whole-area read by another name.
+ * transaction. Pictures come back one document at a time, when that
+ * article or book is opened (`restorePictures`) - never all at once, since
+ * all at once is the whole-area read by another name.
  *
  * The rules: additions only while the copy is on, removals always (switching
  * off clears the copy, and a stale row must never come back with the switch);
@@ -83,7 +84,7 @@ import { asSavedMeta } from "./saved-article.js";
  * @typedef {import("../reader/position.js").ReadingPosition} ReadingPosition
  * @typedef {import("../reader/pictures.js").PictureRow} PictureRow
  * @typedef {import("../reader/pictures.js").PicturesSummary} PicturesSummary
- * @typedef {{ blocks: string[], charCount: number }} Segment
+ * @typedef {import("./book.js").StoredSegment} Segment
  */
 
 /**
@@ -96,7 +97,7 @@ import { asSavedMeta } from "./saved-article.js";
 /**
  * What the copy holds, by the documents' own ids - an article's address, a
  * book's id - each with the bytes its row took when it was written, and by
- * article the account of its pictures: how many rows stand under it and
+ * document the account of its pictures: how many rows stand under it and
  * what they take. The settings page's line is a sum over this, never a
  * read of a row.
  *
@@ -126,7 +127,7 @@ import { asSavedMeta } from "./saved-article.js";
 
 /**
  * The library as the copy is built from it, whole - its text. The pictures
- * are asked for one article at a time (`LibraryCopyDeps.pictures`).
+ * are asked for one document at a time (`LibraryCopyDeps.pictures`).
  *
  * @typedef {{ articles: SavedArticle[], books: CopiedBook[], positions: ReadingPosition[] }} LibrarySnapshot
  */
@@ -140,7 +141,8 @@ import { asSavedMeta } from "./saved-article.js";
  * @property {(library: CopiedLibrary) => Promise<number>} putRows the documents written back - into an
  *   empty library only, checked again where the write is atomic; answers how many were
  * @property {() => Promise<LibrarySnapshot>} snapshot the whole library, for a build
- * @property {(url: string) => Promise<PictureRow[]>} pictures one article's pictures, for a build
+ * @property {(docId: string) => Promise<PictureRow[]>} pictures one document's pictures - an
+ *   article's by its address, a book's by its id - for a build
  * @property {() => Promise<Record<string, unknown>>} readAll everything in the storage area - asked
  *   by `migrateIndex` alone, and by it once
  * @property {(key: string) => Promise<unknown>} read whatever stands under one key
@@ -432,10 +434,10 @@ export function documentKeys(index) {
 }
 
 /**
- * The keys of one article's pictures, from the count the index claims.
+ * The keys of one document's pictures, from the count the index claims.
  *
  * @param {CopyIndex} index
- * @param {string} url
+ * @param {string} url an article's address or a book's id
  * @returns {string[]}
  */
 export function pictureKeys(index, url) {
@@ -582,11 +584,11 @@ export function indexOf(library, rows) {
 }
 
 /**
- * The account an article's picture rows add up to, as the index claims it -
+ * The account a document's picture rows add up to, as the index claims it -
  * only when they are all there, first to last: a run with a hole is not
  * what the count says it is, and is swept rather than claimed.
  *
- * @param {PictureRow[]} rows one article's, in index order
+ * @param {PictureRow[]} rows one document's, in index order
  * @returns {PicturesSummary | null}
  */
 function claimedPictures(rows) {
@@ -617,9 +619,9 @@ export async function migrateIndex(deps) {
   const index = emptyIndex();
   for (const article of library.articles) index.articles[article.url] = bytesOf(all[articleKey(article.url)]);
   for (const book of library.books) index.books[book.meta.id] = bytesOf(all[bookKey(book.meta.id)]);
-  for (const url of Object.keys(index.articles)) {
-    const summary = claimedPictures(library.pictures.filter((picture) => picture.url === url));
-    if (summary !== null) index.pictures[url] = summary;
+  for (const docId of [...Object.keys(index.articles), ...Object.keys(index.books)]) {
+    const summary = claimedPictures(library.pictures.filter((picture) => picture.url === docId));
+    if (summary !== null) index.pictures[docId] = summary;
   }
   const claimed = new Set(indexedKeys(index));
   await deps.remove(library.keys.filter((key) => !claimed.has(key)));
@@ -685,13 +687,13 @@ export async function restoreLibrary(deps) {
 }
 
 /**
- * One article's pictures back from the copy, one key at a time - never all
- * of an article's in one read, since one read of seventy pictures is the
+ * One document's pictures back from the copy, one key at a time - never all
+ * of a document's in one read, since one read of seventy pictures is the
  * message the index exists to avoid. A key the index claims and no row
  * answers (a save that died between the two writes) is simply not among
  * them, and so is a row that will not decode.
  *
- * @param {string} url
+ * @param {string} url an article's address or a book's id
  * @param {StorageDeps} deps
  * @returns {Promise<PictureRow[]>}
  */
@@ -711,7 +713,7 @@ export async function restorePictures(url, deps) {
  * A set of documents into the copy under an index that claims them: the
  * index first, with every one of them, then every document written, one
  * row at a time so no single write carries the whole reading list, and
- * each article's pictures after its text, claimed by the article before
+ * each document's pictures after its text, claimed by the document before
  * they are written. The whole library on a build, the missing part on a
  * completion.
  *
@@ -724,13 +726,14 @@ async function writeDocuments(library, index, deps) {
   const rows = rowsOf(library);
   await deps.write({ [INDEX_KEY]: index });
   for (const [key, row] of rows) await deps.write({ [key]: row });
-  for (const article of library.articles) {
-    const pictures = await deps.pictures(article.url);
+  const docIds = [...library.articles.map((article) => article.url), ...library.books.map((book) => book.meta.id)];
+  for (const docId of docIds) {
+    const pictures = await deps.pictures(docId);
     const summary = claimedPictures(pictures);
     if (summary === null) continue;
-    index.pictures[article.url] = summary;
+    index.pictures[docId] = summary;
     await deps.write({ [INDEX_KEY]: index });
-    for (const picture of pictures) await deps.write({ [pictureKey(article.url, picture.index)]: pictureRow(picture) });
+    for (const picture of pictures) await deps.write({ [pictureKey(docId, picture.index)]: pictureRow(picture) });
   }
 }
 
@@ -861,10 +864,13 @@ export async function copyPosition(position, deps) {
 }
 
 /**
- * One picture into the copy, beside its article and only beside one the
+ * One picture into the copy, beside its document and only beside one the
  * copy holds - claimed by count first, written second, like a document.
- * The pictures of an article arrive in order, so the count claimed is the
- * one past this picture's place.
+ * The pictures of a document arrive in order, so the count claimed is the
+ * one past this picture's place. An article's as they are downloaded; a
+ * book's after its row, which is written last of the import and claimed
+ * only then (D183) - so they wait, and `library-copy.js` sends them right
+ * behind it.
  *
  * @param {PictureRow} picture
  * @param {LibraryCopyDeps} deps
@@ -873,7 +879,7 @@ export async function copyPosition(position, deps) {
 export async function copyPicture(picture, deps) {
   if (!(await deps.enabled())) return false;
   const index = await readIndex(deps);
-  if (index === null || !Object.hasOwn(index.articles, picture.url)) return false;
+  if (index === null || !indexHolds(index, picture.url)) return false;
   const before = index.pictures[picture.url] ?? { count: 0, bytes: 0 };
   index.pictures[picture.url] = {
     count: Math.max(before.count, picture.index + 1),
@@ -885,11 +891,11 @@ export async function copyPicture(picture, deps) {
 }
 
 /**
- * An article's pictures out of the copy - always, switch or no switch: the
- * rows first, the claim after. An article the index holds no pictures of
+ * A document's pictures out of the copy - always, switch or no switch: the
+ * rows first, the claim after. A document the index holds no pictures of
  * costs one read.
  *
- * @param {string} url
+ * @param {string} url an article's address or a book's id
  * @param {LibraryCopyDeps} deps
  * @returns {Promise<void>}
  */
