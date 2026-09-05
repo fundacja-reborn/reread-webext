@@ -88,6 +88,23 @@ import { loadFflate } from "./zip.js";
  */
 
 /**
+ * The one failure sentence the reader gets, with its cause left where
+ * somebody looking for it will find it: the reader page's console. The
+ * sentence covers everything from "not a ZIP" to a database that would not
+ * take a row, and a cause swallowed whole is a report nobody can act on -
+ * the first import of a book with pictures failed with the sentence alone
+ * (2026-09-05), and the file turned out to be the question.
+ *
+ * @param {string} what
+ * @param {unknown} [error]
+ * @returns {ImportOutcome}
+ */
+function unreadable(what, error) {
+  console.warn(`re/read: this file cannot be imported as an EPUB - ${what}`, ...(error === undefined ? [] : [error]));
+  return { ok: false, reason: "unreadable" };
+}
+
+/**
  * Where an import stands: how many parts are written, how many pictures
  * are kept and what they take (D183).
  *
@@ -202,8 +219,8 @@ export async function importEpub(file, onProgress) {
   try {
     bytes = new Uint8Array(await file.arrayBuffer());
     ({ unzipSync } = await loadFflate());
-  } catch {
-    return { ok: false, reason: "unreadable" };
+  } catch (error) {
+    return unreadable("the file could not be read, or the ZIP reader could not load", error);
   }
 
   /**
@@ -227,9 +244,9 @@ export async function importEpub(file, onProgress) {
         return false;
       },
     });
-  } catch {
+  } catch (error) {
     // Not a ZIP at all - a renamed PDF, a truncated download.
-    return { ok: false, reason: "unreadable" };
+    return unreadable("not a ZIP archive", error);
   }
   if (hasEncryption(names)) return { ok: false, reason: "drm" };
 
@@ -240,10 +257,14 @@ export async function importEpub(file, onProgress) {
     const opfPath = containerDoc === null ? null : containerOpfPath(containerDoc.documentElement);
     const opfBytes = opfPath === null ? null : entry(opfPath);
     const opfDoc = opfBytes === null ? null : parseXml(decodeXml(opfBytes));
-    if (opfPath === null || opfDoc === null) return { ok: false, reason: "unreadable" };
+    // The usual shape of a "book" that is not one: a folder zipped with
+    // its own name in front of every entry, so nothing stands at the root.
+    if (containerDoc === null) return unreadable("META-INF/container.xml is missing at the root, or will not parse");
+    if (opfPath === null) return unreadable("META-INF/container.xml names no package document");
+    if (opfDoc === null) return unreadable(`the package document ${opfPath} is missing, or will not parse`);
 
     const pkg = opfPackage(opfDoc.documentElement);
-    if (pkg.spineHrefs.length === 0) return { ok: false, reason: "unreadable" };
+    if (pkg.spineHrefs.length === 0) return unreadable("the spine names no XHTML entry");
 
     const baseDir = opfDirectory(opfPath);
     const packer = /** @type {ReturnType<typeof segmenter<PackedBlock>>} */ (segmenter());
@@ -377,10 +398,11 @@ export async function importEpub(file, onProgress) {
 
     await putBook(book);
     return { ok: true, book };
-  } catch {
+  } catch (error) {
     // Leave nothing behind: the book row was never written, and this takes
-    // the segments (best-effort - the orphan sweep covers a failure here).
+    // the segments and the pictures (best-effort - the orphan sweep covers
+    // a failure here).
     await deleteBook(bookId).catch(() => undefined);
-    return { ok: false, reason: "unreadable" };
+    return unreadable("the import failed part-way", error);
   }
 }
