@@ -955,7 +955,7 @@
   },
   "options_bubble_more": { "message": "Mostrar enseguida la frase y las entradas del diccionario" },
   "options_bubble_more_hint": {
-    "message": "Al seleccionar texto, la burbuja se abre con todo lo que de otro modo queda tras «Más»: la frase traducida y las entradas del diccionario. Merece la pena dejarlo activado con un diccionario instalado - un modelo de traducción suele equivocarse con una palabra suelta, y el diccionario muestra lo que significa de verdad. La burbuja sobre una expresión ya guardada conserva «Más»."
+    "message": "Al seleccionar texto, la burbuja se abre con todo lo que de otro modo queda tras «Más»: la frase traducida y las entradas del diccionario. Merece la pena dejarlo activado con un diccionario instalado - un modelo de traducción suele equivocarse con una palabra suelta, y el diccionario muestra lo que significa de verdad. La burbuja sobre una expresión ya guardada muestra solo la traducción guardada - la frase y las entradas del diccionario aparecen al pulsar «Más»."
   },
   "options_no_translation": { "message": "Usar sin modelo de traducción" },
   "options_no_translation_hint": {

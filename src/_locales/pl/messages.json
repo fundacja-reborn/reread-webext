@@ -1296,7 +1296,7 @@
   },
   "options_bubble_more": { "message": "Od razu pokazuj zdanie i hasła ze słowników" },
   "options_bubble_more_hint": {
-    "message": "Po zaznaczeniu tekstu dymek otwiera się z tym, co normalnie kryje się za „Więcej”: przetłumaczonym zdaniem i hasłami ze słowników. Warto zostawić włączone, gdy masz słownik - model tłumaczenia często myli się na pojedynczym słowie, a słownik pokazuje, co ono naprawdę znaczy. Dymek nad już zapisaną frazą zachowuje „Więcej”."
+    "message": "Po zaznaczeniu tekstu dymek otwiera się z tym, co normalnie kryje się za „Więcej”: przetłumaczonym zdaniem i hasłami ze słowników. Warto zostawić włączone, gdy masz słownik - model tłumaczenia często myli się na pojedynczym słowie, a słownik pokazuje, co ono naprawdę znaczy. Dymek nad już zapisaną frazą wyświetla tylko zapisane tłumaczenie - zdanie i definicje ze słowników możesz zobaczyć po kliknięciu na „Więcej”."
   },
   "options_no_translation": { "message": "Używaj bez modelu tłumaczenia" },
   "options_no_translation_hint": {

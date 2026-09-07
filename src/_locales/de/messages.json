@@ -932,7 +932,7 @@
   },
   "options_bubble_more": { "message": "Satz und Wörterbucheinträge sofort anzeigen" },
   "options_bubble_more_hint": {
-    "message": "Nach dem Markieren von Text öffnet sich die Sprechblase mit allem, was sonst hinter „Mehr“ liegt: dem übersetzten Satz und den Wörterbucheinträgen. Mit einem installierten Wörterbuch lohnt es sich, dies eingeschaltet zu lassen - ein Übersetzungsmodell übersetzt ein einzelnes Wort oft falsch, und das Wörterbuch zeigt, was es wirklich bedeutet. Die Sprechblase über einer bereits gespeicherten Wendung behält „Mehr“."
+    "message": "Nach dem Markieren von Text öffnet sich die Sprechblase mit allem, was sonst hinter „Mehr“ liegt: dem übersetzten Satz und den Wörterbucheinträgen. Mit einem installierten Wörterbuch lohnt es sich, dies eingeschaltet zu lassen - ein Übersetzungsmodell übersetzt ein einzelnes Wort oft falsch, und das Wörterbuch zeigt, was es wirklich bedeutet. Die Sprechblase über einer bereits gespeicherten Wendung zeigt nur die gespeicherte Übersetzung - den Satz und die Wörterbucheinträge sehen Sie nach einem Druck auf „Mehr“."
   },
   "options_no_translation": { "message": "Ohne Übersetzungsmodell verwenden" },
   "options_no_translation_hint": {
