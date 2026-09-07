@@ -121,6 +121,18 @@ export const CONFIG_KEY = "config";
  *   editing - should be visible to somebody meeting it for the first time,
  *   and folding it away is the taste of a reader who already knows it is
  *   there. The fold stays one press away in the popup.
+ * @property {boolean} showBubbleMore Whether the bubble over a fresh selection
+ *   opens with its second layer - the translated sentence and the dictionary
+ *   entries - already out, where a press on More used to be the only way to
+ *   them (D186). Default `true`, and deliberately so for every profile that
+ *   predates the field (Michał's call): a translation model is at its weakest
+ *   on a single word out of context, and the dictionary's answer to it stood
+ *   one press away from a reader who never went looking. Nothing is fetched
+ *   for it - the sentence and the entries ride the same answer as the gloss -
+ *   so the whole cost is the bubble's height. Only the fresh selection: the
+ *   bubble over an underline is the reader's own saved meaning, and its layer
+ *   stays behind More, fetched on that press (D27). Only a stored `false` is
+ *   somebody having turned it off.
  * @property {Record<string, string>} ttsVoices Which voice reads a language
  *   aloud (D83): source language to the `voiceURI` chosen for it. Per language
  *   rather than per pair - the voice picked for `en` serves every pair read in
@@ -257,6 +269,7 @@ export const DEFAULTS = Object.freeze({
   keepArticles: true,
   libraryCopy: null,
   hideBubbleActions: false,
+  showBubbleMore: true,
   ttsVoices: {},
   ttsRate: 100,
   ttsOff: false,
@@ -433,6 +446,11 @@ export function withDefaults(stored) {
     libraryCopy: typeof raw["libraryCopy"] === "boolean" ? raw["libraryCopy"] : null,
     hideBubbleActions:
       typeof raw["hideBubbleActions"] === "boolean" ? raw["hideBubbleActions"] : DEFAULTS.hideBubbleActions,
+    // Default `true`, and meant to reach the profiles that predate the field
+    // as well as fresh ones (D186): only a stored `false` is somebody having
+    // folded the layer away.
+    showBubbleMore:
+      typeof raw["showBubbleMore"] === "boolean" ? raw["showBubbleMore"] : DEFAULTS.showBubbleMore,
     ttsVoices: voiceMap(raw["ttsVoices"]),
     ttsRate: within(raw["ttsRate"], TTS_RATE, DEFAULTS.ttsRate),
     // As `translationOff`: only a stored boolean is a choice, and a profile
@@ -494,6 +512,7 @@ export async function readConfig() {
  * @property {boolean} [keepArticles]
  * @property {boolean} [libraryCopy]
  * @property {boolean} [hideBubbleActions]
+ * @property {boolean} [showBubbleMore]
  * @property {Record<string, string>} [ttsVoices]
  * @property {number} [ttsRate]
  * @property {boolean} [ttsOff]

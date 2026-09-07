@@ -217,6 +217,15 @@ const tooltip = createTooltip({
 let hideActions = DEFAULTS.hideBubbleActions;
 
 /**
+ * The open-layer setting (D186), mirrored the same way: while this is on, the
+ * bubble over a fresh selection opens with its second layer out, and the
+ * sentence and the dictionary entries show the moment the answer lands - they
+ * ride the same answer as the gloss, so nothing is fetched for it. The recall
+ * bubble is deliberately not its business (`showSaved`).
+ */
+let showMore = DEFAULTS.showBubbleMore;
+
+/**
  * How heavily saved phrases are underlined (D130), mirrored the same way. It
  * decides which highlight registration the paint goes on, so a change here is
  * a repaint - which is what the storage listener does with every change
@@ -598,6 +607,7 @@ async function loadVocabulary(preloaded) {
     // Rides the same read and the same storage listener as the vocabulary:
     // flipping the switch in the popup reaches every open page on the spot.
     hideActions = config.hideBubbleActions;
+    showMore = config.showBubbleMore;
     // Repainted below with every other change this read carries: the weight
     // is a registration name, so a new one is a repaint, not a restyle (D130).
     underline = config.underline;
@@ -958,7 +968,12 @@ function showSaved(anchor, text, normalized, context, how = {}) {
   // answer comes from the database, without a message and without waking the
   // engine (D27). More is the press that says the sentence and the
   // dictionaries are worth an engine ride after all, and only then do they go
-  // to the background (`fillSecondLayer`).
+  // to the background (`fillSecondLayer`). The switch that opens the layer
+  // over a fresh selection (D186) stops short of this bubble on purpose
+  // (Michał's call): a tap on an underline asks what the reader decided the
+  // word means, and that answer is the body; the sentence and the dictionary
+  // are the extra here, and fetching them unasked would be an engine ride
+  // per tap.
   secondLayer = ["more"];
   unfetched = { context };
   // Recall: the answer first, and the row of actions with it or behind a fold,
@@ -1278,6 +1293,12 @@ function present(selection, { deliberate, touch, chain = false }) {
   // above (D131): one checkbox, every opening. What the setting never hides
   // is a Save or an error's button: those reveal on their own when the answer
   // lands (`reveal`).
+  // The second layer starts as the other setting says (D186): out, so the
+  // sentence and the dictionary entries show the moment the answer lands -
+  // they ride the same answer as the gloss, so nothing is fetched for it -
+  // or behind More. This opening only: the recall bubble keeps More
+  // (`showSaved`) - its body is the reader's own meaning, and the layer
+  // there is an engine ride away (D27).
   tooltip.show({
     anchor: selection.rect,
     line: firstLineOf(selection.range),
@@ -1292,6 +1313,7 @@ function present(selection, { deliberate, touch, chain = false }) {
     coarse: touchPointer(lastPointerType),
     scale: bubbleScale / 100,
     folded: hideActions,
+    expanded: showMore,
     anchored,
     scheme: bubbleScheme?.() ?? null,
   });
@@ -1317,9 +1339,10 @@ function present(selection, { deliberate, touch, chain = false }) {
 
     const { gloss, sentence, entries } = asTranslation(result.value);
     tooltip.setBody(gloss, "normal");
-    // Folded. The reader asked about a word, and G0 is about answering that
-    // word and getting out of the way; the sentence and whatever the
-    // dictionaries said wait for a second press.
+    // Into the layer, which shows them or holds them as the opening said
+    // (D186): out from the first frame, or waiting behind More - G0's
+    // answer-the-word-and-get-out-of-the-way, kept for whoever folds the
+    // layer away in the settings.
     tooltip.setContext(sentence);
     const blocks = entryBlocks(entries ?? [], normalized);
     tooltip.setEntries(blocks);

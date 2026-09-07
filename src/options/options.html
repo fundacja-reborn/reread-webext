@@ -151,8 +151,8 @@
         </li>
         <li data-i18n="options_first_steps_dictionary">
           Under "Dictionaries", download a dictionary for the same pair (optional, but worth it)
-          - single words then get fuller answers than a translation alone (after pressing "More"
-          in the translation bubble).
+          - single words then get fuller answers than a translation alone, shown in the
+          translation bubble below the translation.
         </li>
       </ol>
       <p id="first-steps-pin" data-i18n="options_first_steps_pin">
@@ -377,6 +377,30 @@
           appear only when you click or tap the bubble.
         </p>
       </div>
+      <!-- The second layer's start (D186): the sentence and the dictionary
+           entries open with the bubble over a fresh selection, where a press
+           on More used to be the only way to them. On by default, existing
+           profiles included (Michał's call): a model is at its weakest on a
+           single word, and the dictionary's answer stood one press away from
+           a reader who never went looking. Right under the fold switch: the
+           two are the bubble's two "what shows first" questions, and both on
+           is the bubble for reading - text only, buttons on a press.
+           `translation-only` for the quiet bubble's reason above: without
+           the model the entries are the answer itself and never fold (D121).
+           The bubble over an underline keeps More - its body is the reader's
+           own meaning (D27) - and the hint says so. -->
+      <div class="row translation-only">
+        <label class="row-toggle">
+          <span class="row-name" data-i18n="options_bubble_more">Show the sentence and dictionary entries right away</span>
+          <input type="checkbox" id="bubble-more" />
+        </label>
+        <p class="row-note" data-fold data-i18n="options_bubble_more_hint">
+          When you select text, the bubble opens with everything otherwise behind "More": the
+          translated sentence and the dictionary entries. Worth keeping on with a dictionary
+          installed - a translation model often gets a single word wrong, and the dictionary shows
+          what it really means. The bubble over an already saved phrase keeps "More".
+        </p>
+      </div>
       <!-- The bubble's one size knob (D85): the bubble deliberately ignores
            every page it stands on, so no page setting can reach it - and
            built-in sizes land differently on different screens (an e-ink
@@ -453,7 +477,9 @@
 
     <p class="explain" data-i18n="options_models_intro">
       Download a translation model here for each language pair you want to translate. These are
-      official Mozilla files that run entirely offline on your device.
+      official Mozilla files that run entirely offline on your device. A model translates sentences
+      well, but a single word on its own often comes back wrong - cut short, or not a real word at
+      all. For single words, a dictionary from the section below gives the better answer.
     </p>
 
     <!-- The one fetch this section can make, and the press that makes it: the

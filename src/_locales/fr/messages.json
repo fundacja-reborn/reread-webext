@@ -863,7 +863,7 @@
     "message": "Sous « Modèles de traduction », trouvez la paire de langues qu'il vous faut (le filtre est le plus rapide) et appuyez sur « Télécharger ». Le modèle est enregistré sur cet appareil et traduit désormais hors ligne - et le premier modèle règle de lui-même la paire de langues ci-dessus."
   },
   "options_first_steps_dictionary": {
-    "message": "Sous « Dictionnaires », téléchargez un dictionnaire pour la même paire (facultatif, mais utile) - les mots isolés reçoivent alors des réponses plus complètes qu'une traduction seule (après un appui sur « Plus » dans la bulle de traduction)."
+    "message": "Sous « Dictionnaires », téléchargez un dictionnaire pour la même paire (facultatif, mais utile) - les mots isolés reçoivent alors des réponses plus complètes qu'une traduction seule, visibles dans la bulle de traduction sous la traduction."
   },
   "options_first_steps_pin": {
     "message": "Enfin, épinglez re/read à la barre d'outils : l'icône en forme de pièce de puzzle à droite de la barre, puis l'engrenage à côté de re/read et « Épingler à la barre d’outils ». Le bouton ouvre le lecteur, la liste de lecture, vos phrases enregistrées et l'interrupteur du site où vous êtes."
@@ -965,6 +965,10 @@
   "options_quiet_bubble_hint": {
     "message": "Affiche uniquement le texte traduit dans la bulle. Les boutons d'action (copier, enregistrer) n'apparaissent que lorsque vous cliquez ou touchez la bulle."
   },
+  "options_bubble_more": { "message": "Afficher tout de suite la phrase et les entrées du dictionnaire" },
+  "options_bubble_more_hint": {
+    "message": "Après la sélection d'un texte, la bulle s'ouvre avec tout ce qui se trouve autrement derrière « Plus » : la phrase traduite et les entrées du dictionnaire. À garder activé avec un dictionnaire installé - un modèle de traduction se trompe souvent sur un mot isolé, et le dictionnaire montre ce qu'il veut vraiment dire. La bulle au-dessus d'une expression déjà enregistrée garde « Plus »."
+  },
   "options_no_translation": { "message": "Utiliser sans modèle de traduction" },
   "options_no_translation_hint": {
     "message": "Désactive la traduction automatique (le modèle). Le lecteur, la liste de lecture hors ligne et le surligneur continuent de fonctionner. Avec une paire de langues choisie, la bulle affiche toujours les sens des dictionnaires, et vous pouvez enregistrer des phrases et voir leurs soulignements. Idéal pour lire avec des dictionnaires ou dans votre langue maternelle. Vos données enregistrées ne sont pas supprimées et reviennent quand vous désactivez cette option."
@@ -993,7 +997,7 @@
   "options_tts_rate": { "message": "Vitesse de lecture" },
   "options_models_heading": { "message": "Modèles de traduction" },
   "options_models_intro": {
-    "message": "Téléchargez ici un modèle de traduction pour chaque paire de langues que vous voulez traduire. Ce sont des fichiers officiels de Mozilla qui fonctionnent entièrement hors ligne sur votre appareil."
+    "message": "Téléchargez ici un modèle de traduction pour chaque paire de langues que vous voulez traduire. Ce sont des fichiers officiels de Mozilla qui fonctionnent entièrement hors ligne sur votre appareil. Un modèle traduit bien les phrases, mais un mot isolé, sans contexte, revient souvent faux - tronqué, ou sous la forme d'un mot qui n'existe pas. Pour les mots isolés, un dictionnaire de la section ci-dessous donne la meilleure réponse."
   },
   "options_update_list": { "message": "Mettre à jour la liste" },
   "options_list_dated": { "message": "Liste du" },

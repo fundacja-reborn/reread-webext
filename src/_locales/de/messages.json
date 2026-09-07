@@ -840,7 +840,7 @@
     "message": "Suchen Sie unter „Übersetzungsmodelle“ das Sprachpaar, das Sie brauchen (am schnellsten über den Filter), und drücken Sie auf „Herunterladen“. Das Modell wird auf diesem Gerät gespeichert und übersetzt von da an offline - und das erste Modell stellt das Sprachpaar oben von selbst ein."
   },
   "options_first_steps_dictionary": {
-    "message": "Laden Sie unter „Wörterbücher“ ein Wörterbuch für dasselbe Paar herunter (optional, aber lohnend) - einzelne Wörter bekommen dann vollständigere Antworten als eine Übersetzung allein (nach einem Druck auf „Mehr“ in der Übersetzungsblase)."
+    "message": "Laden Sie unter „Wörterbücher“ ein Wörterbuch für dasselbe Paar herunter (optional, aber lohnend) - einzelne Wörter bekommen dann vollständigere Antworten als eine Übersetzung allein, sichtbar in der Übersetzungsblase unter der Übersetzung."
   },
   "options_first_steps_pin": {
     "message": "Heften Sie re/read zuletzt an die Symbolleiste: das Puzzleteil-Symbol rechts in der Leiste, dann neben re/read das Zahnrad und „An Symbolleiste anheften“. Der Knopf öffnet die Leseansicht, die Leseliste, den gespeicherten Wortschatz und den Schalter für die Website, auf der Sie sind."
@@ -930,6 +930,10 @@
   "options_quiet_bubble_hint": {
     "message": "Zeigt nur den übersetzten Text in der Sprechblase an. Die Aktionsschaltflächen (wie Kopieren oder Speichern) erscheinen erst, wenn Sie auf die Sprechblase klicken oder tippen."
   },
+  "options_bubble_more": { "message": "Satz und Wörterbucheinträge sofort anzeigen" },
+  "options_bubble_more_hint": {
+    "message": "Nach dem Markieren von Text öffnet sich die Sprechblase mit allem, was sonst hinter „Mehr“ liegt: dem übersetzten Satz und den Wörterbucheinträgen. Mit einem installierten Wörterbuch lohnt es sich, dies eingeschaltet zu lassen - ein Übersetzungsmodell übersetzt ein einzelnes Wort oft falsch, und das Wörterbuch zeigt, was es wirklich bedeutet. Die Sprechblase über einer bereits gespeicherten Wendung behält „Mehr“."
+  },
   "options_no_translation": { "message": "Ohne Übersetzungsmodell verwenden" },
   "options_no_translation_hint": {
     "message": "Schaltet die maschinelle Übersetzung (das Modell) aus. Leseansicht, Offline-Leseliste und Textmarker funktionieren weiter. Mit einem gewählten Sprachpaar zeigt die Sprechblase weiterhin Bedeutungen aus Wörterbüchern, und Phrasen lassen sich speichern und unterstreichen. Ideal zum Lesen mit Wörterbüchern oder in der Muttersprache. Gespeicherte Daten werden nicht gelöscht und kehren zurück, wenn Sie die Option ausschalten."
@@ -958,7 +962,7 @@
   "options_tts_rate": { "message": "Lesegeschwindigkeit" },
   "options_models_heading": { "message": "Übersetzungsmodelle" },
   "options_models_intro": {
-    "message": "Laden Sie hier für jedes Sprachpaar, das Sie übersetzen möchten, ein Übersetzungsmodell herunter. Es handelt sich um offizielle Mozilla-Dateien, die vollständig offline auf Ihrem Gerät laufen."
+    "message": "Laden Sie hier für jedes Sprachpaar, das Sie übersetzen möchten, ein Übersetzungsmodell herunter. Es handelt sich um offizielle Mozilla-Dateien, die vollständig offline auf Ihrem Gerät laufen. Ein Modell übersetzt Sätze gut, ein einzelnes Wort ohne Kontext aber oft falsch - abgeschnitten oder als Wort, das es gar nicht gibt. Für einzelne Wörter gibt ein Wörterbuch aus dem Abschnitt unten die bessere Antwort."
   },
   "options_update_list": { "message": "Liste aktualisieren" },
   "options_list_dated": { "message": "Liste vom" },

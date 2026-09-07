@@ -20,9 +20,11 @@
  *
  * The sentence and the dictionary entries, when there are any, are a second
  * layer behind "More" - one line first, everything else on a deliberate second
- * press (G1). They live in their own elements and not in the body, because the
- * body is what gets saved: anything that leaked into it would end up in the
- * vocabulary and on a flashcard.
+ * press (G1) - unless the caller says the layer opens with the bubble
+ * (`expanded`, D186): then whatever lands down there shows the moment it
+ * lands, and More is the press that folds it away. They live in their own
+ * elements and not in the body, because the body is what gets saved: anything
+ * that leaked into it would end up in the vocabulary and on a flashcard.
  *
  * A dictionary line is the one thing down there that is also a button. Pressing
  * it adds that meaning to the body, which is to say to the vocabulary, and
@@ -386,6 +388,21 @@ export function foldControl({ entries, overflows }) {
  */
 export function foldStart({ entries }) {
   return entries;
+}
+
+/**
+ * Where the second layer starts for a new phrase: open when the caller asked
+ * for it (`expanded`, the settings switch of D186), and always open in the
+ * quiet bubble, which has no gloss and no More - its entries are the answer
+ * itself, not an extra behind a press (D121). Only a starting state, like
+ * `foldStart`: More folds and reopens the layer for as long as the bubble
+ * stands on its phrase. Exported for the test that holds the rule.
+ *
+ * @param {{ variant: Variant, expanded: boolean }} opening
+ * @returns {boolean} whether the layer opens with the bubble
+ */
+export function layerStart({ variant, expanded }) {
+  return variant === "quiet" || expanded;
 }
 
 /**
@@ -1189,6 +1206,13 @@ export const STYLE = `
  * out. `reveal()` is the caller's way to bring it out after all when one
  * button turns out to be the point (Save, an error's way to settings).
  *
+ * `expanded` is where the second layer starts (D186): out from the first
+ * frame, so the sentence and the dictionary entries show as they land and
+ * More is the press that folds them away - the settings switch's answer,
+ * handed down by the caller on the openings it is about. Said nothing, the
+ * layer waits behind More as it always has. The quiet bubble ignores it the
+ * other way round: its layer is always out (`layerStart`).
+ *
  * `anchored` pins the bubble to the page rather than to the viewport: the
  * host goes `absolute` at the document coordinates the anchor had when shown,
  * so scrolling carries the bubble with the phrase it is about - the reader
@@ -1231,7 +1255,7 @@ export const STYLE = `
  * phrase the bubble is about stays the page's own highlight (D23).
  *
  * @typedef {object} Tooltip
- * @property {(options: { anchor: DOMRect, variant: Variant, body: string, tone?: Tone, actions?: Action[], touch?: boolean, below?: boolean, coarse?: boolean, scale?: number, folded?: boolean, anchored?: boolean, line?: number, phrase?: string, scheme?: "light" | "sepia" | "dark" | null, choosable?: boolean }) => void} show
+ * @property {(options: { anchor: DOMRect, variant: Variant, body: string, tone?: Tone, actions?: Action[], touch?: boolean, below?: boolean, coarse?: boolean, scale?: number, folded?: boolean, expanded?: boolean, anchored?: boolean, line?: number, phrase?: string, scheme?: "light" | "sepia" | "dark" | null, choosable?: boolean }) => void} show
  * @property {(body: string, tone?: Tone) => void} setBody
  * @property {(sentence: string | null, tone?: Tone) => void} setContext
  * @property {(blocks: Block[]) => void} setEntries
@@ -2640,6 +2664,7 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
       coarse = false,
       scale = 1,
       folded,
+      expanded = false,
       anchored = false,
       line = 0,
       phrase = "",
@@ -2707,16 +2732,19 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
         bubble.classList.toggle("revealed", folded !== true);
         swallowClick = false;
       }
-      // Folded again: this is another phrase, and the sentence behind "More"
-      // belonged to the last one. Set directly rather than through `unfold`,
-      // which would render and place a bubble that has no body yet. The
+      // The layer starts where this phrase's opening says (`layerStart`):
+      // folded behind More, or out from the first frame when the caller
+      // asked (D186) - and always out in the quiet bubble (D121), which has
+      // no gloss and no More, so entries handed to it later are the answer
+      // itself. Either way it is decided afresh: the sentence behind "More"
+      // belonged to the last phrase. Set directly rather than through
+      // `unfold`, which would render and place a bubble that has no body
+      // yet - what lands later shows through `unfold` as it lands. The
       // sentence's own fold is handed back to the content too (D96): the
       // clamp was about the last phrase - the reader's press or its
       // dictionary - and this phrase's layer decides afresh (`foldStart`)
-      // as it fills. The quiet bubble is the standing exception (D121): it
-      // has no gloss and no More, so entries handed to it later are the
-      // answer itself and show the moment they land.
-      unfolded = variant === "quiet";
+      // as it fills.
+      unfolded = layerStart({ variant, expanded });
       contextFolded = false;
       contextChosen = false;
       // The note line starts empty for this phrase, and so does the prompt

@@ -863,7 +863,7 @@
     "message": "Bajo «Modelos de traducción», busca el par de idiomas que necesitas (el filtro es lo más rápido) y pulsa «Descargar». El modelo queda guardado en este dispositivo y desde entonces traduce sin conexión - y el primer modelo ajusta por sí solo el par de idiomas de arriba."
   },
   "options_first_steps_dictionary": {
-    "message": "Bajo «Diccionarios», descarga un diccionario para el mismo par (opcional, pero merece la pena) - las palabras sueltas reciben entonces respuestas más completas que una traducción sola (tras pulsar «Más» en la burbuja de traducción)."
+    "message": "Bajo «Diccionarios», descarga un diccionario para el mismo par (opcional, pero merece la pena) - las palabras sueltas reciben entonces respuestas más completas que una traducción sola, visibles en la burbuja de traducción bajo la traducción."
   },
   "options_first_steps_pin": {
     "message": "Por último, fija re/read a la barra de herramientas: el icono de la pieza de puzle a la derecha de la barra, luego el engranaje junto a re/read y «Fijar a la barra de herramientas». El botón abre la vista de lectura, la lista de lectura, tus frases guardadas y el interruptor del sitio en el que estás."
@@ -953,6 +953,10 @@
   "options_quiet_bubble_hint": {
     "message": "Muestra solo el texto traducido en la burbuja. Los botones de acción (copiar, guardar) aparecerán únicamente al hacer clic o tocar la burbuja."
   },
+  "options_bubble_more": { "message": "Mostrar enseguida la frase y las entradas del diccionario" },
+  "options_bubble_more_hint": {
+    "message": "Al seleccionar texto, la burbuja se abre con todo lo que de otro modo queda tras «Más»: la frase traducida y las entradas del diccionario. Merece la pena dejarlo activado con un diccionario instalado - un modelo de traducción suele equivocarse con una palabra suelta, y el diccionario muestra lo que significa de verdad. La burbuja sobre una expresión ya guardada conserva «Más»."
+  },
   "options_no_translation": { "message": "Usar sin modelo de traducción" },
   "options_no_translation_hint": {
     "message": "Desactiva la traducción automática (el modelo). La vista de lectura, la lista de lectura sin conexión y el marcador siguen funcionando. Con un par de idiomas elegido, la burbuja sigue mostrando significados de los diccionarios, y puedes guardar frases y ver sus subrayados. Ideal para leer con diccionarios o en tu idioma materno. Tus datos guardados no se borran y vuelven al desactivar esta opción."
@@ -981,7 +985,7 @@
   "options_tts_rate": { "message": "Velocidad de lectura" },
   "options_models_heading": { "message": "Modelos de traducción" },
   "options_models_intro": {
-    "message": "Descarga aquí un modelo de traducción para cada par de idiomas que quieras traducir. Son archivos oficiales de Mozilla que funcionan totalmente sin conexión en tu dispositivo."
+    "message": "Descarga aquí un modelo de traducción para cada par de idiomas que quieras traducir. Son archivos oficiales de Mozilla que funcionan totalmente sin conexión en tu dispositivo. Un modelo traduce bien las frases, pero una palabra suelta, sin contexto, a menudo sale mal - cortada o como una palabra que no existe. Para palabras sueltas, un diccionario de la sección de abajo da la mejor respuesta."
   },
   "options_update_list": { "message": "Actualizar la lista" },
   "options_list_dated": { "message": "Lista del" },
