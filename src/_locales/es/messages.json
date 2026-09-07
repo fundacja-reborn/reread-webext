@@ -955,7 +955,7 @@
   },
   "options_bubble_more": { "message": "Mostrar enseguida la frase y las entradas del diccionario" },
   "options_bubble_more_hint": {
-    "message": "Al seleccionar texto, la burbuja se abre con todo lo que de otro modo queda tras «Más»: la frase traducida y las entradas del diccionario. Merece la pena dejarlo activado con un diccionario instalado - un modelo de traducción suele equivocarse con una palabra suelta, y el diccionario muestra lo que significa de verdad. La burbuja sobre una expresión ya guardada muestra solo la traducción guardada - la frase y las entradas del diccionario aparecen al pulsar «Más»."
+    "message": "Al seleccionar texto, la burbuja muestra enseguida lo que de otro modo solo aparece al pulsar «Más»: la frase traducida y las entradas del diccionario. Merece la pena dejarlo activado con un diccionario instalado - un modelo de traducción suele equivocarse con una palabra suelta, y el diccionario muestra lo que significa de verdad. La burbuja sobre una expresión ya guardada muestra solo la traducción guardada - la frase y las entradas del diccionario aparecen al pulsar «Más»."
   },
   "options_no_translation": { "message": "Usar sin modelo de traducción" },
   "options_no_translation_hint": {
@@ -985,7 +985,7 @@
   "options_tts_rate": { "message": "Velocidad de lectura" },
   "options_models_heading": { "message": "Modelos de traducción" },
   "options_models_intro": {
-    "message": "Descarga aquí un modelo de traducción para cada par de idiomas que quieras traducir. Son archivos oficiales de Mozilla que funcionan totalmente sin conexión en tu dispositivo. Un modelo traduce bien las frases, pero una palabra suelta, sin contexto, a menudo sale mal - cortada o como una palabra que no existe. Para palabras sueltas, un diccionario de la sección de abajo da la mejor respuesta."
+    "message": "Descarga aquí un modelo de traducción para cada par de idiomas que quieras traducir. Son archivos oficiales de Mozilla que funcionan totalmente sin conexión en tu dispositivo. Un modelo traduce bien las frases, pero una palabra suelta, sin contexto, a menudo se traduce mal - el resultado queda cortado o es una palabra que no existe. Para palabras sueltas, un diccionario de la sección de abajo es la mejor fuente."
   },
   "options_update_list": { "message": "Actualizar la lista" },
   "options_list_dated": { "message": "Lista del" },
