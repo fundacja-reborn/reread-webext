@@ -1054,8 +1054,8 @@
     "description": "Quotes the options_models_heading section name and the action_download button - each language quotes its own wording of those keys, so the three must move together."
   },
   "options_first_steps_dictionary": {
-    "message": "Under \"Dictionaries\", download a dictionary for the same pair (optional, but worth it) - single words then get fuller answers than a translation alone (after pressing \"More\" in the translation bubble).",
-    "description": "Quotes the options_dictionaries_heading section name and the bubble_more button - each language quotes its own wording of those keys, so they must move together."
+    "message": "Under \"Dictionaries\", download a dictionary for the same pair (optional, but worth it) - single words then get fuller answers than a translation alone, shown in the translation bubble below the translation.",
+    "description": "Quotes the options_dictionaries_heading section name - each language quotes its own wording of that key, so they must move together. Since D186 the entries show in the bubble by default, so the sentence no longer points at the More button."
   },
   "options_first_steps_pin": {
     "message": "Last, pin re/read to the toolbar: the puzzle-piece icon at the right end of the bar, then the gear next to re/read and \"Pin to Toolbar\". The button opens the reader, the reading list, your saved phrases and the switch for the site you are on.",
@@ -1176,6 +1176,14 @@
   "options_quiet_bubble_hint": {
     "message": "Shows only the translated text in the bubble. The action buttons (such as copy or save) appear only when you click or tap the bubble."
   },
+  "options_bubble_more": {
+    "message": "Show the sentence and dictionary entries right away",
+    "description": "Checkbox label on the settings page (D186): the bubble over a fresh selection opens with its second layer - the translated sentence and the dictionary entries - already out, where a press on More used to be the only way to them. On by default."
+  },
+  "options_bubble_more_hint": {
+    "message": "When you select text, the bubble shows right away what is otherwise shown only after a press on \"More\": the translated sentence and the dictionary entries. Worth keeping on with a dictionary installed - a translation model often gets a single word wrong, and the dictionary shows what it really means. The bubble over an already saved phrase shows only the saved translation - the sentence and the dictionary entries appear after you press \"More\".",
+    "description": "Quotes the bubble_more button - each language quotes its own wording of that key, so they must move together. The last sentence is the promise that the bubble over an underline (a saved phrase) is not changed by the switch."
+  },
   "options_no_translation": { "message": "Use without a translation model" },
   "options_no_translation_hint": {
     "message": "Turns off machine translation (the model). The reader, the offline reading list and the highlighter keep working. With a language pair chosen, the bubble still shows dictionary meanings, and you can save phrases and see their underlines. Ideal for reading with dictionaries or in your native language. Your saved data is not deleted and returns when you turn this off."
@@ -1216,7 +1224,7 @@
   "options_tts_rate": { "message": "Reading speed" },
   "options_models_heading": { "message": "Translation models" },
   "options_models_intro": {
-    "message": "Download a translation model here for each language pair you want to translate. These are official Mozilla files that run entirely offline on your device."
+    "message": "Download a translation model here for each language pair you want to translate. These are official Mozilla files that run entirely offline on your device. A model translates sentences well, but a single word on its own is often translated wrongly - the result is cut short, or is a word that does not exist. For single words, a dictionary from the section below is the better source."
   },
   "options_update_list": {
     "message": "Update the list",

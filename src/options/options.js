@@ -323,6 +323,13 @@ function renderQuietBubble() {
   if (toggle instanceof HTMLInputElement) toggle.checked = config.hideBubbleActions;
 }
 
+/** The open-layer switch (D186): whether the sentence and the dictionary
+ *  entries open with the bubble over a fresh selection. Stored plainly. */
+function renderBubbleMore() {
+  const toggle = document.getElementById("bubble-more");
+  if (toggle instanceof HTMLInputElement) toggle.checked = config.showBubbleMore;
+}
+
 /** The default-keep switch (D124): whether the reader files what it opens. */
 function renderKeepArticles() {
   const toggle = document.getElementById("keep-articles");
@@ -2417,6 +2424,7 @@ async function render() {
   linkSources(webext().runtime.getManifest().version);
   renderReaderOnly();
   renderQuietBubble();
+  renderBubbleMore();
   renderKeepArticles();
   renderLibraryCopy();
   renderFontCustom();
@@ -2477,6 +2485,7 @@ async function refresh() {
   config = await readConfig();
   renderReaderOnly();
   renderQuietBubble();
+  renderBubbleMore();
   renderKeepArticles();
   renderLibraryCopy();
   renderFontCustom();
@@ -2526,6 +2535,15 @@ document.getElementById("quiet-bubble")?.addEventListener("change", (event) => {
   // Same road as the mode switch: open pages hear it through storage and the
   // next bubble opens the way the box now says.
   void writeConfig({ hideBubbleActions: toggle.checked }).then((written) => {
+    config = written;
+  });
+});
+document.getElementById("bubble-more")?.addEventListener("change", (event) => {
+  const toggle = event.target;
+  if (!(toggle instanceof HTMLInputElement)) return;
+  // The same road again (D186): the next bubble over a selection opens its
+  // layer the way the box now says, on every open page, with no reload.
+  void writeConfig({ showBubbleMore: toggle.checked }).then((written) => {
     config = written;
   });
 });

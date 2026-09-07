@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { STYLE, foldControl, foldStart } from "../src/content/tooltip.js";
+import { STYLE, foldControl, foldStart, layerStart } from "../src/content/tooltip.js";
 
 /**
  * The fold in the sentence's corner (D96) is a rule and a stylesheet contract,
@@ -74,5 +74,18 @@ describe("the sentence's fold", () => {
   it("turns the chevron when the sentence is clamped", () => {
     const turned = blockAfter('.context[data-folded="true"] .context-toggle svg');
     assert.match(turned, /transform:\s*rotate\(180deg\)/);
+  });
+});
+
+describe("the second layer's start", () => {
+  it("opens with the bubble on the caller's word, and always in the quiet bubble", () => {
+    // The settings switch (D186) is the caller's answer for the translating
+    // bubble; the quiet bubble has no gloss and no More, so its entries are
+    // the answer itself and never wait behind a press (D121).
+    assert.equal(layerStart({ variant: "save", expanded: true }), true);
+    assert.equal(layerStart({ variant: "save", expanded: false }), false);
+    assert.equal(layerStart({ variant: "recall", expanded: false }), false);
+    assert.equal(layerStart({ variant: "quiet", expanded: false }), true);
+    assert.equal(layerStart({ variant: "launcher", expanded: false }), false);
   });
 });

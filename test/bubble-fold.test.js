@@ -79,3 +79,32 @@ describe("where the bubble's actions start", () => {
     assert.match(String(toggle[1]), /folded/, "the caller's answer is no longer what decides");
   });
 });
+
+describe("where the bubble's second layer starts", () => {
+  it("hands the setting to the fresh selection, and to nothing else", async () => {
+    const source = await readFile(new URL("reading.js", ROOT), "utf8");
+    const calls = openings(source);
+    const fresh = calls.filter((call) => call.includes('variant: "save"'));
+    assert.equal(fresh.length, 1, "the translating fresh selection opens somewhere new");
+    // The one opening the switch is about (D186): the sentence and the
+    // entries ride the same answer as the gloss, so opening the layer with
+    // the bubble costs nothing but height.
+    assert.match(fresh[0] ?? "", /expanded: showMore/, "the fresh selection opens without asking the open-layer setting");
+    for (const call of calls) {
+      if (call === fresh[0]) continue;
+      // Deliberately (Michał's call, 2026-09-07): the recall bubble's body
+      // is the reader's own meaning and its layer is an engine ride away
+      // (D27); the quiet bubbles' layer is always out (`layerStart`).
+      assert.doesNotMatch(call, /expanded/, "an opening the switch is not about carries it");
+    }
+  });
+
+  it("starts the layer by the caller's word, with the quiet bubble always out", async () => {
+    const source = await readFile(new URL("tooltip.js", ROOT), "utf8");
+    assert.match(
+      source,
+      /unfolded = layerStart\(\{ variant, expanded \}\)/,
+      "the bubble stopped asking `layerStart` where its layer starts",
+    );
+  });
+});

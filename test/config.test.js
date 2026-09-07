@@ -527,6 +527,36 @@ describe("the quiet bubble", () => {
   });
 });
 
+describe("the open layer", () => {
+  it("opens the layer by default, on profiles old and new", () => {
+    // Default `true` since D186, and meant for every profile that never
+    // touched the switch - existing installations included (Michał's call):
+    // a model is at its weakest on a single word, and the dictionary's answer
+    // stood one press away from a reader who never went looking.
+    assert.equal(withDefaults(undefined).showBubbleMore, true);
+    assert.equal(withDefaults({ sourceLang: "en" }).showBubbleMore, true);
+  });
+
+  it("keeps a choice somebody made, in both directions", () => {
+    assert.equal(withDefaults({ showBubbleMore: false }).showBubbleMore, false);
+    assert.equal(withDefaults({ showBubbleMore: true }).showBubbleMore, true);
+  });
+
+  it("treats a hand-edited value of the wrong type as the default", () => {
+    for (const showBubbleMore of ["false", 0, null, {}]) {
+      assert.equal(withDefaults({ showBubbleMore }).showBubbleMore, true);
+    }
+  });
+
+  it("writes the choice through writeConfig without touching the rest", async () => {
+    const store = installFakeBrowser({ config: { sourceLang: "de", targetLang: "en" } });
+    const written = await writeConfig({ showBubbleMore: false });
+
+    assert.deepEqual(written, { ...DEFAULTS, sourceLang: "de", targetLang: "en", showBubbleMore: false });
+    assert.equal(/** @type {any} */ (store["config"]).showBubbleMore, false);
+  });
+});
+
 describe("the default keep", () => {
   it("keeps what the reader opens, on profiles old and new", () => {
     // The switch arrives with D124, so every profile that predates it has a

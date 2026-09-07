@@ -1172,7 +1172,7 @@
     "message": "W sekcji „Modele tłumaczeniowe” znajdź parę językową, której potrzebujesz (najszybciej przez filtr), i naciśnij „Pobierz”. Model zostaje zapisany na tym urządzeniu i odtąd tłumaczy offline - a pierwszy model sam ustawia parę językową powyżej."
   },
   "options_first_steps_dictionary": {
-    "message": "W sekcji „Słowniki” pobierz słownik dla tej samej pary (to opcjonalne, ale warto) - pojedyncze słowa dostają wtedy pełniejsze odpowiedzi niż samo tłumaczenie (po kliknięciu na „Więcej” w dymku tłumaczenia)."
+    "message": "W sekcji „Słowniki” pobierz słownik dla tej samej pary (to opcjonalne, ale warto) - pojedyncze słowa dostają wtedy pełniejsze odpowiedzi niż samo tłumaczenie, widoczne w dymku tłumaczenia pod tłumaczeniem."
   },
   "options_first_steps_pin": {
     "message": "Na koniec przypnij re/read do paska narzędzi: ikona puzzla po prawej stronie paska, potem koło zębate przy re/read i „Przypnij do paska narzędzi”. Przycisk otwiera widok czytania, czytelnię, zapisane frazy i wyłącznik witryny, na której jesteś."
@@ -1294,6 +1294,10 @@
   "options_quiet_bubble_hint": {
     "message": "Pokazuje w dymku tylko tekst tłumaczenia. Przyciski akcji (np. kopiowanie lub zapis) pojawią się dopiero po kliknięciu w dymek."
   },
+  "options_bubble_more": { "message": "Od razu pokazuj zdanie i hasła ze słowników" },
+  "options_bubble_more_hint": {
+    "message": "Po zaznaczeniu tekstu dymek od razu pokazuje to, co normalnie jest widoczne dopiero po kliknięciu „Więcej”: przetłumaczone zdanie i hasła ze słowników. Warto zostawić włączone, gdy masz słownik - model tłumaczenia często myli się na pojedynczym słowie, a słownik pokazuje, co ono naprawdę znaczy. Dymek nad już zapisaną frazą wyświetla tylko zapisane tłumaczenie - zdanie i definicje ze słowników możesz zobaczyć po kliknięciu na „Więcej”."
+  },
   "options_no_translation": { "message": "Używaj bez modelu tłumaczenia" },
   "options_no_translation_hint": {
     "message": "Wyłącza tłumaczenie maszynowe (model). Widok czytania, czytelnia offline i zakreślacz działają dalej. Przy wybranej parze językowej dymek nadal pokazuje znaczenia ze słowników, a frazy można zapisywać i widzieć ich podkreślenia. Idealne do czytania ze słownikami albo w ojczystym języku. Zapisane dane nie są usuwane i wracają po wyłączeniu tej opcji."
@@ -1322,7 +1326,7 @@
   "options_tts_rate": { "message": "Tempo czytania" },
   "options_models_heading": { "message": "Modele tłumaczeniowe" },
   "options_models_intro": {
-    "message": "Pobierz tutaj model tłumaczenia dla każdej pary językowej, którą chcesz tłumaczyć. Są to oficjalne pliki Mozilli, które działają całkowicie offline na Twoim urządzeniu."
+    "message": "Pobierz tutaj model tłumaczenia dla każdej pary językowej, którą chcesz tłumaczyć. Są to oficjalne pliki Mozilli, które działają całkowicie offline na Twoim urządzeniu. Model dobrze tłumaczy zdania, ale pojedyncze słowo bez kontekstu jest często tłumaczone błędnie - wynik bywa ucięty albo jest wyrazem, którego nie ma w języku. Dla pojedynczych słów lepszym źródłem jest słownik z sekcji poniżej."
   },
   "options_update_list": { "message": "Zaktualizuj listę" },
   "options_list_dated": { "message": "Lista z dnia" },
