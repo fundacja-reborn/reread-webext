@@ -1067,7 +1067,22 @@
   },
   "options_disabled_heading": { "message": "Sitios desactivados" },
   "options_disabled_intro": {
-    "message": "Lista de sitios web donde la extensión está desactivada (sin traducción ni subrayados). Puedes añadir sitios usando el icono de la extensión en la barra de herramientas del navegador."
+    "message": "Lista de sitios web donde la extensión está desactivada: sin traducción, sin burbuja, sin subrayados. Añade un sitio con el interruptor bajo el icono de la extensión en la barra de herramientas del navegador mientras estás en él, o escribe su dirección abajo. No hay interruptor cuando están activados a la vez \"Usar sin modelo de traducción\" y \"Sin burbuja al seleccionar texto\": en las páginas normales no pasa nada entonces, así que no hay nada que desactivar."
+  },
+  "options_add_host_label": { "message": "Dirección del sitio" },
+  "options_add_host_button": { "message": "Añadir" },
+  "options_add_host_note": {
+    "message": "La dirección tal como la muestra el navegador, por ejemplo www.example.org: exactamente ese sitio, sin sus subdominios. Se puede pegar la dirección completa de una página; solo se conserva la parte del sitio."
+  },
+  "options_host_empty": { "message": "Escribe primero la dirección del sitio." },
+  "options_host_invalid": { "message": "Eso no es una dirección de sitio." },
+  "options_host_added": {
+    "message": "Desactivada en $HOST$.",
+    "placeholders": { "host": { "content": "$1", "example": "www.example.org" } }
+  },
+  "options_host_listed": {
+    "message": "$HOST$ ya está en la lista.",
+    "placeholders": { "host": { "content": "$1", "example": "www.example.org" } }
   },
   "options_custom_css_heading": { "message": "CSS personalizado" },
   "options_custom_css_intro": {

@@ -1408,7 +1408,22 @@
   },
   "options_disabled_heading": { "message": "Wyłączone witryny" },
   "options_disabled_intro": {
-    "message": "Lista stron internetowych, na których rozszerzenie jest wyłączone (bez tłumaczenia i podkreśleń). Strony dodaje się do tej listy za pomocą ikony rozszerzenia na pasku przeglądarki."
+    "message": "Lista stron internetowych, na których rozszerzenie jest wyłączone: bez tłumaczenia, dymka i podkreśleń. Stronę dodasz przełącznikiem pod ikoną rozszerzenia na pasku przeglądarki, będąc na niej, albo wpisując jej adres poniżej. Przełącznika nie ma, gdy włączone są jednocześnie „Używaj bez modelu tłumaczenia\" i „Bez dymka po zaznaczeniu tekstu\": na zwykłych stronach nic się wtedy nie dzieje, więc nie ma czego wyłączać."
+  },
+  "options_add_host_label": { "message": "Adres strony" },
+  "options_add_host_button": { "message": "Dodaj" },
+  "options_add_host_note": {
+    "message": "Adres tak, jak pokazuje go przeglądarka, na przykład www.example.org - dokładnie ta strona, bez subdomen. Można wkleić cały adres podstrony; zostaje sama nazwa strony."
+  },
+  "options_host_empty": { "message": "Najpierw wpisz adres strony." },
+  "options_host_invalid": { "message": "To nie jest adres strony." },
+  "options_host_added": {
+    "message": "Wyłączone na $HOST$.",
+    "placeholders": { "host": { "content": "$1", "example": "www.example.org" } }
+  },
+  "options_host_listed": {
+    "message": "$HOST$ już jest na liście.",
+    "placeholders": { "host": { "content": "$1", "example": "www.example.org" } }
   },
   "options_custom_css_heading": { "message": "Własny CSS" },
   "options_custom_css_intro": {

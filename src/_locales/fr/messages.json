@@ -1079,7 +1079,22 @@
   },
   "options_disabled_heading": { "message": "Sites désactivés" },
   "options_disabled_intro": {
-    "message": "Liste des sites web où l'extension est désactivée (pas de traduction ni de soulignements). Vous pouvez en ajouter via l'icône de l'extension dans la barre d'outils du navigateur."
+    "message": "Liste des sites web où l'extension est désactivée : pas de traduction, pas de bulle, pas de soulignements. Ajoutez un site avec l'interrupteur sous l'icône de l'extension dans la barre d'outils du navigateur pendant que vous y êtes, ou tapez son adresse ci-dessous. Il n'y a pas d'interrupteur quand « Utiliser sans modèle de traduction » et « Pas de bulle à la sélection de texte » sont tous deux activés : il ne se passe alors rien sur les pages ordinaires, il n'y a donc rien à désactiver."
+  },
+  "options_add_host_label": { "message": "Adresse du site" },
+  "options_add_host_button": { "message": "Ajouter" },
+  "options_add_host_note": {
+    "message": "L'adresse telle que le navigateur l'affiche, par exemple www.example.org - ce site exactement, sans ses sous-domaines. Une adresse de page entière peut être collée ; seule la partie du site est conservée."
+  },
+  "options_host_empty": { "message": "Tapez d'abord l'adresse du site." },
+  "options_host_invalid": { "message": "Ce n'est pas une adresse de site." },
+  "options_host_added": {
+    "message": "Désactivée sur $HOST$.",
+    "placeholders": { "host": { "content": "$1", "example": "www.example.org" } }
+  },
+  "options_host_listed": {
+    "message": "$HOST$ est déjà dans la liste.",
+    "placeholders": { "host": { "content": "$1", "example": "www.example.org" } }
   },
   "options_custom_css_heading": { "message": "CSS personnalisé" },
   "options_custom_css_intro": {
