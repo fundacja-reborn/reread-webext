@@ -11,6 +11,7 @@
  */
 
 import { t } from "./i18n.js";
+import { siteOf } from "./site.js";
 
 /** @typedef {"empty" | "invalid"} HostProblem */
 
@@ -36,7 +37,10 @@ export function parseHostname(text) {
 
   const host = url.hostname;
   if (host.length === 0) return { ok: false, problem: "invalid" };
-  return { ok: true, value: host };
+  // Stored without a leading `www.`, the site's own name: the list then
+  // reads "reapps.eu" whichever way the address was typed, and the match
+  // (`sameSite`) treats both forms as one site anyway.
+  return { ok: true, value: siteOf(host) };
 }
 
 /**

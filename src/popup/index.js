@@ -31,6 +31,7 @@ import { webext } from "../lib/browser.js";
 import { chosenPair, effectiveReaderOnly, platformOs, readConfig, writeConfig } from "../lib/config.js";
 import { localizePage, t } from "../lib/i18n.js";
 import { pairLabel } from "../lib/language.js";
+import { isSwitchedOff, sameSite, siteOf } from "../lib/site.js";
 import { dresser } from "../lib/user-css.js";
 import { listDictionaries } from "../lib/dict/store.js";
 import { listModels } from "../lib/models/store.js";
@@ -154,7 +155,7 @@ function renderSite(info, config) {
   // Named, not just shown: a bare hostname next to a checkbox says nothing
   // about which way the checkbox points. "Enabled on ..." does.
   if (siteLabel !== null) siteLabel.textContent = t("popup_site_enabled", info.hostname);
-  if (siteToggle !== null) siteToggle.checked = !config.disabledHosts.includes(info.hostname);
+  if (siteToggle !== null) siteToggle.checked = !isSwitchedOff(config.disabledHosts, info.hostname);
   if (siteRow !== null) siteRow.hidden = !siteStands;
 }
 
@@ -163,11 +164,14 @@ async function toggleSite() {
   if (host === null || siteToggle === null) return;
 
   // Read fresh before writing: another surface may have moved the list since
-  // this popup drew itself, and the write must lose only this one entry.
+  // this popup drew itself, and the write must lose only this one site -
+  // under either of its names (D189), so turning reapps.eu back on also
+  // takes a www.reapps.eu entry away. A new entry goes in as the site's own
+  // name, without the www.
   const current = await readConfig();
   const hosts = siteToggle.checked
-    ? current.disabledHosts.filter((one) => one !== host)
-    : [...current.disabledHosts, host];
+    ? current.disabledHosts.filter((one) => !sameSite(one, host))
+    : [...current.disabledHosts, siteOf(host)];
   await writeConfig({ disabledHosts: hosts });
 }
 

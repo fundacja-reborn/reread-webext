@@ -38,6 +38,7 @@ import { catalogDictionaries, catalogSource } from "../lib/dict/catalog.js";
 import { describeDictDownloadProblem, downloadArchive } from "../lib/dict/download.js";
 import { describeLinkProblem, parseDictionaryLink } from "../lib/dict/link.js";
 import { describeHostProblem, parseHostname } from "../lib/host.js";
+import { sameSite } from "../lib/site.js";
 import { readLiveDictionaries, refreshLiveDictionaries } from "../lib/dict/live.js";
 import {
   aliasesOf,
@@ -1378,10 +1379,13 @@ async function addHostByHand() {
   }
   const host = parsed.value;
 
-  // Read fresh before writing, for the reason `restoreHost` does.
+  // Read fresh before writing, for the reason `restoreHost` does. Listed
+  // under either of its names counts (D189): a www.reapps.eu from the popup
+  // of an older version already covers reapps.eu.
   const current = await readConfig();
-  if (current.disabledHosts.includes(host)) {
-    say("host-status", t("options_host_listed", host));
+  const listed = current.disabledHosts.find((one) => sameSite(one, host));
+  if (listed !== undefined) {
+    say("host-status", t("options_host_listed", listed));
     return;
   }
   config = await writeConfig({ disabledHosts: [...current.disabledHosts, host] });

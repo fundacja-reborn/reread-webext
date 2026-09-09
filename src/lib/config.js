@@ -6,6 +6,7 @@
 
 import { webext } from "./browser.js";
 import { DEFAULT_MARK_COLOR, isMarkColor } from "./reader/marks.js";
+import { isSwitchedOff } from "./site.js";
 import { DEFAULT_UNDERLINE, isUnderlineWeight } from "./underline.js";
 
 /**
@@ -69,10 +70,12 @@ export const CONFIG_KEY = "config";
  * @property {string | null} targetLang Language it is translated into,
  *   BCP-47. Null exactly when `sourceLang` is - the pair is chosen whole.
  * @property {ReaderConfig} reader How the reader looks. Nothing else uses it.
- * @property {string[]} disabledHosts Sites where re/read stays off. Exact
- *   hostnames - no port, no scheme, no patterns, no subdomain matching. Every
- *   entry is one conscious press of the switch in the toolbar popup, and the
- *   settings page is where the list can be read and emptied.
+ * @property {string[]} disabledHosts Sites where re/read stays off. Hostnames -
+ *   no port, no scheme, no patterns, no subdomain matching; only a leading
+ *   `www.` is folded, on both sides of every comparison (`lib/site.js`, D189).
+ *   Every entry is one conscious press of the switch in the toolbar popup or
+ *   an address typed on the settings page, which is where the list can be
+ *   read and emptied.
  * @property {boolean | null} readerOnly Whether ordinary pages only offer the
  *   reader, never a translation in place. `null` means nobody has chosen, and
  *   the platform decides at read time (`effectiveReaderOnly`): on Android,
@@ -621,7 +624,7 @@ export function effectiveLibraryCopy(config) {
  * @returns {"off" | "launcher" | "reading"}
  */
 export function pageMode(config, os, hostname) {
-  if (config.disabledHosts.includes(hostname)) return "off";
+  if (isSwitchedOff(config.disabledHosts, hostname)) return "off";
   // The no-bubble sub-option (D149) is the ladder's last rung: with nothing
   // to offer a selection, the page is left entirely alone - the same silence
   // a switched-off site gets - and the reader opens from the toolbar button

@@ -1049,7 +1049,7 @@
   "options_add_host_label": { "message": "Adresse der Website" },
   "options_add_host_button": { "message": "Hinzufügen" },
   "options_add_host_note": {
-    "message": "Die Adresse, wie der Browser sie anzeigt, zum Beispiel www.example.org - genau diese Website, ohne Subdomains. Eine ganze Seitenadresse kann eingefügt werden; nur der Website-Teil bleibt."
+    "message": "Die Adresse, wie der Browser sie anzeigt, zum Beispiel example.org; www.example.org ist dieselbe Website. Eine Subdomain wie news.example.org ist eine eigene Website. Eine ganze Seitenadresse kann eingefügt werden; nur der Website-Teil bleibt."
   },
   "options_host_empty": { "message": "Geben Sie zuerst die Adresse der Website ein." },
   "options_host_invalid": { "message": "Das ist keine Website-Adresse." },

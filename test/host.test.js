@@ -4,14 +4,15 @@ import { describe, it } from "node:test";
 import { describeHostProblem, parseHostname } from "../src/lib/host.js";
 
 describe("parseHostname", () => {
-  it("keeps the site part of whatever was pasted, in the browser's own form", () => {
+  it("keeps the site part of whatever was pasted, in the browser's own form, without a leading www.", () => {
     for (const [typed, host] of /** @type {[string, string][]} */ ([
-      ["www.example.org", "www.example.org"],
-      ["  www.example.org  ", "www.example.org"],
-      ["https://www.example.org/some/page?x=1#top", "www.example.org"],
+      ["www.example.org", "example.org"],
+      ["  www.example.org  ", "example.org"],
+      ["https://www.example.org/some/page?x=1#top", "example.org"],
       ["http://example.org:8080/", "example.org"],
-      ["WWW.Example.ORG", "www.example.org"],
+      ["WWW.Example.ORG", "example.org"],
       ["example.org/path", "example.org"],
+      ["news.example.org", "news.example.org"],
       ["localhost", "localhost"],
       ["192.168.1.10", "192.168.1.10"],
     ])) {
@@ -24,7 +25,7 @@ describe("parseHostname", () => {
   it("writes an international name the way the page's own hostname reads", () => {
     const result = parseHostname("www.przykład.pl");
     assert.ok(result.ok);
-    assert.equal(result.value, new URL("https://www.przykład.pl/").hostname);
+    assert.equal(result.value, new URL("https://przykład.pl/").hostname);
   });
 
   it("tells an empty field from one holding no address at all", () => {

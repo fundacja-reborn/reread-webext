@@ -1413,7 +1413,7 @@
   "options_add_host_label": { "message": "Adres strony" },
   "options_add_host_button": { "message": "Dodaj" },
   "options_add_host_note": {
-    "message": "Adres tak, jak pokazuje go przeglądarka, na przykład www.example.org - dokładnie ta strona, bez subdomen. Można wkleić cały adres podstrony; zostaje sama nazwa strony."
+    "message": "Adres tak, jak pokazuje go przeglądarka, na przykład example.org; www.example.org to ta sama strona. Subdomena, na przykład news.example.org, to osobna strona. Można wkleić cały adres podstrony; zostaje sama nazwa strony."
   },
   "options_host_empty": { "message": "Najpierw wpisz adres strony." },
   "options_host_invalid": { "message": "To nie jest adres strony." },

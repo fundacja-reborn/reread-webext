@@ -1072,7 +1072,7 @@
   "options_add_host_label": { "message": "Dirección del sitio" },
   "options_add_host_button": { "message": "Añadir" },
   "options_add_host_note": {
-    "message": "La dirección tal como la muestra el navegador, por ejemplo www.example.org: exactamente ese sitio, sin sus subdominios. Se puede pegar la dirección completa de una página; solo se conserva la parte del sitio."
+    "message": "La dirección tal como la muestra el navegador, por ejemplo example.org; www.example.org es el mismo sitio. Un subdominio como news.example.org es un sitio aparte. Se puede pegar la dirección completa de una página; solo se conserva la parte del sitio."
   },
   "options_host_empty": { "message": "Escribe primero la dirección del sitio." },
   "options_host_invalid": { "message": "Eso no es una dirección de sitio." },

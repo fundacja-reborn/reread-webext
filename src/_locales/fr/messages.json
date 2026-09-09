@@ -1084,7 +1084,7 @@
   "options_add_host_label": { "message": "Adresse du site" },
   "options_add_host_button": { "message": "Ajouter" },
   "options_add_host_note": {
-    "message": "L'adresse telle que le navigateur l'affiche, par exemple www.example.org - ce site exactement, sans ses sous-domaines. Une adresse de page entière peut être collée ; seule la partie du site est conservée."
+    "message": "L'adresse telle que le navigateur l'affiche, par exemple example.org ; www.example.org est le même site. Un sous-domaine comme news.example.org est un site à part. Une adresse de page entière peut être collée ; seule la partie du site est conservée."
   },
   "options_host_empty": { "message": "Tapez d'abord l'adresse du site." },
   "options_host_invalid": { "message": "Ce n'est pas une adresse de site." },

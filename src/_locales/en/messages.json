@@ -1330,7 +1330,7 @@
   "options_add_host_label": { "message": "Site address" },
   "options_add_host_button": { "message": "Add" },
   "options_add_host_note": {
-    "message": "The address as the browser shows it, for example www.example.org - the exact site, not its subdomains. A page's whole address can be pasted; only the site part is kept."
+    "message": "The address as the browser shows it, for example example.org; www.example.org is the same site. A subdomain such as news.example.org is a separate site. A page's whole address can be pasted; only the site part is kept."
   },
   "options_host_empty": { "message": "Type the site's address first." },
   "options_host_invalid": { "message": "That is not a site address." },
