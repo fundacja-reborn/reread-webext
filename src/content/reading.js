@@ -135,12 +135,33 @@ function speakActions() {
 const COPY = ["copy"];
 
 /**
+ * Whether the row carries the door into the reader (D188): on somebody else's
+ * page it does, on the reader's own page there is nowhere further to go. Set
+ * with `ownSelection` in `start`, the flag that tells the two pages apart.
+ */
+let onOthersPage = true;
+
+/**
+ * The row's third picture (D188), the reading view's page: the same door the
+ * launcher bubble opens on a phone and the popup opens everywhere, standing
+ * in the translation bubble so that the first selection on a page shows the
+ * way into the reader - for whoever never pinned the toolbar button and never
+ * learned the shortcut. Only away from the reader: its own bubble has no
+ * reader to open.
+ *
+ * @returns {import("./tooltip.js").Action[]}
+ */
+function readerDoor() {
+  return onOthersPage ? ["open-reader"] : [];
+}
+
+/**
  * What the bubble offers for a phrase that is in the vocabulary.
  *
  * @returns {import("./tooltip.js").Action[]}
  */
 function kept() {
-  return [...speakActions(), ...COPY, "learned", "edit"];
+  return [...speakActions(), ...COPY, ...readerDoor(), "learned", "edit"];
 }
 
 /**
@@ -174,9 +195,9 @@ function offered(decision) {
     // hearing, and a whole translated sentence is exactly what gets copied
     // out into notes (D110).
     case "none":
-      return [...speakActions(), ...COPY];
+      return [...speakActions(), ...COPY, ...readerDoor()];
     case "ask":
-      return [...speakActions(), ...COPY, "save", "edit"];
+      return [...speakActions(), ...COPY, ...readerDoor(), "save", "edit"];
     default:
       return kept();
   }
@@ -780,6 +801,14 @@ async function onAction(action, meanings) {
   // The launcher bubble's one button, which this side never offers - the guard
   // is here so the type can say so without a stray report ever writing.
   if (action === "reader") return;
+  // The row's own door into the reader (D188): the same message the launcher
+  // sends, with the tab read off the sender in the background; nothing here
+  // waits for it - the reader tab coming forward is its own confirmation.
+  if (action === "open-reader") {
+    void ask({ kind: Message.OPEN_READER });
+    tooltip.hide();
+    return;
+  }
   if (action === "settings") {
     // The reader page walks to the settings in its own tab (D139) - the way
     // back must exist on a phone - and hands the walk down; on somebody
@@ -1206,7 +1235,7 @@ function present(selection, { deliberate, touch, chain = false }) {
       line: firstLineOf(selection.range),
       variant: "quiet",
       body: "",
-      actions: [...speakActions(), ...COPY],
+      actions: [...speakActions(), ...COPY, ...readerDoor()],
       phrase: text,
       touch,
       coarse: touchPointer(lastPointerType),
@@ -1254,6 +1283,7 @@ function present(selection, { deliberate, touch, chain = false }) {
       actions: [
         ...speakActions(),
         ...COPY,
+        ...readerDoor(),
         .../** @type {import("./tooltip.js").Action[]} */ (
           selection.findable ? ["edit", "save"] : []
         ),
@@ -1639,8 +1669,11 @@ export function start(where = {}) {
   quietVoice = where.quietVoice ?? null;
   bubbleScheme = where.scheme ?? null;
   // The page that took the native selection away answers the copy chord
-  // itself (D110) - and only that page.
+  // itself (D110) - and only that page. The same flag tells the reader's own
+  // page from everybody else's, which is where the door into the reader
+  // stands (D188).
   bridgeCopy = where.ownSelection === true;
+  onOthersPage = where.ownSelection !== true;
 
   // Called again when the reader renders another article, and the listeners
   // must not stack up behind it.

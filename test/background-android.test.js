@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { afterEach, describe, it } from "node:test";
 
-import { commandsApi } from "../src/lib/browser.js";
+import { commandsApi, contextMenusApi } from "../src/lib/browser.js";
 
 /**
  * The background module registers its listeners at the top level, one after
@@ -80,6 +80,20 @@ describe("commandsApi", () => {
     const commands = { onCommand: event("commands.onCommand") };
     /** @type {any} */ (globalThis.browser).commands = commands;
     assert.equal(commandsApi(), commands);
+  });
+});
+
+describe("contextMenusApi", () => {
+  it("answers null on a browser without the API, the way Android is", () => {
+    installAndroidBrowser();
+    assert.equal(contextMenusApi(), null);
+  });
+
+  it("answers the API where there is one", () => {
+    installAndroidBrowser();
+    const contextMenus = { onClicked: event("contextMenus.onClicked"), create() {}, async removeAll() {} };
+    /** @type {any} */ (globalThis.browser).contextMenus = contextMenus;
+    assert.equal(contextMenusApi(), contextMenus);
   });
 });
 

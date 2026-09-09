@@ -145,6 +145,7 @@ function label(action) {
     case "more":
       return t("bubble_more");
     case "reader":
+    case "open-reader":
       return t("bubble_reader");
     case "library":
       // A verb, like the door beside it (D182): the room's name alone read
@@ -954,12 +955,14 @@ export const STYLE = `
      Inline-flex centers the icon in the same box the text labels get, and the
      icon matches their cap height, so the row keeps one baseline rhythm. */
   .actions button[data-action="speak"],
-  .actions button[data-action="copy"] {
+  .actions button[data-action="copy"],
+  .actions button[data-action="open-reader"] {
     display: inline-flex;
     align-items: center;
   }
   .actions button[data-action="speak"] svg,
-  .actions button[data-action="copy"] svg {
+  .actions button[data-action="copy"] svg,
+  .actions button[data-action="open-reader"] svg {
     width: var(--icon);
     height: var(--icon);
     display: block;
@@ -1168,16 +1171,18 @@ export const STYLE = `
  *  grows the vocabulary's hands back: the lines become presses and the row
  *  carries the pencil and Save - the engine stays out of it either way.
  *  @typedef {"recall" | "save" | "launcher" | "quiet"} Variant */
-/** What the bubble can offer. `speak` and `copy` are the row's two pictures -
- *  a speaker icon that reads the phrase aloud (D83), and a copy icon that
- *  opens the clipboard row (D110).
- *  @typedef {"save" | "learned" | "edit" | "settings" | "more" | "reader" | "library" | "speak" | "copy"} Action */
+/** What the bubble can offer. `speak`, `copy` and `open-reader` are the row's
+ *  pictures - a speaker icon that reads the phrase aloud (D83), a copy icon
+ *  that opens the clipboard row (D110), and the reading view's page, the door
+ *  into the reader from a bubble on somebody else's page (D188). `reader` is
+ *  the launcher's door with words on it, a different dress for the same room.
+ *  @typedef {"save" | "learned" | "edit" | "settings" | "more" | "reader" | "library" | "speak" | "copy" | "open-reader"} Action */
 /** The clipboard row's two presses (D110) - the bubble's own business, like
  *  editing: never offered by a caller, never reported to one.
  *  @typedef {"copy-original" | "copy-translation"} CopyChoice */
 /** What it reports - editing never leaves the bubble, and More leaves it only
  *  on the press that opens the layer, so a caller with nothing fetched yet can
- *  fetch it then. @typedef {"save" | "choose" | "learned" | "settings" | "reader" | "library" | "more" | "speak"} ReportedAction */
+ *  fetch it then. @typedef {"save" | "choose" | "learned" | "settings" | "reader" | "library" | "more" | "speak" | "open-reader"} ReportedAction */
 
 /**
  * One block of the second layer below the sentence: where it came from, and the
@@ -2437,14 +2442,18 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
       const button = document.createElement("button");
       button.type = "button";
       button.dataset["action"] = action;
-      if (action === "speak" || action === "copy") {
+      if (action === "speak" || action === "copy" || action === "open-reader") {
         // The labels that are pictures: the words go where a screen reader
         // and a hovering cursor read them, and the icons are built with DOM
         // calls like everything else here (see `speakerIcon`, `copyIcon`).
+        // The third picture (D188) is the reading view's own page, the
+        // launcher door's glyph without its words: a door out of the bubble
+        // on somebody else's page, into the reader, for whoever never found
+        // the toolbar button.
         const name = label(action);
         button.setAttribute("aria-label", name);
         button.title = name;
-        button.append(action === "speak" ? speakerIcon() : copyIcon());
+        button.append(action === "speak" ? speakerIcon() : action === "copy" ? copyIcon() : readerIcon());
         // The copy icon is a disclosure: it says so, and keeps saying the
         // truth when the buttons are rebuilt over an open row.
         if (action === "copy") {

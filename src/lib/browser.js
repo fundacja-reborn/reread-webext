@@ -58,6 +58,19 @@ export function commandsApi() {
 }
 
 /**
+ * The right-click menu API, or null on a browser without one (D188). Firefox
+ * on Android has no menu for extensions, and the same lesson as `commands`
+ * applies: reached unguarded, its absence is not a missing feature but a
+ * TypeError partway through the background's top level. Callers ask this
+ * one question and never which platform they are on.
+ *
+ * @returns {NonNullable<WebExtBrowser["contextMenus"]> | null}
+ */
+export function contextMenusApi() {
+  return webext().contextMenus ?? null;
+}
+
+/**
  * Whether this page sits in a private window or tab. It matters because the
  * pages open their databases themselves, and Firefox gives an extension page
  * in a private window its own storage partition: an IndexedDB in memory,
