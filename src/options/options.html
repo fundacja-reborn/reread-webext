@@ -774,11 +774,41 @@
     <h2 id="switched-off-sites" data-i18n="options_disabled_heading">Switched-off sites</h2>
 
     <p class="explain" data-i18n="options_disabled_intro">
-      A list of websites where the extension is switched off (no translation or underlines). You
-      can add sites here using the extension icon in your browser's toolbar.
+      A list of websites where the extension is switched off: no translation, no bubble, no
+      underlines. Add a site with the switch under the extension's icon in the browser's toolbar
+      while you are on it, or type its address below. There is no switch when both "Use without
+      a translation model" and "No bubble when selecting text" are on: nothing happens on ordinary
+      pages then, so there is nothing to switch off.
     </p>
 
     <div id="disabled-hosts" class="models"></div>
+
+    <!-- Adding by hand (D189): the popup's switch reaches only the site
+         somebody is standing on, and only while the popup shows it; a site
+         typed here needs neither. Whatever is pasted - a page's whole address
+         included - is reduced to the site part by lib/host.js, in the shape
+         the popup stores. -->
+    <p class="inline">
+      <label for="disabled-host" data-i18n="options_add_host_label">Site address</label>
+      <input
+        type="text"
+        id="disabled-host"
+        inputmode="url"
+        autocomplete="off"
+        autocapitalize="off"
+        spellcheck="false"
+        placeholder="www.example.org"
+      />
+      <button type="button" id="add-disabled-host" data-i18n="options_add_host_button">Add</button>
+    </p>
+
+    <p id="host-status" class="status" role="status"></p>
+
+    <p class="note footnote" data-i18n="options_add_host_note">
+      The address as the browser shows it, for example example.org; www.example.org is the same
+      site. A subdomain such as news.example.org is a separate site. A page's whole address can be
+      pasted; only the site part is kept.
+    </p>
 
     <!-- The tinkerer's door (D176): rules of the reader's own for the bubble
          and the reader page, and for nothing else - never the page being

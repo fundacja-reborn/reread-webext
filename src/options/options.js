@@ -37,6 +37,8 @@ import { languageName, pairLabel } from "../lib/language.js";
 import { catalogDictionaries, catalogSource } from "../lib/dict/catalog.js";
 import { describeDictDownloadProblem, downloadArchive } from "../lib/dict/download.js";
 import { describeLinkProblem, parseDictionaryLink } from "../lib/dict/link.js";
+import { describeHostProblem, parseHostname } from "../lib/host.js";
+import { sameSite } from "../lib/site.js";
 import { readLiveDictionaries, refreshLiveDictionaries } from "../lib/dict/live.js";
 import {
   aliasesOf,
@@ -759,7 +761,7 @@ async function renderStorage() {
  * has to say how it went - a sentence about a failed download printed below the
  * file picker is a sentence nobody scrolls to.
  *
- * @param {"model-status" | "refresh-status" | "file-status" | "dictionary-status" | "dictionary-file-status" | "dictionary-link-status" | "dictionary-refresh-status"} id
+ * @param {"model-status" | "refresh-status" | "file-status" | "dictionary-status" | "dictionary-file-status" | "dictionary-link-status" | "dictionary-refresh-status" | "host-status"} id
  * @param {string} text
  * @param {"idle" | "busy" | "error"} [tone]
  */
@@ -1359,6 +1361,37 @@ async function restoreHost(host) {
   renderDisabledHosts();
   // Open tabs of that site notice the same write and start on the spot -
   // nothing here has to find them, which is good, because nothing here could.
+}
+
+/**
+ * Switches a site off by its typed address (D189), the popup's write by other
+ * means: the popup reaches only the site somebody is standing on, and shows
+ * its switch only while ordinary pages do anything at all - with the model
+ * and the bubble both off it shows none, and somebody who read this section's
+ * promise then found no switch (Gormagon's report of 0.5.47).
+ */
+async function addHostByHand() {
+  const input = /** @type {HTMLInputElement | null} */ (document.getElementById("disabled-host"));
+  const parsed = parseHostname(input?.value ?? "");
+  if (!parsed.ok) {
+    say("host-status", describeHostProblem(parsed.problem), "error");
+    return;
+  }
+  const host = parsed.value;
+
+  // Read fresh before writing, for the reason `restoreHost` does. Listed
+  // under either of its names counts (D189): a www.reapps.eu from the popup
+  // of an older version already covers reapps.eu.
+  const current = await readConfig();
+  const listed = current.disabledHosts.find((one) => sameSite(one, host));
+  if (listed !== undefined) {
+    say("host-status", t("options_host_listed", listed));
+    return;
+  }
+  config = await writeConfig({ disabledHosts: [...current.disabledHosts, host] });
+  renderDisabledHosts();
+  if (input !== null) input.value = "";
+  say("host-status", t("options_host_added", host));
 }
 
 /**
@@ -2853,6 +2886,12 @@ document.getElementById("dictionary-link")?.addEventListener("keydown", (event) 
   if (event.key !== "Enter") return;
   event.preventDefault();
   void downloadFromLink();
+});
+document.getElementById("add-disabled-host")?.addEventListener("click", () => void addHostByHand());
+document.getElementById("disabled-host")?.addEventListener("keydown", (event) => {
+  if (event.key !== "Enter") return;
+  event.preventDefault();
+  void addHostByHand();
 });
 
 // The armed Delete stands down at any step away from it - a press elsewhere,

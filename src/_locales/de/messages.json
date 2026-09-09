@@ -1044,7 +1044,22 @@
   },
   "options_disabled_heading": { "message": "Abgeschaltete Websites" },
   "options_disabled_intro": {
-    "message": "Eine Liste von Websites, auf denen die Erweiterung abgeschaltet ist (keine Übersetzung, keine Unterstreichungen). Websites fügen Sie hier über das Symbol der Erweiterung in der Symbolleiste Ihres Browsers hinzu."
+    "message": "Eine Liste von Websites, auf denen die Erweiterung abgeschaltet ist: keine Übersetzung, keine Sprechblase, keine Unterstreichungen. Fügen Sie eine Website mit dem Schalter unter dem Symbol der Erweiterung in der Symbolleiste des Browsers hinzu, während Sie sie geöffnet haben, oder tippen Sie ihre Adresse unten ein. Der Schalter fehlt, wenn sowohl „Ohne Übersetzungsmodell verwenden\" als auch „Keine Sprechblase beim Auswählen von Text\" eingeschaltet sind: auf gewöhnlichen Seiten passiert dann nichts, es gibt also nichts abzuschalten."
+  },
+  "options_add_host_label": { "message": "Adresse der Website" },
+  "options_add_host_button": { "message": "Hinzufügen" },
+  "options_add_host_note": {
+    "message": "Die Adresse, wie der Browser sie anzeigt, zum Beispiel example.org; www.example.org ist dieselbe Website. Eine Subdomain wie news.example.org ist eine eigene Website. Eine ganze Seitenadresse kann eingefügt werden; nur der Website-Teil bleibt."
+  },
+  "options_host_empty": { "message": "Geben Sie zuerst die Adresse der Website ein." },
+  "options_host_invalid": { "message": "Das ist keine Website-Adresse." },
+  "options_host_added": {
+    "message": "Auf $HOST$ abgeschaltet.",
+    "placeholders": { "host": { "content": "$1", "example": "www.example.org" } }
+  },
+  "options_host_listed": {
+    "message": "$HOST$ steht bereits auf der Liste.",
+    "placeholders": { "host": { "content": "$1", "example": "www.example.org" } }
   },
   "options_custom_css_heading": { "message": "Eigenes CSS" },
   "options_custom_css_intro": {

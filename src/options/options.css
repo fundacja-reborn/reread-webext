@@ -626,7 +626,8 @@ button.model-delete {
    empty field is not a line across the page. Its inline font-family is the
    preview: options.js sets it from the cleaned name. */
 #font-custom,
-#dictionary-link {
+#dictionary-link,
+#disabled-host {
   flex: 1 1 12rem;
   max-width: 22rem;
   min-width: 0;

@@ -452,8 +452,11 @@ describe("pageMode", () => {
     assert.equal(pageMode(off, "mac", "example.org"), "off");
     assert.equal(pageMode({ ...off, translationOff: true }, "mac", "example.org"), "off");
     assert.equal(pageMode({ ...off, readerOnly: true }, "android", "example.org"), "off");
-    // The switch names one exact host, and no other host inherits it.
-    assert.equal(pageMode(off, "mac", "www.example.org"), "reading");
+    // With or without www. is one site (D189); a subdomain is another, and
+    // no other host inherits the switch.
+    assert.equal(pageMode(off, "mac", "www.example.org"), "off");
+    assert.equal(pageMode({ ...base, disabledHosts: ["www.example.org"] }, "mac", "example.org"), "off");
+    assert.equal(pageMode(off, "mac", "news.example.org"), "reading");
   });
 
   it("only ever launches under the trim without a pair - nothing else is on offer", () => {

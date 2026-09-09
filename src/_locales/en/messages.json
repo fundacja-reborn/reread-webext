@@ -1325,7 +1325,22 @@
   },
   "options_disabled_heading": { "message": "Switched-off sites" },
   "options_disabled_intro": {
-    "message": "A list of websites where the extension is switched off (no translation or underlines). You can add sites here using the extension icon in your browser's toolbar."
+    "message": "A list of websites where the extension is switched off: no translation, no bubble, no underlines. Add a site with the switch under the extension's icon in the browser's toolbar while you are on it, or type its address below. There is no switch when both \"Use without a translation model\" and \"No bubble when selecting text\" are on: nothing happens on ordinary pages then, so there is nothing to switch off."
+  },
+  "options_add_host_label": { "message": "Site address" },
+  "options_add_host_button": { "message": "Add" },
+  "options_add_host_note": {
+    "message": "The address as the browser shows it, for example example.org; www.example.org is the same site. A subdomain such as news.example.org is a separate site. A page's whole address can be pasted; only the site part is kept."
+  },
+  "options_host_empty": { "message": "Type the site's address first." },
+  "options_host_invalid": { "message": "That is not a site address." },
+  "options_host_added": {
+    "message": "Switched off on $HOST$.",
+    "placeholders": { "host": { "content": "$1", "example": "www.example.org" } }
+  },
+  "options_host_listed": {
+    "message": "$HOST$ is already on the list.",
+    "placeholders": { "host": { "content": "$1", "example": "www.example.org" } }
   },
   "options_custom_css_heading": { "message": "Custom CSS" },
   "options_custom_css_intro": {
