@@ -34,19 +34,24 @@ import { answeredByHost } from "../same-host.js";
  * @typedef {object} DictDownloadOptions
  * @property {(progress: DictDownloadProgress) => void} [onProgress]
  * @property {AbortSignal} [signal]
+ * @property {boolean} [anyHost] follow the address wherever its host sends it -
+ *   for an address the reader pasted, never for one out of the package
  * @property {typeof fetch} [fetch] for tests; the real one by default
  */
 
 /**
- * @typedef {{ ok: true, value: ArrayBuffer } | { ok: false, problem: DictDownloadProblem, detail?: string }} DictDownloadResult
+ * @typedef {{ ok: true, value: ArrayBuffer, host: string } | { ok: false, problem: DictDownloadProblem, detail?: string }} DictDownloadResult
  */
 
 /**
- * The largest download this will accept, compressed. WikDict's biggest archive
- * is a few megabytes; far above that and this is not the file the catalogue
- * promised, whatever it is.
+ * The largest download this will accept, compressed. A bound on memory, not a
+ * judgement on dictionaries: the archive is held whole while it is taken
+ * apart, and this is what the settings page can hold on a phone with room for
+ * the unpacking behind it. WikDict's biggest archive is a few megabytes; the
+ * monolingual English one a reader pastes a link to (reader.dict, 2026) is
+ * sixty-three, and rebuilt twice a month.
  */
-export const MAX_ARCHIVE_BYTES = 64 * 1024 * 1024;
+export const MAX_ARCHIVE_BYTES = 256 * 1024 * 1024;
 
 /**
  * @param {string} url
@@ -54,6 +59,18 @@ export const MAX_ARCHIVE_BYTES = 64 * 1024 * 1024;
  */
 function fileName(url) {
   return url.split("?")[0]?.split("/").pop() || url;
+}
+
+/**
+ * @param {string} url
+ * @returns {string} the host part, or the whole string when it does not parse
+ */
+function hostOf(url) {
+  try {
+    return new URL(url).host;
+  } catch {
+    return url;
+  }
 }
 
 /**
@@ -80,10 +97,14 @@ export async function downloadArchive(url, options = {}) {
     return { ok: false, problem: "network", detail: `${fileName(url)}: ${error instanceof Error ? error.message : String(error)}` };
   }
 
-  // Answered by the host it was asked of, or not at all (D171).
-  if (!answeredByHost(response, url)) {
+  // Answered by the host it was asked of, or not at all (D171) - for an
+  // address out of the package. An address the reader pasted is theirs to
+  // follow wherever its host sends it, the way the browser's own download
+  // would go; where it ended up is handed back (`host`) to be said.
+  if (!options.anyHost && !answeredByHost(response, url)) {
     return { ok: false, problem: "http", detail: `${fileName(url)}: answered from another host` };
   }
+  const host = hostOf(typeof response.url === "string" && response.url !== "" ? response.url : url);
 
   if (!response.ok) {
     return { ok: false, problem: "http", detail: `${response.status} ${response.statusText} for ${fileName(url)}`.trim() };
@@ -104,12 +125,16 @@ export async function downloadArchive(url, options = {}) {
       return { ok: false, problem: "too_big", detail: `${fileName(url)}: ${whole.byteLength} bytes` };
     }
     onProgress?.({ received: whole.byteLength, total });
-    return { ok: true, value: whole };
+    return { ok: true, value: whole, host };
   }
 
   const reader = body.getReader();
-  /** @type {Uint8Array[]} */
-  const chunks = [];
+  // One buffer, sized by the header when there is one and grown when there is
+  // none: each chunk is written straight into it, so the archive is never in
+  // memory twice. Joining a list of chunks at the end costs a second copy of
+  // the whole for a moment, and at this cap that moment is a quarter of a
+  // gigabyte on a phone.
+  let all = new Uint8Array(total > 0 ? total : 1 << 20);
   let received = 0;
 
   for (;;) {
@@ -124,14 +149,19 @@ export async function downloadArchive(url, options = {}) {
     if (step.done) break;
     const chunk = step.value ?? new Uint8Array(0);
 
-    chunks.push(chunk);
-    received += chunk.byteLength;
     // The cap is enforced on what actually arrives, not on the header - a
     // header is a claim, and the claim is not what fills memory.
-    if (received > MAX_ARCHIVE_BYTES) {
+    if (received + chunk.byteLength > MAX_ARCHIVE_BYTES) {
       await reader.cancel().catch(() => undefined);
       return { ok: false, problem: "too_big", detail: `${fileName(url)}: over ${MAX_ARCHIVE_BYTES} bytes` };
     }
+    if (received + chunk.byteLength > all.byteLength) {
+      const grown = new Uint8Array(Math.min(MAX_ARCHIVE_BYTES, Math.max(all.byteLength * 2, received + chunk.byteLength)));
+      grown.set(all.subarray(0, received));
+      all = grown;
+    }
+    all.set(chunk, received);
+    received += chunk.byteLength;
     // A total the server claimed is raised rather than overrun when it turns
     // out to be short; no claim at all stays zero, and the bar stays endless.
     onProgress?.({ received, total: total === 0 ? 0 : Math.max(total, received) });
@@ -144,13 +174,9 @@ export async function downloadArchive(url, options = {}) {
     }
   }
 
-  const all = new Uint8Array(received);
-  let at = 0;
-  for (const chunk of chunks) {
-    all.set(chunk, at);
-    at += chunk.byteLength;
-  }
-  return { ok: true, value: all.buffer };
+  // Exact when the header was right, which is the usual case; a body shorter
+  // than announced, or one with no announcement, is cut to what arrived.
+  return { ok: true, value: received === all.byteLength ? all.buffer : all.buffer.slice(0, received), host };
 }
 
 /**

@@ -625,7 +625,8 @@ button.model-delete {
    wide enough for a real name ("Atkinson Hyperlegible"), capped so an
    empty field is not a line across the page. Its inline font-family is the
    preview: options.js sets it from the cleaned name. */
-#font-custom {
+#font-custom,
+#dictionary-link {
   flex: 1 1 12rem;
   max-width: 22rem;
   min-width: 0;
@@ -636,6 +637,13 @@ button.model-delete {
   border: 1px solid var(--page-border);
   background: transparent;
   color: var(--page-fg);
+}
+
+/* The pasted address (D187) wears the same dress, wider: an address is long,
+   and a field that cuts it off hides the part that says which file it is. */
+#dictionary-link {
+  flex: 1 1 18rem;
+  max-width: 40rem;
 }
 
 /* The reader's own rules (D176): a code field in the same quiet dress, but

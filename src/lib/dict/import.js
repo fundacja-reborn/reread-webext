@@ -8,11 +8,12 @@
  * gzip file with a random-access table in its header, and a reader that only
  * ever wants all of it can let the table go by.
  *
- * Archives arrive here already opened. The catalogue downloads WikDict's
- * `.zip` files and `zip.js` takes them apart; somebody adding files by hand
+ * Archives arrive here already opened. The settings page downloads `.zip`
+ * files - the catalogue's from WikDict, or one from an address the reader
+ * pasted - and `zip.js` takes them apart; somebody adding files by hand
  * unpacks the archive themselves. Either way, what this module sees is a set
  * of named files - `dictionaryFromZip` below is the whole of the difference,
- * and the two paths share every check after it.
+ * and the paths share every check after it.
  *
  * What the database gets is a stream, not a copy. `openDictionary` unpacks the
  * files and checks the one thing that can be checked up front; `entriesOf` and
@@ -164,23 +165,37 @@ export function classifyDictionaryFiles(names) {
 }
 
 /**
+ * Whether a name inside an archive is one of the four kinds of file a
+ * dictionary is made of - by its extension, compressed or not.
+ *
+ * Everything else an archive carries is left where it is, and with this as
+ * its `wanted` the zip reader never even inflates it: the pictures a
+ * Wiktionary build ships in `res/` by the hundred, offset caches, a readme -
+ * and the resource forks and folder metadata a Mac zips in (`__MACOSX`, names
+ * starting with a dot), which would otherwise read as a second dictionary and
+ * fail the one-at-a-time rule for something nobody chose to put there. Real
+ * files keep their full archive paths, so two dictionaries genuinely zipped
+ * together still refuse cleanly.
+ *
+ * @param {string} name an archive path
+ * @returns {boolean}
+ */
+export function isDictionaryFile(name) {
+  const parts = name.split("/");
+  const leaf = parts.pop() ?? "";
+  if (leaf.length === 0 || leaf.startsWith(".") || parts.includes("__MACOSX")) return false;
+  return /\.(?:ifo|idx|dict|syn)(?:\.(?:gz|dz))?$/iu.test(leaf);
+}
+
+/**
  * Sorts the files inside a downloaded archive into the roles of one
  * dictionary, and hands their bytes over.
- *
- * The junk a zip really carries is dropped before classification: resource
- * forks and folder metadata (`__MACOSX`, names starting with a dot) would
- * otherwise read as a second dictionary and fail the one-at-a-time rule for
- * something nobody chose to put there. Real files keep their full archive
- * paths, so two dictionaries genuinely zipped together still refuse cleanly.
  *
  * @param {import("./zip.js").ZipEntry[]} entries
  * @returns {{ ok: true, value: { base: string, files: DictionaryFiles } } | { ok: false, problem: ImportProblem, detail?: string }}
  */
 export function dictionaryFromZip(entries) {
-  const usable = entries.filter((entry) => {
-    const leaf = entry.name.split("/").pop() ?? "";
-    return leaf.length > 0 && !leaf.startsWith(".") && !entry.name.split("/").includes("__MACOSX");
-  });
+  const usable = entries.filter((entry) => isDictionaryFile(entry.name));
 
   const classified = classifyDictionaryFiles(usable.map((entry) => entry.name));
   if (!classified.ok) return classified;

@@ -707,6 +707,70 @@
       </p>
     </details>
 
+    <!-- The third door (D187): an address instead of files. The catalogue's
+         own road - download, zip, importer - with the reader's address on it,
+         so the four files never have to go through a picker (on a phone or an
+         iPad the picker is the hard part). The extension connects to the
+         pasted address and to nowhere else, the summary says so, and the
+         address is judged (link.js) before a byte is asked for. -->
+    <details class="fold">
+      <summary>
+        <h3 data-i18n="options_add_link_heading">Add a dictionary from a link</h3>
+      </summary>
+
+      <p class="explain" data-i18n="options_add_link_summary">
+        Paste the address of a StarDict dictionary packed as a .zip file, choose the languages and
+        press Download. The extension connects to that address once, when you press the button, and
+        to nowhere else; nothing of yours is sent along. The archive is unpacked and checked on this
+        device, exactly like files you pick yourself.
+      </p>
+
+      <p class="inline">
+        <label for="dictionary-link" data-i18n="options_link_label">Address</label>
+        <!-- `url` rather than `text` for the keyboard a phone then offers (the
+             slash, the dot); the browser's own validation plays no part - the
+             address is judged in link.js when the button is pressed. -->
+        <input
+          type="url"
+          id="dictionary-link"
+          inputmode="url"
+          autocomplete="off"
+          autocapitalize="off"
+          spellcheck="false"
+          placeholder="https://"
+        />
+      </p>
+
+      <p class="inline">
+        <label for="link-from" data-i18n="options_words_in">Words in</label>
+        <select id="link-from"></select>
+        <label for="link-to" data-i18n="options_explained_in">explained in</label>
+        <select id="link-to"></select>
+        <button type="button" id="download-link" data-i18n="action_download">Download</button>
+      </p>
+
+      <!-- The download's progress in the catalogue's own row shape: shown
+           while a download runs, emptied and hidden after it. -->
+      <div id="dictionary-link-row" class="model" hidden></div>
+
+      <p id="dictionary-link-status" class="status" role="status"></p>
+
+      <p class="explain">
+        <span data-i18n="options_link_sources"
+          >Where to find dictionaries, monolingual ones too - English-English, for example - each
+          with its licence:</span
+        >
+        <a id="dictionary-sources-link" href="https://reapps.eu/read#faq-dictionary-sources" target="_blank" rel="noopener"
+          >reapps.eu/read</a
+        >.
+      </p>
+
+      <p class="note footnote" data-i18n="options_link_note">
+        Only https addresses are accepted. An archive that is not a .zip file (.tar.xz, .tar.zst) has
+        to be unpacked and added from files.
+      </p>
+    </details>
+
     <h2 id="switched-off-sites" data-i18n="options_disabled_heading">Switched-off sites</h2>
 
     <p class="explain" data-i18n="options_disabled_intro">

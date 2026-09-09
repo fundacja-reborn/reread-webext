@@ -973,6 +973,12 @@
   "model_files_missing_vocab": { "message": "The vocabulary file is missing (vocab.<pair>.spm)." },
   "model_files_not_a_model": { "message": "Those files are not a translation model." },
 
+  "dict_link_empty": { "message": "Paste the address of the archive first. Nothing was stored." },
+  "dict_link_invalid": { "message": "That is not a web address. Nothing was stored." },
+  "dict_link_not_https": { "message": "Only https addresses are accepted. Nothing was stored." },
+  "dict_link_credentials": {
+    "message": "An address with a user name or password in it is not accepted. Nothing was stored."
+  },
   "dict_default_name": { "message": "Dictionary" },
   "dict_import_empty": { "message": "No files were selected. Nothing was stored." },
   "dict_import_missing_ifo": { "message": "There is no .ifo file among those, so this is not a StarDict dictionary. Nothing was stored." },
@@ -1295,6 +1301,27 @@
   "options_dict_files_note": {
     "message": "Adding from files makes no network request. Any StarDict files work, including the catalogue's own, which are published at",
     "description": "Ends just before the address, which stands in the page as a link; the sentence's closing full stop is part of the page."
+  },
+  "options_add_link_heading": { "message": "Add a dictionary from a link" },
+  "options_add_link_summary": {
+    "message": "Paste the address of a StarDict dictionary packed as a .zip file, choose the languages and press Download. The extension connects to that address once, when you press the button, and to nowhere else; nothing of yours is sent along. The archive is unpacked and checked on this device, exactly like files you pick yourself.",
+    "description": "The whole instruction of the fold that adds a dictionary from a pasted address."
+  },
+  "options_link_label": { "message": "Address" },
+  "options_link_sources": {
+    "message": "Where to find dictionaries, monolingual ones too - English-English, for example - each with its licence:",
+    "description": "Ends just before the address of the page of sources, which stands in the page as a link; the sentence's closing full stop is part of the page."
+  },
+  "options_link_note": {
+    "message": "Only https addresses are accepted. An archive that is not a .zip file (.tar.xz, .tar.zst) has to be unpacked and added from files."
+  },
+  "options_downloading_link": {
+    "message": "Downloading from $HOST$...",
+    "placeholders": { "host": { "content": "$1", "example": "www.reader-dict.com" } }
+  },
+  "options_link_answered_by": {
+    "message": "The address led to $HOST$, and the archive came from there.",
+    "placeholders": { "host": { "content": "$1", "example": "objects.githubusercontent.com" } }
   },
   "options_disabled_heading": { "message": "Switched-off sites" },
   "options_disabled_intro": {

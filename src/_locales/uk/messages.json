@@ -1070,6 +1070,12 @@
   "model_files_missing_vocab": { "message": "Бракує словникового файлу (vocab.<pair>.spm)." },
   "model_files_not_a_model": { "message": "Ці файли не є моделлю перекладу." },
 
+  "dict_link_empty": { "message": "Спочатку вставте адресу архіву. Нічого не збережено." },
+  "dict_link_invalid": { "message": "Це не вебадреса. Нічого не збережено." },
+  "dict_link_not_https": { "message": "Приймаються лише адреси https. Нічого не збережено." },
+  "dict_link_credentials": {
+    "message": "Адреса з іменем користувача або паролем не приймається. Нічого не збережено."
+  },
   "dict_default_name": { "message": "Словник" },
   "dict_import_empty": { "message": "Не вибрано жодного файлу. Нічого не збережено." },
   "dict_import_missing_ifo": { "message": "Серед цих файлів немає .ifo, тож це не словник StarDict. Нічого не збережено." },
@@ -1380,6 +1386,25 @@
   },
   "options_dict_files_note": {
     "message": "Додавання з файлів не робить жодного мережевого запиту. Працюють будь-які файли StarDict, зокрема й файли каталогу, опубліковані на"
+  },
+  "options_add_link_heading": { "message": "Додати словник за посиланням" },
+  "options_add_link_summary": {
+    "message": "Вставте адресу словника StarDict, запакованого у файл .zip, вкажіть мови та натисніть Завантажити. Розширення з'єднується з цією адресою один раз, коли ви натискаєте кнопку, і з жодною іншою; нічого вашого не надсилається. Архів розпаковується та перевіряється на цьому пристрої, точно так само, як файли, які ви обираєте самі."
+  },
+  "options_link_label": { "message": "Адреса" },
+  "options_link_sources": {
+    "message": "Де шукати словники, зокрема одномовні - наприклад, англійсько-англійський - кожен із зазначеною ліцензією:"
+  },
+  "options_link_note": {
+    "message": "Приймаються лише адреси https. Архів, який не є файлом .zip (.tar.xz, .tar.zst), потрібно розпакувати й додати з файлів."
+  },
+  "options_downloading_link": {
+    "message": "Завантаження з $HOST$...",
+    "placeholders": { "host": { "content": "$1", "example": "www.reader-dict.com" } }
+  },
+  "options_link_answered_by": {
+    "message": "Адреса вела до $HOST$, і саме звідти прийшов архів.",
+    "placeholders": { "host": { "content": "$1", "example": "objects.githubusercontent.com" } }
   },
   "options_disabled_heading": { "message": "Вимкнені сайти" },
   "options_disabled_intro": {

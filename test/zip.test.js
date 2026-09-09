@@ -155,7 +155,6 @@ describe("readZip", () => {
       ["an entry that unpacks past the size the directory claims", buildZip([{ name: "a.dict", data: new Uint8Array(1 << 20), uncompressedSize: 8 }]), "zip_bad"],
       ["an empty archive", buildZip([], { count: 0 }), "zip_bad"],
       ["only directories inside", buildZip([{ name: "folder/", data: new Uint8Array(0), method: 0 }]), "zip_bad"],
-      ["a count past the room a dictionary needs", buildZip(Array.from({ length: 65 }, (_, index) => ({ name: `f${index}.txt`, data: text("x") }))), "zip_too_big"],
       ["an entry claiming more than the total cap", buildZip([{ name: "a.ifo", data: text("x"), uncompressedSize: 257 * 1024 * 1024 }]), "zip_too_big"],
     ]);
 
@@ -164,6 +163,28 @@ describe("readZip", () => {
       assert.ok(!result.ok, `should have refused ${what}`);
       assert.equal(result.problem, problem, `${what} should be ${problem}, was ${result.problem}`);
     }
+  });
+
+  it("unpacks only the wanted members, and counts only them against the cap", async () => {
+    // A Wiktionary build ships a picture per hundred entries beside its four
+    // files; none of them is inflated, and an unwanted member may claim any
+    // size at all - it is never what fills memory.
+    const zip = buildZip([
+      { name: "dict-data.ifo", data: text("bookname=Test") },
+      ...Array.from({ length: 200 }, (_, index) => ({ name: `res/${index}.gif`, data: text("GIF89a") })),
+      { name: "res/huge.bin", data: text("x"), uncompressedSize: 300 * 1024 * 1024 },
+    ]);
+    const result = await readZip(zip, { wanted: (name) => name.endsWith(".ifo") });
+    assert.ok(result.ok, JSON.stringify(result));
+    assert.deepEqual(result.value.map((entry) => entry.name), ["dict-data.ifo"]);
+  });
+
+  it("answers with no files, not a refusal, when nothing inside is wanted", async () => {
+    // What is missing is for the caller to name - "no .ifo among these" says
+    // more than "bad archive" would.
+    const result = await readZip(buildZip([{ name: "readme.txt", data: text("hi") }]), { wanted: () => false });
+    assert.ok(result.ok);
+    assert.deepEqual(result.value, []);
   });
 
   it("calls a truncated archive damaged rather than reading past its end", async () => {

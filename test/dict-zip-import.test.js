@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { dictionaryFromZip } from "../src/lib/dict/import.js";
+import { dictionaryFromZip, isDictionaryFile } from "../src/lib/dict/import.js";
 
 /**
  * @param {string} name
@@ -64,5 +64,22 @@ describe("dictionaryFromZip", () => {
       file("__MACOSX/._a.ifo"),
     ]);
     assert.ok(result.ok);
+  });
+});
+
+describe("isDictionaryFile", () => {
+  it("knows the four kinds of file, compressed or not, and nothing else", () => {
+    for (const name of ["a.ifo", "dir/a.idx", "a.idx.gz", "a.dict", "wikdict-en-pl/a.dict.dz", "a.syn", "A.IFO"]) {
+      assert.ok(isDictionaryFile(name), name);
+    }
+    for (const name of ["res/1.gif", "a.ifo.txt", "readme", "dir/", "", "a.dict.zip", "a.idx.oft"]) {
+      assert.ok(!isDictionaryFile(name), name);
+    }
+  });
+
+  it("leaves a Mac's clutter where it is", () => {
+    for (const name of ["__MACOSX/a/._a.ifo", "__MACOSX/a.ifo", "a/.a.ifo", ".DS_Store"]) {
+      assert.ok(!isDictionaryFile(name), name);
+    }
   });
 });
