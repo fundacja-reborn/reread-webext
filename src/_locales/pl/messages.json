@@ -1070,6 +1070,12 @@
   "model_files_missing_vocab": { "message": "Brakuje pliku słownictwa (vocab.<pair>.spm)." },
   "model_files_not_a_model": { "message": "Te pliki nie są modelem tłumaczeniowym." },
 
+  "dict_link_empty": { "message": "Najpierw wklej adres archiwum. Nic nie zapisano." },
+  "dict_link_invalid": { "message": "To nie jest adres strony. Nic nie zapisano." },
+  "dict_link_not_https": { "message": "Przyjmowane są tylko adresy https. Nic nie zapisano." },
+  "dict_link_credentials": {
+    "message": "Adres z nazwą użytkownika albo hasłem nie jest przyjmowany. Nic nie zapisano."
+  },
   "dict_default_name": { "message": "Słownik" },
   "dict_import_empty": { "message": "Nie wybrano żadnych plików. Nic nie zapisano." },
   "dict_import_missing_ifo": { "message": "Wśród tych plików nie ma pliku .ifo, więc to nie jest słownik StarDict. Nic nie zapisano." },
@@ -1380,6 +1386,25 @@
   },
   "options_dict_files_note": {
     "message": "Dodawanie z plików nie wykonuje żadnego zapytania sieciowego. Działają dowolne pliki StarDict, także pliki z katalogu, opublikowane pod"
+  },
+  "options_add_link_heading": { "message": "Dodaj słownik z linku" },
+  "options_add_link_summary": {
+    "message": "Wklej adres słownika StarDict spakowanego do pliku .zip, określ języki i naciśnij Pobierz. Rozszerzenie łączy się z tym adresem raz, po naciśnięciu przycisku, i z żadnym innym; nic Twojego nie jest wysyłane. Archiwum jest rozpakowywane i sprawdzane na tym urządzeniu, dokładnie tak jak pliki wybrane ręcznie."
+  },
+  "options_link_label": { "message": "Adres" },
+  "options_link_sources": {
+    "message": "Gdzie szukać słowników, także jednojęzycznych - na przykład angielsko-angielskiego - każdy z podaną licencją:"
+  },
+  "options_link_note": {
+    "message": "Przyjmowane są tylko adresy https. Archiwum inne niż plik .zip (.tar.xz, .tar.zst) trzeba rozpakować i dodać z plików."
+  },
+  "options_downloading_link": {
+    "message": "Pobieranie z $HOST$...",
+    "placeholders": { "host": { "content": "$1", "example": "www.reader-dict.com" } }
+  },
+  "options_link_answered_by": {
+    "message": "Adres prowadził do $HOST$ i stamtąd przyszło archiwum.",
+    "placeholders": { "host": { "content": "$1", "example": "objects.githubusercontent.com" } }
   },
   "options_disabled_heading": { "message": "Wyłączone witryny" },
   "options_disabled_intro": {

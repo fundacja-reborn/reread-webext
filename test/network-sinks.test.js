@@ -23,7 +23,8 @@ const NETWORK_SINKS = new Map([
   ["src/lib/models/download.js", 1],
   // Mozilla's index of models, from the same bucket, on the update button.
   ["src/lib/models/live.js", 1],
-  // A dictionary archive, from WikDict, on the download button.
+  // A dictionary archive, on the download button: the catalogue's from
+  // WikDict, or one from an address the reader pasted (D187).
   ["src/lib/dict/download.js", 1],
   // WikDict's listing, on the update button.
   ["src/lib/dict/live.js", 1],

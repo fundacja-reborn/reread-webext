@@ -36,6 +36,7 @@ import { armBackArrow } from "../lib/back-arrow.js";
 import { languageName, pairLabel } from "../lib/language.js";
 import { catalogDictionaries, catalogSource } from "../lib/dict/catalog.js";
 import { describeDictDownloadProblem, downloadArchive } from "../lib/dict/download.js";
+import { describeLinkProblem, parseDictionaryLink } from "../lib/dict/link.js";
 import { readLiveDictionaries, refreshLiveDictionaries } from "../lib/dict/live.js";
 import {
   aliasesOf,
@@ -43,6 +44,7 @@ import {
   describeImportProblem,
   dictionaryFromZip,
   entriesOf,
+  isDictionaryFile,
   openDictionary,
 } from "../lib/dict/import.js";
 import { describeZipProblem, readZip } from "../lib/dict/zip.js";
@@ -757,7 +759,7 @@ async function renderStorage() {
  * has to say how it went - a sentence about a failed download printed below the
  * file picker is a sentence nobody scrolls to.
  *
- * @param {"model-status" | "refresh-status" | "file-status" | "dictionary-status" | "dictionary-file-status" | "dictionary-refresh-status"} id
+ * @param {"model-status" | "refresh-status" | "file-status" | "dictionary-status" | "dictionary-file-status" | "dictionary-link-status" | "dictionary-refresh-status"} id
  * @param {string} text
  * @param {"idle" | "busy" | "error"} [tone]
  */
@@ -1513,6 +1515,17 @@ function dictionaryFileStatus(text, tone = "idle") {
 }
 
 /**
+ * The link fold's own line (D187): what a pasted address led to has to be
+ * said next to the field it was pasted into.
+ *
+ * @param {string} text
+ * @param {"idle" | "busy" | "error"} [tone]
+ */
+function dictionaryLinkStatus(text, tone = "idle") {
+  say("dictionary-link-status", text, tone);
+}
+
+/**
  * The dictionary update button's own line, for the same reason the model
  * one has its own: what a press did has to be said next to the button.
  *
@@ -2060,10 +2073,12 @@ async function downloadDictionary(entry) {
  * @param {string} url
  * @param {AbortSignal} signal
  * @param {((progress: import("../lib/dict/download.js").DictDownloadProgress) => void) | undefined} onProgress
- * @returns {Promise<{ ok: true, value: { base: string, files: import("../lib/dict/import.js").DictionaryFiles } } | { ok: false, text: string, tone: "idle" | "error" }>}
+ * @param {{ anyHost?: boolean }} [options] `anyHost` for an address the reader pasted (D187): followed wherever its host sends it
+ * @returns {Promise<{ ok: true, value: { base: string, files: import("../lib/dict/import.js").DictionaryFiles, host: string } } | { ok: false, text: string, tone: "idle" | "error" }>}
+ *   `host` is the one that answered - the one asked, unless the address led elsewhere
  */
-async function fetchDictionaryFiles(url, signal, onProgress) {
-  const result = await downloadArchive(url, { signal, onProgress });
+async function fetchDictionaryFiles(url, signal, onProgress, { anyHost = false } = {}) {
+  const result = await downloadArchive(url, { signal, onProgress, anyHost });
   if (!result.ok) {
     return {
       ok: false,
@@ -2072,7 +2087,9 @@ async function fetchDictionaryFiles(url, signal, onProgress) {
     };
   }
 
-  const zip = await readZip(result.value);
+  // Only the dictionary's own files are inflated: the pictures a Wiktionary
+  // build ships beside them by the hundred stay packed and cost nothing.
+  const zip = await readZip(result.value, { wanted: isDictionaryFile });
   if (!zip.ok) return { ok: false, text: describeZipProblem(zip.problem, zip.detail), tone: "error" };
 
   const sorted = dictionaryFromZip(zip.value);
@@ -2080,7 +2097,7 @@ async function fetchDictionaryFiles(url, signal, onProgress) {
     return { ok: false, text: describeImportProblem(sorted.problem, sorted.detail), tone: "error" };
   }
 
-  return sorted;
+  return { ok: true, value: { ...sorted.value, host: result.host } };
 }
 
 /**
@@ -2404,6 +2421,83 @@ async function addSelectedDictionary() {
   }
 }
 
+/**
+ * Fetches a dictionary from an address the reader pasted, and adds it (D187).
+ *
+ * The catalogue's road with the reader's own address on it: the same
+ * download, the same zip reader, the same importer, the same one-at-a-time
+ * rule - and two things of its own. The address is judged first (`link.js`),
+ * before a byte is asked for. And the answer may come from another host than
+ * the one pasted, because a link a person copied is theirs to follow wherever
+ * its host sends it, the way the browser's own download would go; where it
+ * led is said on the status line once the dictionary is in, so the fold never
+ * quietly names one server and reads from another.
+ *
+ * The language sides come from the fold's own selects, as for files: an
+ * archive's name says nothing reliable about them, and the .ifo's `lang`
+ * field is nobody's standard.
+ */
+async function downloadFromLink() {
+  if (importing || running !== null) return;
+
+  const input = /** @type {HTMLInputElement | null} */ (document.getElementById("dictionary-link"));
+  const parsed = parseDictionaryLink(input?.value ?? "");
+  if (!parsed.ok) {
+    dictionaryLinkStatus(describeLinkProblem(parsed.problem), "error");
+    return;
+  }
+  const url = parsed.value;
+  const asked = new URL(url).host;
+  const langFrom = chosenLanguage("link-from", config.sourceLang ?? "");
+  const langTo = chosenLanguage("link-to", config.targetLang ?? "");
+
+  importing = true;
+  const letGo = holdScreen();
+  const controller = new AbortController();
+  await renderCatalog();
+
+  // The fold's own progress row, shown for the download and gone after it:
+  // the catalogue's bar, with the chosen pair for a name.
+  const row = document.getElementById("dictionary-link-row");
+  /** @type {((progress: import("../lib/dict/download.js").DictDownloadProgress) => void) | undefined} */
+  let onProgress;
+  if (row !== null) {
+    row.hidden = false;
+    onProgress = renderFetching(row, { from: langFrom, to: langTo, url }, controller);
+  }
+  dictionaryLinkStatus(t("options_downloading_link", asked), "busy");
+
+  try {
+    const fetched = await fetchDictionaryFiles(url, controller.signal, onProgress, { anyHost: true });
+    if (!fetched.ok) {
+      dictionaryLinkStatus(fetched.text, fetched.tone);
+      return;
+    }
+
+    // Where the bytes came from rides on the import's last line rather than
+    // standing before it: the import's own lines would paint over it at once.
+    const { host } = fetched.value;
+    /** @type {(text: string, tone?: "idle" | "busy" | "error") => void} */
+    const say = (text, tone = "idle") =>
+      dictionaryLinkStatus(tone === "idle" && host !== asked ? `${text} ${t("options_link_answered_by", host)}` : text, tone);
+
+    let stored = false;
+    const ran = await withImportLock(async () => {
+      stored = await storeDictionary(fetched.value.files, { base: fetched.value.base, langFrom, langTo, say });
+    });
+    if (!ran) dictionaryLinkStatus(t("options_import_elsewhere"), "error");
+    if (stored && input !== null) input.value = "";
+  } finally {
+    if (row !== null) {
+      row.hidden = true;
+      row.replaceChildren();
+    }
+    letGo();
+    importing = false;
+    await renderCatalog();
+  }
+}
+
 async function render() {
   config = await readConfig();
   os = await platformOs();
@@ -2441,6 +2535,16 @@ async function render() {
   // a preselected one - the import's own selects are still the full list.
   renderLanguageChoices("dictionary-from", config.sourceLang ?? "");
   renderLanguageChoices("dictionary-to", config.targetLang ?? "");
+  renderLanguageChoices("link-from", config.sourceLang ?? "");
+  renderLanguageChoices("link-to", config.targetLang ?? "");
+  // The page of dictionary sources is written in two languages; a Polish
+  // interface opens the Polish one. A link the reader follows, not a request
+  // the extension makes.
+  const sources = document.getElementById("dictionary-sources-link");
+  if (sources instanceof HTMLAnchorElement && uiLocale().startsWith("pl")) {
+    sources.href = "https://reapps.eu/pl/read#faq-dictionary-sources";
+    sources.textContent = "reapps.eu/pl/read";
+  }
 
   const { source } = registrySource();
   const host = source === "" ? "" : new URL(source).host;
@@ -2742,6 +2846,14 @@ document.getElementById("dictionary-filter")?.addEventListener("input", () => ap
 document.getElementById("models-show-all")?.addEventListener("click", () => expandList("models"));
 document.getElementById("dictionaries-show-all")?.addEventListener("click", () => expandList("dictionary-catalog"));
 document.getElementById("add-dictionary")?.addEventListener("click", () => void addSelectedDictionary());
+document.getElementById("download-link")?.addEventListener("click", () => void downloadFromLink());
+// Enter in the address field is the same press: an address is pasted and
+// confirmed, and reaching for the button after it is a second gesture.
+document.getElementById("dictionary-link")?.addEventListener("keydown", (event) => {
+  if (event.key !== "Enter") return;
+  event.preventDefault();
+  void downloadFromLink();
+});
 
 // The armed Delete stands down at any step away from it - a press elsewhere,
 // focus moving on, Escape - and never on a clock. `pointerdown` rather than

@@ -773,6 +773,12 @@
   "model_files_missing_vocab": { "message": "Falta el archivo de vocabulario (vocab.<pair>.spm)." },
   "model_files_not_a_model": { "message": "Esos archivos no son un modelo de traducción." },
 
+  "dict_link_empty": { "message": "Pega primero la dirección del archivo. No se guardó nada." },
+  "dict_link_invalid": { "message": "Eso no es una dirección web. No se guardó nada." },
+  "dict_link_not_https": { "message": "Solo se aceptan direcciones https. No se guardó nada." },
+  "dict_link_credentials": {
+    "message": "No se acepta una dirección con nombre de usuario o contraseña. No se guardó nada."
+  },
   "dict_default_name": { "message": "Diccionario" },
   "dict_import_empty": { "message": "No se seleccionó ningún archivo. No se guardó nada." },
   "dict_import_missing_ifo": { "message": "Entre esos no hay ningún archivo .ifo, así que esto no es un diccionario StarDict. No se guardó nada." },
@@ -1039,6 +1045,25 @@
   },
   "options_dict_files_note": {
     "message": "Añadir desde archivos no hace ninguna petición de red. Sirve cualquier archivo StarDict, incluidos los del catálogo, publicados en"
+  },
+  "options_add_link_heading": { "message": "Añadir un diccionario desde un enlace" },
+  "options_add_link_summary": {
+    "message": "Pega la dirección de un diccionario StarDict empaquetado en un archivo .zip, elige los idiomas y pulsa Descargar. La extensión se conecta a esa dirección una sola vez, cuando pulsas el botón, y a ninguna otra; no se envía nada tuyo. El archivo se descomprime y se comprueba en este dispositivo, exactamente igual que los archivos que eliges tú."
+  },
+  "options_link_label": { "message": "Dirección" },
+  "options_link_sources": {
+    "message": "Dónde encontrar diccionarios, también monolingües - inglés-inglés, por ejemplo - cada uno con su licencia:"
+  },
+  "options_link_note": {
+    "message": "Solo se aceptan direcciones https. Un archivo que no sea .zip (.tar.xz, .tar.zst) hay que descomprimirlo y añadirlo desde archivos."
+  },
+  "options_downloading_link": {
+    "message": "Descargando de $HOST$...",
+    "placeholders": { "host": { "content": "$1", "example": "www.reader-dict.com" } }
+  },
+  "options_link_answered_by": {
+    "message": "La dirección llevaba a $HOST$, y de ahí vino el archivo.",
+    "placeholders": { "host": { "content": "$1", "example": "objects.githubusercontent.com" } }
   },
   "options_disabled_heading": { "message": "Sitios desactivados" },
   "options_disabled_intro": {

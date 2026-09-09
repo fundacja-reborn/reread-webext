@@ -69,6 +69,33 @@ describe("downloadArchive", () => {
     assert.match(result.detail ?? "", /another host/);
   });
 
+  it("follows the host's redirect when the address is the reader's own, and says which host answered", async () => {
+    const result = await downloadArchive(URL_UNDER_TEST, {
+      anyHost: true,
+      fetch: /** @type {typeof fetch} */ (
+        /** @type {unknown} */ (
+          async () => ({
+            url: "https://mirror.example/wikdict-en-pl.zip",
+            ok: true,
+            status: 200,
+            headers: new Headers({ "content-length": "3" }),
+            body: null,
+            arrayBuffer: async () => new Uint8Array([1, 2, 3]).buffer,
+          })
+        )
+      ),
+    });
+    assert.ok(result.ok, JSON.stringify(result));
+    assert.equal(result.host, "mirror.example");
+    assert.deepEqual([...new Uint8Array(result.value)], [1, 2, 3]);
+  });
+
+  it("names the host it asked when the answer carries no address of its own", async () => {
+    const result = await downloadArchive(URL_UNDER_TEST, { fetch: fetchOf([new Uint8Array([1])]) });
+    assert.ok(result.ok);
+    assert.equal(result.host, "download.wikdict.com");
+  });
+
   it("turns a dead network into a problem, not an exception", async () => {
     const result = await downloadArchive(URL_UNDER_TEST, {
       fetch: async () => {

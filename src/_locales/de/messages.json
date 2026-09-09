@@ -762,6 +762,12 @@
   "model_files_missing_vocab": { "message": "Die Vokabulardatei fehlt (vocab.<pair>.spm)." },
   "model_files_not_a_model": { "message": "Diese Dateien sind kein Übersetzungsmodell." },
 
+  "dict_link_empty": { "message": "Fügen Sie zuerst die Adresse des Archivs ein. Nichts wurde gespeichert." },
+  "dict_link_invalid": { "message": "Das ist keine Webadresse. Nichts wurde gespeichert." },
+  "dict_link_not_https": { "message": "Es werden nur https-Adressen angenommen. Nichts wurde gespeichert." },
+  "dict_link_credentials": {
+    "message": "Eine Adresse mit Benutzername oder Passwort wird nicht angenommen. Nichts wurde gespeichert."
+  },
   "dict_default_name": { "message": "Wörterbuch" },
   "dict_import_empty": { "message": "Es wurden keine Dateien ausgewählt. Nichts wurde gespeichert." },
   "dict_import_missing_ifo": { "message": "Darunter ist keine .ifo-Datei, das ist also kein StarDict-Wörterbuch. Nichts wurde gespeichert." },
@@ -1016,6 +1022,25 @@
   },
   "options_dict_files_note": {
     "message": "Aus Dateien hinzuzufügen stellt keine Netzwerkanfrage. Beliebige StarDict-Dateien funktionieren, auch die des Katalogs, veröffentlicht unter"
+  },
+  "options_add_link_heading": { "message": "Wörterbuch über einen Link hinzufügen" },
+  "options_add_link_summary": {
+    "message": "Fügen Sie die Adresse eines als .zip-Datei gepackten StarDict-Wörterbuchs ein, stellen Sie die Sprachen ein und klicken Sie auf Herunterladen. Die Erweiterung verbindet sich einmal mit dieser Adresse, wenn Sie die Schaltfläche drücken, und mit keiner anderen; nichts von Ihnen wird mitgeschickt. Das Archiv wird auf diesem Gerät entpackt und geprüft, genau wie selbst ausgewählte Dateien."
+  },
+  "options_link_label": { "message": "Adresse" },
+  "options_link_sources": {
+    "message": "Wo Wörterbücher zu finden sind, auch einsprachige - zum Beispiel Englisch-Englisch - jedes mit seiner Lizenz:"
+  },
+  "options_link_note": {
+    "message": "Es werden nur https-Adressen angenommen. Ein Archiv, das keine .zip-Datei ist (.tar.xz, .tar.zst), muss entpackt und aus Dateien hinzugefügt werden."
+  },
+  "options_downloading_link": {
+    "message": "Herunterladen von $HOST$...",
+    "placeholders": { "host": { "content": "$1", "example": "www.reader-dict.com" } }
+  },
+  "options_link_answered_by": {
+    "message": "Die Adresse führte zu $HOST$, und von dort kam das Archiv.",
+    "placeholders": { "host": { "content": "$1", "example": "objects.githubusercontent.com" } }
   },
   "options_disabled_heading": { "message": "Abgeschaltete Websites" },
   "options_disabled_intro": {

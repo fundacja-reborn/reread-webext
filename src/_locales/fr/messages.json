@@ -773,6 +773,12 @@
   "model_files_missing_vocab": { "message": "Le fichier de vocabulaire manque (vocab.<pair>.spm)." },
   "model_files_not_a_model": { "message": "Ces fichiers ne sont pas un modèle de traduction." },
 
+  "dict_link_empty": { "message": "Collez d'abord l'adresse de l'archive. Rien n'a été enregistré." },
+  "dict_link_invalid": { "message": "Ce n'est pas une adresse web. Rien n'a été enregistré." },
+  "dict_link_not_https": { "message": "Seules les adresses https sont acceptées. Rien n'a été enregistré." },
+  "dict_link_credentials": {
+    "message": "Une adresse contenant un nom d'utilisateur ou un mot de passe n'est pas acceptée. Rien n'a été enregistré."
+  },
   "dict_default_name": { "message": "Dictionnaire" },
   "dict_import_empty": { "message": "Aucun fichier n'a été sélectionné. Rien n'a été enregistré." },
   "dict_import_missing_ifo": { "message": "Il n'y a pas de fichier .ifo parmi ceux-là, ce n'est donc pas un dictionnaire StarDict. Rien n'a été enregistré." },
@@ -1051,6 +1057,25 @@
   },
   "options_dict_files_note": {
     "message": "Ajouter depuis des fichiers ne fait aucune requête réseau. N'importe quels fichiers StarDict fonctionnent, y compris ceux du catalogue, publiés à"
+  },
+  "options_add_link_heading": { "message": "Ajouter un dictionnaire depuis un lien" },
+  "options_add_link_summary": {
+    "message": "Collez l'adresse d'un dictionnaire StarDict compressé en fichier .zip, choisissez les langues et cliquez sur Télécharger. L'extension se connecte une seule fois à cette adresse, quand vous cliquez sur le bouton, et à aucune autre ; rien de vous n'est envoyé. L'archive est décompressée et vérifiée sur cet appareil, exactement comme des fichiers que vous choisissez vous-même."
+  },
+  "options_link_label": { "message": "Adresse" },
+  "options_link_sources": {
+    "message": "Où trouver des dictionnaires, y compris unilingues - anglais-anglais, par exemple - chacun avec sa licence :"
+  },
+  "options_link_note": {
+    "message": "Seules les adresses https sont acceptées. Une archive qui n'est pas un fichier .zip (.tar.xz, .tar.zst) doit être décompressée et ajoutée depuis des fichiers."
+  },
+  "options_downloading_link": {
+    "message": "Téléchargement depuis $HOST$...",
+    "placeholders": { "host": { "content": "$1", "example": "www.reader-dict.com" } }
+  },
+  "options_link_answered_by": {
+    "message": "L'adresse menait à $HOST$, et l'archive est venue de là.",
+    "placeholders": { "host": { "content": "$1", "example": "objects.githubusercontent.com" } }
   },
   "options_disabled_heading": { "message": "Sites désactivés" },
   "options_disabled_intro": {

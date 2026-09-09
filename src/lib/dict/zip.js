@@ -2,12 +2,13 @@
  * Reading a zip archive, and refusing everything a zip can be that a
  * dictionary download is not.
  *
- * This exists for one caller: the dictionary catalogue downloads WikDict's
- * `.zip` files, and an archive fetched by the extension has to be opened by
- * the extension. It is deliberately not a zip library. The whole format it
- * accepts is the one those files use - a handful of entries, stored or
- * deflated - and everything else is a refusal with a reason: zip64, encryption,
- * other compression methods, more entries or bytes than a dictionary could be.
+ * This exists for one caller: the settings page downloads `.zip` files - the
+ * catalogue's from WikDict, or one from an address the reader pasted - and an
+ * archive fetched by the extension has to be opened by the extension. It is
+ * deliberately not a zip library. The whole format it accepts is the one
+ * those files use - members stored or deflated - and everything else is a
+ * refusal with a reason: zip64, encryption, other compression methods, more
+ * bytes than a dictionary could be.
  * The browser supplies the actual decompression (`DecompressionStream`), so
  * what this file owns is the container: headers, offsets, sizes, checksums.
  *
@@ -40,12 +41,15 @@
 import { aside, t } from "../i18n.js";
 
 /**
- * What a dictionary archive is allowed to be. WikDict's largest is a few
- * megabytes holding four files; the room above that is for other dictionaries,
- * not other kinds of payload.
+ * What a dictionary archive is allowed to unpack to. WikDict's largest is a
+ * few megabytes in four files, a monolingual Wiktionary build a few hundred;
+ * the room above that is for other dictionaries, not other kinds of payload.
+ * Only the members asked for count (`wanted`): a dictionary shipping a
+ * thousand pictures beside its four files costs the four. The number of
+ * members is not bounded here - a directory record is cheap to walk, and the
+ * format's own sixteen bits bound it anyway.
  */
 const LIMITS = Object.freeze({
-  entries: 64,
   totalBytes: 256 * 1024 * 1024,
   nameLength: 512,
 });
@@ -159,10 +163,19 @@ function refuse(problem, detail) {
  */
 
 /**
- * @param {ArrayBuffer} buffer the archive as downloaded
- * @returns {Promise<ZipResult>} files only - directory entries are dropped
+ * @typedef {object} ZipOptions
+ * @property {(name: string) => boolean} [wanted] which members to unpack. The
+ *   rest are read as far as the directory goes - checked, counted for nothing,
+ *   never inflated. Everything, by default.
  */
-export async function readZip(buffer) {
+
+/**
+ * @param {ArrayBuffer} buffer the archive as downloaded
+ * @param {ZipOptions} [options]
+ * @returns {Promise<ZipResult>} the wanted files - directory entries are
+ *   dropped, and an archive whose files are all unwanted answers with none
+ */
+export async function readZip(buffer, { wanted = () => true } = {}) {
   const view = new DataView(buffer);
   if (view.byteLength < 22) return refuse("not_zip");
 
@@ -179,12 +192,12 @@ export async function readZip(buffer) {
   const centralOffset = view.getUint32(end + 16, true);
   if (count === MAX_U16 || centralOffset === MAX_U32) return refuse("zip_unsupported", "zip64");
   if (count === 0) return refuse("zip_bad", "no entries");
-  if (count > LIMITS.entries) return refuse("zip_too_big", `${count} entries`);
 
   /** @type {CentralEntry[]} */
   const entries = [];
   let at = centralOffset;
   let totalBytes = 0;
+  let fileCount = 0;
 
   for (let read = 0; read < count; read += 1) {
     if (at + 46 > end || view.getUint32(at, true) !== CENTRAL_SIGNATURE) {
@@ -216,13 +229,18 @@ export async function readZip(buffer) {
     if (name.includes(String.fromCodePoint(0))) return refuse("zip_bad", "a name with a NUL in it");
 
     if (!name.endsWith("/")) {
-      totalBytes += uncompressedSize;
-      if (totalBytes > LIMITS.totalBytes) return refuse("zip_too_big", "unpacks to too much");
-      entries.push({ name, method, crc, compressedSize, uncompressedSize, localOffset });
+      fileCount += 1;
+      if (wanted(name)) {
+        totalBytes += uncompressedSize;
+        if (totalBytes > LIMITS.totalBytes) return refuse("zip_too_big", "unpacks to too much");
+        entries.push({ name, method, crc, compressedSize, uncompressedSize, localOffset });
+      }
     }
 
     at += 46 + nameLength + extraLength + commentLength;
   }
+
+  if (fileCount === 0) return refuse("zip_bad", "only directories inside");
 
   /** @type {ZipEntry[]} */
   const files = [];
@@ -269,7 +287,6 @@ export async function readZip(buffer) {
     files.push({ name: entry.name, bytes });
   }
 
-  if (files.length === 0) return refuse("zip_bad", "only directories inside");
   return { ok: true, value: files };
 }
 

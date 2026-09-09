@@ -71,8 +71,19 @@ the pages you read. Opening the Settings page makes no request at all - the list
 shown there come from a copy included in the extension until you press **Update the list**,
 and each list shows the date it was last fetched.
 
-One more request happens only when you ask for it, and it is the only one to an address
-that is not built into the extension: **Download pictures**, a row in the reader's menu
+Two more requests happen only when you ask for them, and they are the only ones to
+addresses that are not built into the extension.
+
+The first is **Add a dictionary from a link** on the Settings page: it downloads a
+dictionary archive from the address you paste there - once, without cookies or referrer,
+when you press **Download** - and the server at that address sees what any download shows
+it: your IP address and your browser's user agent. The address is yours: the extension
+suggests none, and a link is followed wherever its host sends it, the way the browser's
+own download would be; when it led to another server, the Settings page says which. The
+archive is unpacked and checked on your device exactly like files you pick by hand, and
+only `https` addresses are accepted.
+
+The second is **Download pictures**, a row in the reader's menu
 over a saved article, downloads that article's pictures from the addresses the pictures
 point at - the site the article came from, its image server, or another site the page
 embedded a picture from - once, without cookies or referrer, and only when you press it.
@@ -86,9 +97,11 @@ are stored with the book at that moment; no request is made for them, ever.
 There is no third server of the extension's own. No fonts, scripts or images are loaded
 from outside the extension, there is no crash reporting, no A/B testing and no update
 check of the extension's own (updates are handled by the browser and the add-on store you
-installed from, under their policies). A download that a server redirects to another host
-is refused rather than followed, so the two addresses above are the only ones the
-extension's downloads can come from. The custom CSS you can type on the settings page is
+installed from, under their policies). A download from one of the two built-in addresses
+that a server redirects to another host is refused rather than followed, so those two are
+the only addresses the extension's own downloads can come from; only a link you pasted
+yourself is followed where it leads, and the Settings page names the host it ended at.
+The custom CSS you can type on the settings page is
 checked before it is stored, and a rule that would load anything (url(), @import, @font-face)
 is refused - so it cannot become a third address either.
 
