@@ -137,6 +137,28 @@ interface WebExtBrowser {
     // opened the reader directly, before it opened the popup.
     onCommand: WebExtEvent<(command: string, tab?: WebExtTab) => void>;
   };
+  // The right-click menu (D188): Firefox calls it `menus` and answers to
+  // `contextMenus` as well; Chromium and Safari know only the latter, so that
+  // is the one name used. Under the `contextMenus` permission, which neither
+  // store shows a warning for. Optional because Firefox on Android has no
+  // menu for extensions at all - reach it through `contextMenusApi()` in
+  // browser.js, never directly, for the reason `commands` is guarded.
+  contextMenus?: {
+    // Rows are kept by the browser once made: Firefox persists an event
+    // page's menus and recreates them at startup, Chromium stores a service
+    // worker's - so they are created once, in `onInstalled`, after a wipe.
+    create(properties: {
+      id: string;
+      parentId?: string;
+      title: string;
+      contexts: string[];
+      documentUrlPatterns?: string[];
+    }): unknown;
+    removeAll(): Promise<void>;
+    // The tab is the one the menu was opened over - the same tab the keyboard
+    // shortcut brings along, and the only way to learn it without `tabs`.
+    onClicked: WebExtEvent<(info: { menuItemId: string | number }, tab?: WebExtTab) => void>;
+  };
   action: {
     // How the Chromium package matches the toolbar icon to the browser's
     // color scheme (`src/lib/theme-icon.js`) - Chrome has no theme-aware

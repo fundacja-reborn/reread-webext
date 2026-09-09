@@ -8,7 +8,7 @@
  * megabytes of WebAssembly, loaded once instead of once per tab.
  */
 
-import { commandsApi, offscreenApi, webext } from "../lib/browser.js";
+import { commandsApi, contextMenusApi, offscreenApi, webext } from "../lib/browser.js";
 import { chosenPair, publishPlatform, readConfig } from "../lib/config.js";
 import { writeInventory } from "../lib/models/inventory.js";
 import { listModels } from "../lib/models/store.js";
@@ -21,6 +21,7 @@ import { bergamot } from "../lib/translator/providers/bergamot/index.js";
 import { bergamotViaHost, raiseEngineHost } from "../lib/translator/providers/bergamot/remote.js";
 import { lookUp, lookUpAnswer } from "../lib/dict/lookup.js";
 import { readPage } from "./page.js";
+import { installMenus, menuDoor } from "./menus.js";
 import { openLibrary, openMarks, openReader, readInReader } from "./reader-tab.js";
 import { openSettings, openVocabulary } from "./room-tab.js";
 import {
@@ -191,6 +192,17 @@ commandsApi()?.onCommand.addListener((command, tab) => {
   void (tab === undefined ? openReader() : readInReader(tab));
 });
 
+// The right-click rows (D188): the same two doors as the keyboard shortcut
+// and the popup, for whoever never pinned the button. The tab is the one the
+// menu was opened over. Guarded like `commands`, and for the same reason:
+// Firefox on Android has no menu for extensions, and an unguarded access
+// would throw and take every registration below this line with it.
+contextMenusApi()?.onClicked.addListener((info, tab) => {
+  const door = menuDoor(info.menuItemId);
+  if (door === "reader") void (tab === undefined ? openReader() : readInReader(tab));
+  else if (door === "library") void openLibrary();
+});
+
 // The copy pages read is written whenever the vocabulary changes. An install or
 // an update is the one moment it can be missing while the database is not, so
 // it is also written here - once, not on every wake. The platform rides along
@@ -201,6 +213,15 @@ commandsApi()?.onCommand.addListener((command, tab) => {
 // fresh install, whose first page needs "no models yet" said in storage
 // before the settings page has ever been opened.
 webext().runtime.onInstalled.addListener(() => {
+  // The right-click rows are made here and only here (D188): both engines
+  // keep them once made, and an update is when their wording may change.
+  const menus = contextMenusApi();
+  if (menus !== null) {
+    void installMenus(menus).catch(() => {
+      // A browser whose menu refused the rows loses the rows and nothing
+      // else; the shortcut, the popup and the bubble's own door remain.
+    });
+  }
   void refreshVocabulary();
   void publishPlatform().catch(() => {
     // Storage unreachable: pages fall back to the desktop default, and the

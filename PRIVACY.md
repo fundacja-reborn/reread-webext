@@ -166,6 +166,7 @@ see is busy.
 | `storage` | Your vocabulary and settings, in the browser's local extension storage. Never synced. |
 | `unlimitedStorage` | Translation models are tens of megabytes and dictionaries can be larger; the browser's default quota is not enough for them. |
 | `<all_urls>` (access to all websites) | Saved phrases are underlined on every page where they appear, so the content script has to be able to run everywhere. This is a broad permission: it means the extension can read the pages you visit. It reads them locally to find your saved phrases, and sends nothing. There is no narrower permission for "every page you might read". |
+| `contextMenus` (the right-click menu) | The **re/read** entries in the right-click menu on any web page - **Read this page in the reader** and **Offline reading list** - for whoever never pinned the toolbar button. It adds two rows to the browser's menu and reads nothing from the page; the browser shows no consent prompt for it. |
 | `offscreen` (Chrome/Chromium package only) | Chromium runs the extension's background part as a service worker, which cannot start the worker thread the translation engine runs in. A single hidden document (offscreen document) runs that worker instead. It grants no access to any page or to any data. |
 
 There is deliberately nothing else: no `tabs`, no `webRequest`, no `cookies`, no
