@@ -212,16 +212,27 @@ contextMenusApi()?.onClicked.addListener((info, tab) => {
 // write is what hands the key to installations that predate it - and to a
 // fresh install, whose first page needs "no models yet" said in storage
 // before the settings page has ever been opened.
-webext().runtime.onInstalled.addListener(() => {
-  // The right-click rows are made here and only here (D188): both engines
-  // keep them once made, and an update is when their wording may change.
+/**
+ * Makes the right-click rows (D188), wiping first so it can run more than
+ * once. Both engines keep the rows once made, so install and browser start
+ * are the two moments that matter: an update is when the wording may change,
+ * and a start is the one moment the GitHub zip's way of updating reaches -
+ * files replaced in the folder, browser restarted. Chromium loads that
+ * without any install event (its InstalledLoader adds the extension; only an
+ * installer fires onInstalled), so an extension that made its rows at install
+ * alone had none after such an update (Gormagon's report, D189).
+ */
+function makeMenus() {
   const menus = contextMenusApi();
-  if (menus !== null) {
-    void installMenus(menus).catch(() => {
-      // A browser whose menu refused the rows loses the rows and nothing
-      // else; the shortcut, the popup and the bubble's own door remain.
-    });
-  }
+  if (menus === null) return;
+  void installMenus(menus).catch(() => {
+    // A browser whose menu refused the rows loses the rows and nothing else;
+    // the shortcut, the popup and the bubble's own door remain.
+  });
+}
+
+webext().runtime.onInstalled.addListener(() => {
+  makeMenus();
   void refreshVocabulary();
   void publishPlatform().catch(() => {
     // Storage unreachable: pages fall back to the desktop default, and the
@@ -243,6 +254,7 @@ webext().runtime.onInstalled.addListener(() => {
 // `action.theme_icons` and skips all of this.
 webext().runtime.onStartup.addListener(() => {
   if (offscreenApi() !== null) void raiseEngineHost();
+  makeMenus();
 });
 
 // The one thing asked of the browser about the extension's own storage: to
