@@ -409,22 +409,53 @@ function filingNote(entries, findable) {
  * file the phrase (D167, `filingNote`).
  * Until D164 an empty answer changed nothing, and a bubble standing on two
  * icons and no word read as a bubble that had not finished loading (Michał's
- * screenshot, 2026-09-01).
+ * screenshot, 2026-09-01). Since D190 the bubble says it is looking while it
+ * waits, so every answer - the null one included - takes that line down: a
+ * wait that never ends is the same picture again.
  *
  * @param {import("../lib/protocol.js").LookUp | null} answer
  * @param {string} normalized the key the phrase would be stored under
  * @param {boolean} findable whether the phrase could ever be found on a page again
  */
 function landQuietAnswer(answer, normalized, findable) {
-  if (answer === null) return;
+  // No answer at all - a database that would not open: the bubble says
+  // nothing on it (D164), and nothing is what replaces the pending line.
+  if (answer === null) {
+    tooltip.setContext(null);
+    return;
+  }
   const note = quietNote({ entries: answer.entries.length, dictionaries: answer.dictionaries, findable });
   if (note !== null) {
     tooltip.setContext(quietSentence(note), "note");
     return;
   }
   tooltip.setEntries(entryBlocks(answer.entries, normalized));
-  const filing = filingNote(answer.entries.length, findable);
-  if (filing !== null) tooltip.setContext(filing, "note");
+  // The filing line (D167) where it applies, and otherwise no line at all -
+  // the pending one may not stand over the entries.
+  tooltip.setContext(filingNote(answer.entries.length, findable), "note");
+}
+
+/**
+ * The dictionaries asked, with the note line saying so until they answer
+ * (D190). The read is a point lookup, but on an ordinary page it first has to
+ * wake the background, and that took seconds on Michał's desk (2026-09-10):
+ * a bubble standing on two icons for that long read as one that had hung -
+ * the same picture D164 fixed for the answer that came back empty. D164 had
+ * left this line out as a flash of furniture over a quick read; the flash
+ * costs no repaint the answer's arrival does not make anyway, and the wait
+ * it covers is real. The same sentence the translating bubble opens with,
+ * in the dictionaries' words - and `landQuietAnswer` replaces it whatever
+ * the answer says.
+ *
+ * @param {{ text: string, normalized: string, lang: string, findable: boolean }} selection
+ * @param {number} mine the generation this ask belongs to
+ */
+function askDictionaries(selection, mine) {
+  tooltip.setContext(t("bubble_looking_up"), "pending");
+  void lookUpQuiet(selection.text, selection.lang).then((answer) => {
+    if (mine !== generation || !tooltip.isOpen()) return;
+    landQuietAnswer(answer, selection.normalized, selection.findable);
+  });
 }
 
 /**
@@ -1049,9 +1080,11 @@ async function fillSecondLayer() {
 
   // The quiet vocabulary's second layer (D158): there is no engine to ride,
   // so More holds no sentence - the dictionaries are the whole extra, from
-  // wherever this page reaches them (`lookUpQuiet`). No pending line: the
-  // read is quick, and a flash of furniture would outlive its usefulness.
+  // wherever this page reaches them (`lookUpQuiet`). The pending line stands
+  // here as well (D190): the read is quick only once the background is
+  // awake, and it is the same wait as the fresh selection's.
   if (noTranslation) {
+    tooltip.setContext(t("bubble_looking_up"), "pending");
     const entries = (await lookUpQuiet(phrase.text, phrase.lang))?.entries ?? [];
     if (mine !== generation || !tooltip.isOpen()) return;
     const blocks = entryBlocks(entries, phrase.normalized);
@@ -1247,11 +1280,9 @@ function present(selection, { deliberate, touch, chain = false }) {
     // since D162): the reader hands the lookup down, an ordinary page asks
     // the background. What they say lands in the bubble the moment it
     // arrives - the entries, or the one line saying why there are none
-    // (D164, `landQuietAnswer`).
-    void lookUpQuiet(text, selection.lang).then((answer) => {
-      if (mine !== generation || !tooltip.isOpen()) return;
-      landQuietAnswer(answer, normalized, selection.findable);
-    });
+    // (D164, `landQuietAnswer`) - and until then the note line says the
+    // asking is under way (D190, `askDictionaries`).
+    askDictionaries(selection, mine);
     return;
   }
 
@@ -1298,10 +1329,7 @@ function present(selection, { deliberate, touch, chain = false }) {
       // gets its entries as prose, exactly the rule Save answers to.
       choosable: selection.findable,
     });
-    void lookUpQuiet(text, selection.lang).then((answer) => {
-      if (mine !== generation || !tooltip.isOpen()) return;
-      landQuietAnswer(answer, normalized, selection.findable);
-    });
+    askDictionaries(selection, mine);
     return;
   }
 

@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { describe, it } from "node:test";
+import { openings } from "./openings.js";
 
 /**
  * One checkbox, every bubble (D131).
@@ -18,34 +19,6 @@ import { describe, it } from "node:test";
  */
 
 const ROOT = new URL("../src/content/", import.meta.url);
-
-/**
- * The text of every `tooltip.show({ ... })` argument in a file, braces
- * balanced - the calls nest object literals, so a regex to the first `}`
- * would stop inside one.
- *
- * @param {string} source
- * @returns {string[]}
- */
-function openings(source) {
-  /** @type {string[]} */
-  const found = [];
-  const marker = "tooltip.show({";
-  for (let at = source.indexOf(marker); at !== -1; at = source.indexOf(marker, at + 1)) {
-    let depth = 0;
-    for (let i = at + marker.length - 1; i < source.length; i++) {
-      if (source[i] === "{") depth++;
-      else if (source[i] === "}") {
-        depth--;
-        if (depth === 0) {
-          found.push(source.slice(at, i + 1));
-          break;
-        }
-      }
-    }
-  }
-  return found;
-}
 
 describe("where the bubble's actions start", () => {
   it("hands the setting to every opening that has a row to fold", async () => {

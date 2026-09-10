@@ -45,6 +45,7 @@
   "bubble_reader": { "message": "Lire dans le lecteur" },
   "bubble_library": { "message": "Ouvrir la liste de lecture hors ligne" },
   "bubble_translating": { "message": "Traduction..." },
+  "bubble_looking_up": { "message": "Recherche dans les dictionnaires..." },
   "bubble_nothing_more": { "message": "Pas de phrase ni d'entrée de dictionnaire à afficher" },
   "bubble_whole_words": { "message": "Sélectionnez des mots entiers" },
   "bubble_not_in_dictionary": { "message": "Absent de vos dictionnaires" },
