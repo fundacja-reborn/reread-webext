@@ -44,21 +44,30 @@ describe("asLookUp", () => {
 
   it("passes a well-formed answer through, its entries narrowed", () => {
     // The quiet bubble's own door (D164): the count is what tells "not in
-    // your dictionaries" from "no dictionary for this language".
-    assert.deepEqual(asLookUp({ entries: [ENTRY, "junk"], dictionaries: 2 }), { entries: [ENTRY], dictionaries: 2 });
-    assert.deepEqual(asLookUp({ entries: [], dictionaries: 0 }), { entries: [], dictionaries: 0 });
+    // your dictionaries" from "no dictionary for this language", and the
+    // language (D191) is what the sentence names and the voice reads in.
+    assert.deepEqual(
+      asLookUp({ entries: [ENTRY, "junk"], dictionaries: 2, lang: "en" }),
+      { entries: [ENTRY], dictionaries: 2, lang: "en" },
+    );
+    assert.deepEqual(asLookUp({ entries: [], dictionaries: 0, lang: "pl" }), { entries: [], dictionaries: 0, lang: "pl" });
   });
 
-  it("answers no answer for anything else, an older background's bare list included", () => {
+  it("answers no answer for anything else, an older background's answers included", () => {
     // Saying nothing beats saying something wrong: a "no dictionary" line off
-    // a malformed count would send somebody to the settings for nothing.
+    // a malformed count, or naming a language nobody asked in, would send
+    // somebody to the settings for nothing. An older background answers a
+    // bare list (before D164) or a count without a language (before D191).
     assert.equal(asLookUp(null), null);
     assert.equal(asLookUp(undefined), null);
     assert.equal(asLookUp([ENTRY]), null);
-    assert.equal(asLookUp({ entries: [], dictionaries: -1 }), null);
-    assert.equal(asLookUp({ entries: [], dictionaries: 1.5 }), null);
-    assert.equal(asLookUp({ entries: [], dictionaries: "2" }), null);
-    assert.equal(asLookUp({ entries: "none", dictionaries: 1 }), null);
+    assert.equal(asLookUp({ entries: [], dictionaries: 0 }), null);
+    assert.equal(asLookUp({ entries: [], dictionaries: 0, lang: "" }), null);
+    assert.equal(asLookUp({ entries: [], dictionaries: 0, lang: 7 }), null);
+    assert.equal(asLookUp({ entries: [], dictionaries: -1, lang: "en" }), null);
+    assert.equal(asLookUp({ entries: [], dictionaries: 1.5, lang: "en" }), null);
+    assert.equal(asLookUp({ entries: [], dictionaries: "2", lang: "en" }), null);
+    assert.equal(asLookUp({ entries: "none", dictionaries: 1, lang: "en" }), null);
   });
 });
 

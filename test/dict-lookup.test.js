@@ -1,14 +1,17 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { lookupKeys } from "../src/lib/dict/lookup.js";
+import { languagesToAsk, lookupKeys } from "../src/lib/dict/lookup.js";
+import { settle } from "../src/lib/dict/store.js";
 
 /**
  * The pure half of asking the dictionaries (D121): which keys a phrase is
- * asked under, and when it is not a dictionary question at all. The database
- * half (`lookUp` -> `lookupEntries`) lives on IndexedDB and stays with the
- * smoke tests; these are the rules both its callers - the background's
- * translate ride and the reader's quiet bubble - stand on.
+ * asked under, and when it is not a dictionary question at all; since D191
+ * also which languages it is asked in, in what order, and which language's
+ * answer the bubble gets. The database half (`lookupEntries`) lives on
+ * IndexedDB and stays with the smoke tests; these are the rules its callers -
+ * the background's translate ride, the quiet bubble on any page, the reader's
+ * own hand - stand on.
  */
 describe("lookupKeys", () => {
   it("asks under the normalized phrase first", () => {
@@ -41,5 +44,68 @@ describe("lookupKeys", () => {
     // Polish inflection is the `.syn` file's business, not a rule's: a wrong
     // guess would find a real entry for a word nobody selected.
     assert.deepEqual(lookupKeys("czytania", "pl"), ["czytania"]);
+  });
+});
+
+describe("languagesToAsk", () => {
+  it("asks the pair first and the page's declaration second", () => {
+    // The Mastodon case (D191): the interface says Polish, the post is
+    // English, the pair is English - the pair's dictionaries get the word
+    // before the page's word counts for anything.
+    assert.deepEqual(languagesToAsk({ pair: "en", declared: "pl" }), ["en", "pl"]);
+  });
+
+  it("asks a language named twice once", () => {
+    assert.deepEqual(languagesToAsk({ pair: "en", declared: "en" }), ["en"]);
+  });
+
+  it("asks only what was named, and nothing when nothing was", () => {
+    // No pair (D165's stand-in the other way round): the page's own language
+    // is all there is. No page language either: nothing to ask, and the
+    // caller answers null rather than guessing.
+    assert.deepEqual(languagesToAsk({ pair: null, declared: "pl" }), ["pl"]);
+    assert.deepEqual(languagesToAsk({ pair: "en", declared: null }), ["en"]);
+    assert.deepEqual(languagesToAsk({ pair: "en", declared: "" }), ["en"]);
+    assert.deepEqual(languagesToAsk({ pair: null, declared: null }), []);
+    assert.deepEqual(languagesToAsk({ pair: "  ", declared: "" }), []);
+  });
+});
+
+describe("settle", () => {
+  const ENTRY = { dictionary: "WikDict", headword: "pan", senses: ["patelnia"] };
+
+  it("answers with the first language whose dictionaries knew the word", () => {
+    // The order is the caller's: the pair's answer stands even when the
+    // page's dictionaries would have had something to say - `lookupEntries`
+    // never asks them once the pair's knew the word.
+    const pair = { entries: [ENTRY], dictionaries: 2, lang: "en" };
+    const page = { entries: [ENTRY], dictionaries: 1, lang: "pl" };
+    assert.deepEqual(settle([pair, page]), pair);
+    // And the page's, one step later, for the word the pair's did not know:
+    // a Polish word on a Polish page with a Polish dictionary (D165's case).
+    const silent = { entries: [], dictionaries: 2, lang: "en" };
+    assert.deepEqual(settle([silent, page]), page);
+  });
+
+  it("says 'not in your dictionaries' of the shelf that was consulted", () => {
+    // Nobody knew the word, but the pair's dictionaries were asked: the count
+    // and the language are theirs, so the bubble says "not in your
+    // dictionaries" rather than sending anybody to install a Polish one.
+    const silent = { entries: [], dictionaries: 2, lang: "en" };
+    const none = { entries: [], dictionaries: 0, lang: "pl" };
+    assert.deepEqual(settle([silent, none]), silent);
+    // The other way round as well: no dictionary for the pair, the page's
+    // dictionaries asked and silent - the answer is about them.
+    assert.deepEqual(settle([none, silent]), silent);
+  });
+
+  it("names the first language asked when there is no dictionary at all", () => {
+    // Zero dictionaries everywhere: "no dictionary for English yet" names
+    // the pair's language - the one somebody reading with an English pair
+    // would install - and never the interface language of a Polish site.
+    const pair = { entries: [], dictionaries: 0, lang: "en" };
+    const page = { entries: [], dictionaries: 0, lang: "pl" };
+    assert.deepEqual(settle([pair, page]), { entries: [], dictionaries: 0, lang: "en" });
+    assert.deepEqual(settle([]), { entries: [], dictionaries: 0, lang: "" });
   });
 });

@@ -198,62 +198,112 @@ function rowsOf(id) {
  * What the dictionaries here have to say about a word.
  *
  * One transaction over both stores: which dictionaries are installed, then a
- * point read per dictionary per candidate form. A dictionary answers at most
- * once - the first form that hits wins, so `watches` finding `watch` does not
- * also go looking for `watche`.
+ * point read per dictionary per candidate form, language by language in the
+ * order asked (D191). A dictionary answers at most once - the first form that
+ * hits wins, so `watches` finding `watch` does not also go looking for
+ * `watche` - and a language answers for all the later ones: the first whose
+ * dictionaries know the word is the answer, so a Polish page's dictionary
+ * never gets to second-guess an English word the pair's dictionaries knew.
  *
- * Ordering is the reader's own, as the settings page arranged it (`order.js`);
- * a store nobody has arranged answers in import order, as it always did.
+ * Ordering within a language is the reader's own, as the settings page
+ * arranged it (`order.js`); a store nobody has arranged answers in import
+ * order, as it always did.
  *
- * Answered with how many dictionaries were asked, out of the same read (D164):
- * "nothing in three dictionaries" and "no dictionary for this language" are
- * different sentences for a bubble to say, and a bare list cannot tell them
- * apart. Asked even with no keys - a selection that is not a dictionary
- * question still has to learn which of the two silences it met.
+ * Answered with how many dictionaries were asked and in which language, out
+ * of the same read (D164, D191): "nothing in three dictionaries" and "no
+ * dictionary for this language" are different sentences for a bubble to say,
+ * and which language they are about is `settle`'s to decide. Asked even with
+ * no keys - a selection that is not a dictionary question still has to learn
+ * which of the two silences it met.
  *
- * @param {string[]} keys the word, then the forms worth trying instead of it
- * @param {string} langFrom the language being read
- * @returns {Promise<{ entries: DictionaryEntry[], dictionaries: number }>}
+ * @param {{ lang: string, keys: string[] }[]} asks the languages in the order
+ *   they are asked, each with the word and the forms worth trying instead of it
+ * @returns {Promise<LookupAnswer>}
  */
-export async function lookupEntries(keys, langFrom) {
+export async function lookupEntries(asks) {
   return await withStores([META, ENTRIES], "readonly", async (transaction) => {
     const installed = /** @type {Dictionary[]} */ (await promisify(transaction.objectStore(META).getAll()));
-    // Matched on the language of the headwords alone. A dictionary explaining
-    // English in English is often the better answer for somebody learning it,
-    // and refusing it because the settings say "into Polish" would refuse a
-    // book the reader deliberately installed.
-    const dictionaries = answerOrder(
-      installed.filter((dictionary) => dictionary.ready && dictionary.langFrom === langFrom),
-    );
-
     const store = transaction.objectStore(ENTRIES);
-    /** @type {DictionaryEntry[]} */
-    const found = [];
+    /** @type {LookupAnswer[]} */
+    const answers = [];
 
-    for (const dictionary of dictionaries) {
-      for (const key of keys) {
-        const row = /** @type {import("./rows.js").DictionaryRow | undefined} */ (
-          await promisify(store.get([dictionary.id, key]))
-        );
-        if (row === undefined) continue;
-
-        // One hop, never two: an alias points at a word, and a word that turned
-        // out to be another alias is a dictionary contradicting itself.
-        const target =
-          row.aliasOf === undefined
-            ? row
-            : /** @type {import("./rows.js").DictionaryRow | undefined} */ (
-                await promisify(store.get([dictionary.id, row.aliasOf]))
-              );
-
-        if (target === undefined || target.senses.length === 0) continue;
-        found.push({ dictionary: dictionary.name, headword: target.headword, senses: target.senses });
-        break;
-      }
+    for (const ask of asks) {
+      // Matched on the language of the headwords alone. A dictionary explaining
+      // English in English is often the better answer for somebody learning it,
+      // and refusing it because the settings say "into Polish" would refuse a
+      // book the reader deliberately installed.
+      const dictionaries = answerOrder(
+        installed.filter((dictionary) => dictionary.ready && dictionary.langFrom === ask.lang),
+      );
+      const entries = dictionaries.length === 0 ? [] : await readEntries(store, dictionaries, ask.keys);
+      answers.push({ entries, dictionaries: dictionaries.length, lang: ask.lang });
+      if (entries.length > 0) break;
     }
 
-    return { entries: found, dictionaries: dictionaries.length };
+    return settle(answers);
   });
+}
+
+/**
+ * @param {IDBObjectStore} store the entries
+ * @param {Dictionary[]} dictionaries in the order they answer
+ * @param {string[]} keys the word, then the forms worth trying instead of it
+ * @returns {Promise<DictionaryEntry[]>}
+ */
+async function readEntries(store, dictionaries, keys) {
+  /** @type {DictionaryEntry[]} */
+  const found = [];
+
+  for (const dictionary of dictionaries) {
+    for (const key of keys) {
+      const row = /** @type {import("./rows.js").DictionaryRow | undefined} */ (
+        await promisify(store.get([dictionary.id, key]))
+      );
+      if (row === undefined) continue;
+
+      // One hop, never two: an alias points at a word, and a word that turned
+      // out to be another alias is a dictionary contradicting itself.
+      const target =
+        row.aliasOf === undefined
+          ? row
+          : /** @type {import("./rows.js").DictionaryRow | undefined} */ (
+              await promisify(store.get([dictionary.id, row.aliasOf]))
+            );
+
+      if (target === undefined || target.senses.length === 0) continue;
+      found.push({ dictionary: dictionary.name, headword: target.headword, senses: target.senses });
+      break;
+    }
+  }
+
+  return found;
+}
+
+/**
+ * What the dictionaries said about a phrase, how many of them were asked and
+ * in which language.
+ * @typedef {{ entries: DictionaryEntry[], dictionaries: number, lang: string }} LookupAnswer
+ */
+
+/**
+ * Which language's answer the bubble gets, out of the ones asked in order
+ * (D191): the first whose dictionaries knew the word; failing that, the first
+ * that had dictionaries at all, so "not in your dictionaries" is said of the
+ * shelf that was actually consulted; failing that, the first asked - the
+ * pair's language when there is a pair - so "no dictionary for English yet"
+ * names the language somebody reading with an English pair would install,
+ * not the one a Polish-interface site declares for its buttons. Pure, so the
+ * rule can be tested without a database.
+ *
+ * @param {LookupAnswer[]} answers in the order asked
+ * @returns {LookupAnswer}
+ */
+export function settle(answers) {
+  const known = answers.find((answer) => answer.entries.length > 0);
+  if (known !== undefined) return known;
+  const asked = answers.find((answer) => answer.dictionaries > 0);
+  if (asked !== undefined) return asked;
+  return { entries: [], dictionaries: 0, lang: answers[0]?.lang ?? "" };
 }
 
 /**

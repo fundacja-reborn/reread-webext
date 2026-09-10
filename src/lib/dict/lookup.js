@@ -61,24 +61,59 @@ export function lookupKeys(text, langFrom) {
 }
 
 /**
- * What the dictionaries have on a phrase - and how many of them were asked,
- * because "nothing in your dictionaries" and "no dictionary for this language"
- * are different sentences for a bubble to say (D164). The count comes out of
- * the read the lookup makes anyway, and is asked even for a phrase that is
- * not a dictionary question (a sentence, an empty selection): the bubble
- * still has to know which of the two silences it met. Null is no answer at
- * all - a database that would not open - and the bubble says nothing on it,
- * by the header's rule: extras do not get to break answers, and neither do
- * they get to send anybody to the settings for a dictionary that is there.
+ * The languages a phrase is asked in, in order (D191): the pair's source
+ * first - the language somebody said they are reading - and what the page
+ * declares for the phrase second, for the word the pair's dictionaries did
+ * not know on a page that says it is in another language. The same language
+ * named twice is asked once; nothing named at all is nothing to ask, and the
+ * caller answers null on it.
+ *
+ * Until D191 the page came first and the pair was the stand-in (D165) - and
+ * every localised web app declares the language of its buttons, not of its
+ * posts, so an English word on a Polish-interface page was looked up in
+ * Polish and told there was no Polish dictionary. The pair is the one
+ * choice somebody made on purpose, and it is on show in the popup; the
+ * page's word still counts, one step later, so a Polish page with a Polish
+ * dictionary reads without a trip to the settings.
+ *
+ * @param {{ pair: string | null, declared: string | null }} of the pair's
+ *   source language and the page's declaration for the phrase, each null or
+ *   empty for none - primary subtags, the way the callers already hold them
+ * @returns {string[]}
+ */
+export function languagesToAsk({ pair, declared }) {
+  /** @type {string[]} */
+  const languages = [];
+  for (const candidate of [pair, declared]) {
+    const lang = (candidate ?? "").trim();
+    if (lang.length > 0 && !languages.includes(lang)) languages.push(lang);
+  }
+  return languages;
+}
+
+/**
+ * What the dictionaries have on a phrase - how many of them were asked and
+ * in which language, because "nothing in your dictionaries" and "no
+ * dictionary for this language" are different sentences for a bubble to say
+ * (D164), and the language has to be named (D191). The count comes out of the
+ * read the lookup makes anyway, and is asked even for a phrase that is not a
+ * dictionary question (a sentence, an empty selection): the bubble still has
+ * to know which of the two silences it met. Null is no answer at all - no
+ * language to ask in, a database that would not open - and the bubble says
+ * nothing on it, by the header's rule: extras do not get to break answers,
+ * and neither do they get to send anybody to the settings for a dictionary
+ * that is there.
  *
  * @param {string} text as the page had it
- * @param {string} langFrom the language being read
+ * @param {{ pair: string | null, declared: string | null }} languages the
+ *   pair's source and the page's declaration, in `languagesToAsk`'s terms
  * @returns {Promise<import("../protocol.js").LookUp | null>}
  */
-export async function lookUpAnswer(text, langFrom) {
-  const keys = lookupKeys(text, langFrom) ?? [];
+export async function lookUpAnswer(text, languages) {
+  const asks = languagesToAsk(languages).map((lang) => ({ lang, keys: lookupKeys(text, lang) ?? [] }));
+  if (asks.length === 0) return null;
   try {
-    return await lookupEntries(keys, langFrom);
+    return await lookupEntries(asks);
   } catch {
     return null;
   }
@@ -86,12 +121,13 @@ export async function lookUpAnswer(text, langFrom) {
 
 /**
  * The entries alone, for the translating bubble's second layer (D31), where
- * the sentence stands whether or not a dictionary answered.
+ * the sentence stands whether or not a dictionary answered - read in the
+ * pair's language, the one the engine translates from.
  *
  * @param {string} text as the page had it
  * @param {string} langFrom the language being read
  * @returns {Promise<import("../protocol.js").DictEntry[]>}
  */
 export async function lookUp(text, langFrom) {
-  return (await lookUpAnswer(text, langFrom))?.entries ?? [];
+  return (await lookUpAnswer(text, { pair: langFrom, declared: null }))?.entries ?? [];
 }

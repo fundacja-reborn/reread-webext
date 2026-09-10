@@ -87,7 +87,12 @@ export const ErrorCode = Object.freeze({
  * (D164): `dictionaries` counts the installed dictionaries that answer for
  * the language, zero saying there is none - the one fact that tells "not in
  * your dictionaries" from "no dictionary for this language" in the bubble.
- * @typedef {{ entries: DictEntry[], dictionaries: number }} LookUp
+ * `lang` is the language they were asked in (D191): the pair's or the page's,
+ * decided in the background where the pair lives - the bubble names it in
+ * "no dictionary for ...", reads the phrase aloud in it once a dictionary
+ * knew the phrase, and says where Save would file the phrase (D167) only
+ * when it is not the pair's.
+ * @typedef {{ entries: DictEntry[], dictionaries: number, lang: string }} LookUp
  */
 
 /**
@@ -126,16 +131,19 @@ export const ErrorCode = Object.freeze({
  * `look-up` is the dictionaries alone (D162): what the quiet vocabulary asks
  * from a page that has no database in reach - the reader page reads its own.
  * It carries the text, and since D165 the language the page declares for it
- * (`lang`, absent when the page says nothing): under the trim a page is read
- * in its own language, the way the reader page reads its document, and the
- * pair in the settings is the stand-in for a page that declares none - the
- * background applies that rule, so the pair stays its business alone.
- * The answer is a `LookUp` (D164): the entries, and how many dictionaries
- * were asked - the bubble says "not in your dictionaries" or "no dictionary
- * for this language" by the count, which a bare list could never tell it.
- * No pair chosen, or a database that would not open, answers `null`: no
- * answer rather than an error, and the bubble says nothing on it - a note
- * sending somebody to the settings has to be about a dictionary, not a fault.
+ * (`lang`, absent when the page says nothing). The background asks in the
+ * pair's language first and in the page's second (D191, `languagesToAsk`) -
+ * a localised site declares the language of its buttons, not of its posts -
+ * and the pair stays the background's business alone: the content only
+ * reports what the page said.
+ * The answer is a `LookUp` (D164): the entries, how many dictionaries were
+ * asked and in which language (D191) - the bubble says "not in your
+ * dictionaries" or "no dictionary for this language" by the count, which a
+ * bare list could never tell it, and names the language by `lang`.
+ * No language to ask in at all, or a database that would not open, answers
+ * `null`: no answer rather than an error, and the bubble says nothing on it
+ * - a note sending somebody to the settings has to be about a dictionary,
+ * not a fault.
  *
  * Saving replaces the meanings of a phrase with the ones given, which is what
  * makes "the phrase means exactly what the bubble is showing" one rule instead
@@ -328,20 +336,23 @@ export function asDictEntries(value) {
 
 /**
  * The `look-up` answer narrowed the way every answer is (D164): the entries
- * through `asDictEntries`, the count a whole number. Anything else - null,
- * an older background's bare list, a count that is not one - is no answer,
- * and the bubble says nothing rather than something wrong: a "no dictionary"
- * line off a malformed count would send somebody to the settings for nothing.
+ * through `asDictEntries`, the count a whole number, the language a name
+ * (D191). Anything else - null, an older background's bare list or its answer
+ * without a language, a count that is not one - is no answer, and the bubble
+ * says nothing rather than something wrong: a "no dictionary" line off a
+ * malformed count, or naming a language nobody asked in, would send somebody
+ * to the settings for nothing.
  *
  * @param {unknown} value
  * @returns {LookUp | null}
  */
 export function asLookUp(value) {
   if (typeof value !== "object" || value === null || Array.isArray(value)) return null;
-  const { entries, dictionaries } = /** @type {Record<string, unknown>} */ (value);
+  const { entries, dictionaries, lang } = /** @type {Record<string, unknown>} */ (value);
   if (!Array.isArray(entries) || typeof dictionaries !== "number") return null;
   if (!Number.isInteger(dictionaries) || dictionaries < 0) return null;
-  return { entries: asDictEntries(entries), dictionaries };
+  if (typeof lang !== "string" || lang.length === 0) return null;
+  return { entries: asDictEntries(entries), dictionaries, lang };
 }
 
 /**
