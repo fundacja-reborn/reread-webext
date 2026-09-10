@@ -45,6 +45,7 @@
   "bubble_reader": { "message": "Czytaj w widoku czytania" },
   "bubble_library": { "message": "Otwórz czytelnię offline" },
   "bubble_translating": { "message": "Tłumaczę..." },
+  "bubble_looking_up": { "message": "Szukam w słownikach..." },
   "bubble_nothing_more": { "message": "Nie ma ani zdania, ani wpisu ze słownika" },
   "bubble_whole_words": { "message": "Zaznacz całe słowa" },
   "bubble_not_in_dictionary": { "message": "Nie ma tego w słownikach" },

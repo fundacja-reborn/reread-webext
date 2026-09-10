@@ -45,6 +45,7 @@
   "bubble_reader": { "message": "Читати в режимі читання" },
   "bubble_library": { "message": "Відкрити офлайн-список читання" },
   "bubble_translating": { "message": "Перекладаю..." },
+  "bubble_looking_up": { "message": "Шукаю у словниках..." },
   "bubble_nothing_more": { "message": "Немає ні речення, ні словникової статті" },
   "bubble_whole_words": { "message": "Виділіть цілі слова" },
   "bubble_not_in_dictionary": { "message": "Немає у ваших словниках" },

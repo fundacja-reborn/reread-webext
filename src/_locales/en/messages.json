@@ -61,6 +61,10 @@
     "description": "The second door of the reader-only bubble on an ordinary page, under \"Read in the reader\": a verb phrase, like that one, opening the offline reading list. The list keeps its own name (reading_list) everywhere else."
   },
   "bubble_translating": { "message": "Translating..." },
+  "bubble_looking_up": {
+    "message": "Looking it up...",
+    "description": "The quiet bubble's line while the installed dictionaries are being asked about the selected phrase (translation switched off). The counterpart of bubble_translating: same tone, same place, replaced by the entries or by the line saying why there are none."
+  },
   "bubble_nothing_more": {
     "message": "No sentence and no dictionary entry to show",
     "description": "The line behind the bubble's More button when the fetch it started comes back empty - shown instead of the layer closing without a word. It stands where a translated sentence normally would, so it must name the missing things (sentence, dictionary) and read unmistakably as the extension talking, never like a line of the book."
