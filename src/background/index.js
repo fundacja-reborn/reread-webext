@@ -88,15 +88,17 @@ async function handle(request, sender) {
       // dictionaries live in the extension's own storage, out of a content
       // script's reach, so the page asks here - the reader page keeps
       // reading its own database directly (D121). The answer carries the
-      // entries and how many dictionaries were asked (D164), so the bubble
-      // can say which silence it met. Read in the page's own language where
-      // it declared one (D165) - a Polish page with a pl-en dictionary is
-      // read in Polish whatever the pair says - and in the pair's source
-      // where it did not. Neither means no language to ask in: no answer
-      // (null) rather than an error - the bubble says nothing on it, and a
-      // fault must never read as a missing dictionary.
-      const lang = request.lang ?? chosenPair(await readConfig())?.from ?? null;
-      return ok(lang === null ? null : await lookUpAnswer(request.text, lang));
+      // entries, how many dictionaries were asked and in which language
+      // (D164, D191), so the bubble can say which silence it met and name
+      // it. Asked in the pair's language first and in the page's own second
+      // (D191, `languagesToAsk`): the pair is what somebody said they read,
+      // and a localised site declares the language of its buttons, not of
+      // its posts - the page's declaration gets its turn for the word the
+      // pair's dictionaries did not know. Neither named means no language
+      // to ask in: no answer (null) rather than an error - the bubble says
+      // nothing on it, and a fault must never read as a missing dictionary.
+      const pair = chosenPair(await readConfig());
+      return ok(await lookUpAnswer(request.text, { pair: pair?.from ?? null, declared: request.lang ?? null }));
     }
     case Message.OPEN_READER: {
       // Two senders, one function. The popup says which tab it stood over,

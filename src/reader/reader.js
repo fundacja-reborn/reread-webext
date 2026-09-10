@@ -6601,13 +6601,20 @@ function rootReadingSide(ground) {
     onMarkStretch,
     onMarkResized: (range) => void onMarkResized(range),
     // The no-translation trim's two hands (D121): the dictionaries and the
-    // voice of the document on screen, both by the rule the voice panel
-    // already lives by (`speechLang`) - the document's own declaration first,
-    // the pair's source as the stand-in. Only over a document: the quote rows
-    // of the highlights page show many documents at once, and a lookup in a
-    // guessed language would find real entries for words nobody asked about.
+    // voice of the document on screen. The dictionaries by the one rule every
+    // page asks in (D191, `languagesToAsk`): the pair's source first, the
+    // document's own declaration second, for the word the pair's dictionaries
+    // did not know. The voice by the rule the voice panel already lives by
+    // (`speechLang`) - the document's own declaration first, the pair's
+    // source as the stand-in - because reading the whole document aloud has
+    // to go in one voice, and the bubble's is the same one. Only over a
+    // document: the quote rows of the highlights page show many documents at
+    // once, and a lookup in a guessed language would find real entries for
+    // words nobody asked about.
     quietLookup: (text) =>
-      shown === null ? Promise.resolve(null) : lookUpAnswer(text, primaryLanguage(speechLang())),
+      shown === null
+        ? Promise.resolve(null)
+        : lookUpAnswer(text, { pair: settings.sourceLang, declared: primaryLanguage(article?.getAttribute("lang") ?? "") }),
     quietVoice: () =>
       shown === null
         ? null
