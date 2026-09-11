@@ -256,8 +256,10 @@ summary {
   margin: 0 0 0.75rem;
 }
 
-.lookup-fold .lookup-phrase,
-.lookup-fold .lookup-meaning {
+/* The phrase wears the reading face like the rows' (D104); the meanings
+   under it are chips echoing the dictionary lines they were pressed in,
+   and keep those lines' interface face, so the two read as one thing. */
+.lookup-fold .lookup-phrase {
   font-family: var(--reader-font-lead, var(--reader-font-stack));
   font-size: var(--reader-size, 18px);
   line-height: 1.45;

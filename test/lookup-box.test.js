@@ -54,7 +54,12 @@ describe("the look-up field", () => {
     assert.ok(at('"lookup-close"') !== -1 && at('"lookup-close"') < at('"lookup-kept"'), "the close is not at the head");
     assert.ok(at('"lookup-kept"') < at('"lookup-actions"'), "the acts stand before what the phrase means");
     assert.ok(at('"lookup-actions"') < at('"lookup-entries"'), "the acts trail the books");
-    assert.match(render, /element\("p", "lookup-meaning", meaning\)/, "the meanings are not one per line");
+    // The meanings as chips in the pressed line's dress; where the field
+    // writes, a chip is a press that takes its meaning back out (the one way
+    // out for a meaning typed by hand), and where it only reads, plain text.
+    assert.match(render, /const chip = button\("lookup-chip", meaning\);\s*chip\.setAttribute\("aria-pressed", "true"\)/, "a chip is not a pressed toggle");
+    assert.match(render, /chip\.addEventListener\("click", \(\) => void press\(meaning\)\)/, "a chip does not take its meaning back out");
+    assert.match(render, /if \(readOnly\) \{\s*chips\.append\(element\("span", "lookup-chip", meaning\)\)/, "the read-only field's chips are presses");
     // Edit over meanings that exist, Own meaning over none.
     assert.match(bodyOf(await source("lib/lookup-box.js"), "editLabel"), /t\("bubble_edit"\) : t\("lookup_own_meaning"\)/, "the editor's button does not follow the phrase's standing");
   });

@@ -473,13 +473,33 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
 
     // The phrase's standing in the vocabulary, before what the books say:
     // the reader's own meaning outranks a dictionary's (the recall bubble's
-    // order), one meaning per line as the editor and the bubble keep them.
+    // order). Each meaning is a chip in the pressed line's own dress - the
+    // same words in the same face on the same wash - so that a line pressed
+    // below is seen to land up here (Michał's fourth smoke: set in the
+    // reading face, one meaning per line, they read as a paragraph nobody
+    // connected to the presses). Where the field writes, a chip is a press
+    // too: it takes its meaning back out, as pressing the line again does -
+    // and it is the one way out for a meaning typed by hand.
     if (state.editing) {
       answer.append(editor());
     } else if (state.meanings.length > 0) {
       const kept = element("div", "lookup-kept");
       kept.append(element("p", "lookup-kept-label", t("lookup_kept")));
-      for (const meaning of state.meanings) kept.append(element("p", "lookup-meaning", meaning));
+      const chips = element("div", "lookup-chips");
+      for (const meaning of state.meanings) {
+        if (readOnly) {
+          chips.append(element("span", "lookup-chip", meaning));
+          continue;
+        }
+        const chip = button("lookup-chip", meaning);
+        chip.setAttribute("aria-pressed", "true");
+        const cross = element("span", "lookup-chip-x", String.fromCodePoint(0x00d7));
+        cross.setAttribute("aria-hidden", "true");
+        chip.append(cross);
+        chip.addEventListener("click", () => void press(meaning));
+        chips.append(chip);
+      }
+      kept.append(chips);
       answer.append(kept);
     }
 

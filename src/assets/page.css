@@ -760,24 +760,57 @@ body:not(.reader):has(.panel-scrim:not([hidden])) .page-chrome {
   height: 1.6em;
 }
 
-/* What the phrase already means: the small label, and under it one meaning
-   per line - the editor's and the bubble's shape, where a "; " list of three
-   dictionary lines read as one long sentence (Michał's screenshot,
-   2026-09-11). */
+/* What the phrase already means: the small label, and under it the meanings
+   as chips in the pressed line's own dress - the same face, the same wash
+   and border as `.lookup-sense[aria-pressed="true"]` below - so a line
+   pressed in an entry is seen to land up here (Michał's fourth smoke,
+   2026-09-11: one meaning per line in the reading face read as a paragraph
+   nobody connected to the presses). A chip that is a button takes its
+   meaning back out; the cross says so. */
 .lookup-kept {
   display: grid;
-  gap: 0.15rem;
+  gap: 0.3rem;
 }
 
 .lookup-kept-label {
-  margin: 0 0 0.1rem;
+  margin: 0;
   color: var(--page-muted);
   font-size: 0.85rem;
 }
 
-.lookup-meaning {
+.lookup-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.lookup-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   margin: 0;
+  padding: 0.3rem 0.6rem;
+  font: inherit;
+  text-align: left;
+  color: inherit;
+  background: color-mix(in srgb, var(--page-fg) 7%, transparent);
+  border: 1px solid var(--page-border);
+  border-radius: 5px;
   overflow-wrap: anywhere;
+}
+
+button.lookup-chip {
+  cursor: pointer;
+}
+
+.lookup-chip-x {
+  color: var(--page-muted);
+  line-height: 1;
+}
+
+button.lookup-chip:hover .lookup-chip-x,
+button.lookup-chip:focus-visible .lookup-chip-x {
+  color: var(--page-fg);
 }
 
 /* The line that says the dictionaries are being asked, why they said
