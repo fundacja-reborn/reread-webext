@@ -159,6 +159,31 @@
   "vocab_filter_placeholder": { "message": "Filter by phrase or meaning" },
   "vocab_filter_label": { "message": "Filter the list of saved phrases" },
   "vocab_filter_clear": { "message": "Clear the filter" },
+  "vocab_add_title": {
+    "message": "Add a phrase",
+    "description": "The fold on the saved-phrases page that opens onto the look-up field (D197): a word typed instead of selected, answered by the dictionaries and saved with a press on a meaning."
+  },
+  "vocab_add_note": {
+    "message": "Type a word to see its entries in your dictionaries. Press a meaning to save the phrase, or write your own.",
+    "description": "The sentence inside the \"Add a phrase\" fold, above the field. The translation model is never asked there - a word on its own is where it guesses worst - so the sentence names only the dictionaries and the reader's own meaning."
+  },
+  "lookup_label": {
+    "message": "Look up a word",
+    "description": "The look-up field's accessible name (D197): the toolbar popup's row under the language pair, and the field inside the saved-phrases page's \"Add a phrase\" fold."
+  },
+  "lookup_placeholder": { "message": "Type a word or phrase" },
+  "lookup_action": {
+    "message": "Look up",
+    "description": "The button beside the look-up field; Enter in the field does the same."
+  },
+  "lookup_own_meaning": {
+    "message": "Own meaning",
+    "description": "The button under the look-up field's answer that opens the editor for a meaning the reader types - for a phrase no dictionary knows, or a meaning of their own. Also the editor's accessible name."
+  },
+  "lookup_kept": {
+    "message": "In your saved phrases",
+    "description": "The small line under the look-up field when the phrase is already saved for the pair, over its saved meanings - said before what the dictionaries say, because the reader's own meaning outranks a book's."
+  },
   "vocab_count_filtered_one": {
     "message": "$MATCHING$ of $TOTAL$ saved phrase",
     "description": "The counter while the filter is active. Plural family over the total; the matching count rides along as $2.",

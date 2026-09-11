@@ -230,6 +230,28 @@ summary {
   color: var(--page-fg);
 }
 
+/* --- the fold for a phrase added by hand (D197) --- */
+
+/* The fold stands the filter's distance under it; inside, the sentence and
+   the field (dressed in page.css) follow. The phrase and its meanings are
+   content, like the rows' (D104): they wear the reading face at the Aa
+   panel's size, and the dictionary lines stay in the interface face, as
+   in the bubble. */
+.lookup-fold {
+  margin: 1rem 0 0;
+}
+
+.lookup-fold > .hint {
+  margin: 0 0 0.75rem;
+}
+
+.lookup-fold .lookup-phrase,
+.lookup-fold .lookup-meanings {
+  font-family: var(--reader-font-lead, var(--reader-font-stack));
+  font-size: var(--reader-size, 18px);
+  line-height: 1.45;
+}
+
 /* --- the import offer: size, a taste of its rows, the target pair --- */
 
 .import-confirm {

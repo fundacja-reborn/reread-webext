@@ -246,6 +246,21 @@
       />
     </div>
 
+    <!-- A phrase added by hand (D197): a word typed instead of selected,
+         answered by the dictionaries and saved with a press on a meaning - or
+         with a meaning of the reader's own. Folded, because adding is the
+         occasional act here and the list is the page; the fold opens onto
+         the field, built by `lib/lookup-box.js` (the popup's own). Hidden
+         without a pair, when there is nowhere to file a phrase. -->
+    <details class="fold-line lookup-fold" id="add-phrase">
+      <summary data-i18n="vocab_add_title">Add a phrase</summary>
+      <p class="hint" data-i18n="vocab_add_note">
+        Type a word to see its entries in your dictionaries. Press a meaning to save the phrase, or
+        write your own.
+      </p>
+      <div class="lookup-box" id="lookup-box"></div>
+    </details>
+
     <div id="list" class="phrases"></div>
 
     <p id="status" class="status" role="status"></p>

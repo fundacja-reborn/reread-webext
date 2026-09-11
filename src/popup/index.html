@@ -98,6 +98,24 @@
       Machine translation is off - the reader and your dictionaries keep working.
     </p>
 
+    <!-- The look-up field (D197): a word typed instead of selected, answered
+         by the dictionaries in the pair's language - never by the model - and
+         saved with a press on a meaning. Right under the pair, which says
+         which language the word is in. Stands from the first paint like the
+         pair row and leaves only without a pair (`rows.js`): the settings
+         alone decide, so the row is settled before the models are read and
+         nothing below it moves (D194). The field and its answer are built by
+         `lib/lookup-box.js`, the saved-phrases page's own. -->
+    <div
+      class="popup-row popup-lookup"
+      id="lookup-row"
+      role="group"
+      aria-label="Look up a word"
+      data-i18n-aria-label="lookup_label"
+    >
+      <div class="lookup-box" id="lookup-box"></div>
+    </div>
+
     <!-- The extension's rooms right under the pair (Michał's call, second
          round 2026-08-17): the rows visited often stand above the switches
          flipped rarely. Settings stays below, at the preferences' side - it

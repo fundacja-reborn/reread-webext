@@ -642,6 +642,227 @@ body:not(.reader):has(.panel-scrim:not([hidden])) .page-chrome {
   overflow-x: clip;
 }
 
+/* --- the look-up field (D197): the popup's row and the phrases page's fold --- */
+
+/* One component in two homes (`lib/lookup-box.js`), dressed once: a field
+   with its button, and under it the answer - the phrase, its standing in
+   the vocabulary, the dictionaries' lines as presses, the two actions.
+   Every control keeps the pages' 44px floor. */
+.lookup-box {
+  display: grid;
+  gap: 0.6rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.lookup-form {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+/* The field's real label, read by screen readers, invisible to everyone
+   else - the clip pattern the phrases page uses for its filter. */
+.lookup-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.lookup-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 44px;
+  font: inherit;
+  padding: 0.35rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid var(--page-border);
+  background: transparent;
+  color: var(--page-fg);
+}
+
+.lookup-go {
+  min-height: 44px;
+  white-space: nowrap;
+}
+
+.lookup-answer {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.lookup-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.lookup-phrase {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+/* The speaker beside the phrase, the phrases page's quiet button: no
+   resting border, the muted color, the icon its whole face. */
+.lookup-speak {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  margin-block: -0.45rem;
+  padding: 0.3rem;
+  border-color: transparent;
+  color: var(--page-muted);
+}
+
+.lookup-speak:hover,
+.lookup-speak:focus-visible {
+  border-color: var(--page-border);
+  color: var(--page-fg);
+}
+
+.lookup-speak svg {
+  width: 1.6em;
+  height: 1.6em;
+}
+
+/* "In your saved phrases", a step below the meanings it stands over. */
+.lookup-kept {
+  margin: 0;
+  color: var(--page-muted);
+  font-size: 0.85rem;
+}
+
+.lookup-meanings {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+/* The line that says the dictionaries are being asked, why they said
+   nothing, or what went wrong - the page's own status voice, one step below
+   the prose; pending in the italic the bubble uses for the same wait. */
+.lookup-note {
+  margin: 0;
+  color: var(--page-muted);
+  font-size: 0.9rem;
+}
+
+.lookup-note[data-tone="pending"] {
+  font-style: italic;
+}
+
+.lookup-note[data-tone="error"] {
+  color: var(--page-error);
+}
+
+/* A word of the sentence that is a press or a link (the bubble's hint line,
+   D192): the accent and an underline say so, and nothing else changes shape
+   - a framed button inside a sentence would read as a form. */
+.lookup-link,
+button.lookup-link {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: none;
+  font: inherit;
+  color: var(--page-accent);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* The books' entries, the bubble's own layout: a line between one book and
+   the next, a small label naming the book and the headword it answered
+   about, and under it the meanings one to a row - lines to read first and
+   presses second, so they keep the shape of the text around them. What says
+   a line was pressed is the mark that stays: a wash and a border, because a
+   wash alone is one of the 16 greys an e-ink panel rounds back to paper. */
+.lookup-entries {
+  display: grid;
+  gap: 0;
+}
+
+.lookup-entry + .lookup-entry {
+  margin-top: 0.6em;
+  padding-top: 0.6em;
+  border-top: 1px solid var(--page-line);
+}
+
+.lookup-entry-label {
+  padding-left: 5px;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--page-muted);
+}
+
+.lookup-entry-label .lookup-entry-dict {
+  font-weight: 600;
+}
+
+button.lookup-sense {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0.3rem 0.35rem;
+  font: inherit;
+  text-align: left;
+  color: inherit;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+button.lookup-sense:hover {
+  border-color: var(--page-line);
+}
+
+button.lookup-sense[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--page-fg) 7%, transparent);
+  border-color: var(--page-border);
+}
+
+button.lookup-sense:disabled {
+  color: inherit;
+  cursor: default;
+}
+
+.lookup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.lookup-actions button {
+  min-height: 44px;
+}
+
+.lookup-edit {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.lookup-editor {
+  width: 100%;
+  font: inherit;
+  padding: 0.35rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid var(--page-border);
+  background: transparent;
+  color: var(--page-fg);
+  resize: vertical;
+}
+
 /* --- the colophon (the settings' first, now every room that ends) --- */
 
 /* The line that closes a page the way one closes a book: name and version,

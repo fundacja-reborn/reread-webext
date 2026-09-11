@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { popupRows, siteRowStands } from "../src/popup/rows.js";
+import { lookupRowStands, popupRows, siteRowStands } from "../src/popup/rows.js";
 
 /** @param {Partial<Parameters<typeof popupRows>[0]>} [state] */
 const rows = (state = {}) =>
@@ -16,6 +16,27 @@ describe("the site switch's own rule (D194)", () => {
         // The popup decides this row before it knows the rest (the models,
         // the pair): the two answers must never disagree.
         assert.equal(rows({ translationOff, bubbleOff, fresh: true, pair: false }).site, stands);
+      }
+    }
+  });
+});
+
+describe("the look-up field's own rule (D197)", () => {
+  it("stands wherever a pair is chosen, models or not, and agrees with the rows", () => {
+    // The field asks the dictionaries in the pair's language and files the
+    // phrase under the pair; the engine has no say, so neither does the
+    // trim or a device with no model. Without a pair there is nowhere to
+    // file - the signpost stands in the pair's place instead.
+    for (const translationOff of [false, true]) {
+      for (const bubbleOff of [false, true]) {
+        for (const fresh of [false, true]) {
+          for (const pair of [false, true]) {
+            assert.equal(lookupRowStands({ pair }), pair);
+            // Decided before the popup knows the rest (D194): the two
+            // answers must never disagree.
+            assert.equal(popupRows({ translationOff, bubbleOff, fresh, pair }).lookup, pair);
+          }
+        }
       }
     }
   });

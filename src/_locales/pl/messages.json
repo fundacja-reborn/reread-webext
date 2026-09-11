@@ -98,6 +98,13 @@
   "vocab_filter_placeholder": { "message": "Filtruj po frazie lub znaczeniu" },
   "vocab_filter_label": { "message": "Filtruj listę zapisanych fraz" },
   "vocab_filter_clear": { "message": "Wyczyść filtr" },
+  "vocab_add_title": { "message": "Dodaj frazę" },
+  "vocab_add_note": { "message": "Wpisz słowo, żeby zobaczyć jego hasła w Twoich słownikach. Naciśnij znaczenie, żeby zapisać frazę, albo wpisz własne." },
+  "lookup_label": { "message": "Sprawdź słowo" },
+  "lookup_placeholder": { "message": "Wpisz słowo lub frazę" },
+  "lookup_action": { "message": "Sprawdź" },
+  "lookup_own_meaning": { "message": "Własne znaczenie" },
+  "lookup_kept": { "message": "W zapisanych frazach" },
   "vocab_count_filtered_one": {
     "message": "$MATCHING$ z $TOTAL$ zapisanej frazy",
     "placeholders": {

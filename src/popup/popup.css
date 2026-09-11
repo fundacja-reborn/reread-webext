@@ -79,6 +79,18 @@ body[data-os="android"] .popup-row {
   max-width: 60%;
 }
 
+/* The look-up row (D197): a field with its answer under it, not a label
+   beside a switch - a block, so the box fills the row and the answer grows
+   down inside it. The box's own dress is shared with the saved-phrases page
+   (`.lookup-*` in page.css); here only the row's measure is the popup's. */
+.popup-lookup {
+  display: block;
+}
+
+.popup-lookup .lookup-go {
+  padding-inline: 0.7rem;
+}
+
 /* Buttons as rows: the popup is a list, and a list of pills would shout. The
    hover moves the text, not the separator - a row is not a framed button. */
 .popup-action {

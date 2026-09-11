@@ -27,7 +27,9 @@ import { holdChrome } from "../lib/chrome-hold.js";
 import { fileSize, localizePage, plural, t, uiLocale } from "../lib/i18n.js";
 import { privateNote } from "../lib/private-note.js";
 import { pairLabel } from "../lib/language.js";
+import { mountLookupBox } from "../lib/lookup-box.js";
 import { describeError } from "../lib/messages.js";
+import { speakerIcon } from "../lib/speaker-icon.js";
 import { armBackArrow } from "../lib/back-arrow.js";
 import { ErrorCode, Message, asResult, fail } from "../lib/protocol.js";
 import { BACK_ROAD_KEY, writeVocabTab } from "../lib/session.js";
@@ -98,6 +100,8 @@ const importRun = /** @type {HTMLButtonElement | null} */ (document.getElementBy
 const importCancel = /** @type {HTMLButtonElement | null} */ (document.getElementById("import-cancel"));
 const transferLine = document.getElementById("transfer-status");
 const filterInput = /** @type {HTMLInputElement | null} */ (document.getElementById("filter"));
+const addFold = /** @type {HTMLDetailsElement | null} */ (document.getElementById("add-phrase"));
+const lookupHost = document.getElementById("lookup-box");
 const listContainer = document.getElementById("list");
 const statusLine = document.getElementById("status");
 const pager = document.getElementById("pager");
@@ -176,38 +180,6 @@ function button(label) {
   node.type = "button";
   node.textContent = label;
   return node;
-}
-
-/**
- * The speaker, the bubble's own drawing (`speakerIcon` in
- * `content/tooltip.js`) by the same DOM calls: `currentColor` hands the icon
- * the quiet button's text color, so its resting, hover and focus states are
- * already handled by the button's own rules.
- *
- * @returns {SVGSVGElement}
- */
-function speakerIcon() {
-  const NS = "http://www.w3.org/2000/svg";
-  const svg = document.createElementNS(NS, "svg");
-  svg.setAttribute("viewBox", "0 0 24 24");
-  // Decoration to assistive tech - the button's aria-label carries the words.
-  svg.setAttribute("aria-hidden", "true");
-
-  const body = document.createElementNS(NS, "path");
-  body.setAttribute("d", "M4 9.5v5h3.2L12 18.6V5.4L7.2 9.5H4z");
-  body.setAttribute("fill", "currentColor");
-  svg.append(body);
-
-  for (const arc of ["M15 9.2a4.4 4.4 0 0 1 0 5.6", "M17.6 6.8a8 8 0 0 1 0 10.4"]) {
-    const wave = document.createElementNS(NS, "path");
-    wave.setAttribute("d", arc);
-    wave.setAttribute("fill", "none");
-    wave.setAttribute("stroke", "currentColor");
-    wave.setAttribute("stroke-width", "1.8");
-    wave.setAttribute("stroke-linecap", "round");
-    svg.append(wave);
-  }
-  return svg;
 }
 
 /**
@@ -396,11 +368,16 @@ async function reload() {
     adoptConfig(fresh);
     const chosen = chosenPair(fresh);
     const pair = chosen === null ? "" : `${chosen.from}${chosen.to}`;
+    // The fold for a phrase added by hand (D197) stands wherever there is a
+    // pair to file it under - the same condition the popup's row keeps.
+    if (addFold !== null) addFold.hidden = chosen === null;
     // A different pair is a different list, and page 7 of the old one means
-    // nothing on it.
+    // nothing on it - and the look-up field's answer was in the old pair's
+    // language.
     if (pair !== shownPair) {
       shownPair = pair;
       page = 1;
+      lookupBox?.reset();
     }
 
     // A vocabulary the browser deleted comes back from its copy before the
@@ -934,16 +911,56 @@ async function runImport() {
 // true: it is read only by a settings page that arrives in this tab, and
 // one that arrives here always has this page behind it. A background
 // mid-restart answers nothing; then the walk is made here, as it was.
-function goToSettings() {
+/**
+ * @param {import("../lib/protocol.js").SettingsSection} [section] where on
+ *   the settings page to land (D192): the look-up field's "settings" word
+ *   opens them at the dictionaries
+ */
+function goToSettings(section) {
   try {
     sessionStorage.setItem(BACK_ROAD_KEY, "vocab");
   } catch {
     // The arrow is an enhancement; the walk works without it.
   }
+  const landing = section === undefined ? "" : `#${section}`;
   void webext()
-    .runtime.sendMessage({ kind: Message.OPEN_SETTINGS })
-    .catch(() => location.assign(webext().runtime.getURL("options/options.html")));
+    .runtime.sendMessage(
+      section === undefined
+        ? { kind: Message.OPEN_SETTINGS }
+        : { kind: Message.OPEN_SETTINGS, section },
+    )
+    .catch(() => location.assign(webext().runtime.getURL(`options/options.html${landing}`)));
 }
+
+/**
+ * The look-up field (D197) behind the "Add a phrase" fold: the background
+ * asked the way the rows ask it, the phrase's standing read off the list
+ * this page already holds (fresh through the mirror, like the rows), the
+ * pair's voice for its speaker. The fold opening puts the caret in the
+ * field: opening it is what somebody does to type.
+ */
+const lookupBox =
+  lookupHost === null
+    ? null
+    : mountLookupBox(lookupHost, {
+        ask,
+        savedMeanings: (normalized) =>
+          Promise.resolve(phrases.find((one) => one.normalized === normalized)?.translations ?? []),
+        openDictionaries: () => goToSettings("dictionaries"),
+        voice: () => {
+          const lang = config?.sourceLang ?? null;
+          if (config === null || lang === null) return null;
+          return {
+            lang,
+            voiceURI: config.ttsVoices[primaryLanguage(lang)],
+            rate: config.ttsRate / 100,
+          };
+        },
+      });
+
+addFold?.addEventListener("toggle", () => {
+  if (addFold.open) lookupBox?.focus();
+});
 
 brandButton?.addEventListener("click", () => goToSettings());
 

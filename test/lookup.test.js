@@ -1,0 +1,98 @@
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
+
+import { afterPress, lookupOutcome, lookupText } from "../src/lib/lookup.js";
+import { MAX_PHRASE_LENGTH } from "../src/lib/store/phrase.js";
+
+/**
+ * The look-up field's rules (D197): what a typed word becomes, what the
+ * dictionaries' answer becomes on the screen, and what a press on a line
+ * does to the phrase. The field itself (`lib/lookup-box.js`) is DOM; its call
+ * sites are read in `lookup-box.test.js`.
+ */
+
+describe("lookupText", () => {
+  it("reduces what was typed to the phrase and its key, as a selection would be", () => {
+    // The same two forms the bubble keeps (`trimPhrase`, `normalize`): a word
+    // typed here and the same word selected on a page are one phrase.
+    assert.deepEqual(lookupText("  Elevation, "), { text: "Elevation", normalized: "elevation" });
+    assert.deepEqual(lookupText("take\toff"), { text: "take off", normalized: "take off" });
+  });
+
+  it("has nothing to ask about punctuation, spaces or nothing at all", () => {
+    assert.equal(lookupText(""), null);
+    assert.equal(lookupText("   "), null);
+    assert.equal(lookupText("...!?"), null);
+  });
+
+  it("refuses what the store would refuse", () => {
+    assert.notEqual(lookupText("a".repeat(MAX_PHRASE_LENGTH)), null);
+    assert.equal(lookupText("a".repeat(MAX_PHRASE_LENGTH + 1)), null);
+  });
+});
+
+describe("lookupOutcome", () => {
+  const entry = { dictionary: "WikDict", headword: "elevation", senses: ["wysokość", "wzniesienie"] };
+
+  it("shows the entries as the bubble's blocks, with the language they came in", () => {
+    const outcome = lookupOutcome({ entries: [entry], dictionaries: 1, lang: "en" }, "elevation");
+    assert.equal(outcome.kind, "entries");
+    if (outcome.kind !== "entries") return;
+    assert.equal(outcome.lang, "en");
+    // One book: no dictionary name in the label; the headword is the word
+    // typed, so no headword either - the label stays empty (D23).
+    assert.deepEqual(outcome.blocks, [{ headword: "", dictionary: "", lines: ["wysokość", "wzniesienie"] }]);
+  });
+
+  it("names the headword the dictionary answered about when it is not the word typed", () => {
+    const outcome = lookupOutcome({ entries: [entry], dictionaries: 1, lang: "en" }, "elevations");
+    assert.equal(outcome.kind, "entries");
+    if (outcome.kind !== "entries") return;
+    assert.equal(outcome.blocks[0]?.headword, "elevation");
+  });
+
+  it("tells the two silences apart by the count (D164)", () => {
+    assert.deepEqual(lookupOutcome({ entries: [], dictionaries: 0, lang: "en" }, "elevation"), {
+      kind: "silence",
+      note: "no-dictionary",
+      lang: "en",
+    });
+    assert.deepEqual(lookupOutcome({ entries: [], dictionaries: 2, lang: "en" }, "elevation"), {
+      kind: "silence",
+      note: "not-in-dictionary",
+      lang: "en",
+    });
+  });
+
+  it("says a fault as a fault - a press answered with nothing would read as a hang", () => {
+    assert.deepEqual(lookupOutcome(null, "elevation"), { kind: "fault" });
+  });
+});
+
+describe("afterPress", () => {
+  it("saves the phrase with the pressed line, after what it already meant (D34)", () => {
+    assert.deepEqual(afterPress([], "wysokość"), { act: "save", meanings: ["wysokość"] });
+    assert.deepEqual(afterPress(["wysokość"], "wzniesienie"), {
+      act: "save",
+      meanings: ["wysokość", "wzniesienie"],
+    });
+  });
+
+  it("takes a pressed line back out", () => {
+    assert.deepEqual(afterPress(["wysokość", "wzniesienie"], "wysokość"), {
+      act: "save",
+      meanings: ["wzniesienie"],
+    });
+  });
+
+  it("forgets the phrase when the last meaning is taken back", () => {
+    // The bubble declines to save an empty gloss and leaves the reader the
+    // rest of the bubble; here the line was the reader's only word about the
+    // phrase, and a phrase with nothing to mean has nothing to stay for.
+    assert.deepEqual(afterPress(["wysokość"], "wysokość"), { act: "forget", meanings: [] });
+  });
+
+  it("splits a line the book wrote as several", () => {
+    assert.deepEqual(afterPress([], "bank\nbrzeg"), { act: "save", meanings: ["bank", "brzeg"] });
+  });
+});
