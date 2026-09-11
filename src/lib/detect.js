@@ -7,10 +7,14 @@
  * around it word salad (Michał's screenshot, 2026-09-11). Two witnesses can
  * say a phrase is not in the pair's language, and both are local:
  *
- * The browser's own detector, `i18n.detectLanguage` - CLD2 behind Firefox's
- * `LanguageDetector`, CLD3 in Chromium - offline, permission-free, and
- * reliable on a sentence, which is what it is handed (the sentence around
- * the phrase, the phrase alone when there is none). It is trusted narrowly:
+ * The browser's own detector, `i18n.detectLanguage` - CLD2 in a worker that
+ * ships inside Firefox (`resource://gre/modules/translations/cld-worker.js`),
+ * CLD3 linked into Chromium's renderer (`third_party/cld_3`); read in both
+ * browsers' sources, not their docs: no model is fetched, nothing is sent,
+ * the text never leaves the browser (PRIVACY.md, "Language detection").
+ * Permission-free, and reliable on a sentence, which is what it is handed
+ * (the sentence around the phrase, the phrase alone when there is none -
+ * CLD3 calls anything under 50 bytes unreliable). It is trusted narrowly:
  * only where its confident verdict is the pair's target language - the
  * reader's own, the one case that matters - or the language the page
  * declares, two witnesses agreeing. Not any language it names: detectors
