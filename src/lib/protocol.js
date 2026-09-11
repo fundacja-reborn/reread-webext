@@ -38,6 +38,26 @@ export const Message = Object.freeze({
   PAGE_INFO: "page-info",
 });
 
+/**
+ * The places on the settings page a press may ask to land on (D192), by the
+ * anchor the page gives them - one so far: the bubble's "settings", in the
+ * line about a missing dictionary, opens the dictionaries. A closed list, so
+ * that a request names a section and never an address: the background puts
+ * the name on as a fragment, and a name it does not know is dropped like
+ * every other extra (the settings then open at the top, as before).
+ */
+export const SETTINGS_SECTIONS = Object.freeze(/** @type {const} */ (["dictionaries"]));
+
+/** @typedef {(typeof SETTINGS_SECTIONS)[number]} SettingsSection */
+
+/**
+ * @param {unknown} value
+ * @returns {value is SettingsSection}
+ */
+function isSettingsSection(value) {
+  return typeof value === "string" && SETTINGS_SECTIONS.some((section) => section === value);
+}
+
 /** Every way a request can fail, and the whole list of them. */
 export const ErrorCode = Object.freeze({
   /** No translation engine is bundled yet (the state before M1 lands). */
@@ -112,7 +132,17 @@ export const ErrorCode = Object.freeze({
  * way. That is what keeps "is there a second layer" one question rather than
  * three states.
  *
- * @typedef {{ gloss: string, sentence: string | null, entries?: DictEntry[] }} Translation
+ * `dictionaries` is the `look-up` answer's count (D164) riding along with a
+ * translation (D192): how many installed dictionaries answer for the pair's
+ * source language, zero saying there is none. It is what lets the bubble
+ * over a word or two the engine translated alone say which of two things the
+ * empty entries mean - no dictionary to ask, or dictionaries that did not
+ * know the word - and point at the right remedy. Absent when the lookup gave
+ * no answer at all (a database that would not open), and from a background
+ * older than this field: the bubble says nothing then, by D164's rule that a
+ * fault must never read as a missing dictionary.
+ *
+ * @typedef {{ gloss: string, sentence: string | null, entries?: DictEntry[], dictionaries?: number }} Translation
  */
 
 /**
@@ -183,7 +213,7 @@ export const ErrorCode = Object.freeze({
  * @typedef {{ kind: typeof Message.OPEN_LIBRARY }} OpenLibraryRequest
  * @typedef {{ kind: typeof Message.OPEN_MARKS }} OpenMarksRequest
  * @typedef {{ kind: typeof Message.OPEN_VOCABULARY }} OpenVocabularyRequest
- * @typedef {{ kind: typeof Message.OPEN_SETTINGS }} OpenSettingsRequest
+ * @typedef {{ kind: typeof Message.OPEN_SETTINGS, section?: SettingsSection }} OpenSettingsRequest
  * @typedef {{ kind: typeof Message.SAVE_PHRASE, text: string, translations: string[] }} SavePhraseRequest
  * @typedef {{ kind: typeof Message.FORGET_PHRASE, text: string }} ForgetPhraseRequest
  * @typedef {{ kind: typeof Message.LIST_PHRASES }} ListPhrasesRequest
@@ -284,7 +314,7 @@ export function asResult(response) {
  */
 export function asTranslation(value) {
   if (typeof value !== "object" || value === null) return { gloss: "", sentence: null, entries: [] };
-  const { gloss, sentence, entries } = /** @type {Record<string, unknown>} */ (value);
+  const { gloss, sentence, entries, dictionaries } = /** @type {Record<string, unknown>} */ (value);
 
   const answer = typeof gloss === "string" ? gloss : "";
   // The sentence is an extra to the gloss, so without a gloss there is nothing
@@ -292,7 +322,15 @@ export function asTranslation(value) {
   // has something behind it is a state nobody should have to make sense of.
   const second = answer.length > 0 && typeof sentence === "string" ? sentence : null;
 
-  return { gloss: answer, sentence: second, entries: answer.length > 0 ? asDictEntries(entries) : [] };
+  /** @type {Translation} */
+  const translation = { gloss: answer, sentence: second, entries: answer.length > 0 ? asDictEntries(entries) : [] };
+  // The count is an extra to the entries the same way (D192), and it is a
+  // count or nothing: a value that is not a whole non-negative number says
+  // nothing about the dictionaries, so it is left out rather than read as one.
+  if (answer.length > 0 && typeof dictionaries === "number" && Number.isInteger(dictionaries) && dictionaries >= 0) {
+    translation.dictionaries = dictionaries;
+  }
+  return translation;
 }
 
 /**
@@ -369,7 +407,14 @@ export function asRequest(message) {
   if (kind === Message.OPEN_LIBRARY) return { kind: Message.OPEN_LIBRARY };
   if (kind === Message.OPEN_MARKS) return { kind: Message.OPEN_MARKS };
   if (kind === Message.OPEN_VOCABULARY) return { kind: Message.OPEN_VOCABULARY };
-  if (kind === Message.OPEN_SETTINGS) return { kind: Message.OPEN_SETTINGS };
+  if (kind === Message.OPEN_SETTINGS) {
+    // The section is an extra like the reader's tab id: kept when it names
+    // one the page has, dropped otherwise, never a reason to refuse.
+    const section = /** @type {Record<string, unknown>} */ (message)["section"];
+    return isSettingsSection(section)
+      ? { kind: Message.OPEN_SETTINGS, section }
+      : { kind: Message.OPEN_SETTINGS };
+  }
   if (kind === Message.LIST_PHRASES) return { kind: Message.LIST_PHRASES };
   if (kind === Message.READ_PAGE) return { kind: Message.READ_PAGE };
 

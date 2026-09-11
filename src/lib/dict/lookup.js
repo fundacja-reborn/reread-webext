@@ -119,15 +119,3 @@ export async function lookUpAnswer(text, languages) {
   }
 }
 
-/**
- * The entries alone, for the translating bubble's second layer (D31), where
- * the sentence stands whether or not a dictionary answered - read in the
- * pair's language, the one the engine translates from.
- *
- * @param {string} text as the page had it
- * @param {string} langFrom the language being read
- * @returns {Promise<import("../protocol.js").DictEntry[]>}
- */
-export async function lookUp(text, langFrom) {
-  return (await lookUpAnswer(text, { pair: langFrom, declared: null }))?.entries ?? [];
-}

@@ -664,6 +664,45 @@ export const STYLE = `
     background-repeat: no-repeat;
   }
 
+  /* The hint line (D192), last in the layer: the same quiet italic the note
+     line wears, because it is the same voice - the layer talking about its
+     own answer, not a sentence of the page. Its link is dressed as a link
+     and as nothing else: underlined text in the line's own ink, which a
+     16-grey panel draws, and a shade less faded than the words around it so
+     that the one pressable thing on the line is the one that stands out. */
+  .hint {
+    margin-top: 8px;
+    padding-top: 8px;
+    border: 0 solid var(--edge);
+    border-top-width: 1px;
+    font-size: calc(var(--type-second) * var(--bubble-scale, 1));
+    font-style: italic;
+  }
+  .hint-text { opacity: 0.6; }
+  /* One dress for the anchor and for the press: a word of the sentence that
+     can be pressed looks like a link, whether it leaves the page or opens
+     the settings - the button's own box would make it the loudest thing on
+     a line meant to be read. */
+  .hint-link {
+    display: inline;
+    margin: 0;
+    padding: 0;
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: 0;
+    opacity: 0.8;
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+    cursor: pointer;
+  }
+  .hint-link:hover { opacity: 1; }
+  .hint-link:focus-visible {
+    opacity: 1;
+    outline: 1px solid currentColor;
+    outline-offset: 1px;
+  }
+
   /* A line between one book and the next, with about a line of the entries'
      own text around it. The 8px gap that stood here alone was half a line at
      desktop size and a quarter once the bubble was scaled up on an e-ink
@@ -821,7 +860,8 @@ export const STYLE = `
   /* Reversing the column moves no borders: the separators in front of the
      second layer change sides by width, colour and style stay put. */
   .bubble[data-grow="up"] .context,
-  .bubble[data-grow="up"] .entries {
+  .bubble[data-grow="up"] .entries,
+  .bubble[data-grow="up"] .hint {
     margin: 0 0 8px;
     padding: 0 0 8px;
     border-width: 0 0 1px;
@@ -1182,7 +1222,8 @@ export const STYLE = `
  *  @typedef {"copy-original" | "copy-translation"} CopyChoice */
 /** What it reports - editing never leaves the bubble, and More leaves it only
  *  on the press that opens the layer, so a caller with nothing fetched yet can
- *  fetch it then. @typedef {"save" | "choose" | "learned" | "settings" | "reader" | "library" | "more" | "speak" | "open-reader"} ReportedAction */
+ *  fetch it then. `dictionaries` is the hint line's word pressed (D192): the
+ *  settings, at the dictionaries. @typedef {"save" | "choose" | "learned" | "settings" | "reader" | "library" | "more" | "speak" | "open-reader" | "dictionaries"} ReportedAction */
 
 /**
  * One block of the second layer below the sentence: where it came from, and the
@@ -1201,6 +1242,23 @@ export const STYLE = `
  * something that can stand alone as the answer to a word.
  *
  * @typedef {{ headword: string, dictionary: string, lines: string[] }} Block
+ */
+
+/**
+ * The hint line (D192): the layer's one aside about the answer itself, under
+ * the sentence and the entries - that the engine guesses badly at a word on
+ * its own and which dictionary would have known better - with the way there
+ * inside the words. A hint is its parts in reading order: runs of words, a
+ * link out of the page, and a press reported to the caller by name. The
+ * link is a real anchor: it leaves for a page of ours in a new tab, and an
+ * anchor is the one thing that says where it leads before it is pressed -
+ * its words are the address for the same reason. The press is a word of
+ * the sentence itself ("settings", in "add one in the settings"), dressed
+ * like the link and reported the way the row's buttons are: `dictionaries`
+ * asks the caller for the settings, opened at the dictionaries.
+ *
+ * @typedef {string | { label: string, href: string } | { label: string, action: "dictionaries" }} HintPart
+ * @typedef {HintPart[]} Hint
  */
 
 /**
@@ -1264,6 +1322,7 @@ export const STYLE = `
  * @property {(body: string, tone?: Tone) => void} setBody
  * @property {(sentence: string | null, tone?: Tone) => void} setContext
  * @property {(blocks: Block[]) => void} setEntries
+ * @property {(hint: Hint | null) => void} setHint
  * @property {(actions: Action[]) => void} setActions
  * @property {(rect: DOMRect) => void} follow
  * @property {() => void} reveal
@@ -1546,6 +1605,8 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
   let contextToggle = null;
   /** @type {HTMLDivElement | null} */
   let entriesElement = null;
+  /** @type {HTMLDivElement | null} */
+  let hintElement = null;
   /** @type {HTMLTextAreaElement | null} */
   let editor = null;
   /** @type {HTMLDivElement | null} */
@@ -1697,6 +1758,9 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
     entriesElement = document.createElement("div");
     entriesElement.className = "entries";
     entriesElement.hidden = true;
+    hintElement = document.createElement("div");
+    hintElement.className = "hint";
+    hintElement.hidden = true;
     editor = document.createElement("textarea");
     editor.className = "editor";
     editor.hidden = true;
@@ -1735,7 +1799,7 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
     // clipboard row is in it twice over: copying exists exactly so the phrase
     // can leave the page, and a press that dropped the selection would take
     // away the very thing Ctrl+C is about to copy (D110).
-    for (const element of [actionsElement, copyRowElement, entriesElement, contextElement]) {
+    for (const element of [actionsElement, copyRowElement, entriesElement, contextElement, hintElement]) {
       element.addEventListener("mousedown", (event) => event.preventDefault());
     }
     editor.addEventListener("input", onEditorInput);
@@ -1765,7 +1829,7 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
     // edits it, then the actions with the clipboard row they open (D110),
     // then the second layer. The signature stands before them all and outside
     // the order: only the error tone shows it (see .brand).
-    bubble.append(brandElement, bodyElement, editor, revealElement, copyRowElement, contextElement, entriesElement);
+    bubble.append(brandElement, bodyElement, editor, revealElement, copyRowElement, contextElement, entriesElement, hintElement);
     root.append(bubble);
     // `documentElement` and not `body`: single-page applications replace the
     // body, and a bubble that vanishes with a re-render is a bug nobody can
@@ -1828,6 +1892,10 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
     if (!swallowClick) return;
     swallowClick = false;
     event.stopPropagation();
+    // A button's click is its listener, and stopping it is the whole
+    // swallow; the hint's link (D192) has a default of its own - leaving for
+    // the page it names - and that must not go through either.
+    event.preventDefault();
   }
 
   /**
@@ -1968,7 +2036,7 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
   }
 
   /**
-   * @param {Action | "cancel" | "choose"} action
+   * @param {Action | "cancel" | "choose" | "dictionaries"} action
    */
   function emit(action) {
     // A press inside the bubble holds its side from here on (D177) - except the
@@ -2129,6 +2197,9 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
     }
     contextElement.hidden = !unfolded || (contextTextElement?.textContent ?? "").length === 0;
     entriesElement.hidden = !unfolded || !entriesThere;
+    // The hint is the layer's (D192): folded away with it, shown with it when
+    // it has anything to say.
+    if (hintElement !== null) hintElement.hidden = !unfolded || (hintElement.textContent ?? "").length === 0;
     // The fold's column comes or goes before placing: its width decides where
     // the sentence wraps, and the wrapping is measured below. Presence needs
     // no measurement - `absent` is about the entries alone (D96).
@@ -2265,6 +2336,48 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
 
     unfold(unfolded);
     refreshControls();
+  }
+
+  /**
+   * The hint line filled or emptied (D192), part by part. Words go in their
+   * own element, so they can fade a shade further than what can be pressed;
+   * everything takes its text through `textContent`, like everything else in
+   * here. A link opens in a new tab, with no opener and no referrer: the page
+   * the bubble stands on is somebody else's, and where it was read is
+   * nobody's business - not even a page of ours. A press goes out under its
+   * name like a button of the row, and so answers to the same swallow.
+   *
+   * @param {Hint | null} hint
+   */
+  function setHint(hint) {
+    if (hintElement === null) return;
+    hintElement.replaceChildren();
+    for (const part of hint ?? []) {
+      if (typeof part === "string") {
+        if (part.length === 0) continue;
+        const words = document.createElement("span");
+        words.className = "hint-text";
+        words.textContent = part;
+        hintElement.append(words);
+      } else if ("href" in part) {
+        const link = document.createElement("a");
+        link.className = "hint-link";
+        link.href = part.href;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.textContent = part.label;
+        hintElement.append(link);
+      } else {
+        const press = document.createElement("button");
+        press.type = "button";
+        press.className = "hint-link";
+        press.dataset["action"] = part.action;
+        press.textContent = part.label;
+        press.addEventListener("click", () => emit(part.action));
+        hintElement.append(press);
+      }
+    }
+    unfold(unfolded);
   }
 
   /**
@@ -2644,6 +2757,7 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
     contextTextElement = null;
     contextToggle = null;
     entriesElement = null;
+    hintElement = null;
     editor = null;
     actionsElement = null;
     copyRowElement = null;
@@ -2773,6 +2887,11 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
         entriesElement.replaceChildren();
         entriesElement.hidden = true;
       }
+      // The hint was about the last phrase, like the entries above it.
+      if (hintElement !== null) {
+        hintElement.replaceChildren();
+        hintElement.hidden = true;
+      }
       if (editor !== null) editor.hidden = true;
       if (bodyElement !== null) bodyElement.hidden = false;
       setBody(body, tone);
@@ -2793,6 +2912,11 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
 
     setEntries(blocks) {
       setEntries(blocks);
+      place();
+    },
+
+    setHint(hint) {
+      setHint(hint);
       place();
     },
 

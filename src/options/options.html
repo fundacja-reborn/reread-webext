@@ -477,12 +477,21 @@
     <section class="translation-only">
     <h2 id="translation-models" data-i18n="options_models_heading">Translation models</h2>
 
-    <p class="explain" data-i18n="options_models_intro">
-      Download a translation model here for each language pair you want to translate. These are
-      official Mozilla files that run entirely offline on your device. A model translates sentences
-      well, but a single word on its own is often translated wrongly - the result is cut short, or
-      is a word that does not exist. For single words, a dictionary from the section below is the
-      better source.
+    <!-- Two sentences of the intro wear a highlighter's stroke (D192,
+         Michał's ask): the one fact about models that changes what a reader
+         installs next - a model guesses badly at a single word - stood in
+         the middle of a paragraph nobody reads twice. Two elements, because
+         a marked element holds text alone (test/locales.test.js). -->
+    <p class="explain">
+      <span data-i18n="options_models_intro"
+        >Download a translation model here for each language pair you want to translate. These
+        are official Mozilla files that run entirely offline on your device.</span
+      >
+      <mark data-i18n="options_models_single_word"
+        >A model translates sentences well, but a single word on its own is often translated
+        wrongly - the result is cut short, or is a word that does not exist. For single words, a
+        dictionary from the section below is the better source.</mark
+      >
     </p>
 
     <!-- The one fetch this section can make, and the press that makes it: the
@@ -585,6 +594,23 @@
     <p class="explain" data-i18n="options_dictionaries_intro">
       Add dictionaries to see detailed word definitions in the translation bubble. You can change
       the order in which they appear using the arrows.
+    </p>
+
+    <!-- Where the list comes from and that it is not the only way in (D192,
+         Michał's ask): the by-hand folds stand under a list of four hundred
+         rows, and a reader who never unfolds them never learns that a
+         dictionary of their own, or a second one for the same language, is
+         possible. The link is the same page the link fold points at, in the
+         interface's language (see `linkDictionarySources`). -->
+    <p class="explain">
+      <span data-i18n="options_dictionaries_sources"
+        >The dictionaries listed below come from WikDict. You can also add your own - from files
+        or from a link, and several for one language - in the sections under the list. Where to
+        find them, each with its licence:</span
+      >
+      <a id="dictionary-sources-intro" href="https://reapps.eu/read#faq-dictionary-sources" target="_blank" rel="noopener"
+        >reapps.eu/read</a
+      >.
     </p>
 
     <!-- The dictionary list's twin of the model refresh line: the one fetch

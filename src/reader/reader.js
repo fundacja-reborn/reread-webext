@@ -6067,20 +6067,27 @@ window.addEventListener("popstate", (event) => {
  *
  * @param {string} page
  * @param {typeof Message.OPEN_SETTINGS | typeof Message.OPEN_VOCABULARY} kind
+ * @param {string} [section] a section of the page to land on, by its anchor
+ *   (D192) - carried in the message, and on the fallback as the fragment
  */
-function walkTo(page, kind) {
+function walkTo(page, kind, section) {
   try {
     sessionStorage.setItem(BACK_ROAD_KEY, "reader");
   } catch {
     // The arrow is an enhancement; history carries the gesture regardless.
   }
+  const fragment = section === undefined ? "" : `#${section}`;
   void webext()
-    .runtime.sendMessage({ kind })
-    .catch(() => location.assign(webext().runtime.getURL(page)));
+    .runtime.sendMessage(section === undefined ? { kind } : { kind, section })
+    .catch(() => location.assign(webext().runtime.getURL(page) + fragment));
 }
 
-function goToSettings() {
-  walkTo("options/options.html", Message.OPEN_SETTINGS);
+/**
+ * @param {import("../lib/protocol.js").SettingsSection} [section] where on the
+ *   page to land (D192) - the top when nothing is named
+ */
+function goToSettings(section) {
+  walkTo("options/options.html", Message.OPEN_SETTINGS, section);
 }
 
 // The reader-tab bookkeeping, both halves (D139/D140): this tab is the
@@ -6573,7 +6580,7 @@ function rootReadingSide(ground) {
     // The bubble's own door to the settings - an error's one button - walks
     // the same road as the bar's mark (D139): this tab, so the way back
     // exists. Everywhere else the bubble keeps asking the background.
-    openSettings: () => goToSettings(),
+    openSettings: (section) => goToSettings(section),
     plainLinks: () => settings.reader.links === "plain",
     // The bubble dresses for the paper it stands on: the reader's theme by
     // name, asked live because the Aa panel can change it mid-session.

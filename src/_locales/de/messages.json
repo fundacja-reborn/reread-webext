@@ -50,9 +50,15 @@
   "bubble_whole_words": { "message": "Markieren Sie ganze Wörter" },
   "bubble_not_in_dictionary": { "message": "Nicht in Ihren Wörterbüchern" },
   "bubble_no_dictionary": {
-    "message": "Noch kein Wörterbuch für $LANGUAGE$ - fügen Sie eines in den Einstellungen hinzu",
-    "placeholders": { "language": { "content": "$1", "example": "Englisch" } }
+    "message": "Noch kein Wörterbuch für $LANGUAGE$ - fügen Sie eines in den $SETTINGS$ hinzu",
+    "placeholders": {
+      "language": { "content": "$1", "example": "Englisch" },
+      "settings": { "content": "$2", "example": "Einstellungen" }
+    }
   },
+  "bubble_settings_word": { "message": "Einstellungen" },
+  "bubble_model_word": { "message": "Ein Übersetzungsmodell übersetzt ein einzelnes Wort ohne Kontext oft falsch." },
+  "bubble_dictionary_sources": { "message": "Wo Wörterbücher zu finden sind:" },
   "bubble_saves_under": {
     "message": "Wird unter $PAIR$ gespeichert",
     "placeholders": { "pair": { "content": "$1", "example": "Englisch → Polnisch" } }
@@ -969,7 +975,10 @@
   "options_tts_rate": { "message": "Lesegeschwindigkeit" },
   "options_models_heading": { "message": "Übersetzungsmodelle" },
   "options_models_intro": {
-    "message": "Laden Sie hier für jedes Sprachpaar, das Sie übersetzen möchten, ein Übersetzungsmodell herunter. Es handelt sich um offizielle Mozilla-Dateien, die vollständig offline auf Ihrem Gerät laufen. Ein Modell übersetzt Sätze gut, ein einzelnes Wort ohne Kontext wird aber oft falsch übersetzt - das Ergebnis ist abgeschnitten oder ein Wort, das es gar nicht gibt. Für einzelne Wörter ist ein Wörterbuch aus dem Abschnitt unten die bessere Quelle."
+    "message": "Laden Sie hier für jedes Sprachpaar, das Sie übersetzen möchten, ein Übersetzungsmodell herunter. Es handelt sich um offizielle Mozilla-Dateien, die vollständig offline auf Ihrem Gerät laufen."
+  },
+  "options_models_single_word": {
+    "message": "Ein Modell übersetzt Sätze gut, ein einzelnes Wort ohne Kontext wird aber oft falsch übersetzt - das Ergebnis ist abgeschnitten oder ein Wort, das es gar nicht gibt. Für einzelne Wörter ist ein Wörterbuch aus dem Abschnitt unten die bessere Quelle."
   },
   "options_update_list": { "message": "Liste aktualisieren" },
   "options_list_dated": { "message": "Liste vom" },
@@ -998,6 +1007,9 @@
   "options_dictionaries_heading": { "message": "Wörterbücher" },
   "options_dictionaries_intro": {
     "message": "Fügen Sie Wörterbücher hinzu, um detaillierte Wortdefinitionen in der Sprechblase zu sehen. Die Reihenfolge, in der sie erscheinen, können Sie mit den Pfeilen ändern."
+  },
+  "options_dictionaries_sources": {
+    "message": "Die Wörterbücher in der Liste unten stammen von WikDict. Sie können auch eigene hinzufügen - aus Dateien oder über einen Link, auch mehrere für eine Sprache - in den Abschnitten unter der Liste. Wo sie zu finden sind, jedes mit seiner Lizenz:"
   },
   "options_dictionary_order_hint": {
     "message": "Die Sprechblase antwortet in der Reihenfolge unten. Es antworten nur die Wörterbücher der Sprache, die Sie gerade lesen."

@@ -19,7 +19,7 @@ import { setProvider, translate } from "../lib/translator/index.js";
 import { asSchemeReport } from "../lib/translator/providers/bergamot/host-protocol.js";
 import { bergamot } from "../lib/translator/providers/bergamot/index.js";
 import { bergamotViaHost, raiseEngineHost } from "../lib/translator/providers/bergamot/remote.js";
-import { lookUp, lookUpAnswer } from "../lib/dict/lookup.js";
+import { lookUpAnswer } from "../lib/dict/lookup.js";
 import { readPage } from "./page.js";
 import { installMenus, menuDoor } from "./menus.js";
 import { openLibrary, openMarks, openReader, readInReader } from "./reader-tab.js";
@@ -68,20 +68,31 @@ async function handle(request, sender) {
       // Side by side, not one after the other: the dictionary read is a point
       // lookup and the translation is the engine, so waiting for them together
       // costs what the engine costs and nothing more.
-      const [translated, entries] = await Promise.all([
+      // Asked in the pair's language alone, the one the engine translates
+      // from: the page's declaration gets its turn only in the quiet bubble
+      // (D191), where there is no engine to say which language the pair is.
+      const [translated, looked] = await Promise.all([
         translate({
           text: request.text,
           context: request.context,
           from: pair.from,
           to: pair.to,
         }),
-        lookUp(request.text, pair.from),
+        lookUpAnswer(request.text, { pair: pair.from, declared: null }),
       ]);
 
       // Dictionary entries ride with a translation and never instead of one: a
       // failed translation is an error the bubble has to show, and hanging
       // definitions off it would make an error message into a half-answer.
-      return translated.ok ? ok({ ...translated.value, entries }) : translated;
+      // The count of dictionaries asked rides with the entries (D192), and a
+      // lookup that gave no answer at all hands over neither: no entries and
+      // no count, which the bubble reads as nothing to say (D164).
+      if (!translated.ok) return translated;
+      return ok(
+        looked === null
+          ? { ...translated.value, entries: [] }
+          : { ...translated.value, entries: looked.entries, dictionaries: looked.dictionaries },
+      );
     }
     case Message.LOOK_UP: {
       // The quiet vocabulary's hand on somebody else's page (D162): the
@@ -140,7 +151,9 @@ async function handle(request, sender) {
       // but cannot turn a tab of ours to it, and the reader's walk to the
       // settings in place (D139) left a settings tab behind every time the
       // reader was next raised elsewhere.
-      await openSettings({ from: sender.tab?.id });
+      // At the section the press named, when it named one (D192): the
+      // hint line's "settings" lands on the dictionaries.
+      await openSettings({ from: sender.tab?.id, section: request.section });
       return ok(null);
     }
     case Message.READ_PAGE:
