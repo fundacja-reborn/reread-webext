@@ -373,11 +373,13 @@ async function reload() {
     if (addFold !== null) addFold.hidden = chosen === null;
     // A different pair is a different list, and page 7 of the old one means
     // nothing on it - and the look-up field's answer was in the old pair's
-    // language.
+    // language. Only a pair *changed*: the first draw has no old pair, and a
+    // reset there emptied the field the address had just filled (Michał's
+    // screenshot, 2026-09-11).
     if (pair !== shownPair) {
+      if (shownPair !== "") lookupBox?.reset();
       shownPair = pair;
       page = 1;
-      lookupBox?.reset();
     }
 
     // A vocabulary the browser deleted comes back from its copy before the
@@ -991,7 +993,6 @@ function arriveWithPhrase() {
 }
 
 window.addEventListener("hashchange", arriveWithPhrase);
-arriveWithPhrase();
 
 brandButton?.addEventListener("click", () => goToSettings());
 
@@ -1215,4 +1216,7 @@ webext().storage.onChanged.addListener((changes, area) => {
 const intro = t("vocab_intro", [t("bubble_learned"), t("bubble_edit")]);
 if (introLine !== null && intro.length > 0) introLine.textContent = intro;
 
-void reload();
+// The phrase the address brought is looked up once the list is in: the
+// field reads the phrase's standing off that list, and asked before the
+// first draw it read an empty one.
+void reload().then(arriveWithPhrase);

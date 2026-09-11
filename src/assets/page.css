@@ -718,6 +718,23 @@ body:not(.reader):has(.panel-scrim:not([hidden])) .page-chrome {
   overflow-wrap: anywhere;
 }
 
+/* The way to close the answer, at the head's far end: a quiet button, the
+   phrases page's kind - no resting border, the muted voice. */
+.lookup-close {
+  margin-inline-start: auto;
+  min-height: 44px;
+  padding: 0.5rem 0.8rem;
+  border-color: transparent;
+  color: var(--page-muted);
+  font-size: 0.85rem;
+}
+
+.lookup-close:hover,
+.lookup-close:focus-visible {
+  border-color: var(--page-border);
+  color: var(--page-fg);
+}
+
 /* The speaker beside the phrase, the phrases page's quiet button: no
    resting border, the muted color, the icon its whole face. */
 .lookup-speak {
@@ -743,14 +760,22 @@ body:not(.reader):has(.panel-scrim:not([hidden])) .page-chrome {
   height: 1.6em;
 }
 
-/* "In your saved phrases", a step below the meanings it stands over. */
+/* What the phrase already means: the small label, and under it one meaning
+   per line - the editor's and the bubble's shape, where a "; " list of three
+   dictionary lines read as one long sentence (Michał's screenshot,
+   2026-09-11). */
 .lookup-kept {
-  margin: 0;
+  display: grid;
+  gap: 0.15rem;
+}
+
+.lookup-kept-label {
+  margin: 0 0 0.1rem;
   color: var(--page-muted);
   font-size: 0.85rem;
 }
 
-.lookup-meanings {
+.lookup-meaning {
   margin: 0;
   overflow-wrap: anywhere;
 }
@@ -798,6 +823,12 @@ button.lookup-link {
 .lookup-entries {
   display: grid;
   gap: 0;
+}
+
+/* Still there to read while the meanings are typed by hand, not what the
+   hands are on. */
+.lookup-entries[data-dim="true"] {
+  opacity: 0.55;
 }
 
 .lookup-entry + .lookup-entry {

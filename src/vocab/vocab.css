@@ -241,12 +241,23 @@ summary {
   margin: 1rem 0 0;
 }
 
-.lookup-fold > .hint {
+/* The fold's body in the import offer's frame: the answer can be a long
+   entry, and without a frame it ran straight into the list's first row
+   (Michał's screenshot, 2026-09-11). The room below it is the list's own
+   top margin plus this one. */
+.lookup-fold-panel {
+  margin: 0.25rem 0 1.5rem;
+  padding: 0.75rem 1rem 1rem;
+  border: 1px solid var(--page-line);
+  border-radius: 8px;
+}
+
+.lookup-fold-panel > .hint {
   margin: 0 0 0.75rem;
 }
 
 .lookup-fold .lookup-phrase,
-.lookup-fold .lookup-meanings {
+.lookup-fold .lookup-meaning {
   font-family: var(--reader-font-lead, var(--reader-font-stack));
   font-size: var(--reader-size, 18px);
   line-height: 1.45;

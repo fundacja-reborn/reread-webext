@@ -46,6 +46,25 @@ describe("the look-up field", () => {
     assert.match(pressed, /Message\.SAVE_PHRASE, text: phrase\.text, translations: next\.meanings/, "a press saves something other than the rule's meanings");
   });
 
+  it("reads top down: the phrase and its close, what it means one line each, the acts, then the books", async () => {
+    const render = bodyOf(await source("lib/lookup-box.js"), "render");
+    const at = (/** @type {string} */ marker) => render.indexOf(marker);
+    // The order Michał asked for after the third smoke ("a lot of clutter"):
+    // the acts by the phrase, above the entries they used to trail.
+    assert.ok(at('"lookup-close"') !== -1 && at('"lookup-close"') < at('"lookup-kept"'), "the close is not at the head");
+    assert.ok(at('"lookup-kept"') < at('"lookup-actions"'), "the acts stand before what the phrase means");
+    assert.ok(at('"lookup-actions"') < at('"lookup-entries"'), "the acts trail the books");
+    assert.match(render, /element\("p", "lookup-meaning", meaning\)/, "the meanings are not one per line");
+    // Edit over meanings that exist, Own meaning over none.
+    assert.match(bodyOf(await source("lib/lookup-box.js"), "editLabel"), /t\("bubble_edit"\) : t\("lookup_own_meaning"\)/, "the editor's button does not follow the phrase's standing");
+  });
+
+  it("takes the answer down with the field emptied, and with the close", async () => {
+    const box = await source("lib/lookup-box.js");
+    assert.match(box, /input\.addEventListener\("input", \(\) => \{\s*if \(input\.value\.length === 0 && state\.phrase !== null\) clear\(\);/, "an emptied field keeps its answer");
+    assert.match(bodyOf(box, "render"), /if \(!readOnly\) \{\s*const close = button\("lookup-close", t\("close"\)\)/, "the field that writes has no close, or the popup's has one");
+  });
+
   it("draws the entries as prose, paragraph by paragraph, and offers no editor where it only reads", async () => {
     const render = bodyOf(await source("lib/lookup-box.js"), "render");
     // The read-only field's entries must not promise a choice: divs, never
@@ -87,7 +106,9 @@ describe("the popup's look-up row", () => {
     assert.match(mounted, /readOnly: true/, "the popup's field writes");
     assert.match(mounted, /onState: onLookupState/, "the popup does not follow the field");
     const landing = bodyOf(script, "onLookupState");
-    assert.match(landing, /if \(state\.phrase !== null\) showResults\(true\)/, "an answer leaves the hallway standing");
+    // An answer turns the rows into the results mode; the answer taken down
+    // (the field emptied by its own "x") brings them back.
+    assert.match(landing, /showResults\(state\.phrase !== null\)/, "an answer leaves the hallway standing, or an emptied field the results");
     assert.match(landing, /state\.saved \? t\("popup_lookup_open"\) : t\("popup_lookup_add"\)/, "the door does not name the phrase's standing");
     // The rows leave on the body's mode, in the stylesheet, and the field's
     // row sticks to the top there; the arrow brings the rows back.
@@ -130,5 +151,11 @@ describe("the saved-phrases page's fold", () => {
     assert.match(arrival, /history\.replaceState\(/, "the fragment stays on the address for the next reload");
     assert.match(arrival, /addFold\.open = true;\s*void lookupBox\.search\(text\)/, "the fold does not open on the phrase, or the field is not asked");
     assert.match(script, /window\.addEventListener\("hashchange", arriveWithPhrase\)/, "a turn of the open tab goes unheard");
+    // Asked only once the list is in - the field reads the phrase's standing
+    // off it - and the first draw must not reset the field the address just
+    // filled: only a pair changed does (Michał's screenshot, 2026-09-11).
+    assert.match(script, /void reload\(\)\.then\(arriveWithPhrase\)/, "the phrase is looked up before the list is in");
+    assert.doesNotMatch(script, /^arriveWithPhrase\(\);/m, "the phrase is looked up before the list is in");
+    assert.match(bodyOf(script, "reload"), /if \(shownPair !== ""\) lookupBox\?\.reset\(\)/, "the first draw resets the field");
   });
 });

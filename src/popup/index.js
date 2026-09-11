@@ -174,7 +174,9 @@ function showResults(results) {
  */
 function onLookupState(state) {
   lookedUp = state.phrase;
-  if (state.phrase !== null) showResults(true);
+  // An answer turns the popup into its results mode; the answer taken down
+  // (the field emptied by its own "x") brings the hallway back.
+  showResults(state.phrase !== null);
   if (lookupDoor === null) return;
   lookupDoor.hidden = state.phrase === null || state.pending;
   lookupDoor.textContent = state.saved ? t("popup_lookup_open") : t("popup_lookup_add");

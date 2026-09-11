@@ -254,11 +254,15 @@
          without a pair, when there is nowhere to file a phrase. -->
     <details class="fold-line lookup-fold" id="add-phrase">
       <summary data-i18n="vocab_add_title">Add a phrase</summary>
-      <p class="hint" data-i18n="vocab_add_note">
-        Type a word to see its entries in your dictionaries. Press a meaning to save the phrase, or
-        write your own.
-      </p>
-      <div class="lookup-box" id="lookup-box"></div>
+      <!-- Framed, like the import offer: the answer can be a long entry, and
+           without a frame it ran straight into the list's first row. -->
+      <div class="lookup-fold-panel">
+        <p class="hint" data-i18n="vocab_add_note">
+          Type a word to see its entries in your dictionaries. Press a meaning to save the phrase, or
+          write your own.
+        </p>
+        <div class="lookup-box" id="lookup-box"></div>
+      </div>
     </details>
 
     <div id="list" class="phrases"></div>
