@@ -135,14 +135,26 @@ picks the voice, under the system's own settings.
 
 Before a selected phrase is translated, re/read checks which language it is in, so that a page
 in your own language is not fed to a translation model built for another one. This uses the
-browser's built-in language detector (the `i18n.detectLanguage` extension API). In Firefox it is
-the CLD2 algorithm compiled into the browser and run in a worker that ships with it; in
-Chromium-based browsers it is CLD3, linked into the browser itself. Both run on your device, load
-no model from the network and send nothing anywhere: the text never leaves the browser. We have
-checked this in both browsers' source code, not only in their documentation. Safari provides no
-such detector; there re/read skips the check and behaves as before. This is unrelated to the
-browsers' own page-translation features (Chrome's "Translate this page", Firefox Translations),
-which re/read does not use.
+browser's built-in language detector (the `i18n.detectLanguage` extension API), which is Compact
+Language Detector (CLD): in Firefox CLD2, compiled into the browser and run in a worker that
+ships with it; in Chromium-based browsers CLD3, linked into the browser itself. Both run on your
+device, load no model from the network and send nothing anywhere: the text never leaves the
+browser. We have checked this in both browsers' source code, not only in their documentation
+(Firefox: `toolkit/components/translations/LanguageDetector.sys.mjs` and the `cld-worker.js` it
+starts; Chromium: `extensions/renderer/api/i18n_hooks_delegate.cc`, built on `third_party/cld_3`).
+Safari provides no such detector; there re/read skips the check and behaves as before. This is
+unrelated to the browsers' own page-translation features (Chrome's "Translate this page", Firefox
+Translations), which re/read does not use.
+
+What the detector is handed: at most one sentence - the sentence around the selection, or the
+selection itself when there is no sentence around it - cut to 400 characters, and only when you
+select text with a translation model switched on. Never the page, its address or its title.
+
+What we can and cannot promise: re/read does not control the browser's code. Today's
+implementations are local and the API is documented as CLD-based; we check both browsers' source
+code again with every release of re/read and update this section if anything changes. Should a
+browser ever back this call with a network service, re/read would stop using it before the next
+release. Where the detector is missing, re/read simply skips the check.
 
 ## Page content
 
