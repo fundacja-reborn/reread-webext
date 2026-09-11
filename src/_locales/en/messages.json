@@ -184,6 +184,18 @@
     "message": "In your saved phrases",
     "description": "The small line under the look-up field when the phrase is already saved for the pair, over its saved meanings - said before what the dictionaries say, because the reader's own meaning outranks a book's."
   },
+  "popup_lookup_back": {
+    "message": "Back to the menu",
+    "description": "Title and accessible name of the arrow in the popup's look-up row once the field has answered (D197): the popup shows only the field and the answer then, and the arrow brings the menu's rows back."
+  },
+  "popup_lookup_add": {
+    "message": "Add to saved phrases",
+    "description": "The one row under the popup's look-up answer while the phrase is not saved: opens the saved-phrases page with the phrase already looked up in its \"Add a phrase\" fold, where a press on a meaning saves it. The popup's field itself only reads."
+  },
+  "popup_lookup_open": {
+    "message": "Open in saved phrases",
+    "description": "The same row once the phrase is already saved: the saved-phrases page with the phrase looked up, its meanings, Learned and the editor there."
+  },
   "vocab_count_filtered_one": {
     "message": "$MATCHING$ of $TOTAL$ saved phrase",
     "description": "The counter while the filter is active. Plural family over the total; the matching count rides along as $2.",

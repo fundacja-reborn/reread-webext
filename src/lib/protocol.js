@@ -206,9 +206,14 @@ export const ErrorCode = Object.freeze({
  * only inside the reader, which needs no message to turn its own view.
  *
  * `open-vocabulary` brings the saved-phrases page forward, one tab like the
- * reader. It carries nothing for the same reason `open-library` carries
- * nothing: the page shows the vocabulary of the configured pair, and the pair
- * lives in the settings, not in a message.
+ * reader. It carries no tab and no pair for the same reason `open-library`
+ * carries nothing: the page shows the vocabulary of the configured pair, and
+ * the pair lives in the settings, not in a message. Since D197 it may carry
+ * `text` - a phrase to look up on arrival, in the page's "Add a phrase" fold:
+ * the popup's look-up field only reads, and this is its door to the page
+ * where a press on a meaning saves. An extra like the settings' `section`:
+ * kept when it is a non-empty string, dropped otherwise, never a refusal;
+ * the page reduces it the way it reduces anything typed into the field.
  *
  * `import-phrases` adds a file's worth of rows to the configured pair - and
  * only adds: a phrase already saved keeps its meanings. Like every request
@@ -222,7 +227,7 @@ export const ErrorCode = Object.freeze({
  * @typedef {{ kind: typeof Message.OPEN_READER, sourceTabId?: number }} OpenReaderRequest
  * @typedef {{ kind: typeof Message.OPEN_LIBRARY }} OpenLibraryRequest
  * @typedef {{ kind: typeof Message.OPEN_MARKS }} OpenMarksRequest
- * @typedef {{ kind: typeof Message.OPEN_VOCABULARY }} OpenVocabularyRequest
+ * @typedef {{ kind: typeof Message.OPEN_VOCABULARY, text?: string }} OpenVocabularyRequest
  * @typedef {{ kind: typeof Message.OPEN_SETTINGS, section?: SettingsSection }} OpenSettingsRequest
  * @typedef {{ kind: typeof Message.SAVE_PHRASE, text: string, translations: string[] }} SavePhraseRequest
  * @typedef {{ kind: typeof Message.FORGET_PHRASE, text: string }} ForgetPhraseRequest
@@ -422,7 +427,15 @@ export function asRequest(message) {
 
   if (kind === Message.OPEN_LIBRARY) return { kind: Message.OPEN_LIBRARY };
   if (kind === Message.OPEN_MARKS) return { kind: Message.OPEN_MARKS };
-  if (kind === Message.OPEN_VOCABULARY) return { kind: Message.OPEN_VOCABULARY };
+  if (kind === Message.OPEN_VOCABULARY) {
+    // The phrase to look up on arrival (D197) is an extra like the settings'
+    // section: kept when it is a string with something in it, dropped
+    // otherwise - the page opens on its list, as before.
+    const text = /** @type {Record<string, unknown>} */ (message)["text"];
+    return typeof text === "string" && text.trim().length > 0
+      ? { kind: Message.OPEN_VOCABULARY, text }
+      : { kind: Message.OPEN_VOCABULARY };
+  }
   if (kind === Message.OPEN_SETTINGS) {
     // The section is an extra like the reader's tab id: kept when it names
     // one the page has, dropped otherwise, never a reason to refuse.

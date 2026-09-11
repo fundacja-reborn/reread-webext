@@ -105,6 +105,9 @@
   "lookup_action": { "message": "Sprawdź" },
   "lookup_own_meaning": { "message": "Własne znaczenie" },
   "lookup_kept": { "message": "W zapisanych frazach" },
+  "popup_lookup_back": { "message": "Wróć do menu" },
+  "popup_lookup_add": { "message": "Dodaj do zapisanych fraz" },
+  "popup_lookup_open": { "message": "Otwórz w zapisanych frazach" },
   "vocab_count_filtered_one": {
     "message": "$MATCHING$ z $TOTAL$ zapisanej frazy",
     "placeholders": {

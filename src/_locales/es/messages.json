@@ -105,6 +105,9 @@
   "lookup_action": { "message": "Buscar" },
   "lookup_own_meaning": { "message": "Significado propio" },
   "lookup_kept": { "message": "En tus frases guardadas" },
+  "popup_lookup_back": { "message": "Volver al menú" },
+  "popup_lookup_add": { "message": "Añadir a las frases guardadas" },
+  "popup_lookup_open": { "message": "Abrir en las frases guardadas" },
   "vocab_count_filtered_one": {
     "message": "$MATCHING$ de $TOTAL$ frase guardada",
     "placeholders": {

@@ -942,25 +942,56 @@ function goToSettings(section) {
 const lookupBox =
   lookupHost === null
     ? null
-    : mountLookupBox(lookupHost, {
-        ask,
-        savedMeanings: (normalized) =>
-          Promise.resolve(phrases.find((one) => one.normalized === normalized)?.translations ?? []),
-        openDictionaries: () => goToSettings("dictionaries"),
-        voice: () => {
-          const lang = config?.sourceLang ?? null;
-          if (config === null || lang === null) return null;
-          return {
-            lang,
-            voiceURI: config.ttsVoices[primaryLanguage(lang)],
-            rate: config.ttsRate / 100,
-          };
+    : mountLookupBox(
+        { form: lookupHost, answer: lookupHost },
+        {
+          ask,
+          savedMeanings: (normalized) =>
+            Promise.resolve(phrases.find((one) => one.normalized === normalized)?.translations ?? []),
+          openDictionaries: () => goToSettings("dictionaries"),
+          voice: () => {
+            const lang = config?.sourceLang ?? null;
+            if (config === null || lang === null) return null;
+            return {
+              lang,
+              voiceURI: config.ttsVoices[primaryLanguage(lang)],
+              rate: config.ttsRate / 100,
+            };
+          },
         },
-      });
+      );
 
 addFold?.addEventListener("toggle", () => {
   if (addFold.open) lookupBox?.focus();
 });
+
+/**
+ * A phrase handed over in the address (D197): the popup's look-up field
+ * only reads, and its door opens this page with `#lookup=<phrase>` - on a
+ * fresh tab as the page loads, on an open one as the tab is turned to the
+ * fragment (`hashchange`, the same document). The fold opens, the field is
+ * asked, and the fragment is taken off the address: a reload should show
+ * the list, not ask the word again. The phrase arrives as typed, encoded by
+ * the background; anything that is not that shape is no phrase.
+ */
+function arriveWithPhrase() {
+  const match = /^#lookup=(.*)$/.exec(location.hash);
+  if (match === null) return;
+  /** @type {string} */
+  let text;
+  try {
+    text = decodeURIComponent(String(match[1]));
+  } catch {
+    return;
+  }
+  history.replaceState(history.state, "", location.pathname + location.search);
+  if (text.trim().length === 0 || addFold === null || lookupBox === null) return;
+  addFold.open = true;
+  void lookupBox.search(text);
+}
+
+window.addEventListener("hashchange", arriveWithPhrase);
+arriveWithPhrase();
 
 brandButton?.addEventListener("click", () => goToSettings());
 

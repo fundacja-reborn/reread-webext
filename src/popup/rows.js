@@ -23,7 +23,6 @@
  *   translates, in the same place
  * @property {boolean} lookup the look-up field (D197)
  * @property {boolean} vocabulary the door to the saved phrases
- * @property {boolean} quiet the folded-bubble switch
  * @property {boolean} readerOnly the reader-only switch
  * @property {boolean} translation the translation-off switch itself
  */
@@ -52,8 +51,10 @@ export function popupRows({ translationOff, bubbleOff, fresh, pair }) {
     // vocabulary writes them without the engine (D158/D162) - so their door
     // goes only when there is truly nothing behind it.
     vocabulary: !translationOff || pair,
-    // The bubble's fold means nothing when the trimmed bubble never folds.
-    quiet: !translationOff,
+    // The folded-bubble switch (D81) stood here from D128 to D197; it is set
+    // once and left, and the popup keeps what is flipped often (Michał's
+    // call after the first smoke of the look-up field, 2026-09-11) - the
+    // settings page keeps it.
     // Reader-only keeps its say under the trim now (D162): with a pair the
     // ordinary pages read again, and this is the switch that decides. It
     // still goes when every page is a launcher (no pair) or left alone

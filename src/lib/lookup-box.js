@@ -1,21 +1,29 @@
 /**
  * The look-up field (D197): a word typed instead of selected, answered by the
- * dictionaries, saved with a press - the bubble with the page taken away.
+ * dictionaries - the bubble with the page taken away.
  *
- * One component in two homes: the toolbar popup's "Look up a word" row and the
- * saved-phrases page's "Add a phrase" fold. Both are pages of this extension,
- * so the field is ordinary DOM on the page's own stylesheet (`.lookup-*` in
- * assets/page.css) - no shadow root, which is the bubble's armour against
- * somebody else's page. What differs between the two homes travels in as
- * `deps`: how the page asks the background, what it already knows about a
- * saved phrase, how it opens the settings, and which voice reads the pair's
- * language.
+ * One component in two homes, and the two homes differ in what a press may
+ * do. The saved-phrases page's "Add a phrase" fold is the full field: a
+ * dictionary line saves the phrase with that meaning (D34), "Own meaning" is
+ * the door for a phrase no book knows, Learned takes it back out - the quiet
+ * bubble's rules (D121, D158) in a field, on a page that stays, with the list
+ * right under it showing what a press did. The toolbar popup's field only
+ * reads (`readOnly`): a popup leaves at a click beside it, its answer scrolls
+ * the "saved" line out of view, and a save nobody saw is the wrong kind of
+ * surprise (Michał's call after the first smoke, 2026-09-11) - so there the
+ * lines are prose, and the popup's own row leads to the page.
+ *
+ * Both are pages of this extension, so the field is ordinary DOM on the
+ * page's own stylesheet (`.lookup-*` in assets/page.css) - no shadow root,
+ * which is the bubble's armour against somebody else's page. What differs
+ * between the homes travels in as `deps` and `options`: how the page asks
+ * the background, what it already knows about a saved phrase, how it opens
+ * the settings, which voice reads the pair's language, and whether a press
+ * may write.
  *
  * The engine is never asked here, on purpose (Michał's call, 2026-09-11): a
  * word on its own has no sentence around it, and that is where the engine
- * guesses worst. The dictionaries answer, a line of theirs saves the phrase
- * with that meaning (D34), and "Own meaning" is the door for a phrase no
- * book knows - the quiet bubble's rules (D121, D158), in a field.
+ * guesses worst.
  *
  * Every string that lands in the DOM goes in through `textContent`: the
  * entries came out of a file somebody downloaded, and the phrase is whatever
@@ -48,7 +56,24 @@ import { canSpeak, primaryLanguage, speak, speaking, stop as stopSpeaking } from
  */
 
 /**
+ * What the field is showing, for the home to act on (D197): the popup turns
+ * its rows into the results mode on it and names its door to the page.
+ *
+ * @typedef {{ phrase: { text: string, normalized: string } | null, saved: boolean, pending: boolean }} LookupState
+ */
+
+/**
+ * @typedef {object} LookupBoxOptions
+ * @property {boolean} [readOnly] the lines as prose and no editor: the popup's
+ *   field, which only reads (see the header); the phrases page's writes
+ * @property {(state: LookupState) => void} [onState] told after every draw
+ */
+
+/**
  * @typedef {object} LookupBox
+ * @property {(text: string) => Promise<void>} search the field filled with
+ *   `text` and asked, as if it had been typed - the page's arrival with a
+ *   phrase from the popup
  * @property {() => void} reset the field emptied and the answer taken down -
  *   what a change of pair does, because the answer was in the old pair's
  *   language
@@ -117,13 +142,18 @@ function button(className, label) {
 }
 
 /**
- * Builds the field inside `container` and wires it up.
+ * Builds the field and wires it up: the form into `hosts.form`, the answer
+ * into `hosts.answer` - two elements in the popup, where the form has to
+ * stay stuck at the top while the answer scrolls, and one and the same on
+ * the phrases page.
  *
- * @param {HTMLElement} container an empty element of the page's own
+ * @param {{ form: HTMLElement, answer: HTMLElement }} hosts empty elements of
+ *   the page's own
  * @param {LookupBoxDeps} deps
+ * @param {LookupBoxOptions} [options]
  * @returns {LookupBox}
  */
-export function mountLookupBox(container, deps) {
+export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) {
   /**
    * The phrase being shown, its meanings as saved (empty while it is not),
    * what the dictionaries said - or that they are still being asked - and
@@ -157,10 +187,15 @@ export function mountLookupBox(container, deps) {
   go.className = "lookup-go";
   go.textContent = t("lookup_action");
   form.append(label, input, go);
+  hosts.form.append(form);
 
   const answer = element("div", "lookup-answer");
   answer.hidden = true;
-  container.append(form, answer);
+  hosts.answer.append(answer);
+
+  function tell() {
+    onState?.({ phrase: state.phrase, saved: state.meanings.length > 0, pending: state.pending });
+  }
 
   /**
    * The phrase read aloud (D83: the phrase, never the meanings), in the
@@ -344,8 +379,8 @@ export function mountLookupBox(container, deps) {
         if (!save.disabled) void saveTyped(area.value);
       }
       if (event.key === "Escape") {
-        // The editor's own Escape; the page's (a panel closing, the popup)
-        // must not also answer it.
+        // The editor's own Escape; the page's (a panel closing) must not
+        // also answer it.
         event.stopPropagation();
         closeEditor();
       }
@@ -380,6 +415,7 @@ export function mountLookupBox(container, deps) {
     answer.replaceChildren();
     if (state.phrase === null) {
       answer.hidden = true;
+      tell();
       return;
     }
     answer.hidden = false;
@@ -433,6 +469,12 @@ export function mountLookupBox(container, deps) {
           entry.append(heading);
         }
         for (const line of block.lines) {
+          if (readOnly) {
+            // Prose, not a press (the header): the field that only reads
+            // must not promise a choice it does not make.
+            entry.append(element("div", "lookup-sense", line));
+            continue;
+          }
           const sense = button("lookup-sense", line);
           // A toggle, and told as one: the mark that stays says which meanings
           // are the phrase's now.
@@ -447,7 +489,7 @@ export function mountLookupBox(container, deps) {
       answer.append(entries);
     }
 
-    if (!state.pending && !state.editing) {
+    if (!readOnly && !state.pending && !state.editing) {
       const actions = element("div", "lookup-actions");
       const own = button("lookup-own", t("lookup_own_meaning"));
       own.addEventListener("click", () => openEditor());
@@ -465,6 +507,8 @@ export function mountLookupBox(container, deps) {
       line.dataset["tone"] = "error";
       answer.append(line);
     }
+
+    tell();
   }
 
   form.addEventListener("submit", (event) => {
@@ -473,6 +517,10 @@ export function mountLookupBox(container, deps) {
   });
 
   return {
+    search(text) {
+      input.value = text;
+      return lookUp();
+    },
     reset() {
       generation += 1;
       input.value = "";

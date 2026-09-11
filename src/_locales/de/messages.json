@@ -105,6 +105,9 @@
   "lookup_action": { "message": "Nachschlagen" },
   "lookup_own_meaning": { "message": "Eigene Bedeutung" },
   "lookup_kept": { "message": "In Ihrem gespeicherten Wortschatz" },
+  "popup_lookup_back": { "message": "Zurück zum Menü" },
+  "popup_lookup_add": { "message": "Zum gespeicherten Wortschatz hinzufügen" },
+  "popup_lookup_open": { "message": "Im gespeicherten Wortschatz öffnen" },
   "vocab_count_filtered_one": {
     "message": "$MATCHING$ von $TOTAL$ gespeicherten Eintrag",
     "placeholders": {

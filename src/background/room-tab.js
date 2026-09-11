@@ -41,6 +41,9 @@ const SETTINGS_PAGE = "options/options.html";
  *   contexts, `runtime.getContexts` shaped - injected by the tests
  * @property {string} [section] a section of the page to land on (D192), by
  *   its anchor - the settings at the dictionaries; the top when none
+ * @property {string} [text] a phrase for the saved-phrases page to look up on
+ *   arrival (D197), in its "Add a phrase" fold - the popup's field's door to
+ *   the place where a press on a meaning saves
  */
 
 /**
@@ -48,11 +51,12 @@ const SETTINGS_PAGE = "options/options.html";
  * @param {string} room.page the page, relative to the extension's root
  * @param {(session: WebExtBrowser["storage"]["session"]) => Promise<number | null>} room.read
  * @param {(tabId: number | null, session: WebExtBrowser["storage"]["session"]) => Promise<void>} room.write
- * @param {string} [room.section] see `RoomTabDeps.section`
+ * @param {string} [room.fragment] where on the page to land, as the fragment
+ *   the page reads - a section's anchor (D192), a phrase to look up (D197)
  * @param {RoomTabDeps} deps
  * @returns {Promise<void>}
  */
-async function openRoom({ page, read, write, section }, deps) {
+async function openRoom({ page, read, write, fragment }, deps) {
   const session = deps.session ?? webext().storage.session;
   const url = deps.url ?? webext().runtime.getURL(page);
   const rooms = deps.rooms ?? ROOM_PAGES.map((room) => webext().runtime.getURL(room));
@@ -63,7 +67,7 @@ async function openRoom({ page, read, write, section }, deps) {
     url,
     // The page is what a tab is recognized by (a fragment on it still starts
     // with it, `tabsShowing`); the landing is where the press asked to be.
-    landing: section === undefined ? url : `${url}#${section}`,
+    landing: fragment === undefined ? url : `${url}#${fragment}`,
     // The witness, exactly the reader's (D140/D141, `single-tab.js`): since
     // the reader's menu walks to these pages in place, a tab can both stop
     // being the page (it walked on) and start somewhere nobody remembered -
@@ -84,7 +88,11 @@ async function openRoom({ page, read, write, section }, deps) {
  * @returns {Promise<void>}
  */
 export function openVocabulary(deps = {}) {
-  return openRoom({ page: VOCAB_PAGE, read: readVocabTab, write: writeVocabTab }, deps);
+  // The phrase rides in the fragment the page reads on arrival and on every
+  // turn of an open tab (`#lookup=`, `vocab.js`), encoded so that whatever
+  // was typed - a space, a hash, a slash - survives the address.
+  const fragment = deps.text === undefined ? undefined : `lookup=${encodeURIComponent(deps.text)}`;
+  return openRoom({ page: VOCAB_PAGE, read: readVocabTab, write: writeVocabTab, fragment }, deps);
 }
 
 /**
@@ -92,5 +100,5 @@ export function openVocabulary(deps = {}) {
  * @returns {Promise<void>}
  */
 export function openSettings(deps = {}) {
-  return openRoom({ page: SETTINGS_PAGE, read: readSettingsTab, write: writeSettingsTab, section: deps.section }, deps);
+  return openRoom({ page: SETTINGS_PAGE, read: readSettingsTab, write: writeSettingsTab, fragment: deps.section }, deps);
 }

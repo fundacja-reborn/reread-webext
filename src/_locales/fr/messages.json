@@ -105,6 +105,9 @@
   "lookup_action": { "message": "Chercher" },
   "lookup_own_meaning": { "message": "Sens personnel" },
   "lookup_kept": { "message": "Dans vos phrases enregistrées" },
+  "popup_lookup_back": { "message": "Retour au menu" },
+  "popup_lookup_add": { "message": "Ajouter aux phrases enregistrées" },
+  "popup_lookup_open": { "message": "Ouvrir dans les phrases enregistrées" },
   "vocab_count_filtered_one": {
     "message": "$MATCHING$ sur $TOTAL$ phrase enregistrée",
     "placeholders": {

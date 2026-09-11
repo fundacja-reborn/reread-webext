@@ -61,8 +61,13 @@ describe("the popup's rows", () => {
     assert.equal(shown.pair, false);
     assert.equal(shown.setup, false);
     assert.equal(shown.vocabulary, false);
-    assert.equal(shown.quiet, false);
     assert.equal(shown.readerOnly, false);
+  });
+
+  it("has no folded-bubble switch any more (D197)", () => {
+    // Set once and left: the settings page keeps it, and the popup keeps
+    // what is flipped often (Michał's call, 2026-09-11).
+    assert.equal("quiet" in rows(), false);
   });
 
   it("keeps the pair select under the trim with a pair, models or not (D165)", () => {
@@ -78,12 +83,10 @@ describe("the popup's rows", () => {
   it("keeps the quiet vocabulary's rows under the trim with a pair (D162)", () => {
     // The switch turns off the model, not the bubble: with a pair the saved
     // phrases live and the ordinary pages read again, so their door and the
-    // reader-only switch stand. The fold stays away - the trimmed bubble
-    // never folds (D131).
+    // reader-only switch stand.
     const shown = rows({ translationOff: true });
     assert.equal(shown.vocabulary, true);
     assert.equal(shown.readerOnly, true);
-    assert.equal(shown.quiet, false);
     // The no-bubble sub-option leaves every ordinary page alone, and a
     // reader-only switch over pages already left alone chooses nothing.
     assert.equal(rows({ translationOff: true, bubbleOff: true }).readerOnly, false);

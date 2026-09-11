@@ -105,6 +105,9 @@
   "lookup_action": { "message": "Знайти" },
   "lookup_own_meaning": { "message": "Власне значення" },
   "lookup_kept": { "message": "У ваших збережених фразах" },
+  "popup_lookup_back": { "message": "Назад до меню" },
+  "popup_lookup_add": { "message": "Додати до збережених фраз" },
+  "popup_lookup_open": { "message": "Відкрити у збережених фразах" },
   "vocab_count_filtered_one": {
     "message": "$MATCHING$ з $TOTAL$ збереженої фрази",
     "placeholders": {

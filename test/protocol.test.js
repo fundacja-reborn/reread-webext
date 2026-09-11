@@ -248,12 +248,23 @@ describe("asRequest", () => {
     });
   });
 
-  it("lets open-vocabulary carry nothing even when something was sent along", () => {
-    // Same rule as the reading list: the page shows the configured pair, and
-    // neither a tab nor a pair may ride in.
+  it("lets open-vocabulary carry a phrase to look up, and nothing else (D197)", () => {
+    // Same rule as the reading list for tabs and pairs: the page shows the
+    // configured pair, and neither may ride in.
     assert.deepEqual(asRequest({ kind: Message.OPEN_VOCABULARY, sourceTabId: 42, pair: "enpl" }), {
       kind: Message.OPEN_VOCABULARY,
     });
+    // The phrase the popup's field read, for the page's "Add a phrase" fold
+    // to look up on arrival - kept as typed.
+    assert.deepEqual(asRequest({ kind: Message.OPEN_VOCABULARY, text: " take off " }), {
+      kind: Message.OPEN_VOCABULARY,
+      text: " take off ",
+    });
+    // An extra like the settings' section: anything that is not a phrase is
+    // dropped, and the page opens on its list as before.
+    for (const text of ["", "   ", 42, null, {}, ["news"], undefined]) {
+      assert.deepEqual(asRequest({ kind: Message.OPEN_VOCABULARY, text }), { kind: Message.OPEN_VOCABULARY });
+    }
   });
 
   it("keeps the tab the reader is asked to read", () => {

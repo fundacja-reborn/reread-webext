@@ -168,7 +168,9 @@ async function handle(request, sender) {
       return ok(null);
     }
     case Message.OPEN_VOCABULARY: {
-      await openVocabulary({ from: sender.tab?.id });
+      // With a phrase to look up on arrival (D197): the popup's field read
+      // it, and the page's "Add a phrase" fold is where it gets saved.
+      await openVocabulary({ from: sender.tab?.id, text: request.text });
       return ok(null);
     }
     case Message.OPEN_SETTINGS: {

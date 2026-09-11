@@ -13,8 +13,9 @@
   <body>
     <!--
       Eleven rows and nothing else: this site and what to do with it first,
-      the extension's own pages, the three reading preferences, and the quiet
-      heart. No counters, no logo - the popup is a hallway, not a room. On a
+      the pair and the look-up field, the extension's own pages, the two
+      reading preferences, and the quiet heart. No counters, no logo - the
+      popup is a hallway, not a room. On a
       fresh install the pair row yields its place to a signpost, because a
       pair nothing can translate yet is a promise the popup must not make;
       with translation switched off most of these rows leave altogether
@@ -99,22 +100,57 @@
     </p>
 
     <!-- The look-up field (D197): a word typed instead of selected, answered
-         by the dictionaries in the pair's language - never by the model - and
-         saved with a press on a meaning. Right under the pair, which says
-         which language the word is in. Stands from the first paint like the
-         pair row and leaves only without a pair (`rows.js`): the settings
-         alone decide, so the row is settled before the models are read and
-         nothing below it moves (D194). The field and its answer are built by
-         `lib/lookup-box.js`, the saved-phrases page's own. -->
+         by the dictionaries in the pair's language - never by the model. Right
+         under the pair, which says which language the word is in. Stands from
+         the first paint like the pair row and leaves only without a pair
+         (`rows.js`): the settings alone decide, so the row is settled before
+         the models are read and nothing below it moves (D194).
+         Once the field has answered, the popup is in its results mode
+         (`body[data-mode="lookup"]`, popup.css): every other row leaves, this
+         row sticks to the top with the arrow back to the menu in it, and the
+         answer scrolls under it. The field only reads here - a popup leaves
+         at a click beside it, and a save nobody saw is the wrong surprise
+         (Michał's call after the first smoke); its one act is the row under
+         the answer, which opens the saved-phrases page with the word already
+         looked up in its "Add a phrase" fold. Field, answer and rules:
+         `lib/lookup-box.js`, `lib/lookup.js`. -->
     <div
-      class="popup-row popup-lookup"
-      id="lookup-row"
+      class="popup-row popup-lookup-head"
+      id="lookup-head"
       role="group"
       aria-label="Look up a word"
       data-i18n-aria-label="lookup_label"
     >
-      <div class="lookup-box" id="lookup-box"></div>
+      <!-- The pages' own "Back" arrow (`.page-back`, page.css), shown in the
+           results mode only: it brings the rows back, the word kept in the
+           field. Escape is the browser's and closes the popup. -->
+      <button
+        type="button"
+        class="page-back popup-lookup-back popup-lookup-only"
+        id="lookup-back"
+        title="Back to the menu"
+        data-i18n-title="popup_lookup_back"
+        aria-label="Back to the menu"
+        data-i18n-aria-label="popup_lookup_back"
+      >
+        <svg class="page-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <path
+            d="M13.25 8H3.1M7.3 3.8 3.1 8l4.2 4.2"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.3"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </button>
+      <div class="lookup-box" id="lookup-form"></div>
     </div>
+    <div class="lookup-box popup-lookup-answer popup-lookup-only" id="lookup-answer"></div>
+    <!-- Its words are the state's (the phrase not saved yet, or already
+         saved), written by the script from the catalogue; no fallback stands
+         here. -->
+    <button type="button" class="popup-row popup-action popup-lookup-door popup-lookup-only" id="lookup-door" hidden></button>
 
     <!-- The extension's rooms right under the pair (Michał's call, second
          round 2026-08-17): the rows visited often stand above the switches
@@ -132,18 +168,13 @@
       Saved phrases
     </button>
 
-    <!-- The quiet-bubble switch (D81), here as well as in the settings: it is
-         a reading preference somebody flips mid-article, and the popup is the
-         surface already in reach. Save shows itself regardless - the hint for
-         that lives on the settings page, where there is room to say it. -->
-    <label class="popup-row popup-quiet" id="quiet-row">
-      <span data-i18n="quiet_bubble">Hide bubble actions by default</span>
-      <input type="checkbox" id="quiet-bubble" />
-    </label>
+    <!-- The quiet-bubble switch (D81) stood here from D128 to D197; it is set
+         once and left, and the popup keeps what is flipped often (Michał's
+         call, 2026-09-11) - the settings page keeps it. -->
 
-    <!-- The reader-only switch, for the quiet bubble's reason: a mode flipped
-         depending on what is being read, and the popup is the surface in
-         reach. It replaces the status line that used to stand at the bottom -
+    <!-- The reader-only switch: a mode flipped depending on what is being
+         read, and the popup is the surface in reach. It replaces the status
+         line that used to stand at the bottom -
          a switch says the state and changes it in one row, where the line
          could only point at the settings. The hint stays on the settings
          page, where there is room to say it. -->
