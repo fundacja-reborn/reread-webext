@@ -158,6 +158,8 @@ Dictionaries are matched by the language of their headwords, not by the pair - s
 
 A translation model often gets a word on its own wrong, and a dictionary is the better answer to one. So when you select a word or two while translating and no dictionary entry stands under the translation, a line in the bubble says so, and which of two things it means: no dictionary for the language is installed yet (the word "settings" in that line opens them at the dictionaries), or the installed ones do not know the word - with a link to the list of dictionary sources, its address on the link.
 
+The model translates only from the pair's language, and a page in your own language can feed it the wrong one - a Polish word on a Polish page under English → Polish comes back as nonsense. So while translating, the dictionaries are asked in the pair's language first and in the language the page declares second, as with the model off; when a dictionary of the page's language knows the selected word and the pair's do not, the bubble shows that dictionary's entries instead of the model's guess, says where Save would file the phrase, reads it aloud in that language, and keeps nothing on its own.
+
 With more than one installed, the bubble shows their entries in the order the settings page lists the dictionaries, and two arrows on each row change that order - put the English-English one above the English-Polish one and its entries come first.
 
 For English-Polish, WikDict is the recommended start: 66,609 entries plus 51,721 alternative spellings in its `.syn` file (which is what lets `elevations` find `elevation`). FreeDict's `eng-pol` StarDict build (release 0.2.1) is mostly missing the Polish translations (checked 2026-08-11); other FreeDict pairs may be fine.

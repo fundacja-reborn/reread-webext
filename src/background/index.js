@@ -68,9 +68,12 @@ async function handle(request, sender) {
       // Side by side, not one after the other: the dictionary read is a point
       // lookup and the translation is the engine, so waiting for them together
       // costs what the engine costs and nothing more.
-      // Asked in the pair's language alone, the one the engine translates
-      // from: the page's declaration gets its turn only in the quiet bubble
-      // (D191), where there is no engine to say which language the pair is.
+      // The dictionaries are asked in the pair's language first and in the
+      // page's declared one second (D191, since D193 here as in the quiet
+      // bubble): the engine translates from the pair's language or not at
+      // all, but a word the page's own dictionary knows while the pair's do
+      // not is a word in the page's language - and the answer says so
+      // (`lang`), for the bubble to set the engine's guess aside.
       const [translated, looked] = await Promise.all([
         translate({
           text: request.text,
@@ -78,20 +81,21 @@ async function handle(request, sender) {
           from: pair.from,
           to: pair.to,
         }),
-        lookUpAnswer(request.text, { pair: pair.from, declared: null }),
+        lookUpAnswer(request.text, { pair: pair.from, declared: request.lang ?? null }),
       ]);
 
       // Dictionary entries ride with a translation and never instead of one: a
       // failed translation is an error the bubble has to show, and hanging
       // definitions off it would make an error message into a half-answer.
-      // The count of dictionaries asked rides with the entries (D192), and a
-      // lookup that gave no answer at all hands over neither: no entries and
-      // no count, which the bubble reads as nothing to say (D164).
+      // The count of dictionaries asked and the language they answered in
+      // ride with the entries (D192, D193), and a lookup that gave no answer
+      // at all hands over none of the three: the bubble reads that as
+      // nothing to say (D164).
       if (!translated.ok) return translated;
       return ok(
         looked === null
           ? { ...translated.value, entries: [] }
-          : { ...translated.value, entries: looked.entries, dictionaries: looked.dictionaries },
+          : { ...translated.value, entries: looked.entries, dictionaries: looked.dictionaries, lang: looked.lang },
       );
     }
     case Message.LOOK_UP: {

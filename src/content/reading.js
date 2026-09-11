@@ -32,7 +32,15 @@
 
 import { webext } from "../lib/browser.js";
 import { CONFIG_KEY, DEFAULTS, chosenPair, withDefaults } from "../lib/config.js";
-import { HINT_MAX_WORDS, dictionaryHint, entryBlocks, filingWarning, linkedWord, quietNote } from "../lib/gloss.js";
+import {
+  HINT_MAX_WORDS,
+  answeredElsewhere,
+  dictionaryHint,
+  entryBlocks,
+  filingWarning,
+  linkedWord,
+  quietNote,
+} from "../lib/gloss.js";
 import { t, uiLocale } from "../lib/i18n.js";
 import { languageName, pairLabel } from "../lib/language.js";
 import { keyTokens } from "../lib/matcher/tokenize.js";
@@ -373,7 +381,10 @@ async function lookUpQuiet(text, lang) {
  * @returns {string} BCP-47
  */
 function readingLanguage() {
-  if (!noTranslation) return ttsLang;
+  // With the engine on, the pair's - unless a dictionary of another language
+  // knew the phrase (D193, the trim's own rule below): the engine translated
+  // the wrong language then, and the voice follows the book that knew it.
+  if (!noTranslation) return current !== null && current.answered.length > 0 ? current.answered : ttsLang;
   if (quietVoice !== null) return quietVoice()?.lang ?? "";
   if (current !== null && current.answered.length > 0) return current.answered;
   return ttsLang.length > 0 ? ttsLang : (current?.lang ?? "");
@@ -411,6 +422,27 @@ function filingNote(entries, findable, lang) {
  */
 function wordsOf(normalized) {
   return keyTokens(normalized).length;
+}
+
+/**
+ * A translate request as the bubble asks it: the phrase, the sentence it
+ * stands in when the page had one, and since D193 the language the page
+ * declares for it (`declaredLanguage`) - which the background asks the
+ * dictionaries in second, after the pair's (D191), and which is never the
+ * engine's business: the engine translates from the pair's language or not
+ * at all.
+ *
+ * @param {string} text
+ * @param {string | null} context
+ * @param {string} lang the page's declaration, empty for none
+ * @returns {import("../lib/protocol.js").TranslateRequest}
+ */
+function translateRequest(text, context, lang) {
+  /** @type {import("../lib/protocol.js").TranslateRequest} */
+  const request = { kind: Message.TRANSLATE, text };
+  if (context !== null) request.context = context;
+  if (lang.length > 0) request.lang = lang;
+  return request;
 }
 
 /**
@@ -1190,11 +1222,7 @@ async function fillSecondLayer() {
   tooltip.setContext(t("bubble_translating"), "pending");
 
   /** @type {Promise<import("../lib/protocol.js").Result<import("../lib/protocol.js").Translation>>} */
-  const answer = ask(
-    wanted.context === null
-      ? { kind: Message.TRANSLATE, text: phrase.text }
-      : { kind: Message.TRANSLATE, text: phrase.text, context: wanted.context },
-  );
+  const answer = ask(translateRequest(phrase.text, wanted.context, phrase.lang));
   const result = await answer;
   if (mine !== generation || !tooltip.isOpen()) return;
 
@@ -1206,8 +1234,11 @@ async function fillSecondLayer() {
     return;
   }
 
-  const { sentence, entries } = asTranslation(result.value);
+  const { sentence, entries, lang } = asTranslation(result.value);
   const blocks = entryBlocks(entries ?? [], phrase.normalized);
+  // The same voice rule as the fresh selection's (D191, D193): the book that
+  // knew the phrase says what language it is.
+  phrase.answered = blocks.length > 0 ? (lang ?? "") : "";
 
   // Nothing behind More after all - no sentence to translate (a selected
   // phrase that is a whole short sentence, common in a book's dialogue),
@@ -1465,12 +1496,8 @@ function present(selection, { deliberate, touch, chain = false }) {
     scheme: bubbleScheme?.() ?? null,
   });
 
-  const request = selection.context === null
-    ? { kind: Message.TRANSLATE, text }
-    : { kind: Message.TRANSLATE, text, context: selection.context };
-
   /** @type {Promise<import("../lib/protocol.js").Result<import("../lib/protocol.js").Translation>>} */
-  const answer = ask(request);
+  const answer = ask(translateRequest(text, selection.context, selection.lang));
 
   void answer.then((result) => {
     if (mine !== generation || !tooltip.isOpen()) return;
@@ -1484,14 +1511,52 @@ function present(selection, { deliberate, touch, chain = false }) {
       return;
     }
 
-    const { gloss, sentence, entries, dictionaries } = asTranslation(result.value);
+    const { gloss, sentence, entries, dictionaries, lang } = asTranslation(result.value);
+    const blocks = entryBlocks(entries ?? [], normalized);
+
+    // A word the page's dictionary knew and the pair's did not (D193): the
+    // two signals D167 asks for agree that the phrase is in the page's
+    // language, not the pair's - and what the engine made of it is a guess
+    // at the wrong language (Michał's screenshot, 2026-09-11: "książkach"
+    // on a Polish page under en → pl, glossed "księgowa", the sentence
+    // around it word salad). Dropped, gloss and sentence both, and never
+    // kept: what stands is the quiet pair's answer (D158) - the entries as
+    // presses, the pencil, Save waiting for a meaning (D175) - with the
+    // line saying where Save would file it (D167) and the voice of the
+    // book that knew it (D191). The layer comes out whatever the fold
+    // setting says, and so does the row: the entries are the whole answer,
+    // and Save may not hide (D131).
+    const reading = primaryLanguage(lang ?? "");
+    const pairFrom = primaryLanguage(ttsLang);
+    if (answeredElsewhere({ entries: blocks.length, reading, pairFrom })) {
+      if (current !== null) current.answered = lang ?? "";
+      tooltip.setBody("", "normal");
+      tooltip.setEntries(blocks);
+      tooltip.setContext(
+        filingWarning({ entries: blocks.length, findable: selection.findable, reading, pairFrom })
+          ? t("bubble_saves_under", pairLabel(ttsLang, pairTarget))
+          : null,
+        "note",
+      );
+      secondLayer = ["more"];
+      tooltip.setActions([
+        ...speakActions(),
+        ...COPY,
+        ...readerDoor(),
+        .../** @type {import("./tooltip.js").Action[]} */ (selection.findable ? ["edit", "save"] : []),
+        ...secondLayer,
+      ]);
+      tooltip.expand();
+      tooltip.reveal();
+      return;
+    }
+
     tooltip.setBody(gloss, "normal");
     // Into the layer, which shows them or holds them as the opening said
     // (D186): out from the first frame, or waiting behind More - G0's
     // answer-the-word-and-get-out-of-the-way, kept for whoever folds the
     // layer away in the settings.
     tooltip.setContext(sentence);
-    const blocks = entryBlocks(entries ?? [], normalized);
     tooltip.setEntries(blocks);
     // The layer's aside on the answer itself (D192): over a word or two the
     // engine translated alone, with no dictionary line under it, the hint

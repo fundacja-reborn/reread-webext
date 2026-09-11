@@ -153,6 +153,20 @@ describe("asTranslation", () => {
     }
     assert.equal("dictionaries" in asTranslation({ gloss: "", sentence: null, entries: [], dictionaries: 0 }), false);
   });
+
+  it("carries the language the dictionaries answered in, with a gloss to carry it (D193)", () => {
+    assert.deepEqual(asTranslation({ gloss: "bank", sentence: null, entries: [ENTRY], dictionaries: 2, lang: "pl" }), {
+      gloss: "bank",
+      sentence: null,
+      entries: [ENTRY],
+      dictionaries: 2,
+      lang: "pl",
+    });
+    for (const lang of [undefined, "", 42, null, ["pl"]]) {
+      assert.equal("lang" in asTranslation({ gloss: "bank", sentence: null, entries: [], lang }), false);
+    }
+    assert.equal("lang" in asTranslation({ gloss: "", sentence: null, entries: [], lang: "pl" }), false);
+  });
 });
 
 describe("asRequest", () => {
@@ -181,6 +195,21 @@ describe("asRequest", () => {
   it("drops a sentence that is not one, rather than refusing the translation", () => {
     for (const context of [42, null, {}, ["a"], undefined]) {
       assert.deepEqual(asRequest({ kind: Message.TRANSLATE, text: "bank", context }), {
+        kind: Message.TRANSLATE,
+        text: "bank",
+      });
+    }
+  });
+
+  it("keeps the language the page declares for a translate request, and drops what is not one (D193)", () => {
+    assert.deepEqual(asRequest({ kind: Message.TRANSLATE, text: "bank", context: "Nad rzeką.", lang: "pl" }), {
+      kind: Message.TRANSLATE,
+      text: "bank",
+      context: "Nad rzeką.",
+      lang: "pl",
+    });
+    for (const lang of ["", 42, null, {}, ["pl"], undefined]) {
+      assert.deepEqual(asRequest({ kind: Message.TRANSLATE, text: "bank", lang }), {
         kind: Message.TRANSLATE,
         text: "bank",
       });

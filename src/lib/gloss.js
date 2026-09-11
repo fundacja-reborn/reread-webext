@@ -195,6 +195,28 @@ export function linkedWord(sentence, word) {
 }
 
 /**
+ * Whether a dictionary of another language than the pair's knew the phrase
+ * (D167's two signals, the rule itself since D193): entries came back from
+ * a lookup made in `reading` - the page's declared language, asked second
+ * (D191), so it answered only where the pair's dictionaries did not - and
+ * `reading` is not the pair's source. One signal alone cries wolf: a page
+ * mis-tagged, an English quote on a Polish page. Both together say the
+ * phrase is in the page's language, which outranks the page's `lang`
+ * attribute and the engine's guess alike: a Polish dictionary recognising a
+ * Polish word says what language it is better than either. The known
+ * miss: a word two languages share ("hotel") on a page in the other one,
+ * with no dictionary for the pair's language to answer first.
+ *
+ * @param {{ entries: number, reading: string, pairFrom: string }} of how many
+ *   entries the lookup returned, the primary subtag it answered in and the
+ *   pair's source subtag
+ * @returns {boolean}
+ */
+export function answeredElsewhere({ entries, reading, pairFrom }) {
+  return entries > 0 && reading.length > 0 && pairFrom.length > 0 && reading !== pairFrom;
+}
+
+/**
  * Whether the quiet bubble should say where Save would file this phrase
  * (D167, Michał's rule): only where two signals agree that the page is not
  * in the pair's language - the page declares another one, AND a dictionary
@@ -209,7 +231,7 @@ export function linkedWord(sentence, word) {
  * @returns {boolean}
  */
 export function filingWarning({ entries, findable, reading, pairFrom }) {
-  return entries > 0 && findable && reading.length > 0 && pairFrom.length > 0 && reading !== pairFrom;
+  return findable && answeredElsewhere({ entries, reading, pairFrom });
 }
 
 /**

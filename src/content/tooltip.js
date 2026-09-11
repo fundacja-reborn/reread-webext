@@ -1323,6 +1323,7 @@ export const STYLE = `
  * @property {(sentence: string | null, tone?: Tone) => void} setContext
  * @property {(blocks: Block[]) => void} setEntries
  * @property {(hint: Hint | null) => void} setHint
+ * @property {() => void} expand
  * @property {(actions: Action[]) => void} setActions
  * @property {(rect: DOMRect) => void} follow
  * @property {() => void} reveal
@@ -2918,6 +2919,14 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
     setHint(hint) {
       setHint(hint);
       place();
+    },
+
+    expand() {
+      // The layer brought out whatever the opening said (D193): when the
+      // entries are the whole answer, a fold that held them behind More
+      // would leave a bubble of nothing but its row - the quiet bubble's
+      // rule (`layerStart`), applied after the fact.
+      unfold(true);
     },
 
     setActions(actions) {
