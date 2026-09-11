@@ -18,11 +18,22 @@
  * stored, and a transferred buffer is a buffer this side no longer has. The
  * transient copy is the price of "nothing is stored until the engine says
  * yes", and it lives for seconds.
+ *
+ * The engine's own binary is read here and handed over first, the way the
+ * background does it (D196): the worker's own `fetch()` is refused offline
+ * in Firefox, and a model added from files with the network off has to be
+ * checked like any other. That one is transferred - read for this worker
+ * alone, of no use here afterwards.
  */
 
 import { webext } from "../browser.js";
+import { readEngineBinary } from "../translator/providers/bergamot/binary.js";
 
 const WORKER_PATH = "background/engine.worker.js";
+
+/** The two calls made, by their ids in the worker's replies. */
+const START = 1;
+const LOAD = 2;
 
 /**
  * Engine start plus one model load, with headroom for a slow phone. A worker
@@ -38,9 +49,10 @@ const VERDICT_TIMEOUT_MS = 120_000;
 /**
  * @param {{ from: string, to: string }} pair
  * @param {import("./store.js").ModelFiles} files
+ * @param {() => Promise<ArrayBuffer>} [readBinary] a stand-in for tests
  * @returns {Promise<LoadVerdict>}
  */
-export function testLoadModel(pair, files) {
+export async function testLoadModel(pair, files, readBinary = readEngineBinary) {
   /** @type {Worker} */
   let worker;
   try {
@@ -48,7 +60,17 @@ export function testLoadModel(pair, files) {
   } catch (error) {
     // No worker means nothing was checked - not that the model is bad. Waving
     // it through here would turn a broken page into unverified stores.
-    return Promise.resolve({ ok: false, detail: error instanceof Error ? error.message : String(error) });
+    return { ok: false, detail: error instanceof Error ? error.message : String(error) };
+  }
+
+  /** @type {ArrayBuffer} */
+  let binary;
+  try {
+    binary = await readBinary();
+  } catch (error) {
+    // The same rule: nothing read, nothing checked.
+    worker.terminate();
+    return { ok: false, detail: error instanceof Error ? error.message : String(error) };
   }
 
   return new Promise((resolve) => {
@@ -63,9 +85,11 @@ export function testLoadModel(pair, files) {
 
     worker.addEventListener("message", (event) => {
       const { id, error } = /** @type {{ id?: unknown, error?: { message?: string } }} */ (event.data ?? {});
-      if (id !== 1) return;
+      if (id !== START && id !== LOAD) return;
+      // An engine that did not come up and a model it refused end the same
+      // way - nothing is kept - and the sentence says which it was.
       if (error) settle({ ok: false, detail: String(error.message ?? "engine failed") });
-      else settle({ ok: true });
+      else if (id === LOAD) settle({ ok: true });
     });
 
     // A model that crashes the engine outright surfaces here, not as a reply.
@@ -73,8 +97,9 @@ export function testLoadModel(pair, files) {
       settle({ ok: false, detail: String(event.message ?? "the engine crashed") });
     });
 
+    worker.postMessage({ id: START, name: "start", args: [binary] }, [binary]);
     worker.postMessage({
-      id: 1,
+      id: LOAD,
       name: "load",
       args: [
         { from: pair.from, to: pair.to },
