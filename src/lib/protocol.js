@@ -112,7 +112,17 @@ export const ErrorCode = Object.freeze({
  * way. That is what keeps "is there a second layer" one question rather than
  * three states.
  *
- * @typedef {{ gloss: string, sentence: string | null, entries?: DictEntry[] }} Translation
+ * `dictionaries` is the `look-up` answer's count (D164) riding along with a
+ * translation (D192): how many installed dictionaries answer for the pair's
+ * source language, zero saying there is none. It is what lets the bubble
+ * over a word or two the engine translated alone say which of two things the
+ * empty entries mean - no dictionary to ask, or dictionaries that did not
+ * know the word - and point at the right remedy. Absent when the lookup gave
+ * no answer at all (a database that would not open), and from a background
+ * older than this field: the bubble says nothing then, by D164's rule that a
+ * fault must never read as a missing dictionary.
+ *
+ * @typedef {{ gloss: string, sentence: string | null, entries?: DictEntry[], dictionaries?: number }} Translation
  */
 
 /**
@@ -284,7 +294,7 @@ export function asResult(response) {
  */
 export function asTranslation(value) {
   if (typeof value !== "object" || value === null) return { gloss: "", sentence: null, entries: [] };
-  const { gloss, sentence, entries } = /** @type {Record<string, unknown>} */ (value);
+  const { gloss, sentence, entries, dictionaries } = /** @type {Record<string, unknown>} */ (value);
 
   const answer = typeof gloss === "string" ? gloss : "";
   // The sentence is an extra to the gloss, so without a gloss there is nothing
@@ -292,7 +302,15 @@ export function asTranslation(value) {
   // has something behind it is a state nobody should have to make sense of.
   const second = answer.length > 0 && typeof sentence === "string" ? sentence : null;
 
-  return { gloss: answer, sentence: second, entries: answer.length > 0 ? asDictEntries(entries) : [] };
+  /** @type {Translation} */
+  const translation = { gloss: answer, sentence: second, entries: answer.length > 0 ? asDictEntries(entries) : [] };
+  // The count is an extra to the entries the same way (D192), and it is a
+  // count or nothing: a value that is not a whole non-negative number says
+  // nothing about the dictionaries, so it is left out rather than read as one.
+  if (answer.length > 0 && typeof dictionaries === "number" && Number.isInteger(dictionaries) && dictionaries >= 0) {
+    translation.dictionaries = dictionaries;
+  }
+  return translation;
 }
 
 /**

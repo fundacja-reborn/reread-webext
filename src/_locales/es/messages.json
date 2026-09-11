@@ -53,6 +53,8 @@
     "message": "Aún no hay diccionario para $LANGUAGE$ - añade uno en los ajustes",
     "placeholders": { "language": { "content": "$1", "example": "inglés" } }
   },
+  "bubble_model_word": { "message": "Un modelo de traducción a menudo se equivoca con una palabra suelta, sin contexto." },
+  "bubble_dictionary_sources": { "message": "Dónde encontrar diccionarios" },
   "bubble_saves_under": {
     "message": "Se guardará en $PAIR$",
     "placeholders": { "pair": { "content": "$1", "example": "inglés → polaco" } }
@@ -992,7 +994,10 @@
   "options_tts_rate": { "message": "Velocidad de lectura" },
   "options_models_heading": { "message": "Modelos de traducción" },
   "options_models_intro": {
-    "message": "Descarga aquí un modelo de traducción para cada par de idiomas que quieras traducir. Son archivos oficiales de Mozilla que funcionan totalmente sin conexión en tu dispositivo. Un modelo traduce bien las frases, pero una palabra suelta, sin contexto, a menudo se traduce mal - el resultado queda cortado o es una palabra que no existe. Para palabras sueltas, un diccionario de la sección de abajo es la mejor fuente."
+    "message": "Descarga aquí un modelo de traducción para cada par de idiomas que quieras traducir. Son archivos oficiales de Mozilla que funcionan totalmente sin conexión en tu dispositivo."
+  },
+  "options_models_single_word": {
+    "message": "Un modelo traduce bien las frases, pero una palabra suelta, sin contexto, a menudo se traduce mal - el resultado queda cortado o es una palabra que no existe. Para palabras sueltas, un diccionario de la sección de abajo es la mejor fuente."
   },
   "options_update_list": { "message": "Actualizar la lista" },
   "options_list_dated": { "message": "Lista del" },
@@ -1021,6 +1026,9 @@
   "options_dictionaries_heading": { "message": "Diccionarios" },
   "options_dictionaries_intro": {
     "message": "Añade diccionarios para ver definiciones detalladas de las palabras en la burbuja de traducción. Puedes cambiar el orden en que aparecen usando las flechas."
+  },
+  "options_dictionaries_sources": {
+    "message": "Los diccionarios de la lista de abajo vienen de WikDict. También puedes añadir los tuyos - desde archivos o desde un enlace, y varios para un mismo idioma - en las secciones bajo la lista. Dónde encontrarlos, cada uno con su licencia:"
   },
   "options_dictionary_order_hint": {
     "message": "La burbuja responde en el orden de abajo. Solo responden los diccionarios del idioma que estás leyendo."

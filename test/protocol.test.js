@@ -132,6 +132,27 @@ describe("asTranslation", () => {
       entries: [],
     });
   });
+
+  it("carries the count of dictionaries asked when it is one (D192)", () => {
+    // Zero is a count - the one that says there is no dictionary at all.
+    assert.deepEqual(asTranslation({ gloss: "bank", sentence: null, entries: [], dictionaries: 0 }), {
+      gloss: "bank",
+      sentence: null,
+      entries: [],
+      dictionaries: 0,
+    });
+    assert.equal(asTranslation({ gloss: "bank", sentence: null, entries: [ENTRY], dictionaries: 2 }).dictionaries, 2);
+  });
+
+  it("leaves the count out when it is not one, and when there is no gloss", () => {
+    // A background from before the field sends none; anything that is not a
+    // whole non-negative number says nothing about the dictionaries and must
+    // not be read as if it did - the bubble then says nothing (D164).
+    for (const dictionaries of [undefined, null, -1, 1.5, "2", NaN, Infinity]) {
+      assert.equal("dictionaries" in asTranslation({ gloss: "bank", sentence: null, entries: [], dictionaries }), false);
+    }
+    assert.equal("dictionaries" in asTranslation({ gloss: "", sentence: null, entries: [], dictionaries: 0 }), false);
+  });
 });
 
 describe("asRequest", () => {

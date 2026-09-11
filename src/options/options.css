@@ -25,6 +25,20 @@ p.explain {
   margin: 0.75rem 0;
 }
 
+/* A highlighter's stroke over the sentences worth a second look (D192): the
+   accent as a wash, on both papers, in the ink around it - the browser's own
+   mark is a yellow block with black text, which no theme of ours has. Cloned
+   at the line breaks, so a stroke that wraps starts and ends its padding on
+   every line it spans. */
+p.explain mark {
+  background: color-mix(in srgb, var(--page-accent) 20%, transparent);
+  color: inherit;
+  padding: 0.05em 0.2em;
+  border-radius: 3px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
 /* Focus must be findable on every control here - the quiet row buttons erase
    their resting border, so the browser default cannot be trusted to survive
    the styling. */

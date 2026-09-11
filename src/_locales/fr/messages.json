@@ -53,6 +53,8 @@
     "message": "Pas encore de dictionnaire pour la langue : $LANGUAGE$ - ajoutez-en un dans les paramètres",
     "placeholders": { "language": { "content": "$1", "example": "anglais" } }
   },
+  "bubble_model_word": { "message": "Un modèle de traduction se trompe souvent sur un mot isolé, sans contexte." },
+  "bubble_dictionary_sources": { "message": "Où trouver des dictionnaires" },
   "bubble_saves_under": {
     "message": "Sera enregistré sous $PAIR$",
     "placeholders": { "pair": { "content": "$1", "example": "anglais → polonais" } }
@@ -1004,7 +1006,10 @@
   "options_tts_rate": { "message": "Vitesse de lecture" },
   "options_models_heading": { "message": "Modèles de traduction" },
   "options_models_intro": {
-    "message": "Téléchargez ici un modèle de traduction pour chaque paire de langues que vous voulez traduire. Ce sont des fichiers officiels de Mozilla qui fonctionnent entièrement hors ligne sur votre appareil. Un modèle traduit bien les phrases, mais un mot isolé, sans contexte, est souvent mal traduit - le résultat est tronqué, ou c'est un mot qui n'existe pas. Pour les mots isolés, un dictionnaire de la section ci-dessous est la meilleure source."
+    "message": "Téléchargez ici un modèle de traduction pour chaque paire de langues que vous voulez traduire. Ce sont des fichiers officiels de Mozilla qui fonctionnent entièrement hors ligne sur votre appareil."
+  },
+  "options_models_single_word": {
+    "message": "Un modèle traduit bien les phrases, mais un mot isolé, sans contexte, est souvent mal traduit - le résultat est tronqué, ou c'est un mot qui n'existe pas. Pour les mots isolés, un dictionnaire de la section ci-dessous est la meilleure source."
   },
   "options_update_list": { "message": "Mettre à jour la liste" },
   "options_list_dated": { "message": "Liste du" },
@@ -1033,6 +1038,9 @@
   "options_dictionaries_heading": { "message": "Dictionnaires" },
   "options_dictionaries_intro": {
     "message": "Ajoutez des dictionnaires pour voir des définitions détaillées des mots dans la bulle de traduction. Vous pouvez modifier leur ordre d'affichage à l'aide des flèches."
+  },
+  "options_dictionaries_sources": {
+    "message": "Les dictionnaires de la liste ci-dessous viennent de WikDict. Vous pouvez aussi ajouter les vôtres - depuis des fichiers ou depuis un lien, et plusieurs pour une même langue - dans les sections sous la liste. Où les trouver, chacun avec sa licence :"
   },
   "options_dictionary_order_hint": {
     "message": "La bulle répond dans l'ordre ci-dessous. Seuls les dictionnaires de la langue que vous lisez répondent."

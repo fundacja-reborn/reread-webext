@@ -75,6 +75,14 @@
     "message": "No dictionary for $LANGUAGE$ yet - add one in the settings",
     "placeholders": { "language": { "content": "$1", "example": "English" } }
   },
+  "bubble_model_word": {
+    "message": "A translation model often gets a word on its own wrong.",
+    "description": "The first sentence of the translating bubble's hint line (D192), shown under the translation of a word or two that no dictionary line stands under. Followed, across a plain space, by bubble_no_dictionary or bubble_not_in_dictionary, which the bubble closes with a full stop of its own - so this one ends with a full stop too."
+  },
+  "bubble_dictionary_sources": {
+    "message": "Where to find dictionaries",
+    "description": "The link in the bubble's hint line (D192), under \"Not in your dictionaries\" over a word or two: opens the re/read page listing dictionary sources in a new tab. A noun phrase naming what the page answers, not a verb."
+  },
   "bubble_saves_under": {
     "message": "Will be saved under $PAIR$",
     "placeholders": { "pair": { "content": "$1", "example": "English → Polish" } }
@@ -1234,7 +1242,12 @@
   "options_tts_rate": { "message": "Reading speed" },
   "options_models_heading": { "message": "Translation models" },
   "options_models_intro": {
-    "message": "Download a translation model here for each language pair you want to translate. These are official Mozilla files that run entirely offline on your device. A model translates sentences well, but a single word on its own is often translated wrongly - the result is cut short, or is a word that does not exist. For single words, a dictionary from the section below is the better source."
+    "message": "Download a translation model here for each language pair you want to translate. These are official Mozilla files that run entirely offline on your device.",
+    "description": "The first half of the models section's intro; options_models_single_word follows it in the same paragraph, highlighted. Each half must read on from the other across a plain space - no half starts or ends with whitespace."
+  },
+  "options_models_single_word": {
+    "message": "A model translates sentences well, but a single word on its own is often translated wrongly - the result is cut short, or is a word that does not exist. For single words, a dictionary from the section below is the better source.",
+    "description": "The highlighted half of the models section's intro (D192): the one fact about models that changes what a reader installs next."
   },
   "options_update_list": {
     "message": "Update the list",
@@ -1274,6 +1287,10 @@
   "options_dictionaries_heading": { "message": "Dictionaries" },
   "options_dictionaries_intro": {
     "message": "Add dictionaries to see detailed word definitions in the translation bubble. You can change the order in which they appear using the arrows."
+  },
+  "options_dictionaries_sources": {
+    "message": "The dictionaries listed below come from WikDict. You can also add your own - from files or from a link, and several for one language - in the sections under the list. Where to find them, each with its licence:",
+    "description": "The second paragraph of the dictionaries section's intro (D192). Ends just before the address, which stands in the page as a link; the sentence's closing full stop is part of the page. Must not end with whitespace."
   },
   "options_dictionary_order_hint": {
     "message": "The bubble answers in the order below. Only the dictionaries of the language you are reading answer.",

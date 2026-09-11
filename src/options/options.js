@@ -39,6 +39,7 @@ import { describeDictDownloadProblem, downloadArchive } from "../lib/dict/downlo
 import { describeLinkProblem, parseDictionaryLink } from "../lib/dict/link.js";
 import { describeHostProblem, parseHostname } from "../lib/host.js";
 import { sameSite } from "../lib/site.js";
+import { dictionarySourcesLink } from "../lib/sources.js";
 import { readLiveDictionaries, refreshLiveDictionaries } from "../lib/dict/live.js";
 import {
   aliasesOf,
@@ -363,6 +364,23 @@ function previewFontFamily(field) {
  * the focus leaves the field long before the press on Save.
  */
 let customCssTyped = false;
+
+/**
+ * The two links to the page of dictionary sources - the dictionaries
+ * section's intro (D192) and the link fold - pointed at the page in the
+ * interface's language: the page is written in two, and a Polish interface
+ * opens the Polish one. Links the reader follows, not requests the extension
+ * makes.
+ */
+function linkDictionarySources() {
+  const { href, label } = dictionarySourcesLink(uiLocale());
+  for (const id of ["dictionary-sources-intro", "dictionary-sources-link"]) {
+    const anchor = document.getElementById(id);
+    if (!(anchor instanceof HTMLAnchorElement)) continue;
+    anchor.href = href;
+    anchor.textContent = label;
+  }
+}
 
 /**
  * The stylesheets the reader's own rules address (D176), at the installed
@@ -2570,14 +2588,7 @@ async function render() {
   renderLanguageChoices("dictionary-to", config.targetLang ?? "");
   renderLanguageChoices("link-from", config.sourceLang ?? "");
   renderLanguageChoices("link-to", config.targetLang ?? "");
-  // The page of dictionary sources is written in two languages; a Polish
-  // interface opens the Polish one. A link the reader follows, not a request
-  // the extension makes.
-  const sources = document.getElementById("dictionary-sources-link");
-  if (sources instanceof HTMLAnchorElement && uiLocale().startsWith("pl")) {
-    sources.href = "https://reapps.eu/pl/read#faq-dictionary-sources";
-    sources.textContent = "reapps.eu/pl/read";
-  }
+  linkDictionarySources();
 
   const { source } = registrySource();
   const host = source === "" ? "" : new URL(source).host;

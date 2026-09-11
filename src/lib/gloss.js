@@ -139,6 +139,42 @@ export function quietNote({ entries, dictionaries, findable }) {
 }
 
 /**
+ * The longest selection the hint below is about: a word or two (Michał's
+ * measure, 2026-09-11). The engine translates the phrase alone, without its
+ * sentence, and that is where it guesses worst; past two words a selection is
+ * a phrase the engine handles and no dictionary is expected to hold.
+ */
+export const HINT_MAX_WORDS = 2;
+
+/**
+ * Whether the bubble over a translated word or two should say that the
+ * dictionaries could have done better, and how (D192): the engine's answer
+ * to a word on its own is often cut short or made up (the settings page has
+ * said so since D186), and the dictionary that would answer instead is
+ * either not installed for the language or installed and silent - two
+ * different remedies, told apart by the count the translation carries.
+ *
+ * Said nothing over an answer that came without a count (a lookup that gave
+ * no answer at all, or a background older than the field): by D164's rule a
+ * fault never reads as a missing dictionary. Nothing over a longer phrase
+ * (`HINT_MAX_WORDS`), over a fragment of a word (the gesture is the problem
+ * there, not the dictionaries - `quietNote` says so in the quiet bubble), and
+ * nothing while there are entries: the dictionaries have answered.
+ *
+ * @param {{ words: number, entries: number, dictionaries: number | undefined, findable: boolean }} of
+ *   how many words the phrase has, how many entries came back, how many
+ *   dictionaries were asked (undefined for no answer), and whether the phrase
+ *   could ever be found on a page again
+ * @returns {"no-dictionary" | "not-in-dictionary" | null}
+ */
+export function dictionaryHint({ words, entries, dictionaries, findable }) {
+  if (dictionaries === undefined) return null;
+  if (words < 1 || words > HINT_MAX_WORDS) return null;
+  const note = quietNote({ entries, dictionaries, findable });
+  return note === "whole-words" ? null : note;
+}
+
+/**
  * Whether the quiet bubble should say where Save would file this phrase
  * (D167, Michał's rule): only where two signals agree that the page is not
  * in the pair's language - the page declares another one, AND a dictionary

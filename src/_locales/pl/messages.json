@@ -53,6 +53,8 @@
     "message": "Brak słownika dla języka: $LANGUAGE$ - dodaj go w ustawieniach",
     "placeholders": { "language": { "content": "$1", "example": "angielski" } }
   },
+  "bubble_model_word": { "message": "Model tłumaczenia często myli się na słowie bez kontekstu." },
+  "bubble_dictionary_sources": { "message": "Gdzie szukać słowników" },
   "bubble_saves_under": {
     "message": "Zapis trafi do pary $PAIR$",
     "placeholders": { "pair": { "content": "$1", "example": "angielski → polski" } }
@@ -1333,7 +1335,10 @@
   "options_tts_rate": { "message": "Tempo czytania" },
   "options_models_heading": { "message": "Modele tłumaczeniowe" },
   "options_models_intro": {
-    "message": "Pobierz tutaj model tłumaczenia dla każdej pary językowej, którą chcesz tłumaczyć. Są to oficjalne pliki Mozilli, które działają całkowicie offline na Twoim urządzeniu. Model dobrze tłumaczy zdania, ale pojedyncze słowo bez kontekstu jest często tłumaczone błędnie - wynik bywa ucięty albo jest wyrazem, którego nie ma w języku. Dla pojedynczych słów lepszym źródłem jest słownik z sekcji poniżej."
+    "message": "Pobierz tutaj model tłumaczenia dla każdej pary językowej, którą chcesz tłumaczyć. Są to oficjalne pliki Mozilli, które działają całkowicie offline na Twoim urządzeniu."
+  },
+  "options_models_single_word": {
+    "message": "Model dobrze tłumaczy zdania, ale pojedyncze słowo bez kontekstu jest często tłumaczone błędnie - wynik bywa ucięty albo jest wyrazem, którego nie ma w języku. Dla pojedynczych słów lepszym źródłem jest słownik z sekcji poniżej."
   },
   "options_update_list": { "message": "Zaktualizuj listę" },
   "options_list_dated": { "message": "Lista z dnia" },
@@ -1362,6 +1367,9 @@
   "options_dictionaries_heading": { "message": "Słowniki" },
   "options_dictionaries_intro": {
     "message": "Dodaj słowniki, aby widzieć szczegółowe definicje słów w dymku tłumaczenia. Możesz zmienić kolejność ich wyświetlania za pomocą strzałek."
+  },
+  "options_dictionaries_sources": {
+    "message": "Słowniki na liście poniżej pochodzą z WikDict. Możesz też dodać własne - z plików albo z linku, także kilka dla jednego języka - w sekcjach pod listą. Gdzie ich szukać, każdy z podaną licencją:"
   },
   "options_dictionary_order_hint": {
     "message": "Dymek odpowiada w kolejności z listy poniżej. Odpowiadają tylko słowniki języka, który czytasz."

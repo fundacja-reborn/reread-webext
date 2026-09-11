@@ -32,11 +32,13 @@
 
 import { webext } from "../lib/browser.js";
 import { CONFIG_KEY, DEFAULTS, chosenPair, withDefaults } from "../lib/config.js";
-import { entryBlocks, filingWarning, quietNote } from "../lib/gloss.js";
-import { t } from "../lib/i18n.js";
+import { dictionaryHint, entryBlocks, filingWarning, quietNote } from "../lib/gloss.js";
+import { t, uiLocale } from "../lib/i18n.js";
 import { languageName, pairLabel } from "../lib/language.js";
+import { keyTokens } from "../lib/matcher/tokenize.js";
 import { describeError } from "../lib/messages.js";
 import { normalize, trimPhrase } from "../lib/normalize.js";
+import { dictionarySourcesLink } from "../lib/sources.js";
 import { ErrorCode, Message, asLookUp, asResult, asTranslation, fail } from "../lib/protocol.js";
 import { copyCombo, keeping, madeSelection, touchPointer } from "../lib/selection.js";
 import { sentenceAround } from "../lib/sentence.js";
@@ -417,6 +419,52 @@ function filingNote(entries, findable, lang) {
 }
 
 /**
+ * How many words a phrase is, by the tokens its key is compared by - the
+ * measure the hint (D192) and the automatic keep (D22) share.
+ *
+ * @param {string} normalized the key the phrase would be stored under
+ * @returns {number}
+ */
+function wordsOf(normalized) {
+  return keyTokens(normalized).length;
+}
+
+/**
+ * The link to the page listing dictionary sources (D192), in the interface's
+ * language: what the hint line offers under "not in your dictionaries". The
+ * words are the offer, not the address - the address shows where every link
+ * shows it, before the press.
+ *
+ * @returns {{ label: string, href: string }}
+ */
+function sourcesLink() {
+  return { label: t("bubble_dictionary_sources"), href: dictionarySourcesLink(uiLocale()).href };
+}
+
+/**
+ * The hint line of the translating bubble (D192): what the engine's answer to
+ * a word or two is worth, said first, and then which dictionary would have
+ * done better - the missing one, named in the pair's language with the
+ * settings as the place to add it (D164's sentence, which names the place
+ * and so needs no button beside it), or the installed ones that did not
+ * know the word, with the way to more of them.
+ *
+ * @param {"no-dictionary" | "not-in-dictionary"} kind
+ * @param {string} lang the language the dictionaries were asked in - the pair's
+ * @returns {import("./tooltip.js").Hint}
+ */
+function translatingHint(kind, lang) {
+  // The second sentence is the note line's own (D164), which closes with no
+  // full stop because it stands alone there; here it stands in prose, and
+  // the stop is what keeps the link after it from reading as its tail.
+  const engine = t("bubble_model_word");
+  if (kind === "no-dictionary") {
+    return { text: `${engine} ${t("bubble_no_dictionary", languageName(primaryLanguage(lang)))}.`, link: null };
+  }
+  return { text: `${engine} ${t("bubble_not_in_dictionary")}.`, link: sourcesLink() };
+}
+
+/**
  * What the dictionaries said, landed in the quiet bubble: the entries where
  * there are any - the quiet variant keeps no fold, because with no gloss the
  * definitions are not an extra behind the answer, they are the answer - and
@@ -446,6 +494,17 @@ function landQuietAnswer(answer, normalized, findable) {
   const note = quietNote({ entries: answer.entries.length, dictionaries: answer.dictionaries, findable });
   if (note !== null) {
     tooltip.setContext(quietSentence(note, answer.lang), "note");
+    // Under "not in your dictionaries", for a word or two, the way to more
+    // of them (D192) - the link alone: the note line has said what happened.
+    // The missing dictionary keeps its sentence and nothing else, the way
+    // D164 decided: it names the place already.
+    const hint = dictionaryHint({
+      words: wordsOf(normalized),
+      entries: answer.entries.length,
+      dictionaries: answer.dictionaries,
+      findable,
+    });
+    tooltip.setHint(hint === "not-in-dictionary" ? { text: "", link: sourcesLink() } : null);
     return;
   }
   tooltip.setEntries(entryBlocks(answer.entries, normalized));
@@ -1418,7 +1477,7 @@ function present(selection, { deliberate, touch, chain = false }) {
       return;
     }
 
-    const { gloss, sentence, entries } = asTranslation(result.value);
+    const { gloss, sentence, entries, dictionaries } = asTranslation(result.value);
     tooltip.setBody(gloss, "normal");
     // Into the layer, which shows them or holds them as the opening said
     // (D186): out from the first frame, or waiting behind More - G0's
@@ -1427,7 +1486,19 @@ function present(selection, { deliberate, touch, chain = false }) {
     tooltip.setContext(sentence);
     const blocks = entryBlocks(entries ?? [], normalized);
     tooltip.setEntries(blocks);
-    secondLayer = (sentence !== null && sentence.length > 0) || blocks.length > 0 ? ["more"] : [];
+    // The layer's aside on the answer itself (D192): over a word or two the
+    // engine translated alone, with no dictionary line under it, the hint
+    // says the answer is a guess and which dictionary would have known -
+    // decided by the count the translation carries, said nothing without it.
+    const hint = dictionaryHint({
+      words: wordsOf(normalized),
+      entries: blocks.length,
+      dictionaries,
+      findable: selection.findable,
+    });
+    tooltip.setHint(hint === null ? null : translatingHint(hint, ttsLang));
+    secondLayer =
+      (sentence !== null && sentence.length > 0) || blocks.length > 0 || hint !== null ? ["more"] : [];
 
     const decision = keeping({ normalized, gloss, findable: selection.findable, deliberate });
     tooltip.setActions([...offered(decision), ...secondLayer]);

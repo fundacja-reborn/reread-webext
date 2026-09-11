@@ -2,8 +2,10 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import {
+  HINT_MAX_WORDS,
   afterChoosing,
   choosableLines,
+  dictionaryHint,
   entryBlocks,
   filingWarning,
   quietNote,
@@ -162,6 +164,41 @@ describe("quietNote", () => {
     assert.equal(quietNote({ entries: 0, dictionaries: 0, findable: false }), "no-dictionary");
     assert.equal(quietNote({ entries: 0, dictionaries: 1, findable: false }), "whole-words");
     assert.equal(quietNote({ entries: 0, dictionaries: 3, findable: true }), "not-in-dictionary");
+  });
+});
+
+describe("dictionaryHint", () => {
+  it("is about a word or two, and nothing longer", () => {
+    // Michał's measure (2026-09-11): the engine guesses worst at a word on
+    // its own; past two words a selection is a phrase it handles.
+    assert.equal(HINT_MAX_WORDS, 2);
+    assert.equal(dictionaryHint({ words: 1, entries: 0, dictionaries: 0, findable: true }), "no-dictionary");
+    assert.equal(dictionaryHint({ words: 2, entries: 0, dictionaries: 0, findable: true }), "no-dictionary");
+    assert.equal(dictionaryHint({ words: 3, entries: 0, dictionaries: 0, findable: true }), null);
+    assert.equal(dictionaryHint({ words: 0, entries: 0, dictionaries: 0, findable: true }), null);
+  });
+
+  it("tells the missing dictionary from the silent ones by the count", () => {
+    assert.equal(dictionaryHint({ words: 1, entries: 0, dictionaries: 0, findable: true }), "no-dictionary");
+    assert.equal(dictionaryHint({ words: 1, entries: 0, dictionaries: 2, findable: true }), "not-in-dictionary");
+  });
+
+  it("says nothing without a count - a fault never reads as a missing dictionary", () => {
+    // A lookup that gave no answer, or a background from before the field:
+    // the same silence D164 keeps in the quiet bubble.
+    assert.equal(dictionaryHint({ words: 1, entries: 0, dictionaries: undefined, findable: true }), null);
+  });
+
+  it("says nothing while the dictionaries have answered", () => {
+    assert.equal(dictionaryHint({ words: 1, entries: 1, dictionaries: 2, findable: true }), null);
+  });
+
+  it("leaves a fragment of a word to the gesture, not to the dictionaries", () => {
+    // The quiet bubble says "select whole words" there (quietNote); the
+    // translating bubble has no such line and says nothing. The missing
+    // dictionary still outranks the gesture, as in quietNote.
+    assert.equal(dictionaryHint({ words: 1, entries: 0, dictionaries: 2, findable: false }), null);
+    assert.equal(dictionaryHint({ words: 1, entries: 0, dictionaries: 0, findable: false }), "no-dictionary");
   });
 });
 
