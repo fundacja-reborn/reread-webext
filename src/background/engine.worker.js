@@ -5,7 +5,12 @@
  * work synchronously, and doing that on the thread that answers messages would
  * freeze the extension for the length of a sentence. Everything here is
  * message-in, message-out, and nothing in this file knows what a browser
- * extension is - it is handed model bytes and hands back strings.
+ * extension is - it is handed the engine's binary and model bytes, and hands
+ * back strings. The binary comes in the first message (`start`) rather than
+ * being fetched here, where it is needed: a worker's `fetch()` in Firefox is
+ * refused while the network link is down, package or not (D196; the reason
+ * in full at `readEngineBinary`). Only the glue is loaded from here, by
+ * `importScripts` - a script load, which that refusal never touches.
  *
  * Its own message shape, deliberately not the one in `protocol.js`: that one is
  * a contract with content scripts, this one is an implementation detail between
@@ -36,9 +41,14 @@ const GEMM_FALLBACKS = Object.freeze({
 });
 
 const ENGINE_GLUE = "../vendor/bergamot/bergamot-translator-worker.js";
-const ENGINE_BINARY = "../vendor/bergamot/bergamot-translator-worker.wasm";
 
-/** @type {Promise<BergamotModule> | null} */
+/**
+ * The engine coming up, from the moment the binary arrives. Null until then:
+ * a model load or a translation asked before `start` is a caller's mistake,
+ * and it is answered with a sentence, never with a fetch of our own.
+ *
+ * @type {Promise<BergamotModule> | null}
+ */
 let starting = null;
 
 /** @type {BergamotBlockingService | null} */
@@ -70,19 +80,11 @@ function gemmImports() {
 }
 
 /**
+ * @param {ArrayBuffer} binary the engine's wasm, handed over by the page
  * @returns {Promise<BergamotModule>}
  */
-async function startEngine() {
-  const response = await fetch(assetUrl(ENGINE_BINARY));
-  if (!response.ok) {
-    throw new Error(`engine binary is missing from the package (HTTP ${response.status})`);
-  }
-  // Read it whole rather than streaming: five megabytes off the local disk, and
-  // `instantiateStreaming` would additionally depend on the browser labelling
-  // extension resources with the right MIME type.
-  const binary = await response.arrayBuffer();
-
-  return await new Promise((resolve, reject) => {
+function startEngine(binary) {
+  return new Promise((resolve, reject) => {
     /** @type {Partial<BergamotModule>} */
     const bootstrap = {
       instantiateWasm(imports, accept) {
@@ -114,8 +116,25 @@ async function startEngine() {
  * @returns {Promise<BergamotModule>}
  */
 function engine() {
-  starting ??= startEngine();
-  return starting;
+  return starting ?? Promise.reject(new Error("the engine binary was never handed to the worker"));
+}
+
+/**
+ * The first message: the engine's binary, once. A second `start` changes
+ * nothing - the engine that came up stays up - and a start that failed stays
+ * failed: the page drops a worker whose engine did not come up and builds a
+ * new one, which is where a retry belongs. Answered only once the engine
+ * stands, so that the page learns of a binary the engine refused from this
+ * call, not from the model load after it.
+ *
+ * @param {unknown} binary
+ * @returns {Promise<boolean>} true once the engine is up
+ */
+async function startWith(binary) {
+  if (!(binary instanceof ArrayBuffer)) throw new Error("the engine binary must be an ArrayBuffer");
+  starting ??= startEngine(binary);
+  await starting;
+  return true;
 }
 
 /**
@@ -235,6 +254,8 @@ globalThis.addEventListener("message", (event) => {
 
   const call = async () => {
     switch (name) {
+      case "start":
+        return startWith(args[0]);
       case "load":
         return loadModel(args[0], args[1]);
       case "translate":

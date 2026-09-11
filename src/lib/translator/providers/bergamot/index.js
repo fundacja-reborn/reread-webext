@@ -2,13 +2,15 @@
  * The provider that puts the engine behind the translator facade.
  *
  * Everything expensive lives on the other side of a worker: this file only
- * knows how to ask it something, how to give it a model it does not have yet,
- * and how to turn its failures into codes the bubble can say out loud.
+ * knows how to ask it something, how to stand its engine up and give it a
+ * model it does not have yet, and how to turn its failures into codes the
+ * bubble can say out loud.
  */
 
 import { webext } from "../../../browser.js";
 import { getModelFiles, getModelMeta } from "../../../models/store.js";
 import { ErrorCode, fail, ok } from "../../../protocol.js";
+import { readEngineBinary } from "./binary.js";
 
 const WORKER_PATH = "background/engine.worker.js";
 
@@ -16,6 +18,9 @@ const WORKER_PATH = "background/engine.worker.js";
  * @typedef {object} Link
  * @property {Worker} worker
  * @property {Map<number, { resolve: (value: any) => void, reject: (error: Error) => void }>} pending
+ * @property {Promise<unknown>} started settles once the worker's engine stands:
+ *   the binary read on this side, handed over and instantiated over there.
+ *   Rejects when any of that failed, or when the worker was dropped meanwhile.
  */
 
 /** @type {Link | null} */
@@ -55,7 +60,12 @@ function connect() {
 
   const worker = new Worker(webext().runtime.getURL(WORKER_PATH));
   /** @type {Link} */
-  const fresh = { worker, pending: new Map() };
+  const fresh = {
+    worker,
+    pending: new Map(),
+    // Filled in below, once `fresh` exists for `send` to address.
+    started: Promise.resolve(),
+  };
 
   worker.addEventListener("message", (event) => {
     const { id, result, error } = event.data ?? {};
@@ -71,7 +81,37 @@ function connect() {
   });
 
   link = fresh;
+
+  // The engine's binary is read here, on the page, and handed over as the
+  // worker's first message - never fetched by the worker itself, whose
+  // `fetch()` Firefox refuses while the network link is down (D196; the
+  // reason in full in `binary.js`). Started with the worker, so that the read
+  // overlaps the model coming out of the database; awaited by `ensureModel`
+  // before the first load. Observed here as well, so that a read failing
+  // before anybody awaits it is not an unhandled rejection - the caller that
+  // awaits it still gets the error.
+  fresh.started = readEngineBinary().then((binary) => send(fresh, "start", [binary], [binary]));
+  fresh.started.catch(() => {});
   return fresh;
+}
+
+/**
+ * @param {Link} target the worker to ask
+ * @param {string} name
+ * @param {unknown[]} args
+ * @param {Transferable[]} [transfer]
+ * @returns {Promise<any>}
+ */
+function send(target, name, args, transfer = []) {
+  // A worker dropped by `reset` is not asked anything more - and not revived
+  // by a late arrival, which is what routing through `connect()` would do
+  // with the binary of a worker that died while it was being read.
+  if (target !== link) return Promise.reject(new Error("the engine worker was dropped"));
+  const id = ++serial;
+  return new Promise((resolve, reject) => {
+    target.pending.set(id, { resolve, reject });
+    target.worker.postMessage({ id, name, args }, transfer);
+  });
 }
 
 /**
@@ -81,12 +121,7 @@ function connect() {
  * @returns {Promise<any>}
  */
 function call(name, args, transfer = []) {
-  const { worker, pending } = connect();
-  const id = ++serial;
-  return new Promise((resolve, reject) => {
-    pending.set(id, { resolve, reject });
-    worker.postMessage({ id, name, args }, transfer);
-  });
+  return send(connect(), name, args, transfer);
 }
 
 /**
@@ -128,6 +163,11 @@ async function ensureModel(from, to) {
   const meta = await getModelMeta(pair);
   if (meta === null) return false;
 
+  // From here on a worker is needed, and spawning it now rather than at the
+  // first call lets the engine's binary come in while the model comes out
+  // of the database.
+  connect();
+
   if (loadedStamp.get(pair) === meta.addedAt && (await call("loaded", [{ from, to }]))) {
     return true;
   }
@@ -136,6 +176,11 @@ async function ensureModel(from, to) {
   if (stored === null) return false;
 
   if (loadedStamp.has(pair)) await call("unload", [{ from, to }]);
+
+  // The engine has to be standing before a model goes into it: the binary
+  // handed over and instantiated (`connect`). A start that failed surfaces
+  // here, and `translate` drops the worker like any other failure.
+  await connect().started;
 
   // Transferred rather than copied: these buffers are tens of megabytes, they
   // came straight out of the database, and nothing here needs them afterwards.

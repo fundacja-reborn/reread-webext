@@ -30,10 +30,16 @@ const NETWORK_SINKS = new Map([
   ["src/lib/dict/live.js", 1],
   // An article's pictures, from the addresses its text names, on the press.
   ["src/reader/pictures.js", 1],
-  // The engine's own binary and its glue, out of the package - no network
-  // at all: one `fetch`, one `importScripts`.
-  ["src/background/engine.worker.js", 2],
+  // The engine's glue, out of the package by `importScripts` - no network
+  // at all. Its binary is read by the page that owns the worker (below).
+  ["src/background/engine.worker.js", 1],
+  // The engine's binary, out of the package, on the page - never in the
+  // worker, whose `fetch` Firefox refuses while the link is down (D196).
+  ["src/lib/translator/providers/bergamot/binary.js", 1],
 ]);
+
+/** The two reads out of the package: no server is asked, so no host to hold to. */
+const PACKAGE_READS = new Set(["src/background/engine.worker.js", "src/lib/translator/providers/bergamot/binary.js"]);
 
 /**
  * What reaching the network looks like in source: the global `fetch` - bare,
@@ -94,9 +100,9 @@ describe("the places the extension reaches the network", () => {
   it("all say that nothing of the reader's rides along, and which host may answer", () => {
     // The two-server promise is made of two things per download: no
     // credentials, and an answer from the host that was asked (`same-host.js`).
-    // The engine's binary comes from the package and needs neither.
+    // The engine's glue and binary come from the package and need neither.
     for (const file of NETWORK_SINKS.keys()) {
-      if (file === "src/background/engine.worker.js") continue;
+      if (PACKAGE_READS.has(file)) continue;
       const source = readFileSync(join(ROOT, file), "utf8");
       assert.match(source, /credentials:\s*"omit"/, `${file} should fetch with credentials: "omit"`);
       if (file === "src/reader/pictures.js") continue;
