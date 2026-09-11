@@ -168,6 +168,50 @@
           >
             Aa
           </button>
+          <!-- The whole screen in one press, for a reader in the hand (D195,
+               Michał's ask for the Boox): the browser's full screen (D180)
+               and the bar folded behind its ribbon, together - on Android,
+               where the address bar is what the press is about, and only
+               where the bar has room for one more tool (measured in
+               reader.js: a row that would run past its edge loses it, a
+               phone held upright usually does). Two glyphs stand
+               in the markup and the root's `:fullscreen` shows the one that
+               says what a press would do, the menu row's manner; the name
+               follows in reader.js. Before the menu, whose row does the half
+               of this that is about the window: a view control belongs with
+               the view controls, and the leading edge is for the way back
+               and the mark. Article view only, like the pen: the list keeps
+               its whole chrome. -->
+          <button
+            id="fullscreen"
+            type="button"
+            title="Full screen, with the bar folded away"
+            data-i18n-title="reader_fullscreen_bar"
+            aria-label="Full screen, with the bar folded away"
+            data-i18n-aria-label="reader_fullscreen_bar"
+            hidden
+          >
+            <svg class="reader-icon fullscreen-enter" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+              <path
+                d="M2.5 6V2.5H6M10 2.5h3.5V6M13.5 10v3.5H10M6 13.5H2.5V10"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.3"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            <svg class="reader-icon fullscreen-exit" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+              <path
+                d="M6 2.5V6H2.5M10 2.5V6h3.5M13.5 10H10v3.5M2.5 10H6v3.5"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.3"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
           <!-- The other pages of this extension, behind one drawn button: on a
                phone the toolbar popup that used to be the only hallway is three
                taps into the browser menu, and this bar is already here. Drawn

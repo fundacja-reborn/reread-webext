@@ -45,6 +45,7 @@ import {
   isFont,
   isLinks,
   isTheme,
+  platformOs,
   readConfig,
   writeConfig,
 } from "../lib/config.js";
@@ -246,6 +247,7 @@ const navVocabulary = document.getElementById("nav-vocabulary");
 const navSettings = document.getElementById("nav-settings");
 const navPictures = document.getElementById("nav-pictures");
 const navFullscreen = document.getElementById("nav-fullscreen");
+const fullscreenTool = document.getElementById("fullscreen");
 // The row's two lines live inside the button (Michał's smoke, 2026-08-29: a
 // hint standing under the row behind its own separator read as a second,
 // dead row): the label, and the line that says where the press reaches or
@@ -1083,6 +1085,7 @@ function renderArticle(piece) {
   updateListen();
   updateMarker();
   updateChromeTab();
+  updateFullscreenTool();
   scrollTo(0, 0);
   // The action rows are the caller's move, not taken here: the two callers
   // that restore a position must have them laid out BEFORE the scroll - the
@@ -1518,6 +1521,42 @@ function updateChromeTab() {
   const label = folded ? t("reader_bar_show") : t("reader_bar_hide");
   chromeTab.title = label;
   chromeTab.setAttribute("aria-label", label);
+}
+
+/**
+ * The platform this page runs on, for the one tool that is about the
+ * phone's own bars (`updateFullscreenTool`): asked once at startup, empty
+ * until the answer lands and on a browser that has no answer.
+ */
+let os = "";
+
+/**
+ * The bar's own full-screen tool (D195), offered where it earns its place:
+ * on Android, whose address bar is what the press takes away (D180), over
+ * an article (the list keeps its whole chrome - the ribbon's rule), where
+ * the browser has a full screen to give - and where the row has room for
+ * it. The room is measured, not assumed: the tool is stood in the row and
+ * the row asked whether it now runs past its edge, because the row's width
+ * in CSS pixels is the browser's business, not the screen's - Firefox's
+ * font-size setting on Android is a whole-page zoom, so a Boox with room
+ * to spare reported a narrower row than a fixed breakpoint allowed for
+ * (Michał's photo, 2026-09-11), and a Pixel held upright has none. Asked
+ * again on every resize, an orientation turned included.
+ *
+ * Its name follows the browser's state - the one listener D180 did
+ * without, because a glyph has no second label a stylesheet could show;
+ * the lit frame is the stylesheet's (`:root:fullscreen`), like the glyph.
+ */
+function updateFullscreenTool() {
+  if (fullscreenTool === null) return;
+  fullscreenTool.hidden = shown === null || os !== "android" || !document.fullscreenEnabled;
+  const bar = fullscreenTool.closest(".reader-bar");
+  if (!fullscreenTool.hidden && bar instanceof HTMLElement && bar.scrollWidth > bar.clientWidth) {
+    fullscreenTool.hidden = true;
+  }
+  const label = document.fullscreenElement !== null ? t("reader_fullscreen_exit") : t("reader_fullscreen_bar");
+  fullscreenTool.title = label;
+  fullscreenTool.setAttribute("aria-label", label);
 }
 
 /**
@@ -3092,6 +3131,7 @@ function leaveDocView() {
   stopMarkSpeech();
   updateListen();
   updateChromeTab();
+  updateFullscreenTool();
   // An open footnote was about the text leaving the screen.
   hideNotePopover();
   // The pen goes away with the article: the list has nothing to mark, and
@@ -5085,6 +5125,7 @@ function applyAppearance(reader) {
   // the stuck bar lives by.
   root.dataset["readerChrome"] = reader.chromeHidden ? "hidden" : "shown";
   updateChromeTab();
+  updateFullscreenTool();
   applyLinkStops(reader.links);
 
   for (const button of document.querySelectorAll(
@@ -6194,6 +6235,34 @@ navFullscreen?.addEventListener("click", () => {
   setPanel(menuButton, menuPanel, false);
   if (document.fullscreenElement !== null) void document.exitFullscreen();
   else document.documentElement.requestFullscreen().catch(() => {});
+});
+
+// The bar's own full-screen tool (D195, Michał's ask for the Boox): the
+// row's press above and the ribbon's press in one. The request goes first,
+// inside the press's own activation - the only thing a browser accepts it
+// from - and then the bar folds behind its ribbon by the stored choice the
+// ribbon itself makes (`chromeHidden`), so the ribbon's press brings it
+// back the same way. In full screen the same tool leaves it; the bar's
+// fold stays whatever it is, because the reader unfolded it to reach the
+// tool - or left full screen with Back and keeps the ribbon.
+fullscreenTool?.addEventListener("click", async () => {
+  closePanels();
+  if (document.fullscreenElement !== null) {
+    void document.exitFullscreen();
+    return;
+  }
+  document.documentElement.requestFullscreen().catch(() => {});
+  if (!settings.reader.chromeHidden) adoptConfig(await writeConfig({ reader: { chromeHidden: true } }));
+});
+// The tool's name follows the browser's state, entered by either press and
+// left by the tool, the row, Back or Esc - and its room follows the window.
+document.addEventListener("fullscreenchange", updateFullscreenTool);
+window.addEventListener("resize", updateFullscreenTool);
+// Which platform this is, for the tool's one-word rule: asked once, the
+// tool drawn as soon as the answer lands.
+void platformOs().then((found) => {
+  os = found;
+  updateFullscreenTool();
 });
 
 keepButton?.addEventListener("click", () => void onKeepPress());

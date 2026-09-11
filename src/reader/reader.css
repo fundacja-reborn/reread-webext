@@ -497,6 +497,7 @@ html {
 #marker,
 #listen,
 #display,
+#fullscreen,
 #menu {
   display: inline-flex;
   align-items: center;
@@ -518,6 +519,7 @@ html {
    what these two are - the state is the same to the eye. */
 #listen[aria-pressed="true"],
 #marker[aria-pressed="true"],
+:root:fullscreen #fullscreen,
 #display[aria-expanded="true"],
 #menu[aria-expanded="true"] {
   border-color: var(--page-accent);
@@ -527,9 +529,10 @@ html {
 /* The full-screen row says what a press would do (D180): both labels are
    in the markup, and the root's `:fullscreen` picks the one to show. The
    state lives in the browser - entered by this row, left by Back or Esc -
-   so the stylesheet reads it from there and no script mirrors it. */
-:root:fullscreen #nav-fullscreen .fullscreen-enter,
-:root:not(:fullscreen) #nav-fullscreen .fullscreen-exit {
+   so the stylesheet reads it from there and no script mirrors it. The
+   bar's own full-screen tool (D195) carries two glyphs the same way. */
+:root:fullscreen :is(#nav-fullscreen, #fullscreen) .fullscreen-enter,
+:root:not(:fullscreen) :is(#nav-fullscreen, #fullscreen) .fullscreen-exit {
   display: none;
 }
 
@@ -553,6 +556,7 @@ html {
   #marker,
   #listen,
   #display,
+  #fullscreen,
   #menu {
     min-width: 2.4rem;
     padding-inline: 0.4rem;

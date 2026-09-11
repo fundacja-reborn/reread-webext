@@ -301,6 +301,7 @@
   "reader_pictures_removed": { "message": "Зображення видалено." },
   "reader_pictures_failed": { "message": "Не вдалося зберегти зображення." },
   "reader_fullscreen": { "message": "На весь екран" },
+  "reader_fullscreen_bar": { "message": "На весь екран зі згорнутою панеллю" },
   "reader_fullscreen_exit": { "message": "Вийти з повноекранного режиму" },
   "library_pictures_one": {
     "message": "$COUNT$ зображення, $SIZE$",

@@ -308,9 +308,13 @@
     "message": "Full screen",
     "description": "The reader menu's row that asks the browser for the whole screen: Firefox for Android hides its address bar and Android its status bar."
   },
+  "reader_fullscreen_bar": {
+    "message": "Full screen, with the bar folded away",
+    "description": "Name and hover title of the drawn full-screen tool in the reader's bar (D195, Android, wide screens only): one press asks the browser for the whole screen and folds the reader's bar behind its ribbon. While the page has the whole screen the tool's name is reader_fullscreen_exit."
+  },
   "reader_fullscreen_exit": {
     "message": "Exit full screen",
-    "description": "The same row while the page has the whole screen: the press that gives the browser's bars back (Back or Esc do the same)."
+    "description": "The same row while the page has the whole screen: the press that gives the browser's bars back (Back or Esc do the same). Also the bar's full-screen tool's name in that state (D195)."
   },
   "library_pictures_one": {
     "message": "$COUNT$ picture, $SIZE$",
