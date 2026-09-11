@@ -301,6 +301,7 @@
   "reader_pictures_removed": { "message": "Obrazki usunięte." },
   "reader_pictures_failed": { "message": "Nie udało się zapisać obrazków." },
   "reader_fullscreen": { "message": "Pełny ekran" },
+  "reader_fullscreen_bar": { "message": "Pełny ekran ze schowanym paskiem" },
   "reader_fullscreen_exit": { "message": "Wyjdź z pełnego ekranu" },
   "library_pictures_one": {
     "message": "$COUNT$ obrazek, $SIZE$",
