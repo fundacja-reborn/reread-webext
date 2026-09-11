@@ -36,11 +36,7 @@
  */
 export function popupRows({ translationOff, bubbleOff, fresh, pair }) {
   return {
-    // With the bubble switched off under the trim (D149) every ordinary page
-    // is left alone already, so a switch that could only leave it alone too
-    // has no other side - the row goes; a site's own entry, if any, stays
-    // readable in the settings' list.
-    site: !(translationOff && bubbleOff),
+    site: siteRowStands({ translationOff, bubbleOff }),
     // Under the trim the pair still has a say - which language the
     // dictionaries answer in where a page declares none, and where saved
     // phrases are filed (D158/D165) - and a select that hid while deciding
@@ -67,4 +63,20 @@ export function popupRows({ translationOff, bubbleOff, fresh, pair }) {
     // popup keeps what is flipped rarely.
     translation: true,
   };
+}
+
+/**
+ * Whether the switch for the site the popup opened over may stand at all
+ * (D149): with the bubble switched off under the trim every ordinary page is
+ * left alone already, so a switch that could only leave it alone too has no
+ * other side - the row goes; a site's own entry, if any, stays readable in
+ * the settings' list. Its own rule, because the popup needs it before it
+ * knows the rest (D194): the row stands from the first paint, and the
+ * settings alone decide whether it should.
+ *
+ * @param {{ translationOff: boolean, bubbleOff: boolean }} settings
+ * @returns {boolean}
+ */
+export function siteRowStands({ translationOff, bubbleOff }) {
+  return !(translationOff && bubbleOff);
 }

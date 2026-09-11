@@ -1,11 +1,25 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { popupRows } from "../src/popup/rows.js";
+import { popupRows, siteRowStands } from "../src/popup/rows.js";
 
 /** @param {Partial<Parameters<typeof popupRows>[0]>} [state] */
 const rows = (state = {}) =>
   popupRows({ translationOff: false, fresh: false, bubbleOff: false, pair: true, ...state });
+
+describe("the site switch's own rule (D194)", () => {
+  it("stands unless the bubble is switched off under the trim, and agrees with the rows", () => {
+    for (const translationOff of [false, true]) {
+      for (const bubbleOff of [false, true]) {
+        const stands = siteRowStands({ translationOff, bubbleOff });
+        assert.equal(stands, !(translationOff && bubbleOff));
+        // The popup decides this row before it knows the rest (the models,
+        // the pair): the two answers must never disagree.
+        assert.equal(rows({ translationOff, bubbleOff, fresh: true, pair: false }).site, stands);
+      }
+    }
+  });
+});
 
 describe("the popup's rows", () => {
   it("shows the pair on a device that has a model", () => {

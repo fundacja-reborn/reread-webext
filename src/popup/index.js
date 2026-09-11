@@ -38,7 +38,7 @@ import { listModels } from "../lib/models/store.js";
 import { Message, asPageInfo, asResult } from "../lib/protocol.js";
 import { watchToolbarScheme } from "../lib/theme-icon.js";
 import { pairChoices } from "./choices.js";
-import { popupRows } from "./rows.js";
+import { popupRows, siteRowStands } from "./rows.js";
 
 // First, so the rows are already in the catalogue's language when they show.
 localizePage();
@@ -94,6 +94,12 @@ let siteStands = true;
 /** @type {import("./choices.js").PairChoice[]} */
 let choices = [];
 
+// The site row stands from the first paint (D194), its host still to come:
+// the label says the host is being asked, the switch waits disabled (see the
+// markup), and `renderSite` lands the answer in place. Set before anything
+// is awaited, so the first frame already shows it.
+if (siteLabel !== null) siteLabel.textContent = t("popup_site_enabled", "...");
+
 /**
  * @returns {Promise<number | null>}
  */
@@ -141,12 +147,18 @@ function renderPair(config) {
 function renderSite(info, config) {
   if (info?.reader === true) {
     // On the reader both rows about "this page" go: there is no site behind it
-    // to switch off, and no page behind it to read.
+    // to switch off, and no page behind it to read. The one answer that
+    // moves the rows below - within the first frames, since the page is
+    // asked before anything else (`render`).
+    stand(siteRow, false);
     if (readerButton !== null) readerButton.hidden = true;
     return;
   }
 
   if (info === null) {
+    // Nothing in the tab is listening: the note takes the switch's place, a
+    // row of the same height, so nothing below moves.
+    stand(siteRow, false);
     if (siteNote !== null) siteNote.hidden = false;
     return;
   }
@@ -155,8 +167,11 @@ function renderSite(info, config) {
   // Named, not just shown: a bare hostname next to a checkbox says nothing
   // about which way the checkbox points. "Enabled on ..." does.
   if (siteLabel !== null) siteLabel.textContent = t("popup_site_enabled", info.hostname);
-  if (siteToggle !== null) siteToggle.checked = !isSwitchedOff(config.disabledHosts, info.hostname);
-  if (siteRow !== null) siteRow.hidden = !siteStands;
+  if (siteToggle !== null) {
+    siteToggle.checked = !isSwitchedOff(config.disabledHosts, info.hostname);
+    siteToggle.disabled = false;
+  }
+  stand(siteRow, siteStands);
 }
 
 async function toggleSite() {
@@ -382,12 +397,17 @@ async function choicesFor(config, installed) {
 }
 
 async function render() {
-  const [config, installed, tabId, os] = await Promise.all([
-    readConfig(),
-    installedModels(),
-    currentTabId(),
-    platformOs(),
-  ]);
+  // The page is asked first and on its own (D194). Its answer decides the
+  // two rows at the top, and every other read the popup makes - the models,
+  // the dictionaries under the trim - used to stand between the question and
+  // those rows: they appeared a second or two after the rest, pushing the
+  // rows below down under a cursor already on its way to Settings (Michał's
+  // report, 2026-09-11). Asked first, the answer lands within the first
+  // frames; and the site row stands from the first paint either way, so a
+  // late answer moves nothing - it fills the row in.
+  const [tabId, config, os] = await Promise.all([currentTabId(), readConfig(), platformOs()]);
+  over.tabId = tabId;
+  const page = askPage(tabId);
 
   // The stylesheet reads the platform off the body: on Android the popup is a
   // page over the whole window and fills it, on desktop it is a panel that
@@ -398,14 +418,19 @@ async function render() {
   // (the settings page's rule): with nothing chosen, the box reflects the
   // platform's default - on this Android popup it opens checked.
   if (readerOnlyToggle !== null) readerOnlyToggle.checked = effectiveReaderOnly(config, os);
-
-  over.tabId = tabId;
-  showRows(config, installed.length);
   if (quietToggle !== null) quietToggle.checked = config.hideBubbleActions;
   if (translationToggle !== null) translationToggle.checked = config.translationOff;
+  // The settings alone say whether the site switch may stand (D149): decided
+  // here, before the page answers, so the row it takes away goes at once.
+  siteStands = siteRowStands(config);
+  if (!siteStands) stand(siteRow, false);
+  const landed = page.then((info) => renderSite(info, config));
+
+  const installed = await installedModels();
+  showRows(config, installed.length);
   choices = await choicesFor(config, installed);
   renderPair(config);
-  renderSite(await askPage(tabId), config);
+  await landed;
 }
 
 void render();
