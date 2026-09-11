@@ -856,6 +856,9 @@ button.lookup-link {
 .lookup-entries {
   display: grid;
   gap: 0;
+  /* Air between the acts on the phrase and the books under them: the label
+     of the first book sat right on the buttons (Michał's fifth smoke). */
+  margin-top: 0.6rem;
 }
 
 /* Still there to read while the meanings are typed by hand, not what the
@@ -931,6 +934,7 @@ button.lookup-sense:disabled {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
+  margin-top: 0.2rem;
 }
 
 .lookup-actions button {
