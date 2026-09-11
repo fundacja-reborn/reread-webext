@@ -60,7 +60,7 @@
   "bubble_model_word": { "message": "Un modèle de traduction se trompe souvent sur un mot isolé, sans contexte." },
   "bubble_dictionary_sources": { "message": "Où trouver des dictionnaires :" },
   "bubble_saves_under": {
-    "message": "Sera enregistré sous $PAIR$",
+    "message": "Sera enregistré dans la paire de langues active : $PAIR$",
     "placeholders": { "pair": { "content": "$1", "example": "anglais → polonais" } }
   },
   "bubble_choose_meaning": { "message": "Appuyez sur un sens pour l'enregistrer" },

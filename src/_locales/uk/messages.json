@@ -60,7 +60,7 @@
   "bubble_model_word": { "message": "Модель перекладу часто помиляється на окремому слові без контексту." },
   "bubble_dictionary_sources": { "message": "Де шукати словники:" },
   "bubble_saves_under": {
-    "message": "Буде збережено в парі $PAIR$",
+    "message": "Буде збережено в активній мовній парі: $PAIR$",
     "placeholders": { "pair": { "content": "$1", "example": "англійська → польська" } }
   },
   "bubble_choose_meaning": { "message": "Натисніть на значення, щоб зберегти його" },

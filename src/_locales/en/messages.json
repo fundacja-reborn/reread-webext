@@ -92,7 +92,8 @@
     "description": "The offer in the bubble's hint line (D192), under \"Not in your dictionaries\" over a word or two. Ends just before the address of the re/read page listing dictionary sources, which follows across a plain space as the link's own words (reapps.eu/read) - so it closes with a colon and must not end with whitespace."
   },
   "bubble_saves_under": {
-    "message": "Will be saved under $PAIR$",
+    "message": "Will be saved under the active language pair: $PAIR$",
+    "description": "The bubble's note when Save would file a phrase of another language than the pair's - a Polish word on a Polish page under English → Polish (D167, D193). Names the active pair as such (Michał's ask, 2026-09-11): a bare pair under a Polish word read as a mistake. The pair stands after the colon as a label, so the sentence must read on into a name.",
     "placeholders": { "pair": { "content": "$1", "example": "English → Polish" } }
   },
   "bubble_choose_meaning": {

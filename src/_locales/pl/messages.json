@@ -60,7 +60,7 @@
   "bubble_model_word": { "message": "Model tłumaczenia często myli się na słowie bez kontekstu." },
   "bubble_dictionary_sources": { "message": "Gdzie szukać słowników:" },
   "bubble_saves_under": {
-    "message": "Zapis trafi do pary $PAIR$",
+    "message": "Zapis trafi do aktywnej pary językowej: $PAIR$",
     "placeholders": { "pair": { "content": "$1", "example": "angielski → polski" } }
   },
   "bubble_choose_meaning": { "message": "Naciśnij znaczenie, żeby je zapisać" },

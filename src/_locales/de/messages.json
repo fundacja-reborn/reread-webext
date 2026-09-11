@@ -60,7 +60,7 @@
   "bubble_model_word": { "message": "Ein Übersetzungsmodell übersetzt ein einzelnes Wort ohne Kontext oft falsch." },
   "bubble_dictionary_sources": { "message": "Wo Wörterbücher zu finden sind:" },
   "bubble_saves_under": {
-    "message": "Wird unter $PAIR$ gespeichert",
+    "message": "Wird unter dem aktiven Sprachpaar gespeichert: $PAIR$",
     "placeholders": { "pair": { "content": "$1", "example": "Englisch → Polnisch" } }
   },
   "bubble_choose_meaning": { "message": "Wählen Sie eine Bedeutung aus, um sie zu speichern" },
