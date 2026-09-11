@@ -33,7 +33,7 @@
 import { HINT_MAX_WORDS, MEANING_SEPARATOR, linkedWord, toMeanings } from "./gloss.js";
 import { t, uiLocale } from "./i18n.js";
 import { languageName } from "./language.js";
-import { afterPress, lookupOutcome, lookupText } from "./lookup.js";
+import { afterPress, lookupOutcome, lookupText, paragraphsOf } from "./lookup.js";
 import { keyTokens } from "./matcher/tokenize.js";
 import { describeError } from "./messages.js";
 import { ErrorCode, Message, asLookUp } from "./protocol.js";
@@ -455,7 +455,7 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
       answer.append(verdictLine(verdictParts(state.outcome.note, state.outcome.lang, words)));
     } else if (state.outcome?.kind === "entries") {
       const entries = element("div", "lookup-entries");
-      for (const block of state.outcome.blocks) {
+      for (const [at, block] of state.outcome.blocks.entries()) {
         const entry = element("div", "lookup-entry");
         if (block.headword.length > 0 || block.dictionary.length > 0) {
           const heading = element("div", "lookup-entry-label");
@@ -468,13 +468,19 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
           }
           entry.append(heading);
         }
-        for (const line of block.lines) {
-          if (readOnly) {
-            // Prose, not a press (the header): the field that only reads
-            // must not promise a choice it does not make.
-            entry.append(element("div", "lookup-sense", line));
-            continue;
+        if (readOnly) {
+          // Prose, not presses (the header): the field that only reads must
+          // not promise a choice it does not make - and prose keeps the
+          // book's own paragraphs, which the presses cut into lines.
+          for (const sense of state.outcome.entries[at]?.senses ?? []) {
+            for (const paragraph of paragraphsOf(sense)) {
+              entry.append(element("div", "lookup-paragraph", paragraph));
+            }
           }
+          entries.append(entry);
+          continue;
+        }
+        for (const line of block.lines) {
           const sense = button("lookup-sense", line);
           // A toggle, and told as one: the mark that stays says which meanings
           // are the phrase's now.

@@ -650,6 +650,12 @@ body:not(.reader):has(.panel-scrim:not([hidden])) .page-chrome {
    Every control keeps the pages' 44px floor. */
 .lookup-box {
   display: grid;
+  /* A track that may shrink under its content: the field below has no
+     width of its own to insist on, and the box must not either - in the
+     popup it shares one row with the arrow and the button, and a box that
+     kept its content's width pushed the whole popup wider (Michał's
+     screenshot, 2026-09-11). */
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.6rem;
   width: 100%;
   min-width: 0;
@@ -659,6 +665,7 @@ body:not(.reader):has(.panel-scrim:not([hidden])) .page-chrome {
   display: flex;
   gap: 0.5rem;
   margin: 0;
+  min-width: 0;
 }
 
 /* The field's real label, read by screen readers, invisible to everyone
@@ -675,7 +682,11 @@ body:not(.reader):has(.panel-scrim:not([hidden])) .page-chrome {
 }
 
 .lookup-input {
+  /* No width of its own: a text field asks for room for twenty characters
+     unless told otherwise, and that ask is what widened the popup. It takes
+     what the arrow and the button leave, and all of it. */
   flex: 1 1 auto;
+  width: 0;
   min-width: 0;
   min-height: 44px;
   font: inherit;
@@ -835,6 +846,21 @@ button.lookup-sense[aria-pressed="true"] {
 button.lookup-sense:disabled {
   color: inherit;
   cursor: default;
+}
+
+/* The read-only field's entries, as the book wrote them: one block per
+   paragraph with the lines inside it kept (`pre-line`), and the space
+   between paragraphs where the book had a section's end - "Noun", its
+   senses, "Verb" (D197). The same inset as a pressed line, so the two
+   fields read alike. */
+.lookup-paragraph {
+  padding: 0 0.35rem;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.lookup-paragraph + .lookup-paragraph {
+  margin-top: 0.55em;
 }
 
 .lookup-actions {

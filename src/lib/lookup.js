@@ -36,10 +36,31 @@ export function lookupText(input) {
 }
 
 /**
- * @typedef {{ kind: "entries", blocks: ReturnType<typeof entryBlocks>, lang: string }
+ * The entries come twice: as the bubble's blocks - the label decided, the
+ * senses cut into lines to press (`entryBlocks`) - and as they were stored,
+ * for the field that only reads and shows an entry as the book wrote it,
+ * paragraph by paragraph (`paragraphsOf`). Same order, one for one.
+ *
+ * @typedef {{ kind: "entries", blocks: ReturnType<typeof entryBlocks>, entries: import("./protocol.js").DictEntry[], lang: string }
  *   | { kind: "silence", note: "no-dictionary" | "not-in-dictionary", lang: string }
  *   | { kind: "fault" }} LookupOutcome
  */
+
+/**
+ * A stored sense as the paragraphs the book wrote it in: the import keeps a
+ * section's end as one blank line (`dict/text.js`, D197), and a field that
+ * reads rather than presses shows the space - "Noun", its senses, then
+ * "Verb". Lines inside a paragraph stay lines; blank paragraphs are none.
+ *
+ * @param {string} sense
+ * @returns {string[]}
+ */
+export function paragraphsOf(sense) {
+  return sense
+    .split(/\n{2,}/u)
+    .map((paragraph) => paragraph.trim())
+    .filter((paragraph) => paragraph.length > 0);
+}
 
 /**
  * What the field shows once the dictionaries have answered (`look-up`, D162):
@@ -70,7 +91,12 @@ export function lookupOutcome(answer, normalized) {
     findable: true,
   });
   if (note === null) {
-    return { kind: "entries", blocks: entryBlocks(answer.entries, normalized), lang: answer.lang };
+    return {
+      kind: "entries",
+      blocks: entryBlocks(answer.entries, normalized),
+      entries: answer.entries,
+      lang: answer.lang,
+    };
   }
   // `findable: true` rules the whole-words verdict out; the type of
   // `quietNote` does not know that, so it is folded into the nearest one.

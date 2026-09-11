@@ -49,12 +49,45 @@ const READABLE = new Set(["m", "l", "t", "y", "n", ...MARKUP]);
 export const LIMITS = Object.freeze({ senseLength: 1000, senses: 10, name: 120, credit: 400, field: 65536 });
 
 /**
- * Elements that start or end a line for a reader, whatever they are in the
- * markup. Both ends of each: a dictionary that writes `<p>` per meaning and one
- * that writes `</p>` between them should read the same afterwards, and a blank
- * line either way costs nothing because empty lines are dropped.
+ * Elements that begin a paragraph for a reader, whatever they are in the
+ * markup - a section, a heading, a note. Both ends of each: a dictionary that
+ * writes `<p>` per section and one that writes `</p>` between them should read
+ * the same afterwards, and a text after a closed paragraph is a paragraph of
+ * its own. They come out as a blank line (D197): the bubble drops blank lines
+ * (`toMeanings`, one press per line), and the popup's read-only field keeps
+ * them as the space between sections - reader.dict writes an entry as
+ * `<p><b>Noun</b></p><ol><li>...</li></ol><p><b>Verb</b></p>...`, and
+ * flattened to one line per element it read as one long list (Michał's
+ * screenshot, 2026-09-11).
  */
-const LINE_BREAKS = /<\s*\/?\s*(?:br|p|div|li|tr|td|th|table|ul|ol|dl|dt|dd|blockquote|h[1-6])\b[^<>]*>/giu;
+const PARAGRAPH_BREAKS = /<\s*\/?\s*(?:p|div|h[1-6]|blockquote|table|section|article)\b[^<>]*>/giu;
+
+/**
+ * Elements that begin a line: the opening tag only, and the list itself none
+ * at all - its first item begins the first line. A list is one block of
+ * lines, and `</li><li>` counted as two breaks would have put an empty line
+ * between two senses; a closing tag ends its line silently, stripped with
+ * the rest of the tags below.
+ */
+const LINE_BREAKS = /<\s*(?:br|li|tr|td|th|dt|dd)\b[^<>]*>/giu;
+
+/**
+ * Two or more `<br>` in a row: the one way an entry written in line breaks
+ * says "paragraph", so it comes out as one - before the single breaks are
+ * read.
+ */
+const BREAK_RUN = /(?:<\s*br\b[^<>]*>\s*){2,}/giu;
+
+/**
+ * Where a paragraph ends, on its way through `tidy` - a mark no text is made
+ * of (private use), written by code point like every invisible character in
+ * this project. Not whitespace on purpose: `tidy` trims whitespace off every
+ * line, and the mark has to survive as a line of its own.
+ */
+const PARAGRAPH_MARK = String.fromCodePoint(0xe000);
+
+/** One or more paragraph ends in a row, with the line breaks around them. */
+const PARAGRAPH_RUN = new RegExp(`\\n?(?:${PARAGRAPH_MARK}\\n?)+`, "gu");
 
 /** XDXF wraps the headword in `<k>`, and the row already knows its headword. */
 const XDXF_KEY = /<k>[\s\S]*?<\/k>/giu;
@@ -205,20 +238,31 @@ function decodeEntities(text) {
 }
 
 /**
- * Line breaks kept, everything else squeezed: an entry that arrives as one
- * paragraph per meaning should read as one line per meaning, and an entry that
- * arrives with forty spaces of XML indentation should not.
+ * Line breaks kept, paragraph ends kept as one blank line, everything else
+ * squeezed: an entry that arrives as one line per meaning should read as one
+ * line per meaning, an entry that arrives with forty spaces of XML
+ * indentation should not, and an entry in sections should keep its sections
+ * apart (D197). However many paragraph ends stand in a row, one blank line
+ * is what they come out as, and none at either edge.
+ *
+ * A blank line in a plain-text field is a paragraph end too - it is what a
+ * plain book means by one. In markup it is not: there the tags say where
+ * the paragraphs are, and an empty line is what two breaks in a row leave
+ * behind (`</p>` and the `<li>` after it), so it is dropped as before.
  *
  * @param {string} text
+ * @param {boolean} [blankLineEndsParagraph]
  * @returns {string}
  */
-function tidy(text) {
+function tidy(text, blankLineEndsParagraph = true) {
   return text
     .replace(/\r\n?/gu, "\n")
     .split("\n")
     .map((line) => line.replace(/[^\S\n]+/gu, " ").trim())
+    .map((line) => (line.length === 0 && blankLineEndsParagraph ? PARAGRAPH_MARK : line))
     .filter((line) => line.length > 0)
     .join("\n")
+    .replace(PARAGRAPH_RUN, "\n\n")
     .trim();
 }
 
@@ -266,18 +310,21 @@ export function fieldText({ type, text: raw }) {
   const text = raw.length > LIMITS.field ? raw.slice(0, LIMITS.field) : raw;
   if (!MARKUP.has(type)) return tidy(stripSourceNotes(text));
 
-  // Everything that separates one line of an entry from the next is a line
-  // break by now, so what is left is inline - `<b>`, `<font>`, the `<a>` around
-  // a licence address - and inline tags join the text around them. Replacing
+  // Everything that separates one section or one line of an entry from the
+  // next is a paragraph mark or a line break by now, so what is left is
+  // inline - `<b>`, `<font>`, the `<a>` around a licence address, the closing
+  // tags of lines - and inline tags join the text around them. Replacing
   // them with a space instead put one in front of every full stop that followed
   // a link, which is how a licence ends up reading "by WikDict .".
   const withoutMarkup = (type === "x" ? text.replace(XDXF_KEY, " ") : text)
+    .replace(BREAK_RUN, `\n${PARAGRAPH_MARK}\n`)
+    .replace(PARAGRAPH_BREAKS, `\n${PARAGRAPH_MARK}\n`)
     .replace(LINE_BREAKS, "\n")
     .replace(TAG, "");
 
   // The source annotations after the decoding, because the decoding is what
   // surfaces them (see SOURCE_NOTE).
-  return tidy(stripSourceNotes(decodeEntities(withoutMarkup)));
+  return tidy(stripSourceNotes(decodeEntities(withoutMarkup)), false);
 }
 
 /**

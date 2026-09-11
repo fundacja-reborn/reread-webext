@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { afterPress, lookupOutcome, lookupText } from "../src/lib/lookup.js";
+import { afterPress, lookupOutcome, lookupText, paragraphsOf } from "../src/lib/lookup.js";
 import { MAX_PHRASE_LENGTH } from "../src/lib/store/phrase.js";
 
 /**
@@ -42,6 +42,8 @@ describe("lookupOutcome", () => {
     // One book: no dictionary name in the label; the headword is the word
     // typed, so no headword either - the label stays empty (D23).
     assert.deepEqual(outcome.blocks, [{ headword: "", dictionary: "", lines: ["wysokość", "wzniesienie"] }]);
+    // And as stored, one for one with the blocks, for the field that reads.
+    assert.deepEqual(outcome.entries, [entry]);
   });
 
   it("names the headword the dictionary answered about when it is not the word typed", () => {
@@ -66,6 +68,23 @@ describe("lookupOutcome", () => {
 
   it("says a fault as a fault - a press answered with nothing would read as a hang", () => {
     assert.deepEqual(lookupOutcome(null, "elevation"), { kind: "fault" });
+  });
+});
+
+describe("paragraphsOf", () => {
+  it("cuts a stored sense at the blank lines the import kept, and nowhere else", () => {
+    // The import keeps a section's end as one blank line (dict/text.js,
+    // D197); the lines inside a section stay one paragraph.
+    assert.deepEqual(paragraphsOf("Noun\nNew information of interest.\n\nVerb\nTo report."), [
+      "Noun\nNew information of interest.",
+      "Verb\nTo report.",
+    ]);
+    assert.deepEqual(paragraphsOf("wysokość"), ["wysokość"]);
+  });
+
+  it("has no paragraph of nothing", () => {
+    assert.deepEqual(paragraphsOf("\n\n a \n\n\n\n b \n\n"), ["a", "b"]);
+    assert.deepEqual(paragraphsOf("   "), []);
   });
 });
 

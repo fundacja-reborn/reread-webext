@@ -46,11 +46,16 @@ describe("the look-up field", () => {
     assert.match(pressed, /Message\.SAVE_PHRASE, text: phrase\.text, translations: next\.meanings/, "a press saves something other than the rule's meanings");
   });
 
-  it("draws the lines as prose and offers no editor where it only reads", async () => {
+  it("draws the entries as prose, paragraph by paragraph, and offers no editor where it only reads", async () => {
     const render = bodyOf(await source("lib/lookup-box.js"), "render");
-    // The read-only field's lines must not promise a choice: a div, never a
-    // button - and neither Own meaning nor Learned stands under them.
-    assert.match(render, /if \(readOnly\) \{[\s\S]*?element\("div", "lookup-sense", line\)/, "a read-only line is a press");
+    // The read-only field's entries must not promise a choice: divs, never
+    // buttons - the book's paragraphs as it wrote them (the presses cut a
+    // sense into lines) - and neither Own meaning nor Learned stands under them.
+    assert.match(
+      render,
+      /if \(readOnly\) \{[\s\S]*?paragraphsOf\(sense\)[\s\S]*?element\("div", "lookup-paragraph", paragraph\)/,
+      "a read-only entry is presses, or loses the book's paragraphs",
+    );
     assert.match(render, /if \(!readOnly && !state\.pending && !state\.editing\)/, "the actions stand in the read-only field");
   });
 });

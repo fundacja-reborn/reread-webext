@@ -122,6 +122,10 @@ body[data-mode="lookup"] .popup-lookup-head {
   position: sticky;
   top: 0;
   z-index: 1;
+  /* Edge to edge: the row's own width, not the column's - with the
+     column's `width: 100%` the line under it stopped a padding short of
+     the popup's right edge (Michał's screenshot, 2026-09-11). */
+  width: auto;
   margin-inline: -0.9rem;
   padding-inline: 0.9rem;
   background: var(--page-bg);
@@ -131,6 +135,18 @@ body[data-mode="lookup"] .popup-lookup-head {
    entries' own lines between books. */
 .popup-lookup-answer {
   padding-block: 0.6rem;
+}
+
+/* The door under the answer is the results mode's one act, and it stands
+   after a long entry: a framed button, not a row - a bare line there read
+   as a caption, the launcher's own lesson (D182). The frame is the pages'
+   default button; the room above keeps it off the entry's last line. */
+.popup-lookup-door {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin: 0.5rem 0 0.6rem;
+  padding: 0.35rem 1rem;
 }
 
 /* Buttons as rows: the popup is a list, and a list of pills would shout. The

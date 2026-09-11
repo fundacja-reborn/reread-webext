@@ -4,13 +4,49 @@ import { describe, it } from "node:test";
 import { LIMITS, about, fieldText, senses } from "../src/lib/dict/text.js";
 
 describe("fieldText", () => {
-  it("passes plain text through, tidied", () => {
-    assert.equal(fieldText({ type: "m", text: "  brzeg   rzeki \n\n  bank  " }), "brzeg rzeki\nbank");
+  it("passes plain text through, tidied, a blank line kept as one", () => {
+    // A blank line in a plain field is a paragraph's end (D197) - kept as
+    // exactly one, whatever the indentation around it.
+    assert.equal(fieldText({ type: "m", text: "  brzeg   rzeki \n\n  bank  " }), "brzeg rzeki\n\nbank");
+    assert.equal(fieldText({ type: "m", text: "brzeg\n \n\n  \nbank" }), "brzeg\n\nbank");
   });
 
   it("takes the tags off HTML and keeps the line breaks they stood for", () => {
+    // `<br>` begins a line, `<p>` a paragraph: the section's end comes out as
+    // a blank line, which the bubble drops and the read-only field keeps.
     const html = "<b>bank</b><br>1. brzeg<br />2. instytucja<p>3. ława</p>";
-    assert.equal(fieldText({ type: "h", text: html }), "bank\n1. brzeg\n2. instytucja\n3. ława");
+    assert.equal(fieldText({ type: "h", text: html }), "bank\n1. brzeg\n2. instytucja\n\n3. ława");
+  });
+
+  it("keeps a book's sections apart and its lists together (D197)", () => {
+    // reader.dict's `news`, shortened: headings and notes as paragraphs, the
+    // senses as list items, a nested list for a synonym. Flattened to one
+    // line per element it read as one long list (Michał's screenshot).
+    const html =
+      "<p><b>Noun</b></p><ol><li>New information of interest.</li>" +
+      '<ol style="list-style-type:lower-alpha"><li>Synonym: word</li></ol>' +
+      "<li>(<i>Internet</i>) Messages posted on newsgroups.</li></ol>" +
+      "<p><b>Verb</b></p><ol><li>(transitive,&#32;archaic) To report; to make known.</li></ol>" +
+      "<p>From Middle English <i>newes</i>.</p>";
+    // A heading is a paragraph of its own, as the book wrote it: the space
+    // on both sides of "Noun" is the space its `<p>` has on a page.
+    assert.equal(
+      fieldText({ type: "h", text: html }),
+      "Noun\n\nNew information of interest.\nSynonym: word\n(Internet) Messages posted on newsgroups.\n\n" +
+        "Verb\n\n(transitive, archaic) To report; to make known.\n\nFrom Middle English newes.",
+    );
+    // Two list items are two lines, never two paragraphs; `</li><li>` used
+    // to count as two breaks with an empty line between them, and the list
+    // itself begins no line - its first item does.
+    assert.equal(fieldText({ type: "h", text: "x<ul><li>a</li><li>b</li></ul>" }), "x\na\nb");
+    // However many paragraph ends stand in a row, one blank line - and none
+    // at either edge of the entry.
+    assert.equal(fieldText({ type: "h", text: "<p>a</p><p></p><div></div><p>b</p>" }), "a\n\nb");
+    // Two breaks in a row are the one way an entry written in `<br>` says
+    // "paragraph"; an empty line the tags leave behind otherwise is not one.
+    assert.equal(fieldText({ type: "h", text: "<br><br>a<br><br>b<p></p>" }), "a\n\nb");
+    assert.equal(fieldText({ type: "h", text: "a<br>\n\n  <br />b" }), "a\n\nb");
+    assert.equal(fieldText({ type: "h", text: "a</li>\n\n<li>b" }), "a\nb");
   });
 
   it("decodes the entities markup arrives with", () => {
