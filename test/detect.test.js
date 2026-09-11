@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { detectLanguage, foreignLanguage, phraseLanguage } from "../src/lib/detect.js";
+import { SAMPLE_CHARS, detectLanguage, foreignLanguage, phraseLanguage, sample } from "../src/lib/detect.js";
 
 /** @param {string} language @param {number} percentage */
 const sure = (language, percentage = 99) => ({ isReliable: true, languages: [{ language, percentage }] });
@@ -74,6 +74,17 @@ describe("phraseLanguage", () => {
     assert.equal(phraseLanguage({ detected: "", answered: "en", entries: 2, pairFrom: "en" }), "");
     assert.equal(phraseLanguage({ detected: "", answered: "pl", entries: 0, pairFrom: "en" }), "");
     assert.equal(phraseLanguage({ detected: "", answered: null, entries: 0, pairFrom: "en" }), "");
+  });
+});
+
+describe("sample", () => {
+  it("hands the detector at most four hundred characters of the sentence, and nothing of a blank one", () => {
+    // The promise PRIVACY.md makes about what a browser component is handed:
+    // the sentence around the selection, never more than this.
+    assert.equal(SAMPLE_CHARS, 400);
+    assert.equal(sample("  Zaznacz słowo.  "), "Zaznacz słowo.");
+    assert.equal(sample("x".repeat(1000)).length, SAMPLE_CHARS);
+    assert.equal(sample("   "), "");
   });
 });
 

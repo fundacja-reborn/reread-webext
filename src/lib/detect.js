@@ -48,6 +48,27 @@ import { answeredElsewhere } from "./gloss.js";
 const MIN_SHARE = 70;
 
 /**
+ * The most the detector is ever handed: the sentence around the phrase, cut
+ * to this many characters. CLD is sure of a language well within a hundred
+ * bytes, so a longer sample buys nothing - and what is handed to a browser
+ * component is worth keeping as small as the job allows, whatever the
+ * component does with it today (PRIVACY.md says what).
+ */
+export const SAMPLE_CHARS = 400;
+
+/**
+ * The text as the detector gets it: the first `SAMPLE_CHARS` of it, trimmed.
+ * Pure, so the promise in PRIVACY.md ("at most the sentence around the
+ * selection, never more than four hundred characters") has a test.
+ *
+ * @param {string} text
+ * @returns {string}
+ */
+export function sample(text) {
+  return text.trim().slice(0, SAMPLE_CHARS);
+}
+
+/**
  * "en-US", "zh-CN" and "en" all answer their primary subtag - the shape the
  * pair's codes and the page's declaration are compared in.
  *
@@ -93,7 +114,9 @@ export async function detectLanguage(text) {
   try {
     const { i18n } = webext();
     if (typeof i18n.detectLanguage !== "function") return null;
-    return await i18n.detectLanguage(text);
+    const handed = sample(text);
+    if (handed.length === 0) return null;
+    return await i18n.detectLanguage(handed);
   } catch {
     return null;
   }
