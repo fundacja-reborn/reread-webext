@@ -32,15 +32,7 @@
 
 import { webext } from "../lib/browser.js";
 import { CONFIG_KEY, DEFAULTS, chosenPair, withDefaults } from "../lib/config.js";
-import {
-  HINT_MAX_WORDS,
-  answeredElsewhere,
-  dictionaryHint,
-  entryBlocks,
-  filingWarning,
-  linkedWord,
-  quietNote,
-} from "../lib/gloss.js";
+import { HINT_MAX_WORDS, dictionaryHint, entryBlocks, filingWarning, linkedWord, quietNote } from "../lib/gloss.js";
 import { t, uiLocale } from "../lib/i18n.js";
 import { languageName, pairLabel } from "../lib/language.js";
 import { keyTokens } from "../lib/matcher/tokenize.js";
@@ -1234,11 +1226,8 @@ async function fillSecondLayer() {
     return;
   }
 
-  const { sentence, entries, lang } = asTranslation(result.value);
+  const { sentence, entries } = asTranslation(result.value);
   const blocks = entryBlocks(entries ?? [], phrase.normalized);
-  // The same voice rule as the fresh selection's (D191, D193): the book that
-  // knew the phrase says what language it is.
-  phrase.answered = blocks.length > 0 ? (lang ?? "") : "";
 
   // Nothing behind More after all - no sentence to translate (a selected
   // phrase that is a whole short sentence, common in a book's dialogue),
@@ -1511,34 +1500,38 @@ function present(selection, { deliberate, touch, chain = false }) {
       return;
     }
 
-    const { gloss, sentence, entries, dictionaries, lang } = asTranslation(result.value);
+    const { gloss, sentence, entries, dictionaries, language } = asTranslation(result.value);
     const blocks = entryBlocks(entries ?? [], normalized);
+    const words = wordsOf(normalized);
 
-    // A word the page's dictionary knew and the pair's did not (D193): the
-    // two signals D167 asks for agree that the phrase is in the page's
-    // language, not the pair's - and what the engine made of it is a guess
-    // at the wrong language (Michał's screenshot, 2026-09-11: "książkach"
-    // on a Polish page under en → pl, glossed "księgowa", the sentence
-    // around it word salad). Dropped, gloss and sentence both, and never
-    // kept: what stands is the quiet pair's answer (D158) - the entries as
-    // presses, the pencil, Save waiting for a meaning (D175) - with the
-    // line saying where Save would file it (D167) and the voice of the
-    // book that knew it (D191). The layer comes out whatever the fold
-    // setting says, and so does the row: the entries are the whole answer,
+    // A phrase in another language than the pair's (D193): the browser's
+    // detector read the sentence as the reader's own language, or a
+    // dictionary of that language knew the word while the pair's did not
+    // (Michał's screenshot, 2026-09-11: "książkach" on a Polish page under
+    // en → pl, glossed "księgowa", the sentence around it word salad, and
+    // the guess kept in the vocabulary). The engine was not asked, so there
+    // is no gloss and nothing is ever kept on its own: what stands is the
+    // quiet pair's answer (D158) - the entries as presses, the pencil, Save
+    // waiting for a meaning (D175) - or, with none, the dictionaries'
+    // verdict about that language in the hint line (D164, D192: no
+    // dictionary for it yet, or none that knew the word). The line saying
+    // where Save would file the phrase (D167) stands wherever Save does,
+    // and the voice is that language's (D191). The layer comes out whatever
+    // the fold setting says, and so does the row: the answer is down there,
     // and Save may not hide (D131).
-    const reading = primaryLanguage(lang ?? "");
-    const pairFrom = primaryLanguage(ttsLang);
-    if (answeredElsewhere({ entries: blocks.length, reading, pairFrom })) {
-      if (current !== null) current.answered = lang ?? "";
+    if (language !== undefined) {
+      if (current !== null) current.answered = language;
       tooltip.setBody("", "normal");
       tooltip.setEntries(blocks);
-      tooltip.setContext(
-        filingWarning({ entries: blocks.length, findable: selection.findable, reading, pairFrom })
-          ? t("bubble_saves_under", pairLabel(ttsLang, pairTarget))
-          : null,
-        "note",
-      );
-      secondLayer = ["more"];
+      const verdict =
+        blocks.length > 0 || dictionaries === undefined
+          ? null
+          : quietNote({ entries: 0, dictionaries, findable: selection.findable });
+      if (verdict === "whole-words") tooltip.setContext(t("bubble_whole_words"), "note");
+      else tooltip.setContext(selection.findable ? t("bubble_saves_under", pairLabel(ttsLang, pairTarget)) : null, "note");
+      const said = verdict !== null && verdict !== "whole-words";
+      tooltip.setHint(said ? dictionaryVerdict(verdict, language, words) : null);
+      secondLayer = blocks.length > 0 || said ? ["more"] : [];
       tooltip.setActions([
         ...speakActions(),
         ...COPY,
@@ -1562,7 +1555,6 @@ function present(selection, { deliberate, touch, chain = false }) {
     // engine translated alone, with no dictionary line under it, the hint
     // says the answer is a guess and which dictionary would have known -
     // decided by the count the translation carries, said nothing without it.
-    const words = wordsOf(normalized);
     const hint = dictionaryHint({ words, entries: blocks.length, dictionaries, findable: selection.findable });
     tooltip.setHint(hint === null ? null : translatingHint(hint, ttsLang, words));
     secondLayer =

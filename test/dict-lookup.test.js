@@ -59,6 +59,18 @@ describe("languagesToAsk", () => {
     assert.deepEqual(languagesToAsk({ pair: "en", declared: "en" }), ["en"]);
   });
 
+  it("lets the detector's verdict replace the pair (D193)", () => {
+    // A Polish "list" is not the English one: the pair's shelf would answer
+    // about the wrong word, so it is left alone once the phrase is known
+    // to be Polish.
+    assert.deepEqual(languagesToAsk({ detected: "pl", pair: "en", declared: "pl" }), ["pl"]);
+    assert.deepEqual(languagesToAsk({ detected: "de", pair: "en", declared: "pl" }), ["de", "pl"]);
+    assert.deepEqual(languagesToAsk({ detected: "pl", pair: "en", declared: null }), ["pl"]);
+    // No verdict: the pair first, as before.
+    assert.deepEqual(languagesToAsk({ detected: "", pair: "en", declared: "pl" }), ["en", "pl"]);
+    assert.deepEqual(languagesToAsk({ detected: null, pair: "en", declared: "pl" }), ["en", "pl"]);
+  });
+
   it("asks only what was named, and nothing when nothing was", () => {
     // No pair (D165's stand-in the other way round): the page's own language
     // is all there is. No page language either: nothing to ask, and the

@@ -19,6 +19,7 @@ import { setProvider, translate } from "../lib/translator/index.js";
 import { asSchemeReport } from "../lib/translator/providers/bergamot/host-protocol.js";
 import { bergamot } from "../lib/translator/providers/bergamot/index.js";
 import { bergamotViaHost, raiseEngineHost } from "../lib/translator/providers/bergamot/remote.js";
+import { detectLanguage, foreignLanguage, phraseLanguage } from "../lib/detect.js";
 import { lookUpAnswer } from "../lib/dict/lookup.js";
 import { readPage } from "./page.js";
 import { installMenus, menuDoor } from "./menus.js";
@@ -68,34 +69,55 @@ async function handle(request, sender) {
       // Side by side, not one after the other: the dictionary read is a point
       // lookup and the translation is the engine, so waiting for them together
       // costs what the engine costs and nothing more.
-      // The dictionaries are asked in the pair's language first and in the
-      // page's declared one second (D191, since D193 here as in the quiet
-      // bubble): the engine translates from the pair's language or not at
-      // all, but a word the page's own dictionary knows while the pair's do
-      // not is a word in the page's language - and the answer says so
-      // (`lang`), for the bubble to set the engine's guess aside.
-      const [translated, looked] = await Promise.all([
-        translate({
-          text: request.text,
-          context: request.context,
-          from: pair.from,
-          to: pair.to,
-        }),
-        lookUpAnswer(request.text, { pair: pair.from, declared: request.lang ?? null }),
-      ]);
+      // Which language the phrase is in, before the engine is asked at all
+      // (D193): the engine translates from the pair's language or not at
+      // all, and a page in the reader's own language fed it Polish. The
+      // browser's detector reads the sentence around the phrase (the phrase
+      // alone when there is none); the dictionaries are then asked in the
+      // language found, or - with no verdict - in the pair's first and the
+      // page's declared one second (D191), and a dictionary of another
+      // language knowing the word is the second witness. Both reads are
+      // milliseconds; the engine is the cost, and a foreign phrase never
+      // pays it: it gets the entries, no gloss, and the name of its language.
+      const declared = request.lang ?? null;
+      const detected = foreignLanguage(await detectLanguage(request.context ?? request.text), {
+        from: pair.from,
+        to: pair.to,
+        declared,
+      });
+      const looked = await lookUpAnswer(request.text, { detected: detected || null, pair: pair.from, declared });
+      const language = phraseLanguage({
+        detected,
+        answered: looked?.lang ?? null,
+        entries: looked?.entries.length ?? 0,
+        pairFrom: pair.from,
+      });
+      if (language.length > 0) {
+        return ok(
+          looked === null
+            ? { gloss: "", sentence: null, entries: [], language }
+            : { gloss: "", sentence: null, entries: looked.entries, dictionaries: looked.dictionaries, language },
+        );
+      }
+
+      const translated = await translate({
+        text: request.text,
+        context: request.context,
+        from: pair.from,
+        to: pair.to,
+      });
 
       // Dictionary entries ride with a translation and never instead of one: a
       // failed translation is an error the bubble has to show, and hanging
       // definitions off it would make an error message into a half-answer.
-      // The count of dictionaries asked and the language they answered in
-      // ride with the entries (D192, D193), and a lookup that gave no answer
-      // at all hands over none of the three: the bubble reads that as
-      // nothing to say (D164).
+      // The count of dictionaries asked rides with the entries (D192), and a
+      // lookup that gave no answer at all hands over neither: no entries and
+      // no count, which the bubble reads as nothing to say (D164).
       if (!translated.ok) return translated;
       return ok(
         looked === null
           ? { ...translated.value, entries: [] }
-          : { ...translated.value, entries: looked.entries, dictionaries: looked.dictionaries, lang: looked.lang },
+          : { ...translated.value, entries: looked.entries, dictionaries: looked.dictionaries },
       );
     }
     case Message.LOOK_UP: {

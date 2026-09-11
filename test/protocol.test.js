@@ -154,18 +154,22 @@ describe("asTranslation", () => {
     assert.equal("dictionaries" in asTranslation({ gloss: "", sentence: null, entries: [], dictionaries: 0 }), false);
   });
 
-  it("carries the language the dictionaries answered in, with a gloss to carry it (D193)", () => {
-    assert.deepEqual(asTranslation({ gloss: "bank", sentence: null, entries: [ENTRY], dictionaries: 2, lang: "pl" }), {
-      gloss: "bank",
+  it("carries a phrase found to be in another language, with its entries and no gloss (D193)", () => {
+    // The engine was not asked: no gloss, no sentence - and the entries and
+    // the count are the answer, so they ride along the one time a gloss is
+    // missing on purpose.
+    assert.deepEqual(asTranslation({ gloss: "", sentence: null, entries: [ENTRY], dictionaries: 1, language: "pl" }), {
+      gloss: "",
       sentence: null,
       entries: [ENTRY],
-      dictionaries: 2,
-      lang: "pl",
+      dictionaries: 1,
+      language: "pl",
     });
-    for (const lang of [undefined, "", 42, null, ["pl"]]) {
-      assert.equal("lang" in asTranslation({ gloss: "bank", sentence: null, entries: [], lang }), false);
+    // A sentence still needs a gloss to be extra to.
+    assert.equal(asTranslation({ gloss: "", sentence: "Brzeg.", entries: [], language: "pl" }).sentence, null);
+    for (const language of [undefined, "", 42, null, ["pl"]]) {
+      assert.equal("language" in asTranslation({ gloss: "bank", sentence: null, entries: [], language }), false);
     }
-    assert.equal("lang" in asTranslation({ gloss: "", sentence: null, entries: [], lang: "pl" }), false);
   });
 });
 

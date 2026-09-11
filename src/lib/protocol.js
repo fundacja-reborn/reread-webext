@@ -142,14 +142,17 @@ export const ErrorCode = Object.freeze({
  * older than this field: the bubble says nothing then, by D164's rule that a
  * fault must never read as a missing dictionary.
  *
- * `lang` is the language the dictionaries answered in (D191's `LookUp.lang`,
- * riding along since D193): the pair's, or the page's declared one for the
- * word the pair's dictionaries did not know. It is the one fact that can say
- * the engine translated the wrong language - a Polish dictionary recognising
- * a Polish word on a Polish page, with the pair reading English - and the
- * bubble sets the engine's answer aside on it. Absent when the count is.
+ * `language` says the phrase is not in the pair's source language at all
+ * (D193), and which one it is in: the browser's detector read the sentence
+ * as the reader's own language, or a dictionary of another language knew
+ * the word while the pair's did not. The engine is not asked then - it
+ * translates from the pair's language or not at all - so the gloss comes
+ * empty and the sentence null, and the entries and the count are about the
+ * language named: what the bubble shows instead of a guess. Absent for a
+ * phrase in the pair's language, which is every translation there was
+ * before D193.
  *
- * @typedef {{ gloss: string, sentence: string | null, entries?: DictEntry[], dictionaries?: number, lang?: string }} Translation
+ * @typedef {{ gloss: string, sentence: string | null, entries?: DictEntry[], dictionaries?: number, language?: string }} Translation
  */
 
 /**
@@ -321,24 +324,28 @@ export function asResult(response) {
  */
 export function asTranslation(value) {
   if (typeof value !== "object" || value === null) return { gloss: "", sentence: null, entries: [] };
-  const { gloss, sentence, entries, dictionaries, lang } = /** @type {Record<string, unknown>} */ (value);
+  const { gloss, sentence, entries, dictionaries, language } = /** @type {Record<string, unknown>} */ (value);
 
   const answer = typeof gloss === "string" ? gloss : "";
+  // A phrase found to be in another language (D193) comes with no gloss on
+  // purpose, and its entries are the answer: the one case an empty first
+  // line has something to stand over.
+  const foreign = typeof language === "string" && language.length > 0 ? language : "";
+  const answered = answer.length > 0 || foreign.length > 0;
   // The sentence is an extra to the gloss, so without a gloss there is nothing
   // for it to be extra to: a bubble with an empty first line and a "More" that
   // has something behind it is a state nobody should have to make sense of.
   const second = answer.length > 0 && typeof sentence === "string" ? sentence : null;
 
   /** @type {Translation} */
-  const translation = { gloss: answer, sentence: second, entries: answer.length > 0 ? asDictEntries(entries) : [] };
+  const translation = { gloss: answer, sentence: second, entries: answered ? asDictEntries(entries) : [] };
   // The count is an extra to the entries the same way (D192), and it is a
   // count or nothing: a value that is not a whole non-negative number says
   // nothing about the dictionaries, so it is left out rather than read as one.
-  if (answer.length > 0 && typeof dictionaries === "number" && Number.isInteger(dictionaries) && dictionaries >= 0) {
+  if (answered && typeof dictionaries === "number" && Number.isInteger(dictionaries) && dictionaries >= 0) {
     translation.dictionaries = dictionaries;
   }
-  // The language the dictionaries answered in (D193), a name or nothing.
-  if (answer.length > 0 && typeof lang === "string" && lang.length > 0) translation.lang = lang;
+  if (foreign.length > 0) translation.language = foreign;
   return translation;
 }
 
