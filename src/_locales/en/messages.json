@@ -164,8 +164,8 @@
     "description": "The fold on the saved-phrases page that opens onto the look-up field (D197): a word typed instead of selected, answered by the dictionaries and saved with a press on a meaning."
   },
   "vocab_add_note": {
-    "message": "Type a word to see its entries in your dictionaries. Press a meaning to save the phrase, or write your own.",
-    "description": "The sentence inside the \"Add a phrase\" fold, above the field. The translation model is never asked there - a word on its own is where it guesses worst - so the sentence names only the dictionaries and the reader's own meaning."
+    "message": "Type a word and confirm - tick meanings from your dictionaries or write your own.",
+    "description": "The one sentence inside the \"Add a phrase\" fold, above the field. The translation model is never asked there - a word on its own is where it guesses worst - so the sentence names only the dictionaries and the reader's own meaning. \"Confirm\" because the field asks on Enter or the button, never as the word is typed."
   },
   "lookup_label": {
     "message": "Look up a word",
@@ -173,12 +173,23 @@
   },
   "lookup_placeholder": { "message": "Type a word or phrase" },
   "lookup_action": {
-    "message": "Look up",
-    "description": "The button beside the look-up field; Enter in the field does the same."
+    "message": "Search",
+    "description": "The button beside the look-up field; Enter in the field does the same. One word: it shares the field's row with the arrow in the popup."
   },
-  "lookup_own_meaning": {
-    "message": "Own meaning",
-    "description": "The button under the look-up field's answer that opens the editor for a meaning the reader types - for a phrase no dictionary knows, or a meaning of their own. Also the editor's accessible name."
+  "lookup_clear": {
+    "message": "Clear the field",
+    "description": "Accessible name and hover title of the cross inside the look-up field: it empties the field and takes the answer down, leaving the caret in the field."
+  },
+  "lookup_saved_count": {
+    "message": "Saved: $COUNT$",
+    "description": "The phrase's standing at the far end of the look-up answer's first line, for a phrase already saved for the pair: how many meanings it is kept with. Nothing stands there for an unsaved phrase.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "lookup_show_in_list": {
+    "message": "Show in list",
+    "description": "The link after the saved count on the saved-phrases page: sets the list's filter to the phrase and scrolls to its row, where Edit and Learned are. The popup's field has no list and shows no link."
   },
   "lookup_kept": {
     "message": "In your saved phrases",

@@ -935,11 +935,33 @@ function goToSettings(section) {
 }
 
 /**
+ * "Show in list" under the field's answer: the saved phrase's own row
+ * brought into view, where Edit and Learned are. The filter is set to the
+ * phrase - which also walks past the pages, so a phrase on page three is on
+ * page one of the narrowed list - and the row itself is scrolled to, the
+ * first matching row when the exact one is not on the page. No smooth
+ * scrolling: on e-ink an animated scroll is a run of flashes.
+ *
+ * @param {{ text: string, normalized: string }} phrase
+ */
+function showInList(phrase) {
+  query = phrase.text;
+  page = 1;
+  if (filterInput !== null) filterInput.value = phrase.text;
+  renderList();
+  if (listContainer === null) return;
+  const rows = [...listContainer.querySelectorAll(".phrase-row")];
+  const own = rows.find((row) => row instanceof HTMLElement && row.dataset["key"] === phrase.normalized);
+  (own ?? rows[0])?.scrollIntoView({ block: "start" });
+}
+
+/**
  * The look-up field (D197) behind the "Add a phrase" fold: the background
  * asked the way the rows ask it, the phrase's standing read off the list
  * this page already holds (fresh through the mirror, like the rows), the
- * pair's voice for its speaker. The fold opening puts the caret in the
- * field: opening it is what somebody does to type.
+ * pair's voice for its speaker, and the list under the fold as the place
+ * "Show in list" points at. The fold opening puts the caret in the field:
+ * opening it is what somebody does to type.
  */
 const lookupBox =
   lookupHost === null
@@ -951,6 +973,7 @@ const lookupBox =
           savedMeanings: (normalized) =>
             Promise.resolve(phrases.find((one) => one.normalized === normalized)?.translations ?? []),
           openDictionaries: () => goToSettings("dictionaries"),
+          showInList,
           voice: () => {
             const lang = config?.sourceLang ?? null;
             if (config === null || lang === null) return null;

@@ -46,41 +46,65 @@ describe("the look-up field", () => {
     assert.match(pressed, /Message\.SAVE_PHRASE, text: phrase\.text, translations: next\.meanings/, "a press saves something other than the rule's meanings");
   });
 
-  it("reads top down: the phrase and its close, what it means one line each, the acts, then the books", async () => {
-    const render = bodyOf(await source("lib/lookup-box.js"), "render");
+  it("asks on submit alone - never as the word is typed - and lets a phone spell the word as the book does", async () => {
+    const box = await source("lib/lookup-box.js");
+    assert.match(box, /form\.addEventListener\("submit", \(event\) => \{\s*event\.preventDefault\(\);\s*void lookUp\(\);/, "Enter and the button do not ask the same way");
+    // The input listener follows the cross and takes the answer down with
+    // an emptied field; it must not look the word up (on e-ink every redraw
+    // is a flash - the rebuild's D4).
+    const typing = box.slice(box.indexOf('input.addEventListener("input"'), box.indexOf("return {", box.indexOf('input.addEventListener("input"')));
+    assert.doesNotMatch(typing, /lookUp\(\)/, "typing asks the dictionaries");
+    assert.match(box, /input\.type = "search";/, "the field is not a search field");
+    assert.match(box, /input\.enterKeyHint = "search";/, "the phone's keyboard does not say Search");
+    assert.match(box, /input\.setAttribute\("autocapitalize", "off"\)/, "a phone's keyboard forces a capital on the word");
+  });
+
+  it("has one way out: the cross empties the field and takes the answer down, the caret kept in the field", async () => {
+    const box = await source("lib/lookup-box.js");
+    assert.match(box, /const clearButton = button\("lookup-clear", String\.fromCodePoint\(0x00d7\)\)/, "the field has no cross of its own");
+    assert.match(box, /clearButton\.setAttribute\("aria-label", t\("lookup_clear"\)\)/, "the cross has no name");
+    assert.match(box, /clearButton\.addEventListener\("click", \(\) => \{\s*input\.value = "";\s*showClear\(\);\s*clear\(\);\s*input\.focus\(\);/, "the cross does not empty the field, take the answer down and keep the caret");
+    assert.match(box, /input\.addEventListener\("input", \(\) => \{\s*showClear\(\);\s*if \(input\.value\.length === 0 && state\.phrase !== null\) clear\(\);/, "an emptied field keeps its answer");
+    // No Close, no Edit, no Learned in the panel: the field does one thing,
+    // and the phrase's row in the list does the rest (the rebuild's D3, D6).
+    assert.doesNotMatch(box, /t\("close"\)/, "the panel has a Close");
+    assert.doesNotMatch(box, /bubble_edit|bubble_learned|lookup_own_meaning|textarea/, "the panel manages the whole entry");
+    // And the browser's own cross stands down, so there is one cross, not two.
+    const styles = await source("assets/page.css");
+    assert.match(styles, /\.lookup-input::-webkit-search-cancel-button[\s\S]*?appearance: none;/, "the browser's own cross doubles the field's");
+  });
+
+  it("reads top down: the phrase with its standing, what it means as chips, then the books", async () => {
+    const box = await source("lib/lookup-box.js");
+    const render = bodyOf(box, "render");
     const at = (/** @type {string} */ marker) => render.indexOf(marker);
-    // The order Michał asked for after the third smoke ("a lot of clutter"):
-    // the acts by the phrase, above the entries they used to trail.
-    assert.ok(at('"lookup-close"') !== -1 && at('"lookup-close"') < at('"lookup-kept"'), "the close is not at the head");
-    assert.ok(at('"lookup-kept"') < at('"lookup-actions"'), "the acts stand before what the phrase means");
-    assert.ok(at('"lookup-actions"') < at('"lookup-entries"'), "the acts trail the books");
+    assert.ok(at('"lookup-head"') !== -1 && at('"lookup-head"') < at('"lookup-kept"'), "the phrase is not at the head");
+    assert.ok(at('"lookup-kept"') < at('"lookup-entries"'), "the books stand before what the phrase means");
+    // The standing at the head's far end, for a saved phrase only: the
+    // count, and the way to the phrase's own row where the home has a list.
+    assert.match(render, /if \(state\.meanings\.length > 0\) head\.append\(standing\(state\.phrase\)\)/, "the standing stands for an unsaved phrase, or not at all");
+    const standing = bodyOf(box, "standing");
+    assert.match(standing, /t\("lookup_saved_count", \[state\.meanings\.length\.toLocaleString\(\)\]\)/, "the count is not the saved meanings'");
+    assert.match(standing, /if \(deps\.showInList !== undefined\) \{[\s\S]*?button\("lookup-show", t\("lookup_show_in_list"\)\)/, "the link stands without a list to show, or never");
+    assert.match(standing, /show\.addEventListener\("click", \(\) => deps\.showInList\?\.\(phrase\)\)/, "the link does not hand the phrase to the list");
     // The meanings as chips in the pressed line's dress; where the field
-    // writes, a chip is a press that takes its meaning back out (the one way
-    // out for a meaning typed by hand), and where it only reads, plain text.
+    // writes, a chip is a press that takes its meaning back out, and where
+    // it only reads, plain text.
     assert.match(render, /const chip = button\("lookup-chip", meaning\);\s*chip\.setAttribute\("aria-pressed", "true"\)/, "a chip is not a pressed toggle");
     assert.match(render, /chip\.addEventListener\("click", \(\) => void press\(meaning\)\)/, "a chip does not take its meaning back out");
     assert.match(render, /if \(readOnly\) \{\s*chips\.append\(element\("span", "lookup-chip", meaning\)\)/, "the read-only field's chips are presses");
-    // Edit over meanings that exist, Own meaning over none.
-    assert.match(bodyOf(await source("lib/lookup-box.js"), "editLabel"), /t\("bubble_edit"\) : t\("lookup_own_meaning"\)/, "the editor's button does not follow the phrase's standing");
   });
 
-  it("takes the answer down with the field emptied, and with the close", async () => {
-    const box = await source("lib/lookup-box.js");
-    assert.match(box, /input\.addEventListener\("input", \(\) => \{\s*if \(input\.value\.length === 0 && state\.phrase !== null\) clear\(\);/, "an emptied field keeps its answer");
-    assert.match(bodyOf(box, "render"), /if \(!readOnly\) \{\s*const close = button\("lookup-close", t\("close"\)\)/, "the field that writes has no close, or the popup's has one");
-  });
-
-  it("draws the entries as prose, paragraph by paragraph, and offers no editor where it only reads", async () => {
+  it("draws the entries as prose, paragraph by paragraph, where it only reads", async () => {
     const render = bodyOf(await source("lib/lookup-box.js"), "render");
     // The read-only field's entries must not promise a choice: divs, never
     // buttons - the book's paragraphs as it wrote them (the presses cut a
-    // sense into lines) - and neither Own meaning nor Learned stands under them.
+    // sense into lines).
     assert.match(
       render,
       /if \(readOnly\) \{[\s\S]*?paragraphsOf\(sense\)[\s\S]*?element\("div", "lookup-paragraph", paragraph\)/,
       "a read-only entry is presses, or loses the book's paragraphs",
     );
-    assert.match(render, /if \(!readOnly && !state\.pending && !state\.editing\)/, "the actions stand in the read-only field");
   });
 });
 
@@ -146,6 +170,24 @@ describe("the saved-phrases page's fold", () => {
     assert.match(script, /mountLookupBox\(/, "the page does not mount the field");
     assert.doesNotMatch(script.slice(script.indexOf("mountLookupBox(")), /readOnly: true/, "the page's field only reads");
     assert.match(bodyOf(script, "reload"), /addFold\.hidden = chosen === null/, "the fold stands with nowhere to file a phrase");
+  });
+
+  it("brings the saved phrase's row into view on \"Show in list\": the filter set, the row scrolled to, no animation", async () => {
+    const script = await source("vocab/vocab.js");
+    assert.match(script.slice(script.indexOf("mountLookupBox(")), /showInList,/, "the page's field has no list to show");
+    const showing = bodyOf(script, "showInList");
+    // The filter narrows the list to the phrase - which also walks past the
+    // pages - and the phrase's own row is scrolled to, the first matching
+    // one when the exact row is not on the page. Not smooth: on e-ink an
+    // animated scroll is a run of flashes.
+    assert.match(showing, /query = phrase\.text;\s*page = 1;/, "the filter is not set to the phrase, or the page not turned back");
+    assert.match(showing, /filterInput\.value = phrase\.text/, "the filter box does not show the filter the list follows");
+    assert.match(showing, /row\.dataset\["key"\] === phrase\.normalized/, "the phrase's own row is not the one looked for");
+    assert.match(showing, /\(own \?\? rows\[0\]\)\?\.scrollIntoView\(\{ block: "start" \}\)/, "the row is not scrolled to, or the scroll animates");
+    assert.doesNotMatch(showing, /smooth/, "the scroll animates");
+    // The panel eases nothing in - the fold opens at once.
+    const styles = await source("vocab/vocab.css");
+    assert.match(styles, /\.lookup-fold button,\s*\.lookup-fold summary \{\s*transition: none;/, "the panel's controls ease in");
   });
 
   it("looks up the phrase the address brought, on arrival and on a turn of the open tab", async () => {

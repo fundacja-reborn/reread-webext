@@ -256,13 +256,15 @@ summary {
   margin: 0 0 0.75rem;
 }
 
-/* The phrase wears the reading face like the rows' (D104); the meanings
-   under it are chips echoing the dictionary lines they were pressed in,
-   and keep those lines' interface face, so the two read as one thing. */
-.lookup-fold .lookup-phrase {
-  font-family: var(--reader-font-lead, var(--reader-font-stack));
-  font-size: var(--reader-size, 18px);
-  line-height: 1.45;
+/* The phrase wears the row's word's exact dress - one rule for both, below
+   with `.phrase-word` - so the word looked up and the same word in the list
+   can never drift apart; the meanings under it are chips echoing the
+   dictionary lines they were pressed in, and keep those lines' interface
+   face, so the two read as one thing. Nothing in the panel eases in: on
+   e-ink a transition is a run of flashes, and the fold opens at once. */
+.lookup-fold button,
+.lookup-fold summary {
+  transition: none;
 }
 
 /* --- the import offer: size, a taste of its rows, the target pair --- */
@@ -339,14 +341,16 @@ summary {
    the hierarchy is weight and color, never size. What stays at the
    interface size is what acts on the pair - buttons, hints, the bar. */
 .phrase-word,
-.phrase-meanings {
+.phrase-meanings,
+.lookup-fold .lookup-phrase {
   font-family: var(--reader-font-lead, var(--reader-font-stack));
   font-size: var(--reader-size, 18px);
   line-height: 1.45;
   overflow-wrap: anywhere;
 }
 
-.phrase-word {
+.phrase-word,
+.lookup-fold .lookup-phrase {
   font-weight: 600;
 }
 

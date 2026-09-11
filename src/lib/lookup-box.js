@@ -4,27 +4,29 @@
  *
  * One component in two homes, and the two homes differ in what a press may
  * do. The saved-phrases page's "Add a phrase" fold is the full field: a
- * dictionary line saves the phrase with that meaning (D34), "Own meaning" is
- * the door for a phrase no book knows, Learned takes it back out - the quiet
- * bubble's rules (D121, D158) in a field, on a page that stays, with the list
- * right under it showing what a press did. The toolbar popup's field only
- * reads (`readOnly`): a popup leaves at a click beside it, its answer scrolls
- * the "saved" line out of view, and a save nobody saw is the wrong kind of
- * surprise (Michał's call after the first smoke, 2026-09-11) - so there the
- * lines are prose, and the popup's own row leads to the page.
+ * dictionary line saves the phrase with that meaning (D34), and the list
+ * right under the fold shows what a press did. The toolbar popup's field
+ * only reads (`readOnly`): a popup leaves at a click beside it, its answer
+ * scrolls the "saved" line out of view, and a save nobody saw is the wrong
+ * kind of surprise (Michał's call after the first smoke, 2026-09-11) - so
+ * there the lines are prose, and the popup's own row leads to the page.
+ *
+ * The field does one thing and leaves the rest to the page around it (the
+ * rebuild of 2026-09-11, block 1): it looks the word up and lets a meaning
+ * be kept or taken back. It does not manage the whole entry - Edit and
+ * Learned belong to the phrase's row in the list, and "Show in list" is
+ * how the field points at that row. And it has one way out: the cross in
+ * the field empties it and takes the answer down; the fold's own summary
+ * folds the panel.
  *
  * Both are pages of this extension, so the field is ordinary DOM on the
  * page's own stylesheet (`.lookup-*` in assets/page.css) - no shadow root,
  * which is the bubble's armour against somebody else's page. What differs
  * between the homes travels in as `deps` and `options`: how the page asks
  * the background, what it already knows about a saved phrase, how it opens
- * the settings, which voice reads the pair's language, and whether a press
- * may write.
+ * the settings, which voice reads the pair's language, whether it has a
+ * list to point at, and whether a press may write.
  *
- * The answer reads top down in the order a reader needs it (Michał's third
- * smoke, 2026-09-11 - "a lot of clutter"): the phrase with its speaker and
- * the way to close the answer; what the phrase already means, one meaning
- * per line; the two acts on it; and only then the books, which can be long.
  * The engine is never asked here, on purpose (Michał's call): a word on its
  * own has no sentence around it, and that is where the engine guesses worst.
  *
@@ -33,7 +35,7 @@
  * was typed.
  */
 
-import { HINT_MAX_WORDS, MEANING_SEPARATOR, linkedWord, toMeanings } from "./gloss.js";
+import { HINT_MAX_WORDS, linkedWord } from "./gloss.js";
 import { t, uiLocale } from "./i18n.js";
 import { languageName } from "./language.js";
 import { afterPress, lookupOutcome, lookupText, paragraphsOf } from "./lookup.js";
@@ -56,6 +58,10 @@ import { canSpeak, primaryLanguage, speak, speaking, stop as stopSpeaking } from
  * @property {() => { lang: string, voiceURI: string | undefined, rate: number } | null} voice
  *   how to read the phrase aloud - the pair's language, the voice stored for
  *   it, the speed - or null while no pair is chosen
+ * @property {(phrase: { text: string, normalized: string }) => void} [showInList]
+ *   the saved phrase's own row brought into view - the phrases page's list
+ *   under the fold; a home without a list (the popup) leaves it out and the
+ *   answer's standing line carries no link
  */
 
 /**
@@ -67,8 +73,9 @@ import { canSpeak, primaryLanguage, speak, speaking, stop as stopSpeaking } from
 
 /**
  * @typedef {object} LookupBoxOptions
- * @property {boolean} [readOnly] the lines as prose and no editor: the popup's
- *   field, which only reads (see the header); the phrases page's writes
+ * @property {boolean} [readOnly] the lines as prose and no press that writes:
+ *   the popup's field, which only reads (see the header); the phrases page's
+ *   writes
  * @property {(state: LookupState) => void} [onState] told after every draw
  */
 
@@ -159,13 +166,12 @@ function button(className, label) {
 export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) {
   /**
    * The phrase being shown, its meanings as saved (empty while it is not),
-   * what the dictionaries said - or that they are still being asked - and
-   * whether the editor is open. State rather than DOM, so that every change
-   * redraws the same way.
+   * and what the dictionaries said - or that they are still being asked.
+   * State rather than DOM, so that every change redraws the same way.
    *
-   * @type {{ phrase: { text: string, normalized: string } | null, meanings: string[], outcome: import("./lookup.js").LookupOutcome | null, pending: boolean, editing: boolean, error: string }}
+   * @type {{ phrase: { text: string, normalized: string } | null, meanings: string[], outcome: import("./lookup.js").LookupOutcome | null, pending: boolean, error: string }}
    */
-  const state = { phrase: null, meanings: [], outcome: null, pending: false, editing: false, error: "" };
+  const state = { phrase: null, meanings: [], outcome: null, pending: false, error: "" };
 
   /**
    * Which ask the answer belongs to: a second word typed while the first is
@@ -177,6 +183,9 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
   form.className = "lookup-form";
   const label = element("label", "lookup-label", t("lookup_label"));
   label.setAttribute("for", "lookup-input");
+  // The field and its cross in one box, so the cross can stand inside the
+  // field's own frame at its far end.
+  const field = element("div", "lookup-field");
   const input = document.createElement("input");
   input.type = "search";
   input.id = "lookup-input";
@@ -185,11 +194,24 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
   input.autocomplete = "off";
   input.spellcheck = false;
   input.enterKeyHint = "search";
+  // A word looked up is a word as the book spells it: no capital forced on
+  // a phone's keyboard.
+  input.setAttribute("autocapitalize", "off");
+  // The one way to take the answer down: the field emptied and the answer
+  // with it, the caret left in the field for the next word. Our own cross
+  // rather than the browser's: Firefox draws none on a search field, and
+  // Chromium's is a small target that fires no event a page can count on.
+  // Hidden while there is nothing to clear.
+  const clearButton = button("lookup-clear", String.fromCodePoint(0x00d7));
+  clearButton.setAttribute("aria-label", t("lookup_clear"));
+  clearButton.title = t("lookup_clear");
+  clearButton.hidden = true;
+  field.append(input, clearButton);
   const go = document.createElement("button");
   go.type = "submit";
   go.className = "lookup-go";
   go.textContent = t("lookup_action");
-  form.append(label, input, go);
+  form.append(label, field, go);
   hosts.form.append(form);
 
   const answer = element("div", "lookup-answer");
@@ -200,10 +222,15 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
     onState?.({ phrase: state.phrase, saved: state.meanings.length > 0, pending: state.pending });
   }
 
+  /** The cross stands while the field has anything in it to clear. */
+  function showClear() {
+    clearButton.hidden = input.value.length === 0;
+  }
+
   /**
    * The answer taken down: nothing shown, nothing pending, an ask on its way
    * ignored when it lands. The field's text is the caller's business - the
-   * field cleared by its own "x" is what calls this most often.
+   * field cleared by its cross is what calls this most often.
    */
   function clear() {
     generation += 1;
@@ -211,7 +238,6 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
     state.meanings = [];
     state.outcome = null;
     state.pending = false;
-    state.editing = false;
     state.error = "";
     render();
   }
@@ -264,49 +290,10 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
   }
 
   /**
-   * The editor's Save: the lines typed become the meanings, the way the
-   * bubble's editor and the phrases page's editor keep them.
-   *
-   * @param {string} typed
-   */
-  async function saveTyped(typed) {
-    if (state.phrase === null) return;
-    const phrase = state.phrase;
-    const meanings = toMeanings(typed);
-    if (meanings.length === 0) return;
-    const result = await deps.ask({ kind: Message.SAVE_PHRASE, text: phrase.text, translations: meanings });
-    if (state.phrase !== phrase) return;
-    if (!result.ok) {
-      // The editor stays open with the draft: an error must not eat the text.
-      state.error = describeError(result.code);
-      render();
-      return;
-    }
-    state.error = "";
-    state.meanings = meanings;
-    state.editing = false;
-    render();
-  }
-
-  /** Learned: the phrase leaves the vocabulary; the entries stay to be read. */
-  async function forget() {
-    if (state.phrase === null) return;
-    const phrase = state.phrase;
-    const result = await deps.ask({ kind: Message.FORGET_PHRASE, text: phrase.text });
-    if (state.phrase !== phrase) return;
-    if (result.ok) {
-      state.error = "";
-      state.meanings = [];
-    } else {
-      state.error = describeError(result.code);
-    }
-    render();
-  }
-
-  /**
    * The field's question: the phrase as typed, the dictionaries asked and the
    * vocabulary consulted side by side. The engine is not asked at all - see
-   * the header.
+   * the header. Asked on submit alone - Enter or the button - never as the
+   * word is typed: on e-ink every redraw is a flash.
    */
   async function lookUp() {
     const typed = input.value;
@@ -325,7 +312,6 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
     state.meanings = [];
     state.outcome = null;
     state.pending = true;
-    state.editing = false;
     state.error = "";
     render();
 
@@ -371,71 +357,25 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
   }
 
   /**
-   * The meanings as lines in a textarea, the phrases page's editor: Enter
-   * keeps, Shift+Enter adds a line, Escape backs out, and there is nothing
-   * to keep when no line has anything on it.
+   * The phrase's standing in the vocabulary, at the head's far end: how many
+   * meanings it is kept with, and - where the home has a list - the way to
+   * its own row there. Nothing at all while the phrase is not saved: the
+   * lines below say so by not being marked.
    *
+   * @param {{ text: string, normalized: string }} phrase
    * @returns {HTMLElement}
    */
-  function editor() {
-    const wrap = element("div", "lookup-edit");
-    const area = document.createElement("textarea");
-    area.className = "lookup-editor";
-    area.value = state.meanings.join(MEANING_SEPARATOR);
-    area.rows = Math.max(2, state.meanings.length + 1);
-    area.setAttribute("aria-label", editLabel());
-
-    const save = button("lookup-save", t("bubble_save"));
-    const cancel = button("lookup-cancel", t("action_cancel"));
-    const empty = () => toMeanings(area.value).length === 0;
-    save.disabled = empty();
-    area.addEventListener("input", () => {
-      save.disabled = empty();
-    });
-    area.addEventListener("keydown", (event) => {
-      if (event.key === "Enter" && !event.shiftKey) {
-        event.preventDefault();
-        if (!save.disabled) void saveTyped(area.value);
-      }
-      if (event.key === "Escape") {
-        // The editor's own Escape; the page's (a panel closing) must not
-        // also answer it.
-        event.stopPropagation();
-        closeEditor();
-      }
-    });
-    save.addEventListener("click", () => void saveTyped(area.value));
-    cancel.addEventListener("click", () => closeEditor());
-
-    const actions = element("div", "lookup-actions");
-    actions.append(save, cancel);
-    wrap.append(area, actions);
-    return wrap;
-  }
-
-  /**
-   * What the editor's button is called: Edit over a phrase that has meanings
-   * to rewrite, Own meaning over one that has none yet.
-   */
-  function editLabel() {
-    return state.meanings.length > 0 ? t("bubble_edit") : t("lookup_own_meaning");
-  }
-
-  function openEditor() {
-    state.editing = true;
-    render();
-    const area = answer.querySelector("textarea");
-    if (area instanceof HTMLTextAreaElement) {
-      area.focus();
-      area.setSelectionRange(area.value.length, area.value.length);
+  function standing(phrase) {
+    const line = element("span", "lookup-standing");
+    line.append(element("span", "lookup-saved-count", t("lookup_saved_count", [state.meanings.length.toLocaleString()])));
+    if (deps.showInList !== undefined) {
+      const dot = element("span", "lookup-standing-dot", String.fromCodePoint(0x00b7));
+      dot.setAttribute("aria-hidden", "true");
+      const show = button("lookup-show", t("lookup_show_in_list"));
+      show.addEventListener("click", () => deps.showInList?.(phrase));
+      line.append(dot, show);
     }
-  }
-
-  function closeEditor() {
-    state.editing = false;
-    render();
-    const own = answer.querySelector("button.lookup-own");
-    if (own instanceof HTMLButtonElement) own.focus();
+    return line;
   }
 
   function render() {
@@ -447,9 +387,8 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
     }
     answer.hidden = false;
 
-    // The phrase, its speaker, and - where the field writes - the way to
-    // close the answer; the popup's answer closes with the field's own "x"
-    // or the arrow back to the menu.
+    // The phrase with its speaker, and at the far end its standing in the
+    // vocabulary once that is known.
     const head = element("div", "lookup-head");
     head.append(element("span", "lookup-phrase", state.phrase.text));
     if (canSpeak() && deps.voice() !== null) {
@@ -460,29 +399,17 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
       speaker.addEventListener("click", () => void speakPhrase());
       head.append(speaker);
     }
-    if (!readOnly) {
-      const close = button("lookup-close", t("close"));
-      close.addEventListener("click", () => {
-        input.value = "";
-        clear();
-        input.focus();
-      });
-      head.append(close);
-    }
+    if (state.meanings.length > 0) head.append(standing(state.phrase));
     answer.append(head);
 
-    // The phrase's standing in the vocabulary, before what the books say:
-    // the reader's own meaning outranks a dictionary's (the recall bubble's
+    // What the phrase already means, before what the books say: the
+    // reader's own meaning outranks a dictionary's (the recall bubble's
     // order). Each meaning is a chip in the pressed line's own dress - the
     // same words in the same face on the same wash - so that a line pressed
-    // below is seen to land up here (Michał's fourth smoke: set in the
-    // reading face, one meaning per line, they read as a paragraph nobody
-    // connected to the presses). Where the field writes, a chip is a press
-    // too: it takes its meaning back out, as pressing the line again does -
-    // and it is the one way out for a meaning typed by hand.
-    if (state.editing) {
-      answer.append(editor());
-    } else if (state.meanings.length > 0) {
+    // below is seen to land up here (Michał's fourth smoke). Where the field
+    // writes, a chip is a press too: it takes its meaning back out, as
+    // pressing the line again does.
+    if (state.meanings.length > 0) {
       const kept = element("div", "lookup-kept");
       kept.append(element("p", "lookup-kept-label", t("lookup_kept")));
       const chips = element("div", "lookup-chips");
@@ -503,21 +430,6 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
       answer.append(kept);
     }
 
-    // The acts on the phrase stand by the phrase, above the books: after a
-    // long entry they were a screen away from what they act on.
-    if (!readOnly && !state.pending && !state.editing) {
-      const actions = element("div", "lookup-actions");
-      const own = button("lookup-own", editLabel());
-      own.addEventListener("click", () => openEditor());
-      actions.append(own);
-      if (state.meanings.length > 0) {
-        const learned = button("lookup-learned", t("bubble_learned"));
-        learned.addEventListener("click", () => void forget());
-        actions.append(learned);
-      }
-      answer.append(actions);
-    }
-
     if (state.pending) {
       const line = element("p", "lookup-note", t("bubble_looking_up"));
       line.dataset["tone"] = "pending";
@@ -531,9 +443,6 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
       answer.append(verdictLine(verdictParts(state.outcome.note, state.outcome.lang, words)));
     } else if (state.outcome?.kind === "entries") {
       const entries = element("div", "lookup-entries");
-      // Dimmed while the meanings are typed by hand: still there to read,
-      // not what the hands are on.
-      if (state.editing) entries.dataset["dim"] = "true";
       for (const [at, block] of state.outcome.blocks.entries()) {
         const entry = element("div", "lookup-entry");
         if (block.headword.length > 0 || block.dictionary.length > 0) {
@@ -564,8 +473,6 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
           // A toggle, and told as one: the mark that stays says which meanings
           // are the phrase's now.
           sense.setAttribute("aria-pressed", state.meanings.includes(line) ? "true" : "false");
-          // Not while the meanings are being typed by hand - the bubble's rule.
-          sense.disabled = state.editing;
           sense.addEventListener("click", () => void press(line));
           entry.append(sense);
         }
@@ -588,20 +495,31 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
     void lookUp();
   });
 
-  // The field emptied - its own "x", Escape in it, the last character
-  // deleted - takes the answer down with it: an answer to a word no longer
-  // in the field is an answer to nothing.
+  clearButton.addEventListener("click", () => {
+    input.value = "";
+    showClear();
+    clear();
+    input.focus();
+  });
+
+  // Typing asks nothing (the header); the cross follows the text. The field
+  // emptied by other means - Escape in it, the last character deleted -
+  // takes the answer down with it too: an answer to a word no longer in the
+  // field is an answer to nothing.
   input.addEventListener("input", () => {
+    showClear();
     if (input.value.length === 0 && state.phrase !== null) clear();
   });
 
   return {
     search(text) {
       input.value = text;
+      showClear();
       return lookUp();
     },
     reset() {
       input.value = "";
+      showClear();
       clear();
     },
     focus() {

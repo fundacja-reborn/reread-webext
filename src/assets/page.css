@@ -645,9 +645,9 @@ body:not(.reader):has(.panel-scrim:not([hidden])) .page-chrome {
 /* --- the look-up field (D197): the popup's row and the phrases page's fold --- */
 
 /* One component in two homes (`lib/lookup-box.js`), dressed once: a field
-   with its button, and under it the answer - the phrase, its standing in
-   the vocabulary, the dictionaries' lines as presses, the two actions.
-   Every control keeps the pages' 44px floor. */
+   with its cross and its button, and under it the answer - the phrase with
+   its standing in the vocabulary, the meanings kept, the dictionaries'
+   lines as presses. Every control keeps the pages' 44px floor. */
 .lookup-box {
   display: grid;
   /* A track that may shrink under its content: the field below has no
@@ -681,6 +681,15 @@ body:not(.reader):has(.panel-scrim:not([hidden])) .page-chrome {
   white-space: nowrap;
 }
 
+/* The field with its cross inside: the box takes the row, the cross stands
+   at the field's far end over the field's own padding. */
+.lookup-field {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
 .lookup-input {
   /* No width of its own: a text field asks for room for twenty characters
      unless told otherwise, and that ask is what widened the popup. It takes
@@ -690,10 +699,45 @@ body:not(.reader):has(.panel-scrim:not([hidden])) .page-chrome {
   min-width: 0;
   min-height: 44px;
   font: inherit;
-  padding: 0.35rem 0.6rem;
+  padding: 0.35rem 2.6rem 0.35rem 0.6rem;
   border-radius: 6px;
   border: 1px solid var(--page-border);
   background: transparent;
+  color: var(--page-fg);
+}
+
+/* The browser's own cross on a search field stands down: Firefox draws
+   none, Chromium's is a small target that fires no event a page can count
+   on - the field's own cross (`.lookup-clear`) is the one in both. */
+.lookup-input::-webkit-search-cancel-button,
+.lookup-input::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* The one way to take the answer down: a 44px cross at the field's far end,
+   no frame of its own inside the field's, hidden while there is nothing to
+   clear (the script toggles `hidden`). */
+.lookup-clear {
+  position: absolute;
+  inset-inline-end: 0;
+  top: 0;
+  bottom: 0;
+  width: 44px;
+  min-height: 44px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0 6px 6px 0;
+  background: none;
+  color: var(--page-muted);
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.lookup-clear:hover,
+.lookup-clear:focus-visible {
   color: var(--page-fg);
 }
 
@@ -707,10 +751,14 @@ body:not(.reader):has(.panel-scrim:not([hidden])) .page-chrome {
   gap: 0.4rem;
 }
 
+/* The phrase, its speaker, and at the far end its standing in the
+   vocabulary; under a phone's width the standing steps down to its own
+   line under the phrase (the rule below). */
 .lookup-head {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.25rem 0.5rem;
 }
 
 .lookup-phrase {
@@ -718,21 +766,24 @@ body:not(.reader):has(.panel-scrim:not([hidden])) .page-chrome {
   overflow-wrap: anywhere;
 }
 
-/* The way to close the answer, at the head's far end: a quiet button, the
-   phrases page's kind - no resting border, the muted voice. */
-.lookup-close {
+/* "Saved: 3 · Show in list": the count in the muted voice, the link in the
+   sentence-link dress (`.lookup-link` below), the dot between them. Stands
+   only for a saved phrase; an unsaved one says so by its unmarked lines. */
+.lookup-standing {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
   margin-inline-start: auto;
-  min-height: 44px;
-  padding: 0.5rem 0.8rem;
-  border-color: transparent;
   color: var(--page-muted);
   font-size: 0.85rem;
 }
 
-.lookup-close:hover,
-.lookup-close:focus-visible {
-  border-color: var(--page-border);
-  color: var(--page-fg);
+@media (max-width: 480px) {
+  .lookup-standing {
+    flex-basis: 100%;
+    margin-inline-start: 0;
+  }
 }
 
 /* The speaker beside the phrase, the phrases page's quiet button: no
@@ -834,7 +885,8 @@ button.lookup-chip:focus-visible .lookup-chip-x {
    D192): the accent and an underline say so, and nothing else changes shape
    - a framed button inside a sentence would read as a form. */
 .lookup-link,
-button.lookup-link {
+button.lookup-link,
+button.lookup-show {
   display: inline;
   margin: 0;
   padding: 0;
@@ -847,6 +899,14 @@ button.lookup-link {
   cursor: pointer;
 }
 
+/* "Show in list" is a press in the standing line's small voice; its hit box
+   keeps the 44px floor through its padding, the room given back by the
+   negative block margin, the phrases page's quiet-button trick. */
+button.lookup-show {
+  padding: 0.7rem 0.2rem;
+  margin-block: -0.7rem;
+}
+
 /* The books' entries, the bubble's own layout: a line between one book and
    the next, a small label naming the book and the headword it answered
    about, and under it the meanings one to a row - lines to read first and
@@ -856,15 +916,8 @@ button.lookup-link {
 .lookup-entries {
   display: grid;
   gap: 0;
-  /* Air between the acts on the phrase and the books under them: the label
-     of the first book sat right on the buttons (Michał's fifth smoke). */
+  /* Air between the phrase's standing and the books under it. */
   margin-top: 0.6rem;
-}
-
-/* Still there to read while the meanings are typed by hand, not what the
-   hands are on. */
-.lookup-entries[data-dim="true"] {
-  opacity: 0.55;
 }
 
 .lookup-entry + .lookup-entry {
@@ -910,11 +963,6 @@ button.lookup-sense[aria-pressed="true"] {
   border-color: var(--page-border);
 }
 
-button.lookup-sense:disabled {
-  color: inherit;
-  cursor: default;
-}
-
 /* The read-only field's entries, as the book wrote them: one block per
    paragraph with the lines inside it kept (`pre-line`), and the space
    between paragraphs where the book had a section's end - "Noun", its
@@ -928,33 +976,6 @@ button.lookup-sense:disabled {
 
 .lookup-paragraph + .lookup-paragraph {
   margin-top: 0.55em;
-}
-
-.lookup-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 0.2rem;
-}
-
-.lookup-actions button {
-  min-height: 44px;
-}
-
-.lookup-edit {
-  display: grid;
-  gap: 0.5rem;
-}
-
-.lookup-editor {
-  width: 100%;
-  font: inherit;
-  padding: 0.35rem 0.6rem;
-  border-radius: 6px;
-  border: 1px solid var(--page-border);
-  background: transparent;
-  color: var(--page-fg);
-  resize: vertical;
 }
 
 /* --- the colophon (the settings' first, now every room that ends) --- */

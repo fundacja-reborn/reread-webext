@@ -99,11 +99,18 @@
   "vocab_filter_label": { "message": "Die Liste des gespeicherten Wortschatzes filtern" },
   "vocab_filter_clear": { "message": "Filter leeren" },
   "vocab_add_title": { "message": "Wendung hinzufügen" },
-  "vocab_add_note": { "message": "Geben Sie ein Wort ein, um seine Einträge in Ihren Wörterbüchern zu sehen. Drücken Sie auf eine Bedeutung, um die Wendung zu speichern, oder schreiben Sie eine eigene." },
+  "vocab_add_note": { "message": "Geben Sie ein Wort ein und bestätigen Sie - haken Sie Bedeutungen aus Ihren Wörterbüchern ab oder schreiben Sie eine eigene." },
   "lookup_label": { "message": "Wort nachschlagen" },
   "lookup_placeholder": { "message": "Wort oder Wendung eingeben" },
-  "lookup_action": { "message": "Nachschlagen" },
-  "lookup_own_meaning": { "message": "Eigene Bedeutung" },
+  "lookup_action": { "message": "Suchen" },
+  "lookup_clear": { "message": "Feld leeren" },
+  "lookup_saved_count": {
+    "message": "Gespeichert: $COUNT$",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "lookup_show_in_list": { "message": "In der Liste zeigen" },
   "lookup_kept": { "message": "In Ihrem gespeicherten Wortschatz" },
   "popup_lookup_back": { "message": "Zurück zum Menü" },
   "popup_lookup_add": { "message": "Zum gespeicherten Wortschatz hinzufügen" },

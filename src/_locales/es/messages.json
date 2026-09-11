@@ -99,11 +99,18 @@
   "vocab_filter_label": { "message": "Filtrar la lista de frases guardadas" },
   "vocab_filter_clear": { "message": "Borrar el filtro" },
   "vocab_add_title": { "message": "Añadir una frase" },
-  "vocab_add_note": { "message": "Escribe una palabra para ver sus entradas en tus diccionarios. Pulsa un significado para guardar la frase, o escribe el tuyo." },
+  "vocab_add_note": { "message": "Escribe una palabra y confirma - marca significados de tus diccionarios o escribe el tuyo." },
   "lookup_label": { "message": "Buscar una palabra" },
   "lookup_placeholder": { "message": "Escribe una palabra o frase" },
   "lookup_action": { "message": "Buscar" },
-  "lookup_own_meaning": { "message": "Significado propio" },
+  "lookup_clear": { "message": "Borrar el campo" },
+  "lookup_saved_count": {
+    "message": "Guardados: $COUNT$",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "lookup_show_in_list": { "message": "Mostrar en la lista" },
   "lookup_kept": { "message": "En tus frases guardadas" },
   "popup_lookup_back": { "message": "Volver al menú" },
   "popup_lookup_add": { "message": "Añadir a las frases guardadas" },

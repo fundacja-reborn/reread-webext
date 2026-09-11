@@ -99,11 +99,18 @@
   "vocab_filter_label": { "message": "Фільтрувати список збережених фраз" },
   "vocab_filter_clear": { "message": "Очистити фільтр" },
   "vocab_add_title": { "message": "Додати фразу" },
-  "vocab_add_note": { "message": "Введіть слово, щоб побачити його статті у ваших словниках. Натисніть на значення, щоб зберегти фразу, або впишіть власне." },
+  "vocab_add_note": { "message": "Введіть слово й підтвердьте - позначте значення з ваших словників або впишіть власне." },
   "lookup_label": { "message": "Знайти слово" },
   "lookup_placeholder": { "message": "Введіть слово або фразу" },
-  "lookup_action": { "message": "Знайти" },
-  "lookup_own_meaning": { "message": "Власне значення" },
+  "lookup_action": { "message": "Шукати" },
+  "lookup_clear": { "message": "Очистити поле" },
+  "lookup_saved_count": {
+    "message": "Збережено: $COUNT$",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "lookup_show_in_list": { "message": "Показати в списку" },
   "lookup_kept": { "message": "У ваших збережених фразах" },
   "popup_lookup_back": { "message": "Назад до меню" },
   "popup_lookup_add": { "message": "Додати до збережених фраз" },
