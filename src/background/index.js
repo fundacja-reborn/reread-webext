@@ -151,7 +151,9 @@ async function handle(request, sender) {
       // but cannot turn a tab of ours to it, and the reader's walk to the
       // settings in place (D139) left a settings tab behind every time the
       // reader was next raised elsewhere.
-      await openSettings({ from: sender.tab?.id });
+      // At the section the press named, when it named one (D192): the
+      // hint line's "settings" lands on the dictionaries.
+      await openSettings({ from: sender.tab?.id, section: request.section });
       return ok(null);
     }
     case Message.READ_PAGE:

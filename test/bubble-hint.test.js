@@ -38,13 +38,38 @@ describe("the hint line under a translated word", () => {
     assert.match(landing, /hint !== null \? \["more"\]/, "a hint alone does not offer More");
   });
 
-  it("offers the way to more dictionaries under the quiet bubble's miss, and only there", async () => {
+  it("says the dictionaries' verdict in the quiet bubble's hint line, and the gesture's note in the note line", async () => {
     const landing = bodyOf(await source("reading.js"), "landQuietAnswer");
-    assert.match(landing, /dictionaryHint\(\{/, "the quiet landing stopped asking the rule");
+    // D164's sentence about the selection has nothing to press and keeps the
+    // note line; the two about the dictionaries moved to the hint line, and
+    // the pending line comes down with nothing in its place.
     assert.match(
       landing,
-      /hint === "not-in-dictionary" \? \{ text: "", link: sourcesLink\(\) \} : null/,
-      "the quiet bubble's hint is not the link alone under the miss",
+      /note === "whole-words"\) \{[^}]*tooltip\.setContext\(t\("bubble_whole_words"\), "note"\)/,
+      "the gesture's note left the note line",
+    );
+    assert.match(
+      landing,
+      /tooltip\.setContext\(null\);\s*tooltip\.setHint\(dictionaryVerdict\(note, answer\.lang, wordsOf\(normalized\)\)\)/,
+      "the quiet bubble's verdict is not the hint line's, or leaves the pending line standing",
+    );
+  });
+
+  it("makes the address the link's words, and the sentence's own word the press to the settings", async () => {
+    // Michał's rules after the first smoke (2026-09-11): a link in a bubble on
+    // somebody else's page leaves for a site of ours, and the reader should
+    // see that - the words on the link are the page's address, the way the
+    // settings page writes it; and "settings" in "add one in the settings"
+    // is itself the press that opens them, at the dictionaries.
+    const verdict = bodyOf(await source("reading.js"), "dictionaryVerdict");
+    assert.match(verdict, /dictionarySourcesLink\(uiLocale\(\)\)\]/, "the link's words are not the page's address");
+    assert.match(verdict, /linkedWord\(sentence, word\)/, "the settings word is no longer cut out of its sentence");
+    assert.match(verdict, /\{ label: linked\.word, action: "dictionaries" \}/, "the settings word is not the press");
+    const pressed = bodyOf(await source("reading.js"), "onAction");
+    assert.match(
+      pressed,
+      /action === "dictionaries"\) \{[^}]*section: "dictionaries"/,
+      "the press does not ask for the settings at the dictionaries",
     );
   });
 
@@ -56,11 +81,13 @@ describe("the hint line under a translated word", () => {
     assert.match(unfold, /hintElement\.hidden = !unfolded/, "the hint stands outside the layer's fold");
   });
 
-  it("links out with no opener and no referrer, in a new tab", async () => {
+  it("links out with no opener and no referrer, in a new tab, and presses by name", async () => {
     const setHint = bodyOf(await source("tooltip.js"), "setHint");
     assert.match(setHint, /link\.target = "_blank"/, "the link leaves in the page's own tab");
     assert.match(setHint, /link\.rel = "noopener noreferrer"/, "the link hands the page being read to its destination");
-    assert.match(setHint, /\.textContent = hint\.link\.label/, "the link's words go in as something other than text");
+    assert.match(setHint, /link\.textContent = part\.label/, "the link's words go in as something other than text");
+    assert.match(setHint, /press\.textContent = part\.label/, "the press's words go in as something other than text");
+    assert.match(setHint, /emit\(part\.action\)/, "the press goes out under something other than its name");
     assert.doesNotMatch(setHint, /innerHTML/, "the hint is written as markup");
   });
 });

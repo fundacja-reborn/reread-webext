@@ -72,16 +72,24 @@
   "bubble_whole_words": { "message": "Select whole words" },
   "bubble_not_in_dictionary": { "message": "Not in your dictionaries" },
   "bubble_no_dictionary": {
-    "message": "No dictionary for $LANGUAGE$ yet - add one in the settings",
-    "placeholders": { "language": { "content": "$1", "example": "English" } }
+    "message": "No dictionary for $LANGUAGE$ yet - add one in the $SETTINGS$",
+    "description": "The dictionaries' verdict when none is installed for the language (D164), in the bubble's hint line (D192). $SETTINGS$ is bubble_settings_word, put in by the bubble and made a press that opens the settings at the dictionaries - so it must appear exactly once, where the sentence needs that word.",
+    "placeholders": {
+      "language": { "content": "$1", "example": "English" },
+      "settings": { "content": "$2", "example": "settings" }
+    }
+  },
+  "bubble_settings_word": {
+    "message": "settings",
+    "description": "The word that stands in bubble_no_dictionary's $SETTINGS$ place, in exactly the form that sentence needs after its preposition: it is the press that opens the settings at the dictionaries. Not the page's name (settings), which stands on its own elsewhere."
   },
   "bubble_model_word": {
     "message": "A translation model often gets a word on its own wrong.",
     "description": "The first sentence of the translating bubble's hint line (D192), shown under the translation of a word or two that no dictionary line stands under. Followed, across a plain space, by bubble_no_dictionary or bubble_not_in_dictionary, which the bubble closes with a full stop of its own - so this one ends with a full stop too."
   },
   "bubble_dictionary_sources": {
-    "message": "Where to find dictionaries",
-    "description": "The link in the bubble's hint line (D192), under \"Not in your dictionaries\" over a word or two: opens the re/read page listing dictionary sources in a new tab. A noun phrase naming what the page answers, not a verb."
+    "message": "Where to find dictionaries:",
+    "description": "The offer in the bubble's hint line (D192), under \"Not in your dictionaries\" over a word or two. Ends just before the address of the re/read page listing dictionary sources, which follows across a plain space as the link's own words (reapps.eu/read) - so it closes with a colon and must not end with whitespace."
   },
   "bubble_saves_under": {
     "message": "Will be saved under $PAIR$",

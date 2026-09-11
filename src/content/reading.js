@@ -32,7 +32,7 @@
 
 import { webext } from "../lib/browser.js";
 import { CONFIG_KEY, DEFAULTS, chosenPair, withDefaults } from "../lib/config.js";
-import { dictionaryHint, entryBlocks, filingWarning, quietNote } from "../lib/gloss.js";
+import { HINT_MAX_WORDS, dictionaryHint, entryBlocks, filingWarning, linkedWord, quietNote } from "../lib/gloss.js";
 import { t, uiLocale } from "../lib/i18n.js";
 import { languageName, pairLabel } from "../lib/language.js";
 import { keyTokens } from "../lib/matcher/tokenize.js";
@@ -380,22 +380,6 @@ function readingLanguage() {
 }
 
 /**
- * The sentence for what the dictionaries did not say (D164). The missing
- * dictionary is named by the language the lookup was made in (D191), in the
- * catalogue's own names (`languageName`), the way the settings page names
- * languages.
- *
- * @param {"no-dictionary" | "whole-words" | "not-in-dictionary"} note
- * @param {string} lang the language the dictionaries were asked in
- * @returns {string}
- */
-function quietSentence(note, lang) {
-  if (note === "whole-words") return t("bubble_whole_words");
-  if (note === "not-in-dictionary") return t("bubble_not_in_dictionary");
-  return t("bubble_no_dictionary", languageName(primaryLanguage(lang)));
-}
-
-/**
  * Where a press on Save would file this phrase, when that is worth a
  * sentence (D167, `filingWarning`): a dictionary of another language than
  * the pair's knew the word - the page's own, asked second (D191) - so a
@@ -430,38 +414,52 @@ function wordsOf(normalized) {
 }
 
 /**
- * The link to the page listing dictionary sources (D192), in the interface's
- * language: what the hint line offers under "not in your dictionaries". The
- * words are the offer, not the address - the address shows where every link
- * shows it, before the press.
+ * The dictionaries' verdict for the hint line - D164's two sentences about
+ * them, said here rather than in the note line since D192, because here a
+ * word can be a press and an address a link. Which dictionary would have
+ * known better, and the way to it inside the words: the missing one is
+ * named in the language the lookup was made in (D191), in the catalogue's
+ * own names (`languageName`), and "settings" in its sentence opens them at
+ * the dictionaries - Michał's ask after the first smoke (2026-09-11), which
+ * takes back D164's "the sentence names the place, so no button": a word
+ * that is the place is not a button beside a sentence. The silent ones get
+ * the way to more of them, the address on the link - the link's own words
+ * are the address, the way the settings page writes it: a press in a
+ * bubble on somebody else's page leaves for a site of ours, and the reader
+ * is owed that before the press (Michał's rule, same smoke). Offered for a
+ * word or two, where another dictionary could plausibly know it; a longer
+ * phrase gets the sentence alone. Prose either way: sentences close with a
+ * full stop, except the one that ends on the address.
  *
- * @returns {{ label: string, href: string }}
+ * @param {"no-dictionary" | "not-in-dictionary"} kind
+ * @param {string} lang the language the dictionaries were asked in
+ * @param {number} words how many words the phrase has
+ * @returns {import("./tooltip.js").Hint}
  */
-function sourcesLink() {
-  return { label: t("bubble_dictionary_sources"), href: dictionarySourcesLink(uiLocale()).href };
+function dictionaryVerdict(kind, lang, words) {
+  if (kind === "no-dictionary") {
+    const word = t("bubble_settings_word");
+    const sentence = t("bubble_no_dictionary", [languageName(primaryLanguage(lang)), word]);
+    const linked = linkedWord(sentence, word);
+    if (linked === null) return [`${sentence}.`];
+    return [linked.before, { label: linked.word, action: "dictionaries" }, `${linked.after}.`];
+  }
+  const miss = `${t("bubble_not_in_dictionary")}.`;
+  if (words > HINT_MAX_WORDS) return [miss];
+  return [`${miss} ${t("bubble_dictionary_sources")} `, dictionarySourcesLink(uiLocale())];
 }
 
 /**
  * The hint line of the translating bubble (D192): what the engine's answer to
- * a word or two is worth, said first, and then which dictionary would have
- * done better - the missing one, named in the pair's language with the
- * settings as the place to add it (D164's sentence, which names the place
- * and so needs no button beside it), or the installed ones that did not
- * know the word, with the way to more of them.
+ * a word or two is worth, said first, and then the dictionaries' verdict.
  *
  * @param {"no-dictionary" | "not-in-dictionary"} kind
  * @param {string} lang the language the dictionaries were asked in - the pair's
+ * @param {number} words how many words the phrase has
  * @returns {import("./tooltip.js").Hint}
  */
-function translatingHint(kind, lang) {
-  // The second sentence is the note line's own (D164), which closes with no
-  // full stop because it stands alone there; here it stands in prose, and
-  // the stop is what keeps the link after it from reading as its tail.
-  const engine = t("bubble_model_word");
-  if (kind === "no-dictionary") {
-    return { text: `${engine} ${t("bubble_no_dictionary", languageName(primaryLanguage(lang)))}.`, link: null };
-  }
-  return { text: `${engine} ${t("bubble_not_in_dictionary")}.`, link: sourcesLink() };
+function translatingHint(kind, lang, words) {
+  return [`${t("bubble_model_word")} `, ...dictionaryVerdict(kind, lang, words)];
 }
 
 /**
@@ -492,19 +490,18 @@ function landQuietAnswer(answer, normalized, findable) {
   // reads in `current.answered` from here on, the pair's language before.
   if (current !== null) current.answered = answer.entries.length > 0 ? answer.lang : "";
   const note = quietNote({ entries: answer.entries.length, dictionaries: answer.dictionaries, findable });
+  if (note === "whole-words") {
+    // The gesture's note keeps the note line (D164): it is about the
+    // selection, and there is nothing in it to press.
+    tooltip.setContext(t("bubble_whole_words"), "note");
+    return;
+  }
   if (note !== null) {
-    tooltip.setContext(quietSentence(note, answer.lang), "note");
-    // Under "not in your dictionaries", for a word or two, the way to more
-    // of them (D192) - the link alone: the note line has said what happened.
-    // The missing dictionary keeps its sentence and nothing else, the way
-    // D164 decided: it names the place already.
-    const hint = dictionaryHint({
-      words: wordsOf(normalized),
-      entries: answer.entries.length,
-      dictionaries: answer.dictionaries,
-      findable,
-    });
-    tooltip.setHint(hint === "not-in-dictionary" ? { text: "", link: sourcesLink() } : null);
+    // The dictionaries' verdict stands in the hint line since D192, where a
+    // word can be a press and an address a link; the pending line comes
+    // down with nothing in its place.
+    tooltip.setContext(null);
+    tooltip.setHint(dictionaryVerdict(note, answer.lang, wordsOf(normalized)));
     return;
   }
   tooltip.setEntries(entryBlocks(answer.entries, normalized));
@@ -640,8 +637,10 @@ let coveredAbove = () => 0;
  * settings button: a walk in the page's one tab, so the way back exists on
  * a phone. Null everywhere else, where the button asks the background for
  * the settings tab instead - a content script never navigates its host.
+ * Handed a section (D192), the walk lands on it - the hint line's word
+ * opens the settings at the dictionaries.
  *
- * @type {(() => void) | null}
+ * @type {((section?: import("../lib/protocol.js").SettingsSection) => void) | null}
  */
 let openSettings = null;
 
@@ -925,6 +924,14 @@ async function onAction(action, meanings) {
     // content script never navigates the page it is a guest on.
     if (openSettings !== null) openSettings();
     else void ask({ kind: Message.OPEN_SETTINGS });
+    tooltip.hide();
+    return;
+  }
+  if (action === "dictionaries") {
+    // The hint line's word pressed (D192): the settings, at the dictionaries
+    // - the same two roads as Settings above, with the section named.
+    if (openSettings !== null) openSettings("dictionaries");
+    else void ask({ kind: Message.OPEN_SETTINGS, section: "dictionaries" });
     tooltip.hide();
     return;
   }
@@ -1490,13 +1497,9 @@ function present(selection, { deliberate, touch, chain = false }) {
     // engine translated alone, with no dictionary line under it, the hint
     // says the answer is a guess and which dictionary would have known -
     // decided by the count the translation carries, said nothing without it.
-    const hint = dictionaryHint({
-      words: wordsOf(normalized),
-      entries: blocks.length,
-      dictionaries,
-      findable: selection.findable,
-    });
-    tooltip.setHint(hint === null ? null : translatingHint(hint, ttsLang));
+    const words = wordsOf(normalized);
+    const hint = dictionaryHint({ words, entries: blocks.length, dictionaries, findable: selection.findable });
+    tooltip.setHint(hint === null ? null : translatingHint(hint, ttsLang, words));
     secondLayer =
       (sentence !== null && sentence.length > 0) || blocks.length > 0 || hint !== null ? ["more"] : [];
 
@@ -1750,7 +1753,7 @@ function onStorageChanged(changes, area) {
 }
 
 /**
- * @param {{ root?: Element | null, observe?: boolean, stored?: Record<string, unknown>, ownSelection?: boolean, anchored?: boolean, covered?: () => number, openSettings?: () => void, plainLinks?: () => boolean, alsoOwns?: (target: EventTarget | null) => boolean, marking?: () => boolean, markRoot?: () => Element | null, onMarked?: (range: Range) => void, onMarkStart?: () => void, onMarkTap?: (x: number, y: number, word?: Range) => void, markHandleAt?: (x: number, y: number) => { edge: "start" | "end", range: Range } | null, onMarkResizeStart?: () => void, onMarkStretch?: (range: Range) => void, onMarkResized?: (range: Range) => void, quietLookup?: (text: string) => Promise<import("../lib/protocol.js").LookUp | null>, quietVoice?: () => { lang: string, voiceURI: string | undefined } | null, scheme?: () => "light" | "sepia" | "dark" | null }} [where]
+ * @param {{ root?: Element | null, observe?: boolean, stored?: Record<string, unknown>, ownSelection?: boolean, anchored?: boolean, covered?: () => number, openSettings?: (section?: import("../lib/protocol.js").SettingsSection) => void, plainLinks?: () => boolean, alsoOwns?: (target: EventTarget | null) => boolean, marking?: () => boolean, markRoot?: () => Element | null, onMarked?: (range: Range) => void, onMarkStart?: () => void, onMarkTap?: (x: number, y: number, word?: Range) => void, markHandleAt?: (x: number, y: number) => { edge: "start" | "end", range: Range } | null, onMarkResizeStart?: () => void, onMarkStretch?: (range: Range) => void, onMarkResized?: (range: Range) => void, quietLookup?: (text: string) => Promise<import("../lib/protocol.js").LookUp | null>, quietVoice?: () => { lang: string, voiceURI: string | undefined } | null, scheme?: () => "light" | "sepia" | "dark" | null }} [where]
  *   what to underline inside, whether it can change on its own, the startup
  *   read of `storage.local` when the caller already made one, whether the
  *   page selects through our own gesture rather than the browser's - every

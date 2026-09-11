@@ -39,6 +39,8 @@ const SETTINGS_PAGE = "options/options.html";
  *   page of this extension: the first tab worth turning to the page (D147)
  * @property {() => Promise<unknown>} [contexts] the extension's own open
  *   contexts, `runtime.getContexts` shaped - injected by the tests
+ * @property {string} [section] a section of the page to land on (D192), by
+ *   its anchor - the settings at the dictionaries; the top when none
  */
 
 /**
@@ -46,10 +48,11 @@ const SETTINGS_PAGE = "options/options.html";
  * @param {string} room.page the page, relative to the extension's root
  * @param {(session: WebExtBrowser["storage"]["session"]) => Promise<number | null>} room.read
  * @param {(tabId: number | null, session: WebExtBrowser["storage"]["session"]) => Promise<void>} room.write
+ * @param {string} [room.section] see `RoomTabDeps.section`
  * @param {RoomTabDeps} deps
  * @returns {Promise<void>}
  */
-async function openRoom({ page, read, write }, deps) {
+async function openRoom({ page, read, write, section }, deps) {
   const session = deps.session ?? webext().storage.session;
   const url = deps.url ?? webext().runtime.getURL(page);
   const rooms = deps.rooms ?? ROOM_PAGES.map((room) => webext().runtime.getURL(room));
@@ -58,6 +61,9 @@ async function openRoom({ page, read, write }, deps) {
     tabs: deps.tabs ?? webext().tabs,
     windows: deps.windows ?? webext().windows,
     url,
+    // The page is what a tab is recognized by (a fragment on it still starts
+    // with it, `tabsShowing`); the landing is where the press asked to be.
+    landing: section === undefined ? url : `${url}#${section}`,
     // The witness, exactly the reader's (D140/D141, `single-tab.js`): since
     // the reader's menu walks to these pages in place, a tab can both stop
     // being the page (it walked on) and start somewhere nobody remembered -
@@ -86,5 +92,5 @@ export function openVocabulary(deps = {}) {
  * @returns {Promise<void>}
  */
 export function openSettings(deps = {}) {
-  return openRoom({ page: SETTINGS_PAGE, read: readSettingsTab, write: writeSettingsTab }, deps);
+  return openRoom({ page: SETTINGS_PAGE, read: readSettingsTab, write: writeSettingsTab, section: deps.section }, deps);
 }

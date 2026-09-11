@@ -50,11 +50,15 @@
   "bubble_whole_words": { "message": "Markieren Sie ganze Wörter" },
   "bubble_not_in_dictionary": { "message": "Nicht in Ihren Wörterbüchern" },
   "bubble_no_dictionary": {
-    "message": "Noch kein Wörterbuch für $LANGUAGE$ - fügen Sie eines in den Einstellungen hinzu",
-    "placeholders": { "language": { "content": "$1", "example": "Englisch" } }
+    "message": "Noch kein Wörterbuch für $LANGUAGE$ - fügen Sie eines in den $SETTINGS$ hinzu",
+    "placeholders": {
+      "language": { "content": "$1", "example": "Englisch" },
+      "settings": { "content": "$2", "example": "Einstellungen" }
+    }
   },
+  "bubble_settings_word": { "message": "Einstellungen" },
   "bubble_model_word": { "message": "Ein Übersetzungsmodell übersetzt ein einzelnes Wort ohne Kontext oft falsch." },
-  "bubble_dictionary_sources": { "message": "Wo Wörterbücher zu finden sind" },
+  "bubble_dictionary_sources": { "message": "Wo Wörterbücher zu finden sind:" },
   "bubble_saves_under": {
     "message": "Wird unter $PAIR$ gespeichert",
     "placeholders": { "pair": { "content": "$1", "example": "Englisch → Polnisch" } }

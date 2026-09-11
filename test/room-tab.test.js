@@ -106,6 +106,38 @@ describe("opening the settings", () => {
     assert.deepEqual(state.turned, []);
     assert.equal(state.selected, 7);
   });
+
+  it("lands on the section a press names, in a fresh tab and in the one already showing the page (D192)", async () => {
+    const fresh = settings();
+    await openSettings({ ...fresh.deps, section: "dictionaries" });
+    assert.deepEqual(fresh.state.created, [`${SETTINGS_URL}#dictionaries`]);
+    assert.equal(fresh.state.stored[SETTINGS_TAB_KEY], 100);
+
+    // The tab already showing the settings is turned to the section - the
+    // same document, a fragment on - rather than only raised.
+    const open = settings({ tabs: [{ id: 7, windowId: 3 }], session: { [SETTINGS_TAB_KEY]: 7 } });
+    await openSettings({ ...open.deps, section: "dictionaries", contexts: async () => [showing(SETTINGS_URL, 7)] });
+    assert.deepEqual(open.state.created, []);
+    assert.deepEqual(open.state.turned, [{ tabId: 7, url: `${SETTINGS_URL}#dictionaries` }]);
+    assert.equal(open.state.selected, 7);
+
+    // A tab of ours turned to the settings lands on the section as well.
+    const walked = settings({ tabs: [{ id: 5, windowId: 1 }] });
+    await openSettings({ ...walked.deps, from: 5, section: "dictionaries", contexts: async () => [showing(VOCAB_URL, 5)] });
+    assert.deepEqual(walked.state.turned, [{ tabId: 5, url: `${SETTINGS_URL}#dictionaries` }]);
+  });
+
+  it("still knows its tab once it stands on a section", async () => {
+    // The fragment the last press left on the address must not make the
+    // settings tab a stranger: raised as it is, no copy opened.
+    const { state, deps } = settings({ tabs: [{ id: 7, windowId: 3 }], session: { [SETTINGS_TAB_KEY]: 7 } });
+
+    await openSettings({ ...deps, contexts: async () => [showing(`${SETTINGS_URL}#dictionaries`, 7)] });
+
+    assert.deepEqual(state.created, []);
+    assert.deepEqual(state.turned, []);
+    assert.equal(state.selected, 7);
+  });
 });
 
 /**

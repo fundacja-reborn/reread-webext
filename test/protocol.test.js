@@ -230,6 +230,18 @@ describe("asRequest", () => {
     });
   });
 
+  it("keeps the settings section a press names, and drops one it does not know (D192)", () => {
+    assert.deepEqual(asRequest({ kind: Message.OPEN_SETTINGS, section: "dictionaries" }), {
+      kind: Message.OPEN_SETTINGS,
+      section: "dictionaries",
+    });
+    // A section is a name off a closed list, never a fragment to paste into
+    // an address: anything else opens the settings at the top, as before.
+    for (const section of ["models", "dictionaries#x", "", 42, null, {}, undefined]) {
+      assert.deepEqual(asRequest({ kind: Message.OPEN_SETTINGS, section }), { kind: Message.OPEN_SETTINGS });
+    }
+  });
+
   it("drops a tab id that is not one, rather than refusing the reader", () => {
     for (const sourceTabId of ["42", null, {}, [42], undefined]) {
       assert.deepEqual(asRequest({ kind: Message.OPEN_READER, sourceTabId }), {

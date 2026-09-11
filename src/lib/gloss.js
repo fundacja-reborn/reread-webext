@@ -175,6 +175,26 @@ export function dictionaryHint({ words, entries, dictionaries, findable }) {
 }
 
 /**
+ * A sentence cut around one of its words, so the bubble can make that word
+ * a press (D192: "add one in the settings", where "settings" opens them).
+ * The word arrives as the sentence's own placeholder, substituted verbatim,
+ * so it is found where the catalogue put it - first occurrence, which is
+ * the only one in every catalogue. A word that is not in the sentence (a
+ * catalogue that dropped the placeholder, an empty word) cuts nothing: the
+ * sentence then reads whole, with nothing to press, rather than not at all.
+ *
+ * @param {string} sentence
+ * @param {string} word
+ * @returns {{ before: string, word: string, after: string } | null}
+ */
+export function linkedWord(sentence, word) {
+  if (word.length === 0) return null;
+  const at = sentence.indexOf(word);
+  if (at === -1) return null;
+  return { before: sentence.slice(0, at), word, after: sentence.slice(at + word.length) };
+}
+
+/**
  * Whether the quiet bubble should say where Save would file this phrase
  * (D167, Michał's rule): only where two signals agree that the page is not
  * in the pair's language - the page declares another one, AND a dictionary

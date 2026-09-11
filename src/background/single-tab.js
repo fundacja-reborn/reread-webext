@@ -123,25 +123,30 @@ async function focusTab(tabs, windows, id, url) {
  * @param {object} deps
  * @param {Pick<WebExtBrowser["tabs"], "create" | "update">} deps.tabs
  * @param {WebExtBrowser["windows"]} deps.windows
- * @param {string} deps.url
+ * @param {string} deps.url the page, as its tabs are recognized by
+ * @param {string} [deps.landing] where to land on it - the page with a fragment
+ *   naming a section (D192); the page itself when nothing was asked for
  * @param {() => Promise<number | null>} deps.read which tab it was, last anybody looked
  * @param {(tabId: number | null) => Promise<void>} deps.write
  * @param {() => Promise<number[]>} deps.adopt the tabs worth turning to the page, in order
  *   (`adoptable`), asked only once no tab shows it
  * @returns {Promise<void>}
  */
-export async function raiseOrOpen({ tabs, windows, url, read, write, adopt }) {
+export async function raiseOrOpen({ tabs, windows, url, landing = url, read, write, adopt }) {
   const known = await read();
-  if (known !== null && (await focusTab(tabs, windows, known))) return;
+  // Raised as it is, unless a place on the page was asked for (D192): then
+  // the tab is turned to it - the same document, a fragment on - which is
+  // how the settings open at the dictionaries in a tab already showing them.
+  if (known !== null && (await focusTab(tabs, windows, known, landing === url ? undefined : landing))) return;
 
   for (const id of await adopt()) {
-    if (await focusTab(tabs, windows, id, url)) {
+    if (await focusTab(tabs, windows, id, landing)) {
       await write(id);
       return;
     }
   }
 
-  const opened = await tabs.create({ url });
+  const opened = await tabs.create({ url: landing });
   // No id means nothing to come back to, and the id we have is the stale one
   // that just failed. Keeping it would send the next press after a dead tab.
   await write(typeof opened.id === "number" ? opened.id : null);

@@ -679,8 +679,18 @@ export const STYLE = `
     font-style: italic;
   }
   .hint-text { opacity: 0.6; }
+  /* One dress for the anchor and for the press: a word of the sentence that
+     can be pressed looks like a link, whether it leaves the page or opens
+     the settings - the button's own box would make it the loudest thing on
+     a line meant to be read. */
   .hint-link {
+    display: inline;
+    margin: 0;
+    padding: 0;
+    font: inherit;
     color: inherit;
+    background: none;
+    border: 0;
     opacity: 0.8;
     text-decoration: underline;
     text-underline-offset: 0.15em;
@@ -1212,7 +1222,8 @@ export const STYLE = `
  *  @typedef {"copy-original" | "copy-translation"} CopyChoice */
 /** What it reports - editing never leaves the bubble, and More leaves it only
  *  on the press that opens the layer, so a caller with nothing fetched yet can
- *  fetch it then. @typedef {"save" | "choose" | "learned" | "settings" | "reader" | "library" | "more" | "speak" | "open-reader"} ReportedAction */
+ *  fetch it then. `dictionaries` is the hint line's word pressed (D192): the
+ *  settings, at the dictionaries. @typedef {"save" | "choose" | "learned" | "settings" | "reader" | "library" | "more" | "speak" | "open-reader" | "dictionaries"} ReportedAction */
 
 /**
  * One block of the second layer below the sentence: where it came from, and the
@@ -1236,14 +1247,18 @@ export const STYLE = `
 /**
  * The hint line (D192): the layer's one aside about the answer itself, under
  * the sentence and the entries - that the engine guesses badly at a word on
- * its own and which dictionary would have known better - with, where there
- * is somewhere to go, one link. The link is a real anchor and not a press
- * reported to the caller: it leaves for a page of ours in a new tab, and an
- * anchor is the one thing that says where it leads before it is pressed. A
- * hint with no words is a hint that is only its link (the quiet bubble's,
- * whose note line has already said what happened).
+ * its own and which dictionary would have known better - with the way there
+ * inside the words. A hint is its parts in reading order: runs of words, a
+ * link out of the page, and a press reported to the caller by name. The
+ * link is a real anchor: it leaves for a page of ours in a new tab, and an
+ * anchor is the one thing that says where it leads before it is pressed -
+ * its words are the address for the same reason. The press is a word of
+ * the sentence itself ("settings", in "add one in the settings"), dressed
+ * like the link and reported the way the row's buttons are: `dictionaries`
+ * asks the caller for the settings, opened at the dictionaries.
  *
- * @typedef {{ text: string, link: { label: string, href: string } | null }} Hint
+ * @typedef {string | { label: string, href: string } | { label: string, action: "dictionaries" }} HintPart
+ * @typedef {HintPart[]} Hint
  */
 
 /**
@@ -2021,7 +2036,7 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
   }
 
   /**
-   * @param {Action | "cancel" | "choose"} action
+   * @param {Action | "cancel" | "choose" | "dictionaries"} action
    */
   function emit(action) {
     // A press inside the bubble holds its side from here on (D177) - except the
@@ -2184,7 +2199,7 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
     entriesElement.hidden = !unfolded || !entriesThere;
     // The hint is the layer's (D192): folded away with it, shown with it when
     // it has anything to say.
-    if (hintElement !== null) hintElement.hidden = !unfolded || hintElement.childElementCount === 0;
+    if (hintElement !== null) hintElement.hidden = !unfolded || (hintElement.textContent ?? "").length === 0;
     // The fold's column comes or goes before placing: its width decides where
     // the sentence wraps, and the wrapping is measured below. Presence needs
     // no measurement - `absent` is about the entries alone (D96).
@@ -2324,34 +2339,42 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
   }
 
   /**
-   * The hint line filled or emptied (D192). Words and link are two elements,
-   * so the words can fade a shade further than the link; both take their
-   * text through `textContent`, like everything else in here. The link opens
-   * in a new tab, with no opener and no referrer: the page the bubble stands
-   * on is somebody else's, and where it was read is nobody's business - not
-   * even a page of ours.
+   * The hint line filled or emptied (D192), part by part. Words go in their
+   * own element, so they can fade a shade further than what can be pressed;
+   * everything takes its text through `textContent`, like everything else in
+   * here. A link opens in a new tab, with no opener and no referrer: the page
+   * the bubble stands on is somebody else's, and where it was read is
+   * nobody's business - not even a page of ours. A press goes out under its
+   * name like a button of the row, and so answers to the same swallow.
    *
    * @param {Hint | null} hint
    */
   function setHint(hint) {
     if (hintElement === null) return;
     hintElement.replaceChildren();
-    if (hint !== null) {
-      if (hint.text.length > 0) {
+    for (const part of hint ?? []) {
+      if (typeof part === "string") {
+        if (part.length === 0) continue;
         const words = document.createElement("span");
         words.className = "hint-text";
-        words.textContent = hint.text;
+        words.textContent = part;
         hintElement.append(words);
-      }
-      if (hint.link !== null) {
-        if (hint.text.length > 0) hintElement.append(" ");
+      } else if ("href" in part) {
         const link = document.createElement("a");
         link.className = "hint-link";
-        link.href = hint.link.href;
+        link.href = part.href;
         link.target = "_blank";
         link.rel = "noopener noreferrer";
-        link.textContent = hint.link.label;
+        link.textContent = part.label;
         hintElement.append(link);
+      } else {
+        const press = document.createElement("button");
+        press.type = "button";
+        press.className = "hint-link";
+        press.dataset["action"] = part.action;
+        press.textContent = part.label;
+        press.addEventListener("click", () => emit(part.action));
+        hintElement.append(press);
       }
     }
     unfold(unfolded);

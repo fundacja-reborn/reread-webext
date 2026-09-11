@@ -38,6 +38,26 @@ export const Message = Object.freeze({
   PAGE_INFO: "page-info",
 });
 
+/**
+ * The places on the settings page a press may ask to land on (D192), by the
+ * anchor the page gives them - one so far: the bubble's "settings", in the
+ * line about a missing dictionary, opens the dictionaries. A closed list, so
+ * that a request names a section and never an address: the background puts
+ * the name on as a fragment, and a name it does not know is dropped like
+ * every other extra (the settings then open at the top, as before).
+ */
+export const SETTINGS_SECTIONS = Object.freeze(/** @type {const} */ (["dictionaries"]));
+
+/** @typedef {(typeof SETTINGS_SECTIONS)[number]} SettingsSection */
+
+/**
+ * @param {unknown} value
+ * @returns {value is SettingsSection}
+ */
+function isSettingsSection(value) {
+  return typeof value === "string" && SETTINGS_SECTIONS.some((section) => section === value);
+}
+
 /** Every way a request can fail, and the whole list of them. */
 export const ErrorCode = Object.freeze({
   /** No translation engine is bundled yet (the state before M1 lands). */
@@ -193,7 +213,7 @@ export const ErrorCode = Object.freeze({
  * @typedef {{ kind: typeof Message.OPEN_LIBRARY }} OpenLibraryRequest
  * @typedef {{ kind: typeof Message.OPEN_MARKS }} OpenMarksRequest
  * @typedef {{ kind: typeof Message.OPEN_VOCABULARY }} OpenVocabularyRequest
- * @typedef {{ kind: typeof Message.OPEN_SETTINGS }} OpenSettingsRequest
+ * @typedef {{ kind: typeof Message.OPEN_SETTINGS, section?: SettingsSection }} OpenSettingsRequest
  * @typedef {{ kind: typeof Message.SAVE_PHRASE, text: string, translations: string[] }} SavePhraseRequest
  * @typedef {{ kind: typeof Message.FORGET_PHRASE, text: string }} ForgetPhraseRequest
  * @typedef {{ kind: typeof Message.LIST_PHRASES }} ListPhrasesRequest
@@ -387,7 +407,14 @@ export function asRequest(message) {
   if (kind === Message.OPEN_LIBRARY) return { kind: Message.OPEN_LIBRARY };
   if (kind === Message.OPEN_MARKS) return { kind: Message.OPEN_MARKS };
   if (kind === Message.OPEN_VOCABULARY) return { kind: Message.OPEN_VOCABULARY };
-  if (kind === Message.OPEN_SETTINGS) return { kind: Message.OPEN_SETTINGS };
+  if (kind === Message.OPEN_SETTINGS) {
+    // The section is an extra like the reader's tab id: kept when it names
+    // one the page has, dropped otherwise, never a reason to refuse.
+    const section = /** @type {Record<string, unknown>} */ (message)["section"];
+    return isSettingsSection(section)
+      ? { kind: Message.OPEN_SETTINGS, section }
+      : { kind: Message.OPEN_SETTINGS };
+  }
   if (kind === Message.LIST_PHRASES) return { kind: Message.LIST_PHRASES };
   if (kind === Message.READ_PAGE) return { kind: Message.READ_PAGE };
 

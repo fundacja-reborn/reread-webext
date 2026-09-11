@@ -48,13 +48,17 @@
   "bubble_looking_up": { "message": "Szukam w słownikach..." },
   "bubble_nothing_more": { "message": "Nie ma ani zdania, ani wpisu ze słownika" },
   "bubble_whole_words": { "message": "Zaznacz całe słowa" },
-  "bubble_not_in_dictionary": { "message": "Nie ma tego w słownikach" },
+  "bubble_not_in_dictionary": { "message": "Nie ma tego w Twoich słownikach" },
   "bubble_no_dictionary": {
-    "message": "Brak słownika dla języka: $LANGUAGE$ - dodaj go w ustawieniach",
-    "placeholders": { "language": { "content": "$1", "example": "angielski" } }
+    "message": "Brak słownika dla języka: $LANGUAGE$ - dodaj go w $SETTINGS$",
+    "placeholders": {
+      "language": { "content": "$1", "example": "angielski" },
+      "settings": { "content": "$2", "example": "ustawieniach" }
+    }
   },
+  "bubble_settings_word": { "message": "ustawieniach" },
   "bubble_model_word": { "message": "Model tłumaczenia często myli się na słowie bez kontekstu." },
-  "bubble_dictionary_sources": { "message": "Gdzie szukać słowników" },
+  "bubble_dictionary_sources": { "message": "Gdzie szukać słowników:" },
   "bubble_saves_under": {
     "message": "Zapis trafi do pary $PAIR$",
     "placeholders": { "pair": { "content": "$1", "example": "angielski → polski" } }

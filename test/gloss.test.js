@@ -8,6 +8,7 @@ import {
   dictionaryHint,
   entryBlocks,
   filingWarning,
+  linkedWord,
   quietNote,
   savePress,
   toMeanings,
@@ -199,6 +200,32 @@ describe("dictionaryHint", () => {
     // dictionary still outranks the gesture, as in quietNote.
     assert.equal(dictionaryHint({ words: 1, entries: 0, dictionaries: 2, findable: false }), null);
     assert.equal(dictionaryHint({ words: 1, entries: 0, dictionaries: 0, findable: false }), "no-dictionary");
+  });
+});
+
+describe("linkedWord", () => {
+  it("cuts the sentence around the word the catalogue put in, wherever it stands", () => {
+    assert.deepEqual(linkedWord("add one in the settings", "settings"), {
+      before: "add one in the ",
+      word: "settings",
+      after: "",
+    });
+    // German puts the verb's tail after it.
+    assert.deepEqual(linkedWord("fügen Sie eines in den Einstellungen hinzu", "Einstellungen"), {
+      before: "fügen Sie eines in den ",
+      word: "Einstellungen",
+      after: " hinzu",
+    });
+  });
+
+  it("cuts nothing when the word is not in the sentence, or is nothing", () => {
+    // A catalogue that dropped the placeholder still reads as a sentence.
+    assert.equal(linkedWord("add one in the settings", ""), null);
+    assert.equal(linkedWord("add one", "settings"), null);
+  });
+
+  it("takes the first occurrence", () => {
+    assert.deepEqual(linkedWord("a b a", "a"), { before: "", word: "a", after: " b a" });
   });
 });
 
