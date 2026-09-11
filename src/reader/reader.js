@@ -1533,16 +1533,27 @@ let os = "";
 /**
  * The bar's own full-screen tool (D195), offered where it earns its place:
  * on Android, whose address bar is what the press takes away (D180), over
- * an article (the list keeps its whole chrome - the ribbon's rule), and
- * where the browser has a full screen to give. The width is the
- * stylesheet's say: under 30rem the tool leaves the row. Its name follows
- * the browser's state - the one listener D180 did without, because a glyph
- * has no second label a stylesheet could show; the lit frame is the
- * stylesheet's (`:root:fullscreen`), like the glyph.
+ * an article (the list keeps its whole chrome - the ribbon's rule), where
+ * the browser has a full screen to give - and where the row has room for
+ * it. The room is measured, not assumed: the tool is stood in the row and
+ * the row asked whether it now runs past its edge, because the row's width
+ * in CSS pixels is the browser's business, not the screen's - Firefox's
+ * font-size setting on Android is a whole-page zoom, so a Boox with room
+ * to spare reported a narrower row than a fixed breakpoint allowed for
+ * (Michał's photo, 2026-09-11), and a Pixel held upright has none. Asked
+ * again on every resize, an orientation turned included.
+ *
+ * Its name follows the browser's state - the one listener D180 did
+ * without, because a glyph has no second label a stylesheet could show;
+ * the lit frame is the stylesheet's (`:root:fullscreen`), like the glyph.
  */
 function updateFullscreenTool() {
   if (fullscreenTool === null) return;
   fullscreenTool.hidden = shown === null || os !== "android" || !document.fullscreenEnabled;
+  const bar = fullscreenTool.closest(".reader-bar");
+  if (!fullscreenTool.hidden && bar instanceof HTMLElement && bar.scrollWidth > bar.clientWidth) {
+    fullscreenTool.hidden = true;
+  }
   const label = document.fullscreenElement !== null ? t("reader_fullscreen_exit") : t("reader_fullscreen_bar");
   fullscreenTool.title = label;
   fullscreenTool.setAttribute("aria-label", label);
@@ -6244,8 +6255,9 @@ fullscreenTool?.addEventListener("click", async () => {
   if (!settings.reader.chromeHidden) adoptConfig(await writeConfig({ reader: { chromeHidden: true } }));
 });
 // The tool's name follows the browser's state, entered by either press and
-// left by the tool, the row, Back or Esc.
+// left by the tool, the row, Back or Esc - and its room follows the window.
 document.addEventListener("fullscreenchange", updateFullscreenTool);
+window.addEventListener("resize", updateFullscreenTool);
 // Which platform this is, for the tool's one-word rule: asked once, the
 // tool drawn as soon as the answer lands.
 void platformOs().then((found) => {

@@ -32,11 +32,17 @@ describe("the reader bar's full-screen tool", () => {
     assert.match(startTag, /\n\s+hidden\s*$/, "the tool stands before the page knows where it is");
   });
 
-  it("is offered on Android over an article where the browser has a full screen to give", async () => {
-    const rule = bodyOf(await source("reader.js"), "updateFullscreenTool");
+  it("is offered on Android over an article where the browser has a full screen to give and the row has room", async () => {
+    const script = await source("reader.js");
+    const rule = bodyOf(script, "updateFullscreenTool");
     assert.match(rule, /shown === null/, "the tool stands over the list, which keeps its whole chrome");
     assert.match(rule, /os !== "android"/, "the tool stands on the desktop, which the ask was not about");
     assert.match(rule, /document\.fullscreenEnabled/, "the tool stands where the browser has no full screen");
+    // Room is measured in the row, not read off a breakpoint: the row's
+    // width in CSS pixels follows the browser's zoom, and a Boox with room
+    // to spare fell under a fixed 30rem (Michał's photo, 2026-09-11).
+    assert.match(rule, /bar\.scrollWidth > bar\.clientWidth/, "the room for the tool is assumed rather than measured");
+    assert.match(script, /window\.addEventListener\("resize", updateFullscreenTool\)/, "a turned phone keeps the old answer about the room");
     assert.match(rule, /reader_fullscreen_exit/, "the tool's name does not follow the browser's state");
   });
 
@@ -53,10 +59,11 @@ describe("the reader bar's full-screen tool", () => {
     assert.match(script, /addEventListener\("fullscreenchange", updateFullscreenTool\)/, "the tool's name stops following Back and Esc");
   });
 
-  it("leaves the row where the row has no room, and lights up in full screen", async () => {
+  it("wears the row's tight dress on a narrow screen, and lights up in full screen", async () => {
     const sheet = await source("reader.css");
     const narrow = sheet.slice(sheet.indexOf("@media (max-width: 30rem)"));
-    assert.match(narrow, /#fullscreen \{\s*display: none;/, "a sixth tool pushes the menu off a phone's row again");
+    assert.match(narrow, /#display,\s*#fullscreen,\s*#menu \{/, "the tool keeps the desktop's air where the others give it up");
+    assert.doesNotMatch(narrow, /#fullscreen \{\s*display: none/, "the stylesheet takes the tool away by width, which the zoom makes a lie");
     assert.match(sheet, /:root:fullscreen #fullscreen,/, "the tool does not light up while the page has the screen");
     assert.match(sheet, /:root:fullscreen :is\(#nav-fullscreen, #fullscreen\) \.fullscreen-enter/, "the glyph does not follow the browser's state");
   });
