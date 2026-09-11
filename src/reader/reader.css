@@ -556,17 +556,10 @@ html {
   #marker,
   #listen,
   #display,
+  #fullscreen,
   #menu {
     min-width: 2.4rem;
     padding-inline: 0.4rem;
-  }
-
-  /* The full-screen tool (D195) is the one resident that leaves: under this
-     width the row is already trading air for fit, and a sixth tool would
-     push the menu off the edge again (a Pixel at 125% zoom). The menu row
-     keeps the same door open there. */
-  #fullscreen {
-    display: none;
   }
 }
 
