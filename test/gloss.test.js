@@ -4,6 +4,7 @@ import { describe, it } from "node:test";
 import {
   HINT_MAX_WORDS,
   afterChoosing,
+  answeredElsewhere,
   choosableLines,
   dictionaryHint,
   entryBlocks,
@@ -226,6 +227,26 @@ describe("linkedWord", () => {
 
   it("takes the first occurrence", () => {
     assert.deepEqual(linkedWord("a b a", "a"), { before: "", word: "a", after: " b a" });
+  });
+});
+
+describe("answeredElsewhere", () => {
+  it("is the two signals agreeing: entries from a dictionary of another language than the pair's (D193)", () => {
+    // Michał's screenshot (2026-09-11): "książkach" on a Polish page under
+    // en → pl - with a Polish dictionary that knows the word, the phrase is
+    // Polish and the engine's "księgowa" is a guess at the wrong language.
+    assert.equal(answeredElsewhere({ entries: 1, reading: "pl", pairFrom: "en" }), true);
+  });
+
+  it("cries no wolf on one signal alone", () => {
+    // Nothing found in the page's language: an English quote on a Polish
+    // page, or a Polish word no dictionary holds - the engine's answer stands.
+    assert.equal(answeredElsewhere({ entries: 0, reading: "pl", pairFrom: "en" }), false);
+    // The pair's own dictionary answered: nothing foreign about it.
+    assert.equal(answeredElsewhere({ entries: 2, reading: "en", pairFrom: "en" }), false);
+    // No language named on either side says nothing.
+    assert.equal(answeredElsewhere({ entries: 2, reading: "", pairFrom: "en" }), false);
+    assert.equal(answeredElsewhere({ entries: 2, reading: "pl", pairFrom: "" }), false);
   });
 });
 

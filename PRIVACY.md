@@ -1,6 +1,6 @@
 # Privacy policy for re/read
 
-Last updated: 2 September 2026. This document is kept in the extension's repository, so
+Last updated: 11 September 2026. This document is kept in the extension's repository, so
 every change to it is a commit anyone can read: [`PRIVACY.md`](https://github.com/fundacja-reborn/reread-webext/blob/main/PRIVACY.md).
 
 ## The short version
@@ -130,6 +130,19 @@ privacy policy, not of re/read, and it applies to every application that speaks 
 system. Firefox for Android is the one browser that lists no voices at all; there re/read
 hands the text to the browser with the language alone, and the system's speech engine
 picks the voice, under the system's own settings.
+
+## Language detection
+
+Before a selected phrase is translated, re/read checks which language it is in, so that a page
+in your own language is not fed to a translation model built for another one. This uses the
+browser's built-in language detector (the `i18n.detectLanguage` extension API). In Firefox it is
+the CLD2 algorithm compiled into the browser and run in a worker that ships with it; in
+Chromium-based browsers it is CLD3, linked into the browser itself. Both run on your device, load
+no model from the network and send nothing anywhere: the text never leaves the browser. We have
+checked this in both browsers' source code, not only in their documentation. Safari provides no
+such detector; there re/read skips the check and behaves as before. This is unrelated to the
+browsers' own page-translation features (Chrome's "Translate this page", Firefox Translations),
+which re/read does not use.
 
 ## Page content
 

@@ -125,6 +125,12 @@ interface WebExtBrowser {
     // included; the catalogue is picked by the browser's UI language, with
     // `default_locale` as the floor.
     getMessage(messageName: string, substitutions?: string | string[]): string;
+    // The browser's own language detector (D193): CLD2 behind Firefox's
+    // `LanguageDetector`, CLD3 in Chromium - offline, no permission, no
+    // network. Optional because WebKit does not promise it; reach it through
+    // `detectLanguage` in lib/detect.js, which treats its absence as "no
+    // verdict". The languages come with the share of the text in each.
+    detectLanguage?(text: string): Promise<{ isReliable: boolean; languages: { language: string; percentage: number }[] }>;
   };
   // Optional because Firefox on Android does not have it - no keyboard, no
   // API - and the type saying "always there" is what let an unguarded access

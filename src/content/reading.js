@@ -373,7 +373,10 @@ async function lookUpQuiet(text, lang) {
  * @returns {string} BCP-47
  */
 function readingLanguage() {
-  if (!noTranslation) return ttsLang;
+  // With the engine on, the pair's - unless a dictionary of another language
+  // knew the phrase (D193, the trim's own rule below): the engine translated
+  // the wrong language then, and the voice follows the book that knew it.
+  if (!noTranslation) return current !== null && current.answered.length > 0 ? current.answered : ttsLang;
   if (quietVoice !== null) return quietVoice()?.lang ?? "";
   if (current !== null && current.answered.length > 0) return current.answered;
   return ttsLang.length > 0 ? ttsLang : (current?.lang ?? "");
@@ -411,6 +414,27 @@ function filingNote(entries, findable, lang) {
  */
 function wordsOf(normalized) {
   return keyTokens(normalized).length;
+}
+
+/**
+ * A translate request as the bubble asks it: the phrase, the sentence it
+ * stands in when the page had one, and since D193 the language the page
+ * declares for it (`declaredLanguage`) - which the background asks the
+ * dictionaries in second, after the pair's (D191), and which is never the
+ * engine's business: the engine translates from the pair's language or not
+ * at all.
+ *
+ * @param {string} text
+ * @param {string | null} context
+ * @param {string} lang the page's declaration, empty for none
+ * @returns {import("../lib/protocol.js").TranslateRequest}
+ */
+function translateRequest(text, context, lang) {
+  /** @type {import("../lib/protocol.js").TranslateRequest} */
+  const request = { kind: Message.TRANSLATE, text };
+  if (context !== null) request.context = context;
+  if (lang.length > 0) request.lang = lang;
+  return request;
 }
 
 /**
@@ -1190,11 +1214,7 @@ async function fillSecondLayer() {
   tooltip.setContext(t("bubble_translating"), "pending");
 
   /** @type {Promise<import("../lib/protocol.js").Result<import("../lib/protocol.js").Translation>>} */
-  const answer = ask(
-    wanted.context === null
-      ? { kind: Message.TRANSLATE, text: phrase.text }
-      : { kind: Message.TRANSLATE, text: phrase.text, context: wanted.context },
-  );
+  const answer = ask(translateRequest(phrase.text, wanted.context, phrase.lang));
   const result = await answer;
   if (mine !== generation || !tooltip.isOpen()) return;
 
@@ -1465,12 +1485,8 @@ function present(selection, { deliberate, touch, chain = false }) {
     scheme: bubbleScheme?.() ?? null,
   });
 
-  const request = selection.context === null
-    ? { kind: Message.TRANSLATE, text }
-    : { kind: Message.TRANSLATE, text, context: selection.context };
-
   /** @type {Promise<import("../lib/protocol.js").Result<import("../lib/protocol.js").Translation>>} */
-  const answer = ask(request);
+  const answer = ask(translateRequest(text, selection.context, selection.lang));
 
   void answer.then((result) => {
     if (mine !== generation || !tooltip.isOpen()) return;
@@ -1484,20 +1500,61 @@ function present(selection, { deliberate, touch, chain = false }) {
       return;
     }
 
-    const { gloss, sentence, entries, dictionaries } = asTranslation(result.value);
+    const { gloss, sentence, entries, dictionaries, language } = asTranslation(result.value);
+    const blocks = entryBlocks(entries ?? [], normalized);
+    const words = wordsOf(normalized);
+
+    // A phrase in another language than the pair's (D193): the browser's
+    // detector read the sentence as the reader's own language, or a
+    // dictionary of that language knew the word while the pair's did not
+    // (Michał's screenshot, 2026-09-11: "książkach" on a Polish page under
+    // en → pl, glossed "księgowa", the sentence around it word salad, and
+    // the guess kept in the vocabulary). The engine was not asked, so there
+    // is no gloss and nothing is ever kept on its own: what stands is the
+    // quiet pair's answer (D158) - the entries as presses, the pencil, Save
+    // waiting for a meaning (D175) - or, with none, the dictionaries'
+    // verdict about that language in the hint line (D164, D192: no
+    // dictionary for it yet, or none that knew the word). The line saying
+    // where Save would file the phrase (D167) stands wherever Save does,
+    // and the voice is that language's (D191). The layer comes out whatever
+    // the fold setting says, and so does the row: the answer is down there,
+    // and Save may not hide (D131).
+    if (language !== undefined) {
+      if (current !== null) current.answered = language;
+      tooltip.setBody("", "normal");
+      tooltip.setEntries(blocks);
+      const verdict =
+        blocks.length > 0 || dictionaries === undefined
+          ? null
+          : quietNote({ entries: 0, dictionaries, findable: selection.findable });
+      if (verdict === "whole-words") tooltip.setContext(t("bubble_whole_words"), "note");
+      else tooltip.setContext(selection.findable ? t("bubble_saves_under", pairLabel(ttsLang, pairTarget)) : null, "note");
+      const said = verdict !== null && verdict !== "whole-words";
+      tooltip.setHint(said ? dictionaryVerdict(verdict, language, words) : null);
+      secondLayer = blocks.length > 0 || said ? ["more"] : [];
+      tooltip.setActions([
+        ...speakActions(),
+        ...COPY,
+        ...readerDoor(),
+        .../** @type {import("./tooltip.js").Action[]} */ (selection.findable ? ["edit", "save"] : []),
+        ...secondLayer,
+      ]);
+      tooltip.expand();
+      tooltip.reveal();
+      return;
+    }
+
     tooltip.setBody(gloss, "normal");
     // Into the layer, which shows them or holds them as the opening said
     // (D186): out from the first frame, or waiting behind More - G0's
     // answer-the-word-and-get-out-of-the-way, kept for whoever folds the
     // layer away in the settings.
     tooltip.setContext(sentence);
-    const blocks = entryBlocks(entries ?? [], normalized);
     tooltip.setEntries(blocks);
     // The layer's aside on the answer itself (D192): over a word or two the
     // engine translated alone, with no dictionary line under it, the hint
     // says the answer is a guess and which dictionary would have known -
     // decided by the count the translation carries, said nothing without it.
-    const words = wordsOf(normalized);
     const hint = dictionaryHint({ words, entries: blocks.length, dictionaries, findable: selection.findable });
     tooltip.setHint(hint === null ? null : translatingHint(hint, ttsLang, words));
     secondLayer =

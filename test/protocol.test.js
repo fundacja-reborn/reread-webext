@@ -153,6 +153,24 @@ describe("asTranslation", () => {
     }
     assert.equal("dictionaries" in asTranslation({ gloss: "", sentence: null, entries: [], dictionaries: 0 }), false);
   });
+
+  it("carries a phrase found to be in another language, with its entries and no gloss (D193)", () => {
+    // The engine was not asked: no gloss, no sentence - and the entries and
+    // the count are the answer, so they ride along the one time a gloss is
+    // missing on purpose.
+    assert.deepEqual(asTranslation({ gloss: "", sentence: null, entries: [ENTRY], dictionaries: 1, language: "pl" }), {
+      gloss: "",
+      sentence: null,
+      entries: [ENTRY],
+      dictionaries: 1,
+      language: "pl",
+    });
+    // A sentence still needs a gloss to be extra to.
+    assert.equal(asTranslation({ gloss: "", sentence: "Brzeg.", entries: [], language: "pl" }).sentence, null);
+    for (const language of [undefined, "", 42, null, ["pl"]]) {
+      assert.equal("language" in asTranslation({ gloss: "bank", sentence: null, entries: [], language }), false);
+    }
+  });
 });
 
 describe("asRequest", () => {
@@ -181,6 +199,21 @@ describe("asRequest", () => {
   it("drops a sentence that is not one, rather than refusing the translation", () => {
     for (const context of [42, null, {}, ["a"], undefined]) {
       assert.deepEqual(asRequest({ kind: Message.TRANSLATE, text: "bank", context }), {
+        kind: Message.TRANSLATE,
+        text: "bank",
+      });
+    }
+  });
+
+  it("keeps the language the page declares for a translate request, and drops what is not one (D193)", () => {
+    assert.deepEqual(asRequest({ kind: Message.TRANSLATE, text: "bank", context: "Nad rzeką.", lang: "pl" }), {
+      kind: Message.TRANSLATE,
+      text: "bank",
+      context: "Nad rzeką.",
+      lang: "pl",
+    });
+    for (const lang of ["", 42, null, {}, ["pl"], undefined]) {
+      assert.deepEqual(asRequest({ kind: Message.TRANSLATE, text: "bank", lang }), {
         kind: Message.TRANSLATE,
         text: "bank",
       });

@@ -19,6 +19,7 @@ import { setProvider, translate } from "../lib/translator/index.js";
 import { asSchemeReport } from "../lib/translator/providers/bergamot/host-protocol.js";
 import { bergamot } from "../lib/translator/providers/bergamot/index.js";
 import { bergamotViaHost, raiseEngineHost } from "../lib/translator/providers/bergamot/remote.js";
+import { detectLanguage, foreignLanguage, phraseLanguage } from "../lib/detect.js";
 import { lookUpAnswer } from "../lib/dict/lookup.js";
 import { readPage } from "./page.js";
 import { installMenus, menuDoor } from "./menus.js";
@@ -68,18 +69,43 @@ async function handle(request, sender) {
       // Side by side, not one after the other: the dictionary read is a point
       // lookup and the translation is the engine, so waiting for them together
       // costs what the engine costs and nothing more.
-      // Asked in the pair's language alone, the one the engine translates
-      // from: the page's declaration gets its turn only in the quiet bubble
-      // (D191), where there is no engine to say which language the pair is.
-      const [translated, looked] = await Promise.all([
-        translate({
-          text: request.text,
-          context: request.context,
-          from: pair.from,
-          to: pair.to,
-        }),
-        lookUpAnswer(request.text, { pair: pair.from, declared: null }),
-      ]);
+      // Which language the phrase is in, before the engine is asked at all
+      // (D193): the engine translates from the pair's language or not at
+      // all, and a page in the reader's own language fed it Polish. The
+      // browser's detector reads the sentence around the phrase (the phrase
+      // alone when there is none); the dictionaries are then asked in the
+      // language found, or - with no verdict - in the pair's first and the
+      // page's declared one second (D191), and a dictionary of another
+      // language knowing the word is the second witness. Both reads are
+      // milliseconds; the engine is the cost, and a foreign phrase never
+      // pays it: it gets the entries, no gloss, and the name of its language.
+      const declared = request.lang ?? null;
+      const detected = foreignLanguage(await detectLanguage(request.context ?? request.text), {
+        from: pair.from,
+        to: pair.to,
+        declared,
+      });
+      const looked = await lookUpAnswer(request.text, { detected: detected || null, pair: pair.from, declared });
+      const language = phraseLanguage({
+        detected,
+        answered: looked?.lang ?? null,
+        entries: looked?.entries.length ?? 0,
+        pairFrom: pair.from,
+      });
+      if (language.length > 0) {
+        return ok(
+          looked === null
+            ? { gloss: "", sentence: null, entries: [], language }
+            : { gloss: "", sentence: null, entries: looked.entries, dictionaries: looked.dictionaries, language },
+        );
+      }
+
+      const translated = await translate({
+        text: request.text,
+        context: request.context,
+        from: pair.from,
+        to: pair.to,
+      });
 
       // Dictionary entries ride with a translation and never instead of one: a
       // failed translation is an error the bubble has to show, and hanging

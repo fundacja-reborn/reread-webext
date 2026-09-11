@@ -76,15 +76,23 @@ export function lookupKeys(text, langFrom) {
  * page's word still counts, one step later, so a Polish page with a Polish
  * dictionary reads without a trip to the settings.
  *
- * @param {{ pair: string | null, declared: string | null }} of the pair's
- *   source language and the page's declaration for the phrase, each null or
- *   empty for none - primary subtags, the way the callers already hold them
+ * Since D193 a detector's verdict outranks the pair: a phrase the browser
+ * read as being in another language (`foreignLanguage`) is asked in that
+ * language and in the page's, and the pair's shelf is left alone - a Polish
+ * "list" is not the English one, and an English dictionary that happens to
+ * hold the spelling would answer about the wrong word.
+ *
+ * @param {{ pair: string | null, declared: string | null, detected?: string | null }} of the pair's
+ *   source language, the page's declaration for the phrase and the
+ *   detector's verdict, each null or empty for none - primary subtags, the
+ *   way the callers already hold them
  * @returns {string[]}
  */
-export function languagesToAsk({ pair, declared }) {
+export function languagesToAsk({ pair, declared, detected = null }) {
   /** @type {string[]} */
   const languages = [];
-  for (const candidate of [pair, declared]) {
+  const first = (detected ?? "").trim();
+  for (const candidate of first.length > 0 ? [first, declared] : [pair, declared]) {
     const lang = (candidate ?? "").trim();
     if (lang.length > 0 && !languages.includes(lang)) languages.push(lang);
   }
@@ -105,8 +113,9 @@ export function languagesToAsk({ pair, declared }) {
  * that is there.
  *
  * @param {string} text as the page had it
- * @param {{ pair: string | null, declared: string | null }} languages the
- *   pair's source and the page's declaration, in `languagesToAsk`'s terms
+ * @param {{ pair: string | null, declared: string | null, detected?: string | null }} languages the
+ *   pair's source, the page's declaration and the detector's verdict, in
+ *   `languagesToAsk`'s terms
  * @returns {Promise<import("../protocol.js").LookUp | null>}
  */
 export async function lookUpAnswer(text, languages) {

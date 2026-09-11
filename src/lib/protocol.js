@@ -142,7 +142,17 @@ export const ErrorCode = Object.freeze({
  * older than this field: the bubble says nothing then, by D164's rule that a
  * fault must never read as a missing dictionary.
  *
- * @typedef {{ gloss: string, sentence: string | null, entries?: DictEntry[], dictionaries?: number }} Translation
+ * `language` says the phrase is not in the pair's source language at all
+ * (D193), and which one it is in: the browser's detector read the sentence
+ * as the reader's own language, or a dictionary of another language knew
+ * the word while the pair's did not. The engine is not asked then - it
+ * translates from the pair's language or not at all - so the gloss comes
+ * empty and the sentence null, and the entries and the count are about the
+ * language named: what the bubble shows instead of a guess. Absent for a
+ * phrase in the pair's language, which is every translation there was
+ * before D193.
+ *
+ * @typedef {{ gloss: string, sentence: string | null, entries?: DictEntry[], dictionaries?: number, language?: string }} Translation
  */
 
 /**
@@ -207,7 +217,7 @@ export const ErrorCode = Object.freeze({
  * counts what happened, because "added 1200, skipped 43" is the whole reason
  * to trust an import that says nothing else.
  *
- * @typedef {{ kind: typeof Message.TRANSLATE, text: string, context?: string }} TranslateRequest
+ * @typedef {{ kind: typeof Message.TRANSLATE, text: string, context?: string, lang?: string }} TranslateRequest
  * @typedef {{ kind: typeof Message.LOOK_UP, text: string, lang?: string }} LookUpRequest
  * @typedef {{ kind: typeof Message.OPEN_READER, sourceTabId?: number }} OpenReaderRequest
  * @typedef {{ kind: typeof Message.OPEN_LIBRARY }} OpenLibraryRequest
@@ -314,22 +324,28 @@ export function asResult(response) {
  */
 export function asTranslation(value) {
   if (typeof value !== "object" || value === null) return { gloss: "", sentence: null, entries: [] };
-  const { gloss, sentence, entries, dictionaries } = /** @type {Record<string, unknown>} */ (value);
+  const { gloss, sentence, entries, dictionaries, language } = /** @type {Record<string, unknown>} */ (value);
 
   const answer = typeof gloss === "string" ? gloss : "";
+  // A phrase found to be in another language (D193) comes with no gloss on
+  // purpose, and its entries are the answer: the one case an empty first
+  // line has something to stand over.
+  const foreign = typeof language === "string" && language.length > 0 ? language : "";
+  const answered = answer.length > 0 || foreign.length > 0;
   // The sentence is an extra to the gloss, so without a gloss there is nothing
   // for it to be extra to: a bubble with an empty first line and a "More" that
   // has something behind it is a state nobody should have to make sense of.
   const second = answer.length > 0 && typeof sentence === "string" ? sentence : null;
 
   /** @type {Translation} */
-  const translation = { gloss: answer, sentence: second, entries: answer.length > 0 ? asDictEntries(entries) : [] };
+  const translation = { gloss: answer, sentence: second, entries: answered ? asDictEntries(entries) : [] };
   // The count is an extra to the entries the same way (D192), and it is a
   // count or nothing: a value that is not a whole non-negative number says
   // nothing about the dictionaries, so it is left out rather than read as one.
-  if (answer.length > 0 && typeof dictionaries === "number" && Number.isInteger(dictionaries) && dictionaries >= 0) {
+  if (answered && typeof dictionaries === "number" && Number.isInteger(dictionaries) && dictionaries >= 0) {
     translation.dictionaries = dictionaries;
   }
+  if (foreign.length > 0) translation.language = foreign;
   return translation;
 }
 
@@ -433,10 +449,15 @@ export function asRequest(message) {
     if (typeof text !== "string") return null;
     // A context that is not a string is dropped rather than refused: it is an
     // extra the answer does not depend on, and refusing would cost the reader
-    // the translation over something they cannot see.
-    return typeof context === "string"
-      ? { kind: Message.TRANSLATE, text, context }
-      : { kind: Message.TRANSLATE, text };
+    // the translation over something they cannot see. The page's declared
+    // language (D193) is the same kind of extra, read the way `look-up`
+    // reads it: the dictionaries are asked in it second, the engine never.
+    /** @type {TranslateRequest} */
+    const request = { kind: Message.TRANSLATE, text };
+    if (typeof context === "string") request.context = context;
+    const lang = /** @type {Record<string, unknown>} */ (message)["lang"];
+    if (typeof lang === "string" && lang.length > 0) request.lang = lang;
+    return request;
   }
 
   if (kind === Message.LOOK_UP) {
