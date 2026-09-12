@@ -12,6 +12,7 @@ import {
   ordered,
   pairChoicesFor,
   searchablePhrase,
+  sentenceSegments,
 } from "../src/vocab/list-view.js";
 
 /**
@@ -260,5 +261,38 @@ describe("anyCounted", () => {
     // @ts-expect-error - a value the store would never write, as an old row might carry
     assert.equal(anyCounted([phrase(1, { recallCount: "7" })]), false);
     assert.equal(anyCounted([phrase(1, { readCount: -2 })]), false);
+  });
+});
+
+describe("sentenceSegments", () => {
+  it("marks the phrase's first occurrence in its sentence, case-folded, and only that one", () => {
+    assert.deepEqual(sentenceSegments("Miracles happen; miracles are rare.", "miracles"), [
+      { text: "Miracles", hit: true },
+      { text: " happen; miracles are rare.", hit: false },
+    ]);
+    assert.deepEqual(sentenceSegments("It became clear.", "became"), [
+      { text: "It ", hit: false },
+      { text: "became", hit: true },
+      { text: " clear.", hit: false },
+    ]);
+    assert.deepEqual(sentenceSegments("nevertheless willing", "nevertheless willing"), [
+      { text: "nevertheless willing", hit: true },
+    ]);
+  });
+
+  it("hands the sentence back plain when the phrase is not in it - another form, a longer selection, nothing", () => {
+    assert.deepEqual(sentenceSegments("She was becoming tired.", "became"), [{ text: "She was becoming tired.", hit: false }]);
+    assert.deepEqual(sentenceSegments("A sentence.", ""), [{ text: "A sentence.", hit: false }]);
+    assert.deepEqual(sentenceSegments("A sentence.", "   "), [{ text: "A sentence.", hit: false }]);
+  });
+
+  it("always hands back the sentence it was given, in order", () => {
+    const sentence = "One of the miracles of the international systems of the world.";
+    const joined = sentenceSegments(sentence, "miracles").map((segment) => segment.text).join("");
+    assert.equal(joined, sentence);
+  });
+
+  it("marks nothing rather than marking wrong when folding shifts letters", () => {
+    assert.deepEqual(sentenceSegments("İstanbul is far.", "istanbul"), [{ text: "İstanbul is far.", hit: false }]);
   });
 });

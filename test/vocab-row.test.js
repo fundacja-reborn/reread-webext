@@ -110,6 +110,21 @@ describe("a row of the saved phrases", () => {
     assert.match(rule(styles, ".phrase-count-icon"), /width: 1em;\s*height: 1em;\s*vertical-align: -0\.15em;\s*margin-inline-end: 0\.25em;/, "the glyph is not an em on the baseline with its number a quarter em after");
   });
 
+  it("lights the phrase inside its opened sentence, and keeps the closed line quiet", async () => {
+    const row = bodyOf(await source("vocab/vocab.js"), "phraseRow");
+    // The sentence is built from segments as text nodes and marks - never
+    // markup, the text is a page's - with the phrase's first occurrence lit.
+    assert.match(row, /for \(const segment of sentenceSegments\([^)]*phrase\.context\), phrase\.phrase\)\) \{\s*if \(segment\.hit\) \{\s*const mark = document\.createElement\("mark"\);\s*mark\.textContent = segment\.text;/, "the sentence is not segmented around the phrase into text and marks");
+    assert.doesNotMatch(row, /fillHighlighted\(summary/, "the filter's marks reach into the sentence");
+    const styles = await source("vocab/vocab.css");
+    // Only once open: a lit word in the one-line preview would read as a
+    // filter hit the filter never made.
+    assert.match(rule(styles, ".phrase-sentence:not([open]) mark"), /background: none;\s*color: inherit;\s*text-decoration: none;/, "the closed preview lights the phrase");
+    // The press is tall enough for a finger without parting the sentence
+    // from the meanings.
+    assert.match(rule(styles, ".phrase-sentence > summary"), /padding-block: 0\.25rem;/, "the summary is not a 32px press at the smallest reading size");
+  });
+
   it("dresses the phrase, the meanings and the sentence in the Aa panel's size, and nothing above them", async () => {
     const styles = await source("vocab/vocab.css");
     const bare = styles.replace(/\/\*[\s\S]*?\*\//g, "");

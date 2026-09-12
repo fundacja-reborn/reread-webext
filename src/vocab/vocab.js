@@ -54,7 +54,17 @@ import {
   voicesFor,
 } from "../lib/tts.js";
 import { filterActive } from "../options/models-view.js";
-import { Order, anyCounted, asOrder, listView, markSegments, newestFirst, ordered, pairChoicesFor } from "./list-view.js";
+import {
+  Order,
+  anyCounted,
+  asOrder,
+  listView,
+  markSegments,
+  newestFirst,
+  ordered,
+  pairChoicesFor,
+  sentenceSegments,
+} from "./list-view.js";
 
 // First, so the static text is already the catalogue's language when it shows.
 localizePage();
@@ -649,13 +659,25 @@ function phraseRow(phrase) {
   // ellipsis while closed, the whole sentence open - so the list stays a
   // list of phrases and the sentence is a press away, with the keyboard and
   // the screen reader served by the element's own conduct and no script of
-  // ours. Text from a page, so `textContent` and nothing else; not through
+  // ours. Text from a page, so text nodes and nothing else; not through
   // `fillHighlighted`, because the filter does not read the sentence and a
-  // mark in it would say it did. Under the meanings and under the editor
+  // mark in it would say it did - the one mark here is the phrase's own
+  // place in its sentence (D211, `sentenceSegments`), which the sheet shows
+  // only once the fold is open. Under the meanings and under the editor
   // alike, so a row being edited keeps its sentence where it was.
   if (hasSentence(phrase)) {
     const fold = element("details", "phrase-sentence");
-    fold.append(element("summary", "", /** @type {string} */ (phrase.context)));
+    const summary = element("summary", "");
+    for (const segment of sentenceSegments(/** @type {string} */ (phrase.context), phrase.phrase)) {
+      if (segment.hit) {
+        const mark = document.createElement("mark");
+        mark.textContent = segment.text;
+        summary.append(mark);
+      } else {
+        summary.append(segment.text);
+      }
+    }
+    fold.append(summary);
     body.append(fold);
   }
   row.append(body);
