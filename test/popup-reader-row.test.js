@@ -59,7 +59,12 @@ describe("the reading view's row in the popup", () => {
     assert.doesNotMatch(silent, /readerButton\.hidden = true/);
     // And back to life over a page that answered.
     assert.match(site.slice(site.indexOf("over.hostname = info.hostname")), /readerButton\.disabled = false/);
+    // In the separator lines' ink, a step paler than the notes' muted one,
+    // which the note above the row already wears: the settings' disabled
+    // arrows' token (D200).
     const css = readFileSync(join(ROOT, "src/popup/popup.css"), "utf8");
-    assert.match(rule(css, ".popup-reader:disabled,\n.popup-reader:disabled:hover,\n.popup-reader:disabled .popup-icon"), /var\(--page-muted\)/);
+    const quiet = rule(css, ".popup-reader:disabled,\n.popup-reader:disabled:hover,\n.popup-reader:disabled .popup-icon");
+    assert.match(quiet, /color: var\(--page-line\)/);
+    assert.doesNotMatch(quiet, /--page-muted/);
   });
 });
