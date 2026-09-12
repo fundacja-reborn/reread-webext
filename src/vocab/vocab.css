@@ -7,6 +7,14 @@
    Base styles lay the page out for a narrow screen; the one media query at
    the end spreads the same HTML out for a desktop. */
 
+/* The one line-height of everything set in the reading face on this page -
+   the rows' phrase and meanings, the panel's word and lines - as a token,
+   because the panel's checkboxes are centred on the first line of their
+   text by it (below, `.lookup-fold .lookup-line`). */
+:root {
+  --phrase-line-height: 1.45;
+}
+
 /* A touch wider than the shared 44rem: the row grid holds three columns and
    the extra room goes to the meanings. The top padding is the reader page's
    headroom (its body's 0.75rem plus its chrome box's 0.75rem), so the two
@@ -271,6 +279,18 @@ summary {
   transition: none;
 }
 
+/* What a line of the panel's text stands tall, in px: the reading size the
+   Aa panel sets (`--reader-size`, `lib/appearance.js`) by the one
+   line-height above. The checkbox's top margin is half of what this has
+   over the box (page.css), so the box sits centred on the text's first
+   line - in a one-line row and a wrapped one alike, at every size the Aa
+   panel can set - never `align-items: center` (which centres on the whole
+   wrapped row) nor `baseline` (a native checkbox has no useful one in
+   Firefox). */
+.lookup-fold .lookup-line {
+  --lookup-line-height: calc(var(--reader-size, 18px) * var(--phrase-line-height));
+}
+
 /* --- the import offer: size, a taste of its rows, the target pair --- */
 
 .import-confirm {
@@ -350,7 +370,7 @@ summary {
 .lookup-fold .lookup-line-text {
   font-family: var(--reader-font-lead, var(--reader-font-stack));
   font-size: var(--reader-size, 18px);
-  line-height: 1.45;
+  line-height: var(--phrase-line-height);
   overflow-wrap: anywhere;
 }
 

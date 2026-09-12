@@ -256,6 +256,23 @@ describe("the saved-phrases page's fold", () => {
     assert.match(styles, /\.lookup-fold button,\s*\.lookup-fold summary \{\s*transition: none;/, "the panel's controls ease in");
   });
 
+  it("centres a row's checkbox on the first line of its text, by the tokens and at every reading size", async () => {
+    const page = await source("assets/page.css");
+    const vocab = await source("vocab/vocab.css");
+    // The margin is half of what the line stands tall over the box, from
+    // tokens - the line's height set by the phrases page from the reading
+    // size the Aa panel chose, by the one line-height the rows use.
+    assert.match(page, /\.lookup-line-box \{\s*--lookup-box-size: 20px;[\s\S]*?margin: calc\(\(var\(--lookup-line-height, 1\.6em\) - var\(--lookup-box-size\)\) \/ 2\) 0 0;/, "the box's margin is a constant, or not half the line's excess");
+    assert.match(vocab, /:root \{\s*--phrase-line-height: 1\.45;/, "the rows' line-height is not a token");
+    assert.match(vocab, /line-height: var\(--phrase-line-height\);/, "the rows' rule does not use the token");
+    assert.doesNotMatch(vocab, /^\s*line-height: 1\.45;/m, "the line-height is written twice");
+    assert.match(vocab, /\.lookup-fold \.lookup-line \{\s*--lookup-line-height: calc\(var\(--reader-size, 18px\) \* var\(--phrase-line-height\)\);/, "the panel's line height does not follow the reading size");
+    // Neither centring on the whole wrapped row nor a native checkbox's baseline.
+    const row = page.slice(page.indexOf(".lookup-line {"), page.indexOf(".lookup-line:hover"));
+    assert.match(row, /align-items: flex-start;/, "the row does not align its box to the first line");
+    assert.doesNotMatch(row, /align-items: (center|baseline)/, "the row centres the box on the whole row, or on a baseline");
+  });
+
   it("sets the word and the lines in the list's reading face, and leaves the fold's dress to the fold's own summary", async () => {
     const styles = await source("vocab/vocab.css");
     // The content in the reading face by the rows' own rule (block 5): the

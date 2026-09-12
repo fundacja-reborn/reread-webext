@@ -979,13 +979,18 @@ button.lookup-show {
   background: color-mix(in srgb, var(--page-fg) 5%, transparent);
 }
 
-/* The box keeps its size whatever the text does, and sits on the text's
-   first line rather than in the middle of a wrapped row. */
+/* The box keeps its size whatever the text does, and sits centred on the
+   text's first line rather than in the middle of a wrapped row: its top
+   margin is half of what the line stands tall over the box. The line's
+   height comes in as a token from the home - the phrases page sets it from
+   the reading size the Aa panel chose (vocab.css) - and falls back to the
+   interface line box here, where `em` is the box's own inherited size. */
 .lookup-line-box {
+  --lookup-box-size: 20px;
   flex: none;
-  width: 20px;
-  height: 20px;
-  margin: 0.2em 0 0;
+  width: var(--lookup-box-size);
+  height: var(--lookup-box-size);
+  margin: calc((var(--lookup-line-height, 1.6em) - var(--lookup-box-size)) / 2) 0 0;
   cursor: pointer;
 }
 
