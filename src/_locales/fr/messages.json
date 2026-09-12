@@ -161,9 +161,29 @@
     "message": "Rien n'est encore enregistré pour cette paire. Sélectionnez une phrase pendant la lecture et appuyez sur « $BUTTON$ » - elle vous attendra ici.",
     "placeholders": { "button": { "content": "$1", "example": "Enregistrer" } }
   },
-  "vocab_filter_no_match": {
-    "message": "Aucune phrase enregistrée ne correspond à « $QUERY$ ».",
-    "placeholders": { "query": { "content": "$1", "example": "banque" } }
+  "vocab_filter_status_one": {
+    "message": "$SHOWN$ sur $TOTAL$ phrase pour « $QUERY$ »",
+    "placeholders": {
+      "total": { "content": "$1", "example": "1" },
+      "shown": { "content": "$2", "example": "1" },
+      "query": { "content": "$3", "example": "news" }
+    }
+  },
+  "vocab_filter_status_many": {
+    "message": "$SHOWN$ sur $TOTAL$ phrases pour « $QUERY$ »",
+    "placeholders": {
+      "total": { "content": "$1", "example": "1 000 000" },
+      "shown": { "content": "$2", "example": "1" },
+      "query": { "content": "$3", "example": "news" }
+    }
+  },
+  "vocab_filter_status_other": {
+    "message": "$SHOWN$ sur $TOTAL$ phrases pour « $QUERY$ »",
+    "placeholders": {
+      "total": { "content": "$1", "example": "827" },
+      "shown": { "content": "$2", "example": "1" },
+      "query": { "content": "$3", "example": "news" }
+    }
   },
   "pager_page_of": {
     "message": "Page $PAGE$ sur $PAGES$",

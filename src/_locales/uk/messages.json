@@ -168,9 +168,37 @@
     "message": "Для цієї пари ще нічого не збережено. Виділіть фразу під час читання й натисніть «$BUTTON$» - вона чекатиме тут.",
     "placeholders": { "button": { "content": "$1", "example": "Зберегти" } }
   },
-  "vocab_filter_no_match": {
-    "message": "Жодна збережена фраза не відповідає «$QUERY$».",
-    "placeholders": { "query": { "content": "$1", "example": "банк" } }
+  "vocab_filter_status_one": {
+    "message": "$SHOWN$ з $TOTAL$ фрази для «$QUERY$»",
+    "placeholders": {
+      "total": { "content": "$1", "example": "1" },
+      "shown": { "content": "$2", "example": "1" },
+      "query": { "content": "$3", "example": "news" }
+    }
+  },
+  "vocab_filter_status_few": {
+    "message": "$SHOWN$ з $TOTAL$ фраз для «$QUERY$»",
+    "placeholders": {
+      "total": { "content": "$1", "example": "3" },
+      "shown": { "content": "$2", "example": "1" },
+      "query": { "content": "$3", "example": "news" }
+    }
+  },
+  "vocab_filter_status_many": {
+    "message": "$SHOWN$ з $TOTAL$ фраз для «$QUERY$»",
+    "placeholders": {
+      "total": { "content": "$1", "example": "827" },
+      "shown": { "content": "$2", "example": "1" },
+      "query": { "content": "$3", "example": "news" }
+    }
+  },
+  "vocab_filter_status_other": {
+    "message": "$SHOWN$ з $TOTAL$ фрази для «$QUERY$»",
+    "placeholders": {
+      "total": { "content": "$1", "example": "1,5" },
+      "shown": { "content": "$2", "example": "1" },
+      "query": { "content": "$3", "example": "news" }
+    }
   },
   "pager_page_of": {
     "message": "Сторінка $PAGE$ з $PAGES$",

@@ -161,9 +161,29 @@
     "message": "Aún no hay nada guardado para este par. Selecciona una frase mientras lees y pulsa «$BUTTON$» - te estará esperando aquí.",
     "placeholders": { "button": { "content": "$1", "example": "Guardar" } }
   },
-  "vocab_filter_no_match": {
-    "message": "Ninguna frase guardada coincide con «$QUERY$».",
-    "placeholders": { "query": { "content": "$1", "example": "banco" } }
+  "vocab_filter_status_one": {
+    "message": "$SHOWN$ de $TOTAL$ frase para «$QUERY$»",
+    "placeholders": {
+      "total": { "content": "$1", "example": "1" },
+      "shown": { "content": "$2", "example": "1" },
+      "query": { "content": "$3", "example": "news" }
+    }
+  },
+  "vocab_filter_status_many": {
+    "message": "$SHOWN$ de $TOTAL$ frases para «$QUERY$»",
+    "placeholders": {
+      "total": { "content": "$1", "example": "1.000.000" },
+      "shown": { "content": "$2", "example": "1" },
+      "query": { "content": "$3", "example": "news" }
+    }
+  },
+  "vocab_filter_status_other": {
+    "message": "$SHOWN$ de $TOTAL$ frases para «$QUERY$»",
+    "placeholders": {
+      "total": { "content": "$1", "example": "827" },
+      "shown": { "content": "$2", "example": "1" },
+      "query": { "content": "$3", "example": "news" }
+    }
   },
   "pager_page_of": {
     "message": "Página $PAGE$ de $PAGES$",

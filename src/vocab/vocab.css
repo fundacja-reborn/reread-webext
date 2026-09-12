@@ -338,11 +338,34 @@ summary {
   padding: 0.35rem 1rem;
 }
 
+/* --- the filter's state over the list --- */
+
+/* "1 of 827 phrases for "news" · Clear filter": the counter's voice (the
+   hint's size and color), one line that wraps when it must, the button a
+   quiet one with the 44px hit box. Static, not stuck: it is read once, on
+   the way into the rows. The scroll margin keeps it off the viewport's edge
+   when "Show in list" scrolls to it. Hidden while the filter asks nothing -
+   out of the flow, so the rows do not move when it goes. */
+.filter-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 0.5rem;
+  margin: 1rem 0 0;
+  scroll-margin-top: 0.75rem;
+}
+
 /* --- the list: a grid, so the meanings all start on one vertical line --- */
 
 .phrases {
   margin: 1rem 0 0;
   border-top: 1px solid var(--page-line);
+}
+
+/* The list takes the focus from "Clear filter" (script only, tabindex -1):
+   a landing place, not a control, so no ring around the whole list. */
+.phrases:focus {
+  outline: none;
 }
 
 /* One phrase per row. On a phone the row stacks: phrase, meanings, and the
@@ -477,24 +500,9 @@ button.quiet-speak svg {
   padding: 0.35rem 1rem;
 }
 
-/* --- the two empty states --- */
-
-/* The filter came up empty: the sentence quotes the query, the one button
-   undoes it. */
-.no-match {
-  display: grid;
-  gap: 0.6rem;
-  justify-items: start;
-}
-
-.no-match p {
-  margin: 0;
-}
-
-.no-match button {
-  min-height: 44px;
-  padding: 0.35rem 1rem;
-}
+/* The one empty state is the shared `.empty` (page.css): a vocabulary with
+   nothing in it. A filter that matches nothing leaves the list empty under
+   the state line above, which says so and offers the way out. */
 
 /* The pager is the shared one (`.pager`, page.css): the chevrons with their
    words, the words stepping aside under a phone's width, the 44px floor -

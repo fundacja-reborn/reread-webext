@@ -238,18 +238,19 @@ describe("the saved-phrases page's fold", () => {
     assert.match(bodyOf(script, "reload"), /addFold\.hidden = chosen === null/, "the fold stands with nowhere to file a phrase");
   });
 
-  it("brings the saved phrase's row into view on \"Show in list\": the filter set, the row scrolled to, no animation", async () => {
+  it("brings the saved phrase's row into view on \"Show in list\": the filter set, the filter's state line scrolled to, no animation", async () => {
     const script = await source("vocab/vocab.js");
     assert.match(script.slice(script.indexOf("mountLookupBox(")), /showInList,/, "the page's field has no list to show");
     const showing = bodyOf(script, "showInList");
     // The filter narrows the list to the phrase - which also walks past the
-    // pages - and the phrase's own row is scrolled to, the first matching
-    // one when the exact row is not on the page. Not smooth: on e-ink an
-    // animated scroll is a run of flashes.
+    // pages - and the page scrolls to the filter's state line over the list,
+    // so the sentence about the filter and the phrase's row are on the
+    // screen together, with the way out of the filter under the keyboard's
+    // focus. Not smooth: on e-ink an animated scroll is a run of flashes.
     assert.match(showing, /query = phrase\.text;\s*page = 1;/, "the filter is not set to the phrase, or the page not turned back");
     assert.match(showing, /filterInput\.value = phrase\.text/, "the filter box does not show the filter the list follows");
-    assert.match(showing, /row\.dataset\["key"\] === phrase\.normalized/, "the phrase's own row is not the one looked for");
-    assert.match(showing, /\(own \?\? rows\[0\]\)\?\.scrollIntoView\(\{ block: "start" \}\)/, "the row is not scrolled to, or the scroll animates");
+    assert.match(showing, /filterStatus\.scrollIntoView\(\{ block: "start" \}\)/, "the state line is not what is scrolled to, or the scroll animates");
+    assert.match(showing, /clear\.focus\(\{ preventScroll: true \}\)/, "Clear filter does not take the focus");
     assert.doesNotMatch(showing, /smooth/, "the scroll animates");
     // The panel eases nothing in - the fold opens at once.
     const styles = await source("vocab/vocab.css");

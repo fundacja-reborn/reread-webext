@@ -48,6 +48,7 @@ import {
   stop as stopSpeaking,
   voicesFor,
 } from "../lib/tts.js";
+import { filterActive } from "../options/models-view.js";
 import { listView, markSegments, newestFirst, pairChoicesFor } from "./list-view.js";
 
 // First, so the static text is already the catalogue's language when it shows.
@@ -100,6 +101,7 @@ const importRun = /** @type {HTMLButtonElement | null} */ (document.getElementBy
 const importCancel = /** @type {HTMLButtonElement | null} */ (document.getElementById("import-cancel"));
 const transferLine = document.getElementById("transfer-status");
 const filterInput = /** @type {HTMLInputElement | null} */ (document.getElementById("filter"));
+const filterStatus = document.getElementById("filter-status");
 const addFold = /** @type {HTMLDetailsElement | null} */ (document.getElementById("add-phrase"));
 const lookupHost = document.getElementById("lookup-box");
 const listContainer = document.getElementById("list");
@@ -461,8 +463,10 @@ function renderList() {
   const view = listView(phrases, { query, page });
   page = view.page;
   // The counter follows every repaint of the list, so a keystroke in the
-  // filter and a phrase learned on another tab both keep it true.
+  // filter and a phrase learned on another tab both keep it true - and so
+  // does the filter's state over the list.
   renderCount(view.matching);
+  renderFilterStatus(view.matching);
 
   // A re-render can land mid-keystroke (a save on another tab rebuilds the
   // mirror); the draft survives as state, and the keyboard should too.
@@ -472,10 +476,11 @@ function renderList() {
 
   listContainer.replaceChildren();
 
+  // A filter that matches nothing leaves the list empty under the state
+  // line, which already says "0 of 827 phrases for ..." and offers the way
+  // out: a second sentence about it here would be the same thing twice.
   if (phrases.length === 0) {
     listContainer.append(element("p", "empty", t("vocab_empty", t("bubble_save"))));
-  } else if (view.matching === 0) {
-    listContainer.append(noMatch());
   } else {
     for (const phrase of view.rows) listContainer.append(phraseRow(phrase));
   }
@@ -525,27 +530,46 @@ function fillHighlighted(node, text) {
 }
 
 /**
- * The filter came up empty: the sentence quotes the query, and the one move
- * that helps stands under it. Clearing hands focus back to the filter, ready
- * for a second try.
+ * The filter's state over the list it narrows: "1 of 827 phrases for
+ * "news"" in the counter's own voice, with "Clear filter" beside it -
+ * right where the rows are, because the filter box at the top of the page
+ * is off the screen by the time the list is read, and "Show in list" in
+ * the fold fills that box unseen. Only while the filter asks anything;
+ * otherwise hidden and out of the flow, so nothing under it moves.
  *
- * @returns {HTMLElement}
+ * @param {number} matching how many rows the filter keeps
  */
-function noMatch() {
-  const wrap = element("div", "empty no-match");
-  wrap.append(element("p", "no-match-text", t("vocab_filter_no_match", query)));
-
+function renderFilterStatus(matching) {
+  if (filterStatus === null) return;
+  const asking = filterActive(query);
+  filterStatus.hidden = !asking;
+  filterStatus.replaceChildren();
+  if (!asking) return;
+  // The plural family runs over the total, as the counter's does; the
+  // matching count and the query ride along as $2 and $3.
+  filterStatus.append(
+    element("span", "filter-status-text", plural(phrases.length, "vocab_filter_status", [matching.toLocaleString(), query.trim()])),
+  );
+  const dot = element("span", "filter-status-dot", String.fromCodePoint(0x00b7));
+  dot.setAttribute("aria-hidden", "true");
   const clear = button(t("vocab_filter_clear"));
-  clear.addEventListener("click", () => {
-    query = "";
-    if (filterInput !== null) {
-      filterInput.value = "";
-      filterInput.focus();
-    }
-    renderList();
-  });
-  wrap.append(clear);
-  return wrap;
+  clear.className = "quiet quiet-clear";
+  clear.addEventListener("click", () => clearFilter());
+  filterStatus.append(dot, clear);
+}
+
+/**
+ * The filter emptied from the state line: the whole list is back on its
+ * first page, and the page stays where it was scrolled - the filter box at
+ * the top is not the place to jump to. The button pressed left with the
+ * line, so the focus lands on the list itself, where the eye is.
+ */
+function clearFilter() {
+  query = "";
+  page = 1;
+  if (filterInput !== null) filterInput.value = "";
+  renderList();
+  listContainer?.focus({ preventScroll: true });
 }
 
 /**
@@ -938,9 +962,12 @@ function goToSettings(section) {
  * "Show in list" under the field's answer: the saved phrase's own row
  * brought into view, where Edit and Learned are. The filter is set to the
  * phrase - which also walks past the pages, so a phrase on page three is on
- * page one of the narrowed list - and the row itself is scrolled to, the
- * first matching row when the exact one is not on the page. No smooth
- * scrolling: on e-ink an animated scroll is a run of flashes.
+ * page one of the narrowed list - and the page is scrolled to the filter's
+ * state line over the list, so that the sentence about the filter and the
+ * phrase's row are on the screen together, with the way out of the filter
+ * under the keyboard's focus: Enter undoes the side effect at once. The
+ * fold stays open above. No smooth scrolling: on e-ink an animated scroll
+ * is a run of flashes.
  *
  * @param {{ text: string, normalized: string }} phrase
  */
@@ -949,10 +976,10 @@ function showInList(phrase) {
   page = 1;
   if (filterInput !== null) filterInput.value = phrase.text;
   renderList();
-  if (listContainer === null) return;
-  const rows = [...listContainer.querySelectorAll(".phrase-row")];
-  const own = rows.find((row) => row instanceof HTMLElement && row.dataset["key"] === phrase.normalized);
-  (own ?? rows[0])?.scrollIntoView({ block: "start" });
+  if (filterStatus === null) return;
+  filterStatus.scrollIntoView({ block: "start" });
+  const clear = filterStatus.querySelector("button");
+  if (clear instanceof HTMLButtonElement) clear.focus({ preventScroll: true });
 }
 
 /**

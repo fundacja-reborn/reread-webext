@@ -266,7 +266,18 @@
       </div>
     </details>
 
-    <div id="list" class="phrases"></div>
+    <!-- The filter's state over the list it narrows: "1 of 827 phrases for
+         "news"" with the way out beside it - said right where the rows are,
+         because the filter box at the top of the page is off the screen by
+         the time the list is read (and "Show in list" in the fold above
+         fills that box unseen). Filled by vocab.js while the filter asks
+         anything; hidden, and out of the flow, while it does not. -->
+    <p id="filter-status" class="hint filter-status" hidden></p>
+
+    <!-- Focusable by script only: "Clear filter" takes its own button out
+         of the page, and the focus then lands on the list itself, where the
+         eye is, without the page jumping to the filter box at the top. -->
+    <div id="list" class="phrases" tabindex="-1"></div>
 
     <p id="status" class="status" role="status"></p>
 

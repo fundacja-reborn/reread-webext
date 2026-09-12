@@ -260,9 +260,22 @@
     "description": "The button quoted is bubble_save, passed in so the two can never drift apart.",
     "placeholders": { "button": { "content": "$1", "example": "Save" } }
   },
-  "vocab_filter_no_match": {
-    "message": "No saved phrase matches \"$QUERY$\".",
-    "placeholders": { "query": { "content": "$1", "example": "bank" } }
+  "vocab_filter_status_one": {
+    "message": "$SHOWN$ of $TOTAL$ phrase for “$QUERY$”",
+    "description": "The filter's state over the list of saved phrases while the filter is active, with \"Clear filter\" beside it. Plural family over the total; the matching count rides along as $2, the query as $3.",
+    "placeholders": {
+      "total": { "content": "$1", "example": "1" },
+      "shown": { "content": "$2", "example": "1" },
+      "query": { "content": "$3", "example": "news" }
+    }
+  },
+  "vocab_filter_status_other": {
+    "message": "$SHOWN$ of $TOTAL$ phrases for “$QUERY$”",
+    "placeholders": {
+      "total": { "content": "$1", "example": "827" },
+      "shown": { "content": "$2", "example": "1" },
+      "query": { "content": "$3", "example": "news" }
+    }
   },
   "pager_page_of": {
     "message": "Page $PAGE$ of $PAGES$",

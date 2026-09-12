@@ -154,9 +154,21 @@
     "message": "Für dieses Paar ist noch nichts gespeichert. Wählen Sie beim Lesen eine Wendung aus und drücken Sie „$BUTTON$“ - sie wartet dann hier.",
     "placeholders": { "button": { "content": "$1", "example": "Speichern" } }
   },
-  "vocab_filter_no_match": {
-    "message": "Kein gespeicherter Eintrag passt zu „$QUERY$“.",
-    "placeholders": { "query": { "content": "$1", "example": "Bank" } }
+  "vocab_filter_status_one": {
+    "message": "$SHOWN$ von $TOTAL$ Eintrag für „$QUERY$“",
+    "placeholders": {
+      "total": { "content": "$1", "example": "1" },
+      "shown": { "content": "$2", "example": "1" },
+      "query": { "content": "$3", "example": "news" }
+    }
+  },
+  "vocab_filter_status_other": {
+    "message": "$SHOWN$ von $TOTAL$ Einträgen für „$QUERY$“",
+    "placeholders": {
+      "total": { "content": "$1", "example": "827" },
+      "shown": { "content": "$2", "example": "1" },
+      "query": { "content": "$3", "example": "news" }
+    }
   },
   "pager_page_of": {
     "message": "Seite $PAGE$ von $PAGES$",
