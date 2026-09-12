@@ -39,6 +39,7 @@ import { BACK_ROAD_KEY, writeVocabTab } from "../lib/session.js";
 import { restoreVocabulary } from "../lib/store/backup.js";
 import { migrateSemicolonsOnce } from "../lib/store/semicolon-migration.js";
 import { MIRROR_KEY } from "../lib/store/mirror.js";
+import { countsOf } from "../lib/store/phrase.js";
 import { exportFilename, fromTsv, pairFromFilename, toTsv } from "../lib/store/tsv.js";
 import { listPairs, listPhrases } from "../lib/store/vocab.js";
 import { watchToolbarScheme } from "../lib/theme-icon.js";
@@ -53,7 +54,7 @@ import {
   voicesFor,
 } from "../lib/tts.js";
 import { filterActive } from "../options/models-view.js";
-import { listView, markSegments, newestFirst, pairChoicesFor } from "./list-view.js";
+import { Order, asOrder, listView, markSegments, newestFirst, ordered, pairChoicesFor } from "./list-view.js";
 
 // First, so the static text is already the catalogue's language when it shows.
 localizePage();
@@ -106,6 +107,7 @@ const importCancel = /** @type {HTMLButtonElement | null} */ (document.getElemen
 const transferLine = document.getElementById("transfer-status");
 const filterInput = /** @type {HTMLInputElement | null} */ (document.getElementById("filter"));
 const filterStatus = document.getElementById("filter-status");
+const orderSelect = /** @type {HTMLSelectElement | null} */ (document.getElementById("order"));
 const addFold = /** @type {HTMLDetailsElement | null} */ (document.getElementById("add-phrase"));
 const lookupHost = document.getElementById("lookup-box");
 const listContainer = document.getElementById("list");
@@ -125,6 +127,12 @@ let choices = [];
 let shownPair = "";
 let query = "";
 let page = 1;
+/**
+ * The order the list is shown in (D209): the page's own state, like the
+ * filter - chosen on the page, starting over with it.
+ * @type {import("./list-view.js").OrderValue}
+ */
+let order = Order.NEWEST;
 
 /**
  * The row being edited, by its key, and the editor's unsaved text. State
@@ -470,7 +478,10 @@ function renderCount(matching) {
 function renderList() {
   if (listContainer === null) return;
 
-  const view = listView(phrases, { query, page });
+  // Ordered before it is filtered and paged (D209): the page's copy stays
+  // newest first, the store's order for an export; the order chosen on the
+  // page is the view's alone. The collator speaks the phrases' language.
+  const view = listView(ordered(phrases, order, config?.sourceLang ?? ""), { query, page });
   page = view.page;
   // The counter follows every repaint of the list, so a keystroke in the
   // filter and a phrase learned on another tab both keep it true - and so
@@ -597,6 +608,18 @@ function phraseRow(phrase) {
   // The day it was kept, on hover: useful now and then, clutter always.
   word.title = new Date(phrase.createdAt).toLocaleDateString(uiLocale());
   row.append(word);
+
+  // The two counts (D209), each only once it has something to say, and the
+  // line only when one has: a phrase never checked and never met in a
+  // finished text keeps the row it always had.
+  const { recalls, reads } = countsOf(phrase);
+  if (recalls > 0 || reads > 0) {
+    /** @type {string[]} */
+    const said = [];
+    if (recalls > 0) said.push(plural(recalls, "vocab_recalls"));
+    if (reads > 0) said.push(plural(reads, "vocab_reads"));
+    row.append(element("span", "phrase-counts", said.join(` ${String.fromCodePoint(0x00b7)} `)));
+  }
 
   if (editing === phrase.normalized) {
     row.append(editorFor(phrase));
@@ -1239,6 +1262,14 @@ importRun?.addEventListener("click", () => void runImport());
 importCancel?.addEventListener("click", () => {
   closeImportOffer();
   transferStatus("");
+});
+
+// A new order starts the list over at its first page (D209): the page that
+// was open belonged to the old order.
+orderSelect?.addEventListener("change", () => {
+  order = asOrder(orderSelect.value);
+  page = 1;
+  renderList();
 });
 
 filterInput?.addEventListener("input", () => {

@@ -2,10 +2,13 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import {
+  Order,
   PAGE_SIZE,
+  asOrder,
   listView,
   markSegments,
   newestFirst,
+  ordered,
   pairChoicesFor,
   searchablePhrase,
 } from "../src/vocab/list-view.js";
@@ -198,5 +201,47 @@ describe("pairChoicesFor", () => {
     // Nothing chosen, nothing saved: an empty select behind the page's own
     // empty state.
     assert.deepEqual(pairChoicesFor(none, []), []);
+  });
+});
+
+describe("ordered", () => {
+  const rows = [
+    phrase(1, { phrase: "zebra", recallCount: 2, readCount: 10 }),
+    phrase(2, { phrase: "Émile", recallCount: 5 }),
+    phrase(3, { phrase: "apple", readCount: 10 }),
+    phrase(4, { phrase: "eagle" }),
+  ];
+  /** @param {import("../src/lib/store/phrase.js").Phrase[]} list */
+  const names = (list) => list.map((one) => one.phrase);
+
+  it("keeps newest first as the page's own order, whatever order the rows came in", () => {
+    assert.deepEqual(names(ordered(rows, Order.NEWEST, "en")), ["eagle", "apple", "Émile", "zebra"]);
+    assert.deepEqual(names(ordered([...rows].reverse(), Order.NEWEST, "en")), ["eagle", "apple", "Émile", "zebra"]);
+  });
+
+  it("puts the most checked first, the other count second, newest after that", () => {
+    assert.deepEqual(names(ordered(rows, Order.RECALLED, "en")), ["Émile", "zebra", "apple", "eagle"]);
+  });
+
+  it("puts the most read first, the other count second, newest after that", () => {
+    assert.deepEqual(names(ordered(rows, Order.READ, "en")), ["zebra", "apple", "Émile", "eagle"]);
+  });
+
+  it("orders the alphabet with the language's collator - accents beside their letters, case aside", () => {
+    assert.deepEqual(names(ordered(rows, Order.ALPHABETICAL, "en")), ["apple", "eagle", "Émile", "zebra"]);
+    assert.deepEqual(names(ordered(rows, Order.ALPHABETICAL, "")), ["apple", "eagle", "Émile", "zebra"]);
+  });
+
+  it("does not touch the list it was given", () => {
+    const copy = [...rows];
+    ordered(rows, Order.READ, "en");
+    assert.deepEqual(rows, copy);
+  });
+
+  it("names an order for the select's value, newest first for anything else", () => {
+    assert.equal(asOrder("read"), Order.READ);
+    assert.equal(asOrder("recalled"), Order.RECALLED);
+    assert.equal(asOrder("alphabetical"), Order.ALPHABETICAL);
+    for (const other of [undefined, null, "", "oldest", 3]) assert.equal(asOrder(other), Order.NEWEST);
   });
 });

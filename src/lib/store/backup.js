@@ -33,6 +33,7 @@
  */
 
 import { webext } from "../browser.js";
+import { isCount } from "./phrase.js";
 import { allPhrases, hasPhrases, putMissingPhrases } from "./vocab.js";
 
 /** @typedef {import("./phrase.js").Phrase} Phrase */
@@ -107,8 +108,21 @@ function isWord(value) {
  */
 function asPhrase(row) {
   if (typeof row !== "object" || row === null) return null;
-  const { id, langFrom, langTo, phrase, normalized, translations, createdAt, context, sourceUrl } =
-    /** @type {Record<string, unknown>} */ (row);
+  const {
+    id,
+    langFrom,
+    langTo,
+    phrase,
+    normalized,
+    translations,
+    createdAt,
+    context,
+    sourceUrl,
+    recallCount,
+    lastRecallAt,
+    readCount,
+    lastReadAt,
+  } = /** @type {Record<string, unknown>} */ (row);
   if (!isWord(id) || !isWord(langFrom) || !isWord(langTo) || !isWord(phrase) || !isWord(normalized)) return null;
   if (!Array.isArray(translations)) return null;
   const meanings = translations.filter(isWord);
@@ -119,6 +133,18 @@ function asPhrase(row) {
   const clean = { id, langFrom, langTo, phrase, normalized, translations: meanings, createdAt };
   if (isWord(context)) clean.context = context;
   if (isWord(sourceUrl)) clean.sourceUrl = sourceUrl;
+  // The counts (D209) come back as they were, and only as counts: a copy
+  // written by a hand or an older shape that holds something else there
+  // restores the phrase without them, never with a number that is not one.
+  // A count's time rides only with its count - a time alone says nothing.
+  if (isCount(recallCount) && recallCount > 0) {
+    clean.recallCount = recallCount;
+    if (typeof lastRecallAt === "number" && Number.isFinite(lastRecallAt)) clean.lastRecallAt = lastRecallAt;
+  }
+  if (isCount(readCount) && readCount > 0) {
+    clean.readCount = readCount;
+    if (typeof lastReadAt === "number" && Number.isFinite(lastReadAt)) clean.lastReadAt = lastReadAt;
+  }
   return clean;
 }
 

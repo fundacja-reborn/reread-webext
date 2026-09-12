@@ -8,6 +8,7 @@
  * wrong quietly, and so all three live here, under `node --test`.
  */
 
+import { countsOf } from "../lib/store/phrase.js";
 import { matchesFilter, sortByLabel } from "../options/models-view.js";
 
 /** @typedef {import("../lib/store/phrase.js").Phrase} Phrase */
@@ -29,6 +30,59 @@ export const PAGE_SIZE = 100;
  */
 export function newestFirst(phrases) {
   return [...phrases].sort((a, b) => b.createdAt - a.createdAt || b.id.localeCompare(a.id));
+}
+
+/**
+ * The orders the page offers (D209). Newest first is the page's own since
+ * D65; the two counts order by what the reader did with a phrase - the most
+ * checked, the most read; the alphabet is for finding a word whose spelling
+ * is known. Strings, so the select's value can be one.
+ */
+export const Order = Object.freeze({
+  NEWEST: "newest",
+  RECALLED: "recalled",
+  READ: "read",
+  ALPHABETICAL: "alphabetical",
+});
+
+/** @typedef {(typeof Order)[keyof typeof Order]} OrderValue */
+
+/**
+ * @param {unknown} value
+ * @returns {OrderValue} the order named, newest first for anything else
+ */
+export function asOrder(value) {
+  return Object.values(Order).find((one) => one === value) ?? Order.NEWEST;
+}
+
+/**
+ * The list in one of the orders, as a copy. The counts order descending,
+ * the other count second - among phrases checked equally often, the one
+ * read more stands first - and newest first after that, so the order never
+ * depends on how the store happened to list two rows. The alphabet is the
+ * phrases' own language's: its collator puts an accented letter beside its
+ * plain one and knows the order of the letters of Ukrainian, which a
+ * code-point sort does not.
+ *
+ * @param {Phrase[]} phrases as `listPhrases` answers or as the page keeps them
+ * @param {OrderValue} order
+ * @param {string} lang the phrases' language, for the collator; empty for the browser's
+ * @returns {Phrase[]}
+ */
+export function ordered(phrases, order, lang) {
+  const newest = newestFirst(phrases);
+  if (order === Order.NEWEST) return newest;
+  if (order === Order.ALPHABETICAL) {
+    const collator = new Intl.Collator(lang.length > 0 ? lang : undefined, { sensitivity: "base", numeric: true });
+    return newest.sort((a, b) => collator.compare(a.phrase, b.phrase));
+  }
+  return newest.sort((a, b) => {
+    const one = countsOf(a);
+    const two = countsOf(b);
+    const byRecalls = two.recalls - one.recalls;
+    const byReads = two.reads - one.reads;
+    return order === Order.RECALLED ? byRecalls || byReads : byReads || byRecalls;
+  });
 }
 
 /**

@@ -89,7 +89,7 @@
 
   "vocab_title": { "message": "re/read - frases guardadas" },
   "vocab_intro": {
-    "message": "Todas las frases que guardaste para este par de idiomas, las más recientes primero - guardadas mientras leías y almacenadas solo en este dispositivo. «$LEARNED$» quita una frase y sus subrayados con ella; «$EDIT$» reescribe sus significados, uno por línea. Varios significados a la vez: sepáralos con punto y coma.",
+    "message": "Todas las frases que guardaste para este par de idiomas, las más recientes primero - guardadas mientras leías y almacenadas solo en este dispositivo. «$LEARNED$» quita una frase y sus subrayados con ella; «$EDIT$» reescribe sus significados, uno por línea. Varios significados a la vez: sepáralos con punto y coma. Bajo una frase, dos números: cuántas veces la consultaste (abriste su burbuja) y cuántas veces apareció en los textos que terminaste - una parte de un libro que dejaste con «Siguiente» bajo el texto, o un artículo marcado como leído. La lista puede ordenarse por cualquiera de los dos.",
     "placeholders": {
       "learned": { "content": "$1", "example": "Aprendida" },
       "edit": { "content": "$2", "example": "Editar" }
@@ -191,6 +191,47 @@
       "total": { "content": "$1", "example": "827" },
       "shown": { "content": "$2", "example": "1" },
       "query": { "content": "$3", "example": "news" }
+    }
+  },
+  "vocab_order_label": { "message": "Orden de la lista" },
+  "vocab_order_newest": { "message": "Más recientes primero" },
+  "vocab_order_recalled": { "message": "Más consultadas" },
+  "vocab_order_read": { "message": "Más leídas" },
+  "vocab_order_alphabetical": { "message": "Alfabético" },
+  "vocab_recalls_one": {
+    "message": "Consultada $COUNT$ vez",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "vocab_recalls_many": {
+    "message": "Consultada $COUNT$ veces",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1000000" }
+    }
+  },
+  "vocab_recalls_other": {
+    "message": "Consultada $COUNT$ veces",
+    "placeholders": {
+      "count": { "content": "$1", "example": "20" }
+    }
+  },
+  "vocab_reads_one": {
+    "message": "$COUNT$ vez en textos terminados",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "vocab_reads_many": {
+    "message": "$COUNT$ veces en textos terminados",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1000000" }
+    }
+  },
+  "vocab_reads_other": {
+    "message": "$COUNT$ veces en textos terminados",
+    "placeholders": {
+      "count": { "content": "$1", "example": "100" }
     }
   },
   "pager_page_of": {

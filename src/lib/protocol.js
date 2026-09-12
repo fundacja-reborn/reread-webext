@@ -33,10 +33,19 @@ export const Message = Object.freeze({
   FORGET_PHRASE: "forget-phrase",
   LIST_PHRASES: "list-phrases",
   IMPORT_PHRASES: "import-phrases",
+  COUNT_PHRASES: "count-phrases",
   READ_PAGE: "read-page",
   GRAB_PAGE: "grab-page",
   PAGE_INFO: "page-info",
 });
+
+/**
+ * How many keys one `count-phrases` batch may carry, in either list: the
+ * vocabulary budget from the brief. A page reports the keys it was handed
+ * in the mirror, so a batch past this size is not a big vocabulary, it is
+ * a bug - and refused like a broken import row, not trimmed.
+ */
+export const MAX_COUNTED_KEYS = 10_000;
 
 /**
  * The places on the settings page a press may ask to land on (D192), by the
@@ -222,6 +231,19 @@ export const ErrorCode = Object.freeze({
  * counts what happened, because "added 1200, skipped 43" is the whole reason
  * to trust an import that says nothing else.
  *
+ * `count-phrases` is the one request that carries keys rather than text
+ * (D209): a page reports what the reader did with phrases it was handed in
+ * the mirror - `recalled` names a key once per bubble opening, `read` pairs
+ * a key with how many times it occurred in a text the reader finished - and
+ * the keys are the mirror's own, written by the background, so nothing here
+ * is normalized a second time. The lists are exact: a key that is not a
+ * string, a count that is not a whole positive number, or more keys than
+ * the vocabulary budget refuse the message, the way a broken import row
+ * does - the sender is our own page, and half a batch counted quietly is
+ * the worse outcome. A key the store does not know is the background's to
+ * skip, not a refusal: Learned may have taken it between the report and the
+ * write.
+ *
  * @typedef {{ kind: typeof Message.TRANSLATE, text: string, context?: string, lang?: string }} TranslateRequest
  * @typedef {{ kind: typeof Message.LOOK_UP, text: string, lang?: string }} LookUpRequest
  * @typedef {{ kind: typeof Message.OPEN_READER, sourceTabId?: number }} OpenReaderRequest
@@ -235,6 +257,7 @@ export const ErrorCode = Object.freeze({
  * @typedef {{ text: string, translations: string[] }} ImportRow
  * @typedef {{ kind: typeof Message.IMPORT_PHRASES, rows: ImportRow[] }} ImportPhrasesRequest
  * @typedef {{ added: number, skipped: number, invalid: number }} ImportReport
+ * @typedef {{ kind: typeof Message.COUNT_PHRASES, recalled: string[], read: Array<[string, number]> }} CountPhrasesRequest
  * @typedef {{ kind: typeof Message.READ_PAGE }} ReadPageRequest
  * @typedef {TranslateRequest
  *   | LookUpRequest
@@ -247,6 +270,7 @@ export const ErrorCode = Object.freeze({
  *   | ForgetPhraseRequest
  *   | ListPhrasesRequest
  *   | ImportPhrasesRequest
+ *   | CountPhrasesRequest
  *   | ReadPageRequest} Request
  */
 
@@ -511,6 +535,23 @@ export function asRequest(message) {
       clean.push({ text: one["text"], translations: one["translations"] });
     }
     return { kind: Message.IMPORT_PHRASES, rows: clean };
+  }
+
+  if (kind === Message.COUNT_PHRASES) {
+    const { recalled, read } = /** @type {Record<string, unknown>} */ (message);
+    if (!Array.isArray(recalled) || !Array.isArray(read)) return null;
+    if (recalled.length > MAX_COUNTED_KEYS || read.length > MAX_COUNTED_KEYS) return null;
+    if (!recalled.every((key) => typeof key === "string" && key.length > 0)) return null;
+    /** @type {Array<[string, number]>} */
+    const occurrences = [];
+    for (const pair of read) {
+      if (!Array.isArray(pair) || pair.length !== 2) return null;
+      const [key, count] = pair;
+      if (typeof key !== "string" || key.length === 0) return null;
+      if (typeof count !== "number" || !Number.isInteger(count) || count < 1) return null;
+      occurrences.push([key, count]);
+    }
+    return { kind: Message.COUNT_PHRASES, recalled: [...recalled], read: occurrences };
   }
 
   return null;

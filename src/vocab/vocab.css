@@ -244,6 +244,16 @@ summary {
   color: var(--page-fg);
 }
 
+/* The order select (D209) beside the filter, in the pair select's dress
+   (page.css) and the field's height, never shrinking: the filter gives
+   way on a narrow screen, the order keeps its word. */
+.filter-line select {
+  flex: 0 0 auto;
+  margin-inline-start: 0.5rem;
+  min-height: 44px;
+  max-width: 45%;
+}
+
 /* --- the fold for a phrase added by hand (D197) --- */
 
 /* The fold stands the filter's distance under it; inside, the sentence and
@@ -423,6 +433,15 @@ summary {
   color: var(--page-muted);
 }
 
+/* The two counts under the phrase (D209), in the interface's size and the
+   meanings' muted ink: a note about the phrase, not part of the lesson.
+   Absent from a row that has none - a phrase never checked and never met
+   in a finished text reads exactly as it did before the counts. */
+.phrase-counts {
+  color: var(--page-muted);
+  font-size: max(13px, 0.85rem);
+}
+
 /* What the filter matched, lit inside the row: the accent as a wash, and
    under it a 2px line in the ink itself - on e-ink the wash is one of the
    16 greys that rounds back to paper, and the line is what survives
@@ -586,11 +605,36 @@ button.quiet-speak svg {
     align-items: baseline;
   }
 
+  /* Placed by name rather than by flow: the counts (D209) stand under the
+     phrase, in its column, as a second line the row grows only when there
+     is something to say - and the first line keeps its three columns
+     whether that line is there or not. */
+  .phrase-row > .phrase-word {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .phrase-row > .phrase-counts {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .phrase-row > .phrase-meanings {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .phrase-row > .phrase-actions {
+    grid-column: 3;
+    grid-row: 1;
+  }
+
   /* The editor takes the meanings' and the actions' room, beside its phrase.
      Out of the baseline group on purpose: a textarea's baseline sits at its
      bottom edge, and aligning the phrase to that would drag the row down. */
   .phrase-edit {
     grid-column: 2 / -1;
+    grid-row: 1;
     align-self: start;
   }
 }

@@ -83,6 +83,30 @@ describe("the copy of the vocabulary", () => {
     assert.deepEqual(asBackup(stored), { version: 1, writtenAt: 42, phrases: rows });
   });
 
+  it("carries the counts (D209) as counts, and restores a phrase without a count that is not one", () => {
+    const counted = phrase("1", { recallCount: 3, lastRecallAt: 50, readCount: 12, lastReadAt: 60 });
+    assert.deepEqual(asBackup(JSON.parse(JSON.stringify(backupOf([counted], 42))))?.phrases, [counted]);
+
+    const narrowed = asBackup({
+      version: 1,
+      writtenAt: 1,
+      phrases: [
+        { ...phrase("2"), recallCount: "3", lastRecallAt: 50 },
+        { ...phrase("3"), recallCount: -1, readCount: 1.5 },
+        { ...phrase("4"), lastRecallAt: 50, lastReadAt: 60 },
+        { ...phrase("5"), recallCount: 0, readCount: 0 },
+        { ...phrase("6"), recallCount: 2, lastRecallAt: "then" },
+      ],
+    });
+    assert.deepEqual(narrowed?.phrases, [
+      phrase("2"),
+      phrase("3"),
+      phrase("4"),
+      phrase("5"),
+      { ...phrase("6"), recallCount: 2 },
+    ]);
+  });
+
   it("is no copy at all in another shape, and drops the rows that make no sense", () => {
     assert.equal(asBackup(undefined), null);
     assert.equal(asBackup(null), null);

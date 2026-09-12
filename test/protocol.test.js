@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 
 import {
   ErrorCode,
+  MAX_COUNTED_KEYS,
   Message,
   asDictEntries,
   asLookUp,
@@ -365,6 +366,60 @@ describe("asRequest", () => {
         rows: [{ text: "bank", translations: ["brzeg"], id: "smuggled", createdAt: 7 }],
       }),
       { kind: Message.IMPORT_PHRASES, rows: [{ text: "bank", translations: ["brzeg"] }] },
+    );
+  });
+
+  it("accepts a count report with its keys and tallies (D209)", () => {
+    assert.deepEqual(
+      asRequest({
+        kind: Message.COUNT_PHRASES,
+        recalled: ["bank", "bank", "river"],
+        read: [
+          ["bank", 3],
+          ["shore", 1],
+        ],
+      }),
+      {
+        kind: Message.COUNT_PHRASES,
+        recalled: ["bank", "bank", "river"],
+        read: [
+          ["bank", 3],
+          ["shore", 1],
+        ],
+      },
+    );
+    assert.deepEqual(asRequest({ kind: Message.COUNT_PHRASES, recalled: [], read: [] }), {
+      kind: Message.COUNT_PHRASES,
+      recalled: [],
+      read: [],
+    });
+  });
+
+  it("refuses a count report that is not exact, and one past the vocabulary budget", () => {
+    for (const bad of [
+      { recalled: "bank", read: [] },
+      { recalled: [], read: {} },
+      { recalled: [42], read: [] },
+      { recalled: [""], read: [] },
+      { recalled: [], read: [["bank"]] },
+      { recalled: [], read: [["bank", 0]] },
+      { recalled: [], read: [["bank", 1.5]] },
+      { recalled: [], read: [["bank", "3"]] },
+      { recalled: [], read: [[42, 3]] },
+      { recalled: [], read: ["bank"] },
+      { read: [] },
+      { recalled: [] },
+      { recalled: new Array(MAX_COUNTED_KEYS + 1).fill("bank"), read: [] },
+      { recalled: [], read: new Array(MAX_COUNTED_KEYS + 1).fill(["bank", 1]) },
+    ]) {
+      assert.equal(asRequest({ kind: Message.COUNT_PHRASES, ...bad }), null, JSON.stringify(bad).slice(0, 60));
+    }
+  });
+
+  it("keeps of a count report only what a report is", () => {
+    assert.deepEqual(
+      asRequest({ kind: Message.COUNT_PHRASES, recalled: ["bank"], read: [], url: "https://example.org/" }),
+      { kind: Message.COUNT_PHRASES, recalled: ["bank"], read: [] },
     );
   });
 

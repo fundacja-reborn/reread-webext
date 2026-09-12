@@ -89,7 +89,7 @@
 
   "vocab_title": { "message": "re/read - zapisane frazy" },
   "vocab_intro": {
-    "message": "Wszystkie frazy zachowane dla tej pary językowej, od najnowszych - zapisane podczas czytania i przechowywane tylko na tym urządzeniu. „$LEARNED$” usuwa frazę razem z jej podkreśleniami; „$EDIT$” pozwala przepisać znaczenia, po jednym w linii. Kilka znaczeń naraz rozdziel średnikiem.",
+    "message": "Wszystkie frazy zachowane dla tej pary językowej, od najnowszych - zapisane podczas czytania i przechowywane tylko na tym urządzeniu. „$LEARNED$” usuwa frazę razem z jej podkreśleniami; „$EDIT$” pozwala przepisać znaczenia, po jednym w linii. Kilka znaczeń naraz rozdziel średnikiem. Pod frazą dwie liczby: ile razy ją sprawdzałeś (otwierałeś jej dymek) i ile razy wystąpiła w tekstach, które skończyłeś - w części książki, z której wyszedłeś przyciskiem „Następna” pod tekstem, albo w artykule oznaczonym jako przeczytany. Listę można uporządkować według każdej z nich.",
     "placeholders": {
       "learned": { "content": "$1", "example": "Znam to" },
       "edit": { "content": "$2", "example": "Edytuj" }
@@ -206,6 +206,59 @@
       "total": { "content": "$1", "example": "1,5" },
       "shown": { "content": "$2", "example": "1" },
       "query": { "content": "$3", "example": "news" }
+    }
+  },
+  "vocab_order_label": { "message": "Porządek listy" },
+  "vocab_order_newest": { "message": "Od najnowszych" },
+  "vocab_order_recalled": { "message": "Najczęściej sprawdzane" },
+  "vocab_order_read": { "message": "Najczęściej czytane" },
+  "vocab_order_alphabetical": { "message": "Alfabetycznie" },
+  "vocab_recalls_one": {
+    "message": "Sprawdzane $COUNT$ raz",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "vocab_recalls_few": {
+    "message": "Sprawdzane $COUNT$ razy",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "vocab_recalls_many": {
+    "message": "Sprawdzane $COUNT$ razy",
+    "placeholders": {
+      "count": { "content": "$1", "example": "20" }
+    }
+  },
+  "vocab_recalls_other": {
+    "message": "Sprawdzane $COUNT$ razy",
+    "placeholders": {
+      "count": { "content": "$1", "example": "20" }
+    }
+  },
+  "vocab_reads_one": {
+    "message": "$COUNT$ raz w przeczytanych tekstach",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "vocab_reads_few": {
+    "message": "$COUNT$ razy w przeczytanych tekstach",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "vocab_reads_many": {
+    "message": "$COUNT$ razy w przeczytanych tekstach",
+    "placeholders": {
+      "count": { "content": "$1", "example": "100" }
+    }
+  },
+  "vocab_reads_other": {
+    "message": "$COUNT$ razy w przeczytanych tekstach",
+    "placeholders": {
+      "count": { "content": "$1", "example": "100" }
     }
   },
   "pager_page_of": {

@@ -27,8 +27,9 @@ import {
   supported as highlightsSupported,
   unregister as unregisterHighlight,
 } from "../content/highlighter.js";
-import { dismiss, rescan, start, stop as stopReadingSide } from "../content/reading.js";
+import { dismiss, reportRead, rescan, start, stop as stopReadingSide } from "../content/reading.js";
 import { applyReading } from "../lib/appearance.js";
+import { ReadLedger } from "../lib/counting.js";
 import { dresser } from "../lib/user-css.js";
 import { webext } from "../lib/browser.js";
 import { holdChrome } from "../lib/chrome-hold.js";
@@ -415,6 +416,8 @@ const segmentNexts = [
   document.getElementById("segment-next"),
   document.getElementById("segment-next-end"),
 ];
+/** The Next under the text alone: the one that says a part was read to its end (D209). */
+const segmentNextEndButton = document.getElementById("segment-next-end");
 // The book's table of contents (D116): the two doors in the pagers, and the
 // dialog they open.
 const tocButtons = [document.getElementById("toc"), document.getElementById("toc-end")];
@@ -5057,6 +5060,28 @@ async function onRemovePress(button) {
 }
 
 /**
+ * Which parts of the document on screen were already counted as finished
+ * (D209): one document deep, forgotten when another opens.
+ */
+const readLedger = new ReadLedger();
+
+/**
+ * The part on screen counted as finished (D209): its underlined occurrences
+ * go to the saved phrases they belong to, through the reading side's report.
+ * Once per part per opening of the document, whichever gesture says so - the
+ * Next under the text, or Mark as read - and never for the whole book: the
+ * parts already left through Next are counted, and the mark over a book
+ * counts only the part it was pressed on.
+ */
+function countFinished() {
+  const target = shown;
+  if (target === null) return;
+  const part = target.origin === "book" ? target.segmentIndex : 0;
+  if (!readLedger.claim(target.url, part)) return;
+  reportRead();
+}
+
+/**
  * Mark the article read, or unread again - only ever by hand, from here:
  * opening an article is not reading it (D-g).
  */
@@ -5065,13 +5090,20 @@ async function onMarkReadPress() {
   if (target === null) return;
 
   try {
+    // Marking counts the part on screen as finished (D209) - marking, never
+    // unmarking, and over a book only this part: the parts before it were
+    // counted as Next under their text left them, and the mark is the last
+    // part's way of arriving. Before the write, while the page still shows
+    // what is being marked.
     if (target.origin === "book") {
       const book = await getBook(target.url);
       if (shown !== target || book === null) return;
+      if (book.readAt === null) countFinished();
       await setBookReadAt(target.url, book.readAt === null ? Date.now() : null);
     } else {
       const meta = await getArticleMeta(target.url);
       if (shown !== target || meta === null) return;
+      if (meta.readAt === null) countFinished();
       await setReadAt(target.url, meta.readAt === null ? Date.now() : null);
     }
   } catch {
@@ -5938,6 +5970,11 @@ async function runBookImport(file) {
 }
 
 for (const button of segmentPrevs) button?.addEventListener("click", () => turnSegment(-1));
+// The Next under the text counts the part it leaves as finished (D209),
+// registered before the turn so the count reads the part still on screen.
+// Only that one: the bar's Next above is a way of moving, the one under the
+// last line is a way of arriving, and only arriving counts.
+segmentNextEndButton?.addEventListener("click", () => countFinished());
 for (const button of segmentNexts) button?.addEventListener("click", () => turnSegment(1));
 
 for (const button of tocButtons) button?.addEventListener("click", () => openTocDialog());

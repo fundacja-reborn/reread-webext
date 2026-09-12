@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import { ErrorCode, fail, ok } from "../src/lib/protocol.js";
-import { MAX_PHRASE_LENGTH, buildPhrase, resaved } from "../src/lib/store/phrase.js";
+import { MAX_PHRASE_LENGTH, buildPhrase, counted, countsOf, resaved } from "../src/lib/store/phrase.js";
 
 /**
  * @param {Partial<Parameters<typeof buildPhrase>[0]>} overrides
@@ -107,5 +107,60 @@ describe("resaved", () => {
       createdAt: 1000,
       context: "on the bank of the river",
     });
+  });
+});
+
+describe("counted", () => {
+  /** @type {import("../src/lib/store/phrase.js").Phrase} */
+  const kept = {
+    id: "id-1",
+    langFrom: "en",
+    langTo: "pl",
+    phrase: "bank",
+    normalized: "bank",
+    translations: ["brzeg"],
+    createdAt: 1000,
+  };
+
+  it("adds a batch of counts and stamps the time of each count that grew", () => {
+    assert.deepEqual(counted(kept, { recalled: 2, read: 5 }, 5000), {
+      ...kept,
+      recallCount: 2,
+      lastRecallAt: 5000,
+      readCount: 5,
+      lastReadAt: 5000,
+    });
+    const once = counted(kept, { recalled: 1, read: 0 }, 5000);
+    assert.deepEqual(once, { ...kept, recallCount: 1, lastRecallAt: 5000 });
+    assert.deepEqual(counted(once, { recalled: 0, read: 3 }, 6000), {
+      ...kept,
+      recallCount: 1,
+      lastRecallAt: 5000,
+      readCount: 3,
+      lastReadAt: 6000,
+    });
+  });
+
+  it("gives the row back untouched - the same object - when the batch adds nothing", () => {
+    assert.equal(counted(kept, { recalled: 0, read: 0 }, 5000), kept);
+    assert.equal(counted(kept, { recalled: -1, read: 1.5 }, 5000), kept);
+    assert.equal(counted(kept, { recalled: Number.NaN, read: 0 }, 5000), kept);
+  });
+
+  it("reads a row from before the counts as zero, and keeps every other field", () => {
+    assert.deepEqual(countsOf(kept), { recalls: 0, reads: 0 });
+    const withContext = { ...kept, context: "on the bank", recallCount: 4 };
+    assert.deepEqual(countsOf(withContext), { recalls: 4, reads: 0 });
+    assert.deepEqual(counted(withContext, { recalled: 1, read: 0 }, 7000), {
+      ...withContext,
+      recallCount: 5,
+      lastRecallAt: 7000,
+    });
+  });
+
+  it("survives a save of the same phrase again - resaved keeps the counts", () => {
+    const existing = { ...kept, recallCount: 3, lastRecallAt: 2000, readCount: 9, lastReadAt: 3000 };
+    const incoming = { ...kept, id: "id-2", createdAt: 4000, phrase: "Bank", translations: ["brzeg rzeki"] };
+    assert.deepEqual(resaved(existing, incoming), { ...existing, phrase: "Bank", translations: ["brzeg rzeki"] });
   });
 });
