@@ -746,7 +746,11 @@ body:not(.reader):has(.panel-scrim:not([hidden])) .page-chrome {
   white-space: nowrap;
 }
 
+/* The answer's two measures, read by the rows' checkboxes and by the
+   "Show all" button that lines up with the rows' text. */
 .lookup-answer {
+  --lookup-box-size: 20px;
+  --lookup-line-gap: 12px;
   display: grid;
   gap: 0.4rem;
 }
@@ -947,28 +951,33 @@ button.lookup-show {
   color: var(--page-muted);
 }
 
-/* The rest of a book's lines, folded: the fold's line reads like the
-   sentence-links, and the rows under it are the same rows. */
-.lookup-more-label {
+/* The button after the rest of a long book's lines - "Show all (N)" over
+   the hidden block, "Show fewer" over the shown one - the book's last child
+   either way (block 3 of the polish round). It reads like the
+   sentence-links and lines up with the rows' text: the same inset as a row
+   plus the box and the gap, not the box's own edge. */
+.lookup-more-toggle {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  width: 100%;
   min-height: 44px;
-  padding: 0 0.35rem;
+  margin: 0;
+  padding: 0 0.35rem 0 calc(0.35rem + var(--lookup-box-size, 20px) + var(--lookup-line-gap, 12px));
+  border: none;
+  border-radius: 0;
+  background: none;
+  font: inherit;
   font-size: 0.85rem;
+  text-align: left;
   color: var(--page-accent);
   text-decoration: underline;
   cursor: pointer;
 }
 
-.lookup-more-label::marker {
-  color: var(--page-muted);
-}
-
 .lookup-line {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
+  gap: var(--lookup-line-gap, 12px);
   min-height: 44px;
   padding: 0.45rem 0.35rem;
   border-radius: 5px;
@@ -986,11 +995,10 @@ button.lookup-show {
    the reading size the Aa panel chose (vocab.css) - and falls back to the
    interface line box here, where `em` is the box's own inherited size. */
 .lookup-line-box {
-  --lookup-box-size: 20px;
   flex: none;
-  width: var(--lookup-box-size);
-  height: var(--lookup-box-size);
-  margin: calc((var(--lookup-line-height, 1.6em) - var(--lookup-box-size)) / 2) 0 0;
+  width: var(--lookup-box-size, 20px);
+  height: var(--lookup-box-size, 20px);
+  margin: calc((var(--lookup-line-height, 1.6em) - var(--lookup-box-size, 20px)) / 2) 0 0;
   cursor: pointer;
 }
 

@@ -505,22 +505,12 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
       const book = fold("lookup-group", `group:${group.dictionary}`, at === 0, summary);
 
       // Everything up to the cut goes straight into the book; the rest
-      // goes into the "Show all" fold, headwords and lines alike.
+      // goes into the block behind "Show all", headwords and lines alike.
       const { shown, unfolded } = foldPoint(group.lines, state.meanings);
-      /** @type {HTMLElement | null} */
-      let more = null;
-      if (!readOnly && shown < group.lines.length) {
-        const label = element("summary", "lookup-more-label");
-        more = fold("lookup-more", `more:${group.dictionary}`, unfolded, label);
-        const say = () => {
-          label.textContent = more?.hasAttribute("open") === true ? t("lookup_show_fewer") : t("lookup_show_all", [group.lines.length.toLocaleString()]);
-        };
-        say();
-        more.addEventListener("toggle", say);
-      }
+      const more = !readOnly && shown < group.lines.length ? moreFold(book, group, unfolded, at) : null;
       let index = 0;
       for (const [entryAt, entry] of group.entries.entries()) {
-        const into = more !== null && index >= shown ? more : book;
+        const into = more !== null && index >= shown ? more.rest : book;
         if (entry.headword.length > 0) {
           into.append(element("div", "lookup-entry-headword", entry.headword));
         }
@@ -536,15 +526,62 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
           continue;
         }
         for (const line of entry.lines) {
-          const home = more !== null && index >= shown ? more : book;
+          const home = more !== null && index >= shown ? more.rest : book;
           home.append(lineRow(line, `${at}:${index}`));
           index += 1;
         }
       }
-      if (more !== null) book.append(more);
+      // The rest of the lines, then the button: the book's last child, so
+      // the rows unfold above it and it stays where it is in both states.
+      if (more !== null) book.append(more.rest, more.toggle);
       entries.append(book);
     }
     return entries;
+  }
+
+  /**
+   * The rest of a long book's lines behind "Show all (N)" (block 3 of the
+   * polish round): the lines in a block that is hidden or shown, and the
+   * button after them - always the book's last child, so the rows unfold
+   * above it and it does not move between the two states. A button over a
+   * hidden block rather than a `details`: a summary has to stand first in
+   * its fold, and the rows then unfolded under the link. Opened and closed
+   * on the spot, without a redraw (a redraw rebuilds the rows under the
+   * finger); the state is written down in `folds` for the next redraw. A
+   * close from the bottom of a long book brings the book's name back into
+   * view when it has scrolled off the top, so the reader does not land in
+   * another book; an open moves nothing - the rows appear where the button
+   * was.
+   *
+   * @param {HTMLElement} book the fold the lines belong to
+   * @param {import("./lookup.js").EntryGroup} group
+   * @param {boolean} unfolded whether the block starts shown (a saved line
+   *   in it, `foldPoint`)
+   * @param {number} at the book's index, for the block's id
+   * @returns {{ rest: HTMLElement, toggle: HTMLButtonElement }}
+   */
+  function moreFold(book, group, unfolded, at) {
+    const key = `more:${group.dictionary}`;
+    const open = folds.get(key) ?? unfolded;
+    const rest = element("div", "lookup-more");
+    rest.id = `lookup-more-${at}`;
+    rest.hidden = !open;
+    const toggle = button("lookup-more-toggle", "");
+    toggle.setAttribute("aria-controls", rest.id);
+    const say = (/** @type {boolean} */ shown) => {
+      toggle.textContent = shown ? t("lookup_show_fewer") : t("lookup_show_all", [group.lines.length.toLocaleString()]);
+      toggle.setAttribute("aria-expanded", String(shown));
+    };
+    say(open);
+    toggle.addEventListener("click", () => {
+      // `hidden` may also be a string in the newest DOM typings.
+      const opening = rest.hidden === true;
+      rest.hidden = !opening;
+      say(opening);
+      folds.set(key, opening);
+      if (!opening && book.getBoundingClientRect().top < 0) book.scrollIntoView({ block: "start" });
+    });
+    return { rest, toggle };
   }
 
   /**

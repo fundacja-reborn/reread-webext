@@ -122,8 +122,20 @@ describe("the look-up field", () => {
     assert.match(shelf, /fold\("lookup-group", `group:\$\{group\.dictionary\}`, at === 0, summary\)/, "the first book is not the one open by default, or a book is no fold");
     assert.match(shelf, /if \(!readOnly\) summary\.append\(` \(\$\{group\.lines\.length\.toLocaleString\(\)\}\)`\)/, "the fold's name carries no count where lines are ticked, or one where they are prose");
     assert.match(shelf, /foldPoint\(group\.lines, state\.meanings\)/, "the cut does not ask the rule");
-    assert.match(shelf, /fold\("lookup-more", `more:\$\{group\.dictionary\}`, unfolded, label\)/, "the rest of a long book does not fold, or ignores a saved line out of sight");
-    assert.match(shelf, /t\("lookup_show_fewer"\) : t\("lookup_show_all", \[group\.lines\.length\.toLocaleString\(\)\]\)/, "the fold's words do not follow its state");
+    assert.match(shelf, /moreFold\(book, group, unfolded, at\) : null/, "the rest of a long book does not fold, or ignores a saved line out of sight");
+    // The rest of the lines, then the button - the book's last child in
+    // both states, so the rows unfold above it and it does not move.
+    assert.match(shelf, /book\.append\(more\.rest, more\.toggle\)/, "the button does not stand last in the book");
+    const rest = bodyOf(box, "moreFold");
+    assert.match(rest, /rest\.hidden = !open;/, "the rest of the lines is not a hidden block");
+    assert.match(rest, /toggle\.textContent = shown \? t\("lookup_show_fewer"\) : t\("lookup_show_all", \[group\.lines\.length\.toLocaleString\(\)\]\)/, "the button's words do not follow the state");
+    assert.match(rest, /toggle\.setAttribute\("aria-expanded", String\(shown\)\)/, "the button does not say whether the block is shown");
+    // On the spot, without a redraw; the state written down; a close from
+    // the bottom of a long book brings the book's name back into view.
+    assert.match(rest, /rest\.hidden = !opening;\s*say\(opening\);\s*folds\.set\(key, opening\);/, "a press redraws, or forgets the state");
+    assert.doesNotMatch(rest, /render\(\)/, "a press redraws the whole answer");
+    assert.match(rest, /if \(!opening && book\.getBoundingClientRect\(\)\.top < 0\) book\.scrollIntoView\(\{ block: "start" \}\)/, "a close at the bottom of a long book leaves the reader in another book");
+    assert.doesNotMatch(await source("assets/page.css"), /lookup-more-label/, "the old summary's dress is still there");
     // A fold is remembered as the reader left it across the redraws a tick
     // makes, and forgotten with the next word.
     const folded = bodyOf(box, "fold");
@@ -263,7 +275,8 @@ describe("the saved-phrases page's fold", () => {
     // The margin is half of what the line stands tall over the box, from
     // tokens - the line's height set by the phrases page from the reading
     // size the Aa panel chose, by the one line-height the rows use.
-    assert.match(page, /\.lookup-line-box \{\s*--lookup-box-size: 20px;[\s\S]*?margin: calc\(\(var\(--lookup-line-height, 1\.6em\) - var\(--lookup-box-size\)\) \/ 2\) 0 0;/, "the box's margin is a constant, or not half the line's excess");
+    assert.match(page, /\.lookup-answer \{\s*--lookup-box-size: 20px;\s*--lookup-line-gap: 12px;/, "the answer does not hold the box's size and the gap as tokens");
+    assert.match(page, /\.lookup-line-box \{[\s\S]*?margin: calc\(\(var\(--lookup-line-height, 1\.6em\) - var\(--lookup-box-size, 20px\)\) \/ 2\) 0 0;/, "the box's margin is a constant, or not half the line's excess");
     assert.match(vocab, /:root \{\s*--phrase-line-height: 1\.45;/, "the rows' line-height is not a token");
     assert.match(vocab, /line-height: var\(--phrase-line-height\);/, "the rows' rule does not use the token");
     assert.doesNotMatch(vocab, /^\s*line-height: 1\.45;/m, "the line-height is written twice");
