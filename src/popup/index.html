@@ -107,12 +107,15 @@
          the models are read and nothing below it moves (D194).
          Once the field has answered, the popup is in its results mode
          (`body[data-mode="lookup"]`, popup.css): every other row leaves, this
-         row sticks to the top with the arrow back to the menu in it, and the
-         answer scrolls under it. The field only reads here - a popup leaves
-         at a click beside it, and a save nobody saw is the wrong surprise
-         (Michał's call after the first smoke); its one act is the row under
-         the answer, which opens the saved-phrases page with the word already
-         looked up in its "Add a phrase" fold. Field, answer and rules:
+         row stays at the top with the arrow back to the menu in it, the
+         answer scrolls inside itself under it, and the button stays at the
+         bottom. The field only reads here - a popup leaves at a click
+         beside it, and a save nobody saw is the wrong surprise (Michał's
+         call after the first smoke): the same answer as the saved-phrases
+         page's, without its boxes, what is saved first under its own name;
+         its one act is the button under the answer, which opens the
+         saved-phrases page with the word already looked up in its "Add a
+         phrase" fold and the list narrowed to it. Field, answer and rules:
          `lib/lookup-box.js`, `lib/lookup.js`. -->
     <div
       class="popup-row popup-lookup-head"

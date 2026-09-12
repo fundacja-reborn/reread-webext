@@ -817,42 +817,6 @@ body:not(.reader):has(.panel-scrim:not([hidden])) .page-chrome {
   height: 1.6em;
 }
 
-/* What the phrase already means, in the field that only reads (the popup):
-   the small label, and under it the meanings as chips - a wash and a
-   border, because a wash alone is one of the 16 greys an e-ink panel rounds
-   back to paper. The field that writes has no chips: its ticked rows say
-   the same thing once. */
-.lookup-kept {
-  display: grid;
-  gap: 0.3rem;
-}
-
-.lookup-kept-label {
-  margin: 0;
-  color: var(--page-muted);
-  font-size: 0.85rem;
-}
-
-.lookup-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-}
-
-.lookup-chip {
-  display: inline-flex;
-  align-items: center;
-  margin: 0;
-  padding: 0.3rem 0.6rem;
-  font: inherit;
-  text-align: left;
-  color: inherit;
-  background: color-mix(in srgb, var(--page-fg) 7%, transparent);
-  border: 1px solid var(--page-border);
-  border-radius: 5px;
-  overflow-wrap: anywhere;
-}
-
 /* The line that says the dictionaries are being asked, why they said
    nothing, or what went wrong - the page's own status voice, one step below
    the prose; pending in the italic the bubble uses for the same wait. */
@@ -1096,11 +1060,38 @@ button.lookup-show {
   white-space: nowrap;
 }
 
-/* The read-only field's entries, as the book wrote them: one block per
-   paragraph with the lines inside it kept (`pre-line`), and the space
-   between paragraphs where the book had a section's end - "Noun", its
-   senses, "Verb" (D197). The same inset as a pressed line, so the two
-   fields read alike. */
+/* The field that only reads (the popup, the fourth brief's D2): the same
+   shelf without its boxes. The rows are nothing to press - no pointer, no
+   hover wash - and their text starts at the group's edge, the box's column
+   gone; what is saved stands first under its own name, each meaning with
+   a tick standing still in the column the page's rows give their box, and
+   the standing line steps under the word, where the popup's width puts it. */
+.lookup-answer[data-readonly="true"] .lookup-line {
+  cursor: default;
+}
+
+.lookup-answer[data-readonly="true"] .lookup-line:hover {
+  background: none;
+}
+
+.lookup-line-mark {
+  flex: none;
+  width: var(--lookup-box-size, 20px);
+  text-align: center;
+}
+
+.lookup-answer[data-readonly="true"]
+  :is(.lookup-entry-heading, .lookup-more-toggle, .lookup-about-label, .lookup-about .lookup-paragraph) {
+  padding-inline-start: 0.35rem;
+}
+
+.lookup-answer[data-readonly="true"] .lookup-standing {
+  flex-basis: 100%;
+  margin-inline-start: 0;
+}
+
+/* A line of "More about the word": plain text with the lines inside it
+   kept (`pre-line`), one paragraph each. */
 .lookup-paragraph {
   padding: 0 0.35rem;
   white-space: pre-line;

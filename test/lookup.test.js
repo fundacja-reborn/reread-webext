@@ -10,7 +10,6 @@ import {
   lookupOutcome,
   lookupText,
   ownMeanings,
-  paragraphsOf,
   sameMeaning,
 } from "../src/lib/lookup.js";
 import { MAX_PHRASE_LENGTH } from "../src/lib/store/phrase.js";
@@ -79,23 +78,6 @@ describe("lookupOutcome", () => {
 
   it("says a fault as a fault - a press answered with nothing would read as a hang", () => {
     assert.deepEqual(lookupOutcome(null, "elevation"), { kind: "fault" });
-  });
-});
-
-describe("paragraphsOf", () => {
-  it("cuts a stored sense at the blank lines the import kept, and nowhere else", () => {
-    // The import keeps a section's end as one blank line (dict/text.js,
-    // D197); the lines inside a section stay one paragraph.
-    assert.deepEqual(paragraphsOf("Noun\nNew information of interest.\n\nVerb\nTo report."), [
-      "Noun\nNew information of interest.",
-      "Verb\nTo report.",
-    ]);
-    assert.deepEqual(paragraphsOf("wysokość"), ["wysokość"]);
-  });
-
-  it("has no paragraph of nothing", () => {
-    assert.deepEqual(paragraphsOf("\n\n a \n\n\n\n b \n\n"), ["a", "b"]);
-    assert.deepEqual(paragraphsOf("   "), []);
   });
 });
 

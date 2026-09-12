@@ -121,9 +121,14 @@
   },
   "lookup_show_fewer": { "message": "Показати менше" },
   "lookup_show_in_list": { "message": "Показати в списку" },
-  "lookup_kept": { "message": "У ваших збережених фразах" },
+  "lookup_saved_group": {
+    "message": "Збережено ($COUNT$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
   "popup_lookup_back": { "message": "Назад до меню" },
-  "popup_lookup_add": { "message": "Додати до збережених фраз" },
+  "popup_lookup_add": { "message": "Зберегти на сторінці фраз" },
   "popup_lookup_open": { "message": "Відкрити у збережених фразах" },
   "vocab_count_filtered_one": {
     "message": "$MATCHING$ з $TOTAL$ збереженої фрази",

@@ -10,7 +10,9 @@
  * reads (`readOnly`): a popup leaves at a click beside it, its answer
  * scrolls the "saved" line out of view, and a save nobody saw is the wrong
  * kind of surprise (Michał's call after the first smoke, 2026-09-11) - so
- * there the lines are prose, and the popup's own row leads to the page.
+ * there the same answer stands without its boxes (the fourth brief's D2):
+ * nothing to press, what is saved first under its own name, and the
+ * popup's own button leads to the page where a tick saves.
  *
  * The field does one thing and leaves the rest to the page around it (the
  * rebuild of 2026-09-11, block 1): it looks the word up and lets a meaning
@@ -48,7 +50,6 @@ import {
   lookupOutcome,
   lookupText,
   ownMeanings,
-  paragraphsOf,
 } from "./lookup.js";
 import { keyTokens } from "./matcher/tokenize.js";
 import { describeError } from "./messages.js";
@@ -232,6 +233,9 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
 
   const answer = element("div", "lookup-answer");
   answer.hidden = true;
+  // The stylesheet reads the mode off the answer: no box column, nothing
+  // to press, the standing under the word.
+  if (readOnly) answer.dataset["readonly"] = "true";
   hosts.answer.append(answer);
 
   function tell() {
@@ -476,9 +480,8 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
    * others closed with the count in their name - the height of the answer
    * limited by structure, not by a scrollbar. Inside a book, the lines past
    * `LINES_OPEN` fold again under "Show all", which opens by itself when a
-   * saved meaning would otherwise be out of sight. Where the field only
-   * reads, a book's entries are prose, paragraph by paragraph, and the
-   * count is not said: paragraphs are nothing to tick.
+   * saved meaning would otherwise be out of sight. The same shelf where
+   * the field only reads - the rows without their boxes (`lineRow`).
    *
    * @param {import("./lookup.js").EntryGroup[]} groups
    * @returns {HTMLElement[]} one fold per book, for the shelf
@@ -489,29 +492,18 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
     for (const [at, group] of groups.entries()) {
       const summary = element("summary", "lookup-group-label");
       summary.append(element("span", "lookup-entry-dict", group.dictionary));
-      if (!readOnly) summary.append(` (${group.lines.length.toLocaleString()})`);
+      summary.append(` (${group.lines.length.toLocaleString()})`);
       const book = fold("lookup-group", `group:${group.dictionary}`, at === 0, summary);
 
       // Everything up to the cut goes straight into the book; the rest
       // goes into the block behind "Show all", headwords and lines alike.
       const { shown, unfolded } = foldPoint(group.lines, state.meanings);
-      const more = !readOnly && shown < group.lines.length ? moreFold(book, group, unfolded, at) : null;
+      const more = shown < group.lines.length ? moreFold(book, group, unfolded, at) : null;
       let index = 0;
-      for (const [entryAt, entry] of group.entries.entries()) {
+      for (const entry of group.entries) {
         const into = more !== null && index >= shown ? more.rest : book;
         if (entry.headword.length > 0) {
           into.append(element("div", "lookup-entry-headword", entry.headword));
-        }
-        if (readOnly) {
-          // Prose, not presses (the header): the book's own paragraphs,
-          // which the rows cut into lines - read off the entries as stored,
-          // the group's entries being those in the answer's order.
-          const stored = state.outcome?.kind === "entries" ? state.outcome.entries : [];
-          const own = stored.filter((one) => one.dictionary === group.dictionary)[entryAt];
-          for (const sense of own?.senses ?? []) {
-            for (const paragraph of paragraphsOf(sense)) into.append(element("div", "lookup-paragraph", paragraph));
-          }
-          continue;
         }
         // A label stands over the first meaning after it, wherever that
         // meaning lands - open, or behind "Show all" - so a cut inside a
@@ -539,10 +531,36 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
       // one, so the rows unfold above it and it stays where it is in both
       // states; "More about the word" last of all.
       if (more !== null) book.append(more.rest, more.toggle);
-      if (!readOnly && group.about.length > 0) book.append(aboutFold(group));
+      if (group.about.length > 0) book.append(aboutFold(group));
       shelf.push(book);
     }
     return shelf;
+  }
+
+  /**
+   * What the phrase already means, first on the shelf where the field only
+   * reads (the fourth brief's D2): every saved meaning - a book's line or
+   * the reader's own - as a row with a tick standing still where the
+   * page's rows have their box, the text in the kept weight. A fold like
+   * a book's, open by default and remembered; in the popup, in place of
+   * the chips it used to show. The books below say a saved line by its
+   * weight alone - the tick stands once, here.
+   *
+   * @returns {HTMLDetailsElement}
+   */
+  function savedGroup() {
+    const summary = element("summary", "lookup-group-label", t("lookup_saved_group", [state.meanings.length.toLocaleString()]));
+    const group = fold("lookup-group lookup-group-saved", "saved", true, summary);
+    for (const [at, meaning] of state.meanings.entries()) {
+      const row = element("div", "lookup-line");
+      row.dataset["line"] = `saved:${at}`;
+      row.dataset["saved"] = "true";
+      const mark = element("span", "lookup-line-mark", String.fromCodePoint(0x2713));
+      mark.setAttribute("aria-hidden", "true");
+      row.append(mark, element("span", "lookup-line-text", meaning));
+      group.append(row);
+    }
+    return group;
   }
 
   /**
@@ -619,9 +637,19 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
    * @returns {HTMLElement}
    */
   function lineRow(line, at) {
+    const saved = isSaved(state.meanings, line);
+    if (readOnly) {
+      // The same row without its box (the fourth brief's D2): nothing to
+      // press, the weight alone saying the meaning is kept - the tick
+      // stands once, in "Saved" above.
+      const row = element("div", "lookup-line");
+      row.dataset["line"] = at;
+      row.dataset["saved"] = saved ? "true" : "false";
+      row.append(element("span", "lookup-line-text", line));
+      return row;
+    }
     const row = element("label", "lookup-line");
     row.dataset["line"] = at;
-    const saved = isSaved(state.meanings, line);
     row.dataset["saved"] = saved ? "true" : "false";
     const box = document.createElement("input");
     box.type = "checkbox";
@@ -750,21 +778,6 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
     if (state.meanings.length > 0) head.append(standing(state.phrase));
     answer.append(head);
 
-    // Where the field only reads, what the phrase already means stands
-    // before what the books say, as chips: the reader's own meaning
-    // outranks a dictionary's (the recall bubble's order), and the popup
-    // has no rows to tick that would show it. Where the field writes, the
-    // ticked rows say it - one list with a state, not the same meanings
-    // twice (block 2 of the rebuild).
-    if (readOnly && state.meanings.length > 0) {
-      const kept = element("div", "lookup-kept");
-      kept.append(element("p", "lookup-kept-label", t("lookup_kept")));
-      const chips = element("div", "lookup-chips");
-      for (const meaning of state.meanings) chips.append(element("span", "lookup-chip", meaning));
-      kept.append(chips);
-      answer.append(kept);
-    }
-
     if (state.pending) {
       const line = element("p", "lookup-note", t("bubble_looking_up"));
       line.dataset["tone"] = "pending";
@@ -778,16 +791,19 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
       answer.append(verdictLine(verdictParts(state.outcome.note, state.outcome.lang, words)));
     }
 
-    // The books and, where the field writes, the reader's own meanings
-    // last - once the books have answered, whatever they said - in one
-    // column with one separator between any two of them (the stylesheet),
-    // so the space between the last book and "Your own" is the space
-    // between two books (block 4 of the polish round).
+    // The shelf: where the field only reads, what the phrase already means
+    // first (the reader's own meaning outranks a book's, the recall
+    // bubble's order); the books; and where the field writes, the reader's
+    // own meanings last - once the books have answered, whatever they said
+    // - in one column with one separator between any two of them (the
+    // stylesheet), so the space between the last book and "Your own" is
+    // the space between two books (block 4 of the polish round).
     const groups =
       state.outcome?.kind === "entries"
         ? entryGroups(state.outcome.entries, state.phrase.normalized, state.outcome.lang)
         : [];
     const shelf = element("div", "lookup-entries");
+    if (readOnly && !state.pending && state.meanings.length > 0) shelf.append(savedGroup());
     shelf.append(...books(groups));
     if (!readOnly && !state.pending) shelf.append(ownSection(groups.flatMap((group) => group.lines)));
     if (shelf.childElementCount > 0) answer.append(shelf);

@@ -121,9 +121,14 @@
   },
   "lookup_show_fewer": { "message": "Pokaż mniej" },
   "lookup_show_in_list": { "message": "Pokaż w liście" },
-  "lookup_kept": { "message": "W zapisanych frazach" },
+  "lookup_saved_group": {
+    "message": "Zapisane ($COUNT$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
   "popup_lookup_back": { "message": "Wróć do menu" },
-  "popup_lookup_add": { "message": "Dodaj do zapisanych fraz" },
+  "popup_lookup_add": { "message": "Zapisz na stronie fraz" },
   "popup_lookup_open": { "message": "Otwórz w zapisanych frazach" },
   "vocab_count_filtered_one": {
     "message": "$MATCHING$ z $TOTAL$ zapisanej frazy",

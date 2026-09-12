@@ -121,9 +121,14 @@
   },
   "lookup_show_fewer": { "message": "Weniger zeigen" },
   "lookup_show_in_list": { "message": "In der Liste zeigen" },
-  "lookup_kept": { "message": "In Ihrem gespeicherten Wortschatz" },
+  "lookup_saved_group": {
+    "message": "Gespeichert ($COUNT$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
   "popup_lookup_back": { "message": "Zurück zum Menü" },
-  "popup_lookup_add": { "message": "Zum gespeicherten Wortschatz hinzufügen" },
+  "popup_lookup_add": { "message": "Auf der Wortschatz-Seite speichern" },
   "popup_lookup_open": { "message": "Im gespeicherten Wortschatz öffnen" },
   "vocab_count_filtered_one": {
     "message": "$MATCHING$ von $TOTAL$ gespeicherten Eintrag",

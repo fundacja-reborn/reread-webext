@@ -1041,6 +1041,14 @@ function arriveWithPhrase() {
   }
   history.replaceState(history.state, "", location.pathname + location.search);
   if (text.trim().length === 0 || addFold === null || lookupBox === null) return;
+  // The list narrowed to the phrase as well (the fourth brief): the row
+  // the ticks below make - or the one that is there - stands right under
+  // the panel, and the state line over the list says which filter is on.
+  query = text;
+  page = 1;
+  if (filterInput !== null) filterInput.value = text;
+  filterClear?.refresh();
+  renderList();
   addFold.open = true;
   void lookupBox.search(text);
 }

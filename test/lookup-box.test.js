@@ -109,8 +109,8 @@ describe("the look-up field", () => {
     const box = await source("lib/lookup-box.js");
     const render = bodyOf(box, "render");
     const at = (/** @type {string} */ marker) => render.indexOf(marker);
-    assert.ok(at('"lookup-head"') !== -1 && at('"lookup-head"') < at('"lookup-kept"'), "the phrase is not at the head");
-    assert.ok(at('"lookup-kept"') < at("books(groups)"), "the books stand before what the phrase means");
+    assert.ok(at('"lookup-head"') !== -1 && at('"lookup-head"') < at("savedGroup()"), "the phrase is not at the head");
+    assert.ok(at("savedGroup()") < at("books(groups)"), "the books stand before what the phrase means");
     // The standing at the head's far end, for a saved phrase only: the
     // count, and the way to the phrase's own row where the home has a list.
     assert.match(render, /if \(state\.meanings\.length > 0\) head\.append\(standing\(state\.phrase\)\)/, "the standing stands for an unsaved phrase, or not at all");
@@ -118,10 +118,11 @@ describe("the look-up field", () => {
     assert.match(standing, /t\("lookup_saved_count", \[state\.meanings\.length\.toLocaleString\(\)\]\)/, "the count is not the saved meanings'");
     assert.match(standing, /if \(deps\.showInList !== undefined\) \{[\s\S]*?button\("lookup-show", t\("lookup_show_in_list"\)\)/, "the link stands without a list to show, or never");
     assert.match(standing, /show\.addEventListener\("click", \(\) => deps\.showInList\?\.\(phrase\)\)/, "the link does not hand the phrase to the list");
-    // The chips stand only where the field reads (the popup has no rows to
-    // tick); where it writes, the ticked rows say it once (D2 of the rebuild).
-    assert.match(render, /if \(readOnly && state\.meanings\.length > 0\) \{[\s\S]*?element\("span", "lookup-chip", meaning\)/, "the field that writes shows its meanings twice, or the popup not at all");
-    assert.doesNotMatch(render, /button\("lookup-chip"/, "a chip is a press");
+    // Where the field writes, the ticked rows say what is saved once (D2 of
+    // the rebuild); where it only reads, "Saved (N)" stands first on the
+    // shelf (the fourth brief) - no chips anywhere any more.
+    assert.match(render, /if \(readOnly && !state\.pending && state\.meanings\.length > 0\) shelf\.append\(savedGroup\(\)\)/, "the popup's saved meanings do not stand first, or the page's stand twice");
+    assert.doesNotMatch(box, /lookup-chip|lookup_kept|lookup-kept/, "the chips are still there");
   });
 
   it("folds the books: one fold per book, the first open, the rest of a long book under Show all", async () => {
@@ -135,7 +136,7 @@ describe("the look-up field", () => {
     assert.match(rows, /if \(row\.kind === "heading"\) \{\s*label = row\.text;\s*continue;/, "a label is a row to tick");
     assert.match(rows, /if \(row\.kind !== "meaning"\) continue;/, "a transcription or a cross-reference is a row to tick");
     assert.match(rows, /if \(label !== null\) \{\s*home\.append\(element\("div", "lookup-entry-heading", label\)\);/, "the label does not stand over its first meaning where that meaning lands");
-    assert.match(rows, /if \(!readOnly && group\.about\.length > 0\) book\.append\(aboutFold\(group\)\)/, "More about the word stands with nothing in it, or not at the book's end");
+    assert.match(rows, /if \(group\.about\.length > 0\) book\.append\(aboutFold\(group\)\)/, "More about the word stands with nothing in it, or not at the book's end");
     assert.match(bodyOf(box, "aboutFold"), /fold\("lookup-about", `about:\$\{group\.dictionary\}`, false,[\s\S]*?t\("lookup_more_about"\)/, "More about the word opens by default, or is not remembered");
     // The books and "Your own" on one shelf, parted by one separator rule -
     // the space between the last book and "Your own" is the space between
@@ -153,9 +154,9 @@ describe("the look-up field", () => {
     assert.doesNotMatch(heads, /list-style: none|details-marker/, "a fold's triangle is hidden somewhere");
     const shelf = bodyOf(box, "books");
     assert.match(shelf, /fold\("lookup-group", `group:\$\{group\.dictionary\}`, at === 0, summary\)/, "the first book is not the one open by default, or a book is no fold");
-    assert.match(shelf, /if \(!readOnly\) summary\.append\(` \(\$\{group\.lines\.length\.toLocaleString\(\)\}\)`\)/, "the fold's name carries no count where lines are ticked, or one where they are prose");
+    assert.match(shelf, /summary\.append\(` \(\$\{group\.lines\.length\.toLocaleString\(\)\}\)`\)/, "the fold's name carries no count");
     assert.match(shelf, /foldPoint\(group\.lines, state\.meanings\)/, "the cut does not ask the rule");
-    assert.match(shelf, /moreFold\(book, group, unfolded, at\) : null/, "the rest of a long book does not fold, or ignores a saved line out of sight");
+    assert.match(shelf, /shown < group\.lines\.length \? moreFold\(book, group, unfolded, at\) : null/, "the rest of a long book does not fold, or ignores a saved line out of sight");
     // The rest of the lines, then the button - the book's last child in
     // both states, so the rows unfold above it and it does not move.
     assert.match(shelf, /book\.append\(more\.rest, more\.toggle\)/, "the button does not stand last in the book");
@@ -209,16 +210,25 @@ describe("the look-up field", () => {
     assert.match(bodyOf(box, "lookUp"), /if \(!readOnly && state\.outcome\.kind === "silence"\) ownField\(\)\?\.focus\(\);/, "the caret stays in the word field over a word no book knows");
   });
 
-  it("draws the entries as prose, paragraph by paragraph, where it only reads", async () => {
-    const shelf = bodyOf(await source("lib/lookup-box.js"), "books");
-    // The read-only field's entries must not promise a choice: divs, never
-    // checkboxes - the book's paragraphs as it wrote them (the rows cut a
-    // sense into lines).
-    assert.match(
-      shelf,
-      /if \(readOnly\) \{[\s\S]*?paragraphsOf\(sense\)[\s\S]*?element\("div", "lookup-paragraph", paragraph\)/,
-      "a read-only entry is rows, or loses the book's paragraphs",
-    );
+  it("shows the same shelf without its boxes where it only reads, what is saved first under its own name", async () => {
+    const box = await source("lib/lookup-box.js");
+    // One component in both homes (the fourth brief's D2): the read-only
+    // row is the same row with no box and nothing to press.
+    const row = bodyOf(box, "lineRow");
+    assert.match(row, /if \(readOnly\) \{\s*\/\/[\s\S]*?const row = element\("div", "lookup-line"\);[\s\S]*?row\.dataset\["saved"\] = saved \? "true" : "false";[\s\S]*?return row;\s*\}/, "a read-only row is a label with a box, or does not say it is saved");
+    assert.doesNotMatch(box, /paragraphsOf|lookup-paragraph", paragraph/, "the popup still draws prose of its own");
+    // "Saved (N)" first: every saved meaning with a tick standing still in
+    // the box's column, open by default and remembered.
+    const saved = bodyOf(box, "savedGroup");
+    assert.match(saved, /t\("lookup_saved_group", \[state\.meanings\.length\.toLocaleString\(\)\]\)/, "the saved group is not named with its count");
+    assert.match(saved, /fold\("lookup-group lookup-group-saved", "saved", true, summary\)/, "the saved group is not a fold open by default");
+    assert.match(saved, /element\("span", "lookup-line-mark", String\.fromCodePoint\(0x2713\)\)/, "a saved meaning has no tick");
+    assert.match(saved, /mark\.setAttribute\("aria-hidden", "true"\)/, "the tick is read out beside the group's own name");
+    // The stylesheet reads the mode off the answer.
+    assert.match(box, /if \(readOnly\) answer\.dataset\["readonly"\] = "true";/, "the answer does not say it only reads");
+    const styles = await source("assets/page.css");
+    assert.match(styles, /\.lookup-answer\[data-readonly="true"\] \.lookup-line \{\s*cursor: default;/, "a read-only row invites a press");
+    assert.match(styles, /\.lookup-line-mark \{\s*flex: none;\s*width: var\(--lookup-box-size, 20px\);/, "the tick does not stand in the box's column");
   });
 });
 
@@ -253,11 +263,16 @@ describe("the popup's look-up row", () => {
     // (the field emptied by its own "x") brings them back.
     assert.match(landing, /showResults\(state\.phrase !== null\)/, "an answer leaves the hallway standing, or an emptied field the results");
     assert.match(landing, /state\.saved \? t\("popup_lookup_open"\) : t\("popup_lookup_add"\)/, "the door does not name the phrase's standing");
-    // The rows leave on the body's mode, in the stylesheet, and the field's
-    // row sticks to the top there; the arrow brings the rows back.
+    // The rows leave on the body's mode, in the stylesheet; the popup is a
+    // column of three pieces of which only the answer scrolls, inside
+    // itself (the fourth brief) - the field and the door stay in reach; the
+    // arrow brings the rows back.
     const styles = await source("popup/popup.css");
     assert.match(styles, /body\[data-mode="lookup"\] \.popup-row:not\(\.popup-lookup-head, \.popup-lookup-only\) \{\s*display: none;/, "the rows stay in the results mode");
-    assert.match(styles, /body\[data-mode="lookup"\] \.popup-lookup-head \{\s*position: sticky;\s*top: 0;/, "the field's row scrolls away with the answer");
+    assert.match(styles, /body\[data-mode="lookup"\] \{\s*display: flex;\s*flex-direction: column;/, "the popup is not a column in the results mode");
+    assert.match(styles, /body\[data-mode="lookup"\] \.popup-lookup-answer \{\s*flex: 1 1 auto;\s*min-height: 0;\s*max-height: 420px;\s*overflow-y: auto;/, "the answer does not scroll inside itself under the desktop panel's ceiling");
+    assert.match(styles, /body\[data-os="android"\]\[data-mode="lookup"\] \{\s*height: 100dvh;/, "on Android the popup does not take the window");
+    assert.doesNotMatch(styles, /position: sticky/, "something still sticks");
     assert.match(script, /lookupBack\?\.addEventListener\("click", \(\) => showResults\(false\)\)/, "the arrow does not bring the hallway back");
   });
 
@@ -349,6 +364,9 @@ describe("the saved-phrases page's fold", () => {
     assert.match(arrival, /\/\^#lookup=\(\.\*\)\$\/\.exec\(location\.hash\)/, "the page reads something other than the fragment the background writes");
     assert.match(arrival, /decodeURIComponent\(/, "the phrase is read as it was encoded");
     assert.match(arrival, /history\.replaceState\(/, "the fragment stays on the address for the next reload");
+    // The list narrowed to the phrase as well (the fourth brief), then the
+    // fold opened and the field asked.
+    assert.match(arrival, /query = text;\s*page = 1;\s*if \(filterInput !== null\) filterInput\.value = text;\s*filterClear\?\.refresh\(\);\s*renderList\(\);/, "the list is not narrowed to the phrase on arrival");
     assert.match(arrival, /addFold\.open = true;\s*void lookupBox\.search\(text\)/, "the fold does not open on the phrase, or the field is not asked");
     assert.match(script, /window\.addEventListener\("hashchange", arriveWithPhrase\)/, "a turn of the open tab goes unheard");
     // Asked only once the list is in - the field reads the phrase's standing
