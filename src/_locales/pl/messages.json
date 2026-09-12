@@ -64,6 +64,10 @@
     "message": "Zapis trafi do aktywnej pary językowej: $PAIR$",
     "placeholders": { "pair": { "content": "$1", "example": "angielski → polski" } }
   },
+  "bubble_saved_word": {
+    "message": "Zapisane słowo: $WORD$",
+    "placeholders": { "word": { "content": "$1", "example": "read" } }
+  },
   "bubble_choose_meaning": { "message": "Naciśnij znaczenie, żeby je zapisać" },
   "bubble_speak": { "message": "Przeczytaj na głos" },
   "bubble_sentence_collapse": { "message": "Zwiń zdanie" },
@@ -1369,6 +1373,10 @@
   "options_bubble_more": { "message": "Od razu pokazuj zdanie i hasła ze słowników" },
   "options_bubble_more_hint": {
     "message": "Po zaznaczeniu tekstu dymek od razu pokazuje to, co normalnie jest widoczne dopiero po kliknięciu „Więcej”: przetłumaczone zdanie i hasła ze słowników. Warto zostawić włączone, gdy masz słownik - model tłumaczenia często myli się na pojedynczym słowie, a słownik pokazuje, co ono naprawdę znaczy. Dymek nad już zapisaną frazą wyświetla tylko zapisane tłumaczenie - zdanie i definicje ze słowników możesz zobaczyć po kliknięciu na „Więcej”."
+  },
+  "options_underline_forms": { "message": "Podkreślaj też inne formy zapisanych słów" },
+  "options_underline_forms_hint": {
+    "message": "Zapisane słowo jest podkreślane także w innych formach: po zapisaniu „read” podkreślone są też „reads” i „reading”, a dymek nad nimi pokazuje to, co masz zapisane dla „read”. O tym, które formy się liczą, decyduje słownik dla czytanego języka - musi być zainstalowany. Na razie tylko wtedy, gdy czytasz po angielsku. Po wyłączeniu podkreślana jest tylko dokładnie ta forma, którą masz zapisaną."
   },
   "options_no_translation": { "message": "Używaj bez modelu tłumaczenia" },
   "options_no_translation_hint": {

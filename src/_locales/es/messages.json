@@ -64,6 +64,10 @@
     "message": "Se guardará en el par de idiomas activo: $PAIR$",
     "placeholders": { "pair": { "content": "$1", "example": "inglés → polaco" } }
   },
+  "bubble_saved_word": {
+    "message": "Palabra guardada: $WORD$",
+    "placeholders": { "word": { "content": "$1", "example": "read" } }
+  },
   "bubble_choose_meaning": { "message": "Pulsa un significado para guardarlo" },
   "bubble_speak": { "message": "Leer en voz alta" },
   "bubble_sentence_collapse": { "message": "Contraer la frase" },
@@ -1020,6 +1024,10 @@
   "options_bubble_more": { "message": "Mostrar enseguida la frase y las entradas del diccionario" },
   "options_bubble_more_hint": {
     "message": "Al seleccionar texto, la burbuja muestra enseguida lo que de otro modo solo aparece al pulsar «Más»: la frase traducida y las entradas del diccionario. Merece la pena dejarlo activado con un diccionario instalado - un modelo de traducción suele equivocarse con una palabra suelta, y el diccionario muestra lo que significa de verdad. La burbuja sobre una expresión ya guardada muestra solo la traducción guardada - la frase y las entradas del diccionario aparecen al pulsar «Más»."
+  },
+  "options_underline_forms": { "message": "Subrayar también otras formas de las palabras guardadas" },
+  "options_underline_forms_hint": {
+    "message": "Una palabra guardada se subraya también en sus otras formas: al guardar «read», «reads» y «reading» quedan subrayadas también, y la burbuja sobre ellas muestra lo que guardaste para «read». Qué formas cuentan lo decide tu diccionario del idioma que lees - tiene que estar instalado. Por ahora solo cuando lees en inglés. Desactivado, se subraya solo la forma exacta que guardaste."
   },
   "options_no_translation": { "message": "Usar sin modelo de traducción" },
   "options_no_translation_hint": {
