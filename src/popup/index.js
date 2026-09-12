@@ -499,7 +499,6 @@ function showRows(config, installed) {
   if (over.hostname !== null) stand(siteRow, rows.site);
   stand(pairRow, rows.pair);
   stand(setupRow, rows.setup);
-  stand(document.getElementById("translation-off-note"), rows.translationNote);
   stand(lookupHead, rows.lookup);
   stand(vocabularyButton, rows.vocabulary);
   stand(document.getElementById("reader-only-row"), rows.readerOnly);

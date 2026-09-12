@@ -81,9 +81,6 @@
   "popup_no_model": {
     "message": "Auf diesem Gerät gibt es noch kein Übersetzungsmodell - drücken Sie hier und wählen Sie eines in den Einstellungen."
   },
-  "popup_translation_off": {
-    "message": "Die maschinelle Übersetzung ist aus - Leseansicht und Wörterbücher funktionieren weiter."
-  },
 
   "vocab_title": { "message": "re/read - gespeicherter Wortschatz" },
   "vocab_intro": {

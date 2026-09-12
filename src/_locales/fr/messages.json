@@ -81,9 +81,6 @@
   "popup_no_model": {
     "message": "Aucun modèle de traduction sur cet appareil pour l'instant - appuyez ici pour en choisir un dans les paramètres."
   },
-  "popup_translation_off": {
-    "message": "La traduction automatique est désactivée - le lecteur et les dictionnaires continuent de fonctionner."
-  },
 
   "vocab_title": { "message": "re/read - phrases enregistrées" },
   "vocab_intro": {

@@ -81,9 +81,6 @@
   "popup_no_model": {
     "message": "Na tym urządzeniu nie ma jeszcze modelu tłumaczeniowego - naciśnij tutaj i wybierz go w ustawieniach."
   },
-  "popup_translation_off": {
-    "message": "Tłumaczenie maszynowe jest wyłączone - czytnik i słowniki działają dalej."
-  },
 
   "vocab_title": { "message": "re/read - zapisane frazy" },
   "vocab_intro": {
