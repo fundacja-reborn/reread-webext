@@ -38,6 +38,7 @@
 
   "bubble_save": { "message": "Guardar" },
   "bubble_learned": { "message": "Aprendida" },
+  "bubble_edit_separator_hint": { "message": "Un punto y coma separa los significados." },
   "bubble_edit": { "message": "Editar" },
   "bubble_settings": { "message": "Abrir ajustes" },
   "bubble_more": { "message": "Más" },
@@ -84,7 +85,7 @@
 
   "vocab_title": { "message": "re/read - frases guardadas" },
   "vocab_intro": {
-    "message": "Todas las frases que guardaste para este par de idiomas, las más recientes primero - guardadas mientras leías y almacenadas solo en este dispositivo. «$LEARNED$» quita una frase y sus subrayados con ella; «$EDIT$» reescribe sus significados, uno por línea.",
+    "message": "Todas las frases que guardaste para este par de idiomas, las más recientes primero - guardadas mientras leías y almacenadas solo en este dispositivo. «$LEARNED$» quita una frase y sus subrayados con ella; «$EDIT$» reescribe sus significados, uno por línea. Varios significados a la vez: sepáralos con punto y coma.",
     "placeholders": {
       "learned": { "content": "$1", "example": "Aprendida" },
       "edit": { "content": "$2", "example": "Editar" }
@@ -201,7 +202,7 @@
   "action_import": { "message": "Importar" },
   "transfer_heading": { "message": "Importar y exportar" },
   "vocab_transfer_note": {
-    "message": "Un archivo .tsv de dos columnas - el mismo formato que escribe el plugin de KOReader y que lee Anki. La importación solo añade frases que faltan en este par; lo guardado no se toca."
+    "message": "Un archivo .tsv de dos columnas - el mismo formato que escribe el plugin de KOReader y que lee Anki. La importación solo añade frases que faltan en este par; lo guardado no se toca. En la celda de significados, un punto y coma seguido de espacio separa los significados; sin espacio, se queda dentro del significado."
   },
   "vocab_import_into": { "message": "Importar a" },
   "vocab_import_nothing": { "message": "Ese archivo no contiene frases para importar." },

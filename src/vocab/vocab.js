@@ -28,7 +28,9 @@ import { holdChrome } from "../lib/chrome-hold.js";
 import { fileSize, localizePage, plural, t, uiLocale } from "../lib/i18n.js";
 import { privateNote } from "../lib/private-note.js";
 import { pairLabel } from "../lib/language.js";
+import { toMeanings } from "../lib/gloss.js";
 import { mountLookupBox } from "../lib/lookup-box.js";
+import { editedMeanings } from "../lib/meanings.js";
 import { describeError } from "../lib/messages.js";
 import { speakerIcon } from "../lib/speaker-icon.js";
 import { armBackArrow } from "../lib/back-arrow.js";
@@ -637,7 +639,10 @@ function phraseRow(phrase) {
 /**
  * The row, unfolded: the meanings as lines in a textarea, the bubble's editor
  * by other means - Enter keeps, Shift+Enter adds a line, Escape backs out,
- * and there is nothing to keep when no line has anything on it.
+ * and there is nothing to keep when no line has anything on it. The same
+ * rule as the bubble's at the save (D203, `editedMeanings`): a line the box
+ * opened with stays as it is, a line written or changed is split at its
+ * semicolons - and the same one line under the box says so.
  *
  * @param {Phrase} phrase
  * @returns {HTMLElement}
@@ -672,7 +677,7 @@ function editorFor(phrase) {
 
   const actions = element("div", "phrase-actions");
   actions.append(save, cancel);
-  wrap.append(editor, actions);
+  wrap.append(editor, element("p", "phrase-edit-hint", t("bubble_edit_separator_hint")), actions);
   return wrap;
 }
 
@@ -740,10 +745,7 @@ async function forget(phrase, trigger) {
  * @param {Phrase} phrase
  */
 async function saveEdit(phrase) {
-  const translations = draft
-    .split("\n")
-    .map((line) => line.trim())
-    .filter((line) => line.length > 0);
+  const translations = editedMeanings(phrase.translations, toMeanings(draft));
   if (translations.length === 0) return;
 
   const answer = await ask({ kind: Message.SAVE_PHRASE, text: phrase.phrase, translations });

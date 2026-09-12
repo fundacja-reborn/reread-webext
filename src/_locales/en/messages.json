@@ -51,6 +51,10 @@
 
   "bubble_save": { "message": "Save" },
   "bubble_learned": { "message": "Learned" },
+  "bubble_edit_separator_hint": {
+    "message": "A semicolon separates meanings.",
+    "description": "The one line under the edit box of a phrase, in the bubble and on the phrases page (D203): several meanings typed at once are apart by semicolons. Not \"or a new line\": on a phone Enter closes the bubble."
+  },
   "bubble_edit": { "message": "Edit" },
   "bubble_settings": { "message": "Open settings" },
   "bubble_more": { "message": "More" },
@@ -143,7 +147,7 @@
 
   "vocab_title": { "message": "re/read - saved phrases" },
   "vocab_intro": {
-    "message": "Every phrase you kept for this language pair, newest first - saved while reading, stored only on this device. $LEARNED$ removes a phrase and its underlines with it; $EDIT$ rewrites what it means, one meaning per line.",
+    "message": "Every phrase you kept for this language pair, newest first - saved while reading, stored only on this device. $LEARNED$ removes a phrase and its underlines with it; $EDIT$ rewrites what it means, one meaning per line. Several meanings at once: separate them with a semicolon.",
     "description": "The buttons quoted are bubble_learned and bubble_edit, passed in so the three can never drift apart.",
     "placeholders": {
       "learned": { "content": "$1", "example": "Learned" },
@@ -189,7 +193,7 @@
   },
   "lookup_own_placeholder": {
     "message": "Write your own meaning",
-    "description": "Placeholder and accessible name of the field under \"Your own\": one meaning, kept with Enter or the Save button beside it."
+    "description": "Placeholder and accessible name of the field under \"Your own\": a meaning kept with Enter or the Save button beside it - several at once apart by semicolons (D203); the sentence saying so stands in the page's How it works."
   },
   "lookup_more_about": {
     "message": "More about the word",
@@ -296,7 +300,7 @@
     "description": "Heading of the transfer section under the saved-phrases and reading lists, and the text of the anchor link that jumps to it - one name for one place."
   },
   "vocab_transfer_note": {
-    "message": "A two-column .tsv file - what the KOReader plugin writes and Anki imports. Importing adds phrases this pair is missing and never touches a saved one."
+    "message": "A two-column .tsv file - what the KOReader plugin writes and Anki imports. Importing adds phrases this pair is missing and never touches a saved one. In the meaning cell, a semicolon followed by a space separates meanings; a semicolon without a space stays inside its meaning."
   },
   "vocab_import_into": { "message": "Import into" },
   "vocab_import_nothing": { "message": "There are no phrases to import in that file." },

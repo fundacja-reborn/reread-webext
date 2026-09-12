@@ -38,6 +38,7 @@
 
   "bubble_save": { "message": "Zapisz" },
   "bubble_learned": { "message": "Znam to" },
+  "bubble_edit_separator_hint": { "message": "Średnik rozdziela znaczenia." },
   "bubble_edit": { "message": "Edytuj" },
   "bubble_settings": { "message": "Otwórz ustawienia" },
   "bubble_more": { "message": "Więcej" },
@@ -84,7 +85,7 @@
 
   "vocab_title": { "message": "re/read - zapisane frazy" },
   "vocab_intro": {
-    "message": "Wszystkie frazy zachowane dla tej pary językowej, od najnowszych - zapisane podczas czytania i przechowywane tylko na tym urządzeniu. „$LEARNED$” usuwa frazę razem z jej podkreśleniami; „$EDIT$” pozwala przepisać znaczenia, po jednym w linii.",
+    "message": "Wszystkie frazy zachowane dla tej pary językowej, od najnowszych - zapisane podczas czytania i przechowywane tylko na tym urządzeniu. „$LEARNED$” usuwa frazę razem z jej podkreśleniami; „$EDIT$” pozwala przepisać znaczenia, po jednym w linii. Kilka znaczeń naraz rozdziel średnikiem.",
     "placeholders": {
       "learned": { "content": "$1", "example": "Znam to" },
       "edit": { "content": "$2", "example": "Edytuj" }
@@ -216,7 +217,7 @@
   "action_import": { "message": "Importuj" },
   "transfer_heading": { "message": "Import i eksport" },
   "vocab_transfer_note": {
-    "message": "Plik .tsv z dwiema kolumnami - ten sam format zapisuje wtyczka KOReadera, a czyta Anki. Import dodaje tylko frazy, których w tej parze nie ma; zapisanych nie zmienia."
+    "message": "Plik .tsv z dwiema kolumnami - ten sam format zapisuje wtyczka KOReadera, a czyta Anki. Import dodaje tylko frazy, których w tej parze nie ma; zapisanych nie zmienia. W komórce znaczeń średnik ze spacją rozdziela znaczenia; średnik bez spacji zostaje wewnątrz znaczenia."
   },
   "vocab_import_into": { "message": "Importuj do" },
   "vocab_import_nothing": { "message": "W tym pliku nie ma fraz do zaimportowania." },

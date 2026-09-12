@@ -46,6 +46,7 @@ import { afterPress, entryGroups, isSaved, lookupOutcome, lookupText, ownMeaning
 import { renderShelf, shelfFold, shelfRow } from "./lookup-shelf.js";
 import { keyTokens } from "./matcher/tokenize.js";
 import { describeError } from "./messages.js";
+import { splitMeanings } from "./meanings.js";
 import { collapseWhitespace } from "./normalize.js";
 import { ErrorCode, Message, asLookUp } from "./protocol.js";
 import { dictionarySourcesLink } from "./sources.js";
@@ -365,12 +366,14 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
   /**
    * A meaning of the reader's own, typed and kept (block 4): it joins the
    * saved meanings after what is there - the phrase saved with it when it
-   * was not saved yet. Typed as it was, whitespace folded, nothing else
-   * changed: a marker like "☞" in the text is the reader's to keep. One
-   * already saved - as a line ticked above, or as an own meaning - is not
-   * saved again; the field is emptied and the row above says so. Queued
-   * behind the ticks (see `queue`), and the caret stays in the field for
-   * the next one.
+   * was not saved yet. Several at once, apart by semicolons (the eighth
+   * brief, D203): each piece a meaning of its own, in the order typed.
+   * Typed as it was otherwise, whitespace folded, nothing else changed: a
+   * marker like "☞" in the text is the reader's to keep. A piece already
+   * saved - as a line ticked above, or as an own meaning - is not saved
+   * again and not remarked on; nothing new at all writes nothing. The
+   * field is emptied either way. Queued behind the ticks (see `queue`),
+   * and the caret stays in the field for the next one.
    */
   function saveOwn() {
     queue = queue.then(() => savedOwn()).catch(() => undefined);
@@ -380,10 +383,11 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
   async function savedOwn() {
     if (state.phrase === null) return;
     const phrase = state.phrase;
-    const own = collapseWhitespace(state.ownDraft);
-    if (own.length === 0) return;
-    if (!isSaved(state.meanings, own)) {
-      const meanings = [...state.meanings, own];
+    const meanings = [...state.meanings];
+    for (const piece of splitMeanings(collapseWhitespace(state.ownDraft))) {
+      if (!isSaved(meanings, piece)) meanings.push(piece);
+    }
+    if (meanings.length > state.meanings.length) {
       const result = await deps.ask({ kind: Message.SAVE_PHRASE, text: phrase.text, translations: meanings });
       if (state.phrase !== phrase) return;
       if (!result.ok) {
