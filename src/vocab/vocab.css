@@ -380,7 +380,7 @@ summary {
   scroll-margin-top: 0.75rem;
 }
 
-/* --- the list: a grid, so the meanings all start on one vertical line --- */
+/* --- the list: one row per phrase, three parts in one order at every width --- */
 
 .phrases {
   margin: 1rem 0 0;
@@ -393,14 +393,51 @@ summary {
   outline: none;
 }
 
-/* One phrase per row. On a phone the row stacks: phrase, meanings, and the
-   actions under them on the right. The media query below spreads the same
-   three children over one line. */
+/* One phrase per row, and the same three parts in the same order whatever
+   the width (D211): the head - the phrase with its counts beside it - the
+   body - the meanings with the sentence under them - and the actions. The
+   DOM keeps head, body, actions, which is what the keyboard and a screen
+   reader walk; only the screen reorders.
+
+   On a phone the row is one wrapping flex line. The head grows to take what
+   the actions leave; the actions stand at the line's end and drop under the
+   phrase the moment the phrase's own width plus the three buttons would not
+   fit - no breakpoint says when, the wrap does (a 12rem floor on the head
+   would have dropped them under every phrase: 12rem plus three 44px
+   buttons is more than a 360px column holds); the body takes the whole
+   next line. No column gap on purpose: the first button's own padding is
+   the room between the counts and the speaker, and on a 360px line every
+   pixel is spoken for. The block padding is tighter than it was: a row is
+   two reading lines on a phone and one on a desktop, and the list is what
+   the page is for. */
 .phrase-row {
-  display: grid;
-  gap: 0.25rem 1rem;
-  padding: 0.6rem 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0;
+  padding-block: 0.5rem;
   border-bottom: 1px solid var(--page-line);
+}
+
+/* The phrase and its counts on one line while it holds them, the counts
+   wrapping under the phrase when it does not; aligned by baseline, so the
+   small counts sit on the phrase's line whatever size the Aa panel gave
+   it. `min-width: 0` lets a phrase longer than the line wrap inside the
+   head instead of pushing the row wider than the page. */
+.phrase-head {
+  order: 1;
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.15rem 0.6rem;
+}
+
+.phrase-body {
+  order: 3;
+  flex: 1 1 100%;
+  min-width: 0;
 }
 
 /* The phrase AND its meanings are content, not interface (D104; the pair
@@ -411,7 +448,9 @@ summary {
    list's titles do (`.library-open` in reader.css). A phrase growing while
    its meaning stood still read as a fault, not a hierarchy: inside the row
    the hierarchy is weight and color, never size. What stays at the
-   interface size is what acts on the pair - buttons, hints, the bar. */
+   interface size is what acts on the pair - buttons, hints, the bar. The
+   size is set on these elements and on nothing above them, so the counts
+   and the buttons beside them inherit nothing of it. */
 .phrase-word,
 .phrase-meanings,
 .lookup-fold .lookup-phrase,
@@ -428,12 +467,14 @@ summary {
 }
 
 /* A step quieter than the phrase, still above the 4.5:1 contrast floor in
-   both themes. */
+   both themes. A block, so the sentence's fold stands under it, never
+   beside it. */
 .phrase-meanings {
+  display: block;
   color: var(--page-muted);
 }
 
-/* The two counts under the phrase (D209), in the interface's size and the
+/* The two counts beside the phrase (D209), in the interface's size and the
    meanings' muted ink: a note about the phrase, not part of the lesson.
    Absent from a row that has none - a phrase never checked and never met
    in a finished text reads exactly as it did before the counts. */
@@ -442,16 +483,16 @@ summary {
   font-size: max(13px, 0.85rem);
 }
 
-/* The sentence the phrase was kept from (D210), under the row's first line:
-   a native fold whose summary is the sentence itself. Content, not
-   interface - the text's own words - so the reading face at the reading
-   size like the phrase (D104), in the meanings' muted ink and in italics,
-   which is how a quoted example reads on a flashcard. Closed, the summary
-   is one line cut with an ellipsis; open, the sentence wraps. The marker
-   sits inside the line (`list-style-position`) - an outside marker is
-   clipped by the overflow that makes the ellipsis - and wears the muted
-   ink. Absent from a row without a sentence, which reads exactly as it did
-   before D210. */
+/* The sentence the phrase was kept from (D210), under the meanings in the
+   body (D211 - the same place on a phone and on a desktop): a native fold
+   whose summary is the sentence itself. Content, not interface - the
+   text's own words - so the reading face at the reading size like the
+   phrase (D104), in the meanings' muted ink and in italics, which is how a
+   quoted example reads on a flashcard. Closed, the summary is one line cut
+   with an ellipsis; open, the sentence wraps. The marker sits inside the
+   line (`list-style-position`) - an outside marker is clipped by the
+   overflow that makes the ellipsis - and wears the muted ink. Absent from
+   a row without a sentence, which reads exactly as it did before D210. */
 .phrase-sentence {
   min-width: 0;
 }
@@ -496,12 +537,19 @@ summary {
   text-decoration-color: currentColor;
 }
 
-/* --- the row's two quiet actions --- */
+/* --- the row's quiet actions --- */
 
-.phrase-row > .phrase-actions {
+/* At the phrase line's end on a phone, under the phrase when the line is
+   short of room (the wrap above), in their own column on a desktop; the
+   auto start margin is what keeps them on the right on a line of their
+   own. */
+.phrase-actions {
+  order: 2;
+  flex: 0 0 auto;
+  margin-inline-start: auto;
   display: flex;
+  align-items: center;
   gap: 0.5rem;
-  justify-self: end;
 }
 
 /* Always visible - touch and e-ink have no hover to reveal them with - but
@@ -581,6 +629,7 @@ button.quiet-speak svg {
 .phrase-edit .phrase-actions {
   display: flex;
   gap: 0.5rem;
+  margin-inline-start: 0;
 }
 
 .phrase-edit button {
@@ -624,7 +673,10 @@ button.quiet-speak svg {
 
 /* --- one breakpoint: the same HTML, spread out for a desktop --- */
 
-@media (min-width: 600px) {
+/* In rem, like the pager's own query: the point is whether the three parts
+   of a row fit side by side, and that moves with the text zoom, not with
+   the glass. */
+@media (min-width: 40rem) {
   /* Title on the left, the pair select on the right of the same line. */
   .head-row select {
     flex: 0 1 auto;
@@ -634,53 +686,32 @@ button.quiet-speak svg {
     flex: none;
   }
 
-  /* Three columns: phrase, meanings, actions. The meanings all starting on
-     one vertical line is what this grid is for. */
+  /* Three columns, the same three parts: the phrase with its counts, the
+     meanings with the sentence under them, the actions. The meanings all
+     starting on one vertical line is what the grid is for, and a row with
+     a one-line meaning is one line tall - the counts stand beside the
+     phrase, not under it, and the sentence's fold stays in the meanings'
+     column instead of taking a line under all three. Aligned by baseline:
+     the phrase and the meanings share a face and a size, so their first
+     lines meet exactly; the actions are taken out of that group below. */
   .phrase-row {
-    grid-template-columns: minmax(10rem, 1fr) 2fr auto;
+    display: grid;
+    grid-template-columns: minmax(10rem, 1fr) minmax(0, 2fr) auto;
+    grid-template-areas: "head body actions";
+    column-gap: 1rem;
     align-items: baseline;
   }
 
-  /* Placed by name rather than by flow: the counts (D209) stand under the
-     phrase, in its column, as a second line the row grows only when there
-     is something to say - and the first line keeps its three columns
-     whether that line is there or not. */
-  .phrase-row > .phrase-word {
-    grid-column: 1;
-    grid-row: 1;
+  .phrase-head {
+    grid-area: head;
   }
 
-  .phrase-row > .phrase-counts {
-    grid-column: 1;
-    grid-row: 2;
+  .phrase-body {
+    grid-area: body;
   }
 
-  .phrase-row > .phrase-meanings {
-    grid-column: 2;
-    grid-row: 1;
-  }
-
-  .phrase-row > .phrase-actions {
-    grid-column: 3;
-    grid-row: 1;
-  }
-
-  /* The sentence (D210) takes a whole line under the three columns - a
-     sentence in the phrase's narrow column would stand ten lines tall. Its
-     row is left to the grid: the first free line under the counts when
-     there are any, the second line otherwise - never a pinned third row,
-     which would leave an empty second track and its gap behind on a row
-     without counts. */
-  .phrase-row > .phrase-sentence {
-    grid-column: 1 / -1;
-  }
-
-  /* The editor takes the meanings' and the actions' room, beside its phrase.
-     Out of the baseline group on purpose: a textarea's baseline sits at its
-     bottom edge, and aligning the phrase to that would drag the row down. */
-  .phrase-edit {
-    grid-column: 2 / -1;
-    grid-row: 1;
+  .phrase-actions {
+    grid-area: actions;
     align-self: start;
   }
 }

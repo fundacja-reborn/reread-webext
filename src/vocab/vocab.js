@@ -605,11 +605,18 @@ function phraseRow(phrase) {
   // How the closed editor finds its row again to hand focus back.
   row.dataset["key"] = phrase.normalized;
 
+  // Three parts in one order on every width (D211): the head - the phrase
+  // with its counts beside it - then the body - the meanings with the
+  // sentence under them - then the actions. The DOM order is what the
+  // keyboard and a screen reader walk: the sentence's fold before the
+  // buttons, the buttons last; where the screen puts the actions on the
+  // phrase's line is the stylesheet's business.
+  const head = element("div", "phrase-head");
   const word = element("span", "phrase-word");
   fillHighlighted(word, phrase.phrase);
   // The day it was kept, on hover: useful now and then, clutter always.
   word.title = new Date(phrase.createdAt).toLocaleDateString(uiLocale());
-  row.append(word);
+  head.append(word);
 
   // The two counts (D209), each only once it has something to say, and the
   // line only when one has: a phrase never checked and never met in a
@@ -620,7 +627,17 @@ function phraseRow(phrase) {
     const said = [];
     if (recalls > 0) said.push(plural(recalls, "vocab_recalls"));
     if (reads > 0) said.push(plural(reads, "vocab_reads"));
-    row.append(element("span", "phrase-counts", said.join(` ${String.fromCodePoint(0x00b7)} `)));
+    head.append(element("span", "phrase-counts", said.join(` ${String.fromCodePoint(0x00b7)} `)));
+  }
+  row.append(head);
+
+  const body = element("div", "phrase-body");
+  if (editing === phrase.normalized) {
+    body.append(editorFor(phrase));
+  } else {
+    const meanings = element("span", "phrase-meanings");
+    fillHighlighted(meanings, phrase.translations.join("; "));
+    body.append(meanings);
   }
 
   // The sentence the phrase was kept from (D210), when the row has one: a
@@ -630,22 +647,16 @@ function phraseRow(phrase) {
   // the screen reader served by the element's own conduct and no script of
   // ours. Text from a page, so `textContent` and nothing else; not through
   // `fillHighlighted`, because the filter does not read the sentence and a
-  // mark in it would say it did. Before the editor's branch below, so a row
-  // being edited keeps its sentence where it was.
+  // mark in it would say it did. Under the meanings and under the editor
+  // alike, so a row being edited keeps its sentence where it was.
   if (hasSentence(phrase)) {
     const fold = element("details", "phrase-sentence");
     fold.append(element("summary", "", /** @type {string} */ (phrase.context)));
-    row.append(fold);
+    body.append(fold);
   }
+  row.append(body);
 
-  if (editing === phrase.normalized) {
-    row.append(editorFor(phrase));
-    return row;
-  }
-
-  const meanings = element("span", "phrase-meanings");
-  fillHighlighted(meanings, phrase.translations.join("; "));
-  row.append(meanings);
+  if (editing === phrase.normalized) return row;
 
   // The buttons speak for themselves to the eye; to a screen reader a bare
   // "Edit" in a list of a hundred names nothing, so each carries its phrase.
