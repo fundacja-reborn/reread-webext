@@ -78,7 +78,13 @@ describe("the bubble's dictionary shelf", () => {
     // second layer's type, so they step up with the tier and the knob.
     assert.match(tooltip, /--lookup-box-size: 20px;\s*--lookup-line-gap: 12px;\s*--lookup-line-height: calc\(var\(--type-second\) \* var\(--bubble-scale, 1\) \* 1\.45\);\s*--lookup-check-offset: calc\(var\(--type-second\) \* var\(--bubble-scale, 1\) \* 0\.1\);/, "the shelf's measures are not the bubble's own tokens");
     assert.doesNotMatch(tooltip, /--pad-sense/, "the old rows' padding token is still there");
-    assert.match(tooltip, /\.lookup-line \{[\s\S]*?min-height: 40px;/, "a row is shorter than a finger's press in the compact measure");
+    // The rows' rhythm at the compact floor, the pages' own reckoning (the
+    // sixth brief): name-to-row equals row-to-row, in px.
+    assert.match(tooltip, /--lookup-touch: 40px;\s*--lookup-row-gap: calc\(var\(--type-second\) \* var\(--bubble-scale, 1\) \* 0\.6\);\s*--lookup-label-size: calc\(var\(--type-label\) \* var\(--bubble-scale, 1\)\);\s*--lookup-label-line: calc\(var\(--lookup-label-size\) \* 1\.3\);\s*--lookup-row-pad: max\(var\(--lookup-row-gap\), calc\(\(var\(--lookup-touch\) - var\(--lookup-line-height\)\) \/ 2\)\);\s*--lookup-label-pad-top: max\(var\(--lookup-row-pad\), calc\(var\(--lookup-touch\) - var\(--lookup-label-line\) - var\(--lookup-row-pad\)\)\);/, "the rhythm's tokens are not the pages' reckoning at the bubble's floor");
+    assert.match(tooltip, /\.lookup-line \{[\s\S]*?padding: var\(--lookup-row-pad\) 5px;/, "a row does not keep the pad above and below");
+    assert.match(tooltip, /\.lookup-group-label,\s*\.lookup-about-label \{[\s\S]*?padding: var\(--lookup-label-pad-top\) 5px var\(--lookup-row-pad\);/, "a book's name line does not end in the row's pad");
+    assert.match(tooltip, /--lookup-touch: 40px;/, "the compact floor is not a finger's press");
+    assert.match(tooltip, /\.lookup-line \{[\s\S]*?min-height: var\(--lookup-touch\);/, "a row is shorter than the compact floor");
     assert.match(tooltip, /\.lookup-line > \.lookup-line-box \{[\s\S]*?margin: calc\(\(var\(--lookup-line-height\) - var\(--lookup-box-size\)\) \/ 2 \+ var\(--lookup-check-offset\)\) 0 0;[\s\S]*?accent-color: currentColor;/, "the box is not centred on the text's first line in the bubble's ink");
     assert.match(tooltip, /\.lookup-group-label,\s*\.lookup-about-label \{\s*display: list-item;/, "a book's name hides the browser's triangle");
     assert.match(tooltip, /\.lookup-line\[data-saved="true"\] \.lookup-line-text \{ font-weight: 600; \}/, "a saved row is not told by its weight");

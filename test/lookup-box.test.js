@@ -171,7 +171,7 @@ describe("the look-up field", () => {
     // triangle stands before each name - the glyph every other fold on the
     // page wears - on a 44px line that is the whole press.
     const heads = await source("assets/page.css");
-    assert.match(heads, /\.lookup-group-label \{\s*display: list-item;\s*min-height: 44px;[\s\S]*?cursor: pointer;/, "a book's name line does not keep the browser's triangle, or is not the press");
+    assert.match(heads, /\.lookup-group-label \{\s*display: list-item;\s*min-height: var\(--lookup-touch, 44px\);[\s\S]*?cursor: pointer;/, "a book's name line does not keep the browser's triangle, or is not the press");
     assert.match(heads, /\.lookup-group-label::marker \{\s*color: var\(--page-muted\);/, "the triangle is not in the muted voice");
     assert.match(heads, /\.lookup-about-label \{\s*display: list-item;/, "More about the word hides its triangle");
     assert.doesNotMatch(heads, /list-style: none|details-marker/, "a fold's triangle is hidden somewhere");
@@ -218,7 +218,7 @@ describe("the look-up field", () => {
     // triangle.
     assert.match(section, /element\("section", "lookup-own"\);[\s\S]*?element\("div", "lookup-own-label", t\("lookup_own"\)\)/, "Your own is a fold, or its label not the section's");
     assert.doesNotMatch(section, /fold\(|summary/, "Your own folds");
-    assert.match(await source("assets/page.css"), /\.lookup-own-label \{\s*display: flex;[\s\S]*?min-height: 44px;[\s\S]*?text-transform: uppercase;/, "Your own's label is not a book's name line without the triangle");
+    assert.match(await source("assets/page.css"), /\.lookup-own-label \{\s*display: flex;[\s\S]*?padding: var\(--lookup-label-pad-top, 0\.8rem\) 0\.35rem var\(--lookup-row-pad, 0\.45rem\);[\s\S]*?text-transform: uppercase;/, "Your own's label is not a book's name line without the triangle");
     assert.match(section, /ownMeanings\(state\.meanings, lines\)\.entries\(\)[\s\S]*?shelfRow\(meaning, `own:\$\{at\}`, \{ saved: true, onPress: \(line, where\) => void press\(line, where\) \}\)/, "an own meaning is not a row to untick, or a book's line stands here twice");
     assert.match(section, /input\.value = state\.ownDraft;/, "a redraw after a tick eats what was typed");
     assert.match(section, /state\.ownDraft = input\.value;/, "what is typed is not kept");
@@ -382,7 +382,18 @@ describe("the saved-phrases page's fold", () => {
     assert.match(vocab, /:root \{\s*--phrase-line-height: 1\.45;/, "the rows' line-height is not a token");
     assert.match(vocab, /line-height: var\(--phrase-line-height\);/, "the rows' rule does not use the token");
     assert.doesNotMatch(vocab, /^\s*line-height: 1\.45;/m, "the line-height is written twice");
-    assert.match(vocab, /\.lookup-fold \.lookup-line \{\s*--lookup-line-height: calc\(var\(--reader-size, 18px\) \* var\(--phrase-line-height\)\);/, "the panel's line height does not follow the reading size");
+    assert.match(vocab, /\.lookup-fold \.lookup-answer \{\s*--lookup-line-height: calc\(var\(--reader-size, 18px\) \* var\(--phrase-line-height\)\);/, "the panel's line height does not follow the reading size, or is not on the answer where the rhythm reads it");
+    // The rows' rhythm (the sixth brief): one pad for a row's top and
+    // bottom, grown from the least gap to what centres one line on the
+    // touch floor; a name line's bottom the same pad, its top what the
+    // floor still needs - so name-to-row equals row-to-row, in px.
+    assert.match(page, /--lookup-row-pad: max\(var\(--lookup-row-gap\), calc\(\(var\(--lookup-touch\) - var\(--lookup-line-height, 1\.6em\)\) \/ 2\)\);/, "a row's pad is not grown from the gap to centre its line on the floor");
+    assert.match(page, /--lookup-label-pad-top: max\(var\(--lookup-row-pad\), calc\(var\(--lookup-touch\) - var\(--lookup-label-line\) - var\(--lookup-row-pad\)\)\);/, "a name line's top is not what the floor still needs");
+    assert.match(page, /\.lookup-line \{[\s\S]*?padding: var\(--lookup-row-pad, 0\.45rem\) 0\.35rem;/, "a row does not keep the pad above and below");
+    assert.match(page, /\.lookup-group-label \{[\s\S]*?padding: var\(--lookup-label-pad-top, 0\.8rem\) 0\.35rem var\(--lookup-row-pad, 0\.45rem\);/, "a book's name line does not end in the row's pad");
+    assert.match(page, /\.lookup-own-label \{[\s\S]*?padding: var\(--lookup-label-pad-top, 0\.8rem\) 0\.35rem var\(--lookup-row-pad, 0\.45rem\);/, "Your own's label does not end in the row's pad");
+    // The tick in the text's own ink, in every theme, over the pages' accent rule.
+    assert.match(page, /\.lookup-line > \.lookup-line-box,\s*\.lookup-line > \.lookup-line-mark \{[\s\S]*?accent-color: currentColor;/, "the tick is not in the text's ink");
     // Neither centring on the whole wrapped row nor a native checkbox's baseline.
     const row = page.slice(page.indexOf(".lookup-line {"), page.indexOf(".lookup-line:hover"));
     assert.match(row, /align-items: flex-start;/, "the row does not align its box to the first line");

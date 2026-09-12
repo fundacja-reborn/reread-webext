@@ -289,8 +289,10 @@ summary {
    line - in a one-line row and a wrapped one alike, at every size the Aa
    panel can set - never `align-items: center` (which centres on the whole
    wrapped row) nor `baseline` (a native checkbox has no useful one in
-   Firefox). */
-.lookup-fold .lookup-line {
+   Firefox). On the answer rather than on the rows, because the rows'
+   rhythm (`--lookup-row-pad`, page.css) is computed there and the books'
+   name lines read it too. */
+.lookup-fold .lookup-answer {
   --lookup-line-height: calc(var(--reader-size, 18px) * var(--phrase-line-height));
   /* The optical correction (Michał's screenshot, 2026-09-12): centred on
      the line box the box sits on the middle of the capitals, and the eye

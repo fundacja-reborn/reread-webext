@@ -483,6 +483,19 @@ export const STYLE = `
     --lookup-line-gap: 12px;
     --lookup-line-height: calc(var(--type-second) * var(--bubble-scale, 1) * 1.45);
     --lookup-check-offset: calc(var(--type-second) * var(--bubble-scale, 1) * 0.1);
+    /* The rows' rhythm (the sixth brief), the pages' own reckoning at the
+       bubble's compact floor: the least a row keeps above and below its
+       text, grown to what centres one line on the floor, so a one-line row
+       is exactly the floor tall; a name line's bottom is that same pad and
+       its top what the floor still needs over the label's line - so the
+       space from a book's name to its first row is the space between two
+       rows, in px, here as on the pages. */
+    --lookup-touch: 40px;
+    --lookup-row-gap: calc(var(--type-second) * var(--bubble-scale, 1) * 0.6);
+    --lookup-label-size: calc(var(--type-label) * var(--bubble-scale, 1));
+    --lookup-label-line: calc(var(--lookup-label-size) * 1.3);
+    --lookup-row-pad: max(var(--lookup-row-gap), calc((var(--lookup-touch) - var(--lookup-line-height)) / 2));
+    --lookup-label-pad-top: max(var(--lookup-row-pad), calc(var(--lookup-touch) - var(--lookup-label-line) - var(--lookup-row-pad)));
     /* The launcher's two doors (D182): their type never under 15px - the
        words are the meaning, and a door is read at arm's length - and their
        pictures between 16 and 20. Both step up on the touch tier. */
@@ -737,10 +750,10 @@ export const STYLE = `
   .lookup-group-label,
   .lookup-about-label {
     display: list-item;
-    min-height: 40px;
+    min-height: var(--lookup-touch);
     margin: 0;
-    padding: 0.6em 5px;
-    font-size: calc(var(--type-label) * var(--bubble-scale, 1));
+    padding: var(--lookup-label-pad-top) 5px var(--lookup-row-pad);
+    font-size: var(--lookup-label-size);
     line-height: 1.3;
     opacity: 0.75;
     cursor: pointer;
@@ -765,7 +778,7 @@ export const STYLE = `
   .lookup-entry-headword,
   .lookup-entry-heading {
     padding: 0.4em 5px 0;
-    font-size: calc(var(--type-label) * var(--bubble-scale, 1));
+    font-size: var(--lookup-label-size);
     opacity: 0.75;
   }
   .lookup-entry-headword { font-style: italic; }
@@ -788,9 +801,9 @@ export const STYLE = `
     display: flex;
     align-items: flex-start;
     gap: var(--lookup-line-gap);
-    min-height: 40px;
+    min-height: var(--lookup-touch);
     margin: 0;
-    padding: 0.6em 5px;
+    padding: var(--lookup-row-pad) 5px;
     cursor: pointer;
   }
   .lookup-line:not(label) { cursor: default; }

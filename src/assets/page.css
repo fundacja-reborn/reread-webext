@@ -762,11 +762,26 @@ body:not(.reader):has(.panel-scrim:not([hidden])) .page-chrome {
   white-space: nowrap;
 }
 
-/* The answer's two measures, read by the rows' checkboxes and by the
-   "Show all" button that lines up with the rows' text. */
+/* The answer's measures, read by every row and every name line on the
+   shelf (the sixth brief's rhythm): the box's square and its gap to the
+   text; the touch floor; the least a row keeps above and below its text
+   (`--lookup-row-gap`), which grows to what centres one line of text on
+   the floor (`--lookup-row-pad`) - so a one-line row is exactly the floor
+   tall and the space between two rows' text is twice the pad; and a name
+   line's paddings, its bottom the row's own pad and its top whatever the
+   floor still needs over the label's line - so the space from a book's
+   name to its first row is the space between two rows, measured in px.
+   The line's height comes in from the home (the phrases page sets it from
+   the reading size, vocab.css) and falls back to the interface line box. */
 .lookup-answer {
   --lookup-box-size: 20px;
   --lookup-line-gap: 12px;
+  --lookup-touch: 44px;
+  --lookup-row-gap: 0.45rem;
+  --lookup-label-size: 0.78rem;
+  --lookup-label-line: calc(var(--lookup-label-size) * 1.3);
+  --lookup-row-pad: max(var(--lookup-row-gap), calc((var(--lookup-touch) - var(--lookup-line-height, 1.6em)) / 2));
+  --lookup-label-pad-top: max(var(--lookup-row-pad), calc(var(--lookup-touch) - var(--lookup-label-line) - var(--lookup-row-pad)));
   display: grid;
   gap: 0.4rem;
 }
@@ -911,10 +926,10 @@ button.lookup-show {
    the press. */
 .lookup-group-label {
   display: list-item;
-  min-height: 44px;
+  min-height: var(--lookup-touch, 44px);
   margin: 0;
-  padding: 0.8rem 0.35rem;
-  font-size: 0.78rem;
+  padding: var(--lookup-label-pad-top, 0.8rem) 0.35rem var(--lookup-row-pad, 0.45rem);
+  font-size: var(--lookup-label-size, 0.78rem);
   line-height: 1.3;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -958,9 +973,9 @@ button.lookup-show {
    paragraph each, at the same inset. */
 .lookup-about-label {
   display: list-item;
-  min-height: 44px;
-  padding: 0.75rem 0.35rem 0.75rem calc(0.35rem + var(--lookup-box-size, 20px) + var(--lookup-line-gap, 12px));
-  font-size: 0.85rem;
+  min-height: var(--lookup-touch, 44px);
+  padding: var(--lookup-label-pad-top, 0.75rem) 0.35rem var(--lookup-row-pad, 0.45rem) calc(0.35rem + var(--lookup-box-size, 20px) + var(--lookup-line-gap, 12px));
+  font-size: var(--lookup-label-size, 0.78rem);
   line-height: 1.3;
   color: var(--page-muted);
   cursor: pointer;
@@ -1002,8 +1017,8 @@ button.lookup-show {
   display: flex;
   align-items: flex-start;
   gap: var(--lookup-line-gap, 12px);
-  min-height: 44px;
-  padding: 0.45rem 0.35rem;
+  min-height: var(--lookup-touch, 44px);
+  padding: var(--lookup-row-pad, 0.45rem) 0.35rem;
   border-radius: 5px;
   cursor: pointer;
 }
@@ -1037,6 +1052,11 @@ button.lookup-show {
   width: var(--lookup-box-size, 20px);
   height: var(--lookup-box-size, 20px);
   margin: calc((var(--lookup-line-height, 1.6em) - var(--lookup-box-size, 20px)) / 2 + var(--lookup-check-offset, 0.11em)) 0 0;
+  /* The tick in the ink of the text beside it, in every theme and in
+     every home alike (the sixth brief) - the current colour, not a token
+     of the pages', because the bubble has its own ink and no page tokens;
+     over the pages' own checkbox rule (an accent) by the two classes. */
+  accent-color: currentColor;
 }
 
 .lookup-line-box {
@@ -1065,10 +1085,9 @@ button.lookup-show {
 .lookup-own-label {
   display: flex;
   align-items: center;
-  min-height: 44px;
   margin: 0;
-  padding: 0 0.35rem;
-  font-size: 0.78rem;
+  padding: var(--lookup-label-pad-top, 0.8rem) 0.35rem var(--lookup-row-pad, 0.45rem);
+  font-size: var(--lookup-label-size, 0.78rem);
   font-weight: 600;
   line-height: 1.3;
   text-transform: uppercase;
