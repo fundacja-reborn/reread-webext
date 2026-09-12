@@ -226,15 +226,17 @@ body[data-os="android"][data-mode="lookup"] .popup-lookup-answer {
    the glyph hanging between its two lines. So the row aligns its items at
    the top and pads itself to the touch floor from the line's own height -
    the rows' rule for a checkbox beside a wrapped line (`--lookup-row-pad`) -
-   which keeps a one-line row centred exactly as before. The line's height
-   is page.css's body line-height, inherited unitless. */
+   which keeps a one-line row centred exactly as before and the row at the
+   floor's 44px - less the row's one line, which the border box counts
+   (measured: 45px without it). The line's height is page.css's body
+   line-height, inherited unitless. */
 .popup-reader,
 .popup-support {
   --popup-line-height: 1.6em;
   justify-content: flex-start;
   align-items: flex-start;
   gap: 0.45rem;
-  padding-block: max(0.55rem, calc((44px - var(--popup-line-height)) / 2));
+  padding-block: max(0.55rem, calc((43px - var(--popup-line-height)) / 2));
 }
 
 /* The reading view's glyph, drawn like the reader bar's own icons and sized

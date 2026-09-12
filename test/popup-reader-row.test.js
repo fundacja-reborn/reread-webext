@@ -41,9 +41,10 @@ describe("the reading view's row in the popup", () => {
     const css = readFileSync(join(ROOT, "src/popup/popup.css"), "utf8");
     const rows = rule(css, ".popup-reader,\n.popup-support");
     assert.match(rows, /align-items: flex-start/);
-    // Padded to the touch floor from the line's height, so a one-line row is
-    // centred exactly as it was under `align-items: center`.
-    assert.match(rows, /padding-block: max\(0\.55rem, calc\(\(44px - var\(--popup-line-height\)\) \/ 2\)\)/);
+    // Padded to the touch floor from the line's height - the floor less the
+    // row's own 1px line, which the border box counts - so a one-line row
+    // is centred exactly as it was under `align-items: center`, at 44px.
+    assert.match(rows, /padding-block: max\(0\.55rem, calc\(\(43px - var\(--popup-line-height\)\) \/ 2\)\)/);
     const icon = rule(css, ".popup-icon");
     assert.match(icon, /margin-top: calc\(\(var\(--popup-line-height, 1\.6em\) - var\(--popup-icon-size\)\) \/ 2\)/);
   });
