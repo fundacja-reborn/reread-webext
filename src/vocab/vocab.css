@@ -153,18 +153,21 @@ summary {
   margin: 0.25rem 0 0;
 }
 
-.fold-line summary {
+/* The fold's own summary and paragraph - direct children, because the
+   "Add a phrase" fold holds folds of its own (a book's, "Show all"), and
+   their lines wear the panel's dress (page.css), not this one. */
+.fold-line > summary {
   padding: 0.7rem 0;
   cursor: pointer;
   color: var(--page-muted);
   font-size: 0.9rem;
 }
 
-.fold-line summary::marker {
+.fold-line > summary::marker {
   color: var(--page-muted);
 }
 
-.fold-line p {
+.fold-line > p {
   margin: 0 0 0.75rem;
 }
 
@@ -256,12 +259,13 @@ summary {
   margin: 0 0 0.75rem;
 }
 
-/* The phrase wears the row's word's exact dress - one rule for both, below
-   with `.phrase-word` - so the word looked up and the same word in the list
-   can never drift apart; the meanings under it are chips echoing the
-   dictionary lines they were pressed in, and keep those lines' interface
-   face, so the two read as one thing. Nothing in the panel eases in: on
-   e-ink a transition is a run of flashes, and the fold opens at once. */
+/* The phrase wears the row's word's exact dress, and the books' lines and
+   the reader's own meanings the row's meanings' - one rule for each pair,
+   below with `.phrase-word` and `.phrase-meanings` - so a word looked up
+   and the same word in the list can never drift apart (block 5 of the
+   rebuild: the content in the reading face, the labels, the help and the
+   buttons in the interface's). Nothing in the panel eases in: on e-ink a
+   transition is a run of flashes, and every fold opens at once. */
 .lookup-fold button,
 .lookup-fold summary {
   transition: none;
@@ -342,7 +346,8 @@ summary {
    interface size is what acts on the pair - buttons, hints, the bar. */
 .phrase-word,
 .phrase-meanings,
-.lookup-fold .lookup-phrase {
+.lookup-fold .lookup-phrase,
+.lookup-fold .lookup-line-text {
   font-family: var(--reader-font-lead, var(--reader-font-stack));
   font-size: var(--reader-size, 18px);
   line-height: 1.45;

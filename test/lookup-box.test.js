@@ -256,6 +256,26 @@ describe("the saved-phrases page's fold", () => {
     assert.match(styles, /\.lookup-fold button,\s*\.lookup-fold summary \{\s*transition: none;/, "the panel's controls ease in");
   });
 
+  it("sets the word and the lines in the list's reading face, and leaves the fold's dress to the fold's own summary", async () => {
+    const styles = await source("vocab/vocab.css");
+    // The content in the reading face by the rows' own rule (block 5): the
+    // word with `.phrase-word`, the lines and the own meanings with
+    // `.phrase-meanings`; labels, help and buttons stay the interface's.
+    assert.match(styles, /\.phrase-word,\s*\.phrase-meanings,\s*\.lookup-fold \.lookup-phrase,\s*\.lookup-fold \.lookup-line-text \{\s*font-family: var\(--reader-font-lead/, "the panel's content is not in the rows' face by the rows' rule");
+    assert.match(styles, /\.phrase-word,\s*\.lookup-fold \.lookup-phrase \{\s*font-weight: 600;/, "the word is not bold as the row's word is");
+    // The fold-line rules reach their own summary and paragraph only: the
+    // panel holds folds of its own, dressed in page.css.
+    assert.match(styles, /\.fold-line > summary \{/, "the fold's summary rule reaches the books' folds");
+    assert.doesNotMatch(styles, /\.fold-line summary \{|\.fold-line p \{/, "a descendant rule of the fold reaches into the panel");
+    // Edges by the two tokens e-ink keeps: separators on --page-line, the
+    // controls' borders on --page-border; nothing near-white of its own.
+    const panel = (await source("assets/page.css")).slice((await source("assets/page.css")).indexOf("/* --- the look-up field"), (await source("assets/page.css")).indexOf("/* --- the colophon"));
+    assert.doesNotMatch(panel, /#[0-9a-f]{3,8}\b/i, "the panel paints a colour of its own outside the tokens");
+    assert.doesNotMatch(panel, /transition|animation/, "the panel eases something in");
+    assert.match(panel, /\.lookup-group \+ \.lookup-group \{\s*border-top: 1px solid var\(--page-line\)/, "the books are not parted by the separator token");
+    assert.match(panel, /\.lookup-own-input \{[\s\S]*?border: 1px solid var\(--page-border\)/, "the own field's edge is not the control token");
+  });
+
   it("looks up the phrase the address brought, on arrival and on a turn of the open tab", async () => {
     const script = await source("vocab/vocab.js");
     const arrival = bodyOf(script, "arriveWithPhrase");
