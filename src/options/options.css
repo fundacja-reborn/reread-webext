@@ -429,21 +429,98 @@ button.note-toggle {
   white-space: nowrap;
 }
 
-/* A stored dictionary's own name, under the pair: what tells two dictionaries
-   of one pair apart. A book's name can be long, and it may wrap. */
-.dictionary-title {
-  display: block;
-  color: var(--page-muted);
-  font-size: 0.9rem;
+/* --- the dictionary list: every row a stack of lines, the same at every
+   width (the seventh brief, D2). The list is a real list, so the browser's
+   own bullets and indent come off; the rows keep the models' separator. --- */
+
+ul.models {
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dictionary-row {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--page-line);
+}
+
+/* The first line: the pair, the badge of the pair being read, and the
+   buttons at the right edge. The pair never breaks in the middle - "English
+   to" over "Polish" read as two things - while the badge may drop to the
+   next line; the buttons are one group that never wraps inside itself.
+   Only a pair wider than the whole row is cut, with an ellipsis, rather
+   than pushing the page into a sideways scroll. */
+.dictionary-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.6rem;
+}
+
+.dictionary-pair {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dictionary-head .badge {
+  margin-left: 0;
+}
+
+.dictionary-actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.dictionary-actions button {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0.35rem 0.9rem;
+  white-space: nowrap;
+}
+
+/* The row's title: the name the reader knows the book by, at the weight of
+   the page's own headings. Wrapped when long, never cut. */
+.dictionary-name {
+  margin: 0.15rem 0 0;
+  font-weight: bold;
   overflow-wrap: anywhere;
 }
 
-/* The name a reader gives a dictionary (D199), on its own line under the
-   file's name it stands in for - inside the name cell, so the phone's layout
-   (name first, counts and buttons under it) and the desktop's columns both
-   keep it with the name. The caption is the label; the field wears the
-   filter fields' quiet dress, capped the way the font name's field is, so an
-   empty one is not a line across the page. */
+/* The small print under the title: the file's name when it differs, the
+   counts, the size - one line that wraps between its items on a phone. A
+   count keeps its unit on one line; a file's name may break anywhere,
+   since a name written without spaces would otherwise be wider than the
+   screen. */
+.dictionary-meta {
+  margin: 0.15rem 0 0;
+  color: var(--page-muted);
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.dictionary-count {
+  white-space: nowrap;
+}
+
+/* The same line while a download runs: the bar and the byte count beside it. */
+.dictionary-fetching {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.75rem;
+}
+
+/* The name a reader gives a dictionary (D199), on a line of its own under
+   the small print. The caption is the label; the field wears the filter
+   fields' quiet dress, capped the way the font name's field is, so an empty
+   one is not a line across the page. */
 .dictionary-rename {
   display: flex;
   flex-wrap: wrap;
@@ -547,7 +624,8 @@ button.model-delete {
    instead of the quiet rows stopping visibly short of it. The hit box keeps
    its full size, reaching past the edge. Only the quiet button may hang out
    there - a bordered Download or Cancel ending the line stays flush. */
-.model-act > .model-delete:last-child {
+.model-act > .model-delete:last-child,
+.dictionary-actions > .model-delete:last-child {
   margin-inline-end: calc(-0.8rem - 1px);
 }
 
@@ -582,10 +660,6 @@ button.model-delete {
 }
 
 /* --- the attribution fold inside a stored dictionary's row --- */
-
-.model-about {
-  grid-column: 1 / -1;
-}
 
 .model-about summary {
   /* The block padding is the touch target: 0.9rem text alone stands 39px.
@@ -832,5 +906,15 @@ summary::marker {
   /* List rows on one line: name | size | action. */
   .model-name {
     grid-column: 1;
+  }
+}
+
+/* The one narrow-screen move of the dictionary list: the buttons leave the
+   pair's line for a line of their own under it, flush right, so a pair
+   and three buttons never fight for one 360px line (the seventh brief). */
+@media (max-width: 480px) {
+  .dictionary-actions {
+    flex-basis: 100%;
+    justify-content: flex-end;
   }
 }
