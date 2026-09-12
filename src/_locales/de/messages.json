@@ -98,6 +98,38 @@
   "vocab_filter_placeholder": { "message": "Nach Wendung oder Bedeutung filtern" },
   "vocab_filter_label": { "message": "Die Liste des gespeicherten Wortschatzes filtern" },
   "vocab_filter_clear": { "message": "Filter leeren" },
+  "vocab_add_title": { "message": "Wendung hinzufügen" },
+  "vocab_add_note": { "message": "Geben Sie ein Wort ein und bestätigen Sie - haken Sie Bedeutungen aus Ihren Wörterbüchern ab oder schreiben Sie eine eigene." },
+  "lookup_label": { "message": "Wort nachschlagen" },
+  "lookup_placeholder": { "message": "Wort oder Wendung eingeben" },
+  "lookup_action": { "message": "Suchen" },
+  "lookup_clear": { "message": "Feld leeren" },
+  "lookup_saved_count": {
+    "message": "Gespeichert: $COUNT$",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "lookup_own": { "message": "Eigene" },
+  "lookup_own_placeholder": { "message": "Eigene Bedeutung eingeben" },
+  "lookup_more_about": { "message": "Mehr zum Wort" },
+  "lookup_show_all": {
+    "message": "Alle zeigen ($COUNT$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "lookup_show_fewer": { "message": "Weniger zeigen" },
+  "lookup_show_in_list": { "message": "In der Liste zeigen" },
+  "lookup_saved_group": {
+    "message": "Gespeichert ($COUNT$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "popup_lookup_back": { "message": "Zurück zum Menü" },
+  "popup_lookup_add": { "message": "Auf der Wortschatz-Seite speichern" },
+  "popup_lookup_open": { "message": "Im gespeicherten Wortschatz öffnen" },
   "vocab_count_filtered_one": {
     "message": "$MATCHING$ von $TOTAL$ gespeicherten Eintrag",
     "placeholders": {
@@ -128,9 +160,21 @@
     "message": "Für dieses Paar ist noch nichts gespeichert. Wählen Sie beim Lesen eine Wendung aus und drücken Sie „$BUTTON$“ - sie wartet dann hier.",
     "placeholders": { "button": { "content": "$1", "example": "Speichern" } }
   },
-  "vocab_filter_no_match": {
-    "message": "Kein gespeicherter Eintrag passt zu „$QUERY$“.",
-    "placeholders": { "query": { "content": "$1", "example": "Bank" } }
+  "vocab_filter_status_one": {
+    "message": "$SHOWN$ von $TOTAL$ Eintrag für „$QUERY$“",
+    "placeholders": {
+      "total": { "content": "$1", "example": "1" },
+      "shown": { "content": "$2", "example": "1" },
+      "query": { "content": "$3", "example": "news" }
+    }
+  },
+  "vocab_filter_status_other": {
+    "message": "$SHOWN$ von $TOTAL$ Einträgen für „$QUERY$“",
+    "placeholders": {
+      "total": { "content": "$1", "example": "827" },
+      "shown": { "content": "$2", "example": "1" },
+      "query": { "content": "$3", "example": "news" }
+    }
   },
   "pager_page_of": {
     "message": "Seite $PAGE$ von $PAGES$",

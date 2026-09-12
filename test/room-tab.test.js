@@ -64,6 +64,29 @@ describe("opening the saved-phrases page", () => {
     assert.equal(state.stored[VOCAB_TAB_KEY], 100);
   });
 
+  it("lands with the phrase to look up, in a fresh tab and in the one already showing the page (D197)", async () => {
+    // The popup's field only reads; its door opens this page with the
+    // phrase in the address, encoded so that whatever was typed survives it.
+    const fresh = vocab();
+    await openVocabulary({ ...fresh.deps, text: "take off #1" });
+    assert.deepEqual(fresh.state.created, [`${VOCAB_URL}#lookup=take%20off%20%231`]);
+    assert.equal(fresh.state.stored[VOCAB_TAB_KEY], 100);
+
+    // The tab already showing the page is turned to the fragment - the same
+    // document, `hashchange` - rather than only raised.
+    const open = vocab({ tabs: [{ id: 7, windowId: 3 }], session: { [VOCAB_TAB_KEY]: 7 } });
+    await openVocabulary({ ...open.deps, text: "news", contexts: async () => [showing(VOCAB_URL, 7)] });
+    assert.deepEqual(open.state.created, []);
+    assert.deepEqual(open.state.turned, [{ tabId: 7, url: `${VOCAB_URL}#lookup=news` }]);
+    assert.equal(open.state.selected, 7);
+
+    // Without a phrase the page opens on its list, as before.
+    const plain = vocab({ tabs: [{ id: 7, windowId: 3 }], session: { [VOCAB_TAB_KEY]: 7 } });
+    await openVocabulary({ ...plain.deps, contexts: async () => [showing(VOCAB_URL, 7)] });
+    assert.deepEqual(plain.state.turned, []);
+    assert.equal(plain.state.selected, 7);
+  });
+
   it("keeps its tab apart from the reader's", async () => {
     // Both pages remember a tab; a shared key would make one button close in
     // on the other's page.

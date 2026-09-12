@@ -98,6 +98,38 @@
   "vocab_filter_placeholder": { "message": "Filtrar por frase o significado" },
   "vocab_filter_label": { "message": "Filtrar la lista de frases guardadas" },
   "vocab_filter_clear": { "message": "Borrar el filtro" },
+  "vocab_add_title": { "message": "Añadir una frase" },
+  "vocab_add_note": { "message": "Escribe una palabra y confirma - marca significados de tus diccionarios o escribe el tuyo." },
+  "lookup_label": { "message": "Buscar una palabra" },
+  "lookup_placeholder": { "message": "Escribe una palabra o frase" },
+  "lookup_action": { "message": "Buscar" },
+  "lookup_clear": { "message": "Borrar el campo" },
+  "lookup_saved_count": {
+    "message": "Guardados: $COUNT$",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "lookup_own": { "message": "Propios" },
+  "lookup_own_placeholder": { "message": "Escribe tu propio significado" },
+  "lookup_more_about": { "message": "Más sobre la palabra" },
+  "lookup_show_all": {
+    "message": "Mostrar todo ($COUNT$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "lookup_show_fewer": { "message": "Mostrar menos" },
+  "lookup_show_in_list": { "message": "Mostrar en la lista" },
+  "lookup_saved_group": {
+    "message": "Guardadas ($COUNT$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "popup_lookup_back": { "message": "Volver al menú" },
+  "popup_lookup_add": { "message": "Guardar en la página de frases" },
+  "popup_lookup_open": { "message": "Abrir en las frases guardadas" },
   "vocab_count_filtered_one": {
     "message": "$MATCHING$ de $TOTAL$ frase guardada",
     "placeholders": {
@@ -135,9 +167,29 @@
     "message": "Aún no hay nada guardado para este par. Selecciona una frase mientras lees y pulsa «$BUTTON$» - te estará esperando aquí.",
     "placeholders": { "button": { "content": "$1", "example": "Guardar" } }
   },
-  "vocab_filter_no_match": {
-    "message": "Ninguna frase guardada coincide con «$QUERY$».",
-    "placeholders": { "query": { "content": "$1", "example": "banco" } }
+  "vocab_filter_status_one": {
+    "message": "$SHOWN$ de $TOTAL$ frase para «$QUERY$»",
+    "placeholders": {
+      "total": { "content": "$1", "example": "1" },
+      "shown": { "content": "$2", "example": "1" },
+      "query": { "content": "$3", "example": "news" }
+    }
+  },
+  "vocab_filter_status_many": {
+    "message": "$SHOWN$ de $TOTAL$ frases para «$QUERY$»",
+    "placeholders": {
+      "total": { "content": "$1", "example": "1.000.000" },
+      "shown": { "content": "$2", "example": "1" },
+      "query": { "content": "$3", "example": "news" }
+    }
+  },
+  "vocab_filter_status_other": {
+    "message": "$SHOWN$ de $TOTAL$ frases para «$QUERY$»",
+    "placeholders": {
+      "total": { "content": "$1", "example": "827" },
+      "shown": { "content": "$2", "example": "1" },
+      "query": { "content": "$3", "example": "news" }
+    }
   },
   "pager_page_of": {
     "message": "Página $PAGE$ de $PAGES$",

@@ -238,15 +238,51 @@
       <label for="filter" class="visually-hidden" data-i18n="vocab_filter_label">
         Filter the list of saved phrases
       </label>
+      <!-- The same field as the look-up field in the fold below: a search
+           field with our own cross inside (`lib/clear-field.js`, wrapped by
+           vocab.js), the phone's keyboard saying Search, nothing suggested. -->
       <input
         type="search"
         id="filter"
         placeholder="Filter by phrase or meaning"
         data-i18n-placeholder="vocab_filter_placeholder"
+        enterkeyhint="search"
+        autocomplete="off"
       />
     </div>
 
-    <div id="list" class="phrases"></div>
+    <!-- A phrase added by hand (D197): a word typed instead of selected,
+         answered by the dictionaries and saved with a press on a meaning - or
+         with a meaning of the reader's own. Folded, because adding is the
+         occasional act here and the list is the page; the fold opens onto
+         the field, built by `lib/lookup-box.js` (the popup's own). Hidden
+         without a pair, when there is nowhere to file a phrase. The panel
+         does one thing: Edit and Learned stay with the phrase's row in the
+         list below, which "Show in list" under the answer brings into view. -->
+    <details class="fold-line lookup-fold" id="add-phrase">
+      <summary data-i18n="vocab_add_title">Add a phrase</summary>
+      <!-- Framed, like the import offer: the answer can be a long entry, and
+           without a frame it ran straight into the list's first row. -->
+      <div class="lookup-fold-panel">
+        <p class="hint" data-i18n="vocab_add_note">
+          Type a word and confirm - tick meanings from your dictionaries or write your own.
+        </p>
+        <div class="lookup-box" id="lookup-box"></div>
+      </div>
+    </details>
+
+    <!-- The filter's state over the list it narrows: "1 of 827 phrases for
+         "news"" with the way out beside it - said right where the rows are,
+         because the filter box at the top of the page is off the screen by
+         the time the list is read (and "Show in list" in the fold above
+         fills that box unseen). Filled by vocab.js while the filter asks
+         anything; hidden, and out of the flow, while it does not. -->
+    <p id="filter-status" class="hint filter-status" hidden></p>
+
+    <!-- Focusable by script only: "Clear filter" takes its own button out
+         of the page, and the focus then lands on the list itself, where the
+         eye is, without the page jumping to the filter box at the top. -->
+    <div id="list" class="phrases" tabindex="-1"></div>
 
     <p id="status" class="status" role="status"></p>
 

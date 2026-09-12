@@ -7,6 +7,14 @@
    Base styles lay the page out for a narrow screen; the one media query at
    the end spreads the same HTML out for a desktop. */
 
+/* The one line-height of everything set in the reading face on this page -
+   the rows' phrase and meanings, the panel's word and lines - as a token,
+   because the panel's checkboxes are centred on the first line of their
+   text by it (below, `.lookup-fold .lookup-line`). */
+:root {
+  --phrase-line-height: 1.45;
+}
+
 /* A touch wider than the shared 44rem: the row grid holds three columns and
    the extra room goes to the meanings. The top padding is the reader page's
    headroom (its body's 0.75rem plus its chrome box's 0.75rem), so the two
@@ -153,18 +161,21 @@ summary {
   margin: 0.25rem 0 0;
 }
 
-.fold-line summary {
+/* The fold's own summary and paragraph - direct children, because the
+   "Add a phrase" fold holds folds of its own (a book's, "Show all"), and
+   their lines wear the panel's dress (page.css), not this one. */
+.fold-line > summary {
   padding: 0.7rem 0;
   cursor: pointer;
   color: var(--page-muted);
   font-size: 0.9rem;
 }
 
-.fold-line summary::marker {
+.fold-line > summary::marker {
   color: var(--page-muted);
 }
 
-.fold-line p {
+.fold-line > p {
   margin: 0 0 0.75rem;
 }
 
@@ -218,16 +229,79 @@ summary {
   margin: 1rem 0 0;
 }
 
+/* The filter in the look-up field's dress, its cross inside at the far end
+   (`.clear-field` in page.css wraps it), so the two fields on this page
+   look and behave the same; the end padding is the cross's room. */
 .filter-line input {
   flex: 1 1 auto;
   min-height: 44px;
   min-width: 0;
   font: inherit;
-  padding: 0.35rem 0.6rem;
+  padding: 0.35rem 2.6rem 0.35rem 0.6rem;
   border-radius: 6px;
   border: 1px solid var(--page-border);
   background: transparent;
   color: var(--page-fg);
+}
+
+/* --- the fold for a phrase added by hand (D197) --- */
+
+/* The fold stands the filter's distance under it; inside, the sentence and
+   the field (dressed in page.css) follow. The phrase and its meanings are
+   content, like the rows' (D104): they wear the reading face at the Aa
+   panel's size, and the dictionary lines stay in the interface face, as
+   in the bubble. */
+.lookup-fold {
+  margin: 1rem 0 0;
+}
+
+/* The fold's body in the import offer's frame: the answer can be a long
+   entry, and without a frame it ran straight into the list's first row
+   (Michał's screenshot, 2026-09-11). The room below it is the list's own
+   top margin plus this one. */
+.lookup-fold-panel {
+  margin: 0.25rem 0 1.5rem;
+  padding: 0.75rem 1rem 1rem;
+  border: 1px solid var(--page-line);
+  border-radius: 8px;
+}
+
+.lookup-fold-panel > .hint {
+  margin: 0 0 0.75rem;
+}
+
+/* The phrase wears the row's word's exact dress, and the books' lines and
+   the reader's own meanings the row's meanings' - one rule for each pair,
+   below with `.phrase-word` and `.phrase-meanings` - so a word looked up
+   and the same word in the list can never drift apart (block 5 of the
+   rebuild: the content in the reading face, the labels, the help and the
+   buttons in the interface's). Nothing in the panel eases in: on e-ink a
+   transition is a run of flashes, and every fold opens at once. */
+.lookup-fold button,
+.lookup-fold summary {
+  transition: none;
+}
+
+/* What a line of the panel's text stands tall, in px: the reading size the
+   Aa panel sets (`--reader-size`, `lib/appearance.js`) by the one
+   line-height above. The checkbox's top margin is half of what this has
+   over the box (page.css), so the box sits centred on the text's first
+   line - in a one-line row and a wrapped one alike, at every size the Aa
+   panel can set - never `align-items: center` (which centres on the whole
+   wrapped row) nor `baseline` (a native checkbox has no useful one in
+   Firefox). */
+.lookup-fold .lookup-line {
+  --lookup-line-height: calc(var(--reader-size, 18px) * var(--phrase-line-height));
+  /* The optical correction (Michał's screenshot, 2026-09-12): centred on
+     the line box the box sits on the middle of the capitals, and the eye
+     wants it on the middle of the x-height, which a serif face puts lower -
+     Georgia's ascent is 0.917em to a descent of 0.219em, its x-height
+     0.481em, so the x-height's middle lies 0.11em under the line box's
+     (2px at 18px; 1.5px at 14px, 3.1px at 28px). A constant in px misses
+     by more than a pixel at the top of the Aa panel's range, so the
+     correction is the reading size's own eleventh - a px value per size,
+     never more than 0.2px off at any of them. */
+  --lookup-check-offset: calc(var(--reader-size, 18px) * 0.11);
 }
 
 /* --- the import offer: size, a taste of its rows, the target pair --- */
@@ -277,11 +351,34 @@ summary {
   padding: 0.35rem 1rem;
 }
 
+/* --- the filter's state over the list --- */
+
+/* "1 of 827 phrases for "news" · Clear filter": the counter's voice (the
+   hint's size and color), one line that wraps when it must, the button a
+   quiet one with the 44px hit box. Static, not stuck: it is read once, on
+   the way into the rows. The scroll margin keeps it off the viewport's edge
+   when "Show in list" scrolls to it. Hidden while the filter asks nothing -
+   out of the flow, so the rows do not move when it goes. */
+.filter-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 0.5rem;
+  margin: 1rem 0 0;
+  scroll-margin-top: 0.75rem;
+}
+
 /* --- the list: a grid, so the meanings all start on one vertical line --- */
 
 .phrases {
   margin: 1rem 0 0;
   border-top: 1px solid var(--page-line);
+}
+
+/* The list takes the focus from "Clear filter" (script only, tabindex -1):
+   a landing place, not a control, so no ring around the whole list. */
+.phrases:focus {
+  outline: none;
 }
 
 /* One phrase per row. On a phone the row stacks: phrase, meanings, and the
@@ -304,14 +401,17 @@ summary {
    the hierarchy is weight and color, never size. What stays at the
    interface size is what acts on the pair - buttons, hints, the bar. */
 .phrase-word,
-.phrase-meanings {
+.phrase-meanings,
+.lookup-fold .lookup-phrase,
+.lookup-fold .lookup-line-text {
   font-family: var(--reader-font-lead, var(--reader-font-stack));
   font-size: var(--reader-size, 18px);
-  line-height: 1.45;
+  line-height: var(--phrase-line-height);
   overflow-wrap: anywhere;
 }
 
-.phrase-word {
+.phrase-word,
+.lookup-fold .lookup-phrase {
   font-weight: 600;
 }
 
@@ -321,12 +421,22 @@ summary {
   color: var(--page-muted);
 }
 
-/* What the filter matched, lit inside the row: the accent as a wash, never
-   the only signal - the row being on screen at all is the real answer. */
+/* What the filter matched, lit inside the row: the accent as a wash, and
+   under it a 2px line in the ink itself - on e-ink the wash is one of the
+   16 greys that rounds back to paper, and the line is what survives
+   (block 5 of the polish round). Not bold: the phrase is bold already. The
+   page's full ink over the wash, not the meanings' muted one: muted on the
+   wash fell under 4.5:1 in the light theme (4.2:1), the full ink stays
+   well over it in every theme (11:1 light, 6.4:1 dark, 8:1 sepia). No
+   link stands in a row, so the underline is nobody else's. */
 .phrase-row mark {
   background: color-mix(in srgb, var(--page-accent) 30%, transparent);
-  color: inherit;
+  color: var(--page-fg);
   border-radius: 2px;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
+  text-decoration-color: currentColor;
 }
 
 /* --- the row's two quiet actions --- */
@@ -413,24 +523,9 @@ button.quiet-speak svg {
   padding: 0.35rem 1rem;
 }
 
-/* --- the two empty states --- */
-
-/* The filter came up empty: the sentence quotes the query, the one button
-   undoes it. */
-.no-match {
-  display: grid;
-  gap: 0.6rem;
-  justify-items: start;
-}
-
-.no-match p {
-  margin: 0;
-}
-
-.no-match button {
-  min-height: 44px;
-  padding: 0.35rem 1rem;
-}
+/* The one empty state is the shared `.empty` (page.css): a vocabulary with
+   nothing in it. A filter that matches nothing leaves the list empty under
+   the state line above, which says so and offers the way out. */
 
 /* The pager is the shared one (`.pager`, page.css): the chevrons with their
    words, the words stepping aside under a phone's width, the 44px floor -

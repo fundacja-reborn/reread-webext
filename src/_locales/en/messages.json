@@ -159,6 +159,80 @@
   "vocab_filter_placeholder": { "message": "Filter by phrase or meaning" },
   "vocab_filter_label": { "message": "Filter the list of saved phrases" },
   "vocab_filter_clear": { "message": "Clear the filter" },
+  "vocab_add_title": {
+    "message": "Add a phrase",
+    "description": "The fold on the saved-phrases page that opens onto the look-up field (D197): a word typed instead of selected, answered by the dictionaries and saved with a press on a meaning."
+  },
+  "vocab_add_note": {
+    "message": "Type a word and confirm - tick meanings from your dictionaries or write your own.",
+    "description": "The one sentence inside the \"Add a phrase\" fold, above the field. The translation model is never asked there - a word on its own is where it guesses worst - so the sentence names only the dictionaries and the reader's own meaning. \"Confirm\" because the field asks on Enter or the button, never as the word is typed."
+  },
+  "lookup_label": {
+    "message": "Look up a word",
+    "description": "The look-up field's accessible name (D197): the toolbar popup's row under the language pair, and the field inside the saved-phrases page's \"Add a phrase\" fold."
+  },
+  "lookup_placeholder": { "message": "Type a word or phrase" },
+  "lookup_action": {
+    "message": "Search",
+    "description": "The button beside the look-up field; Enter in the field does the same. One word: it shares the field's row with the arrow in the popup."
+  },
+  "lookup_clear": {
+    "message": "Clear the field",
+    "description": "Accessible name and hover title of the cross inside the look-up field: it empties the field and takes the answer down, leaving the caret in the field."
+  },
+  "lookup_saved_count": {
+    "message": "Saved: $COUNT$",
+    "description": "The phrase's standing at the far end of the look-up answer's first line, for a phrase already saved for the pair: how many meanings it is kept with. Nothing stands there for an unsaved phrase.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "lookup_own": {
+    "message": "Your own",
+    "description": "The heading of the last section of the look-up answer on the saved-phrases page: the meanings the reader typed (those matching no dictionary line), and the field for the next one. Also the section's accessible name."
+  },
+  "lookup_own_placeholder": {
+    "message": "Write your own meaning",
+    "description": "Placeholder and accessible name of the field under \"Your own\": one meaning, kept with Enter or the Save button beside it."
+  },
+  "lookup_more_about": {
+    "message": "More about the word",
+    "description": "The fold at the end of a dictionary's group in the look-up answer, closed by default: the transcriptions and cross-references the dictionary wrote between its meanings, which are nothing to tick."
+  },
+  "lookup_show_all": {
+    "message": "Show all ($COUNT$)",
+    "description": "The fold under a dictionary's first lines in the look-up answer, closed: the rest of the lines stand behind it, and the count is all the lines the dictionary has for the word.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "lookup_show_fewer": {
+    "message": "Show fewer",
+    "description": "The same fold once it is open."
+  },
+  "lookup_show_in_list": {
+    "message": "Show in list",
+    "description": "The link after the saved count on the saved-phrases page: sets the list's filter to the phrase and scrolls to its row, where Edit and Learned are. The popup's field has no list and shows no link."
+  },
+  "lookup_saved_group": {
+    "message": "Saved ($COUNT$)",
+    "description": "The name of the first group in the popup's look-up answer, for a phrase already saved for the pair: every saved meaning as a row with a tick, before the dictionaries' groups. The popup only reads; the saved-phrases page shows the same meanings as ticked rows in the dictionaries' groups instead.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "popup_lookup_back": {
+    "message": "Back to the menu",
+    "description": "Title and accessible name of the arrow in the popup's look-up row once the field has answered (D197): the popup shows only the field and the answer then, and the arrow brings the menu's rows back."
+  },
+  "popup_lookup_add": {
+    "message": "Save on the phrases page",
+    "description": "The button under the popup's look-up answer while the phrase is not saved: opens the saved-phrases page with the phrase already looked up in its \"Add a phrase\" fold and the list narrowed to it, where a tick on a meaning saves. Says where the saving happens, because the popup's field itself only reads."
+  },
+  "popup_lookup_open": {
+    "message": "Open in saved phrases",
+    "description": "The same row once the phrase is already saved: the saved-phrases page with the phrase looked up, its meanings, Learned and the editor there."
+  },
   "vocab_count_filtered_one": {
     "message": "$MATCHING$ of $TOTAL$ saved phrase",
     "description": "The counter while the filter is active. Plural family over the total; the matching count rides along as $2.",
@@ -193,9 +267,22 @@
     "description": "The button quoted is bubble_save, passed in so the two can never drift apart.",
     "placeholders": { "button": { "content": "$1", "example": "Save" } }
   },
-  "vocab_filter_no_match": {
-    "message": "No saved phrase matches \"$QUERY$\".",
-    "placeholders": { "query": { "content": "$1", "example": "bank" } }
+  "vocab_filter_status_one": {
+    "message": "$SHOWN$ of $TOTAL$ phrase for “$QUERY$”",
+    "description": "The filter's state over the list of saved phrases while the filter is active, with \"Clear filter\" beside it. Plural family over the total; the matching count rides along as $2, the query as $3.",
+    "placeholders": {
+      "total": { "content": "$1", "example": "1" },
+      "shown": { "content": "$2", "example": "1" },
+      "query": { "content": "$3", "example": "news" }
+    }
+  },
+  "vocab_filter_status_other": {
+    "message": "$SHOWN$ of $TOTAL$ phrases for “$QUERY$”",
+    "placeholders": {
+      "total": { "content": "$1", "example": "827" },
+      "shown": { "content": "$2", "example": "1" },
+      "query": { "content": "$3", "example": "news" }
+    }
   },
   "pager_page_of": {
     "message": "Page $PAGE$ of $PAGES$",

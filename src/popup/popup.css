@@ -10,6 +10,14 @@ body {
   padding: 0.4rem 0.9rem;
   max-width: none;
   font-size: 14px;
+  /* A surface raised over the page (the fourth brief's D3): the page's
+     paper a step lighter in sepia and in the dark, the paper itself where
+     it is white - and always the 1px edge in the controls' border token,
+     which is what survives an e-ink panel's greys and a theme where the
+     two tones meet. No shadow: it greys the edge in sepia and says nothing
+     on e-ink. */
+  background: var(--surface-raised);
+  border: 1px solid var(--page-border);
 }
 
 /* On Android there is no panel: the popup opens as a page over the whole
@@ -67,7 +75,6 @@ body[data-os="android"] .popup-row {
 
 /* The checkbox rows: the switch stays a switch, whatever the label does. */
 .popup-site input,
-.popup-quiet input,
 .popup-reader-only input,
 .popup-no-translation input {
   flex: none;
@@ -77,6 +84,111 @@ body[data-os="android"] .popup-row {
 
 .popup-pair select {
   max-width: 60%;
+}
+
+/* The look-up row (D197): the arrow back to the menu (results mode only) and
+   the field with its button, on one line; the box's own dress is shared with
+   the saved-phrases page (`.lookup-*` in page.css). The field takes what the
+   arrow and the button leave. */
+.popup-lookup-head {
+  gap: 0.35rem;
+}
+
+.popup-lookup-head .lookup-box {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.popup-lookup-head .lookup-go {
+  padding-inline: 0.7rem;
+}
+
+/* The arrow keeps the pages' dress (`.page-back`) at the row's leading edge,
+   without the negative start margin the pages use to hand its padding back
+   to their column - here the row's edge is the popup's. */
+.popup-lookup-back {
+  margin-inline-start: -0.4rem;
+}
+
+/* The results mode (`body[data-mode="lookup"]`, set by the script once the
+   field has answered): every row but the field's leaves, and the popup
+   stands as three pieces in a column - the field's row, the answer, the
+   door - of which only the answer scrolls, inside itself (the fourth
+   brief): the field and the door stay in reach whatever the answer's
+   length, and the popup keeps one size once the answer is longer than its
+   middle. On the desktop the middle is capped in pixels, under the panel's
+   600px ceiling; on Android, where the popup is a page over the whole
+   window, the body takes the window's height and the middle what the two
+   fixed pieces leave. The arrow, the answer and the door stand only in
+   this mode, each in its own dress (the arrow the pages' `.page-back`, the
+   door a framed button). The [hidden] attribute keeps its say inside the
+   mode (page.css makes it !important), so the door the script hides while
+   the dictionaries are asked stays hidden. */
+body:not([data-mode="lookup"]) .popup-lookup-only {
+  display: none;
+}
+
+body[data-mode="lookup"] {
+  display: flex;
+  flex-direction: column;
+}
+
+body[data-mode="lookup"] .popup-row:not(.popup-lookup-head, .popup-lookup-only) {
+  display: none;
+}
+
+body[data-mode="lookup"] .popup-lookup-head {
+  flex: none;
+  /* Edge to edge: the row's own width, not the column's - with the
+     column's `width: 100%` the line under it stopped a padding short of
+     the popup's right edge (Michał's screenshot, 2026-09-11). */
+  width: auto;
+  margin-inline: -0.9rem;
+  padding-inline: 0.9rem;
+}
+
+/* The answer between the field and the door: the same air the rows keep,
+   the books' own lines between them, a line under it where the door
+   begins - and the one place in the popup that scrolls inside itself. */
+.popup-lookup-answer {
+  padding-block: 0.6rem;
+}
+
+body[data-mode="lookup"] .popup-lookup-answer {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: 420px;
+  overflow-y: auto;
+  border-bottom: 1px solid var(--page-line);
+}
+
+body[data-os="android"][data-mode="lookup"] {
+  height: 100dvh;
+}
+
+body[data-os="android"][data-mode="lookup"] .popup-lookup-answer {
+  max-height: none;
+}
+
+/* The word and the books' lines in the reading face, as on the
+   saved-phrases page: the same answer in two homes should read alike. */
+.popup-lookup-answer .lookup-phrase,
+.popup-lookup-answer .lookup-line-text {
+  font-family: var(--reader-font-lead, var(--reader-font-stack));
+}
+
+/* The door under the answer is the results mode's one act, and it stands
+   after a long entry: a framed button, not a row - a bare line there read
+   as a caption, the launcher's own lesson (D182). The frame is the pages'
+   default button; the room above keeps it off the answer's line. */
+.popup-lookup-door {
+  display: inline-flex;
+  flex: none;
+  align-self: flex-start;
+  align-items: center;
+  min-height: 44px;
+  margin: 0.5rem 0 0.4rem;
+  padding: 0.35rem 1rem;
 }
 
 /* Buttons as rows: the popup is a list, and a list of pills would shout. The

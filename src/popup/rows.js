@@ -21,8 +21,8 @@
  *   device with no model at all
  * @property {boolean} translationNote the line that says why nothing
  *   translates, in the same place
+ * @property {boolean} lookup the look-up field (D197)
  * @property {boolean} vocabulary the door to the saved phrases
- * @property {boolean} quiet the folded-bubble switch
  * @property {boolean} readerOnly the reader-only switch
  * @property {boolean} translation the translation-off switch itself
  */
@@ -46,12 +46,15 @@ export function popupRows({ translationOff, bubbleOff, fresh, pair }) {
     pair: translationOff ? pair : !fresh,
     setup: !translationOff && fresh,
     translationNote: translationOff,
+    lookup: lookupRowStands({ pair }),
     // The saved phrases live wherever a pair is chosen - the quiet
     // vocabulary writes them without the engine (D158/D162) - so their door
     // goes only when there is truly nothing behind it.
     vocabulary: !translationOff || pair,
-    // The bubble's fold means nothing when the trimmed bubble never folds.
-    quiet: !translationOff,
+    // The folded-bubble switch (D81) stood here from D128 to D197; it is set
+    // once and left, and the popup keeps what is flipped often (Michał's
+    // call after the first smoke of the look-up field, 2026-09-11) - the
+    // settings page keeps it.
     // Reader-only keeps its say under the trim now (D162): with a pair the
     // ordinary pages read again, and this is the switch that decides. It
     // still goes when every page is a launcher (no pair) or left alone
@@ -79,4 +82,21 @@ export function popupRows({ translationOff, bubbleOff, fresh, pair }) {
  */
 export function siteRowStands({ translationOff, bubbleOff }) {
   return !(translationOff && bubbleOff);
+}
+
+/**
+ * Whether the look-up field stands (D197): wherever a pair is chosen, models
+ * or not - the field asks the dictionaries in the pair's language and files
+ * the phrase under the pair, and neither needs the engine (the trim changes
+ * nothing here). Without a pair there is no language to ask in and nowhere
+ * to file, and the signpost to the settings already says what to do first.
+ * Its own rule for the site row's reason (D194): the settings alone decide
+ * it, so the popup settles the row before the models are read and nothing
+ * below it moves.
+ *
+ * @param {{ pair: boolean }} settings whether a language pair is chosen
+ * @returns {boolean}
+ */
+export function lookupRowStands({ pair }) {
+  return pair;
 }

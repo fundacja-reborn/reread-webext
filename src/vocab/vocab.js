@@ -22,12 +22,15 @@
 
 import { applyReading } from "../lib/appearance.js";
 import { webext } from "../lib/browser.js";
+import { clearableField } from "../lib/clear-field.js";
 import { CONFIG_KEY, SIZE, TTS_RATE, chosenPair, isFont, isTheme, readConfig, writeConfig } from "../lib/config.js";
 import { holdChrome } from "../lib/chrome-hold.js";
 import { fileSize, localizePage, plural, t, uiLocale } from "../lib/i18n.js";
 import { privateNote } from "../lib/private-note.js";
 import { pairLabel } from "../lib/language.js";
+import { mountLookupBox } from "../lib/lookup-box.js";
 import { describeError } from "../lib/messages.js";
+import { speakerIcon } from "../lib/speaker-icon.js";
 import { armBackArrow } from "../lib/back-arrow.js";
 import { ErrorCode, Message, asResult, fail } from "../lib/protocol.js";
 import { BACK_ROAD_KEY, writeVocabTab } from "../lib/session.js";
@@ -46,6 +49,7 @@ import {
   stop as stopSpeaking,
   voicesFor,
 } from "../lib/tts.js";
+import { filterActive } from "../options/models-view.js";
 import { listView, markSegments, newestFirst, pairChoicesFor } from "./list-view.js";
 
 // First, so the static text is already the catalogue's language when it shows.
@@ -98,6 +102,9 @@ const importRun = /** @type {HTMLButtonElement | null} */ (document.getElementBy
 const importCancel = /** @type {HTMLButtonElement | null} */ (document.getElementById("import-cancel"));
 const transferLine = document.getElementById("transfer-status");
 const filterInput = /** @type {HTMLInputElement | null} */ (document.getElementById("filter"));
+const filterStatus = document.getElementById("filter-status");
+const addFold = /** @type {HTMLDetailsElement | null} */ (document.getElementById("add-phrase"));
+const lookupHost = document.getElementById("lookup-box");
 const listContainer = document.getElementById("list");
 const statusLine = document.getElementById("status");
 const pager = document.getElementById("pager");
@@ -176,38 +183,6 @@ function button(label) {
   node.type = "button";
   node.textContent = label;
   return node;
-}
-
-/**
- * The speaker, the bubble's own drawing (`speakerIcon` in
- * `content/tooltip.js`) by the same DOM calls: `currentColor` hands the icon
- * the quiet button's text color, so its resting, hover and focus states are
- * already handled by the button's own rules.
- *
- * @returns {SVGSVGElement}
- */
-function speakerIcon() {
-  const NS = "http://www.w3.org/2000/svg";
-  const svg = document.createElementNS(NS, "svg");
-  svg.setAttribute("viewBox", "0 0 24 24");
-  // Decoration to assistive tech - the button's aria-label carries the words.
-  svg.setAttribute("aria-hidden", "true");
-
-  const body = document.createElementNS(NS, "path");
-  body.setAttribute("d", "M4 9.5v5h3.2L12 18.6V5.4L7.2 9.5H4z");
-  body.setAttribute("fill", "currentColor");
-  svg.append(body);
-
-  for (const arc of ["M15 9.2a4.4 4.4 0 0 1 0 5.6", "M17.6 6.8a8 8 0 0 1 0 10.4"]) {
-    const wave = document.createElementNS(NS, "path");
-    wave.setAttribute("d", arc);
-    wave.setAttribute("fill", "none");
-    wave.setAttribute("stroke", "currentColor");
-    wave.setAttribute("stroke-width", "1.8");
-    wave.setAttribute("stroke-linecap", "round");
-    svg.append(wave);
-  }
-  return svg;
 }
 
 /**
@@ -396,9 +371,16 @@ async function reload() {
     adoptConfig(fresh);
     const chosen = chosenPair(fresh);
     const pair = chosen === null ? "" : `${chosen.from}${chosen.to}`;
+    // The fold for a phrase added by hand (D197) stands wherever there is a
+    // pair to file it under - the same condition the popup's row keeps.
+    if (addFold !== null) addFold.hidden = chosen === null;
     // A different pair is a different list, and page 7 of the old one means
-    // nothing on it.
+    // nothing on it - and the look-up field's answer was in the old pair's
+    // language. Only a pair *changed*: the first draw has no old pair, and a
+    // reset there emptied the field the address had just filled (Michał's
+    // screenshot, 2026-09-11).
     if (pair !== shownPair) {
+      if (shownPair !== "") lookupBox?.reset();
       shownPair = pair;
       page = 1;
     }
@@ -482,8 +464,10 @@ function renderList() {
   const view = listView(phrases, { query, page });
   page = view.page;
   // The counter follows every repaint of the list, so a keystroke in the
-  // filter and a phrase learned on another tab both keep it true.
+  // filter and a phrase learned on another tab both keep it true - and so
+  // does the filter's state over the list.
   renderCount(view.matching);
+  renderFilterStatus(view.matching);
 
   // A re-render can land mid-keystroke (a save on another tab rebuilds the
   // mirror); the draft survives as state, and the keyboard should too.
@@ -493,10 +477,11 @@ function renderList() {
 
   listContainer.replaceChildren();
 
+  // A filter that matches nothing leaves the list empty under the state
+  // line, which already says "0 of 827 phrases for ..." and offers the way
+  // out: a second sentence about it here would be the same thing twice.
   if (phrases.length === 0) {
     listContainer.append(element("p", "empty", t("vocab_empty", t("bubble_save"))));
-  } else if (view.matching === 0) {
-    listContainer.append(noMatch());
   } else {
     for (const phrase of view.rows) listContainer.append(phraseRow(phrase));
   }
@@ -546,27 +531,47 @@ function fillHighlighted(node, text) {
 }
 
 /**
- * The filter came up empty: the sentence quotes the query, and the one move
- * that helps stands under it. Clearing hands focus back to the filter, ready
- * for a second try.
+ * The filter's state over the list it narrows: "1 of 827 phrases for
+ * "news"" in the counter's own voice, with "Clear filter" beside it -
+ * right where the rows are, because the filter box at the top of the page
+ * is off the screen by the time the list is read, and "Show in list" in
+ * the fold fills that box unseen. Only while the filter asks anything;
+ * otherwise hidden and out of the flow, so nothing under it moves.
  *
- * @returns {HTMLElement}
+ * @param {number} matching how many rows the filter keeps
  */
-function noMatch() {
-  const wrap = element("div", "empty no-match");
-  wrap.append(element("p", "no-match-text", t("vocab_filter_no_match", query)));
-
+function renderFilterStatus(matching) {
+  if (filterStatus === null) return;
+  const asking = filterActive(query);
+  filterStatus.hidden = !asking;
+  filterStatus.replaceChildren();
+  if (!asking) return;
+  // The plural family runs over the total, as the counter's does; the
+  // matching count and the query ride along as $2 and $3.
+  filterStatus.append(
+    element("span", "filter-status-text", plural(phrases.length, "vocab_filter_status", [matching.toLocaleString(), query.trim()])),
+  );
+  const dot = element("span", "filter-status-dot", String.fromCodePoint(0x00b7));
+  dot.setAttribute("aria-hidden", "true");
   const clear = button(t("vocab_filter_clear"));
-  clear.addEventListener("click", () => {
-    query = "";
-    if (filterInput !== null) {
-      filterInput.value = "";
-      filterInput.focus();
-    }
-    renderList();
-  });
-  wrap.append(clear);
-  return wrap;
+  clear.className = "quiet quiet-clear";
+  clear.addEventListener("click", () => clearFilter());
+  filterStatus.append(dot, clear);
+}
+
+/**
+ * The filter emptied from the state line: the whole list is back on its
+ * first page, and the page stays where it was scrolled - the filter box at
+ * the top is not the place to jump to. The button pressed left with the
+ * line, so the focus lands on the list itself, where the eye is.
+ */
+function clearFilter() {
+  query = "";
+  page = 1;
+  if (filterInput !== null) filterInput.value = "";
+  filterClear?.refresh();
+  renderList();
+  listContainer?.focus({ preventScroll: true });
 }
 
 /**
@@ -934,16 +939,121 @@ async function runImport() {
 // true: it is read only by a settings page that arrives in this tab, and
 // one that arrives here always has this page behind it. A background
 // mid-restart answers nothing; then the walk is made here, as it was.
-function goToSettings() {
+/**
+ * @param {import("../lib/protocol.js").SettingsSection} [section] where on
+ *   the settings page to land (D192): the look-up field's "settings" word
+ *   opens them at the dictionaries
+ */
+function goToSettings(section) {
   try {
     sessionStorage.setItem(BACK_ROAD_KEY, "vocab");
   } catch {
     // The arrow is an enhancement; the walk works without it.
   }
+  const landing = section === undefined ? "" : `#${section}`;
   void webext()
-    .runtime.sendMessage({ kind: Message.OPEN_SETTINGS })
-    .catch(() => location.assign(webext().runtime.getURL("options/options.html")));
+    .runtime.sendMessage(
+      section === undefined
+        ? { kind: Message.OPEN_SETTINGS }
+        : { kind: Message.OPEN_SETTINGS, section },
+    )
+    .catch(() => location.assign(webext().runtime.getURL(`options/options.html${landing}`)));
 }
+
+/**
+ * "Show in list" under the field's answer: the saved phrase's own row
+ * brought into view, where Edit and Learned are. The filter is set to the
+ * phrase - which also walks past the pages, so a phrase on page three is on
+ * page one of the narrowed list - and the page is scrolled to the filter's
+ * state line over the list, so that the sentence about the filter and the
+ * phrase's row are on the screen together, with the way out of the filter
+ * under the keyboard's focus: Enter undoes the side effect at once. The
+ * fold stays open above. No smooth scrolling: on e-ink an animated scroll
+ * is a run of flashes.
+ *
+ * @param {{ text: string, normalized: string }} phrase
+ */
+function showInList(phrase) {
+  query = phrase.text;
+  page = 1;
+  if (filterInput !== null) filterInput.value = phrase.text;
+  filterClear?.refresh();
+  renderList();
+  if (filterStatus === null) return;
+  filterStatus.scrollIntoView({ block: "start" });
+  const clear = filterStatus.querySelector("button");
+  if (clear instanceof HTMLButtonElement) clear.focus({ preventScroll: true });
+}
+
+/**
+ * The look-up field (D197) behind the "Add a phrase" fold: the background
+ * asked the way the rows ask it, the phrase's standing read off the list
+ * this page already holds (fresh through the mirror, like the rows), the
+ * pair's voice for its speaker, and the list under the fold as the place
+ * "Show in list" points at. The fold opening puts the caret in the field:
+ * opening it is what somebody does to type.
+ */
+const lookupBox =
+  lookupHost === null
+    ? null
+    : mountLookupBox(
+        { form: lookupHost, answer: lookupHost },
+        {
+          ask,
+          savedMeanings: (normalized) =>
+            Promise.resolve(phrases.find((one) => one.normalized === normalized)?.translations ?? []),
+          openDictionaries: () => goToSettings("dictionaries"),
+          showInList,
+          voice: () => {
+            const lang = config?.sourceLang ?? null;
+            if (config === null || lang === null) return null;
+            return {
+              lang,
+              voiceURI: config.ttsVoices[primaryLanguage(lang)],
+              rate: config.ttsRate / 100,
+            };
+          },
+        },
+      );
+
+addFold?.addEventListener("toggle", () => {
+  if (addFold.open) lookupBox?.focus();
+});
+
+/**
+ * A phrase handed over in the address (D197): the popup's look-up field
+ * only reads, and its door opens this page with `#lookup=<phrase>` - on a
+ * fresh tab as the page loads, on an open one as the tab is turned to the
+ * fragment (`hashchange`, the same document). The fold opens, the field is
+ * asked, and the fragment is taken off the address: a reload should show
+ * the list, not ask the word again. The phrase arrives as typed, encoded by
+ * the background; anything that is not that shape is no phrase.
+ */
+function arriveWithPhrase() {
+  const match = /^#lookup=(.*)$/.exec(location.hash);
+  if (match === null) return;
+  /** @type {string} */
+  let text;
+  try {
+    text = decodeURIComponent(String(match[1]));
+  } catch {
+    return;
+  }
+  history.replaceState(history.state, "", location.pathname + location.search);
+  if (text.trim().length === 0 || addFold === null || lookupBox === null) return;
+  // The list narrowed to the phrase as well (the fourth brief): the row
+  // the ticks below make - or the one that is there - stands right under
+  // the panel, and the state line over the list says which filter is on.
+  query = text;
+  page = 1;
+  if (filterInput !== null) filterInput.value = text;
+  filterClear?.refresh();
+  renderList();
+  addFold.open = true;
+  void lookupBox.search(text);
+}
+
+window.addEventListener("hashchange", arriveWithPhrase);
 
 brandButton?.addEventListener("click", () => goToSettings());
 
@@ -1129,6 +1239,24 @@ filterInput?.addEventListener("input", () => {
   renderList();
 });
 
+/**
+ * The filter's cross, the look-up field's own (`clear-field.js`): a press
+ * empties the filter, puts the whole list back on page one and keeps the
+ * caret in the filter for the next word - the same effect as "Clear
+ * filter" in the state line over the list, from the field itself.
+ */
+const filterClear =
+  filterInput === null
+    ? null
+    : clearableField(filterInput, {
+        label: t("vocab_filter_clear"),
+        onClear: () => {
+          query = "";
+          page = 1;
+          renderList();
+        },
+      });
+
 prevButton?.addEventListener("click", () => {
   page -= 1;
   renderList();
@@ -1167,4 +1295,7 @@ webext().storage.onChanged.addListener((changes, area) => {
 const intro = t("vocab_intro", [t("bubble_learned"), t("bubble_edit")]);
 if (introLine !== null && intro.length > 0) introLine.textContent = intro;
 
-void reload();
+// The phrase the address brought is looked up once the list is in: the
+// field reads the phrase's standing off that list, and asked before the
+// first draw it read an empty one.
+void reload().then(arriveWithPhrase);

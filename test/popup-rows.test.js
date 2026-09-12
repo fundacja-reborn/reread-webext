@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { popupRows, siteRowStands } from "../src/popup/rows.js";
+import { lookupRowStands, popupRows, siteRowStands } from "../src/popup/rows.js";
 
 /** @param {Partial<Parameters<typeof popupRows>[0]>} [state] */
 const rows = (state = {}) =>
@@ -16,6 +16,27 @@ describe("the site switch's own rule (D194)", () => {
         // The popup decides this row before it knows the rest (the models,
         // the pair): the two answers must never disagree.
         assert.equal(rows({ translationOff, bubbleOff, fresh: true, pair: false }).site, stands);
+      }
+    }
+  });
+});
+
+describe("the look-up field's own rule (D197)", () => {
+  it("stands wherever a pair is chosen, models or not, and agrees with the rows", () => {
+    // The field asks the dictionaries in the pair's language and files the
+    // phrase under the pair; the engine has no say, so neither does the
+    // trim or a device with no model. Without a pair there is nowhere to
+    // file - the signpost stands in the pair's place instead.
+    for (const translationOff of [false, true]) {
+      for (const bubbleOff of [false, true]) {
+        for (const fresh of [false, true]) {
+          for (const pair of [false, true]) {
+            assert.equal(lookupRowStands({ pair }), pair);
+            // Decided before the popup knows the rest (D194): the two
+            // answers must never disagree.
+            assert.equal(popupRows({ translationOff, bubbleOff, fresh, pair }).lookup, pair);
+          }
+        }
       }
     }
   });
@@ -40,8 +61,13 @@ describe("the popup's rows", () => {
     assert.equal(shown.pair, false);
     assert.equal(shown.setup, false);
     assert.equal(shown.vocabulary, false);
-    assert.equal(shown.quiet, false);
     assert.equal(shown.readerOnly, false);
+  });
+
+  it("has no folded-bubble switch any more (D197)", () => {
+    // Set once and left: the settings page keeps it, and the popup keeps
+    // what is flipped often (Michał's call, 2026-09-11).
+    assert.equal("quiet" in rows(), false);
   });
 
   it("keeps the pair select under the trim with a pair, models or not (D165)", () => {
@@ -57,12 +83,10 @@ describe("the popup's rows", () => {
   it("keeps the quiet vocabulary's rows under the trim with a pair (D162)", () => {
     // The switch turns off the model, not the bubble: with a pair the saved
     // phrases live and the ordinary pages read again, so their door and the
-    // reader-only switch stand. The fold stays away - the trimmed bubble
-    // never folds (D131).
+    // reader-only switch stand.
     const shown = rows({ translationOff: true });
     assert.equal(shown.vocabulary, true);
     assert.equal(shown.readerOnly, true);
-    assert.equal(shown.quiet, false);
     // The no-bubble sub-option leaves every ordinary page alone, and a
     // reader-only switch over pages already left alone chooses nothing.
     assert.equal(rows({ translationOff: true, bubbleOff: true }).readerOnly, false);

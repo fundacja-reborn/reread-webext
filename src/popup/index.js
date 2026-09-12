@@ -1,10 +1,10 @@
 /**
  * The toolbar popup: the basic acts on top, the door to the settings at the
  * bottom, in the place every user already looks for them. Whether re/read
- * runs on this site, this page in the reader, which pair is being read, the
- * extension's own rooms, then the three reading preferences somebody flips
- * mid-article - the bubble's fold (D81), reader-only mode (D111) and
- * translation itself (D128) - the settings, and nothing else.
+ * runs on this site, this page in the reader, which pair is being read, a
+ * word to look up (D197), the extension's own rooms, then the two reading
+ * preferences somebody flips depending on what is read - reader-only mode
+ * (D111) and translation itself (D128) - the settings, and nothing else.
  *
  * The order is the popup's one rule: from what is pressed daily down to what
  * is flipped seldom. Which rows stand at all is `rows.js`, because a fresh
@@ -31,14 +31,17 @@ import { webext } from "../lib/browser.js";
 import { chosenPair, effectiveReaderOnly, platformOs, readConfig, writeConfig } from "../lib/config.js";
 import { localizePage, t } from "../lib/i18n.js";
 import { pairLabel } from "../lib/language.js";
+import { mountLookupBox } from "../lib/lookup-box.js";
 import { isSwitchedOff, sameSite, siteOf } from "../lib/site.js";
 import { dresser } from "../lib/user-css.js";
 import { listDictionaries } from "../lib/dict/store.js";
 import { listModels } from "../lib/models/store.js";
-import { Message, asPageInfo, asResult } from "../lib/protocol.js";
+import { ErrorCode, Message, asPageInfo, asResult, fail } from "../lib/protocol.js";
+import { MIRROR_KEY, asMirror, mirrorMatches } from "../lib/store/mirror.js";
 import { watchToolbarScheme } from "../lib/theme-icon.js";
+import { primaryLanguage, setSpeechOff } from "../lib/tts.js";
 import { pairChoices } from "./choices.js";
-import { popupRows, siteRowStands } from "./rows.js";
+import { lookupRowStands, popupRows, siteRowStands } from "./rows.js";
 
 // First, so the rows are already in the catalogue's language when they show.
 localizePage();
@@ -56,11 +59,15 @@ const siteRow = document.getElementById("site-row");
 const siteLabel = document.getElementById("site-label");
 const siteNote = document.getElementById("site-note");
 const siteToggle = /** @type {HTMLInputElement | null} */ (document.getElementById("site-toggle"));
-const quietToggle = /** @type {HTMLInputElement | null} */ (document.getElementById("quiet-bubble"));
 const pairRow = document.getElementById("pair-row");
 const setupRow = document.getElementById("setup-row");
 const pairSelect = /** @type {HTMLSelectElement | null} */ (document.getElementById("pair"));
 const readerButton = document.getElementById("open-reader");
+const lookupHead = document.getElementById("lookup-head");
+const lookupForm = document.getElementById("lookup-form");
+const lookupAnswer = document.getElementById("lookup-answer");
+const lookupBack = document.getElementById("lookup-back");
+const lookupDoor = document.getElementById("lookup-door");
 const libraryButton = document.getElementById("open-library");
 const marksButton = document.getElementById("open-marks");
 const vocabularyButton = document.getElementById("open-vocabulary");
@@ -93,6 +100,132 @@ let siteStands = true;
 
 /** @type {import("./choices.js").PairChoice[]} */
 let choices = [];
+
+/**
+ * The settings as last read, for the look-up field: which language it reads
+ * aloud in and which pair's copy of the vocabulary it consults. Written by
+ * every read and write the popup makes, so the field never asks storage for
+ * what the popup already knows.
+ *
+ * @type {import("../lib/config.js").Config | null}
+ */
+let settings = null;
+
+/**
+ * @param {import("../lib/protocol.js").Request} request
+ * @returns {Promise<import("../lib/protocol.js").Result<unknown>>}
+ */
+async function ask(request) {
+  try {
+    return asResult(await webext().runtime.sendMessage(request));
+  } catch {
+    // The background was mid-restart. The press can be repeated.
+    return fail(ErrorCode.INTERNAL);
+  }
+}
+
+/**
+ * What a phrase means now, from the copy of the vocabulary the pages read
+ * (`mirror.js`): one storage read, no background woken - the same copy every
+ * page consults before it underlines anything. A copy of another pair, or
+ * none, answers "not saved", which is the truth about this pair.
+ *
+ * @param {string} normalized
+ * @returns {Promise<string[]>}
+ */
+async function savedMeanings(normalized) {
+  if (settings === null) return [];
+  const stored = await webext().storage.local.get(MIRROR_KEY);
+  const mirror = asMirror(stored[MIRROR_KEY]);
+  if (mirror === null || !mirrorMatches(mirror, settings)) return [];
+  return mirror.entries.find(([key]) => key === normalized)?.[1] ?? [];
+}
+
+/**
+ * The phrase the look-up field is showing, for the door under the answer:
+ * the saved-phrases page opens with it already looked up.
+ *
+ * @type {{ text: string, normalized: string } | null}
+ */
+let lookedUp = null;
+
+/**
+ * The popup in its results mode or back in its hallway (D197): once the
+ * field has answered, every other row leaves and the answer takes the popup
+ * under the stuck field - the rows below a long entry meant nothing while it
+ * was read, and the popup scrolled as one. The stylesheet reads the mode
+ * off the body; the arrow in the field's row brings the hallway back, the
+ * word kept in the field.
+ *
+ * @param {boolean} results
+ */
+function showResults(results) {
+  if (results) document.body.dataset["mode"] = "lookup";
+  else delete document.body.dataset["mode"];
+}
+
+/**
+ * What the field is showing, landed in the popup's own two pieces: the mode,
+ * and the door to the saved-phrases page under the answer - "Add to saved
+ * phrases" for a phrase not saved yet, "Open in saved phrases" for one that
+ * is - shown once the dictionaries have answered.
+ *
+ * @param {import("../lib/lookup-box.js").LookupState} state
+ */
+function onLookupState(state) {
+  lookedUp = state.phrase;
+  // An answer turns the popup into its results mode; the answer taken down
+  // (the field emptied by its own "x") brings the hallway back.
+  showResults(state.phrase !== null);
+  if (lookupDoor === null) return;
+  lookupDoor.hidden = state.phrase === null || state.pending;
+  lookupDoor.textContent = state.saved ? t("popup_lookup_open") : t("popup_lookup_add");
+}
+
+/**
+ * The look-up field (D197), built before anything is awaited so it stands
+ * in the first frame with the rest of the rows. The word "settings" in its
+ * line about a missing dictionary opens the settings at the dictionaries,
+ * the bubble's own door (D192), and closes the popup the way every room's
+ * row does. Read-only here (`readOnly`): the field's one act is the door
+ * below it, to the page where a press on a meaning saves.
+ */
+const lookupBox =
+  lookupForm === null || lookupAnswer === null
+    ? null
+    : mountLookupBox(
+        { form: lookupForm, answer: lookupAnswer },
+        {
+          ask,
+          savedMeanings,
+          openDictionaries: () => {
+            void ask({ kind: Message.OPEN_SETTINGS, section: "dictionaries" });
+            window.close();
+          },
+          voice: () => {
+            const lang = settings?.sourceLang ?? null;
+            if (settings === null || lang === null) return null;
+            return {
+              lang,
+              voiceURI: settings.ttsVoices[primaryLanguage(lang)],
+              rate: settings.ttsRate / 100,
+            };
+          },
+        },
+        { readOnly: true, onState: onLookupState },
+      );
+
+/**
+ * The door under the answer: the saved-phrases page, one tab like every room
+ * (`open-vocabulary`), with the phrase riding along to be looked up in its
+ * "Add a phrase" fold on arrival - where a press on a meaning saves and the
+ * list under the fold shows it.
+ */
+async function openVocabularyWith() {
+  if (lookedUp === null) return;
+  await ask({ kind: Message.OPEN_VOCABULARY, text: lookedUp.text });
+  window.close();
+}
 
 // The site row stands from the first paint (D194), its host still to come:
 // the label says the host is being asked, the switch waits disabled (see the
@@ -190,13 +323,6 @@ async function toggleSite() {
   await writeConfig({ disabledHosts: hosts });
 }
 
-async function toggleQuietBubble() {
-  if (quietToggle === null) return;
-  // The same write the settings page makes; every open page's bubble follows
-  // through `storage.onChanged`, next selection onwards.
-  await writeConfig({ hideBubbleActions: quietToggle.checked });
-}
-
 async function toggleTranslationOff() {
   if (translationToggle === null) return;
   // The settings page's own write, and then the popup redraws itself: this is
@@ -207,6 +333,7 @@ async function toggleTranslationOff() {
   // `storage.onChanged`, launcher or reading side, no reload.
   await writeConfig({ translationOff: translationToggle.checked });
   const config = await readConfig();
+  settings = config;
   const installed = await installedModels();
   showRows(config, installed.length);
   // The select's offer changes with the mode too (D165): under the trim the
@@ -232,7 +359,10 @@ async function choosePair() {
   // The same write the settings page makes: every open page notices through
   // `storage.onChanged` and asks the background for the vocabulary of the new
   // pair, so nothing here has to tell them.
-  await writeConfig({ sourceLang: choice.from, targetLang: choice.to });
+  settings = await writeConfig({ sourceLang: choice.from, targetLang: choice.to });
+  // The look-up field's answer was in the old pair's language.
+  lookupBox?.reset();
+  showResults(false);
 }
 
 async function openReader() {
@@ -304,7 +434,10 @@ async function openSupport() {
 }
 
 siteToggle?.addEventListener("change", () => void toggleSite());
-quietToggle?.addEventListener("change", () => void toggleQuietBubble());
+// The arrow in the field's row: the hallway back, the word and its answer
+// kept for the next press of the field's button.
+lookupBack?.addEventListener("click", () => showResults(false));
+lookupDoor?.addEventListener("click", () => void openVocabularyWith());
 readerOnlyToggle?.addEventListener("change", () => void toggleReaderOnly());
 translationToggle?.addEventListener("change", () => void toggleTranslationOff());
 pairSelect?.addEventListener("change", () => void choosePair());
@@ -360,8 +493,8 @@ function showRows(config, installed) {
   stand(pairRow, rows.pair);
   stand(setupRow, rows.setup);
   stand(document.getElementById("translation-off-note"), rows.translationNote);
+  stand(lookupHead, rows.lookup);
   stand(vocabularyButton, rows.vocabulary);
-  stand(document.getElementById("quiet-row"), rows.quiet);
   stand(document.getElementById("reader-only-row"), rows.readerOnly);
   stand(document.getElementById("no-translation-row"), rows.translation);
 }
@@ -407,7 +540,15 @@ async function render() {
   // late answer moves nothing - it fills the row in.
   const [tabId, config, os] = await Promise.all([currentTabId(), readConfig(), platformOs()]);
   over.tabId = tabId;
+  settings = config;
   const page = askPage(tabId);
+
+  // The look-up row is the settings' alone to decide (D197, the site row's
+  // rule): settled here, before the models are read, so it never arrives
+  // late under a cursor. The reading-aloud switch (D148) reaches its speaker
+  // the way it reaches every page's: one gate, set from the settings.
+  setSpeechOff(config.ttsOff);
+  stand(lookupHead, lookupRowStands({ pair: chosenPair(config) !== null }));
 
   // The stylesheet reads the platform off the body: on Android the popup is a
   // page over the whole window and fills it, on desktop it is a panel that
@@ -418,7 +559,6 @@ async function render() {
   // (the settings page's rule): with nothing chosen, the box reflects the
   // platform's default - on this Android popup it opens checked.
   if (readerOnlyToggle !== null) readerOnlyToggle.checked = effectiveReaderOnly(config, os);
-  if (quietToggle !== null) quietToggle.checked = config.hideBubbleActions;
   if (translationToggle !== null) translationToggle.checked = config.translationOff;
   // The settings alone say whether the site switch may stand (D149): decided
   // here, before the page answers, so the row it takes away goes at once.
