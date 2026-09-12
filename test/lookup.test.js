@@ -110,26 +110,82 @@ describe("entryGroups", () => {
         { dictionary: "WikDict en-pl", headword: "watches", senses: ["zegarki"] },
       ],
       "watches",
+      "en",
     );
     assert.deepEqual(groups, [
       {
         dictionary: "WikDict en-pl",
         entries: [
-          { headword: "watch", lines: ["zegarek", "oglądać"] },
-          { headword: "", lines: ["zegarki"] },
+          {
+            headword: "watch",
+            rows: [
+              { kind: "meaning", text: "zegarek" },
+              { kind: "meaning", text: "oglądać" },
+            ],
+          },
+          { headword: "", rows: [{ kind: "meaning", text: "zegarki" }] },
         ],
         lines: ["zegarek", "oglądać", "zegarki"],
+        about: [],
       },
       {
         dictionary: "reader.dict",
-        entries: [{ headword: "watch", lines: ["A timepiece.", "To observe."] }],
+        entries: [
+          {
+            headword: "watch",
+            rows: [
+              { kind: "meaning", text: "A timepiece." },
+              { kind: "meaning", text: "To observe." },
+            ],
+          },
+        ],
         lines: ["A timepiece.", "To observe."],
+        about: [],
       },
     ]);
   });
 
+  it("tells the rows apart: the meanings counted, the labels kept in place, the rest gathered for More about the word", () => {
+    // WikDict en-pl "news" and reader.dict "news", as the import stores
+    // them (the panel's second round).
+    const [wikdict, reader] = entryGroups(
+      [
+        {
+          dictionary: "FreeDict+WikDict (en-pl)",
+          headword: "news",
+          senses: ["noun\n\nnew information of interest\n\naktualności\n\nwiadomość\n\n/n(j)udʒ/, /njuːz/, /[ɲus]/"],
+        },
+        {
+          dictionary: "reader.dict EN",
+          headword: "news",
+          senses: [
+            "Noun\n\nNew information of interest.\nSynonym: word\n\nVerb\n\n(transitive, archaic) To report; to make known.\n\nFrom Middle English newes.",
+          ],
+        },
+      ],
+      "news",
+      "en",
+    );
+    assert.deepEqual(wikdict?.lines, ["new information of interest", "aktualności", "wiadomość"]);
+    assert.deepEqual(wikdict?.about, ["/n(j)udʒ/, /njuːz/, /[ɲus]/"]);
+    assert.deepEqual(
+      wikdict?.entries[0]?.rows.map((row) => row.kind),
+      ["heading", "meaning", "meaning", "meaning", "pronunciation"],
+    );
+    assert.deepEqual(reader?.lines, [
+      "New information of interest.",
+      "(transitive, archaic) To report; to make known.",
+      "From Middle English newes.",
+    ]);
+    assert.deepEqual(reader?.about, ["Synonym: word"]);
+    assert.deepEqual(
+      reader?.entries[0]?.rows.map((row) => row.kind),
+      ["heading", "meaning", "reference", "heading", "meaning", "meaning"],
+    );
+  });
+
   it("names a lone book too - the name is the fold's own words", () => {
-    const [group] = entryGroups([{ dictionary: "WikDict en-pl", headword: "watch", senses: ["zegarek"] }], "watch");
+    const [group] = entryGroups([{ dictionary: "WikDict en-pl", headword: "watch", senses: ["zegarek"] }], "watch", "en");
     assert.equal(group?.dictionary, "WikDict en-pl");
     assert.equal(group?.entries[0]?.headword, "");
   });

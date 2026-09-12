@@ -112,6 +112,7 @@
   },
   "lookup_own": { "message": "Власні" },
   "lookup_own_placeholder": { "message": "Впишіть власне значення" },
+  "lookup_more_about": { "message": "Більше про слово" },
   "lookup_show_all": {
     "message": "Показати всі ($COUNT$)",
     "placeholders": {

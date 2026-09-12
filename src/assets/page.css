@@ -960,6 +960,44 @@ button.lookup-show {
   color: var(--page-muted);
 }
 
+/* A part of speech or a section's name over the meanings after it (the
+   panel's second round): the book's own small uppercase label a step
+   smaller, no line of its own, no box - nothing to tick. Set at the rows'
+   text inset so it reads as the heading of the rows under it. */
+.lookup-entry-heading {
+  padding: 0.5rem 0.35rem 0.1rem calc(0.35rem + var(--lookup-box-size, 20px) + var(--lookup-line-gap, 12px));
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--page-muted);
+}
+
+/* "More about the word" at the end of a book: the transcriptions and the
+   cross-references the book wrote between its meanings, folded and closed
+   until asked. The fold's line wears the "Show all" button's dress at the
+   rows' text inset, without the browser's marker; the lines inside are
+   plain text, one paragraph each, at the same inset. */
+.lookup-about-label {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 0.35rem 0 calc(0.35rem + var(--lookup-box-size, 20px) + var(--lookup-line-gap, 12px));
+  font-size: 0.85rem;
+  color: var(--page-accent);
+  text-decoration: underline;
+  list-style: none;
+  cursor: pointer;
+}
+
+.lookup-about-label::-webkit-details-marker {
+  display: none;
+}
+
+.lookup-about .lookup-paragraph {
+  padding: 0.2rem 0.35rem 0.2rem calc(0.35rem + var(--lookup-box-size, 20px) + var(--lookup-line-gap, 12px));
+  color: var(--page-muted);
+}
+
 /* The button after the rest of a long book's lines - "Show all (N)" over
    the hidden block, "Show fewer" over the shown one - the book's last child
    either way (block 3 of the polish round). It reads like the

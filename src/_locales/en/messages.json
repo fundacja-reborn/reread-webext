@@ -195,6 +195,10 @@
     "message": "Write your own meaning",
     "description": "Placeholder and accessible name of the field under \"Your own\": one meaning, kept with Enter or the Save button beside it."
   },
+  "lookup_more_about": {
+    "message": "More about the word",
+    "description": "The fold at the end of a dictionary's group in the look-up answer, closed by default: the transcriptions and cross-references the dictionary wrote between its meanings, which are nothing to tick."
+  },
   "lookup_show_all": {
     "message": "Show all ($COUNT$)",
     "description": "The fold under a dictionary's first lines in the look-up answer, closed: the rest of the lines stand behind it, and the count is all the lines the dictionary has for the word.",

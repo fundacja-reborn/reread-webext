@@ -12,6 +12,7 @@
  * database: shapes come in, decisions go out, and `lookup-box.js` draws them.
  */
 
+import { classifyLine } from "./dict/line-classifier.js";
 import { MEANING_SEPARATOR, afterChoosing, entryBlocks, quietNote, toMeanings } from "./gloss.js";
 import { collapseWhitespace, normalize, trimPhrase } from "./normalize.js";
 import { MAX_PHRASE_LENGTH } from "./store/phrase.js";
@@ -104,23 +105,35 @@ export function lookupOutcome(answer, normalized) {
 }
 
 /**
+ * A line of an entry with what it is (`dict/line-classifier.js`): a meaning
+ * to tick, a label to stand over the meanings after it, or a transcription
+ * or cross-reference for "More about the word".
+ *
+ * @typedef {{ kind: import("./dict/line-classifier.js").LineKind, text: string }} EntryRow
+ */
+
+/**
  * The entries as one group per dictionary (block 3 of the panel's rebuild):
  * the book's name, and under it every entry it answered with - each with
  * the headword `entryBlocks` decided to name (only when it is not the word
- * typed, D23) and its lines. The order is the answer's, which is the
- * settings' order of the dictionaries; a book that answered under two
- * headwords (a word and its base form) is still one group, with the lines
- * of both counted together. The name comes from the entry itself, not from
- * the block's label, which drops it when there is one book to tell apart -
- * here every group is named, because the name is the fold's own words.
+ * typed, D23) and its rows, each row told what it is. The order is the
+ * answer's, which is the settings' order of the dictionaries; a book that
+ * answered under two headwords (a word and its base form) is still one
+ * group, with the meanings of both counted together (`lines`) and what
+ * the book says beside its meanings gathered in order (`about`). The name
+ * comes from the entry itself, not from the block's label, which drops it
+ * when there is one book to tell apart - here every group is named,
+ * because the name is the fold's own words.
  *
- * @typedef {{ dictionary: string, entries: Array<{ headword: string, lines: string[] }>, lines: string[] }} EntryGroup
+ * @typedef {{ dictionary: string, entries: Array<{ headword: string, rows: EntryRow[] }>, lines: string[], about: string[] }} EntryGroup
  *
  * @param {import("./protocol.js").DictEntry[]} entries
  * @param {string} normalized the phrase's key
+ * @param {string} lang the language the entries are written in - the
+ *   dictionaries' source, which the answer names (`LookUp.lang`)
  * @returns {EntryGroup[]}
  */
-export function entryGroups(entries, normalized) {
+export function entryGroups(entries, normalized, lang) {
   const blocks = entryBlocks(entries, normalized);
   /** @type {Map<string, EntryGroup>} */
   const groups = new Map();
@@ -129,11 +142,15 @@ export function entryGroups(entries, normalized) {
     if (block === undefined) return;
     let group = groups.get(entry.dictionary);
     if (group === undefined) {
-      group = { dictionary: entry.dictionary, entries: [], lines: [] };
+      group = { dictionary: entry.dictionary, entries: [], lines: [], about: [] };
       groups.set(entry.dictionary, group);
     }
-    group.entries.push({ headword: block.headword, lines: block.lines });
-    group.lines.push(...block.lines);
+    const rows = block.lines.map((text) => ({ kind: classifyLine(text, lang), text }));
+    group.entries.push({ headword: block.headword, rows });
+    for (const row of rows) {
+      if (row.kind === "meaning") group.lines.push(row.text);
+      else if (row.kind !== "heading") group.about.push(row.text);
+    }
   });
   return [...groups.values()];
 }

@@ -526,18 +526,52 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
           }
           continue;
         }
-        for (const line of entry.lines) {
+        // A label stands over the first meaning after it, wherever that
+        // meaning lands - open, or behind "Show all" - so a cut inside a
+        // section leaves the label with its lines; a label with no meaning
+        // after it stands over nothing and is dropped. Transcriptions and
+        // cross-references are the book's "More about the word", below.
+        /** @type {string | null} */
+        let label = null;
+        for (const row of entry.rows) {
+          if (row.kind === "heading") {
+            label = row.text;
+            continue;
+          }
+          if (row.kind !== "meaning") continue;
           const home = more !== null && index >= shown ? more.rest : book;
-          home.append(lineRow(line, `${at}:${index}`));
+          if (label !== null) {
+            home.append(element("div", "lookup-entry-heading", label));
+            label = null;
+          }
+          home.append(lineRow(row.text, `${at}:${index}`));
           index += 1;
         }
       }
-      // The rest of the lines, then the button: the book's last child, so
-      // the rows unfold above it and it stays where it is in both states.
+      // The rest of the lines, then the button: the book's last child but
+      // one, so the rows unfold above it and it stays where it is in both
+      // states; "More about the word" last of all.
       if (more !== null) book.append(more.rest, more.toggle);
+      if (!readOnly && group.about.length > 0) book.append(aboutFold(group));
       shelf.push(book);
     }
     return shelf;
+  }
+
+  /**
+   * What the book says beside its meanings - the transcriptions and the
+   * cross-references, in the order the entry had them - folded under "More
+   * about the word" at the end of the book, closed until asked: a reader
+   * ticking meanings does not need eight transcriptions between them. One
+   * line, one paragraph, plain text. Remembered like the other folds.
+   *
+   * @param {import("./lookup.js").EntryGroup} group
+   * @returns {HTMLDetailsElement}
+   */
+  function aboutFold(group) {
+    const about = fold("lookup-about", `about:${group.dictionary}`, false, element("summary", "lookup-about-label", t("lookup_more_about")));
+    for (const line of group.about) about.append(element("div", "lookup-paragraph", line));
+    return about;
   }
 
   /**
@@ -763,7 +797,9 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
     // so the space between the last book and "Your own" is the space
     // between two books (block 4 of the polish round).
     const groups =
-      state.outcome?.kind === "entries" ? entryGroups(state.outcome.entries, state.phrase.normalized) : [];
+      state.outcome?.kind === "entries"
+        ? entryGroups(state.outcome.entries, state.phrase.normalized, state.outcome.lang)
+        : [];
     const shelf = element("div", "lookup-entries");
     shelf.append(...books(groups));
     if (!readOnly && !state.pending) shelf.append(ownSection(groups.flatMap((group) => group.lines)));

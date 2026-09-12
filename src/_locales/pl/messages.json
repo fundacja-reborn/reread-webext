@@ -112,6 +112,7 @@
   },
   "lookup_own": { "message": "Własne" },
   "lookup_own_placeholder": { "message": "Wpisz własne znaczenie" },
+  "lookup_more_about": { "message": "Więcej o słowie" },
   "lookup_show_all": {
     "message": "Pokaż wszystkie ($COUNT$)",
     "placeholders": {

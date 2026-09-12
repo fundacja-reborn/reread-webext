@@ -118,7 +118,16 @@ describe("the look-up field", () => {
   it("folds the books: one fold per book, the first open, the rest of a long book under Show all", async () => {
     const box = await source("lib/lookup-box.js");
     const render = bodyOf(box, "render");
-    assert.match(render, /entryGroups\(state\.outcome\.entries, state\.phrase\.normalized\)/, "the entries are not grouped by book");
+    assert.match(render, /entryGroups\(state\.outcome\.entries, state\.phrase\.normalized, state\.outcome\.lang\)/, "the entries are not grouped by book, or the rows not told apart in the book's language");
+    // A label stands over the first meaning after it, wherever that lands;
+    // a transcription or a cross-reference is never a row, and the book
+    // ends in "More about the word" when it has any.
+    const rows = bodyOf(box, "books");
+    assert.match(rows, /if \(row\.kind === "heading"\) \{\s*label = row\.text;\s*continue;/, "a label is a row to tick");
+    assert.match(rows, /if \(row\.kind !== "meaning"\) continue;/, "a transcription or a cross-reference is a row to tick");
+    assert.match(rows, /if \(label !== null\) \{\s*home\.append\(element\("div", "lookup-entry-heading", label\)\);/, "the label does not stand over its first meaning where that meaning lands");
+    assert.match(rows, /if \(!readOnly && group\.about\.length > 0\) book\.append\(aboutFold\(group\)\)/, "More about the word stands with nothing in it, or not at the book's end");
+    assert.match(bodyOf(box, "aboutFold"), /fold\("lookup-about", `about:\$\{group\.dictionary\}`, false,[\s\S]*?t\("lookup_more_about"\)/, "More about the word opens by default, or is not remembered");
     // The books and "Your own" on one shelf, parted by one separator rule -
     // the space between the last book and "Your own" is the space between
     // two books (block 4 of the polish round).
