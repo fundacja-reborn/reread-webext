@@ -52,6 +52,21 @@ describe("the filter's state over the list", () => {
     assert.match(await source("vocab/vocab.html"), /id="list" class="phrases" tabindex="-1"/, "the list cannot take the focus");
   });
 
+  it("gives the filter the look-up field's own cross, and the same field's manners", async () => {
+    const markup = await source("vocab/vocab.html");
+    assert.match(markup, /id="filter"[\s\S]*?enterkeyhint="search"\s*autocomplete="off"/, "the filter is not the look-up field's kind of field");
+    const script = await source("vocab/vocab.js");
+    // The shared component, named as "Clear the filter"; a press empties
+    // the filter, puts the list back on page one and keeps the caret in the
+    // field (the component's own manners).
+    assert.match(script, /clearableField\(filterInput, \{\s*label: t\("vocab_filter_clear"\),\s*onClear: \(\) => \{\s*query = "";\s*page = 1;\s*renderList\(\);/, "the filter's cross is not the shared one, or clears something else");
+    // A filter set by script - Show in list, Clear filter - tells the cross.
+    assert.match(bodyOf(script, "showInList"), /filterInput\.value = phrase\.text;\s*filterClear\?\.refresh\(\);/, "the cross does not follow Show in list");
+    assert.match(bodyOf(script, "clearFilter"), /filterInput\.value = "";\s*filterClear\?\.refresh\(\);/, "the cross does not follow Clear filter");
+    // The field leaves the cross its room at the end.
+    assert.match(await source("vocab/vocab.css"), /\.filter-line input \{[\s\S]*?padding: 0\.35rem 2\.6rem 0\.35rem 0\.6rem;/, "the filter's text runs under the cross");
+  });
+
   it("lights a match in a row with a line the e-ink keeps, in ink that keeps its contrast", async () => {
     const styles = await source("vocab/vocab.css");
     const mark = styles.slice(styles.indexOf(".phrase-row mark {"), styles.indexOf("}", styles.indexOf(".phrase-row mark {")));

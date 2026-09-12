@@ -36,6 +36,7 @@
  * was typed.
  */
 
+import { clearableField } from "./clear-field.js";
 import { HINT_MAX_WORDS, linkedWord } from "./gloss.js";
 import { t, uiLocale } from "./i18n.js";
 import { languageName } from "./language.js";
@@ -207,9 +208,6 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
   form.className = "lookup-form";
   const label = element("label", "lookup-label", t("lookup_label"));
   label.setAttribute("for", "lookup-input");
-  // The field and its cross in one box, so the cross can stand inside the
-  // field's own frame at its far end.
-  const field = element("div", "lookup-field");
   const input = document.createElement("input");
   input.type = "search";
   input.id = "lookup-input";
@@ -221,21 +219,15 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
   // A word looked up is a word as the book spells it: no capital forced on
   // a phone's keyboard.
   input.setAttribute("autocapitalize", "off");
-  // The one way to take the answer down: the field emptied and the answer
-  // with it, the caret left in the field for the next word. Our own cross
-  // rather than the browser's: Firefox draws none on a search field, and
-  // Chromium's is a small target that fires no event a page can count on.
-  // Hidden while there is nothing to clear.
-  const clearButton = button("lookup-clear", String.fromCodePoint(0x00d7));
-  clearButton.setAttribute("aria-label", t("lookup_clear"));
-  clearButton.title = t("lookup_clear");
-  clearButton.hidden = true;
-  field.append(input, clearButton);
   const go = document.createElement("button");
   go.type = "submit";
   go.className = "lookup-go";
   go.textContent = t("lookup_action");
-  form.append(label, field, go);
+  form.append(label, input, go);
+  // The one way to take the answer down: the cross inside the field
+  // (`clear-field.js`, the list's filter wears the same) empties it and the
+  // answer with it, the caret left in the field for the next word.
+  const clearing = clearableField(input, { label: t("lookup_clear"), onClear: () => clear() });
   hosts.form.append(form);
 
   const answer = element("div", "lookup-answer");
@@ -244,11 +236,6 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
 
   function tell() {
     onState?.({ phrase: state.phrase, saved: state.meanings.length > 0, pending: state.pending });
-  }
-
-  /** The cross stands while the field has anything in it to clear. */
-  function showClear() {
-    clearButton.hidden = input.value.length === 0;
   }
 
   /**
@@ -819,31 +806,23 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
     void lookUp();
   });
 
-  clearButton.addEventListener("click", () => {
-    input.value = "";
-    showClear();
-    clear();
-    input.focus();
-  });
-
-  // Typing asks nothing (the header); the cross follows the text. The field
-  // emptied by other means - Escape in it, the last character deleted -
-  // takes the answer down with it too: an answer to a word no longer in the
-  // field is an answer to nothing.
+  // Typing asks nothing (the header). The field emptied by other means than
+  // its cross - Escape in it, the last character deleted - takes the answer
+  // down with it too: an answer to a word no longer in the field is an
+  // answer to nothing.
   input.addEventListener("input", () => {
-    showClear();
     if (input.value.length === 0 && state.phrase !== null) clear();
   });
 
   return {
     search(text) {
       input.value = text;
-      showClear();
+      clearing.refresh();
       return lookUp();
     },
     reset() {
       input.value = "";
-      showClear();
+      clearing.refresh();
       clear();
     },
     focus() {

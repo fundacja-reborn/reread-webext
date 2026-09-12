@@ -681,36 +681,22 @@ body:not(.reader):has(.panel-scrim:not([hidden])) .page-chrome {
   white-space: nowrap;
 }
 
-/* The field with its cross inside: the box takes the row, the cross stands
-   at the field's far end over the field's own padding. */
-.lookup-field {
+/* A field with its cross inside (`lib/clear-field.js`: the look-up field
+   and the saved-phrases list's filter): the box takes the row, the cross
+   stands at the field's far end over the field's own padding, which the
+   field's own rule has to leave it (2.6rem at the end). */
+.clear-field {
   position: relative;
   display: flex;
   flex: 1 1 auto;
   min-width: 0;
 }
 
-.lookup-input {
-  /* No width of its own: a text field asks for room for twenty characters
-     unless told otherwise, and that ask is what widened the popup. It takes
-     what the arrow and the button leave, and all of it. */
-  flex: 1 1 auto;
-  width: 0;
-  min-width: 0;
-  min-height: 44px;
-  font: inherit;
-  padding: 0.35rem 2.6rem 0.35rem 0.6rem;
-  border-radius: 6px;
-  border: 1px solid var(--page-border);
-  background: transparent;
-  color: var(--page-fg);
-}
-
 /* The browser's own cross on a search field stands down: Firefox draws
    none, Chromium's is a small target that fires no event a page can count
-   on - the field's own cross (`.lookup-clear`) is the one in both. */
-.lookup-input::-webkit-search-cancel-button,
-.lookup-input::-webkit-search-decoration {
+   on - the field's own cross is the one in both. */
+.clear-field > input::-webkit-search-cancel-button,
+.clear-field > input::-webkit-search-decoration {
   -webkit-appearance: none;
   appearance: none;
 }
@@ -718,7 +704,7 @@ body:not(.reader):has(.panel-scrim:not([hidden])) .page-chrome {
 /* The one way to take the answer down: a 44px cross at the field's far end,
    no frame of its own inside the field's, hidden while there is nothing to
    clear (the script toggles `hidden`). */
-.lookup-clear {
+.clear-field-x {
   position: absolute;
   inset-inline-end: 0;
   top: 0;
@@ -736,8 +722,24 @@ body:not(.reader):has(.panel-scrim:not([hidden])) .page-chrome {
   cursor: pointer;
 }
 
-.lookup-clear:hover,
-.lookup-clear:focus-visible {
+.clear-field-x:hover,
+.clear-field-x:focus-visible {
+  color: var(--page-fg);
+}
+
+.lookup-input {
+  /* No width of its own: a text field asks for room for twenty characters
+     unless told otherwise, and that ask is what widened the popup. It takes
+     what the arrow and the button leave, and all of it. */
+  flex: 1 1 auto;
+  width: 0;
+  min-width: 0;
+  min-height: 44px;
+  font: inherit;
+  padding: 0.35rem 2.6rem 0.35rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid var(--page-border);
+  background: transparent;
   color: var(--page-fg);
 }
 

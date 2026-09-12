@@ -238,11 +238,16 @@
       <label for="filter" class="visually-hidden" data-i18n="vocab_filter_label">
         Filter the list of saved phrases
       </label>
+      <!-- The same field as the look-up field in the fold below: a search
+           field with our own cross inside (`lib/clear-field.js`, wrapped by
+           vocab.js), the phone's keyboard saying Search, nothing suggested. -->
       <input
         type="search"
         id="filter"
         placeholder="Filter by phrase or meaning"
         data-i18n-placeholder="vocab_filter_placeholder"
+        enterkeyhint="search"
+        autocomplete="off"
       />
     </div>
 

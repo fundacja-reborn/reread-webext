@@ -73,8 +73,8 @@ describe("the look-up field", () => {
     // The input listener follows the cross and takes the answer down with
     // an emptied field; it must not look the word up (on e-ink every redraw
     // is a flash - the rebuild's D4).
-    const typing = box.slice(box.indexOf('clearButton.addEventListener("click"'), box.lastIndexOf("return {"));
-    assert.match(typing, /input\.addEventListener\("input"/, "the word field has no input listener to read");
+    const typing = box.slice(box.lastIndexOf('input.addEventListener("input"'), box.lastIndexOf("return {"));
+    assert.match(typing, /if \(input\.value\.length === 0 && state\.phrase !== null\) clear\(\);/, "the word field's input listener is not the one read");
     assert.doesNotMatch(typing, /lookUp\(\)/, "typing asks the dictionaries");
     assert.match(box, /input\.type = "search";/, "the field is not a search field");
     assert.match(box, /input\.enterKeyHint = "search";/, "the phone's keyboard does not say Search");
@@ -83,17 +83,26 @@ describe("the look-up field", () => {
 
   it("has one way out: the cross empties the field and takes the answer down, the caret kept in the field", async () => {
     const box = await source("lib/lookup-box.js");
-    assert.match(box, /const clearButton = button\("lookup-clear", String\.fromCodePoint\(0x00d7\)\)/, "the field has no cross of its own");
-    assert.match(box, /clearButton\.setAttribute\("aria-label", t\("lookup_clear"\)\)/, "the cross has no name");
-    assert.match(box, /clearButton\.addEventListener\("click", \(\) => \{\s*input\.value = "";\s*showClear\(\);\s*clear\(\);\s*input\.focus\(\);/, "the cross does not empty the field, take the answer down and keep the caret");
-    assert.match(box, /input\.addEventListener\("input", \(\) => \{\s*showClear\(\);\s*if \(input\.value\.length === 0 && state\.phrase !== null\) clear\(\);/, "an emptied field keeps its answer");
+    // The cross is the shared component's (`clear-field.js`, the list's
+    // filter wears the same); emptied, the field takes its answer down.
+    assert.match(box, /const clearing = clearableField\(input, \{ label: t\("lookup_clear"\), onClear: \(\) => clear\(\) \}\)/, "the field has no cross of its own, or one of its own making");
+    assert.match(box, /input\.addEventListener\("input", \(\) => \{\s*if \(input\.value\.length === 0 && state\.phrase !== null\) clear\(\);/, "an emptied field keeps its answer");
+    // A value set by script tells the cross.
+    assert.match(box, /search\(text\) \{\s*input\.value = text;\s*clearing\.refresh\(\);/, "the cross does not follow a phrase set by script");
     // No Close, no Edit, no Learned in the panel: the field does one thing,
     // and the phrase's row in the list does the rest (the rebuild's D3, D6).
     assert.doesNotMatch(box, /t\("close"\)/, "the panel has a Close");
     assert.doesNotMatch(box, /bubble_edit|bubble_learned|lookup_own_meaning|textarea/, "the panel manages the whole entry");
-    // And the browser's own cross stands down, so there is one cross, not two.
+    // The component itself: wrapped in place, hidden while empty, a press
+    // empties, tells the home and keeps the caret; the browser's own cross
+    // stands down, so there is one cross, not two.
+    const field = await source("lib/clear-field.js");
+    assert.match(field, /input\.replaceWith\(field\);\s*field\.append\(input\);/, "the field is not wrapped in place");
+    assert.match(field, /cross\.hidden = input\.value\.length === 0;/, "the cross stands over an empty field");
+    assert.match(field, /cross\.addEventListener\("click", \(\) => \{\s*input\.value = "";\s*refresh\(\);\s*onClear\(\);\s*input\.focus\(\);/, "the cross does not empty the field, tell the home and keep the caret");
     const styles = await source("assets/page.css");
-    assert.match(styles, /\.lookup-input::-webkit-search-cancel-button[\s\S]*?appearance: none;/, "the browser's own cross doubles the field's");
+    assert.match(styles, /\.clear-field > input::-webkit-search-cancel-button[\s\S]*?appearance: none;/, "the browser's own cross doubles the field's");
+    assert.doesNotMatch(styles, /lookup-clear|lookup-field/, "the old cross's dress is still there");
   });
 
   it("reads top down: the phrase with its standing, then the books - the meanings once, as ticked rows", async () => {

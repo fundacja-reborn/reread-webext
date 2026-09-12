@@ -22,6 +22,7 @@
 
 import { applyReading } from "../lib/appearance.js";
 import { webext } from "../lib/browser.js";
+import { clearableField } from "../lib/clear-field.js";
 import { CONFIG_KEY, SIZE, TTS_RATE, chosenPair, isFont, isTheme, readConfig, writeConfig } from "../lib/config.js";
 import { holdChrome } from "../lib/chrome-hold.js";
 import { fileSize, localizePage, plural, t, uiLocale } from "../lib/i18n.js";
@@ -568,6 +569,7 @@ function clearFilter() {
   query = "";
   page = 1;
   if (filterInput !== null) filterInput.value = "";
+  filterClear?.refresh();
   renderList();
   listContainer?.focus({ preventScroll: true });
 }
@@ -975,6 +977,7 @@ function showInList(phrase) {
   query = phrase.text;
   page = 1;
   if (filterInput !== null) filterInput.value = phrase.text;
+  filterClear?.refresh();
   renderList();
   if (filterStatus === null) return;
   filterStatus.scrollIntoView({ block: "start" });
@@ -1227,6 +1230,24 @@ filterInput?.addEventListener("input", () => {
   page = 1;
   renderList();
 });
+
+/**
+ * The filter's cross, the look-up field's own (`clear-field.js`): a press
+ * empties the filter, puts the whole list back on page one and keeps the
+ * caret in the filter for the next word - the same effect as "Clear
+ * filter" in the state line over the list, from the field itself.
+ */
+const filterClear =
+  filterInput === null
+    ? null
+    : clearableField(filterInput, {
+        label: t("vocab_filter_clear"),
+        onClear: () => {
+          query = "";
+          page = 1;
+          renderList();
+        },
+      });
 
 prevButton?.addEventListener("click", () => {
   page -= 1;

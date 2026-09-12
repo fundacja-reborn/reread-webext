@@ -229,12 +229,15 @@ summary {
   margin: 1rem 0 0;
 }
 
+/* The filter in the look-up field's dress, its cross inside at the far end
+   (`.clear-field` in page.css wraps it), so the two fields on this page
+   look and behave the same; the end padding is the cross's room. */
 .filter-line input {
   flex: 1 1 auto;
   min-height: 44px;
   min-width: 0;
   font: inherit;
-  padding: 0.35rem 0.6rem;
+  padding: 0.35rem 2.6rem 0.35rem 0.6rem;
   border-radius: 6px;
   border: 1px solid var(--page-border);
   background: transparent;
