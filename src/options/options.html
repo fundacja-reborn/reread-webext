@@ -423,6 +423,27 @@
           underlined.
         </p>
       </div>
+      <!-- The sentence kept with a phrase (D210): the one the bubble had
+           around the selection, as the page shows it - never its
+           translation - written into the row and shown on the phrases page
+           under the phrase, and the third column of the export for Anki.
+           Off by default and meant to stay off until pressed: a sentence is
+           a piece of the page kept for good, which is the reader's call and
+           not a default's. Not `translation-only`: the quiet vocabulary's
+           bubble saves phrases too (D158), from the same sentence. -->
+      <div class="row">
+        <label class="row-toggle">
+          <span class="row-name" data-i18n="options_save_sentence">Save the sentence with the phrase</span>
+          <input type="checkbox" id="save-sentence" />
+        </label>
+        <p class="row-note" data-fold data-i18n="options_save_sentence_hint">
+          When you save a phrase from the bubble, the sentence it stands in is saved with it - the
+          sentence as the page shows it, without its translation. It is shown under the phrase on
+          the saved phrases page, folded to one line, and goes into the third column of the export
+          for Anki. Like the phrase, it stays on this device. Switched off, no new sentence is
+          saved; the ones already saved stay with their phrases.
+        </p>
+      </div>
       <!-- The bubble's one size knob (D85): the bubble deliberately ignores
            every page it stands on, so no page setting can reach it - and
            built-in sizes land differently on different screens (an e-ink

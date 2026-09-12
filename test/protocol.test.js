@@ -303,6 +303,22 @@ describe("asRequest", () => {
     });
   });
 
+  it("carries the sentence a phrase is saved from, and drops one that is not a string (D210)", () => {
+    assert.deepEqual(
+      asRequest({ kind: Message.SAVE_PHRASE, text: "bank", translations: ["brzeg"], context: "The bank was steep." }),
+      { kind: Message.SAVE_PHRASE, text: "bank", translations: ["brzeg"], context: "The bank was steep." },
+    );
+    // An extra, read the way `translate` reads its own: a save must not fail
+    // over the part of it the reader never asked to see.
+    for (const context of [42, null, {}, ["a"], undefined]) {
+      assert.deepEqual(asRequest({ kind: Message.SAVE_PHRASE, text: "bank", translations: ["brzeg"], context }), {
+        kind: Message.SAVE_PHRASE,
+        text: "bank",
+        translations: ["brzeg"],
+      });
+    }
+  });
+
   it("rejects a save whose meanings are not a list of strings", () => {
     for (const translations of [undefined, "brzeg", 7, null, ["brzeg", 7], [{}]]) {
       assert.equal(

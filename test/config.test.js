@@ -895,3 +895,32 @@ describe("the other forms of saved words", () => {
     assert.equal(/** @type {any} */ (store["config"]).underlineForms, true);
   });
 });
+
+describe("the sentence kept with a phrase", () => {
+  it("is off by default, on profiles old and new (D210)", () => {
+    // A sentence is a piece of the page kept for good: the reader asks for
+    // that, a default does not - and a profile from before the field has
+    // not asked.
+    assert.equal(withDefaults(undefined).saveSentence, false);
+    assert.equal(withDefaults({ sourceLang: "en", targetLang: "pl" }).saveSentence, false);
+  });
+
+  it("keeps a choice somebody made, in both directions", () => {
+    assert.equal(withDefaults({ saveSentence: true }).saveSentence, true);
+    assert.equal(withDefaults({ saveSentence: false }).saveSentence, false);
+  });
+
+  it("treats a hand-edited value of the wrong type as the default", () => {
+    for (const saveSentence of ["true", 1, null, {}]) {
+      assert.equal(withDefaults({ saveSentence }).saveSentence, false);
+    }
+  });
+
+  it("writes the choice through writeConfig without touching the rest", async () => {
+    const store = installFakeBrowser({ config: { sourceLang: "en", targetLang: "pl" } });
+    const written = await writeConfig({ saveSentence: true });
+
+    assert.deepEqual(written, { ...DEFAULTS, sourceLang: "en", targetLang: "pl", saveSentence: true });
+    assert.equal(/** @type {any} */ (store["config"]).saveSentence, true);
+  });
+});

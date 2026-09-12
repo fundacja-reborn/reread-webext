@@ -339,13 +339,18 @@
   "pager_prev": { "message": "Previous" },
   "pager_next": { "message": "Next" },
   "action_export": { "message": "Export" },
+  "vocab_export_anki": {
+    "message": "Export for Anki",
+    "description": "The second export button on the saved phrases page (D210): the three-column file - phrase, meanings, the sentence the phrase was saved in - meant for Anki's sentence cards. Beside Export, which writes the two-column file the KOReader plugin and Import read."
+  },
   "action_import": { "message": "Import" },
   "transfer_heading": {
     "message": "Import and export",
     "description": "Heading of the transfer section under the saved-phrases and reading lists, and the text of the anchor link that jumps to it - one name for one place."
   },
   "vocab_transfer_note": {
-    "message": "A two-column .tsv file - what the KOReader plugin writes and Anki imports. Importing adds phrases this pair is missing and never touches a saved one. In the meaning cell, a semicolon followed by a space separates meanings; a semicolon without a space stays inside its meaning."
+    "message": "A two-column .tsv file - what the KOReader plugin writes and Anki imports. Importing adds phrases this pair is missing and never touches a saved one. In the meaning cell, a semicolon followed by a space separates meanings; a semicolon without a space stays inside its meaning. Export for Anki writes a third column with the sentence each phrase was saved in - empty when none was kept. That file is for Anki; it cannot be imported here.",
+    "description": "The file-format fold under Import and Export. The last two sentences (D210) quote the vocab_export_anki button - each language quotes its own wording of that key - and say the two things a reader needs about that file: what its third column is, and that Import does not read it."
   },
   "vocab_import_into": { "message": "Import into" },
   "vocab_import_nothing": { "message": "There are no phrases to import in that file." },
@@ -1354,6 +1359,14 @@
   "options_underline_forms_hint": {
     "message": "A saved word is underlined in its other forms too: save \"read\", and \"reads\" and \"reading\" are underlined as well - the bubble over them shows what you saved for \"read\". Which forms count is decided by your dictionary for the language you read, so one has to be installed. For now only when you read English. Switched off, only the exact form you saved is underlined.",
     "description": "The example words read, reads and reading are English and stay English in every language: they are the forms the rules know. The last sentence is the promise the README makes - matching is literal unless this is on."
+  },
+  "options_save_sentence": {
+    "message": "Save the sentence with the phrase",
+    "description": "Checkbox label on the settings page (D210): a phrase saved from the bubble keeps the sentence it stood in - the page's own sentence, never its translation. Off by default."
+  },
+  "options_save_sentence_hint": {
+    "message": "When you save a phrase from the bubble, the sentence it stands in is saved with it - the sentence as the page shows it, without its translation. It is shown under the phrase on the saved phrases page, folded to one line, and goes into the third column of the export for Anki. Like the phrase, it stays on this device. Switched off, no new sentence is saved; the ones already saved stay with their phrases.",
+    "description": "Under the checkbox. Names the two places the sentence shows up (the phrases page, the export for Anki) and makes two promises the README and PRIVACY.md make: the sentence never leaves the device, and switching off keeps what was saved."
   },
   "options_no_translation": { "message": "Use without a translation model" },
   "options_no_translation_hint": {

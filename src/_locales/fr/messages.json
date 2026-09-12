@@ -244,10 +244,11 @@
   "pager_prev": { "message": "Précédente" },
   "pager_next": { "message": "Suivante" },
   "action_export": { "message": "Exporter" },
+  "vocab_export_anki": { "message": "Exporter pour Anki" },
   "action_import": { "message": "Importer" },
   "transfer_heading": { "message": "Import et export" },
   "vocab_transfer_note": {
-    "message": "Un fichier .tsv à deux colonnes - le format qu'écrit le plugin KOReader et que lit Anki. L'import ajoute seulement les phrases qui manquent à cette paire ; rien de déjà enregistré n'est modifié. Dans la cellule des sens, un point-virgule suivi d'une espace sépare les sens ; un point-virgule sans espace reste dans son sens."
+    "message": "Un fichier .tsv à deux colonnes - le format qu'écrit le plugin KOReader et que lit Anki. L'import ajoute seulement les phrases qui manquent à cette paire ; rien de déjà enregistré n'est modifié. Dans la cellule des sens, un point-virgule suivi d'une espace sépare les sens ; un point-virgule sans espace reste dans son sens. « Exporter pour Anki » écrit une troisième colonne avec la phrase dans laquelle chaque expression a été enregistrée - vide quand il n'y en a pas. Ce fichier est destiné à Anki ; il ne peut pas être importé ici."
   },
   "vocab_import_into": { "message": "Importer dans" },
   "vocab_import_nothing": { "message": "Ce fichier ne contient aucune phrase à importer." },
@@ -1081,6 +1082,10 @@
   "options_underline_forms": { "message": "Souligner aussi les autres formes des mots enregistrés" },
   "options_underline_forms_hint": {
     "message": "Un mot enregistré est aussi souligné sous ses autres formes : après l'enregistrement de « read », « reads » et « reading » sont soulignés eux aussi, et la bulle au-dessus montre ce que vous avez enregistré pour « read ». Les formes qui comptent sont décidées par votre dictionnaire de la langue lue - il doit donc être installé. Pour l'instant, seulement quand vous lisez en anglais. Désactivé, seule la forme exacte que vous avez enregistrée est soulignée."
+  },
+  "options_save_sentence": { "message": "Enregistrer la phrase avec l'expression" },
+  "options_save_sentence_hint": {
+    "message": "Quand vous enregistrez une expression depuis la bulle, la phrase où elle se trouve est enregistrée avec elle - la phrase telle que la page l'affiche, sans sa traduction. Elle apparaît sous l'expression dans la liste des expressions enregistrées, repliée sur une ligne, et va dans la troisième colonne de l'export pour Anki. Comme l'expression, elle reste sur cet appareil. Désactivé, aucune nouvelle phrase n'est enregistrée ; celles déjà enregistrées restent avec leurs expressions."
   },
   "options_no_translation": { "message": "Utiliser sans modèle de traduction" },
   "options_no_translation_hint": {

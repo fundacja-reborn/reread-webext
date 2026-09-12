@@ -23,11 +23,24 @@
  * `"; "` comes back as two meanings, which reads the same everywhere the list
  * is shown, and joins back into the same cell.
  *
+ * A second file, for Anki alone (D210): the same two columns and a third,
+ * the sentence the phrase was kept from - the second half of a sentence
+ * card, which is the card every guide to Anki says to make. Its own file
+ * under its own name rather than a third column on the file above, because
+ * Anki maps columns onto note fields: a two-field note type set up for the
+ * sister plugin's file would take a third column into the wrong field, and
+ * the plugin reads two columns and nothing else. The third cell is there on
+ * every row, empty for a phrase without a sentence, so the mapping never
+ * shifts under the reader between one export and the next. It is written
+ * and not read: `fromTsv` counts a three-column line as a line of another
+ * format, which it is - the two-column file is the one that travels back.
+ *
  * Everything in this module is a value in and a value out; the database and
  * the message wire live elsewhere.
  */
 
 import { collapseWhitespace } from "../normalize.js";
+import { hasSentence } from "./phrase.js";
 
 /** @typedef {import("./phrase.js").Phrase} Phrase */
 
@@ -76,6 +89,28 @@ function field(text) {
 export function toTsv(phrases) {
   const lines = phrases.map(
     (phrase) => field(phrase.phrase) + SEPARATOR + field(phrase.translations.join(JOINER)),
+  );
+  return lines.length === 0 ? "" : lines.join("\n") + "\n";
+}
+
+/**
+ * The file for Anki (D210): `toTsv`'s two columns and the sentence as the
+ * third, on every row - an empty cell where the phrase has none, so the
+ * columns stay the columns whatever the vocabulary holds. Same order, same
+ * rules, same absence of escaping: the sentence was folded to one line when
+ * it was stored, and is folded again here for the same reason the phrase is.
+ *
+ * @param {Phrase[]} phrases
+ * @returns {string}
+ */
+export function toAnkiTsv(phrases) {
+  const lines = phrases.map(
+    (phrase) =>
+      field(phrase.phrase) +
+      SEPARATOR +
+      field(phrase.translations.join(JOINER)) +
+      SEPARATOR +
+      (hasSentence(phrase) ? field(/** @type {string} */ (phrase.context)) : ""),
   );
   return lines.length === 0 ? "" : lines.join("\n") + "\n";
 }
@@ -144,6 +179,21 @@ function safeCode(code) {
  */
 export function exportFilename({ langFrom, langTo }) {
   return `reread-${safeCode(langFrom)}-${safeCode(langTo)}.tsv`;
+}
+
+/**
+ * What the file for Anki is called (D210): the same suffix carrying the pair,
+ * behind a prefix that says which of the two files this is - so the two
+ * exports of one pair never overwrite each other in a downloads folder, and
+ * a glance at the name says which one has the sentences. The suffix still
+ * parses (`pairFromFilename`), which only matters for the offer the import
+ * makes before it counts every line of this file as another format's.
+ *
+ * @param {{ langFrom: string, langTo: string }} pair
+ * @returns {string}
+ */
+export function ankiExportFilename({ langFrom, langTo }) {
+  return `reread-anki-${safeCode(langFrom)}-${safeCode(langTo)}.tsv`;
 }
 
 /**

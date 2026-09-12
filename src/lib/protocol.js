@@ -173,9 +173,18 @@ export const ErrorCode = Object.freeze({
  * by their text, and the background is the only side that normalizes it.
  *
  * `context` is the sentence, not a promise about it: the background may ignore
- * it, and nothing about the answer's shape depends on whether it was sent. It
- * exists on the wire and nowhere else - no request stores it, which is what O2
- * decided about context in the database and this does not reopen.
+ * it, and nothing about the answer's shape depends on whether it was sent. On
+ * a `translate` it exists on the wire and nowhere else. On a `save-phrase` it
+ * is, since D210, the sentence the phrase is being kept from - the same one
+ * the bubble had, as the page shows it, never its translation - and the
+ * background writes it into the row only while the setting that asks for it
+ * (`saveSentence`) is on: the content script sends what it has, the settings
+ * live in the background, and a page that never reads them cannot disagree
+ * with them. Sent without the setting it is dropped, like every other extra.
+ * A phrase kept once keeps its first sentence: a later save with another
+ * sentence changes the meanings and leaves the sentence alone (`resaved`).
+ * That is what closed O2 - the field was reserved until a feature showed it,
+ * and the phrases page and the export for Anki are that feature.
  *
  * `look-up` is the dictionaries alone (D162): what the quiet vocabulary asks
  * from a page that has no database in reach - the reader page reads its own.
@@ -251,7 +260,7 @@ export const ErrorCode = Object.freeze({
  * @typedef {{ kind: typeof Message.OPEN_MARKS }} OpenMarksRequest
  * @typedef {{ kind: typeof Message.OPEN_VOCABULARY, text?: string }} OpenVocabularyRequest
  * @typedef {{ kind: typeof Message.OPEN_SETTINGS, section?: SettingsSection }} OpenSettingsRequest
- * @typedef {{ kind: typeof Message.SAVE_PHRASE, text: string, translations: string[] }} SavePhraseRequest
+ * @typedef {{ kind: typeof Message.SAVE_PHRASE, text: string, translations: string[], context?: string }} SavePhraseRequest
  * @typedef {{ kind: typeof Message.FORGET_PHRASE, text: string }} ForgetPhraseRequest
  * @typedef {{ kind: typeof Message.LIST_PHRASES }} ListPhrasesRequest
  * @typedef {{ text: string, translations: string[] }} ImportRow
@@ -516,7 +525,13 @@ export function asRequest(message) {
     if (typeof text !== "string") return null;
     if (!Array.isArray(translations)) return null;
     if (!translations.every((one) => typeof one === "string")) return null;
-    return { kind: Message.SAVE_PHRASE, text, translations };
+    // The sentence (D210) is an extra, read the way `translate` reads its
+    // own: a string rides along, anything else is dropped - a save must not
+    // fail over the part of it the reader never asked to see.
+    /** @type {SavePhraseRequest} */
+    const request = { kind: Message.SAVE_PHRASE, text, translations };
+    if (typeof context === "string") request.context = context;
+    return request;
   }
 
   if (kind === Message.IMPORT_PHRASES) {
