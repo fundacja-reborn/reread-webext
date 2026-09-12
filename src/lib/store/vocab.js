@@ -152,6 +152,23 @@ export async function putMissingPhrases(phrases) {
 }
 
 /**
+ * Rewrites phrases that are already there, all in one transaction: the
+ * one-time migration's write (D205), which must land whole or not at all -
+ * a store half rewritten when the browser closed would be the state nothing
+ * can reason about. Each row goes in under its own id, so it replaces the
+ * row it came from; a row that is not there any more is written back as it
+ * was read, which is what a copy taken a moment earlier would restore too.
+ *
+ * @param {Phrase[]} phrases
+ * @returns {Promise<void>}
+ */
+export async function putPhrases(phrases) {
+  await withPhrases("readwrite", async (store) => {
+    for (const phrase of phrases) await promisify(store.put(phrase));
+  });
+}
+
+/**
  * @param {PhraseKey} key
  * @returns {Promise<Phrase | null>}
  */

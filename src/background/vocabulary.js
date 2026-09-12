@@ -20,6 +20,7 @@ import { normalize } from "../lib/normalize.js";
 import { chosenPair, readConfig } from "../lib/config.js";
 import { ErrorCode, fail, ok } from "../lib/protocol.js";
 import { ensureBackup, rebuildBackup, restoreVocabulary } from "../lib/store/backup.js";
+import { migrateSemicolonsOnce, sweepSemicolonBackup } from "../lib/store/semicolon-migration.js";
 import { mirrorOf, writeMirror } from "../lib/store/mirror.js";
 import { buildPhrase } from "../lib/store/phrase.js";
 import { deletePhrase, listPhrases, putMissingPhrases, putPhrase } from "../lib/store/vocab.js";
@@ -84,13 +85,20 @@ function settled() {
  * Every start of the background: the store settled - with the mirror
  * rebuilt if something came back, so the pages' underlines return with the
  * words - and a copy written for a vocabulary that has none yet, which is
- * every installation that kept its phrases before the copy existed. Quiet on
- * failure: a start must not hang on it, and the next write asks again.
+ * every installation that kept its phrases before the copy existed. Then the
+ * one-time migrations (D205: the semicolons in the meanings saved before
+ * D203), after the store is settled so a vocabulary just restored is
+ * migrated too, and before any message reads or writes a phrase - every
+ * door below waits on this. Its own copy is swept last. Quiet on failure: a
+ * start must not hang on it, the next write asks again, and a migration
+ * that failed left no flag and tries again at the next start.
  */
 const started = settled()
   .then(async (restored) => {
     if (restored > 0) await rebuildMirror(await readConfig());
     await ensureBackup();
+    await migrateSemicolonsOnce();
+    await sweepSemicolonBackup();
   })
   .catch(() => undefined);
 
