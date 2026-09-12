@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { LIMITS, about, fieldText, senses } from "../src/lib/dict/text.js";
+import { LIMITS, TEXT_REVISION, about, catchUp, fieldText, senses } from "../src/lib/dict/text.js";
 
 describe("fieldText", () => {
   it("passes plain text through, tidied, a blank line kept as one", () => {
@@ -140,8 +140,70 @@ describe("fieldText", () => {
 
   it("tells two entities apart that differ only in case", () => {
     // `&Prime;` is the double prime of a measurement, `&prime;` the single one;
-    // lower-casing every name would answer the second for both.
+    // lower-casing every name would answer the second for both. `&AMP;` is a
+    // line of the standard's table, not a spelling the decoder forgives.
     assert.equal(fieldText({ type: "h", text: "5&prime;7&Prime; &AMP; more" }), "5′7″ & more");
+  });
+
+  it("decodes every name the standard's table has, not a list of the ones met so far", () => {
+    // reader.dict's English edition (Michał's screenshot of the popup,
+    // 2026-09-12): `&lsqb;from 14th c.&rsqb;` after a sense, twelve thousand
+    // times over - and, counted in the raw file, `&minus;`, `&rarr;`, the
+    // Greek letters, `&NoBreak;`, `&ZeroWidthSpace;` and `&frac12;`, a name
+    // with a digit in it that the old expression could not match at all.
+    assert.equal(
+      fieldText({ type: "h", text: "A large wild feline. &lsqb;from 14th c.&rsqb; &minus;1 &rarr; &frac12;" }),
+      `A large wild feline. [from 14th c.] ${String.fromCodePoint(0x2212)}1 ${String.fromCodePoint(0x2192)} ½`,
+    );
+    assert.equal(
+      fieldText({ type: "h", text: "&alpha;&beta;&Gamma; x&NoBreak;y a&ZeroWidthSpace;b" }),
+      `αβΓ x${String.fromCodePoint(0x2060)}y a${String.fromCodePoint(0x200b)}b`,
+    );
+    // A name that stands for two code points, and a name of the other case.
+    assert.equal(
+      fieldText({ type: "h", text: "&NotNestedGreaterGreater; &Aring;&aring;" }),
+      `${String.fromCodePoint(0x2aa2, 0x0338)} Åå`,
+    );
+  });
+
+  it("takes the name as written and nothing else", () => {
+    // `&Lsqb;` is nobody's, `&bnsp;` is a misspelling reader.dict really
+    // writes, and `&constructor;` is a property every object has - none of
+    // them is a reference, and each stays as the book wrote it.
+    assert.equal(fieldText({ type: "h", text: "&Lsqb;a&rsqb; &bnsp; &constructor; &toString;" }), "&Lsqb;a] &bnsp; &constructor; &toString;");
+    // Without the semicolon nothing is a reference: `&para` in running text
+    // is the standard's legacy rule, which no dictionary needs and which eats
+    // the start of "&parameter".
+    assert.equal(fieldText({ type: "h", text: "&parameter &copy 2020 R&D" }), "&parameter &copy 2020 R&D");
+  });
+
+  it("reads a numeric reference the way a browser does", () => {
+    // Decimal, hexadecimal in either case, and the C1 range as Windows-1252
+    // meant it: `&#150;` is an en dash in a book built with Windows tools,
+    // `&#146;` a closing quote, never a control character.
+    assert.equal(
+      fieldText({ type: "h", text: "&#65;&#x42;&#X43; 1914&#150;1918 o&#146;clock &#x96;" }),
+      `ABC 1914${String.fromCodePoint(0x2013)}1918 o’clock ${String.fromCodePoint(0x2013)}`,
+    );
+    // The five bytes Windows-1252 leaves unassigned decode as written; a
+    // number that is no code point, or no number, stays as the book wrote it.
+    assert.equal(fieldText({ type: "h", text: "x&#129;y" }), `x${String.fromCodePoint(0x81)}y`);
+    assert.equal(fieldText({ type: "h", text: "&#0; &#xD800; &#12ab; &#x110000;" }), "&#0; &#xD800; &#12ab; &#x110000;");
+  });
+
+  it("brings a sense an earlier import stored up to date, and leaves a current one alone", () => {
+    // What a dictionary imported before the whole table (TEXT_REVISION 2)
+    // holds: the entities beyond the old list as written, the source notes
+    // the old decoding surfaced, the markup it decoded from entities - each
+    // exactly what the tail of `fieldText` would have done to it.
+    assert.equal(TEXT_REVISION, 2);
+    assert.equal(catchUp("A large wild feline. &lsqb;from 14th c.&rsqb;"), "A large wild feline. [from 14th c.]");
+    assert.equal(catchUp("/ʃuːld/<ref:<<name:Dobson>>>/, /ʃəd/"), "/ʃuːld/, /ʃəd/");
+    assert.equal(catchUp("/ˌadɛ̃ˈnɔ<sup>j</sup>it/"), "/ˌadɛ̃ˈnɔjit/");
+    // A sense that needs nothing comes back as it is: its paragraphs (D197),
+    // its lines, its honest angle bracket.
+    const current = "Noun\n\nNew information.\nSynonym: word\n\nFrom a < b.";
+    assert.equal(catchUp(current), current);
   });
 
   it("drops the headword XDXF repeats in front of every entry", () => {

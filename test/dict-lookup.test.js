@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import { languagesToAsk, lookupKeys } from "../src/lib/dict/lookup.js";
-import { settle } from "../src/lib/dict/store.js";
+import { settle, shownSenses } from "../src/lib/dict/store.js";
 
 /**
  * The pure half of asking the dictionaries (D121): which keys a phrase is
@@ -119,5 +119,45 @@ describe("settle", () => {
     const page = { entries: [], dictionaries: 0, lang: "pl" };
     assert.deepEqual(settle([pair, page]), { entries: [], dictionaries: 0, lang: "en" });
     assert.deepEqual(settle([]), { entries: [], dictionaries: 0, lang: "" });
+  });
+});
+
+/**
+ * The one thing a lookup does to a stored sense on its way out (0.5.56): a
+ * dictionary imported before the whole entity table has no `textRevision` on
+ * its record, and its senses are decoded as they are read - so `&lsqb;` reads
+ * as a bracket without the dictionary being imported again. One imported
+ * since carries the revision and is left exactly as stored: what it holds as
+ * `&trade;` is text its book wrote as `&amp;trade;`, about the reference.
+ */
+describe("shownSenses", () => {
+  /** @type {import("../src/lib/dict/store.js").Dictionary} */
+  const record = {
+    id: "d1",
+    name: "reader.dict",
+    langFrom: "en",
+    langTo: "en",
+    entryCount: 1,
+    aliasCount: 0,
+    bytes: 1,
+    addedAt: 0,
+    rank: 0,
+    ready: true,
+    credit: null,
+  };
+  const stored = ["A large wild feline. &lsqb;from 14th c.&rsqb;", "Synonym of snow leopard. &lsqb;from 18th c.&rsqb;"];
+
+  it("decodes what an import from before the table left as written", () => {
+    assert.deepEqual(shownSenses(record, stored), [
+      "A large wild feline. [from 14th c.]",
+      "Synonym of snow leopard. [from 18th c.]",
+    ]);
+    assert.deepEqual(shownSenses({ ...record, textRevision: 1 }, stored), shownSenses(record, stored));
+  });
+
+  it("leaves a dictionary imported with the table exactly as stored", () => {
+    const current = ["write &trade; for the mark", "Noun\n\nA sense."];
+    assert.equal(shownSenses({ ...record, textRevision: 2 }, current), current);
+    assert.equal(shownSenses({ ...record, textRevision: 3 }, current), current);
   });
 });

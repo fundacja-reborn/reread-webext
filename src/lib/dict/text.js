@@ -9,11 +9,18 @@
  * the door means the database holds text, the message carries text, and the
  * bubble sets `textContent`, with nothing left to sanitise later.
  *
+ * Once, with one exception: a dictionary imported before the whole entity
+ * table (`TEXT_REVISION`) has its senses brought up to date on their way out
+ * of the database (`catchUp`), so that nobody has to import a dictionary
+ * again to read `&lsqb;` as a bracket.
+ *
  * Tags are stripped with a regular expression rather than a parser. `DOMParser`
  * would be more correct about malformed markup, but it means building a
  * document per entry, three hundred thousand times, to reach `textContent` -
  * and the worst a stray `<` can do to the output here is stay a `<`.
  */
+
+import { ENTITIES } from "./entities.js";
 
 /** Markup types, in the sense of "has tags that have to come off". */
 const MARKUP = new Set(["h", "g", "x", "w", "k"]);
@@ -160,100 +167,61 @@ function stripSourceNotes(text) {
 }
 
 /**
- * The named entities a dictionary actually writes, and nothing beyond them.
- *
- * The full HTML table is some two thousand names, which is a table nobody here
- * would read; this is what turned up in real books. Five markup escapes, the
- * marks that separate or shape a line, and the punctuation an entry is set in -
- * `&mdash;` between a sense and its gloss, `&rsquo;` inside an English word,
- * `&lrm;` in an etymology beside a word from a right-to-left script. That last
- * one is how this list got longer: `even +&lrm; handed` reached the bubble with
- * the ampersand still in it, on a screenshot going to a store.
- *
- * Invisible marks are decoded rather than dropped, because in an entry quoting
- * Hebrew or Arabic they are what puts the punctuation on the right side of the
- * word. They are written by code point for the reason the project writes every
- * invisible character that way: a literal one is a character nobody sees in the
- * diff.
+ * A numeric reference in the C1 control range, as a browser reads it: the
+ * character Windows-1252 kept at that byte, which is what a dictionary built
+ * with Windows tools meant by `&#150;` (an en dash) or `&#146;` (a closing
+ * quote) - never the control character. The standard's own table: thirty-two
+ * code points less the five Windows-1252 leaves unassigned (0x81, 0x8D, 0x8F,
+ * 0x90, 0x9D), which decode as written.
  */
-const NAMED_ENTITIES = Object.freeze({
-  amp: "&",
-  lt: "<",
-  gt: ">",
-  quot: '"',
-  apos: "'",
-  nbsp: " ",
-
-  lrm: String.fromCodePoint(0x200e),
-  rlm: String.fromCodePoint(0x200f),
-  zwj: String.fromCodePoint(0x200d),
-  zwnj: String.fromCodePoint(0x200c),
-  shy: String.fromCodePoint(0x00ad),
-  ensp: " ",
-  emsp: " ",
-  thinsp: " ",
-
-  // Written by code point, not as themselves: the house style keeps a literal
-  // em dash out of our own prose, and a dash decoded from a book is the book's
-  // character rather than ours - it has to come out as what the book wrote.
-  mdash: String.fromCodePoint(0x2014),
-  ndash: String.fromCodePoint(0x2013),
-  hellip: "…",
-  lsquo: "‘",
-  rsquo: "’",
-  ldquo: "“",
-  rdquo: "”",
-  sbquo: "‚",
-  bdquo: "„",
-  laquo: "«",
-  raquo: "»",
-  prime: "′",
-  Prime: "″",
-
-  deg: "°",
-  times: "×",
-  divide: "÷",
-  plusmn: "±",
-  middot: "·",
-  bull: "•",
-  dagger: "†",
-  Dagger: "‡",
-  sect: "§",
-  para: "¶",
-  copy: "©",
-  reg: "®",
-  trade: "™",
-  micro: "µ",
-  sup1: "¹",
-  sup2: "²",
-  sup3: "³",
-});
+const C1_AS_WINDOWS_1252 = new Map([
+  [0x80, 0x20ac], [0x82, 0x201a], [0x83, 0x0192], [0x84, 0x201e], [0x85, 0x2026], [0x86, 0x2020], [0x87, 0x2021],
+  [0x88, 0x02c6], [0x89, 0x2030], [0x8a, 0x0160], [0x8b, 0x2039], [0x8c, 0x0152], [0x8e, 0x017d],
+  [0x91, 0x2018], [0x92, 0x2019], [0x93, 0x201c], [0x94, 0x201d], [0x95, 0x2022], [0x96, 0x2013], [0x97, 0x2014],
+  [0x98, 0x02dc], [0x99, 0x2122], [0x9a, 0x0161], [0x9b, 0x203a], [0x9c, 0x0153], [0x9e, 0x017e], [0x9f, 0x0178],
+]);
 
 /**
+ * A character reference as the standard spells one: a name, a decimal number
+ * or a hexadecimal one, and the semicolon. The 106 legacy names a browser
+ * also takes without the semicolon are not taken here: in running text that
+ * rule decodes the `&para` inside "&parameter" too, and no dictionary counted
+ * so far writes a single one of them.
+ */
+const REFERENCE = /&(#[0-9]+|#[xX][0-9A-Fa-f]+|[A-Za-z][A-Za-z0-9]*);/gu;
+
+/**
+ * Every reference a browser would decode, decoded the way a browser decodes
+ * it: a dictionary is written for one, and nothing short of the browser's
+ * table reads the entries the way their authors saw them. Until 0.5.56 this
+ * was a list of the names that had turned up in real books, and
+ * `&lsqb;from 14th c.&rsqb;` reached the popup from reader.dict's English
+ * edition - which writes that pair twelve thousand times, `&minus;`, `&rarr;`
+ * and the Greek letters hundreds of times more, and `&frac12;`, a name with a
+ * digit in it that the old expression could not even match.
+ *
+ * The name is taken as written, never lower-cased: `&Prime;` and `&prime;`
+ * are two different marks, `&AMP;` has a line of its own in the table, and
+ * `&Lsqb;` is nobody's. A name that is not in the table, or a number that is
+ * no code point (zero, a surrogate, past the last plane), stays as written
+ * rather than being eaten: a reader can still see what the book wrote.
+ *
  * @param {string} text
  * @returns {string}
  */
 function decodeEntities(text) {
-  return text.replace(/&(#x?[0-9a-f]+|[a-z]+);/giu, (whole, body) => {
-    const table = /** @type {Record<string, string>} */ (NAMED_ENTITIES);
+  return text.replace(REFERENCE, (whole, body) => {
     const written = String(body);
-    // The spelling as written comes first: `&Prime;` and `&prime;` are two
-    // different marks, and lower-casing everything would let the second answer
-    // for both. Lower case second, so `&AMP;` still decodes.
-    const named = table[written] ?? table[written.toLowerCase()];
-    if (named !== undefined) return named;
-
-    const name = written.toLowerCase();
-
-    if (name.startsWith("#")) {
-      const code = name.startsWith("#x") ? Number.parseInt(name.slice(2), 16) : Number.parseInt(name.slice(1), 10);
-      // Anything outside Unicode, and the surrogate range, would throw.
-      if (Number.isInteger(code) && code > 0 && code <= 0x10ffff && !(code >= 0xd800 && code <= 0xdfff)) {
-        return String.fromCodePoint(code);
-      }
+    if (!written.startsWith("#")) {
+      // Own names only: `&constructor;` must not answer with the prototype's.
+      const named = Object.hasOwn(ENTITIES, written) ? ENTITIES[written] : undefined;
+      return named ?? whole;
     }
-
-    return whole;
+    const hex = written[1] === "x" || written[1] === "X";
+    const code = Number.parseInt(written.slice(hex ? 2 : 1), hex ? 16 : 10);
+    // Anything outside Unicode, and the surrogate range, would throw.
+    if (!Number.isInteger(code) || code <= 0 || code > 0x10ffff || (code >= 0xd800 && code <= 0xdfff)) return whole;
+    return String.fromCodePoint(C1_AS_WINDOWS_1252.get(code) ?? code);
   });
 }
 
@@ -345,6 +313,34 @@ export function fieldText({ type, text: raw }) {
   // The source annotations and the decoded tags after the decoding, because
   // the decoding is what surfaces them (see SOURCE_NOTE, DECODED_TAGS).
   return tidy(stripSourceNotes(decodeEntities(withoutMarkup)).replace(DECODED_TAGS, ""), false);
+}
+
+/**
+ * The revision of these rules, stamped on a dictionary as it is imported
+ * (`Dictionary.textRevision` in `store.js`), so that a lookup can tell what
+ * an older import left in its rows. Revision 2 (0.5.56) is the whole entity
+ * table: a dictionary imported before it - no revision on its record - has
+ * its senses brought up to date by `catchUp` as they are read, rather than
+ * by an import over again. Whoever raises this decides again what `catchUp`
+ * owes the rows written under each earlier revision.
+ */
+export const TEXT_REVISION = 2;
+
+/**
+ * A sense as an import before revision 2 stored it, brought up to what
+ * today's import writes - as far as the stored text allows, which for the
+ * entities is all the way: the tag strip was the same then, so what an old
+ * row lacks is exactly the tail of `fieldText` after it, and each step of
+ * that tail leaves a sense that already had it as it is. A row written under
+ * revision 2 is never brought here (`shownSenses` in `store.js`): an entry
+ * that honestly wrote `&amp;trade;` about the reference itself holds
+ * `&trade;` as text, and decoding it again would turn it into the mark.
+ *
+ * @param {string} sense as stored
+ * @returns {string}
+ */
+export function catchUp(sense) {
+  return tidy(stripSourceNotes(decodeEntities(sense)).replace(DECODED_TAGS, ""));
 }
 
 /**

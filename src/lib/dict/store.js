@@ -25,6 +25,7 @@
 import { cleanDisplayName, shownName } from "./display-name.js";
 import { answerOrder, inChosenOrder, nextRank } from "./order.js";
 import { mergeSenses, utf8Length } from "./rows.js";
+import { TEXT_REVISION, catchUp } from "./text.js";
 
 const DB_NAME = "reread-dicts";
 
@@ -69,6 +70,10 @@ const SOURCES = "sources";
  *   absent while they gave none, never empty
  * @property {ImportProgress} [progress] while unready: how far the import got,
  *   absent before its first batch landed
+ * @property {number} [textRevision] the revision of `text.js`'s cleaning the
+ *   rows were written under (`TEXT_REVISION`, since 0.5.56); absent on a
+ *   dictionary imported before that, whose senses `shownSenses` brings up to
+ *   date as they are read
  */
 
 /**
@@ -276,7 +281,11 @@ async function readEntries(store, dictionaries, keys) {
             );
 
       if (target === undefined || target.senses.length === 0) continue;
-      found.push({ dictionary: shownName(dictionary), headword: target.headword, senses: target.senses });
+      found.push({
+        dictionary: shownName(dictionary),
+        headword: target.headword,
+        senses: shownSenses(dictionary, target.senses),
+      });
       break;
     }
   }
@@ -309,6 +318,23 @@ export function settle(answers) {
   const asked = answers.find((answer) => answer.dictionaries > 0);
   if (asked !== undefined) return asked;
   return { entries: [], dictionaries: 0, lang: answers[0]?.lang ?? "" };
+}
+
+/**
+ * A row's senses as the reader gets them: as stored, unless the dictionary
+ * was imported before the whole entity table (`TEXT_REVISION` 2, 0.5.56) -
+ * then `catchUp` decodes what that import left as written, `&lsqb;` and the
+ * rest, on the way out. Ten short strings per answer, so the reader is not
+ * asked to import a dictionary again for it; a dictionary imported since
+ * carries the revision on its record and is left exactly as stored. Pure,
+ * so the rule can be tested without a database.
+ *
+ * @param {Dictionary} dictionary the record the row belongs to
+ * @param {string[]} senses as stored
+ * @returns {string[]}
+ */
+export function shownSenses(dictionary, senses) {
+  return (dictionary.textRevision ?? 1) < TEXT_REVISION ? senses.map(catchUp) : senses;
 }
 
 /**
@@ -406,6 +432,7 @@ export async function beginImport({ name, langFrom, langTo, credit }) {
       rank: nextRank(stored),
       ready: false,
       credit,
+      textRevision: TEXT_REVISION,
     };
 
     await promisify(store.put(dictionary));
