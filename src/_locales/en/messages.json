@@ -1362,8 +1362,12 @@
   "options_filter_dictionaries_label": { "message": "Filter the list of dictionaries" },
   "options_show_all": {
     "message": "Show all ($COUNT$)",
-    "description": "Unfolds a catalogue past its installed rows; the count is the whole list.",
+    "description": "Unfolds a catalogue past its installed rows; the count is every row the filter lets through - the whole list while nothing is typed.",
     "placeholders": { "count": { "content": "$1", "example": "118" } }
+  },
+  "options_show_fewer": {
+    "message": "Show fewer",
+    "description": "The same fold once the list is unfolded: folds it back to the installed rows."
   },
   "options_model_note_from": {
     "message": "Model downloads come from",
@@ -1512,10 +1516,6 @@
     "description": "The same button, armed and asking; shared by models (the pair label) and dictionaries (the name).",
     "placeholders": { "name": { "content": "$1", "example": "English to Polish" } }
   },
-  "options_about_dictionary": {
-    "message": "About this dictionary",
-    "description": "Summary of the fold holding a stored dictionary's publisher, licence and description."
-  },
   "options_size_here": {
     "message": "$SIZE$ here",
     "placeholders": { "size": { "content": "$1", "example": "40.2 MB" } }
@@ -1644,6 +1644,33 @@
       "place": { "content": "$2", "example": "1" },
       "total": { "content": "$3", "example": "3" }
     }
+  },
+  "options_dictionary_details": {
+    "message": "Details",
+    "description": "The fold at the end of a stored dictionary's row (the seventh brief): the display name field, the file's name and the attribution."
+  },
+  "options_dictionary_file_name": {
+    "message": "File name: $NAME$",
+    "description": "Inside that fold: what the dictionary's own .ifo file calls it.",
+    "placeholders": { "name": { "content": "$1", "example": "English-Polish FreeDict+WikDict dictionary (en-pl)" } }
+  },
+  "options_dictionary_display_name": {
+    "message": "Display name",
+    "description": "The caption of the field on a stored dictionary's row (D199): the name its entries are grouped under on the phrases page, in the popup and in the bubble, in place of the name its file carries."
+  },
+  "options_dictionary_display_name_aria": {
+    "message": "Display name of $NAME$",
+    "description": "The accessible name of that field; every row has one captioned the same.",
+    "placeholders": { "name": { "content": "$1", "example": "English-Polish FreeDict+WikDict dictionary (en-pl)" } }
+  },
+  "options_dictionary_name_taken": {
+    "message": "Another dictionary is already shown as $NAME$ - choose a different name.",
+    "description": "Two dictionaries shown under one name would be one group in the bubble, so the second name is refused.",
+    "placeholders": { "name": { "content": "$1", "example": "FreeDict en-pl" } }
+  },
+  "options_rename_failed": {
+    "message": "Could not save the name: $DETAIL$",
+    "placeholders": { "detail": { "content": "$1" } }
   },
   "options_reorder_failed": {
     "message": "Could not change the order: $DETAIL$",

@@ -53,6 +53,7 @@ import {
 import { describeZipProblem, readZip } from "../lib/dict/zip.js";
 import { entriesReadFrom, rowBatches } from "../lib/dict/rows.js";
 import { afterMove } from "../lib/dict/order.js";
+import { DISPLAY_NAME_LIMIT, cleanDisplayName, nameHolder, shownName } from "../lib/dict/display-name.js";
 import {
   beginImport,
   deleteDictionary,
@@ -61,6 +62,7 @@ import {
   openWriter,
   readSources,
   removeUnfinished,
+  renameDictionary,
   reorderDictionaries,
   stageSources,
 } from "../lib/dict/store.js";
@@ -1244,30 +1246,34 @@ function applyFilterIn(containerId, inputId, noneId, showAllId, expanded) {
   const input = document.getElementById(inputId);
   const query = input instanceof HTMLInputElement ? input.value : "";
 
-  let visible = 0;
-  let total = 0;
-  let installedCount = 0;
-  for (const row of container.querySelectorAll(".model")) {
+  // The rows the filter lets through, and the installed ones among them:
+  // what the fold stands over and counts. Every row of either list says
+  // whether it is installed; the models' rows and the dictionaries' are
+  // shaped differently, and that is the one mark they share.
+  let matching = 0;
+  let installedMatching = 0;
+  for (const row of container.querySelectorAll("[data-installed]")) {
     if (!(row instanceof HTMLElement)) continue;
-    total += 1;
     const installed = row.dataset["installed"] === "true";
-    if (installed) installedCount += 1;
     const matches = matchesFilter(row.dataset["search"] ?? "", query);
-    const shown = rowVisible({ installed, matches, expanded, query });
-    row.hidden = !shown;
-    if (shown) visible += 1;
+    if (matches) {
+      matching += 1;
+      if (installed) installedMatching += 1;
+    }
+    row.hidden = !rowVisible({ installed, matches, expanded });
   }
 
   // "The filter matched nothing" is only true of a filter: a folded list
   // showing none of its rows is answered by "Show all" below, not by this.
   const none = document.getElementById(noneId);
-  if (none !== null) none.hidden = !filterActive(query) || visible > 0;
+  if (none !== null) none.hidden = !filterActive(query) || matching > 0;
 
   const showAll = document.getElementById(showAllId);
   if (showAll instanceof HTMLButtonElement) {
-    const state = showAllState({ total, installedCount, expanded, query });
+    const state = showAllState({ total: matching, installedCount: installedMatching, expanded });
     showAll.hidden = !state.shown;
-    showAll.textContent = t("options_show_all", state.count.toLocaleString());
+    showAll.textContent = state.expanded ? t("options_show_fewer") : t("options_show_all", state.count.toLocaleString());
+    showAll.setAttribute("aria-expanded", String(state.expanded));
   }
 }
 
@@ -1280,21 +1286,26 @@ function applyCatalogFilter() {
 }
 
 /**
- * The press that unfolds a list past its installed rows. The button dissolves
- * under the pointer, so focus is walked to the first row it revealed - the
- * same place the eye went.
+ * The press on a list's fold: unfolds it past its installed rows, or folds
+ * it back (block 4 of the seventh brief). Unfolding walks the focus to the
+ * first row it revealed - the same place the eye went; folding leaves it on
+ * the button, which stays where it is to be pressed again.
  *
  * @param {"models" | "dictionary-catalog"} containerId
  */
-function expandList(containerId) {
+function toggleList(containerId) {
+  const opening = containerId === "models" ? !modelsExpanded : !dictionariesExpanded;
   if (containerId === "models") {
-    modelsExpanded = true;
+    modelsExpanded = opening;
     applyModelFilter();
   } else {
-    dictionariesExpanded = true;
+    dictionariesExpanded = opening;
     applyCatalogFilter();
   }
-  const first = document.querySelector(`#${containerId} .model[data-installed="false"] button`);
+  if (!opening) return;
+  // The first row on screen that the press revealed - not the first the
+  // filter is hiding.
+  const first = document.querySelector(`#${containerId} [data-installed="false"]:not([hidden]) button`);
   if (first instanceof HTMLElement) first.focus();
 }
 
@@ -1668,15 +1679,15 @@ function moveButton(dictionary, step, enabled) {
   button.className = "model-move";
   button.textContent = step < 0 ? "↑" : "↓";
   button.disabled = !enabled || importing;
+  // Said twice for the end of the list - the attribute and the state - so
+  // an assistive technology that reads only one of them still hears it.
+  if (button.disabled) button.setAttribute("aria-disabled", "true");
   // What the redraw after a move finds this button by - the row it belonged to
   // is gone by then, so the dictionary and the direction are the address.
   button.dataset["move"] = dictionary.id;
   button.dataset["step"] = String(step);
 
-  const label =
-    step < 0
-      ? t("options_move_dictionary_up_aria", dictionary.name)
-      : t("options_move_dictionary_down_aria", dictionary.name);
+  const label = moveLabel(dictionary, step);
   button.setAttribute("aria-label", label);
   button.title = label;
 
@@ -1685,78 +1696,203 @@ function moveButton(dictionary, step, enabled) {
 }
 
 /**
- * A stored dictionary's row - the same three cells a stored model gets, plus
- * what only a dictionary carries: its own name under the pair (two
- * dictionaries of one pair must be told apart), the arrows that move it up and
- * down the answering order, and its attribution, folded.
+ * The sentence an arrow carries, naming the book by the name the reader
+ * knows it by.
+ *
+ * @param {import("../lib/dict/store.js").Dictionary} dictionary
+ * @param {number} step
+ * @returns {string}
+ */
+function moveLabel(dictionary, step) {
+  const shown = shownName(dictionary);
+  return step < 0 ? t("options_move_dictionary_up_aria", shown) : t("options_move_dictionary_down_aria", shown);
+}
+
+/**
+ * A row of the dictionary list, begun: the line every row opens with - the
+ * pair, the badge of the pair being read, and room at its right edge for
+ * the row's buttons - under a list item that stacks its lines. The same
+ * stack at every width (the seventh brief, D2): a row is read top to bottom
+ * on a phone and on a desktop alike, and its buttons keep one place.
+ *
+ * @param {string} from
+ * @param {string} to
+ * @returns {{ row: HTMLElement, head: HTMLElement }}
+ */
+function dictionaryRow(from, to) {
+  const row = element("li", "dictionary-row");
+  const head = element("div", "dictionary-head");
+  head.append(element("span", "dictionary-pair", pairLabel(from, to)));
+  if (from === config.sourceLang && to === config.targetLang) {
+    head.append(element("span", "badge", t("options_badge_reading")));
+  }
+  row.append(head);
+  return { row, head };
+}
+
+/**
+ * The row's buttons, in the head's right edge: a group that never wraps
+ * inside itself, so a narrow screen moves the whole of it under the pair.
+ *
+ * @param {HTMLElement} head
+ * @param {HTMLElement[]} buttons
+ */
+function placeActions(head, buttons) {
+  const actions = element("span", "dictionary-actions");
+  actions.append(...buttons);
+  head.append(actions);
+}
+
+/**
+ * A row's line of small print, its items apart by a middle dot: the file's
+ * name when the reader gave the book another (the title wears that one), the
+ * counts, the size. One line that wraps between its items on a narrow
+ * screen - the space before the dot is the no-break kind, so a line never
+ * opens with a dot - and never inside a number: the digits are grouped by
+ * the reader's locale with its own no-break space, and each count stands
+ * with its unit in a span that does not wrap.
+ *
+ * @param {HTMLElement} meta the `p` to fill, emptied first
+ * @param {import("../lib/dict/store.js").Dictionary} dictionary
+ */
+function fillDictionaryMeta(meta, dictionary) {
+  /** @type {(string | HTMLElement)[]} */
+  const items = [];
+  if (shownName(dictionary) !== dictionary.name) items.push(element("span", "dictionary-file", dictionary.name));
+
+  const counts = element("span", "");
+  counts.append(element("span", "dictionary-count", words(dictionary.entryCount)));
+  if (dictionary.aliasCount > 0) {
+    counts.append(", ", element("span", "dictionary-count", plural(dictionary.aliasCount, "spellings")));
+  }
+  items.push(counts);
+  items.push(element("span", "dictionary-count", megabytes(dictionary.bytes)));
+
+  meta.replaceChildren();
+  items.forEach((item, at) => {
+    if (at > 0) meta.append("\u00a0· ");
+    meta.append(item);
+  });
+}
+
+/**
+ * A stored dictionary's row: the pair and the buttons on the first line, the
+ * name the reader knows the book by on the second - the one its groups stand
+ * under on the shelf (D199), so the list and the bubble call it the same
+ * thing - its small print on the third, and its fold on the last.
  *
  * @param {import("../lib/dict/store.js").Dictionary} dictionary
  * @param {{ at: number, total: number }} place among the stored dictionaries
  * @returns {HTMLElement}
  */
 function renderDictionary(dictionary, place) {
-  const container = element("div", "model");
-
-  const name = element("span", "model-name", pairLabel(dictionary.langFrom, dictionary.langTo));
-  if (dictionary.langFrom === config.sourceLang && dictionary.langTo === config.targetLang) {
-    name.append(element("span", "badge", t("options_badge_reading")));
-  }
-  name.append(element("span", "dictionary-title", dictionary.name));
-  container.append(name);
+  const { row, head } = dictionaryRow(dictionary.langFrom, dictionary.langTo);
+  const shown = shownName(dictionary);
+  row.append(element("p", "dictionary-name", shown));
 
   if (dictionary.id === deletingId) {
-    // Going: the counts give way to the one word that says so, and the
-    // buttons go with them - there is nothing left to press on this row.
-    const meta = element("span", "model-meta");
-    meta.append(element("span", "", t("options_deleting_row")));
-    container.append(meta);
-    return container;
+    // Going: the small print gives way to the one word that says so, and
+    // the buttons go with it - there is nothing left to press on this row.
+    row.append(element("p", "dictionary-meta", t("options_deleting_row")));
+    return row;
   }
 
   if (!dictionary.ready) {
-    renderUnfinished(container, dictionary);
-    return container;
+    renderUnfinished(row, head, dictionary);
+    return row;
   }
 
-  const counted =
-    dictionary.aliasCount > 0
-      ? `${words(dictionary.entryCount)}, ${plural(dictionary.aliasCount, "spellings")}`
-      : words(dictionary.entryCount);
-  const meta = element("span", "model-meta");
-  meta.append(element("span", "", counted));
-  meta.append(element("span", "", megabytes(dictionary.bytes)));
-  container.append(meta);
+  const meta = element("p", "dictionary-meta");
+  fillDictionaryMeta(meta, dictionary);
+  row.append(meta);
 
-  const act = element("span", "model-act");
+  /** @type {HTMLElement[]} */
+  const buttons = [];
   // Only where there is something to arrange: one dictionary answers first
   // whatever the arrows say, and two dead buttons on its row would be a
   // control that does nothing standing next to one that deletes.
   if (place.total > 1) {
-    act.append(moveButton(dictionary, -1, place.at > 0));
-    act.append(moveButton(dictionary, 1, place.at < place.total - 1));
+    buttons.push(moveButton(dictionary, -1, place.at > 0));
+    buttons.push(moveButton(dictionary, 1, place.at < place.total - 1));
   }
-  act.append(
+  buttons.push(
     deleteButton({
-      name: dictionary.name,
-      restAria: t("options_delete_dictionary_aria", dictionary.name),
+      name: shown,
+      restAria: t("options_delete_dictionary_aria", shown),
       disabled: importing,
       onConfirm: (button) => void removeDictionary(dictionary, button),
     }),
   );
-  container.append(act);
+  placeActions(head, buttons);
 
-  // Attribution is why this fold is here at all: the dictionaries worth having
-  // are Wiktionary-derived and CC BY-SA, and naming their source is the whole
-  // of what that asks for. Folded, not gone - the row stays scannable and the
-  // credit stays, one press away, exactly as the dictionary wrote it.
-  if (dictionary.credit !== null) {
-    const about = element("details", "model-about");
-    about.append(element("summary", "", t("options_about_dictionary")));
-    about.append(element("p", "dictionary-credit", dictionary.credit));
-    container.append(about);
+  // The fold every finished book ends with (block 2 of the seventh brief):
+  // the name the reader may give it instead of the file's (D199), the file's
+  // name said in full - here it is information, not a repeat - and, when
+  // the book wrote one, its attribution: the dictionaries worth having are
+  // Wiktionary-derived and CC BY-SA, and naming their source is the whole of
+  // what that asks for. Folded, not gone - the row stays scannable, the
+  // rarely-used field is not a field per row on a list of hundreds, and the
+  // credit stays one press away, exactly as the dictionary wrote it. An
+  // unfinished book gets none of this: it is still being named by its files.
+  const details = element("details", "dictionary-details");
+  details.append(element("summary", "", t("options_dictionary_details")));
+  details.append(renameField(dictionary));
+  details.append(element("p", "dictionary-file-name", t("options_dictionary_file_name", dictionary.name)));
+  if (dictionary.credit !== null) details.append(element("p", "dictionary-credit", dictionary.credit));
+  row.append(details);
+
+  return row;
+}
+
+/**
+ * Everything on a row that says the book's name, said again after the name
+ * changed (block 2 of the seventh brief): the title, the small print (the
+ * file's name stands there only while it differs), the arrows' and Delete's
+ * sentences, and what the filter finds the row by. In place, on the row
+ * that is there: a redraw of the list would shut the fold the name was
+ * typed in and drop the focus on the page's floor.
+ *
+ * @param {HTMLElement} row
+ * @param {import("../lib/dict/store.js").Dictionary} dictionary as the store now has it
+ */
+function refreshRowName(row, dictionary) {
+  const shown = shownName(dictionary);
+  const title = row.querySelector(".dictionary-name");
+  if (title !== null) title.textContent = shown;
+  const meta = row.querySelector(".dictionary-meta");
+  if (meta instanceof HTMLElement) fillDictionaryMeta(meta, dictionary);
+
+  for (const step of [-1, 1]) {
+    const arrow = moveButtonFor(dictionary.id, step);
+    if (arrow === null) continue;
+    const label = moveLabel(dictionary, step);
+    arrow.setAttribute("aria-label", label);
+    arrow.title = label;
   }
 
-  return container;
+  const remove = row.querySelector("button.model-delete");
+  if (remove instanceof HTMLButtonElement) {
+    const restAria = t("options_delete_dictionary_aria", shown);
+    remove.dataset["name"] = shown;
+    remove.dataset["restAria"] = restAria;
+    // An armed Delete is asking "Sure?" about this very book; its sentence
+    // is rebuilt from the name at the press, and stands down to the rest one.
+    if (!remove.hasAttribute("data-armed")) remove.setAttribute("aria-label", restAria);
+  }
+
+  row.dataset["search"] = dictionarySearchText(dictionary);
+}
+
+/**
+ * What the filter finds a stored book's row by: the pair either way it is
+ * spelled, the file's name, and the name the reader gave it (D199).
+ *
+ * @param {import("../lib/dict/store.js").Dictionary} dictionary
+ * @returns {string}
+ */
+function dictionarySearchText(dictionary) {
+  const own = dictionary.displayName === undefined ? "" : ` ${dictionary.displayName.toLowerCase()}`;
+  return `${searchableText({ from: dictionary.langFrom, to: dictionary.langTo })} ${dictionary.name.toLowerCase()}${own}`;
 }
 
 /**
@@ -1769,37 +1905,34 @@ function renderDictionary(dictionary, place) {
  * while an import runs - on this page, or, for as long as the lock is held,
  * on another.
  *
- * @param {HTMLElement} container
+ * @param {HTMLElement} row the list item, its head and name already in
+ * @param {HTMLElement} head the row's first line, where the buttons go
  * @param {import("../lib/dict/store.js").Dictionary} dictionary
  */
-function renderUnfinished(container, dictionary) {
+function renderUnfinished(row, head, dictionary) {
   const progress = dictionary.progress;
   const standing = importElsewhere
     ? t("options_import_elsewhere")
     : progress === undefined
       ? t("options_import_interrupted_early")
       : t("options_import_interrupted", [progress.done.toLocaleString(), progress.total.toLocaleString()]);
-  const meta = element("span", "model-meta");
-  meta.append(element("span", "", standing));
-  container.append(meta);
+  row.append(element("p", "dictionary-meta", standing));
 
-  const act = element("span", "model-act");
   const go = document.createElement("button");
   go.type = "button";
   go.textContent = t("options_continue_import");
   go.setAttribute("aria-label", t("options_continue_import_aria", dictionary.name));
   go.disabled = importing || importElsewhere;
   go.addEventListener("click", () => void resumeImport(dictionary));
-  act.append(go);
-  act.append(
+  placeActions(head, [
+    go,
     deleteButton({
       name: dictionary.name,
       restAria: t("options_delete_dictionary_aria", dictionary.name),
       disabled: importing || importElsewhere,
       onConfirm: (button) => void removeDictionary(dictionary, button),
     }),
-  );
-  container.append(act);
+  ]);
 }
 
 /**
@@ -1879,13 +2012,96 @@ async function moveDictionary(dictionary, step) {
   if (at >= 0) {
     dictionaryStatus(
       t("options_dictionary_moved", [
-        dictionary.name,
+        shownName(dictionary),
         (at + 1).toLocaleString(),
         dictionaryOrder.length.toLocaleString(),
       ]),
     );
   }
   focusMove(dictionary.id, step);
+}
+
+/**
+ * The field a stored dictionary's own name is typed into (D199): the name its
+ * groups stand under on the shelf - the panel, the popup, the bubble - and
+ * the title of its row here, in place of what its file calls it. The file's
+ * name is the placeholder, so an empty field says what it means; the field
+ * stops where the record would cut.
+ *
+ * Saved when the field is left or Enter is pressed (`change`), not on every
+ * keystroke: a name is a decision, and a half-typed one would be a database
+ * write per letter. A label around the field is what a press on the caption
+ * focuses; the accessible name says which dictionary's, since every row has
+ * a field captioned the same.
+ *
+ * @param {import("../lib/dict/store.js").Dictionary} dictionary
+ * @returns {HTMLElement}
+ */
+function renameField(dictionary) {
+  const line = element("label", "dictionary-rename");
+  line.append(element("span", "dictionary-rename-label", t("options_dictionary_display_name")));
+
+  const field = document.createElement("input");
+  field.type = "text";
+  field.className = "dictionary-rename-field";
+  field.maxLength = DISPLAY_NAME_LIMIT;
+  field.placeholder = dictionary.name;
+  field.value = dictionary.displayName ?? "";
+  field.autocomplete = "off";
+  field.spellcheck = false;
+  field.setAttribute("aria-label", t("options_dictionary_display_name_aria", dictionary.name));
+  // Held like the arrows while an import writes to this database: the redraw
+  // at its end would take a half-typed name with it.
+  field.disabled = importing;
+  field.addEventListener("change", () => void renameFromField(dictionary, field));
+  line.append(field);
+  return line;
+}
+
+/**
+ * What a change of the field does: the typed name, cleaned, becomes the
+ * dictionary's own - or, emptied, gives the file's name back - and the row
+ * says the new name at once, in place (`refreshRowName`): no redraw, so the
+ * fold stays open and the focus stays in the field, and no sentence in the
+ * status line - the title changing is the answer. Refused when another
+ * dictionary is already shown under it, over the list as the store has it
+ * now (a second page may have named one since this list was drawn): the
+ * field goes back to what it held and the section's status line says why,
+ * since a name that silently came back would read as a broken field.
+ *
+ * @param {import("../lib/dict/store.js").Dictionary} dictionary the row's own
+ *   record, which learns the name so the row's later actions say it too
+ * @param {HTMLInputElement} field
+ */
+async function renameFromField(dictionary, field) {
+  const wanted = cleanDisplayName(field.value);
+  const held = dictionary.displayName ?? null;
+  if (wanted === held) {
+    // Nothing to write - spaces around the same name, say - but the field
+    // shows the name as the record would have kept it.
+    field.value = held ?? "";
+    return;
+  }
+
+  if (wanted !== null && nameHolder(await listDictionaries(), dictionary.id, wanted) !== null) {
+    field.value = held ?? "";
+    dictionaryStatus(t("options_dictionary_name_taken", wanted), "error");
+    return;
+  }
+
+  try {
+    await renameDictionary(dictionary.id, wanted);
+  } catch (error) {
+    field.value = held ?? "";
+    dictionaryStatus(t("options_rename_failed", message(error)), "error");
+    return;
+  }
+
+  if (wanted === null) delete dictionary.displayName;
+  else dictionary.displayName = wanted;
+  field.value = wanted ?? "";
+  const row = field.closest(".dictionary-row");
+  if (row instanceof HTMLElement) refreshRowName(row, dictionary);
 }
 
 /**
@@ -1906,14 +2122,15 @@ async function removeDictionary(dictionary, button) {
   importing = true;
   deletingId = dictionary.id;
   const letGo = holdScreen();
-  dictionaryStatus(t("options_deleting_dictionary", dictionary.name), "busy");
+  const shown = shownName(dictionary);
+  dictionaryStatus(t("options_deleting_dictionary", shown), "busy");
   await renderCatalog();
 
   try {
     await deleteDictionary(dictionary.id);
-    dictionaryStatus(t("options_deleted_dictionary", dictionary.name));
+    dictionaryStatus(t("options_deleted_dictionary", shown));
   } catch (error) {
-    dictionaryStatus(t("options_delete_dictionary_failed", [dictionary.name, message(error)]), "error");
+    dictionaryStatus(t("options_delete_dictionary_failed", [shown, message(error)]), "error");
   } finally {
     letGo();
     deletingId = null;
@@ -1939,18 +2156,15 @@ function catalogRowId(entry) {
  * @returns {HTMLElement}
  */
 function renderCatalogRow(entry) {
-  const container = element("div", "model");
-  container.append(element("span", "model-name", pairLabel(entry.from, entry.to)));
+  const { row, head } = dictionaryRow(entry.from, entry.to);
 
   const get = document.createElement("button");
   get.type = "button";
   get.textContent = t("action_download");
   get.disabled = running !== null || importing;
   get.addEventListener("click", () => void downloadDictionary(entry));
-  const act = element("span", "model-act");
-  act.append(get);
-  container.append(act);
-  return container;
+  placeActions(head, [get]);
+  return row;
 }
 
 /**
@@ -1984,7 +2198,7 @@ async function renderCatalog() {
   container.replaceChildren();
 
   if (rows.length === 0) {
-    container.append(element("p", "empty", t("options_no_catalog")));
+    container.append(element("li", "empty", t("options_no_catalog")));
   } else {
     // Which place among the stored ones this row holds - the arrows need it,
     // and the rows arrive with the stored ones first, in their own order.
@@ -1995,8 +2209,7 @@ async function renderCatalog() {
       if (row.installed !== null) {
         rendered = renderDictionary(row.installed, { at, total: stored.length });
         at += 1;
-        // Found by the pair either way it is spelled, and by the book's own name.
-        rendered.dataset["search"] = `${searchableText(row)} ${row.installed.name.toLowerCase()}`;
+        rendered.dataset["search"] = dictionarySearchText(row.installed);
       } else if (row.available !== null) {
         rendered = renderCatalogRow(row.available);
         rendered.id = catalogRowId(row.available);
@@ -2008,7 +2221,7 @@ async function renderCatalog() {
       container.append(rendered);
     }
 
-    const none = element("p", "empty", t("options_filter_no_match_dictionaries"));
+    const none = element("li", "empty", t("options_filter_no_match_dictionaries"));
     none.id = "dictionary-none";
     none.hidden = true;
     container.append(none);
@@ -2029,15 +2242,8 @@ async function renderCatalog() {
  */
 function renderFetching(container, entry, controller) {
   container.replaceChildren();
-  container.append(element("span", "model-name", pairLabel(entry.from, entry.to)));
-
-  const bar = document.createElement("progress");
-  bar.className = "model-progress";
-
-  const size = element("span", "", "");
-
-  const meta = element("span", "model-meta");
-  meta.append(bar, size);
+  const head = element("div", "dictionary-head");
+  head.append(element("span", "dictionary-pair", pairLabel(entry.from, entry.to)));
 
   const cancel = document.createElement("button");
   cancel.type = "button";
@@ -2046,11 +2252,17 @@ function renderFetching(container, entry, controller) {
     cancel.disabled = true;
     controller.abort();
   });
+  placeActions(head, [cancel]);
 
-  const act = element("span", "model-act");
-  act.append(cancel);
+  const bar = document.createElement("progress");
+  bar.className = "model-progress";
 
-  container.append(meta, act);
+  const size = element("span", "", "");
+
+  const meta = element("p", "dictionary-meta dictionary-fetching");
+  meta.append(bar, size);
+
+  container.append(head, meta);
 
   let shown = "";
   return ({ received, total }) => {
@@ -2887,8 +3099,8 @@ document.getElementById("refresh-models")?.addEventListener("click", () => void 
 document.getElementById("refresh-dictionaries")?.addEventListener("click", () => void refreshDictionaryList());
 document.getElementById("model-filter")?.addEventListener("input", () => applyModelFilter());
 document.getElementById("dictionary-filter")?.addEventListener("input", () => applyCatalogFilter());
-document.getElementById("models-show-all")?.addEventListener("click", () => expandList("models"));
-document.getElementById("dictionaries-show-all")?.addEventListener("click", () => expandList("dictionary-catalog"));
+document.getElementById("models-show-all")?.addEventListener("click", () => toggleList("models"));
+document.getElementById("dictionaries-show-all")?.addEventListener("click", () => toggleList("dictionary-catalog"));
 document.getElementById("add-dictionary")?.addEventListener("click", () => void addSelectedDictionary());
 document.getElementById("download-link")?.addEventListener("click", () => void downloadFromLink());
 // Enter in the address field is the same press: an address is pasted and

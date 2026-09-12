@@ -42,15 +42,8 @@ import { clearableField } from "./clear-field.js";
 import { HINT_MAX_WORDS, linkedWord } from "./gloss.js";
 import { t, uiLocale } from "./i18n.js";
 import { languageName } from "./language.js";
-import {
-  afterPress,
-  entryGroups,
-  foldPoint,
-  isSaved,
-  lookupOutcome,
-  lookupText,
-  ownMeanings,
-} from "./lookup.js";
+import { afterPress, entryGroups, isSaved, lookupOutcome, lookupText, ownMeanings } from "./lookup.js";
+import { renderShelf, shelfFold, shelfRow } from "./lookup-shelf.js";
 import { keyTokens } from "./matcher/tokenize.js";
 import { describeError } from "./messages.js";
 import { collapseWhitespace } from "./normalize.js";
@@ -427,7 +420,7 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
     section.setAttribute("aria-label", t("lookup_own"));
     section.append(element("div", "lookup-own-label", t("lookup_own")));
     for (const [at, meaning] of ownMeanings(state.meanings, lines).entries()) {
-      section.append(lineRow(meaning, `own:${at}`));
+      section.append(shelfRow(meaning, `own:${at}`, { saved: true, onPress: (line, where) => void press(line, where) }));
     }
 
     const form = document.createElement("form");
@@ -457,90 +450,6 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
   }
 
   /**
-   * A fold with its state remembered: open as the reader last left it, or
-   * as the default says; every change of the reader's hand is written down
-   * for the next redraw.
-   *
-   * @param {string} className
-   * @param {string} key the fold's key in `folds`
-   * @param {boolean} openByDefault
-   * @param {HTMLElement} summary
-   * @returns {HTMLDetailsElement}
-   */
-  function fold(className, key, openByDefault, summary) {
-    const details = document.createElement("details");
-    details.className = className;
-    details.open = folds.get(key) ?? openByDefault;
-    details.append(summary);
-    details.addEventListener("toggle", () => {
-      folds.set(key, details.open);
-    });
-    return details;
-  }
-
-  /**
-   * The books' entries as one fold per book (block 3): the first open, the
-   * others closed with the count in their name - the height of the answer
-   * limited by structure, not by a scrollbar. Inside a book, the lines past
-   * `LINES_OPEN` fold again under "Show all", which opens by itself when a
-   * saved meaning would otherwise be out of sight. The same shelf where
-   * the field only reads - the rows without their boxes (`lineRow`).
-   *
-   * @param {import("./lookup.js").EntryGroup[]} groups
-   * @returns {HTMLElement[]} one fold per book, for the shelf
-   */
-  function books(groups) {
-    /** @type {HTMLElement[]} */
-    const shelf = [];
-    for (const [at, group] of groups.entries()) {
-      const summary = element("summary", "lookup-group-label");
-      summary.append(element("span", "lookup-entry-dict", group.dictionary));
-      summary.append(` (${group.lines.length.toLocaleString()})`);
-      const book = fold("lookup-group", `group:${group.dictionary}`, at === 0, summary);
-
-      // Everything up to the cut goes straight into the book; the rest
-      // goes into the block behind "Show all", headwords and lines alike.
-      const { shown, unfolded } = foldPoint(group.lines, state.meanings);
-      const more = shown < group.lines.length ? moreFold(book, group, unfolded, at) : null;
-      let index = 0;
-      for (const entry of group.entries) {
-        const into = more !== null && index >= shown ? more.rest : book;
-        if (entry.headword.length > 0) {
-          into.append(element("div", "lookup-entry-headword", entry.headword));
-        }
-        // A label stands over the first meaning after it, wherever that
-        // meaning lands - open, or behind "Show all" - so a cut inside a
-        // section leaves the label with its lines; a label with no meaning
-        // after it stands over nothing and is dropped. Transcriptions and
-        // cross-references are the book's "More about the word", below.
-        /** @type {string | null} */
-        let label = null;
-        for (const row of entry.rows) {
-          if (row.kind === "heading") {
-            label = row.text;
-            continue;
-          }
-          if (row.kind !== "meaning") continue;
-          const home = more !== null && index >= shown ? more.rest : book;
-          if (label !== null) {
-            home.append(element("div", "lookup-entry-heading", label));
-            label = null;
-          }
-          home.append(lineRow(row.text, `${at}:${index}`));
-          index += 1;
-        }
-      }
-      // The rest of the lines, then the button: the book's last child but
-      // one, so the rows unfold above it and it stays where it is in both
-      // states; "More about the word" last of all.
-      if (more !== null) book.append(more.rest, more.toggle);
-      if (group.about.length > 0) book.append(aboutFold(group));
-      shelf.push(book);
-    }
-    return shelf;
-  }
-
-  /**
    * What the phrase already means, first on the shelf where the field only
    * reads (the fourth brief's D2): every saved meaning - a book's line or
    * the reader's own - as a row with a tick standing still where the
@@ -553,7 +462,7 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
    */
   function savedGroup() {
     const summary = element("summary", "lookup-group-label", t("lookup_saved_group", [state.meanings.length.toLocaleString()]));
-    const group = fold("lookup-group lookup-group-saved", "saved", true, summary);
+    const group = shelfFold("lookup-group lookup-group-saved", "saved", true, summary, folds);
     for (const [at, meaning] of state.meanings.entries()) {
       const row = element("div", "lookup-line");
       row.dataset["line"] = `saved:${at}`;
@@ -564,103 +473,6 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
       group.append(row);
     }
     return group;
-  }
-
-  /**
-   * What the book says beside its meanings - the transcriptions and the
-   * cross-references, in the order the entry had them - folded under "More
-   * about the word" at the end of the book, closed until asked: a reader
-   * ticking meanings does not need eight transcriptions between them. One
-   * line, one paragraph, plain text. Remembered like the other folds.
-   *
-   * @param {import("./lookup.js").EntryGroup} group
-   * @returns {HTMLDetailsElement}
-   */
-  function aboutFold(group) {
-    const about = fold("lookup-about", `about:${group.dictionary}`, false, element("summary", "lookup-about-label", t("lookup_more_about")));
-    for (const line of group.about) about.append(element("div", "lookup-paragraph", line));
-    return about;
-  }
-
-  /**
-   * The rest of a long book's lines behind "Show all (N)" (block 3 of the
-   * polish round): the lines in a block that is hidden or shown, and the
-   * button after them - always the book's last child, so the rows unfold
-   * above it and it does not move between the two states. A button over a
-   * hidden block rather than a `details`: a summary has to stand first in
-   * its fold, and the rows then unfolded under the link. Opened and closed
-   * on the spot, without a redraw (a redraw rebuilds the rows under the
-   * finger); the state is written down in `folds` for the next redraw. A
-   * close from the bottom of a long book brings the book's name back into
-   * view when it has scrolled off the top, so the reader does not land in
-   * another book; an open moves nothing - the rows appear where the button
-   * was.
-   *
-   * @param {HTMLElement} book the fold the lines belong to
-   * @param {import("./lookup.js").EntryGroup} group
-   * @param {boolean} unfolded whether the block starts shown (a saved line
-   *   in it, `foldPoint`)
-   * @param {number} at the book's index, for the block's id
-   * @returns {{ rest: HTMLElement, toggle: HTMLButtonElement }}
-   */
-  function moreFold(book, group, unfolded, at) {
-    const key = `more:${group.dictionary}`;
-    const open = folds.get(key) ?? unfolded;
-    const rest = element("div", "lookup-more");
-    rest.id = `lookup-more-${at}`;
-    rest.hidden = !open;
-    const toggle = button("lookup-more-toggle", "");
-    toggle.setAttribute("aria-controls", rest.id);
-    const say = (/** @type {boolean} */ shown) => {
-      toggle.textContent = shown ? t("lookup_show_fewer") : t("lookup_show_all", [group.lines.length.toLocaleString()]);
-      toggle.setAttribute("aria-expanded", String(shown));
-    };
-    say(open);
-    toggle.addEventListener("click", () => {
-      // `hidden` may also be a string in the newest DOM typings.
-      const opening = rest.hidden === true;
-      rest.hidden = !opening;
-      say(opening);
-      folds.set(key, opening);
-      if (!opening && book.getBoundingClientRect().top < 0) book.scrollIntoView({ block: "start" });
-    });
-    return { rest, toggle };
-  }
-
-  /**
-   * A dictionary line as a row to tick: a label over the whole row with a
-   * native checkbox in it - it draws solidly on e-ink, reads as a checkbox
-   * to a screen reader, and takes the space bar and Tab for nothing. What
-   * says the meaning is kept is the checkbox's own mark and the weight of
-   * the text (the stylesheet, off `data-saved`): a wash alone is one of the
-   * 16 greys an e-ink panel rounds back to paper.
-   *
-   * @param {string} line
-   * @param {string} at the row's mark, stable across redraws
-   * @returns {HTMLElement}
-   */
-  function lineRow(line, at) {
-    const saved = isSaved(state.meanings, line);
-    if (readOnly) {
-      // The same row without its box (the fourth brief's D2): nothing to
-      // press, the weight alone saying the meaning is kept - the tick
-      // stands once, in "Saved" above.
-      const row = element("div", "lookup-line");
-      row.dataset["line"] = at;
-      row.dataset["saved"] = saved ? "true" : "false";
-      row.append(element("span", "lookup-line-text", line));
-      return row;
-    }
-    const row = element("label", "lookup-line");
-    row.dataset["line"] = at;
-    row.dataset["saved"] = saved ? "true" : "false";
-    const box = document.createElement("input");
-    box.type = "checkbox";
-    box.className = "lookup-line-box";
-    box.checked = saved;
-    box.addEventListener("change", () => void press(line, at));
-    row.append(box, element("span", "lookup-line-text", line));
-    return row;
   }
 
   /**
@@ -809,7 +621,14 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
         : [];
     const shelf = element("div", "lookup-entries");
     if (readOnly && !state.pending && state.meanings.length > 0) shelf.append(savedGroup());
-    shelf.append(...books(groups));
+    shelf.append(
+      ...renderShelf(groups, {
+        meanings: state.meanings,
+        folds,
+        readOnly,
+        onPress: (line, at) => void press(line, at),
+      }),
+    );
     if (!readOnly && !state.pending) shelf.append(ownSection(groups.flatMap((group) => group.lines)));
     if (shelf.childElementCount > 0) answer.append(shelf);
 

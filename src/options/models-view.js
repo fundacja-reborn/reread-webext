@@ -167,30 +167,31 @@ export function filterActive(query) {
  *
  * The lists stand folded to what is installed, because that is what somebody
  * returns to this page for; the hundreds of downloadable rows unfold on
- * request. A query overrides the fold in both directions - typing searches
- * the whole list without a press on "Show all", and what it hides it hides
- * even among the installed.
+ * request. The filter narrows the list the fold stands over, and the fold
+ * stays (block 4 of the seventh brief): a query hides what it does not
+ * match, installed or not, and among what it matches the fold keeps the
+ * installed rows on screen and the rest behind "Show all", counted.
  *
- * @param {{ installed: boolean, matches: boolean, expanded: boolean, query: string }} row
+ * @param {{ installed: boolean, matches: boolean, expanded: boolean }} row
  * @returns {boolean}
  */
-export function rowVisible({ installed, matches, expanded, query }) {
-  if (filterActive(query)) return matches;
-  return expanded || installed;
+export function rowVisible({ installed, matches, expanded }) {
+  return matches && (expanded || installed);
 }
 
 /**
- * The one control of a folded list: whether "Show all" stands, and the count
- * it wears. The count is the whole list - the promise of what pressing it
- * shows, not of what is currently out of sight. Gone while a query runs the
- * list (the filter already reaches everything) and once everything shows
- * anyway.
+ * The one control of a folded list: whether it stands, which way it reads -
+ * "Show all (N)" over a folded list, "Show fewer" over an unfolded one - and
+ * the count it wears: the rows the filter lets through, the promise of what
+ * pressing it shows. Gone only when everything the filter lets through is on
+ * screen anyway: nothing beyond the installed rows.
  *
- * @param {{ total: number, installedCount: number, expanded: boolean, query: string }} list
- * @returns {{ shown: boolean, count: number }}
+ * @param {{ total: number, installedCount: number, expanded: boolean }} list
+ *   the rows the filter lets through, and the installed ones among them
+ * @returns {{ shown: boolean, expanded: boolean, count: number }}
  */
-export function showAllState({ total, installedCount, expanded, query }) {
-  return { shown: !expanded && !filterActive(query) && total > installedCount, count: total };
+export function showAllState({ total, installedCount, expanded }) {
+  return { shown: total > installedCount, expanded, count: total };
 }
 
 /**

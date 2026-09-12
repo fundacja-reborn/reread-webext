@@ -150,18 +150,21 @@ export function entryGroups(entries, normalized, lang) {
 export const LINES_OPEN = 8;
 
 /**
- * Where a group's rows are cut (`LINES_OPEN`), and whether the fold under
- * the cut starts open: it does when a saved meaning would otherwise be out
- * of sight - a tick that cannot be seen is a state the panel is hiding.
+ * Where a group's rows are cut (`LINES_OPEN`, or the home's own count),
+ * and whether the fold under the cut starts open: it does when a saved
+ * meaning would otherwise be out of sight - a tick that cannot be seen is a
+ * state the panel is hiding. A home whose own box scrolls (the bubble)
+ * cuts nowhere: `null`.
  *
  * @param {string[]} lines the group's lines, in order
  * @param {string[]} meanings what the phrase means now
+ * @param {number | null} [foldAt] lines open before the cut; null for no cut
  * @returns {{ shown: number, unfolded: boolean }} how many lines stand open;
  *   whether the fold with the rest opens by default (false with nothing
  *   folded)
  */
-export function foldPoint(lines, meanings) {
-  const shown = Math.min(lines.length, LINES_OPEN);
+export function foldPoint(lines, meanings, foldAt = LINES_OPEN) {
+  const shown = foldAt === null ? lines.length : Math.min(lines.length, foldAt);
   const folded = lines.slice(shown);
   return { shown, unfolded: folded.some((line) => isSaved(meanings, line)) };
 }

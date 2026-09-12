@@ -527,7 +527,7 @@
     <!-- Folded length, not a scrolled box: the list stands in the page's own
          flow, installed rows first, and this button unfolds the rest. Typing
          in the filter above searches the whole list either way. -->
-    <button type="button" id="models-show-all" class="show-all" hidden></button>
+    <button type="button" id="models-show-all" class="show-all" aria-controls="models" hidden></button>
 
     <p id="model-status" class="status" role="status"></p>
 
@@ -652,9 +652,12 @@
       answer.
     </p>
 
-    <div id="dictionary-catalog" class="models"></div>
+    <!-- A list, not a frame of cells: every dictionary is one item that
+         stacks its lines - pair and buttons, name, small print, fold - the
+         same way at every width (the seventh brief). -->
+    <ul id="dictionary-catalog" class="models"></ul>
 
-    <button type="button" id="dictionaries-show-all" class="show-all" hidden></button>
+    <button type="button" id="dictionaries-show-all" class="show-all" aria-controls="dictionary-catalog" hidden></button>
 
     <p id="dictionary-status" class="status" role="status"></p>
 
@@ -777,7 +780,7 @@
 
       <!-- The download's progress in the catalogue's own row shape: shown
            while a download runs, emptied and hidden after it. -->
-      <div id="dictionary-link-row" class="model" hidden></div>
+      <div id="dictionary-link-row" class="dictionary-row" hidden></div>
 
       <p id="dictionary-link-status" class="status" role="status"></p>
 

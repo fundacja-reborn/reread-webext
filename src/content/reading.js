@@ -32,7 +32,8 @@
 
 import { webext } from "../lib/browser.js";
 import { CONFIG_KEY, DEFAULTS, chosenPair, withDefaults } from "../lib/config.js";
-import { HINT_MAX_WORDS, dictionaryHint, entryBlocks, filingWarning, linkedWord, quietNote } from "../lib/gloss.js";
+import { HINT_MAX_WORDS, dictionaryHint, filingWarning, linkedWord, quietNote } from "../lib/gloss.js";
+import { entryGroups } from "../lib/lookup.js";
 import { t, uiLocale } from "../lib/i18n.js";
 import { languageName, pairLabel } from "../lib/language.js";
 import { keyTokens } from "../lib/matcher/tokenize.js";
@@ -528,7 +529,9 @@ function landQuietAnswer(answer, normalized, findable) {
     tooltip.setHint(dictionaryVerdict(note, answer.lang, wordsOf(normalized)));
     return;
   }
-  tooltip.setEntries(entryBlocks(answer.entries, normalized));
+  // The shelf, with its rows told apart in the language the books answered
+  // in (`entryGroups`): the same rows the saved-phrases page draws.
+  tooltip.setEntries(entryGroups(answer.entries, normalized, answer.lang));
   // The filing line (D167) where it applies, and otherwise no line at all -
   // the pending one may not stand over the entries.
   tooltip.setContext(filingNote(answer.entries.length, findable, answer.lang), "note");
@@ -1200,14 +1203,14 @@ async function fillSecondLayer() {
     const entries = answer?.entries ?? [];
     // The same voice rule as the fresh selection's (D191, `landQuietAnswer`).
     phrase.answered = answer !== null && entries.length > 0 ? answer.lang : "";
-    const blocks = entryBlocks(entries, phrase.normalized);
-    if (blocks.length === 0) {
+    const groups = entryGroups(entries, phrase.normalized, answer?.lang ?? phrase.lang);
+    if (groups.length === 0) {
       tooltip.setContext(t("bubble_nothing_more"), "note");
       tooltip.setEntries([]);
       return;
     }
     tooltip.setContext(null);
-    tooltip.setEntries(blocks);
+    tooltip.setEntries(groups);
     return;
   }
 
@@ -1227,7 +1230,8 @@ async function fillSecondLayer() {
   }
 
   const { sentence, entries } = asTranslation(result.value);
-  const blocks = entryBlocks(entries ?? [], phrase.normalized);
+  // The books answered in the language that knew the phrase, else the pair's.
+  const groups = entryGroups(entries ?? [], phrase.normalized, phrase.answered.length > 0 ? phrase.answered : ttsLang);
 
   // Nothing behind More after all - no sentence to translate (a selected
   // phrase that is a whole short sentence, common in a book's dialogue),
@@ -1235,14 +1239,14 @@ async function fillSecondLayer() {
   // the button away instead, and the bubble snapping shut on the press that
   // opened it read as the UI breaking. The line stays for as long as the
   // bubble does, and More goes on folding it like any other layer.
-  if ((sentence === null || sentence.length === 0) && blocks.length === 0) {
+  if ((sentence === null || sentence.length === 0) && groups.length === 0) {
     tooltip.setContext(t("bubble_nothing_more"), "note");
     tooltip.setEntries([]);
     return;
   }
 
   tooltip.setContext(sentence);
-  tooltip.setEntries(blocks);
+  tooltip.setEntries(groups);
 }
 
 /**
@@ -1501,7 +1505,9 @@ function present(selection, { deliberate, touch, chain = false }) {
     }
 
     const { gloss, sentence, entries, dictionaries, language } = asTranslation(result.value);
-    const blocks = entryBlocks(entries ?? [], normalized);
+    // The shelf with its rows told apart in the books' language: the one the
+    // detector named (D193), else the pair's.
+    const groups = entryGroups(entries ?? [], normalized, language ?? ttsLang);
     const words = wordsOf(normalized);
 
     // A phrase in another language than the pair's (D193): the browser's
@@ -1522,16 +1528,16 @@ function present(selection, { deliberate, touch, chain = false }) {
     if (language !== undefined) {
       if (current !== null) current.answered = language;
       tooltip.setBody("", "normal");
-      tooltip.setEntries(blocks);
+      tooltip.setEntries(groups);
       const verdict =
-        blocks.length > 0 || dictionaries === undefined
+        groups.length > 0 || dictionaries === undefined
           ? null
           : quietNote({ entries: 0, dictionaries, findable: selection.findable });
       if (verdict === "whole-words") tooltip.setContext(t("bubble_whole_words"), "note");
       else tooltip.setContext(selection.findable ? t("bubble_saves_under", pairLabel(ttsLang, pairTarget)) : null, "note");
       const said = verdict !== null && verdict !== "whole-words";
       tooltip.setHint(said ? dictionaryVerdict(verdict, language, words) : null);
-      secondLayer = blocks.length > 0 || said ? ["more"] : [];
+      secondLayer = groups.length > 0 || said ? ["more"] : [];
       tooltip.setActions([
         ...speakActions(),
         ...COPY,
@@ -1550,15 +1556,15 @@ function present(selection, { deliberate, touch, chain = false }) {
     // answer-the-word-and-get-out-of-the-way, kept for whoever folds the
     // layer away in the settings.
     tooltip.setContext(sentence);
-    tooltip.setEntries(blocks);
+    tooltip.setEntries(groups);
     // The layer's aside on the answer itself (D192): over a word or two the
     // engine translated alone, with no dictionary line under it, the hint
     // says the answer is a guess and which dictionary would have known -
     // decided by the count the translation carries, said nothing without it.
-    const hint = dictionaryHint({ words, entries: blocks.length, dictionaries, findable: selection.findable });
+    const hint = dictionaryHint({ words, entries: (entries ?? []).length, dictionaries, findable: selection.findable });
     tooltip.setHint(hint === null ? null : translatingHint(hint, ttsLang, words));
     secondLayer =
-      (sentence !== null && sentence.length > 0) || blocks.length > 0 || hint !== null ? ["more"] : [];
+      (sentence !== null && sentence.length > 0) || groups.length > 0 || hint !== null ? ["more"] : [];
 
     const decision = keeping({ normalized, gloss, findable: selection.findable, deliberate });
     tooltip.setActions([...offered(decision), ...secondLayer]);

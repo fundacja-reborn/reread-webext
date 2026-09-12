@@ -1077,6 +1077,7 @@
     "message": "Tout afficher ($COUNT$)",
     "placeholders": { "count": { "content": "$1" } }
   },
+  "options_show_fewer": { "message": "Afficher moins" },
   "options_model_note_from": { "message": "Les modèles sont téléchargés depuis" },
   "options_model_note_rest": {
     "message": "- c'est là que Mozilla les publie. L'extension ne se connecte à ce serveur public que lorsque vous cliquez sur Mettre à jour la liste ou Télécharger. Aucune donnée personnelle n'est transmise."
@@ -1206,7 +1207,6 @@
     "message": "Confirmer la suppression : $NAME$",
     "placeholders": { "name": { "content": "$1" } }
   },
-  "options_about_dictionary": { "message": "À propos de ce dictionnaire" },
   "options_size_here": {
     "message": "$SIZE$ ici",
     "placeholders": { "size": { "content": "$1" } }
@@ -1327,6 +1327,24 @@
       "place": { "content": "$2", "example": "1" },
       "total": { "content": "$3", "example": "3" }
     }
+  },
+  "options_dictionary_details": { "message": "Détails" },
+  "options_dictionary_file_name": {
+    "message": "Nom du fichier : $NAME$",
+    "placeholders": { "name": { "content": "$1", "example": "English-Polish FreeDict+WikDict dictionary (en-pl)" } }
+  },
+  "options_dictionary_display_name": { "message": "Nom affiché" },
+  "options_dictionary_display_name_aria": {
+    "message": "Nom affiché de $NAME$",
+    "placeholders": { "name": { "content": "$1", "example": "English-Polish FreeDict+WikDict dictionary (en-pl)" } }
+  },
+  "options_dictionary_name_taken": {
+    "message": "Un autre dictionnaire s'affiche déjà sous le nom $NAME$ - choisissez un autre nom.",
+    "placeholders": { "name": { "content": "$1", "example": "FreeDict en-pl" } }
+  },
+  "options_rename_failed": {
+    "message": "Le nom n'a pas pu être enregistré : $DETAIL$",
+    "placeholders": { "detail": { "content": "$1" } }
   },
   "options_reorder_failed": {
     "message": "L'ordre n'a pas pu être modifié : $DETAIL$",

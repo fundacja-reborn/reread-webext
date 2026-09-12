@@ -185,6 +185,11 @@ describe("foldPoint", () => {
     assert.deepEqual(foldPoint(lines, [`line ${LINES_OPEN + 1}`]), { shown: LINES_OPEN, unfolded: true });
     assert.deepEqual(foldPoint(lines, ["line 0"]), { shown: LINES_OPEN, unfolded: false });
   });
+
+  it("cuts nowhere for a home whose own box scrolls - the bubble", () => {
+    assert.deepEqual(foldPoint(lines, [`line ${LINES_OPEN + 1}`], null), { shown: lines.length, unfolded: false });
+    assert.deepEqual(foldPoint(lines, [], 3), { shown: 3, unfolded: false });
+  });
 });
 
 describe("sameMeaning", () => {

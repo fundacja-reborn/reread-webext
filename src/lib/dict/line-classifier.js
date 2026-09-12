@@ -190,14 +190,14 @@ export function isPronunciation(line) {
 
 /**
  * @param {string} line
- * @param {string} lang the primary subtag of the language the entry is
- *   written in - the book's source language
+ * @param {string} lang the language the entry is written in - the book's
+ *   source language; a full tag ("en-US") is read by its primary subtag
  * @returns {boolean}
  */
 export function isHeading(line, lang) {
   const text = line.trim().replace(/\.$/u, "").toLowerCase();
   if (text.length === 0) return false;
-  const own = HEADINGS[lang] ?? [];
+  const own = HEADINGS[(lang.split("-")[0] ?? "").toLowerCase()] ?? [];
   return HEADINGS["en"]?.includes(text) === true || own.includes(text);
 }
 

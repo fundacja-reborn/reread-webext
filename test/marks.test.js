@@ -50,24 +50,29 @@ describe("the marks on the page", () => {
     );
   });
 
-  it("keeps the dictionary lines' hover tint away from the touch tier", () => {
-    // Innermost rules only, which every `.entry-sense` rule is - the media
-    // query wrapping the dark theme never matches this shape itself.
+  it("keeps the dictionary rows' hover away from the touch tier, and paints no wash for it", () => {
+    // Innermost rules only, which every `.lookup-line` rule is - the media
+    // query wrapping the dark theme never matches this shape itself. The
+    // comments go first: a comment about hovers is not a hover rule.
     let found = 0;
-    for (const [, selector, body] of STYLE.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
-      if (!(selector ?? "").includes(".entry-sense") || !(selector ?? "").includes(":hover")) continue;
-      if (!/background/.test(body ?? "")) continue;
+    const rules = STYLE.replace(/\/\*[\s\S]*?\*\//g, "");
+    for (const [, selector, body] of rules.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+      if (!(selector ?? "").includes(".lookup-line") || !(selector ?? "").includes(":hover")) continue;
       found += 1;
       // Under a finger :hover is an emulation: it paints the line a scroll is
       // passing through and sticks after the finger lifts. The gate is the
       // gesture's own attribute, because the pointer media query answers
-      // wrong on an e-ink tablet (D84).
+      // wrong on an e-ink tablet (D84). And the hover says nothing with a
+      // wash (the fifth brief): the text underlines, a wash is one of the
+      // 16 greys an e-ink panel rounds back to paper.
       assert.ok(
         (selector ?? "").includes('.bubble:not([data-pointer="coarse"])'),
-        `a hover tint on a dictionary line is not gated to the mouse: "${(selector ?? "").trim()}"`,
+        `a hover on a dictionary row is not gated to the mouse: "${(selector ?? "").trim()}"`,
       );
+      assert.doesNotMatch(body ?? "", /background/, "a hover on a dictionary row paints a wash");
     }
-    assert.ok(found >= 2, "the hover tint rules went missing - both themes had one");
+    assert.ok(found >= 1, "the hover rule went missing");
+    assert.doesNotMatch(STYLE, /\.entry-sense|\.entry-label|\.entry-dict|\.entry \+ \.entry/, "the old dictionary section's dress is still there");
   });
 
   it("names the highlighter's strokes the same in the scripts and in reader.css", async () => {
