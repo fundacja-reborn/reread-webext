@@ -178,6 +178,25 @@ body[data-os="android"][data-mode="lookup"] .popup-lookup-answer {
   font-family: var(--reader-font-lead, var(--reader-font-stack));
 }
 
+/* The rows only read here - nothing on a row is a press - so the answer
+   gives up the shelf's 44px touch floor (D204): at the popup's 14px text
+   it left a whole line of air between two rows (Michał: "two lines?").
+   32px rows leave a third of one, the same rhythm from the same tokens.
+   The books' names take the same floor: a name kept at 44px stood 23px
+   of it over its own text, and the gap under the phrase was the biggest
+   thing on the screen (his second screenshot); at 32px a name is still a
+   press. And no air under the head: the shelf's room there is for the
+   standing line the popup does not draw. Measured: phrase to first name
+   45px to 24px text to text, row to row 16px. */
+.popup-lookup-answer .lookup-answer {
+  --lookup-touch: 32px;
+  --lookup-row-gap: 0.3rem;
+}
+
+.popup-lookup-answer .lookup-entries {
+  margin-top: 0;
+}
+
 /* The door under the answer is the results mode's one act, and it stands
    after a long entry: a framed button, not a row - a bare line there read
    as a caption, the launcher's own lesson (D182). The frame is the pages'
