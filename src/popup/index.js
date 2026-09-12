@@ -298,7 +298,7 @@ function renderSite(info, config) {
     // (D194), and a row that pressed would make the note a lie.
     stand(siteRow, false);
     if (siteNote !== null) siteNote.hidden = false;
-    if (readerButton !== null) readerButton.disabled = true;
+    if (readerButton instanceof HTMLButtonElement) readerButton.disabled = true;
     return;
   }
 
@@ -311,7 +311,7 @@ function renderSite(info, config) {
     siteToggle.disabled = false;
   }
   stand(siteRow, siteStands);
-  if (readerButton !== null) readerButton.disabled = false;
+  if (readerButton instanceof HTMLButtonElement) readerButton.disabled = false;
 }
 
 async function toggleSite() {

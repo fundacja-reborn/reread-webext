@@ -34,7 +34,7 @@ describe("the right-click rows", () => {
       items.map((item) => [item.id, item.parentId ?? null, item.title]),
       [
         [MENU.parent, null, "re/read"],
-        [MENU.read, MENU.parent, "Read this page in the reader"],
+        [MENU.read, MENU.parent, "Open in reading view"],
         [MENU.library, MENU.parent, "Offline reading list"],
       ],
     );
