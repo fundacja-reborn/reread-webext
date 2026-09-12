@@ -998,6 +998,52 @@ button.lookup-show {
   font-weight: 600;
 }
 
+/* The reader's own meanings, last in the answer (block 4): the same
+   uppercase label as a book's fold, the same rows, and under them the
+   field for the next meaning with Save beside it on one line - the field
+   in the look-up field's own dress. */
+.lookup-own {
+  margin-top: 0.6rem;
+  border-top: 1px solid var(--page-line);
+}
+
+.lookup-own-label {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--page-muted);
+}
+
+.lookup-own-form {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0.25rem 0 0;
+  min-width: 0;
+}
+
+.lookup-own-input {
+  flex: 1 1 auto;
+  width: 0;
+  min-width: 0;
+  min-height: 44px;
+  font: inherit;
+  padding: 0.35rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid var(--page-border);
+  background: transparent;
+  color: var(--page-fg);
+}
+
+.lookup-own-save {
+  min-height: 44px;
+  white-space: nowrap;
+}
+
 /* The read-only field's entries, as the book wrote them: one block per
    paragraph with the lines inside it kept (`pre-line`), and the space
    between paragraphs where the book had a section's end - "Noun", its

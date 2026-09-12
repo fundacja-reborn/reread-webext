@@ -195,6 +195,20 @@ export function isSaved(meanings, line) {
 }
 
 /**
+ * The meanings that are the reader's own (block 4 of the rebuild): saved,
+ * and matching no line of the books that answered - by `sameMeaning`, so a
+ * meaning identical to a line stands once, as that line ticked, and not
+ * again under "Your own". In the saved order.
+ *
+ * @param {string[]} meanings what the phrase means now
+ * @param {string[]} lines every line the books answered with
+ * @returns {string[]}
+ */
+export function ownMeanings(meanings, lines) {
+  return meanings.filter((meaning) => !lines.some((line) => sameMeaning(meaning, line)));
+}
+
+/**
  * What a press on a dictionary line does to the phrase - D34's rule seen from
  * the field: the line joins the saved meanings or leaves them, and the phrase
  * is saved with what is left. Taking the last meaning back forgets the

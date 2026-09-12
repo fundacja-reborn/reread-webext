@@ -73,7 +73,8 @@ describe("the look-up field", () => {
     // The input listener follows the cross and takes the answer down with
     // an emptied field; it must not look the word up (on e-ink every redraw
     // is a flash - the rebuild's D4).
-    const typing = box.slice(box.indexOf('input.addEventListener("input"'), box.indexOf("return {", box.indexOf('input.addEventListener("input"')));
+    const typing = box.slice(box.indexOf('clearButton.addEventListener("click"'), box.lastIndexOf("return {"));
+    assert.match(typing, /input\.addEventListener\("input"/, "the word field has no input listener to read");
     assert.doesNotMatch(typing, /lookUp\(\)/, "typing asks the dictionaries");
     assert.match(box, /input\.type = "search";/, "the field is not a search field");
     assert.match(box, /input\.enterKeyHint = "search";/, "the phone's keyboard does not say Search");
@@ -133,6 +134,31 @@ describe("the look-up field", () => {
     const styles = await source("assets/page.css");
     const panel = styles.slice(styles.indexOf(".lookup-entries {"), styles.indexOf("/* --- the colophon"));
     assert.doesNotMatch(panel, /max-height|overflow(-y)?: auto/, "the entries scroll inside the panel");
+  });
+
+  it("keeps a meaning of the reader's own from the field under Your own, last in the answer", async () => {
+    const box = await source("lib/lookup-box.js");
+    const render = bodyOf(box, "render");
+    // Last, where the field writes, once the books have answered - whatever
+    // they said: the way in for a word no book knows.
+    assert.match(render, /if \(!readOnly && !state\.pending\) \{[\s\S]*?answer\.append\(ownSection\(lines\)\)/, "the section stands in the popup, or before the books have answered");
+    assert.ok(render.indexOf("books(entryGroups(") < render.indexOf("ownSection(lines)"), "Your own stands before the books");
+    const section = bodyOf(box, "ownSection");
+    assert.match(section, /ownMeanings\(state\.meanings, lines\)\.entries\(\)[\s\S]*?lineRow\(meaning, `own:\$\{at\}`\)/, "an own meaning is not a row to untick, or a book's line stands here twice");
+    assert.match(section, /input\.value = state\.ownDraft;/, "a redraw after a tick eats what was typed");
+    assert.match(section, /state\.ownDraft = input\.value;/, "what is typed is not kept");
+    assert.match(section, /form\.addEventListener\("submit", \(event\) => \{\s*event\.preventDefault\(\);\s*if \(!empty\(\)\) void saveOwn\(\);/, "Enter does not save");
+    assert.match(section, /save\.type = "submit";/, "the Save button is not the form's");
+    // Saved after what is there, once, whitespace folded and nothing else;
+    // the caret stays for the next one.
+    const kept = bodyOf(box, "savedOwn");
+    assert.match(kept, /const own = collapseWhitespace\(state\.ownDraft\);/, "the meaning is changed beyond its whitespace");
+    assert.match(kept, /if \(!isSaved\(state\.meanings, own\)\) \{[\s\S]*?translations: meanings/, "a meaning already kept is saved twice");
+    assert.match(kept, /const meanings = \[\.\.\.state\.meanings, own\];/, "the own meaning does not join after what is there");
+    assert.match(kept, /state\.ownDraft = "";\s*render\(\);\s*ownField\(\)\?\.focus\(\);/, "the field is not emptied, or the caret leaves it");
+    assert.match(bodyOf(box, "saveOwn"), /queue = queue\.then\(\(\) => savedOwn\(\)\)/, "an own save can cross a tick in flight");
+    // A word no book knows lands the caret in the field.
+    assert.match(bodyOf(box, "lookUp"), /if \(!readOnly && state\.outcome\.kind === "silence"\) ownField\(\)\?\.focus\(\);/, "the caret stays in the word field over a word no book knows");
   });
 
   it("draws the entries as prose, paragraph by paragraph, where it only reads", async () => {

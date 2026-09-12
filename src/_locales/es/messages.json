@@ -110,6 +110,8 @@
       "count": { "content": "$1", "example": "3" }
     }
   },
+  "lookup_own": { "message": "Propios" },
+  "lookup_own_placeholder": { "message": "Escribe tu propio significado" },
   "lookup_show_all": {
     "message": "Mostrar todo ($COUNT$)",
     "placeholders": {

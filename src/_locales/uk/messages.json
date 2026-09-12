@@ -110,6 +110,8 @@
       "count": { "content": "$1", "example": "3" }
     }
   },
+  "lookup_own": { "message": "Власні" },
+  "lookup_own_placeholder": { "message": "Впишіть власне значення" },
   "lookup_show_all": {
     "message": "Показати всі ($COUNT$)",
     "placeholders": {

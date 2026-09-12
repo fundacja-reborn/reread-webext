@@ -187,6 +187,14 @@
       "count": { "content": "$1", "example": "3" }
     }
   },
+  "lookup_own": {
+    "message": "Your own",
+    "description": "The heading of the last section of the look-up answer on the saved-phrases page: the meanings the reader typed (those matching no dictionary line), and the field for the next one. Also the section's accessible name."
+  },
+  "lookup_own_placeholder": {
+    "message": "Write your own meaning",
+    "description": "Placeholder and accessible name of the field under \"Your own\": one meaning, kept with Enter or the Save button beside it."
+  },
   "lookup_show_all": {
     "message": "Show all ($COUNT$)",
     "description": "The fold under a dictionary's first lines in the look-up answer, closed: the rest of the lines stand behind it, and the count is all the lines the dictionary has for the word.",

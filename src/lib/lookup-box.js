@@ -39,9 +39,19 @@
 import { HINT_MAX_WORDS, linkedWord } from "./gloss.js";
 import { t, uiLocale } from "./i18n.js";
 import { languageName } from "./language.js";
-import { afterPress, entryGroups, foldPoint, isSaved, lookupOutcome, lookupText, paragraphsOf } from "./lookup.js";
+import {
+  afterPress,
+  entryGroups,
+  foldPoint,
+  isSaved,
+  lookupOutcome,
+  lookupText,
+  ownMeanings,
+  paragraphsOf,
+} from "./lookup.js";
 import { keyTokens } from "./matcher/tokenize.js";
 import { describeError } from "./messages.js";
+import { collapseWhitespace } from "./normalize.js";
 import { ErrorCode, Message, asLookUp } from "./protocol.js";
 import { dictionarySourcesLink } from "./sources.js";
 import { speakerIcon } from "./speaker-icon.js";
@@ -167,12 +177,14 @@ function button(className, label) {
 export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) {
   /**
    * The phrase being shown, its meanings as saved (empty while it is not),
-   * and what the dictionaries said - or that they are still being asked.
-   * State rather than DOM, so that every change redraws the same way.
+   * what the dictionaries said - or that they are still being asked - and
+   * the meaning of the reader's own being typed, kept as state so that a
+   * redraw after a tick does not eat it. State rather than DOM, so that
+   * every change redraws the same way.
    *
-   * @type {{ phrase: { text: string, normalized: string } | null, meanings: string[], outcome: import("./lookup.js").LookupOutcome | null, pending: boolean, error: string }}
+   * @type {{ phrase: { text: string, normalized: string } | null, meanings: string[], outcome: import("./lookup.js").LookupOutcome | null, pending: boolean, error: string, ownDraft: string }}
    */
-  const state = { phrase: null, meanings: [], outcome: null, pending: false, error: "" };
+  const state = { phrase: null, meanings: [], outcome: null, pending: false, error: "", ownDraft: "" };
 
   /**
    * Which ask the answer belongs to: a second word typed while the first is
@@ -251,6 +263,7 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
     state.outcome = null;
     state.pending = false;
     state.error = "";
+    state.ownDraft = "";
     render();
   }
 
@@ -363,6 +376,90 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
   function ownField() {
     const field = answer.querySelector("input.lookup-own-input");
     return field instanceof HTMLInputElement ? field : null;
+  }
+
+  /**
+   * A meaning of the reader's own, typed and kept (block 4): it joins the
+   * saved meanings after what is there - the phrase saved with it when it
+   * was not saved yet. Typed as it was, whitespace folded, nothing else
+   * changed: a marker like "☞" in the text is the reader's to keep. One
+   * already saved - as a line ticked above, or as an own meaning - is not
+   * saved again; the field is emptied and the row above says so. Queued
+   * behind the ticks (see `queue`), and the caret stays in the field for
+   * the next one.
+   */
+  function saveOwn() {
+    queue = queue.then(() => savedOwn()).catch(() => undefined);
+    return queue;
+  }
+
+  async function savedOwn() {
+    if (state.phrase === null) return;
+    const phrase = state.phrase;
+    const own = collapseWhitespace(state.ownDraft);
+    if (own.length === 0) return;
+    if (!isSaved(state.meanings, own)) {
+      const meanings = [...state.meanings, own];
+      const result = await deps.ask({ kind: Message.SAVE_PHRASE, text: phrase.text, translations: meanings });
+      if (state.phrase !== phrase) return;
+      if (!result.ok) {
+        // The draft stays: an error must not eat the text.
+        state.error = describeError(result.code);
+        render();
+        ownField()?.focus();
+        return;
+      }
+      state.error = "";
+      state.meanings = meanings;
+    }
+    state.ownDraft = "";
+    render();
+    ownField()?.focus();
+  }
+
+  /**
+   * The section for the reader's own meanings, last in the answer (block
+   * 4): the saved meanings that match no line of the books - as rows
+   * ticked, unticked the way a book's line is - and under them the field
+   * for the next one, with Save beside it; Enter saves too. Always drawn
+   * once the books have answered, the field at least: it is the way in
+   * for a word no book knows, and the second meaning for one they do.
+   *
+   * @param {string[]} lines every line the books answered with
+   * @returns {HTMLElement}
+   */
+  function ownSection(lines) {
+    const section = element("section", "lookup-own");
+    section.setAttribute("aria-label", t("lookup_own"));
+    section.append(element("div", "lookup-own-label", t("lookup_own")));
+    for (const [at, meaning] of ownMeanings(state.meanings, lines).entries()) {
+      section.append(lineRow(meaning, `own:${at}`));
+    }
+
+    const form = document.createElement("form");
+    form.className = "lookup-own-form";
+    const input = document.createElement("input");
+    input.type = "text";
+    input.className = "lookup-own-input";
+    input.placeholder = t("lookup_own_placeholder");
+    input.setAttribute("aria-label", t("lookup_own_placeholder"));
+    input.autocomplete = "off";
+    input.value = state.ownDraft;
+    const save = button("lookup-own-save", t("bubble_save"));
+    save.type = "submit";
+    const empty = () => collapseWhitespace(input.value).length === 0;
+    save.disabled = empty();
+    input.addEventListener("input", () => {
+      state.ownDraft = input.value;
+      save.disabled = empty();
+    });
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      if (!empty()) void saveOwn();
+    });
+    form.append(input, save);
+    section.append(form);
+    return section;
   }
 
   /**
@@ -500,6 +597,7 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
     state.outcome = null;
     state.pending = true;
     state.error = "";
+    state.ownDraft = "";
     folds = new Map();
     render();
 
@@ -514,6 +612,9 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
     state.outcome = lookupOutcome(asked.ok ? asLookUp(asked.value) : null, phrase.normalized);
     state.pending = false;
     render();
+    // A word no book knows: the one way to keep it is a meaning of the
+    // reader's own, so the caret goes to that field (block 4).
+    if (!readOnly && state.outcome.kind === "silence") ownField()?.focus();
   }
 
   /**
@@ -618,6 +719,16 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
       answer.append(verdictLine(verdictParts(state.outcome.note, state.outcome.lang, words)));
     } else if (state.outcome?.kind === "entries") {
       answer.append(books(entryGroups(state.outcome.entries, state.phrase.normalized)));
+    }
+
+    // Last, where the field writes: the reader's own meanings and the field
+    // for the next one - once the books have answered, whatever they said.
+    if (!readOnly && !state.pending) {
+      const lines =
+        state.outcome?.kind === "entries"
+          ? entryGroups(state.outcome.entries, state.phrase.normalized).flatMap((group) => group.lines)
+          : [];
+      answer.append(ownSection(lines));
     }
 
     if (state.error.length > 0) {

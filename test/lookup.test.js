@@ -9,6 +9,7 @@ import {
   isSaved,
   lookupOutcome,
   lookupText,
+  ownMeanings,
   paragraphsOf,
   sameMeaning,
 } from "../src/lib/lookup.js";
@@ -163,6 +164,13 @@ describe("sameMeaning", () => {
     assert.ok(isSaved(["wysokość"], " wysokość "));
     assert.equal(isSaved(["wysokość"], "Wysokość"), false);
     assert.equal(isSaved([], "wysokość"), false);
+  });
+
+  it("keeps under Your own only the meanings no book's line says, in the saved order", () => {
+    // A meaning identical to a line stands once, as that line ticked.
+    assert.deepEqual(ownMeanings(["☞ nowina", "wysokość", "moje"], ["wysokość", "wzniesienie"]), ["☞ nowina", "moje"]);
+    assert.deepEqual(ownMeanings(["wysokość"], ["wysokość"]), []);
+    assert.deepEqual(ownMeanings(["moje"], []), ["moje"]);
   });
 });
 
