@@ -24,17 +24,23 @@ function rule(css, selector) {
 }
 
 describe("the popup's look-up answer", () => {
-  it("keeps 32px rows and 44px names, from the shelf's own tokens", () => {
-    const answer = rule(sheet("src/popup/popup.css"), ".popup-lookup-answer .lookup-answer");
+  it("stands at a 32px floor, rows and names alike, from the shelf's own tokens", () => {
+    const css = sheet("src/popup/popup.css");
+    const answer = rule(css, ".popup-lookup-answer .lookup-answer");
     assert.match(answer, /--lookup-touch: 32px/);
     assert.match(answer, /--lookup-row-gap: 0\.3rem/);
-    assert.match(answer, /--lookup-label-touch: 44px/);
+    // No floor of the names' own: kept at 44px, a name stood 23px of it
+    // over its text, and the gap under the phrase was the biggest thing on
+    // the screen.
+    assert.doesNotMatch(css, /--lookup-label-touch/);
+    // And no air under the head: the shelf's room there is for the
+    // standing line the popup does not draw.
+    assert.match(rule(css, ".popup-lookup-answer .lookup-entries"), /margin-top: 0/);
   });
 
-  it("has a name floor of its own on the pages' shelf, falling back to the rows'", () => {
+  it("leaves the shelf's reckoning to its one floor everywhere else", () => {
     const shelf = rule(sheet("src/assets/page.css"), ".lookup-answer");
-    assert.match(shelf, /--lookup-label-pad-top: max\(var\(--lookup-row-pad\), calc\(var\(--lookup-label-touch, var\(--lookup-touch\)\) - var\(--lookup-label-line\) - var\(--lookup-row-pad\)\)\)/);
-    // The rows' pad still comes from the rows' floor alone.
+    assert.match(shelf, /--lookup-label-pad-top: max\(var\(--lookup-row-pad\), calc\(var\(--lookup-touch\) - var\(--lookup-label-line\) - var\(--lookup-row-pad\)\)\)/);
     assert.match(shelf, /--lookup-row-pad: max\(var\(--lookup-row-gap\), calc\(\(var\(--lookup-touch\) - var\(--lookup-line-height, 1\.6em\)\) \/ 2\)\)/);
   });
 });

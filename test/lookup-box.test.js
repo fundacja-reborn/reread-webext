@@ -391,7 +391,7 @@ describe("the saved-phrases page's fold", () => {
     // touch floor; a name line's bottom the same pad, its top what the
     // floor still needs - so name-to-row equals row-to-row, in px.
     assert.match(page, /--lookup-row-pad: max\(var\(--lookup-row-gap\), calc\(\(var\(--lookup-touch\) - var\(--lookup-line-height, 1\.6em\)\) \/ 2\)\);/, "a row's pad is not grown from the gap to centre its line on the floor");
-    assert.match(page, /--lookup-label-pad-top: max\(var\(--lookup-row-pad\), calc\(var\(--lookup-label-touch, var\(--lookup-touch\)\) - var\(--lookup-label-line\) - var\(--lookup-row-pad\)\)\);/, "a name line's top is not what the floor still needs - the name's own floor where a home sets one (D204), the rows' elsewhere");
+    assert.match(page, /--lookup-label-pad-top: max\(var\(--lookup-row-pad\), calc\(var\(--lookup-touch\) - var\(--lookup-label-line\) - var\(--lookup-row-pad\)\)\);/, "a name line's top is not what the floor still needs");
     assert.match(page, /\.lookup-line \{[\s\S]*?padding: var\(--lookup-row-pad, 0\.45rem\) 0\.35rem;/, "a row does not keep the pad above and below");
     assert.match(page, /\.lookup-group-label \{[\s\S]*?padding: var\(--lookup-label-pad-top, 0\.8rem\) 0\.35rem var\(--lookup-row-pad, 0\.45rem\);/, "a book's name line does not end in the row's pad");
     assert.match(page, /\.lookup-own-label \{[\s\S]*?padding: var\(--lookup-label-pad-top, 0\.8rem\) 0\.35rem var\(--lookup-row-pad, 0\.45rem\);/, "Your own's label does not end in the row's pad");
