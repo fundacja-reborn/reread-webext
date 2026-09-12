@@ -14,6 +14,15 @@
  * nothing to press, what is saved first under its own name, and the
  * popup's own button leads to the page where a tick saves.
  *
+ * The homes differ in how a long book folds, too (`foldAt`). On the page
+ * the rest of a book past `LINES_OPEN` lines waits under "Show all",
+ * because the list of saved phrases stands under the panel and a big
+ * monolingual entry would push it two screens down (D5 of the rebuild).
+ * The popup's answer scrolls in a box of its own with nothing under it but
+ * the door, so there every line stands open and the box is the fold a long
+ * book gets, as in the bubble (D207, Gormagon on mobileread: "I'd rather
+ * scroll than click").
+ *
  * The field does one thing and leaves the rest to the page around it (the
  * rebuild of 2026-09-11, block 1): it looks the word up and lets a meaning
  * be kept or taken back. It does not manage the whole entry - Edit and
@@ -42,7 +51,7 @@ import { clearableField } from "./clear-field.js";
 import { HINT_MAX_WORDS, linkedWord } from "./gloss.js";
 import { t, uiLocale } from "./i18n.js";
 import { languageName } from "./language.js";
-import { afterPress, entryGroups, isSaved, lookupOutcome, lookupText, ownMeanings } from "./lookup.js";
+import { LINES_OPEN, afterPress, entryGroups, isSaved, lookupOutcome, lookupText, ownMeanings } from "./lookup.js";
 import { renderShelf, shelfFold, shelfRow } from "./lookup-shelf.js";
 import { keyTokens } from "./matcher/tokenize.js";
 import { describeError } from "./messages.js";
@@ -83,6 +92,9 @@ import { canSpeak, primaryLanguage, speak, speaking, stop as stopSpeaking } from
  * @property {boolean} [readOnly] the lines as prose and no press that writes:
  *   the popup's field, which only reads (see the header); the phrases page's
  *   writes
+ * @property {number | null} [foldAt] how many lines of a book stand open
+ *   before the rest fold under "Show all" - `LINES_OPEN` by default (the
+ *   phrases page); null folds nothing (the popup, see the header)
  * @property {(state: LookupState) => void} [onState] told after every draw
  */
 
@@ -170,7 +182,7 @@ function button(className, label) {
  * @param {LookupBoxOptions} [options]
  * @returns {LookupBox}
  */
-export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) {
+export function mountLookupBox(hosts, deps, { readOnly = false, foldAt = LINES_OPEN, onState } = {}) {
   /**
    * The phrase being shown, its meanings as saved (empty while it is not),
    * what the dictionaries said - or that they are still being asked - and
@@ -630,6 +642,7 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
         meanings: state.meanings,
         folds,
         readOnly,
+        foldAt,
         onPress: (line, at) => void press(line, at),
       }),
     );

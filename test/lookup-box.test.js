@@ -179,6 +179,10 @@ describe("the look-up field", () => {
     assert.match(shelf, /shelfFold\("lookup-group", `group:\$\{group\.dictionary\}`, at === 0, summary, folds\)/, "the first book is not the one open by default, or a book is no fold");
     assert.match(shelf, /summary\.append\(` \(\$\{group\.lines\.length\.toLocaleString\(\)\}\)`\)/, "the fold's name carries no count");
     assert.match(shelf, /foldPoint\(group\.lines, meanings, foldAt\)/, "the cut does not ask the rule, or ignores the home's own count");
+    // The count is the home's: the field cuts at LINES_OPEN unless the home
+    // says otherwise (the popup says null, D207), and hands its count on.
+    assert.match(box, /export function mountLookupBox\(hosts, deps, \{ readOnly = false, foldAt = LINES_OPEN, onState \} = \{\}\)/, "the field's cut is not LINES_OPEN by default, or the home cannot set it");
+    assert.match(render, /renderShelf\(groups, \{\s*meanings: state\.meanings,\s*folds,\s*readOnly,\s*foldAt,/, "the shelf does not take the home's own cut");
     assert.match(shelf, /shown < group\.lines\.length \? moreFold\(book, group, unfolded, at, folds\) : null/, "the rest of a long book does not fold, or ignores a saved line out of sight");
     // The rest of the lines, then the button - the book's last child in
     // both states, so the rows unfold above it and it does not move.
@@ -285,6 +289,10 @@ describe("the popup's look-up row", () => {
     const script = await source("popup/index.js");
     const mounted = script.slice(script.indexOf("mountLookupBox("), script.indexOf("async function openVocabularyWith"));
     assert.match(mounted, /readOnly: true/, "the popup's field writes");
+    // Its answer scrolls in a box of its own with nothing under it but the
+    // door, so no line waits under "Show all" (D207): the box is the fold a
+    // long book gets, as in the bubble.
+    assert.match(mounted, /foldAt: null/, "the popup's field folds a long book under Show all");
     assert.match(mounted, /onState: onLookupState/, "the popup does not follow the field");
     const landing = bodyOf(script, "onLookupState");
     // An answer turns the rows into the results mode; the answer taken down
@@ -341,6 +349,9 @@ describe("the saved-phrases page's fold", () => {
     const script = await source("vocab/vocab.js");
     assert.match(script, /mountLookupBox\(/, "the page does not mount the field");
     assert.doesNotMatch(script.slice(script.indexOf("mountLookupBox(")), /readOnly: true/, "the page's field only reads");
+    // The list of saved phrases stands under the panel (D5 of the rebuild):
+    // here a long book keeps folding under "Show all", at the field's count.
+    assert.doesNotMatch(script.slice(script.indexOf("mountLookupBox(")), /foldAt/, "the page's field stopped folding a long book, or cuts at a count of its own");
     assert.match(bodyOf(script, "reload"), /addFold\.hidden = chosen === null/, "the fold stands with nowhere to file a phrase");
   });
 

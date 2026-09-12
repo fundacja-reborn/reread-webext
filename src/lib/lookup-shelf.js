@@ -41,7 +41,8 @@ import { LINES_OPEN, foldPoint, isSaved } from "./lookup.js";
  *   bubble while its edit box is open
  * @property {number | null} [foldAt] how many lines of a book stand open
  *   before the rest fold under "Show all" - `LINES_OPEN` by default; null
- *   folds nothing, for a home whose own box scrolls (the bubble)
+ *   folds nothing, for a home whose own box scrolls (the bubble; the popup,
+ *   D207)
  * @property {(line: string, at: string) => void} [onPress] a row ticked or
  *   unticked: the line, and the row's mark (`data-line`) for the home to
  *   find the row again after its redraw
