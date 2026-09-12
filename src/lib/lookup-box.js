@@ -410,15 +410,15 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
    * ticked, unticked the way a book's line is - and under them the field
    * for the next one, with Save beside it; Enter saves too. Always drawn
    * once the books have answered, the field at least: it is the way in
-   * for a word no book knows, and the second meaning for one they do.
+   * for a word no book knows, and the second meaning for one they do. A
+   * fold like a book's, open by default and remembered like the others:
+   * one look for every section's head (the fourth brief's D1).
    *
    * @param {string[]} lines every line the books answered with
    * @returns {HTMLElement}
    */
   function ownSection(lines) {
-    const section = element("section", "lookup-own");
-    section.setAttribute("aria-label", t("lookup_own"));
-    section.append(element("div", "lookup-own-label", t("lookup_own")));
+    const section = fold("lookup-group lookup-own", "own", true, element("summary", "lookup-group-label", t("lookup_own")));
     for (const [at, meaning] of ownMeanings(state.meanings, lines).entries()) {
       section.append(lineRow(meaning, `own:${at}`));
     }

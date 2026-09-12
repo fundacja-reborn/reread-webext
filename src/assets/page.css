@@ -925,23 +925,23 @@ button.lookup-show {
   border-top: 1px solid var(--page-line);
 }
 
-/* The fold's line is the book's name, and "Your own" wears the same line:
-   44px, the small uppercase label, the marker in the muted voice. */
-.lookup-group-label,
-.lookup-own-label {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
+/* The fold's line is the book's name - and "Your own" wears the same line,
+   a fold too (open by default): one look for every section's head. The
+   browser's own disclosure triangle before the name, the glyph every other
+   fold on the page wears (D1 of the fourth brief) - a summary keeps it only
+   as a list item, which is why the line is not a flex row: 44px by its
+   padding and floor, the small uppercase label, the marker in the muted
+   voice. The whole line is the press. */
+.lookup-group-label {
+  display: list-item;
   min-height: 44px;
   margin: 0;
-  padding: 0 0.35rem;
+  padding: 0.8rem 0.35rem;
   font-size: 0.78rem;
+  line-height: 1.3;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--page-muted);
-}
-
-.lookup-group-label {
   cursor: pointer;
 }
 
@@ -976,23 +976,21 @@ button.lookup-show {
 
 /* "More about the word" at the end of a book: the transcriptions and the
    cross-references the book wrote between its meanings, folded and closed
-   until asked. The fold's line wears the "Show all" button's dress at the
-   rows' text inset, without the browser's marker; the lines inside are
-   plain text, one paragraph each, at the same inset. */
+   until asked. A fold like the books', with the same triangle before its
+   words, at the rows' text inset; the lines inside are plain text, one
+   paragraph each, at the same inset. */
 .lookup-about-label {
-  display: flex;
-  align-items: center;
+  display: list-item;
   min-height: 44px;
-  padding: 0 0.35rem 0 calc(0.35rem + var(--lookup-box-size, 20px) + var(--lookup-line-gap, 12px));
+  padding: 0.75rem 0.35rem 0.75rem calc(0.35rem + var(--lookup-box-size, 20px) + var(--lookup-line-gap, 12px));
   font-size: 0.85rem;
-  color: var(--page-accent);
-  text-decoration: underline;
-  list-style: none;
+  line-height: 1.3;
+  color: var(--page-muted);
   cursor: pointer;
 }
 
-.lookup-about-label::-webkit-details-marker {
-  display: none;
+.lookup-about-label::marker {
+  color: var(--page-muted);
 }
 
 .lookup-about .lookup-paragraph {
@@ -1060,16 +1058,16 @@ button.lookup-show {
   font-weight: 600;
 }
 
-/* The reader's own meanings, last on the shelf (block 4): the same label
-   as a book's fold (above), the same rows, and under them the field for
-   the next meaning with Save beside it on one line - the field in the
-   look-up field's own dress. No margin and no line of its own: the shelf's
-   one separator parts it from the last book. */
+/* The reader's own meanings, last on the shelf (block 4): a fold like a
+   book's, open by default, with the same label line, the same rows, and
+   under them the field for the next meaning with Save beside it on one
+   line - the field in the look-up field's own dress. No margin and no line
+   of its own: the shelf's one separator parts it from the last book. */
 .lookup-own {
   margin: 0;
 }
 
-.lookup-own-label {
+.lookup-own > .lookup-group-label {
   font-weight: 600;
 }
 
