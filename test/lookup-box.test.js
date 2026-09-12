@@ -113,7 +113,9 @@ describe("the look-up field", () => {
     assert.ok(at("savedGroup()") < at("books(groups)"), "the books stand before what the phrase means");
     // The standing at the head's far end, for a saved phrase only: the
     // count, and the way to the phrase's own row where the home has a list.
-    assert.match(render, /if \(state\.meanings\.length > 0\) head\.append\(standing\(state\.phrase\)\)/, "the standing stands for an unsaved phrase, or not at all");
+    // Where the field writes only: where it reads, "Saved (N)" first on the
+    // shelf says the same thing (Michał's cosmetic round).
+    assert.match(render, /if \(!readOnly && state\.meanings\.length > 0\) head\.append\(standing\(state\.phrase\)\)/, "the standing stands for an unsaved phrase, in the popup, or not at all");
     const standing = bodyOf(box, "standing");
     assert.match(standing, /t\("lookup_saved_count", \[state\.meanings\.length\.toLocaleString\(\)\]\)/, "the count is not the saved meanings'");
     assert.match(standing, /if \(deps\.showInList !== undefined\) \{[\s\S]*?button\("lookup-show", t\("lookup_show_in_list"\)\)/, "the link stands without a list to show, or never");
@@ -190,9 +192,12 @@ describe("the look-up field", () => {
     assert.match(render, /if \(!readOnly && !state\.pending\) shelf\.append\(ownSection\(groups\.flatMap\(\(group\) => group\.lines\)\)\)/, "the section stands in the popup, or before the books have answered");
     assert.ok(render.indexOf("books(groups)") < render.indexOf("ownSection("), "Your own stands before the books");
     const section = bodyOf(box, "ownSection");
-    // A fold like a book's, open by default: one look for every section's
-    // head, the browser's own triangle before each (the fourth brief's D1).
-    assert.match(section, /fold\("lookup-group lookup-own", "own", true, element\("summary", "lookup-group-label", t\("lookup_own"\)\)\)/, "Your own is not a fold in the book's dress");
+    // Not a fold (Michał's cosmetic round): the field for the next meaning
+    // always in view, the label in a book's name line's dress without the
+    // triangle.
+    assert.match(section, /element\("section", "lookup-own"\);[\s\S]*?element\("div", "lookup-own-label", t\("lookup_own"\)\)/, "Your own is a fold, or its label not the section's");
+    assert.doesNotMatch(section, /fold\(|summary/, "Your own folds");
+    assert.match(await source("assets/page.css"), /\.lookup-own-label \{\s*display: flex;[\s\S]*?min-height: 44px;[\s\S]*?text-transform: uppercase;/, "Your own's label is not a book's name line without the triangle");
     assert.match(section, /ownMeanings\(state\.meanings, lines\)\.entries\(\)[\s\S]*?lineRow\(meaning, `own:\$\{at\}`\)/, "an own meaning is not a row to untick, or a book's line stands here twice");
     assert.match(section, /input\.value = state\.ownDraft;/, "a redraw after a tick eats what was typed");
     assert.match(section, /state\.ownDraft = input\.value;/, "what is typed is not kept");

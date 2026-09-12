@@ -903,13 +903,12 @@ button.lookup-show {
   border-top: 1px solid var(--page-line);
 }
 
-/* The fold's line is the book's name - and "Your own" wears the same line,
-   a fold too (open by default): one look for every section's head. The
-   browser's own disclosure triangle before the name, the glyph every other
-   fold on the page wears (D1 of the fourth brief) - a summary keeps it only
-   as a list item, which is why the line is not a flex row: 44px by its
-   padding and floor, the small uppercase label, the marker in the muted
-   voice. The whole line is the press. */
+/* The fold's line is the book's name, with the browser's own disclosure
+   triangle before it - the glyph every other fold on the page wears (D1 of
+   the fourth brief). A summary keeps the marker only as a list item, which
+   is why the line is not a flex row: 44px by its padding and floor, the
+   small uppercase label, the marker in the muted voice. The whole line is
+   the press. */
 .lookup-group-label {
   display: list-item;
   min-height: 44px;
@@ -1036,17 +1035,28 @@ button.lookup-show {
   font-weight: 600;
 }
 
-/* The reader's own meanings, last on the shelf (block 4): a fold like a
-   book's, open by default, with the same label line, the same rows, and
-   under them the field for the next meaning with Save beside it on one
-   line - the field in the look-up field's own dress. No margin and no line
-   of its own: the shelf's one separator parts it from the last book. */
+/* The reader's own meanings, last on the shelf (block 4): not a fold - the
+   field for the next meaning is always in view - under a label in a book's
+   name line's dress without its triangle, then the same rows, and the
+   field with Save beside it on one line, in the look-up field's own dress.
+   No margin and no line of its own: the shelf's one separator parts it
+   from the last book. */
 .lookup-own {
   margin: 0;
 }
 
-.lookup-own > .lookup-group-label {
+.lookup-own-label {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  margin: 0;
+  padding: 0 0.35rem;
+  font-size: 0.78rem;
   font-weight: 600;
+  line-height: 1.3;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--page-muted);
 }
 
 .lookup-own-form {
@@ -1078,8 +1088,8 @@ button.lookup-show {
    shelf without its boxes. The rows are nothing to press - no pointer, no
    hover wash - and their text starts at the group's edge, the box's column
    gone; what is saved stands first under its own name, each meaning with
-   a tick standing still in the column the page's rows give their box, and
-   the standing line steps under the word, where the popup's width puts it. */
+   a tick standing still in the column the page's rows give their box; the
+   standing line is not drawn at all, "Saved (N)" says it. */
 .lookup-answer[data-readonly="true"] .lookup-line {
   cursor: default;
 }
@@ -1097,11 +1107,6 @@ button.lookup-show {
 .lookup-answer[data-readonly="true"]
   :is(.lookup-entry-heading, .lookup-more-toggle, .lookup-about-label, .lookup-about .lookup-paragraph) {
   padding-inline-start: 0.35rem;
-}
-
-.lookup-answer[data-readonly="true"] .lookup-standing {
-  flex-basis: 100%;
-  margin-inline-start: 0;
 }
 
 /* A line of "More about the word": plain text with the lines inside it
