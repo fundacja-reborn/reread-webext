@@ -17,6 +17,10 @@
   --page-muted: #5c6478;
   --page-line: #99a1b0;
   --page-border: #6e7583;
+  /* A control that cannot be pressed (D201): a neutral grey, the convention
+     every platform's disabled controls follow, about 2.5:1 to the paper in
+     each theme - paler than the muted ink of a note, which is still prose. */
+  --page-disabled: #9ca0a8;
   --page-accent: #b8791d;
   --page-error: #a3341f;
   /* A surface raised over the page - the toolbar popup (the fourth brief's
@@ -44,6 +48,7 @@
     --page-muted: #98a1b5;
     --page-line: #565d6c;
     --page-border: #767e8f;
+    --page-disabled: #5f636a;
     --page-accent: #f09a3e;
     --page-error: #f09a3e;
     --surface-raised: #20242d;
@@ -66,6 +71,7 @@
   --page-muted: #5c6478;
   --page-line: #99a1b0;
   --page-border: #6e7583;
+  --page-disabled: #9ca0a8;
   --page-accent: #b8791d;
   --page-error: #a3341f;
   --surface-raised: #ffffff;
@@ -78,6 +84,7 @@
   --page-muted: #98a1b5;
   --page-line: #565d6c;
   --page-border: #767e8f;
+  --page-disabled: #5f636a;
   --page-accent: #f09a3e;
   --page-error: #f09a3e;
   --surface-raised: #20242d;
@@ -93,6 +100,7 @@
   --page-muted: #6b5f4d;
   --page-line: #a3937a;
   --page-border: #83745a;
+  --page-disabled: #969696;
   --page-accent: #9a5b16;
   --page-error: #a3341f;
   --surface-raised: #f8f4e8;

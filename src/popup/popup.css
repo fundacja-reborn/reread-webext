@@ -257,15 +257,17 @@ body[data-os="android"][data-mode="lookup"] .popup-lookup-answer {
 /* Over a page nothing listens in - the browser's own pages, the store, the
    extension's - the reading view has nothing to read, and the row says so
    by going quiet under the note: the accent leaves the glyph with the ink,
-   and the hover has nothing to promise. In the separator lines' ink, not
-   the notes' muted one: muted is what the note above it and the support
+   and the hover has nothing to promise. In the theme's disabled grey, not
+   the notes' muted ink: muted is what the note above it and the support
    row wear, and the row read as one more note (Michał's screenshot in
-   sepia) - the lines' token is the ink the settings' disabled arrows wear
-   (D200), a clear step paler than every live row in each palette. */
+   sepia); the separator lines' token was paler but brown on the sepia
+   paper, and a control that cannot be pressed is grey by every platform's
+   convention (his second screenshot) - `--page-disabled`, neutral in each
+   palette, about 2.5:1 to the paper. */
 .popup-reader:disabled,
 .popup-reader:disabled:hover,
 .popup-reader:disabled .popup-icon {
-  color: var(--page-line);
+  color: var(--page-disabled);
 }
 
 /* The support row rests quieter than the rows above it, and carries its own
