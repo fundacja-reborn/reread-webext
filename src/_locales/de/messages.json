@@ -1285,6 +1285,30 @@
       "total": { "content": "$3", "example": "3" }
     }
   },
+  "options_dictionary_display_name": { "message": "Anzeigename" },
+  "options_dictionary_display_name_aria": {
+    "message": "Anzeigename von $NAME$",
+    "placeholders": { "name": { "content": "$1", "example": "English-Polish FreeDict+WikDict dictionary (en-pl)" } }
+  },
+  "options_dictionary_renamed": {
+    "message": "$NAME$ wird jetzt als $SHOWN$ angezeigt.",
+    "placeholders": {
+      "name": { "content": "$1", "example": "English-Polish FreeDict+WikDict dictionary (en-pl)" },
+      "shown": { "content": "$2", "example": "FreeDict en-pl" }
+    }
+  },
+  "options_dictionary_name_restored": {
+    "message": "$NAME$ wird wieder unter seinem eigenen Namen angezeigt.",
+    "placeholders": { "name": { "content": "$1", "example": "English-Polish FreeDict+WikDict dictionary (en-pl)" } }
+  },
+  "options_dictionary_name_taken": {
+    "message": "Ein anderes Wörterbuch wird bereits als $NAME$ angezeigt - wählen Sie einen anderen Namen.",
+    "placeholders": { "name": { "content": "$1", "example": "FreeDict en-pl" } }
+  },
+  "options_rename_failed": {
+    "message": "Der Name ließ sich nicht speichern: $DETAIL$",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
   "options_reorder_failed": {
     "message": "Die Reihenfolge ließ sich nicht ändern: $DETAIL$",
     "placeholders": { "detail": { "content": "$1" } }

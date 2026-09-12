@@ -53,6 +53,7 @@ import {
 import { describeZipProblem, readZip } from "../lib/dict/zip.js";
 import { entriesReadFrom, rowBatches } from "../lib/dict/rows.js";
 import { afterMove } from "../lib/dict/order.js";
+import { DISPLAY_NAME_LIMIT, cleanDisplayName, nameHolder } from "../lib/dict/display-name.js";
 import {
   beginImport,
   deleteDictionary,
@@ -61,6 +62,7 @@ import {
   openWriter,
   readSources,
   removeUnfinished,
+  renameDictionary,
   reorderDictionaries,
   stageSources,
 } from "../lib/dict/store.js";
@@ -1718,6 +1720,11 @@ function renderDictionary(dictionary, place) {
     return container;
   }
 
+  // Under the file's name, the one the reader may give instead (D199): a
+  // finished book's only, since an unfinished one is still being named by
+  // its files.
+  name.append(renameField(dictionary));
+
   const counted =
     dictionary.aliasCount > 0
       ? `${words(dictionary.entryCount)}, ${plural(dictionary.aliasCount, "spellings")}`
@@ -1889,6 +1896,106 @@ async function moveDictionary(dictionary, step) {
 }
 
 /**
+ * The field a stored dictionary's own name is typed into (D199): the name its
+ * groups stand under on the shelf - the panel, the popup, the bubble - in
+ * place of what its file calls it. The file's name is the placeholder, so an
+ * empty field says what it means; the field stops where the record would cut.
+ *
+ * Saved when the field is left or Enter is pressed (`change`), not on every
+ * keystroke: a name is a decision, and a half-typed one would be a database
+ * write per letter. A label around the field is what a press on the caption
+ * focuses; the accessible name says which dictionary's, since every row has
+ * a field captioned the same.
+ *
+ * @param {import("../lib/dict/store.js").Dictionary} dictionary
+ * @returns {HTMLElement}
+ */
+function renameField(dictionary) {
+  const line = element("label", "dictionary-rename");
+  line.append(element("span", "dictionary-rename-label", t("options_dictionary_display_name")));
+
+  const field = document.createElement("input");
+  field.type = "text";
+  field.className = "dictionary-rename-field";
+  field.maxLength = DISPLAY_NAME_LIMIT;
+  field.placeholder = dictionary.name;
+  field.value = dictionary.displayName ?? "";
+  field.autocomplete = "off";
+  field.spellcheck = false;
+  field.setAttribute("aria-label", t("options_dictionary_display_name_aria", dictionary.name));
+  // Held like the arrows while an import writes to this database: the redraw
+  // at its end would take a half-typed name with it.
+  field.disabled = importing;
+  // What the redraw after a save finds this field by (`focusRename`).
+  field.dataset["rename"] = dictionary.id;
+  field.addEventListener("change", () => void renameFromField(dictionary, field));
+  line.append(field);
+  return line;
+}
+
+/**
+ * @param {string} id
+ * @returns {HTMLInputElement | null}
+ */
+function renameFieldFor(id) {
+  for (const field of document.querySelectorAll("input.dictionary-rename-field")) {
+    if (field instanceof HTMLInputElement && field.dataset["rename"] === id) return field;
+  }
+  return null;
+}
+
+/**
+ * What a change of the field does: the typed name, cleaned, becomes the
+ * dictionary's own - or, emptied, gives the file's name back. Refused when
+ * another dictionary is already shown under it, over the list as the store
+ * has it now (a second page may have named one since this list was drawn):
+ * the field goes back to what it held and the status line says so. Said in
+ * the section's status line, as a move is, because the field is where the
+ * name was typed and what became of it belongs next to the list.
+ *
+ * The list is redrawn from the store afterwards, as every row action redraws
+ * it - the rows' closures and their search text carry the name - and the
+ * field takes the focus back if it had it, so Enter does not drop the reader
+ * on the page's floor.
+ *
+ * @param {import("../lib/dict/store.js").Dictionary} dictionary
+ * @param {HTMLInputElement} field
+ */
+async function renameFromField(dictionary, field) {
+  const wanted = cleanDisplayName(field.value);
+  const held = dictionary.displayName ?? null;
+  if (wanted === held) {
+    // Nothing to write - spaces around the same name, say - but the field
+    // shows the name as the record would have kept it.
+    field.value = held ?? "";
+    return;
+  }
+
+  if (wanted !== null && nameHolder(await listDictionaries(), dictionary.id, wanted) !== null) {
+    field.value = held ?? "";
+    dictionaryStatus(t("options_dictionary_name_taken", wanted), "error");
+    return;
+  }
+
+  try {
+    await renameDictionary(dictionary.id, wanted);
+  } catch (error) {
+    field.value = held ?? "";
+    dictionaryStatus(t("options_rename_failed", message(error)), "error");
+    return;
+  }
+
+  dictionaryStatus(
+    wanted === null
+      ? t("options_dictionary_name_restored", dictionary.name)
+      : t("options_dictionary_renamed", [dictionary.name, wanted]),
+  );
+  const hadFocus = document.activeElement === field;
+  await renderCatalog();
+  if (hadFocus) renameFieldFor(dictionary.id)?.focus();
+}
+
+/**
  * The confirmed second press of a stored dictionary's Delete.
  *
  * @param {import("../lib/dict/store.js").Dictionary} dictionary
@@ -1995,8 +2102,10 @@ async function renderCatalog() {
       if (row.installed !== null) {
         rendered = renderDictionary(row.installed, { at, total: stored.length });
         at += 1;
-        // Found by the pair either way it is spelled, and by the book's own name.
-        rendered.dataset["search"] = `${searchableText(row)} ${row.installed.name.toLowerCase()}`;
+        // Found by the pair either way it is spelled, by the book's own name,
+        // and by the name the reader gave it (D199).
+        const own = row.installed.displayName === undefined ? "" : ` ${row.installed.displayName.toLowerCase()}`;
+        rendered.dataset["search"] = `${searchableText(row)} ${row.installed.name.toLowerCase()}${own}`;
       } else if (row.available !== null) {
         rendered = renderCatalogRow(row.available);
         rendered.id = catalogRowId(row.available);

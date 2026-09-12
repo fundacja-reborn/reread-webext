@@ -438,6 +438,36 @@ button.note-toggle {
   overflow-wrap: anywhere;
 }
 
+/* The name a reader gives a dictionary (D199), on its own line under the
+   file's name it stands in for - inside the name cell, so the phone's layout
+   (name first, counts and buttons under it) and the desktop's columns both
+   keep it with the name. The caption is the label; the field wears the
+   filter fields' quiet dress, capped the way the font name's field is, so an
+   empty one is not a line across the page. */
+.dictionary-rename {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.6rem;
+  margin-top: 0.35rem;
+  color: var(--page-muted);
+  font-size: 0.85rem;
+}
+
+.dictionary-rename-field {
+  flex: 1 1 12rem;
+  max-width: 22rem;
+  min-width: 0;
+  min-height: 44px;
+  font: inherit;
+  font-size: 0.9rem;
+  padding: 0.35rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid var(--page-border);
+  background: transparent;
+  color: var(--page-fg);
+}
+
 /* The arrows that arrange the dictionaries: the quiet Delete's dressing (no
    border at rest, wash on hover and focus), because they sit on the same row
    and three differently dressed buttons would read as three unrelated

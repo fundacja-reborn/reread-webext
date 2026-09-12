@@ -1645,6 +1645,36 @@
       "total": { "content": "$3", "example": "3" }
     }
   },
+  "options_dictionary_display_name": {
+    "message": "Display name",
+    "description": "The caption of the field on a stored dictionary's row (D199): the name its entries are grouped under on the phrases page, in the popup and in the bubble, in place of the name its file carries."
+  },
+  "options_dictionary_display_name_aria": {
+    "message": "Display name of $NAME$",
+    "description": "The accessible name of that field; every row has one captioned the same.",
+    "placeholders": { "name": { "content": "$1", "example": "English-Polish FreeDict+WikDict dictionary (en-pl)" } }
+  },
+  "options_dictionary_renamed": {
+    "message": "$NAME$ is now shown as $SHOWN$.",
+    "placeholders": {
+      "name": { "content": "$1", "example": "English-Polish FreeDict+WikDict dictionary (en-pl)" },
+      "shown": { "content": "$2", "example": "FreeDict en-pl" }
+    }
+  },
+  "options_dictionary_name_restored": {
+    "message": "$NAME$ is shown under its own name again.",
+    "description": "After the display name field is emptied.",
+    "placeholders": { "name": { "content": "$1", "example": "English-Polish FreeDict+WikDict dictionary (en-pl)" } }
+  },
+  "options_dictionary_name_taken": {
+    "message": "Another dictionary is already shown as $NAME$ - choose a different name.",
+    "description": "Two dictionaries shown under one name would be one group in the bubble, so the second name is refused.",
+    "placeholders": { "name": { "content": "$1", "example": "FreeDict en-pl" } }
+  },
+  "options_rename_failed": {
+    "message": "Could not save the name: $DETAIL$",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
   "options_reorder_failed": {
     "message": "Could not change the order: $DETAIL$",
     "placeholders": { "detail": { "content": "$1" } }

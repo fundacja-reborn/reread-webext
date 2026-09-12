@@ -1665,6 +1665,30 @@
       "total": { "content": "$3", "example": "3" }
     }
   },
+  "options_dictionary_display_name": { "message": "Відображувана назва" },
+  "options_dictionary_display_name_aria": {
+    "message": "Відображувана назва словника $NAME$",
+    "placeholders": { "name": { "content": "$1", "example": "English-Polish FreeDict+WikDict dictionary (en-pl)" } }
+  },
+  "options_dictionary_renamed": {
+    "message": "$NAME$ тепер відображається як $SHOWN$.",
+    "placeholders": {
+      "name": { "content": "$1", "example": "English-Polish FreeDict+WikDict dictionary (en-pl)" },
+      "shown": { "content": "$2", "example": "FreeDict en-pl" }
+    }
+  },
+  "options_dictionary_name_restored": {
+    "message": "$NAME$ знову відображається під власною назвою.",
+    "placeholders": { "name": { "content": "$1", "example": "English-Polish FreeDict+WikDict dictionary (en-pl)" } }
+  },
+  "options_dictionary_name_taken": {
+    "message": "Інший словник уже відображається як $NAME$ - виберіть іншу назву.",
+    "placeholders": { "name": { "content": "$1", "example": "FreeDict en-pl" } }
+  },
+  "options_rename_failed": {
+    "message": "Не вдалося зберегти назву: $DETAIL$",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
   "options_reorder_failed": {
     "message": "Не вдалося змінити порядок: $DETAIL$",
     "placeholders": { "detail": { "content": "$1" } }

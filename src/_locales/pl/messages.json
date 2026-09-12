@@ -1665,6 +1665,30 @@
       "total": { "content": "$3", "example": "3" }
     }
   },
+  "options_dictionary_display_name": { "message": "Nazwa wyświetlana" },
+  "options_dictionary_display_name_aria": {
+    "message": "Nazwa wyświetlana słownika $NAME$",
+    "placeholders": { "name": { "content": "$1", "example": "English-Polish FreeDict+WikDict dictionary (en-pl)" } }
+  },
+  "options_dictionary_renamed": {
+    "message": "$NAME$ jest teraz wyświetlany jako $SHOWN$.",
+    "placeholders": {
+      "name": { "content": "$1", "example": "English-Polish FreeDict+WikDict dictionary (en-pl)" },
+      "shown": { "content": "$2", "example": "FreeDict en-pl" }
+    }
+  },
+  "options_dictionary_name_restored": {
+    "message": "$NAME$ jest znów wyświetlany pod własną nazwą.",
+    "placeholders": { "name": { "content": "$1", "example": "English-Polish FreeDict+WikDict dictionary (en-pl)" } }
+  },
+  "options_dictionary_name_taken": {
+    "message": "Inny słownik jest już wyświetlany jako $NAME$ - wybierz inną nazwę.",
+    "placeholders": { "name": { "content": "$1", "example": "FreeDict en-pl" } }
+  },
+  "options_rename_failed": {
+    "message": "Nie udało się zapisać nazwy: $DETAIL$",
+    "placeholders": { "detail": { "content": "$1" } }
+  },
   "options_reorder_failed": {
     "message": "Nie udało się zmienić kolejności: $DETAIL$",
     "placeholders": { "detail": { "content": "$1" } }

@@ -22,6 +22,7 @@
  * through a message port).
  */
 
+import { cleanDisplayName, shownName } from "./display-name.js";
 import { answerOrder, inChosenOrder, nextRank } from "./order.js";
 import { mergeSenses, utf8Length } from "./rows.js";
 
@@ -63,6 +64,9 @@ const SOURCES = "sources";
  * @property {number} rank where it stands among the others, 0 first
  * @property {boolean} ready false until every row is in
  * @property {string | null} credit author and source, for attribution
+ * @property {string} [displayName] the name the reader gave it on the settings
+ *   page (D199): what its groups stand under on the shelf in place of `name`;
+ *   absent while they gave none, never empty
  * @property {ImportProgress} [progress] while unready: how far the import got,
  *   absent before its first batch landed
  */
@@ -189,7 +193,8 @@ function rowsOf(id) {
 
 /**
  * @typedef {object} DictionaryEntry
- * @property {string} dictionary the name of the book it came from
+ * @property {string} dictionary the name of the book it came from - the one
+ *   the reader gave it, when they did (D199), else what the .ifo calls it
  * @property {string} headword as that dictionary spells it, which is not always what was selected
  * @property {string[]} senses
  */
@@ -271,7 +276,7 @@ async function readEntries(store, dictionaries, keys) {
             );
 
       if (target === undefined || target.senses.length === 0) continue;
-      found.push({ dictionary: dictionary.name, headword: target.headword, senses: target.senses });
+      found.push({ dictionary: shownName(dictionary), headword: target.headword, senses: target.senses });
       break;
     }
   }
@@ -339,6 +344,32 @@ export async function reorderDictionaries(ids) {
       if (dictionary.rank === at) continue;
       await promisify(store.put({ ...dictionary, rank: at }));
     }
+  });
+}
+
+/**
+ * The name a reader gave a dictionary on the settings page (D199), written
+ * down - or, with `null`, taken back, so the book stands under what its file
+ * calls it again.
+ *
+ * Cleaned here as well as on the page: the record is the one place the rule
+ * has to hold, whoever writes it, and a name that cleans to nothing is no
+ * name. Whether the name is free is the page's question (`nameHolder`), asked
+ * over the list it shows; the store keeps no index to ask it by.
+ *
+ * @param {string} id
+ * @param {string | null} displayName
+ * @returns {Promise<void>}
+ */
+export async function renameDictionary(id, displayName) {
+  const name = displayName === null ? null : cleanDisplayName(displayName);
+  await withStores([META], "readwrite", async (transaction) => {
+    const store = transaction.objectStore(META);
+    const existing = /** @type {Dictionary | undefined} */ (await promisify(store.get(id)));
+    if (existing === undefined) throw new Error("The dictionary was removed while it was being named");
+
+    const { displayName: _, ...rest } = existing;
+    await promisify(store.put(name === null ? rest : { ...rest, displayName: name }));
   });
 }
 
