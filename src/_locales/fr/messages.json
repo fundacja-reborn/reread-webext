@@ -1077,6 +1077,7 @@
     "message": "Tout afficher ($COUNT$)",
     "placeholders": { "count": { "content": "$1" } }
   },
+  "options_show_fewer": { "message": "Afficher moins" },
   "options_model_note_from": { "message": "Les modèles sont téléchargés depuis" },
   "options_model_note_rest": {
     "message": "- c'est là que Mozilla les publie. L'extension ne se connecte à ce serveur public que lorsque vous cliquez sur Mettre à jour la liste ou Télécharger. Aucune donnée personnelle n'est transmise."

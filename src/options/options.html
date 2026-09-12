@@ -527,7 +527,7 @@
     <!-- Folded length, not a scrolled box: the list stands in the page's own
          flow, installed rows first, and this button unfolds the rest. Typing
          in the filter above searches the whole list either way. -->
-    <button type="button" id="models-show-all" class="show-all" hidden></button>
+    <button type="button" id="models-show-all" class="show-all" aria-controls="models" hidden></button>
 
     <p id="model-status" class="status" role="status"></p>
 
@@ -657,7 +657,7 @@
          same way at every width (the seventh brief). -->
     <ul id="dictionary-catalog" class="models"></ul>
 
-    <button type="button" id="dictionaries-show-all" class="show-all" hidden></button>
+    <button type="button" id="dictionaries-show-all" class="show-all" aria-controls="dictionary-catalog" hidden></button>
 
     <p id="dictionary-status" class="status" role="status"></p>
 

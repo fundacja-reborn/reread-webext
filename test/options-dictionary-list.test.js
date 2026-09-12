@@ -139,3 +139,30 @@ describe("the arrows", () => {
     assert.match(fn("moveDictionary", "renameField"), /focusMove\(dictionary\.id, step\)/);
   });
 });
+
+describe("the list's fold", () => {
+  it("stands at the rows' left edge and reads like the shelf's own", () => {
+    const fold = rule(css, ".show-all");
+    assert.match(fold, /text-align: start/);
+    assert.match(fold, /background: none/);
+    assert.doesNotMatch(fold, /width: 100%|text-align: center/);
+  });
+
+  it("reads Show all with the count the filter lets through, and Show fewer once unfolded", () => {
+    const apply = fn("applyFilterIn", "applyModelFilter");
+    assert.match(apply, /showAllState\(\{ total: matching, installedCount: installedMatching, expanded \}\)/);
+    assert.match(apply, /state\.expanded \? t\("options_show_fewer"\) : t\("options_show_all", state\.count\.toLocaleString\(\)\)/);
+    assert.match(apply, /setAttribute\("aria-expanded", String\(state\.expanded\)\)/);
+    // "Nothing matched" is about the filter alone, never about the fold.
+    assert.match(apply, /none\.hidden = !filterActive\(query\) \|\| matching > 0/);
+    assert.match(page, /id="dictionaries-show-all" class="show-all" aria-controls="dictionary-catalog"/);
+    assert.match(page, /id="models-show-all" class="show-all" aria-controls="models"/);
+  });
+
+  it("walks the focus into the list on unfolding and leaves it on the button on folding", () => {
+    const toggle = fn("toggleList", "renderModels");
+    assert.match(toggle, /if \(!opening\) return;/);
+    assert.match(toggle, /\[data-installed="false"\]:not\(\[hidden\]\) button/);
+    assert.match(script, /addEventListener\("click", \(\) => toggleList\("dictionary-catalog"\)\)/);
+  });
+});

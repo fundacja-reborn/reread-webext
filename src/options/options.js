@@ -1246,33 +1246,34 @@ function applyFilterIn(containerId, inputId, noneId, showAllId, expanded) {
   const input = document.getElementById(inputId);
   const query = input instanceof HTMLInputElement ? input.value : "";
 
-  let visible = 0;
-  let total = 0;
-  let installedCount = 0;
-  // Every row of either list says whether it is installed; the models' rows
-  // and the dictionaries' are shaped differently, and that is the one mark
-  // they share.
+  // The rows the filter lets through, and the installed ones among them:
+  // what the fold stands over and counts. Every row of either list says
+  // whether it is installed; the models' rows and the dictionaries' are
+  // shaped differently, and that is the one mark they share.
+  let matching = 0;
+  let installedMatching = 0;
   for (const row of container.querySelectorAll("[data-installed]")) {
     if (!(row instanceof HTMLElement)) continue;
-    total += 1;
     const installed = row.dataset["installed"] === "true";
-    if (installed) installedCount += 1;
     const matches = matchesFilter(row.dataset["search"] ?? "", query);
-    const shown = rowVisible({ installed, matches, expanded, query });
-    row.hidden = !shown;
-    if (shown) visible += 1;
+    if (matches) {
+      matching += 1;
+      if (installed) installedMatching += 1;
+    }
+    row.hidden = !rowVisible({ installed, matches, expanded });
   }
 
   // "The filter matched nothing" is only true of a filter: a folded list
   // showing none of its rows is answered by "Show all" below, not by this.
   const none = document.getElementById(noneId);
-  if (none !== null) none.hidden = !filterActive(query) || visible > 0;
+  if (none !== null) none.hidden = !filterActive(query) || matching > 0;
 
   const showAll = document.getElementById(showAllId);
   if (showAll instanceof HTMLButtonElement) {
-    const state = showAllState({ total, installedCount, expanded, query });
+    const state = showAllState({ total: matching, installedCount: installedMatching, expanded });
     showAll.hidden = !state.shown;
-    showAll.textContent = t("options_show_all", state.count.toLocaleString());
+    showAll.textContent = state.expanded ? t("options_show_fewer") : t("options_show_all", state.count.toLocaleString());
+    showAll.setAttribute("aria-expanded", String(state.expanded));
   }
 }
 
@@ -1285,21 +1286,26 @@ function applyCatalogFilter() {
 }
 
 /**
- * The press that unfolds a list past its installed rows. The button dissolves
- * under the pointer, so focus is walked to the first row it revealed - the
- * same place the eye went.
+ * The press on a list's fold: unfolds it past its installed rows, or folds
+ * it back (block 4 of the seventh brief). Unfolding walks the focus to the
+ * first row it revealed - the same place the eye went; folding leaves it on
+ * the button, which stays where it is to be pressed again.
  *
  * @param {"models" | "dictionary-catalog"} containerId
  */
-function expandList(containerId) {
+function toggleList(containerId) {
+  const opening = containerId === "models" ? !modelsExpanded : !dictionariesExpanded;
   if (containerId === "models") {
-    modelsExpanded = true;
+    modelsExpanded = opening;
     applyModelFilter();
   } else {
-    dictionariesExpanded = true;
+    dictionariesExpanded = opening;
     applyCatalogFilter();
   }
-  const first = document.querySelector(`#${containerId} [data-installed="false"] button`);
+  if (!opening) return;
+  // The first row on screen that the press revealed - not the first the
+  // filter is hiding.
+  const first = document.querySelector(`#${containerId} [data-installed="false"]:not([hidden]) button`);
   if (first instanceof HTMLElement) first.focus();
 }
 
@@ -3093,8 +3099,8 @@ document.getElementById("refresh-models")?.addEventListener("click", () => void 
 document.getElementById("refresh-dictionaries")?.addEventListener("click", () => void refreshDictionaryList());
 document.getElementById("model-filter")?.addEventListener("input", () => applyModelFilter());
 document.getElementById("dictionary-filter")?.addEventListener("input", () => applyCatalogFilter());
-document.getElementById("models-show-all")?.addEventListener("click", () => expandList("models"));
-document.getElementById("dictionaries-show-all")?.addEventListener("click", () => expandList("dictionary-catalog"));
+document.getElementById("models-show-all")?.addEventListener("click", () => toggleList("models"));
+document.getElementById("dictionaries-show-all")?.addEventListener("click", () => toggleList("dictionary-catalog"));
 document.getElementById("add-dictionary")?.addEventListener("click", () => void addSelectedDictionary());
 document.getElementById("download-link")?.addEventListener("click", () => void downloadFromLink());
 // Enter in the address field is the same press: an address is pasted and

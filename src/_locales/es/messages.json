@@ -1065,6 +1065,7 @@
     "message": "Mostrar todos ($COUNT$)",
     "placeholders": { "count": { "content": "$1" } }
   },
+  "options_show_fewer": { "message": "Mostrar menos" },
   "options_model_note_from": { "message": "Los modelos se descargan de" },
   "options_model_note_rest": {
     "message": "- ahí los publica Mozilla. La extensión se conecta a este servidor público solo cuando pulsas Actualizar la lista o Descargar. No se envía ningún dato personal."

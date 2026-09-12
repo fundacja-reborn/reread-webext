@@ -664,26 +664,30 @@ button.model-delete {
   accent-color: var(--page-accent);
 }
 
-/* The one visible move of a collapsed list: a centered quiet line saying how
-   much stands folded under it. The hit area keeps the full row's width; the
-   dressing follows the quiet pattern (no box at rest, wash on hover/focus) -
-   unfolding is a rare act and a bordered bar overstated it. */
+/* The one visible move of a collapsed list: a quiet line at the rows' left
+   edge saying how much stands folded under it - "Show all (N)" - and, once
+   unfolded, "Show fewer" (block 4 of the seventh brief). It reads like the
+   shelf's own "Show all" under a long book: a text button in the list's
+   axis, no box at rest, the underline on hover and focus - not a bar across
+   the frame, since unfolding is a rare act. */
 .show-all {
   display: block;
-  width: 100%;
+  width: auto;
   min-height: 44px;
   margin: 0.25rem 0 0;
-  padding: 0.35rem 1rem;
-  border-color: transparent;
+  padding: 0.35rem 0;
+  border: none;
+  border-radius: 0;
+  background: none;
   color: var(--page-muted);
   font-size: 0.9rem;
+  text-align: start;
 }
 
 .show-all:hover,
 .show-all:focus-visible {
-  border-color: var(--page-border);
-  background: color-mix(in srgb, var(--page-fg) 6%, transparent);
   color: var(--page-fg);
+  text-decoration: underline;
 }
 
 /* Who made the dictionary, in its own words: the line breaks are the ones its

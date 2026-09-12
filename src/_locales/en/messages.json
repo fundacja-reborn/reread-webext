@@ -1362,8 +1362,12 @@
   "options_filter_dictionaries_label": { "message": "Filter the list of dictionaries" },
   "options_show_all": {
     "message": "Show all ($COUNT$)",
-    "description": "Unfolds a catalogue past its installed rows; the count is the whole list.",
+    "description": "Unfolds a catalogue past its installed rows; the count is every row the filter lets through - the whole list while nothing is typed.",
     "placeholders": { "count": { "content": "$1", "example": "118" } }
+  },
+  "options_show_fewer": {
+    "message": "Show fewer",
+    "description": "The same fold once the list is unfolded: folds it back to the installed rows."
   },
   "options_model_note_from": {
     "message": "Model downloads come from",

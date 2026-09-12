@@ -1034,6 +1034,7 @@
     "message": "Alle anzeigen ($COUNT$)",
     "placeholders": { "count": { "content": "$1" } }
   },
+  "options_show_fewer": { "message": "Weniger zeigen" },
   "options_model_note_from": { "message": "Modelle kommen von" },
   "options_model_note_rest": {
     "message": "- dort veröffentlicht Mozilla sie. Die Erweiterung verbindet sich mit diesem öffentlichen Server nur, wenn Sie auf Liste aktualisieren oder Herunterladen klicken. Es werden keine persönlichen Daten gesendet."

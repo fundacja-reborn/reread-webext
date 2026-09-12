@@ -235,42 +235,52 @@ describe("filterActive", () => {
 });
 
 describe("rowVisible", () => {
-  it("shows only the installed rows while folded with no query", () => {
-    assert.ok(rowVisible({ installed: true, matches: true, expanded: false, query: "" }));
-    assert.ok(!rowVisible({ installed: false, matches: true, expanded: false, query: "" }));
+  it("shows only the installed rows while folded", () => {
+    assert.ok(rowVisible({ installed: true, matches: true, expanded: false }));
+    assert.ok(!rowVisible({ installed: false, matches: true, expanded: false }));
   });
 
   it("shows every row once unfolded", () => {
-    assert.ok(rowVisible({ installed: false, matches: true, expanded: true, query: "" }));
+    assert.ok(rowVisible({ installed: false, matches: true, expanded: true }));
   });
 
-  it("lets a query override the fold in both directions", () => {
-    // A match unfolds past "Show all"; a miss hides even an installed row.
-    assert.ok(rowVisible({ installed: false, matches: true, expanded: false, query: "pl" }));
-    assert.ok(!rowVisible({ installed: true, matches: false, expanded: false, query: "de" }));
-  });
-
-  it("treats a whitespace query as no query at all", () => {
-    assert.ok(!rowVisible({ installed: false, matches: true, expanded: false, query: "   " }));
+  it("hides what the filter does not match, folded or not, installed or not", () => {
+    assert.ok(!rowVisible({ installed: true, matches: false, expanded: false }));
+    assert.ok(!rowVisible({ installed: false, matches: false, expanded: true }));
+    // A match does not unfold the list by itself (block 4 of the seventh
+    // brief): the fold counts it and shows it on the press.
+    assert.ok(!rowVisible({ installed: false, matches: true, expanded: false }));
   });
 });
 
 describe("showAllState", () => {
-  it("stands under a folded list, wearing the whole count", () => {
-    assert.deepEqual(
-      showAllState({ total: 118, installedCount: 2, expanded: false, query: "" }),
-      { shown: true, count: 118 },
-    );
+  it("stands under a folded list, wearing the count the filter lets through", () => {
+    assert.deepEqual(showAllState({ total: 118, installedCount: 2, expanded: false }), {
+      shown: true,
+      expanded: false,
+      count: 118,
+    });
+    // Seven rows match the query, one of them installed: the fold promises
+    // the seven, not the whole list.
+    assert.deepEqual(showAllState({ total: 7, installedCount: 1, expanded: false }), {
+      shown: true,
+      expanded: false,
+      count: 7,
+    });
   });
 
-  it("leaves once the list is unfolded, and while a query runs it", () => {
-    assert.equal(showAllState({ total: 118, installedCount: 2, expanded: true, query: "" }).shown, false);
-    assert.equal(showAllState({ total: 118, installedCount: 2, expanded: false, query: "pl" }).shown, false);
+  it("stays once the list is unfolded, reading the other way", () => {
+    assert.deepEqual(showAllState({ total: 118, installedCount: 2, expanded: true }), {
+      shown: true,
+      expanded: true,
+      count: 118,
+    });
   });
 
   it("has nothing to offer when everything is already on screen", () => {
-    assert.equal(showAllState({ total: 2, installedCount: 2, expanded: false, query: "" }).shown, false);
-    assert.equal(showAllState({ total: 0, installedCount: 0, expanded: false, query: "" }).shown, false);
+    assert.equal(showAllState({ total: 2, installedCount: 2, expanded: false }).shown, false);
+    assert.equal(showAllState({ total: 2, installedCount: 2, expanded: true }).shown, false);
+    assert.equal(showAllState({ total: 0, installedCount: 0, expanded: false }).shown, false);
   });
 });
 

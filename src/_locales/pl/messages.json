@@ -1414,6 +1414,7 @@
     "message": "Pokaż wszystkie ($COUNT$)",
     "placeholders": { "count": { "content": "$1" } }
   },
+  "options_show_fewer": { "message": "Pokaż mniej" },
   "options_model_note_from": { "message": "Modele pobierane są z" },
   "options_model_note_rest": {
     "message": "- to tam publikuje je Mozilla. Rozszerzenie łączy się z tym publicznym serwerem tylko wtedy, gdy naciśniesz Zaktualizuj listę albo Pobierz. Żadne dane osobowe nie są wysyłane."
