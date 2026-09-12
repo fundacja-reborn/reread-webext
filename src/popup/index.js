@@ -188,7 +188,11 @@ function onLookupState(state) {
  * line about a missing dictionary opens the settings at the dictionaries,
  * the bubble's own door (D192), and closes the popup the way every room's
  * row does. Read-only here (`readOnly`): the field's one act is the door
- * below it, to the page where a press on a meaning saves.
+ * below it, to the page where a press on a meaning saves. And no "Show all"
+ * fold (`foldAt: null`, D207): the answer scrolls in a box of its own with
+ * nothing under it but the door, so every line of a book stands open, as
+ * in the bubble - the phrases page keeps the fold for the list under its
+ * panel.
  */
 const lookupBox =
   lookupForm === null || lookupAnswer === null
@@ -212,7 +216,7 @@ const lookupBox =
             };
           },
         },
-        { readOnly: true, onState: onLookupState },
+        { readOnly: true, foldAt: null, onState: onLookupState },
       );
 
 /**

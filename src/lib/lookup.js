@@ -153,8 +153,8 @@ export const LINES_OPEN = 8;
  * Where a group's rows are cut (`LINES_OPEN`, or the home's own count),
  * and whether the fold under the cut starts open: it does when a saved
  * meaning would otherwise be out of sight - a tick that cannot be seen is a
- * state the panel is hiding. A home whose own box scrolls (the bubble)
- * cuts nowhere: `null`.
+ * state the panel is hiding. A home whose own box scrolls (the bubble; the
+ * popup, D207) cuts nowhere: `null`.
  *
  * @param {string[]} lines the group's lines, in order
  * @param {string[]} meanings what the phrase means now
