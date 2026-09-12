@@ -1,6 +1,6 @@
 # Privacy policy for re/read
 
-Last updated: 11 September 2026. This document is kept in the extension's repository, so
+Last updated: 12 September 2026. This document is kept in the extension's repository, so
 every change to it is a commit anyone can read: [`PRIVACY.md`](https://github.com/fundacja-reborn/reread-webext/blob/main/PRIVACY.md).
 
 ## The short version
@@ -28,11 +28,12 @@ deleted when the private session ends. The pages fill it from the safety copies,
 private session reads and never writes: an article saved, a book imported, a highlight made
 or anything deleted in a private window is gone with the session, and nothing about that
 session remains in the copies. Saved phrases are the one exception - they are handled by
-the extension's background, which is never private, and are kept.
+the extension's background, which is never private, and are kept; so are the two counts
+kept with a phrase (below), which a private window adds to like any other.
 
 | What | Why it is stored |
 |---|---|
-| Saved phrases with their meanings | To underline them on later pages and show your meaning again |
+| Saved phrases with their meanings, and two counts per phrase (how many times you opened its bubble, how many times it occurred in the texts you finished - see *Page content*) | To underline them on later pages and show your meaning again; the counts, to help you decide what you have learned |
 | Translation models you downloaded | So translation works offline |
 | Dictionaries you installed | So dictionary lookups work offline |
 | Articles and books you saved to the reading list | So they open with no network, and after the original page has changed or gone |
@@ -166,6 +167,15 @@ is saved as soon as you select it and its translation arrives, longer ones wait 
 **Save** - and the article you open in the reader, which is kept in the reading list by
 default (a setting turns that off). Only your own selecting and clicking count: a page's
 own scripts cannot select a phrase or press a button on the extension's behalf.
+
+Two counts are kept with each saved phrase, on your device like the phrase itself: how
+many times you opened its bubble (clicked its underline, or selected it again), and how many
+times it occurred in the texts you finished in the reader - a part of a book you left
+through the **Next** button under its text, or an article you marked as read - each with
+the time it last happened. They are shown on the saved phrases page, which can order the
+list by them. They record no page, no title and no text: not where you met the phrase, only
+how often. A page you read outside the reader adds to the first count only, when you open a
+bubble on it, and to nothing else. Marking a phrase **Learned** deletes its counts with it.
 
 A page you have switched re/read off on (the toolbar popup, or the list in Settings)
 is not read at all: no scan, no underlines, no bubble. The one thing that still works

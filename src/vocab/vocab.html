@@ -249,6 +249,18 @@
         enterkeyhint="search"
         autocomplete="off"
       />
+      <!-- The order of the list (D209), beside the filter: newest first as
+           the page has always been, then the two counts a phrase carries
+           and the alphabet. The values are `Order` in list-view.js; the
+           choice lives with the page, like the filter, and starts over
+           with it. -->
+      <label for="order" class="visually-hidden" data-i18n="vocab_order_label">Order of the list</label>
+      <select id="order">
+        <option value="newest" data-i18n="vocab_order_newest">Newest first</option>
+        <option value="recalled" data-i18n="vocab_order_recalled">Most checked</option>
+        <option value="read" data-i18n="vocab_order_read">Most read</option>
+        <option value="alphabetical" data-i18n="vocab_order_alphabetical">A to Z</option>
+      </select>
     </div>
 
     <!-- A phrase added by hand (D197): a word typed instead of selected,

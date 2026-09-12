@@ -152,7 +152,7 @@
 
   "vocab_title": { "message": "re/read - saved phrases" },
   "vocab_intro": {
-    "message": "Every phrase you kept for this language pair, newest first - saved while reading, stored only on this device. $LEARNED$ removes a phrase and its underlines with it; $EDIT$ rewrites what it means, one meaning per line. Several meanings at once: separate them with a semicolon.",
+    "message": "Every phrase you kept for this language pair, newest first - saved while reading, stored only on this device. $LEARNED$ removes a phrase and its underlines with it; $EDIT$ rewrites what it means, one meaning per line. Several meanings at once: separate them with a semicolon. Under a phrase, two counts: how many times you checked it (opened its bubble), and how many times it occurred in the texts you finished - a part of a book you left through Next under its text, an article you marked as read. The list can be ordered by either.",
     "description": "The buttons quoted are bubble_learned and bubble_edit, passed in so the three can never drift apart.",
     "placeholders": {
       "learned": { "content": "$1", "example": "Learned" },
@@ -287,6 +287,46 @@
       "total": { "content": "$1", "example": "827" },
       "shown": { "content": "$2", "example": "1" },
       "query": { "content": "$3", "example": "news" }
+    }
+  },
+  "vocab_order_label": {
+    "message": "Order of the list",
+    "description": "The hidden label of the order select beside the filter on the saved-phrases page (D209)."
+  },
+  "vocab_order_newest": { "message": "Newest first" },
+  "vocab_order_recalled": {
+    "message": "Most checked",
+    "description": "An order of the saved-phrases list (D209): by how many times a phrase's bubble was opened - a press on its underline, or a fresh selection of it. Short: the select stands beside the filter box on a phone."
+  },
+  "vocab_order_read": {
+    "message": "Most read",
+    "description": "An order of the saved-phrases list (D209): by how many times a phrase occurred in the texts the reader finished - a book part left through Next under its text, an article marked as read. Short, like the option above."
+  },
+  "vocab_order_alphabetical": { "message": "A to Z" },
+  "vocab_recalls_one": {
+    "message": "Checked $COUNT$ time",
+    "description": "Under a phrase on the saved-phrases page (D209): how many times its bubble was opened. Plural family over the count.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "vocab_recalls_other": {
+    "message": "Checked $COUNT$ times",
+    "placeholders": {
+      "count": { "content": "$1", "example": "20" }
+    }
+  },
+  "vocab_reads_one": {
+    "message": "$COUNT$ time in texts you finished",
+    "description": "Under a phrase on the saved-phrases page (D209): how many times it occurred in the texts the reader finished. Plural family over the count.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "vocab_reads_other": {
+    "message": "$COUNT$ times in texts you finished",
+    "placeholders": {
+      "count": { "content": "$1", "example": "100" }
     }
   },
   "pager_page_of": {

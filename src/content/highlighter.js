@@ -24,6 +24,7 @@
  * so the observer is not started at all.
  */
 
+import { whenIdle } from "../lib/idle.js";
 import { buildIndex } from "../lib/matcher/index.js";
 import { DEFAULT_UNDERLINE, UNDERLINE_NAMES, underlineName } from "../lib/underline.js";
 import { blockAround, scan } from "./scan.js";
@@ -231,11 +232,7 @@ function onMutations(records) {
   scheduled = true;
   // Idle rather than immediate: a page loading its own content fires hundreds
   // of these, and none of them is more urgent than the article being readable.
-  if (typeof requestIdleCallback === "function") {
-    requestIdleCallback(catchUp, { timeout: IDLE_TIMEOUT });
-  } else {
-    setTimeout(catchUp, IDLE_TIMEOUT);
-  }
+  whenIdle(catchUp, IDLE_TIMEOUT);
 }
 
 /**
@@ -299,4 +296,16 @@ export function phraseAt(x, y) {
     }
   }
   return null;
+}
+
+/**
+ * The text every painted range matched, one entry per occurrence, in
+ * document order - what the reader page tallies when a text is finished
+ * (D209, `lib/counting.js`). Under D208 an entry may be a form rather than
+ * the saved word; the caller knows the aliases, this module only paints.
+ *
+ * @returns {string[]}
+ */
+export function occurrences() {
+  return painted.map((one) => one.normalized);
 }

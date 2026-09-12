@@ -19,7 +19,7 @@
  * and `background/vocabulary.js` is where that rule is enforced.
  */
 
-import { resaved } from "./phrase.js";
+import { counted, resaved } from "./phrase.js";
 
 const DB_NAME = "reread-vocab";
 const DB_VERSION = 1;
@@ -165,6 +165,36 @@ export async function putMissingPhrases(phrases) {
 export async function putPhrases(phrases) {
   await withPhrases("readwrite", async (store) => {
     for (const phrase of phrases) await promisify(store.put(phrase));
+  });
+}
+
+/**
+ * Adds a batch of counts (D209) to the rows of one pair, in one transaction:
+ * a key that is not there any more - learned between the page's report and
+ * this write - is skipped, and a row the batch adds nothing to is not
+ * written. Only the count fields move (`counted`); the row's identity, its
+ * text and its meanings are read and put back as they were.
+ *
+ * @param {Pair} pair
+ * @param {Map<string, import("./phrase.js").Counts>} counts by normalized key
+ * @param {number} now epoch milliseconds
+ * @returns {Promise<number>} how many rows were written
+ */
+export async function countPhrases(pair, counts, now) {
+  return await withPhrases("readwrite", async (store) => {
+    const index = store.index(BY_KEY);
+    let written = 0;
+    for (const [normalized, batch] of counts) {
+      const existing = /** @type {Phrase | undefined} */ (
+        await promisify(index.get(indexKey({ ...pair, normalized })))
+      );
+      if (existing === undefined) continue;
+      const next = counted(existing, batch, now);
+      if (next === existing) continue;
+      await promisify(store.put(next));
+      written += 1;
+    }
+    return written;
   });
 }
 

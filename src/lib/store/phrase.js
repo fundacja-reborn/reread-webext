@@ -25,6 +25,15 @@ import { ErrorCode, fail, ok } from "../protocol.js";
  * behind it. Deciding that shape now costs one array literal; deciding it after
  * the first release costs a database migration.
  *
+ * The four counts (D209) are what the reader did with the phrase after
+ * keeping it, and they are all a row remembers of that: how many times its
+ * bubble was opened (a press on an underline, or a fresh selection of a
+ * phrase already kept), and how many times it occurred in the texts the
+ * reader finished - a part of a book left through the Next button under its
+ * text, an article marked as read - each with the time it last happened.
+ * Never where: no page, no title, no text. A row from before D209 has none,
+ * which reads as zero (`countsOf`).
+ *
  * @typedef {object} Phrase
  * @property {string} id
  * @property {string} langFrom
@@ -35,6 +44,17 @@ import { ErrorCode, fail, ok } from "../protocol.js";
  * @property {number} createdAt epoch milliseconds
  * @property {string} [context] reserved, written by nobody in M2 - see O2 in the docs
  * @property {string} [sourceUrl] reserved, written by nobody in M2 - see O3 in the docs
+ * @property {number} [recallCount] bubble openings since the phrase was kept (D209)
+ * @property {number} [lastRecallAt] epoch milliseconds of the last one
+ * @property {number} [readCount] occurrences in the texts finished since then (D209)
+ * @property {number} [lastReadAt] epoch milliseconds of the last text finished with it
+ */
+
+/**
+ * What the reader did with a phrase, as one batch: how many bubble
+ * openings and how many occurrences in finished texts to add.
+ *
+ * @typedef {{ recalled: number, read: number }} Counts
  */
 
 /**
@@ -108,4 +128,61 @@ export function buildPhrase({ text, translations, langFrom, langTo, id, now }) {
  */
 export function resaved(existing, incoming) {
   return { ...existing, phrase: incoming.phrase, translations: incoming.translations };
+}
+
+/**
+ * @param {unknown} value
+ * @returns {value is number} a whole, non-negative number - what a count is
+ */
+export function isCount(value) {
+  return typeof value === "number" && Number.isInteger(value) && value >= 0;
+}
+
+/**
+ * The counts as a row carries them, absent ones read as zero: every row
+ * kept before D209 has none, and nothing is rewritten to give it any.
+ *
+ * @param {Phrase} phrase
+ * @returns {{ recalls: number, reads: number }}
+ */
+export function countsOf(phrase) {
+  return {
+    recalls: isCount(phrase.recallCount) ? phrase.recallCount : 0,
+    reads: isCount(phrase.readCount) ? phrase.readCount : 0,
+  };
+}
+
+/**
+ * A row with a batch of counts added (D209). Only the four count fields
+ * move; a batch that adds nothing gives the row back untouched - the same
+ * object, so a store can tell there is nothing to write. A time is stamped
+ * only for the count that grew: the last bubble opening and the last
+ * finished text are two different moments.
+ *
+ * Counts that are not whole positive numbers add nothing rather than
+ * poisoning the row - the batch came over a message, and a row with `NaN`
+ * in it would sort nowhere and show nothing.
+ *
+ * @param {Phrase} phrase
+ * @param {Counts} counts
+ * @param {number} now epoch milliseconds
+ * @returns {Phrase}
+ */
+export function counted(phrase, counts, now) {
+  const recalled = isCount(counts.recalled) ? counts.recalled : 0;
+  const read = isCount(counts.read) ? counts.read : 0;
+  if (recalled === 0 && read === 0) return phrase;
+
+  const { recalls, reads } = countsOf(phrase);
+  /** @type {Phrase} */
+  const next = { ...phrase };
+  if (recalled > 0) {
+    next.recallCount = recalls + recalled;
+    next.lastRecallAt = now;
+  }
+  if (read > 0) {
+    next.readCount = reads + read;
+    next.lastReadAt = now;
+  }
+  return next;
 }

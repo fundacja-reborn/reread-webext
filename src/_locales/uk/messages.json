@@ -89,7 +89,7 @@
 
   "vocab_title": { "message": "re/read - збережені фрази" },
   "vocab_intro": {
-    "message": "Усе, що ви зберегли для цієї мовної пари, найновіше першим - збережене під час читання й лише на цьому пристрої. «$LEARNED$» прибирає фразу разом з її підкресленнями; «$EDIT$» переписує її значення, по одному в рядку. Кілька значень одразу розділяйте крапкою з комою.",
+    "message": "Усе, що ви зберегли для цієї мовної пари, найновіше першим - збережене під час читання й лише на цьому пристрої. «$LEARNED$» прибирає фразу разом з її підкресленнями; «$EDIT$» переписує її значення, по одному в рядку. Кілька значень одразу розділяйте крапкою з комою. Під фразою два числа: скільки разів ви її перевіряли (відкривали її бульбашку) і скільки разів вона траплялася в текстах, які ви дочитали - у частині книги, яку ви залишили кнопкою «Наступна» під текстом, або в статті, позначеній як прочитана. Список можна впорядкувати за будь-яким із них.",
     "placeholders": {
       "learned": { "content": "$1", "example": "Вивчено" },
       "edit": { "content": "$2", "example": "Редагувати" }
@@ -206,6 +206,59 @@
       "total": { "content": "$1", "example": "1,5" },
       "shown": { "content": "$2", "example": "1" },
       "query": { "content": "$3", "example": "news" }
+    }
+  },
+  "vocab_order_label": { "message": "Порядок списку" },
+  "vocab_order_newest": { "message": "Найновіші першими" },
+  "vocab_order_recalled": { "message": "Найчастіше перевірені" },
+  "vocab_order_read": { "message": "Найчастіше читані" },
+  "vocab_order_alphabetical": { "message": "За алфавітом" },
+  "vocab_recalls_one": {
+    "message": "Перевірено $COUNT$ раз",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "vocab_recalls_few": {
+    "message": "Перевірено $COUNT$ рази",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "vocab_recalls_many": {
+    "message": "Перевірено $COUNT$ разів",
+    "placeholders": {
+      "count": { "content": "$1", "example": "20" }
+    }
+  },
+  "vocab_recalls_other": {
+    "message": "Перевірено $COUNT$ разу",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1,5" }
+    }
+  },
+  "vocab_reads_one": {
+    "message": "$COUNT$ раз у прочитаних текстах",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "vocab_reads_few": {
+    "message": "$COUNT$ рази у прочитаних текстах",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "vocab_reads_many": {
+    "message": "$COUNT$ разів у прочитаних текстах",
+    "placeholders": {
+      "count": { "content": "$1", "example": "100" }
+    }
+  },
+  "vocab_reads_other": {
+    "message": "$COUNT$ разу у прочитаних текстах",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1,5" }
     }
   },
   "pager_page_of": {

@@ -32,9 +32,11 @@
 
 import { webext } from "../lib/browser.js";
 import { CONFIG_KEY, DEFAULTS, chosenPair, withDefaults } from "../lib/config.js";
+import { CountReport, tallyRead } from "../lib/counting.js";
 import { HINT_MAX_WORDS, dictionaryHint, filingWarning, linkedWord, quietNote } from "../lib/gloss.js";
 import { entryGroups } from "../lib/lookup.js";
 import { t, uiLocale } from "../lib/i18n.js";
+import { whenIdle } from "../lib/idle.js";
 import { languageName, pairLabel } from "../lib/language.js";
 import { keyTokens } from "../lib/matcher/tokenize.js";
 import { describeError } from "../lib/messages.js";
@@ -45,7 +47,7 @@ import { copyCombo, keeping, madeSelection, touchPointer } from "../lib/selectio
 import { sentenceAround } from "../lib/sentence.js";
 import { MIRROR_KEY, asMirror, formAliases, mirrorMatches } from "../lib/store/mirror.js";
 import { canSpeakLang, primaryLanguage, setSpeechOff, speak, speaking, stop as stopSpeaking } from "../lib/tts.js";
-import { clear, mark, paint, phraseAt, unmark } from "./highlighter.js";
+import { clear, mark, occurrences, paint, phraseAt, unmark } from "./highlighter.js";
 import { blockTextAround, findable } from "./scan.js";
 import { claimsNativeSelection, clearSelection, releaseMouse, startSelect, stopSelect } from "./select.js";
 import { createTooltip } from "./tooltip.js";
@@ -776,6 +778,55 @@ function repaint() {
 }
 
 /**
+ * What this page has to report about the reader's phrases (D209): bubble
+ * openings as they happen, the tally of a text the reader finished. Sent in
+ * the idle moment after, as one message - the background wakes once for a
+ * burst of openings, and a finished part with the bubble opened on its last
+ * line is one wake, not two. `pagehide` is listened for only while
+ * something waits, so a tab closed inside that moment still reports; the
+ * moment is short because nothing on the page depends on the answer.
+ */
+const report = new CountReport();
+let reportScheduled = false;
+/** How long a report may wait for the page's quiet moment. */
+const REPORT_TIMEOUT = 1000;
+
+function scheduleReport() {
+  if (reportScheduled) return;
+  reportScheduled = true;
+  window.addEventListener("pagehide", sendReport);
+  whenIdle(sendReport, REPORT_TIMEOUT);
+}
+
+function sendReport() {
+  reportScheduled = false;
+  window.removeEventListener("pagehide", sendReport);
+  const batch = report.take();
+  if (batch === null) return;
+  // Fire and forget: nothing on the page waits for a count, and a background
+  // that is asleep or gone answers `internal`, which `ask` already swallows.
+  void ask({ kind: Message.COUNT_PHRASES, ...batch });
+}
+
+/**
+ * The text on screen counted as finished (D209): every painted occurrence,
+ * a form counted for the saved word it stands for (D208), reported with the
+ * next batch. The reader page calls this on the gestures that prove the
+ * reader reached the end of a text - it is the one caller, and the one that
+ * knows which parts it has already counted (`ReadLedger`).
+ */
+export function reportRead() {
+  if (!started) return;
+  const tally = tallyRead(occurrences(), (normalized) => {
+    const key = aliases.get(normalized) ?? normalized;
+    return vocabulary.has(key) ? key : null;
+  });
+  if (tally.length === 0) return;
+  report.read(tally);
+  scheduleReport();
+}
+
+/**
  * Reads the settings and the vocabulary in one call, and decides which of three
  * situations this page is in:
  *
@@ -1228,6 +1279,10 @@ function showSaved(anchor, text, normalized, context, how = {}) {
     anchored,
     scheme: bubbleScheme?.() ?? null,
   });
+  // One bubble opening, counted (D209): the row's key, reported in the idle
+  // moment after with whatever else the page has gathered by then.
+  report.recalled(key);
+  scheduleReport();
   return true;
 }
 
@@ -2008,6 +2063,9 @@ export function stop() {
   quietLookup = null;
   quietVoice = null;
   bridgeCopy = false;
+  // Whatever waited for the quiet moment goes now: the side is leaving the
+  // page, and a count is not worth losing to that.
+  if (reportScheduled) sendReport();
   vocabulary = new Map();
   clear();
 }

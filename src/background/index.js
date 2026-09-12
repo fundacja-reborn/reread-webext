@@ -26,6 +26,7 @@ import { installMenus, menuDoor } from "./menus.js";
 import { openLibrary, openMarks, openReader, readInReader } from "./reader-tab.js";
 import { openSettings, openVocabulary } from "./room-tab.js";
 import {
+  countPhrases,
   forgetPhrase,
   importPhrases,
   listVocabulary,
@@ -194,6 +195,8 @@ async function handle(request, sender) {
       return await listVocabulary();
     case Message.IMPORT_PHRASES:
       return await importPhrases(request);
+    case Message.COUNT_PHRASES:
+      return await countPhrases(request);
   }
 }
 

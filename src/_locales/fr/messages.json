@@ -89,7 +89,7 @@
 
   "vocab_title": { "message": "re/read - phrases enregistrées" },
   "vocab_intro": {
-    "message": "Toutes les phrases gardées pour cette paire de langues, les plus récentes d'abord - enregistrées pendant la lecture et conservées uniquement sur cet appareil. « $LEARNED$ » supprime une phrase et ses soulignements avec elle ; « $EDIT$ » réécrit ses sens, un par ligne. Plusieurs sens à la fois : séparez-les par un point-virgule.",
+    "message": "Toutes les phrases gardées pour cette paire de langues, les plus récentes d'abord - enregistrées pendant la lecture et conservées uniquement sur cet appareil. « $LEARNED$ » supprime une phrase et ses soulignements avec elle ; « $EDIT$ » réécrit ses sens, un par ligne. Plusieurs sens à la fois : séparez-les par un point-virgule. Sous une phrase, deux nombres : combien de fois vous l'avez consultée (ouvert sa bulle) et combien de fois elle est apparue dans les textes que vous avez terminés - une partie de livre quittée par « Suivante » sous le texte, ou un article marqué comme lu. La liste peut être ordonnée selon l'un ou l'autre.",
     "placeholders": {
       "learned": { "content": "$1", "example": "Appris" },
       "edit": { "content": "$2", "example": "Modifier" }
@@ -191,6 +191,47 @@
       "total": { "content": "$1", "example": "827" },
       "shown": { "content": "$2", "example": "1" },
       "query": { "content": "$3", "example": "news" }
+    }
+  },
+  "vocab_order_label": { "message": "Ordre de la liste" },
+  "vocab_order_newest": { "message": "Les plus récentes d'abord" },
+  "vocab_order_recalled": { "message": "Les plus consultées" },
+  "vocab_order_read": { "message": "Les plus lues" },
+  "vocab_order_alphabetical": { "message": "Alphabétique" },
+  "vocab_recalls_one": {
+    "message": "Consultée $COUNT$ fois",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "vocab_recalls_many": {
+    "message": "Consultée $COUNT$ fois",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1000000" }
+    }
+  },
+  "vocab_recalls_other": {
+    "message": "Consultée $COUNT$ fois",
+    "placeholders": {
+      "count": { "content": "$1", "example": "20" }
+    }
+  },
+  "vocab_reads_one": {
+    "message": "$COUNT$ fois dans les textes terminés",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "vocab_reads_many": {
+    "message": "$COUNT$ fois dans les textes terminés",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1000000" }
+    }
+  },
+  "vocab_reads_other": {
+    "message": "$COUNT$ fois dans les textes terminés",
+    "placeholders": {
+      "count": { "content": "$1", "example": "100" }
     }
   },
   "pager_page_of": {

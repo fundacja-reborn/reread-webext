@@ -18,13 +18,14 @@
 
 import { normalize } from "../lib/normalize.js";
 import { chosenPair, readConfig } from "../lib/config.js";
+import { mergeCounts } from "../lib/counting.js";
 import { ErrorCode, fail, ok } from "../lib/protocol.js";
 import { ensureBackup, rebuildBackup, restoreVocabulary } from "../lib/store/backup.js";
 import { migrateSemicolonsOnce, sweepSemicolonBackup } from "../lib/store/semicolon-migration.js";
 import { mirrorWithForms } from "../lib/store/forms.js";
 import { writeMirror } from "../lib/store/mirror.js";
 import { buildPhrase } from "../lib/store/phrase.js";
-import { deletePhrase, listPhrases, putMissingPhrases, putPhrase } from "../lib/store/vocab.js";
+import { countPhrases as countRows, deletePhrase, listPhrases, putMissingPhrases, putPhrase } from "../lib/store/vocab.js";
 
 /**
  * The chosen pair in the store's spelling, or null while nobody has chosen
@@ -170,6 +171,34 @@ export async function forgetPhrase(request) {
   // event in every open tab, and every one of them would rebuild for nothing.
   // A restore is a change too - the pages must learn what came back.
   if (forgotten || restored > 0) await afterWrite(config);
+  return ok(null);
+}
+
+/**
+ * A page's report of what the reader did with the phrases it was handed
+ * (D209): bubble openings, and the occurrences in a text finished. Added to
+ * the rows and to nothing else - not the mirror, not the copy. The mirror
+ * carries no count, and rewriting it would be a storage event in every open
+ * tab, each repainting its page for a number it never shows; the copy
+ * catches up with the next save, Learned or import, and the counts gathered
+ * since are what a deletion of the database costs - statistics, not the
+ * vocabulary. A key the store no longer holds is skipped: Learned may have
+ * taken it between the report and this write. A restore on the way is the
+ * one thing the pages must learn about, as with forgetting.
+ *
+ * @param {import("../lib/protocol.js").CountPhrasesRequest} request
+ * @returns {Promise<import("../lib/protocol.js").Result<null>>}
+ */
+export async function countPhrases(request) {
+  await started;
+  const restored = await settled();
+  const config = await readConfig();
+  const pair = pairOf(config);
+  // No pair holds no phrases, so there is nothing to count - true, not an error.
+  if (pair === null) return ok(null);
+  const counts = mergeCounts(request);
+  if (counts.size > 0) await countRows(pair, counts, Date.now());
+  if (restored > 0) await afterWrite(config);
   return ok(null);
 }
 
