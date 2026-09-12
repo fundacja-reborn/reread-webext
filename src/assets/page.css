@@ -1048,14 +1048,23 @@ button.lookup-show {
    Georgia's x-height read off a canvas. */
 .lookup-line > .lookup-line-box,
 .lookup-line > .lookup-line-mark {
+  --lookup-box-top: calc((var(--lookup-line-height, 1.6em) - var(--lookup-box-size, 20px)) / 2 + var(--lookup-check-offset, 0.11em));
   flex: none;
   width: var(--lookup-box-size, 20px);
   height: var(--lookup-box-size, 20px);
-  margin: calc((var(--lookup-line-height, 1.6em) - var(--lookup-box-size, 20px)) / 2 + var(--lookup-check-offset, 0.11em)) 0 0;
+  /* And never taller than the line as a whole: under a short line (14px)
+     the box with its correction stands out below the text, and the row
+     grew by that much, so the space to the next row did (measured in
+     Brave: 25.1px against 23.7 from a book's name). The bottom margin
+     takes the overhang back, and the row's height is the line's. */
+  margin: var(--lookup-box-top) 0 min(0px, calc(var(--lookup-line-height, 1.6em) - var(--lookup-box-size, 20px) - var(--lookup-box-top)));
   /* The tick in the ink of the text beside it, in every theme and in
-     every home alike (the sixth brief) - the current colour, not a token
-     of the pages', because the bubble has its own ink and no page tokens;
-     over the pages' own checkbox rule (an accent) by the two classes. */
+     every home alike (the sixth brief) - the current colour, inherited
+     from the row (a form control keeps the browser's own ink otherwise),
+     not a token of the pages', because the bubble has its own ink and no
+     page tokens; over the pages' own checkbox rule (an accent) by the two
+     classes. */
+  color: inherit;
   accent-color: currentColor;
 }
 

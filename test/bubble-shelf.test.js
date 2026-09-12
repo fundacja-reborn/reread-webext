@@ -85,7 +85,8 @@ describe("the bubble's dictionary shelf", () => {
     assert.match(tooltip, /\.lookup-group-label,\s*\.lookup-about-label \{[\s\S]*?padding: var\(--lookup-label-pad-top\) 5px var\(--lookup-row-pad\);/, "a book's name line does not end in the row's pad");
     assert.match(tooltip, /--lookup-touch: 40px;/, "the compact floor is not a finger's press");
     assert.match(tooltip, /\.lookup-line \{[\s\S]*?min-height: var\(--lookup-touch\);/, "a row is shorter than the compact floor");
-    assert.match(tooltip, /\.lookup-line > \.lookup-line-box \{[\s\S]*?margin: calc\(\(var\(--lookup-line-height\) - var\(--lookup-box-size\)\) \/ 2 \+ var\(--lookup-check-offset\)\) 0 0;[\s\S]*?accent-color: currentColor;/, "the box is not centred on the text's first line in the bubble's ink");
+    assert.match(tooltip, /--lookup-box-top: calc\(\(var\(--lookup-line-height\) - var\(--lookup-box-size\)\) \/ 2 \+ var\(--lookup-check-offset\)\);/, "the box's top margin is not the bubble's own token");
+    assert.match(tooltip, /\.lookup-line > \.lookup-line-box \{[\s\S]*?margin: var\(--lookup-box-top\) 0 min\(0px, calc\(var\(--lookup-line-height\) - var\(--lookup-box-size\) - var\(--lookup-box-top\)\)\);\s*color: inherit;\s*accent-color: currentColor;/, "the box is not centred on the text's first line in the bubble's ink, or grows the row under a short line");
     assert.match(tooltip, /\.lookup-group-label,\s*\.lookup-about-label \{\s*display: list-item;/, "a book's name hides the browser's triangle");
     assert.match(tooltip, /\.lookup-line\[data-saved="true"\] \.lookup-line-text \{ font-weight: 600; \}/, "a saved row is not told by its weight");
     assert.doesNotMatch(tooltip, /\.lookup-line[^{]*\{[^}]*background/, "a row paints a wash");

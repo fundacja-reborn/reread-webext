@@ -496,6 +496,9 @@ export const STYLE = `
     --lookup-label-line: calc(var(--lookup-label-size) * 1.3);
     --lookup-row-pad: max(var(--lookup-row-gap), calc((var(--lookup-touch) - var(--lookup-line-height)) / 2));
     --lookup-label-pad-top: max(var(--lookup-row-pad), calc(var(--lookup-touch) - var(--lookup-label-line) - var(--lookup-row-pad)));
+    /* The box's top margin: half of what the line stands tall over the box,
+       plus the optical correction. */
+    --lookup-box-top: calc((var(--lookup-line-height) - var(--lookup-box-size)) / 2 + var(--lookup-check-offset));
     /* The launcher's two doors (D182): their type never under 15px - the
        words are the meaning, and a door is read at arm's length - and their
        pictures between 16 and 20. Both step up on the touch tier. */
@@ -824,7 +827,10 @@ export const STYLE = `
     flex: none;
     width: var(--lookup-box-size);
     height: var(--lookup-box-size);
-    margin: calc((var(--lookup-line-height) - var(--lookup-box-size)) / 2 + var(--lookup-check-offset)) 0 0;
+    /* Never taller than the line as a whole (page.css says why): the
+       bottom margin takes back what the box stands out under a short line. */
+    margin: var(--lookup-box-top) 0 min(0px, calc(var(--lookup-line-height) - var(--lookup-box-size) - var(--lookup-box-top)));
+    color: inherit;
     accent-color: currentColor;
     cursor: pointer;
   }
