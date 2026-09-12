@@ -9,6 +9,7 @@
 
 import { collapseWhitespace, normalize, trimPhrase } from "../normalize.js";
 import { ErrorCode, fail, ok } from "../protocol.js";
+import { MAX_SENTENCE_LENGTH } from "../sentence.js";
 
 /**
  * A phrase somebody kept.
@@ -34,6 +35,17 @@ import { ErrorCode, fail, ok } from "../protocol.js";
  * Never where: no page, no title, no text. A row from before D209 has none,
  * which reads as zero (`countsOf`).
  *
+ * `context` is the sentence the phrase stood in when it was kept (D210): the
+ * one the bubble had around the selection, as the page shows it - never its
+ * translation, and never more than one sentence (`MAX_SENTENCE_LENGTH`). It
+ * is the second half of a flashcard, and it is the one field here a reader
+ * has to ask for: written only while the setting that asks for it is on,
+ * which is off until they turn it on. A row keeps its first sentence - a
+ * later save changes the meanings and leaves it alone (`resaved`) - and a
+ * phrase kept from the phrases page or from an import has none. Absent
+ * otherwise, and absent on every row from before D210; the field was
+ * reserved from M2 on and written by nobody until then (O2 in the docs).
+ *
  * @typedef {object} Phrase
  * @property {string} id
  * @property {string} langFrom
@@ -42,8 +54,8 @@ import { ErrorCode, fail, ok } from "../protocol.js";
  * @property {string} normalized
  * @property {string[]} translations at least one, most specific first
  * @property {number} createdAt epoch milliseconds
- * @property {string} [context] reserved, written by nobody in M2 - see O2 in the docs
- * @property {string} [sourceUrl] reserved, written by nobody in M2 - see O3 in the docs
+ * @property {string} [context] the sentence the phrase was kept from (D210), when one was
+ * @property {string} [sourceUrl] reserved, written by nobody - see O3 in the docs
  * @property {number} [recallCount] bubble openings since the phrase was kept (D209)
  * @property {number} [lastRecallAt] epoch milliseconds of the last one
  * @property {number} [readCount] occurrences in the texts finished since then (D209)
@@ -86,6 +98,25 @@ function cleanTranslations(translations) {
 }
 
 /**
+ * The sentence as it is stored, or nothing: one line with the whitespace
+ * folded, for the reason the meanings are folded - the TSV it ends up in has
+ * no escaping, and a newline in a sentence would be a broken row in Anki.
+ * Longer than a sentence can be is not a sentence but a paragraph, and it
+ * came over a message, so it is left out rather than written: the bubble
+ * never offers one past the same ceiling, and the store keeps the promise
+ * on its own side too.
+ *
+ * @param {string | undefined} context
+ * @returns {string | undefined}
+ */
+function cleanSentence(context) {
+  if (typeof context !== "string") return undefined;
+  const sentence = collapseWhitespace(context);
+  if (sentence.length === 0 || sentence.length > MAX_SENTENCE_LENGTH) return undefined;
+  return sentence;
+}
+
+/**
  * @param {object} input
  * @param {string} input.text as selected, or as it came out of an import
  * @param {string[]} input.translations what the reader is keeping it for
@@ -93,9 +124,12 @@ function cleanTranslations(translations) {
  * @param {string} input.langTo
  * @param {string} input.id
  * @param {number} input.now epoch milliseconds
+ * @param {string} [input.context] the sentence the phrase stood in (D210), when
+ *   the page had one and the setting asked for it - the caller answers for the
+ *   setting, this only for the sentence's shape
  * @returns {import("../protocol.js").Result<Phrase>}
  */
-export function buildPhrase({ text, translations, langFrom, langTo, id, now }) {
+export function buildPhrase({ text, translations, langFrom, langTo, id, now, context }) {
   if (text.length > MAX_PHRASE_LENGTH) return fail(ErrorCode.TOO_LONG);
 
   const phrase = trimPhrase(text);
@@ -106,28 +140,55 @@ export function buildPhrase({ text, translations, langFrom, langTo, id, now }) {
   // should have sent.
   if (normalized.length === 0 || meanings.length === 0) return fail(ErrorCode.INTERNAL);
 
-  return ok({ id, langFrom, langTo, phrase, normalized, translations: meanings, createdAt: now });
+  /** @type {Phrase} */
+  const built = { id, langFrom, langTo, phrase, normalized, translations: meanings, createdAt: now };
+  const sentence = cleanSentence(context);
+  if (sentence !== undefined) built.context = sentence;
+  return ok(built);
+}
+
+/**
+ * Whether a row carries a sentence (D210) - as a string with something in
+ * it, which is the only way one is ever written; a copy edited by hand can
+ * hold anything, and anything else reads as none.
+ *
+ * @param {Phrase} phrase
+ * @returns {boolean}
+ */
+export function hasSentence(phrase) {
+  return typeof phrase.context === "string" && phrase.context.length > 0;
 }
 
 /**
  * Saving a phrase that is already known.
  *
  * The row keeps its identity - same `id`, same `createdAt`, same reserved
- * fields - and takes the two things the reader just decided: how the phrase is
- * written and what it means. The key is not touched, because the key is how
- * this row was found.
+ * fields, same counts - and takes the two things the reader just decided:
+ * how the phrase is written and what it means. The key is not touched,
+ * because the key is how this row was found.
  *
  * Saving replaces the meanings rather than adding to them, and that is the
  * whole rule: a save says "this phrase means exactly what the bubble is
  * showing". Adding a meaning is then adding a line in the bubble, not a second
  * kind of message.
  *
+ * The sentence (D210) is the one thing a save does not replace: the row
+ * keeps the sentence it was first kept from, because that is the meeting the
+ * flashcard is about, and a phrase met again in another sentence is the same
+ * phrase - the meanings may have been corrected, the card's example stays.
+ * Only a row without one takes the sentence this save brings: a phrase kept
+ * before the setting was on, or from the phrases page, gets its sentence the
+ * first time it is saved from a bubble with the setting on.
+ *
  * @param {Phrase} existing
  * @param {Phrase} incoming
  * @returns {Phrase}
  */
 export function resaved(existing, incoming) {
-  return { ...existing, phrase: incoming.phrase, translations: incoming.translations };
+  /** @type {Phrase} */
+  const next = { ...existing, phrase: incoming.phrase, translations: incoming.translations };
+  if (!hasSentence(existing) && hasSentence(incoming)) next.context = incoming.context;
+  return next;
 }
 
 /**

@@ -2,7 +2,8 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import { ErrorCode, fail, ok } from "../src/lib/protocol.js";
-import { MAX_PHRASE_LENGTH, buildPhrase, counted, countsOf, resaved } from "../src/lib/store/phrase.js";
+import { MAX_SENTENCE_LENGTH } from "../src/lib/sentence.js";
+import { MAX_PHRASE_LENGTH, buildPhrase, counted, countsOf, hasSentence, resaved } from "../src/lib/store/phrase.js";
 
 /**
  * @param {Partial<Parameters<typeof buildPhrase>[0]>} overrides
@@ -80,6 +81,32 @@ describe("buildPhrase", () => {
     const built = build({ text: "x".repeat(MAX_PHRASE_LENGTH) });
     assert.ok(built.ok);
   });
+
+  it("keeps the sentence the phrase stood in, folded to one line (D210)", () => {
+    const built = build({ context: "The  bank\nwas steep." });
+    assert.ok(built.ok);
+    assert.equal(built.value.context, "The bank was steep.");
+    assert.ok(hasSentence(built.value));
+  });
+
+  it("writes no sentence field at all without one - a row from a save without the setting is a row from before D210", () => {
+    for (const context of [undefined, "", "   "]) {
+      const built = build({ context });
+      assert.ok(built.ok);
+      assert.equal("context" in built.value, false, `should have written no field for ${JSON.stringify(context)}`);
+      assert.equal(hasSentence(built.value), false);
+    }
+  });
+
+  it("leaves out a sentence longer than the bubble would ever offer - a paragraph sent by a malformed message", () => {
+    const atLimit = build({ context: "x".repeat(MAX_SENTENCE_LENGTH) });
+    assert.ok(atLimit.ok);
+    assert.equal(atLimit.value.context?.length, MAX_SENTENCE_LENGTH);
+
+    const past = build({ context: "x".repeat(MAX_SENTENCE_LENGTH + 1) });
+    assert.ok(past.ok);
+    assert.equal("context" in past.value, false);
+  });
 });
 
 describe("resaved", () => {
@@ -107,6 +134,56 @@ describe("resaved", () => {
       createdAt: 1000,
       context: "on the bank of the river",
     });
+  });
+
+  it("keeps the first sentence whatever a later save carries (D210)", () => {
+    /** @type {import("../src/lib/store/phrase.js").Phrase} */
+    const existing = {
+      id: "id-1",
+      langFrom: "en",
+      langTo: "pl",
+      phrase: "bank",
+      normalized: "bank",
+      translations: ["bank"],
+      createdAt: 1000,
+      context: "The bank was steep.",
+    };
+    // Met again in another sentence: the meanings move, the card's example stays.
+    const again = { ...existing, id: "id-2", createdAt: 2000, translations: ["brzeg"], context: "A bank in the city." };
+    assert.equal(resaved(existing, again).context, "The bank was steep.");
+    // Saved again with the setting off, or from the phrases page: no sentence
+    // on the way in, and none taken away.
+    const { context: _dropped, ...bare } = again;
+    assert.equal(resaved(existing, bare).context, "The bank was steep.");
+  });
+
+  it("takes a sentence into a row that has none - the phrase kept before the setting was on", () => {
+    /** @type {import("../src/lib/store/phrase.js").Phrase} */
+    const existing = {
+      id: "id-1",
+      langFrom: "en",
+      langTo: "pl",
+      phrase: "bank",
+      normalized: "bank",
+      translations: ["bank"],
+      createdAt: 1000,
+    };
+    const incoming = { ...existing, id: "id-2", createdAt: 2000, context: "The bank was steep." };
+    assert.deepEqual(resaved(existing, incoming), { ...existing, context: "The bank was steep." });
+    // A hand-edited copy can hold an empty string there; that is no sentence.
+    assert.equal(resaved({ ...existing, context: "" }, incoming).context, "The bank was steep.");
+    assert.equal("context" in resaved(existing, { ...existing, id: "id-3" }), false);
+  });
+});
+
+describe("hasSentence", () => {
+  it("is a string with something in it, and nothing else - a copy edited by hand can hold anything", () => {
+    /** @type {import("../src/lib/store/phrase.js").Phrase} */
+    const bare = { id: "id-1", langFrom: "en", langTo: "pl", phrase: "bank", normalized: "bank", translations: ["brzeg"], createdAt: 1 };
+    assert.equal(hasSentence(bare), false);
+    assert.equal(hasSentence({ ...bare, context: "" }), false);
+    assert.equal(hasSentence({ ...bare, context: /** @type {any} */ (42) }), false);
+    assert.equal(hasSentence({ ...bare, context: "The bank was steep." }), true);
   });
 });
 

@@ -337,9 +337,16 @@
          to the rows, and the anchor in the header is the short way here. -->
     <section id="transfer" class="transfer-section" aria-labelledby="transfer-title">
       <h2 id="transfer-title" data-i18n="transfer_heading">Import and export</h2>
+      <!-- Two exports (D210): the sister plugin's two-column file, which is
+           also what Import reads, and the three-column file for Anki with
+           the sentence each phrase was kept from. Its own button rather than
+           a choice inside one, because the two files go to two different
+           places and a reader who only ever presses one should not have to
+           pick it each time. -->
       <p class="transfer">
         <button type="button" id="import" data-i18n="action_import">Import</button>
         <button type="button" id="export" data-i18n="action_export">Export</button>
+        <button type="button" id="export-anki" data-i18n="vocab_export_anki">Export for Anki</button>
       </p>
       <!-- The moment of consent: what the file holds and where it would go,
            shown before anything is written. vocab.js fills it and keeps it in
@@ -367,7 +374,8 @@
           A two-column .tsv file - what the KOReader plugin writes and Anki imports. Importing adds
           phrases this pair is missing and never touches a saved one. In the meaning cell, a
           semicolon followed by a space separates meanings; a semicolon without a space stays inside
-          its meaning.
+          its meaning. Export for Anki writes a third column with the sentence each phrase was saved
+          in - empty when none was kept. That file is for Anki; it cannot be imported here.
         </p>
       </details>
       <input type="file" id="import-file" accept=".tsv,text/tab-separated-values" hidden />

@@ -87,7 +87,13 @@ let underlineForms = false;
  * reported to whoever looks it up; `answered` is the language a dictionary
  * then knew it in (D191) - empty until an answer with entries lands, and
  * gone with the phrase, which is why it lives here and not beside it.
- * @type {{ text: string, stored: string, normalized: string, keepable: boolean, lang: string, answered: string } | null}
+ * `context` is the sentence around the phrase as the page has it, when the
+ * page offers one (`contextOf`) - what a save carries along since D210, so
+ * the row can keep the sentence the phrase was met in. Read at the moment
+ * the phrase is read, never later: by the time Save is pressed the page may
+ * have moved on. Whether it is kept is the background's to decide, by the
+ * setting it alone reads.
+ * @type {{ text: string, stored: string, normalized: string, keepable: boolean, lang: string, answered: string, context: string | null } | null}
  */
 let current = null;
 
@@ -1110,7 +1116,7 @@ async function onAction(action, meanings) {
  * here too is what makes the underline appear in the paragraph being read
  * rather than a beat later.
  *
- * @param {(phrase: { text: string, stored: string, normalized: string }) => Promise<import("../lib/protocol.js").Result<null>>} write
+ * @param {(phrase: { text: string, stored: string, normalized: string, context: string | null }) => Promise<import("../lib/protocol.js").Result<null>>} write
  * @param {(phrase: { text: string, stored: string, normalized: string }) => void} remember
  * @param {import("./tooltip.js").Action[] | null} next what the bubble offers once it
  *   worked, or `null` when the answer was the end of the exchange
@@ -1157,7 +1163,16 @@ async function change(write, remember, next) {
  */
 async function keep(meanings, next) {
   await change(
-    (phrase) => ask({ kind: Message.SAVE_PHRASE, text: phrase.stored, translations: meanings }),
+    (phrase) => {
+      // The sentence rides along when the page offered one (D210) - the
+      // same sentence More translates, untranslated. Whether it is written
+      // is the background's call, by the setting only it reads; sent from
+      // here it costs nothing but the message it was already in.
+      /** @type {import("../lib/protocol.js").SavePhraseRequest} */
+      const request = { kind: Message.SAVE_PHRASE, text: phrase.stored, translations: meanings };
+      if (phrase.context !== null) request.context = phrase.context;
+      return ask(request);
+    },
     (phrase) => {
       // A save that lands replaces the chain's earlier automatic keep (D81):
       // that step was scaffolding for the phrase it grew into, and leaving it
@@ -1232,6 +1247,7 @@ function showSaved(anchor, text, normalized, context, how = {}) {
     keepable: true,
     lang: how.range === undefined ? "" : declaredLanguage(how.range),
     answered: "",
+    context,
   };
   generation += 1;
   anchorRange = how.range === undefined ? null : how.range.cloneRange();
@@ -1477,7 +1493,7 @@ function present(selection, { deliberate, touch, chain = false }) {
   if (noTranslation && !quietVocabulary) {
     stopSpeaking();
     unmark();
-    current = { text, stored: text, normalized, keepable: false, lang: selection.lang, answered: "" };
+    current = { text, stored: text, normalized, keepable: false, lang: selection.lang, answered: "", context: selection.context };
     secondLayer = [];
     unfetched = null;
     anchorRange = selection.range.cloneRange();
@@ -1525,7 +1541,7 @@ function present(selection, { deliberate, touch, chain = false }) {
   if (noTranslation) {
     stopSpeaking();
     unmark();
-    current = { text, stored: text, normalized, keepable: selection.findable, lang: selection.lang, answered: "" };
+    current = { text, stored: text, normalized, keepable: selection.findable, lang: selection.lang, answered: "", context: selection.context };
     secondLayer = [];
     unfetched = null;
     anchorRange = selection.range.cloneRange();
@@ -1562,7 +1578,7 @@ function present(selection, { deliberate, touch, chain = false }) {
   // A fresh selection marks itself; a recall mark left over from the last
   // phrase may not keep pointing at it (D89).
   unmark();
-  current = { text, stored: text, normalized, keepable: selection.findable, lang: selection.lang, answered: "" };
+  current = { text, stored: text, normalized, keepable: selection.findable, lang: selection.lang, answered: "", context: selection.context };
   secondLayer = [];
   unfetched = null;
   anchorRange = selection.range.cloneRange();

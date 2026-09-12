@@ -147,6 +147,18 @@ export const CONFIG_KEY = "config";
  *   out of the dictionary, never out of the rules alone. They live in the
  *   pages' mirror (`store/mirror.js`), computed by the background as it
  *   rebuilds it, and the pages read them only while this is on.
+ * @property {boolean} saveSentence Whether a phrase saved from the bubble
+ *   keeps the sentence it stood in (D210): the one the bubble had around the
+ *   selection, as the page shows it and never its translation, stored in the
+ *   row's `context` and shown under the phrase on the phrases page, folded to
+ *   a line; the export for Anki writes it as the third column of a sentence
+ *   card. Off by default, and deliberately not reaching any profile that did
+ *   not turn it on: a sentence is a piece of the page kept for good, and the
+ *   reader is the one to decide that the page's words may stay - the phrase
+ *   is a word they chose, the sentence is the text around it. Turned off
+ *   again it keeps nothing new; what was kept stays with its phrase, and
+ *   Learned takes it with the phrase. A phrase already saved keeps its first
+ *   sentence whatever a later save carries (`resaved`).
  * @property {Record<string, string>} ttsVoices Which voice reads a language
  *   aloud (D83): source language to the `voiceURI` chosen for it. Per language
  *   rather than per pair - the voice picked for `en` serves every pair read in
@@ -285,6 +297,7 @@ export const DEFAULTS = Object.freeze({
   hideBubbleActions: false,
   showBubbleMore: true,
   underlineForms: false,
+  saveSentence: false,
   ttsVoices: {},
   ttsRate: 100,
   ttsOff: false,
@@ -470,6 +483,10 @@ export function withDefaults(stored) {
     // word nobody saved is the wrong direction to fall in.
     underlineForms:
       typeof raw["underlineForms"] === "boolean" ? raw["underlineForms"] : DEFAULTS.underlineForms,
+    // Off unless a stored `true` says otherwise (D210): a sentence kept from
+    // a page is the reader's to ask for, never a default they have to find.
+    saveSentence:
+      typeof raw["saveSentence"] === "boolean" ? raw["saveSentence"] : DEFAULTS.saveSentence,
     ttsVoices: voiceMap(raw["ttsVoices"]),
     ttsRate: within(raw["ttsRate"], TTS_RATE, DEFAULTS.ttsRate),
     // As `translationOff`: only a stored boolean is a choice, and a profile
@@ -533,6 +550,7 @@ export async function readConfig() {
  * @property {boolean} [hideBubbleActions]
  * @property {boolean} [showBubbleMore]
  * @property {boolean} [underlineForms]
+ * @property {boolean} [saveSentence]
  * @property {Record<string, string>} [ttsVoices]
  * @property {number} [ttsRate]
  * @property {boolean} [ttsOff]

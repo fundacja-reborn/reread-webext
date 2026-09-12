@@ -344,6 +344,13 @@ function renderUnderlineForms() {
   if (toggle instanceof HTMLInputElement) toggle.checked = config.underlineForms;
 }
 
+/** The sentence switch (D210): whether a phrase saved from the bubble keeps
+ *  the sentence it stood in. Stored plainly. */
+function renderSaveSentence() {
+  const toggle = document.getElementById("save-sentence");
+  if (toggle instanceof HTMLInputElement) toggle.checked = config.saveSentence;
+}
+
 /**
  * The pages' mirror rebuilt by the background, with the forms the
  * dictionaries vouch for now (D208). Asked after the switch is turned on and
@@ -2809,6 +2816,7 @@ async function render() {
   renderQuietBubble();
   renderBubbleMore();
   renderUnderlineForms();
+  renderSaveSentence();
   renderKeepArticles();
   renderLibraryCopy();
   renderFontCustom();
@@ -2874,6 +2882,7 @@ async function refresh() {
   renderQuietBubble();
   renderBubbleMore();
   renderUnderlineForms();
+  renderSaveSentence();
   renderKeepArticles();
   renderLibraryCopy();
   renderFontCustom();
@@ -2945,6 +2954,16 @@ document.getElementById("underline-forms")?.addEventListener("change", (event) =
   void writeConfig({ underlineForms: toggle.checked }).then((written) => {
     config = written;
     refreshForms();
+  });
+});
+document.getElementById("save-sentence")?.addEventListener("change", (event) => {
+  const toggle = event.target;
+  if (!(toggle instanceof HTMLInputElement)) return;
+  // Read fresh by the background on every save (D210), so the very next
+  // Save on any open page obeys the box - nothing to redraw here, nothing
+  // to tell the pages.
+  void writeConfig({ saveSentence: toggle.checked }).then((written) => {
+    config = written;
   });
 });
 document.getElementById("keep-articles")?.addEventListener("change", (event) => {

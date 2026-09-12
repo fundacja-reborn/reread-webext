@@ -271,10 +271,11 @@
   "pager_prev": { "message": "Poprzednia" },
   "pager_next": { "message": "Następna" },
   "action_export": { "message": "Eksportuj" },
+  "vocab_export_anki": { "message": "Eksportuj dla Anki" },
   "action_import": { "message": "Importuj" },
   "transfer_heading": { "message": "Import i eksport" },
   "vocab_transfer_note": {
-    "message": "Plik .tsv z dwiema kolumnami - ten sam format zapisuje wtyczka KOReadera, a czyta Anki. Import dodaje tylko frazy, których w tej parze nie ma; zapisanych nie zmienia. W komórce znaczeń średnik ze spacją rozdziela znaczenia; średnik bez spacji zostaje wewnątrz znaczenia."
+    "message": "Plik .tsv z dwiema kolumnami - ten sam format zapisuje wtyczka KOReadera, a czyta Anki. Import dodaje tylko frazy, których w tej parze nie ma; zapisanych nie zmienia. W komórce znaczeń średnik ze spacją rozdziela znaczenia; średnik bez spacji zostaje wewnątrz znaczenia. „Eksportuj dla Anki” dopisuje trzecią kolumnę ze zdaniem, w którym fraza została zapisana - pustą, gdy zdania nie ma. Ten plik jest dla Anki; nie da się go tu zaimportować."
   },
   "vocab_import_into": { "message": "Importuj do" },
   "vocab_import_nothing": { "message": "W tym pliku nie ma fraz do zaimportowania." },
@@ -1430,6 +1431,10 @@
   "options_underline_forms": { "message": "Podkreślaj też inne formy zapisanych słów" },
   "options_underline_forms_hint": {
     "message": "Zapisane słowo jest podkreślane także w innych formach: po zapisaniu „read” podkreślone są też „reads” i „reading”, a dymek nad nimi pokazuje to, co masz zapisane dla „read”. O tym, które formy się liczą, decyduje słownik dla czytanego języka - musi być zainstalowany. Na razie tylko wtedy, gdy czytasz po angielsku. Po wyłączeniu podkreślana jest tylko dokładnie ta forma, którą masz zapisaną."
+  },
+  "options_save_sentence": { "message": "Zapisuj zdanie razem z frazą" },
+  "options_save_sentence_hint": {
+    "message": "Gdy zapisujesz frazę z dymka, razem z nią zapisuje się zdanie, w którym stała - takie, jak na stronie, bez tłumaczenia. Widać je pod frazą na stronie zapisanych fraz, zwinięte do jednej linii, i trafia do trzeciej kolumny eksportu dla Anki. Tak jak fraza, zostaje na tym urządzeniu. Po wyłączeniu nowe zdania nie są zapisywane; zapisane wcześniej zostają przy swoich frazach."
   },
   "options_no_translation": { "message": "Używaj bez modelu tłumaczenia" },
   "options_no_translation_hint": {

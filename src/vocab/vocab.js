@@ -39,8 +39,8 @@ import { BACK_ROAD_KEY, writeVocabTab } from "../lib/session.js";
 import { restoreVocabulary } from "../lib/store/backup.js";
 import { migrateSemicolonsOnce } from "../lib/store/semicolon-migration.js";
 import { MIRROR_KEY } from "../lib/store/mirror.js";
-import { countsOf } from "../lib/store/phrase.js";
-import { exportFilename, fromTsv, pairFromFilename, toTsv } from "../lib/store/tsv.js";
+import { countsOf, hasSentence } from "../lib/store/phrase.js";
+import { ankiExportFilename, exportFilename, fromTsv, pairFromFilename, toAnkiTsv, toTsv } from "../lib/store/tsv.js";
 import { listPairs, listPhrases } from "../lib/store/vocab.js";
 import { watchToolbarScheme } from "../lib/theme-icon.js";
 import {
@@ -96,6 +96,7 @@ const pairSelect = /** @type {HTMLSelectElement | null} */ (document.getElementB
 const introLine = document.getElementById("intro");
 const countLine = document.getElementById("count");
 const exportButton = /** @type {HTMLButtonElement | null} */ (document.getElementById("export"));
+const ankiButton = /** @type {HTMLButtonElement | null} */ (document.getElementById("export-anki"));
 const importButton = /** @type {HTMLButtonElement | null} */ (document.getElementById("import"));
 const importInput = /** @type {HTMLInputElement | null} */ (document.getElementById("import-file"));
 const importConfirm = document.getElementById("import-confirm");
@@ -440,8 +441,9 @@ async function reload() {
 function render() {
   renderPair();
   renderList();
-  // Exporting nothing would download an empty file; the button says so first.
+  // Exporting nothing would download an empty file; the buttons say so first.
   if (exportButton !== null) exportButton.disabled = phrases.length === 0;
+  if (ankiButton !== null) ankiButton.disabled = phrases.length === 0;
 }
 
 function renderPair() {
@@ -621,6 +623,21 @@ function phraseRow(phrase) {
     row.append(element("span", "phrase-counts", said.join(` ${String.fromCodePoint(0x00b7)} `)));
   }
 
+  // The sentence the phrase was kept from (D210), when the row has one: a
+  // native fold whose summary is the sentence itself - one line with an
+  // ellipsis while closed, the whole sentence open - so the list stays a
+  // list of phrases and the sentence is a press away, with the keyboard and
+  // the screen reader served by the element's own conduct and no script of
+  // ours. Text from a page, so `textContent` and nothing else; not through
+  // `fillHighlighted`, because the filter does not read the sentence and a
+  // mark in it would say it did. Before the editor's branch below, so a row
+  // being edited keeps its sentence where it was.
+  if (hasSentence(phrase)) {
+    const fold = element("details", "phrase-sentence");
+    fold.append(element("summary", "", /** @type {string} */ (phrase.context)));
+    row.append(fold);
+  }
+
   if (editing === phrase.normalized) {
     row.append(editorFor(phrase));
     return row;
@@ -798,8 +815,15 @@ async function saveEdit(phrase) {
  * page's copy, because the copy is newest first and an export is the
  * vocabulary, not the view: oldest first, the order that keeps two exports
  * diffable. Downloading is a blob and an anchor; no permission asks for less.
+ *
+ * Two files from one button row (D210): the sister plugin's two columns,
+ * which travel back in through Import, and the three-column file for Anki
+ * with the sentence each phrase was kept from - its own name, so the two
+ * never overwrite each other in a downloads folder.
+ *
+ * @param {"plugin" | "anki"} shape which of the two files to write
  */
-async function exportPhrases() {
+async function exportPhrases(shape) {
   if (config === null) return;
   // The export is "the whole current pair as a file"; with no pair chosen
   // the button has nothing to name - and the list above it is empty anyway.
@@ -809,11 +833,13 @@ async function exportPhrases() {
   try {
     const list = await listPhrases(pair);
     if (list.length === 0) return;
-    const blob = new Blob([toTsv(list)], { type: "text/tab-separated-values" });
+    const name = shape === "anki" ? ankiExportFilename(pair) : exportFilename(pair);
+    const text = shape === "anki" ? toAnkiTsv(list) : toTsv(list);
+    const blob = new Blob([text], { type: "text/tab-separated-values" });
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
     anchor.href = url;
-    anchor.download = exportFilename(pair);
+    anchor.download = name;
     anchor.click();
     // The URL has to outlive the click long enough for the download to take
     // it. A minute is comfortably that, and then the blob can go.
@@ -821,9 +847,7 @@ async function exportPhrases() {
     // The export says what it wrote (D153): a download is a quiet thing, and
     // a press nobody meant would otherwise go unnoticed - the name, the count
     // and the size, in the section's own status line, the reading list's way.
-    transferStatus(
-      plural(list.length, "vocab_export_done", [exportFilename(pair), fileSize(blob.size)]),
-    );
+    transferStatus(plural(list.length, "vocab_export_done", [name, fileSize(blob.size)]));
   } catch {
     transferStatus(describeError(ErrorCode.INTERNAL), "error");
   }
@@ -1245,7 +1269,8 @@ pairSelect?.addEventListener("change", () => {
   void writeConfig({ sourceLang: choice.from, targetLang: choice.to });
 });
 
-exportButton?.addEventListener("click", () => void exportPhrases());
+exportButton?.addEventListener("click", () => void exportPhrases("plugin"));
+ankiButton?.addEventListener("click", () => void exportPhrases("anki"));
 
 importButton?.addEventListener("click", () => importInput?.click());
 

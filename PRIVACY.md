@@ -33,7 +33,7 @@ kept with a phrase (below), which a private window adds to like any other.
 
 | What | Why it is stored |
 |---|---|
-| Saved phrases with their meanings, and two counts per phrase (how many times you opened its bubble, how many times it occurred in the texts you finished - see *Page content*) | To underline them on later pages and show your meaning again; the counts, to help you decide what you have learned |
+| Saved phrases with their meanings, two counts per phrase (how many times you opened its bubble, how many times it occurred in the texts you finished) and, only when you turn on **Save the sentence with the phrase**, the sentence each phrase was saved in - see *Page content* | To underline them on later pages and show your meaning again; the counts, to help you decide what you have learned; the sentence, for a flashcard that shows the phrase in use |
 | Translation models you downloaded | So translation works offline |
 | Dictionaries you installed | So dictionary lookups work offline |
 | Articles and books you saved to the reading list | So they open with no network, and after the original page has changed or gone |
@@ -51,9 +51,10 @@ Saved phrases are not part of an article: a phrase you saved while reading it is
 your vocabulary, without any record of where it came from, and stays there until you mark
 it **Learned** - deleting the article does not delete the phrase.
 
-You can export your data at any time to files on your disk: vocabulary as TSV, the
-reading list as JSON (or as a `.zip` with its pictures), highlights as Markdown. The
-browser saves those files the way it saves any download; they are not uploaded anywhere.
+You can export your data at any time to files on your disk: vocabulary as TSV (two
+columns, or three with the saved sentences, for Anki), the reading list as JSON (or as a
+`.zip` with its pictures), highlights as Markdown. The browser saves those files the way it
+saves any download; they are not uploaded anywhere.
 
 ## What leaves your device
 
@@ -176,6 +177,18 @@ the time it last happened. They are shown on the saved phrases page, which can o
 list by them. They record no page, no title and no text: not where you met the phrase, only
 how often. A page you read outside the reader adds to the first count only, when you open a
 bubble on it, and to nothing else. Marking a phrase **Learned** deletes its counts with it.
+
+One more thing can be kept with a saved phrase, and only after you turn on **Save the
+sentence with the phrase** in Settings - it is off until you do: the sentence the phrase stood
+in when you saved it from the bubble. It is the sentence as the page shows it, at most one
+sentence and at most 600 characters, without its translation; it records no page, no title
+and no address. It is shown under the phrase on the saved phrases page and written into the
+third column of the file that **Export for Anki** makes; nothing else reads it, and it never
+leaves your device. A phrase keeps the first sentence it was saved from - saving the same
+phrase again changes its meanings and leaves the sentence alone. A phrase you save from the
+**Add a phrase** field or import from a file has no sentence. Marking a phrase **Learned**
+deletes its sentence with it; switching the setting off keeps the sentences already saved
+and saves no new ones.
 
 A page you have switched re/read off on (the toolbar popup, or the list in Settings)
 is not read at all: no scan, no underlines, no bubble. The one thing that still works

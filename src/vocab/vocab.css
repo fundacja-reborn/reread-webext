@@ -442,6 +442,42 @@ summary {
   font-size: max(13px, 0.85rem);
 }
 
+/* The sentence the phrase was kept from (D210), under the row's first line:
+   a native fold whose summary is the sentence itself. Content, not
+   interface - the text's own words - so the reading face at the reading
+   size like the phrase (D104), in the meanings' muted ink and in italics,
+   which is how a quoted example reads on a flashcard. Closed, the summary
+   is one line cut with an ellipsis; open, the sentence wraps. The marker
+   sits inside the line (`list-style-position`) - an outside marker is
+   clipped by the overflow that makes the ellipsis - and wears the muted
+   ink. Absent from a row without a sentence, which reads exactly as it did
+   before D210. */
+.phrase-sentence {
+  min-width: 0;
+}
+
+.phrase-sentence > summary {
+  list-style-position: inside;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  color: var(--page-muted);
+  font-family: var(--reader-font-lead, var(--reader-font-stack));
+  font-size: var(--reader-size, 18px);
+  font-style: italic;
+  line-height: var(--phrase-line-height);
+}
+
+.phrase-sentence > summary::marker {
+  color: var(--page-muted);
+}
+
+.phrase-sentence[open] > summary {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
 /* What the filter matched, lit inside the row: the accent as a wash, and
    under it a 2px line in the ink itself - on e-ink the wash is one of the
    16 greys that rounds back to paper, and the line is what survives
@@ -627,6 +663,16 @@ button.quiet-speak svg {
   .phrase-row > .phrase-actions {
     grid-column: 3;
     grid-row: 1;
+  }
+
+  /* The sentence (D210) takes a whole line under the three columns - a
+     sentence in the phrase's narrow column would stand ten lines tall. Its
+     row is left to the grid: the first free line under the counts when
+     there are any, the second line otherwise - never a pinned third row,
+     which would leave an empty second track and its gap behind on a row
+     without counts. */
+  .phrase-row > .phrase-sentence {
+    grid-column: 1 / -1;
   }
 
   /* The editor takes the meanings' and the actions' room, beside its phrase.

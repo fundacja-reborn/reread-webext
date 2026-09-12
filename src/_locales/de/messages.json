@@ -217,10 +217,11 @@
   "pager_prev": { "message": "Zurück" },
   "pager_next": { "message": "Weiter" },
   "action_export": { "message": "Exportieren" },
+  "vocab_export_anki": { "message": "Für Anki exportieren" },
   "action_import": { "message": "Importieren" },
   "transfer_heading": { "message": "Import und Export" },
   "vocab_transfer_note": {
-    "message": "Eine .tsv-Datei mit zwei Spalten - dasselbe Format schreibt das KOReader-Plugin, und Anki liest es. Der Import ergänzt nur Phrasen, die diesem Paar fehlen; Gespeichertes bleibt unberührt. In der Bedeutungszelle trennt ein Semikolon mit Leerzeichen die Bedeutungen; ein Semikolon ohne Leerzeichen bleibt in seiner Bedeutung."
+    "message": "Eine .tsv-Datei mit zwei Spalten - dasselbe Format schreibt das KOReader-Plugin, und Anki liest es. Der Import ergänzt nur Phrasen, die diesem Paar fehlen; Gespeichertes bleibt unberührt. In der Bedeutungszelle trennt ein Semikolon mit Leerzeichen die Bedeutungen; ein Semikolon ohne Leerzeichen bleibt in seiner Bedeutung. „Für Anki exportieren“ schreibt eine dritte Spalte mit dem Satz, in dem die Phrase gespeichert wurde - leer, wenn es keinen gibt. Diese Datei ist für Anki; hier lässt sie sich nicht importieren."
   },
   "vocab_import_into": { "message": "Importieren in" },
   "vocab_import_nothing": { "message": "In dieser Datei gibt es keine Phrasen zum Importieren." },
@@ -1026,6 +1027,10 @@
   "options_underline_forms": { "message": "Auch andere Formen gespeicherter Wörter unterstreichen" },
   "options_underline_forms_hint": {
     "message": "Ein gespeichertes Wort wird auch in seinen anderen Formen unterstrichen: Nach dem Speichern von „read“ sind auch „reads“ und „reading“ unterstrichen, und die Sprechblase darüber zeigt, was Sie für „read“ gespeichert haben. Welche Formen zählen, entscheidet Ihr Wörterbuch für die gelesene Sprache - eines muss installiert sein. Vorerst nur, wenn Sie Englisch lesen. Ausgeschaltet wird nur genau die Form unterstrichen, die Sie gespeichert haben."
+  },
+  "options_save_sentence": { "message": "Den Satz zusammen mit der Phrase speichern" },
+  "options_save_sentence_hint": {
+    "message": "Wenn Sie eine Phrase aus der Sprechblase speichern, wird der Satz, in dem sie steht, mit ihr gespeichert - der Satz so, wie die Seite ihn zeigt, ohne Übersetzung. Er steht auf der Seite der gespeicherten Phrasen unter der Phrase, auf eine Zeile eingeklappt, und kommt in die dritte Spalte des Exports für Anki. Wie die Phrase bleibt er auf diesem Gerät. Ausgeschaltet wird kein neuer Satz gespeichert; die bereits gespeicherten bleiben bei ihren Phrasen."
   },
   "options_no_translation": { "message": "Ohne Übersetzungsmodell verwenden" },
   "options_no_translation_hint": {

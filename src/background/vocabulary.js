@@ -141,6 +141,12 @@ export async function savePhrase(request) {
     langTo: pair.langTo,
     id: crypto.randomUUID(),
     now: Date.now(),
+    // The sentence the phrase stood in (D210) is kept only while the setting
+    // asks for it, and the setting is read here, fresh, on every save: the
+    // page sends what it has, and this is the one place that knows whether
+    // the reader wanted it kept. Without the setting the sentence goes no
+    // further than this line.
+    context: config.saveSentence ? request.context : undefined,
   });
   if (!built.ok) return built;
 

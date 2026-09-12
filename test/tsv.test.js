@@ -1,15 +1,17 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { exportFilename, fromTsv, pairFromFilename, toTsv } from "../src/lib/store/tsv.js";
+import { ankiExportFilename, exportFilename, fromTsv, pairFromFilename, toAnkiTsv, toTsv } from "../src/lib/store/tsv.js";
 
 /**
  * @param {string} text
  * @param {string[]} translations
+ * @param {string} [context] the sentence the phrase was kept from (D210)
  * @returns {import("../src/lib/store/phrase.js").Phrase}
  */
-function phrase(text, translations) {
-  return {
+function phrase(text, translations, context) {
+  /** @type {import("../src/lib/store/phrase.js").Phrase} */
+  const row = {
     id: "id-" + text,
     langFrom: "en",
     langTo: "pl",
@@ -18,6 +20,8 @@ function phrase(text, translations) {
     translations,
     createdAt: 0,
   };
+  if (context !== undefined) row.context = context;
+  return row;
 }
 
 describe("toTsv", () => {
@@ -44,6 +48,33 @@ describe("toTsv", () => {
     // A tab would open a column and a newline a row. Stored phrases are
     // already clean; this holds even for a caller that is not the store.
     assert.equal(toTsv([phrase("a\tb", ["c\nd"])]), "a b\tc d\n");
+  });
+
+  it("leaves the sentence out of the sister plugin's file - two columns, whatever the row holds (D210)", () => {
+    assert.equal(toTsv([phrase("bank", ["brzeg"], "The bank was steep.")]), "bank\tbrzeg\n");
+  });
+});
+
+describe("toAnkiTsv", () => {
+  it("writes the sentence as a third column, empty on a row without one, so the columns never shift", () => {
+    assert.equal(
+      toAnkiTsv([phrase("bank", ["brzeg", "instytucja"], "The bank was steep."), phrase("hello", ["cześć"])]),
+      "bank\tbrzeg; instytucja\tThe bank was steep.\nhello\tcześć\t\n",
+    );
+  });
+
+  it("writes nothing for an empty vocabulary, and no header row", () => {
+    assert.equal(toAnkiTsv([]), "");
+    assert.ok(toAnkiTsv([phrase("hello", ["cześć"])]).startsWith("hello\t"));
+  });
+
+  it("lets nothing into the sentence that would break the file", () => {
+    assert.equal(toAnkiTsv([phrase("a", ["b"], "one\ttwo\nthree")]), "a\tb\tone two three\n");
+  });
+
+  it("is not read back by the importer - that file is Anki's", () => {
+    const written = toAnkiTsv([phrase("bank", ["brzeg"], "The bank was steep."), phrase("hello", ["cześć"])]);
+    assert.deepEqual(fromTsv(written), { rows: [], invalid: 2 });
   });
 });
 
@@ -116,6 +147,12 @@ describe("exportFilename", () => {
 
   it("lets no hand-edited code name a path", () => {
     assert.equal(exportFilename({ langFrom: "e/n", langTo: "p l" }), "reread-e_n-p_l.tsv");
+  });
+
+  it("names the file for Anki apart from the plugin's, behind the same pair suffix (D210)", () => {
+    assert.equal(ankiExportFilename({ langFrom: "en", langTo: "pl" }), "reread-anki-en-pl.tsv");
+    assert.equal(ankiExportFilename({ langFrom: "e/n", langTo: "p l" }), "reread-anki-e_n-p_l.tsv");
+    assert.deepEqual(pairFromFilename(ankiExportFilename({ langFrom: "en", langTo: "pl" })), { langFrom: "en", langTo: "pl" });
   });
 });
 

@@ -244,10 +244,11 @@
   "pager_prev": { "message": "Anterior" },
   "pager_next": { "message": "Siguiente" },
   "action_export": { "message": "Exportar" },
+  "vocab_export_anki": { "message": "Exportar para Anki" },
   "action_import": { "message": "Importar" },
   "transfer_heading": { "message": "Importar y exportar" },
   "vocab_transfer_note": {
-    "message": "Un archivo .tsv de dos columnas - el mismo formato que escribe el plugin de KOReader y que lee Anki. La importación solo añade frases que faltan en este par; lo guardado no se toca. En la celda de significados, un punto y coma seguido de espacio separa los significados; sin espacio, se queda dentro del significado."
+    "message": "Un archivo .tsv de dos columnas - el mismo formato que escribe el plugin de KOReader y que lee Anki. La importación solo añade frases que faltan en este par; lo guardado no se toca. En la celda de significados, un punto y coma seguido de espacio separa los significados; sin espacio, se queda dentro del significado. «Exportar para Anki» escribe una tercera columna con la oración en la que se guardó cada frase - vacía cuando no la hay. Ese archivo es para Anki; aquí no se puede importar."
   },
   "vocab_import_into": { "message": "Importar a" },
   "vocab_import_nothing": { "message": "Ese archivo no contiene frases para importar." },
@@ -1069,6 +1070,10 @@
   "options_underline_forms": { "message": "Subrayar también otras formas de las palabras guardadas" },
   "options_underline_forms_hint": {
     "message": "Una palabra guardada se subraya también en sus otras formas: al guardar «read», «reads» y «reading» quedan subrayadas también, y la burbuja sobre ellas muestra lo que guardaste para «read». Qué formas cuentan lo decide tu diccionario del idioma que lees - tiene que estar instalado. Por ahora solo cuando lees en inglés. Desactivado, se subraya solo la forma exacta que guardaste."
+  },
+  "options_save_sentence": { "message": "Guardar la oración junto con la frase" },
+  "options_save_sentence_hint": {
+    "message": "Al guardar una frase desde la burbuja, se guarda con ella la oración en la que aparece - tal como la muestra la página, sin su traducción. Se ve bajo la frase en la página de frases guardadas, plegada en una línea, y va a la tercera columna de la exportación para Anki. Como la frase, se queda en este dispositivo. Desactivado, no se guarda ninguna oración nueva; las ya guardadas se quedan con sus frases."
   },
   "options_no_translation": { "message": "Usar sin modelo de traducción" },
   "options_no_translation_hint": {
