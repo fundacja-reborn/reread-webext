@@ -38,6 +38,7 @@
 
   "bubble_save": { "message": "Speichern" },
   "bubble_learned": { "message": "Gelernt" },
+  "bubble_edit_separator_hint": { "message": "Ein Semikolon trennt Bedeutungen." },
   "bubble_edit": { "message": "Bearbeiten" },
   "bubble_settings": { "message": "Einstellungen öffnen" },
   "bubble_more": { "message": "Mehr" },
@@ -84,7 +85,7 @@
 
   "vocab_title": { "message": "re/read - gespeicherter Wortschatz" },
   "vocab_intro": {
-    "message": "Alles, was Sie für dieses Sprachpaar behalten haben, Neuestes zuerst - beim Lesen gespeichert und nur auf diesem Gerät. „$LEARNED$“ entfernt einen Eintrag samt seinen Unterstreichungen; „$EDIT$“ schreibt seine Bedeutungen neu, eine pro Zeile.",
+    "message": "Alles, was Sie für dieses Sprachpaar behalten haben, Neuestes zuerst - beim Lesen gespeichert und nur auf diesem Gerät. „$LEARNED$“ entfernt einen Eintrag samt seinen Unterstreichungen; „$EDIT$“ schreibt seine Bedeutungen neu, eine pro Zeile. Mehrere Bedeutungen auf einmal trennen Sie mit einem Semikolon.",
     "placeholders": {
       "learned": { "content": "$1", "example": "Gelernt" },
       "edit": { "content": "$2", "example": "Bearbeiten" }
@@ -186,7 +187,7 @@
   "action_import": { "message": "Importieren" },
   "transfer_heading": { "message": "Import und Export" },
   "vocab_transfer_note": {
-    "message": "Eine .tsv-Datei mit zwei Spalten - dasselbe Format schreibt das KOReader-Plugin, und Anki liest es. Der Import ergänzt nur Phrasen, die diesem Paar fehlen; Gespeichertes bleibt unberührt."
+    "message": "Eine .tsv-Datei mit zwei Spalten - dasselbe Format schreibt das KOReader-Plugin, und Anki liest es. Der Import ergänzt nur Phrasen, die diesem Paar fehlen; Gespeichertes bleibt unberührt. In der Bedeutungszelle trennt ein Semikolon mit Leerzeichen die Bedeutungen; ein Semikolon ohne Leerzeichen bleibt in seiner Bedeutung."
   },
   "vocab_import_into": { "message": "Importieren in" },
   "vocab_import_nothing": { "message": "In dieser Datei gibt es keine Phrasen zum Importieren." },

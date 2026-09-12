@@ -224,12 +224,14 @@ describe("the look-up field", () => {
     assert.match(section, /state\.ownDraft = input\.value;/, "what is typed is not kept");
     assert.match(section, /form\.addEventListener\("submit", \(event\) => \{\s*event\.preventDefault\(\);\s*if \(!empty\(\)\) void saveOwn\(\);/, "Enter does not save");
     assert.match(section, /save\.type = "submit";/, "the Save button is not the form's");
-    // Saved after what is there, once, whitespace folded and nothing else;
-    // the caret stays for the next one.
+    // Saved after what is there, once, whitespace folded and nothing else
+    // - several at once apart by semicolons (D203), a piece already kept
+    // skipped; the caret stays for the next one.
     const kept = bodyOf(box, "savedOwn");
-    assert.match(kept, /const own = collapseWhitespace\(state\.ownDraft\);/, "the meaning is changed beyond its whitespace");
-    assert.match(kept, /if \(!isSaved\(state\.meanings, own\)\) \{[\s\S]*?translations: meanings/, "a meaning already kept is saved twice");
-    assert.match(kept, /const meanings = \[\.\.\.state\.meanings, own\];/, "the own meaning does not join after what is there");
+    assert.match(kept, /const meanings = \[\.\.\.state\.meanings\];/, "the own meanings do not join after what is there");
+    assert.match(kept, /for \(const piece of splitMeanings\(collapseWhitespace\(state\.ownDraft\)\)\)/, "the meaning is changed beyond its whitespace, or not split at its semicolons");
+    assert.match(kept, /if \(!isSaved\(meanings, piece\)\) meanings\.push\(piece\);/, "a meaning already kept is saved twice");
+    assert.match(kept, /if \(meanings\.length > state\.meanings\.length\) \{[\s\S]*?translations: meanings/, "nothing new still writes");
     assert.match(kept, /state\.ownDraft = "";\s*render\(\);\s*ownField\(\)\?\.focus\(\);/, "the field is not emptied, or the caret leaves it");
     assert.match(bodyOf(box, "saveOwn"), /queue = queue\.then\(\(\) => savedOwn\(\)\)/, "an own save can cross a tick in flight");
     // A word no book knows lands the caret in the field.

@@ -38,6 +38,7 @@
 
   "bubble_save": { "message": "Enregistrer" },
   "bubble_learned": { "message": "Appris" },
+  "bubble_edit_separator_hint": { "message": "Un point-virgule sépare les sens." },
   "bubble_edit": { "message": "Modifier" },
   "bubble_settings": { "message": "Ouvrir les paramètres" },
   "bubble_more": { "message": "Plus" },
@@ -84,7 +85,7 @@
 
   "vocab_title": { "message": "re/read - phrases enregistrées" },
   "vocab_intro": {
-    "message": "Toutes les phrases gardées pour cette paire de langues, les plus récentes d'abord - enregistrées pendant la lecture et conservées uniquement sur cet appareil. « $LEARNED$ » supprime une phrase et ses soulignements avec elle ; « $EDIT$ » réécrit ses sens, un par ligne.",
+    "message": "Toutes les phrases gardées pour cette paire de langues, les plus récentes d'abord - enregistrées pendant la lecture et conservées uniquement sur cet appareil. « $LEARNED$ » supprime une phrase et ses soulignements avec elle ; « $EDIT$ » réécrit ses sens, un par ligne. Plusieurs sens à la fois : séparez-les par un point-virgule.",
     "placeholders": {
       "learned": { "content": "$1", "example": "Appris" },
       "edit": { "content": "$2", "example": "Modifier" }
@@ -201,7 +202,7 @@
   "action_import": { "message": "Importer" },
   "transfer_heading": { "message": "Import et export" },
   "vocab_transfer_note": {
-    "message": "Un fichier .tsv à deux colonnes - le format qu'écrit le plugin KOReader et que lit Anki. L'import ajoute seulement les phrases qui manquent à cette paire ; rien de déjà enregistré n'est modifié."
+    "message": "Un fichier .tsv à deux colonnes - le format qu'écrit le plugin KOReader et que lit Anki. L'import ajoute seulement les phrases qui manquent à cette paire ; rien de déjà enregistré n'est modifié. Dans la cellule des sens, un point-virgule suivi d'une espace sépare les sens ; un point-virgule sans espace reste dans son sens."
   },
   "vocab_import_into": { "message": "Importer dans" },
   "vocab_import_nothing": { "message": "Ce fichier ne contient aucune phrase à importer." },

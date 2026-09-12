@@ -504,6 +504,14 @@ button.quiet-speak svg {
   gap: 0.5rem;
 }
 
+/* The one line under the edit box (D203): the word about the semicolon,
+   in the hint's voice. */
+.phrase-edit-hint {
+  margin: 0.3rem 0 0;
+  color: var(--page-muted);
+  font-size: 0.85rem;
+}
+
 .phrase-edit textarea {
   width: 100%;
   font: inherit;

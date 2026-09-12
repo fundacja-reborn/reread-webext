@@ -353,7 +353,9 @@
         <summary data-i18n="vocab_format_title">File format</summary>
         <p class="hint" data-i18n="vocab_transfer_note">
           A two-column .tsv file - what the KOReader plugin writes and Anki imports. Importing adds
-          phrases this pair is missing and never touches a saved one.
+          phrases this pair is missing and never touches a saved one. In the meaning cell, a
+          semicolon followed by a space separates meanings; a semicolon without a space stays inside
+          its meaning.
         </p>
       </details>
       <input type="file" id="import-file" accept=".tsv,text/tab-separated-values" hidden />

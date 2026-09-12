@@ -100,6 +100,7 @@
  */
 
 import { MEANING_SEPARATOR, savePress, toMeanings } from "../lib/gloss.js";
+import { editedMeanings } from "../lib/meanings.js";
 import { t } from "../lib/i18n.js";
 import { afterPress, isSaved } from "../lib/lookup.js";
 import { renderShelf } from "../lib/lookup-shelf.js";
@@ -864,6 +865,14 @@ export const STYLE = `
     border: 1px solid var(--edge);
     border-radius: 6px;
     resize: none;
+  }
+
+  /* The line under the edit box (D203): the one word about the semicolon,
+     in the hint's quiet voice, never in the way of the box. */
+  .editor-hint {
+    margin: 4px 0 0;
+    font-size: calc(var(--type-second) * var(--bubble-scale, 1));
+    opacity: 0.6;
   }
 
   /* The row of actions, folded. The fold is a grid row going from zero to one
@@ -1665,6 +1674,8 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
   let entriesElement = null;
   /** @type {HTMLDivElement | null} */
   let hintElement = null;
+  /** @type {HTMLElement | null} */
+  let editorHintElement = null;
   /** @type {HTMLTextAreaElement | null} */
   let editor = null;
   /** @type {HTMLDivElement | null} */
@@ -1713,6 +1724,13 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
    */
   let carried = 0;
   let editing = false;
+  /**
+   * The lines the edit box opened with (D203): a line still among them at
+   * the save is kept as it is, semicolons and all; any other line is the
+   * reader's and is split at its semicolons.
+   * @type {string[]}
+   */
+  let initialLines = [];
   /** Whether the note line is saying what Save is waiting for (D175): raised
    *  by a press of Save with nothing chosen, lowered by whatever changes the
    *  answer - a line chosen, the edit box, a new phrase. */
@@ -1765,7 +1783,8 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
    * @returns {string[]}
    */
   function currentMeanings() {
-    return toMeanings(shownGloss());
+    if (editing && editor !== null) return editedMeanings(initialLines, toMeanings(editor.value));
+    return toMeanings(bodyElement?.textContent ?? "");
   }
 
   function build() {
@@ -1832,6 +1851,13 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
     editor.className = "editor";
     editor.hidden = true;
     editor.rows = 1;
+    // The one line under the box (D203): a semicolon between meanings is the
+    // way to several at once where Enter saves - on a phone Enter closes the
+    // bubble, so "or a new line" would not be true there and is not said.
+    editorHintElement = document.createElement("div");
+    editorHintElement.className = "editor-hint";
+    editorHintElement.textContent = t("bubble_edit_separator_hint");
+    editorHintElement.hidden = true;
     // The row of actions inside the one element that folds. Nothing outside
     // this function ever needs the wrapper: what unfolds it is a stylesheet.
     const revealElement = document.createElement("div");
@@ -1896,7 +1922,7 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
     // edits it, then the actions with the clipboard row they open (D110),
     // then the second layer. The signature stands before them all and outside
     // the order: only the error tone shows it (see .brand).
-    bubble.append(brandElement, bodyElement, editor, revealElement, copyRowElement, contextElement, entriesElement, hintElement);
+    bubble.append(brandElement, bodyElement, editor, editorHintElement, revealElement, copyRowElement, contextElement, entriesElement, hintElement);
     root.append(bubble);
     // `documentElement` and not `body`: single-page applications replace the
     // body, and a bubble that vanishes with a re-render is a bug nobody can
@@ -2567,8 +2593,10 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
     // want to dress the phrase so the box is visibly about something.
     onEditing?.();
     editing = true;
-    editor.value = toMeanings(bodyElement.textContent ?? "").join(MEANING_SEPARATOR);
+    initialLines = toMeanings(bodyElement.textContent ?? "");
+    editor.value = initialLines.join(MEANING_SEPARATOR);
     editor.hidden = false;
+    if (editorHintElement !== null) editorHintElement.hidden = false;
     bodyElement.hidden = true;
     sizeEditor();
     renderActions(["save", "cancel"]);
@@ -2590,10 +2618,11 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
    */
   function stopEditing(keep) {
     if (!editing || editor === null || bodyElement === null) return;
-    if (keep) setBody(toMeanings(editor.value).join(MEANING_SEPARATOR));
+    if (keep) setBody(editedMeanings(initialLines, toMeanings(editor.value)).join(MEANING_SEPARATOR));
     editing = false;
     watchKeyboard(false);
     editor.hidden = true;
+    if (editorHintElement !== null) editorHintElement.hidden = true;
     bodyElement.hidden = false;
     renderActions(restingActions);
     // The quiet bubble has no More to bring the layer back (D121/D162): its
