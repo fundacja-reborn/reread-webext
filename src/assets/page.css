@@ -1012,17 +1012,26 @@ button.lookup-show {
   background: color-mix(in srgb, var(--page-fg) 5%, transparent);
 }
 
-/* The box keeps its size whatever the text does, and sits centred on the
+/* The box - and the tick that stands in its place where the field only
+   reads - keeps its size whatever the text does, and sits centred on the
    text's first line rather than in the middle of a wrapped row: its top
-   margin is half of what the line stands tall over the box. The line's
-   height comes in as a token from the home - the phrases page sets it from
-   the reading size the Aa panel chose (vocab.css) - and falls back to the
-   interface line box here, where `em` is the box's own inherited size. */
-.lookup-line-box {
+   margin is half of what the line stands tall over the box, plus the
+   optical correction that takes it from the middle of the line box down
+   to the middle of the x-height (`--lookup-check-offset`, a serif face's
+   asymmetry - see vocab.css). The line's height and the correction come
+   in as tokens from the home - the phrases page sets them from the
+   reading size the Aa panel chose - and fall back to the interface line
+   box and its own eleventh here, where `em` is the box's inherited size,
+   which in the popup is the text's size too. */
+.lookup-line-box,
+.lookup-line-mark {
   flex: none;
   width: var(--lookup-box-size, 20px);
   height: var(--lookup-box-size, 20px);
-  margin: calc((var(--lookup-line-height, 1.6em) - var(--lookup-box-size, 20px)) / 2) 0 0;
+  margin: calc((var(--lookup-line-height, 1.6em) - var(--lookup-box-size, 20px)) / 2 + var(--lookup-check-offset, 0.11em)) 0 0;
+}
+
+.lookup-line-box {
   cursor: pointer;
 }
 
@@ -1098,9 +1107,10 @@ button.lookup-show {
   background: none;
 }
 
+/* The tick as a glyph centred in the box's own square, so the one margin
+   rule above places it exactly where the box would stand. */
 .lookup-line-mark {
-  flex: none;
-  width: var(--lookup-box-size, 20px);
+  line-height: var(--lookup-box-size, 20px);
   text-align: center;
 }
 

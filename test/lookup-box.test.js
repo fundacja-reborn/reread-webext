@@ -233,7 +233,7 @@ describe("the look-up field", () => {
     assert.match(box, /if \(readOnly\) answer\.dataset\["readonly"\] = "true";/, "the answer does not say it only reads");
     const styles = await source("assets/page.css");
     assert.match(styles, /\.lookup-answer\[data-readonly="true"\] \.lookup-line \{\s*cursor: default;/, "a read-only row invites a press");
-    assert.match(styles, /\.lookup-line-mark \{\s*flex: none;\s*width: var\(--lookup-box-size, 20px\);/, "the tick does not stand in the box's column");
+    assert.match(styles, /\.lookup-line-box,\s*\.lookup-line-mark \{\s*flex: none;\s*width: var\(--lookup-box-size, 20px\);/, "the tick does not stand in the box's column");
   });
 });
 
@@ -347,7 +347,14 @@ describe("the saved-phrases page's fold", () => {
     // tokens - the line's height set by the phrases page from the reading
     // size the Aa panel chose, by the one line-height the rows use.
     assert.match(page, /\.lookup-answer \{\s*--lookup-box-size: 20px;\s*--lookup-line-gap: 12px;/, "the answer does not hold the box's size and the gap as tokens");
-    assert.match(page, /\.lookup-line-box \{[\s\S]*?margin: calc\(\(var\(--lookup-line-height, 1\.6em\) - var\(--lookup-box-size, 20px\)\) \/ 2\) 0 0;/, "the box's margin is a constant, or not half the line's excess");
+    // The one margin rule for the box and for the tick that stands in its
+    // place in the popup: half the line's excess, plus the optical
+    // correction down to the middle of the x-height - the reading size's
+    // eleventh, from Georgia's metrics, a px value per size (a constant
+    // missed by over a pixel at the top of the Aa range).
+    assert.match(page, /\.lookup-line-box,\s*\.lookup-line-mark \{[\s\S]*?margin: calc\(\(var\(--lookup-line-height, 1\.6em\) - var\(--lookup-box-size, 20px\)\) \/ 2 \+ var\(--lookup-check-offset, 0\.11em\)\) 0 0;/, "the box's margin is a constant, not half the line's excess, or without the optical correction");
+    assert.match(page, /\.lookup-line-mark \{\s*line-height: var\(--lookup-box-size, 20px\);\s*text-align: center;/, "the tick is not centred in the box's own square");
+    assert.match(vocab, /--lookup-check-offset: calc\(var\(--reader-size, 18px\) \* 0\.11\);/, "the correction does not follow the reading size");
     assert.match(vocab, /:root \{\s*--phrase-line-height: 1\.45;/, "the rows' line-height is not a token");
     assert.match(vocab, /line-height: var\(--phrase-line-height\);/, "the rows' rule does not use the token");
     assert.doesNotMatch(vocab, /^\s*line-height: 1\.45;/m, "the line-height is written twice");

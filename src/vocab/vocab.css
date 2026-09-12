@@ -292,6 +292,16 @@ summary {
    Firefox). */
 .lookup-fold .lookup-line {
   --lookup-line-height: calc(var(--reader-size, 18px) * var(--phrase-line-height));
+  /* The optical correction (Michał's screenshot, 2026-09-12): centred on
+     the line box the box sits on the middle of the capitals, and the eye
+     wants it on the middle of the x-height, which a serif face puts lower -
+     Georgia's ascent is 0.917em to a descent of 0.219em, its x-height
+     0.481em, so the x-height's middle lies 0.11em under the line box's
+     (2px at 18px; 1.5px at 14px, 3.1px at 28px). A constant in px misses
+     by more than a pixel at the top of the Aa panel's range, so the
+     correction is the reading size's own eleventh - a px value per size,
+     never more than 0.2px off at any of them. */
+  --lookup-check-offset: calc(var(--reader-size, 18px) * 0.11);
 }
 
 /* --- the import offer: size, a taste of its rows, the target pair --- */
