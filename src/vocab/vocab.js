@@ -645,9 +645,18 @@ function phraseRow(phrase) {
   }
   row.append(head);
 
+  // The body: the meanings, or the editor in their place - the edit box
+  // with its hint here, Save and Cancel in the actions' own slot below, so
+  // an unfolded row keeps the shape of a folded one (D211). The attribute
+  // is what the sheet lays the unfolded row out by.
   const body = element("div", "phrase-body");
+  /** @type {HTMLElement | null} */
+  let editActions = null;
   if (editing === phrase.normalized) {
-    body.append(editorFor(phrase));
+    const unfolded = editorFor(phrase);
+    body.append(unfolded.editor);
+    editActions = unfolded.actions;
+    row.dataset["editing"] = "true";
   } else {
     const meanings = element("span", "phrase-meanings");
     fillHighlighted(meanings, phrase.translations.join("; "));
@@ -682,7 +691,10 @@ function phraseRow(phrase) {
   }
   row.append(body);
 
-  if (editing === phrase.normalized) return row;
+  if (editActions !== null) {
+    row.append(editActions);
+    return row;
+  }
 
   // The buttons speak for themselves to the eye; to a screen reader a bare
   // "Edit" in a list of a hundred names nothing, so each carries its phrase.
@@ -769,10 +781,12 @@ function countIcon(glyph) {
  * and there is nothing to keep when no line has anything on it. The same
  * rule as the bubble's at the save (D203, `editedMeanings`): a line the box
  * opened with stays as it is, a line written or changed is split at its
- * semicolons - and the same one line under the box says so.
+ * semicolons - and the same one line under the box says so. Two pieces for
+ * two places in the row (D211): the box with its hint for the body, Save
+ * and Cancel for the slot the row's quiet actions stood in.
  *
  * @param {Phrase} phrase
- * @returns {HTMLElement}
+ * @returns {{ editor: HTMLElement, actions: HTMLElement }}
  */
 function editorFor(phrase) {
   const wrap = element("div", "phrase-edit");
@@ -804,8 +818,8 @@ function editorFor(phrase) {
 
   const actions = element("div", "phrase-actions");
   actions.append(save, cancel);
-  wrap.append(editor, element("p", "phrase-edit-hint", t("bubble_edit_separator_hint")), actions);
-  return wrap;
+  wrap.append(editor, element("p", "phrase-edit-hint", t("bubble_edit_separator_hint")));
+  return { editor: wrap, actions };
 }
 
 /**

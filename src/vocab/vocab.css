@@ -619,28 +619,56 @@ summary {
 /* At the phrase line's end on a phone, under the phrase when the line is
    short of room (the wrap above), in their own column on a desktop; the
    auto start margin is what keeps them on the right on a line of their
-   own. */
+   own. No gap between the buttons: each one's padding is the room to the
+   next, and on a 360px line the room is what keeps the three on the
+   phrase's line at all. */
 .phrase-actions {
   order: 2;
   flex: 0 0 auto;
   margin-inline-start: auto;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
 }
 
-/* Always visible - touch and e-ink have no hover to reveal them with - but
-   dressed down: no resting border, muted color, one type step smaller (never
-   below 13px). The padding is the touch target and the negative block margin
-   gives the room back to the layout: the hit box keeps 44px while the row
-   stays a reading line. The 0.5rem gap holds the two hit boxes 8px apart -
-   Learned has no undo, so a miss must stay improbable. */
+/* The quiet dress every text act on this page wears (the rows' three,
+   "Clear filter" in the state line): always visible - touch and e-ink have
+   no hover to reveal them with - but dressed down: no resting border, muted
+   color, one type step smaller (never below 13px). The padding is the
+   touch target and the negative block margin gives the room back to the
+   layout: the hit box keeps 44px while the line stays a reading line. */
 button.quiet {
   border-color: transparent;
   color: var(--page-muted);
   font-size: 0.85rem;
   padding: 0.7rem 0.8rem;
   margin-block: -0.45rem;
+}
+
+/* The row's three, fitted to the phrase's line (D211): a 44px hit box
+   whatever the reading size, and a margin box exactly as tall as the
+   phrase's line box - the block margin takes back half of what 44px has
+   over the line, so the buttons never make the row taller than its text,
+   at Aa 14 as at Aa 26. Narrower padding than the shared dress: three of
+   these must share a 360px line with a phrase and its counts. A label
+   never breaks. Flex inside, so the speaker's glyph centres in its box
+   rather than sitting on a text baseline the box no longer has. */
+.phrase-actions > button.quiet {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 0.5rem;
+  margin-block: calc((var(--reader-size, 18px) * var(--phrase-line-height) - 44px) / 2);
+  white-space: nowrap;
+}
+
+/* The last button hands its padding and its transparent border to the
+   gutter (the settings' trailing Delete, the reader's article actions):
+   "Learned" ends where the separator ends, and the hit box reaches past
+   the edge. */
+.phrase-actions > button.quiet:last-child {
+  margin-inline-end: calc(-0.5rem - 1px);
 }
 
 button.quiet:hover,
@@ -661,17 +689,12 @@ button.quiet-learned:focus-visible {
 
 /* The speaker leads the row, the bubble's own order (D83): hearing the phrase
    is about the phrase, not the vocabulary. The icon is the whole label - the
-   words live in the accessible name and the hover title - and it is laid out
-   as inline text on purpose: the row grid aligns its columns by baseline, and
-   a flexed icon would hand the button the icon's bottom edge as its baseline,
-   lifting all three buttons off the phrase's line. Sized to the line box
-   (1.6em = the page's line-height) and dropped half its leading under the
-   baseline, the icon fills exactly the space a text label's line does, so the
-   button keeps a text button's height and baseline. */
+   words live in the accessible name and the hover title - sized to a text
+   label's line box (1.6em = the page's line-height) and centred in the
+   button's 44px square by the flex above. */
 button.quiet-speak svg {
   width: 1.6em;
   height: 1.6em;
-  vertical-align: -0.5em;
 }
 
 /* --- the editor a row unfolds into --- */
@@ -703,13 +726,20 @@ button.quiet-speak svg {
   resize: vertical;
 }
 
-.phrase-edit .phrase-actions {
-  display: flex;
+/* Save and Cancel take the quiet actions' slot (D211) - framed, as an act
+   that writes is on this page, at the touch floor. On a phone they go
+   under the box, the whole line to themselves, where the old editor had
+   them: on the phrase's line above the box they would stand over what
+   they act on. */
+.phrase-row[data-editing="true"] > .phrase-actions {
+  order: 4;
+  flex: 1 1 100%;
   gap: 0.5rem;
+  margin-block-start: 0.5rem;
   margin-inline-start: 0;
 }
 
-.phrase-edit button {
+.phrase-row[data-editing="true"] > .phrase-actions > button {
   min-height: 44px;
   padding: 0.35rem 1rem;
 }
@@ -790,5 +820,18 @@ button.quiet-speak svg {
   .phrase-actions {
     grid-area: actions;
     align-self: start;
+  }
+
+  /* An unfolded row: the edit box in the meanings' column, Save and Cancel
+     at the top of the actions' column beside it. The head and the body
+     leave the baseline group - a textarea's baseline sits at its bottom
+     edge, and aligning the phrase to that would drag the row down. */
+  .phrase-row[data-editing="true"] > .phrase-head,
+  .phrase-row[data-editing="true"] > .phrase-body {
+    align-self: start;
+  }
+
+  .phrase-row[data-editing="true"] > .phrase-actions {
+    margin-block-start: 0;
   }
 }

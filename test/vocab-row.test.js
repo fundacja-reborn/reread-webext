@@ -125,6 +125,41 @@ describe("a row of the saved phrases", () => {
     assert.match(rule(styles, ".phrase-sentence > summary"), /padding-block: 0\.25rem;/, "the summary is not a 32px press at the smallest reading size");
   });
 
+  it("fits the three quiet actions to the phrase's line: 44px to press, no taller than the text", async () => {
+    const styles = await source("vocab/vocab.css");
+    const buttons = rule(styles, ".phrase-actions > button.quiet");
+    assert.match(buttons, /min-height: 44px;\s*min-width: 44px;/, "a row's button is under the touch floor");
+    // The margin box is exactly the phrase's line box at every reading
+    // size: half of what 44px has over the line, taken back above and below.
+    assert.match(buttons, /margin-block: calc\(\(var\(--reader-size, 18px\) \* var\(--phrase-line-height\) - 44px\) \/ 2\);/, "the buttons' height is not given back to the line");
+    assert.match(buttons, /white-space: nowrap;/, "a label may break");
+    // No gap in the cluster - the padding is the room - and the last label
+    // ends on the list's edge.
+    assert.doesNotMatch(rule(styles, ".phrase-actions"), /gap:/, "the cluster keeps a gap beyond the buttons' padding");
+    assert.match(rule(styles, ".phrase-actions > button.quiet:last-child"), /margin-inline-end: calc\(-0\.5rem - 1px\);/, "the last button does not hand its padding to the gutter");
+    // The interface size, not the Aa panel's: the shared quiet dress says
+    // 0.85rem and nothing in the row's rules overrides it with the reading size.
+    assert.match(rule(styles, "button.quiet"), /font-size: 0\.85rem;/, "the quiet buttons do not wear the interface size");
+    assert.doesNotMatch(buttons, /font-size/, "the row's buttons change the shared size");
+  });
+
+  it("unfolds a row into the same three parts: the box in the body, Save and Cancel in the actions' slot", async () => {
+    const script = await source("vocab/vocab.js");
+    const row = bodyOf(script, "phraseRow");
+    assert.match(row, /const unfolded = editorFor\(phrase\);\s*body\.append\(unfolded\.editor\);\s*editActions = unfolded\.actions;\s*row\.dataset\["editing"\] = "true";/, "the editor does not split into the body and the actions' slot");
+    assert.match(row, /if \(editActions !== null\) \{\s*row\.append\(editActions\);\s*return row;\s*\}/, "Save and Cancel are not the unfolded row's last part");
+    const editor = bodyOf(script, "editorFor");
+    assert.match(editor, /return \{ editor: wrap, actions \};/, "editorFor does not hand back the two pieces");
+    assert.doesNotMatch(editor, /wrap\.append\([^)]*actions\)/, "Save and Cancel are still inside the edit box");
+    const styles = await source("vocab/vocab.css");
+    // On a phone the two go under the box, the whole line to themselves.
+    assert.match(rule(styles, '.phrase-row[data-editing="true"] > .phrase-actions'), /order: 4;\s*flex: 1 1 100%;/, "on a phone Save and Cancel do not take the line under the box");
+    assert.match(rule(styles, '.phrase-row[data-editing="true"] > .phrase-actions > button'), /min-height: 44px;/, "Save and Cancel are under the touch floor");
+    // On a desktop the head and the body leave the baseline group.
+    const desktop = styles.slice(styles.indexOf("@media (min-width: 40rem)"));
+    assert.match(desktop, /\.phrase-row\[data-editing="true"\] > \.phrase-head,\s*\.phrase-row\[data-editing="true"\] > \.phrase-body \{\s*align-self: start;/, "the phrase aligns to the textarea's bottom edge");
+  });
+
   it("dresses the phrase, the meanings and the sentence in the Aa panel's size, and nothing above them", async () => {
     const styles = await source("vocab/vocab.css");
     const bare = styles.replace(/\/\*[\s\S]*?\*\//g, "");
