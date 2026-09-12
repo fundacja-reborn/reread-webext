@@ -52,6 +52,16 @@ describe("the filter's state over the list", () => {
     assert.match(await source("vocab/vocab.html"), /id="list" class="phrases" tabindex="-1"/, "the list cannot take the focus");
   });
 
+  it("lights a match in a row with a line the e-ink keeps, in ink that keeps its contrast", async () => {
+    const styles = await source("vocab/vocab.css");
+    const mark = styles.slice(styles.indexOf(".phrase-row mark {"), styles.indexOf("}", styles.indexOf(".phrase-row mark {")));
+    // The wash stays; under it a 2px line in the ink itself - the wash is
+    // one of the 16 greys an e-ink panel rounds back to paper.
+    assert.match(mark, /text-decoration: underline;\s*text-decoration-thickness: 2px;\s*text-underline-offset: 2px;\s*text-decoration-color: currentColor;/, "a match is told by the wash alone");
+    assert.match(mark, /color: var\(--page-fg\);/, "the meanings' muted ink over the wash falls under 4.5:1");
+    assert.doesNotMatch(mark, /font-weight/, "a match is bold - invisible in the phrase, which is bold already");
+  });
+
   it("says a filter that matches nothing once - the state line, not a second sentence in the list", async () => {
     const script = await source("vocab/vocab.js");
     assert.doesNotMatch(script, /noMatch|vocab_filter_no_match/, "the list says the filter matched nothing under the line that already says so");

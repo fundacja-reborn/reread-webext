@@ -408,12 +408,22 @@ summary {
   color: var(--page-muted);
 }
 
-/* What the filter matched, lit inside the row: the accent as a wash, never
-   the only signal - the row being on screen at all is the real answer. */
+/* What the filter matched, lit inside the row: the accent as a wash, and
+   under it a 2px line in the ink itself - on e-ink the wash is one of the
+   16 greys that rounds back to paper, and the line is what survives
+   (block 5 of the polish round). Not bold: the phrase is bold already. The
+   page's full ink over the wash, not the meanings' muted one: muted on the
+   wash fell under 4.5:1 in the light theme (4.2:1), the full ink stays
+   well over it in every theme (11:1 light, 6.4:1 dark, 8:1 sepia). No
+   link stands in a row, so the underline is nobody else's. */
 .phrase-row mark {
   background: color-mix(in srgb, var(--page-accent) 30%, transparent);
-  color: inherit;
+  color: var(--page-fg);
   border-radius: 2px;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
+  text-decoration-color: currentColor;
 }
 
 /* --- the row's two quiet actions --- */
