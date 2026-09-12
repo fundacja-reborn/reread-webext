@@ -99,8 +99,10 @@
  * `reveal()` brings the row out when one of them turns out to be the point.
  */
 
-import { MEANING_SEPARATOR, afterChoosing, savePress, toMeanings } from "../lib/gloss.js";
+import { MEANING_SEPARATOR, savePress, toMeanings } from "../lib/gloss.js";
 import { t } from "../lib/i18n.js";
+import { afterPress, isSaved } from "../lib/lookup.js";
+import { renderShelf } from "../lib/lookup-shelf.js";
 import { compileUserCss } from "../lib/user-css.js";
 
 const GAP = 8;
@@ -422,7 +424,6 @@ const TOUCH_SIZES = `
     --type-action: 14px;
     --type-cta: 15px;
     --gap-actions: 0.63em;
-    --pad-sense: 0.4em 0.53em;
     --pad-action: 0.57em 0.43em;
     --pull-action: -0.43em;
     --pad-cta: 0.53em 1.07em;
@@ -467,11 +468,21 @@ export const STYLE = `
     --type-action: 12px;
     --type-cta: 13px;
     --gap-actions: 0.43em;
-    --pad-sense: 0.15em 0.31em;
     --pad-action: 0.17em 0.33em;
     --pull-action: -0.33em;
     --pad-cta: 0.23em 0.77em;
     --icon: 1.33em;
+    /* The dictionaries' shelf's measures (lib/lookup-shelf.js, the fifth
+       brief): the box's square and its gap to the text, the line's height
+       for centring the box on the text's first line, and the optical
+       correction under that - the middle of the x-height, which the
+       interface face puts a tenth of the size below the middle of the line
+       box (the page's serif a bit more; page.css). From the second layer's
+       type, so they step up with the tier and with the knob. */
+    --lookup-box-size: 20px;
+    --lookup-line-gap: 12px;
+    --lookup-line-height: calc(var(--type-second) * var(--bubble-scale, 1) * 1.45);
+    --lookup-check-offset: calc(var(--type-second) * var(--bubble-scale, 1) * 0.1);
     /* The launcher's two doors (D182): their type never under 15px - the
        words are the meaning, and a door is read at arm's length - and their
        pictures between 16 and 20. Both step up on the touch tier. */
@@ -703,87 +714,124 @@ export const STYLE = `
     outline-offset: 1px;
   }
 
-  /* A line between one book and the next, with about a line of the entries'
-     own text around it. The 8px gap that stood here alone was half a line at
-     desktop size and a quarter once the bubble was scaled up on an e-ink
-     tablet, and the label above each book is small and quiet by design - so a
-     reader with three dictionaries saw one long list even after the book's
-     name got its weight (D157; mobileread report, D174). The line is how the
-     bubble already sets off its layers - the sentence, this list - and it is
-     ink, which a 16-grey panel draws. A frame or a wash per book is what the
-     report's own patch did, and stays rejected: the entries are prose. In em,
-     so it grows with the tier and with --bubble-scale. */
-  .entry + .entry {
-    margin-top: 0.6em;
-    padding-top: 0.6em;
-    border-top: 1px solid var(--edge);
-  }
+  /* The dictionaries' shelf (Michał's fifth brief): the same rows as the
+     saved-phrases page's (lib/lookup-shelf.js), in the bubble's own dress -
+     a book per fold with the browser's own triangle and the count of its
+     meanings, a native checkbox per line that saves at once, the labels
+     over their meanings, "More about the word" folded at the book's end.
+     No "Show all": the box this list scrolls in is the fold a long book
+     gets elsewhere. In em where it can be, so it grows with the tier and
+     with --bubble-scale; the shelf's own measures stand with the tiers'
+     variables on .bubble above. */
 
-  /* Which book this came from, and the word it actually found - the second one
-     matters when the reader selected "watches" and the dictionary knows
-     "watch". Three quarters and not six tenths: small uppercase at 0.6 was
-     too faint to read at all (mobileread report), and on an e-ink panel's
-     16 greys fainter still. */
-  .entry-label {
-    font-size: calc(var(--type-label) * var(--bubble-scale, 1));
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    opacity: 0.75;
-    /* The border and the padding a meaning below it carries, so the two start
-       at the same place on the screen. */
-    padding-left: 5px;
-  }
-  /* The book's name is what somebody with several dictionaries scans the
-     list by, so it is the half with weight. Weight and not a frame or a
-     tint per book: the entries are prose, and a wash quantizes away on
-     e-ink anyway. */
-  .entry-label .entry-dict { font-weight: 600; }
+  /* A line between one book and the next: how the bubble already sets off
+     its layers, and ink, which a 16-grey panel draws. A frame or a wash per
+     book stays rejected (D174). */
+  .lookup-entries > * + * { border-top: 1px solid var(--edge); }
 
-  /* A meaning is a line to read first and a choice second, so it keeps the shape
-     of the text around it: a stack of things that look like buttons under a word
-     reads as a form to fill in. What says it can be pressed is the cursor and
-     the tint under it, and what says it was pressed is the mark that stays. */
-  .entry-sense {
-    display: block;
-    width: 100%;
+  /* The fold's line is the book's name with its count, and "More about the
+     word" a fold under it: small uppercase at three quarters (six tenths was
+     too faint to read - mobileread report), the browser's own triangle
+     before the name as a list item, the whole line the press, 40px tall in
+     the bubble's compact measure. */
+  .lookup-group-label,
+  .lookup-about-label {
+    display: list-item;
+    min-height: 40px;
     margin: 0;
-    padding: var(--pad-sense);
-    font: inherit;
-    text-align: left;
-    color: inherit;
-    background: none;
-    border: 1px solid transparent;
-    border-radius: 5px;
-    white-space: pre-wrap;
+    padding: 0.6em 5px;
+    font-size: calc(var(--type-label) * var(--bubble-scale, 1));
+    line-height: 1.3;
+    opacity: 0.75;
     cursor: pointer;
   }
-  /* The tint is the cursor's affordance, so it follows only a real mouse:
-     under a finger :hover is an emulation, which paints the line a scroll
-     happens to be passing through and stays on the last line touched after
-     the finger lifts - a mark that reads as a choice nobody made, beside
-     marks that are choices (reported from a Pixel). The media query cannot
-     draw this line - a Boox answers it wrong (D84) - so the gate is the same
-     attribute the gesture sets for the size tiers. A tap loses nothing: its
-     feedback is the border that stays, and on an e-ink panel a transient
-     wash was one more repaint of the list being scrolled. */
-  .bubble:not([data-pointer="coarse"]) .entry-sense[aria-pressed="false"]:hover:not(:disabled) { background: rgba(0, 0, 0, 0.06); }
-  /* The mark that stays, and the border is the whole of it where the tint
-     cannot be seen: a wash this light is one of the 16 greys an e-ink panel
-     rounds back to paper, and which meanings are already in the gloss is not
-     something to leave to a wash. */
-  .entry-sense[aria-pressed="true"] {
-    background: rgba(0, 0, 0, 0.07);
-    border-color: var(--edge);
+  .lookup-group-label {
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
   }
-  /* Not faded while the edit box is open, unlike every other disabled button
-     here: the entry is still there to be read, it just cannot be chosen for as
-     long as the gloss is being typed by hand. */
-  .entry-sense:disabled { opacity: 1; cursor: default; }
-  /* The quiet bubble's lines are prose, not presses (D121) - the pointer must
-     not promise a choice that does not exist. With a chosen pair the choice
-     exists after all (D158, data-choosable), and the buttons' own cursor
-     stands. */
-  .bubble[data-variant="quiet"]:not([data-choosable="true"]) .entry-sense { cursor: default; }
+  /* The book's name is what somebody with several dictionaries scans the
+     list by, so it is the half with weight. */
+  .lookup-group-label .lookup-entry-dict { font-weight: 600; }
+  .lookup-about-label { padding-left: calc(5px + var(--lookup-box-size) + var(--lookup-line-gap)); }
+  :is(.lookup-group-label, .lookup-about-label):focus-visible {
+    opacity: 1;
+    outline: 1px solid currentColor;
+    outline-offset: 0;
+  }
+
+  /* A headword the book answered under when it is not the word selected
+     (D23), and a part of speech over the meanings after it - quiet lines at
+     the label's size, the label at the rows' text inset: nothing to tick. */
+  .lookup-entry-headword,
+  .lookup-entry-heading {
+    padding: 0.4em 5px 0;
+    font-size: calc(var(--type-label) * var(--bubble-scale, 1));
+    opacity: 0.75;
+  }
+  .lookup-entry-headword { font-style: italic; }
+  .lookup-entry-heading {
+    padding-left: calc(5px + var(--lookup-box-size) + var(--lookup-line-gap));
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  /* A meaning as a row: the box, then the text, 40px tall so a finger has
+     something to press; the text wraps as it needs to. What says a meaning
+     is kept is the box's own mark and the weight of the text - no frame, no
+     wash: a wash is one of the 16 greys an e-ink panel rounds back to paper.
+     The hover says nothing with a wash either: under a mouse the text
+     underlines, and only under a mouse - under a finger :hover is an
+     emulation that sticks to the last line touched (reported from a Pixel),
+     and the pointer media query answers wrong on a Boox (D84), so the gate
+     is the gesture's own attribute. */
+  .lookup-line {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--lookup-line-gap);
+    min-height: 40px;
+    margin: 0;
+    padding: 0.6em 5px;
+    cursor: pointer;
+  }
+  .lookup-line:not(label) { cursor: default; }
+  .bubble:not([data-pointer="coarse"]) label.lookup-line:hover .lookup-line-text {
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+  .lookup-line-text {
+    min-width: 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  .lookup-line[data-saved="true"] .lookup-line-text { font-weight: 600; }
+  /* The box centred on the first line of its text: half of what the line
+     stands tall over the box, plus the optical correction (the tokens above).
+     In the bubble's own ink, so the mark reads on either paper. */
+  .lookup-line > .lookup-line-box {
+    flex: none;
+    width: var(--lookup-box-size);
+    height: var(--lookup-box-size);
+    margin: calc((var(--lookup-line-height) - var(--lookup-box-size)) / 2 + var(--lookup-check-offset)) 0 0;
+    accent-color: currentColor;
+    cursor: pointer;
+  }
+  /* Out of reach while the edit box is open, unlike every other disabled
+     control here not faded: the row is still there to be read, it just
+     cannot be ticked for as long as the gloss is being typed by hand. */
+  .lookup-line-box:disabled { opacity: 1; cursor: default; }
+  .lookup-line-box:focus-visible {
+    outline: 1px solid currentColor;
+    outline-offset: 1px;
+  }
+
+  /* A line of "More about the word": a transcription or a cross-reference,
+     plain text at the rows' text inset, one paragraph each. */
+  .lookup-paragraph {
+    padding: 0.2em 5px 0.2em calc(5px + var(--lookup-box-size) + var(--lookup-line-gap));
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+    opacity: 0.85;
+  }
 
   .editor {
     display: block;
@@ -1150,8 +1198,6 @@ export const STYLE = `
       --door-paper: #262c3a;
     }
     .bubble:not([data-scheme]) :is(.body, .context)[data-tone="error"] { color: #f09a3e; }
-    .bubble:not([data-pointer="coarse"]):not([data-scheme]) .entry-sense[aria-pressed="false"]:hover:not(:disabled) { background: rgba(255, 255, 255, 0.08); }
-    .bubble:not([data-scheme]) .entry-sense[aria-pressed="true"] { background: rgba(255, 255, 255, 0.1); }
     .bubble:not([data-scheme]) .editor { background: rgba(255, 255, 255, 0.06); }
     /* The quiet labels need nothing here: they are the bubble's own colour at
        seven tenths, which lands right on either background. */
@@ -1180,8 +1226,6 @@ export const STYLE = `
     --door-paper: #262c3a;
   }
   .bubble[data-scheme="dark"] :is(.body, .context)[data-tone="error"] { color: #f09a3e; }
-  .bubble:not([data-pointer="coarse"])[data-scheme="dark"] .entry-sense[aria-pressed="false"]:hover:not(:disabled) { background: rgba(255, 255, 255, 0.08); }
-  .bubble[data-scheme="dark"] .entry-sense[aria-pressed="true"] { background: rgba(255, 255, 255, 0.1); }
   .bubble[data-scheme="dark"] .editor { background: rgba(255, 255, 255, 0.06); }
   .bubble[data-scheme="dark"]:not([data-variant="launcher"]) .actions :is(button[data-action="save"], button[data-action="reader"], button[data-action="settings"]) { background: rgba(255, 255, 255, 0.08); }
   .bubble[data-scheme="dark"]:not([data-variant="launcher"]) .actions :is(button[data-action="save"], button[data-action="reader"], button[data-action="settings"]):hover:not(:disabled):not([aria-disabled="true"]) { background: rgba(255, 255, 255, 0.16); }
@@ -1226,22 +1270,16 @@ export const STYLE = `
  *  settings, at the dictionaries. @typedef {"save" | "choose" | "learned" | "settings" | "reader" | "library" | "more" | "speak" | "open-reader" | "dictionaries"} ReportedAction */
 
 /**
- * One block of the second layer below the sentence: where it came from, and the
- * lines it has to show. The bubble is handed the label's two halves rather
- * than dictionary records on purpose - deciding whether a book's name or a
- * headword is worth repeating needs to know what the reader selected, and the
- * bubble does not. They arrive as halves and not as one string because they
- * dress differently: the book's name is what somebody with several
- * dictionaries scans the list by, so it carries weight the headword does not
- * (mobileread report: one grey line was too faint to tell the books apart).
- * An empty half is a half not worth printing.
+ * The second layer below the sentence: the dictionaries' shelf, one group
+ * per book with its rows told apart (`lib/lookup.js`, `entryGroups`) - the
+ * same shelf the saved-phrases page and the popup draw (`lib/lookup-shelf.js`,
+ * Michał's fifth brief). The bubble is handed the groups rather than
+ * dictionary records on purpose: deciding whether a book's name or a
+ * headword is worth repeating, and which line is a meaning and which a
+ * transcription, needs to know what the reader selected and what language
+ * the book is in, and the bubble knows neither.
  *
- * One line is one meaning and therefore one button. The caller guarantees that,
- * because the caller is where a dictionary's idea of a line stops mattering:
- * whatever a book packed into one field, what a reader presses here has to be
- * something that can stand alone as the answer to a word.
- *
- * @typedef {{ headword: string, dictionary: string, lines: string[] }} Block
+ * @typedef {import("../lib/lookup.js").EntryGroup} EntryGroup
  */
 
 /**
@@ -1321,7 +1359,7 @@ export const STYLE = `
  * @property {(options: { anchor: DOMRect, variant: Variant, body: string, tone?: Tone, actions?: Action[], touch?: boolean, below?: boolean, coarse?: boolean, scale?: number, folded?: boolean, expanded?: boolean, anchored?: boolean, line?: number, phrase?: string, scheme?: "light" | "sepia" | "dark" | null, choosable?: boolean }) => void} show
  * @property {(body: string, tone?: Tone) => void} setBody
  * @property {(sentence: string | null, tone?: Tone) => void} setContext
- * @property {(blocks: Block[]) => void} setEntries
+ * @property {(groups: EntryGroup[]) => void} setEntries
  * @property {(hint: Hint | null) => void} setHint
  * @property {() => void} expand
  * @property {(actions: Action[]) => void} setActions
@@ -1757,8 +1795,17 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
     contextToggle.addEventListener("click", toggleContextFold);
     contextElement.append(contextTextElement, contextToggle);
     entriesElement = document.createElement("div");
-    entriesElement.className = "entries";
+    // The bubble's own box and the shelf's column in one element: the
+    // shelf's rules read the second name, the scrolling and the squeeze
+    // (D79) the first.
+    entriesElement.className = "entries lookup-entries";
     entriesElement.hidden = true;
+    // A press on a book's name must not grow the bubble: the box keeps the
+    // height it has at that moment and the rest scrolls inside it (the
+    // fifth brief). Pinned before the fold opens - on the press, in the
+    // capture phase - because once it has opened the box has grown already.
+    entriesElement.addEventListener("click", pinEntries, true);
+    entriesElement.addEventListener("keydown", pinEntries, true);
     hintElement = document.createElement("div");
     hintElement.className = "hint";
     hintElement.hidden = true;
@@ -1944,13 +1991,22 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
     }
 
     if (entriesElement !== null) {
-      for (const sense of entriesElement.querySelectorAll("button")) {
-        sense.disabled = editing;
-        // A line is marked when it is one of the meanings on show - which is
-        // also true of a line the reader typed by hand into the edit box, and
-        // that is honest: what the mark says is "this is in", not "you pressed
-        // this".
-        sense.setAttribute("aria-pressed", shown.has(sense.textContent ?? "") ? "true" : "false");
+      // In place rather than redrawn: the shelf may be scrolled and a box
+      // may hold the focus. A row is ticked when its line is one of the
+      // meanings on show - which is also true of a line the reader typed
+      // by hand into the edit box, and that is honest: what the tick says
+      // is "this is in", not "you pressed this".
+      const meanings = [...shown];
+      for (const row of entriesElement.querySelectorAll(".lookup-line")) {
+        if (!(row instanceof HTMLElement)) continue;
+        const line = row.querySelector(".lookup-line-text")?.textContent ?? "";
+        const saved = isSaved(meanings, line);
+        row.dataset["saved"] = saved ? "true" : "false";
+        const box = row.querySelector("input");
+        if (box instanceof HTMLInputElement) {
+          box.checked = saved;
+          box.disabled = editing;
+        }
       }
     }
   }
@@ -2098,27 +2154,47 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
   }
 
   /**
-   * A line of a dictionary entry, pressed.
+   * A line of a dictionary entry, ticked or unticked.
    *
-   * It writes what Save writes: this is what the phrase means from now on - one
-   * meaning longer, or one shorter. It goes out under its own name all the same,
-   * because the two presses end differently. Save is somebody finished with a
-   * phrase and the bubble gets out of the way; a line is somebody assembling
-   * one, and the next line has to still be there to press.
+   * It writes what Save writes: this is what the phrase means from now on -
+   * one meaning longer, or one shorter (`afterPress`, the saved-phrases
+   * page's own rule). It goes out under its own name all the same, because
+   * the two presses end differently. Save is somebody finished with a
+   * phrase and the bubble gets out of the way; a line is somebody
+   * assembling one, and the next line has to still be there to tick. The
+   * last meaning unticked forgets the phrase (K4, the fifth brief), and
+   * that ends the exchange the way Learned does.
    *
    * @param {string} sense
    */
   function choose(sense) {
     if (bodyElement === null) return;
     holdSide = true;
-    const next = afterChoosing(bodyElement.textContent ?? "", sense);
-    // Taking out the last meaning there was. A phrase means something or it is
-    // not kept at all, so this press does nothing rather than emptying it.
-    if (next.length === 0) return;
-
-    setBody(next);
+    const next = afterPress(currentMeanings(), sense);
+    if (next.act === "forget") {
+      emit("learned");
+      return;
+    }
+    setBody(next.meanings.join(MEANING_SEPARATOR));
     place();
     emit("choose");
+  }
+
+  /**
+   * The shelf's box kept at the height it has when a book's name is
+   * pressed (the fifth brief): the fold opens into the box, which scrolls,
+   * and the bubble stands where it stood. Once per shelf - `setEntries`
+   * lets the pin go with a new answer - and only for the presses that open
+   * a fold: a click on a name, Enter or Space on it.
+   *
+   * @param {Event} event
+   */
+  function pinEntries(event) {
+    if (entriesElement === null || entriesElement.style.height !== "") return;
+    const target = event.target;
+    if (!(target instanceof Element) || target.closest("summary") === null) return;
+    if (event instanceof KeyboardEvent && event.key !== "Enter" && event.key !== " ") return;
+    entriesElement.style.height = `${entriesElement.getBoundingClientRect().height}px`;
   }
 
   /**
@@ -2250,12 +2326,12 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
   }
 
   /**
-   * How many dictionary lines are presses right now: the buttons among the
-   * senses. The quiet bubble without a vocabulary renders its lines as prose
-   * (D121), and prose is nothing to point a reader at.
+   * How many dictionary lines are presses right now: the rows with a box.
+   * The quiet bubble without a vocabulary draws its rows without one (D121),
+   * and a row that cannot be ticked is nothing to point a reader at.
    */
   function pressableLines() {
-    return entriesElement?.querySelectorAll("button").length ?? 0;
+    return entriesElement?.querySelectorAll("input.lookup-line-box").length ?? 0;
   }
 
   /**
@@ -2271,69 +2347,32 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
   }
 
   /**
-   * @param {Block[]} blocks
+   * The shelf drawn into the bubble's box (`lib/lookup-shelf.js`): a new
+   * answer, so the folds start afresh - the first book open, the rest
+   * closed - and the box's pinned height goes with the old answer. In the
+   * quiet bubble a row is prose, not a press (D121): ticking a row writes a
+   * meaning (D34), and with translation off nothing writes - a box that
+   * did nothing would read as a breakage, so there is none. Unless the
+   * caller said the lines are choosable (D158): with a pair chosen the
+   * quiet bubble has a vocabulary to write after all. No "Show all" fold:
+   * this box scrolls, and that is the fold a long book gets here.
+   *
+   * @param {EntryGroup[]} groups
    */
-  function setEntries(blocks) {
+  function setEntries(groups) {
     if (entriesElement === null) return;
-    entriesElement.replaceChildren();
-
-    for (const block of blocks) {
-      const entry = document.createElement("div");
-      entry.className = "entry";
-
-      if (block.headword.length > 0 || block.dictionary.length > 0) {
-        const label = document.createElement("div");
-        label.className = "entry-label";
-        // Halves as their own elements so the book's name can carry its
-        // weight (see `Block`); text always through textContent - both
-        // halves came out of a file somebody downloaded.
-        if (block.headword.length > 0) {
-          const headword = document.createElement("span");
-          headword.textContent = block.headword;
-          label.append(headword);
-        }
-        if (block.headword.length > 0 && block.dictionary.length > 0) label.append(" - ");
-        if (block.dictionary.length > 0) {
-          const dictionary = document.createElement("span");
-          dictionary.className = "entry-dict";
-          dictionary.textContent = block.dictionary;
-          label.append(dictionary);
-        }
-        entry.append(label);
-      }
-
-      // In the quiet bubble a line is prose, not a press (D121): choosing a
-      // line writes a meaning (D34), and with translation off nothing writes.
-      // A button that did nothing would read as a breakage, so it is not one.
-      // Unless the caller said the lines are choosable (D158): with a pair
-      // chosen the quiet bubble has a vocabulary to write after all.
-      const plain =
-        bubble?.dataset["variant"] === "quiet" && bubble?.dataset["choosable"] !== "true";
-      for (const line of block.lines) {
-        if (plain) {
-          const sense = document.createElement("div");
-          sense.className = "entry-sense";
-          // Text, never markup - the rule below, same reason.
-          sense.textContent = line;
-          entry.append(sense);
-          continue;
-        }
-        const sense = document.createElement("button");
-        sense.type = "button";
-        sense.className = "entry-sense";
-        // A toggle, and told as one: pressing it makes this the meaning, and
-        // pressing it again gives back the one it replaced.
-        sense.setAttribute("aria-pressed", "false");
-        // Every string here came out of a file somebody downloaded, so it goes
-        // in as text and never as markup - the same rule that governs text
-        // coming off the page.
-        sense.textContent = line;
-        sense.addEventListener("click", () => choose(line));
-        entry.append(sense);
-      }
-
-      entriesElement.append(entry);
-    }
+    entriesElement.style.height = "";
+    const plain = bubble?.dataset["variant"] === "quiet" && bubble?.dataset["choosable"] !== "true";
+    entriesElement.replaceChildren(
+      ...renderShelf(groups, {
+        meanings: currentMeanings(),
+        folds: new Map(),
+        readOnly: plain,
+        disabled: editing,
+        foldAt: null,
+        onPress: (line) => choose(line),
+      }),
+    );
 
     unfold(unfolded);
     refreshControls();
