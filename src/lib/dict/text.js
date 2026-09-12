@@ -110,14 +110,34 @@ const TAG = /<[^<>]*>/gu;
  * template (`&lt;ref:{{R:en:Dobson:1957|II|334|986}}&gt;`). The tag strip
  * cannot touch them (they are not tags yet), and decoding is what makes them
  * visible - `/ʃuːld/<ref:<<name:Dobson>>>/` reached a bubble on Michał's
- * screenshot. Only these two names, and only with the colon: a stray `<`
- * a dictionary honestly writes (an entry about `a < b`) matches nothing here.
+ * screenshot. Only these names, and only with the colon: a stray `<` a
+ * dictionary honestly writes (an entry about `a < b`) matches nothing here.
+ *
+ * The names are the ones the files actually write, counted in the raw en-pl
+ * and pl-en WikDict builds and reader.dict's English edition (2026-09-12):
+ * `a` (456 in en-pl, an accent - "affricated"), `q` (281, a qualifier -
+ * "verb", "contemporary"), `ref` (146), `name` (112, inside a `ref`), `aa`
+ * (25, "Northern England"), `qq` (18, "dated", "senses 2-4"), `t` (2,
+ * "measuring device"), and reader.dict's `tr` (27, a transliteration the
+ * entry already gives in brackets beside it). All of them qualify the word
+ * they stand after - which sense, which accent, which age, which script -
+ * and none is text a reader would keep, so they go with their contents.
  *
  * The inside allows `<<...>>` pairs, `{{...}}` templates and anything that is
  * not an angle bracket, so a nested reference is eaten whole rather than to
  * its first `>`.
  */
-const SOURCE_NOTE = "<(?:ref|a):(?:<<[^<>]*>>|\\{\\{[^{}]*\\}\\}|[^<>])*>";
+const SOURCE_NOTE = "<(?:ref|name|aa?|qq?|tr?):(?:<<[^<>]*>>|\\{\\{[^{}]*\\}\\}|[^<>])*>";
+
+/**
+ * Markup a build wrote as entities - `&lt;sup&gt;j&lt;/sup&gt;` in the pl-en
+ * transcriptions (395 lines), `&lt;sup &gt;` before a citation's link in
+ * reader.dict (57) - which the decoding turns back into tags after the tag
+ * strip has run. Their contents are text (the glide's `j`, the link) and
+ * stay; the tags go. Only these two: a dictionary that honestly writes
+ * `&lt;i&gt;` as text about the tag keeps it (the test says so).
+ */
+const DECODED_TAGS = /<\/?(?:sup|sub)\b[^<>]*>/giu;
 
 /**
  * A note standing between two slashes of a transcription - the common case:
@@ -322,9 +342,9 @@ export function fieldText({ type, text: raw }) {
     .replace(LINE_BREAKS, "\n")
     .replace(TAG, "");
 
-  // The source annotations after the decoding, because the decoding is what
-  // surfaces them (see SOURCE_NOTE).
-  return tidy(stripSourceNotes(decodeEntities(withoutMarkup)), false);
+  // The source annotations and the decoded tags after the decoding, because
+  // the decoding is what surfaces them (see SOURCE_NOTE, DECODED_TAGS).
+  return tidy(stripSourceNotes(decodeEntities(withoutMarkup)).replace(DECODED_TAGS, ""), false);
 }
 
 /**

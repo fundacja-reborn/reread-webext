@@ -82,6 +82,40 @@ describe("fieldText", () => {
     );
     // A plain field may carry the notation as itself.
     assert.equal(fieldText({ type: "m", text: "/wʊd/<a:Early Modern,weak form>/" }), "/wʊd/");
+    // The other qualifiers the en-pl and pl-en files write, counted in the
+    // raw files (2026-09-12): which sense (`q`), which age (`qq`), which
+    // accent (`aa`, nested pairs inside), which term (`t`). `<a:affricated>`
+    // reached the saved-phrases page on Michał's screenshot from a
+    // dictionary imported before the strip knew even `a`.
+    assert.equal(
+      fieldText({
+        type: "h",
+        text:
+          '/<font color="gray">ˈæb.lə.ɡeɪt/&lt;q:verb&gt;</font>/, ' +
+          '/<font color="gray">ˈæb.lə.ɡət/&lt;q:noun&gt;</font>/',
+      }),
+      "/ˈæb.lə.ɡeɪt/, /ˈæb.lə.ɡət/",
+    );
+    assert.equal(
+      fieldText({
+        type: "h",
+        text:
+          '/<font color="gray">ˈkʌvət/&lt;qq:dated&gt;</font>/, ' +
+          '/<font color="gray">ˈkʊ.ɹi/&lt;aa:Northern England&gt;</font>/, ' +
+          '/<font color="gray">ˈɹuː.lə/&lt;t:measuring device&gt;</font>/, ' +
+          '/<font color="gray">[luːx]&lt;aa:&lt;&lt;Liverpool&gt;&gt; variant&gt;</font>/',
+      }),
+      "/ˈkʌvət/, /ˈkʊ.ɹi/, /ˈɹuː.lə/, /[luːx]/",
+    );
+    // Markup the build wrote as entities: the glide's superscript in the
+    // pl-en transcriptions keeps its letter, the tag goes; reader.dict's
+    // transliteration note goes whole - the entry gives it in brackets
+    // beside the word already.
+    assert.equal(fieldText({ type: "h", text: "/ˌadɛ̃ˈnɔ&lt;sup&gt;j&lt;/sup&gt;it/" }), "/ˌadɛ̃ˈnɔjit/");
+    assert.equal(
+      fieldText({ type: "h", text: "Clipping of Russian абха́з&lt;tr:abxáz&gt; (abxáz&lt;tr:abxáz&gt;)." }),
+      "Clipping of Russian абха́з (abxáz).",
+    );
   });
 
   it("never mistakes an honest angle bracket for an annotation", () => {
