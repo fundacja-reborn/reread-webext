@@ -3,10 +3,11 @@
  * dictionaries - the bubble with the page taken away.
  *
  * One component in two homes, and the two homes differ in what a press may
- * do. The saved-phrases page's "Add a phrase" fold is the full field: a
- * dictionary line saves the phrase with that meaning (D34), and the list
- * right under the fold shows what a press did. The toolbar popup's field
- * only reads (`readOnly`): a popup leaves at a click beside it, its answer
+ * do. The saved-phrases page's "Add a phrase" fold is the full field: every
+ * dictionary line is a row with a checkbox, ticked while the phrase is
+ * saved with that meaning (D34; block 2 of the rebuild), and the list right
+ * under the fold shows what a tick did. The toolbar popup's field only
+ * reads (`readOnly`): a popup leaves at a click beside it, its answer
  * scrolls the "saved" line out of view, and a save nobody saw is the wrong
  * kind of surprise (Michał's call after the first smoke, 2026-09-11) - so
  * there the lines are prose, and the popup's own row leads to the page.
@@ -38,7 +39,7 @@
 import { HINT_MAX_WORDS, linkedWord } from "./gloss.js";
 import { t, uiLocale } from "./i18n.js";
 import { languageName } from "./language.js";
-import { afterPress, lookupOutcome, lookupText, paragraphsOf } from "./lookup.js";
+import { afterPress, isSaved, lookupOutcome, lookupText, paragraphsOf } from "./lookup.js";
 import { keyTokens } from "./matcher/tokenize.js";
 import { describeError } from "./messages.js";
 import { ErrorCode, Message, asLookUp } from "./protocol.js";
@@ -263,13 +264,35 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
   }
 
   /**
-   * A dictionary line pressed: the meaning joins the saved ones or leaves
-   * them (D34), and the phrase is saved with what is left - or forgotten with
-   * the last meaning taken back (`afterPress`).
+   * The presses, one after another: three lines ticked in a row are three
+   * saves, each computed from what the one before it left - two in flight
+   * at once would each start from the same meanings and the second would
+   * write over the first.
+   *
+   * @type {Promise<void>}
+   */
+  let queue = Promise.resolve();
+
+  /**
+   * A dictionary line ticked or unticked: the meaning joins the saved ones
+   * or leaves them (D34), and the phrase is saved with what is left - or
+   * forgotten with the last meaning taken back (`afterPress`). Queued behind
+   * the press before it (see `queue`).
    *
    * @param {string} line
+   * @param {string} [at] the row's mark (`data-line`), for the focus and the
+   *   scroll to come back to it after the redraw
    */
-  async function press(line) {
+  function press(line, at) {
+    queue = queue.then(() => pressed(line, at)).catch(() => undefined);
+    return queue;
+  }
+
+  /**
+   * @param {string} line
+   * @param {string} [at]
+   */
+  async function pressed(line, at) {
     if (state.phrase === null) return;
     const phrase = state.phrase;
     const next = afterPress(state.meanings, line);
@@ -286,7 +309,75 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
     } else {
       state.error = describeError(result.code);
     }
+    redrawAround(at);
+  }
+
+  /**
+   * @param {string} at a row's mark
+   * @returns {HTMLElement | null}
+   */
+  function rowAt(at) {
+    const row = answer.querySelector(`[data-line="${at}"]`);
+    return row instanceof HTMLElement ? row : null;
+  }
+
+  /**
+   * The redraw after a tick, with the row ticked kept where it was: under
+   * the finger on the screen (what stood above it may have grown by the
+   * standing line - the page is scrolled by the difference) and under the
+   * keyboard's focus (the checkbox is rebuilt, so the focus is handed to
+   * its successor). A row that left with the redraw (an own meaning
+   * unticked, block 4) hands the focus to the field for own meanings.
+   *
+   * @param {string} [at]
+   */
+  function redrawAround(at) {
+    const before = at === undefined ? null : rowAt(at);
+    const had = before !== null && before.contains(document.activeElement);
+    const top = before?.getBoundingClientRect().top ?? null;
     render();
+    if (at === undefined) return;
+    const after = rowAt(at);
+    if (after !== null && top !== null) {
+      const moved = after.getBoundingClientRect().top - top;
+      if (moved !== 0) window.scrollBy(0, moved);
+    }
+    if (!had) return;
+    const box = after?.querySelector("input");
+    if (box instanceof HTMLInputElement) box.focus({ preventScroll: true });
+    else ownField()?.focus({ preventScroll: true });
+  }
+
+  /** The field for a meaning of the reader's own (block 4), when drawn. */
+  function ownField() {
+    const field = answer.querySelector("input.lookup-own-input");
+    return field instanceof HTMLInputElement ? field : null;
+  }
+
+  /**
+   * A dictionary line as a row to tick: a label over the whole row with a
+   * native checkbox in it - it draws solidly on e-ink, reads as a checkbox
+   * to a screen reader, and takes the space bar and Tab for nothing. What
+   * says the meaning is kept is the checkbox's own mark and the weight of
+   * the text (the stylesheet, off `data-saved`): a wash alone is one of the
+   * 16 greys an e-ink panel rounds back to paper.
+   *
+   * @param {string} line
+   * @param {string} at the row's mark, stable across redraws
+   * @returns {HTMLElement}
+   */
+  function lineRow(line, at) {
+    const row = element("label", "lookup-line");
+    row.dataset["line"] = at;
+    const saved = isSaved(state.meanings, line);
+    row.dataset["saved"] = saved ? "true" : "false";
+    const box = document.createElement("input");
+    box.type = "checkbox";
+    box.className = "lookup-line-box";
+    box.checked = saved;
+    box.addEventListener("change", () => void press(line, at));
+    row.append(box, element("span", "lookup-line-text", line));
+    return row;
   }
 
   /**
@@ -402,30 +493,17 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
     if (state.meanings.length > 0) head.append(standing(state.phrase));
     answer.append(head);
 
-    // What the phrase already means, before what the books say: the
-    // reader's own meaning outranks a dictionary's (the recall bubble's
-    // order). Each meaning is a chip in the pressed line's own dress - the
-    // same words in the same face on the same wash - so that a line pressed
-    // below is seen to land up here (Michał's fourth smoke). Where the field
-    // writes, a chip is a press too: it takes its meaning back out, as
-    // pressing the line again does.
-    if (state.meanings.length > 0) {
+    // Where the field only reads, what the phrase already means stands
+    // before what the books say, as chips: the reader's own meaning
+    // outranks a dictionary's (the recall bubble's order), and the popup
+    // has no rows to tick that would show it. Where the field writes, the
+    // ticked rows say it - one list with a state, not the same meanings
+    // twice (block 2 of the rebuild).
+    if (readOnly && state.meanings.length > 0) {
       const kept = element("div", "lookup-kept");
       kept.append(element("p", "lookup-kept-label", t("lookup_kept")));
       const chips = element("div", "lookup-chips");
-      for (const meaning of state.meanings) {
-        if (readOnly) {
-          chips.append(element("span", "lookup-chip", meaning));
-          continue;
-        }
-        const chip = button("lookup-chip", meaning);
-        chip.setAttribute("aria-pressed", "true");
-        const cross = element("span", "lookup-chip-x", String.fromCodePoint(0x00d7));
-        cross.setAttribute("aria-hidden", "true");
-        chip.append(cross);
-        chip.addEventListener("click", () => void press(meaning));
-        chips.append(chip);
-      }
+      for (const meaning of state.meanings) chips.append(element("span", "lookup-chip", meaning));
       kept.append(chips);
       answer.append(kept);
     }
@@ -468,14 +546,7 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
           entries.append(entry);
           continue;
         }
-        for (const line of block.lines) {
-          const sense = button("lookup-sense", line);
-          // A toggle, and told as one: the mark that stays says which meanings
-          // are the phrase's now.
-          sense.setAttribute("aria-pressed", state.meanings.includes(line) ? "true" : "false");
-          sense.addEventListener("click", () => void press(line));
-          entry.append(sense);
-        }
+        for (const [lineAt, line] of block.lines.entries()) entry.append(lineRow(line, `${at}:${lineAt}`));
         entries.append(entry);
       }
       answer.append(entries);

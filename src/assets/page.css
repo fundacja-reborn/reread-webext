@@ -811,13 +811,11 @@ body:not(.reader):has(.panel-scrim:not([hidden])) .page-chrome {
   height: 1.6em;
 }
 
-/* What the phrase already means: the small label, and under it the meanings
-   as chips in the pressed line's own dress - the same face, the same wash
-   and border as `.lookup-sense[aria-pressed="true"]` below - so a line
-   pressed in an entry is seen to land up here (Michał's fourth smoke,
-   2026-09-11: one meaning per line in the reading face read as a paragraph
-   nobody connected to the presses). A chip that is a button takes its
-   meaning back out; the cross says so. */
+/* What the phrase already means, in the field that only reads (the popup):
+   the small label, and under it the meanings as chips - a wash and a
+   border, because a wash alone is one of the 16 greys an e-ink panel rounds
+   back to paper. The field that writes has no chips: its ticked rows say
+   the same thing once. */
 .lookup-kept {
   display: grid;
   gap: 0.3rem;
@@ -838,7 +836,6 @@ body:not(.reader):has(.panel-scrim:not([hidden])) .page-chrome {
 .lookup-chip {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
   margin: 0;
   padding: 0.3rem 0.6rem;
   font: inherit;
@@ -848,20 +845,6 @@ body:not(.reader):has(.panel-scrim:not([hidden])) .page-chrome {
   border: 1px solid var(--page-border);
   border-radius: 5px;
   overflow-wrap: anywhere;
-}
-
-button.lookup-chip {
-  cursor: pointer;
-}
-
-.lookup-chip-x {
-  color: var(--page-muted);
-  line-height: 1;
-}
-
-button.lookup-chip:hover .lookup-chip-x,
-button.lookup-chip:focus-visible .lookup-chip-x {
-  color: var(--page-fg);
 }
 
 /* The line that says the dictionaries are being asked, why they said
@@ -907,12 +890,14 @@ button.lookup-show {
   margin-block: -0.7rem;
 }
 
-/* The books' entries, the bubble's own layout: a line between one book and
-   the next, a small label naming the book and the headword it answered
-   about, and under it the meanings one to a row - lines to read first and
-   presses second, so they keep the shape of the text around them. What says
-   a line was pressed is the mark that stays: a wash and a border, because a
-   wash alone is one of the 16 greys an e-ink panel rounds back to paper. */
+/* The books' entries: a line between one book and the next, a small label
+   naming the book and the headword it answered about, and under it the
+   meanings one to a row. Where the field writes, a row is a label over a
+   native checkbox and the line's text (block 2 of the rebuild): 44px tall,
+   the box 20px with 12px to the text, the text wrapping as it needs to.
+   What says the meaning is kept is the checkbox's own mark and the weight
+   of the text - never a wash alone, which an e-ink panel rounds back to
+   paper; the hover wash is an extra, not the signal. */
 .lookup-entries {
   display: grid;
   gap: 0;
@@ -938,29 +923,37 @@ button.lookup-show {
   font-weight: 600;
 }
 
-button.lookup-sense {
-  display: block;
-  width: 100%;
-  margin: 0;
-  padding: 0.3rem 0.35rem;
-  font: inherit;
-  text-align: left;
-  color: inherit;
-  background: none;
-  border: 1px solid transparent;
+.lookup-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-height: 44px;
+  padding: 0.45rem 0.35rem;
   border-radius: 5px;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
   cursor: pointer;
 }
 
-button.lookup-sense:hover {
-  border-color: var(--page-line);
+.lookup-line:hover {
+  background: color-mix(in srgb, var(--page-fg) 5%, transparent);
 }
 
-button.lookup-sense[aria-pressed="true"] {
-  background: color-mix(in srgb, var(--page-fg) 7%, transparent);
-  border-color: var(--page-border);
+/* The box keeps its size whatever the text does, and sits on the text's
+   first line rather than in the middle of a wrapped row. */
+.lookup-line-box {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin: 0.2em 0 0;
+  cursor: pointer;
+}
+
+.lookup-line-text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.lookup-line[data-saved="true"] .lookup-line-text {
+  font-weight: 600;
 }
 
 /* The read-only field's entries, as the book wrote them: one block per

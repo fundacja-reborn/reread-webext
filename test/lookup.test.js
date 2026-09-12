@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { afterPress, lookupOutcome, lookupText, paragraphsOf } from "../src/lib/lookup.js";
+import { afterPress, isSaved, lookupOutcome, lookupText, paragraphsOf, sameMeaning } from "../src/lib/lookup.js";
 import { MAX_PHRASE_LENGTH } from "../src/lib/store/phrase.js";
 
 /**
@@ -88,7 +88,31 @@ describe("paragraphsOf", () => {
   });
 });
 
+describe("sameMeaning", () => {
+  it("folds whitespace the way the store does on a save, and nothing else (K3)", () => {
+    assert.ok(sameMeaning("być omawianym w mediach", "  być omawianym   w mediach "));
+    assert.ok(sameMeaning("a\tb", "a b"));
+    // Case counts: a German noun and its verb differ by a capital, and a
+    // meaning the reader typed is the reader's spelling.
+    assert.equal(sameMeaning("Laufen", "laufen"), false);
+    assert.equal(sameMeaning("nowina", "nowiny"), false);
+  });
+
+  it("finds a line among the saved meanings by the same rule", () => {
+    assert.ok(isSaved(["wysokość", "wzniesienie"], "wzniesienie"));
+    assert.ok(isSaved(["wysokość"], " wysokość "));
+    assert.equal(isSaved(["wysokość"], "Wysokość"), false);
+    assert.equal(isSaved([], "wysokość"), false);
+  });
+});
+
 describe("afterPress", () => {
+  it("takes a meaning back on the press of the line it came from, whitespace folded or not", () => {
+    // Saved from the bubble the line arrives with its whitespace folded;
+    // the row's checkbox still has to untick it.
+    assert.deepEqual(afterPress(["a b", "c"], "a  b"), { act: "save", meanings: ["c"] });
+  });
+
   it("saves the phrase with the pressed line, after what it already meant (D34)", () => {
     assert.deepEqual(afterPress([], "wysokość"), { act: "save", meanings: ["wysokość"] });
     assert.deepEqual(afterPress(["wysokość"], "wzniesienie"), {

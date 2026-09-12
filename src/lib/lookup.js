@@ -13,7 +13,7 @@
  */
 
 import { MEANING_SEPARATOR, afterChoosing, entryBlocks, quietNote, toMeanings } from "./gloss.js";
-import { normalize, trimPhrase } from "./normalize.js";
+import { collapseWhitespace, normalize, trimPhrase } from "./normalize.js";
 import { MAX_PHRASE_LENGTH } from "./store/phrase.js";
 
 /**
@@ -104,12 +104,45 @@ export function lookupOutcome(answer, normalized) {
 }
 
 /**
+ * Whether a saved meaning and a dictionary line are one and the same (K3 of
+ * the panel's rebuild, Michał's call 2026-09-12): equal once whitespace is
+ * folded the way the store folds it on every save (`collapseWhitespace` -
+ * the ends trimmed, every run of whitespace one space), and otherwise
+ * exact. Case counts: a German noun and the verb it came from differ by a
+ * capital, and a meaning the reader typed is the reader's spelling.
+ *
+ * @param {string} meaning as saved
+ * @param {string} line as the book wrote it, or as typed
+ * @returns {boolean}
+ */
+export function sameMeaning(meaning, line) {
+  return collapseWhitespace(meaning) === collapseWhitespace(line);
+}
+
+/**
+ * Whether a dictionary line is among the phrase's saved meanings - what the
+ * line's checkbox shows.
+ *
+ * @param {string[]} meanings what the phrase means now
+ * @param {string} line
+ * @returns {boolean}
+ */
+export function isSaved(meanings, line) {
+  return meanings.some((meaning) => sameMeaning(meaning, line));
+}
+
+/**
  * What a press on a dictionary line does to the phrase - D34's rule seen from
  * the field: the line joins the saved meanings or leaves them, and the phrase
  * is saved with what is left. Taking the last meaning back forgets the
  * phrase: the bubble declines to save an empty gloss and leaves the reader
  * the rest of the bubble, but here the line was the reader's only word about
- * the phrase, and a phrase with nothing to mean has nothing to stay for.
+ * the phrase, and a phrase with nothing to mean has nothing to stay for
+ * (K4 of the panel's rebuild, confirmed by Michał 2026-09-12).
+ *
+ * The meaning taken back is found by `sameMeaning`: a meaning saved from the
+ * bubble is the line with its whitespace folded, and it has to leave on the
+ * press of the line it came from.
  *
  * @param {string[]} meanings what the phrase means now - empty while it is
  *   not saved
@@ -117,6 +150,10 @@ export function lookupOutcome(answer, normalized) {
  * @returns {{ act: "save", meanings: string[] } | { act: "forget", meanings: string[] }}
  */
 export function afterPress(meanings, line) {
-  const next = toMeanings(afterChoosing(meanings.join(MEANING_SEPARATOR), line));
+  const without = meanings.filter((meaning) => !sameMeaning(meaning, line));
+  const next =
+    without.length === meanings.length
+      ? toMeanings(afterChoosing(meanings.join(MEANING_SEPARATOR), line))
+      : without;
   return next.length === 0 ? { act: "forget", meanings: [] } : { act: "save", meanings: next };
 }

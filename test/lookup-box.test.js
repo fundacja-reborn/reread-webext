@@ -38,12 +38,33 @@ describe("the look-up field", () => {
     assert.match(verdict, /deps\.openDictionaries\(\)/, "the settings word does not open the settings");
   });
 
-  it("saves with a press on a line, and forgets with the last line taken back", async () => {
+  it("saves with a tick on a line, and forgets with the last line unticked", async () => {
     const box = await source("lib/lookup-box.js");
-    const pressed = bodyOf(box, "press");
+    const pressed = bodyOf(box, "pressed");
     assert.match(pressed, /afterPress\(state\.meanings, line\)/, "a press stopped asking the rule");
     assert.match(pressed, /next\.act === "forget"[\s\S]*?Message\.FORGET_PHRASE/, "the last line taken back does not forget");
     assert.match(pressed, /Message\.SAVE_PHRASE, text: phrase\.text, translations: next\.meanings/, "a press saves something other than the rule's meanings");
+    // One after another: three lines ticked in a row are three saves, each
+    // from what the one before it left.
+    assert.match(bodyOf(box, "press"), /queue = queue\.then\(\(\) => pressed\(line, at\)\)/, "two presses can be in flight at once");
+  });
+
+  it("draws every line as a row with a native checkbox where it writes, ticked while the meaning is saved", async () => {
+    const box = await source("lib/lookup-box.js");
+    const row = bodyOf(box, "lineRow");
+    assert.match(row, /element\("label", "lookup-line"\)/, "a row is not a label over the whole line");
+    assert.match(row, /box\.type = "checkbox";/, "the row has no native checkbox");
+    assert.match(row, /const saved = isSaved\(state\.meanings, line\);[\s\S]*?box\.checked = saved;/, "the checkbox does not show whether the meaning is saved");
+    assert.match(row, /row\.dataset\["saved"\] = saved \? "true" : "false"/, "the row does not say for the stylesheet that its meaning is saved");
+    assert.match(row, /box\.addEventListener\("change", \(\) => void press\(line, at\)\)/, "a tick does not save");
+    // The mark that stays is the checkbox and the weight, never a wash alone.
+    const styles = await source("assets/page.css");
+    assert.match(styles, /\.lookup-line\[data-saved="true"\] \.lookup-line-text \{\s*font-weight: 600;/, "a saved line is told by a wash alone");
+    assert.doesNotMatch(box, /lookup-sense|aria-pressed/, "a line is still a pressed button");
+    // The redraw after a tick keeps the row under the finger and the focus.
+    const redraw = bodyOf(box, "redrawAround");
+    assert.match(redraw, /window\.scrollBy\(0, moved\)/, "the page does not follow the row that moved");
+    assert.match(redraw, /box\.focus\(\{ preventScroll: true \}\)/, "the focus is dropped with the rebuilt checkbox");
   });
 
   it("asks on submit alone - never as the word is typed - and lets a phone spell the word as the book does", async () => {
@@ -74,7 +95,7 @@ describe("the look-up field", () => {
     assert.match(styles, /\.lookup-input::-webkit-search-cancel-button[\s\S]*?appearance: none;/, "the browser's own cross doubles the field's");
   });
 
-  it("reads top down: the phrase with its standing, what it means as chips, then the books", async () => {
+  it("reads top down: the phrase with its standing, then the books - the meanings once, as ticked rows", async () => {
     const box = await source("lib/lookup-box.js");
     const render = bodyOf(box, "render");
     const at = (/** @type {string} */ marker) => render.indexOf(marker);
@@ -87,12 +108,10 @@ describe("the look-up field", () => {
     assert.match(standing, /t\("lookup_saved_count", \[state\.meanings\.length\.toLocaleString\(\)\]\)/, "the count is not the saved meanings'");
     assert.match(standing, /if \(deps\.showInList !== undefined\) \{[\s\S]*?button\("lookup-show", t\("lookup_show_in_list"\)\)/, "the link stands without a list to show, or never");
     assert.match(standing, /show\.addEventListener\("click", \(\) => deps\.showInList\?\.\(phrase\)\)/, "the link does not hand the phrase to the list");
-    // The meanings as chips in the pressed line's dress; where the field
-    // writes, a chip is a press that takes its meaning back out, and where
-    // it only reads, plain text.
-    assert.match(render, /const chip = button\("lookup-chip", meaning\);\s*chip\.setAttribute\("aria-pressed", "true"\)/, "a chip is not a pressed toggle");
-    assert.match(render, /chip\.addEventListener\("click", \(\) => void press\(meaning\)\)/, "a chip does not take its meaning back out");
-    assert.match(render, /if \(readOnly\) \{\s*chips\.append\(element\("span", "lookup-chip", meaning\)\)/, "the read-only field's chips are presses");
+    // The chips stand only where the field reads (the popup has no rows to
+    // tick); where it writes, the ticked rows say it once (D2 of the rebuild).
+    assert.match(render, /if \(readOnly && state\.meanings\.length > 0\) \{[\s\S]*?element\("span", "lookup-chip", meaning\)/, "the field that writes shows its meanings twice, or the popup not at all");
+    assert.doesNotMatch(render, /button\("lookup-chip"/, "a chip is a press");
   });
 
   it("draws the entries as prose, paragraph by paragraph, where it only reads", async () => {
