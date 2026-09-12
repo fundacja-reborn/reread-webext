@@ -1512,10 +1512,6 @@
     "description": "The same button, armed and asking; shared by models (the pair label) and dictionaries (the name).",
     "placeholders": { "name": { "content": "$1", "example": "English to Polish" } }
   },
-  "options_about_dictionary": {
-    "message": "About this dictionary",
-    "description": "Summary of the fold holding a stored dictionary's publisher, licence and description."
-  },
   "options_size_here": {
     "message": "$SIZE$ here",
     "placeholders": { "size": { "content": "$1", "example": "40.2 MB" } }
@@ -1645,6 +1641,15 @@
       "total": { "content": "$3", "example": "3" }
     }
   },
+  "options_dictionary_details": {
+    "message": "Details",
+    "description": "The fold at the end of a stored dictionary's row (the seventh brief): the display name field, the file's name and the attribution."
+  },
+  "options_dictionary_file_name": {
+    "message": "File name: $NAME$",
+    "description": "Inside that fold: what the dictionary's own .ifo file calls it.",
+    "placeholders": { "name": { "content": "$1", "example": "English-Polish FreeDict+WikDict dictionary (en-pl)" } }
+  },
   "options_dictionary_display_name": {
     "message": "Display name",
     "description": "The caption of the field on a stored dictionary's row (D199): the name its entries are grouped under on the phrases page, in the popup and in the bubble, in place of the name its file carries."
@@ -1652,18 +1657,6 @@
   "options_dictionary_display_name_aria": {
     "message": "Display name of $NAME$",
     "description": "The accessible name of that field; every row has one captioned the same.",
-    "placeholders": { "name": { "content": "$1", "example": "English-Polish FreeDict+WikDict dictionary (en-pl)" } }
-  },
-  "options_dictionary_renamed": {
-    "message": "$NAME$ is now shown as $SHOWN$.",
-    "placeholders": {
-      "name": { "content": "$1", "example": "English-Polish FreeDict+WikDict dictionary (en-pl)" },
-      "shown": { "content": "$2", "example": "FreeDict en-pl" }
-    }
-  },
-  "options_dictionary_name_restored": {
-    "message": "$NAME$ is shown under its own name again.",
-    "description": "After the display name field is emptied.",
     "placeholders": { "name": { "content": "$1", "example": "English-Polish FreeDict+WikDict dictionary (en-pl)" } }
   },
   "options_dictionary_name_taken": {

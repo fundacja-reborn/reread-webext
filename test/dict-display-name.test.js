@@ -107,7 +107,9 @@ describe("the name on the shelf", () => {
 
 describe("the settings page's field", () => {
   const options = sourceOf("src/options/options.js");
-  const field = options.slice(options.indexOf("function renameField("), options.indexOf("function renameFieldFor("));
+  const field = options.slice(options.indexOf("function renameField("), options.indexOf("async function renameFromField("));
+  const save = options.slice(options.indexOf("async function renameFromField("), options.indexOf("async function removeDictionary("));
+  const row = options.slice(options.indexOf("function renderDictionary("), options.indexOf("function refreshRowName("));
 
   it("stops typing at the record's limit and shows the file's name as the placeholder", () => {
     assert.match(field, /field\.maxLength = DISPLAY_NAME_LIMIT;/);
@@ -121,12 +123,34 @@ describe("the settings page's field", () => {
   });
 
   it("refuses a name another dictionary is shown under, over the store's own list", () => {
-    const save = options.slice(options.indexOf("async function renameFromField("), options.indexOf("async function removeDictionary("));
     assert.match(save, /nameHolder\(await listDictionaries\(\), dictionary\.id, wanted\)/);
     assert.match(save, /options_dictionary_name_taken/);
-    // Only a finished dictionary gets the field: an unfinished one is still
-    // being named by its files.
-    const row = options.slice(options.indexOf("function renderDictionary("), options.indexOf("function renderUnfinished("));
-    assert.ok(row.indexOf("renderUnfinished(container, dictionary)") < row.indexOf("renameField(dictionary)"));
+  });
+
+  it("stands in the Details fold of every finished row, and of no unfinished one", () => {
+    // The fold is built after the unfinished row has returned: an import
+    // that stopped halfway is still being named by its files.
+    assert.ok(row.indexOf("renderUnfinished(row, head, dictionary)") < row.indexOf("renameField(dictionary)"));
+    const fold = row.slice(row.indexOf('element("details", "dictionary-details")'));
+    assert.match(fold, /options_dictionary_details/);
+    assert.match(fold, /renameField\(dictionary\)/);
+    assert.match(fold, /options_dictionary_file_name", dictionary\.name/);
+    // Unconditional: a book without a credit has a fold with the field and
+    // the file's name in it.
+    assert.doesNotMatch(fold.slice(0, fold.indexOf("row.append(details)")), /if \(dictionary\.credit !== null\) \{/);
+  });
+
+  it("says the new name on the row in place, with no redraw and no sentence", () => {
+    // A redraw would shut the fold the name was typed in and drop the focus;
+    // the title changing is the answer, so no status line either (block 2 of
+    // the seventh brief: no toast).
+    assert.doesNotMatch(save, /renderCatalog\(\)/);
+    assert.match(save, /refreshRowName\(row, dictionary\)/);
+    assert.doesNotMatch(save, /options_dictionary_renamed|options_dictionary_name_restored/);
+    // The record the row's later actions read learns the name too.
+    assert.match(save, /delete dictionary\.displayName/);
+    assert.match(save, /dictionary\.displayName = wanted/);
+    // And the row's title is the shown name from the first draw.
+    assert.match(row, /element\("p", "dictionary-name", shown\)/);
   });
 });

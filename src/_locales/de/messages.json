@@ -1163,7 +1163,6 @@
     "message": "Löschen bestätigen: $NAME$",
     "placeholders": { "name": { "content": "$1" } }
   },
-  "options_about_dictionary": { "message": "Über dieses Wörterbuch" },
   "options_size_here": {
     "message": "$SIZE$ hier",
     "placeholders": { "size": { "content": "$1" } }
@@ -1285,20 +1284,14 @@
       "total": { "content": "$3", "example": "3" }
     }
   },
+  "options_dictionary_details": { "message": "Details" },
+  "options_dictionary_file_name": {
+    "message": "Name aus der Datei: $NAME$",
+    "placeholders": { "name": { "content": "$1", "example": "English-Polish FreeDict+WikDict dictionary (en-pl)" } }
+  },
   "options_dictionary_display_name": { "message": "Anzeigename" },
   "options_dictionary_display_name_aria": {
     "message": "Anzeigename von $NAME$",
-    "placeholders": { "name": { "content": "$1", "example": "English-Polish FreeDict+WikDict dictionary (en-pl)" } }
-  },
-  "options_dictionary_renamed": {
-    "message": "$NAME$ wird jetzt als $SHOWN$ angezeigt.",
-    "placeholders": {
-      "name": { "content": "$1", "example": "English-Polish FreeDict+WikDict dictionary (en-pl)" },
-      "shown": { "content": "$2", "example": "FreeDict en-pl" }
-    }
-  },
-  "options_dictionary_name_restored": {
-    "message": "$NAME$ wird wieder unter seinem eigenen Namen angezeigt.",
     "placeholders": { "name": { "content": "$1", "example": "English-Polish FreeDict+WikDict dictionary (en-pl)" } }
   },
   "options_dictionary_name_taken": {

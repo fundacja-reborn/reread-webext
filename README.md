@@ -164,7 +164,7 @@ The model translates only from the pair's language, and a page in your own langu
 
 With more than one installed, the bubble shows their entries in the order the settings page lists the dictionaries, and two arrows on each row change that order - put the English-English one above the English-Polish one and its entries come first.
 
-A dictionary's name comes from its file and can be a whole sentence, which breaks the heading of its entries into several lines. The **Display name** field on its row in the settings takes a shorter one, up to 40 characters, and that name heads the dictionary's entries in the bubble, in the popup and on the phrases page; clearing the field brings the file's name back. Two dictionaries cannot be shown under one name.
+A dictionary's name comes from its file and can be a whole sentence, which breaks the heading of its entries into several lines. The **Display name** field under **Details** on its row in the settings takes a shorter one, up to 40 characters, and that name is the row's title and heads the dictionary's entries in the bubble, in the popup and on the phrases page; clearing the field brings the file's name back. Two dictionaries cannot be shown under one name.
 
 For English-Polish, WikDict is the recommended start: 66,609 entries plus 51,721 alternative spellings in its `.syn` file (which is what lets `elevations` find `elevation`). FreeDict's `eng-pol` StarDict build (release 0.2.1) is mostly missing the Polish translations (checked 2026-08-11); other FreeDict pairs may be fine.
 

@@ -1678,14 +1678,25 @@ function moveButton(dictionary, step, enabled) {
   button.dataset["move"] = dictionary.id;
   button.dataset["step"] = String(step);
 
-  const shown = shownName(dictionary);
-  const label =
-    step < 0 ? t("options_move_dictionary_up_aria", shown) : t("options_move_dictionary_down_aria", shown);
+  const label = moveLabel(dictionary, step);
   button.setAttribute("aria-label", label);
   button.title = label;
 
   button.addEventListener("click", () => void moveDictionary(dictionary, step));
   return button;
+}
+
+/**
+ * The sentence an arrow carries, naming the book by the name the reader
+ * knows it by.
+ *
+ * @param {import("../lib/dict/store.js").Dictionary} dictionary
+ * @param {number} step
+ * @returns {string}
+ */
+function moveLabel(dictionary, step) {
+  const shown = shownName(dictionary);
+  return step < 0 ? t("options_move_dictionary_up_aria", shown) : t("options_move_dictionary_down_aria", shown);
 }
 
 /**
@@ -1750,7 +1761,7 @@ function fillDictionaryMeta(meta, dictionary) {
 
   meta.replaceChildren();
   items.forEach((item, at) => {
-    if (at > 0) meta.append(" · ");
+    if (at > 0) meta.append("\u00a0· ");
     meta.append(item);
   });
 }
@@ -1805,22 +1816,74 @@ function renderDictionary(dictionary, place) {
   );
   placeActions(head, buttons);
 
-  // The name the reader may give instead of the file's (D199): a finished
-  // book's only, since an unfinished one is still being named by its files.
-  row.append(renameField(dictionary));
-
-  // Attribution is why this fold is here at all: the dictionaries worth having
-  // are Wiktionary-derived and CC BY-SA, and naming their source is the whole
-  // of what that asks for. Folded, not gone - the row stays scannable and the
-  // credit stays, one press away, exactly as the dictionary wrote it.
-  if (dictionary.credit !== null) {
-    const about = element("details", "model-about");
-    about.append(element("summary", "", t("options_about_dictionary")));
-    about.append(element("p", "dictionary-credit", dictionary.credit));
-    row.append(about);
-  }
+  // The fold every finished book ends with (block 2 of the seventh brief):
+  // the name the reader may give it instead of the file's (D199), the file's
+  // name said in full - here it is information, not a repeat - and, when
+  // the book wrote one, its attribution: the dictionaries worth having are
+  // Wiktionary-derived and CC BY-SA, and naming their source is the whole of
+  // what that asks for. Folded, not gone - the row stays scannable, the
+  // rarely-used field is not a field per row on a list of hundreds, and the
+  // credit stays one press away, exactly as the dictionary wrote it. An
+  // unfinished book gets none of this: it is still being named by its files.
+  const details = element("details", "dictionary-details");
+  details.append(element("summary", "", t("options_dictionary_details")));
+  details.append(renameField(dictionary));
+  details.append(element("p", "dictionary-file-name", t("options_dictionary_file_name", dictionary.name)));
+  if (dictionary.credit !== null) details.append(element("p", "dictionary-credit", dictionary.credit));
+  row.append(details);
 
   return row;
+}
+
+/**
+ * Everything on a row that says the book's name, said again after the name
+ * changed (block 2 of the seventh brief): the title, the small print (the
+ * file's name stands there only while it differs), the arrows' and Delete's
+ * sentences, and what the filter finds the row by. In place, on the row
+ * that is there: a redraw of the list would shut the fold the name was
+ * typed in and drop the focus on the page's floor.
+ *
+ * @param {HTMLElement} row
+ * @param {import("../lib/dict/store.js").Dictionary} dictionary as the store now has it
+ */
+function refreshRowName(row, dictionary) {
+  const shown = shownName(dictionary);
+  const title = row.querySelector(".dictionary-name");
+  if (title !== null) title.textContent = shown;
+  const meta = row.querySelector(".dictionary-meta");
+  if (meta instanceof HTMLElement) fillDictionaryMeta(meta, dictionary);
+
+  for (const step of [-1, 1]) {
+    const arrow = moveButtonFor(dictionary.id, step);
+    if (arrow === null) continue;
+    const label = moveLabel(dictionary, step);
+    arrow.setAttribute("aria-label", label);
+    arrow.title = label;
+  }
+
+  const remove = row.querySelector("button.model-delete");
+  if (remove instanceof HTMLButtonElement) {
+    const restAria = t("options_delete_dictionary_aria", shown);
+    remove.dataset["name"] = shown;
+    remove.dataset["restAria"] = restAria;
+    // An armed Delete is asking "Sure?" about this very book; its sentence
+    // is rebuilt from the name at the press, and stands down to the rest one.
+    if (!remove.hasAttribute("data-armed")) remove.setAttribute("aria-label", restAria);
+  }
+
+  row.dataset["search"] = dictionarySearchText(dictionary);
+}
+
+/**
+ * What the filter finds a stored book's row by: the pair either way it is
+ * spelled, the file's name, and the name the reader gave it (D199).
+ *
+ * @param {import("../lib/dict/store.js").Dictionary} dictionary
+ * @returns {string}
+ */
+function dictionarySearchText(dictionary) {
+  const own = dictionary.displayName === undefined ? "" : ` ${dictionary.displayName.toLowerCase()}`;
+  return `${searchableText({ from: dictionary.langFrom, to: dictionary.langTo })} ${dictionary.name.toLowerCase()}${own}`;
 }
 
 /**
@@ -1951,9 +2014,10 @@ async function moveDictionary(dictionary, step) {
 
 /**
  * The field a stored dictionary's own name is typed into (D199): the name its
- * groups stand under on the shelf - the panel, the popup, the bubble - in
- * place of what its file calls it. The file's name is the placeholder, so an
- * empty field says what it means; the field stops where the record would cut.
+ * groups stand under on the shelf - the panel, the popup, the bubble - and
+ * the title of its row here, in place of what its file calls it. The file's
+ * name is the placeholder, so an empty field says what it means; the field
+ * stops where the record would cut.
  *
  * Saved when the field is left or Enter is pressed (`change`), not on every
  * keystroke: a name is a decision, and a half-typed one would be a database
@@ -1980,39 +2044,24 @@ function renameField(dictionary) {
   // Held like the arrows while an import writes to this database: the redraw
   // at its end would take a half-typed name with it.
   field.disabled = importing;
-  // What the redraw after a save finds this field by (`focusRename`).
-  field.dataset["rename"] = dictionary.id;
   field.addEventListener("change", () => void renameFromField(dictionary, field));
   line.append(field);
   return line;
 }
 
 /**
- * @param {string} id
- * @returns {HTMLInputElement | null}
- */
-function renameFieldFor(id) {
-  for (const field of document.querySelectorAll("input.dictionary-rename-field")) {
-    if (field instanceof HTMLInputElement && field.dataset["rename"] === id) return field;
-  }
-  return null;
-}
-
-/**
  * What a change of the field does: the typed name, cleaned, becomes the
- * dictionary's own - or, emptied, gives the file's name back. Refused when
- * another dictionary is already shown under it, over the list as the store
- * has it now (a second page may have named one since this list was drawn):
- * the field goes back to what it held and the status line says so. Said in
- * the section's status line, as a move is, because the field is where the
- * name was typed and what became of it belongs next to the list.
+ * dictionary's own - or, emptied, gives the file's name back - and the row
+ * says the new name at once, in place (`refreshRowName`): no redraw, so the
+ * fold stays open and the focus stays in the field, and no sentence in the
+ * status line - the title changing is the answer. Refused when another
+ * dictionary is already shown under it, over the list as the store has it
+ * now (a second page may have named one since this list was drawn): the
+ * field goes back to what it held and the section's status line says why,
+ * since a name that silently came back would read as a broken field.
  *
- * The list is redrawn from the store afterwards, as every row action redraws
- * it - the rows' closures and their search text carry the name - and the
- * field takes the focus back if it had it, so Enter does not drop the reader
- * on the page's floor.
- *
- * @param {import("../lib/dict/store.js").Dictionary} dictionary
+ * @param {import("../lib/dict/store.js").Dictionary} dictionary the row's own
+ *   record, which learns the name so the row's later actions say it too
  * @param {HTMLInputElement} field
  */
 async function renameFromField(dictionary, field) {
@@ -2039,14 +2088,11 @@ async function renameFromField(dictionary, field) {
     return;
   }
 
-  dictionaryStatus(
-    wanted === null
-      ? t("options_dictionary_name_restored", dictionary.name)
-      : t("options_dictionary_renamed", [dictionary.name, wanted]),
-  );
-  const hadFocus = document.activeElement === field;
-  await renderCatalog();
-  if (hadFocus) renameFieldFor(dictionary.id)?.focus();
+  if (wanted === null) delete dictionary.displayName;
+  else dictionary.displayName = wanted;
+  field.value = wanted ?? "";
+  const row = field.closest(".dictionary-row");
+  if (row instanceof HTMLElement) refreshRowName(row, dictionary);
 }
 
 /**
@@ -2154,10 +2200,7 @@ async function renderCatalog() {
       if (row.installed !== null) {
         rendered = renderDictionary(row.installed, { at, total: stored.length });
         at += 1;
-        // Found by the pair either way it is spelled, by the book's own name,
-        // and by the name the reader gave it (D199).
-        const own = row.installed.displayName === undefined ? "" : ` ${row.installed.displayName.toLowerCase()}`;
-        rendered.dataset["search"] = `${searchableText(row)} ${row.installed.name.toLowerCase()}${own}`;
+        rendered.dataset["search"] = dictionarySearchText(row.installed);
       } else if (row.available !== null) {
         rendered = renderCatalogRow(row.available);
         rendered.id = catalogRowId(row.available);
