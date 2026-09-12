@@ -1673,6 +1673,9 @@ function moveButton(dictionary, step, enabled) {
   button.className = "model-move";
   button.textContent = step < 0 ? "↑" : "↓";
   button.disabled = !enabled || importing;
+  // Said twice for the end of the list - the attribute and the state - so
+  // an assistive technology that reads only one of them still hears it.
+  if (button.disabled) button.setAttribute("aria-disabled", "true");
   // What the redraw after a move finds this button by - the row it belonged to
   // is gone by then, so the dictionary and the direction are the address.
   button.dataset["move"] = dictionary.id;

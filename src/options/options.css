@@ -592,14 +592,20 @@ button.model-move {
 
 /* At the ends of the list the arrow stays in place rather than vanishing: a
    row whose buttons come and go moves the Delete under a finger already on
-   its way down. Dimmed enough to read as unavailable, not as missing - and
-   the hover is spelled out because the page's own disabled-button rule would
-   otherwise draw a frame around an arrow that does nothing. */
+   its way down. Unavailable is said with the separator lines' own ink, not
+   with a thinner version of the glyph's (block 3 of the seventh brief): on
+   e-ink, posterised to sixteen greys, the muted glyph and the frame's token
+   fall one step apart in the light and sepia palettes while the line's
+   token stands three to five steps away - and a solid colour stays crisp
+   where a translucent one dithers. The hover is spelled out because the
+   page's own disabled-button rule would otherwise draw a frame around an
+   arrow that does nothing. */
 .model-move:disabled,
 .model-move:disabled:hover {
   border-color: transparent;
   background: none;
-  opacity: 0.35;
+  color: var(--page-line);
+  opacity: 1;
 }
 
 /* Delete asks with a second press, so it dresses down at rest: no border,
