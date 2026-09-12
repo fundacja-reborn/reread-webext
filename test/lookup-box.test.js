@@ -233,7 +233,7 @@ describe("the look-up field", () => {
     assert.match(box, /if \(readOnly\) answer\.dataset\["readonly"\] = "true";/, "the answer does not say it only reads");
     const styles = await source("assets/page.css");
     assert.match(styles, /\.lookup-answer\[data-readonly="true"\] \.lookup-line \{\s*cursor: default;/, "a read-only row invites a press");
-    assert.match(styles, /\.lookup-line-box,\s*\.lookup-line-mark \{\s*flex: none;\s*width: var\(--lookup-box-size, 20px\);/, "the tick does not stand in the box's column");
+    assert.match(styles, /\.lookup-line > \.lookup-line-box,\s*\.lookup-line > \.lookup-line-mark \{\s*flex: none;\s*width: var\(--lookup-box-size, 20px\);/, "the tick does not stand in the box's column");
   });
 });
 
@@ -352,7 +352,10 @@ describe("the saved-phrases page's fold", () => {
     // correction down to the middle of the x-height - the reading size's
     // eleventh, from Georgia's metrics, a px value per size (a constant
     // missed by over a pixel at the top of the Aa range).
-    assert.match(page, /\.lookup-line-box,\s*\.lookup-line-mark \{[\s\S]*?margin: calc\(\(var\(--lookup-line-height, 1\.6em\) - var\(--lookup-box-size, 20px\)\) \/ 2 \+ var\(--lookup-check-offset, 0\.11em\)\) 0 0;/, "the box's margin is a constant, not half the line's excess, or without the optical correction");
+    // As the row's child: the pages' `input[type="checkbox"] { margin: 0 }`
+    // outranks a lone class, and under it the margin was never applied.
+    assert.match(page, /\.lookup-line > \.lookup-line-box,\s*\.lookup-line > \.lookup-line-mark \{[\s\S]*?margin: calc\(\(var\(--lookup-line-height, 1\.6em\) - var\(--lookup-box-size, 20px\)\) \/ 2 \+ var\(--lookup-check-offset, 0\.11em\)\) 0 0;/, "the box's margin is a constant, not half the line's excess, without the optical correction, or outranked by the checkbox rule");
+    assert.doesNotMatch(page, /^\.lookup-line-box,\s*\.lookup-line-mark \{/m, "the margin rule is a lone class the checkbox rule outranks");
     assert.match(page, /\.lookup-line-mark \{\s*line-height: var\(--lookup-box-size, 20px\);\s*text-align: center;/, "the tick is not centred in the box's own square");
     assert.match(vocab, /--lookup-check-offset: calc\(var\(--reader-size, 18px\) \* 0\.11\);/, "the correction does not follow the reading size");
     assert.match(vocab, /:root \{\s*--phrase-line-height: 1\.45;/, "the rows' line-height is not a token");

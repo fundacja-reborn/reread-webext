@@ -1022,9 +1022,17 @@ button.lookup-show {
    in as tokens from the home - the phrases page sets them from the
    reading size the Aa panel chose - and fall back to the interface line
    box and its own eleventh here, where `em` is the box's inherited size,
-   which in the popup is the text's size too. */
-.lookup-line-box,
-.lookup-line-mark {
+   which in the popup is the text's size too.
+
+   Written as the row's child on purpose: the pages' own checkbox rule
+   above (`input[type="checkbox"] { margin: 0 }`) outranks a lone class,
+   and under it the box sat at the top of its row at every size - the
+   margin was never applied (measured in Brave, 2026-09-12). Two classes
+   outrank the attribute. With the margin in force the box's centre lands
+   on the x-height's middle within a third of a pixel from 14px to 28px,
+   Georgia's x-height read off a canvas. */
+.lookup-line > .lookup-line-box,
+.lookup-line > .lookup-line-mark {
   flex: none;
   width: var(--lookup-box-size, 20px);
   height: var(--lookup-box-size, 20px);
