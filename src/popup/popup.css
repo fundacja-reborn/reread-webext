@@ -73,13 +73,14 @@ body[data-os="android"] .popup-row {
   overflow-wrap: anywhere;
 }
 
-/* The checkbox rows: the switch stays a switch, whatever the label does. */
+/* The checkbox rows: the switch stays a switch, whatever the label does. Its
+   tick is in the text's ink like every checkbox of the extension (page.css,
+   D202) - no accent of its own here. */
 .popup-site input,
 .popup-reader-only input,
 .popup-no-translation input {
   flex: none;
   margin: 0;
-  accent-color: var(--page-accent);
 }
 
 .popup-pair select {

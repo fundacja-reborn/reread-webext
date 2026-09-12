@@ -242,9 +242,14 @@ select {
   font-size: 0.9rem;
 }
 
+/* Every checkbox of the extension ticks in the text's own ink (D202): the
+   look-up answer's boxes took it first (the sixth brief - `currentColor`
+   inside the shelf, where the bubble has no page tokens), and a switch in
+   the popup or the settings ticking in the accent beside them read as two
+   kinds of checkbox. One token here, no override per page. */
 input[type="checkbox"] {
   margin: 0;
-  accent-color: var(--page-accent);
+  accent-color: var(--page-fg);
 }
 
 .status:empty {
