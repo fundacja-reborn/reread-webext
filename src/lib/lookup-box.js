@@ -494,10 +494,11 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
    * count is not said: paragraphs are nothing to tick.
    *
    * @param {import("./lookup.js").EntryGroup[]} groups
-   * @returns {HTMLElement}
+   * @returns {HTMLElement[]} one fold per book, for the shelf
    */
   function books(groups) {
-    const entries = element("div", "lookup-entries");
+    /** @type {HTMLElement[]} */
+    const shelf = [];
     for (const [at, group] of groups.entries()) {
       const summary = element("summary", "lookup-group-label");
       summary.append(element("span", "lookup-entry-dict", group.dictionary));
@@ -534,9 +535,9 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
       // The rest of the lines, then the button: the book's last child, so
       // the rows unfold above it and it stays where it is in both states.
       if (more !== null) book.append(more.rest, more.toggle);
-      entries.append(book);
+      shelf.push(book);
     }
-    return entries;
+    return shelf;
   }
 
   /**
@@ -754,19 +755,19 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
     } else if (state.outcome?.kind === "silence") {
       const words = keyTokens(state.phrase.normalized).length;
       answer.append(verdictLine(verdictParts(state.outcome.note, state.outcome.lang, words)));
-    } else if (state.outcome?.kind === "entries") {
-      answer.append(books(entryGroups(state.outcome.entries, state.phrase.normalized)));
     }
 
-    // Last, where the field writes: the reader's own meanings and the field
-    // for the next one - once the books have answered, whatever they said.
-    if (!readOnly && !state.pending) {
-      const lines =
-        state.outcome?.kind === "entries"
-          ? entryGroups(state.outcome.entries, state.phrase.normalized).flatMap((group) => group.lines)
-          : [];
-      answer.append(ownSection(lines));
-    }
+    // The books and, where the field writes, the reader's own meanings
+    // last - once the books have answered, whatever they said - in one
+    // column with one separator between any two of them (the stylesheet),
+    // so the space between the last book and "Your own" is the space
+    // between two books (block 4 of the polish round).
+    const groups =
+      state.outcome?.kind === "entries" ? entryGroups(state.outcome.entries, state.phrase.normalized) : [];
+    const shelf = element("div", "lookup-entries");
+    shelf.append(...books(groups));
+    if (!readOnly && !state.pending) shelf.append(ownSection(groups.flatMap((group) => group.lines)));
+    if (shelf.childElementCount > 0) answer.append(shelf);
 
     if (state.error.length > 0) {
       const line = element("p", "lookup-note", state.error);

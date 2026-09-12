@@ -101,7 +101,7 @@ describe("the look-up field", () => {
     const render = bodyOf(box, "render");
     const at = (/** @type {string} */ marker) => render.indexOf(marker);
     assert.ok(at('"lookup-head"') !== -1 && at('"lookup-head"') < at('"lookup-kept"'), "the phrase is not at the head");
-    assert.ok(at('"lookup-kept"') < at("books(entryGroups("), "the books stand before what the phrase means");
+    assert.ok(at('"lookup-kept"') < at("books(groups)"), "the books stand before what the phrase means");
     // The standing at the head's far end, for a saved phrase only: the
     // count, and the way to the phrase's own row where the home has a list.
     assert.match(render, /if \(state\.meanings\.length > 0\) head\.append\(standing\(state\.phrase\)\)/, "the standing stands for an unsaved phrase, or not at all");
@@ -117,7 +117,15 @@ describe("the look-up field", () => {
 
   it("folds the books: one fold per book, the first open, the rest of a long book under Show all", async () => {
     const box = await source("lib/lookup-box.js");
-    assert.match(bodyOf(box, "render"), /books\(entryGroups\(state\.outcome\.entries, state\.phrase\.normalized\)\)/, "the entries are not grouped by book");
+    const render = bodyOf(box, "render");
+    assert.match(render, /entryGroups\(state\.outcome\.entries, state\.phrase\.normalized\)/, "the entries are not grouped by book");
+    // The books and "Your own" on one shelf, parted by one separator rule -
+    // the space between the last book and "Your own" is the space between
+    // two books (block 4 of the polish round).
+    assert.match(render, /shelf\.append\(\.\.\.books\(groups\)\);\s*if \(!readOnly && !state\.pending\) shelf\.append\(ownSection\(/, "Your own stands off the shelf");
+    assert.match(await source("assets/page.css"), /\.lookup-entries > \* \+ \* \{\s*border-top: 1px solid var\(--page-line\);/, "the shelf has no one separator rule");
+    assert.match(await source("assets/page.css"), /\.lookup-own \{\s*margin: 0;\s*\}/, "Your own keeps a margin of its own over the separator");
+    assert.match(await source("assets/page.css"), /\.lookup-group-label,\s*\.lookup-own-label \{[\s\S]*?min-height: 44px;\s*margin: 0;\s*padding: 0 0\.35rem;/, "Your own's label is not the book's line");
     const shelf = bodyOf(box, "books");
     assert.match(shelf, /fold\("lookup-group", `group:\$\{group\.dictionary\}`, at === 0, summary\)/, "the first book is not the one open by default, or a book is no fold");
     assert.match(shelf, /if \(!readOnly\) summary\.append\(` \(\$\{group\.lines\.length\.toLocaleString\(\)\}\)`\)/, "the fold's name carries no count where lines are ticked, or one where they are prose");
@@ -153,8 +161,8 @@ describe("the look-up field", () => {
     const render = bodyOf(box, "render");
     // Last, where the field writes, once the books have answered - whatever
     // they said: the way in for a word no book knows.
-    assert.match(render, /if \(!readOnly && !state\.pending\) \{[\s\S]*?answer\.append\(ownSection\(lines\)\)/, "the section stands in the popup, or before the books have answered");
-    assert.ok(render.indexOf("books(entryGroups(") < render.indexOf("ownSection(lines)"), "Your own stands before the books");
+    assert.match(render, /if \(!readOnly && !state\.pending\) shelf\.append\(ownSection\(groups\.flatMap\(\(group\) => group\.lines\)\)\)/, "the section stands in the popup, or before the books have answered");
+    assert.ok(render.indexOf("books(groups)") < render.indexOf("ownSection("), "Your own stands before the books");
     const section = bodyOf(box, "ownSection");
     assert.match(section, /ownMeanings\(state\.meanings, lines\)\.entries\(\)[\s\S]*?lineRow\(meaning, `own:\$\{at\}`\)/, "an own meaning is not a row to untick, or a book's line stands here twice");
     assert.match(section, /input\.value = state\.ownDraft;/, "a redraw after a tick eats what was typed");
@@ -303,7 +311,7 @@ describe("the saved-phrases page's fold", () => {
     const panel = (await source("assets/page.css")).slice((await source("assets/page.css")).indexOf("/* --- the look-up field"), (await source("assets/page.css")).indexOf("/* --- the colophon"));
     assert.doesNotMatch(panel, /#[0-9a-f]{3,8}\b/i, "the panel paints a colour of its own outside the tokens");
     assert.doesNotMatch(panel, /transition|animation/, "the panel eases something in");
-    assert.match(panel, /\.lookup-group \+ \.lookup-group \{\s*border-top: 1px solid var\(--page-line\)/, "the books are not parted by the separator token");
+    assert.match(panel, /\.lookup-entries > \* \+ \* \{\s*border-top: 1px solid var\(--page-line\)/, "the books are not parted by the separator token");
     assert.match(panel, /\.lookup-own-input \{[\s\S]*?border: 1px solid var\(--page-border\)/, "the own field's edge is not the control token");
   });
 

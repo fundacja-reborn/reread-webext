@@ -915,22 +915,31 @@ button.lookup-show {
   margin-top: 0.6rem;
 }
 
-.lookup-group + .lookup-group {
+/* One separator between any two things on the shelf - a book and the next,
+   the last book and "Your own" - and no margin on either side of it: the
+   space around a separator is the 44px line of the name under it and the
+   rows' own padding above, the same for every pair. */
+.lookup-entries > * + * {
   border-top: 1px solid var(--page-line);
 }
 
-/* The fold's line is the book's name: 44px to press, the marker in the
-   muted voice with it. */
-.lookup-group-label {
+/* The fold's line is the book's name, and "Your own" wears the same line:
+   44px, the small uppercase label, the marker in the muted voice. */
+.lookup-group-label,
+.lookup-own-label {
   display: flex;
   align-items: center;
   gap: 0.4rem;
   min-height: 44px;
+  margin: 0;
   padding: 0 0.35rem;
   font-size: 0.78rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--page-muted);
+}
+
+.lookup-group-label {
   cursor: pointer;
 }
 
@@ -1011,25 +1020,17 @@ button.lookup-show {
   font-weight: 600;
 }
 
-/* The reader's own meanings, last in the answer (block 4): the same
-   uppercase label as a book's fold, the same rows, and under them the
-   field for the next meaning with Save beside it on one line - the field
-   in the look-up field's own dress. */
+/* The reader's own meanings, last on the shelf (block 4): the same label
+   as a book's fold (above), the same rows, and under them the field for
+   the next meaning with Save beside it on one line - the field in the
+   look-up field's own dress. No margin and no line of its own: the shelf's
+   one separator parts it from the last book. */
 .lookup-own {
-  margin-top: 0.6rem;
-  border-top: 1px solid var(--page-line);
+  margin: 0;
 }
 
 .lookup-own-label {
-  display: flex;
-  align-items: center;
-  min-height: 44px;
-  padding: 0 0.35rem;
-  font-size: 0.78rem;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--page-muted);
 }
 
 .lookup-own-form {
