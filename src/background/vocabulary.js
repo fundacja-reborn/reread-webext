@@ -21,7 +21,8 @@ import { chosenPair, readConfig } from "../lib/config.js";
 import { ErrorCode, fail, ok } from "../lib/protocol.js";
 import { ensureBackup, rebuildBackup, restoreVocabulary } from "../lib/store/backup.js";
 import { migrateSemicolonsOnce, sweepSemicolonBackup } from "../lib/store/semicolon-migration.js";
-import { mirrorOf, writeMirror } from "../lib/store/mirror.js";
+import { mirrorWithForms } from "../lib/store/forms.js";
+import { writeMirror } from "../lib/store/mirror.js";
 import { buildPhrase } from "../lib/store/phrase.js";
 import { deletePhrase, listPhrases, putMissingPhrases, putPhrase } from "../lib/store/vocab.js";
 
@@ -44,13 +45,17 @@ function pairOf(config) {
  * written: pages match it against the pairless settings and stay quiet,
  * instead of reading its absence as "ask the background", forever.
  *
+ * The other forms of the words ride along (D208, `lib/store/forms.js`):
+ * computed from the dictionaries for the words the standing mirror does not
+ * have them for, and only while the switch asks for them.
+ *
  * @param {import("../lib/config.js").Config} config
  * @returns {Promise<import("../lib/protocol.js").VocabEntry[]>}
  */
 async function rebuildMirror(config) {
   const pair = pairOf(config);
   const phrases = pair === null ? [] : await listPhrases(pair);
-  const mirror = mirrorOf(config, phrases);
+  const mirror = await mirrorWithForms(config, phrases);
   await writeMirror(mirror);
   return mirror.entries;
 }
@@ -221,7 +226,11 @@ export async function importPhrases(request) {
  * The repair path. A page asks for this when the mirror it found describes a
  * different language pair than the one being read, and the answer doubles as
  * the rebuild - settled first, so a page asking after a deletion gets the
- * vocabulary back rather than an honest nothing.
+ * vocabulary back rather than an honest nothing. The settings page asks for
+ * it too, for the rebuild alone (D208): when the switch for the other forms
+ * is turned on, and when a dictionary comes or goes while it is on - the
+ * forms come out of the dictionaries, and the dictionaries change on that
+ * page, where no storage event says so.
  *
  * @returns {Promise<import("../lib/protocol.js").Result<import("../lib/protocol.js").VocabEntry[]>>}
  */

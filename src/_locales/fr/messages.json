@@ -64,6 +64,10 @@
     "message": "Sera enregistré dans la paire de langues active : $PAIR$",
     "placeholders": { "pair": { "content": "$1", "example": "anglais → polonais" } }
   },
+  "bubble_saved_word": {
+    "message": "Mot enregistré : $WORD$",
+    "placeholders": { "word": { "content": "$1", "example": "read" } }
+  },
   "bubble_choose_meaning": { "message": "Appuyez sur un sens pour l'enregistrer" },
   "bubble_speak": { "message": "Lire à voix haute" },
   "bubble_sentence_collapse": { "message": "Réduire la phrase" },
@@ -1032,6 +1036,10 @@
   "options_bubble_more": { "message": "Afficher tout de suite la phrase et les entrées du dictionnaire" },
   "options_bubble_more_hint": {
     "message": "Après la sélection d'un texte, la bulle affiche tout de suite ce qui n'apparaît autrement qu'après un appui sur « Plus » : la phrase traduite et les entrées du dictionnaire. À garder activé avec un dictionnaire installé - un modèle de traduction se trompe souvent sur un mot isolé, et le dictionnaire montre ce qu'il veut vraiment dire. La bulle au-dessus d'une expression déjà enregistrée n'affiche que la traduction enregistrée - la phrase et les entrées du dictionnaire apparaissent après un appui sur « Plus »."
+  },
+  "options_underline_forms": { "message": "Souligner aussi les autres formes des mots enregistrés" },
+  "options_underline_forms_hint": {
+    "message": "Un mot enregistré est aussi souligné sous ses autres formes : après l'enregistrement de « read », « reads » et « reading » sont soulignés eux aussi, et la bulle au-dessus montre ce que vous avez enregistré pour « read ». Les formes qui comptent sont décidées par votre dictionnaire de la langue lue - il doit donc être installé. Pour l'instant, seulement quand vous lisez en anglais. Désactivé, seule la forme exacte que vous avez enregistrée est soulignée."
   },
   "options_no_translation": { "message": "Utiliser sans modèle de traduction" },
   "options_no_translation_hint": {

@@ -43,7 +43,7 @@ import { dictionarySourcesLink } from "../lib/sources.js";
 import { ErrorCode, Message, asLookUp, asResult, asTranslation, fail } from "../lib/protocol.js";
 import { copyCombo, keeping, madeSelection, touchPointer } from "../lib/selection.js";
 import { sentenceAround } from "../lib/sentence.js";
-import { MIRROR_KEY, asMirror, mirrorMatches } from "../lib/store/mirror.js";
+import { MIRROR_KEY, asMirror, formAliases, mirrorMatches } from "../lib/store/mirror.js";
 import { canSpeakLang, primaryLanguage, setSpeechOff, speak, speaking, stop as stopSpeaking } from "../lib/tts.js";
 import { clear, mark, paint, phraseAt, unmark } from "./highlighter.js";
 import { blockTextAround, findable } from "./scan.js";
@@ -57,17 +57,35 @@ import { createTooltip } from "./tooltip.js";
 let vocabulary = new Map();
 
 /**
+ * The other forms of the saved words, as the page matches them (D208): a
+ * form to the key it stands for, from the mirror's `forms` while the switch
+ * is on and empty otherwise. `reading` on the page is found under `read`,
+ * and everything the bubble it opens does - the meanings, Learned, Edit - is
+ * `read`'s.
+ * @type {Map<string, string>}
+ */
+let aliases = new Map();
+
+/** The switch for the forms (D208), read with the rest of the settings. */
+let underlineForms = false;
+
+/**
  * What the bubble is about right now, in the form the page had it - and whether
  * the vocabulary may be written for it at all. A phrase earns that either by
  * being findable on a page (`findable` in `scan.js`) or by already being saved,
  * and nothing else gets in: not Save, and not a dictionary line either.
  */
 /**
+ * `stored` is the phrase as the vocabulary is written to - the page's own
+ * text, except over a form of a saved word (D208), where it is the saved
+ * word: a Learned over `reading` forgets `read`, and an edit rewrites
+ * `read`'s meanings, while `text` stays the page's `reading` for the
+ * speaker, the clipboard and the sentence More translates.
  * `lang` is what the page declares for the phrase (D165, `declaredLanguage`),
  * reported to whoever looks it up; `answered` is the language a dictionary
  * then knew it in (D191) - empty until an answer with entries lands, and
  * gone with the phrase, which is why it lives here and not beside it.
- * @type {{ text: string, normalized: string, keepable: boolean, lang: string, answered: string } | null}
+ * @type {{ text: string, stored: string, normalized: string, keepable: boolean, lang: string, answered: string } | null}
  */
 let current = null;
 
@@ -717,14 +735,34 @@ async function ask(request) {
 
 /**
  * @param {VocabEntry[]} entries
+ * @param {Record<string, string[]>} [forms] the other forms of the words, as
+ *   the mirror carries them (D208) - none from a background's answer, which
+ *   is the list alone
  */
-function adopt(entries) {
+function adopt(entries, forms = {}) {
   // Stopped while the read was in flight - the popup's switch can land between
   // a page loading and its vocabulary arriving. Painting now would put
   // underlines, and an observer, on a page that was just switched off.
   if (!started) return;
   vocabulary = new Map(entries);
+  // Only while the switch says so: the mirror may still carry forms written
+  // before it was turned off, and a stored value the switch has disowned
+  // must never act.
+  aliases = underlineForms ? formAliases(entries, forms) : new Map();
   repaint();
+}
+
+/**
+ * What the page is scanned for: every saved key, and every form that stands
+ * for a key still saved. A Learned press takes a key out of `vocabulary`
+ * before the mirror says so, and its forms have to go with it.
+ *
+ * @returns {string[]}
+ */
+function paintedKeys() {
+  const keys = [...vocabulary.keys()];
+  for (const [form, key] of aliases) if (vocabulary.has(key)) keys.push(form);
+  return keys;
 }
 
 /**
@@ -734,7 +772,7 @@ function adopt(entries) {
  */
 function repaint() {
   if (vocabulary.size === 0) clear();
-  else paint(vocabulary.keys(), { root: root ?? document.body, observe: follow, weight: underline });
+  else paint(paintedKeys(), { root: root ?? document.body, observe: follow, weight: underline });
 }
 
 /**
@@ -764,6 +802,9 @@ async function loadVocabulary(preloaded) {
     // flipping the switch in the popup reaches every open page on the spot.
     hideActions = config.hideBubbleActions;
     showMore = config.showBubbleMore;
+    // Read before the mirror is adopted below: `adopt` asks it whether the
+    // mirror's forms may be matched at all (D208).
+    underlineForms = config.underlineForms;
     // Repainted below with every other change this read carries: the weight
     // is a registration name, so a new one is a repaint, not a restyle (D130).
     underline = config.underline;
@@ -804,13 +845,20 @@ async function loadVocabulary(preloaded) {
       return;
     }
     if (mirrorMatches(mirror, config)) {
-      adopt(mirror.entries);
+      adopt(mirror.entries, mirror.forms);
       return;
     }
 
     /** @type {import("../lib/protocol.js").Result<VocabEntry[]>} */
     const result = await ask({ kind: Message.LIST_PHRASES });
-    if (result.ok) adopt(result.value);
+    if (!result.ok) return;
+    // The answer doubles as the rebuild (`listVocabulary`): the mirror was
+    // written before the answer came, and the forms (D208) travel only in
+    // the mirror - so it is read once more, and the answer's own list stands
+    // in only if the mirror still describes another pair.
+    const rebuilt = asMirror((await webext().storage.local.get(MIRROR_KEY))[MIRROR_KEY]);
+    if (rebuilt !== null && mirrorMatches(rebuilt, config)) adopt(rebuilt.entries, rebuilt.forms);
+    else adopt(result.value);
   } catch {
     // Storage unreachable: the page keeps working, nothing is underlined, and
     // the next change to the vocabulary tries again.
@@ -1011,8 +1059,8 @@ async function onAction(action, meanings) {
  * here too is what makes the underline appear in the paragraph being read
  * rather than a beat later.
  *
- * @param {(phrase: { text: string, normalized: string }) => Promise<import("../lib/protocol.js").Result<null>>} write
- * @param {(phrase: { text: string, normalized: string }) => void} remember
+ * @param {(phrase: { text: string, stored: string, normalized: string }) => Promise<import("../lib/protocol.js").Result<null>>} write
+ * @param {(phrase: { text: string, stored: string, normalized: string }) => void} remember
  * @param {import("./tooltip.js").Action[] | null} next what the bubble offers once it
  *   worked, or `null` when the answer was the end of the exchange
  */
@@ -1058,7 +1106,7 @@ async function change(write, remember, next) {
  */
 async function keep(meanings, next) {
   await change(
-    (phrase) => ask({ kind: Message.SAVE_PHRASE, text: phrase.text, translations: meanings }),
+    (phrase) => ask({ kind: Message.SAVE_PHRASE, text: phrase.stored, translations: meanings }),
     (phrase) => {
       // A save that lands replaces the chain's earlier automatic keep (D81):
       // that step was scaffolding for the phrase it grew into, and leaving it
@@ -1093,7 +1141,7 @@ async function keep(meanings, next) {
  */
 async function forget() {
   await change(
-    (phrase) => ask({ kind: Message.FORGET_PHRASE, text: phrase.text }),
+    (phrase) => ask({ kind: Message.FORGET_PHRASE, text: phrase.stored }),
     (phrase) => vocabulary.delete(phrase.normalized),
     null,
   );
@@ -1114,7 +1162,11 @@ async function forget() {
  * @returns {boolean} whether it was known
  */
 function showSaved(anchor, text, normalized, context, how = {}) {
-  const meanings = vocabulary.get(normalized);
+  // A form of a saved word (D208) is that word's: the bubble is about the
+  // key, and the page's word is only where the bubble stands - reached by a
+  // press on the underline or by selecting the form afresh alike.
+  const key = aliases.get(normalized) ?? normalized;
+  const meanings = vocabulary.get(key);
   if (meanings === undefined) return false;
 
   // The bubble is reused from phrase to phrase without passing through hide,
@@ -1124,7 +1176,8 @@ function showSaved(anchor, text, normalized, context, how = {}) {
   // so its meanings may be corrected from anywhere, however it was reached.
   current = {
     text,
-    normalized,
+    stored: key === normalized ? text : key,
+    normalized: key,
     keepable: true,
     lang: how.range === undefined ? "" : declaredLanguage(how.range),
     answered: "",
@@ -1162,6 +1215,9 @@ function showSaved(anchor, text, normalized, context, how = {}) {
     body: meanings.join("\n"),
     actions: [...kept(), ...secondLayer],
     phrase: text,
+    // Named only over a form (D208): the one time the bubble has to say
+    // which saved word it answers with, because the page shows another.
+    savedWord: key === normalized ? "" : key,
     folded: hideActions,
     touch: how.touch === true,
     // Not `how.touch`, which a tap on an underline honestly lacks - the
@@ -1366,7 +1422,7 @@ function present(selection, { deliberate, touch, chain = false }) {
   if (noTranslation && !quietVocabulary) {
     stopSpeaking();
     unmark();
-    current = { text, normalized, keepable: false, lang: selection.lang, answered: "" };
+    current = { text, stored: text, normalized, keepable: false, lang: selection.lang, answered: "" };
     secondLayer = [];
     unfetched = null;
     anchorRange = selection.range.cloneRange();
@@ -1414,7 +1470,7 @@ function present(selection, { deliberate, touch, chain = false }) {
   if (noTranslation) {
     stopSpeaking();
     unmark();
-    current = { text, normalized, keepable: selection.findable, lang: selection.lang, answered: "" };
+    current = { text, stored: text, normalized, keepable: selection.findable, lang: selection.lang, answered: "" };
     secondLayer = [];
     unfetched = null;
     anchorRange = selection.range.cloneRange();
@@ -1451,7 +1507,7 @@ function present(selection, { deliberate, touch, chain = false }) {
   // A fresh selection marks itself; a recall mark left over from the last
   // phrase may not keep pointing at it (D89).
   unmark();
-  current = { text, normalized, keepable: selection.findable, lang: selection.lang, answered: "" };
+  current = { text, stored: text, normalized, keepable: selection.findable, lang: selection.lang, answered: "" };
   secondLayer = [];
   unfetched = null;
   anchorRange = selection.range.cloneRange();

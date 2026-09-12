@@ -136,6 +136,17 @@ export const CONFIG_KEY = "config";
  *   bubble over an underline is the reader's own saved meaning, and its layer
  *   stays behind More, fetched on that press (D27). Only a stored `false` is
  *   somebody having turned it off.
+ * @property {boolean} underlineForms Whether a saved word is underlined in
+ *   its other forms as well (D208): `read` in `reads` and `reading`, and the
+ *   bubble over any of them is `read`'s. Off by default, and the README's
+ *   "matching is literal" holds while it is: a form is a guess by rule
+ *   (`dict/deinflect.js`) that an installed dictionary of the language
+ *   confirmed (`dict/forms.js`), and a wrong guess is an underline over a
+ *   word the reader never saved. English only for now - the one language
+ *   with rules - and nothing without a dictionary for it: the forms come
+ *   out of the dictionary, never out of the rules alone. They live in the
+ *   pages' mirror (`store/mirror.js`), computed by the background as it
+ *   rebuilds it, and the pages read them only while this is on.
  * @property {Record<string, string>} ttsVoices Which voice reads a language
  *   aloud (D83): source language to the `voiceURI` chosen for it. Per language
  *   rather than per pair - the voice picked for `en` serves every pair read in
@@ -273,6 +284,7 @@ export const DEFAULTS = Object.freeze({
   libraryCopy: null,
   hideBubbleActions: false,
   showBubbleMore: true,
+  underlineForms: false,
   ttsVoices: {},
   ttsRate: 100,
   ttsOff: false,
@@ -454,6 +466,10 @@ export function withDefaults(stored) {
     // folded the layer away.
     showBubbleMore:
       typeof raw["showBubbleMore"] === "boolean" ? raw["showBubbleMore"] : DEFAULTS.showBubbleMore,
+    // Off unless a stored `true` says otherwise (D208): an underline over a
+    // word nobody saved is the wrong direction to fall in.
+    underlineForms:
+      typeof raw["underlineForms"] === "boolean" ? raw["underlineForms"] : DEFAULTS.underlineForms,
     ttsVoices: voiceMap(raw["ttsVoices"]),
     ttsRate: within(raw["ttsRate"], TTS_RATE, DEFAULTS.ttsRate),
     // As `translationOff`: only a stored boolean is a choice, and a profile
@@ -516,6 +532,7 @@ export async function readConfig() {
  * @property {boolean} [libraryCopy]
  * @property {boolean} [hideBubbleActions]
  * @property {boolean} [showBubbleMore]
+ * @property {boolean} [underlineForms]
  * @property {Record<string, string>} [ttsVoices]
  * @property {number} [ttsRate]
  * @property {boolean} [ttsOff]

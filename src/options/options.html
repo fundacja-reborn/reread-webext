@@ -403,6 +403,26 @@
           "More".
         </p>
       </div>
+      <!-- The other forms of a saved word (D208): `read` underlined in
+           `reads` and `reading` too, with the bubble over them `read`'s. Off
+           by default - the README's "matching is literal" holds until it is
+           turned on - and not `translation-only`: the underlines are the
+           quiet vocabulary's as much as the model's (D162). Which forms count
+           is the installed dictionary's word, never the rules' alone, and for
+           now only English has rules; the hint says both. -->
+      <div class="row">
+        <label class="row-toggle">
+          <span class="row-name" data-i18n="options_underline_forms">Underline other forms of saved words</span>
+          <input type="checkbox" id="underline-forms" />
+        </label>
+        <p class="row-note" data-fold data-i18n="options_underline_forms_hint">
+          A saved word is underlined in its other forms too: save "read", and "reads" and "reading"
+          are underlined as well - the bubble over them shows what you saved for "read". Which forms
+          count is decided by your dictionary for the language you read, so one has to be installed.
+          For now only when you read English. Switched off, only the exact form you saved is
+          underlined.
+        </p>
+      </div>
       <!-- The bubble's one size knob (D85): the bubble deliberately ignores
            every page it stands on, so no page setting can reach it - and
            built-in sizes land differently on different screens (an e-ink

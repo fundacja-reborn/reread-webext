@@ -19,7 +19,7 @@
 
 import { keyTokens } from "../matcher/tokenize.js";
 import { normalize } from "../normalize.js";
-import { baseForms } from "./deinflect.js";
+import { RULED_LANGUAGE, baseForms } from "./deinflect.js";
 import { lookupEntries } from "./store.js";
 
 /**
@@ -28,13 +28,6 @@ import { lookupEntries } from "./store.js";
  * and no dictionary has an entry for it anyway.
  */
 const MAX_WORDS = 4;
-
-/**
- * The one language whose word endings this build knows. Everything else asks
- * for what was selected and takes what it gets - a wrong guess in a language we
- * do not know would find a real entry for a word nobody selected.
- */
-const DEINFLECTED = "en";
 
 /**
  * The keys a phrase is asked under, or null when it is not a dictionary
@@ -56,7 +49,7 @@ export function lookupKeys(text, langFrom) {
   const words = keyTokens(key);
   if (words.length === 0 || words.length > MAX_WORDS) return null;
 
-  const others = words.length === 1 && langFrom === DEINFLECTED ? baseForms(key) : [];
+  const others = words.length === 1 && langFrom === RULED_LANGUAGE ? baseForms(key) : [];
   return [key, ...others];
 }
 

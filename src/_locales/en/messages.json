@@ -100,6 +100,11 @@
     "description": "The bubble's note when Save would file a phrase of another language than the pair's - a Polish word on a Polish page under English → Polish (D167, D193). Names the active pair as such (Michał's ask, 2026-09-11): a bare pair under a Polish word read as a mistake. The pair stands after the colon as a label, so the sentence must read on into a name.",
     "placeholders": { "pair": { "content": "$1", "example": "English → Polish" } }
   },
+  "bubble_saved_word": {
+    "message": "Saved word: $WORD$",
+    "description": "One quiet line above the meanings in the bubble over an underline that is another form of a saved word (D208): the page shows reading, the meanings are read's, and this names read. $WORD$ is the saved word as stored - lower case, one word.",
+    "placeholders": { "word": { "content": "$1", "example": "read" } }
+  },
   "bubble_choose_meaning": {
     "message": "Press a meaning to save it",
     "description": "The bubble's note line after Save is pressed while no meaning is chosen yet (the dictionaries-only bubble): a line of a dictionary entry is the thing to press. Neutral about the pointer - it is read under a finger and under a mouse alike - and short, because the note line is one line also with the bubble text enlarged."
@@ -1301,6 +1306,14 @@
   "options_bubble_more_hint": {
     "message": "When you select text, the bubble shows right away what is otherwise shown only after a press on \"More\": the translated sentence and the dictionary entries. Worth keeping on with a dictionary installed - a translation model often gets a single word wrong, and the dictionary shows what it really means. The bubble over an already saved phrase shows only the saved translation - the sentence and the dictionary entries appear after you press \"More\".",
     "description": "Quotes the bubble_more button - each language quotes its own wording of that key, so they must move together. The last sentence is the promise that the bubble over an underline (a saved phrase) is not changed by the switch."
+  },
+  "options_underline_forms": {
+    "message": "Underline other forms of saved words",
+    "description": "Checkbox label on the settings page (D208): a saved word is underlined in its other forms as well - read in reads and reading - when an installed dictionary of the language confirms them. Off by default."
+  },
+  "options_underline_forms_hint": {
+    "message": "A saved word is underlined in its other forms too: save \"read\", and \"reads\" and \"reading\" are underlined as well - the bubble over them shows what you saved for \"read\". Which forms count is decided by your dictionary for the language you read, so one has to be installed. For now only when you read English. Switched off, only the exact form you saved is underlined.",
+    "description": "The example words read, reads and reading are English and stay English in every language: they are the forms the rules know. The last sentence is the promise the README makes - matching is literal unless this is on."
   },
   "options_no_translation": { "message": "Use without a translation model" },
   "options_no_translation_hint": {

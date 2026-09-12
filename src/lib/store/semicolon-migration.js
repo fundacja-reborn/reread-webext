@@ -39,7 +39,8 @@ import { lookupEntries } from "../dict/store.js";
 import { entryGroups } from "../lookup.js";
 import { splitMeanings } from "../meanings.js";
 import { rebuildBackup } from "./backup.js";
-import { mirrorOf, writeMirror } from "./mirror.js";
+import { mirrorWithForms } from "./forms.js";
+import { writeMirror } from "./mirror.js";
 import { allPhrases, listPhrases, putPhrases } from "./vocab.js";
 
 /** @typedef {import("./phrase.js").Phrase} Phrase */
@@ -130,7 +131,7 @@ function defaults() {
       const config = await readConfig();
       const pair = chosenPair(config);
       const phrases = pair === null ? [] : await listPhrases({ langFrom: pair.from, langTo: pair.to });
-      await writeMirror(mirrorOf(config, phrases));
+      await writeMirror(await mirrorWithForms(config, phrases));
     },
     now: () => Date.now(),
     version: () => webext().runtime.getManifest().version,

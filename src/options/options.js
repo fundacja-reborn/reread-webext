@@ -337,6 +337,28 @@ function renderBubbleMore() {
   if (toggle instanceof HTMLInputElement) toggle.checked = config.showBubbleMore;
 }
 
+/** The other-forms switch (D208): whether a saved word is underlined in its
+ *  other forms as well. Stored plainly. */
+function renderUnderlineForms() {
+  const toggle = document.getElementById("underline-forms");
+  if (toggle instanceof HTMLInputElement) toggle.checked = config.underlineForms;
+}
+
+/**
+ * The pages' mirror rebuilt by the background, with the forms the
+ * dictionaries vouch for now (D208). Asked after the switch is turned on and
+ * after a dictionary comes or goes while it is on: the forms come out of the
+ * dictionaries, this page is where the dictionaries change, and no storage
+ * event tells the background so. `list-phrases` is the background's rebuild
+ * by another name (the repair path pages take on a pair change); its answer
+ * is not needed here. Quiet on failure - the next write to the vocabulary
+ * rebuilds the mirror anyway.
+ */
+function refreshForms() {
+  if (!config.underlineForms) return;
+  void webext().runtime.sendMessage({ kind: Message.LIST_PHRASES }).catch(() => {});
+}
+
 /** The default-keep switch (D124): whether the reader files what it opens. */
 function renderKeepArticles() {
   const toggle = document.getElementById("keep-articles");
@@ -2129,6 +2151,8 @@ async function removeDictionary(dictionary, button) {
   try {
     await deleteDictionary(dictionary.id);
     dictionaryStatus(t("options_deleted_dictionary", shown));
+    // The forms this book vouched for go with it (D208).
+    refreshForms();
   } catch (error) {
     dictionaryStatus(t("options_delete_dictionary_failed", [shown, message(error)]), "error");
   } finally {
@@ -2597,6 +2621,8 @@ async function runImport(opened, dictionary, { say, progress }) {
   const unreadable = summary.skipped === 0 ? "" : ` ${plural(summary.skipped, "options_skipped_entries")}`;
   say(t("options_added_dictionary", [ready.name, words(ready.entryCount), megabytes(ready.bytes)]) + unreadable);
   await adoptDictionaryPair(ready.langFrom, ready.langTo);
+  // A new book may vouch for forms the shelf did not before (D208).
+  refreshForms();
   // The pair select lists the dictionaries' pairs too (D158): a fresh pair
   // lands in it with the book that brought it.
   await renderPair(modelRows(await listModels(), availableModels()));
@@ -2782,6 +2808,7 @@ async function render() {
   renderReaderOnly();
   renderQuietBubble();
   renderBubbleMore();
+  renderUnderlineForms();
   renderKeepArticles();
   renderLibraryCopy();
   renderFontCustom();
@@ -2846,6 +2873,7 @@ async function refresh() {
   renderReaderOnly();
   renderQuietBubble();
   renderBubbleMore();
+  renderUnderlineForms();
   renderKeepArticles();
   renderLibraryCopy();
   renderFontCustom();
@@ -2905,6 +2933,18 @@ document.getElementById("bubble-more")?.addEventListener("change", (event) => {
   // layer the way the box now says, on every open page, with no reload.
   void writeConfig({ showBubbleMore: toggle.checked }).then((written) => {
     config = written;
+  });
+});
+document.getElementById("underline-forms")?.addEventListener("change", (event) => {
+  const toggle = event.target;
+  if (!(toggle instanceof HTMLInputElement)) return;
+  // The pages hear the switch through storage and drop the forms on the
+  // spot when it goes off (D208); turned on, they have nothing to match
+  // until the background has computed the forms - so it is asked to, once
+  // the switch is written and it can read it.
+  void writeConfig({ underlineForms: toggle.checked }).then((written) => {
+    config = written;
+    refreshForms();
   });
 });
 document.getElementById("keep-articles")?.addEventListener("change", (event) => {

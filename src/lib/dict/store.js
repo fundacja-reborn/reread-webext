@@ -23,6 +23,7 @@
  */
 
 import { cleanDisplayName, shownName } from "./display-name.js";
+import { formsIn, formsStamp } from "./forms.js";
 import { answerOrder, inChosenOrder, nextRank } from "./order.js";
 import { mergeSenses, utf8Length } from "./rows.js";
 import { TEXT_REVISION, catchUp } from "./text.js";
@@ -298,6 +299,59 @@ async function readEntries(store, dictionaries, keys) {
  * in which language.
  * @typedef {{ entries: DictionaryEntry[], dictionaries: number, lang: string }} LookupAnswer
  */
+
+/**
+ * The other forms of saved words, as every installed dictionary of the
+ * language vouches for them (D208, the rules in `forms.js`) - a form any one
+ * dictionary vouches for is kept.
+ *
+ * Asked with what is already known, because the reads are the cost: a word
+ * is a dozen point reads per dictionary, and the background rebuilds the
+ * mirror on every save. The forms a word was found to have stay true for as
+ * long as the shelf that vouched for them stands, so they come back with a
+ * stamp of that shelf (`formsStamp`), and a caller handing the stamp back
+ * with the forms it kept gets only the words it did not have computed. A
+ * stamp that no longer matches - a dictionary added, removed, imported
+ * again, or a version with other rules - throws the kept forms away and
+ * computes every word again. One transaction, so the stamp and the forms
+ * describe one moment of the shelf.
+ *
+ * @param {string} lang the language of the words
+ * @param {{ keys: string[], known: Record<string, string[]>, stamp: string }} of
+ *   the words to answer for, and the forms already kept under which stamp
+ * @returns {Promise<{ stamp: string, forms: Record<string, string[]> }>} every
+ *   key answered, an empty list for a word with no forms
+ */
+export async function readForms(lang, { keys, known, stamp }) {
+  return await withStores([META, ENTRIES], "readonly", async (transaction) => {
+    const installed = /** @type {Dictionary[]} */ (await promisify(transaction.objectStore(META).getAll()));
+    const dictionaries = installed.filter((dictionary) => dictionary.ready && dictionary.langFrom === lang);
+    const current = formsStamp(lang, dictionaries);
+    const reuse = current === stamp ? known : {};
+    const store = transaction.objectStore(ENTRIES);
+
+    /** @type {Record<string, string[]>} */
+    const forms = {};
+    for (const key of keys) {
+      const kept = reuse[key];
+      if (kept !== undefined) {
+        forms[key] = kept;
+        continue;
+      }
+      /** @type {string[]} */
+      const union = [];
+      for (const dictionary of dictionaries) {
+        /** @type {import("./forms.js").RowReader} */
+        const row = (one) => promisify(store.get([dictionary.id, one]));
+        for (const form of await formsIn(key, row)) {
+          if (!union.includes(form)) union.push(form);
+        }
+      }
+      forms[key] = union;
+    }
+    return { stamp: current, forms };
+  });
+}
 
 /**
  * Which language's answer the bubble gets, out of the ones asked in order

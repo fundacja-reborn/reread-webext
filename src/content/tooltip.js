@@ -552,6 +552,21 @@ export const STYLE = `
      one long word in a gloss would push the bubble past its maximum width. */
   .bubble > * { min-width: 0; }
 
+  /* The saved word, named over one of its forms (D208): "reading" underlined,
+     "read" saved. The hint line's quiet italic, because it is the same voice -
+     the bubble about its own answer - and it stands between the phrase and
+     the meanings whichever way the column runs, so it is read first: the
+     word, then what it means. Empty, which is every other bubble, it costs
+     no line. */
+  .saved-word {
+    margin-bottom: 4px;
+    font-size: calc(var(--type-second) * var(--bubble-scale, 1));
+    font-style: italic;
+    opacity: 0.6;
+  }
+  .saved-word:empty { display: none; }
+  .bubble[data-grow="up"] .saved-word { margin: 4px 0 0; }
+
   .body { white-space: pre-wrap; }
   .body[data-tone="pending"] { opacity: 0.6; font-style: italic; }
   .body[data-tone="error"] { color: #a3341f; }
@@ -1383,8 +1398,14 @@ export const STYLE = `
  * row's "copy original" press (D110) and never rendered: what says which
  * phrase the bubble is about stays the page's own highlight (D23).
  *
+ * `savedWord` is the one exception to that rule, and only over an underline
+ * that is another form of a saved word (D208): the page shows `reading`, the
+ * bubble answers with `read`'s meanings, and a bubble that named neither
+ * would read as a wrong answer. Named in one quiet line above the meanings;
+ * empty - every other bubble - it costs no line.
+ *
  * @typedef {object} Tooltip
- * @property {(options: { anchor: DOMRect, variant: Variant, body: string, tone?: Tone, actions?: Action[], touch?: boolean, below?: boolean, coarse?: boolean, scale?: number, folded?: boolean, expanded?: boolean, anchored?: boolean, line?: number, phrase?: string, scheme?: "light" | "sepia" | "dark" | null, choosable?: boolean }) => void} show
+ * @property {(options: { anchor: DOMRect, variant: Variant, body: string, tone?: Tone, actions?: Action[], touch?: boolean, below?: boolean, coarse?: boolean, scale?: number, folded?: boolean, expanded?: boolean, anchored?: boolean, line?: number, phrase?: string, savedWord?: string, scheme?: "light" | "sepia" | "dark" | null, choosable?: boolean }) => void} show
  * @property {(body: string, tone?: Tone) => void} setBody
  * @property {(sentence: string | null, tone?: Tone) => void} setContext
  * @property {(groups: EntryGroup[]) => void} setEntries
@@ -1665,6 +1686,8 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
   /** @type {HTMLDivElement | null} */
   let bodyElement = null;
   /** @type {HTMLDivElement | null} */
+  let savedWordElement = null;
+  /** @type {HTMLDivElement | null} */
   let contextElement = null;
   /** @type {HTMLDivElement | null} */
   let contextTextElement = null;
@@ -1815,6 +1838,11 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
     const brandElement = document.createElement("div");
     brandElement.className = "brand";
     brandElement.textContent = "re/read";
+    // The saved word over one of its forms (D208): before the meanings in the
+    // order of distance from the phrase, so it reads first either way the
+    // column runs - the word, then what it means.
+    savedWordElement = document.createElement("div");
+    savedWordElement.className = "saved-word";
     bodyElement = document.createElement("div");
     bodyElement.className = "body";
     contextElement = document.createElement("div");
@@ -1922,7 +1950,7 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
     // edits it, then the actions with the clipboard row they open (D110),
     // then the second layer. The signature stands before them all and outside
     // the order: only the error tone shows it (see .brand).
-    bubble.append(brandElement, bodyElement, editor, editorHintElement, revealElement, copyRowElement, contextElement, entriesElement, hintElement);
+    bubble.append(brandElement, savedWordElement, bodyElement, editor, editorHintElement, revealElement, copyRowElement, contextElement, entriesElement, hintElement);
     root.append(bubble);
     // `documentElement` and not `body`: single-page applications replace the
     // body, and a bubble that vanishes with a re-render is a bug nobody can
@@ -2841,6 +2869,7 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
     host = null;
     bubble = null;
     bodyElement = null;
+    savedWordElement = null;
     contextElement = null;
     contextTextElement = null;
     contextToggle = null;
@@ -2879,6 +2908,7 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
       anchored = false,
       line = 0,
       phrase = "",
+      savedWord = "",
       scheme = null,
       choosable = false,
     }) {
@@ -2982,6 +3012,11 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
       }
       if (editor !== null) editor.hidden = true;
       if (bodyElement !== null) bodyElement.hidden = false;
+      // The saved word named over its form (D208), or the line left empty -
+      // it was about the last phrase, like everything else here.
+      if (savedWordElement !== null) {
+        savedWordElement.textContent = savedWord.length > 0 ? t("bubble_saved_word", savedWord) : "";
+      }
       setBody(body, tone);
       restingActions = actions;
       renderActions(actions);

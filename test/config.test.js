@@ -866,3 +866,32 @@ describe("custom CSS", () => {
     assert.equal(/** @type {any} */ (store["config"]).customCss, ".bubble { border-width: 2px; }");
   });
 });
+
+describe("the other forms of saved words", () => {
+  it("is off by default, on profiles old and new (D208)", () => {
+    // An underline over a word nobody saved is the wrong direction to fall
+    // in: the README's "matching is literal" holds until somebody turns
+    // this on.
+    assert.equal(withDefaults(undefined).underlineForms, false);
+    assert.equal(withDefaults({ sourceLang: "en" }).underlineForms, false);
+  });
+
+  it("keeps a choice somebody made, in both directions", () => {
+    assert.equal(withDefaults({ underlineForms: true }).underlineForms, true);
+    assert.equal(withDefaults({ underlineForms: false }).underlineForms, false);
+  });
+
+  it("treats a hand-edited value of the wrong type as the default", () => {
+    for (const underlineForms of ["true", 1, null, {}]) {
+      assert.equal(withDefaults({ underlineForms }).underlineForms, false);
+    }
+  });
+
+  it("writes the choice through writeConfig without touching the rest", async () => {
+    const store = installFakeBrowser({ config: { sourceLang: "en", targetLang: "pl" } });
+    const written = await writeConfig({ underlineForms: true });
+
+    assert.deepEqual(written, { ...DEFAULTS, sourceLang: "en", targetLang: "pl", underlineForms: true });
+    assert.equal(/** @type {any} */ (store["config"]).underlineForms, true);
+  });
+});
