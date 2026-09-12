@@ -5,9 +5,9 @@
  * promise. A fresh install has no model, so a pair select would offer a
  * translation nothing can deliver (the signpost to the settings stands in its
  * place). Translation switched off (D120) takes the whole translating half of
- * the extension out of reach, so every row that only serves it goes too, and
- * one quiet note stands where the pair was - the state must never read as a
- * breakage.
+ * the extension out of reach, so every row that only serves it goes too; the
+ * switch itself, ticked, is what says so (D202 - the note that once stood
+ * where the pair was repeated the switch, and read as a warning).
  *
  * Pure and separate from the popup's DOM for the reason `choices.js` is: the
  * rule is worth a test, and `node --test` has no popup to open.
@@ -19,8 +19,6 @@
  * @property {boolean} pair the language pair select
  * @property {boolean} setup the signpost that stands in the pair's place on a
  *   device with no model at all
- * @property {boolean} translationNote the line that says why nothing
- *   translates, in the same place
  * @property {boolean} lookup the look-up field (D197)
  * @property {boolean} vocabulary the door to the saved phrases
  * @property {boolean} readerOnly the reader-only switch
@@ -45,7 +43,6 @@ export function popupRows({ translationOff, bubbleOff, fresh, pair }) {
     // device gets the signpost in its place instead.
     pair: translationOff ? pair : !fresh,
     setup: !translationOff && fresh,
-    translationNote: translationOff,
     lookup: lookupRowStands({ pair }),
     // The saved phrases live wherever a pair is chosen - the quiet
     // vocabulary writes them without the engine (D158/D162) - so their door

@@ -47,7 +47,6 @@ describe("the popup's rows", () => {
     const shown = rows();
     assert.equal(shown.pair, true);
     assert.equal(shown.setup, false);
-    assert.equal(shown.translationNote, false);
   });
 
   it("puts the signpost in the pair's place while nothing is installed", () => {
@@ -93,11 +92,12 @@ describe("the popup's rows", () => {
     assert.equal(rows({ translationOff: true, bubbleOff: true }).vocabulary, true);
   });
 
-  it("says why in the pair's place, so nothing reads as a breakage", () => {
-    assert.equal(rows({ translationOff: true }).translationNote, true);
-    assert.equal(rows({ translationOff: true, fresh: true, pair: false }).translationNote, true);
-    // The signpost never stands beside the note: with the model off, a
-    // missing model is not what the popup has to say.
+  it("lets the switch alone say the model is off - no note in the pair's place (D202)", () => {
+    // The note that repeated the switch is gone: the ticked switch nine rows
+    // down is the state, and the rule has no row for a sentence about it.
+    assert.equal("translationNote" in rows({ translationOff: true }), false);
+    // Nor the signpost: with the model off, a missing model is not what the
+    // popup has to say.
     assert.equal(rows({ translationOff: true, fresh: true, pair: false }).setup, false);
   });
 

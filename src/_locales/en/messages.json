@@ -30,7 +30,7 @@
     "description": "The sentence at the top of the extension's pages (reading list, reader, highlights, saved phrases, settings) when the page runs in a private window or tab: Firefox gives it a separate, in-memory database, filled from the copies in the extension's storage, which a private session may read but never writes (D171). Saved phrases go through the background, which is never private, so they are kept. Never shown on Chromium, whose extension pages share one database in both modes."
   },
   "saved_phrases": { "message": "Saved phrases" },
-  "open_reader": { "message": "Read this page in the reader" },
+  "open_reader": { "message": "Open in reading view" },
   "quiet_bubble": {
     "message": "Hide bubble actions by default",
     "description": "Checkbox label in the popup and on the settings page: the translation bubble opens with its buttons folded away (D81)."
@@ -139,10 +139,6 @@
   "popup_no_model": {
     "message": "No translation model on this device yet - press here to pick one in the settings.",
     "description": "Stands in the popup where the pair select would be, while no model is stored. The whole row is a button that opens the settings page."
-  },
-  "popup_translation_off": {
-    "message": "Machine translation is off - the reader and your dictionaries keep working.",
-    "description": "Stands in the popup where the pair row would be while the translation-off setting (D120) is on. A plain note, not a button - since D128 the switch itself is a few rows below, so the note no longer points at the settings."
   },
 
   "vocab_title": { "message": "re/read - saved phrases" },

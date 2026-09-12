@@ -20,7 +20,7 @@
   "reading_list": { "message": "Liste de lecture hors ligne" },
   "private_browsing_note": { "message": "Vous êtes en navigation privée. Le navigateur utilise pour cette page une base de données séparée, qu'il supprime à la fin de la session privée : la liste de lecture et les surlignages que vous voyez ici proviennent de leurs copies, et un article enregistré, un livre importé, un surlignage fait ou tout ce qui est supprimé ici disparaît avec la session. Seule exception : les phrases enregistrées, qui sont conservées. Pour tout le reste, ouvrez re/read dans un onglet normal." },
   "saved_phrases": { "message": "Phrases enregistrées" },
-  "open_reader": { "message": "Lire cette page dans le lecteur" },
+  "open_reader": { "message": "Ouvrir en mode lecture" },
   "quiet_bubble": { "message": "Masquer par défaut les actions de la bulle" },
   "action_delete": { "message": "Supprimer" },
   "action_download": { "message": "Télécharger" },
@@ -80,9 +80,6 @@
   "popup_no_page": { "message": "re/read ne fonctionne pas sur cette page." },
   "popup_no_model": {
     "message": "Aucun modèle de traduction sur cet appareil pour l'instant - appuyez ici pour en choisir un dans les paramètres."
-  },
-  "popup_translation_off": {
-    "message": "La traduction automatique est désactivée - le lecteur et les dictionnaires continuent de fonctionner."
   },
 
   "vocab_title": { "message": "re/read - phrases enregistrées" },

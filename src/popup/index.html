@@ -54,9 +54,11 @@
          drawn glyph (his call too, same day): a page of prose, the reading
          view's own association, in the accent that says "start here". The
          glyph stands outside the marked span (`localizePage` swaps text only)
-         and outside the accessible name. Stays even over the reader itself:
-         there it turns the reader to the list, which is exactly what the
-         press means. -->
+         and outside the accessible name. The label names the act, not the
+         page (the popup is always about the page it opened over) - short
+         enough for one line in six languages (D201). Over a page nothing
+         listens in (the note above stands), the row stays and goes quiet:
+         there is no page for the reading view to read. -->
     <button type="button" class="popup-row popup-action popup-reader" id="open-reader">
       <svg class="popup-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
         <rect
@@ -77,7 +79,7 @@
           stroke-linecap="round"
         />
       </svg>
-      <span data-i18n="open_reader">Read this page in the reader</span>
+      <span data-i18n="open_reader">Open in reading view</span>
     </button>
 
     <label class="popup-row popup-pair" id="pair-row">
@@ -90,14 +92,11 @@
     <button type="button" class="popup-row popup-action popup-setup" id="setup-row" data-i18n="popup_no_model" hidden>
       No translation model on this device yet - press here to pick one in the settings.
     </button>
-    <!-- Stands where the pair row would: with translation switched off (D120)
-         this is the popup's one word about why nothing translates, so the
-         state never reads as a breakage. It stopped pointing at the settings
-         when the switch moved into this popup (D128) - the way back is nine
-         rows down, not in another room. -->
-    <p class="popup-row popup-note" id="translation-off-note" data-i18n="popup_translation_off" hidden>
-      Machine translation is off - the reader and your dictionaries keep working.
-    </p>
+    <!-- The note that stood here with translation switched off (D120, D128:
+         "Machine translation is off - the reader and your dictionaries keep
+         working") left with D202: the switch nine rows down, ticked, is the
+         state itself, and a sentence repeating it read as a warning over the
+         pair. -->
 
     <!-- The look-up field (D197): a word typed instead of selected, answered
          by the dictionaries in the pair's language - never by the model. Right

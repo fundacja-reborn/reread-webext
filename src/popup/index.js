@@ -290,9 +290,15 @@ function renderSite(info, config) {
 
   if (info === null) {
     // Nothing in the tab is listening: the note takes the switch's place, a
-    // row of the same height, so nothing below moves.
+    // row of the same height, so nothing below moves. The reading view has
+    // no page to read there either - a press would open the reader to find
+    // nothing behind it, right under a note saying re/read does not work on
+    // this page - so its row stays, in place, and goes quiet: a row that
+    // left would move the rows below it under a cursor already on its way
+    // (D194), and a row that pressed would make the note a lie.
     stand(siteRow, false);
     if (siteNote !== null) siteNote.hidden = false;
+    if (readerButton instanceof HTMLButtonElement) readerButton.disabled = true;
     return;
   }
 
@@ -305,6 +311,7 @@ function renderSite(info, config) {
     siteToggle.disabled = false;
   }
   stand(siteRow, siteStands);
+  if (readerButton instanceof HTMLButtonElement) readerButton.disabled = false;
 }
 
 async function toggleSite() {
@@ -492,7 +499,6 @@ function showRows(config, installed) {
   if (over.hostname !== null) stand(siteRow, rows.site);
   stand(pairRow, rows.pair);
   stand(setupRow, rows.setup);
-  stand(document.getElementById("translation-off-note"), rows.translationNote);
   stand(lookupHead, rows.lookup);
   stand(vocabularyButton, rows.vocabulary);
   stand(document.getElementById("reader-only-row"), rows.readerOnly);
