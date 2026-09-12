@@ -30,7 +30,7 @@
     "description": "The sentence at the top of the extension's pages (reading list, reader, highlights, saved phrases, settings) when the page runs in a private window or tab: Firefox gives it a separate, in-memory database, filled from the copies in the extension's storage, which a private session may read but never writes (D171). Saved phrases go through the background, which is never private, so they are kept. Never shown on Chromium, whose extension pages share one database in both modes."
   },
   "saved_phrases": { "message": "Saved phrases" },
-  "open_reader": { "message": "Read this page in the reader" },
+  "open_reader": { "message": "Open in reading view" },
   "quiet_bubble": {
     "message": "Hide bubble actions by default",
     "description": "Checkbox label in the popup and on the settings page: the translation bubble opens with its buttons folded away (D81)."

@@ -20,7 +20,7 @@
   "reading_list": { "message": "Lista de lectura sin conexión" },
   "private_browsing_note": { "message": "Estás en navegación privada. El navegador usa para esta página una base de datos aparte y la borra al terminar la sesión privada: la lista de lectura y los resaltados que ves aquí vienen de sus copias, y un artículo guardado, un libro importado, un resaltado hecho o cualquier cosa borrada aquí se pierde con la sesión. La única excepción son las frases guardadas: esas se conservan. Para todo lo demás, abre re/read en una pestaña normal." },
   "saved_phrases": { "message": "Frases guardadas" },
-  "open_reader": { "message": "Leer esta página en la vista de lectura" },
+  "open_reader": { "message": "Abrir en vista de lectura" },
   "quiet_bubble": { "message": "Ocultar por defecto las acciones de la burbuja" },
   "action_delete": { "message": "Eliminar" },
   "action_download": { "message": "Descargar" },

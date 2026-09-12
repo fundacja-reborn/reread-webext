@@ -20,7 +20,7 @@
   "reading_list": { "message": "Czytelnia offline" },
   "private_browsing_note": { "message": "Jesteś w trybie prywatnym. Przeglądarka używa tu dla tej strony osobnej bazy danych i kasuje ją po zakończeniu sesji prywatnej: czytelnia i zakreślenia, które tu widzisz, pochodzą z ich kopii, a artykuł zapisany, książka zaimportowana, zakreślenie zrobione albo cokolwiek usuniętego w tym oknie przepada razem z sesją. Jedyny wyjątek to zapisane frazy - te są zachowywane. Na wszystko inne otwórz re/read w zwykłej karcie." },
   "saved_phrases": { "message": "Zapisane frazy" },
-  "open_reader": { "message": "Przeczytaj tę stronę w widoku czytania" },
+  "open_reader": { "message": "Otwórz w widoku czytania" },
   "quiet_bubble": { "message": "Domyślnie ukrywaj akcje w dymku" },
   "action_delete": { "message": "Usuń" },
   "action_download": { "message": "Pobierz" },

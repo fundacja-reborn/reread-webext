@@ -221,22 +221,45 @@ body[data-os="android"][data-mode="lookup"] .popup-lookup-answer {
 /* The two rows that carry a mark before their word - the reader's glyph at
    the top, the heart at the bottom: left-aligned as one phrase, because the
    row grid's space-between would strand the word at the far edge of its
-   mark. */
+   mark. The mark stands at the first line of its word, not in the middle of
+   the row (D201): a label that wraps in some language would otherwise leave
+   the glyph hanging between its two lines. So the row aligns its items at
+   the top and pads itself to the touch floor from the line's own height -
+   the rows' rule for a checkbox beside a wrapped line (`--lookup-row-pad`) -
+   which keeps a one-line row centred exactly as before. The line's height
+   is page.css's body line-height, inherited unitless. */
 .popup-reader,
 .popup-support {
+  --popup-line-height: 1.6em;
   justify-content: flex-start;
+  align-items: flex-start;
   gap: 0.45rem;
+  padding-block: max(0.55rem, calc((44px - var(--popup-line-height)) / 2));
 }
 
 /* The reading view's glyph, drawn like the reader bar's own icons and sized
    by the text around it; the accent is what says "start here" in a list of
    quiet rows - the signpost's color, on the row that is the popup's main
-   act. */
+   act. Its top margin is half of what the line stands tall over it, the
+   checkbox's formula in the look-up answer, so it sits centred on the
+   first line of the label; the heart is text and needs none. */
 .popup-icon {
-  width: 1.15em;
-  height: 1.15em;
+  --popup-icon-size: 1.15em;
+  width: var(--popup-icon-size);
+  height: var(--popup-icon-size);
   flex: none;
+  margin-top: calc((var(--popup-line-height, 1.6em) - var(--popup-icon-size)) / 2);
   color: var(--page-accent);
+}
+
+/* Over a page nothing listens in - the browser's own pages, the store, the
+   extension's - the reading view has nothing to read, and the row says so
+   by going quiet under the note: the accent leaves the glyph with the ink,
+   and the hover has nothing to promise. */
+.popup-reader:disabled,
+.popup-reader:disabled:hover,
+.popup-reader:disabled .popup-icon {
+  color: var(--page-muted);
 }
 
 /* The support row rests quieter than the rows above it, and carries its own
