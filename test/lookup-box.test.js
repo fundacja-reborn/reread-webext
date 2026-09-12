@@ -283,6 +283,21 @@ describe("the popup's look-up row", () => {
     assert.match(door, /window\.close\(\)/, "the popup stays open behind the page");
   });
 
+  it("stands as a raised surface with an edge that survives the greys, in every theme", async () => {
+    const page = await source("assets/page.css");
+    // The token in every palette: the paper a step lighter in sepia and in
+    // the dark, the paper itself where it is white (the fourth brief's D3).
+    const palettes = page.match(/--surface-raised: #[0-9a-f]{6};/g) ?? [];
+    assert.equal(palettes.length, 5, "a palette has no raised surface");
+    assert.match(page, /:root\[data-reader-theme="sepia"\] \{[\s\S]*?--page-bg: #f4ecd8;[\s\S]*?--surface-raised: #f8f4e8;/, "sepia's raised surface is not its paper a step lighter");
+    assert.match(page, /:root\[data-reader-theme="dark"\] \{[\s\S]*?--page-bg: #171a21;[\s\S]*?--surface-raised: #20242d;/, "the dark raised surface is not its paper a step lighter");
+    assert.match(page, /:root\[data-reader-theme="light"\] \{[\s\S]*?--page-bg: #ffffff;[\s\S]*?--surface-raised: #ffffff;/, "the light raised surface is not the white paper itself");
+    // The popup wears it with the edge, and no shadow.
+    const popup = await source("popup/popup.css");
+    assert.match(popup, /^body \{[\s\S]*?background: var\(--surface-raised\);\s*border: 1px solid var\(--page-border\);/m, "the popup is not the raised surface with the border token's edge");
+    assert.doesNotMatch(popup, /box-shadow/, "the popup leans on a shadow");
+  });
+
   it("has no folded-bubble switch any more (D197)", async () => {
     const markup = await source("popup/index.html");
     assert.doesNotMatch(markup, /id="quiet-bubble"/, "the switch stands in the popup");

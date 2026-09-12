@@ -19,6 +19,15 @@
   --page-border: #6e7583;
   --page-accent: #b8791d;
   --page-error: #a3341f;
+  /* A surface raised over the page - the toolbar popup (the fourth brief's
+     D3): one step lighter than the page's paper in sepia and in the dark,
+     the paper itself where the paper is white. Never the only signal - the
+     tone is one of the 16 greys an e-ink panel rounds away, so the surface
+     always wears a 1px border in --page-border with it, and no shadow (a
+     shadow greys the edge in sepia and says nothing on e-ink). The ink and
+     the controls' borders keep their contrast on it in every theme: text
+     11:1 and above, --page-border 3.8:1 and above. */
+  --surface-raised: #ffffff;
 }
 
 /* Dark ink is dimmed on purpose: near-white on near-black (#f2f4f8 measured
@@ -37,6 +46,7 @@
     --page-border: #767e8f;
     --page-accent: #f09a3e;
     --page-error: #f09a3e;
+    --surface-raised: #20242d;
   }
 }
 
@@ -58,6 +68,7 @@
   --page-border: #6e7583;
   --page-accent: #b8791d;
   --page-error: #a3341f;
+  --surface-raised: #ffffff;
 }
 
 :root[data-reader-theme="dark"] {
@@ -69,10 +80,12 @@
   --page-border: #767e8f;
   --page-accent: #f09a3e;
   --page-error: #f09a3e;
+  --surface-raised: #20242d;
 }
 
 /* Paper rather than a dimmed white: the point of sepia is less blue light at
-   the same contrast, so the text stays nearly as dark as on white. */
+   the same contrast, so the text stays nearly as dark as on white. The
+   raised surface is the same paper a step closer to white, the hue kept. */
 :root[data-reader-theme="sepia"] {
   color-scheme: light;
   --page-bg: #f4ecd8;
@@ -82,6 +95,7 @@
   --page-border: #83745a;
   --page-accent: #9a5b16;
   --page-error: #a3341f;
+  --surface-raised: #f8f4e8;
 }
 
 /* The content typeface (the article, the reading list's titles, the saved
