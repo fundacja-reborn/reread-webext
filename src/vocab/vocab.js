@@ -37,6 +37,7 @@ import { armBackArrow } from "../lib/back-arrow.js";
 import { ErrorCode, Message, asResult, fail } from "../lib/protocol.js";
 import { BACK_ROAD_KEY, writeVocabTab } from "../lib/session.js";
 import { restoreVocabulary } from "../lib/store/backup.js";
+import { migrateSemicolonsOnce } from "../lib/store/semicolon-migration.js";
 import { MIRROR_KEY } from "../lib/store/mirror.js";
 import { exportFilename, fromTsv, pairFromFilename, toTsv } from "../lib/store/tsv.js";
 import { listPairs, listPhrases } from "../lib/store/vocab.js";
@@ -395,6 +396,12 @@ async function reload() {
     if ((await restoreVocabulary()) > 0) {
       void webext().runtime.sendMessage({ kind: Message.LIST_PHRASES }).catch(() => {});
     }
+    // The one-time migrations before the first read (D205), after the
+    // restore so what came back is migrated too; after the first run this
+    // is one read of a flag. Under the lock the background's start holds
+    // while it runs the same, so the list never shows the state before it.
+    // Quiet on failure: the list still shows, and the next start tries again.
+    await migrateSemicolonsOnce().catch(() => undefined);
 
     // With no pair chosen there is no current list to show - the page opens
     // on its empty state, and the select below still offers every pair that
