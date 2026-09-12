@@ -474,13 +474,75 @@ summary {
   color: var(--page-muted);
 }
 
-/* The two counts beside the phrase (D209), in the interface's size and the
-   meanings' muted ink: a note about the phrase, not part of the lesson.
+/* The two counts beside the phrase (D209, drawn as glyphs by D211): a
+   magnifier with the bubble openings, a book with the occurrences in
+   finished texts - in the interface's size, never the Aa panel's, and in
+   the meanings' muted ink (5.3:1 and above in every theme): a note about
+   the phrase, not part of the lesson. One line at rest - a count never
+   breaks between its glyph and its number - wrapping only between the two.
    Absent from a row that has none - a phrase never checked and never met
-   in a finished text reads exactly as it did before the counts. */
+   in a finished text reads exactly as it did before the counts. The
+   number in tabular figures, so "12" and "11" stand the same width. */
 .phrase-counts {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0 0.75em;
   color: var(--page-muted);
   font-size: max(13px, 0.85rem);
+  /* A tight line box: on the phrase's baseline the counts must never be
+     the tallest thing in the line, or the row grows by their leading. */
+  line-height: 1;
+}
+
+.phrase-count {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The glyph, an em of whatever size the counts and the legend wear, sat a
+   little under the baseline so its middle meets the digits' middle, with
+   its number a quarter em after it. The stroke is the current ink: the
+   sprite's symbols draw with `currentColor`. */
+.phrase-count-icon {
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.15em;
+  margin-inline-end: 0.25em;
+}
+
+/* The sprite the glyphs are drawn in (vocab.html): out of the flow and
+   of zero size, so it is nowhere on the page and its symbols are still
+   there for every <use>. */
+.icon-sprite {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+/* --- the key to the count glyphs, over the list --- */
+
+/* One line in the counts' own voice - their size, their muted ink - right
+   over the first row: a glyph, its word, a middle dot, the other glyph and
+   word. Prose, so on a phone it wraps like a sentence; the glyph and the
+   word after it are one unbreakable piece (no space between them in the
+   markup). Hidden while no row on the page carries a count, and then out
+   of the flow, so the rows do not move when it goes. */
+.phrase-legend {
+  margin: 1rem 0 0;
+  color: var(--page-muted);
+  font-size: max(13px, 0.85rem);
+  line-height: 1.5;
+}
+
+.phrase-legend-dot {
+  margin-inline: 0.35em;
+}
+
+/* Under the legend the list closes up: the legend is the list's caption,
+   not a section of its own. */
+.phrase-legend:not([hidden]) + .phrases {
+  margin-top: 0.35rem;
 }
 
 /* The sentence the phrase was kept from (D210), under the meanings in the

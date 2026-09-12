@@ -86,6 +86,21 @@ export function ordered(phrases, order, lang) {
 }
 
 /**
+ * Whether any of the rows on screen carries a count to explain (D211): the
+ * legend over the list stands only then, so a page of phrases nobody has
+ * checked or met in a finished text reads as it did before the counts.
+ *
+ * @param {Phrase[]} rows the rows of the page shown
+ * @returns {boolean}
+ */
+export function anyCounted(rows) {
+  return rows.some((phrase) => {
+    const counts = countsOf(phrase);
+    return counts.recalls > 0 || counts.reads > 0;
+  });
+}
+
+/**
  * Everything a row can be found by: how the phrase is written and every
  * meaning it was kept for.
  *

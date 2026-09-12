@@ -54,7 +54,7 @@ import {
   voicesFor,
 } from "../lib/tts.js";
 import { filterActive } from "../options/models-view.js";
-import { Order, asOrder, listView, markSegments, newestFirst, ordered, pairChoicesFor } from "./list-view.js";
+import { Order, anyCounted, asOrder, listView, markSegments, newestFirst, ordered, pairChoicesFor } from "./list-view.js";
 
 // First, so the static text is already the catalogue's language when it shows.
 localizePage();
@@ -108,6 +108,7 @@ const importCancel = /** @type {HTMLButtonElement | null} */ (document.getElemen
 const transferLine = document.getElementById("transfer-status");
 const filterInput = /** @type {HTMLInputElement | null} */ (document.getElementById("filter"));
 const filterStatus = document.getElementById("filter-status");
+const legendLine = document.getElementById("legend");
 const orderSelect = /** @type {HTMLSelectElement | null} */ (document.getElementById("order"));
 const addFold = /** @type {HTMLDetailsElement | null} */ (document.getElementById("add-phrase"));
 const lookupHost = document.getElementById("lookup-box");
@@ -507,6 +508,10 @@ function renderList() {
   } else {
     for (const phrase of view.rows) listContainer.append(phraseRow(phrase));
   }
+  // The key to the count glyphs (D211) stands only while a row on this page
+  // has a glyph to explain: a page of phrases never checked and never met
+  // in a finished text reads as it did before the counts.
+  if (legendLine !== null) legendLine.hidden = !anyCounted(view.rows);
 
   if (editorHadFocus) {
     const editor = listContainer.querySelector("textarea");
@@ -618,16 +623,15 @@ function phraseRow(phrase) {
   word.title = new Date(phrase.createdAt).toLocaleDateString(uiLocale());
   head.append(word);
 
-  // The two counts (D209), each only once it has something to say, and the
-  // line only when one has: a phrase never checked and never met in a
-  // finished text keeps the row it always had.
+  // The two counts (D209) beside the phrase, each only once it has
+  // something to say, and the group only when one has: a phrase never
+  // checked and never met in a finished text keeps the row it always had.
   const { recalls, reads } = countsOf(phrase);
   if (recalls > 0 || reads > 0) {
-    /** @type {string[]} */
-    const said = [];
-    if (recalls > 0) said.push(plural(recalls, "vocab_recalls"));
-    if (reads > 0) said.push(plural(reads, "vocab_reads"));
-    head.append(element("span", "phrase-counts", said.join(` ${String.fromCodePoint(0x00b7)} `)));
+    const counts = element("span", "phrase-counts");
+    if (recalls > 0) counts.append(countStat("i-lookup", recalls, plural(recalls, "vocab_recalls")));
+    if (reads > 0) counts.append(countStat("i-read", reads, plural(reads, "vocab_reads")));
+    head.append(counts);
   }
   row.append(head);
 
@@ -692,6 +696,49 @@ function phraseRow(phrase) {
   actions.append(edit, learned);
   row.append(actions);
   return row;
+}
+
+/**
+ * One of the two counts as the row shows it (D211): the glyph with the
+ * number after it, and the whole sentence - "Checked 3 times" - as the
+ * accessible name and the hover title, so the eye gets a glyph and a
+ * number, a screen reader the sentence, and a mouse both. `role="img"`
+ * makes the span one thing to assistive tech: the glyph is decoration
+ * inside it and the digits are not read twice. The legend over the list is
+ * what says the same to a finger, which has no hover.
+ *
+ * @param {"i-lookup" | "i-read"} glyph the symbol's id in the page's sprite
+ * @param {number} count
+ * @param {string} said the count as the catalogue's sentence
+ * @returns {HTMLElement}
+ */
+function countStat(glyph, count, said) {
+  const stat = element("span", "phrase-count");
+  stat.setAttribute("role", "img");
+  stat.setAttribute("aria-label", said);
+  stat.title = said;
+  stat.append(countIcon(glyph), count.toLocaleString());
+  return stat;
+}
+
+/**
+ * A count's glyph: a reference into the sprite the page carries (one
+ * drawing per symbol, `<use>` in every row), sized by the sheet to the
+ * counts' own em. Decoration - the stat's label carries the words.
+ *
+ * @param {"i-lookup" | "i-read"} glyph
+ * @returns {SVGSVGElement}
+ */
+function countIcon(glyph) {
+  const NS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("class", "phrase-count-icon");
+  svg.setAttribute("aria-hidden", "true");
+  svg.setAttribute("focusable", "false");
+  const use = document.createElementNS(NS, "use");
+  use.setAttribute("href", `#${glyph}`);
+  svg.append(use);
+  return svg;
 }
 
 /**

@@ -207,6 +207,8 @@
       "count": { "content": "$1", "example": "100" }
     }
   },
+  "vocab_legend_recalls": { "message": "nachgeschlagen - wie oft Sie die Sprechblase des Eintrags beim Lesen geöffnet haben" },
+  "vocab_legend_reads": { "message": "gelesen - wie oft der Eintrag in zu Ende gelesenen Texten vorkam" },
   "pager_page_of": {
     "message": "Seite $PAGE$ von $PAGES$",
     "placeholders": {

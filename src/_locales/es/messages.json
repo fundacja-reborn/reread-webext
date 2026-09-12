@@ -234,6 +234,8 @@
       "count": { "content": "$1", "example": "100" }
     }
   },
+  "vocab_legend_recalls": { "message": "consultada - cuántas veces abriste la burbuja de la frase al leer" },
+  "vocab_legend_reads": { "message": "leída - cuántas veces apareció la frase en textos terminados" },
   "pager_page_of": {
     "message": "Página $PAGE$ de $PAGES$",
     "placeholders": {

@@ -261,6 +261,8 @@
       "count": { "content": "$1", "example": "100" }
     }
   },
+  "vocab_legend_recalls": { "message": "sprawdzane - otwarcia dymka frazy podczas czytania" },
+  "vocab_legend_reads": { "message": "czytane - wystąpienia frazy w przeczytanych tekstach" },
   "pager_page_of": {
     "message": "Strona $PAGE$ z $PAGES$",
     "placeholders": {

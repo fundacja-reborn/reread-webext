@@ -69,6 +69,47 @@ describe("a row of the saved phrases", () => {
     assert.match(rule(desktop, "  .phrase-actions"), /grid-area: actions;\s*align-self: start;/, "the actions are not at the row's top, out of the baseline group");
   });
 
+  it("shows a count as a glyph and a number, the whole sentence in its name, and no count at zero", async () => {
+    const script = await source("vocab/vocab.js");
+    const row = bodyOf(script, "phraseRow");
+    // Each count only above zero, the group only when one is; the sentence
+    // the catalogue counts with is the accessible name and the hover title.
+    assert.match(row, /if \(recalls > 0 \|\| reads > 0\) \{\s*const counts = element\("span", "phrase-counts"\);\s*if \(recalls > 0\) counts\.append\(countStat\("i-lookup", recalls, plural\(recalls, "vocab_recalls"\)\)\);\s*if \(reads > 0\) counts\.append\(countStat\("i-read", reads, plural\(reads, "vocab_reads"\)\)\);\s*head\.append\(counts\);/, "the counts are not two glyph stats in the head, each only above zero");
+    const stat = bodyOf(script, "countStat");
+    assert.match(stat, /setAttribute\("role", "img"\)/, "a stat is not one image to assistive tech");
+    assert.match(stat, /setAttribute\("aria-label", said\);\s*stat\.title = said;/, "the sentence is not the stat's name and title");
+    assert.match(stat, /stat\.append\(countIcon\(glyph\), count\.toLocaleString\(\)\)/, "the stat is not the glyph with the number after it");
+    const icon = bodyOf(script, "countIcon");
+    assert.match(icon, /setAttribute\("aria-hidden", "true"\)/, "the glyph speaks");
+    assert.match(icon, /use\.setAttribute\("href", `#\$\{glyph\}`\)/, "the glyph is not a use of the sprite");
+    // The sprite carries exactly the two symbols the rows and the legend use.
+    const markup = await source("vocab/vocab.html");
+    assert.match(markup, /<svg class="icon-sprite" aria-hidden="true" focusable="false">[\s\S]*?<symbol id="i-lookup" viewBox="0 0 16 16">[\s\S]*?<symbol id="i-read" viewBox="0 0 16 16">/, "the sprite does not carry the two symbols");
+    assert.doesNotMatch(markup, /icon-sprite" style=/, "the sprite hides by an inline style");
+    // In the sprite every stroke is the current ink, so the glyphs follow
+    // the counts' color in every theme.
+    const sprite = markup.slice(markup.indexOf('<svg class="icon-sprite"'), markup.indexOf("</svg>", markup.indexOf('<svg class="icon-sprite"')));
+    for (const stroke of sprite.matchAll(/stroke="([^"]+)"/g)) assert.equal(stroke[1], "currentColor");
+  });
+
+  it("keys the glyphs in one line over the list, shown only while a row has a count to explain", async () => {
+    const markup = await source("vocab/vocab.html");
+    const legend = markup.indexOf('id="legend"');
+    assert.notEqual(legend, -1, "the page has no legend");
+    assert.ok(markup.indexOf('id="filter-status"') < legend && legend < markup.indexOf('id="list"'), "the legend does not stand between the filter's state line and the list");
+    assert.match(markup, /id="legend" class="phrase-legend" hidden/, "the legend stands before the script decides");
+    // The two words are the order select's; a glyph and its word never part.
+    assert.match(markup, /<use href="#i-lookup" \/><\/svg><span data-i18n="vocab_legend_recalls">/, "the magnifier is parted from its word, or the word is not the catalogue's");
+    assert.match(markup, /<use href="#i-read" \/><\/svg><span data-i18n="vocab_legend_reads">/, "the book is parted from its word, or the word is not the catalogue's");
+    const script = await source("vocab/vocab.js");
+    assert.match(bodyOf(script, "renderList"), /legendLine\.hidden = !anyCounted\(view\.rows\)/, "the legend does not follow the rows on the page");
+    // The counts and the legend wear the interface's size, not the Aa panel's.
+    const styles = await source("vocab/vocab.css");
+    assert.match(rule(styles, ".phrase-counts"), /font-size: max\(13px, 0\.85rem\);/, "the counts do not wear the interface size");
+    assert.match(rule(styles, ".phrase-legend"), /font-size: max\(13px, 0\.85rem\);/, "the legend does not wear the counts' size");
+    assert.match(rule(styles, ".phrase-count-icon"), /width: 1em;\s*height: 1em;\s*vertical-align: -0\.15em;\s*margin-inline-end: 0\.25em;/, "the glyph is not an em on the baseline with its number a quarter em after");
+  });
+
   it("dresses the phrase, the meanings and the sentence in the Aa panel's size, and nothing above them", async () => {
     const styles = await source("vocab/vocab.css");
     const bare = styles.replace(/\/\*[\s\S]*?\*\//g, "");

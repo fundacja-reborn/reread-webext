@@ -4,6 +4,7 @@ import { describe, it } from "node:test";
 import {
   Order,
   PAGE_SIZE,
+  anyCounted,
   asOrder,
   listView,
   markSegments,
@@ -243,5 +244,21 @@ describe("ordered", () => {
     assert.equal(asOrder("recalled"), Order.RECALLED);
     assert.equal(asOrder("alphabetical"), Order.ALPHABETICAL);
     for (const other of [undefined, null, "", "oldest", 3]) assert.equal(asOrder(other), Order.NEWEST);
+  });
+});
+
+describe("anyCounted", () => {
+  it("says whether any row on the page carries a count - the legend's cue", () => {
+    assert.equal(anyCounted([]), false);
+    assert.equal(anyCounted([phrase(1), phrase(2)]), false);
+    assert.equal(anyCounted([phrase(1, { recallCount: 0, readCount: 0 })]), false);
+    assert.equal(anyCounted([phrase(1), phrase(2, { recallCount: 1 })]), true);
+    assert.equal(anyCounted([phrase(1, { readCount: 3 })]), true);
+  });
+
+  it("reads a count the way the row does - a stored oddity is no count", () => {
+    // @ts-expect-error - a value the store would never write, as an old row might carry
+    assert.equal(anyCounted([phrase(1, { recallCount: "7" })]), false);
+    assert.equal(anyCounted([phrase(1, { readCount: -2 })]), false);
   });
 });
