@@ -110,6 +110,13 @@
       "count": { "content": "$1", "example": "3" }
     }
   },
+  "lookup_show_all": {
+    "message": "Alle zeigen ($COUNT$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "lookup_show_fewer": { "message": "Weniger zeigen" },
   "lookup_show_in_list": { "message": "In der Liste zeigen" },
   "lookup_kept": { "message": "In Ihrem gespeicherten Wortschatz" },
   "popup_lookup_back": { "message": "Zurück zum Menü" },

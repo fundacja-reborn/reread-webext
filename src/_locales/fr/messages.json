@@ -110,6 +110,13 @@
       "count": { "content": "$1", "example": "3" }
     }
   },
+  "lookup_show_all": {
+    "message": "Tout afficher ($COUNT$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "lookup_show_fewer": { "message": "Afficher moins" },
   "lookup_show_in_list": { "message": "Afficher dans la liste" },
   "lookup_kept": { "message": "Dans vos phrases enregistrées" },
   "popup_lookup_back": { "message": "Retour au menu" },

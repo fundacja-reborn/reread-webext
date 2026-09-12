@@ -39,7 +39,7 @@
 import { HINT_MAX_WORDS, linkedWord } from "./gloss.js";
 import { t, uiLocale } from "./i18n.js";
 import { languageName } from "./language.js";
-import { afterPress, isSaved, lookupOutcome, lookupText, paragraphsOf } from "./lookup.js";
+import { afterPress, entryGroups, foldPoint, isSaved, lookupOutcome, lookupText, paragraphsOf } from "./lookup.js";
 import { keyTokens } from "./matcher/tokenize.js";
 import { describeError } from "./messages.js";
 import { ErrorCode, Message, asLookUp } from "./protocol.js";
@@ -179,6 +179,17 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
    * still being looked up must not have the first's answer land on it.
    */
   let generation = 0;
+
+  /**
+   * Which folds the reader opened or closed by hand, by the fold's key
+   * (`group:<book>` for a book, `more:<book>` for the rest of its lines), so
+   * that a redraw after a tick finds them as they were left. Emptied with
+   * every new word: the folds' defaults - the first book open, the others
+   * closed - are about this word's answer.
+   *
+   * @type {Map<string, boolean>}
+   */
+  let folds = new Map();
 
   const form = document.createElement("form");
   form.className = "lookup-form";
@@ -355,6 +366,91 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
   }
 
   /**
+   * A fold with its state remembered: open as the reader last left it, or
+   * as the default says; every change of the reader's hand is written down
+   * for the next redraw.
+   *
+   * @param {string} className
+   * @param {string} key the fold's key in `folds`
+   * @param {boolean} openByDefault
+   * @param {HTMLElement} summary
+   * @returns {HTMLDetailsElement}
+   */
+  function fold(className, key, openByDefault, summary) {
+    const details = document.createElement("details");
+    details.className = className;
+    details.open = folds.get(key) ?? openByDefault;
+    details.append(summary);
+    details.addEventListener("toggle", () => {
+      folds.set(key, details.open);
+    });
+    return details;
+  }
+
+  /**
+   * The books' entries as one fold per book (block 3): the first open, the
+   * others closed with the count in their name - the height of the answer
+   * limited by structure, not by a scrollbar. Inside a book, the lines past
+   * `LINES_OPEN` fold again under "Show all", which opens by itself when a
+   * saved meaning would otherwise be out of sight. Where the field only
+   * reads, a book's entries are prose, paragraph by paragraph, and the
+   * count is not said: paragraphs are nothing to tick.
+   *
+   * @param {import("./lookup.js").EntryGroup[]} groups
+   * @returns {HTMLElement}
+   */
+  function books(groups) {
+    const entries = element("div", "lookup-entries");
+    for (const [at, group] of groups.entries()) {
+      const summary = element("summary", "lookup-group-label");
+      summary.append(element("span", "lookup-entry-dict", group.dictionary));
+      if (!readOnly) summary.append(` (${group.lines.length.toLocaleString()})`);
+      const book = fold("lookup-group", `group:${group.dictionary}`, at === 0, summary);
+
+      // Everything up to the cut goes straight into the book; the rest
+      // goes into the "Show all" fold, headwords and lines alike.
+      const { shown, unfolded } = foldPoint(group.lines, state.meanings);
+      /** @type {HTMLElement | null} */
+      let more = null;
+      if (!readOnly && shown < group.lines.length) {
+        const label = element("summary", "lookup-more-label");
+        more = fold("lookup-more", `more:${group.dictionary}`, unfolded, label);
+        const say = () => {
+          label.textContent = more?.hasAttribute("open") === true ? t("lookup_show_fewer") : t("lookup_show_all", [group.lines.length.toLocaleString()]);
+        };
+        say();
+        more.addEventListener("toggle", say);
+      }
+      let index = 0;
+      for (const [entryAt, entry] of group.entries.entries()) {
+        const into = more !== null && index >= shown ? more : book;
+        if (entry.headword.length > 0) {
+          into.append(element("div", "lookup-entry-headword", entry.headword));
+        }
+        if (readOnly) {
+          // Prose, not presses (the header): the book's own paragraphs,
+          // which the rows cut into lines - read off the entries as stored,
+          // the group's entries being those in the answer's order.
+          const stored = state.outcome?.kind === "entries" ? state.outcome.entries : [];
+          const own = stored.filter((one) => one.dictionary === group.dictionary)[entryAt];
+          for (const sense of own?.senses ?? []) {
+            for (const paragraph of paragraphsOf(sense)) into.append(element("div", "lookup-paragraph", paragraph));
+          }
+          continue;
+        }
+        for (const line of entry.lines) {
+          const home = more !== null && index >= shown ? more : book;
+          home.append(lineRow(line, `${at}:${index}`));
+          index += 1;
+        }
+      }
+      if (more !== null) book.append(more);
+      entries.append(book);
+    }
+    return entries;
+  }
+
+  /**
    * A dictionary line as a row to tick: a label over the whole row with a
    * native checkbox in it - it draws solidly on e-ink, reads as a checkbox
    * to a screen reader, and takes the space bar and Tab for nothing. What
@@ -404,6 +500,7 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
     state.outcome = null;
     state.pending = true;
     state.error = "";
+    folds = new Map();
     render();
 
     const [meanings, asked] = await Promise.all([
@@ -520,36 +617,7 @@ export function mountLookupBox(hosts, deps, { readOnly = false, onState } = {}) 
       const words = keyTokens(state.phrase.normalized).length;
       answer.append(verdictLine(verdictParts(state.outcome.note, state.outcome.lang, words)));
     } else if (state.outcome?.kind === "entries") {
-      const entries = element("div", "lookup-entries");
-      for (const [at, block] of state.outcome.blocks.entries()) {
-        const entry = element("div", "lookup-entry");
-        if (block.headword.length > 0 || block.dictionary.length > 0) {
-          const heading = element("div", "lookup-entry-label");
-          if (block.headword.length > 0) {
-            heading.append(element("span", "lookup-entry-headword", block.headword));
-          }
-          if (block.headword.length > 0 && block.dictionary.length > 0) heading.append(" - ");
-          if (block.dictionary.length > 0) {
-            heading.append(element("span", "lookup-entry-dict", block.dictionary));
-          }
-          entry.append(heading);
-        }
-        if (readOnly) {
-          // Prose, not presses (the header): the field that only reads must
-          // not promise a choice it does not make - and prose keeps the
-          // book's own paragraphs, which the presses cut into lines.
-          for (const sense of state.outcome.entries[at]?.senses ?? []) {
-            for (const paragraph of paragraphsOf(sense)) {
-              entry.append(element("div", "lookup-paragraph", paragraph));
-            }
-          }
-          entries.append(entry);
-          continue;
-        }
-        for (const [lineAt, line] of block.lines.entries()) entry.append(lineRow(line, `${at}:${lineAt}`));
-        entries.append(entry);
-      }
-      answer.append(entries);
+      answer.append(books(entryGroups(state.outcome.entries, state.phrase.normalized)));
     }
 
     if (state.error.length > 0) {

@@ -890,14 +890,20 @@ button.lookup-show {
   margin-block: -0.7rem;
 }
 
-/* The books' entries: a line between one book and the next, a small label
-   naming the book and the headword it answered about, and under it the
-   meanings one to a row. Where the field writes, a row is a label over a
-   native checkbox and the line's text (block 2 of the rebuild): 44px tall,
-   the box 20px with 12px to the text, the text wrapping as it needs to.
-   What says the meaning is kept is the checkbox's own mark and the weight
-   of the text - never a wash alone, which an e-ink panel rounds back to
-   paper; the hover wash is an extra, not the signal. */
+/* The books' entries, one fold per book (block 3 of the rebuild): a line
+   between one book and the next (a separator that survives an e-ink
+   panel's 16 greys), the book's name as the fold's own words - the small
+   uppercase label, with the count of its lines - and under it the meanings
+   one to a row. The first book opens by default, the others stand closed;
+   past the first lines of a book the rest fold again under "Show all".
+   No height limit and no scrollbar inside: the folds are the limit.
+
+   Where the field writes, a row is a label over a native checkbox and the
+   line's text (block 2): 44px tall, the box 20px with 12px to the text,
+   the text wrapping as it needs to. What says the meaning is kept is the
+   checkbox's own mark and the weight of the text - never a wash alone,
+   which an e-ink panel rounds back to paper; the hover wash is an extra,
+   not the signal. */
 .lookup-entries {
   display: grid;
   gap: 0;
@@ -905,22 +911,58 @@ button.lookup-show {
   margin-top: 0.6rem;
 }
 
-.lookup-entry + .lookup-entry {
-  margin-top: 0.6em;
-  padding-top: 0.6em;
+.lookup-group + .lookup-group {
   border-top: 1px solid var(--page-line);
 }
 
-.lookup-entry-label {
-  padding-left: 5px;
+/* The fold's line is the book's name: 44px to press, the marker in the
+   muted voice with it. */
+.lookup-group-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 44px;
+  padding: 0 0.35rem;
   font-size: 0.78rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--page-muted);
+  cursor: pointer;
 }
 
-.lookup-entry-label .lookup-entry-dict {
+.lookup-group-label::marker {
+  color: var(--page-muted);
+}
+
+.lookup-group-label .lookup-entry-dict {
   font-weight: 600;
+}
+
+/* A headword the book answered under when it is not the word typed (D23):
+   a quiet line over its rows. */
+.lookup-entry-headword {
+  padding: 0.35rem 0.35rem 0;
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--page-muted);
+}
+
+/* The rest of a book's lines, folded: the fold's line reads like the
+   sentence-links, and the rows under it are the same rows. */
+.lookup-more-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 44px;
+  padding: 0 0.35rem;
+  font-size: 0.85rem;
+  color: var(--page-accent);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.lookup-more-label::marker {
+  color: var(--page-muted);
 }
 
 .lookup-line {

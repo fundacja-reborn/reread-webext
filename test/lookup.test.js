@@ -1,7 +1,17 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { afterPress, isSaved, lookupOutcome, lookupText, paragraphsOf, sameMeaning } from "../src/lib/lookup.js";
+import {
+  LINES_OPEN,
+  afterPress,
+  entryGroups,
+  foldPoint,
+  isSaved,
+  lookupOutcome,
+  lookupText,
+  paragraphsOf,
+  sameMeaning,
+} from "../src/lib/lookup.js";
 import { MAX_PHRASE_LENGTH } from "../src/lib/store/phrase.js";
 
 /**
@@ -85,6 +95,56 @@ describe("paragraphsOf", () => {
   it("has no paragraph of nothing", () => {
     assert.deepEqual(paragraphsOf("\n\n a \n\n\n\n b \n\n"), ["a", "b"]);
     assert.deepEqual(paragraphsOf("   "), []);
+  });
+});
+
+describe("entryGroups", () => {
+  it("groups the entries by book, in the answer's order, every group named", () => {
+    const groups = entryGroups(
+      [
+        { dictionary: "WikDict en-pl", headword: "watch", senses: ["zegarek", "oglądać"] },
+        { dictionary: "reader.dict", headword: "watch", senses: ["A timepiece.\nTo observe."] },
+        // The same book answering under a second headword (a base form) is
+        // still one group, its lines counted together.
+        { dictionary: "WikDict en-pl", headword: "watches", senses: ["zegarki"] },
+      ],
+      "watches",
+    );
+    assert.deepEqual(groups, [
+      {
+        dictionary: "WikDict en-pl",
+        entries: [
+          { headword: "watch", lines: ["zegarek", "oglądać"] },
+          { headword: "", lines: ["zegarki"] },
+        ],
+        lines: ["zegarek", "oglądać", "zegarki"],
+      },
+      {
+        dictionary: "reader.dict",
+        entries: [{ headword: "watch", lines: ["A timepiece.", "To observe."] }],
+        lines: ["A timepiece.", "To observe."],
+      },
+    ]);
+  });
+
+  it("names a lone book too - the name is the fold's own words", () => {
+    const [group] = entryGroups([{ dictionary: "WikDict en-pl", headword: "watch", senses: ["zegarek"] }], "watch");
+    assert.equal(group?.dictionary, "WikDict en-pl");
+    assert.equal(group?.entries[0]?.headword, "");
+  });
+});
+
+describe("foldPoint", () => {
+  const lines = Array.from({ length: LINES_OPEN + 3 }, (_, at) => `line ${at}`);
+
+  it("cuts a long book after the first lines, the rest folded", () => {
+    assert.deepEqual(foldPoint(lines, []), { shown: LINES_OPEN, unfolded: false });
+    assert.deepEqual(foldPoint(["a", "b"], []), { shown: 2, unfolded: false });
+  });
+
+  it("opens the fold by itself when a saved meaning would be out of sight", () => {
+    assert.deepEqual(foldPoint(lines, [`line ${LINES_OPEN + 1}`]), { shown: LINES_OPEN, unfolded: true });
+    assert.deepEqual(foldPoint(lines, ["line 0"]), { shown: LINES_OPEN, unfolded: false });
   });
 });
 

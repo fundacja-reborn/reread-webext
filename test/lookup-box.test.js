@@ -100,7 +100,7 @@ describe("the look-up field", () => {
     const render = bodyOf(box, "render");
     const at = (/** @type {string} */ marker) => render.indexOf(marker);
     assert.ok(at('"lookup-head"') !== -1 && at('"lookup-head"') < at('"lookup-kept"'), "the phrase is not at the head");
-    assert.ok(at('"lookup-kept"') < at('"lookup-entries"'), "the books stand before what the phrase means");
+    assert.ok(at('"lookup-kept"') < at("books(entryGroups("), "the books stand before what the phrase means");
     // The standing at the head's far end, for a saved phrase only: the
     // count, and the way to the phrase's own row where the home has a list.
     assert.match(render, /if \(state\.meanings\.length > 0\) head\.append\(standing\(state\.phrase\)\)/, "the standing stands for an unsaved phrase, or not at all");
@@ -114,15 +114,36 @@ describe("the look-up field", () => {
     assert.doesNotMatch(render, /button\("lookup-chip"/, "a chip is a press");
   });
 
+  it("folds the books: one fold per book, the first open, the rest of a long book under Show all", async () => {
+    const box = await source("lib/lookup-box.js");
+    assert.match(bodyOf(box, "render"), /books\(entryGroups\(state\.outcome\.entries, state\.phrase\.normalized\)\)/, "the entries are not grouped by book");
+    const shelf = bodyOf(box, "books");
+    assert.match(shelf, /fold\("lookup-group", `group:\$\{group\.dictionary\}`, at === 0, summary\)/, "the first book is not the one open by default, or a book is no fold");
+    assert.match(shelf, /if \(!readOnly\) summary\.append\(` \(\$\{group\.lines\.length\.toLocaleString\(\)\}\)`\)/, "the fold's name carries no count where lines are ticked, or one where they are prose");
+    assert.match(shelf, /foldPoint\(group\.lines, state\.meanings\)/, "the cut does not ask the rule");
+    assert.match(shelf, /fold\("lookup-more", `more:\$\{group\.dictionary\}`, unfolded, label\)/, "the rest of a long book does not fold, or ignores a saved line out of sight");
+    assert.match(shelf, /t\("lookup_show_fewer"\) : t\("lookup_show_all", \[group\.lines\.length\.toLocaleString\(\)\]\)/, "the fold's words do not follow its state");
+    // A fold is remembered as the reader left it across the redraws a tick
+    // makes, and forgotten with the next word.
+    const folded = bodyOf(box, "fold");
+    assert.match(folded, /details\.open = folds\.get\(key\) \?\? openByDefault;/, "a redraw forgets which folds were opened");
+    assert.match(folded, /details\.addEventListener\("toggle", \(\) => \{\s*folds\.set\(key, details\.open\);/, "the reader's hand on a fold is not written down");
+    assert.match(bodyOf(box, "lookUp"), /folds = new Map\(\);/, "a new word inherits the last word's folds");
+    // No scrollbar inside the panel: the folds are the limit.
+    const styles = await source("assets/page.css");
+    const panel = styles.slice(styles.indexOf(".lookup-entries {"), styles.indexOf("/* --- the colophon"));
+    assert.doesNotMatch(panel, /max-height|overflow(-y)?: auto/, "the entries scroll inside the panel");
+  });
+
   it("draws the entries as prose, paragraph by paragraph, where it only reads", async () => {
-    const render = bodyOf(await source("lib/lookup-box.js"), "render");
+    const shelf = bodyOf(await source("lib/lookup-box.js"), "books");
     // The read-only field's entries must not promise a choice: divs, never
-    // buttons - the book's paragraphs as it wrote them (the presses cut a
+    // checkboxes - the book's paragraphs as it wrote them (the rows cut a
     // sense into lines).
     assert.match(
-      render,
+      shelf,
       /if \(readOnly\) \{[\s\S]*?paragraphsOf\(sense\)[\s\S]*?element\("div", "lookup-paragraph", paragraph\)/,
-      "a read-only entry is presses, or loses the book's paragraphs",
+      "a read-only entry is rows, or loses the book's paragraphs",
     );
   });
 });

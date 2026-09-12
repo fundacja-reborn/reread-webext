@@ -104,6 +104,69 @@ export function lookupOutcome(answer, normalized) {
 }
 
 /**
+ * The entries as one group per dictionary (block 3 of the panel's rebuild):
+ * the book's name, and under it every entry it answered with - each with
+ * the headword `entryBlocks` decided to name (only when it is not the word
+ * typed, D23) and its lines. The order is the answer's, which is the
+ * settings' order of the dictionaries; a book that answered under two
+ * headwords (a word and its base form) is still one group, with the lines
+ * of both counted together. The name comes from the entry itself, not from
+ * the block's label, which drops it when there is one book to tell apart -
+ * here every group is named, because the name is the fold's own words.
+ *
+ * @typedef {{ dictionary: string, entries: Array<{ headword: string, lines: string[] }>, lines: string[] }} EntryGroup
+ *
+ * @param {import("./protocol.js").DictEntry[]} entries
+ * @param {string} normalized the phrase's key
+ * @returns {EntryGroup[]}
+ */
+export function entryGroups(entries, normalized) {
+  const blocks = entryBlocks(entries, normalized);
+  /** @type {Map<string, EntryGroup>} */
+  const groups = new Map();
+  entries.forEach((entry, at) => {
+    const block = blocks[at];
+    if (block === undefined) return;
+    let group = groups.get(entry.dictionary);
+    if (group === undefined) {
+      group = { dictionary: entry.dictionary, entries: [], lines: [] };
+      groups.set(entry.dictionary, group);
+    }
+    group.entries.push({ headword: block.headword, lines: block.lines });
+    group.lines.push(...block.lines);
+  });
+  return [...groups.values()];
+}
+
+/**
+ * How many of a group's lines stand open before the rest fold under "Show
+ * all": enough for a word's meanings in a bilingual book, few enough that
+ * a big monolingual entry does not push the list under the panel two
+ * screens down (D5 of the rebuild: the height is limited by structure,
+ * never by a scrollbar inside the panel). Not by kind of line - nothing in
+ * the data says which line is prose (K2, confirmed): the reader's eyes do
+ * that, the way they do in the bubble.
+ */
+export const LINES_OPEN = 8;
+
+/**
+ * Where a group's rows are cut (`LINES_OPEN`), and whether the fold under
+ * the cut starts open: it does when a saved meaning would otherwise be out
+ * of sight - a tick that cannot be seen is a state the panel is hiding.
+ *
+ * @param {string[]} lines the group's lines, in order
+ * @param {string[]} meanings what the phrase means now
+ * @returns {{ shown: number, unfolded: boolean }} how many lines stand open;
+ *   whether the fold with the rest opens by default (false with nothing
+ *   folded)
+ */
+export function foldPoint(lines, meanings) {
+  const shown = Math.min(lines.length, LINES_OPEN);
+  const folded = lines.slice(shown);
+  return { shown, unfolded: folded.some((line) => isSaved(meanings, line)) };
+}
+
+/**
  * Whether a saved meaning and a dictionary line are one and the same (K3 of
  * the panel's rebuild, Michał's call 2026-09-12): equal once whitespace is
  * folded the way the store folds it on every save (`collapseWhitespace` -

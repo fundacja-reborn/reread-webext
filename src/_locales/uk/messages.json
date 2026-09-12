@@ -110,6 +110,13 @@
       "count": { "content": "$1", "example": "3" }
     }
   },
+  "lookup_show_all": {
+    "message": "Показати всі ($COUNT$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "lookup_show_fewer": { "message": "Показати менше" },
   "lookup_show_in_list": { "message": "Показати в списку" },
   "lookup_kept": { "message": "У ваших збережених фразах" },
   "popup_lookup_back": { "message": "Назад до меню" },

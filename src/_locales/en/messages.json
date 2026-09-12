@@ -187,6 +187,17 @@
       "count": { "content": "$1", "example": "3" }
     }
   },
+  "lookup_show_all": {
+    "message": "Show all ($COUNT$)",
+    "description": "The fold under a dictionary's first lines in the look-up answer, closed: the rest of the lines stand behind it, and the count is all the lines the dictionary has for the word.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "lookup_show_fewer": {
+    "message": "Show fewer",
+    "description": "The same fold once it is open."
+  },
   "lookup_show_in_list": {
     "message": "Show in list",
     "description": "The link after the saved count on the saved-phrases page: sets the list's filter to the phrase and scrolls to its row, where Edit and Learned are. The popup's field has no list and shows no link."
