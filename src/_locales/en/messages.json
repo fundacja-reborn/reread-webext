@@ -488,14 +488,14 @@
     "description": "The same row while the page has the whole screen: the press that gives the browser's bars back (Back or Esc do the same). Also the bar's full-screen tool's name in that state (D195)."
   },
   "library_pictures_one": {
-    "message": "$COUNT$ picture, $SIZE$",
+    "message": "$COUNT$ picture · $SIZE$",
     "placeholders": {
       "count": { "content": "$1", "example": "1" },
       "size": { "content": "$2", "example": "0.3 MB" }
     }
   },
   "library_pictures_other": {
-    "message": "$COUNT$ pictures, $SIZE$",
+    "message": "$COUNT$ pictures · $SIZE$",
     "description": "In a reading list row: the article's pictures and what they take.",
     "placeholders": {
       "count": { "content": "$1", "example": "12" },
@@ -621,12 +621,23 @@
   },
   "reader_format_title": { "message": "File format" },
   "reader_transfer_note": {
-    "message": ".zip - Import only adds what is missing and never overwrites what is saved: an article already here keeps its copy, a saved phrase keeps its meanings and takes only a sentence it lacks or a higher count, a highlight already here is left out. The settings are restored only when you tick \"Restore the settings too\".",
-    "description": "The .zip line of the file-format fold: only what the paragraphs above do not say - the import's merging rules and the settings box, named by its own label (reader_backup_settings_restore)."
+    "message": "Import only adds what is missing and never overwrites what is saved: an article already here keeps its copy, a saved phrase keeps its meanings and takes only a sentence it lacks or a higher count, a highlight already here is left out.",
+    "description": "The .zip entry of the file-format glossary, after the bold extension the page itself writes: the import's merging rules. The settings sentence is its own key (reader_transfer_settings) - the entry is two paragraphs, and a marked element holds text only."
   },
-  "reader_export_pictures": {
-    "message": "Export with pictures ($COUNT$, $SIZE$)",
-    "description": "Checkbox under the Import/Export buttons: names Export outright, so nobody reads it as an import option (Michał, 2026-08-29). Checked, the backup becomes a .zip with the pictures kept with articles.",
+  "reader_transfer_settings": {
+    "message": "The settings are restored only when you tick \"Restore the settings too\".",
+    "description": "Second paragraph of the .zip entry: the settings box, named by its own label (reader_backup_settings_restore)."
+  },
+  "reader_export_pictures_one": {
+    "message": "Export with pictures ($COUNT$ picture · $SIZE$)",
+    "description": "Checkbox under the Import/Export buttons: names Export outright, so nobody reads it as an import option (Michał, 2026-08-29). Checked, the backup becomes a .zip with the pictures kept with articles. The count with its unit and a middle dot before the size (Michał, 2026-09-13): a comma between two numbers read as one number.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "size": { "content": "$2", "example": "12.4 MB" }
+    }
+  },
+  "reader_export_pictures_other": {
+    "message": "Export with pictures ($COUNT$ pictures · $SIZE$)",
     "placeholders": {
       "count": { "content": "$1", "example": "34" },
       "size": { "content": "$2", "example": "12.4 MB" }
@@ -663,8 +674,8 @@
     }
   },
   "reader_transfer_epub": {
-    "message": ".epub - the electronic book format. A book is stored as text and pictures, split into parts at import.",
-    "description": "The .epub line of the file-format fold: what a book becomes in the reading list."
+    "message": "the electronic book format. A book is stored as text and pictures, split into parts at import.",
+    "description": "The .epub entry of the glossary, after the bold extension: lowercase, it continues the line."
   },
   "reader_backup_scope": {
     "message": "The backup holds your articles with their highlights and reading positions, the saved phrases of every language pair, and the settings. Highlights made in books are in it too.",
@@ -741,8 +752,8 @@
     "placeholders": { "count": { "content": "$1", "example": "12" } }
   },
   "reader_transfer_marks": {
-    "message": "Highlights of articles and books can also be exported as .md notes from the Highlights page.",
-    "description": "The last line of the file-format fold: the other way the highlights leave - the notes file of the Highlights page."
+    "message": "notes with the highlights of articles and books, exported from the Highlights page.",
+    "description": "The .md entry of the glossary, after the bold extension: the notes file of the Highlights page."
   },
   "reader_backup_done": {
     "message": "Backup written to $FILE$ ($SIZE$): $PARTS$.",

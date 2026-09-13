@@ -470,28 +470,28 @@
   "reader_fullscreen_bar": { "message": "На весь екран зі згорнутою панеллю" },
   "reader_fullscreen_exit": { "message": "Вийти з повноекранного режиму" },
   "library_pictures_one": {
-    "message": "$COUNT$ зображення, $SIZE$",
+    "message": "$COUNT$ зображення · $SIZE$",
     "placeholders": {
       "count": { "content": "$1", "example": "1" },
       "size": { "content": "$2", "example": "0,3 MB" }
     }
   },
   "library_pictures_few": {
-    "message": "$COUNT$ зображення, $SIZE$",
+    "message": "$COUNT$ зображення · $SIZE$",
     "placeholders": {
       "count": { "content": "$1", "example": "3" },
       "size": { "content": "$2", "example": "0,8 MB" }
     }
   },
   "library_pictures_many": {
-    "message": "$COUNT$ зображень, $SIZE$",
+    "message": "$COUNT$ зображень · $SIZE$",
     "placeholders": {
       "count": { "content": "$1", "example": "12" },
       "size": { "content": "$2", "example": "4,2 MB" }
     }
   },
   "library_pictures_other": {
-    "message": "$COUNT$ зображення, $SIZE$",
+    "message": "$COUNT$ зображення · $SIZE$",
     "placeholders": {
       "count": { "content": "$1", "example": "12" },
       "size": { "content": "$2", "example": "4,2 MB" }
@@ -602,13 +602,37 @@
   },
   "reader_format_title": { "message": "Формат файлу" },
   "reader_transfer_note": {
-    "message": ".zip - Імпорт лише додає те, чого бракує, і ніколи не перезаписує збереженого: стаття, яка вже є, зберігає свою копію, збережена фраза зберігає значення й бере лише речення, якого не має, або вищий лічильник, позначення, яке вже є, пропускається. Налаштування відновлюються лише тоді, коли ви позначите «Відновити також налаштування»."
+    "message": "Імпорт лише додає те, чого бракує, і ніколи не перезаписує збереженого: стаття, яка вже є, зберігає свою копію, збережена фраза зберігає значення й бере лише речення, якого не має, або вищий лічильник, позначення, яке вже є, пропускається."
   },
-  "reader_export_pictures": {
-    "message": "Експорт із зображеннями ($COUNT$, $SIZE$)",
+  "reader_transfer_settings": {
+    "message": "Налаштування відновлюються лише тоді, коли ви позначите «Відновити також налаштування»."
+  },
+  "reader_export_pictures_one": {
+    "message": "Експорт із зображеннями ($COUNT$ зображення · $SIZE$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "size": { "content": "$2", "example": "12,4 МБ" }
+    }
+  },
+  "reader_export_pictures_few": {
+    "message": "Експорт із зображеннями ($COUNT$ зображення · $SIZE$)",
     "placeholders": {
       "count": { "content": "$1", "example": "34" },
-      "size": { "content": "$2", "example": "12,4 MB" }
+      "size": { "content": "$2", "example": "12,4 МБ" }
+    }
+  },
+  "reader_export_pictures_many": {
+    "message": "Експорт із зображеннями ($COUNT$ зображень · $SIZE$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "34" },
+      "size": { "content": "$2", "example": "12,4 МБ" }
+    }
+  },
+  "reader_export_pictures_other": {
+    "message": "Експорт із зображеннями ($COUNT$ зображення · $SIZE$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "34" },
+      "size": { "content": "$2", "example": "12,4 МБ" }
     }
   },
   "reader_import_pictures_one": {
@@ -654,7 +678,7 @@
     }
   },
   "reader_transfer_epub": {
-    "message": ".epub - формат електронних книжок. Книга зберігається як текст і зображення, поділена на частини під час імпорту."
+    "message": "формат електронних книжок. Книга зберігається як текст і зображення, поділена на частини під час імпорту."
   },
   "reader_backup_scope": {
     "message": "Резервна копія містить ваші статті з їхніми позначеннями та позиціями читання, збережені фрази кожної мовної пари й налаштування. Позначення, зроблені в книгах, також є в ній."
@@ -770,7 +794,7 @@
     "placeholders": { "count": { "content": "$1", "example": "1,5" } }
   },
   "reader_transfer_marks": {
-    "message": "Позначення зі статей і книг можна також експортувати як нотатки .md зі сторінки позначень."
+    "message": "нотатки з позначеннями зі статей і книг, для експорту зі сторінки позначень."
   },
   "reader_backup_done": {
     "message": "Резервну копію записано до $FILE$ ($SIZE$): $PARTS$.",

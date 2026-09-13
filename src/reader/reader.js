@@ -3372,10 +3372,9 @@ function renderExportControls() {
   );
   if (exportPicturesRow !== null) exportPicturesRow.hidden = kept.count === 0;
   if (exportPicturesLabel !== null) {
-    exportPicturesLabel.textContent = t("reader_export_pictures", [
-      kept.count.toLocaleString(),
-      megabytes(kept.bytes),
-    ]);
+    // The count with its unit, a middle dot, the size: two bare numbers
+    // in one bracket read as one number (Michał, 2026-09-13).
+    exportPicturesLabel.textContent = plural(kept.count, "reader_export_pictures", [megabytes(kept.bytes)]);
   }
 }
 

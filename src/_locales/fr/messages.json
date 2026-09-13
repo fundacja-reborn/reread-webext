@@ -365,14 +365,14 @@
   "reader_fullscreen_bar": { "message": "Plein écran, barre repliée" },
   "reader_fullscreen_exit": { "message": "Quitter le plein écran" },
   "library_pictures_one": {
-    "message": "$COUNT$ image, $SIZE$",
+    "message": "$COUNT$ image · $SIZE$",
     "placeholders": {
       "count": { "content": "$1", "example": "1" },
       "size": { "content": "$2", "example": "0,3 MB" }
     }
   },
   "library_pictures_other": {
-    "message": "$COUNT$ images, $SIZE$",
+    "message": "$COUNT$ images · $SIZE$",
     "placeholders": {
       "count": { "content": "$1", "example": "12" },
       "size": { "content": "$2", "example": "4,2 MB" }
@@ -483,13 +483,23 @@
   },
   "reader_format_title": { "message": "Format du fichier" },
   "reader_transfer_note": {
-    "message": ".zip - L'import n'ajoute que ce qui manque et n'écrase jamais ce qui est enregistré : un article déjà présent garde sa copie, une phrase enregistrée garde ses sens et ne prend qu'une phrase d'exemple qui lui manque ou un compteur plus élevé, un surlignage déjà présent est laissé de côté. Les paramètres ne sont restaurés que si vous cochez « Restaurer aussi les paramètres »."
+    "message": "L'import n'ajoute que ce qui manque et n'écrase jamais ce qui est enregistré : un article déjà présent garde sa copie, une phrase enregistrée garde ses sens et ne prend qu'une phrase d'exemple qui lui manque ou un compteur plus élevé, un surlignage déjà présent est laissé de côté."
   },
-  "reader_export_pictures": {
-    "message": "Exporter avec les images ($COUNT$, $SIZE$)",
+  "reader_transfer_settings": {
+    "message": "Les paramètres ne sont restaurés que si vous cochez « Restaurer aussi les paramètres »."
+  },
+  "reader_export_pictures_one": {
+    "message": "Exporter avec les images ($COUNT$ image · $SIZE$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "size": { "content": "$2", "example": "12,4 Mo" }
+    }
+  },
+  "reader_export_pictures_other": {
+    "message": "Exporter avec les images ($COUNT$ images · $SIZE$)",
     "placeholders": {
       "count": { "content": "$1", "example": "34" },
-      "size": { "content": "$2", "example": "12,4 MB" }
+      "size": { "content": "$2", "example": "12,4 Mo" }
     }
   },
   "reader_import_pictures_one": {
@@ -521,7 +531,7 @@
     }
   },
   "reader_transfer_epub": {
-    "message": ".epub - le format des livres numériques. Un livre est enregistré comme texte et images, découpé en parties à l'import."
+    "message": "le format des livres numériques. Un livre est enregistré comme texte et images, découpé en parties à l'import."
   },
   "reader_backup_scope": {
     "message": "La sauvegarde contient vos articles avec leurs surlignages et leurs positions de lecture, les phrases enregistrées de chaque paire de langues et les paramètres. Les surlignages faits dans les livres y sont aussi."
@@ -585,7 +595,7 @@
     "placeholders": { "count": { "content": "$1", "example": "12" } }
   },
   "reader_transfer_marks": {
-    "message": "Les surlignages des articles et des livres peuvent aussi être exportés en notes .md depuis la page Surlignages."
+    "message": "des notes avec les surlignages des articles et des livres, à exporter depuis la page Surlignages."
   },
   "reader_backup_done": {
     "message": "Sauvegarde écrite dans $FILE$ ($SIZE$) : $PARTS$.",

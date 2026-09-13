@@ -1269,6 +1269,48 @@ body.reader:has(#library:not([hidden])) {
   padding: 0.35rem 1rem;
 }
 
+/* The transfer section's description as a list (Michał, 2026-09-13): the
+   four points under the pictures box, and the format fold's glossary in
+   the same dress. The indent of the settings page's "First steps" list;
+   the bullets in the text's own ink, not the hint's grey - on e-ink a grey
+   dot posterizes toward the paper, and a list without its bullets is a
+   paragraph with ragged edges. The words keep the hint's voice. */
+.transfer-notes {
+  margin: 0.75rem 0 0;
+  padding-left: 1.4rem;
+}
+
+.transfer-notes li {
+  margin: 0.3rem 0;
+  overflow-wrap: anywhere;
+}
+
+.transfer-notes li::marker {
+  color: var(--page-fg);
+}
+
+/* Two paragraphs in one point (the .zip entry): the second steps down a
+   line, no more. */
+.transfer-notes p {
+  margin: 0;
+}
+
+.transfer-notes p + p {
+  margin-top: 0.35rem;
+}
+
+/* Inside the fold the list stands where its paragraphs stood. */
+.fold-line .transfer-notes {
+  margin: 0 0 0.75rem;
+}
+
+/* The glossary's extensions: the one bold of the section, in the text's
+   ink like the bullets. */
+.transfer-notes strong {
+  color: var(--page-fg);
+  font-weight: 600;
+}
+
 /* --- the two kinds of nothing: an empty segment, a filter with no match --- */
 
 #library-empty {

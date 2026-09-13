@@ -470,28 +470,28 @@
   "reader_fullscreen_bar": { "message": "Pełny ekran ze schowanym paskiem" },
   "reader_fullscreen_exit": { "message": "Wyjdź z pełnego ekranu" },
   "library_pictures_one": {
-    "message": "$COUNT$ obrazek, $SIZE$",
+    "message": "$COUNT$ obrazek · $SIZE$",
     "placeholders": {
       "count": { "content": "$1", "example": "1" },
       "size": { "content": "$2", "example": "0,3 MB" }
     }
   },
   "library_pictures_few": {
-    "message": "$COUNT$ obrazki, $SIZE$",
+    "message": "$COUNT$ obrazki · $SIZE$",
     "placeholders": {
       "count": { "content": "$1", "example": "3" },
       "size": { "content": "$2", "example": "0,8 MB" }
     }
   },
   "library_pictures_many": {
-    "message": "$COUNT$ obrazków, $SIZE$",
+    "message": "$COUNT$ obrazków · $SIZE$",
     "placeholders": {
       "count": { "content": "$1", "example": "12" },
       "size": { "content": "$2", "example": "4,2 MB" }
     }
   },
   "library_pictures_other": {
-    "message": "$COUNT$ obrazka, $SIZE$",
+    "message": "$COUNT$ obrazka · $SIZE$",
     "placeholders": {
       "count": { "content": "$1", "example": "12" },
       "size": { "content": "$2", "example": "4,2 MB" }
@@ -602,10 +602,34 @@
   },
   "reader_format_title": { "message": "Format pliku" },
   "reader_transfer_note": {
-    "message": ".zip - Import tylko dodaje to, czego brakuje, i nigdy nie nadpisuje zapisanych danych: artykuł już obecny zachowuje swoją kopię, zapisana fraza zachowuje znaczenia i przyjmuje tylko brakujące zdanie lub wyższy licznik, obecne zakreślenie jest pomijane. Ustawienia są przywracane tylko po zaznaczeniu pola „Przywróć też ustawienia”."
+    "message": "Import tylko dodaje to, czego brakuje, i nigdy nie nadpisuje zapisanych danych: artykuł już obecny zachowuje swoją kopię, zapisana fraza zachowuje znaczenia i przyjmuje tylko brakujące zdanie lub wyższy licznik, obecne zakreślenie jest pomijane."
   },
-  "reader_export_pictures": {
-    "message": "Eksport z obrazkami ($COUNT$, $SIZE$)",
+  "reader_transfer_settings": {
+    "message": "Ustawienia są przywracane tylko po zaznaczeniu pola „Przywróć też ustawienia”."
+  },
+  "reader_export_pictures_one": {
+    "message": "Eksport z obrazkami ($COUNT$ obrazek · $SIZE$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "size": { "content": "$2", "example": "12,4 MB" }
+    }
+  },
+  "reader_export_pictures_few": {
+    "message": "Eksport z obrazkami ($COUNT$ obrazki · $SIZE$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "34" },
+      "size": { "content": "$2", "example": "12,4 MB" }
+    }
+  },
+  "reader_export_pictures_many": {
+    "message": "Eksport z obrazkami ($COUNT$ obrazków · $SIZE$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "34" },
+      "size": { "content": "$2", "example": "12,4 MB" }
+    }
+  },
+  "reader_export_pictures_other": {
+    "message": "Eksport z obrazkami ($COUNT$ obrazka · $SIZE$)",
     "placeholders": {
       "count": { "content": "$1", "example": "34" },
       "size": { "content": "$2", "example": "12,4 MB" }
@@ -654,7 +678,7 @@
     }
   },
   "reader_transfer_epub": {
-    "message": ".epub - format książki elektronicznej. Książka jest zapisywana jako tekst i obrazki, podzielona na części przy imporcie."
+    "message": "format książki elektronicznej. Książka jest zapisywana jako tekst i obrazki, podzielona na części przy imporcie."
   },
   "reader_backup_scope": {
     "message": "Kopia zawiera artykuły z zakreśleniami i pozycją czytania, zapisane frazy wszystkich par językowych oraz ustawienia. Zakreślenia z książek też w niej są."
@@ -770,7 +794,7 @@
     "placeholders": { "count": { "content": "$1", "example": "1,5" } }
   },
   "reader_transfer_marks": {
-    "message": "Zakreślenia z artykułów i książek można też wyeksportować jako notatki .md ze strony Zakreślenia."
+    "message": "notatki z zakreśleniami artykułów i książek, do eksportu ze strony Zakreślenia."
   },
   "reader_backup_done": {
     "message": "Kopia zapisana do $FILE$ ($SIZE$): $PARTS$.",

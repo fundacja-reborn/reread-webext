@@ -334,14 +334,14 @@
   "reader_fullscreen_bar": { "message": "Vollbild mit eingeklappter Leiste" },
   "reader_fullscreen_exit": { "message": "Vollbild beenden" },
   "library_pictures_one": {
-    "message": "$COUNT$ Bild, $SIZE$",
+    "message": "$COUNT$ Bild · $SIZE$",
     "placeholders": {
       "count": { "content": "$1", "example": "1" },
       "size": { "content": "$2", "example": "0,3 MB" }
     }
   },
   "library_pictures_other": {
-    "message": "$COUNT$ Bilder, $SIZE$",
+    "message": "$COUNT$ Bilder · $SIZE$",
     "placeholders": {
       "count": { "content": "$1", "example": "12" },
       "size": { "content": "$2", "example": "4,2 MB" }
@@ -452,10 +452,20 @@
   },
   "reader_format_title": { "message": "Dateiformat" },
   "reader_transfer_note": {
-    "message": ".zip - Der Import ergänzt nur, was fehlt, und überschreibt nie Gespeichertes: ein schon vorhandener Artikel behält seine Kopie, ein gespeicherter Eintrag behält seine Bedeutungen und übernimmt nur einen fehlenden Satz oder einen höheren Zähler, eine schon vorhandene Markierung wird ausgelassen. Die Einstellungen werden nur wiederhergestellt, wenn Sie „Auch die Einstellungen wiederherstellen“ ankreuzen."
+    "message": "Der Import ergänzt nur, was fehlt, und überschreibt nie Gespeichertes: ein schon vorhandener Artikel behält seine Kopie, ein gespeicherter Eintrag behält seine Bedeutungen und übernimmt nur einen fehlenden Satz oder einen höheren Zähler, eine schon vorhandene Markierung wird ausgelassen."
   },
-  "reader_export_pictures": {
-    "message": "Export mit Bildern ($COUNT$, $SIZE$)",
+  "reader_transfer_settings": {
+    "message": "Die Einstellungen werden nur wiederhergestellt, wenn Sie „Auch die Einstellungen wiederherstellen“ ankreuzen."
+  },
+  "reader_export_pictures_one": {
+    "message": "Export mit Bildern ($COUNT$ Bild · $SIZE$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "size": { "content": "$2", "example": "12,4 MB" }
+    }
+  },
+  "reader_export_pictures_other": {
+    "message": "Export mit Bildern ($COUNT$ Bilder · $SIZE$)",
     "placeholders": {
       "count": { "content": "$1", "example": "34" },
       "size": { "content": "$2", "example": "12,4 MB" }
@@ -490,7 +500,7 @@
     }
   },
   "reader_transfer_epub": {
-    "message": ".epub - das Format elektronischer Bücher. Ein Buch wird als Text und Bilder gespeichert, beim Import in Teile geteilt."
+    "message": "das Format elektronischer Bücher. Ein Buch wird als Text und Bilder gespeichert, beim Import in Teile geteilt."
   },
   "reader_backup_scope": {
     "message": "Die Sicherung enthält Ihre Artikel mit ihren Markierungen und Lesepositionen, die gespeicherten Einträge jedes Sprachpaars und die Einstellungen. Markierungen in Büchern sind ebenfalls enthalten."
@@ -554,7 +564,7 @@
     "placeholders": { "count": { "content": "$1", "example": "12" } }
   },
   "reader_transfer_marks": {
-    "message": "Markierungen aus Artikeln und Büchern lassen sich auch als .md-Notizen von der Markierungsseite exportieren."
+    "message": "Notizen mit den Markierungen aus Artikeln und Büchern, zum Export von der Markierungsseite."
   },
   "reader_backup_done": {
     "message": "Sicherung geschrieben nach $FILE$ ($SIZE$): $PARTS$.",

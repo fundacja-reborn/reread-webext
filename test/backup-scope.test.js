@@ -26,16 +26,51 @@ describe("the backup's scope on the reading list page", () => {
     const scope = page.indexOf('data-i18n="reader_backup_scope"');
     const books = page.indexOf('data-i18n="reader_backup_books"');
     const accepts = page.indexOf('data-i18n="reader_transfer_accepts"');
+    const pick = page.indexOf('data-i18n="reader_transfer_pick"');
     const fold = page.indexOf('data-i18n="reader_format_title"');
-    assert.ok(scope !== -1 && books !== -1, "a paragraph of the backup's scope is missing");
-    assert.ok(scope < books && books < accepts, "the scope's paragraphs do not stand first under the report lines");
-    assert.ok(accepts < fold, "the scope's paragraphs stand inside or after the fold");
+    assert.ok(scope !== -1 && books !== -1, "a point of the backup's scope is missing");
+    assert.ok(scope < books && books < accepts && accepts < pick, "the points do not stand in the brief's order: the backup, the books, Import, Select");
+    assert.ok(pick < fold, "the points stand inside or after the fold");
+    // One list, no heading, the four points as its items (the second polish).
+    assert.match(
+      page,
+      /<ul class="hint transfer-notes">\s*<li data-i18n="reader_backup_scope">[\s\S]*?<li data-i18n="reader_backup_books">[\s\S]*?<li data-i18n="reader_transfer_accepts">[\s\S]*?<li data-i18n="reader_transfer_pick">[\s\S]*?<\/ul>\s*<details class="fold-line">/,
+      "the four points are not one list right over the fold",
+    );
     // The fold keeps only what the paragraphs do not say.
     assert.doesNotMatch(page, /reader_transfer_books/, "the fold still repeats that books are not in the backup");
+    // The fold is a glossary: each entry opens with its extension in bold,
+    // written in the page (a marked element holds text only), the .zip
+    // entry in two paragraphs.
+    const glossary = page.slice(fold, page.indexOf("</details>", fold));
+    assert.match(glossary, /<strong>\.zip<\/strong> -\s*<span data-i18n="reader_transfer_note">/, "the .zip entry does not open with its extension in bold");
+    assert.match(glossary, /<p data-i18n="reader_transfer_settings">/, "the settings sentence is not the .zip entry's second paragraph");
+    assert.match(glossary, /<strong>\.epub<\/strong> -\s*<span data-i18n="reader_transfer_epub">/, "the .epub entry does not open with its extension in bold");
+    assert.match(glossary, /<strong>\.md<\/strong> -\s*<span data-i18n="reader_transfer_marks">/, "the .md entry does not open with its extension in bold");
+    assert.equal((glossary.match(/<strong>/g) ?? []).length, 3, "the glossary bolds something beyond its three extensions");
+    assert.doesNotMatch(page.slice(scope, fold), /<strong>/, "the list over the fold wears a bold");
     for (const locale of ["en", "pl", "de", "fr", "es", "uk"]) {
       const catalogue = JSON.parse(await readFile(new URL(`_locales/${locale}/messages.json`, ROOT), "utf8"));
       assert.equal(catalogue["reader_transfer_books"], undefined, `${locale} still carries the fold's old key`);
       assert.match(catalogue["reader_backup_books"].message, /\.epub/, `${locale}: the books paragraph does not name the .epub file`);
+    }
+  });
+});
+
+describe("the pictures box under the buttons", () => {
+  it("counts the pictures with their unit and a middle dot before the size, in the language's plural", async () => {
+    const script = await source("reader/reader.js");
+    assert.match(
+      bodyOf(script, "renderExportControls"),
+      /plural\(kept\.count, "reader_export_pictures", \[megabytes\(kept\.bytes\)\]\)/,
+      "the label does not count through the plural family",
+    );
+    for (const locale of ["en", "pl", "de", "fr", "es", "uk"]) {
+      const catalogue = JSON.parse(await readFile(new URL(`_locales/${locale}/messages.json`, ROOT), "utf8"));
+      for (const family of ["reader_export_pictures", "library_pictures"]) {
+        const sentence = catalogue[`${family}_other`].message;
+        assert.match(sentence, /\$COUNT\$ \S+ · \$SIZE\$/, `${locale}/${family}: not "N unit · size"`);
+      }
     }
   });
 });

@@ -365,14 +365,14 @@
   "reader_fullscreen_bar": { "message": "Pantalla completa con la barra plegada" },
   "reader_fullscreen_exit": { "message": "Salir de pantalla completa" },
   "library_pictures_one": {
-    "message": "$COUNT$ imagen, $SIZE$",
+    "message": "$COUNT$ imagen · $SIZE$",
     "placeholders": {
       "count": { "content": "$1", "example": "1" },
       "size": { "content": "$2", "example": "0,3 MB" }
     }
   },
   "library_pictures_other": {
-    "message": "$COUNT$ imágenes, $SIZE$",
+    "message": "$COUNT$ imágenes · $SIZE$",
     "placeholders": {
       "count": { "content": "$1", "example": "12" },
       "size": { "content": "$2", "example": "4,2 MB" }
@@ -483,10 +483,20 @@
   },
   "reader_format_title": { "message": "Formato del archivo" },
   "reader_transfer_note": {
-    "message": ".zip - La importación solo añade lo que falta y nunca sobrescribe lo guardado: un artículo ya presente conserva su copia, una frase guardada conserva sus significados y toma solo una oración que le falte o un contador más alto, un resaltado ya presente se omite. Los ajustes se restauran solo si marcas «Restaurar también los ajustes»."
+    "message": "La importación solo añade lo que falta y nunca sobrescribe lo guardado: un artículo ya presente conserva su copia, una frase guardada conserva sus significados y toma solo una oración que le falte o un contador más alto, un resaltado ya presente se omite."
   },
-  "reader_export_pictures": {
-    "message": "Exportar con imágenes ($COUNT$, $SIZE$)",
+  "reader_transfer_settings": {
+    "message": "Los ajustes se restauran solo si marcas «Restaurar también los ajustes»."
+  },
+  "reader_export_pictures_one": {
+    "message": "Exportar con imágenes ($COUNT$ imagen · $SIZE$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "size": { "content": "$2", "example": "12,4 MB" }
+    }
+  },
+  "reader_export_pictures_other": {
+    "message": "Exportar con imágenes ($COUNT$ imágenes · $SIZE$)",
     "placeholders": {
       "count": { "content": "$1", "example": "34" },
       "size": { "content": "$2", "example": "12,4 MB" }
@@ -521,7 +531,7 @@
     }
   },
   "reader_transfer_epub": {
-    "message": ".epub - el formato de los libros electrónicos. Un libro se guarda como texto e imágenes, dividido en partes al importar."
+    "message": "el formato de los libros electrónicos. Un libro se guarda como texto e imágenes, dividido en partes al importar."
   },
   "reader_backup_scope": {
     "message": "La copia de seguridad contiene tus artículos con sus resaltados y posiciones de lectura, las frases guardadas de cada par de idiomas y los ajustes. Los resaltados hechos en libros también están en ella."
@@ -585,7 +595,7 @@
     "placeholders": { "count": { "content": "$1", "example": "12" } }
   },
   "reader_transfer_marks": {
-    "message": "Los resaltados de artículos y libros también se pueden exportar como notas .md desde la página Resaltados."
+    "message": "notas con los resaltados de artículos y libros, para exportar desde la página Resaltados."
   },
   "reader_backup_done": {
     "message": "Copia de seguridad escrita en $FILE$ ($SIZE$): $PARTS$.",
