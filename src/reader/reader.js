@@ -33,9 +33,9 @@ import { ReadLedger } from "../lib/counting.js";
 import { dresser } from "../lib/user-css.js";
 import { webext } from "../lib/browser.js";
 import { holdChrome } from "../lib/chrome-hold.js";
-import { fileSize, localizePage, megabytes, plural, t } from "../lib/i18n.js";
+import { fileSize, localizePage, megabytes, plural, t, uiLocale } from "../lib/i18n.js";
 import { privateNote } from "../lib/private-note.js";
-import { languageName } from "../lib/language.js";
+import { languageName, pairLabel } from "../lib/language.js";
 import {
   CONFIG_KEY,
   DEFAULTS,
@@ -94,6 +94,7 @@ import { BACK_ROAD_KEY, READER_SOURCE_KEY, readReaderSource, writeReaderTab } fr
 import {
   ARTICLES_FILENAME,
   fromArticlesFile,
+  importPlan,
   toArticlesFile,
 } from "../lib/store/articles-file.js";
 import {
@@ -133,13 +134,17 @@ import {
   sweepOrphanSegments,
 } from "../lib/store/books.js";
 import {
-  MARKS_COPY_FILENAME,
-  fromMarksCopy,
-  isMarksCopy,
-  marksImportPlan,
-  toMarksCopy,
-} from "../lib/store/marks-copy.js";
+  BACKUP_ENTRIES,
+  BACKUP_FILENAME,
+  backupEntries,
+  fromManifest,
+  isNewerBackup,
+} from "../lib/store/backup-file.js";
+import { fromMarksCopy, isMarksCopy, marksImportPlan } from "../lib/store/marks-copy.js";
 import { MARKS_FILENAME, toMarksFile } from "../lib/store/marks-file.js";
+import { fromSettingsFile } from "../lib/store/settings-file.js";
+import { allPhrases } from "../lib/store/vocab.js";
+import { fromVocabularyFile } from "../lib/store/vocabulary-file.js";
 import { completeLibraryCopy, restoreLibrary } from "../lib/store/library-copy.js";
 import { allMarks, getMarks, putMarks, putMarksRows, restoreMarks } from "../lib/store/marks.js";
 import { keptTitles, readMarksBackup } from "../lib/store/marks-backup.js";
@@ -324,6 +329,13 @@ const importRun = /** @type {HTMLButtonElement | null} */ (
   document.getElementById("library-import-run")
 );
 const importCancel = document.getElementById("library-import-cancel");
+// The backup of everything's offer (D213): one line per part the file
+// holds, and the box that decides about the settings.
+const importParts = document.getElementById("library-import-parts");
+const importSettingsRow = document.getElementById("library-import-settings-row");
+const importSettings = /** @type {HTMLInputElement | null} */ (
+  document.getElementById("library-import-settings")
+);
 const transferLine = document.getElementById("library-transfer-status");
 const exportPicturesRow = document.getElementById("library-export-pictures-row");
 const exportPictures = /** @type {HTMLInputElement | null} */ (
@@ -352,32 +364,9 @@ const marksExportButton = /** @type {HTMLButtonElement | null} */ (
 // export button that says what it wrote, and the heading that says whose
 // quotes the page holds.
 const marksTransferLink = document.getElementById("marks-transfer-link");
-const marksTransferLine = document.getElementById("marks-transfer-status");
 const marksTitle = document.getElementById("marks-title");
-// The highlights' own backup (D168), on the page of all highlights alone:
-// the .json export and import, the offer a picked file becomes and the line
-// under them; the notes export with a line of its own (each report under
-// its own press, D153); and, on one document's page, the sentence that says
-// where the backup is, with the way there.
-const marksCopy = document.getElementById("marks-copy");
-const marksExportCopyButton = /** @type {HTMLButtonElement | null} */ (
-  document.getElementById("marks-export-copy")
-);
-const marksImportButton = document.getElementById("marks-import");
-const marksImportInput = /** @type {HTMLInputElement | null} */ (
-  document.getElementById("marks-import-file")
-);
-const marksImportConfirm = document.getElementById("marks-import-confirm");
-const marksImportSummary = document.getElementById("marks-import-summary");
-const marksImportSample = document.getElementById("marks-import-sample");
-const marksImportNote = document.getElementById("marks-import-note");
-const marksImportRun = /** @type {HTMLButtonElement | null} */ (
-  document.getElementById("marks-import-run")
-);
-const marksImportCancel = document.getElementById("marks-import-cancel");
+// The notes export's own line (each report under its own press, D153).
 const marksNotesLine = document.getElementById("marks-notes-status");
-const marksCopyElsewhere = document.getElementById("marks-copy-elsewhere");
-const marksAllLink = document.getElementById("marks-all-link");
 const marksCopyIcons = /** @type {HTMLTemplateElement | null} */ (
   document.getElementById("marks-copy-icons")
 );
@@ -757,18 +746,26 @@ let settings = DEFAULTS;
 let pendingImport = null;
 
 /**
- * The highlights file picked on the highlights page, waiting for the press
- * that writes it (D168): the plan of where every mark lands, made before
- * consent so the offer can say it, and the counts the file came with.
+ * The backup of everything a picked file turned out to be (D213), waiting
+ * for the reader's yes: each part parsed by its own reader, and what of it
+ * the library already holds where the offer can say so. The old files come
+ * here too - a highlights `.json` as a backup with one part; the list's own
+ * `.json` and `.zip` keep their offer above. State rather than DOM, the
+ * articles' offer's own reason.
  *
  * @type {{
  *   name: string,
- *   documents: number,
+ *   manifest: import("../lib/store/backup-file.js").BackupManifest | null,
+ *   articles: import("../lib/store/articles-file.js").FileArticle[],
+ *   newArticles: number,
  *   invalid: number,
- *   plan: import("../lib/store/marks-copy.js").MarksImportPlan,
+ *   pictures?: { bytes: Uint8Array, refs: Map<string, PictureRef[]>, account: { count: number, bytes: number } },
+ *   phrases: import("../lib/protocol.js").RestoreRow[],
+ *   highlights: import("../lib/store/marks-copy.js").CopyDoc[],
+ *   settings: import("../lib/config.js").ConfigPatch | null,
  * } | null}
  */
-let pendingMarksImport = null;
+let pendingBackup = null;
 
 /**
  * How many titles the confirmation quotes before asking - a sample to
@@ -867,22 +864,6 @@ function transferStatus(text, tone) {
   transferLine.textContent = text;
   if (tone === undefined) delete transferLine.dataset["tone"];
   else transferLine.dataset["tone"] = tone;
-}
-
-/**
- * The highlights page's own status line, under its export button (D153):
- * what the export wrote, or why it could not - beside the press, the way
- * the transfer sections' lines are. A notice under the bar stood a page
- * away from the button (Michał's smoke, 2026-08-29).
- *
- * @param {string} text
- * @param {"error"} [tone]
- */
-function marksStatus(text, tone) {
-  if (marksTransferLine === null) return;
-  marksTransferLine.textContent = text;
-  if (tone === undefined) delete marksTransferLine.dataset["tone"];
-  else marksTransferLine.dataset["tone"] = tone;
 }
 
 /**
@@ -3204,16 +3185,7 @@ async function showMarks(scope, { fresh = false } = {}) {
   // A report of the last visit's export is that visit's; the lines start
   // clear, the transfer sections' way - and a file offered on the last
   // visit is not offered on this one.
-  marksStatus("");
   marksNotesStatus("");
-  closeMarksImportOffer();
-  // The backup (D168) is exported and imported on the page of all
-  // highlights alone: an import on one document's page would have to
-  // answer what to do with another document's marks, and a sentence with
-  // the way there is the better answer (Michał's call, 2026-09-01). The
-  // notes export stands on both.
-  if (marksCopy !== null) marksCopy.hidden = scope !== null;
-  if (marksCopyElsewhere !== null) marksCopyElsewhere.hidden = scope === null;
   if (fresh) {
     marksQuery = "";
     marksPage = 1;
@@ -3376,7 +3348,9 @@ function renderExportControls() {
   const { metas } = libraryShown;
   const going = picking ? metas.filter((meta) => picked.has(meta.url)) : metas;
   if (exportButton !== null) {
-    exportButton.disabled = going.length === 0;
+    // Outside the selection the export is the backup of everything (D213),
+    // which always has something to write - the settings at the least.
+    exportButton.disabled = picking && going.length === 0;
     exportButton.textContent = picking
       ? t("reader_export_selected", going.length.toLocaleString())
       : t("action_export");
@@ -3688,7 +3662,6 @@ async function refreshMarks() {
   // puts it a page away - and stands only while there is something to
   // write.
   if (marksExportButton !== null) marksExportButton.disabled = view.total === 0;
-  if (marksExportCopyButton !== null) marksExportCopyButton.disabled = view.total === 0;
   if (marksTransferLink !== null) marksTransferLink.hidden = view.total === 0;
 
   // "3 of 12" while the filter narrows the page down, like the list's line.
@@ -4212,49 +4185,104 @@ async function articlesToExport() {
 }
 
 /**
- * The list as one file - fresh from the database rather than from the rows
- * on screen, because the screen shows one segment and an export is the
- * list, not the view; inside the selection (D152), the ticked articles,
- * which likewise stand on every tab and page. Downloading is a blob and an
- * anchor; no permission asks for less.
+ * The export: inside the selection (D152) the ticked articles as the list's
+ * own file - a file to hand somebody; otherwise the backup of everything
+ * (D213): the whole list with its highlights and reading positions (and
+ * its pictures when the box is ticked), every saved phrase of every pair
+ * with its sentence and counts, every document's highlights - books' too -
+ * and the settings, in one archive. Fresh from the databases rather than
+ * from the rows on screen, because the screen shows one segment and a
+ * backup is everything. Downloading is a blob and an anchor; no permission
+ * asks for less.
  */
 async function exportList() {
   try {
-    const [articles, marks] = await Promise.all([articlesToExport(), allMarks()]);
-    if (articles.length === 0) return;
-    // With pictures (D145) the file is an archive: the same .json inside,
-    // and one entry per picture beside it - read one article at a time,
-    // back from the copy where the database has lost them.
-    const withPictures =
-      exportPictures !== null && !exportPicturesRow?.hidden && exportPictures.checked;
-    /** @type {number} */
-    let size;
-    if (withPictures) {
-      /** @type {Map<string, import("../lib/reader/pictures.js").PictureRow[]>} */
-      const pictures = new Map();
-      for (const article of articles) {
-        if (article.pictures === undefined) continue;
-        const rows = await getPictures(article.url);
-        if (rows.length > 0) pictures.set(article.url, rows);
-      }
-      const archive = await packArchive(archiveEntries(articles, marks, pictures));
-      size = downloadFile(archive, ARCHIVE_FILENAME, "application/zip");
-    } else {
-      size = downloadFile(toArticlesFile(articles, marks), ARTICLES_FILENAME, "application/json");
+    if (picking) {
+      await exportSelection();
+      return;
     }
-    // The export says what it wrote (D153): a download is a quiet thing - a
-    // file in a folder, an arrow that blinks once - and a press nobody meant
-    // would otherwise go unnoticed (Michał's smoke, 2026-08-29). The name,
-    // the count and the size, in the section's own status line.
-    transferStatus(
-      plural(articles.length, "reader_export_done", [
-        withPictures ? ARCHIVE_FILENAME : ARTICLES_FILENAME,
-        fileSize(size),
-      ]),
+    const [articles, marks, positions, phrases, docs, config] = await Promise.all([
+      allArticles(),
+      allMarks(),
+      allPositions(),
+      allPhrases(),
+      marksDocs(() => true),
+      readConfig(),
+    ]);
+    const withPictures = exportPictures !== null && !exportPicturesRow?.hidden && exportPictures.checked;
+    const archive = await packArchive(
+      backupEntries({
+        app: webext().runtime.getManifest().version,
+        now: Date.now(),
+        articles,
+        marks,
+        pictures: withPictures ? await picturesOf(articles) : new Map(),
+        positions,
+        phrases,
+        highlights: docs.map(copyDocOf),
+        settings: config,
+      }),
     );
+    const size = downloadFile(archive, BACKUP_FILENAME, "application/zip");
+    // What the file holds, said where the press was (D153): each count in
+    // its own words and the settings as a word - a download is a quiet
+    // thing, and this one is the whole of somebody's reading.
+    const highlights = docs.reduce((sum, doc) => sum + doc.marks.length, 0);
+    const parts = [
+      plural(articles.length, "reader_backup_articles"),
+      plural(phrases.length, "phrases"),
+      plural(highlights, "reader_backup_highlights"),
+      t("reader_backup_settings_word"),
+    ];
+    transferStatus(t("reader_backup_done", [BACKUP_FILENAME, fileSize(size), parts.join(", ")]));
   } catch {
     transferStatus(describeError(ErrorCode.INTERNAL), "error");
   }
+}
+
+/**
+ * The pictures of the articles going into a file, each article's rows read
+ * back from the copy where the database has lost them - only for the
+ * articles that have any.
+ *
+ * @param {import("../lib/store/saved-article.js").SavedArticle[]} articles
+ * @returns {Promise<Map<string, import("../lib/reader/pictures.js").PictureRow[]>>}
+ */
+async function picturesOf(articles) {
+  /** @type {Map<string, import("../lib/reader/pictures.js").PictureRow[]>} */
+  const pictures = new Map();
+  for (const article of articles) {
+    if (article.pictures === undefined) continue;
+    const rows = await getPictures(article.url);
+    if (rows.length > 0) pictures.set(article.url, rows);
+  }
+  return pictures;
+}
+
+/**
+ * The ticked articles as the list's own file (D152) - the `.json`, or the
+ * `.zip` with their pictures beside it (D145): a file to hand somebody,
+ * not the backup, so it carries neither the vocabulary nor the settings.
+ * The export says what it wrote (D153) in the section's own line.
+ */
+async function exportSelection() {
+  const [articles, marks] = await Promise.all([articlesToExport(), allMarks()]);
+  if (articles.length === 0) return;
+  const withPictures = exportPictures !== null && !exportPicturesRow?.hidden && exportPictures.checked;
+  /** @type {number} */
+  let size;
+  if (withPictures) {
+    const archive = await packArchive(archiveEntries(articles, marks, await picturesOf(articles)));
+    size = downloadFile(archive, ARCHIVE_FILENAME, "application/zip");
+  } else {
+    size = downloadFile(toArticlesFile(articles, marks), ARTICLES_FILENAME, "application/json");
+  }
+  transferStatus(
+    plural(articles.length, "reader_export_done", [
+      withPictures ? ARCHIVE_FILENAME : ARTICLES_FILENAME,
+      fileSize(size),
+    ]),
+  );
 }
 
 /**
@@ -4379,94 +4407,6 @@ async function exportMarksPage() {
 }
 
 /**
- * The highlights as their own backup (D168): every document's marks in the
- * file `marks-copy.js` reads back. From the page of all highlights alone
- * (`showMarks` hides the half on a scoped page), so the cut is everybody's.
- */
-async function exportMarksCopy() {
-  try {
-    const docs = await marksDocs(() => true);
-    if (docs.length === 0) return;
-    const size = downloadFile(
-      toMarksCopy(docs.map(copyDocOf)),
-      MARKS_COPY_FILENAME,
-      "application/json",
-    );
-    marksStatus(plural(docs.length, "reader_export_marks_done", [MARKS_COPY_FILENAME, fileSize(size)]));
-  } catch {
-    marksStatus(describeError(ErrorCode.INTERNAL), "error");
-  }
-}
-
-/**
- * A highlights file picked (D168): read, narrowed, and laid against the
- * library, so the offer can say where every mark would land before anything
- * is written. Nothing of the file is written here. Whatever the browser
- * deleted comes back from its copy before the library is read, the page's
- * own rule (`refreshMarks`).
- *
- * @param {File} file
- */
-async function offerMarksImport(file) {
-  try {
-    const { documents, invalid } = fromMarksCopy(await file.text());
-    if (documents.length === 0) {
-      closeMarksImportOffer();
-      marksStatus(t("reader_marks_import_nothing"), "error");
-      return;
-    }
-    await restoreMarks();
-    const [articles, books, marks] = await Promise.all([listArticles(), listBooks(), allMarks()]);
-    const plan = marksImportPlan(documents, { articles, books, marks });
-    // Nothing to write - the file's marks all stand here already, or their
-    // documents do not: the sentences that say which are the whole answer,
-    // and an offer with nothing to accept would be a frame around a Cancel
-    // (Michał's smoke, 2026-09-01).
-    if (plan.added === 0) {
-      closeMarksImportOffer();
-      marksStatus(marksImportNotes(plan, invalid).join(" "));
-      return;
-    }
-    pendingMarksImport = { name: file.name, documents: documents.length, invalid, plan };
-    marksStatus("");
-    renderMarksImportOffer();
-  } catch {
-    closeMarksImportOffer();
-    marksStatus(describeError(ErrorCode.INTERNAL), "error");
-  }
-}
-
-/**
- * The moment of consent (D168): what the file holds and where its marks
- * land, before anything is written - one row per document that receives
- * some, and under them what is left out and why. Titles came from
- * somebody's page or book once, so they enter as text - the rows' own rule.
- */
-function renderMarksImportOffer() {
-  if (marksImportConfirm === null) return;
-  marksImportConfirm.hidden = pendingMarksImport === null;
-  if (pendingMarksImport === null) return;
-  const { name, documents, invalid, plan } = pendingMarksImport;
-
-  if (marksImportSummary !== null) {
-    marksImportSummary.textContent = plural(documents, "reader_marks_import_summary", [name]);
-  }
-  if (marksImportSample !== null) {
-    marksImportSample.replaceChildren();
-    for (const target of plan.targets) {
-      const item = document.createElement("li");
-      item.textContent = plural(target.added, "reader_marks_import_row", [target.title]);
-      marksImportSample.append(item);
-    }
-  }
-  if (marksImportNote !== null) {
-    const sentences = marksImportNotes(plan, invalid);
-    marksImportNote.textContent = sentences.join(" ");
-    marksImportNote.hidden = sentences.length === 0;
-  }
-}
-
-/**
  * What a file's import leaves out and why, as sentences: the documents the
  * reading list does not hold (a sample of their titles - the count says how
  * many there are, and a file of hundreds must not become a paragraph), the
@@ -4490,37 +4430,6 @@ function marksImportNotes(plan, invalid) {
   if (plan.overlapping > 0) sentences.push(plural(plan.overlapping, "reader_marks_import_overlap"));
   if (invalid > 0) sentences.push(plural(invalid, "reader_import_unreadable"));
   return sentences;
-}
-
-function closeMarksImportOffer() {
-  pendingMarksImport = null;
-  renderMarksImportOffer();
-}
-
-/**
- * The press that writes the plan (D168) - every receiving document's row
- * whole, in one transaction - and says what it did, the import report's
- * way: what was added, and what was left out and why.
- */
-async function runMarksImport() {
-  if (pendingMarksImport === null || marksImportRun === null) return;
-  const { plan } = pendingMarksImport;
-  marksImportRun.disabled = true;
-  try {
-    await putMarksRows(plan.targets.map(({ docId, marks }) => ({ docId, marks })));
-    const sentences = [plural(plan.added, "reader_marks_import_done")];
-    if (plan.twins > 0) sentences.push(plural(plan.twins, "reader_marks_import_twins"));
-    if (plan.overlapping > 0) sentences.push(plural(plan.overlapping, "reader_marks_import_overlap"));
-    marksStatus(sentences.join(" "));
-    closeMarksImportOffer();
-    await refreshMarks();
-  } catch {
-    // The offer stays open: an error must not eat the file the reader
-    // already picked and read.
-    marksStatus(t("reader_list_write_failed"), "error");
-  } finally {
-    marksImportRun.disabled = false;
-  }
 }
 
 /**
@@ -4550,13 +4459,17 @@ function downloadFile(content, filename, type) {
 async function offerImport(file) {
   try {
     const text = await file.text();
-    // The highlights' own backup (D168) is a .json too: named for what it
-    // is and sent to the page that reads it, rather than reported as a
-    // backup holding no articles.
+    // The highlights' old backup (D168) is a .json too: since D213 it is a
+    // part of the backup of everything, and it is offered as one - its
+    // marks laid against the library at the press, as an archive's are.
     if (isMarksCopy(text)) {
-      pendingImport = null;
-      renderImportOffer();
-      transferStatus(t("reader_import_marks_elsewhere"), "error");
+      await offerParts(file.name, {
+        manifest: null,
+        articles: null,
+        vocabulary: null,
+        highlights: fromMarksCopy(text),
+        settings: null,
+      });
       return;
     }
     const parsed = fromArticlesFile(text);
@@ -4624,6 +4537,14 @@ function offerParsed(name, parsed, pictures) {
  */
 function renderImportOffer() {
   if (importConfirm === null) return;
+  // The backup of everything's offer (D213) wears the same frame; the
+  // list's own file shows none of its parts.
+  if (pendingBackup !== null) {
+    renderBackupOffer();
+    return;
+  }
+  if (importParts !== null) importParts.hidden = true;
+  if (importSettingsRow !== null) importSettingsRow.hidden = true;
   importConfirm.hidden = pendingImport === null;
   if (pendingImport === null) return;
 
@@ -4663,7 +4584,259 @@ function renderImportOffer() {
 
 function closeImportOffer() {
   pendingImport = null;
+  pendingBackup = null;
   renderImportOffer();
+}
+
+/**
+ * The archive with a manifest (D213): every part read by its own reader
+ * before the offer - no picture entry is opened before the consent, and
+ * nothing is written. A file from a newer re/read is refused whole: the
+ * parts this version knows might depend on ones it does not.
+ *
+ * @param {File} file
+ * @param {Uint8Array} bytes the whole archive, read once
+ * @param {import("./zip.js").ZipEntryInfo[]} entries its directory
+ */
+async function offerBackup(file, bytes, entries) {
+  try {
+    const read = await entryReader(bytes);
+    /** @param {string} name */
+    const textOf = (name) => {
+      const data = read(name, Number.POSITIVE_INFINITY);
+      return data === null ? null : new TextDecoder().decode(data);
+    };
+    const manifest = fromManifest(textOf(BACKUP_ENTRIES.manifest) ?? "");
+    if (manifest !== null && isNewerBackup(manifest)) {
+      closeImportOffer();
+      transferStatus(t("reader_backup_newer", [manifest.app]), "error");
+      return;
+    }
+    const articlesText = textOf(BACKUP_ENTRIES.articles);
+    const articles = articlesText === null ? null : fromArchiveText(articlesText);
+    const account = articles === null ? null : archiveAccount(articles.refs, entries);
+    const vocabularyText = textOf(BACKUP_ENTRIES.vocabulary);
+    const highlightsText = textOf(BACKUP_ENTRIES.highlights);
+    const settingsText = textOf(BACKUP_ENTRIES.settings);
+    await offerParts(file.name, {
+      manifest,
+      articles,
+      ...(articles !== null && account !== null && account.count > 0
+        ? { pictures: { bytes, refs: articles.refs, account } }
+        : {}),
+      vocabulary: vocabularyText === null ? null : fromVocabularyFile(vocabularyText),
+      highlights: highlightsText === null ? null : fromMarksCopy(highlightsText),
+      settings: settingsText === null ? null : fromSettingsFile(settingsText),
+    });
+  } catch {
+    closeImportOffer();
+    transferStatus(describeError(ErrorCode.INTERNAL), "error");
+  }
+}
+
+/**
+ * The parts a backup holds, as the offer will show them: the articles laid
+ * against the list so the offer can say how many are new, the rest
+ * counted. A file with nothing in any part is said so, not offered.
+ *
+ * @param {string} name
+ * @param {{
+ *   manifest: import("../lib/store/backup-file.js").BackupManifest | null,
+ *   articles: import("../lib/store/articles-file.js").ArticlesFile | null,
+ *   pictures?: NonNullable<typeof pendingBackup>["pictures"],
+ *   vocabulary: { rows: import("../lib/protocol.js").RestoreRow[], invalid: number } | null,
+ *   highlights: { documents: import("../lib/store/marks-copy.js").CopyDoc[], invalid: number } | null,
+ *   settings: import("../lib/config.js").ConfigPatch | null,
+ * }} parts
+ */
+async function offerParts(name, parts) {
+  const articles = parts.articles?.articles ?? [];
+  const phrases = parts.vocabulary?.rows ?? [];
+  const highlights = parts.highlights?.documents ?? [];
+  const settings = parts.settings;
+  if (articles.length === 0 && phrases.length === 0 && highlights.length === 0 && settings === null) {
+    closeImportOffer();
+    transferStatus(t("reader_backup_nothing"), "error");
+    return;
+  }
+  const metas = articles.length === 0 ? [] : await listArticles();
+  pendingImport = null;
+  pendingBackup = {
+    name,
+    manifest: parts.manifest,
+    articles,
+    newArticles: importPlan(metas.map((meta) => meta.url), articles).toAdd.length,
+    invalid: (parts.articles?.invalid ?? 0) + (parts.vocabulary?.invalid ?? 0) + (parts.highlights?.invalid ?? 0),
+    ...(parts.pictures === undefined ? {} : { pictures: parts.pictures }),
+    phrases,
+    highlights,
+    settings,
+  };
+  transferStatus("");
+  renderImportOffer();
+}
+
+/**
+ * The moment of consent for the backup of everything (D213): what the file
+ * is - when and by which version it was written - and what it holds, one
+ * line per part, with the sample of titles the articles' offer shows and
+ * the box that decides about the settings. Titles came from somebody's
+ * page once, so they enter as text - the rows' own rule.
+ */
+function renderBackupOffer() {
+  if (importConfirm === null || pendingBackup === null) return;
+  const offer = pendingBackup;
+  importConfirm.hidden = false;
+
+  if (importSummary !== null) {
+    importSummary.textContent =
+      offer.manifest === null
+        ? t("reader_backup_summary_highlights", [offer.name])
+        : t("reader_backup_summary", [
+            offer.name,
+            new Date(offer.manifest.createdAt).toLocaleDateString(uiLocale()),
+            offer.manifest.app,
+          ]);
+  }
+
+  if (importParts !== null) {
+    /** @type {string[]} */
+    const lines = [];
+    if (offer.articles.length > 0) {
+      lines.push(plural(offer.articles.length, "reader_backup_part_articles", [offer.newArticles.toLocaleString()]));
+    }
+    if (offer.pictures !== undefined) {
+      lines.push(plural(offer.pictures.account.count, "reader_import_pictures", [megabytes(offer.pictures.account.bytes)]));
+    }
+    if (offer.phrases.length > 0) {
+      // The pairs by name, not by count: a count would need its own plural
+      // inside a sentence that already has one.
+      const pairs = [...new Set(offer.phrases.map((row) => `${row.langFrom}\t${row.langTo}`))].map((key) => {
+        const [from = "", to = ""] = key.split("\t");
+        return pairLabel(from, to);
+      });
+      lines.push(plural(offer.phrases.length, "reader_backup_part_phrases", [pairs.join(", ")]));
+    }
+    const marks = offer.highlights.reduce((sum, doc) => sum + doc.marks.length, 0);
+    if (marks > 0) lines.push(plural(marks, "reader_backup_part_highlights"));
+    if (offer.invalid > 0) lines.push(plural(offer.invalid, "reader_import_unreadable"));
+    importParts.replaceChildren(
+      ...lines.map((line) => {
+        const item = document.createElement("li");
+        item.textContent = line;
+        return item;
+      }),
+    );
+    importParts.hidden = lines.length === 0;
+  }
+
+  if (importSample !== null) {
+    importSample.replaceChildren();
+    for (const article of offer.articles.slice(0, SAMPLE_TITLES)) {
+      const item = document.createElement("li");
+      item.textContent = article.title;
+      importSample.append(item);
+    }
+    const rest = offer.articles.length - SAMPLE_TITLES;
+    if (rest > 0) {
+      const more = document.createElement("li");
+      more.className = "import-more";
+      more.textContent = plural(rest, "reader_import_more");
+      importSample.append(more);
+    }
+  }
+
+  if (importSettingsRow !== null) importSettingsRow.hidden = offer.settings === null;
+  if (importSettings !== null) importSettings.checked = true;
+}
+
+/**
+ * The press that writes the backup (D213), part by part, each through the
+ * importer it always had and every one adding, never overwriting: the
+ * articles with their pictures and positions first; then the vocabulary,
+ * through the background, which owns every write to it; then the
+ * highlights - after the articles, so the marks that came in with an
+ * article meet themselves and are left out; the settings last, when the
+ * box says so. One report, the parts' sentences in a row.
+ */
+async function runBackup() {
+  if (pendingBackup === null || importRun === null) return;
+  const offered = pendingBackup;
+  importRun.disabled = true;
+  try {
+    /** @type {string[]} */
+    const sentences = [];
+    if (offered.articles.length > 0) {
+      const report = await importArticles(offered.articles);
+      const pictured = await writePictures(offered.pictures, report.urls);
+      sentences.push(plural(report.added, "reader_import_added"));
+      if (report.skipped > 0) sentences.push(plural(report.skipped, "reader_import_skipped"));
+      if (pictured.count > 0) {
+        sentences.push(plural(pictured.count, "reader_import_pictures_added", [megabytes(pictured.bytes)]));
+      }
+    }
+    if (offered.phrases.length > 0) {
+      const answer = asResult(
+        await webext().runtime.sendMessage({ kind: Message.RESTORE_VOCABULARY, rows: offered.phrases }),
+      );
+      if (answer.ok) {
+        const report = /** @type {import("../lib/protocol.js").RestoreReport} */ (answer.value);
+        sentences.push(plural(report.added, "vocab_import_added"));
+        if (report.skipped > 0) sentences.push(plural(report.skipped, "vocab_import_skipped"));
+        if (report.sentenced > 0) sentences.push(plural(report.sentenced, "vocab_import_sentenced"));
+        if (report.counted > 0) sentences.push(plural(report.counted, "reader_backup_phrases_counted"));
+      } else {
+        sentences.push(describeError(answer.code));
+      }
+    }
+    if (offered.highlights.length > 0) {
+      await restoreMarks();
+      const [articles, books, marks] = await Promise.all([listArticles(), listBooks(), allMarks()]);
+      const plan = marksImportPlan(offered.highlights, { articles, books, marks });
+      if (plan.added > 0) await putMarksRows(plan.targets.map(({ docId, marks }) => ({ docId, marks })));
+      sentences.push(plural(plan.added, "reader_marks_import_done"), ...marksImportNotes(plan, 0));
+    }
+    if (offered.settings !== null && importSettings !== null && importSettings.checked) {
+      await writeConfig(offered.settings);
+      sentences.push(t("reader_backup_settings_done"));
+    }
+    transferStatus(sentences.join(" "));
+    closeImportOffer();
+    await refreshLibrary();
+  } catch {
+    // The offer stays open: an error must not eat the file the reader
+    // already picked and read.
+    transferStatus(t("reader_list_write_failed"), "error");
+  } finally {
+    importRun.disabled = false;
+  }
+}
+
+/**
+ * The pictures of a `.zip` backup (D145), for the articles just added and
+ * no other - an article already saved keeps its copy whole - read out of
+ * the archive one entry at a time and written one row at a time, the way a
+ * save writes them.
+ *
+ * @param {NonNullable<typeof pendingImport>["pictures"]} pictures
+ * @param {string[]} urls the addresses actually added
+ * @returns {Promise<{ count: number, bytes: number }>}
+ */
+async function writePictures(pictures, urls) {
+  let pictured = { count: 0, bytes: 0 };
+  if (pictures === undefined) return pictured;
+  const read = await entryReader(pictures.bytes);
+  for (const url of urls) {
+    const refs = pictures.refs.get(url);
+    if (refs === undefined) continue;
+    const rows = archivePictures(url, refs, (name) => read(name, MAX_DOWNLOAD_BYTES));
+    if (rows.length === 0) continue;
+    for (const row of rows) await putPicture(row);
+    const summary = picturesSummary(rows);
+    await setPictures(url, summary);
+    pictured = { count: pictured.count + summary.count, bytes: pictured.bytes + summary.bytes };
+  }
+  return pictured;
 }
 
 async function runImport() {
@@ -4673,24 +4846,7 @@ async function runImport() {
   try {
     const report = await importArticles(offered.articles);
 
-    // The pictures of a `.zip` backup (D145), for the articles just added
-    // and no other - an article already saved keeps its copy whole - read
-    // out of the archive one entry at a time and written one row at a
-    // time, the way a save writes them.
-    let pictured = { count: 0, bytes: 0 };
-    if (offered.pictures !== undefined) {
-      const read = await entryReader(offered.pictures.bytes);
-      for (const url of report.urls) {
-        const refs = offered.pictures.refs.get(url);
-        if (refs === undefined) continue;
-        const rows = archivePictures(url, refs, (name) => read(name, MAX_DOWNLOAD_BYTES));
-        if (rows.length === 0) continue;
-        for (const row of rows) await putPicture(row);
-        const summary = picturesSummary(rows);
-        await setPictures(url, summary);
-        pictured = { count: pictured.count + summary.count, bytes: pictured.bytes + summary.bytes };
-      }
-    }
+    const pictured = await writePictures(offered.pictures, report.urls);
 
     // "Added 12, skipped 3" is the whole reason to trust an import that
     // says nothing else - the same report the phrase import gives.
@@ -5741,37 +5897,6 @@ marksRowsList?.addEventListener("click", (event) => {
 
 marksExportButton?.addEventListener("click", () => void exportMarksPage());
 
-// The highlights' own backup (D168): the export, the picker behind the
-// Import button - cleared so that the same file, picked again, offers again
-// - and the two presses that decide the offer.
-marksExportCopyButton?.addEventListener("click", () => void exportMarksCopy());
-
-marksImportButton?.addEventListener("click", () => marksImportInput?.click());
-
-marksImportInput?.addEventListener("change", () => {
-  if (marksImportInput === null) return;
-  const file = marksImportInput.files?.[0];
-  marksImportInput.value = "";
-  if (file !== undefined) void offerMarksImport(file);
-});
-
-marksImportRun?.addEventListener("click", () => void runMarksImport());
-
-marksImportCancel?.addEventListener("click", () => {
-  closeMarksImportOffer();
-  marksStatus("");
-});
-
-// On one document's page the backup is a sentence away: the way to the page
-// of all highlights - a real step, like the menu's row writes, so Back
-// retraces it - fresh the way any visit begins.
-marksAllLink?.addEventListener("click", (event) => {
-  event.preventDefault();
-  hideNotice();
-  history.pushState(marksState(null), "");
-  void showMarks(null, { fresh: true });
-});
-
 // The link over the rows leads to the export by scrolling, not by its
 // fragment: a fragment jump writes a history entry with no state of ours,
 // and the popstate that follows reads that as Back under the highlights -
@@ -5783,9 +5908,7 @@ marksTransferLink?.addEventListener("click", (event) => {
   document
     .getElementById("marks-transfer")
     ?.scrollIntoView({ behavior: "instant", block: "start" });
-  (marksCopy !== null && !marksCopy.hidden ? marksExportCopyButton : marksExportButton)?.focus({
-    preventScroll: true,
-  });
+  marksExportButton?.focus({ preventScroll: true });
 });
 
 noticeClose?.addEventListener("click", () => hideNotice());
@@ -5874,7 +5997,11 @@ async function dispatchImport(file) {
     // backup with pictures (D145) or a book - `articles.json` is the word.
     const bytes = new Uint8Array(await file.arrayBuffer());
     const entries = await listEntries(bytes).catch(() => []);
-    if (entries.some((entry) => entry.name === ARTICLES_ENTRY)) {
+    if (entries.some((entry) => entry.name === BACKUP_ENTRIES.manifest)) {
+      // The backup of everything (D213): the manifest is the word.
+      bookImportStatus("");
+      await offerBackup(file, bytes, entries);
+    } else if (entries.some((entry) => entry.name === ARTICLES_ENTRY)) {
       bookImportStatus("");
       await offerArchive(file, bytes, entries);
     } else {
@@ -5896,7 +6023,7 @@ importInput?.addEventListener("change", () => {
   if (file !== undefined) void dispatchImport(file);
 });
 
-importRun?.addEventListener("click", () => void runImport());
+importRun?.addEventListener("click", () => void (pendingBackup !== null ? runBackup() : runImport()));
 
 importCancel?.addEventListener("click", () => {
   closeImportOffer();

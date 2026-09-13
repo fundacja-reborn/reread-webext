@@ -483,7 +483,7 @@
   },
   "reader_format_title": { "message": "Formato del archivo" },
   "reader_transfer_note": {
-    "message": ".json - un archivo de copia de seguridad con todos los artículos guardados en la lista de lectura sin conexión de re/read, de este u otro navegador o dispositivo donde uses re/read. La importación solo añade los artículos que faltan aquí y nunca sobrescribe uno ya guardado. Con las imágenes, la copia es un .zip con el mismo .json y las imágenes al lado."
+    "message": ".zip - la copia de seguridad de todo lo que guarda re/read: la lista de lectura sin conexión con sus resaltados y posiciones de lectura (y sus imágenes si marcas la casilla), cada frase guardada de cada par de idiomas con su oración y sus contadores, y los ajustes. La importación solo añade lo que falta aquí y nunca sobrescribe lo guardado: un artículo que ya está aquí conserva su copia, una frase guardada conserva sus significados y toma solo una oración que le falte o un contador más alto, un resaltado que ya está aquí se omite. Los ajustes se restauran solo si marcas la casilla."
   },
   "reader_export_pictures": {
     "message": "Exportar con imágenes ($COUNT$, $SIZE$)",
@@ -522,44 +522,11 @@
   },
   "reader_transfer_epub": { "message": ".epub - el formato de los libros electrónicos." },
   "reader_transfer_books": {
-    "message": "La exportación incluye solo artículos - los libros (.epub) no se exportan. Un libro importado de nuevo no tiene posición de lectura ni resaltados: exporta los resaltados en la página de resaltados (.json) antes de eliminar el libro e importa ese archivo después de importar el mismo libro otra vez."
+    "message": "La exportación abarca los artículos - los libros (.epub) no están en la copia. Un libro importado de nuevo no tiene posición de lectura; sus resaltados vuelven de la copia cuando el mismo libro se importa desde su archivo .epub."
   },
   "reader_export_marks": { "message": "Exportar los resaltados" },
-  "reader_marks_export_copy": { "message": "Exportar una copia (.json)" },
-  "reader_marks_import": { "message": "Importar (.json)" },
-  "reader_marks_copy_hint": { "message": "El archivo .json es una copia de seguridad de los resaltados y sus notas. Importar añade los resaltados de un archivo así a los mismos artículos y a un libro importado de nuevo desde el mismo archivo .epub. Nada de lo que ya está aquí se cambia ni se elimina." },
-  "reader_marks_copy_elsewhere": { "message": "Una copia que se puede importar (.json) se exporta y se importa en la página de todos los resaltados." },
-  "reader_marks_all_link": { "message": "Todos los resaltados" },
   "reader_marks_export_notes": { "message": "Exportar como notas (.md)" },
   "reader_marks_notes_hint": { "message": "El archivo .md es una lista en texto plano de las citas y las notas, agrupadas por documento - para leer y para tus propias notas. No se puede importar." },
-  "reader_marks_import_summary_one": {
-    "message": "$NAME$ contiene los resaltados de $COUNT$ documento:",
-    "placeholders": {
-      "count": { "content": "$1", "example": "1" },
-      "name": { "content": "$2", "example": "reread-highlights.json" }
-    }
-  },
-  "reader_marks_import_summary_other": {
-    "message": "$NAME$ contiene los resaltados de $COUNT$ documentos:",
-    "placeholders": {
-      "count": { "content": "$1", "example": "3" },
-      "name": { "content": "$2", "example": "reread-highlights.json" }
-    }
-  },
-  "reader_marks_import_row_one": {
-    "message": "$TITLE$ - $COUNT$ resaltado por añadir",
-    "placeholders": {
-      "count": { "content": "$1", "example": "1" },
-      "title": { "content": "$2", "example": "Una novela" }
-    }
-  },
-  "reader_marks_import_row_other": {
-    "message": "$TITLE$ - $COUNT$ resaltados por añadir",
-    "placeholders": {
-      "count": { "content": "$1", "example": "12" },
-      "title": { "content": "$2", "example": "Una novela" }
-    }
-  },
   "reader_marks_import_missing_one": {
     "message": "$COUNT$ documento no está en la lista de lectura: $TITLES$. Impórtalo primero - un libro desde su archivo .epub, un artículo desde la copia de la lista de lectura - y luego importa este archivo otra vez.",
     "placeholders": {
@@ -598,9 +565,126 @@
     "message": "Se añadieron $COUNT$ resaltados.",
     "placeholders": { "count": { "content": "$1", "example": "12" } }
   },
-  "reader_marks_import_nothing": { "message": "En ese archivo no hay resaltados que importar." },
-  "reader_import_marks_elsewhere": { "message": "Es un archivo de resaltados. Impórtalo en la página de resaltados." },
-  "reader_transfer_marks": { "message": "Los resaltados se incluyen con sus artículos en la copia .json. La página de resaltados los exporta por separado: como copia .json, que se puede importar - también para libros - o como notas .md." },
+  "reader_transfer_marks": { "message": "Los resaltados están en la copia, con sus artículos y también los de los libros. La página Resaltados los exporta como notas .md para leer." },
+  "reader_backup_done": {
+    "message": "Copia de seguridad escrita en $FILE$ ($SIZE$): $PARTS$.",
+    "placeholders": {
+      "file": { "content": "$1", "example": "reread-backup.zip" },
+      "size": { "content": "$2", "example": "2.3 MB" },
+      "parts": { "content": "$3", "example": "12 articles, 856 saved phrases, 41 highlights, the settings" }
+    }
+  },
+  "reader_backup_settings_word": {
+    "message": "los ajustes"
+  },
+  "reader_backup_summary": {
+    "message": "$NAME$ es una copia de seguridad de re/read del $DATE$ (re/read $APP$):",
+    "placeholders": {
+      "name": { "content": "$1", "example": "reread-backup.zip" },
+      "date": { "content": "$2", "example": "13/09/2026" },
+      "app": { "content": "$3", "example": "0.5.56" }
+    }
+  },
+  "reader_backup_summary_highlights": {
+    "message": "$NAME$ contiene resaltados:",
+    "placeholders": {
+      "name": { "content": "$1", "example": "reread-backup.zip" }
+    }
+  },
+  "reader_backup_settings_restore": {
+    "message": "Restaurar también los ajustes"
+  },
+  "reader_backup_settings_done": {
+    "message": "Ajustes restaurados."
+  },
+  "reader_backup_newer": {
+    "message": "Ese archivo lo escribió una versión más nueva de re/read ($APP$). Actualiza re/read e impórtalo de nuevo.",
+    "placeholders": {
+      "app": { "content": "$1", "example": "0.5.56" }
+    }
+  },
+  "reader_backup_nothing": {
+    "message": "No hay nada que importar en ese archivo."
+  },
+  "reader_marks_backup_elsewhere": {
+    "message": "Los resaltados viajan en la copia de seguridad de todo, que la lista de lectura exporta e importa - también los de los libros."
+  },
+  "reader_backup_articles_one": {
+    "message": "$COUNT$ artículo",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_backup_articles_other": {
+    "message": "$COUNT$ artículos",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_backup_highlights_one": {
+    "message": "$COUNT$ resaltado",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_backup_highlights_other": {
+    "message": "$COUNT$ resaltados",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_backup_part_articles_one": {
+    "message": "$COUNT$ artículo, $NEW$ aún no en la lista",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "new": { "content": "$2", "example": "3" }
+    }
+  },
+  "reader_backup_part_articles_other": {
+    "message": "$COUNT$ artículos, $NEW$ aún no en la lista",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "new": { "content": "$2", "example": "3" }
+    }
+  },
+  "reader_backup_part_phrases_one": {
+    "message": "$COUNT$ frase guardada ($PAIRS$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "pairs": { "content": "$2", "example": "English → Polish" }
+    }
+  },
+  "reader_backup_part_phrases_other": {
+    "message": "$COUNT$ frases guardadas ($PAIRS$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "pairs": { "content": "$2", "example": "English → Polish" }
+    }
+  },
+  "reader_backup_part_highlights_one": {
+    "message": "$COUNT$ resaltado - si ya está aquí o falta su documento, se omite",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_backup_part_highlights_other": {
+    "message": "$COUNT$ resaltados - los que ya están aquí o sin su documento se omiten",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_backup_phrases_counted_one": {
+    "message": "$COUNT$ frase guardada tomó contadores más altos del archivo.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_backup_phrases_counted_other": {
+    "message": "$COUNT$ frases guardadas tomaron contadores más altos del archivo.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
   "reader_transfer_pick": { "message": "Para exportar solo algunos artículos, pulsa «Seleccionar» encima de la lista y márcalos." },
   "reader_pick_start": { "message": "Seleccionar" },
   "reader_pick_close": { "message": "Cerrar la selección" },
@@ -694,8 +778,8 @@
     "message": "Abrir «$TITLE$» en este resaltado",
     "placeholders": { "title": { "content": "$1", "example": "Old Chinese" } }
   },
-  "reader_transfer_link": { "message": "Importar y exportar (artículos o EPUB)" },
-  "reader_transfer_accepts": { "message": "La importación reconoce el archivo elegido: una copia de seguridad de la lista de artículos de re/read (.json, o .zip con imágenes) o un libro electrónico (.epub)." },
+  "reader_transfer_link": { "message": "Importar y exportar (copia de seguridad o EPUB)" },
+  "reader_transfer_accepts": { "message": "La importación lee el archivo que se le da: una copia de seguridad de re/read (.zip - o los antiguos archivos .json de la lista y de los resaltados), o un libro electrónico (.epub)." },
   "reader_book_label": { "message": "Libro" },
   "reader_book_part_of": {
     "message": "Parte $PART$ de $PARTS$",

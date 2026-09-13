@@ -602,7 +602,7 @@
   },
   "reader_format_title": { "message": "Format pliku" },
   "reader_transfer_note": {
-    "message": ".json - plik kopii (backupu) ze wszystkimi zapisanymi artykułami z czytelni offline re/read, z tej lub z innej Twojej przeglądarki czy urządzenia, na którym korzystasz z re/read. Import dodaje tylko artykuły, których tu brakuje, a już istniejących tu artykułów nie nadpisuje. Z obrazkami kopia jest plikiem .zip z tym samym .json i obrazkami obok."
+    "message": ".zip - kopia wszystkiego, co przechowuje re/read: czytelnia offline z zakreśleniami i pozycjami czytania (z obrazkami, gdy zaznaczysz pole), wszystkie zapisane frazy każdej pary językowej ze zdaniami i licznikami oraz ustawienia. Import dodaje tylko to, czego tu brakuje, i nie nadpisuje niczego zapisanego: artykuł, który już tu jest, zachowuje swoją kopię, zapisana fraza zachowuje znaczenia i bierze tylko brakujące zdanie albo wyższy licznik, zakreślenie, które już tu jest, jest pomijane. Ustawienia są przywracane tylko wtedy, gdy zaznaczysz pole."
   },
   "reader_export_pictures": {
     "message": "Eksport z obrazkami ($COUNT$, $SIZE$)",
@@ -655,72 +655,11 @@
   },
   "reader_transfer_epub": { "message": ".epub - format e-booków." },
   "reader_transfer_books": {
-    "message": "Eksport uwzględnia tylko artykuły, nie eksportuje książek (.epub). Ponownie zaimportowana książka nie ma pozycji czytania ani zakreśleń: zakreślenia wyeksportuj na stronie Zakreśleń (.json) przed usunięciem książki, a ten plik zaimportuj po ponownym imporcie tej samej książki."
+    "message": "Eksport obejmuje artykuły - książek (.epub) nie ma w kopii. Ponownie zaimportowana książka nie ma pozycji czytania; jej zakreślenia wracają z kopii, gdy ta sama książka zostanie zaimportowana z pliku .epub."
   },
   "reader_export_marks": { "message": "Eksportuj zakreślenia" },
-  "reader_marks_export_copy": { "message": "Eksportuj kopię (.json)" },
-  "reader_marks_import": { "message": "Importuj (.json)" },
-  "reader_marks_copy_hint": { "message": "Plik .json to kopia zapasowa zakreśleń i ich notatek. Import dodaje zakreślenia z takiego pliku do tych samych artykułów oraz do książki zaimportowanej ponownie z tego samego pliku .epub. Nic, co już tu jest, nie zostaje zmienione ani usunięte." },
-  "reader_marks_copy_elsewhere": { "message": "Kopię zapasową, którą można zaimportować (.json), eksportuje się i importuje na stronie wszystkich zakreśleń." },
-  "reader_marks_all_link": { "message": "Wszystkie zakreślenia" },
   "reader_marks_export_notes": { "message": "Eksportuj jako notatki (.md)" },
   "reader_marks_notes_hint": { "message": "Plik .md to tekstowa lista cytatów i notatek pogrupowana według dokumentów - do czytania i do własnych notatek. Nie da się go zaimportować." },
-  "reader_marks_import_summary_one": {
-    "message": "$NAME$ zawiera zakreślenia $COUNT$ dokumentu:",
-    "placeholders": {
-      "count": { "content": "$1", "example": "1" },
-      "name": { "content": "$2", "example": "reread-highlights.json" }
-    }
-  },
-  "reader_marks_import_summary_few": {
-    "message": "$NAME$ zawiera zakreślenia $COUNT$ dokumentów:",
-    "placeholders": {
-      "count": { "content": "$1", "example": "3" },
-      "name": { "content": "$2", "example": "reread-highlights.json" }
-    }
-  },
-  "reader_marks_import_summary_many": {
-    "message": "$NAME$ zawiera zakreślenia $COUNT$ dokumentów:",
-    "placeholders": {
-      "count": { "content": "$1", "example": "12" },
-      "name": { "content": "$2", "example": "reread-highlights.json" }
-    }
-  },
-  "reader_marks_import_summary_other": {
-    "message": "$NAME$ zawiera zakreślenia $COUNT$ dokumentu:",
-    "placeholders": {
-      "count": { "content": "$1", "example": "1,5" },
-      "name": { "content": "$2", "example": "reread-highlights.json" }
-    }
-  },
-  "reader_marks_import_row_one": {
-    "message": "$TITLE$ - $COUNT$ zakreślenie do dodania",
-    "placeholders": {
-      "count": { "content": "$1", "example": "1" },
-      "title": { "content": "$2", "example": "Lalka" }
-    }
-  },
-  "reader_marks_import_row_few": {
-    "message": "$TITLE$ - $COUNT$ zakreślenia do dodania",
-    "placeholders": {
-      "count": { "content": "$1", "example": "3" },
-      "title": { "content": "$2", "example": "Lalka" }
-    }
-  },
-  "reader_marks_import_row_many": {
-    "message": "$TITLE$ - $COUNT$ zakreśleń do dodania",
-    "placeholders": {
-      "count": { "content": "$1", "example": "12" },
-      "title": { "content": "$2", "example": "Lalka" }
-    }
-  },
-  "reader_marks_import_row_other": {
-    "message": "$TITLE$ - $COUNT$ zakreślenia do dodania",
-    "placeholders": {
-      "count": { "content": "$1", "example": "1,5" },
-      "title": { "content": "$2", "example": "Lalka" }
-    }
-  },
   "reader_marks_import_missing_one": {
     "message": "$COUNT$ dokumentu nie ma w czytelni: $TITLES$. Najpierw zaimportuj go - książkę z jej pliku .epub, artykuł z kopii zapasowej czytelni - a potem jeszcze raz ten plik.",
     "placeholders": {
@@ -797,9 +736,202 @@
     "message": "Dodano $COUNT$ zakreślenia.",
     "placeholders": { "count": { "content": "$1", "example": "1,5" } }
   },
-  "reader_marks_import_nothing": { "message": "W tym pliku nie ma zakreśleń do zaimportowania." },
-  "reader_import_marks_elsewhere": { "message": "To plik zakreśleń. Zaimportuj go na stronie Zakreśleń." },
-  "reader_transfer_marks": { "message": "Zakreślenia są zapisane razem z artykułami w kopii zapasowej .json. Strona Zakreśleń eksportuje je osobno: jako kopię .json, którą można zaimportować - także dla książek - albo jako notatki .md." },
+  "reader_transfer_marks": { "message": "Zakreślenia są w kopii - razem z artykułami, a także zakreślenia książek. Strona Zakreśleń eksportuje je jako notatki .md do czytania." },
+  "reader_backup_done": {
+    "message": "Kopia zapisana do $FILE$ ($SIZE$): $PARTS$.",
+    "placeholders": {
+      "file": { "content": "$1", "example": "reread-backup.zip" },
+      "size": { "content": "$2", "example": "2.3 MB" },
+      "parts": { "content": "$3", "example": "12 articles, 856 saved phrases, 41 highlights, the settings" }
+    }
+  },
+  "reader_backup_settings_word": {
+    "message": "ustawienia"
+  },
+  "reader_backup_summary": {
+    "message": "$NAME$ to kopia re/read z $DATE$ (re/read $APP$):",
+    "placeholders": {
+      "name": { "content": "$1", "example": "reread-backup.zip" },
+      "date": { "content": "$2", "example": "13/09/2026" },
+      "app": { "content": "$3", "example": "0.5.56" }
+    }
+  },
+  "reader_backup_summary_highlights": {
+    "message": "$NAME$ zawiera zakreślenia:",
+    "placeholders": {
+      "name": { "content": "$1", "example": "reread-backup.zip" }
+    }
+  },
+  "reader_backup_settings_restore": {
+    "message": "Przywróć też ustawienia"
+  },
+  "reader_backup_settings_done": {
+    "message": "Ustawienia przywrócone."
+  },
+  "reader_backup_newer": {
+    "message": "Ten plik zapisała nowsza wersja re/read ($APP$). Zaktualizuj re/read i zaimportuj go ponownie.",
+    "placeholders": {
+      "app": { "content": "$1", "example": "0.5.56" }
+    }
+  },
+  "reader_backup_nothing": {
+    "message": "W tym pliku nie ma nic do zaimportowania."
+  },
+  "reader_marks_backup_elsewhere": {
+    "message": "Zakreślenia jadą w kopii wszystkiego, którą zapisuje i wczytuje czytelnia - także zakreślenia książek."
+  },
+  "reader_backup_articles_one": {
+    "message": "$COUNT$ artykuł",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_backup_articles_few": {
+    "message": "$COUNT$ artykuły",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_backup_articles_many": {
+    "message": "$COUNT$ artykułów",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_backup_articles_other": {
+    "message": "$COUNT$ artykułu",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_backup_highlights_one": {
+    "message": "$COUNT$ zakreślenie",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_backup_highlights_few": {
+    "message": "$COUNT$ zakreślenia",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_backup_highlights_many": {
+    "message": "$COUNT$ zakreśleń",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_backup_highlights_other": {
+    "message": "$COUNT$ zakreślenia",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_backup_part_articles_one": {
+    "message": "$COUNT$ artykuł, w tym $NEW$ nowych",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "new": { "content": "$2", "example": "3" }
+    }
+  },
+  "reader_backup_part_articles_few": {
+    "message": "$COUNT$ artykuły, w tym $NEW$ nowych",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "new": { "content": "$2", "example": "3" }
+    }
+  },
+  "reader_backup_part_articles_many": {
+    "message": "$COUNT$ artykułów, w tym $NEW$ nowych",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "new": { "content": "$2", "example": "3" }
+    }
+  },
+  "reader_backup_part_articles_other": {
+    "message": "$COUNT$ artykułu, w tym $NEW$ nowych",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "new": { "content": "$2", "example": "3" }
+    }
+  },
+  "reader_backup_part_phrases_one": {
+    "message": "$COUNT$ zapisana fraza ($PAIRS$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "pairs": { "content": "$2", "example": "English → Polish" }
+    }
+  },
+  "reader_backup_part_phrases_few": {
+    "message": "$COUNT$ zapisane frazy ($PAIRS$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "pairs": { "content": "$2", "example": "English → Polish" }
+    }
+  },
+  "reader_backup_part_phrases_many": {
+    "message": "$COUNT$ zapisanych fraz ($PAIRS$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "pairs": { "content": "$2", "example": "English → Polish" }
+    }
+  },
+  "reader_backup_part_phrases_other": {
+    "message": "$COUNT$ zapisanej frazy ($PAIRS$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "pairs": { "content": "$2", "example": "English → Polish" }
+    }
+  },
+  "reader_backup_part_highlights_one": {
+    "message": "$COUNT$ zakreślenie - pominięte będzie to, które już tu jest albo nie ma tu swojego dokumentu",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_backup_part_highlights_few": {
+    "message": "$COUNT$ zakreślenia - pominięte będą te, które już tu są albo nie mają tu swojego dokumentu",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_backup_part_highlights_many": {
+    "message": "$COUNT$ zakreśleń - pominięte będą te, które już tu są albo nie mają tu swojego dokumentu",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_backup_part_highlights_other": {
+    "message": "$COUNT$ zakreślenia - pominięte będą te, które już tu są albo nie mają tu swojego dokumentu",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_backup_phrases_counted_one": {
+    "message": "$COUNT$ zapisana fraza dostała wyższe liczniki z pliku.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_backup_phrases_counted_few": {
+    "message": "$COUNT$ zapisane frazy dostały wyższe liczniki z pliku.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_backup_phrases_counted_many": {
+    "message": "$COUNT$ zapisanych fraz dostało wyższe liczniki z pliku.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_backup_phrases_counted_other": {
+    "message": "$COUNT$ zapisanej frazy dostało wyższe liczniki z pliku.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
   "reader_transfer_pick": { "message": "Żeby wyeksportować tylko niektóre artykuły, naciśnij „Zaznacz” nad listą i zaznacz je." },
   "reader_pick_start": { "message": "Zaznacz" },
   "reader_pick_close": { "message": "Zamknij zaznaczanie" },
@@ -953,8 +1085,8 @@
     "message": "Otwórz „$TITLE$” w miejscu zakreślenia",
     "placeholders": { "title": { "content": "$1", "example": "Old Chinese" } }
   },
-  "reader_transfer_link": { "message": "Import i eksport (artykuły lub EPUB)" },
-  "reader_transfer_accepts": { "message": "Import rozpoznaje podany plik: kopię listy artykułów z re/read (.json albo .zip z obrazkami) albo e-booka (.epub)." },
+  "reader_transfer_link": { "message": "Import i eksport (kopia lub EPUB)" },
+  "reader_transfer_accepts": { "message": "Import rozpoznaje podany plik: kopię re/read (.zip - albo starsze pliki .json listy i zakreśleń) albo e-booka (.epub)." },
   "reader_book_label": { "message": "Książka" },
   "reader_book_part_of": {
     "message": "Część $PART$ z $PARTS$",

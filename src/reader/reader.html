@@ -566,7 +566,7 @@
               page goes away.
             </p>
           </details>
-          <a href="#transfer" data-i18n="reader_transfer_link">Import and export (articles or EPUB)</a>
+          <a href="#transfer" data-i18n="reader_transfer_link">Import and export (backup or EPUB)</a>
         </div>
         <!-- The search line above the list (D173, Michał's call 2026-09-03):
              the field asks, the press answers. Nothing narrows the list
@@ -771,7 +771,18 @@
           -->
           <div id="library-import-confirm" class="import-confirm" hidden>
             <p id="library-import-summary"></p>
+            <!-- The backup of everything (D213): one line per part the file
+                 holds, over the sample of titles, and under it the box that
+                 decides about the settings - both shown by script for a
+                 backup, hidden for the list's own file. -->
+            <ul id="library-import-parts" class="import-sample" hidden></ul>
             <ul id="library-import-sample" class="import-sample"></ul>
+            <p class="hint transfer-option" id="library-import-settings-row" hidden>
+              <label>
+                <input type="checkbox" id="library-import-settings" checked />
+                <span data-i18n="reader_backup_settings_restore">Restore the settings too</span>
+              </label>
+            </p>
             <p class="transfer">
               <button type="button" id="library-import-run" data-i18n="action_import">Import</button>
               <button type="button" id="library-import-cancel" data-i18n="action_cancel">Cancel</button>
@@ -783,9 +794,8 @@
                and the two must not overwrite each other mid-sentence. -->
           <p id="book-import-status" class="status report" role="status"></p>
           <p class="hint" data-i18n="reader_transfer_accepts">
-            Import reads the file it is given: a backup of the re/read article list (.json, or .zip
-            with pictures), or an e-book (.epub).
-          </p>
+              Import reads the file it is given: a re/read backup (.zip - or the older .json files of the list and of the highlights), or an e-book (.epub).
+            </p>
           <!-- The way to a partial export (D152), said where a reader about
                to press Export expects the choice - the button that offers
                it stands fifty rows up. -->
@@ -795,23 +805,14 @@
           <details class="fold-line">
             <summary data-i18n="reader_format_title">File format</summary>
             <p class="hint" data-i18n="reader_transfer_note">
-              .json - a backup file holding every article saved in the re/read offline reading
-              list, from this browser or any other browser or device where you use re/read. Import
-              only adds the articles missing here and never overwrites one already saved. With
-              pictures included, the backup is a .zip holding the same .json and the pictures beside
-              it.
+              .zip - the backup of everything re/read keeps: the offline reading list with its highlights and reading positions (and its pictures when you tick the box), every saved phrase of every language pair with its sentence and counts, and the settings. Import only adds what is missing here and never overwrites what is saved: an article already here keeps its copy, a saved phrase keeps its meanings and takes only a sentence it lacks or a higher count, a highlight already here is left out. The settings are restored only when you tick the box.
             </p>
             <p class="hint" data-i18n="reader_transfer_epub">.epub - the e-book format.</p>
             <p class="hint" data-i18n="reader_transfer_books">
-              Export covers articles only - books (.epub) are not exported. A book imported again
-              has no reading position and no highlights: export the highlights on the Highlights
-              page (.json) before deleting the book, and import that file after importing the same
-              book again.
+              Export covers articles - books (.epub) are not in the backup. A book imported again has no reading position; its highlights come back from the backup once the same book is imported from its .epub file.
             </p>
             <p class="hint" data-i18n="reader_transfer_marks">
-              Highlights are included with their articles in the .json backup. The Highlights page
-              exports them on their own: as a .json backup that can be imported - for books too - or
-              as .md notes.
+              Highlights are in the backup, with their articles and for books too. The Highlights page exports them as .md notes for reading.
             </p>
           </details>
           <input
@@ -905,45 +906,12 @@
              right under its own press (D153); the export buttons grey with
              nothing to write, their shared rule. -->
         <div id="marks-transfer" class="marks-transfer">
-          <div id="marks-copy">
-            <p class="transfer">
-              <button type="button" id="marks-export-copy" data-i18n="reader_marks_export_copy">
-                Export a backup (.json)
-              </button>
-              <button type="button" id="marks-import" data-i18n="reader_marks_import">
-                Import (.json)
-              </button>
-            </p>
-            <p class="hint" data-i18n="reader_marks_copy_hint">
-              The .json file is a backup of the highlights and their notes. Import adds the
-              highlights from such a file to the same articles, and to a book imported again from
-              the same .epub file. Nothing already here is changed or removed.
-            </p>
-            <!-- The moment of consent: what the picked file holds and where
-                 every mark lands, before anything is written; the rules live
-                 in `lib/store/marks-copy.js`. -->
-            <div id="marks-import-confirm" class="import-confirm" hidden>
-              <p id="marks-import-summary"></p>
-              <ul id="marks-import-sample" class="import-sample"></ul>
-              <p id="marks-import-note" class="hint" hidden></p>
-              <p class="transfer">
-                <button type="button" id="marks-import-run" data-i18n="action_import">Import</button>
-                <button type="button" id="marks-import-cancel" data-i18n="action_cancel">Cancel</button>
-              </p>
-            </div>
-            <p id="marks-transfer-status" class="status report" role="status"></p>
-            <input type="file" id="marks-import-file" accept=".json,application/json" hidden />
-          </div>
-          <!-- A plain link inside the sentence, not the tools line's quiet
-               anchor: that one is an inline-flex box of a finger's height,
-               which inside a paragraph lifted its whole line (Michał's
-               smoke, 2026-09-01). -->
-          <p class="hint" id="marks-copy-elsewhere" hidden>
-            <span data-i18n="reader_marks_copy_elsewhere">
-              A backup that can be imported (.json) is exported and imported on the page of all
-              highlights.
-            </span>
-            <a href="#" id="marks-all-link" data-i18n="reader_marks_all_link">All highlights</a>
+          <!-- Where the highlights' backup is since D213: in the backup of
+               everything, exported and imported on the reading list - for
+               books too. The page's own export below is the notes file. -->
+          <p class="hint" data-i18n="reader_marks_backup_elsewhere">
+            Highlights travel in the backup of everything, exported and imported on the reading list
+            - for books too.
           </p>
           <div class="marks-notes">
             <p class="transfer">
