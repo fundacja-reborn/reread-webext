@@ -68,6 +68,13 @@ const VERSION = 1;
  */
 const ID = /^[A-Za-z0-9_-]{1,64}$/;
 
+/**
+ * The most a book's text entry may be before it is inflated. A novel's
+ * segments run to a megabyte or two of markup; a hand-made archive must
+ * not plant a text that is inflated whole into a tablet's memory.
+ */
+export const MAX_BOOK_TEXT_BYTES = 32 * 1024 * 1024;
+
 /** The one shape a text entry's name may have - only what this module writes. */
 const TEXT_ENTRY = /^books\/[A-Za-z0-9_-]{1,64}\.json$/;
 

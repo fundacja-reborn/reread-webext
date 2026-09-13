@@ -502,6 +502,20 @@
       "size": { "content": "$2", "example": "12,4 MB" }
     }
   },
+  "reader_export_books_one": {
+    "message": "Exportar con libros ($COUNT$ libro · $SIZE$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "size": { "content": "$2", "example": "6,6 MB" }
+    }
+  },
+  "reader_export_books_other": {
+    "message": "Exportar con libros ($COUNT$ libros · $SIZE$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "size": { "content": "$2", "example": "6,6 MB" }
+    }
+  },
   "reader_import_pictures_one": {
     "message": "Con $COUNT$ imagen ($SIZE$).",
     "placeholders": {
@@ -536,8 +550,8 @@
   "reader_backup_scope": {
     "message": "La copia de seguridad contiene tus artículos con sus resaltados y posiciones de lectura, las frases guardadas de cada par de idiomas y los ajustes. Los resaltados hechos en libros también están en ella."
   },
-  "reader_backup_books": {
-    "message": "Los libros en sí (.epub) no están en la copia - conserva tus archivos .epub. Cuando importes el mismo libro de nuevo y después la copia, sus resaltados vuelven; su posición de lectura, no."
+  "reader_backup_books_note": {
+    "message": "Los libros están en la copia solo si marcas «Exportar con libros»; si no, conserva tus archivos .epub - cuando importes el mismo libro de nuevo y después la copia, sus resaltados vuelven."
   },
   "reader_export_marks": { "message": "Exportar los resaltados" },
   "reader_marks_export_notes": { "message": "Exportar como notas (.md)" },
@@ -652,6 +666,14 @@
       "count": { "content": "$1", "example": "12" }
     }
   },
+  "reader_backup_books_one": {
+    "message": "$COUNT$ libro",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_backup_books_other": {
+    "message": "$COUNT$ libros",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
   "reader_backup_highlights_one": {
     "message": "$COUNT$ resaltado",
     "placeholders": {
@@ -676,6 +698,20 @@
     "placeholders": {
       "count": { "content": "$1", "example": "12" },
       "new": { "content": "$2", "example": "3" }
+    }
+  },
+  "reader_backup_part_books_one": {
+    "message": "$COUNT$ libro, $NEW$ aún no en la lista",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "new": { "content": "$2", "example": "2" }
+    }
+  },
+  "reader_backup_part_books_other": {
+    "message": "$COUNT$ libros, $NEW$ aún no en la lista",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "new": { "content": "$2", "example": "2" }
     }
   },
   "reader_backup_part_phrases_one": {
@@ -719,9 +755,9 @@
   "reader_transfer_pick": { "message": "Para exportar solo algunos artículos, pulsa «Seleccionar» encima de la lista y márcalos." },
   "reader_pick_start": { "message": "Seleccionar" },
   "reader_pick_close": { "message": "Cerrar la selección" },
-  "reader_pick_book_title": { "message": "Los libros no están en la copia" },
+  "reader_pick_book_title": { "message": "Los libros se exportan solo en la copia" },
   "reader_pick_books_note": {
-    "message": "Los libros no se pueden seleccionar - no están en la copia, solo sus resaltados lo están."
+    "message": "Los libros no se pueden seleccionar - se exportan solo en la copia, con «Exportar con libros» marcado."
   },
   "reader_pick_all": { "message": "Seleccionar todo" },
   "reader_pick_count_one": {
@@ -954,6 +990,22 @@
     "placeholders": {
       "count": { "content": "$1", "example": "3" }
     }
+  },
+  "reader_import_books_added_one": {
+    "message": "Se añadió $COUNT$ libro nuevo.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_import_books_added_other": {
+    "message": "Se añadieron $COUNT$ libros nuevos.",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
+  "reader_import_books_skipped_one": {
+    "message": "Se omitió $COUNT$ libro ya presente.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_import_books_skipped_other": {
+    "message": "Se omitieron $COUNT$ libros ya presentes.",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
   },
   "reader_import_unreadable_one": {
     "message": "No se pudo leer $COUNT$ entrada.",

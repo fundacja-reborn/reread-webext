@@ -24,7 +24,7 @@ describe("the backup's scope on the reading list page", () => {
   it("says what the backup holds and that books are not in it before the format fold, not inside it", async () => {
     const page = await source("reader/reader.html");
     const scope = page.indexOf('data-i18n="reader_backup_scope"');
-    const books = page.indexOf('data-i18n="reader_backup_books"');
+    const books = page.indexOf('data-i18n="reader_backup_books_note"');
     const accepts = page.indexOf('data-i18n="reader_transfer_accepts"');
     const pick = page.indexOf('data-i18n="reader_transfer_pick"');
     const fold = page.indexOf('data-i18n="reader_format_title"');
@@ -34,7 +34,7 @@ describe("the backup's scope on the reading list page", () => {
     // One list, no heading, the four points as its items (the second polish).
     assert.match(
       page,
-      /<ul class="hint transfer-notes">\s*<li data-i18n="reader_backup_scope">[\s\S]*?<li data-i18n="reader_backup_books">[\s\S]*?<li data-i18n="reader_transfer_accepts">[\s\S]*?<li data-i18n="reader_transfer_pick">[\s\S]*?<\/ul>\s*<details class="fold-line">/,
+      /<ul class="hint transfer-notes">\s*<li data-i18n="reader_backup_scope">[\s\S]*?<li data-i18n="reader_backup_books_note">[\s\S]*?<li data-i18n="reader_transfer_accepts">[\s\S]*?<li data-i18n="reader_transfer_pick">[\s\S]*?<\/ul>\s*<details class="fold-line">/,
       "the four points are not one list right over the fold",
     );
     // The fold keeps only what the paragraphs do not say.
@@ -52,7 +52,7 @@ describe("the backup's scope on the reading list page", () => {
     for (const locale of ["en", "pl", "de", "fr", "es", "uk"]) {
       const catalogue = JSON.parse(await readFile(new URL(`_locales/${locale}/messages.json`, ROOT), "utf8"));
       assert.equal(catalogue["reader_transfer_books"], undefined, `${locale} still carries the fold's old key`);
-      assert.match(catalogue["reader_backup_books"].message, /\.epub/, `${locale}: the books paragraph does not name the .epub file`);
+      assert.match(catalogue["reader_backup_books_note"].message, /\.epub/, `${locale}: the books paragraph does not name the .epub file`);
     }
   });
 });

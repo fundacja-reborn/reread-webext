@@ -643,6 +643,21 @@
       "size": { "content": "$2", "example": "12.4 MB" }
     }
   },
+  "reader_export_books_one": {
+    "message": "Export with books ($COUNT$ book · $SIZE$)",
+    "description": "Checkbox under the pictures' box (D218): names Export outright like its neighbour; ticked, the backup carries every book - text and pictures - with the reading positions. The count with its unit and a middle dot before the size, the pictures' box's pattern.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "size": { "content": "$2", "example": "6.6 MB" }
+    }
+  },
+  "reader_export_books_other": {
+    "message": "Export with books ($COUNT$ books · $SIZE$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "size": { "content": "$2", "example": "6.6 MB" }
+    }
+  },
   "reader_import_pictures_one": {
     "message": "With $COUNT$ picture ($SIZE$).",
     "placeholders": {
@@ -681,9 +696,9 @@
     "message": "The backup holds your articles with their highlights and reading positions, the saved phrases of every language pair, and the settings. Highlights made in books are in it too.",
     "description": "First paragraph under the reading list's Import/Export buttons and the pictures box: what Export writes, said in the open - until 2026-09-13 only the file-format fold said it, and a reader who had just imported books could take Export for a backup of the whole list (Michał)."
   },
-  "reader_backup_books": {
-    "message": "The books themselves (.epub) are not in the backup - keep your .epub files. When you import the same book again and the backup after it, its highlights come back; its reading position does not.",
-    "description": "Second paragraph: the one thing the backup leaves out, and what to do about it. The order matters: the import keeps no highlights of a book the reading list does not hold - they stay in the file (marksImportPlan) - so the backup goes in after the book."
+  "reader_backup_books_note": {
+    "message": "Books are in the backup only when you tick \"Export with books\"; otherwise keep your .epub files - when you import the same book again and the backup after it, its highlights come back.",
+    "description": "Second point of the transfer section's list: the books are in the backup on request (D218) - the box named by its own label - and what to do otherwise. The order matters: the import keeps no highlights of a book the reading list does not hold, so the backup goes in after the book."
   },
   "reader_export_marks": { "message": "Export highlights" },
   "reader_marks_export_notes": {
@@ -820,6 +835,15 @@
       "count": { "content": "$1", "example": "12" }
     }
   },
+  "reader_backup_books_one": {
+    "message": "$COUNT$ book",
+    "description": "In the report after writing the backup: the books' count, one part of the list the sentence ends with (reader_backup_done) - only when the books went in.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_backup_books_other": {
+    "message": "$COUNT$ books",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
   "reader_backup_highlights_one": {
     "message": "$COUNT$ highlight",
     "description": "One item of the backup report's list of parts: how many highlights the file holds. Plural family over the count.",
@@ -846,6 +870,21 @@
     "placeholders": {
       "count": { "content": "$1", "example": "12" },
       "new": { "content": "$2", "example": "3" }
+    }
+  },
+  "reader_backup_part_books_one": {
+    "message": "$COUNT$ book, $NEW$ not in the list yet",
+    "description": "One line of the backup's offer: how many books the file holds and how many the list does not - a book already here by id or by title and author is left alone.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "new": { "content": "$2", "example": "2" }
+    }
+  },
+  "reader_backup_part_books_other": {
+    "message": "$COUNT$ books, $NEW$ not in the list yet",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "new": { "content": "$2", "example": "2" }
     }
   },
   "reader_backup_part_phrases_one": {
@@ -902,11 +941,11 @@
     "description": "Name and tooltip of the cross at the end of the selection's bar: closes the selection and drops the ticks."
   },
   "reader_pick_book_title": {
-    "message": "Books are not in the backup",
-    "description": "Tooltip of a book's row inside the selection (D152): why the row has no box. The same words will name the unticked \"Export with books\" box if books ever enter the backup."
+    "message": "Books are exported only in the backup",
+    "description": "Tooltip of a book's row inside the selection (D152): why the row has no box - the list's own file carries articles; books go only in the backup of everything (D218)."
   },
   "reader_pick_books_note": {
-    "message": "Books can't be selected - they are not in the backup, only their highlights are.",
+    "message": "Books can't be selected - they are exported only in the backup, with \"Export with books\" ticked.",
     "description": "One quiet line under the selection's bar, only while the rows the tab and the filter show include a book: a title alone says nothing on a touch screen or e-ink, where there is no hover."
   },
   "reader_pick_all": {
@@ -1218,6 +1257,24 @@
     "placeholders": {
       "count": { "content": "$1", "example": "3" }
     }
+  },
+  "reader_import_books_added_one": {
+    "message": "Added $COUNT$ new book.",
+    "description": "In the report after the backup's import: the books written, each with its text, pictures and reading position.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_import_books_added_other": {
+    "message": "Added $COUNT$ new books.",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
+  "reader_import_books_skipped_one": {
+    "message": "Skipped $COUNT$ book already here.",
+    "description": "After the added count: the file's books left alone because the list holds them already - by id, or by title and author.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_import_books_skipped_other": {
+    "message": "Skipped $COUNT$ books already here.",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
   },
   "reader_import_unreadable_one": {
     "message": "$COUNT$ entry could not be read.",

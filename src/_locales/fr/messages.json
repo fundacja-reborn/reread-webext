@@ -502,6 +502,20 @@
       "size": { "content": "$2", "example": "12,4 Mo" }
     }
   },
+  "reader_export_books_one": {
+    "message": "Exporter avec les livres ($COUNT$ livre · $SIZE$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "size": { "content": "$2", "example": "6,6 Mo" }
+    }
+  },
+  "reader_export_books_other": {
+    "message": "Exporter avec les livres ($COUNT$ livres · $SIZE$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "size": { "content": "$2", "example": "6,6 Mo" }
+    }
+  },
   "reader_import_pictures_one": {
     "message": "Avec $COUNT$ image ($SIZE$).",
     "placeholders": {
@@ -536,8 +550,8 @@
   "reader_backup_scope": {
     "message": "La sauvegarde contient vos articles avec leurs surlignages et leurs positions de lecture, les phrases enregistrées de chaque paire de langues et les paramètres. Les surlignages faits dans les livres y sont aussi."
   },
-  "reader_backup_books": {
-    "message": "Les livres eux-mêmes (.epub) ne sont pas dans la sauvegarde - gardez vos fichiers .epub. Quand vous importez le même livre à nouveau, puis la sauvegarde après lui, ses surlignages reviennent ; sa position de lecture, non."
+  "reader_backup_books_note": {
+    "message": "Les livres ne sont dans la sauvegarde que si vous cochez « Exporter avec les livres » ; sinon gardez vos fichiers .epub - quand vous importez le même livre à nouveau, puis la sauvegarde après lui, ses surlignages reviennent."
   },
   "reader_export_marks": { "message": "Exporter les surlignages" },
   "reader_marks_export_notes": { "message": "Exporter comme notes (.md)" },
@@ -652,6 +666,14 @@
       "count": { "content": "$1", "example": "12" }
     }
   },
+  "reader_backup_books_one": {
+    "message": "$COUNT$ livre",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_backup_books_other": {
+    "message": "$COUNT$ livres",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
   "reader_backup_highlights_one": {
     "message": "$COUNT$ surlignage",
     "placeholders": {
@@ -676,6 +698,20 @@
     "placeholders": {
       "count": { "content": "$1", "example": "12" },
       "new": { "content": "$2", "example": "3" }
+    }
+  },
+  "reader_backup_part_books_one": {
+    "message": "$COUNT$ livre, dont $NEW$ pas encore dans la liste",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "new": { "content": "$2", "example": "2" }
+    }
+  },
+  "reader_backup_part_books_other": {
+    "message": "$COUNT$ livres, dont $NEW$ pas encore dans la liste",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "new": { "content": "$2", "example": "2" }
     }
   },
   "reader_backup_part_phrases_one": {
@@ -719,9 +755,9 @@
   "reader_transfer_pick": { "message": "Pour n'exporter que certains articles, appuyez sur « Sélectionner » au-dessus de la liste et cochez-les." },
   "reader_pick_start": { "message": "Sélectionner" },
   "reader_pick_close": { "message": "Fermer la sélection" },
-  "reader_pick_book_title": { "message": "Les livres ne sont pas dans la sauvegarde" },
+  "reader_pick_book_title": { "message": "Les livres ne sont exportés que dans la sauvegarde" },
   "reader_pick_books_note": {
-    "message": "Les livres ne peuvent pas être sélectionnés - ils ne sont pas dans la sauvegarde, seuls leurs surlignages y sont."
+    "message": "Les livres ne peuvent pas être sélectionnés - ils ne sont exportés que dans la sauvegarde, avec « Exporter avec les livres » coché."
   },
   "reader_pick_all": { "message": "Tout sélectionner" },
   "reader_pick_count_one": {
@@ -954,6 +990,22 @@
     "placeholders": {
       "count": { "content": "$1", "example": "3" }
     }
+  },
+  "reader_import_books_added_one": {
+    "message": "$COUNT$ nouveau livre ajouté.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_import_books_added_other": {
+    "message": "$COUNT$ nouveaux livres ajoutés.",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
+  "reader_import_books_skipped_one": {
+    "message": "$COUNT$ livre déjà présent, ignoré.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_import_books_skipped_other": {
+    "message": "$COUNT$ livres déjà présents, ignorés.",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
   },
   "reader_import_unreadable_one": {
     "message": "$COUNT$ entrée n'a pas pu être lue.",
