@@ -94,7 +94,13 @@
       <nav id="menu-panel" class="nav-menu" hidden aria-label="Menu" data-i18n-aria-label="nav_menu">
         <button id="nav-library" type="button" data-i18n="reading_list">Offline reading list</button>
         <button id="nav-marks" type="button" data-i18n="reader_marks_title">Highlights</button>
-        <button id="nav-vocabulary" class="translation-only" type="button" data-i18n="saved_phrases">Saved phrases</button>
+        <!-- The phrases row stands whatever the translation switch says
+             (Michał's report, 2026-09-13: "the option is missing"): the
+             saved phrases work without the model since D158/D162 - the
+             dictionaries answer, the look-up field files - so a row that
+             hid with the model hid the page most of its readers use. The
+             reader's own menu never hid it. -->
+        <button id="nav-vocabulary" type="button" data-i18n="saved_phrases">Saved phrases</button>
       </nav>
     </div>
     <header>
