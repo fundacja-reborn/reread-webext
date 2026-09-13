@@ -621,7 +621,7 @@
   },
   "reader_format_title": { "message": "File format" },
   "reader_transfer_note": {
-    "message": ".json - a backup file holding every article saved in the re/read offline reading list, from this browser or any other browser or device where you use re/read. Import only adds the articles missing here and never overwrites one already saved. With pictures included, the backup is a .zip holding the same .json and the pictures beside it."
+    "message": ".zip - the backup of everything re/read keeps: the offline reading list with its highlights and reading positions (and its pictures when you tick the box), every saved phrase of every language pair with its sentence and counts, and the settings. Import only adds what is missing here and never overwrites what is saved: an article already here keeps its copy, a saved phrase keeps its meanings and takes only a sentence it lacks or a higher count, a highlight already here is left out. The settings are restored only when you tick the box."
   },
   "reader_export_pictures": {
     "message": "Export with pictures ($COUNT$, $SIZE$)",
@@ -666,29 +666,9 @@
     "description": "The second line of the file-format fold on the reading list, between the .json and the export notes."
   },
   "reader_transfer_books": {
-    "message": "Export covers articles only - books (.epub) are not exported. A book imported again has no reading position and no highlights: export the highlights on the Highlights page (.json) before deleting the book, and import that file after importing the same book again."
+    "message": "Export covers articles - books (.epub) are not in the backup. A book imported again has no reading position; its highlights come back from the backup once the same book is imported from its .epub file."
   },
   "reader_export_marks": { "message": "Export highlights" },
-  "reader_marks_export_copy": {
-    "message": "Export a backup (.json)",
-    "description": "Button on the page of all highlights (D168): writes reread-highlights.json, the file the Import button beside it reads back."
-  },
-  "reader_marks_import": {
-    "message": "Import (.json)",
-    "description": "Button beside the backup export on the page of all highlights: picks a reread-highlights.json file."
-  },
-  "reader_marks_copy_hint": {
-    "message": "The .json file is a backup of the highlights and their notes. Import adds the highlights from such a file to the same articles, and to a book imported again from the same .epub file. Nothing already here is changed or removed.",
-    "description": "Hint under the backup's two buttons. Plain and literal: what the file is, what Import does with it, what it never does."
-  },
-  "reader_marks_copy_elsewhere": {
-    "message": "A backup that can be imported (.json) is exported and imported on the page of all highlights.",
-    "description": "On one document's highlights page, where the backup's buttons do not stand; the link that follows leads to the page of all highlights."
-  },
-  "reader_marks_all_link": {
-    "message": "All highlights",
-    "description": "The link after reader_marks_copy_elsewhere: opens the page of all highlights."
-  },
   "reader_marks_export_notes": {
     "message": "Export as notes (.md)",
     "description": "Button under the backup's half, and alone on one document's page: writes reread-highlights.md, the quotes for reading."
@@ -696,36 +676,6 @@
   "reader_marks_notes_hint": {
     "message": "The .md file is a plain-text list of the quotes and notes, grouped by document - for reading and for your own notes. It cannot be imported.",
     "description": "Hint under the notes export."
-  },
-  "reader_marks_import_summary_one": {
-    "message": "$NAME$ holds the highlights of $COUNT$ document:",
-    "description": "Plural family over the file's document count; NAME is the picked file's name. The colon leads into the rows below, one per document of the reading list that receives highlights.",
-    "placeholders": {
-      "count": { "content": "$1", "example": "1" },
-      "name": { "content": "$2", "example": "reread-highlights.json" }
-    }
-  },
-  "reader_marks_import_summary_other": {
-    "message": "$NAME$ holds the highlights of $COUNT$ documents:",
-    "placeholders": {
-      "count": { "content": "$1", "example": "3" },
-      "name": { "content": "$2", "example": "reread-highlights.json" }
-    }
-  },
-  "reader_marks_import_row_one": {
-    "message": "$TITLE$ - $COUNT$ highlight to add",
-    "description": "One row of the import offer: a document of the reading list and how many of the file's highlights it receives.",
-    "placeholders": {
-      "count": { "content": "$1", "example": "1" },
-      "title": { "content": "$2", "example": "A Novel" }
-    }
-  },
-  "reader_marks_import_row_other": {
-    "message": "$TITLE$ - $COUNT$ highlights to add",
-    "placeholders": {
-      "count": { "content": "$1", "example": "12" },
-      "title": { "content": "$2", "example": "A Novel" }
-    }
   },
   "reader_marks_import_missing_one": {
     "message": "$COUNT$ document is not in the reading list: $TITLES$. Import it first - a book from its .epub file, an article from the reading list's backup - then import this file again.",
@@ -769,15 +719,141 @@
     "message": "Added $COUNT$ highlights.",
     "placeholders": { "count": { "content": "$1", "example": "12" } }
   },
-  "reader_marks_import_nothing": {
-    "message": "There are no highlights to import in that file.",
-    "description": "The picked file is not a highlights backup, or holds no highlights."
+  "reader_transfer_marks": { "message": "Highlights are in the backup, with their articles and for books too. The Highlights page exports them as .md notes for reading." },
+  "reader_backup_done": {
+    "message": "Backup written to $FILE$ ($SIZE$): $PARTS$.",
+    "description": "The reading list's report after writing the backup of everything (D213): the file, its size, and the parts as a list - each count in its own plural family, the settings as a word (reader_backup_settings_word).",
+    "placeholders": {
+      "file": { "content": "$1", "example": "reread-backup.zip" },
+      "size": { "content": "$2", "example": "2.3 MB" },
+      "parts": { "content": "$3", "example": "12 articles, 856 saved phrases, 41 highlights, the settings" }
+    }
   },
-  "reader_import_marks_elsewhere": {
-    "message": "That is a highlights file. Import it on the Highlights page.",
-    "description": "The reading list's Import was handed reread-highlights.json: that file is read on the Highlights page."
+  "reader_backup_settings_word": {
+    "message": "the settings",
+    "description": "The settings as one item in the backup report's list of parts."
   },
-  "reader_transfer_marks": { "message": "Highlights are included with their articles in the .json backup. The Highlights page exports them on their own: as a .json backup that can be imported - for books too - or as .md notes." },
+  "reader_backup_summary": {
+    "message": "$NAME$ is a re/read backup from $DATE$ (re/read $APP$):",
+    "description": "The first line of the import offer for a backup of everything: the file's name, the day it was written and the re/read version that wrote it. What it holds follows, one line per part.",
+    "placeholders": {
+      "name": { "content": "$1", "example": "reread-backup.zip" },
+      "date": { "content": "$2", "example": "13/09/2026" },
+      "app": { "content": "$3", "example": "0.5.56" }
+    }
+  },
+  "reader_backup_summary_highlights": {
+    "message": "$NAME$ holds highlights:",
+    "description": "The first line of the offer for the old highlights .json (D168), now read by the reading list's Import as a backup with one part.",
+    "placeholders": {
+      "name": { "content": "$1", "example": "reread-backup.zip" }
+    }
+  },
+  "reader_backup_settings_restore": {
+    "message": "Restore the settings too",
+    "description": "The checkbox under a backup's offer: whether the settings in the file replace the ones here. Ticked by default."
+  },
+  "reader_backup_settings_done": {
+    "message": "Settings restored.",
+    "description": "The report's sentence after the settings were restored from the backup."
+  },
+  "reader_backup_newer": {
+    "message": "That file was written by a newer re/read ($APP$). Update re/read and import it again.",
+    "description": "The reading list's refusal of a backup written by a newer re/read than this one - the parts this version knows might depend on ones it does not.",
+    "placeholders": {
+      "app": { "content": "$1", "example": "0.5.56" }
+    }
+  },
+  "reader_backup_nothing": {
+    "message": "There is nothing to import in that file.",
+    "description": "The reading list's answer to a backup with nothing in any part."
+  },
+  "reader_marks_backup_elsewhere": {
+    "message": "Highlights travel in the backup of everything, exported and imported on the reading list - for books too.",
+    "description": "The one sentence on the highlights page about the backup since D213: the highlights are in the backup of everything, which the reading list exports and imports. The page's own export is the .md notes file."
+  },
+  "reader_backup_articles_one": {
+    "message": "$COUNT$ article",
+    "description": "One item of the backup report's list of parts: how many articles the file holds. Plural family over the count.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_backup_articles_other": {
+    "message": "$COUNT$ articles",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_backup_highlights_one": {
+    "message": "$COUNT$ highlight",
+    "description": "One item of the backup report's list of parts: how many highlights the file holds. Plural family over the count.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_backup_highlights_other": {
+    "message": "$COUNT$ highlights",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_backup_part_articles_one": {
+    "message": "$COUNT$ article, $NEW$ not in the list yet",
+    "description": "One line of a backup's import offer: the articles in the file and how many of them the list does not hold yet ($2). Plural family over the count.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "new": { "content": "$2", "example": "3" }
+    }
+  },
+  "reader_backup_part_articles_other": {
+    "message": "$COUNT$ articles, $NEW$ not in the list yet",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "new": { "content": "$2", "example": "3" }
+    }
+  },
+  "reader_backup_part_phrases_one": {
+    "message": "$COUNT$ saved phrase ($PAIRS$)",
+    "description": "One line of a backup's import offer: the saved phrases in the file, with the language pairs they belong to named ($2, a list). Plural family over the count.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "pairs": { "content": "$2", "example": "English → Polish" }
+    }
+  },
+  "reader_backup_part_phrases_other": {
+    "message": "$COUNT$ saved phrases ($PAIRS$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "pairs": { "content": "$2", "example": "English → Polish" }
+    }
+  },
+  "reader_backup_part_highlights_one": {
+    "message": "$COUNT$ highlight - one already here or without its document is left out",
+    "description": "One line of a backup's import offer: the highlights in the file, and the rule for the ones left out. Plural family over the count.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_backup_part_highlights_other": {
+    "message": "$COUNT$ highlights - those already here or without their document are left out",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_backup_phrases_counted_one": {
+    "message": "$COUNT$ saved phrase took higher counts from the file.",
+    "description": "The report's sentence when saved phrases took higher counts from the backup - never lower ones. Plural family over the count. Absent when none did.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_backup_phrases_counted_other": {
+    "message": "$COUNT$ saved phrases took higher counts from the file.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
   "reader_transfer_pick": {
     "message": "To export only some of the articles, press Select above the list and tick them.",
     "description": "Hint under the Import/Export buttons (D152): the Select button stands above the list, fifty rows up, and a reader about to press Export expects the choice here."
@@ -905,11 +981,11 @@
     "placeholders": { "title": { "content": "$1", "example": "Old Chinese" } }
   },
   "reader_transfer_link": {
-    "message": "Import and export (articles or EPUB)",
+    "message": "Import and export (backup or EPUB)",
     "description": "The quiet anchor over the reading list that jumps to the transfer section - it names both kinds of file the section takes, because a book is not obvious from the section's own name."
   },
   "reader_transfer_accepts": {
-    "message": "Import reads the file it is given: a backup of the re/read article list (.json, or .zip with pictures), or an e-book (.epub).",
+    "message": "Import reads the file it is given: a re/read backup (.zip - or the older .json files of the list and of the highlights), or an e-book (.epub).",
     "description": "The line under the reading list's Import and Export buttons - why there is no separate button for books."
   },
   "reader_book_label": {

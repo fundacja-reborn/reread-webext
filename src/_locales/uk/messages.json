@@ -602,7 +602,7 @@
   },
   "reader_format_title": { "message": "Формат файлу" },
   "reader_transfer_note": {
-    "message": ".json - файл резервної копії з усіма статтями, збереженими в офлайн-читальні re/read, із цього чи іншого браузера або пристрою, де використовується re/read. Імпорт додає лише статті, яких тут бракує, і ніколи не перезаписує вже збережених. Із зображеннями резервна копія - це .zip із тим самим .json і зображеннями поруч."
+    "message": ".zip - резервна копія всього, що зберігає re/read: офлайн-список читання з позначеннями та позиціями читання (і з зображеннями, якщо ви позначите поле), кожна збережена фраза кожної мовної пари з реченням і лічильниками, а також налаштування. Імпорт додає лише те, чого тут бракує, і нічого збереженого не перезаписує: стаття, яка вже є тут, зберігає свою копію, збережена фраза зберігає значення й бере лише речення, якого не має, або вищий лічильник, позначення, яке вже є тут, пропускається. Налаштування відновлюються лише тоді, коли ви позначите поле."
   },
   "reader_export_pictures": {
     "message": "Експорт із зображеннями ($COUNT$, $SIZE$)",
@@ -655,72 +655,11 @@
   },
   "reader_transfer_epub": { "message": ".epub - формат електронних книжок." },
   "reader_transfer_books": {
-    "message": "Експорт охоплює лише статті - книжки (.epub) не експортуються. Повторно імпортована книжка не має ні позиції читання, ні позначень: експортуйте позначення на сторінці позначень (.json) перед видаленням книжки, а цей файл імпортуйте після повторного імпорту тієї самої книжки."
+    "message": "Експорт охоплює статті - книг (.epub) у резервній копії немає. Знову імпортована книга не має позиції читання; її позначення повертаються з копії, щойно ту саму книгу імпортовано з файлу .epub."
   },
   "reader_export_marks": { "message": "Експортувати позначення" },
-  "reader_marks_export_copy": { "message": "Експортувати копію (.json)" },
-  "reader_marks_import": { "message": "Імпортувати (.json)" },
-  "reader_marks_copy_hint": { "message": "Файл .json - це резервна копія позначень та їхніх нотаток. Імпорт додає позначення з такого файлу до тих самих статей і до книжки, імпортованої знову з того самого файлу .epub. Нічого з того, що вже є тут, не змінюється й не видаляється." },
-  "reader_marks_copy_elsewhere": { "message": "Резервну копію, яку можна імпортувати (.json), експортують та імпортують на сторінці всіх позначень." },
-  "reader_marks_all_link": { "message": "Усі позначення" },
   "reader_marks_export_notes": { "message": "Експортувати як нотатки (.md)" },
   "reader_marks_notes_hint": { "message": "Файл .md - це текстовий список цитат і нотаток, згрупованих за документами - для читання та для власних нотаток. Його не можна імпортувати." },
-  "reader_marks_import_summary_one": {
-    "message": "$NAME$ містить позначення $COUNT$ документа:",
-    "placeholders": {
-      "count": { "content": "$1", "example": "1" },
-      "name": { "content": "$2", "example": "reread-highlights.json" }
-    }
-  },
-  "reader_marks_import_summary_few": {
-    "message": "$NAME$ містить позначення $COUNT$ документів:",
-    "placeholders": {
-      "count": { "content": "$1", "example": "3" },
-      "name": { "content": "$2", "example": "reread-highlights.json" }
-    }
-  },
-  "reader_marks_import_summary_many": {
-    "message": "$NAME$ містить позначення $COUNT$ документів:",
-    "placeholders": {
-      "count": { "content": "$1", "example": "12" },
-      "name": { "content": "$2", "example": "reread-highlights.json" }
-    }
-  },
-  "reader_marks_import_summary_other": {
-    "message": "$NAME$ містить позначення $COUNT$ документа:",
-    "placeholders": {
-      "count": { "content": "$1", "example": "1,5" },
-      "name": { "content": "$2", "example": "reread-highlights.json" }
-    }
-  },
-  "reader_marks_import_row_one": {
-    "message": "$TITLE$ - $COUNT$ позначення до додавання",
-    "placeholders": {
-      "count": { "content": "$1", "example": "1" },
-      "title": { "content": "$2", "example": "Роман" }
-    }
-  },
-  "reader_marks_import_row_few": {
-    "message": "$TITLE$ - $COUNT$ позначення до додавання",
-    "placeholders": {
-      "count": { "content": "$1", "example": "3" },
-      "title": { "content": "$2", "example": "Роман" }
-    }
-  },
-  "reader_marks_import_row_many": {
-    "message": "$TITLE$ - $COUNT$ позначень до додавання",
-    "placeholders": {
-      "count": { "content": "$1", "example": "12" },
-      "title": { "content": "$2", "example": "Роман" }
-    }
-  },
-  "reader_marks_import_row_other": {
-    "message": "$TITLE$ - $COUNT$ позначення до додавання",
-    "placeholders": {
-      "count": { "content": "$1", "example": "1,5" },
-      "title": { "content": "$2", "example": "Роман" }
-    }
-  },
   "reader_marks_import_missing_one": {
     "message": "$COUNT$ документа немає в списку читання: $TITLES$. Спершу імпортуйте його - книжку з її файлу .epub, статтю з резервної копії списку читання - а потім ще раз цей файл.",
     "placeholders": {
@@ -797,9 +736,202 @@
     "message": "Додано $COUNT$ позначення.",
     "placeholders": { "count": { "content": "$1", "example": "1,5" } }
   },
-  "reader_marks_import_nothing": { "message": "У цьому файлі немає позначень для імпорту." },
-  "reader_import_marks_elsewhere": { "message": "Це файл позначень. Імпортуйте його на сторінці позначень." },
-  "reader_transfer_marks": { "message": "Позначення зберігаються разом зі статтями в резервній копії .json. Сторінка позначень експортує їх окремо: як копію .json, яку можна імпортувати - також для книжок - або як нотатки .md." },
+  "reader_transfer_marks": { "message": "Позначення є в резервній копії - разом зі статтями, а також позначення книг. Сторінка позначень експортує їх як нотатки .md для читання." },
+  "reader_backup_done": {
+    "message": "Резервну копію записано до $FILE$ ($SIZE$): $PARTS$.",
+    "placeholders": {
+      "file": { "content": "$1", "example": "reread-backup.zip" },
+      "size": { "content": "$2", "example": "2.3 MB" },
+      "parts": { "content": "$3", "example": "12 articles, 856 saved phrases, 41 highlights, the settings" }
+    }
+  },
+  "reader_backup_settings_word": {
+    "message": "налаштування"
+  },
+  "reader_backup_summary": {
+    "message": "$NAME$ - резервна копія re/read від $DATE$ (re/read $APP$):",
+    "placeholders": {
+      "name": { "content": "$1", "example": "reread-backup.zip" },
+      "date": { "content": "$2", "example": "13/09/2026" },
+      "app": { "content": "$3", "example": "0.5.56" }
+    }
+  },
+  "reader_backup_summary_highlights": {
+    "message": "$NAME$ містить позначення:",
+    "placeholders": {
+      "name": { "content": "$1", "example": "reread-backup.zip" }
+    }
+  },
+  "reader_backup_settings_restore": {
+    "message": "Відновити також налаштування"
+  },
+  "reader_backup_settings_done": {
+    "message": "Налаштування відновлено."
+  },
+  "reader_backup_newer": {
+    "message": "Цей файл записала новіша версія re/read ($APP$). Оновіть re/read та імпортуйте його знову.",
+    "placeholders": {
+      "app": { "content": "$1", "example": "0.5.56" }
+    }
+  },
+  "reader_backup_nothing": {
+    "message": "У цьому файлі немає чого імпортувати."
+  },
+  "reader_marks_backup_elsewhere": {
+    "message": "Позначення подорожують у резервній копії всього, яку записує й читає список читання - позначення книг також."
+  },
+  "reader_backup_articles_one": {
+    "message": "$COUNT$ стаття",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_backup_articles_few": {
+    "message": "$COUNT$ статті",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_backup_articles_many": {
+    "message": "$COUNT$ статей",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_backup_articles_other": {
+    "message": "$COUNT$ статті",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_backup_highlights_one": {
+    "message": "$COUNT$ позначення",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_backup_highlights_few": {
+    "message": "$COUNT$ позначення",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_backup_highlights_many": {
+    "message": "$COUNT$ позначень",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_backup_highlights_other": {
+    "message": "$COUNT$ позначення",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_backup_part_articles_one": {
+    "message": "$COUNT$ стаття, з них $NEW$ ще немає в списку",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "new": { "content": "$2", "example": "3" }
+    }
+  },
+  "reader_backup_part_articles_few": {
+    "message": "$COUNT$ статті, з них $NEW$ ще немає в списку",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "new": { "content": "$2", "example": "3" }
+    }
+  },
+  "reader_backup_part_articles_many": {
+    "message": "$COUNT$ статей, з них $NEW$ ще немає в списку",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "new": { "content": "$2", "example": "3" }
+    }
+  },
+  "reader_backup_part_articles_other": {
+    "message": "$COUNT$ статті, з них $NEW$ ще немає в списку",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "new": { "content": "$2", "example": "3" }
+    }
+  },
+  "reader_backup_part_phrases_one": {
+    "message": "$COUNT$ збережена фраза ($PAIRS$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "pairs": { "content": "$2", "example": "English → Polish" }
+    }
+  },
+  "reader_backup_part_phrases_few": {
+    "message": "$COUNT$ збережені фрази ($PAIRS$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "pairs": { "content": "$2", "example": "English → Polish" }
+    }
+  },
+  "reader_backup_part_phrases_many": {
+    "message": "$COUNT$ збережених фраз ($PAIRS$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "pairs": { "content": "$2", "example": "English → Polish" }
+    }
+  },
+  "reader_backup_part_phrases_other": {
+    "message": "$COUNT$ збереженої фрази ($PAIRS$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "pairs": { "content": "$2", "example": "English → Polish" }
+    }
+  },
+  "reader_backup_part_highlights_one": {
+    "message": "$COUNT$ позначення - те, що вже є тут або не має свого документа, буде пропущене",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_backup_part_highlights_few": {
+    "message": "$COUNT$ позначення - ті, що вже є тут або не мають свого документа, будуть пропущені",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_backup_part_highlights_many": {
+    "message": "$COUNT$ позначень - ті, що вже є тут або не мають свого документа, будуть пропущені",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_backup_part_highlights_other": {
+    "message": "$COUNT$ позначення - ті, що вже є тут або не мають свого документа, будуть пропущені",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_backup_phrases_counted_one": {
+    "message": "$COUNT$ збережена фраза отримала вищі лічильники з файлу.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_backup_phrases_counted_few": {
+    "message": "$COUNT$ збережені фрази отримали вищі лічильники з файлу.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_backup_phrases_counted_many": {
+    "message": "$COUNT$ збережених фраз отримали вищі лічильники з файлу.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
+  "reader_backup_phrases_counted_other": {
+    "message": "$COUNT$ збереженої фрази отримали вищі лічильники з файлу.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" }
+    }
+  },
   "reader_transfer_pick": { "message": "Щоб експортувати лише частину статей, натисніть «Вибрати» над списком і позначте їх." },
   "reader_pick_start": { "message": "Вибрати" },
   "reader_pick_close": { "message": "Закрити вибір" },
@@ -953,8 +1085,8 @@
     "message": "Відкрити «$TITLE$» на цьому позначенні",
     "placeholders": { "title": { "content": "$1", "example": "Old Chinese" } }
   },
-  "reader_transfer_link": { "message": "Імпорт та експорт (статті або EPUB)" },
-  "reader_transfer_accepts": { "message": "Імпорт розпізнає файл: резервну копію списку статей re/read (.json або .zip із зображеннями) або електронну книжку (.epub)." },
+  "reader_transfer_link": { "message": "Імпорт та експорт (резервна копія або EPUB)" },
+  "reader_transfer_accepts": { "message": "Імпорт читає поданий файл: резервну копію re/read (.zip - або старіші файли .json списку та позначень) чи електронну книгу (.epub)." },
   "reader_book_label": { "message": "Книжка" },
   "reader_book_part_of": {
     "message": "Частина $PART$ з $PARTS$",

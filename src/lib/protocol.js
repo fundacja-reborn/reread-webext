@@ -33,6 +33,7 @@ export const Message = Object.freeze({
   FORGET_PHRASE: "forget-phrase",
   LIST_PHRASES: "list-phrases",
   IMPORT_PHRASES: "import-phrases",
+  RESTORE_VOCABULARY: "restore-vocabulary",
   COUNT_PHRASES: "count-phrases",
   READ_PAGE: "read-page",
   GRAB_PAGE: "grab-page",
@@ -266,6 +267,20 @@ export const ErrorCode = Object.freeze({
  * @typedef {{ text: string, translations: string[], context?: string }} ImportRow
  * @typedef {{ kind: typeof Message.IMPORT_PHRASES, rows: ImportRow[] }} ImportPhrasesRequest
  * @typedef {{ added: number, skipped: number, sentenced: number, invalid: number }} ImportReport
+ * @typedef {{
+ *   langFrom: string,
+ *   langTo: string,
+ *   text: string,
+ *   translations: string[],
+ *   createdAt?: number,
+ *   context?: string,
+ *   recallCount?: number,
+ *   lastRecallAt?: number,
+ *   readCount?: number,
+ *   lastReadAt?: number,
+ * }} RestoreRow one phrase as the backup of everything carries it (D213) - its pair in the row, so one file holds every pair
+ * @typedef {{ kind: typeof Message.RESTORE_VOCABULARY, rows: RestoreRow[] }} RestoreVocabularyRequest
+ * @typedef {{ added: number, skipped: number, sentenced: number, counted: number, invalid: number }} RestoreReport
  * @typedef {{ kind: typeof Message.COUNT_PHRASES, recalled: string[], read: Array<[string, number]> }} CountPhrasesRequest
  * @typedef {{ kind: typeof Message.READ_PAGE }} ReadPageRequest
  * @typedef {TranslateRequest
@@ -279,6 +294,7 @@ export const ErrorCode = Object.freeze({
  *   | ForgetPhraseRequest
  *   | ListPhrasesRequest
  *   | ImportPhrasesRequest
+ *   | RestoreVocabularyRequest
  *   | CountPhrasesRequest
  *   | ReadPageRequest} Request
  */
@@ -448,6 +464,67 @@ export function asLookUp(value) {
 }
 
 /**
+ * A language code as the model registry and the settings spell one: two or
+ * three letters, with an underscored script tag when there is one
+ * (`zh_hant`) - the shape `pairFromFilename` reads off a file name.
+ *
+ * @param {unknown} value
+ * @returns {value is string}
+ */
+export function isLanguageCode(value) {
+  return typeof value === "string" && /^[a-z]{2,3}(?:_[a-z]{4})?$/.test(value);
+}
+
+/**
+ * @param {unknown} value
+ * @returns {value is number} a moment in epoch milliseconds, or as good as one
+ */
+function isMoment(value) {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0;
+}
+
+/**
+ * @param {unknown} value
+ * @returns {value is number} a count worth carrying - whole and above zero
+ */
+function isTally(value) {
+  return typeof value === "number" && Number.isInteger(value) && value > 0;
+}
+
+/**
+ * One row of the vocabulary as the backup of everything carries it (D213),
+ * narrowed field by field - the shape the file and the wire share, so a
+ * file read on the page and a row that reaches the background are one
+ * rule. The pair and the phrase must be there; everything else rides along
+ * when it is what it says it is and is dropped when it is not: a broken
+ * count must not cost the phrase, and a broken phrase costs only its row.
+ *
+ * @param {unknown} value
+ * @returns {RestoreRow | null}
+ */
+export function asRestoreRow(value) {
+  if (typeof value !== "object" || value === null) return null;
+  const { langFrom, langTo, text, translations, createdAt, context, recallCount, lastRecallAt, readCount, lastReadAt } =
+    /** @type {Record<string, unknown>} */ (value);
+  if (!isLanguageCode(langFrom) || !isLanguageCode(langTo)) return null;
+  if (typeof text !== "string" || text.length === 0) return null;
+  if (!Array.isArray(translations) || !translations.every((one) => typeof one === "string")) return null;
+  /** @type {RestoreRow} */
+  const row = { langFrom, langTo, text, translations: /** @type {string[]} */ ([...translations]) };
+  if (isMoment(createdAt)) row.createdAt = createdAt;
+  if (typeof context === "string" && context.length > 0) row.context = context;
+  if (isTally(recallCount)) {
+    row.recallCount = recallCount;
+    if (isMoment(lastRecallAt)) row.lastRecallAt = lastRecallAt;
+  }
+  if (isTally(readCount)) {
+    row.readCount = readCount;
+    if (isMoment(lastReadAt)) row.lastReadAt = lastReadAt;
+  }
+  return row;
+}
+
+/**
  * Narrows whatever arrived over `runtime.sendMessage` - which is to say,
  * anything at all - to a request this extension sends.
  *
@@ -555,6 +632,21 @@ export function asRequest(message) {
       clean.push(sound);
     }
     return { kind: Message.IMPORT_PHRASES, rows: clean };
+  }
+
+  if (kind === Message.RESTORE_VOCABULARY) {
+    if (!Array.isArray(rows)) return null;
+    // As the TSV import's rows: one broken row refuses the message - the
+    // sender is our own page reading a file it parsed by this same rule,
+    // and a row that is not one means a bug.
+    /** @type {RestoreRow[]} */
+    const clean = [];
+    for (const row of rows) {
+      const one = asRestoreRow(row);
+      if (one === null) return null;
+      clean.push(one);
+    }
+    return { kind: Message.RESTORE_VOCABULARY, rows: clean };
   }
 
   if (kind === Message.COUNT_PHRASES) {

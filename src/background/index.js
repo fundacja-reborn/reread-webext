@@ -31,6 +31,7 @@ import {
   importPhrases,
   listVocabulary,
   refreshVocabulary,
+  restoreFromBackup,
   savePhrase,
 } from "./vocabulary.js";
 
@@ -195,6 +196,8 @@ async function handle(request, sender) {
       return await listVocabulary();
     case Message.IMPORT_PHRASES:
       return await importPhrases(request);
+    case Message.RESTORE_VOCABULARY:
+      return await restoreFromBackup(request);
     case Message.COUNT_PHRASES:
       return await countPhrases(request);
   }
