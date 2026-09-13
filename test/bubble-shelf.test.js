@@ -28,7 +28,7 @@ describe("the bubble's dictionary shelf", () => {
     assert.match(tooltip, /import \{ renderShelf \} from "\.\.\/lib\/lookup-shelf\.js";/, "the bubble does not import the shelf");
     const setting = bodyOf(tooltip, "setEntries");
     assert.match(setting, /entriesElement\.style\.height = "";/, "a new answer keeps the old answer's pinned height");
-    assert.match(setting, /renderShelf\(groups, \{\s*meanings: currentMeanings\(\),\s*folds: new Map\(\),\s*readOnly: plain,\s*disabled: editing,\s*foldAt: null,\s*onPress: \(line\) => choose\(line\),/, "the shelf is not drawn compact, afresh, with the quiet bubble's rows prose and a tick choosing");
+    assert.match(setting, /renderShelf\(groups, \{\s*meanings: currentMeanings\(\),\s*folds: new Map\(\),\s*readOnly: plain,\s*disabled: editing,\s*foldAt: null,\s*oneOpen: true,\s*onPress: \(line\) => choose\(line\),/, "the shelf is not drawn compact, afresh, one book at a time, with the quiet bubble's rows prose and a tick choosing");
     // No rows of the bubble's own any more.
     assert.doesNotMatch(tooltip, /\.entry-sense|\.entry-label|\.entry-dict|"entry"|"entry-/, "the old dictionary section is still drawn");
     assert.doesNotMatch(tooltip, /afterChoosing/, "a tick composes the gloss the old way");
@@ -58,6 +58,14 @@ describe("the bubble's dictionary shelf", () => {
     assert.match(pinning, /entriesElement\.style\.height = `\$\{entriesElement\.getBoundingClientRect\(\)\.height\}px`;/, "the box is not pinned at the height it has");
     // The box still scrolls inside itself, the only place outside the popup where that is allowed.
     assert.match(tooltip, /\.entries \{[\s\S]*?max-height: 40vh;\s*overflow-y: auto;/, "the box no longer scrolls inside itself");
+  });
+
+  it("stands the books one open at a time, and brings the book opened into the box's view (D214)", async () => {
+    const tooltip = await source("content/tooltip.js");
+    assert.match(bodyOf(tooltip, "setEntries"), /foldAt: null,\s*oneOpen: true,/, "the bubble's books open one under another - the second out of sight under the pinned box's edge");
+    const shelf = await source("lib/lookup-shelf.js");
+    assert.match(shelf, /if \(oneOpen\) book\.name = "lookup-group";/, "the books do not share a name - the browser's own exclusive group");
+    assert.match(shelf, /summary\.addEventListener\("click", \(\) => \{\s*requestAnimationFrame\(\(\) => \{\s*if \(book\.open\) showOpened\(book\);/, "a book opened by a press is not brought into view once the fold has answered the press");
   });
 
   it("is handed groups with their rows told apart, in the books' language, by every caller", async () => {

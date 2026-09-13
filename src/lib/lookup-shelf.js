@@ -23,7 +23,7 @@
  */
 
 import { t } from "./i18n.js";
-import { LINES_OPEN, foldPoint, isSaved } from "./lookup.js";
+import { LINES_OPEN, foldPoint, isSaved, scrollToShow } from "./lookup.js";
 
 /** @typedef {import("./lookup.js").EntryGroup} EntryGroup */
 
@@ -43,6 +43,10 @@ import { LINES_OPEN, foldPoint, isSaved } from "./lookup.js";
  *   before the rest fold under "Show all" - `LINES_OPEN` by default; null
  *   folds nothing, for a home whose own box scrolls (the bubble; the popup,
  *   D207)
+ * @property {boolean} [oneOpen] the books one open at a time: a book opened
+ *   folds the one that was open (the bubble, D214 - its box stands pinned
+ *   at the height it had, and a second book opened under a first still
+ *   open opened out of sight, under the box's edge)
  * @property {(line: string, at: string) => void} [onPress] a row ticked or
  *   unticked: the line, and the row's mark (`data-line`) for the home to
  *   find the row again after its redraw
@@ -192,10 +196,52 @@ function aboutFold(group, folds) {
 }
 
 /**
+ * The box the shelf scrolls in, when it scrolls in one: the nearest
+ * ancestor set to scroll on its own - the bubble's box, the popup's answer
+ * - and nothing on a page that scrolls as a whole, whose scroll is the
+ * reader's own (the "Add a phrase" panel; `moreFold` moves it, and only to
+ * bring a name back after a close). A bubble's walk ends at its shadow
+ * root: the page under it is never the box.
+ *
+ * @param {Element} from
+ * @returns {Element | null}
+ */
+function scrollBoxOf(from) {
+  for (let node = from.parentElement; node !== null; node = node.parentElement) {
+    const overflow = window.getComputedStyle(node).overflowY;
+    if (overflow === "auto" || overflow === "scroll") return node;
+  }
+  return null;
+}
+
+/**
+ * A book opened by a press brought into view of the box it scrolls in
+ * (D214; the rule is `scrollToShow`): the box's own scroll position moved
+ * and nothing else - not `scrollIntoView`, which moves every scrolling
+ * ancestor there is, the page under a bubble included. Measured against
+ * the box's inner edges, its border left out.
+ *
+ * @param {HTMLElement} book
+ */
+function showOpened(book) {
+  const box = scrollBoxOf(book);
+  if (box === null) return;
+  const top = box.getBoundingClientRect().top + box.clientTop;
+  const edges = book.getBoundingClientRect();
+  box.scrollTop += scrollToShow({ top, bottom: top + box.clientHeight }, { top: edges.top, bottom: edges.bottom });
+}
+
+/**
  * The books as folds: the first open, the others closed with the count of
  * their meanings in their name - the height of the answer limited by
  * structure, not by a scrollbar - in the order the answer came in, which is
- * the settings' order of the dictionaries. Inside a book, a label stands
+ * the settings' order of the dictionaries. One open at a time where the
+ * home says so (`oneOpen`, D214): the books share a name, and the browser
+ * folds the open one as another opens - its own exclusive group, no script
+ * between the press and the fold. A book opened by a press is brought into
+ * view of the box the shelf scrolls in (`showOpened`) a frame later, once
+ * the fold has answered the press: the click comes first, and the fold's
+ * opening is what the click does by default. Inside a book, a label stands
  * over the first meaning after it, wherever that meaning lands - open, or
  * behind "Show all" - so a cut inside a section leaves the label with its
  * lines; a label with no meaning after it stands over nothing and is
@@ -208,7 +254,7 @@ function aboutFold(group, folds) {
  * @param {ShelfOptions} options
  * @returns {HTMLElement[]} one fold per book
  */
-export function renderShelf(groups, { meanings, folds, readOnly = false, disabled = false, foldAt = LINES_OPEN, onPress }) {
+export function renderShelf(groups, { meanings, folds, readOnly = false, disabled = false, foldAt = LINES_OPEN, oneOpen = false, onPress }) {
   /** @type {HTMLElement[]} */
   const shelf = [];
   for (const [at, group] of groups.entries()) {
@@ -216,6 +262,12 @@ export function renderShelf(groups, { meanings, folds, readOnly = false, disable
     summary.append(element("span", "lookup-entry-dict", group.dictionary));
     summary.append(` (${group.lines.length.toLocaleString()})`);
     const book = shelfFold("lookup-group", `group:${group.dictionary}`, at === 0, summary, folds);
+    if (oneOpen) book.name = "lookup-group";
+    summary.addEventListener("click", () => {
+      requestAnimationFrame(() => {
+        if (book.open) showOpened(book);
+      });
+    });
 
     // Everything up to the cut goes straight into the book; the rest goes
     // into the block behind "Show all", headwords and lines alike.

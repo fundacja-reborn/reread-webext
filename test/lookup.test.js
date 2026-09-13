@@ -11,6 +11,7 @@ import {
   lookupText,
   ownMeanings,
   sameMeaning,
+  scrollToShow,
 } from "../src/lib/lookup.js";
 import { MAX_PHRASE_LENGTH } from "../src/lib/store/phrase.js";
 
@@ -248,5 +249,30 @@ describe("afterPress", () => {
 
   it("splits a line the book wrote as several", () => {
     assert.deepEqual(afterPress([], "bank\nbrzeg"), { act: "save", meanings: ["bank", "brzeg"] });
+  });
+});
+
+describe("scrollToShow", () => {
+  // The box's visible edges: 200 tall, from 100 to 300.
+  const view = { top: 100, bottom: 300 };
+
+  it("moves nothing while the whole book is in view", () => {
+    assert.equal(scrollToShow(view, { top: 100, bottom: 300 }), 0);
+    assert.equal(scrollToShow(view, { top: 150, bottom: 220 }), 0);
+  });
+
+  it("brings the end of a book that fits into view and no further - the name stays where it was pressed", () => {
+    assert.equal(scrollToShow(view, { top: 250, bottom: 350 }), 50);
+  });
+
+  it("puts the name at the top edge when the book is taller than the box", () => {
+    // A book opened at the bottom edge: before D214 it opened out of sight.
+    assert.equal(scrollToShow(view, { top: 260, bottom: 700 }), 160);
+    assert.equal(scrollToShow(view, { top: 100, bottom: 700 }), 0);
+  });
+
+  it("puts the name back at the top edge when it has gone above it - the book that was open folded away", () => {
+    assert.equal(scrollToShow(view, { top: 40, bottom: 200 }), -60);
+    assert.equal(scrollToShow(view, { top: 40, bottom: 500 }), -60);
   });
 });
