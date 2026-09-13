@@ -371,25 +371,37 @@ export async function allArticles() {
 export async function importArticles(articles) {
   await restoreMarks();
   await restoreLibrary();
-  const { added, skipped } = await withLibrary("readwrite", async (stores) => {
+  const { added, skipped, positions } = await withLibrary("readwrite", async (stores) => {
     const keys = /** @type {IDBValidKey[]} */ (await promisify(stores.meta.getAllKeys()));
     const plan = importPlan(keys.map(String), articles);
     /** @type {SavedArticle[]} */
     const added = [];
+    /** @type {ReadingPosition[]} */
+    const positions = [];
     for (const article of plan.toAdd) {
-      const { content, dir, lang, marks, ...meta } = article;
+      const { content, dir, lang, marks, position, ...meta } = article;
       await promisify(stores.meta.put(meta));
       await promisify(stores.content.put({ url: article.url, content, dir, lang }));
       if (marks !== undefined && marks.length > 0) {
         const standing = await promisify(stores.marks.getKey(article.url));
         if (standing === undefined) await promisify(stores.marks.put({ docId: article.url, marks }));
       }
+      // Where the reader stopped (D213) comes back with the article it
+      // belongs to - only with an article actually added: one already saved
+      // keeps its own place, as it keeps everything else.
+      if (position !== undefined) {
+        await promisify(stores.positions.put(position));
+        positions.push(position);
+      }
       added.push({ ...meta, content, dir, lang });
     }
-    return { added, skipped: plan.skipped };
+    return { added, skipped: plan.skipped, positions };
   });
   if (added.length > 0) await rebuildMarksBackup();
   for (const article of added) await copyArticle(article, false);
+  // After the articles: the copy writes a position only for a document its
+  // index holds.
+  for (const position of positions) await copyPosition(position);
   return { added: added.length, skipped, urls: added.map((article) => article.url) };
 }
 

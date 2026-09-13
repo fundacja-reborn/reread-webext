@@ -116,12 +116,13 @@ function isSide(value) {
  * @param {SavedArticle[]} articles
  * @param {Map<string, Mark[]>} marks each article's marks, keyed by `url`
  * @param {Map<string, PictureRow[]>} pictures each article's pictures, keyed by `url`
+ * @param {Map<string, import("../reader/position.js").ReadingPosition>} [positions] each document's position, keyed by `docId` (D213)
  * @returns {ArchiveEntry[]}
  */
-export function archiveEntries(articles, marks, pictures) {
+export function archiveEntries(articles, marks, pictures, positions = new Map()) {
   /** @type {ArchiveEntry[]} */
   const entries = [];
-  const rows = fileRows(articles, marks).map((row, at) => {
+  const rows = fileRows(articles, marks, positions).map((row, at) => {
     const kept = pictures.get(row.url) ?? [];
     if (kept.length === 0) return row;
     const refs = kept.map((picture) => {

@@ -254,3 +254,37 @@ describe("the exported file's name", () => {
     assert.equal(ARTICLES_FILENAME, "reread-articles.json");
   });
 });
+
+describe("where the reader stopped, in the file (D213)", () => {
+  it("carries an article's position beside it without the address said twice, and no field without one", () => {
+    const one = article("one");
+    const two = article("two");
+    const positions = new Map([[one.url, { docId: one.url, segmentIndex: 0, blockIndex: 12, updatedAt: 500, percent: 40 }]]);
+    const text = toArticlesFile([one, two], new Map(), positions);
+    const rows = JSON.parse(text).articles;
+    assert.deepEqual(rows[0].position, { segmentIndex: 0, blockIndex: 12, updatedAt: 500, percent: 40 });
+    assert.equal("position" in rows[1], false);
+    // Back in, the position wears its document again.
+    const read = fromArticlesFile(text);
+    assert.deepEqual(read.articles[0]?.position, { docId: one.url, segmentIndex: 0, blockIndex: 12, updatedAt: 500, percent: 40 });
+    assert.equal("position" in (read.articles[1] ?? {}), false);
+  });
+
+  it("drops a position that is no place and keeps the article, and reads a file from before positions as it did", () => {
+    const one = article("one");
+    const rows = JSON.parse(toArticlesFile([one])).articles;
+    rows[0].position = { segmentIndex: -1, blockIndex: "3" };
+    const read = fromArticlesFile(JSON.stringify({ format: "reread-articles", version: 1, articles: rows }));
+    assert.equal(read.articles.length, 1);
+    assert.equal("position" in (read.articles[0] ?? {}), false);
+    assert.equal(read.invalid, 0);
+    assert.deepEqual(fromArticlesFile(toArticlesFile([one])).articles[0]?.position, undefined);
+  });
+
+  it("carries the position through the import plan with the article, as it carries the marks", () => {
+    const one = article("one");
+    const position = { docId: one.url, segmentIndex: 0, blockIndex: 2, updatedAt: 9 };
+    const { toAdd } = importPlan([], [{ ...one, position }]);
+    assert.deepEqual(toAdd[0]?.position, position);
+  });
+});

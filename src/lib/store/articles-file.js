@@ -27,16 +27,26 @@
 
 import { MAX_PAGE_HTML } from "../protocol.js";
 import { asMark, compareMarks } from "../reader/marks.js";
+import { asPosition } from "../reader/position.js";
 import { savedArticle } from "./saved-article.js";
 
 /** @typedef {import("./saved-article.js").SavedArticle} SavedArticle */
 /** @typedef {import("../reader/marks.js").Mark} Mark */
+/** @typedef {import("../reader/position.js").ReadingPosition} ReadingPosition */
 
 /**
  * An article as the file carries it: the stored row, plus the marks riding
- * beside it when it has any.
+ * beside it when it has any, and - since D213 - where its reader stopped,
+ * when the row had a position.
  *
- * @typedef {SavedArticle & { marks?: Mark[] }} FileArticle
+ * @typedef {SavedArticle & { marks?: Mark[], position?: ReadingPosition }} FileArticle
+ */
+
+/**
+ * A reading position as the file writes it: the row without its `docId`,
+ * which is the article's own address - said once, on the article.
+ *
+ * @typedef {{ segmentIndex: number, blockIndex: number, updatedAt: number, percent?: number }} FilePosition
  */
 
 /**
@@ -84,6 +94,7 @@ export const ARTICLES_FILENAME = "reread-articles.json";
  *   dir: string | null,
  *   lang: string | null,
  *   marks?: Mark[],
+ *   position?: FilePosition,
  * }} FileRow
  */
 
@@ -92,18 +103,23 @@ export const ARTICLES_FILENAME = "reread-articles.json";
  * address as the tie, so two exports of the same list are the same file -
  * diffable, like the vocabulary's. An article with marks carries them; one
  * without carries no field at all, so the file of somebody who never picked
- * up the pen reads exactly as it always did. The archive with pictures
- * (`articles-archive.js`) starts from these same rows.
+ * up the pen reads exactly as it always did. The same for where the reader
+ * stopped (D213): a row with a position carries it, one without carries
+ * nothing - and a file from before positions travelled reads as it did.
+ * The archive with pictures (`articles-archive.js`) starts from these same
+ * rows.
  *
  * @param {SavedArticle[]} articles
  * @param {Map<string, Mark[]>} [marks] each article's marks, keyed by `url`
+ * @param {Map<string, ReadingPosition>} [positions] each document's position, keyed by `docId`
  * @returns {FileRow[]}
  */
-export function fileRows(articles, marks = new Map()) {
+export function fileRows(articles, marks = new Map(), positions = new Map()) {
   return [...articles]
     .sort((a, b) => a.savedAt - b.savedAt || a.url.localeCompare(b.url))
     .map(({ url, title, savedAt, readAt, content, dir, lang }) => {
       const kept = marks.get(url);
+      const where = positions.get(url);
       return {
         url,
         title,
@@ -113,8 +129,17 @@ export function fileRows(articles, marks = new Map()) {
         dir,
         lang,
         ...(kept === undefined || kept.length === 0 ? {} : { marks: kept }),
+        ...(where === undefined ? {} : { position: filePosition(where) }),
       };
     });
+}
+
+/**
+ * @param {ReadingPosition} position
+ * @returns {FilePosition}
+ */
+function filePosition({ segmentIndex, blockIndex, updatedAt, percent }) {
+  return { segmentIndex, blockIndex, updatedAt, ...(percent === undefined ? {} : { percent }) };
 }
 
 /**
@@ -133,10 +158,11 @@ export function fileText(rows) {
  *
  * @param {SavedArticle[]} articles
  * @param {Map<string, Mark[]>} [marks] each article's marks, keyed by `url`
+ * @param {Map<string, ReadingPosition>} [positions] each document's position, keyed by `docId`
  * @returns {string}
  */
-export function toArticlesFile(articles, marks = new Map()) {
-  return fileText(fileRows(articles, marks));
+export function toArticlesFile(articles, marks = new Map(), positions = new Map()) {
+  return fileText(fileRows(articles, marks, positions));
 }
 
 /**
@@ -191,7 +217,7 @@ export function fromArticlesFile(text) {
  */
 function asFileArticle(value) {
   if (typeof value !== "object" || value === null) return null;
-  const { url, title, savedAt, readAt, content, dir, lang, marks } =
+  const { url, title, savedAt, readAt, content, dir, lang, marks, position } =
     /** @type {Record<string, unknown>} */ (value);
 
   if (typeof url !== "string" || typeof content !== "string") return null;
@@ -209,10 +235,18 @@ function asFileArticle(value) {
   if (built === null) return null;
 
   const kept = asFileMarks(marks);
+  // Where the reader stopped (D213), narrowed by the store's own rule with
+  // the address as its document - the entry is not refused over a broken
+  // position, the lean the whole file reads by.
+  const where =
+    typeof position === "object" && position !== null
+      ? asPosition({ .../** @type {Record<string, unknown>} */ (position), docId: url })
+      : null;
   return {
     ...built,
     readAt: typeof readAt === "number" && Number.isFinite(readAt) ? readAt : null,
     ...(kept.length === 0 ? {} : { marks: kept }),
+    ...(where === null ? {} : { position: where }),
   };
 }
 
