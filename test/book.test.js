@@ -215,3 +215,14 @@ describe("library entries", () => {
     assert.equal(entry.hostname, "");
   });
 });
+
+describe("the cut's version on a book's row", () => {
+  it("is written by bookRecord and read back by asBookMeta, only as a count", () => {
+    assert.equal(bookRecord({ ...whole, cut: 2 })?.cut, 2);
+    assert.equal(bookRecord(whole)?.cut, undefined);
+    assert.equal(bookRecord({ ...whole, cut: 0 })?.cut, undefined);
+    assert.equal(asBookMeta({ ...whole, cut: 2 })?.cut, 2);
+    assert.equal(asBookMeta({ ...whole, cut: "2" })?.cut, undefined);
+    assert.equal(asBookMeta(whole)?.cut, undefined);
+  });
+});

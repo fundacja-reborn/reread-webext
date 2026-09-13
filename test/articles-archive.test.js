@@ -9,6 +9,7 @@ import {
   archiveEntries,
   archivePictures,
   asPictureRef,
+  bookPictureEntryName,
   fromArchiveText,
   pictureEntryName,
 } from "../src/lib/store/articles-archive.js";
@@ -218,5 +219,14 @@ describe("the backup with pictures", () => {
     // Not JSON, not ours: no articles, no references, no throw.
     assert.deepEqual(fromArchiveText("{").refs.size, 0);
     assert.deepEqual(fromArchiveText("{}").articles, []);
+  });
+});
+
+describe("a book's picture entries (D218)", () => {
+  it("are named under book/ and read as references like an article's", () => {
+    assert.equal(bookPictureEntryName(0, { index: 3, mime: "image/jpeg" }), "pictures/book/0/3.jpg");
+    const ref = asPictureRef({ index: 3, file: "pictures/book/0/3.jpg", src: "OEBPS/a.jpg", mime: "image/jpeg", width: 10, height: 10 });
+    assert.equal(ref?.file, "pictures/book/0/3.jpg");
+    assert.equal(asPictureRef({ index: 3, file: "pictures/books/0/3.jpg", src: "x", mime: "image/jpeg", width: 10, height: 10 }), null);
   });
 });

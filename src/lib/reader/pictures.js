@@ -87,6 +87,18 @@ export const SOURCE_ATTRIBUTE = "data-src";
 /** The stored kinds, as `sniffPictureType` names them. */
 const STORED_TYPES = new Set(["image/jpeg", "image/png", "image/gif", "image/webp"]);
 
+/**
+ * Whether a type is one the database ever holds - what a file's entry has
+ * to turn out to be, by its bytes, before it becomes a row (D218: a
+ * book's pictures back from the backup ask this the way an article's do).
+ *
+ * @param {string | null} type as `sniffPictureType` names it
+ * @returns {type is "image/jpeg" | "image/png" | "image/gif" | "image/webp"}
+ */
+export function isStoredPictureType(type) {
+  return type !== null && STORED_TYPES.has(type);
+}
+
 const ELEMENT_NODE = 1;
 
 /**

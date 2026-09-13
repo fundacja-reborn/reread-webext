@@ -26,6 +26,11 @@ import { asPicturesSummary } from "../reader/pictures.js";
  * pictures, one whose file held none worth keeping, one whose reader
  * removed them.
  *
+ * `cut` is the version of the cut the book's segments were made with
+ * (D218, `BOOK_CUT_VERSION` at import; back from the backup as it was
+ * written). Absent on rows from before the field, which read as the cut
+ * of 1 - a book cut before pictures had a weight.
+ *
  * @typedef {{
  *   id: string,
  *   title: string,
@@ -37,12 +42,13 @@ import { asPicturesSummary } from "../reader/pictures.js";
  *   readAt: number | null,
  *   toc: import("../book/toc.js").TocEntry[] | null,
  *   pictures?: import("../reader/pictures.js").PicturesSummary,
+ *   cut?: number,
  * }} BookMeta
  */
 
 /**
  * @param {unknown} value
- * @returns {boolean}
+ * @returns {value is number}
  */
 function isCount(value) {
   return typeof value === "number" && Number.isInteger(value) && value > 0;
@@ -111,10 +117,11 @@ function asToc(value) {
  *   addedAt: number,
  *   toc?: import("../book/toc.js").TocEntry[],
  *   pictures?: import("../reader/pictures.js").PicturesSummary | null,
+ *   cut?: number,
  * }} input
  * @returns {BookMeta | null}
  */
-export function bookRecord({ id, title, author, lang, segmentCount, totalChars, addedAt, toc, pictures }) {
+export function bookRecord({ id, title, author, lang, segmentCount, totalChars, addedAt, toc, pictures, cut }) {
   if (typeof id !== "string" || id.length === 0) return null;
   const shown = typeof title === "string" ? title.trim() : "";
   if (shown.length === 0) return null;
@@ -138,6 +145,8 @@ export function bookRecord({ id, title, author, lang, segmentCount, totalChars, 
     toc: asToc(toc) ?? [],
     // The field stands only where there are pictures, as on an article's row.
     ...(kept === null ? {} : { pictures: kept }),
+    // The cut's version rides only as a count - anything else is no version.
+    ...(isCount(cut) ? { cut } : {}),
   };
 }
 
@@ -152,7 +161,7 @@ export function bookRecord({ id, title, author, lang, segmentCount, totalChars, 
  */
 export function asBookMeta(value) {
   if (typeof value !== "object" || value === null) return null;
-  const { id, title, author, lang, segmentCount, totalChars, addedAt, readAt, toc, pictures } =
+  const { id, title, author, lang, segmentCount, totalChars, addedAt, readAt, toc, pictures, cut } =
     /** @type {Record<string, unknown>} */ (value);
   if (typeof id !== "string" || id.length === 0) return null;
   if (!isCount(segmentCount)) return null;
@@ -175,6 +184,9 @@ export function asBookMeta(value) {
     toc: asToc(toc),
     // As on an article's row: the field stands only where there are pictures.
     ...(kept === null ? {} : { pictures: kept }),
+    // Absent on rows from before D218, and whenever what stands there is
+    // not a count; both read as the cut of 1.
+    ...(isCount(cut) ? { cut } : {}),
   };
 }
 

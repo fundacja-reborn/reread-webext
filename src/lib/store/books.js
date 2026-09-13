@@ -25,6 +25,7 @@
 
 import { asPictureRow } from "../reader/pictures.js";
 import { asBookMeta, asSegment } from "./book.js";
+import { segmentsOf } from "./library-backup.js";
 import {
   copyBook,
   dropBookCopy,
@@ -234,6 +235,54 @@ export async function getBookSegment(bookId, index) {
     promisify(stores.bookSegments.get([bookId, index])),
   );
   return asSegment(row);
+}
+
+/**
+ * Every segment of one book in index order, for the backup (D218) - or
+ * null when the text is not all there, the copy's own rule (`segmentsOf`):
+ * a book with a torn segment is left out of the file rather than written
+ * as a book nobody could open.
+ *
+ * @param {BookMeta} book
+ * @returns {Promise<StoredSegment[] | null>}
+ */
+export async function allBookSegments(book) {
+  const rows = /** @type {unknown[]} */ (
+    await withLibrary("readonly", (stores) => promisify(stores.bookSegments.getAll(segmentRange(book.id))))
+  );
+  return segmentsOf(book, rows);
+}
+
+/**
+ * Every picture of one book by its index, for the backup (D218) - from the
+ * database, or back from the copy when the database has lost them and the
+ * row still promises some: the road `getBookPictures` takes for one part,
+ * taken here for the whole book.
+ *
+ * @param {BookMeta} book
+ * @returns {Promise<PictureRow[]>}
+ */
+export async function allBookPictures(book) {
+  if (book.pictures === undefined) return [];
+  const rows = await readPictureRange(book.id);
+  if (rows.length > 0) return rows;
+  const restored = await restorePictures(book.id, book.pictures.count);
+  if (restored.length === 0) return [];
+  await withLibrary("readwrite", async (stores) => {
+    for (const row of restored) await promisify(stores.pictures.put(row));
+  });
+  return readPictureRange(book.id);
+}
+
+/**
+ * @param {string} id
+ * @returns {Promise<PictureRow[]>} in index order - the store's key order
+ */
+async function readPictureRange(id) {
+  const rows = /** @type {unknown[]} */ (
+    await withLibrary("readonly", (stores) => promisify(stores.pictures.getAll(pictureRange(id))))
+  );
+  return rows.map(asPictureRow).filter((row) => row !== null);
 }
 
 /**

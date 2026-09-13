@@ -155,3 +155,37 @@ describe("isHeadingTag", () => {
     assert.equal(isHeadingTag("p"), false);
   });
 });
+
+describe("BOOK_CUT_VERSION", () => {
+  it("pins the cut of one fixture - a boundary that moves is a new version of the cut, bumped by hand", async () => {
+    const { BOOK_CUT_VERSION } = await import("../src/lib/book/segment.js");
+    const { packedChars } = await import("../src/lib/book/pictures.js");
+    assert.equal(BOOK_CUT_VERSION, 2);
+    // A heading, six paragraphs, a figure (one picture's weight), five
+    // paragraphs, a heading close to the budget's three quarters, three
+    // paragraphs, one block over the whole budget, and a short tail.
+    const blocks = [
+      h(packedChars(40, 0), "h1"),
+      ...Array.from({ length: 6 }, (_, i) => p(packedChars(2900, 0), `p${i}`)),
+      p(packedChars(120, 1), "fig"),
+      ...Array.from({ length: 5 }, (_, i) => p(packedChars(3100, 0), `q${i}`)),
+      h(packedChars(30, 0), "h2"),
+      ...Array.from({ length: 3 }, (_, i) => p(packedChars(4000, 0), `r${i}`)),
+      p(packedChars(25000, 0), "long"),
+      p(packedChars(800, 0), "tail"),
+    ];
+    const segments = packed(blocks, SEGMENT_CHAR_BUDGET);
+    // The cut of version 2. Changing the budget, a threshold, a picture's
+    // weight or the packer's rules moves these - then BOOK_CUT_VERSION
+    // moves too, and this expectation with it.
+    assert.deepEqual(
+      segments.map((segment) => [segment.blocks.join(","), segment.charCount]),
+      [
+        ["h1,p0,p1,p2,p3,p4,p5,fig", 19560],
+        ["q0,q1,q2,q3,q4", 15500],
+        ["h2,r0,r1,r2", 12030],
+        ["long,tail", 25800],
+      ],
+    );
+  });
+});

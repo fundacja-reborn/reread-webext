@@ -22,6 +22,7 @@
  */
 
 import { ARTICLES_ENTRY, archiveEntries } from "./articles-archive.js";
+import { BOOKS_ENTRY } from "./books-file.js";
 import { toMarksCopy } from "./marks-copy.js";
 import { SETTINGS_ENTRY, toSettingsFile } from "./settings-file.js";
 import { VOCABULARY_ENTRY, toVocabularyFile } from "./vocabulary-file.js";
@@ -35,6 +36,7 @@ import { VOCABULARY_ENTRY, toVocabularyFile } from "./vocabulary-file.js";
  * @typedef {import("../reader/pictures.js").PictureRow} PictureRow
  * @typedef {import("../reader/position.js").ReadingPosition} ReadingPosition
  * @typedef {import("../config.js").Config} Config
+ * @typedef {import("./book.js").BookMeta} BookMeta
  */
 
 /** What the export is called. No date: a browser numbers a second download by itself. */
@@ -68,6 +70,8 @@ export const BACKUP_VERSION = 1;
  *   articles: number,
  *   pictures: boolean,
  *   settings: boolean,
+ *   books: number,
+ *   bookPictures: boolean,
  * }} BackupHolds
  * @typedef {{ format: string, version: number, createdAt: number, app: string, holds: BackupHolds }} BackupManifest
  */
@@ -85,13 +89,15 @@ export const BACKUP_VERSION = 1;
  * @property {Phrase[]} phrases every pair
  * @property {CopyDoc[]} highlights every document with marks, articles and books alike
  * @property {Config | null} settings the config, or null to leave it out
+ * @property {BookMeta[]} [books] the books going into the archive (D218) - written by the
+ *   page after these entries, one at a time; none by default
  */
 
 /**
  * @param {BackupInput} input
  * @returns {BackupManifest}
  */
-export function manifestOf({ app, now, articles, pictures, phrases, highlights, settings }) {
+export function manifestOf({ app, now, articles, pictures, phrases, highlights, settings, books = [] }) {
   const pairs = new Set(phrases.map((phrase) => `${phrase.langFrom}\t${phrase.langTo}`));
   return {
     format: FORMAT,
@@ -105,6 +111,8 @@ export function manifestOf({ app, now, articles, pictures, phrases, highlights, 
       articles: articles.length,
       pictures: pictures.size > 0,
       settings: settings !== null,
+      books: books.length,
+      bookPictures: books.some((book) => book.pictures !== undefined),
     },
   };
 }
@@ -182,6 +190,8 @@ export function fromManifest(text) {
       articles: countOf(claims["articles"]),
       pictures: claims["pictures"] === true,
       settings: claims["settings"] === true,
+      books: countOf(claims["books"]),
+      bookPictures: claims["bookPictures"] === true,
     },
   };
 }
@@ -204,4 +214,5 @@ export const BACKUP_ENTRIES = Object.freeze({
   highlights: HIGHLIGHTS_ENTRY,
   settings: SETTINGS_ENTRY,
   articles: ARTICLES_ENTRY,
+  books: BOOKS_ENTRY,
 });

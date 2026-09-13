@@ -26,6 +26,21 @@
 export const SEGMENT_CHAR_BUDGET = 20000;
 
 /**
+ * The version of the cut (D218), written on every book's row at import
+ * (`BookMeta.cut`) and carried in the backup with the book. Everything a
+ * highlight's or a position's anchor stands on is a function of the cut:
+ * the budget and the two thresholds here, the weight a picture adds
+ * (`packedChars`), and what the block builder lets through (`buildArticle`,
+ * `packableBlocks`, the pictures kept or dropped) - so a change to any of
+ * them is a new version, bumped here by hand. The test in
+ * `test/segment.test.js` pins the cut of one fixture to this number: a
+ * change that moves a boundary turns it red until the number moves too.
+ * A row without the field is a book cut before the field existed - the
+ * cut of 1, from before D183 gave pictures a weight.
+ */
+export const BOOK_CUT_VERSION = 2;
+
+/**
  * A heading arriving this far into the budget starts the next segment - a
  * chapter break close to the natural cut is a better cut than a fuller
  * segment. Below this line the heading just joins the flow.

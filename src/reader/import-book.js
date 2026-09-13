@@ -63,7 +63,7 @@ import {
   resolveZipPath,
 } from "../lib/book/opf.js";
 import { framedPictureHref, packedChars } from "../lib/book/pictures.js";
-import { isHeadingTag, segmenter } from "../lib/book/segment.js";
+import { BOOK_CUT_VERSION, isHeadingTag, segmenter } from "../lib/book/segment.js";
 import { cappedToc, headingEntries } from "../lib/book/toc.js";
 import { buildArticle } from "../lib/reader/article.js";
 import { bookRecord } from "../lib/store/book.js";
@@ -392,6 +392,7 @@ export async function importEpub(file, onProgress) {
       addedAt: Date.now(),
       toc: cappedToc(tocEntries),
       pictures: keeper.summary(),
+      cut: BOOK_CUT_VERSION,
     });
     // No record means no text worth keeping came out - a spine of covers.
     if (book === null) throw new Error("nothing to keep");
