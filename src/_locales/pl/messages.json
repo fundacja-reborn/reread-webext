@@ -89,7 +89,7 @@
 
   "vocab_title": { "message": "re/read - zapisane frazy" },
   "vocab_intro": {
-    "message": "Wszystkie frazy zachowane dla tej pary językowej, od najnowszych - zapisane podczas czytania i przechowywane tylko na tym urządzeniu. „$LEARNED$” usuwa frazę razem z jej podkreśleniami; „$EDIT$” pozwala przepisać znaczenia, po jednym w linii. Kilka znaczeń naraz rozdziel średnikiem. Pod frazą dwie liczby: ile razy ją sprawdzałeś (otwierałeś jej dymek) i ile razy wystąpiła w tekstach, które skończyłeś - w części książki, z której wyszedłeś przyciskiem „Następna” pod tekstem, albo w artykule oznaczonym jako przeczytany. Listę można uporządkować według każdej z nich.",
+    "message": "Wszystkie frazy zachowane dla tej pary językowej, od najnowszych - zapisane podczas czytania i przechowywane tylko na tym urządzeniu. „$LEARNED$” usuwa frazę razem z jej podkreśleniami; „$EDIT$” pozwala przepisać znaczenia, po jednym w linii. Kilka znaczeń naraz rozdziel średnikiem. Przy frazie dwie liczby - lupa i książka: ile razy ją sprawdzałeś (otwierałeś jej dymek) i ile razy wystąpiła w tekstach, które skończyłeś - w części książki, z której wyszedłeś przyciskiem „Następna” pod tekstem, albo w artykule oznaczonym jako przeczytany. Listę można uporządkować według każdej z nich.",
     "placeholders": {
       "learned": { "content": "$1", "example": "Znam to" },
       "edit": { "content": "$2", "example": "Edytuj" }
@@ -261,6 +261,8 @@
       "count": { "content": "$1", "example": "100" }
     }
   },
+  "vocab_legend_recalls": { "message": "sprawdzane – otwarcia dymka podczas czytania" },
+  "vocab_legend_reads": { "message": "czytane – wystąpienia w przeczytanych tekstach" },
   "pager_page_of": {
     "message": "Strona $PAGE$ z $PAGES$",
     "placeholders": {

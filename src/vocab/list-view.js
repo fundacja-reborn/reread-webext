@@ -86,6 +86,21 @@ export function ordered(phrases, order, lang) {
 }
 
 /**
+ * Whether any of the rows on screen carries a count to explain (D211): the
+ * legend over the list stands only then, so a page of phrases nobody has
+ * checked or met in a finished text reads as it did before the counts.
+ *
+ * @param {Phrase[]} rows the rows of the page shown
+ * @returns {boolean}
+ */
+export function anyCounted(rows) {
+  return rows.some((phrase) => {
+    const counts = countsOf(phrase);
+    return counts.recalls > 0 || counts.reads > 0;
+  });
+}
+
+/**
  * Everything a row can be found by: how the phrase is written and every
  * meaning it was kept for.
  *
@@ -154,6 +169,39 @@ export function markSegments(text, query) {
       from = at;
     }
   }
+  return segments;
+}
+
+/**
+ * Where the phrase stands in the sentence it was kept from (D210), as
+ * segments to render (D211): the first occurrence marked, case-folded,
+ * everything else plain - so the opened sentence shows what it is an
+ * example of. The first only: a sentence quotes the phrase once as the
+ * place it was saved from, and a second marking would say nothing more.
+ * No occurrence - the sentence holds another form of the word (D208), or
+ * was saved around a longer selection - hands the sentence back plain,
+ * which is no error: the example still reads.
+ *
+ * The same folding guard as `markSegments`: when lower-casing changes the
+ * length, the folded index no longer points into the original, and the
+ * sentence comes back unmarked rather than marked wrong.
+ *
+ * @param {string} sentence as the row shows it
+ * @param {string} phrase as saved
+ * @returns {Array<{ text: string, hit: boolean }>} the whole sentence, in order
+ */
+export function sentenceSegments(sentence, phrase) {
+  const needle = phrase.trim().toLowerCase();
+  const folded = sentence.toLowerCase();
+  const plain = [{ text: sentence, hit: false }];
+  if (needle.length === 0 || folded.length !== sentence.length) return plain;
+  const at = folded.indexOf(needle);
+  if (at === -1) return plain;
+  /** @type {Array<{ text: string, hit: boolean }>} */
+  const segments = [];
+  if (at > 0) segments.push({ text: sentence.slice(0, at), hit: false });
+  segments.push({ text: sentence.slice(at, at + needle.length), hit: true });
+  if (at + needle.length < sentence.length) segments.push({ text: sentence.slice(at + needle.length), hit: false });
   return segments;
 }
 

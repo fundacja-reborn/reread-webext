@@ -89,7 +89,7 @@
 
   "vocab_title": { "message": "re/read - phrases enregistrées" },
   "vocab_intro": {
-    "message": "Toutes les phrases gardées pour cette paire de langues, les plus récentes d'abord - enregistrées pendant la lecture et conservées uniquement sur cet appareil. « $LEARNED$ » supprime une phrase et ses soulignements avec elle ; « $EDIT$ » réécrit ses sens, un par ligne. Plusieurs sens à la fois : séparez-les par un point-virgule. Sous une phrase, deux nombres : combien de fois vous l'avez consultée (ouvert sa bulle) et combien de fois elle est apparue dans les textes que vous avez terminés - une partie de livre quittée par « Suivante » sous le texte, ou un article marqué comme lu. La liste peut être ordonnée selon l'un ou l'autre.",
+    "message": "Toutes les phrases gardées pour cette paire de langues, les plus récentes d'abord - enregistrées pendant la lecture et conservées uniquement sur cet appareil. « $LEARNED$ » supprime une phrase et ses soulignements avec elle ; « $EDIT$ » réécrit ses sens, un par ligne. Plusieurs sens à la fois : séparez-les par un point-virgule. À côté d'une phrase, deux nombres - une loupe et un livre : combien de fois vous l'avez consultée (ouvert sa bulle) et combien de fois elle est apparue dans les textes que vous avez terminés - une partie de livre quittée par « Suivante » sous le texte, ou un article marqué comme lu. La liste peut être ordonnée selon l'un ou l'autre.",
     "placeholders": {
       "learned": { "content": "$1", "example": "Appris" },
       "edit": { "content": "$2", "example": "Modifier" }
@@ -234,6 +234,8 @@
       "count": { "content": "$1", "example": "100" }
     }
   },
+  "vocab_legend_recalls": { "message": "consultée – ouvertures de la bulle en lisant" },
+  "vocab_legend_reads": { "message": "lue – occurrences dans les textes terminés" },
   "pager_page_of": {
     "message": "Page $PAGE$ sur $PAGES$",
     "placeholders": {

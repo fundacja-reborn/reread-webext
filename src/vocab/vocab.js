@@ -54,7 +54,17 @@ import {
   voicesFor,
 } from "../lib/tts.js";
 import { filterActive } from "../options/models-view.js";
-import { Order, asOrder, listView, markSegments, newestFirst, ordered, pairChoicesFor } from "./list-view.js";
+import {
+  Order,
+  anyCounted,
+  asOrder,
+  listView,
+  markSegments,
+  newestFirst,
+  ordered,
+  pairChoicesFor,
+  sentenceSegments,
+} from "./list-view.js";
 
 // First, so the static text is already the catalogue's language when it shows.
 localizePage();
@@ -108,6 +118,7 @@ const importCancel = /** @type {HTMLButtonElement | null} */ (document.getElemen
 const transferLine = document.getElementById("transfer-status");
 const filterInput = /** @type {HTMLInputElement | null} */ (document.getElementById("filter"));
 const filterStatus = document.getElementById("filter-status");
+const legendLine = document.getElementById("legend");
 const orderSelect = /** @type {HTMLSelectElement | null} */ (document.getElementById("order"));
 const addFold = /** @type {HTMLDetailsElement | null} */ (document.getElementById("add-phrase"));
 const lookupHost = document.getElementById("lookup-box");
@@ -507,6 +518,10 @@ function renderList() {
   } else {
     for (const phrase of view.rows) listContainer.append(phraseRow(phrase));
   }
+  // The key to the count glyphs (D211) stands only while a row on this page
+  // has a glyph to explain: a page of phrases never checked and never met
+  // in a finished text reads as it did before the counts.
+  if (legendLine !== null) legendLine.hidden = !anyCounted(view.rows);
 
   if (editorHadFocus) {
     const editor = listContainer.querySelector("textarea");
@@ -605,22 +620,47 @@ function phraseRow(phrase) {
   // How the closed editor finds its row again to hand focus back.
   row.dataset["key"] = phrase.normalized;
 
+  // Three parts in one order on every width (D211): the head - the phrase
+  // with its counts beside it - then the body - the meanings with the
+  // sentence under them - then the actions. The DOM order is what the
+  // keyboard and a screen reader walk: the sentence's fold before the
+  // buttons, the buttons last; where the screen puts the actions on the
+  // phrase's line is the stylesheet's business.
+  const head = element("div", "phrase-head");
   const word = element("span", "phrase-word");
   fillHighlighted(word, phrase.phrase);
   // The day it was kept, on hover: useful now and then, clutter always.
   word.title = new Date(phrase.createdAt).toLocaleDateString(uiLocale());
-  row.append(word);
+  head.append(word);
 
-  // The two counts (D209), each only once it has something to say, and the
-  // line only when one has: a phrase never checked and never met in a
-  // finished text keeps the row it always had.
+  // The two counts (D209) beside the phrase, each only once it has
+  // something to say, and the group only when one has: a phrase never
+  // checked and never met in a finished text keeps the row it always had.
   const { recalls, reads } = countsOf(phrase);
   if (recalls > 0 || reads > 0) {
-    /** @type {string[]} */
-    const said = [];
-    if (recalls > 0) said.push(plural(recalls, "vocab_recalls"));
-    if (reads > 0) said.push(plural(reads, "vocab_reads"));
-    row.append(element("span", "phrase-counts", said.join(` ${String.fromCodePoint(0x00b7)} `)));
+    const counts = element("span", "phrase-counts");
+    if (recalls > 0) counts.append(countStat("i-lookup", recalls, plural(recalls, "vocab_recalls")));
+    if (reads > 0) counts.append(countStat("i-read", reads, plural(reads, "vocab_reads")));
+    head.append(counts);
+  }
+  row.append(head);
+
+  // The body: the meanings, or the editor in their place - the edit box
+  // with its hint here, Save and Cancel in the actions' own slot below, so
+  // an unfolded row keeps the shape of a folded one (D211). The attribute
+  // is what the sheet lays the unfolded row out by.
+  const body = element("div", "phrase-body");
+  /** @type {HTMLElement | null} */
+  let editActions = null;
+  if (editing === phrase.normalized) {
+    const unfolded = editorFor(phrase);
+    body.append(unfolded.editor);
+    editActions = unfolded.actions;
+    row.dataset["editing"] = "true";
+  } else {
+    const meanings = element("span", "phrase-meanings");
+    fillHighlighted(meanings, phrase.translations.join("; "));
+    body.append(meanings);
   }
 
   // The sentence the phrase was kept from (D210), when the row has one: a
@@ -628,24 +668,33 @@ function phraseRow(phrase) {
   // ellipsis while closed, the whole sentence open - so the list stays a
   // list of phrases and the sentence is a press away, with the keyboard and
   // the screen reader served by the element's own conduct and no script of
-  // ours. Text from a page, so `textContent` and nothing else; not through
+  // ours. Text from a page, so text nodes and nothing else; not through
   // `fillHighlighted`, because the filter does not read the sentence and a
-  // mark in it would say it did. Before the editor's branch below, so a row
-  // being edited keeps its sentence where it was.
+  // mark in it would say it did - the one mark here is the phrase's own
+  // place in its sentence (D211, `sentenceSegments`), which the sheet shows
+  // only once the fold is open. Under the meanings and under the editor
+  // alike, so a row being edited keeps its sentence where it was.
   if (hasSentence(phrase)) {
     const fold = element("details", "phrase-sentence");
-    fold.append(element("summary", "", /** @type {string} */ (phrase.context)));
-    row.append(fold);
+    const summary = element("summary", "");
+    for (const segment of sentenceSegments(/** @type {string} */ (phrase.context), phrase.phrase)) {
+      if (segment.hit) {
+        const mark = document.createElement("mark");
+        mark.textContent = segment.text;
+        summary.append(mark);
+      } else {
+        summary.append(segment.text);
+      }
+    }
+    fold.append(summary);
+    body.append(fold);
   }
+  row.append(body);
 
-  if (editing === phrase.normalized) {
-    row.append(editorFor(phrase));
+  if (editActions !== null) {
+    row.append(editActions);
     return row;
   }
-
-  const meanings = element("span", "phrase-meanings");
-  fillHighlighted(meanings, phrase.translations.join("; "));
-  row.append(meanings);
 
   // The buttons speak for themselves to the eye; to a screen reader a bare
   // "Edit" in a list of a hundred names nothing, so each carries its phrase.
@@ -684,15 +733,60 @@ function phraseRow(phrase) {
 }
 
 /**
+ * One of the two counts as the row shows it (D211): the glyph with the
+ * number after it, and the whole sentence - "Checked 3 times" - as the
+ * accessible name and the hover title, so the eye gets a glyph and a
+ * number, a screen reader the sentence, and a mouse both. `role="img"`
+ * makes the span one thing to assistive tech: the glyph is decoration
+ * inside it and the digits are not read twice. The legend over the list is
+ * what says the same to a finger, which has no hover.
+ *
+ * @param {"i-lookup" | "i-read"} glyph the symbol's id in the page's sprite
+ * @param {number} count
+ * @param {string} said the count as the catalogue's sentence
+ * @returns {HTMLElement}
+ */
+function countStat(glyph, count, said) {
+  const stat = element("span", "phrase-count");
+  stat.setAttribute("role", "img");
+  stat.setAttribute("aria-label", said);
+  stat.title = said;
+  stat.append(countIcon(glyph), count.toLocaleString());
+  return stat;
+}
+
+/**
+ * A count's glyph: a reference into the sprite the page carries (one
+ * drawing per symbol, `<use>` in every row), sized by the sheet to the
+ * counts' own em. Decoration - the stat's label carries the words.
+ *
+ * @param {"i-lookup" | "i-read"} glyph
+ * @returns {SVGSVGElement}
+ */
+function countIcon(glyph) {
+  const NS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("class", "phrase-count-icon");
+  svg.setAttribute("aria-hidden", "true");
+  svg.setAttribute("focusable", "false");
+  const use = document.createElementNS(NS, "use");
+  use.setAttribute("href", `#${glyph}`);
+  svg.append(use);
+  return svg;
+}
+
+/**
  * The row, unfolded: the meanings as lines in a textarea, the bubble's editor
  * by other means - Enter keeps, Shift+Enter adds a line, Escape backs out,
  * and there is nothing to keep when no line has anything on it. The same
  * rule as the bubble's at the save (D203, `editedMeanings`): a line the box
  * opened with stays as it is, a line written or changed is split at its
- * semicolons - and the same one line under the box says so.
+ * semicolons - and the same one line under the box says so. Two pieces for
+ * two places in the row (D211): the box with its hint for the body, Save
+ * and Cancel for the slot the row's quiet actions stood in.
  *
  * @param {Phrase} phrase
- * @returns {HTMLElement}
+ * @returns {{ editor: HTMLElement, actions: HTMLElement }}
  */
 function editorFor(phrase) {
   const wrap = element("div", "phrase-edit");
@@ -724,8 +818,8 @@ function editorFor(phrase) {
 
   const actions = element("div", "phrase-actions");
   actions.append(save, cancel);
-  wrap.append(editor, element("p", "phrase-edit-hint", t("bubble_edit_separator_hint")), actions);
-  return wrap;
+  wrap.append(editor, element("p", "phrase-edit-hint", t("bubble_edit_separator_hint")));
+  return { editor: wrap, actions };
 }
 
 /**

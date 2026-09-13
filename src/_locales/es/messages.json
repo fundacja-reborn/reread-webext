@@ -89,7 +89,7 @@
 
   "vocab_title": { "message": "re/read - frases guardadas" },
   "vocab_intro": {
-    "message": "Todas las frases que guardaste para este par de idiomas, las más recientes primero - guardadas mientras leías y almacenadas solo en este dispositivo. «$LEARNED$» quita una frase y sus subrayados con ella; «$EDIT$» reescribe sus significados, uno por línea. Varios significados a la vez: sepáralos con punto y coma. Bajo una frase, dos números: cuántas veces la consultaste (abriste su burbuja) y cuántas veces apareció en los textos que terminaste - una parte de un libro que dejaste con «Siguiente» bajo el texto, o un artículo marcado como leído. La lista puede ordenarse por cualquiera de los dos.",
+    "message": "Todas las frases que guardaste para este par de idiomas, las más recientes primero - guardadas mientras leías y almacenadas solo en este dispositivo. «$LEARNED$» quita una frase y sus subrayados con ella; «$EDIT$» reescribe sus significados, uno por línea. Varios significados a la vez: sepáralos con punto y coma. Junto a una frase, dos números - una lupa y un libro: cuántas veces la consultaste (abriste su burbuja) y cuántas veces apareció en los textos que terminaste - una parte de un libro que dejaste con «Siguiente» bajo el texto, o un artículo marcado como leído. La lista puede ordenarse por cualquiera de los dos.",
     "placeholders": {
       "learned": { "content": "$1", "example": "Aprendida" },
       "edit": { "content": "$2", "example": "Editar" }
@@ -234,6 +234,8 @@
       "count": { "content": "$1", "example": "100" }
     }
   },
+  "vocab_legend_recalls": { "message": "consultada – aperturas de la burbuja al leer" },
+  "vocab_legend_reads": { "message": "leída – apariciones en textos terminados" },
   "pager_page_of": {
     "message": "Página $PAGE$ de $PAGES$",
     "placeholders": {

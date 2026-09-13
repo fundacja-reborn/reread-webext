@@ -89,7 +89,7 @@
 
   "vocab_title": { "message": "re/read - gespeicherter Wortschatz" },
   "vocab_intro": {
-    "message": "Alles, was Sie für dieses Sprachpaar behalten haben, Neuestes zuerst - beim Lesen gespeichert und nur auf diesem Gerät. „$LEARNED$“ entfernt einen Eintrag samt seinen Unterstreichungen; „$EDIT$“ schreibt seine Bedeutungen neu, eine pro Zeile. Mehrere Bedeutungen auf einmal trennen Sie mit einem Semikolon. Unter einem Eintrag zwei Zahlen: wie oft Sie ihn nachgeschlagen haben (seine Sprechblase geöffnet) und wie oft er in den Texten vorkam, die Sie zu Ende gelesen haben - in einem Buchteil, den Sie über „Weiter“ unter dem Text verlassen haben, oder in einem als gelesen markierten Artikel. Die Liste lässt sich nach beiden ordnen.",
+    "message": "Alles, was Sie für dieses Sprachpaar behalten haben, Neuestes zuerst - beim Lesen gespeichert und nur auf diesem Gerät. „$LEARNED$“ entfernt einen Eintrag samt seinen Unterstreichungen; „$EDIT$“ schreibt seine Bedeutungen neu, eine pro Zeile. Mehrere Bedeutungen auf einmal trennen Sie mit einem Semikolon. Neben einem Eintrag zwei Zahlen - eine Lupe und ein Buch: wie oft Sie ihn nachgeschlagen haben (seine Sprechblase geöffnet) und wie oft er in den Texten vorkam, die Sie zu Ende gelesen haben - in einem Buchteil, den Sie über „Weiter“ unter dem Text verlassen haben, oder in einem als gelesen markierten Artikel. Die Liste lässt sich nach beiden ordnen.",
     "placeholders": {
       "learned": { "content": "$1", "example": "Gelernt" },
       "edit": { "content": "$2", "example": "Bearbeiten" }
@@ -207,6 +207,8 @@
       "count": { "content": "$1", "example": "100" }
     }
   },
+  "vocab_legend_recalls": { "message": "nachgeschlagen – Öffnungen der Sprechblase beim Lesen" },
+  "vocab_legend_reads": { "message": "gelesen – Vorkommen in zu Ende gelesenen Texten" },
   "pager_page_of": {
     "message": "Seite $PAGE$ von $PAGES$",
     "placeholders": {

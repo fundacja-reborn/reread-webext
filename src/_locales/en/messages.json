@@ -152,7 +152,7 @@
 
   "vocab_title": { "message": "re/read - saved phrases" },
   "vocab_intro": {
-    "message": "Every phrase you kept for this language pair, newest first - saved while reading, stored only on this device. $LEARNED$ removes a phrase and its underlines with it; $EDIT$ rewrites what it means, one meaning per line. Several meanings at once: separate them with a semicolon. Under a phrase, two counts: how many times you checked it (opened its bubble), and how many times it occurred in the texts you finished - a part of a book you left through Next under its text, an article you marked as read. The list can be ordered by either.",
+    "message": "Every phrase you kept for this language pair, newest first - saved while reading, stored only on this device. $LEARNED$ removes a phrase and its underlines with it; $EDIT$ rewrites what it means, one meaning per line. Several meanings at once: separate them with a semicolon. Beside a phrase, two counts - a magnifier and a book: how many times you checked it (opened its bubble), and how many times it occurred in the texts you finished - a part of a book you left through Next under its text, an article you marked as read. The list can be ordered by either.",
     "description": "The buttons quoted are bubble_learned and bubble_edit, passed in so the three can never drift apart.",
     "placeholders": {
       "learned": { "content": "$1", "example": "Learned" },
@@ -305,7 +305,7 @@
   "vocab_order_alphabetical": { "message": "A to Z" },
   "vocab_recalls_one": {
     "message": "Checked $COUNT$ time",
-    "description": "Under a phrase on the saved-phrases page (D209): how many times its bubble was opened. Plural family over the count.",
+    "description": "Beside a phrase on the saved-phrases page (D209), as the name and hover title of the magnifier count (D211): how many times its bubble was opened. Plural family over the count.",
     "placeholders": {
       "count": { "content": "$1", "example": "1" }
     }
@@ -318,7 +318,7 @@
   },
   "vocab_reads_one": {
     "message": "$COUNT$ time in texts you finished",
-    "description": "Under a phrase on the saved-phrases page (D209): how many times it occurred in the texts the reader finished. Plural family over the count.",
+    "description": "Beside a phrase on the saved-phrases page (D209), as the name and hover title of the book count (D211): how many times it occurred in the texts the reader finished. Plural family over the count.",
     "placeholders": {
       "count": { "content": "$1", "example": "1" }
     }
@@ -328,6 +328,14 @@
     "placeholders": {
       "count": { "content": "$1", "example": "100" }
     }
+  },
+  "vocab_legend_recalls": {
+    "message": "checked – bubble openings while reading",
+    "description": "One half of the legend over the saved-phrases list (D211), after the magnifier glyph: what the count beside a phrase means. Opens with the same word as the order select's \"Most checked\", so the legend ties the number to the order. Only bubble openings count - a press on an underline or a fresh selection of a saved phrase, never the look-up field."
+  },
+  "vocab_legend_reads": {
+    "message": "read – occurrences in texts you finished",
+    "description": "The other half of the legend, after the book glyph. Opens with the same word as \"Most read\". Only texts the reader finished count - a book part left through Next under its text, an article marked as read."
   },
   "pager_page_of": {
     "message": "Page $PAGE$ of $PAGES$",
