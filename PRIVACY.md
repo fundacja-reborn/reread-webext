@@ -58,8 +58,8 @@ You can export your data at any time to files on your disk: everything at once, 
 and, if you tick the box, pictures; the books with their text, pictures and reading positions,
 if you tick their box; every saved phrase with its sentence and counts; the settings, including the sites you switched re/read off on and your custom CSS - or the parts
 on their own: vocabulary as TSV (two columns, or three with the saved sentences, for Anki), a
-selection of the reading list as JSON (or as a `.zip` with its pictures), highlights as
-Markdown. The browser saves those files the way it saves any download; they are not uploaded
+selection of the reading list - articles and books - as a `.zip` of the same kind, highlights
+as Markdown. The browser saves those files the way it saves any download; they are not uploaded
 anywhere. Importing a backup writes only what is missing here and changes nothing already
 saved; the settings in it replace yours only when you tick the box.
 

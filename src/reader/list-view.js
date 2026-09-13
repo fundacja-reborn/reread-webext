@@ -138,13 +138,8 @@ export function searchableArticle(meta) {
  *
  * `selectable` is what a "Select all" covers (D152): the segment as the
  * filter left it, every page of it - the filter is how a reader says
- * "these", and a page is only how many fit on a screen. Articles only: a
- * book is not exported, so a tick the export could not honour is not
- * offered.
- *
- * `books` counts those rows - the books the filter leaves in the segment,
- * every page of them - so the selection can say why they wear no box, and
- * only while there is one to say it about.
+ * "these", and a page is only how many fit on a screen. Articles and
+ * books alike since D218: the selection's file carries both.
  *
  * @template {SavedMeta & { lastReadAt?: number | null, kind?: "article" | "book" }} T
  * @param {T[]} metas as the stores answer, in any order
@@ -158,7 +153,6 @@ export function searchableArticle(meta) {
  *   unread: number,
  *   read: number,
  *   selectable: string[],
- *   books: number,
  * }}
  */
 export function libraryView(metas, { segment, query, page }) {
@@ -175,8 +169,7 @@ export function libraryView(metas, { segment, query, page }) {
     inSegment: inSegment.length,
     unread: segment === Segment.UNREAD ? inSegment.length : elsewhere,
     read: segment === Segment.READ ? inSegment.length : elsewhere,
-    selectable: matching.filter((meta) => meta.kind !== "book").map((meta) => meta.url),
-    books: matching.filter((meta) => meta.kind === "book").length,
+    selectable: matching.map((meta) => meta.url),
   };
 }
 
@@ -217,19 +210,16 @@ export function withAllPicked(picked, selectable, on) {
 }
 
 /**
- * The selection held to the list as it stands (D152): an article deleted
+ * The selection held to the list as it stands (D152): a document deleted
  * since its tick - from another tab, or by the browser - leaves the
- * selection with it, so the count says what the export will take. Books
- * never enter it, so a book's id among the ticks leaves the same way.
+ * selection with it, so the count says what the export will take.
  *
  * @param {ReadonlySet<string>} picked
  * @param {readonly { url: string, kind?: "article" | "book" }[]} entries
  * @returns {Set<string>}
  */
 export function keptPicks(picked, entries) {
-  const present = new Set(
-    entries.filter((entry) => entry.kind !== "book").map((entry) => entry.url),
-  );
+  const present = new Set(entries.map((entry) => entry.url));
   return new Set([...picked].filter((url) => present.has(url)));
 }
 

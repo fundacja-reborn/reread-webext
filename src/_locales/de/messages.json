@@ -721,22 +721,18 @@
       "count": { "content": "$1", "example": "12" }
     }
   },
-  "reader_transfer_pick": { "message": "Um nur einige Artikel zu exportieren, drücken Sie über der Liste auf „Auswählen“ und haken Sie sie ab." },
+  "reader_transfer_pick": { "message": "Um nur einige Artikel oder Bücher zu exportieren, drücken Sie über der Liste auf „Auswählen“ und haken Sie sie ab." },
   "reader_pick_start": { "message": "Auswählen" },
   "reader_pick_close": { "message": "Auswahl schließen" },
-  "reader_pick_book_title": { "message": "Bücher werden nur in der Sicherung exportiert" },
-  "reader_pick_books_note": {
-    "message": "Bücher lassen sich nicht auswählen - sie werden nur in der Sicherung exportiert, mit angekreuztem „Export mit Büchern“."
-  },
   "reader_pick_all": { "message": "Alle auswählen" },
   "reader_pick_count_one": {
-    "message": "$COUNT$ Artikel ausgewählt",
+    "message": "$COUNT$ Dokument ausgewählt",
     "placeholders": {
       "count": { "content": "$1", "example": "1" }
     }
   },
   "reader_pick_count_other": {
-    "message": "$COUNT$ Artikel ausgewählt",
+    "message": "$COUNT$ Dokumente ausgewählt",
     "placeholders": {
       "count": { "content": "$1", "example": "3" }
     }
@@ -748,18 +744,18 @@
     }
   },
   "reader_export_done_one": {
-    "message": "$COUNT$ Artikel nach $FILE$ exportiert ($SIZE$).",
+    "message": "$COUNT$ Dokument nach $FILE$ exportiert ($SIZE$).",
     "placeholders": {
       "count": { "content": "$1", "example": "1" },
-      "file": { "content": "$2", "example": "reread-articles.json" },
-      "size": { "content": "$3", "example": "38 KB" }
+      "file": { "content": "$2", "example": "reread-selection.zip" },
+      "size": { "content": "$3", "example": "2,1 MB" }
     }
   },
   "reader_export_done_other": {
-    "message": "$COUNT$ Artikel nach $FILE$ exportiert ($SIZE$).",
+    "message": "$COUNT$ Dokumente nach $FILE$ exportiert ($SIZE$).",
     "placeholders": {
-      "count": { "content": "$1", "example": "12" },
-      "file": { "content": "$2", "example": "reread-articles.zip" },
+      "count": { "content": "$1", "example": "3" },
+      "file": { "content": "$2", "example": "reread-selection.zip" },
       "size": { "content": "$3", "example": "2,1 MB" }
     }
   },

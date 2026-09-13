@@ -76,32 +76,21 @@ describe("the pictures box under the buttons", () => {
 });
 
 describe("the books' rows inside the selection", () => {
-  it("say why they wear no box - to the pointer, to assistive technology, and under the bar", async () => {
+  it("wear a box like an article's, with nothing left of the dimmed row or the line under the bar (D218)", async () => {
     const script = await source("reader/reader.js");
     const row = bodyOf(script, "libraryRow");
-    assert.match(
-      row,
-      /if \(entry\.kind === "book"\) \{\s*item\.classList\.add\("library-row-still"\);[\s\S]*?item\.setAttribute\("aria-disabled", "true"\);\s*item\.title = t\("reader_pick_book_title"\);/,
-      "a book's row is not marked disabled with the reason as its title",
-    );
+    assert.doesNotMatch(row, /library-row-still|aria-disabled|reader_pick_book_title/, "a book's row is still kept out of the selection");
+    assert.match(row, /if \(picking\) \{\s*item\.classList\.add\("library-row-pick"\);\s*const box = document\.createElement\("input"\);/, "the selection's row does not start with its box for every kind");
     const page = await source("reader/reader.html");
-    assert.match(
-      page,
-      /<div class="pick-bar" id="library-pick-line" hidden>[\s\S]*?<\/div>\s*(?:<!--[\s\S]*?-->\s*)?<p class="hint pick-note" id="library-pick-books" data-i18n="reader_pick_books_note" hidden>/,
-      "the line about the books does not stand right under the selection's bar",
-    );
-  });
-
-  it("show the line only inside the selection and only while a book is among the rows shown", async () => {
-    const script = await source("reader/reader.js");
-    assert.match(
-      bodyOf(script, "renderPickLine"),
-      /libraryPickBooks\.hidden = !picking \|\| libraryShown\.books === 0;/,
-      "the line is not hidden outside the selection or over a list without books",
-    );
-    assert.match(bodyOf(script, "refreshLibrary"), /books: view\.books/, "the refresh does not keep the count of books shown");
-    // The deep search's results stand in the rows' place; the line goes with the rows.
-    assert.match(bodyOf(script, "applyLibrarySearchVisibility"), /libraryPickLine,\s*libraryPickBooks,/, "the line stays over the search's results");
+    assert.doesNotMatch(page, /library-pick-books|reader_pick_books_note/, "the line about unselectable books survives");
+    const styles = await source("reader/reader.css");
+    assert.doesNotMatch(styles, /library-row-still|\.pick-note/, "the dimmed row's or the line's rules survive");
+    for (const locale of ["en", "pl", "de", "fr", "es", "uk"]) {
+      const catalogue = JSON.parse(await readFile(new URL(`_locales/${locale}/messages.json`, ROOT), "utf8"));
+      assert.equal(catalogue["reader_pick_book_title"], undefined, `${locale} still carries the tooltip's key`);
+      assert.equal(catalogue["reader_pick_books_note"], undefined, `${locale} still carries the line's key`);
+      assert.match(catalogue["reader_transfer_pick"].message, /\.|book|książk|Bücher|livre|libro|книг/i, `${locale}: the fourth point does not name books`);
+    }
   });
 });
 

@@ -1063,36 +1063,32 @@
       "count": { "content": "$1", "example": "12" }
     }
   },
-  "reader_transfer_pick": { "message": "Щоб експортувати лише частину статей, натисніть «Вибрати» над списком і позначте їх." },
+  "reader_transfer_pick": { "message": "Щоб експортувати лише частину статей або книг, натисніть «Вибрати» над списком і позначте їх." },
   "reader_pick_start": { "message": "Вибрати" },
   "reader_pick_close": { "message": "Закрити вибір" },
-  "reader_pick_book_title": { "message": "Книги експортуються лише в резервній копії" },
-  "reader_pick_books_note": {
-    "message": "Книги не можна вибрати - вони експортуються лише в резервній копії, з позначеним «Експорт із книгами»."
-  },
   "reader_pick_all": { "message": "Вибрати все" },
   "reader_pick_count_one": {
-    "message": "Вибрано $COUNT$ статтю",
+    "message": "Вибрано $COUNT$ документ",
     "placeholders": {
       "count": { "content": "$1", "example": "1" }
     }
   },
   "reader_pick_count_few": {
-    "message": "Вибрано $COUNT$ статті",
+    "message": "Вибрано $COUNT$ документи",
     "placeholders": {
       "count": { "content": "$1", "example": "3" }
     }
   },
   "reader_pick_count_many": {
-    "message": "Вибрано $COUNT$ статей",
+    "message": "Вибрано $COUNT$ документів",
     "placeholders": {
-      "count": { "content": "$1", "example": "5" }
+      "count": { "content": "$1", "example": "3" }
     }
   },
   "reader_pick_count_other": {
-    "message": "Вибрано $COUNT$ статті",
+    "message": "Вибрано $COUNT$ документа",
     "placeholders": {
-      "count": { "content": "$1", "example": "1,5" }
+      "count": { "content": "$1", "example": "3" }
     }
   },
   "reader_export_selected": {
@@ -1102,35 +1098,35 @@
     }
   },
   "reader_export_done_one": {
-    "message": "Експортовано $COUNT$ статтю до $FILE$ ($SIZE$).",
+    "message": "Експортовано $COUNT$ документ до $FILE$ ($SIZE$).",
     "placeholders": {
       "count": { "content": "$1", "example": "1" },
-      "file": { "content": "$2", "example": "reread-articles.json" },
-      "size": { "content": "$3", "example": "38 KB" }
+      "file": { "content": "$2", "example": "reread-selection.zip" },
+      "size": { "content": "$3", "example": "2,1 МБ" }
     }
   },
   "reader_export_done_few": {
-    "message": "Експортовано $COUNT$ статті до $FILE$ ($SIZE$).",
+    "message": "Експортовано $COUNT$ документи до $FILE$ ($SIZE$).",
     "placeholders": {
       "count": { "content": "$1", "example": "3" },
-      "file": { "content": "$2", "example": "reread-articles.json" },
-      "size": { "content": "$3", "example": "120 KB" }
+      "file": { "content": "$2", "example": "reread-selection.zip" },
+      "size": { "content": "$3", "example": "2,1 МБ" }
     }
   },
   "reader_export_done_many": {
-    "message": "Експортовано $COUNT$ статей до $FILE$ ($SIZE$).",
+    "message": "Експортовано $COUNT$ документів до $FILE$ ($SIZE$).",
     "placeholders": {
-      "count": { "content": "$1", "example": "12" },
-      "file": { "content": "$2", "example": "reread-articles.zip" },
-      "size": { "content": "$3", "example": "2,1 MB" }
+      "count": { "content": "$1", "example": "3" },
+      "file": { "content": "$2", "example": "reread-selection.zip" },
+      "size": { "content": "$3", "example": "2,1 МБ" }
     }
   },
   "reader_export_done_other": {
-    "message": "Експортовано $COUNT$ статті до $FILE$ ($SIZE$).",
+    "message": "Експортовано $COUNT$ документа до $FILE$ ($SIZE$).",
     "placeholders": {
-      "count": { "content": "$1", "example": "1,5" },
-      "file": { "content": "$2", "example": "reread-articles.json" },
-      "size": { "content": "$3", "example": "38 KB" }
+      "count": { "content": "$1", "example": "3" },
+      "file": { "content": "$2", "example": "reread-selection.zip" },
+      "size": { "content": "$3", "example": "2,1 МБ" }
     }
   },
   "reader_export_marks_done_one": {

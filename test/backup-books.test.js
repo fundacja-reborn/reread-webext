@@ -95,3 +95,19 @@ describe("the import with books", () => {
     assert.match(importing, /await deleteBook\(id\)\.catch\(\(\) => undefined\);/, "a failed write leaves the book's parts behind");
   });
 });
+
+describe("the selection's export (D218)", () => {
+  it("writes the ticked documents, articles and books, as the backup's format under its own name, without the vocabulary or the settings", async () => {
+    const script = await source("reader/reader.js");
+    const exporting = bodyOf(script, "exportSelection");
+    assert.match(exporting, /const books = shelf\.filter\(\(book\) => picked\.has\(book\.id\)\);/, "the ticked books are not taken");
+    assert.match(exporting, /marksDocs\(\(docId\) => picked\.has\(docId\)\)/, "the highlights are not cut to the selection");
+    assert.match(exporting, /backupStream\(\{[\s\S]*?phrases: \[\],[\s\S]*?settings: null,\s*books,\s*selection: true,/, "the selection is not the backup's format without vocabulary and settings");
+    assert.match(exporting, /downloadFile\(archive, SELECTION_FILENAME, "application\/zip"\)/, "the file is not written under the selection's name");
+    assert.match(exporting, /plural\(articles\.length \+ books\.length, "reader_export_done", \[SELECTION_FILENAME, fileSize\(size\)\]\)/, "the report does not count both kinds");
+    assert.doesNotMatch(script, /ARTICLES_FILENAME|ARCHIVE_FILENAME|toArticlesFile\(|articlesToExport/, "the list's own files are still written from the page");
+    const controls = bodyOf(script, "renderExportControls");
+    assert.match(controls, /exportButton\.disabled = picking && picked\.size === 0;/, "the button does not count every ticked document");
+    assert.match(controls, /t\("reader_export_selected", picked\.size\.toLocaleString\(\)\)/, "the button's count leaves the books out");
+  });
+});

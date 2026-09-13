@@ -56,10 +56,8 @@ import { ErrorCode, Message, asPage, asPageRequest, asResult, ok } from "../lib/
 import { buildArticle } from "../lib/reader/article.js";
 import { MAX_DOWNLOAD_BYTES, pictureSources, picturesSummary } from "../lib/reader/pictures.js";
 import {
-  ARCHIVE_FILENAME,
   ARTICLES_ENTRY,
   archiveAccount,
-  archiveEntries,
   archivePictures,
   bookPictureEntryName,
   fromArchiveText,
@@ -93,10 +91,8 @@ import { hitsInText, isSearchableQuery } from "../lib/reader/search.js";
 import { isUnderlineWeight } from "../lib/underline.js";
 import { BACK_ROAD_KEY, READER_SOURCE_KEY, readReaderSource, writeReaderTab } from "../lib/session.js";
 import {
-  ARTICLES_FILENAME,
   fromArticlesFile,
   importPlan,
-  toArticlesFile,
 } from "../lib/store/articles-file.js";
 import {
   allArticles,
@@ -154,6 +150,7 @@ import {
 import {
   BACKUP_ENTRIES,
   BACKUP_FILENAME,
+  SELECTION_FILENAME,
   backupEntries,
   fromManifest,
   isNewerBackup,
@@ -333,7 +330,6 @@ const libraryPickAll = /** @type {HTMLInputElement | null} */ (
 );
 const libraryPickCount = document.getElementById("library-pick-count");
 const libraryPickClose = document.getElementById("library-pick-close");
-const libraryPickBooks = document.getElementById("library-pick-books");
 const exportButton = /** @type {HTMLButtonElement | null} */ (
   document.getElementById("library-export")
 );
@@ -683,19 +679,17 @@ let picked = new Set();
  * without rebuilding the rows, which would take the focus off the box just
  * pressed and flash the whole list on e-ink.
  *
- * `books` counts the books among the rows the tab and the filter show -
- * the rows a selection cannot take, which the line under its bar is about;
  * `bookRows` are every book's light rows, whichever tab, for the box that
- * offers them to the backup (D218) - a backup is everything.
+ * offers them to the backup (D218) - a backup is everything - and for the
+ * selection's export, which takes the ticked ones among them.
  *
  * @type {{
  *   selectable: string[],
  *   metas: SavedMeta[],
- *   books: number,
  *   bookRows: import("../lib/store/book.js").BookMeta[],
  * }}
  */
-let libraryShown = { selectable: [], metas: [], books: 0, bookRows: [] };
+let libraryShown = { selectable: [], metas: [], bookRows: [] };
 
 /**
  * The highlights page, while it is the view (D108) - null otherwise, the
@@ -3282,7 +3276,7 @@ async function refreshLibrary() {
   // The selection held to the list as it stands (D152), and what this read
   // found kept for the ticks that follow it.
   picked = keptPicks(picked, entries);
-  libraryShown = { selectable: view.selectable, metas, books: view.books, bookRows: books };
+  libraryShown = { selectable: view.selectable, metas, bookRows: books };
 
   // Each tab wears its whole segment's count - the entire half of the list,
   // not the page or the filter's slice, so the two labels always add up to
@@ -3360,10 +3354,6 @@ function renderPickLine() {
     libraryPickToggle.disabled = libraryShown.metas.length === 0;
   }
   if (libraryPickLine !== null) libraryPickLine.hidden = !picking;
-  // The line about the books' rows stands only while there is such a row
-  // to explain: over a list of articles it would be a sentence about
-  // nothing on screen.
-  if (libraryPickBooks !== null) libraryPickBooks.hidden = !picking || libraryShown.books === 0;
   if (libraryPickAll !== null) {
     const state = pickedState(libraryShown.selectable, picked);
     libraryPickAll.checked = state === "all";
@@ -3377,16 +3367,18 @@ function renderPickLine() {
 }
 
 /**
- * The Export button and the pictures row under the list, over what they
- * will take: the whole list, or - inside the selection (D152) - the ticked
- * articles, which the button then counts in its own words.
+ * The Export button and the boxes under the list, over what they will
+ * take: the whole list, or - inside the selection (D152) - the ticked
+ * documents, articles and books alike (D218), which the button then
+ * counts in its own words.
  *
- * Exporting nothing would download an empty file; the button says so first,
- * on whether any *articles* are going - books stay out of the file, so a
- * list of books alone still has nothing to export. The pictures kept with
- * articles (D145) ride in the backup only when asked: the row stands while
- * some article going has any, and says how many and what they take - the
- * size the file will grow by, before the press.
+ * Exporting nothing would download an empty file; the button says so
+ * first. The pictures kept with articles (D145) ride in the file only
+ * when asked: the row stands while some article going has any, and says
+ * how many and what they take - the size the file will grow by, before
+ * the press. A ticked book goes with its pictures whatever the box says:
+ * they are the book's own, out of its .epub, and cannot be downloaded
+ * again the way an article's can.
  */
 function renderExportControls() {
   const { metas } = libraryShown;
@@ -3394,9 +3386,9 @@ function renderExportControls() {
   if (exportButton !== null) {
     // Outside the selection the export is the backup of everything (D213),
     // which always has something to write - the settings at the least.
-    exportButton.disabled = picking && going.length === 0;
+    exportButton.disabled = picking && picked.size === 0;
     exportButton.textContent = picking
-      ? t("reader_export_selected", going.length.toLocaleString())
+      ? t("reader_export_selected", picked.size.toLocaleString())
       : t("action_export");
   }
   const kept = going.reduce(
@@ -3412,10 +3404,10 @@ function renderExportControls() {
     // in one bracket read as one number (Michał, 2026-09-13).
     exportPicturesLabel.textContent = plural(kept.count, "reader_export_pictures", [megabytes(kept.bytes)]);
   }
-  // The books (D218): offered outside the selection alone - inside it the
-  // export is the list's own file, which carries articles - and only
-  // while there is a book to offer. The label counts them and what they
-  // take, text and pictures, off the light rows.
+  // The books' box (D218): outside the selection alone - inside it the
+  // ticks decide which books go - and only while there is a book to
+  // offer. The label counts them and what they take, text and pictures,
+  // off the light rows.
   const shelf = booksAccount(libraryShown.bookRows);
   if (exportBooksRow !== null) exportBooksRow.hidden = picking || shelf.count === 0;
   if (exportBooksLabel !== null) {
@@ -3444,7 +3436,6 @@ function applyLibrarySearchVisibility() {
       libraryPager,
       libraryPickToggle,
       libraryPickLine,
-      libraryPickBooks,
     ];
     for (const element of plain) {
       if (element !== null) element.hidden = true;
@@ -3534,8 +3525,8 @@ function renderLibraryPager(view) {
  * Inside the selection (D152) the row is a box and its label instead: the
  * title, stretched over the same cell, ticks the box - the whole row is the
  * target, which a finger needs more than a box does - and Delete steps
- * away with the act it served. A book, which the export does not take,
- * gets no box: its row stands still and dimmed, the title plain text.
+ * away with the act it served. A book's row wears the box like an
+ * article's since D218: the selection's file carries both.
  *
  * @param {import("./list-view.js").LibraryEntry} entry
  */
@@ -3548,32 +3539,18 @@ function libraryRow(entry) {
 
   if (picking) {
     item.classList.add("library-row-pick");
-    if (entry.kind === "book") {
-      item.classList.add("library-row-still");
-      // Said to the pointer and to assistive technology as well as to the
-      // eye: the row is out of the selection because the export leaves
-      // books out. The line under the bar says it where nothing hovers.
-      item.setAttribute("aria-disabled", "true");
-      item.title = t("reader_pick_book_title");
-      const still = document.createElement("span");
-      still.className = "library-open";
-      still.textContent = entry.title;
-      text.append(still, detailLine(entry));
-    } else {
-      const box = document.createElement("input");
-      box.type = "checkbox";
-      box.className = "library-pick";
-      box.id = `library-pick-${pickBoxes++}`;
-      box.setAttribute("data-url", entry.url);
-      box.checked = picked.has(entry.url);
-      const label = document.createElement("label");
-      label.className = "library-open";
-      label.htmlFor = box.id;
-      label.textContent = entry.title;
-      text.append(label, detailLine(entry));
-      item.append(box);
-    }
-    item.append(text);
+    const box = document.createElement("input");
+    box.type = "checkbox";
+    box.className = "library-pick";
+    box.id = `library-pick-${pickBoxes++}`;
+    box.setAttribute("data-url", entry.url);
+    box.checked = picked.has(entry.url);
+    const label = document.createElement("label");
+    label.className = "library-open";
+    label.htmlFor = box.id;
+    label.textContent = entry.title;
+    text.append(label, detailLine(entry));
+    item.append(box, text);
     return item;
   }
 
@@ -4230,19 +4207,6 @@ async function removeRow(button, url, kind) {
 }
 
 /**
- * What the export takes (D152): the whole list, or - inside the selection -
- * the articles ticked, each read whole by its address. A row torn or gone
- * since its tick is left out, the reading `getArticle` gives one.
- *
- * @returns {Promise<import("../lib/store/saved-article.js").SavedArticle[]>}
- */
-async function articlesToExport() {
-  if (!picking) return allArticles();
-  const read = await Promise.all([...picked].map((url) => getArticle(url)));
-  return read.filter((article) => article !== null);
-}
-
-/**
  * The export: inside the selection (D152) the ticked articles as the list's
  * own file - a file to hand somebody; otherwise the backup of everything
  * (D213): the whole list with its highlights and reading positions (and
@@ -4374,29 +4338,46 @@ async function picturesOf(articles) {
 }
 
 /**
- * The ticked articles as the list's own file (D152) - the `.json`, or the
- * `.zip` with their pictures beside it (D145): a file to hand somebody,
- * not the backup, so it carries neither the vocabulary nor the settings.
- * The export says what it wrote (D153) in the section's own line.
+ * The ticked documents as a file to hand somebody (D152) - since D218 the
+ * backup's own format cut to the selection: the ticked articles with
+ * their highlights and reading positions (and their pictures when the box
+ * is ticked), the ticked books whole - text, pictures, position - and
+ * the highlights of both; neither the vocabulary nor the settings, which
+ * are nobody's to hand on. Written by the same stream, read back by the
+ * same import, under a name that says what it is. A row torn or gone
+ * since its tick is left out, the reading `getArticle` gives one. The
+ * export says what it wrote (D153) in the section's own line.
  */
 async function exportSelection() {
-  const [articles, marks] = await Promise.all([articlesToExport(), allMarks()]);
-  if (articles.length === 0) return;
+  const [shelf, marks, positions, docs] = await Promise.all([
+    listBooks(),
+    allMarks(),
+    allPositions(),
+    marksDocs((docId) => picked.has(docId)),
+  ]);
+  const books = shelf.filter((book) => picked.has(book.id));
+  const ids = new Set(shelf.map((book) => book.id));
+  const read = await Promise.all([...picked].filter((url) => !ids.has(url)).map((url) => getArticle(url)));
+  const articles = read.filter((article) => article !== null);
+  if (articles.length === 0 && books.length === 0) return;
   const withPictures = exportPictures !== null && !exportPicturesRow?.hidden && exportPictures.checked;
-  /** @type {number} */
-  let size;
-  if (withPictures) {
-    const archive = await packArchive(archiveEntries(articles, marks, await picturesOf(articles)));
-    size = downloadFile(archive, ARCHIVE_FILENAME, "application/zip");
-  } else {
-    size = downloadFile(toArticlesFile(articles, marks), ARTICLES_FILENAME, "application/json");
-  }
-  transferStatus(
-    plural(articles.length, "reader_export_done", [
-      withPictures ? ARCHIVE_FILENAME : ARTICLES_FILENAME,
-      fileSize(size),
-    ]),
+  const archive = await packArchive(
+    backupStream({
+      app: webext().runtime.getManifest().version,
+      now: Date.now(),
+      articles,
+      marks,
+      pictures: withPictures ? await picturesOf(articles) : new Map(),
+      positions,
+      phrases: [],
+      highlights: docs.map(copyDocOf),
+      settings: null,
+      books,
+      selection: true,
+    }),
   );
+  const size = downloadFile(archive, SELECTION_FILENAME, "application/zip");
+  transferStatus(plural(articles.length + books.length, "reader_export_done", [SELECTION_FILENAME, fileSize(size)]));
 }
 
 /**

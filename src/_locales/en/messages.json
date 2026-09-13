@@ -929,62 +929,55 @@
     }
   },
   "reader_transfer_pick": {
-    "message": "To export only some of the articles, press Select above the list and tick them.",
+    "message": "To export only some of the articles or books, press Select above the list and tick them.",
     "description": "Hint under the Import/Export buttons (D152): the Select button stands above the list, fifty rows up, and a reader about to press Export expects the choice here."
   },
   "reader_pick_start": {
     "message": "Select",
-    "description": "Button on the reading list's own line over the rows (D152): opens the selection - every article row grows a checkbox, and Export takes the ticked ones."
+    "description": "Button on the reading list's own line over the rows (D152): opens the selection - every row, article or book (D218), grows a checkbox, and Export takes the ticked ones."
   },
   "reader_pick_close": {
     "message": "Close the selection",
     "description": "Name and tooltip of the cross at the end of the selection's bar: closes the selection and drops the ticks."
   },
-  "reader_pick_book_title": {
-    "message": "Books are exported only in the backup",
-    "description": "Tooltip of a book's row inside the selection (D152): why the row has no box - the list's own file carries articles; books go only in the backup of everything (D218)."
-  },
-  "reader_pick_books_note": {
-    "message": "Books can't be selected - they are exported only in the backup, with \"Export with books\" ticked.",
-    "description": "One quiet line under the selection's bar, only while the rows the tab and the filter show include a book: a title alone says nothing on a touch screen or e-ink, where there is no hover."
-  },
   "reader_pick_all": {
     "message": "Select all",
-    "description": "Checkbox over the rows inside the selection: ticks every article the current tab and filter show, on every page; half-ticked while only some of them are."
+    "description": "Checkbox over the rows inside the selection: ticks every document the current tab and filter show, on every page; half-ticked while only some of them are."
   },
   "reader_pick_count_one": {
-    "message": "$COUNT$ article selected",
+    "message": "$COUNT$ document selected",
+    "description": "Under the selection's bar: how many documents are ticked in all - articles and books alike since D218 - across tabs, filters and pages.",
     "placeholders": {
       "count": { "content": "$1", "example": "1" }
     }
   },
   "reader_pick_count_other": {
-    "message": "$COUNT$ articles selected",
+    "message": "$COUNT$ documents selected",
     "placeholders": {
       "count": { "content": "$1", "example": "3" }
     }
   },
   "reader_export_selected": {
     "message": "Export selected ($COUNT$)",
-    "description": "The Export button inside the selection: says how many ticked articles the file will hold.",
+    "description": "The Export button inside the selection: says how many ticked documents - articles and books - the file will hold.",
     "placeholders": {
       "count": { "content": "$1", "example": "3" }
     }
   },
   "reader_export_done_one": {
-    "message": "Exported $COUNT$ article to $FILE$ ($SIZE$).",
-    "description": "Status line after the reading list's export (D153): a download is quiet, so the page says what it wrote - the count, the file's name and its size.",
+    "message": "Exported $COUNT$ document to $FILE$ ($SIZE$).",
+    "description": "Status line after the selection's export (D153, D218): a download is quiet, so the page says what it wrote - the count of documents, articles and books together, the file's name and its size.",
     "placeholders": {
       "count": { "content": "$1", "example": "1" },
-      "file": { "content": "$2", "example": "reread-articles.json" },
-      "size": { "content": "$3", "example": "38 KB" }
+      "file": { "content": "$2", "example": "reread-selection.zip" },
+      "size": { "content": "$3", "example": "2.1 MB" }
     }
   },
   "reader_export_done_other": {
-    "message": "Exported $COUNT$ articles to $FILE$ ($SIZE$).",
+    "message": "Exported $COUNT$ documents to $FILE$ ($SIZE$).",
     "placeholders": {
-      "count": { "content": "$1", "example": "12" },
-      "file": { "content": "$2", "example": "reread-articles.zip" },
+      "count": { "content": "$1", "example": "3" },
+      "file": { "content": "$2", "example": "reread-selection.zip" },
       "size": { "content": "$3", "example": "2.1 MB" }
     }
   },

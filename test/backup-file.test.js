@@ -8,6 +8,7 @@ import {
   BACKUP_ENTRIES,
   BACKUP_FILENAME,
   BACKUP_VERSION,
+  SELECTION_FILENAME,
   backupEntries,
   fromManifest,
   isNewerBackup,
@@ -97,6 +98,7 @@ describe("the backup of everything", () => {
     const manifest = manifestOf(input());
     assert.deepEqual(manifest, {
       format: "reread-backup",
+      scope: "everything",
       version: BACKUP_VERSION,
       createdAt: 1234,
       app: "0.5.56",
@@ -136,6 +138,7 @@ describe("the backup of everything", () => {
     const healed = fromManifest(JSON.stringify({ format: "reread-backup", version: "2", holds: { phrases: -1, pictures: "yes" } }));
     assert.deepEqual(healed, {
       format: "reread-backup",
+      scope: "everything",
       version: BACKUP_VERSION,
       createdAt: 0,
       app: "",
@@ -170,5 +173,20 @@ describe("the books in the manifest (D218)", () => {
     assert.equal(older?.holds.books, 0);
     assert.equal(older?.holds.bookPictures, false);
     assert.equal(BACKUP_ENTRIES.books, "books.json");
+  });
+});
+
+describe("a selection in the backup's format (D218)", () => {
+  it("says so in its manifest and leaves the vocabulary's entry out rather than writing it empty", () => {
+    const base = { app: "0.5.60", now: 5, articles: [], marks: new Map(), pictures: new Map(), positions: new Map(), phrases: [], highlights: [], settings: null };
+    assert.equal(manifestOf(base).scope, "everything");
+    const selection = manifestOf({ ...base, selection: true });
+    assert.equal(selection.scope, "selection");
+    assert.equal(fromManifest(JSON.stringify(selection))?.scope, "selection");
+    assert.equal(fromManifest(JSON.stringify({ format: "reread-backup", version: 1 }))?.scope, "everything");
+    const names = backupEntries({ ...base, selection: true }).map((entry) => entry.name);
+    assert.deepEqual(names, [BACKUP_ENTRIES.manifest, BACKUP_ENTRIES.highlights, BACKUP_ENTRIES.articles]);
+    assert.ok(backupEntries(base).map((entry) => entry.name).includes(BACKUP_ENTRIES.vocabulary), "the backup of everything lost its vocabulary");
+    assert.equal(SELECTION_FILENAME, "reread-selection.zip");
   });
 });
