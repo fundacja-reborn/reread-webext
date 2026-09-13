@@ -158,7 +158,10 @@ export const CONFIG_KEY = "config";
  *   is a word they chose, the sentence is the text around it. Turned off
  *   again it keeps nothing new; what was kept stays with its phrase, and
  *   Learned takes it with the phrase. A phrase already saved keeps its first
- *   sentence whatever a later save carries (`resaved`).
+ *   sentence whatever a later save carries (`resaved`); one saved without
+ *   a sentence - before the setting was on, from the phrases page, from a
+ *   two-column file - takes the sentence it stands in the next time its
+ *   bubble opens on a page (D216), while the setting is on.
  * @property {Record<string, string>} ttsVoices Which voice reads a language
  *   aloud (D83): source language to the `voiceURI` chosen for it. Per language
  *   rather than per pair - the voice picked for `en` serves every pair read in

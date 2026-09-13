@@ -1296,8 +1296,11 @@ function showSaved(anchor, text, normalized, context, how = {}) {
     scheme: bubbleScheme?.() ?? null,
   });
   // One bubble opening, counted (D209): the row's key, reported in the idle
-  // moment after with whatever else the page has gathered by then.
-  report.recalled(key);
+  // moment after with whatever else the page has gathered by then - and the
+  // sentence the phrase stands in here (D216), for a row kept without one:
+  // the page sends what it has, as a save does, and the background keeps it
+  // only while the setting asks for it.
+  report.recalled(key, context);
   scheduleReport();
   return true;
 }

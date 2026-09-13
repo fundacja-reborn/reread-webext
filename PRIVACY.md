@@ -33,7 +33,7 @@ kept with a phrase (below), which a private window adds to like any other.
 
 | What | Why it is stored |
 |---|---|
-| Saved phrases with their meanings, two counts per phrase (how many times you opened its bubble, how many times it occurred in the texts you finished) and, only when you turn on **Save the sentence with the phrase**, the sentence each phrase was saved in - see *Page content* | To underline them on later pages and show your meaning again; the counts, to help you decide what you have learned; the sentence, for a flashcard that shows the phrase in use |
+| Saved phrases with their meanings, two counts per phrase (how many times you opened its bubble, how many times it occurred in the texts you finished) and, only when you turn on **Save the sentence with the phrase**, the sentence each phrase was saved in (or, for a phrase saved without one, the sentence its bubble was next opened in) - see *Page content* | To underline them on later pages and show your meaning again; the counts, to help you decide what you have learned; the sentence, for a flashcard that shows the phrase in use |
 | Translation models you downloaded | So translation works offline |
 | Dictionaries you installed | So dictionary lookups work offline |
 | Articles and books you saved to the reading list | So they open with no network, and after the original page has changed or gone |
@@ -181,7 +181,8 @@ through the **Next** button under its text, or an article you marked as read - e
 the time it last happened. They are shown on the saved phrases page, which can order the
 list by them. They record no page, no title and no text: not where you met the phrase, only
 how often. A page you read outside the reader adds to the first count only, when you open a
-bubble on it, and to nothing else. Marking a phrase **Learned** deletes its counts with it.
+bubble on it, and to nothing else - apart from the sentence described next, once you have
+turned that on. Marking a phrase **Learned** deletes its counts with it.
 
 One more thing can be kept with a saved phrase, and only after you turn on **Save the
 sentence with the phrase** in Settings - it is off until you do: the sentence the phrase stood
@@ -193,9 +194,12 @@ leaves your device. A phrase keeps the first sentence it was saved from - saving
 phrase again changes its meanings and leaves the sentence alone. A phrase you save from the
 **Add a phrase** field has no sentence. A phrase imported from a file has the sentence the
 file's third column holds, if any, whatever the setting says - the file is your own; a phrase
-already saved takes the file's sentence only when it has none. Marking a phrase **Learned**
-deletes its sentence with it; switching the setting off keeps the sentences already saved
-and saves no new ones.
+already saved takes the file's sentence only when it has none. A phrase that has no
+sentence - saved before you turned the setting on, from the **Add a phrase** field, or from
+a file without one - takes the sentence it stands in the next time you open its bubble on a
+page: one sentence, under the same limits, and only while the setting is on. Marking a phrase
+**Learned** deletes its sentence with it; switching the setting off keeps the sentences
+already saved and saves no new ones.
 
 A page you have switched re/read off on (the toolbar popup, or the list in Settings)
 is not read at all: no scan, no underlines, no bubble. The one thing that still works

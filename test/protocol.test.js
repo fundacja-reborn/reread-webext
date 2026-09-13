@@ -404,13 +404,67 @@ describe("asRequest", () => {
           ["bank", 3],
           ["shore", 1],
         ],
+        sentences: [],
       },
     );
     assert.deepEqual(asRequest({ kind: Message.COUNT_PHRASES, recalled: [], read: [] }), {
       kind: Message.COUNT_PHRASES,
       recalled: [],
       read: [],
+      sentences: [],
     });
+  });
+
+  it("accepts the sentences the openings stood in, and reads a report without them as carrying none (D216)", () => {
+    assert.deepEqual(
+      asRequest({
+        kind: Message.COUNT_PHRASES,
+        recalled: ["bank", "read"],
+        read: [],
+        sentences: [
+          ["bank", "The bank was steep."],
+          ["read", "I read it twice."],
+        ],
+      }),
+      {
+        kind: Message.COUNT_PHRASES,
+        recalled: ["bank", "read"],
+        read: [],
+        sentences: [
+          ["bank", "The bank was steep."],
+          ["read", "I read it twice."],
+        ],
+      },
+    );
+    // A page older than the field sends none; an empty list is the same.
+    assert.deepEqual(asRequest({ kind: Message.COUNT_PHRASES, recalled: ["bank"], read: [], sentences: [] }), {
+      kind: Message.COUNT_PHRASES,
+      recalled: ["bank"],
+      read: [],
+      sentences: [],
+    });
+  });
+
+  it("refuses sentences that are not exact, as it refuses the two lists", () => {
+    for (const sentences of [
+      "The bank was steep.",
+      {},
+      [["bank"]],
+      [["bank", "The bank was steep.", "extra"]],
+      [["", "The bank was steep."]],
+      [["bank", ""]],
+      [["bank", 42]],
+      [[42, "The bank was steep."]],
+      ["bank"],
+      [null],
+      new Array(MAX_COUNTED_KEYS + 1).fill(["bank", "The bank was steep."]),
+    ]) {
+      assert.equal(
+        asRequest({ kind: Message.COUNT_PHRASES, recalled: ["bank"], read: [], sentences }),
+        null,
+        JSON.stringify(sentences).slice(0, 60),
+      );
+    }
   });
 
   it("refuses a count report that is not exact, and one past the vocabulary budget", () => {
@@ -437,7 +491,7 @@ describe("asRequest", () => {
   it("keeps of a count report only what a report is", () => {
     assert.deepEqual(
       asRequest({ kind: Message.COUNT_PHRASES, recalled: ["bank"], read: [], url: "https://example.org/" }),
-      { kind: Message.COUNT_PHRASES, recalled: ["bank"], read: [] },
+      { kind: Message.COUNT_PHRASES, recalled: ["bank"], read: [], sentences: [] },
     );
   });
 
