@@ -48,8 +48,10 @@ Settings), and the per-site off switches (Settings, **Switched-off sites**). Del
 article or a book removes everything stored for it - text, pictures, highlights, notes and
 the reading position - from the database and from the safety copy in `storage.local`.
 Saved phrases are not part of an article: a phrase you saved while reading it is stored in
-your vocabulary, without any record of where it came from, and stays there until you mark
-it **Learned** - deleting the article does not delete the phrase.
+your vocabulary, without any record of where it came from, and is kept there until you mark
+it **Learned** - deleting the article does not delete the phrase. The same holds for the
+sentence saved with a phrase (see *Page content*): it is stored with the phrase, not with the
+article, so deleting the article does not delete it either.
 
 You can export your data at any time to files on your disk: everything at once, as one
 `.zip` backup from the reading list - the reading list with its highlights, reading positions
@@ -185,21 +187,21 @@ bubble on it, and to nothing else - apart from the sentence described next, once
 turned that on. Marking a phrase **Learned** deletes its counts with it.
 
 One more thing can be kept with a saved phrase, and only after you turn on **Save the
-sentence with the phrase** in Settings - it is off until you do: the sentence the phrase stood
-in when you saved it from the bubble. It is the sentence as the page shows it, at most one
+sentence with the phrase** in Settings - it is off until you do: the sentence around the
+phrase when you saved it from the bubble. It is the sentence as the page shows it, at most one
 sentence and at most 600 characters, without its translation; it records no page, no title
 and no address. It is shown under the phrase on the saved phrases page and written into the
 third column of the file that **Export for Anki** makes; nothing else reads it, and it never
-leaves your device. A phrase keeps the first sentence it was saved from - saving the same
-phrase again changes its meanings and leaves the sentence alone. A phrase you save from the
-**Add a phrase** field has no sentence. A phrase imported from a file has the sentence the
-file's third column holds, if any, whatever the setting says - the file is your own; a phrase
-already saved takes the file's sentence only when it has none. A phrase that has no
-sentence - saved before you turned the setting on, from the **Add a phrase** field, or from
-a file without one - takes the sentence it stands in the next time you open its bubble on a
-page: one sentence, under the same limits, and only while the setting is on. Marking a phrase
-**Learned** deletes its sentence with it; switching the setting off keeps the sentences
-already saved and saves no new ones.
+leaves your device. Only the first sentence is kept - saving the same phrase again changes its
+meanings, not the sentence. A phrase you save from the **Add a phrase** field has no sentence.
+A phrase imported from a file has the sentence from the file's third column, if any, whatever
+the setting says - the file is your own; for a phrase already saved, the file's sentence is
+added only when the phrase has none. For a phrase that has no sentence - saved before you
+turned the setting on, from the **Add a phrase** field, or from a file without one - the
+sentence around it is saved the next time you open its bubble on a page: one sentence, under
+the same limits, and only while the setting is on. Marking a phrase **Learned** deletes its
+sentence with it; switching the setting off saves no new sentences, and the ones already
+saved are kept.
 
 A page you have switched re/read off on (the toolbar popup, or the list in Settings)
 is not read at all: no scan, no underlines, no bubble. The one thing that still works
