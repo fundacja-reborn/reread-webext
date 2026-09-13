@@ -695,6 +695,13 @@
             </svg>
           </button>
         </div>
+        <!-- Why the books' rows wear no box, said under the bar only while
+             the rows the tab and the filter show include a book: their
+             rows carry the same words as a tooltip, and a tooltip is
+             nothing on a touch screen or e-ink. Hidden with the bar. -->
+        <p class="hint pick-note" id="library-pick-books" data-i18n="reader_pick_books_note" hidden>
+          Books can't be selected - they are not in the backup, only their highlights are.
+        </p>
         <div id="library-empty" class="empty" hidden></div>
         <ul id="library-rows" class="library-rows"></ul>
         <!-- The shared pager (page.css): a drawn chevron at each end with its
@@ -793,27 +800,64 @@
                written part while the article import's reports stand still,
                and the two must not overwrite each other mid-sentence. -->
           <p id="book-import-status" class="status report" role="status"></p>
-          <p class="hint" data-i18n="reader_transfer_accepts">
-              Import reads the file it is given: a re/read backup (.zip - or the older .json files of the list and of the highlights), or an e-book (.epub).
-            </p>
-          <!-- The way to a partial export (D152), said where a reader about
-               to press Export expects the choice - the button that offers
-               it stands fifty rows up. -->
-          <p class="hint" data-i18n="reader_transfer_pick">
-            To export only some of the articles, press Select above the list and tick them.
-          </p>
+          <!-- What Export writes, and the one thing it leaves out, said in the
+               open under the buttons: until 2026-09-13 only the folded format
+               details said that books are not in the backup, and a reader who
+               had just imported books could take Export for a backup of the
+               whole list (Michał). One list, no heading (his second polish):
+               the backup, the books, what Import takes, the way to a partial
+               export (D152, said where a reader about to press Export expects
+               the choice - the button that offers it stands fifty rows up).
+               Plain hints, not a framed note - a description, not a warning;
+               the bullets in the text's own ink, so they survive e-ink. -->
+          <ul class="hint transfer-notes">
+            <li data-i18n="reader_backup_scope">
+              The backup holds your articles with their highlights and reading positions, the saved phrases of every language pair, and the settings. Highlights made in books are in it too.
+            </li>
+            <li data-i18n="reader_backup_books">
+              The books themselves (.epub) are not in the backup - keep your .epub files. When you import the same book again and the backup after it, its highlights come back; its reading position does not.
+            </li>
+            <li data-i18n="reader_transfer_accepts">
+              Import reads the file it is given: a re/read backup (.zip - or the older .json files of the list and of the highlights), or a book (.epub).
+            </li>
+            <li data-i18n="reader_transfer_pick">
+              To export only some of the articles, press Select above the list and tick them.
+            </li>
+          </ul>
           <details class="fold-line">
             <summary data-i18n="reader_format_title">File format</summary>
-            <p class="hint" data-i18n="reader_transfer_note">
-              .zip - the backup of everything re/read keeps: the offline reading list with its highlights and reading positions (and its pictures when you tick the box), every saved phrase of every language pair with its sentence and counts, and the settings. Import only adds what is missing here and never overwrites what is saved: an article already here keeps its copy, a saved phrase keeps its meanings and takes only a sentence it lacks or a higher count, a highlight already here is left out. The settings are restored only when you tick the box.
-            </p>
-            <p class="hint" data-i18n="reader_transfer_epub">.epub - the e-book format.</p>
-            <p class="hint" data-i18n="reader_transfer_books">
-              Export covers articles - books (.epub) are not in the backup. A book imported again has no reading position; its highlights come back from the backup once the same book is imported from its .epub file.
-            </p>
-            <p class="hint" data-i18n="reader_transfer_marks">
-              Highlights are in the backup, with their articles and for books too. The Highlights page exports them as .md notes for reading.
-            </p>
+            <!-- A glossary: each entry opens with its extension in bold, the
+                 one bold of the section, written here and not in the
+                 catalogues - a marked element holds text only. Only what
+                 the list above does not say: the import's merging rules and
+                 the settings box (two paragraphs of one entry, the way the
+                 settings page's "First steps" keeps its paragraphs), what a
+                 book becomes, and the notes file. -->
+            <ul class="hint transfer-notes">
+              <li>
+                <p>
+                  <strong>.zip</strong> -
+                  <span data-i18n="reader_transfer_note">
+                    Import only adds what is missing and never overwrites what is saved: an article already here keeps its copy, a saved phrase keeps its meanings and takes only a sentence it lacks or a higher count, a highlight already here is left out.
+                  </span>
+                </p>
+                <p data-i18n="reader_transfer_settings">
+                  The settings are restored only when you tick "Restore the settings too".
+                </p>
+              </li>
+              <li>
+                <strong>.epub</strong> -
+                <span data-i18n="reader_transfer_epub">
+                  the electronic book format. A book is stored as text and pictures, split into parts at import.
+                </span>
+              </li>
+              <li>
+                <strong>.md</strong> -
+                <span data-i18n="reader_transfer_marks">
+                  notes with the highlights of articles and books, exported from the Highlights page.
+                </span>
+              </li>
+            </ul>
           </details>
           <input
             type="file"

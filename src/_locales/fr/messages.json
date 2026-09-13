@@ -365,14 +365,14 @@
   "reader_fullscreen_bar": { "message": "Plein écran, barre repliée" },
   "reader_fullscreen_exit": { "message": "Quitter le plein écran" },
   "library_pictures_one": {
-    "message": "$COUNT$ image, $SIZE$",
+    "message": "$COUNT$ image · $SIZE$",
     "placeholders": {
       "count": { "content": "$1", "example": "1" },
       "size": { "content": "$2", "example": "0,3 MB" }
     }
   },
   "library_pictures_other": {
-    "message": "$COUNT$ images, $SIZE$",
+    "message": "$COUNT$ images · $SIZE$",
     "placeholders": {
       "count": { "content": "$1", "example": "12" },
       "size": { "content": "$2", "example": "4,2 MB" }
@@ -483,13 +483,23 @@
   },
   "reader_format_title": { "message": "Format du fichier" },
   "reader_transfer_note": {
-    "message": ".zip - la sauvegarde de tout ce que re/read conserve : la liste de lecture hors ligne avec ses surlignages et ses positions de lecture (et ses images si vous cochez la case), chaque phrase enregistrée de chaque paire de langues avec sa phrase d'exemple et ses compteurs, et les paramètres. L'import n'ajoute que ce qui manque ici et n'écrase rien d'enregistré : un article déjà présent garde sa copie, une phrase enregistrée garde ses sens et ne prend qu'une phrase d'exemple qui lui manque ou un compteur plus élevé, un surlignage déjà présent est laissé de côté. Les paramètres ne sont restaurés que si vous cochez la case."
+    "message": "L'import n'ajoute que ce qui manque et n'écrase jamais ce qui est enregistré : un article déjà présent garde sa copie, une phrase enregistrée garde ses sens et ne prend qu'une phrase d'exemple qui lui manque ou un compteur plus élevé, un surlignage déjà présent est laissé de côté."
   },
-  "reader_export_pictures": {
-    "message": "Exporter avec les images ($COUNT$, $SIZE$)",
+  "reader_transfer_settings": {
+    "message": "Les paramètres ne sont restaurés que si vous cochez « Restaurer aussi les paramètres »."
+  },
+  "reader_export_pictures_one": {
+    "message": "Exporter avec les images ($COUNT$ image · $SIZE$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "size": { "content": "$2", "example": "12,4 Mo" }
+    }
+  },
+  "reader_export_pictures_other": {
+    "message": "Exporter avec les images ($COUNT$ images · $SIZE$)",
     "placeholders": {
       "count": { "content": "$1", "example": "34" },
-      "size": { "content": "$2", "example": "12,4 MB" }
+      "size": { "content": "$2", "example": "12,4 Mo" }
     }
   },
   "reader_import_pictures_one": {
@@ -520,13 +530,32 @@
       "size": { "content": "$2", "example": "12,4 MB" }
     }
   },
-  "reader_transfer_epub": { "message": ".epub - le format des livres numériques." },
-  "reader_transfer_books": {
-    "message": "L'export couvre les articles - les livres (.epub) ne sont pas dans la sauvegarde. Un livre importé à nouveau n'a pas de position de lecture ; ses surlignages reviennent de la sauvegarde une fois le même livre importé depuis son fichier .epub."
+  "reader_transfer_epub": {
+    "message": "le format des livres numériques. Un livre est enregistré comme texte et images, découpé en parties à l'import."
+  },
+  "reader_backup_scope": {
+    "message": "La sauvegarde contient vos articles avec leurs surlignages et leurs positions de lecture, les phrases enregistrées de chaque paire de langues et les paramètres. Les surlignages faits dans les livres y sont aussi."
+  },
+  "reader_backup_books": {
+    "message": "Les livres eux-mêmes (.epub) ne sont pas dans la sauvegarde - gardez vos fichiers .epub. Quand vous importez le même livre à nouveau, puis la sauvegarde après lui, ses surlignages reviennent ; sa position de lecture, non."
   },
   "reader_export_marks": { "message": "Exporter les surlignages" },
   "reader_marks_export_notes": { "message": "Exporter comme notes (.md)" },
   "reader_marks_notes_hint": { "message": "Le fichier .md est une liste en texte brut des citations et des notes, groupées par document - pour la lecture et pour vos propres notes. Il ne peut pas être importé." },
+  "reader_marks_import_books_one": {
+    "message": "Les surlignages de $COUNT$ livre attendent : $TITLES$. Importez ce livre depuis son fichier .epub, puis importez ce fichier à nouveau.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "titles": { "content": "$2", "example": "A Novel" }
+    }
+  },
+  "reader_marks_import_books_other": {
+    "message": "Les surlignages de $COUNT$ livres attendent : $TITLES$. Importez ces livres depuis leurs fichiers .epub, puis importez ce fichier à nouveau.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "2" },
+      "titles": { "content": "$2", "example": "A Novel, Another Novel" }
+    }
+  },
   "reader_marks_import_missing_one": {
     "message": "$COUNT$ document n'est pas dans la liste de lecture : $TITLES$. Importez-le d'abord - un livre depuis son fichier .epub, un article depuis la sauvegarde de la liste de lecture - puis importez ce fichier à nouveau.",
     "placeholders": {
@@ -565,7 +594,9 @@
     "message": "$COUNT$ surlignages ajoutés.",
     "placeholders": { "count": { "content": "$1", "example": "12" } }
   },
-  "reader_transfer_marks": { "message": "Les surlignages sont dans la sauvegarde, avec leurs articles et pour les livres aussi. La page Surlignages les exporte en notes .md pour la lecture." },
+  "reader_transfer_marks": {
+    "message": "des notes avec les surlignages des articles et des livres, à exporter depuis la page Surlignages."
+  },
   "reader_backup_done": {
     "message": "Sauvegarde écrite dans $FILE$ ($SIZE$) : $PARTS$.",
     "placeholders": {
@@ -688,6 +719,10 @@
   "reader_transfer_pick": { "message": "Pour n'exporter que certains articles, appuyez sur « Sélectionner » au-dessus de la liste et cochez-les." },
   "reader_pick_start": { "message": "Sélectionner" },
   "reader_pick_close": { "message": "Fermer la sélection" },
+  "reader_pick_book_title": { "message": "Les livres ne sont pas dans la sauvegarde" },
+  "reader_pick_books_note": {
+    "message": "Les livres ne peuvent pas être sélectionnés - ils ne sont pas dans la sauvegarde, seuls leurs surlignages y sont."
+  },
   "reader_pick_all": { "message": "Tout sélectionner" },
   "reader_pick_count_one": {
     "message": "$COUNT$ article sélectionné",

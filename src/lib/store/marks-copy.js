@@ -331,3 +331,20 @@ export function marksImportPlan(documents, library) {
     missing,
   };
 }
+
+/**
+ * The documents a plan could not place, told apart by what brings each
+ * back: a book returns from its .epub file, an article from the reading
+ * list's backup - and the report says the two differently, because a
+ * book's highlights are kept nowhere until the book is here, so the file
+ * has to come round again after it.
+ *
+ * @param {CopyDoc[]} missing
+ * @returns {{ books: CopyDoc[], articles: CopyDoc[] }} each in the file's order
+ */
+export function missingByKind(missing) {
+  return {
+    books: missing.filter((doc) => doc.kind === "book"),
+    articles: missing.filter((doc) => doc.kind === "article"),
+  };
+}

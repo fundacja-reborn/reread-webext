@@ -470,28 +470,28 @@
   "reader_fullscreen_bar": { "message": "Pełny ekran ze schowanym paskiem" },
   "reader_fullscreen_exit": { "message": "Wyjdź z pełnego ekranu" },
   "library_pictures_one": {
-    "message": "$COUNT$ obrazek, $SIZE$",
+    "message": "$COUNT$ obrazek · $SIZE$",
     "placeholders": {
       "count": { "content": "$1", "example": "1" },
       "size": { "content": "$2", "example": "0,3 MB" }
     }
   },
   "library_pictures_few": {
-    "message": "$COUNT$ obrazki, $SIZE$",
+    "message": "$COUNT$ obrazki · $SIZE$",
     "placeholders": {
       "count": { "content": "$1", "example": "3" },
       "size": { "content": "$2", "example": "0,8 MB" }
     }
   },
   "library_pictures_many": {
-    "message": "$COUNT$ obrazków, $SIZE$",
+    "message": "$COUNT$ obrazków · $SIZE$",
     "placeholders": {
       "count": { "content": "$1", "example": "12" },
       "size": { "content": "$2", "example": "4,2 MB" }
     }
   },
   "library_pictures_other": {
-    "message": "$COUNT$ obrazka, $SIZE$",
+    "message": "$COUNT$ obrazka · $SIZE$",
     "placeholders": {
       "count": { "content": "$1", "example": "12" },
       "size": { "content": "$2", "example": "4,2 MB" }
@@ -598,14 +598,38 @@
   },
   "reader_how_title": { "message": "Jak to działa?" },
   "reader_library_note": {
-    "message": "Wszystko tutaj to tekstowe kopie artykułów ze stron www, które otworzyłeś w widoku czytania i świadomie zapisałeś w czytelni, oraz artykuły i pliki .epub, które zaimportowałeś opcją Importuj poniżej. Wszystkie te artykuły i e-booki otwierają się bez internetu i zostają na Twoim urządzeniu, nawet gdy oryginalna strona zniknie."
+    "message": "Wszystko tutaj to tekstowe kopie artykułów ze stron www, które otworzyłeś w widoku czytania i świadomie zapisałeś w czytelni, oraz artykuły i pliki .epub, które zaimportowałeś opcją Importuj poniżej. Wszystkie te artykuły i książki otwierają się bez internetu i zostają na Twoim urządzeniu, nawet gdy oryginalna strona zniknie."
   },
   "reader_format_title": { "message": "Format pliku" },
   "reader_transfer_note": {
-    "message": ".zip - kopia wszystkiego, co przechowuje re/read: czytelnia offline z zakreśleniami i pozycjami czytania (z obrazkami, gdy zaznaczysz pole), wszystkie zapisane frazy każdej pary językowej ze zdaniami i licznikami oraz ustawienia. Import dodaje tylko to, czego tu brakuje, i nie nadpisuje niczego zapisanego: artykuł, który już tu jest, zachowuje swoją kopię, zapisana fraza zachowuje znaczenia i bierze tylko brakujące zdanie albo wyższy licznik, zakreślenie, które już tu jest, jest pomijane. Ustawienia są przywracane tylko wtedy, gdy zaznaczysz pole."
+    "message": "Import tylko dodaje to, czego brakuje, i nigdy nie nadpisuje zapisanych danych: artykuł już obecny zachowuje swoją kopię, zapisana fraza zachowuje znaczenia i przyjmuje tylko brakujące zdanie lub wyższy licznik, obecne zakreślenie jest pomijane."
   },
-  "reader_export_pictures": {
-    "message": "Eksport z obrazkami ($COUNT$, $SIZE$)",
+  "reader_transfer_settings": {
+    "message": "Ustawienia są przywracane tylko po zaznaczeniu pola „Przywróć też ustawienia”."
+  },
+  "reader_export_pictures_one": {
+    "message": "Eksport z obrazkami ($COUNT$ obrazek · $SIZE$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "size": { "content": "$2", "example": "12,4 MB" }
+    }
+  },
+  "reader_export_pictures_few": {
+    "message": "Eksport z obrazkami ($COUNT$ obrazki · $SIZE$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "34" },
+      "size": { "content": "$2", "example": "12,4 MB" }
+    }
+  },
+  "reader_export_pictures_many": {
+    "message": "Eksport z obrazkami ($COUNT$ obrazków · $SIZE$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "34" },
+      "size": { "content": "$2", "example": "12,4 MB" }
+    }
+  },
+  "reader_export_pictures_other": {
+    "message": "Eksport z obrazkami ($COUNT$ obrazka · $SIZE$)",
     "placeholders": {
       "count": { "content": "$1", "example": "34" },
       "size": { "content": "$2", "example": "12,4 MB" }
@@ -653,13 +677,46 @@
       "size": { "content": "$2", "example": "12,4 MB" }
     }
   },
-  "reader_transfer_epub": { "message": ".epub - format e-booków." },
-  "reader_transfer_books": {
-    "message": "Eksport obejmuje artykuły - książek (.epub) nie ma w kopii. Ponownie zaimportowana książka nie ma pozycji czytania; jej zakreślenia wracają z kopii, gdy ta sama książka zostanie zaimportowana z pliku .epub."
+  "reader_transfer_epub": {
+    "message": "format książki elektronicznej. Książka jest zapisywana jako tekst i obrazki, podzielona na części przy imporcie."
+  },
+  "reader_backup_scope": {
+    "message": "Kopia zawiera artykuły z zakreśleniami i pozycją czytania, zapisane frazy wszystkich par językowych oraz ustawienia. Zakreślenia z książek też w niej są."
+  },
+  "reader_backup_books": {
+    "message": "Samych książek (.epub) w kopii nie ma - zachowaj pliki .epub. Gdy zaimportujesz tę samą książkę ponownie, a po niej kopię, jej zakreślenia wrócą; pozycja czytania nie."
   },
   "reader_export_marks": { "message": "Eksportuj zakreślenia" },
   "reader_marks_export_notes": { "message": "Eksportuj jako notatki (.md)" },
   "reader_marks_notes_hint": { "message": "Plik .md to tekstowa lista cytatów i notatek pogrupowana według dokumentów - do czytania i do własnych notatek. Nie da się go zaimportować." },
+  "reader_marks_import_books_one": {
+    "message": "Zakreślenia z $COUNT$ książki czekają: $TITLES$. Zaimportuj tę książkę z jej pliku .epub, a potem jeszcze raz ten plik.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "titles": { "content": "$2", "example": "A Novel" }
+    }
+  },
+  "reader_marks_import_books_few": {
+    "message": "Zakreślenia z $COUNT$ książek czekają: $TITLES$. Zaimportuj te książki z ich plików .epub, a potem jeszcze raz ten plik.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "2" },
+      "titles": { "content": "$2", "example": "A Novel, Another Novel" }
+    }
+  },
+  "reader_marks_import_books_many": {
+    "message": "Zakreślenia z $COUNT$ książek czekają: $TITLES$. Zaimportuj te książki z ich plików .epub, a potem jeszcze raz ten plik.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "2" },
+      "titles": { "content": "$2", "example": "A Novel, Another Novel" }
+    }
+  },
+  "reader_marks_import_books_other": {
+    "message": "Zakreślenia z $COUNT$ książki czekają: $TITLES$. Zaimportuj te książki z ich plików .epub, a potem jeszcze raz ten plik.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "2" },
+      "titles": { "content": "$2", "example": "A Novel, Another Novel" }
+    }
+  },
   "reader_marks_import_missing_one": {
     "message": "$COUNT$ dokumentu nie ma w czytelni: $TITLES$. Najpierw zaimportuj go - książkę z jej pliku .epub, artykuł z kopii zapasowej czytelni - a potem jeszcze raz ten plik.",
     "placeholders": {
@@ -736,7 +793,9 @@
     "message": "Dodano $COUNT$ zakreślenia.",
     "placeholders": { "count": { "content": "$1", "example": "1,5" } }
   },
-  "reader_transfer_marks": { "message": "Zakreślenia są w kopii - razem z artykułami, a także zakreślenia książek. Strona Zakreśleń eksportuje je jako notatki .md do czytania." },
+  "reader_transfer_marks": {
+    "message": "notatki z zakreśleniami artykułów i książek, do eksportu ze strony Zakreślenia."
+  },
   "reader_backup_done": {
     "message": "Kopia zapisana do $FILE$ ($SIZE$): $PARTS$.",
     "placeholders": {
@@ -935,6 +994,10 @@
   "reader_transfer_pick": { "message": "Żeby wyeksportować tylko niektóre artykuły, naciśnij „Zaznacz” nad listą i zaznacz je." },
   "reader_pick_start": { "message": "Zaznacz" },
   "reader_pick_close": { "message": "Zamknij zaznaczanie" },
+  "reader_pick_book_title": { "message": "Książek nie ma w kopii" },
+  "reader_pick_books_note": {
+    "message": "Książek nie da się zaznaczyć - nie ma ich w kopii, są w niej tylko ich zakreślenia."
+  },
   "reader_pick_all": { "message": "Zaznacz wszystkie" },
   "reader_pick_count_one": {
     "message": "Zaznaczono $COUNT$ artykuł",
@@ -1086,7 +1149,7 @@
     "placeholders": { "title": { "content": "$1", "example": "Old Chinese" } }
   },
   "reader_transfer_link": { "message": "Import i eksport (kopia lub EPUB)" },
-  "reader_transfer_accepts": { "message": "Import rozpoznaje podany plik: kopię re/read (.zip - albo starsze pliki .json listy i zakreśleń) albo e-booka (.epub)." },
+  "reader_transfer_accepts": { "message": "Import rozpoznaje podany plik: kopię re/read (.zip - albo starsze pliki .json listy i zakreśleń) albo książkę (.epub)." },
   "reader_book_label": { "message": "Książka" },
   "reader_book_part_of": {
     "message": "Część $PART$ z $PARTS$",

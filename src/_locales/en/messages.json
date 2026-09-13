@@ -488,14 +488,14 @@
     "description": "The same row while the page has the whole screen: the press that gives the browser's bars back (Back or Esc do the same). Also the bar's full-screen tool's name in that state (D195)."
   },
   "library_pictures_one": {
-    "message": "$COUNT$ picture, $SIZE$",
+    "message": "$COUNT$ picture · $SIZE$",
     "placeholders": {
       "count": { "content": "$1", "example": "1" },
       "size": { "content": "$2", "example": "0.3 MB" }
     }
   },
   "library_pictures_other": {
-    "message": "$COUNT$ pictures, $SIZE$",
+    "message": "$COUNT$ pictures · $SIZE$",
     "description": "In a reading list row: the article's pictures and what they take.",
     "placeholders": {
       "count": { "content": "$1", "example": "12" },
@@ -621,11 +621,23 @@
   },
   "reader_format_title": { "message": "File format" },
   "reader_transfer_note": {
-    "message": ".zip - the backup of everything re/read keeps: the offline reading list with its highlights and reading positions (and its pictures when you tick the box), every saved phrase of every language pair with its sentence and counts, and the settings. Import only adds what is missing here and never overwrites what is saved: an article already here keeps its copy, a saved phrase keeps its meanings and takes only a sentence it lacks or a higher count, a highlight already here is left out. The settings are restored only when you tick the box."
+    "message": "Import only adds what is missing and never overwrites what is saved: an article already here keeps its copy, a saved phrase keeps its meanings and takes only a sentence it lacks or a higher count, a highlight already here is left out.",
+    "description": "The .zip entry of the file-format glossary, after the bold extension the page itself writes: the import's merging rules. The settings sentence is its own key (reader_transfer_settings) - the entry is two paragraphs, and a marked element holds text only."
   },
-  "reader_export_pictures": {
-    "message": "Export with pictures ($COUNT$, $SIZE$)",
-    "description": "Checkbox under the Import/Export buttons: names Export outright, so nobody reads it as an import option (Michał, 2026-08-29). Checked, the backup becomes a .zip with the pictures kept with articles.",
+  "reader_transfer_settings": {
+    "message": "The settings are restored only when you tick \"Restore the settings too\".",
+    "description": "Second paragraph of the .zip entry: the settings box, named by its own label (reader_backup_settings_restore)."
+  },
+  "reader_export_pictures_one": {
+    "message": "Export with pictures ($COUNT$ picture · $SIZE$)",
+    "description": "Checkbox under the Import/Export buttons: names Export outright, so nobody reads it as an import option (Michał, 2026-08-29). Checked, the backup becomes a .zip with the pictures kept with articles. The count with its unit and a middle dot before the size (Michał, 2026-09-13): a comma between two numbers read as one number.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "size": { "content": "$2", "example": "12.4 MB" }
+    }
+  },
+  "reader_export_pictures_other": {
+    "message": "Export with pictures ($COUNT$ pictures · $SIZE$)",
     "placeholders": {
       "count": { "content": "$1", "example": "34" },
       "size": { "content": "$2", "example": "12.4 MB" }
@@ -662,11 +674,16 @@
     }
   },
   "reader_transfer_epub": {
-    "message": ".epub - the e-book format.",
-    "description": "The second line of the file-format fold on the reading list, between the .json and the export notes."
+    "message": "the electronic book format. A book is stored as text and pictures, split into parts at import.",
+    "description": "The .epub entry of the glossary, after the bold extension: lowercase, it continues the line."
   },
-  "reader_transfer_books": {
-    "message": "Export covers articles - books (.epub) are not in the backup. A book imported again has no reading position; its highlights come back from the backup once the same book is imported from its .epub file."
+  "reader_backup_scope": {
+    "message": "The backup holds your articles with their highlights and reading positions, the saved phrases of every language pair, and the settings. Highlights made in books are in it too.",
+    "description": "First paragraph under the reading list's Import/Export buttons and the pictures box: what Export writes, said in the open - until 2026-09-13 only the file-format fold said it, and a reader who had just imported books could take Export for a backup of the whole list (Michał)."
+  },
+  "reader_backup_books": {
+    "message": "The books themselves (.epub) are not in the backup - keep your .epub files. When you import the same book again and the backup after it, its highlights come back; its reading position does not.",
+    "description": "Second paragraph: the one thing the backup leaves out, and what to do about it. The order matters: the import keeps no highlights of a book the reading list does not hold - they stay in the file (marksImportPlan) - so the backup goes in after the book."
   },
   "reader_export_marks": { "message": "Export highlights" },
   "reader_marks_export_notes": {
@@ -676,6 +693,21 @@
   "reader_marks_notes_hint": {
     "message": "The .md file is a plain-text list of the quotes and notes, grouped by document - for reading and for your own notes. It cannot be imported.",
     "description": "Hint under the notes export."
+  },
+  "reader_marks_import_books_one": {
+    "message": "Highlights of $COUNT$ book are waiting: $TITLES$. Import that book from its .epub file, then import this file again.",
+    "description": "In the import report, only when the file holds highlights of books the reading list does not hold: those highlights are not written anywhere - the file keeps them - so the book comes first and the file again after it. TITLES is a comma-separated sample of their titles.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "titles": { "content": "$2", "example": "A Novel" }
+    }
+  },
+  "reader_marks_import_books_other": {
+    "message": "Highlights of $COUNT$ books are waiting: $TITLES$. Import those books from their .epub files, then import this file again.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "2" },
+      "titles": { "content": "$2", "example": "A Novel, Another Novel" }
+    }
   },
   "reader_marks_import_missing_one": {
     "message": "$COUNT$ document is not in the reading list: $TITLES$. Import it first - a book from its .epub file, an article from the reading list's backup - then import this file again.",
@@ -719,7 +751,10 @@
     "message": "Added $COUNT$ highlights.",
     "placeholders": { "count": { "content": "$1", "example": "12" } }
   },
-  "reader_transfer_marks": { "message": "Highlights are in the backup, with their articles and for books too. The Highlights page exports them as .md notes for reading." },
+  "reader_transfer_marks": {
+    "message": "notes with the highlights of articles and books, exported from the Highlights page.",
+    "description": "The .md entry of the glossary, after the bold extension: the notes file of the Highlights page."
+  },
   "reader_backup_done": {
     "message": "Backup written to $FILE$ ($SIZE$): $PARTS$.",
     "description": "The reading list's report after writing the backup of everything (D213): the file, its size, and the parts as a list - each count in its own plural family, the settings as a word (reader_backup_settings_word).",
@@ -866,6 +901,14 @@
     "message": "Close the selection",
     "description": "Name and tooltip of the cross at the end of the selection's bar: closes the selection and drops the ticks."
   },
+  "reader_pick_book_title": {
+    "message": "Books are not in the backup",
+    "description": "Tooltip of a book's row inside the selection (D152): why the row has no box. The same words will name the unticked \"Export with books\" box if books ever enter the backup."
+  },
+  "reader_pick_books_note": {
+    "message": "Books can't be selected - they are not in the backup, only their highlights are.",
+    "description": "One quiet line under the selection's bar, only while the rows the tab and the filter show include a book: a title alone says nothing on a touch screen or e-ink, where there is no hover."
+  },
   "reader_pick_all": {
     "message": "Select all",
     "description": "Checkbox over the rows inside the selection: ticks every article the current tab and filter show, on every page; half-ticked while only some of them are."
@@ -985,7 +1028,7 @@
     "description": "The quiet anchor over the reading list that jumps to the transfer section - it names both kinds of file the section takes, because a book is not obvious from the section's own name."
   },
   "reader_transfer_accepts": {
-    "message": "Import reads the file it is given: a re/read backup (.zip - or the older .json files of the list and of the highlights), or an e-book (.epub).",
+    "message": "Import reads the file it is given: a re/read backup (.zip - or the older .json files of the list and of the highlights), or a book (.epub).",
     "description": "The line under the reading list's Import and Export buttons - why there is no separate button for books."
   },
   "reader_book_label": {

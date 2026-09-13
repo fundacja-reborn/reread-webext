@@ -268,3 +268,28 @@ describe("searchButtonState", () => {
     });
   });
 });
+
+describe("the books among the rows a selection covers", () => {
+  it("counts the books the filter leaves in the segment, every page of them", () => {
+    const metas = [
+      meta(1),
+      meta(2, { kind: "book", url: "book-2", title: "A Novel", hostname: "Somebody" }),
+      meta(3, { kind: "book", url: "book-3", title: "Another Novel", hostname: "Somebody", readAt: 9 }),
+      meta(4, { kind: "article" }),
+    ];
+    const unread = libraryView(metas, { segment: Segment.UNREAD, query: "", page: 1 });
+    assert.equal(unread.books, 1);
+    // The read book stands on the other tab - the line under the bar is
+    // about the rows on this one.
+    const read = libraryView(metas, { segment: Segment.READ, query: "", page: 1 });
+    assert.equal(read.books, 1);
+    // The filter narrows the count as it narrows the rows.
+    const filtered = libraryView(metas, { segment: Segment.UNREAD, query: "article", page: 1 });
+    assert.equal(filtered.books, 0);
+    assert.deepEqual(filtered.selectable, [metas[3]?.url, metas[0]?.url]);
+  });
+
+  it("counts none over a list of articles", () => {
+    assert.equal(libraryView([meta(1), meta(2)], { segment: Segment.UNREAD, query: "", page: 1 }).books, 0);
+  });
+});

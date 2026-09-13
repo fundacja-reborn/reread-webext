@@ -365,14 +365,14 @@
   "reader_fullscreen_bar": { "message": "Pantalla completa con la barra plegada" },
   "reader_fullscreen_exit": { "message": "Salir de pantalla completa" },
   "library_pictures_one": {
-    "message": "$COUNT$ imagen, $SIZE$",
+    "message": "$COUNT$ imagen · $SIZE$",
     "placeholders": {
       "count": { "content": "$1", "example": "1" },
       "size": { "content": "$2", "example": "0,3 MB" }
     }
   },
   "library_pictures_other": {
-    "message": "$COUNT$ imágenes, $SIZE$",
+    "message": "$COUNT$ imágenes · $SIZE$",
     "placeholders": {
       "count": { "content": "$1", "example": "12" },
       "size": { "content": "$2", "example": "4,2 MB" }
@@ -483,10 +483,20 @@
   },
   "reader_format_title": { "message": "Formato del archivo" },
   "reader_transfer_note": {
-    "message": ".zip - la copia de seguridad de todo lo que guarda re/read: la lista de lectura sin conexión con sus resaltados y posiciones de lectura (y sus imágenes si marcas la casilla), cada frase guardada de cada par de idiomas con su oración y sus contadores, y los ajustes. La importación solo añade lo que falta aquí y nunca sobrescribe lo guardado: un artículo que ya está aquí conserva su copia, una frase guardada conserva sus significados y toma solo una oración que le falte o un contador más alto, un resaltado que ya está aquí se omite. Los ajustes se restauran solo si marcas la casilla."
+    "message": "La importación solo añade lo que falta y nunca sobrescribe lo guardado: un artículo ya presente conserva su copia, una frase guardada conserva sus significados y toma solo una oración que le falte o un contador más alto, un resaltado ya presente se omite."
   },
-  "reader_export_pictures": {
-    "message": "Exportar con imágenes ($COUNT$, $SIZE$)",
+  "reader_transfer_settings": {
+    "message": "Los ajustes se restauran solo si marcas «Restaurar también los ajustes»."
+  },
+  "reader_export_pictures_one": {
+    "message": "Exportar con imágenes ($COUNT$ imagen · $SIZE$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "size": { "content": "$2", "example": "12,4 MB" }
+    }
+  },
+  "reader_export_pictures_other": {
+    "message": "Exportar con imágenes ($COUNT$ imágenes · $SIZE$)",
     "placeholders": {
       "count": { "content": "$1", "example": "34" },
       "size": { "content": "$2", "example": "12,4 MB" }
@@ -520,13 +530,32 @@
       "size": { "content": "$2", "example": "12,4 MB" }
     }
   },
-  "reader_transfer_epub": { "message": ".epub - el formato de los libros electrónicos." },
-  "reader_transfer_books": {
-    "message": "La exportación abarca los artículos - los libros (.epub) no están en la copia. Un libro importado de nuevo no tiene posición de lectura; sus resaltados vuelven de la copia cuando el mismo libro se importa desde su archivo .epub."
+  "reader_transfer_epub": {
+    "message": "el formato de los libros electrónicos. Un libro se guarda como texto e imágenes, dividido en partes al importar."
+  },
+  "reader_backup_scope": {
+    "message": "La copia de seguridad contiene tus artículos con sus resaltados y posiciones de lectura, las frases guardadas de cada par de idiomas y los ajustes. Los resaltados hechos en libros también están en ella."
+  },
+  "reader_backup_books": {
+    "message": "Los libros en sí (.epub) no están en la copia - conserva tus archivos .epub. Cuando importes el mismo libro de nuevo y después la copia, sus resaltados vuelven; su posición de lectura, no."
   },
   "reader_export_marks": { "message": "Exportar los resaltados" },
   "reader_marks_export_notes": { "message": "Exportar como notas (.md)" },
   "reader_marks_notes_hint": { "message": "El archivo .md es una lista en texto plano de las citas y las notas, agrupadas por documento - para leer y para tus propias notas. No se puede importar." },
+  "reader_marks_import_books_one": {
+    "message": "Los resaltados de $COUNT$ libro esperan: $TITLES$. Importa ese libro desde su archivo .epub y luego importa este archivo otra vez.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "titles": { "content": "$2", "example": "A Novel" }
+    }
+  },
+  "reader_marks_import_books_other": {
+    "message": "Los resaltados de $COUNT$ libros esperan: $TITLES$. Importa esos libros desde sus archivos .epub y luego importa este archivo otra vez.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "2" },
+      "titles": { "content": "$2", "example": "A Novel, Another Novel" }
+    }
+  },
   "reader_marks_import_missing_one": {
     "message": "$COUNT$ documento no está en la lista de lectura: $TITLES$. Impórtalo primero - un libro desde su archivo .epub, un artículo desde la copia de la lista de lectura - y luego importa este archivo otra vez.",
     "placeholders": {
@@ -565,7 +594,9 @@
     "message": "Se añadieron $COUNT$ resaltados.",
     "placeholders": { "count": { "content": "$1", "example": "12" } }
   },
-  "reader_transfer_marks": { "message": "Los resaltados están en la copia, con sus artículos y también los de los libros. La página Resaltados los exporta como notas .md para leer." },
+  "reader_transfer_marks": {
+    "message": "notas con los resaltados de artículos y libros, para exportar desde la página Resaltados."
+  },
   "reader_backup_done": {
     "message": "Copia de seguridad escrita en $FILE$ ($SIZE$): $PARTS$.",
     "placeholders": {
@@ -688,6 +719,10 @@
   "reader_transfer_pick": { "message": "Para exportar solo algunos artículos, pulsa «Seleccionar» encima de la lista y márcalos." },
   "reader_pick_start": { "message": "Seleccionar" },
   "reader_pick_close": { "message": "Cerrar la selección" },
+  "reader_pick_book_title": { "message": "Los libros no están en la copia" },
+  "reader_pick_books_note": {
+    "message": "Los libros no se pueden seleccionar - no están en la copia, solo sus resaltados lo están."
+  },
   "reader_pick_all": { "message": "Seleccionar todo" },
   "reader_pick_count_one": {
     "message": "$COUNT$ artículo seleccionado",

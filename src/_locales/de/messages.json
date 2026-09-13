@@ -334,14 +334,14 @@
   "reader_fullscreen_bar": { "message": "Vollbild mit eingeklappter Leiste" },
   "reader_fullscreen_exit": { "message": "Vollbild beenden" },
   "library_pictures_one": {
-    "message": "$COUNT$ Bild, $SIZE$",
+    "message": "$COUNT$ Bild · $SIZE$",
     "placeholders": {
       "count": { "content": "$1", "example": "1" },
       "size": { "content": "$2", "example": "0,3 MB" }
     }
   },
   "library_pictures_other": {
-    "message": "$COUNT$ Bilder, $SIZE$",
+    "message": "$COUNT$ Bilder · $SIZE$",
     "placeholders": {
       "count": { "content": "$1", "example": "12" },
       "size": { "content": "$2", "example": "4,2 MB" }
@@ -452,10 +452,20 @@
   },
   "reader_format_title": { "message": "Dateiformat" },
   "reader_transfer_note": {
-    "message": ".zip - die Sicherung von allem, was re/read aufbewahrt: die Offline-Leseliste mit ihren Markierungen und Lesepositionen (und ihren Bildern, wenn Sie das Kästchen ankreuzen), jeder gespeicherte Eintrag jedes Sprachpaars mit Satz und Zählern, und die Einstellungen. Der Import ergänzt nur, was hier fehlt, und überschreibt nichts Gespeichertes: ein Artikel, der schon hier ist, behält seine Kopie, ein gespeicherter Eintrag behält seine Bedeutungen und übernimmt nur einen fehlenden Satz oder einen höheren Zähler, eine schon vorhandene Markierung wird ausgelassen. Die Einstellungen werden nur wiederhergestellt, wenn Sie das Kästchen ankreuzen."
+    "message": "Der Import ergänzt nur, was fehlt, und überschreibt nie Gespeichertes: ein schon vorhandener Artikel behält seine Kopie, ein gespeicherter Eintrag behält seine Bedeutungen und übernimmt nur einen fehlenden Satz oder einen höheren Zähler, eine schon vorhandene Markierung wird ausgelassen."
   },
-  "reader_export_pictures": {
-    "message": "Export mit Bildern ($COUNT$, $SIZE$)",
+  "reader_transfer_settings": {
+    "message": "Die Einstellungen werden nur wiederhergestellt, wenn Sie „Auch die Einstellungen wiederherstellen“ ankreuzen."
+  },
+  "reader_export_pictures_one": {
+    "message": "Export mit Bildern ($COUNT$ Bild · $SIZE$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "size": { "content": "$2", "example": "12,4 MB" }
+    }
+  },
+  "reader_export_pictures_other": {
+    "message": "Export mit Bildern ($COUNT$ Bilder · $SIZE$)",
     "placeholders": {
       "count": { "content": "$1", "example": "34" },
       "size": { "content": "$2", "example": "12,4 MB" }
@@ -489,13 +499,32 @@
       "size": { "content": "$2", "example": "12,4 MB" }
     }
   },
-  "reader_transfer_epub": { "message": ".epub - das E-Book-Format." },
-  "reader_transfer_books": {
-    "message": "Der Export umfasst Artikel - Bücher (.epub) sind nicht in der Sicherung. Ein erneut importiertes Buch hat keine Leseposition; seine Markierungen kommen aus der Sicherung zurück, sobald dasselbe Buch aus seiner .epub-Datei importiert ist."
+  "reader_transfer_epub": {
+    "message": "das Format elektronischer Bücher. Ein Buch wird als Text und Bilder gespeichert, beim Import in Teile geteilt."
+  },
+  "reader_backup_scope": {
+    "message": "Die Sicherung enthält Ihre Artikel mit ihren Markierungen und Lesepositionen, die gespeicherten Einträge jedes Sprachpaars und die Einstellungen. Markierungen in Büchern sind ebenfalls enthalten."
+  },
+  "reader_backup_books": {
+    "message": "Die Bücher selbst (.epub) sind nicht in der Sicherung - bewahren Sie Ihre .epub-Dateien auf. Wenn Sie dasselbe Buch erneut importieren und danach die Sicherung, kommen seine Markierungen zurück; seine Leseposition nicht."
   },
   "reader_export_marks": { "message": "Markierungen exportieren" },
   "reader_marks_export_notes": { "message": "Als Notizen exportieren (.md)" },
   "reader_marks_notes_hint": { "message": "Die .md-Datei ist eine Textliste der Zitate und Notizen, nach Dokumenten gruppiert - zum Lesen und für eigene Notizen. Sie kann nicht importiert werden." },
+  "reader_marks_import_books_one": {
+    "message": "Markierungen aus $COUNT$ Buch warten: $TITLES$. Importieren Sie dieses Buch aus seiner .epub-Datei und danach diese Datei erneut.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "titles": { "content": "$2", "example": "A Novel" }
+    }
+  },
+  "reader_marks_import_books_other": {
+    "message": "Markierungen aus $COUNT$ Büchern warten: $TITLES$. Importieren Sie diese Bücher aus ihren .epub-Dateien und danach diese Datei erneut.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "2" },
+      "titles": { "content": "$2", "example": "A Novel, Another Novel" }
+    }
+  },
   "reader_marks_import_missing_one": {
     "message": "$COUNT$ Dokument ist nicht in der Leseliste: $TITLES$. Importieren Sie es zuerst - ein Buch aus seiner .epub-Datei, einen Artikel aus der Sicherung der Leseliste - und danach diese Datei erneut.",
     "placeholders": {
@@ -534,7 +563,9 @@
     "message": "$COUNT$ Markierungen hinzugefügt.",
     "placeholders": { "count": { "content": "$1", "example": "12" } }
   },
-  "reader_transfer_marks": { "message": "Markierungen sind in der Sicherung - mit ihren Artikeln und auch die von Büchern. Die Markierungsseite exportiert sie als .md-Notizen zum Lesen." },
+  "reader_transfer_marks": {
+    "message": "Notizen mit den Markierungen aus Artikeln und Büchern, zum Export von der Markierungsseite."
+  },
   "reader_backup_done": {
     "message": "Sicherung geschrieben nach $FILE$ ($SIZE$): $PARTS$.",
     "placeholders": {
@@ -657,6 +688,10 @@
   "reader_transfer_pick": { "message": "Um nur einige Artikel zu exportieren, drücken Sie über der Liste auf „Auswählen“ und haken Sie sie ab." },
   "reader_pick_start": { "message": "Auswählen" },
   "reader_pick_close": { "message": "Auswahl schließen" },
+  "reader_pick_book_title": { "message": "Bücher sind nicht in der Sicherung" },
+  "reader_pick_books_note": {
+    "message": "Bücher lassen sich nicht auswählen - sie sind nicht in der Sicherung, nur ihre Markierungen sind es."
+  },
   "reader_pick_all": { "message": "Alle auswählen" },
   "reader_pick_count_one": {
     "message": "$COUNT$ Artikel ausgewählt",
@@ -748,7 +783,7 @@
     "placeholders": { "title": { "content": "$1", "example": "Old Chinese" } }
   },
   "reader_transfer_link": { "message": "Import und Export (Sicherung oder EPUB)" },
-  "reader_transfer_accepts": { "message": "Der Import erkennt die übergebene Datei: eine re/read-Sicherung (.zip - oder die älteren .json-Dateien der Liste und der Markierungen) oder ein E-Book (.epub)." },
+  "reader_transfer_accepts": { "message": "Der Import erkennt die übergebene Datei: eine re/read-Sicherung (.zip - oder die älteren .json-Dateien der Liste und der Markierungen) oder ein Buch (.epub)." },
   "reader_book_label": { "message": "Buch" },
   "reader_book_part_of": {
     "message": "Teil $PART$ von $PARTS$",
