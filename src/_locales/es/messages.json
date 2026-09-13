@@ -483,7 +483,7 @@
   },
   "reader_format_title": { "message": "Formato del archivo" },
   "reader_transfer_note": {
-    "message": ".zip - la copia de seguridad de todo lo que guarda re/read: la lista de lectura sin conexión con sus resaltados y posiciones de lectura (y sus imágenes si marcas la casilla), cada frase guardada de cada par de idiomas con su oración y sus contadores, y los ajustes. La importación solo añade lo que falta aquí y nunca sobrescribe lo guardado: un artículo que ya está aquí conserva su copia, una frase guardada conserva sus significados y toma solo una oración que le falte o un contador más alto, un resaltado que ya está aquí se omite. Los ajustes se restauran solo si marcas la casilla."
+    "message": ".zip - La importación solo añade lo que falta y nunca sobrescribe lo guardado: un artículo ya presente conserva su copia, una frase guardada conserva sus significados y toma solo una oración que le falte o un contador más alto, un resaltado ya presente se omite. Los ajustes se restauran solo si marcas «Restaurar también los ajustes»."
   },
   "reader_export_pictures": {
     "message": "Exportar con imágenes ($COUNT$, $SIZE$)",
@@ -520,9 +520,14 @@
       "size": { "content": "$2", "example": "12,4 MB" }
     }
   },
-  "reader_transfer_epub": { "message": ".epub - el formato de los libros electrónicos." },
-  "reader_transfer_books": {
-    "message": "La exportación abarca los artículos - los libros (.epub) no están en la copia. Un libro importado de nuevo no tiene posición de lectura; sus resaltados vuelven de la copia cuando el mismo libro se importa desde su archivo .epub."
+  "reader_transfer_epub": {
+    "message": ".epub - el formato de los libros electrónicos. Un libro se guarda como su texto con las imágenes del archivo, dividido en partes al importar."
+  },
+  "reader_backup_scope": {
+    "message": "La copia de seguridad contiene tus artículos con sus resaltados y posiciones de lectura, las frases guardadas de cada par de idiomas y los ajustes. Los resaltados hechos en libros también están en ella."
+  },
+  "reader_backup_books": {
+    "message": "Los libros en sí (.epub) no están en la copia - conserva tus archivos .epub. Cuando importes el mismo libro de nuevo y después la copia, sus resaltados vuelven; su posición de lectura, no."
   },
   "reader_export_marks": { "message": "Exportar los resaltados" },
   "reader_marks_export_notes": { "message": "Exportar como notas (.md)" },
@@ -565,7 +570,9 @@
     "message": "Se añadieron $COUNT$ resaltados.",
     "placeholders": { "count": { "content": "$1", "example": "12" } }
   },
-  "reader_transfer_marks": { "message": "Los resaltados están en la copia, con sus artículos y también los de los libros. La página Resaltados los exporta como notas .md para leer." },
+  "reader_transfer_marks": {
+    "message": "Los resaltados de artículos y libros también se pueden exportar como notas .md desde la página Resaltados."
+  },
   "reader_backup_done": {
     "message": "Copia de seguridad escrita en $FILE$ ($SIZE$): $PARTS$.",
     "placeholders": {

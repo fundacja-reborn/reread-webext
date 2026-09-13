@@ -602,7 +602,7 @@
   },
   "reader_format_title": { "message": "Format pliku" },
   "reader_transfer_note": {
-    "message": ".zip - kopia wszystkiego, co przechowuje re/read: czytelnia offline z zakreśleniami i pozycjami czytania (z obrazkami, gdy zaznaczysz pole), wszystkie zapisane frazy każdej pary językowej ze zdaniami i licznikami oraz ustawienia. Import dodaje tylko to, czego tu brakuje, i nie nadpisuje niczego zapisanego: artykuł, który już tu jest, zachowuje swoją kopię, zapisana fraza zachowuje znaczenia i bierze tylko brakujące zdanie albo wyższy licznik, zakreślenie, które już tu jest, jest pomijane. Ustawienia są przywracane tylko wtedy, gdy zaznaczysz pole."
+    "message": ".zip - Import tylko dodaje to, czego brakuje, i nigdy nie nadpisuje zapisanych danych: artykuł już obecny zachowuje swoją kopię, zapisana fraza zachowuje znaczenia i przyjmuje tylko brakujące zdanie lub wyższy licznik, obecne zakreślenie jest pomijane. Ustawienia są przywracane tylko po zaznaczeniu pola „Przywróć też ustawienia”."
   },
   "reader_export_pictures": {
     "message": "Eksport z obrazkami ($COUNT$, $SIZE$)",
@@ -653,9 +653,14 @@
       "size": { "content": "$2", "example": "12,4 MB" }
     }
   },
-  "reader_transfer_epub": { "message": ".epub - format e-booków." },
-  "reader_transfer_books": {
-    "message": "Eksport obejmuje artykuły - książek (.epub) nie ma w kopii. Ponownie zaimportowana książka nie ma pozycji czytania; jej zakreślenia wracają z kopii, gdy ta sama książka zostanie zaimportowana z pliku .epub."
+  "reader_transfer_epub": {
+    "message": ".epub - format e-booka. Książka jest zapisywana jako tekst z obrazkami z pliku, podzielony na części przy imporcie."
+  },
+  "reader_backup_scope": {
+    "message": "Kopia zawiera artykuły z zakreśleniami i pozycją czytania, zapisane frazy wszystkich par językowych oraz ustawienia. Zakreślenia z książek też w niej są."
+  },
+  "reader_backup_books": {
+    "message": "Samych książek (.epub) w kopii nie ma - zachowaj pliki .epub. Gdy zaimportujesz tę samą książkę ponownie, a po niej kopię, jej zakreślenia wrócą; pozycja czytania nie."
   },
   "reader_export_marks": { "message": "Eksportuj zakreślenia" },
   "reader_marks_export_notes": { "message": "Eksportuj jako notatki (.md)" },
@@ -736,7 +741,9 @@
     "message": "Dodano $COUNT$ zakreślenia.",
     "placeholders": { "count": { "content": "$1", "example": "1,5" } }
   },
-  "reader_transfer_marks": { "message": "Zakreślenia są w kopii - razem z artykułami, a także zakreślenia książek. Strona Zakreśleń eksportuje je jako notatki .md do czytania." },
+  "reader_transfer_marks": {
+    "message": "Zakreślenia z artykułów i książek można też wyeksportować jako notatki .md ze strony Zakreślenia."
+  },
   "reader_backup_done": {
     "message": "Kopia zapisana do $FILE$ ($SIZE$): $PARTS$.",
     "placeholders": {

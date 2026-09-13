@@ -97,7 +97,7 @@ The read-aloud keys work only while the voice is reading; with the voice off, Sp
 - **Matching is literal by default.** Saving `read` does not underline `reading` unless you turn on **Underline other forms of saved words** in the settings - and then only the forms your dictionary for the language confirms, for English only so far. No guessing by rule alone, and no forms for a word your dictionaries do not know.
 - **Nothing inside embedded frames.** The extension works in the page you opened, not in embedded ads, players or widgets.
 - **No remote code.** Everything that runs ships in the package (Manifest V3 enforces this anyway).
-- **Books are imported as text only.** EPUB import takes the text: no images, no publisher styling, and no DRM - a protected book is not imported, and a message says why. The table of contents comes from the chapter headings in the text; the book's own TOC page and internal links are not followed. Footnotes are the one exception: a footnote's text is stored with the book at import and opens in a small card next to its number - the page does not scroll anywhere.
+- **Books are imported as text and pictures only.** EPUB import takes the text and the pictures in the file: no publisher styling, no fonts, and no DRM - a protected book is not imported, and a message says why. The table of contents comes from the chapter headings in the text; the book's own TOC page and internal links are not followed. Footnotes are the one exception: a footnote's text is stored with the book at import and opens in a small card next to its number - the page does not scroll anywhere.
 
 ## Privacy
 

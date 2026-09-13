@@ -793,9 +793,21 @@
                written part while the article import's reports stand still,
                and the two must not overwrite each other mid-sentence. -->
           <p id="book-import-status" class="status report" role="status"></p>
+          <!-- What Export writes, and the one thing it leaves out, said in the
+               open under the buttons: until 2026-09-13 only the folded format
+               details said that books are not in the backup, and a reader who
+               had just imported books could take Export for a backup of the
+               whole list (Michał). Plain hints, not a framed note - this is a
+               description, not a warning. -->
+          <p class="hint" data-i18n="reader_backup_scope">
+            The backup holds your articles with their highlights and reading positions, the saved phrases of every language pair, and the settings. Highlights made in books are in it too.
+          </p>
+          <p class="hint" data-i18n="reader_backup_books">
+            The books themselves (.epub) are not in the backup - keep your .epub files. When you import the same book again and the backup after it, its highlights come back; its reading position does not.
+          </p>
           <p class="hint" data-i18n="reader_transfer_accepts">
-              Import reads the file it is given: a re/read backup (.zip - or the older .json files of the list and of the highlights), or an e-book (.epub).
-            </p>
+            Import reads the file it is given: a re/read backup (.zip - or the older .json files of the list and of the highlights), or an e-book (.epub).
+          </p>
           <!-- The way to a partial export (D152), said where a reader about
                to press Export expects the choice - the button that offers
                it stands fifty rows up. -->
@@ -804,15 +816,17 @@
           </p>
           <details class="fold-line">
             <summary data-i18n="reader_format_title">File format</summary>
+            <!-- Only what the paragraphs above do not say: the import's
+                 merging rules, the settings box by its own label, what a
+                 book becomes, and the notes file. -->
             <p class="hint" data-i18n="reader_transfer_note">
-              .zip - the backup of everything re/read keeps: the offline reading list with its highlights and reading positions (and its pictures when you tick the box), every saved phrase of every language pair with its sentence and counts, and the settings. Import only adds what is missing here and never overwrites what is saved: an article already here keeps its copy, a saved phrase keeps its meanings and takes only a sentence it lacks or a higher count, a highlight already here is left out. The settings are restored only when you tick the box.
+              .zip - Import only adds what is missing and never overwrites what is saved: an article already here keeps its copy, a saved phrase keeps its meanings and takes only a sentence it lacks or a higher count, a highlight already here is left out. The settings are restored only when you tick "Restore the settings too".
             </p>
-            <p class="hint" data-i18n="reader_transfer_epub">.epub - the e-book format.</p>
-            <p class="hint" data-i18n="reader_transfer_books">
-              Export covers articles - books (.epub) are not in the backup. A book imported again has no reading position; its highlights come back from the backup once the same book is imported from its .epub file.
+            <p class="hint" data-i18n="reader_transfer_epub">
+              .epub - the e-book format. A book is stored as its text with the pictures the file holds, split into parts at import.
             </p>
             <p class="hint" data-i18n="reader_transfer_marks">
-              Highlights are in the backup, with their articles and for books too. The Highlights page exports them as .md notes for reading.
+              Highlights of articles and books can also be exported as .md notes from the Highlights page.
             </p>
           </details>
           <input

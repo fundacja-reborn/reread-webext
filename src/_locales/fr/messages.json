@@ -483,7 +483,7 @@
   },
   "reader_format_title": { "message": "Format du fichier" },
   "reader_transfer_note": {
-    "message": ".zip - la sauvegarde de tout ce que re/read conserve : la liste de lecture hors ligne avec ses surlignages et ses positions de lecture (et ses images si vous cochez la case), chaque phrase enregistrée de chaque paire de langues avec sa phrase d'exemple et ses compteurs, et les paramètres. L'import n'ajoute que ce qui manque ici et n'écrase rien d'enregistré : un article déjà présent garde sa copie, une phrase enregistrée garde ses sens et ne prend qu'une phrase d'exemple qui lui manque ou un compteur plus élevé, un surlignage déjà présent est laissé de côté. Les paramètres ne sont restaurés que si vous cochez la case."
+    "message": ".zip - L'import n'ajoute que ce qui manque et n'écrase jamais ce qui est enregistré : un article déjà présent garde sa copie, une phrase enregistrée garde ses sens et ne prend qu'une phrase d'exemple qui lui manque ou un compteur plus élevé, un surlignage déjà présent est laissé de côté. Les paramètres ne sont restaurés que si vous cochez « Restaurer aussi les paramètres »."
   },
   "reader_export_pictures": {
     "message": "Exporter avec les images ($COUNT$, $SIZE$)",
@@ -520,9 +520,14 @@
       "size": { "content": "$2", "example": "12,4 MB" }
     }
   },
-  "reader_transfer_epub": { "message": ".epub - le format des livres numériques." },
-  "reader_transfer_books": {
-    "message": "L'export couvre les articles - les livres (.epub) ne sont pas dans la sauvegarde. Un livre importé à nouveau n'a pas de position de lecture ; ses surlignages reviennent de la sauvegarde une fois le même livre importé depuis son fichier .epub."
+  "reader_transfer_epub": {
+    "message": ".epub - le format des livres numériques. Un livre est enregistré comme son texte avec les images du fichier, découpé en parties à l'import."
+  },
+  "reader_backup_scope": {
+    "message": "La sauvegarde contient vos articles avec leurs surlignages et leurs positions de lecture, les phrases enregistrées de chaque paire de langues et les paramètres. Les surlignages faits dans les livres y sont aussi."
+  },
+  "reader_backup_books": {
+    "message": "Les livres eux-mêmes (.epub) ne sont pas dans la sauvegarde - gardez vos fichiers .epub. Quand vous importez le même livre à nouveau, puis la sauvegarde après lui, ses surlignages reviennent ; sa position de lecture, non."
   },
   "reader_export_marks": { "message": "Exporter les surlignages" },
   "reader_marks_export_notes": { "message": "Exporter comme notes (.md)" },
@@ -565,7 +570,9 @@
     "message": "$COUNT$ surlignages ajoutés.",
     "placeholders": { "count": { "content": "$1", "example": "12" } }
   },
-  "reader_transfer_marks": { "message": "Les surlignages sont dans la sauvegarde, avec leurs articles et pour les livres aussi. La page Surlignages les exporte en notes .md pour la lecture." },
+  "reader_transfer_marks": {
+    "message": "Les surlignages des articles et des livres peuvent aussi être exportés en notes .md depuis la page Surlignages."
+  },
   "reader_backup_done": {
     "message": "Sauvegarde écrite dans $FILE$ ($SIZE$) : $PARTS$.",
     "placeholders": {
