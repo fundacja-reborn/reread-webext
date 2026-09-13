@@ -112,6 +112,7 @@ const importInput = /** @type {HTMLInputElement | null} */ (document.getElementB
 const importConfirm = document.getElementById("import-confirm");
 const importSummary = document.getElementById("import-summary");
 const importSample = document.getElementById("import-sample");
+const importSentences = document.getElementById("import-sentences");
 const importPairSelect = /** @type {HTMLSelectElement | null} */ (document.getElementById("import-pair"));
 const importRun = /** @type {HTMLButtonElement | null} */ (document.getElementById("import-run"));
 const importCancel = /** @type {HTMLButtonElement | null} */ (document.getElementById("import-cancel"));
@@ -982,6 +983,15 @@ function renderImportOffer() {
     importSummary.textContent = plural(pending.rows.length, "vocab_import_summary", [pending.name]);
   }
 
+  // How many rows bring a sentence (D212), said before the yes: a sentence
+  // is the one thing an import may add to a phrase already saved, and the
+  // line says under what rule.
+  if (importSentences !== null) {
+    const withSentence = pending.rows.filter((row) => row.context !== undefined).length;
+    importSentences.hidden = withSentence === 0;
+    importSentences.textContent = withSentence === 0 ? "" : plural(withSentence, "vocab_import_with_sentence");
+  }
+
   if (importSample !== null) {
     importSample.replaceChildren();
     for (const row of pending.rows.slice(0, SAMPLE_ROWS)) {
@@ -1069,6 +1079,7 @@ async function runImport() {
     const unreadable = report.invalid + offered.invalid;
     const sentences = [plural(report.added, "vocab_import_added")];
     if (report.skipped > 0) sentences.push(plural(report.skipped, "vocab_import_skipped"));
+    if (report.sentenced > 0) sentences.push(plural(report.sentenced, "vocab_import_sentenced"));
     if (unreadable > 0) sentences.push(plural(unreadable, "vocab_import_unreadable"));
     transferStatus(sentences.join(" "));
 

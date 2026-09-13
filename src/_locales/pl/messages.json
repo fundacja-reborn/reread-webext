@@ -263,6 +263,54 @@
   },
   "vocab_legend_recalls": { "message": "sprawdzane – otwarcia dymka podczas czytania" },
   "vocab_legend_reads": { "message": "czytane – wystąpienia w przeczytanych tekstach" },
+  "vocab_import_with_sentence_one": {
+    "message": "$COUNT$ wiersz niesie zdanie - zapisana już fraza dostanie je tylko wtedy, gdy nie ma własnego.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "vocab_import_with_sentence_few": {
+    "message": "$COUNT$ wiersze niosą zdanie - zapisana już fraza dostanie je tylko wtedy, gdy nie ma własnego.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "vocab_import_with_sentence_many": {
+    "message": "$COUNT$ wierszy niesie zdanie - zapisana już fraza dostanie je tylko wtedy, gdy nie ma własnego.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "20" }
+    }
+  },
+  "vocab_import_with_sentence_other": {
+    "message": "$COUNT$ wiersza niesie zdanie - zapisana już fraza dostanie je tylko wtedy, gdy nie ma własnego.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1,5" }
+    }
+  },
+  "vocab_import_sentenced_one": {
+    "message": "Zdanie z pliku uzupełniło $COUNT$ zapisaną już frazę.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "vocab_import_sentenced_few": {
+    "message": "Zdanie z pliku uzupełniło $COUNT$ zapisane już frazy.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "vocab_import_sentenced_many": {
+    "message": "Zdanie z pliku uzupełniło $COUNT$ zapisanych już fraz.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "20" }
+    }
+  },
+  "vocab_import_sentenced_other": {
+    "message": "Zdanie z pliku uzupełniło $COUNT$ zapisanej już frazy.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1,5" }
+    }
+  },
   "pager_page_of": {
     "message": "Strona $PAGE$ z $PAGES$",
     "placeholders": {
@@ -277,7 +325,7 @@
   "action_import": { "message": "Importuj" },
   "transfer_heading": { "message": "Import i eksport" },
   "vocab_transfer_note": {
-    "message": "Plik .tsv z dwiema kolumnami - ten sam format zapisuje wtyczka KOReadera, a czyta Anki. Import dodaje tylko frazy, których w tej parze nie ma; zapisanych nie zmienia. W komórce znaczeń średnik ze spacją rozdziela znaczenia; średnik bez spacji zostaje wewnątrz znaczenia. „Eksportuj dla Anki” dopisuje trzecią kolumnę ze zdaniem, w którym fraza została zapisana - pustą, gdy zdania nie ma. Ten plik jest dla Anki; nie da się go tu zaimportować."
+    "message": "Plik .tsv z dwiema kolumnami - ten sam format zapisuje wtyczka KOReadera, a czyta Anki. Import dodaje tylko frazy, których w tej parze nie ma; zapisanych nie zmienia. W komórce znaczeń średnik ze spacją rozdziela znaczenia; średnik bez spacji zostaje wewnątrz znaczenia. „Eksportuj dla Anki” dopisuje trzecią kolumnę ze zdaniem, w którym fraza została zapisana - pustą, gdy zdania nie ma. Ten plik też można tu zaimportować: zdania wracają razem z frazami, a zapisana już fraza dostaje zdanie z pliku tylko wtedy, gdy nie ma własnego."
   },
   "vocab_import_into": { "message": "Importuj do" },
   "vocab_import_nothing": { "message": "W tym pliku nie ma fraz do zaimportowania." },

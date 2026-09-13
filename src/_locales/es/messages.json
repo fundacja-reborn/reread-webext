@@ -236,6 +236,30 @@
   },
   "vocab_legend_recalls": { "message": "consultada – aperturas de la burbuja al leer" },
   "vocab_legend_reads": { "message": "leída – apariciones en textos terminados" },
+  "vocab_import_with_sentence_one": {
+    "message": "$COUNT$ fila trae una oración - una frase ya guardada la toma solo cuando no tiene una propia.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "vocab_import_with_sentence_other": {
+    "message": "$COUNT$ filas traen una oración - una frase ya guardada la toma solo cuando no tiene una propia.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1,5" }
+    }
+  },
+  "vocab_import_sentenced_one": {
+    "message": "La oración del archivo se añadió a $COUNT$ frase ya guardada.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "vocab_import_sentenced_other": {
+    "message": "La oración del archivo se añadió a $COUNT$ frases ya guardadas.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1,5" }
+    }
+  },
   "pager_page_of": {
     "message": "Página $PAGE$ de $PAGES$",
     "placeholders": {
@@ -250,7 +274,7 @@
   "action_import": { "message": "Importar" },
   "transfer_heading": { "message": "Importar y exportar" },
   "vocab_transfer_note": {
-    "message": "Un archivo .tsv de dos columnas - el mismo formato que escribe el plugin de KOReader y que lee Anki. La importación solo añade frases que faltan en este par; lo guardado no se toca. En la celda de significados, un punto y coma seguido de espacio separa los significados; sin espacio, se queda dentro del significado. «Exportar para Anki» escribe una tercera columna con la oración en la que se guardó cada frase - vacía cuando no la hay. Ese archivo es para Anki; aquí no se puede importar."
+    "message": "Un archivo .tsv de dos columnas - el mismo formato que escribe el plugin de KOReader y que lee Anki. La importación solo añade frases que faltan en este par; lo guardado no se toca. En la celda de significados, un punto y coma seguido de espacio separa los significados; sin espacio, se queda dentro del significado. «Exportar para Anki» escribe una tercera columna con la oración en la que se guardó cada frase - vacía cuando no la hay. Ese archivo también se puede importar aquí: las oraciones vuelven con las frases, y una frase ya guardada toma la oración del archivo solo cuando no tiene una propia."
   },
   "vocab_import_into": { "message": "Importar a" },
   "vocab_import_nothing": { "message": "Ese archivo no contiene frases para importar." },

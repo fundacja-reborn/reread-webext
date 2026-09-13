@@ -72,9 +72,15 @@ describe("toAnkiTsv", () => {
     assert.equal(toAnkiTsv([phrase("a", ["b"], "one\ttwo\nthree")]), "a\tb\tone two three\n");
   });
 
-  it("is not read back by the importer - that file is Anki's", () => {
+  it("is read back by the importer, sentences along - the file for Anki doubles as the backup (D212)", () => {
     const written = toAnkiTsv([phrase("bank", ["brzeg"], "The bank was steep."), phrase("hello", ["cześć"])]);
-    assert.deepEqual(fromTsv(written), { rows: [], invalid: 2 });
+    assert.deepEqual(fromTsv(written), {
+      rows: [
+        { text: "bank", translations: ["brzeg"], context: "The bank was steep." },
+        { text: "hello", translations: ["cześć"] },
+      ],
+      invalid: 0,
+    });
   });
 });
 
@@ -129,8 +135,19 @@ describe("fromTsv", () => {
     });
   });
 
-  it("counts a line with a third column - that is some other format", () => {
-    assert.deepEqual(fromTsv("a\tb\tc\n"), { rows: [], invalid: 1 });
+  it("reads a third column as the sentence, cleaned the way the store cleans one (D212)", () => {
+    assert.deepEqual(fromTsv("a\tb\tThe   sentence.\n"), {
+      rows: [{ text: "a", translations: ["b"], context: "The sentence." }],
+      invalid: 0,
+    });
+    // An empty third cell is a row without a sentence, and so is a paragraph
+    // past the ceiling - left out rather than kept, the row itself staying.
+    assert.deepEqual(fromTsv("a\tb\t\n"), { rows: [{ text: "a", translations: ["b"] }], invalid: 0 });
+    assert.deepEqual(fromTsv(`a\tb\t${"x".repeat(601)}\n`), { rows: [{ text: "a", translations: ["b"] }], invalid: 0 });
+  });
+
+  it("counts a line with a fourth column - that is some other format", () => {
+    assert.deepEqual(fromTsv("a\tb\tc\td\n"), { rows: [], invalid: 1 });
   });
 
   it("counts a row that lost either cell", () => {

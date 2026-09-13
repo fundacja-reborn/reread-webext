@@ -244,17 +244,23 @@ export async function importPhrases(request) {
       langTo: pair.langTo,
       id: crypto.randomUUID(),
       now: now + at,
+      // The file's sentence (D212), whatever the setting says: the setting
+      // is about what the bubble writes on its own, and a file is the
+      // reader's own choice.
+      context: row.context,
     });
     if (built.ok) rows.push(built.value);
     else invalid += 1;
   }
 
-  const { added, skipped } = await putMissingPhrases(rows);
+  const { added, skipped, sentenced } = await putMissingPhrases(rows);
   // Nothing added means the mirror already tells the truth, and rewriting it
   // would ping every open tab for nothing - the same restraint as forgetting.
-  // A restore is a change too - the pages must learn what came back.
-  if (added > 0 || restored > 0) await afterWrite(config);
-  return ok({ added, skipped, invalid });
+  // A restore is a change too - the pages must learn what came back - and so
+  // is a sentence filled into a saved row: the mirror carries none, but the
+  // copy does, and `afterWrite` rebuilds both.
+  if (added > 0 || sentenced > 0 || restored > 0) await afterWrite(config);
+  return ok({ added, skipped, sentenced, invalid });
 }
 
 /**

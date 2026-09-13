@@ -186,7 +186,9 @@ and no address. It is shown under the phrase on the saved phrases page and writt
 third column of the file that **Export for Anki** makes; nothing else reads it, and it never
 leaves your device. A phrase keeps the first sentence it was saved from - saving the same
 phrase again changes its meanings and leaves the sentence alone. A phrase you save from the
-**Add a phrase** field or import from a file has no sentence. Marking a phrase **Learned**
+**Add a phrase** field has no sentence. A phrase imported from a file has the sentence the
+file's third column holds, if any, whatever the setting says - the file is your own; a phrase
+already saved takes the file's sentence only when it has none. Marking a phrase **Learned**
 deletes its sentence with it; switching the setting off keeps the sentences already saved
 and saves no new ones.
 

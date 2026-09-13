@@ -209,6 +209,30 @@
   },
   "vocab_legend_recalls": { "message": "nachgeschlagen – Öffnungen der Sprechblase beim Lesen" },
   "vocab_legend_reads": { "message": "gelesen – Vorkommen in zu Ende gelesenen Texten" },
+  "vocab_import_with_sentence_one": {
+    "message": "$COUNT$ Zeile bringt einen Satz mit - ein bereits gespeicherter Eintrag übernimmt ihn nur, wenn er keinen eigenen hat.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "vocab_import_with_sentence_other": {
+    "message": "$COUNT$ Zeilen bringen einen Satz mit - ein bereits gespeicherter Eintrag übernimmt ihn nur, wenn er keinen eigenen hat.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1,5" }
+    }
+  },
+  "vocab_import_sentenced_one": {
+    "message": "Der Satz aus der Datei wurde bei $COUNT$ bereits gespeicherten Eintrag ergänzt.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "vocab_import_sentenced_other": {
+    "message": "Der Satz aus der Datei wurde bei $COUNT$ bereits gespeicherten Einträgen ergänzt.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1,5" }
+    }
+  },
   "pager_page_of": {
     "message": "Seite $PAGE$ von $PAGES$",
     "placeholders": {
@@ -223,7 +247,7 @@
   "action_import": { "message": "Importieren" },
   "transfer_heading": { "message": "Import und Export" },
   "vocab_transfer_note": {
-    "message": "Eine .tsv-Datei mit zwei Spalten - dasselbe Format schreibt das KOReader-Plugin, und Anki liest es. Der Import ergänzt nur Phrasen, die diesem Paar fehlen; Gespeichertes bleibt unberührt. In der Bedeutungszelle trennt ein Semikolon mit Leerzeichen die Bedeutungen; ein Semikolon ohne Leerzeichen bleibt in seiner Bedeutung. „Für Anki exportieren“ schreibt eine dritte Spalte mit dem Satz, in dem die Phrase gespeichert wurde - leer, wenn es keinen gibt. Diese Datei ist für Anki; hier lässt sie sich nicht importieren."
+    "message": "Eine .tsv-Datei mit zwei Spalten - dasselbe Format schreibt das KOReader-Plugin, und Anki liest es. Der Import ergänzt nur Phrasen, die diesem Paar fehlen; Gespeichertes bleibt unberührt. In der Bedeutungszelle trennt ein Semikolon mit Leerzeichen die Bedeutungen; ein Semikolon ohne Leerzeichen bleibt in seiner Bedeutung. „Für Anki exportieren“ schreibt eine dritte Spalte mit dem Satz, in dem die Phrase gespeichert wurde - leer, wenn es keinen gibt. Auch diese Datei lässt sich hier importieren: die Sätze kommen mit, und ein bereits gespeicherter Eintrag übernimmt den Satz aus der Datei nur, wenn er keinen eigenen hat."
   },
   "vocab_import_into": { "message": "Importieren in" },
   "vocab_import_nothing": { "message": "In dieser Datei gibt es keine Phrasen zum Importieren." },

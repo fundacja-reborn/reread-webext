@@ -397,6 +397,11 @@
       <div id="import-confirm" class="import-confirm" hidden>
         <p id="import-summary"></p>
         <ul id="import-sample" class="import-sample"></ul>
+        <!-- How many of the file's rows bring a sentence (D212), and the one
+             rule for a phrase already saved: it takes the file's sentence
+             only when it has none. Filled by vocab.js; hidden when no row
+             has one, so a plugin file reads as it always did. -->
+        <p id="import-sentences" class="hint" hidden></p>
         <p class="import-pair">
           <label for="import-pair" data-i18n="vocab_import_into">Import into</label>
           <select id="import-pair"></select>
@@ -414,7 +419,9 @@
           phrases this pair is missing and never touches a saved one. In the meaning cell, a
           semicolon followed by a space separates meanings; a semicolon without a space stays inside
           its meaning. Export for Anki writes a third column with the sentence each phrase was saved
-          in - empty when none was kept. That file is for Anki; it cannot be imported here.
+          in - empty when none was kept. That file can be imported back too: its sentences come
+          along, and a phrase already saved takes the file's sentence only when it has none of
+          its own.
         </p>
       </details>
       <input type="file" id="import-file" accept=".tsv,text/tab-separated-values" hidden />

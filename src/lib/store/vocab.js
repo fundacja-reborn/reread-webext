@@ -19,7 +19,7 @@
  * and `background/vocabulary.js` is where that rule is enforced.
  */
 
-import { counted, resaved } from "./phrase.js";
+import { counted, resaved, withImportedSentence } from "./phrase.js";
 
 const DB_NAME = "reread-vocab";
 const DB_VERSION = 1;
@@ -118,7 +118,9 @@ export async function putPhrase(phrase) {
 }
 
 /**
- * Writes the phrases that are not already saved, and counts both outcomes.
+ * Writes the phrases that are not already saved, and counts both outcomes -
+ * and, since D212, gives a saved row the file's sentence when the row has
+ * none of its own.
  *
  * One transaction for the whole batch, each lookup paired with its write, for
  * the same reason `putPhrase` pairs them: an import must not race a bubble's
@@ -126,28 +128,38 @@ export async function putPhrase(phrase) {
  * counts. A file's own duplicate meets the row its first copy just wrote and
  * is skipped like anything else already there - the first spelling wins.
  *
- * Unlike `putPhrase` this never touches an existing row: an import is
- * somebody's past, a save is this reader's decision, and the second must not
- * be overwritten by the first.
+ * Unlike `putPhrase` this never rewrites what an existing row says: an
+ * import is somebody's past, a save is this reader's decision, and the
+ * second must not be overwritten by the first. The one thing an import may
+ * add to a saved row is a sentence where there was none
+ * (`withImportedSentence`) - the first sentence stays, as it does on a
+ * bubble's re-save (D210).
  *
  * @param {Phrase[]} phrases
- * @returns {Promise<{ added: number, skipped: number }>}
+ * @returns {Promise<{ added: number, skipped: number, sentenced: number }>}
+ *   `sentenced` counts the saved rows that took a sentence from the file
  */
 export async function putMissingPhrases(phrases) {
   return await withPhrases("readwrite", async (store) => {
     const index = store.index(BY_KEY);
     let added = 0;
     let skipped = 0;
+    let sentenced = 0;
     for (const phrase of phrases) {
-      const existing = await promisify(index.getKey(indexKey(phrase)));
+      const existing = /** @type {Phrase | undefined} */ (await promisify(index.get(indexKey(phrase))));
       if (existing === undefined) {
         await promisify(store.put(phrase));
         added += 1;
-      } else {
-        skipped += 1;
+        continue;
+      }
+      skipped += 1;
+      const filled = withImportedSentence(existing, phrase);
+      if (filled !== existing) {
+        await promisify(store.put(filled));
+        sentenced += 1;
       }
     }
-    return { added, skipped };
+    return { added, skipped, sentenced };
   });
 }
 
