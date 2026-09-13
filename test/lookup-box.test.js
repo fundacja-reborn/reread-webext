@@ -455,3 +455,21 @@ describe("the saved-phrases page's fold", () => {
     assert.match(bodyOf(script, "reload"), /if \(shownPair !== ""\) lookupBox\?\.reset\(\)/, "the first draw resets the field");
   });
 });
+
+describe("the shelf's scrolling box", () => {
+  it("brings a book opened by a press into view of the box it scrolls in - by the box's own scroll alone (D214)", async () => {
+    const shelfSource = await source("lib/lookup-shelf.js");
+    const showing = shelfFunction(shelfSource, "showOpened");
+    assert.match(showing, /const box = scrollBoxOf\(book\);\s*if \(box === null\) return;/, "a page with no box of its own is scrolled");
+    assert.match(showing, /box\.scrollTop \+= scrollToShow\(\{ top, bottom: top \+ box\.clientHeight \}, \{ top: edges\.top, bottom: edges\.bottom \}\);/, "the box is not moved by the rule, or is measured with its border");
+    assert.doesNotMatch(showing, /scrollIntoView/, "the book is scrolled into view through every ancestor - the page under a bubble included");
+    const finding = shelfFunction(shelfSource, "scrollBoxOf");
+    assert.match(finding, /overflow === "auto" \|\| overflow === "scroll"/, "a box that clips without scrolling counts as the shelf's box");
+    assert.match(finding, /node = from\.parentElement; node !== null; node = node\.parentElement/, "the walk does not stop where the tree does - a bubble's shadow root");
+    // The bubble's box and the popup's answer are the two boxes there are;
+    // the phrases page scrolls as a whole and keeps the reader's scroll.
+    assert.match(await source("content/tooltip.js"), /\.entries \{[\s\S]*?overflow-y: auto;/, "the bubble's box does not scroll");
+    assert.match(await source("popup/popup.css"), /body\[data-mode="lookup"\] \.popup-lookup-answer \{[\s\S]*?overflow-y: auto;/, "the popup's answer does not scroll");
+    assert.doesNotMatch(await source("assets/page.css"), /\.lookup-entries \{[^}]*overflow/, "the shelf's column on the pages scrolls inside itself");
+  });
+});
