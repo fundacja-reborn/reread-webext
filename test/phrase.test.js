@@ -3,7 +3,18 @@ import { describe, it } from "node:test";
 
 import { ErrorCode, fail, ok } from "../src/lib/protocol.js";
 import { MAX_SENTENCE_LENGTH } from "../src/lib/sentence.js";
-import { MAX_PHRASE_LENGTH, buildPhrase, cleanSentence, counted, countsOf, hasSentence, resaved, withImportedSentence } from "../src/lib/store/phrase.js";
+import {
+  MAX_PHRASE_LENGTH,
+  buildPhrase,
+  cleanSentence,
+  counted,
+  countsOf,
+  hasSentence,
+  resaved,
+  restored,
+  withImportedSentence,
+  withRestoredCounts,
+} from "../src/lib/store/phrase.js";
 
 /**
  * @param {Partial<Parameters<typeof buildPhrase>[0]>} overrides
@@ -275,5 +286,74 @@ describe("cleanSentence", () => {
     assert.equal(cleanSentence("   "), undefined);
     assert.equal(cleanSentence("x".repeat(601)), undefined);
     assert.equal(cleanSentence(undefined), undefined);
+  });
+});
+
+describe("withRestoredCounts", () => {
+  /** @returns {import("../src/lib/store/phrase.js").Phrase} */
+  function bank() {
+    const built = buildPhrase({ text: "bank", translations: ["brzeg"], langFrom: "en", langTo: "pl", id: "id-bank", now: 1 });
+    assert.ok(built.ok);
+    return built.value;
+  }
+
+  it("takes the file's counts and their moments onto a fresh row (D213)", () => {
+    const row = withRestoredCounts(bank(), { recallCount: 3, lastRecallAt: 100, readCount: 2, lastReadAt: 200 });
+    assert.equal(row.recallCount, 3);
+    assert.equal(row.lastRecallAt, 100);
+    assert.equal(row.readCount, 2);
+    assert.equal(row.lastReadAt, 200);
+  });
+
+  it("writes no count of zero and drops what is no count, keeping the phrase", () => {
+    const row = withRestoredCounts(bank(), { recallCount: 0, lastRecallAt: 5, readCount: -1, lastReadAt: 6 });
+    assert.equal("recallCount" in row, false);
+    assert.equal("lastRecallAt" in row, false);
+    assert.equal("readCount" in row, false);
+    assert.equal(row.phrase, "bank");
+    // A count without a usable moment keeps the count alone.
+    const bare = withRestoredCounts(bank(), { recallCount: 2, lastRecallAt: Number.NaN });
+    assert.equal(bare.recallCount, 2);
+    assert.equal("lastRecallAt" in bare, false);
+  });
+});
+
+describe("restored", () => {
+  /**
+   * @param {Partial<import("../src/lib/store/phrase.js").Phrase>} [rest]
+   * @returns {import("../src/lib/store/phrase.js").Phrase}
+   */
+  function bank(rest = {}) {
+    const built = buildPhrase({ text: "bank", translations: ["brzeg"], langFrom: "en", langTo: "pl", id: "id-bank", now: 1 });
+    assert.ok(built.ok);
+    return { ...built.value, ...rest };
+  }
+
+  it("takes the greater of each count with the later moment, and never lowers one (D213)", () => {
+    const existing = bank({ recallCount: 5, lastRecallAt: 500, readCount: 1, lastReadAt: 50 });
+    const incoming = bank({ recallCount: 8, lastRecallAt: 300, readCount: 1, lastReadAt: 900 });
+    const merged = restored(existing, incoming);
+    assert.equal(merged.recallCount, 8);
+    assert.equal(merged.lastRecallAt, 500, "the later of the two moments stays");
+    assert.equal(merged.readCount, 1, "an equal count does not move");
+    assert.equal(merged.lastReadAt, 50, "an equal count keeps its own moment");
+    // The other way round: the file knows less, the row keeps its own.
+    assert.equal(restored(incoming, existing).recallCount, 8);
+  });
+
+  it("fills the sentence where there was none, and never rewrites the meanings or the day", () => {
+    const existing = bank({ translations: ["brzeg"], createdAt: 1 });
+    const incoming = bank({ translations: ["instytucja"], createdAt: 99, context: "The bank was steep." });
+    const merged = restored(existing, incoming);
+    assert.equal(merged.context, "The bank was steep.");
+    assert.deepEqual(merged.translations, ["brzeg"]);
+    assert.equal(merged.createdAt, 1);
+    assert.equal(restored(bank({ context: "Mine." }), incoming).context, "Mine.");
+  });
+
+  it("hands the same row back when nothing rises - the same file twice writes nothing", () => {
+    const existing = bank({ context: "Mine.", recallCount: 4, lastRecallAt: 10, readCount: 2, lastReadAt: 20 });
+    assert.equal(restored(existing, bank({ context: "Other.", recallCount: 4, readCount: 1 })), existing);
+    assert.equal(restored(existing, bank()), existing);
   });
 });

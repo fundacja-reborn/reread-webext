@@ -209,6 +209,80 @@ export function withImportedSentence(existing, incoming) {
 }
 
 /**
+ * The later of two moments, when either is one.
+ *
+ * @param {unknown} a
+ * @param {unknown} b
+ * @returns {number | undefined}
+ */
+function laterOf(a, b) {
+  /** @type {number[]} */
+  const moments = [];
+  for (const one of [a, b]) if (typeof one === "number" && Number.isFinite(one)) moments.push(one);
+  return moments.length === 0 ? undefined : Math.max(...moments);
+}
+
+/**
+ * A row built from the backup of everything (D213), with the counts the
+ * file kept for it: the two tallies and their moments, each taken only
+ * when it is what it says it is - a broken count must not cost the phrase.
+ * A count of zero is not written, the store's own rule for a row nobody
+ * checked.
+ *
+ * @param {Phrase} phrase as `buildPhrase` made it
+ * @param {{ recallCount?: number, lastRecallAt?: number, readCount?: number, lastReadAt?: number }} counts
+ * @returns {Phrase}
+ */
+export function withRestoredCounts(phrase, counts) {
+  /** @type {Phrase} */
+  const next = { ...phrase };
+  if (isCount(counts.recallCount) && counts.recallCount > 0) {
+    next.recallCount = counts.recallCount;
+    const at = laterOf(counts.lastRecallAt, undefined);
+    if (at !== undefined) next.lastRecallAt = at;
+  }
+  if (isCount(counts.readCount) && counts.readCount > 0) {
+    next.readCount = counts.readCount;
+    const at = laterOf(counts.lastReadAt, undefined);
+    if (at !== undefined) next.lastReadAt = at;
+  }
+  return next;
+}
+
+/**
+ * A saved row met by the backup of everything (D213): what the file knows
+ * and the row does not is taken - the sentence where there was none (the
+ * TSV import's rule, D212), and of each count the greater, with the later
+ * of the two moments - and what the row says stays: its meanings, its
+ * spelling, the day it was kept. Never lower: the backup was made
+ * somewhere the reader read as well, not instead. The same object back
+ * when nothing rises, so the store can tell there is nothing to write.
+ *
+ * @param {Phrase} existing
+ * @param {Phrase} incoming as the file's row was built
+ * @returns {Phrase}
+ */
+export function restored(existing, incoming) {
+  let next = withImportedSentence(existing, incoming);
+  const mine = countsOf(existing);
+  const theirs = countsOf(incoming);
+  const own = () => (next === existing ? (next = { ...existing }) : next);
+  if (theirs.recalls > mine.recalls) {
+    const row = own();
+    row.recallCount = theirs.recalls;
+    const at = laterOf(existing.lastRecallAt, incoming.lastRecallAt);
+    if (at !== undefined) row.lastRecallAt = at;
+  }
+  if (theirs.reads > mine.reads) {
+    const row = own();
+    row.readCount = theirs.reads;
+    const at = laterOf(existing.lastReadAt, incoming.lastReadAt);
+    if (at !== undefined) row.lastReadAt = at;
+  }
+  return next;
+}
+
+/**
  * @param {unknown} value
  * @returns {value is number} a whole, non-negative number - what a count is
  */

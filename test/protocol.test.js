@@ -2,18 +2,20 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import {
-  ErrorCode,
-  MAX_COUNTED_KEYS,
-  Message,
   asDictEntries,
   asLookUp,
   asPage,
   asPageInfo,
   asPageRequest,
   asRequest,
+  asRestoreRow,
   asResult,
   asTranslation,
+  ErrorCode,
   fail,
+  isLanguageCode,
+  MAX_COUNTED_KEYS,
+  Message,
   ok,
 } from "../src/lib/protocol.js";
 
@@ -515,6 +517,7 @@ describe("asPageRequest", () => {
       Message.SAVE_PHRASE,
       Message.LIST_PHRASES,
       Message.IMPORT_PHRASES,
+      Message.RESTORE_VOCABULARY,
       Message.OPEN_READER,
     ]) {
       assert.equal(asPageRequest({ kind, text: "word", translations: [] }), null, kind);
@@ -587,5 +590,64 @@ describe("an import row's sentence (D212)", () => {
         { kind: Message.IMPORT_PHRASES, rows: [{ text: "bank", translations: ["brzeg"] }] },
       );
     }
+  });
+});
+
+describe("a row of the backup of everything (D213)", () => {
+  it("knows a language code the way the registry spells one", () => {
+    for (const code of ["en", "pl", "zh_hant", "ast"]) assert.equal(isLanguageCode(code), true, code);
+    for (const code of ["EN", "english", "e", "en-US", "zh_Hant", "", 7, null]) assert.equal(isLanguageCode(code), false, String(code));
+  });
+
+  it("keeps the pair and the phrase, carries the rest when it is what it says it is, drops it otherwise", () => {
+    const whole = {
+      langFrom: "en",
+      langTo: "pl",
+      text: "bank",
+      translations: ["brzeg"],
+      createdAt: 5,
+      context: "The bank was steep.",
+      recallCount: 3,
+      lastRecallAt: 100,
+      readCount: 2,
+      lastReadAt: 200,
+    };
+    assert.deepEqual(asRestoreRow(whole), whole);
+    assert.deepEqual(
+      asRestoreRow({ ...whole, createdAt: "5", context: 7, recallCount: 0, lastRecallAt: 1, readCount: 2.5, lastReadAt: 2 }),
+      { langFrom: "en", langTo: "pl", text: "bank", translations: ["brzeg"] },
+    );
+    // A moment rides only with its count.
+    assert.deepEqual(asRestoreRow({ ...whole, recallCount: 3, lastRecallAt: -1, readCount: undefined, lastReadAt: 9 }), {
+      langFrom: "en",
+      langTo: "pl",
+      text: "bank",
+      translations: ["brzeg"],
+      createdAt: 5,
+      context: "The bank was steep.",
+      recallCount: 3,
+    });
+    for (const broken of [
+      { ...whole, langFrom: "english" },
+      { ...whole, langTo: "" },
+      { ...whole, text: "" },
+      { ...whole, translations: "brzeg" },
+      { ...whole, translations: ["brzeg", 7] },
+      null,
+      "bank",
+    ]) {
+      assert.equal(asRestoreRow(broken), null);
+    }
+  });
+
+  it("is carried by restore-vocabulary, one broken row refusing the whole message", () => {
+    const row = { langFrom: "en", langTo: "pl", text: "bank", translations: ["brzeg"], recallCount: 1 };
+    assert.deepEqual(asRequest({ kind: Message.RESTORE_VOCABULARY, rows: [row] }), {
+      kind: Message.RESTORE_VOCABULARY,
+      rows: [row],
+    });
+    assert.deepEqual(asRequest({ kind: Message.RESTORE_VOCABULARY, rows: [] }), { kind: Message.RESTORE_VOCABULARY, rows: [] });
+    assert.equal(asRequest({ kind: Message.RESTORE_VOCABULARY, rows: [row, { text: "no pair" }] }), null);
+    assert.equal(asRequest({ kind: Message.RESTORE_VOCABULARY }), null);
   });
 });

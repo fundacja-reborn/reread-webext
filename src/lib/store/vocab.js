@@ -19,7 +19,7 @@
  * and `background/vocabulary.js` is where that rule is enforced.
  */
 
-import { counted, resaved, withImportedSentence } from "./phrase.js";
+import { counted, countsOf, hasSentence, resaved, restored, withImportedSentence } from "./phrase.js";
 
 const DB_NAME = "reread-vocab";
 const DB_VERSION = 1;
@@ -160,6 +160,46 @@ export async function putMissingPhrases(phrases) {
       }
     }
     return { added, skipped, sentenced };
+  });
+}
+
+/**
+ * Writes the rows of the backup of everything (D213): a phrase not yet
+ * saved is added as the file has it - its day, its sentence, its counts -
+ * and a saved one takes only what it lacks (`restored`): the sentence
+ * where there was none, the greater of each count. Its meanings are never
+ * rewritten, and the same file twice writes nothing the second time. One
+ * transaction, each lookup paired with its write, the import's own reason.
+ *
+ * @param {Phrase[]} phrases every pair at once - the row carries its own
+ * @returns {Promise<{ added: number, skipped: number, sentenced: number, counted: number }>}
+ *   `sentenced` and `counted` count the saved rows that took a sentence,
+ *   and those whose counts rose
+ */
+export async function restorePhrases(phrases) {
+  return await withPhrases("readwrite", async (store) => {
+    const index = store.index(BY_KEY);
+    let added = 0;
+    let skipped = 0;
+    let sentenced = 0;
+    let risen = 0;
+    for (const phrase of phrases) {
+      const existing = /** @type {Phrase | undefined} */ (await promisify(index.get(indexKey(phrase))));
+      if (existing === undefined) {
+        await promisify(store.put(phrase));
+        added += 1;
+        continue;
+      }
+      skipped += 1;
+      const merged = restored(existing, phrase);
+      if (merged === existing) continue;
+      await promisify(store.put(merged));
+      if (hasSentence(merged) !== hasSentence(existing)) sentenced += 1;
+      const before = countsOf(existing);
+      const after = countsOf(merged);
+      if (after.recalls > before.recalls || after.reads > before.reads) risen += 1;
+    }
+    return { added, skipped, sentenced, counted: risen };
   });
 }
 

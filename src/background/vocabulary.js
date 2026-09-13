@@ -24,8 +24,15 @@ import { ensureBackup, rebuildBackup, restoreVocabulary } from "../lib/store/bac
 import { migrateSemicolonsOnce, sweepSemicolonBackup } from "../lib/store/semicolon-migration.js";
 import { mirrorWithForms } from "../lib/store/forms.js";
 import { writeMirror } from "../lib/store/mirror.js";
-import { buildPhrase } from "../lib/store/phrase.js";
-import { countPhrases as countRows, deletePhrase, listPhrases, putMissingPhrases, putPhrase } from "../lib/store/vocab.js";
+import { buildPhrase, withRestoredCounts } from "../lib/store/phrase.js";
+import {
+  countPhrases as countRows,
+  deletePhrase,
+  listPhrases,
+  putMissingPhrases,
+  putPhrase,
+  restorePhrases,
+} from "../lib/store/vocab.js";
 
 /**
  * The chosen pair in the store's spelling, or null while nobody has chosen
@@ -261,6 +268,50 @@ export async function importPhrases(request) {
   // copy does, and `afterWrite` rebuilds both.
   if (added > 0 || sentenced > 0 || restored > 0) await afterWrite(config);
   return ok({ added, skipped, sentenced, invalid });
+}
+
+/**
+ * The vocabulary of the backup of everything (D213) written back: every
+ * pair the file holds, whatever the settings say the pair being read is -
+ * a backup restores what was, not what is chosen now. A phrase not yet
+ * saved is added as the file has it - the day it was kept, its sentence,
+ * its counts; a saved one takes only what it lacks (`restored`). The
+ * setting for the sentence does not enter, as it does not for the TSV
+ * import (D212): the file is the reader's own.
+ *
+ * @param {import("../lib/protocol.js").RestoreVocabularyRequest} request
+ * @returns {Promise<import("../lib/protocol.js").Result<import("../lib/protocol.js").RestoreReport>>}
+ */
+export async function restoreFromBackup(request) {
+  await started;
+  const restored = await settled();
+  const config = await readConfig();
+  const now = Date.now();
+
+  /** @type {import("../lib/store/phrase.js").Phrase[]} */
+  const rows = [];
+  let invalid = 0;
+  for (const [at, row] of request.rows.entries()) {
+    const built = buildPhrase({
+      text: row.text,
+      translations: row.translations,
+      langFrom: row.langFrom,
+      langTo: row.langTo,
+      id: crypto.randomUUID(),
+      // The day the file says it was kept, or this moment: a row without
+      // one is a hand-made file, and it goes to the end of the list.
+      now: row.createdAt ?? now + at,
+      context: row.context,
+    });
+    if (built.ok) rows.push(withRestoredCounts(built.value, row));
+    else invalid += 1;
+  }
+
+  const report = await restorePhrases(rows);
+  // Anything written reaches the mirror and the copy; a restore of what the
+  // browser deleted is a change too.
+  if (report.added > 0 || report.sentenced > 0 || report.counted > 0 || restored > 0) await afterWrite(config);
+  return ok({ ...report, invalid });
 }
 
 /**
