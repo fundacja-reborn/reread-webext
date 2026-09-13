@@ -48,8 +48,10 @@ Settings), and the per-site off switches (Settings, **Switched-off sites**). Del
 article or a book removes everything stored for it - text, pictures, highlights, notes and
 the reading position - from the database and from the safety copy in `storage.local`.
 Saved phrases are not part of an article: a phrase you saved while reading it is stored in
-your vocabulary, without any record of where it came from, and stays there until you mark
-it **Learned** - deleting the article does not delete the phrase.
+your vocabulary, without any record of where it came from, and is kept there until you mark
+it **Learned** - deleting the article does not delete the phrase. The same holds for the
+sentence saved with a phrase (see *Page content*): it is stored with the phrase, not with the
+article, so deleting the article does not delete it either.
 
 You can export your data at any time to files on your disk: everything at once, as one
 `.zip` backup from the reading list - the reading list with its highlights, reading positions
