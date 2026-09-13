@@ -695,6 +695,13 @@
             </svg>
           </button>
         </div>
+        <!-- Why the books' rows wear no box, said under the bar only while
+             the rows the tab and the filter show include a book: their
+             rows carry the same words as a tooltip, and a tooltip is
+             nothing on a touch screen or e-ink. Hidden with the bar. -->
+        <p class="hint pick-note" id="library-pick-books" data-i18n="reader_pick_books_note" hidden>
+          Books can't be selected - they are not in the backup, only their highlights are.
+        </p>
         <div id="library-empty" class="empty" hidden></div>
         <ul id="library-rows" class="library-rows"></ul>
         <!-- The shared pager (page.css): a drawn chevron at each end with its

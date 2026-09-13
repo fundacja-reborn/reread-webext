@@ -532,6 +532,20 @@
   "reader_export_marks": { "message": "Exporter les surlignages" },
   "reader_marks_export_notes": { "message": "Exporter comme notes (.md)" },
   "reader_marks_notes_hint": { "message": "Le fichier .md est une liste en texte brut des citations et des notes, groupées par document - pour la lecture et pour vos propres notes. Il ne peut pas être importé." },
+  "reader_marks_import_books_one": {
+    "message": "Les surlignages de $COUNT$ livre attendent : $TITLES$. Importez ce livre depuis son fichier .epub, puis importez ce fichier à nouveau.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "titles": { "content": "$2", "example": "A Novel" }
+    }
+  },
+  "reader_marks_import_books_other": {
+    "message": "Les surlignages de $COUNT$ livres attendent : $TITLES$. Importez ces livres depuis leurs fichiers .epub, puis importez ce fichier à nouveau.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "2" },
+      "titles": { "content": "$2", "example": "A Novel, Another Novel" }
+    }
+  },
   "reader_marks_import_missing_one": {
     "message": "$COUNT$ document n'est pas dans la liste de lecture : $TITLES$. Importez-le d'abord - un livre depuis son fichier .epub, un article depuis la sauvegarde de la liste de lecture - puis importez ce fichier à nouveau.",
     "placeholders": {
@@ -695,6 +709,10 @@
   "reader_transfer_pick": { "message": "Pour n'exporter que certains articles, appuyez sur « Sélectionner » au-dessus de la liste et cochez-les." },
   "reader_pick_start": { "message": "Sélectionner" },
   "reader_pick_close": { "message": "Fermer la sélection" },
+  "reader_pick_book_title": { "message": "Les livres ne sont pas dans la sauvegarde" },
+  "reader_pick_books_note": {
+    "message": "Les livres ne peuvent pas être sélectionnés - ils ne sont pas dans la sauvegarde, seuls leurs surlignages y sont."
+  },
   "reader_pick_all": { "message": "Tout sélectionner" },
   "reader_pick_count_one": {
     "message": "$COUNT$ article sélectionné",

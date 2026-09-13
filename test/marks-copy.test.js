@@ -7,6 +7,7 @@ import {
   fromMarksCopy,
   isMarksCopy,
   marksImportPlan,
+  missingByKind,
   toMarksCopy,
 } from "../src/lib/store/marks-copy.js";
 
@@ -237,5 +238,20 @@ describe("marksImportPlan", () => {
     assert.deepEqual(plan.targets, []);
     assert.deepEqual(plan.missing, [ARTICLE, BOOK]);
     assert.equal(plan.added, 0);
+  });
+});
+
+describe("missingByKind", () => {
+  it("tells the books the plan could not place apart from the articles, each in the file's order", () => {
+    const second = { ...BOOK, title: "Another Novel" };
+    const plan = marksImportPlan([BOOK, ARTICLE, second], library());
+    const { books, articles } = missingByKind(plan.missing);
+    assert.deepEqual(books.map((doc) => doc.title), ["A Novel", "Another Novel"]);
+    assert.deepEqual(articles, [ARTICLE]);
+  });
+
+  it("answers two empty lists for a plan that placed everything", () => {
+    const shelf = library({ books: [{ id: "b", title: BOOK.title, author: BOOK.author }] });
+    assert.deepEqual(missingByKind(marksImportPlan([BOOK], shelf).missing), { books: [], articles: [] });
   });
 });

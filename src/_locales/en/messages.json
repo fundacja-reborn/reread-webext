@@ -683,6 +683,21 @@
     "message": "The .md file is a plain-text list of the quotes and notes, grouped by document - for reading and for your own notes. It cannot be imported.",
     "description": "Hint under the notes export."
   },
+  "reader_marks_import_books_one": {
+    "message": "Highlights of $COUNT$ book are waiting: $TITLES$. Import that book from its .epub file, then import this file again.",
+    "description": "In the import report, only when the file holds highlights of books the reading list does not hold: those highlights are not written anywhere - the file keeps them - so the book comes first and the file again after it. TITLES is a comma-separated sample of their titles.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "titles": { "content": "$2", "example": "A Novel" }
+    }
+  },
+  "reader_marks_import_books_other": {
+    "message": "Highlights of $COUNT$ books are waiting: $TITLES$. Import those books from their .epub files, then import this file again.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "2" },
+      "titles": { "content": "$2", "example": "A Novel, Another Novel" }
+    }
+  },
   "reader_marks_import_missing_one": {
     "message": "$COUNT$ document is not in the reading list: $TITLES$. Import it first - a book from its .epub file, an article from the reading list's backup - then import this file again.",
     "description": "Under the offer's rows, only when the file names documents the reading list does not hold. TITLES is a comma-separated sample of their titles.",
@@ -874,6 +889,14 @@
   "reader_pick_close": {
     "message": "Close the selection",
     "description": "Name and tooltip of the cross at the end of the selection's bar: closes the selection and drops the ticks."
+  },
+  "reader_pick_book_title": {
+    "message": "Books are not in the backup",
+    "description": "Tooltip of a book's row inside the selection (D152): why the row has no box. The same words will name the unticked \"Export with books\" box if books ever enter the backup."
+  },
+  "reader_pick_books_note": {
+    "message": "Books can't be selected - they are not in the backup, only their highlights are.",
+    "description": "One quiet line under the selection's bar, only while the rows the tab and the filter show include a book: a title alone says nothing on a touch screen or e-ink, where there is no hover."
   },
   "reader_pick_all": {
     "message": "Select all",

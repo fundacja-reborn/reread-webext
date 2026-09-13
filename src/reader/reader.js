@@ -140,7 +140,7 @@ import {
   fromManifest,
   isNewerBackup,
 } from "../lib/store/backup-file.js";
-import { fromMarksCopy, isMarksCopy, marksImportPlan } from "../lib/store/marks-copy.js";
+import { fromMarksCopy, isMarksCopy, marksImportPlan, missingByKind } from "../lib/store/marks-copy.js";
 import { MARKS_FILENAME, toMarksFile } from "../lib/store/marks-file.js";
 import { fromSettingsFile } from "../lib/store/settings-file.js";
 import { allPhrases } from "../lib/store/vocab.js";
@@ -315,6 +315,7 @@ const libraryPickAll = /** @type {HTMLInputElement | null} */ (
 );
 const libraryPickCount = document.getElementById("library-pick-count");
 const libraryPickClose = document.getElementById("library-pick-close");
+const libraryPickBooks = document.getElementById("library-pick-books");
 const exportButton = /** @type {HTMLButtonElement | null} */ (
   document.getElementById("library-export")
 );
@@ -659,9 +660,12 @@ let picked = new Set();
  * without rebuilding the rows, which would take the focus off the box just
  * pressed and flash the whole list on e-ink.
  *
- * @type {{ selectable: string[], metas: SavedMeta[] }}
+ * `books` counts the books among the rows the tab and the filter show -
+ * the rows a selection cannot take, which the line under its bar is about.
+ *
+ * @type {{ selectable: string[], metas: SavedMeta[], books: number }}
  */
-let libraryShown = { selectable: [], metas: [] };
+let libraryShown = { selectable: [], metas: [], books: 0 };
 
 /**
  * The highlights page, while it is the view (D108) - null otherwise, the
@@ -3242,7 +3246,7 @@ async function refreshLibrary() {
   // The selection held to the list as it stands (D152), and what this read
   // found kept for the ticks that follow it.
   picked = keptPicks(picked, entries);
-  libraryShown = { selectable: view.selectable, metas };
+  libraryShown = { selectable: view.selectable, metas, books: view.books };
 
   // Each tab wears its whole segment's count - the entire half of the list,
   // not the page or the filter's slice, so the two labels always add up to
@@ -3320,6 +3324,10 @@ function renderPickLine() {
     libraryPickToggle.disabled = libraryShown.metas.length === 0;
   }
   if (libraryPickLine !== null) libraryPickLine.hidden = !picking;
+  // The line about the books' rows stands only while there is such a row
+  // to explain: over a list of articles it would be a sentence about
+  // nothing on screen.
+  if (libraryPickBooks !== null) libraryPickBooks.hidden = !picking || libraryShown.books === 0;
   if (libraryPickAll !== null) {
     const state = pickedState(libraryShown.selectable, picked);
     libraryPickAll.checked = state === "all";
@@ -3392,6 +3400,7 @@ function applyLibrarySearchVisibility() {
       libraryPager,
       libraryPickToggle,
       libraryPickLine,
+      libraryPickBooks,
     ];
     for (const element of plain) {
       if (element !== null) element.hidden = true;
@@ -3497,6 +3506,11 @@ function libraryRow(entry) {
     item.classList.add("library-row-pick");
     if (entry.kind === "book") {
       item.classList.add("library-row-still");
+      // Said to the pointer and to assistive technology as well as to the
+      // eye: the row is out of the selection because the export leaves
+      // books out. The line under the bar says it where nothing hovers.
+      item.setAttribute("aria-disabled", "true");
+      item.title = t("reader_pick_book_title");
       const still = document.createElement("span");
       still.className = "library-open";
       still.textContent = entry.title;
@@ -4409,10 +4423,14 @@ async function exportMarksPage() {
 /**
  * What a file's import leaves out and why, as sentences: the documents the
  * reading list does not hold (a sample of their titles - the count says how
- * many there are, and a file of hundreds must not become a paragraph), the
- * marks standing here already, the marks meeting one, the entries that were
- * not marks. Under the offer's rows - and alone, in the report line, when
- * the file has nothing else to say.
+ * many there are, and a file of hundreds must not become a paragraph) -
+ * the books apart from the articles, because what to do about them
+ * differs: a book comes back from its .epub file, and its highlights are
+ * not written anywhere until it does, so the sentence says to import the
+ * file again after the book - then the marks standing here already, the
+ * marks meeting one, the entries that were not marks. Under the offer's
+ * rows - and alone, in the report line, when the file has nothing else to
+ * say.
  *
  * @param {import("../lib/store/marks-copy.js").MarksImportPlan} plan
  * @param {number} invalid
@@ -4421,10 +4439,18 @@ async function exportMarksPage() {
 function marksImportNotes(plan, invalid) {
   /** @type {string[]} */
   const sentences = [];
-  if (plan.missing.length > 0) {
-    const titles = plan.missing.slice(0, SAMPLE_TITLES).map((doc) => doc.title);
-    if (plan.missing.length > SAMPLE_TITLES) titles.push("...");
-    sentences.push(plural(plan.missing.length, "reader_marks_import_missing", [titles.join(", ")]));
+  /** @param {import("../lib/store/marks-copy.js").CopyDoc[]} docs */
+  const sampleOf = (docs) => {
+    const titles = docs.slice(0, SAMPLE_TITLES).map((doc) => doc.title);
+    if (docs.length > SAMPLE_TITLES) titles.push("...");
+    return titles.join(", ");
+  };
+  const { books, articles } = missingByKind(plan.missing);
+  if (books.length > 0) {
+    sentences.push(plural(books.length, "reader_marks_import_books", [sampleOf(books)]));
+  }
+  if (articles.length > 0) {
+    sentences.push(plural(articles.length, "reader_marks_import_missing", [sampleOf(articles)]));
   }
   if (plan.twins > 0) sentences.push(plural(plan.twins, "reader_marks_import_twins"));
   if (plan.overlapping > 0) sentences.push(plural(plan.overlapping, "reader_marks_import_overlap"));

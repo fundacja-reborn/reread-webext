@@ -142,6 +142,10 @@ export function searchableArticle(meta) {
  * book is not exported, so a tick the export could not honour is not
  * offered.
  *
+ * `books` counts those rows - the books the filter leaves in the segment,
+ * every page of them - so the selection can say why they wear no box, and
+ * only while there is one to say it about.
+ *
  * @template {SavedMeta & { lastReadAt?: number | null, kind?: "article" | "book" }} T
  * @param {T[]} metas as the stores answer, in any order
  * @param {{ segment: SegmentValue, query: string, page: number }} shown
@@ -154,6 +158,7 @@ export function searchableArticle(meta) {
  *   unread: number,
  *   read: number,
  *   selectable: string[],
+ *   books: number,
  * }}
  */
 export function libraryView(metas, { segment, query, page }) {
@@ -171,6 +176,7 @@ export function libraryView(metas, { segment, query, page }) {
     unread: segment === Segment.UNREAD ? inSegment.length : elsewhere,
     read: segment === Segment.READ ? inSegment.length : elsewhere,
     selectable: matching.filter((meta) => meta.kind !== "book").map((meta) => meta.url),
+    books: matching.filter((meta) => meta.kind === "book").length,
   };
 }
 

@@ -1923,6 +1923,15 @@ a.marks-act {
   margin-inline-start: auto;
 }
 
+/* The line under the bar about the books' rows: the rows' own detail voice
+   (the size of a row's second line), in from the edge by the bar's own
+   padding so it reads as the bar's footnote and not as a row. */
+.pick-note {
+  margin: 0.35rem 0 0;
+  padding-inline: 0.6rem;
+  font-size: 0.85rem;
+}
+
 /* The cross in the note's dress: quiet at rest, a 44px hit box, the page's
    ink on hover and on the keyboard. */
 .pick-close {

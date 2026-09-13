@@ -665,6 +665,34 @@
   "reader_export_marks": { "message": "Eksportuj zakreślenia" },
   "reader_marks_export_notes": { "message": "Eksportuj jako notatki (.md)" },
   "reader_marks_notes_hint": { "message": "Plik .md to tekstowa lista cytatów i notatek pogrupowana według dokumentów - do czytania i do własnych notatek. Nie da się go zaimportować." },
+  "reader_marks_import_books_one": {
+    "message": "Zakreślenia z $COUNT$ książki czekają: $TITLES$. Zaimportuj tę książkę z jej pliku .epub, a potem jeszcze raz ten plik.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "titles": { "content": "$2", "example": "A Novel" }
+    }
+  },
+  "reader_marks_import_books_few": {
+    "message": "Zakreślenia z $COUNT$ książek czekają: $TITLES$. Zaimportuj te książki z ich plików .epub, a potem jeszcze raz ten plik.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "2" },
+      "titles": { "content": "$2", "example": "A Novel, Another Novel" }
+    }
+  },
+  "reader_marks_import_books_many": {
+    "message": "Zakreślenia z $COUNT$ książek czekają: $TITLES$. Zaimportuj te książki z ich plików .epub, a potem jeszcze raz ten plik.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "2" },
+      "titles": { "content": "$2", "example": "A Novel, Another Novel" }
+    }
+  },
+  "reader_marks_import_books_other": {
+    "message": "Zakreślenia z $COUNT$ książki czekają: $TITLES$. Zaimportuj te książki z ich plików .epub, a potem jeszcze raz ten plik.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "2" },
+      "titles": { "content": "$2", "example": "A Novel, Another Novel" }
+    }
+  },
   "reader_marks_import_missing_one": {
     "message": "$COUNT$ dokumentu nie ma w czytelni: $TITLES$. Najpierw zaimportuj go - książkę z jej pliku .epub, artykuł z kopii zapasowej czytelni - a potem jeszcze raz ten plik.",
     "placeholders": {
@@ -942,6 +970,10 @@
   "reader_transfer_pick": { "message": "Żeby wyeksportować tylko niektóre artykuły, naciśnij „Zaznacz” nad listą i zaznacz je." },
   "reader_pick_start": { "message": "Zaznacz" },
   "reader_pick_close": { "message": "Zamknij zaznaczanie" },
+  "reader_pick_book_title": { "message": "Książek nie ma w kopii" },
+  "reader_pick_books_note": {
+    "message": "Książek nie da się zaznaczyć - nie ma ich w kopii, są w niej tylko ich zakreślenia."
+  },
   "reader_pick_all": { "message": "Zaznacz wszystkie" },
   "reader_pick_count_one": {
     "message": "Zaznaczono $COUNT$ artykuł",

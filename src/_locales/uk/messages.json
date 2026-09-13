@@ -665,6 +665,34 @@
   "reader_export_marks": { "message": "Експортувати позначення" },
   "reader_marks_export_notes": { "message": "Експортувати як нотатки (.md)" },
   "reader_marks_notes_hint": { "message": "Файл .md - це текстовий список цитат і нотаток, згрупованих за документами - для читання та для власних нотаток. Його не можна імпортувати." },
+  "reader_marks_import_books_one": {
+    "message": "Позначення з $COUNT$ книги чекають: $TITLES$. Імпортуйте цю книгу з її файлу .epub, а потім ще раз цей файл.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "titles": { "content": "$2", "example": "A Novel" }
+    }
+  },
+  "reader_marks_import_books_few": {
+    "message": "Позначення з $COUNT$ книг чекають: $TITLES$. Імпортуйте ці книги з їхніх файлів .epub, а потім ще раз цей файл.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "2" },
+      "titles": { "content": "$2", "example": "A Novel, Another Novel" }
+    }
+  },
+  "reader_marks_import_books_many": {
+    "message": "Позначення з $COUNT$ книг чекають: $TITLES$. Імпортуйте ці книги з їхніх файлів .epub, а потім ще раз цей файл.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "2" },
+      "titles": { "content": "$2", "example": "A Novel, Another Novel" }
+    }
+  },
+  "reader_marks_import_books_other": {
+    "message": "Позначення з $COUNT$ книги чекають: $TITLES$. Імпортуйте ці книги з їхніх файлів .epub, а потім ще раз цей файл.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "2" },
+      "titles": { "content": "$2", "example": "A Novel, Another Novel" }
+    }
+  },
   "reader_marks_import_missing_one": {
     "message": "$COUNT$ документа немає в списку читання: $TITLES$. Спершу імпортуйте його - книжку з її файлу .epub, статтю з резервної копії списку читання - а потім ще раз цей файл.",
     "placeholders": {
@@ -942,6 +970,10 @@
   "reader_transfer_pick": { "message": "Щоб експортувати лише частину статей, натисніть «Вибрати» над списком і позначте їх." },
   "reader_pick_start": { "message": "Вибрати" },
   "reader_pick_close": { "message": "Закрити вибір" },
+  "reader_pick_book_title": { "message": "Книг немає в резервній копії" },
+  "reader_pick_books_note": {
+    "message": "Книги не можна вибрати - їх немає в резервній копії, у ній є лише їхні позначення."
+  },
   "reader_pick_all": { "message": "Вибрати все" },
   "reader_pick_count_one": {
     "message": "Вибрано $COUNT$ статтю",

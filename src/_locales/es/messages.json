@@ -532,6 +532,20 @@
   "reader_export_marks": { "message": "Exportar los resaltados" },
   "reader_marks_export_notes": { "message": "Exportar como notas (.md)" },
   "reader_marks_notes_hint": { "message": "El archivo .md es una lista en texto plano de las citas y las notas, agrupadas por documento - para leer y para tus propias notas. No se puede importar." },
+  "reader_marks_import_books_one": {
+    "message": "Los resaltados de $COUNT$ libro esperan: $TITLES$. Importa ese libro desde su archivo .epub y luego importa este archivo otra vez.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "titles": { "content": "$2", "example": "A Novel" }
+    }
+  },
+  "reader_marks_import_books_other": {
+    "message": "Los resaltados de $COUNT$ libros esperan: $TITLES$. Importa esos libros desde sus archivos .epub y luego importa este archivo otra vez.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "2" },
+      "titles": { "content": "$2", "example": "A Novel, Another Novel" }
+    }
+  },
   "reader_marks_import_missing_one": {
     "message": "$COUNT$ documento no está en la lista de lectura: $TITLES$. Impórtalo primero - un libro desde su archivo .epub, un artículo desde la copia de la lista de lectura - y luego importa este archivo otra vez.",
     "placeholders": {
@@ -695,6 +709,10 @@
   "reader_transfer_pick": { "message": "Para exportar solo algunos artículos, pulsa «Seleccionar» encima de la lista y márcalos." },
   "reader_pick_start": { "message": "Seleccionar" },
   "reader_pick_close": { "message": "Cerrar la selección" },
+  "reader_pick_book_title": { "message": "Los libros no están en la copia" },
+  "reader_pick_books_note": {
+    "message": "Los libros no se pueden seleccionar - no están en la copia, solo sus resaltados lo están."
+  },
   "reader_pick_all": { "message": "Seleccionar todo" },
   "reader_pick_count_one": {
     "message": "$COUNT$ artículo seleccionado",
