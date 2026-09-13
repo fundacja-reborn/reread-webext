@@ -574,3 +574,18 @@ describe("asPage", () => {
     }
   });
 });
+
+describe("an import row's sentence (D212)", () => {
+  it("rides along as a string and is dropped as anything else, the row itself kept", () => {
+    assert.deepEqual(
+      asRequest({ kind: Message.IMPORT_PHRASES, rows: [{ text: "bank", translations: ["brzeg"], context: "The bank was steep." }] }),
+      { kind: Message.IMPORT_PHRASES, rows: [{ text: "bank", translations: ["brzeg"], context: "The bank was steep." }] },
+    );
+    for (const context of [7, null, [], "", { s: 1 }]) {
+      assert.deepEqual(
+        asRequest({ kind: Message.IMPORT_PHRASES, rows: [{ text: "bank", translations: ["brzeg"], context }] }),
+        { kind: Message.IMPORT_PHRASES, rows: [{ text: "bank", translations: ["brzeg"] }] },
+      );
+    }
+  });
+});

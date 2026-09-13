@@ -236,6 +236,30 @@
   },
   "vocab_legend_recalls": { "message": "consultée – ouvertures de la bulle en lisant" },
   "vocab_legend_reads": { "message": "lue – occurrences dans les textes terminés" },
+  "vocab_import_with_sentence_one": {
+    "message": "$COUNT$ ligne apporte une phrase d'exemple - une expression déjà enregistrée ne la prend que si elle n'en a pas.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "vocab_import_with_sentence_other": {
+    "message": "$COUNT$ lignes apportent une phrase d'exemple - une expression déjà enregistrée ne la prend que si elle n'en a pas.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1,5" }
+    }
+  },
+  "vocab_import_sentenced_one": {
+    "message": "La phrase du fichier a été ajoutée à $COUNT$ expression déjà enregistrée.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "vocab_import_sentenced_other": {
+    "message": "La phrase du fichier a été ajoutée à $COUNT$ expressions déjà enregistrées.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1,5" }
+    }
+  },
   "pager_page_of": {
     "message": "Page $PAGE$ sur $PAGES$",
     "placeholders": {
@@ -250,7 +274,7 @@
   "action_import": { "message": "Importer" },
   "transfer_heading": { "message": "Import et export" },
   "vocab_transfer_note": {
-    "message": "Un fichier .tsv à deux colonnes - le format qu'écrit le plugin KOReader et que lit Anki. L'import ajoute seulement les phrases qui manquent à cette paire ; rien de déjà enregistré n'est modifié. Dans la cellule des sens, un point-virgule suivi d'une espace sépare les sens ; un point-virgule sans espace reste dans son sens. « Exporter pour Anki » écrit une troisième colonne avec la phrase dans laquelle chaque expression a été enregistrée - vide quand il n'y en a pas. Ce fichier est destiné à Anki ; il ne peut pas être importé ici."
+    "message": "Un fichier .tsv à deux colonnes - le format qu'écrit le plugin KOReader et que lit Anki. L'import ajoute seulement les phrases qui manquent à cette paire ; rien de déjà enregistré n'est modifié. Dans la cellule des sens, un point-virgule suivi d'une espace sépare les sens ; un point-virgule sans espace reste dans son sens. « Exporter pour Anki » écrit une troisième colonne avec la phrase dans laquelle chaque expression a été enregistrée - vide quand il n'y en a pas. Ce fichier peut aussi être importé ici : les phrases d'exemple reviennent avec les expressions, et une expression déjà enregistrée ne prend la phrase du fichier que si elle n'en a pas."
   },
   "vocab_import_into": { "message": "Importer dans" },
   "vocab_import_nothing": { "message": "Ce fichier ne contient aucune phrase à importer." },

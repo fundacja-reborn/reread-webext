@@ -31,16 +31,17 @@
  * sister plugin's file would take a third column into the wrong field, and
  * the plugin reads two columns and nothing else. The third cell is there on
  * every row, empty for a phrase without a sentence, so the mapping never
- * shifts under the reader between one export and the next. It is written
- * and not read: `fromTsv` counts a three-column line as a line of another
- * format, which it is - the two-column file is the one that travels back.
+ * shifts under the reader between one export and the next. Since D212 it
+ * travels back too: `fromTsv` reads a third column as the sentence, so the
+ * file for Anki doubles as the vocabulary's own backup with the sentences
+ * in it - the two-column file stays the one the plugin exchanges.
  *
  * Everything in this module is a value in and a value out; the database and
  * the message wire live elsewhere.
  */
 
 import { collapseWhitespace } from "../normalize.js";
-import { hasSentence } from "./phrase.js";
+import { cleanSentence, hasSentence } from "./phrase.js";
 
 /** @typedef {import("./phrase.js").Phrase} Phrase */
 
@@ -48,6 +49,8 @@ import { hasSentence } from "./phrase.js";
  * @typedef {object} TsvRow
  * @property {string} text the phrase, as the file spells it
  * @property {string[]} translations at least one, in the cell's order
+ * @property {string} [context] the sentence the phrase was kept from (D210),
+ *   when the file has a third column and the cell holds one (D212)
  */
 
 /**
@@ -119,8 +122,9 @@ export function toAnkiTsv(phrases) {
  * Reads what `toTsv` writes, and what the sister plugin writes, and what a
  * spreadsheet saved - which is why line endings may be CRLF and blank lines
  * are nobody's fault. A line that is not a row of this format - no tab, a
- * third column, an empty cell - is counted and dropped: one broken line must
- * not cost the file, and a count the reader can see beats a silent shrug.
+ * fourth column, an empty cell - is counted and dropped: one broken line
+ * must not cost the file, and a count the reader can see beats a silent
+ * shrug. A third column is the sentence (D212), the file for Anki's own.
  *
  * @param {string} text
  * @returns {TsvFile}
@@ -135,7 +139,7 @@ export function fromTsv(text) {
     if (one.trim().length === 0) continue;
 
     const cells = one.split(SEPARATOR);
-    if (cells.length !== 2) {
+    if (cells.length !== 2 && cells.length !== 3) {
       invalid += 1;
       continue;
     }
@@ -150,7 +154,14 @@ export function fromTsv(text) {
       continue;
     }
 
-    rows.push({ text: phrase, translations: meanings });
+    /** @type {TsvRow} */
+    const row = { text: phrase, translations: meanings };
+    // The third column (D212): the sentence, cleaned the way the store
+    // cleans one - one line, at most a sentence long. An empty cell or a
+    // paragraph past the ceiling leaves the row without one; the row stays.
+    const sentence = cells.length === 3 ? cleanSentence(String(cells[2])) : undefined;
+    if (sentence !== undefined) row.context = sentence;
+    rows.push(row);
   }
 
   return { rows, invalid };

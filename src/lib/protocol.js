@@ -263,9 +263,9 @@ export const ErrorCode = Object.freeze({
  * @typedef {{ kind: typeof Message.SAVE_PHRASE, text: string, translations: string[], context?: string }} SavePhraseRequest
  * @typedef {{ kind: typeof Message.FORGET_PHRASE, text: string }} ForgetPhraseRequest
  * @typedef {{ kind: typeof Message.LIST_PHRASES }} ListPhrasesRequest
- * @typedef {{ text: string, translations: string[] }} ImportRow
+ * @typedef {{ text: string, translations: string[], context?: string }} ImportRow
  * @typedef {{ kind: typeof Message.IMPORT_PHRASES, rows: ImportRow[] }} ImportPhrasesRequest
- * @typedef {{ added: number, skipped: number, invalid: number }} ImportReport
+ * @typedef {{ added: number, skipped: number, sentenced: number, invalid: number }} ImportReport
  * @typedef {{ kind: typeof Message.COUNT_PHRASES, recalled: string[], read: Array<[string, number]> }} CountPhrasesRequest
  * @typedef {{ kind: typeof Message.READ_PAGE }} ReadPageRequest
  * @typedef {TranslateRequest
@@ -547,7 +547,12 @@ export function asRequest(message) {
       if (typeof one["text"] !== "string") return null;
       if (!Array.isArray(one["translations"])) return null;
       if (!one["translations"].every((meaning) => typeof meaning === "string")) return null;
-      clean.push({ text: one["text"], translations: one["translations"] });
+      /** @type {ImportRow} */
+      const sound = { text: one["text"], translations: one["translations"] };
+      // The sentence (D212) rides along the way a save's does: a string is
+      // kept, anything else dropped - the row itself is sound without it.
+      if (typeof one["context"] === "string" && one["context"].length > 0) sound.context = one["context"];
+      clean.push(sound);
     }
     return { kind: Message.IMPORT_PHRASES, rows: clean };
   }

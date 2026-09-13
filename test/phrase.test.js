@@ -3,7 +3,7 @@ import { describe, it } from "node:test";
 
 import { ErrorCode, fail, ok } from "../src/lib/protocol.js";
 import { MAX_SENTENCE_LENGTH } from "../src/lib/sentence.js";
-import { MAX_PHRASE_LENGTH, buildPhrase, counted, countsOf, hasSentence, resaved } from "../src/lib/store/phrase.js";
+import { MAX_PHRASE_LENGTH, buildPhrase, cleanSentence, counted, countsOf, hasSentence, resaved, withImportedSentence } from "../src/lib/store/phrase.js";
 
 /**
  * @param {Partial<Parameters<typeof buildPhrase>[0]>} overrides
@@ -239,5 +239,41 @@ describe("counted", () => {
     const existing = { ...kept, recallCount: 3, lastRecallAt: 2000, readCount: 9, lastReadAt: 3000 };
     const incoming = { ...kept, id: "id-2", createdAt: 4000, phrase: "Bank", translations: ["brzeg rzeki"] };
     assert.deepEqual(resaved(existing, incoming), { ...existing, phrase: "Bank", translations: ["brzeg rzeki"] });
+  });
+});
+
+describe("withImportedSentence", () => {
+  /**
+   * @param {string} [context]
+   * @returns {import("../src/lib/store/phrase.js").Phrase}
+   */
+  function bank(context) {
+    const built = buildPhrase({ text: "bank", translations: ["brzeg"], langFrom: "en", langTo: "pl", id: "id-bank", now: 1, context });
+    assert.ok(built.ok);
+    return built.value;
+  }
+
+  it("gives a saved row the file's sentence when the row has none (D212)", () => {
+    const existing = bank();
+    const filled = withImportedSentence(existing, bank("The bank was steep."));
+    assert.equal(filled.context, "The bank was steep.");
+    // Nothing else of the row moves: the file's meanings are not taken.
+    assert.deepEqual({ ...filled, context: undefined }, { ...existing, context: undefined });
+  });
+
+  it("hands the same row back when it has a sentence already, or the file none - nothing to write", () => {
+    const kept = bank("The first sentence.");
+    assert.equal(withImportedSentence(kept, bank("Another sentence.")), kept);
+    const bare = bank();
+    assert.equal(withImportedSentence(bare, bank()), bare);
+  });
+});
+
+describe("cleanSentence", () => {
+  it("folds a sentence to one line and leaves out what is no sentence - empty, or past the ceiling", () => {
+    assert.equal(cleanSentence("The  bank\n was steep."), "The bank was steep.");
+    assert.equal(cleanSentence("   "), undefined);
+    assert.equal(cleanSentence("x".repeat(601)), undefined);
+    assert.equal(cleanSentence(undefined), undefined);
   });
 });

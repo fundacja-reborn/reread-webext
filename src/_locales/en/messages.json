@@ -337,6 +337,32 @@
     "message": "read – occurrences in texts you finished",
     "description": "The other half of the legend, after the book glyph. Opens with the same word as \"Most read\". Only texts the reader finished count - a book part left through Next under its text, an article marked as read."
   },
+  "vocab_import_with_sentence_one": {
+    "message": "$COUNT$ row brings a sentence - a phrase already saved takes it only when it has none of its own.",
+    "description": "Under the import offer on the saved-phrases page (D212), when rows of the file carry a sentence in a third column (the file Export for Anki writes): how many, and the one rule for a phrase already saved. Plural family over the count.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "vocab_import_with_sentence_other": {
+    "message": "$COUNT$ rows bring a sentence - a phrase already saved takes it only when it has none of its own.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1,5" }
+    }
+  },
+  "vocab_import_sentenced_one": {
+    "message": "The file's sentence was added to $COUNT$ phrase already saved.",
+    "description": "The import report's sentence (D212) when a file's sentence was filled into phrases that were already saved without one. Plural family over the count. Absent when none was.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "vocab_import_sentenced_other": {
+    "message": "The file's sentence was added to $COUNT$ phrases already saved.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1,5" }
+    }
+  },
   "pager_page_of": {
     "message": "Page $PAGE$ of $PAGES$",
     "placeholders": {
@@ -357,7 +383,7 @@
     "description": "Heading of the transfer section under the saved-phrases and reading lists, and the text of the anchor link that jumps to it - one name for one place."
   },
   "vocab_transfer_note": {
-    "message": "A two-column .tsv file - what the KOReader plugin writes and Anki imports. Importing adds phrases this pair is missing and never touches a saved one. In the meaning cell, a semicolon followed by a space separates meanings; a semicolon without a space stays inside its meaning. Export for Anki writes a third column with the sentence each phrase was saved in - empty when none was kept. That file is for Anki; it cannot be imported here.",
+    "message": "A two-column .tsv file - what the KOReader plugin writes and Anki imports. Importing adds phrases this pair is missing and never touches a saved one. In the meaning cell, a semicolon followed by a space separates meanings; a semicolon without a space stays inside its meaning. Export for Anki writes a third column with the sentence each phrase was saved in - empty when none was kept. That file can be imported back too: its sentences come along, and a phrase already saved takes the file's sentence only when it has none of its own.",
     "description": "The file-format fold under Import and Export. The last two sentences (D210) quote the vocab_export_anki button - each language quotes its own wording of that key - and say the two things a reader needs about that file: what its third column is, and that Import does not read it."
   },
   "vocab_import_into": { "message": "Import into" },

@@ -109,7 +109,7 @@ function cleanTranslations(translations) {
  * @param {string | undefined} context
  * @returns {string | undefined}
  */
-function cleanSentence(context) {
+export function cleanSentence(context) {
   if (typeof context !== "string") return undefined;
   const sentence = collapseWhitespace(context);
   if (sentence.length === 0 || sentence.length > MAX_SENTENCE_LENGTH) return undefined;
@@ -189,6 +189,23 @@ export function resaved(existing, incoming) {
   const next = { ...existing, phrase: incoming.phrase, translations: incoming.translations };
   if (!hasSentence(existing) && hasSentence(incoming)) next.context = incoming.context;
   return next;
+}
+
+/**
+ * A saved row met by an import (D212): the file's sentence fills a row that
+ * has none, and nothing else moves - the row's meanings are this reader's
+ * decision, the file is somebody's past (`putMissingPhrases`' rule), and
+ * the first sentence stays as it does on a re-save above. The same object
+ * back when there is nothing to take, so the store can tell there is
+ * nothing to write.
+ *
+ * @param {Phrase} existing
+ * @param {Phrase} incoming as the file's row was built
+ * @returns {Phrase}
+ */
+export function withImportedSentence(existing, incoming) {
+  if (hasSentence(existing) || !hasSentence(incoming)) return existing;
+  return { ...existing, context: incoming.context };
 }
 
 /**
