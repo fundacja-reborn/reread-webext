@@ -253,6 +253,15 @@ export const ErrorCode = Object.freeze({
  * the worse outcome. A key the store does not know is the background's to
  * skip, not a refusal: Learned may have taken it between the report and the
  * write.
+ * Since D216 the report may carry `sentences` as well: for a key whose
+ * bubble opened with a sentence around it, that sentence once per key -
+ * the page's own text, the same one `save-phrase` carries - so a phrase
+ * kept without one (before the setting was on, from the phrases page, from
+ * a two-column file) takes the sentence it is next met in. The setting
+ * stays the background's to read, as on a save: the page sends what it
+ * has. The one list a page may leave out, because a page older than the
+ * field never had it - read as empty then - and exact like the other two
+ * once it is there.
  *
  * @typedef {{ kind: typeof Message.TRANSLATE, text: string, context?: string, lang?: string }} TranslateRequest
  * @typedef {{ kind: typeof Message.LOOK_UP, text: string, lang?: string }} LookUpRequest
@@ -281,7 +290,7 @@ export const ErrorCode = Object.freeze({
  * }} RestoreRow one phrase as the backup of everything carries it (D213) - its pair in the row, so one file holds every pair
  * @typedef {{ kind: typeof Message.RESTORE_VOCABULARY, rows: RestoreRow[] }} RestoreVocabularyRequest
  * @typedef {{ added: number, skipped: number, sentenced: number, counted: number, invalid: number }} RestoreReport
- * @typedef {{ kind: typeof Message.COUNT_PHRASES, recalled: string[], read: Array<[string, number]> }} CountPhrasesRequest
+ * @typedef {{ kind: typeof Message.COUNT_PHRASES, recalled: string[], read: Array<[string, number]>, sentences: Array<[string, string]> }} CountPhrasesRequest
  * @typedef {{ kind: typeof Message.READ_PAGE }} ReadPageRequest
  * @typedef {TranslateRequest
  *   | LookUpRequest
@@ -650,7 +659,7 @@ export function asRequest(message) {
   }
 
   if (kind === Message.COUNT_PHRASES) {
-    const { recalled, read } = /** @type {Record<string, unknown>} */ (message);
+    const { recalled, read, sentences } = /** @type {Record<string, unknown>} */ (message);
     if (!Array.isArray(recalled) || !Array.isArray(read)) return null;
     if (recalled.length > MAX_COUNTED_KEYS || read.length > MAX_COUNTED_KEYS) return null;
     if (!recalled.every((key) => typeof key === "string" && key.length > 0)) return null;
@@ -663,7 +672,22 @@ export function asRequest(message) {
       if (typeof count !== "number" || !Number.isInteger(count) || count < 1) return null;
       occurrences.push([key, count]);
     }
-    return { kind: Message.COUNT_PHRASES, recalled: [...recalled], read: occurrences };
+    // The sentences (D216): absent from a page older than the field, and
+    // exact like the two lists once present - the sender is our own page,
+    // and a pair that is not one means a bug, not a sentence to drop.
+    /** @type {Array<[string, string]>} */
+    const met = [];
+    if (sentences !== undefined) {
+      if (!Array.isArray(sentences) || sentences.length > MAX_COUNTED_KEYS) return null;
+      for (const pair of sentences) {
+        if (!Array.isArray(pair) || pair.length !== 2) return null;
+        const [key, sentence] = pair;
+        if (typeof key !== "string" || key.length === 0) return null;
+        if (typeof sentence !== "string" || sentence.length === 0) return null;
+        met.push([key, sentence]);
+      }
+    }
+    return { kind: Message.COUNT_PHRASES, recalled: [...recalled], read: occurrences, sentences: met };
   }
 
   return null;

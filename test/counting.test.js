@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { CountReport, ReadLedger, mergeCounts, tallyRead } from "../src/lib/counting.js";
+import { CountReport, ReadLedger, mergeCounts, mergeSentences, tallyRead } from "../src/lib/counting.js";
 
 describe("ReadLedger", () => {
   it("claims a part once per document, however the reader moves inside it", () => {
@@ -67,6 +67,24 @@ describe("mergeCounts", () => {
   });
 });
 
+describe("mergeSentences", () => {
+  it("keeps the first sentence named for a key, and none from a report older than the field (D216)", () => {
+    const merged = mergeSentences({
+      sentences: [
+        ["bank", "The bank was steep."],
+        ["read", "I read it twice."],
+        ["bank", "A bank in the city."],
+      ],
+    });
+    assert.deepEqual([...merged], [
+      ["bank", "The bank was steep."],
+      ["read", "I read it twice."],
+    ]);
+    assert.equal(mergeSentences({}).size, 0);
+    assert.equal(mergeSentences({ sentences: [] }).size, 0);
+  });
+});
+
 describe("CountReport", () => {
   it("gathers openings and tallies and hands them over once", () => {
     const report = new CountReport();
@@ -77,9 +95,29 @@ describe("CountReport", () => {
     report.read([["read", 3]]);
     report.recalled("bank");
     assert.equal(report.isEmpty(), false);
-    assert.deepEqual(report.take(), { recalled: ["bank", "bank"], read: [["read", 3]] });
+    assert.deepEqual(report.take(), { recalled: ["bank", "bank"], read: [["read", 3]], sentences: [] });
 
     assert.equal(report.isEmpty(), true);
     assert.equal(report.take(), null);
+  });
+
+  it("carries the sentence an opening stood in, the first per key, and forgets it with the batch (D216)", () => {
+    const report = new CountReport();
+    report.recalled("bank", "The bank was steep.");
+    report.recalled("bank", "A bank in the city.");
+    report.recalled("read", null);
+    report.recalled("shore", "");
+    report.recalled("read", "I read it twice.");
+    assert.deepEqual(report.take(), {
+      recalled: ["bank", "bank", "read", "shore", "read"],
+      read: [],
+      sentences: [
+        ["bank", "The bank was steep."],
+        ["read", "I read it twice."],
+      ],
+    });
+    // The next batch starts without the sentences of the last one.
+    report.recalled("bank");
+    assert.deepEqual(report.take(), { recalled: ["bank"], read: [], sentences: [] });
   });
 });

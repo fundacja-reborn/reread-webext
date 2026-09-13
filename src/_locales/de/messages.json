@@ -1140,7 +1140,7 @@
   },
   "options_save_sentence": { "message": "Den Satz zusammen mit der Phrase speichern" },
   "options_save_sentence_hint": {
-    "message": "Wenn Sie eine Phrase aus der Sprechblase speichern, wird der Satz, in dem sie steht, mit ihr gespeichert - der Satz so, wie die Seite ihn zeigt, ohne Übersetzung. Er steht auf der Seite der gespeicherten Phrasen unter der Phrase, auf eine Zeile eingeklappt, und kommt in die dritte Spalte des Exports für Anki. Wie die Phrase bleibt er auf diesem Gerät. Ausgeschaltet wird kein neuer Satz gespeichert; die bereits gespeicherten bleiben bei ihren Phrasen."
+    "message": "Wenn Sie eine Phrase aus der Sprechblase speichern, wird der Satz, in dem sie steht, mit ihr gespeichert - der Satz so, wie die Seite ihn zeigt, ohne Übersetzung. Er steht auf der Seite der gespeicherten Phrasen unter der Phrase, auf eine Zeile eingeklappt, und kommt in die dritte Spalte des Exports für Anki. Eine ohne Satz gespeicherte Phrase bekommt ihn, wenn Sie ihre Sprechblase das nächste Mal auf einer Seite öffnen - den Satz, in dem sie dort steht. Wie die Phrase bleibt der Satz auf diesem Gerät. Ausgeschaltet wird kein neuer Satz gespeichert; die bereits gespeicherten bleiben bei ihren Phrasen."
   },
   "options_no_translation": { "message": "Ohne Übersetzungsmodell verwenden" },
   "options_no_translation_hint": {

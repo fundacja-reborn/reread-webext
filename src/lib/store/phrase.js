@@ -42,9 +42,11 @@ import { MAX_SENTENCE_LENGTH } from "../sentence.js";
  * has to ask for: written only while the setting that asks for it is on,
  * which is off until they turn it on. A row keeps its first sentence - a
  * later save changes the meanings and leaves it alone (`resaved`) - and a
- * phrase kept from the phrases page or from an import has none. Absent
- * otherwise, and absent on every row from before D210; the field was
- * reserved from M2 on and written by nobody until then (O2 in the docs).
+ * phrase kept from the phrases page or from a two-column file has none
+ * until it is met in a sentence again: the next bubble opened over it with
+ * the setting on fills the row (D216, `withSentence`), as a save would.
+ * Absent otherwise, and absent on every row from before D210; the field
+ * was reserved from M2 on and written by nobody until then (O2 in the docs).
  *
  * @typedef {object} Phrase
  * @property {string} id
@@ -192,20 +194,42 @@ export function resaved(existing, incoming) {
 }
 
 /**
+ * A saved row met again in a sentence (D216): the bubble over it opened
+ * with a sentence around the phrase, and the row has none - kept before
+ * the setting was on, from the phrases page, or from a two-column file.
+ * The sentence fills the row the way a save's does (`resaved`) and nothing
+ * else moves; a row with a sentence keeps it, the first sentence staying
+ * as it does everywhere. The sentence came over a message and takes the
+ * shape rule on the way in (`cleanSentence`): nothing, or a paragraph past
+ * the ceiling, fills nothing. The same object back when there is nothing
+ * to take, so the store can tell there is nothing to write.
+ *
+ * @param {Phrase} existing
+ * @param {string | undefined} sentence as the page had it
+ * @returns {Phrase}
+ */
+export function withSentence(existing, sentence) {
+  if (hasSentence(existing)) return existing;
+  const cleaned = cleanSentence(sentence);
+  if (cleaned === undefined) return existing;
+  return { ...existing, context: cleaned };
+}
+
+/**
  * A saved row met by an import (D212): the file's sentence fills a row that
  * has none, and nothing else moves - the row's meanings are this reader's
  * decision, the file is somebody's past (`putMissingPhrases`' rule), and
- * the first sentence stays as it does on a re-save above. The same object
- * back when there is nothing to take, so the store can tell there is
- * nothing to write.
+ * the first sentence stays as it does on a re-save above. The same rule as
+ * a bubble's (`withSentence`), told with a row: the same object back when
+ * there is nothing to take, so the store can tell there is nothing to
+ * write.
  *
  * @param {Phrase} existing
  * @param {Phrase} incoming as the file's row was built
  * @returns {Phrase}
  */
 export function withImportedSentence(existing, incoming) {
-  if (hasSentence(existing) || !hasSentence(incoming)) return existing;
-  return { ...existing, context: incoming.context };
+  return hasSentence(incoming) ? withSentence(existing, incoming.context) : existing;
 }
 
 /**

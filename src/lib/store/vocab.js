@@ -19,7 +19,7 @@
  * and `background/vocabulary.js` is where that rule is enforced.
  */
 
-import { counted, countsOf, hasSentence, resaved, restored, withImportedSentence } from "./phrase.js";
+import { counted, countsOf, hasSentence, resaved, restored, withImportedSentence, withSentence } from "./phrase.js";
 
 const DB_NAME = "reread-vocab";
 const DB_VERSION = 1;
@@ -247,6 +247,36 @@ export async function countPhrases(pair, counts, now) {
       written += 1;
     }
     return written;
+  });
+}
+
+/**
+ * Fills the sentence a bubble opened in (D216) into the rows of one pair
+ * that have none, in one transaction: a key that is not there any more -
+ * learned between the page's report and this write - is skipped, and a
+ * row that has its sentence is not written (`withSentence`). Only the
+ * sentence moves; the row's identity, its text, its meanings and its
+ * counts are read and put back as they were.
+ *
+ * @param {Pair} pair
+ * @param {Map<string, string>} sentences by normalized key
+ * @returns {Promise<number>} how many rows took a sentence
+ */
+export async function fillSentences(pair, sentences) {
+  return await withPhrases("readwrite", async (store) => {
+    const index = store.index(BY_KEY);
+    let filled = 0;
+    for (const [normalized, sentence] of sentences) {
+      const existing = /** @type {Phrase | undefined} */ (
+        await promisify(index.get(indexKey({ ...pair, normalized })))
+      );
+      if (existing === undefined) continue;
+      const next = withSentence(existing, sentence);
+      if (next === existing) continue;
+      await promisify(store.put(next));
+      filled += 1;
+    }
+    return filled;
   });
 }
 

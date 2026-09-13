@@ -14,6 +14,7 @@ import {
   restored,
   withImportedSentence,
   withRestoredCounts,
+  withSentence,
 } from "../src/lib/store/phrase.js";
 
 /**
@@ -277,6 +278,42 @@ describe("withImportedSentence", () => {
     assert.equal(withImportedSentence(kept, bank("Another sentence.")), kept);
     const bare = bank();
     assert.equal(withImportedSentence(bare, bank()), bare);
+  });
+});
+
+describe("withSentence", () => {
+  /**
+   * @param {string} [context]
+   * @returns {import("../src/lib/store/phrase.js").Phrase}
+   */
+  function bank(context) {
+    const built = buildPhrase({ text: "bank", translations: ["brzeg"], langFrom: "en", langTo: "pl", id: "id-bank", now: 1, context });
+    assert.ok(built.ok);
+    return built.value;
+  }
+
+  it("gives a row kept without a sentence the one its bubble opened in, folded to one line (D216)", () => {
+    const existing = { ...bank(), recallCount: 3, lastRecallAt: 500 };
+    const filled = withSentence(existing, "The  bank\n was steep.");
+    assert.equal(filled.context, "The bank was steep.");
+    // Nothing else of the row moves - not the meanings, not the counts.
+    assert.deepEqual({ ...filled, context: undefined }, { ...existing, context: undefined });
+  });
+
+  it("keeps the first sentence: a row with one hands itself back whatever the bubble stood in", () => {
+    const kept = bank("The first sentence.");
+    assert.equal(withSentence(kept, "Another sentence."), kept);
+  });
+
+  it("hands the same row back for no sentence, or one past the ceiling - nothing to write", () => {
+    const bare = bank();
+    assert.equal(withSentence(bare, undefined), bare);
+    assert.equal(withSentence(bare, ""), bare);
+    assert.equal(withSentence(bare, "   "), bare);
+    assert.equal(withSentence(bare, "x".repeat(MAX_SENTENCE_LENGTH + 1)), bare);
+    assert.equal(withSentence(bare, "x".repeat(MAX_SENTENCE_LENGTH)).context?.length, MAX_SENTENCE_LENGTH);
+    // A hand-edited copy can hold an empty string there; that is no sentence.
+    assert.equal(withSentence({ ...bare, context: "" }, "The bank was steep.").context, "The bank was steep.");
   });
 });
 

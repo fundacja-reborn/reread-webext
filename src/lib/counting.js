@@ -7,8 +7,11 @@
  *
  * Two counts, two gestures. A bubble opening is reported as it happens - a
  * press on an underline, or a selection of a phrase already kept - and the
- * page batches them for the idle moment after. A text counts as finished
- * only through the gestures that prove the reader reached its end: the Next
+ * page batches them for the idle moment after. Since D216 an opening also
+ * carries the sentence the phrase stood in, when the page had one: not a
+ * count, but the one moment a phrase kept without a sentence is met in one
+ * again, and the same batch is how it reaches the row. A text counts as
+ * finished only through the gestures that prove the reader reached its end: the Next
  * button under a book part's text, and Mark as read - which, over a book,
  * counts the part on screen and never the whole book, so the parts already
  * counted on the way are not counted twice. Nothing else counts: not
@@ -106,6 +109,25 @@ export function mergeCounts(report) {
 }
 
 /**
+ * The sentences a report carries (D216), by key - the first named per key,
+ * which is the one the reader met first: the page sends one per key
+ * already, and a report naming a key twice is a hand-made message that
+ * must not turn "the first sentence stays" into "the last one wins". A
+ * report from a page older than the field carries none.
+ *
+ * @param {{ sentences?: Array<[string, string]> }} report
+ * @returns {Map<string, string>}
+ */
+export function mergeSentences(report) {
+  /** @type {Map<string, string>} */
+  const sentences = new Map();
+  for (const [key, sentence] of report.sentences ?? []) {
+    if (!sentences.has(key)) sentences.set(key, sentence);
+  }
+  return sentences;
+}
+
+/**
  * What a page has to report, gathered between two flushes: openings as they
  * came, and the tallies of the texts finished meanwhile - joined into one
  * message so that a finished part and the bubble opened on its last line
@@ -116,10 +138,25 @@ export class CountReport {
   #recalled = [];
   /** @type {Array<[string, number]>} */
   #read = [];
+  /**
+   * The sentence each recalled phrase stood in (D216), the first of the
+   * batch per key: a row takes one sentence and keeps it, so a second
+   * opening in another sentence carries nothing the store could use.
+   *
+   * @type {Map<string, string>}
+   */
+  #sentences = new Map();
 
-  /** @param {string} key a saved phrase's own key */
-  recalled(key) {
+  /**
+   * @param {string} key a saved phrase's own key
+   * @param {string | null} [sentence] the sentence the bubble opened in, as
+   *   the page shows it, when the page had one (D216) - what fills a row
+   *   kept without a sentence, if the setting asks for it; the page sends
+   *   what it has, the setting is the background's to read
+   */
+  recalled(key, sentence = null) {
     this.#recalled.push(key);
+    if (sentence !== null && sentence.length > 0 && !this.#sentences.has(key)) this.#sentences.set(key, sentence);
   }
 
   /** @param {Array<[string, number]>} tally what `tallyRead` found */
@@ -135,13 +172,14 @@ export class CountReport {
   /**
    * Everything gathered, and the report emptied - what one message carries.
    *
-   * @returns {{ recalled: string[], read: Array<[string, number]> } | null} null when there was nothing
+   * @returns {{ recalled: string[], read: Array<[string, number]>, sentences: Array<[string, string]> } | null} null when there was nothing
    */
   take() {
     if (this.isEmpty()) return null;
-    const batch = { recalled: this.#recalled, read: this.#read };
+    const batch = { recalled: this.#recalled, read: this.#read, sentences: [...this.#sentences] };
     this.#recalled = [];
     this.#read = [];
+    this.#sentences = new Map();
     return batch;
   }
 }

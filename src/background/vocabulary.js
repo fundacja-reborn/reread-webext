@@ -18,7 +18,7 @@
 
 import { normalize } from "../lib/normalize.js";
 import { chosenPair, readConfig } from "../lib/config.js";
-import { mergeCounts } from "../lib/counting.js";
+import { mergeCounts, mergeSentences } from "../lib/counting.js";
 import { ErrorCode, fail, ok } from "../lib/protocol.js";
 import { ensureBackup, rebuildBackup, restoreVocabulary } from "../lib/store/backup.js";
 import { migrateSemicolonsOnce, sweepSemicolonBackup } from "../lib/store/semicolon-migration.js";
@@ -28,6 +28,7 @@ import { buildPhrase, withRestoredCounts } from "../lib/store/phrase.js";
 import {
   countPhrases as countRows,
   deletePhrase,
+  fillSentences,
   listPhrases,
   putMissingPhrases,
   putPhrase,
@@ -199,6 +200,15 @@ export async function forgetPhrase(request) {
  * taken it between the report and this write. A restore on the way is the
  * one thing the pages must learn about, as with forgetting.
  *
+ * The sentence a bubble opened in rides the same report (D216) and fills
+ * the rows kept without one - only while the setting asks for it, read
+ * here fresh as on every save: the page sends what it has, and this is the
+ * one place that knows whether the reader wanted a sentence kept. A
+ * sentence filled in is vocabulary, not a count, so the copy is rebuilt
+ * for it - a deletion of the database must not lose it again - and the
+ * mirror is not, for the counts' own reason: it carries no sentence, and
+ * rewriting it would repaint every open tab for nothing.
+ *
  * @param {import("../lib/protocol.js").CountPhrasesRequest} request
  * @returns {Promise<import("../lib/protocol.js").Result<null>>}
  */
@@ -211,7 +221,10 @@ export async function countPhrases(request) {
   if (pair === null) return ok(null);
   const counts = mergeCounts(request);
   if (counts.size > 0) await countRows(pair, counts, Date.now());
+  const sentences = config.saveSentence ? mergeSentences(request) : null;
+  const filled = sentences === null || sentences.size === 0 ? 0 : await fillSentences(pair, sentences);
   if (restored > 0) await afterWrite(config);
+  else if (filled > 0) await rebuildBackup();
   return ok(null);
 }
 
