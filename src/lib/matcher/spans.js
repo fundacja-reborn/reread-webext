@@ -19,6 +19,29 @@
  */
 
 /**
+ * A text node's data with the line breaks its file was wrapped with read as
+ * the spaces the reader sees.
+ *
+ * A file wrapped at seventy columns - every Project Gutenberg book, most
+ * pretty-printed HTML - has a line break in the middle of every other
+ * sentence, and under `white-space: normal` the browser paints each of them
+ * as a space. Text read out of such a node has to say the same, or a break
+ * nobody can see ends a sentence for `sentenceAround` and stops the reading
+ * voice for breath: the only breaks that mean one are the ones the scanner
+ * puts in itself, for a `<br>` or a block boundary.
+ *
+ * One character for one, never collapsing: every index into the result is
+ * still an index into the node the data came from, which is what `locate`
+ * relies on to get a match back onto the page.
+ *
+ * @param {string} data of one text node
+ * @returns {string}
+ */
+export function unwrapLines(data) {
+  return data.replace(/\n/gu, " ");
+}
+
+/**
  * Joined without a separator: the pieces of a block are what the browser paints
  * next to each other, so `<b>hot</b>test` really is the word `hottest` on the
  * screen, and pretending otherwise would be inventing a gap the reader cannot

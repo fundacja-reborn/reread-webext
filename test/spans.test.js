@@ -2,7 +2,34 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import { buildIndex, findMatches } from "../src/lib/matcher/index.js";
-import { joinPieces, locate } from "../src/lib/matcher/spans.js";
+import { joinPieces, locate, unwrapLines } from "../src/lib/matcher/spans.js";
+import { sentenceAround } from "../src/lib/sentence.js";
+
+describe("unwrapLines", () => {
+  it("reads the line breaks a file was wrapped with as the spaces the reader sees", () => {
+    assert.equal(unwrapLines("told by our forefathers and\nmothers"), "told by our forefathers and mothers");
+  });
+
+  it("changes nothing else, and never the length", () => {
+    const data = "one\ttwo  three\n";
+    assert.equal(unwrapLines(data), "one\ttwo  three ");
+    assert.equal(unwrapLines(data).length, data.length);
+    assert.equal(unwrapLines("no breaks"), "no breaks");
+    assert.deepEqual(joinPieces([unwrapLines("a\nb"), "c"]).spans, joinPieces(["a\nb", "c"]).spans);
+  });
+
+  it("keeps a sentence whole across a wrapped line", () => {
+    // What a Project Gutenberg paragraph is in the DOM: one text node, wrapped
+    // at seventy columns. Read as stored, the sentence ended at "and".
+    const stored = "those that came before. All the way back to the myths and legends told by our forefathers and\nmothers around the cave fire.";
+    const text = unwrapLines(stored);
+    const at = text.indexOf("forefathers");
+    assert.equal(
+      sentenceAround(text, at, at + "forefathers".length),
+      "All the way back to the myths and legends told by our forefathers and mothers around the cave fire.",
+    );
+  });
+});
 
 describe("joinPieces", () => {
   it("puts nothing between the pieces, because the page does not either", () => {
