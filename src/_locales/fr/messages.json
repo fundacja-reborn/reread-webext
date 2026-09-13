@@ -234,8 +234,8 @@
       "count": { "content": "$1", "example": "100" }
     }
   },
-  "vocab_legend_recalls": { "message": "consultée - combien de fois vous avez ouvert la bulle de la phrase en lisant" },
-  "vocab_legend_reads": { "message": "lue - combien de fois la phrase est apparue dans les textes terminés" },
+  "vocab_legend_recalls": { "message": "consultée – ouvertures de la bulle en lisant" },
+  "vocab_legend_reads": { "message": "lue – occurrences dans les textes terminés" },
   "pager_page_of": {
     "message": "Page $PAGE$ sur $PAGES$",
     "placeholders": {

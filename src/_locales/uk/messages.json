@@ -261,8 +261,8 @@
       "count": { "content": "$1", "example": "1,5" }
     }
   },
-  "vocab_legend_recalls": { "message": "перевірені - скільки разів ви відкривали бульбашку фрази під час читання" },
-  "vocab_legend_reads": { "message": "читані - скільки разів фраза траплялася в прочитаних текстах" },
+  "vocab_legend_recalls": { "message": "перевірені – відкриття бульбашки під час читання" },
+  "vocab_legend_reads": { "message": "читані – появи в прочитаних текстах" },
   "pager_page_of": {
     "message": "Сторінка $PAGE$ з $PAGES$",
     "placeholders": {

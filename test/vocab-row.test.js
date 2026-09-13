@@ -50,7 +50,7 @@ describe("a row of the saved phrases", () => {
     assert.match(row, /row\.append\(head\);[\s\S]*row\.append\(body\);[\s\S]*row\.append\(actions\)/, "the row is not appended head, body, actions");
   });
 
-  it("lays the row out as one wrapping line on a phone and three columns from 40rem", async () => {
+  it("lays the row out as one wrapping line on a phone and three columns from 50rem", async () => {
     const styles = await source("vocab/vocab.css");
     const phone = rule(styles, ".phrase-row");
     assert.match(phone, /display: flex;\s*flex-wrap: wrap;/, "the phone row is not a wrapping line");
@@ -60,13 +60,27 @@ describe("a row of the saved phrases", () => {
     assert.match(rule(styles, ".phrase-head"), /order: 1;\s*flex: 1 1 auto;\s*min-width: 0;/, "the head does not grow from its own width");
     assert.match(rule(styles, ".phrase-actions"), /order: 2;[\s\S]*margin-inline-start: auto;/, "the actions do not stand at the line's end");
     assert.match(rule(styles, ".phrase-body"), /order: 3;\s*flex: 1 1 100%;/, "the body does not take the next line whole");
-    // One breakpoint, in rem like the pager's: the grid with the three
-    // named areas, the actions out of the baseline group.
-    const desktop = styles.slice(styles.indexOf("@media (min-width: 40rem)"));
-    assert.notEqual(desktop.length, 0, "no 40rem breakpoint");
-    assert.doesNotMatch(styles, /@media \(min-width: 600px\)/, "a second breakpoint in px survives");
-    assert.match(rule(desktop, "  .phrase-row"), /display: grid;\s*grid-template-columns: minmax\(10rem, 1fr\) minmax\(0, 2fr\) auto;\s*grid-template-areas: "head body actions";[\s\S]*align-items: baseline;/, "the desktop row is not the three-column grid");
+    // Breakpoints in rem like the pager's, none in px. The grid waits for
+    // the column to be as wide as it gets (the 46rem body plus its padding
+    // is 49rem): three named areas, the meanings three parts to the
+    // phrase's one, the actions out of the baseline group.
+    assert.doesNotMatch(styles, /@media \(min-width: 600px\)/, "a breakpoint in px survives");
+    assert.match(styles, /@media \(min-width: 40rem\)/, "the title's select and the transfer buttons lost their query");
+    const desktop = styles.slice(styles.indexOf("@media (min-width: 50rem)"));
+    assert.notEqual(desktop.length, 0, "no 50rem breakpoint for the grid");
+    assert.doesNotMatch(styles.slice(styles.indexOf("@media (min-width: 40rem)"), styles.indexOf("@media (min-width: 50rem)")), /display: grid/, "the grid stands under 50rem, where the meanings' column is squeezed");
+    assert.match(rule(desktop, "  .phrase-row"), /display: grid;\s*grid-template-columns: minmax\(9rem, 1fr\) minmax\(0, 3fr\) auto;\s*grid-template-areas: "head body actions";[\s\S]*align-items: baseline;/, "the desktop row is not the three-column grid");
     assert.match(rule(desktop, "  .phrase-actions"), /grid-area: actions;\s*align-self: start;/, "the actions are not at the row's top, out of the baseline group");
+  });
+
+  it("stacks the filter and the order under a phone's width, each the whole line", async () => {
+    const styles = await source("vocab/vocab.css");
+    const narrow = styles.slice(styles.indexOf("@media (max-width: 30rem)"), styles.indexOf("@media (min-width: 40rem)"));
+    assert.notEqual(narrow.length, 0, "no 30rem query");
+    assert.match(narrow, /\.filter-line \{\s*flex-wrap: wrap;/, "the filter line does not wrap");
+    // The field's flex child is the cross's wrapper, not the input.
+    assert.match(narrow, /\.filter-line > \.clear-field \{\s*flex-basis: 100%;/, "the field does not take the whole line");
+    assert.match(narrow, /\.filter-line select \{\s*flex: 1 1 100%;\s*max-width: none;\s*margin-inline-start: 0;/, "the order select keeps its 45% cap under the field");
   });
 
   it("shows a count as a glyph and a number, the whole sentence in its name, and no count at zero", async () => {
@@ -106,6 +120,10 @@ describe("a row of the saved phrases", () => {
     // The counts and the legend wear the interface's size, not the Aa panel's.
     const styles = await source("vocab/vocab.css");
     assert.match(rule(styles, ".phrase-counts"), /font-size: max\(13px, 0\.85rem\);/, "the counts do not wear the interface size");
+    // And the interface face, said outright: the head around them wears
+    // the reading face, and Georgia's oldstyle figures are no digits for
+    // a 13px count on e-ink.
+    assert.match(rule(styles, ".phrase-counts"), /font-family: system-ui, -apple-system, "Segoe UI", sans-serif;/, "the digits inherit the reading face from the head");
     assert.match(rule(styles, ".phrase-legend"), /font-size: max\(13px, 0\.85rem\);/, "the legend does not wear the counts' size");
     assert.match(rule(styles, ".phrase-count-icon"), /width: 1em;\s*height: 1em;\s*vertical-align: -0\.15em;\s*margin-inline-end: 0\.25em;/, "the glyph is not an em on the baseline with its number a quarter em after");
   });
@@ -123,6 +141,9 @@ describe("a row of the saved phrases", () => {
     // The press is tall enough for a finger without parting the sentence
     // from the meanings.
     assert.match(rule(styles, ".phrase-sentence > summary"), /padding-block: 0\.25rem;/, "the summary is not a 32px press at the smallest reading size");
+    // The opened sentence keeps a measure on the stacked layout, where the
+    // body is the whole column.
+    assert.match(rule(styles, ".phrase-sentence[open] > summary"), /max-width: 65ch;/, "the opened sentence runs the whole column");
   });
 
   it("fits the three quiet actions to the phrase's line: 44px to press, no taller than the text", async () => {
@@ -157,7 +178,7 @@ describe("a row of the saved phrases", () => {
     assert.match(rule(styles, '.phrase-row[data-editing="true"] > .phrase-actions'), /order: 4;\s*flex: 1 1 100%;/, "on a phone Save and Cancel do not take the line under the box");
     assert.match(rule(styles, '.phrase-row[data-editing="true"] > .phrase-actions > button'), /min-height: 44px;/, "Save and Cancel are under the touch floor");
     // On a desktop the head and the body leave the baseline group.
-    const desktop = styles.slice(styles.indexOf("@media (min-width: 40rem)"));
+    const desktop = styles.slice(styles.indexOf("@media (min-width: 50rem)"));
     assert.match(desktop, /\.phrase-row\[data-editing="true"\] > \.phrase-head,\s*\.phrase-row\[data-editing="true"\] > \.phrase-body \{\s*align-self: start;/, "the phrase aligns to the textarea's bottom edge");
   });
 
