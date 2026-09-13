@@ -853,13 +853,15 @@ button.quiet-speak svg {
      phrase, not under it, and the sentence's fold stays in the meanings'
      column instead of taking a line under all three. The phrases are
      short and the meanings are the reading, so the middle column takes
-     three parts to the phrase's one, the phrase never under 9rem. Aligned
+     three parts to the phrase's one - and the phrase never under 10rem,
+     where a thirteen-letter word like "accommodation" still fits on one
+     line at Aa 19 (at 9rem it broke in the middle). Aligned
      by baseline: the phrase and the meanings share a face and a size, so
      their first lines meet exactly; the actions are taken out of that
      group below. */
   .phrase-row {
     display: grid;
-    grid-template-columns: minmax(9rem, 1fr) minmax(0, 3fr) auto;
+    grid-template-columns: minmax(10rem, 1fr) minmax(0, 3fr) auto;
     grid-template-areas: "head body actions";
     column-gap: 1rem;
     align-items: baseline;

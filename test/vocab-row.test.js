@@ -69,7 +69,7 @@ describe("a row of the saved phrases", () => {
     const desktop = styles.slice(styles.indexOf("@media (min-width: 50rem)"));
     assert.notEqual(desktop.length, 0, "no 50rem breakpoint for the grid");
     assert.doesNotMatch(styles.slice(styles.indexOf("@media (min-width: 40rem)"), styles.indexOf("@media (min-width: 50rem)")), /display: grid/, "the grid stands under 50rem, where the meanings' column is squeezed");
-    assert.match(rule(desktop, "  .phrase-row"), /display: grid;\s*grid-template-columns: minmax\(9rem, 1fr\) minmax\(0, 3fr\) auto;\s*grid-template-areas: "head body actions";[\s\S]*align-items: baseline;/, "the desktop row is not the three-column grid");
+    assert.match(rule(desktop, "  .phrase-row"), /display: grid;\s*grid-template-columns: minmax\(10rem, 1fr\) minmax\(0, 3fr\) auto;\s*grid-template-areas: "head body actions";[\s\S]*align-items: baseline;/, "the desktop row is not the three-column grid");
     assert.match(rule(desktop, "  .phrase-actions"), /grid-area: actions;\s*align-self: start;/, "the actions are not at the row's top, out of the baseline group");
   });
 
