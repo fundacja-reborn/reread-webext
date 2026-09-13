@@ -1195,7 +1195,7 @@
   },
   "options_save_sentence": { "message": "Enregistrer la phrase avec l'expression" },
   "options_save_sentence_hint": {
-    "message": "Quand vous enregistrez une expression depuis la bulle, la phrase où elle se trouve est enregistrée avec elle - la phrase telle que la page l'affiche, sans sa traduction. Elle apparaît sous l'expression dans la liste des expressions enregistrées, repliée sur une ligne, et va dans la troisième colonne de l'export pour Anki. Une expression enregistrée sans phrase en reçoit une la prochaine fois que vous ouvrez sa bulle sur une page : la phrase où elle se trouve alors. Comme l'expression, la phrase reste sur cet appareil. Désactivé, aucune nouvelle phrase n'est enregistrée ; celles déjà enregistrées restent avec leurs expressions."
+    "message": "Quand vous enregistrez une expression depuis la bulle, la phrase qui l'entoure est enregistrée avec elle - la phrase telle que la page l'affiche, sans sa traduction. Elle est affichée sous l'expression dans la liste des expressions enregistrées, repliée sur une ligne, et écrite dans la troisième colonne de l'export pour Anki. Pour une expression enregistrée sans phrase, la phrase qui l'entoure est enregistrée la prochaine fois que vous ouvrez sa bulle sur une page. Comme l'expression, la phrase est conservée uniquement sur cet appareil. Désactivé, aucune nouvelle phrase n'est enregistrée ; celles déjà enregistrées ne sont pas supprimées."
   },
   "options_no_translation": { "message": "Utiliser sans modèle de traduction" },
   "options_no_translation_hint": {
