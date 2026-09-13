@@ -4462,13 +4462,14 @@ function marksImportNotes(plan, invalid) {
  * has to outlive the click long enough for the download to take it - a
  * minute is comfortably that, and then the blob can go.
  *
- * @param {string | Uint8Array<ArrayBuffer>} content text, or the bytes of an archive (D145)
+ * @param {string | Uint8Array<ArrayBuffer> | Blob} content text, the bytes of a file, or the
+ *   archive as the stream packed it (D218)
  * @param {string} filename
  * @param {string} type
  * @returns {number} the file's size in bytes, for the line that says what was written
  */
 function downloadFile(content, filename, type) {
-  const blob = new Blob([content], { type });
+  const blob = content instanceof Blob ? content : new Blob([content], { type });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   anchor.href = url;
