@@ -17,7 +17,7 @@
  */
 
 import { buildIndex, findMatches } from "../lib/matcher/index.js";
-import { joinPieces, locate } from "../lib/matcher/spans.js";
+import { joinPieces, locate, unwrapLines } from "../lib/matcher/spans.js";
 
 /** Text that is never prose: not rendered, or being typed into. */
 const SKIP = new Set(["SCRIPT", "STYLE", "NOSCRIPT", "TEXTAREA", "INPUT", "SELECT", "OPTION", "SVG"]);
@@ -59,12 +59,21 @@ export function blockAround(node) {
  * them would invent a sentence that is on neither of them. `sentenceAround`
  * treats a line as an ending, so putting one here is all it takes.
  *
+ * Which is why the breaks a text node already holds must not stay: a file
+ * wrapped at seventy columns has one in the middle of every other sentence,
+ * and the reader sees a space there (`unwrapLines`). Inside `<pre>` they are
+ * lines, and stay. A tag rather than the block's computed `white-space`, in
+ * keeping with `blockAround`: a paragraph that keeps its line breaks by
+ * stylesheet alone is read as if it did not, at the cost of a sentence that
+ * runs across a break the reader can see.
+ *
  * @param {Element} block
  * @returns {{ node: Text | null, text: string }[]}
  */
 function partsOf(block) {
   /** @type {{ node: Text | null, text: string }[]} */
   const parts = [];
+  const preformatted = block.tagName === "PRE";
 
   /**
    * @param {Node} node
@@ -73,7 +82,7 @@ function partsOf(block) {
     for (let child = node.firstChild; child !== null; child = child.nextSibling) {
       if (child.nodeType === Node.TEXT_NODE) {
         const text = /** @type {Text} */ (child);
-        parts.push({ node: text, text: text.data });
+        parts.push({ node: text, text: preformatted ? text.data : unwrapLines(text.data) });
         continue;
       }
       if (child.nodeType !== Node.ELEMENT_NODE) continue;
@@ -112,6 +121,9 @@ function partsOf(block) {
  * The pieces come out in document order and are the same `BlockPart` shape the
  * matcher joins, so `joinPieces` and `locate` do the offset arithmetic here
  * too - one way of getting from a character back to the text node it is in.
+ * The line breaks a text node holds from its file are read as spaces here as
+ * well (`unwrapLines`, see `partsOf`), so the voice does not stop for breath
+ * at the end of every line of a wrapped file; inside `<pre>` they stay lines.
  *
  * @param {Element} root
  * @returns {BlockPart[]}
@@ -122,12 +134,13 @@ export function prosePieces(root) {
 
   /**
    * @param {Node} node
+   * @param {boolean} preformatted inside a `<pre>`, where a line break is a line
    */
-  const walk = (node) => {
+  const walk = (node, preformatted) => {
     for (let child = node.firstChild; child !== null; child = child.nextSibling) {
       if (child.nodeType === Node.TEXT_NODE) {
         const text = /** @type {Text} */ (child);
-        parts.push({ node: text, text: text.data });
+        parts.push({ node: text, text: preformatted ? text.data : unwrapLines(text.data) });
         continue;
       }
       if (child.nodeType !== Node.ELEMENT_NODE) continue;
@@ -138,12 +151,12 @@ export function prosePieces(root) {
 
       const boundary = BLOCK.has(element.tagName);
       if (boundary) parts.push({ node: null, text: "\n" });
-      walk(element);
+      walk(element, preformatted || element.tagName === "PRE");
       if (boundary) parts.push({ node: null, text: "\n" });
     }
   };
 
-  walk(root);
+  walk(root, root.tagName === "PRE");
   return parts;
 }
 

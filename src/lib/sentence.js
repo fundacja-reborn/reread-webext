@@ -24,7 +24,9 @@ import { trimPhrase } from "./normalize.js";
 /**
  * Ends a sentence on its own, whatever follows it. The one member is the line
  * break the page's blocks leave behind: a heading has no full stop and is still
- * the end of what it says.
+ * the end of what it says. The breaks a file was wrapped with are not in the
+ * text this gets - the scanner reads them as the spaces the reader sees
+ * (`unwrapLines`) - so a break here is always one the reader can see too.
  */
 const HARD_STOP = "\n";
 
