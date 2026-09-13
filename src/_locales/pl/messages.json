@@ -1616,7 +1616,7 @@
   },
   "options_save_sentence": { "message": "Zapisuj zdanie razem z frazą" },
   "options_save_sentence_hint": {
-    "message": "Gdy zapisujesz frazę z dymka, razem z nią zapisuje się zdanie, w którym stała - takie, jak na stronie, bez tłumaczenia. Widać je pod frazą na stronie zapisanych fraz, zwinięte do jednej linii, i trafia do trzeciej kolumny eksportu dla Anki. Fraza zapisana bez zdania dostaje je przy następnym otwarciu jej dymka na stronie - zdanie, w którym tam stoi. Tak jak fraza, zdanie zostaje na tym urządzeniu. Po wyłączeniu nowe zdania nie są zapisywane; zapisane wcześniej zostają przy swoich frazach."
+    "message": "Gdy zapisujesz frazę z dymka, razem z nią zapisywane jest zdanie wokół niej - takie, jak na stronie, bez tłumaczenia. Jest pokazywane pod frazą na stronie zapisanych fraz, zwinięte do jednej linii, i zapisywane w trzeciej kolumnie eksportu dla Anki. Przy frazie zapisanej bez zdania zdanie wokół niej jest zapisywane przy następnym otwarciu jej dymka na stronie. Tak jak fraza, zdanie jest przechowywane tylko na tym urządzeniu. Po wyłączeniu nowe zdania nie są zapisywane; zapisane wcześniej nie są usuwane."
   },
   "options_no_translation": { "message": "Używaj bez modelu tłumaczenia" },
   "options_no_translation_hint": {

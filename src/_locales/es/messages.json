@@ -1183,7 +1183,7 @@
   },
   "options_save_sentence": { "message": "Guardar la oración junto con la frase" },
   "options_save_sentence_hint": {
-    "message": "Al guardar una frase desde la burbuja, se guarda con ella la oración en la que aparece - tal como la muestra la página, sin su traducción. Se ve bajo la frase en la página de frases guardadas, plegada en una línea, y va a la tercera columna de la exportación para Anki. Una frase guardada sin oración recibe una la próxima vez que abre su burbuja en una página: la oración en la que aparece allí. Como la frase, la oración se queda en este dispositivo. Desactivado, no se guarda ninguna oración nueva; las ya guardadas se quedan con sus frases."
+    "message": "Al guardar una frase desde la burbuja, se guarda con ella la oración que la rodea - tal como la muestra la página, sin su traducción. Se muestra bajo la frase en la página de frases guardadas, plegada en una línea, y se escribe en la tercera columna de la exportación para Anki. Para una frase guardada sin oración, la oración que la rodea se guarda la próxima vez que abre su burbuja en una página. Como la frase, la oración se guarda solo en este dispositivo. Desactivado, no se guarda ninguna oración nueva; las ya guardadas no se eliminan."
   },
   "options_no_translation": { "message": "Usar sin modelo de traducción" },
   "options_no_translation_hint": {
