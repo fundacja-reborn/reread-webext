@@ -521,7 +521,7 @@
     }
   },
   "reader_transfer_epub": {
-    "message": ".epub - el formato de los libros electrónicos. Un libro se guarda como su texto con las imágenes del archivo, dividido en partes al importar."
+    "message": ".epub - el formato de los libros electrónicos. Un libro se guarda como texto e imágenes, dividido en partes al importar."
   },
   "reader_backup_scope": {
     "message": "La copia de seguridad contiene tus artículos con sus resaltados y posiciones de lectura, las frases guardadas de cada par de idiomas y los ajustes. Los resaltados hechos en libros también están en ella."

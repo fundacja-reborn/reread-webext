@@ -490,7 +490,7 @@
     }
   },
   "reader_transfer_epub": {
-    "message": ".epub - das E-Book-Format. Ein Buch wird als sein Text mit den Bildern aus der Datei gespeichert, beim Import in Teile geteilt."
+    "message": ".epub - das Format elektronischer Bücher. Ein Buch wird als Text und Bilder gespeichert, beim Import in Teile geteilt."
   },
   "reader_backup_scope": {
     "message": "Die Sicherung enthält Ihre Artikel mit ihren Markierungen und Lesepositionen, die gespeicherten Einträge jedes Sprachpaars und die Einstellungen. Markierungen in Büchern sind ebenfalls enthalten."
@@ -773,7 +773,7 @@
     "placeholders": { "title": { "content": "$1", "example": "Old Chinese" } }
   },
   "reader_transfer_link": { "message": "Import und Export (Sicherung oder EPUB)" },
-  "reader_transfer_accepts": { "message": "Der Import erkennt die übergebene Datei: eine re/read-Sicherung (.zip - oder die älteren .json-Dateien der Liste und der Markierungen) oder ein E-Book (.epub)." },
+  "reader_transfer_accepts": { "message": "Der Import erkennt die übergebene Datei: eine re/read-Sicherung (.zip - oder die älteren .json-Dateien der Liste und der Markierungen) oder ein Buch (.epub)." },
   "reader_book_label": { "message": "Buch" },
   "reader_book_part_of": {
     "message": "Teil $PART$ von $PARTS$",

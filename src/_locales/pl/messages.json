@@ -598,7 +598,7 @@
   },
   "reader_how_title": { "message": "Jak to działa?" },
   "reader_library_note": {
-    "message": "Wszystko tutaj to tekstowe kopie artykułów ze stron www, które otworzyłeś w widoku czytania i świadomie zapisałeś w czytelni, oraz artykuły i pliki .epub, które zaimportowałeś opcją Importuj poniżej. Wszystkie te artykuły i e-booki otwierają się bez internetu i zostają na Twoim urządzeniu, nawet gdy oryginalna strona zniknie."
+    "message": "Wszystko tutaj to tekstowe kopie artykułów ze stron www, które otworzyłeś w widoku czytania i świadomie zapisałeś w czytelni, oraz artykuły i pliki .epub, które zaimportowałeś opcją Importuj poniżej. Wszystkie te artykuły i książki otwierają się bez internetu i zostają na Twoim urządzeniu, nawet gdy oryginalna strona zniknie."
   },
   "reader_format_title": { "message": "Format pliku" },
   "reader_transfer_note": {
@@ -654,7 +654,7 @@
     }
   },
   "reader_transfer_epub": {
-    "message": ".epub - format e-booka. Książka jest zapisywana jako tekst z obrazkami z pliku, podzielony na części przy imporcie."
+    "message": ".epub - format książki elektronicznej. Książka jest zapisywana jako tekst i obrazki, podzielona na części przy imporcie."
   },
   "reader_backup_scope": {
     "message": "Kopia zawiera artykuły z zakreśleniami i pozycją czytania, zapisane frazy wszystkich par językowych oraz ustawienia. Zakreślenia z książek też w niej są."
@@ -1125,7 +1125,7 @@
     "placeholders": { "title": { "content": "$1", "example": "Old Chinese" } }
   },
   "reader_transfer_link": { "message": "Import i eksport (kopia lub EPUB)" },
-  "reader_transfer_accepts": { "message": "Import rozpoznaje podany plik: kopię re/read (.zip - albo starsze pliki .json listy i zakreśleń) albo e-booka (.epub)." },
+  "reader_transfer_accepts": { "message": "Import rozpoznaje podany plik: kopię re/read (.zip - albo starsze pliki .json listy i zakreśleń) albo książkę (.epub)." },
   "reader_book_label": { "message": "Książka" },
   "reader_book_part_of": {
     "message": "Część $PART$ z $PARTS$",

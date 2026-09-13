@@ -521,7 +521,7 @@
     }
   },
   "reader_transfer_epub": {
-    "message": ".epub - le format des livres numériques. Un livre est enregistré comme son texte avec les images du fichier, découpé en parties à l'import."
+    "message": ".epub - le format des livres numériques. Un livre est enregistré comme texte et images, découpé en parties à l'import."
   },
   "reader_backup_scope": {
     "message": "La sauvegarde contient vos articles avec leurs surlignages et leurs positions de lecture, les phrases enregistrées de chaque paire de langues et les paramètres. Les surlignages faits dans les livres y sont aussi."
