@@ -136,7 +136,8 @@ describe("a row of the saved phrases", () => {
     // No gap in the cluster - the padding is the room - and the last label
     // ends on the list's edge.
     assert.doesNotMatch(rule(styles, ".phrase-actions"), /gap:/, "the cluster keeps a gap beyond the buttons' padding");
-    assert.match(rule(styles, ".phrase-actions > button.quiet:last-child"), /margin-inline-end: calc\(-0\.5rem - 1px\);/, "the last button does not hand its padding to the gutter");
+    assert.match(buttons, /padding: 0 0\.4rem;/, "the buttons' padding is not the narrow one three of them need on a 360px line");
+    assert.match(rule(styles, ".phrase-actions > button.quiet:last-child"), /margin-inline-end: calc\(-0\.4rem - 1px\);/, "the last button does not hand its padding to the gutter");
     // The interface size, not the Aa panel's: the shared quiet dress says
     // 0.85rem and nothing in the row's rules overrides it with the reading size.
     assert.match(rule(styles, "button.quiet"), /font-size: 0\.85rem;/, "the quiet buttons do not wear the interface size");
@@ -165,9 +166,15 @@ describe("a row of the saved phrases", () => {
     const bare = styles.replace(/\/\*[\s\S]*?\*\//g, "");
     // The reading size is set on the content elements themselves; a
     // container carrying it would hand it to the counts and the buttons.
-    for (const selector of [".phrase-row", ".phrase-head", ".phrase-body", ".phrases"]) {
+    for (const selector of [".phrase-row", ".phrase-body", ".phrases"]) {
       assert.doesNotMatch(rule(bare, selector), /--reader-size|font-size/, `${selector} sets a size its interface children would inherit`);
     }
+    // The head is the one container that carries the reading size - its
+    // strut is the phrase's line, so the counts flowing after the phrase
+    // never make the line the interface's height - and the counts inside
+    // it override that size in rem (asserted with the counts above).
+    assert.match(rule(bare, ".phrase-head"), /font-size: var\(--reader-size, 18px\);\s*line-height: var\(--phrase-line-height\);/, "the head's strut is not the phrase's line");
+    assert.doesNotMatch(rule(bare, ".phrase-head"), /display: flex/, "the counts stand on a line of their own under a wrapped phrase");
     assert.match(bare, /\.phrase-word,\s*\.phrase-meanings,[^{]*\{\s*font-family: var\(--reader-font-lead, var\(--reader-font-stack\)\);\s*font-size: var\(--reader-size, 18px\);/, "the phrase and the meanings do not wear the reading face and size");
     assert.match(rule(bare, ".phrase-sentence > summary"), /font-size: var\(--reader-size, 18px\);/, "the sentence does not wear the reading size");
   });

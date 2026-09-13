@@ -419,19 +419,22 @@ summary {
   border-bottom: 1px solid var(--page-line);
 }
 
-/* The phrase and its counts on one line while it holds them, the counts
-   wrapping under the phrase when it does not; aligned by baseline, so the
-   small counts sit on the phrase's line whatever size the Aa panel gave
-   it. `min-width: 0` lets a phrase longer than the line wrap inside the
-   head instead of pushing the row wider than the page. */
+/* The phrase with its counts flowing after it as inline text - after the
+   last word of a phrase that wrapped, not on a line of their own under it
+   (a flex head put them there, one line taller than needed) - and so on
+   the phrase's baseline whatever size the Aa panel gave it. The head's
+   own line is the phrase's: it wears the reading face, size and
+   line-height so its strut is the phrase's line box and never the
+   interface's; the counts inside override the size in rem, so nothing of
+   this reaches them. `min-width: 0` lets a phrase longer than the line
+   wrap inside the head instead of pushing the row wider than the page. */
 .phrase-head {
   order: 1;
   flex: 1 1 auto;
   min-width: 0;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.15rem 0.6rem;
+  font-family: var(--reader-font-lead, var(--reader-font-stack));
+  font-size: var(--reader-size, 18px);
+  line-height: var(--phrase-line-height);
 }
 
 .phrase-body {
@@ -482,11 +485,17 @@ summary {
    breaks between its glyph and its number - wrapping only between the two.
    Absent from a row that has none - a phrase never checked and never met
    in a finished text reads exactly as it did before the counts. The
-   number in tabular figures, so "12" and "11" stand the same width. */
+   number in tabular figures, so "12" and "11" stand the same width. An
+   atomic inline after the phrase's text: the line may break before it,
+   never inside a count. Half an em between the two counts and half a rem
+   after the phrase - every pixel of a 360px line decides whether the
+   three actions stay on the phrase's line (K2 of the round: the wider
+   gaps dropped them under an eight-letter word with two counts). */
 .phrase-counts {
   display: inline-flex;
   flex-wrap: wrap;
-  gap: 0 0.75em;
+  gap: 0 0.5em;
+  margin-inline-start: 0.5rem;
   color: var(--page-muted);
   font-size: max(13px, 0.85rem);
   /* A tight line box: on the phrase's baseline the counts must never be
@@ -649,7 +658,8 @@ button.quiet {
    phrase's line box - the block margin takes back half of what 44px has
    over the line, so the buttons never make the row taller than its text,
    at Aa 14 as at Aa 26. Narrower padding than the shared dress: three of
-   these must share a 360px line with a phrase and its counts. A label
+   these must share a 360px line with a phrase and its counts, and in
+   Polish the three are 156px wide as it is (K2 of the round). A label
    never breaks. Flex inside, so the speaker's glyph centres in its box
    rather than sitting on a text baseline the box no longer has. */
 .phrase-actions > button.quiet {
@@ -658,7 +668,7 @@ button.quiet {
   justify-content: center;
   min-height: 44px;
   min-width: 44px;
-  padding: 0 0.5rem;
+  padding: 0 0.4rem;
   margin-block: calc((var(--reader-size, 18px) * var(--phrase-line-height) - 44px) / 2);
   white-space: nowrap;
 }
@@ -668,7 +678,7 @@ button.quiet {
    "Learned" ends where the separator ends, and the hit box reaches past
    the edge. */
 .phrase-actions > button.quiet:last-child {
-  margin-inline-end: calc(-0.5rem - 1px);
+  margin-inline-end: calc(-0.4rem - 1px);
 }
 
 button.quiet:hover,
