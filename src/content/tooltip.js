@@ -2428,7 +2428,12 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
    * did nothing would read as a breakage, so there is none. Unless the
    * caller said the lines are choosable (D158): with a pair chosen the
    * quiet bubble has a vocabulary to write after all. No "Show all" fold:
-   * this box scrolls, and that is the fold a long book gets here.
+   * this box scrolls, and that is the fold a long book gets here. And one
+   * book open at a time (`oneOpen`, D214): the box stands pinned at its
+   * height once a name is pressed (`pinEntries`), so a second book opened
+   * under a first still open used to open below the box's edge, out of
+   * sight, a scrollbar the only sign of it - now the first folds as the
+   * second opens, and the shelf brings the book opened into the box's view.
    *
    * @param {EntryGroup[]} groups
    */
@@ -2443,6 +2448,7 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
         readOnly: plain,
         disabled: editing,
         foldAt: null,
+        oneOpen: true,
         onPress: (line) => choose(line),
       }),
     );

@@ -237,3 +237,23 @@ export function afterPress(meanings, line) {
       : without;
   return next.length === 0 ? { act: "forget", meanings: [] } : { act: "save", meanings: next };
 }
+
+/**
+ * How far a box has to scroll so that a book opened in it stands in view
+ * (D214): not at all while the whole book is in view already; the least
+ * that brings its end in when it fits below - the name stays where it was
+ * pressed and the rows come up under it; and the name to the top edge when
+ * the book is taller than the box or starts above it, so the rows begin
+ * where the eye lands. A book opened at the bottom edge of a box used to
+ * open below it, and the only thing the press seemed to do was draw a
+ * scrollbar. Edges in any one set of coordinates, the answer in the same.
+ *
+ * @param {{ top: number, bottom: number }} view the box's visible edges
+ * @param {{ top: number, bottom: number }} book the book's edges, name and rows
+ * @returns {number} what to add to the box's scroll position
+ */
+export function scrollToShow(view, book) {
+  if (book.top >= view.top && book.bottom <= view.bottom) return 0;
+  if (book.top < view.top || book.bottom - book.top > view.bottom - view.top) return book.top - view.top;
+  return book.bottom - view.bottom;
+}
