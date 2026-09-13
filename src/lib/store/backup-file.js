@@ -22,6 +22,7 @@
  */
 
 import { ARTICLES_ENTRY, archiveEntries } from "./articles-archive.js";
+import { BOOKS_ENTRY } from "./books-file.js";
 import { toMarksCopy } from "./marks-copy.js";
 import { SETTINGS_ENTRY, toSettingsFile } from "./settings-file.js";
 import { VOCABULARY_ENTRY, toVocabularyFile } from "./vocabulary-file.js";
@@ -35,10 +36,18 @@ import { VOCABULARY_ENTRY, toVocabularyFile } from "./vocabulary-file.js";
  * @typedef {import("../reader/pictures.js").PictureRow} PictureRow
  * @typedef {import("../reader/position.js").ReadingPosition} ReadingPosition
  * @typedef {import("../config.js").Config} Config
+ * @typedef {import("./book.js").BookMeta} BookMeta
  */
 
 /** What the export is called. No date: a browser numbers a second download by itself. */
 export const BACKUP_FILENAME = "reread-backup.zip";
+
+/**
+ * What the selection's export is called (D218): the same format cut to
+ * the ticked documents, under a name that says so - a file to hand
+ * somebody, not the backup of everything.
+ */
+export const SELECTION_FILENAME = "reread-selection.zip";
 
 /** The entry that makes an archive the backup of everything. */
 export const MANIFEST_ENTRY = "manifest.json";
@@ -68,8 +77,17 @@ export const BACKUP_VERSION = 1;
  *   articles: number,
  *   pictures: boolean,
  *   settings: boolean,
+ *   books: number,
+ *   bookPictures: boolean,
  * }} BackupHolds
- * @typedef {{ format: string, version: number, createdAt: number, app: string, holds: BackupHolds }} BackupManifest
+ * @typedef {{
+ *   format: string,
+ *   version: number,
+ *   createdAt: number,
+ *   app: string,
+ *   scope: "everything" | "selection",
+ *   holds: BackupHolds,
+ * }} BackupManifest
  */
 
 /**
@@ -85,19 +103,25 @@ export const BACKUP_VERSION = 1;
  * @property {Phrase[]} phrases every pair
  * @property {CopyDoc[]} highlights every document with marks, articles and books alike
  * @property {Config | null} settings the config, or null to leave it out
+ * @property {BookMeta[]} [books] the books going into the archive (D218) - written by the
+ *   page after these entries, one at a time; none by default
+ * @property {boolean} [selection] whether the archive is a selection of documents to hand on
+ *   (D218) rather than the backup of everything: the manifest says so, and the vocabulary's
+ *   entry is left out rather than written empty
  */
 
 /**
  * @param {BackupInput} input
  * @returns {BackupManifest}
  */
-export function manifestOf({ app, now, articles, pictures, phrases, highlights, settings }) {
+export function manifestOf({ app, now, articles, pictures, phrases, highlights, settings, books = [], selection = false }) {
   const pairs = new Set(phrases.map((phrase) => `${phrase.langFrom}\t${phrase.langTo}`));
   return {
     format: FORMAT,
     version: BACKUP_VERSION,
     createdAt: now,
     app,
+    scope: selection ? "selection" : "everything",
     holds: {
       phrases: phrases.length,
       pairs: pairs.size,
@@ -105,6 +129,8 @@ export function manifestOf({ app, now, articles, pictures, phrases, highlights, 
       articles: articles.length,
       pictures: pictures.size > 0,
       settings: settings !== null,
+      books: books.length,
+      bookPictures: books.some((book) => book.pictures !== undefined),
     },
   };
 }
@@ -123,7 +149,9 @@ function textEntry(name, text) {
  * the highlights, the settings when asked for, and the reading list's own
  * entries - `articles.json` with the pictures beside it - exactly as the
  * list's backup writes them. Every part is written even when empty, so a
- * reader opening the archive sees what the file is made of.
+ * reader opening the archive sees what the file is made of - except the
+ * vocabulary of a selection (D218), which hands on documents and never
+ * held phrases: written empty it would read as phrases lost.
  *
  * @param {BackupInput} input
  * @returns {ArchiveEntry[]}
@@ -131,11 +159,10 @@ function textEntry(name, text) {
 export function backupEntries(input) {
   const manifest = JSON.stringify(manifestOf(input), null, 2) + "\n";
   /** @type {ArchiveEntry[]} */
-  const entries = [
-    textEntry(MANIFEST_ENTRY, manifest),
-    textEntry(VOCABULARY_ENTRY, toVocabularyFile(input.phrases)),
-    textEntry(HIGHLIGHTS_ENTRY, toMarksCopy(input.highlights)),
-  ];
+  /** @type {ArchiveEntry[]} */
+  const entries = [textEntry(MANIFEST_ENTRY, manifest)];
+  if (input.selection !== true) entries.push(textEntry(VOCABULARY_ENTRY, toVocabularyFile(input.phrases)));
+  entries.push(textEntry(HIGHLIGHTS_ENTRY, toMarksCopy(input.highlights)));
   if (input.settings !== null) entries.push(textEntry(SETTINGS_ENTRY, toSettingsFile(input.settings)));
   entries.push(...archiveEntries(input.articles, input.marks, input.pictures, input.positions));
   return entries;
@@ -167,7 +194,7 @@ export function fromManifest(text) {
     return null;
   }
   if (typeof parsed !== "object" || parsed === null) return null;
-  const { format, version, createdAt, app, holds } = /** @type {Record<string, unknown>} */ (parsed);
+  const { format, version, createdAt, app, scope, holds } = /** @type {Record<string, unknown>} */ (parsed);
   if (format !== FORMAT) return null;
   const claims = typeof holds === "object" && holds !== null ? /** @type {Record<string, unknown>} */ (holds) : {};
   return {
@@ -175,6 +202,7 @@ export function fromManifest(text) {
     version: typeof version === "number" && Number.isInteger(version) && version >= 1 ? version : BACKUP_VERSION,
     createdAt: typeof createdAt === "number" && Number.isFinite(createdAt) ? createdAt : 0,
     app: typeof app === "string" ? app : "",
+    scope: scope === "selection" ? "selection" : "everything",
     holds: {
       phrases: countOf(claims["phrases"]),
       pairs: countOf(claims["pairs"]),
@@ -182,6 +210,8 @@ export function fromManifest(text) {
       articles: countOf(claims["articles"]),
       pictures: claims["pictures"] === true,
       settings: claims["settings"] === true,
+      books: countOf(claims["books"]),
+      bookPictures: claims["bookPictures"] === true,
     },
   };
 }
@@ -204,4 +234,5 @@ export const BACKUP_ENTRIES = Object.freeze({
   highlights: HIGHLIGHTS_ENTRY,
   settings: SETTINGS_ENTRY,
   articles: ARTICLES_ENTRY,
+  books: BOOKS_ENTRY,
 });

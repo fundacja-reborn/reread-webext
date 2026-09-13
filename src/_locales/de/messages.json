@@ -471,6 +471,20 @@
       "size": { "content": "$2", "example": "12,4 MB" }
     }
   },
+  "reader_export_books_one": {
+    "message": "Export mit Büchern ($COUNT$ Buch · $SIZE$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "size": { "content": "$2", "example": "6,6 MB" }
+    }
+  },
+  "reader_export_books_other": {
+    "message": "Export mit Büchern ($COUNT$ Bücher · $SIZE$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "size": { "content": "$2", "example": "6,6 MB" }
+    }
+  },
   "reader_import_pictures_one": {
     "message": "Mit $COUNT$ Bild ($SIZE$).",
     "placeholders": {
@@ -505,8 +519,8 @@
   "reader_backup_scope": {
     "message": "Die Sicherung enthält Ihre Artikel mit ihren Markierungen und Lesepositionen, die gespeicherten Einträge jedes Sprachpaars und die Einstellungen. Markierungen in Büchern sind ebenfalls enthalten."
   },
-  "reader_backup_books": {
-    "message": "Die Bücher selbst (.epub) sind nicht in der Sicherung - bewahren Sie Ihre .epub-Dateien auf. Wenn Sie dasselbe Buch erneut importieren und danach die Sicherung, kommen seine Markierungen zurück; seine Leseposition nicht."
+  "reader_backup_books_note": {
+    "message": "Bücher sind nur dann in der Sicherung, wenn Sie „Export mit Büchern“ ankreuzen; sonst bewahren Sie Ihre .epub-Dateien auf - wenn Sie dasselbe Buch erneut importieren und danach die Sicherung, kommen seine Markierungen zurück."
   },
   "reader_export_marks": { "message": "Markierungen exportieren" },
   "reader_marks_export_notes": { "message": "Als Notizen exportieren (.md)" },
@@ -621,6 +635,14 @@
       "count": { "content": "$1", "example": "12" }
     }
   },
+  "reader_backup_books_one": {
+    "message": "$COUNT$ Buch",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_backup_books_other": {
+    "message": "$COUNT$ Bücher",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
   "reader_backup_highlights_one": {
     "message": "$COUNT$ Markierung",
     "placeholders": {
@@ -645,6 +667,20 @@
     "placeholders": {
       "count": { "content": "$1", "example": "12" },
       "new": { "content": "$2", "example": "3" }
+    }
+  },
+  "reader_backup_part_books_one": {
+    "message": "$COUNT$ Buch, davon $NEW$ noch nicht in der Liste",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "new": { "content": "$2", "example": "2" }
+    }
+  },
+  "reader_backup_part_books_other": {
+    "message": "$COUNT$ Bücher, davon $NEW$ noch nicht in der Liste",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "new": { "content": "$2", "example": "2" }
     }
   },
   "reader_backup_part_phrases_one": {
@@ -685,22 +721,18 @@
       "count": { "content": "$1", "example": "12" }
     }
   },
-  "reader_transfer_pick": { "message": "Um nur einige Artikel zu exportieren, drücken Sie über der Liste auf „Auswählen“ und haken Sie sie ab." },
+  "reader_transfer_pick": { "message": "Um nur einige Artikel oder Bücher zu exportieren, drücken Sie über der Liste auf „Auswählen“ und haken Sie sie ab." },
   "reader_pick_start": { "message": "Auswählen" },
   "reader_pick_close": { "message": "Auswahl schließen" },
-  "reader_pick_book_title": { "message": "Bücher sind nicht in der Sicherung" },
-  "reader_pick_books_note": {
-    "message": "Bücher lassen sich nicht auswählen - sie sind nicht in der Sicherung, nur ihre Markierungen sind es."
-  },
   "reader_pick_all": { "message": "Alle auswählen" },
   "reader_pick_count_one": {
-    "message": "$COUNT$ Artikel ausgewählt",
+    "message": "$COUNT$ Dokument ausgewählt",
     "placeholders": {
       "count": { "content": "$1", "example": "1" }
     }
   },
   "reader_pick_count_other": {
-    "message": "$COUNT$ Artikel ausgewählt",
+    "message": "$COUNT$ Dokumente ausgewählt",
     "placeholders": {
       "count": { "content": "$1", "example": "3" }
     }
@@ -712,18 +744,18 @@
     }
   },
   "reader_export_done_one": {
-    "message": "$COUNT$ Artikel nach $FILE$ exportiert ($SIZE$).",
+    "message": "$COUNT$ Dokument nach $FILE$ exportiert ($SIZE$).",
     "placeholders": {
       "count": { "content": "$1", "example": "1" },
-      "file": { "content": "$2", "example": "reread-articles.json" },
-      "size": { "content": "$3", "example": "38 KB" }
+      "file": { "content": "$2", "example": "reread-selection.zip" },
+      "size": { "content": "$3", "example": "2,1 MB" }
     }
   },
   "reader_export_done_other": {
-    "message": "$COUNT$ Artikel nach $FILE$ exportiert ($SIZE$).",
+    "message": "$COUNT$ Dokumente nach $FILE$ exportiert ($SIZE$).",
     "placeholders": {
-      "count": { "content": "$1", "example": "12" },
-      "file": { "content": "$2", "example": "reread-articles.zip" },
+      "count": { "content": "$1", "example": "3" },
+      "file": { "content": "$2", "example": "reread-selection.zip" },
       "size": { "content": "$3", "example": "2,1 MB" }
     }
   },
@@ -923,6 +955,22 @@
     "placeholders": {
       "count": { "content": "$1", "example": "3" }
     }
+  },
+  "reader_import_books_added_one": {
+    "message": "$COUNT$ neues Buch hinzugefügt.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_import_books_added_other": {
+    "message": "$COUNT$ neue Bücher hinzugefügt.",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
+  "reader_import_books_skipped_one": {
+    "message": "$COUNT$ bereits vorhandenes Buch übersprungen.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_import_books_skipped_other": {
+    "message": "$COUNT$ bereits vorhandene Bücher übersprungen.",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
   },
   "reader_import_unreadable_one": {
     "message": "$COUNT$ Eintrag ließ sich nicht lesen.",

@@ -25,10 +25,10 @@ describe("the backup of everything on the reading list page", () => {
     const exporting = bodyOf(script, "exportList");
     assert.match(exporting, /if \(picking\) \{\s*await exportSelection\(\);\s*return;\s*\}/, "the selection's file is not the list's own any more");
     assert.match(exporting, /allArticles\(\),\s*allMarks\(\),\s*allPositions\(\),\s*allPhrases\(\),\s*marksDocs\(\(\) => true\),\s*readConfig\(\),/, "a part is not read fresh from its store");
-    assert.match(exporting, /backupEntries\(\{[\s\S]*highlights: docs\.map\(copyDocOf\),\s*settings: config,/, "the highlights or the settings do not reach the archive");
+    assert.match(exporting, /backupStream\(\{[\s\S]*highlights: docs\.map\(copyDocOf\),\s*settings: config,/, "the highlights or the settings do not reach the archive");
     assert.match(exporting, /downloadFile\(archive, BACKUP_FILENAME, "application\/zip"\)/, "the backup is not written under its own name");
     // The button is never greyed for the backup: the settings are always there.
-    assert.match(bodyOf(script, "renderExportControls"), /exportButton\.disabled = picking && going\.length === 0;/, "Export is greyed outside the selection");
+    assert.match(bodyOf(script, "renderExportControls"), /exportButton\.disabled = picking && picked\.size === 0;/, "Export is greyed outside the selection");
   });
 
   it("reads an archive with a manifest as the backup, refuses a newer one, and still reads the old files", async () => {

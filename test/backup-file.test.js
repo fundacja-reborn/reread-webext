@@ -8,6 +8,7 @@ import {
   BACKUP_ENTRIES,
   BACKUP_FILENAME,
   BACKUP_VERSION,
+  SELECTION_FILENAME,
   backupEntries,
   fromManifest,
   isNewerBackup,
@@ -97,10 +98,11 @@ describe("the backup of everything", () => {
     const manifest = manifestOf(input());
     assert.deepEqual(manifest, {
       format: "reread-backup",
+      scope: "everything",
       version: BACKUP_VERSION,
       createdAt: 1234,
       app: "0.5.56",
-      holds: { phrases: 2, pairs: 2, highlights: 1, articles: 2, pictures: false, settings: true },
+      holds: { phrases: 2, pairs: 2, highlights: 1, articles: 2, pictures: false, settings: true, books: 0, bookPictures: false },
     });
   });
 
@@ -136,10 +138,11 @@ describe("the backup of everything", () => {
     const healed = fromManifest(JSON.stringify({ format: "reread-backup", version: "2", holds: { phrases: -1, pictures: "yes" } }));
     assert.deepEqual(healed, {
       format: "reread-backup",
+      scope: "everything",
       version: BACKUP_VERSION,
       createdAt: 0,
       app: "",
-      holds: { phrases: 0, pairs: 0, highlights: 0, articles: 0, pictures: false, settings: false },
+      holds: { phrases: 0, pairs: 0, highlights: 0, articles: 0, pictures: false, settings: false, books: 0, bookPictures: false },
     });
   });
 
@@ -148,5 +151,42 @@ describe("the backup of everything", () => {
     assert.ok(newer !== null);
     assert.equal(isNewerBackup(newer), true);
     assert.equal(isNewerBackup(manifestOf(input())), false);
+  });
+});
+
+describe("the books in the manifest (D218)", () => {
+  it("says how many books the archive holds and whether their pictures ride along, and reads it back", () => {
+    /** @type {import("../src/lib/store/book.js").BookMeta} */
+    const plain = { id: "b-1", title: "A Novel", author: null, lang: null, segmentCount: 1, totalChars: 10, addedAt: 1, readAt: null, toc: [] };
+    const base = { app: "0.5.60", now: 5, articles: [], marks: new Map(), pictures: new Map(), positions: new Map(), phrases: [], highlights: [], settings: null };
+    const without = manifestOf(base);
+    assert.equal(without.holds.books, 0);
+    assert.equal(without.holds.bookPictures, false);
+    const withBooks = manifestOf({ ...base, books: [plain, { ...plain, id: "b-2", pictures: { count: 1, bytes: 100 } }] });
+    assert.equal(withBooks.holds.books, 2);
+    assert.equal(withBooks.holds.bookPictures, true);
+    const read = fromManifest(JSON.stringify(withBooks));
+    assert.equal(read?.holds.books, 2);
+    assert.equal(read?.holds.bookPictures, true);
+    // A manifest from before books says none.
+    const older = fromManifest(JSON.stringify({ format: "reread-backup", version: 1, createdAt: 1, app: "0.5.59", holds: { articles: 3 } }));
+    assert.equal(older?.holds.books, 0);
+    assert.equal(older?.holds.bookPictures, false);
+    assert.equal(BACKUP_ENTRIES.books, "books.json");
+  });
+});
+
+describe("a selection in the backup's format (D218)", () => {
+  it("says so in its manifest and leaves the vocabulary's entry out rather than writing it empty", () => {
+    const base = { app: "0.5.60", now: 5, articles: [], marks: new Map(), pictures: new Map(), positions: new Map(), phrases: [], highlights: [], settings: null };
+    assert.equal(manifestOf(base).scope, "everything");
+    const selection = manifestOf({ ...base, selection: true });
+    assert.equal(selection.scope, "selection");
+    assert.equal(fromManifest(JSON.stringify(selection))?.scope, "selection");
+    assert.equal(fromManifest(JSON.stringify({ format: "reread-backup", version: 1 }))?.scope, "everything");
+    const names = backupEntries({ ...base, selection: true }).map((entry) => entry.name);
+    assert.deepEqual(names, [BACKUP_ENTRIES.manifest, BACKUP_ENTRIES.highlights, BACKUP_ENTRIES.articles]);
+    assert.ok(backupEntries(base).map((entry) => entry.name).includes(BACKUP_ENTRIES.vocabulary), "the backup of everything lost its vocabulary");
+    assert.equal(SELECTION_FILENAME, "reread-selection.zip");
   });
 });

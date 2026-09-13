@@ -695,13 +695,6 @@
             </svg>
           </button>
         </div>
-        <!-- Why the books' rows wear no box, said under the bar only while
-             the rows the tab and the filter show include a book: their
-             rows carry the same words as a tooltip, and a tooltip is
-             nothing on a touch screen or e-ink. Hidden with the bar. -->
-        <p class="hint pick-note" id="library-pick-books" data-i18n="reader_pick_books_note" hidden>
-          Books can't be selected - they are not in the backup, only their highlights are.
-        </p>
         <div id="library-empty" class="empty" hidden></div>
         <ul id="library-rows" class="library-rows"></ul>
         <!-- The shared pager (page.css): a drawn chevron at each end with its
@@ -767,6 +760,19 @@
               <span id="library-export-pictures-label"></span>
             </label>
           </p>
+          <!-- The books (D218) ride in the backup only when asked, like the
+               pictures: the row stands while the list holds a book, and
+               its label says how many and what they take - text and
+               pictures. Unticked by default: the backup stays the light
+               file it was, and a reader who wants the books in it says
+               so. Not inside the selection, whose export is the list's own
+               file. Filled by script. -->
+          <p class="hint transfer-option" id="library-export-books-row" hidden>
+            <label>
+              <input type="checkbox" id="library-export-books" />
+              <span id="library-export-books-label"></span>
+            </label>
+          </p>
           <!--
             The moment of consent: what the picked file holds, quoted before
             anything is written - and import only ever adds; the file's rules
@@ -814,14 +820,14 @@
             <li data-i18n="reader_backup_scope">
               The backup holds your articles with their highlights and reading positions, the saved phrases of every language pair, and the settings. Highlights made in books are in it too.
             </li>
-            <li data-i18n="reader_backup_books">
-              The books themselves (.epub) are not in the backup - keep your .epub files. When you import the same book again and the backup after it, its highlights come back; its reading position does not.
+            <li data-i18n="reader_backup_books_note">
+              Books are in the backup only when you tick "Export with books"; otherwise keep your .epub files - when you import the same book again and the backup after it, its highlights come back.
             </li>
             <li data-i18n="reader_transfer_accepts">
               Import reads the file it is given: a re/read backup (.zip - or the older .json files of the list and of the highlights), or a book (.epub).
             </li>
             <li data-i18n="reader_transfer_pick">
-              To export only some of the articles, press Select above the list and tick them.
+              To export only some of the articles or books, press Select above the list and tick them.
             </li>
           </ul>
           <details class="fold-line">

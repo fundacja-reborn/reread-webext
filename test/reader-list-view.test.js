@@ -163,33 +163,22 @@ describe("libraryView", () => {
     assert.deepEqual([filtered.unread, filtered.read], [PAGE_SIZE / 2 + 5, PAGE_SIZE / 2 + 5]);
   });
 
-  it("offers Select all the segment as filtered, every page of it, and never a book", () => {
-    // The selection's "all" (D152) is what the reader narrowed the list to,
-    // not what happens to fit on one screen - and a book cannot be exported,
-    // so it is not offered a tick.
+  it("offers Select all the segment as filtered, every page of it, books included", () => {
+    // Every page: the filter is how a reader says "these", a page is only
+    // what fits on one screen - and since D218 a book is a document the
+    // selection's file carries, so its row is offered like an article's.
     // 120 rows: the odd ones unread, the even ones read, every fourth a book.
-    const metas = Array.from({ length: 120 }, (_, at) =>
+    const metas = Array.from({ length: 120 }, (_, i) => i + 1).map((at) =>
       meta(at, { kind: at % 4 === 0 ? "book" : "article", readAt: at % 2 === 0 ? 9 : null }),
     );
-
-    // Sixty unread articles over two pages: every one of them, not the ten
-    // on the page in view.
     const unread = libraryView(metas, { segment: Segment.UNREAD, query: "", page: 2 });
+    assert.equal(unread.rows.length, 10);
     assert.equal(unread.selectable.length, 60);
-    assert.ok(unread.selectable.length > unread.rows.length);
-
-    // The read half holds the thirty books, and none of them is offered.
+    // The read half holds the thirty books, offered like the articles.
     const read = libraryView(metas, { segment: Segment.READ, query: "", page: 1 });
-    assert.equal(read.selectable.length, 30);
-    assert.ok(read.selectable.every((url) => Number(url.split("/").at(-1)) % 4 !== 0));
-
-    // Under a filter, exactly the rows the filter left, in their order.
-    const filtered = libraryView(metas, { segment: Segment.UNREAD, query: "article 1", page: 1 });
-    assert.ok(filtered.matching > 0 && filtered.matching < unread.matching);
-    assert.deepEqual(
-      filtered.selectable,
-      filtered.rows.map((one) => one.url),
-    );
+    assert.equal(read.selectable.length, 60);
+    const books = new Set(metas.filter((one) => one.kind === "book").map((one) => one.url));
+    assert.equal(read.selectable.filter((url) => books.has(url)).length, 30);
   });
 });
 
@@ -215,13 +204,13 @@ describe("the selection (D152)", () => {
     assert.deepEqual([...cleared], ["z"]);
   });
 
-  it("drops a tick whose article is gone, and never holds a book", () => {
+  it("drops a tick whose document is gone, and holds a book like an article", () => {
     const entries = [
       { url: "a", kind: /** @type {const} */ ("article") },
       { url: "book:1", kind: /** @type {const} */ ("book") },
     ];
     const kept = keptPicks(new Set(["a", "deleted", "book:1"]), entries);
-    assert.deepEqual([...kept], ["a"]);
+    assert.deepEqual([...kept].sort(), ["a", "book:1"]);
   });
 });
 
@@ -266,30 +255,5 @@ describe("searchButtonState", () => {
       enabled: false,
       stale: false,
     });
-  });
-});
-
-describe("the books among the rows a selection covers", () => {
-  it("counts the books the filter leaves in the segment, every page of them", () => {
-    const metas = [
-      meta(1),
-      meta(2, { kind: "book", url: "book-2", title: "A Novel", hostname: "Somebody" }),
-      meta(3, { kind: "book", url: "book-3", title: "Another Novel", hostname: "Somebody", readAt: 9 }),
-      meta(4, { kind: "article" }),
-    ];
-    const unread = libraryView(metas, { segment: Segment.UNREAD, query: "", page: 1 });
-    assert.equal(unread.books, 1);
-    // The read book stands on the other tab - the line under the bar is
-    // about the rows on this one.
-    const read = libraryView(metas, { segment: Segment.READ, query: "", page: 1 });
-    assert.equal(read.books, 1);
-    // The filter narrows the count as it narrows the rows.
-    const filtered = libraryView(metas, { segment: Segment.UNREAD, query: "article", page: 1 });
-    assert.equal(filtered.books, 0);
-    assert.deepEqual(filtered.selectable, [metas[3]?.url, metas[0]?.url]);
-  });
-
-  it("counts none over a list of articles", () => {
-    assert.equal(libraryView([meta(1), meta(2)], { segment: Segment.UNREAD, query: "", page: 1 }).books, 0);
   });
 });

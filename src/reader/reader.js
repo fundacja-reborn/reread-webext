@@ -56,11 +56,10 @@ import { ErrorCode, Message, asPage, asPageRequest, asResult, ok } from "../lib/
 import { buildArticle } from "../lib/reader/article.js";
 import { MAX_DOWNLOAD_BYTES, pictureSources, picturesSummary } from "../lib/reader/pictures.js";
 import {
-  ARCHIVE_FILENAME,
   ARTICLES_ENTRY,
   archiveAccount,
-  archiveEntries,
   archivePictures,
+  bookPictureEntryName,
   fromArchiveText,
 } from "../lib/store/articles-archive.js";
 import { asDocState, asMarksState, docState, marksState } from "../lib/reader/history-state.js";
@@ -92,10 +91,8 @@ import { hitsInText, isSearchableQuery } from "../lib/reader/search.js";
 import { isUnderlineWeight } from "../lib/underline.js";
 import { BACK_ROAD_KEY, READER_SOURCE_KEY, readReaderSource, writeReaderTab } from "../lib/session.js";
 import {
-  ARTICLES_FILENAME,
   fromArticlesFile,
   importPlan,
-  toArticlesFile,
 } from "../lib/store/articles-file.js";
 import {
   allArticles,
@@ -123,19 +120,37 @@ import { entryReader, listEntries, packArchive } from "./zip.js";
 import { packableBlocks } from "../lib/book/blocks.js";
 import { cappedToc, headingEntries, renderedEntries } from "../lib/book/toc.js";
 import {
+  allBookPictures,
+  allBookSegments,
   deleteBook,
   deleteBookPictures,
   getBook,
   getBookPictures,
   getBookSegment,
   listBooks,
+  putBook,
+  putBookPicture,
+  putBookSegment,
   setBookReadAt,
   setBookToc,
   sweepOrphanSegments,
 } from "../lib/store/books.js";
 import {
+  BOOKS_ENTRY,
+  MAX_BOOK_TEXT_BYTES,
+  bookPictureRows,
+  bookTextEntryName,
+  booksAccount,
+  booksImportPlan,
+  fromBookText,
+  fromBooksIndex,
+  toBookText,
+  toBooksIndex,
+} from "../lib/store/books-file.js";
+import {
   BACKUP_ENTRIES,
   BACKUP_FILENAME,
+  SELECTION_FILENAME,
   backupEntries,
   fromManifest,
   isNewerBackup,
@@ -315,7 +330,6 @@ const libraryPickAll = /** @type {HTMLInputElement | null} */ (
 );
 const libraryPickCount = document.getElementById("library-pick-count");
 const libraryPickClose = document.getElementById("library-pick-close");
-const libraryPickBooks = document.getElementById("library-pick-books");
 const exportButton = /** @type {HTMLButtonElement | null} */ (
   document.getElementById("library-export")
 );
@@ -343,6 +357,11 @@ const exportPictures = /** @type {HTMLInputElement | null} */ (
   document.getElementById("library-export-pictures")
 );
 const exportPicturesLabel = document.getElementById("library-export-pictures-label");
+const exportBooksRow = document.getElementById("library-export-books-row");
+const exportBooks = /** @type {HTMLInputElement | null} */ (
+  document.getElementById("library-export-books")
+);
+const exportBooksLabel = document.getElementById("library-export-books-label");
 // The highlights page (D108): the reading list's furniture repeated - a
 // filter, an empty state, the rows, a pager - plus the scoped page's title
 // line, its own export, and the template a row's copy button is cloned from.
@@ -660,12 +679,17 @@ let picked = new Set();
  * without rebuilding the rows, which would take the focus off the box just
  * pressed and flash the whole list on e-ink.
  *
- * `books` counts the books among the rows the tab and the filter show -
- * the rows a selection cannot take, which the line under its bar is about.
+ * `bookRows` are every book's light rows, whichever tab, for the box that
+ * offers them to the backup (D218) - a backup is everything - and for the
+ * selection's export, which takes the ticked ones among them.
  *
- * @type {{ selectable: string[], metas: SavedMeta[], books: number }}
+ * @type {{
+ *   selectable: string[],
+ *   metas: SavedMeta[],
+ *   bookRows: import("../lib/store/book.js").BookMeta[],
+ * }}
  */
-let libraryShown = { selectable: [], metas: [], books: 0 };
+let libraryShown = { selectable: [], metas: [], bookRows: [] };
 
 /**
  * The highlights page, while it is the view (D108) - null otherwise, the
@@ -767,6 +791,12 @@ let pendingImport = null;
  *   phrases: import("../lib/protocol.js").RestoreRow[],
  *   highlights: import("../lib/store/marks-copy.js").CopyDoc[],
  *   settings: import("../lib/config.js").ConfigPatch | null,
+ *   books: {
+ *     rows: import("../lib/store/books-file.js").FileBook[],
+ *     plan: { toAdd: import("../lib/store/books-file.js").FileBook[], skipped: number },
+ *     account: { count: number, bytes: number },
+ *     bytes: Uint8Array,
+ *   } | null,
  * } | null}
  */
 let pendingBackup = null;
@@ -3246,7 +3276,7 @@ async function refreshLibrary() {
   // The selection held to the list as it stands (D152), and what this read
   // found kept for the ticks that follow it.
   picked = keptPicks(picked, entries);
-  libraryShown = { selectable: view.selectable, metas, books: view.books };
+  libraryShown = { selectable: view.selectable, metas, bookRows: books };
 
   // Each tab wears its whole segment's count - the entire half of the list,
   // not the page or the filter's slice, so the two labels always add up to
@@ -3324,10 +3354,6 @@ function renderPickLine() {
     libraryPickToggle.disabled = libraryShown.metas.length === 0;
   }
   if (libraryPickLine !== null) libraryPickLine.hidden = !picking;
-  // The line about the books' rows stands only while there is such a row
-  // to explain: over a list of articles it would be a sentence about
-  // nothing on screen.
-  if (libraryPickBooks !== null) libraryPickBooks.hidden = !picking || libraryShown.books === 0;
   if (libraryPickAll !== null) {
     const state = pickedState(libraryShown.selectable, picked);
     libraryPickAll.checked = state === "all";
@@ -3341,16 +3367,18 @@ function renderPickLine() {
 }
 
 /**
- * The Export button and the pictures row under the list, over what they
- * will take: the whole list, or - inside the selection (D152) - the ticked
- * articles, which the button then counts in its own words.
+ * The Export button and the boxes under the list, over what they will
+ * take: the whole list, or - inside the selection (D152) - the ticked
+ * documents, articles and books alike (D218), which the button then
+ * counts in its own words.
  *
- * Exporting nothing would download an empty file; the button says so first,
- * on whether any *articles* are going - books stay out of the file, so a
- * list of books alone still has nothing to export. The pictures kept with
- * articles (D145) ride in the backup only when asked: the row stands while
- * some article going has any, and says how many and what they take - the
- * size the file will grow by, before the press.
+ * Exporting nothing would download an empty file; the button says so
+ * first. The pictures kept with articles (D145) ride in the file only
+ * when asked: the row stands while some article going has any, and says
+ * how many and what they take - the size the file will grow by, before
+ * the press. A ticked book goes with its pictures whatever the box says:
+ * they are the book's own, out of its .epub, and cannot be downloaded
+ * again the way an article's can.
  */
 function renderExportControls() {
   const { metas } = libraryShown;
@@ -3358,9 +3386,9 @@ function renderExportControls() {
   if (exportButton !== null) {
     // Outside the selection the export is the backup of everything (D213),
     // which always has something to write - the settings at the least.
-    exportButton.disabled = picking && going.length === 0;
+    exportButton.disabled = picking && picked.size === 0;
     exportButton.textContent = picking
-      ? t("reader_export_selected", going.length.toLocaleString())
+      ? t("reader_export_selected", picked.size.toLocaleString())
       : t("action_export");
   }
   const kept = going.reduce(
@@ -3375,6 +3403,15 @@ function renderExportControls() {
     // The count with its unit, a middle dot, the size: two bare numbers
     // in one bracket read as one number (Michał, 2026-09-13).
     exportPicturesLabel.textContent = plural(kept.count, "reader_export_pictures", [megabytes(kept.bytes)]);
+  }
+  // The books' box (D218): outside the selection alone - inside it the
+  // ticks decide which books go - and only while there is a book to
+  // offer. The label counts them and what they take, text and pictures,
+  // off the light rows.
+  const shelf = booksAccount(libraryShown.bookRows);
+  if (exportBooksRow !== null) exportBooksRow.hidden = picking || shelf.count === 0;
+  if (exportBooksLabel !== null) {
+    exportBooksLabel.textContent = plural(shelf.count, "reader_export_books", [megabytes(shelf.bytes)]);
   }
 }
 
@@ -3399,7 +3436,6 @@ function applyLibrarySearchVisibility() {
       libraryPager,
       libraryPickToggle,
       libraryPickLine,
-      libraryPickBooks,
     ];
     for (const element of plain) {
       if (element !== null) element.hidden = true;
@@ -3489,8 +3525,8 @@ function renderLibraryPager(view) {
  * Inside the selection (D152) the row is a box and its label instead: the
  * title, stretched over the same cell, ticks the box - the whole row is the
  * target, which a finger needs more than a box does - and Delete steps
- * away with the act it served. A book, which the export does not take,
- * gets no box: its row stands still and dimmed, the title plain text.
+ * away with the act it served. A book's row wears the box like an
+ * article's since D218: the selection's file carries both.
  *
  * @param {import("./list-view.js").LibraryEntry} entry
  */
@@ -3503,32 +3539,18 @@ function libraryRow(entry) {
 
   if (picking) {
     item.classList.add("library-row-pick");
-    if (entry.kind === "book") {
-      item.classList.add("library-row-still");
-      // Said to the pointer and to assistive technology as well as to the
-      // eye: the row is out of the selection because the export leaves
-      // books out. The line under the bar says it where nothing hovers.
-      item.setAttribute("aria-disabled", "true");
-      item.title = t("reader_pick_book_title");
-      const still = document.createElement("span");
-      still.className = "library-open";
-      still.textContent = entry.title;
-      text.append(still, detailLine(entry));
-    } else {
-      const box = document.createElement("input");
-      box.type = "checkbox";
-      box.className = "library-pick";
-      box.id = `library-pick-${pickBoxes++}`;
-      box.setAttribute("data-url", entry.url);
-      box.checked = picked.has(entry.url);
-      const label = document.createElement("label");
-      label.className = "library-open";
-      label.htmlFor = box.id;
-      label.textContent = entry.title;
-      text.append(label, detailLine(entry));
-      item.append(box);
-    }
-    item.append(text);
+    const box = document.createElement("input");
+    box.type = "checkbox";
+    box.className = "library-pick";
+    box.id = `library-pick-${pickBoxes++}`;
+    box.setAttribute("data-url", entry.url);
+    box.checked = picked.has(entry.url);
+    const label = document.createElement("label");
+    label.className = "library-open";
+    label.htmlFor = box.id;
+    label.textContent = entry.title;
+    text.append(label, detailLine(entry));
+    item.append(box, text);
     return item;
   }
 
@@ -4185,28 +4207,16 @@ async function removeRow(button, url, kind) {
 }
 
 /**
- * What the export takes (D152): the whole list, or - inside the selection -
- * the articles ticked, each read whole by its address. A row torn or gone
- * since its tick is left out, the reading `getArticle` gives one.
- *
- * @returns {Promise<import("../lib/store/saved-article.js").SavedArticle[]>}
- */
-async function articlesToExport() {
-  if (!picking) return allArticles();
-  const read = await Promise.all([...picked].map((url) => getArticle(url)));
-  return read.filter((article) => article !== null);
-}
-
-/**
  * The export: inside the selection (D152) the ticked articles as the list's
  * own file - a file to hand somebody; otherwise the backup of everything
  * (D213): the whole list with its highlights and reading positions (and
  * its pictures when the box is ticked), every saved phrase of every pair
  * with its sentence and counts, every document's highlights - books' too -
- * and the settings, in one archive. Fresh from the databases rather than
- * from the rows on screen, because the screen shows one segment and a
- * backup is everything. Downloading is a blob and an anchor; no permission
- * asks for less.
+ * the settings, and the books themselves when their box is ticked (D218),
+ * in one archive. Fresh from the databases rather than from the rows on
+ * screen, because the screen shows one segment and a backup is
+ * everything. Packed as a stream, each book read when its turn comes.
+ * Downloading is a blob and an anchor; no permission asks for less.
  */
 async function exportList() {
   try {
@@ -4214,17 +4224,22 @@ async function exportList() {
       await exportSelection();
       return;
     }
-    const [articles, marks, positions, phrases, docs, config] = await Promise.all([
+    const [articles, marks, positions, phrases, docs, config, shelf] = await Promise.all([
       allArticles(),
       allMarks(),
       allPositions(),
       allPhrases(),
       marksDocs(() => true),
       readConfig(),
+      listBooks(),
     ]);
     const withPictures = exportPictures !== null && !exportPicturesRow?.hidden && exportPictures.checked;
+    // The books only when their box says so (D218): unticked, the backup
+    // is the light file it was, and a book's backup is its .epub.
+    const withBooks = exportBooks !== null && !exportBooksRow?.hidden && exportBooks.checked;
+    const books = withBooks ? shelf : [];
     const archive = await packArchive(
-      backupEntries({
+      backupStream({
         app: webext().runtime.getManifest().version,
         now: Date.now(),
         articles,
@@ -4234,15 +4249,19 @@ async function exportList() {
         phrases,
         highlights: docs.map(copyDocOf),
         settings: config,
+        books,
       }),
     );
     const size = downloadFile(archive, BACKUP_FILENAME, "application/zip");
     // What the file holds, said where the press was (D153): each count in
     // its own words and the settings as a word - a download is a quiet
-    // thing, and this one is the whole of somebody's reading.
+    // thing, and this one is the whole of somebody's reading. The books
+    // only when they went in: "0 books" would say the file leaves them
+    // out, which the list's own point says already.
     const highlights = docs.reduce((sum, doc) => sum + doc.marks.length, 0);
     const parts = [
       plural(articles.length, "reader_backup_articles"),
+      ...(withBooks ? [plural(books.length, "reader_backup_books")] : []),
       plural(phrases.length, "phrases"),
       plural(highlights, "reader_backup_highlights"),
       t("reader_backup_settings_word"),
@@ -4251,6 +4270,52 @@ async function exportList() {
   } catch {
     transferStatus(describeError(ErrorCode.INTERNAL), "error");
   }
+}
+
+/**
+ * The entries of the backup, one at a time (D218): the manifest and the
+ * light parts first, the reading list with its pictures as
+ * `backupEntries` writes them, then every book asked for - its text read
+ * from the store only when its turn comes, its pictures after it - and
+ * the books' index last, once every book's pictures have entries to be
+ * referred to. The order inside the archive is nobody's concern: an
+ * import reads entries by name. A book whose text is not all there is
+ * left out - a row over parts that are not there would be a book nobody
+ * could open.
+ *
+ * @param {import("../lib/store/backup-file.js").BackupInput & {
+ *   books: import("../lib/store/book.js").BookMeta[],
+ * }} input
+ * @returns {AsyncGenerator<import("../lib/store/articles-archive.js").ArchiveEntry>}
+ */
+async function* backupStream(input) {
+  yield* backupEntries(input);
+  if (input.books.length === 0) return;
+  /** @type {Parameters<typeof toBooksIndex>[0]} */
+  const index = [];
+  for (const book of input.books) {
+    const segments = await allBookSegments(book);
+    if (segments === null) continue;
+    const at = index.length;
+    yield { name: bookTextEntryName(book.id), data: new TextEncoder().encode(toBookText(book.id, segments)), deflate: true };
+    /** @type {import("../lib/store/articles-archive.js").PictureRef[]} */
+    const refs = [];
+    for (const picture of await allBookPictures(book)) {
+      const file = bookPictureEntryName(at, picture);
+      yield { name: file, data: new Uint8Array(picture.data), deflate: false };
+      refs.push({
+        index: picture.index,
+        file,
+        src: picture.src,
+        mime: picture.mime,
+        width: picture.width,
+        height: picture.height,
+      });
+    }
+    const position = input.positions.get(book.id);
+    index.push({ meta: book, ...(position === undefined ? {} : { position }), pictures: refs });
+  }
+  yield { name: BOOKS_ENTRY, data: new TextEncoder().encode(toBooksIndex(index)), deflate: true };
 }
 
 /**
@@ -4273,29 +4338,46 @@ async function picturesOf(articles) {
 }
 
 /**
- * The ticked articles as the list's own file (D152) - the `.json`, or the
- * `.zip` with their pictures beside it (D145): a file to hand somebody,
- * not the backup, so it carries neither the vocabulary nor the settings.
- * The export says what it wrote (D153) in the section's own line.
+ * The ticked documents as a file to hand somebody (D152) - since D218 the
+ * backup's own format cut to the selection: the ticked articles with
+ * their highlights and reading positions (and their pictures when the box
+ * is ticked), the ticked books whole - text, pictures, position - and
+ * the highlights of both; neither the vocabulary nor the settings, which
+ * are nobody's to hand on. Written by the same stream, read back by the
+ * same import, under a name that says what it is. A row torn or gone
+ * since its tick is left out, the reading `getArticle` gives one. The
+ * export says what it wrote (D153) in the section's own line.
  */
 async function exportSelection() {
-  const [articles, marks] = await Promise.all([articlesToExport(), allMarks()]);
-  if (articles.length === 0) return;
+  const [shelf, marks, positions, docs] = await Promise.all([
+    listBooks(),
+    allMarks(),
+    allPositions(),
+    marksDocs((docId) => picked.has(docId)),
+  ]);
+  const books = shelf.filter((book) => picked.has(book.id));
+  const ids = new Set(shelf.map((book) => book.id));
+  const read = await Promise.all([...picked].filter((url) => !ids.has(url)).map((url) => getArticle(url)));
+  const articles = read.filter((article) => article !== null);
+  if (articles.length === 0 && books.length === 0) return;
   const withPictures = exportPictures !== null && !exportPicturesRow?.hidden && exportPictures.checked;
-  /** @type {number} */
-  let size;
-  if (withPictures) {
-    const archive = await packArchive(archiveEntries(articles, marks, await picturesOf(articles)));
-    size = downloadFile(archive, ARCHIVE_FILENAME, "application/zip");
-  } else {
-    size = downloadFile(toArticlesFile(articles, marks), ARTICLES_FILENAME, "application/json");
-  }
-  transferStatus(
-    plural(articles.length, "reader_export_done", [
-      withPictures ? ARCHIVE_FILENAME : ARTICLES_FILENAME,
-      fileSize(size),
-    ]),
+  const archive = await packArchive(
+    backupStream({
+      app: webext().runtime.getManifest().version,
+      now: Date.now(),
+      articles,
+      marks,
+      pictures: withPictures ? await picturesOf(articles) : new Map(),
+      positions,
+      phrases: [],
+      highlights: docs.map(copyDocOf),
+      settings: null,
+      books,
+      selection: true,
+    }),
   );
+  const size = downloadFile(archive, SELECTION_FILENAME, "application/zip");
+  transferStatus(plural(articles.length + books.length, "reader_export_done", [SELECTION_FILENAME, fileSize(size)]));
 }
 
 /**
@@ -4462,13 +4544,14 @@ function marksImportNotes(plan, invalid) {
  * has to outlive the click long enough for the download to take it - a
  * minute is comfortably that, and then the blob can go.
  *
- * @param {string | Uint8Array<ArrayBuffer>} content text, or the bytes of an archive (D145)
+ * @param {string | Uint8Array<ArrayBuffer> | Blob} content text, the bytes of a file, or the
+ *   archive as the stream packed it (D218)
  * @param {string} filename
  * @param {string} type
  * @returns {number} the file's size in bytes, for the line that says what was written
  */
 function downloadFile(content, filename, type) {
-  const blob = new Blob([content], { type });
+  const blob = content instanceof Blob ? content : new Blob([content], { type });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   anchor.href = url;
@@ -4643,6 +4726,9 @@ async function offerBackup(file, bytes, entries) {
     const vocabularyText = textOf(BACKUP_ENTRIES.vocabulary);
     const highlightsText = textOf(BACKUP_ENTRIES.highlights);
     const settingsText = textOf(BACKUP_ENTRIES.settings);
+    // The books' index (D218): light, so no book's text is read before
+    // the consent; the texts and the pictures wait in the archive.
+    const booksText = textOf(BACKUP_ENTRIES.books);
     await offerParts(file.name, {
       manifest,
       articles,
@@ -4652,6 +4738,7 @@ async function offerBackup(file, bytes, entries) {
       vocabulary: vocabularyText === null ? null : fromVocabularyFile(vocabularyText),
       highlights: highlightsText === null ? null : fromMarksCopy(highlightsText),
       settings: settingsText === null ? null : fromSettingsFile(settingsText),
+      books: booksText === null ? null : { index: fromBooksIndex(booksText), bytes, entries },
     });
   } catch {
     closeImportOffer();
@@ -4672,6 +4759,11 @@ async function offerBackup(file, bytes, entries) {
  *   vocabulary: { rows: import("../lib/protocol.js").RestoreRow[], invalid: number } | null,
  *   highlights: { documents: import("../lib/store/marks-copy.js").CopyDoc[], invalid: number } | null,
  *   settings: import("../lib/config.js").ConfigPatch | null,
+ *   books?: {
+ *     index: { books: import("../lib/store/books-file.js").FileBook[], invalid: number },
+ *     bytes: Uint8Array,
+ *     entries: import("./zip.js").ZipEntryInfo[],
+ *   } | null,
  * }} parts
  */
 async function offerParts(name, parts) {
@@ -4679,23 +4771,41 @@ async function offerParts(name, parts) {
   const phrases = parts.vocabulary?.rows ?? [];
   const highlights = parts.highlights?.documents ?? [];
   const settings = parts.settings;
-  if (articles.length === 0 && phrases.length === 0 && highlights.length === 0 && settings === null) {
+  const filed = parts.books?.index.books ?? [];
+  if (articles.length === 0 && phrases.length === 0 && highlights.length === 0 && settings === null && filed.length === 0) {
     closeImportOffer();
     transferStatus(t("reader_backup_nothing"), "error");
     return;
   }
   const metas = articles.length === 0 ? [] : await listArticles();
+  // The books (D218) laid against the list the same way, so the offer
+  // says how many are new; their pictures counted off the directory.
+  const shelf = filed.length === 0 ? [] : await listBooks();
+  const books =
+    parts.books === undefined || parts.books === null
+      ? null
+      : {
+          rows: filed,
+          plan: booksImportPlan(filed, { books: shelf }),
+          account: archiveAccount(new Map(filed.map((book) => [book.meta.id, book.pictures ?? []])), parts.books.entries),
+          bytes: parts.books.bytes,
+        };
   pendingImport = null;
   pendingBackup = {
     name,
     manifest: parts.manifest,
     articles,
     newArticles: importPlan(metas.map((meta) => meta.url), articles).toAdd.length,
-    invalid: (parts.articles?.invalid ?? 0) + (parts.vocabulary?.invalid ?? 0) + (parts.highlights?.invalid ?? 0),
+    invalid:
+      (parts.articles?.invalid ?? 0) +
+      (parts.vocabulary?.invalid ?? 0) +
+      (parts.highlights?.invalid ?? 0) +
+      (parts.books?.index.invalid ?? 0),
     ...(parts.pictures === undefined ? {} : { pictures: parts.pictures }),
     phrases,
     highlights,
     settings,
+    books,
   };
   transferStatus("");
   renderImportOffer();
@@ -4730,8 +4840,20 @@ function renderBackupOffer() {
     if (offer.articles.length > 0) {
       lines.push(plural(offer.articles.length, "reader_backup_part_articles", [offer.newArticles.toLocaleString()]));
     }
-    if (offer.pictures !== undefined) {
-      lines.push(plural(offer.pictures.account.count, "reader_import_pictures", [megabytes(offer.pictures.account.bytes)]));
+    // The books (D218) beside the articles, with how many are new; the
+    // pictures' line counts the articles' and the books' together - one
+    // number for what the file's pictures come to.
+    if (offer.books !== null && offer.books.rows.length > 0) {
+      lines.push(
+        plural(offer.books.rows.length, "reader_backup_part_books", [offer.books.plan.toAdd.length.toLocaleString()]),
+      );
+    }
+    const pictured = {
+      count: (offer.pictures?.account.count ?? 0) + (offer.books?.account.count ?? 0),
+      bytes: (offer.pictures?.account.bytes ?? 0) + (offer.books?.account.bytes ?? 0),
+    };
+    if (pictured.count > 0) {
+      lines.push(plural(pictured.count, "reader_import_pictures", [megabytes(pictured.bytes)]));
     }
     if (offer.phrases.length > 0) {
       // The pairs by name, not by count: a count would need its own plural
@@ -4778,11 +4900,13 @@ function renderBackupOffer() {
 /**
  * The press that writes the backup (D213), part by part, each through the
  * importer it always had and every one adding, never overwriting: the
- * articles with their pictures and positions first; then the vocabulary,
+ * articles with their pictures and positions first; then the books
+ * (D218), each the way its own import writes it; then the vocabulary,
  * through the background, which owns every write to it; then the
- * highlights - after the articles, so the marks that came in with an
- * article meet themselves and are left out; the settings last, when the
- * box says so. One report, the parts' sentences in a row.
+ * highlights - after the articles and the books, so the marks that came
+ * in with an article meet themselves and are left out, and a book's find
+ * their book; the settings last, when the box says so. One report, the
+ * parts' sentences in a row.
  */
 async function runBackup() {
   if (pendingBackup === null || importRun === null) return;
@@ -4799,6 +4923,17 @@ async function runBackup() {
       if (pictured.count > 0) {
         sentences.push(plural(pictured.count, "reader_import_pictures_added", [megabytes(pictured.bytes)]));
       }
+    }
+    if (offered.books !== null && offered.books.rows.length > 0) {
+      const report =
+        offered.books.plan.toAdd.length > 0
+          ? await importBooks(offered.books.plan.toAdd, offered.books.bytes)
+          : { added: 0, unreadable: 0 };
+      sentences.push(plural(report.added, "reader_import_books_added"));
+      if (offered.books.plan.skipped > 0) {
+        sentences.push(plural(offered.books.plan.skipped, "reader_import_books_skipped"));
+      }
+      if (report.unreadable > 0) sentences.push(plural(report.unreadable, "reader_import_unreadable"));
     }
     if (offered.phrases.length > 0) {
       const answer = asResult(
@@ -4835,6 +4970,56 @@ async function runBackup() {
   } finally {
     importRun.disabled = false;
   }
+}
+
+/**
+ * The books of a backup written into the library (D218), one at a time,
+ * each the way an import from its .epub writes it: the segments first,
+ * the pictures as the file holds them under the indexes the segments
+ * name, the row last (`putBook` - the write that makes the book exist,
+ * and copies it), then where the reader stopped - only with a book
+ * actually added, as an article's position comes only with the article.
+ * The row's account of its pictures is written from the rows that
+ * actually came out of the archive. A book whose text will not read, or
+ * whose parts are not the number the row promises, is left out and
+ * counted; a write cut short leaves nothing behind (`deleteBook` takes
+ * what a failure wrote, the orphan sweep covers the rest).
+ *
+ * @param {import("../lib/store/books-file.js").FileBook[]} books the ones the plan adds
+ * @param {Uint8Array} bytes the whole archive
+ * @returns {Promise<{ added: number, unreadable: number }>}
+ */
+async function importBooks(books, bytes) {
+  const read = await entryReader(bytes);
+  let added = 0;
+  let unreadable = 0;
+  for (const book of books) {
+    const id = book.meta.id;
+    const text = read(book.text, MAX_BOOK_TEXT_BYTES);
+    const segments = text === null ? null : fromBookText(new TextDecoder().decode(text), id);
+    if (segments === null || segments.length !== book.meta.segmentCount) {
+      unreadable += 1;
+      continue;
+    }
+    try {
+      for (const [index, segment] of segments.entries()) {
+        await putBookSegment({ bookId: id, index, ...segment });
+      }
+      const rows = bookPictureRows(id, book.pictures ?? [], (name) => read(name, MAX_DOWNLOAD_BYTES));
+      for (const row of rows) await putBookPicture(row);
+      const summary = picturesSummary(rows);
+      const { pictures: claimed, ...meta } = book.meta;
+      void claimed;
+      await putBook(summary.count === 0 ? meta : { ...meta, pictures: summary });
+      if (book.position !== undefined) await putPosition(book.position);
+      added += 1;
+    } catch (error) {
+      console.warn("re/read: a book of the backup could not be written", error);
+      await deleteBook(id).catch(() => undefined);
+      unreadable += 1;
+    }
+  }
+  return { added, unreadable };
 }
 
 /**

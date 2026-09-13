@@ -62,12 +62,14 @@ const EXTENSIONS = new Map([
 
 /**
  * The one shape a picture entry's name may have - only what this module
- * writes, so a hand-made archive cannot point a reference anywhere else.
+ * writes, so a hand-made archive cannot point a reference anywhere else:
+ * an article's under its place in `articles.json`, a book's (D218) under
+ * `book/` and its place in `books.json`.
  */
-const ENTRY_NAME = /^pictures\/\d{1,7}\/\d{1,7}\.(jpg|png|gif|webp)$/;
+const ENTRY_NAME = /^pictures\/(?:book\/)?\d{1,7}\/\d{1,7}\.(jpg|png|gif|webp)$/;
 
 /** How much of an entry the type is read from, as on a download. */
-const SNIFF_BYTES = 512;
+export const SNIFF_BYTES = 512;
 
 /**
  * Where an article's picture is written: under the article's place in the
@@ -79,6 +81,19 @@ const SNIFF_BYTES = 512;
  */
 export function pictureEntryName(articleAt, picture) {
   return `pictures/${articleAt}/${picture.index}.${EXTENSIONS.get(picture.mime) ?? "bin"}`;
+}
+
+/**
+ * Where a book's picture is written (D218): under `book/` and the book's
+ * place in `books.json`, by the picture's own index - the index the
+ * book's segments name it by, which the import keeps.
+ *
+ * @param {number} bookAt the book's position in `books.json`
+ * @param {Pick<PictureRow, "index" | "mime">} picture
+ * @returns {string}
+ */
+export function bookPictureEntryName(bookAt, picture) {
+  return `pictures/book/${bookAt}/${picture.index}.${EXTENSIONS.get(picture.mime) ?? "bin"}`;
 }
 
 /**

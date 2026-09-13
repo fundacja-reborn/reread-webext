@@ -1,7 +1,7 @@
 # fflate (vendored)
 
-The ZIP reader behind EPUB import. One file, copied in unchanged, committed for the same
-reason as its two neighbours: Manifest V3 forbids remotely hosted code, and an extension
+The ZIP reader behind EPUB import, and the writer behind the backup. One file, copied in
+unchanged, committed for the same reason as its two neighbours: Manifest V3 forbids remotely hosted code, and an extension
 that asks for `<all_urls>` should ship what it runs.
 
 | File | What it is | Size |
@@ -47,15 +47,18 @@ loads it before then.
 
 ## What is used, and what is not
 
-Two synchronous functions, both through `src/reader/zip.js`: **`unzipSync`**, always with a
-`filter`, which is what makes it decompress single ZIP entries on demand - the central
-directory is scanned, and only the entry asked for is inflated (the book import's reads, and
-since D145 the listing and the picture entries of the reading list's `.zip` backup) - and
-**`zipSync`**, which writes that backup when the export is asked to include pictures. Nothing
+One synchronous function and three synchronous classes, all through `src/reader/zip.js`:
+**`unzipSync`**, always with a `filter`, which is what makes it decompress single ZIP entries
+on demand - the central directory is scanned, and only the entry asked for is inflated (the
+book import's reads, and since D145 the listing and the entries of the `.zip` backup) - and
+the streaming writer **`Zip`** with **`ZipDeflate`** (text entries) and **`ZipPassThrough`**
+(pictures, stored as they are), which write the backup one entry at a time (D218; until then
+`zipSync` wrote it whole, and the whole library stood in memory beside its archive). Nothing
 else is called. In particular the **asynchronous API is never touched**: that path (visible
-near the top of the file) spins up Web Workers from `Blob` URLs, which is exactly the kind of
-dynamic code an auditor should be able to rule out - and can, by checking that no
-`unzip(`/`zip(`/`Async` call sites exist in `src/`.
+near the top of the file, and `AsyncZipDeflate` beside the classes above) spins up Web Workers
+from `Blob` URLs, which is exactly the kind of dynamic code an auditor should be able to rule
+out - and can, by checking that no `unzip(`, `zip(` or `Async` call sites exist in `src/`
+(`test/vendor-surface.test.js` checks exactly that on every run of the quality gate).
 
 ## The licence, precisely
 

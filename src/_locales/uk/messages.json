@@ -635,6 +635,34 @@
       "size": { "content": "$2", "example": "12,4 МБ" }
     }
   },
+  "reader_export_books_one": {
+    "message": "Експорт із книгами ($COUNT$ книга · $SIZE$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "size": { "content": "$2", "example": "6,6 МБ" }
+    }
+  },
+  "reader_export_books_few": {
+    "message": "Експорт із книгами ($COUNT$ книги · $SIZE$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "size": { "content": "$2", "example": "6,6 МБ" }
+    }
+  },
+  "reader_export_books_many": {
+    "message": "Експорт із книгами ($COUNT$ книг · $SIZE$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "size": { "content": "$2", "example": "6,6 МБ" }
+    }
+  },
+  "reader_export_books_other": {
+    "message": "Експорт із книгами ($COUNT$ книги · $SIZE$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "size": { "content": "$2", "example": "6,6 МБ" }
+    }
+  },
   "reader_import_pictures_one": {
     "message": "Із $COUNT$ зображенням ($SIZE$).",
     "placeholders": {
@@ -683,8 +711,8 @@
   "reader_backup_scope": {
     "message": "Резервна копія містить ваші статті з їхніми позначеннями та позиціями читання, збережені фрази кожної мовної пари й налаштування. Позначення, зроблені в книгах, також є в ній."
   },
-  "reader_backup_books": {
-    "message": "Самих книг (.epub) у резервній копії немає - збережіть свої файли .epub. Коли ви знову імпортуєте ту саму книгу, а після неї резервну копію, її позначення повернуться; позиція читання - ні."
+  "reader_backup_books_note": {
+    "message": "Книги є в резервній копії лише тоді, коли ви позначите «Експорт із книгами»; інакше збережіть свої файли .epub - коли ви знову імпортуєте ту саму книгу, а після неї резервну копію, її позначення повернуться."
   },
   "reader_export_marks": { "message": "Експортувати позначення" },
   "reader_marks_export_notes": { "message": "Експортувати як нотатки (.md)" },
@@ -863,6 +891,22 @@
       "count": { "content": "$1", "example": "12" }
     }
   },
+  "reader_backup_books_one": {
+    "message": "$COUNT$ книга",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_backup_books_few": {
+    "message": "$COUNT$ книги",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
+  "reader_backup_books_many": {
+    "message": "$COUNT$ книг",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
+  "reader_backup_books_other": {
+    "message": "$COUNT$ книги",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
   "reader_backup_highlights_one": {
     "message": "$COUNT$ позначення",
     "placeholders": {
@@ -913,6 +957,34 @@
     "placeholders": {
       "count": { "content": "$1", "example": "12" },
       "new": { "content": "$2", "example": "3" }
+    }
+  },
+  "reader_backup_part_books_one": {
+    "message": "$COUNT$ книга, з них $NEW$ ще немає в списку",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "new": { "content": "$2", "example": "2" }
+    }
+  },
+  "reader_backup_part_books_few": {
+    "message": "$COUNT$ книги, з них $NEW$ ще немає в списку",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "new": { "content": "$2", "example": "2" }
+    }
+  },
+  "reader_backup_part_books_many": {
+    "message": "$COUNT$ книг, з них $NEW$ ще немає в списку",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "new": { "content": "$2", "example": "2" }
+    }
+  },
+  "reader_backup_part_books_other": {
+    "message": "$COUNT$ книги, з них $NEW$ ще немає в списку",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "new": { "content": "$2", "example": "2" }
     }
   },
   "reader_backup_part_phrases_one": {
@@ -991,36 +1063,32 @@
       "count": { "content": "$1", "example": "12" }
     }
   },
-  "reader_transfer_pick": { "message": "Щоб експортувати лише частину статей, натисніть «Вибрати» над списком і позначте їх." },
+  "reader_transfer_pick": { "message": "Щоб експортувати лише частину статей або книг, натисніть «Вибрати» над списком і позначте їх." },
   "reader_pick_start": { "message": "Вибрати" },
   "reader_pick_close": { "message": "Закрити вибір" },
-  "reader_pick_book_title": { "message": "Книг немає в резервній копії" },
-  "reader_pick_books_note": {
-    "message": "Книги не можна вибрати - їх немає в резервній копії, у ній є лише їхні позначення."
-  },
   "reader_pick_all": { "message": "Вибрати все" },
   "reader_pick_count_one": {
-    "message": "Вибрано $COUNT$ статтю",
+    "message": "Вибрано $COUNT$ документ",
     "placeholders": {
       "count": { "content": "$1", "example": "1" }
     }
   },
   "reader_pick_count_few": {
-    "message": "Вибрано $COUNT$ статті",
+    "message": "Вибрано $COUNT$ документи",
     "placeholders": {
       "count": { "content": "$1", "example": "3" }
     }
   },
   "reader_pick_count_many": {
-    "message": "Вибрано $COUNT$ статей",
+    "message": "Вибрано $COUNT$ документів",
     "placeholders": {
-      "count": { "content": "$1", "example": "5" }
+      "count": { "content": "$1", "example": "3" }
     }
   },
   "reader_pick_count_other": {
-    "message": "Вибрано $COUNT$ статті",
+    "message": "Вибрано $COUNT$ документа",
     "placeholders": {
-      "count": { "content": "$1", "example": "1,5" }
+      "count": { "content": "$1", "example": "3" }
     }
   },
   "reader_export_selected": {
@@ -1030,35 +1098,35 @@
     }
   },
   "reader_export_done_one": {
-    "message": "Експортовано $COUNT$ статтю до $FILE$ ($SIZE$).",
+    "message": "Експортовано $COUNT$ документ до $FILE$ ($SIZE$).",
     "placeholders": {
       "count": { "content": "$1", "example": "1" },
-      "file": { "content": "$2", "example": "reread-articles.json" },
-      "size": { "content": "$3", "example": "38 KB" }
+      "file": { "content": "$2", "example": "reread-selection.zip" },
+      "size": { "content": "$3", "example": "2,1 МБ" }
     }
   },
   "reader_export_done_few": {
-    "message": "Експортовано $COUNT$ статті до $FILE$ ($SIZE$).",
+    "message": "Експортовано $COUNT$ документи до $FILE$ ($SIZE$).",
     "placeholders": {
       "count": { "content": "$1", "example": "3" },
-      "file": { "content": "$2", "example": "reread-articles.json" },
-      "size": { "content": "$3", "example": "120 KB" }
+      "file": { "content": "$2", "example": "reread-selection.zip" },
+      "size": { "content": "$3", "example": "2,1 МБ" }
     }
   },
   "reader_export_done_many": {
-    "message": "Експортовано $COUNT$ статей до $FILE$ ($SIZE$).",
+    "message": "Експортовано $COUNT$ документів до $FILE$ ($SIZE$).",
     "placeholders": {
-      "count": { "content": "$1", "example": "12" },
-      "file": { "content": "$2", "example": "reread-articles.zip" },
-      "size": { "content": "$3", "example": "2,1 MB" }
+      "count": { "content": "$1", "example": "3" },
+      "file": { "content": "$2", "example": "reread-selection.zip" },
+      "size": { "content": "$3", "example": "2,1 МБ" }
     }
   },
   "reader_export_done_other": {
-    "message": "Експортовано $COUNT$ статті до $FILE$ ($SIZE$).",
+    "message": "Експортовано $COUNT$ документа до $FILE$ ($SIZE$).",
     "placeholders": {
-      "count": { "content": "$1", "example": "1,5" },
-      "file": { "content": "$2", "example": "reread-articles.json" },
-      "size": { "content": "$3", "example": "38 KB" }
+      "count": { "content": "$1", "example": "3" },
+      "file": { "content": "$2", "example": "reread-selection.zip" },
+      "size": { "content": "$3", "example": "2,1 МБ" }
     }
   },
   "reader_export_marks_done_one": {
@@ -1359,6 +1427,38 @@
     "placeholders": {
       "count": { "content": "$1", "example": "1,5" }
     }
+  },
+  "reader_import_books_added_one": {
+    "message": "Додано $COUNT$ нову книгу.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_import_books_added_few": {
+    "message": "Додано $COUNT$ нові книги.",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
+  "reader_import_books_added_many": {
+    "message": "Додано $COUNT$ нових книг.",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
+  "reader_import_books_added_other": {
+    "message": "Додано $COUNT$ нової книги.",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
+  "reader_import_books_skipped_one": {
+    "message": "Пропущено $COUNT$ книгу, яка вже є.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_import_books_skipped_few": {
+    "message": "Пропущено $COUNT$ книги, які вже є.",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
+  "reader_import_books_skipped_many": {
+    "message": "Пропущено $COUNT$ книг, які вже є.",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
+  "reader_import_books_skipped_other": {
+    "message": "Пропущено $COUNT$ книги, яка вже є.",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
   },
   "reader_import_unreadable_one": {
     "message": "Не вдалося прочитати $COUNT$ запис.",

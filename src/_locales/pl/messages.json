@@ -635,6 +635,34 @@
       "size": { "content": "$2", "example": "12,4 MB" }
     }
   },
+  "reader_export_books_one": {
+    "message": "Eksport z książkami ($COUNT$ książka · $SIZE$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "size": { "content": "$2", "example": "6,6 MB" }
+    }
+  },
+  "reader_export_books_few": {
+    "message": "Eksport z książkami ($COUNT$ książki · $SIZE$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "size": { "content": "$2", "example": "6,6 MB" }
+    }
+  },
+  "reader_export_books_many": {
+    "message": "Eksport z książkami ($COUNT$ książek · $SIZE$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "size": { "content": "$2", "example": "6,6 MB" }
+    }
+  },
+  "reader_export_books_other": {
+    "message": "Eksport z książkami ($COUNT$ książki · $SIZE$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "size": { "content": "$2", "example": "6,6 MB" }
+    }
+  },
   "reader_import_pictures_one": {
     "message": "Z $COUNT$ obrazkiem ($SIZE$).",
     "placeholders": {
@@ -683,8 +711,8 @@
   "reader_backup_scope": {
     "message": "Kopia zawiera artykuły z zakreśleniami i pozycją czytania, zapisane frazy wszystkich par językowych oraz ustawienia. Zakreślenia z książek też w niej są."
   },
-  "reader_backup_books": {
-    "message": "Samych książek (.epub) w kopii nie ma - zachowaj pliki .epub. Gdy zaimportujesz tę samą książkę ponownie, a po niej kopię, jej zakreślenia wrócą; pozycja czytania nie."
+  "reader_backup_books_note": {
+    "message": "Książki są w kopii tylko po zaznaczeniu pola „Eksport z książkami”; w przeciwnym razie zachowaj pliki .epub - po ponownym imporcie tej samej książki i kopii po niej jej zakreślenia wrócą."
   },
   "reader_export_marks": { "message": "Eksportuj zakreślenia" },
   "reader_marks_export_notes": { "message": "Eksportuj jako notatki (.md)" },
@@ -863,6 +891,22 @@
       "count": { "content": "$1", "example": "12" }
     }
   },
+  "reader_backup_books_one": {
+    "message": "$COUNT$ książka",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_backup_books_few": {
+    "message": "$COUNT$ książki",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
+  "reader_backup_books_many": {
+    "message": "$COUNT$ książek",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
+  "reader_backup_books_other": {
+    "message": "$COUNT$ książki",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
   "reader_backup_highlights_one": {
     "message": "$COUNT$ zakreślenie",
     "placeholders": {
@@ -913,6 +957,34 @@
     "placeholders": {
       "count": { "content": "$1", "example": "12" },
       "new": { "content": "$2", "example": "3" }
+    }
+  },
+  "reader_backup_part_books_one": {
+    "message": "$COUNT$ książka, w tym $NEW$ nowych",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "new": { "content": "$2", "example": "2" }
+    }
+  },
+  "reader_backup_part_books_few": {
+    "message": "$COUNT$ książki, w tym $NEW$ nowych",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "new": { "content": "$2", "example": "2" }
+    }
+  },
+  "reader_backup_part_books_many": {
+    "message": "$COUNT$ książek, w tym $NEW$ nowych",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "new": { "content": "$2", "example": "2" }
+    }
+  },
+  "reader_backup_part_books_other": {
+    "message": "$COUNT$ książki, w tym $NEW$ nowych",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "new": { "content": "$2", "example": "2" }
     }
   },
   "reader_backup_part_phrases_one": {
@@ -991,36 +1063,32 @@
       "count": { "content": "$1", "example": "12" }
     }
   },
-  "reader_transfer_pick": { "message": "Żeby wyeksportować tylko niektóre artykuły, naciśnij „Zaznacz” nad listą i zaznacz je." },
+  "reader_transfer_pick": { "message": "Żeby wyeksportować tylko niektóre artykuły lub książki, naciśnij „Zaznacz” nad listą i zaznacz je." },
   "reader_pick_start": { "message": "Zaznacz" },
   "reader_pick_close": { "message": "Zamknij zaznaczanie" },
-  "reader_pick_book_title": { "message": "Książek nie ma w kopii" },
-  "reader_pick_books_note": {
-    "message": "Książek nie da się zaznaczyć - nie ma ich w kopii, są w niej tylko ich zakreślenia."
-  },
   "reader_pick_all": { "message": "Zaznacz wszystkie" },
   "reader_pick_count_one": {
-    "message": "Zaznaczono $COUNT$ artykuł",
+    "message": "Zaznaczono $COUNT$ dokument",
     "placeholders": {
       "count": { "content": "$1", "example": "1" }
     }
   },
   "reader_pick_count_few": {
-    "message": "Zaznaczono $COUNT$ artykuły",
+    "message": "Zaznaczono $COUNT$ dokumenty",
     "placeholders": {
       "count": { "content": "$1", "example": "3" }
     }
   },
   "reader_pick_count_many": {
-    "message": "Zaznaczono $COUNT$ artykułów",
+    "message": "Zaznaczono $COUNT$ dokumentów",
     "placeholders": {
-      "count": { "content": "$1", "example": "5" }
+      "count": { "content": "$1", "example": "3" }
     }
   },
   "reader_pick_count_other": {
-    "message": "Zaznaczono $COUNT$ artykułu",
+    "message": "Zaznaczono $COUNT$ dokumentu",
     "placeholders": {
-      "count": { "content": "$1", "example": "1,5" }
+      "count": { "content": "$1", "example": "3" }
     }
   },
   "reader_export_selected": {
@@ -1030,35 +1098,35 @@
     }
   },
   "reader_export_done_one": {
-    "message": "Wyeksportowano $COUNT$ artykuł do $FILE$ ($SIZE$).",
+    "message": "Wyeksportowano $COUNT$ dokument do $FILE$ ($SIZE$).",
     "placeholders": {
       "count": { "content": "$1", "example": "1" },
-      "file": { "content": "$2", "example": "reread-articles.json" },
-      "size": { "content": "$3", "example": "38 KB" }
+      "file": { "content": "$2", "example": "reread-selection.zip" },
+      "size": { "content": "$3", "example": "2,1 MB" }
     }
   },
   "reader_export_done_few": {
-    "message": "Wyeksportowano $COUNT$ artykuły do $FILE$ ($SIZE$).",
+    "message": "Wyeksportowano $COUNT$ dokumenty do $FILE$ ($SIZE$).",
     "placeholders": {
       "count": { "content": "$1", "example": "3" },
-      "file": { "content": "$2", "example": "reread-articles.json" },
-      "size": { "content": "$3", "example": "120 KB" }
+      "file": { "content": "$2", "example": "reread-selection.zip" },
+      "size": { "content": "$3", "example": "2,1 MB" }
     }
   },
   "reader_export_done_many": {
-    "message": "Wyeksportowano $COUNT$ artykułów do $FILE$ ($SIZE$).",
+    "message": "Wyeksportowano $COUNT$ dokumentów do $FILE$ ($SIZE$).",
     "placeholders": {
-      "count": { "content": "$1", "example": "12" },
-      "file": { "content": "$2", "example": "reread-articles.zip" },
+      "count": { "content": "$1", "example": "3" },
+      "file": { "content": "$2", "example": "reread-selection.zip" },
       "size": { "content": "$3", "example": "2,1 MB" }
     }
   },
   "reader_export_done_other": {
-    "message": "Wyeksportowano $COUNT$ artykułu do $FILE$ ($SIZE$).",
+    "message": "Wyeksportowano $COUNT$ dokumentu do $FILE$ ($SIZE$).",
     "placeholders": {
-      "count": { "content": "$1", "example": "1,5" },
-      "file": { "content": "$2", "example": "reread-articles.json" },
-      "size": { "content": "$3", "example": "38 KB" }
+      "count": { "content": "$1", "example": "3" },
+      "file": { "content": "$2", "example": "reread-selection.zip" },
+      "size": { "content": "$3", "example": "2,1 MB" }
     }
   },
   "reader_export_marks_done_one": {
@@ -1359,6 +1427,38 @@
     "placeholders": {
       "count": { "content": "$1", "example": "1,5" }
     }
+  },
+  "reader_import_books_added_one": {
+    "message": "Dodano $COUNT$ nową książkę.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_import_books_added_few": {
+    "message": "Dodano $COUNT$ nowe książki.",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
+  "reader_import_books_added_many": {
+    "message": "Dodano $COUNT$ nowych książek.",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
+  "reader_import_books_added_other": {
+    "message": "Dodano $COUNT$ nowej książki.",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
+  "reader_import_books_skipped_one": {
+    "message": "Pominięto $COUNT$ książkę już obecną.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_import_books_skipped_few": {
+    "message": "Pominięto $COUNT$ książki już obecne.",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
+  "reader_import_books_skipped_many": {
+    "message": "Pominięto $COUNT$ książek już obecnych.",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
+  "reader_import_books_skipped_other": {
+    "message": "Pominięto $COUNT$ książki już obecnej.",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
   },
   "reader_import_unreadable_one": {
     "message": "Nie dało się odczytać $COUNT$ wpisu.",

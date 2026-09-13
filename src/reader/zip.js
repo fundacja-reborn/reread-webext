@@ -1,23 +1,40 @@
 /**
  * The vendored ZIP library as this extension uses it: the synchronous
  * single-entry reads the book import has always made, and - since the
- * reading list's backup learned to carry pictures (D145) - the synchronous
- * writer. Nothing asynchronous: that path spawns Web Workers from `Blob`
- * URLs, which is exactly the kind of dynamic code an auditor should be able
- * to rule out (`vendor/fflate/README.md`). Loaded once, the first time an
- * import or export actually needs it - the reader page in its usual life
- * never pays for it.
+ * reading list's backup learned to carry pictures (D145) - a writer. The
+ * writer is a stream since the backup learned to carry books (D218):
+ * `Zip` with a `ZipDeflate` or `ZipPassThrough` per entry, fed one entry
+ * at a time, so that a library of thirty books never stands in memory
+ * whole beside its own archive - the archive's chunks are all the export
+ * holds, and one entry's bytes beside them. Nothing asynchronous: that
+ * path spawns Web Workers from `Blob` URLs, which is exactly the kind of
+ * dynamic code an auditor should be able to rule out
+ * (`vendor/fflate/README.md`; `test/vendor-surface.test.js` holds the
+ * promise). Loaded once, the first time an import or export actually
+ * needs it - the reader page in its usual life never pays for it.
  */
 
 /**
  * @typedef {{ name: string, size: number, originalSize: number }} ZipEntryInfo
+ * @typedef {{ push: (data: Uint8Array, final: boolean) => void }} ZipFile
  * @typedef {{
  *   unzipSync: (
  *     data: Uint8Array,
  *     opts?: { filter?: (file: ZipEntryInfo) => boolean },
  *   ) => Record<string, Uint8Array>,
- *   zipSync: (data: Record<string, [Uint8Array, { level: number }]>) => Uint8Array<ArrayBuffer>,
+ *   Zip: new (
+ *     cb: (error: Error | null, chunk: Uint8Array<ArrayBuffer>, final: boolean) => void,
+ *   ) => { add: (file: ZipFile) => void, end: () => void },
+ *   ZipDeflate: new (name: string, opts?: { level: number }) => ZipFile,
+ *   ZipPassThrough: new (name: string) => ZipFile,
  * }} FflateModule
+ */
+
+/**
+ * One entry to write: its name, its bytes, and whether it is worth
+ * deflating - text is, a picture that is already compressed is not.
+ *
+ * @typedef {{ name: string, data: Uint8Array, deflate: boolean }} ArchiveEntry
  */
 
 /** @type {FflateModule | null} */
@@ -82,17 +99,37 @@ export async function entryReader(bytes) {
 }
 
 /**
- * The archive an export writes: deflated where the entry is text, stored
- * where it is a picture that is compressed already - a JPEG through
- * deflate is the same size and the time it took.
+ * The archive an export writes, as a stream: deflated where the entry is
+ * text, stored where it is a picture that is compressed already - a JPEG
+ * through deflate is the same size and the time it took. The entries come
+ * one at a time, from an array or from a generator that reads each book
+ * only when its turn comes, and leave as the chunks of the archive; what
+ * the export holds at any moment is those chunks and the one entry being
+ * written. The result is a `Blob` of the chunks - what a download takes,
+ * and what a browser may keep outside memory when it is large.
  *
- * @param {{ name: string, data: Uint8Array, deflate: boolean }[]} entries
- * @returns {Promise<Uint8Array<ArrayBuffer>>}
+ * @param {Iterable<ArchiveEntry> | AsyncIterable<ArchiveEntry>} entries
+ * @param {Pick<FflateModule, "Zip" | "ZipDeflate" | "ZipPassThrough">} [lib]
+ *   the vendored module, injected by the tests; loaded here otherwise
+ * @returns {Promise<Blob>}
  */
-export async function packArchive(entries) {
-  const { zipSync } = await loadFflate();
-  /** @type {Record<string, [Uint8Array, { level: number }]>} */
-  const data = {};
-  for (const entry of entries) data[entry.name] = [entry.data, { level: entry.deflate ? 6 : 0 }];
-  return zipSync(data);
+export async function packArchive(entries, lib) {
+  const { Zip, ZipDeflate, ZipPassThrough } = lib ?? (await loadFflate());
+  /** @type {Uint8Array<ArrayBuffer>[]} */
+  const parts = [];
+  /** @type {Error | null} */
+  let failed = null;
+  const zip = new Zip((error, chunk) => {
+    if (error !== null) failed = error;
+    else parts.push(chunk);
+  });
+  for await (const entry of entries) {
+    const file = entry.deflate ? new ZipDeflate(entry.name, { level: 6 }) : new ZipPassThrough(entry.name);
+    zip.add(file);
+    file.push(entry.data, true);
+    if (failed !== null) throw failed;
+  }
+  zip.end();
+  if (failed !== null) throw failed;
+  return new Blob(parts, { type: "application/zip" });
 }
