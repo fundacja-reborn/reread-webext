@@ -552,10 +552,10 @@ button.page-mark:hover {
    with a shadow under it (the scrim, #255), a line on the paper's last
    pixel read as an edge drawn twice (Michał's smoke, 2026-08-29). The
    closing row is the last one showing, not the last one written: a menu
-   row hides by its attribute, and the settings' phrases row by the body's
-   translation-off class. */
-.nav-menu > :is(a, button):not(:has(~ :is(a, button):not([hidden]))),
-body.no-translation .nav-menu > :is(a, button):not(:has(~ :is(a, button):not([hidden], .translation-only))) {
+   row hides by its attribute. (The settings' phrases row hid by the body's
+   translation-off class until 2026-09-13; no menu row follows the switch
+   now.) */
+.nav-menu > :is(a, button):not(:has(~ :is(a, button):not([hidden]))) {
   border-bottom: none;
 }
 
