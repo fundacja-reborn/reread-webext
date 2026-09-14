@@ -1930,7 +1930,12 @@ a.marks-act {
    shade, so the mode is seen to be a mode and not a line of hints; the
    wash is the page's own ink, not the accent - the accent is what a
    ticked row wears below, and the bar must not compete with it. Wraps on
-   a phone rather than run off its edge: the count steps down a line. */
+   a phone rather than run off its edge: the count steps down a line. In
+   the flow, where the Select line stood, and it scrolls away with the
+   rows: not a second stuck strip under the page's bar (D219 - the bar
+   and the selection's bar together would be a lot of chrome over a
+   list), and with no stacking of its own it passes under the stuck bar
+   like every row. */
 .pick-bar {
   display: flex;
   flex-wrap: wrap;

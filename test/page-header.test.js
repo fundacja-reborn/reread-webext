@@ -129,6 +129,16 @@ describe("the bar stuck to the top of every page", () => {
     assert.match(reader, /block\.scrollIntoView\(\{ behavior: "instant", block: "start" \}\);\s*(?:\/\/[^\n]*\n\s*)*scrollBy\(0, -chromeFold\(\)\);/, "the position restore no longer steps back from under the bar by its own measure");
   });
 
+  it("is the one stuck strip over a list: the selection's bar scrolls with the rows, under it", async () => {
+    const styles = await source("reader/reader.css");
+    const bar = ruleOf(styles, ".pick-bar");
+    assert.doesNotMatch(bar, /position:/, "the selection's bar is stuck or lifted - a second strip of chrome over the list");
+    assert.doesNotMatch(bar, /z-index:/, "the selection's bar carries a stacking of its own, which could paint over the stuck bar");
+    // Nothing else on the page is stuck: the speech bar is fixed at the
+    // bottom of the article view, and the two never meet.
+    assert.equal((styles.match(/position: (?:sticky|fixed)/g) ?? []).length, 1, "a third strip of chrome is stuck or fixed on the reader page");
+  });
+
   it("holds nothing any more: the hold module went with the offset it measured", async () => {
     await assert.rejects(source("lib/chrome-hold.js"), "the hold module is still in the package");
     for (const path of ["assets/page.css", "reader/reader.css", "reader/reader.js", "vocab/vocab.js", "options/options.js"]) {
