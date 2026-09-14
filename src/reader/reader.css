@@ -450,14 +450,11 @@ html {
   text-decoration: underline;
 }
 
-.reader-tools {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  /* To the far edge on its own: the bar's third resident (the back arrow)
-     took `space-between`'s meaning away. */
-  margin-inline-start: auto;
-}
+/* The tools span is `.page-tools` (page.css) since D221: to the far edge
+   on its own (the bar's third resident, the back arrow, took
+   `space-between`'s meaning away), one frame for every tool, and one way
+   of lighting the tool in hand. The reader's own class keeps the tighter
+   gap under a phone's width, below. */
 
 #display {
   font-family: Georgia, "Times New Roman", serif;
@@ -472,42 +469,14 @@ html {
   flex: none;
 }
 
-/* The bar's buttons share one frame height: most hold drawn glyphs and one
-   holds serif text, and left to their contents their borders came out three
-   sizes (reported from a phone). The floor is set on all of them and the
-   contents centre inside it. */
-#marker,
-#listen,
-#display,
-#fullscreen,
-#menu {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 2.1rem;
-  min-width: 2.6rem;
-  padding: 0.15rem 0.55rem;
-}
-
-/* The button says "the voice is busy" while it is - and the pen says it is
-   in the hand: pressing either again stands it down, and a button that
-   looked identical either way would hide that. The tabs' treatment - accent
-   border and a wash - is the page's word for "this is on".
-
-   The two panels wear it too, for their open state (Michał's report,
-   2026-08-19): the row lights whichever tool is in hand, and a panel hanging
-   under an unlit button was the one place in the bar where that promise
-   broke. `aria-expanded` rather than `aria-pressed` because a disclosure is
-   what these two are - the state is the same to the eye. The bar's
-   full-screen tool lights the same way while the page has the screen, by
-   the rule every page shares (`:root:fullscreen #fullscreen`, page.css). */
-#listen[aria-pressed="true"],
-#marker[aria-pressed="true"],
-#display[aria-expanded="true"],
-#menu[aria-expanded="true"] {
-  border-color: var(--page-accent);
-  background: color-mix(in srgb, var(--page-accent) 12%, transparent);
-}
+/* The bar's buttons share one frame height - most hold drawn glyphs and
+   one holds serif text, and left to their contents their borders came out
+   three sizes (reported from a phone) - and a tool in hand is lit: the
+   voice busy, the pen in the hand, a panel open (Michał's report,
+   2026-08-19: a panel hanging under an unlit button was the one place in
+   the bar where that promise broke), the page in full screen. Both are
+   `.page-tools`' rules in page.css since D221, one for every page's bar;
+   the lit state there is the one an e-ink panel keeps. */
 
 /* The full-screen row says what a press would do (D180): both labels are
    in the markup, and the root's `:fullscreen` picks the one to show. The

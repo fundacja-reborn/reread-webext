@@ -86,8 +86,27 @@ describe("the bar stuck to the top of every page", () => {
     const [, floor, air] = parts;
     assert.match(ruleOf(styles, ".page-tools > button"), new RegExp(`min-height: ${floor};`), "the tools stand on another floor than the token counts");
     assert.match(bar, new RegExp(`padding-bottom: ${air};`), "the air under the tools is not what the token counts");
-    const reader = await source("reader/reader.css");
-    assert.match(reader, new RegExp(`#menu \\{[^}]*min-height: ${floor};`), "the reader's tools stand on another floor than the token counts");
+    // The reader's tools stand in the same frame: its span wears the class
+    // (D221), and no floor of the reader's own is left to drift.
+    assert.match(await source("reader/reader.html"), /<span class="reader-tools page-tools">/, "the reader's tools do not stand in the shared frame");
+    assert.doesNotMatch(await source("reader/reader.css"), /#menu \{[^}]*min-height/, "the reader keeps a floor of its own for its tools");
+  });
+
+  it("says a tool in hand so that 16 greys keep it: the accent frame doubled and a real wash, on every page's bar", async () => {
+    const styles = await source("assets/page.css");
+    const lit = ruleOf(styles, '.page-tools > button[aria-pressed="true"],\n.page-tools > button[aria-expanded="true"],\n:root:fullscreen #fullscreen');
+    assert.match(lit, /border-color: var\(--page-accent\);/, "the lit tool lost its accent frame");
+    // A 2px line is a shape, which survives an e-ink panel's greys where
+    // the accent's tone does not; inset, so nothing in the row moves.
+    assert.match(lit, /box-shadow: inset 0 0 0 1px var\(--page-accent\);/, "the lit tool's frame is not doubled - one grey line among grey lines on e-ink");
+    // A quarter of the accent lands two greys under the paper; 12% rounded
+    // back into it (Michał's photo from the Boox, 2026-09-14).
+    const wash = /background: color-mix\(in srgb, var\(--page-accent\) (\d+)%, transparent\);/.exec(lit);
+    assert.ok(wash !== null, "the lit tool has no wash of the accent");
+    assert.ok(Number(wash[1]) >= 25, `the lit tool's wash is ${wash[1]}% of the accent - back to invisible on e-ink`);
+    assert.doesNotMatch(lit, /transition/, "the lit state animates");
+    // One rule for every page's bar: the reader keeps none of its own.
+    assert.doesNotMatch(await source("reader/reader.css"), /#marker\[aria-pressed="true"\]/, "the reader lights its tools by a rule of its own");
   });
 
   it("tells the browser where the visible page begins, so anchors, focus and the pages' own scrolls land under the bar, not behind it", async () => {

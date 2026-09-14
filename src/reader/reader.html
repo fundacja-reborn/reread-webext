@@ -96,7 +96,10 @@
         >
           re/read
         </button>
-        <span class="reader-tools">
+        <!-- The tools span wears the shared class too (D221): the frame the
+             tools stand in, and the way a tool in hand is lit, are one rule
+             for every page's bar (`.page-tools`, page.css). -->
+        <span class="reader-tools page-tools">
           <!--
             The highlighter (D106): a pressed pen changes what the selection
             gesture means - it draws a lasting mark instead of asking for a
