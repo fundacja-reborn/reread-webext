@@ -125,6 +125,24 @@
   --reader-font-stack: system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
+/* The bar's box, as numbers the pages can lean on (D219): the paper the
+   stuck box keeps over the bar, the bar itself - its tools' floor (the
+   2.1rem every drawn button and the serif "Aa" stand on), the air under
+   them and the line - and the two together, which is how far down the
+   window the stuck bar reaches. `scroll-padding-top` below keeps anchors
+   and focused rows out from under it, and anything that has to stand
+   under the bar takes `--header-h` as its `top`. Fixed on purpose: the
+   bar is interface, so the Aa panel's size never reaches it (D104), and
+   the bar's box takes `--bar-h` as its height outright - a tool that
+   outgrew the floor would show over the line rather than move it, so the
+   number here and the bar on screen cannot quietly part. In rem, so the
+   browser's text zoom grows both alike. */
+:root {
+  --header-air: 0.75rem;
+  --bar-h: calc(2.1rem + 1rem + 1px);
+  --header-h: calc(var(--header-air) + var(--bar-h));
+}
+
 * {
   box-sizing: border-box;
 }
@@ -421,16 +439,20 @@ a[href] {
   color: var(--page-accent);
 }
 
-/* The bar the reading list wears (`.reader-bar` in reader.css), as the other
-   pages' headers wear it - the saved phrases and the settings: the mark on
-   the leading edge, the drawn tools at the far one, one line under both. The
-   dress and the conduct are the reader bar's exactly - keep the two in step,
-   they are one bar in two homes. The line under it is also the menu panel's
-   top edge, exactly as in the reader's chrome. */
+/* The bar every page of this extension wears - the reader's (`.reader-bar`,
+   which wears this class too since D219), the saved phrases' and the
+   settings': the mark on the leading edge, the drawn tools at the far one,
+   one line under both. One bar in one home; what the reader's keeps in
+   reader.css is its own tighter dress under a phone's width. The line
+   under it is also the menu panel's top edge. The height is the token's
+   (`--bar-h`, above): the tools' floor is the tallest thing in it, and
+   the box is told the sum rather than left to measure it, so the stuck
+   bar's reach is a number the stylesheet knows. */
 .page-bar {
   display: flex;
   align-items: center;
   gap: 1rem;
+  height: var(--bar-h);
   padding-bottom: 1rem;
   border-bottom: 1px solid var(--page-line);
   font-size: 0.85rem;
@@ -616,13 +638,29 @@ button.page-mark:hover {
   }
 }
 
-/* The box around the bar and its panels (`.page-chrome` on the phrases and
-   the settings pages; the reader's `.reader-chrome` is its twin in
-   reader.css), lifted above the scrim as one thing - a stacking context of
-   its own, so the paper below can stand under everything in it. */
+/* The box around the bar and its panels, stuck to the top of the window on
+   every page (D219): the reading list, the highlights, the saved phrases
+   and the settings, as the article view has been since D93 - a long list
+   scrolled to its end kept the way back, Aa and the menu a whole page
+   away. One box in one home: the reader's `.reader-chrome` wears this
+   class too, and keeps for itself only what is the article view's - the
+   ribbon that folds the bar away (reader.css), which no list gets: folding
+   is for a read, not for a list. Its own paper, so nothing scrolling under
+   it shows through in any theme; the breath of paper above the bar is the
+   half of the page's headroom that moved in here, so the box, once stuck,
+   still holds air over the bar (`body` keeps the other half). Lifted above
+   the scrim (1) and above everything in a list - the highlighter's pins
+   and badges stand at 0 for this reason - as one stacking context, so the
+   paper below can stand under everything in it. Plain sticky, no hiding
+   on scroll and no transition: the simplest thing an e-ink panel can be
+   asked to redraw (D93). A child of the body, not of a page's header: a
+   stuck box never leaves its parent's box. */
 .page-chrome {
-  position: relative;
+  position: sticky;
+  top: 0;
   z-index: 2;
+  padding-top: var(--header-air);
+  background: var(--page-bg);
 }
 
 /* One sheet of paper under the whole box while the page is dimmed, from one
@@ -640,7 +678,14 @@ button.page-mark:hover {
    as the scrim stands, so no scrollbar appears for it (`clip`, not
    `hidden`: clipping makes no scroll container, so sticky keeps working
    against the viewport). The shadow falls on the page under the sheet's
-   one edge that is not the window's. */
+   one edge that is not the window's. Only while the page is dimmed: at
+   rest the stuck box's own paper is enough on these pages, where nothing
+   stands outside the column to scroll under the bar's gutters (the reader
+   keeps its sheet up over an article for its margin pins, reader.css).
+   Until D219 the box was stuck only for as long as a panel stood open,
+   held at its own offset by `lib/chrome-hold.js` (D153); stuck at the
+   window's top on every page now, it has nothing to be held from, and the
+   module went with the hold. */
 body:not(.reader):has(.panel-scrim:not([hidden])) .page-chrome::before {
   content: "";
   position: absolute;
@@ -648,21 +693,6 @@ body:not(.reader):has(.panel-scrim:not([hidden])) .page-chrome::before {
   z-index: -1;
   background: var(--page-bg);
   box-shadow: 0 10px 24px -8px rgb(0 0 0 / 0.35);
-}
-
-/* The box stays in view while a panel is open (D153, Michał's smoke,
-   2026-08-29): the dimmed page still scrolls, and the menu scrolled away
-   with it. Stuck for as long as the panel stands and not a moment longer -
-   these pages' bars are otherwise not sticky, for the reading list's own
-   reason (everything they lead to is at the top). A child of the body, not
-   of the page's header: a stuck box never leaves its parent's box, and
-   inside the short header it slid away with it. Stuck at its own offset,
-   not at the window's top: at zero it first slid up by the page's top
-   padding, a small scroll of an open menu on its way to being stuck - the
-   script measures the offset on the press (`lib/chrome-hold.js`). */
-body:not(.reader):has(.panel-scrim:not([hidden])) .page-chrome {
-  position: sticky;
-  top: var(--chrome-hold, 0px);
 }
 
 :root:has(.panel-scrim:not([hidden])) {

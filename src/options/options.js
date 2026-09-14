@@ -16,7 +16,6 @@
 
 import { followTheme } from "../lib/appearance.js";
 import { webext } from "../lib/browser.js";
-import { holdChrome } from "../lib/chrome-hold.js";
 import {
   BUBBLE_SCALE,
   CONFIG_KEY,
@@ -3210,7 +3209,6 @@ const pageBar = document.querySelector(".page-bar");
 const menuButton = document.getElementById("menu");
 const menuPanel = document.getElementById("menu-panel");
 const panelScrim = document.getElementById("panel-scrim");
-const pageChrome = document.querySelector(".page-chrome");
 
 // The way back to the reading (D139-D142): walked here from the reader, the
 // arrow pops the same history entry as the system's back gesture; raised
@@ -3224,10 +3222,10 @@ function setMenu(open) {
   if (menuButton === null || menuPanel === null) return;
   menuPanel.hidden = !open;
   menuButton.setAttribute("aria-expanded", String(open));
-  // The page dims under the open menu, and clears with it; the chrome holds
-  // where it stands for as long as the dimming lasts (D153, `chrome-hold.js`).
+  // The page dims under the open menu, and clears with it. The chrome needs
+  // no holding meanwhile: it is stuck to the window's top (D219,
+  // `.page-chrome` in page.css).
   if (panelScrim !== null) panelScrim.hidden = !open;
-  holdChrome(pageChrome, open);
 }
 
 menuButton?.addEventListener("click", () => {

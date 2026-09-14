@@ -17,11 +17,12 @@
 
 /* A touch wider than the shared 44rem: the row grid holds three columns and
    the extra room goes to the meanings. The top padding is the reader page's
-   headroom (its body's 0.75rem plus its chrome box's 0.75rem), so the two
-   bars stand at one height when the pages are walked between. */
+   own: half of the headroom, the other half being the stuck box's paper
+   over the bar (`.page-chrome`, page.css - D219), so the bar stands at one
+   height on every page, resting or stuck. */
 body {
   max-width: 46rem;
-  padding-top: 1.5rem;
+  padding-top: 0.75rem;
 }
 
 /* Focus must be findable on every control here - the quiet row buttons erase

@@ -59,16 +59,15 @@
            door to the settings, a button rather than a link because the way
            there is the background's (D147): the settings tab raised if one
            stands, this tab turned to the settings otherwise - which a link
-           could not choose between. Not sticky, for the reading list's own reason: everything
-           the bar leads to is already at the top. The bar and its two panels
-           are the outside-press boundary: a press inside any of them is the
-           panels' own business (see vocab.js), exactly the reader's
-           `.reader-chrome` rule. The box around the bar and its panels is
-           what sticks while a panel is open (D153, page.css): the dimmed
-           page still scrolls, and the menu must not scroll away with it. A
-           child of the body, not of the header: a stuck box never leaves its
-           parent's box, and inside the short header it slid away with it
-           (Michał's smoke, 2026-08-29). -->
+           could not choose between. The bar and its two panels are the
+           outside-press boundary: a press inside any of them is the panels'
+           own business (see vocab.js), exactly the reader's rule. The box
+           around the bar and its panels (`.page-chrome`, page.css) is stuck
+           to the top of the window (D219), as on every page of this
+           extension: a list of a few hundred phrases scrolled to its end
+           kept Aa and the menu a page away. A child of the body, not of the
+           header: a stuck box never leaves its parent's box, and inside the
+           short header it slid away with it (Michał's smoke, 2026-08-29). -->
       <div class="page-bar">
         <!-- The way back to the reading (D141/D142), the settings bar's own
              arrow. Walked into in this tab, it pops the entry the system's

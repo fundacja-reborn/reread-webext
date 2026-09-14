@@ -29,21 +29,24 @@
          text for the catalogue's language before anything renders. -->
     <!--
       The bar and the two panels it opens, held in one box so they can stand
-      still together: while an article is on screen the box is sticky (see
-      reader.css), because what it holds is wanted mid-article - the way back
-      to the list at the leading edge (D102), the voice that starts from the
-      first sentence still on screen, which a button that scrolled away with
-      the top of the page could never mean, and the menu to everywhere else.
-      On the list view the box scrolls away like any heading: everything it
-      leads to is already at the top.
+      still together: the box is stuck to the top of the window in every
+      view (`.page-chrome`, assets/page.css - the box every page of this
+      extension wears since D219). Over an article, because what it holds
+      is wanted mid-article - the way back to the list at the leading edge
+      (D102), the voice that starts from the first sentence still on
+      screen, which a button that scrolled away with the top of the page
+      could never mean, and the menu to everywhere else (D93). Over the
+      list and the highlights for the reason every page got it: a long
+      list scrolled to its end kept the menu a page away. The ribbon that
+      folds the bar away stays the article view's alone (reader.css).
     -->
     <!-- The page dimmed under an open panel (Michał's report, 2026-08-29: the
          menu's rows read as lines of the article they stood over). Under the
          chrome, over everything else; a press on it is a press outside the
          chrome, which is what closes the panels. Shown by `setPanel`. -->
     <div id="panel-scrim" class="panel-scrim" hidden></div>
-    <div class="reader-chrome">
-      <header class="reader-bar">
+    <div class="reader-chrome page-chrome">
+      <header class="reader-bar page-bar">
         <!-- The way out of an article, standing where every app puts it: the
              leading edge of the bar that is stuck over the text - the row a
              finished reader is looking at wherever the article let them go.
