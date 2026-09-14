@@ -18,10 +18,14 @@
  * every one of them adding and never overwriting.
  *
  * Everything here is a value in and a value out - the entries to write,
- * the manifest read back; the ZIP itself is the reader page's business.
+ * the manifest read back; the ZIP itself is the reader page's business,
+ * and so are the heavy parts: the reading list's pictures and the books
+ * are read from the store one document at a time and written as a
+ * stream after the entries here (D218, D222), with `articles.json` and
+ * `books.json` following the pictures they refer to.
  */
 
-import { ARTICLES_ENTRY, archiveEntries } from "./articles-archive.js";
+import { ARTICLES_ENTRY } from "./articles-archive.js";
 import { BOOKS_ENTRY } from "./books-file.js";
 import { toMarksCopy } from "./marks-copy.js";
 import { SETTINGS_ENTRY, toSettingsFile } from "./settings-file.js";
@@ -33,7 +37,6 @@ import { VOCABULARY_ENTRY, toVocabularyFile } from "./vocabulary-file.js";
  * @typedef {import("./phrase.js").Phrase} Phrase
  * @typedef {import("./saved-article.js").SavedArticle} SavedArticle
  * @typedef {import("../reader/marks.js").Mark} Mark
- * @typedef {import("../reader/pictures.js").PictureRow} PictureRow
  * @typedef {import("../reader/position.js").ReadingPosition} ReadingPosition
  * @typedef {import("../config.js").Config} Config
  * @typedef {import("./book.js").BookMeta} BookMeta
@@ -98,7 +101,8 @@ export const BACKUP_VERSION = 1;
  * @property {number} now epoch milliseconds
  * @property {SavedArticle[]} articles
  * @property {Map<string, Mark[]>} marks each article's marks, keyed by `url`
- * @property {Map<string, PictureRow[]>} pictures each article's pictures, keyed by `url` - empty when not asked for
+ * @property {boolean} pictures whether the articles' pictures go in (D222) - read by the page
+ *   one article at a time after these entries, never held here
  * @property {Map<string, ReadingPosition>} positions each document's position, keyed by `docId`
  * @property {Phrase[]} phrases every pair
  * @property {CopyDoc[]} highlights every document with marks, articles and books alike
@@ -127,7 +131,9 @@ export function manifestOf({ app, now, articles, pictures, phrases, highlights, 
       pairs: pairs.size,
       highlights: highlights.reduce((sum, doc) => sum + doc.marks.length, 0),
       articles: articles.length,
-      pictures: pictures.size > 0,
+      // By the light rows' account, as the books' claim is: the manifest
+      // is written before any picture is read (D222).
+      pictures: pictures && articles.some((article) => article.pictures !== undefined),
       settings: settings !== null,
       books: books.length,
       bookPictures: books.some((book) => book.pictures !== undefined),
@@ -145,13 +151,15 @@ function textEntry(name, text) {
 }
 
 /**
- * The entries an export writes: the manifest first, then the vocabulary,
- * the highlights, the settings when asked for, and the reading list's own
- * entries - `articles.json` with the pictures beside it - exactly as the
- * list's backup writes them. Every part is written even when empty, so a
- * reader opening the archive sees what the file is made of - except the
- * vocabulary of a selection (D218), which hands on documents and never
- * held phrases: written empty it would read as phrases lost.
+ * The light entries an export writes, first: the manifest, then the
+ * vocabulary, the highlights, and the settings when asked for - each
+ * exactly as its own module writes it. The reading list follows on the
+ * page's stream (D222): each article's pictures as its rows are read,
+ * then `articles.json` with the references (`articles-archive.js`) - and
+ * the books after it (D218). Every part here is written even when empty,
+ * so a reader opening the archive sees what the file is made of - except
+ * the vocabulary of a selection (D218), which hands on documents and
+ * never held phrases: written empty it would read as phrases lost.
  *
  * @param {BackupInput} input
  * @returns {ArchiveEntry[]}
@@ -159,12 +167,10 @@ function textEntry(name, text) {
 export function backupEntries(input) {
   const manifest = JSON.stringify(manifestOf(input), null, 2) + "\n";
   /** @type {ArchiveEntry[]} */
-  /** @type {ArchiveEntry[]} */
   const entries = [textEntry(MANIFEST_ENTRY, manifest)];
   if (input.selection !== true) entries.push(textEntry(VOCABULARY_ENTRY, toVocabularyFile(input.phrases)));
   entries.push(textEntry(HIGHLIGHTS_ENTRY, toMarksCopy(input.highlights)));
   if (input.settings !== null) entries.push(textEntry(SETTINGS_ENTRY, toSettingsFile(input.settings)));
-  entries.push(...archiveEntries(input.articles, input.marks, input.pictures, input.positions));
   return entries;
 }
 

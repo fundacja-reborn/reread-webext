@@ -58,9 +58,12 @@ import {
   ARTICLES_ENTRY,
   archiveAccount,
   archivePictures,
+  articlesEntry,
   bookPictureEntryName,
   fromArchiveText,
+  pictureEntries,
 } from "../lib/store/articles-archive.js";
+import { fileOrder } from "../lib/store/articles-file.js";
 import { asDocState, asMarksState, docState, marksState } from "../lib/reader/history-state.js";
 import { importKind } from "../lib/reader/import-kind.js";
 import { speechAction } from "../lib/reader/keys.js";
@@ -4183,8 +4186,9 @@ async function removeRow(button, url, kind) {
  * the settings, and the books themselves when their box is ticked (D218),
  * in one archive. Fresh from the databases rather than from the rows on
  * screen, because the screen shows one segment and a backup is
- * everything. Packed as a stream, each book read when its turn comes.
- * Downloading is a blob and an anchor; no permission asks for less.
+ * everything. Packed as a stream, each article's pictures and each book
+ * read when its turn comes. Downloading is a blob and an anchor; no
+ * permission asks for less.
  */
 async function exportList() {
   try {
@@ -4212,7 +4216,7 @@ async function exportList() {
         now: Date.now(),
         articles,
         marks,
-        pictures: withPictures ? await picturesOf(articles) : new Map(),
+        pictures: withPictures,
         positions,
         phrases,
         highlights: docs.map(copyDocOf),
@@ -4241,10 +4245,13 @@ async function exportList() {
 }
 
 /**
- * The entries of the backup, one at a time (D218): the manifest and the
- * light parts first, the reading list with its pictures as
- * `backupEntries` writes them, then every book asked for - its text read
- * from the store only when its turn comes, its pictures after it - and
+ * The entries of the backup, one at a time (D218, D222): the manifest and
+ * the light parts first, as `backupEntries` writes them; then, when the
+ * box says so, each article's pictures - its rows read from the store
+ * only when its turn comes, in the file's order, so that a library of
+ * pictures never stands in memory whole beside its own archive - and
+ * `articles.json` after them, carrying their names; then every book
+ * asked for - its text read the same way, its pictures after it - and
  * the books' index last, once every book's pictures have entries to be
  * referred to. The order inside the archive is nobody's concern: an
  * import reads entries by name. A book whose text is not all there is
@@ -4258,6 +4265,22 @@ async function exportList() {
  */
 async function* backupStream(input) {
   yield* backupEntries(input);
+  const articles = fileOrder(input.articles);
+  /** @type {Map<string, import("../lib/store/articles-archive.js").PictureRef[]>} */
+  const refs = new Map();
+  if (input.pictures) {
+    for (const [at, article] of articles.entries()) {
+      // Only the articles whose row says there are any: the row is the
+      // account, and the rows come back from the copy where the database
+      // has lost them.
+      if (article.pictures === undefined) continue;
+      const kept = pictureEntries(at, await getPictures(article.url));
+      if (kept.refs.length === 0) continue;
+      yield* kept.entries;
+      refs.set(article.url, kept.refs);
+    }
+  }
+  yield articlesEntry(articles, input.marks, input.positions, refs);
   if (input.books.length === 0) return;
   /** @type {Parameters<typeof toBooksIndex>[0]} */
   const index = [];
@@ -4284,25 +4307,6 @@ async function* backupStream(input) {
     index.push({ meta: book, ...(position === undefined ? {} : { position }), pictures: refs });
   }
   yield { name: BOOKS_ENTRY, data: new TextEncoder().encode(toBooksIndex(index)), deflate: true };
-}
-
-/**
- * The pictures of the articles going into a file, each article's rows read
- * back from the copy where the database has lost them - only for the
- * articles that have any.
- *
- * @param {import("../lib/store/saved-article.js").SavedArticle[]} articles
- * @returns {Promise<Map<string, import("../lib/reader/pictures.js").PictureRow[]>>}
- */
-async function picturesOf(articles) {
-  /** @type {Map<string, import("../lib/reader/pictures.js").PictureRow[]>} */
-  const pictures = new Map();
-  for (const article of articles) {
-    if (article.pictures === undefined) continue;
-    const rows = await getPictures(article.url);
-    if (rows.length > 0) pictures.set(article.url, rows);
-  }
-  return pictures;
 }
 
 /**
@@ -4335,7 +4339,7 @@ async function exportSelection() {
       now: Date.now(),
       articles,
       marks,
-      pictures: withPictures ? await picturesOf(articles) : new Map(),
+      pictures: withPictures,
       positions,
       phrases: [],
       highlights: docs.map(copyDocOf),

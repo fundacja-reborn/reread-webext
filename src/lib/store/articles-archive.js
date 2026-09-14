@@ -15,6 +15,13 @@
  * pictures, and imports as it always did; the archive is written only
  * when the export is asked to include pictures.
  *
+ * Written as a stream since D222: the page asks for one article's
+ * pictures at a time (`pictureEntries`) and writes `articles.json` last
+ * (`articlesEntry`), once every picture has an entry to be referred to -
+ * the way a book's index follows its pictures (D218). Reading looks
+ * entries up by name, so the order inside the archive changes nothing
+ * for an import, this version's or an older one's.
+ *
  * The archive itself is fflate's business on the reader page
  * (`src/reader/zip.js`). Everything here is a value in and a value out -
  * the entries to write, the rows and references read back - so that it
@@ -123,38 +130,57 @@ function isSide(value) {
 }
 
 /**
- * The entries an export writes: `articles.json` first, with a `pictures`
- * field on every article that has pictures here, then one stored entry
- * per picture. An article without pictures is written exactly as the
- * plain file writes it.
+ * One article's pictures as the entries an export writes - each stored
+ * as it is - and the references `articles.json` will carry for them. The
+ * export takes the articles in file order and asks for each one's rows
+ * only when its turn comes (D222), so a library of pictures never stands
+ * in memory whole beside its own archive; the references are all it
+ * keeps until the file is written, last.
+ *
+ * @param {number} articleAt the article's position in `articles.json` (`fileOrder`)
+ * @param {PictureRow[]} rows the article's pictures, in their order
+ * @returns {{ entries: ArchiveEntry[], refs: PictureRef[] }}
+ */
+export function pictureEntries(articleAt, rows) {
+  /** @type {ArchiveEntry[]} */
+  const entries = [];
+  /** @type {PictureRef[]} */
+  const refs = [];
+  for (const picture of rows) {
+    const file = pictureEntryName(articleAt, picture);
+    entries.push({ name: file, data: new Uint8Array(picture.data), deflate: false });
+    refs.push({
+      index: picture.index,
+      file,
+      src: picture.src,
+      mime: picture.mime,
+      width: picture.width,
+      height: picture.height,
+    });
+  }
+  return { entries, refs };
+}
+
+/**
+ * The `articles.json` entry: the plain file's rows, with a `pictures`
+ * field on every article whose references are here. An article without
+ * any is written exactly as the plain file writes it, and a list with
+ * none is the plain file, byte for byte. Written after the pictures'
+ * entries, whose names it carries; where it stands in the archive is
+ * nobody's concern, an import reads entries by name.
  *
  * @param {SavedArticle[]} articles
  * @param {Map<string, Mark[]>} marks each article's marks, keyed by `url`
- * @param {Map<string, PictureRow[]>} pictures each article's pictures, keyed by `url`
- * @param {Map<string, import("../reader/position.js").ReadingPosition>} [positions] each document's position, keyed by `docId` (D213)
- * @returns {ArchiveEntry[]}
+ * @param {Map<string, import("../reader/position.js").ReadingPosition>} positions each document's position, keyed by `docId` (D213)
+ * @param {Map<string, PictureRef[]>} refs each article's references, keyed by `url` - from `pictureEntries`
+ * @returns {ArchiveEntry}
  */
-export function archiveEntries(articles, marks, pictures, positions = new Map()) {
-  /** @type {ArchiveEntry[]} */
-  const entries = [];
-  const rows = fileRows(articles, marks, positions).map((row, at) => {
-    const kept = pictures.get(row.url) ?? [];
-    if (kept.length === 0) return row;
-    const refs = kept.map((picture) => {
-      const file = pictureEntryName(at, picture);
-      entries.push({ name: file, data: new Uint8Array(picture.data), deflate: false });
-      return {
-        index: picture.index,
-        file,
-        src: picture.src,
-        mime: picture.mime,
-        width: picture.width,
-        height: picture.height,
-      };
-    });
-    return { ...row, pictures: refs };
+export function articlesEntry(articles, marks, positions, refs) {
+  const rows = fileRows(articles, marks, positions).map((row) => {
+    const kept = refs.get(row.url) ?? [];
+    return kept.length === 0 ? row : { ...row, pictures: kept };
   });
-  return [{ name: ARTICLES_ENTRY, data: new TextEncoder().encode(fileText(rows)), deflate: true }, ...entries];
+  return { name: ARTICLES_ENTRY, data: new TextEncoder().encode(fileText(rows)), deflate: true };
 }
 
 /**

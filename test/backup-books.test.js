@@ -50,10 +50,11 @@ describe("the export with books", () => {
     assert.ok(start !== -1, "backupStream is missing");
     const stream = script.slice(start, script.indexOf("\n}\n", start));
     const light = stream.indexOf("yield* backupEntries(input)");
+    const list = stream.indexOf("yield articlesEntry(");
     const text = stream.indexOf("allBookSegments(book)");
     const pictures = stream.indexOf("allBookPictures(book)");
     const index = stream.indexOf("name: BOOKS_ENTRY");
-    assert.ok(light !== -1 && light < text && text < pictures && pictures < index, "the stream is not light parts, then each book's text and pictures, then the index");
+    assert.ok(light !== -1 && light < list && list < text && text < pictures && pictures < index, "the stream is not light parts, the reading list, then each book's text and pictures, then the index");
     assert.match(stream, /if \(segments === null\) continue;/, "a book whose text is not all there is written anyway");
     assert.match(stream, /bookPictureEntryName\(at, picture\)/, "a book's pictures are not named under its place in the index");
   });

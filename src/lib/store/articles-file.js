@@ -115,23 +115,35 @@ export const ARTICLES_FILENAME = "reread-articles.json";
  * @returns {FileRow[]}
  */
 export function fileRows(articles, marks = new Map(), positions = new Map()) {
-  return [...articles]
-    .sort((a, b) => a.savedAt - b.savedAt || a.url.localeCompare(b.url))
-    .map(({ url, title, savedAt, readAt, content, dir, lang }) => {
-      const kept = marks.get(url);
-      const where = positions.get(url);
-      return {
-        url,
-        title,
-        savedAt,
-        readAt,
-        content,
-        dir,
-        lang,
-        ...(kept === undefined || kept.length === 0 ? {} : { marks: kept }),
-        ...(where === undefined ? {} : { position: filePosition(where) }),
-      };
-    });
+  return fileOrder(articles).map(({ url, title, savedAt, readAt, content, dir, lang }) => {
+    const kept = marks.get(url);
+    const where = positions.get(url);
+    return {
+      url,
+      title,
+      savedAt,
+      readAt,
+      content,
+      dir,
+      lang,
+      ...(kept === undefined || kept.length === 0 ? {} : { marks: kept }),
+      ...(where === undefined ? {} : { position: filePosition(where) }),
+    };
+  });
+}
+
+/**
+ * The articles in the file's order - the one rule `fileRows` sorts by,
+ * on its own for whoever writes an entry beside the file under an
+ * article's place in it: the archive with pictures names a picture's
+ * entry by that place, and streams the pictures before the file is
+ * written (D222), so the place has to be known without the rows.
+ *
+ * @param {SavedArticle[]} articles
+ * @returns {SavedArticle[]} a new array; the input is left alone
+ */
+export function fileOrder(articles) {
+  return [...articles].sort((a, b) => a.savedAt - b.savedAt || a.url.localeCompare(b.url));
 }
 
 /**
