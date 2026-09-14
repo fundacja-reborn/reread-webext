@@ -541,23 +541,24 @@ button.page-mark:hover {
 
 /* A tool in hand is said on its button - the reader's pen or its voice, an
    open Aa panel or menu on any page (a disclosure's open state is the same
-   to the eye, so `aria-expanded` counts as pressed), the page in full
-   screen: the accent frame doubled, and a wash of the accent under the
-   glyph. Two signals on purpose, and both heavier than the 1px frame and
-   12% wash the state wore until D221 - Michał's photo from the Boox
-   (2026-09-14) showed the pen in hand looking exactly like the pen at
-   rest. An e-ink panel keeps 16 greys: the accent's frame rounds to the
-   same grey as every other frame, so the frame is doubled - a 2px line is
-   a shape, and a shape survives - and the wash is a quarter of the accent,
-   which lands two greys under the paper where 12% rounded back into it
-   (the highlighter's own wash, plainly visible on the same panel, lands
-   there too). An inset ring rather than a wider border, so nothing in the
-   row moves; no transition on it, so the flip is one repaint. */
+   to the eye, so `aria-expanded` counts as pressed): a wash of the accent
+   under the glyph, in the frame every button wears at rest. The wash is a
+   quarter of the accent because an e-ink panel keeps 16 greys, and the 12%
+   the state wore until D221 rounded back into the paper - Michał's photo
+   from the Boox (2026-09-14) showed the pen in hand looking exactly like
+   the pen at rest; 25% lands two greys under the paper, where the
+   highlighter's own wash, plainly visible on the same panel, lands too.
+   D221 doubled the frame as well (an inset ring of the accent: a 2px line
+   is a shape, and a shape survives the greys), and the next photo from the
+   same panel showed the doubled frame too loud for a bar that has to stay
+   quiet over an article (Michał, 2026-09-14): the wash alone says the
+   state, and the frame stays the frame. No transition on it, so the flip
+   is one repaint. The full-screen tool is not in this list on purpose:
+   its glyph turns its corners inward while the page has the screen (the
+   rule below), so a wash on top of it would light the bar for the whole
+   of a reading for nothing. */
 .page-tools > button[aria-pressed="true"],
-.page-tools > button[aria-expanded="true"],
-:root:fullscreen #fullscreen {
-  border-color: var(--page-accent);
-  box-shadow: inset 0 0 0 1px var(--page-accent);
+.page-tools > button[aria-expanded="true"] {
   background: color-mix(in srgb, var(--page-accent) 25%, transparent);
 }
 
@@ -566,7 +567,9 @@ button.page-mark:hover {
    in the markup - the corners out to enter, in to leave - and the root's
    `:fullscreen` shows the one that applies. The state lives in the
    browser, entered by the press and left by it, by Back or by Esc, so the
-   stylesheet reads it from there and no script mirrors it. */
+   stylesheet reads it from there and no script mirrors it. The glyph is
+   the whole of the tool's state - it wears no wash in full screen (the lit
+   rule above says why). */
 :root:fullscreen #fullscreen .fullscreen-enter,
 :root:not(:fullscreen) #fullscreen .fullscreen-exit {
   display: none;
