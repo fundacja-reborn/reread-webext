@@ -802,6 +802,16 @@ button.quiet-speak svg {
   padding: 0.35rem 1rem;
 }
 
+/* Air over the edit box on a phone, for its focus ring: the ring stands
+   4px outside the box (2px, offset 2px, the page's rule), and with the box
+   flush under the phrase's line it sat on the phrase's descenders
+   (Michał's screenshot, 2026-09-14). Half a rem: the ring clear of the
+   line box, the box still plainly the phrase's. On a desktop the phrase
+   stands beside the box, not over it (the query below takes it back). */
+.phrase-row[data-editing="true"] > .phrase-body {
+  margin-block-start: 0.5rem;
+}
+
 /* The unfolded row's sentence is a child of the row, after Save and Cancel
    (vocab.js) - the editor one unit, the context a step under it, and the
    keyboard walking the same order the eye reads. On a phone the whole
@@ -915,6 +925,12 @@ button.quiet-speak svg {
   }
 
   .phrase-row[data-editing="true"] > .phrase-actions {
+    margin-block-start: 0;
+  }
+
+  /* The phrase stands beside the box here, not over it: the phone's air
+     over the box would only drop the box under the phrase's first line. */
+  .phrase-row[data-editing="true"] > .phrase-body {
     margin-block-start: 0;
   }
 

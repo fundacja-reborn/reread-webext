@@ -200,6 +200,14 @@ describe("a row of the saved phrases", () => {
     // The hint is a footnote to the box: the column's gap alone parts them.
     assert.match(rule(styles, ".phrase-edit"), /gap: 0\.3rem;/, "the box and its hint stand apart");
     assert.match(rule(styles, ".phrase-edit-hint"), /margin: 0;/, "the hint adds a margin of its own to the gap");
+    // On a phone the box stands half a rem under the phrase's line, so its
+    // focus ring (4px outside the box) clears the phrase's descenders; on a
+    // desktop the phrase is beside the box and the air is taken back.
+    assert.match(rule(styles, '.phrase-row[data-editing="true"] > .phrase-body'), /margin-block-start: 0\.5rem;/, "the box's focus ring sits on the phrase's descenders on a phone");
+    const desktop = styles.slice(styles.indexOf("@media (min-width: 50rem)"));
+    // Its own rule, not the one it shares with the head (which only leaves
+    // the baseline group).
+    assert.match(desktop, /\n  \.phrase-row\[data-editing="true"\] > \.phrase-body \{\s*margin-block-start: 0;/, "on a desktop the box drops under the phrase's first line");
     // The row's padding grows with what the buttons' 44px box has over
     // the phrase's line, plus a hairline: at a flat 0.5rem the box reached
     // the separator and drew its hover frame over it.
