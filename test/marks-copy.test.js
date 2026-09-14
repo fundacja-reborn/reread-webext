@@ -4,6 +4,7 @@ import { describe, it } from "node:test";
 import { markRecord } from "../src/lib/reader/marks.js";
 import {
   MARKS_COPY_FILENAME,
+  booksOf,
   fromMarksCopy,
   isMarksCopy,
   marksImportPlan,
@@ -253,5 +254,45 @@ describe("missingByKind", () => {
   it("answers two empty lists for a plan that placed everything", () => {
     const shelf = library({ books: [{ id: "b", title: BOOK.title, author: BOOK.author }] });
     assert.deepEqual(missingByKind(marksImportPlan([BOOK], shelf).missing), { books: [], articles: [] });
+  });
+});
+
+describe("a book document addressed to one copy (D223)", () => {
+  const shelf = [
+    { id: "old", title: "A Novel", author: "Somebody" },
+    { id: "new", title: "A Novel", author: "Somebody" },
+    { id: "other", title: "A Novel", author: "Somebody Else" },
+  ];
+
+  it("booksOf names every copy by title and author, or the one copy the page addressed, and none for an article", () => {
+    assert.deepEqual(booksOf(BOOK, shelf).map((book) => book.id), ["old", "new"]);
+    assert.deepEqual(booksOf({ ...BOOK, docId: "new" }, shelf).map((book) => book.id), ["new"]);
+    // An address the library does not hold names nothing: the plan then
+    // counts the document as missing, as for a book that is not here.
+    assert.deepEqual(booksOf({ ...BOOK, docId: "gone" }, shelf), []);
+    assert.deepEqual(booksOf(ARTICLE, shelf), []);
+    // The rows come back as they were given, whatever else each carries.
+    const rows = [{ id: "old", title: "A Novel", author: "Somebody", segmentCount: 12 }];
+    assert.equal(booksOf(BOOK, rows)[0]?.segmentCount, 12);
+  });
+
+  it("the plan lays an addressed document on that copy alone, and its twin on the other", () => {
+    const moved = mark("a line of the book", { segment: 5, block: 1, offset: 0, note: "why" });
+    const plan = marksImportPlan([{ ...BOOK, docId: "old" }, { ...BOOK, docId: "new", marks: [moved] }], library({ books: shelf }));
+    assert.deepEqual(
+      plan.targets.map((target) => target.docId),
+      ["old", "new"],
+    );
+    assert.deepEqual(plan.targets[0]?.marks, BOOK.marks);
+    assert.deepEqual(plan.targets[1]?.marks, [moved]);
+    assert.equal(plan.added, 2);
+  });
+
+  it("the file never carries the address: a document written and read back has none", () => {
+    const text = toMarksCopy([{ ...BOOK, docId: "old" }]);
+    assert.equal(text.includes("docId"), false);
+    const read = fromMarksCopy(text);
+    assert.equal(read.documents.length, 1);
+    assert.equal("docId" in (read.documents[0] ?? {}), false);
   });
 });

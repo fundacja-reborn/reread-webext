@@ -514,3 +514,107 @@ function pointAt(prose, index) {
   }
   return null;
 }
+
+/**
+ * Whether a mark's anchor still reads its own quote off its segment's
+ * prose - the quote guard as a value: the check `rangeOfMark` makes on the
+ * document (`quoteOfSpan`), made on the prose alone. The blocks the span
+ * covers, joined as `quoteOf` joins them, have to read back exactly what
+ * the mark wrote down. False for an anchor past the prose.
+ *
+ * @param {string[]} prose every block of the mark's segment, in order
+ * @param {Mark} mark
+ * @returns {boolean}
+ */
+export function fitsProse(prose, mark) {
+  if (mark.end.block >= prose.length) return false;
+  return quoteOf(prose.slice(mark.start.block, mark.end.block + 1), mark.start, mark.end) === mark.text;
+}
+
+/**
+ * The one segment a quote stands in when it stands in exactly one place in
+ * the whole book, or -1: a second hit anywhere - in the same part or in
+ * another - is the end of it. Over the parts' prose joined once, so a book
+ * of fifty parts costs one search per part and no joining per mark.
+ *
+ * @param {string[]} joined every segment's prose as `findQuote` joins it
+ * @param {string} quote
+ * @returns {number}
+ */
+function segmentOfQuote(joined, quote) {
+  let found = -1;
+  for (const [segmentIndex, text] of joined.entries()) {
+    const at = text.indexOf(quote);
+    if (at === -1) continue;
+    if (found !== -1 || text.indexOf(quote, at + 1) !== -1) return -1;
+    found = segmentIndex;
+  }
+  return found;
+}
+
+/**
+ * @param {string[][]} book every segment's prose, by segment index
+ * @param {string[]} joined the same, each segment joined once
+ * @param {string} quote
+ * @returns {{ segmentIndex: number, start: MarkPoint, end: MarkPoint } | null}
+ */
+function locateIn(book, joined, quote) {
+  const segmentIndex = segmentOfQuote(joined, quote);
+  const span = segmentIndex === -1 ? null : findQuote(book[segmentIndex] ?? [], quote);
+  return span === null ? null : { segmentIndex, ...span };
+}
+
+/**
+ * Where a quote stands in a whole book when it stands in exactly one place
+ * in all of it (D223): `findQuote` widened from one segment to every
+ * segment, for a mark whose quote moved to another part. A book cut again
+ * from its own file after the cut changed - a picture's weight (D183), the
+ * budget (O21) - puts a quote one or several parts past where its anchor
+ * says, and the shift grows with every picture before it, so the part next
+ * door is not far enough to look. One hit in the whole book and no other: a
+ * quote standing in two parts is nobody's to choose between. Null for none,
+ * for more, and for a quote whose ends fall on a boundary.
+ *
+ * @param {string[][]} book every segment's prose, by segment index
+ * @param {string} quote
+ * @returns {{ segmentIndex: number, start: MarkPoint, end: MarkPoint } | null}
+ */
+export function locateQuote(book, quote) {
+  if (quote.length === 0) return null;
+  return locateIn(book, book.map((prose) => prose.join("\n")), quote);
+}
+
+/**
+ * A document's marks laid against its book as the book stands now (D223):
+ * a mark whose anchor still reads its quote is kept as it is; one whose
+ * anchor does not is looked for by its quote in the whole book and, found
+ * once, rewritten to stand there - colour, note and clock as they were;
+ * one found nowhere, or twice, is kept as it was - in the list and in the
+ * database, unpainted, the guard's bargain (D169) - and counted. The
+ * import's road: a file's marks were written against another cut of the
+ * same book, and the reader who imported the book again should find every
+ * highlight where its words are, not where its numbers were.
+ *
+ * @param {string[][]} book every segment's prose, by segment index
+ * @param {Mark[]} marks
+ * @returns {{ marks: Mark[], healed: number, lost: number }} the marks in
+ *   the same order, each as it was or as it stands now
+ */
+export function reanchorMarks(book, marks) {
+  const joined = book.map((prose) => prose.join("\n"));
+  let healed = 0;
+  let lost = 0;
+  const placed = marks.map((mark) => {
+    const prose = book[mark.segmentIndex];
+    if (prose !== undefined && fitsProse(prose, mark)) return mark;
+    const found = locateIn(book, joined, mark.text);
+    const record = found === null ? null : markRecord({ ...mark, ...found });
+    if (record === null) {
+      lost += 1;
+      return mark;
+    }
+    healed += 1;
+    return record;
+  });
+  return { marks: placed, healed, lost };
+}

@@ -538,6 +538,20 @@
       "titles": { "content": "$2", "example": "A Novel, Another Novel" }
     }
   },
+  "reader_marks_import_unplaced_one": {
+    "message": "$COUNT$ Markierung konnte im aktuellen Text nicht untergebracht werden ($TITLES$). Sie bleibt auf der Seite Markierungen erhalten.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "titles": { "content": "$2", "example": "Ein Roman" }
+    }
+  },
+  "reader_marks_import_unplaced_other": {
+    "message": "$COUNT$ Markierungen konnten im aktuellen Text nicht untergebracht werden ($TITLES$). Sie bleiben auf der Seite Markierungen erhalten.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "titles": { "content": "$2", "example": "Ein Roman, Ein anderer Roman" }
+    }
+  },
   "reader_marks_import_missing_one": {
     "message": "$COUNT$ Dokument ist nicht in der Leseliste: $TITLES$. Importieren Sie es zuerst - ein Buch aus seiner .epub-Datei, einen Artikel aus der Sicherung der Leseliste - und danach diese Datei erneut.",
     "placeholders": {

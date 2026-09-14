@@ -71,12 +71,14 @@ import { wordless } from "../lib/matcher/words.js";
 import {
   compareMarks,
   comparePoints,
+  fitsProse,
   handleAt,
   isMarkColor,
   markRecord,
   mergePlan,
   mergedNote,
   placeMark,
+  reanchorMarks,
   reshapePlan,
   withoutMark,
 } from "../lib/reader/marks.js";
@@ -157,7 +159,7 @@ import {
   fromManifest,
   isNewerBackup,
 } from "../lib/store/backup-file.js";
-import { fromMarksCopy, isMarksCopy, marksImportPlan, missingByKind } from "../lib/store/marks-copy.js";
+import { booksOf, fromMarksCopy, isMarksCopy, marksImportPlan, missingByKind } from "../lib/store/marks-copy.js";
 import { MARKS_FILENAME, toMarksFile } from "../lib/store/marks-file.js";
 import { fromSettingsFile } from "../lib/store/settings-file.js";
 import { allPhrases } from "../lib/store/vocab.js";
@@ -182,6 +184,7 @@ import {
   configureDocSearch,
   openDocSearch,
   resetDocSearch,
+  storedBlockText,
 } from "./doc-search.js";
 import { importEpub } from "./import-book.js";
 import {
@@ -4474,6 +4477,142 @@ async function exportMarksPage() {
 }
 
 /**
+ * The file's book documents laid against the books the library holds
+ * (D223), one document per copy: a copy this import did not just write is
+ * read back from the database, part by part, and the document's marks are
+ * set where their words stand in it - so a highlight made in the book as
+ * it was cut on another day, or on another device, is found where its
+ * words are and not where its numbers were. Every article document, and a
+ * book the library does not hold, goes through as it is: the plan names
+ * the missing. What could not be placed - a quote found nowhere in the
+ * book, or twice - is written all the same, as it was, and counted for the
+ * report: it stands on the highlights page, unpainted in the book, the
+ * guard's bargain (D169).
+ *
+ * @param {import("../lib/store/marks-copy.js").CopyDoc[]} documents
+ * @param {BookMeta[]} books the library's books as they stand at the press
+ * @param {Set<string>} written the ids of the books this import wrote from
+ *   the same file - their parts are the file's own, so the anchors fit
+ * @returns {Promise<{
+ *   documents: import("../lib/store/marks-copy.js").CopyDoc[],
+ *   healed: number,
+ *   unplaced: { title: string, count: number }[],
+ * }>}
+ */
+async function layBookMarks(documents, books, written) {
+  /** @type {import("../lib/store/marks-copy.js").CopyDoc[]} */
+  const laid = [];
+  let healed = 0;
+  /** @type {{ title: string, count: number }[]} */
+  const unplaced = [];
+  for (const doc of documents) {
+    if (doc.kind !== "book") {
+      laid.push(doc);
+      continue;
+    }
+    const copies = booksOf(doc, books);
+    if (copies.length === 0) {
+      laid.push(doc);
+      continue;
+    }
+    for (const book of copies) {
+      if (written.has(book.id)) {
+        laid.push({ ...doc, docId: book.id });
+        continue;
+      }
+      const placed = await placeBookMarks(book, doc.marks);
+      healed += placed.healed;
+      if (placed.lost > 0) unplaced.push({ title: book.title, count: placed.lost });
+      laid.push({ ...doc, docId: book.id, marks: placed.marks });
+    }
+  }
+  return { documents: laid, healed, unplaced };
+}
+
+/**
+ * One document's marks against one book (D223): the parts the marks name
+ * are read first and alone - a file written against this very cut costs
+ * the parts it marks and nothing more - and only when an anchor does not
+ * read its quote is the whole book read, part by part, for `reanchorMarks`
+ * to lay every mark where its words stand.
+ *
+ * @param {BookMeta} book
+ * @param {import("../lib/reader/marks.js").Mark[]} marks
+ * @returns {Promise<{ marks: import("../lib/reader/marks.js").Mark[], healed: number, lost: number }>}
+ */
+async function placeBookMarks(book, marks) {
+  /** @type {Map<number, string[] | null>} */
+  const parts = new Map();
+  /** @param {number} index */
+  const proseAt = async (index) => {
+    let prose = parts.get(index);
+    if (prose === undefined) {
+      prose = await bookPartProse(book.id, index);
+      parts.set(index, prose);
+    }
+    return prose;
+  };
+  let fit = true;
+  for (const mark of marks) {
+    const prose = await proseAt(mark.segmentIndex);
+    if (prose === null || !fitsProse(prose, mark)) {
+      fit = false;
+      break;
+    }
+  }
+  if (fit) return { marks, healed: 0, lost: 0 };
+  /** @type {string[][]} */
+  const whole = [];
+  for (let index = 0; index < book.segmentCount; index += 1) whole.push((await proseAt(index)) ?? []);
+  return reanchorMarks(whole, marks);
+}
+
+/**
+ * One part's prose as the marks count it, without the screen: the stored
+ * blocks parsed inert and walked by `storedBlockText` - the search's own
+ * reading of a stored block, one arithmetic with the paint's `blockProse`
+ * (a stored block is one rebuilt block, and the render's second pass
+ * through the allowed list moves none, which is what the search's landing
+ * stands on too). Null for a part that is not there.
+ *
+ * @param {string} bookId
+ * @param {number} index
+ * @returns {Promise<string[] | null>}
+ */
+async function bookPartProse(bookId, index) {
+  const segment = await getBookSegment(bookId, index);
+  return segment === null ? null : segment.blocks.map(storedBlockText);
+}
+
+/**
+ * The report's sentence about the marks no book could place (D223) - only
+ * when there are any: their count and a sample of the books' titles. The
+ * marks are written all the same and stand on the highlights page.
+ *
+ * @param {{ title: string, count: number }[]} unplaced
+ * @returns {string[]}
+ */
+function unplacedNotes(unplaced) {
+  const count = unplaced.reduce((sum, row) => sum + row.count, 0);
+  if (count === 0) return [];
+  return [plural(count, "reader_marks_import_unplaced", [titleSample(unplaced.map((row) => row.title))])];
+}
+
+/**
+ * A sample of titles for a sentence: the first few and an ellipsis for the
+ * rest - the count says how many there are, and a file of hundreds must
+ * not become a paragraph.
+ *
+ * @param {string[]} titles
+ * @returns {string}
+ */
+function titleSample(titles) {
+  const shown = titles.slice(0, SAMPLE_TITLES);
+  if (titles.length > SAMPLE_TITLES) shown.push("...");
+  return shown.join(", ");
+}
+
+/**
  * What a file's import leaves out and why, as sentences: the documents the
  * reading list does not hold (a sample of their titles - the count says how
  * many there are, and a file of hundreds must not become a paragraph) -
@@ -4493,11 +4632,7 @@ function marksImportNotes(plan, invalid) {
   /** @type {string[]} */
   const sentences = [];
   /** @param {import("../lib/store/marks-copy.js").CopyDoc[]} docs */
-  const sampleOf = (docs) => {
-    const titles = docs.slice(0, SAMPLE_TITLES).map((doc) => doc.title);
-    if (docs.length > SAMPLE_TITLES) titles.push("...");
-    return titles.join(", ");
-  };
+  const sampleOf = (docs) => titleSample(docs.map((doc) => doc.title));
   const { books, articles } = missingByKind(plan.missing);
   if (books.length > 0) {
     sentences.push(plural(books.length, "reader_marks_import_books", [sampleOf(books)]));
@@ -4877,8 +5012,8 @@ function renderBackupOffer() {
  * through the background, which owns every write to it; then the
  * highlights - after the articles and the books, so the marks that came
  * in with an article meet themselves and are left out, and a book's find
- * their book; the settings last, when the box says so. One report, the
- * parts' sentences in a row.
+ * their book and are laid against its text (D223); the settings last,
+ * when the box says so. One report, the parts' sentences in a row.
  */
 async function runBackup() {
   if (pendingBackup === null || importRun === null) return;
@@ -4924,9 +5059,15 @@ async function runBackup() {
     if (offered.highlights.length > 0) {
       await restoreMarks();
       const [articles, books, marks] = await Promise.all([listArticles(), listBooks(), allMarks()]);
-      const plan = marksImportPlan(offered.highlights, { articles, books, marks });
+      // A book's marks laid against its text first (D223): a book that
+      // stood here before this import may be cut otherwise than the one
+      // the file's anchors count on. A book this same import just wrote
+      // came with the file's own parts, so its anchors fit as they are.
+      const written = new Set(offered.books === null ? [] : offered.books.plan.toAdd.map((book) => book.meta.id));
+      const laid = await layBookMarks(offered.highlights, books, written);
+      const plan = marksImportPlan(laid.documents, { articles, books, marks });
       if (plan.added > 0) await putMarksRows(plan.targets.map(({ docId, marks }) => ({ docId, marks })));
-      sentences.push(plural(plan.added, "reader_marks_import_done"), ...marksImportNotes(plan, 0));
+      sentences.push(plural(plan.added, "reader_marks_import_done"), ...marksImportNotes(plan, 0), ...unplacedNotes(laid.unplaced));
     }
     if (offered.settings !== null && importSettings !== null && importSettings.checked) {
       await writeConfig(offered.settings);

@@ -744,6 +744,34 @@
       "titles": { "content": "$2", "example": "A Novel, Another Novel" }
     }
   },
+  "reader_marks_import_unplaced_one": {
+    "message": "$COUNT$ позначення не вдалося розмістити в поточному тексті ($TITLES$). Воно залишається на сторінці Позначення.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "titles": { "content": "$2", "example": "Роман" }
+    }
+  },
+  "reader_marks_import_unplaced_few": {
+    "message": "$COUNT$ позначення не вдалося розмістити в поточному тексті ($TITLES$). Вони залишаються на сторінці Позначення.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "titles": { "content": "$2", "example": "Роман, Інший роман" }
+    }
+  },
+  "reader_marks_import_unplaced_many": {
+    "message": "$COUNT$ позначень не вдалося розмістити в поточному тексті ($TITLES$). Вони залишаються на сторінці Позначення.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "titles": { "content": "$2", "example": "Роман, Інший роман" }
+    }
+  },
+  "reader_marks_import_unplaced_other": {
+    "message": "$COUNT$ позначення не вдалося розмістити в поточному тексті ($TITLES$). Вони залишаються на сторінці Позначення.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1,5" },
+      "titles": { "content": "$2", "example": "Роман" }
+    }
+  },
   "reader_marks_import_missing_one": {
     "message": "$COUNT$ документа немає в списку читання: $TITLES$. Спершу імпортуйте його - книжку з її файлу .epub, статтю з резервної копії списку читання - а потім ще раз цей файл.",
     "placeholders": {
