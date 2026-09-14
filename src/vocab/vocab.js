@@ -672,10 +672,17 @@ function phraseRow(phrase) {
   // `fillHighlighted`, because the filter does not read the sentence and a
   // mark in it would say it did - the one mark here is the phrase's own
   // place in its sentence (D211, `sentenceSegments`), which the sheet shows
-  // only once the fold is open. Under the meanings and under the editor
-  // alike, so a row being edited keeps its sentence where it was.
+  // only once the fold is open. At rest it stands in the body under the
+  // meanings; unfolded, it stands after Save and Cancel - the editor is one
+  // unit, the box with its hint and the two buttons, and the sentence is
+  // the context under it (Michał's screenshot, 2026-09-14: on a phone,
+  // with the sentence between the box and the buttons, the buttons read as
+  // the row's, not the box's). The DOM says so too, for the keyboard: box,
+  // Save, Cancel, then the sentence.
+  /** @type {HTMLElement | null} */
+  let fold = null;
   if (hasSentence(phrase)) {
-    const fold = element("details", "phrase-sentence");
+    fold = element("details", "phrase-sentence");
     const summary = element("summary", "");
     for (const segment of sentenceSegments(/** @type {string} */ (phrase.context), phrase.phrase)) {
       if (segment.hit) {
@@ -687,12 +694,13 @@ function phraseRow(phrase) {
       }
     }
     fold.append(summary);
-    body.append(fold);
   }
+  if (editActions === null && fold !== null) body.append(fold);
   row.append(body);
 
   if (editActions !== null) {
     row.append(editActions);
+    if (fold !== null) row.append(fold);
     return row;
   }
 
