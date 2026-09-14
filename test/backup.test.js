@@ -107,6 +107,22 @@ describe("the copy of the vocabulary", () => {
     ]);
   });
 
+  it("carries the learned mark (D224) as a moment, and restores a phrase without a mark that is not one", () => {
+    const marked = phrase("1", { learnedAt: 5000 });
+    assert.deepEqual(asBackup(JSON.parse(JSON.stringify(backupOf([marked], 42))))?.phrases, [marked]);
+    const narrowed = asBackup({
+      version: 1,
+      writtenAt: 1,
+      phrases: [
+        { ...phrase("2"), learnedAt: "5000" },
+        { ...phrase("3"), learnedAt: 0 },
+        { ...phrase("4"), learnedAt: -1 },
+        { ...phrase("5"), learnedAt: 7000, recallCount: 2 },
+      ],
+    });
+    assert.deepEqual(narrowed?.phrases, [phrase("2"), phrase("3"), phrase("4"), { ...phrase("5"), recallCount: 2, learnedAt: 7000 }]);
+  });
+
   it("is no copy at all in another shape, and drops the rows that make no sense", () => {
     assert.equal(asBackup(undefined), null);
     assert.equal(asBackup(null), null);

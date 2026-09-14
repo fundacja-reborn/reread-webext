@@ -151,6 +151,32 @@ summary {
   min-height: 44px;
 }
 
+/* --- the two shelves (D224): the reading list's segment buttons, here --- */
+
+/* Two halves of one vocabulary, said with pressed buttons: the same dress
+   as the reading list's "To read / Read" (`.library-segments`, reader.css),
+   so the two pages read as one extension. Two equal halves of the line on
+   a phone; their own width on a desktop. */
+.phrase-segments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.75rem 0 0;
+}
+
+.phrase-segments button {
+  flex: 1 1 0;
+  min-height: 44px;
+  padding: 0.35rem 1rem;
+}
+
+/* The shelf in view: the accent as a border and a wash behind the page's
+   own text color, so the label stays readable in all four themes. */
+.phrase-segments button[aria-pressed="true"] {
+  border-color: var(--page-accent);
+  background: color-mix(in srgb, var(--page-accent) 12%, transparent);
+}
+
 /* --- disclosure lines: the intro and the file-format note, folded --- */
 
 /* Native details/summary: no script, keyboard for free, and closed is the
@@ -733,9 +759,44 @@ button.quiet:focus-visible {
    apart from Edit at a glance, without an alarm color - it is a frequent,
    intended act, not a deletion to warn about. */
 button.quiet-learned:hover,
-button.quiet-learned:focus-visible {
+button.quiet-learned:focus-visible,
+button.quiet-unlearn:hover,
+button.quiet-unlearn:focus-visible {
   border-color: var(--page-accent);
   background: color-mix(in srgb, var(--page-accent) 12%, transparent);
+}
+
+/* A Delete pressed once and asking (D224, the reading list's rule D150):
+   the accent as a border and a wash, the words swapped for the question,
+   the width held by script so the second press lands where the first
+   did. The row's and the shelf's alike; last of the quiet rules, so the
+   armed state outranks the hovers above. */
+button.quiet-delete[data-armed],
+button.quiet-delete[data-armed]:hover,
+button.quiet-delete[data-armed]:focus-visible,
+button.quiet-delete-all[data-armed],
+button.quiet-delete-all[data-armed]:hover,
+button.quiet-delete-all[data-armed]:focus-visible {
+  border-color: var(--page-accent);
+  background: color-mix(in srgb, var(--page-accent) 12%, transparent);
+  color: var(--page-fg);
+}
+
+/* The learned shelf's act on the whole shelf, under the pager (D224): a
+   quiet text act on a line of its own, at its own width, in the shared
+   dress minus the rows' negative block margin - it stands in no reading
+   line, so it takes its 44px outright. Words rather than a glyph, because
+   "all" is a scope only words can carry. */
+.learned-actions {
+  display: flex;
+  margin: 1rem 0 0;
+}
+
+.learned-actions > button.quiet {
+  margin-block: 0;
+  min-height: 44px;
+  max-width: 100%;
+  white-space: nowrap;
 }
 
 /* The speaker leads the row, the bubble's own order (D83): hearing the phrase

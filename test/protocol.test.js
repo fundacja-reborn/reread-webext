@@ -504,6 +504,15 @@ describe("asRequest", () => {
     assert.equal(asRequest({ kind: Message.FORGET_PHRASE, text: 42 }), null);
   });
 
+  it("accepts the learned shelf's three acts (D224): the two by the phrase alone, the shelf-wide one bare", () => {
+    assert.deepEqual(asRequest({ kind: Message.UNLEARN_PHRASE, text: "bank" }), { kind: Message.UNLEARN_PHRASE, text: "bank" });
+    assert.deepEqual(asRequest({ kind: Message.DELETE_PHRASE, text: "bank" }), { kind: Message.DELETE_PHRASE, text: "bank" });
+    assert.equal(asRequest({ kind: Message.UNLEARN_PHRASE }), null);
+    assert.equal(asRequest({ kind: Message.DELETE_PHRASE, text: 42 }), null);
+    assert.deepEqual(asRequest({ kind: Message.DELETE_LEARNED }), { kind: Message.DELETE_LEARNED });
+    assert.deepEqual(asRequest({ kind: Message.DELETE_LEARNED, text: "bank" }), { kind: Message.DELETE_LEARNED });
+  });
+
   it("accepts a look-up, and only with the text (D162)", () => {
     assert.deepEqual(asRequest({ kind: Message.LOOK_UP, text: "bank" }), {
       kind: Message.LOOK_UP,
@@ -681,6 +690,11 @@ describe("a row of the backup of everything (D213)", () => {
       context: "The bank was steep.",
       recallCount: 3,
     });
+    // The learned mark (D224): a moment after the epoch, or nothing.
+    assert.equal(asRestoreRow({ ...whole, learnedAt: 7000 })?.learnedAt, 7000);
+    for (const broken of [0, -1, "7000", null]) {
+      assert.equal("learnedAt" in (asRestoreRow({ ...whole, learnedAt: broken }) ?? {}), false, String(broken));
+    }
     for (const broken of [
       { ...whole, langFrom: "english" },
       { ...whole, langTo: "" },

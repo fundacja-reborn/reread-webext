@@ -66,6 +66,14 @@ describe("vocabularyRows", () => {
     assert.deepEqual(zero, { langFrom: "en", langTo: "pl", text: "zero", translations: ["znaczenie"], createdAt: 10 });
   });
 
+  it("carries the learned mark (D224) - the one file that does - and writes none for a phrase still being learned", () => {
+    const [learning, learnt] = vocabularyRows([phrase("learning"), phrase("learnt", { learnedAt: 5000 })]);
+    assert.equal(learning !== undefined && "learnedAt" in learning, false);
+    assert.equal(learnt?.learnedAt, 5000);
+    const text = toVocabularyFile([phrase("learnt", { learnedAt: 5000 })]);
+    assert.equal(fromVocabularyFile(text).rows[0]?.learnedAt, 5000);
+  });
+
   it("does not carry the id or the normalized form - the store mints one and derives the other", () => {
     const [row] = vocabularyRows([phrase("Bank")]);
     assert.ok(row !== undefined);

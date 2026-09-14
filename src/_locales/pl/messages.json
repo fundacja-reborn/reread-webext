@@ -89,7 +89,7 @@
 
   "vocab_title": { "message": "re/read - zapisane frazy" },
   "vocab_intro": {
-    "message": "Wszystkie frazy zachowane dla tej pary językowej, od najnowszych - zapisane podczas czytania i przechowywane tylko na tym urządzeniu. „$LEARNED$” usuwa frazę razem z jej podkreśleniami; „$EDIT$” pozwala przepisać znaczenia, po jednym w linii. Kilka znaczeń naraz rozdziel średnikiem. Przy frazie dwie liczby - lupa i książka: ile razy ją sprawdzałeś (otwierałeś jej dymek) i ile razy wystąpiła w tekstach, które skończyłeś - w części książki, z której wyszedłeś przyciskiem „Następna” pod tekstem, albo w artykule oznaczonym jako przeczytany. Listę można uporządkować według każdej z nich.",
+    "message": "Wszystkie frazy zachowane dla tej pary językowej, od najnowszych - zapisane podczas czytania i przechowywane tylko na tym urządzeniu. „$LEARNED$” przenosi frazę na listę „Nauczone” i zdejmuje jej podkreślenia; „$EDIT$” pozwala przepisać znaczenia, po jednym w linii. Kilka znaczeń naraz rozdziel średnikiem. Przy frazie dwie liczby - lupa i książka: ile razy ją sprawdzałeś (otwierałeś jej dymek) i ile razy wystąpiła w tekstach, które skończyłeś - w części książki, z której wyszedłeś przyciskiem „Następna” pod tekstem, albo w artykule oznaczonym jako przeczytany. Listę można uporządkować według każdej z nich.",
     "placeholders": {
       "learned": { "content": "$1", "example": "Znam to" },
       "edit": { "content": "$2", "example": "Edytuj" }
@@ -175,6 +175,97 @@
   "vocab_empty": {
     "message": "Dla tej pary nie ma jeszcze nic zapisanego. Zaznacz frazę podczas czytania i naciśnij „$BUTTON$” - będzie tu czekać.",
     "placeholders": { "button": { "content": "$1", "example": "Zapisz" } }
+  },
+  "vocab_segment_learning": { "message": "Do nauki" },
+  "vocab_segment_learned": { "message": "Nauczone" },
+  "vocab_segment_learning_count": {
+    "message": "Do nauki ($COUNT$)",
+    "placeholders": { "count": {"content":"$1","example":"12"} }
+  },
+  "vocab_segment_learned_count": {
+    "message": "Nauczone ($COUNT$)",
+    "placeholders": { "count": {"content":"$1","example":"12"} }
+  },
+  "vocab_count_filtered_learned_one": {
+    "message": "$MATCHING$ z $TOTAL$ nauczonej frazy",
+    "placeholders": { "total": {"content":"$1","example":"26"}, "matching": {"content":"$2","example":"8"} }
+  },
+  "vocab_count_filtered_learned_few": {
+    "message": "$MATCHING$ z $TOTAL$ nauczonych fraz",
+    "placeholders": { "total": {"content":"$1","example":"26"}, "matching": {"content":"$2","example":"8"} }
+  },
+  "vocab_count_filtered_learned_many": {
+    "message": "$MATCHING$ z $TOTAL$ nauczonych fraz",
+    "placeholders": { "total": {"content":"$1","example":"26"}, "matching": {"content":"$2","example":"8"} }
+  },
+  "vocab_count_filtered_learned_other": {
+    "message": "$MATCHING$ z $TOTAL$ nauczonej frazy",
+    "placeholders": { "total": {"content":"$1","example":"26"}, "matching": {"content":"$2","example":"8"} }
+  },
+  "vocab_unlearn": { "message": "Wróć do nauki" },
+  "vocab_unlearn_aria": {
+    "message": "Wróć do nauki: $PHRASE$",
+    "placeholders": { "phrase": {"content":"$1","example":"bank"} }
+  },
+  "vocab_delete_aria": {
+    "message": "Usuń na zawsze: $PHRASE$",
+    "placeholders": { "phrase": {"content":"$1","example":"bank"} }
+  },
+  "vocab_delete_learned_one": {
+    "message": "Usuń $COUNT$ nauczoną frazę",
+    "placeholders": { "count": {"content":"$1","example":"12"} }
+  },
+  "vocab_delete_learned_few": {
+    "message": "Usuń wszystkie $COUNT$ nauczone frazy",
+    "placeholders": { "count": {"content":"$1","example":"12"} }
+  },
+  "vocab_delete_learned_many": {
+    "message": "Usuń wszystkie $COUNT$ nauczonych fraz",
+    "placeholders": { "count": {"content":"$1","example":"12"} }
+  },
+  "vocab_delete_learned_other": {
+    "message": "Usuń wszystkie $COUNT$ nauczonych fraz",
+    "placeholders": { "count": {"content":"$1","example":"12"} }
+  },
+  "vocab_delete_learned_confirm_one": {
+    "message": "Potwierdź: usuń na zawsze $COUNT$ nauczoną frazę",
+    "placeholders": { "count": {"content":"$1","example":"12"} }
+  },
+  "vocab_delete_learned_confirm_few": {
+    "message": "Potwierdź: usuń na zawsze wszystkie $COUNT$ nauczone frazy",
+    "placeholders": { "count": {"content":"$1","example":"12"} }
+  },
+  "vocab_delete_learned_confirm_many": {
+    "message": "Potwierdź: usuń na zawsze wszystkie $COUNT$ nauczonych fraz",
+    "placeholders": { "count": {"content":"$1","example":"12"} }
+  },
+  "vocab_delete_learned_confirm_other": {
+    "message": "Potwierdź: usuń na zawsze wszystkie $COUNT$ nauczonych fraz",
+    "placeholders": { "count": {"content":"$1","example":"12"} }
+  },
+  "vocab_deleted_learned_one": {
+    "message": "Usunięto $COUNT$ nauczoną frazę.",
+    "placeholders": { "count": {"content":"$1","example":"12"} }
+  },
+  "vocab_deleted_learned_few": {
+    "message": "Usunięto $COUNT$ nauczone frazy.",
+    "placeholders": { "count": {"content":"$1","example":"12"} }
+  },
+  "vocab_deleted_learned_many": {
+    "message": "Usunięto $COUNT$ nauczonych fraz.",
+    "placeholders": { "count": {"content":"$1","example":"12"} }
+  },
+  "vocab_deleted_learned_other": {
+    "message": "Usunięto $COUNT$ nauczonej frazy.",
+    "placeholders": { "count": {"content":"$1","example":"12"} }
+  },
+  "vocab_learned_empty": {
+    "message": "Nic nie jest jeszcze oznaczone jako nauczone. Naciśnij „$BUTTON$” przy frazie - w dymku albo na tej liście - a trafi tutaj.",
+    "placeholders": { "button": {"content":"$1","example":"Learned"} }
+  },
+  "vocab_empty_all_learned": {
+    "message": "Wszystkie frazy zapisane dla tej pary są na liście „Nauczone”. Zaznacz frazę podczas czytania i naciśnij „$BUTTON$” - będzie tu czekać.",
+    "placeholders": { "button": { "content": "$1", "example": "Save" } }
   },
   "vocab_filter_status_one": {
     "message": "$SHOWN$ z $TOTAL$ frazy dla „$QUERY$”",
@@ -325,7 +416,7 @@
   "action_import": { "message": "Importuj" },
   "transfer_heading": { "message": "Import i eksport" },
   "vocab_transfer_note": {
-    "message": "Plik .tsv z dwiema kolumnami - ten sam format zapisuje wtyczka KOReadera, a czyta Anki. Import dodaje tylko frazy, których w tej parze nie ma; zapisanych nie zmienia. W komórce znaczeń średnik ze spacją rozdziela znaczenia; średnik bez spacji zostaje wewnątrz znaczenia. „Eksportuj dla Anki” dopisuje trzecią kolumnę ze zdaniem, w którym fraza została zapisana - pustą, gdy zdania nie ma. Ten plik też można tu zaimportować: zdania wracają razem z frazami, a zapisana już fraza dostaje zdanie z pliku tylko wtedy, gdy nie ma własnego."
+    "message": "Plik .tsv z dwiema kolumnami - ten sam format zapisuje wtyczka KOReadera, a czyta Anki. Import dodaje tylko frazy, których w tej parze nie ma; zapisanych nie zmienia. W komórce znaczeń średnik ze spacją rozdziela znaczenia; średnik bez spacji zostaje wewnątrz znaczenia. „Eksportuj dla Anki” dopisuje trzecią kolumnę ze zdaniem, w którym fraza została zapisana - pustą, gdy zdania nie ma. Ten plik też można tu zaimportować: zdania wracają razem z frazami, a zapisana już fraza dostaje zdanie z pliku tylko wtedy, gdy nie ma własnego. Frazy oznaczone jako nauczone nie trafiają do żadnego z tych plików; przenosi je tylko kopia wszystkiego z czytelni."
   },
   "vocab_import_into": { "message": "Importuj do" },
   "vocab_import_nothing": { "message": "W tym pliku nie ma fraz do zaimportowania." },

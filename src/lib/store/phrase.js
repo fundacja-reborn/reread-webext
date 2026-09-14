@@ -48,6 +48,19 @@ import { MAX_SENTENCE_LENGTH } from "../sentence.js";
  * Absent otherwise, and absent on every row from before D210; the field
  * was reserved from M2 on and written by nobody until then (O2 in the docs).
  *
+ * `learnedAt` is the moment the reader marked the phrase learned (D224).
+ * Learned used to delete the row; now it sets this one field and the row
+ * stays, with everything the reader put into it - the meanings, the
+ * sentence, the counts - so that a file from another device cannot bring
+ * the phrase back as new, and so that "what have I learned" is a list and
+ * not a memory. A row with it is on the learned shelf of the phrases page
+ * and nowhere else: not in the mirror, so not underlined and not "saved"
+ * to the popup; not in either TSV file. Absent on a phrase still being
+ * learned, and absent on every row from before D224. Saving the phrase
+ * again from a bubble takes it off (`resaved`); the phrases page takes it
+ * off by name (`unlearned`), and deletes the row for good only from that
+ * shelf, on a second press.
+ *
  * @typedef {object} Phrase
  * @property {string} id
  * @property {string} langFrom
@@ -62,6 +75,7 @@ import { MAX_SENTENCE_LENGTH } from "../sentence.js";
  * @property {number} [lastRecallAt] epoch milliseconds of the last one
  * @property {number} [readCount] occurrences in the texts finished since then (D209)
  * @property {number} [lastReadAt] epoch milliseconds of the last text finished with it
+ * @property {number} [learnedAt] epoch milliseconds of the reader marking it learned (D224); absent while it is being learned
  */
 
 /**
@@ -169,6 +183,12 @@ export function hasSentence(phrase) {
  * how the phrase is written and what it means. The key is not touched,
  * because the key is how this row was found.
  *
+ * A learned row saved again is being learned again (D224): the mark comes
+ * off, and the row comes back to the mirror and the list with its history
+ * - the counts and the sentence it had - rather than as a phrase met for
+ * the first time. A save is the reader's decision, and "I want this
+ * underlined again" is what saving a phrase they had marked learned means.
+ *
  * Saving replaces the meanings rather than adding to them, and that is the
  * whole rule: a save says "this phrase means exactly what the bubble is
  * showing". Adding a meaning is then adding a line in the bubble, not a second
@@ -190,7 +210,100 @@ export function resaved(existing, incoming) {
   /** @type {Phrase} */
   const next = { ...existing, phrase: incoming.phrase, translations: incoming.translations };
   if (!hasSentence(existing) && hasSentence(incoming)) next.context = incoming.context;
+  delete next.learnedAt;
   return next;
+}
+
+/**
+ * Whether the reader marked the row learned (D224): a moment in it, which
+ * is the only way one is ever written. A copy edited by hand can hold
+ * anything there, and anything else reads as still being learned - the
+ * state that costs the reader nothing they cannot undo with one press.
+ *
+ * @param {Phrase} phrase
+ * @returns {boolean}
+ */
+export function isLearned(phrase) {
+  return isMoment(phrase.learnedAt);
+}
+
+/**
+ * @param {unknown} value
+ * @returns {value is number} a finite moment after the epoch
+ */
+function isMoment(value) {
+  return typeof value === "number" && Number.isFinite(value) && value > 0;
+}
+
+/**
+ * The row marked learned (D224): one field set, everything else as it was
+ * - the meanings, the sentence, the counts stay, because they are what the
+ * learned shelf is for. A row already learned is the same object back, so
+ * the store can tell there is nothing to write - and the day it was first
+ * marked stands: a second press is not a second learning.
+ *
+ * @param {Phrase} phrase
+ * @param {number} now epoch milliseconds
+ * @returns {Phrase}
+ */
+export function learned(phrase, now) {
+  if (isLearned(phrase)) return phrase;
+  return { ...phrase, learnedAt: now };
+}
+
+/**
+ * The row back to being learned (D224): the mark taken off, nothing else
+ * touched. The same object back for a row that was not learned, the
+ * store's rule for a write that would change nothing.
+ *
+ * @param {Phrase} phrase
+ * @returns {Phrase}
+ */
+export function unlearned(phrase) {
+  if (!isLearned(phrase)) return phrase;
+  /** @type {Phrase} */
+  const next = { ...phrase };
+  delete next.learnedAt;
+  return next;
+}
+
+/**
+ * A row built from a file or a copy, with the learned mark it carried
+ * (D224) - taken only when it is a moment, the rule every restored field
+ * follows: a broken mark must not cost the phrase, and must not make a
+ * learned one of it either. Nothing when the row carried none.
+ *
+ * @param {Phrase} phrase as `buildPhrase` made it
+ * @param {unknown} at what the file or the copy had under `learnedAt`
+ * @returns {Phrase}
+ */
+export function withLearnedAt(phrase, at) {
+  return isMoment(at) ? { ...phrase, learnedAt: at } : phrase;
+}
+
+/**
+ * The rows still being learned (D224): what the mirror is built from, what
+ * the TSV files carry, what the phrases page lists first. One filter in
+ * one place, so no reader of the store can forget it.
+ *
+ * @template {Phrase} T
+ * @param {T[]} phrases
+ * @returns {T[]}
+ */
+export function learningOf(phrases) {
+  return phrases.filter((phrase) => !isLearned(phrase));
+}
+
+/**
+ * The rows the reader marked learned (D224): the phrases page's second
+ * shelf, and nothing else's.
+ *
+ * @template {Phrase} T
+ * @param {T[]} phrases
+ * @returns {T[]}
+ */
+export function learnedOf(phrases) {
+  return phrases.filter(isLearned);
 }
 
 /**
@@ -278,9 +391,14 @@ export function withRestoredCounts(phrase, counts) {
  * and the row does not is taken - the sentence where there was none (the
  * TSV import's rule, D212), and of each count the greater, with the later
  * of the two moments - and what the row says stays: its meanings, its
- * spelling, the day it was kept. Never lower: the backup was made
- * somewhere the reader read as well, not instead. The same object back
- * when nothing rises, so the store can tell there is nothing to write.
+ * spelling, the day it was kept, and whether the reader marked it learned
+ * (D224) - in both directions. A file cannot make a learned phrase of one
+ * this device is still learning, nor bring one back that this device
+ * marked learned: the file is somebody's past, the row is this reader's
+ * decision, and the whole point of the mark is that no file undoes it.
+ * Never lower: the backup was made somewhere the reader read as well, not
+ * instead. The same object back when nothing rises, so the store can tell
+ * there is nothing to write.
  *
  * @param {Phrase} existing
  * @param {Phrase} incoming as the file's row was built

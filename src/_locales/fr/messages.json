@@ -89,7 +89,7 @@
 
   "vocab_title": { "message": "re/read - phrases enregistrées" },
   "vocab_intro": {
-    "message": "Toutes les phrases gardées pour cette paire de langues, les plus récentes d'abord - enregistrées pendant la lecture et conservées uniquement sur cet appareil. « $LEARNED$ » supprime une phrase et ses soulignements avec elle ; « $EDIT$ » réécrit ses sens, un par ligne. Plusieurs sens à la fois : séparez-les par un point-virgule. À côté d'une phrase, deux nombres - une loupe et un livre : combien de fois vous l'avez consultée (ouvert sa bulle) et combien de fois elle est apparue dans les textes que vous avez terminés - une partie de livre quittée par « Suivante » sous le texte, ou un article marqué comme lu. La liste peut être ordonnée selon l'un ou l'autre.",
+    "message": "Toutes les phrases gardées pour cette paire de langues, les plus récentes d'abord - enregistrées pendant la lecture et conservées uniquement sur cet appareil. « $LEARNED$ » déplace une phrase vers la liste « Apprises » et retire ses soulignements ; « $EDIT$ » réécrit ses sens, un par ligne. Plusieurs sens à la fois : séparez-les par un point-virgule. À côté d'une phrase, deux nombres - une loupe et un livre : combien de fois vous l'avez consultée (ouvert sa bulle) et combien de fois elle est apparue dans les textes que vous avez terminés - une partie de livre quittée par « Suivante » sous le texte, ou un article marqué comme lu. La liste peut être ordonnée selon l'un ou l'autre.",
     "placeholders": {
       "learned": { "content": "$1", "example": "Appris" },
       "edit": { "content": "$2", "example": "Modifier" }
@@ -168,6 +168,65 @@
   "vocab_empty": {
     "message": "Rien n'est encore enregistré pour cette paire. Sélectionnez une phrase pendant la lecture et appuyez sur « $BUTTON$ » - elle vous attendra ici.",
     "placeholders": { "button": { "content": "$1", "example": "Enregistrer" } }
+  },
+  "vocab_segment_learning": { "message": "À apprendre" },
+  "vocab_segment_learned": { "message": "Apprises" },
+  "vocab_segment_learning_count": {
+    "message": "À apprendre ($COUNT$)",
+    "placeholders": { "count": {"content":"$1","example":"12"} }
+  },
+  "vocab_segment_learned_count": {
+    "message": "Apprises ($COUNT$)",
+    "placeholders": { "count": {"content":"$1","example":"12"} }
+  },
+  "vocab_count_filtered_learned_one": {
+    "message": "$MATCHING$ sur $TOTAL$ phrase apprise",
+    "placeholders": { "total": {"content":"$1","example":"26"}, "matching": {"content":"$2","example":"8"} }
+  },
+  "vocab_count_filtered_learned_other": {
+    "message": "$MATCHING$ sur $TOTAL$ phrases apprises",
+    "placeholders": { "total": {"content":"$1","example":"26"}, "matching": {"content":"$2","example":"8"} }
+  },
+  "vocab_unlearn": { "message": "Réapprendre" },
+  "vocab_unlearn_aria": {
+    "message": "Réapprendre : $PHRASE$",
+    "placeholders": { "phrase": {"content":"$1","example":"bank"} }
+  },
+  "vocab_delete_aria": {
+    "message": "Supprimer définitivement : $PHRASE$",
+    "placeholders": { "phrase": {"content":"$1","example":"bank"} }
+  },
+  "vocab_delete_learned_one": {
+    "message": "Supprimer la $COUNT$ phrase apprise",
+    "placeholders": { "count": {"content":"$1","example":"12"} }
+  },
+  "vocab_delete_learned_other": {
+    "message": "Supprimer les $COUNT$ phrases apprises",
+    "placeholders": { "count": {"content":"$1","example":"12"} }
+  },
+  "vocab_delete_learned_confirm_one": {
+    "message": "Confirmer : supprimer définitivement la $COUNT$ phrase apprise",
+    "placeholders": { "count": {"content":"$1","example":"12"} }
+  },
+  "vocab_delete_learned_confirm_other": {
+    "message": "Confirmer : supprimer définitivement les $COUNT$ phrases apprises",
+    "placeholders": { "count": {"content":"$1","example":"12"} }
+  },
+  "vocab_deleted_learned_one": {
+    "message": "$COUNT$ phrase apprise supprimée.",
+    "placeholders": { "count": {"content":"$1","example":"12"} }
+  },
+  "vocab_deleted_learned_other": {
+    "message": "$COUNT$ phrases apprises supprimées.",
+    "placeholders": { "count": {"content":"$1","example":"12"} }
+  },
+  "vocab_learned_empty": {
+    "message": "Rien n'est encore marqué comme appris. Appuyez sur « $BUTTON$ » à côté d'une phrase - dans la bulle ou dans cette liste - et elle viendra ici.",
+    "placeholders": { "button": {"content":"$1","example":"Learned"} }
+  },
+  "vocab_empty_all_learned": {
+    "message": "Toutes les phrases enregistrées pour cette paire sont dans la liste « Apprises ». Sélectionnez une phrase pendant la lecture et appuyez sur « $BUTTON$ » - elle vous attendra ici.",
+    "placeholders": { "button": { "content": "$1", "example": "Save" } }
   },
   "vocab_filter_status_one": {
     "message": "$SHOWN$ sur $TOTAL$ phrase pour « $QUERY$ »",
@@ -274,7 +333,7 @@
   "action_import": { "message": "Importer" },
   "transfer_heading": { "message": "Import et export" },
   "vocab_transfer_note": {
-    "message": "Un fichier .tsv à deux colonnes - le format qu'écrit le plugin KOReader et que lit Anki. L'import ajoute seulement les phrases qui manquent à cette paire ; rien de déjà enregistré n'est modifié. Dans la cellule des sens, un point-virgule suivi d'une espace sépare les sens ; un point-virgule sans espace reste dans son sens. « Exporter pour Anki » écrit une troisième colonne avec la phrase dans laquelle chaque expression a été enregistrée - vide quand il n'y en a pas. Ce fichier peut aussi être importé ici : les phrases d'exemple reviennent avec les expressions, et une expression déjà enregistrée ne prend la phrase du fichier que si elle n'en a pas."
+    "message": "Un fichier .tsv à deux colonnes - le format qu'écrit le plugin KOReader et que lit Anki. L'import ajoute seulement les phrases qui manquent à cette paire ; rien de déjà enregistré n'est modifié. Dans la cellule des sens, un point-virgule suivi d'une espace sépare les sens ; un point-virgule sans espace reste dans son sens. « Exporter pour Anki » écrit une troisième colonne avec la phrase dans laquelle chaque expression a été enregistrée - vide quand il n'y en a pas. Ce fichier peut aussi être importé ici : les phrases d'exemple reviennent avec les expressions, et une expression déjà enregistrée ne prend la phrase du fichier que si elle n'en a pas. Les expressions marquées comme apprises ne vont dans aucun de ces fichiers ; seule la sauvegarde de tout, faite depuis la liste de lecture, les emporte."
   },
   "vocab_import_into": { "message": "Importer dans" },
   "vocab_import_nothing": { "message": "Ce fichier ne contient aucune phrase à importer." },

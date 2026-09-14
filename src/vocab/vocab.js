@@ -1,7 +1,11 @@
 /**
  * The saved-phrases page: everything kept for the pair being read, with the
  * two acts the bubble offers - Learned and Edit - available in one place
- * instead of wherever the word last appeared.
+ * instead of wherever the word last appeared, and, since D224, the shelf
+ * Learned puts a phrase on: the learned phrases with their history kept,
+ * "back to learning" beside each, and the one deletion for good this
+ * extension has for a phrase - here, behind a second press, and nowhere
+ * else.
  *
  * Reads go straight to the vocabulary database, the way the settings page
  * reads the model store: extension pages share the extension's origin, and a
@@ -39,7 +43,7 @@ import { BACK_ROAD_KEY, writeVocabTab } from "../lib/session.js";
 import { restoreVocabulary } from "../lib/store/backup.js";
 import { migrateSemicolonsOnce } from "../lib/store/semicolon-migration.js";
 import { MIRROR_KEY } from "../lib/store/mirror.js";
-import { countsOf, hasSentence } from "../lib/store/phrase.js";
+import { countsOf, hasSentence, isLearned, learningOf } from "../lib/store/phrase.js";
 import { ankiExportFilename, exportFilename, fromTsv, pairFromFilename, toAnkiTsv, toTsv } from "../lib/store/tsv.js";
 import { listPairs, listPhrases } from "../lib/store/vocab.js";
 import { watchToolbarScheme } from "../lib/theme-icon.js";
@@ -56,14 +60,17 @@ import {
 import { filterActive } from "../options/models-view.js";
 import {
   Order,
+  Segment,
   anyCounted,
   asOrder,
+  asSegment,
   listView,
   markSegments,
   newestFirst,
   ordered,
   pairChoicesFor,
   sentenceSegments,
+  splitSegments,
 } from "./list-view.js";
 
 // First, so the static text is already the catalogue's language when it shows.
@@ -102,8 +109,11 @@ const navLibrary = document.getElementById("nav-library");
 const navMarks = document.getElementById("nav-marks");
 const navSettings = document.getElementById("nav-settings");
 const pairSelect = /** @type {HTMLSelectElement | null} */ (document.getElementById("pair"));
+const segmentButtons = document.getElementById("phrase-segments");
 const introLine = document.getElementById("intro");
 const countLine = document.getElementById("count");
+const learnedActions = document.getElementById("learned-actions");
+const deleteLearnedButton = /** @type {HTMLButtonElement | null} */ (document.getElementById("delete-learned"));
 const exportButton = /** @type {HTMLButtonElement | null} */ (document.getElementById("export"));
 const ankiButton = /** @type {HTMLButtonElement | null} */ (document.getElementById("export-anki"));
 const importButton = /** @type {HTMLButtonElement | null} */ (document.getElementById("import"));
@@ -131,8 +141,25 @@ const nextButton = /** @type {HTMLButtonElement | null} */ (document.getElementB
 
 /** @type {import("../lib/config.js").Config | null} */
 let config = null;
-/** @type {Phrase[]} newest first */
+/**
+ * The phrases still being learned, newest first: the shelf the page opens
+ * on, the one the look-up field reads a phrase's standing off, the one the
+ * files are made of.
+ * @type {Phrase[]}
+ */
 let phrases = [];
+/**
+ * The phrases marked learned (D224), in the store's order - the second
+ * shelf, ordered on its own terms when it is drawn (`ordered`).
+ * @type {Phrase[]}
+ */
+let learnedPhrases = [];
+/**
+ * Which shelf is on screen: the page's own state, like the filter and the
+ * order - chosen on the page, starting over with it.
+ * @type {import("./list-view.js").SegmentValue}
+ */
+let segment = Segment.LEARNING;
 /** @type {ReturnType<typeof pairChoicesFor>} */
 let choices = [];
 /** Which pair the list on screen belongs to, so a change resets the page. */
@@ -433,7 +460,12 @@ async function reload() {
         : listPhrases({ langFrom: chosen.from, langTo: chosen.to }),
     ]);
     choices = pairChoicesFor(fresh, saved);
-    phrases = newestFirst(list);
+    // The two shelves (D224): the store answers the pair whole, and the
+    // learned rows are this page's alone - the mirror, the files and the
+    // look-up field see the other shelf only.
+    const shelves = splitSegments(list);
+    phrases = newestFirst(shelves.learning);
+    learnedPhrases = shelves.learned;
 
     // The phrase being edited can be learned from a bubble on another tab; an
     // editor for a row that no longer exists must not lie in wait for the day
@@ -451,10 +483,55 @@ async function reload() {
 
 function render() {
   renderPair();
+  renderSegments();
   renderList();
   // Exporting nothing would download an empty file; the buttons say so first.
+  // The files carry the learning shelf alone (D224), so that is the shelf
+  // the buttons answer for.
   if (exportButton !== null) exportButton.disabled = phrases.length === 0;
   if (ankiButton !== null) ankiButton.disabled = phrases.length === 0;
+}
+
+/**
+ * The rows of the shelf on screen, in the store's order.
+ *
+ * @returns {Phrase[]}
+ */
+function shelf() {
+  return segment === Segment.LEARNED ? learnedPhrases : phrases;
+}
+
+/**
+ * The two shelf buttons (D224), each wearing its whole shelf's count - the
+ * entire shelf, not the page or the filter's slice, so the two labels
+ * always add up to everything saved for the pair - and the pressed one
+ * saying so.
+ */
+function renderSegments() {
+  for (const button of segmentButtons?.querySelectorAll("button[data-segment]") ?? []) {
+    const which = asSegment(button.getAttribute("data-segment"));
+    button.setAttribute("aria-pressed", String(which === segment));
+    button.textContent =
+      which === Segment.LEARNED
+        ? t("vocab_segment_learned_count", learnedPhrases.length.toLocaleString())
+        : t("vocab_segment_learning_count", phrases.length.toLocaleString());
+  }
+}
+
+/**
+ * The shelf turned (D224): a different shelf is a different list - page
+ * three of the old one would be a position in a list no longer on screen,
+ * and an armed deletion on it a question about a row no longer shown.
+ *
+ * @param {import("./list-view.js").SegmentValue} which
+ */
+function showSegment(which) {
+  if (which === segment) return;
+  segment = which;
+  page = 1;
+  disarmDelete();
+  renderSegments();
+  renderList();
 }
 
 function renderPair() {
@@ -474,18 +551,27 @@ function renderPair() {
 }
 
 /**
- * The one counter, under the title: the whole pair, or "8 of 26" while the
- * filter narrows it down.
+ * The one counter, under the title: "8 of 26" while the filter narrows the
+ * shelf down, and nothing otherwise - the shelf buttons carry the whole
+ * counts (D224), and two numbers for one list drift apart in the eye.
  *
  * @param {number} matching
  */
 function renderCount(matching) {
   if (countLine === null) return;
-  countLine.hidden = phrases.length === 0;
+  const rows = shelf();
+  const filtering = filterActive(query) && rows.length > 0;
+  countLine.hidden = !filtering;
+  if (!filtering) {
+    countLine.textContent = "";
+    return;
+  }
+  // Two calls rather than one with the family chosen: the catalogue test
+  // reads the family off the call, and each shelf has its own.
   countLine.textContent =
-    query.trim().length > 0
-      ? plural(phrases.length, "vocab_count_filtered", [matching.toLocaleString()])
-      : plural(phrases.length, "phrases");
+    segment === Segment.LEARNED
+      ? plural(rows.length, "vocab_count_filtered_learned", [matching.toLocaleString()])
+      : plural(rows.length, "vocab_count_filtered", [matching.toLocaleString()]);
 }
 
 function renderList() {
@@ -494,7 +580,10 @@ function renderList() {
   // Ordered before it is filtered and paged (D209): the page's copy stays
   // newest first, the store's order for an export; the order chosen on the
   // page is the view's alone. The collator speaks the phrases' language.
-  const view = listView(ordered(phrases, order, config?.sourceLang ?? ""), { query, page });
+  // The shelf on screen is what is ordered (D224): the learned one from the
+  // most recently marked.
+  const rows = shelf();
+  const view = listView(ordered(rows, order, config?.sourceLang ?? "", segment), { query, page });
   page = view.page;
   // The counter follows every repaint of the list, so a keystroke in the
   // filter and a phrase learned on another tab both keep it true - and so
@@ -513,11 +602,15 @@ function renderList() {
   // A filter that matches nothing leaves the list empty under the state
   // line, which already says "0 of 827 phrases for ..." and offers the way
   // out: a second sentence about it here would be the same thing twice.
-  if (phrases.length === 0) {
-    listContainer.append(element("p", "empty", t("vocab_empty", t("bubble_save"))));
+  // Each shelf has its own empty sentence (D224): the learned one names the
+  // button that fills it; the learning one, once everything saved is on
+  // the other shelf, says so instead of "nothing is saved".
+  if (rows.length === 0) {
+    listContainer.append(element("p", "empty", emptySentence()));
   } else {
     for (const phrase of view.rows) listContainer.append(phraseRow(phrase));
   }
+  renderLearnedActions();
   // The key to the count glyphs (D211) stands only while a row on this page
   // has a glyph to explain: a page of phrases never checked and never met
   // in a finished text reads as it did before the counts.
@@ -532,6 +625,19 @@ function renderList() {
   }
 
   renderPager(view);
+}
+
+/**
+ * What an empty shelf says (D224): the learned one names the button that
+ * fills it; the learning one says where everything went when the other
+ * shelf holds it all, and "nothing is saved yet" only when nothing is.
+ *
+ * @returns {string}
+ */
+function emptySentence() {
+  if (segment === Segment.LEARNED) return t("vocab_learned_empty", t("bubble_learned"));
+  if (learnedPhrases.length > 0) return t("vocab_empty_all_learned", t("bubble_save"));
+  return t("vocab_empty", t("bubble_save"));
 }
 
 /**
@@ -586,7 +692,7 @@ function renderFilterStatus(matching) {
   // The plural family runs over the total, as the counter's does; the
   // matching count and the query ride along as $2 and $3.
   filterStatus.append(
-    element("span", "filter-status-text", plural(phrases.length, "vocab_filter_status", [matching.toLocaleString(), query.trim()])),
+    element("span", "filter-status-text", plural(shelf().length, "vocab_filter_status", [matching.toLocaleString(), query.trim()])),
   );
   const dot = element("span", "filter-status-dot", String.fromCodePoint(0x00b7));
   dot.setAttribute("aria-hidden", "true");
@@ -648,11 +754,12 @@ function phraseRow(phrase) {
   // The body: the meanings, or the editor in their place - the edit box
   // with its hint here, Save and Cancel in the actions' own slot below, so
   // an unfolded row keeps the shape of a folded one (D211). The attribute
-  // is what the sheet lays the unfolded row out by.
+  // is what the sheet lays the unfolded row out by. A learned row (D224)
+  // never unfolds: its meanings are not being decided any more.
   const body = element("div", "phrase-body");
   /** @type {HTMLElement | null} */
   let editActions = null;
-  if (editing === phrase.normalized) {
+  if (editing === phrase.normalized && !isLearned(phrase)) {
     const unfolded = editorFor(phrase);
     body.append(unfolded.editor);
     editActions = unfolded.actions;
@@ -704,8 +811,37 @@ function phraseRow(phrase) {
     return row;
   }
 
-  // The buttons speak for themselves to the eye; to a screen reader a bare
-  // "Edit" in a list of a hundred names nothing, so each carries its phrase.
+  const actions = element("div", "phrase-actions");
+  // The speaker leads the row where the device can speak at all, the bubble's
+  // own order (D83): hearing the phrase is about the phrase, not about the
+  // vocabulary - the one action here that never writes.
+  if (canSpeak()) {
+    const speaker = button("");
+    speaker.className = "quiet quiet-speak";
+    speaker.setAttribute("aria-label", t("vocab_speak_aria", phrase.phrase));
+    speaker.title = t("bubble_speak");
+    speaker.append(speakerIcon());
+    speaker.addEventListener("click", () => void speakPhrase(phrase));
+    actions.append(speaker);
+  }
+  // The two written acts are the shelf's (D224): a phrase being learned
+  // can be edited and marked learned; a learned one can come back to
+  // learning or go for good - the same two slots, so a row keeps its shape
+  // on either shelf. The buttons speak for themselves to the eye; to a
+  // screen reader a bare "Edit" in a list of a hundred names nothing, so
+  // each carries its phrase.
+  actions.append(...(isLearned(phrase) ? learnedActs(phrase) : learningActs(phrase)));
+  row.append(actions);
+  return row;
+}
+
+/**
+ * Edit and Learned, the bubble's two acts, for a row on the learning shelf.
+ *
+ * @param {Phrase} phrase
+ * @returns {HTMLButtonElement[]}
+ */
+function learningActs(phrase) {
   const edit = button(t("bubble_edit"));
   edit.className = "quiet quiet-edit";
   edit.setAttribute("aria-label", t("vocab_edit_aria", phrase.phrase));
@@ -721,23 +857,103 @@ function phraseRow(phrase) {
   learned.className = "quiet quiet-learned";
   learned.setAttribute("aria-label", t("vocab_learned_aria", phrase.phrase));
   learned.addEventListener("click", () => void forget(phrase, learned));
+  return [edit, learned];
+}
 
-  const actions = element("div", "phrase-actions");
-  // The speaker leads the row where the device can speak at all, the bubble's
-  // own order (D83): hearing the phrase is about the phrase, not about the
-  // vocabulary - the one action here that never writes.
-  if (canSpeak()) {
-    const speaker = button("");
-    speaker.className = "quiet quiet-speak";
-    speaker.setAttribute("aria-label", t("vocab_speak_aria", phrase.phrase));
-    speaker.title = t("bubble_speak");
-    speaker.append(speakerIcon());
-    speaker.addEventListener("click", () => void speakPhrase(phrase));
-    actions.append(speaker);
+/**
+ * Back to learning and Delete, for a row on the learned shelf (D224). The
+ * first is one press, like Learned - it undoes Learned, and the row loses
+ * nothing on the way. The second is the one deletion for good a phrase
+ * has, and it asks first (D62): the first press arms the button - "Sure?"
+ * on the very spot, its width held so the finger stays over it - and the
+ * second press deletes; a press elsewhere, focus moving on or Escape
+ * stands it down (the reading list's rule, D150).
+ *
+ * @param {Phrase} phrase
+ * @returns {HTMLButtonElement[]}
+ */
+function learnedActs(phrase) {
+  const back = button(t("vocab_unlearn"));
+  back.className = "quiet quiet-unlearn";
+  back.setAttribute("aria-label", t("vocab_unlearn_aria", phrase.phrase));
+  back.addEventListener("click", () => void returnToLearning(phrase, back));
+
+  const remove = button(t("action_delete"));
+  remove.className = "quiet quiet-delete";
+  remove.setAttribute("aria-label", t("vocab_delete_aria", phrase.phrase));
+  remove.addEventListener("click", () => {
+    if (remove.hasAttribute("data-armed")) void deleteOne(phrase, remove);
+    else armDelete(remove, t("reader_delete_confirm_aria", phrase.phrase));
+  });
+  return [back, remove];
+}
+
+/**
+ * The learned shelf's act on the whole shelf (D224), under the pager: shown
+ * on that shelf alone and only while it holds anything, its label counting
+ * the whole shelf - not the page, not the filter's slice - because that is
+ * what the press takes. Redrawn with the list, so the count is never stale
+ * and an armed question never outlives the rows it was about.
+ */
+function renderLearnedActions() {
+  if (learnedActions === null || deleteLearnedButton === null) return;
+  // The rows were just replaced, so a row's armed Delete is gone with them;
+  // the shelf's own is the one that could still be asking about a shelf
+  // that has changed under it.
+  disarmDelete();
+  const shown = segment === Segment.LEARNED && learnedPhrases.length > 0;
+  learnedActions.hidden = !shown;
+  if (!shown) return;
+  deleteLearnedButton.textContent = plural(learnedPhrases.length, "vocab_delete_learned");
+  deleteLearnedButton.removeAttribute("aria-label");
+}
+
+/**
+ * The button pressed once and asking (D150): "Sure?" in its own place, the
+ * accessible name saying what the second press would do. One at a time -
+ * arming one stands down any other. The label it had is kept on the
+ * button, for the way back.
+ *
+ * @param {HTMLButtonElement} button
+ * @param {string} asking the accessible name while armed
+ */
+function armDelete(button, asking) {
+  disarmDelete();
+  button.setAttribute("data-label", button.textContent ?? "");
+  // The question is shorter than the label; a box that shrank to it would
+  // leave the finger over paper (the reading list's rule, Michał's smoke
+  // 2026-08-29).
+  button.style.minWidth = `${button.offsetWidth}px`;
+  button.setAttribute("data-armed", "");
+  button.textContent = t("reader_delete_confirm");
+  button.setAttribute("aria-label", asking);
+}
+
+/**
+ * @returns {HTMLButtonElement | null} the button asking, if one is
+ */
+function armedDelete() {
+  const armed = document.querySelector("button[data-armed]");
+  return armed instanceof HTMLButtonElement ? armed : null;
+}
+
+/**
+ * The asking button stood down to what it was: its own words back, its
+ * width its own again, its accessible name the phrase's or none.
+ */
+function disarmDelete() {
+  const armed = armedDelete();
+  if (armed === null) return;
+  armed.removeAttribute("data-armed");
+  armed.textContent = armed.getAttribute("data-label") ?? "";
+  armed.removeAttribute("data-label");
+  armed.style.minWidth = "";
+  if (armed === deleteLearnedButton) armed.removeAttribute("aria-label");
+  else {
+    const key = armed.closest(".phrase-row")?.getAttribute("data-key");
+    const phrase = learnedPhrases.find((one) => one.normalized === key);
+    if (phrase !== undefined) armed.setAttribute("aria-label", t("vocab_delete_aria", phrase.phrase));
   }
-  actions.append(edit, learned);
-  row.append(actions);
-  return row;
 }
 
 /**
@@ -858,23 +1074,56 @@ function closeEditor() {
 }
 
 /**
- * Removes the phrase the moment the button is pressed - no dialog, no undo:
- * a slip is repaired by selecting the phrase while reading, the ordinary
- * save path.
+ * Moves the phrase to the learned shelf the moment the button is pressed -
+ * no dialog, and no undo needed (D224): the row keeps everything, and
+ * "Back to learning" on that shelf is the way back; so is selecting the
+ * phrase while reading and saving it again, the ordinary save path.
  *
  * @param {Phrase} phrase
  * @param {HTMLButtonElement} trigger the row's own Learned button
  */
 async function forget(phrase, trigger) {
-  // The pressed button is about to leave the DOM, and focus would fall to
-  // the body. Its place in the list, counted first, names the successor:
-  // the next row's Learned, the previous one's after the last row, the
-  // filter once the list is empty.
-  const learnedButtons = () =>
-    listContainer === null ? [] : [...listContainer.querySelectorAll("button.quiet-learned")];
-  const at = learnedButtons().indexOf(trigger);
+  await actOnRow({ kind: Message.FORGET_PHRASE, text: phrase.phrase }, trigger, "button.quiet-learned");
+}
 
-  const answer = await ask({ kind: Message.FORGET_PHRASE, text: phrase.phrase });
+/**
+ * Back to learning (D224): the mark off, the row back on the first shelf
+ * with its history - one press, the mirror of Learned.
+ *
+ * @param {Phrase} phrase
+ * @param {HTMLButtonElement} trigger the row's own button
+ */
+async function returnToLearning(phrase, trigger) {
+  await actOnRow({ kind: Message.UNLEARN_PHRASE, text: phrase.phrase }, trigger, "button.quiet-unlearn");
+}
+
+/**
+ * The deletion for good (D224), on the second press of an armed button:
+ * the row and its history go, and the store's copies with it.
+ *
+ * @param {Phrase} phrase
+ * @param {HTMLButtonElement} trigger the row's own Delete button, armed
+ */
+async function deleteOne(phrase, trigger) {
+  await actOnRow({ kind: Message.DELETE_PHRASE, text: phrase.phrase }, trigger, "button.quiet-delete");
+}
+
+/**
+ * One row's act sent to the background, the list reloaded, and focus
+ * handed on: the pressed button is about to leave the DOM, and focus would
+ * fall to the body. Its place among its kind, counted first, names the
+ * successor - the next row's same button, the previous one's after the
+ * last row, the filter once the shelf is empty.
+ *
+ * @param {import("../lib/protocol.js").Request} request
+ * @param {HTMLButtonElement} trigger
+ * @param {string} kind the selector of the buttons of the trigger's kind
+ */
+async function actOnRow(request, trigger, kind) {
+  const siblings = () => (listContainer === null ? [] : [...listContainer.querySelectorAll(kind)]);
+  const at = siblings().indexOf(trigger);
+
+  const answer = await ask(request);
   if (!answer.ok) {
     status(describeError(answer.code), "error");
     return;
@@ -885,9 +1134,30 @@ async function forget(phrase, trigger) {
   await reload();
 
   if (at === -1) return;
-  const successor = learnedButtons()[Math.min(at, learnedButtons().length - 1)];
+  const successor = siblings()[Math.min(at, siblings().length - 1)];
   if (successor instanceof HTMLButtonElement) successor.focus();
   else filterInput?.focus();
+}
+
+/**
+ * The whole learned shelf deleted for good (D224), on the second press:
+ * the background answers how many went, the page says so in its status
+ * line - a deletion is a quiet thing, and a press nobody meant would
+ * otherwise go unnoticed - and the focus lands on the shelf's button,
+ * which stands whatever the shelf holds.
+ */
+async function deleteAllLearned() {
+  const answer = await ask({ kind: Message.DELETE_LEARNED });
+  if (!answer.ok) {
+    disarmDelete();
+    status(describeError(answer.code), "error");
+    return;
+  }
+  const { deleted } = /** @type {import("../lib/protocol.js").DeleteLearnedReport} */ (answer.value);
+  status(plural(deleted, "vocab_deleted_learned"));
+  await reload();
+  const tab = segmentButtons?.querySelector(`button[data-segment="${Segment.LEARNED}"]`);
+  if (tab instanceof HTMLButtonElement) tab.focus();
 }
 
 /**
@@ -921,7 +1191,11 @@ async function saveEdit(phrase) {
  * Two files from one button row (D210): the sister plugin's two columns,
  * which travel back in through Import, and the three-column file for Anki
  * with the sentence each phrase was kept from - its own name, so the two
- * never overwrite each other in a downloads folder.
+ * never overwrite each other in a downloads folder. Neither carries the
+ * learned shelf (D224): a learned phrase is a card the reader is done
+ * with, and a file for the sister plugin that underlined it there would
+ * undo Learned on the other device; the backup of everything is the one
+ * file that carries it.
  *
  * @param {"plugin" | "anki"} shape which of the two files to write
  */
@@ -933,7 +1207,7 @@ async function exportPhrases(shape) {
   if (chosen === null) return;
   const pair = { langFrom: chosen.from, langTo: chosen.to };
   try {
-    const list = await listPhrases(pair);
+    const list = learningOf(await listPhrases(pair));
     if (list.length === 0) return;
     const name = shape === "anki" ? ankiExportFilename(pair) : exportFilename(pair);
     const text = shape === "anki" ? toAnkiTsv(list) : toTsv(list);
@@ -1142,10 +1416,14 @@ function goToSettings(section) {
  * @param {{ text: string, normalized: string }} phrase
  */
 function showInList(phrase) {
+  // The saved phrase's row stands on the learning shelf (D224): the field
+  // reads a phrase's standing off that shelf, so that is the shelf shown.
+  segment = Segment.LEARNING;
   query = phrase.text;
   page = 1;
   if (filterInput !== null) filterInput.value = phrase.text;
   filterClear?.refresh();
+  renderSegments();
   renderList();
   if (filterStatus === null) return;
   filterStatus.scrollIntoView({ block: "start" });
@@ -1212,10 +1490,13 @@ function arriveWithPhrase() {
   // The list narrowed to the phrase as well (the fourth brief): the row
   // the ticks below make - or the one that is there - stands right under
   // the panel, and the state line over the list says which filter is on.
+  // On the learning shelf (D224), where a tick's row appears.
+  segment = Segment.LEARNING;
   query = text;
   page = 1;
   if (filterInput !== null) filterInput.value = text;
   filterClear?.refresh();
+  renderSegments();
   renderList();
   addFold.open = true;
   void lookupBox.search(text);
@@ -1411,6 +1692,42 @@ orderSelect?.addEventListener("change", () => {
   order = asOrder(orderSelect.value);
   page = 1;
   renderList();
+});
+
+// The shelf buttons (D224): the reading list's segments by another name.
+segmentButtons?.addEventListener("click", (event) => {
+  const target = event.target;
+  if (!(target instanceof Element)) return;
+  const choice = target.closest("button[data-segment]")?.getAttribute("data-segment");
+  if (choice === Segment.LEARNING || choice === Segment.LEARNED) showSegment(choice);
+});
+
+// The whole shelf's deletion (D224): armed on the first press, done on the
+// second - the row's Delete by the same two steps.
+deleteLearnedButton?.addEventListener("click", () => {
+  if (deleteLearnedButton.hasAttribute("data-armed")) void deleteAllLearned();
+  else armDelete(deleteLearnedButton, plural(learnedPhrases.length, "vocab_delete_learned_confirm"));
+});
+
+// An armed Delete - a row's or the shelf's - stands down at any step away
+// from it: a press elsewhere, focus moving on, Escape, and never on a
+// clock (the reading list's rule, D150). `pointerdown` rather than `click`,
+// so that the press that arms another Delete finds the previous one
+// already disarmed when its own click handler runs.
+document.addEventListener("pointerdown", (event) => {
+  const armed = armedDelete();
+  if (armed === null) return;
+  if (event.target instanceof Node && armed.contains(event.target)) return;
+  disarmDelete();
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") disarmDelete();
+});
+
+document.addEventListener("focusout", (event) => {
+  const armed = armedDelete();
+  if (armed !== null && event.target === armed && event.relatedTarget !== armed) disarmDelete();
 });
 
 filterInput?.addEventListener("input", () => {

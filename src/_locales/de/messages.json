@@ -89,7 +89,7 @@
 
   "vocab_title": { "message": "re/read - gespeicherter Wortschatz" },
   "vocab_intro": {
-    "message": "Alles, was Sie für dieses Sprachpaar behalten haben, Neuestes zuerst - beim Lesen gespeichert und nur auf diesem Gerät. „$LEARNED$“ entfernt einen Eintrag samt seinen Unterstreichungen; „$EDIT$“ schreibt seine Bedeutungen neu, eine pro Zeile. Mehrere Bedeutungen auf einmal trennen Sie mit einem Semikolon. Neben einem Eintrag zwei Zahlen - eine Lupe und ein Buch: wie oft Sie ihn nachgeschlagen haben (seine Sprechblase geöffnet) und wie oft er in den Texten vorkam, die Sie zu Ende gelesen haben - in einem Buchteil, den Sie über „Weiter“ unter dem Text verlassen haben, oder in einem als gelesen markierten Artikel. Die Liste lässt sich nach beiden ordnen.",
+    "message": "Alles, was Sie für dieses Sprachpaar behalten haben, Neuestes zuerst - beim Lesen gespeichert und nur auf diesem Gerät. „$LEARNED$“ verschiebt einen Eintrag in die Liste „Gelernt“ und nimmt seine Unterstreichungen weg; „$EDIT$“ schreibt seine Bedeutungen neu, eine pro Zeile. Mehrere Bedeutungen auf einmal trennen Sie mit einem Semikolon. Neben einem Eintrag zwei Zahlen - eine Lupe und ein Buch: wie oft Sie ihn nachgeschlagen haben (seine Sprechblase geöffnet) und wie oft er in den Texten vorkam, die Sie zu Ende gelesen haben - in einem Buchteil, den Sie über „Weiter“ unter dem Text verlassen haben, oder in einem als gelesen markierten Artikel. Die Liste lässt sich nach beiden ordnen.",
     "placeholders": {
       "learned": { "content": "$1", "example": "Gelernt" },
       "edit": { "content": "$2", "example": "Bearbeiten" }
@@ -161,6 +161,65 @@
   "vocab_empty": {
     "message": "Für dieses Paar ist noch nichts gespeichert. Wählen Sie beim Lesen eine Wendung aus und drücken Sie „$BUTTON$“ - sie wartet dann hier.",
     "placeholders": { "button": { "content": "$1", "example": "Speichern" } }
+  },
+  "vocab_segment_learning": { "message": "Zu lernen" },
+  "vocab_segment_learned": { "message": "Gelernt" },
+  "vocab_segment_learning_count": {
+    "message": "Zu lernen ($COUNT$)",
+    "placeholders": { "count": {"content":"$1","example":"12"} }
+  },
+  "vocab_segment_learned_count": {
+    "message": "Gelernt ($COUNT$)",
+    "placeholders": { "count": {"content":"$1","example":"12"} }
+  },
+  "vocab_count_filtered_learned_one": {
+    "message": "$MATCHING$ von $TOTAL$ gelernten Eintrag",
+    "placeholders": { "total": {"content":"$1","example":"26"}, "matching": {"content":"$2","example":"8"} }
+  },
+  "vocab_count_filtered_learned_other": {
+    "message": "$MATCHING$ von $TOTAL$ gelernten Einträgen",
+    "placeholders": { "total": {"content":"$1","example":"26"}, "matching": {"content":"$2","example":"8"} }
+  },
+  "vocab_unlearn": { "message": "Zurück zum Lernen" },
+  "vocab_unlearn_aria": {
+    "message": "Zurück zum Lernen: $PHRASE$",
+    "placeholders": { "phrase": {"content":"$1","example":"bank"} }
+  },
+  "vocab_delete_aria": {
+    "message": "Endgültig löschen: $PHRASE$",
+    "placeholders": { "phrase": {"content":"$1","example":"bank"} }
+  },
+  "vocab_delete_learned_one": {
+    "message": "Den $COUNT$ gelernten Eintrag löschen",
+    "placeholders": { "count": {"content":"$1","example":"12"} }
+  },
+  "vocab_delete_learned_other": {
+    "message": "Alle $COUNT$ gelernten Einträge löschen",
+    "placeholders": { "count": {"content":"$1","example":"12"} }
+  },
+  "vocab_delete_learned_confirm_one": {
+    "message": "Bestätigen: den $COUNT$ gelernten Eintrag endgültig löschen",
+    "placeholders": { "count": {"content":"$1","example":"12"} }
+  },
+  "vocab_delete_learned_confirm_other": {
+    "message": "Bestätigen: alle $COUNT$ gelernten Einträge endgültig löschen",
+    "placeholders": { "count": {"content":"$1","example":"12"} }
+  },
+  "vocab_deleted_learned_one": {
+    "message": "$COUNT$ gelernter Eintrag gelöscht.",
+    "placeholders": { "count": {"content":"$1","example":"12"} }
+  },
+  "vocab_deleted_learned_other": {
+    "message": "$COUNT$ gelernte Einträge gelöscht.",
+    "placeholders": { "count": {"content":"$1","example":"12"} }
+  },
+  "vocab_learned_empty": {
+    "message": "Noch ist nichts als gelernt markiert. Drücken Sie „$BUTTON$“ bei einem Eintrag - in der Sprechblase oder in dieser Liste - und er wandert hierher.",
+    "placeholders": { "button": {"content":"$1","example":"Learned"} }
+  },
+  "vocab_empty_all_learned": {
+    "message": "Alle für dieses Paar gespeicherten Einträge stehen in der Liste „Gelernt“. Wählen Sie beim Lesen eine Wendung aus und drücken Sie „$BUTTON$“ - sie wartet dann hier.",
+    "placeholders": { "button": { "content": "$1", "example": "Save" } }
   },
   "vocab_filter_status_one": {
     "message": "$SHOWN$ von $TOTAL$ Eintrag für „$QUERY$“",
@@ -247,7 +306,7 @@
   "action_import": { "message": "Importieren" },
   "transfer_heading": { "message": "Import und Export" },
   "vocab_transfer_note": {
-    "message": "Eine .tsv-Datei mit zwei Spalten - dasselbe Format schreibt das KOReader-Plugin, und Anki liest es. Der Import ergänzt nur Phrasen, die diesem Paar fehlen; Gespeichertes bleibt unberührt. In der Bedeutungszelle trennt ein Semikolon mit Leerzeichen die Bedeutungen; ein Semikolon ohne Leerzeichen bleibt in seiner Bedeutung. „Für Anki exportieren“ schreibt eine dritte Spalte mit dem Satz, in dem die Phrase gespeichert wurde - leer, wenn es keinen gibt. Auch diese Datei lässt sich hier importieren: die Sätze kommen mit, und ein bereits gespeicherter Eintrag übernimmt den Satz aus der Datei nur, wenn er keinen eigenen hat."
+    "message": "Eine .tsv-Datei mit zwei Spalten - dasselbe Format schreibt das KOReader-Plugin, und Anki liest es. Der Import ergänzt nur Phrasen, die diesem Paar fehlen; Gespeichertes bleibt unberührt. In der Bedeutungszelle trennt ein Semikolon mit Leerzeichen die Bedeutungen; ein Semikolon ohne Leerzeichen bleibt in seiner Bedeutung. „Für Anki exportieren“ schreibt eine dritte Spalte mit dem Satz, in dem die Phrase gespeichert wurde - leer, wenn es keinen gibt. Auch diese Datei lässt sich hier importieren: die Sätze kommen mit, und ein bereits gespeicherter Eintrag übernimmt den Satz aus der Datei nur, wenn er keinen eigenen hat. Als gelernt markierte Einträge kommen in keine der beiden Dateien; nur die Sicherung von allem aus der Leseliste nimmt sie mit."
   },
   "vocab_import_into": { "message": "Importieren in" },
   "vocab_import_nothing": { "message": "In dieser Datei gibt es keine Phrasen zum Importieren." },

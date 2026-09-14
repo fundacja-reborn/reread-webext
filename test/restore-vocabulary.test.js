@@ -25,7 +25,9 @@ describe("restoring the vocabulary from the backup of everything", () => {
     assert.match(restoring, /langFrom: row\.langFrom,\s*langTo: row\.langTo,/, "the row does not land in its own pair");
     assert.match(restoring, /now: row\.createdAt \?\? now \+ at,/, "the file's day is not the row's");
     assert.match(restoring, /context: row\.context,/, "the sentence does not reach the row");
-    assert.match(restoring, /rows\.push\(withRestoredCounts\(built\.value, row\)\)/, "the counts do not reach the row");
+    // The counts, and the learned mark (D224) over them: a phrase the file
+    // says was learned comes back learned.
+    assert.match(restoring, /rows\.push\(withLearnedAt\(withRestoredCounts\(built\.value, row\), row\.learnedAt\)\)/, "the counts or the learned mark do not reach the row");
     assert.doesNotMatch(restoring, /pairOf\(config\)|chosenPair|saveSentence/, "the restore is gated by the pair being read or by the sentence setting");
     assert.match(restoring, /const report = await restorePhrases\(rows\);/, "the rows do not go through the store's restore");
     assert.match(restoring, /if \(report\.added > 0 \|\| report\.sentenced > 0 \|\| report\.counted > 0 \|\| restored > 0\) await afterWrite\(config\);/, "a change never reaches the mirror and the copy");

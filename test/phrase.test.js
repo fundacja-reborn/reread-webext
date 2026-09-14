@@ -10,9 +10,15 @@ import {
   counted,
   countsOf,
   hasSentence,
+  isLearned,
+  learned,
+  learnedOf,
+  learningOf,
   resaved,
   restored,
+  unlearned,
   withImportedSentence,
+  withLearnedAt,
   withRestoredCounts,
   withSentence,
 } from "../src/lib/store/phrase.js";
@@ -392,5 +398,82 @@ describe("restored", () => {
     const existing = bank({ context: "Mine.", recallCount: 4, lastRecallAt: 10, readCount: 2, lastReadAt: 20 });
     assert.equal(restored(existing, bank({ context: "Other.", recallCount: 4, readCount: 1 })), existing);
     assert.equal(restored(existing, bank()), existing);
+  });
+});
+
+describe("the learned mark (D224)", () => {
+  /**
+   * @param {Partial<import("../src/lib/store/phrase.js").Phrase>} [rest]
+   * @returns {import("../src/lib/store/phrase.js").Phrase}
+   */
+  function bank(rest = {}) {
+    const built = buildPhrase({ text: "bank", translations: ["brzeg"], langFrom: "en", langTo: "pl", id: "id-bank", now: 1 });
+    assert.ok(built.ok);
+    return { ...built.value, ...rest };
+  }
+
+  it("is a moment after the epoch, and nothing else - a copy edited by hand can hold anything", () => {
+    assert.equal(isLearned(bank()), false);
+    assert.equal(isLearned(bank({ learnedAt: 1000 })), true);
+    for (const broken of [0, -1, Number.NaN, Number.POSITIVE_INFINITY, "1000", null, true]) {
+      // @ts-expect-error - the point: a row from a hand-edited copy
+      assert.equal(isLearned(bank({ learnedAt: broken })), false, String(broken));
+    }
+  });
+
+  it("marks a row learned with one field and keeps everything else - the meanings, the sentence, the counts", () => {
+    const row = bank({ context: "The bank was steep.", recallCount: 3, lastRecallAt: 10, readCount: 1, lastReadAt: 20 });
+    const marked = learned(row, 5000);
+    assert.deepEqual(marked, { ...row, learnedAt: 5000 });
+    assert.notEqual(marked, row, "a copy, not the row mutated");
+    assert.equal(isLearned(marked), true);
+  });
+
+  it("hands the same row back when it is learned already - a second press is not a second learning", () => {
+    const marked = bank({ learnedAt: 5000 });
+    assert.equal(learned(marked, 9000), marked);
+    assert.equal(marked.learnedAt, 5000);
+  });
+
+  it("takes the mark off, and nothing else, and hands the same row back when there was none", () => {
+    const marked = bank({ learnedAt: 5000, recallCount: 3, context: "Mine." });
+    assert.deepEqual(unlearned(marked), bank({ recallCount: 3, context: "Mine." }));
+    assert.equal("learnedAt" in unlearned(marked), false);
+    const plain = bank();
+    assert.equal(unlearned(plain), plain);
+  });
+
+  it("comes off with a save of the phrase again - resaved brings the row back to learning with its history", () => {
+    const marked = bank({ learnedAt: 5000, recallCount: 3, context: "Mine." });
+    const saved = resaved(marked, bank({ translations: ["instytucja"] }));
+    assert.equal("learnedAt" in saved, false);
+    assert.equal(saved.recallCount, 3);
+    assert.equal(saved.context, "Mine.");
+    assert.deepEqual(saved.translations, ["instytucja"]);
+  });
+
+  it("is the row's own against a file, in both directions - restored and the import's sentence never touch it", () => {
+    const learnedHere = bank({ learnedAt: 5000 });
+    assert.equal(isLearned(restored(learnedHere, bank({ recallCount: 9 }))), true, "a file cannot bring a learned phrase back");
+    assert.equal(restored(learnedHere, bank({ recallCount: 9 })).learnedAt, 5000);
+    const learningHere = bank();
+    assert.equal(isLearned(restored(learningHere, bank({ learnedAt: 7000, recallCount: 9 }))), false, "a file cannot mark a phrase learned");
+    assert.equal(restored(learningHere, bank({ learnedAt: 7000 })), learningHere, "nothing rises, nothing written");
+    assert.equal(isLearned(withImportedSentence(learnedHere, bank({ context: "From the file." }))), true);
+    assert.equal(isLearned(withImportedSentence(learningHere, bank({ context: "From the file.", learnedAt: 7000 }))), false);
+  });
+
+  it("is taken from a file or a copy only as a moment (withLearnedAt)", () => {
+    assert.deepEqual(withLearnedAt(bank(), 5000), bank({ learnedAt: 5000 }));
+    const plain = bank();
+    for (const broken of [undefined, null, 0, -5, "5000", Number.NaN]) {
+      assert.equal(withLearnedAt(plain, broken), plain, String(broken));
+    }
+  });
+
+  it("splits a list into the phrases still being learned and the learned ones", () => {
+    const rows = [bank({ id: "a" }), bank({ id: "b", learnedAt: 5000 }), bank({ id: "c" })];
+    assert.deepEqual(learningOf(rows).map((one) => one.id), ["a", "c"]);
+    assert.deepEqual(learnedOf(rows).map((one) => one.id), ["b"]);
   });
 });

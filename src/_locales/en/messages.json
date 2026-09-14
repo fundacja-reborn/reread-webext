@@ -152,7 +152,7 @@
 
   "vocab_title": { "message": "re/read - saved phrases" },
   "vocab_intro": {
-    "message": "Every phrase you kept for this language pair, newest first - saved while reading, stored only on this device. $LEARNED$ removes a phrase and its underlines with it; $EDIT$ rewrites what it means, one meaning per line. Several meanings at once: separate them with a semicolon. Beside a phrase, two counts - a magnifier and a book: how many times you checked it (opened its bubble), and how many times it occurred in the texts you finished - a part of a book you left through Next under its text, an article you marked as read. The list can be ordered by either.",
+    "message": "Every phrase you kept for this language pair, newest first - saved while reading, stored only on this device. $LEARNED$ moves a phrase to the Learned list and takes its underlines away; $EDIT$ rewrites what it means, one meaning per line. Several meanings at once: separate them with a semicolon. Beside a phrase, two counts - a magnifier and a book: how many times you checked it (opened its bubble), and how many times it occurred in the texts you finished - a part of a book you left through Next under its text, an article you marked as read. The list can be ordered by either.",
     "description": "The buttons quoted are bubble_learned and bubble_edit, passed in so the three can never drift apart.",
     "placeholders": {
       "learned": { "content": "$1", "example": "Learned" },
@@ -272,6 +272,83 @@
     "description": "The button quoted is bubble_save, passed in so the two can never drift apart.",
     "placeholders": { "button": { "content": "$1", "example": "Save" } }
   },
+  "vocab_segment_learning": {
+    "message": "To learn",
+    "description": "One of the two shelf buttons of the saved-phrases page (D224): the phrases still being learned - underlined, exported, shown as saved in the popup. The static fallback; the label with the count is written by script once the list is read."
+  },
+  "vocab_segment_learned": {
+    "message": "Learned",
+    "description": "The other shelf button: the phrases the reader marked Learned, kept with their meanings, sentence and counts, off every page's underlines and out of the TSV files."
+  },
+  "vocab_segment_learning_count": {
+    "message": "To learn ($COUNT$)",
+    "description": "Shelf button label wearing the whole shelf's count - the entire shelf, not the page on screen or the filter's slice.",
+    "placeholders": { "count": {"content":"$1","example":"12"} }
+  },
+  "vocab_segment_learned_count": {
+    "message": "Learned ($COUNT$)",
+    "placeholders": { "count": {"content":"$1","example":"12"} }
+  },
+  "vocab_count_filtered_learned_one": {
+    "message": "$MATCHING$ of $TOTAL$ learned phrase",
+    "description": "The counter while the filter narrows the learned shelf. Plural family over the total; the matching count rides along as $2.",
+    "placeholders": { "total": {"content":"$1","example":"26"}, "matching": {"content":"$2","example":"8"} }
+  },
+  "vocab_count_filtered_learned_other": {
+    "message": "$MATCHING$ of $TOTAL$ learned phrases",
+    "placeholders": { "total": {"content":"$1","example":"26"}, "matching": {"content":"$2","example":"8"} }
+  },
+  "vocab_unlearn": {
+    "message": "Back to learning",
+    "description": "A learned row's first act: the Learned mark taken off, the phrase back on the learning shelf with everything it had - the mirror image of Learned, one press."
+  },
+  "vocab_unlearn_aria": {
+    "message": "Back to learning: $PHRASE$",
+    "description": "Accessible name of that button - a bare label in a list of a hundred names nothing.",
+    "placeholders": { "phrase": {"content":"$1","example":"bank"} }
+  },
+  "vocab_delete_aria": {
+    "message": "Delete for good: $PHRASE$",
+    "description": "Accessible name of a learned row's Delete button before it is armed: the one deletion for good a phrase has, which asks first (\"Sure?\", reader_delete_confirm).",
+    "placeholders": { "phrase": {"content":"$1","example":"bank"} }
+  },
+  "vocab_delete_learned_one": {
+    "message": "Delete the $COUNT$ learned phrase",
+    "description": "Plural family; the quiet text act under the learned shelf, naming how many phrases the shelf-wide deletion takes. Armed on the first press (reader_delete_confirm), done on the second.",
+    "placeholders": { "count": {"content":"$1","example":"12"} }
+  },
+  "vocab_delete_learned_other": {
+    "message": "Delete all $COUNT$ learned phrases",
+    "placeholders": { "count": {"content":"$1","example":"12"} }
+  },
+  "vocab_delete_learned_confirm_one": {
+    "message": "Confirm: delete the $COUNT$ learned phrase for good",
+    "description": "Plural family; the accessible name of that button while it is armed and asking.",
+    "placeholders": { "count": {"content":"$1","example":"12"} }
+  },
+  "vocab_delete_learned_confirm_other": {
+    "message": "Confirm: delete all $COUNT$ learned phrases for good",
+    "placeholders": { "count": {"content":"$1","example":"12"} }
+  },
+  "vocab_deleted_learned_one": {
+    "message": "Deleted $COUNT$ learned phrase.",
+    "description": "Plural family; the status line after the shelf-wide deletion.",
+    "placeholders": { "count": {"content":"$1","example":"12"} }
+  },
+  "vocab_deleted_learned_other": {
+    "message": "Deleted $COUNT$ learned phrases.",
+    "placeholders": { "count": {"content":"$1","example":"12"} }
+  },
+  "vocab_learned_empty": {
+    "message": "Nothing is marked as learned yet. Press \"$BUTTON$\" on a phrase - in the bubble or in this list - and it moves here.",
+    "description": "The learned shelf while nothing is marked learned. The button quoted is bubble_learned, passed in so the two can never drift apart.",
+    "placeholders": { "button": {"content":"$1","example":"Learned"} }
+  },
+  "vocab_empty_all_learned": {
+    "message": "Every phrase saved for this pair is on the Learned list. Select a phrase while reading and press \"$BUTTON$\" - it will be waiting here.",
+    "description": "The learning shelf while it is empty but the learned shelf is not: \"nothing is saved\" would be false. The button quoted is bubble_save, as in vocab_empty.",
+    "placeholders": { "button": { "content": "$1", "example": "Save" } }
+  },
   "vocab_filter_status_one": {
     "message": "$SHOWN$ of $TOTAL$ phrase for “$QUERY$”",
     "description": "The filter's state over the list of saved phrases while the filter is active, with \"Clear filter\" beside it. Plural family over the total; the matching count rides along as $2, the query as $3.",
@@ -383,7 +460,7 @@
     "description": "Heading of the transfer section under the saved-phrases and reading lists, and the text of the anchor link that jumps to it - one name for one place."
   },
   "vocab_transfer_note": {
-    "message": "A two-column .tsv file - what the KOReader plugin writes and Anki imports. Importing adds phrases this pair is missing and never touches a saved one. In the meaning cell, a semicolon followed by a space separates meanings; a semicolon without a space stays inside its meaning. Export for Anki writes a third column with the sentence each phrase was saved in - empty when none was kept. That file can be imported back too: its sentences come along, and a phrase already saved takes the file's sentence only when it has none of its own.",
+    "message": "A two-column .tsv file - what the KOReader plugin writes and Anki imports. Importing adds phrases this pair is missing and never touches a saved one. In the meaning cell, a semicolon followed by a space separates meanings; a semicolon without a space stays inside its meaning. Export for Anki writes a third column with the sentence each phrase was saved in - empty when none was kept. That file can be imported back too: its sentences come along, and a phrase already saved takes the file's sentence only when it has none of its own. Phrases marked Learned are written to neither file; they travel only in the backup of everything, made from the reading list.",
     "description": "The file-format fold under Import and Export. The last two sentences (D210) quote the vocab_export_anki button - each language quotes its own wording of that key - and say the two things a reader needs about that file: what its third column is, and that Import does not read it."
   },
   "vocab_import_into": { "message": "Import into" },
