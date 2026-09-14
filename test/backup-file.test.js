@@ -3,7 +3,6 @@ import { describe, it } from "node:test";
 
 import { DEFAULTS, withDefaults } from "../src/lib/config.js";
 import { markRecord } from "../src/lib/reader/marks.js";
-import { fromArchiveText } from "../src/lib/store/articles-archive.js";
 import {
   BACKUP_ENTRIES,
   BACKUP_FILENAME,
@@ -80,7 +79,7 @@ function input() {
     now: 1234,
     articles: [one, article("two")],
     marks: new Map([[one.url, [mark()]]]),
-    pictures: new Map(),
+    pictures: false,
     positions: new Map([[one.url, { docId: one.url, segmentIndex: 0, blockIndex: 3, updatedAt: 7 }]]),
     phrases: [phrase("bank", { recallCount: 2 }), phrase("Haus", { langFrom: "de" })],
     highlights: [{ kind: "article", url: one.url, title: one.title, marks: [mark()] }],
@@ -106,11 +105,11 @@ describe("the backup of everything", () => {
     });
   });
 
-  it("writes the manifest first, then each part exactly as its own module writes it", () => {
+  it("writes the manifest first, then each light part exactly as its own module writes it - the reading list is the page's stream (D222)", () => {
     const entries = backupEntries(input());
     assert.deepEqual(
       entries.map((entry) => entry.name),
-      [BACKUP_ENTRIES.manifest, BACKUP_ENTRIES.vocabulary, BACKUP_ENTRIES.highlights, BACKUP_ENTRIES.settings, BACKUP_ENTRIES.articles],
+      [BACKUP_ENTRIES.manifest, BACKUP_ENTRIES.vocabulary, BACKUP_ENTRIES.highlights, BACKUP_ENTRIES.settings],
     );
     const byName = new Map(entries.map((entry) => [entry.name, text(entry.data)]));
     const manifest = fromManifest(byName.get(BACKUP_ENTRIES.manifest) ?? "");
@@ -120,10 +119,17 @@ describe("the backup of everything", () => {
     assert.deepEqual(fromVocabularyFile(byName.get(BACKUP_ENTRIES.vocabulary) ?? "").rows, vocabularyRows(input().phrases));
     assert.equal(fromMarksCopy(byName.get(BACKUP_ENTRIES.highlights) ?? "").documents.length, 1);
     assert.deepEqual(fromSettingsFile(byName.get(BACKUP_ENTRIES.settings) ?? ""), input().settings);
-    const list = fromArchiveText(byName.get(BACKUP_ENTRIES.articles) ?? "");
-    assert.equal(list.articles.length, 2);
-    // The reading list's positions travel with the articles (D213).
-    assert.deepEqual(list.articles[0]?.position, { docId: article("one").url, segmentIndex: 0, blockIndex: 3, updatedAt: 7 });
+  });
+
+  it("says whether the articles' pictures ride along by the light rows' account, before any is read (D222)", () => {
+    const base = input();
+    const illustrated = { ...article("three"), pictures: { count: 2, bytes: 4096 } };
+    // Not asked for: none, whatever the rows say.
+    assert.equal(manifestOf({ ...base, articles: [...base.articles, illustrated] }).holds.pictures, false);
+    // Asked for, but no row promises any: none.
+    assert.equal(manifestOf({ ...base, pictures: true }).holds.pictures, false);
+    assert.equal(manifestOf({ ...base, pictures: true, articles: [...base.articles, illustrated] }).holds.pictures, true);
+    assert.equal(fromManifest(JSON.stringify(manifestOf({ ...base, pictures: true, articles: [illustrated] })))?.holds.pictures, true);
   });
 
   it("leaves the settings out when not asked for, and still says so in the manifest", () => {
@@ -158,7 +164,7 @@ describe("the books in the manifest (D218)", () => {
   it("says how many books the archive holds and whether their pictures ride along, and reads it back", () => {
     /** @type {import("../src/lib/store/book.js").BookMeta} */
     const plain = { id: "b-1", title: "A Novel", author: null, lang: null, segmentCount: 1, totalChars: 10, addedAt: 1, readAt: null, toc: [] };
-    const base = { app: "0.5.60", now: 5, articles: [], marks: new Map(), pictures: new Map(), positions: new Map(), phrases: [], highlights: [], settings: null };
+    const base = { app: "0.5.60", now: 5, articles: [], marks: new Map(), pictures: false, positions: new Map(), phrases: [], highlights: [], settings: null };
     const without = manifestOf(base);
     assert.equal(without.holds.books, 0);
     assert.equal(without.holds.bookPictures, false);
@@ -178,14 +184,14 @@ describe("the books in the manifest (D218)", () => {
 
 describe("a selection in the backup's format (D218)", () => {
   it("says so in its manifest and leaves the vocabulary's entry out rather than writing it empty", () => {
-    const base = { app: "0.5.60", now: 5, articles: [], marks: new Map(), pictures: new Map(), positions: new Map(), phrases: [], highlights: [], settings: null };
+    const base = { app: "0.5.60", now: 5, articles: [], marks: new Map(), pictures: false, positions: new Map(), phrases: [], highlights: [], settings: null };
     assert.equal(manifestOf(base).scope, "everything");
     const selection = manifestOf({ ...base, selection: true });
     assert.equal(selection.scope, "selection");
     assert.equal(fromManifest(JSON.stringify(selection))?.scope, "selection");
     assert.equal(fromManifest(JSON.stringify({ format: "reread-backup", version: 1 }))?.scope, "everything");
     const names = backupEntries({ ...base, selection: true }).map((entry) => entry.name);
-    assert.deepEqual(names, [BACKUP_ENTRIES.manifest, BACKUP_ENTRIES.highlights, BACKUP_ENTRIES.articles]);
+    assert.deepEqual(names, [BACKUP_ENTRIES.manifest, BACKUP_ENTRIES.highlights]);
     assert.ok(backupEntries(base).map((entry) => entry.name).includes(BACKUP_ENTRIES.vocabulary), "the backup of everything lost its vocabulary");
     assert.equal(SELECTION_FILENAME, "reread-selection.zip");
   });

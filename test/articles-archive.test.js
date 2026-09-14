@@ -6,20 +6,23 @@ import {
   ARCHIVE_FILENAME,
   ARTICLES_ENTRY,
   archiveAccount,
-  archiveEntries,
   archivePictures,
+  articlesEntry,
   asPictureRef,
   bookPictureEntryName,
   fromArchiveText,
+  pictureEntries,
   pictureEntryName,
 } from "../src/lib/store/articles-archive.js";
-import { toArticlesFile } from "../src/lib/store/articles-file.js";
+import { fileOrder, toArticlesFile } from "../src/lib/store/articles-file.js";
 import { savedArticle } from "../src/lib/store/saved-article.js";
 
 /**
  * The backup with pictures: the plain file's rows under `articles.json`,
- * a reference per picture, and the pictures as entries of their own. The
- * ZIP container is the reader page's (fflate); here the entries are values.
+ * a reference per picture, and the pictures as entries of their own -
+ * written as the page streams them (D222): each article's pictures in
+ * file order, the file last. The ZIP container is the reader page's
+ * (fflate); here the entries are values.
  */
 
 /**
@@ -73,6 +76,31 @@ const readerOf = (entries) => {
 
 const decode = (/** @type {Uint8Array} */ bytes) => new TextDecoder().decode(bytes);
 
+/**
+ * The entries as the reader page's stream writes them (D222): each
+ * article's pictures under its place in the file's order, then the file
+ * carrying their names.
+ *
+ * @param {import("../src/lib/store/saved-article.js").SavedArticle[]} articles
+ * @param {Map<string, import("../src/lib/reader/pictures.js").PictureRow[]>} pictures
+ * @param {Map<string, import("../src/lib/reader/position.js").ReadingPosition>} [positions]
+ * @returns {import("../src/lib/store/articles-archive.js").ArchiveEntry[]}
+ */
+function streamed(articles, pictures, positions = new Map()) {
+  /** @type {import("../src/lib/store/articles-archive.js").ArchiveEntry[]} */
+  const entries = [];
+  /** @type {Map<string, import("../src/lib/store/articles-archive.js").PictureRef[]>} */
+  const refs = new Map();
+  for (const [at, article] of fileOrder(articles).entries()) {
+    const kept = pictureEntries(at, pictures.get(article.url) ?? []);
+    if (kept.refs.length === 0) continue;
+    entries.push(...kept.entries);
+    refs.set(article.url, kept.refs);
+  }
+  entries.push(articlesEntry(articles, new Map(), positions, refs));
+  return entries;
+}
+
 describe("the backup with pictures", () => {
   const plain = article("plain");
   const shot = article("shot", { savedAt: 2000 });
@@ -88,27 +116,32 @@ describe("the backup with pictures", () => {
     assert.equal(ARCHIVE_FILENAME, "reread-articles.zip");
   });
 
-  it("writes articles.json first with a reference per picture, then the pictures stored as they are", () => {
-    const entries = archiveEntries([pictured, plain, shot], new Map(), pictures);
+  it("writes each article's pictures stored as they are under its place in the file, then articles.json with a reference per picture", () => {
+    // The file's order is the plain file's - oldest saved first - known
+    // before the file is written, so the pictures can go first.
+    assert.deepEqual(
+      fileOrder([pictured, plain, shot]).map((article) => article.url),
+      [plain.url, shot.url, pictured.url],
+    );
+    const entries = streamed([pictured, plain, shot], pictures);
     assert.deepEqual(
       entries.map(({ name, deflate }) => ({ name, deflate })),
       [
-        { name: ARTICLES_ENTRY, deflate: true },
         { name: "pictures/1/0.jpg", deflate: false },
         { name: "pictures/2/0.jpg", deflate: false },
         { name: "pictures/2/1.png", deflate: false },
+        { name: ARTICLES_ENTRY, deflate: true },
       ],
     );
-    const stored = entries[3];
+    const stored = entries[2];
     const second = pictures.get(pictured.url)?.[1];
     assert.ok(stored !== undefined && second !== undefined);
     assert.deepEqual(stored.data, new Uint8Array(second.data));
 
-    const text = decode(entries[0]?.data ?? new Uint8Array());
+    const text = decode(entries[3]?.data ?? new Uint8Array());
     const parsed = JSON.parse(text);
     assert.equal(parsed.format, "reread-articles");
     assert.equal(parsed.version, 1);
-    // File order is the plain file's: oldest saved first.
     assert.deepEqual(
       parsed.articles.map((/** @type {{ url: string }} */ row) => row.url),
       [plain.url, shot.url, pictured.url],
@@ -118,15 +151,21 @@ describe("the backup with pictures", () => {
       { index: 0, file: "pictures/2/0.jpg", src: "https://cdn.example/0.jpg", mime: "image/jpeg", width: 800, height: 600 },
       { index: 1, file: "pictures/2/1.png", src: "https://cdn.example/1.jpg", mime: "image/png", width: 800, height: 600 },
     ]);
+    // An article with no rows to write gets no entry and no field.
+    assert.deepEqual(pictureEntries(4, []), { entries: [], refs: [] });
     // An archive of a list without pictures holds the plain file, byte for byte.
-    const bare = archiveEntries([pictured, plain, shot], new Map(), new Map());
+    const bare = streamed([pictured, plain, shot], new Map());
     assert.equal(bare.length, 1);
     assert.equal(decode(bare[0]?.data ?? new Uint8Array()), toArticlesFile([pictured, plain, shot]));
+    // The reading list's positions travel with the articles (D213).
+    const position = { docId: plain.url, segmentIndex: 0, blockIndex: 3, updatedAt: 7 };
+    const placed = streamed([plain], new Map(), new Map([[plain.url, position]]));
+    assert.deepEqual(fromArchiveText(decode(placed[0]?.data ?? new Uint8Array())).articles[0]?.position, position);
   });
 
   it("reads the articles as the plain file does, with the pictures each names beside them", () => {
-    const entries = archiveEntries([pictured, plain, shot], new Map(), pictures);
-    const read = fromArchiveText(decode(entries[0]?.data ?? new Uint8Array()));
+    const entries = streamed([pictured, plain, shot], pictures);
+    const read = fromArchiveText(decode(entries[3]?.data ?? new Uint8Array()));
     assert.equal(read.invalid, 0);
     assert.deepEqual(
       read.articles.map((row) => row.url),

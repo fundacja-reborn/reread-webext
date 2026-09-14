@@ -31,6 +31,28 @@ describe("the backup of everything on the reading list page", () => {
     assert.match(bodyOf(script, "renderExportControls"), /exportButton\.disabled = picking && picked\.size === 0;/, "Export is greyed outside the selection");
   });
 
+  it("streams the articles' pictures one article at a time, in the file's order, and writes articles.json after them (D222)", async () => {
+    const script = await source("reader/reader.js");
+    // Both exports hand the stream the box's word, never the rows.
+    for (const name of ["exportList", "exportSelection"]) {
+      assert.match(bodyOf(script, name), /backupStream\(\{[\s\S]*?pictures: withPictures,/, `${name} reads the pictures before the stream`);
+    }
+    assert.equal(script.includes("picturesOf("), false, "the pictures are still read whole before packing");
+    // A generator: `bodyOf` looks for a plain function, so the body is cut
+    // from the head to the first close at the margin.
+    const start = script.indexOf("async function* backupStream(");
+    assert.ok(start !== -1, "backupStream is missing");
+    const stream = script.slice(start, script.indexOf("\n}\n", start));
+    const light = stream.indexOf("yield* backupEntries(input)");
+    const order = stream.indexOf("const articles = fileOrder(input.articles);");
+    const box = stream.indexOf("if (input.pictures) {");
+    const rows = stream.indexOf("pictureEntries(at, await getPictures(article.url))");
+    const list = stream.indexOf("yield articlesEntry(articles, input.marks, input.positions, refs);");
+    assert.ok(light !== -1 && light < order && order < box && box < rows && rows < list, "the stream is not light parts, then each article's pictures in file order, then articles.json");
+    assert.match(stream, /if \(article\.pictures === undefined\) continue;/, "an article whose row promises no pictures is asked for them");
+    assert.match(stream, /if \(kept\.refs\.length === 0\) continue;/, "an article with no rows to write gets a field");
+  });
+
   it("reads an archive with a manifest as the backup, refuses a newer one, and still reads the old files", async () => {
     const script = await source("reader/reader.js");
     const dispatch = bodyOf(script, "dispatchImport");
