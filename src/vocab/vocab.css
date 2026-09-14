@@ -16,12 +16,11 @@
 }
 
 /* A touch wider than the shared 44rem: the row grid holds three columns and
-   the extra room goes to the meanings. The top padding is the reader page's
-   headroom (its body's 0.75rem plus its chrome box's 0.75rem), so the two
-   bars stand at one height when the pages are walked between. */
+   the extra room goes to the meanings. No top padding of its own: the
+   headroom is the stuck box's paper over the bar (`.page-chrome`,
+   page.css - D219), the same on every page, resting or stuck. */
 body {
   max-width: 46rem;
-  padding-top: 1.5rem;
 }
 
 /* Focus must be findable on every control here - the quiet row buttons erase
@@ -392,8 +391,9 @@ summary {
 /* "1 of 827 phrases for "news" · Clear filter": the counter's voice (the
    hint's size and color), one line that wraps when it must, the button a
    quiet one with the 44px hit box. Static, not stuck: it is read once, on
-   the way into the rows. The scroll margin keeps it off the viewport's edge
-   when "Show in list" scrolls to it. Hidden while the filter asks nothing -
+   the way into the rows. The scroll margin keeps it off the stuck bar's
+   line (the root's scroll padding, page.css - D219) when "Show in list"
+   scrolls to it. Hidden while the filter asks nothing -
    out of the flow, so the rows do not move when it goes. */
 .filter-status {
   display: flex;
@@ -433,13 +433,20 @@ summary {
    the room between the counts and the speaker, and on a 360px line every
    pixel is spoken for. The block padding is tighter than it was: a row is
    two reading lines on a phone and one on a desktop, and the list is what
-   the page is for. */
+   the page is for - but never less than what holds the actions' 44px hit
+   box inside the row: the buttons stand on the phrase's line with a
+   negative block margin (below), so below Aa 21 their box reaches past the
+   line's top into the padding, and at 0.5rem it reached the separator and
+   drew its hover frame over it (Michał's screenshot, 2026-09-14). The
+   padding grows with what the box has over the line, plus a hairline of
+   paper - so a row is also never shorter than the hit box, and no two
+   rows' buttons overlap. */
 .phrase-row {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
   gap: 0;
-  padding-block: 0.5rem;
+  padding-block: max(0.5rem, calc((44px - var(--reader-size, 18px) * var(--phrase-line-height)) / 2 + 1px));
   border-bottom: 1px solid var(--page-line);
 }
 
@@ -744,17 +751,20 @@ button.quiet-speak svg {
 /* --- the editor a row unfolds into --- */
 
 /* The meanings swapped for a textarea: one meaning per line, the bubble's
-   editor by other means. */
+   editor by other means. The hint stands close under the box, a footnote
+   to it: with the box's own air plus the hint's margin it floated between
+   the box and the sentence (Michał's screenshot, 2026-09-14). */
 .phrase-edit {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.3rem;
 }
 
 /* The one line under the edit box (D203): the word about the semicolon,
-   in the hint's voice. */
+   in the hint's voice. No margin of its own - the column's gap is its
+   distance from the box. */
 .phrase-edit-hint {
-  margin: 0.3rem 0 0;
+  margin: 0;
   color: var(--page-muted);
   font-size: 0.85rem;
 }
@@ -772,9 +782,11 @@ button.quiet-speak svg {
 
 /* Save and Cancel take the quiet actions' slot (D211) - framed, as an act
    that writes is on this page, at the touch floor. On a phone they go
-   under the box, the whole line to themselves, where the old editor had
-   them: on the phrase's line above the box they would stand over what
-   they act on. */
+   under the box and its hint, the whole line to themselves, where the old
+   editor had them: on the phrase's line above the box they would stand
+   over what they act on - and under the sentence, where the body's whole
+   line put them, they read as the row's and not the box's (Michał's
+   screenshot, 2026-09-14). */
 .phrase-row[data-editing="true"] > .phrase-actions {
   order: 4;
   flex: 1 1 100%;
@@ -788,6 +800,26 @@ button.quiet-speak svg {
   padding: 0.35rem 1rem;
 }
 
+/* Air over the edit box on a phone, for its focus ring: the ring stands
+   4px outside the box (2px, offset 2px, the page's rule), and with the box
+   flush under the phrase's line it sat on the phrase's descenders
+   (Michał's screenshot, 2026-09-14). Half a rem: the ring clear of the
+   line box, the box still plainly the phrase's. On a desktop the phrase
+   stands beside the box, not over it (the query below takes it back). */
+.phrase-row[data-editing="true"] > .phrase-body {
+  margin-block-start: 0.5rem;
+}
+
+/* The unfolded row's sentence is a child of the row, after Save and Cancel
+   (vocab.js) - the editor one unit, the context a step under it, and the
+   keyboard walking the same order the eye reads. On a phone the whole
+   line, like the body it stood in. */
+.phrase-row[data-editing="true"] > .phrase-sentence {
+  order: 5;
+  flex: 1 1 100%;
+  margin-block-start: 0.35rem;
+}
+
 /* The one empty state is the shared `.empty` (page.css): a vocabulary with
    nothing in it. A filter that matches nothing leaves the list empty under
    the state line above, which says so and offers the way out. */
@@ -799,7 +831,8 @@ button.quiet-speak svg {
 /* --- the transfer section: import and export, under the list --- */
 
 /* Its own quiet area below the pager, reached by the header's anchor; the
-   scroll margin keeps the landing heading off the viewport's edge. No rule
+   scroll margin keeps the landing heading off the stuck bar's line (the
+   root's scroll padding, page.css - D219). No rule
    of its own: the list's last row already ends in a line, and a second one
    floating here read as a leftover (Michał, 2026-08-16, same call as the
    reader library's) - distance alone does the parting. With no border
@@ -891,5 +924,25 @@ button.quiet-speak svg {
 
   .phrase-row[data-editing="true"] > .phrase-actions {
     margin-block-start: 0;
+  }
+
+  /* The phrase stands beside the box here, not over it: the phone's air
+     over the box would only drop the box under the phrase's first line. */
+  .phrase-row[data-editing="true"] > .phrase-body {
+    margin-block-start: 0;
+  }
+
+  /* The unfolded row's sentence, a child of the row after Save and Cancel:
+     a second row of the grid, in the meanings' column under the box and
+     its hint - exactly where it stood inside the body. */
+  .phrase-row[data-editing="true"] {
+    grid-template-areas:
+      "head body actions"
+      ". sentence .";
+  }
+
+  .phrase-row[data-editing="true"] > .phrase-sentence {
+    grid-area: sentence;
+    align-self: start;
   }
 }

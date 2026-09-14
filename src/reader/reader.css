@@ -76,12 +76,12 @@
    hold. That is the ONLY thing the body's font is for - nothing standing on
    the body reads in it (the rule after the next one dresses the page in
    the interface, and the texts take the reading face back by name).
-   Half of the old top padding moved into the chrome box below, so the page
-   opens looking exactly as it did while the box, once stuck, still holds a
-   breath of paper over the bar. */
+   No top padding: the page's headroom is the stuck box's own paper
+   (`.page-chrome`, page.css), so the bar rests where it sticks - until
+   D219's smoke half of it stayed here, and the box slid up by that half
+   on the first scroll. */
 body.reader {
   max-width: var(--reader-measure, 65ch);
-  padding-top: 0.75rem;
   font-family: var(--reader-font-lead, var(--reader-font-stack));
   font-size: var(--reader-size, 18px);
   line-height: 1.65;
@@ -160,30 +160,22 @@ summary {
   white-space: nowrap;
 }
 
-/* The bar and its panels speak a step below the page's interface size: they
-   stand over an article and should not be the loudest thing on it. The
-   family is the chrome's (`.reader-chrome`, above). */
-.reader-bar,
+/* The panels speak a step below the page's interface size, as the bar does
+   (`.page-bar`, page.css): they stand over an article and should not be
+   the loudest thing on it. The family is the chrome's (`.reader-chrome`,
+   above). */
 .reader-panel {
   font-size: 0.85rem;
   line-height: 1.5;
 }
 
-/* The box around the bar and its two panels. Its background is the page's
-   own paper - invisible at rest, and the thing that keeps article text from
-   shining through once the box is stuck. The top padding is the other half
-   of the body's old breathing room (see `body.reader`). */
-.reader-chrome {
-  padding-top: 0.75rem;
-  background: var(--page-bg);
-  /* Above the page's scrim (page.css) in every view - the list and the
-     highlights too, where the chrome is not stuck and used to have no
-     stacking of its own, so the wash covered the menu it was meant to set
-     off (Michał's smoke, 2026-08-29). The article view's rule below keeps
-     the same height and makes the position sticky. */
-  position: relative;
-  z-index: 2;
-}
+/* The box around the bar and its two panels is `.page-chrome` (page.css)
+   since D219 - stuck to the window's top in every view, on its own paper,
+   above the scrim and the pins, with the half of the body's breathing room
+   that moved into it (see `body.reader`). What stays here under the
+   reader's own class is the article view's: the ribbon that folds the bar
+   away, and the paper under the box that runs edge to edge over an
+   article's margin pins. */
 
 /* The page's notice, in the chrome under the bar (D151) - and under an open
    panel, which stands in flow above it. `page.css` gives a note a heading's
@@ -244,33 +236,27 @@ summary {
   white-space: nowrap;
 }
 
-/* Stuck to the top only while an article is on screen: that is when the two
-   things it holds are wanted mid-scroll - the voice that starts from the
-   first visible sentence, and the way out of a finished article. The list
-   view keeps its whole chrome scrolling like any heading. `:has` rather than
-   a class set by script, the way this sheet already switches the column and
-   the speech-bar room. Plain sticky, no hiding on scroll: the simplest thing
-   that can be judged on an e-ink panel, where a bar that moved would flash
-   (D93). */
-body.reader:has(#article:not([hidden])) .reader-chrome {
-  position: sticky;
-  top: 0;
-  /* Over the article's text and its painted highlights; the speech bar at the
-     bottom stands at the same height and the two never meet. */
-  z-index: 2;
-}
+/* The box is stuck in every view since D219 (`.page-chrome`, page.css).
+   Over an article that is D93's own bar - the voice that starts from the
+   first visible sentence and the way out of a finished article, wanted
+   mid-scroll - and its z-index is the speech bar's: the two stand at the
+   same height and never meet. Over the list and the highlights it is the
+   same box for the same reason every page got it: a long list scrolled to
+   its end kept the menu a page away. Plain sticky, no hiding on scroll:
+   the simplest thing that can be judged on an e-ink panel, where a bar
+   that moved would flash (D93). Until D219 the list views stuck the box
+   only while a panel stood open, held at its own offset (D153,
+   `lib/chrome-hold.js`); stuck at the window's top always, it has nothing
+   to be held from, and the module went with the hold. */
 
-/* And in the list and the highlights views, stuck for as long as a panel is
-   open (D153, Michał's smoke, 2026-08-29): the dimmed page still scrolls,
-   and the menu scrolled away with it. Stuck at its own offset, not at the
-   window's top: at zero it first slid up by the page's top padding, a small
-   scroll of an open menu on its way to being stuck - the script measures
-   the offset on the press (`lib/chrome-hold.js`). The article view keeps
-   its plain stuck bar (D93), so this rule stands down there. The other
-   pages' `.page-chrome` does the same in page.css. */
-body.reader:not(:has(#article:not([hidden]))):has(.panel-scrim:not([hidden])) .reader-chrome {
-  position: sticky;
-  top: var(--chrome-hold, 0px);
+/* The scroll padding under the bar (page.css) is the list views' - the
+   article view stands it down: every scroll it makes is its own
+   arithmetic against the bar as it stands (`chromeFold` in reader.js - a
+   bar folded behind its ribbon, or carrying a notice, which no token
+   knows), and the position restore steps back from `scrollIntoView` by
+   that measure, which the browser's padding would double. */
+:root:has(body.reader #article:not([hidden])) {
+  scroll-padding-top: auto;
 }
 
 /* The bookmark tab (Michał's design, after a mobileread request asked for a
@@ -324,16 +310,12 @@ body.reader:not(:has(#article:not([hidden]))):has(.panel-scrim:not([hidden])) .r
    in the chrome goes but the ribbon, which stays stuck at the window's top
    edge with its chevron turned to say "pull out". Scoped to the article
    view the way the stuck bar is - the list always keeps its whole chrome.
-   Both halves of the breathing room go too - the chrome's padding and the
-   body's half above it (see `body.reader`): an empty strip of paper stuck
-   over the text would be the bar's ghost, and the body's half kept the
-   ribbon 0.75rem off the window's edge until a scroll ate it (Michał's
-   smoke, 2026-09-01: sticky only holds the box from `top: 0`, and on an
-   unscrolled page it stands at its flow position). */
-:root[data-reader-chrome="hidden"] body.reader:has(#article:not([hidden])) {
-  padding-top: 0;
-}
-
+   The breathing room goes too - the chrome's padding, which is the page's
+   whole headroom since D219's smoke (the body keeps none): an empty strip
+   of paper stuck over the text would be the bar's ghost. (Until then the
+   body held half of it, and that half kept the ribbon 0.75rem off the
+   window's edge until a scroll ate it - Michał's smoke, 2026-09-01 - so a
+   rule here zeroed it while folded.) */
 :root[data-reader-chrome="hidden"] body.reader:has(#article:not([hidden])) .reader-chrome {
   padding-top: 0;
 }
@@ -379,13 +361,13 @@ body.reader:has(.panel-scrim:not([hidden])) .reader-chrome::before {
   z-index: -1;
   background: var(--page-bg);
 }
-/* The same paper under an open panel in the views where the chrome is not
-   stuck (the list, the highlights): lifted above the scrim, a column-wide
-   chrome read as a white card dropped on the dimmed page (Michał's smoke,
-   2026-08-29); edge to edge it reads as the bar it is. And while a panel
-   is open, a shadow under the sheet's one edge that is not the window's -
-   never under the plain stuck bar, which stays the simplest thing an e-ink
-   panel can be asked to redraw (D93). */
+/* The same paper under an open panel over the list and the highlights,
+   where nothing stands in the margins to need it at rest: lifted above the
+   scrim, a column-wide chrome read as a white card dropped on the dimmed
+   page (Michał's smoke, 2026-08-29); edge to edge it reads as the bar it
+   is. And while a panel is open, a shadow under the sheet's one edge that
+   is not the window's - never under the plain stuck bar, which stays the
+   simplest thing an e-ink panel can be asked to redraw (D93). */
 body.reader:has(.panel-scrim:not([hidden])) .reader-chrome::before {
   box-shadow: 0 10px 24px -8px rgb(0 0 0 / 0.35);
 }
@@ -399,18 +381,14 @@ html {
   overflow-x: clip;
 }
 
-/* Centred, not baseline-aligned: two of the three buttons are drawn glyphs
-   with no baseline to speak of, and against them the mark hung visibly low
-   (reported from a phone). The tools push themselves to the far edge; the
+/* The bar itself is `.page-bar` (page.css) since D219 - one bar in one
+   home: centred, not baseline-aligned (two of the three buttons are drawn
+   glyphs with no baseline to speak of, and against them the mark hung
+   visibly low - reported from a phone), the line under it, the height the
+   `--bar-h` token says. The tools push themselves to the far edge; the
    back arrow and the mark keep the leading one (`space-between` stopped
-   meaning that the moment the bar had three residents). */
-.reader-bar {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid var(--page-line);
-}
+   meaning that the moment the bar had three residents). What the reader's
+   own class keeps is the tighter dress under a phone's width, below. */
 
 /* The way back, in the dress of the platform's own headers: a bare drawn
    arrow, no frame - the frame is the tools', and back is not one more tool.
@@ -468,14 +446,11 @@ html {
   text-decoration: underline;
 }
 
-.reader-tools {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  /* To the far edge on its own: the bar's third resident (the back arrow)
-     took `space-between`'s meaning away. */
-  margin-inline-start: auto;
-}
+/* The tools span is `.page-tools` (page.css) since D221: to the far edge
+   on its own (the bar's third resident, the back arrow, took
+   `space-between`'s meaning away), one frame for every tool, and one way
+   of lighting the tool in hand. The reader's own class keeps the tighter
+   gap under a phone's width, below. */
 
 #display {
   font-family: Georgia, "Times New Roman", serif;
@@ -490,78 +465,32 @@ html {
   flex: none;
 }
 
-/* The bar's buttons share one frame height: most hold drawn glyphs and one
-   holds serif text, and left to their contents their borders came out three
-   sizes (reported from a phone). The floor is set on all of them and the
-   contents centre inside it. */
-#marker,
-#listen,
-#display,
-#fullscreen,
-#menu {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 2.1rem;
-  min-width: 2.6rem;
-  padding: 0.15rem 0.55rem;
-}
-
-/* The button says "the voice is busy" while it is - and the pen says it is
-   in the hand: pressing either again stands it down, and a button that
-   looked identical either way would hide that. The tabs' treatment - accent
-   border and a wash - is the page's word for "this is on".
-
-   The two panels wear it too, for their open state (Michał's report,
-   2026-08-19): the row lights whichever tool is in hand, and a panel hanging
-   under an unlit button was the one place in the bar where that promise
-   broke. `aria-expanded` rather than `aria-pressed` because a disclosure is
-   what these two are - the state is the same to the eye. */
-#listen[aria-pressed="true"],
-#marker[aria-pressed="true"],
-:root:fullscreen #fullscreen,
-#display[aria-expanded="true"],
-#menu[aria-expanded="true"] {
-  border-color: var(--page-accent);
-  background: color-mix(in srgb, var(--page-accent) 12%, transparent);
-}
+/* The bar's buttons share one frame height - most hold drawn glyphs and
+   one holds serif text, and left to their contents their borders came out
+   three sizes (reported from a phone) - and a tool in hand is lit: the
+   voice busy, the pen in the hand, a panel open (Michał's report,
+   2026-08-19: a panel hanging under an unlit button was the one place in
+   the bar where that promise broke), the page in full screen. Both are
+   `.page-tools`' rules in page.css since D221, one for every page's bar;
+   the lit state there is the one an e-ink panel keeps. */
 
 /* The full-screen row says what a press would do (D180): both labels are
    in the markup, and the root's `:fullscreen` picks the one to show. The
    state lives in the browser - entered by this row, left by Back or Esc -
    so the stylesheet reads it from there and no script mirrors it. The
-   bar's own full-screen tool (D195) carries two glyphs the same way. */
-:root:fullscreen :is(#nav-fullscreen, #fullscreen) .fullscreen-enter,
-:root:not(:fullscreen) :is(#nav-fullscreen, #fullscreen) .fullscreen-exit {
+   bar's own full-screen tool (D195) carries two glyphs the same way, by
+   the rule in page.css since every page has the tool (D220). */
+:root:fullscreen #nav-fullscreen .fullscreen-enter,
+:root:not(:fullscreen) #nav-fullscreen .fullscreen-exit {
   display: none;
 }
 
-/* The bar's five residents on one phone-wide row. At the desktop gaps and
-   button floors the article view's bar added up past a Pixel's width once
-   the browser's text zoom grew the rem: the menu slid off the edge and the
-   brand broke in half (reported 2026-08-17). Under this width the bar
-   trades air for fit - tighter gaps, a slimmer floor - and nothing leaves
-   the row. The limit is in rem on purpose: the overflow arrives with the
-   text zoom, and an em-based query grows with the same zoom, so the tight
-   dress comes exactly to the screens that need it. */
-@media (max-width: 30rem) {
-  .reader-bar {
-    gap: 0.5rem;
-  }
-
-  .reader-tools {
-    gap: 0.4rem;
-  }
-
-  #marker,
-  #listen,
-  #display,
-  #fullscreen,
-  #menu {
-    min-width: 2.4rem;
-    padding-inline: 0.4rem;
-  }
-}
+/* The bar's tight dress under a phone's width - tighter gaps, a slimmer
+   floor for the tools - is every page's since D219's smoke (page.css, the
+   `@media (max-width: 30rem)` block on `.page-bar` and `.page-tools`): kept
+   here as the reader's own, it left the phrases' and the settings' tools a
+   desktop's distance apart on the same phone (Michał's screenshots,
+   2026-09-14). Nothing of the bar's dress is the reader's alone now. */
 
 /* No line under the panel: the scrim dims the page beneath an open panel
    (2026-08-29), so the panel's own edge is where the paper stops being
@@ -1655,7 +1584,8 @@ a.marks-act {
 .marks-transfer {
   margin-top: 3rem;
   /* The anchor over the rows lands here (D153); the same room the list's
-     transfer section keeps under the window's edge. */
+     transfer section keeps under the stuck bar's line (the root's scroll
+     padding, page.css - D219). */
   scroll-margin-top: 0.75rem;
   /* Chrome, not text: the buttons, hints, offer and reports wear the page's
      interface dress (`#page`) where the quotes above them read in the Aa
@@ -1947,7 +1877,12 @@ a.marks-act {
    shade, so the mode is seen to be a mode and not a line of hints; the
    wash is the page's own ink, not the accent - the accent is what a
    ticked row wears below, and the bar must not compete with it. Wraps on
-   a phone rather than run off its edge: the count steps down a line. */
+   a phone rather than run off its edge: the count steps down a line. In
+   the flow, where the Select line stood, and it scrolls away with the
+   rows: not a second stuck strip under the page's bar (D219 - the bar
+   and the selection's bar together would be a lot of chrome over a
+   list), and with no stacking of its own it passes under the stuck bar
+   like every row. */
 .pick-bar {
   display: flex;
   flex-wrap: wrap;
@@ -2192,7 +2127,8 @@ a.marks-act {
 /* --- the transfer section: import and export, under the list --- */
 
 /* Its own quiet area below the pager, reached by the anchor beside the fold;
-   the scroll margin keeps the landing heading off the viewport's edge. No rule
+   the scroll margin keeps the landing heading off the stuck bar's line (the
+   root's scroll padding, page.css - D219). No rule
    of its own: the list's last row already ends in a line, and a second one
    floating here read as a leftover (Michał, 2026-08-16) - distance alone does
    the parting. With no border between them, this margin collapses with the

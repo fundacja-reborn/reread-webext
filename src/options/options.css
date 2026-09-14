@@ -8,14 +8,13 @@
    the end spreads the same HTML out for a desktop. */
 
 /* A touch wider than the shared 44rem: the list rows hold three columns and
-   the extra room goes to the pair names. The top padding is the other pages'
-   headroom (see vocab.css), so the bar stands at one height when the pages
-   are walked between - and tighter than the stock padding anyway: with the
-   table of contents and the first-steps card above the rows, that one pushed
-   the models section under a 768px fold. */
+   the extra room goes to the pair names. No top padding of its own: the
+   headroom is the stuck box's paper over the bar (`.page-chrome`,
+   page.css - D219), the same on every page - and tighter than the stock
+   padding anyway: with the table of contents and the first-steps card
+   above the rows, that one pushed the models section under a 768px fold. */
 body {
   max-width: 46rem;
-  padding-top: 1.5rem;
 }
 
 /* Denser prose rhythm for the same reason - this page stacks many short
@@ -160,8 +159,9 @@ header h1 {
   min-height: 44px;
 }
 
-/* The anchors' landing pads: a heading flush with the viewport's edge reads
-   as cut off. The margin above sections is a step wider than the shared
+/* The anchors' landing pads: a heading flush with the stuck bar's line
+   (the root's scroll padding, page.css - D219) reads as cut off, so each
+   lands a step under it. The margin above sections is a step wider than the shared
    default (Michał's request, 2026-08-17): the rows above end dense, and a
    section heading needs air to read as a new chapter - worth more than the
    fold arithmetic that once kept it tight. */

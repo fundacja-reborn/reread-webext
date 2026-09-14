@@ -16,7 +16,6 @@
 
 import { followTheme } from "../lib/appearance.js";
 import { webext } from "../lib/browser.js";
-import { holdChrome } from "../lib/chrome-hold.js";
 import {
   BUBBLE_SCALE,
   CONFIG_KEY,
@@ -33,6 +32,7 @@ import { aside, localizePage, megabytes, plural, t, uiLocale } from "../lib/i18n
 import { compileUserCss } from "../lib/user-css.js";
 import { privateNote } from "../lib/private-note.js";
 import { armBackArrow } from "../lib/back-arrow.js";
+import { armFullscreenTool } from "../lib/fullscreen-tool.js";
 import { languageName, pairLabel } from "../lib/language.js";
 import { catalogDictionaries, catalogSource } from "../lib/dict/catalog.js";
 import { describeDictDownloadProblem, downloadArchive } from "../lib/dict/download.js";
@@ -3210,7 +3210,6 @@ const pageBar = document.querySelector(".page-bar");
 const menuButton = document.getElementById("menu");
 const menuPanel = document.getElementById("menu-panel");
 const panelScrim = document.getElementById("panel-scrim");
-const pageChrome = document.querySelector(".page-chrome");
 
 // The way back to the reading (D139-D142): walked here from the reader, the
 // arrow pops the same history entry as the system's back gesture; raised
@@ -3219,15 +3218,21 @@ const pageChrome = document.querySelector(".page-chrome");
 // live in `lib/back-arrow.js`, shared with the saved-phrases page.
 armBackArrow();
 
+// The bar's full-screen tool (D195; every page since D220): the reader
+// bar's own, in `lib/fullscreen-tool.js` - where the browser has a full
+// screen to give and the row has room, with the menu put away before the
+// screen changes.
+armFullscreenTool(document.getElementById("fullscreen"), () => setMenu(false));
+
 /** @param {boolean} open */
 function setMenu(open) {
   if (menuButton === null || menuPanel === null) return;
   menuPanel.hidden = !open;
   menuButton.setAttribute("aria-expanded", String(open));
-  // The page dims under the open menu, and clears with it; the chrome holds
-  // where it stands for as long as the dimming lasts (D153, `chrome-hold.js`).
+  // The page dims under the open menu, and clears with it. The chrome needs
+  // no holding meanwhile: it is stuck to the window's top (D219,
+  // `.page-chrome` in page.css).
   if (panelScrim !== null) panelScrim.hidden = !open;
-  holdChrome(pageChrome, open);
 }
 
 menuButton?.addEventListener("click", () => {

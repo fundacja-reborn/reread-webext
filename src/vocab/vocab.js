@@ -24,7 +24,6 @@ import { applyReading } from "../lib/appearance.js";
 import { webext } from "../lib/browser.js";
 import { clearableField } from "../lib/clear-field.js";
 import { CONFIG_KEY, SIZE, TTS_RATE, chosenPair, isFont, isTheme, readConfig, writeConfig } from "../lib/config.js";
-import { holdChrome } from "../lib/chrome-hold.js";
 import { fileSize, localizePage, plural, t, uiLocale } from "../lib/i18n.js";
 import { privateNote } from "../lib/private-note.js";
 import { pairLabel } from "../lib/language.js";
@@ -34,6 +33,7 @@ import { editedMeanings } from "../lib/meanings.js";
 import { describeError } from "../lib/messages.js";
 import { speakerIcon } from "../lib/speaker-icon.js";
 import { armBackArrow } from "../lib/back-arrow.js";
+import { armFullscreenTool } from "../lib/fullscreen-tool.js";
 import { ErrorCode, Message, asResult, fail } from "../lib/protocol.js";
 import { BACK_ROAD_KEY, writeVocabTab } from "../lib/session.js";
 import { restoreVocabulary } from "../lib/store/backup.js";
@@ -98,7 +98,6 @@ const rateValue = document.getElementById("rate-value");
 const menuButton = document.getElementById("menu");
 const menuPanel = document.getElementById("menu-panel");
 const panelScrim = document.getElementById("panel-scrim");
-const pageChrome = document.querySelector(".page-chrome");
 const navLibrary = document.getElementById("nav-library");
 const navMarks = document.getElementById("nav-marks");
 const navSettings = document.getElementById("nav-settings");
@@ -673,10 +672,17 @@ function phraseRow(phrase) {
   // `fillHighlighted`, because the filter does not read the sentence and a
   // mark in it would say it did - the one mark here is the phrase's own
   // place in its sentence (D211, `sentenceSegments`), which the sheet shows
-  // only once the fold is open. Under the meanings and under the editor
-  // alike, so a row being edited keeps its sentence where it was.
+  // only once the fold is open. At rest it stands in the body under the
+  // meanings; unfolded, it stands after Save and Cancel - the editor is one
+  // unit, the box with its hint and the two buttons, and the sentence is
+  // the context under it (Michał's screenshot, 2026-09-14: on a phone,
+  // with the sentence between the box and the buttons, the buttons read as
+  // the row's, not the box's). The DOM says so too, for the keyboard: box,
+  // Save, Cancel, then the sentence.
+  /** @type {HTMLElement | null} */
+  let fold = null;
   if (hasSentence(phrase)) {
-    const fold = element("details", "phrase-sentence");
+    fold = element("details", "phrase-sentence");
     const summary = element("summary", "");
     for (const segment of sentenceSegments(/** @type {string} */ (phrase.context), phrase.phrase)) {
       if (segment.hit) {
@@ -688,12 +694,13 @@ function phraseRow(phrase) {
       }
     }
     fold.append(summary);
-    body.append(fold);
   }
+  if (editActions === null && fold !== null) body.append(fold);
   row.append(body);
 
   if (editActions !== null) {
     row.append(editActions);
+    if (fold !== null) row.append(fold);
     return row;
   }
 
@@ -1225,6 +1232,12 @@ brandButton?.addEventListener("click", () => goToSettings());
 // live in `lib/back-arrow.js`, shared with the settings page.
 armBackArrow();
 
+// The bar's full-screen tool (D195; every page since D220): the reader
+// bar's own, in `lib/fullscreen-tool.js` - where the browser has a full
+// screen to give and the row has room, with the open panel put away before
+// the screen changes.
+armFullscreenTool(document.getElementById("fullscreen"), closePanels);
+
 // The phrases-tab bookkeeping, the reader's exactly (D139/D140, applied here
 // by D141): this tab is the one phrases tab for as long as the phrases are
 // what it shows - signed in on every arrival (`pageshow`, the back/forward
@@ -1254,12 +1267,10 @@ function setPanel(button, panel, open) {
   if (button === null || panel === null) return;
   panel.hidden = !open;
   button.setAttribute("aria-expanded", String(open));
-  // The page dims under whichever panel is open, and clears with the last;
-  // the chrome holds where it stands for as long as the dimming lasts
-  // (D153, `chrome-hold.js`).
-  const dimmed = anyPanelOpen();
-  if (panelScrim !== null) panelScrim.hidden = !dimmed;
-  holdChrome(pageChrome, dimmed);
+  // The page dims under whichever panel is open, and clears with the last.
+  // The chrome needs no holding meanwhile: it is stuck to the window's top
+  // (D219, `.page-chrome` in page.css).
+  if (panelScrim !== null) panelScrim.hidden = !anyPanelOpen();
 }
 
 displayButton?.addEventListener("click", () => {

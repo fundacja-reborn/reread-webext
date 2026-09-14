@@ -192,10 +192,12 @@ describe("the look-up field", () => {
     assert.match(rest, /toggle\.textContent = shown \? t\("lookup_show_fewer"\) : t\("lookup_show_all", \[group\.lines\.length\.toLocaleString\(\)\]\)/, "the button's words do not follow the state");
     assert.match(rest, /toggle\.setAttribute\("aria-expanded", String\(shown\)\)/, "the button does not say whether the block is shown");
     // On the spot, without a redraw; the state written down; a close from
-    // the bottom of a long book brings the book's name back into view.
+    // the bottom of a long book brings the book's name back into view -
+    // measured from where the visible page begins, which on the saved
+    // phrases is under the stuck bar (D219, `page-header.test.js`).
     assert.match(rest, /rest\.hidden = !opening;\s*say\(opening\);\s*folds\.set\(key, opening\);/, "a press redraws, or forgets the state");
     assert.doesNotMatch(rest, /render\(\)/, "a press redraws the whole answer");
-    assert.match(rest, /if \(!opening && book\.getBoundingClientRect\(\)\.top < 0\) book\.scrollIntoView\(\{ block: "start" \}\)/, "a close at the bottom of a long book leaves the reader in another book");
+    assert.match(rest, /if \(!opening && book\.getBoundingClientRect\(\)\.top < coveredTop\(\)\) book\.scrollIntoView\(\{ block: "start" \}\)/, "a close at the bottom of a long book leaves the reader in another book");
     assert.doesNotMatch(await source("assets/page.css"), /lookup-more-label/, "the old summary's dress is still there");
     // A fold is remembered as the reader left it across the redraws a tick
     // makes, and forgotten with the next word.

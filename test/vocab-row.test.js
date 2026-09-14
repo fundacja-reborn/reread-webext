@@ -46,7 +46,11 @@ describe("a row of the saved phrases", () => {
     // sentence share the body - the same order on a phone and on a desktop.
     assert.match(row, /head\.append\(word\)/, "the phrase does not stand in the head");
     assert.match(row, /body\.append\(meanings\)/, "the meanings do not stand in the body");
-    assert.match(row, /const fold = element\("details", "phrase-sentence"\);[\s\S]*?body\.append\(fold\)/, "the sentence does not stand in the body");
+    // At rest the sentence stands in the body under the meanings; unfolded,
+    // it follows Save and Cancel (the editor is one unit, the sentence the
+    // context under it), on the screen and for the keyboard alike.
+    assert.match(row, /fold = element\("details", "phrase-sentence"\);/, "the sentence is not a fold");
+    assert.match(row, /if \(editActions === null && fold !== null\) body\.append\(fold\);/, "the sentence does not stand in the body at rest");
     assert.match(row, /row\.append\(head\);[\s\S]*row\.append\(body\);[\s\S]*row\.append\(actions\)/, "the row is not appended head, body, actions");
   });
 
@@ -169,17 +173,49 @@ describe("a row of the saved phrases", () => {
     const script = await source("vocab/vocab.js");
     const row = bodyOf(script, "phraseRow");
     assert.match(row, /const unfolded = editorFor\(phrase\);\s*body\.append\(unfolded\.editor\);\s*editActions = unfolded\.actions;\s*row\.dataset\["editing"\] = "true";/, "the editor does not split into the body and the actions' slot");
-    assert.match(row, /if \(editActions !== null\) \{\s*row\.append\(editActions\);\s*return row;\s*\}/, "Save and Cancel are not the unfolded row's last part");
+    // Save and Cancel follow the body, and the sentence follows them: the
+    // box with its hint and the two buttons are one unit, the sentence the
+    // context under it (Michał's screenshot, 2026-09-14: on a phone the
+    // buttons under the sentence read as the row's, not the box's).
+    assert.match(row, /if \(editActions !== null\) \{\s*row\.append\(editActions\);\s*if \(fold !== null\) row\.append\(fold\);\s*return row;\s*\}/, "the unfolded row is not box, Save and Cancel, sentence");
     const editor = bodyOf(script, "editorFor");
     assert.match(editor, /return \{ editor: wrap, actions \};/, "editorFor does not hand back the two pieces");
     assert.doesNotMatch(editor, /wrap\.append\([^)]*actions\)/, "Save and Cancel are still inside the edit box");
     const styles = await source("vocab/vocab.css");
-    // On a phone the two go under the box, the whole line to themselves.
+    // On a phone the two go under the box, the whole line to themselves,
+    // and the sentence takes the line after them.
     assert.match(rule(styles, '.phrase-row[data-editing="true"] > .phrase-actions'), /order: 4;\s*flex: 1 1 100%;/, "on a phone Save and Cancel do not take the line under the box");
     assert.match(rule(styles, '.phrase-row[data-editing="true"] > .phrase-actions > button'), /min-height: 44px;/, "Save and Cancel are under the touch floor");
-    // On a desktop the head and the body leave the baseline group.
+    assert.match(rule(styles, '.phrase-row[data-editing="true"] > .phrase-sentence'), /order: 5;\s*flex: 1 1 100%;/, "on a phone the sentence does not take the line after Save and Cancel");
+    // On a desktop the head and the body leave the baseline group, and the
+    // sentence takes a second grid row in the meanings' column.
     const desktop = styles.slice(styles.indexOf("@media (min-width: 50rem)"));
     assert.match(desktop, /\.phrase-row\[data-editing="true"\] > \.phrase-head,\s*\.phrase-row\[data-editing="true"\] > \.phrase-body \{\s*align-self: start;/, "the phrase aligns to the textarea's bottom edge");
+    assert.match(desktop, /\.phrase-row\[data-editing="true"\] \{\s*grid-template-areas:\s*"head body actions"\s*"\. sentence \.";/, "the unfolded row's grid has no row for the sentence");
+    assert.match(rule(desktop, '  .phrase-row[data-editing="true"] > .phrase-sentence'), /grid-area: sentence;/, "the sentence does not stand in the meanings' column under the box");
+  });
+
+  it("keeps the hint close under the box and the actions' hit box inside the row", async () => {
+    const styles = await source("vocab/vocab.css");
+    // The hint is a footnote to the box: the column's gap alone parts them.
+    assert.match(rule(styles, ".phrase-edit"), /gap: 0\.3rem;/, "the box and its hint stand apart");
+    assert.match(rule(styles, ".phrase-edit-hint"), /margin: 0;/, "the hint adds a margin of its own to the gap");
+    // On a phone the box stands half a rem under the phrase's line, so its
+    // focus ring (4px outside the box) clears the phrase's descenders; on a
+    // desktop the phrase is beside the box and the air is taken back.
+    assert.match(rule(styles, '.phrase-row[data-editing="true"] > .phrase-body'), /margin-block-start: 0\.5rem;/, "the box's focus ring sits on the phrase's descenders on a phone");
+    const desktop = styles.slice(styles.indexOf("@media (min-width: 50rem)"));
+    // Its own rule, not the one it shares with the head (which only leaves
+    // the baseline group).
+    assert.match(desktop, /\n  \.phrase-row\[data-editing="true"\] > \.phrase-body \{\s*margin-block-start: 0;/, "on a desktop the box drops under the phrase's first line");
+    // The row's padding grows with what the buttons' 44px box has over
+    // the phrase's line, plus a hairline: at a flat 0.5rem the box reached
+    // the separator and drew its hover frame over it.
+    assert.match(
+      rule(styles, ".phrase-row"),
+      /padding-block: max\(0\.5rem, calc\(\(44px - var\(--reader-size, 18px\) \* var\(--phrase-line-height\)\) \/ 2 \+ 1px\)\);/,
+      "the row's padding does not hold the actions' hit box",
+    );
   });
 
   it("dresses the phrase, the meanings and the sentence in the Aa panel's size, and nothing above them", async () => {
@@ -187,8 +223,10 @@ describe("a row of the saved phrases", () => {
     const bare = styles.replace(/\/\*[\s\S]*?\*\//g, "");
     // The reading size is set on the content elements themselves; a
     // container carrying it would hand it to the counts and the buttons.
+    // Reading the size for arithmetic is another matter: the row's padding
+    // counts the phrase's line against the buttons' 44px box.
     for (const selector of [".phrase-row", ".phrase-body", ".phrases"]) {
-      assert.doesNotMatch(rule(bare, selector), /--reader-size|font-size/, `${selector} sets a size its interface children would inherit`);
+      assert.doesNotMatch(rule(bare, selector), /font-size/, `${selector} sets a size its interface children would inherit`);
     }
     // The head is the one container that carries the reading size - its
     // strut is the phrase's line, so the counts flowing after the phrase
