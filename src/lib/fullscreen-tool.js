@@ -27,8 +27,10 @@
  * width to ask about; the reader asks again when it unfolds.
  *
  * Its name follows the browser's state - a glyph has no second label a
- * stylesheet could show; the lit frame and the glyph are the stylesheet's
- * (`:root:fullscreen`, page.css).
+ * stylesheet could show; the glyph is the stylesheet's (`:root:fullscreen`,
+ * page.css), and it is the whole of the tool's state: no lit frame, no
+ * wash - the corners turned inward say it, and a bar lit for the whole of
+ * a reading in full screen said nothing (Michał's photo, 2026-09-14).
  */
 
 import { t } from "./i18n.js";

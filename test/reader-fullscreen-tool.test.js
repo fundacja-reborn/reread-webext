@@ -92,7 +92,7 @@ describe("the bar's full-screen tool", () => {
     assert.doesNotMatch(await source("reader/reader.js"), /fullscreenTool\?\.addEventListener/, "the reader keeps a press handler of its own on the tool");
   });
 
-  it("wears the row's tight dress on a narrow screen, and lights up in full screen on every page", async () => {
+  it("wears the row's tight dress on a narrow screen, and says full screen by its glyph alone on every page", async () => {
     const sheet = await source("reader/reader.css");
     const shared = await source("assets/page.css");
     // The tight dress is every page's (one bar, one dress): the tools
@@ -102,7 +102,10 @@ describe("the bar's full-screen tool", () => {
     assert.match(narrow, /\.page-tools > button \{\s*min-width: 2\.4rem;/, "the tools keep the desktop's floor on a phone");
     assert.doesNotMatch(narrow, /#fullscreen \{\s*display: none/, "the stylesheet takes the tool away by width, which the zoom makes a lie");
     assert.doesNotMatch(sheet, /@media \(max-width: 30rem\) \{/, "the reader keeps a tight dress of its own for the bar");
-    assert.match(shared, /:root:fullscreen #fullscreen \{/, "the tool does not light up while the page has the screen");
+    // The glyph is the tool's whole state: the corners turn inward while
+    // the page has the screen, and no wash or frame lights the bar for the
+    // whole of a reading on top of it (Michał's photo, 2026-09-14).
+    assert.doesNotMatch(shared, /:root:fullscreen #fullscreen(?:,|\s*\{)/, "the tool lights up on top of its own glyph while the page has the screen");
     assert.match(
       shared,
       /:root:fullscreen #fullscreen \.fullscreen-enter,\s*:root:not\(:fullscreen\) #fullscreen \.fullscreen-exit \{\s*display: none;/,

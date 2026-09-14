@@ -110,21 +110,25 @@ describe("the bar stuck to the top of every page", () => {
     assert.match(styles, /@media \(max-width: 30rem\) \{\s*\.page-bar \{\s*gap: 0\.5rem;\s*\}\s*\.page-tools \{\s*gap: 0\.4rem;/, "the bar has no tight dress under a phone's width shared by every page");
   });
 
-  it("says a tool in hand so that 16 greys keep it: the accent frame doubled and a real wash, on every page's bar", async () => {
+  it("says a tool in hand by a real wash alone, so that 16 greys keep it and the bar stays quiet, on every page's bar", async () => {
     const styles = await source("assets/page.css");
-    const lit = ruleOf(styles, '.page-tools > button[aria-pressed="true"],\n.page-tools > button[aria-expanded="true"],\n:root:fullscreen #fullscreen');
-    assert.match(lit, /border-color: var\(--page-accent\);/, "the lit tool lost its accent frame");
-    // A 2px line is a shape, which survives an e-ink panel's greys where
-    // the accent's tone does not; inset, so nothing in the row moves.
-    assert.match(lit, /box-shadow: inset 0 0 0 1px var\(--page-accent\);/, "the lit tool's frame is not doubled - one grey line among grey lines on e-ink");
+    const lit = ruleOf(styles, '.page-tools > button[aria-pressed="true"],\n.page-tools > button[aria-expanded="true"]');
     // A quarter of the accent lands two greys under the paper; 12% rounded
     // back into it (Michał's photo from the Boox, 2026-09-14).
     const wash = /background: color-mix\(in srgb, var\(--page-accent\) (\d+)%, transparent\);/.exec(lit);
     assert.ok(wash !== null, "the lit tool has no wash of the accent");
     assert.ok(Number(wash[1]) >= 25, `the lit tool's wash is ${wash[1]}% of the accent - back to invisible on e-ink`);
+    // The frame stays the frame: D221's doubled accent ring was too loud
+    // for a bar over an article (Michał's second photo from the Boox,
+    // 2026-09-14) - the wash is the one signal.
+    assert.doesNotMatch(lit, /border-color|box-shadow|outline/, "the lit tool wears a frame of its own");
     assert.doesNotMatch(lit, /transition/, "the lit state animates");
     // One rule for every page's bar: the reader keeps none of its own.
     assert.doesNotMatch(await source("reader/reader.css"), /#marker\[aria-pressed="true"\]/, "the reader lights its tools by a rule of its own");
+    // The full-screen tool is not lit: its glyph turns inward while the
+    // page has the screen, and a wash on top of it lit the bar for the
+    // whole of a reading for nothing.
+    assert.doesNotMatch(styles, /:root:fullscreen #fullscreen(?:,|\s*\{)/, "the full-screen tool is lit in full screen, on top of its own glyph");
   });
 
   it("tells the browser where the visible page begins, so anchors, focus and the pages' own scrolls land under the bar, not behind it", async () => {

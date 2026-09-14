@@ -470,9 +470,11 @@ html {
    three sizes (reported from a phone) - and a tool in hand is lit: the
    voice busy, the pen in the hand, a panel open (Michał's report,
    2026-08-19: a panel hanging under an unlit button was the one place in
-   the bar where that promise broke), the page in full screen. Both are
-   `.page-tools`' rules in page.css since D221, one for every page's bar;
-   the lit state there is the one an e-ink panel keeps. */
+   the bar where that promise broke). Both are `.page-tools`' rules in
+   page.css since D221, one for every page's bar; the lit state there is
+   the one an e-ink panel keeps - a wash alone, since the doubled frame
+   proved too loud on the same panel. The full-screen tool is not lit: its
+   glyph says the state (below). */
 
 /* The full-screen row says what a press would do (D180): both labels are
    in the markup, and the root's `:fullscreen` picks the one to show. The
