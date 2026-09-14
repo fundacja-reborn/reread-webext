@@ -489,32 +489,12 @@ html {
   display: none;
 }
 
-/* The bar's five residents on one phone-wide row. At the desktop gaps and
-   button floors the article view's bar added up past a Pixel's width once
-   the browser's text zoom grew the rem: the menu slid off the edge and the
-   brand broke in half (reported 2026-08-17). Under this width the bar
-   trades air for fit - tighter gaps, a slimmer floor - and nothing leaves
-   the row. The limit is in rem on purpose: the overflow arrives with the
-   text zoom, and an em-based query grows with the same zoom, so the tight
-   dress comes exactly to the screens that need it. */
-@media (max-width: 30rem) {
-  .reader-bar {
-    gap: 0.5rem;
-  }
-
-  .reader-tools {
-    gap: 0.4rem;
-  }
-
-  #marker,
-  #listen,
-  #display,
-  #fullscreen,
-  #menu {
-    min-width: 2.4rem;
-    padding-inline: 0.4rem;
-  }
-}
+/* The bar's tight dress under a phone's width - tighter gaps, a slimmer
+   floor for the tools - is every page's since D219's smoke (page.css, the
+   `@media (max-width: 30rem)` block on `.page-bar` and `.page-tools`): kept
+   here as the reader's own, it left the phrases' and the settings' tools a
+   desktop's distance apart on the same phone (Michał's screenshots,
+   2026-09-14). Nothing of the bar's dress is the reader's alone now. */
 
 /* No line under the panel: the scrim dims the page beneath an open panel
    (2026-08-29), so the panel's own edge is where the paper stops being

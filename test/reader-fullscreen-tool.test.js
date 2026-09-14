@@ -94,10 +94,14 @@ describe("the bar's full-screen tool", () => {
 
   it("wears the row's tight dress on a narrow screen, and lights up in full screen on every page", async () => {
     const sheet = await source("reader/reader.css");
-    const narrow = sheet.slice(sheet.indexOf("@media (max-width: 30rem)"));
-    assert.match(narrow, /#display,\s*#fullscreen,\s*#menu \{/, "the tool keeps the desktop's air where the others give it up");
-    assert.doesNotMatch(narrow, /#fullscreen \{\s*display: none/, "the stylesheet takes the tool away by width, which the zoom makes a lie");
     const shared = await source("assets/page.css");
+    // The tight dress is every page's (one bar, one dress): the tools
+    // give up their air together, and none is taken away by width - the
+    // zoom makes a width a lie, so the room is measured in the row.
+    const narrow = shared.slice(shared.indexOf("@media (max-width: 30rem) {\n  .page-bar {"));
+    assert.match(narrow, /\.page-tools > button \{\s*min-width: 2\.4rem;/, "the tools keep the desktop's floor on a phone");
+    assert.doesNotMatch(narrow, /#fullscreen \{\s*display: none/, "the stylesheet takes the tool away by width, which the zoom makes a lie");
+    assert.doesNotMatch(sheet, /@media \(max-width: 30rem\) \{/, "the reader keeps a tight dress of its own for the bar");
     assert.match(shared, /:root:fullscreen #fullscreen \{/, "the tool does not light up while the page has the screen");
     assert.match(
       shared,

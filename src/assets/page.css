@@ -572,6 +572,33 @@ button.page-mark:hover {
   display: none;
 }
 
+/* The bar's residents on one phone-wide row. At the desktop gaps and
+   button floors the reader's bar added up past a Pixel's width once the
+   browser's text zoom grew the rem: the menu slid off the edge and the
+   brand broke in half (reported 2026-08-17). Under this width the bar
+   trades air for fit - tighter gaps, a slimmer floor - and nothing leaves
+   the row. The limit is in rem on purpose: the overflow arrives with the
+   text zoom, and an em-based query grows with the same zoom, so the tight
+   dress comes exactly to the screens that need it. The reader's rule
+   until D219's smoke, every page's since: kept in reader.css alone, it
+   left the phrases' and the settings' tools a desktop's distance apart on
+   the same phone (Michał's screenshots, 2026-09-14) - one bar, one dress.
+   After the base rules above, so the same selectors win here by order. */
+@media (max-width: 30rem) {
+  .page-bar {
+    gap: 0.5rem;
+  }
+
+  .page-tools {
+    gap: 0.4rem;
+  }
+
+  .page-tools > button {
+    min-width: 2.4rem;
+    padding-inline: 0.4rem;
+  }
+}
+
 /* The small menu behind a page's drawn ☰ button: the extension's own pages
    linking to one another. It repeats the toolbar popup's hallway where the
    popup itself is three taps into the browser menu on a phone, and it speaks

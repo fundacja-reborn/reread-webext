@@ -89,7 +89,13 @@ describe("the bar stuck to the top of every page", () => {
     // The reader's tools stand in the same frame: its span wears the class
     // (D221), and no floor of the reader's own is left to drift.
     assert.match(await source("reader/reader.html"), /<span class="reader-tools page-tools">/, "the reader's tools do not stand in the shared frame");
-    assert.doesNotMatch(await source("reader/reader.css"), /#menu \{[^}]*min-height/, "the reader keeps a floor of its own for its tools");
+    const reader = await source("reader/reader.css");
+    assert.doesNotMatch(reader, /#menu \{[^}]*min-height/, "the reader keeps a floor of its own for its tools");
+    // And the tight dress under a phone's width is the shared bar's too:
+    // kept as the reader's own, it left the phrases' tools a desktop's
+    // distance apart on the same phone (Michał's screenshots, 2026-09-14).
+    assert.doesNotMatch(reader, /\n\s*\.reader-tools \{|\n\s*\.reader-bar \{/, "the reader dresses its bar or its tools twice");
+    assert.match(styles, /@media \(max-width: 30rem\) \{\s*\.page-bar \{\s*gap: 0\.5rem;\s*\}\s*\.page-tools \{\s*gap: 0\.4rem;/, "the bar has no tight dress under a phone's width shared by every page");
   });
 
   it("says a tool in hand so that 16 greys keep it: the accent frame doubled and a real wash, on every page's bar", async () => {
