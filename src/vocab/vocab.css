@@ -393,8 +393,9 @@ summary {
 /* "1 of 827 phrases for "news" · Clear filter": the counter's voice (the
    hint's size and color), one line that wraps when it must, the button a
    quiet one with the 44px hit box. Static, not stuck: it is read once, on
-   the way into the rows. The scroll margin keeps it off the viewport's edge
-   when "Show in list" scrolls to it. Hidden while the filter asks nothing -
+   the way into the rows. The scroll margin keeps it off the stuck bar's
+   line (the root's scroll padding, page.css - D219) when "Show in list"
+   scrolls to it. Hidden while the filter asks nothing -
    out of the flow, so the rows do not move when it goes. */
 .filter-status {
   display: flex;
@@ -800,7 +801,8 @@ button.quiet-speak svg {
 /* --- the transfer section: import and export, under the list --- */
 
 /* Its own quiet area below the pager, reached by the header's anchor; the
-   scroll margin keeps the landing heading off the viewport's edge. No rule
+   scroll margin keeps the landing heading off the stuck bar's line (the
+   root's scroll padding, page.css - D219). No rule
    of its own: the list's last row already ends in a line, and a second one
    floating here read as a leftover (Michał, 2026-08-16, same call as the
    reader library's) - distance alone does the parting. With no border

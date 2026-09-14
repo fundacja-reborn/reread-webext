@@ -90,6 +90,45 @@ describe("the bar stuck to the top of every page", () => {
     assert.match(reader, new RegExp(`#menu \\{[^}]*min-height: ${floor};`), "the reader's tools stand on another floor than the token counts");
   });
 
+  it("tells the browser where the visible page begins, so anchors, focus and the pages' own scrolls land under the bar, not behind it", async () => {
+    const styles = await source("assets/page.css");
+    const padding = ruleOf(styles, ":root:has(.page-chrome)");
+    assert.match(padding, /scroll-padding-top: calc\(var\(--header-h\) \+ 0\.25rem\);/, "the root's scroll padding is not the bar's reach and a breath");
+    // The landing pads every anchor keeps add their air on top of the
+    // padding; none of them may have grown into the bar's own measure.
+    for (const [path, selector] of /** @type {[string, string][]} */ ([
+      ["options/options.css", "h2"],
+      ["vocab/vocab.css", ".filter-status"],
+      ["vocab/vocab.css", ".transfer-section"],
+      ["reader/reader.css", ".marks-transfer"],
+      ["reader/reader.css", ".transfer-section"],
+    ])) {
+      assert.match(ruleOf(await source(path), selector), /scroll-margin-top: 0\.75rem;/, `${selector} in ${path} lost its landing pad`);
+    }
+    // The pages' own scrolls aim at the top of what they show and let the
+    // padding place it: no arithmetic of their own against the bar.
+    const reader = await source("reader/reader.js");
+    assert.match(reader, /libraryRows\?\.scrollIntoView\(\{ behavior: "instant", block: "start" \}\)/, "a turned page of the list no longer starts at its top");
+    assert.match(reader, /marksRowsList\?\.scrollIntoView\(\{ behavior: "instant", block: "start" \}\)/, "a turned page of the highlights no longer starts at its top");
+    assert.match(await source("vocab/vocab.js"), /filterStatus\.scrollIntoView\(\{ block: "start" \}\)/, "\"Show in list\" no longer lands on the filter's line");
+    // The shelf's fold measures the visible page from the same number: a
+    // book's name under the bar is out of view as much as one past the
+    // window's top.
+    const shelf = await source("lib/lookup-shelf.js");
+    assert.match(shelf, /book\.getBoundingClientRect\(\)\.top < coveredTop\(\)/, "the shelf's fold measures the visible page from the window's edge");
+    assert.match(shelf, /getComputedStyle\(document\.documentElement\)\.scrollPaddingTop/, "the shelf's fold does not read the root's scroll padding");
+  });
+
+  it("leaves the article view to its own arithmetic: no scroll padding over an article", async () => {
+    const styles = await source("reader/reader.css");
+    const standDown = ruleOf(styles, ":root:has(body.reader #article:not([hidden]))");
+    assert.match(standDown, /scroll-padding-top: auto;/, "the article view keeps the list views' scroll padding");
+    // The position restore steps back from `scrollIntoView` by the bar's
+    // measure; with the padding standing it would step back twice.
+    const reader = await source("reader/reader.js");
+    assert.match(reader, /block\.scrollIntoView\(\{ behavior: "instant", block: "start" \}\);\s*(?:\/\/[^\n]*\n\s*)*scrollBy\(0, -chromeFold\(\)\);/, "the position restore no longer steps back from under the bar by its own measure");
+  });
+
   it("holds nothing any more: the hold module went with the offset it measured", async () => {
     await assert.rejects(source("lib/chrome-hold.js"), "the hold module is still in the package");
     for (const path of ["assets/page.css", "reader/reader.css", "reader/reader.js", "vocab/vocab.js", "options/options.js"]) {

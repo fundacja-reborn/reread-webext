@@ -142,9 +142,12 @@ export function shelfRow(line, at, { saved, readOnly = false, disabled = false, 
  * unfolded under the link. Opened and closed on the spot, without a redraw
  * (a redraw rebuilds the rows under the finger); the state is written down
  * in `folds` for the next redraw. A close from the bottom of a long book
- * brings the book's name back into view when it has scrolled off the top,
- * so the reader does not land in another book; an open moves nothing - the
- * rows appear where the button was.
+ * brings the book's name back into view when it has scrolled out of it -
+ * past the window's top, or under the bar stuck there on the saved phrases
+ * (D219): the page's own scroll padding says where the visible page
+ * begins, and `scrollIntoView` lands under the same number on the way
+ * back - so the reader does not land in another book; an open moves
+ * nothing - the rows appear where the button was.
  *
  * @param {HTMLElement} book the fold the lines belong to
  * @param {EntryGroup} group
@@ -173,9 +176,19 @@ function moreFold(book, group, unfolded, at, folds) {
     rest.hidden = !opening;
     say(opening);
     folds.set(key, opening);
-    if (!opening && book.getBoundingClientRect().top < 0) book.scrollIntoView({ block: "start" });
+    if (!opening && book.getBoundingClientRect().top < coveredTop()) book.scrollIntoView({ block: "start" });
   });
   return { rest, toggle };
+}
+
+/**
+ * Where the visible page begins: the root's `scroll-padding-top` where the
+ * page has one (the bar stuck over the saved phrases, D219), the window's
+ * top edge where it has none (the popup). `auto` reads as no padding.
+ */
+function coveredTop() {
+  const padding = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop);
+  return Number.isFinite(padding) ? padding : 0;
 }
 
 /**

@@ -161,8 +161,9 @@ header h1 {
   min-height: 44px;
 }
 
-/* The anchors' landing pads: a heading flush with the viewport's edge reads
-   as cut off. The margin above sections is a step wider than the shared
+/* The anchors' landing pads: a heading flush with the stuck bar's line
+   (the root's scroll padding, page.css - D219) reads as cut off, so each
+   lands a step under it. The margin above sections is a step wider than the shared
    default (Michał's request, 2026-08-17): the rows above end dense, and a
    section heading needs air to read as a new chapter - worth more than the
    fold arithmetic that once kept it tight. */

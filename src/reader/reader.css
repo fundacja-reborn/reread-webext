@@ -249,6 +249,16 @@ summary {
    `lib/chrome-hold.js`); stuck at the window's top always, it has nothing
    to be held from, and the module went with the hold. */
 
+/* The scroll padding under the bar (page.css) is the list views' - the
+   article view stands it down: every scroll it makes is its own
+   arithmetic against the bar as it stands (`chromeFold` in reader.js - a
+   bar folded behind its ribbon, or carrying a notice, which no token
+   knows), and the position restore steps back from `scrollIntoView` by
+   that measure, which the browser's padding would double. */
+:root:has(body.reader #article:not([hidden])) {
+  scroll-padding-top: auto;
+}
+
 /* The bookmark tab (Michał's design, after a mobileread request asked for a
    way to minimize the bar): a ribbon hanging off the bar's far edge, the one
    hand on the bar's visibility. Absolute, so the ribbon never adds to the
@@ -1627,7 +1637,8 @@ a.marks-act {
 .marks-transfer {
   margin-top: 3rem;
   /* The anchor over the rows lands here (D153); the same room the list's
-     transfer section keeps under the window's edge. */
+     transfer section keeps under the stuck bar's line (the root's scroll
+     padding, page.css - D219). */
   scroll-margin-top: 0.75rem;
   /* Chrome, not text: the buttons, hints, offer and reports wear the page's
      interface dress (`#page`) where the quotes above them read in the Aa
@@ -2164,7 +2175,8 @@ a.marks-act {
 /* --- the transfer section: import and export, under the list --- */
 
 /* Its own quiet area below the pager, reached by the anchor beside the fold;
-   the scroll margin keeps the landing heading off the viewport's edge. No rule
+   the scroll margin keeps the landing heading off the stuck bar's line (the
+   root's scroll padding, page.css - D219). No rule
    of its own: the list's last row already ends in a line, and a second one
    floating here read as a leftover (Michał, 2026-08-16) - distance alone does
    the parting. With no border between them, this margin collapses with the

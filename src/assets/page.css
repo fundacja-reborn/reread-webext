@@ -663,6 +663,23 @@ button.page-mark:hover {
   background: var(--page-bg);
 }
 
+/* Where the visible page begins, told to the browser (D219): under the
+   stuck bar, not at the window's edge. Every scroll the browser makes on
+   its own honours it - an anchor's landing (the settings' sections, the
+   transfer sections, the highlights' export), a row brought into view for
+   the keyboard's focus, `scrollIntoView` from the pages' scripts (a
+   turned page of the list, "Show in list" over the filter's line) - so
+   none of them lands what it aimed at under the bar. A breath more than
+   the bar itself, so a landing does not touch the line; the anchors' own
+   `scroll-margin-top` adds its heading's air on top. Only where the bar
+   is (`:has`): the popup has no bar. The reader's article view stands
+   this down for itself (reader.css): its scrolls do their own arithmetic
+   against a bar that may be folded away or carrying a notice, which no
+   token knows. */
+:root:has(.page-chrome) {
+  scroll-padding-top: calc(var(--header-h) + 0.25rem);
+}
+
 /* One sheet of paper under the whole box while the page is dimmed, from one
    edge of the window to the other - the reader chrome's own trick
    (reader.css): lifted alone, a column-wide bar reads as a white card
