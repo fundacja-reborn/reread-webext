@@ -218,14 +218,17 @@ export const ErrorCode = Object.freeze({
  * underlines and the popup's "saved") and stands on the phrases page's
  * learned shelf. A phrase never saved, or already learned, answers `ok`
  * all the same: the button says "learned", and it is true either way.
- * Three doors exist only for that shelf, and the phrases page is the one
- * page that sends them: `unlearn-phrase` takes the mark off (back to
- * learning, the row's history intact), `delete-phrase` deletes one row for
- * good - what Learned used to do - and `delete-learned` deletes every
- * learned row of the configured pair, answering how many. Each names its
- * phrase by text, as `forget-phrase` does, and acts within the configured
- * pair, as every phrase request does; deleting what is not there is not a
- * failure either.
+ * Three doors exist for that shelf, and the phrases page is the page that
+ * sends them: `unlearn-phrase` takes the mark off (back to learning, the
+ * row's history intact), `delete-phrase` deletes one row for good - what
+ * Learned used to do - and `delete-learned` deletes every learned row of
+ * the configured pair, answering how many. One other sender of
+ * `delete-phrase`: the touch chain's revision (D81), which takes back the
+ * step it kept automatically once the phrase grew past it - scaffolding
+ * the reader never learned, so it goes for good rather than onto the
+ * shelf. Each names its phrase by text, as `forget-phrase` does, and acts
+ * within the configured pair, as every phrase request does; deleting what
+ * is not there is not a failure either.
  *
  * `open-reader` may say which tab the reader should read - the popup knows,
  * because it stood over it, and passes the id along. Without one the reader

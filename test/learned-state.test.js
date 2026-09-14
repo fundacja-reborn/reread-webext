@@ -128,10 +128,20 @@ describe("Learned as a state (D224) - the phrases page", () => {
     assert.match(styles, /\n\.learned-actions > button\.quiet \{\s*margin-block: 0;\s*min-height: 44px;/, "the shelf-wide act has no 44px box of its own");
   });
 
-  it("keeps the three acts the phrases page's own - no content script, popup or look-up field sends them", async () => {
-    for (const path of ["content/index.js", "content/tooltip.js", "content/launcher.js", "popup/index.js", "lib/lookup-box.js", "reader/reader.js"]) {
+  it("keeps the shelf's acts the phrases page's own - no content script, popup or look-up field sends them", async () => {
+    for (const path of ["content/index.js", "content/reading.js", "content/tooltip.js", "content/launcher.js", "popup/index.js", "lib/lookup-box.js", "reader/reader.js"]) {
       const text = await source(path);
-      assert.doesNotMatch(text, /UNLEARN_PHRASE|DELETE_PHRASE|DELETE_LEARNED/, `${path} sends a learned shelf act`);
+      assert.doesNotMatch(text, /UNLEARN_PHRASE|DELETE_LEARNED/, `${path} sends a learned shelf act`);
+    }
+    // The one deletion for good outside the shelf: the touch chain taking
+    // back the step it kept automatically (D81) - scaffolding the reader
+    // never learned, which must not land on the shelf as learned. Learned
+    // itself, from the bubble and the look-up field, stays the mark.
+    const reading = await source("content/reading.js");
+    assert.match(reading, /void ask\(\{ kind: Message\.DELETE_PHRASE, text: kept\.text \}\);\s*vocabulary\.delete\(kept\.normalized\);/, "the chain's revision marks its scaffolding learned instead of deleting it");
+    assert.match(bodyOf(reading, "forget"), /kind: Message\.FORGET_PHRASE, text: phrase\.stored/, "the bubble's Learned sends something else");
+    for (const path of ["content/index.js", "content/tooltip.js", "popup/index.js", "lib/lookup-box.js", "reader/reader.js"]) {
+      assert.doesNotMatch(await source(path), /DELETE_PHRASE/, `${path} deletes a phrase for good`);
     }
   });
 });
