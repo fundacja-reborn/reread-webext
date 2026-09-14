@@ -78,7 +78,7 @@ describe("the import with books", () => {
     const articles = running.indexOf("await importArticles(offered.articles)");
     const books = running.indexOf("await importBooks(offered.books.plan.toAdd, offered.books.bytes)");
     const phrases = running.indexOf("kind: Message.RESTORE_VOCABULARY");
-    const marks = running.indexOf("marksImportPlan(offered.highlights");
+    const marks = running.indexOf("marksImportPlan(laid.documents");
     assert.ok(articles !== -1 && books !== -1 && phrases !== -1 && marks !== -1, "a part is not written");
     assert.ok(articles < books && books < phrases && phrases < marks, "the books are not written between the articles and the vocabulary");
     assert.match(running, /plural\(offered\.books\.plan\.skipped, "reader_import_books_skipped"\)/, "the books left alone are not counted");

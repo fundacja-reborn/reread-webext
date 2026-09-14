@@ -27,6 +27,15 @@
  * opens), and every other mark is added. Running the same file again adds
  * nothing.
  *
+ * A book's marks reach the plan laid against the book's own text (D223,
+ * the reader page): the file's anchors count on the cut the book had
+ * where the file was written, and a book imported again from its .epub
+ * may be cut otherwise - so the page reads the book back from the
+ * database, part by part, and sets every mark where its words stand,
+ * then addresses the document to that one copy (`docId`). The plan then
+ * lays the marks as it always has: what stands here stays, what meets a
+ * standing mark is left out.
+ *
  * Everything here is a value in and a value out; the database lives in
  * `marks.js`, and the reader page dresses the map it returns in titles.
  */
@@ -37,10 +46,14 @@ import { asMark, compareMarks, mergePlan } from "../reader/marks.js";
 
 /**
  * One document as the file carries it: its kind, what it is found by again,
- * and its marks in reading order.
+ * and its marks in reading order. A book's `docId` is never in the file:
+ * the reader page sets it (D223) once it has laid the document's marks
+ * against one copy of the book in the library - the document then names
+ * that copy and no other, so two copies cut differently each get the marks
+ * laid against their own text.
  *
  * @typedef {{ kind: "article", url: string, title: string, marks: Mark[] }
- *   | { kind: "book", title: string, author: string | null, marks: Mark[] }} CopyDoc
+ *   | { kind: "book", title: string, author: string | null, marks: Mark[], docId?: string }} CopyDoc
  */
 
 /** What the file says it is, and the first thing reading one checks. */
@@ -252,11 +265,28 @@ function sameMark(a, b) {
 }
 
 /**
+ * The copies of a file's book in the library: by title and author, every
+ * one of them - two copies of the same book standing side by side both
+ * receive the marks (the one that has them already leaves the twins out),
+ * which is what makes "import the book again first, delete the old one
+ * later" work in either order - or, for a document the page addressed
+ * (D223), the one copy it names. An article has none. The rows come back
+ * as they were given, whatever else each carries.
+ *
+ * @template {{ id: string, title: string, author: string | null }} B
+ * @param {CopyDoc} doc
+ * @param {B[]} books
+ * @returns {B[]}
+ */
+export function booksOf(doc, books) {
+  if (doc.kind !== "book") return [];
+  if (doc.docId !== undefined) return books.filter((book) => book.id === doc.docId);
+  return books.filter((book) => book.title === doc.title && authorOf(book.author) === doc.author);
+}
+
+/**
  * Which documents of the library a file's document is - an article by its
- * address, a book by its title and author, every one of them: two copies of
- * the same book standing side by side both receive the marks (the one that
- * has them already leaves the twins out), which is what makes "import the
- * book again first, delete the old one later" work in either order.
+ * address, a book by `booksOf`.
  *
  * @param {CopyDoc} doc
  * @param {MarksLibrary} library
@@ -268,9 +298,7 @@ function targetsOf(doc, library) {
       .filter((article) => article.url === doc.url)
       .map((article) => ({ docId: article.url, kind: "article", title: article.title }));
   }
-  return library.books
-    .filter((book) => book.title === doc.title && authorOf(book.author) === doc.author)
-    .map((book) => ({ docId: book.id, kind: "book", title: book.title }));
+  return booksOf(doc, library.books).map((book) => ({ docId: book.id, kind: "book", title: book.title }));
 }
 
 /**

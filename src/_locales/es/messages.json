@@ -569,6 +569,20 @@
       "titles": { "content": "$2", "example": "A Novel, Another Novel" }
     }
   },
+  "reader_marks_import_unplaced_one": {
+    "message": "$COUNT$ resaltado no se pudo situar en el texto actual ($TITLES$). Se conserva en la página Resaltados.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "titles": { "content": "$2", "example": "Una novela" }
+    }
+  },
+  "reader_marks_import_unplaced_other": {
+    "message": "$COUNT$ resaltados no se pudieron situar en el texto actual ($TITLES$). Se conservan en la página Resaltados.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "titles": { "content": "$2", "example": "Una novela, Otra novela" }
+    }
+  },
   "reader_marks_import_missing_one": {
     "message": "$COUNT$ documento no está en la lista de lectura: $TITLES$. Impórtalo primero - un libro desde su archivo .epub, un artículo desde la copia de la lista de lectura - y luego importa este archivo otra vez.",
     "placeholders": {

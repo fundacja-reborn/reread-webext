@@ -74,7 +74,7 @@ describe("the backup of everything on the reading list page", () => {
     const running = bodyOf(script, "runBackup");
     const articles = running.indexOf("await importArticles(offered.articles)");
     const phrases = running.indexOf("kind: Message.RESTORE_VOCABULARY");
-    const marks = running.indexOf("marksImportPlan(offered.highlights");
+    const marks = running.indexOf("marksImportPlan(laid.documents");
     const settings = running.indexOf("await writeConfig(offered.settings)");
     assert.ok(articles !== -1 && phrases !== -1 && marks !== -1 && settings !== -1, "a part is not written");
     assert.ok(articles < phrases && phrases < marks && marks < settings, "the parts are not written articles, vocabulary, highlights, settings");
@@ -82,7 +82,9 @@ describe("the backup of everything on the reading list page", () => {
     assert.match(running, /webext\(\)\.runtime\.sendMessage\(\{ kind: Message\.RESTORE_VOCABULARY, rows: offered\.phrases \}\)/, "the vocabulary is written from the page");
     assert.match(running, /if \(offered\.settings !== null && importSettings !== null && importSettings\.checked\) \{/, "the settings are restored without the box");
     // The marks are planned after the articles, against the library as it then stands.
-    assert.match(running, /await restoreMarks\(\);\s*const \[articles, books, marks\] = await Promise\.all\(\[listArticles\(\), listBooks\(\), allMarks\(\)\]\);\s*const plan = marksImportPlan\(offered\.highlights, \{ articles, books, marks \}\);/, "the highlights are not laid against the library at the press");
+    // The book documents are laid against their books' text first (D223,
+    // `marks-reanchor.test.js`), then the plan against the library.
+    assert.match(running, /await restoreMarks\(\);\s*const \[articles, books, marks\] = await Promise\.all\(\[listArticles\(\), listBooks\(\), allMarks\(\)\]\);[\s\S]*?const plan = marksImportPlan\(laid\.documents, \{ articles, books, marks \}\);/, "the highlights are not laid against the library at the press");
   });
 
   it("offers a backup in the list's own frame: what the file is, one line per part, the settings' box", async () => {
@@ -110,6 +112,6 @@ describe("the backup of everything on the reading list page", () => {
     }
     // The plan and its notes stay: the backup import lays the highlights
     // against the library by the same rule.
-    assert.match(script, /marksImportPlan\(offered\.highlights/, "the highlights' plan is gone with the copy");
+    assert.match(script, /marksImportPlan\(laid\.documents/, "the highlights' plan is gone with the copy");
   });
 });

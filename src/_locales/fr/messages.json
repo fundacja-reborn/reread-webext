@@ -569,6 +569,20 @@
       "titles": { "content": "$2", "example": "A Novel, Another Novel" }
     }
   },
+  "reader_marks_import_unplaced_one": {
+    "message": "$COUNT$ surlignage n'a pas pu être replacé dans le texte actuel ($TITLES$). Il reste sur la page Surlignages.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "titles": { "content": "$2", "example": "Un roman" }
+    }
+  },
+  "reader_marks_import_unplaced_other": {
+    "message": "$COUNT$ surlignages n'ont pas pu être replacés dans le texte actuel ($TITLES$). Ils restent sur la page Surlignages.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "titles": { "content": "$2", "example": "Un roman, Un autre roman" }
+    }
+  },
   "reader_marks_import_missing_one": {
     "message": "$COUNT$ document n'est pas dans la liste de lecture : $TITLES$. Importez-le d'abord - un livre depuis son fichier .epub, un article depuis la sauvegarde de la liste de lecture - puis importez ce fichier à nouveau.",
     "placeholders": {

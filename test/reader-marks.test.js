@@ -9,15 +9,18 @@ import {
   compareMarks,
   comparePoints,
   findQuote,
+  fitsProse,
   handleAt,
   headRect,
   isMarkColor,
+  locateQuote,
   markRecord,
   marksInSegment,
   mergePlan,
   mergedNote,
   placeMark,
   quoteOf,
+  reanchorMarks,
   reshapePlan,
   tailRect,
   withoutMark,
@@ -497,5 +500,86 @@ describe("findQuote (D169)", () => {
     // The text changed under the quote (T625, D151): still refused - a
     // heal finds words, never guesses at them.
     assert.equal(findQuote(["costs $1100 and offers"], "costs $899 and offers"), null);
+  });
+});
+
+describe("fitsProse, locateQuote and reanchorMarks (D223)", () => {
+  // A book of three parts as its prose reads after a cut; the marks below
+  // were written against another cut of the same text.
+  const book = [
+    ["Chapter one.", "The fox ran across the field.", "A picture."],
+    ["Chapter two.", "The dog slept.", "The fox came back at night."],
+    ["Chapter three.", "Nobody saw the fox again."],
+  ];
+
+  it("fitsProse is the quote guard on the prose alone", () => {
+    const fits = mark({ segmentIndex: 0, start: { block: 1, offset: 4 }, end: { block: 1, offset: 7 }, text: "fox" });
+    assert.equal(fitsProse(book[0] ?? [], fits), true);
+    assert.equal(fitsProse(book[0] ?? [], { ...fits, text: "dog" }), false);
+    assert.equal(fitsProse(book[0] ?? [], { ...fits, start: { block: 5, offset: 0 }, end: { block: 5, offset: 3 } }), false);
+    assert.equal(fitsProse([], fits), false);
+  });
+
+  it("locateQuote finds a quote standing once in the whole book, in whichever part", () => {
+    assert.deepEqual(locateQuote(book, "came back"), {
+      segmentIndex: 1,
+      start: { block: 2, offset: 8 },
+      end: { block: 2, offset: 17 },
+    });
+    assert.deepEqual(locateQuote(book, "Chapter three."), {
+      segmentIndex: 2,
+      start: { block: 0, offset: 0 },
+      end: { block: 0, offset: 14 },
+    });
+    // Across blocks inside one part, as quoteOf joins them.
+    assert.deepEqual(locateQuote(book, "slept.\nThe fox came"), {
+      segmentIndex: 1,
+      start: { block: 1, offset: 8 },
+      end: { block: 2, offset: 12 },
+    });
+  });
+
+  it("locateQuote refuses a quote standing twice - in one part or in two - and one standing nowhere", () => {
+    assert.equal(locateQuote(book, "fox"), null);
+    assert.equal(locateQuote(book, "The fox"), null);
+    assert.equal(locateQuote(book, "Chapter"), null);
+    assert.equal(locateQuote(book, "the cat"), null);
+    assert.equal(locateQuote(book, ""), null);
+    assert.equal(locateQuote([], "fox"), null);
+  });
+
+  it("reanchorMarks keeps a mark that fits, moves one whose words moved to another part, and keeps one it cannot place - counting both", () => {
+    const fits = mark({ segmentIndex: 0, start: { block: 1, offset: 4 }, end: { block: 1, offset: 7 }, text: "fox", note: "kept" });
+    // Written when "came back at night" stood in part 0, block 3.
+    const moved = mark({
+      segmentIndex: 0,
+      start: { block: 3, offset: 8 },
+      end: { block: 3, offset: 26 },
+      text: "came back at night",
+      note: "moved",
+      color: "green",
+      createdAt: 7,
+    });
+    // Its part is past the end of this cut altogether.
+    const far = mark({ segmentIndex: 9, start: { block: 0, offset: 0 }, end: { block: 0, offset: 18 }, text: "saw the fox again." });
+    const gone = mark({ segmentIndex: 1, start: { block: 1, offset: 0 }, end: { block: 1, offset: 7 }, text: "The cat" });
+    // Anchored where "A picture." stands now; "Chapter" opens every part.
+    const twice = mark({ segmentIndex: 0, start: { block: 2, offset: 0 }, end: { block: 2, offset: 7 }, text: "Chapter" });
+    const laid = reanchorMarks(book, [fits, moved, far, gone, twice]);
+    assert.equal(laid.healed, 2);
+    assert.equal(laid.lost, 2);
+    assert.equal(laid.marks.length, 5);
+    assert.equal(laid.marks[0], fits);
+    assert.deepEqual(laid.marks[1], { ...moved, segmentIndex: 1, start: { block: 2, offset: 8 }, end: { block: 2, offset: 26 } });
+    assert.deepEqual(laid.marks[2], { ...far, segmentIndex: 2, start: { block: 1, offset: 7 }, end: { block: 1, offset: 25 } });
+    // Nowhere and twice: as they were, in the list all the same.
+    assert.equal(laid.marks[3], gone);
+    assert.equal(laid.marks[4], twice);
+    // Every placed record reads its quote back through the guard.
+    for (const placed of laid.marks.slice(0, 3)) {
+      assert.equal(fitsProse(book[placed.segmentIndex] ?? [], placed), true);
+    }
+    // A file written against this very cut: nothing moves, nothing is counted.
+    assert.deepEqual(reanchorMarks(book, [fits]), { marks: [fits], healed: 0, lost: 0 });
   });
 });

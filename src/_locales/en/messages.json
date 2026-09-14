@@ -720,6 +720,21 @@
       "titles": { "content": "$2", "example": "A Novel, Another Novel" }
     }
   },
+  "reader_marks_import_unplaced_one": {
+    "message": "$COUNT$ highlight could not be placed in the current text of $TITLES$. It is kept on the Highlights page.",
+    "description": "In the import report, only when a book already in the reading list is divided into parts otherwise than the book the file's highlights were made in (imported again from its .epub after the cut changed) and a highlight's words could not be found exactly once in it: the highlight is written all the same and listed on the highlights page, but not shown in the book. TITLES is a comma-separated sample of the books' titles.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "titles": { "content": "$2", "example": "A Novel" }
+    }
+  },
+  "reader_marks_import_unplaced_other": {
+    "message": "$COUNT$ highlights could not be placed in the current text of $TITLES$. They are kept on the Highlights page.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "titles": { "content": "$2", "example": "A Novel, Another Novel" }
+    }
+  },
   "reader_marks_import_missing_one": {
     "message": "$COUNT$ document is not in the reading list: $TITLES$. Import it first - a book from its .epub file, an article from the reading list's backup - then import this file again.",
     "description": "Under the offer's rows, only when the file names documents the reading list does not hold. TITLES is a comma-separated sample of their titles.",

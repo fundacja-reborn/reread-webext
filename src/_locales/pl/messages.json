@@ -744,6 +744,34 @@
       "titles": { "content": "$2", "example": "A Novel, Another Novel" }
     }
   },
+  "reader_marks_import_unplaced_one": {
+    "message": "Dla $COUNT$ zakreślenia nie udało się znaleźć miejsca w obecnym tekście ($TITLES$). Jest nadal na stronie Zakreślenia.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "titles": { "content": "$2", "example": "Lalka" }
+    }
+  },
+  "reader_marks_import_unplaced_few": {
+    "message": "Dla $COUNT$ zakreśleń nie udało się znaleźć miejsca w obecnym tekście ($TITLES$). Są nadal na stronie Zakreślenia.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "titles": { "content": "$2", "example": "Lalka, Inna powieść" }
+    }
+  },
+  "reader_marks_import_unplaced_many": {
+    "message": "Dla $COUNT$ zakreśleń nie udało się znaleźć miejsca w obecnym tekście ($TITLES$). Są nadal na stronie Zakreślenia.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "12" },
+      "titles": { "content": "$2", "example": "Lalka, Inna powieść" }
+    }
+  },
+  "reader_marks_import_unplaced_other": {
+    "message": "Dla $COUNT$ zakreśleń nie udało się znaleźć miejsca w obecnym tekście ($TITLES$). Są nadal na stronie Zakreślenia.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1,5" },
+      "titles": { "content": "$2", "example": "Lalka" }
+    }
+  },
   "reader_marks_import_missing_one": {
     "message": "$COUNT$ dokumentu nie ma w czytelni: $TITLES$. Najpierw zaimportuj go - książkę z jej pliku .epub, artykuł z kopii zapasowej czytelni - a potem jeszcze raz ten plik.",
     "placeholders": {
