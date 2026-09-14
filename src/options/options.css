@@ -8,15 +8,13 @@
    the end spreads the same HTML out for a desktop. */
 
 /* A touch wider than the shared 44rem: the list rows hold three columns and
-   the extra room goes to the pair names. The top padding is the other pages'
-   (see vocab.css): half of the headroom, the other half being the stuck
-   box's paper over the bar (`.page-chrome`, page.css - D219), so the bar
-   stands at one height on every page - and tighter than the stock padding
-   anyway: with the table of contents and the first-steps card above the
-   rows, that one pushed the models section under a 768px fold. */
+   the extra room goes to the pair names. No top padding of its own: the
+   headroom is the stuck box's paper over the bar (`.page-chrome`,
+   page.css - D219), the same on every page - and tighter than the stock
+   padding anyway: with the table of contents and the first-steps card
+   above the rows, that one pushed the models section under a 768px fold. */
 body {
   max-width: 46rem;
-  padding-top: 0.75rem;
 }
 
 /* Denser prose rhythm for the same reason - this page stacks many short

@@ -76,12 +76,12 @@
    hold. That is the ONLY thing the body's font is for - nothing standing on
    the body reads in it (the rule after the next one dresses the page in
    the interface, and the texts take the reading face back by name).
-   Half of the old top padding moved into the chrome box below, so the page
-   opens looking exactly as it did while the box, once stuck, still holds a
-   breath of paper over the bar. */
+   No top padding: the page's headroom is the stuck box's own paper
+   (`.page-chrome`, page.css), so the bar rests where it sticks - until
+   D219's smoke half of it stayed here, and the box slid up by that half
+   on the first scroll. */
 body.reader {
   max-width: var(--reader-measure, 65ch);
-  padding-top: 0.75rem;
   font-family: var(--reader-font-lead, var(--reader-font-stack));
   font-size: var(--reader-size, 18px);
   line-height: 1.65;
@@ -310,16 +310,12 @@ summary {
    in the chrome goes but the ribbon, which stays stuck at the window's top
    edge with its chevron turned to say "pull out". Scoped to the article
    view the way the stuck bar is - the list always keeps its whole chrome.
-   Both halves of the breathing room go too - the chrome's padding and the
-   body's half above it (see `body.reader`): an empty strip of paper stuck
-   over the text would be the bar's ghost, and the body's half kept the
-   ribbon 0.75rem off the window's edge until a scroll ate it (Michał's
-   smoke, 2026-09-01: sticky only holds the box from `top: 0`, and on an
-   unscrolled page it stands at its flow position). */
-:root[data-reader-chrome="hidden"] body.reader:has(#article:not([hidden])) {
-  padding-top: 0;
-}
-
+   The breathing room goes too - the chrome's padding, which is the page's
+   whole headroom since D219's smoke (the body keeps none): an empty strip
+   of paper stuck over the text would be the bar's ghost. (Until then the
+   body held half of it, and that half kept the ribbon 0.75rem off the
+   window's edge until a scroll ate it - Michał's smoke, 2026-09-01 - so a
+   rule here zeroed it while folded.) */
 :root[data-reader-chrome="hidden"] body.reader:has(#article:not([hidden])) .reader-chrome {
   padding-top: 0;
 }

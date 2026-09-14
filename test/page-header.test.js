@@ -45,6 +45,18 @@ describe("the bar stuck to the top of every page", () => {
     assert.match(box, /z-index: 2;/, "the box lost its place over the scrim and the lists");
     assert.match(box, /padding-top: var\(--header-air\);/, "the stuck box holds no paper over the bar");
     assert.doesNotMatch(box, /transition/, "the box animates, which an e-ink panel draws as a smear");
+    // The bar rests exactly where it sticks: the page's whole headroom is
+    // the box's own paper, and the body keeps none - with half of it on
+    // the body the box slid up by that half on the first scroll (Michał's
+    // report, 2026-09-14).
+    assert.match(ruleOf(await source("assets/page.css"), "body:has(> .page-chrome)"), /padding-top: 0;/, "the body keeps headroom over the box, which the first scroll eats");
+    for (const [path, selector] of /** @type {[string, string][]} */ ([
+      ["reader/reader.css", "body.reader"],
+      ["vocab/vocab.css", "body"],
+      ["options/options.css", "body"],
+    ])) {
+      assert.doesNotMatch(ruleOf(await source(path), selector), /padding-top/, `${path}: the body keeps a top padding of its own over the box`);
+    }
   });
 
   it("is the reader's box on the reading list and the highlights too, the folding kept to the article view", async () => {
