@@ -122,6 +122,43 @@
           >
             Aa
           </button>
+          <!-- The bar's full-screen tool (D195; every page since D220):
+               where the browser has a full screen to give and the row has
+               room, one press asks for the whole screen and the same press
+               gives it back; hidden until the row is measured
+               (`lib/fullscreen-tool.js`). Before the menu, the reader bar's
+               own place for it; the two glyphs and the lit frame are
+               page.css's. -->
+          <button
+            id="fullscreen"
+            type="button"
+            title="Full screen"
+            data-i18n-title="reader_fullscreen"
+            aria-label="Full screen"
+            data-i18n-aria-label="reader_fullscreen"
+            hidden
+          >
+            <svg class="page-icon fullscreen-enter" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+              <path
+                d="M2.5 6V2.5H6M10 2.5h3.5V6M13.5 10v3.5H10M6 13.5H2.5V10"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.3"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            <svg class="page-icon fullscreen-exit" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+              <path
+                d="M6 2.5V6H2.5M10 2.5V6h3.5M13.5 10H10v3.5M2.5 10H6v3.5"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.3"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
           <!-- The same drawn menu button as the reader's bar, for the same
                reason: on a phone the toolbar popup that used to be the only
                hallway between these pages is three taps into the browser menu,

@@ -538,6 +538,24 @@ button.page-mark:hover {
   padding: 0.15rem 0.55rem;
 }
 
+/* The bar's full-screen tool (D195; in the bar of every page since D220,
+   `lib/fullscreen-tool.js`) says what a press would do: both glyphs stand
+   in the markup - the corners out to enter, in to leave - and the root's
+   `:fullscreen` shows the one that applies. The state lives in the
+   browser, entered by the press and left by it, by Back or by Esc, so the
+   stylesheet reads it from there and no script mirrors it. Lit while the
+   page has the screen, the reader bar's word for "this is on": the accent
+   frame and a wash. */
+:root:fullscreen #fullscreen {
+  border-color: var(--page-accent);
+  background: color-mix(in srgb, var(--page-accent) 12%, transparent);
+}
+
+:root:fullscreen #fullscreen .fullscreen-enter,
+:root:not(:fullscreen) #fullscreen .fullscreen-exit {
+  display: none;
+}
+
 /* The small menu behind a page's drawn ☰ button: the extension's own pages
    linking to one another. It repeats the toolbar popup's hallway where the
    popup itself is three taps into the browser menu on a phone, and it speaks

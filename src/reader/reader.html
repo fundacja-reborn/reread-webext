@@ -171,27 +171,28 @@
           >
             Aa
           </button>
-          <!-- The whole screen in one press, for a reader in the hand (D195,
-               Michał's ask for the Boox): the browser's full screen (D180)
-               and the bar folded behind its ribbon, together - on Android,
-               where the address bar is what the press is about, and only
-               where the bar has room for one more tool (measured in
-               reader.js: a row that would run past its edge loses it, a
-               phone held upright usually does). Two glyphs stand
-               in the markup and the root's `:fullscreen` shows the one that
-               says what a press would do, the menu row's manner; the name
-               follows in reader.js. Before the menu, whose row does the half
-               of this that is about the window: a view control belongs with
-               the view controls, and the leading edge is for the way back
-               and the mark. Article view only, like the pen: the list keeps
-               its whole chrome. -->
+          <!-- The whole screen in one press (D195, Michał's ask for the
+               Boox): the browser's full screen (D180) from the bar, where
+               the browser has one to give and only where the bar has room
+               for one more tool (measured in `lib/fullscreen-tool.js`, the
+               one home of the tool every page wears since D220: a row that
+               would run past its edge loses it, a phone held upright
+               usually does). Two glyphs stand in the markup and the root's
+               `:fullscreen` shows the one that says what a press would do,
+               the menu row's manner; the name follows in the same module.
+               Before the menu, whose row does the same from the menu: a
+               view control belongs with the view controls, and the leading
+               edge is for the way back and the mark. In every view since
+               D220, the list's included, on every platform - and the press
+               leaves the bar standing: the ribbon alone folds it (until
+               D220 the press folded it too). -->
           <button
             id="fullscreen"
             type="button"
-            title="Full screen, with the bar folded away"
-            data-i18n-title="reader_fullscreen_bar"
-            aria-label="Full screen, with the bar folded away"
-            data-i18n-aria-label="reader_fullscreen_bar"
+            title="Full screen"
+            data-i18n-title="reader_fullscreen"
+            aria-label="Full screen"
+            data-i18n-aria-label="reader_fullscreen"
             hidden
           >
             <svg class="reader-icon fullscreen-enter" viewBox="0 0 16 16" aria-hidden="true" focusable="false">

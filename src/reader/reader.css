@@ -498,10 +498,11 @@ html {
    2026-08-19): the row lights whichever tool is in hand, and a panel hanging
    under an unlit button was the one place in the bar where that promise
    broke. `aria-expanded` rather than `aria-pressed` because a disclosure is
-   what these two are - the state is the same to the eye. */
+   what these two are - the state is the same to the eye. The bar's
+   full-screen tool lights the same way while the page has the screen, by
+   the rule every page shares (`:root:fullscreen #fullscreen`, page.css). */
 #listen[aria-pressed="true"],
 #marker[aria-pressed="true"],
-:root:fullscreen #fullscreen,
 #display[aria-expanded="true"],
 #menu[aria-expanded="true"] {
   border-color: var(--page-accent);
@@ -512,9 +513,10 @@ html {
    in the markup, and the root's `:fullscreen` picks the one to show. The
    state lives in the browser - entered by this row, left by Back or Esc -
    so the stylesheet reads it from there and no script mirrors it. The
-   bar's own full-screen tool (D195) carries two glyphs the same way. */
-:root:fullscreen :is(#nav-fullscreen, #fullscreen) .fullscreen-enter,
-:root:not(:fullscreen) :is(#nav-fullscreen, #fullscreen) .fullscreen-exit {
+   bar's own full-screen tool (D195) carries two glyphs the same way, by
+   the rule in page.css since every page has the tool (D220). */
+:root:fullscreen #nav-fullscreen .fullscreen-enter,
+:root:not(:fullscreen) #nav-fullscreen .fullscreen-exit {
   display: none;
 }
 

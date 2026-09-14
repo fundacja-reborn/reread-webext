@@ -32,6 +32,7 @@ import { aside, localizePage, megabytes, plural, t, uiLocale } from "../lib/i18n
 import { compileUserCss } from "../lib/user-css.js";
 import { privateNote } from "../lib/private-note.js";
 import { armBackArrow } from "../lib/back-arrow.js";
+import { armFullscreenTool } from "../lib/fullscreen-tool.js";
 import { languageName, pairLabel } from "../lib/language.js";
 import { catalogDictionaries, catalogSource } from "../lib/dict/catalog.js";
 import { describeDictDownloadProblem, downloadArchive } from "../lib/dict/download.js";
@@ -3216,6 +3217,12 @@ const panelScrim = document.getElementById("panel-scrim");
 // another tab, it brings that tab forward. The three states and their order
 // live in `lib/back-arrow.js`, shared with the saved-phrases page.
 armBackArrow();
+
+// The bar's full-screen tool (D195; every page since D220): the reader
+// bar's own, in `lib/fullscreen-tool.js` - where the browser has a full
+// screen to give and the row has room, with the menu put away before the
+// screen changes.
+armFullscreenTool(document.getElementById("fullscreen"), () => setMenu(false));
 
 /** @param {boolean} open */
 function setMenu(open) {

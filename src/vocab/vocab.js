@@ -33,6 +33,7 @@ import { editedMeanings } from "../lib/meanings.js";
 import { describeError } from "../lib/messages.js";
 import { speakerIcon } from "../lib/speaker-icon.js";
 import { armBackArrow } from "../lib/back-arrow.js";
+import { armFullscreenTool } from "../lib/fullscreen-tool.js";
 import { ErrorCode, Message, asResult, fail } from "../lib/protocol.js";
 import { BACK_ROAD_KEY, writeVocabTab } from "../lib/session.js";
 import { restoreVocabulary } from "../lib/store/backup.js";
@@ -1222,6 +1223,12 @@ brandButton?.addEventListener("click", () => goToSettings());
 // another tab, it brings that tab forward. The three states and their order
 // live in `lib/back-arrow.js`, shared with the settings page.
 armBackArrow();
+
+// The bar's full-screen tool (D195; every page since D220): the reader
+// bar's own, in `lib/fullscreen-tool.js` - where the browser has a full
+// screen to give and the row has room, with the open panel put away before
+// the screen changes.
+armFullscreenTool(document.getElementById("fullscreen"), closePanels);
 
 // The phrases-tab bookkeeping, the reader's exactly (D139/D140, applied here
 // by D141): this tab is the one phrases tab for as long as the phrases are
