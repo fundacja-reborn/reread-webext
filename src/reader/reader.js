@@ -230,6 +230,7 @@ import {
   readingState,
   readingVoice,
   skipSentence,
+  startReading,
   stopReading,
   toggleReading,
 } from "./read-aloud.js";
@@ -314,6 +315,7 @@ const underlineSetting = document.getElementById("underline-setting");
 const rateSetting = document.getElementById("rate-setting");
 const rateValue = document.getElementById("rate-value");
 const speechBar = document.getElementById("speech-bar");
+const speechPlayButton = document.getElementById("speech-play");
 const speechPlayLabel = document.getElementById("speech-play-label");
 const library = document.getElementById("library");
 const librarySegments = document.getElementById("library-segments");
@@ -6076,6 +6078,12 @@ function showSpeechBar(state) {
   // over the window's foot cost more article than either tool was worth.
   if (state !== "off") setMarker(false);
   if (speechBar !== null) {
+    // A keyboard's focus can be standing on the transport when the bar goes
+    // (a keyboard start parks it there, `onListenPress`; a pointer's press
+    // leaves none behind). It goes back to the switch that opened the bar,
+    // the way the panels hand theirs back on Escape, rather than dropping
+    // on the body for a keyboard to hunt from the top.
+    if (state === "off" && speechBar.contains(document.activeElement)) listenButton?.focus();
     speechBar.hidden = state === "off";
     speechBar.dataset["state"] = state;
   }
@@ -7038,18 +7046,48 @@ configureReading({
  * for a real pointer.
  *
  * @param {string} id
- * @param {() => void} act
+ * @param {(keyboard: boolean) => void} act told which kind of press it was
  */
 function onSpeechPress(id, act) {
   document.getElementById(id)?.addEventListener("click", (event) => {
-    if (event.detail > 0 && event.currentTarget instanceof HTMLElement) {
+    const keyboard = event.detail === 0;
+    if (!keyboard && event.currentTarget instanceof HTMLElement) {
       event.currentTarget.blur();
     }
-    act();
+    act(keyboard);
   });
 }
 
-onSpeechPress("listen", () => toggleReading());
+/**
+ * The speaker in the bar at the top is the switch, and the bar at the bottom
+ * is the transport (D227). Lit, the voice is on - reading or paused - and a
+ * press on it lit turns the voice off, the way the pen beside it pressed again
+ * puts the pen down. Pause and resume live on the transport and on the space
+ * bar; a third copy of them up here, far from the thumb on a phone, left a lit
+ * speaker over silence (Michał, 2026-09-15: the speaker pressed, the bar
+ * saying Resume).
+ *
+ * A start from the keyboard hands the focus to the transport's Pause. The
+ * button pressed keeps the focus otherwise (`onSpeechPress`), and a focused
+ * button answers the space bar by pressing itself (`lib/reader/keys.js`) -
+ * which, with the speaker now a switch, would make the first space bar after a
+ * keyboard start stop the reading instead of pausing it. On the transport the
+ * space bar means what it means in every player.
+ *
+ * @param {boolean} keyboard
+ */
+function onListenPress(keyboard) {
+  if (readingState() !== "off") {
+    stopReading();
+    return;
+  }
+  startReading();
+  // Only when the voice really started: an engine that refused, or a language
+  // no voice on this device reads offline, leaves no bar to stand on.
+  if (keyboard && readingState() !== "off") speechPlayButton?.focus();
+}
+
+onSpeechPress("listen", onListenPress);
 onSpeechPress("speech-play", () => toggleReading());
 onSpeechPress("speech-stop", () => stopReading());
 onSpeechPress("speech-back", () => skipSentence(-1));
