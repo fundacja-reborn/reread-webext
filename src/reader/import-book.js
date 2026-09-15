@@ -66,6 +66,7 @@ import { framedPictureHref, packedChars } from "../lib/book/pictures.js";
 import { BOOK_CUT_VERSION, isHeadingTag, segmenter } from "../lib/book/segment.js";
 import { cappedToc, headingEntries } from "../lib/book/toc.js";
 import { buildArticle } from "../lib/reader/article.js";
+import { wordsIn } from "../lib/reader/length.js";
 import { bookRecord } from "../lib/store/book.js";
 import { deleteBook, putBook, putBookSegment } from "../lib/store/books.js";
 import { archivePictures, pictureKeeper } from "./book-pictures.js";
@@ -300,6 +301,10 @@ export async function importEpub(file, onProgress) {
     };
     let written = 0;
     let totalChars = 0;
+    // The words of the whole book (D226), summed as its parts are written -
+    // the one moment every block passes through in the shape the reader
+    // will count it in, so the row's number and a part's agree.
+    let words = 0;
     /** @type {import("../lib/book/toc.js").TocEntry[]} */
     const tocEntries = [];
 
@@ -326,6 +331,7 @@ export async function importEpub(file, onProgress) {
         tocEntries.push(...headingEntries(blocks, written));
         written += 1;
         totalChars += segment.charCount;
+        words += wordsIn(blocks.join(""));
         progress.segments = written;
         onProgress({ ...progress });
       }
@@ -393,6 +399,7 @@ export async function importEpub(file, onProgress) {
       toc: cappedToc(tocEntries),
       pictures: keeper.summary(),
       cut: BOOK_CUT_VERSION,
+      words,
     });
     // No record means no text worth keeping came out - a spine of covers.
     if (book === null) throw new Error("nothing to keep");

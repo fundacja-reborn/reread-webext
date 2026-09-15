@@ -105,6 +105,9 @@ export function bookEntry(book, position) {
     // article's - the one place the space a document costs is said before
     // it is opened.
     ...(book.pictures === undefined ? {} : { pictures: book.pictures }),
+    // Its words too (D226), the whole book's: the row says how long the
+    // reading is, the part on screen says its own share once opened.
+    ...(book.words === undefined ? {} : { words: book.words }),
   };
 }
 

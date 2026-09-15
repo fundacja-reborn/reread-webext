@@ -209,6 +209,31 @@ export async function setPictures(url, pictures) {
 }
 
 /**
+ * The light row's count of words (D226), filled in for a row from before the
+ * field by the reader that opened it - only for such a row: the count is
+ * derived from content that cannot change without the row being rewritten
+ * (`putArticle` counts as it writes), so a row that has one keeps it, and
+ * two reader tabs filling the same row write the same number once. A no-op
+ * when the article is gone, like every patch of the light row.
+ *
+ * @param {string} url
+ * @param {number} words
+ * @returns {Promise<boolean>} whether the row was filled
+ */
+export async function setWords(url, words) {
+  const updated = await withLibrary("readwrite", async (stores) => {
+    const row = asSavedMeta(await promisify(stores.meta.get(url)));
+    if (row === null || row.words !== undefined) return null;
+    /** @type {SavedMeta} */
+    const updated = { ...row, words };
+    await promisify(stores.meta.put(updated));
+    return updated;
+  });
+  if (updated !== null) await patchArticleCopy(updated);
+  return updated !== null;
+}
+
+/**
  * Where this document's reader stopped, or null for the top - which is also
  * the answer for a torn row, exactly as `restoredIndex` will read it.
  *

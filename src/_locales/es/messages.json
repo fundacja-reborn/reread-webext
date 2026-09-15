@@ -941,6 +941,46 @@
       "parts": { "content": "$2", "example": "12" }
     }
   },
+  "reader_words_one": {
+    "message": "$COUNT$ palabra",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_words_many": {
+    "message": "$COUNT$ palabras",
+    "placeholders": { "count": { "content": "$1", "example": "1.234.567" } }
+  },
+  "reader_words_other": {
+    "message": "$COUNT$ palabras",
+    "placeholders": { "count": { "content": "$1", "example": "1234" } }
+  },
+  "reader_time_minutes": {
+    "message": "aprox. $MINUTES$ min",
+    "placeholders": { "minutes": { "content": "$1", "example": "12" } }
+  },
+  "reader_time_hours": {
+    "message": "aprox. $HOURS$ h",
+    "placeholders": { "hours": { "content": "$1", "example": "8" } }
+  },
+  "reader_time_hours_minutes": {
+    "message": "aprox. $HOURS$ h $MINUTES$ min",
+    "placeholders": {
+      "hours": { "content": "$1", "example": "1" },
+      "minutes": { "content": "$2", "example": "35" }
+    }
+  },
+  "reader_phrases_here_one": {
+    "message": "$COUNT$ frase guardada en este texto",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_phrases_here_many": {
+    "message": "$COUNT$ frases guardadas en este texto",
+    "placeholders": { "count": { "content": "$1", "example": "1.000.000" } }
+  },
+  "reader_phrases_here_other": {
+    "message": "$COUNT$ frases guardadas en este texto",
+    "placeholders": { "count": { "content": "$1", "example": "7" } }
+  },
+  "reader_phrases_here_none": { "message": "Ninguna frase guardada en este texto" },
   "reader_percent_read": {
     "message": "$PERCENT$ % leído",
     "placeholders": {

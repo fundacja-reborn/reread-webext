@@ -71,6 +71,7 @@ import { fileOrder } from "../lib/store/articles-file.js";
 import { asDocState, asMarksState, docState, marksState } from "../lib/reader/history-state.js";
 import { importKind } from "../lib/reader/import-kind.js";
 import { speechAction } from "../lib/reader/keys.js";
+import { readingTime, wordsIn } from "../lib/reader/length.js";
 import { wordless } from "../lib/matcher/words.js";
 import {
   compareMarks,
@@ -118,6 +119,7 @@ import {
   putPosition,
   setPictures,
   setReadAt,
+  setWords,
 } from "../lib/store/articles.js";
 import { savePictures } from "./pictures.js";
 import { entryReader, listEntries, packArchive } from "./zip.js";
@@ -141,6 +143,7 @@ import {
   putBookSegment,
   setBookReadAt,
   setBookToc,
+  setBookWords,
   sweepOrphanSegments,
 } from "../lib/store/books.js";
 import {
@@ -261,6 +264,7 @@ const noticeClose = document.getElementById("notice-close");
 const article = document.getElementById("article");
 const titleElement = document.getElementById("title");
 const bylineElement = document.getElementById("byline");
+const factsElement = document.getElementById("facts");
 const contentElement = document.getElementById("content");
 const originalLink = document.getElementById("original");
 const brandButton = document.getElementById("brand");
@@ -542,6 +546,17 @@ let picturesNote = null;
 let shownPictures = [];
 
 /**
+ * The two facts the header line says about the text on screen (D226): how
+ * many words it holds - counted off the same markup a save would write, so
+ * the header and the list row can never disagree - and how many of the
+ * reader's saved phrases the paint found in it: null until something is
+ * painted, and wherever there is nothing to paint (`onPainted`).
+ */
+let shownWords = 0;
+/** @type {number | null} */
+let foundPhrases = null;
+
+/**
  * The addresses whose reader said no on this way in: deleted from the
  * article, or from the list. The default keep (D124) is only ever on the way
  * in - and this tab's way in is the live page, which a reload of the tab, or
@@ -635,6 +650,14 @@ let tocBlocks = [];
  * @type {Set<string>}
  */
 const tocScansRunning = new Set();
+
+/**
+ * Books whose words are being summed in this page (D226) - the same
+ * one-at-a-time guard the TOC scan has, for the same reason.
+ *
+ * @type {Set<string>}
+ */
+const wordScansRunning = new Set();
 
 /**
  * The mark the toolbar is about, while it shows (D107). Which one it is on
@@ -1076,8 +1099,15 @@ function renderArticle(piece) {
   // (D109), and the underlines found again now that there is different text
   // under the ground. Nothing is asked of storage: the vocabulary did not
   // change, only what it can be found in.
+  // The header's facts (D226): the words counted now, off the markup exactly
+  // as a save would serialize it; the phrases once the paint has spoken -
+  // which the rescan below does at once when the vocabulary is already in,
+  // and `onPainted` does later when it arrives.
+  shownWords = wordsIn(rebuilt.innerHTML);
+  foundPhrases = null;
   rootReadingSide(article);
   rescan();
+  renderFacts();
 
   if (originalLink instanceof HTMLAnchorElement) {
     // The same door the orphan rows' links go through (D150, `webAddress`):
@@ -1124,6 +1154,43 @@ function renderArticle(piece) {
   // that restore a position must have them laid out BEFORE the scroll - the
   // bar stands above the article, and appearing later it would push the
   // restored block down the exact height it takes.
+}
+
+/**
+ * The line under the byline (D226): how long the text on screen is, and how
+ * many of the reader's saved phrases stand in it. Each piece only where it
+ * says something: a text of pictures alone has no words to count, and the
+ * phrases are said once something has been painted - never where there is
+ * nothing to paint, so a reader who has saved nothing yet is not told
+ * "none" over every text.
+ */
+function renderFacts() {
+  if (factsElement === null) return;
+  /** @type {string[]} */
+  const pieces = [];
+  if (shownWords > 0) pieces.push(plural(shownWords, "reader_words"), timeLabel(shownWords));
+  if (foundPhrases !== null) {
+    pieces.push(
+      foundPhrases === 0 ? t("reader_phrases_here_none") : plural(foundPhrases, "reader_phrases_here"),
+    );
+  }
+  factsElement.textContent = pieces.join(" · ");
+  factsElement.hidden = pieces.length === 0;
+}
+
+/**
+ * About how long a count of words takes to read, said the way the catalogue
+ * says it: minutes under an hour, hours - and minutes, when there are any -
+ * above it (`readingTime`). One place for the list's rows and the header.
+ *
+ * @param {number} words
+ * @returns {string}
+ */
+function timeLabel(words) {
+  const { hours, minutes } = readingTime(words);
+  if (hours === 0) return t("reader_time_minutes", minutes.toLocaleString());
+  if (minutes === 0) return t("reader_time_hours", hours.toLocaleString());
+  return t("reader_time_hours_minutes", [hours.toLocaleString(), minutes.toLocaleString()]);
 }
 
 /**
@@ -2564,6 +2631,10 @@ async function openSaved(url, target) {
   const shownSet = shownPictureSet(pictures);
   renderSaved(saved, shownSet.resolve);
   shownPictures = shownSet.addresses;
+  // A row from before the count (D226) gets it now, from the text the
+  // render just counted for the header - behind the reading, never in its
+  // way, and the row is what stops the next open from counting again.
+  if (saved.words === undefined) void setWords(url, shownWords).catch(() => undefined);
   docMarks = marks;
   repaintMarks();
   // The action rows first, the scroll second: they stand above the article,
@@ -2822,6 +2893,33 @@ async function backfillToc(book) {
 }
 
 /**
+ * A book from before the count (D226) gets it now: every part read once,
+ * behind the reading, and the sum written to the row - which is what stops
+ * the next open from summing again. The parts are read one at a time, as
+ * the TOC scan reads them, so a long book never stands whole in memory.
+ *
+ * @param {BookMeta} book
+ */
+async function backfillWords(book) {
+  if (wordScansRunning.has(book.id)) return;
+  wordScansRunning.add(book.id);
+  try {
+    let words = 0;
+    for (let index = 0; index < book.segmentCount; index += 1) {
+      const segment = await getBookSegment(book.id, index);
+      // A torn part reads as absent; the row keeps the count of what is readable.
+      if (segment !== null) words += wordsIn(segment.blocks.join(""));
+    }
+    await setBookWords(book.id, words);
+  } catch {
+    // A closed database or a torn book: no count today, another try at the
+    // next open.
+  } finally {
+    wordScansRunning.delete(book.id);
+  }
+}
+
+/**
  * Opens a book at one of its segments - the remembered one when no segment
  * is asked for, which is what a press in the list means. The same round trip
  * and epoch guard as a saved article; the render is `renderArticle` whole,
@@ -2891,6 +2989,8 @@ async function openBook(id, wanted, target) {
   // A row from before the TOC existed is owed its scan (D116) - behind the
   // reading, never in its way.
   if (book.toc === null) void backfillToc(book);
+  // A book from before the count (D226) is owed its sum the same way.
+  if (book.words === undefined) void backfillWords(book);
   // The whole book's marks, painted for the part on screen; a turned part
   // reloads them fresh, which is also what keeps two reader tabs honest.
   docMarks = marks;
@@ -3584,6 +3684,14 @@ function detailLine(entry) {
     entry.pictures === undefined
       ? ""
       : plural(entry.pictures.count, "library_pictures", [megabytes(entry.pictures.bytes)]);
+  // How long the text is (D226): its words and about how many minutes they
+  // take, on a row that has been counted - a row from before the count says
+  // nothing until its next open fills it, and a text of pictures alone says
+  // nothing rather than "0 words".
+  const length =
+    entry.words === undefined || entry.words === 0
+      ? ""
+      : `${plural(entry.words, "reader_words")} · ${timeLabel(entry.words)}`;
   if (entry.kind === "book") {
     const progress =
       entry.progress === null
@@ -3592,12 +3700,12 @@ function detailLine(entry) {
             entry.progress.at.toLocaleString(),
             entry.progress.of.toLocaleString(),
           ]);
-    detail.textContent = [entry.hostname, t("reader_book_label"), progress, pictures, percent]
+    detail.textContent = [entry.hostname, t("reader_book_label"), progress, length, pictures, percent]
       .filter((part) => part.length > 0)
       .join(" - ");
   } else {
     const when = entry.savedAt > 0 ? new Date(entry.savedAt).toLocaleDateString() : "";
-    detail.textContent = [entry.hostname, when, pictures, percent]
+    detail.textContent = [entry.hostname, when, length, pictures, percent]
       .filter((part) => part.length > 0)
       .join(" - ");
   }
@@ -7143,6 +7251,14 @@ function rootReadingSide(ground) {
     // `auto` names nothing - the browser answers there, and so does the
     // bubble's own media query.
     scheme: () => (settings.reader.theme === "auto" ? null : settings.reader.theme),
+    // How many saved phrases the paint found in the text (D226), for the
+    // header line - only over a document: the highlights page roots the
+    // side over its quote rows, and their count is nobody's text.
+    onPainted: (found) => {
+      if (readingGround !== article) return;
+      foundPhrases = found;
+      renderFacts();
+    },
     // The highlighter's hooks (D106): whether the pen is in the hand, where
     // marks may anchor (the rebuilt content - the reader's own title has no
     // block order to write against), what a finished stroke becomes, and what

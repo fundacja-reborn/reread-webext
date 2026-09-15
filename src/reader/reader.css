@@ -647,10 +647,17 @@ html {
   max-width: 100%;
 }
 
-.reader-byline {
+.reader-byline,
+.reader-facts {
   margin: 0 0 2rem;
   color: var(--page-muted);
   font-size: 0.9em;
+}
+
+/* The byline and the facts line (D226) read as two lines of one block when
+   both stand: the gap to the text belongs under the last of them. */
+.reader-byline:has(+ .reader-facts:not([hidden])) {
+  margin-bottom: 0.35rem;
 }
 
 #page {

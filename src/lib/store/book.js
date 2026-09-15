@@ -9,6 +9,7 @@
  * cleared only by hand, because opening a book is not reading it.
  */
 
+import { asWordCount } from "../reader/length.js";
 import { asPicturesSummary } from "../reader/pictures.js";
 
 /**
@@ -31,6 +32,13 @@ import { asPicturesSummary } from "../reader/pictures.js";
  * written). Absent on rows from before the field, which read as the cut
  * of 1 - a book cut before pictures had a weight.
  *
+ * `words` is how many words the whole book holds (D226), summed over its
+ * segments at import - the same field, with the same meaning, an article's
+ * light row carries (`saved-article.js`), so the list says how long a book
+ * is the way it says it of an article. Absent on rows from before the
+ * field, which the reader counts and fills the next time the book is
+ * opened, the way it fills a missing table of contents.
+ *
  * @typedef {{
  *   id: string,
  *   title: string,
@@ -43,6 +51,7 @@ import { asPicturesSummary } from "../reader/pictures.js";
  *   toc: import("../book/toc.js").TocEntry[] | null,
  *   pictures?: import("../reader/pictures.js").PicturesSummary,
  *   cut?: number,
+ *   words?: number,
  * }} BookMeta
  */
 
@@ -118,10 +127,11 @@ function asToc(value) {
  *   toc?: import("../book/toc.js").TocEntry[],
  *   pictures?: import("../reader/pictures.js").PicturesSummary | null,
  *   cut?: number,
+ *   words?: number,
  * }} input
  * @returns {BookMeta | null}
  */
-export function bookRecord({ id, title, author, lang, segmentCount, totalChars, addedAt, toc, pictures, cut }) {
+export function bookRecord({ id, title, author, lang, segmentCount, totalChars, addedAt, toc, pictures, cut, words }) {
   if (typeof id !== "string" || id.length === 0) return null;
   const shown = typeof title === "string" ? title.trim() : "";
   if (shown.length === 0) return null;
@@ -147,6 +157,8 @@ export function bookRecord({ id, title, author, lang, segmentCount, totalChars, 
     ...(kept === null ? {} : { pictures: kept }),
     // The cut's version rides only as a count - anything else is no version.
     ...(isCount(cut) ? { cut } : {}),
+    // The words as the import summed them (D226); zero is a count too.
+    ...(asWordCount(words) === null ? {} : { words }),
   };
 }
 
@@ -161,11 +173,12 @@ export function bookRecord({ id, title, author, lang, segmentCount, totalChars, 
  */
 export function asBookMeta(value) {
   if (typeof value !== "object" || value === null) return null;
-  const { id, title, author, lang, segmentCount, totalChars, addedAt, readAt, toc, pictures, cut } =
+  const { id, title, author, lang, segmentCount, totalChars, addedAt, readAt, toc, pictures, cut, words } =
     /** @type {Record<string, unknown>} */ (value);
   if (typeof id !== "string" || id.length === 0) return null;
   if (!isCount(segmentCount)) return null;
   const kept = asPicturesSummary(pictures);
+  const counted = asWordCount(words);
 
   return {
     id,
@@ -187,6 +200,9 @@ export function asBookMeta(value) {
     // Absent on rows from before D218, and whenever what stands there is
     // not a count; both read as the cut of 1.
     ...(isCount(cut) ? { cut } : {}),
+    // Absent on rows from before D226, and whenever what stands there is
+    // not a count; both read as "not counted yet", owed to the next open.
+    ...(counted === null ? {} : { words: counted }),
   };
 }
 

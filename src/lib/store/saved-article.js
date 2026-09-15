@@ -23,6 +23,12 @@
  * which is every article saved before pictures and every one whose reader
  * never asked for them.
  *
+ * `words` is how many words the content holds (D226), counted off the
+ * markup as the row is written, so the list can say how long a text is
+ * and about how many minutes it takes without opening it. Absent on a row
+ * from before the field, which the reader counts and fills the next time
+ * the article is opened.
+ *
  * @typedef {{
  *   url: string,
  *   hostname: string,
@@ -30,6 +36,7 @@
  *   savedAt: number,
  *   readAt: number | null,
  *   pictures?: import("../reader/pictures.js").PicturesSummary,
+ *   words?: number,
  * }} SavedMeta
  */
 
@@ -42,6 +49,7 @@
  */
 
 import { t } from "../i18n.js";
+import { asWordCount, wordsIn } from "../reader/length.js";
 import { asPicturesSummary } from "../reader/pictures.js";
 
 /** The two segments of the list, and the only filter it has. */
@@ -69,7 +77,9 @@ const ARTICLE_SCHEMES = new Set(["http:", "https:", "file:"]);
  * The hostname is derived here, once, so the list never parses URLs to render
  * rows. A URL without a hostname (`file:`) is still an article; its row just
  * has no domain to show, and the title falls back to the address rather than
- * to an empty line.
+ * to an empty line. The words are counted here for the same reason (D226):
+ * every road into the list - the save, the file import - passes through,
+ * and a row written here is a row the list never has to open to measure.
  *
  * @param {{
  *   url: string,
@@ -105,6 +115,7 @@ export function savedArticle({ url, title, content, dir, lang, savedAt }) {
     title: shown.length > 0 ? shown : hostname.length > 0 ? hostname : url,
     savedAt,
     readAt: null,
+    words: wordsIn(content),
     content,
     dir: keptWord(dir),
     lang: keptWord(lang),
@@ -136,14 +147,14 @@ function keptWord(value) {
  */
 export function asSavedMeta(value) {
   if (typeof value !== "object" || value === null) return null;
-  const { url, hostname, title, savedAt, readAt, pictures } = /** @type {Record<string, unknown>} */ (
-    value
-  );
+  const { url, hostname, title, savedAt, readAt, pictures, words } =
+    /** @type {Record<string, unknown>} */ (value);
   if (typeof url !== "string" || url.length === 0) return null;
 
   const host = typeof hostname === "string" ? hostname : "";
   const shown = typeof title === "string" && title.length > 0 ? title : host.length > 0 ? host : url;
   const kept = asPicturesSummary(pictures);
+  const counted = asWordCount(words);
 
   return {
     url,
@@ -154,6 +165,9 @@ export function asSavedMeta(value) {
     // The field stands only where there are pictures: a row without it is
     // one shape everywhere, and a row from before pictures reads as one.
     ...(kept === null ? {} : { pictures: kept }),
+    // Absent on a row from before D226 and wherever what stands there is not
+    // a count; both read as "not counted yet", which the next open provides.
+    ...(counted === null ? {} : { words: counted }),
   };
 }
 
