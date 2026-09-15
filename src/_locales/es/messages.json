@@ -89,7 +89,7 @@
 
   "vocab_title": { "message": "re/read - frases guardadas" },
   "vocab_intro": {
-    "message": "Todas las frases que guardaste para este par de idiomas, las más recientes primero - guardadas mientras leías y almacenadas solo en este dispositivo. «$LEARNED$» quita una frase y sus subrayados con ella; «$EDIT$» reescribe sus significados, uno por línea. Varios significados a la vez: sepáralos con punto y coma. Junto a una frase, dos números - una lupa y un libro: cuántas veces la consultaste (abriste su burbuja) y cuántas veces apareció en los textos que terminaste - una parte de un libro que dejaste con «Siguiente» bajo el texto, o un artículo marcado como leído. La lista puede ordenarse por cualquiera de los dos.",
+    "message": "Todas las frases que guardaste para este par de idiomas, las más recientes primero - guardadas mientras leías y almacenadas solo en este dispositivo. «$LEARNED$» pasa una frase a la lista «Aprendidas» y le quita los subrayados; «$EDIT$» reescribe sus significados, uno por línea. Varios significados a la vez: sepáralos con punto y coma. Junto a una frase, dos números - una lupa y un libro: cuántas veces la consultaste (abriste su burbuja) y cuántas veces apareció en los textos que terminaste - una parte de un libro que dejaste con «Siguiente» bajo el texto, o un artículo marcado como leído. La lista puede ordenarse por cualquiera de los dos.",
     "placeholders": {
       "learned": { "content": "$1", "example": "Aprendida" },
       "edit": { "content": "$2", "example": "Editar" }
@@ -168,6 +168,65 @@
   "vocab_empty": {
     "message": "Aún no hay nada guardado para este par. Selecciona una frase mientras lees y pulsa «$BUTTON$» - te estará esperando aquí.",
     "placeholders": { "button": { "content": "$1", "example": "Guardar" } }
+  },
+  "vocab_segment_learning": { "message": "Por aprender" },
+  "vocab_segment_learned": { "message": "Aprendidas" },
+  "vocab_segment_learning_count": {
+    "message": "Por aprender ($COUNT$)",
+    "placeholders": { "count": {"content":"$1","example":"12"} }
+  },
+  "vocab_segment_learned_count": {
+    "message": "Aprendidas ($COUNT$)",
+    "placeholders": { "count": {"content":"$1","example":"12"} }
+  },
+  "vocab_count_filtered_learned_one": {
+    "message": "$MATCHING$ de $TOTAL$ frase aprendida",
+    "placeholders": { "total": {"content":"$1","example":"26"}, "matching": {"content":"$2","example":"8"} }
+  },
+  "vocab_count_filtered_learned_other": {
+    "message": "$MATCHING$ de $TOTAL$ frases aprendidas",
+    "placeholders": { "total": {"content":"$1","example":"26"}, "matching": {"content":"$2","example":"8"} }
+  },
+  "vocab_unlearn": { "message": "Volver a aprender" },
+  "vocab_unlearn_aria": {
+    "message": "Volver a aprender: $PHRASE$",
+    "placeholders": { "phrase": {"content":"$1","example":"bank"} }
+  },
+  "vocab_delete_aria": {
+    "message": "Eliminar para siempre: $PHRASE$",
+    "placeholders": { "phrase": {"content":"$1","example":"bank"} }
+  },
+  "vocab_delete_learned_one": {
+    "message": "Eliminar la $COUNT$ frase aprendida",
+    "placeholders": { "count": {"content":"$1","example":"12"} }
+  },
+  "vocab_delete_learned_other": {
+    "message": "Eliminar las $COUNT$ frases aprendidas",
+    "placeholders": { "count": {"content":"$1","example":"12"} }
+  },
+  "vocab_delete_learned_confirm_one": {
+    "message": "Confirmar: eliminar para siempre la $COUNT$ frase aprendida",
+    "placeholders": { "count": {"content":"$1","example":"12"} }
+  },
+  "vocab_delete_learned_confirm_other": {
+    "message": "Confirmar: eliminar para siempre las $COUNT$ frases aprendidas",
+    "placeholders": { "count": {"content":"$1","example":"12"} }
+  },
+  "vocab_deleted_learned_one": {
+    "message": "Se eliminó $COUNT$ frase aprendida.",
+    "placeholders": { "count": {"content":"$1","example":"12"} }
+  },
+  "vocab_deleted_learned_other": {
+    "message": "Se eliminaron $COUNT$ frases aprendidas.",
+    "placeholders": { "count": {"content":"$1","example":"12"} }
+  },
+  "vocab_learned_empty": {
+    "message": "Aún no hay nada marcado como aprendido. Pulsa «$BUTTON$» junto a una frase - en la burbuja o en esta lista - y pasará aquí.",
+    "placeholders": { "button": {"content":"$1","example":"Learned"} }
+  },
+  "vocab_empty_all_learned": {
+    "message": "Todas las frases guardadas para este par están en la lista «Aprendidas». Selecciona una frase mientras lees y pulsa «$BUTTON$» - te estará esperando aquí.",
+    "placeholders": { "button": { "content": "$1", "example": "Save" } }
   },
   "vocab_filter_status_one": {
     "message": "$SHOWN$ de $TOTAL$ frase para «$QUERY$»",
@@ -274,7 +333,7 @@
   "action_import": { "message": "Importar" },
   "transfer_heading": { "message": "Importar y exportar" },
   "vocab_transfer_note": {
-    "message": "Un archivo .tsv de dos columnas - el mismo formato que escribe el plugin de KOReader y que lee Anki. La importación solo añade frases que faltan en este par; lo guardado no se toca. En la celda de significados, un punto y coma seguido de espacio separa los significados; sin espacio, se queda dentro del significado. «Exportar para Anki» escribe una tercera columna con la oración en la que se guardó cada frase - vacía cuando no la hay. Ese archivo también se puede importar aquí: las oraciones vuelven con las frases, y una frase ya guardada toma la oración del archivo solo cuando no tiene una propia."
+    "message": "Un archivo .tsv de dos columnas - el mismo formato que escribe el plugin de KOReader y que lee Anki. La importación solo añade frases que faltan en este par; lo guardado no se toca. En la celda de significados, un punto y coma seguido de espacio separa los significados; sin espacio, se queda dentro del significado. «Exportar para Anki» escribe una tercera columna con la oración en la que se guardó cada frase - vacía cuando no la hay. Ese archivo también se puede importar aquí: las oraciones vuelven con las frases, y una frase ya guardada toma la oración del archivo solo cuando no tiene una propia. Las frases marcadas como aprendidas no van a ninguno de estos archivos; solo la copia de seguridad de todo, hecha desde la lista de lectura, las lleva."
   },
   "vocab_import_into": { "message": "Importar a" },
   "vocab_import_nothing": { "message": "Ese archivo no contiene frases para importar." },

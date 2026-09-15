@@ -446,7 +446,8 @@ describe("the saved-phrases page's fold", () => {
     assert.match(arrival, /history\.replaceState\(/, "the fragment stays on the address for the next reload");
     // The list narrowed to the phrase as well (the fourth brief), then the
     // fold opened and the field asked.
-    assert.match(arrival, /query = text;\s*page = 1;\s*if \(filterInput !== null\) filterInput\.value = text;\s*filterClear\?\.refresh\(\);\s*renderList\(\);/, "the list is not narrowed to the phrase on arrival");
+    // On the learning shelf (D224): a tick's row appears there.
+    assert.match(arrival, /segment = Segment\.LEARNING;\s*query = text;\s*page = 1;\s*if \(filterInput !== null\) filterInput\.value = text;\s*filterClear\?\.refresh\(\);\s*renderSegments\(\);\s*renderList\(\);/, "the list is not narrowed to the phrase on arrival, on the learning shelf");
     assert.match(arrival, /addFold\.open = true;\s*void lookupBox\.search\(text\)/, "the fold does not open on the phrase, or the field is not asked");
     assert.match(script, /window\.addEventListener\("hashchange", arriveWithPhrase\)/, "a turn of the open tab goes unheard");
     // Asked only once the list is in - the field reads the phrase's standing

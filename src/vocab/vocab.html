@@ -268,7 +268,25 @@
         <label for="pair" class="visually-hidden" data-i18n="language_pair">Language pair</label>
         <select id="pair"></select>
       </div>
-      <!-- The one counter this page has; the select's options carry none. -->
+      <!-- The two shelves of the vocabulary (D224), said with pressed buttons
+           the way the reading list says its two halves: the phrases still
+           being learned - underlined, exported, "saved" to the popup - and
+           the ones marked Learned, which stay here with their meanings,
+           sentence and counts until "Back to learning" or a deletion for
+           good. The labels wear the whole shelves' counts once the list is
+           read, so the two always add up to everything saved for the pair. -->
+      <div class="phrase-segments" id="phrase-segments">
+        <button type="button" data-segment="learning" aria-pressed="true" data-i18n="vocab_segment_learning">
+          To learn
+        </button>
+        <button type="button" data-segment="learned" aria-pressed="false" data-i18n="vocab_segment_learned">
+          Learned
+        </button>
+      </div>
+      <!-- The one counter this page has, and only while the filter narrows
+           the shelf: the segment buttons carry the whole counts, and two
+           numbers for one list drift apart in the eye. The select's options
+           carry none either. -->
       <p class="hint" id="count" hidden></p>
       <!-- The intro's fold shares its line with a quiet anchor: the transfer
            section lives under the list, and this link is how it is found
@@ -278,8 +296,8 @@
           <summary data-i18n="vocab_how_title">How it works</summary>
           <p id="intro">
             Every phrase you kept for this language pair, newest first - saved while reading, stored
-            only on this device. Learned removes a phrase and its underlines with it; Edit rewrites
-            what it means, one meaning per line.
+            only on this device. Learned moves a phrase to the Learned list and takes its underlines
+            away; Edit rewrites what it means, one meaning per line.
           </p>
         </details>
         <a href="#transfer" data-i18n="transfer_heading">Import and export</a>
@@ -407,6 +425,18 @@
       </button>
     </nav>
 
+    <!-- The learned shelf's one act on the whole shelf (D224): every learned
+         phrase of this pair deleted for good, behind the two presses every
+         deletion here asks (the highlights page's "delete all", D150) - the
+         second on the very spot the first landed, the button holding its
+         width under the shorter question. Words, not a glyph: "all" is a
+         scope only words can carry. Under the pager, so it is read after
+         the rows it is about; shown by vocab.js on the learned shelf alone,
+         and only while the shelf holds anything. -->
+    <p id="learned-actions" class="learned-actions" hidden>
+      <button type="button" id="delete-learned" class="quiet quiet-delete-all"></button>
+    </p>
+
     <!-- Import and export, after the list the way the acts themselves come
          after the reading: visiting them is a decision, not a toll on the way
          to the rows, and the anchor in the header is the short way here. -->
@@ -457,7 +487,8 @@
           its meaning. Export for Anki writes a third column with the sentence each phrase was saved
           in - empty when none was kept. That file can be imported back too: its sentences come
           along, and a phrase already saved takes the file's sentence only when it has none of
-          its own.
+          its own. Phrases marked Learned are written to neither file; they travel only in the
+          backup of everything, made from the reading list.
         </p>
       </details>
       <input type="file" id="import-file" accept=".tsv,text/tab-separated-values" hidden />

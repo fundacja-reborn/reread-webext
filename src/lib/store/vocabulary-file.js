@@ -20,7 +20,7 @@
  */
 
 import { asRestoreRow } from "../protocol.js";
-import { countsOf, hasSentence } from "./phrase.js";
+import { countsOf, hasSentence, isLearned } from "./phrase.js";
 
 /** @typedef {import("./phrase.js").Phrase} Phrase */
 /** @typedef {import("../protocol.js").RestoreRow} RestoreRow */
@@ -43,8 +43,11 @@ export const VOCABULARY_ENTRY = "vocabulary.json";
  * with the id as the tie - the TSV's own order within a pair - so two
  * exports of the same vocabulary are the same file. A field a row does not
  * have is not written: a phrase never checked carries no count, one
- * without a sentence no sentence, and the file of somebody who never
- * turned either on reads as plainly as their TSV.
+ * without a sentence no sentence, one still being learned no learned mark
+ * (D224), and the file of somebody who never turned either on reads as
+ * plainly as their TSV. The learned rows are in the file - it is the one
+ * file that carries them, so that a backup restored on a fresh device
+ * brings them back learned and not underlined.
  *
  * @param {Phrase[]} phrases as the store holds them, any pair
  * @returns {RestoreRow[]}
@@ -77,6 +80,7 @@ export function vocabularyRows(phrases) {
         row.readCount = reads;
         if (typeof phrase.lastReadAt === "number") row.lastReadAt = phrase.lastReadAt;
       }
+      if (isLearned(phrase)) row.learnedAt = /** @type {number} */ (phrase.learnedAt);
       return row;
     });
 }

@@ -27,12 +27,15 @@ import { openLibrary, openMarks, openReader, readInReader } from "./reader-tab.j
 import { openSettings, openVocabulary } from "./room-tab.js";
 import {
   countPhrases,
+  deleteLearned,
+  deletePhrase,
   forgetPhrase,
   importPhrases,
   listVocabulary,
   refreshVocabulary,
   restoreFromBackup,
   savePhrase,
+  unlearnPhrase,
 } from "./vocabulary.js";
 
 // The engine itself starts on the first translation, not here: this module runs
@@ -50,6 +53,7 @@ setProvider(offscreenApi() === null ? bergamot : bergamotViaHost);
  *   | import("../lib/protocol.js").LookUp
  *   | import("../lib/protocol.js").VocabEntry[]
  *   | import("../lib/protocol.js").ImportReport
+ *   | import("../lib/protocol.js").DeleteLearnedReport
  *   | import("../lib/protocol.js").Page} Answer
  */
 
@@ -192,6 +196,12 @@ async function handle(request, sender) {
       return await savePhrase(request);
     case Message.FORGET_PHRASE:
       return await forgetPhrase(request);
+    case Message.UNLEARN_PHRASE:
+      return await unlearnPhrase(request);
+    case Message.DELETE_PHRASE:
+      return await deletePhrase(request);
+    case Message.DELETE_LEARNED:
+      return await deleteLearned();
     case Message.LIST_PHRASES:
       return await listVocabulary();
     case Message.IMPORT_PHRASES:

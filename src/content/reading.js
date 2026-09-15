@@ -1177,12 +1177,16 @@ async function keep(meanings, next) {
       // A save that lands replaces the chain's earlier automatic keep (D81):
       // that step was scaffolding for the phrase it grew into, and leaving it
       // would put two overlapping entries in the vocabulary and onto the
-      // flashcards. Fire and forget, literally - a failure leaves a word the
-      // reader can Learned away, not worth holding this save for.
+      // flashcards. Deleted for good, not marked learned (D224): the reader
+      // never learned the scaffolding, and a row that was never their
+      // decision (`autoKept` is never set for a phrase already kept) has
+      // no history to keep on the learned shelf. Fire and forget, literally
+      // - a failure leaves a word the reader can put away from its row, not
+      // worth holding this save for.
       const kept = autoKept;
       if (kept !== null && kept.normalized !== phrase.normalized) {
         autoKept = null;
-        void ask({ kind: Message.FORGET_PHRASE, text: kept.text });
+        void ask({ kind: Message.DELETE_PHRASE, text: kept.text });
         vocabulary.delete(kept.normalized);
       }
       vocabulary.set(phrase.normalized, meanings);

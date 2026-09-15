@@ -33,7 +33,7 @@ kept with a phrase (below), which a private window adds to like any other.
 
 | What | Why it is stored |
 |---|---|
-| Saved phrases with their meanings, two counts per phrase (how many times you opened its bubble, how many times it occurred in the texts you finished) and, only when you turn on **Save the sentence with the phrase**, the sentence each phrase was saved in (or, for a phrase saved without one, the sentence its bubble was next opened in) - see *Page content* | To underline them on later pages and show your meaning again; the counts, to help you decide what you have learned; the sentence, for a flashcard that shows the phrase in use |
+| Saved phrases with their meanings, two counts per phrase (how many times you opened its bubble, how many times it occurred in the texts you finished), the day you marked a phrase **Learned** if you did, and, only when you turn on **Save the sentence with the phrase**, the sentence each phrase was saved in (or, for a phrase saved without one, the sentence its bubble was next opened in) - see *Page content* | To underline them on later pages and show your meaning again; the counts, to help you decide what you have learned; the Learned mark, to keep a learned phrase off the pages without losing it; the sentence, for a flashcard that shows the phrase in use |
 | Translation models you downloaded | So translation works offline |
 | Dictionaries you installed | So dictionary lookups work offline |
 | Articles and books you saved to the reading list | So they open with no network, and after the original page has changed or gone |
@@ -42,14 +42,17 @@ kept with a phrase (below), which a private window adds to like any other.
 
 Uninstalling the extension deletes all of it, because the browser deletes an
 extension's storage together with the extension. You can also remove any part of it
-from inside the extension itself: individual phrases (**Learned**), individual
+from inside the extension itself: individual phrases (**Delete** on the **Learned** list of
+the saved phrases page, or **Delete all learned phrases** there), individual
 articles and books (**Delete**), models and dictionaries (their sections in
 Settings), and the per-site off switches (Settings, **Switched-off sites**). Deleting an
 article or a book removes everything stored for it - text, pictures, highlights, notes and
 the reading position - from the database and from the safety copy in `storage.local`.
 Saved phrases are not part of an article: a phrase you saved while reading it is stored in
-your vocabulary, without any record of where it came from, and is kept there until you mark
-it **Learned** - deleting the article does not delete the phrase. The same holds for the
+your vocabulary, without any record of where it came from, and is kept there until you delete
+it from the Learned list - deleting the article does not delete the phrase. Marking a phrase
+**Learned** does not delete it either: it takes the phrase off the pages and moves it to that
+list, with everything stored for it and the day you marked it. The same holds for the
 sentence saved with a phrase (see *Page content*): it is stored with the phrase, not with the
 article, so deleting the article does not delete it either.
 
@@ -184,7 +187,8 @@ the time it last happened. They are shown on the saved phrases page, which can o
 list by them. They record no page, no title and no text: not where you met the phrase, only
 how often. A page you read outside the reader adds to the first count only, when you open a
 bubble on it, and to nothing else - apart from the sentence described next, once you have
-turned that on. Marking a phrase **Learned** deletes its counts with it.
+turned that on. Marking a phrase **Learned** keeps its counts; deleting the phrase from the
+Learned list deletes them with it.
 
 One more thing can be kept with a saved phrase, and only after you turn on **Save the
 sentence with the phrase** in Settings - it is off until you do: the sentence around the
@@ -199,9 +203,9 @@ the setting says - the file is your own; for a phrase already saved, the file's 
 added only when the phrase has none. For a phrase that has no sentence - saved before you
 turned the setting on, from the **Add a phrase** field, or from a file without one - the
 sentence around it is saved the next time you open its bubble on a page: one sentence, under
-the same limits, and only while the setting is on. Marking a phrase **Learned** deletes its
-sentence with it; switching the setting off saves no new sentences, and the ones already
-saved are kept.
+the same limits, and only while the setting is on. Deleting a phrase from the Learned list
+deletes its sentence with it (marking it **Learned** keeps it); switching the setting off saves
+no new sentences, and the ones already saved are kept.
 
 A page you have switched re/read off on (the toolbar popup, or the list in Settings)
 is not read at all: no scan, no underlines, no bubble. The one thing that still works

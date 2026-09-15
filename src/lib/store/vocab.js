@@ -19,7 +19,18 @@
  * and `background/vocabulary.js` is where that rule is enforced.
  */
 
-import { counted, countsOf, hasSentence, resaved, restored, withImportedSentence, withSentence } from "./phrase.js";
+import {
+  counted,
+  countsOf,
+  hasSentence,
+  isLearned,
+  learned,
+  resaved,
+  restored,
+  unlearned,
+  withImportedSentence,
+  withSentence,
+} from "./phrase.js";
 
 const DB_NAME = "reread-vocab";
 const DB_VERSION = 1;
@@ -222,10 +233,12 @@ export async function putPhrases(phrases) {
 
 /**
  * Adds a batch of counts (D209) to the rows of one pair, in one transaction:
- * a key that is not there any more - learned between the page's report and
- * this write - is skipped, and a row the batch adds nothing to is not
- * written. Only the count fields move (`counted`); the row's identity, its
- * text and its meanings are read and put back as they were.
+ * a key that is not there any more, or that was marked learned between the
+ * page's report and this write (D224 - a learned row is off the mirror, so
+ * the report is a stale tab's), is skipped, and a row the batch adds
+ * nothing to is not written. Only the count fields move (`counted`); the
+ * row's identity, its text and its meanings are read and put back as they
+ * were.
  *
  * @param {Pair} pair
  * @param {Map<string, import("./phrase.js").Counts>} counts by normalized key
@@ -240,7 +253,7 @@ export async function countPhrases(pair, counts, now) {
       const existing = /** @type {Phrase | undefined} */ (
         await promisify(index.get(indexKey({ ...pair, normalized })))
       );
-      if (existing === undefined) continue;
+      if (existing === undefined || isLearned(existing)) continue;
       const next = counted(existing, batch, now);
       if (next === existing) continue;
       await promisify(store.put(next));
@@ -252,11 +265,11 @@ export async function countPhrases(pair, counts, now) {
 
 /**
  * Fills the sentence a bubble opened in (D216) into the rows of one pair
- * that have none, in one transaction: a key that is not there any more -
- * learned between the page's report and this write - is skipped, and a
- * row that has its sentence is not written (`withSentence`). Only the
- * sentence moves; the row's identity, its text, its meanings and its
- * counts are read and put back as they were.
+ * that have none, in one transaction: a key that is not there any more, or
+ * marked learned since the page's report (D224, the counts' rule), is
+ * skipped, and a row that has its sentence is not written (`withSentence`).
+ * Only the sentence moves; the row's identity, its text, its meanings and
+ * its counts are read and put back as they were.
  *
  * @param {Pair} pair
  * @param {Map<string, string>} sentences by normalized key
@@ -270,7 +283,7 @@ export async function fillSentences(pair, sentences) {
       const existing = /** @type {Phrase | undefined} */ (
         await promisify(index.get(indexKey({ ...pair, normalized })))
       );
-      if (existing === undefined) continue;
+      if (existing === undefined || isLearned(existing)) continue;
       const next = withSentence(existing, sentence);
       if (next === existing) continue;
       await promisify(store.put(next));
@@ -292,8 +305,52 @@ export async function getPhrase(key) {
 }
 
 /**
+ * Marks a phrase learned (D224): the row stays, with one field set - what
+ * Learned means since then, where it used to be `deletePhrase`. Lookup and
+ * write in one transaction, as every write here. A key that is not there,
+ * or a row already learned, writes nothing.
+ *
  * @param {PhraseKey} key
- * @returns {Promise<boolean>} whether there was anything to forget
+ * @param {number} now epoch milliseconds
+ * @returns {Promise<boolean>} whether a row was marked
+ */
+export async function learnPhrase(key, now) {
+  return await withPhrases("readwrite", async (store) => {
+    const existing = /** @type {Phrase | undefined} */ (await promisify(store.index(BY_KEY).get(indexKey(key))));
+    if (existing === undefined) return false;
+    const next = learned(existing, now);
+    if (next === existing) return false;
+    await promisify(store.put(next));
+    return true;
+  });
+}
+
+/**
+ * Takes the learned mark off a phrase (D224) - "back to learning" on the
+ * phrases page. Nothing else moves; a key that is not there, or a row not
+ * learned, writes nothing.
+ *
+ * @param {PhraseKey} key
+ * @returns {Promise<boolean>} whether a row was unmarked
+ */
+export async function unlearnPhrase(key) {
+  return await withPhrases("readwrite", async (store) => {
+    const existing = /** @type {Phrase | undefined} */ (await promisify(store.index(BY_KEY).get(indexKey(key))));
+    if (existing === undefined) return false;
+    const next = unlearned(existing);
+    if (next === existing) return false;
+    await promisify(store.put(next));
+    return true;
+  });
+}
+
+/**
+ * Deletes a row for good - since D224 the phrases page's own act on its
+ * learned shelf, behind a second press, where it used to be what Learned
+ * did everywhere.
+ *
+ * @param {PhraseKey} key
+ * @returns {Promise<boolean>} whether there was anything to delete
  */
 export async function deletePhrase(key) {
   return await withPhrases("readwrite", async (store) => {
@@ -305,7 +362,35 @@ export async function deletePhrase(key) {
 }
 
 /**
- * Everything saved for one language pair, oldest first.
+ * Deletes every learned row of one pair for good (D224): the learned
+ * shelf emptied in one transaction, so a browser closed halfway leaves the
+ * shelf whole rather than half gone. The rows still being learned are
+ * read past, never touched.
+ *
+ * @param {Pair} pair
+ * @returns {Promise<number>} how many rows were deleted
+ */
+export async function deleteLearned(pair) {
+  return await withPhrases("readwrite", async (store) => {
+    const records = /** @type {Phrase[]} */ (
+      await promisify(store.index(BY_PAIR).getAll([pair.langFrom, pair.langTo]))
+    );
+    let deleted = 0;
+    for (const phrase of records) {
+      if (!isLearned(phrase)) continue;
+      await promisify(store.delete(phrase.id));
+      deleted += 1;
+    }
+    return deleted;
+  });
+}
+
+/**
+ * Everything saved for one language pair, oldest first - the rows marked
+ * learned among them (D224): the callers that want only the ones still
+ * being learned (the mirror, the TSV files) filter with `learningOf`, the
+ * phrases page splits the list into its two shelves, and the copies carry
+ * the whole of it.
  *
  * Sorted here rather than by the index, which orders by its own key: what a
  * reader means by "my vocabulary" is the order they collected it in, and an

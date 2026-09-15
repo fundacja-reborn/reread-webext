@@ -29,6 +29,12 @@
  * No mirror at all means the background has never written one, which means
  * nothing has ever been saved. A page that finds nothing does nothing: an
  * install with an empty vocabulary costs exactly one storage read per page.
+ *
+ * The phrases the reader marked learned are not in it (D224): the
+ * background hands `mirrorOf` the rows still being learned and no others,
+ * so that Learned is what takes a phrase off every page - and off the
+ * popup's "saved", which reads the same copy - while the row itself stays
+ * in the store, on the phrases page's learned shelf.
  */
 
 import { webext } from "../browser.js";

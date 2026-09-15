@@ -37,7 +37,9 @@ describe("the filter's state over the list", () => {
     assert.match(bodyOf(script, "renderList"), /renderFilterStatus\(view\.matching\)/, "a repaint of the list leaves the state line stale");
     const line = bodyOf(script, "renderFilterStatus");
     assert.match(line, /const asking = filterActive\(query\);\s*filterStatus\.hidden = !asking;/, "the line stands while the filter asks nothing");
-    assert.match(line, /plural\(phrases\.length, "vocab_filter_status", \[matching\.toLocaleString\(\), query\.trim\(\)\]\)/, "the sentence is not the counter's family over the total, with the count and the query riding along");
+    // Over the shelf on screen (D224): the learned shelf's total when that
+    // is the one narrowed.
+    assert.match(line, /plural\(shelf\(\)\.length, "vocab_filter_status", \[matching\.toLocaleString\(\), query\.trim\(\)\]\)/, "the sentence is not the counter's family over the shelf's total, with the count and the query riding along");
     assert.match(line, /button\(t\("vocab_filter_clear"\)\)[\s\S]*?clear\.className = "quiet quiet-clear"/, "Clear filter is not the quiet 44px button");
     assert.match(line, /clear\.addEventListener\("click", \(\) => clearFilter\(\)\)/, "Clear filter does not clear");
   });

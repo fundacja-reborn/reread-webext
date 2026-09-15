@@ -234,10 +234,17 @@ describe("where the migration runs", () => {
     const background = sourceOf("src/background/vocabulary.js");
     const started = background.slice(background.indexOf("const started = settled()"), background.indexOf("export async function refreshVocabulary("));
     assert.match(started, /await ensureBackup\(\);\s*await migrateSemicolonsOnce\(\);\s*await sweepSemicolonBackup\(\);/);
-    // Every door waits on it.
-    for (const door of ["savePhrase", "forgetPhrase", "importPhrases", "listVocabulary"]) {
+    // Every door waits on it - the three one-phrase acts of the learned
+    // shelf (D224) through the road they share, `markPhrase`.
+    for (const door of ["savePhrase", "importPhrases", "listVocabulary", "deleteLearned"]) {
       const body = background.slice(background.indexOf(`export async function ${door}(`));
       assert.match(body.slice(0, body.indexOf("\n}\n")), /await started;/, `${door} waits for the start`);
+    }
+    const road = background.slice(background.indexOf("async function markPhrase("));
+    assert.match(road.slice(0, road.indexOf("\n}\n")), /await started;/, "markPhrase waits for the start");
+    for (const door of ["forgetPhrase", "unlearnPhrase", "deletePhrase"]) {
+      const body = background.slice(background.indexOf(`export async function ${door}(`));
+      assert.match(body.slice(0, body.indexOf("\n}\n")), /return await markPhrase\(request\.text, /, `${door} does not take the shared road`);
     }
   });
 

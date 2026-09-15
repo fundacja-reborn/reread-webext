@@ -4,15 +4,19 @@ import { describe, it } from "node:test";
 import {
   Order,
   PAGE_SIZE,
+  Segment,
   anyCounted,
   asOrder,
+  asSegment,
   listView,
   markSegments,
   newestFirst,
   ordered,
   pairChoicesFor,
+  recentlyLearnedFirst,
   searchablePhrase,
   sentenceSegments,
+  splitSegments,
 } from "../src/vocab/list-view.js";
 
 /**
@@ -294,5 +298,40 @@ describe("sentenceSegments", () => {
 
   it("marks nothing rather than marking wrong when folding shifts letters", () => {
     assert.deepEqual(sentenceSegments("İstanbul is far.", "istanbul"), [{ text: "İstanbul is far.", hit: false }]);
+  });
+});
+
+describe("the two shelves (D224)", () => {
+  it("splits the store's list into the phrases still being learned and the learned ones, in the store's order", () => {
+    const rows = [phrase(1), phrase(2, { learnedAt: 50 }), phrase(3), phrase(4, { learnedAt: 40 })];
+    const shelves = splitSegments(rows);
+    assert.deepEqual(shelves.learning.map((one) => one.id), ["id-0001", "id-0003"]);
+    assert.deepEqual(shelves.learned.map((one) => one.id), ["id-0002", "id-0004"]);
+    assert.equal(shelves.learning.length + shelves.learned.length, rows.length);
+  });
+
+  it("puts the phrase marked learned last first on the learned shelf, the day kept and the id as the ties", () => {
+    const rows = [phrase(1, { learnedAt: 50 }), phrase(2, { learnedAt: 90 }), phrase(3, { learnedAt: 50 }), phrase(4, { learnedAt: 90 })];
+    assert.deepEqual(recentlyLearnedFirst(rows).map((one) => one.id), ["id-0004", "id-0002", "id-0003", "id-0001"]);
+    assert.deepEqual(ordered(rows, Order.NEWEST, "en", Segment.LEARNED).map((one) => one.id), ["id-0004", "id-0002", "id-0003", "id-0001"]);
+    // The learning shelf, and no shelf said, keep the day kept as "newest".
+    assert.deepEqual(ordered(rows, Order.NEWEST, "en", Segment.LEARNING).map((one) => one.id), ["id-0004", "id-0003", "id-0002", "id-0001"]);
+    assert.deepEqual(ordered(rows, Order.NEWEST, "en").map((one) => one.id), ["id-0004", "id-0003", "id-0002", "id-0001"]);
+  });
+
+  it("orders the learned shelf by a count with the most recently marked as the tie", () => {
+    const rows = [
+      phrase(1, { learnedAt: 50, recallCount: 2 }),
+      phrase(2, { learnedAt: 90, recallCount: 2 }),
+      phrase(3, { learnedAt: 70, recallCount: 5 }),
+    ];
+    assert.deepEqual(ordered(rows, Order.RECALLED, "en", Segment.LEARNED).map((one) => one.id), ["id-0003", "id-0002", "id-0001"]);
+  });
+
+  it("names a shelf for a button's value, the learning one for anything else", () => {
+    assert.equal(asSegment("learned"), Segment.LEARNED);
+    assert.equal(asSegment("learning"), Segment.LEARNING);
+    assert.equal(asSegment("read"), Segment.LEARNING);
+    assert.equal(asSegment(null), Segment.LEARNING);
   });
 });

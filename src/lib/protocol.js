@@ -31,6 +31,9 @@ export const Message = Object.freeze({
   OPEN_SETTINGS: "open-settings",
   SAVE_PHRASE: "save-phrase",
   FORGET_PHRASE: "forget-phrase",
+  UNLEARN_PHRASE: "unlearn-phrase",
+  DELETE_PHRASE: "delete-phrase",
+  DELETE_LEARNED: "delete-learned",
   LIST_PHRASES: "list-phrases",
   IMPORT_PHRASES: "import-phrases",
   RESTORE_VOCABULARY: "restore-vocabulary",
@@ -208,6 +211,25 @@ export const ErrorCode = Object.freeze({
  * makes "the phrase means exactly what the bubble is showing" one rule instead
  * of two messages.
  *
+ * `forget-phrase` is Learned, from wherever it is pressed - the bubble, the
+ * phrases page, the last meaning unticked in a look-up panel - and since
+ * D224 it marks the row learned rather than deleting it: the row keeps its
+ * meanings, its sentence and its counts, leaves the mirror (so the
+ * underlines and the popup's "saved") and stands on the phrases page's
+ * learned shelf. A phrase never saved, or already learned, answers `ok`
+ * all the same: the button says "learned", and it is true either way.
+ * Three doors exist for that shelf, and the phrases page is the page that
+ * sends them: `unlearn-phrase` takes the mark off (back to learning, the
+ * row's history intact), `delete-phrase` deletes one row for good - what
+ * Learned used to do - and `delete-learned` deletes every learned row of
+ * the configured pair, answering how many. One other sender of
+ * `delete-phrase`: the touch chain's revision (D81), which takes back the
+ * step it kept automatically once the phrase grew past it - scaffolding
+ * the reader never learned, so it goes for good rather than onto the
+ * shelf. Each names its phrase by text, as `forget-phrase` does, and acts
+ * within the configured pair, as every phrase request does; deleting what
+ * is not there is not a failure either.
+ *
  * `open-reader` may say which tab the reader should read - the popup knows,
  * because it stood over it, and passes the id along. Without one the reader
  * only comes forward, which is all a press on a page nobody can read can mean.
@@ -272,6 +294,10 @@ export const ErrorCode = Object.freeze({
  * @typedef {{ kind: typeof Message.OPEN_SETTINGS, section?: SettingsSection }} OpenSettingsRequest
  * @typedef {{ kind: typeof Message.SAVE_PHRASE, text: string, translations: string[], context?: string }} SavePhraseRequest
  * @typedef {{ kind: typeof Message.FORGET_PHRASE, text: string }} ForgetPhraseRequest
+ * @typedef {{ kind: typeof Message.UNLEARN_PHRASE, text: string }} UnlearnPhraseRequest
+ * @typedef {{ kind: typeof Message.DELETE_PHRASE, text: string }} DeletePhraseRequest
+ * @typedef {{ kind: typeof Message.DELETE_LEARNED }} DeleteLearnedRequest
+ * @typedef {{ deleted: number }} DeleteLearnedReport
  * @typedef {{ kind: typeof Message.LIST_PHRASES }} ListPhrasesRequest
  * @typedef {{ text: string, translations: string[], context?: string }} ImportRow
  * @typedef {{ kind: typeof Message.IMPORT_PHRASES, rows: ImportRow[] }} ImportPhrasesRequest
@@ -287,7 +313,8 @@ export const ErrorCode = Object.freeze({
  *   lastRecallAt?: number,
  *   readCount?: number,
  *   lastReadAt?: number,
- * }} RestoreRow one phrase as the backup of everything carries it (D213) - its pair in the row, so one file holds every pair
+ *   learnedAt?: number,
+ * }} RestoreRow one phrase as the backup of everything carries it (D213) - its pair in the row, so one file holds every pair; `learnedAt` since D224, for a phrase the reader had marked learned
  * @typedef {{ kind: typeof Message.RESTORE_VOCABULARY, rows: RestoreRow[] }} RestoreVocabularyRequest
  * @typedef {{ added: number, skipped: number, sentenced: number, counted: number, invalid: number }} RestoreReport
  * @typedef {{ kind: typeof Message.COUNT_PHRASES, recalled: string[], read: Array<[string, number]>, sentences: Array<[string, string]> }} CountPhrasesRequest
@@ -301,6 +328,9 @@ export const ErrorCode = Object.freeze({
  *   | OpenSettingsRequest
  *   | SavePhraseRequest
  *   | ForgetPhraseRequest
+ *   | UnlearnPhraseRequest
+ *   | DeletePhraseRequest
+ *   | DeleteLearnedRequest
  *   | ListPhrasesRequest
  *   | ImportPhrasesRequest
  *   | RestoreVocabularyRequest
@@ -513,8 +543,19 @@ function isTally(value) {
  */
 export function asRestoreRow(value) {
   if (typeof value !== "object" || value === null) return null;
-  const { langFrom, langTo, text, translations, createdAt, context, recallCount, lastRecallAt, readCount, lastReadAt } =
-    /** @type {Record<string, unknown>} */ (value);
+  const {
+    langFrom,
+    langTo,
+    text,
+    translations,
+    createdAt,
+    context,
+    recallCount,
+    lastRecallAt,
+    readCount,
+    lastReadAt,
+    learnedAt,
+  } = /** @type {Record<string, unknown>} */ (value);
   if (!isLanguageCode(langFrom) || !isLanguageCode(langTo)) return null;
   if (typeof text !== "string" || text.length === 0) return null;
   if (!Array.isArray(translations) || !translations.every((one) => typeof one === "string")) return null;
@@ -530,6 +571,10 @@ export function asRestoreRow(value) {
     row.readCount = readCount;
     if (isMoment(lastReadAt)) row.lastReadAt = lastReadAt;
   }
+  // The learned mark (D224) is a moment after the epoch, never zero: a
+  // hand-edited zero would be "learned at the epoch", and the store reads
+  // it as not learned - so the wire does not carry it either.
+  if (isMoment(learnedAt) && learnedAt > 0) row.learnedAt = learnedAt;
   return row;
 }
 
@@ -564,6 +609,7 @@ export function asRequest(message) {
       : { kind: Message.OPEN_SETTINGS };
   }
   if (kind === Message.LIST_PHRASES) return { kind: Message.LIST_PHRASES };
+  if (kind === Message.DELETE_LEARNED) return { kind: Message.DELETE_LEARNED };
   if (kind === Message.READ_PAGE) return { kind: Message.READ_PAGE };
 
   const { text, translations, context, sourceTabId, rows } = /** @type {Record<string, unknown>} */ (message);
@@ -605,6 +651,18 @@ export function asRequest(message) {
   if (kind === Message.FORGET_PHRASE) {
     if (typeof text !== "string") return null;
     return { kind: Message.FORGET_PHRASE, text };
+  }
+
+  // The learned shelf's two acts on one phrase (D224): the phrase by its
+  // text and nothing else, exactly as forgetting is asked.
+  if (kind === Message.UNLEARN_PHRASE) {
+    if (typeof text !== "string") return null;
+    return { kind: Message.UNLEARN_PHRASE, text };
+  }
+
+  if (kind === Message.DELETE_PHRASE) {
+    if (typeof text !== "string") return null;
+    return { kind: Message.DELETE_PHRASE, text };
   }
 
   if (kind === Message.SAVE_PHRASE) {

@@ -24,15 +24,18 @@ import { ensureBackup, rebuildBackup, restoreVocabulary } from "../lib/store/bac
 import { migrateSemicolonsOnce, sweepSemicolonBackup } from "../lib/store/semicolon-migration.js";
 import { mirrorWithForms } from "../lib/store/forms.js";
 import { writeMirror } from "../lib/store/mirror.js";
-import { buildPhrase, withRestoredCounts } from "../lib/store/phrase.js";
+import { buildPhrase, learningOf, withLearnedAt, withRestoredCounts } from "../lib/store/phrase.js";
 import {
   countPhrases as countRows,
-  deletePhrase,
+  deleteLearned as deleteLearnedRows,
+  deletePhrase as deleteRow,
   fillSentences,
+  learnPhrase,
   listPhrases,
   putMissingPhrases,
   putPhrase,
   restorePhrases,
+  unlearnPhrase as unlearnRow,
 } from "../lib/store/vocab.js";
 
 /**
@@ -58,12 +61,17 @@ function pairOf(config) {
  * computed from the dictionaries for the words the standing mirror does not
  * have them for, and only while the switch asks for them.
  *
+ * The phrases still being learned, and only those (D224): a phrase marked
+ * learned leaves the mirror, which is what takes its underlines off every
+ * page and its "saved" off the popup - the row itself stays in the store,
+ * on the phrases page's learned shelf.
+ *
  * @param {import("../lib/config.js").Config} config
  * @returns {Promise<import("../lib/protocol.js").VocabEntry[]>}
  */
 async function rebuildMirror(config) {
   const pair = pairOf(config);
-  const phrases = pair === null ? [] : await listPhrases(pair);
+  const phrases = pair === null ? [] : learningOf(await listPhrases(pair));
   const mirror = await mirrorWithForms(config, phrases);
   await writeMirror(mirror);
   return mirror.entries;
@@ -164,28 +172,89 @@ export async function savePhrase(request) {
 }
 
 /**
- * Forgetting something that was never saved is not a failure - the button says
- * "learned", and it is true either way.
+ * Learned (D224): the row marked, not deleted - it leaves the mirror, so
+ * the underlines and the popup's "saved" go, and keeps its meanings, its
+ * sentence and its counts on the phrases page's learned shelf, where "back
+ * to learning" and the deletion for good live. Forgetting something that
+ * was never saved, or was learned already, is not a failure - the button
+ * says "learned", and it is true either way.
  *
  * @param {import("../lib/protocol.js").ForgetPhraseRequest} request
  * @returns {Promise<import("../lib/protocol.js").Result<null>>}
  */
 export async function forgetPhrase(request) {
-  const normalized = normalize(request.text);
+  return await markPhrase(request.text, (key) => learnPhrase(key, Date.now()));
+}
+
+/**
+ * Back to learning (D224): the mark taken off, the row back in the mirror
+ * with everything it had. Nothing to take off is not a failure either.
+ *
+ * @param {import("../lib/protocol.js").UnlearnPhraseRequest} request
+ * @returns {Promise<import("../lib/protocol.js").Result<null>>}
+ */
+export async function unlearnPhrase(request) {
+  return await markPhrase(request.text, unlearnRow);
+}
+
+/**
+ * The deletion for good (D224): what Learned used to be, now the learned
+ * shelf's own act behind a second press. The row goes with its history;
+ * nothing left to delete is not a failure.
+ *
+ * @param {import("../lib/protocol.js").DeletePhraseRequest} request
+ * @returns {Promise<import("../lib/protocol.js").Result<null>>}
+ */
+export async function deletePhrase(request) {
+  return await markPhrase(request.text, deleteRow);
+}
+
+/**
+ * One phrase of the configured pair, changed by one store call - the road
+ * Learned, back-to-learning and the deletion for good share: the phrase
+ * by its text, normalized here and nowhere else; the copies rebuilt only
+ * when the store says something moved, because an untouched mirror
+ * written again is a storage event in every open tab, and every one of
+ * them would rebuild for nothing. A restore on the way is a change too -
+ * the pages must learn what came back.
+ *
+ * @param {string} text the phrase as the page had it
+ * @param {(key: { langFrom: string, langTo: string, normalized: string }) => Promise<boolean>} change
+ *   the store call, answering whether a row was written
+ * @returns {Promise<import("../lib/protocol.js").Result<null>>}
+ */
+async function markPhrase(text, change) {
+  const normalized = normalize(text);
   if (normalized.length === 0) return ok(null);
 
   await started;
   const restored = await settled();
   const config = await readConfig();
   const pair = pairOf(config);
-  // No pair holds no phrases, so there is nothing to forget - true, not an error.
+  // No pair holds no phrases, so there is nothing to change - true, not an error.
   if (pair === null) return ok(null);
-  const forgotten = await deletePhrase({ ...pair, normalized });
-  // Only when something changed: an untouched mirror written again is a storage
-  // event in every open tab, and every one of them would rebuild for nothing.
-  // A restore is a change too - the pages must learn what came back.
-  if (forgotten || restored > 0) await afterWrite(config);
+  const changed = await change({ ...pair, normalized });
+  if (changed || restored > 0) await afterWrite(config);
   return ok(null);
+}
+
+/**
+ * The learned shelf of the configured pair emptied for good (D224): every
+ * row marked learned deleted in one transaction, the rows still being
+ * learned untouched. Answers how many went, for the page's report; an
+ * empty shelf answers zero and rebuilds nothing.
+ *
+ * @returns {Promise<import("../lib/protocol.js").Result<import("../lib/protocol.js").DeleteLearnedReport>>}
+ */
+export async function deleteLearned() {
+  await started;
+  const restored = await settled();
+  const config = await readConfig();
+  const pair = pairOf(config);
+  if (pair === null) return ok({ deleted: 0 });
+  const deleted = await deleteLearnedRows(pair);
+  if (deleted > 0 || restored > 0) await afterWrite(config);
+  return ok({ deleted });
 }
 
 /**
@@ -288,9 +357,10 @@ export async function importPhrases(request) {
  * pair the file holds, whatever the settings say the pair being read is -
  * a backup restores what was, not what is chosen now. A phrase not yet
  * saved is added as the file has it - the day it was kept, its sentence,
- * its counts; a saved one takes only what it lacks (`restored`). The
- * setting for the sentence does not enter, as it does not for the TSV
- * import (D212): the file is the reader's own.
+ * its counts, and whether the reader had marked it learned (D224); a saved
+ * one takes only what it lacks (`restored`), and its learned mark is its
+ * own in both directions. The setting for the sentence does not enter, as
+ * it does not for the TSV import (D212): the file is the reader's own.
  *
  * @param {import("../lib/protocol.js").RestoreVocabularyRequest} request
  * @returns {Promise<import("../lib/protocol.js").Result<import("../lib/protocol.js").RestoreReport>>}
@@ -316,7 +386,7 @@ export async function restoreFromBackup(request) {
       now: row.createdAt ?? now + at,
       context: row.context,
     });
-    if (built.ok) rows.push(withRestoredCounts(built.value, row));
+    if (built.ok) rows.push(withLearnedAt(withRestoredCounts(built.value, row), row.learnedAt));
     else invalid += 1;
   }
 

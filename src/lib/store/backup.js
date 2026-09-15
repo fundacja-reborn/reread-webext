@@ -33,7 +33,7 @@
  */
 
 import { webext } from "../browser.js";
-import { isCount } from "./phrase.js";
+import { isCount, withLearnedAt } from "./phrase.js";
 import { allPhrases, hasPhrases, putMissingPhrases } from "./vocab.js";
 
 /** @typedef {import("./phrase.js").Phrase} Phrase */
@@ -122,6 +122,7 @@ function asPhrase(row) {
     lastRecallAt,
     readCount,
     lastReadAt,
+    learnedAt,
   } = /** @type {Record<string, unknown>} */ (row);
   if (!isWord(id) || !isWord(langFrom) || !isWord(langTo) || !isWord(phrase) || !isWord(normalized)) return null;
   if (!Array.isArray(translations)) return null;
@@ -145,7 +146,11 @@ function asPhrase(row) {
     clean.readCount = readCount;
     if (typeof lastReadAt === "number" && Number.isFinite(lastReadAt)) clean.lastReadAt = lastReadAt;
   }
-  return clean;
+  // The learned mark (D224) comes back as it was, and only as a moment: a
+  // phrase the reader had marked learned must not come back underlined
+  // because the database was deleted - and a broken mark must not make a
+  // learned phrase of one still being learned.
+  return withLearnedAt(clean, learnedAt);
 }
 
 /**

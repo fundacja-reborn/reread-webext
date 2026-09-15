@@ -8,10 +8,44 @@
  * wrong quietly, and so all three live here, under `node --test`.
  */
 
-import { countsOf } from "../lib/store/phrase.js";
+import { countsOf, learnedOf, learningOf } from "../lib/store/phrase.js";
 import { matchesFilter, sortByLabel } from "../options/models-view.js";
 
 /** @typedef {import("../lib/store/phrase.js").Phrase} Phrase */
+
+/**
+ * The two shelves of the page (D224), said with pressed buttons the way the
+ * reading list says its two halves: the phrases still being learned - the
+ * ones underlined, exported, "saved" to the popup - and the ones the
+ * reader marked learned, which are the page's own and nobody else's.
+ * Strings, so a button's `data-segment` can be one.
+ */
+export const Segment = Object.freeze({
+  LEARNING: "learning",
+  LEARNED: "learned",
+});
+
+/** @typedef {(typeof Segment)[keyof typeof Segment]} SegmentValue */
+
+/**
+ * @param {unknown} value
+ * @returns {SegmentValue} the segment named, the learning one for anything else
+ */
+export function asSegment(value) {
+  return value === Segment.LEARNED ? Segment.LEARNED : Segment.LEARNING;
+}
+
+/**
+ * The store's list split into the two shelves, each in the store's own
+ * order (oldest first) - the segment buttons wear the two lengths, and
+ * the two always add up to everything saved for the pair.
+ *
+ * @param {Phrase[]} phrases as `listPhrases` answers
+ * @returns {{ learning: Phrase[], learned: Phrase[] }}
+ */
+export function splitSegments(phrases) {
+  return { learning: learningOf(phrases), learned: learnedOf(phrases) };
+}
 
 /**
  * A hundred rows: enough that a page of vocabulary feels like a list rather
@@ -30,6 +64,22 @@ export const PAGE_SIZE = 100;
  */
 export function newestFirst(phrases) {
   return [...phrases].sort((a, b) => b.createdAt - a.createdAt || b.id.localeCompare(a.id));
+}
+
+/**
+ * The learned shelf's own "newest first" (D224): the phrase marked learned
+ * last stands first - what a reader opens that shelf for is "what did I
+ * just put away" - with the day it was kept and the id as the ties, so
+ * two phrases marked in one press hold their order between renders. A row
+ * without the mark (none is on this shelf) sorts as marked at the epoch.
+ *
+ * @param {Phrase[]} phrases the learned shelf, any order
+ * @returns {Phrase[]}
+ */
+export function recentlyLearnedFirst(phrases) {
+  return [...phrases].sort(
+    (a, b) => (b.learnedAt ?? 0) - (a.learnedAt ?? 0) || b.createdAt - a.createdAt || b.id.localeCompare(a.id),
+  );
 }
 
 /**
@@ -62,15 +112,17 @@ export function asOrder(value) {
  * depends on how the store happened to list two rows. The alphabet is the
  * phrases' own language's: its collator puts an accented letter beside its
  * plain one and knows the order of the letters of Ukrainian, which a
- * code-point sort does not.
+ * code-point sort does not. On the learned shelf (D224) "newest" means
+ * most recently marked learned, in the first place and as the tie.
  *
  * @param {Phrase[]} phrases as `listPhrases` answers or as the page keeps them
  * @param {OrderValue} order
  * @param {string} lang the phrases' language, for the collator; empty for the browser's
+ * @param {SegmentValue} [segment] which shelf the rows are, the learning one when unsaid
  * @returns {Phrase[]}
  */
-export function ordered(phrases, order, lang) {
-  const newest = newestFirst(phrases);
+export function ordered(phrases, order, lang, segment = Segment.LEARNING) {
+  const newest = segment === Segment.LEARNED ? recentlyLearnedFirst(phrases) : newestFirst(phrases);
   if (order === Order.NEWEST) return newest;
   if (order === Order.ALPHABETICAL) {
     const collator = new Intl.Collator(lang.length > 0 ? lang : undefined, { sensitivity: "base", numeric: true });
