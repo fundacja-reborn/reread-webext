@@ -791,7 +791,7 @@ describe("the reader's appearance", () => {
     }
     for (const align of ["left", "justify"]) assert.equal(reader({ align }).align, align);
     for (const hyphens of ["none", "auto"]) assert.equal(reader({ hyphens }).hyphens, hyphens);
-    for (const paragraphs of ["spaced", "indented"]) {
+    for (const paragraphs of ["spaced", "indented", "both"]) {
       assert.equal(reader({ paragraphs }).paragraphs, paragraphs);
     }
   });

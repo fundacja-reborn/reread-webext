@@ -468,6 +468,7 @@
   "reader_paragraphs": { "message": "Párrafos" },
   "reader_paragraphs_spaced": { "message": "Con espacio" },
   "reader_paragraphs_indented": { "message": "Con sangría" },
+  "reader_paragraphs_both": { "message": "Ambos" },
   "reader_links": { "message": "Enlaces" },
   "reader_links_plain": { "message": "Texto simple" },
   "reader_links_active": { "message": "Activos" },

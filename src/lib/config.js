@@ -59,11 +59,13 @@ export const CONFIG_KEY = "config";
  *   at the line's end (D225), in the language the article declares - the
  *   patterns are the browser's own, and there are none without a `lang`.
  *   The CSS keywords, because that is all the stylesheet turns them into.
- * @property {"spaced" | "indented"} paragraphs How one paragraph is told
- *   from the next (D225): a blank line, the web's way and the default, or
- *   an indented first line with no gap, a book's. Only between two
- *   paragraphs - the first after a heading or a picture keeps its edge
- *   flush, as in a book.
+ * @property {"spaced" | "indented" | "both"} paragraphs How one paragraph
+ *   is told from the next (D225): a blank line, the web's way and the
+ *   default; an indented first line with no gap, a book's; or both at once
+ *   (Michał's ask after the first smoke). The indent steps in every
+ *   paragraph of prose but the one opening a section - after a heading or
+ *   a rule - because a page's paragraphs come grouped in wrapper divs, and
+ *   "the paragraph another one follows" left the first of each group flush.
  * @property {"active" | "plain"} links Whether links in the article text answer
  *   a press (D95). The words stay either way - they are part of the sentence -
  *   but the reader's main gesture is selecting a phrase to translate, and a
@@ -242,7 +244,7 @@ const ALIGNS = ["left", "justify"];
 /** @type {readonly string[]} */
 const HYPHENS = ["none", "auto"];
 /** @type {readonly string[]} */
-const PARAGRAPHS = ["spaced", "indented"];
+const PARAGRAPHS = ["spaced", "indented", "both"];
 
 /**
  * Type guards rather than casts, and exported because the reader needs the

@@ -619,6 +619,7 @@
   "reader_paragraphs": { "message": "Akapity" },
   "reader_paragraphs_spaced": { "message": "Z odstępem" },
   "reader_paragraphs_indented": { "message": "Z wcięciem" },
+  "reader_paragraphs_both": { "message": "Z oboma" },
   "reader_links": { "message": "Linki" },
   "reader_links_plain": { "message": "Zwykły tekst" },
   "reader_links_active": { "message": "Aktywne" },

@@ -437,6 +437,7 @@
   "reader_paragraphs": { "message": "Absätze" },
   "reader_paragraphs_spaced": { "message": "Mit Abstand" },
   "reader_paragraphs_indented": { "message": "Mit Einzug" },
+  "reader_paragraphs_both": { "message": "Beides" },
   "reader_links": { "message": "Links" },
   "reader_links_plain": { "message": "Nur Text" },
   "reader_links_active": { "message": "Aktiv" },

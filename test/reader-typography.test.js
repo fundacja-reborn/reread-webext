@@ -27,7 +27,7 @@ const ROWS = [
   { key: "lineHeight", root: "data-reader-line-height", button: "data-line-height", names: ["tight", "normal", "loose"], accepts: isLineHeight },
   { key: "align", root: "data-reader-align", button: "data-align", names: ["left", "justify"], accepts: isAlign },
   { key: "hyphens", root: "data-reader-hyphens", button: "data-hyphens", names: ["none", "auto"], accepts: isHyphens },
-  { key: "paragraphs", root: "data-reader-paragraphs", button: "data-paragraphs", names: ["spaced", "indented"], accepts: isParagraphs },
+  { key: "paragraphs", root: "data-reader-paragraphs", button: "data-paragraphs", names: ["spaced", "indented", "both"], accepts: isParagraphs },
 ];
 
 describe("the typography rows (D225) - the panel", () => {
@@ -122,13 +122,23 @@ describe("the typography rows (D225) - the stylesheet", () => {
     assert.doesNotMatch(css, /:root\[data-reader-hyphens="auto"\] #article \{/, "hyphenation reaches an article with no language");
   });
 
-  it("indents and closes the gap between two paragraphs only", async () => {
+  it("indents every paragraph of prose but the one opening a section, and closes the gap in the indented mode alone", async () => {
     const css = await source("src/reader/reader.css");
-    assert.match(css, /:root\[data-reader-paragraphs="indented"\] #content p:has\(\+ p\) \{\s*margin-bottom: 0;/);
-    assert.match(css, /:root\[data-reader-paragraphs="indented"\] #content p \+ p \{\s*text-indent: 1\.5em;/);
-    // A blanket rule on every paragraph would close the gap before a
-    // heading, a list or a picture as well.
-    assert.doesNotMatch(css, /:root\[data-reader-paragraphs="indented"\] #content p \{/);
+    // Every paragraph, not "a paragraph another one follows": a page's
+    // paragraphs come grouped in wrapper divs the sanitizer keeps, and the
+    // first of each group stood flush with a gap over it (Michał's smoke,
+    // 2026-09-15). Lists and table cells are not prose.
+    const prose = String.raw`#content p:not\(:is\(li, td, th\) p\)`;
+    const opening = String.raw`#content :is\(h1, h2, h3, h4, h5, h6, hr\) \+ p`;
+    assert.match(css, new RegExp(String.raw`:root\[data-reader-paragraphs="indented"\] ${prose},\s*:root\[data-reader-paragraphs="both"\] ${prose} \{\s*text-indent: 1\.5em;`));
+    assert.match(css, new RegExp(String.raw`:root\[data-reader-paragraphs="indented"\] ${opening},\s*:root\[data-reader-paragraphs="both"\] ${opening} \{\s*text-indent: 0;`));
+    assert.match(css, new RegExp(String.raw`:root\[data-reader-paragraphs="indented"\] ${prose} \{\s*margin-bottom: 0;`));
+    // The air a paragraph no longer leaves under itself comes back from the
+    // blocks that are not paragraphs, so a list or a picture keeps its room.
+    assert.match(css, /:root\[data-reader-paragraphs="indented"\] #content :is\(ul, ol, dl, table, figure, blockquote, pre\),\s*:root\[data-reader-paragraphs="indented"\] #content p \+ img \{\s*margin-top: 1\.2rem;/);
+    // `both` keeps the web's blank line: nothing about margins under it.
+    assert.doesNotMatch(css, /:root\[data-reader-paragraphs="both"\][^{]*\{\s*margin/);
+    assert.doesNotMatch(css, /p:has\(\+ p\)/, "the first cut's sibling rule is back");
   });
 
   it("justifies the prose and leaves headings, captions and cells ragged", async () => {

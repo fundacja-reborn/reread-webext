@@ -875,17 +875,36 @@ html {
   hyphens: manual;
 }
 
-/* Paragraphs a book's way: the first line stepped in and no blank line -
-   between two paragraphs only. The first after a heading, a picture or a
-   list keeps its edge flush and its gap, as a book's does; `:has` is
-   what lets the gap close on exactly the paragraph another one follows.
-   In `em`, so the step grows with the type. */
-:root[data-reader-paragraphs="indented"] #content p:has(+ p) {
+/* Paragraphs a book's way: the first line stepped in on every paragraph
+   of prose but the one that opens a section (after a heading or a rule),
+   and - in the indented mode alone - no blank line between them. Every
+   paragraph rather than "a paragraph another one follows" (the first cut,
+   `p + p`): a page's paragraphs come grouped in wrapper divs the sanitizer
+   keeps (a news site splits its story around its ads), and the first of
+   each group stood flush with a gap over it, reading as a section break in
+   the middle of the prose (Michał's smoke, 2026-09-15). Lists and table
+   cells are not prose and keep their edge. The air a paragraph no longer
+   leaves under itself comes back from the blocks that are not paragraphs,
+   so a list or a picture keeps its room. `both` keeps the web's blank line
+   and adds the book's indent (Michał's ask). In `em`, so the step grows
+   with the type. */
+:root[data-reader-paragraphs="indented"] #content p:not(:is(li, td, th) p),
+:root[data-reader-paragraphs="both"] #content p:not(:is(li, td, th) p) {
+  text-indent: 1.5em;
+}
+
+:root[data-reader-paragraphs="indented"] #content :is(h1, h2, h3, h4, h5, h6, hr) + p,
+:root[data-reader-paragraphs="both"] #content :is(h1, h2, h3, h4, h5, h6, hr) + p {
+  text-indent: 0;
+}
+
+:root[data-reader-paragraphs="indented"] #content p:not(:is(li, td, th) p) {
   margin-bottom: 0;
 }
 
-:root[data-reader-paragraphs="indented"] #content p + p {
-  text-indent: 1.5em;
+:root[data-reader-paragraphs="indented"] #content :is(ul, ol, dl, table, figure, blockquote, pre),
+:root[data-reader-paragraphs="indented"] #content p + img {
+  margin-top: 1.2rem;
 }
 
 /* An article's pictures (D145). A picture stands as a block of its own,

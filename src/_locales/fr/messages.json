@@ -468,6 +468,7 @@
   "reader_paragraphs": { "message": "Paragraphes" },
   "reader_paragraphs_spaced": { "message": "Espacés" },
   "reader_paragraphs_indented": { "message": "Avec retrait" },
+  "reader_paragraphs_both": { "message": "Les deux" },
   "reader_links": { "message": "Liens" },
   "reader_links_plain": { "message": "Texte simple" },
   "reader_links_active": { "message": "Actifs" },

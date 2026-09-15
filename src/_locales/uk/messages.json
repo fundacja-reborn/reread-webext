@@ -619,6 +619,7 @@
   "reader_paragraphs": { "message": "Абзаци" },
   "reader_paragraphs_spaced": { "message": "З проміжком" },
   "reader_paragraphs_indented": { "message": "Червоний рядок" },
+  "reader_paragraphs_both": { "message": "Обидва" },
   "reader_links": { "message": "Посилання" },
   "reader_links_plain": { "message": "Звичайний текст" },
   "reader_links_active": { "message": "Активні" },

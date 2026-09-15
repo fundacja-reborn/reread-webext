@@ -610,6 +610,7 @@
   "reader_paragraphs": { "message": "Paragraphs" },
   "reader_paragraphs_spaced": { "message": "Spaced" },
   "reader_paragraphs_indented": { "message": "Indented" },
+  "reader_paragraphs_both": { "message": "Both" },
   "reader_links": { "message": "Links" },
   "reader_links_plain": { "message": "Plain text" },
   "reader_links_active": { "message": "Active" },
