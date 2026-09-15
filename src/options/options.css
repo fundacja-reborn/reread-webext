@@ -765,7 +765,8 @@ button.model-delete {
    preview: options.js sets it from the cleaned name. */
 #font-custom,
 #dictionary-link,
-#disabled-host {
+#disabled-host,
+#reading-pace {
   flex: 1 1 12rem;
   max-width: 22rem;
   min-width: 0;
@@ -783,6 +784,19 @@ button.model-delete {
 #dictionary-link {
   flex: 1 1 18rem;
   max-width: 40rem;
+}
+
+/* The reader's own pace (D228): the same dress, the width of a number -
+   three digits and the browser's arrows - with the unit as plain text after
+   it, in the muted grey the steppers' values wear. */
+#reading-pace {
+  flex: 0 0 auto;
+  width: 6.5rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.inline .unit {
+  color: var(--page-muted);
 }
 
 /* The reader's own rules (D176): a code field in the same quiet dress, but

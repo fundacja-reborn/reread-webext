@@ -12,15 +12,21 @@
  * every character counts, which is how reading speed is quoted for those
  * languages anyway (characters a minute).
  *
- * The pace is one number for everybody, on purpose. Reading speed differs by
- * reader, by language and by how much of a text is new, and no setting could
- * keep up with that; the label says "about", and a text counted at one steady
- * pace still orders the list honestly - twice the words, twice the minutes.
- * Two hundred words a minute is a slow native reader, which is about what a
- * reader in a language they are learning manages on a good day.
+ * The pace is one number per reader - typed once in the settings (D228) -
+ * and the same for every text, on purpose. Reading speed differs by text
+ * too, by its language and by how much of it is new, and no setting could
+ * keep up with that; the label says "about", and a text counted at one
+ * steady pace still orders the list honestly - twice the words, twice the
+ * minutes. What the setting puts right is the reader's own pace: the
+ * default, two hundred words a minute, is a slow native reader, and a
+ * reader of a language they are learning at half that saw every estimate
+ * halved.
  */
 
-/** Words a minute - the one pace every estimate is made at. */
+/**
+ * Words a minute - the pace every estimate is made at until the reader sets
+ * their own (`readingPace` in the config).
+ */
 export const WORDS_PER_MINUTE = 200;
 
 /** The tokenizer's word class, as one run. */
@@ -127,16 +133,18 @@ export function wordsIn(markup) {
 }
 
 /**
- * The minutes a count of words takes at the one pace, as a label wants
- * them: whole minutes under an hour (never less than one - a text is never
- * read in no time), hours and minutes above it, the minutes to the nearest
- * five because at that length the estimate is no finer than that.
+ * The minutes a count of words takes at a pace, as a label wants them:
+ * whole minutes under an hour (never less than one - a text is never read
+ * in no time), hours and minutes above it, the minutes to the nearest five
+ * because at that length the estimate is no finer than that.
  *
  * @param {number} words
+ * @param {number} [pace] words a minute - the reader's own from the config,
+ *   already held to its scale there; the default where nobody set one
  * @returns {{ hours: number, minutes: number }}
  */
-export function readingTime(words) {
-  const total = Math.max(1, Math.round(words / WORDS_PER_MINUTE));
+export function readingTime(words, pace = WORDS_PER_MINUTE) {
+  const total = Math.max(1, Math.round(words / pace));
   if (total < 60) return { hours: 0, minutes: total };
   const hours = Math.floor(total / 60);
   const rest = Math.round((total - hours * 60) / 5) * 5;

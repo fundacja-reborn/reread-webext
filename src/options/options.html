@@ -374,9 +374,11 @@
       <!-- How fast that voice reads (D87), for the phrase in the bubble and for
            a whole article in the reader alike - one setting, because what is
            slow is the language being learned, not the surface it is read on.
-           The reader's own panel has the same two buttons over it. -->
+           The reader's own panel has the same two buttons over it. Named for
+           the voice since D228, when the reader's own pace below took the
+           name "reading speed" for the thing it measures. -->
       <div class="row tts-only">
-        <span class="row-name" data-i18n="options_tts_rate">Reading speed</span>
+        <span class="row-name" data-i18n="options_tts_rate">Voice speed</span>
         <p class="inline stepper">
           <button type="button" id="tts-rate-down" title="Slower" data-i18n-title="reader_slower">
             &minus;
@@ -405,6 +407,26 @@
           Type the name of a font installed on this device, for example Georgia or Noto Serif.
           The reading view's Type row will then offer it as Custom. Leave the field empty to use
           the built-in typefaces only.
+        </p>
+      </div>
+      <!-- The reader's own pace (D228): words a minute, typed once - the one
+           number every reading time in the list and under a title is made
+           at. A typed field rather than a stepper, because a pace is a
+           measured number and the way from the default to a learner's
+           honest one would be eight presses; here rather than in the Aa
+           panel for the font name's reason. The bounds are the config's
+           (`READING_PACE`), put on the field by options.js, so the page and
+           the healer cannot disagree. -->
+      <div class="row row-stack">
+        <label class="row-name" for="reading-pace" data-i18n="options_reading_pace">Reading speed</label>
+        <p class="inline">
+          <input id="reading-pace" type="number" inputmode="numeric" autocomplete="off" />
+          <span class="unit" data-i18n="options_reading_pace_unit">words a minute</span>
+        </p>
+        <p class="row-note" data-fold data-i18n="options_reading_pace_hint">
+          The number of words you read in a minute. It is used only to estimate the reading time
+          shown in the reading list and under an article's title. 200 is an unhurried pace in
+          your own language; in a language you are learning it is usually 100-150.
         </p>
       </div>
       <!-- `translation-only`: the trimmed bubble ignores the fold - its two

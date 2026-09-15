@@ -1379,6 +1379,11 @@
   "options_font_custom_hint": {
     "message": "Escribe el nombre de una fuente instalada en este dispositivo, por ejemplo Georgia o Noto Serif. La fila Tipografía de la vista de lectura la ofrecerá entonces como Personalizada. Deja el campo vacío para usar solo las fuentes integradas."
   },
+  "options_reading_pace": { "message": "Velocidad de lectura" },
+  "options_reading_pace_unit": { "message": "palabras por minuto" },
+  "options_reading_pace_hint": {
+    "message": "El número de palabras que lees en un minuto. Solo se usa para estimar el tiempo de lectura que se muestra en la lista de lectura y bajo el título de un artículo. 200 es un ritmo tranquilo en tu propio idioma; en un idioma que estás aprendiendo suele ser 100-150."
+  },
   "options_quiet_bubble_hint": {
     "message": "Muestra solo el texto traducido en la burbuja. Los botones de acción (copiar, guardar) aparecerán únicamente al hacer clic o tocar la burbuja."
   },
@@ -1419,7 +1424,7 @@
     "message": "Selecciona, para cada idioma, la voz para leer frases y artículos. Solo se ofrecen voces que hablan sin conexión: la voz se genera en este dispositivo y no se envía nada a internet."
   },
   "speech_no_offline_voice": { "message": "Este dispositivo no tiene una voz sin conexión para este idioma." },
-  "options_tts_rate": { "message": "Velocidad de lectura" },
+  "options_tts_rate": { "message": "Velocidad de la voz" },
   "options_models_heading": { "message": "Modelos de traducción" },
   "options_models_intro": {
     "message": "Descarga aquí un modelo de traducción para cada par de idiomas que quieras traducir. Son archivos oficiales de Mozilla que funcionan totalmente sin conexión en tu dispositivo."
