@@ -1133,10 +1133,13 @@ body.reader:has(#library:not([hidden])) {
 }
 
 /* The tab in view: the accent as a border and a wash behind the page's own
-   text color, so the label stays readable in all four themes. */
+   text color, so the label stays readable in all four themes. The wash is
+   the bar's quarter of the accent (`.page-tools`, page.css) since D225's
+   smoke: at 12% it rounded back into an e-ink panel's paper, and the tab
+   in view looked like the other one (Michał's Boox, 2026-09-15). */
 .library-segments button[aria-pressed="true"] {
   border-color: var(--page-accent);
-  background: color-mix(in srgb, var(--page-accent) 12%, transparent);
+  background: color-mix(in srgb, var(--page-accent) 25%, transparent);
 }
 
 /* --- disclosure lines: the offline promise and the file-format note --- */
@@ -2323,11 +2326,12 @@ a.marks-act {
 /* A held state (saved, marked read) is a pill, not an act: the accent as a
    border and a wash behind the page's own text color - the tabs' treatment,
    readable in all four themes where accent-colored text is not, and the only
-   frame any of these buttons wears at rest. After the hover rule, so a
-   pressed button keeps saying what is true under the pointer. */
+   frame any of these buttons wears at rest. The tabs' quarter of the accent
+   too, for the tabs' reason (12% is paper on e-ink). After the hover rule,
+   so a pressed button keeps saying what is true under the pointer. */
 .article-actions button[aria-pressed="true"] {
   border-color: var(--page-accent);
-  background: color-mix(in srgb, var(--page-accent) 12%, transparent);
+  background: color-mix(in srgb, var(--page-accent) 25%, transparent);
   color: var(--page-fg);
 }
 

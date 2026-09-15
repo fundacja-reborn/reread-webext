@@ -159,6 +159,17 @@ describe("the typography rows (D225) - the stylesheet", () => {
     assert.match(phrases, new RegExp(String.raw`\.page-choices button\[aria-pressed="true"\] \{\s*${wash}`), "the phrases page's panel says it another way");
   });
 
+  it("gives the list's tabs, the article's held pills and the phrases page's shelves the same quarter of the accent", async () => {
+    // Every pressed state on the pages says it with one wash (Michał's
+    // ask after the panel, 2026-09-15): 12% was paper on the Boox.
+    const quarter = /background: color-mix\(in srgb, var\(--page-accent\) 25%, transparent\);/;
+    const reader = await source("src/reader/reader.css");
+    assert.match(reader, new RegExp(String.raw`\.library-segments button\[aria-pressed="true"\] \{\s*border-color: var\(--page-accent\);\s*${quarter.source}`), "the tab in view is back to 12%");
+    assert.match(reader, new RegExp(String.raw`\.article-actions button\[aria-pressed="true"\] \{\s*border-color: var\(--page-accent\);\s*${quarter.source}`), "the held pill is back to 12%");
+    const phrases = await source("src/vocab/vocab.css");
+    assert.match(phrases, new RegExp(String.raw`\.phrase-segments button\[aria-pressed="true"\] \{\s*border-color: var\(--page-accent\);\s*${quarter.source}`), "the shelf in view is back to 12%");
+  });
+
   it("lets the panel scroll within itself where the rows outgrow the window", async () => {
     const css = await source("src/reader/reader.css");
     assert.match(css, /\.reader-panel \{[^}]*max-height: calc\(100dvh - var\(--header-h\) - 1rem\);\s*overflow-y: auto;\s*overscroll-behavior: contain;/);
