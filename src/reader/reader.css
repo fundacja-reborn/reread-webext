@@ -500,6 +500,14 @@ html {
    2026-09-01). */
 .reader-panel {
   padding: 0.6rem 0;
+  /* Thirteen rows since D225 stand taller than a phone's window held
+     sideways, and the stuck box they live in has no page to scroll them
+     into view: the panel scrolls within itself when it must and stays put
+     when it fits. `contain` keeps a flick past its end from moving the
+     article underneath. */
+  max-height: calc(100dvh - var(--header-h) - 1rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .reader-setting {
@@ -526,11 +534,23 @@ html {
   font-size: 0.85rem;
 }
 
-/* The one that is on, said with the border rather than a fill: this row sits
-   above an article and should not become the brightest thing on the screen. */
+/* The one that is on, said with the bar's own wash (`.page-tools`,
+   page.css): a quarter of the accent under the word, in the accent frame,
+   the word in the page's own ink. Until D225's smoke the row said it with
+   the accent alone - on the frame and on the word - and on an e-ink
+   panel's sixteen greys the accent is the grey the resting frame already
+   is, so every row read as all-off (Michał's Boox, 2026-09-15). The wash
+   is the bar's 25% for the bar's reason (12% rounds back into the paper),
+   and the word keeps the page's ink over it as the bar's glyphs and the
+   list's tabs do, readable in all four themes; no heavier frame - the bar
+   tried one and it came back as too loud. Nothing about the box changes
+   size, so the row stands still when the choice moves. The swatch rows
+   opt out below: a wash around a drawn ink would muddy it, and their ring
+   already survives the greys. */
 .reader-choices button[aria-pressed="true"] {
   border-color: var(--page-accent);
-  color: var(--page-accent);
+  background: color-mix(in srgb, var(--page-accent) 25%, transparent);
+  color: var(--page-fg);
 }
 
 .reader-choices output {
@@ -825,6 +845,80 @@ html {
   margin: 0 0 1.2rem;
 }
 
+/* The typography rows of the Aa panel (D225): four names stamped on the
+   root by `applyAppearance`, each with its rule here, the way the links
+   mode has its own. The defaults - `normal`, `left`, `none`, `spaced` -
+   match no rule on purpose: they are the article as it was drawn before
+   the rows existed, so a profile that never touched them does not move.
+
+   Leading: three steps the eye tells apart, around the 1.65 the article
+   has always had. The article alone - the lists, the quotes on the
+   highlights page and the chrome keep their own. */
+:root[data-reader-line-height="tight"] #article {
+  line-height: 1.4;
+}
+
+:root[data-reader-line-height="loose"] #article {
+  line-height: 1.9;
+}
+
+/* Flush edges on the prose alone: a heading, a caption or a table cell
+   spread across its box reads as broken, not as set. Ragged is the
+   browser's own `start` and needs no rule - and it is the right-hand
+   edge in a right-to-left text, which is why the row says "left" and the
+   property never does. */
+:root[data-reader-align="justify"] #content :is(p, li, dd) {
+  text-align: justify;
+}
+
+/* Words broken at the line's end, in the language the article declares:
+   the patterns are the browser's own (Firefox carries a set in its
+   package, Chromium reads the system's on Android and its own
+   component's on Windows and Linux, WebKit asks the OS), and the rule
+   asks for the attribute because without one the property would inherit
+   this page's `lang="en"` and break a Polish text by English rules. The
+   prose alone: code keeps its words whole, and a heading is short enough
+   to keep its own. */
+:root[data-reader-hyphens="auto"] #article[lang] #content :is(p, li, dd, blockquote, figcaption) {
+  hyphens: auto;
+}
+
+:root[data-reader-hyphens="auto"] #content :is(code, kbd, samp, pre) {
+  hyphens: manual;
+}
+
+/* Paragraphs a book's way: the first line stepped in on every paragraph
+   of prose but the one that opens a section (after a heading or a rule),
+   and - in the indented mode alone - no blank line between them. Every
+   paragraph rather than "a paragraph another one follows" (the first cut,
+   `p + p`): a page's paragraphs come grouped in wrapper divs the sanitizer
+   keeps (a news site splits its story around its ads), and the first of
+   each group stood flush with a gap over it, reading as a section break in
+   the middle of the prose (Michał's smoke, 2026-09-15). Lists and table
+   cells are not prose and keep their edge. The air a paragraph no longer
+   leaves under itself comes back from the blocks that are not paragraphs,
+   so a list or a picture keeps its room. `both` keeps the web's blank line
+   and adds the book's indent (Michał's ask). In `em`, so the step grows
+   with the type. */
+:root[data-reader-paragraphs="indented"] #content p:not(:is(li, td, th) p),
+:root[data-reader-paragraphs="both"] #content p:not(:is(li, td, th) p) {
+  text-indent: 1.5em;
+}
+
+:root[data-reader-paragraphs="indented"] #content :is(h1, h2, h3, h4, h5, h6, hr) + p,
+:root[data-reader-paragraphs="both"] #content :is(h1, h2, h3, h4, h5, h6, hr) + p {
+  text-indent: 0;
+}
+
+:root[data-reader-paragraphs="indented"] #content p:not(:is(li, td, th) p) {
+  margin-bottom: 0;
+}
+
+:root[data-reader-paragraphs="indented"] #content :is(ul, ol, dl, table, figure, blockquote, pre),
+:root[data-reader-paragraphs="indented"] #content p + img {
+  margin-top: 1.2rem;
+}
+
 /* An article's pictures (D145). A picture stands as a block of its own,
    never wider than the text and never taller than most of the screen - a
    photo taller than a page would fight the pager for the fold (D143). Its
@@ -1039,10 +1133,13 @@ body.reader:has(#library:not([hidden])) {
 }
 
 /* The tab in view: the accent as a border and a wash behind the page's own
-   text color, so the label stays readable in all four themes. */
+   text color, so the label stays readable in all four themes. The wash is
+   the bar's quarter of the accent (`.page-tools`, page.css) since D225's
+   smoke: at 12% it rounded back into an e-ink panel's paper, and the tab
+   in view looked like the other one (Michał's Boox, 2026-09-15). */
 .library-segments button[aria-pressed="true"] {
   border-color: var(--page-accent);
-  background: color-mix(in srgb, var(--page-accent) 12%, transparent);
+  background: color-mix(in srgb, var(--page-accent) 25%, transparent);
 }
 
 /* --- disclosure lines: the offline promise and the file-format note --- */
@@ -2229,11 +2326,12 @@ a.marks-act {
 /* A held state (saved, marked read) is a pill, not an act: the accent as a
    border and a wash behind the page's own text color - the tabs' treatment,
    readable in all four themes where accent-colored text is not, and the only
-   frame any of these buttons wears at rest. After the hover rule, so a
-   pressed button keeps saying what is true under the pointer. */
+   frame any of these buttons wears at rest. The tabs' quarter of the accent
+   too, for the tabs' reason (12% is paper on e-ink). After the hover rule,
+   so a pressed button keeps saying what is true under the pointer. */
 .article-actions button[aria-pressed="true"] {
   border-color: var(--page-accent);
-  background: color-mix(in srgb, var(--page-accent) 12%, transparent);
+  background: color-mix(in srgb, var(--page-accent) 25%, transparent);
   color: var(--page-fg);
 }
 
@@ -2323,6 +2421,9 @@ button[data-armed],
 #underline-choices button[aria-pressed="true"],
 .mark-inks button[aria-pressed="true"] {
   box-shadow: 0 0 0 2px var(--page-accent);
+  /* The ring alone: the wash the word rows wear (`.reader-choices`, above)
+     would sit around the drawn ink and muddy it. */
+  background: transparent;
 }
 
 /* The toolbar's own glyphs step up beyond the transport icons' desktop size

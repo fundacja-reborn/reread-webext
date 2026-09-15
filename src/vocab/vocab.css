@@ -102,11 +102,15 @@ summary {
   font-size: 0.85rem;
 }
 
-/* The one that is on, said with the border rather than a fill: the reader
-   panel's own word for "this is chosen". */
+/* The one that is on, said the way the reader's panel says it
+   (`.reader-choices`, reader.css): the bar's quarter-accent wash under the
+   word in the accent frame, the word in the page's own ink - the accent
+   alone was invisible on an e-ink panel's greys (Michał's Boox,
+   2026-09-15). */
 .page-choices button[aria-pressed="true"] {
   border-color: var(--page-accent);
-  color: var(--page-accent);
+  background: color-mix(in srgb, var(--page-accent) 25%, transparent);
+  color: var(--page-fg);
 }
 
 .page-choices output {
@@ -171,10 +175,13 @@ summary {
 }
 
 /* The shelf in view: the accent as a border and a wash behind the page's
-   own text color, so the label stays readable in all four themes. */
+   own text color, so the label stays readable in all four themes. The
+   reading list's tabs' quarter of the accent (reader.css) since D225's
+   smoke: 12% rounded back into an e-ink panel's paper (Michał's Boox,
+   2026-09-15). */
 .phrase-segments button[aria-pressed="true"] {
   border-color: var(--page-accent);
-  background: color-mix(in srgb, var(--page-accent) 12%, transparent);
+  background: color-mix(in srgb, var(--page-accent) 25%, transparent);
 }
 
 /* --- disclosure lines: the intro and the file-format note, folded --- */

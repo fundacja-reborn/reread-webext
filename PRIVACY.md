@@ -168,6 +168,28 @@ code again with every release of re/read and update this section if anything cha
 browser ever back this call with a network service, re/read would stop using it before the next
 release. Where the detector is missing, re/read simply skips the check.
 
+## Hyphenation
+
+The **Hyphenation** row in the reader's Aa panel (off unless you turn it on) lets the browser
+break words at the end of a line, in the language the page or book declares. re/read sets one
+CSS property for it (`hyphens: auto`) and does nothing else: no text is handed to anything, and
+nothing is downloaded for it. The hyphenation patterns are the browser's own, and we have checked
+in the browsers' source code where they come from.
+
+Firefox carries its own set inside the browser package, on desktop and on Android alike
+(`intl/locales/moz.build` lists the 47 languages; `intl/hyphenation/glue/nsHyphenationManager.cpp`
+loads them from the package and from nowhere else). Chromium-based browsers read the system's
+patterns on Android (`/system/usr/hyphen-data`, in `content/browser/hyphenation/hyphenation_impl.cc`)
+and the operating system's on macOS (`third_party/blink/renderer/platform/text/apple/hyphenation_apple.cc`);
+on Windows and Linux they use a "Hyphenation" component that the browser itself downloads
+through its component updater - registered when the browser starts
+(`chrome/browser/component_updater/registration.cc`) and fetched on the browser's own schedule,
+whether or not any page ever asks for hyphenation; a page that asks only reads what the updater
+has already put on the disk (`chrome/browser/component_updater/hyphenation_component_installer.cc`).
+Safari asks the operating system (`Source/WebCore/platform/text/cf/HyphenationCF.cpp` in WebKit).
+Which languages are covered is the browser's and the system's business; a language without
+patterns, and a page that declares no language, is simply not hyphenated.
+
 ## Page content
 
 The part of the extension that runs on web pages reads the text of the pages you visit,
