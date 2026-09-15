@@ -1391,6 +1391,11 @@
   "options_font_custom_hint": {
     "message": "Saisissez le nom d'une police installée sur cet appareil, par exemple Georgia ou Noto Serif. La ligne Police du lecteur la proposera alors comme Personnalisée. Laissez le champ vide pour n'utiliser que les polices intégrées."
   },
+  "options_reading_pace": { "message": "Vitesse de lecture" },
+  "options_reading_pace_unit": { "message": "mots par minute" },
+  "options_reading_pace_hint": {
+    "message": "Le nombre de mots que vous lisez en une minute. Il sert uniquement à estimer le temps de lecture affiché dans la liste de lecture et sous le titre d'un article. 200 est un rythme tranquille dans votre propre langue. Dans une langue que vous apprenez, c'est généralement 100-150."
+  },
   "options_quiet_bubble_hint": {
     "message": "Affiche uniquement le texte traduit dans la bulle. Les boutons d'action (copier, enregistrer) n'apparaissent que lorsque vous cliquez ou touchez la bulle."
   },
@@ -1431,7 +1436,7 @@
     "message": "Choisissez, pour chaque langue, la voix utilisée pour lire les phrases et les articles. Seules les voix qui parlent hors ligne sont proposées : la parole est produite sur cet appareil et rien n'est envoyé sur Internet."
   },
   "speech_no_offline_voice": { "message": "Cet appareil n'a pas de voix hors ligne pour cette langue." },
-  "options_tts_rate": { "message": "Vitesse de lecture" },
+  "options_tts_rate": { "message": "Vitesse de la voix" },
   "options_models_heading": { "message": "Modèles de traduction" },
   "options_models_intro": {
     "message": "Téléchargez ici un modèle de traduction pour chaque paire de langues que vous voulez traduire. Ce sont des fichiers officiels de Mozilla qui fonctionnent entièrement hors ligne sur votre appareil."

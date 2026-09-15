@@ -100,7 +100,19 @@ describe("readingTime", () => {
     assert.deepEqual(readingTime(23600), { hours: 2, minutes: 0 });
   });
 
-  it("is made at two hundred words a minute - a change here changes every row", () => {
+  it("is made at the reader's own pace when one is given", () => {
+    // Half the pace, twice the minutes - and the default is the constant.
+    assert.deepEqual(readingTime(2400, 100), { hours: 0, minutes: 24 });
+    assert.deepEqual(readingTime(2400, WORDS_PER_MINUTE), readingTime(2400));
+    assert.deepEqual(readingTime(300, 600), { hours: 0, minutes: 1 });
+  });
+
+  it("crosses the hour at a slower pace where the default stayed under it", () => {
+    assert.deepEqual(readingTime(11800), { hours: 0, minutes: 59 });
+    assert.deepEqual(readingTime(11800, 150), { hours: 1, minutes: 20 });
+  });
+
+  it("defaults to two hundred words a minute - a change here changes every row nobody set a pace for", () => {
     assert.equal(WORDS_PER_MINUTE, 200);
   });
 });

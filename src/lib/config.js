@@ -5,6 +5,7 @@
  */
 
 import { webext } from "./browser.js";
+import { WORDS_PER_MINUTE } from "./reader/length.js";
 import { DEFAULT_MARK_COLOR, isMarkColor } from "./reader/marks.js";
 import { isSwitchedOff } from "./site.js";
 import { DEFAULT_UNDERLINE, isUnderlineWeight } from "./underline.js";
@@ -211,6 +212,18 @@ export const CONFIG_KEY = "config";
  *   stands on, so no page setting can reach it - this is its one knob, and it
  *   exists because built-in sizes land differently on different screens: an
  *   e-ink tablet can render a CSS pixel visibly smaller than a phone does.
+ * @property {number} readingPace How many words a minute the reader reads
+ *   (D228): the one number every reading-time estimate is made at, on the
+ *   list's rows and in the line under a title (`lib/reader/length.js`).
+ *   Typed once in the settings rather than measured - measuring would mean
+ *   timing every reading, a new kind of record kept about the reader for
+ *   the sake of one number. One number for every text and every language,
+ *   on purpose: the estimate says "about", and what the setting puts right
+ *   is the reader's own pace, not a text's difficulty. The default is the
+ *   pace every estimate was made at before the field existed, so a profile
+ *   that never touched it reads unchanged. Words a minute, because that is
+ *   the unit a reading speed is quoted in everywhere; held to `READING_PACE`
+ *   by `within`.
  * @property {import("./underline.js").UnderlineWeight} underline How heavily
  *   a saved phrase is underlined (D130). Not in `reader`, though its dial
  *   sits in the reader's Aa panel: the underline is worn by every page being
@@ -339,6 +352,15 @@ export const BUBBLE_SCALE = Object.freeze({ min: 80, max: 200, step: 10 });
  */
 export const TTS_RATE = Object.freeze({ min: 50, max: 200, step: 10 });
 
+/**
+ * What the reading-pace field on the settings page accepts, in words a
+ * minute (D228). The floor is a beginner going word by word with a
+ * dictionary open; the ceiling is a skimmer in their own language, past
+ * which nobody reads the words the count counted. No step: the field is
+ * typed, not stepped, and a measured 135 is a number to keep.
+ */
+export const READING_PACE = Object.freeze({ min: 50, max: 600 });
+
 /** @type {Readonly<ReaderConfig>} */
 export const READER_DEFAULTS = Object.freeze({
   theme: "auto",
@@ -374,6 +396,7 @@ export const DEFAULTS = Object.freeze({
   ttsRate: 100,
   ttsOff: false,
   bubbleScale: 100,
+  readingPace: WORDS_PER_MINUTE,
   underline: DEFAULT_UNDERLINE,
   customCss: "",
 });
@@ -571,6 +594,10 @@ export function withDefaults(stored) {
     // from before the switch keeps its voice.
     ttsOff: typeof raw["ttsOff"] === "boolean" ? raw["ttsOff"] : DEFAULTS.ttsOff,
     bubbleScale: within(raw["bubbleScale"], BUBBLE_SCALE, DEFAULTS.bubbleScale),
+    // Clamped like the scales above (D228): a typed 1000 is "as fast as the
+    // scale goes", and a profile from before the field reads at the pace
+    // every estimate was made at until then.
+    readingPace: within(raw["readingPace"], READING_PACE, DEFAULTS.readingPace),
     // A name the stylesheet knows, or the line as it has always been drawn:
     // a weight this version never heard of has no rule to paint under, and a
     // registration nothing styles underlines nothing at all.
@@ -633,6 +660,7 @@ export async function readConfig() {
  * @property {number} [ttsRate]
  * @property {boolean} [ttsOff]
  * @property {number} [bubbleScale]
+ * @property {number} [readingPace]
  * @property {import("./underline.js").UnderlineWeight} [underline]
  * @property {string} [customCss]
  */

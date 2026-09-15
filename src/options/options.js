@@ -19,6 +19,7 @@ import { webext } from "../lib/browser.js";
 import {
   BUBBLE_SCALE,
   CONFIG_KEY,
+  READING_PACE,
   TTS_RATE,
   cleanFontFamily,
   effectiveLibraryCopy,
@@ -443,6 +444,22 @@ function renderFontCustom() {
   // eat a half-typed name.
   if (document.activeElement !== field) field.value = config.reader.fontFamily;
   previewFontFamily(field);
+}
+
+/**
+ * The reader's own pace (D228) - the field shows what is stored, which is
+ * the clamped number when a typed one fell outside the scale: at either end
+ * the honest answer is "this is as far as it goes". The scale's ends are the
+ * config's own, put on the field here so the browser's arrows and its
+ * validity agree with the healer rather than with a copy in the markup.
+ */
+function renderPace() {
+  const field = document.getElementById("reading-pace");
+  if (!(field instanceof HTMLInputElement)) return;
+  field.min = String(READING_PACE.min);
+  field.max = String(READING_PACE.max);
+  // Not while it is the thing being typed in, for the font name's reason.
+  if (document.activeElement !== field) field.value = String(config.readingPace);
 }
 
 /**
@@ -2820,6 +2837,7 @@ async function render() {
   renderKeepArticles();
   renderLibraryCopy();
   renderFontCustom();
+  renderPace();
   renderCustomCss();
   renderNoTranslation();
   renderBubbleScale();
@@ -2886,6 +2904,7 @@ async function refresh() {
   renderKeepArticles();
   renderLibraryCopy();
   renderFontCustom();
+  renderPace();
   renderCustomCss();
   renderNoTranslation();
   renderBubbleScale();
@@ -3001,6 +3020,27 @@ document.getElementById("font-custom")?.addEventListener("input", (event) => {
   if (field instanceof HTMLInputElement) previewFontFamily(field);
 });
 document.getElementById("font-custom")?.addEventListener("keydown", (event) => {
+  if (event.key === "Enter" && event.target instanceof HTMLElement) event.target.blur();
+});
+// The reader's own pace (D228), committed on change - blur or Enter - the
+// way the font's name is: a number is typed whole. What was actually stored
+// comes back into the field, so a typed 1000 reads back as the scale's top;
+// a field left empty or unreadable keeps the stored pace rather than writing
+// nothing over it.
+document.getElementById("reading-pace")?.addEventListener("change", (event) => {
+  const field = event.target;
+  if (!(field instanceof HTMLInputElement)) return;
+  const typed = field.valueAsNumber;
+  if (!Number.isFinite(typed)) {
+    renderPace();
+    return;
+  }
+  void writeConfig({ readingPace: typed }).then((written) => {
+    config = written;
+    renderPace();
+  });
+});
+document.getElementById("reading-pace")?.addEventListener("keydown", (event) => {
   if (event.key === "Enter" && event.target instanceof HTMLElement) event.target.blur();
 });
 // The reader's own rules (D176), stored on the press and not per keystroke:
