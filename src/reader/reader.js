@@ -33,6 +33,7 @@ import { ReadLedger } from "../lib/counting.js";
 import { dresser } from "../lib/user-css.js";
 import { webext } from "../lib/browser.js";
 import { fileSize, localizePage, megabytes, plural, t, uiLocale } from "../lib/i18n.js";
+import { whenIdle } from "../lib/idle.js";
 import { privateNote } from "../lib/private-note.js";
 import { languageName, pairLabel } from "../lib/language.js";
 import {
@@ -207,6 +208,7 @@ import {
   libraryView,
   pickedState,
   searchButtonState,
+  uncounted,
   withAllPicked,
 } from "./list-view.js";
 import { markRows, marksListView } from "./marks-list.js";
@@ -658,6 +660,27 @@ const tocScansRunning = new Set();
  * @type {Set<string>}
  */
 const wordScansRunning = new Set();
+
+/**
+ * The rows the length pass (D226, `fillLengths`) has already tried on this
+ * page: a row that could not be counted must not be tried again on every
+ * refresh - and the refresh the pass makes when it is done lists the very
+ * rows it just filled. Keyed the way the list keys its rows: an article's
+ * address, a book's id.
+ *
+ * @type {Set<string>}
+ */
+const lengthsTried = new Set();
+
+/** One pass at a time: the refresh at a pass's end starts none. */
+let lengthPassRunning = false;
+
+/**
+ * How long a row of the length pass may wait for the page's quiet moment
+ * before it goes anyway: long enough to stay out of a scroll's way, short
+ * enough that a page never idle still fills its rows.
+ */
+const LENGTH_PASS_TIMEOUT = 1000;
 
 /**
  * The mark the toolbar is about, while it shows (D107). Which one it is on
@@ -2899,9 +2922,10 @@ async function backfillToc(book) {
  * the TOC scan reads them, so a long book never stands whole in memory.
  *
  * @param {BookMeta} book
+ * @returns {Promise<boolean>} whether the row was filled by this scan
  */
 async function backfillWords(book) {
-  if (wordScansRunning.has(book.id)) return;
+  if (wordScansRunning.has(book.id)) return false;
   wordScansRunning.add(book.id);
   try {
     let words = 0;
@@ -2910,13 +2934,74 @@ async function backfillWords(book) {
       // A torn part reads as absent; the row keeps the count of what is readable.
       if (segment !== null) words += wordsIn(segment.blocks.join(""));
     }
-    await setBookWords(book.id, words);
+    return await setBookWords(book.id, words);
   } catch {
     // A closed database or a torn book: no count today, another try at the
     // next open.
+    return false;
   } finally {
     wordScansRunning.delete(book.id);
   }
+}
+
+/**
+ * A promise of the page's next quiet moment - or of the deadline, on a page
+ * that never has one (`whenIdle`).
+ *
+ * @returns {Promise<void>}
+ */
+function quietMoment() {
+  return new Promise((resolve) => whenIdle(() => resolve(), LENGTH_PASS_TIMEOUT));
+}
+
+/**
+ * The rows from before the count (D226) filled behind the list, once: each
+ * read in one of the page's quiet moments and written through the same
+ * doors an open would use - an article's text counted as the header counts
+ * it, a book's parts summed as its open sums them. The list is drawn first,
+ * and from the light rows alone, as always; this is the one pass that reads
+ * documents nobody opened, each once and never again once its row carries
+ * the number (the row is what stops the next pass, on this page and in any
+ * other tab - the writes take only a row without one). A row that will not
+ * count is left as it is and not asked again on this page. When the pass
+ * ends with something filled and the list still on screen, the list is
+ * drawn again so the numbers show.
+ *
+ * Why not leave the old rows to their next open: the rows without a number
+ * are exactly the texts nobody has opened yet - the ones a reader chooses
+ * among by length (Michał's smoke of PR #391).
+ *
+ * @param {import("./list-view.js").LibraryEntry[]} entries the list as it
+ *   was just drawn
+ */
+async function fillLengths(entries) {
+  const owed = uncounted(entries, lengthsTried);
+  if (owed.length === 0 || lengthPassRunning) return;
+  lengthPassRunning = true;
+  let filled = 0;
+  try {
+    for (const entry of owed) {
+      lengthsTried.add(entry.url);
+      // The list, or whatever somebody opened meanwhile, comes first.
+      await quietMoment();
+      try {
+        if (entry.kind === "book") {
+          const book = await getBook(entry.url);
+          if (book !== null && book.words === undefined && (await backfillWords(book))) filled += 1;
+        } else {
+          const saved = await getArticle(entry.url);
+          if (saved !== null && saved.words === undefined && (await setWords(entry.url, wordsIn(saved.content)))) {
+            filled += 1;
+          }
+        }
+      } catch {
+        // A closed database or a torn row: the row stays as it is.
+      }
+    }
+  } finally {
+    lengthPassRunning = false;
+  }
+  if (filled > 0 && library !== null && !library.hidden) await refreshLibrary();
 }
 
 /**
@@ -3415,6 +3500,9 @@ async function refreshLibrary() {
   renderPickLine();
   renderLibraryPager(view);
   applyLibrarySearchVisibility();
+  // The rows from before the count (D226), filled behind the list once it
+  // stands - never before: the list is drawn from the light rows alone.
+  void fillLengths(entries);
 }
 
 /**

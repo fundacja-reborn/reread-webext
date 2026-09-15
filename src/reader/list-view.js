@@ -112,6 +112,22 @@ export function bookEntry(book, position) {
 }
 
 /**
+ * The rows still owed their count of words (D226), for the pass that fills
+ * them behind the list: every row without one, minus the rows already tried
+ * on this page - a row that could not be counted (torn, or gone under the
+ * pass) would otherwise be tried again on every refresh, including the
+ * refresh the pass itself makes when it is done.
+ *
+ * @template {{ url: string, words?: number }} T
+ * @param {readonly T[]} entries
+ * @param {ReadonlySet<string>} tried
+ * @returns {T[]}
+ */
+export function uncounted(entries, tried) {
+  return entries.filter((entry) => entry.words === undefined && !tried.has(entry.url));
+}
+
+/**
  * Everything a row can be found by: the title as it is shown, and the site
  * it came from - or, for a book, its author.
  *

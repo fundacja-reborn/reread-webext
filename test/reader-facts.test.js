@@ -73,6 +73,23 @@ describe("the facts line (D226) - the count of words", () => {
     assert.match(reader, /await setBookWords\(book\.id, words\)/);
   });
 
+  it("is filled behind the list for the rows from before the count, once each", async () => {
+    const reader = await source("src/reader/reader.js");
+    // The list stands first; the pass is the last thing a refresh does.
+    assert.match(reader, /applyLibrarySearchVisibility\(\);\s*\/\/[^\n]*\n(?:\s*\/\/[^\n]*\n)*\s*void fillLengths\(entries\);\s*\}/);
+    const body = reader.slice(reader.indexOf("async function fillLengths("));
+    const fn = body.slice(0, body.indexOf("\n}\n"));
+    assert.match(fn, /uncounted\(entries, lengthsTried\)/, "the pass does not ask the pure rule which rows are owed");
+    // A row is marked tried before anything is read, so a row that throws is
+    // not asked again; and every row waits for a quiet moment first.
+    assert.match(fn, /lengthsTried\.add\(entry\.url\);\s*\/\/[^\n]*\n\s*await quietMoment\(\);/);
+    assert.match(fn, /await setWords\(entry\.url, wordsIn\(saved\.content\)\)/);
+    assert.match(fn, /await backfillWords\(book\)/);
+    // The list is drawn again only for something filled, and only while it
+    // is the view on screen.
+    assert.match(fn, /if \(filled > 0 && library !== null && !library\.hidden\) await refreshLibrary\(\);/);
+  });
+
   it("is summed at a book's import and written with its row", async () => {
     const importer = await source("src/reader/import-book.js");
     assert.match(importer, /words \+= wordsIn\(blocks\.join\(""\)\)/);

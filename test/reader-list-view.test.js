@@ -9,6 +9,7 @@ import {
   pickedState,
   searchButtonState,
   searchableArticle,
+  uncounted,
   withAllPicked,
 } from "../src/reader/list-view.js";
 
@@ -39,6 +40,29 @@ describe("searchableArticle", () => {
     for (const word of ["old", "chinese", "wikipedia"]) {
       assert.ok(searchable.includes(word), `misses ${word}`);
     }
+  });
+});
+
+describe("uncounted (D226)", () => {
+  it("lists the rows without a count of words, skipping the ones already tried", () => {
+    const rows = [
+      meta(1, { words: 1200 }),
+      meta(2),
+      meta(3, { words: 0 }),
+      meta(4),
+      meta(5, { kind: "book" }),
+    ];
+    assert.deepEqual(
+      uncounted(rows, new Set()).map((row) => row.url),
+      [rows[1]?.url, rows[3]?.url, rows[4]?.url],
+    );
+    // Zero is a count - a text of pictures alone was counted and found empty.
+    // A row tried once on this page is not asked again, whatever it holds.
+    assert.deepEqual(
+      uncounted(rows, new Set([rows[3]?.url ?? ""])).map((row) => row.url),
+      [rows[1]?.url, rows[4]?.url],
+    );
+    assert.deepEqual(uncounted([], new Set()), []);
   });
 });
 
