@@ -105,7 +105,26 @@ export function bookEntry(book, position) {
     // article's - the one place the space a document costs is said before
     // it is opened.
     ...(book.pictures === undefined ? {} : { pictures: book.pictures }),
+    // Its words too (D226), the whole book's: the row says how long the
+    // reading is, the part on screen says its own share once opened.
+    ...(book.words === undefined ? {} : { words: book.words }),
   };
+}
+
+/**
+ * The rows still owed their count of words (D226), for the pass that fills
+ * them behind the list: every row without one, minus the rows already tried
+ * on this page - a row that could not be counted (torn, or gone under the
+ * pass) would otherwise be tried again on every refresh, including the
+ * refresh the pass itself makes when it is done.
+ *
+ * @template {{ url: string, words?: number }} T
+ * @param {readonly T[]} entries
+ * @param {ReadonlySet<string>} tried
+ * @returns {T[]}
+ */
+export function uncounted(entries, tried) {
+  return entries.filter((entry) => entry.words === undefined && !tried.has(entry.url));
 }
 
 /**

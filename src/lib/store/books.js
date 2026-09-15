@@ -354,6 +354,28 @@ export async function setBookToc(id, toc) {
 }
 
 /**
+ * The count of the book's words (D226), filled in for a row from before the
+ * field by the reader that opened it - and only for such a row, the way the
+ * table of contents is filled: an import writes the count with the row, so
+ * a row that has one keeps it. A no-op when the book is gone.
+ *
+ * @param {string} id
+ * @param {number} words
+ * @returns {Promise<boolean>} whether the row was filled
+ */
+export async function setBookWords(id, words) {
+  const written = await withLibrary("readwrite", async (stores) => {
+    const row = asBookMeta(await promisify(stores.books.get(id)));
+    if (row === null || row.words !== undefined) return null;
+    const updated = { ...row, words };
+    await promisify(stores.books.put(updated));
+    return updated;
+  });
+  if (written !== null) await patchBookCopy(written);
+  return written !== null;
+}
+
+/**
  * Removes segments and pictures whose book never came to exist - the
  * leavings of an import that a closed tab cut short (the book row is
  * written last). Run when the list opens, because this page is the only

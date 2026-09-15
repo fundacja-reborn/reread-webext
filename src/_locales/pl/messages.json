@@ -1358,6 +1358,54 @@
       "parts": { "content": "$2", "example": "12" }
     }
   },
+  "reader_words_one": {
+    "message": "$COUNT$ słowo",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_words_few": {
+    "message": "$COUNT$ słowa",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
+  "reader_words_many": {
+    "message": "$COUNT$ słów",
+    "placeholders": { "count": { "content": "$1", "example": "1234" } }
+  },
+  "reader_words_other": {
+    "message": "$COUNT$ słowa",
+    "placeholders": { "count": { "content": "$1", "example": "1,5" } }
+  },
+  "reader_time_minutes": {
+    "message": "ok. $MINUTES$ min",
+    "placeholders": { "minutes": { "content": "$1", "example": "12" } }
+  },
+  "reader_time_hours": {
+    "message": "ok. $HOURS$ godz.",
+    "placeholders": { "hours": { "content": "$1", "example": "8" } }
+  },
+  "reader_time_hours_minutes": {
+    "message": "ok. $HOURS$ godz. $MINUTES$ min",
+    "placeholders": {
+      "hours": { "content": "$1", "example": "1" },
+      "minutes": { "content": "$2", "example": "35" }
+    }
+  },
+  "reader_phrases_here_one": {
+    "message": "$COUNT$ zapisana fraza w tym tekście",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_phrases_here_few": {
+    "message": "$COUNT$ zapisane frazy w tym tekście",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
+  "reader_phrases_here_many": {
+    "message": "$COUNT$ zapisanych fraz w tym tekście",
+    "placeholders": { "count": { "content": "$1", "example": "7" } }
+  },
+  "reader_phrases_here_other": {
+    "message": "$COUNT$ zapisanej frazy w tym tekście",
+    "placeholders": { "count": { "content": "$1", "example": "1,5" } }
+  },
+  "reader_phrases_here_none": { "message": "Brak zapisanych fraz w tym tekście" },
   "reader_percent_read": {
     "message": "przeczytane $PERCENT$%",
     "placeholders": {

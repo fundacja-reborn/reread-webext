@@ -21,6 +21,13 @@ const chapters = [
 ];
 
 describe("bookRecord", () => {
+  it("carries the count of the book's words only where the import summed one (D226)", () => {
+    assert.equal(bookRecord({ ...whole, words: 98_000 })?.words, 98_000);
+    assert.equal(bookRecord({ ...whole, words: 0 })?.words, 0);
+    assert.equal("words" in (bookRecord(whole) ?? {}), false);
+    assert.equal("words" in (bookRecord({ ...whole, words: 1.5 }) ?? {}), false);
+  });
+
   it("builds the row an import writes", () => {
     assert.deepEqual(bookRecord(whole), { ...whole, readAt: null, toc: [] });
   });
@@ -60,6 +67,15 @@ describe("bookRecord", () => {
 });
 
 describe("asBookMeta", () => {
+  it("keeps the count of words, zero included, and drops what is no count (D226)", () => {
+    const row = { ...whole, readAt: null, toc: [] };
+    assert.equal(asBookMeta({ ...row, words: 98_000 })?.words, 98_000);
+    assert.equal(asBookMeta({ ...row, words: 0 })?.words, 0);
+    // A row from before the count reads as owed one - the next open sums it.
+    assert.equal("words" in (asBookMeta(row) ?? {}), false);
+    assert.equal("words" in (asBookMeta({ ...row, words: "many" }) ?? {}), false);
+  });
+
   it("narrows a stored row field by field, healing what it can", () => {
     const healed = asBookMeta({ id: "b-1", segmentCount: 3, addedAt: "when", readAt: 7 });
     assert.deepEqual(healed, {
@@ -178,6 +194,12 @@ describe("library entries", () => {
       percentRead: null,
       lastReadAt: null,
     });
+  });
+
+  it("a book's row says how many words the book holds, as an article's does (D226)", () => {
+    const book = { ...whole, readAt: null, toc: [], words: 98_000 };
+    assert.equal(bookEntry(book, null).words, 98_000);
+    assert.equal("words" in bookEntry({ ...whole, readAt: null, toc: [] }, null), false);
   });
 
   it("a book's row says what its pictures take, as an article's does (D183)", () => {

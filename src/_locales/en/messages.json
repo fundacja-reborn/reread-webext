@@ -1177,6 +1177,46 @@
       "parts": { "content": "$2", "example": "12" }
     }
   },
+  "reader_words_one": {
+    "message": "$COUNT$ word",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_words_other": {
+    "message": "$COUNT$ words",
+    "description": "How many words a text holds: in a reading list row (before the estimated reading time) and in the line under an article's byline.",
+    "placeholders": { "count": { "content": "$1", "example": "1,234" } }
+  },
+  "reader_time_minutes": {
+    "message": "about $MINUTES$ min",
+    "description": "About how long a text takes to read, under an hour, at a steady 200 words a minute; abbreviated unit, next to the word count.",
+    "placeholders": { "minutes": { "content": "$1", "example": "12" } }
+  },
+  "reader_time_hours": {
+    "message": "about $HOURS$ h",
+    "description": "About how long a text takes to read, in whole hours (a book); abbreviated unit.",
+    "placeholders": { "hours": { "content": "$1", "example": "8" } }
+  },
+  "reader_time_hours_minutes": {
+    "message": "about $HOURS$ h $MINUTES$ min",
+    "description": "About how long a text takes to read, above an hour and not on the hour (the minutes are rounded to the nearest five); abbreviated units.",
+    "placeholders": {
+      "hours": { "content": "$1", "example": "1" },
+      "minutes": { "content": "$2", "example": "35" }
+    }
+  },
+  "reader_phrases_here_one": {
+    "message": "$COUNT$ saved phrase in this text",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_phrases_here_other": {
+    "message": "$COUNT$ saved phrases in this text",
+    "description": "In the line under an article's byline: how many different saved phrases the reader's underlines found in the text on screen (a phrase met three times counts once).",
+    "placeholders": { "count": { "content": "$1", "example": "7" } }
+  },
+  "reader_phrases_here_none": {
+    "message": "No saved phrases in this text",
+    "description": "The same line when the underlines found none of the reader's saved phrases in the text; not shown at all when nothing is saved yet."
+  },
   "reader_percent_read": {
     "message": "$PERCENT$% read",
     "description": "The tail of an unread row's detail line, shown once some of the document has been read: how much of the whole has passed before the eyes, in percent.",

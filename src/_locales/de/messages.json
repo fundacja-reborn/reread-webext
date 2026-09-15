@@ -910,6 +910,38 @@
       "parts": { "content": "$2", "example": "12" }
     }
   },
+  "reader_words_one": {
+    "message": "$COUNT$ Wort",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_words_other": {
+    "message": "$COUNT$ Wörter",
+    "placeholders": { "count": { "content": "$1", "example": "1.234" } }
+  },
+  "reader_time_minutes": {
+    "message": "etwa $MINUTES$ Min.",
+    "placeholders": { "minutes": { "content": "$1", "example": "12" } }
+  },
+  "reader_time_hours": {
+    "message": "etwa $HOURS$ Std.",
+    "placeholders": { "hours": { "content": "$1", "example": "8" } }
+  },
+  "reader_time_hours_minutes": {
+    "message": "etwa $HOURS$ Std. $MINUTES$ Min.",
+    "placeholders": {
+      "hours": { "content": "$1", "example": "1" },
+      "minutes": { "content": "$2", "example": "35" }
+    }
+  },
+  "reader_phrases_here_one": {
+    "message": "$COUNT$ gespeicherter Eintrag in diesem Text",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_phrases_here_other": {
+    "message": "$COUNT$ gespeicherte Einträge in diesem Text",
+    "placeholders": { "count": { "content": "$1", "example": "7" } }
+  },
+  "reader_phrases_here_none": { "message": "Keine gespeicherten Einträge in diesem Text" },
   "reader_percent_read": {
     "message": "$PERCENT$ % gelesen",
     "placeholders": {

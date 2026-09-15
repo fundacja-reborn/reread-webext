@@ -1358,6 +1358,54 @@
       "parts": { "content": "$2", "example": "12" }
     }
   },
+  "reader_words_one": {
+    "message": "$COUNT$ слово",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_words_few": {
+    "message": "$COUNT$ слова",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
+  "reader_words_many": {
+    "message": "$COUNT$ слів",
+    "placeholders": { "count": { "content": "$1", "example": "1234" } }
+  },
+  "reader_words_other": {
+    "message": "$COUNT$ слова",
+    "placeholders": { "count": { "content": "$1", "example": "1,5" } }
+  },
+  "reader_time_minutes": {
+    "message": "бл. $MINUTES$ хв",
+    "placeholders": { "minutes": { "content": "$1", "example": "12" } }
+  },
+  "reader_time_hours": {
+    "message": "бл. $HOURS$ год",
+    "placeholders": { "hours": { "content": "$1", "example": "8" } }
+  },
+  "reader_time_hours_minutes": {
+    "message": "бл. $HOURS$ год $MINUTES$ хв",
+    "placeholders": {
+      "hours": { "content": "$1", "example": "1" },
+      "minutes": { "content": "$2", "example": "35" }
+    }
+  },
+  "reader_phrases_here_one": {
+    "message": "$COUNT$ збережена фраза в цьому тексті",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_phrases_here_few": {
+    "message": "$COUNT$ збережені фрази в цьому тексті",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
+  "reader_phrases_here_many": {
+    "message": "$COUNT$ збережених фраз у цьому тексті",
+    "placeholders": { "count": { "content": "$1", "example": "7" } }
+  },
+  "reader_phrases_here_other": {
+    "message": "$COUNT$ збереженої фрази в цьому тексті",
+    "placeholders": { "count": { "content": "$1", "example": "1,5" } }
+  },
+  "reader_phrases_here_none": { "message": "Немає збережених фраз у цьому тексті" },
   "reader_percent_read": {
     "message": "прочитано $PERCENT$%",
     "placeholders": {

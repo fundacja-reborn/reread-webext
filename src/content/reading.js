@@ -47,7 +47,7 @@ import { copyCombo, keeping, madeSelection, touchPointer } from "../lib/selectio
 import { sentenceAround } from "../lib/sentence.js";
 import { MIRROR_KEY, asMirror, formAliases, mirrorMatches } from "../lib/store/mirror.js";
 import { canSpeakLang, primaryLanguage, setSpeechOff, speak, speaking, stop as stopSpeaking } from "../lib/tts.js";
-import { clear, mark, occurrences, paint, phraseAt, unmark } from "./highlighter.js";
+import { clear, mark, occurrences, paint, phraseAt, supported, unmark } from "./highlighter.js";
 import { blockTextAround, findable } from "./scan.js";
 import { claimsNativeSelection, clearSelection, releaseMouse, startSelect, stopSelect } from "./select.js";
 import { createTooltip } from "./tooltip.js";
@@ -341,6 +341,17 @@ let quietVoice = null;
  * @type {(() => "light" | "sepia" | "dark" | null) | null}
  */
 let bubbleScheme = null;
+
+/**
+ * Who hears how many of the reader's saved phrases the text on screen holds
+ * (D226) - the reader page's header line, and nobody else's: on somebody
+ * else's page there is nowhere of ours to say it. Told after every paint,
+ * because the paint is what knows: the vocabulary arrives after the text
+ * does, and changes under it from another tab.
+ *
+ * @type {((found: number | null) => void) | null}
+ */
+let onPainted = null;
 
 /**
  * Whether the vocabulary lives without the engine (D158, everywhere since
@@ -781,6 +792,33 @@ function paintedKeys() {
 function repaint() {
   if (vocabulary.size === 0) clear();
   else paint(paintedKeys(), { root: root ?? document.body, observe: follow, weight: underline });
+  onPainted?.(foundPhrases());
+}
+
+/**
+ * The saved phrase a painted text belongs to: the word itself, or the word
+ * a form stands for (D208) - and nothing for a text that is nobody's, a
+ * form whose word was learned a moment ago.
+ *
+ * @param {string} normalized
+ * @returns {string | null}
+ */
+function keyFor(normalized) {
+  const key = aliases.get(normalized) ?? normalized;
+  return vocabulary.has(key) ? key : null;
+}
+
+/**
+ * How many distinct saved phrases the painted text holds (D226) - a phrase
+ * met three times is one phrase to revisit - or null where the question has
+ * no answer: no vocabulary to look for, or a browser that cannot paint (no
+ * `CSS.highlights`), where a zero would be a false "none".
+ *
+ * @returns {number | null}
+ */
+function foundPhrases() {
+  if (vocabulary.size === 0 || !supported()) return null;
+  return tallyRead(occurrences(), keyFor).length;
 }
 
 /**
@@ -823,10 +861,7 @@ function sendReport() {
  */
 export function reportRead() {
   if (!started) return;
-  const tally = tallyRead(occurrences(), (normalized) => {
-    const key = aliases.get(normalized) ?? normalized;
-    return vocabulary.has(key) ? key : null;
-  });
+  const tally = tallyRead(occurrences(), keyFor);
   if (tally.length === 0) return;
   report.read(tally);
   scheduleReport();
@@ -1950,7 +1985,7 @@ function onStorageChanged(changes, area) {
 }
 
 /**
- * @param {{ root?: Element | null, observe?: boolean, stored?: Record<string, unknown>, ownSelection?: boolean, anchored?: boolean, covered?: () => number, openSettings?: (section?: import("../lib/protocol.js").SettingsSection) => void, plainLinks?: () => boolean, alsoOwns?: (target: EventTarget | null) => boolean, marking?: () => boolean, markRoot?: () => Element | null, onMarked?: (range: Range) => void, onMarkStart?: () => void, onMarkTap?: (x: number, y: number, word?: Range) => void, markHandleAt?: (x: number, y: number) => { edge: "start" | "end", range: Range } | null, onMarkResizeStart?: () => void, onMarkStretch?: (range: Range) => void, onMarkResized?: (range: Range) => void, quietLookup?: (text: string) => Promise<import("../lib/protocol.js").LookUp | null>, quietVoice?: () => { lang: string, voiceURI: string | undefined } | null, scheme?: () => "light" | "sepia" | "dark" | null }} [where]
+ * @param {{ root?: Element | null, observe?: boolean, stored?: Record<string, unknown>, ownSelection?: boolean, anchored?: boolean, covered?: () => number, openSettings?: (section?: import("../lib/protocol.js").SettingsSection) => void, plainLinks?: () => boolean, alsoOwns?: (target: EventTarget | null) => boolean, marking?: () => boolean, markRoot?: () => Element | null, onMarked?: (range: Range) => void, onMarkStart?: () => void, onMarkTap?: (x: number, y: number, word?: Range) => void, markHandleAt?: (x: number, y: number) => { edge: "start" | "end", range: Range } | null, onMarkResizeStart?: () => void, onMarkStretch?: (range: Range) => void, onMarkResized?: (range: Range) => void, quietLookup?: (text: string) => Promise<import("../lib/protocol.js").LookUp | null>, quietVoice?: () => { lang: string, voiceURI: string | undefined } | null, scheme?: () => "light" | "sepia" | "dark" | null, onPainted?: (found: number | null) => void }} [where]
  *   what to underline inside, whether it can change on its own, the startup
  *   read of `storage.local` when the caller already made one, whether the
  *   page selects through our own gesture rather than the browser's - every
@@ -1978,7 +2013,9 @@ function onStorageChanged(changes, area) {
  *   too, because only an extension page has the database in reach and only
  *   the reader knows what language it is showing. `scheme` names the paper
  *   the bubble dresses for - a reader flag for the same reason: only our
- *   page knows what theme it painted itself in.
+ *   page knows what theme it painted itself in. `onPainted` hears, after
+ *   every paint, how many saved phrases the text holds (D226) - the reader
+ *   page's header line; on somebody else's page nothing of ours could say it.
  */
 export function start(where = {}) {
   root = where.root ?? null;
@@ -1990,6 +2027,7 @@ export function start(where = {}) {
   quietLookup = where.quietLookup ?? null;
   quietVoice = where.quietVoice ?? null;
   bubbleScheme = where.scheme ?? null;
+  onPainted = where.onPainted ?? null;
   // The page that took the native selection away answers the copy chord
   // itself (D110) - and only that page. The same flag tells the reader's own
   // page from everybody else's, which is where the door into the reader
@@ -2086,6 +2124,7 @@ export function stop() {
   quietLookup = null;
   quietVoice = null;
   bridgeCopy = false;
+  onPainted = null;
   // Whatever waited for the quiet moment goes now: the side is leaving the
   // page, and a count is not worth losing to that.
   if (reportScheduled) sendReport();

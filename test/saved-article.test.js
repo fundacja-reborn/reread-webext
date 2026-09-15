@@ -23,6 +23,12 @@ function build(overrides) {
 }
 
 describe("savedArticle", () => {
+  it("counts the words of the content as it is saved (D226)", () => {
+    assert.equal(build({ content: "<p>One two three.</p><p>Four</p>" })?.words, 4);
+    // A text of pictures alone: counted, and found to hold none.
+    assert.equal(build({ content: '<figure><img alt="two words"></figure>' })?.words, 0);
+  });
+
   it("derives the hostname once, so the list never parses URLs", () => {
     const article = build({});
     assert.ok(article !== null);
@@ -72,6 +78,20 @@ describe("savedArticle", () => {
 });
 
 describe("asSavedMeta", () => {
+  it("carries the count of words only where there is one (D226)", () => {
+    const row = { url: "https://example.com/a", hostname: "example.com", title: "A", savedAt: 1, readAt: null };
+    assert.deepEqual(asSavedMeta({ ...row, words: 1234 }), { ...row, words: 1234 });
+    // Zero is a count: a text of pictures alone, counted and found empty,
+    // must not be counted again on every open.
+    assert.deepEqual(asSavedMeta({ ...row, words: 0 }), { ...row, words: 0 });
+    // A row from before the count, or one whose count will not read: no
+    // field, which the next open fills.
+    assert.deepEqual(asSavedMeta(row), row);
+    assert.deepEqual(asSavedMeta({ ...row, words: "many" }), row);
+    assert.deepEqual(asSavedMeta({ ...row, words: -3 }), row);
+    assert.deepEqual(asSavedMeta({ ...row, words: 1.5 }), row);
+  });
+
   it("keeps a wounded row rather than hiding somebody's saved reading", () => {
     const meta = asSavedMeta({ url: "https://example.com/a", hostname: 7, title: 7, savedAt: "x", readAt: "x" });
     assert.deepEqual(meta, {
