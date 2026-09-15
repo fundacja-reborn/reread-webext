@@ -534,11 +534,23 @@ html {
   font-size: 0.85rem;
 }
 
-/* The one that is on, said with the border rather than a fill: this row sits
-   above an article and should not become the brightest thing on the screen. */
+/* The one that is on, said with the bar's own wash (`.page-tools`,
+   page.css): a quarter of the accent under the word, in the accent frame,
+   the word in the page's own ink. Until D225's smoke the row said it with
+   the accent alone - on the frame and on the word - and on an e-ink
+   panel's sixteen greys the accent is the grey the resting frame already
+   is, so every row read as all-off (Michał's Boox, 2026-09-15). The wash
+   is the bar's 25% for the bar's reason (12% rounds back into the paper),
+   and the word keeps the page's ink over it as the bar's glyphs and the
+   list's tabs do, readable in all four themes; no heavier frame - the bar
+   tried one and it came back as too loud. Nothing about the box changes
+   size, so the row stands still when the choice moves. The swatch rows
+   opt out below: a wash around a drawn ink would muddy it, and their ring
+   already survives the greys. */
 .reader-choices button[aria-pressed="true"] {
   border-color: var(--page-accent);
-  color: var(--page-accent);
+  background: color-mix(in srgb, var(--page-accent) 25%, transparent);
+  color: var(--page-fg);
 }
 
 .reader-choices output {
@@ -2405,6 +2417,9 @@ button[data-armed],
 #underline-choices button[aria-pressed="true"],
 .mark-inks button[aria-pressed="true"] {
   box-shadow: 0 0 0 2px var(--page-accent);
+  /* The ring alone: the wash the word rows wear (`.reader-choices`, above)
+     would sit around the drawn ink and muddy it. */
+  background: transparent;
 }
 
 /* The toolbar's own glyphs step up beyond the transport icons' desktop size

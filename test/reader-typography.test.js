@@ -147,6 +147,18 @@ describe("the typography rows (D225) - the stylesheet", () => {
     assert.doesNotMatch(css, /:root\[data-reader-align="justify"\] #(article|content) \{/);
   });
 
+  it("says the chosen word with the bar's wash, in both homes of the panel, and leaves the swatches their ring", async () => {
+    // The accent alone - on the frame and on the word - is the resting
+    // frame's grey on an e-ink panel (Michał's Boox, 2026-09-15); the
+    // bar's quarter-accent wash is the cut that survived its sixteen greys.
+    const wash = String.raw`border-color: var\(--page-accent\);\s*background: color-mix\(in srgb, var\(--page-accent\) 25%, transparent\);\s*color: var\(--page-fg\);`;
+    const reader = await source("src/reader/reader.css");
+    assert.match(reader, new RegExp(String.raw`\.reader-choices button\[aria-pressed="true"\] \{\s*${wash}`));
+    assert.match(reader, /#marker-color-choices button\[aria-pressed="true"\],\s*#underline-choices button\[aria-pressed="true"\],\s*\.mark-inks button\[aria-pressed="true"\] \{\s*box-shadow: 0 0 0 2px var\(--page-accent\);[^}]*background: transparent;/, "a wash sits around a drawn ink");
+    const phrases = await source("src/vocab/vocab.css");
+    assert.match(phrases, new RegExp(String.raw`\.page-choices button\[aria-pressed="true"\] \{\s*${wash}`), "the phrases page's panel says it another way");
+  });
+
   it("lets the panel scroll within itself where the rows outgrow the window", async () => {
     const css = await source("src/reader/reader.css");
     assert.match(css, /\.reader-panel \{[^}]*max-height: calc\(100dvh - var\(--header-h\) - 1rem\);\s*overflow-y: auto;\s*overscroll-behavior: contain;/);
