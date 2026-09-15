@@ -333,6 +333,49 @@
         </div>
 
         <!--
+          The four typography rows (D225): how far apart the lines stand,
+          which edge they end on, whether the browser may break a word at
+          the end of a line, and how one paragraph is told from the next.
+          Each is a name with a rule in reader.css under it, like the theme
+          and the links, and each default is the article as it was drawn
+          before the row existed. Hyphenation follows the language the
+          article declares - the browser's own patterns - and a page that
+          declares none stays unbroken.
+        -->
+        <div class="reader-setting">
+          <span class="reader-setting-name" data-i18n="reader_line_height">Line spacing</span>
+          <span class="reader-choices" id="line-height-choices">
+            <button type="button" data-line-height="tight" data-i18n="reader_line_height_tight">Tight</button>
+            <button type="button" data-line-height="normal" data-i18n="reader_line_height_normal">Normal</button>
+            <button type="button" data-line-height="loose" data-i18n="reader_line_height_loose">Loose</button>
+          </span>
+        </div>
+
+        <div class="reader-setting">
+          <span class="reader-setting-name" data-i18n="reader_align">Alignment</span>
+          <span class="reader-choices" id="align-choices">
+            <button type="button" data-align="left" data-i18n="reader_align_left">Left</button>
+            <button type="button" data-align="justify" data-i18n="reader_align_justify">Justified</button>
+          </span>
+        </div>
+
+        <div class="reader-setting">
+          <span class="reader-setting-name" data-i18n="reader_hyphens">Hyphenation</span>
+          <span class="reader-choices" id="hyphens-choices">
+            <button type="button" data-hyphens="none" data-i18n="reader_hyphens_none">Off</button>
+            <button type="button" data-hyphens="auto" data-i18n="reader_hyphens_auto">On</button>
+          </span>
+        </div>
+
+        <div class="reader-setting">
+          <span class="reader-setting-name" data-i18n="reader_paragraphs">Paragraphs</span>
+          <span class="reader-choices" id="paragraphs-choices">
+            <button type="button" data-paragraphs="spaced" data-i18n="reader_paragraphs_spaced">Spaced</button>
+            <button type="button" data-paragraphs="indented" data-i18n="reader_paragraphs_indented">Indented</button>
+          </span>
+        </div>
+
+        <!--
           Whether links in the article answer a press (D95). Plain - the
           default - keeps their words as ordinary text: the main gesture here
           is selecting a phrase, and a live link under it turns a slightly

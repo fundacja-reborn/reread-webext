@@ -500,6 +500,14 @@ html {
    2026-09-01). */
 .reader-panel {
   padding: 0.6rem 0;
+  /* Thirteen rows since D225 stand taller than a phone's window held
+     sideways, and the stuck box they live in has no page to scroll them
+     into view: the panel scrolls within itself when it must and stays put
+     when it fits. `contain` keeps a flick past its end from moving the
+     article underneath. */
+  max-height: calc(100dvh - var(--header-h) - 1rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .reader-setting {
@@ -823,6 +831,61 @@ html {
 #content blockquote,
 #content pre {
   margin: 0 0 1.2rem;
+}
+
+/* The typography rows of the Aa panel (D225): four names stamped on the
+   root by `applyAppearance`, each with its rule here, the way the links
+   mode has its own. The defaults - `normal`, `left`, `none`, `spaced` -
+   match no rule on purpose: they are the article as it was drawn before
+   the rows existed, so a profile that never touched them does not move.
+
+   Leading: three steps the eye tells apart, around the 1.65 the article
+   has always had. The article alone - the lists, the quotes on the
+   highlights page and the chrome keep their own. */
+:root[data-reader-line-height="tight"] #article {
+  line-height: 1.4;
+}
+
+:root[data-reader-line-height="loose"] #article {
+  line-height: 1.9;
+}
+
+/* Flush edges on the prose alone: a heading, a caption or a table cell
+   spread across its box reads as broken, not as set. Ragged is the
+   browser's own `start` and needs no rule - and it is the right-hand
+   edge in a right-to-left text, which is why the row says "left" and the
+   property never does. */
+:root[data-reader-align="justify"] #content :is(p, li, dd) {
+  text-align: justify;
+}
+
+/* Words broken at the line's end, in the language the article declares:
+   the patterns are the browser's own (Firefox carries a set in its
+   package, Chromium reads the system's on Android and its own
+   component's on Windows and Linux, WebKit asks the OS), and the rule
+   asks for the attribute because without one the property would inherit
+   this page's `lang="en"` and break a Polish text by English rules. The
+   prose alone: code keeps its words whole, and a heading is short enough
+   to keep its own. */
+:root[data-reader-hyphens="auto"] #article[lang] #content :is(p, li, dd, blockquote, figcaption) {
+  hyphens: auto;
+}
+
+:root[data-reader-hyphens="auto"] #content :is(code, kbd, samp, pre) {
+  hyphens: manual;
+}
+
+/* Paragraphs a book's way: the first line stepped in and no blank line -
+   between two paragraphs only. The first after a heading, a picture or a
+   list keeps its edge flush and its gap, as a book's does; `:has` is
+   what lets the gap close on exactly the paragraph another one follows.
+   In `em`, so the step grows with the type. */
+:root[data-reader-paragraphs="indented"] #content p:has(+ p) {
+  margin-bottom: 0;
+}
+
+:root[data-reader-paragraphs="indented"] #content p + p {
+  text-indent: 1.5em;
 }
 
 /* An article's pictures (D145). A picture stands as a block of its own,

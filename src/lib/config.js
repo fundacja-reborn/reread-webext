@@ -45,6 +45,25 @@ export const CONFIG_KEY = "config";
  *   (mobileread request, the tab is Michał's design).
  * @property {number} fontSize In pixels.
  * @property {number} measure Column width in characters.
+ * @property {"tight" | "normal" | "loose"} lineHeight How far apart the
+ *   article's lines stand (D225). Three names rather than a stepper: the
+ *   eye tells three leadings apart and no more, and a name is what the
+ *   stylesheet keys a rule on. `normal` is the leading the article has
+ *   always had, so a profile from before the field reads unchanged.
+ * @property {"left" | "justify"} align Whether the article's lines end
+ *   ragged or flush (D225). `left` names the start edge - it is the right
+ *   one in a right-to-left text, the stylesheet says `start` - and is the
+ *   default: a ragged edge is what the browser does on its own, and a
+ *   justified column without hyphenation is a column of rivers.
+ * @property {"none" | "auto"} hyphens Whether the browser may break a word
+ *   at the line's end (D225), in the language the article declares - the
+ *   patterns are the browser's own, and there are none without a `lang`.
+ *   The CSS keywords, because that is all the stylesheet turns them into.
+ * @property {"spaced" | "indented"} paragraphs How one paragraph is told
+ *   from the next (D225): a blank line, the web's way and the default, or
+ *   an indented first line with no gap, a book's. Only between two
+ *   paragraphs - the first after a heading or a picture keeps its edge
+ *   flush, as in a book.
  * @property {"active" | "plain"} links Whether links in the article text answer
  *   a press (D95). The words stay either way - they are part of the sentence -
  *   but the reader's main gesture is selecting a phrase to translate, and a
@@ -216,6 +235,14 @@ const THEMES = ["auto", "light", "sepia", "dark"];
 const FONTS = ["serif", "sans", "custom"];
 /** @type {readonly string[]} */
 const LINKS = ["active", "plain"];
+/** @type {readonly string[]} */
+const LINE_HEIGHTS = ["tight", "normal", "loose"];
+/** @type {readonly string[]} */
+const ALIGNS = ["left", "justify"];
+/** @type {readonly string[]} */
+const HYPHENS = ["none", "auto"];
+/** @type {readonly string[]} */
+const PARAGRAPHS = ["spaced", "indented"];
 
 /**
  * Type guards rather than casts, and exported because the reader needs the
@@ -243,6 +270,42 @@ export function isFont(value) {
  */
 export function isLinks(value) {
   return typeof value === "string" && LINKS.includes(value);
+}
+
+/**
+ * The four typography rows (D225), each a name the stylesheet knows: a
+ * value it never heard of has no rule to dress the article under, so it
+ * reads as the default - the same guard the theme and the links stand on.
+ *
+ * @param {unknown} value
+ * @returns {value is ReaderConfig["lineHeight"]}
+ */
+export function isLineHeight(value) {
+  return typeof value === "string" && LINE_HEIGHTS.includes(value);
+}
+
+/**
+ * @param {unknown} value
+ * @returns {value is ReaderConfig["align"]}
+ */
+export function isAlign(value) {
+  return typeof value === "string" && ALIGNS.includes(value);
+}
+
+/**
+ * @param {unknown} value
+ * @returns {value is ReaderConfig["hyphens"]}
+ */
+export function isHyphens(value) {
+  return typeof value === "string" && HYPHENS.includes(value);
+}
+
+/**
+ * @param {unknown} value
+ * @returns {value is ReaderConfig["paragraphs"]}
+ */
+export function isParagraphs(value) {
+  return typeof value === "string" && PARAGRAPHS.includes(value);
 }
 
 /**
@@ -282,6 +345,10 @@ export const READER_DEFAULTS = Object.freeze({
   chromeHidden: false,
   fontSize: 18,
   measure: 65,
+  lineHeight: "normal",
+  align: "left",
+  hyphens: "none",
+  paragraphs: "spaced",
   links: "plain",
   markerColor: DEFAULT_MARK_COLOR,
 });
@@ -398,6 +465,12 @@ function readerWithDefaults(stored) {
     chromeHidden: raw["chromeHidden"] === true,
     fontSize: within(raw["fontSize"], SIZE, READER_DEFAULTS.fontSize),
     measure: within(raw["measure"], MEASURE, READER_DEFAULTS.measure),
+    // Each default is the article as it was drawn before the row existed
+    // (D225), so a profile without the keys reads exactly as it did.
+    lineHeight: isLineHeight(raw["lineHeight"]) ? raw["lineHeight"] : READER_DEFAULTS.lineHeight,
+    align: isAlign(raw["align"]) ? raw["align"] : READER_DEFAULTS.align,
+    hyphens: isHyphens(raw["hyphens"]) ? raw["hyphens"] : READER_DEFAULTS.hyphens,
+    paragraphs: isParagraphs(raw["paragraphs"]) ? raw["paragraphs"] : READER_DEFAULTS.paragraphs,
     links: isLinks(raw["links"]) ? raw["links"] : READER_DEFAULTS.links,
     markerColor: isMarkColor(raw["markerColor"]) ? raw["markerColor"] : READER_DEFAULTS.markerColor,
   };

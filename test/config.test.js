@@ -769,8 +769,57 @@ describe("the reader's appearance", () => {
   });
 
   it("drops reader keys it does not know", () => {
-    const result = withDefaults({ reader: { theme: "dark", lineHeight: 3 } });
+    const result = withDefaults({ reader: { theme: "dark", letterSpacing: 3 } });
     assert.deepEqual(Object.keys(result.reader).sort(), Object.keys(READER_DEFAULTS).sort());
+  });
+
+  it("reads a profile from before the typography rows as the article it always had (D225)", () => {
+    // Each default is the article as it was drawn before the row existed,
+    // so a stored config without the keys - every profile that predates
+    // them - changes nothing on the day it is read.
+    const reader = withDefaults({ reader: { theme: "dark", fontSize: 22 } }).reader;
+    assert.equal(reader.lineHeight, "normal");
+    assert.equal(reader.align, "left");
+    assert.equal(reader.hyphens, "none");
+    assert.equal(reader.paragraphs, "spaced");
+  });
+
+  it("keeps a typography name it knows, in every value of every row", () => {
+    const reader = (/** @type {object} */ value) => withDefaults({ reader: value }).reader;
+    for (const lineHeight of ["tight", "normal", "loose"]) {
+      assert.equal(reader({ lineHeight }).lineHeight, lineHeight);
+    }
+    for (const align of ["left", "justify"]) assert.equal(reader({ align }).align, align);
+    for (const hyphens of ["none", "auto"]) assert.equal(reader({ hyphens }).hyphens, hyphens);
+    for (const paragraphs of ["spaced", "indented"]) {
+      assert.equal(reader({ paragraphs }).paragraphs, paragraphs);
+    }
+  });
+
+  it("heals a typography name it does not know to the default", () => {
+    // A name the stylesheet has no rule under would dress nothing, and a
+    // measurement stored by hand is not a name at all: the rows are names.
+    const reader = (/** @type {object} */ value) => withDefaults({ reader: value }).reader;
+    for (const lineHeight of ["double", 1.9, true, null, {}]) {
+      assert.equal(reader({ lineHeight }).lineHeight, "normal");
+    }
+    for (const align of ["center", "start", "right", 7, null]) assert.equal(reader({ align }).align, "left");
+    for (const hyphens of ["manual", true, "on", 1, null]) assert.equal(reader({ hyphens }).hyphens, "none");
+    for (const paragraphs of ["book", "indent", false, null]) {
+      assert.equal(reader({ paragraphs }).paragraphs, "spaced");
+    }
+  });
+
+  it("changes one typography row without resetting another", async () => {
+    const store = installFakeBrowser();
+    await writeConfig({ reader: { hyphens: "auto" } });
+    const written = await writeConfig({ reader: { align: "justify" } });
+
+    assert.deepEqual(written.reader, { ...READER_DEFAULTS, hyphens: "auto", align: "justify" });
+    assert.deepEqual(
+      /** @type {any} */ (store["config"]).reader,
+      { ...READER_DEFAULTS, hyphens: "auto", align: "justify" },
+    );
   });
 
   it("keeps links plain on profiles old and new", () => {

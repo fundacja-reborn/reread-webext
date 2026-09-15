@@ -53,9 +53,14 @@ describe("applyReading", () => {
       "--reader-size": "21px",
       "--reader-font-lead": "var(--reader-font-stack)",
     });
-    // The column's measure and the links mode are the reader page's own; a
-    // list page handed them here by mistake must not start wearing them.
+    // The column's measure, the links mode and the typography rows (D225)
+    // are the reader page's own; a list page handed them here by mistake
+    // must not start wearing them.
     assert.equal(root.dataset["readerLinks"], undefined);
+    assert.equal(root.dataset["readerLineHeight"], undefined);
+    assert.equal(root.dataset["readerAlign"], undefined);
+    assert.equal(root.dataset["readerHyphens"], undefined);
+    assert.equal(root.dataset["readerParagraphs"], undefined);
   });
 
   it("puts the typed font in front of the stack, quoted, only when chosen", () => {

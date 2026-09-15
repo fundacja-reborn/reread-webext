@@ -42,8 +42,12 @@ import {
   SIZE,
   TTS_RATE,
   chosenPair,
+  isAlign,
   isFont,
+  isHyphens,
+  isLineHeight,
   isLinks,
+  isParagraphs,
   isTheme,
   readConfig,
   writeConfig,
@@ -5609,6 +5613,13 @@ function applyAppearance(reader) {
   const root = document.documentElement;
   applyReading(root, reader);
   root.dataset["readerLinks"] = reader.links;
+  // The typography rows (D225), stamped the way the links mode is: each
+  // a name with a rule in reader.css under it, and each default a name
+  // no rule matches - the article as it has always been drawn.
+  root.dataset["readerLineHeight"] = reader.lineHeight;
+  root.dataset["readerAlign"] = reader.align;
+  root.dataset["readerHyphens"] = reader.hyphens;
+  root.dataset["readerParagraphs"] = reader.paragraphs;
   root.style.setProperty("--reader-measure", `${reader.measure}ch`);
   // The measure again with the text size cancelled out of it: `ch` scales
   // with the font, which is right for the article's column (a measure counts
@@ -5641,22 +5652,23 @@ function applyAppearance(reader) {
   refreshFullscreenTool();
   applyLinkStops(reader.links);
 
-  for (const button of document.querySelectorAll(
-    "[data-theme], [data-font], [data-links], [data-marker-color]",
-  )) {
-    const wanted =
-      button.getAttribute("data-theme") ??
-      button.getAttribute("data-font") ??
-      button.getAttribute("data-links") ??
-      button.getAttribute("data-marker-color");
-    const current = button.hasAttribute("data-theme")
-      ? reader.theme
-      : button.hasAttribute("data-font")
-        ? reader.font
-        : button.hasAttribute("data-links")
-          ? reader.links
-          : reader.markerColor;
-    button.setAttribute("aria-pressed", String(wanted === current));
+  // The rows of named choices, each button's attribute against the name
+  // in force: one list for all of them, so a row is one line here.
+  /** @type {[string, string][]} */
+  const named = [
+    ["data-theme", reader.theme],
+    ["data-font", reader.font],
+    ["data-line-height", reader.lineHeight],
+    ["data-align", reader.align],
+    ["data-hyphens", reader.hyphens],
+    ["data-paragraphs", reader.paragraphs],
+    ["data-links", reader.links],
+    ["data-marker-color", reader.markerColor],
+  ];
+  for (const [attribute, current] of named) {
+    for (const button of document.querySelectorAll(`[${attribute}]`)) {
+      button.setAttribute("aria-pressed", String(button.getAttribute(attribute) === current));
+    }
   }
 
   // The mark toolbar's swatches speak for the pen while no mark is active
@@ -5929,6 +5941,10 @@ async function onDisplayPress(event) {
 
   const theme = button.getAttribute("data-theme");
   const font = button.getAttribute("data-font");
+  const lineHeight = button.getAttribute("data-line-height");
+  const align = button.getAttribute("data-align");
+  const hyphens = button.getAttribute("data-hyphens");
+  const paragraphs = button.getAttribute("data-paragraphs");
   const links = button.getAttribute("data-links");
   const markerColor = button.getAttribute("data-marker-color");
   const size = button.getAttribute("data-size");
@@ -5938,6 +5954,10 @@ async function onDisplayPress(event) {
   let patch = {};
   if (isTheme(theme)) patch = { theme };
   else if (isFont(font)) patch = { font };
+  else if (isLineHeight(lineHeight)) patch = { lineHeight };
+  else if (isAlign(align)) patch = { align };
+  else if (isHyphens(hyphens)) patch = { hyphens };
+  else if (isParagraphs(paragraphs)) patch = { paragraphs };
   else if (isLinks(links)) patch = { links };
   else if (isMarkColor(markerColor)) patch = { markerColor };
   else if (size !== null || measure !== null) {
