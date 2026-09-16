@@ -1328,6 +1328,11 @@
   "options_font_custom_hint": {
     "message": "Geben Sie den Namen einer auf diesem Gerät installierten Schrift ein, zum Beispiel Georgia oder Noto Serif. Die Zeile Schrift in der Leseansicht bietet sie dann als Eigene an. Lassen Sie das Feld leer, um nur die mitgelieferten Schriften zu verwenden."
   },
+  "options_reading_pace": { "message": "Lesegeschwindigkeit" },
+  "options_reading_pace_unit": { "message": "Wörter pro Minute" },
+  "options_reading_pace_hint": {
+    "message": "Die Zahl der Wörter, die Sie in einer Minute lesen. Sie dient nur zur Schätzung der Lesezeit, die in der Leseliste und unter dem Titel eines Artikels angezeigt wird. 200 ist ein ruhiges Tempo in der eigenen Sprache; in einer Sprache, die Sie lernen, sind es meist 100-150."
+  },
   "options_quiet_bubble_hint": {
     "message": "Zeigt nur den übersetzten Text in der Sprechblase an. Die Aktionsschaltflächen (wie Kopieren oder Speichern) erscheinen erst, wenn Sie auf die Sprechblase klicken oder tippen."
   },
@@ -1368,7 +1373,7 @@
     "message": "Wählen Sie für jede Sprache die Stimme zum Vorlesen von Phrasen und Artikeln. Angeboten werden nur Stimmen, die offline sprechen: Die Sprache entsteht auf diesem Gerät, und nichts wird ins Internet gesendet."
   },
   "speech_no_offline_voice": { "message": "Dieses Gerät hat keine Offline-Stimme für diese Sprache." },
-  "options_tts_rate": { "message": "Lesegeschwindigkeit" },
+  "options_tts_rate": { "message": "Sprechgeschwindigkeit" },
   "options_models_heading": { "message": "Übersetzungsmodelle" },
   "options_models_intro": {
     "message": "Laden Sie hier für jedes Sprachpaar, das Sie übersetzen möchten, ein Übersetzungsmodell herunter. Es handelt sich um offizielle Mozilla-Dateien, die vollständig offline auf Ihrem Gerät laufen."

@@ -1686,6 +1686,14 @@
   "options_font_custom_hint": {
     "message": "Type the name of a font installed on this device, for example Georgia or Noto Serif. The reading view's Type row will then offer it as Custom. Leave the field empty to use the built-in typefaces only."
   },
+  "options_reading_pace": { "message": "Reading speed" },
+  "options_reading_pace_unit": {
+    "message": "words a minute",
+    "description": "After the number field of the reading pace row (D228). Lower case: it follows the number as a unit, the way 1.0× follows the voice's speed."
+  },
+  "options_reading_pace_hint": {
+    "message": "The number of words you read in a minute. It is used only to estimate the reading time shown in the reading list and under an article's title. 200 is an unhurried pace in your own language; in a language you are learning it is usually 100-150."
+  },
   "options_quiet_bubble_hint": {
     "message": "Shows only the translated text in the bubble. The action buttons (such as copy or save) appear only when you click or tap the bubble."
   },
@@ -1750,7 +1758,10 @@
     "message": "This device has no offline voice for this language.",
     "description": "Where a speaker was refused for want of an offline voice (D155): the device lists voices, and none of them reads the language without the network. Under the voice select on the settings page, in the reader's notice line, in the saved phrases page's status line."
   },
-  "options_tts_rate": { "message": "Reading speed" },
+  "options_tts_rate": {
+    "message": "Voice speed",
+    "description": "The voice's speed on the settings page (D87). Named for the voice since D228, when the reading pace row below took \"reading speed\" for the thing it measures."
+  },
   "options_models_heading": { "message": "Translation models" },
   "options_models_intro": {
     "message": "Download a translation model here for each language pair you want to translate. These are official Mozilla files that run entirely offline on your device.",

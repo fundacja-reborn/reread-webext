@@ -1204,15 +1204,16 @@ function renderFacts() {
 }
 
 /**
- * About how long a count of words takes to read, said the way the catalogue
- * says it: minutes under an hour, hours - and minutes, when there are any -
- * above it (`readingTime`). One place for the list's rows and the header.
+ * About how long a count of words takes to read at the reader's own pace
+ * (`readingPace`, D228), said the way the catalogue says it: minutes under
+ * an hour, hours - and minutes, when there are any - above it
+ * (`readingTime`). One place for the list's rows and the header.
  *
  * @param {number} words
  * @returns {string}
  */
 function timeLabel(words) {
-  const { hours, minutes } = readingTime(words);
+  const { hours, minutes } = readingTime(words, settings.readingPace);
   if (hours === 0) return t("reader_time_minutes", minutes.toLocaleString());
   if (minutes === 0) return t("reader_time_hours", hours.toLocaleString());
   return t("reader_time_hours_minutes", [hours.toLocaleString(), minutes.toLocaleString()]);
@@ -6003,6 +6004,7 @@ const dressPage = dresser(document);
  */
 function adoptConfig(config) {
   const spoke = canSpeak();
+  const paceMoved = settings.readingPace !== config.readingPace;
   settings = config;
   // The reading-aloud switch (D148) lands before anything below asks
   // `canSpeak`: the panel's rows, the bar's button and the quotes' speakers
@@ -6029,6 +6031,16 @@ function adoptConfig(config) {
   // vocabulary being written needs its door.
   if (navVocabulary !== null) {
     navVocabulary.hidden = config.translationOff && chosenPair(config) === null;
+  }
+  // The reading times are made at the reader's own pace (D228), and a pace
+  // changed on the settings page reaches this tab the way every setting
+  // does: the line under the title is redrawn from the count it holds, and
+  // the list, when it is the room on screen, is read again - its rows carry
+  // the minutes in their text. On the first adoption the stored pace
+  // replaces the default's, and whatever is already drawn is redrawn with it.
+  if (paceMoved) {
+    renderFacts();
+    if (document.body.dataset["view"] === "list") void refreshLibrary();
   }
 }
 

@@ -6,6 +6,7 @@ import {
   DEFAULTS,
   MEASURE,
   READER_DEFAULTS,
+  READING_PACE,
   SIZE,
   TTS_RATE,
   chosenPair,
@@ -19,6 +20,7 @@ import {
   withDefaults,
   writeConfig,
 } from "../src/lib/config.js";
+import { WORDS_PER_MINUTE } from "../src/lib/reader/length.js";
 
 /**
  * Enough of the extension API for the settings module: `storage.local` over a
@@ -624,7 +626,41 @@ describe("the bubble scale", () => {
   });
 });
 
-describe("the reading speed", () => {
+describe("the reading pace", () => {
+  it("answers the pace every estimate was made at before the field, for profiles old and new", () => {
+    assert.equal(withDefaults(undefined).readingPace, 200);
+    assert.equal(withDefaults({ sourceLang: "en" }).readingPace, 200);
+    assert.equal(DEFAULTS.readingPace, WORDS_PER_MINUTE);
+  });
+
+  it("keeps a typed pace and clamps one from outside the scale", () => {
+    assert.equal(withDefaults({ readingPace: 135 }).readingPace, 135);
+    assert.equal(withDefaults({ readingPace: READING_PACE.min }).readingPace, READING_PACE.min);
+    assert.equal(withDefaults({ readingPace: READING_PACE.max }).readingPace, READING_PACE.max);
+    // Clamped rather than dropped, as every scale here: a typed 1000 is
+    // "as fast as the scale goes", not a reason to forget the number.
+    assert.equal(withDefaults({ readingPace: 10 }).readingPace, READING_PACE.min);
+    assert.equal(withDefaults({ readingPace: 1000 }).readingPace, READING_PACE.max);
+    // A typed fraction is a whole number's worth of it.
+    assert.equal(withDefaults({ readingPace: 149.6 }).readingPace, 150);
+  });
+
+  it("treats a hand-edited value of the wrong type as the default", () => {
+    for (const readingPace of ["150", null, {}, Number.NaN]) {
+      assert.equal(withDefaults({ readingPace }).readingPace, 200);
+    }
+  });
+
+  it("writes the pace through writeConfig without touching the rest", async () => {
+    const store = installFakeBrowser({ config: { sourceLang: "de", targetLang: "en" } });
+    const written = await writeConfig({ readingPace: 140 });
+
+    assert.deepEqual(written, { ...DEFAULTS, sourceLang: "de", targetLang: "en", readingPace: 140 });
+    assert.equal(/** @type {any} */ (store["config"]).readingPace, 140);
+  });
+});
+
+describe("the voice's speed", () => {
   it("answers the voice's own speed for profiles old and new", () => {
     assert.equal(withDefaults(undefined).ttsRate, 100);
     assert.equal(withDefaults({ sourceLang: "en" }).ttsRate, 100);

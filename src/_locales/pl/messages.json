@@ -1946,6 +1946,11 @@
   "options_font_custom_hint": {
     "message": "Wpisz nazwę czcionki zainstalowanej na tym urządzeniu, np. Georgia albo Noto Serif. W widoku czytania, w wierszu Krój, pojawi się wybór Własny. Zostaw pole puste, aby używać tylko wbudowanych krojów."
   },
+  "options_reading_pace": { "message": "Tempo czytania" },
+  "options_reading_pace_unit": { "message": "słów na minutę" },
+  "options_reading_pace_hint": {
+    "message": "Liczba słów, które czytasz w ciągu minuty. Służy tylko do szacowania czasu czytania pokazywanego w czytelni i pod tytułem artykułu. 200 to spokojne tempo we własnym języku; w języku, którego się uczysz, zwykle 100-150."
+  },
   "options_quiet_bubble_hint": {
     "message": "Pokazuje w dymku tylko tekst tłumaczenia. Przyciski akcji (np. kopiowanie lub zapis) pojawią się dopiero po kliknięciu w dymek."
   },
@@ -1986,7 +1991,7 @@
     "message": "Wybierz głos do czytania fraz i artykułów w każdym z języków. Do wyboru są tylko głosy działające offline: mowa powstaje na tym urządzeniu i nic nie jest wysyłane do internetu."
   },
   "speech_no_offline_voice": { "message": "To urządzenie nie ma głosu offline dla tego języka." },
-  "options_tts_rate": { "message": "Tempo czytania" },
+  "options_tts_rate": { "message": "Tempo mówienia" },
   "options_models_heading": { "message": "Modele tłumaczeniowe" },
   "options_models_intro": {
     "message": "Pobierz tutaj model tłumaczenia dla każdej pary językowej, którą chcesz tłumaczyć. Są to oficjalne pliki Mozilli, które działają całkowicie offline na Twoim urządzeniu."
