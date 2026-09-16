@@ -518,6 +518,28 @@
             article on this device. After the download they are shown in the article.
           </span>
         </button>
+        <!-- The document as a file of its own (D229): a book file for an
+             e-reader or a reading app, and a plain-text page for notes -
+             one file per document, written from the stored copy through
+             the same allowed list the screen shows, with the pictures the
+             database keeps. Over a saved article or a book; hidden over a
+             page not yet saved, the list and the highlights page, where
+             there is no stored document to write. The line under each row
+             says what the file is before the press, and what was written
+             after it - the pictures row's manner, one row, one press
+             target, the report as its footnote. -->
+        <button id="nav-export-epub" type="button" class="nav-row-hinted" hidden>
+          <span data-i18n="reader_export_epub">Export as EPUB</span>
+          <span id="nav-export-epub-hint" class="nav-hint" data-i18n="reader_export_epub_hint">
+            A book file for e-readers and reading apps: the text with the pictures kept with it.
+          </span>
+        </button>
+        <button id="nav-export-markdown" type="button" class="nav-row-hinted" hidden>
+          <span data-i18n="reader_export_markdown">Export as Markdown (.md)</span>
+          <span id="nav-export-markdown-hint" class="nav-hint" data-i18n="reader_export_markdown_hint">
+            A plain-text file with headings and links, for notes and other apps.
+          </span>
+        </button>
         <!-- The whole screen for the page (D180). Firefox for Android folds
              its address bar only under a finger scrolling down, brings it
              back with every scroll up, and never moves it for the page keys
@@ -796,6 +818,12 @@
           <p class="transfer">
             <button type="button" id="library-import" data-i18n="action_import">Import</button>
             <button type="button" id="library-export" data-i18n="action_export">Export</button>
+            <!-- Inside the selection only (D229): every ticked document as a
+                 file of its own - the book file, or the text page - beside
+                 the backup cut to the selection. Labels by script, counted
+                 like the Export button's. -->
+            <button type="button" id="library-export-epub" hidden></button>
+            <button type="button" id="library-export-markdown" hidden></button>
             <!-- The pen's own export (D106) stood here as a third button
                  until D152: it lives on the highlights page now, where the
                  quotes are (Michał's call), and the format fold below points
@@ -879,7 +907,7 @@
               Import reads the file it is given: a re/read backup (.zip - or the older .json files of the list and of the highlights), or a book (.epub).
             </li>
             <li data-i18n="reader_transfer_pick">
-              To export only some of the articles or books, press Select above the list and tick them.
+              To export only some of the articles or books, press Select above the list and tick them - as a backup file, or as separate EPUB or Markdown files.
             </li>
           </ul>
           <details class="fold-line">

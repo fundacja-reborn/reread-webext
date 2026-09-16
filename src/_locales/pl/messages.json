@@ -1195,7 +1195,7 @@
       "count": { "content": "$1", "example": "12" }
     }
   },
-  "reader_transfer_pick": { "message": "Żeby wyeksportować tylko niektóre artykuły lub książki, naciśnij „Zaznacz” nad listą i zaznacz je." },
+  "reader_transfer_pick": { "message": "Żeby wyeksportować tylko niektóre artykuły lub książki, naciśnij „Zaznacz” nad listą i zaznacz je - do pliku kopii albo do osobnych plików EPUB lub Markdown." },
   "reader_pick_start": { "message": "Zaznacz" },
   "reader_pick_close": { "message": "Zamknij zaznaczanie" },
   "reader_pick_all": { "message": "Zaznacz wszystkie" },
@@ -1221,6 +1221,86 @@
     "message": "Zaznaczono $COUNT$ dokumentu",
     "placeholders": {
       "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_export_epub": { "message": "Eksportuj jako EPUB" },
+  "reader_export_epub_hint": {
+    "message": "Plik książki dla czytników e-booków i aplikacji do czytania: tekst razem z zapisanymi obrazkami."
+  },
+  "reader_export_markdown": { "message": "Eksportuj jako Markdown (.md)" },
+  "reader_export_markdown_hint": {
+    "message": "Plik tekstowy z nagłówkami i linkami - do notatek i innych aplikacji."
+  },
+  "reader_export_epub_selected": {
+    "message": "Eksportuj jako EPUB ($COUNT$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_export_markdown_selected": {
+    "message": "Eksportuj jako Markdown ($COUNT$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_export_doc_done": {
+    "message": "Wyeksportowano do $FILE$ ($SIZE$).",
+    "placeholders": {
+      "file": { "content": "$1", "example": "Długi artykuł.epub" },
+      "size": { "content": "$2", "example": "1,2 MB" }
+    }
+  },
+  "reader_export_doc_failed": { "message": "Nie udało się wyeksportować dokumentu." },
+  "reader_export_files_done_one": {
+    "message": "Wyeksportowano $COUNT$ dokument do osobnego pliku ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "size": { "content": "$2", "example": "1,2 MB" }
+    }
+  },
+  "reader_export_files_done_few": {
+    "message": "Wyeksportowano $COUNT$ dokumenty, każdy do osobnego pliku (razem $SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "size": { "content": "$2", "example": "4,8 MB" }
+    }
+  },
+  "reader_export_files_done_many": {
+    "message": "Wyeksportowano $COUNT$ dokumentów, każdy do osobnego pliku (razem $SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "7" },
+      "size": { "content": "$2", "example": "9,1 MB" }
+    }
+  },
+  "reader_export_files_done_other": {
+    "message": "Wyeksportowano $COUNT$ dokumentu, każdy do osobnego pliku (razem $SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1,5" },
+      "size": { "content": "$2", "example": "4,8 MB" }
+    }
+  },
+  "reader_export_files_failed_one": {
+    "message": "Nie udało się wyeksportować $COUNT$ dokumentu.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "reader_export_files_failed_few": {
+    "message": "Nie udało się wyeksportować $COUNT$ dokumentów.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "2" }
+    }
+  },
+  "reader_export_files_failed_many": {
+    "message": "Nie udało się wyeksportować $COUNT$ dokumentów.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "5" }
+    }
+  },
+  "reader_export_files_failed_other": {
+    "message": "Nie udało się wyeksportować $COUNT$ dokumentu.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1,5" }
     }
   },
   "reader_export_selected": {

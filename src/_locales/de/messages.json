@@ -807,7 +807,7 @@
       "count": { "content": "$1", "example": "12" }
     }
   },
-  "reader_transfer_pick": { "message": "Um nur einige Artikel oder Bücher zu exportieren, drücken Sie über der Liste auf „Auswählen“ und haken Sie sie ab." },
+  "reader_transfer_pick": { "message": "Um nur einige Artikel oder Bücher zu exportieren, drücken Sie über der Liste auf „Auswählen“ und haken Sie sie ab - als Sicherungsdatei oder als einzelne EPUB- oder Markdown-Dateien." },
   "reader_pick_start": { "message": "Auswählen" },
   "reader_pick_close": { "message": "Auswahl schließen" },
   "reader_pick_all": { "message": "Alle auswählen" },
@@ -821,6 +821,60 @@
     "message": "$COUNT$ Dokumente ausgewählt",
     "placeholders": {
       "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_export_epub": { "message": "Als EPUB exportieren" },
+  "reader_export_epub_hint": {
+    "message": "Eine Buchdatei für E-Reader und Lese-Apps: der Text zusammen mit den gespeicherten Bildern."
+  },
+  "reader_export_markdown": { "message": "Als Markdown exportieren (.md)" },
+  "reader_export_markdown_hint": {
+    "message": "Eine Textdatei mit Überschriften und Links - für Notizen und andere Apps."
+  },
+  "reader_export_epub_selected": {
+    "message": "Als EPUB exportieren ($COUNT$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_export_markdown_selected": {
+    "message": "Als Markdown exportieren ($COUNT$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_export_doc_done": {
+    "message": "Nach $FILE$ exportiert ($SIZE$).",
+    "placeholders": {
+      "file": { "content": "$1", "example": "Ein langer Artikel.epub" },
+      "size": { "content": "$2", "example": "1,2 MB" }
+    }
+  },
+  "reader_export_doc_failed": { "message": "Das Dokument konnte nicht exportiert werden." },
+  "reader_export_files_done_one": {
+    "message": "$COUNT$ Dokument in eine eigene Datei exportiert ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "size": { "content": "$2", "example": "1,2 MB" }
+    }
+  },
+  "reader_export_files_done_other": {
+    "message": "$COUNT$ Dokumente exportiert, je eine Datei ($SIZE$ insgesamt).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "size": { "content": "$2", "example": "4,8 MB" }
+    }
+  },
+  "reader_export_files_failed_one": {
+    "message": "$COUNT$ Dokument konnte nicht exportiert werden.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "reader_export_files_failed_other": {
+    "message": "$COUNT$ Dokumente konnten nicht exportiert werden.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "2" }
     }
   },
   "reader_export_selected": {

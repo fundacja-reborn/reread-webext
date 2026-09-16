@@ -1195,7 +1195,7 @@
       "count": { "content": "$1", "example": "12" }
     }
   },
-  "reader_transfer_pick": { "message": "Щоб експортувати лише частину статей або книг, натисніть «Вибрати» над списком і позначте їх." },
+  "reader_transfer_pick": { "message": "Щоб експортувати лише частину статей або книг, натисніть «Вибрати» над списком і позначте їх - у файл копії або в окремі файли EPUB чи Markdown." },
   "reader_pick_start": { "message": "Вибрати" },
   "reader_pick_close": { "message": "Закрити вибір" },
   "reader_pick_all": { "message": "Вибрати все" },
@@ -1221,6 +1221,86 @@
     "message": "Вибрано $COUNT$ документа",
     "placeholders": {
       "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_export_epub": { "message": "Експортувати як EPUB" },
+  "reader_export_epub_hint": {
+    "message": "Файл книги для електронних читалок і застосунків для читання: текст разом зі збереженими зображеннями."
+  },
+  "reader_export_markdown": { "message": "Експортувати як Markdown (.md)" },
+  "reader_export_markdown_hint": {
+    "message": "Текстовий файл із заголовками та посиланнями - для нотаток та інших застосунків."
+  },
+  "reader_export_epub_selected": {
+    "message": "Експортувати як EPUB ($COUNT$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_export_markdown_selected": {
+    "message": "Експортувати як Markdown ($COUNT$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_export_doc_done": {
+    "message": "Експортовано до $FILE$ ($SIZE$).",
+    "placeholders": {
+      "file": { "content": "$1", "example": "Довга стаття.epub" },
+      "size": { "content": "$2", "example": "1,2 МБ" }
+    }
+  },
+  "reader_export_doc_failed": { "message": "Не вдалося експортувати документ." },
+  "reader_export_files_done_one": {
+    "message": "Експортовано $COUNT$ документ в окремий файл ($SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "size": { "content": "$2", "example": "1,2 МБ" }
+    }
+  },
+  "reader_export_files_done_few": {
+    "message": "Експортовано $COUNT$ документи, кожен в окремий файл (разом $SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "size": { "content": "$2", "example": "4,8 МБ" }
+    }
+  },
+  "reader_export_files_done_many": {
+    "message": "Експортовано $COUNT$ документів, кожен в окремий файл (разом $SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "7" },
+      "size": { "content": "$2", "example": "9,1 МБ" }
+    }
+  },
+  "reader_export_files_done_other": {
+    "message": "Експортовано $COUNT$ документа, кожен в окремий файл (разом $SIZE$).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1,5" },
+      "size": { "content": "$2", "example": "4,8 МБ" }
+    }
+  },
+  "reader_export_files_failed_one": {
+    "message": "Не вдалося експортувати $COUNT$ документ.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "reader_export_files_failed_few": {
+    "message": "Не вдалося експортувати $COUNT$ документи.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "2" }
+    }
+  },
+  "reader_export_files_failed_many": {
+    "message": "Не вдалося експортувати $COUNT$ документів.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "5" }
+    }
+  },
+  "reader_export_files_failed_other": {
+    "message": "Не вдалося експортувати $COUNT$ документа.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1,5" }
     }
   },
   "reader_export_selected": {
