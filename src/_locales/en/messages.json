@@ -552,6 +552,19 @@
   "reader_pictures_none": { "message": "None of the pictures could be downloaded." },
   "reader_pictures_removed": { "message": "Pictures removed." },
   "reader_pictures_failed": { "message": "The pictures could not be written." },
+  "reader_pictures_offer_one": {
+    "message": "$COUNT$ picture to download",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_pictures_offer_other": {
+    "message": "$COUNT$ pictures to download",
+    "description": "The line under a saved article's header (D231) while its pictures are not downloaded: how many the text asks for, followed by the Download press (action_download). The same offer as the menu's 'Download pictures' row, where a reader who never opens the menu meets it.",
+    "placeholders": { "count": { "content": "$1", "example": "9" } }
+  },
+  "reader_pictures_offer_stop": {
+    "message": "Stop",
+    "description": "The press of the line under the header while the pictures are being downloaded: stops the download, after which the article has no pictures (a stopped download keeps nothing)."
+  },
   "reader_fullscreen": {
     "message": "Full screen",
     "description": "The reader menu's row that asks the browser for the whole screen: Firefox for Android hides its address bar and Android its status bar. Also the name and hover title of the drawn full-screen tool in the bar of every page (D195; D220: the reader in every view, the saved phrases and the settings, on every platform where the row has room). While the page has the whole screen the tool's name is reader_fullscreen_exit."

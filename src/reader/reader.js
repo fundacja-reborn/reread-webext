@@ -58,7 +58,7 @@ import { lookUpAnswer } from "../lib/dict/lookup.js";
 import { describeError } from "../lib/messages.js";
 import { ErrorCode, Message, asPage, asPageRequest, asResult, ok } from "../lib/protocol.js";
 import { NO_BASE, buildArticle } from "../lib/reader/article.js";
-import { MAX_DOWNLOAD_BYTES, pictureSources, picturesSummary } from "../lib/reader/pictures.js";
+import { MAX_DOWNLOAD_BYTES, pictureSources, picturesState, picturesSummary } from "../lib/reader/pictures.js";
 import {
   ARTICLES_ENTRY,
   archiveAccount,
@@ -300,6 +300,11 @@ let refreshFullscreenTool = () => {};
 // how it went.
 const navPicturesLabel = document.getElementById("nav-pictures-label");
 const navPicturesHint = document.getElementById("nav-pictures-hint");
+// The line under the header (D231): the row's offer where a reader who never
+// opens the menu meets it - the sentence, and the one press beside it.
+const picturesOffer = document.getElementById("pictures-offer");
+const picturesOfferText = document.getElementById("pictures-offer-text");
+const picturesOfferButton = document.getElementById("pictures-offer-button");
 // The export rows (D229): the document on screen as a book file or as a
 // text page, each with the line under it that says what the file is and,
 // after a press, what was written.
@@ -1130,6 +1135,9 @@ function renderArticle(piece) {
     bylineElement.textContent = piece.credit.join(" - ");
     bylineElement.hidden = piece.credit.length === 0;
   }
+  // The pictures line (D231) waits for the database's say like the action
+  // rows do: the offer of the document just left must not stand over this one.
+  if (picturesOffer !== null) picturesOffer.hidden = true;
 
   // The direction and language of the article, not of the extension: a page in
   // Arabic has to lay out as one, and `lang` is what a spell checker and a
@@ -5540,6 +5548,7 @@ async function refreshActions() {
     if (toLibraryButton !== null) toLibraryButton.hidden = true;
     if (navPictures !== null) navPictures.hidden = true;
     if (navPicturesHint !== null) navPicturesHint.hidden = true;
+    if (picturesOffer !== null) picturesOffer.hidden = true;
     if (navExportEpub !== null) navExportEpub.hidden = true;
     if (navExportMarkdown !== null) navExportMarkdown.hidden = true;
     return;
@@ -5690,35 +5699,45 @@ async function onExportPress(format) {
  */
 function refreshPicturesRow(target, row) {
   if (navPictures === null || navPicturesLabel === null || navPicturesHint === null) return;
-  const task = picturesTask;
-  if (task !== null && task.url === target.url) {
-    navPicturesLabel.textContent = task.label;
-    navPicturesHint.textContent = t("reader_pictures_stop");
-    navPictures.hidden = false;
-    navPicturesHint.hidden = false;
-    return;
-  }
   const book = target.origin === "book";
   const root = contentRoot();
-  const asked = book || row === null || root === null ? 0 : pictureSources(root).length;
-  const kept = row?.pictures;
-  if (row === null || (kept === undefined && asked === 0)) {
-    navPictures.hidden = true;
-    navPicturesHint.hidden = true;
-    return;
+  const task = picturesTask !== null && picturesTask.url === target.url ? picturesTask : null;
+  const state = picturesState({
+    saved: row !== null,
+    book,
+    asked: book || row === null || root === null ? 0 : pictureSources(root).length,
+    kept: row?.pictures ?? null,
+    saving: task !== null,
+  });
+  const note = picturesNote !== null && picturesNote.url === target.url ? picturesNote.text : null;
+
+  navPictures.hidden = state.kind === "hidden";
+  navPicturesHint.hidden = state.kind === "hidden";
+  if (state.kind === "saving") {
+    navPicturesLabel.textContent = task?.label ?? "";
+    navPicturesHint.textContent = t("reader_pictures_stop");
+  } else if (state.kind === "kept") {
+    navPicturesLabel.textContent = t("reader_pictures_remove", megabytes(state.bytes));
+    navPicturesHint.textContent = note ?? (book ? t("reader_pictures_book_hint") : t("reader_pictures_hint"));
+  } else if (state.kind === "offer") {
+    navPicturesLabel.textContent = t("reader_pictures_save", state.count.toLocaleString());
+    navPicturesHint.textContent = note ?? t("reader_pictures_hint");
   }
-  navPicturesLabel.textContent =
-    kept !== undefined
-      ? t("reader_pictures_remove", megabytes(kept.bytes))
-      : t("reader_pictures_save", asked.toLocaleString());
-  navPicturesHint.textContent =
-    picturesNote !== null && picturesNote.url === target.url
-      ? picturesNote.text
-      : book
-        ? t("reader_pictures_book_hint")
-        : t("reader_pictures_hint");
-  navPictures.hidden = false;
-  navPicturesHint.hidden = false;
+
+  // The line under the header (D231) carries the offer and the save only:
+  // downloaded pictures stand in the text and are their own announcement,
+  // and the removal stays a menu act. What the last press came to - none
+  // could be downloaded, pictures removed - takes the sentence's place,
+  // with the press beside it to try again.
+  if (picturesOffer === null || picturesOfferText === null || picturesOfferButton === null) return;
+  if (state.kind === "saving") {
+    picturesOfferText.textContent = task?.label ?? "";
+    picturesOfferButton.textContent = t("reader_pictures_offer_stop");
+  } else if (state.kind === "offer") {
+    picturesOfferText.textContent = note ?? plural(state.count, "reader_pictures_offer");
+    picturesOfferButton.textContent = t("action_download");
+  }
+  picturesOffer.hidden = state.kind !== "saving" && state.kind !== "offer";
 }
 
 /**
@@ -5778,8 +5797,9 @@ async function onPicturesPress() {
       onProgress: ({ done, bytes }) => {
         if (picturesTask?.controller !== controller) return;
         picturesTask.label = progress(done, bytes);
-        if (shown?.url === target.url && navPicturesLabel !== null) {
-          navPicturesLabel.textContent = picturesTask.label;
+        if (shown?.url === target.url) {
+          if (navPicturesLabel !== null) navPicturesLabel.textContent = picturesTask.label;
+          if (picturesOfferText !== null) picturesOfferText.textContent = picturesTask.label;
         }
       },
     });
@@ -7121,6 +7141,11 @@ navLibrary?.addEventListener("click", () => {
 navPictures?.addEventListener("click", () => {
   void onPicturesPress();
 });
+// The line under the header (D231) presses the same act as the menu's row:
+// one handler, one state, two places to meet it.
+picturesOfferButton?.addEventListener("click", () => {
+  void onPicturesPress();
+});
 
 // The export rows (D229) keep the panel open like the pictures row: the
 // line under the pressed row is where the report lands.
@@ -7621,8 +7646,12 @@ function rootReadingSide(ground) {
     // marks may anchor (the rebuilt content - the reader's own title has no
     // block order to write against), what a finished stroke becomes, and what
     // a tap means while the pen is up. The delete bubble is ours the way the
-    // translation bubble is - presses on it must not read as the page's.
-    alsoOwns: (target) => target instanceof Node && markBar?.contains(target) === true,
+    // translation bubble is - presses on it must not read as the page's. So
+    // is the pictures line under the header (D231): a hold on its press is a
+    // press held, not a word to select.
+    alsoOwns: (target) =>
+      target instanceof Node &&
+      (markBar?.contains(target) === true || picturesOffer?.contains(target) === true),
     marking: () => markerOn,
     markRoot: () => contentRoot(),
     onMarked: (range) => void onMarked(range),

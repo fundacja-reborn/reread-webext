@@ -12,6 +12,7 @@ import {
   isIllustration,
   keepsOriginal,
   pictureSources,
+  picturesState,
   picturesSummary,
   sniffPictureType,
 } from "../src/lib/reader/pictures.js";
@@ -144,5 +145,23 @@ describe("an article's pictures", () => {
     assert.equal(asPictureRow({ ...row, data: new Uint8Array(12) }), null);
     assert.equal(asPictureRow({ ...row, src: "" }), null);
     assert.equal(asPictureRow("not a row"), null);
+  });
+
+  it("says one thing about a document's pictures, for the menu's row and the line under the header", () => {
+    const kept = { count: 3, bytes: 4096 };
+    const over = { saved: true, book: false, asked: 9, kept: null, saving: false };
+    // A save under way outranks the rest: the progress and the stop.
+    assert.deepEqual(picturesState({ ...over, saving: true }), { kind: "saving" });
+    // Nothing over a page not yet saved, however many pictures it asks for.
+    assert.deepEqual(picturesState({ ...over, saved: false }), { kind: "hidden" });
+    // The offer carries the count the text asks for.
+    assert.deepEqual(picturesState(over), { kind: "offer", count: 9 });
+    // Pictures held: the removal, with what they take - whatever the text asks for now.
+    assert.deepEqual(picturesState({ ...over, kept }), { kind: "kept", bytes: 4096 });
+    // An article whose text kept no address - saved before pictures - is offered nothing.
+    assert.deepEqual(picturesState({ ...over, asked: 0 }), { kind: "hidden" });
+    // A book is never offered a download: its pictures came with the file. Removal stands.
+    assert.deepEqual(picturesState({ ...over, book: true, asked: 4 }), { kind: "hidden" });
+    assert.deepEqual(picturesState({ ...over, book: true, asked: 0, kept }), { kind: "kept", bytes: 4096 });
   });
 });

@@ -648,16 +648,43 @@ html {
 }
 
 .reader-byline,
-.reader-facts {
+.reader-facts,
+.reader-pictures {
   margin: 0 0 2rem;
   color: var(--page-muted);
   font-size: 0.9em;
 }
 
 /* The byline and the facts line (D226) read as two lines of one block when
-   both stand: the gap to the text belongs under the last of them. */
-.reader-byline:has(+ .reader-facts:not([hidden])) {
+   both stand: the gap to the text belongs under the last of them. The
+   pictures line (D231) joins the block the same way. */
+.reader-byline:has(+ .reader-facts:not([hidden])),
+.reader-facts:has(+ .reader-pictures:not([hidden])) {
   margin-bottom: 0.35rem;
+}
+
+/* The one press of the pictures line (D231) is a word of the header, not a
+   framed control: the page's own text color against the line's muted
+   sentence, an underline to say it acts, and the frame the acts over the
+   article wear under the pointer or the keyboard. The touch target keeps
+   the 44px of every act here; the negative block margin keeps the line the
+   height of its text, so the header grows no button-sized gap. */
+.reader-pictures button {
+  min-height: 44px;
+  margin-block: -0.6rem;
+  padding: 0.35rem 0.6rem;
+  border-color: transparent;
+  color: var(--page-fg);
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  white-space: nowrap;
+}
+
+.reader-pictures button:hover,
+.reader-pictures button:focus-visible {
+  border-color: var(--page-border);
+  background: color-mix(in srgb, var(--page-fg) 6%, transparent);
 }
 
 #page {

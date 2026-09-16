@@ -98,13 +98,15 @@ archive is unpacked and checked on your device exactly like files you pick by ha
 only `https` addresses are accepted.
 
 The second is **Download pictures**, a row in the reader's menu
-over a saved article, downloads that article's pictures from the addresses the pictures
-point at - the site the article came from, its image server, or another site the page
-embedded a picture from - once, without cookies or referrer, and only when you press it.
-Each of those servers sees what it saw when the page first showed you the pictures: your
-IP address and your browser's user agent, nothing more. The extension never downloads a
-picture on its own; a saved article contains only text until you press that row. Once
-the pictures are downloaded, the same menu row changes to **Remove pictures**, which
+over a saved article - the same act as the **Download** press on the line under the
+article's title that says how many pictures it has. It downloads that article's pictures
+from the addresses the pictures point at - the site the article came from, its image
+server, or another site the page embedded a picture from - once, without cookies or
+referrer, and only when you press it. Each of those servers sees what it saw when the
+page first showed you the pictures: your IP address and your browser's user agent,
+nothing more. The extension never downloads a picture on its own; a saved article
+contains only text until you press that row or that line. Once the pictures are
+downloaded, the line disappears and the menu row changes to **Remove pictures**, which
 deletes them again. The pictures of a book come from the `.epub` file you import and
 are stored with the book at that moment; no request is made for them, ever. A Markdown
 text you import keeps its pictures only as the addresses written in the file; nothing is

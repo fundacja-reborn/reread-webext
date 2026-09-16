@@ -557,6 +557,23 @@
   "reader_pictures_none": { "message": "Nie udało się pobrać żadnego obrazka." },
   "reader_pictures_removed": { "message": "Obrazki usunięte." },
   "reader_pictures_failed": { "message": "Nie udało się zapisać obrazków." },
+  "reader_pictures_offer_one": {
+    "message": "$COUNT$ obrazek do pobrania",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_pictures_offer_few": {
+    "message": "$COUNT$ obrazki do pobrania",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
+  "reader_pictures_offer_many": {
+    "message": "$COUNT$ obrazków do pobrania",
+    "placeholders": { "count": { "content": "$1", "example": "9" } }
+  },
+  "reader_pictures_offer_other": {
+    "message": "$COUNT$ obrazka do pobrania",
+    "placeholders": { "count": { "content": "$1", "example": "9" } }
+  },
+  "reader_pictures_offer_stop": { "message": "Przerwij" },
   "reader_fullscreen": { "message": "Pełny ekran" },
   "reader_fullscreen_exit": { "message": "Wyjdź z pełnego ekranu" },
   "library_pictures_one": {

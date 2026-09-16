@@ -283,3 +283,42 @@ export function asPicturesSummary(value) {
   if (typeof bytes !== "number" || !Number.isFinite(bytes) || bytes < 0) return null;
   return { count, bytes };
 }
+
+/**
+ * What the pictures controls say over a document. The menu's row (D145) and
+ * the line under the header (D231) read one answer, so that they never
+ * disagree: the save under way, with its progress and the stop; the offer,
+ * with how many pictures the text asks for; the removal, with what the kept
+ * pictures take; or nothing - over a page not yet saved, over an article
+ * whose text asks for no picture (the articles saved before pictures among
+ * them, since their text kept no address to ask for), and over a book
+ * without pictures. A book is never offered a download (D183): its pictures
+ * came with the file, and the file is not here to ask again.
+ *
+ * @typedef {{ kind: "hidden" }
+ *   | { kind: "saving" }
+ *   | { kind: "kept", bytes: number }
+ *   | { kind: "offer", count: number }} PicturesState
+ */
+
+/**
+ * @param {{
+ *   saved: boolean,
+ *   book: boolean,
+ *   asked: number,
+ *   kept: PicturesSummary | null,
+ *   saving: boolean,
+ * }} of
+ *   whether the database holds a row for the document, whether it is a
+ *   book, how many addresses its rebuilt text asks pictures for, the row's
+ *   account of the pictures held, and whether a save of its pictures is
+ *   under way
+ * @returns {PicturesState}
+ */
+export function picturesState({ saved, book, asked, kept, saving }) {
+  if (saving) return { kind: "saving" };
+  if (!saved) return { kind: "hidden" };
+  if (kept !== null) return { kind: "kept", bytes: kept.bytes };
+  if (!book && asked > 0) return { kind: "offer", count: asked };
+  return { kind: "hidden" };
+}

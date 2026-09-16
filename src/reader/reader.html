@@ -1319,6 +1319,19 @@
         <h1 id="title"></h1>
         <p id="byline" class="reader-byline" hidden></p>
         <p id="facts" class="reader-facts" hidden></p>
+        <!--
+          The pictures the text asks for, said where a reader who never opens
+          the menu meets it (D231): one line under the header, over a saved
+          article whose pictures are not downloaded - the count, and the one
+          press, the same offer as the menu's row. A save under way turns the
+          press into the stop; downloaded pictures take the line away, being
+          their own announcement. Filled by script, never by markup.
+        -->
+        <p id="pictures-offer" class="reader-pictures" hidden>
+          <span id="pictures-offer-text"></span>
+          <span class="reader-pictures-sep" aria-hidden="true">·</span>
+          <button type="button" id="pictures-offer-button"></button>
+        </p>
         <div id="content"></div>
       </article>
 

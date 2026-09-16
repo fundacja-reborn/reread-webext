@@ -557,6 +557,23 @@
   "reader_pictures_none": { "message": "Не вдалося завантажити жодного зображення." },
   "reader_pictures_removed": { "message": "Зображення видалено." },
   "reader_pictures_failed": { "message": "Не вдалося зберегти зображення." },
+  "reader_pictures_offer_one": {
+    "message": "$COUNT$ зображення для завантаження",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_pictures_offer_few": {
+    "message": "$COUNT$ зображення для завантаження",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
+  "reader_pictures_offer_many": {
+    "message": "$COUNT$ зображень для завантаження",
+    "placeholders": { "count": { "content": "$1", "example": "9" } }
+  },
+  "reader_pictures_offer_other": {
+    "message": "$COUNT$ зображення для завантаження",
+    "placeholders": { "count": { "content": "$1", "example": "9" } }
+  },
+  "reader_pictures_offer_stop": { "message": "Зупинити" },
   "reader_fullscreen": { "message": "На весь екран" },
   "reader_fullscreen_exit": { "message": "Вийти з повноекранного режиму" },
   "library_pictures_one": {
