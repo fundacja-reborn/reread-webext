@@ -663,15 +663,37 @@ html {
   margin-bottom: 0.35rem;
 }
 
-/* The one press of the pictures line (D231) is a word of the header, not a
+/* The pictures line (D231) lays its three parts - the sentence, the dot,
+   the press - one gap apart, and lets the press wrap whole onto a line of
+   its own on a phone. Laid out as a flex row rather than as text so that
+   the gap on either side of the dot is the same width: as text, the
+   press's own padding made the dot stand nearer the sentence than the
+   word (Michał's screenshot, 2026-09-16). A flex row is a display of its
+   own, so the hidden attribute is said again here. */
+.reader-pictures {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 0.35em;
+}
+
+.reader-pictures[hidden] {
+  display: none;
+}
+
+/* The one press of the pictures line is a word of the header, not a
    framed control: the page's own text color against the line's muted
    sentence, an underline to say it acts, and the frame the acts over the
    article wear under the pointer or the keyboard. The touch target keeps
    the 44px of every act here; the negative block margin keeps the line the
-   height of its text, so the header grows no button-sized gap. */
+   height of its text, so the header grows no button-sized gap, and the
+   negative inline margin is the padding's width, so the word stands one
+   gap from the dot - and flush with the sentence's edge when it wraps,
+   the action rows' own trick. */
 .reader-pictures button {
   min-height: 44px;
   margin-block: -0.6rem;
+  margin-inline-start: -0.6rem;
   padding: 0.35rem 0.6rem;
   border-color: transparent;
   color: var(--page-fg);

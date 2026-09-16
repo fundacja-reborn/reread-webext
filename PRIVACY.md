@@ -98,8 +98,8 @@ archive is unpacked and checked on your device exactly like files you pick by ha
 only `https` addresses are accepted.
 
 The second is **Download pictures**, a row in the reader's menu
-over a saved article - the same act as the **Download** press on the line under the
-article's title that says how many pictures it has. It downloads that article's pictures
+over a saved article - the same act as **Download and show in the text** on the line under
+the article's title that says how many pictures it has. It downloads that article's pictures
 from the addresses the pictures point at - the site the article came from, its image
 server, or another site the page embedded a picture from - once, without cookies or
 referrer, and only when you press it. Each of those servers sees what it saw when the

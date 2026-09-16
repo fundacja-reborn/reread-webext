@@ -5735,7 +5735,7 @@ function refreshPicturesRow(target, row) {
     picturesOfferButton.textContent = t("reader_pictures_offer_stop");
   } else if (state.kind === "offer") {
     picturesOfferText.textContent = note ?? plural(state.count, "reader_pictures_offer");
-    picturesOfferButton.textContent = t("action_download");
+    picturesOfferButton.textContent = t("reader_pictures_offer_button");
   }
   picturesOffer.hidden = state.kind !== "saving" && state.kind !== "offer";
 }
