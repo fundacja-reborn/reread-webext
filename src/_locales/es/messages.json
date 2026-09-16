@@ -420,6 +420,16 @@
   "reader_pictures_none": { "message": "No se pudo descargar ninguna imagen." },
   "reader_pictures_removed": { "message": "Imágenes quitadas." },
   "reader_pictures_failed": { "message": "No se pudieron guardar las imágenes." },
+  "reader_pictures_offer_one": {
+    "message": "Este artículo tiene $COUNT$ imagen",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_pictures_offer_other": {
+    "message": "Este artículo tiene $COUNT$ imágenes",
+    "placeholders": { "count": { "content": "$1", "example": "9" } }
+  },
+  "reader_pictures_offer_button": { "message": "Descargar y mostrar en el texto" },
+  "reader_pictures_offer_stop": { "message": "Detener" },
   "reader_fullscreen": { "message": "Pantalla completa" },
   "reader_fullscreen_exit": { "message": "Salir de pantalla completa" },
   "library_pictures_one": {

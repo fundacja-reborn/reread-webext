@@ -33,8 +33,44 @@ describe("the facts line (D226) - the page", () => {
 
   it("is dressed like the byline, and the byline closes up to it", async () => {
     const css = await source("src/reader/reader.css");
-    assert.match(css, /\.reader-byline,\s*\.reader-facts\s*\{/);
+    assert.match(css, /\.reader-byline,\s*\.reader-facts,\s*\.reader-pictures\s*\{/);
     assert.match(css, /\.reader-byline:has\(\+ \.reader-facts:not\(\[hidden\]\)\)/);
+  });
+});
+
+/**
+ * The pictures line (D231): the menu row's offer said under the header,
+ * where a reader who never opens the menu meets it. The state it reads is
+ * tested in `reader-pictures.test.js` (`picturesState`); this reads the
+ * places the line meets the page - its markup under the facts line, the
+ * stylesheet that closes the facts line up to it, the press wired to the
+ * row's own act, and the gesture hook that keeps a hold on the press from
+ * becoming a word to select - for the reason the facts line's tests do.
+ */
+describe("the pictures line (D231) - the page", () => {
+  it("stands right under the facts line, hidden until there is an offer", async () => {
+    const html = await source("src/reader/reader.html");
+    const facts = html.indexOf('<p id="facts" class="reader-facts" hidden></p>');
+    const line = html.indexOf('<p id="pictures-offer" class="reader-pictures" hidden>');
+    assert.ok(facts !== -1, "the facts line is not where it was");
+    assert.ok(line > facts, "the pictures line does not follow the facts line");
+    assert.ok(!html.slice(facts, line).includes("<div"), "something stands between the facts line and the pictures line");
+    const content = html.indexOf('<div id="content">');
+    assert.ok(content > line, "the pictures line does not stand before the text");
+    assert.match(html, /<button type="button" id="pictures-offer-button"><\/button>/, "the press carries markup of its own");
+  });
+
+  it("is dressed like the facts line, which closes up to it", async () => {
+    const css = await source("src/reader/reader.css");
+    assert.match(css, /\.reader-facts:has\(\+ \.reader-pictures:not\(\[hidden\]\)\)/);
+    assert.match(css, /\.reader-pictures button \{/);
+  });
+
+  it("presses the row's own act, and is the reader's to press rather than the text's to select", async () => {
+    const reader = await source("src/reader/reader.js");
+    assert.match(reader, /picturesOfferButton\?\.addEventListener\("click", \(\) => \{\s*void onPicturesPress\(\);/, "the press is not the row's act");
+    assert.match(reader, /picturesOffer\?\.contains\(target\) === true/, "a hold on the press would select a word");
+    assert.match(reader, /picturesState\(\{/, "the line does not read the row's state");
   });
 });
 
