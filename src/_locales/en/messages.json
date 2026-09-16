@@ -1031,7 +1031,7 @@
     }
   },
   "reader_transfer_pick": {
-    "message": "To export only some of the articles or books, press Select above the list and tick them.",
+    "message": "To export only some of the articles or books, press Select above the list and tick them - as a backup file, or as separate EPUB or Markdown files.",
     "description": "Hint under the Import/Export buttons (D152): the Select button stands above the list, fifty rows up, and a reader about to press Export expects the choice here."
   },
   "reader_pick_start": {
@@ -1057,6 +1057,74 @@
     "message": "$COUNT$ documents selected",
     "placeholders": {
       "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_export_epub": {
+    "message": "Export as EPUB",
+    "description": "Menu row over a saved article or a book (D229): writes the document as one .epub file - the text with the pictures kept with it - for e-readers and reading apps. The selection's button under the list is the counted variant (reader_export_epub_selected)."
+  },
+  "reader_export_epub_hint": {
+    "message": "A book file for e-readers and reading apps: the text with the pictures kept with it.",
+    "description": "The line under the EPUB row before a press; after one it shows reader_export_doc_done or reader_export_doc_failed."
+  },
+  "reader_export_markdown": {
+    "message": "Export as Markdown (.md)",
+    "description": "Menu row over a saved article or a book (D229): writes the document as a plain-text Markdown page - headings, lists, quotes, links - for notes and other apps."
+  },
+  "reader_export_markdown_hint": {
+    "message": "A plain-text file with headings and links, for notes and other apps."
+  },
+  "reader_export_epub_selected": {
+    "message": "Export as EPUB ($COUNT$)",
+    "description": "Button inside the selection (D229): every ticked document as an .epub file of its own - one download per document.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_export_markdown_selected": {
+    "message": "Export as Markdown ($COUNT$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "reader_export_doc_done": {
+    "message": "Exported to $FILE$ ($SIZE$).",
+    "description": "Under the pressed export row after the download: the file's name - the document's title with the extension - and its size.",
+    "placeholders": {
+      "file": { "content": "$1", "example": "A long article.epub" },
+      "size": { "content": "$2", "example": "1.2 MB" }
+    }
+  },
+  "reader_export_doc_failed": {
+    "message": "The document could not be exported.",
+    "description": "Under the export row, or under the selection's buttons, when nothing could be written: the document is gone from the database, or a book's text is no longer whole."
+  },
+  "reader_export_files_done_one": {
+    "message": "Exported $COUNT$ document as a file of its own ($SIZE$).",
+    "description": "Status line after the selection's file export (D229): how many documents went out, one file each, and what the files take together.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" },
+      "size": { "content": "$2", "example": "1.2 MB" }
+    }
+  },
+  "reader_export_files_done_other": {
+    "message": "Exported $COUNT$ documents, one file each ($SIZE$ in total).",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" },
+      "size": { "content": "$2", "example": "4.8 MB" }
+    }
+  },
+  "reader_export_files_failed_one": {
+    "message": "$COUNT$ document could not be exported.",
+    "description": "Second sentence of the status line when some of the ticked documents could not be written.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "reader_export_files_failed_other": {
+    "message": "$COUNT$ documents could not be exported.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "2" }
     }
   },
   "reader_export_selected": {

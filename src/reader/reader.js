@@ -122,6 +122,7 @@ import {
   setReadAt,
   setWords,
 } from "../lib/store/articles.js";
+import { exportDocument } from "./export-doc.js";
 import { savePictures } from "./pictures.js";
 import { entryReader, listEntries, packArchive } from "./zip.js";
 
@@ -298,6 +299,17 @@ let refreshFullscreenTool = () => {};
 // how it went.
 const navPicturesLabel = document.getElementById("nav-pictures-label");
 const navPicturesHint = document.getElementById("nav-pictures-hint");
+// The export rows (D229): the document on screen as a book file or as a
+// text page, each with the line under it that says what the file is and,
+// after a press, what was written.
+const navExportEpub = /** @type {HTMLButtonElement | null} */ (
+  document.getElementById("nav-export-epub")
+);
+const navExportEpubHint = document.getElementById("nav-export-epub-hint");
+const navExportMarkdown = /** @type {HTMLButtonElement | null} */ (
+  document.getElementById("nav-export-markdown")
+);
+const navExportMarkdownHint = document.getElementById("nav-export-markdown-hint");
 // The box the bar and its panels stand in - measured, not styled, from here:
 // while an article is on screen it is stuck over the text, and the voice needs
 // to know how much of the window's top it covers.
@@ -356,6 +368,14 @@ const libraryPickCount = document.getElementById("library-pick-count");
 const libraryPickClose = document.getElementById("library-pick-close");
 const exportButton = /** @type {HTMLButtonElement | null} */ (
   document.getElementById("library-export")
+);
+// The selection's two file buttons (D229): every ticked document as a
+// file of its own.
+const exportEpubButton = /** @type {HTMLButtonElement | null} */ (
+  document.getElementById("library-export-epub")
+);
+const exportMarkdownButton = /** @type {HTMLButtonElement | null} */ (
+  document.getElementById("library-export-markdown")
 );
 const importButton = document.getElementById("library-import");
 const importInput = /** @type {HTMLInputElement | null} */ (
@@ -540,6 +560,24 @@ let picturesTask = null;
  * @type {{ url: string, text: string } | null}
  */
 let picturesNote = null;
+
+/**
+ * Whether a document is being written as a file of its own (D229) - by an
+ * export row of the menu or by the selection's buttons. One at a time: a
+ * document's whole text and pictures stand in memory while its file is
+ * written, and the rows and buttons grey until it is.
+ */
+let documentExport = false;
+
+/**
+ * What the last press of an export row came to - "Exported to X (1.2 MB)",
+ * "The document could not be exported" - shown under the row for the
+ * document and the format it was about, until another document is on
+ * screen; the pictures row's own pattern.
+ *
+ * @type {{ url: string, format: import("./export-doc.js").ExportFormat, text: string } | null}
+ */
+let exportNote = null;
 
 /**
  * The `blob:` addresses the pictures on screen are shown through, revoked
@@ -3338,6 +3376,10 @@ function leaveDocView() {
   // list, count and all).
   if (navPictures !== null) navPictures.hidden = true;
   if (navPicturesHint !== null) navPicturesHint.hidden = true;
+  // The export rows (D229) are the document's too, and stand outside the
+  // action rows for the same reason.
+  if (navExportEpub !== null) navExportEpub.hidden = true;
+  if (navExportMarkdown !== null) navExportMarkdown.hidden = true;
   showSegmentNav(null);
   showBookNote(null);
   docToc = [];
@@ -3559,6 +3601,21 @@ function renderExportControls() {
     exportButton.textContent = picking
       ? t("reader_export_selected", picked.size.toLocaleString())
       : t("action_export");
+  }
+  // The selection's own two buttons (D229): every ticked document as a
+  // file of its own - the book file, or the text page - counted like the
+  // Export button; greyed with nothing ticked, and while files are being
+  // written. Outside the selection they hide: the whole list as separate
+  // files is nobody's ask, and the backup is one file.
+  if (exportEpubButton !== null) {
+    exportEpubButton.hidden = !picking;
+    exportEpubButton.disabled = picked.size === 0 || documentExport;
+    exportEpubButton.textContent = t("reader_export_epub_selected", picked.size.toLocaleString());
+  }
+  if (exportMarkdownButton !== null) {
+    exportMarkdownButton.hidden = !picking;
+    exportMarkdownButton.disabled = picked.size === 0 || documentExport;
+    exportMarkdownButton.textContent = t("reader_export_markdown_selected", picked.size.toLocaleString());
   }
   const kept = going.reduce(
     (sum, meta) =>
@@ -4559,6 +4616,54 @@ async function exportSelection() {
 }
 
 /**
+ * The selection's documents each as a file of its own (D229): the ticked
+ * articles and books written one by one as the format's file - a book
+ * file or a text page - and each handed to the browser as a download; the
+ * line under the buttons counts what was written and what could not be
+ * (a book whose text is torn, a row gone since its tick). One at a time
+ * on purpose: a document's whole text and pictures stand in memory while
+ * its file is written, the bargain every export here keeps. Which kind a
+ * ticked key is - an article's address or a book's id - the shelf says.
+ *
+ * @param {import("./export-doc.js").ExportFormat} format
+ */
+async function exportPickedDocuments(format) {
+  if (documentExport || picked.size === 0) return;
+  documentExport = true;
+  renderExportControls();
+  let exported = 0;
+  let failed = 0;
+  let bytes = 0;
+  try {
+    const shelf = await listBooks();
+    const ids = new Set(shelf.map((book) => book.id));
+    for (const key of [...picked]) {
+      try {
+        const file = await exportDocument(ids.has(key) ? "book" : "article", key, format);
+        if (file === null) {
+          failed += 1;
+          continue;
+        }
+        bytes += downloadFile(file.content, file.filename, file.type);
+        exported += 1;
+      } catch {
+        failed += 1;
+      }
+    }
+  } finally {
+    documentExport = false;
+    renderExportControls();
+  }
+  if (exported === 0) {
+    transferStatus(t("reader_export_doc_failed"), "error");
+    return;
+  }
+  const sentences = [plural(exported, "reader_export_files_done", [fileSize(bytes)])];
+  if (failed > 0) sentences.push(plural(failed, "reader_export_files_failed"));
+  transferStatus(sentences.join(" "));
+}
+
+/**
  * One document of the highlights as the lists know it - its kind and key,
  * its title, a book's author, the day it entered - and its marks: the input
  * of both files the page writes, cut to the documents `wanted` says yes to:
@@ -5417,6 +5522,8 @@ async function refreshActions() {
     if (toLibraryButton !== null) toLibraryButton.hidden = true;
     if (navPictures !== null) navPictures.hidden = true;
     if (navPicturesHint !== null) navPicturesHint.hidden = true;
+    if (navExportEpub !== null) navExportEpub.hidden = true;
+    if (navExportMarkdown !== null) navExportMarkdown.hidden = true;
     return;
   }
 
@@ -5479,6 +5586,75 @@ async function refreshActions() {
   }
 
   refreshPicturesRow(target, row);
+  refreshExportRows(target, row);
+}
+
+/**
+ * The export rows of the menu (D229), over the document on screen: the
+ * book file and the text page, each with its line - what the file is
+ * before the press, what the last press came to after it (`exportNote`,
+ * the pictures row's own pattern). Nothing over a page not yet saved: the
+ * file is written from the stored copy, and there is none. Greyed while a
+ * file is being written, so a second press does not start a second one.
+ *
+ * @param {NonNullable<typeof shown>} target
+ * @param {SavedMeta | BookMeta | null} row
+ */
+function refreshExportRows(target, row) {
+  if (navExportEpub !== null) {
+    navExportEpub.hidden = row === null;
+    navExportEpub.disabled = documentExport;
+  }
+  if (navExportMarkdown !== null) {
+    navExportMarkdown.hidden = row === null;
+    navExportMarkdown.disabled = documentExport;
+  }
+  const note = exportNote !== null && exportNote.url === target.url ? exportNote : null;
+  if (navExportEpubHint !== null) {
+    navExportEpubHint.textContent =
+      note !== null && note.format === "epub" ? note.text : t("reader_export_epub_hint");
+  }
+  if (navExportMarkdownHint !== null) {
+    navExportMarkdownHint.textContent =
+      note !== null && note.format === "markdown" ? note.text : t("reader_export_markdown_hint");
+  }
+}
+
+/**
+ * An export row pressed (D229): the document on screen written as the
+ * file the row names and handed to the browser as a download, the row's
+ * line saying what was written - or that it could not be (a book whose
+ * text the database no longer holds whole). The menu stays open, the
+ * pictures row's manner: the line under the row is the report. The
+ * document is the one the press was made on, whatever is on screen when
+ * the file is done; the line is redrawn only if it still is.
+ *
+ * @param {import("./export-doc.js").ExportFormat} format
+ */
+async function onExportPress(format) {
+  const target = shown;
+  if (target === null || documentExport) return;
+  documentExport = true;
+  for (const button of [navExportEpub, navExportMarkdown]) if (button !== null) button.disabled = true;
+  /** @type {string} */
+  let text;
+  try {
+    const file = await exportDocument(target.origin === "book" ? "book" : "article", target.url, format);
+    if (file === null) {
+      text = t("reader_export_doc_failed");
+    } else {
+      const size = downloadFile(file.content, file.filename, file.type);
+      text = t("reader_export_doc_done", [file.filename, fileSize(size)]);
+    }
+  } catch {
+    text = t("reader_export_doc_failed");
+  }
+  documentExport = false;
+  exportNote = { url: target.url, format, text };
+  for (const button of [navExportEpub, navExportMarkdown]) if (button !== null) button.disabled = false;
+  if (shown?.url !== target.url) return;
+  const hint = format === "epub" ? navExportEpubHint : navExportMarkdownHint;
+  if (hint !== null) hint.textContent = text;
 }
 
 /**
@@ -6531,6 +6707,11 @@ document.addEventListener("focusout", (event) => {
 
 exportButton?.addEventListener("click", () => void exportList());
 
+// The selection's file buttons (D229): each ticked document as a file of
+// its own, in the format the button names.
+exportEpubButton?.addEventListener("click", () => void exportPickedDocuments("epub"));
+exportMarkdownButton?.addEventListener("click", () => void exportPickedDocuments("markdown"));
+
 importButton?.addEventListener("click", () => importInput?.click());
 
 /**
@@ -6909,6 +7090,15 @@ navLibrary?.addEventListener("click", () => {
 // from where it was started - the row is the progress and the stop.
 navPictures?.addEventListener("click", () => {
   void onPicturesPress();
+});
+
+// The export rows (D229) keep the panel open like the pictures row: the
+// line under the pressed row is where the report lands.
+navExportEpub?.addEventListener("click", () => {
+  void onExportPress("epub");
+});
+navExportMarkdown?.addEventListener("click", () => {
+  void onExportPress("markdown");
 });
 
 // The highlights row (D108): over a document it opens that document's own
