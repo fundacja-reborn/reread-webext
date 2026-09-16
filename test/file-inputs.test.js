@@ -56,13 +56,18 @@ describe("file inputs vs the iOS picker", () => {
     // the highlights travel in the backup of everything, which this one
     // input takes.
     assert.equal(rest.length, 0, "expected exactly one file input");
-    // JSON, ZIP and EPUB all have system-registered types (public.json,
-    // public.zip-archive, org.idpf.epub-container), so this filter may stay
-    // too. The ZIP is the backup - of everything (D213), or the older one
-    // with pictures (D145).
+    // JSON, ZIP and EPUB have system-registered types (public.json,
+    // public.zip-archive, org.idpf.epub-container - CoreTypes declares
+    // them), so this filter may stay too. Markdown has none there (checked
+    // in the CoreTypes bundle on macOS 2026-09-16: no
+    // net.daringfireball.markdown), so `.md` names an extension the picker
+    // maps to a dynamic type on both sides - to be checked on the iPad at
+    // the Safari phase (D230; planning/safari-ios.md). The ZIP is the
+    // backup - of everything (D213), or the older one with pictures (D145);
+    // the Markdown text is a book's other road in (D230).
     assert.match(
       transfer,
-      /accept="\.json,application\/json,\.zip,application\/zip,\.epub,application\/epub\+zip"/,
+      /accept="\.json,application\/json,\.zip,application\/zip,\.epub,application\/epub\+zip,\.md,\.markdown,text\/markdown"/,
     );
   });
 });

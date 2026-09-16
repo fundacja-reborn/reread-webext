@@ -904,7 +904,7 @@
               Books are in the backup only when you tick "Export with books"; otherwise keep your .epub files - when you import the same book again and the backup after it, its highlights come back.
             </li>
             <li data-i18n="reader_transfer_accepts">
-              Import reads the file it is given: a re/read backup (.zip - or the older .json files of the list and of the highlights), or a book (.epub).
+              Import reads the file it is given: a re/read backup (.zip - or the older .json files of the list and of the highlights), a book (.epub), or a Markdown text (.md).
             </li>
             <li data-i18n="reader_transfer_pick">
               To export only some of the articles or books, press Select above the list and tick them - as a backup file, or as separate EPUB or Markdown files.
@@ -940,7 +940,7 @@
               <li>
                 <strong>.md</strong> -
                 <span data-i18n="reader_transfer_marks">
-                  notes with the highlights of articles and books, exported from the Highlights page.
+                  a Markdown text - a note from another app, or a document exported from the reader's menu - which Import adds to the list the way it adds a book. The Highlights page also writes its quotes as one; imported, it is a text to read, not the highlights.
                 </span>
               </li>
             </ul>
@@ -948,7 +948,7 @@
           <input
             type="file"
             id="library-import-file"
-            accept=".json,application/json,.zip,application/zip,.epub,application/epub+zip"
+            accept=".json,application/json,.zip,application/zip,.epub,application/epub+zip,.md,.markdown,text/markdown"
             hidden
           />
         </section>
@@ -1048,7 +1048,8 @@
             </p>
             <p class="hint" data-i18n="reader_marks_notes_hint">
               The .md file is a plain-text list of the quotes and notes, grouped by document - for
-              reading and for your own notes. It cannot be imported.
+              reading and for your own notes. Import reads it back only as a text to read, not as
+              highlights.
             </p>
             <p id="marks-notes-status" class="status report" role="status"></p>
           </div>

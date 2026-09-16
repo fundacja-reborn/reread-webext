@@ -820,7 +820,7 @@
   },
   "reader_export_marks": { "message": "Eksportuj zakreślenia" },
   "reader_marks_export_notes": { "message": "Eksportuj jako notatki (.md)" },
-  "reader_marks_notes_hint": { "message": "Plik .md to tekstowa lista cytatów i notatek pogrupowana według dokumentów - do czytania i do własnych notatek. Nie da się go zaimportować." },
+  "reader_marks_notes_hint": { "message": "Plik .md to tekstowa lista cytatów i notatek pogrupowana według dokumentów - do czytania i do własnych notatek. Import wczyta go tylko jako tekst do czytania, nie jako zakreślenia." },
   "reader_marks_import_books_one": {
     "message": "Zakreślenia z $COUNT$ książki czekają: $TITLES$. Zaimportuj tę książkę z jej pliku .epub, a potem jeszcze raz ten plik.",
     "placeholders": {
@@ -954,7 +954,7 @@
     "placeholders": { "count": { "content": "$1", "example": "1,5" } }
   },
   "reader_transfer_marks": {
-    "message": "notatki z zakreśleniami artykułów i książek, do eksportu ze strony Zakreślenia."
+    "message": "tekst Markdown - notatka z innej aplikacji albo dokument wyeksportowany z menu czytnika - który Import dodaje do listy tak jak książkę. Strona Zakreślenia też zapisuje w nim swoje cytaty; po imporcie to tekst do czytania, nie zakreślenia."
   },
   "reader_backup_done": {
     "message": "Kopia zapisana do $FILE$ ($SIZE$): $PARTS$.",
@@ -1429,7 +1429,7 @@
     "placeholders": { "title": { "content": "$1", "example": "Old Chinese" } }
   },
   "reader_transfer_link": { "message": "Import i eksport (kopia lub EPUB)" },
-  "reader_transfer_accepts": { "message": "Import rozpoznaje podany plik: kopię re/read (.zip - albo starsze pliki .json listy i zakreśleń) albo książkę (.epub)." },
+  "reader_transfer_accepts": { "message": "Import rozpoznaje podany plik: kopię re/read (.zip - albo starsze pliki .json listy i zakreśleń), książkę (.epub) albo tekst Markdown (.md)." },
   "reader_book_label": { "message": "Książka" },
   "reader_book_part_of": {
     "message": "Część $PART$ z $PARTS$",
@@ -1588,6 +1588,13 @@
   },
   "reader_book_drm": { "message": "Ta książka ma zabezpieczenie DRM i nie da się jej zaimportować." },
   "reader_book_unreadable": { "message": "Nie udało się odczytać tego pliku jako książki EPUB." },
+  "reader_text_importing": {
+    "message": "Dodawanie tekstu - część $PART$",
+    "placeholders": {
+      "part": { "content": "$1", "example": "1" }
+    }
+  },
+  "reader_markdown_unreadable": { "message": "Nie udało się odczytać tego pliku jako tekstu Markdown." },
   "reader_book_pair_note": {
     "message": "Język książki: $BOOK$; bieżąca para tłumaczy z: $PAIR$.",
     "placeholders": {

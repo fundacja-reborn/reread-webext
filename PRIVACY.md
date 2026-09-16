@@ -106,7 +106,9 @@ IP address and your browser's user agent, nothing more. The extension never down
 picture on its own; a saved article contains only text until you press that row. Once
 the pictures are downloaded, the same menu row changes to **Remove pictures**, which
 deletes them again. The pictures of a book come from the `.epub` file you import and
-are stored with the book at that moment; no request is made for them, ever.
+are stored with the book at that moment; no request is made for them, ever. A Markdown
+text you import keeps its pictures only as the addresses written in the file; nothing is
+fetched for them either.
 
 There is no third server of the extension's own. No fonts, scripts or images are loaded
 from outside the extension, there is no crash reporting, no A/B testing and no update

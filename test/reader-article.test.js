@@ -324,11 +324,16 @@ describe("a book's pictures in the rebuild (D183)", () => {
     el("img", { src: "../../../outside.jpg" }),
   ]);
 
-  it("keeps a picture's path in the archive, resolved against the chapter, and nothing that is not in the file", () => {
+  it("keeps a picture's path in the archive, resolved against the chapter, and an address on the web as it stands", () => {
+    // The web address survives the rebuild (D230: a Markdown text's
+    // pictures are such addresses); the EPUB import's keeper drops it
+    // afterwards, since no entry of the archive answers to it. A `data:`
+    // address and a path out of the archive are nothing either way.
     assert.equal(
       rebuildInArchive(chapter, true, "OEBPS/xhtml"),
       '<div><div><img data-src="OEBPS/images/cover.jpg" alt="Cover"></img></div>' +
         '<p>A paragraph <img data-src="OEBPS/xhtml/ornament.png"></img> with an ornament.</p>' +
+        '<img data-src="https://cdn.test/remote.jpg"></img>' +
         '<img data-src="root.jpg"></img></div>',
     );
   });

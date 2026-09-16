@@ -57,7 +57,7 @@ import { armFullscreenTool } from "../lib/fullscreen-tool.js";
 import { lookUpAnswer } from "../lib/dict/lookup.js";
 import { describeError } from "../lib/messages.js";
 import { ErrorCode, Message, asPage, asPageRequest, asResult, ok } from "../lib/protocol.js";
-import { buildArticle } from "../lib/reader/article.js";
+import { NO_BASE, buildArticle } from "../lib/reader/article.js";
 import { MAX_DOWNLOAD_BYTES, pictureSources, picturesSummary } from "../lib/reader/pictures.js";
 import {
   ARTICLES_ENTRY,
@@ -123,6 +123,7 @@ import {
   setWords,
 } from "../lib/store/articles.js";
 import { exportDocument } from "./export-doc.js";
+import { importMarkdown } from "./import-markdown.js";
 import { savePictures } from "./pictures.js";
 import { entryReader, listEntries, packArchive } from "./zip.js";
 
@@ -1114,7 +1115,10 @@ function renderArticle(piece) {
   shownPictures = [];
 
   const rebuilt = buildArticle(piece.source, document, {
-    baseUrl: piece.url,
+    // A book came from no address (D230): a link its text kept - a Markdown
+    // text's - stands when absolute and goes when relative, and its id,
+    // which is no URL, is not asked to resolve anything.
+    baseUrl: piece.origin === "book" ? NO_BASE : piece.url,
     pictures: piece.pictures ?? true,
     // A book's pictures are addressed inside its archive (D183), and the
     // stored address is whole already - resolved against the root.
@@ -6726,10 +6730,10 @@ importButton?.addEventListener("click", () => importInput?.click());
 async function dispatchImport(file) {
   const head = new Uint8Array(await file.slice(0, 2).arrayBuffer());
   const kind = importKind({ name: file.name, type: file.type, head });
-  if (kind === "book") {
+  if (kind === "book" || kind === "markdown") {
     closeImportOffer();
     transferStatus("");
-    await runBookImport(file);
+    await runBookImport(file, kind);
     return;
   }
   if (kind === "archive") {
@@ -6747,7 +6751,7 @@ async function dispatchImport(file) {
     } else {
       closeImportOffer();
       transferStatus("");
-      await runBookImport(file);
+      await runBookImport(file, "book");
     }
     return;
   }
@@ -6790,22 +6794,30 @@ function bookImportStatus(text, tone) {
 let importingBook = false;
 
 /**
+ * A file into the list as a book: an EPUB, or a Markdown text (D230) -
+ * the same lock, the same line, the same report, with the words told
+ * apart where a text is not a book.
+ *
  * @param {File} file
+ * @param {"book" | "markdown"} kind
  */
-async function runBookImport(file) {
+async function runBookImport(file, kind) {
   if (importingBook) return;
   importingBook = true;
   if (importButton instanceof HTMLButtonElement) importButton.disabled = true;
-  bookImportStatus(t("reader_book_importing", "1"));
+  const importing = (/** @type {string} */ part) =>
+    kind === "markdown" ? t("reader_text_importing", part) : t("reader_book_importing", part);
+  bookImportStatus(importing("1"));
   try {
     // Progress once per segment written and once per picture kept, not per
     // block - every repaint is a flash on e-ink, and those two are the
     // honest units of "saved so far".
-    const outcome = await importEpub(file, ({ segments, pictures, bytes }) => {
+    const importer = kind === "markdown" ? importMarkdown : importEpub;
+    const outcome = await importer(file, ({ segments, pictures, bytes }) => {
       const part = Math.max(1, segments).toLocaleString();
       bookImportStatus(
         pictures === 0
-          ? t("reader_book_importing", part)
+          ? importing(part)
           : t("reader_book_importing_pictures", [part, pictures.toLocaleString(), megabytes(bytes)]),
       );
     });
@@ -6826,7 +6838,11 @@ async function runBookImport(file) {
       await refreshLibrary();
     } else {
       bookImportStatus(
-        outcome.reason === "drm" ? t("reader_book_drm") : t("reader_book_unreadable"),
+        outcome.reason === "drm"
+          ? t("reader_book_drm")
+          : kind === "markdown"
+            ? t("reader_markdown_unreadable")
+            : t("reader_book_unreadable"),
         "error",
       );
     }

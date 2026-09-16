@@ -15,6 +15,8 @@ describe("importKind", () => {
     assert.equal(kind({ name: "DRACULA.EPUB" }), "book");
     assert.equal(kind({ name: "reread-articles.json" }), "articles");
     assert.equal(kind({ name: "reread-articles.zip" }), "archive");
+    assert.equal(kind({ name: "A note.md" }), "markdown");
+    assert.equal(kind({ name: "notes.MARKDOWN" }), "markdown");
     // The extension outranks a lying MIME type: it is the word the person
     // picking the file can actually see.
     assert.equal(kind({ name: "dracula.epub", type: "application/json" }), "book");
@@ -25,6 +27,7 @@ describe("importKind", () => {
     assert.equal(kind({ name: "book", type: "application/epub+zip" }), "book");
     assert.equal(kind({ name: "list", type: "application/json" }), "articles");
     assert.equal(kind({ name: "backup", type: "application/zip" }), "archive");
+    assert.equal(kind({ name: "note", type: "text/markdown" }), "markdown");
   });
 
   it("calls a nameless, typeless ZIP an archive, for its entries to decide", () => {

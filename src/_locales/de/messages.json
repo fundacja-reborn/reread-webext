@@ -596,7 +596,7 @@
   },
   "reader_export_marks": { "message": "Markierungen exportieren" },
   "reader_marks_export_notes": { "message": "Als Notizen exportieren (.md)" },
-  "reader_marks_notes_hint": { "message": "Die .md-Datei ist eine Textliste der Zitate und Notizen, nach Dokumenten gruppiert - zum Lesen und für eigene Notizen. Sie kann nicht importiert werden." },
+  "reader_marks_notes_hint": { "message": "Die .md-Datei ist eine Textliste der Zitate und Notizen, nach Dokumenten gruppiert - zum Lesen und für eigene Notizen. Der Import liest sie nur als Text zum Lesen ein, nicht als Markierungen." },
   "reader_marks_import_books_one": {
     "message": "Markierungen aus $COUNT$ Buch warten: $TITLES$. Importieren Sie dieses Buch aus seiner .epub-Datei und danach diese Datei erneut.",
     "placeholders": {
@@ -664,7 +664,7 @@
     "placeholders": { "count": { "content": "$1", "example": "12" } }
   },
   "reader_transfer_marks": {
-    "message": "Notizen mit den Markierungen aus Artikeln und Büchern, zum Export von der Markierungsseite."
+    "message": "ein Markdown-Text - eine Notiz aus einer anderen App oder ein aus dem Menü des Readers exportiertes Dokument -, den der Import wie ein Buch in die Liste aufnimmt. Auch die Markierungsseite schreibt ihre Zitate in eine solche Datei; importiert ist sie ein Text zum Lesen, nicht die Markierungen."
   },
   "reader_backup_done": {
     "message": "Sicherung geschrieben nach $FILE$ ($SIZE$): $PARTS$.",
@@ -955,7 +955,7 @@
     "placeholders": { "title": { "content": "$1", "example": "Old Chinese" } }
   },
   "reader_transfer_link": { "message": "Import und Export (Sicherung oder EPUB)" },
-  "reader_transfer_accepts": { "message": "Der Import erkennt die übergebene Datei: eine re/read-Sicherung (.zip - oder die älteren .json-Dateien der Liste und der Markierungen) oder ein Buch (.epub)." },
+  "reader_transfer_accepts": { "message": "Der Import erkennt die übergebene Datei: eine re/read-Sicherung (.zip - oder die älteren .json-Dateien der Liste und der Markierungen), ein Buch (.epub) oder einen Markdown-Text (.md)." },
   "reader_book_label": { "message": "Buch" },
   "reader_book_part_of": {
     "message": "Teil $PART$ von $PARTS$",
@@ -1074,6 +1074,13 @@
   },
   "reader_book_drm": { "message": "Dieses Buch ist mit DRM kopiergeschützt und kann nicht importiert werden." },
   "reader_book_unreadable": { "message": "Diese Datei ließ sich nicht als EPUB-Buch lesen." },
+  "reader_text_importing": {
+    "message": "Text wird hinzugefügt - Teil $PART$",
+    "placeholders": {
+      "part": { "content": "$1", "example": "1" }
+    }
+  },
+  "reader_markdown_unreadable": { "message": "Diese Datei ließ sich nicht als Markdown-Text lesen." },
   "reader_book_pair_note": {
     "message": "Sprache des Buches: $BOOK$; das aktuelle Paar übersetzt aus: $PAIR$.",
     "placeholders": {
