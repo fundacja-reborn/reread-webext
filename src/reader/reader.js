@@ -2730,15 +2730,19 @@ async function openSaved(url, target) {
 /**
  * The two rows around a book's text: which part is on screen, and the way to
  * its neighbours. Or, with null, no rows at all - which is every view that
- * is not a book.
+ * is not a book - and none over a book of one part either (a Markdown text
+ * that fit in one, a short EPUB; Michał's smoke, 2026-09-16): with no
+ * neighbour to turn to, "Part 1 of 1" between two dead buttons said
+ * nothing, and the contents stay a menu row away (D117).
  *
  * @param {{ index: number, count: number } | null} segment
  */
 function showSegmentNav(segment) {
+  const shown = segment !== null && segment.count > 1;
   for (const nav of segmentNavs) {
-    if (nav !== null) nav.hidden = segment === null;
+    if (nav !== null) nav.hidden = !shown;
   }
-  if (segment === null) return;
+  if (segment === null || !shown) return;
   for (const label of segmentLabels) {
     if (label !== null) {
       label.textContent = t("reader_book_part_of", [

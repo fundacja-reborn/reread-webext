@@ -83,7 +83,9 @@ function lastReadFrom(position) {
  * book was added, so the one ordering rule serves both kinds. Progress reads
  * the stored position: a book never opened is honestly at its first part,
  * and a position pointing past the end (which the anchor rules would refuse
- * anyway) shows as the last.
+ * anyway) shows as the last. A book of one part has no progress to speak
+ * of (D230: a Markdown text that fit in one, a short EPUB; Michał's smoke,
+ * 2026-09-16) - "Part 1 of 1" on the row was a number nobody needed.
  *
  * @param {BookMeta} book
  * @param {ReadingPosition | null} position
@@ -98,7 +100,7 @@ export function bookEntry(book, position) {
     savedAt: book.addedAt,
     readAt: book.readAt,
     kind: "book",
-    progress: { at: at + 1, of: book.segmentCount },
+    progress: book.segmentCount > 1 ? { at: at + 1, of: book.segmentCount } : null,
     percentRead: overallPercent(position, book.segmentCount),
     lastReadAt: lastReadFrom(position),
     // The pictures kept with the book (D183), said on its row as on an
