@@ -2751,12 +2751,22 @@ function showSegmentNav(segment) {
       ]);
     }
   }
-  for (const button of segmentPrevs) {
-    if (button instanceof HTMLButtonElement) button.disabled = segment.index <= 0;
-  }
-  for (const button of segmentNexts) {
-    if (button instanceof HTMLButtonElement) button.disabled = segment.index >= segment.count - 1;
-  }
+  // A button with nowhere to go leaves the row rather than standing greyed
+  // (Michał, 2026-09-16): "Previous" over the first part, "Next" under the
+  // last. It keeps its slot (`.pager-blank`), so the label and the other
+  // button do not move between two turns.
+  for (const button of segmentPrevs) blankPager(button, segment.index <= 0);
+  for (const button of segmentNexts) blankPager(button, segment.index >= segment.count - 1);
+}
+
+/**
+ * @param {HTMLElement | null} button
+ * @param {boolean} blank whether the button has nowhere to go
+ */
+function blankPager(button, blank) {
+  if (!(button instanceof HTMLButtonElement)) return;
+  button.disabled = blank;
+  button.classList.toggle("pager-blank", blank);
 }
 
 /**

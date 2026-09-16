@@ -1728,6 +1728,14 @@ a.marks-act {
   font-size: 0.85rem;
 }
 
+/* A pager button with nowhere to go - "Previous" over the first part,
+   "Next" under the last (Michał, 2026-09-16; a greyed button was still a
+   button). Invisible rather than gone: the slot stays, so the part label
+   and the other button stand where they stood on the part before. */
+.segment-nav .pager-blank {
+  visibility: hidden;
+}
+
 /* The way onward under a segment's last line, pushed off it: finishing a
    part deserves a breath between the prose and the buttons (Michał,
    2026-08-17). Distance alone does the parting, as everywhere on this page;
