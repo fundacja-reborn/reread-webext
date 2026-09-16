@@ -232,6 +232,14 @@ describe("library entries", () => {
     });
   });
 
+  it("a book of one part has no progress to show (D230)", () => {
+    // A Markdown text that fit in one part, a short EPUB: "Part 1 of 1" on
+    // the row said nothing, and the row reads like an article's.
+    const book = { ...whole, segmentCount: 1, readAt: null, toc: null };
+    assert.equal(bookEntry(book, null).progress, null);
+    assert.equal(bookEntry(book, { docId: "b-1", segmentIndex: 0, blockIndex: 2, updatedAt: 1 }).progress, null);
+  });
+
   it("a book without an author leads with nothing, not with a blank", () => {
     const entry = bookEntry({ ...whole, author: null, readAt: null, toc: null }, null);
     assert.equal(entry.hostname, "");

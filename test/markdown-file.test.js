@@ -31,11 +31,10 @@ function text(data) {
  * most cases are about.
  *
  * @param {object[]} children of the rebuilt root
- * @param {{ webPictures?: boolean }} [over]
  * @returns {string}
  */
-function body(children, over = {}) {
-  const page = markdownDocument({ title: "T", source: null, at: 0, webPictures: true, ...over });
+function body(children) {
+  const page = markdownDocument({ title: "T", source: null, at: 0 });
   page.part(/** @type {import("../src/lib/store/export-tree.js").ExportNode} */ (el("div", {}, children)));
   const whole = page.text();
   assert.ok(whole.startsWith("# T\n\n"), whole);
@@ -48,17 +47,16 @@ describe("markdownDocument", () => {
       title: "  A long\narticle  ",
       source: "https://example.test/long",
       at: Date.UTC(2026, 7, 17, 13, 30),
-      webPictures: true,
     });
     page.part(/** @type {import("../src/lib/store/export-tree.js").ExportNode} */ (el("div", {}, [el("p", {}, [text("Body")])])));
     assert.equal(page.text(), "# A long article\n\nhttps://example.test/long - 2026-08-17\n\nBody\n");
   });
 
   it("says nothing about a source or a day it does not have", () => {
-    const page = markdownDocument({ title: "Bare", source: null, at: 0, webPictures: false });
+    const page = markdownDocument({ title: "Bare", source: null, at: 0 });
     page.part(/** @type {import("../src/lib/store/export-tree.js").ExportNode} */ (el("div", {}, [el("p", {}, [text("Body")])])));
     assert.equal(page.text(), "# Bare\n\nBody\n");
-    const authored = markdownDocument({ title: "Book", source: "An Author", at: 0, webPictures: false });
+    const authored = markdownDocument({ title: "Book", source: "An Author", at: 0 });
     authored.part(/** @type {import("../src/lib/store/export-tree.js").ExportNode} */ (el("div", {}, [])));
     assert.equal(authored.text(), "# Book\n\nAn Author\n");
   });
@@ -112,7 +110,7 @@ describe("markdownDocument", () => {
     );
   });
 
-  it("writes a picture by its web address, and none for a book", () => {
+  it("writes a picture by its web address, and none for a path in an archive", () => {
     const children = [
       el("figure", {}, [
         el("img", { "data-src": "https://cdn.test/one.jpg", alt: "A [photo]" }),
@@ -121,7 +119,6 @@ describe("markdownDocument", () => {
       el("p", {}, [text("Before "), el("img", { "data-src": "OEBPS/images/x.jpg", alt: "inside" }), text(" after")]),
     ];
     assert.equal(body(children), "![A \\[photo\\]](https://cdn.test/one.jpg)\n\n*Caption*\n\nBefore after");
-    assert.equal(body(children, { webPictures: false }), "*Caption*\n\nBefore after");
   });
 
   it("writes lists with their marks, nested and numbered from where the page starts", () => {
@@ -187,7 +184,7 @@ describe("markdownDocument", () => {
   });
 
   it("makes a footnote of a note, numbered across the parts, the notes at the end", () => {
-    const page = markdownDocument({ title: "B", source: null, at: 0, webPictures: false });
+    const page = markdownDocument({ title: "B", source: null, at: 0 });
     const part = (/** @type {object} */ root) =>
       page.part(/** @type {import("../src/lib/store/export-tree.js").ExportNode} */ (root));
     part(el("div", {}, [el("p", {}, [text("First"), el("a", { "data-note": "The *note*" }, [text("1")])])]));

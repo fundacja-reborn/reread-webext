@@ -22,7 +22,7 @@
  */
 
 import { t } from "../lib/i18n.js";
-import { buildArticle } from "../lib/reader/article.js";
+import { NO_BASE, buildArticle } from "../lib/reader/article.js";
 import { getArticle, getPictures } from "../lib/store/articles.js";
 import { allBookPictures, allBookSegments, getBook } from "../lib/store/books.js";
 import { EPUB_MIME, documentFilename, documentIdentifier, epubDocument } from "../lib/store/epub-file.js";
@@ -72,7 +72,7 @@ async function exportArticle(url, format) {
   if (article === null) return null;
   const writer =
     format === "markdown"
-      ? markdownWriter({ title: article.title, source: url, at: article.savedAt, webPictures: true }, article.title)
+      ? markdownWriter({ title: article.title, source: url, at: article.savedAt }, article.title)
       : epubWriter(
           {
             identifier: documentIdentifier("article", url),
@@ -102,7 +102,7 @@ async function exportBook(id, format) {
   if (segments === null) return null;
   const writer =
     format === "markdown"
-      ? markdownWriter({ title: book.title, source: book.author, at: book.addedAt, webPictures: false }, book.title)
+      ? markdownWriter({ title: book.title, source: book.author, at: book.addedAt }, book.title)
       : epubWriter(
           {
             identifier: documentIdentifier("book", id),
@@ -120,8 +120,9 @@ async function exportBook(id, format) {
     if (at > 0) await yieldToUi();
     // A book's pictures are addressed inside its archive (D183), and the
     // stored address is whole already - resolved against the root, as on
-    // screen.
-    writer.part(rebuilt(segment.blocks.join(""), { baseUrl: id, archive: "" }));
+    // screen; its links, where a Markdown text left any (D230), resolve
+    // against no address and stand only when absolute.
+    writer.part(rebuilt(segment.blocks.join(""), { baseUrl: NO_BASE, archive: "" }));
   }
   return writer.finish();
 }

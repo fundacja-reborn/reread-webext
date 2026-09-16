@@ -627,7 +627,7 @@
   },
   "reader_export_marks": { "message": "Exporter les surlignages" },
   "reader_marks_export_notes": { "message": "Exporter comme notes (.md)" },
-  "reader_marks_notes_hint": { "message": "Le fichier .md est une liste en texte brut des citations et des notes, groupées par document - pour la lecture et pour vos propres notes. Il ne peut pas être importé." },
+  "reader_marks_notes_hint": { "message": "Le fichier .md est une liste en texte brut des citations et des notes, groupées par document - pour la lecture et pour vos propres notes. L'import ne le relit que comme un texte à lire, pas comme des surlignages." },
   "reader_marks_import_books_one": {
     "message": "Les surlignages de $COUNT$ livre attendent : $TITLES$. Importez ce livre depuis son fichier .epub, puis importez ce fichier à nouveau.",
     "placeholders": {
@@ -695,7 +695,7 @@
     "placeholders": { "count": { "content": "$1", "example": "12" } }
   },
   "reader_transfer_marks": {
-    "message": "des notes avec les surlignages des articles et des livres, à exporter depuis la page Surlignages."
+    "message": "un texte Markdown - une note d'une autre application, ou un document exporté depuis le menu du lecteur - que l'import ajoute à la liste comme un livre. La page Surlignages y écrit aussi ses citations ; importé, c'est un texte à lire, pas les surlignages."
   },
   "reader_backup_done": {
     "message": "Sauvegarde écrite dans $FILE$ ($SIZE$) : $PARTS$.",
@@ -986,7 +986,7 @@
     "placeholders": { "title": { "content": "$1", "example": "Old Chinese" } }
   },
   "reader_transfer_link": { "message": "Import et export (sauvegarde ou EPUB)" },
-  "reader_transfer_accepts": { "message": "L'import lit le fichier qu'on lui donne : une sauvegarde re/read (.zip - ou les anciens fichiers .json de la liste et des surlignages), ou un livre numérique (.epub)." },
+  "reader_transfer_accepts": { "message": "L'import lit le fichier qu'on lui donne : une sauvegarde re/read (.zip - ou les anciens fichiers .json de la liste et des surlignages), un livre numérique (.epub) ou un texte Markdown (.md)." },
   "reader_book_label": { "message": "Livre" },
   "reader_book_part_of": {
     "message": "Partie $PART$ sur $PARTS$",
@@ -1113,6 +1113,13 @@
   },
   "reader_book_drm": { "message": "Ce livre est protégé par DRM et ne peut pas être importé." },
   "reader_book_unreadable": { "message": "Ce fichier n'a pas pu être lu comme livre EPUB." },
+  "reader_text_importing": {
+    "message": "Ajout du texte - partie $PART$",
+    "placeholders": {
+      "part": { "content": "$1", "example": "1" }
+    }
+  },
+  "reader_markdown_unreadable": { "message": "Ce fichier n'a pas pu être lu comme texte Markdown." },
   "reader_book_pair_note": {
     "message": "Langue du livre : $BOOK$ ; la paire actuelle traduit depuis : $PAIR$.",
     "placeholders": {

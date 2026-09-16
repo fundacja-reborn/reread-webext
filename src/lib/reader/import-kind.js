@@ -1,10 +1,10 @@
 /**
  * Which kind of reading a picked file is - the whole decision behind the one
  * Import button of the reading list, which takes the list's own .json
- * backup, its .zip backup with pictures (D145), and an EPUB book. Pure, so
- * the order of evidence can sit under `node --test`: the name first (the
- * strongest word the picker gives), then the declared type, then the file's
- * own first bytes. Every EPUB is a ZIP and opens with "PK", and so does the
+ * backup, its .zip backup with pictures (D145), an EPUB book, and a
+ * Markdown text (D230). Pure, so the order of evidence can sit under
+ * `node --test`: the name first (the strongest word the picker gives), then
+ * the declared type, then the file's own first bytes. Every EPUB is a ZIP and opens with "PK", and so does the
  * backup with pictures - so a ZIP that no name or type has spoken for is an
  * `archive`, whose entries say the rest: an `articles.json` inside makes it
  * a backup, anything else a book. A file that answers to none of them falls
@@ -12,7 +12,7 @@
  * gentlest of the failure sentences.
  */
 
-/** @typedef {"articles" | "book" | "archive"} ImportKind */
+/** @typedef {"articles" | "book" | "archive" | "markdown"} ImportKind */
 
 /** The first two bytes of every ZIP archive, and so of every EPUB. */
 const ZIP_MAGIC = [0x50, 0x4b];
@@ -28,9 +28,11 @@ export function importKind({ name, type, head }) {
   if (lower.endsWith(".epub")) return "book";
   if (lower.endsWith(".json")) return "articles";
   if (lower.endsWith(".zip")) return "archive";
+  if (lower.endsWith(".md") || lower.endsWith(".markdown")) return "markdown";
   if (type.includes("epub")) return "book";
   if (type.includes("json")) return "articles";
   if (type.includes("zip")) return "archive";
+  if (type.includes("markdown")) return "markdown";
   if (ZIP_MAGIC.every((byte, at) => head[at] === byte)) return "archive";
   return "articles";
 }

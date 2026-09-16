@@ -16,9 +16,10 @@
  * What the text keeps and what it lets go: headings, paragraphs, quotes,
  * code, emphasis, lists, definition lists, tables (as rows of cells - a
  * cell spanning columns is written once, in its own column), rules, line
- * breaks, links, and the pictures of an article by their addresses on the
- * web - a book's pictures have no address anybody could follow, and are
- * left out. A footnote (`data-note`) becomes a Markdown footnote, the
+ * breaks, links, and the pictures that have an address on the web (an
+ * article's; a Markdown text's, since D230) - a book's pictures out of
+ * its archive have no address anybody could follow, and are left out. A
+ * footnote (`data-note`) becomes a Markdown footnote, the
  * marker a reference and the note a line at the end, the form the
  * readers that know footnotes at all agree on. The prose is escaped only
  * where a character would otherwise read as markup - a star, an
@@ -90,15 +91,13 @@ const LINE_MARKUP = /^(?:[#>+\-|]|\d+[.)])(?=\s|$)/;
  * @property {string} title
  * @property {string | null} source an article's address, a book's author - whichever it has
  * @property {number} at when the document entered the list
- * @property {boolean} webPictures whether pictures are written by their
- *   addresses - true for an article, whose pictures live on the web
  */
 
 /**
  * What a walk carries: the footnotes met so far (numbered across parts,
- * a book's notes are one list), and whether pictures are written.
+ * a book's notes are one list).
  *
- * @typedef {{ notes: string[], webPictures: boolean }} WalkContext
+ * @typedef {{ notes: string[] }} WalkContext
  */
 
 /**
@@ -112,7 +111,7 @@ const LINE_MARKUP = /^(?:[#>+\-|]|\d+[.)])(?=\s|$)/;
  */
 export function markdownDocument(meta) {
   /** @type {WalkContext} */
-  const context = { notes: [], webPictures: meta.webPictures };
+  const context = { notes: [] };
   /** @type {string[]} */
   const blocks = [];
   return {
@@ -539,9 +538,9 @@ function link(node, context) {
 
 /**
  * A picture by its address on the web, or nothing: an article's pictures
- * are on their servers and a reader of the file can fetch them; a book's
- * are paths inside an archive nobody has, and a caller that says so gets
- * no picture at all.
+ * are on their servers, a Markdown text's were written as addresses, and
+ * a reader of the file can fetch either; a book's out of its archive are
+ * paths inside a file nobody has, and no picture at all.
  *
  * @param {ExportNode & { localName: string }} node
  * @param {WalkContext} context
@@ -549,7 +548,7 @@ function link(node, context) {
  */
 function picture(node, context) {
   const src = attributeOf(node, SOURCE_ATTRIBUTE);
-  if (!context.webPictures || src === null || !WEB_PICTURE.test(src)) return "";
+  if (src === null || !WEB_PICTURE.test(src)) return "";
   const alt = oneLine(attributeOf(node, "alt") ?? "");
   return ` ![${escapeText(alt)}](${linkTarget(src)}) `;
 }

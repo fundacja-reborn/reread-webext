@@ -20,6 +20,17 @@ import { allowedAttributes, archiveSrc, decide, safeHref, safeSrc } from "./sani
 const ELEMENT_NODE = 1;
 const TEXT_NODE = 3;
 
+/**
+ * The base for a document that came from no address - a book, whose blocks
+ * are rebuilt at render, export and import (D230). `about:blank` cannot be
+ * a base for anything relative: an absolute address resolves against it as
+ * itself, a relative one against nothing and is refused. A book keeps the
+ * links to the web its text wrote (a Markdown text's) and never one to
+ * "the next chapter" the file cannot follow. Until D230 a book's blocks
+ * were rebuilt over its id, which is no URL, and every link died.
+ */
+export const NO_BASE = "about:blank";
+
 /** Links carry them; these two are the only attributes holding an address. */
 const URL_ATTRIBUTES = new Set(["href", "cite"]);
 
@@ -59,8 +70,13 @@ const URL_ATTRIBUTES = new Set(["href", "cite"]);
  * with pictures; and, for a book (D183), the directory inside its archive
  * that a picture's address is resolved against instead - the chapter's at
  * import, the root (`""`) at render, where the stored address is already
- * whole. With `archive` set, no address is ever a URL: a book's pictures
- * are entries of the file it came from, and `archiveSrc` decides them.
+ * whole. With `archive` set, an address is a path in that archive - a
+ * book's pictures are entries of the file it came from, and `archiveSrc`
+ * decides them - or, since D230, an address on the web: a Markdown text's
+ * pictures are those, kept as the addresses they are (`safeSrc`) and
+ * fetched by nothing. What a path and an address share is the shape they
+ * are kept in; what no book ever gets is a relative address resolved
+ * against anything.
  *
  * @typedef {{ baseUrl: string, pictures?: Pictures, archive?: string }} RebuildOptions
  */
@@ -147,7 +163,7 @@ function appendPicture(source, into, target, options) {
   const src =
     options.archive === undefined
       ? safeSrc(written, options.baseUrl)
-      : archiveSrc(written, options.archive);
+      : (archiveSrc(written, options.archive) ?? safeSrc(written, NO_BASE));
   if (src === null) return;
 
   const rebuilt = target.createElement("img");

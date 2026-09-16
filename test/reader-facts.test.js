@@ -90,10 +90,14 @@ describe("the facts line (D226) - the count of words", () => {
     assert.match(fn, /if \(filled > 0 && library !== null && !library\.hidden\) await refreshLibrary\(\);/);
   });
 
-  it("is summed at a book's import and written with its row", async () => {
-    const importer = await source("src/reader/import-book.js");
-    assert.match(importer, /words \+= wordsIn\(blocks\.join\(""\)\)/);
-    assert.match(importer, /cut: BOOK_CUT_VERSION,\s*words,\s*\}\)/);
+  it("is summed as a book's parts are written and written with its row, whichever file it came from", async () => {
+    // The sum lives in the writer both imports feed (D230); each import
+    // hands it to the row.
+    const writer = await source("src/reader/book-parts.js");
+    assert.match(writer, /words \+= wordsIn\(blocks\.join\(""\)\)/);
+    for (const path of ["src/reader/import-book.js", "src/reader/import-markdown.js"]) {
+      assert.match(await source(path), /cut: BOOK_CUT_VERSION,\s*words: parts\.words\(\),\s*\}\)/);
+    }
   });
 
   it("stands on the list row between the date or the part and the pictures", async () => {

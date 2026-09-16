@@ -820,7 +820,7 @@
   },
   "reader_export_marks": { "message": "Експортувати позначення" },
   "reader_marks_export_notes": { "message": "Експортувати як нотатки (.md)" },
-  "reader_marks_notes_hint": { "message": "Файл .md - це текстовий список цитат і нотаток, згрупованих за документами - для читання та для власних нотаток. Його не можна імпортувати." },
+  "reader_marks_notes_hint": { "message": "Файл .md - це текстовий список цитат і нотаток, згрупованих за документами - для читання та для власних нотаток. Імпорт читає його лише як текст для читання, а не як позначення." },
   "reader_marks_import_books_one": {
     "message": "Позначення з $COUNT$ книги чекають: $TITLES$. Імпортуйте цю книгу з її файлу .epub, а потім ще раз цей файл.",
     "placeholders": {
@@ -954,7 +954,7 @@
     "placeholders": { "count": { "content": "$1", "example": "1,5" } }
   },
   "reader_transfer_marks": {
-    "message": "нотатки з позначеннями зі статей і книг, для експорту зі сторінки позначень."
+    "message": "текст Markdown - нотатка з іншого застосунку або документ, експортований з меню читача, - який імпорт додає до списку так само, як книжку. Сторінка позначень теж записує в нього свої цитати; після імпорту це текст для читання, а не позначення."
   },
   "reader_backup_done": {
     "message": "Резервну копію записано до $FILE$ ($SIZE$): $PARTS$.",
@@ -1429,7 +1429,7 @@
     "placeholders": { "title": { "content": "$1", "example": "Old Chinese" } }
   },
   "reader_transfer_link": { "message": "Імпорт та експорт (резервна копія або EPUB)" },
-  "reader_transfer_accepts": { "message": "Імпорт читає поданий файл: резервну копію re/read (.zip - або старіші файли .json списку та позначень) чи електронну книгу (.epub)." },
+  "reader_transfer_accepts": { "message": "Імпорт читає поданий файл: резервну копію re/read (.zip - або старіші файли .json списку та позначень), електронну книгу (.epub) чи текст Markdown (.md)." },
   "reader_book_label": { "message": "Книжка" },
   "reader_book_part_of": {
     "message": "Частина $PART$ з $PARTS$",
@@ -1588,6 +1588,13 @@
   },
   "reader_book_drm": { "message": "Ця книжка захищена DRM, її не можна імпортувати." },
   "reader_book_unreadable": { "message": "Не вдалося прочитати цей файл як книжку EPUB." },
+  "reader_text_importing": {
+    "message": "Додавання тексту - частина $PART$",
+    "placeholders": {
+      "part": { "content": "$1", "example": "1" }
+    }
+  },
+  "reader_markdown_unreadable": { "message": "Не вдалося прочитати цей файл як текст Markdown." },
   "reader_book_pair_note": {
     "message": "Мова книжки: $BOOK$; поточна пара перекладає з: $PAIR$.",
     "placeholders": {

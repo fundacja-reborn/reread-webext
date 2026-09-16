@@ -64,11 +64,10 @@ import {
 } from "../lib/book/opf.js";
 import { framedPictureHref, packedChars } from "../lib/book/pictures.js";
 import { BOOK_CUT_VERSION, isHeadingTag, segmenter } from "../lib/book/segment.js";
-import { cappedToc, headingEntries } from "../lib/book/toc.js";
 import { buildArticle } from "../lib/reader/article.js";
-import { wordsIn } from "../lib/reader/length.js";
 import { bookRecord } from "../lib/store/book.js";
-import { deleteBook, putBook, putBookSegment } from "../lib/store/books.js";
+import { deleteBook, putBook } from "../lib/store/books.js";
+import { partWriter } from "./book-parts.js";
 import { archivePictures, pictureKeeper } from "./book-pictures.js";
 import { loadFflate } from "./zip.js";
 
@@ -112,12 +111,7 @@ function unreadable(what, error) {
  * @typedef {{ segments: number, pictures: number, bytes: number }} ImportProgress
  */
 
-/**
- * A block as the packer carries it: its markup, and the rows of the book's
- * pictures it shows (D183), so the segment it lands in can name them.
- *
- * @typedef {{ html: string, pictures: number[] }} PackedBlock
- */
+/** @typedef {import("./book-parts.js").PackedBlock} PackedBlock */
 
 /**
  * XML parsed inert, or nothing when it would not parse - `DOMParser` never
@@ -299,43 +293,13 @@ export async function importEpub(file, onProgress) {
       noteDocs.set(path, doc);
       return doc;
     };
-    let written = 0;
-    let totalChars = 0;
-    // The words of the whole book (D226), summed as its parts are written -
-    // the one moment every block passes through in the shape the reader
-    // will count it in, so the row's number and a part's agree.
-    let words = 0;
-    /** @type {import("../lib/book/toc.js").TocEntry[]} */
-    const tocEntries = [];
-
-    /** @param {Array<import("../lib/book/segment.js").Segment<PackedBlock>>} segments */
-    const writeSegments = async (segments) => {
-      for (const segment of segments) {
-        const blocks = segment.blocks.map((block) => block.html);
-        // The rows of pictures this segment shows, each named once (D183):
-        // what an opening of the part reads, and nothing of the book's other
-        // parts.
-        const pictures = [...new Set(segment.blocks.flatMap((block) => block.pictures))].sort(
-          (a, b) => a - b,
-        );
-        await putBookSegment({
-          bookId,
-          index: written,
-          blocks,
-          charCount: segment.charCount,
-          pictures,
-        });
-        // The table of contents (D116), read off the segment in its final
-        // shape - only here are the packer's cuts and merges all spoken for,
-        // so only here do the anchors name blocks a render will show.
-        tocEntries.push(...headingEntries(blocks, written));
-        written += 1;
-        totalChars += segment.charCount;
-        words += wordsIn(blocks.join(""));
-        progress.segments = written;
-        onProgress({ ...progress });
-      }
-    };
+    // The parts written as the packer closes them, with the table of
+    // contents and the words counted on the way (`book-parts.js`, shared
+    // with the Markdown import since D230).
+    const parts = partWriter(bookId, (written) => {
+      progress.segments = written;
+      onProgress({ ...progress });
+    });
 
     for (const href of pkg.spineHrefs) {
       await yieldToUi();
@@ -377,7 +341,7 @@ export async function importEpub(file, onProgress) {
         // are the scene break, which is its own meaning, and a picture
         // standing on its own.
         if (text.trim().length === 0 && block.localName !== "hr" && pictures.length === 0) continue;
-        await writeSegments(
+        await parts.write(
           packer.push({
             chars: packedChars(text.length, pictures.length),
             heading: isHeadingTag(block.localName),
@@ -386,20 +350,20 @@ export async function importEpub(file, onProgress) {
         );
       }
     }
-    await writeSegments(packer.finish());
+    await parts.write(packer.finish());
 
     const book = bookRecord({
       id: bookId,
       title: pkg.title ?? file.name.replace(/\.epub$/i, "").trim(),
       author: pkg.author,
       lang: pkg.lang,
-      segmentCount: written,
-      totalChars,
+      segmentCount: parts.written(),
+      totalChars: parts.totalChars(),
       addedAt: Date.now(),
-      toc: cappedToc(tocEntries),
+      toc: parts.toc(),
       pictures: keeper.summary(),
       cut: BOOK_CUT_VERSION,
-      words,
+      words: parts.words(),
     });
     // No record means no text worth keeping came out - a spine of covers.
     if (book === null) throw new Error("nothing to keep");

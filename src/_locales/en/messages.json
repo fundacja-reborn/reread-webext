@@ -793,7 +793,7 @@
     "description": "Button under the backup's half, and alone on one document's page: writes reread-highlights.md, the quotes for reading."
   },
   "reader_marks_notes_hint": {
-    "message": "The .md file is a plain-text list of the quotes and notes, grouped by document - for reading and for your own notes. It cannot be imported.",
+    "message": "The .md file is a plain-text list of the quotes and notes, grouped by document - for reading and for your own notes. Import reads it back only as a text to read, not as highlights.",
     "description": "Hint under the notes export."
   },
   "reader_marks_import_books_one": {
@@ -869,7 +869,7 @@
     "placeholders": { "count": { "content": "$1", "example": "12" } }
   },
   "reader_transfer_marks": {
-    "message": "notes with the highlights of articles and books, exported from the Highlights page.",
+    "message": "a Markdown text - a note from another app, or a document exported from the reader's menu - which Import adds to the list the way it adds a book. The Highlights page also writes its quotes as one; imported, it is a text to read, not the highlights.",
     "description": "The .md entry of the glossary, after the bold extension: the notes file of the Highlights page."
   },
   "reader_backup_done": {
@@ -1230,7 +1230,7 @@
     "description": "The quiet anchor over the reading list that jumps to the transfer section - it names both kinds of file the section takes, because a book is not obvious from the section's own name."
   },
   "reader_transfer_accepts": {
-    "message": "Import reads the file it is given: a re/read backup (.zip - or the older .json files of the list and of the highlights), or a book (.epub).",
+    "message": "Import reads the file it is given: a re/read backup (.zip - or the older .json files of the list and of the highlights), a book (.epub), or a Markdown text (.md).",
     "description": "The line under the reading list's Import and Export buttons - why there is no separate button for books."
   },
   "reader_book_label": {
@@ -1408,6 +1408,17 @@
   },
   "reader_book_drm": { "message": "This book is copy-protected (DRM) and cannot be imported." },
   "reader_book_unreadable": { "message": "This file could not be read as an EPUB book." },
+  "reader_text_importing": {
+    "message": "Adding the text - part $PART$",
+    "description": "The import's status line for a Markdown text (D230): the book import's line with 'text' where 'book' stood - a note is not a book, even where the list files it as one.",
+    "placeholders": {
+      "part": { "content": "$1", "example": "1" }
+    }
+  },
+  "reader_markdown_unreadable": {
+    "message": "This file could not be read as a Markdown text.",
+    "description": "The Markdown import's failure line (D230): the file could not be read, holds nothing to read, or is over the size the import takes."
+  },
   "reader_book_pair_note": {
     "message": "The book's language is $BOOK$; the current pair translates from $PAIR$.",
     "description": "The quiet line over a book whose language is not the pair's source. Both names come from Intl.DisplayNames in their base form, so the sentence must not bend them grammatically.",
