@@ -338,7 +338,7 @@ let quietVoice = null;
  * else - on somebody else's page the system's preference is the only signal,
  * and the bubble's own media query already reads it.
  *
- * @type {(() => "light" | "sepia" | "dark" | null) | null}
+ * @type {(() => "light" | "sepia" | "dark" | "eink" | null) | null}
  */
 let bubbleScheme = null;
 
@@ -2012,7 +2012,7 @@ function onStorageChanged(changes, area) {
 }
 
 /**
- * @param {{ root?: Element | null, observe?: boolean, stored?: Record<string, unknown>, ownSelection?: boolean, anchored?: boolean, covered?: () => number, openSettings?: (section?: import("../lib/protocol.js").SettingsSection) => void, plainLinks?: () => boolean, alsoOwns?: (target: EventTarget | null) => boolean, marking?: () => boolean, markRoot?: () => Element | null, onMarked?: (range: Range) => void, onMarkStart?: () => void, onMarkTap?: (x: number, y: number, word?: Range) => void, markHandleAt?: (x: number, y: number) => { edge: "start" | "end", range: Range } | null, onMarkResizeStart?: () => void, onMarkStretch?: (range: Range) => void, onMarkResized?: (range: Range) => void, quietLookup?: (text: string) => Promise<import("../lib/protocol.js").LookUp | null>, quietVoice?: () => { lang: string, voiceURI: string | undefined } | null, scheme?: () => "light" | "sepia" | "dark" | null, onPainted?: (found: number | null) => void, onBareTap?: (x: number, y: number, target: EventTarget | null) => void }} [where]
+ * @param {{ root?: Element | null, observe?: boolean, stored?: Record<string, unknown>, ownSelection?: boolean, anchored?: boolean, covered?: () => number, openSettings?: (section?: import("../lib/protocol.js").SettingsSection) => void, plainLinks?: () => boolean, alsoOwns?: (target: EventTarget | null) => boolean, marking?: () => boolean, markRoot?: () => Element | null, onMarked?: (range: Range) => void, onMarkStart?: () => void, onMarkTap?: (x: number, y: number, word?: Range) => void, markHandleAt?: (x: number, y: number) => { edge: "start" | "end", range: Range } | null, onMarkResizeStart?: () => void, onMarkStretch?: (range: Range) => void, onMarkResized?: (range: Range) => void, quietLookup?: (text: string) => Promise<import("../lib/protocol.js").LookUp | null>, quietVoice?: () => { lang: string, voiceURI: string | undefined } | null, scheme?: () => "light" | "sepia" | "dark" | "eink" | null, onPainted?: (found: number | null) => void, onBareTap?: (x: number, y: number, target: EventTarget | null) => void }} [where]
  *   what to underline inside, whether it can change on its own, the startup
  *   read of `storage.local` when the caller already made one, whether the
  *   page selects through our own gesture rather than the browser's - every

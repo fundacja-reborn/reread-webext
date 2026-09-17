@@ -773,7 +773,7 @@ describe("the reader's appearance", () => {
   });
 
   it("keeps a theme and a font it knows", () => {
-    for (const theme of ["auto", "light", "sepia", "dark"]) {
+    for (const theme of ["auto", "light", "sepia", "dark", "eink"]) {
       assert.equal(withDefaults({ reader: { theme } }).reader.theme, theme);
     }
     assert.equal(withDefaults({ reader: { font: "sans" } }).reader.font, "sans");

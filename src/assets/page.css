@@ -106,6 +106,43 @@
   --surface-raised: #f8f4e8;
 }
 
+/* E-ink (D234): the light theme's shape in the sixteen greys an e-ink
+   panel has. White paper and black ink - the one contrast the panel is
+   sure of; the muted ink and the two lines on the grey ladder, each a
+   step the panel can show (the light theme's blue-greys landed between
+   steps and rounded away). The accent is black: a tool in hand wears a
+   quarter of it (the `.page-tools` rule), and a quarter of black is a
+   grey two steps under the paper, where the light theme's quarter of
+   amber was one step and gone (Michał's photo from the Boox, 2026-09-14).
+   The error colour stays - on the panel it is a dark grey like any ink,
+   on glass it still says what it says. Chosen by hand like every theme:
+   no browser says what panel it is on. Sizes, room and gestures are not
+   this theme's business (Michał, 2026-09-17: "the UI works well on the
+   Boox as it is"). */
+:root[data-reader-theme="eink"] {
+  color-scheme: light;
+  --page-bg: #ffffff;
+  --page-fg: #000000;
+  --page-muted: #3d3d3d;
+  --page-line: #8c8c8c;
+  --page-border: #4a4a4a;
+  --page-disabled: #8c8c8c;
+  --page-accent: #000000;
+  --page-error: #a3341f;
+  --surface-raised: #ffffff;
+}
+
+/* Nothing moves on e-ink paper: every transition and animation on every
+   page is one refresh per frame there, and a state that arrives over
+   150ms arrives as a smear. The same rule the pages already keep under
+   `prefers-reduced-motion`, said for the paper instead of the system. */
+:root[data-reader-theme="eink"] *,
+:root[data-reader-theme="eink"] *::before,
+:root[data-reader-theme="eink"] *::after {
+  transition: none !important;
+  animation: none !important;
+}
+
 /* The content typeface (the article, the reading list's titles, the saved
    phrases): the Aa panel's Type row picks which preset stack this variable
    holds, and its Custom choice (D163) puts the font the reader named in the
