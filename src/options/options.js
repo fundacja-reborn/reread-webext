@@ -373,6 +373,12 @@ function renderKeepArticles() {
   if (toggle instanceof HTMLInputElement) toggle.checked = config.keepArticles;
 }
 
+/** The full-screen switch (D236): whether the reader asks for the screen on arrival. */
+function renderReaderFullscreen() {
+  const toggle = document.getElementById("reader-fullscreen");
+  if (toggle instanceof HTMLInputElement) toggle.checked = config.readerFullscreen;
+}
+
 /**
  * The field previewing itself in the face it names: the one place a typed
  * value reaches a style, and it goes there cleaned and quoted - through the
@@ -2835,6 +2841,7 @@ async function render() {
   renderUnderlineForms();
   renderSaveSentence();
   renderKeepArticles();
+  renderReaderFullscreen();
   renderLibraryCopy();
   renderFontCustom();
   renderPace();
@@ -2902,6 +2909,7 @@ async function refresh() {
   renderUnderlineForms();
   renderSaveSentence();
   renderKeepArticles();
+  renderReaderFullscreen();
   renderLibraryCopy();
   renderFontCustom();
   renderPace();
@@ -2992,6 +3000,16 @@ document.getElementById("keep-articles")?.addEventListener("change", (event) => 
   // tab obeys the new answer from the very next article - nothing to redraw
   // here, and nothing to reload there.
   void writeConfig({ keepArticles: toggle.checked }).then((written) => {
+    config = written;
+  });
+});
+document.getElementById("reader-fullscreen")?.addEventListener("change", (event) => {
+  const toggle = event.target;
+  if (!(toggle instanceof HTMLInputElement)) return;
+  // Read fresh by the reader on every arrival (D236), the default keep's
+  // manner: nothing to redraw here, and an open reader asks at its next
+  // opening from outside.
+  void writeConfig({ readerFullscreen: toggle.checked }).then((written) => {
     config = written;
   });
 });

@@ -145,6 +145,13 @@ export const CONFIG_KEY = "config";
  *   position, and writing over it would take both, so reopening a page must
  *   never be what erases them. Live pages only: books and saved articles are
  *   in the list by definition.
+ * @property {boolean} readerFullscreen Whether the reader page asks the
+ *   browser for the whole screen when it is opened from outside (D236). Off
+ *   by default: a screen taken over is a choice. Asked at the first press
+ *   after the arrival, not at the arrival itself - a browser accepts the
+ *   request only from a user's own press - and full screen left ends the
+ *   ask until the next arrival. The reader reads it fresh on every arrival,
+ *   the default keep's manner.
  * @property {boolean | null} libraryCopy Whether the reading list keeps a
  *   copy of itself in the extension's own storage, where the loss of the
  *   database does not reach (`lib/store/library-backup.js`). `null` means
@@ -413,6 +420,7 @@ export const DEFAULTS = Object.freeze({
   translationOff: false,
   bubbleOff: false,
   keepArticles: true,
+  readerFullscreen: false,
   libraryCopy: null,
   hideBubbleActions: false,
   showBubbleMore: true,
@@ -597,6 +605,9 @@ export function withDefaults(stored) {
     // as fresh ones: only a stored `false` is somebody having turned it off.
     keepArticles:
       typeof raw["keepArticles"] === "boolean" ? raw["keepArticles"] : DEFAULTS.keepArticles,
+    // Off unless a stored `true` says otherwise (D236): a screen taken over
+    // is the wrong direction to fall in.
+    readerFullscreen: raw["readerFullscreen"] === true,
     // As `readerOnly`: not a boolean is nobody having chosen, which the
     // platform then decides (`effectiveLibraryCopy`).
     libraryCopy: typeof raw["libraryCopy"] === "boolean" ? raw["libraryCopy"] : null,
@@ -678,6 +689,7 @@ export async function readConfig() {
  * @property {boolean} [translationOff]
  * @property {boolean} [bubbleOff]
  * @property {boolean} [keepArticles]
+ * @property {boolean} [readerFullscreen]
  * @property {boolean} [libraryCopy]
  * @property {boolean} [hideBubbleActions]
  * @property {boolean} [showBubbleMore]

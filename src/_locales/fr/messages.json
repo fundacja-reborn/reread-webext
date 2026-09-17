@@ -1469,6 +1469,10 @@
   "options_keep_articles_hint": {
     "message": "Enregistre automatiquement chaque page ouverte dans le lecteur pour la lecture hors ligne. Vos pages enregistrées, vos surlignages et votre progression de lecture sont préservés même si le site d'origine change ou disparaît."
   },
+  "options_reader_fullscreen": { "message": "Ouvrir le lecteur en plein écran" },
+  "options_reader_fullscreen_hint": {
+    "message": "Le lecteur occupe tout l'écran au premier toucher, clic ou appui sur une touche après son ouverture - un navigateur n'autorise le plein écran qu'après un appui, jamais de lui-même. Quittez le plein écran avec Retour, Échap ou le bouton de la barre, et le lecteur reste en fenêtre jusqu'à ce que vous l'ouvriez de nouveau depuis une page web ou depuis le bouton re/read."
+  },
   "options_font_custom": { "message": "Police personnelle" },
   "options_font_custom_hint": {
     "message": "Saisissez le nom d'une police installée sur cet appareil, par exemple Georgia ou Noto Serif. La ligne Police du lecteur la proposera alors comme Personnalisée. Laissez le champ vide pour n'utiliser que les polices intégrées."

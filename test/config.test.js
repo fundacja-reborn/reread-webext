@@ -1018,3 +1018,25 @@ describe("the sentence kept with a phrase", () => {
     assert.equal(/** @type {any} */ (store["config"]).saveSentence, true);
   });
 });
+
+describe("the reader opened in full screen (D236)", () => {
+  it("is off unless a stored true says otherwise", () => {
+    assert.equal(DEFAULTS.readerFullscreen, false);
+    assert.equal(withDefaults(undefined).readerFullscreen, false);
+    assert.equal(withDefaults({ readerFullscreen: true }).readerFullscreen, true);
+    assert.equal(withDefaults({ readerFullscreen: false }).readerFullscreen, false);
+    // A hand-edited value of the wrong type falls to off: a screen taken
+    // over is the wrong direction to fall in.
+    for (const readerFullscreen of ["true", 1, null, {}]) {
+      assert.equal(withDefaults({ readerFullscreen }).readerFullscreen, false);
+    }
+  });
+
+  it("writes the choice through writeConfig without touching the rest", async () => {
+    const store = installFakeBrowser({ config: { sourceLang: "en", targetLang: "pl" } });
+    const written = await writeConfig({ readerFullscreen: true });
+
+    assert.deepEqual(written, { ...DEFAULTS, sourceLang: "en", targetLang: "pl", readerFullscreen: true });
+    assert.equal(/** @type {any} */ (store["config"]).readerFullscreen, true);
+  });
+});

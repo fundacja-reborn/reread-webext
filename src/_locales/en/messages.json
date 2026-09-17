@@ -1790,6 +1790,10 @@
   "options_keep_articles_hint": {
     "message": "Automatically saves every page you open in the reader for offline reading. Your saved pages, highlights and reading progress are kept safe even if the original website changes or disappears."
   },
+  "options_reader_fullscreen": { "message": "Open the reader in full screen" },
+  "options_reader_fullscreen_hint": {
+    "message": "The reader takes the whole screen at your first tap, click or key press after it opens - a browser allows full screen only after a press, never on its own. Leave full screen with Back, Esc or the button in the bar, and the reader stays out of it until you open it again from a web page or from re/read's button."
+  },
   "options_font_custom": { "message": "Own font" },
   "options_font_custom_hint": {
     "message": "Type the name of a font installed on this device, for example Georgia or Noto Serif. The reading view's Type row will then offer it as Custom. Leave the field empty to use the built-in typefaces only."

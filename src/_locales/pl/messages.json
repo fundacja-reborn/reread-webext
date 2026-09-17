@@ -2058,6 +2058,10 @@
   "options_keep_articles_hint": {
     "message": "Automatycznie zapisuje każdą stronę otwartą w widoku czytania do czytania offline. Twoje zapisane strony, zakreślenia i postęp czytania są bezpieczne, nawet jeśli oryginalna strona internetowa zmieni się lub zniknie."
   },
+  "options_reader_fullscreen": { "message": "Otwieraj widok czytania w trybie pełnego ekranu" },
+  "options_reader_fullscreen_hint": {
+    "message": "Widok czytania przechodzi w tryb pełnego ekranu przy pierwszym dotknięciu, kliknięciu lub naciśnięciu klawisza po otwarciu - przeglądarka pozwala na pełny ekran tylko po naciśnięciu, nigdy sama z siebie. Po wyjściu z pełnego ekranu (Wstecz, Esc albo przycisk w pasku) widok czytania zostaje poza nim, dopóki nie otworzysz go ponownie ze strony internetowej albo z przycisku re/read."
+  },
   "options_font_custom": { "message": "Własna czcionka" },
   "options_font_custom_hint": {
     "message": "Wpisz nazwę czcionki zainstalowanej na tym urządzeniu, np. Georgia albo Noto Serif. W widoku czytania, w wierszu Krój, pojawi się wybór Własny. Zostaw pole puste, aby używać tylko wbudowanych krojów."

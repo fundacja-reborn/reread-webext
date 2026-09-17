@@ -290,6 +290,25 @@
           or disappears.
         </p>
       </div>
+      <!-- The reader's window (D236, Michał's ask): with this on, the reader
+           takes the whole screen at the first press after it is opened from
+           outside - never at the opening itself, because a browser accepts
+           the request only from a press. Right under the default keep: the
+           two rows say what happens when a page opens in the reader, and
+           both are read on the way in. Not `translation-only`: the reader
+           is the whole extension with the model off. -->
+      <div class="row">
+        <label class="row-toggle">
+          <span class="row-name" data-i18n="options_reader_fullscreen">Open the reader in full screen</span>
+          <input type="checkbox" id="reader-fullscreen" />
+        </label>
+        <p class="row-note" data-fold data-i18n="options_reader_fullscreen_hint">
+          The reader takes the whole screen at your first tap, click or key press after it opens -
+          a browser allows full screen only after a press, never on its own. Leave full screen with
+          Back, Esc or the button in the bar, and the reader stays out of it until you open it again
+          from a web page or from re/read's button.
+        </p>
+      </div>
       <!-- The pair select offers only the pairs whose model is on this device:
            a pair without one translates nothing, and the full catalogue of a
            hundred pairs made the select unusable. The line below is the way

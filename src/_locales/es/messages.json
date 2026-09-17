@@ -1457,6 +1457,10 @@
   "options_keep_articles_hint": {
     "message": "Guarda automáticamente cada página abierta en la vista de lectura para leerla sin conexión. Tus páginas guardadas, resaltados y progreso de lectura se conservan aunque el sitio web original cambie o desaparezca."
   },
+  "options_reader_fullscreen": { "message": "Abrir la vista de lectura en pantalla completa" },
+  "options_reader_fullscreen_hint": {
+    "message": "La vista de lectura ocupa toda la pantalla con el primer toque, clic o pulsación de tecla después de abrirse - un navegador solo permite la pantalla completa tras una pulsación, nunca por sí mismo. Sal de la pantalla completa con Atrás, Esc o el botón de la barra, y la vista de lectura se queda fuera de ella hasta que la abras de nuevo desde una página web o desde el botón de re/read."
+  },
   "options_font_custom": { "message": "Fuente propia" },
   "options_font_custom_hint": {
     "message": "Escribe el nombre de una fuente instalada en este dispositivo, por ejemplo Georgia o Noto Serif. La fila Tipografía de la vista de lectura la ofrecerá entonces como Personalizada. Deja el campo vacío para usar solo las fuentes integradas."

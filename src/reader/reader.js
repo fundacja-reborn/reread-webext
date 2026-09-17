@@ -3211,6 +3211,9 @@ window.addEventListener("resize", () => showNoteBadges());
  */
 async function showPage(firstLoad = false) {
   const turn = ++epoch;
+  // Every road in from outside - the load, a page or the list handed in by
+  // the background - arms the full-screen ask (D236).
+  offerFullscreen();
 
   // Opened with nothing to read - a restored tab after a restart, mostly.
   // That is not an error, it is the reading list's whole cue (D-c).
@@ -7725,6 +7728,9 @@ function goToSettings(section) {
 // against `runtime.getContexts` before raising it (`reader-tab.js`), and
 // the same witness adopts a reader this bookkeeping never met.
 window.addEventListener("pageshow", () => {
+  // A return through history - from the settings, mostly - is an arrival
+  // from outside too, and arms the full-screen ask (D236).
+  offerFullscreen();
   void webext()
     .tabs.getCurrent()
     .then((tab) => (typeof tab?.id === "number" ? writeReaderTab(tab.id) : undefined))
@@ -7841,6 +7847,66 @@ navFullscreen?.addEventListener("click", () => {
 // on every platform. It no longer folds the bar (D220): the bar stays, and
 // the ribbon folds it on its own.
 refreshFullscreenTool = armFullscreenTool(fullscreenTool, closePanels);
+
+// The reader opened in full screen (D236, Michał's ask): with the setting
+// on, the first press after an arrival from outside asks the browser for
+// the whole screen - that is the setting's whole mechanism. Not the arrival
+// itself: a browser accepts the request only from a user's own press, never
+// from a load or a message (the rule the tool above rides on), and on
+// Android there is no other road to the screen. So the ask is armed on
+// every arrival - the load, a page or the list handed in by the background,
+// a return through history - and rides the first trusted click or key
+// (Escape and the bare modifiers grant no activation and are let through).
+// One ask an arrival: refused, it is not repeated, because a browser that
+// said no once says it again. Full screen left - by Back, Esc or the tool -
+// ends the ask for this visit, and the next arrival from outside arms it
+// again (Michał's rule: "until the end of the session in re/read"). The
+// setting is read fresh each time, the default keep's manner (D124): it is
+// about the way in, and the page's own copy of the settings may not have
+// arrived yet on the first load.
+let fullscreenWaiting = false;
+
+/** The keys a press of which grants no activation: the ask would be refused. */
+const NO_ACTIVATION_KEYS = new Set([
+  "Escape",
+  "Shift",
+  "Control",
+  "Alt",
+  "Meta",
+  "AltGraph",
+  "CapsLock",
+  "NumLock",
+  "ScrollLock",
+]);
+
+/** An arrival from outside: the next press may ask for the screen. */
+function offerFullscreen() {
+  if (document.fullscreenEnabled !== true) return;
+  void readConfig()
+    .then((config) => {
+      fullscreenWaiting = config.readerFullscreen && document.fullscreenElement === null;
+    })
+    .catch(() => undefined);
+}
+
+/** @param {Event} event */
+function onFullscreenPress(event) {
+  if (!fullscreenWaiting || !event.isTrusted) return;
+  if (event instanceof KeyboardEvent && NO_ACTIVATION_KEYS.has(event.key)) return;
+  fullscreenWaiting = false;
+  // The root, not the body, so the fixed bars keep their viewport (the
+  // tool's reason). A request refused is the browser's word in its own
+  // console, and nothing the page could add to.
+  document.documentElement.requestFullscreen().catch(() => {});
+}
+
+document.addEventListener("click", onFullscreenPress, { capture: true });
+document.addEventListener("keydown", onFullscreenPress, { capture: true });
+// Entered any other way, there is nothing left to ask; left, the visit has
+// answered.
+document.addEventListener("fullscreenchange", () => {
+  fullscreenWaiting = false;
+});
 
 keepButton?.addEventListener("click", () => void onKeepPress());
 for (const button of [removeButton, removeEndButton]) {

@@ -1406,6 +1406,10 @@
   "options_keep_articles_hint": {
     "message": "Speichert jede in der Leseansicht geöffnete Seite automatisch zum Offline-Lesen. Ihre gespeicherten Seiten, Markierungen und der Lesefortschritt bleiben erhalten, auch wenn die ursprüngliche Website sich ändert oder verschwindet."
   },
+  "options_reader_fullscreen": { "message": "Leseansicht im Vollbild öffnen" },
+  "options_reader_fullscreen_hint": {
+    "message": "Die Leseansicht nimmt beim ersten Tippen, Klicken oder Tastendruck nach dem Öffnen den ganzen Bildschirm ein - ein Browser erlaubt den Vollbildmodus nur nach einer Eingabe, nie von sich aus. Verlassen Sie den Vollbildmodus mit Zurück, Esc oder der Schaltfläche in der Leiste, bleibt die Leseansicht außerhalb davon, bis Sie sie erneut von einer Webseite oder über die re/read-Schaltfläche öffnen."
+  },
   "options_font_custom": { "message": "Eigene Schrift" },
   "options_font_custom_hint": {
     "message": "Geben Sie den Namen einer auf diesem Gerät installierten Schrift ein, zum Beispiel Georgia oder Noto Serif. Die Zeile Schrift in der Leseansicht bietet sie dann als Eigene an. Lassen Sie das Feld leer, um nur die mitgelieferten Schriften zu verwenden."
