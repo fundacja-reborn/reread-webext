@@ -27,7 +27,7 @@ import {
   supported as highlightsSupported,
   unregister as unregisterHighlight,
 } from "../content/highlighter.js";
-import { bubbleOpen, dismiss, reportRead, rescan, start, stop as stopReadingSide } from "../content/reading.js";
+import { bubbleOpen, dismiss, reportRead, rescan, restretch, start, stop as stopReadingSide } from "../content/reading.js";
 import { applyReading } from "../lib/appearance.js";
 import { ReadLedger } from "../lib/counting.js";
 import { dresser } from "../lib/user-css.js";
@@ -91,7 +91,11 @@ import {
   withoutMark,
 } from "../lib/reader/marks.js";
 import {
+  EDGE_TURN_FIRST_MS,
+  EDGE_TURN_REPEAT_MS,
   curtainTop,
+  edgeTurn,
+  edgeZone,
   onPage,
   pageAt,
   pagePercent,
@@ -361,6 +365,9 @@ const pageHead = document.getElementById("page-head");
 const pageFooter = document.getElementById("page-footer");
 const pageCount = document.getElementById("page-count");
 const pageLive = document.getElementById("page-live");
+// The line of ink on the page's edge while a stretched range waits there
+// for the page to turn (D239).
+const pageEdge = document.getElementById("page-edge");
 const speechPlayButton = document.getElementById("speech-play");
 const speechPlayLabel = document.getElementById("speech-play-label");
 const library = document.getElementById("library");
@@ -2195,6 +2202,11 @@ function showPageOf(pages, page) {
   pages.anchor = top;
   keepPageAnchor(pages, page);
   refreshCurtain();
+  // A range being stretched under a held pointer grows onto the page just
+  // turned to (D239) - read again at the pointer, which stands over other
+  // words now, in the same task as the turn: one refresh. Nothing while no
+  // stretch is on.
+  restretch();
 }
 
 /**
@@ -2345,6 +2357,7 @@ function refreshCurtain() {
     pageHead.hidden = true;
     if (pageCount !== null) pageCount.hidden = true;
     if (pageLive !== null && pageLive.textContent !== "") pageLive.textContent = "";
+    dressMarkPins();
     return;
   }
   const band = pageBand();
@@ -2377,6 +2390,8 @@ function refreshCurtain() {
     const spoken = t("reader_page_of", [(page + 1).toLocaleString(), count.toLocaleString()]);
     if (pageLive.textContent !== spoken) pageLive.textContent = spoken;
   }
+  // The active mark's pins, on this page or not (D239).
+  dressMarkPins();
 }
 
 /**
@@ -2488,6 +2503,10 @@ document.addEventListener(
   { capture: true, passive: true },
 );
 function onPointerLift() {
+  // A turn armed at the edge dies with the pointer (D239), whatever the
+  // gesture said - the gesture's own end says it too, but a lift the
+  // gesture never heard of must not leave a timer running.
+  disarmEdge();
   if (!pointerHeld) return;
   pointerHeld = false;
   if (!settleWanted) return;
@@ -2497,6 +2516,182 @@ function onPointerLift() {
 document.addEventListener("pointerup", onPointerLift, { capture: true, passive: true });
 document.addEventListener("pointercancel", onPointerLift, { capture: true, passive: true });
 window.addEventListener("blur", onPointerLift);
+
+/**
+ * The page turned from the window's edge while a range is being stretched
+ * (D239): a hold's drag, a handle's drag or the pen's stroke reaching the
+ * foot of the page - the curtain, the margin, the foot's strip, a bar (the
+ * pointer is captured, so the bar hears nothing) - or its head turns the
+ * page under the finger, the way Kindle, Apple Books and KOReader turn
+ * theirs, and the range grows onto the new page. The document is the
+ * window's scroller (D233), so a range across the page's edge already
+ * exists - the wheel proved it mid-drag; what was missing was the turn
+ * inside the gesture. Nothing turns at once: a finger grazing the edge
+ * to take the last line must not lose the page. Entering the zone draws
+ * a line of ink on the band's edge (`#page-edge`) - the one still signal,
+ * no animation, no countdown - and the first turn comes after a stay of
+ * `EDGE_TURN_FIRST_MS`, the next ones every `EDGE_TURN_REPEAT_MS` while
+ * the pointer stays (an e-ink panel needs the time to refresh, the eye to
+ * find the new page); leaving the zone disarms it, and so does the lift.
+ * In the zone the range's end sticks to the end of the page's last line
+ * (`stretchPoint`), never to a word behind the curtain; after a turn the
+ * pointer is still in the zone, so the whole new page joins the range,
+ * and a finger moving back up shortens it to the word under it - "at the
+ * edge I take whole pages, away from it I stop here", which is Kindle's
+ * grammar. The part's last page has no zone at its foot and its first
+ * none at its head: the range cannot leave the part, whose next page is
+ * another document. The pages are never cut again meanwhile (`pointerHeld`).
+ *
+ * @type {{ zone: import("../lib/reader/pages.js").EdgeZone, x: number, y: number, enteredAt: number, turnedAt: number | null, timer: number } | null}
+ */
+let edgeStay = null;
+
+/**
+ * Where the page's last full line ends, window coordinates: the curtain's
+ * edge while it is drawn, the band's foot otherwise (the part's last page,
+ * or a page whose last line ends on the margin).
+ *
+ * @param {PageTable} pages
+ * @param {number} page
+ * @param {{ top: number, bottom: number, floor: number }} band
+ * @returns {number}
+ */
+function lastLineEnd(pages, page, band) {
+  const cover = onPage(window.scrollY, pages.tops[page] ?? 0, band.top)
+    ? curtainTop(pages.tops, page, window.scrollY, band.floor)
+    : null;
+  return cover === null ? band.bottom : cover;
+}
+
+/**
+ * The edge zone a pointer stands in, or null (`edgeZone`, pages.js).
+ *
+ * @param {number} y window coordinates
+ * @returns {import("../lib/reader/pages.js").EdgeZone | null}
+ */
+function edgeZoneAt(y) {
+  const pages = pagesNow();
+  if (pages === null) return null;
+  const page = pageShown(pages);
+  const band = pageBand();
+  const view = window.visualViewport;
+  const bottom = view === null ? document.documentElement.clientHeight : view.offsetTop + view.height;
+  return edgeZone(y, band.top, lastLineEnd(pages, page, band), bottom, {
+    up: turnTarget(pages.tops, page, "up") !== null,
+    down: turnTarget(pages.tops, page, "down") !== null,
+  });
+}
+
+/**
+ * The pointer moved while stretching a range (the gesture's `onStretch`):
+ * in a zone the stay goes on or begins, out of one it ends.
+ *
+ * @param {number} x
+ * @param {number} y
+ */
+function onStretch(x, y) {
+  if (!paged()) return;
+  const zone = edgeZoneAt(y);
+  if (zone === null) {
+    disarmEdge();
+    return;
+  }
+  const stay = edgeStay;
+  if (stay !== null && stay.zone === zone) {
+    stay.x = x;
+    stay.y = y;
+    return;
+  }
+  disarmEdge();
+  edgeStay = { zone, x, y, enteredAt: performance.now(), turnedAt: null, timer: 0 };
+  showEdgeLine(zone);
+  scheduleEdgeTurn();
+}
+
+/** The stay's next turn, on the clock `edgeTurn` keeps. */
+function scheduleEdgeTurn() {
+  const stay = edgeStay;
+  if (stay === null) return;
+  const due =
+    stay.turnedAt === null ? stay.enteredAt + EDGE_TURN_FIRST_MS : stay.turnedAt + EDGE_TURN_REPEAT_MS;
+  stay.timer = window.setTimeout(onEdgeDue, Math.max(0, due - performance.now()));
+}
+
+/**
+ * The stay's clock rang: the turn, and the range grown onto the new page
+ * in the same task (`showPageOf` reads the stretch again) - one refresh.
+ * Still in the zone after the turn, unless the page turned to is the
+ * part's end, where the zone is dead and the stay is over.
+ */
+function onEdgeDue() {
+  const stay = edgeStay;
+  if (stay === null) return;
+  const now = performance.now();
+  if (!edgeTurn(stay.zone, stay.enteredAt, stay.turnedAt, now)) {
+    scheduleEdgeTurn();
+    return;
+  }
+  turnPage(stay.zone);
+  stay.turnedAt = now;
+  if (edgeZoneAt(stay.y) !== stay.zone) {
+    disarmEdge();
+    return;
+  }
+  scheduleEdgeTurn();
+}
+
+/** The stay over: the clock stopped, the line gone. */
+function disarmEdge() {
+  const stay = edgeStay;
+  if (stay === null) return;
+  window.clearTimeout(stay.timer);
+  edgeStay = null;
+  if (pageEdge !== null) pageEdge.hidden = true;
+}
+
+/**
+ * The line of ink on the edge the stay waits at: the foot's - the last
+ * full line's end - or the head's, just above the first line.
+ *
+ * @param {import("../lib/reader/pages.js").EdgeZone} zone
+ */
+function showEdgeLine(zone) {
+  if (pageEdge === null) return;
+  const pages = pagesNow();
+  if (pages === null) return;
+  const band = pageBand();
+  const y = zone === "down" ? lastLineEnd(pages, pageShown(pages), band) : band.top - 2;
+  pageEdge.style.top = `${Math.round(y)}px`;
+  pageEdge.hidden = false;
+}
+
+/**
+ * Where a stretch is read while the pointer stands in an edge zone (the
+ * gesture's `stretchPoint`): the end of the page's last full line for the
+ * foot, the start of its first line for the head - the range grows to the
+ * page's edge, never to a word behind the curtain. The pointer's own point
+ * everywhere else. The line's end is at the column's far side, which is
+ * the left one in a right-to-left text.
+ *
+ * @param {number} x
+ * @param {number} y
+ * @returns {{ x: number, y: number }}
+ */
+function stretchPoint(x, y) {
+  if (!paged()) return { x, y };
+  const zone = edgeZoneAt(y);
+  if (zone === null) return { x, y };
+  const pages = pagesNow();
+  const column = (contentElement ?? pageMain)?.getBoundingClientRect();
+  if (pages === null || column === undefined) return { x, y };
+  const band = pageBand();
+  const rtl = article !== null && getComputedStyle(article).direction === "rtl";
+  const half = readingLine() / 2;
+  if (zone === "down") {
+    return { x: rtl ? column.left + 3 : column.right - 3, y: lastLineEnd(pages, pageShown(pages), band) - half };
+  }
+  return { x: rtl ? column.right - 3 : column.left + 3, y: band.top + half };
+}
 
 /**
  * The highlighter (D106): the pen in the bar hands the selection gesture to
@@ -2823,6 +3018,34 @@ function placeMarkPins(range) {
   markPinEnd.style.top = `${Math.round(last.top + window.scrollY)}px`;
   markPinEnd.style.height = `${Math.round(last.height)}px`;
   markPinEnd.hidden = false;
+  dressMarkPins();
+}
+
+/**
+ * The pins drawn only on the page shown (D239): a mark across the page's
+ * edge has one end on another page, and its pin is simply not drawn - not
+ * pulled to the edge, where it would say the mark ends there. The pins
+ * ride the scroll in page coordinates (D181) and the curtains cover most
+ * of a pin behind them, but a pin's dot stands above its stem and showed
+ * in the leading over the curtain's edge. Asked again with the curtain, at
+ * every turn and scroll; the scroll layout draws both pins always. Kept
+ * apart from `hidden`, which says the pins are down altogether.
+ */
+function dressMarkPins() {
+  if (markPinStart === null || markPinEnd === null || markPinStart.hidden) return;
+  const pages = pagesNow();
+  if (pages === null) {
+    markPinStart.style.visibility = "";
+    markPinEnd.style.visibility = "";
+    return;
+  }
+  const band = pageBand();
+  const foot = lastLineEnd(pages, pageShown(pages), band);
+  for (const pin of [markPinStart, markPinEnd]) {
+    const rect = pin.getBoundingClientRect();
+    const shown = rect.top >= band.top - 1 && rect.bottom <= foot + 1;
+    pin.style.visibility = shown ? "" : "hidden";
+  }
 }
 
 /**
@@ -8551,6 +8774,12 @@ function rootReadingSide(ground) {
     onMarkResizeStart,
     onMarkStretch,
     onMarkResized: (range) => void onMarkResized(range),
+    // The page turned under a range stretched to the window's edge
+    // (D239): where the pointer stands, when the stretch is over, and
+    // where the stretch is read at the edge - the page's own edge.
+    onStretch,
+    onStretchEnd: disarmEdge,
+    stretchPoint,
     // The no-translation trim's two hands (D121): the dictionaries and the
     // voice of the document on screen. The dictionaries by the one rule every
     // page asks in (D191, `languagesToAsk`): the pair's source first, the

@@ -2921,6 +2921,22 @@ body.reader:has(#mark-bar:not([hidden])) {
   background: var(--page-bg);
 }
 
+/* The line of ink on the page's edge while a stretched range waits there
+   for the page to turn (D239): two pixels of the page's ink along the
+   foot's edge - the curtain's top - or the head's, placed by script; the
+   one signal that a turn is armed, still, because an e-ink panel draws
+   nothing else well and a countdown would be a flicker. */
+.page-edge {
+  position: fixed;
+  inset-inline: 0;
+  height: 2px;
+  /* Over the curtains (0), where its edge is drawn, under the scrim (1)
+     and the bars (2); the pointer passes through it to the text. */
+  z-index: 1;
+  background: var(--page-fg);
+  pointer-events: none;
+}
+
 /* The head's curtain: the same paper from the window's top down to where
    the page's first line stands (its height set by script) - the page's top
    margin, and the strip under the bar's tab, which the tail of the page

@@ -50,6 +50,12 @@ import { canSpeakLang, primaryLanguage, setSpeechOff, speak, speaking, stop as s
 import { clear, mark, occurrences, paint, phraseAt, supported, unmark } from "./highlighter.js";
 import { blockTextAround, findable } from "./scan.js";
 import { claimsNativeSelection, clearSelection, releaseMouse, startSelect, stopSelect } from "./select.js";
+
+// The reader page's one hand back into the gesture (D239): a range being
+// stretched, read again where the pointer stands after the page turned
+// under it. Passed through here, where the reader already talks to the
+// reading side, rather than reaching into `select.js` itself.
+export { restretch } from "./select.js";
 import { createTooltip } from "./tooltip.js";
 
 /** @typedef {import("../lib/protocol.js").VocabEntry} VocabEntry */
@@ -2012,7 +2018,7 @@ function onStorageChanged(changes, area) {
 }
 
 /**
- * @param {{ root?: Element | null, observe?: boolean, stored?: Record<string, unknown>, ownSelection?: boolean, anchored?: boolean, covered?: () => number, openSettings?: (section?: import("../lib/protocol.js").SettingsSection) => void, plainLinks?: () => boolean, alsoOwns?: (target: EventTarget | null) => boolean, marking?: () => boolean, markRoot?: () => Element | null, onMarked?: (range: Range) => void, onMarkStart?: () => void, onMarkTap?: (x: number, y: number, word?: Range) => void, markHandleAt?: (x: number, y: number) => { edge: "start" | "end", range: Range } | null, onMarkResizeStart?: () => void, onMarkStretch?: (range: Range) => void, onMarkResized?: (range: Range) => void, quietLookup?: (text: string) => Promise<import("../lib/protocol.js").LookUp | null>, quietVoice?: () => { lang: string, voiceURI: string | undefined } | null, scheme?: () => "light" | "sepia" | "dark" | "eink" | null, onPainted?: (found: number | null) => void, onBareTap?: (x: number, y: number, target: EventTarget | null) => void }} [where]
+ * @param {{ root?: Element | null, observe?: boolean, stored?: Record<string, unknown>, ownSelection?: boolean, anchored?: boolean, covered?: () => number, openSettings?: (section?: import("../lib/protocol.js").SettingsSection) => void, plainLinks?: () => boolean, alsoOwns?: (target: EventTarget | null) => boolean, marking?: () => boolean, markRoot?: () => Element | null, onMarked?: (range: Range) => void, onMarkStart?: () => void, onMarkTap?: (x: number, y: number, word?: Range) => void, markHandleAt?: (x: number, y: number) => { edge: "start" | "end", range: Range } | null, onMarkResizeStart?: () => void, onMarkStretch?: (range: Range) => void, onMarkResized?: (range: Range) => void, onStretch?: (x: number, y: number) => void, onStretchEnd?: () => void, stretchPoint?: (x: number, y: number) => { x: number, y: number }, quietLookup?: (text: string) => Promise<import("../lib/protocol.js").LookUp | null>, quietVoice?: () => { lang: string, voiceURI: string | undefined } | null, scheme?: () => "light" | "sepia" | "dark" | "eink" | null, onPainted?: (found: number | null) => void, onBareTap?: (x: number, y: number, target: EventTarget | null) => void }} [where]
  *   what to underline inside, whether it can change on its own, the startup
  *   read of `storage.local` when the caller already made one, whether the
  *   page selects through our own gesture rather than the browser's - every
@@ -2034,7 +2040,11 @@ function onStorageChanged(changes, area) {
  *   the reader's highlighter (D106; the pins as handles, D181) and ride
  *   through to `select.js` - `alsoOwns` besides names the reader's own
  *   floating UI (the mark-delete bubble), whose presses must not read as
- *   the page's. `quietLookup` and
+ *   the page's. `onStretch`, `onStretchEnd` and `stretchPoint` ride
+ *   through the same way (D239): the reader page turns the page under a
+ *   range being stretched to the window's edge, and reads the stretch at
+ *   the page's own edge there - a reader flag, because only a page read by
+ *   pages has an edge to turn at. `quietLookup` and
  *   `quietVoice` are the reader's hands into the no-translation trim (D121):
  *   the dictionaries and the voice of the document on screen - reader flags
  *   too, because only an extension page has the database in reach and only
@@ -2107,6 +2117,9 @@ export function start(where = {}) {
         ...(where.onMarkResizeStart === undefined ? {} : { onMarkResizeStart: where.onMarkResizeStart }),
         ...(where.onMarkStretch === undefined ? {} : { onMarkStretch: where.onMarkStretch }),
         ...(where.onMarkResized === undefined ? {} : { onMarkResized: where.onMarkResized }),
+        ...(where.onStretch === undefined ? {} : { onStretch: where.onStretch }),
+        ...(where.onStretchEnd === undefined ? {} : { onStretchEnd: where.onStretchEnd }),
+        ...(where.stretchPoint === undefined ? {} : { stretchPoint: where.stretchPoint }),
       });
     }
     webext().storage.onChanged.addListener(onStorageChanged);

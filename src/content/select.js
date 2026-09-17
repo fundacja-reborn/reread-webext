@@ -210,6 +210,19 @@ const SCROLL_TAIL_MS = 100;
  *   on this range: the mark it moved is the one to rewrite to it. Like
  *   `onMarked`, the range is handed over with the stroke's paint already
  *   cleared.
+ * @property {(x: number, y: number) => void} [onStretch] the pointer moved
+ *   while a range is being stretched - a hold's drag, a handle's, the
+ *   pen's stroke - and where it stands, window coordinates (D239): the
+ *   reader page arms a page turn at the window's edges from it, and hears
+ *   it again when it asks for the stretch to be read again (`restretch`).
+ *   Heard before the stretch is read.
+ * @property {() => void} [onStretchEnd] the stretch is over, however it
+ *   ended - the lift, a take-back, the selection cleared under it.
+ * @property {(x: number, y: number) => { x: number, y: number }} [stretchPoint]
+ *   where the stretch is read instead of under the pointer (D239): over
+ *   the paper that hides the next page's lines the reader page answers the
+ *   end of the page's last line, so the range grows to the page's edge and
+ *   never to a word nobody can see. The pointer's own point when absent.
  */
 
 /**
@@ -508,6 +521,36 @@ function clearInk() {
   inkFocus = null;
   inkHighlight = null;
   unregister(DRAFT);
+  stretchOver();
+}
+
+/**
+ * Where the pointer last stretched a range to, window coordinates - kept
+ * while a stretch is on, so the reader can have the stretch read again
+ * after it turned the page under the pointer (D239).
+ *
+ * @type {{ x: number, y: number } | null}
+ */
+let stretchAt = null;
+
+/** The stretch over, whichever way: the reader hears it once. */
+function stretchOver() {
+  if (stretchAt === null) return;
+  stretchAt = null;
+  hooks?.onStretchEnd?.();
+}
+
+/**
+ * The stretch read again where the pointer last stood (D239): after the
+ * page turned under a held finger - at the window's edge, by a key, by
+ * the wheel - the same point is over other words, and the range grows to
+ * them. Nothing while no stretch is on.
+ */
+export function restretch() {
+  const at = stretchAt;
+  if (at === null) return;
+  if (gesture?.mode !== "select" && mouse?.mode !== "select") return;
+  extendTo(at.x, at.y);
 }
 
 /**
@@ -898,15 +941,21 @@ function onTouchMove(event) {
  * @param {number} y
  */
 function extendTo(x, y) {
+  // The reader hears where the pointer stands before the stretch is read
+  // (D239): at the window's edge it arms a page turn, and it may answer
+  // another point to read the stretch at - the page's own edge.
+  stretchAt = { x, y };
+  hooks?.onStretch?.(x, y);
+  const read = hooks?.stretchPoint?.(x, y) ?? { x, y };
   if (ink !== null) {
-    extendInk(x, y);
+    extendInk(read.x, read.y);
     return;
   }
   const geo = geometry;
   const at = span;
   if (geo === null || at === null) return;
 
-  const caret = caretAt(x, y);
+  const caret = caretAt(read.x, read.y);
   if (caret === null) return;
   const offset = offsetIn(geo, caret.node, caret.offset);
   if (offset === null) return;
@@ -939,6 +988,7 @@ function onTouchEnd(event) {
       finishInk();
       return;
     }
+    stretchOver();
     if (range === null) return;
     hooks.onSelected(range, "press");
     return;
@@ -962,6 +1012,7 @@ function onTouchCancel(event) {
   if (touchById(event.changedTouches, active.id) === null) return;
   cancelGesture();
   if (active.mode !== "select") return;
+  stretchOver();
   if (ink !== null) finishInk();
   else if (range !== null) hooks?.onSelected(range, "press");
 }
@@ -1091,6 +1142,7 @@ function endMouse() {
   const active = mouse;
   cancelMouse();
   if (active === null || active.mode !== "select") return;
+  stretchOver();
   if (ink !== null) finishInk();
   else if (range !== null) hooks?.onSelected(range, "press");
 }
@@ -1246,6 +1298,7 @@ export function releaseMouse(event) {
   if (active === null) return false;
 
   if (active.mode === "select") {
+    stretchOver();
     if (ink !== null) finishInk();
     else if (range !== null) hooks.onSelected(range, "press");
     return true;

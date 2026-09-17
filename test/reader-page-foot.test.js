@@ -55,7 +55,7 @@ describe("the page's foot (D238)", () => {
     // the page turned to last, not to whatever page the fold happens to cut.
     assert.match(bodyOf(reader, "pageShown"), /return pageAt\(pages\.tops, pages\.anchor\);/, "the window off its page does not go back to the page turned to last");
     // The lift settles what the hold deferred.
-    assert.match(reader, /function onPointerLift\(\) \{\s*if \(!pointerHeld\) return;\s*pointerHeld = false;\s*if \(!settleWanted\) return;\s*settleWanted = false;\s*settlePage\(\);/, "a settle deferred under the finger is lost on the lift");
+    assert.match(reader, /function onPointerLift\(\) \{[\s\S]*?if \(!pointerHeld\) return;\s*pointerHeld = false;\s*if \(!settleWanted\) return;\s*settleWanted = false;\s*settlePage\(\);/, "a settle deferred under the finger is lost on the lift");
     assert.match(bodyOf(reader, "settlePage"), /if \(pointerHeld\) \{\s*settleWanted = true;\s*return;/, "the page settles under a finger");
   });
 
