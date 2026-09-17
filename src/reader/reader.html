@@ -1836,6 +1836,17 @@
     <p id="page-live" class="visually-hidden" aria-live="polite"></p>
 
     <!--
+      A room of this extension standing over the reading (D243): the settings
+      or the saved phrases, shown inside this document instead of walked to,
+      so the full screen survives the visit - it belongs to the document, and
+      a walk is a new one (Michał's smoke, 2026-09-17). Empty in the markup:
+      the frame is built when a room opens and taken away when it closes, so
+      its first address rewrites its own initial entry rather than adding one
+      to this tab's history, and nothing of its own walking outlives it.
+    -->
+    <section id="room" class="room" hidden></section>
+
+    <!--
       The note behind a mark (D118), read and written in one room: a native
       dialog, so Esc, the focus trap and the way back to the opener come from
       the engine (the TOC dialog's manner). The dimmed line up top quotes the

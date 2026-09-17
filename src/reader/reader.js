@@ -71,7 +71,8 @@ import {
   pictureEntries,
 } from "../lib/store/articles-archive.js";
 import { fileOrder } from "../lib/store/articles-file.js";
-import { asDocState, asMarksState, docState, marksState } from "../lib/reader/history-state.js";
+import { asDocState, asMarksState, asRoomState, docState, marksState, roomState } from "../lib/reader/history-state.js";
+import { asRoomRequest } from "../lib/room-frame.js";
 import { importKind } from "../lib/reader/import-kind.js";
 import { speechAction } from "../lib/reader/keys.js";
 import { readingTime, wordsIn } from "../lib/reader/length.js";
@@ -546,6 +547,10 @@ const markPinEnd = document.getElementById("mark-pin-end");
 // The two turns in that toolbar (D242), offered in the paged layout alone.
 const markTurnPrev = document.getElementById("mark-turn-prev");
 const markTurnNext = document.getElementById("mark-turn-next");
+
+// The room of this extension standing over the reading (D243): the settings
+// or the saved phrases, in a frame this page builds and takes away.
+const roomBox = document.getElementById("room");
 
 // The note dialog and the badges of the noted marks (D118).
 const markNoteBadges = document.getElementById("mark-note-badges");
@@ -1724,6 +1729,10 @@ const macPaging = navigator.platform.startsWith("Mac") || navigator.platform.sta
  */
 function onPageKey(event) {
   if (article === null || article.hidden) return;
+  // A room over the reading (D243) owns the window; the keys inside its
+  // frame are its own, and a key that reaches this document must not turn
+  // a page nobody can see.
+  if (roomShown !== null) return;
 
   const target = event.target instanceof HTMLElement ? event.target : null;
   const turn = pageTurn({
@@ -2412,7 +2421,7 @@ function refreshCurtain() {
  * @param {EventTarget | null} target
  */
 function onBareTap(x, y, target) {
-  if (!paged() || markerOn || pressHadWork) return;
+  if (!paged() || markerOn || pressHadWork || roomShown !== null) return;
   if (
     target instanceof Element &&
     target.closest(
@@ -2450,7 +2459,7 @@ let wheelTurnedAt = -Infinity;
 document.addEventListener(
   "wheel",
   (event) => {
-    if (!paged()) return;
+    if (!paged() || roomShown !== null) return;
     const target = event.target instanceof Element ? event.target : null;
     if (target !== null && target.closest(".reader-chrome, dialog, .speech-bar, .mark-bar, .note-popover") !== null) return;
     const now = performance.now();
@@ -8095,6 +8104,32 @@ for (const button of [toLibraryButton, toLibraryEndButton]) {
  * belong to the system.
  */
 window.addEventListener("popstate", (event) => {
+  // A room over the reading (D243) is the first thing a step reads. Forward
+  // into one opens it again; a step out of one takes it away and stops
+  // there, because the view underneath never left - unless the room was
+  // left FOR somewhere, which its menu's rows ask for on the way out.
+  const room = asRoomState(event.state);
+  if (room !== null) {
+    openRoom(room.kind, room.section, true);
+    return;
+  }
+  const leavingFor = roomLeavingTo;
+  roomLeavingTo = null;
+  if (roomShown !== null) {
+    closeRoom();
+    if (leavingFor === "library") {
+      leaveToList();
+      return;
+    }
+    if (leavingFor === "marks") {
+      hideNotice();
+      const scope = shown === null ? null : shown.url;
+      history.pushState(marksState(scope), "");
+      void showMarks(scope, { fresh: true });
+      return;
+    }
+    if (!unwindToList) return;
+  }
   const doc = asDocState(event.state);
   const quotes = asMarksState(event.state);
   // Mid-walk to the list (the menu's list row over stacked entries, D108):
@@ -8191,11 +8226,226 @@ function walkTo(page, kind, section) {
 }
 
 /**
+ * The rooms of this extension, shown over the reading instead of walked to
+ * (D243).
+ *
+ * The settings and the saved phrases are pages of their own and stay pages:
+ * the browser's own Options button opens one, the popup and the bubble open
+ * either, and both have to work with no reader anywhere. But walking to them
+ * from here cost the full screen every single time - it belongs to the
+ * document (the Fullscreen spec ends it in the unloading document cleanup
+ * steps) and a walk is a new document, while the reader's own three views
+ * keep it because they are three sections of one file. Michał, 2026-09-17,
+ * after the 0.5.67 smoke: "theoretically it is one press, but every loss is
+ * the picture rescaling and the browser's bar coming back (...) could they
+ * not all work like those three?". They can: the page comes here, in a frame
+ * of this document, and nothing navigates.
+ *
+ * The frame is built on opening and taken away on closing, never reused: a
+ * frame's FIRST address rewrites its own initial entry, while every later one
+ * adds an entry to this tab's history - so a frame thrown away leaves the
+ * history exactly as clean as the reader's own views leave it, one entry per
+ * opening, and the step back that every platform already offers is the way
+ * out (`popstate` below). A framed page cannot walk anywhere by itself, so
+ * its bar asks instead (`lib/room-frame.js`), and the asks are read here the
+ * way a history entry is read: field by field, source and origin checked.
+ */
+
+/** Where each room's page lives, relative to the extension's root. */
+const ROOM_PAGE = /** @type {const} */ ({
+  settings: "options/options.html",
+  vocab: "vocab/vocab.html",
+});
+
+/** Which room stands over the reading, or null while the reading has it. */
+/** @type {import("../lib/room-frame.js").RoomKind | null} */
+let roomShown = null;
+
+/** Whether this tab's history already carries the standing room's entry. */
+let roomEntry = false;
+
+/** The entry the standing room will write once its frame reports for duty. */
+/** @type {{ kind: import("../lib/room-frame.js").RoomKind, section: string | undefined, replace: boolean } | null} */
+let roomPending = null;
+
+/** What the focus goes back to when the room goes. */
+/** @type {HTMLElement | null} */
+let roomOpener = null;
+
+/** Where the standing room asked to be left for - read by the step back. */
+/** @type {"library" | "marks" | null} */
+let roomLeavingTo = null;
+
+/**
+ * How long a frame has to report for duty before the room gives up on it.
+ * Loading a page of our own from the package is a matter of milliseconds;
+ * this is not a load budget but the one honest answer to a frame that will
+ * never load at all - a policy that refuses it, a page that is not there.
+ */
+const ROOM_READY_MS = 2000;
+let roomWatch = 0;
+
+/**
+ * A room opened over the reading. Whatever the reading had in hand is put
+ * down first: the room takes the whole window, and a pen, a voice or a
+ * bubble left armed underneath it would answer gestures nobody could see.
+ * A walk did the same by ending this document; this has to do it on purpose.
+ *
+ * @param {import("../lib/room-frame.js").RoomKind} kind
+ * @param {string} [section] where in the room to land (D192)
+ * @param {boolean} [fromHistory] the step into an entry that already names
+ *   this room - a forward step, or a reload standing on one; the entry is
+ *   there, so none is written
+ */
+function openRoom(kind, section, fromHistory = false) {
+  if (roomBox === null) {
+    walkToRoom(kind, section);
+    return;
+  }
+  const standing = roomShown !== null;
+  closePanels();
+  setMarker(false);
+  stopReading();
+  dismiss();
+  if (!standing) {
+    roomOpener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  }
+  const frame = document.createElement("iframe");
+  // The room's own name, for whoever hears the frame rather than sees it.
+  frame.title = t(kind === "settings" ? "settings" : "saved_phrases");
+  frame.src = webext().runtime.getURL(ROOM_PAGE[kind] + (section === undefined ? "" : `#${section}`));
+  roomBox.replaceChildren(frame);
+  roomBox.hidden = false;
+  roomShown = kind;
+  // Nothing behind the room answers a key either: the sheet covers the
+  // reading, and a Tab that walked into the article under it would move a
+  // focus ring nobody can see.
+  dressRoomRest(true);
+  roomEntry = fromHistory;
+  roomPending = null;
+  window.clearTimeout(roomWatch);
+  frame.focus();
+  if (fromHistory) return;
+  // The entry is written when the frame reports for duty, not before: a
+  // frame that never loads must not leave a step back written for a room
+  // nobody can see. Until then the room is a sheet this page can take away.
+  roomPending = { kind, section, replace: standing };
+  roomWatch = window.setTimeout(() => {
+    if (roomShown !== kind || roomEntry) return;
+    closeRoom();
+    walkToRoom(kind, section);
+  }, ROOM_READY_MS);
+}
+
+/**
+ * The frame reported for duty: the room is real, so it gets its history
+ * entry - a new one over the reading, or the standing room's own rewritten
+ * when one room leads to the other, because the rooms are one layer over the
+ * reading and a step back from either means the reading.
+ */
+function roomReported() {
+  window.clearTimeout(roomWatch);
+  const pending = roomPending;
+  roomPending = null;
+  if (pending === null || roomEntry) return;
+  const state = roomState(pending.kind, pending.section);
+  if (pending.replace) history.replaceState(state, "");
+  else history.pushState(state, "");
+  roomEntry = true;
+}
+
+/**
+ * The room taken away, leaving the view it stood over exactly as it was -
+ * this document never left, which is the whole point. The focus goes back to
+ * whatever opened the room.
+ */
+function closeRoom() {
+  window.clearTimeout(roomWatch);
+  roomPending = null;
+  roomShown = null;
+  roomEntry = false;
+  if (roomBox !== null) {
+    roomBox.replaceChildren();
+    roomBox.hidden = true;
+  }
+  dressRoomRest(false);
+  const opener = roomOpener;
+  roomOpener = null;
+  if (opener !== null && opener.isConnected) opener.focus();
+}
+
+/**
+ * The rest of the page put out of reach while a room stands over it, and
+ * given back when it goes: `inert` on everything of ours but the room, so
+ * the keyboard and the screen reader stay inside the frame. A browser that
+ * does not know the attribute ignores it, and the sheet still covers the
+ * reading.
+ *
+ * @param {boolean} away
+ */
+function dressRoomRest(away) {
+  for (const node of document.body.children) {
+    if (node !== roomBox) node.toggleAttribute("inert", away);
+  }
+}
+
+/**
+ * The room's own way out - its bar's arrow - taken as the step back the
+ * system's gesture takes, so both land in one place. With no entry written
+ * yet there is nothing to step over, and the sheet is simply taken away.
+ */
+function leaveRoom() {
+  if (roomEntry) history.back();
+  else closeRoom();
+}
+
+/**
+ * The walk this room replaced (D139/D141), kept for the one case that has to
+ * survive a frame: no room box in the markup, or a frame that never loaded.
+ *
+ * @param {import("../lib/room-frame.js").RoomKind} kind
+ * @param {string} [section]
+ */
+function walkToRoom(kind, section) {
+  if (kind === "settings") walkTo(ROOM_PAGE.settings, Message.OPEN_SETTINGS, section);
+  else walkTo(ROOM_PAGE.vocab, Message.OPEN_VOCABULARY);
+}
+
+// What a framed room asks for. Only the standing frame's own window is heard,
+// and only from this extension's origin: `message` is a doorway anything can
+// knock on, and the ask is validated field by field (`lib/room-frame.js`).
+window.addEventListener("message", (event) => {
+  if (roomShown === null || roomBox === null) return;
+  const frame = roomBox.firstElementChild;
+  if (!(frame instanceof HTMLIFrameElement) || event.source !== frame.contentWindow) return;
+  if (event.origin !== location.origin) return;
+  const ask = asRoomRequest(event.data);
+  if (ask === null) return;
+  if (ask.act === "ready") {
+    roomReported();
+    return;
+  }
+  if (ask.act === "close") {
+    leaveRoom();
+    return;
+  }
+  if (ask.act === "view") {
+    // A room's menu naming one of the reader's own views: the step back
+    // takes the room away first, and the view is shown where that step
+    // lands - so the history keeps the grammar the reader's own rows keep.
+    roomLeavingTo = ask.view;
+    leaveRoom();
+    return;
+  }
+  openRoom(ask.room, ask.section);
+});
+
+/**
  * @param {import("../lib/protocol.js").SettingsSection} [section] where on the
  *   page to land (D192) - the top when nothing is named
  */
 function goToSettings(section) {
-  walkTo("options/options.html", Message.OPEN_SETTINGS, section);
+  openRoom("settings", section);
 }
 
 // The reader-tab bookkeeping, both halves (D139/D140): this tab is the
@@ -8287,9 +8537,10 @@ navVocabulary?.addEventListener("click", () => {
   // bring the one phrases tab forward, and the article was left behind with
   // no way back - two neighbouring rows, two grammars (Michał's report). The
   // popup and the settings menu keep raising: no reading place stands behind
-  // them. The one phrases tab keeps holding: the witness in `vocab-tab.js`
-  // adopts the walked-to page, so a raise finds this tab instead of a copy.
-  walkTo("vocab/vocab.html", Message.OPEN_VOCABULARY);
+  // them. Since D243 the row opens the phrases HERE, in a frame of this
+  // document, so the visit costs neither the reading's place nor the full
+  // screen; the walk stays underneath it as the fallback (`walkToRoom`).
+  openRoom("vocab");
 });
 
 navSettings?.addEventListener("click", () => {
@@ -8822,3 +9073,9 @@ function rootReadingSide(ground) {
 // The load-time ask is the one that may be a reload standing on a document's
 // history entry - the only caller allowed to reopen from it (D102).
 void showPage(true);
+
+// A reload standing on a room's entry (D243) opens that room again, over
+// whatever view the line above lands on: the entry says a room stood here,
+// and a reload that swallowed the visit would be a step nobody took.
+const roomStanding = asRoomState(history.state);
+if (roomStanding !== null) openRoom(roomStanding.kind, roomStanding.section, true);

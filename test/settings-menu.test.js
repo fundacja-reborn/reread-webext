@@ -26,9 +26,11 @@ describe("the settings page's menu", () => {
     }
     assert.doesNotMatch(menu, /translation-only/, "a menu row still hides with the translation switch");
     // The row's press goes the popup's way: the background raises the
-    // phrases tab or turns this one.
+    // phrases tab or turns this one. Inside the reader's own document
+    // (D243) it asks the reader for the other room instead - a frame that
+    // navigated would take the reading's document with it.
     const script = await source("options/options.js");
-    assert.match(script, /getElementById\("nav-vocabulary"\)\?\.addEventListener\("click", \(\) => \{\s*setMenu\(false\);\s*void webext\(\)\.runtime\.sendMessage\(\{ kind: Message\.OPEN_VOCABULARY \}\)/, "the phrases row does not open the phrases page through the background");
+    assert.match(script, /getElementById\("nav-vocabulary"\)\?\.addEventListener\("click", \(\) => \{\s*setMenu\(false\);\s*if \(inReader\) \{\s*askReader\(\{ act: "room", room: "vocab" \}\);\s*return;\s*\}\s*void webext\(\)\.runtime\.sendMessage\(\{ kind: Message\.OPEN_VOCABULARY \}\)/, "the phrases row does not open the phrases page through the background");
   });
 
   it("closes the menu on the last row showing, with no clause for a row that follows the switch", async () => {

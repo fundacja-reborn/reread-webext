@@ -29,6 +29,7 @@ import { webext } from "./browser.js";
 import { Message } from "./protocol.js";
 import { tabsShowing } from "./own-tabs.js";
 import { BACK_ROAD_KEY } from "./session.js";
+import { askReader, framedInReader } from "./room-frame.js";
 
 const READER_PAGE = "reader/reader.html";
 
@@ -101,6 +102,15 @@ async function toReading() {
 export function armBackArrow() {
   const button = document.getElementById("back");
   if (button === null) return;
+
+  // Inside the reader's own document (D243) the arrow is the way out of the
+  // room and always stands: the reading is one step behind it, and the step
+  // is the reader's to take - a frame has no walk of its own to undo.
+  if (framedInReader()) {
+    button.hidden = false;
+    button.addEventListener("click", () => askReader({ act: "close" }));
+    return;
+  }
 
   if (walkedHere()) {
     button.hidden = false;

@@ -33,6 +33,7 @@ import { aside, localizePage, megabytes, plural, t, uiLocale } from "../lib/i18n
 import { compileUserCss } from "../lib/user-css.js";
 import { privateNote } from "../lib/private-note.js";
 import { armBackArrow } from "../lib/back-arrow.js";
+import { askReader, framedInReader } from "../lib/room-frame.js";
 import { armFullscreenTool } from "../lib/fullscreen-tool.js";
 import { languageName, pairLabel } from "../lib/language.js";
 import { catalogDictionaries, catalogSource } from "../lib/dict/catalog.js";
@@ -3273,13 +3274,22 @@ const panelScrim = document.getElementById("panel-scrim");
 // here from the popup or the add-on manager with the reading standing in
 // another tab, it brings that tab forward. The three states and their order
 // live in `lib/back-arrow.js`, shared with the saved-phrases page.
+/**
+ * Whether this page stands in a frame of the reader's own document (D243) -
+ * asked once, because it cannot change while the page is open.
+ */
+const inReader = framedInReader();
+
 armBackArrow();
 
 // The bar's full-screen tool (D195; every page since D220): the reader
 // bar's own, in `lib/fullscreen-tool.js` - where the browser has a full
 // screen to give and the row has room, with the menu put away before the
 // screen changes.
-armFullscreenTool(document.getElementById("fullscreen"), () => setMenu(false));
+// Standing inside the reader (D243), the screen is the reader's: it holds
+// the full screen for this visit, and a second tool asking for it from in
+// here would be a button with two answers. The reader's own bar carries it.
+if (!inReader) armFullscreenTool(document.getElementById("fullscreen"), () => setMenu(false));
 
 /** @param {boolean} open */
 function setMenu(open) {
@@ -3296,16 +3306,32 @@ menuButton?.addEventListener("click", () => {
   setMenu(menuPanel?.hidden === true);
 });
 
+// The menu's rows. Standing inside the reader (D243) they ask it instead of
+// sending the background anywhere: a frame that navigated would take the
+// reading's own document with it, which is the whole thing this page is
+// framed to avoid. On its own screen the rows are what they always were.
 document.getElementById("nav-library")?.addEventListener("click", () => {
   setMenu(false);
+  if (inReader) {
+    askReader({ act: "view", view: "library" });
+    return;
+  }
   void webext().runtime.sendMessage({ kind: Message.OPEN_LIBRARY }).catch(() => {});
 });
 document.getElementById("nav-marks")?.addEventListener("click", () => {
   setMenu(false);
+  if (inReader) {
+    askReader({ act: "view", view: "marks" });
+    return;
+  }
   void webext().runtime.sendMessage({ kind: Message.OPEN_MARKS }).catch(() => {});
 });
 document.getElementById("nav-vocabulary")?.addEventListener("click", () => {
   setMenu(false);
+  if (inReader) {
+    askReader({ act: "room", room: "vocab" });
+    return;
+  }
   void webext().runtime.sendMessage({ kind: Message.OPEN_VOCABULARY }).catch(() => {});
 });
 
@@ -3336,3 +3362,9 @@ window.addEventListener("beforeunload", (event) => {
 });
 
 void render();
+
+// Standing inside the reader (D243), the frame reports for duty: the reader
+// writes the room's history entry on the strength of this one message, so a
+// frame a policy ever refuses to load leaves no step back written for a room
+// nobody can see - the reader falls back to walking to this page instead.
+if (inReader) askReader({ act: "ready" });
