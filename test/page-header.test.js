@@ -185,6 +185,26 @@ describe("the bar stuck to the top of every page", () => {
     assert.match(styles, /body\.reader:has\(#speech-bar:not\(\[hidden\]\)\) \.page-footer,\s*body\.reader:has\(#mark-bar:not\(\[hidden\]\)\) \.page-footer \{\s*display: none;/, "the page count stands under a bar at the foot");
   });
 
+  it("hangs the reader's panels under the bar as sheets over the text, and offers each Aa row once", async () => {
+    // Opened in the box's flow the panels grew the box and pushed the
+    // article down; read by pages (D233) that re-cut every page for a band
+    // a few lines tall, and closing the menu landed on page one (Michał's
+    // smoke, 2026-09-17).
+    const styles = await source("reader/reader.css");
+    const sheets = ruleOf(styles, ".reader-chrome > .reader-panel,\n.reader-chrome > .nav-menu");
+    assert.match(sheets, /position: absolute;\s*top: 100%;/, "the panels stand in the box's flow and push the text down");
+    assert.match(sheets, /background: var\(--page-bg\);/, "the dimmed page shows through a sheet");
+    // The menu's own rule stands after the shared one, whose second line
+    // `ruleOf` would find first.
+    assert.match(styles, /\n\.reader-chrome > \.nav-menu \{\s*max-height: calc\(100dvh - var\(--header-h\) - 1rem\);\s*overflow-y: auto;/, "a long menu cannot scroll within itself");
+    // The e-ink merge once doubled the Layout row (2026-09-17): every row of
+    // the Aa panel stands once.
+    const markup = await source("reader/reader.html");
+    for (const id of ["theme-choices", "layout-choices", "font-choices", "line-height-choices", "align-choices", "hyphens-choices", "paragraphs-choices", "links-choices", "marker-color-choices"]) {
+      assert.equal((markup.match(new RegExp(`id="${id}"`, "g")) ?? []).length, 1, `the ${id} row stands more than once, or not at all`);
+    }
+  });
+
   it("holds nothing any more: the hold module went with the offset it measured", async () => {
     await assert.rejects(source("lib/chrome-hold.js"), "the hold module is still in the package");
     for (const path of ["assets/page.css", "reader/reader.css", "reader/reader.js", "vocab/vocab.js", "options/options.js"]) {

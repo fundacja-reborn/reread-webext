@@ -1424,6 +1424,25 @@ function contentRoot() {
  * because an open panel makes the chrome taller for as long as it is open.
  */
 function chromeFold() {
+  let fold = barFold();
+  // The panels hang under the bar as sheets since D233's smoke (reader.css)
+  // rather than growing the box: open, a sheet is chrome over the text all
+  // the same - the voice must not park a line under it, nor the bubble
+  // stand beneath it - so the fold reaches to its foot while it stands.
+  for (const panel of [displayPanel, menuPanel]) {
+    if (panel === null || panel.hidden) continue;
+    fold = Math.max(fold, panel.getBoundingClientRect().bottom);
+  }
+  return fold;
+}
+
+/**
+ * How far down the window the bar itself reaches - the stuck box without
+ * the sheets that may hang under it. What the pages are cut under (D233):
+ * a sheet opening over the text must not re-cut them, and closing it must
+ * not move the reading.
+ */
+function barFold() {
   return Math.max(0, chromeBox?.getBoundingClientRect().bottom ?? 0);
 }
 
@@ -1577,9 +1596,11 @@ function restorePosition(position, segmentIndex = 0) {
  * counts a bar standing over the text would hide the very lines this measures
  * to keep.
  *
+ * @param {number} [fold] the chrome's reach to measure under - the whole
+ *   chrome with any open sheet by default; the bar alone for the pages
  * @returns {{ top: number, bottom: number }}
  */
-function readableBand() {
+function readableBand(fold = chromeFold()) {
   const view = window.visualViewport;
   const seen =
     view === null
@@ -1597,7 +1618,7 @@ function readableBand() {
     // for the floor of the text would page by one line forever.
     if (edge > 0) bottom = Math.min(bottom, edge);
   }
-  return { top: Math.max(chromeFold(), seen.top), bottom };
+  return { top: Math.max(fold, seen.top), bottom };
 }
 
 /**
@@ -1770,14 +1791,16 @@ function pageAir() {
  * The strip of the window a page's lines stand in: the readable band less
  * the margins, and under the bookmark tab - which hangs below the bar,
  * folded or not, over the first line's right end (the same smoke: "key"
- * read as "ke[v]h"). Its top is also the first page's top in the flow: the
- * chrome stands at the document's head, stuck, so its edge in the window
- * is its edge in the flow before anything has scrolled.
+ * read as "ke[v]h"). Under the bar alone, never under an open sheet: the
+ * Aa panel and the menu hang over the text and leave the pages as they
+ * are. Its top is also the first page's top in the flow: the chrome stands
+ * at the document's head, stuck, so its edge in the window is its edge in
+ * the flow before anything has scrolled.
  *
  * @returns {{ top: number, bottom: number }}
  */
 function pageBand() {
-  const band = readableBand();
+  const band = readableBand(barFold());
   const air = pageAir();
   let top = band.top;
   if (chromeTab !== null && !chromeTab.hidden) {
