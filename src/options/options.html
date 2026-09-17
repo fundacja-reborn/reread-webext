@@ -276,6 +276,24 @@
           and iOS it is on by default.
         </p>
       </div>
+      <!-- The page count at the foot of a page read by pages (D238): a
+           setting rather than an Aa row, because it is set once and the Aa
+           panel on a small e-ink screen already fills it. Off by default -
+           a line under every page for the whole of a reading - and the
+           count is still in the bar on a wide screen, and read by a screen
+           reader always. Beside the reader-only switch: the two rows about
+           how the reading view stands on the screen. -->
+      <div class="row">
+        <label class="row-toggle">
+          <span class="row-name" data-i18n="options_page_number">Page number in the Pages layout</span>
+          <input type="checkbox" id="page-number" />
+        </label>
+        <p class="row-note" data-fold data-i18n="options_page_number_hint">
+          Shows a page count at the foot of the window when the reader's Layout is set to Pages.
+          Off, the last line of each page stands lower; the count is still read by screen readers,
+          and on a wide screen it stands in the bar next to re/read.
+        </p>
+      </div>
       <!-- The default keep (D124). Not `translation-only`: with translation
            off the reader and its list are the whole extension, which is when
            this switch matters most. -->

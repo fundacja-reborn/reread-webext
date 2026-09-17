@@ -29,8 +29,24 @@
  */
 const EPS = 1;
 
+/** @typedef {{ index: number, top: number, bottom: number }} Block */
+
 /**
  * Where every page begins.
+ *
+ * Cut from the document's head by default: page after page down the flow.
+ * Given an `anchor` - the top of the page being read, when the band was
+ * cut short or long by a bar standing up, the count's footer, the browser's
+ * own bar sliding in (D238) - the pages are cut from the anchor both ways:
+ * on from it exactly as from the head, and back from it so that the page
+ * before ends exactly on it. The page being read keeps its first line
+ * whatever the band did, and only its foot moves; a table cut from the head
+ * again moved the first line of every page after the change, and on an
+ * e-ink panel a moved page is a full refresh and a lost place (Michał's
+ * smoke, 2026-09-17: the page began a paragraph earlier once the pen was
+ * out). The named artefact: the first page of the part may come up short,
+ * the way the last page of a chapter does. An anchor at the head, or past
+ * the flow's end, is no anchor.
  *
  * @param {Box[]} blocks the flow's blocks in order, document coordinates;
  *   boxes without height are skipped (a hidden row measures as nothing)
@@ -41,18 +57,44 @@ const EPS = 1;
  * @param {number} [first] where the first page begins - what the window
  *   shows under the stuck chrome before anything has scrolled, breathing
  *   room and all; the first block's top when not given
+ * @param {number} [anchor] the top of a page to keep - a line's top, or a
+ *   block's - from which the table is cut both ways
  * @returns {number[]} the top of every page, ascending; one page at least
  */
-export function pageTops(blocks, linesOf, height, first) {
+export function pageTops(blocks, linesOf, height, first, anchor) {
+  /** @type {Block[]} */
   const flow = [];
   for (const [index, box] of blocks.entries()) {
     if (box.bottom - box.top > 0) flow.push({ index, top: box.top, bottom: box.bottom });
   }
   const start = first ?? flow[0]?.top ?? 0;
   if (flow.length === 0 || !(height > 0)) return [start];
+  const end = flow[flow.length - 1]?.bottom ?? start;
+  if (anchor === undefined || anchor <= start + EPS || anchor >= end - EPS) {
+    return pagesOn(flow, linesOf, height, start);
+  }
+  const back = pagesBack(flow, linesOf, height, anchor, start);
+  // The head's page is what is left above the pages cut back - unless the
+  // cut reached the first block itself, and the only thing left is the
+  // paper above it: then that page is the head's, and nobody is shown a
+  // page of margin.
+  const highest = back[back.length - 1];
+  const head = highest !== undefined && highest <= (flow[0]?.top ?? start) + EPS ? highest : start;
+  if (head !== start) back.pop();
+  return [head, ...back.reverse(), ...pagesOn(flow, linesOf, height, anchor)];
+}
 
-  const tops = [start];
-  let top = start;
+/**
+ * The pages from `top` on, `top` itself the first.
+ *
+ * @param {Block[]} flow
+ * @param {(index: number) => Box[]} linesOf
+ * @param {number} height
+ * @param {number} top
+ * @returns {number[]}
+ */
+function pagesOn(flow, linesOf, height, top) {
+  const tops = [top];
   let at = 0;
   // Whatever stands wholly above the first page is not on any page.
   while (at < flow.length && (flow[at]?.bottom ?? 0) <= top + EPS) at += 1;
@@ -92,6 +134,70 @@ export function pageTops(blocks, linesOf, height, first) {
     tops.push(next);
     top = next;
     at = cut;
+  }
+}
+
+/**
+ * The pages above `bottom`, the nearest first: each ends exactly where the
+ * one below begins and opens on the earliest line from which everything
+ * down to that edge fits the band - the mirror of `pagesOn`, cut upward.
+ * Stops above `start`, the head's own page, which takes whatever is left
+ * however short it comes up.
+ *
+ * @param {Block[]} flow
+ * @param {(index: number) => Box[]} linesOf
+ * @param {number} height
+ * @param {number} bottom
+ * @param {number} start
+ * @returns {number[]} tops, descending
+ */
+function pagesBack(flow, linesOf, height, bottom, start) {
+  /** @type {number[]} */
+  const tops = [];
+  for (;;) {
+    const limit = bottom - height;
+    // What is left fits the head's page.
+    if (limit <= start + EPS) return tops;
+    // The last block not wholly on this page: cut by the edge, or above it.
+    let cut = -1;
+    while (cut + 1 < flow.length && (flow[cut + 1]?.top ?? Infinity) < limit - EPS) cut += 1;
+    const block = flow[cut];
+    // The block after it is the first that may open this page whole - if it
+    // stands above the edge at all.
+    const after = flow[cut + 1];
+    const opener = after !== undefined && after.top < bottom - EPS ? after.top : null;
+
+    let top;
+    if (block === undefined) {
+      // No block begins above the edge: the page opens with the flow's
+      // first, and the paper above that is nobody's page.
+      top = opener ?? limit;
+    } else if (block.bottom <= limit + EPS) {
+      // The block ends above the edge: the page opens with the next one.
+      top = opener ?? limit;
+    } else {
+      const lines = linesOf(block.index);
+      const line = lines.find((one) => one.top >= limit - EPS);
+      if (line === undefined) {
+        // Every line stands above the edge and only the box's own foot
+        // reaches past it - or a block with no lines. One that fits a page
+        // moves whole onto the page before, and this page opens with the
+        // next block; one taller than a page is cut at the edge.
+        const fits = block.bottom - block.top <= height + EPS;
+        top = (lines.length > 0 || fits) && opener !== null ? opener : limit;
+      } else if (line.bottom >= bottom - EPS) {
+        // The line found is the page's last and only - taller than the page.
+        top = limit;
+      } else {
+        top = line.top;
+      }
+    }
+    // A page has to reach back: whatever the measurement said, this page
+    // begins above the one below it.
+    if (top >= bottom - EPS) top = limit;
+    if (top <= start + EPS) return tops;
+    tops.push(top);
+    bottom = top;
   }
 }
 

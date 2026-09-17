@@ -1402,6 +1402,10 @@
   "options_reader_only_hint": {
     "message": "Beschränkt die Unterstreichung gespeicherter Phrasen und die Übersetzungs-Sprechblase auf die Leseansicht. Das Markieren von Text auf einer gewöhnlichen Webseite zeigt nur die Option, die Seite in der Leseansicht zu öffnen. Ist die Option eingeschaltet, kann keine Webseite feststellen, welche ihrer Wörter Sie gespeichert haben. Auf Android und iOS ist die Option standardmäßig eingeschaltet."
   },
+  "options_page_number": { "message": "Seitenzahl in der Ansicht Seiten" },
+  "options_page_number_hint": {
+    "message": "Zeigt die Seitenzahl am unteren Fensterrand, wenn die Ansicht der Leseansicht auf Seiten steht. Ausgeschaltet steht die letzte Zeile jeder Seite tiefer; Screenreader lesen die Seitenzahl weiterhin vor, und auf einem breiten Bildschirm steht sie in der Leiste neben re/read."
+  },
   "options_keep_articles": { "message": "Standardmäßig in der Offline-Leseliste speichern" },
   "options_keep_articles_hint": {
     "message": "Speichert jede in der Leseansicht geöffnete Seite automatisch zum Offline-Lesen. Ihre gespeicherten Seiten, Markierungen und der Lesefortschritt bleiben erhalten, auch wenn die ursprüngliche Website sich ändert oder verschwindet."

@@ -1786,6 +1786,10 @@
   "options_reader_only_hint": {
     "message": "Limits the underlining of saved phrases and the translation bubble to the reader. Selecting text on an ordinary web page will only show an option to open the page in the reader. With it on, no web page can tell which of its words you have saved. On Android and iOS it is on by default."
   },
+  "options_page_number": { "message": "Page number in the Pages layout" },
+  "options_page_number_hint": {
+    "message": "Shows a page count at the foot of the window when the reader's Layout is set to Pages. Off, the last line of each page stands lower; the count is still read by screen readers, and on a wide screen it stands in the bar next to re/read."
+  },
   "options_keep_articles": { "message": "Save in the offline reading list by default" },
   "options_keep_articles_hint": {
     "message": "Automatically saves every page you open in the reader for offline reading. Your saved pages, highlights and reading progress are kept safe even if the original website changes or disappears."

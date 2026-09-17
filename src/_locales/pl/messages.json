@@ -2054,6 +2054,10 @@
   "options_reader_only_hint": {
     "message": "Ogranicza podkreślenia zapisanych fraz i dymek tłumaczenia do widoku czytania. Zaznaczenie tekstu na zwykłej stronie pokaże jedynie przycisk do otwarcia jej w widoku czytania. Przy włączonej opcji żadna strona nie może stwierdzić, które z jej słów masz zapisane. Na Androidzie i iOS opcja jest domyślnie włączona."
   },
+  "options_page_number": { "message": "Numer strony w układzie Strony" },
+  "options_page_number_hint": {
+    "message": "Pokazuje licznik stron u dołu okna, gdy Układ w widoku czytania jest ustawiony na Strony. Bez niego ostatnia linia każdej strony stoi niżej; czytniki ekranu nadal odczytują licznik, a na szerokim ekranie widać go w pasku obok re/read."
+  },
   "options_keep_articles": { "message": "Zapisuj domyślnie w czytelni offline" },
   "options_keep_articles_hint": {
     "message": "Automatycznie zapisuje każdą stronę otwartą w widoku czytania do czytania offline. Twoje zapisane strony, zakreślenia i postęp czytania są bezpieczne, nawet jeśli oryginalna strona internetowa zmieni się lub zniknie."

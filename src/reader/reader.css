@@ -2777,15 +2777,20 @@ button[data-armed],
    one token for how tall a bar standing at the foot is - the voice's, the
    pen's - counted from what stands in it (the buttons' 44px floor, the air
    above and below them, the line), so that the pages' strip and the bars
-   can never quietly part; and the page's margin, top and bottom, which the
-   reader reads for its own arithmetic (`pageAir` in reader.js). The strip
-   under a page read by pages is the bar less the margin: the margin is
-   empty paper by construction, so a bar standing up may cover it and
-   still cover no line (D233; Michał's question about the strip's cost on
-   a phone, 2026-09-17 - a line a page). */
+   can never quietly part; the page's top margin, which the reader reads
+   for its own arithmetic (`pageAir` in reader.js); and the page's bottom
+   margin (D238), only as much as keeps the last line's descenders off
+   whatever stands at the foot - the window's edge, the count's line, a
+   bar's border. Until D238 the foot kept a strip the bars' height under
+   every page so that a bar standing up would not re-cut the pages, and
+   on the Boox the strip read as three or four empty lines (Michał's
+   photos, 2026-09-17); now a bar ends the band like any edge, and the
+   page being read keeps its first line through the re-cut (the anchor,
+   reader.js). */
 :root {
   --foot-h: calc(44px + 0.5rem + 1px);
   --page-air: 0.75rem;
+  --page-foot-air: 0.5rem;
 }
 
 .speech-bar {
@@ -2904,12 +2909,20 @@ body.reader:has(#mark-bar:not([hidden])) {
   background: var(--page-bg);
 }
 
-/* The page count, one quiet line at the window's foot in the interface
-   face, on the page's paper; the readable band ends above it (reader.js
-   measures it like the bars). Pinned the way the speech bar is - `100dvh`
-   and a transform - for the same Android reason. Gone while a bar stands
-   at the foot: the bar's row is the band's floor then, and two strips
-   would be one too many. */
+/* The page's foot: the strip at the window's foot the readable band ends
+   above (reader.js measures it like the bars). Pinned the way the speech
+   bar is - `100dvh` and a transform - for the same Android reason. By
+   default (D238) it is the phone's safe area alone, zero on most screens,
+   with the count written into it but clipped: the page number is a
+   setting, off by default, because a strip under every page is a line of
+   text a page for the whole of a reading, and the count is had otherwise
+   - in the bar beside the brand on a wide screen (`.page-count`), and by
+   a screen reader always (the live region). Under a bar the strip is
+   covered; the band ends above the bar then. What stood here before D238
+   - a strip the bars' height, so a bar would not re-cut the pages - read
+   on the Boox as three or four empty lines under every page (Michał's
+   photos, 2026-09-17); the page keeps its first line through a re-cut
+   now (the anchor, reader.js), and the strip has nothing left to reserve. */
 .page-footer {
   position: fixed;
   inset-inline: 0;
@@ -2917,30 +2930,43 @@ body.reader:has(#mark-bar:not([hidden])) {
   transform: translateY(-100%);
   z-index: 0;
   box-sizing: border-box;
-  /* The strip is the bars' own height: a bar standing up at the foot - the
-     voice's, the pen's - covers the strip and the count and never a line,
-     and the page's bottom margin stays above it, so the last line clears
-     the bar's edge by the margin at least. The pages are cut above the
-     strip whatever stands in it, and stay cut as a bar comes and goes
-     (Michał's smoke, 2026-09-17: the bar must not change the text's
-     layout). Counted from the foot's token, so the strip and the bars
-     cannot part. The first cut reserved 4.5rem, a line more than the bars
-     needed (Michał's question about a phone's screen); the second cut the
-     strip to the bar less the margin and let the bar cover the margin, and
-     the last line then stood on the bar's edge every few pages (the same
-     smoke). The count keeps to the strip's foot. */
-  min-height: var(--foot-h);
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
+  height: env(safe-area-inset-bottom, 0px);
+  overflow: hidden;
   margin: 0;
-  padding: 0.2rem 0.6rem calc(0.2rem + env(safe-area-inset-bottom, 0px));
+  padding: 0;
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   font-size: 0.8rem;
-  line-height: 1.4;
+  line-height: 1.25;
+  text-align: center;
   color: var(--page-muted);
   background: var(--page-bg);
   pointer-events: none;
+}
+
+/* The count shown at the foot (the setting): one compact line in the
+   interface face, a breath of air above and below, no touch floor - it is
+   not a control - so the strip costs the page as little as a line can.
+   The floor is the line's own height with the air, so the strip stands as
+   tall before the count is written as after, and the band measured on
+   the first cut is the band of every cut. */
+:root[data-reader-page-number="true"] .page-footer {
+  height: auto;
+  min-height: calc(1.4rem + env(safe-area-inset-bottom, 0px));
+  padding: 0.2rem 0.6rem calc(0.2rem + env(safe-area-inset-bottom, 0px));
+}
+
+/* The count's second home (D238): beside the brand in the bar, in the
+   muted voice, while the foot keeps none - so unfolding the bar is the
+   natural "where am I", at no cost in height for the rest of the reading.
+   Only where the bar has room: under the phone's width the bar wears its
+   tight dress, and the count leaves with the tools' air there (the bar's
+   one tight dress, page.css) - the full-screen tool already yields to the
+   row's width, and the count would only evict it. Filled and shown by
+   script with the curtain; a screen reader hears the live region, not this. */
+.page-count {
+  color: var(--page-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 /* Icon-only on a narrow screen means the icon IS the button: at 1.15em the

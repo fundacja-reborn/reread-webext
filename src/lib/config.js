@@ -82,6 +82,13 @@ export const CONFIG_KEY = "config";
  *   A name with a rule in the stylesheet and a table of page tops in
  *   `lib/reader/pages.js` under it. Independent of the theme on purpose:
  *   pages are wanted on light paper and on dark, and a theme is colours.
+ * @property {boolean} pageNumber Whether, read by pages, the page count
+ *   stands at the foot of the window (D238). Off by default: a line under
+ *   every page costs a line of text a page for the whole of a reading, and
+ *   the count is had otherwise - beside the brand in the bar on a wide
+ *   screen, and by a screen reader always. A setting rather than an Aa row
+ *   (D163): a thing set once, not a dial turned while reading, and the Aa
+ *   panel on a small e-ink panel already fills the screen.
  * @property {"active" | "plain"} links Whether links in the article text answer
  *   a press (D95). The words stay either way - they are part of the sentence -
  *   but the reader's main gesture is selecting a phrase to translate, and a
@@ -399,6 +406,7 @@ export const READER_DEFAULTS = Object.freeze({
   hyphens: "none",
   paragraphs: "spaced",
   layout: "scroll",
+  pageNumber: false,
   links: "plain",
   markerColor: DEFAULT_MARK_COLOR,
 });
@@ -523,6 +531,9 @@ function readerWithDefaults(stored) {
     hyphens: isHyphens(raw["hyphens"]) ? raw["hyphens"] : READER_DEFAULTS.hyphens,
     paragraphs: isParagraphs(raw["paragraphs"]) ? raw["paragraphs"] : READER_DEFAULTS.paragraphs,
     layout: isLayout(raw["layout"]) ? raw["layout"] : READER_DEFAULTS.layout,
+    // Only a stored `true` shows the count (D238): anything else, the field
+    // missing most of all, is the default's quiet foot.
+    pageNumber: raw["pageNumber"] === true,
     links: isLinks(raw["links"]) ? raw["links"] : READER_DEFAULTS.links,
     markerColor: isMarkColor(raw["markerColor"]) ? raw["markerColor"] : READER_DEFAULTS.markerColor,
   };

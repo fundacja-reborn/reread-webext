@@ -325,6 +325,12 @@ function renderReaderOnly() {
   if (toggle instanceof HTMLInputElement) toggle.checked = effectiveReaderOnly(config, os);
 }
 
+/** The page-count switch (D238) - stored plainly under the reader's settings. */
+function renderPageNumber() {
+  const toggle = document.getElementById("page-number");
+  if (toggle instanceof HTMLInputElement) toggle.checked = config.reader.pageNumber;
+}
+
 /** The quiet-bubble switch (D81) - stored plainly, no platform in the picture. */
 function renderQuietBubble() {
   const toggle = document.getElementById("quiet-bubble");
@@ -2830,6 +2836,7 @@ async function render() {
   fill("version", webext().runtime.getManifest().version);
   linkSources(webext().runtime.getManifest().version);
   renderReaderOnly();
+  renderPageNumber();
   renderQuietBubble();
   renderBubbleMore();
   renderUnderlineForms();
@@ -2897,6 +2904,7 @@ async function render() {
 async function refresh() {
   config = await readConfig();
   renderReaderOnly();
+  renderPageNumber();
   renderQuietBubble();
   renderBubbleMore();
   renderUnderlineForms();
@@ -2942,6 +2950,15 @@ document.getElementById("reader-only")?.addEventListener("change", (event) => {
   // Open pages notice through `storage.onChanged` and change modes on the
   // spot - the launcher appears or the reading side starts, with no reload.
   void writeConfig({ readerOnly: toggle.checked }).then((written) => {
+    config = written;
+  });
+});
+document.getElementById("page-number")?.addEventListener("change", (event) => {
+  const toggle = event.target;
+  if (!(toggle instanceof HTMLInputElement)) return;
+  // The same road (D238): a reader open by pages hears it through storage,
+  // gives the foot its line or takes it back, and keeps the page it is on.
+  void writeConfig({ reader: { pageNumber: toggle.checked } }).then((written) => {
     config = written;
   });
 });

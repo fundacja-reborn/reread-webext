@@ -1453,6 +1453,10 @@
   "options_reader_only_hint": {
     "message": "Limita el subrayado de las frases guardadas y la burbuja de traducción a la vista de lectura. Seleccionar texto en una página web normal solo mostrará la opción de abrirla en la vista de lectura. Con la opción activada, ninguna página web puede saber cuáles de sus palabras has guardado. En Android e iOS la opción está activada de forma predeterminada."
   },
+  "options_page_number": { "message": "Número de página en la vista Páginas" },
+  "options_page_number_hint": {
+    "message": "Muestra el contador de páginas en la parte inferior de la ventana cuando la vista de lectura está en Páginas. Desactivado, la última línea de cada página queda más abajo; los lectores de pantalla siguen leyendo el contador, y en una pantalla ancha aparece en la barra junto a re/read."
+  },
   "options_keep_articles": { "message": "Guardar de forma predeterminada en la lista de lectura sin conexión" },
   "options_keep_articles_hint": {
     "message": "Guarda automáticamente cada página abierta en la vista de lectura para leerla sin conexión. Tus páginas guardadas, resaltados y progreso de lectura se conservan aunque el sitio web original cambie o desaparezca."
