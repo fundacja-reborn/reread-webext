@@ -462,6 +462,8 @@
       "pages": { "content": "$2", "example": "48" }
     }
   },
+  "reader_page_prev": { "message": "Vorherige Seite" },
+  "reader_page_next": { "message": "Nächste Seite" },
   "reader_marker": { "message": "Textmarker" },
   "reader_underline": { "message": "Unterstreichung" },
   "underline_fine": { "message": "Fein" },

@@ -643,6 +643,14 @@
       "pages": { "content": "$2", "example": "48" }
     }
   },
+  "reader_page_prev": {
+    "message": "Previous page",
+    "description": "The highlighter's toolbar in the paged layout: the page before this one. With the highlighter in hand a tap on the text is the highlighter's, so the toolbar carries the two turns."
+  },
+  "reader_page_next": {
+    "message": "Next page",
+    "description": "The highlighter's toolbar in the paged layout: the page after this one - where the lines a bar at the foot covers now stand."
+  },
   "reader_marker": { "message": "Highlighter" },
   "reader_underline": { "message": "Underline" },
   "underline_fine": {

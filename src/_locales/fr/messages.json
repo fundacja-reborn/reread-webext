@@ -493,6 +493,8 @@
       "pages": { "content": "$2", "example": "48" }
     }
   },
+  "reader_page_prev": { "message": "Page précédente" },
+  "reader_page_next": { "message": "Page suivante" },
   "reader_marker": { "message": "Surligneur" },
   "reader_underline": { "message": "Soulignement" },
   "underline_fine": { "message": "Fin" },

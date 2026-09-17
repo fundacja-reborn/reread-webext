@@ -543,6 +543,9 @@ const markNoteButton = document.getElementById("mark-note");
 const markDeleteButton = document.getElementById("mark-delete");
 const markPinStart = document.getElementById("mark-pin-start");
 const markPinEnd = document.getElementById("mark-pin-end");
+// The two turns in that toolbar (D242), offered in the paged layout alone.
+const markTurnPrev = document.getElementById("mark-turn-prev");
+const markTurnNext = document.getElementById("mark-turn-next");
 
 // The note dialog and the badges of the noted marks (D118).
 const markNoteBadges = document.getElementById("mark-note-badges");
@@ -3187,10 +3190,16 @@ function wearDraftInk(color) {
  * The toolbar dressed for its state (D107): with a mark active the swatches
  * wear its ink and the copy and the bin stand ready; with none they speak
  * for the pen - the same setting the Aa panel writes - and the two acts
- * step away, having nothing to act on.
+ * step away, having nothing to act on. The two page turns (D242) follow the
+ * layout instead of the mark: they are the only way to turn a page with the
+ * pen in the hand, and the scrolling layout needs none - a drag that never
+ * held still scrolls the article there as it always did.
  */
 function refreshMarkBar() {
   if (markBar === null) return;
+  const turning = paged();
+  if (markTurnPrev !== null) markTurnPrev.hidden = !turning;
+  if (markTurnNext !== null) markTurnNext.hidden = !turning;
   const ink = activeMark === null ? settings.reader.markerColor : activeMark.color;
   for (const button of markBar.querySelectorAll("button[data-mark-ink]")) {
     button.setAttribute("aria-pressed", String(ink === button.getAttribute("data-mark-ink")));
@@ -3610,6 +3619,14 @@ noteText?.addEventListener("keydown", (event) => {
 // The box follows the words as they are typed - growth per line, never a
 // scrollbar before the dialog's cap says so.
 noteText?.addEventListener("input", () => sizeNoteBox());
+
+// The two page turns of the pen's toolbar (D242). The pen stays in the
+// hand and the active mark stays active - a press inside this bar is not a
+// press away (the rule below) - so a mark whose tail moved onto the next
+// page when the bar stood up is reached by turning to it, marked, reshaped
+// or deleted there, as it would be anywhere else on the page.
+markTurnPrev?.addEventListener("click", () => turnPage("up"));
+markTurnNext?.addEventListener("click", () => turnPage("down"));
 
 markBar?.addEventListener("click", (event) => {
   const target = event.target;

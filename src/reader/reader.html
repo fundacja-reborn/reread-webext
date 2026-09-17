@@ -1610,6 +1610,38 @@
       aria-label="Highlighter"
       data-i18n-aria-label="reader_marker"
     >
+      <!--
+        The page turned with the pen in the hand (D242), in the paged
+        layout alone. There a bar at the foot shortens the page and its
+        last lines are given to the page after it (D238) - and with the pen
+        up nothing else in the window turns a page: every tap on the text
+        is the marker's (D107) and every drag is a stroke. So a mark on
+        those lines could not be reached at all: picking the pen up moved
+        them on, and every way of following them put the pen down first
+        (Michał's smoke on the Boox, 2026-09-17). Icons without words, like
+        the swatches beside them: the name is the button's title.
+      -->
+      <button
+        type="button"
+        id="mark-turn-prev"
+        class="mark-turn"
+        hidden
+        title="Previous page"
+        data-i18n-title="reader_page_prev"
+        aria-label="Previous page"
+        data-i18n-aria-label="reader_page_prev"
+      >
+        <svg class="reader-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <path
+            d="M10.1 3.8 5.9 8l4.2 4.2"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.3"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </button>
       <button type="button" id="mark-copy" hidden>
         <svg class="reader-icon icon-copy" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
           <rect
@@ -1719,6 +1751,27 @@
           />
         </svg>
         <span class="speech-label" data-i18n="action_delete">Delete</span>
+      </button>
+      <button
+        type="button"
+        id="mark-turn-next"
+        class="mark-turn"
+        hidden
+        title="Next page"
+        data-i18n-title="reader_page_next"
+        aria-label="Next page"
+        data-i18n-aria-label="reader_page_next"
+      >
+        <svg class="reader-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <path
+            d="M5.9 3.8 10.1 8l-4.2 4.2"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.3"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
       </button>
     </div>
 
