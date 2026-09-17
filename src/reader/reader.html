@@ -500,11 +500,17 @@
         put; it hides on the list view - a hallway does not list the room it
         stands in.
       -->
-      <!-- The rows run from the nearest to the farthest (D117, order revised
-           by Michał 2026-08-18): inside the open text (its map, its quotes),
-           then this extension's own rooms (the phrases the reading feeds,
-           the list), the one door out of it, and the settings last - the
-           door every menu keeps at the bottom. -->
+      <!-- The rows run from the nearest to the farthest (D117, D235): first
+           what acts inside the open text (its map, its search, its quotes),
+           then what acts on the document as a whole (its pictures, the two
+           files it can be written out as), then the window (full screen),
+           then the doors - this extension's own rooms (the phrases the
+           reading feeds, the list) and the one door out of it - and the
+           settings last, the door every menu keeps at the bottom. The rows
+           that came later (search, pictures, the exports, full screen) had
+           been slotted by their decision's date and left the two doors in
+           the middle of the list (Michał, 2026-09-17: "the offline reading
+           list and Open the original should be almost at the end"). -->
       <nav id="menu-panel" class="nav-menu" hidden aria-label="Menu" data-i18n-aria-label="nav_menu">
         <!-- The document's table of contents (D116/D117): the same dialog the
              book pagers open, reachable here without scrolling to a pager -
@@ -521,16 +527,13 @@
              document's own quotes; over the list, everybody's. Like the
              list row it hides in the room it names. -->
         <button id="nav-marks" type="button" data-i18n="reader_marks_title">Highlights</button>
-        <button id="nav-vocabulary" type="button" data-i18n="saved_phrases">Saved phrases</button>
-        <button id="nav-library" type="button" data-i18n="reading_list" hidden>Offline reading list</button>
-        <a id="original" data-i18n="reader_open_original" hidden>Open the original</a>
         <!-- The article's pictures (D145): the one row that reaches the
-             network, beside the other door to the article's servers. Over a
-             saved article whose text refers to pictures it offers to fetch
-             them; while it fetches it is the progress and the stop; with
-             pictures kept it removes them. The line under it says where the
-             pictures come from before the press, and how the press went
-             after. Filled by script; hidden over everything else. -->
+             network. Over a saved article whose text refers to pictures it
+             offers to fetch them; while it fetches it is the progress and
+             the stop; with pictures kept it removes them. The line under it
+             says where the pictures come from before the press, and how the
+             press went after. Filled by script; hidden over everything
+             else. -->
         <button id="nav-pictures" type="button" class="nav-row-hinted" hidden>
           <span id="nav-pictures-label">Download pictures</span>
           <span id="nav-pictures-hint" class="nav-hint" data-i18n="reader_pictures_hint">
@@ -568,12 +571,19 @@
              stylesheet shows the one that says what a press would do
              (`:fullscreen` on the root, the speech bar's play-and-pause
              manner); hidden where the browser has no full screen to give.
-             Next to the settings, not among the rooms: it is about the
-             window, not about what is read in it. -->
+             After the document's rows and before the doors: it is about
+             the window, not about what is read in it, and not a way out. -->
         <button id="nav-fullscreen" type="button" hidden>
           <span class="fullscreen-enter" data-i18n="reader_fullscreen">Full screen</span>
           <span class="fullscreen-exit" data-i18n="reader_fullscreen_exit">Exit full screen</span>
         </button>
+        <!-- The doors (D117, D235): the extension's own rooms first - the
+             phrases the reading feeds, the list this document came from -
+             and the one door out of the extension after them, the last row
+             before the settings. Each hides in the room it names. -->
+        <button id="nav-vocabulary" type="button" data-i18n="saved_phrases">Saved phrases</button>
+        <button id="nav-library" type="button" data-i18n="reading_list" hidden>Offline reading list</button>
+        <a id="original" data-i18n="reader_open_original" hidden>Open the original</a>
         <button id="nav-settings" type="button" data-i18n="settings">Settings</button>
       </nav>
 
