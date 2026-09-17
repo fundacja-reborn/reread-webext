@@ -648,6 +648,7 @@ html {
 }
 
 .reader-byline,
+.reader-source,
 .reader-facts,
 .reader-pictures {
   margin: 0 0 2rem;
@@ -656,11 +657,67 @@ html {
 }
 
 /* The byline and the facts line (D226) read as two lines of one block when
-   both stand: the gap to the text belongs under the last of them. The
-   pictures line (D231) joins the block the same way. */
-.reader-byline:has(+ .reader-facts:not([hidden])),
-.reader-facts:has(+ .reader-pictures:not([hidden])) {
+   both stand: the gap to the text belongs under the last of them. The site
+   (D232) and the pictures line (D231) join the block the same way: each
+   line closes up to whichever line of the block stands after it, the hidden
+   ones between taking no room, so the block reads as one whatever lines a
+   document has to say. */
+.reader-byline:has(~ :is(.reader-source, .reader-facts, .reader-pictures):not([hidden])),
+.reader-source:has(~ :is(.reader-facts, .reader-pictures):not([hidden])),
+.reader-facts:has(~ .reader-pictures:not([hidden])) {
   margin-bottom: 0.35rem;
+}
+
+/* The site under the title (D232) is the header's one link. Laid out as a
+   flex row like the pictures line, so the link is a box of its own with the
+   pictures press's measures - the same 44px target, the negative block
+   margin that keeps the line the height of its text, the negative start
+   margin that puts the name on the column's edge. A flex row is a display
+   of its own, so the hidden attribute is said again here. */
+.reader-source {
+  display: flex;
+}
+
+.reader-source[hidden] {
+  display: none;
+}
+
+/* The link in the pictures press's dress: the page's own text color against
+   the block's muted lines, the underline on the name to say it acts, the
+   frame the acts over the article wear under the pointer or the keyboard.
+   The name and the arrow leaving a frame (the orphan quotes' door, D150)
+   stand one gap apart, centred on each other. The underline is the name's,
+   not the link's: a decoration set on the flex box would have to propagate
+   into its items, and this way it does not depend on that. */
+.reader-source a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  min-width: 0;
+  min-height: 44px;
+  margin-block: -0.6rem;
+  margin-inline-start: -0.6rem;
+  padding: 0.35rem 0.6rem;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--page-fg);
+  text-decoration: none;
+  transition: border-color 120ms ease, background-color 120ms ease;
+}
+
+.reader-source a:hover,
+.reader-source a:focus-visible {
+  border-color: var(--page-border);
+  background: color-mix(in srgb, var(--page-fg) 6%, transparent);
+}
+
+/* A long site name breaks rather than pushing the line past the column on
+   a phone (viewport of about 330 CSS px on the Pixel). */
+#source-site {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
 }
 
 /* The pictures line (D231) lays its three parts - the sentence, the dot,
