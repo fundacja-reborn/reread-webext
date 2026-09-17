@@ -7653,9 +7653,10 @@ function rootReadingSide(ground) {
     // block order to write against), what a finished stroke becomes, and what
     // a tap means while the pen is up. The delete bubble is ours the way the
     // translation bubble is - presses on it must not read as the page's. So
-    // are the pictures line under the header (D231) and the site's link over
-    // it (D232): a hold on the press is a press held, and a hold on the link
-    // is the browser's own gesture on a link - neither a word to select.
+    // are the pictures line under the header (D231) and the site line over
+    // it (D232): a hold on the press is a press held, a hold on the arrow is
+    // the browser's own gesture on a link, and the site's name is no word
+    // to look up - none of them a word to select.
     alsoOwns: (target) =>
       target instanceof Node &&
       (markBar?.contains(target) === true ||

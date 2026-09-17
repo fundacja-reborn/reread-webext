@@ -75,14 +75,17 @@ describe("the site under the title (D232) - the page", () => {
     const facts = html.indexOf('<p id="facts" class="reader-facts" hidden></p>');
     assert.ok(byline !== -1 && facts !== -1, "the byline or the facts line is not where it was");
     assert.ok(line > byline && line < facts, "the site does not stand between the byline and the facts line");
+    // The name stands outside the link, as text (Michał's smoke, 2026-09-17:
+    // the name as a link read as an invitation back to the page); the link
+    // is the arrow alone, and so carries its name for the screen reader.
     assert.match(
       html,
-      /<a id="source-link" title="Open the original" data-i18n-title="reader_open_original">\s*<span id="source-site"><\/span>\s*<svg class="reader-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">/,
-      "the link, its name and its arrow are not as drawn",
+      /<span id="source-site"><\/span>\s*<a\s+id="source-link"\s+title="Open the original"\s+data-i18n-title="reader_open_original"\s+aria-label="Open the original"\s+data-i18n-aria-label="reader_open_original"\s*>\s*<svg class="reader-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">/,
+      "the name, the link and its arrow are not as drawn",
     );
     // The markup carries no address: the script fills one in over a web
     // address only, and the name is text, never markup.
-    assert.doesNotMatch(html, /<a id="source-link"[^>]*\shref=/, "the link has an address of its own");
+    assert.doesNotMatch(html, /<a\s+id="source-link"[^>]*\shref=/, "the link has an address of its own");
   });
 
   it("is dressed like the byline, and the block closes up around it", async () => {
@@ -92,6 +95,8 @@ describe("the site under the title (D232) - the page", () => {
     assert.match(css, /\.reader-source:has\(~ :is\(\.reader-facts, \.reader-pictures\):not\(\[hidden\]\)\)/);
     assert.match(css, /\.reader-source\[hidden\]\s*\{\s*display: none;/, "a flex row that does not hide");
     assert.match(css, /\.reader-source a \{[^}]*min-height: 44px;/, "the link has no touch target");
+    assert.match(css, /\.reader-source a \{[^}]*text-decoration: none;/, "the arrow is underlined");
+    assert.doesNotMatch(css, /#source-site \{[^}]*text-decoration/, "the name is dressed as a link");
   });
 
   it("is filled by the rule the menu's row goes by, opens the page in a new tab, and is the reader's to press", async () => {

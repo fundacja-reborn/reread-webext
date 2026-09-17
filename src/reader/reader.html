@@ -1320,17 +1320,26 @@
         <p id="byline" class="reader-byline" hidden></p>
         <!--
           Where the text came from (D232): its site, said under the title the
-          way the list row says it before the length - and the one door to
-          the original page that a reader who never opens the menu meets. The
-          site's name is a link to the page, in a new tab, wearing the arrow
-          leaving a frame that the orphan quotes' door wears (D150). A book
-          came from no address and a `file:` page has no site to name, so the
-          line stands only over a web address. Filled by script, never by
-          markup; the title is the menu row's own words.
+          way the list row says it before the length - and, beside the name,
+          the one door to the original page that a reader who never opens the
+          menu meets. The name is text, in the block's muted dress: the line
+          is there to say where the text is from, not to send anyone back
+          (Michał's smoke, 2026-09-17). The link is the arrow leaving a frame
+          after it - the orphan quotes' door (D150) - opening the page in a
+          new tab, named for the screen reader with the menu row's own words.
+          A book came from no address and a `file:` page has no site to name,
+          so the line stands only over a web address. Filled by script, never
+          by markup.
         -->
         <p id="source" class="reader-source" hidden>
-          <a id="source-link" title="Open the original" data-i18n-title="reader_open_original">
-            <span id="source-site"></span>
+          <span id="source-site"></span>
+          <a
+            id="source-link"
+            title="Open the original"
+            data-i18n-title="reader_open_original"
+            aria-label="Open the original"
+            data-i18n-aria-label="reader_open_original"
+          >
             <svg class="reader-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
               <path
                 d="M9.4 2.9h3.7v3.7M13.1 2.9 7.8 8.2"
