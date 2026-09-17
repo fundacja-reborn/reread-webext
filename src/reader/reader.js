@@ -8117,17 +8117,7 @@ window.addEventListener("popstate", (event) => {
   roomLeavingTo = null;
   if (roomShown !== null) {
     closeRoom();
-    if (leavingFor === "library") {
-      leaveToList();
-      return;
-    }
-    if (leavingFor === "marks") {
-      hideNotice();
-      const scope = shown === null ? null : shown.url;
-      history.pushState(marksState(scope), "");
-      void showMarks(scope, { fresh: true });
-      return;
-    }
+    if (afterRoom(leavingFor)) return;
     if (!unwindToList) return;
   }
   const doc = asDocState(event.state);
@@ -8395,8 +8385,40 @@ function dressRoomRest(away) {
  * yet there is nothing to step over, and the sheet is simply taken away.
  */
 function leaveRoom() {
-  if (roomEntry) history.back();
-  else closeRoom();
+  if (roomEntry) {
+    history.back();
+    return;
+  }
+  // No entry to step over - a frame that has not reported yet. The room is
+  // taken away here, and whatever it was left for happens right away rather
+  // than waiting for a step that will never come.
+  const leavingFor = roomLeavingTo;
+  roomLeavingTo = null;
+  closeRoom();
+  afterRoom(leavingFor);
+}
+
+/**
+ * What a room was left FOR, done once it is gone: nothing at all for the
+ * plain way out, because the view underneath never left - and otherwise the
+ * row its menu pressed, answered in the reader's own grammar (D108, D243).
+ *
+ * @param {"library" | "marks" | null} leavingFor
+ * @returns {boolean} whether the leaving was answered here
+ */
+function afterRoom(leavingFor) {
+  if (leavingFor === "library") {
+    leaveToList();
+    return true;
+  }
+  if (leavingFor === "marks") {
+    hideNotice();
+    const scope = shown === null ? null : shown.url;
+    history.pushState(marksState(scope), "");
+    void showMarks(scope, { fresh: true });
+    return true;
+  }
+  return false;
 }
 
 /**

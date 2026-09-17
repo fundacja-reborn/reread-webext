@@ -131,12 +131,17 @@ describe("the room over the reading (D243)", () => {
 
   it("makes the step back the way out, for the arrow and the system's gesture alike", async () => {
     const reader = await source("reader/reader.js");
-    assert.match(bodyOf(reader, "leaveRoom"), /if \(roomEntry\) history\.back\(\);\s*else closeRoom\(\);/, "the arrow closes the room past the history it wrote");
+    assert.match(bodyOf(reader, "leaveRoom"), /if \(roomEntry\) \{\s*history\.back\(\);\s*return;\s*\}/, "the arrow closes the room past the history it wrote");
+    // A frame that has not reported yet wrote no entry, so there is no step
+    // to wait for: the room goes here, and so does what it was left for.
+    assert.match(bodyOf(reader, "leaveRoom"), /closeRoom\(\);\s*afterRoom\(leavingFor\);/, "a room left before its entry exists forgets what it was left for");
     const at = reader.indexOf('window.addEventListener("popstate"');
     const listener = reader.slice(at, reader.indexOf("\n});", at));
     assert.match(listener, /const room = asRoomState\(event\.state\);\s*if \(room !== null\) \{\s*openRoom\(room\.kind, room\.section, true\);/, "a step forward into a room's entry does not open it");
     assert.match(listener, /if \(roomShown !== null\) \{\s*closeRoom\(\);/, "a step out of a room leaves it standing");
-    assert.match(listener, /if \(leavingFor === "library"\) \{\s*leaveToList\(\);/, "a room's reading-list row does not land on the list");
+    assert.match(listener, /if \(afterRoom\(leavingFor\)\) return;/, "a step out of a room forgets what it was left for");
+    assert.match(bodyOf(reader, "afterRoom"), /if \(leavingFor === "library"\) \{\s*leaveToList\(\);/, "a room's reading-list row does not land on the list");
+    assert.match(bodyOf(reader, "afterRoom"), /history\.pushState\(marksState\(scope\), ""\);\s*void showMarks\(scope, \{ fresh: true \}\);/, "a room's highlights row does not open the highlights");
     assert.match(listener, /if \(!unwindToList\) return;/, "a step out of a room falls through to the views it never left");
     // A reload standing on a room's entry opens the room again.
     assert.match(reader, /const roomStanding = asRoomState\(history\.state\);\s*if \(roomStanding !== null\) openRoom\(roomStanding\.kind, roomStanding\.section, true\);/, "a reload swallows the visit");
