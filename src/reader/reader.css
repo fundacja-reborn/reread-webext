@@ -548,7 +548,14 @@ html {
 .reader-chrome > .nav-menu {
   position: absolute;
   top: 100%;
-  inset-inline: 0;
+  /* Edge to edge, like the box's own paper over an article, with the rows
+     aligned to the column: the sheet reaches out by the column's margin and
+     its padding gives the margin back (the first cut hung the sheet at the
+     column's width, and the rows stood against its edges - Michał's smoke,
+     2026-09-17). The halves of the calc overshoot by half a scrollbar; the
+     root clips sideways for as long as the scrim stands (page.css). */
+  inset-inline: calc(50% - 50vw);
+  padding-inline: calc(50vw - 50%);
   z-index: 1;
   background: var(--page-bg);
 }
@@ -2838,6 +2845,19 @@ body.reader:has(#mark-bar:not([hidden])) {
   background: var(--page-bg);
 }
 
+/* The head's curtain: the same paper from the window's top down to where
+   the page's first line stands (its height set by script) - the page's top
+   margin, and the strip under the bar's tab, which the tail of the page
+   before would otherwise run on through. Under the chrome and its tab
+   (z-index 2), above the text like the curtain. */
+.page-head {
+  position: fixed;
+  inset-inline: 0;
+  top: 0;
+  z-index: 1;
+  background: var(--page-bg);
+}
+
 /* The page count, one quiet line at the window's foot in the interface
    face, on the page's paper; the readable band ends above it (reader.js
    measures it like the bars). Pinned the way the speech bar is - `100dvh`
@@ -2850,20 +2870,26 @@ body.reader:has(#mark-bar:not([hidden])) {
   top: 100dvh;
   transform: translateY(-100%);
   z-index: 1;
+  box-sizing: border-box;
+  /* The strip is as tall as the bars that stand at the foot - the voice's,
+     the pen's (the room the scroll layout gives them under the last line,
+     4.5rem) - so a bar standing up covers the strip and the count, and
+     never a line: the pages are cut above the strip whatever stands in it,
+     and stay cut as a bar comes and goes (Michał's smoke, 2026-09-17: the
+     bar must not change the text's layout). The count keeps to the strip's
+     foot. */
+  min-height: 4.5rem;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
   margin: 0;
   padding: 0.2rem 0.6rem calc(0.2rem + env(safe-area-inset-bottom, 0px));
-  text-align: center;
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   font-size: 0.8rem;
   line-height: 1.4;
   color: var(--page-muted);
   background: var(--page-bg);
   pointer-events: none;
-}
-
-body.reader:has(#speech-bar:not([hidden])) .page-footer,
-body.reader:has(#mark-bar:not([hidden])) .page-footer {
-  display: none;
 }
 
 /* Icon-only on a narrow screen means the icon IS the button: at 1.15em the

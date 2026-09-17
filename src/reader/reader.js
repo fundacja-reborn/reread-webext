@@ -354,6 +354,7 @@ const speechBar = document.getElementById("speech-bar");
 // The paged layout's two pieces of chrome (D233): the paper over the cut
 // line at the foot of a page, and the page count under it.
 const pageCurtain = document.getElementById("page-curtain");
+const pageHead = document.getElementById("page-head");
 const pageFooter = document.getElementById("page-footer");
 const speechPlayButton = document.getElementById("speech-play");
 const speechPlayLabel = document.getElementById("speech-play-label");
@@ -1598,9 +1599,12 @@ function restorePosition(position, segmentIndex = 0) {
  *
  * @param {number} [fold] the chrome's reach to measure under - the whole
  *   chrome with any open sheet by default; the bar alone for the pages
+ * @param {boolean} [bars] whether a bar standing at the foot ends the band -
+ *   yes for the scroll layout's turns and the voice; no for the pages, whose
+ *   footer's strip is the bars' height and holds them (D233)
  * @returns {{ top: number, bottom: number }}
  */
-function readableBand(fold = chromeFold()) {
+function readableBand(fold = chromeFold(), bars = true) {
   const view = window.visualViewport;
   const seen =
     view === null
@@ -1610,8 +1614,8 @@ function readableBand(fold = chromeFold()) {
   let bottom = seen.bottom;
   // The page count's footer (D233) stands at the foot like the bars, and is
   // measured like them - and like them measures as nothing while it is not
-  // laid out, which is also how it stands down under a bar.
-  for (const bar of [speechBar, markBar, pageFooter]) {
+  // laid out.
+  for (const bar of bars ? [speechBar, markBar, pageFooter] : [pageFooter]) {
     if (bar === null || bar.hidden) continue;
     const edge = bar.getBoundingClientRect().top;
     // A bar measured at nothing is a bar that is not laid out; taking that
@@ -1795,12 +1799,16 @@ function pageAir() {
  * Aa panel and the menu hang over the text and leave the pages as they
  * are. Its top is also the first page's top in the flow: the chrome stands
  * at the document's head, stuck, so its edge in the window is its edge in
- * the flow before anything has scrolled.
+ * the flow before anything has scrolled. Above the footer's strip, and
+ * never above a bar: the strip is the bars' height and a bar standing up
+ * covers it, so the pages stay cut as it comes and goes (the same smoke:
+ * "the toolbar must not change the text's layout"). `floor` is the strip's
+ * edge - where the curtain has nothing left to cover.
  *
- * @returns {{ top: number, bottom: number }}
+ * @returns {{ top: number, bottom: number, floor: number }}
  */
 function pageBand() {
-  const band = readableBand(barFold());
+  const band = readableBand(barFold(), false);
   const air = pageAir();
   let top = band.top;
   if (chromeTab !== null && !chromeTab.hidden) {
@@ -1808,7 +1816,7 @@ function pageBand() {
     if (edge > top) top = edge;
   }
   top += air;
-  return { top, bottom: Math.max(top, band.bottom - air) };
+  return { top, bottom: Math.max(top, band.bottom - air), floor: band.bottom };
 }
 
 /**
@@ -2074,23 +2082,30 @@ function settlePage() {
  * gone when the document is not read by pages.
  */
 function refreshCurtain() {
-  if (pageCurtain === null || pageFooter === null) return;
+  if (pageCurtain === null || pageHead === null || pageFooter === null) return;
   const reading = paged();
   // The footer stands before the band is measured: the band ends above it.
   pageFooter.hidden = !reading;
   const pages = pagesNow();
   if (pages === null) {
     pageCurtain.hidden = true;
+    pageHead.hidden = true;
     return;
   }
   const band = pageBand();
+  // The head's curtain: from the window's top down to the first line's
+  // stand, over the margin and the strip under the tab, where the page
+  // before would otherwise show its tail. Drawn whatever the window's
+  // position - a page shown off its top shows text there too.
+  pageHead.hidden = false;
+  pageHead.style.height = `${band.top}px`;
   const page = pageAt(pages.tops, window.scrollY + band.top);
   const top = pages.tops[page] ?? 0;
   // The curtain runs down to the window's foot, under the footer or a bar;
-  // what decides whether there is anything to cover is the footer's edge,
+  // what decides whether there is anything to cover is the strip's edge,
   // not the page's bottom margin above it.
   const cover = onPage(window.scrollY, top, band.top)
-    ? curtainTop(pages.tops, page, window.scrollY, readableBand().bottom)
+    ? curtainTop(pages.tops, page, window.scrollY, band.floor)
     : null;
   pageCurtain.hidden = cover === null;
   if (cover !== null) pageCurtain.style.top = `${cover}px`;

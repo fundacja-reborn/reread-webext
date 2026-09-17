@@ -179,10 +179,16 @@ describe("the bar stuck to the top of every page", () => {
     // bottom of the article view, and the two never meet - and the paged
     // layout's curtain and page count (D233) are fixed there too, over an
     // article read by pages, never over a list.
-    assert.equal((styles.match(/position: (?:sticky|fixed)/g) ?? []).length, 3, "a strip of chrome beyond the speech bar, the curtain and the page count is stuck or fixed on the reader page");
+    assert.equal((styles.match(/position: (?:sticky|fixed)/g) ?? []).length, 4, "a strip of chrome beyond the speech bar, the two curtains and the page count is stuck or fixed on the reader page");
     assert.match(ruleOf(styles, ".page-curtain"), /position: fixed;/, "the curtain is not fixed to the window");
-    assert.match(ruleOf(styles, ".page-footer"), /position: fixed;/, "the page count is not fixed to the window");
-    assert.match(styles, /body\.reader:has\(#speech-bar:not\(\[hidden\]\)\) \.page-footer,\s*body\.reader:has\(#mark-bar:not\(\[hidden\]\)\) \.page-footer \{\s*display: none;/, "the page count stands under a bar at the foot");
+    assert.match(ruleOf(styles, ".page-head"), /position: fixed;\s*inset-inline: 0;\s*top: 0;/, "the head's curtain is not fixed to the window's top");
+    const footer = ruleOf(styles, ".page-footer");
+    assert.match(footer, /position: fixed;/, "the page count is not fixed to the window");
+    // The strip is the bars' height, so a bar standing up covers the strip
+    // and never a line - the scroll layout's own room under the last line.
+    assert.match(footer, /min-height: 4\.5rem;/, "the footer's strip is not the bars' height");
+    assert.match(ruleOf(styles, "body.reader:has(#speech-bar:not([hidden])),\nbody.reader:has(#mark-bar:not([hidden]))"), /padding-bottom: 4\.5rem;/, "the scroll layout's room under a bar is not the strip's height");
+    assert.doesNotMatch(styles, /\.page-footer \{\s*display: none;/, "the page count leaves under a bar, and the band with it");
   });
 
   it("hangs the reader's panels under the bar as sheets over the text, and offers each Aa row once", async () => {
