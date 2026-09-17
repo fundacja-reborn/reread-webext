@@ -1787,8 +1787,17 @@ const pageMain = document.getElementById("page");
  * @returns {number}
  */
 function pageAir() {
-  const rem = Number.parseFloat(getComputedStyle(document.documentElement).fontSize);
-  return Number.isFinite(rem) && rem > 0 ? rem * 0.75 : 12;
+  const root = getComputedStyle(document.documentElement);
+  const rem = Number.parseFloat(root.fontSize);
+  const unit = Number.isFinite(rem) && rem > 0 ? rem : 16;
+  // The stylesheet's own number (`--page-air`, reader.css), read rather
+  // than repeated: the footer's strip is cut from the same token, and two
+  // copies of one margin would part on the first edit.
+  const declared = /^\s*([\d.]+)\s*(rem|px)\s*$/.exec(root.getPropertyValue("--page-air"));
+  if (declared === null) return unit * 0.75;
+  const amount = Number.parseFloat(declared[1] ?? "");
+  if (!Number.isFinite(amount)) return unit * 0.75;
+  return declared[2] === "px" ? amount : amount * unit;
 }
 
 /**
