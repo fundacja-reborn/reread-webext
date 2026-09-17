@@ -631,6 +631,17 @@
   "reader_links": { "message": "Links" },
   "reader_links_plain": { "message": "Plain text" },
   "reader_links_active": { "message": "Active" },
+  "reader_layout": { "message": "Layout" },
+  "reader_layout_scroll": { "message": "Scroll" },
+  "reader_layout_paged": { "message": "Pages" },
+  "reader_page_of": {
+    "message": "Page $PAGE$ of $PAGES$",
+    "description": "The paged layout's footer, for a screen reader: the page on screen out of how many the text on screen holds at the current settings.",
+    "placeholders": {
+      "page": { "content": "$1", "example": "12" },
+      "pages": { "content": "$2", "example": "48" }
+    }
+  },
   "reader_marker": { "message": "Highlighter" },
   "reader_underline": { "message": "Underline" },
   "underline_fine": {

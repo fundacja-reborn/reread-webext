@@ -27,7 +27,7 @@ import {
   supported as highlightsSupported,
   unregister as unregisterHighlight,
 } from "../content/highlighter.js";
-import { dismiss, reportRead, rescan, start, stop as stopReadingSide } from "../content/reading.js";
+import { bubbleOpen, dismiss, reportRead, rescan, start, stop as stopReadingSide } from "../content/reading.js";
 import { applyReading } from "../lib/appearance.js";
 import { ReadLedger } from "../lib/counting.js";
 import { dresser } from "../lib/user-css.js";
@@ -47,6 +47,7 @@ import {
   isFont,
   isHyphens,
   isLineHeight,
+  isLayout,
   isLinks,
   isParagraphs,
   isTheme,
@@ -89,6 +90,16 @@ import {
   reshapePlan,
   withoutMark,
 } from "../lib/reader/marks.js";
+import {
+  curtain as curtainOver,
+  onPage,
+  pageAt,
+  pagePercent,
+  pageTops,
+  tapZone,
+  turnTarget,
+  wheelTurn,
+} from "../lib/reader/pages.js";
 import { foldSnap, pageStep, pageTurn } from "../lib/reader/paging.js";
 import {
   POSITION_SAVE_DELAY,
@@ -340,6 +351,10 @@ const underlineSetting = document.getElementById("underline-setting");
 const rateSetting = document.getElementById("rate-setting");
 const rateValue = document.getElementById("rate-value");
 const speechBar = document.getElementById("speech-bar");
+// The paged layout's two pieces of chrome (D233): the paper over the cut
+// line at the foot of a page, and the page count under it.
+const pageCurtain = document.getElementById("page-curtain");
+const pageFooter = document.getElementById("page-footer");
 const speechPlayButton = document.getElementById("speech-play");
 const speechPlayLabel = document.getElementById("speech-play-label");
 const library = document.getElementById("library");
@@ -1453,11 +1468,14 @@ function savePositionNow() {
   const at = topBlockIndex();
   if (at === null) return;
   const segment = target.origin === "book" ? target.segmentIndex : 0;
-  const percent = measuredPercent(
-    window.scrollY,
-    window.innerHeight,
-    document.documentElement.scrollHeight,
-  );
+  // Read by pages, "read" is the page on screen out of the part's pages
+  // (D233): the window's edge would count the screen of padding the
+  // layout keeps under the last line.
+  const pages = pagesNow();
+  const percent =
+    pages === null
+      ? measuredPercent(window.scrollY, window.innerHeight, document.documentElement.scrollHeight)
+      : pagePercent(pageShown(pages), pages.tops.length);
   const record = positionRecord(target.url, segment, at, Date.now(), percent);
   if (record !== null) void putPosition(record).catch(() => undefined);
 }
@@ -1517,7 +1535,12 @@ function restorePosition(position, segmentIndex = 0) {
   const root = contentRoot();
   if (root === null) return;
   const at = restoredIndex(position, segmentIndex, root.children.length);
-  if (at === null) return;
+  if (at === null) {
+    // The top - and, read by pages, the first page squared under the bar
+    // with its curtain drawn (D233).
+    settlePage();
+    return;
+  }
   const block = root.children[at];
   if (block === undefined) return;
   block.scrollIntoView({ behavior: "instant", block: "start" });
@@ -1528,14 +1551,18 @@ function restorePosition(position, segmentIndex = 0) {
   // the anchor cannot answer for: its top may be screens away from where
   // the reading stopped. The stored percent finds the place inside it.
   const rect = block.getBoundingClientRect();
+  const blockTop = rect.top + window.scrollY;
   const fine = fineScrollTop(
-    rect.top + window.scrollY,
+    blockTop,
     rect.height,
     window.innerHeight,
     position?.percent,
     document.documentElement.scrollHeight,
   );
   if (fine !== null) scrollTo(0, fine);
+  // Read by pages, the place is the page the block's first line stands on -
+  // or, inside a block taller than a page, the page the fine scroll reached.
+  landOnPageOf(fine !== null ? fine + chromeFold() : blockTop);
 }
 
 /**
@@ -1560,7 +1587,10 @@ function readableBand() {
       : { top: view.offsetTop, bottom: view.offsetTop + view.height };
 
   let bottom = seen.bottom;
-  for (const bar of [speechBar, markBar]) {
+  // The page count's footer (D233) stands at the foot like the bars, and is
+  // measured like them - and like them measures as nothing while it is not
+  // laid out, which is also how it stands down under a bar.
+  for (const bar of [speechBar, markBar, pageFooter]) {
     if (bar === null || bar.hidden) continue;
     const edge = bar.getBoundingClientRect().top;
     // A bar measured at nothing is a bar that is not laid out; taking that
@@ -1651,10 +1681,18 @@ function onPageKey(event) {
     editable: target?.isContentEditable ?? false,
     reading: readingState() !== "off",
     dialog: document.querySelector("dialog[open]") !== null,
+    paged: paged(),
   });
   if (turn === null) return;
 
   event.preventDefault();
+  // Read by pages (D233), a turn is a page of the table, not a screenful:
+  // the arithmetic below is the scroll layout's.
+  if (paged()) {
+    turnPage(turn);
+    return;
+  }
+  if (turn === "first" || turn === "last") return;
   const band = readableBand();
   const step = pageStep(band, readingLine());
   // Instantly, and nothing here says otherwise: a smooth scroll on an e-ink
@@ -1669,6 +1707,417 @@ function onPageKey(event) {
 }
 
 document.addEventListener("keydown", onPageKey);
+
+/**
+ * Reading by pages (D233): the document stays the window's scroller, and
+ * moves only by whole pages.
+ *
+ * A page is a stretch of the column that fits the readable band, cut so
+ * that it opens and closes on a whole line: the table of page tops is cut
+ * from the flow's blocks and, where a page's edge falls inside a block,
+ * from that block's own line boxes (`lib/reader/pages.js`, where the rule is
+ * tested). A turn is one `scrollTo` to a page's top under the stuck chrome
+ * plus the curtain drawn over whatever the window still shows below the
+ * page's last line - both in one task, so an e-ink panel sees one refresh,
+ * the same bargain D127 and D143 made. The finger and the wheel do not
+ * scroll the window (the stylesheet), a tap on the page's outer thirds
+ * turns it, and every scroll the reader makes for its own reasons - a
+ * position restored, a search hit, a heading, the spoken line - lands on
+ * the page its target stands on.
+ *
+ * The table is measured on the ask and kept while nothing that cuts pages
+ * has changed: the band's height (a panel opening, a bar standing up, the
+ * window resized), the document's height (a picture arriving, the type
+ * resized) and the document itself (`epoch`). What it measures is blocks
+ * first and lines only where a cut falls, so a book's part costs one or
+ * two line walks a page.
+ */
+
+/** Whether the document on screen is being read by pages right now. */
+function paged() {
+  return settings.reader.layout === "paged" && article !== null && !article.hidden;
+}
+
+/**
+ * @typedef {object} PageTable
+ * @property {number[]} tops where every page begins, document coordinates
+ * @property {number} height the band the pages were cut for
+ * @property {number} extent the document's scroll height they were cut from
+ * @property {number} epoch the document they were cut from
+ */
+
+/** @type {PageTable | null} */
+let pageTable = null;
+
+/**
+ * The blocks of the flow between the stuck chrome and the document's end,
+ * in order: everything on the body that stands in the flow - the part
+ * pager, the note over a book's language, the article's header pieces and
+ * the content's own blocks, the pager and the action row under the text -
+ * with the fixed and the stuck pieces left out, whose rects say nothing
+ * about the flow. Hidden rows measure as nothing and are dropped by the
+ * cutter.
+ *
+ * @returns {Element[]}
+ */
+function flowBlocks() {
+  /** @type {Element[]} */
+  const blocks = [];
+  for (const child of document.body.children) {
+    if (child === article) {
+      for (const piece of child.children) {
+        if (piece === contentElement) blocks.push(...piece.children);
+        else blocks.push(piece);
+      }
+      continue;
+    }
+    if (child.tagName === "DIALOG" || child.tagName === "TEMPLATE" || child.tagName === "SCRIPT") continue;
+    const position = getComputedStyle(child).position;
+    if (position === "fixed" || position === "sticky" || position === "absolute") continue;
+    blocks.push(child);
+  }
+  return blocks;
+}
+
+/**
+ * The line boxes of one block, document coordinates, sorted, one box per
+ * line: the rects of its text, and of the pictures set in its text, with
+ * the boxes of one line - a line runs through several rects wherever an
+ * inline element begins - merged into one. Asked only for a block a page's
+ * edge cuts.
+ *
+ * @param {Element} block
+ * @returns {import("../lib/reader/pages.js").Box[]}
+ */
+function lineBoxes(block) {
+  /** @type {import("../lib/reader/pages.js").Box[]} */
+  const boxes = [];
+  const scrolled = window.scrollY;
+  const range = document.createRange();
+  const walker = document.createTreeWalker(block, NodeFilter.SHOW_TEXT);
+  for (let node = walker.nextNode(); node !== null; node = walker.nextNode()) {
+    if (!(node instanceof Text) || node.data.trim().length === 0) continue;
+    range.selectNodeContents(node);
+    for (const rect of range.getClientRects()) {
+      if (rect.height > 0) boxes.push({ top: rect.top + scrolled, bottom: rect.bottom + scrolled });
+    }
+  }
+  for (const picture of block.querySelectorAll("img, svg, video, canvas")) {
+    const rect = picture.getBoundingClientRect();
+    if (rect.height > 0) boxes.push({ top: rect.top + scrolled, bottom: rect.bottom + scrolled });
+  }
+  boxes.sort((a, b) => a.top - b.top);
+  /** @type {import("../lib/reader/pages.js").Box[]} */
+  const lines = [];
+  for (const box of boxes) {
+    const last = lines[lines.length - 1];
+    // Overlapping in height is the same line: a rect beginning above the
+    // last line's foot belongs to it (an inline element's box, a taller
+    // glyph); one beginning at or under it is the next line.
+    if (last !== undefined && box.top < last.bottom - 1) {
+      last.top = Math.min(last.top, box.top);
+      last.bottom = Math.max(last.bottom, box.bottom);
+    } else {
+      lines.push({ top: box.top, bottom: box.bottom });
+    }
+  }
+  return lines;
+}
+
+/**
+ * The page table as it stands, cut now if nothing usable is kept - or null
+ * when the document is not read by pages.
+ *
+ * @returns {PageTable | null}
+ */
+function pagesNow() {
+  if (!paged()) return null;
+  // The footer stands before the band is measured - the band ends above
+  // it, and a table cut for a band without it would be a line too long.
+  if (pageFooter !== null) pageFooter.hidden = false;
+  const band = readableBand();
+  const height = Math.max(0, band.bottom - band.top);
+  const extent = document.documentElement.scrollHeight;
+  if (
+    pageTable !== null &&
+    pageTable.height === height &&
+    pageTable.extent === extent &&
+    pageTable.epoch === epoch
+  ) {
+    return pageTable;
+  }
+  const blocks = flowBlocks();
+  const scrolled = window.scrollY;
+  const boxes = blocks.map((block) => {
+    const rect = block.getBoundingClientRect();
+    return { top: rect.top + scrolled, bottom: rect.bottom + scrolled };
+  });
+  // The first page is what the window shows under the chrome before
+  // anything has scrolled: the chrome's own height in the flow, which is
+  // where the fold stands at the top of the document.
+  const first = chromeBox?.getBoundingClientRect().height ?? 0;
+  const tops = pageTops(
+    boxes,
+    (index) => {
+      const block = blocks[index];
+      return block === undefined ? [] : lineBoxes(block);
+    },
+    height,
+    first,
+  );
+  pageTable = { tops, height, extent, epoch };
+  return pageTable;
+}
+
+/**
+ * The page on screen: the one the line under the stuck chrome belongs to.
+ *
+ * @param {PageTable} pages
+ * @returns {number}
+ */
+function pageShown(pages) {
+  return pageAt(pages.tops, window.scrollY + readableBand().top);
+}
+
+/**
+ * Turns to one page of the table: the scroll, and the curtain, in one task.
+ *
+ * @param {PageTable} pages
+ * @param {number} page
+ */
+function showPageOf(pages, page) {
+  const top = pages.tops[page];
+  if (top === undefined) return;
+  // Instantly, like every movement in the reader: a smooth scroll on an
+  // e-ink panel is a page of smeared refreshes. The scroll arms the
+  // position save like any other.
+  scrollTo(0, Math.max(0, top - readableBand().top));
+  refreshCurtain();
+}
+
+/**
+ * A turn: the next page, the one before, either end - and past a part's
+ * last page the next part of the book, past its first page the last page
+ * of the part before, the way a book's pages run on across its parts. The
+ * turn on past the last page counts the part as read to its end (D209:
+ * arriving counts, the way the Next under the text does), and an article's
+ * last page is where an article ends.
+ *
+ * @param {import("../lib/reader/paging.js").PageTurn} turn
+ */
+function turnPage(turn) {
+  const pages = pagesNow();
+  if (pages === null) return;
+  const target = turnTarget(pages.tops, pageShown(pages), turn);
+  if (target !== null) {
+    showPageOf(pages, target);
+    return;
+  }
+  const book = shown;
+  if (book === null || book.origin !== "book") return;
+  if (turn === "down" && book.segmentIndex < book.segmentCount - 1) {
+    countFinished();
+    turnSegment(1);
+  } else if (turn === "up" && book.segmentIndex > 0) {
+    void openBook(book.url, book.segmentIndex - 1, { end: true });
+  }
+}
+
+/**
+ * The page a document coordinate stands on, turned to - the landing every
+ * scroll the reader makes takes when the document is read by pages. False
+ * when it is not, and the caller scrolls its own way.
+ *
+ * @param {number} docY
+ * @returns {boolean}
+ */
+function landOnPageOf(docY) {
+  const pages = pagesNow();
+  if (pages === null) return false;
+  showPageOf(pages, pageAt(pages.tops, docY));
+  return true;
+}
+
+/**
+ * The last page of the part just rendered (D233): where a turn back from
+ * the next part's first page lands. False when the document is not read
+ * by pages, and the opener falls back to the reading position.
+ *
+ * @returns {boolean}
+ */
+function landOnLastPage() {
+  const pages = pagesNow();
+  if (pages === null) return false;
+  showPageOf(pages, pages.tops.length - 1);
+  return true;
+}
+
+/**
+ * The spoken line kept on its page (D233, `read-aloud.js`): nothing while
+ * the line stands on the page shown, a turn to its page when it does not.
+ * True whenever the document is read by pages, so the voice never scrolls
+ * a paged document into its band.
+ *
+ * @param {DOMRect} rect
+ * @returns {boolean}
+ */
+function revealOnPage(rect) {
+  const pages = pagesNow();
+  if (pages === null) return false;
+  const shownPage = pageShown(pages);
+  const page = pageAt(pages.tops, rect.top + window.scrollY);
+  const top = pages.tops[shownPage] ?? 0;
+  if (page !== shownPage || !onPage(window.scrollY, top, readableBand().top)) showPageOf(pages, page);
+  return true;
+}
+
+/**
+ * The window squared with the page it shows: the page under the line at
+ * the top of the screen, turned to unless the window stands on it already.
+ * Taken after every scroll that was not a turn - the layout switched under
+ * a scrolled document, a hash the browser jumped to, the bubble's scrolling
+ * undone as it left - and never while a bubble stands: its scrolling is
+ * deliberate, keeping its edit box above the keyboard (D97) or making room
+ * for itself (D138), and the page waits for it to leave.
+ */
+function settlePage() {
+  const pages = pagesNow();
+  if (pages === null) {
+    refreshCurtain();
+    return;
+  }
+  if (bubbleOpen()) {
+    refreshCurtain();
+    return;
+  }
+  const page = pageShown(pages);
+  const top = pages.tops[page] ?? 0;
+  if (onPage(window.scrollY, top, readableBand().top)) refreshCurtain();
+  else showPageOf(pages, page);
+}
+
+/**
+ * The curtain and the page count, as they stand for the window's position:
+ * the curtain over the foot of the page shown - and only while the window
+ * stands on a page, because shown off its top the page's foot is somewhere
+ * else - and the count of the page shown out of the part's pages. Both
+ * gone when the document is not read by pages.
+ */
+function refreshCurtain() {
+  if (pageCurtain === null || pageFooter === null) return;
+  const reading = paged();
+  // The footer stands before the band is measured: the band ends above it.
+  pageFooter.hidden = !reading;
+  const pages = pagesNow();
+  if (pages === null) {
+    pageCurtain.hidden = true;
+    return;
+  }
+  const band = readableBand();
+  const page = pageAt(pages.tops, window.scrollY + band.top);
+  const top = pages.tops[page] ?? 0;
+  const cover = onPage(window.scrollY, top, band.top)
+    ? curtainOver(pages.tops, page, window.scrollY, band.bottom)
+    : null;
+  pageCurtain.hidden = cover === null;
+  if (cover !== null) {
+    pageCurtain.style.top = `${cover.top}px`;
+    pageCurtain.style.height = `${cover.height}px`;
+  }
+  const count = pages.tops.length;
+  pageFooter.textContent = `${(page + 1).toLocaleString()} / ${count.toLocaleString()}`;
+  pageFooter.setAttribute(
+    "aria-label",
+    t("reader_page_of", [(page + 1).toLocaleString(), count.toLocaleString()]),
+  );
+}
+
+/**
+ * A click or a tap that found nothing to put away (`reading.js`): read by
+ * pages, the outer thirds of the window turn the page - the way every
+ * e-reader turns, and the way the pen's hand stays free, because with the
+ * pen in the hand every tap is the marker's and never reaches here. Not
+ * from a press on anything that answers presses itself - a button, a live
+ * link, a pager, a bar, the chrome, the dimmed page under an open panel -
+ * and not from the press that closed a panel or a footnote: a press that
+ * found something to close has done its work.
+ *
+ * @param {number} x
+ * @param {number} y
+ * @param {EventTarget | null} target
+ */
+function onBareTap(x, y, target) {
+  if (!paged() || markerOn || pressHadWork) return;
+  if (
+    target instanceof Element &&
+    target.closest(
+      "button, a[href], input, select, textarea, summary, dialog, .reader-chrome, .panel-scrim, .speech-bar, .mark-bar, .pager, .article-actions, .note-popover, #mark-note-badges",
+    ) !== null
+  ) {
+    return;
+  }
+  const turn = tapZone(x, window.innerWidth);
+  if (turn !== null) turnPage(turn);
+}
+
+/**
+ * Whether the press now ending had something to close when it began: a
+ * panel, a footnote, the active mark's toolbar. Read at `pointerdown`,
+ * before the closers on the same event do their closing, and asked by the
+ * bare tap at `mouseup`, by which time everything looks closed.
+ */
+let pressHadWork = false;
+
+document.addEventListener(
+  "pointerdown",
+  () => {
+    pressHadWork = anyPanelOpen() || noteMarkShown !== null || activeMark !== null;
+  },
+  { capture: true, passive: true },
+);
+
+/** When the wheel last turned a page - the cooldown's clock. */
+let wheelTurnedAt = -Infinity;
+
+// The wheel turns pages the way it scrolls: a notch on, a notch back, a
+// flick one page and not a chapter (`wheelTurn`, with its cooldown). Not
+// over the chrome or a dialog, whose own lists scroll under the wheel.
+document.addEventListener(
+  "wheel",
+  (event) => {
+    if (!paged()) return;
+    const target = event.target instanceof Element ? event.target : null;
+    if (target !== null && target.closest(".reader-chrome, dialog, .speech-bar, .mark-bar, .note-popover") !== null) return;
+    const now = performance.now();
+    const turn = wheelTurn(
+      { deltaX: event.deltaX, deltaY: event.deltaY, ctrl: event.ctrlKey },
+      now,
+      wheelTurnedAt,
+    );
+    if (turn === null) return;
+    wheelTurnedAt = now;
+    turnPage(turn);
+  },
+  { passive: true },
+);
+
+// A turn to the page under the fold or the curtain; the curtain follows
+// every scroll (the bubble's, the browser's), so a page shown off its top
+// never wears the wrong curtain - and once the scroll ends, a scroll that
+// was not a turn squares with the page (`scrollend`: Gecko and Blink; an
+// engine without it keeps the curtain right and squares on the next turn).
+// On the document in the capture phase, for the reason the position save's
+// listener gives: the clipped root hands Firefox's viewport scrolls to an
+// element.
+document.addEventListener("scroll", () => refreshCurtain(), { capture: true, passive: true });
+document.addEventListener("scrollend", () => settlePage(), { capture: true, passive: true });
+
+// The window resized, the browser's bar slid in or out (the visual
+// viewport), a picture arrived, the type grew: the pages are cut again on
+// the next ask, and the window squares with the page under its fold.
+window.addEventListener("resize", () => settlePage());
+window.visualViewport?.addEventListener("resize", () => settlePage());
+new ResizeObserver(() => settlePage()).observe(document.body);
 
 /**
  * The highlighter (D106): the pen in the bar hands the selection gesture to
@@ -3103,10 +3552,11 @@ async function fillLengths(entries) {
  *
  * @param {string} id
  * @param {number} [wanted] a specific segment - the neighbour rows' press
- * @param {MarkTarget | BlockTarget | SearchTarget} [target] a spot to land
- *   on instead of the reading position: a mark for the highlights page's
- *   press (D108), a block for a table-of-contents row (D116), a found
- *   phrase for a search row's (D119) - each asking for its own segment
+ * @param {MarkTarget | BlockTarget | SearchTarget | EndTarget} [target] a spot
+ *   to land on instead of the reading position: a mark for the highlights
+ *   page's press (D108), a block for a table-of-contents row (D116), a
+ *   found phrase for a search row's (D119), the last page for a page turned
+ *   back past a part's first (D233) - each asking for its own segment
  *   through `wanted` as well
  */
 async function openBook(id, wanted, target) {
@@ -3182,7 +3632,9 @@ async function openBook(id, wanted, target) {
         ? scrollToSearchHit(target)
         : "start" in target
           ? scrollToTargetMark(target)
-          : scrollToBlock(target.block);
+          : "end" in target
+            ? landOnLastPage()
+            : scrollToBlock(target.block);
   if (!landed) restorePosition(position, index);
   // Same reason as `openSaved`: the open winds the position row's clock. For
   // a book this also writes which part is on screen, so a part reached with
@@ -3205,6 +3657,11 @@ async function openBook(id, wanted, target) {
  * there is no mark - just a place to land.
  *
  * @typedef {{ segmentIndex: number, block: number }} BlockTarget
+ *
+ * The last page of a part (D233): where a turn back from the first page of
+ * the next one lands, read by pages. Never asked for by the scroll layout.
+ *
+ * @typedef {{ end: true }} EndTarget
  */
 
 /**
@@ -3333,7 +3790,7 @@ function scrollToTargetMark(target) {
   if (rect === undefined) return false;
   // The quote's first line under the stuck bar, the position restore's own
   // landing - plus a breath of air, so the wash reads as found, not clipped.
-  scrollTo(0, Math.max(0, rect.top + window.scrollY - chromeFold() - 8));
+  landAt(rect.top + window.scrollY);
   return true;
 }
 
@@ -3348,8 +3805,20 @@ function scrollToTargetMark(target) {
  */
 function scrollToRect(rect) {
   if (rect === undefined) return false;
-  scrollTo(0, Math.max(0, rect.top + window.scrollY - chromeFold() - 8));
+  landAt(rect.top + window.scrollY);
   return true;
+}
+
+/**
+ * Every landing's last step: the named spot's line under the stuck bar with
+ * a breath of air - or, read by pages (D233), the page that line stands on,
+ * squared and curtained, because a page shown off its top is no page.
+ *
+ * @param {number} docY the spot, in document coordinates
+ */
+function landAt(docY) {
+  if (landOnPageOf(docY)) return;
+  scrollTo(0, Math.max(0, docY - chromeFold() - 8));
 }
 
 /**
@@ -3440,6 +3909,9 @@ function leaveDocView() {
   clearSearchWash();
   closeDocSearch();
   resetDocSearch();
+  // The curtain and the page count were the document's (D233); over a list
+  // there are no pages, and the window scrolls as it always did.
+  refreshCurtain();
 }
 
 async function showLibrary() {
@@ -6039,6 +6511,9 @@ function applyAppearance(reader) {
   root.dataset["readerAlign"] = reader.align;
   root.dataset["readerHyphens"] = reader.hyphens;
   root.dataset["readerParagraphs"] = reader.paragraphs;
+  // The layout (D233), stamped the same way: the stylesheet takes the
+  // finger's scroll away under it, and the page table below answers to it.
+  root.dataset["readerLayout"] = reader.layout;
   root.style.setProperty("--reader-measure", `${reader.measure}ch`);
   // The measure again with the text size cancelled out of it: `ch` scales
   // with the font, which is right for the article's column (a measure counts
@@ -6081,6 +6556,7 @@ function applyAppearance(reader) {
     ["data-align", reader.align],
     ["data-hyphens", reader.hyphens],
     ["data-paragraphs", reader.paragraphs],
+    ["data-layout", reader.layout],
     ["data-links", reader.links],
     ["data-marker-color", reader.markerColor],
   ];
@@ -6097,6 +6573,12 @@ function applyAppearance(reader) {
   // A size or measure change reflows the article under the note badges;
   // reading fresh boxes here sees the layout the new variables made.
   showNoteBadges();
+  // The same reflow cuts the pages elsewhere (D233): the table is measured
+  // again on the next ask, and the window squares with the page the
+  // reading stands on - which, the layout just switched, is the page under
+  // the line at the top of the screen.
+  pageTable = null;
+  settlePage();
 }
 
 /**
@@ -6381,6 +6863,7 @@ async function onDisplayPress(event) {
   const align = button.getAttribute("data-align");
   const hyphens = button.getAttribute("data-hyphens");
   const paragraphs = button.getAttribute("data-paragraphs");
+  const layout = button.getAttribute("data-layout");
   const links = button.getAttribute("data-links");
   const markerColor = button.getAttribute("data-marker-color");
   const size = button.getAttribute("data-size");
@@ -6394,6 +6877,7 @@ async function onDisplayPress(event) {
   else if (isAlign(align)) patch = { align };
   else if (isHyphens(hyphens)) patch = { hyphens };
   else if (isParagraphs(paragraphs)) patch = { paragraphs };
+  else if (isLayout(layout)) patch = { layout };
   else if (isLinks(links)) patch = { links };
   else if (isMarkColor(markerColor)) patch = { markerColor };
   else if (size !== null || measure !== null) {
@@ -7286,6 +7770,10 @@ configureReading({
   // on one nor park the spoken line beneath the bar. The same line the
   // position save reads under, measured by the same function.
   fold: chromeFold,
+  // Read by pages (D233), the spoken line is kept on screen by turning to
+  // its page, not by scrolling it into a band - the page it is on stays
+  // exactly as it stands until the voice leaves it.
+  reveal: revealOnPage,
   onChange: showSpeechBar,
   // The engine refusing is the one thing reading aloud can do that leaves
   // nothing on screen to explain itself, so it is said in the page's own
@@ -7648,6 +8136,10 @@ function rootReadingSide(ground) {
       foundPhrases = found;
       renderFacts();
     },
+    // A press that found nothing to put away (D233): read by pages, the
+    // page turns on it - the outer thirds of the window, the way every
+    // e-reader turns - and nothing happens on it otherwise, as before.
+    onBareTap,
     // The highlighter's hooks (D106): whether the pen is in the hand, where
     // marks may anchor (the rebuilt content - the reader's own title has no
     // block order to write against), what a finished stroke becomes, and what

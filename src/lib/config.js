@@ -67,6 +67,16 @@ export const CONFIG_KEY = "config";
  *   paragraph of prose but the one opening a section - after a heading or
  *   a rule - because a page's paragraphs come grouped in wrapper divs, and
  *   "the paragraph another one follows" left the first of each group flush.
+ * @property {"scroll" | "paged"} layout Whether the article is read as one
+ *   column the window scrolls through, or by pages (D233): the same column,
+ *   moved only by whole pages - each beginning and ending with a whole line,
+ *   the cut line at the foot hidden by a curtain, a page count at the foot
+ *   of the window - and never by a finger or a wheel. Asked for from an
+ *   e-ink panel, where a scroll is a smear and a page turn is one clean
+ *   refresh; `scroll` is the default, the reader as it has always been.
+ *   A name with a rule in the stylesheet and a table of page tops in
+ *   `lib/reader/pages.js` under it. Independent of the theme on purpose:
+ *   pages are wanted on light paper and on dark, and a theme is colours.
  * @property {"active" | "plain"} links Whether links in the article text answer
  *   a press (D95). The words stay either way - they are part of the sentence -
  *   but the reader's main gesture is selecting a phrase to translate, and a
@@ -258,6 +268,8 @@ const ALIGNS = ["left", "justify"];
 const HYPHENS = ["none", "auto"];
 /** @type {readonly string[]} */
 const PARAGRAPHS = ["spaced", "indented", "both"];
+/** @type {readonly string[]} */
+const LAYOUTS = ["scroll", "paged"];
 
 /**
  * Type guards rather than casts, and exported because the reader needs the
@@ -324,6 +336,14 @@ export function isParagraphs(value) {
 }
 
 /**
+ * @param {unknown} value
+ * @returns {value is ReaderConfig["layout"]}
+ */
+export function isLayout(value) {
+  return typeof value === "string" && LAYOUTS.includes(value);
+}
+
+/**
  * What the buttons in the reader can reach.
  *
  * The width is in `ch`, the width of a zero in whatever font is set - which is
@@ -373,6 +393,7 @@ export const READER_DEFAULTS = Object.freeze({
   align: "left",
   hyphens: "none",
   paragraphs: "spaced",
+  layout: "scroll",
   links: "plain",
   markerColor: DEFAULT_MARK_COLOR,
 });
@@ -496,6 +517,7 @@ function readerWithDefaults(stored) {
     align: isAlign(raw["align"]) ? raw["align"] : READER_DEFAULTS.align,
     hyphens: isHyphens(raw["hyphens"]) ? raw["hyphens"] : READER_DEFAULTS.hyphens,
     paragraphs: isParagraphs(raw["paragraphs"]) ? raw["paragraphs"] : READER_DEFAULTS.paragraphs,
+    layout: isLayout(raw["layout"]) ? raw["layout"] : READER_DEFAULTS.layout,
     links: isLinks(raw["links"]) ? raw["links"] : READER_DEFAULTS.links,
     markerColor: isMarkColor(raw["markerColor"]) ? raw["markerColor"] : READER_DEFAULTS.markerColor,
   };

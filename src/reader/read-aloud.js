@@ -75,6 +75,10 @@ const BAND = Object.freeze({ top: 0.12, bottom: 0.75, land: 0.3 });
  *   stuck chrome covers (D93) - asked at each measurement, because an open
  *   panel makes it taller. Text above this line is paper under the bar, not
  *   text anybody can see
+ * @property {(rect: DOMRect) => boolean} [reveal] the reader page's own way
+ *   of bringing a line onto the screen (D233): read by pages, a line off the
+ *   page is reached by turning to its page, not by scrolling to a band -
+ *   true when the page took the line, false when the band below should
  * @property {(state: ReadingState) => void} onChange the bar's whole job
  * @property {() => void} onFail the engine refused, and the reader has to be
  *   told in words - a silent bar disappearing says nothing
@@ -664,6 +668,11 @@ function clearMarks() {
 function keepVisible(range) {
   const rect = range.getBoundingClientRect();
   if (rect.width === 0 && rect.height === 0) return;
+
+  // A document read by pages (D233) keeps its lines on pages, not in a band:
+  // the reader turns to the sentence's page when it is off the one on
+  // screen, and leaves the page alone when it is on it.
+  if (hooks?.reveal?.(rect) === true) return;
 
   const height = window.innerHeight;
   // The band's ceiling clears the stuck chrome on windows short enough for

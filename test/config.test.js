@@ -785,6 +785,15 @@ describe("the reader's appearance", () => {
     assert.deepEqual(withDefaults({ reader: "large" }).reader, READER_DEFAULTS);
   });
 
+  it("keeps a layout it knows and scrolls for one it does not", () => {
+    // The paged layout (D233) is a name with a rule under it; a profile from
+    // before the field, or with a name from a future version, scrolls.
+    assert.equal(withDefaults({ reader: { layout: "paged" } }).reader.layout, "paged");
+    assert.equal(withDefaults({ reader: { layout: "scroll" } }).reader.layout, "scroll");
+    assert.equal(withDefaults({ reader: { layout: "columns" } }).reader.layout, "scroll");
+    assert.equal(withDefaults({ reader: {} }).reader.layout, "scroll");
+  });
+
   it("clamps a size or a width out of range instead of forgetting it", () => {
     // A value from a future version with a wider scale said what somebody
     // wanted; the default would not.

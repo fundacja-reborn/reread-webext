@@ -16,7 +16,13 @@
  * is somebody else's key.
  */
 
-/** @typedef {"down" | "up"} PageTurn */
+/**
+ * A screenful on, a screenful back - and in the paged layout (D233) the
+ * document's two ends as well, the way Home and End move a page nothing
+ * else can scroll.
+ *
+ * @typedef {"down" | "up" | "first" | "last"} PageTurn
+ */
 
 /**
  * What a press was aimed at, and what the page it was aimed at was doing.
@@ -33,6 +39,9 @@
  * @property {boolean} editable whether what had focus is being typed into
  * @property {boolean} reading whether the voice is reading right now
  * @property {boolean} dialog whether a dialog stands over the article
+ * @property {boolean} [paged] whether the document is read by pages (D233):
+ *   then the browser has nothing to scroll by itself, and the arrows, Home
+ *   and End - dead keys otherwise - turn the page too
  */
 
 /**
@@ -96,6 +105,23 @@ export function pageTurn(press) {
       // voice has no use for them.
       if (press.reading || !PAGE_ITSELF.has(press.tag)) return null;
       return press.shift ? "up" : "down";
+    // Read by pages, the window cannot be scrolled by the browser at all, so
+    // the keys that scroll it by a line or to an end would be dead - and a
+    // dead key reads as a broken one. Every e-reader with a keyboard turns
+    // on the arrows; the sideways pair stays the voice's while it reads (the
+    // sentence back, the sentence on - `keys.js`).
+    case "ArrowDown":
+      return press.paged === true ? "down" : null;
+    case "ArrowUp":
+      return press.paged === true ? "up" : null;
+    case "ArrowRight":
+      return press.paged === true && !press.reading ? "down" : null;
+    case "ArrowLeft":
+      return press.paged === true && !press.reading ? "up" : null;
+    case "End":
+      return press.paged === true ? "last" : null;
+    case "Home":
+      return press.paged === true ? "first" : null;
     default:
       return null;
   }

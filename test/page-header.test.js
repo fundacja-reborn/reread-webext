@@ -176,8 +176,13 @@ describe("the bar stuck to the top of every page", () => {
     assert.doesNotMatch(bar, /position:/, "the selection's bar is stuck or lifted - a second strip of chrome over the list");
     assert.doesNotMatch(bar, /z-index:/, "the selection's bar carries a stacking of its own, which could paint over the stuck bar");
     // Nothing else on the page is stuck: the speech bar is fixed at the
-    // bottom of the article view, and the two never meet.
-    assert.equal((styles.match(/position: (?:sticky|fixed)/g) ?? []).length, 1, "a third strip of chrome is stuck or fixed on the reader page");
+    // bottom of the article view, and the two never meet - and the paged
+    // layout's curtain and page count (D233) are fixed there too, over an
+    // article read by pages, never over a list.
+    assert.equal((styles.match(/position: (?:sticky|fixed)/g) ?? []).length, 3, "a strip of chrome beyond the speech bar, the curtain and the page count is stuck or fixed on the reader page");
+    assert.match(ruleOf(styles, ".page-curtain"), /position: fixed;/, "the curtain is not fixed to the window");
+    assert.match(ruleOf(styles, ".page-footer"), /position: fixed;/, "the page count is not fixed to the window");
+    assert.match(styles, /body\.reader:has\(#speech-bar:not\(\[hidden\]\)\) \.page-footer,\s*body\.reader:has\(#mark-bar:not\(\[hidden\]\)\) \.page-footer \{\s*display: none;/, "the page count stands under a bar at the foot");
   });
 
   it("holds nothing any more: the hold module went with the offset it measured", async () => {

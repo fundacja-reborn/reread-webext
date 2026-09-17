@@ -354,6 +354,27 @@ let bubbleScheme = null;
 let onPainted = null;
 
 /**
+ * Who hears a click or a tap that found nothing to put away (D233): the
+ * reader page, which turns a page on one when it reads by pages. Nobody
+ * else's - a press on somebody else's page means what their page says.
+ *
+ * @type {((x: number, y: number, target: EventTarget | null) => void) | null}
+ */
+let onBareTap = null;
+
+/**
+ * Whether a bubble stands on the page right now - the reader page asks
+ * before it squares a scroll with its pages (D233): the bubble's own
+ * scrolling, to keep its edit box above the keyboard (D97) or to make room
+ * for itself (D138), is deliberate, and the page waits until it leaves.
+ *
+ * @returns {boolean}
+ */
+export function bubbleOpen() {
+  return tooltip.isOpen();
+}
+
+/**
  * Whether the vocabulary lives without the engine (D158, everywhere since
  * D162): the trim is on and a pair is chosen to file phrases under. Then the
  * mirror is adopted, saved phrases underline and recall, dictionary lines
@@ -1478,6 +1499,11 @@ function onMouseUp(event) {
     // an underline, which is the other half of what saving a phrase is for.
     // Either way the reader's own chain is over: a click or a tap that got
     // this far is one the selection module stepped aside for.
+    // Whether the press found anything to put away - a bubble, or the
+    // bubble-less selection of D149 that `current` still names - is read
+    // before it puts them away: a press that found nothing is a bare press
+    // on the page, which the reader page may turn into a page turn (D233).
+    const bare = !tooltip.isOpen() && current === null;
     clearSelection();
     autoKept = null;
     const hit = phraseAt(event.clientX, event.clientY);
@@ -1489,6 +1515,7 @@ function onMouseUp(event) {
     current = null;
     secondLayer = [];
     unfetched = null;
+    if (bare) onBareTap?.(event.clientX, event.clientY, event.target);
     return;
   }
 
@@ -1985,7 +2012,7 @@ function onStorageChanged(changes, area) {
 }
 
 /**
- * @param {{ root?: Element | null, observe?: boolean, stored?: Record<string, unknown>, ownSelection?: boolean, anchored?: boolean, covered?: () => number, openSettings?: (section?: import("../lib/protocol.js").SettingsSection) => void, plainLinks?: () => boolean, alsoOwns?: (target: EventTarget | null) => boolean, marking?: () => boolean, markRoot?: () => Element | null, onMarked?: (range: Range) => void, onMarkStart?: () => void, onMarkTap?: (x: number, y: number, word?: Range) => void, markHandleAt?: (x: number, y: number) => { edge: "start" | "end", range: Range } | null, onMarkResizeStart?: () => void, onMarkStretch?: (range: Range) => void, onMarkResized?: (range: Range) => void, quietLookup?: (text: string) => Promise<import("../lib/protocol.js").LookUp | null>, quietVoice?: () => { lang: string, voiceURI: string | undefined } | null, scheme?: () => "light" | "sepia" | "dark" | null, onPainted?: (found: number | null) => void }} [where]
+ * @param {{ root?: Element | null, observe?: boolean, stored?: Record<string, unknown>, ownSelection?: boolean, anchored?: boolean, covered?: () => number, openSettings?: (section?: import("../lib/protocol.js").SettingsSection) => void, plainLinks?: () => boolean, alsoOwns?: (target: EventTarget | null) => boolean, marking?: () => boolean, markRoot?: () => Element | null, onMarked?: (range: Range) => void, onMarkStart?: () => void, onMarkTap?: (x: number, y: number, word?: Range) => void, markHandleAt?: (x: number, y: number) => { edge: "start" | "end", range: Range } | null, onMarkResizeStart?: () => void, onMarkStretch?: (range: Range) => void, onMarkResized?: (range: Range) => void, quietLookup?: (text: string) => Promise<import("../lib/protocol.js").LookUp | null>, quietVoice?: () => { lang: string, voiceURI: string | undefined } | null, scheme?: () => "light" | "sepia" | "dark" | null, onPainted?: (found: number | null) => void, onBareTap?: (x: number, y: number, target: EventTarget | null) => void }} [where]
  *   what to underline inside, whether it can change on its own, the startup
  *   read of `storage.local` when the caller already made one, whether the
  *   page selects through our own gesture rather than the browser's - every
@@ -2016,6 +2043,10 @@ function onStorageChanged(changes, area) {
  *   page knows what theme it painted itself in. `onPainted` hears, after
  *   every paint, how many saved phrases the text holds (D226) - the reader
  *   page's header line; on somebody else's page nothing of ours could say it.
+ *   `onBareTap` hears a click or a tap that found nothing to put away - no
+ *   bubble open, no selection standing, no underline under it - which is
+ *   what the reader page turns a page on (D233); a reader flag, because a
+ *   press on somebody else's page means whatever their page says.
  */
 export function start(where = {}) {
   root = where.root ?? null;
@@ -2028,6 +2059,7 @@ export function start(where = {}) {
   quietVoice = where.quietVoice ?? null;
   bubbleScheme = where.scheme ?? null;
   onPainted = where.onPainted ?? null;
+  onBareTap = where.onBareTap ?? null;
   // The page that took the native selection away answers the copy chord
   // itself (D110) - and only that page. The same flag tells the reader's own
   // page from everybody else's, which is where the door into the reader
