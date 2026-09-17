@@ -115,6 +115,35 @@ describe("pageTurn", () => {
     assert.equal(press("ArrowDown", { mac: true, alt: true, editable: true }), null);
     assert.equal(press("ArrowDown", { mac: true, alt: true, dialog: true }), null);
   });
+
+  it("turns on the arrows, Home and End when the document is read by pages", () => {
+    // The browser has nothing to scroll by itself then (D233), and a dead
+    // arrow reads as a broken one.
+    assert.equal(press("ArrowDown", { paged: true }), "down");
+    assert.equal(press("ArrowUp", { paged: true }), "up");
+    assert.equal(press("ArrowRight", { paged: true }), "down");
+    assert.equal(press("ArrowLeft", { paged: true }), "up");
+    assert.equal(press("End", { paged: true }), "last");
+    assert.equal(press("Home", { paged: true }), "first");
+    for (const key of ["ArrowDown", "ArrowUp", "ArrowRight", "ArrowLeft", "End", "Home"]) {
+      assert.equal(press(key), null, `${key} in the scroll layout`);
+      assert.equal(press(key, { paged: false }), null, `${key} in the scroll layout`);
+    }
+  });
+
+  it("leaves the sideways arrows to the voice while it reads, and keeps the rest", () => {
+    assert.equal(press("ArrowRight", { paged: true, reading: true }), null);
+    assert.equal(press("ArrowLeft", { paged: true, reading: true }), null);
+    assert.equal(press("ArrowDown", { paged: true, reading: true }), "down");
+    assert.equal(press("PageDown", { paged: true, reading: true }), "down");
+  });
+
+  it("gives the paged keys away the way it gives every page key", () => {
+    assert.equal(press("ArrowDown", { paged: true, tag: "TEXTAREA" }), null);
+    assert.equal(press("End", { paged: true, editable: true }), null);
+    assert.equal(press("ArrowRight", { paged: true, dialog: true }), null);
+    assert.equal(press("ArrowDown", { paged: true, ctrl: true }), null);
+  });
 });
 
 describe("pageStep", () => {

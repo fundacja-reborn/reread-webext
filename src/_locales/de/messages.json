@@ -451,6 +451,16 @@
   "reader_links": { "message": "Links" },
   "reader_links_plain": { "message": "Nur Text" },
   "reader_links_active": { "message": "Aktiv" },
+  "reader_layout": { "message": "Ansicht" },
+  "reader_layout_scroll": { "message": "Scrollen" },
+  "reader_layout_paged": { "message": "Seiten" },
+  "reader_page_of": {
+    "message": "Seite $PAGE$ von $PAGES$",
+    "placeholders": {
+      "page": { "content": "$1", "example": "12" },
+      "pages": { "content": "$2", "example": "48" }
+    }
+  },
   "reader_marker": { "message": "Textmarker" },
   "reader_underline": { "message": "Unterstreichung" },
   "underline_fine": { "message": "Fein" },

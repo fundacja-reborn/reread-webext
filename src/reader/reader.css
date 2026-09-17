@@ -2742,6 +2742,77 @@ body.reader:has(#mark-bar:not([hidden])) {
   padding-bottom: 4.5rem;
 }
 
+/* The paged layout (D233): the same column, moved only by whole pages.
+   The window keeps its scroller - every scroll the reader makes is a
+   `scrollTo` to a page's top (reader.js, `lib/reader/pages.js`) - but the
+   finger and the wheel stop moving it: `hidden` rather than `clip`, because
+   `clip` would take the programmatic scroll away with the rest. Only over
+   an article: the list views scroll as they always did. */
+:root[data-reader-layout="paged"]:has(body.reader #article:not([hidden])) {
+  overflow: hidden;
+}
+
+/* A screen of room under the last line, so the last page's top can reach
+   the fold like every other page's: without it the window would stop
+   short at the document's end, and the page before would show through
+   above the last one. The percent read is counted in pages there
+   (`pagePercent`), never off this padded height. */
+:root[data-reader-layout="paged"] body.reader:has(#article:not([hidden])) {
+  padding-bottom: 100dvh;
+}
+
+/* A picture taller than a page fits one instead of being cut in two - what
+   every e-reader does with a plate. The cap is the band at its tallest
+   (the bar's own height under the window's), a little less for the footer;
+   a panel open over the text or a notice in the bar makes the band shorter
+   for as long as it stands, and a picture cut by that is cut like text. */
+:root[data-reader-layout="paged"] #content :is(img, picture, video) {
+  max-height: calc(100dvh - var(--header-h) - 2.5rem);
+  object-fit: contain;
+}
+
+/* The curtain: the page's own paper over the foot of the readable band,
+   from where the next page begins down to the band's floor, hiding the
+   line the window would show cut in half. Sized by script at every turn;
+   above the text and the pins, under the bars and the chrome. It takes the
+   pointer on purpose - a hold on a covered word would select what nobody
+   can see, and a tap on it is a tap at the foot of the page, which turns
+   it like any other. */
+.page-curtain {
+  position: fixed;
+  inset-inline: 0;
+  z-index: 1;
+  background: var(--page-bg);
+}
+
+/* The page count, one quiet line at the window's foot in the interface
+   face, on the page's paper; the readable band ends above it (reader.js
+   measures it like the bars). Pinned the way the speech bar is - `100dvh`
+   and a transform - for the same Android reason. Gone while a bar stands
+   at the foot: the bar's row is the band's floor then, and two strips
+   would be one too many. */
+.page-footer {
+  position: fixed;
+  inset-inline: 0;
+  top: 100dvh;
+  transform: translateY(-100%);
+  z-index: 1;
+  margin: 0;
+  padding: 0.2rem 0.6rem calc(0.2rem + env(safe-area-inset-bottom, 0px));
+  text-align: center;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--page-muted);
+  background: var(--page-bg);
+  pointer-events: none;
+}
+
+body.reader:has(#speech-bar:not([hidden])) .page-footer,
+body.reader:has(#mark-bar:not([hidden])) .page-footer {
+  display: none;
+}
+
 /* Icon-only on a narrow screen means the icon IS the button: at 1.15em the
    transport glyphs were specks inside their 44px targets (reported from a
    phone). The words come back at the desktop breakpoint below, and there the
