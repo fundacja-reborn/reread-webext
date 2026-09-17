@@ -558,12 +558,27 @@ html {
   padding-inline: calc(50vw - 50%);
   z-index: 1;
   background: var(--page-bg);
+  /* The shadow under the sheet's edge says which layer it is (Michał,
+     2026-09-17: "so that it reads as the higher layer") - the same shadow
+     the other pages' box casts on the dimmed page under an open panel
+     (page.css), and the one this box cast from its own paper's edge before
+     the panels became sheets. Not the line under the panel of 2026-09-01,
+     which read as clutter: a shadow falls on the page, a line stood in the
+     panel. */
+  box-shadow: 0 10px 24px -8px rgb(0 0 0 / 0.35);
 }
 
 .reader-chrome > .nav-menu {
   max-height: calc(100dvh - var(--header-h) - 1rem);
   overflow-y: auto;
   overscroll-behavior: contain;
+}
+
+/* No shadow on e-ink paper (D234): a panel dithers a gradient into noise,
+   and the scrim's own edge already says where the sheet ends - the bubble
+   drops its shadow there for the same reason. */
+:root[data-reader-theme="eink"] .reader-chrome > :is(.reader-panel, .nav-menu) {
+  box-shadow: none;
 }
 
 .reader-setting {
@@ -2836,12 +2851,18 @@ body.reader:has(#mark-bar:not([hidden])) {
    device pixel of the text showing between two fractional edges. Above the
    text and the pins. It takes the pointer on purpose - a hold on a covered
    word would select what nobody can see, and a tap on it is a tap at the
-   foot of the page, which turns it like any other. */
+   foot of the page, which turns it like any other. At zero, like the pins
+   and the badges, which stand before it in the markup and so under it:
+   positioned, it paints over the text, and it stays under the scrim (1),
+   the bars and the chrome (2) - at 1 it stood beside the scrim and, later
+   in the markup, over it, a white strip at the foot of a dimmed page
+   (Michał's smoke, 2026-09-17). The head's curtain and the footer stand
+   at zero for the same reason. */
 .page-curtain {
   position: fixed;
   inset-inline: 0;
   bottom: 0;
-  z-index: 1;
+  z-index: 0;
   background: var(--page-bg);
 }
 
@@ -2854,7 +2875,7 @@ body.reader:has(#mark-bar:not([hidden])) {
   position: fixed;
   inset-inline: 0;
   top: 0;
-  z-index: 1;
+  z-index: 0;
   background: var(--page-bg);
 }
 
@@ -2869,7 +2890,7 @@ body.reader:has(#mark-bar:not([hidden])) {
   inset-inline: 0;
   top: 100dvh;
   transform: translateY(-100%);
-  z-index: 1;
+  z-index: 0;
   box-sizing: border-box;
   /* The strip is as tall as the bars that stand at the foot - the voice's,
      the pen's (the room the scroll layout gives them under the last line,

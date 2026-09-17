@@ -200,6 +200,16 @@ describe("the bar stuck to the top of every page", () => {
     const sheets = ruleOf(styles, ".reader-chrome > .reader-panel,\n.reader-chrome > .nav-menu");
     assert.match(sheets, /position: absolute;\s*top: 100%;/, "the panels stand in the box's flow and push the text down");
     assert.match(sheets, /background: var\(--page-bg\);/, "the dimmed page shows through a sheet");
+    // The shadow that says which layer the sheet is - the other pages' box
+    // casts the same one on the dimmed page (page.css); e-ink paper drops it.
+    assert.match(sheets, /box-shadow: 0 10px 24px -8px rgb\(0 0 0 \/ 0\.35\);/, "the sheet casts no shadow on the dimmed page");
+    assert.match(styles, /:root\[data-reader-theme="eink"\] \.reader-chrome > :is\(\.reader-panel, \.nav-menu\) \{\s*box-shadow: none;/, "the sheet dithers a shadow on e-ink paper");
+    // The curtains and the footer stand under the scrim: at zero, with the
+    // pins and the badges, and never beside the scrim's 1 (a white strip
+    // at the foot of a dimmed page, Michał's smoke 2026-09-17).
+    for (const selector of [".page-curtain", ".page-head", ".page-footer"]) {
+      assert.match(ruleOf(styles, selector), /z-index: 0;/, `${selector} stands beside or over the scrim`);
+    }
     // The menu's own rule stands after the shared one, whose second line
     // `ruleOf` would find first.
     assert.match(styles, /\n\.reader-chrome > \.nav-menu \{\s*max-height: calc\(100dvh - var\(--header-h\) - 1rem\);\s*overflow-y: auto;/, "a long menu cannot scroll within itself");
