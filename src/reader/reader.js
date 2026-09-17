@@ -59,6 +59,7 @@ import { describeError } from "../lib/messages.js";
 import { ErrorCode, Message, asPage, asPageRequest, asResult, ok } from "../lib/protocol.js";
 import { NO_BASE, buildArticle } from "../lib/reader/article.js";
 import { MAX_DOWNLOAD_BYTES, pictureSources, picturesState, picturesSummary } from "../lib/reader/pictures.js";
+import { sourceOf, webAddress } from "../lib/reader/source.js";
 import {
   ARTICLES_ENTRY,
   archiveAccount,
@@ -272,6 +273,12 @@ const bylineElement = document.getElementById("byline");
 const factsElement = document.getElementById("facts");
 const contentElement = document.getElementById("content");
 const originalLink = document.getElementById("original");
+// The site under the title (D232): the line, the link in it and the name the
+// link shows - the menu row's door, where a reader who never opens the menu
+// meets it.
+const sourceLine = document.getElementById("source");
+const sourceLink = document.getElementById("source-link");
+const sourceSite = document.getElementById("source-site");
 const brandButton = document.getElementById("brand");
 const displayButton = document.getElementById("display");
 const displayPanel = document.getElementById("display-panel");
@@ -1184,18 +1191,34 @@ function renderArticle(piece) {
   rescan();
   renderFacts();
 
+  // The same door the orphan rows' links go through (D150, `webAddress`):
+  // a stored address is data, and only the web's two schemes belong in an
+  // `href` this page hands out (D171) - a `file:` page cannot be opened
+  // from here anyway, and anything stranger has no business being a link.
+  // Said in two places over the one rule (`sourceOf`): the menu's row, and
+  // the site under the title (D232), where a reader who never opens the
+  // menu meets it - the host the list row shows, as a link to the page in
+  // a new tab. No web address, no row and no line.
+  const from = sourceOf(piece.link);
   if (originalLink instanceof HTMLAnchorElement) {
-    // The same door the orphan rows' links go through (D150, `webAddress`):
-    // a stored address is data, and only the web's two schemes belong in an
-    // `href` this page hands out (D171) - a `file:` page cannot be opened
-    // from here anyway, and anything stranger has no business being a link.
-    if (piece.link === null || !webAddress(piece.link)) {
+    if (from === null) {
       originalLink.hidden = true;
     } else {
-      originalLink.href = piece.link;
+      originalLink.href = from.href;
       originalLink.target = "_blank";
       originalLink.rel = "noreferrer noopener";
       originalLink.hidden = false;
+    }
+  }
+  if (sourceLine !== null && sourceLink instanceof HTMLAnchorElement && sourceSite !== null) {
+    if (from === null) {
+      sourceLine.hidden = true;
+    } else {
+      sourceSite.textContent = from.host;
+      sourceLink.href = from.href;
+      sourceLink.target = "_blank";
+      sourceLink.rel = "noreferrer noopener";
+      sourceLine.hidden = false;
     }
   }
   // With an article on screen the list is elsewhere, so the menu offers it -
@@ -4180,23 +4203,6 @@ function markRowElement(row, index, withTitle) {
 
   item.append(text, acts);
   return item;
-}
-
-/**
- * Whether a document id is an address a browser may open in a tab - the
- * orphan row's link is built from the stored id, and only the web's two
- * schemes belong in an `href` the reader hands out.
- *
- * @param {string} docId
- * @returns {boolean}
- */
-function webAddress(docId) {
-  try {
-    const protocol = new URL(docId).protocol;
-    return protocol === "https:" || protocol === "http:";
-  } catch {
-    return false;
-  }
 }
 
 /**
@@ -7647,11 +7653,15 @@ function rootReadingSide(ground) {
     // block order to write against), what a finished stroke becomes, and what
     // a tap means while the pen is up. The delete bubble is ours the way the
     // translation bubble is - presses on it must not read as the page's. So
-    // is the pictures line under the header (D231): a hold on its press is a
-    // press held, not a word to select.
+    // are the pictures line under the header (D231) and the site line over
+    // it (D232): a hold on the press is a press held, a hold on the arrow is
+    // the browser's own gesture on a link, and the site's name is no word
+    // to look up - none of them a word to select.
     alsoOwns: (target) =>
       target instanceof Node &&
-      (markBar?.contains(target) === true || picturesOffer?.contains(target) === true),
+      (markBar?.contains(target) === true ||
+        picturesOffer?.contains(target) === true ||
+        sourceLine?.contains(target) === true),
     marking: () => markerOn,
     markRoot: () => contentRoot(),
     onMarked: (range) => void onMarked(range),

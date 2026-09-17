@@ -648,6 +648,7 @@ html {
 }
 
 .reader-byline,
+.reader-source,
 .reader-facts,
 .reader-pictures {
   margin: 0 0 2rem;
@@ -656,13 +657,69 @@ html {
 }
 
 /* The byline and the facts line (D226) read as two lines of one block when
-   both stand: the gap to the text belongs under the last of them. The
-   pictures line (D231) joins the block the same way. */
-.reader-byline:has(+ .reader-facts:not([hidden])),
-.reader-facts:has(+ .reader-pictures:not([hidden])) {
+   both stand: the gap to the text belongs under the last of them. The site
+   (D232) and the pictures line (D231) join the block the same way: each
+   line closes up to whichever line of the block stands after it, the hidden
+   ones between taking no room, so the block reads as one whatever lines a
+   document has to say. */
+.reader-byline:has(~ :is(.reader-source, .reader-facts, .reader-pictures):not([hidden])),
+.reader-source:has(~ :is(.reader-facts, .reader-pictures):not([hidden])),
+.reader-facts:has(~ .reader-pictures:not([hidden])) {
   margin-bottom: 0.35rem;
 }
 
+/* The site under the title (D232) is information first and a door second
+   (Michał's smoke, 2026-09-17: the name underlined as a link read as an
+   invitation to go back to the page, where the line is there to say where
+   the text is from). So the name is text in the block's muted dress, as
+   the list row says it, and the one link is the arrow leaving a frame
+   after it - the orphan quotes' door (D150) in the quiet act's dress the
+   highlights page gives it: the 44px box, muted at rest, the frame and
+   the page's text color under the pointer or the keyboard, no underline.
+   Laid out as a flex row so the box is the line's own height without
+   growing it (the pictures press's negative block margin) and the arrow
+   stands one gap from the name once the box's centring is taken back. A
+   flex row is a display of its own, so the hidden attribute is said again
+   here. */
+.reader-source {
+  display: flex;
+  align-items: center;
+}
+
+.reader-source[hidden] {
+  display: none;
+}
+
+/* A long site name breaks rather than pushing the line past the column on
+   a phone (viewport of about 330 CSS px on the Pixel). */
+#source-site {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.reader-source a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  min-width: 44px;
+  min-height: 44px;
+  margin-block: -0.6rem;
+  margin-inline-start: -0.4rem;
+  padding: 0.35rem;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--page-muted);
+  text-decoration: none;
+  transition: border-color 120ms ease, background-color 120ms ease, color 120ms ease;
+}
+
+.reader-source a:hover,
+.reader-source a:focus-visible {
+  border-color: var(--page-border);
+  background: color-mix(in srgb, var(--page-fg) 6%, transparent);
+  color: var(--page-fg);
+}
 /* The pictures line (D231) lays its three parts - the sentence, the dot,
    the press - one gap apart, and lets the press wrap whole onto a line of
    its own on a phone. Laid out as a flex row rather than as text so that

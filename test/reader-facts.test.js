@@ -21,7 +21,7 @@ async function source(path) {
 }
 
 describe("the facts line (D226) - the page", () => {
-  it("stands right under the byline, hidden until there is something to say", async () => {
+  it("stands under the byline, with only the site (D232) between them, hidden until there is something to say", async () => {
     const html = await source("src/reader/reader.html");
     const byline = html.indexOf('<p id="byline" class="reader-byline" hidden></p>');
     const facts = html.indexOf('<p id="facts" class="reader-facts" hidden></p>');
@@ -33,8 +33,8 @@ describe("the facts line (D226) - the page", () => {
 
   it("is dressed like the byline, and the byline closes up to it", async () => {
     const css = await source("src/reader/reader.css");
-    assert.match(css, /\.reader-byline,\s*\.reader-facts,\s*\.reader-pictures\s*\{/);
-    assert.match(css, /\.reader-byline:has\(\+ \.reader-facts:not\(\[hidden\]\)\)/);
+    assert.match(css, /\.reader-byline,\s*\.reader-source,\s*\.reader-facts,\s*\.reader-pictures\s*\{/);
+    assert.match(css, /\.reader-byline:has\(~ :is\(\.reader-source, \.reader-facts, \.reader-pictures\):not\(\[hidden\]\)\)/);
   });
 });
 
@@ -62,7 +62,7 @@ describe("the pictures line (D231) - the page", () => {
 
   it("is dressed like the facts line, which closes up to it", async () => {
     const css = await source("src/reader/reader.css");
-    assert.match(css, /\.reader-facts:has\(\+ \.reader-pictures:not\(\[hidden\]\)\)/);
+    assert.match(css, /\.reader-facts:has\(~ \.reader-pictures:not\(\[hidden\]\)\)/);
     assert.match(css, /\.reader-pictures button \{/);
   });
 
