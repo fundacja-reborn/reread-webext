@@ -947,6 +947,11 @@ export const STYLE = `
      phrase outwards. */
   .bubble[data-grow="up"] { flex-direction: column-reverse; }
   .bubble[data-grow="up"] .actions { padding: 2px 0 8px; }
+  /* The hint's gap follows the box it is about: reversed, the line stands
+     above the box, and its top margin was standing off the action row
+     instead, leaving the words flush against the box's edge (Michał's
+     screenshot, 2026-09-17). */
+  .bubble[data-grow="up"] .editor-hint { margin: 0 0 4px; }
 
   /* Reversing the column moves no borders: the separators in front of the
      second layer change sides by width, colour and style stay put. */
@@ -1123,6 +1128,25 @@ export const STYLE = `
   .actions button[data-action="save"]:hover:not(:disabled):not([aria-disabled="true"]),
   .actions button[data-action="reader"]:hover:not(:disabled),
   .actions button[data-action="settings"]:hover:not(:disabled) { background: rgba(0, 0, 0, 0.1); }
+  /* The press itself, a quarter of the ink: the same strength the page's
+     bar gives a tool in hand (page.css, D221/PR #387), and for the same
+     reason - an e-ink panel keeps 16 greys, and the tenth above rounded
+     back into the paper under Michał's finger on the Boox (2026-09-17).
+     The finger's tap is the press twice over: :active for as long as it
+     is down, and its emulated hover - which stays until the next tap
+     somewhere else - wears the same quarter under the coarse tier the
+     gesture granted (D84), so the panel's refresh finds the state
+     whichever moment it catches. A mouse keeps its tenth on hover. The
+     tier is named by its attribute alone: the sizes test finds the tier's
+     own rule by ".bubble[data-pointer" and must not find this one first. */
+  .actions button[data-action="save"]:active:not(:disabled):not([aria-disabled="true"]),
+  .actions button[data-action="reader"]:active:not(:disabled),
+  .actions button[data-action="settings"]:active:not(:disabled),
+  [data-pointer="coarse"] .actions button[data-action="save"]:hover:not(:disabled):not([aria-disabled="true"]),
+  [data-pointer="coarse"] .actions button[data-action="reader"]:hover:not(:disabled),
+  [data-pointer="coarse"] .actions button[data-action="settings"]:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--door-ink) 25%, transparent);
+  }
   /* Dimmed two ways that look the same: disabled, when there is nothing a
      press could do, and aria-disabled, when a press has one thing to say -
      the note line's sentence about pressing a dictionary line (D175). A
