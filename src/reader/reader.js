@@ -352,11 +352,15 @@ const underlineSetting = document.getElementById("underline-setting");
 const rateSetting = document.getElementById("rate-setting");
 const rateValue = document.getElementById("rate-value");
 const speechBar = document.getElementById("speech-bar");
-// The paged layout's two pieces of chrome (D233): the paper over the cut
-// line at the foot of a page, and the page count under it.
+// The paged layout's pieces of chrome (D233, D238): the paper over the cut
+// line at the foot of a page and over its head, the foot's strip with the
+// page count, the count's second home in the bar, and the count as a
+// screen reader hears it.
 const pageCurtain = document.getElementById("page-curtain");
 const pageHead = document.getElementById("page-head");
 const pageFooter = document.getElementById("page-footer");
+const pageCount = document.getElementById("page-count");
+const pageLive = document.getElementById("page-live");
 const speechPlayButton = document.getElementById("speech-play");
 const speechPlayLabel = document.getElementById("speech-play-label");
 const library = document.getElementById("library");
@@ -1616,12 +1620,9 @@ function restorePosition(position, segmentIndex = 0) {
  *
  * @param {number} [fold] the chrome's reach to measure under - the whole
  *   chrome with any open sheet by default; the bar alone for the pages
- * @param {boolean} [bars] whether a bar standing at the foot ends the band -
- *   yes for the scroll layout's turns and the voice; no for the pages, whose
- *   footer's strip is the bars' height and holds them (D233)
  * @returns {{ top: number, bottom: number }}
  */
-function readableBand(fold = chromeFold(), bars = true) {
+function readableBand(fold = chromeFold()) {
   const view = window.visualViewport;
   const seen =
     view === null
@@ -1629,10 +1630,13 @@ function readableBand(fold = chromeFold(), bars = true) {
       : { top: view.offsetTop, bottom: view.offsetTop + view.height };
 
   let bottom = seen.bottom;
-  // The page count's footer (D233) stands at the foot like the bars, and is
-  // measured like them - and like them measures as nothing while it is not
-  // laid out.
-  for (const bar of bars ? [speechBar, markBar, pageFooter] : [pageFooter]) {
+  // The page's foot (D233, D238) stands at the window's foot like the bars,
+  // and is measured like them - and like them measures as nothing while it
+  // is not laid out. Whatever stands lowest ends the band: the pages are
+  // cut above a bar as the scroll layout's turns are (D238 - the page keeps
+  // its first line when a bar stands up, and gives its last lines to the
+  // curtain), so nothing is ever laid under one.
+  for (const bar of [speechBar, markBar, pageFooter]) {
     if (bar === null || bar.hidden) continue;
     const edge = bar.getBoundingClientRect().top;
     // A bar measured at nothing is a bar that is not laid out; taking that
@@ -1786,6 +1790,13 @@ function paged() {
  * @property {number} height the band the pages were cut for
  * @property {number} extent the document's scroll height they were cut from
  * @property {number} epoch the document they were cut from
+ * @property {Element[]} blocks the flow's blocks the pages were cut from
+ * @property {import("../lib/reader/pages.js").Box[]} boxes their boxes,
+ *   document coordinates, as they stood at the cut
+ * @property {number | null} anchor the top of the page turned to last (D238):
+ *   the page the window is on while nothing has moved it, and the one it
+ *   goes back to when something has - the bubble's ride, the text
+ *   re-wrapped under a re-cut. Null for a table nobody has turned in yet.
  */
 
 /** @type {PageTable | null} */
@@ -1795,26 +1806,49 @@ let pageTable = null;
 const pageMain = document.getElementById("page");
 
 /**
- * A page's margins, top and bottom: the room a page of paper keeps between
- * its edge and its first and last lines (Michał's smoke, 2026-09-17: the
- * first line stood against the bar's border, and against the window's edge
- * with the bar folded). In the interface's own unit, so the margin grows
- * with a device's text zoom the way the bar does.
+ * One of the stylesheet's lengths (`--page-air`, `--page-foot-air` in
+ * reader.css) in CSS pixels, read rather than repeated: two copies of one
+ * margin would part on the first edit. In the interface's own unit there,
+ * so a margin grows with a device's text zoom the way the bar does.
+ *
+ * @param {string} name the custom property
+ * @param {number} fallback in rem, for a stylesheet that does not say
+ * @returns {number}
+ */
+function airToken(name, fallback) {
+  const root = getComputedStyle(document.documentElement);
+  const rem = Number.parseFloat(root.fontSize);
+  const unit = Number.isFinite(rem) && rem > 0 ? rem : 16;
+  const declared = /^\s*([\d.]+)\s*(rem|px)\s*$/.exec(root.getPropertyValue(name));
+  if (declared === null) return unit * fallback;
+  const amount = Number.parseFloat(declared[1] ?? "");
+  if (!Number.isFinite(amount)) return unit * fallback;
+  return declared[2] === "px" ? amount : amount * unit;
+}
+
+/**
+ * A page's top margin: the room a page of paper keeps between the bar's
+ * edge and its first line (Michał's smoke, 2026-09-17: the first line
+ * stood against the bar's border, and against the window's edge with the
+ * bar folded).
  *
  * @returns {number}
  */
 function pageAir() {
-  const root = getComputedStyle(document.documentElement);
-  const rem = Number.parseFloat(root.fontSize);
-  const unit = Number.isFinite(rem) && rem > 0 ? rem : 16;
-  // The stylesheet's own number (`--page-air`, reader.css), read rather
-  // than repeated: the footer's strip is cut from the same token, and two
-  // copies of one margin would part on the first edit.
-  const declared = /^\s*([\d.]+)\s*(rem|px)\s*$/.exec(root.getPropertyValue("--page-air"));
-  if (declared === null) return unit * 0.75;
-  const amount = Number.parseFloat(declared[1] ?? "");
-  if (!Number.isFinite(amount)) return unit * 0.75;
-  return declared[2] === "px" ? amount : amount * unit;
+  return airToken("--page-air", 0.75);
+}
+
+/**
+ * A page's bottom margin (D238): only as much as keeps the last line's
+ * descenders off whatever stands at the foot - the window's edge, the
+ * count's line, a bar's border - and no more. The first cuts kept a strip
+ * the bars' height under every page, and on the Boox it read as three or
+ * four empty lines (Michał's photos, 2026-09-17).
+ *
+ * @returns {number}
+ */
+function pageFootAir() {
+  return airToken("--page-foot-air", 0.5);
 }
 
 /**
@@ -1825,24 +1859,27 @@ function pageAir() {
  * Aa panel and the menu hang over the text and leave the pages as they
  * are. Its top is also the first page's top in the flow: the chrome stands
  * at the document's head, stuck, so its edge in the window is its edge in
- * the flow before anything has scrolled. Above the footer's strip, and
- * never above a bar: the strip is the bars' height and a bar standing up
- * covers it, so the pages stay cut as it comes and goes (the same smoke:
- * "the toolbar must not change the text's layout"). `floor` is the strip's
- * edge - where the curtain has nothing left to cover.
+ * the flow before anything has scrolled. Its foot is a small margin above
+ * whatever actually stands lowest in the window, measured off it (D238):
+ * the page's foot strip - the count's one line when the setting shows it,
+ * the phone's safe area alone otherwise - or a bar standing up, the
+ * voice's or the pen's. A bar shortens the band, then, and the pages are
+ * cut again for it; the page being read keeps its first line through that
+ * (`pagesNow`, the anchor), so what the reader sees is the last lines
+ * going behind the curtain, never the text moving. `floor` is the edge of
+ * what stands lowest - where the curtain has nothing left to cover.
  *
  * @returns {{ top: number, bottom: number, floor: number }}
  */
 function pageBand() {
-  const band = readableBand(barFold(), false);
-  const air = pageAir();
+  const band = readableBand(barFold());
   let top = band.top;
   if (chromeTab !== null && !chromeTab.hidden) {
     const edge = chromeTab.getBoundingClientRect().bottom;
     if (edge > top) top = edge;
   }
-  top += air;
-  return { top, bottom: Math.max(top, band.bottom - air), floor: band.bottom };
+  top += pageAir();
+  return { top, bottom: Math.max(top, band.bottom - pageFootAir()), floor: band.bottom };
 }
 
 /**
@@ -1931,33 +1968,176 @@ function lineBoxes(block) {
 }
 
 /**
+ * The first line of the page turned to, kept as a place in the text
+ * (D238): the block it stands in and, for a line inside the block, the text
+ * node and the offset of the line's first character. Measured again when
+ * the pages have to be cut again for the same document, so the page keeps
+ * its first line whatever moved: a bar standing up only shortens the band,
+ * and the line's coordinate holds; the bar folded away, a picture arrived
+ * or the type resized re-wrap the text, and the line is found again where
+ * its words went. Nothing for a page opening on a block's own top edge but
+ * the block, and nothing when the line cannot be pinned to a character (a
+ * page cut inside a picture): then the next cut runs from the head, as
+ * every cut did before the anchor existed.
+ *
+ * @type {{ block: Element, node: Text | null, offset: number } | null}
+ */
+let pageAnchor = null;
+
+/**
+ * Whether a pointer is down on the page - a hold, a stroke, a handle's
+ * drag. The pages are never cut again under a finger (D238): with the
+ * anchor nothing would move, but the curtain would, and a curtain jumping
+ * under a stretching selection is the gesture losing its end. A cut asked
+ * for meanwhile waits for the lift (`settleWanted`).
+ */
+let pointerHeld = false;
+let settleWanted = false;
+
+/**
+ * Whether the table has to be cut again although nothing it was keyed on
+ * has measurably changed yet - the Aa panel about to re-wrap the text, the
+ * count's line about to stand at the foot. Kept rather than dropped, so the
+ * re-cut still has the page being read to begin from (D238).
+ */
+let pagesStale = false;
+
+/**
+ * Keeps the page's first line as a place in the text (`pageAnchor`).
+ *
+ * @param {PageTable} pages
+ * @param {number} page
+ */
+function keepPageAnchor(pages, page) {
+  pageAnchor = null;
+  const top = pages.tops[page];
+  if (top === undefined) return;
+  // The block the page opens in: the one whose box holds the page's top,
+  // or begins on it.
+  const at = pages.boxes.findIndex((box) => box.top <= top + 1 && box.bottom > top + 1);
+  const block = pages.blocks[at];
+  const box = pages.boxes[at];
+  if (block === undefined || box === undefined) return;
+  if (box.top >= top - 1) {
+    pageAnchor = { block, node: null, offset: 0 };
+    return;
+  }
+  const found = lineStartIn(block, top);
+  if (found !== null) pageAnchor = { block, node: found.node, offset: found.offset };
+}
+
+/**
+ * The first character of the line standing at `top` inside a block: the
+ * first text node with a box on or under that line, and in it the first
+ * character whose box stands there. A node's characters never climb back
+ * up the page, so the edge is found by halves - a handful of boxes asked
+ * for, whatever the paragraph's length.
+ *
+ * @param {Element} block
+ * @param {number} top the line's top, document coordinates
+ * @returns {{ node: Text, offset: number } | null}
+ */
+function lineStartIn(block, top) {
+  const scrolled = window.scrollY;
+  const range = document.createRange();
+  const walker = document.createTreeWalker(block, NodeFilter.SHOW_TEXT);
+  for (let node = walker.nextNode(); node !== null; node = walker.nextNode()) {
+    if (!(node instanceof Text) || node.length === 0) continue;
+    range.selectNodeContents(node);
+    let reaches = false;
+    for (const rect of range.getClientRects()) {
+      if (rect.height > 0 && rect.top + scrolled >= top - 1) {
+        reaches = true;
+        break;
+      }
+    }
+    if (!reaches) continue;
+    let low = 0;
+    let high = node.length - 1;
+    while (low < high) {
+      const mid = (low + high) >> 1;
+      range.setStart(node, mid);
+      range.setEnd(node, mid + 1);
+      const rect = range.getClientRects()[0];
+      // A character with no box - a collapsed space at a line's end - is
+      // the line before's.
+      if (rect !== undefined && rect.top + scrolled >= top - 1) high = mid;
+      else low = mid + 1;
+    }
+    return { node, offset: low };
+  }
+  return null;
+}
+
+/**
+ * Where the kept first line stands now, document coordinates, snapped to
+ * the top of its line box the way the cutter measures lines (a character's
+ * own box can stand a hair under a taller neighbour's on the same line) -
+ * or undefined when nothing is kept, or what was kept is gone.
+ *
+ * @returns {number | undefined}
+ */
+function anchorY() {
+  const kept = pageAnchor;
+  if (kept === null || !kept.block.isConnected) return undefined;
+  const scrolled = window.scrollY;
+  if (kept.node === null) return kept.block.getBoundingClientRect().top + scrolled;
+  if (!kept.node.isConnected || kept.offset >= kept.node.length) return undefined;
+  const range = document.createRange();
+  range.setStart(kept.node, kept.offset);
+  range.setEnd(kept.node, kept.offset + 1);
+  const rect = range.getClientRects()[0];
+  if (rect === undefined) return undefined;
+  const y = rect.top + scrolled;
+  const line = lineBoxes(kept.block).find((one) => one.top <= y + 1 && one.bottom > y + 1);
+  return line === undefined ? y : line.top;
+}
+
+/**
  * The page table as it stands, cut now if nothing usable is kept - or null
  * when the document is not read by pages.
+ *
+ * Cut again for the same document - the band shortened by a bar or the
+ * browser's own bar, lengthened by the bar folding away, the type resized,
+ * a picture arrived - the table is cut from the page being read (D238):
+ * its first line, found again in the text, opens the same page in the new
+ * table, and the pages before it are cut back from there. The window then
+ * stands where it stood, and only the curtain moves. Never under a finger:
+ * a held pointer gets the table it has, and the cut waits for the lift.
  *
  * @returns {PageTable | null}
  */
 function pagesNow() {
   if (!paged()) return null;
-  // The footer stands before the band is measured - the band ends above
-  // it, and a table cut for a band without it would be a line too long.
+  // The foot stands before the band is measured - the band ends above it,
+  // and a table cut for a band without it would be a line too long.
   if (pageFooter !== null) pageFooter.hidden = false;
   const band = pageBand();
   const height = Math.max(0, band.bottom - band.top);
   const extent = document.documentElement.scrollHeight;
+  const kept = pageTable;
   if (
-    pageTable !== null &&
-    pageTable.height === height &&
-    pageTable.extent === extent &&
-    pageTable.epoch === epoch
+    kept !== null &&
+    !pagesStale &&
+    kept.height === height &&
+    kept.extent === extent &&
+    kept.epoch === epoch
   ) {
-    return pageTable;
+    return kept;
   }
+  const same = kept !== null && kept.epoch === epoch;
+  if (same && pointerHeld) {
+    settleWanted = true;
+    return kept;
+  }
+  pagesStale = false;
   const blocks = flowBlocks();
   const scrolled = window.scrollY;
   const boxes = blocks.map((block) => {
     const rect = block.getBoundingClientRect();
     return { top: rect.top + scrolled, bottom: rect.bottom + scrolled };
   });
+  const anchor = same ? anchorY() : undefined;
   // The first page begins where the band does, before anything has
   // scrolled: under the chrome and its tab, a margin down (`pageBand`).
   const tops = pageTops(
@@ -1968,23 +2148,39 @@ function pagesNow() {
     },
     height,
     band.top,
+    anchor,
   );
-  pageTable = { tops, height, extent, epoch };
+  pageTable = {
+    tops,
+    height,
+    extent,
+    epoch,
+    blocks,
+    boxes,
+    anchor: anchor === undefined ? null : (tops[pageAt(tops, anchor)] ?? null),
+  };
   return pageTable;
 }
 
 /**
- * The page on screen: the one the line under the stuck chrome belongs to.
+ * The page on screen: the one the line under the stuck chrome belongs to -
+ * or, with the window off any page (the bubble's ride, the text re-wrapped
+ * under a re-cut), the page turned to last, which the window goes back to.
  *
  * @param {PageTable} pages
  * @returns {number}
  */
 function pageShown(pages) {
-  return pageAt(pages.tops, window.scrollY + pageBand().top);
+  const band = pageBand();
+  const under = pageAt(pages.tops, window.scrollY + band.top);
+  if (pages.anchor === null || onPage(window.scrollY, pages.tops[under] ?? 0, band.top)) return under;
+  return pageAt(pages.tops, pages.anchor);
 }
 
 /**
  * Turns to one page of the table: the scroll, and the curtain, in one task.
+ * The page turned to is the one the table keeps (`anchor`), and its first
+ * line the place the next cut is measured from.
  *
  * @param {PageTable} pages
  * @param {number} page
@@ -1996,6 +2192,8 @@ function showPageOf(pages, page) {
   // e-ink panel is a page of smeared refreshes. The scroll arms the
   // position save like any other.
   scrollTo(0, Math.max(0, top - pageBand().top));
+  pages.anchor = top;
+  keepPageAnchor(pages, page);
   refreshCurtain();
 }
 
@@ -2104,6 +2302,11 @@ function revealOnPage(range, kind) {
  * for itself (D138), and the page waits for it to leave.
  */
 function settlePage() {
+  // Not under a finger (D238): the lift settles the page.
+  if (pointerHeld) {
+    settleWanted = true;
+    return;
+  }
   const pages = pagesNow();
   if (pages === null) {
     refreshCurtain();
@@ -2123,18 +2326,25 @@ function settlePage() {
  * The curtain and the page count, as they stand for the window's position:
  * the curtain over the foot of the page shown - and only while the window
  * stands on a page, because shown off its top the page's foot is somewhere
- * else - and the count of the page shown out of the part's pages. Both
- * gone when the document is not read by pages.
+ * else - and the count of the page shown out of the part's pages, said in
+ * three places (D238): at the foot, where the stylesheet shows it only
+ * when the setting asks (off, the foot is the phone's safe area alone);
+ * in the bar beside the brand while the foot keeps none, on a screen wide
+ * enough (the stylesheet again); and for a screen reader always, in the
+ * live region, whatever the eye is shown. All gone when the document is
+ * not read by pages.
  */
 function refreshCurtain() {
   if (pageCurtain === null || pageHead === null || pageFooter === null) return;
   const reading = paged();
-  // The footer stands before the band is measured: the band ends above it.
+  // The foot stands before the band is measured: the band ends above it.
   pageFooter.hidden = !reading;
   const pages = pagesNow();
   if (pages === null) {
     pageCurtain.hidden = true;
     pageHead.hidden = true;
+    if (pageCount !== null) pageCount.hidden = true;
+    if (pageLive !== null && pageLive.textContent !== "") pageLive.textContent = "";
     return;
   }
   const band = pageBand();
@@ -2144,22 +2354,29 @@ function refreshCurtain() {
   // position - a page shown off its top shows text there too.
   pageHead.hidden = false;
   pageHead.style.height = `${band.top}px`;
-  const page = pageAt(pages.tops, window.scrollY + band.top);
+  const page = pageShown(pages);
   const top = pages.tops[page] ?? 0;
-  // The curtain runs down to the window's foot, under the footer or a bar;
-  // what decides whether there is anything to cover is the strip's edge,
-  // not the page's bottom margin above it.
+  // The curtain runs down to the window's foot, under the foot's strip or a
+  // bar; what decides whether there is anything to cover is that edge, not
+  // the page's bottom margin above it.
   const cover = onPage(window.scrollY, top, band.top)
     ? curtainTop(pages.tops, page, window.scrollY, band.floor)
     : null;
   pageCurtain.hidden = cover === null;
   if (cover !== null) pageCurtain.style.top = `${cover}px`;
   const count = pages.tops.length;
-  pageFooter.textContent = `${(page + 1).toLocaleString()} / ${count.toLocaleString()}`;
-  pageFooter.setAttribute(
-    "aria-label",
-    t("reader_page_of", [(page + 1).toLocaleString(), count.toLocaleString()]),
-  );
+  const said = `${(page + 1).toLocaleString()} / ${count.toLocaleString()}`;
+  if (pageFooter.textContent !== said) pageFooter.textContent = said;
+  if (pageCount !== null) {
+    pageCount.hidden = settings.reader.pageNumber;
+    if (pageCount.textContent !== said) pageCount.textContent = said;
+  }
+  if (pageLive !== null) {
+    // Written only on a change: a live region repeats whatever is written
+    // into it, and the curtain is refreshed on every scroll.
+    const spoken = t("reader_page_of", [(page + 1).toLocaleString(), count.toLocaleString()]);
+    if (pageLive.textContent !== spoken) pageLive.textContent = spoken;
+  }
 }
 
 /**
@@ -2244,7 +2461,8 @@ document.addEventListener("scrollend", () => settlePage(), { capture: true, pass
 
 // The window resized, the browser's bar slid in or out (the visual
 // viewport), a picture arrived, the type grew: the pages are cut again on
-// the next ask, and the window squares with the page under its fold.
+// the next ask - from the page being read (D238), so its first line stays
+// - and the window squares with that page.
 window.addEventListener("resize", () => settlePage());
 window.visualViewport?.addEventListener("resize", () => settlePage());
 new ResizeObserver(() => settlePage()).observe(document.body);
@@ -2257,6 +2475,28 @@ const barWatcher = new MutationObserver(() => settlePage());
 for (const bar of [speechBar, markBar]) {
   if (bar !== null) barWatcher.observe(bar, { attributes: true, attributeFilter: ["hidden"] });
 }
+
+// A pointer down and up (D238): the pages are never cut again under a
+// finger, and a cut asked for meanwhile - the pen's bar standing up from a
+// stroke, the browser's bar sliding - lands on the lift. The window losing
+// the pointer altogether counts as a lift, or a settle could wait forever.
+document.addEventListener(
+  "pointerdown",
+  () => {
+    pointerHeld = true;
+  },
+  { capture: true, passive: true },
+);
+function onPointerLift() {
+  if (!pointerHeld) return;
+  pointerHeld = false;
+  if (!settleWanted) return;
+  settleWanted = false;
+  settlePage();
+}
+document.addEventListener("pointerup", onPointerLift, { capture: true, passive: true });
+document.addEventListener("pointercancel", onPointerLift, { capture: true, passive: true });
+window.addEventListener("blur", onPointerLift);
 
 /**
  * The highlighter (D106): the pen in the bar hands the selection gesture to
@@ -6653,6 +6893,9 @@ function applyAppearance(reader) {
   // The layout (D233), stamped the same way: the stylesheet takes the
   // finger's scroll away under it, and the page table below answers to it.
   root.dataset["readerLayout"] = reader.layout;
+  // Whether the page count stands at the foot (D238): the stylesheet gives
+  // the foot its line under this, and the band ends above it either way.
+  root.dataset["readerPageNumber"] = String(reader.pageNumber);
   root.style.setProperty("--reader-measure", `${reader.measure}ch`);
   // The measure again with the text size cancelled out of it: `ch` scales
   // with the font, which is right for the article's column (a measure counts
@@ -6713,10 +6956,11 @@ function applyAppearance(reader) {
   // reading fresh boxes here sees the layout the new variables made.
   showNoteBadges();
   // The same reflow cuts the pages elsewhere (D233): the table is measured
-  // again on the next ask, and the window squares with the page the
-  // reading stands on - which, the layout just switched, is the page under
-  // the line at the top of the screen.
-  pageTable = null;
+  // again on the next ask - from the page being read, whose first line is
+  // found again in the re-wrapped text (D238) - and the window squares
+  // with that page. The layout just switched, there is no table to keep,
+  // and the page is the one under the line at the top of the screen.
+  pagesStale = true;
   settlePage();
 }
 

@@ -96,6 +96,12 @@
         >
           re/read
         </button>
+        <!-- The page count's place in the bar (D238): beside the brand, in
+             the muted voice, while the foot keeps no count and the bar has
+             the room (the stylesheet hides it under a phone's width).
+             Filled by script with the curtain; the live region at the foot
+             of the page is what a screen reader hears. -->
+        <span id="page-count" class="page-count" hidden aria-hidden="true"></span>
         <!-- The tools span wears the shared class too (D221): the frame the
              tools stand in, and the way a tool in hand is lit, are one rule
              for every page's bar (`.page-tools`, page.css). -->
@@ -1740,14 +1746,17 @@
     <div id="mark-note-badges"></div>
 
     <!--
-      The paged layout's two pieces of chrome (D233), both fixed to the
-      window and both empty until the reader turns pages. The curtain is a
-      strip of the page's own paper laid over the foot of the readable band,
-      from where the next page begins down to the band's floor: it hides the
-      line the window would otherwise show cut in half, so a page closes on
-      a whole line the way it opens on one. The footer is the page count,
-      one quiet line at the window's foot in the interface face; the band
-      ends above it. Sized and filled by script, never by markup.
+      The paged layout's pieces of chrome (D233), fixed to the window and
+      empty until the reader turns pages. The curtain is a strip of the
+      page's own paper laid over the foot of the readable band, from where
+      the next page begins down to the band's floor: it hides the line the
+      window would otherwise show cut in half, so a page closes on a whole
+      line the way it opens on one. The foot is the strip the band ends
+      above: the page count in the interface face when the setting shows it
+      (D238), the phone's safe area alone otherwise - the count is written
+      either way and the stylesheet decides. Sized and filled by script,
+      never by markup. Hidden from the screen reader, which hears the count
+      from the live region below instead.
     -->
     <div id="page-curtain" class="page-curtain" hidden aria-hidden="true"></div>
     <!--
@@ -1758,7 +1767,13 @@
       line of page two). Under the chrome and its tab, above the text.
     -->
     <div id="page-head" class="page-head" hidden aria-hidden="true"></div>
-    <p id="page-footer" class="page-footer" hidden aria-live="off"></p>
+    <p id="page-footer" class="page-footer" hidden aria-hidden="true"></p>
+    <!--
+      The count as a screen reader hears it (D238): "Page 19 of 31", said
+      politely on every turn, whether or not the eye is shown a count
+      anywhere. Empty outside the paged layout.
+    -->
+    <p id="page-live" class="visually-hidden" aria-live="polite"></p>
 
     <!--
       The note behind a mark (D118), read and written in one room: a native

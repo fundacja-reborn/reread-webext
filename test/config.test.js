@@ -794,6 +794,16 @@ describe("the reader's appearance", () => {
     assert.equal(withDefaults({ reader: {} }).reader.layout, "scroll");
   });
 
+  it("shows the page count at the foot only on a stored true (D238)", () => {
+    // Off by default: a line under every page for the whole of a reading.
+    // A profile from before the field keeps the quiet foot.
+    assert.equal(READER_DEFAULTS.pageNumber, false);
+    assert.equal(withDefaults({ reader: { pageNumber: true } }).reader.pageNumber, true);
+    assert.equal(withDefaults({ reader: { pageNumber: "yes" } }).reader.pageNumber, false);
+    assert.equal(withDefaults({ reader: { pageNumber: 1 } }).reader.pageNumber, false);
+    assert.equal(withDefaults({ reader: {} }).reader.pageNumber, false);
+  });
+
   it("clamps a size or a width out of range instead of forgetting it", () => {
     // A value from a future version with a wider scale said what somebody
     // wanted; the default would not.

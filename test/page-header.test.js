@@ -190,11 +190,16 @@ describe("the bar stuck to the top of every page", () => {
     assert.match(ruleOf(styles, ".page-head"), /position: fixed;\s*inset-inline: 0;\s*top: 0;/, "the head's curtain is not fixed to the window's top");
     const footer = ruleOf(styles, ".page-footer");
     assert.match(footer, /position: fixed;/, "the page count is not fixed to the window");
-    // The strip is the bars' own height less the page's margin, so a bar
-    // standing up covers the strip and the empty margin and never a line -
-    // both counted from the foot's token, the way the head's `--bar-h`
-    // holds the bar and the scroll padding together.
-    assert.match(footer, /min-height: var\(--foot-h\);/, "the footer's strip is not the bars' height - the last line would stand on a bar's edge");
+    // The foot is the phone's safe area alone by default (D238): the strip
+    // the bars' height that stood here read on the Boox as three or four
+    // empty lines under every page (Michał's photos, 2026-09-17). The
+    // count's line comes with the setting, and no touch floor with it -
+    // the count is not a control.
+    assert.match(footer, /height: env\(safe-area-inset-bottom, 0px\);\s*overflow: hidden;/, "the foot keeps a strip under every page with the count off");
+    assert.doesNotMatch(footer, /min-height|--foot-h/, "the foot's strip is the bars' height again");
+    const counted = ruleOf(styles, ':root[data-reader-page-number="true"] .page-footer');
+    assert.match(counted, /height: auto;\s*min-height: calc\(1\.4rem \+ env\(safe-area-inset-bottom, 0px\)\);/, "the count's strip is not one line with a breath of air, standing as tall before the count is written as after");
+    assert.doesNotMatch(counted, /44px|--foot-h/, "the count's line wears a touch floor");
     assert.match(ruleOf(styles, "body.reader:has(#speech-bar:not([hidden])),\nbody.reader:has(#mark-bar:not([hidden]))"), /padding-bottom: calc\(var\(--foot-h\) \+ var\(--page-air\)\);/, "the scroll layout's room under a bar is not counted from the foot's token");
     assert.doesNotMatch(styles, /\.page-footer \{\s*display: none;/, "the page count leaves under a bar, and the band with it");
     // The token counts what stands in a bar: the buttons' floor, the air
@@ -208,8 +213,14 @@ describe("the bar stuck to the top of every page", () => {
     assert.match(transport, /min-height: var\(--foot-h\);/, "the transport bar does not take the token as its floor");
     assert.match(ruleOf(styles, ".speech-bar.mark-bar"), new RegExp(`padding: ${Number(air) / 2}rem 0\\.4rem;`), "the pen's bar keeps other air than the token counts");
     assert.match(styles, /--page-air: 0\.75rem;/, "the page's margin is not one declared number");
-    // The reader reads the margin off the stylesheet rather than repeating it.
-    assert.match(await source("reader/reader.js"), /getPropertyValue\("--page-air"\)/, "the reader keeps a margin of its own beside the stylesheet's");
+    // The page's bottom margin (D238): only what keeps the last line's
+    // descenders off what stands at the foot, and smaller than the top's.
+    assert.match(styles, /--page-foot-air: 0\.5rem;/, "the page's bottom margin is not one declared number");
+    // The reader reads both margins off the stylesheet rather than repeating them.
+    const reader = await source("reader/reader.js");
+    assert.match(reader, /airToken\("--page-air", 0\.75\)/, "the reader keeps a margin of its own beside the stylesheet's");
+    assert.match(reader, /airToken\("--page-foot-air", 0\.5\)/, "the reader keeps a bottom margin of its own beside the stylesheet's");
+    assert.match(reader, /bottom: Math\.max\(top, band\.bottom - pageFootAir\(\)\), floor: band\.bottom/, "the band's foot is not the small margin above what stands lowest");
   });
 
   it("hangs the reader's panels under the bar as sheets over the text, and offers each Aa row once", async () => {

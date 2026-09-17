@@ -135,6 +135,113 @@ describe("pageTops", () => {
     assert.deepEqual(pageTops(blocks, linesOf, 160, 260), [260]);
   });
 
+  describe("cut from an anchor (D238)", () => {
+    // Three paragraphs of ten lines at 30px, 20px apart, under a 60px
+    // chrome: lines at 100-400, 420-720, 740-1040.
+    const { blocks, linesOf } = flow([{ lines: 10 }, { lines: 10 }, { lines: 10 }]);
+    const canonical = pageTops(blocks, linesOf, 200, 60);
+
+    /**
+     * Every line of the flow on exactly one page: the pages are contiguous,
+     * each opens on a line's or a block's top (or the head), and no page
+     * holds more than the band.
+     *
+     * @param {number[]} tops
+     * @param {number} height
+     */
+    function whole(tops, height) {
+      const lineTops = [0, 1, 2].flatMap((index) => linesOf(index).map((line) => line.top));
+      const blockTops = blocks.map((block) => block.top);
+      for (const [index, top] of tops.entries()) {
+        if (index > 0) {
+          assert.ok(top > (tops[index - 1] ?? 0), "a page does not begin below the one before");
+          assert.ok(lineTops.includes(top) || blockTops.includes(top), `${top} is no line's top`);
+        }
+        const next = tops[index + 1];
+        if (next !== undefined) {
+          // Every line beginning on the page ends on it, within the band:
+          // the next page may open a gap's width below the band (a block
+          // beginning past the edge opens it whole), never a line's.
+          for (const line of [0, 1, 2].flatMap((one) => linesOf(one))) {
+            if (line.top >= top && line.top < next) {
+              assert.ok(line.bottom <= next + 1, `a line is cut at ${next}`);
+              assert.ok(line.bottom <= top + height + 1, `page ${index} holds more than the band`);
+            }
+          }
+        }
+      }
+    }
+
+    it("keeps the anchored page's first line and cuts on from it as from the head", () => {
+      // The seventh line of the first paragraph (280) opened a page while
+      // the band was 220px tall; the band shrinks to 200 (a bar stood up).
+      const tops = pageTops(blocks, linesOf, 200, 60, 280);
+      assert.ok(tops.includes(280), "the anchored page lost its first line");
+      const at = tops.indexOf(280);
+      // On from the anchor: exactly the canonical cut from that top.
+      assert.deepEqual(tops.slice(at), pageTops(blocks, linesOf, 200, 280).slice(0));
+      whole(tops, 200);
+    });
+
+    it("cuts the pages before the anchor back from it, each ending on the next", () => {
+      // The third paragraph's top (730 is its box top less the gap: 740 is
+      // the first line; the block begins at 740) as the anchor.
+      const tops = pageTops(blocks, linesOf, 200, 60, 740);
+      assert.deepEqual(tops, [60, 160, 340, 540, 740, 920]);
+      whole(tops, 200);
+      // Each page before the anchor is as full as the band allows: the
+      // earliest line from which everything down to the next page fits.
+      assert.equal(540, 740 - 200);
+      assert.equal(340, 540 - 200);
+    });
+
+    it("comes up short on the head's page rather than on any other", () => {
+      // 280 anchored in a 170px band: pages back of 150 (five lines) and
+      // 130 - the head's page holds a single line and the margin.
+      const tops = pageTops(blocks, linesOf, 170, 60, 280);
+      assert.deepEqual(tops.slice(0, 3), [60, 130, 280]);
+      whole(tops, 170);
+    });
+
+    it("opens the head's page on the first block when only the margin is left above the cut", () => {
+      // 280 anchored in a 200px band: the page before holds every line
+      // from 100 to 280 - 180px - and the 40px of paper above the first
+      // block would have made the head's page an empty one.
+      const tops = pageTops(blocks, linesOf, 200, 60, 280);
+      assert.equal(tops[0], 100);
+      assert.equal(tops[1], 280);
+    });
+
+    it("is the canonical table for an anchor at the head, or past the end", () => {
+      assert.deepEqual(pageTops(blocks, linesOf, 200, 60, 60), canonical);
+      assert.deepEqual(pageTops(blocks, linesOf, 200, 60, 20), canonical);
+      assert.deepEqual(pageTops(blocks, linesOf, 200, 60, 5000), canonical);
+      // A canonical page's top as the anchor changes nothing either.
+      assert.deepEqual(pageTops(blocks, linesOf, 200, 60, canonical[2]), canonical);
+    });
+
+    it("holds the anchor's top whatever the band does", () => {
+      for (const height of [120, 170, 200, 260, 400]) {
+        const tops = pageTops(blocks, linesOf, height, 60, 480);
+        assert.ok(tops.includes(480), `the anchor moved at ${height}px`);
+        whole(tops, height);
+      }
+    });
+
+    it("moves a picture whole onto the page before when the cut back lands inside it", () => {
+      // Four lines, a picture four lines tall, six lines: anchored on the
+      // last paragraph's top, the picture (240-360) does not fit above it
+      // with the page's own lines, so it goes whole to the page before.
+      const plated = flow([{ lines: 4 }, { lines: 4, plain: true }, { lines: 6 }]);
+      assert.deepEqual(pageTops(plated.blocks, plated.linesOf, 200, 60, 380), [60, 190, 380]);
+      // Anchored inside a picture taller than a page, the picture is cut at
+      // the edge both ways, as the forward cut cuts one - and the head's
+      // page shows the plate's top, short.
+      const tall = flow([{ lines: 20, plain: true }]);
+      assert.deepEqual(pageTops(tall.blocks, tall.linesOf, 250, 60, 400), [60, 150, 400, 650]);
+    });
+  });
+
   it("never cuts inside a page's first line twice", () => {
     // A cut line whose top is the page's own top would make no progress;
     // the cutter falls back to the edge.

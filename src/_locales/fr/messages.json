@@ -1465,6 +1465,10 @@
   "options_reader_only_hint": {
     "message": "Limite le soulignement des phrases enregistrées et la bulle de traduction au lecteur. Sélectionner du texte sur une page web ordinaire proposera uniquement de l'ouvrir dans le lecteur. Lorsqu'elle est activée, aucune page web ne peut savoir lesquels de ses mots vous avez enregistrés. Sur Android et iOS, l'option est activée par défaut."
   },
+  "options_page_number": { "message": "Numéro de page dans l'affichage Pages" },
+  "options_page_number_hint": {
+    "message": "Affiche le compteur de pages en bas de la fenêtre lorsque l'affichage du lecteur est réglé sur Pages. Désactivé, la dernière ligne de chaque page descend plus bas ; les lecteurs d'écran lisent toujours le compteur, et sur un écran large il se trouve dans la barre à côté de re/read."
+  },
   "options_keep_articles": { "message": "Enregistrer par défaut dans la liste de lecture hors ligne" },
   "options_keep_articles_hint": {
     "message": "Enregistre automatiquement chaque page ouverte dans le lecteur pour la lecture hors ligne. Vos pages enregistrées, vos surlignages et votre progression de lecture sont préservés même si le site d'origine change ou disparaît."

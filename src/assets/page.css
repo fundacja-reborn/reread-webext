@@ -683,6 +683,13 @@ button.page-mark:hover {
     min-width: 2.4rem;
     padding-inline: 0.4rem;
   }
+
+  /* The reader's page count beside the brand (D238, reader.css) leaves
+     with the tools' air: the full-screen tool already yields to the row's
+     width here, and the count would only evict it. */
+  .page-count {
+    display: none;
+  }
 }
 
 /* The small menu behind a page's drawn ☰ button: the extension's own pages
