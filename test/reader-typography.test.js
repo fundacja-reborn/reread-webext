@@ -150,8 +150,10 @@ describe("the typography rows (D225) - the stylesheet", () => {
   it("says the chosen word with the bar's wash, in both homes of the panel, and leaves the swatches their ring", async () => {
     // The accent alone - on the frame and on the word - is the resting
     // frame's grey on an e-ink panel (Michał's Boox, 2026-09-15); the
-    // bar's quarter-accent wash is the cut that survived its sixteen greys.
-    const wash = String.raw`border-color: var\(--page-accent\);\s*background: color-mix\(in srgb, var\(--page-accent\) 25%, transparent\);\s*color: var\(--page-fg\);`;
+    // bar's quarter-accent wash is the cut that survived its sixteen greys,
+    // and since D237 the wash and the ring are the root's tokens (page.css
+    // holds the quarter; the e-ink palette says otherwise).
+    const wash = String.raw`border-color: var\(--page-accent\);\s*background: var\(--page-pressed-bg\);\s*box-shadow: var\(--page-pressed-ring\);\s*color: var\(--page-fg\);`;
     const reader = await source("src/reader/reader.css");
     assert.match(reader, new RegExp(String.raw`\.reader-choices button\[aria-pressed="true"\] \{\s*${wash}`));
     assert.match(reader, /#marker-color-choices button\[aria-pressed="true"\],\s*#underline-choices button\[aria-pressed="true"\],\s*\.mark-inks button\[aria-pressed="true"\] \{\s*box-shadow: 0 0 0 2px var\(--page-accent\);[^}]*background: transparent;/, "a wash sits around a drawn ink");
@@ -159,10 +161,11 @@ describe("the typography rows (D225) - the stylesheet", () => {
     assert.match(phrases, new RegExp(String.raw`\.page-choices button\[aria-pressed="true"\] \{\s*${wash}`), "the phrases page's panel says it another way");
   });
 
-  it("gives the list's tabs, the article's held pills and the phrases page's shelves the same quarter of the accent", async () => {
+  it("gives the list's tabs, the article's held pills and the phrases page's shelves the same wash and ring", async () => {
     // Every pressed state on the pages says it with one wash (Michał's
-    // ask after the panel, 2026-09-15): 12% was paper on the Boox.
-    const quarter = /background: color-mix\(in srgb, var\(--page-accent\) 25%, transparent\);/;
+    // ask after the panel, 2026-09-15): 12% was paper on the Boox. The
+    // wash is the root's token since D237, and the ring beside it.
+    const quarter = /background: var\(--page-pressed-bg\);\s*box-shadow: var\(--page-pressed-ring\);/;
     const reader = await source("src/reader/reader.css");
     assert.match(reader, new RegExp(String.raw`\.library-segments button\[aria-pressed="true"\] \{\s*border-color: var\(--page-accent\);\s*${quarter.source}`), "the tab in view is back to 12%");
     assert.match(reader, new RegExp(String.raw`\.article-actions button\[aria-pressed="true"\] \{\s*border-color: var\(--page-accent\);\s*${quarter.source}`), "the held pill is back to 12%");

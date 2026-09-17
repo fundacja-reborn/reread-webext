@@ -109,7 +109,8 @@ summary {
    2026-09-15). */
 .page-choices button[aria-pressed="true"] {
   border-color: var(--page-accent);
-  background: color-mix(in srgb, var(--page-accent) 25%, transparent);
+  background: var(--page-pressed-bg);
+  box-shadow: var(--page-pressed-ring);
   color: var(--page-fg);
 }
 
@@ -181,7 +182,8 @@ summary {
    2026-09-15). */
 .phrase-segments button[aria-pressed="true"] {
   border-color: var(--page-accent);
-  background: color-mix(in srgb, var(--page-accent) 25%, transparent);
+  background: var(--page-pressed-bg);
+  box-shadow: var(--page-pressed-ring);
 }
 
 /* --- disclosure lines: the intro and the file-format note, folded --- */

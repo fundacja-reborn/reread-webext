@@ -113,15 +113,21 @@ describe("the bar stuck to the top of every page", () => {
   it("says a tool in hand by a real wash alone, so that 16 greys keep it and the bar stays quiet, on every page's bar", async () => {
     const styles = await source("assets/page.css");
     const lit = ruleOf(styles, '.page-tools > button[aria-pressed="true"],\n.page-tools > button[aria-expanded="true"]');
+    // The wash and the ring are the root's two tokens since D237, so a
+    // palette can say otherwise: the lit rule reads nothing else.
+    assert.match(lit, /background: var\(--page-pressed-bg\);\s*box-shadow: var\(--page-pressed-ring\);/, "the lit tool lights itself by a wash of its own");
     // A quarter of the accent lands two greys under the paper; 12% rounded
     // back into it (Michał's photo from the Boox, 2026-09-14).
-    const wash = /background: color-mix\(in srgb, var\(--page-accent\) (\d+)%, transparent\);/.exec(lit);
-    assert.ok(wash !== null, "the lit tool has no wash of the accent");
-    assert.ok(Number(wash[1]) >= 25, `the lit tool's wash is ${wash[1]}% of the accent - back to invisible on e-ink`);
+    const root = ruleOf(styles, ":root");
+    const wash = /--page-pressed-bg: color-mix\(in srgb, var\(--page-accent\) (\d+)%, transparent\);/.exec(root);
+    assert.ok(wash !== null, "the lit token has no wash of the accent");
+    assert.ok(Number(wash[1]) >= 25, `the lit token's wash is ${wash[1]}% of the accent - back to invisible on e-ink`);
     // The frame stays the frame: D221's doubled accent ring was too loud
     // for a bar over an article (Michał's second photo from the Boox,
-    // 2026-09-14) - the wash is the one signal.
-    assert.doesNotMatch(lit, /border-color|box-shadow|outline/, "the lit tool wears a frame of its own");
+    // 2026-09-14) - the wash is the one signal on every paper but e-ink's,
+    // where the ring token is set (test/eink-palette.test.js).
+    assert.match(root, /--page-pressed-ring: none;/, "the lit tool wears a ring on every paper");
+    assert.doesNotMatch(lit, /border-color|outline/, "the lit tool wears a frame of its own");
     assert.doesNotMatch(lit, /transition/, "the lit state animates");
     // One rule for every page's bar: the reader keeps none of its own.
     assert.doesNotMatch(await source("reader/reader.css"), /#marker\[aria-pressed="true"\]/, "the reader lights its tools by a rule of its own");
