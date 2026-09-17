@@ -130,24 +130,37 @@ export function turnTarget(tops, page, turn) {
 }
 
 /**
- * What the curtain covers: from where the next page begins, in window
- * coordinates, down to the foot of the readable band - the lines and the
- * pictures the browser would still show under the page's last whole line.
- * Null for the last page, which ends where the document does, and when the
- * next page begins below the band anyway.
+ * How far above the next page's top the curtain begins. A line's top comes
+ * back fractional, and the browser paints a fixed box on whole device pixels:
+ * a curtain laid exactly on the line's top was snapped half a pixel down and
+ * left the line's anti-aliased first row showing as a faint dotted seam
+ * over the footer (Michał's screenshots from Chrome, 2026-09-17). Two pixels
+ * reach nothing but leading: the previous line's glyphs end at least a
+ * heading's half-leading (three and a half pixels) above the next line's
+ * glyph box, and a block's top stands its own half-leading above its first
+ * glyphs.
+ */
+export const CURTAIN_OVERLAP = 2;
+
+/**
+ * Where the curtain begins, in window coordinates: a little above where the
+ * next page begins (`CURTAIN_OVERLAP`), covering the lines and the pictures
+ * the browser would still show under the page's last whole line - the
+ * curtain itself runs down to the window's foot, under the footer. Null for
+ * the last page, which ends where the document does, and when the next page
+ * begins under the footer anyway.
  *
  * @param {number[]} tops
  * @param {number} page the page on screen
  * @param {number} scrollY
- * @param {number} bandBottom the foot of the readable band, window coordinates
- * @returns {{ top: number, height: number } | null}
+ * @param {number} floor where the footer (or a bar) begins, window coordinates
+ * @returns {number | null}
  */
-export function curtain(tops, page, scrollY, bandBottom) {
+export function curtainTop(tops, page, scrollY, floor) {
   const next = tops[page + 1];
   if (next === undefined) return null;
-  const top = next - scrollY;
-  if (top >= bandBottom - EPS) return null;
-  return { top, height: bandBottom - top };
+  const top = next - scrollY - CURTAIN_OVERLAP;
+  return top >= floor ? null : top;
 }
 
 /**

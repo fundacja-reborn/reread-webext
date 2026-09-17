@@ -91,7 +91,7 @@ import {
   withoutMark,
 } from "../lib/reader/marks.js";
 import {
-  curtain as curtainOver,
+  curtainTop,
   onPage,
   pageAt,
   pagePercent,
@@ -1424,6 +1424,25 @@ function contentRoot() {
  * because an open panel makes the chrome taller for as long as it is open.
  */
 function chromeFold() {
+  let fold = barFold();
+  // The panels hang under the bar as sheets since D233's smoke (reader.css)
+  // rather than growing the box: open, a sheet is chrome over the text all
+  // the same - the voice must not park a line under it, nor the bubble
+  // stand beneath it - so the fold reaches to its foot while it stands.
+  for (const panel of [displayPanel, menuPanel]) {
+    if (panel === null || panel.hidden) continue;
+    fold = Math.max(fold, panel.getBoundingClientRect().bottom);
+  }
+  return fold;
+}
+
+/**
+ * How far down the window the bar itself reaches - the stuck box without
+ * the sheets that may hang under it. What the pages are cut under (D233):
+ * a sheet opening over the text must not re-cut them, and closing it must
+ * not move the reading.
+ */
+function barFold() {
   return Math.max(0, chromeBox?.getBoundingClientRect().bottom ?? 0);
 }
 
@@ -1577,9 +1596,11 @@ function restorePosition(position, segmentIndex = 0) {
  * counts a bar standing over the text would hide the very lines this measures
  * to keep.
  *
+ * @param {number} [fold] the chrome's reach to measure under - the whole
+ *   chrome with any open sheet by default; the bar alone for the pages
  * @returns {{ top: number, bottom: number }}
  */
-function readableBand() {
+function readableBand(fold = chromeFold()) {
   const view = window.visualViewport;
   const seen =
     view === null
@@ -1597,7 +1618,7 @@ function readableBand() {
     // for the floor of the text would page by one line forever.
     if (edge > 0) bottom = Math.min(bottom, edge);
   }
-  return { top: Math.max(chromeFold(), seen.top), bottom };
+  return { top: Math.max(fold, seen.top), bottom };
 }
 
 /**
@@ -1749,33 +1770,84 @@ function paged() {
 /** @type {PageTable | null} */
 let pageTable = null;
 
+/** The page under the chrome (`main#page`): the flow's own box. */
+const pageMain = document.getElementById("page");
+
+/**
+ * A page's margins, top and bottom: the room a page of paper keeps between
+ * its edge and its first and last lines (Michał's smoke, 2026-09-17: the
+ * first line stood against the bar's border, and against the window's edge
+ * with the bar folded). In the interface's own unit, so the margin grows
+ * with a device's text zoom the way the bar does.
+ *
+ * @returns {number}
+ */
+function pageAir() {
+  const rem = Number.parseFloat(getComputedStyle(document.documentElement).fontSize);
+  return Number.isFinite(rem) && rem > 0 ? rem * 0.75 : 12;
+}
+
+/**
+ * The strip of the window a page's lines stand in: the readable band less
+ * the margins, and under the bookmark tab - which hangs below the bar,
+ * folded or not, over the first line's right end (the same smoke: "key"
+ * read as "ke[v]h"). Under the bar alone, never under an open sheet: the
+ * Aa panel and the menu hang over the text and leave the pages as they
+ * are. Its top is also the first page's top in the flow: the chrome stands
+ * at the document's head, stuck, so its edge in the window is its edge in
+ * the flow before anything has scrolled.
+ *
+ * @returns {{ top: number, bottom: number }}
+ */
+function pageBand() {
+  const band = readableBand(barFold());
+  const air = pageAir();
+  let top = band.top;
+  if (chromeTab !== null && !chromeTab.hidden) {
+    const edge = chromeTab.getBoundingClientRect().bottom;
+    if (edge > top) top = edge;
+  }
+  top += air;
+  return { top, bottom: Math.max(top, band.bottom - air) };
+}
+
 /**
  * The blocks of the flow between the stuck chrome and the document's end,
- * in order: everything on the body that stands in the flow - the part
- * pager, the note over a book's language, the article's header pieces and
- * the content's own blocks, the pager and the action row under the text -
- * with the fixed and the stuck pieces left out, whose rects say nothing
- * about the flow. Hidden rows measure as nothing and are dropped by the
- * cutter.
+ * in order: everything under the page's box that stands in the flow - the
+ * part pager, the note over a book's language, the article's header pieces
+ * and the content's own blocks, the pager and the action row under the
+ * text - with the fixed and the stuck pieces left out, whose rects say
+ * nothing about the flow. The boxes that only hold the flow (the page, the
+ * article, the content) are opened, not counted: counted, the page would
+ * be one block, and every cut would walk every line of the text. Hidden
+ * rows measure as nothing and are dropped by the cutter.
  *
  * @returns {Element[]}
  */
 function flowBlocks() {
   /** @type {Element[]} */
   const blocks = [];
-  for (const child of document.body.children) {
-    if (child === article) {
-      for (const piece of child.children) {
-        if (piece === contentElement) blocks.push(...piece.children);
-        else blocks.push(piece);
+  /**
+   * @param {Element} box
+   * @param {boolean} placed whether the children may be positioned out of
+   *   the flow - true for the body's and the page's own children, never
+   *   for the text's blocks, which a style read apiece would slow down
+   */
+  const open = (box, placed) => {
+    for (const child of box.children) {
+      if (child === pageMain || child === article || child === contentElement) {
+        open(child, child === pageMain);
+        continue;
       }
-      continue;
+      if (child.tagName === "DIALOG" || child.tagName === "TEMPLATE" || child.tagName === "SCRIPT") continue;
+      if (placed) {
+        const position = getComputedStyle(child).position;
+        if (position === "fixed" || position === "sticky" || position === "absolute") continue;
+      }
+      blocks.push(child);
     }
-    if (child.tagName === "DIALOG" || child.tagName === "TEMPLATE" || child.tagName === "SCRIPT") continue;
-    const position = getComputedStyle(child).position;
-    if (position === "fixed" || position === "sticky" || position === "absolute") continue;
-    blocks.push(child);
-  }
+  };
+  open(document.body, true);
   return blocks;
 }
 
@@ -1835,7 +1907,7 @@ function pagesNow() {
   // The footer stands before the band is measured - the band ends above
   // it, and a table cut for a band without it would be a line too long.
   if (pageFooter !== null) pageFooter.hidden = false;
-  const band = readableBand();
+  const band = pageBand();
   const height = Math.max(0, band.bottom - band.top);
   const extent = document.documentElement.scrollHeight;
   if (
@@ -1852,10 +1924,8 @@ function pagesNow() {
     const rect = block.getBoundingClientRect();
     return { top: rect.top + scrolled, bottom: rect.bottom + scrolled };
   });
-  // The first page is what the window shows under the chrome before
-  // anything has scrolled: the chrome's own height in the flow, which is
-  // where the fold stands at the top of the document.
-  const first = chromeBox?.getBoundingClientRect().height ?? 0;
+  // The first page begins where the band does, before anything has
+  // scrolled: under the chrome and its tab, a margin down (`pageBand`).
   const tops = pageTops(
     boxes,
     (index) => {
@@ -1863,7 +1933,7 @@ function pagesNow() {
       return block === undefined ? [] : lineBoxes(block);
     },
     height,
-    first,
+    band.top,
   );
   pageTable = { tops, height, extent, epoch };
   return pageTable;
@@ -1876,7 +1946,7 @@ function pagesNow() {
  * @returns {number}
  */
 function pageShown(pages) {
-  return pageAt(pages.tops, window.scrollY + readableBand().top);
+  return pageAt(pages.tops, window.scrollY + pageBand().top);
 }
 
 /**
@@ -1891,7 +1961,7 @@ function showPageOf(pages, page) {
   // Instantly, like every movement in the reader: a smooth scroll on an
   // e-ink panel is a page of smeared refreshes. The scroll arms the
   // position save like any other.
-  scrollTo(0, Math.max(0, top - readableBand().top));
+  scrollTo(0, Math.max(0, top - pageBand().top));
   refreshCurtain();
 }
 
@@ -1967,7 +2037,7 @@ function revealOnPage(rect) {
   const shownPage = pageShown(pages);
   const page = pageAt(pages.tops, rect.top + window.scrollY);
   const top = pages.tops[shownPage] ?? 0;
-  if (page !== shownPage || !onPage(window.scrollY, top, readableBand().top)) showPageOf(pages, page);
+  if (page !== shownPage || !onPage(window.scrollY, top, pageBand().top)) showPageOf(pages, page);
   return true;
 }
 
@@ -1992,7 +2062,7 @@ function settlePage() {
   }
   const page = pageShown(pages);
   const top = pages.tops[page] ?? 0;
-  if (onPage(window.scrollY, top, readableBand().top)) refreshCurtain();
+  if (onPage(window.scrollY, top, pageBand().top)) refreshCurtain();
   else showPageOf(pages, page);
 }
 
@@ -2013,17 +2083,17 @@ function refreshCurtain() {
     pageCurtain.hidden = true;
     return;
   }
-  const band = readableBand();
+  const band = pageBand();
   const page = pageAt(pages.tops, window.scrollY + band.top);
   const top = pages.tops[page] ?? 0;
+  // The curtain runs down to the window's foot, under the footer or a bar;
+  // what decides whether there is anything to cover is the footer's edge,
+  // not the page's bottom margin above it.
   const cover = onPage(window.scrollY, top, band.top)
-    ? curtainOver(pages.tops, page, window.scrollY, band.bottom)
+    ? curtainTop(pages.tops, page, window.scrollY, readableBand().bottom)
     : null;
   pageCurtain.hidden = cover === null;
-  if (cover !== null) {
-    pageCurtain.style.top = `${cover.top}px`;
-    pageCurtain.style.height = `${cover.height}px`;
-  }
+  if (cover !== null) pageCurtain.style.top = `${cover}px`;
   const count = pages.tops.length;
   pageFooter.textContent = `${(page + 1).toLocaleString()} / ${count.toLocaleString()}`;
   pageFooter.setAttribute(
@@ -2118,6 +2188,15 @@ document.addEventListener("scrollend", () => settlePage(), { capture: true, pass
 window.addEventListener("resize", () => settlePage());
 window.visualViewport?.addEventListener("resize", () => settlePage());
 new ResizeObserver(() => settlePage()).observe(document.body);
+// A bar standing up or down at the foot - the voice's, the pen's - shortens
+// or lengthens the band without touching the body's box: read by pages the
+// body keeps its own screen of padding whatever stands at the foot, so the
+// observer above never hears it, and the last line ran on under the pen's
+// toolbar (Michał's smoke, 2026-09-17). The bars are watched themselves.
+const barWatcher = new MutationObserver(() => settlePage());
+for (const bar of [speechBar, markBar]) {
+  if (bar !== null) barWatcher.observe(bar, { attributes: true, attributeFilter: ["hidden"] });
+}
 
 /**
  * The highlighter (D106): the pen in the bar hands the selection gesture to

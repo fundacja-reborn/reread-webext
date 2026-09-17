@@ -532,6 +532,33 @@ html {
   overscroll-behavior: contain;
 }
 
+/* The reader's two panels - the Aa panel and the menu - are sheets over
+   the text, not rows of the stuck box (D233, Michał's smoke 2026-09-17):
+   opened in the box's flow they grew the box and pushed the article down
+   under the scrim, and read by pages that re-cut every page for a band a
+   few lines tall ("2 / 16" became "5 / 47", and closing the menu landed on
+   page 1). Hung under the bar like the bookmark tab, on their own paper
+   over the dimmed page, the box keeps its height and the pages their
+   cut; the voice and the bubble still measure the open sheet as chrome
+   (`chromeFold` in reader.js). Above the tab, which hangs from the same
+   edge. The menu scrolls within itself like the Aa panel when a short
+   window cannot hold it. The phrases page keeps its panels in the flow
+   (D219): nothing there is cut into pages. */
+.reader-chrome > .reader-panel,
+.reader-chrome > .nav-menu {
+  position: absolute;
+  top: 100%;
+  inset-inline: 0;
+  z-index: 1;
+  background: var(--page-bg);
+}
+
+.reader-chrome > .nav-menu {
+  max-height: calc(100dvh - var(--header-h) - 1rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
 .reader-setting {
   display: flex;
   flex-wrap: wrap;
@@ -2793,16 +2820,20 @@ body.reader:has(#mark-bar:not([hidden])) {
   object-fit: contain;
 }
 
-/* The curtain: the page's own paper over the foot of the readable band,
-   from where the next page begins down to the band's floor, hiding the
-   line the window would show cut in half. Sized by script at every turn;
-   above the text and the pins, under the bars and the chrome. It takes the
-   pointer on purpose - a hold on a covered word would select what nobody
-   can see, and a tap on it is a tap at the foot of the page, which turns
-   it like any other. */
+/* The curtain: the page's own paper over the foot of the window, from a
+   hair above where the next page begins (`CURTAIN_OVERLAP`, pages.js) down
+   to the window's edge, hiding the line the window would show cut in half.
+   Its top is set by script at every turn; its foot is the window's, under
+   the footer and the bars (later in the markup at the same level, and a
+   level higher) - a curtain that ended exactly at the footer's edge left a
+   device pixel of the text showing between two fractional edges. Above the
+   text and the pins. It takes the pointer on purpose - a hold on a covered
+   word would select what nobody can see, and a tap on it is a tap at the
+   foot of the page, which turns it like any other. */
 .page-curtain {
   position: fixed;
   inset-inline: 0;
+  bottom: 0;
   z-index: 1;
   background: var(--page-bg);
 }

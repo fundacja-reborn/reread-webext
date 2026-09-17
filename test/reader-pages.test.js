@@ -2,8 +2,9 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import {
+  CURTAIN_OVERLAP,
   WHEEL_COOLDOWN_MS,
-  curtain,
+  curtainTop,
   onPage,
   pageAt,
   pagePercent,
@@ -180,22 +181,29 @@ describe("turnTarget", () => {
   });
 });
 
-describe("curtain", () => {
+describe("curtainTop", () => {
   const tops = [60, 250, 480];
 
-  it("covers from the next page's top down to the band's floor", () => {
-    // On the first page, scrolled to 0, the band ends at 300: the second
-    // page begins at 250, and 50px of it show under the last whole line.
-    assert.deepEqual(curtain(tops, 0, 0, 300), { top: 250, height: 50 });
+  it("begins a hair above the next page's top", () => {
+    // On the first page, scrolled to 0, the footer begins at 300: the
+    // second page begins at 250, and shows under the last whole line.
+    assert.equal(curtainTop(tops, 0, 0, 300), 250 - CURTAIN_OVERLAP);
     // On the second page (scrolled to 250 - 60): the third begins at 480,
     // which is 290 down the window.
-    assert.deepEqual(curtain(tops, 1, 190, 300), { top: 290, height: 10 });
+    assert.equal(curtainTop(tops, 1, 190, 300), 290 - CURTAIN_OVERLAP);
   });
 
-  it("draws nothing over the last page, or when the next page is below the band", () => {
-    assert.equal(curtain(tops, 2, 420, 300), null);
-    assert.equal(curtain(tops, 0, 0, 240), null);
-    assert.equal(curtain(tops, 0, 0, 250), null);
+  it("reaches nothing but leading", () => {
+    // A heading's half-leading (1.3 line-height at 1.2em of 18px) is the
+    // narrowest gap between two lines' glyph boxes in the reader.
+    assert.ok(CURTAIN_OVERLAP < (21.6 * 1.3 - 21.6 * 1.15) / 2 + 0.5);
+  });
+
+  it("draws nothing over the last page, or when the next page begins under the footer", () => {
+    assert.equal(curtainTop(tops, 2, 420, 300), null);
+    assert.equal(curtainTop(tops, 0, 0, 240), null);
+    // Within the overlap of the footer's edge there is still a seam to cover.
+    assert.equal(curtainTop(tops, 0, 0, 249), 250 - CURTAIN_OVERLAP);
   });
 });
 
