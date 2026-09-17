@@ -1309,6 +1309,26 @@ export const STYLE = `
     --door-ink: #322a21;
     --door-paper: #fbf5e7;
   }
+  /* E-ink (D234): black on white, the edge black too - the one line a
+     panel of sixteen greys is sure to draw - and no shadow to dither. The
+     doors are the same pair. The washes underneath (the press, the row's
+     tint) are quarters and tenths of black now, which the panel shows. */
+  .bubble[data-scheme="eink"] {
+    color-scheme: light;
+    background: #ffffff;
+    color: #000000;
+    --edge: #000000;
+    border-color: var(--edge);
+    box-shadow: none;
+    --door-ink: #000000;
+    --door-paper: #ffffff;
+  }
+  /* Nothing moves on e-ink paper: the row unfolds in one repaint, the way
+     it does under reduced motion - and the fold reads as folded or not
+     the moment it is asked, never mid-way. */
+  .bubble[data-scheme="eink"] .reveal {
+    transition: none;
+  }
 `;
 
 /** `note` is an aside in the second layer - the fetch behind More coming back
@@ -1429,7 +1449,7 @@ export const STYLE = `
  * empty - every other bubble - it costs no line.
  *
  * @typedef {object} Tooltip
- * @property {(options: { anchor: DOMRect, variant: Variant, body: string, tone?: Tone, actions?: Action[], touch?: boolean, below?: boolean, coarse?: boolean, scale?: number, folded?: boolean, expanded?: boolean, anchored?: boolean, line?: number, phrase?: string, savedWord?: string, scheme?: "light" | "sepia" | "dark" | null, choosable?: boolean }) => void} show
+ * @property {(options: { anchor: DOMRect, variant: Variant, body: string, tone?: Tone, actions?: Action[], touch?: boolean, below?: boolean, coarse?: boolean, scale?: number, folded?: boolean, expanded?: boolean, anchored?: boolean, line?: number, phrase?: string, savedWord?: string, scheme?: "light" | "sepia" | "dark" | "eink" | null, choosable?: boolean }) => void} show
  * @property {(body: string, tone?: Tone) => void} setBody
  * @property {(sentence: string | null, tone?: Tone) => void} setContext
  * @property {(groups: EntryGroup[]) => void} setEntries

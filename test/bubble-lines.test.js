@@ -81,6 +81,7 @@ const THEMES = [
   // same 4.5:1 floor holds on each.
   { name: "reader dark", css: blockAfter('.bubble[data-scheme="dark"]') },
   { name: "reader sepia", css: blockAfter('.bubble[data-scheme="sepia"]') },
+  { name: "reader e-ink", css: blockAfter('.bubble[data-scheme="eink"]') },
 ];
 
 describe("the bubble's lines", () => {

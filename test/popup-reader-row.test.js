@@ -68,9 +68,9 @@ describe("the reading view's row in the popup", () => {
     assert.match(quiet, /color: var\(--page-disabled\)/);
     assert.doesNotMatch(quiet, /--page-muted|--page-line/);
     // The token stands in every theme block of the pages' sheet: the root
-    // light, the dark media block, the three named themes.
+    // light, the dark media block, the four named themes (e-ink since D234).
     const page = readFileSync(join(ROOT, "src/assets/page.css"), "utf8");
-    assert.equal(page.match(/--page-disabled: #[0-9a-f]{6};/g)?.length, 5);
-    assert.equal(page.match(/--page-border: #[0-9a-f]{6};/g)?.length, 5);
+    assert.equal(page.match(/--page-disabled: #[0-9a-f]{6};/g)?.length, 6);
+    assert.equal(page.match(/--page-border: #[0-9a-f]{6};/g)?.length, 6);
   });
 });

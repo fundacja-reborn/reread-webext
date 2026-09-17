@@ -326,7 +326,8 @@ describe("the popup's look-up row", () => {
     // The token in every palette: the paper a step lighter in sepia and in
     // the dark, the paper itself where it is white (the fourth brief's D3).
     const palettes = page.match(/--surface-raised: #[0-9a-f]{6};/g) ?? [];
-    assert.equal(palettes.length, 5, "a palette has no raised surface");
+    assert.equal(palettes.length, 6, "a palette has no raised surface");
+    assert.match(page, /:root\[data-reader-theme="eink"\] \{[\s\S]*?--page-bg: #ffffff;[\s\S]*?--surface-raised: #ffffff;/, "the e-ink raised surface is not the white paper itself");
     assert.match(page, /:root\[data-reader-theme="sepia"\] \{[\s\S]*?--page-bg: #f4ecd8;[\s\S]*?--surface-raised: #f8f4e8;/, "sepia's raised surface is not its paper a step lighter");
     assert.match(page, /:root\[data-reader-theme="dark"\] \{[\s\S]*?--page-bg: #171a21;[\s\S]*?--surface-raised: #20242d;/, "the dark raised surface is not its paper a step lighter");
     assert.match(page, /:root\[data-reader-theme="light"\] \{[\s\S]*?--page-bg: #ffffff;[\s\S]*?--surface-raised: #ffffff;/, "the light raised surface is not the white paper itself");

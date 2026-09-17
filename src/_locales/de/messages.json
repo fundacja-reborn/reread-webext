@@ -422,6 +422,7 @@
   "reader_theme_light": { "message": "Hell" },
   "reader_theme_sepia": { "message": "Sepia" },
   "reader_theme_dark": { "message": "Dunkel" },
+  "reader_theme_eink": { "message": "E-Ink" },
   "reader_font": { "message": "Schrift" },
   "reader_font_serif": { "message": "Serifen" },
   "reader_font_sans": { "message": "Serifenlos" },

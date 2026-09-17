@@ -71,6 +71,28 @@
   --reader-marker-pink: rgba(235, 110, 170, 0.42);
 }
 
+/* E-ink (D234): the inks chosen for the sixteen greys. The light theme's
+   yellow lands at 91% of white - one grey step under the paper, which a
+   Boox rounds away (Michał, 2026-09-17: the marks want "a little more
+   contrast"). These stand two to four steps under it and two apart from
+   each other, so four inks are four greys on the panel and still four
+   colours on glass: yellow about 82% of white, pink 74%, green 67%, blue
+   58% - black text keeps 6.9:1 on the darkest. The hues are the same
+   family as the light theme's, so a mark made on glass reads as itself
+   here. A wash and never an outline: an outline is what the underline
+   under a saved phrase already is (Michał's call). The speaking washes
+   need no line of their own - a quarter of black ink and a third of a
+   black accent are greys the panel shows. Starting values, to be tuned
+   on the panel itself. */
+:root[data-reader-theme="eink"] {
+  --reader-speaking: color-mix(in srgb, var(--page-fg) 15%, transparent);
+  --reader-speaking-word: color-mix(in srgb, var(--page-accent) 38%, transparent);
+  --reader-marker-yellow: rgba(235, 175, 0, 0.6);
+  --reader-marker-green: rgba(40, 130, 50, 0.55);
+  --reader-marker-blue: rgba(30, 100, 200, 0.65);
+  --reader-marker-pink: rgba(230, 90, 150, 0.5);
+}
+
 /* The article's font lives on the body so that `ch` means what it should: a
    column measured in characters has to be measured in the characters it will
    hold. That is the ONLY thing the body's font is for - nothing standing on

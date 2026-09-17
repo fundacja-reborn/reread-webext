@@ -453,6 +453,7 @@
   "reader_theme_light": { "message": "Claro" },
   "reader_theme_sepia": { "message": "Sepia" },
   "reader_theme_dark": { "message": "Oscuro" },
+  "reader_theme_eink": { "message": "E-ink" },
   "reader_font": { "message": "Tipografía" },
   "reader_font_serif": { "message": "Serif" },
   "reader_font_sans": { "message": "Sans" },

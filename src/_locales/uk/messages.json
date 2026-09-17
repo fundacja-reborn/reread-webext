@@ -612,6 +612,7 @@
   "reader_theme_light": { "message": "Світла" },
   "reader_theme_sepia": { "message": "Сепія" },
   "reader_theme_dark": { "message": "Темна" },
+  "reader_theme_eink": { "message": "E-ink" },
   "reader_font": { "message": "Шрифт" },
   "reader_font_serif": { "message": "Із засічками" },
   "reader_font_sans": { "message": "Без засічок" },

@@ -20,7 +20,12 @@ export const CONFIG_KEY = "config";
 
 /**
  * @typedef {object} ReaderConfig
- * @property {"auto" | "light" | "sepia" | "dark"} theme `auto` follows the browser.
+ * @property {"auto" | "light" | "sepia" | "dark" | "eink"} theme `auto` follows
+ *   the browser. `eink` (D234) is a fifth paper, not a fifth look: white
+ *   paper, black ink, a black accent and stronger highlighter washes, all
+ *   chosen against the sixteen greys of an e-ink panel, where the light
+ *   theme's tints round away; nothing in the sizes or the layout moves.
+ *   Chosen by hand like every theme - no browser says what panel it is on.
  * @property {"serif" | "sans" | "custom"} font `custom` puts the typed name
  *   (`fontFamily`) in the lead, with the default serif stack as the fallback
  *   for every character it lacks; the presets are themselves. A third choice
@@ -255,7 +260,7 @@ export const CONFIG_KEY = "config";
  */
 
 /** @type {readonly string[]} */
-const THEMES = ["auto", "light", "sepia", "dark"];
+const THEMES = ["auto", "light", "sepia", "dark", "eink"];
 /** @type {readonly string[]} */
 const FONTS = ["serif", "sans", "custom"];
 /** @type {readonly string[]} */

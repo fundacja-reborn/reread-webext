@@ -612,6 +612,7 @@
   "reader_theme_light": { "message": "Jasny" },
   "reader_theme_sepia": { "message": "Sepia" },
   "reader_theme_dark": { "message": "Ciemny" },
+  "reader_theme_eink": { "message": "E-ink" },
   "reader_font": { "message": "Krój" },
   "reader_font_serif": { "message": "Szeryfowy" },
   "reader_font_sans": { "message": "Bezszeryfowy" },
