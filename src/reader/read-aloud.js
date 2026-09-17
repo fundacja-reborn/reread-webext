@@ -40,7 +40,7 @@
 import { supported, unregister } from "../content/highlighter.js";
 import { prosePieces } from "../content/scan.js";
 import { joinPieces, locate } from "../lib/matcher/spans.js";
-import { chunkText, wordSpan } from "../lib/reader/speech.js";
+import { chunkText, wordSpan, wordsOf } from "../lib/reader/speech.js";
 import {
   canSpeak,
   offlineAvailable,
@@ -244,8 +244,34 @@ export function startReading() {
   stopPhrase();
   hush();
   at = firstVisibleChunk();
-  within = 0;
+  within = firstVisibleOffset(at);
   speakHere();
+}
+
+/**
+ * Where inside the first sentence the reading begins: at its first word
+ * standing at or under the fold. A sentence cut by the fold - the page's
+ * head, read by pages (D233), or the stuck bar - is read from what can be
+ * seen, not from a start the reader cannot see: a page opening in the
+ * middle of a sentence began with the sentence's first words on the page
+ * before (Michał's smoke, 2026-09-17). Zero for a sentence wholly under the
+ * fold, and for one with nothing to measure. The resume point's own road
+ * (`within`), so the marks and the boundaries count from the same place.
+ *
+ * @param {number} index
+ * @returns {number} the offset inside the sentence
+ */
+function firstVisibleOffset(index) {
+  const chunk = plan?.chunks[index];
+  if (plan === null || chunk === undefined) return 0;
+  const fold = hooks?.fold() ?? 0;
+  const whole = rectOf(index);
+  if (whole === null || whole.top >= fold - 1) return 0;
+  for (const word of wordsOf(plan.text, chunk.start, chunk.end)) {
+    const box = rangeOf(word.start, word.end)?.getBoundingClientRect();
+    if (box !== undefined && box.height > 0 && box.top >= fold - 1) return word.start - chunk.start;
+  }
+  return 0;
 }
 
 /** The place is kept, the voice stops. See the header for why this cancels. */
