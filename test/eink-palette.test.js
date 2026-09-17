@@ -145,7 +145,7 @@ describe("the e-ink palette's fills (D237)", () => {
     assert.ok(brightness(read) - brightness(spoken) >= 100 / 16, "the spoken word is not told from its sentence");
   });
 
-  it("says a control that is on with a light grey inside a black frame, at the light theme's strength", async () => {
+  it("says a control that is on with a light grey inside the frame it wears at rest, at the light theme's strength", async () => {
     const page = await source("assets/page.css");
     const eink = blockOf(page, ':root[data-reader-theme="eink"]');
     const lit = paint(valueOf(eink, "--page-pressed-bg"));
@@ -156,11 +156,15 @@ describe("the e-ink palette's fills (D237)", () => {
     const amber = paint(valueOf(light, "--page-accent"));
     const lightLit = over({ ...amber, a: 0.25 }, WHITE);
     assert.ok(Math.abs(brightness(lit) - brightness(lightLit)) <= 100 / 16, `the e-ink lit fill is ${brightness(lit).toFixed(1)}% of white against the light theme's ${brightness(lightLit).toFixed(1)}%`);
-    // The frame: a line of the accent inside the border, and the accent is
-    // black on this paper.
-    assert.equal(valueOf(eink, "--page-pressed-ring"), "inset 0 0 0 1px var(--page-accent)");
+    // The frame: the one the control wears at rest, and nothing drawn
+    // inside it (D241). D237 hung a black ring inside a black frame, and
+    // the Aa panel came back as ten heavy boxes down a page where the wash
+    // alone reads well (Michał's photo, 2026-09-17).
+    assert.equal(valueOf(eink, "--page-pressed-frame"), "var(--page-border)");
     assert.equal(valueOf(eink, "--page-accent"), "#000000");
-    assert.match(page, /:root\[data-reader-theme="eink"\] \.page-tools > button:is\(\[aria-pressed="true"\], \[aria-expanded="true"\]\) \{\s*border-color: var\(--page-accent\);/, "the lit tool's frame stays grey outside the black ring");
+    for (const sheet of ["assets/page.css", "reader/reader.css", "vocab/vocab.css"]) {
+      assert.doesNotMatch(await source(sheet), /--page-pressed-ring|box-shadow: inset 0 0 0 1px var\(--page-accent\)/, `${sheet}: a control that is on wears a ring inside its frame again`);
+    }
     // The press itself: one grey under the lit fill, and no darker.
     const pressed = paint(valueOf(blockOf(page, ':root[data-reader-theme="eink"] button:active:not(:disabled)'), "background"));
     assert.ok(brightness(pressed) >= FLOOR - 0.05, `the press lands at ${brightness(pressed).toFixed(1)}% of white`);
@@ -168,11 +172,12 @@ describe("the e-ink palette's fills (D237)", () => {
   });
 
   it("lights nothing differently on the other papers", async () => {
-    // The tokens on the bare root are the quarter of the accent and no
-    // ring - what every pressed state wore before the tokens existed.
+    // The tokens on the bare root are the quarter of the accent and the
+    // accent as the frame - what every pressed state wore before the
+    // tokens existed.
     const root = blockOf(await source("assets/page.css"), "\n:root");
     assert.equal(valueOf(root, "--page-pressed-bg"), "color-mix(in srgb, var(--page-accent) 25%, transparent)");
-    assert.equal(valueOf(root, "--page-pressed-ring"), "none");
+    assert.equal(valueOf(root, "--page-pressed-frame"), "var(--page-accent)");
     // And no other palette sets them: the light, sepia and dark blocks, and
     // the dark query, say nothing about the pair.
     const page = await source("assets/page.css");

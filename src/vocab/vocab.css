@@ -108,9 +108,8 @@ summary {
    alone was invisible on an e-ink panel's greys (Michał's Boox,
    2026-09-15). */
 .page-choices button[aria-pressed="true"] {
-  border-color: var(--page-accent);
+  border-color: var(--page-pressed-frame);
   background: var(--page-pressed-bg);
-  box-shadow: var(--page-pressed-ring);
   color: var(--page-fg);
 }
 
@@ -181,9 +180,8 @@ summary {
    smoke: 12% rounded back into an e-ink panel's paper (Michał's Boox,
    2026-09-15). */
 .phrase-segments button[aria-pressed="true"] {
-  border-color: var(--page-accent);
+  border-color: var(--page-pressed-frame);
   background: var(--page-pressed-bg);
-  box-shadow: var(--page-pressed-ring);
 }
 
 /* --- disclosure lines: the intro and the file-format note, folded --- */

@@ -640,15 +640,17 @@ html {
    list's tabs do, readable in all four themes; no heavier frame - the bar
    tried one and it came back as too loud. Nothing about the box changes
    size, so the row stands still when the choice moves. The wash and the
-   ring are the root's tokens since D237 (page.css): on e-ink paper the
-   quarter of black was ten dark stains down the panel, and there the
-   state is a light grey inside a black frame. The swatch rows opt out
-   below: a wash around a drawn ink would muddy it, and their ring already
-   survives the greys. */
+   frame are the root's tokens since D237 (page.css): on e-ink paper the
+   quarter of black was ten dark stains down the panel, so the wash is a
+   light grey there - and the frame is the resting border, because the
+   black ring D237 hung inside a black frame made ten heavy boxes of the
+   panel instead (D241, Michał's photo 2026-09-17: the wash alone reads
+   well, with the frame the row already wears). The swatch rows opt out
+   below: a wash around a drawn ink would muddy it, and their ring is the
+   whole of what they have to say it with. */
 .reader-choices button[aria-pressed="true"] {
-  border-color: var(--page-accent);
+  border-color: var(--page-pressed-frame);
   background: var(--page-pressed-bg);
-  box-shadow: var(--page-pressed-ring);
   color: var(--page-fg);
 }
 
@@ -1350,9 +1352,8 @@ body.reader:has(#library:not([hidden])) {
    smoke: at 12% it rounded back into an e-ink panel's paper, and the tab
    in view looked like the other one (Michał's Boox, 2026-09-15). */
 .library-segments button[aria-pressed="true"] {
-  border-color: var(--page-accent);
+  border-color: var(--page-pressed-frame);
   background: var(--page-pressed-bg);
-  box-shadow: var(--page-pressed-ring);
 }
 
 /* --- disclosure lines: the offline promise and the file-format note --- */
@@ -2551,9 +2552,8 @@ a.marks-act {
    too, for the tabs' reason (12% is paper on e-ink). After the hover rule,
    so a pressed button keeps saying what is true under the pointer. */
 .article-actions button[aria-pressed="true"] {
-  border-color: var(--page-accent);
+  border-color: var(--page-pressed-frame);
   background: var(--page-pressed-bg);
-  box-shadow: var(--page-pressed-ring);
   color: var(--page-fg);
 }
 

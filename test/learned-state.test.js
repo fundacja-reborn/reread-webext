@@ -123,7 +123,7 @@ describe("Learned as a state (D224) - the phrases page", () => {
 
   it("dresses the shelf buttons as the reading list's, and an armed Delete in the accent", async () => {
     const styles = await source("vocab/vocab.css");
-    assert.match(styles, /\n\.phrase-segments button\[aria-pressed="true"\] \{\s*border-color: var\(--page-accent\);/, "the pressed shelf button is not lit");
+    assert.match(styles, /\n\.phrase-segments button\[aria-pressed="true"\] \{\s*border-color: var\(--page-pressed-frame\);/, "the pressed shelf button is not lit");
     assert.match(styles, /button\.quiet-delete\[data-armed\],[\s\S]*?button\.quiet-delete-all\[data-armed\][\s\S]*?\{\s*border-color: var\(--page-accent\);/, "an armed Delete is not in the accent");
     assert.match(styles, /\n\.learned-actions > button\.quiet \{\s*margin-block: 0;\s*min-height: 44px;/, "the shelf-wide act has no 44px box of its own");
   });
