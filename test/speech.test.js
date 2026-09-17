@@ -31,6 +31,24 @@ describe("wordsOf", () => {
       { start: 9, end: 15 },
     ]);
   });
+
+  it("steps over the marks between words instead of stopping at the first comma", () => {
+    // `wordSpan` says null at a comma, and the walk once took that for the
+    // end of the words: a sentence with a comma before the fold had no word
+    // found under it, and was read from its start on the page before
+    // (Michał's smoke, 2026-09-17).
+    const text = 'Towards evening, the rain (at last) thinned - and "stopped"; nobody moved.';
+    assert.deepEqual(
+      wordsOf(text, 0, text.length).map(({ start, end }) => text.slice(start, end)),
+      ["Towards", "evening", "the", "rain", "at", "last", "thinned", "and", "stopped", "nobody", "moved"],
+    );
+  });
+
+  it("walks on from a stretch beginning at a mark, and finds nothing in marks alone", () => {
+    const text = "a, b";
+    assert.deepEqual(wordsOf(text, 1, text.length), [{ start: 3, end: 4 }]);
+    assert.deepEqual(wordsOf(", ... ;", 0, 7), []);
+  });
 });
 
 /**
