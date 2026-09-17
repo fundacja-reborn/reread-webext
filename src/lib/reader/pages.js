@@ -374,3 +374,62 @@ export function pagePercent(page, count) {
   if (!(count > 0)) return 0;
   return Math.min(100, Math.max(0, Math.round(((page + 1) / count) * 100)));
 }
+
+/**
+ * The page turned from the window's edge while a range is being stretched
+ * (D239): a finger dragging a selection, a handle or the pen's stroke to
+ * the foot of the page turns it under the finger and goes on, the way
+ * Kindle, Apple Books and KOReader turn theirs. Nothing turns at once - a
+ * finger grazing the edge to take the last line must not lose the page:
+ * the first turn after a stay this long in the zone, the next ones this
+ * far apart while the pointer stays. An e-ink panel needs the time to
+ * refresh, and the eye to find the new page. Starting values, to be tuned
+ * on the panel.
+ */
+export const EDGE_TURN_FIRST_MS = 700;
+export const EDGE_TURN_REPEAT_MS = 1200;
+
+/**
+ * How tall the edge zones are at the least: the foot's zone is everything
+ * below the page's last full line - the curtain, the margin, the foot's
+ * strip, a bar - which can be next to nothing when the last line ends on
+ * the margin, and the head's zone is the chrome and this much of the band.
+ */
+export const EDGE_ZONE_MIN = 24;
+
+/** @typedef {"down" | "up"} EdgeZone */
+
+/**
+ * The edge zone a pointer stands in, or null. Dead at the part's ends -
+ * the range cannot leave the part, whose next page is another document.
+ *
+ * @param {number} y the pointer, window coordinates
+ * @param {number} head where the page's first line stands
+ * @param {number} foot where the page's last full line ends - the
+ *   curtain's edge, or the band's foot
+ * @param {number} bottom the window's foot
+ * @param {{ up: boolean, down: boolean }} turns whether there is a page that way
+ * @returns {EdgeZone | null}
+ */
+export function edgeZone(y, head, foot, bottom, turns) {
+  if (y >= Math.min(foot, bottom - EDGE_ZONE_MIN)) return turns.down ? "down" : null;
+  if (y < head + EDGE_ZONE_MIN) return turns.up ? "up" : null;
+  return null;
+}
+
+/**
+ * Whether the stay in a zone has earned a turn: the first after
+ * `EDGE_TURN_FIRST_MS` in the zone, each next one `EDGE_TURN_REPEAT_MS`
+ * after the last. The caller keeps the clocks; leaving the zone resets
+ * them by starting a new stay.
+ *
+ * @param {EdgeZone | null} zone
+ * @param {number} enteredAt when the stay began
+ * @param {number | null} turnedAt when the stay last turned, or null
+ * @param {number} now
+ * @returns {boolean}
+ */
+export function edgeTurn(zone, enteredAt, turnedAt, now) {
+  if (zone === null) return false;
+  return turnedAt === null ? now - enteredAt >= EDGE_TURN_FIRST_MS : now - turnedAt >= EDGE_TURN_REPEAT_MS;
+}

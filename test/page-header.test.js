@@ -177,9 +177,9 @@ describe("the bar stuck to the top of every page", () => {
     assert.doesNotMatch(bar, /z-index:/, "the selection's bar carries a stacking of its own, which could paint over the stuck bar");
     // Nothing else on the page is stuck: the speech bar is fixed at the
     // bottom of the article view, and the two never meet - and the paged
-    // layout's curtain and page count (D233) are fixed there too, over an
-    // article read by pages, never over a list.
-    assert.equal((styles.match(/position: (?:sticky|fixed)/g) ?? []).length, 4, "a strip of chrome beyond the speech bar, the two curtains and the page count is stuck or fixed on the reader page");
+    // layout's curtains, page count and edge line (D233, D239) are fixed
+    // there too, over an article read by pages, never over a list.
+    assert.equal((styles.match(/position: (?:sticky|fixed)/g) ?? []).length, 5, "a strip of chrome beyond the speech bar, the two curtains, the page count and the edge line is stuck or fixed on the reader page");
     assert.match(ruleOf(styles, ".page-curtain"), /position: fixed;/, "the curtain is not fixed to the window");
     assert.match(ruleOf(styles, ".page-head"), /position: fixed;\s*inset-inline: 0;\s*top: 0;/, "the head's curtain is not fixed to the window's top");
     const footer = ruleOf(styles, ".page-footer");

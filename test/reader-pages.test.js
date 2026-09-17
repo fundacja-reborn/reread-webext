@@ -3,8 +3,13 @@ import { describe, it } from "node:test";
 
 import {
   CURTAIN_OVERLAP,
+  EDGE_TURN_FIRST_MS,
+  EDGE_TURN_REPEAT_MS,
+  EDGE_ZONE_MIN,
   WHEEL_COOLDOWN_MS,
   curtainTop,
+  edgeTurn,
+  edgeZone,
   onPage,
   pageAt,
   pagePercent,
@@ -413,5 +418,55 @@ describe("pagePercent", () => {
     assert.equal(pagePercent(3, 4), 100);
     assert.equal(pagePercent(0, 1), 100);
     assert.equal(pagePercent(0, 0), 0);
+  });
+});
+
+describe("edgeZone (D239)", () => {
+  // A window 800 tall: the page's first line at 72, its last full line
+  // ending at 740 (the curtain's edge), pages both ways.
+  const both = { up: true, down: true };
+
+  it("is the foot below the last full line, and the head within its reach of the first", () => {
+    assert.equal(edgeZone(740, 72, 740, 800, both), "down");
+    assert.equal(edgeZone(790, 72, 740, 800, both), "down");
+    assert.equal(edgeZone(739, 72, 740, 800, both), null);
+    assert.equal(edgeZone(72 + EDGE_ZONE_MIN - 1, 72, 740, 800, both), "up");
+    assert.equal(edgeZone(72 + EDGE_ZONE_MIN, 72, 740, 800, both), null);
+    // Above the first line - the margin, the chrome - is the head's zone too.
+    assert.equal(edgeZone(10, 72, 740, 800, both), "up");
+    assert.equal(edgeZone(400, 72, 740, 800, both), null);
+  });
+
+  it("keeps the foot's zone at least its reach tall when the curtain is next to nothing", () => {
+    // The last line ends on the margin: the curtain has nothing to cover
+    // and the foot would be a strip of nothing - the window's lowest
+    // pixels make the zone instead.
+    assert.equal(edgeZone(800 - EDGE_ZONE_MIN, 72, 798, 800, both), "down");
+    assert.equal(edgeZone(800 - EDGE_ZONE_MIN - 1, 72, 798, 800, both), null);
+  });
+
+  it("is dead at the part's ends", () => {
+    assert.equal(edgeZone(790, 72, 740, 800, { up: true, down: false }), null);
+    assert.equal(edgeZone(10, 72, 740, 800, { up: false, down: true }), null);
+    // The other edge keeps its zone.
+    assert.equal(edgeZone(10, 72, 740, 800, { up: true, down: false }), "up");
+  });
+});
+
+describe("edgeTurn (D239)", () => {
+  it("turns first after the stay's first wait, then at the repeat's pace", () => {
+    const entered = 1000;
+    assert.equal(edgeTurn("down", entered, null, entered + EDGE_TURN_FIRST_MS - 1), false);
+    assert.equal(edgeTurn("down", entered, null, entered + EDGE_TURN_FIRST_MS), true);
+    const turned = entered + EDGE_TURN_FIRST_MS;
+    assert.equal(edgeTurn("down", entered, turned, turned + EDGE_TURN_REPEAT_MS - 1), false);
+    assert.equal(edgeTurn("down", entered, turned, turned + EDGE_TURN_REPEAT_MS), true);
+    // The repeat is the slower clock: an e-ink panel refreshes, an eye
+    // finds the page.
+    assert.ok(EDGE_TURN_REPEAT_MS > EDGE_TURN_FIRST_MS);
+  });
+
+  it("turns nothing out of a zone", () => {
+    assert.equal(edgeTurn(null, 0, null, 100000), false);
   });
 });
