@@ -37,6 +37,7 @@ import { editedMeanings } from "../lib/meanings.js";
 import { describeError } from "../lib/messages.js";
 import { speakerIcon } from "../lib/speaker-icon.js";
 import { armBackArrow } from "../lib/back-arrow.js";
+import { askReader, framedInReader } from "../lib/room-frame.js";
 import { armFullscreenTool } from "../lib/fullscreen-tool.js";
 import { ErrorCode, Message, asResult, fail } from "../lib/protocol.js";
 import { BACK_ROAD_KEY, writeVocabTab } from "../lib/session.js";
@@ -1387,6 +1388,13 @@ async function runImport() {
  *   opens them at the dictionaries
  */
 function goToSettings(section) {
+  // Inside the reader (D243) the settings are the other room: the reader
+  // swaps the frame and rewrites the one entry the layer has, so a step
+  // back from either room means the reading, not the room before it.
+  if (inReader) {
+    askReader(section === undefined ? { act: "room", room: "settings" } : { act: "room", room: "settings", section });
+    return;
+  }
   try {
     sessionStorage.setItem(BACK_ROAD_KEY, "vocab");
   } catch {
@@ -1511,13 +1519,22 @@ brandButton?.addEventListener("click", () => goToSettings());
 // here from the popup or the settings menu with the reading standing in
 // another tab, it brings that tab forward. The three states and their order
 // live in `lib/back-arrow.js`, shared with the settings page.
+/**
+ * Whether this page stands in a frame of the reader's own document (D243) -
+ * asked once, because it cannot change while the page is open.
+ */
+const inReader = framedInReader();
+
 armBackArrow();
 
 // The bar's full-screen tool (D195; every page since D220): the reader
 // bar's own, in `lib/fullscreen-tool.js` - where the browser has a full
 // screen to give and the row has room, with the open panel put away before
 // the screen changes.
-armFullscreenTool(document.getElementById("fullscreen"), closePanels);
+// Standing inside the reader (D243), the screen is the reader's: it holds
+// the full screen for this visit, and a second tool asking for it from in
+// here would be a button with two answers. The reader's own bar carries it.
+if (!inReader) armFullscreenTool(document.getElementById("fullscreen"), closePanels);
 
 // The phrases-tab bookkeeping, the reader's exactly (D139/D140, applied here
 // by D141): this tab is the one phrases tab for as long as the phrases are
@@ -1526,15 +1543,20 @@ armFullscreenTool(document.getElementById("fullscreen"), closePanels);
 // page announces itself the same way, so the popup's press raises this tab
 // instead of opening a copy beside it; a write the browser drops is caught
 // by the witness in `vocab-tab.js`.
-window.addEventListener("pageshow", () => {
-  void webext()
-    .tabs.getCurrent()
-    .then((tab) => (typeof tab?.id === "number" ? writeVocabTab(tab.id) : undefined))
-    .catch(() => undefined);
-});
-window.addEventListener("pagehide", () => {
-  void writeVocabTab(null).catch(() => undefined);
-});
+// Not inside the reader (D243): the tab this page stands in is the reader's
+// then, not the phrases', and signing the reader's id in here would point
+// the popup's row at a tab that shows an article the moment the room closes.
+if (!inReader) {
+  window.addEventListener("pageshow", () => {
+    void webext()
+      .tabs.getCurrent()
+      .then((tab) => (typeof tab?.id === "number" ? writeVocabTab(tab.id) : undefined))
+      .catch(() => undefined);
+  });
+  window.addEventListener("pagehide", () => {
+    void writeVocabTab(null).catch(() => undefined);
+  });
+}
 
 /**
  * The bar's two disclosure buttons and their panels, the reader's rule: one
@@ -1608,6 +1630,12 @@ if (speechSupported()) speechSynthesis.addEventListener("voiceschanged", renderV
 // repeated; the popup's rows make the same bargain.
 navLibrary?.addEventListener("click", () => {
   closePanels();
+  // Inside the reader (D243): the row asks it for its own view rather than
+  // navigating this frame, which would take the reading's document with it.
+  if (inReader) {
+    askReader({ act: "view", view: "library" });
+    return;
+  }
   void webext()
     .runtime.sendMessage({ kind: Message.OPEN_LIBRARY })
     .catch(() => undefined);
@@ -1618,6 +1646,10 @@ navLibrary?.addEventListener("click", () => {
 // stands.
 navMarks?.addEventListener("click", () => {
   closePanels();
+  if (inReader) {
+    askReader({ act: "view", view: "marks" });
+    return;
+  }
   void webext()
     .runtime.sendMessage({ kind: Message.OPEN_MARKS })
     .catch(() => undefined);
@@ -1797,3 +1829,9 @@ if (introLine !== null && intro.length > 0) introLine.textContent = intro;
 // field reads the phrase's standing off that list, and asked before the
 // first draw it read an empty one.
 void reload().then(arriveWithPhrase);
+
+// Standing inside the reader (D243), the frame reports for duty: the reader
+// writes the room's history entry on the strength of this one message, so a
+// frame a policy ever refuses to load leaves no step back written for a room
+// nobody can see - the reader falls back to walking to this page instead.
+if (inReader) askReader({ act: "ready" });

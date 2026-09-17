@@ -2937,6 +2937,34 @@ body.reader:has(#mark-bar:not([hidden])) {
   pointer-events: none;
 }
 
+/* A room of this extension over the reading (D243): the settings or the
+   saved phrases in a frame that fills the window. Over everything this page
+   draws - the scrim stands at 1, the bars and the panels at 2, the note
+   popover at 3 - because while a room stands it IS the screen; the page's
+   own paper underneath it, so nothing of the article shows through in the
+   beat before the frame's own page paints. The frame carries no border and
+   no scrolling of its own: the page inside it scrolls, as it does on its
+   own screen. */
+.room {
+  position: fixed;
+  inset-inline: 0;
+  top: 0;
+  /* The window as it stands, not the layout viewport: with Firefox for
+     Android's toolbar out, a fixed `inset: 0` box runs a strip under it and
+     the foot of the page inside the frame would sit off screen. The bars
+     keep the same unit for the same reason. */
+  height: 100dvh;
+  z-index: 4;
+  background: var(--page-bg);
+}
+
+.room iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
 /* The head's curtain: the same paper from the window's top down to where
    the page's first line stands (its height set by script) - the page's top
    margin, and the strip under the bar's tab, which the tail of the page

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { asDocState, asMarksState, docState, marksState } from "../src/lib/reader/history-state.js";
+import { asDocState, asMarksState, asRoomState, docState, marksState, roomState } from "../src/lib/reader/history-state.js";
 
 describe("history state", () => {
   it("reads back exactly what it wrote", () => {
@@ -76,5 +76,37 @@ describe("highlights history state (D108)", () => {
   it("keeps the two kinds of entry from answering for each other", () => {
     assert.equal(asDocState(marksState("https://example.com/a")), null);
     assert.equal(asMarksState(docState("article", "https://example.com/a")), null);
+  });
+});
+
+describe("a room's history state (D243)", () => {
+  it("reads back exactly what it wrote, with a section and without", () => {
+    assert.deepEqual(asRoomState(roomState("settings")), { kind: "settings" });
+    assert.deepEqual(asRoomState(roomState("vocab")), { kind: "vocab" });
+    assert.deepEqual(asRoomState(roomState("settings", "dictionaries")), {
+      kind: "settings",
+      section: "dictionaries",
+    });
+  });
+
+  it("answers null for every entry that is not a room's", () => {
+    assert.equal(asRoomState(null), null);
+    assert.equal(asRoomState({ reread: "doc", kind: "article", url: "https://a" }), null);
+    assert.equal(asRoomState({ kind: "settings" }), null);
+    assert.equal(asRoomState({ reread: "room", kind: "reader" }), null);
+  });
+
+  it("keeps a room's entry from answering for a document's or the highlights'", () => {
+    // Three kinds of entry on one stack: a step lands on exactly one.
+    assert.equal(asDocState(roomState("settings")), null);
+    assert.equal(asMarksState(roomState("vocab")), null);
+    assert.equal(asRoomState(docState("article", "https://example.com/a")), null);
+    assert.equal(asRoomState(marksState(null)), null);
+  });
+
+  it("drops a section that is not a name, rather than carrying it", () => {
+    // The section becomes a fragment in the frame's address.
+    assert.deepEqual(asRoomState({ reread: "room", kind: "settings", section: "" }), { kind: "settings" });
+    assert.deepEqual(asRoomState({ reread: "room", kind: "settings", section: 7 }), { kind: "settings" });
   });
 });

@@ -96,3 +96,44 @@ export function asMarksState(state) {
   if (scope !== null && (typeof scope !== "string" || scope.length === 0)) return null;
   return { scope };
 }
+
+/**
+ * A history entry standing for a room shown over the reading (D243): the
+ * settings or the saved phrases, in a frame inside this very document rather
+ * than a page this tab walked to. An entry per opening, for the reason a
+ * document gets one - the way out is the step back every platform already
+ * offers, and the reader takes the frame away when that step lands.
+ *
+ * @typedef {object} RoomState
+ * @property {"settings" | "vocab"} kind which room stands over the reading
+ * @property {string} [section] where in it to land (D192): the settings at
+ *   their dictionaries, the top when nothing is named
+ */
+
+/**
+ * The state a room's history entry carries.
+ *
+ * @param {"settings" | "vocab"} kind
+ * @param {string} [section]
+ * @returns {RoomState & { [MARK]: "room" }}
+ */
+export function roomState(kind, section) {
+  return section === undefined ? { [MARK]: "room", kind } : { [MARK]: "room", kind, section };
+}
+
+/**
+ * The room an entry stands for, or null for every other entry - validated
+ * field by field like the two above, because an entry outlives the build
+ * that wrote it.
+ *
+ * @param {unknown} state
+ * @returns {RoomState | null}
+ */
+export function asRoomState(state) {
+  if (typeof state !== "object" || state === null) return null;
+  const { [MARK]: mark, kind, section } = /** @type {Record<string, unknown>} */ (state);
+  if (mark !== "room") return null;
+  if (kind !== "settings" && kind !== "vocab") return null;
+  if (section === undefined) return { kind };
+  return typeof section === "string" && section.length > 0 ? { kind, section } : { kind };
+}
