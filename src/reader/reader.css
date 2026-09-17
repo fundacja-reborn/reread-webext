@@ -71,26 +71,45 @@
   --reader-marker-pink: rgba(235, 110, 170, 0.42);
 }
 
-/* E-ink (D234): the inks chosen for the sixteen greys. The light theme's
-   yellow lands at 91% of white - one grey step under the paper, which a
-   Boox rounds away (Michał, 2026-09-17: the marks want "a little more
-   contrast"). These stand two to four steps under it and two apart from
-   each other, so four inks are four greys on the panel and still four
-   colours on glass: yellow about 82% of white, pink 74%, green 67%, blue
-   58% - black text keeps 6.9:1 on the darkest. The hues are the same
-   family as the light theme's, so a mark made on glass reads as itself
-   here. A wash and never an outline: an outline is what the underline
-   under a saved phrase already is (Michał's call). The speaking washes
-   need no line of their own - a quarter of black ink and a third of a
-   black accent are greys the panel shows. Starting values, to be tuned
-   on the panel itself. */
+/* E-ink (D234, D237): the inks chosen for the sixteen greys. The light
+   theme's yellow lands at 91% of white - one grey step under the paper,
+   which a Boox rounds away (Michał, 2026-09-17: the marks want "a little
+   more contrast"). The first cut stood the four inks two to four steps
+   under it and two apart (82%, 74%, 67%, 58% of white), and the photo
+   from the same panel showed a mark so dark the words under it could
+   hardly be read: a Boox renders a half-tone two or three greys darker
+   than sRGB arithmetic says. So every fill under text on this paper keeps
+   to the four lightest greys - nothing under a word darker than 80% of
+   white (`#cccccc`), the floor `test/eink-palette.test.js` holds - and
+   the four inks stand between 80% and 90%: yellow about 90%, pink 87%,
+   green 84%, blue 80%. Half a grey apart on the panel, which is to say
+   not apart: an ink is told there by the swatch's place in the row, the
+   order being fixed, and the hues stay so that the same marks are four
+   colours on glass and in the export (the plain cost, taken: the words
+   under a mark come before telling its colour). A wash and never an
+   outline: an outline is what the underline under a saved phrase already
+   is (Michał's call). The speaking washes are black at small alphas
+   rather than the other papers' shares of ink and accent: the sentence
+   lands at 94% of white (`#eeeeee`), and the word, painted over the
+   sentence's wash, at 80% (`#cccccc`) - two greys under it, enough for the
+   word to be seen moving. Alphas rather than flat greys so a wash over a
+   mark still shows the mark. Starting values, to be tuned on the panel
+   itself; the floor is the one thing not to tune below. */
 :root[data-reader-theme="eink"] {
-  --reader-speaking: color-mix(in srgb, var(--page-fg) 15%, transparent);
-  --reader-speaking-word: color-mix(in srgb, var(--page-accent) 38%, transparent);
-  --reader-marker-yellow: rgba(235, 175, 0, 0.6);
-  --reader-marker-green: rgba(40, 130, 50, 0.55);
-  --reader-marker-blue: rgba(30, 100, 200, 0.65);
-  --reader-marker-pink: rgba(230, 90, 150, 0.5);
+  --reader-speaking: rgba(0, 0, 0, 0.067);
+  --reader-speaking-word: rgba(0, 0, 0, 0.14);
+  --reader-marker-yellow: rgba(235, 175, 0, 0.33);
+  --reader-marker-green: rgba(40, 130, 50, 0.28);
+  --reader-marker-blue: rgba(30, 100, 200, 0.31);
+  --reader-marker-pink: rgba(230, 90, 150, 0.26);
+}
+
+/* A swatch this light dissolves into white paper without a line around
+   it (D237): the separators' grey would be one grey too faint there, so
+   the swatch takes the control border's, as every control on this paper
+   does. The chosen one keeps its ring (`#marker-color-choices`, below). */
+:root[data-reader-theme="eink"] .marker-swatch {
+  border-color: var(--page-border);
 }
 
 /* The article's font lives on the body so that `ch` means what it should: a
@@ -620,12 +639,16 @@ html {
    and the word keeps the page's ink over it as the bar's glyphs and the
    list's tabs do, readable in all four themes; no heavier frame - the bar
    tried one and it came back as too loud. Nothing about the box changes
-   size, so the row stands still when the choice moves. The swatch rows
-   opt out below: a wash around a drawn ink would muddy it, and their ring
-   already survives the greys. */
+   size, so the row stands still when the choice moves. The wash and the
+   ring are the root's tokens since D237 (page.css): on e-ink paper the
+   quarter of black was ten dark stains down the panel, and there the
+   state is a light grey inside a black frame. The swatch rows opt out
+   below: a wash around a drawn ink would muddy it, and their ring already
+   survives the greys. */
 .reader-choices button[aria-pressed="true"] {
   border-color: var(--page-accent);
-  background: color-mix(in srgb, var(--page-accent) 25%, transparent);
+  background: var(--page-pressed-bg);
+  box-shadow: var(--page-pressed-ring);
   color: var(--page-fg);
 }
 
@@ -1328,7 +1351,8 @@ body.reader:has(#library:not([hidden])) {
    in view looked like the other one (Michał's Boox, 2026-09-15). */
 .library-segments button[aria-pressed="true"] {
   border-color: var(--page-accent);
-  background: color-mix(in srgb, var(--page-accent) 25%, transparent);
+  background: var(--page-pressed-bg);
+  box-shadow: var(--page-pressed-ring);
 }
 
 /* --- disclosure lines: the offline promise and the file-format note --- */
@@ -2528,7 +2552,8 @@ a.marks-act {
    so a pressed button keeps saying what is true under the pointer. */
 .article-actions button[aria-pressed="true"] {
   border-color: var(--page-accent);
-  background: color-mix(in srgb, var(--page-accent) 25%, transparent);
+  background: var(--page-pressed-bg);
+  box-shadow: var(--page-pressed-ring);
   color: var(--page-fg);
 }
 

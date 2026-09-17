@@ -1329,6 +1329,27 @@ export const STYLE = `
   .bubble[data-scheme="eink"] .reveal {
     transition: none;
   }
+  /* The press on e-ink paper (D237): the quarter of black the doors wear
+     under a finger (the rule above the dark query) came off a Boox as a
+     dark stain - the panel renders a half-tone two or three greys darker
+     than the arithmetic says. A light grey and a second black line inside
+     the door's own black edge instead: the state as a frame, the way the
+     pages' controls say it on this paper (page.css), with the fill kept
+     to the greys the panel shows. The line is an outline drawn inward,
+     not an inset shadow - the bubble keeps no shadow inside itself (the
+     lines test) - and it stands in for the focus ring only while the key
+     is down. The same six selectors as the press rule, so the emulated
+     hover after a tap wears it too. */
+  .bubble[data-scheme="eink"] .actions button[data-action="save"]:active:not(:disabled):not([aria-disabled="true"]),
+  .bubble[data-scheme="eink"] .actions button[data-action="reader"]:active:not(:disabled),
+  .bubble[data-scheme="eink"] .actions button[data-action="settings"]:active:not(:disabled),
+  .bubble[data-scheme="eink"][data-pointer="coarse"] .actions button[data-action="save"]:hover:not(:disabled):not([aria-disabled="true"]),
+  .bubble[data-scheme="eink"][data-pointer="coarse"] .actions button[data-action="reader"]:hover:not(:disabled),
+  .bubble[data-scheme="eink"][data-pointer="coarse"] .actions button[data-action="settings"]:hover:not(:disabled) {
+    background: #dddddd;
+    outline: 1px solid var(--edge);
+    outline-offset: -2px;
+  }
 `;
 
 /** `note` is an aside in the second layer - the fetch behind More coming back
