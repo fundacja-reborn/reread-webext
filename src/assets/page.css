@@ -33,16 +33,19 @@
      11:1 and above, --page-border 3.8:1 and above. */
   --surface-raised: #ffffff;
   /* A control that is on - a tool in hand, the chosen word of an Aa row,
-     a tab in view, a held pill - says so with one wash on every page
-     (D221, D225), and with the ring it may wear inside its frame. A
-     quarter of the accent and no ring on every paper but e-ink's: there
-     the wash is a grey of its own and the ring a black line (D237, the
-     e-ink block below), because a quarter of black ink came off a Boox as
-     a dark stain, two or three greys darker than the arithmetic says.
-     Both on the root, where a palette can say otherwise; the rules that
-     light a control read nothing but these two. */
+     a tab in view, a held pill - says so with one wash inside a frame,
+     on every page (D221, D225) and on every paper. The wash is a quarter
+     of the accent, except on e-ink, where it is a grey of its own (D237,
+     the e-ink block below): a quarter of black ink came off a Boox as a
+     dark stain, two or three greys darker than the arithmetic says. The
+     frame is the accent - and on e-ink the resting border, which is to
+     say no second line at all (D241): a black frame with a black ring
+     inside it read as ten heavy boxes down the Aa panel, and the wash
+     alone tells the chosen row perfectly well there (Michał's photo,
+     2026-09-17). Both on the root, where a palette can say otherwise;
+     the rules that light a control read nothing but these two. */
   --page-pressed-bg: color-mix(in srgb, var(--page-accent) 25%, transparent);
-  --page-pressed-ring: none;
+  --page-pressed-frame: var(--page-accent);
 }
 
 /* Dark ink is dimmed on purpose: near-white on near-black (#f2f4f8 measured
@@ -152,15 +155,7 @@
   --page-error: #a3341f;
   --surface-raised: #ffffff;
   --page-pressed-bg: #dddddd;
-  --page-pressed-ring: inset 0 0 0 1px var(--page-accent);
-}
-
-/* The lit tool's frame goes black with the ring (D237): the ring alone
-   would stand a grey line outside a black one. The rules that light a
-   control elsewhere colour their frame with the accent already, and the
-   accent is black here. */
-:root[data-reader-theme="eink"] .page-tools > button:is([aria-pressed="true"], [aria-expanded="true"]) {
-  border-color: var(--page-accent);
+  --page-pressed-frame: var(--page-border);
 }
 
 /* The press itself, one grey under a control that is on (D237): a finger
@@ -631,10 +626,12 @@ button.page-mark:hover {
    same panel showed the doubled frame too loud for a bar that has to stay
    quiet over an article (Michał, 2026-09-14): the wash alone says the
    state, and the frame stays the frame. No transition on it, so the flip
-   is one repaint. Since D237 the wash and the ring are the root's two
-   tokens (the bare `:root` block): the same quarter and no ring on every
-   paper but e-ink's, where the quarter of black came off a Boox as a
-   stain and the state is a light grey inside a black frame. The
+   is one repaint. Since D237 the wash is the root's token (the bare
+   `:root` block): the same quarter on every paper but e-ink's, where the
+   quarter of black came off a Boox as a stain and the wash is a light
+   grey of its own. The ring D237 hung inside the frame there came back
+   too loud in its turn, and D241 took it away again - the same answer
+   #387 gave for this bar, said once more for the Aa panel. The
    full-screen tool is not in this list on purpose: its glyph turns its
    corners inward while the page has the screen (the rule below), so a
    wash on top of it would light the bar for the whole of a reading for
@@ -642,7 +639,6 @@ button.page-mark:hover {
 .page-tools > button[aria-pressed="true"],
 .page-tools > button[aria-expanded="true"] {
   background: var(--page-pressed-bg);
-  box-shadow: var(--page-pressed-ring);
 }
 
 /* The bar's full-screen tool (D195; in the bar of every page since D220,
