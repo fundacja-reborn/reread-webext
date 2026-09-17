@@ -179,6 +179,41 @@ export function onPage(scrollY, pageTop, fold) {
 }
 
 /**
+ * The page to turn to so that a sentence being read stays on screen - or
+ * null to stay where the window is, because a line of the sentence already
+ * stands on the page shown. A sentence straddling the page's head is read
+ * from its start while its head stays behind the curtain: the voice begins
+ * a page with the first sentence any part of which is visible, and turning
+ * back for its first line turned every such page back (Michał's smoke,
+ * 2026-09-17). A sentence with no line on the page - the one that opens
+ * the next page, or one far away after a skip - turns to the page its first
+ * line stands on. Nothing to measure is nowhere to go.
+ *
+ * The word being spoken asks with `onward`: a word on a later page - the
+ * tail of a long sentence under the foot's curtain - turns the page on, so
+ * the reader follows the voice, but a word on an earlier page never turns it
+ * back: it belongs to the sentence read from its start behind the head's
+ * curtain, and the same smoke's second round watched every such page turn
+ * back on its first word.
+ *
+ * @param {number[]} tops
+ * @param {number} page the page on screen
+ * @param {number[]} lines the tops of the sentence's or the word's lines,
+ *   document coordinates, in reading order
+ * @param {boolean} [onward] whether only a page further on may be turned to
+ * @returns {number | null}
+ */
+export function revealTarget(tops, page, lines, onward = false) {
+  const first = lines[0];
+  if (first === undefined) return null;
+  const top = tops[page] ?? 0;
+  const next = tops[page + 1] ?? Number.POSITIVE_INFINITY;
+  if (lines.some((line) => line >= top - EPS && line < next - EPS)) return null;
+  const target = pageAt(tops, first);
+  return onward && target < page ? null : target;
+}
+
+/**
  * Which way a tap turns the page: the left third of the window turns back,
  * the right third turns on, and the middle - where a thumb rests, and where
  * a tap is most likely aimed at a word - turns nothing. The reading edge is

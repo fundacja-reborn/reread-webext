@@ -179,10 +179,31 @@ describe("the bar stuck to the top of every page", () => {
     // bottom of the article view, and the two never meet - and the paged
     // layout's curtain and page count (D233) are fixed there too, over an
     // article read by pages, never over a list.
-    assert.equal((styles.match(/position: (?:sticky|fixed)/g) ?? []).length, 3, "a strip of chrome beyond the speech bar, the curtain and the page count is stuck or fixed on the reader page");
+    assert.equal((styles.match(/position: (?:sticky|fixed)/g) ?? []).length, 4, "a strip of chrome beyond the speech bar, the two curtains and the page count is stuck or fixed on the reader page");
     assert.match(ruleOf(styles, ".page-curtain"), /position: fixed;/, "the curtain is not fixed to the window");
-    assert.match(ruleOf(styles, ".page-footer"), /position: fixed;/, "the page count is not fixed to the window");
-    assert.match(styles, /body\.reader:has\(#speech-bar:not\(\[hidden\]\)\) \.page-footer,\s*body\.reader:has\(#mark-bar:not\(\[hidden\]\)\) \.page-footer \{\s*display: none;/, "the page count stands under a bar at the foot");
+    assert.match(ruleOf(styles, ".page-head"), /position: fixed;\s*inset-inline: 0;\s*top: 0;/, "the head's curtain is not fixed to the window's top");
+    const footer = ruleOf(styles, ".page-footer");
+    assert.match(footer, /position: fixed;/, "the page count is not fixed to the window");
+    // The strip is the bars' own height less the page's margin, so a bar
+    // standing up covers the strip and the empty margin and never a line -
+    // both counted from the foot's token, the way the head's `--bar-h`
+    // holds the bar and the scroll padding together.
+    assert.match(footer, /min-height: var\(--foot-h\);/, "the footer's strip is not the bars' height - the last line would stand on a bar's edge");
+    assert.match(ruleOf(styles, "body.reader:has(#speech-bar:not([hidden])),\nbody.reader:has(#mark-bar:not([hidden]))"), /padding-bottom: calc\(var\(--foot-h\) \+ var\(--page-air\)\);/, "the scroll layout's room under a bar is not counted from the foot's token");
+    assert.doesNotMatch(styles, /\.page-footer \{\s*display: none;/, "the page count leaves under a bar, and the band with it");
+    // The token counts what stands in a bar: the buttons' floor, the air
+    // above and below them, the line - and both bars take it as their floor.
+    const foot = /--foot-h: calc\((\d+px) \+ (\d+(?:\.\d+)?)rem \+ 1px\);/.exec(styles);
+    assert.ok(foot !== null, "the foot's height is not the buttons' floor, the air around them and the line");
+    const [, floor, air] = foot;
+    const transport = ruleOf(styles, ".speech-bar");
+    assert.match(ruleOf(styles, ".speech-bar button"), new RegExp(`min-height: ${floor};`), "the transport's buttons stand on another floor than the token counts");
+    assert.match(transport, new RegExp(`padding: ${Number(air) / 2}rem 0\\.6rem;`), "the air around the buttons is not what the token counts");
+    assert.match(transport, /min-height: var\(--foot-h\);/, "the transport bar does not take the token as its floor");
+    assert.match(ruleOf(styles, ".speech-bar.mark-bar"), new RegExp(`padding: ${Number(air) / 2}rem 0\\.4rem;`), "the pen's bar keeps other air than the token counts");
+    assert.match(styles, /--page-air: 0\.75rem;/, "the page's margin is not one declared number");
+    // The reader reads the margin off the stylesheet rather than repeating it.
+    assert.match(await source("reader/reader.js"), /getPropertyValue\("--page-air"\)/, "the reader keeps a margin of its own beside the stylesheet's");
   });
 
   it("hangs the reader's panels under the bar as sheets over the text, and offers each Aa row once", async () => {
@@ -194,6 +215,16 @@ describe("the bar stuck to the top of every page", () => {
     const sheets = ruleOf(styles, ".reader-chrome > .reader-panel,\n.reader-chrome > .nav-menu");
     assert.match(sheets, /position: absolute;\s*top: 100%;/, "the panels stand in the box's flow and push the text down");
     assert.match(sheets, /background: var\(--page-bg\);/, "the dimmed page shows through a sheet");
+    // The shadow that says which layer the sheet is - the other pages' box
+    // casts the same one on the dimmed page (page.css); e-ink paper drops it.
+    assert.match(sheets, /box-shadow: 0 10px 24px -8px rgb\(0 0 0 \/ 0\.35\);/, "the sheet casts no shadow on the dimmed page");
+    assert.match(styles, /:root\[data-reader-theme="eink"\] \.reader-chrome > :is\(\.reader-panel, \.nav-menu\) \{\s*box-shadow: none;/, "the sheet dithers a shadow on e-ink paper");
+    // The curtains and the footer stand under the scrim: at zero, with the
+    // pins and the badges, and never beside the scrim's 1 (a white strip
+    // at the foot of a dimmed page, Michał's smoke 2026-09-17).
+    for (const selector of [".page-curtain", ".page-head", ".page-footer"]) {
+      assert.match(ruleOf(styles, selector), /z-index: 0;/, `${selector} stands beside or over the scrim`);
+    }
     // The menu's own rule stands after the shared one, whose second line
     // `ruleOf` would find first.
     assert.match(styles, /\n\.reader-chrome > \.nav-menu \{\s*max-height: calc\(100dvh - var\(--header-h\) - 1rem\);\s*overflow-y: auto;/, "a long menu cannot scroll within itself");
@@ -203,6 +234,21 @@ describe("the bar stuck to the top of every page", () => {
     for (const id of ["theme-choices", "layout-choices", "font-choices", "line-height-choices", "align-choices", "hyphens-choices", "paragraphs-choices", "links-choices", "marker-color-choices"]) {
       assert.equal((markup.match(new RegExp(`id="${id}"`, "g")) ?? []).length, 1, `the ${id} row stands more than once, or not at all`);
     }
+  });
+
+  it("measures the visible text from the page's own top when read by pages: the voice, the position, the bubble", async () => {
+    // The strip between the bar's edge and the page's first line is paper
+    // over the tail of the page before; measured from the bar's edge, the
+    // voice began a page on the paragraph before it and the position saved
+    // under the curtain reopened a page early (Michał's smoke, 2026-09-17).
+    const reader = await source("reader/reader.js");
+    assert.match(reader, /function textFold\(\) \{\s*return paged\(\) \? pageBand\(\)\.top : chromeFold\(\);/, "the text's fold is not the page's top when read by pages");
+    assert.match(reader, /fold: textFold,/, "the voice measures the first visible sentence from the bar's edge");
+    assert.match(reader, /covered: textFold,/, "the bubble parks its line under the bar's edge, behind the page's curtain");
+    assert.match(reader, /function topBlockIndex\(\) \{[\s\S]*?const line = textFold\(\) \+ 2;/, "the position is read under the bar's edge, behind the page's curtain");
+    // The e-ink sheet says its edge with a line where the others cast a shadow.
+    const styles = await source("reader/reader.css");
+    assert.match(styles, /:root\[data-reader-theme="eink"\] \.reader-chrome > :is\(\.reader-panel, \.nav-menu\) \{\s*box-shadow: none;\s*border-bottom: 1px solid var\(--page-border\);/, "the e-ink sheet has neither a shadow nor a line under its edge");
   });
 
   it("holds nothing any more: the hold module went with the offset it measured", async () => {

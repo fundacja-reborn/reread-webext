@@ -548,15 +548,42 @@ html {
 .reader-chrome > .nav-menu {
   position: absolute;
   top: 100%;
-  inset-inline: 0;
+  /* Edge to edge, like the box's own paper over an article, with the rows
+     aligned to the column: the sheet reaches out by the column's margin and
+     its padding gives the margin back (the first cut hung the sheet at the
+     column's width, and the rows stood against its edges - Michał's smoke,
+     2026-09-17). The halves of the calc overshoot by half a scrollbar; the
+     root clips sideways for as long as the scrim stands (page.css). */
+  inset-inline: calc(50% - 50vw);
+  padding-inline: calc(50vw - 50%);
   z-index: 1;
   background: var(--page-bg);
+  /* The shadow under the sheet's edge says which layer it is (Michał,
+     2026-09-17: "so that it reads as the higher layer") - the same shadow
+     the other pages' box casts on the dimmed page under an open panel
+     (page.css), and the one this box cast from its own paper's edge before
+     the panels became sheets. Not the line under the panel of 2026-09-01,
+     which read as clutter: a shadow falls on the page, a line stood in the
+     panel. */
+  box-shadow: 0 10px 24px -8px rgb(0 0 0 / 0.35);
 }
 
 .reader-chrome > .nav-menu {
   max-height: calc(100dvh - var(--header-h) - 1rem);
   overflow-y: auto;
   overscroll-behavior: contain;
+}
+
+/* No shadow on e-ink paper (D234): a panel dithers a gradient into noise -
+   the bubble drops its shadow there for the same reason. A line in its
+   place, the way the e-ink theme says every edge: the scrim under a sheet
+   is a light grey on sixteen greys, and the sheet's white edge over it
+   wants one dark line to be an edge at all (Michał's question, 2026-09-17).
+   The control border's token, not the separators': the bubble's edge is
+   black there for the same reason. */
+:root[data-reader-theme="eink"] .reader-chrome > :is(.reader-panel, .nav-menu) {
+  box-shadow: none;
+  border-bottom: 1px solid var(--page-border);
 }
 
 .reader-setting {
@@ -2627,7 +2654,7 @@ button[data-armed],
    the tightening never applied). */
 .speech-bar.mark-bar {
   gap: 0.25rem;
-  padding: 0.4rem;
+  padding: 0.25rem 0.4rem;
 }
 
 .speech-bar.mark-bar button {
@@ -2746,6 +2773,21 @@ button[data-armed],
    browser settles `dv*` when its bar finishes moving, not frame by frame;
    for that beat the skirt below holds the paper. The transform hands the
    bar's own height back, whatever that height is. */
+/* The foot's two numbers, the way the head has `--bar-h` (page.css, D219):
+   one token for how tall a bar standing at the foot is - the voice's, the
+   pen's - counted from what stands in it (the buttons' 44px floor, the air
+   above and below them, the line), so that the pages' strip and the bars
+   can never quietly part; and the page's margin, top and bottom, which the
+   reader reads for its own arithmetic (`pageAir` in reader.js). The strip
+   under a page read by pages is the bar less the margin: the margin is
+   empty paper by construction, so a bar standing up may cover it and
+   still cover no line (D233; Michał's question about the strip's cost on
+   a phone, 2026-09-17 - a line a page). */
+:root {
+  --foot-h: calc(44px + 0.5rem + 1px);
+  --page-air: 0.75rem;
+}
+
 .speech-bar {
   position: fixed;
   inset-inline: 0;
@@ -2759,7 +2801,12 @@ button[data-armed],
      into the middle at the desktop breakpoint, where they carry their words. */
   justify-content: space-evenly;
   gap: 0.25rem 0.4rem;
-  padding: 0.4rem 0.6rem;
+  /* A quarter rem above and below the buttons - the air the foot's token
+     counts - and the token as the floor, so a bar of shorter buttons (the
+     pen's on a phone) stands as tall as the strip cut for it. */
+  padding: 0.25rem 0.6rem;
+  box-sizing: border-box;
+  min-height: var(--foot-h);
   border-top: 1px solid var(--page-border);
   background: var(--page-bg);
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -2788,7 +2835,7 @@ button[data-armed],
    switches the column width. */
 body.reader:has(#speech-bar:not([hidden])),
 body.reader:has(#mark-bar:not([hidden])) {
-  padding-bottom: 4.5rem;
+  padding-bottom: calc(var(--foot-h) + var(--page-air));
 }
 
 /* The paged layout (D233): the same column, moved only by whole pages.
@@ -2829,12 +2876,31 @@ body.reader:has(#mark-bar:not([hidden])) {
    device pixel of the text showing between two fractional edges. Above the
    text and the pins. It takes the pointer on purpose - a hold on a covered
    word would select what nobody can see, and a tap on it is a tap at the
-   foot of the page, which turns it like any other. */
+   foot of the page, which turns it like any other. At zero, like the pins
+   and the badges, which stand before it in the markup and so under it:
+   positioned, it paints over the text, and it stays under the scrim (1),
+   the bars and the chrome (2) - at 1 it stood beside the scrim and, later
+   in the markup, over it, a white strip at the foot of a dimmed page
+   (Michał's smoke, 2026-09-17). The head's curtain and the footer stand
+   at zero for the same reason. */
 .page-curtain {
   position: fixed;
   inset-inline: 0;
   bottom: 0;
-  z-index: 1;
+  z-index: 0;
+  background: var(--page-bg);
+}
+
+/* The head's curtain: the same paper from the window's top down to where
+   the page's first line stands (its height set by script) - the page's top
+   margin, and the strip under the bar's tab, which the tail of the page
+   before would otherwise run on through. Under the chrome and its tab
+   (z-index 2), above the text like the curtain. */
+.page-head {
+  position: fixed;
+  inset-inline: 0;
+  top: 0;
+  z-index: 0;
   background: var(--page-bg);
 }
 
@@ -2849,21 +2915,32 @@ body.reader:has(#mark-bar:not([hidden])) {
   inset-inline: 0;
   top: 100dvh;
   transform: translateY(-100%);
-  z-index: 1;
+  z-index: 0;
+  box-sizing: border-box;
+  /* The strip is the bars' own height: a bar standing up at the foot - the
+     voice's, the pen's - covers the strip and the count and never a line,
+     and the page's bottom margin stays above it, so the last line clears
+     the bar's edge by the margin at least. The pages are cut above the
+     strip whatever stands in it, and stay cut as a bar comes and goes
+     (Michał's smoke, 2026-09-17: the bar must not change the text's
+     layout). Counted from the foot's token, so the strip and the bars
+     cannot part. The first cut reserved 4.5rem, a line more than the bars
+     needed (Michał's question about a phone's screen); the second cut the
+     strip to the bar less the margin and let the bar cover the margin, and
+     the last line then stood on the bar's edge every few pages (the same
+     smoke). The count keeps to the strip's foot. */
+  min-height: var(--foot-h);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
   margin: 0;
   padding: 0.2rem 0.6rem calc(0.2rem + env(safe-area-inset-bottom, 0px));
-  text-align: center;
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   font-size: 0.8rem;
   line-height: 1.4;
   color: var(--page-muted);
   background: var(--page-bg);
   pointer-events: none;
-}
-
-body.reader:has(#speech-bar:not([hidden])) .page-footer,
-body.reader:has(#mark-bar:not([hidden])) .page-footer {
-  display: none;
 }
 
 /* Icon-only on a narrow screen means the icon IS the button: at 1.15em the
@@ -2960,7 +3037,7 @@ body.reader:has(#mark-bar:not([hidden])) .page-footer {
      selector again: it must outweigh its own base rule. */
   .speech-bar.mark-bar {
     gap: 0.25rem 0.4rem;
-    padding: 0.4rem 0.6rem;
+    padding: 0.25rem 0.6rem;
   }
 
   .speech-bar.mark-bar button {

@@ -1,7 +1,55 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { MAX_CHUNK, chunkText, wordSpan } from "../src/lib/reader/speech.js";
+import { MAX_CHUNK, chunkText, wordSpan, wordsOf } from "../src/lib/reader/speech.js";
+
+describe("wordsOf", () => {
+  it("walks the words of a stretch in order, as wordSpan cuts them", () => {
+    const text = "not anything before or after. If multiple";
+    assert.deepEqual(
+      wordsOf(text, 0, 29).map(({ start, end }) => text.slice(start, end)),
+      ["not", "anything", "before", "or", "after"],
+    );
+  });
+
+  it("never reaches past the stretch's end, and cuts a word the stretch cuts", () => {
+    const text = "one two three";
+    assert.deepEqual(wordsOf(text, 0, 6), [
+      { start: 0, end: 3 },
+      { start: 4, end: 6 },
+    ]);
+    assert.deepEqual(wordsOf(text, 4, 4), []);
+    assert.deepEqual(wordsOf(text, 20, 30), []);
+  });
+
+  it("starts inside a word where the stretch does", () => {
+    // The resume point's manner: a stretch beginning mid-word reads on
+    // from there.
+    const text = "anything before";
+    assert.deepEqual(wordsOf(text, 3, text.length), [
+      { start: 3, end: 8 },
+      { start: 9, end: 15 },
+    ]);
+  });
+
+  it("steps over the marks between words instead of stopping at the first comma", () => {
+    // `wordSpan` says null at a comma, and the walk once took that for the
+    // end of the words: a sentence with a comma before the fold had no word
+    // found under it, and was read from its start on the page before
+    // (Michał's smoke, 2026-09-17).
+    const text = 'Towards evening, the rain (at last) thinned - and "stopped"; nobody moved.';
+    assert.deepEqual(
+      wordsOf(text, 0, text.length).map(({ start, end }) => text.slice(start, end)),
+      ["Towards", "evening", "the", "rain", "at", "last", "thinned", "and", "stopped", "nobody", "moved"],
+    );
+  });
+
+  it("walks on from a stretch beginning at a mark, and finds nothing in marks alone", () => {
+    const text = "a, b";
+    assert.deepEqual(wordsOf(text, 1, text.length), [{ start: 3, end: 4 }]);
+    assert.deepEqual(wordsOf(", ... ;", 0, 7), []);
+  });
+});
 
 /**
  * What the page hands in: the article's text with a line break for every block

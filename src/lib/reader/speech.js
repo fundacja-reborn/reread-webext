@@ -181,3 +181,41 @@ export function wordSpan(text, index, length = 0) {
 
   return end > start ? { start, end } : null;
 }
+
+/**
+ * The words of one stretch of the text, in order, each as `wordSpan` cuts
+ * it - what the reader walks to find the first word of a sentence standing
+ * under the fold (D233). Never past `end`: a word the stretch cuts through
+ * ends where the stretch does.
+ *
+ * `wordSpan` answers a boundary event, and for one pointing at a comma the
+ * right answer is null - nothing to underline there. For this walk null at
+ * a mark is not the end of the words: the walk steps over the mark and asks
+ * again after it. Taking it for the end stopped the walk at the first comma
+ * of the sentence, so a page opening in the middle of a sentence with a
+ * comma before the fold found no word under the fold and was read from the
+ * sentence's start on the page before (Michał's smoke, 2026-09-17, after the
+ * walk was written for a sentence without one).
+ *
+ * @param {string} text
+ * @param {number} start
+ * @param {number} end exclusive
+ * @returns {Array<{ start: number, end: number }>}
+ */
+export function wordsOf(text, start, end) {
+  /** @type {Array<{ start: number, end: number }>} */
+  const words = [];
+  let cursor = Math.max(0, start);
+  const stop = Math.min(end, text.length);
+  while (cursor < stop) {
+    const word = wordSpan(text, cursor);
+    if (word === null) {
+      cursor += 1;
+      continue;
+    }
+    if (word.start >= stop) break;
+    words.push({ start: word.start, end: Math.min(word.end, stop) });
+    cursor = Math.max(word.end, cursor + 1);
+  }
+  return words;
+}

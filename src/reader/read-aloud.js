@@ -40,7 +40,7 @@
 import { supported, unregister } from "../content/highlighter.js";
 import { prosePieces } from "../content/scan.js";
 import { joinPieces, locate } from "../lib/matcher/spans.js";
-import { chunkText, wordSpan } from "../lib/reader/speech.js";
+import { chunkText, wordSpan, wordsOf } from "../lib/reader/speech.js";
 import {
   canSpeak,
   offlineAvailable,
@@ -75,10 +75,14 @@ const BAND = Object.freeze({ top: 0.12, bottom: 0.75, land: 0.3 });
  *   stuck chrome covers (D93) - asked at each measurement, because an open
  *   panel makes it taller. Text above this line is paper under the bar, not
  *   text anybody can see
- * @property {(rect: DOMRect) => boolean} [reveal] the reader page's own way
- *   of bringing a line onto the screen (D233): read by pages, a line off the
- *   page is reached by turning to its page, not by scrolling to a band -
- *   true when the page took the line, false when the band below should
+ * @property {(range: Range, kind: "sentence" | "word") => boolean} [reveal]
+ *   the reader page's own way of bringing a sentence, or the word being
+ *   spoken, onto the screen (D233): read by pages, a sentence off the page
+ *   is reached by turning to its page, not by scrolling to a band, one with
+ *   a line on the page is left where it stands, and a word never turns the
+ *   page back - the words before the page's head belong to a sentence read
+ *   from its start - true when the page took it, false when the band below
+ *   should
  * @property {(state: ReadingState) => void} onChange the bar's whole job
  * @property {() => void} onFail the engine refused, and the reader has to be
  *   told in words - a silent bar disappearing says nothing
@@ -240,8 +244,42 @@ export function startReading() {
   stopPhrase();
   hush();
   at = firstVisibleChunk();
-  within = 0;
+  within = firstVisibleOffset(at);
   speakHere();
+}
+
+/**
+ * Where inside the first sentence the reading begins: at its first word
+ * standing under the fold. A sentence cut by the fold - the page's head,
+ * read by pages (D233), or the stuck bar - is read from what can be seen,
+ * not from a start the reader cannot see: a page opening in the middle of a
+ * sentence began with the sentence's first words on the page before
+ * (Michał's smoke, 2026-09-17). Zero for a sentence wholly under the fold,
+ * and for one with nothing to measure. The resume point's own road
+ * (`within`), so the marks and the boundaries count from the same place.
+ *
+ * A word stands under the fold when the middle of its box does. Not its
+ * top edge: read by pages the first line's glyph box is put exactly on the
+ * fold, and a scroll rounded to the device's pixels can leave it a fraction
+ * above, while the line before it stands a whole line higher - the middle
+ * tells the two apart with room to spare.
+ *
+ * @param {number} index
+ * @returns {number} the offset inside the sentence
+ */
+function firstVisibleOffset(index) {
+  const chunk = plan?.chunks[index];
+  if (plan === null || chunk === undefined) return 0;
+  const fold = hooks?.fold() ?? 0;
+  const whole = rectOf(index);
+  if (whole === null || whole.top >= fold) return 0;
+  for (const word of wordsOf(plan.text, chunk.start, chunk.end)) {
+    const box = rangeOf(word.start, word.end)?.getBoundingClientRect();
+    if (box !== undefined && box.height > 0 && box.top + box.height / 2 >= fold) {
+      return word.start - chunk.start;
+    }
+  }
+  return 0;
 }
 
 /** The place is kept, the voice stops. See the header for why this cancels. */
@@ -508,7 +546,7 @@ function onBoundary(handed, event) {
   const range = rangeOf(word.start, Math.min(word.end, chunk.end));
   if (range === null) return;
   wordMark = mark(WORD, wordMark, range, 3);
-  keepVisible(range);
+  keepVisible(range, "word");
 }
 
 /**
@@ -630,7 +668,7 @@ function markSentence() {
   // for the whole reading is less for the engine to keep track of than two
   // new ones per sentence, and this is a device that reads for an hour.
   wordMark?.clear();
-  keepVisible(range);
+  keepVisible(range, "sentence");
 }
 
 /**
@@ -664,15 +702,18 @@ function clearMarks() {
  * what an e-ink panel needs to be readable at all.
  *
  * @param {Range} range
+ * @param {"sentence" | "word"} kind what the range is: the sentence being
+ *   begun, or the word being spoken in it
  */
-function keepVisible(range) {
+function keepVisible(range, kind) {
   const rect = range.getBoundingClientRect();
   if (rect.width === 0 && rect.height === 0) return;
 
   // A document read by pages (D233) keeps its lines on pages, not in a band:
-  // the reader turns to the sentence's page when it is off the one on
-  // screen, and leaves the page alone when it is on it.
-  if (hooks?.reveal?.(rect) === true) return;
+  // the reader turns to the sentence's page when no line of it is on the
+  // one on screen, leaves the page alone when one is, and never turns back
+  // for a word.
+  if (hooks?.reveal?.(range, kind) === true) return;
 
   const height = window.innerHeight;
   // The band's ceiling clears the stuck chrome on windows short enough for

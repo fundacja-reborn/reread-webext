@@ -9,6 +9,7 @@ import {
   pageAt,
   pagePercent,
   pageTops,
+  revealTarget,
   tapZone,
   turnTarget,
   wheelTurn,
@@ -214,6 +215,52 @@ describe("onPage", () => {
     assert.ok(!onPage(200, 250, 60));
     // The first page under a chrome taller than its top: the window at 0.
     assert.ok(onPage(0, 40, 60));
+  });
+});
+
+describe("revealTarget", () => {
+  const tops = [60, 250, 480];
+
+  it("leaves a sentence with a line on the page where it stands", () => {
+    assert.equal(revealTarget(tops, 1, [280, 310, 340]), null);
+    // Straddling the page's head: read from its start, the head behind the
+    // curtain, the page not turned back for it.
+    assert.equal(revealTarget(tops, 1, [190, 220, 250]), null);
+    assert.equal(revealTarget(tops, 1, [220, 250]), null);
+    // Straddling the page's foot: the page stays until the next sentence.
+    assert.equal(revealTarget(tops, 1, [450, 480, 510]), null);
+  });
+
+  it("turns to the first line's page for a sentence with no line on the page", () => {
+    // The sentence opening the next page.
+    assert.equal(revealTarget(tops, 1, [480, 510]), 2);
+    // A sentence far ahead after a skip, and one behind after a skip back.
+    assert.equal(revealTarget(tops, 0, [510, 540]), 2);
+    assert.equal(revealTarget(tops, 2, [70, 100]), 0);
+  });
+
+  it("goes nowhere for a sentence with no line to measure", () => {
+    assert.equal(revealTarget(tops, 1, []), null);
+  });
+
+  it("turns the page on for a word further on, and never back for one behind", () => {
+    // The tail of a long sentence under the foot's curtain: the reader
+    // follows the voice onto the next page.
+    assert.equal(revealTarget(tops, 1, [510], true), 2);
+    // The first words of a sentence straddling the page's head stand on
+    // the page before, behind the curtain: the page stays (the second
+    // round of the same smoke watched it turn back on every such word).
+    assert.equal(revealTarget(tops, 1, [220], true), null);
+    assert.equal(revealTarget(tops, 2, [70], true), null);
+    // A word on the page shown asks for nothing either way.
+    assert.equal(revealTarget(tops, 1, [300], true), null);
+    // The sentence itself may still turn back - a skip back asks for it.
+    assert.equal(revealTarget(tops, 2, [70, 100], false), 0);
+  });
+
+  it("reads a line within a pixel of a page's top as that page's", () => {
+    assert.equal(revealTarget(tops, 1, [249.5]), null);
+    assert.equal(revealTarget(tops, 1, [479.5]), 2);
   });
 });
 

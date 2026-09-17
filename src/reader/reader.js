@@ -96,6 +96,7 @@ import {
   pageAt,
   pagePercent,
   pageTops,
+  revealTarget,
   tapZone,
   turnTarget,
   wheelTurn,
@@ -354,6 +355,7 @@ const speechBar = document.getElementById("speech-bar");
 // The paged layout's two pieces of chrome (D233): the paper over the cut
 // line at the foot of a page, and the page count under it.
 const pageCurtain = document.getElementById("page-curtain");
+const pageHead = document.getElementById("page-head");
 const pageFooter = document.getElementById("page-footer");
 const speechPlayButton = document.getElementById("speech-play");
 const speechPlayLabel = document.getElementById("speech-play-label");
@@ -1447,6 +1449,22 @@ function barFold() {
 }
 
 /**
+ * Where the visible text begins: under the chrome - and, read by pages
+ * (D233), under the page's head as well, its curtain and its margin. The
+ * strip between the bar's edge and the page's first line is paper over the
+ * tail of the page before, and whatever measures "the first visible line"
+ * from the bar's edge finds that tail instead: the voice began a page on
+ * the paragraph before it, and the position saved under the curtain reopened
+ * a page early (Michał's smoke, 2026-09-17). The voice, the position and the
+ * bubble's room all measure from here.
+ *
+ * @returns {number}
+ */
+function textFold() {
+  return paged() ? pageBand().top : chromeFold();
+}
+
+/**
  * The block being read: the one at the top of the visible text, just under
  * the chrome. One `elementFromPoint` and a climb - nothing observes anything
  * between saves. The point can land on something that is not a block (the
@@ -1458,7 +1476,7 @@ function barFold() {
 function topBlockIndex() {
   const root = contentRoot();
   if (root === null || root.children.length === 0) return null;
-  const line = chromeFold() + 2;
+  const line = textFold() + 2;
 
   const hit = document.elementFromPoint(window.innerWidth / 2, line);
   for (let node = hit; node !== null && node !== root; node = node.parentElement) {
@@ -1581,7 +1599,7 @@ function restorePosition(position, segmentIndex = 0) {
   if (fine !== null) scrollTo(0, fine);
   // Read by pages, the place is the page the block's first line stands on -
   // or, inside a block taller than a page, the page the fine scroll reached.
-  landOnPageOf(fine !== null ? fine + chromeFold() : blockTop);
+  landOnPageOf(fine !== null ? fine + textFold() : blockTop);
 }
 
 /**
@@ -1598,9 +1616,12 @@ function restorePosition(position, segmentIndex = 0) {
  *
  * @param {number} [fold] the chrome's reach to measure under - the whole
  *   chrome with any open sheet by default; the bar alone for the pages
+ * @param {boolean} [bars] whether a bar standing at the foot ends the band -
+ *   yes for the scroll layout's turns and the voice; no for the pages, whose
+ *   footer's strip is the bars' height and holds them (D233)
  * @returns {{ top: number, bottom: number }}
  */
-function readableBand(fold = chromeFold()) {
+function readableBand(fold = chromeFold(), bars = true) {
   const view = window.visualViewport;
   const seen =
     view === null
@@ -1610,8 +1631,8 @@ function readableBand(fold = chromeFold()) {
   let bottom = seen.bottom;
   // The page count's footer (D233) stands at the foot like the bars, and is
   // measured like them - and like them measures as nothing while it is not
-  // laid out, which is also how it stands down under a bar.
-  for (const bar of [speechBar, markBar, pageFooter]) {
+  // laid out.
+  for (const bar of bars ? [speechBar, markBar, pageFooter] : [pageFooter]) {
     if (bar === null || bar.hidden) continue;
     const edge = bar.getBoundingClientRect().top;
     // A bar measured at nothing is a bar that is not laid out; taking that
@@ -1783,8 +1804,17 @@ const pageMain = document.getElementById("page");
  * @returns {number}
  */
 function pageAir() {
-  const rem = Number.parseFloat(getComputedStyle(document.documentElement).fontSize);
-  return Number.isFinite(rem) && rem > 0 ? rem * 0.75 : 12;
+  const root = getComputedStyle(document.documentElement);
+  const rem = Number.parseFloat(root.fontSize);
+  const unit = Number.isFinite(rem) && rem > 0 ? rem : 16;
+  // The stylesheet's own number (`--page-air`, reader.css), read rather
+  // than repeated: the footer's strip is cut from the same token, and two
+  // copies of one margin would part on the first edit.
+  const declared = /^\s*([\d.]+)\s*(rem|px)\s*$/.exec(root.getPropertyValue("--page-air"));
+  if (declared === null) return unit * 0.75;
+  const amount = Number.parseFloat(declared[1] ?? "");
+  if (!Number.isFinite(amount)) return unit * 0.75;
+  return declared[2] === "px" ? amount : amount * unit;
 }
 
 /**
@@ -1795,12 +1825,16 @@ function pageAir() {
  * Aa panel and the menu hang over the text and leave the pages as they
  * are. Its top is also the first page's top in the flow: the chrome stands
  * at the document's head, stuck, so its edge in the window is its edge in
- * the flow before anything has scrolled.
+ * the flow before anything has scrolled. Above the footer's strip, and
+ * never above a bar: the strip is the bars' height and a bar standing up
+ * covers it, so the pages stay cut as it comes and goes (the same smoke:
+ * "the toolbar must not change the text's layout"). `floor` is the strip's
+ * edge - where the curtain has nothing left to cover.
  *
- * @returns {{ top: number, bottom: number }}
+ * @returns {{ top: number, bottom: number, floor: number }}
  */
 function pageBand() {
-  const band = readableBand(barFold());
+  const band = readableBand(barFold(), false);
   const air = pageAir();
   let top = band.top;
   if (chromeTab !== null && !chromeTab.hidden) {
@@ -1808,7 +1842,7 @@ function pageBand() {
     if (edge > top) top = edge;
   }
   top += air;
-  return { top, bottom: Math.max(top, band.bottom - air) };
+  return { top, bottom: Math.max(top, band.bottom - air), floor: band.bottom };
 }
 
 /**
@@ -2023,21 +2057,40 @@ function landOnLastPage() {
 }
 
 /**
- * The spoken line kept on its page (D233, `read-aloud.js`): nothing while
- * the line stands on the page shown, a turn to its page when it does not.
- * True whenever the document is read by pages, so the voice never scrolls
- * a paged document into its band.
+ * The spoken sentence kept on its page (D233, `read-aloud.js`): nothing
+ * while a line of it stands on the page shown - a sentence straddling the
+ * page's head is read from its start with its head behind the curtain - and
+ * a turn to its first line's page when none does. True whenever the
+ * document is read by pages, so the voice never scrolls a paged document
+ * into its band.
  *
- * @param {DOMRect} rect
+ * @param {Range} range
+ * @param {"sentence" | "word"} kind the sentence being begun, or the word
+ *   being spoken - which never turns the page back (`revealTarget`)
  * @returns {boolean}
  */
-function revealOnPage(rect) {
+function revealOnPage(range, kind) {
   const pages = pagesNow();
   if (pages === null) return false;
   const shownPage = pageShown(pages);
-  const page = pageAt(pages.tops, rect.top + window.scrollY);
+  const scrolled = window.scrollY;
+  /** @type {number[]} */
+  const lines = [];
+  for (const rect of range.getClientRects()) {
+    if (rect.height > 0) lines.push(rect.top + scrolled);
+  }
   const top = pages.tops[shownPage] ?? 0;
-  if (page !== shownPage || !onPage(window.scrollY, top, pageBand().top)) showPageOf(pages, page);
+  // The window shown off its page - a scroll that was not a turn - goes to
+  // the sentence's page outright; on a page, the rule decides (`pages.js`):
+  // a sentence with a line on the page shown is read where it stands, and
+  // a word turns the page on, never back.
+  if (!onPage(scrolled, top, pageBand().top)) {
+    const first = lines[0];
+    if (first !== undefined && kind === "sentence") showPageOf(pages, pageAt(pages.tops, first));
+    return true;
+  }
+  const target = revealTarget(pages.tops, shownPage, lines, kind === "word");
+  if (target !== null) showPageOf(pages, target);
   return true;
 }
 
@@ -2074,23 +2127,30 @@ function settlePage() {
  * gone when the document is not read by pages.
  */
 function refreshCurtain() {
-  if (pageCurtain === null || pageFooter === null) return;
+  if (pageCurtain === null || pageHead === null || pageFooter === null) return;
   const reading = paged();
   // The footer stands before the band is measured: the band ends above it.
   pageFooter.hidden = !reading;
   const pages = pagesNow();
   if (pages === null) {
     pageCurtain.hidden = true;
+    pageHead.hidden = true;
     return;
   }
   const band = pageBand();
+  // The head's curtain: from the window's top down to the first line's
+  // stand, over the margin and the strip under the tab, where the page
+  // before would otherwise show its tail. Drawn whatever the window's
+  // position - a page shown off its top shows text there too.
+  pageHead.hidden = false;
+  pageHead.style.height = `${band.top}px`;
   const page = pageAt(pages.tops, window.scrollY + band.top);
   const top = pages.tops[page] ?? 0;
   // The curtain runs down to the window's foot, under the footer or a bar;
-  // what decides whether there is anything to cover is the footer's edge,
+  // what decides whether there is anything to cover is the strip's edge,
   // not the page's bottom margin above it.
   const cover = onPage(window.scrollY, top, band.top)
-    ? curtainTop(pages.tops, page, window.scrollY, readableBand().bottom)
+    ? curtainTop(pages.tops, page, window.scrollY, band.floor)
     : null;
   pageCurtain.hidden = cover === null;
   if (cover !== null) pageCurtain.style.top = `${cover}px`;
@@ -3405,7 +3465,7 @@ function currentTocRow() {
     // arithmetic of a book's parts says nothing - but every heading is an
     // element on this very screen, so the headings themselves answer: the
     // last one that has reached the reading line is the section being read.
-    const line = chromeFold() + 2;
+    const line = textFold() + 2;
     let current = -1;
     for (const [index, entry] of docToc.entries()) {
       const rect = tocBlocks[entry.blockIndex]?.getBoundingClientRect();
@@ -7848,7 +7908,7 @@ configureReading({
   // it is covered paper, not visible text, and the voice must neither start
   // on one nor park the spoken line beneath the bar. The same line the
   // position save reads under, measured by the same function.
-  fold: chromeFold,
+  fold: textFold,
   // Read by pages (D233), the spoken line is kept on screen by turning to
   // its page, not by scrolling it into a band - the page it is on stays
   // exactly as it stands until the voice leaves it.
@@ -8196,7 +8256,7 @@ function rootReadingSide(ground) {
     // it. The same measure the reading position, the voice and the page
     // keys already live by (D93, D127); over the highlights page the chrome
     // scrolls away like any heading, and the measure honestly says so.
-    covered: chromeFold,
+    covered: textFold,
     // The bubble's own door to the settings - an error's one button - walks
     // the same road as the bar's mark (D139): this tab, so the way back
     // exists. Everywhere else the bubble keeps asking the background.
