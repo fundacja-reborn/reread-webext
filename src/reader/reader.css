@@ -574,11 +574,16 @@ html {
   overscroll-behavior: contain;
 }
 
-/* No shadow on e-ink paper (D234): a panel dithers a gradient into noise,
-   and the scrim's own edge already says where the sheet ends - the bubble
-   drops its shadow there for the same reason. */
+/* No shadow on e-ink paper (D234): a panel dithers a gradient into noise -
+   the bubble drops its shadow there for the same reason. A line in its
+   place, the way the e-ink theme says every edge: the scrim under a sheet
+   is a light grey on sixteen greys, and the sheet's white edge over it
+   wants one dark line to be an edge at all (Michał's question, 2026-09-17).
+   The control border's token, not the separators': the bubble's edge is
+   black there for the same reason. */
 :root[data-reader-theme="eink"] .reader-chrome > :is(.reader-panel, .nav-menu) {
   box-shadow: none;
+  border-bottom: 1px solid var(--page-border);
 }
 
 .reader-setting {
@@ -2912,16 +2917,19 @@ body.reader:has(#mark-bar:not([hidden])) {
   transform: translateY(-100%);
   z-index: 0;
   box-sizing: border-box;
-  /* The strip is the bars' own height less the page's bottom margin: a bar
-     standing up at the foot - the voice's, the pen's - covers the strip, the
-     count and the margin, which is empty paper by construction, and never a
-     line: the pages are cut above the strip whatever stands in it, and stay
-     cut as a bar comes and goes (Michał's smoke, 2026-09-17: the bar must
-     not change the text's layout). Counted from the foot's token, so the
-     strip and the bars cannot part; the first cut reserved 4.5rem, a line
-     more than the bars needed (Michał's question about a phone's screen).
-     The count keeps to the strip's foot. */
-  min-height: calc(var(--foot-h) - var(--page-air));
+  /* The strip is the bars' own height: a bar standing up at the foot - the
+     voice's, the pen's - covers the strip and the count and never a line,
+     and the page's bottom margin stays above it, so the last line clears
+     the bar's edge by the margin at least. The pages are cut above the
+     strip whatever stands in it, and stay cut as a bar comes and goes
+     (Michał's smoke, 2026-09-17: the bar must not change the text's
+     layout). Counted from the foot's token, so the strip and the bars
+     cannot part. The first cut reserved 4.5rem, a line more than the bars
+     needed (Michał's question about a phone's screen); the second cut the
+     strip to the bar less the margin and let the bar cover the margin, and
+     the last line then stood on the bar's edge every few pages (the same
+     smoke). The count keeps to the strip's foot. */
+  min-height: var(--foot-h);
   display: flex;
   align-items: flex-end;
   justify-content: center;

@@ -188,7 +188,7 @@ describe("the bar stuck to the top of every page", () => {
     // standing up covers the strip and the empty margin and never a line -
     // both counted from the foot's token, the way the head's `--bar-h`
     // holds the bar and the scroll padding together.
-    assert.match(footer, /min-height: calc\(var\(--foot-h\) - var\(--page-air\)\);/, "the footer's strip is not the bars' height less the margin");
+    assert.match(footer, /min-height: var\(--foot-h\);/, "the footer's strip is not the bars' height - the last line would stand on a bar's edge");
     assert.match(ruleOf(styles, "body.reader:has(#speech-bar:not([hidden])),\nbody.reader:has(#mark-bar:not([hidden]))"), /padding-bottom: calc\(var\(--foot-h\) \+ var\(--page-air\)\);/, "the scroll layout's room under a bar is not counted from the foot's token");
     assert.doesNotMatch(styles, /\.page-footer \{\s*display: none;/, "the page count leaves under a bar, and the band with it");
     // The token counts what stands in a bar: the buttons' floor, the air
@@ -234,6 +234,21 @@ describe("the bar stuck to the top of every page", () => {
     for (const id of ["theme-choices", "layout-choices", "font-choices", "line-height-choices", "align-choices", "hyphens-choices", "paragraphs-choices", "links-choices", "marker-color-choices"]) {
       assert.equal((markup.match(new RegExp(`id="${id}"`, "g")) ?? []).length, 1, `the ${id} row stands more than once, or not at all`);
     }
+  });
+
+  it("measures the visible text from the page's own top when read by pages: the voice, the position, the bubble", async () => {
+    // The strip between the bar's edge and the page's first line is paper
+    // over the tail of the page before; measured from the bar's edge, the
+    // voice began a page on the paragraph before it and the position saved
+    // under the curtain reopened a page early (Michał's smoke, 2026-09-17).
+    const reader = await source("reader/reader.js");
+    assert.match(reader, /function textFold\(\) \{\s*return paged\(\) \? pageBand\(\)\.top : chromeFold\(\);/, "the text's fold is not the page's top when read by pages");
+    assert.match(reader, /fold: textFold,/, "the voice measures the first visible sentence from the bar's edge");
+    assert.match(reader, /covered: textFold,/, "the bubble parks its line under the bar's edge, behind the page's curtain");
+    assert.match(reader, /function topBlockIndex\(\) \{[\s\S]*?const line = textFold\(\) \+ 2;/, "the position is read under the bar's edge, behind the page's curtain");
+    // The e-ink sheet says its edge with a line where the others cast a shadow.
+    const styles = await source("reader/reader.css");
+    assert.match(styles, /:root\[data-reader-theme="eink"\] \.reader-chrome > :is\(\.reader-panel, \.nav-menu\) \{\s*box-shadow: none;\s*border-bottom: 1px solid var\(--page-border\);/, "the e-ink sheet has neither a shadow nor a line under its edge");
   });
 
   it("holds nothing any more: the hold module went with the offset it measured", async () => {

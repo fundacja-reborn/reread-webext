@@ -1448,6 +1448,22 @@ function barFold() {
 }
 
 /**
+ * Where the visible text begins: under the chrome - and, read by pages
+ * (D233), under the page's head as well, its curtain and its margin. The
+ * strip between the bar's edge and the page's first line is paper over the
+ * tail of the page before, and whatever measures "the first visible line"
+ * from the bar's edge finds that tail instead: the voice began a page on
+ * the paragraph before it, and the position saved under the curtain reopened
+ * a page early (Michał's smoke, 2026-09-17). The voice, the position and the
+ * bubble's room all measure from here.
+ *
+ * @returns {number}
+ */
+function textFold() {
+  return paged() ? pageBand().top : chromeFold();
+}
+
+/**
  * The block being read: the one at the top of the visible text, just under
  * the chrome. One `elementFromPoint` and a climb - nothing observes anything
  * between saves. The point can land on something that is not a block (the
@@ -1459,7 +1475,7 @@ function barFold() {
 function topBlockIndex() {
   const root = contentRoot();
   if (root === null || root.children.length === 0) return null;
-  const line = chromeFold() + 2;
+  const line = textFold() + 2;
 
   const hit = document.elementFromPoint(window.innerWidth / 2, line);
   for (let node = hit; node !== null && node !== root; node = node.parentElement) {
@@ -1582,7 +1598,7 @@ function restorePosition(position, segmentIndex = 0) {
   if (fine !== null) scrollTo(0, fine);
   // Read by pages, the place is the page the block's first line stands on -
   // or, inside a block taller than a page, the page the fine scroll reached.
-  landOnPageOf(fine !== null ? fine + chromeFold() : blockTop);
+  landOnPageOf(fine !== null ? fine + textFold() : blockTop);
 }
 
 /**
@@ -3429,7 +3445,7 @@ function currentTocRow() {
     // arithmetic of a book's parts says nothing - but every heading is an
     // element on this very screen, so the headings themselves answer: the
     // last one that has reached the reading line is the section being read.
-    const line = chromeFold() + 2;
+    const line = textFold() + 2;
     let current = -1;
     for (const [index, entry] of docToc.entries()) {
       const rect = tocBlocks[entry.blockIndex]?.getBoundingClientRect();
@@ -7872,7 +7888,7 @@ configureReading({
   // it is covered paper, not visible text, and the voice must neither start
   // on one nor park the spoken line beneath the bar. The same line the
   // position save reads under, measured by the same function.
-  fold: chromeFold,
+  fold: textFold,
   // Read by pages (D233), the spoken line is kept on screen by turning to
   // its page, not by scrolling it into a band - the page it is on stays
   // exactly as it stands until the voice leaves it.
@@ -8220,7 +8236,7 @@ function rootReadingSide(ground) {
     // it. The same measure the reading position, the voice and the page
     // keys already live by (D93, D127); over the highlights page the chrome
     // scrolls away like any heading, and the measure honestly says so.
-    covered: chromeFold,
+    covered: textFold,
     // The bubble's own door to the settings - an error's one button - walks
     // the same road as the bar's mark (D139): this tab, so the way back
     // exists. Everywhere else the bubble keeps asking the background.
