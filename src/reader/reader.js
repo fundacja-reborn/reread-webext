@@ -96,6 +96,7 @@ import {
   pageAt,
   pagePercent,
   pageTops,
+  revealTarget,
   tapZone,
   turnTarget,
   wheelTurn,
@@ -2056,21 +2057,37 @@ function landOnLastPage() {
 }
 
 /**
- * The spoken line kept on its page (D233, `read-aloud.js`): nothing while
- * the line stands on the page shown, a turn to its page when it does not.
- * True whenever the document is read by pages, so the voice never scrolls
- * a paged document into its band.
+ * The spoken sentence kept on its page (D233, `read-aloud.js`): nothing
+ * while a line of it stands on the page shown - a sentence straddling the
+ * page's head is read from its start with its head behind the curtain - and
+ * a turn to its first line's page when none does. True whenever the
+ * document is read by pages, so the voice never scrolls a paged document
+ * into its band.
  *
- * @param {DOMRect} rect
+ * @param {Range} range
  * @returns {boolean}
  */
-function revealOnPage(rect) {
+function revealOnPage(range) {
   const pages = pagesNow();
   if (pages === null) return false;
   const shownPage = pageShown(pages);
-  const page = pageAt(pages.tops, rect.top + window.scrollY);
+  const scrolled = window.scrollY;
+  /** @type {number[]} */
+  const lines = [];
+  for (const rect of range.getClientRects()) {
+    if (rect.height > 0) lines.push(rect.top + scrolled);
+  }
   const top = pages.tops[shownPage] ?? 0;
-  if (page !== shownPage || !onPage(window.scrollY, top, pageBand().top)) showPageOf(pages, page);
+  // The window shown off its page - a scroll that was not a turn - goes to
+  // the sentence's page outright; on a page, the rule decides (`pages.js`):
+  // a sentence with a line on the page shown is read where it stands.
+  if (!onPage(scrolled, top, pageBand().top)) {
+    const first = lines[0];
+    if (first !== undefined) showPageOf(pages, pageAt(pages.tops, first));
+    return true;
+  }
+  const target = revealTarget(pages.tops, shownPage, lines);
+  if (target !== null) showPageOf(pages, target);
   return true;
 }
 
