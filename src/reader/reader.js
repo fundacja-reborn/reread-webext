@@ -2065,9 +2065,11 @@ function landOnLastPage() {
  * into its band.
  *
  * @param {Range} range
+ * @param {"sentence" | "word"} kind the sentence being begun, or the word
+ *   being spoken - which never turns the page back (`revealTarget`)
  * @returns {boolean}
  */
-function revealOnPage(range) {
+function revealOnPage(range, kind) {
   const pages = pagesNow();
   if (pages === null) return false;
   const shownPage = pageShown(pages);
@@ -2080,13 +2082,14 @@ function revealOnPage(range) {
   const top = pages.tops[shownPage] ?? 0;
   // The window shown off its page - a scroll that was not a turn - goes to
   // the sentence's page outright; on a page, the rule decides (`pages.js`):
-  // a sentence with a line on the page shown is read where it stands.
+  // a sentence with a line on the page shown is read where it stands, and
+  // a word turns the page on, never back.
   if (!onPage(scrolled, top, pageBand().top)) {
     const first = lines[0];
-    if (first !== undefined) showPageOf(pages, pageAt(pages.tops, first));
+    if (first !== undefined && kind === "sentence") showPageOf(pages, pageAt(pages.tops, first));
     return true;
   }
-  const target = revealTarget(pages.tops, shownPage, lines);
+  const target = revealTarget(pages.tops, shownPage, lines, kind === "word");
   if (target !== null) showPageOf(pages, target);
   return true;
 }

@@ -189,19 +189,28 @@ export function onPage(scrollY, pageTop, fold) {
  * the next page, or one far away after a skip - turns to the page its first
  * line stands on. Nothing to measure is nowhere to go.
  *
+ * The word being spoken asks with `onward`: a word on a later page - the
+ * tail of a long sentence under the foot's curtain - turns the page on, so
+ * the reader follows the voice, but a word on an earlier page never turns it
+ * back: it belongs to the sentence read from its start behind the head's
+ * curtain, and the same smoke's second round watched every such page turn
+ * back on its first word.
+ *
  * @param {number[]} tops
  * @param {number} page the page on screen
- * @param {number[]} lines the tops of the sentence's lines, document
- *   coordinates, in reading order
+ * @param {number[]} lines the tops of the sentence's or the word's lines,
+ *   document coordinates, in reading order
+ * @param {boolean} [onward] whether only a page further on may be turned to
  * @returns {number | null}
  */
-export function revealTarget(tops, page, lines) {
+export function revealTarget(tops, page, lines, onward = false) {
   const first = lines[0];
   if (first === undefined) return null;
   const top = tops[page] ?? 0;
   const next = tops[page + 1] ?? Number.POSITIVE_INFINITY;
   if (lines.some((line) => line >= top - EPS && line < next - EPS)) return null;
-  return pageAt(tops, first);
+  const target = pageAt(tops, first);
+  return onward && target < page ? null : target;
 }
 
 /**

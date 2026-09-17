@@ -75,11 +75,14 @@ const BAND = Object.freeze({ top: 0.12, bottom: 0.75, land: 0.3 });
  *   stuck chrome covers (D93) - asked at each measurement, because an open
  *   panel makes it taller. Text above this line is paper under the bar, not
  *   text anybody can see
- * @property {(range: Range) => boolean} [reveal] the reader page's own way
- *   of bringing a sentence onto the screen (D233): read by pages, a sentence
- *   off the page is reached by turning to its page, not by scrolling to a
- *   band, and one with a line on the page is left where it stands - true
- *   when the page took the sentence, false when the band below should
+ * @property {(range: Range, kind: "sentence" | "word") => boolean} [reveal]
+ *   the reader page's own way of bringing a sentence, or the word being
+ *   spoken, onto the screen (D233): read by pages, a sentence off the page
+ *   is reached by turning to its page, not by scrolling to a band, one with
+ *   a line on the page is left where it stands, and a word never turns the
+ *   page back - the words before the page's head belong to a sentence read
+ *   from its start - true when the page took it, false when the band below
+ *   should
  * @property {(state: ReadingState) => void} onChange the bar's whole job
  * @property {() => void} onFail the engine refused, and the reader has to be
  *   told in words - a silent bar disappearing says nothing
@@ -509,7 +512,7 @@ function onBoundary(handed, event) {
   const range = rangeOf(word.start, Math.min(word.end, chunk.end));
   if (range === null) return;
   wordMark = mark(WORD, wordMark, range, 3);
-  keepVisible(range);
+  keepVisible(range, "word");
 }
 
 /**
@@ -631,7 +634,7 @@ function markSentence() {
   // for the whole reading is less for the engine to keep track of than two
   // new ones per sentence, and this is a device that reads for an hour.
   wordMark?.clear();
-  keepVisible(range);
+  keepVisible(range, "sentence");
 }
 
 /**
@@ -665,15 +668,18 @@ function clearMarks() {
  * what an e-ink panel needs to be readable at all.
  *
  * @param {Range} range
+ * @param {"sentence" | "word"} kind what the range is: the sentence being
+ *   begun, or the word being spoken in it
  */
-function keepVisible(range) {
+function keepVisible(range, kind) {
   const rect = range.getBoundingClientRect();
   if (rect.width === 0 && rect.height === 0) return;
 
   // A document read by pages (D233) keeps its lines on pages, not in a band:
   // the reader turns to the sentence's page when no line of it is on the
-  // one on screen, and leaves the page alone when one is.
-  if (hooks?.reveal?.(range) === true) return;
+  // one on screen, leaves the page alone when one is, and never turns back
+  // for a word.
+  if (hooks?.reveal?.(range, kind) === true) return;
 
   const height = window.innerHeight;
   // The band's ceiling clears the stuck chrome on windows short enough for
