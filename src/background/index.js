@@ -85,6 +85,12 @@ async function handle(request, sender) {
       // language knowing the word is the second witness. Both reads are
       // milliseconds; the engine is the cost, and a foreign phrase never
       // pays it: it gets the entries, no gloss, and the name of its language.
+      // The witnesses can disagree, and since D252 the dictionary wins that
+      // argument where it is the one with something to show: the pair's own
+      // shelf holding the word (`lookUpAnswer` asks it last, `phraseLanguage`
+      // reads the answer) means the phrase is the pair's, whatever language
+      // the sentence around it is in - an English term in a Polish paragraph,
+      // which is most of a Polish technical text.
       const declared = request.lang ?? null;
       const detected = foreignLanguage(await detectLanguage(request.context ?? request.text), {
         from: pair.from,
@@ -106,9 +112,17 @@ async function handle(request, sender) {
         );
       }
 
+      // Without the sentence where the detector read one in another language
+      // (D252): the phrase got here because the pair's dictionary knew it,
+      // and that says nothing about the sentence around it - which the
+      // detector did read, reliably, as the reader's own language. Feeding
+      // that sentence to an en → pl engine is the word salad D193 was opened
+      // over; the term itself is the pair's word and translates as one. A
+      // lone word still travels with a sentence of the engine's own
+      // (`padding.js`), so the gloss is a lone word's usual gloss.
       const translated = await translate({
         text: request.text,
-        context: request.context,
+        context: detected.length > 0 ? undefined : request.context,
         from: pair.from,
         to: pair.to,
       });

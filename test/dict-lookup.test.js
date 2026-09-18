@@ -1,14 +1,15 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { languagesToAsk, lookupKeys } from "../src/lib/dict/lookup.js";
+import { languagesToAsk, lookupKeys, shelfAfterSilence } from "../src/lib/dict/lookup.js";
 import { settle, shownSenses } from "../src/lib/dict/store.js";
 
 /**
  * The pure half of asking the dictionaries (D121): which keys a phrase is
  * asked under, and when it is not a dictionary question at all; since D191
  * also which languages it is asked in, in what order, and which language's
- * answer the bubble gets. The database half (`lookupEntries`) lives on
+ * answer the bubble gets, and since D252 which shelf is worth one more read
+ * once they have all said nothing. The database half (`lookupEntries`) lives on
  * IndexedDB and stays with the smoke tests; these are the rules its callers -
  * the background's translate ride, the quiet bubble on any page, the reader's
  * own hand - stand on.
@@ -80,6 +81,29 @@ describe("languagesToAsk", () => {
     assert.deepEqual(languagesToAsk({ pair: "en", declared: "" }), ["en"]);
     assert.deepEqual(languagesToAsk({ pair: null, declared: null }), []);
     assert.deepEqual(languagesToAsk({ pair: "  ", declared: "" }), []);
+  });
+});
+
+describe("shelfAfterSilence", () => {
+  it("gives the pair's shelf a last word when the detector's took it out (D252)", () => {
+    // Michał's screenshot, 2026-09-18: "knowledge" in a Polish sentence
+    // under en → pl. The detector read the sentence, the Polish shelf was
+    // asked alone and knew nothing, and the English dictionary holding the
+    // word was never opened. It is opened now.
+    assert.equal(shelfAfterSilence({ pair: "en", asked: ["pl"], entries: 0 }), "en");
+  });
+
+  it("adds nothing where the word was found, or the pair was asked already", () => {
+    // A Polish word on a Polish page (D193's own case): the Polish shelf
+    // answered, and the pair's is left alone - a Polish "list" is not the
+    // English one.
+    assert.equal(shelfAfterSilence({ pair: "en", asked: ["pl"], entries: 2 }), null);
+    // No verdict: the pair led the list, and asking it twice reads the same
+    // rows for the same silence.
+    assert.equal(shelfAfterSilence({ pair: "en", asked: ["en", "pl"], entries: 0 }), null);
+    // Nothing to fall back on: the quiet bubble with no pair chosen.
+    assert.equal(shelfAfterSilence({ pair: null, asked: ["pl"], entries: 0 }), null);
+    assert.equal(shelfAfterSilence({ pair: "  ", asked: ["pl"], entries: 0 }), null);
   });
 });
 
