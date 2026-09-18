@@ -94,15 +94,15 @@ export const CONFIG_KEY = "config";
  *   small e-ink panel already fills the screen.
  * @property {"zones" | "swipe" | "off" | null} touchTurn What a finger does
  *   to a page read by pages (D250): the outer thirds turn it, a sideways
- *   swipe turns it, or nothing does. `null` is nobody having chosen, and
- *   then the window's width decides (`effectiveTouchTurn`) - the way
- *   `readerOnly` lets the platform decide until a hand sets it. Off matters
- *   on an e-ink reader with hardware page keys, where the gesture is worth
- *   less than the certainty that no accidental touch turns anything. Keys,
- *   the wheel and the arrows never answer to this: it says what the glass
- *   does, nothing else. Stored where the whole config is (`storage.local`,
- *   never `sync`), so a choice made on a reader does not follow onto a
- *   phone whose hand holds it differently.
+ *   slide turns it, or nothing does. `null` is nobody having chosen, and the
+ *   slide is what that means (`effectiveTouchTurn`) - the way `readerOnly`
+ *   keeps a null for "the default may still move". Off matters on an e-ink
+ *   reader with hardware page keys, where the gesture is worth less than the
+ *   certainty that no accidental touch turns anything. Keys, the wheel and
+ *   the arrows never answer to this: it says what the glass does, nothing
+ *   else. Stored where the whole config is (`storage.local`, never `sync`),
+ *   so a choice made on a reader does not follow onto a phone whose hand
+ *   holds it differently.
  * @property {"auto" | "off"} turnEffect Whether a page turned by hand is
  *   signalled (D251). `auto` is a flash of the band on e-ink paper and a
  *   smooth scroll everywhere else, and nothing at all when the system asks
@@ -400,28 +400,20 @@ export function isTurnEffect(value) {
 }
 
 /**
- * The width from which the thirds are the better gesture. Under it a hand
- * wraps around the device and the thumb holding it rests on the glass - a
- * phone, and an e-ink reader held one-handed - and a gesture that has to
- * move is the one an idle hand cannot make. Over it - a tablet on a table,
- * a desktop window - nothing rests on the screen and the zones are both
- * quicker and more precise.
- */
-export const TOUCH_TURN_WIDE = 600;
-
-/**
  * What a finger does on a page read by pages: the hand's choice, and with
- * none the window's width (D250). Read at the gesture rather than frozen at
- * the first paint, so a window resized or a device turned answers for what
- * it is now - and so that the rule stays one line nobody has to keep in
- * sync with a stored copy.
+ * none the slide (D250).
+ *
+ * The slide everywhere, and not the thirds on a wide screen as the first cut
+ * had it (Michał's smoke, 2026-09-18): a gesture that has to move is the one
+ * an idle hand cannot make, and that is worth more than the thirds' speed on
+ * every screen a page is read on. The thirds stay one press away in the
+ * settings, and the keys never answered to this at all.
  *
  * @param {Pick<ReaderConfig, "touchTurn">} reader
- * @param {number} width the window's width in CSS pixels
  * @returns {"zones" | "swipe" | "off"}
  */
-export function effectiveTouchTurn(reader, width) {
-  return reader.touchTurn ?? (width < TOUCH_TURN_WIDE ? "swipe" : "zones");
+export function effectiveTouchTurn(reader) {
+  return reader.touchTurn ?? "swipe";
 }
 
 /**

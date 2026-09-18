@@ -40,12 +40,11 @@ describe("the gesture that turns a page by touch (D250)", () => {
   it("reads the setting at every gesture, and turns nothing at all with it off", async () => {
     const reader = await source("reader/reader.js");
     const tap = bodyOf(reader, "onBareTap");
-    // The width has its say wherever nobody has chosen, and it is asked at
-    // the gesture: a window resized or a device turned answers for what it
-    // is now, and `off` leaves neither road open.
-    assert.match(tap, /if \(effectiveTouchTurn\(settings\.reader, window\.innerWidth\) !== "zones"\) return;/, "a tap turns the page under a setting that asks for a swipe, or for nothing");
+    // Asked at every gesture rather than read once: the setting is changed
+    // in a room over the reading itself, and `off` leaves neither road open.
+    assert.match(tap, /if \(effectiveTouchTurn\(settings\.reader\) !== "zones"\) return;/, "a tap turns the page under a setting that asks for a slide, or for nothing");
     assert.match(tap, /const turn = tapIntent\(tap\);/, "the tap is not read as a whole signature");
-    assert.match(reader, /if \(effectiveTouchTurn\(settings\.reader, window\.innerWidth\) === "swipe"\) \{\s*swipeTurn\(liftedTap, down\.target\);/, "the swipe is not read at the lift, or is read under every setting");
+    assert.match(reader, /if \(effectiveTouchTurn\(settings\.reader\) === "swipe"\) \{\s*swipeTurn\(liftedTap, down\.target\);/, "the slide is not read at the lift, or is read under every setting");
     // The guards that were there before the signature was: the pen's tap is
     // the marker's, a room owns the window, and a press that had something
     // to close has done its work.
@@ -110,11 +109,20 @@ describe("the gesture that turns a page by touch (D250)", () => {
   it("offers the three gestures on the settings page, in every language", async () => {
     const markup = await source("options/options.html");
     assert.match(markup, /<select id="touch-turn">\s*<option value="zones"[\s\S]*?<option value="swipe"[\s\S]*?<option value="off"/, "the row does not offer the three gestures in order");
+    assert.match(markup, /data-i18n="options_touch_turn_swipe">Slide a finger sideways</, "the gesture is named in the dialect of a phone's settings, not the reader's");
+    assert.match(markup, /<p class="row-note" id="touch-turn-note"><\/p>/, "there is no line to say what the chosen gesture does");
     assert.match(markup, /data-fold data-i18n="options_touch_turn_hint"/, "the row has no folded note");
     const script = await source("options/options.js");
     assert.match(script, /if \(!\(select instanceof HTMLSelectElement\) \|\| !isTouchTurn\(select\.value\)\) return;/, "a value the guard does not know can be written");
     assert.match(script, /writeConfig\(\{ reader: \{ touchTurn: select\.value \} \}\)/, "the row does not write the reader's setting");
-    assert.match(bodyOf(script, "renderTurning"), /touch\.value = effectiveTouchTurn\(config\.reader, window\.innerWidth\);/, "the row shows the stored null rather than the gesture in force");
+    assert.match(bodyOf(script, "renderTurning"), /touch\.value = effectiveTouchTurn\(config\.reader\);\s*sayGesture\(touch\.value\);/, "the row shows the stored null rather than the gesture in force, or says nothing about it");
+    // One line per value, each key written out: a key built from the value
+    // is a key the catalogue tests cannot see (`lib/messages.js`'s rule).
+    const said = bodyOf(script, "sayGesture");
+    for (const gesture of ["zones", "swipe", "off"]) {
+      assert.match(said, new RegExp(`t\\("options_touch_turn_note_${gesture}"\\)`), `nothing is said about ${gesture}`);
+    }
+    assert.match(script, /sayGesture\(select\.value\);/, "the line stands still when the gesture is changed");
     assert.equal((script.match(/renderTurning\(\);/g) ?? []).length, 2, "the row is not drawn on both renders");
     for (const lang of ["en", "pl", "de", "fr", "es", "uk"]) {
       const catalogue = JSON.parse(await source(`_locales/${lang}/messages.json`));
@@ -132,8 +140,8 @@ describe("the gesture that turns a page by touch (D250)", () => {
 
   it("is promised in the README, defaults and all", async () => {
     const readme = await readFile(new URL("../README.md", ROOT), "utf8");
-    assert.match(readme, /\*\*Turning pages by touch\*\* offers a tap on the left or right third of the page, a sideways swipe, or nothing at all/, "the README does not offer the three gestures");
-    assert.match(readme, /a tap by default on a wide screen, a swipe on a narrow one/, "the README does not say which is the default where");
+    assert.match(readme, /\*\*Turning pages by touch\*\* offers sliding a finger sideways - the default/, "the README does not offer the gestures, or names another default");
+    assert.match(readme, /on a phone it must not begin at the very edge of the screen, where the system's own\s*back gesture lives/, "the README keeps the edge of a phone's screen a surprise");
     assert.match(readme, /A tap turns a page only when it is short, still and away from the edges of the screen/, "the README promises a tap that turns wherever it lands");
   });
 

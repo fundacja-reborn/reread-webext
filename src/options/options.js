@@ -338,18 +338,57 @@ function renderPageNumber() {
 /**
  * The two rows about how a page turns (D250, D251). The touch row shows the
  * gesture as it acts, not as it is stored: with nothing chosen the select
- * stands on what the window's width decides - and this page is not the
- * reader, so the width asked for is the one the reader would be read at,
- * which is this window's. The first press stores a real choice, and from
- * then on the width has no say, exactly as the reader-only switch works.
+ * stands on the default the reader would use, exactly as the reader-only
+ * switch shows the mode the platform would pick. The first press stores a
+ * real choice, and from then on the default has no say.
  */
 function renderTurning() {
   const touch = document.getElementById("touch-turn");
   if (touch instanceof HTMLSelectElement) {
-    touch.value = effectiveTouchTurn(config.reader, window.innerWidth);
+    touch.value = effectiveTouchTurn(config.reader);
+    sayGesture(touch.value);
   }
   const effect = document.getElementById("turn-effect");
-  if (effect instanceof HTMLSelectElement) effect.value = config.reader.turnEffect;
+  if (effect instanceof HTMLSelectElement) {
+    effect.value = config.reader.turnEffect;
+    sayEffect(effect.value);
+  }
+}
+
+/**
+ * What the chosen gesture does, under the select (Michał's smoke,
+ * 2026-09-18). Three names of three words each say what to press and
+ * nothing about what happens: that a slide must not begin at the very edge
+ * of a phone's screen, where the system's own back gesture lives, or that a
+ * tap has to be brief and away from the edges to count. One sentence for
+ * the choice in force rather than a paragraph about all three - the folded
+ * note above stays the place for the whole picture.
+ *
+ * Each key written out rather than built from the value, the way the error
+ * sentences are (`lib/messages.js`): a key nothing names as a literal is a
+ * key the catalogue tests cannot see, and one language quietly missing it
+ * would show as an empty line.
+ *
+ * @param {string} gesture
+ */
+function sayGesture(gesture) {
+  const note = document.getElementById("touch-turn-note");
+  if (note === null) return;
+  if (gesture === "zones") note.textContent = t("options_touch_turn_note_zones");
+  else if (gesture === "swipe") note.textContent = t("options_touch_turn_note_swipe");
+  else note.textContent = t("options_touch_turn_note_off");
+}
+
+/**
+ * The same for the turn's effect: what a page turn will look like on this
+ * screen, said where the choice is made.
+ *
+ * @param {string} effect
+ */
+function sayEffect(effect) {
+  const note = document.getElementById("turn-effect-note");
+  if (note === null) return;
+  note.textContent = effect === "off" ? t("options_turn_effect_note_off") : t("options_turn_effect_note_auto");
 }
 
 /** The quiet-bubble switch (D81) - stored plainly, no platform in the picture. */
@@ -2988,9 +3027,13 @@ document.getElementById("page-number")?.addEventListener("change", (event) => {
 document.getElementById("touch-turn")?.addEventListener("change", (event) => {
   const select = event.target;
   if (!(select instanceof HTMLSelectElement) || !isTouchTurn(select.value)) return;
+  // The line under the select answers at once, before the write comes back
+  // through storage: the choice is made here, and what it means should not
+  // arrive a beat later.
+  sayGesture(select.value);
   // The same road (D250): a reader open by pages hears it through storage,
   // and the next touch is read the new way. What is stored is a name and
-  // never the null the width stands for - a press here is a choice made.
+  // never the null the default stands for - a press here is a choice made.
   void writeConfig({ reader: { touchTurn: select.value } }).then((written) => {
     config = written;
   });
@@ -2998,6 +3041,7 @@ document.getElementById("touch-turn")?.addEventListener("change", (event) => {
 document.getElementById("turn-effect")?.addEventListener("change", (event) => {
   const select = event.target;
   if (!(select instanceof HTMLSelectElement) || !isTurnEffect(select.value)) return;
+  sayEffect(select.value);
   // The same road (D251): the next turn is dressed the way the select now
   // says, in every open reader, with no reload.
   void writeConfig({ reader: { turnEffect: select.value } }).then((written) => {

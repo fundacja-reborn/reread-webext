@@ -1466,16 +1466,31 @@
   },
   "options_touch_turn": { "message": "Pasar páginas con el dedo" },
   "options_touch_turn_zones": { "message": "Tocar el tercio izquierdo o derecho" },
-  "options_touch_turn_swipe": { "message": "Deslizar hacia el lado" },
+  "options_touch_turn_swipe": { "message": "Deslizar el dedo hacia el lado" },
   "options_touch_turn_off": { "message": "Desactivado" },
   "options_touch_turn_hint": {
-    "message": "En una pantalla ancha, tocar el tercio izquierdo o derecho de la página es lo predeterminado; en una estrecha lo es deslizar hacia el lado, porque allí la mano que sujeta el dispositivo se apoya en la pantalla. Desactivado quedan las teclas de página, las flechas y la rueda del ratón, que pasan página con cualquier ajuste. Un toque solo pasa página si es breve, quieto y lejos de los bordes de la pantalla, para que un pulgar apoyado en el borde no pase ninguna; el lápiz nunca pasa página."
+    "message": "Deslizar el dedo es lo predeterminado: un gesto que tiene que moverse es el único que la mano que sujeta el dispositivo no hace sin querer. Las teclas de página, las flechas y la rueda del ratón pasan página con cualquier ajuste, y el lápiz nunca pasa página."
+  },
+  "options_touch_turn_note_zones": {
+    "message": "Tocar el tercio izquierdo o derecho de la página la pasa: el derecho avanza, el izquierdo retrocede. Solo cuenta un toque breve, quieto y lejos de los bordes de la pantalla, para que un pulgar que sujeta el dispositivo no pase ninguna."
+  },
+  "options_touch_turn_note_swipe": {
+    "message": "Deslizar el dedo hacia la izquierda muestra la página siguiente; hacia la derecha, la anterior. En un teléfono no empieces justo en el borde de la pantalla: ahí empieza el gesto de volver del sistema; en un lector de tinta electrónica el borde suele funcionar."
+  },
+  "options_touch_turn_note_off": {
+    "message": "El dedo no pasa páginas. Las teclas de página, las flechas y la rueda del ratón siguen haciéndolo."
   },
   "options_turn_effect": { "message": "Efecto al pasar página" },
   "options_turn_effect_auto": { "message": "Automático" },
   "options_turn_effect_off": { "message": "Desactivado" },
   "options_turn_effect_hint": {
-    "message": "Muestra que la página ha cambiado, algo fácil de pasar por alto cuando se lee el centro de una página. En el tema E-ink, la zona de texto se oscurece un momento, como en un lector de libros electrónicos; en otras pantallas, la nueva página se desliza. No ocurre nada si el sistema pide menos movimiento, ni cuando la página la pasa la lectura en voz alta o el arrastre de una selección hasta el borde de la página."
+    "message": "Muestra que la página ha cambiado, algo fácil de pasar por alto cuando se lee el centro de una página. No ocurre nada si el sistema pide menos movimiento, ni cuando la página la pasa la lectura en voz alta o el arrastre de una selección hasta el borde de la página."
+  },
+  "options_turn_effect_note_auto": {
+    "message": "En el tema E-ink, la zona de texto se oscurece un momento, como en un lector de libros electrónicos; en otras pantallas, la nueva página se desliza."
+  },
+  "options_turn_effect_note_off": {
+    "message": "La página simplemente cambia, como antes de este ajuste."
   },
   "options_keep_articles": { "message": "Guardar de forma predeterminada en la lista de lectura sin conexión" },
   "options_keep_articles_hint": {

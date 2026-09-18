@@ -610,27 +610,31 @@
           bar next to re/read.
         </p>
       </div>
-      <!-- What a finger does (D250). The thirds are what every e-reader
-           does and what this one has done since the Pages layout existed;
-           the swipe is for a hand wrapped around the device, whose thumb
-           rests on the glass; off is for a reader with hardware page keys,
-           where no gesture is worth an accidental turn. Chosen by name in a
-           select, like the language pair: three values, set once. -->
+      <!-- What a finger does (D250). The slide is the default, on every
+           screen (Michał's smoke, 2026-09-18): a gesture that has to move is
+           the one a hand holding the device cannot make by accident. The
+           thirds are what every e-reader does and what this one did first;
+           off is for a reader with hardware page keys, where no gesture is
+           worth an accidental turn. Chosen by name in a select, like the
+           language pair: three values, set once. -->
       <div class="row row-stack">
         <label class="row-name" for="touch-turn" data-i18n="options_touch_turn">Turning pages by touch</label>
         <select id="touch-turn">
           <option value="zones" data-i18n="options_touch_turn_zones">Tap the left or right third</option>
-          <option value="swipe" data-i18n="options_touch_turn_swipe">Swipe sideways</option>
+          <option value="swipe" data-i18n="options_touch_turn_swipe">Slide a finger sideways</option>
           <option value="off" data-i18n="options_touch_turn_off">Off</option>
         </select>
         <p class="row-note" data-fold data-i18n="options_touch_turn_hint">
-          On a wide screen, tapping the left or right third of the page is the default; on a narrow
-          one it is swiping sideways, because there the hand that holds the device rests on the
-          screen. Off leaves the page keys, the arrow keys and the mouse wheel, which turn pages
-          whatever this is set to. A tap turns a page only when it is short, still and away from
-          the edges of the screen, so that a thumb resting at the edge turns nothing; the pen never
-          turns a page.
+          Sliding a finger is what re/read does by default: a gesture that has to move is the one a
+          hand holding the device cannot make by accident. The page keys, the arrow keys and the
+          mouse wheel turn pages whatever this is set to, and the pen never turns one.
         </p>
+        <!-- What the chosen gesture does, in the reader's own words (Michał's
+             smoke, 2026-09-18): three gestures named in three words each say
+             too little, and what a reader needs is the one they picked - where
+             a slide may begin, how short a tap has to be. Filled by script
+             like the voice row's line, and changed with the select. -->
+        <p class="row-note" id="touch-turn-note"></p>
       </div>
       <!-- The turn made visible (D251). Two values, not three: a signal
            given every fifth page would not be a confirmation of anything. -->
@@ -642,11 +646,10 @@
         </select>
         <p class="row-note" data-fold data-i18n="options_turn_effect_hint">
           Shows that the page has turned, which is easy to miss when you are reading the middle of
-          a page. In the E-ink theme the text area goes dark for a moment, the way an e-reader
-          marks a page turn; on other screens the new page slides in. Nothing happens if your
-          system asks for less motion, and nothing when the page is turned by reading aloud or by
-          dragging a selection to the edge of the page.
+          a page. Nothing happens if your system asks for less motion, and nothing when the page is
+          turned by reading aloud or by dragging a selection to the edge of the page.
         </p>
+        <p class="row-note" id="turn-effect-note"></p>
       </div>
     </div>
     </section>
