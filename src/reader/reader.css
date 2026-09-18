@@ -540,7 +540,10 @@ html {
    lit - a rule on top of that read as clutter (Michał's smoke,
    2026-09-01). */
 .reader-panel {
-  padding: 0.6rem 0;
+  /* No air under the last row here: it belongs to the foot strip now
+     (`.panel-more` below), which is stuck to the panel's foot and cannot
+     reach past the panel's own padding to cover it. */
+  padding: 0.6rem 0 0;
   /* Thirteen rows since D225 stand taller than a phone's window held
      sideways, and the stuck box they live in has no page to scroll them
      into view: the panel scrolls within itself when it must and stays put
@@ -591,6 +594,9 @@ html {
   max-height: calc(100dvh - var(--header-h) - 1rem);
   overflow-y: auto;
   overscroll-behavior: contain;
+  /* The air under the last row (page.css) moves into the foot strip here
+     too, and for the same reason as the Aa panel's above. */
+  padding-bottom: 0;
 }
 
 /* The foot of a panel that scrolls within itself (D246): at Firefox for
@@ -605,19 +611,30 @@ html {
    Always in flow, never shown and hidden: a strip that came and went would
    move the rows under it by its own height at the moment somebody reads
    them. Only the chevron's visibility follows the scroll, and the line over
-   the strip is a shadow, so neither costs a reflow. Nothing to press: the
-   panel scrolls under a finger, and a control here would be a second way to
-   do what the finger already does. */
+   the strip is a shadow, so neither costs a reflow.
+
+   A button, and the panel's own air under the last row is its padding
+   (D247, after the first cut met a phone): a sticky foot is held inside its
+   parent's content box, so air given to the panel was a band of the
+   scrollport the rows went on showing through under the strip - half a row
+   below the chevron - and a strip that caught no press handed it to
+   whatever stood under it, which in the Aa panel is the voice list (it
+   opened; Michał's photos, 2026-09-18). The press does what the chevron
+   says: it brings up what is below. */
 .panel-more {
   position: sticky;
   bottom: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 1.3rem;
+  width: 100%;
+  /* The chevron's own line, and under it the air that was the panel's. */
+  min-height: 1.9rem;
+  padding: 0 0 0.6rem;
+  border: 0;
+  border-radius: 0;
   background: var(--page-bg);
   color: var(--page-muted);
-  pointer-events: none;
 }
 
 .panel-more-glyph {

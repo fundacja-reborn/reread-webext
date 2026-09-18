@@ -651,6 +651,10 @@
     "message": "Next page",
     "description": "The highlighter's toolbar in the paged layout: the page after this one - where the lines a bar at the foot covers now stand."
   },
+  "reader_panel_more": {
+    "message": "Show more",
+    "description": "The strip at the foot of the reader's Aa panel and menu when it is taller than the window: the chevron there says there is more below, and pressing it brings the next part of the panel up."
+  },
   "reader_marker": { "message": "Highlighter" },
   "reader_underline": { "message": "Underline" },
   "underline_fine": {

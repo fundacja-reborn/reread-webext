@@ -7649,11 +7649,44 @@ function dressPanelMore() {
     const more = !panel.hidden && panel.scrollHeight - panel.scrollTop - panel.clientHeight > 1;
     const said = more ? "true" : "false";
     if (panel.dataset["more"] !== said) panel.dataset["more"] = said;
+    // The strip is the panel's paper either way; it is a press only while
+    // there is something below to bring up, and a stop on the way through
+    // the rows only while it is a press.
+    const foot = panelFoot(panel);
+    const dead = !more;
+    if (foot === null || foot.disabled === dead) continue;
+    // A button disabled under the focus drops it on the body, and the next
+    // Tab starts again from the top of the page: the panel's own button
+    // takes it back, the way Escape hands it back from inside a panel.
+    if (dead && document.activeElement === foot) (panel === displayPanel ? displayButton : menuButton)?.focus();
+    foot.disabled = dead;
   }
 }
 
+/**
+ * The strip at a panel's foot (`.panel-more`, reader.html).
+ *
+ * @param {HTMLElement} panel
+ * @returns {HTMLButtonElement | null}
+ */
+function panelFoot(panel) {
+  const foot = panel.querySelector(".panel-more");
+  return foot instanceof HTMLButtonElement ? foot : null;
+}
+
 for (const panel of [displayPanel, menuPanel]) {
-  panel?.addEventListener("scroll", () => dressPanelMore(), { passive: true });
+  if (panel === null) continue;
+  panel.addEventListener("scroll", () => dressPanelMore(), { passive: true });
+  // A press on the strip does what its chevron says (D247): it brings up
+  // what stands below. One panel's worth of rows less the strip itself, so
+  // the row the chevron stood over comes up whole instead of being stepped
+  // past - and in one frame, because this is drawn on e-ink panels where a
+  // smooth scroll is a smear.
+  panelFoot(panel)?.addEventListener("click", () => {
+    const foot = panelFoot(panel);
+    const step = panel.clientHeight - (foot === null ? 0 : foot.offsetHeight);
+    panel.scrollBy({ top: Math.max(step, panel.clientHeight / 2), behavior: "instant" });
+  });
 }
 window.addEventListener("resize", () => dressPanelMore());
 

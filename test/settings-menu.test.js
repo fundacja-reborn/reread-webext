@@ -35,8 +35,11 @@ describe("the settings page's menu", () => {
 
   it("closes the menu on the last row showing, with no clause for a row that follows the switch", async () => {
     const styles = await source("assets/page.css");
-    const rule = styles.slice(styles.indexOf(".nav-menu > :is(a, button):not(:has(~ :is(a, button):not([hidden])))"), styles.indexOf("border-bottom: none;", styles.indexOf(".nav-menu > :is(a, button):not(:has(~ :is(a, button):not([hidden])))")));
-    assert.notEqual(rule.length, 0, "the closing row's rule is gone");
+    // The rule reads "the row with no row after it draws no line", and the
+    // reader's foot strip is the one button it steps over (D247).
+    const at = styles.indexOf(".nav-menu > :is(a, button):not(");
+    assert.notEqual(at, -1, "the closing row's rule is gone");
+    const rule = styles.slice(at, styles.indexOf("border-bottom: none;", at));
     assert.doesNotMatch(rule, /no-translation|translation-only/, "the closing row's rule still knows a row that hides with the switch");
   });
 });

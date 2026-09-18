@@ -464,6 +464,7 @@
   },
   "reader_page_prev": { "message": "Vorherige Seite" },
   "reader_page_next": { "message": "Nächste Seite" },
+  "reader_panel_more": { "message": "Mehr anzeigen" },
   "reader_marker": { "message": "Textmarker" },
   "reader_underline": { "message": "Unterstreichung" },
   "underline_fine": { "message": "Fein" },
