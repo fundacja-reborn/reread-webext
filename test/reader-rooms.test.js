@@ -171,7 +171,13 @@ describe("the room over the reading (D243)", () => {
       const script = await source(page);
       assert.match(script, /const inReader = framedInReader\(\);/, `${page} cannot tell it stands in the reader`);
       assert.match(script, new RegExp(row), `${page}: a menu row still navigates the frame`);
-      assert.match(script, /if \(!inReader\) armFullscreenTool\(/, `${page} offers a second full-screen tool inside the reader's own screen`);
+      // The phrases page still guards its tool; the settings page dropped
+      // the tool altogether in F3, so there is nothing there to guard.
+      if (page === "vocab/vocab.js") {
+        assert.match(script, /if \(!inReader\) armFullscreenTool\(/, `${page} offers a second full-screen tool inside the reader's own screen`);
+      } else {
+        assert.doesNotMatch(script, /armFullscreenTool/, `${page} still arms a tool it no longer has`);
+      }
       assert.match(script, /if \(inReader\) askReader\(\{ act: "ready" \}\);/, `${page} never reports for duty`);
     }
     // The phrases page signs the tab as its own; framed, that tab is the

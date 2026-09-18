@@ -37,7 +37,6 @@ import { compileUserCss } from "../lib/user-css.js";
 import { privateNote } from "../lib/private-note.js";
 import { armBackArrow } from "../lib/back-arrow.js";
 import { askReader, framedInReader } from "../lib/room-frame.js";
-import { armFullscreenTool } from "../lib/fullscreen-tool.js";
 import { languageName, pairLabel } from "../lib/language.js";
 import { catalogDictionaries, catalogSource } from "../lib/dict/catalog.js";
 import { describeDictDownloadProblem, downloadArchive } from "../lib/dict/download.js";
@@ -3504,15 +3503,9 @@ const inReader = framedInReader();
 
 armBackArrow();
 
-// The bar's full-screen tool (D195; every page since D220): the reader
-// bar's own, in `lib/fullscreen-tool.js` - where the browser has a full
-// screen to give and the row has room, with the menu put away before the
-// screen changes.
-// Standing inside the reader (D243), the screen is the reader's: it holds
-// the full screen for this visit, and a second tool asking for it from in
-// here would be a button with two answers. The reader's own bar carries it.
-if (!inReader) armFullscreenTool(document.getElementById("fullscreen"), () => setMenu(false));
-
+// No full-screen tool on this page (F3): the settings are read in short
+// visits, mostly beside the page they are about, and the row is busy with the
+// search and the section list. The reader keeps its own.
 /** @param {boolean} open */
 function setMenu(open) {
   if (menuButton === null || menuPanel === null) return;

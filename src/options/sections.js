@@ -118,12 +118,35 @@ function markCurrent(list) {
 }
 
 /**
+ * Whatever the last landing marked, so the next press can clear it.
+ *
+ * @type {HTMLElement | null}
+ */
+let marked = null;
+
+/** The mark goes at the next thing anybody does, and never on a clock. */
+function clearMark() {
+  if (marked === null) return;
+  delete marked.dataset["landed"];
+  marked = null;
+}
+
+document.addEventListener("pointerdown", clearMark);
+document.addEventListener("keydown", clearMark);
+
+/**
  * Where an address lands. A row whose switch is off is not on the page, and
  * an address that named it would scroll nowhere at all - so the landing walks
  * out to the nearest thing that is drawn: the row's own section, or the page's
- * top. A landing is also a focus, so the keyboard arrives where the eye does,
- * and the ring stays until the focus moves on - never on a clock (D234: every
- * timed disappearance is one more refresh of an e-ink panel).
+ * top.
+ *
+ * A landing is also a focus, so a screen reader arrives where the eye does.
+ * It is only *marked* when it lands on one row out of thirty (F5): a section
+ * heading is the whole screen after the jump and needs no pointing at, and the
+ * ring it used to wear read as a form field somebody had selected. The row's
+ * mark is a bar at its leading edge, drawn inside the row so nothing shifts,
+ * and it goes at the next press or key - not when the focus moves, because the
+ * focus is where the reader is about to work.
  *
  * @param {string} id
  */
@@ -138,14 +161,11 @@ export function land(id) {
   if (!landed.hasAttribute("tabindex")) landed.setAttribute("tabindex", "-1");
   landed.scrollIntoView();
   landed.focus({ preventScroll: true });
-  landed.dataset["landed"] = "";
-  landed.addEventListener(
-    "blur",
-    () => {
-      delete landed.dataset["landed"];
-    },
-    { once: true },
-  );
+  clearMark();
+  if (landed.classList.contains("row")) {
+    landed.dataset["landed"] = "";
+    marked = landed;
+  }
 }
 
 /**

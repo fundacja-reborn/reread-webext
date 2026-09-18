@@ -23,7 +23,9 @@ describe("the bar's full-screen tool", () => {
     for (const [page, glyph] of /** @type {[string, string][]} */ ([
       ["reader/reader.html", "reader-icon"],
       ["vocab/vocab.html", "page-icon"],
-      ["options/options.html", "page-icon"],
+      // The settings page dropped its tool in F3 (the round after D254): the
+      // settings are read in short visits, mostly beside the page they are
+      // about, and the bar there is busy with the search and the section list.
     ])) {
       const markup = await source(page);
       const tool = markup.indexOf('id="fullscreen"');
@@ -66,9 +68,13 @@ describe("the bar's full-screen tool", () => {
     assert.match(arm, /record\.target !== tool/, "the tool's own flips ask the measure again, without end");
     assert.match(arm, /t\("reader_fullscreen_exit"\)/, "the tool's name in full screen is not the row's Exit");
     assert.match(arm, /t\("reader_fullscreen"\)/, "the tool's name is not the row's Full screen");
-    for (const page of ["reader/reader.js", "vocab/vocab.js", "options/options.js"]) {
+    for (const page of ["reader/reader.js", "vocab/vocab.js"]) {
       assert.match(await source(page), /armFullscreenTool\(/, `${page} does not arm the tool`);
     }
+    // And the settings page arms nothing: the button is gone with it (F3).
+    const options = await source("options/options.js");
+    assert.doesNotMatch(options, /armFullscreenTool|fullscreen-tool\.js/, "the settings page still arms a tool it no longer has");
+    assert.doesNotMatch(await source("options/options.html"), /id="fullscreen"/, "the settings bar still carries the tool");
     const reader = await source("reader/reader.js");
     assert.doesNotMatch(reader, /function updateFullscreenTool|platformOs/, "the reader keeps a full-screen rule of its own");
     // The reader's bar unfolding from behind its ribbon lays the row out

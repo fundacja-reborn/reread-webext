@@ -39,6 +39,10 @@
            leaves its parent's box, and inside the short header it slid away
            with it (Michał's smoke, 2026-08-29). -->
       <div class="page-bar">
+        <!-- The arrow and the mark travel together (F2): on a wide screen the
+             bar takes the page's own two columns, and these two stand in the
+             first of them, over the table of contents. -->
+        <span class="bar-head">
         <!-- The way back to the reading (D139/D142), drawn where every app
              puts it (the reader bar's own arrow). Walked into in this tab,
              the arrow pops the entry the system's back gesture pops; raised
@@ -68,76 +72,69 @@
           </svg>
         </button>
         <p class="page-mark">re/read</p>
-        <!-- Searching the settings from the bar (D254, P10): under 60rem the
-             column beside the page is gone, and with it the field - so the bar
-             carries the way in, and the field itself unrolls across the bar on
-             a press. One field either way; `search.js` moves the one element
-             between the two places rather than writing it twice. -->
-        <button
-          id="search-open"
-          type="button"
-          class="bar-search-open"
-          aria-expanded="false"
-          aria-controls="settings-search"
-          title="Search the settings"
-          data-i18n-title="options_search_label"
-          aria-label="Search the settings"
-          data-i18n-aria-label="options_search_label"
-        >
-          <svg class="page-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-            <circle cx="7" cy="7" r="4.25" fill="none" stroke="currentColor" stroke-width="1.3" />
-            <path d="M10.2 10.2 13.5 13.5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
-          </svg>
-        </button>
-        <!-- The narrow screen's table of contents (D254): under 60rem the
-             column beside the page has nowhere to stand, and the list moves
-             into the bar as the one control a phone and an e-ink panel are
-             both good at. Filled by `sections.js` from the very links the
-             column holds, so the two can never name different sections; it
-             follows the reading like the column's marker, and a choice in it
-             is the same landing an address makes. -->
+        </span>
+        <!-- The narrow screen's own heading (F4): under 60rem the wordmark
+             goes and the section being read stands in its place, as a title
+             with a mark after it - a native select, so the keyboard, the
+             touch screen and the screen reader all get the list for free.
+             Filled by `sections.js` from the very links the column holds. -->
         <select
           id="section-jump"
           class="bar-sections"
-          aria-label="Sections of this page"
-          data-i18n-aria-label="options_sections_aria"
+          aria-label="Go to a section"
+          data-i18n-aria-label="options_section_jump"
         ></select>
+        <!-- The search, in the bar at every width (F2/T1): over the column of
+             text on a wide screen, the way a browser's own settings stand it,
+             and behind the magnifier below 60rem, where the bar has room for
+             one thing at a time. One field, one value, one piece of state. -->
+        <search id="settings-search" class="settings-search">
+          <label class="visually-hidden" for="settings-search-field" data-i18n="options_search_label"
+            >Search the settings</label
+          >
+          <input
+            type="search"
+            id="settings-search-field"
+            placeholder="Search the settings"
+            data-i18n-placeholder="options_search_label"
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck="false"
+          />
+          <p id="search-status" class="status" role="status" hidden></p>
+        </search>
         <span class="page-tools">
-          <!-- The bar's full-screen tool (D195; every page since D220):
-               where the browser has a full screen to give and the row has
-               room, one press asks for the whole screen and the same press
-               gives it back; hidden until the row is measured
-               (`lib/fullscreen-tool.js`). Before the menu, the reader bar's
-               own place for it; the two glyphs are page.css's, and the
-               glyph is the tool's whole state - it wears no lit frame. -->
+          <!-- The way into the search below 60rem, and the way out of it: one
+               press opens the field over the title, the cross puts the title
+               back. Neither is drawn where the field stands open anyway. -->
           <button
-            id="fullscreen"
+            id="search-open"
             type="button"
-            title="Full screen"
-            data-i18n-title="reader_fullscreen"
-            aria-label="Full screen"
-            data-i18n-aria-label="reader_fullscreen"
+            class="bar-search-open"
+            aria-expanded="false"
+            aria-controls="settings-search"
+            title="Search the settings"
+            data-i18n-title="options_search_label"
+            aria-label="Search the settings"
+            data-i18n-aria-label="options_search_label"
+          >
+            <svg class="page-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+              <circle cx="7" cy="7" r="4.25" fill="none" stroke="currentColor" stroke-width="1.3" />
+              <path d="M10.2 10.2 13.5 13.5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+            </svg>
+          </button>
+          <button
+            id="search-close"
+            type="button"
+            class="bar-search-close"
+            title="Close the search"
+            data-i18n-title="options_search_close"
+            aria-label="Close the search"
+            data-i18n-aria-label="options_search_close"
             hidden
           >
-            <svg class="page-icon fullscreen-enter" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-              <path
-                d="M2.5 6V2.5H6M10 2.5h3.5V6M13.5 10v3.5H10M6 13.5H2.5V10"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.3"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
-            <svg class="page-icon fullscreen-exit" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-              <path
-                d="M6 2.5V6H2.5M10 2.5V6h3.5M13.5 10H10v3.5M2.5 10H6v3.5"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.3"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
+            <svg class="page-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+              <path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
             </svg>
           </button>
           <button
@@ -179,30 +176,6 @@
          select speaks for it. The title lives in the page's column, so the
          list stands beside the settings rather than under the heading. -->
     <div class="page-body">
-    <div class="side">
-    <!-- The field itself (D254, §8): it stands over the table of contents
-         where there is a column for it, and inside the bar where there is
-         not - the one element, moved by `search.js`. What it searches is the
-         page's own rows: their names, the sentence under each of them, the
-         rest behind their More, the section they stand in and whatever
-         keywords the catalogue offers. Never the catalogues of models and
-         dictionaries, never the list of sites, never the CSS field: those are
-         data, and a search over them would answer with the data. -->
-    <search id="settings-search" class="settings-search">
-      <label class="visually-hidden" for="settings-search-field" data-i18n="options_search_label"
-        >Search the settings</label
-      >
-      <input
-        type="search"
-        id="settings-search-field"
-        placeholder="Search the settings"
-        data-i18n-placeholder="options_search_label"
-        autocomplete="off"
-        autocapitalize="off"
-        spellcheck="false"
-      />
-      <p id="search-status" class="status" role="status" hidden></p>
-    </search>
     <nav id="sections" class="sections" aria-label="Sections of this page" data-i18n-aria-label="options_sections_aria">
       <a id="jump-first-steps" class="translation-only" href="#first-steps" data-i18n="options_first_steps_heading" hidden>First steps</a>
       <a href="#languages" data-i18n="options_section_languages">Languages</a>
@@ -214,7 +187,6 @@
       <a href="#custom-css" data-i18n="options_custom_css_heading">Custom CSS</a>
       <a href="#about" data-i18n="options_section_about">About re/read</a>
     </nav>
-    </div>
 
     <main>
     <header>

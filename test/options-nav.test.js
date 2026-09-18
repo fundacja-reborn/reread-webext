@@ -38,11 +38,11 @@ describe("the settings page's navigation", () => {
     assert.match(markup, /<select\s+id="section-jump"/, "the bar has no list of sections");
     assert.match(
       markup.slice(markup.indexOf('id="section-jump"'), markup.indexOf('id="section-jump"') + 400),
-      /data-i18n-aria-label="options_sections_aria"/,
+      /data-i18n-aria-label="options_section_jump"/,
       "the bar's list is unnamed for a screen reader",
     );
     // Empty in the markup: filled from the column, never written twice.
-    assert.match(markup, /aria-label="options_sections_aria"\s*\n\s*><\/select>/, "the bar's list is written out by hand");
+    assert.match(markup, /data-i18n-aria-label="options_section_jump"\s*\n\s*><\/select>/, "the bar's list is written out by hand");
 
     const script = await source("options/sections.js");
     assert.match(script, /document\.querySelectorAll\("#sections a\[href\^='#'\]"\)/, "the list is not read off the column");
@@ -86,17 +86,26 @@ describe("the settings page's navigation", () => {
     assert.match(script, /window\.addEventListener\("hashchange"/, "the page ignores an address changing under it");
 
     const css = await source("options/options.css");
-    const landed = rule(css, "[data-landed]");
-    assert.match(landed, /outline: 2px solid var\(--page-accent\)/, "the landing wears no ring");
+    // A row is marked with a bar at its leading edge, drawn inside the row so
+    // nothing shifts; a section heading is marked with nothing at all (F5).
+    const landed = rule(css, ".row[data-landed]");
+    assert.match(landed, /box-shadow: inset 3px 0 0 var\(--page-accent\)/, "a landed row wears no mark");
+    assert.match(css, /:is\(h1, h2, h3, section, details\):focus \{\s*outline: none;/, "a heading focused for a screen reader still wears a ring");
+    assert.match(script, /if \(landed\.classList\.contains\("row"\)\)/, "a section heading is marked like a row");
+    assert.match(script, /document\.addEventListener\("pointerdown", clearMark\)/, "the mark outstays the next press");
   });
 
   it("stands the column under the bar and hides it where the bar speaks for it", async () => {
     const css = await source("options/options.css");
     assert.match(rule(css, ".sections"), /display: none/, "the column shows on a narrow screen, where there is no room");
     const wide = css.slice(css.indexOf("@media (min-width: 60rem)"));
-    assert.match(wide, /\.sections \{[\s\S]*?position: sticky;[\s\S]*?top: calc\(var\(--header-h\) \+ 0\.75rem\);/, "the column does not stand under the stuck bar");
-    assert.match(wide, /overflow-y: auto/, "a short window leaves the end of the list unreachable");
-    assert.match(rule(css, ".bar-sections"), /min-height: 2\.1rem/, "the bar's list does not keep the bar's floor");
+    assert.match(wide, /\.sections \{[\s\S]*?align-self: start;[\s\S]*?position: sticky;[\s\S]*?top: calc\(var\(--header-h\) \+ 1rem\);/, "the column does not stand under the stuck bar, or is stretched so it cannot stick (F1)");
+    assert.match(wide, /max-height: calc\(100dvh/, "a short window leaves the end of the list unreachable");
+    assert.match(wide, /overscroll-behavior: contain/, "scrolling the list to its end drags the page with it");
+    // And nothing stands between the column and the grid it is an item of:
+    // a wrapper is exactly what stopped the sticky from sticking.
+    const markup = await source("options/options.html");
+    assert.match(markup, /<div class="page-body">\s*<nav id="sections"/, "a wrapper stands between the grid and the column");
   });
 
   it("makes every setting a paragraph names a link to its own row (P9)", async () => {

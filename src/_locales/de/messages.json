@@ -1682,6 +1682,15 @@
     "description": "The settings page's own search field - its label and its placeholder alike."
   },
 
+  "options_section_jump": {
+    "message": "Zu einem Abschnitt springen",
+    "description": "The accessible name of the bar's section list on a narrow screen, where it stands as the page's title."
+  },
+
+  "options_search_close": {
+    "message": "Suche schließen"
+  },
+
   "options_search_found_one": {
     "message": "$COUNT$ Einstellung",
     "description": "How many settings the search left on screen. $COUNT$ is the number.",

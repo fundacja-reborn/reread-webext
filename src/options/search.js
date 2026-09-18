@@ -440,36 +440,42 @@ function run(query) {
 }
 
 /**
- * The field itself lives in one element and stands in two places: the column
- * beside the page where there is room for it, and the bar where there is not.
- * Moved rather than written twice, so there is one field, one value and one
- * piece of state whatever the window does.
+ * The bar's two shapes (F4). Below 60rem the bar holds one thing at a time:
+ * the section being read, as a title, or the search field over it. Above it
+ * both stand - the title's place is the wordmark's, and the field has the
+ * column of text to itself.
+ *
+ * @param {boolean} open
  */
-function placeField() {
-  const search = document.getElementById("settings-search");
-  const bar = document.querySelector(".page-bar");
-  const side = document.querySelector(".side");
-  if (search === null || bar === null || side === null) return;
+function setOpen(open) {
   const wide = window.matchMedia("(min-width: 60rem)").matches;
-  const had = document.activeElement === document.getElementById("settings-search-field");
-  if (wide) {
-    side.prepend(search);
-    search.hidden = false;
-  } else {
-    bar.insertBefore(search, bar.querySelector(".page-tools"));
-    // On the bar the field waits behind the magnifier: the bar has room for
-    // one thing at a time, and a field always open would push the section
-    // list out of it.
-    search.hidden = document.getElementById("search-open")?.getAttribute("aria-expanded") !== "true";
-  }
-  if (had) document.getElementById("settings-search-field")?.focus();
+  const searching = open && !wide;
+  document.getElementById("search-open")?.setAttribute("aria-expanded", String(open));
+  const magnifier = document.getElementById("search-open");
+  const cross = document.getElementById("search-close");
+  if (magnifier instanceof HTMLElement) magnifier.hidden = wide || searching;
+  if (cross instanceof HTMLElement) cross.hidden = wide || !searching;
+  const field = document.getElementById("settings-search");
+  if (field instanceof HTMLElement) field.hidden = !wide && !searching;
+  const jump = document.getElementById("section-jump");
+  if (jump instanceof HTMLElement) jump.hidden = wide || searching;
+}
+
+/**
+ * The bar, dressed for the width it has now. Called at open and whenever the
+ * window crosses the breakpoint: the field is always in the bar, so nothing
+ * moves in the DOM - only which of the bar's things are drawn changes.
+ */
+function fitBar() {
+  const wide = window.matchMedia("(min-width: 60rem)").matches;
+  setOpen(wide ? false : document.getElementById("search-open")?.getAttribute("aria-expanded") === "true");
 }
 
 /** Wire it all up. Called once, after the page is in its language. */
 export function armSearch() {
   build();
-  placeField();
-  window.matchMedia("(min-width: 60rem)").addEventListener("change", placeField);
+  fitBar();
+  window.matchMedia("(min-width: 60rem)").addEventListener("change", fitBar);
 
   const field = document.getElementById("settings-search-field");
   if (!(field instanceof HTMLInputElement)) return;
@@ -507,10 +513,10 @@ export function armSearch() {
     }
   });
 
-  document.getElementById("search-clear")?.addEventListener("click", () => {
+  document.getElementById("search-close")?.addEventListener("click", () => {
     field.value = "";
     run("");
-    field.focus();
+    closeField();
   });
 
   document.getElementById("search-open")?.addEventListener("click", () => {
@@ -550,17 +556,7 @@ function firstControl(part) {
   return null;
 }
 
-/** @param {boolean} open */
-function setOpen(open) {
-  const button = document.getElementById("search-open");
-  const search = document.getElementById("settings-search");
-  if (button === null || search === null) return;
-  button.setAttribute("aria-expanded", String(open));
-  if (window.matchMedia("(min-width: 60rem)").matches) return;
-  search.hidden = !open;
-}
-
-/** The bar's field folds away again, on Escape and on the clear. */
+/** The bar's field folds away again, on Escape and on the cross. */
 function closeField() {
   if (window.matchMedia("(min-width: 60rem)").matches) return;
   setOpen(false);

@@ -120,10 +120,17 @@ describe("searching the settings", () => {
     assert.match(markup, /<label class="visually-hidden" for="settings-search-field"/, "the field is unlabelled");
     assert.match(markup, /<button\s+id="search-open"/, "the bar has no way into the search");
 
+    // In the bar at every width since F2, so nothing moves in the DOM: what
+    // changes with the width is only which of the bar's things are drawn.
+    assert.ok(
+      markup.indexOf('<search id="settings-search"') > markup.indexOf('<div class="page-bar">') &&
+        markup.indexOf('<search id="settings-search"') < markup.indexOf('<span class="page-tools">'),
+      "the field does not stand in the bar, before its tools",
+    );
     const script = await source("options/search.js");
-    assert.match(script, /side\.prepend\(search\)/, "the field never stands in the column");
-    assert.match(script, /bar\.insertBefore\(search, bar\.querySelector\("\.page-tools"\)\)/, "the field never stands in the bar, or stands after its tools");
-    assert.match(script, /window\.matchMedia\("\(min-width: 60rem\)"\)\.addEventListener\("change", placeField\)/, "a resized window leaves the field where it was");
+    assert.doesNotMatch(script, /prepend\(search\)|insertBefore\(search/, "the field is still moved between two places");
+    assert.match(script, /window\.matchMedia\("\(min-width: 60rem\)"\)\.addEventListener\("change", fitBar\)/, "a resized window leaves the bar in the other width's shape");
+    assert.match(script, /if \(field instanceof HTMLElement\) field\.hidden = !wide && !searching;/, "the field is not put away with the bar's other shape");
   });
 
   it("says what it found, waits for the typing to stop, and answers Escape and slash", async () => {
@@ -137,7 +144,7 @@ describe("searching the settings", () => {
     assert.match(script, /first\.focus\(\);/, "Enter does not hand the reading to what was found");
     // The status line is a live region, so the count is spoken as it changes.
     const markup = await source("options/options.html");
-    assert.match(markup, /<p id="search-status" class="status" role="status" hidden>/, "the count is not announced");
+    assert.match(markup, /<p id="search-status" class="status" role="status" hidden><\/p>/, "the count is not announced");
   });
 
   it("finds a row whose switch is off and says which switch brings it (Michał, 2026-09-18)", async () => {

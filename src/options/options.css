@@ -7,6 +7,41 @@
    Base styles lay the page out for a narrow screen; the one media query at
    the end spreads the same HTML out for a desktop. */
 
+/* The page's own tokens (D255, T2/T3): the type scale, the density and the two
+   numbers the two-column layout is made of. Only this page loads this sheet,
+   so `:root` here reaches nothing else - the popup, the reader and the bubble
+   keep the shared sizes in page.css.
+
+   The face is the system's (`system-ui`), which is what Chrome's and Brave's
+   own settings use: on macOS that is SF, on Android Roboto, and re/read is
+   then dressed like the browser it stands in. Nothing is shipped with the
+   package for it.
+
+   The control floor follows the pointer: 2.25rem where there is a mouse,
+   2.75rem (the 44px convention) wherever the device has a coarse pointer at
+   all. `any-pointer` rather than `pointer` on purpose: a Boox with a pen
+   answers `pointer: fine` and is still read with a finger. */
+:root {
+  --font-ui: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+  --ui-h1: 1.5rem;
+  --ui-h2: 1.25rem;
+  --ui-h3: 1rem;
+  --ui-text: 0.9375rem;
+  --ui-small: 0.875rem;
+  --ui-control: 2.25rem;
+  /* The column of sections, the gutter beside it, and the air that puts the
+     list's first line on the title's own line. */
+  --ui-side: 13rem;
+  --ui-gutter: 2.5rem;
+  --ui-side-top: 1.75rem;
+}
+
+@media (any-pointer: coarse) {
+  :root {
+    --ui-control: 2.75rem;
+  }
+}
+
 /* A touch wider than the shared 44rem: the list rows hold three columns and
    the extra room goes to the pair names. No top padding of its own: the
    headroom is the stuck box's paper over the bar (`.page-chrome`,
@@ -102,76 +137,68 @@ header h1 {
   margin: 1.5rem 0 0.75rem;
 }
 
-/* --- searching the settings (D254, P10) ---
+/* --- searching the settings (D254, P10), in the bar at every width (F2) ---
 
-   The field stands over the table of contents where there is a column for it,
-   and inside the bar where there is not - one element, moved between the two
-   places by `search.js`. On the bar it takes the row's whole remaining width
-   while it is open, the section list stepping aside for it. */
+   Over the column of text on a wide screen, the way a browser's own settings
+   stand it; behind the magnifier below 60rem, where the bar has room for one
+   thing at a time. The field is the page's own field component - the same
+   frame, radius and floor as the two catalogue filters - so it does not read
+   as a box borrowed from somewhere else. */
 
 .settings-search {
   display: block;
-  margin-bottom: 0.75rem;
-}
-
-.settings-search input {
-  width: 100%;
-  min-height: 44px;
-  padding: 0.4rem 0.6rem;
-  border: 1px solid var(--page-border);
-  background: var(--page-bg);
-  color: var(--page-fg);
-  font: inherit;
-}
-
-#search-status {
-  margin: 0.35rem 0 0;
-}
-
-/* On the bar: the field takes the room, the list yields it. */
-.page-bar > .settings-search {
+  position: relative;
   flex: 1 1 auto;
   min-width: 0;
-  margin-bottom: 0;
 }
 
-.page-bar > .settings-search input {
+/* The bar's own floor, not the page's: the bar is a fixed height on every
+   page of this extension (`--bar-h`), and a field that asked for the 44px
+   convention would either overflow it or grow it. Its buttons keep the same
+   2.1rem, on a mouse and on a finger alike. */
+.settings-search input {
+  width: 100%;
   min-height: 2.1rem;
-  font-size: 0.85rem;
+  padding: 0.3rem 0.6rem;
+  border: 1px solid var(--page-border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--page-fg);
+  font: inherit;
+  font-size: var(--ui-text);
 }
 
-/* The status has nowhere to stand inside a bar of fixed height: on a narrow
-   screen it hangs just under the bar's line, on the stuck box's own paper and
-   inside its stacking context, so it reads as part of the bar and the page
-   scrolls under it. The bar's height does not move for it. */
-.page-bar > .settings-search #search-status {
+/* The status has nowhere to stand inside a bar of fixed height: it hangs just
+   under the bar's line, on the stuck box's own paper and inside its stacking
+   context, so it reads as part of the bar and the page scrolls under it. The
+   bar's height does not move for it. */
+#search-status {
   position: absolute;
-  top: 100%;
+  /* Under the bar's own line, not inside its bottom padding: the bar's box is
+     the field's height plus that padding and the rule. */
+  top: calc(100% + 1rem + 1px);
   inset-inline: 0;
   margin: 0;
   padding: 0.35rem 0;
   background: var(--page-bg);
-  border-bottom: 1px solid var(--page-line);
 }
 
-/* An open field is the bar's whole business: the section list waits. */
-.page-bar:has(> .settings-search:not([hidden])) > .bar-sections {
-  display: none;
-}
-
-.bar-search-open {
+/* The two ways in and out of the search, in the bar's own tool dress. Which
+   of them is drawn is `search.js`'s business (the `hidden` attribute). */
+.bar-search-open,
+.bar-search-close {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 2.1rem;
-  min-width: 2.6rem;
-  padding: 0.15rem 0.55rem;
 }
 
-@media (min-width: 60rem) {
-  .bar-search-open {
-    display: none;
-  }
+/* The arrow and the mark as one thing, so the bar's grid can stand them over
+   the table of contents without the two fighting for the same cell. */
+.bar-head {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
 }
 
 /* What the query matched, inside a row's name or its sentence: an underline
@@ -243,25 +270,40 @@ mark.hit {
   font-weight: 600;
 }
 
-/* The bar's own table of contents, under 60rem: the bar's floor, the bar's
-   voice, and no more width than it can spare - the tools keep theirs. */
+/* The section being read, as the bar's own title under 60rem (F4): the place
+   the wordmark has on every other page, in a native select so that the
+   keyboard, a finger and a screen reader all get the list for free - and
+   dressed down to a heading, because that is what it is. The mark rides
+   straight after the words rather than at the far edge of a box. */
 .bar-sections {
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   min-width: 0;
-  min-height: 2.1rem;
-  font-size: 0.85rem;
+  max-width: 100%;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: none;
+  color: var(--page-fg);
+  font: inherit;
+  font-size: var(--ui-h3);
+  font-weight: 600;
+  line-height: 1.35;
+  text-overflow: ellipsis;
 }
 
-@media (min-width: 60rem) {
+/* Where the browser can size a select by what stands in it, the mark follows
+   the words; where it cannot, the select keeps to the room it is given. */
+@supports (field-sizing: content) {
   .bar-sections {
-    display: none;
+    field-sizing: content;
   }
 }
 
-/* At a phone's width the mark gives its room to the list: on this page the
-   mark is a plain line of text - the door it is elsewhere would open the room
-   it stands in - so it is the one thing in the bar with nothing to do. */
-@media (max-width: 30rem) {
+/* The wordmark gives its place to the section's name below 60rem: on this
+   page the mark is a plain line of text - the door it is elsewhere would open
+   the room it stands in - so it is the one thing in the bar with nothing to
+   do. */
+@media (max-width: 59.99rem) {
   .page-mark {
     display: none;
   }
@@ -374,13 +416,21 @@ h2 + p + section > h3:first-child {
   scroll-margin-top: 0.75rem;
 }
 
-/* Where an address just landed (D254): the accent's frame around the heading
-   or the row it named, for as long as the focus stays on it. Not a fill and
-   not a flash - the ring leaves when the reading moves on, and nothing here
-   runs on a clock. */
-[data-landed] {
-  outline: 2px solid var(--page-accent);
-  outline-offset: 4px;
+/* Where an address just landed on one row out of thirty (D254, F5): a bar at
+   the row's leading edge, drawn inside the row's own box so nothing shifts
+   under it. It goes at the next press or key - not on a clock, and not when
+   the focus moves, because the focus is where the reader is about to work.
+
+   A section heading gets none of this: after the jump it is the whole screen,
+   and the ring it wore read as a form field somebody had selected. Headings
+   are focused all the same, for a screen reader - so the ring the browser
+   would draw on a programmatic focus is taken off here. */
+.row[data-landed] {
+  box-shadow: inset 3px 0 0 var(--page-accent);
+}
+
+:is(h1, h2, h3, section, details):focus {
+  outline: none;
 }
 
 /* Labels speak at the page's full color; the notes below them are the quiet
@@ -1226,25 +1276,31 @@ summary::marker {
 
   .page-body {
     display: grid;
-    grid-template-columns: 13rem minmax(0, 1fr);
-    gap: 0 2.5rem;
+    grid-template-columns: var(--ui-side) minmax(0, 1fr);
+    gap: 0 var(--ui-gutter);
     align-items: start;
   }
 
-  /* The list stands under the stuck bar and stays there. Its own scrolling
-     for a short window: a table of contents that runs off the bottom of a
-     laptop screen is a table of contents with an unreachable end. */
+  /* The list stands under the stuck bar and stays there (F1). `align-self`
+     said again on the item itself: a grid item stretched to the row's height
+     has nowhere to stick, and the column then scrolls away with the page -
+     which is exactly what it did while a wrapper stood between it and the
+     grid. Its own scrolling for a short window: a table of contents that runs
+     off the bottom of a laptop screen is one with an unreachable end.
+     `100dvh` rather than `100vh` because a phone's bars come and go. */
   .sections {
     display: block;
+    align-self: start;
     position: sticky;
-    top: calc(var(--header-h) + 0.75rem);
-    max-height: calc(100vh - var(--header-h) - 2rem);
+    top: calc(var(--header-h) + 1rem);
+    max-height: calc(100dvh - var(--header-h) - 2rem);
     overflow-y: auto;
-    /* The markers stand on the list's leading edge, and the negative margin
-       hands their width back to the gutter - so the section names line up
-       with the page's own edge, marked or not. */
+    overscroll-behavior: contain;
+    /* The list's first line stands on the title's own line, and the markers
+       on its leading edge hand their width back to the gutter - so the names
+       line up with the page's edge, marked or not. */
+    padding-top: var(--ui-side-top);
     margin-inline-start: -0.6rem;
-    font-size: 0.95rem;
   }
 
   /* The text keeps its measure whatever the window does; the column beside
@@ -1252,6 +1308,21 @@ summary::marker {
   main {
     min-width: 0;
     max-width: 44rem;
+  }
+
+  /* The bar takes the page's own columns (F2): the arrow and the wordmark over
+     the table of contents, the search field over the text - its leading edge
+     on the text's own edge - and the menu at the far end of the row, where
+     every bar of this extension keeps its tools. */
+  .page-bar {
+    display: grid;
+    grid-template-columns: var(--ui-side) minmax(0, 1fr) auto;
+    column-gap: var(--ui-gutter);
+    align-items: center;
+  }
+
+  .page-tools {
+    margin-inline-start: 0;
   }
 }
 
