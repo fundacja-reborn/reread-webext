@@ -144,3 +144,56 @@ describe("the settings page's language", () => {
     assert.match(markup, /aria-controls="more-copies"/, "the rest of it has no way in");
   });
 });
+
+/**
+ * A checkbox is an instruction, so its name is a verb (Michał's rule,
+ * 2026-09-18). "Reading aloud" stood under a heading that already said
+ * "Reading aloud" - the subject named twice and the act not at all - and
+ * "Copy of the reading list" named a thing where the switch is what makes
+ * one. The act goes in the name; where to find what the act produces goes in
+ * the sentence under it.
+ *
+ * English and Polish only: German and Ukrainian put the verb at the end of
+ * the phrase, and this rule is about naming the act, not about word order.
+ * The settings page only: the popup's third switch is named by a hostname.
+ *
+ * The opener lists are the deliberate line. A new checkbox named with a noun
+ * fails here until somebody either names the act or writes its verb down.
+ */
+const TOGGLE_OPENERS = {
+  en: new Set(["Show", "Save", "Underline", "Use", "Back", "Do"]),
+  pl: new Set(["Pokazuj", "Zapisuj", "Podkreślaj", "Używaj", "Wykonuj", "Nie"]),
+};
+
+describe("the name of a checkbox", () => {
+  it("says what the switch does, not what it is about (Michał, 2026-09-18)", async () => {
+    const markup = await source("options/options.html");
+    /** @type {string[]} */
+    const named = [];
+    for (const found of markup.matchAll(/<label class="row-toggle">([\s\S]*?)<\/label>/g)) {
+      const block = found[1] ?? "";
+      assert.match(block, /<input type="checkbox"/, `a toggle row without a checkbox: ${block.slice(0, 80)}`);
+      const key = /<span class="row-name" data-i18n="([a-z_]+)"/.exec(block);
+      assert.notEqual(key, null, `a checkbox without a name: ${block.slice(0, 80)}`);
+      named.push(String(key?.[1]));
+    }
+    // A regex that stopped matching would pass every assertion above by
+    // finding nothing at all.
+    assert.ok(named.length >= 11, `only ${named.length} checkboxes found on the settings page`);
+    assert.ok(named.includes("options_tts"), "the reading-aloud switch is not among them");
+    assert.ok(named.includes("options_library_copy"), "the copy switch is not among them");
+
+    for (const locale of /** @type {("en" | "pl")[]} */ (["en", "pl"])) {
+      const catalogue = JSON.parse(await source(`_locales/${locale}/messages.json`));
+      for (const key of named) {
+        const message = catalogue[key]?.message;
+        assert.equal(typeof message, "string", `${locale} has no name for ${key}`);
+        const opener = String(message).split(" ")[0] ?? "";
+        assert.ok(
+          TOGGLE_OPENERS[locale].has(opener),
+          `${locale}/${key} opens on "${opener}", which is not one of the verbs a checkbox is named with: ${message}`,
+        );
+      }
+    }
+  });
+});

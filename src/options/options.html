@@ -503,12 +503,12 @@
            for the moment. -->
       <div class="row row-sub" id="s-bubbleOff" data-setting="bubbleOff" data-parent="translationOff" data-section="languages">
         <label class="row-toggle">
-          <span class="row-name" data-i18n="options_bubble_off">No bubble when selecting text</span>
+          <span class="row-name" data-i18n="options_bubble_off">Do not show the bubble when selecting text</span>
           <input type="checkbox" id="bubble-off" />
         </label>
         <p class="row-note">
           <span data-i18n="options_bubble_off_hint"
-            >With this on, selecting text on an ordinary page does nothing at all - open a page in the reader from re/read's button or with Alt+Shift+R.</span
+            >On an ordinary page nothing happens when you select text - open a page in the reader from re/read's button or with Alt+Shift+R.</span
           ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-bubbleOff" data-i18n="options_details">Details</button></span>
         </p>
         <p class="row-note row-more" id="more-bubbleOff" data-i18n="options_bubble_off_more" hidden>
@@ -777,7 +777,7 @@
         <span data-i18n="options_disabled_intro_switch">There is no switch in that window when both</span>
         <a href="#s-translationOff" data-i18n="options_no_translation">Use without a translation model</a>
         <span data-i18n="options_disabled_intro_and">and</span>
-        <a href="#s-bubbleOff" data-i18n="options_bubble_off">No bubble when selecting text</a
+        <a href="#s-bubbleOff" data-i18n="options_bubble_off">Do not show the bubble when selecting text</a
         ><span data-i18n="options_disabled_intro_rest"
           > are on: nothing happens on ordinary pages then, so there is nothing to switch off.</span
         >
@@ -835,14 +835,13 @@
            hiding it was what overrode it. -->
       <div class="row" id="s-readerOnly" data-setting="readerOnly" data-section="bubble-and-phrases">
         <label class="row-toggle">
-          <span class="row-name" data-i18n="options_reader_only">Only in the reader</span>
+          <span class="row-name" data-i18n="options_reader_only">Show the underlines and the bubble only in the reader</span>
           <input type="checkbox" id="reader-only" />
         </label>
         <p class="row-note">
           <span data-i18n="options_reader_only_hint"
-            >Phrase underlines and the translation bubble work only in the reader. On an ordinary
-            page, selecting text brings up a bubble with two buttons instead: open the page in the
-            reader, and go to the reading list.</span
+            >On an ordinary page, selecting text brings up a bubble with two buttons instead: open
+            the page in the reader, and go to the reading list.</span
           ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-readerOnly" data-i18n="options_details">Details</button></span>
         </p>
         <p class="row-note row-more" id="more-readerOnly" data-i18n="options_reader_only_more" hidden>
@@ -892,12 +891,12 @@
            would move nothing (D120). -->
       <div class="row translation-only" id="s-hideBubbleActions" data-setting="hideBubbleActions" data-section="bubble">
         <label class="row-toggle">
-          <span class="row-name" data-i18n="quiet_bubble">Hide bubble actions by default</span>
+          <span class="row-name" data-i18n="quiet_bubble">Show the bubble's buttons only after a click</span>
           <input type="checkbox" id="quiet-bubble" />
         </label>
         <p class="row-note">
           <span data-i18n="options_quiet_bubble_hint"
-            >The bubble shows the translation alone; the buttons appear when you click or tap it.</span
+            >The bubble then shows the translation alone; on a touch screen the buttons appear after a tap on it.</span
           ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-hideBubbleActions" data-i18n="options_details">Details</button></span>
         </p>
         <p class="row-note row-more" id="more-hideBubbleActions" data-i18n="options_quiet_bubble_more" hidden>
@@ -1000,14 +999,13 @@
            this switch matters most. -->
       <div class="row" id="s-keepArticles" data-setting="keepArticles" data-section="reading-view">
         <label class="row-toggle">
-          <span class="row-name" data-i18n="options_keep_articles">Save in the offline reading list by default</span>
+          <span class="row-name" data-i18n="options_keep_articles">Save pages you open to the offline reading list</span>
           <input type="checkbox" id="keep-articles" />
         </label>
         <p class="row-note">
           <span data-i18n="options_keep_articles_hint"
-            >
-            Every page you open in the reader is saved in the offline reading list.
-          </span
+            >A single page can still be saved in the reader with “Save to reading list”, or taken
+            out of the list with “Delete”.</span
           ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-keepArticles" data-i18n="options_details">Details</button></span>
         </p>
         <p class="row-note row-more" id="more-keepArticles" data-i18n="options_keep_articles_more" hidden>
@@ -1099,12 +1097,12 @@
            and a book says which page it is on. -->
       <div class="row" id="s-pageNumber" data-setting="pageNumber" data-section="paged-layout">
         <label class="row-toggle">
-          <span class="row-name" data-i18n="options_page_number">Page number</span>
+          <span class="row-name" data-i18n="options_page_number">Show the page number</span>
           <input type="checkbox" id="page-number" />
         </label>
         <p class="row-note">
           <span data-i18n="options_page_number_hint"
-            >A page count at the foot of the window.</span
+            >The current page and how many there are, for example 3 / 12, at the foot of the window.</span
           ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-pageNumber" data-i18n="options_details">Details</button></span>
         </p>
         <p class="row-note row-more" id="more-pageNumber" data-i18n="options_page_number_more" hidden>
@@ -1188,12 +1186,12 @@
            translating. Presentation only: the voice and the speed stay. -->
       <div class="row" id="s-ttsOff" data-setting="ttsOff" data-keywords="options_keywords_tts" data-section="reading-aloud">
         <label class="row-toggle">
-          <span class="row-name" data-i18n="options_tts">Reading aloud</span>
+          <span class="row-name" data-i18n="options_tts">Show the read-aloud buttons</span>
           <input type="checkbox" id="tts" />
         </label>
         <p class="row-note">
           <span data-i18n="options_tts_hint"
-            >The read-aloud buttons in the bubble, in the lists and in the reader.</span
+            >In the bubble, in the lists of saved phrases and highlights, and in the reader.</span
           ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-ttsOff" data-i18n="options_details">Details</button></span>
         </p>
         <p class="row-note row-more" id="more-ttsOff" data-i18n="options_tts_more" hidden>
@@ -1396,12 +1394,12 @@
     <div class="rows">
       <div class="row" id="s-libraryCopy" data-setting="libraryCopy" data-keywords="options_keywords_copy" data-section="copies">
         <label class="row-toggle">
-          <span class="row-name" data-i18n="options_library_copy">Copy of the reading list</span>
+          <span class="row-name" data-i18n="options_library_copy">Back up the reading list</span>
           <input type="checkbox" id="library-copy" />
         </label>
         <p class="row-note" data-i18n="options_library_copy_hint">
-          Optional, because the reading list then takes twice the space. The copies of your phrases
-          and highlights are always on.
+          The reading list then takes twice the space. Copies of your phrases and highlights are
+          always made.
         </p>
       </div>
     </div>

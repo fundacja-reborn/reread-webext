@@ -85,7 +85,7 @@ describe("the page's foot (D238)", () => {
     // (D250): the count, the gesture that turns a page and the signal that
     // one has turned, in the order a page is read in.
     assert.match(markup, /id="paged-layout"[\s\S]*?<input type="checkbox" id="page-number" \/>[\s\S]*?id="touch-turn"[\s\S]*?id="turn-effect"/, "the page-number row does not open the Pages layout's section");
-    assert.match(markup, /data-i18n="options_page_number">Page number</, "the row's name is not the catalogue's");
+    assert.match(markup, /data-i18n="options_page_number">Show the page number</, "the row's name is not the catalogue's");
     assert.match(markup, /data-i18n="options_page_number_hint"[\s\S]{0,400}?aria-controls="more-/, "the row's note has no sentence and no More behind it");
     const script = await source("options/options.js");
     assert.match(script, /writeConfig\(\{ reader: \{ pageNumber: toggle\.checked \} \}\)/, "the switch does not write the reader's setting");
@@ -99,7 +99,7 @@ describe("the page's foot (D238)", () => {
 
   it("is promised in the README as a setting, on by default (D249)", async () => {
     const readme = await source("../README.md");
-    assert.match(readme, /\*\*Page number\*\* under \*\*Pages layout\*\* in the settings, on by default/, "the README still promises a quiet foot the reader no longer has");
+    assert.match(readme, /\*\*Show the page number\*\* under \*\*Pages layout\*\* in the settings, on by default/, "the README still promises a quiet foot the reader no longer has");
     assert.match(readme, /the page being read keeps its first line and only its last lines go behind the bar/, "the README does not say what a bar does to the page");
   });
 });

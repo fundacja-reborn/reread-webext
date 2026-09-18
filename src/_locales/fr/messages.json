@@ -32,7 +32,7 @@
   "private_browsing_note": { "message": "Vous êtes en navigation privée. Le navigateur utilise pour cette page une base de données séparée, qu'il supprime à la fin de la session privée : la liste de lecture et les surlignages que vous voyez ici proviennent de leurs copies, et un article enregistré, un livre importé, un surlignage fait ou tout ce qui est supprimé ici disparaît avec la session. Seule exception : les phrases enregistrées, qui sont conservées. Pour tout le reste, ouvrez re/read dans un onglet normal." },
   "saved_phrases": { "message": "Phrases enregistrées" },
   "open_reader": { "message": "Ouvrir en mode lecture" },
-  "quiet_bubble": { "message": "Masquer par défaut les actions de la bulle" },
+  "quiet_bubble": { "message": "N'afficher les boutons de la bulle qu'après un clic" },
   "action_delete": { "message": "Supprimer" },
   "action_download": { "message": "Télécharger" },
   "action_cancel": { "message": "Annuler" },
@@ -1706,9 +1706,9 @@
   },
   "options_storage_persistent": { "message": "Stockage persistant : accordé. Le navigateur a promis de ne pas effacer ces données pour faire de la place." },
   "options_storage_at_risk": { "message": "Stockage persistant : refusé. Safari efface les données d'un site après environ un mois d'utilisation sans un toucher sur ses pages, et les pages de cette extension comptent comme un site. Vos expressions ont une copie qui y survit (ligne ci-dessous) ; les modèles, les dictionnaires et la liste de lecture non - ouvrez le lecteur ou ces paramètres de temps en temps." },
-  "options_library_copy": { "message": "Copie de la liste de lecture" },
+  "options_library_copy": { "message": "Sauvegarder la liste de lecture" },
   "options_library_copy_hint": {
-    "message": "Facultative, car la liste de lecture occupe alors deux fois plus de place. Les copies des phrases et des surlignages sont toujours actives."
+    "message": "La liste de lecture occupe alors deux fois plus de place. Les copies des phrases et des surlignages sont toujours faites."
   },
 
   "reader_marks_delete_all_one": {
@@ -1735,9 +1735,9 @@
     "message": "Vous lisez $FROM$ - la traduction automatique est désactivée, les phrases enregistrées appartiennent à cette paire.",
     "placeholders": { "from": { "content": "$1", "example": "anglais" } }
   },
-  "options_reader_only": { "message": "Uniquement dans le lecteur" },
+  "options_reader_only": { "message": "Afficher les soulignements et la bulle uniquement dans le lecteur" },
   "options_reader_only_hint": {
-    "message": "Les soulignements des phrases et la bulle de traduction ne fonctionnent que dans le lecteur. Sur une page ordinaire, après une sélection de texte, une bulle apparaît avec deux boutons : ouvrir la page dans le lecteur et aller à la liste de lecture."
+    "message": "Sur une page ordinaire, après une sélection de texte, une bulle apparaît avec deux boutons : ouvrir la page dans le lecteur et aller à la liste de lecture."
   },
 
   "options_reader_only_more": {
@@ -1745,9 +1745,9 @@
     "description": "The rest of the options_reader_only_hint description, behind the row's More button."
   },
 
-  "options_page_number": { "message": "Numéro de page" },
+  "options_page_number": { "message": "Afficher le numéro de page" },
   "options_page_number_hint": {
-    "message": "Le compteur de pages en bas de la fenêtre."
+    "message": "La page en cours et le nombre total, par exemple 3 / 12, en bas de la fenêtre."
   },
 
   "options_page_number_more": {
@@ -1796,9 +1796,9 @@
   "options_turn_effect_note_off": {
     "message": "La page change simplement, comme avant ce réglage."
   },
-  "options_keep_articles": { "message": "Enregistrer par défaut dans la liste de lecture hors ligne" },
+  "options_keep_articles": { "message": "Enregistrer les pages ouvertes dans la liste de lecture hors ligne" },
   "options_keep_articles_hint": {
-    "message": "Chaque page ouverte dans le lecteur est enregistrée dans la liste de lecture hors ligne."
+    "message": "Une page peut toujours être enregistrée dans le lecteur avec Enregistrer dans la liste de lecture, ou retirée de la liste avec Supprimer."
   },
 
   "options_keep_articles_more": {
@@ -1825,7 +1825,7 @@
     "description": "The rest of the options_reading_pace_hint description, behind the row's More button."
   },
   "options_quiet_bubble_hint": {
-    "message": "La bulle n'affiche que la traduction ; les boutons apparaissent quand vous cliquez ou touchez la bulle."
+    "message": "La bulle n'affiche alors que la traduction ; sur un écran tactile, les boutons apparaissent après avoir touché la bulle."
   },
 
   "options_quiet_bubble_more": {
@@ -1868,9 +1868,9 @@
     "message": "Avec une paire de langues choisie, la bulle affiche toujours les sens des dictionnaires, et vous pouvez enregistrer des phrases et voir leurs soulignements. Idéal pour lire avec des dictionnaires ou dans votre langue maternelle. Vos données enregistrées ne sont pas supprimées et reviennent quand vous désactivez cette option.",
     "description": "The rest of the options_no_translation_hint description, behind the row's More button."
   },
-  "options_bubble_off": { "message": "Pas de bulle à la sélection de texte" },
+  "options_bubble_off": { "message": "Ne pas afficher la bulle à la sélection de texte" },
   "options_bubble_off_hint": {
-    "message": "Quand c'est activé, sélectionner du texte sur une page ordinaire ne fait rien du tout - ouvrez une page dans le lecteur avec le bouton de re/read ou avec Alt+Maj+R."
+    "message": "Sur une page ordinaire, sélectionner du texte ne fait rien du tout - ouvrez une page dans le lecteur avec le bouton de re/read ou avec Alt+Maj+R."
   },
 
   "options_bubble_off_more": {
@@ -1996,9 +1996,9 @@
     "message": "domaine, exceptions, blocage, hôte",
     "description": "Words the settings search also finds this row by; never shown."
   },
-  "options_tts": { "message": "Lecture à voix haute" },
+  "options_tts": { "message": "Afficher les boutons de lecture à voix haute" },
   "options_tts_hint": {
-    "message": "Les boutons de lecture à voix haute dans la bulle, dans les listes et dans le lecteur."
+    "message": "Dans la bulle, dans les listes des phrases enregistrées et des surlignages, et dans le lecteur."
   },
 
   "options_tts_more": {

@@ -32,7 +32,7 @@
   "private_browsing_note": { "message": "Estás en navegación privada. El navegador usa para esta página una base de datos aparte y la borra al terminar la sesión privada: la lista de lectura y los resaltados que ves aquí vienen de sus copias, y un artículo guardado, un libro importado, un resaltado hecho o cualquier cosa borrada aquí se pierde con la sesión. La única excepción son las frases guardadas: esas se conservan. Para todo lo demás, abre re/read en una pestaña normal." },
   "saved_phrases": { "message": "Frases guardadas" },
   "open_reader": { "message": "Abrir en vista de lectura" },
-  "quiet_bubble": { "message": "Ocultar por defecto las acciones de la burbuja" },
+  "quiet_bubble": { "message": "Mostrar los botones de la burbuja solo después de un clic" },
   "action_delete": { "message": "Eliminar" },
   "action_download": { "message": "Descargar" },
   "action_cancel": { "message": "Cancelar" },
@@ -1672,9 +1672,9 @@
   },
   "options_storage_persistent": { "message": "Almacenamiento persistente: concedido. El navegador ha prometido no borrar estos datos para hacer sitio." },
   "options_storage_at_risk": { "message": "Almacenamiento persistente: no concedido. Safari borra los datos de un sitio tras aproximadamente un mes de uso sin tocar sus páginas, y las páginas de esta extensión cuentan como un sitio. Tus frases tienen una copia que sobrevive a eso (línea de abajo); los modelos, los diccionarios y la lista de lectura no - abre la vista de lectura o estos ajustes de vez en cuando." },
-  "options_library_copy": { "message": "Copia de la lista de lectura" },
+  "options_library_copy": { "message": "Hacer una copia de seguridad de la lista de lectura" },
   "options_library_copy_hint": {
-    "message": "Opcional, porque la lista de lectura ocupa entonces el doble de espacio. Las copias de las frases y de los resaltados están siempre activas."
+    "message": "La lista de lectura ocupa entonces el doble de espacio. Las copias de las frases y de los resaltados se hacen siempre."
   },
 
   "reader_marks_delete_all_one": {
@@ -1701,9 +1701,9 @@
     "message": "Lees en $FROM$ - la traducción automática está desactivada y las frases guardadas pertenecen a este par.",
     "placeholders": { "from": { "content": "$1", "example": "inglés" } }
   },
-  "options_reader_only": { "message": "Solo en la vista de lectura" },
+  "options_reader_only": { "message": "Mostrar los subrayados y la burbuja solo en la vista de lectura" },
   "options_reader_only_hint": {
-    "message": "Los subrayados de las frases y la burbuja de traducción funcionan solo en la vista de lectura. En una página normal, al seleccionar texto aparece una burbuja con dos botones: abrir la página en la vista de lectura e ir a la lista de lectura."
+    "message": "En una página normal, al seleccionar texto aparece una burbuja con dos botones: abrir la página en la vista de lectura e ir a la lista de lectura."
   },
 
   "options_reader_only_more": {
@@ -1711,9 +1711,9 @@
     "description": "The rest of the options_reader_only_hint description, behind the row's More button."
   },
 
-  "options_page_number": { "message": "Número de página" },
+  "options_page_number": { "message": "Mostrar el número de página" },
   "options_page_number_hint": {
-    "message": "El contador de páginas en la parte inferior de la ventana."
+    "message": "La página actual y el total, por ejemplo 3 / 12, en la parte inferior de la ventana."
   },
 
   "options_page_number_more": {
@@ -1762,9 +1762,9 @@
   "options_turn_effect_note_off": {
     "message": "La página simplemente cambia, como antes de este ajuste."
   },
-  "options_keep_articles": { "message": "Guardar de forma predeterminada en la lista de lectura sin conexión" },
+  "options_keep_articles": { "message": "Guardar las páginas que abres en la lista de lectura sin conexión" },
   "options_keep_articles_hint": {
-    "message": "Cada página que abres en la vista de lectura se guarda en la lista de lectura sin conexión."
+    "message": "Una página suelta puedes guardarla en la vista de lectura con Guardar en la lista de lectura, o sacarla de la lista con Eliminar."
   },
 
   "options_keep_articles_more": {
@@ -1791,7 +1791,7 @@
     "description": "The rest of the options_reading_pace_hint description, behind the row's More button."
   },
   "options_quiet_bubble_hint": {
-    "message": "La burbuja muestra solo la traducción; los botones aparecen al hacer clic o tocar la burbuja."
+    "message": "La burbuja muestra entonces solo la traducción; en una pantalla táctil los botones aparecen al tocarla."
   },
 
   "options_quiet_bubble_more": {
@@ -1834,9 +1834,9 @@
     "message": "Con un par de idiomas elegido, la burbuja sigue mostrando significados de los diccionarios, y puedes guardar frases y ver sus subrayados. Ideal para leer con diccionarios o en tu idioma materno. Tus datos guardados no se borran y vuelven al desactivar esta opción.",
     "description": "The rest of the options_no_translation_hint description, behind the row's More button."
   },
-  "options_bubble_off": { "message": "Sin burbuja al seleccionar texto" },
+  "options_bubble_off": { "message": "No mostrar la burbuja al seleccionar texto" },
   "options_bubble_off_hint": {
-    "message": "Con esto activado, seleccionar texto en una página normal no hace nada - abre una página en la vista de lectura con el botón de re/read o con Alt+Mayús+R."
+    "message": "En una página normal, seleccionar texto no hace nada - abre una página en la vista de lectura con el botón de re/read o con Alt+Mayús+R."
   },
 
   "options_bubble_off_more": {
@@ -1952,9 +1952,9 @@
     "message": "dominio, excepciones, bloqueo, host",
     "description": "Words the settings search also finds this row by; never shown."
   },
-  "options_tts": { "message": "Lectura en voz alta" },
+  "options_tts": { "message": "Mostrar los botones de lectura en voz alta" },
   "options_tts_hint": {
-    "message": "Los botones de lectura en voz alta en la burbuja, en las listas y en la vista de lectura."
+    "message": "En la burbuja, en las listas de frases guardadas y de resaltados, y en la vista de lectura."
   },
 
   "options_tts_more": {

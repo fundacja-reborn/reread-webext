@@ -32,7 +32,7 @@
   "private_browsing_note": { "message": "Sie sind im privaten Modus. Der Browser verwendet für diese Seite eine eigene Datenbank und löscht sie am Ende der privaten Sitzung: Die Leseliste und die Markierungen, die Sie hier sehen, stammen aus ihren Kopien, und ein hier gespeicherter Artikel, ein importiertes Buch, eine gesetzte Markierung oder alles hier Gelöschte geht mit der Sitzung verloren. Die einzige Ausnahme sind gespeicherte Phrasen - sie bleiben erhalten. Für alles andere öffnen Sie re/read in einem normalen Tab." },
   "saved_phrases": { "message": "Gespeicherter Wortschatz" },
   "open_reader": { "message": "In der Leseansicht öffnen" },
-  "quiet_bubble": { "message": "Aktionen der Sprechblase standardmäßig ausblenden" },
+  "quiet_bubble": { "message": "Schaltflächen der Sprechblase erst nach einem Klick zeigen" },
   "action_delete": { "message": "Löschen" },
   "action_download": { "message": "Herunterladen" },
   "action_cancel": { "message": "Abbrechen" },
@@ -1621,9 +1621,9 @@
   },
   "options_storage_persistent": { "message": "Dauerhafter Speicher: gewährt. Der Browser hat zugesagt, diese Daten nicht zu löschen, um Platz zu schaffen." },
   "options_storage_at_risk": { "message": "Dauerhafter Speicher: nicht gewährt. Safari löscht die Daten einer Website nach etwa einem Monat Nutzung ohne ein Tippen auf ihre Seiten, und die Seiten dieser Erweiterung zählen als eine Website. Ihre Phrasen haben eine Kopie, die das übersteht (Zeile darunter); Modelle, Wörterbücher und Leseliste nicht - öffnen Sie ab und zu die Leseansicht oder diese Einstellungen." },
-  "options_library_copy": { "message": "Kopie der Leseliste" },
+  "options_library_copy": { "message": "Sicherungskopie der Leseliste anlegen" },
   "options_library_copy_hint": {
-    "message": "Optional, weil die Leseliste dann doppelt so viel Platz belegt. Die Kopien der Phrasen und der Markierungen sind immer eingeschaltet."
+    "message": "Die Leseliste belegt dann doppelt so viel Platz. Kopien der Phrasen und der Markierungen werden immer angelegt."
   },
 
   "reader_marks_delete_all_one": {
@@ -1650,9 +1650,9 @@
     "message": "Sie lesen $FROM$ - die maschinelle Übersetzung ist aus, gespeicherte Phrasen gehören zu diesem Paar.",
     "placeholders": { "from": { "content": "$1", "example": "Englisch" } }
   },
-  "options_reader_only": { "message": "Nur in der Leseansicht" },
+  "options_reader_only": { "message": "Unterstreichungen und Sprechblase nur in der Leseansicht zeigen" },
   "options_reader_only_hint": {
-    "message": "Unterstreichungen der Phrasen und die Übersetzungs-Sprechblase wirken nur in der Leseansicht. Auf einer gewöhnlichen Seite erscheint nach dem Markieren von Text stattdessen eine Sprechblase mit zwei Schaltflächen: die Seite in der Leseansicht öffnen und zur Leseliste gehen."
+    "message": "Auf einer gewöhnlichen Seite erscheint nach dem Markieren von Text stattdessen eine Sprechblase mit zwei Schaltflächen: die Seite in der Leseansicht öffnen und zur Leseliste gehen."
   },
 
   "options_reader_only_more": {
@@ -1660,9 +1660,9 @@
     "description": "The rest of the options_reader_only_hint description, behind the row's More button."
   },
 
-  "options_page_number": { "message": "Seitenzahl" },
+  "options_page_number": { "message": "Seitenzahl zeigen" },
   "options_page_number_hint": {
-    "message": "Die Seitenzahl am unteren Fensterrand."
+    "message": "Die aktuelle Seite und die Gesamtzahl, zum Beispiel 3 / 12, am unteren Fensterrand."
   },
 
   "options_page_number_more": {
@@ -1711,9 +1711,9 @@
   "options_turn_effect_note_off": {
     "message": "Die Seite wechselt einfach, so wie vor dieser Einstellung."
   },
-  "options_keep_articles": { "message": "Standardmäßig in der Offline-Leseliste speichern" },
+  "options_keep_articles": { "message": "Geöffnete Seiten in der Offline-Leseliste speichern" },
   "options_keep_articles_hint": {
-    "message": "Jede in der Leseansicht geöffnete Seite wird in der Offline-Leseliste gespeichert."
+    "message": "Eine einzelne Seite speichern Sie in der Leseansicht mit In der Leseliste speichern und nehmen sie mit Löschen wieder heraus."
   },
 
   "options_keep_articles_more": {
@@ -1740,7 +1740,7 @@
     "description": "The rest of the options_reading_pace_hint description, behind the row's More button."
   },
   "options_quiet_bubble_hint": {
-    "message": "Die Sprechblase zeigt nur die Übersetzung; die Schaltflächen erscheinen, wenn Sie sie anklicken oder antippen."
+    "message": "Die Sprechblase zeigt dann nur die Übersetzung; auf einem Touchscreen erscheinen die Schaltflächen nach einem Tippen darauf."
   },
 
   "options_quiet_bubble_more": {
@@ -1783,9 +1783,9 @@
     "message": "Mit einem gewählten Sprachpaar zeigt die Sprechblase weiterhin Bedeutungen aus Wörterbüchern, und Phrasen lassen sich speichern und unterstreichen. Ideal zum Lesen mit Wörterbüchern oder in der Muttersprache. Gespeicherte Daten werden nicht gelöscht und kehren zurück, wenn Sie die Option ausschalten.",
     "description": "The rest of the options_no_translation_hint description, behind the row's More button."
   },
-  "options_bubble_off": { "message": "Keine Sprechblase beim Auswählen von Text" },
+  "options_bubble_off": { "message": "Keine Sprechblase beim Auswählen von Text zeigen" },
   "options_bubble_off_hint": {
-    "message": "Ist dies an, tut das Auswählen von Text auf einer gewöhnlichen Seite gar nichts - eine Seite öffnen Sie in der Leseansicht über die Schaltfläche von re/read oder mit Alt+Umschalt+R."
+    "message": "Auf einer gewöhnlichen Seite tut das Auswählen von Text gar nichts - eine Seite öffnen Sie in der Leseansicht über die Schaltfläche von re/read oder mit Alt+Umschalt+R."
   },
 
   "options_bubble_off_more": {
@@ -1901,9 +1901,9 @@
     "message": "Domain, Ausnahmen, Sperre, Host",
     "description": "Words the settings search also finds this row by; never shown."
   },
-  "options_tts": { "message": "Vorlesen" },
+  "options_tts": { "message": "Vorlese-Schaltflächen zeigen" },
   "options_tts_hint": {
-    "message": "Die Vorlese-Schaltflächen in der Sprechblase, in den Listen und in der Leseansicht."
+    "message": "In der Sprechblase, in den Listen der gespeicherten Phrasen und Markierungen und in der Leseansicht."
   },
 
   "options_tts_more": {

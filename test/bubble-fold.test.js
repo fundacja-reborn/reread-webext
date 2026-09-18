@@ -6,7 +6,7 @@ import { openings } from "./openings.js";
 /**
  * One checkbox, every bubble (D131).
  *
- * "Hide bubble actions by default" (D81) is a sentence about the bubble, not
+ * "Show the bubble's buttons only after a click" (D81, named for the act in D262) is a sentence about the bubble, not
  * about one of its variants - but it only ever reached the openings that
  * remembered to pass it, and the bubble over an underline did not: it folded
  * itself by variant, so for a year the setting had no effect on half the

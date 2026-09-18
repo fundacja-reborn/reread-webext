@@ -43,7 +43,7 @@
   "saved_phrases": { "message": "Saved phrases" },
   "open_reader": { "message": "Open in reading view" },
   "quiet_bubble": {
-    "message": "Hide bubble actions by default",
+    "message": "Show the bubble's buttons only after a click",
     "description": "Checkbox label in the popup and on the settings page: the translation bubble opens with its buttons folded away (D81)."
   },
   "action_delete": { "message": "Delete" },
@@ -1989,9 +1989,9 @@
     "message": "Persistent storage: not granted. Safari clears a site's data after about a month of use without a tap on its pages, and this extension's pages count as one site. Your phrases have a copy that survives this (the line below); the models, the dictionaries and the reading list do not - open the reader or these settings now and then.",
     "description": "Shown only in WebKit browsers, where a refused persistence means the browser may delete the extension's data by itself. The line below is options_storage_backup."
   },
-  "options_library_copy": { "message": "Copy of the reading list" },
+  "options_library_copy": { "message": "Back up the reading list" },
   "options_library_copy_hint": {
-    "message": "Optional, because the reading list then takes twice the space. The copies of your phrases and highlights are always on."
+    "message": "The reading list then takes twice the space. Copies of your phrases and highlights are always made."
   },
 
   "reader_marks_delete_all_one": {
@@ -2037,9 +2037,9 @@
     "placeholders": { "from": { "content": "$1", "example": "English" } },
     "description": "Status line after choosing a pair while translation is switched off."
   },
-  "options_reader_only": { "message": "Only in the reader" },
+  "options_reader_only": { "message": "Show the underlines and the bubble only in the reader" },
   "options_reader_only_hint": {
-    "message": "Phrase underlines and the translation bubble work only in the reader. On an ordinary page, selecting text brings up a bubble with two buttons instead: open the page in the reader, and go to the reading list."
+    "message": "On an ordinary page, selecting text brings up a bubble with two buttons instead: open the page in the reader, and go to the reading list."
   },
 
   "options_reader_only_more": {
@@ -2047,9 +2047,9 @@
     "description": "The rest of the options_reader_only_hint description, behind the row's More button."
   },
 
-  "options_page_number": { "message": "Page number" },
+  "options_page_number": { "message": "Show the page number" },
   "options_page_number_hint": {
-    "message": "A page count at the foot of the window."
+    "message": "The current page and how many there are, for example 3 / 12, at the foot of the window."
   },
 
   "options_page_number_more": {
@@ -2098,9 +2098,9 @@
   "options_turn_effect_note_off": {
     "message": "The page simply changes, as it did before this setting existed."
   },
-  "options_keep_articles": { "message": "Save in the offline reading list by default" },
+  "options_keep_articles": { "message": "Save pages you open to the offline reading list" },
   "options_keep_articles_hint": {
-    "message": "Every page you open in the reader is saved in the offline reading list."
+    "message": "A single page can still be saved in the reader with “Save to reading list”, or taken out of the list with “Delete”."
   },
 
   "options_keep_articles_more": {
@@ -2130,7 +2130,7 @@
     "description": "The rest of the options_reading_pace_hint description, behind the row's More button."
   },
   "options_quiet_bubble_hint": {
-    "message": "The bubble shows the translation alone; the buttons appear when you click or tap it."
+    "message": "The bubble then shows the translation alone; on a touch screen the buttons appear after a tap on it."
   },
 
   "options_quiet_bubble_more": {
@@ -2185,9 +2185,9 @@
     "message": "With a language pair chosen, the bubble still shows dictionary meanings, and you can save phrases and see their underlines. Ideal for reading with dictionaries or in your native language. Your saved data is not deleted and returns when you turn this off.",
     "description": "The rest of the options_no_translation_hint description, behind the row's More button."
   },
-  "options_bubble_off": { "message": "No bubble when selecting text" },
+  "options_bubble_off": { "message": "Do not show the bubble when selecting text" },
   "options_bubble_off_hint": {
-    "message": "With this on, selecting text on an ordinary page does nothing at all - open a page in the reader from re/read's button or with Alt+Shift+R.",
+    "message": "On an ordinary page nothing happens when you select text - open a page in the reader from re/read's button or with Alt+Shift+R.",
     "description": "Under the sub-option of the translation-off switch on the settings page (D149); the row shows only while that switch is on. Alt+Shift+R is the extension's keyboard shortcut for opening the reader."
   },
 
@@ -2304,9 +2304,9 @@
     "message": "domain, exceptions, block, host",
     "description": "Words the settings search also finds this row by; never shown."
   },
-  "options_tts": { "message": "Reading aloud" },
+  "options_tts": { "message": "Show the read-aloud buttons" },
   "options_tts_hint": {
-    "message": "The read-aloud buttons in the bubble, in the lists and in the reader.",
+    "message": "In the bubble, in the lists of saved phrases and highlights, and in the reader.",
     "description": "Under the reading-aloud switch on the settings page (D148). Off, the voice and speed rows below it hide as well."
   },
 

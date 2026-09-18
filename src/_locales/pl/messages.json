@@ -32,7 +32,7 @@
   "private_browsing_note": { "message": "Jesteś w trybie prywatnym. Przeglądarka używa tu dla tej strony osobnej bazy danych i kasuje ją po zakończeniu sesji prywatnej: czytelnia i zakreślenia, które tu widzisz, pochodzą z ich kopii, a artykuł zapisany, książka zaimportowana, zakreślenie zrobione albo cokolwiek usuniętego w tym oknie przepada razem z sesją. Jedyny wyjątek to zapisane frazy – te są zachowywane. Na wszystko inne otwórz re/read w zwykłej karcie." },
   "saved_phrases": { "message": "Zapisane frazy" },
   "open_reader": { "message": "Otwórz w widoku czytania" },
-  "quiet_bubble": { "message": "Domyślnie ukrywaj akcje w dymku" },
+  "quiet_bubble": { "message": "Pokazuj przyciski w dymku dopiero po kliknięciu" },
   "action_delete": { "message": "Usuń" },
   "action_download": { "message": "Pobierz" },
   "action_cancel": { "message": "Anuluj" },
@@ -2309,9 +2309,9 @@
   },
   "options_storage_persistent": { "message": "Magazyn trwały: przyznany. Przeglądarka obiecała nie kasować tych danych, żeby zrobić miejsce." },
   "options_storage_at_risk": { "message": "Magazyn trwały: nieprzyznany. Safari kasuje dane witryny po około miesiącu używania bez dotknięcia jej stron, a strony tego rozszerzenia liczą się jak jedna witryna. Frazy mają kopię, która to przetrwa (linijka niżej); modele, słowniki i czytelnia nie – otwieraj widok czytania albo te ustawienia od czasu do czasu." },
-  "options_library_copy": { "message": "Kopia czytelni" },
+  "options_library_copy": { "message": "Wykonuj kopię zapasową czytelni" },
   "options_library_copy_hint": {
-    "message": "Opcjonalna, bo czytelnia zajmuje wtedy dwa razy więcej miejsca. Kopie fraz i zakreśleń są zawsze włączone."
+    "message": "Czytelnia zajmuje wtedy dwa razy więcej miejsca. Kopie fraz i zakreśleń są wykonywane zawsze."
   },
 
   "reader_marks_delete_all_one": {
@@ -2346,9 +2346,9 @@
     "message": "Czytasz w języku: $FROM$ – tłumaczenie maszynowe jest wyłączone, a zapisane frazy są zapisywane w tej parze.",
     "placeholders": { "from": { "content": "$1", "example": "angielski" } }
   },
-  "options_reader_only": { "message": "Tylko w widoku czytania" },
+  "options_reader_only": { "message": "Pokazuj podkreślenia i dymek tylko w widoku czytania" },
   "options_reader_only_hint": {
-    "message": "Podkreślenia fraz i dymek tłumaczenia działają tylko w widoku czytania. Na zwykłej stronie po zaznaczeniu tekstu pojawi się dymek z przyciskami do otwarcia strony w widoku czytania i do czytelni."
+    "message": "Na zwykłej stronie po zaznaczeniu tekstu pojawi się dymek z przyciskami do otwarcia strony w widoku czytania i do czytelni."
   },
 
   "options_reader_only_more": {
@@ -2356,9 +2356,9 @@
     "description": "The rest of the options_reader_only_hint description, behind the row's More button."
   },
 
-  "options_page_number": { "message": "Numer strony" },
+  "options_page_number": { "message": "Pokazuj numer strony" },
   "options_page_number_hint": {
-    "message": "Licznik stron u dołu okna."
+    "message": "Numer bieżącej strony i liczba wszystkich, na przykład 3 / 12, u dołu okna."
   },
 
   "options_page_number_more": {
@@ -2407,9 +2407,9 @@
   "options_turn_effect_note_off": {
     "message": "Strona po prostu się zmienia, tak jak przed pojawieniem się tego ustawienia."
   },
-  "options_keep_articles": { "message": "Zapisuj domyślnie w czytelni offline" },
+  "options_keep_articles": { "message": "Zapisuj otwierane strony w czytelni offline" },
   "options_keep_articles_hint": {
-    "message": "Każda strona otwarta w widoku czytania jest zapisywana w czytelni offline."
+    "message": "Pojedynczą stronę zapiszesz w widoku czytania przyciskiem „Zapisz w czytelni”, a usuniesz przyciskiem „Usuń”."
   },
 
   "options_keep_articles_more": {
@@ -2436,14 +2436,14 @@
     "description": "The rest of the options_reading_pace_hint description, behind the row's More button."
   },
   "options_quiet_bubble_hint": {
-    "message": "Dymek pokazuje samo tłumaczenie; przyciski pojawiają się po kliknięciu w dymek."
+    "message": "W dymku zostaje samo tłumaczenie; na ekranie dotykowym przyciski pojawiają się po dotknięciu dymka."
   },
 
   "options_quiet_bubble_more": {
     "message": "Przyciski akcji to kopiowanie, zapis, czytanie na głos i pozostałe – wszystkie akcje dymka, jedno kliknięcie dalej.",
     "description": "The rest of the options_quiet_bubble_hint description, behind the row's More button."
   },
-  "options_bubble_more": { "message": "Od razu pokazuj zdanie i hasła ze słowników" },
+  "options_bubble_more": { "message": "Pokazuj od razu zdanie i hasła ze słowników" },
   "options_bubble_more_hint": {
     "message": "Dymek od razu pokazuje przetłumaczone zdanie i hasła ze słowników, bez klikania „Więcej”."
   },
@@ -2479,9 +2479,9 @@
     "message": "Przy wybranej parze językowej dymek nadal pokazuje znaczenia ze słowników, a frazy można zapisywać i widzieć ich podkreślenia. Idealne do czytania ze słownikami albo w ojczystym języku. Zapisane dane nie są usuwane i wracają po wyłączeniu tej opcji.",
     "description": "The rest of the options_no_translation_hint description, behind the row's More button."
   },
-  "options_bubble_off": { "message": "Bez dymka po zaznaczeniu tekstu" },
+  "options_bubble_off": { "message": "Nie pokazuj dymka po zaznaczeniu tekstu" },
   "options_bubble_off_hint": {
-    "message": "Gdy to jest włączone, zaznaczenie tekstu na zwykłej stronie nie robi nic – stronę otwierasz w widoku czytania przyciskiem re/read albo skrótem Alt+Shift+R."
+    "message": "Na zwykłej stronie po zaznaczeniu tekstu nie dzieje się nic – stronę otwierasz w widoku czytania przyciskiem re/read albo skrótem Alt+Shift+R."
   },
 
   "options_bubble_off_more": {
@@ -2617,9 +2617,9 @@
     "message": "domena, wyjątki, blokada, host",
     "description": "Words the settings search also finds this row by; never shown."
   },
-  "options_tts": { "message": "Czytanie na głos" },
+  "options_tts": { "message": "Pokazuj przyciski czytania na głos" },
   "options_tts_hint": {
-    "message": "Przyciski odczytu w dymku, na listach i w widoku czytania."
+    "message": "W dymku, na listach zapisanych fraz i zakreśleń oraz w widoku czytania."
   },
 
   "options_tts_more": {
