@@ -463,14 +463,21 @@
       >
     </p>
 
-    <!-- The switch that decides whether this subsection exists at all (D120),
-         at its foot rather than at the head of the page: it is the rare
-         choice, and standing first it was the first thing anybody read about
-         a page mostly not about it. Its own sub-option travels with it
-         (Michał's call, 2026-09-18) - a child two sections away from its
-         parent is a row that appears out of nowhere. -->
+    </section>
+
+    <!-- The switch that decides whether the models subsection exists at all
+         (D120), standing after it rather than inside it (D261, Michał's
+         report): inside it, ticking the switch took the switch off the page
+         with the subsection it hides - and its sub-option, which shows only
+         while the switch is on, could never be reached at all. Outside, it
+         keeps the place it had at the foot of the models - it is the rare
+         choice, and at the head of the page it was the first thing anybody
+         read about a page mostly not about it - and it stays there to be
+         pressed again. Its own sub-option travels with it (Michał's call,
+         2026-09-18): a child two sections away from its parent is a row that
+         appears out of nowhere. -->
     <div class="rows">
-      <div class="row" id="s-translationOff" data-setting="translationOff" data-section="translation-models">
+      <div class="row" id="s-translationOff" data-setting="translationOff" data-section="languages">
         <label class="row-toggle">
           <span class="row-name" data-i18n="options_no_translation">Use without a translation model</span>
           <input type="checkbox" id="no-translation" />
@@ -494,7 +501,7 @@
            all, not even the launcher; the reader keeps its gesture, because the
            highlighter's pen rides on it, and a selection there is a highlight
            for the moment. -->
-      <div class="row row-sub" id="s-bubbleOff" data-setting="bubbleOff" data-parent="translationOff" data-section="translation-models">
+      <div class="row row-sub" id="s-bubbleOff" data-setting="bubbleOff" data-parent="translationOff" data-section="languages">
         <label class="row-toggle">
           <span class="row-name" data-i18n="options_bubble_off">No bubble when selecting text</span>
           <input type="checkbox" id="bubble-off" />
@@ -510,7 +517,6 @@
         </p>
       </div>
     </div>
-    </section>
 
     <!-- No wrapper here on purpose (D121): dictionaries serve reading without
          translation too - a monolingual one answers selections in the reader -

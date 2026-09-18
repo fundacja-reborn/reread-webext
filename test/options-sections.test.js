@@ -45,8 +45,8 @@ const SECTIONS = [
  */
 const ROWS = [
   { setting: "pair", section: "languages", control: "pair" },
-  { setting: "translationOff", section: "translation-models", control: "no-translation" },
-  { setting: "bubbleOff", section: "translation-models", control: "bubble-off" },
+  { setting: "translationOff", section: "languages", control: "no-translation" },
+  { setting: "bubbleOff", section: "languages", control: "bubble-off" },
   { setting: "readerOnly", section: "bubble-and-phrases", control: "reader-only" },
   { setting: "showBubbleMore", section: "bubble", control: "bubble-more" },
   { setting: "hideBubbleActions", section: "bubble", control: "quiet-bubble" },
@@ -170,6 +170,41 @@ describe("the settings page's sections", () => {
     // - carries its own name.
     assert.doesNotMatch(markup, /where-it-works|options_section_where/, "the heading that over-claimed is still here");
     assert.match(markup, /<h2 id="switched-off-sites"/, "the sites list is not a section of its own");
+  });
+
+  it("never stands a switch inside the block it takes off the page (D261)", async () => {
+    const markup = await source("options/options.html");
+    // The models subsection leaves the page with the translation-off switch
+    // (`body.no-translation .translation-only { display: none }`). A switch
+    // standing inside it would take itself away on the press that flipped it,
+    // and its sub-option - which shows only while the switch is on - could
+    // never be reached at all. Michał's report, 2026-09-18.
+    const open = markup.indexOf('<section class="translation-only"');
+    assert.ok(open > 0, "the models subsection no longer leaves with the mode");
+    let depth = 1;
+    let at = open;
+    let close = -1;
+    while (at < markup.length) {
+      const next = markup.slice(at + 1).search(/<\/?section[ >]/);
+      if (next < 0) break;
+      at = at + 1 + next;
+      depth += markup.startsWith("</section", at) ? -1 : 1;
+      if (depth === 0) {
+        close = at;
+        break;
+      }
+    }
+    assert.ok(close > open, "the models subsection is not closed");
+    const inside = markup.slice(open, close);
+    assert.doesNotMatch(inside, /id="s-[A-Za-z]+"/, "a settings row stands inside the subsection the mode hides");
+
+    // And the two rows that govern the mode stand after it, in the section
+    // they belong to, so the press that hides the models leaves them.
+    for (const id of ["s-translationOff", "s-bubbleOff"]) {
+      const row = markup.indexOf(`id="${id}"`);
+      assert.ok(row > close, `${id} still stands inside the subsection it hides`);
+      assert.ok(row < markup.indexOf('<h3 id="dictionaries"'), `${id} has left the Languages section`);
+    }
   });
 
   it("keeps the sub-option beside the switch that brings it (Michał's call, 2026-09-18)", async () => {
