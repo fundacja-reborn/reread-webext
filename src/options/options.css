@@ -224,12 +224,21 @@ header h1 {
 }
 
 /* The arrow and the mark as one thing, so the bar's grid can stand them over
-   the table of contents without the two fighting for the same cell. */
+   the table of contents without the two fighting for the same cell. Below the
+   breakpoint the bar is a row again and the wrapper steps out of it
+   (`display: contents`): with the mark gone and the arrow usually hidden, a
+   box of its own would hold the row's gap open for nothing. */
 .bar-head {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  min-width: 0;
+  display: contents;
+}
+
+@media (min-width: 60rem) {
+  .bar-head {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-width: 0;
+  }
 }
 
 /* What the query matched, inside a row's name or its sentence: an underline

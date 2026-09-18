@@ -974,6 +974,9 @@ async function renderStorage() {
   );
 }
 
+/** Bytes a word of stored text costs, on the average of the languages re/read reads. */
+const AVERAGE_WORD = 6;
+
 /**
  * What the reading list holds, off the documents' own rows (F8): the pictures
  * are counted in bytes because their rows say so, and the text from what each
@@ -997,9 +1000,6 @@ async function libraryBytes() {
   }
   return bytes;
 }
-
-/** Bytes a word of stored text costs, on the average of the languages re/read reads. */
-const AVERAGE_WORD = 6;
 
 /**
  * One line of the copies block: what it holds and when it was written, or a
