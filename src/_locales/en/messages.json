@@ -1791,6 +1791,118 @@
     "message": "Translation models"
   },
 
+  "options_storage_dictionaries": {
+    "message": "Dictionaries"
+  },
+
+  "options_storage_library": {
+    "message": "Reading list (with its copy)"
+  },
+
+  "options_storage_phrases": {
+    "message": "Phrases and highlights"
+  },
+
+  "options_storage_other": {
+    "message": "Other"
+  },
+
+  "options_copies_vocabulary": {
+    "message": "Vocabulary"
+  },
+
+  "options_copies_marks": {
+    "message": "Highlights"
+  },
+
+  "options_copies_library": {
+    "message": "Reading list"
+  },
+
+  "options_copies_none": {
+    "message": "none yet"
+  },
+
+  "options_copies_off": {
+    "message": "switched off"
+  },
+
+  "options_copies_safe": {
+    "message": "Each copy lives where the browser does not clear data on its own, and is written again with the next phrase you save, highlight you make or page you keep."
+  },
+
+  "options_font_custom_placeholder": {
+    "message": "for example Noto Serif"
+  },
+
+  "options_copies_phrases_one": {
+    "message": "$COUNT$ phrase",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "918"
+      }
+    }
+  },
+
+  "options_copies_phrases_other": {
+    "message": "$COUNT$ phrases",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "918"
+      }
+    }
+  },
+
+  "options_copies_notes_one": {
+    "message": "$COUNT$ with its notes",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "918"
+      }
+    }
+  },
+
+  "options_copies_notes_other": {
+    "message": "$COUNT$ with their notes",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "918"
+      }
+    }
+  },
+
+  "options_copies_docs_one": {
+    "message": "$COUNT$ document, $SIZE$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "61"
+      },
+      "size": {
+        "content": "$2",
+        "example": "13.5 MB"
+      }
+    }
+  },
+
+  "options_copies_docs_other": {
+    "message": "$COUNT$ documents, $SIZE$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "61"
+      },
+      "size": {
+        "content": "$2",
+        "example": "13.5 MB"
+      }
+    }
+  },
+
   "options_storage_copies": {
     "message": "Latest copies"
   },
@@ -1817,15 +1929,10 @@
   "options_engine": { "message": "Engine" },
   "options_engine_value": { "message": "Bergamot, inside the package - translates offline" },
   "options_storage": { "message": "Data on this device" },
-  "options_storage_value": {
-    "message": "$SIZE$ - the models, the dictionaries, the reading list and your phrases together",
-    "description": "The size line of the storage row. $SIZE$ is the amount, already formatted with its unit.",
-    "placeholders": { "size": { "content": "$1", "example": "143.2 MB" } }
-  },
   "options_storage_how": { "message": "Disk space used by the extension." },
 
   "options_storage_how_more": {
-    "message": "Dictionaries take up more space than their file size because of the database structure. Deleting an article or book completely removes its text, images, highlights, notes and reading progress. The rest - the dictionaries, the reading list, your phrases and the highlights - is not broken down: a dictionary costs several times what its text weighs, and counting the rest would mean reading every row of the databases each time this page opens.",
+    "message": "The total is the browser's own estimate of everything re/read stores: it counts the databases' indexes and caches too, which is why it is larger than the parts under it. Each part counts what it holds - and a dictionary costs several times what its text weighs, so most of what stands under Other is the dictionaries' database. Deleting an article or book completely removes its text, images, highlights, notes and reading progress.",
     "description": "The rest of the options_storage_how description, behind the row's More button."
   },
   "options_storage_persistent": { "message": "Persistent storage: granted. The browser has promised not to clear this data to make room." },
@@ -1833,37 +1940,6 @@
     "message": "Persistent storage: not granted. Safari clears a site's data after about a month of use without a tap on its pages, and this extension's pages count as one site. Your phrases have a copy that survives this (the line below); the models, the dictionaries and the reading list do not - open the reader or these settings now and then.",
     "description": "Shown only in WebKit browsers, where a refused persistence means the browser may delete the extension's data by itself. The line below is options_storage_backup."
   },
-  "options_storage_backup_one": {
-    "message": "Copy of the vocabulary: $COUNT$ phrase, written $WHEN$ - kept where the browser does not clear data on its own.",
-    "description": "Plural family over the phrase count; $WHEN$ is a date and time in the reader's own calendar.",
-    "placeholders": { "count": { "content": "$1", "example": "1" }, "when": { "content": "$2", "example": "8/26/26, 12:41 PM" } }
-  },
-  "options_storage_backup_other": {
-    "message": "Copy of the vocabulary: $COUNT$ phrases, written $WHEN$ - kept where the browser does not clear data on its own.",
-    "placeholders": { "count": { "content": "$1", "example": "1234" }, "when": { "content": "$2", "example": "8/26/26, 12:41 PM" } }
-  },
-  "options_storage_backup_none": { "message": "Copy of the vocabulary: none yet - it is written with the next phrase you save." },
-  "options_storage_marks_backup_one": {
-    "message": "Copy of the highlights: $COUNT$ highlight with its notes, written $WHEN$.",
-    "description": "Plural family over the highlight count; $WHEN$ is a date and time in the reader's own calendar.",
-    "placeholders": { "count": { "content": "$1", "example": "1" }, "when": { "content": "$2", "example": "8/26/26, 12:41 PM" } }
-  },
-  "options_storage_marks_backup_other": {
-    "message": "Copy of the highlights: $COUNT$ highlights with their notes, written $WHEN$.",
-    "placeholders": { "count": { "content": "$1", "example": "37" }, "when": { "content": "$2", "example": "8/26/26, 12:41 PM" } }
-  },
-  "options_storage_marks_backup_none": { "message": "Copy of the highlights: none yet - it is written with the next highlight you make." },
-  "options_storage_library_copy_one": {
-    "message": "Copy of the reading list: $COUNT$ document, $SIZE$.",
-    "description": "Plural family over the document count; $SIZE$ is a size such as \"12.4 MB\".",
-    "placeholders": { "count": { "content": "$1", "example": "1" }, "size": { "content": "$2", "example": "12.4 MB" } }
-  },
-  "options_storage_library_copy_other": {
-    "message": "Copy of the reading list: $COUNT$ documents, $SIZE$.",
-    "placeholders": { "count": { "content": "$1", "example": "37" }, "size": { "content": "$2", "example": "12.4 MB" } }
-  },
-  "options_storage_library_copy_none": { "message": "Copy of the reading list: none yet - it is written with the next page you save or book you import." },
-  "options_storage_library_copy_off": { "message": "Copy of the reading list: off." },
   "options_library_copy": { "message": "Copy of the reading list" },
   "options_library_copy_hint": {
     "message": "A second copy of the reading list, safe from the browser's own clean-ups; it takes twice the space."
@@ -2020,7 +2096,7 @@
     "description": "Checkbox label on the settings page (D186): the bubble over a fresh selection opens with its second layer - the translated sentence and the dictionary entries - already out, where a press on More used to be the only way to them. On by default."
   },
   "options_bubble_more_hint": {
-    "message": "The bubble shows the translated sentence and the dictionary entries right away, with no press on More.",
+    "message": "The bubble shows the translated sentence and the dictionary entries right away, with no press on “More”.",
     "description": "Quotes the bubble_more button - each language quotes its own wording of that key, so they must move together. The last sentence is the promise that the bubble over an underline (a saved phrase) is not changed by the switch."
   },
 
@@ -2077,9 +2153,10 @@
   "options_bubble_scale_hint": {
     "message": "Adjusts the text and button size inside the translation bubble across all pages."
   },
-  "options_note_more": {
-    "message": "More",
-    "description": "The accessible name of the chevron that opens a folded description on the settings page (D155); `aria-expanded` carries the state."
+
+  "options_details": {
+    "message": "Details",
+    "description": "The word every fold on the settings page opens under - the row notes' and the dictionary rows' alike."
   },
 
   "options_field_saved": {
@@ -2221,7 +2298,7 @@
     "description": "The first half of the models section's intro; options_models_single_word follows it in the same paragraph, highlighted. Each half must read on from the other across a plain space - no half starts or ends with whitespace."
   },
   "options_models_single_word": {
-    "message": "A model translates sentences well, but a single word on its own is often translated wrongly - the result is cut short, or is a word that does not exist. For single words, a dictionary from the section below is the better source.",
+    "message": "A model translates sentences well, but a single word on its own is often translated wrongly - the result is cut short, or is a word that does not exist. For single words the better source is a dictionary:",
     "description": "The highlighted half of the models section's intro (D192): the one fact about models that changes what a reader installs next."
   },
   "options_update_list": {
@@ -2529,10 +2606,6 @@
       "place": { "content": "$2", "example": "1" },
       "total": { "content": "$3", "example": "3" }
     }
-  },
-  "options_dictionary_details": {
-    "message": "Details",
-    "description": "The fold at the end of a stored dictionary's row (the seventh brief): the display name field, the file's name and the attribution."
   },
   "options_dictionary_file_name": {
     "message": "File name: $NAME$",

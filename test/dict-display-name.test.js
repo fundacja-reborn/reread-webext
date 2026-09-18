@@ -132,7 +132,7 @@ describe("the settings page's field", () => {
     // that stopped halfway is still being named by its files.
     assert.ok(row.indexOf("renderUnfinished(row, head, dictionary)") < row.indexOf("renameField(dictionary)"));
     const fold = row.slice(row.indexOf('element("details", "dictionary-details")'));
-    assert.match(fold, /options_dictionary_details/);
+    assert.match(fold, /options_details/);
     assert.match(fold, /renameField\(dictionary\)/);
     assert.match(fold, /options_dictionary_file_name", dictionary\.name/);
     // Unconditional: a book without a credit has a fold with the field and

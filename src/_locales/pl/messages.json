@@ -2052,6 +2052,186 @@
     "message": "Modele tłumaczeniowe"
   },
 
+  "options_storage_dictionaries": {
+    "message": "Słowniki"
+  },
+
+  "options_storage_library": {
+    "message": "Czytelnia (z kopią)"
+  },
+
+  "options_storage_phrases": {
+    "message": "Frazy i zakreślenia"
+  },
+
+  "options_storage_other": {
+    "message": "Inne"
+  },
+
+  "options_copies_vocabulary": {
+    "message": "Słownictwo"
+  },
+
+  "options_copies_marks": {
+    "message": "Zakreślenia"
+  },
+
+  "options_copies_library": {
+    "message": "Czytelnia"
+  },
+
+  "options_copies_none": {
+    "message": "jeszcze jej nie ma"
+  },
+
+  "options_copies_off": {
+    "message": "wyłączona"
+  },
+
+  "options_copies_safe": {
+    "message": "Każda kopia leży tam, gdzie przeglądarka nie kasuje danych sama, i powstaje na nowo przy następnej zapisanej frazie, zakreśleniu albo zachowanej stronie."
+  },
+
+  "options_font_custom_placeholder": {
+    "message": "np. Noto Serif"
+  },
+
+  "options_copies_phrases_one": {
+    "message": "$COUNT$ fraza",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "918"
+      }
+    }
+  },
+
+  "options_copies_phrases_few": {
+    "message": "$COUNT$ frazy",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "918"
+      }
+    }
+  },
+
+  "options_copies_phrases_many": {
+    "message": "$COUNT$ fraz",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "918"
+      }
+    }
+  },
+
+  "options_copies_phrases_other": {
+    "message": "$COUNT$ frazy",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "918"
+      }
+    }
+  },
+
+  "options_copies_notes_one": {
+    "message": "$COUNT$ z notatkami",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "918"
+      }
+    }
+  },
+
+  "options_copies_notes_few": {
+    "message": "$COUNT$ z notatkami",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "918"
+      }
+    }
+  },
+
+  "options_copies_notes_many": {
+    "message": "$COUNT$ z notatkami",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "918"
+      }
+    }
+  },
+
+  "options_copies_notes_other": {
+    "message": "$COUNT$ z notatkami",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "918"
+      }
+    }
+  },
+
+  "options_copies_docs_one": {
+    "message": "$COUNT$ dokument, $SIZE$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "61"
+      },
+      "size": {
+        "content": "$2",
+        "example": "13.5 MB"
+      }
+    }
+  },
+
+  "options_copies_docs_few": {
+    "message": "$COUNT$ dokumenty, $SIZE$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "61"
+      },
+      "size": {
+        "content": "$2",
+        "example": "13.5 MB"
+      }
+    }
+  },
+
+  "options_copies_docs_many": {
+    "message": "$COUNT$ dokumentów, $SIZE$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "61"
+      },
+      "size": {
+        "content": "$2",
+        "example": "13.5 MB"
+      }
+    }
+  },
+
+  "options_copies_docs_other": {
+    "message": "$COUNT$ dokumentu, $SIZE$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "61"
+      },
+      "size": {
+        "content": "$2",
+        "example": "13.5 MB"
+      }
+    }
+  },
+
   "options_storage_copies": {
     "message": "Ostatnie kopie"
   },
@@ -2072,70 +2252,14 @@
   "options_engine": { "message": "Silnik" },
   "options_engine_value": { "message": "Bergamot, wewnątrz paczki - tłumaczy offline" },
   "options_storage": { "message": "Dane na tym urządzeniu" },
-  "options_storage_value": {
-    "message": "$SIZE$ - razem modele, słowniki, czytelnia i Twoje frazy",
-    "placeholders": { "size": { "content": "$1", "example": "143,2 MB" } }
-  },
   "options_storage_how": { "message": "Miejsce na dysku zajmowane przez rozszerzenie." },
 
   "options_storage_how_more": {
-    "message": "Słowniki zajmują więcej miejsca niż ich oryginalny rozmiar z powodu struktury bazy danych. Usunięcie artykułu lub książki bezpowrotnie kasuje tekst, obrazy, zakreślenia, notatki i postęp czytania. Reszta - słowniki, czytelnia, frazy i zakreślenia - nie jest rozbita: słownik kosztuje kilka razy więcej, niż waży jego tekst, a policzenie reszty znaczyłoby czytanie każdego wiersza baz przy każdym otwarciu tej strony.",
+    "message": "Suma to szacunek przeglądarki dla wszystkiego, co przechowuje re/read: liczy także indeksy baz i pamięć podręczną, dlatego jest większa niż pozycje pod nią. Każda pozycja liczy to, co trzyma - a słownik kosztuje kilka razy więcej, niż waży jego tekst, więc większość tego, co stoi pod „Inne”, to baza słowników. Usunięcie artykułu lub książki bezpowrotnie kasuje tekst, obrazy, zakreślenia, notatki i postęp czytania.",
     "description": "The rest of the options_storage_how description, behind the row's More button."
   },
   "options_storage_persistent": { "message": "Magazyn trwały: przyznany. Przeglądarka obiecała nie kasować tych danych, żeby zrobić miejsce." },
   "options_storage_at_risk": { "message": "Magazyn trwały: nieprzyznany. Safari kasuje dane witryny po około miesiącu używania bez dotknięcia jej stron, a strony tego rozszerzenia liczą się jak jedna witryna. Frazy mają kopię, która to przetrwa (linijka niżej); modele, słowniki i czytelnia nie - otwieraj widok czytania albo te ustawienia od czasu do czasu." },
-  "options_storage_backup_one": {
-    "message": "Kopia słownictwa: $COUNT$ fraza, zapisana $WHEN$ - tam, gdzie przeglądarka nie kasuje danych sama.",
-    "placeholders": { "count": { "content": "$1", "example": "1" }, "when": { "content": "$2", "example": "26.08.2026, 12:41" } }
-  },
-  "options_storage_backup_few": {
-    "message": "Kopia słownictwa: $COUNT$ frazy, zapisana $WHEN$ - tam, gdzie przeglądarka nie kasuje danych sama.",
-    "placeholders": { "count": { "content": "$1", "example": "3" }, "when": { "content": "$2", "example": "26.08.2026, 12:41" } }
-  },
-  "options_storage_backup_many": {
-    "message": "Kopia słownictwa: $COUNT$ fraz, zapisana $WHEN$ - tam, gdzie przeglądarka nie kasuje danych sama.",
-    "placeholders": { "count": { "content": "$1", "example": "1234" }, "when": { "content": "$2", "example": "26.08.2026, 12:41" } }
-  },
-  "options_storage_backup_other": {
-    "message": "Kopia słownictwa: $COUNT$ frazy, zapisana $WHEN$ - tam, gdzie przeglądarka nie kasuje danych sama.",
-    "placeholders": { "count": { "content": "$1", "example": "1,5" }, "when": { "content": "$2", "example": "26.08.2026, 12:41" } }
-  },
-  "options_storage_backup_none": { "message": "Kopia słownictwa: jeszcze jej nie ma - powstanie przy następnej zapisanej frazie." },
-  "options_storage_marks_backup_one": {
-    "message": "Kopia zakreśleń: $COUNT$ zakreślenie z notatkami, zapisana $WHEN$.",
-    "placeholders": { "count": { "content": "$1", "example": "1" }, "when": { "content": "$2", "example": "26.08.2026, 12:41" } }
-  },
-  "options_storage_marks_backup_few": {
-    "message": "Kopia zakreśleń: $COUNT$ zakreślenia z notatkami, zapisana $WHEN$.",
-    "placeholders": { "count": { "content": "$1", "example": "3" }, "when": { "content": "$2", "example": "26.08.2026, 12:41" } }
-  },
-  "options_storage_marks_backup_many": {
-    "message": "Kopia zakreśleń: $COUNT$ zakreśleń z notatkami, zapisana $WHEN$.",
-    "placeholders": { "count": { "content": "$1", "example": "37" }, "when": { "content": "$2", "example": "26.08.2026, 12:41" } }
-  },
-  "options_storage_marks_backup_other": {
-    "message": "Kopia zakreśleń: $COUNT$ zakreślenia z notatkami, zapisana $WHEN$.",
-    "placeholders": { "count": { "content": "$1", "example": "1,5" }, "when": { "content": "$2", "example": "26.08.2026, 12:41" } }
-  },
-  "options_storage_marks_backup_none": { "message": "Kopia zakreśleń: jeszcze jej nie ma - powstanie przy następnym zakreśleniu." },
-  "options_storage_library_copy_one": {
-    "message": "Kopia czytelni: $COUNT$ dokument, $SIZE$.",
-    "placeholders": { "count": { "content": "$1", "example": "1" }, "size": { "content": "$2", "example": "12,4 MB" } }
-  },
-  "options_storage_library_copy_few": {
-    "message": "Kopia czytelni: $COUNT$ dokumenty, $SIZE$.",
-    "placeholders": { "count": { "content": "$1", "example": "3" }, "size": { "content": "$2", "example": "12,4 MB" } }
-  },
-  "options_storage_library_copy_many": {
-    "message": "Kopia czytelni: $COUNT$ dokumentów, $SIZE$.",
-    "placeholders": { "count": { "content": "$1", "example": "37" }, "size": { "content": "$2", "example": "12,4 MB" } }
-  },
-  "options_storage_library_copy_other": {
-    "message": "Kopia czytelni: $COUNT$ dokumentu, $SIZE$.",
-    "placeholders": { "count": { "content": "$1", "example": "1,5" }, "size": { "content": "$2", "example": "12,4 MB" } }
-  },
-  "options_storage_library_copy_none": { "message": "Kopia czytelni: jeszcze jej nie ma - powstanie przy następnej zapisanej stronie albo zaimportowanej książce." },
-  "options_storage_library_copy_off": { "message": "Kopia czytelni: wyłączona." },
   "options_library_copy": { "message": "Kopia czytelni" },
   "options_library_copy_hint": {
     "message": "Druga kopia czytelni, odporna na czyszczenie danych przeglądarki; zajmuje dwa razy więcej miejsca."
@@ -2275,7 +2399,7 @@
   },
   "options_bubble_more": { "message": "Od razu pokazuj zdanie i hasła ze słowników" },
   "options_bubble_more_hint": {
-    "message": "Dymek od razu pokazuje przetłumaczone zdanie i hasła ze słowników, bez klikania Więcej."
+    "message": "Dymek od razu pokazuje przetłumaczone zdanie i hasła ze słowników, bez klikania „Więcej”."
   },
 
   "options_bubble_more_more": {
@@ -2322,7 +2446,11 @@
   "options_bubble_scale_hint": {
     "message": "Zmienia rozmiar tekstu i przycisków w dymku tłumaczenia na wszystkich stronach."
   },
-  "options_note_more": { "message": "Więcej" },
+
+  "options_details": {
+    "message": "Szczegóły",
+    "description": "The word every fold on the settings page opens under - the row notes' and the dictionary rows' alike."
+  },
 
   "options_field_saved": {
     "message": "Zapisano",
@@ -2471,7 +2599,7 @@
     "message": "Pobierz tutaj model tłumaczenia dla każdej pary językowej, którą chcesz tłumaczyć. Są to oficjalne pliki Mozilli, które działają całkowicie offline na Twoim urządzeniu."
   },
   "options_models_single_word": {
-    "message": "Model dobrze tłumaczy zdania, ale pojedyncze słowo bez kontekstu jest często tłumaczone błędnie - wynik bywa ucięty albo jest wyrazem, którego nie ma w języku. Dla pojedynczych słów lepszym źródłem jest słownik z sekcji poniżej."
+    "message": "Model dobrze tłumaczy zdania, ale pojedyncze słowo bez kontekstu jest często tłumaczone błędnie - wynik bywa ucięty albo jest wyrazem, którego nie ma w języku. Do pojedynczych słów lepszy jest słownik:"
   },
   "options_update_list": { "message": "Zaktualizuj listę" },
   "options_list_dated": { "message": "Lista z dnia" },
@@ -2743,7 +2871,6 @@
       "total": { "content": "$3", "example": "3" }
     }
   },
-  "options_dictionary_details": { "message": "Szczegóły" },
   "options_dictionary_file_name": {
     "message": "Nazwa z pliku: $NAME$",
     "placeholders": { "name": { "content": "$1", "example": "English-Polish FreeDict+WikDict dictionary (en-pl)" } }

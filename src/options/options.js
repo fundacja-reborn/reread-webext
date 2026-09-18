@@ -80,6 +80,8 @@ import { testLoadModel } from "../lib/models/validate.js";
 import { Message } from "../lib/protocol.js";
 import { ensurePersistent, isWebKit, persistenceNote, readStorage } from "../lib/storage-report.js";
 import { readBackupSummary } from "../lib/store/backup.js";
+import { listArticles } from "../lib/store/articles.js";
+import { listBooks } from "../lib/store/books.js";
 import {
   buildLibraryCopy,
   clearLibraryCopy,
@@ -912,16 +914,40 @@ function fill(id, value) {
 async function renderStorage() {
   await ensurePersistent();
   const report = await readStorage();
-  fill("storage-usage", report.usage === null ? "" : t("options_storage_value", megabytes(report.usage)));
-  // The one share of the total this page can name honestly and cheaply
-  // (D254, §9): a model's metadata carries what it takes on disk. The
-  // dictionaries' own number is what their text weighs, which on disk is
-  // several times less than they cost - a line of it beside the total would
-  // be a lie told in figures - and the reading list has no cheap number at
-  // all. The folded note says what is left unbroken.
+  fill("storage-usage", report.usage === null ? "" : megabytes(report.usage));
+
+  // Where the space went (F8). Each part counts what it holds, its copies
+  // included; what the browser's estimate has over the four of them - the
+  // databases' indexes, the caches, and a dictionary's several-fold cost over
+  // the weight of its text - falls to Other, and the fold above says so. All
+  // four come off metadata the page already reads: nothing here opens a
+  // document or a dictionary row.
   const models = await listModels().catch(() => []);
-  const onDisk = models.reduce((sum, model) => sum + model.bytes, 0);
-  fill("storage-models", t("options_storage_value", megabytes(onDisk)));
+  const dictionaries = await listDictionaries().catch(() => []);
+  await completeLibraryCopy();
+  const copy = effectiveLibraryCopy(config) ? await readLibraryCopy() : null;
+  const vocabulary = await readBackupSummary();
+  const marks = await readMarksBackup();
+
+  const parts = {
+    "storage-models": models.reduce((sum, model) => sum + model.bytes, 0),
+    "storage-dictionaries": dictionaries.reduce((sum, one) => sum + one.bytes, 0),
+    "storage-library": (await libraryBytes()) + (copy === null ? 0 : copy.bytes),
+    // Measured on the copies, which hold the same phrases and the same
+    // highlights as the live rows do - the live rows have no size written
+    // down anywhere, and counting them would mean reading every one. Counted
+    // once: whether the browser's estimate even sees the copies depends on
+    // the engine (`storage.local` is its own store in Chromium), so doubling
+    // would over-count there rather than under-count everywhere.
+    "storage-phrases": (vocabulary?.bytes ?? 0) + (marks === null ? 0 : JSON.stringify(marks).length),
+  };
+  let known = 0;
+  for (const [id, bytes] of Object.entries(parts)) {
+    known += bytes;
+    fill(id, megabytes(bytes));
+  }
+  fill("storage-other", megabytes(report.usage === null ? 0 : Math.max(0, report.usage - known)));
+
   const note = document.getElementById("storage-note");
   if (note === null) return;
   const kind = persistenceNote({ persisted: report.persisted, webkit: isWebKit() });
@@ -929,40 +955,67 @@ async function renderStorage() {
   note.textContent =
     kind === "granted" ? t("options_storage_persistent") : kind === "at-risk" ? t("options_storage_at_risk") : "";
 
-  // The copy of the vocabulary that outlives the database: its size and its
-  // date, in the reader's own calendar - or that there is none yet.
+  // The three copies that outlive the database, each in three parts: what it
+  // is, what it holds, and when it was last written (F8). A copy that does
+  // not exist says so where its contents would stand, and the dash stands
+  // where its date would.
   /** @param {number} at */
   const when = (at) => new Date(at).toLocaleString(uiLocale(), { dateStyle: "short", timeStyle: "short" });
-  const copy = await readBackupSummary();
-  fill(
-    "storage-backup",
-    copy === null
-      ? t("options_storage_backup_none")
-      : plural(copy.count, "options_storage_backup", [when(copy.writtenAt)]),
-  );
-  // The highlights' copy beside it (`marks-backup.js`) - the other thing
-  // nobody could type in again.
-  const marks = await readMarksBackup();
-  fill(
-    "storage-marks-backup",
-    marks === null
-      ? t("options_storage_marks_backup_none")
-      : plural(marksInBackup(marks), "options_storage_marks_backup", [when(marks.writtenAt)]),
-  );
-  // The reading list's copy (`library-copy.js`): off by the switch, none
-  // yet, or how many documents it holds and what they take - completed
-  // first, so a reading list saved before the copy was on by default (D146)
-  // is counted here rather than promised for the next save.
-  await completeLibraryCopy();
-  const library = effectiveLibraryCopy(config) ? await readLibraryCopy() : "off";
-  fill(
+  tellCopy("storage-backup", vocabulary === null ? null : plural(vocabulary.count, "options_copies_phrases"), vocabulary === null ? null : when(vocabulary.writtenAt));
+  tellCopy("storage-marks-backup", marks === null ? null : plural(marksInBackup(marks), "options_copies_notes"), marks === null ? null : when(marks.writtenAt));
+  tellCopy(
     "storage-library-copy",
-    library === "off"
-      ? t("options_storage_library_copy_off")
-      : library === null
-        ? t("options_storage_library_copy_none")
-        : plural(library.docs, "options_storage_library_copy", [megabytes(library.bytes)]),
+    effectiveLibraryCopy(config)
+      ? copy === null
+        ? null
+        : plural(copy.docs, "options_copies_docs", [megabytes(copy.bytes)])
+      : t("options_copies_off"),
+    null,
   );
+}
+
+/**
+ * What the reading list holds, off the documents' own rows (F8): the pictures
+ * are counted in bytes because their rows say so, and the text from what each
+ * row knows of its length - a book its characters, an article its words. An
+ * estimate, and the fold over the breakdown says the whole thing is one; what
+ * it must not be is a read of every document each time this page opens.
+ *
+ * @returns {Promise<number>}
+ */
+async function libraryBytes() {
+  const articles = await listArticles().catch(() => []);
+  const books = await listBooks().catch(() => []);
+  let bytes = 0;
+  for (const article of articles) {
+    bytes += article.pictures?.bytes ?? 0;
+    bytes += (article.words ?? 0) * AVERAGE_WORD;
+  }
+  for (const book of books) {
+    bytes += book.pictures?.bytes ?? 0;
+    bytes += book.totalChars;
+  }
+  return bytes;
+}
+
+/** Bytes a word of stored text costs, on the average of the languages re/read reads. */
+const AVERAGE_WORD = 6;
+
+/**
+ * One line of the copies block: what it holds and when it was written, or a
+ * dash where there is no date to give.
+ *
+ * @param {string} id
+ * @param {string | null} holds
+ * @param {string | null} at
+ */
+function tellCopy(id, holds, at) {
+  const row = document.getElementById(id);
+  if (row === null) return;
+  const what = row.querySelector(".copy-holds");
+  const date = row.querySelector(".copy-when");
+  if (what !== null) what.textContent = holds ?? t("options_copies_none");
+  if (date !== null) date.textContent = at ?? "\u2014";
 }
 
 /**
@@ -2025,7 +2078,7 @@ function renderDictionary(dictionary, place) {
   // credit stays one press away, exactly as the dictionary wrote it. An
   // unfinished book gets none of this: it is still being named by its files.
   const details = element("details", "dictionary-details");
-  details.append(element("summary", "", t("options_dictionary_details")));
+  details.append(element("summary", "", t("options_details")));
   details.append(renameField(dictionary));
   details.append(element("p", "dictionary-file-name", t("options_dictionary_file_name", dictionary.name)));
   if (dictionary.credit !== null) details.append(element("p", "dictionary-credit", dictionary.credit));

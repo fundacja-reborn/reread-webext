@@ -1432,6 +1432,118 @@
     "message": "Übersetzungsmodelle"
   },
 
+  "options_storage_dictionaries": {
+    "message": "Wörterbücher"
+  },
+
+  "options_storage_library": {
+    "message": "Leseliste (mit Kopie)"
+  },
+
+  "options_storage_phrases": {
+    "message": "Wortschatz und Markierungen"
+  },
+
+  "options_storage_other": {
+    "message": "Sonstiges"
+  },
+
+  "options_copies_vocabulary": {
+    "message": "Wortschatz"
+  },
+
+  "options_copies_marks": {
+    "message": "Markierungen"
+  },
+
+  "options_copies_library": {
+    "message": "Leseliste"
+  },
+
+  "options_copies_none": {
+    "message": "noch keine"
+  },
+
+  "options_copies_off": {
+    "message": "abgeschaltet"
+  },
+
+  "options_copies_safe": {
+    "message": "Jede Kopie liegt dort, wo der Browser Daten nicht von selbst löscht, und wird bei der nächsten gespeicherten Phrase, Markierung oder Seite neu geschrieben."
+  },
+
+  "options_font_custom_placeholder": {
+    "message": "zum Beispiel Noto Serif"
+  },
+
+  "options_copies_phrases_one": {
+    "message": "$COUNT$ Phrase",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "918"
+      }
+    }
+  },
+
+  "options_copies_phrases_other": {
+    "message": "$COUNT$ Phrasen",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "918"
+      }
+    }
+  },
+
+  "options_copies_notes_one": {
+    "message": "$COUNT$ mit Notizen",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "918"
+      }
+    }
+  },
+
+  "options_copies_notes_other": {
+    "message": "$COUNT$ mit Notizen",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "918"
+      }
+    }
+  },
+
+  "options_copies_docs_one": {
+    "message": "$COUNT$ Dokument, $SIZE$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "61"
+      },
+      "size": {
+        "content": "$2",
+        "example": "13.5 MB"
+      }
+    }
+  },
+
+  "options_copies_docs_other": {
+    "message": "$COUNT$ Dokumente, $SIZE$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "61"
+      },
+      "size": {
+        "content": "$2",
+        "example": "13.5 MB"
+      }
+    }
+  },
+
   "options_storage_copies": {
     "message": "Letzte Kopien"
   },
@@ -1452,46 +1564,14 @@
   "options_engine": { "message": "Engine" },
   "options_engine_value": { "message": "Bergamot, im Paket enthalten - übersetzt offline" },
   "options_storage": { "message": "Daten auf diesem Gerät" },
-  "options_storage_value": {
-    "message": "$SIZE$ - Modelle, Wörterbücher, Leseliste und Ihre Phrasen zusammen",
-    "placeholders": { "size": { "content": "$1", "example": "143,2 MB" } }
-  },
   "options_storage_how": { "message": "Speicherplatz, der von der Erweiterung belegt wird." },
 
   "options_storage_how_more": {
-    "message": "Wörterbücher benötigen aufgrund der Datenbankstruktur mehr Platz als ihre Dateigröße. Das Löschen eines Artikels oder Buchs entfernt dessen Text, Bilder, Markierungen, Notizen und Lesefortschritt vollständig. Der Rest - die Wörterbücher, die Leseliste, der Wortschatz und die Markierungen - wird nicht aufgeschlüsselt: Ein Wörterbuch kostet ein Vielfaches dessen, was sein Text wiegt, und den Rest zu zählen hieße, bei jedem Öffnen dieser Seite jede Zeile der Datenbanken zu lesen.",
+    "message": "Die Summe ist die eigene Schätzung des Browsers für alles, was re/read speichert: sie zählt auch die Indizes der Datenbanken und den Cache mit, darum ist sie größer als die Posten darunter. Jeder Posten zählt, was er hält - und ein Wörterbuch kostet ein Vielfaches dessen, was sein Text wiegt, weshalb das meiste unter Sonstiges die Wörterbuch-Datenbank ist. Das Löschen eines Artikels oder Buchs entfernt dessen Text, Bilder, Markierungen, Notizen und Lesefortschritt vollständig.",
     "description": "The rest of the options_storage_how description, behind the row's More button."
   },
   "options_storage_persistent": { "message": "Dauerhafter Speicher: gewährt. Der Browser hat zugesagt, diese Daten nicht zu löschen, um Platz zu schaffen." },
   "options_storage_at_risk": { "message": "Dauerhafter Speicher: nicht gewährt. Safari löscht die Daten einer Website nach etwa einem Monat Nutzung ohne ein Tippen auf ihre Seiten, und die Seiten dieser Erweiterung zählen als eine Website. Ihre Phrasen haben eine Kopie, die das übersteht (Zeile darunter); Modelle, Wörterbücher und Leseliste nicht - öffnen Sie ab und zu die Leseansicht oder diese Einstellungen." },
-  "options_storage_backup_one": {
-    "message": "Kopie des Wortschatzes: $COUNT$ Phrase, geschrieben $WHEN$ - dort, wo der Browser Daten nicht von sich aus löscht.",
-    "placeholders": { "count": { "content": "$1", "example": "1" }, "when": { "content": "$2", "example": "26.08.26, 12:41" } }
-  },
-  "options_storage_backup_other": {
-    "message": "Kopie des Wortschatzes: $COUNT$ Phrasen, geschrieben $WHEN$ - dort, wo der Browser Daten nicht von sich aus löscht.",
-    "placeholders": { "count": { "content": "$1", "example": "1234" }, "when": { "content": "$2", "example": "26.08.26, 12:41" } }
-  },
-  "options_storage_backup_none": { "message": "Kopie des Wortschatzes: noch keine - sie entsteht mit der nächsten gespeicherten Phrase." },
-  "options_storage_marks_backup_one": {
-    "message": "Kopie der Markierungen: $COUNT$ Markierung mit Notizen, geschrieben $WHEN$.",
-    "placeholders": { "count": { "content": "$1", "example": "1" }, "when": { "content": "$2", "example": "26.08.26, 12:41" } }
-  },
-  "options_storage_marks_backup_other": {
-    "message": "Kopie der Markierungen: $COUNT$ Markierungen mit Notizen, geschrieben $WHEN$.",
-    "placeholders": { "count": { "content": "$1", "example": "37" }, "when": { "content": "$2", "example": "26.08.26, 12:41" } }
-  },
-  "options_storage_marks_backup_none": { "message": "Kopie der Markierungen: noch keine - sie entsteht mit der nächsten Markierung." },
-  "options_storage_library_copy_one": {
-    "message": "Kopie der Leseliste: $COUNT$ Dokument, $SIZE$.",
-    "placeholders": { "count": { "content": "$1", "example": "1" }, "size": { "content": "$2", "example": "12,4 MB" } }
-  },
-  "options_storage_library_copy_other": {
-    "message": "Kopie der Leseliste: $COUNT$ Dokumente, $SIZE$.",
-    "placeholders": { "count": { "content": "$1", "example": "37" }, "size": { "content": "$2", "example": "12,4 MB" } }
-  },
-  "options_storage_library_copy_none": { "message": "Kopie der Leseliste: noch keine - sie entsteht mit der nächsten gespeicherten Seite oder dem nächsten importierten Buch." },
-  "options_storage_library_copy_off": { "message": "Kopie der Leseliste: aus." },
   "options_library_copy": { "message": "Kopie der Leseliste" },
   "options_library_copy_hint": {
     "message": "Eine zweite Kopie der Leseliste, sicher vor den Aufräumaktionen des Browsers; sie belegt doppelt so viel Platz."
@@ -1623,7 +1703,7 @@
   },
   "options_bubble_more": { "message": "Satz und Wörterbucheinträge sofort anzeigen" },
   "options_bubble_more_hint": {
-    "message": "Die Sprechblase zeigt den übersetzten Satz und die Wörterbucheinträge sofort, ohne einen Druck auf Mehr."
+    "message": "Die Sprechblase zeigt den übersetzten Satz und die Wörterbucheinträge sofort, ohne einen Druck auf „Mehr“."
   },
 
   "options_bubble_more_more": {
@@ -1670,7 +1750,11 @@
   "options_bubble_scale_hint": {
     "message": "Passt die Größe von Text und Schaltflächen in der Sprechblase auf allen Seiten an."
   },
-  "options_note_more": { "message": "Mehr" },
+
+  "options_details": {
+    "message": "Details",
+    "description": "The word every fold on the settings page opens under - the row notes' and the dictionary rows' alike."
+  },
 
   "options_field_saved": {
     "message": "Gespeichert",
@@ -1799,7 +1883,7 @@
     "message": "Laden Sie hier für jedes Sprachpaar, das Sie übersetzen möchten, ein Übersetzungsmodell herunter. Es handelt sich um offizielle Mozilla-Dateien, die vollständig offline auf Ihrem Gerät laufen."
   },
   "options_models_single_word": {
-    "message": "Ein Modell übersetzt Sätze gut, ein einzelnes Wort ohne Kontext wird aber oft falsch übersetzt - das Ergebnis ist abgeschnitten oder ein Wort, das es gar nicht gibt. Für einzelne Wörter ist ein Wörterbuch aus dem Abschnitt unten die bessere Quelle."
+    "message": "Ein Modell übersetzt Sätze gut, ein einzelnes Wort für sich aber oft falsch - das Ergebnis ist abgeschnitten oder ein Wort, das es nicht gibt. Für einzelne Wörter ist ein Wörterbuch die bessere Quelle:"
   },
   "options_update_list": { "message": "Liste aktualisieren" },
   "options_list_dated": { "message": "Liste vom" },
@@ -2071,7 +2155,6 @@
       "total": { "content": "$3", "example": "3" }
     }
   },
-  "options_dictionary_details": { "message": "Details" },
   "options_dictionary_file_name": {
     "message": "Name aus der Datei: $NAME$",
     "placeholders": { "name": { "content": "$1", "example": "English-Polish FreeDict+WikDict dictionary (en-pl)" } }

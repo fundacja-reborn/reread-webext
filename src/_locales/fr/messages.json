@@ -1483,6 +1483,152 @@
     "message": "Modèles de traduction"
   },
 
+  "options_storage_dictionaries": {
+    "message": "Dictionnaires"
+  },
+
+  "options_storage_library": {
+    "message": "Liste de lecture (avec sa copie)"
+  },
+
+  "options_storage_phrases": {
+    "message": "Phrases et surlignages"
+  },
+
+  "options_storage_other": {
+    "message": "Autres"
+  },
+
+  "options_copies_vocabulary": {
+    "message": "Vocabulaire"
+  },
+
+  "options_copies_marks": {
+    "message": "Surlignages"
+  },
+
+  "options_copies_library": {
+    "message": "Liste de lecture"
+  },
+
+  "options_copies_none": {
+    "message": "pas encore"
+  },
+
+  "options_copies_off": {
+    "message": "désactivée"
+  },
+
+  "options_copies_safe": {
+    "message": "Chaque copie se trouve là où le navigateur n'efface pas les données de lui-même, et elle est réécrite à la prochaine phrase enregistrée, au prochain surlignage ou à la prochaine page conservée."
+  },
+
+  "options_font_custom_placeholder": {
+    "message": "par exemple Noto Serif"
+  },
+
+  "options_copies_phrases_one": {
+    "message": "$COUNT$ phrase",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "918"
+      }
+    }
+  },
+
+  "options_copies_phrases_many": {
+    "message": "$COUNT$ phrases",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "918"
+      }
+    }
+  },
+
+  "options_copies_phrases_other": {
+    "message": "$COUNT$ phrases",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "918"
+      }
+    }
+  },
+
+  "options_copies_notes_one": {
+    "message": "$COUNT$ avec ses notes",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "918"
+      }
+    }
+  },
+
+  "options_copies_notes_many": {
+    "message": "$COUNT$ avec leurs notes",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "918"
+      }
+    }
+  },
+
+  "options_copies_notes_other": {
+    "message": "$COUNT$ avec leurs notes",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "918"
+      }
+    }
+  },
+
+  "options_copies_docs_one": {
+    "message": "$COUNT$ document, $SIZE$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "61"
+      },
+      "size": {
+        "content": "$2",
+        "example": "13.5 MB"
+      }
+    }
+  },
+
+  "options_copies_docs_many": {
+    "message": "$COUNT$ documents, $SIZE$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "61"
+      },
+      "size": {
+        "content": "$2",
+        "example": "13.5 MB"
+      }
+    }
+  },
+
+  "options_copies_docs_other": {
+    "message": "$COUNT$ documents, $SIZE$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "61"
+      },
+      "size": {
+        "content": "$2",
+        "example": "13.5 MB"
+      }
+    }
+  },
+
   "options_storage_copies": {
     "message": "Dernières copies"
   },
@@ -1503,58 +1649,14 @@
   "options_engine": { "message": "Moteur" },
   "options_engine_value": { "message": "Bergamot, dans le paquet - traduit hors ligne" },
   "options_storage": { "message": "Données sur cet appareil" },
-  "options_storage_value": {
-    "message": "$SIZE$ - modèles, dictionnaires, liste de lecture et vos expressions réunis",
-    "placeholders": { "size": { "content": "$1", "example": "143,2 MB" } }
-  },
   "options_storage_how": { "message": "Espace disque utilisé par l'extension." },
 
   "options_storage_how_more": {
-    "message": "Les dictionnaires prennent plus de place que leur taille initiale en raison de la structure de la base de données. Supprimer un article ou un livre efface définitivement son texte, ses images, ses surlignages, ses notes et votre progression de lecture. Le reste - les dictionnaires, la liste de lecture, vos phrases et les surlignages - n'est pas détaillé : un dictionnaire coûte plusieurs fois le poids de son texte, et compter le reste voudrait dire lire chaque ligne des bases à chaque ouverture de cette page.",
+    "message": "Le total est l'estimation du navigateur pour tout ce que re/read conserve : il compte aussi les index des bases et les caches, ce qui explique qu'il dépasse les postes en dessous. Chaque poste compte ce qu'il contient - et un dictionnaire coûte plusieurs fois le poids de son texte, si bien que l'essentiel de ce qui figure sous Autres est la base des dictionnaires. Supprimer un article ou un livre efface définitivement son texte, ses images, ses surlignages, ses notes et votre progression de lecture.",
     "description": "The rest of the options_storage_how description, behind the row's More button."
   },
   "options_storage_persistent": { "message": "Stockage persistant : accordé. Le navigateur a promis de ne pas effacer ces données pour faire de la place." },
   "options_storage_at_risk": { "message": "Stockage persistant : refusé. Safari efface les données d'un site après environ un mois d'utilisation sans un toucher sur ses pages, et les pages de cette extension comptent comme un site. Vos expressions ont une copie qui y survit (ligne ci-dessous) ; les modèles, les dictionnaires et la liste de lecture non - ouvrez le lecteur ou ces paramètres de temps en temps." },
-  "options_storage_backup_one": {
-    "message": "Copie du vocabulaire : $COUNT$ expression, écrite $WHEN$ - là où le navigateur n'efface pas les données de lui-même.",
-    "placeholders": { "count": { "content": "$1", "example": "1" }, "when": { "content": "$2", "example": "26/08/2026 12:41" } }
-  },
-  "options_storage_backup_many": {
-    "message": "Copie du vocabulaire : $COUNT$ expressions, écrite $WHEN$ - là où le navigateur n'efface pas les données de lui-même.",
-    "placeholders": { "count": { "content": "$1", "example": "1 000 000" }, "when": { "content": "$2", "example": "26/08/2026 12:41" } }
-  },
-  "options_storage_backup_other": {
-    "message": "Copie du vocabulaire : $COUNT$ expressions, écrite $WHEN$ - là où le navigateur n'efface pas les données de lui-même.",
-    "placeholders": { "count": { "content": "$1", "example": "1234" }, "when": { "content": "$2", "example": "26/08/2026 12:41" } }
-  },
-  "options_storage_backup_none": { "message": "Copie du vocabulaire : aucune pour l'instant - elle sera écrite avec la prochaine expression enregistrée." },
-  "options_storage_marks_backup_one": {
-    "message": "Copie des surlignages : $COUNT$ surlignage avec ses notes, écrite $WHEN$.",
-    "placeholders": { "count": { "content": "$1", "example": "1" }, "when": { "content": "$2", "example": "26/08/2026 12:41" } }
-  },
-  "options_storage_marks_backup_many": {
-    "message": "Copie des surlignages : $COUNT$ surlignages avec leurs notes, écrite $WHEN$.",
-    "placeholders": { "count": { "content": "$1", "example": "1 000 000" }, "when": { "content": "$2", "example": "26/08/2026 12:41" } }
-  },
-  "options_storage_marks_backup_other": {
-    "message": "Copie des surlignages : $COUNT$ surlignages avec leurs notes, écrite $WHEN$.",
-    "placeholders": { "count": { "content": "$1", "example": "37" }, "when": { "content": "$2", "example": "26/08/2026 12:41" } }
-  },
-  "options_storage_marks_backup_none": { "message": "Copie des surlignages : aucune pour l'instant - elle sera écrite avec le prochain surlignage." },
-  "options_storage_library_copy_one": {
-    "message": "Copie de la liste de lecture : $COUNT$ document, $SIZE$.",
-    "placeholders": { "count": { "content": "$1", "example": "1" }, "size": { "content": "$2", "example": "12,4 Mo" } }
-  },
-  "options_storage_library_copy_many": {
-    "message": "Copie de la liste de lecture : $COUNT$ documents, $SIZE$.",
-    "placeholders": { "count": { "content": "$1", "example": "1 000 000" }, "size": { "content": "$2", "example": "12,4 Mo" } }
-  },
-  "options_storage_library_copy_other": {
-    "message": "Copie de la liste de lecture : $COUNT$ documents, $SIZE$.",
-    "placeholders": { "count": { "content": "$1", "example": "37" }, "size": { "content": "$2", "example": "12,4 Mo" } }
-  },
-  "options_storage_library_copy_none": { "message": "Copie de la liste de lecture : aucune pour l'instant - elle sera écrite avec la prochaine page enregistrée ou le prochain livre importé." },
-  "options_storage_library_copy_off": { "message": "Copie de la liste de lecture : désactivée." },
   "options_library_copy": { "message": "Copie de la liste de lecture" },
   "options_library_copy_hint": {
     "message": "Une deuxième copie de la liste de lecture, à l'abri des nettoyages du navigateur ; elle occupe deux fois plus de place."
@@ -1686,7 +1788,7 @@
   },
   "options_bubble_more": { "message": "Afficher tout de suite la phrase et les entrées du dictionnaire" },
   "options_bubble_more_hint": {
-    "message": "La bulle affiche tout de suite la phrase traduite et les entrées du dictionnaire, sans appui sur Plus."
+    "message": "La bulle affiche tout de suite la phrase traduite et les entrées du dictionnaire, sans appui sur « Plus »."
   },
 
   "options_bubble_more_more": {
@@ -1733,7 +1835,11 @@
   "options_bubble_scale_hint": {
     "message": "Ajuste la taille du texte et des boutons dans la bulle de traduction sur toutes les pages."
   },
-  "options_note_more": { "message": "Plus" },
+
+  "options_details": {
+    "message": "Détails",
+    "description": "The word every fold on the settings page opens under - the row notes' and the dictionary rows' alike."
+  },
 
   "options_field_saved": {
     "message": "Enregistré",
@@ -1872,7 +1978,7 @@
     "message": "Téléchargez ici un modèle de traduction pour chaque paire de langues que vous voulez traduire. Ce sont des fichiers officiels de Mozilla qui fonctionnent entièrement hors ligne sur votre appareil."
   },
   "options_models_single_word": {
-    "message": "Un modèle traduit bien les phrases, mais un mot isolé, sans contexte, est souvent mal traduit - le résultat est tronqué, ou c'est un mot qui n'existe pas. Pour les mots isolés, un dictionnaire de la section ci-dessous est la meilleure source."
+    "message": "Un modèle traduit bien les phrases, mais un mot isolé est souvent mal traduit - le résultat est tronqué, ou n'existe pas dans la langue. Pour les mots isolés, la meilleure source est un dictionnaire :"
   },
   "options_update_list": { "message": "Mettre à jour la liste" },
   "options_list_dated": { "message": "Liste du" },
@@ -2144,7 +2250,6 @@
       "total": { "content": "$3", "example": "3" }
     }
   },
-  "options_dictionary_details": { "message": "Détails" },
   "options_dictionary_file_name": {
     "message": "Nom du fichier : $NAME$",
     "placeholders": { "name": { "content": "$1", "example": "English-Polish FreeDict+WikDict dictionary (en-pl)" } }

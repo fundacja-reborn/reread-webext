@@ -543,8 +543,11 @@ h2 + p + section > h3:first-child {
 
 button.note-more {
   min-height: 0;
-  margin-inline-start: 0.35rem;
   padding: 0;
+  /* The trigger is part of the sentence before it, tied to its last word by a
+     hard space (F6): on a wrapping line the two go over together, and the
+     trigger never opens a line of its own. */
+  white-space: nowrap;
   border: none;
   background: none;
   color: var(--page-muted);
@@ -1206,11 +1209,12 @@ button.step-done {
 
 /* --- what the space is spent on, and the copies (D254, §9) --- */
 
-/* The one share of the total the page can name: indented under it, the
-   figures flush right on the digits' own width so a column of them lines up. */
+/* Where the space went (F8): indented under the total, the figures flush
+   right on the digits' own width so the column of them lines up. Always on
+   the page - this is what the section is for. */
 .storage-parts {
   grid-column: 1 / -1;
-  margin: 0.25rem 0 0;
+  margin: 0.35rem 0 0;
   padding: 0;
   list-style: none;
   color: var(--page-muted);
@@ -1228,17 +1232,43 @@ button.step-done {
   font-variant-numeric: tabular-nums;
 }
 
+/* The three copies, each in three parts: what it is, what it holds and when
+   it was written. Three columns where there is room for them; under 30rem the
+   name keeps the date company on the first line and the contents drop to the
+   second, because three columns of that width are three ellipses. */
 .copies {
   margin: 0.5rem 0 0;
   padding: 0;
   list-style: none;
+  color: var(--page-muted);
+  font-size: var(--ui-small);
   font-variant-numeric: tabular-nums;
 }
 
 .copies li {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr) max-content;
+  gap: 0.15rem 1rem;
   margin: 0.25rem 0;
-  color: var(--page-muted);
-  font-size: var(--ui-small);
+}
+
+.copy-name {
+  color: var(--page-fg);
+}
+
+.copy-when {
+  text-align: end;
+}
+
+@media (max-width: 30rem) {
+  .copies li {
+    grid-template-columns: minmax(0, 1fr) max-content;
+  }
+
+  .copy-holds {
+    grid-row: 2;
+    grid-column: 1 / -1;
+  }
 }
 
 /* The two doors to the pages that hold the data, in the quiet dress of the

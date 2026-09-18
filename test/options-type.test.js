@@ -37,14 +37,14 @@ describe("the settings page's type", () => {
   it("keeps the scale in tokens, on this page alone", async () => {
     const css = await source("options/options.css");
     const tokens = rule(css, ":root");
-    for (const [token, value] of [
+    for (const [token, value] of /** @type {[string, string][]} */ ([
       ["--ui-h1", "1.5rem"],
       ["--ui-h2", "1.25rem"],
       ["--ui-h3", "1rem"],
       ["--ui-text", "0.9375rem"],
       ["--ui-small", "0.875rem"],
       ["--ui-control", "2.25rem"],
-    ]) {
+    ])) {
       assert.match(tokens, new RegExp(`${token}: ${value.replace(".", "\\.")};`), `${token} is not ${value}`);
     }
     // The shared sheet dresses the popup, the reader and the bubble too, and

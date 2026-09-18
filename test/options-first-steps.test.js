@@ -104,23 +104,32 @@ describe("the first steps", () => {
 });
 
 describe("the data section", () => {
-  it("breaks out only the share it can name honestly", async () => {
+  it("says where the space went, off metadata alone (F8)", async () => {
+    const markup = await source("options/options.html");
     const options = await source("options/options.js");
-    // A model's metadata carries what it takes on disk, so the sum of them is
-    // a true part of the total. Nothing else on this page is.
+    for (const id of ["storage-models", "storage-dictionaries", "storage-library", "storage-phrases", "storage-other"]) {
+      assert.ok(markup.includes(`id="${id}"`), `the breakdown has no line for ${id}`);
+    }
     assert.match(options, /models\.reduce\(\(sum, model\) => sum \+ model\.bytes, 0\)/, "the models' share is not summed from their own metadata");
-    assert.match(options, /fill\("storage-models"/, "the share is never said");
-    assert.doesNotMatch(options, /dictionaries\.reduce\(\(sum[^)]*\) => sum \+ [a-z]+\.bytes/, "the dictionaries' text is passed off as their cost on disk");
+    assert.match(options, /dictionaries\.reduce\(\(sum, one\) => sum \+ one\.bytes, 0\)/, "the dictionaries' share is not summed from their own metadata");
+    // Whatever the browser's estimate has over the four parts - the indexes,
+    // the caches, a dictionary's cost over the weight of its text - and never
+    // a negative number when the estimate comes in under them.
+    assert.match(options, /Math\.max\(0, report\.usage - known\)/, "Other is not the remainder, or can go negative");
+    // Nothing here opens a document or a dictionary row: the library is read
+    // off the rows the reading list itself lists.
+    const library = options.slice(options.indexOf("async function libraryBytes"), options.indexOf("\n}\n", options.indexOf("async function libraryBytes")));
+    assert.doesNotMatch(library, /readArticle|readBook|openDictionary|entriesOf/, "counting the space opens the documents");
 
-    // And the note says what is left unbroken, in every language.
+    // And the fold says what the total is and what it is not, in every language.
     for (const locale of ["en", "pl", "de", "fr", "es", "uk"]) {
       const catalogue = JSON.parse(await source(`_locales/${locale}/messages.json`));
       const note = catalogue["options_storage_how_more"].message;
-      assert.ok(note.length > 200, `${locale} does not say what the total leaves unbroken`);
+      assert.ok(note.length > 200, `${locale} does not say what the total counts`);
     }
   });
 
-  it("gathers the copies under one heading, with the figures on the digits' own width", async () => {
+  it("gathers the copies under one heading, each in three parts (F8)", async () => {
     const markup = await source("options/options.html");
     const at = markup.indexOf('<h3 id="copies"');
     assert.ok(at > 0, "the copies have no heading of their own");
@@ -128,8 +137,19 @@ describe("the data section", () => {
     for (const id of ["storage-backup", "storage-marks-backup", "storage-library-copy"]) {
       assert.ok(block.includes(`id="${id}"`), `${id} is not in the copies block`);
     }
+    // What it is, what it holds, when it was written - and a dash where there
+    // is no date to give.
+    assert.equal((block.match(/class="copy-name"/g) ?? []).length, 3, "a copy does not say what it is");
+    assert.equal((block.match(/class="copy-holds"/g) ?? []).length, 3, "a copy does not say what it holds");
+    assert.equal((block.match(/class="copy-when"/g) ?? []).length, 3, "a copy does not say when it was written");
+    const options = await source("options/options.js");
+    assert.match(options, /date\.textContent = at \?\? "\\u2014";/, "a copy with no date says nothing where the date stands");
+    // Said once for the three of them, not three times over.
+    assert.equal((markup.match(/data-i18n="options_copies_safe"/g) ?? []).length, 1, "where the copies live is said more than once");
+
     const css = await source("options/options.css");
     assert.match(css, /\.copies \{[\s\S]*?font-variant-numeric: tabular-nums;/, "a column of dates and counts does not line up");
+    assert.match(css, /@media \(max-width: 30rem\) \{\s*\.copies li \{/, "three columns stay three columns on a phone");
   });
 
   it("points at the pages a copy to a file is made on, without inventing a message", async () => {

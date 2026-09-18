@@ -2052,6 +2052,186 @@
     "message": "Моделі перекладу"
   },
 
+  "options_storage_dictionaries": {
+    "message": "Словники"
+  },
+
+  "options_storage_library": {
+    "message": "Список читання (з копією)"
+  },
+
+  "options_storage_phrases": {
+    "message": "Фрази та позначення"
+  },
+
+  "options_storage_other": {
+    "message": "Інше"
+  },
+
+  "options_copies_vocabulary": {
+    "message": "Словниковий запас"
+  },
+
+  "options_copies_marks": {
+    "message": "Позначення"
+  },
+
+  "options_copies_library": {
+    "message": "Список читання"
+  },
+
+  "options_copies_none": {
+    "message": "ще немає"
+  },
+
+  "options_copies_off": {
+    "message": "вимкнена"
+  },
+
+  "options_copies_safe": {
+    "message": "Кожна копія лежить там, де браузер не видаляє дані сам, і створюється наново з наступною збереженою фразою, позначенням чи сторінкою."
+  },
+
+  "options_font_custom_placeholder": {
+    "message": "наприклад Noto Serif"
+  },
+
+  "options_copies_phrases_one": {
+    "message": "$COUNT$ фраза",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "918"
+      }
+    }
+  },
+
+  "options_copies_phrases_few": {
+    "message": "$COUNT$ фрази",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "918"
+      }
+    }
+  },
+
+  "options_copies_phrases_many": {
+    "message": "$COUNT$ фраз",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "918"
+      }
+    }
+  },
+
+  "options_copies_phrases_other": {
+    "message": "$COUNT$ фрази",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "918"
+      }
+    }
+  },
+
+  "options_copies_notes_one": {
+    "message": "$COUNT$ з нотатками",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "918"
+      }
+    }
+  },
+
+  "options_copies_notes_few": {
+    "message": "$COUNT$ з нотатками",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "918"
+      }
+    }
+  },
+
+  "options_copies_notes_many": {
+    "message": "$COUNT$ з нотатками",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "918"
+      }
+    }
+  },
+
+  "options_copies_notes_other": {
+    "message": "$COUNT$ з нотатками",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "918"
+      }
+    }
+  },
+
+  "options_copies_docs_one": {
+    "message": "$COUNT$ документ, $SIZE$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "61"
+      },
+      "size": {
+        "content": "$2",
+        "example": "13.5 MB"
+      }
+    }
+  },
+
+  "options_copies_docs_few": {
+    "message": "$COUNT$ документи, $SIZE$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "61"
+      },
+      "size": {
+        "content": "$2",
+        "example": "13.5 MB"
+      }
+    }
+  },
+
+  "options_copies_docs_many": {
+    "message": "$COUNT$ документів, $SIZE$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "61"
+      },
+      "size": {
+        "content": "$2",
+        "example": "13.5 MB"
+      }
+    }
+  },
+
+  "options_copies_docs_other": {
+    "message": "$COUNT$ документа, $SIZE$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "61"
+      },
+      "size": {
+        "content": "$2",
+        "example": "13.5 MB"
+      }
+    }
+  },
+
   "options_storage_copies": {
     "message": "Останні копії"
   },
@@ -2072,70 +2252,14 @@
   "options_engine": { "message": "Рушій" },
   "options_engine_value": { "message": "Bergamot, усередині пакета - перекладає офлайн" },
   "options_storage": { "message": "Дані на цьому пристрої" },
-  "options_storage_value": {
-    "message": "$SIZE$ - моделі, словники, список читання і ваші фрази разом",
-    "placeholders": { "size": { "content": "$1", "example": "143,2 MB" } }
-  },
   "options_storage_how": { "message": "Обсяг пам'яті, який займає розширення." },
 
   "options_storage_how_more": {
-    "message": "Словники займають більше місця, ніж їхні файли, через структуру бази даних. Видалення статті або книги повністю вилучає її текст, зображення, позначення, нотатки та прогрес читання. Решта - словники, список читання, фрази та позначення - не розбивається: словник коштує в кілька разів більше, ніж важить його текст, а порахувати решту означало б читати кожен рядок баз при кожному відкритті цієї сторінки.",
+    "message": "Сума - це власна оцінка браузера для всього, що зберігає re/read: вона рахує й індекси баз та кеш, тому більша за позиції під нею. Кожна позиція рахує те, що тримає - а словник коштує в кілька разів більше, ніж важить його текст, тож більшість того, що стоїть під „Інше”, - це база словників. Видалення статті або книги повністю вилучає її текст, зображення, позначення, нотатки та прогрес читання.",
     "description": "The rest of the options_storage_how description, behind the row's More button."
   },
   "options_storage_persistent": { "message": "Постійне сховище: надано. Браузер пообіцяв не стирати ці дані, щоб звільнити місце." },
   "options_storage_at_risk": { "message": "Постійне сховище: не надано. Safari стирає дані сайту приблизно після місяця користування без жодного дотику до його сторінок, а сторінки цього розширення рахуються як один сайт. Ваші фрази мають копію, яка це переживе (рядок нижче); моделі, словники і список читання - ні, тож час від часу відкривайте режим читання або ці налаштування." },
-  "options_storage_backup_one": {
-    "message": "Копія словника: $COUNT$ фраза, записана $WHEN$ - там, де браузер не стирає дані сам.",
-    "placeholders": { "count": { "content": "$1", "example": "1" }, "when": { "content": "$2", "example": "26.08.26, 12:41" } }
-  },
-  "options_storage_backup_few": {
-    "message": "Копія словника: $COUNT$ фрази, записана $WHEN$ - там, де браузер не стирає дані сам.",
-    "placeholders": { "count": { "content": "$1", "example": "3" }, "when": { "content": "$2", "example": "26.08.26, 12:41" } }
-  },
-  "options_storage_backup_many": {
-    "message": "Копія словника: $COUNT$ фраз, записана $WHEN$ - там, де браузер не стирає дані сам.",
-    "placeholders": { "count": { "content": "$1", "example": "1234" }, "when": { "content": "$2", "example": "26.08.26, 12:41" } }
-  },
-  "options_storage_backup_other": {
-    "message": "Копія словника: $COUNT$ фрази, записана $WHEN$ - там, де браузер не стирає дані сам.",
-    "placeholders": { "count": { "content": "$1", "example": "1,5" }, "when": { "content": "$2", "example": "26.08.26, 12:41" } }
-  },
-  "options_storage_backup_none": { "message": "Копія словника: ще немає - з'явиться з наступною збереженою фразою." },
-  "options_storage_marks_backup_one": {
-    "message": "Копія позначень: $COUNT$ позначення з нотатками, записана $WHEN$.",
-    "placeholders": { "count": { "content": "$1", "example": "1" }, "when": { "content": "$2", "example": "26.08.26, 12:41" } }
-  },
-  "options_storage_marks_backup_few": {
-    "message": "Копія позначень: $COUNT$ позначення з нотатками, записана $WHEN$.",
-    "placeholders": { "count": { "content": "$1", "example": "3" }, "when": { "content": "$2", "example": "26.08.26, 12:41" } }
-  },
-  "options_storage_marks_backup_many": {
-    "message": "Копія позначень: $COUNT$ позначень з нотатками, записана $WHEN$.",
-    "placeholders": { "count": { "content": "$1", "example": "37" }, "when": { "content": "$2", "example": "26.08.26, 12:41" } }
-  },
-  "options_storage_marks_backup_other": {
-    "message": "Копія позначень: $COUNT$ позначення з нотатками, записана $WHEN$.",
-    "placeholders": { "count": { "content": "$1", "example": "1,5" }, "when": { "content": "$2", "example": "26.08.26, 12:41" } }
-  },
-  "options_storage_marks_backup_none": { "message": "Копія позначень: ще немає - з'явиться з наступним позначенням." },
-  "options_storage_library_copy_one": {
-    "message": "Копія списку читання: $COUNT$ документ, $SIZE$.",
-    "placeholders": { "count": { "content": "$1", "example": "1" }, "size": { "content": "$2", "example": "12,4 МБ" } }
-  },
-  "options_storage_library_copy_few": {
-    "message": "Копія списку читання: $COUNT$ документи, $SIZE$.",
-    "placeholders": { "count": { "content": "$1", "example": "3" }, "size": { "content": "$2", "example": "12,4 МБ" } }
-  },
-  "options_storage_library_copy_many": {
-    "message": "Копія списку читання: $COUNT$ документів, $SIZE$.",
-    "placeholders": { "count": { "content": "$1", "example": "37" }, "size": { "content": "$2", "example": "12,4 МБ" } }
-  },
-  "options_storage_library_copy_other": {
-    "message": "Копія списку читання: $COUNT$ документа, $SIZE$.",
-    "placeholders": { "count": { "content": "$1", "example": "1,5" }, "size": { "content": "$2", "example": "12,4 МБ" } }
-  },
-  "options_storage_library_copy_none": { "message": "Копія списку читання: ще немає - з'явиться з наступною збереженою сторінкою або імпортованою книгою." },
-  "options_storage_library_copy_off": { "message": "Копія списку читання: вимкнена." },
   "options_library_copy": { "message": "Копія списку читання" },
   "options_library_copy_hint": {
     "message": "Друга копія списку читання, захищена від очищення даних браузера; вона займає вдвічі більше місця."
@@ -2275,7 +2399,7 @@
   },
   "options_bubble_more": { "message": "Одразу показувати речення та словникові статті" },
   "options_bubble_more_hint": {
-    "message": "Бульбашка одразу показує перекладене речення та словникові статті, без натискання Більше."
+    "message": "Бульбашка одразу показує перекладене речення та словникові статті, без натискання «Більше»."
   },
 
   "options_bubble_more_more": {
@@ -2322,7 +2446,11 @@
   "options_bubble_scale_hint": {
     "message": "Змінює розмір тексту та кнопок у бульбашці перекладу на всіх сторінках."
   },
-  "options_note_more": { "message": "Більше" },
+
+  "options_details": {
+    "message": "Подробиці",
+    "description": "The word every fold on the settings page opens under - the row notes' and the dictionary rows' alike."
+  },
 
   "options_field_saved": {
     "message": "Збережено",
@@ -2471,7 +2599,7 @@
     "message": "Завантажте тут модель перекладу для кожної мовної пари, яку хочете перекладати. Це офіційні файли Mozilla, які працюють повністю офлайн на вашому пристрої."
   },
   "options_models_single_word": {
-    "message": "Модель добре перекладає речення, але окреме слово без контексту часто перекладається неправильно - результат буває обрізаним або є словом, якого не існує. Для окремих слів кращим джерелом є словник із розділу нижче."
+    "message": "Модель добре перекладає речення, але окреме слово часто виходить неправильно - результат обрізаний або це слово, якого немає. Для окремих слів кращим джерелом є словник:"
   },
   "options_update_list": { "message": "Оновити список" },
   "options_list_dated": { "message": "Список станом на" },
@@ -2743,7 +2871,6 @@
       "total": { "content": "$3", "example": "3" }
     }
   },
-  "options_dictionary_details": { "message": "Подробиці" },
   "options_dictionary_file_name": {
     "message": "Назва з файлу: $NAME$",
     "placeholders": { "name": { "content": "$1", "example": "English-Polish FreeDict+WikDict dictionary (en-pl)" } }

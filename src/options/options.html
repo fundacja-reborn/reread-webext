@@ -347,15 +347,20 @@
     </p>
 
     <!-- The one fact about models that changes what somebody installs next -
-         a model guesses badly at a single word (D192, Michał's ask) - said in
-         the page's own note, the frame the host notes wear (D254, P8). It
-         wore a highlighter's stroke until then, which is the wash re/read's
-         own highlighter puts on a page: the same mark meaning two things,
-         one of them "the extension drew this on your text". -->
-    <p class="note" data-i18n="options_models_single_word">
-      A model translates sentences well, but a single word on its own is often translated
-      wrongly - the result is cut short, or is a word that does not exist. For single words, a
-      dictionary from the section below is the better source.
+         a model guesses badly at a single word (D192, Michał's ask) - as a
+         paragraph of the section's own prose, ending in the way to the
+         dictionaries (F7). It wore a highlighter's stroke until D254 and the
+         page's framed note until this round: two framed notes one under the
+         other read as two warnings, and the frame belongs to the one note
+         that says where a download comes from. -->
+    <p class="explain">
+      <span data-i18n="options_models_single_word"
+        >A model translates sentences well, but a single word on its own is often translated
+        wrongly - the result is cut short, or is a word that does not exist. For single words the
+        better source is a dictionary:</span
+      >
+      <a href="#dictionaries" data-i18n="options_dictionaries_heading">Dictionaries</a
+      >.
     </p>
 
     <!-- The one fetch this section can make, and the press that makes it: the
@@ -464,10 +469,7 @@
         <p class="row-note">
           <span data-i18n="options_no_translation_hint"
             >Dictionaries only, without machine translation; the reader, the offline reading list and the highlighter keep working.</span
-          >
-          <button type="button" class="note-more" aria-expanded="false" aria-controls="more-translationOff" data-i18n="options_note_more">
-            More
-          </button>
+          >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-translationOff" data-i18n="options_details">Details</button>
         </p>
         <p class="row-note row-more" id="more-translationOff" data-i18n="options_no_translation_more" hidden>
           With a language pair chosen, the bubble still shows dictionary meanings, and you can save
@@ -491,10 +493,7 @@
         <p class="row-note">
           <span data-i18n="options_bubble_off_hint"
             >With this on, selecting text on an ordinary page does nothing at all - open a page in the reader from re/read's button or with Alt+Shift+R.</span
-          >
-          <button type="button" class="note-more" aria-expanded="false" aria-controls="more-bubbleOff" data-i18n="options_note_more">
-            More
-          </button>
+          >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-bubbleOff" data-i18n="options_details">Details</button>
         </p>
         <p class="row-note row-more" id="more-bubbleOff" data-i18n="options_bubble_off_more" hidden>
           In the reader a selection is only a highlight for the moment: no bubble opens, a tap or
@@ -742,10 +741,7 @@
         <p class="row-note">
           <span data-i18n="options_reader_only_hint"
             >Underlines and the bubble only in the reader; on an ordinary page a selection shows a button that opens it there.</span
-          >
-          <button type="button" class="note-more" aria-expanded="false" aria-controls="more-readerOnly" data-i18n="options_note_more">
-            More
-          </button>
+          >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-readerOnly" data-i18n="options_details">Details</button>
         </p>
         <p class="row-note row-more" id="more-readerOnly" data-i18n="options_reader_only_more" hidden>
           With it on, no web page can tell which of its words you have saved. On Android and iOS it
@@ -841,11 +837,8 @@
         </label>
         <p class="row-note">
           <span data-i18n="options_bubble_more_hint"
-            >The bubble shows the translated sentence and the dictionary entries right away, with no press on More.</span
-          >
-          <button type="button" class="note-more" aria-expanded="false" aria-controls="more-showBubbleMore" data-i18n="options_note_more">
-            More
-          </button>
+            >The bubble shows the translated sentence and the dictionary entries right away, with no press on “More”.</span
+          >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-showBubbleMore" data-i18n="options_details">Details</button>
         </p>
         <p class="row-note row-more" id="more-showBubbleMore" data-i18n="options_bubble_more_more" hidden>
           Worth keeping on with a dictionary installed - a translation model often gets a single
@@ -865,10 +858,7 @@
         <p class="row-note">
           <span data-i18n="options_quiet_bubble_hint"
             >The bubble shows the translation alone; the buttons appear when you click or tap it.</span
-          >
-          <button type="button" class="note-more" aria-expanded="false" aria-controls="more-hideBubbleActions" data-i18n="options_note_more">
-            More
-          </button>
+          >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-hideBubbleActions" data-i18n="options_details">Details</button>
         </p>
         <p class="row-note row-more" id="more-hideBubbleActions" data-i18n="options_quiet_bubble_more" hidden>
           The action buttons are copy, save, read aloud and the rest - everything the bubble can do,
@@ -917,10 +907,7 @@
         <p class="row-note">
           <span data-i18n="options_save_sentence_hint"
             >Saving a phrase saves the sentence it stood in as well.</span
-          >
-          <button type="button" class="note-more" aria-expanded="false" aria-controls="more-saveSentence" data-i18n="options_note_more">
-            More
-          </button>
+          >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-saveSentence" data-i18n="options_details">Details</button>
         </p>
         <p class="row-note row-more" id="more-saveSentence" data-i18n="options_save_sentence_more" hidden>
           The sentence as the page shows it, without its translation. It is shown under the phrase
@@ -946,10 +933,7 @@
         <p class="row-note">
           <span data-i18n="options_underline_forms_hint"
             >Save "read", and "reads" and "reading" are underlined too.</span
-          >
-          <button type="button" class="note-more" aria-expanded="false" aria-controls="more-underlineForms" data-i18n="options_note_more">
-            More
-          </button>
+          >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-underlineForms" data-i18n="options_details">Details</button>
         </p>
         <p class="row-note row-more" id="more-underlineForms" data-i18n="options_underline_forms_more" hidden>
           The bubble over them shows what you saved for "read". Which forms count is decided by your
@@ -978,10 +962,7 @@
         <p class="row-note">
           <span data-i18n="options_keep_articles_hint"
             >Every page you open in the reader goes into the offline reading list.</span
-          >
-          <button type="button" class="note-more" aria-expanded="false" aria-controls="more-keepArticles" data-i18n="options_note_more">
-            More
-          </button>
+          >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-keepArticles" data-i18n="options_details">Details</button>
         </p>
         <p class="row-note row-more" id="more-keepArticles" data-i18n="options_keep_articles_more" hidden>
           Your saved pages, highlights and reading progress are kept safe even if the original
@@ -999,6 +980,8 @@
           <input
             id="font-custom"
             type="text"
+            placeholder="for example Noto Serif"
+            data-i18n-placeholder="options_font_custom_placeholder"
             autocomplete="off"
             autocapitalize="off"
             spellcheck="false"
@@ -1013,10 +996,7 @@
         <p class="row-note">
           <span data-i18n="options_font_custom_hint"
             >A typeface installed on this device, for example Noto Serif; it then appears as Custom in the Type row of the Aa panel.</span
-          >
-          <button type="button" class="note-more" aria-expanded="false" aria-controls="more-fontFamily" data-i18n="options_note_more">
-            More
-          </button>
+          >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-fontFamily" data-i18n="options_details">Details</button>
         </p>
         <p class="row-note row-more" id="more-fontFamily" data-i18n="options_font_custom_more" hidden>
           Type the name as the system spells it. Leave the field empty to use the built-in typefaces
@@ -1041,10 +1021,7 @@
         <p class="row-note">
           <span data-i18n="options_reading_pace_hint"
             >Used only to estimate the reading time shown in the reading list and under an article's title.</span
-          >
-          <button type="button" class="note-more" aria-expanded="false" aria-controls="more-readingPace" data-i18n="options_note_more">
-            More
-          </button>
+          >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-readingPace" data-i18n="options_details">Details</button>
         </p>
         <p class="row-note row-more" id="more-readingPace" data-i18n="options_reading_pace_more" hidden>
           The number of words you read in a minute. 200 is an unhurried pace in your own language;
@@ -1080,10 +1057,7 @@
         <p class="row-note">
           <span data-i18n="options_page_number_hint"
             >A page count at the foot of the window.</span
-          >
-          <button type="button" class="note-more" aria-expanded="false" aria-controls="more-pageNumber" data-i18n="options_note_more">
-            More
-          </button>
+          >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-pageNumber" data-i18n="options_details">Details</button>
         </p>
         <p class="row-note row-more" id="more-pageNumber" data-i18n="options_page_number_more" hidden>
           Off, the last line of each page stands lower; the count is still read by screen readers,
@@ -1107,10 +1081,7 @@
         <p class="row-note">
           <span data-i18n="options_touch_turn_hint"
             >How a finger turns the pages.</span
-          >
-          <button type="button" class="note-more" aria-expanded="false" aria-controls="more-touchTurn" data-i18n="options_note_more">
-            More
-          </button>
+          >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-touchTurn" data-i18n="options_details">Details</button>
         </p>
         <!-- What the chosen gesture does, in the reader's own words (Michał's
              smoke, 2026-09-18): three gestures named in three words each say
@@ -1136,10 +1107,7 @@
         <p class="row-note">
           <span data-i18n="options_turn_effect_hint"
             >A sign that the page has turned.</span
-          >
-          <button type="button" class="note-more" aria-expanded="false" aria-controls="more-turnEffect" data-i18n="options_note_more">
-            More
-          </button>
+          >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-turnEffect" data-i18n="options_details">Details</button>
         </p>
         <p class="row-note" id="turn-effect-note"></p>
         <p class="row-note row-more" id="more-turnEffect" data-i18n="options_turn_effect_more" hidden>
@@ -1176,10 +1144,7 @@
         <p class="row-note">
           <span data-i18n="options_tts_hint"
             >The read-aloud buttons in the bubble, in the lists and in the reader.</span
-          >
-          <button type="button" class="note-more" aria-expanded="false" aria-controls="more-ttsOff" data-i18n="options_note_more">
-            More
-          </button>
+          >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-ttsOff" data-i18n="options_details">Details</button>
         </p>
         <p class="row-note row-more" id="more-ttsOff" data-i18n="options_tts_more" hidden>
           Turning this off hides every one of them. The voice and the speed you chose stay stored
@@ -1212,10 +1177,7 @@
         <p class="row-note">
           <span data-i18n="options_tts_voice_hint"
             >A separate voice for each language; only voices that speak offline are offered.</span
-          >
-          <button type="button" class="note-more" aria-expanded="false" aria-controls="more-ttsVoices" data-i18n="options_note_more">
-            More
-          </button>
+          >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-ttsVoices" data-i18n="options_details">Details</button>
         </p>
         <p class="row-note row-more" id="more-ttsVoices" data-i18n="options_tts_voice_more" hidden>
           The voice reads phrases and whole articles alike. Speech is made on this device and
@@ -1273,32 +1235,42 @@
         <p class="row-note">
           <span data-i18n="options_storage_how"
             >Disk space used by the extension.</span
-          >
-          <button type="button" class="note-more" aria-expanded="false" aria-controls="more-storage" data-i18n="options_note_more">
-            More
-          </button>
+          >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-storage" data-i18n="options_details">Details</button>
         </p>
         <p class="row-note row-more" id="more-storage" data-i18n="options_storage_how_more" hidden>
-          Dictionaries take up more space than their file size because of the database structure.
-          Deleting an article or book completely removes its text, images, highlights, notes and
-          reading progress. The rest - the dictionaries, the reading list, your phrases and the
-          highlights - is not broken down: a dictionary costs several times what its text weighs,
-          and counting the rest would mean reading every row of the databases each time this page
-          opens.
+          The total is the browser's own estimate of everything re/read stores: it counts the
+          databases' indexes and caches too, which is why it is larger than the parts under it. Each
+          part counts what it holds - and a dictionary costs several times what its text weighs, so
+          most of what stands under Other is the dictionaries' database. Deleting an article or book
+          completely removes its text, images, highlights, notes and reading progress.
         </p>
         <p class="row-note" id="storage-note" hidden></p>
-        <!-- The one share of the total this page can name honestly and
-             cheaply (D254, §9): a model's metadata carries what it takes on
-             disk, so the sum of them is a true part of the number above. The
-             dictionaries' own number is what their text weighs, and on disk a
-             dictionary is one database row per word and per other spelling
-             (measured on a 145 MB dictionary: 705 MB of database) - a line
-             saying "8 MB" beside a total of 500 would be a lie told in
-             figures. The rest is left unbroken, and the note says so. -->
+        <!-- Where the space went (F8), always on the page: this is what the
+             section is for, not a detail to fold away. Each line counts what
+             its part holds, its copies included; what the browser's estimate
+             has over the four of them - the databases' indexes, the caches,
+             and a dictionary's several-fold cost over the weight of its text -
+             stands under Other, and the fold above says so. -->
         <ul class="storage-parts">
           <li>
             <span data-i18n="options_storage_models">Translation models</span>
             <span class="storage-part-value" id="storage-models"></span>
+          </li>
+          <li>
+            <span data-i18n="options_storage_dictionaries">Dictionaries</span>
+            <span class="storage-part-value" id="storage-dictionaries"></span>
+          </li>
+          <li>
+            <span data-i18n="options_storage_library">Reading list (with its copy)</span>
+            <span class="storage-part-value" id="storage-library"></span>
+          </li>
+          <li>
+            <span data-i18n="options_storage_phrases">Phrases and highlights</span>
+            <span class="storage-part-value" id="storage-phrases"></span>
+          </li>
+          <li>
+            <span data-i18n="options_storage_other">Other</span>
+            <span class="storage-part-value" id="storage-other"></span>
           </li>
         </ul>
       </div>
@@ -1316,10 +1288,7 @@
         <p class="row-note">
           <span data-i18n="options_library_copy_hint"
             >A second copy of the reading list, safe from the browser's own clean-ups; it takes twice the space.</span
-          >
-          <button type="button" class="note-more" aria-expanded="false" aria-controls="more-libraryCopy" data-i18n="options_note_more">
-            More
-          </button>
+          >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-libraryCopy" data-i18n="options_details">Details</button>
         </p>
         <p class="row-note row-more" id="more-libraryCopy" data-i18n="options_library_copy_more" hidden>
           It survives a database error too: your saved articles are kept even if the database is
@@ -1334,10 +1303,31 @@
     <h3 id="copies" data-i18n="options_storage_copies">Latest copies</h3>
 
     <ul class="copies">
-      <li class="row-note" id="storage-backup"></li>
-      <li class="row-note" id="storage-marks-backup"></li>
-      <li class="row-note" id="storage-library-copy"></li>
+      <li id="storage-backup">
+        <span class="copy-name" data-i18n="options_copies_vocabulary">Vocabulary</span>
+        <span class="copy-holds"></span>
+        <span class="copy-when"></span>
+      </li>
+      <li id="storage-marks-backup">
+        <span class="copy-name" data-i18n="options_copies_marks">Highlights</span>
+        <span class="copy-holds"></span>
+        <span class="copy-when"></span>
+      </li>
+      <li id="storage-library-copy">
+        <span class="copy-name" data-i18n="options_copies_library">Reading list</span>
+        <span class="copy-holds"></span>
+        <span class="copy-when"></span>
+      </li>
     </ul>
+
+    <!-- Where each of them lives and when it is written again - said once,
+         for the three of them together (F8). -->
+    <p class="row-note">
+      <span data-i18n="options_copies_safe"
+        >Each copy lives where the browser does not clear data on its own, and is written again
+        with the next phrase you save, highlight you make or page you keep.</span
+      >
+    </p>
 
     <!-- The other kind of copy: the one that leaves the device as a file,
          which lives on the two pages that hold the data (D254, §9). The

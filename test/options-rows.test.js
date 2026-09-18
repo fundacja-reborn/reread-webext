@@ -70,7 +70,7 @@ describe("the settings rows", () => {
     // together by the markup rather than each ending in a full stop.
     const hints = [
       ...markup.matchAll(
-        /<p class="row-note">\s*<span data-i18n="([a-z_]+)"\s*>[^<]*<\/span\s*>\s*<button type="button" class="note-more"/g,
+        /<p class="row-note">\s*<span data-i18n="([a-z_]+)"\s*>[^<]*<\/span\s*>&nbsp;<button type="button" class="note-more"/g,
       ),
     ].map((match) => String(match[1]));
     assert.ok(hints.length >= 15, `only ${hints.length} rows open with a sentence of their own`);
@@ -144,16 +144,38 @@ describe("the settings rows", () => {
     assert.doesNotMatch(body, /setTimeout/, "the word leaves on a timer");
   });
 
-  it("says the warning about single words in the page's own note, not in a highlighter's stroke (P8)", async () => {
+  it("says the warning about single words in the section's own prose, and ends it at the dictionaries (P8, F7)", async () => {
     const markup = await source("options/options.html");
-    assert.match(
-      markup,
-      /<p class="note" data-i18n="options_models_single_word">/,
-      "the warning is not the page's own note",
-    );
+    // A highlighter's stroke until D254, the page's framed note until F7:
+    // two framed notes one under the other read as two warnings, and the
+    // frame belongs to the one that says where a download comes from.
+    assert.match(markup, /<span data-i18n="options_models_single_word"/, "the warning is not a paragraph of the section's prose");
+    assert.doesNotMatch(markup, /<p class="note" data-i18n="options_models_single_word">/, "the warning still wears the note's frame");
     assert.doesNotMatch(markup, /<mark data-i18n=/, "a paragraph still wears the highlighter's own wash");
+    const at = markup.indexOf('data-i18n="options_models_single_word"');
+    assert.match(markup.slice(at, at + 600), /<a href="#dictionaries"/, "the warning does not end at the dictionaries");
+    // And one framed note in the models subsection, not two.
+    const section = markup.slice(markup.indexOf('<h3 id="translation-models"'), markup.indexOf('<h3 id="dictionaries"'));
+    assert.equal((section.match(/<p class="note"/g) ?? []).length, 1, "the models subsection wears more than one framed note");
     const css = await source("options/options.css");
     assert.doesNotMatch(css, /p\.explain mark/, "the highlighter's stroke is still dressed on this page");
+  });
+
+  it("ties every fold's trigger to the sentence it follows (F6)", async () => {
+    const markup = await source("options/options.html");
+    // The word is Details, not More: the bubble has a button called More, and
+    // a sentence naming it stood beside a trigger with the same word.
+    assert.doesNotMatch(markup, /data-i18n="options_note_more"/, "a fold is still called More");
+    assert.equal((markup.match(/data-i18n="options_details"/g) ?? []).length, 17, "not every fold is called Details");
+    // Hard space, so the trigger goes over a wrapping line with the last word.
+    assert.equal((markup.match(/<\/span\s*>&nbsp;<button type="button" class="note-more"/g) ?? []).length, 17, "a trigger can be left alone at the start of a line");
+    const css = await source("options/options.css");
+    assert.match(rule(css, "button.note-more"), /white-space: nowrap/, "the trigger's own words can be split");
+    // And the one sentence that names the bubble's button says it in quotes.
+    for (const locale of LOCALES) {
+      const catalogue = JSON.parse(await source(`_locales/${locale}/messages.json`));
+      assert.match(catalogue["options_bubble_more_hint"].message, /[«„“"]/, `${locale} names the bubble's button without quoting it`);
+    }
   });
 
   it("says the option in force right under the sentence, before the folded rest (§6.4)", async () => {
