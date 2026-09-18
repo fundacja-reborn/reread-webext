@@ -49,8 +49,10 @@ describe("the settings rows", () => {
 
   it("gives every More a paragraph to open, and every paragraph a More", async () => {
     const markup = await source("options/options.html");
-    const opens = [...markup.matchAll(/aria-controls="(more-[A-Za-z]+)"/g)].map((match) => String(match[1]));
-    const rests = [...markup.matchAll(/<p class="row-note row-more" id="(more-[A-Za-z]+)"/g)].map((match) =>
+    const opens = [...markup.matchAll(/aria-controls="(more-[A-Za-z-]+)"/g)].map((match) => String(match[1]));
+    // A More stands in a row's note and over a section's opening sentence
+    // alike; both open the same kind of paragraph.
+    const rests = [...markup.matchAll(/<p class="(?:row-note|explain) row-more" id="(more-[A-Za-z-]+)"/g)].map((match) =>
       String(match[1]),
     );
     assert.deepEqual(opens, rests, "a More opens nothing, or a folded half has no way in");
@@ -170,12 +172,12 @@ describe("the settings rows", () => {
     // The word is Details, not More: the bubble has a button called More, and
     // a sentence naming it stood beside a trigger with the same word.
     assert.doesNotMatch(markup, /data-i18n="options_note_more"/, "a fold is still called More");
-    assert.equal((markup.match(/data-i18n="options_details"/g) ?? []).length, 19, "not every fold is called Details");
+    assert.equal((markup.match(/data-i18n="options_details"/g) ?? []).length, 18, "not every fold is called Details");
     // Hard space, so the trigger goes over a wrapping line with the last word.
     // The hard space and the trigger in one box that cannot break (D259, K2):
     // measured in the browser, the hard space alone let the trigger open a
     // line of its own at 49 widths out of 231.
-    assert.equal((markup.match(/<\/span\s*><span class="note-tail">&nbsp;<button type="button" class="note-more"/g) ?? []).length, 19, "a trigger can be left alone at the start of a line");
+    assert.equal((markup.match(/<\/span\s*><span class="note-tail">&nbsp;<button type="button" class="note-more"/g) ?? []).length, 18, "a trigger can be left alone at the start of a line");
     const css = await source("options/options.css");
     assert.match(rule(css, ".note-tail"), /white-space: nowrap/, "the space before a trigger is a break opportunity again");
     assert.match(rule(css, "button.note-more"), /white-space: nowrap/, "the trigger's own words can be split");

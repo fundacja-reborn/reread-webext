@@ -103,6 +103,7 @@ import { asSavedMeta } from "./saved-article.js";
  *
  * @typedef {{
  *   version: number,
+ *   writtenAt: number | null,
  *   articles: Record<string, number>,
  *   books: Record<string, number>,
  *   pictures: Record<string, PicturesSummary>,
@@ -354,13 +355,18 @@ export function asCopiedPicture(value) {
  */
 export function asIndex(value) {
   if (typeof value !== "object" || value === null) return null;
-  const { version, articles, books, pictures } = /** @type {Record<string, unknown>} */ (value);
+  const { version, writtenAt, articles, books, pictures } = /** @type {Record<string, unknown>} */ (value);
   if (version !== VERSION) return null;
   const articleSizes = sizesOf(articles);
   const bookSizes = sizesOf(books);
   const pictureSizes = pictures === undefined ? {} : summariesOf(pictures);
   if (articleSizes === null || bookSizes === null || pictureSizes === null) return null;
-  return { version: VERSION, articles: articleSizes, books: bookSizes, pictures: pictureSizes };
+  // An index written before this field existed is still an index: it simply
+  // cannot say when it was written, and the settings page says so with a
+  // dash until the next change stamps it. No version bump for that - one
+  // would throw away every stored copy and rebuild it for nothing.
+  const stamp = typeof writtenAt === "number" && Number.isFinite(writtenAt) ? writtenAt : null;
+  return { version: VERSION, writtenAt: stamp, articles: articleSizes, books: bookSizes, pictures: pictureSizes };
 }
 
 /**
@@ -396,7 +402,23 @@ function summariesOf(value) {
 
 /** @returns {CopyIndex} */
 function emptyIndex() {
-  return { version: VERSION, articles: {}, books: {}, pictures: {} };
+  return { version: VERSION, writtenAt: null, articles: {}, books: {}, pictures: {} };
+}
+
+/**
+ * The index, stamped with the moment it is stored (D260). Every change to the
+ * copy goes through here - a document claimed, a document released, a whole
+ * build, a picture copied or dropped - so the stamp is what the settings page
+ * means by "last updated": the last time the copy changed, not the last time
+ * anything was read.
+ *
+ * @param {CopyIndex} index
+ * @param {StorageDeps} deps
+ * @returns {Promise<void>}
+ */
+async function saveIndex(index, deps) {
+  index.writtenAt = Date.now();
+  await deps.write({ [INDEX_KEY]: index });
 }
 
 /**
@@ -526,19 +548,23 @@ function bytesOf(value) {
  * of theirs.
  *
  * @param {CopyIndex | null} index
- * @returns {{ docs: number, bytes: number } | null}
+ * @returns {{ docs: number, bytes: number, writtenAt: number | null } | null}
  */
 export function copySummary(index) {
   if (index === null) return null;
   const sizes = [...Object.values(index.articles), ...Object.values(index.books)];
   if (sizes.length === 0) return null;
   const pictures = Object.values(index.pictures).reduce((sum, summary) => sum + summary.bytes, 0);
-  return { docs: sizes.length, bytes: sizes.reduce((sum, bytes) => sum + bytes, 0) + pictures };
+  return {
+    docs: sizes.length,
+    bytes: sizes.reduce((sum, bytes) => sum + bytes, 0) + pictures,
+    writtenAt: index.writtenAt,
+  };
 }
 
 /**
  * @param {Pick<LibraryCopyDeps, "read">} deps
- * @returns {Promise<{ docs: number, bytes: number } | null>}
+ * @returns {Promise<{ docs: number, bytes: number, writtenAt: number | null } | null>}
  */
 export async function summarizeCopy(deps) {
   return copySummary(await readIndex(deps));
@@ -626,7 +652,7 @@ export async function migrateIndex(deps) {
   const claimed = new Set(indexedKeys(index));
   await deps.remove(library.keys.filter((key) => !claimed.has(key)));
   if (copySummary(index) === null) return null;
-  await deps.write({ [INDEX_KEY]: index });
+  await saveIndex(index, deps);
   return index;
 }
 
@@ -643,7 +669,7 @@ export async function migrateIndex(deps) {
 async function claim(kind, docId, bytes, deps) {
   const index = (await readIndex(deps)) ?? emptyIndex();
   (kind === "article" ? index.articles : index.books)[docId] = bytes;
-  await deps.write({ [INDEX_KEY]: index });
+  await saveIndex(index, deps);
 }
 
 /**
@@ -664,7 +690,7 @@ async function release(kind, docId, deps) {
   if (!held) return;
   delete sizes[docId];
   delete index.pictures[docId];
-  await deps.write({ [INDEX_KEY]: index });
+  await saveIndex(index, deps);
 }
 
 /**
@@ -724,7 +750,7 @@ export async function restorePictures(url, deps) {
  */
 async function writeDocuments(library, index, deps) {
   const rows = rowsOf(library);
-  await deps.write({ [INDEX_KEY]: index });
+  await saveIndex(index, deps);
   for (const [key, row] of rows) await deps.write({ [key]: row });
   const docIds = [...library.articles.map((article) => article.url), ...library.books.map((book) => book.meta.id)];
   for (const docId of docIds) {
@@ -732,7 +758,7 @@ async function writeDocuments(library, index, deps) {
     const summary = claimedPictures(pictures);
     if (summary === null) continue;
     index.pictures[docId] = summary;
-    await deps.write({ [INDEX_KEY]: index });
+    await saveIndex(index, deps);
     for (const picture of pictures) await deps.write({ [pictureKey(docId, picture.index)]: pictureRow(picture) });
   }
 }
@@ -885,7 +911,7 @@ export async function copyPicture(picture, deps) {
     count: Math.max(before.count, picture.index + 1),
     bytes: before.bytes + picture.data.byteLength,
   };
-  await deps.write({ [INDEX_KEY]: index });
+  await saveIndex(index, deps);
   await deps.write({ [pictureKey(picture.url, picture.index)]: pictureRow(picture) });
   return true;
 }
@@ -904,7 +930,7 @@ export async function dropPictures(url, deps) {
   if (index === null || !Object.hasOwn(index.pictures, url)) return;
   await deps.remove(pictureKeys(index, url));
   delete index.pictures[url];
-  await deps.write({ [INDEX_KEY]: index });
+  await saveIndex(index, deps);
 }
 
 /**

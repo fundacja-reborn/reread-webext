@@ -145,6 +145,33 @@ function indexFor(library) {
 }
 
 /**
+ * A fixture index without the stamp, to compare a stored one against.
+ *
+ * @param {CopyIndex} index
+ * @returns {Omit<CopyIndex, "writtenAt">}
+ */
+function stampless(index) {
+  const { writtenAt, ...rest } = index;
+  return rest;
+}
+
+/**
+ * The index as it was stored, with the stamp every write puts on it checked
+ * and taken off (D260): what the assertions below are about is which
+ * documents the copy claims, and a moment in milliseconds is not that.
+ *
+ * @param {Record<string, unknown>} area
+ * @returns {Record<string, unknown> | undefined}
+ */
+function storedIndex(area) {
+  const index = area[INDEX_KEY];
+  if (index === undefined) return undefined;
+  const { writtenAt, ...rest } = /** @type {CopyIndex} */ (index);
+  assert.equal(typeof writtenAt, "number", "the copy was written without a stamp");
+  return rest;
+}
+
+/**
  * @param {{
  *   enabled?: boolean,
  *   empty?: boolean,
@@ -330,6 +357,7 @@ describe("the copy of the reading list", () => {
   it("reads the index as stored, and refuses one that will not read", () => {
     const index = {
       version: 1,
+      writtenAt: 1_700_000_000_000,
       articles: { "https://a.example/p": 120 },
       books: { b1: 3000 },
       pictures: { "https://a.example/p": { count: 2, bytes: 4096 } },
@@ -338,10 +366,16 @@ describe("the copy of the reading list", () => {
     // An index from before pictures (#249) reads as one with none.
     assert.deepEqual(asIndex({ version: 1, articles: {}, books: {} }), {
       version: 1,
+      writtenAt: null,
       articles: {},
       books: {},
       pictures: {},
     });
+    // And one from before the stamp (D260) is still an index: it just cannot
+    // say when it was written, and the next change to the copy stamps it.
+    // No version bump for that - one would throw away every stored copy.
+    assert.equal(asIndex({ version: 1, articles: {}, books: {}, writtenAt: "yesterday" })?.writtenAt, null);
+    assert.equal(asIndex({ version: 1, articles: {}, books: {}, writtenAt: Number.NaN })?.writtenAt, null);
     assert.equal(asIndex(undefined), null);
     assert.equal(asIndex({ version: 2, articles: {}, books: {} }), null);
     assert.equal(asIndex({ version: 1, articles: [], books: {} }), null);
@@ -380,14 +414,14 @@ describe("the copy of the reading list", () => {
         [`${LIBRARY_COPY_PREFIX}article:https://a.example/torn`]: { version: 1 },
       },
     });
-    const index = await migrateIndex(legacy.deps);
-    assert.deepEqual(index, {
+    const index = /** @type {CopyIndex} */ (await migrateIndex(legacy.deps));
+    assert.deepEqual(stampless(index), {
       version: 1,
       articles: { [kept.url]: bytes(articleRow(kept)) },
       books: { b1: bytes(bookRow(shelf)) },
       pictures: {},
     });
-    assert.deepEqual(legacy.area[INDEX_KEY], index);
+    assert.deepEqual(storedIndex(legacy.area), stampless(index));
     // The documents that read stay, with their places; the orphan place,
     // the row under the wrong key and the torn row go - unclaimed, nothing
     // would ever clear them.
@@ -435,7 +469,7 @@ describe("the copy of the reading list", () => {
         [pictureKey("https://a.example/nobody", 0)]: pictureRow(picture("https://a.example/nobody", 0)),
       },
     });
-    assert.deepEqual(await migrateIndex(broken.deps), {
+    assert.deepEqual(stampless(/** @type {CopyIndex} */ (await migrateIndex(broken.deps))), {
       version: 1,
       articles: {
         "https://a.example/holed": bytes(articleRow(article("https://a.example/holed"))),
@@ -573,8 +607,8 @@ describe("the copy of the reading list", () => {
       positionKey(kept.url),
       "vocabBackup",
     ]);
-    assert.deepEqual(stand.area[INDEX_KEY], {
-      ...indexFor(library),
+    assert.deepEqual(storedIndex(stand.area), {
+      ...stampless(indexFor(library)),
       pictures: { [kept.url]: { count: 2, bytes: 30 }, b1: { count: 1, bytes: 5 } },
     });
     assert.deepEqual(stand.area[bookKey("b1")], bookRow(shelf));
@@ -614,7 +648,7 @@ describe("the copy of the reading list", () => {
       area: {
         vocabBackup: { version: 1 },
         marksBackup: { version: 1 },
-        [INDEX_KEY]: { ...indexFor(library), pictures: { u: { count: 1, bytes: 16 } } },
+        [INDEX_KEY]: { ...stampless(indexFor(library)), pictures: { u: { count: 1, bytes: 16 } } },
         [articleKey("u")]: articleRow(article("u")),
         [bookKey("b")]: bookRow(book("b", 1)),
         [positionKey("u")]: positionRow(position("u")),
@@ -643,7 +677,7 @@ describe("the copy of the reading list", () => {
     assert.equal(await copyPosition(position("u"), on.deps), true);
     assert.deepEqual(Object.keys(on.area).sort(), [articleKey("u"), bookKey("b"), INDEX_KEY, positionKey("u")]);
     assert.deepEqual(on.area[articleKey("u")], articleRow(article("u")));
-    assert.deepEqual(on.area[INDEX_KEY], {
+    assert.deepEqual(storedIndex(on.area), {
       version: 1,
       articles: { u: bytes(articleRow(article("u"))) },
       books: { b: bytes(bookRow(book("b", 1))) },
@@ -686,17 +720,22 @@ describe("the copy of the reading list", () => {
     const stand = standIn({ enabled: true, area: { [INDEX_KEY]: indexFor(library), [articleKey("u")]: articleRow(article("u")) } });
     assert.equal(await copyPicture(picture("u", 0, 10), stand.deps), true);
     assert.equal(await copyPicture(picture("u", 1, 20), stand.deps), true);
-    assert.deepEqual(stand.area[INDEX_KEY], { ...indexFor(library), pictures: { u: { count: 2, bytes: 30 } } });
+    assert.deepEqual(storedIndex(stand.area), { ...stampless(indexFor(library)), pictures: { u: { count: 2, bytes: 30 } } });
     assert.deepEqual(stand.area[pictureKey("u", 1)], pictureRow(picture("u", 1, 20)));
     assert.deepEqual(
       stand.asked.filter((step) => step.startsWith("write")),
       [`write ${INDEX_KEY}`, `write ${pictureKey("u", 0)}`, `write ${INDEX_KEY}`, `write ${pictureKey("u", 1)}`],
     );
     // The account rides the settings line as space, not as documents.
-    assert.deepEqual(copySummary(/** @type {CopyIndex} */ (stand.area[INDEX_KEY])), {
+    const stored = /** @type {CopyIndex} */ (stand.area[INDEX_KEY]);
+    assert.deepEqual(copySummary(stored), {
       docs: 1,
       bytes: bytes(articleRow(article("u"))) + 30,
+      writtenAt: stored.writtenAt,
     });
+    // Every write of the index stamps it, so the settings page can say when
+    // the copy last changed - a picture copied counts as a change (D260).
+    assert.equal(typeof stored.writtenAt, "number");
 
     // A book's pictures (D183) stand under its id the way an article's
     // stand under its address - and only once the book's row is claimed,
@@ -707,13 +746,13 @@ describe("the copy of the reading list", () => {
     assert.equal(await copyPicture(picture("b1", 0, 10), late.deps), false);
     const claimed = standIn({ enabled: true, area: { [INDEX_KEY]: indexFor(shelved), [bookKey("b1")]: bookRow(shelf) } });
     assert.equal(await copyPicture(picture("b1", 0, 10), claimed.deps), true);
-    assert.deepEqual(claimed.area[INDEX_KEY], { ...indexFor(shelved), pictures: { b1: { count: 1, bytes: 10 } } });
+    assert.deepEqual(storedIndex(claimed.area), { ...stampless(indexFor(shelved)), pictures: { b1: { count: 1, bytes: 10 } } });
     assert.deepEqual(claimed.area[pictureKey("b1", 0)], pictureRow(picture("b1", 0, 10)));
   });
 
   it("drops an article's pictures on request and on a save that writes over it - rows first, claim after", async () => {
     const library = { articles: [article("u")], books: [], positions: [] };
-    const pictured = { ...indexFor(library), pictures: { u: { count: 2, bytes: 30 } } };
+    const pictured = { ...stampless(indexFor(library)), pictures: { u: { count: 2, bytes: 30 } } };
     const stand = standIn({
       enabled: false,
       area: {
@@ -725,7 +764,7 @@ describe("the copy of the reading list", () => {
     });
     await dropPictures("u", stand.deps);
     assert.deepEqual(Object.keys(stand.area).sort(), [articleKey("u"), INDEX_KEY]);
-    assert.deepEqual(stand.area[INDEX_KEY], indexFor(library));
+    assert.deepEqual(storedIndex(stand.area), stampless(indexFor(library)));
     assert.deepEqual(stand.asked, [
       `read ${INDEX_KEY}`,
       `remove ${pictureKey("u", 0)},${pictureKey("u", 1)}`,
@@ -748,7 +787,7 @@ describe("the copy of the reading list", () => {
     });
     assert.equal(await copyArticle(article("u"), true, written.deps), false);
     assert.deepEqual(Object.keys(written.area), [INDEX_KEY]);
-    assert.deepEqual(written.area[INDEX_KEY], indexFor(library));
+    assert.deepEqual(storedIndex(written.area), stampless(indexFor(library)));
   });
 
   it("drops the old place when a save writes over an article, switch or no switch", async () => {
@@ -782,7 +821,7 @@ describe("the copy of the reading list", () => {
     const library = { articles: [article("u")], books: [book("b", 1)], positions: [position("u"), position("b")] };
     const stand = standIn({
       area: {
-        [INDEX_KEY]: { ...indexFor(library), pictures: { u: { count: 1, bytes: 16 } } },
+        [INDEX_KEY]: { ...stampless(indexFor(library)), pictures: { u: { count: 1, bytes: 16 } } },
         [articleKey("u")]: articleRow(article("u")),
         [positionKey("u")]: positionRow(position("u")),
         [pictureKey("u", 0)]: pictureRow(picture("u", 0)),
@@ -792,7 +831,7 @@ describe("the copy of the reading list", () => {
     });
     await dropCopied("u", "article", stand.deps);
     assert.deepEqual(Object.keys(stand.area).sort(), [bookKey("b"), INDEX_KEY, positionKey("b")]);
-    assert.deepEqual(stand.area[INDEX_KEY], indexFor({ articles: [], books: [book("b", 1)], positions: [] }));
+    assert.deepEqual(storedIndex(stand.area), stampless(indexFor({ articles: [], books: [book("b", 1)], positions: [] })));
     assert.deepEqual(stand.asked, [
       `read ${INDEX_KEY}`,
       `remove ${articleKey("u")},${positionKey("u")},${pictureKey("u", 0)}`,
@@ -801,7 +840,7 @@ describe("the copy of the reading list", () => {
     ]);
     await dropCopied("b", "book", stand.deps);
     assert.deepEqual(Object.keys(stand.area), [INDEX_KEY]);
-    assert.deepEqual(stand.area[INDEX_KEY], { version: 1, articles: {}, books: {}, pictures: {} });
+    assert.deepEqual(storedIndex(stand.area), { version: 1, articles: {}, books: {}, pictures: {} });
 
     // A document the index never held costs the removes and no write.
     const stranger = standIn({ area: { [INDEX_KEY]: indexFor(library) } });
@@ -815,7 +854,7 @@ describe("the copy of the reading list", () => {
 
   it("sums the copy from the index for the settings page", async () => {
     assert.equal(copySummary(null), null);
-    assert.equal(copySummary({ version: 1, articles: {}, books: {}, pictures: {} }), null);
+    assert.equal(copySummary({ version: 1, writtenAt: null, articles: {}, books: {}, pictures: {} }), null);
     const library = { articles: [article("u")], books: [book("b", 2)], positions: [position("u")] };
     const index = indexFor(library);
     const summary = copySummary(index);
@@ -850,8 +889,8 @@ describe("the copy of the reading list", () => {
     assert.equal(await completeLibraryCopy(stand.deps), 2);
     // The index claims the newcomers beside what it held, with their
     // pictures; the row it held is the very object it was, unrewritten.
-    assert.deepEqual(stand.area[INDEX_KEY], {
-      ...indexFor(library),
+    assert.deepEqual(storedIndex(stand.area), {
+      ...stampless(indexFor(library)),
       pictures: { [missing.url]: { count: 1, bytes: 16 } },
     });
     assert.equal(stand.area[articleKey(held.url)], heldRow);
@@ -908,8 +947,8 @@ describe("the copy of the reading list", () => {
     const library = { articles: [kept], books: [book("b1", 2)], positions: [position(kept.url)] };
     const stand = standIn({ snapshot: library, pictures: { [kept.url]: [picture(kept.url, 0, 10)] } });
     assert.equal(await completeLibraryCopy(stand.deps), 2);
-    assert.deepEqual(stand.area[INDEX_KEY], {
-      ...indexFor(library),
+    assert.deepEqual(storedIndex(stand.area), {
+      ...stampless(indexFor(library)),
       pictures: { [kept.url]: { count: 1, bytes: 10 } },
     });
     assert.deepEqual(Object.keys(stand.area).sort(), [

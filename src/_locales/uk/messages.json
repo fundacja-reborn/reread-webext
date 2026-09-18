@@ -2104,15 +2104,6 @@
     "message": "вимкнена"
   },
 
-  "options_copies_safe": {
-    "message": "Копії записано у власному сховищі розширення, окремо від бази даних - і те, і те міститься в профілі браузера, а не у файлах на комп'ютері."
-  },
-
-  "options_copies_safe_more": {
-    "message": "Копія створюється наново з наступною збереженою фразою, позначенням чи сторінкою. Вона захищає дані, коли браузер очищає своє сховище або коли псується база даних, але не захищає від видалення розширення: після видалення re/read зникають усі його дані разом із копіями. База даних - це IndexedDB, а копії - у сховищі розширення (storage.local). Перш ніж видалити re/read або перейти на інший пристрій, збережіть копію у файл: кнопка Експортувати в офлайн-списку читання створює один файл reread-backup.zip зі списком читання, збереженими фразами, позначеннями та налаштуваннями. Моделей і словників у цьому файлі немає - їх можна завантажити ще раз.",
-    "description": "Behind the Details of the copies block: what a copy protects against, what it does not, where the data and the copies are, and how to save a copy as a file before uninstalling."
-  },
-
   "options_font_custom_placeholder": {
     "message": "наприклад Noto Serif"
   },
@@ -2254,22 +2245,49 @@
   },
 
   "options_storage_copies": {
-    "message": "Останні копії"
+    "message": "Резервні копії"
   },
 
-  "options_storage_to_file": {
-    "message": "Копію у файл збережете на сторінках із даними: «"
+  "options_copies_intro": {
+    "message": "re/read зберігає копії ваших фраз, позначень і списку читання у сховищі розширення, окремо від бази даних.",
+    "description": "Opens the Backups subsection: what the copies are, in one sentence."
   },
 
-  "options_storage_to_file_and": {
-    "message": "» і «",
-    "description": "Between the two page names in options_storage_to_file: the closing quotation mark, the conjunction, and the opening one."
+  "options_copies_intro_more": {
+    "message": "Копії оновлюються за кожної зміни: коли ви зберігаєте або видаляєте фразу, позначення чи сторінку зі списку читання. Вони захищають дані, коли браузер очищає своє сховище або коли псується база даних. База даних - це IndexedDB, а копії - у сховищі розширення (storage.local); і те, і те в профілі браузера, не у файлах на вашому комп'ютері.",
+    "description": "Behind the Details fold of the Backups subsection: when the copies are written, what they protect against, and where they and the database actually are."
   },
 
-  "options_storage_to_file_end": {
-    "message": "».",
-    "description": "Closes options_storage_to_file after the second page name."
+  "options_copies_head_name": {
+    "message": "Копія",
+    "description": "The Backups table's first column: which copy the row is about."
   },
+
+  "options_copies_head_holds": {
+    "message": "Вміст",
+    "description": "The Backups table's second column: what the copy holds."
+  },
+
+  "options_copies_head_when": {
+    "message": "Останнє оновлення",
+    "description": "The Backups table's third column: when the copy last changed."
+  },
+
+  "options_copies_uninstall": {
+    "message": "Видалення re/read стирає всі його дані разом із копіями. Перш ніж видалити його або перенести дані на інший пристрій, збережіть копію у файл: кнопка Експортувати в",
+    "description": "The note under the Backups table, up to the door that opens the reading list."
+  },
+
+  "options_copies_reading_list": {
+    "message": "офлайн-списку читання",
+    "description": "The door inside options_copies_uninstall: the offline reading list, named as the sentence around it needs it."
+  },
+
+  "options_copies_uninstall_rest": {
+    "message": " створює один файл reread-backup.zip зі списком читання, вашими фразами, позначеннями та налаштуваннями. Моделей і словників у ньому немає - їх можна завантажити ще раз. Експорт на сторінці збережених фраз - це інший файл: самі фрази у форматі TSV, для Anki або плагіна KOReader.",
+    "description": "Closes options_copies_uninstall after the door, and says how the saved phrases' own export differs."
+  },
+
   "options_first_steps_intro": {
     "message": "Поки що ніщо не перекладається - моделі, яка б це робила, ще немає на цьому пристрої. Підготовка займає хвилину:"
   },
@@ -2293,13 +2311,9 @@
   "options_storage_at_risk": { "message": "Постійне сховище: не надано. Safari стирає дані сайту приблизно після місяця користування без жодного дотику до його сторінок, а сторінки цього розширення рахуються як один сайт. Ваші фрази мають копію, яка це переживе (рядок нижче); моделі, словники і список читання - ні, тож час від часу відкривайте режим читання або ці налаштування." },
   "options_library_copy": { "message": "Копія списку читання" },
   "options_library_copy_hint": {
-    "message": "Друга копія списку читання, захищена від очищення даних браузера; вона займає вдвічі більше місця."
+    "message": "Необовʼязкова, бо список читання займає тоді вдвічі більше місця. Копії фраз і позначень увімкнені завжди."
   },
 
-  "options_library_copy_more": {
-    "message": "Вона також захищає від помилки бази даних: збережені статті залишаються, навіть якщо базу даних буде втрачено.",
-    "description": "The rest of the options_library_copy_hint description, behind the row's More button."
-  },
   "reader_marks_delete_all_one": {
     "message": "Видалити $COUNT$ цитату з цієї сторінки",
     "placeholders": { "count": { "content": "$1", "example": "1" } }

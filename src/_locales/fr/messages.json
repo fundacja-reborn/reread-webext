@@ -1535,15 +1535,6 @@
     "message": "désactivée"
   },
 
-  "options_copies_safe": {
-    "message": "Les copies sont enregistrées dans le stockage propre de l'extension, à part de la base de données : les deux se trouvent dans le profil du navigateur, pas dans des fichiers sur votre ordinateur."
-  },
-
-  "options_copies_safe_more": {
-    "message": "Une copie est réécrite à la prochaine phrase enregistrée, au prochain surlignage ou à la prochaine page conservée. Elle protège les données quand le navigateur vide son stockage ou qu'une base de données se corrompt, mais pas quand l'extension est supprimée : désinstaller re/read efface toutes ses données, copies comprises. La base de données est IndexedDB et les copies sont dans le stockage de l'extension (storage.local). Avant de désinstaller re/read ou de passer à un autre appareil, enregistrez une copie sous forme de fichier : Exporter dans la liste de lecture hors ligne écrit un reread-backup.zip avec la liste de lecture, les phrases enregistrées, les surlignages et les paramètres. Les modèles et les dictionnaires ne sont pas dans ce fichier - ils peuvent être téléchargés à nouveau.",
-    "description": "Behind the Details of the copies block: what a copy protects against, what it does not, where the data and the copies are, and how to save a copy as a file before uninstalling."
-  },
-
   "options_font_custom_placeholder": {
     "message": "par exemple Noto Serif"
   },
@@ -1651,22 +1642,49 @@
   },
 
   "options_storage_copies": {
-    "message": "Dernières copies"
+    "message": "Copies de sauvegarde"
   },
 
-  "options_storage_to_file": {
-    "message": "Une copie en fichier se fait sur les pages qui portent les données : «\u00a0"
+  "options_copies_intro": {
+    "message": "re/read enregistre des copies de vos phrases, de vos surlignages et de votre liste de lecture dans le stockage de l'extension, à part de la base de données.",
+    "description": "Opens the Backups subsection: what the copies are, in one sentence."
   },
 
-  "options_storage_to_file_and": {
-    "message": "\u00a0» et «\u00a0",
-    "description": "Between the two page names in options_storage_to_file: the closing quotation mark, the conjunction, and the opening one."
+  "options_copies_intro_more": {
+    "message": "Les copies sont réécrites à chaque changement : quand vous enregistrez ou supprimez une phrase, un surlignage ou une page de la liste de lecture. Elles protègent les données quand le navigateur vide son stockage ou qu'une base de données se corrompt. La base de données est IndexedDB et les copies sont dans le stockage de l'extension (storage.local) - l'un et l'autre dans le profil du navigateur, pas dans des fichiers sur votre ordinateur.",
+    "description": "Behind the Details fold of the Backups subsection: when the copies are written, what they protect against, and where they and the database actually are."
   },
 
-  "options_storage_to_file_end": {
-    "message": "\u00a0».",
-    "description": "Closes options_storage_to_file after the second page name."
+  "options_copies_head_name": {
+    "message": "Copie",
+    "description": "The Backups table's first column: which copy the row is about."
   },
+
+  "options_copies_head_holds": {
+    "message": "Contenu",
+    "description": "The Backups table's second column: what the copy holds."
+  },
+
+  "options_copies_head_when": {
+    "message": "Dernière mise à jour",
+    "description": "The Backups table's third column: when the copy last changed."
+  },
+
+  "options_copies_uninstall": {
+    "message": "Désinstaller re/read efface toutes ses données, copies comprises. Avant de le désinstaller ou de passer à un autre appareil, enregistrez une copie sous forme de fichier : Exporter dans",
+    "description": "The note under the Backups table, up to the door that opens the reading list."
+  },
+
+  "options_copies_reading_list": {
+    "message": "la liste de lecture hors ligne",
+    "description": "The door inside options_copies_uninstall: the offline reading list, named as the sentence around it needs it."
+  },
+
+  "options_copies_uninstall_rest": {
+    "message": " écrit un reread-backup.zip avec la liste de lecture, vos phrases, vos surlignages et les paramètres. Les modèles et les dictionnaires n'y sont pas - ils peuvent être téléchargés à nouveau. L'export de la page des phrases enregistrées est un autre fichier : les phrases seules, au format TSV, pour Anki ou le module KOReader.",
+    "description": "Closes options_copies_uninstall after the door, and says how the saved phrases' own export differs."
+  },
+
   "options_first_steps_intro": {
     "message": "Rien ne se traduit encore - le modèle qui s'en chargerait n'est pas encore sur cet appareil. La mise en place prend une minute :"
   },
@@ -1690,13 +1708,9 @@
   "options_storage_at_risk": { "message": "Stockage persistant : refusé. Safari efface les données d'un site après environ un mois d'utilisation sans un toucher sur ses pages, et les pages de cette extension comptent comme un site. Vos expressions ont une copie qui y survit (ligne ci-dessous) ; les modèles, les dictionnaires et la liste de lecture non - ouvrez le lecteur ou ces paramètres de temps en temps." },
   "options_library_copy": { "message": "Copie de la liste de lecture" },
   "options_library_copy_hint": {
-    "message": "Une deuxième copie de la liste de lecture, à l'abri des nettoyages du navigateur ; elle occupe deux fois plus de place."
+    "message": "Facultative, car la liste de lecture occupe alors deux fois plus de place. Les copies des phrases et des surlignages sont toujours actives."
   },
 
-  "options_library_copy_more": {
-    "message": "Elle protège aussi d'une erreur de base de données : vos articles enregistrés restent même si la base de données est perdue.",
-    "description": "The rest of the options_library_copy_hint description, behind the row's More button."
-  },
   "reader_marks_delete_all_one": {
     "message": "Supprimer la $COUNT$ citation de cette page",
     "placeholders": { "count": { "content": "$1", "example": "1" } }

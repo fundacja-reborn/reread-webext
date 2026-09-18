@@ -141,39 +141,78 @@ describe("the data section", () => {
     }
   });
 
-  it("gathers the copies under one heading, each in three parts (F8)", async () => {
+  it("gathers every explanation of the copies under one heading (D260)", async () => {
     const markup = await source("options/options.html");
     const at = markup.indexOf('<h3 id="copies"');
     assert.ok(at > 0, "the copies have no heading of their own");
-    const block = markup.slice(at, markup.indexOf("</ul>", at));
-    for (const id of ["storage-backup", "storage-marks-backup", "storage-library-copy"]) {
-      assert.ok(block.includes(`id="${id}"`), `${id} is not in the copies block`);
-    }
-    // What it is, what it holds, when it was written - and a dash where there
-    // is no date to give.
-    assert.equal((block.match(/class="copy-name"/g) ?? []).length, 3, "a copy does not say what it is");
-    assert.equal((block.match(/class="copy-holds"/g) ?? []).length, 3, "a copy does not say what it holds");
-    assert.equal((block.match(/class="copy-when"/g) ?? []).length, 3, "a copy does not say when it was written");
-    const options = await source("options/options.js");
-    assert.match(options, /date\.textContent = at \?\? "\\u2014";/, "a copy with no date says nothing where the date stands");
-    // Said once for the three of them, not three times over.
-    assert.equal((markup.match(/data-i18n="options_copies_safe"/g) ?? []).length, 1, "where the copies live is said more than once");
-
-    const css = await source("options/options.css");
-    assert.match(css, /\.copies \{[\s\S]*?font-variant-numeric: tabular-nums;/, "a column of dates and counts does not line up");
-    // One grid for the whole list (D258, V4): three lines sizing their own
-    // columns are three lines whose dates begin in three different places.
-    assert.match(rule(css, ".copies"), /display: grid;\n  grid-template-columns: max-content minmax\(0, 1fr\) max-content;/, "every copy sizes its own columns");
-    assert.match(rule(css, ".copies li"), /display: contents/, "a copy's line stands between the grid and its cells");
-    assert.match(css, /@media \(max-width: 30rem\) \{\s*\.copies \{/, "three columns stay three columns on a phone");
+    const block = markup.slice(at, markup.indexOf("</section>", at));
+    // One sentence in the open, the rest of it behind one More - the three
+    // explanations that stood a screen apart (a paragraph under the table,
+    // the switch's own fold, and the switch's hint) are one now.
+    assert.match(block, /data-i18n="options_copies_intro"/, "the subsection opens on nothing");
+    assert.match(block, /aria-controls="more-copies"/, "the rest of it has no way in");
+    assert.doesNotMatch(markup, /options_copies_safe|options_library_copy_more|options_storage_to_file/, "an explanation the round gathered still stands on its own");
+    // And the switch itself moved under the heading it belongs to.
+    assert.ok(block.includes('id="s-libraryCopy"'), "the one copy that is a choice stands elsewhere");
+    assert.equal((block.match(/class="note-more"/g) ?? []).length, 1, "the subsection says the same thing behind two folds");
   });
 
-  it("points at the pages a copy to a file is made on, without inventing a message", async () => {
+  it("says each copy in a table with named columns (D260)", async () => {
+    const markup = await source("options/options.html");
+    const at = markup.indexOf('<table class="copies">');
+    assert.ok(at > 0, "the copies are not a table");
+    const block = markup.slice(at, markup.indexOf("</table>", at));
+    for (const id of ["storage-backup", "storage-marks-backup", "storage-library-copy"]) {
+      assert.ok(block.includes(`id="${id}"`), `${id} is not in the copies table`);
+    }
+    // Named columns rather than three values a reader has to infer.
+    for (const key of ["options_copies_head_name", "options_copies_head_holds", "options_copies_head_when"]) {
+      assert.match(block, new RegExp(`<th scope="col" data-i18n="${key}"`), `the table has no ${key} column`);
+    }
+    assert.equal((block.match(/<th scope="row" class="copy-name"/g) ?? []).length, 3, "a copy does not say what it is");
+    assert.equal((block.match(/class="copy-holds"/g) ?? []).length, 3, "a copy does not say what it holds");
+    assert.equal((block.match(/class="copy-when"/g) ?? []).length, 3, "a copy does not say when it was written");
+
+    const options = await source("options/options.js");
+    assert.match(options, /date\.textContent = at \?\? "\\u2014";/, "a copy with no date says nothing where the date stands");
+    // The reading list's copy says its date like the other two (D260): the
+    // dash is for a copy that was never written, not for one with 61
+    // documents in it.
+    assert.match(options, /copy === null \|\| copy\.writtenAt === null \? null : when\(copy\.writtenAt\)/, "the reading list's copy can never say when it changed");
+    assert.match(options, /: t\("options_copies_off"\)/, "a copy that is switched off does not say so");
+
+    const css = await source("options/options.css");
+    assert.match(rule(css, ".copies"), /border-collapse: collapse/, "the table is not drawn as one");
+    assert.match(rule(css, ".copies thead th"), /border-bottom: var\(--sep-row\)/, "the column names are not parted from the rows");
+    assert.match(rule(css, ".copies"), /font-variant-numeric: tabular-nums/, "a column of dates and counts does not line up");
+    assert.match(css, /@media \(max-width: 30rem\) \{\s*\.copies,/, "three columns stay three columns on a phone");
+  });
+
+  it("promises of the export only what the export actually writes (D260)", async () => {
+    // The note names four things in reread-backup.zip and says models and
+    // dictionaries are not in it. What writes that file is `backup-file.js`,
+    // and this is the claim checked against it rather than against memory.
+    const backup = await source("lib/store/backup-file.js");
+    for (const entry of ["ARTICLES_ENTRY", "BOOKS_ENTRY", "SETTINGS_ENTRY", "VOCABULARY_ENTRY", "toMarksCopy"]) {
+      assert.ok(backup.includes(entry), `the backup no longer writes ${entry}`);
+    }
+    assert.match(backup, /BACKUP_FILENAME = "reread-backup\.zip"/, "the file is no longer called what the note says");
+    assert.doesNotMatch(backup, /models|dictionar/i, "the backup grew models or dictionaries, which the note says it has not");
+    // And the saved phrases' own export is the other format the note names.
+    const vocab = await source("vocab/vocab.js");
+    assert.match(vocab, /toTsv|toAnkiTsv/, "the saved phrases no longer export TSV");
+  });
+
+  it("points at the one page the whole export is made on, without inventing a message", async () => {
     const markup = await source("options/options.html");
     assert.match(markup, /id="copy-library"/, "there is no way to the reading list");
-    assert.match(markup, /id="copy-vocabulary"/, "there is no way to the saved phrases");
+    // The saved phrases' own export is a different file and a different
+    // format; a second door promising the same thing is gone, and the note
+    // says the difference in a sentence (D260).
+    assert.doesNotMatch(markup, /id="copy-vocabulary"/, "the second door is still there");
     const options = await source("options/options.js");
     assert.match(options, /copy-library"\)\?\.addEventListener\("click", \(\) => \{\s*void webext\(\)\.runtime\.sendMessage\(\{ kind: Message\.OPEN_LIBRARY \}\)/, "the reading list is opened some other way");
+    assert.doesNotMatch(options, /OPEN_VOCABULARY \}\)\.catch\(\(\) => \{\}\);\s*\}\);\s*document\.getElementById\("add-model"/, "the saved phrases are still opened from the copies note");
     // The message the background answers carries no section for these pages,
     // and this round changes no protocol.
     const protocol = await source("lib/protocol.js");

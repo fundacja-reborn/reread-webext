@@ -1484,15 +1484,6 @@
     "message": "abgeschaltet"
   },
 
-  "options_copies_safe": {
-    "message": "Die Kopien werden im eigenen Speicher der Erweiterung abgelegt, getrennt von der Datenbank - beides befindet sich im Profil des Browsers, nicht in Dateien auf Ihrem Computer."
-  },
-
-  "options_copies_safe_more": {
-    "message": "Eine Kopie wird bei der nächsten gespeicherten Phrase, Markierung oder Seite neu geschrieben. Sie schützt die Daten, wenn der Browser seinen Speicher leert oder eine Datenbank fehlerhaft wird, aber nicht beim Entfernen der Erweiterung: Wird re/read deinstalliert, werden alle seine Daten samt den Kopien gelöscht. Die Datenbank ist IndexedDB, die Kopien sind im Speicher der Erweiterung (storage.local). Speichern Sie vor dem Deinstallieren oder vor einem Wechsel des Geräts eine Kopie als Datei: Exportieren in der Offline-Leseliste schreibt eine reread-backup.zip mit der Leseliste, den gespeicherten Phrasen, den Markierungen und den Einstellungen. Modelle und Wörterbücher sind nicht in dieser Datei - sie lassen sich erneut herunterladen.",
-    "description": "Behind the Details of the copies block: what a copy protects against, what it does not, where the data and the copies are, and how to save a copy as a file before uninstalling."
-  },
-
   "options_font_custom_placeholder": {
     "message": "zum Beispiel Noto Serif"
   },
@@ -1566,22 +1557,49 @@
   },
 
   "options_storage_copies": {
-    "message": "Letzte Kopien"
+    "message": "Sicherungskopien"
   },
 
-  "options_storage_to_file": {
-    "message": "Eine Kopie als Datei speichern Sie auf den Seiten mit den Daten: „"
+  "options_copies_intro": {
+    "message": "re/read legt Kopien Ihrer Phrasen, Ihrer Markierungen und Ihrer Leseliste im Speicher der Erweiterung ab, getrennt von der Datenbank.",
+    "description": "Opens the Backups subsection: what the copies are, in one sentence."
   },
 
-  "options_storage_to_file_and": {
-    "message": "“ und „",
-    "description": "Between the two page names in options_storage_to_file: the closing quotation mark, the conjunction, and the opening one."
+  "options_copies_intro_more": {
+    "message": "Die Kopien werden bei jeder Änderung neu geschrieben: wenn Sie eine Phrase, eine Markierung oder eine Seite der Leseliste speichern oder löschen. Sie schützen die Daten, wenn der Browser seinen Speicher leert oder eine Datenbank fehlerhaft wird. Die Datenbank ist IndexedDB, die Kopien sind im Speicher der Erweiterung (storage.local) - beides im Profil des Browsers, nicht in Dateien auf Ihrem Computer.",
+    "description": "Behind the Details fold of the Backups subsection: when the copies are written, what they protect against, and where they and the database actually are."
   },
 
-  "options_storage_to_file_end": {
-    "message": "“.",
-    "description": "Closes options_storage_to_file after the second page name."
+  "options_copies_head_name": {
+    "message": "Kopie",
+    "description": "The Backups table's first column: which copy the row is about."
   },
+
+  "options_copies_head_holds": {
+    "message": "Inhalt",
+    "description": "The Backups table's second column: what the copy holds."
+  },
+
+  "options_copies_head_when": {
+    "message": "Zuletzt aktualisiert",
+    "description": "The Backups table's third column: when the copy last changed."
+  },
+
+  "options_copies_uninstall": {
+    "message": "Wird re/read deinstalliert, werden alle seine Daten samt den Kopien gelöscht. Speichern Sie vor dem Deinstallieren oder vor einem Wechsel des Geräts eine Kopie als Datei: Exportieren in",
+    "description": "The note under the Backups table, up to the door that opens the reading list."
+  },
+
+  "options_copies_reading_list": {
+    "message": "der Offline-Leseliste",
+    "description": "The door inside options_copies_uninstall: the offline reading list, named as the sentence around it needs it."
+  },
+
+  "options_copies_uninstall_rest": {
+    "message": " schreibt eine reread-backup.zip mit der Leseliste, Ihren Phrasen, Ihren Markierungen und den Einstellungen. Modelle und Wörterbücher sind nicht darin - sie lassen sich erneut herunterladen. Der Export auf der Seite der gespeicherten Phrasen ist eine andere Datei: nur die Phrasen, als TSV, für Anki oder das KOReader-Plugin.",
+    "description": "Closes options_copies_uninstall after the door, and says how the saved phrases' own export differs."
+  },
+
   "options_first_steps_intro": {
     "message": "Noch übersetzt nichts - das Modell, das es täte, ist noch nicht auf diesem Gerät. Die Einrichtung dauert eine Minute:"
   },
@@ -1605,13 +1623,9 @@
   "options_storage_at_risk": { "message": "Dauerhafter Speicher: nicht gewährt. Safari löscht die Daten einer Website nach etwa einem Monat Nutzung ohne ein Tippen auf ihre Seiten, und die Seiten dieser Erweiterung zählen als eine Website. Ihre Phrasen haben eine Kopie, die das übersteht (Zeile darunter); Modelle, Wörterbücher und Leseliste nicht - öffnen Sie ab und zu die Leseansicht oder diese Einstellungen." },
   "options_library_copy": { "message": "Kopie der Leseliste" },
   "options_library_copy_hint": {
-    "message": "Eine zweite Kopie der Leseliste, sicher vor den Aufräumaktionen des Browsers; sie belegt doppelt so viel Platz."
+    "message": "Optional, weil die Leseliste dann doppelt so viel Platz belegt. Die Kopien der Phrasen und der Markierungen sind immer eingeschaltet."
   },
 
-  "options_library_copy_more": {
-    "message": "Sie schützt auch vor einem Datenbankfehler: Ihre gespeicherten Artikel bleiben erhalten, falls die Datenbank verloren geht.",
-    "description": "The rest of the options_library_copy_hint description, behind the row's More button."
-  },
   "reader_marks_delete_all_one": {
     "message": "Das $COUNT$ Zitat dieser Seite löschen",
     "placeholders": { "count": { "content": "$1", "example": "1" } }

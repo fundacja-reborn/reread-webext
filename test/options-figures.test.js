@@ -13,9 +13,11 @@ import { speedFactor } from "../src/lib/i18n.js";
  * are stamped with, and the voice's speed, which stood as `0.9x` with a dot
  * in a language that writes a comma.
  *
- * And the two doors under the copies, which wore the row notes' More: after a
- * sentence ending in a colon, two triangles read as two folds rather than as
- * the two links the colon promised.
+ * And the door inside the copies note, which wore the row notes' More: a
+ * sentence that named a page that way read as a fold rather than as the link
+ * it promised. Since D260 there is one of them - the saved phrases' own
+ * export is a different file, said in a sentence rather than in a second
+ * door promising the same thing.
  */
 
 const ROOT = new URL("../src/", import.meta.url);
@@ -71,25 +73,25 @@ describe("the voice's speed", () => {
   });
 });
 
-describe("the doors under the copies", () => {
-  it("are dressed as the links the sentence promises, not as folds (V6)", async () => {
+describe("the door inside the copies note", () => {
+  it("is dressed as the link the sentence promises, not as a fold (V6, D260)", async () => {
     const markup = await source("options/options.html");
-    const at = markup.indexOf('class="explain copies-file"');
+    const at = markup.indexOf('data-i18n="options_copies_uninstall"');
     assert.ok(at > 0, "the sentence about a copy to a file is gone");
     const block = markup.slice(at, markup.indexOf("</p>", at));
-    assert.equal((block.match(/class="doorway"/g) ?? []).length, 2, "the two pages are not doors");
+    assert.equal((block.match(/class="doorway"/g) ?? []).length, 1, "the reading list is not a door");
+    assert.match(block, /data-i18n="options_copies_reading_list"/, "the door is not named as the sentence needs it");
     assert.doesNotMatch(block, /class="note-more"/, "a door still wears a fold's triangle");
 
     const css = await source("options/options.css");
-    const door = rule(css, ".copies-file .doorway");
+    const door = rule(css, ".note .doorway");
     assert.match(door, /color: var\(--page-accent\)/, "a door is not the colour of a link");
     assert.match(door, /text-decoration: underline/, "a door is not underlined like a link");
     assert.doesNotMatch(door, /content: "\\25B8/, "a door still draws a fold's triangle");
 
-    // They still open the pages themselves - this round changes no protocol.
+    // It still opens the page itself - this round changes no protocol.
     const script = await source("options/options.js");
     assert.match(script, /copy-library"\)\?\.addEventListener\("click"/, "the reading list is no longer opened");
-    assert.match(script, /copy-vocabulary"\)\?\.addEventListener\("click"/, "the saved phrases are no longer opened");
   });
 });
 

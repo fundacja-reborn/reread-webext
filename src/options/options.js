@@ -984,6 +984,11 @@ async function renderStorage() {
   const when = (at) => new Date(at).toLocaleString(uiLocale(), { dateStyle: "short", timeStyle: "short" });
   tellCopy("storage-backup", vocabulary === null ? null : plural(vocabulary.count, "options_copies_phrases"), vocabulary === null ? null : when(vocabulary.writtenAt));
   tellCopy("storage-marks-backup", marks === null ? null : plural(marksInBackup(marks), "options_copies_notes"), marks === null ? null : when(marks.writtenAt));
+  // The reading list's copy says when it last changed, like the other two
+  // (D260): the index it is accounted by is stamped at every write - a
+  // document copied, a document deleted, a picture added - so this is the
+  // last time the copy itself changed. An index written before the stamp
+  // existed has none, and the line says so with a dash until the next change.
   tellCopy(
     "storage-library-copy",
     effectiveLibraryCopy(config)
@@ -991,7 +996,7 @@ async function renderStorage() {
         ? null
         : plural(copy.docs, "options_copies_docs", [megabytes(copy.bytes)])
       : t("options_copies_off"),
-    null,
+    copy === null || copy.writtenAt === null ? null : when(copy.writtenAt),
   );
 }
 
@@ -3501,13 +3506,12 @@ document.getElementById("step-pin-how")?.addEventListener("click", (event) => {
   help.hidden = !opening;
   button.setAttribute("aria-expanded", String(opening));
 });
-// The two pages that hold the data, and with it the import and export of a
-// copy as a file (D254, §9) - the menu's own road.
+// The page the file export lives on (D254 §9, D260) - the menu's own road.
+// The saved phrases' own export is a different file and a different format,
+// and the note beside this door says so in a sentence rather than in a second
+// door that promised the same thing.
 document.getElementById("copy-library")?.addEventListener("click", () => {
   void webext().runtime.sendMessage({ kind: Message.OPEN_LIBRARY }).catch(() => {});
-});
-document.getElementById("copy-vocabulary")?.addEventListener("click", () => {
-  void webext().runtime.sendMessage({ kind: Message.OPEN_VOCABULARY }).catch(() => {});
 });
 document.getElementById("add-model")?.addEventListener("click", () => void addSelectedModel());
 document.getElementById("refresh-models")?.addEventListener("click", () => void refreshList());

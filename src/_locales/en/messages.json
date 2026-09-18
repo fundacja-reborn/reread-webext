@@ -1843,15 +1843,6 @@
     "message": "switched off"
   },
 
-  "options_copies_safe": {
-    "message": "The copies are kept in the extension's own storage, apart from the database - both are inside the browser's profile, not in files on your computer."
-  },
-
-  "options_copies_safe_more": {
-    "message": "A copy is written again with the next phrase you save, highlight you make or page you keep. It protects the data when the browser clears its storage or a database goes wrong, but not when the extension is removed: uninstalling re/read deletes all of its data, the copies with it. The database is IndexedDB and the copies are in the extension's storage (storage.local). Before you uninstall re/read, or before you move to another device, save a copy as a file: Export in the offline reading list writes one reread-backup.zip with the reading list, the saved phrases, the highlights and the settings. Models and dictionaries are not in that file - they can be downloaded again.",
-    "description": "Behind the Details of the copies block: what a copy protects against, what it does not, where the data and the copies are, and how to save a copy as a file before uninstalling."
-  },
-
   "options_font_custom_placeholder": {
     "message": "for example Noto Serif"
   },
@@ -1925,22 +1916,49 @@
   },
 
   "options_storage_copies": {
-    "message": "Latest copies"
+    "message": "Backups"
   },
 
-  "options_storage_to_file": {
-    "message": "A copy as a file is saved on the pages with the data: “"
+  "options_copies_intro": {
+    "message": "re/read keeps copies of your phrases, your highlights and your reading list in the extension's own storage, apart from the database.",
+    "description": "Opens the Backups subsection: what the copies are, in one sentence."
   },
 
-  "options_storage_to_file_and": {
-    "message": "” and “",
-    "description": "Between the two page names in options_storage_to_file: the closing quotation mark, the conjunction, and the opening one."
+  "options_copies_intro_more": {
+    "message": "The copies are written again at every change: when you save or delete a phrase, a highlight or a page in the reading list. They protect the data when the browser clears its storage or when a database goes wrong. The database is IndexedDB and the copies are in the extension's storage (storage.local) - both inside the browser's profile, not in files on your computer.",
+    "description": "Behind the Details fold of the Backups subsection: when the copies are written, what they protect against, and where they and the database actually are."
   },
 
-  "options_storage_to_file_end": {
-    "message": "”.",
-    "description": "Closes options_storage_to_file after the second page name."
+  "options_copies_head_name": {
+    "message": "Copy",
+    "description": "The Backups table's first column: which copy the row is about."
   },
+
+  "options_copies_head_holds": {
+    "message": "Contents",
+    "description": "The Backups table's second column: what the copy holds."
+  },
+
+  "options_copies_head_when": {
+    "message": "Last updated",
+    "description": "The Backups table's third column: when the copy last changed."
+  },
+
+  "options_copies_uninstall": {
+    "message": "Uninstalling re/read deletes all of its data, the copies with it. Before you uninstall it, or before you move your data to another device, save a copy as a file: Export in",
+    "description": "The note under the Backups table, up to the door that opens the reading list."
+  },
+
+  "options_copies_reading_list": {
+    "message": "the offline reading list",
+    "description": "The door inside options_copies_uninstall: the offline reading list, named as the sentence around it needs it."
+  },
+
+  "options_copies_uninstall_rest": {
+    "message": " writes one reread-backup.zip with the reading list, your phrases, your highlights and the settings. Models and dictionaries are not in it - they can be downloaded again. The export on the saved phrases page is a different file: the phrases alone, as TSV, for Anki or the KOReader plugin.",
+    "description": "Closes options_copies_uninstall after the door, and says how the saved phrases' own export differs."
+  },
+
   "options_first_steps_intro": {
     "message": "Nothing translates yet - the model that would do it is not yet on this device. Setting up takes a minute:",
     "description": "Opens the first-steps block, shown on the settings page only while no model is stored."
@@ -1973,13 +1991,9 @@
   },
   "options_library_copy": { "message": "Copy of the reading list" },
   "options_library_copy_hint": {
-    "message": "A second copy of the reading list, safe from the browser's own clean-ups; it takes twice the space."
+    "message": "Optional, because the reading list then takes twice the space. The copies of your phrases and highlights are always on."
   },
 
-  "options_library_copy_more": {
-    "message": "It also protects against a database error: your saved articles remain even if the database is lost.",
-    "description": "The rest of the options_library_copy_hint description, behind the row's More button."
-  },
   "reader_marks_delete_all_one": {
     "message": "Delete the $COUNT$ quote of this page",
     "description": "Plural family; the quiet text act under the missing-document note on the highlights page (D150), naming how many quotes the document-wide deletion takes. Shown only for more than one quote - the one-form is the family's formality.",

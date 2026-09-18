@@ -1703,51 +1703,73 @@ button.step-done {
 }
 
 /* The three copies, each in three parts: what it is, what it holds and when
-   it was written.
+   it was written - a table, because it is one (D260). A header row names the
+   columns instead of leaving a reader to infer them from the first line, and
+   the headings speak in the page's quiet voice: they label a report, they do
+   not open a section.
 
-   One grid for the whole list, not a grid per line (D258, V4): every line
-   sizing its own columns is three lines whose middles and ends begin in three
-   different places, and a column of dates that does not line up is a column
-   nobody can compare down. The items step out of the way (`display: contents`)
-   and their three spans are the grid's own cells.
-
-   Under 30rem the name keeps the date company on the first line and the
-   contents drop to the second, because three columns of that width are three
-   ellipses - and there the lines go back to being boxes of their own. */
+   Under 30rem the three columns are three ellipses, so the table gives up
+   being one: every row becomes a block, the name keeps the date company on
+   the first line and the contents drop to the second. */
 .copies {
-  display: grid;
-  grid-template-columns: max-content minmax(0, 1fr) max-content;
-  gap: 0.35rem 1rem;
+  width: 100%;
   margin: 0 0 var(--m-block);
-  padding: 0;
-  list-style: none;
+  border-collapse: collapse;
   color: var(--page-muted);
   font-size: var(--ui-small);
   font-variant-numeric: tabular-nums;
+  text-align: start;
 }
 
-.copies li {
-  display: contents;
+.copies :is(th, td) {
+  padding: 0.35rem 1rem 0.35rem 0;
+  font-weight: inherit;
+  text-align: inherit;
+  vertical-align: baseline;
+}
+
+.copies :is(th, td):last-child {
+  padding-right: 0;
+  text-align: end;
+}
+
+/* The column names: one hairline parts them from the rows - never a fill,
+   which an e-ink panel rounds away. */
+.copies thead th {
+  border-bottom: var(--sep-row);
 }
 
 .copy-name {
   color: var(--page-fg);
-}
-
-.copy-when {
-  text-align: end;
+  white-space: nowrap;
 }
 
 @media (max-width: 30rem) {
-  .copies {
+  .copies,
+  .copies tbody,
+  .copies tr {
     display: block;
   }
 
-  .copies li {
+  /* The clip pattern: the column names stay for a screen reader, which reads
+     the table as a table however it is laid out. */
+  .copies thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .copies tr {
     display: grid;
     grid-template-columns: minmax(0, 1fr) max-content;
     gap: 0.15rem 1rem;
     margin: 0.35rem 0;
+  }
+
+  .copies :is(th, td) {
+    padding: 0;
   }
 
   .copy-holds {
@@ -1756,14 +1778,14 @@ button.step-done {
   }
 }
 
-/* The two doors to the pages that hold the data (D258, V6): dressed as links,
-   because that is what they do - they open another page of this extension.
-   They wore the row notes' More, triangle and all, and after a sentence
-   ending in a colon that reads as two folds, not as the two doors the colon
-   promised: the sentence looked as though its links had gone missing. Since
-   D259 the sentence carries its own quotation marks and its own "and", so
-   the button adds no space of its own. */
-.copies-file .doorway {
+/* A page of this extension named inside a sentence (D258 V6, D260): dressed
+   as the link it is, because that is what it does. It wore the row notes'
+   More, triangle and all, and a sentence that named two pages that way read
+   as two folds rather than as the doors it promised. Since D260 there is one
+   of them, inside the note about uninstalling - the saved phrases' own export
+   is a different file, and the note says so in a sentence rather than in a
+   second door promising the same thing. */
+.note .doorway {
   display: inline;
   min-height: 0;
   margin: 0;
@@ -1776,8 +1798,8 @@ button.step-done {
   transition: none;
 }
 
-.copies-file .doorway:hover,
-.copies-file .doorway:focus-visible {
+.note .doorway:hover,
+.note .doorway:focus-visible {
   color: var(--page-fg);
 }
 

@@ -485,7 +485,7 @@ export async function dropBookCopy(id) {
  * answer, which the line reads the same way. From the index alone: the line
  * costs one small key, not a read of every document.
  *
- * @returns {Promise<{ docs: number, bytes: number } | null>}
+ * @returns {Promise<{ docs: number, bytes: number, writtenAt: number | null } | null>}
  */
 export async function readLibraryCopy() {
   try {

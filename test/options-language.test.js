@@ -126,15 +126,21 @@ describe("the settings page's language", () => {
       const catalogue = JSON.parse(await source(`_locales/${locale}/messages.json`));
       const where = catalogue["options_storage_how_more"].message;
       assert.match(where, /IndexedDB/, `${locale} does not name the database the data is in`);
-      const copies = catalogue["options_copies_safe_more"].message;
+      // Said once, under the Backups heading (D260): where the copies are and
+      // when they are written behind its fold, what uninstalling costs in the
+      // note under the table.
+      const copies = catalogue["options_copies_intro_more"].message;
+      assert.match(copies, /IndexedDB/, `${locale} does not name the database`);
       assert.match(copies, /storage\.local/, `${locale} does not name where the copies are`);
-      assert.match(copies, /re\/read/, `${locale} does not say what uninstalling re/read costs`);
-      assert.match(copies, /reread-backup\.zip/, `${locale} does not name the file a copy is saved as`);
+      const uninstall = catalogue["options_copies_uninstall"].message;
+      assert.match(uninstall, /re\/read/, `${locale} does not say what uninstalling re/read costs`);
+      assert.match(catalogue["options_copies_uninstall_rest"].message, /reread-backup\.zip/, `${locale} does not name the file a copy is saved as`);
+      assert.match(catalogue["options_copies_uninstall_rest"].message, /TSV/, `${locale} does not say the saved phrases export a different file`);
     }
     // And the sentence over the fold says the plain half of it: not a file on
     // your computer.
     const markup = await source("options/options.html");
-    assert.match(markup, /data-i18n="options_copies_safe"/, "the copies say nothing about where they are");
+    assert.match(markup, /data-i18n="options_copies_intro"/, "the copies say nothing about where they are");
     assert.match(markup, /aria-controls="more-copies"/, "the rest of it has no way in");
   });
 });

@@ -2104,15 +2104,6 @@
     "message": "wyłączona"
   },
 
-  "options_copies_safe": {
-    "message": "Kopie są zapisane w pamięci samego rozszerzenia, osobno od bazy danych – jedno i drugie znajduje się w profilu przeglądarki, a nie w plikach na komputerze."
-  },
-
-  "options_copies_safe_more": {
-    "message": "Kopia powstaje na nowo przy następnej zapisanej frazie, zakreśleniu albo zachowanej stronie. Chroni dane, gdy przeglądarka czyści swoją pamięć albo gdy zepsuje się baza danych, ale nie chroni przed usunięciem rozszerzenia: odinstalowanie re/read kasuje wszystkie jego dane razem z kopiami. Baza danych to IndexedDB, a kopie są w pamięci rozszerzenia (storage.local). Zanim odinstalujesz re/read albo przeniesiesz dane na inne urządzenie, zapisz kopię do pliku: przycisk Eksportuj w czytelni offline tworzy jeden plik reread-backup.zip z czytelnią, zapisanymi frazami, zakreśleniami i ustawieniami. Modeli ani słowników w tym pliku nie ma – można je pobrać ponownie.",
-    "description": "Behind the Details of the copies block: what a copy protects against, what it does not, where the data and the copies are, and how to save a copy as a file before uninstalling."
-  },
-
   "options_font_custom_placeholder": {
     "message": "np. Noto Serif"
   },
@@ -2254,22 +2245,49 @@
   },
 
   "options_storage_copies": {
-    "message": "Ostatnie kopie"
+    "message": "Kopie zapasowe"
   },
 
-  "options_storage_to_file": {
-    "message": "Kopię do pliku zapiszesz na stronach z danymi: „"
+  "options_copies_intro": {
+    "message": "re/read automatycznie zapisuje kopie fraz, zakreśleń i czytelni w pamięci rozszerzenia, osobno od bazy danych.",
+    "description": "Opens the Backups subsection: what the copies are, in one sentence."
   },
 
-  "options_storage_to_file_and": {
-    "message": "” i „",
-    "description": "Between the two page names in options_storage_to_file: the closing quotation mark, the conjunction, and the opening one."
+  "options_copies_intro_more": {
+    "message": "Kopie są aktualizowane przy każdej zmianie: gdy zapiszesz lub usuniesz frazę, zakreślenie albo stronę w czytelni. Chronią dane, gdy przeglądarka czyści swoją pamięć albo gdy baza danych zostanie uszkodzona. Baza danych to IndexedDB, kopie są w pamięci rozszerzenia (storage.local) – jedno i drugie w profilu przeglądarki, nie w plikach na komputerze.",
+    "description": "Behind the Details fold of the Backups subsection: when the copies are written, what they protect against, and where they and the database actually are."
   },
 
-  "options_storage_to_file_end": {
-    "message": "”.",
-    "description": "Closes options_storage_to_file after the second page name."
+  "options_copies_head_name": {
+    "message": "Kopia",
+    "description": "The Backups table's first column: which copy the row is about."
   },
+
+  "options_copies_head_holds": {
+    "message": "Zawartość",
+    "description": "The Backups table's second column: what the copy holds."
+  },
+
+  "options_copies_head_when": {
+    "message": "Ostatnia aktualizacja",
+    "description": "The Backups table's third column: when the copy last changed."
+  },
+
+  "options_copies_uninstall": {
+    "message": "Odinstalowanie re/read usuwa wszystkie jego dane razem z kopiami. Przed odinstalowaniem albo przeniesieniem danych na inne urządzenie zapisz kopię do pliku: „Eksportuj” w",
+    "description": "The note under the Backups table, up to the door that opens the reading list."
+  },
+
+  "options_copies_reading_list": {
+    "message": "czytelni offline",
+    "description": "The door inside options_copies_uninstall: the offline reading list, named as the sentence around it needs it."
+  },
+
+  "options_copies_uninstall_rest": {
+    "message": " tworzy plik reread-backup.zip z czytelnią, frazami, zakreśleniami i ustawieniami. Modeli i słowników w nim nie ma – pobierzesz je ponownie. Eksport na stronie zapisanych fraz to inny plik: same frazy w formacie TSV, dla Anki albo wtyczki KOReadera.",
+    "description": "Closes options_copies_uninstall after the door, and says how the saved phrases' own export differs."
+  },
+
   "options_first_steps_intro": {
     "message": "Nic się jeszcze nie tłumaczy – modelu, który by to robił, nie ma jeszcze na tym urządzeniu. Przygotowanie zajmuje minutę:"
   },
@@ -2293,13 +2311,9 @@
   "options_storage_at_risk": { "message": "Magazyn trwały: nieprzyznany. Safari kasuje dane witryny po około miesiącu używania bez dotknięcia jej stron, a strony tego rozszerzenia liczą się jak jedna witryna. Frazy mają kopię, która to przetrwa (linijka niżej); modele, słowniki i czytelnia nie – otwieraj widok czytania albo te ustawienia od czasu do czasu." },
   "options_library_copy": { "message": "Kopia czytelni" },
   "options_library_copy_hint": {
-    "message": "Druga kopia czytelni, odporna na czyszczenie danych przeglądarki; zajmuje dwa razy więcej miejsca."
+    "message": "Opcjonalna, bo czytelnia zajmuje wtedy dwa razy więcej miejsca. Kopie fraz i zakreśleń są zawsze włączone."
   },
 
-  "options_library_copy_more": {
-    "message": "Chroni też przed błędem bazy danych: zapisane artykuły zostają, nawet jeśli baza danych zostanie utracona.",
-    "description": "The rest of the options_library_copy_hint description, behind the row's More button."
-  },
   "reader_marks_delete_all_one": {
     "message": "Usuń $COUNT$ cytat z tej strony",
     "placeholders": { "count": { "content": "$1", "example": "1" } }

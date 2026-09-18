@@ -1325,93 +1325,101 @@
           </li>
         </ul>
       </div>
-      <!-- The copy of the reading list that outlives the database
-           (`lib/store/library-backup.js`). On unasked only where the browser
-           may delete the database on its own - iOS and iPadOS - and a choice
-           everywhere, because it doubles the space the reading list takes.
-           Turning it on builds the copy from the whole list; turning it off
-           removes it; the storage row under it says what it holds. -->
-      <div class="row" id="s-libraryCopy" data-setting="libraryCopy" data-keywords="options_keywords_copy" data-section="data">
+    </div>
+
+    <!-- Everything about the copies in one place (D260): what they are, the
+         table of what each holds, the one of them that is a choice, and what
+         a copy does not protect against. It used to be three explanations a
+         screen apart - a paragraph under the table, a fold on the switch, and
+         the switch's own hint - each saying a piece of the same thing. -->
+    <section aria-labelledby="copies" data-keywords="options_keywords_copy">
+    <header>
+      <h3 id="copies" data-i18n="options_storage_copies">Backups</h3>
+
+      <p class="explain">
+        <span data-i18n="options_copies_intro"
+          >re/read keeps copies of your phrases, your highlights and your reading list in the
+          extension's own storage, apart from the database.</span
+        ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-copies" data-i18n="options_details">Details</button></span>
+      </p>
+      <p class="explain row-more" id="more-copies" data-i18n="options_copies_intro_more" hidden>
+        The copies are written again at every change: when you save or delete a phrase, a highlight
+        or a page in the reading list. They protect the data when the browser clears its storage or
+        when a database goes wrong. The database is IndexedDB and the copies are in the extension's
+        storage (storage.local) - both inside the browser's profile, not in files on your computer.
+      </p>
+    </header>
+
+    <!-- A table because it is one: three copies, three things said about each,
+         and a header row that names the columns instead of leaving a reader to
+         infer them from the first line. The headings speak in the page's quiet
+         voice - they label a report, they do not open a section. -->
+    <table class="copies">
+      <thead>
+        <tr>
+          <th scope="col" data-i18n="options_copies_head_name">Copy</th>
+          <th scope="col" data-i18n="options_copies_head_holds">Contents</th>
+          <th scope="col" data-i18n="options_copies_head_when">Last updated</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr id="storage-backup">
+          <th scope="row" class="copy-name" data-i18n="options_copies_vocabulary">Vocabulary</th>
+          <td class="copy-holds"></td>
+          <td class="copy-when"></td>
+        </tr>
+        <tr id="storage-marks-backup">
+          <th scope="row" class="copy-name" data-i18n="options_copies_marks">Highlights</th>
+          <td class="copy-holds"></td>
+          <td class="copy-when"></td>
+        </tr>
+        <tr id="storage-library-copy">
+          <th scope="row" class="copy-name" data-i18n="options_copies_library">Reading list</th>
+          <td class="copy-holds"></td>
+          <td class="copy-when"></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- The one copy that is a choice (`lib/store/library-copy.js`). On
+         unasked only where the browser may delete the database on its own -
+         iOS and iPadOS - and a choice everywhere, because it doubles the space
+         the reading list takes. Turning it on builds the copy from the whole
+         list; turning it off removes it. No fold under it any more: what a
+         copy is for is said once, over the table. -->
+    <div class="rows">
+      <div class="row" id="s-libraryCopy" data-setting="libraryCopy" data-keywords="options_keywords_copy" data-section="copies">
         <label class="row-toggle">
           <span class="row-name" data-i18n="options_library_copy">Copy of the reading list</span>
           <input type="checkbox" id="library-copy" />
         </label>
-        <p class="row-note">
-          <span data-i18n="options_library_copy_hint"
-            >A second copy of the reading list, safe from the browser's own clean-ups; it takes twice the space.</span
-          ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-libraryCopy" data-i18n="options_details">Details</button></span>
-        </p>
-        <p class="row-note row-more" id="more-libraryCopy" data-i18n="options_library_copy_more" hidden>
-          It also protects against a database error: your saved articles remain even if the database
-          is lost.
+        <p class="row-note" data-i18n="options_library_copy_hint">
+          Optional, because the reading list then takes twice the space. The copies of your phrases
+          and highlights are always on.
         </p>
       </div>
     </div>
 
-    <!-- The copies that outlive the database, in one place (D254, §9): what
-         each of them holds and when it was written. A report, like the row
-         above it - not a preference, and never a promise made twice. -->
-    <header>
-      <h3 id="copies" data-i18n="options_storage_copies">Latest copies</h3>
-    </header>
-
-    <ul class="copies">
-      <li id="storage-backup">
-        <span class="copy-name" data-i18n="options_copies_vocabulary">Vocabulary</span>
-        <span class="copy-holds"></span>
-        <span class="copy-when"></span>
-      </li>
-      <li id="storage-marks-backup">
-        <span class="copy-name" data-i18n="options_copies_marks">Highlights</span>
-        <span class="copy-holds"></span>
-        <span class="copy-when"></span>
-      </li>
-      <li id="storage-library-copy">
-        <span class="copy-name" data-i18n="options_copies_library">Reading list</span>
-        <span class="copy-holds"></span>
-        <span class="copy-when"></span>
-      </li>
-    </ul>
-
-    <!-- Where the copies are and what they are worth - said once, for the
-         three of them together (F8), with the rest behind the fold: what a
-         copy does not protect against (the extension being removed), where
-         the data and the copies actually are, and how to save a copy as a
-         file before uninstalling (Michał's ask, 2026-09-18). -->
-    <p class="row-note">
-      <span data-i18n="options_copies_safe"
-        >The copies are kept in the extension's own storage, apart from the database - both are inside the browser's profile, not in files on your computer.</span
-      ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-copies" data-i18n="options_details">Details</button></span>
+    <!-- The one thing a copy inside the browser cannot survive, and the file
+         that does (Michał's ask, 2026-09-18). The reading list's own name is a
+         door to the page the export lives on - the page, not its Import and
+         export section: the address of a section inside it would be a new
+         field in the message the background answers, and this round changes no
+         protocol. -->
+    <p class="note">
+      <span data-i18n="options_copies_uninstall"
+        >Uninstalling re/read deletes all of its data, the copies with it. Before you uninstall it,
+        or before you move your data to another device, save a copy as a file: Export in</span
+      >
+      <button type="button" class="doorway" id="copy-library" data-i18n="options_copies_reading_list">the offline reading list</button
+      ><span data-i18n="options_copies_uninstall_rest"
+        > writes one reread-backup.zip with the reading list, your phrases, your highlights and the
+        settings. Models and dictionaries are not in it - they can be downloaded again. The export
+        on the saved phrases page is a different file: the phrases alone, as TSV, for Anki or the
+        KOReader plugin.</span
+      >
     </p>
-    <p class="row-note row-more" id="more-copies" data-i18n="options_copies_safe_more" hidden>
-      A copy is written again with the next phrase you save, highlight you make or page you keep. It
-      protects the data when the browser clears its storage or a database goes wrong, but not when
-      the extension is removed: uninstalling re/read deletes all of its data, the copies with it.
-      The database is IndexedDB and the copies are in the extension's storage (storage.local).
-      Before you uninstall re/read, or before you move to another device, save a copy as a file:
-      Export in the offline reading list writes one reread-backup.zip with the reading list, the
-      saved phrases, the highlights and the settings. Models and dictionaries are not in that file -
-      they can be downloaded again.
-    </p>
-
-    <!-- The other kind of copy: the one that leaves the device as a file,
-         which lives on the two pages that hold the data (D254, §9). The
-         buttons open those pages, the menu's own road - the address of the
-         transfer section inside them would be a new field in the message the
-         background answers, and this round changes no protocol. -->
-    <p class="explain copies-file">
-      <!-- The two doors are named the way the page names every button (D259,
-           K5): in the language's own quotation marks, joined by its own word
-           for "and" - a colon followed by two names with a space between them
-           read as one name, and a screen reader read it as one too. Each
-           fragment is glued to the button beside it, so no quotation mark
-           opens a line of its own. -->
-      <span data-i18n="options_storage_to_file">A copy as a file is saved on the pages with the data: “</span
-      ><button type="button" class="doorway" id="copy-library" data-i18n="reading_list">Offline reading list</button
-      ><span data-i18n="options_storage_to_file_and">” and “</span
-      ><button type="button" class="doorway" id="copy-vocabulary" data-i18n="saved_phrases">Saved phrases</button
-      ><span data-i18n="options_storage_to_file_end">”.</span>
-    </p>
+    </section>
     </section>
 
     <!-- The tinkerer's door (D176): rules of the reader's own for the bubble

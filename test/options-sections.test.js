@@ -33,7 +33,7 @@ const SECTIONS = [
   { id: "bubble-and-phrases", key: "options_section_bubble", subs: ["bubble", "saved-phrases"] },
   { id: "reading-view", key: "options_section_reading", subs: ["paged-layout"] },
   { id: "reading-aloud", key: "options_section_aloud", subs: [] },
-  { id: "data", key: "options_section_data", subs: [] },
+  { id: "data", key: "options_section_data", subs: ["copies"] },
   { id: "custom-css", key: "options_custom_css_heading", subs: [] },
   { id: "about", key: "options_section_about", subs: ["support"] },
 ];
@@ -63,7 +63,7 @@ const ROWS = [
   { setting: "ttsVoices", section: "reading-aloud", control: "tts-voice" },
   { setting: "ttsRate", section: "reading-aloud", control: "tts-rate-up" },
   { setting: "storage", section: "data", control: null },
-  { setting: "libraryCopy", section: "data", control: "library-copy" },
+  { setting: "libraryCopy", section: "copies", control: "library-copy" },
 ];
 
 describe("the settings page's sections", () => {
