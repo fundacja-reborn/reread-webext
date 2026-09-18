@@ -703,6 +703,11 @@ button.page-mark:hover {
   line-height: 1.5;
 }
 
+/* The reader's menu ends in a foot strip of its own (`.panel-more`,
+   reader.css): a button, because the chevron in it is pressed, but not a
+   row. It is written out of the row dress here, out of the row hover below,
+   and out of the last row's rule between them - the row before it stays the
+   last row. */
 .nav-menu a,
 .nav-menu button:not(.panel-more) {
   display: flex;
@@ -718,11 +723,6 @@ button.page-mark:hover {
   text-align: left;
   text-decoration: none;
 }
-
-/* The reader's menu ends in a foot strip of its own (`.panel-more`,
-   reader.css): a button, because the chevron in it is pressed, but not a
-   row - it wears no separator, takes none of the row dress above, and the
-   row before it stays the last row for the rule below. */
 
 /* The row that closes the menu draws no line. The last row's line used to
    be the menu's bottom edge; since the panel stands on paper of its own
