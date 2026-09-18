@@ -3142,8 +3142,18 @@ body.reader:has(#mark-bar:not([hidden])) {
   white-space: nowrap;
 }
 
-.speech-bar button:hover,
-.speech-bar button:focus-visible {
+/* The hover on this bar is a mouse's alone (D248). A finger or a pen leaves
+   the button it tapped standing under `:hover` until something else is
+   tapped - Android's own behaviour - and on this bar a hover is the frame
+   and the wash that the swatch beside it means by "chosen": the page turn
+   read as pressed for good after every turn, and handing the focus back
+   (D244) was only half of it (Michał's photos from the Boox, 2026-09-18,
+   the same complaint twice). Which pointer is in use is written on the root
+   by the script from the pointer's own kind, never asked of a media query:
+   the Boox answers `pointer: fine` to those (Michał's metrics, 2026-09-14),
+   and a panel that claims a mouse it has not got keeps the stuck hover. */
+.speech-bar button:focus-visible,
+:root:not([data-pointer-kind="touch"]) .speech-bar button:hover {
   border-color: var(--page-border);
   background: color-mix(in srgb, var(--page-fg) 6%, transparent);
 }

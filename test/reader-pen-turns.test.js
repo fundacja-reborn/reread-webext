@@ -98,7 +98,7 @@ describe("the page turned with the pen in the hand (D242)", () => {
   });
 });
 
-describe("a press that leaves the button as it found it (D244)", () => {
+describe("a press that leaves the button as it found it (D244, D248)", () => {
   it("hands the focus back after a pointer's press, and keeps it after a key's", async () => {
     const reader = await source("reader/reader.js");
     const release = bodyOf(reader, "releasePress");
@@ -111,6 +111,26 @@ describe("a press that leaves the button as it found it (D244)", () => {
     assert.match(reader, /markCopyButton\?\.addEventListener\("click", \(event\) => \{\s*releasePress\(event\);/, "the copy keeps its focus ring after a tap");
     assert.doesNotMatch(reader, /markNoteButton\?\.addEventListener\("click", \(event\) => \{\s*releasePress/, "the note hands back the focus its dialog will want");
     assert.doesNotMatch(reader, /markDeleteButton\?\.addEventListener\("click", \(event\) => \{\s*releasePress/, "the bin blurs a button it is about to hide");
+  });
+
+  it("keeps the bar's hover for a mouse, so a tap leaves no button standing lit", async () => {
+    // The focus was only half of it: a finger or a pen leaves the button it
+    // tapped under `:hover` until something else is tapped, and on this bar
+    // a hover is the frame and the wash (Michał's photos from the Boox,
+    // 2026-09-18, the same complaint twice).
+    const styles = await source("reader/reader.css");
+    assert.match(styles, /\.speech-bar button:focus-visible,\n:root:not\(\[data-pointer-kind="touch"\]\) \.speech-bar button:hover \{/, "a tap leaves the button it hit wearing the bar's hover");
+    // Asked of the pointer, never of a media query: the Boox answers
+    // `pointer: fine` to those, so a bar that trusted them would keep the
+    // stuck hover on the one panel this was reported from.
+    const reader = await source("reader/reader.js");
+    const at = reader.indexOf('window.addEventListener(\n  "pointerover",');
+    assert.notEqual(at, -1, "nothing says which pointer is in use");
+    const listener = reader.slice(at, reader.indexOf("\n);", at));
+    assert.match(listener, /if \(event\.pointerType === ""\) return;/, "a pointer with no kind to it is taken for a finger");
+    assert.match(listener, /const kind = event\.pointerType === "mouse" \? "mouse" : "touch";/, "a pen is taken for a mouse");
+    assert.match(listener, /if \(root\.dataset\["pointerKind"\] !== kind\) root\.dataset\["pointerKind"\] = kind;/, "the root never hears which pointer is in use");
+    assert.match(listener, /\{ capture: true, passive: true \}/, "a page that stops a pointer's event keeps the bar's hover wrong");
   });
 
   it("stands nine buttons of the pen's bar on one line at a phone's width", async () => {
