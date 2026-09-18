@@ -94,9 +94,9 @@ describe("the page's foot (D238)", () => {
     }
   });
 
-  it("is promised in the README as a setting, off by default", async () => {
+  it("is promised in the README as a setting, on by default (D249)", async () => {
     const readme = await source("../README.md");
-    assert.match(readme, /\*\*Page number in the Pages layout\*\* in the settings, off by default/, "the README promises a count at the foot of every page");
+    assert.match(readme, /\*\*Page number in the Pages layout\*\* in the settings, on by default/, "the README still promises a quiet foot the reader no longer has");
     assert.match(readme, /the page being read keeps its first line and only its last lines go behind the bar/, "the README does not say what a bar does to the page");
   });
 });
