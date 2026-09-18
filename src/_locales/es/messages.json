@@ -1992,6 +1992,33 @@
   "options_filter_placeholder": { "message": "Filtra por idioma o código" },
   "options_filter_models_label": { "message": "Filtrar la lista de modelos de traducción" },
   "options_filter_dictionaries_label": { "message": "Filtrar la lista de diccionarios" },
+  "options_list_installed": {
+    "message": "En este dispositivo",
+    "description": "Heading of the block listing what is already on this device, in both the models and the dictionaries subsection."
+  },
+  "options_list_available": {
+    "message": "Para descargar",
+    "description": "Heading of the block holding the catalogue: the filter, the list to download from and the by-hand doors."
+  },
+  "options_no_models_yet": {
+    "message": "Todavía no hay ningún modelo de traducción en este dispositivo. Elige un par en la sección",
+    "description": "Said in place of an empty list of installed models; the name of the catalogue block follows as a link, then the rest."
+  },
+  "options_no_models_yet_rest": { "message": "de abajo." },
+  "options_no_dictionaries_yet": {
+    "message": "Todavía no hay ningún diccionario en este dispositivo. Elige uno en la sección",
+    "description": "Said in place of an empty list of installed dictionaries; the name of the catalogue block follows as a link, then the rest."
+  },
+  "options_no_dictionaries_yet_rest": { "message": "de abajo, o añade el tuyo." },
+  "options_dictionary_into": {
+    "message": "→ $LANGUAGE$",
+    "description": "The language a dictionary explains words in, in the small print of its row. Its own words' language is the heading the row stands under.",
+    "placeholders": { "language": { "content": "$1", "example": "Polish" } }
+  },
+  "options_dictionary_monolingual": {
+    "message": "monolingüe",
+    "description": "Said in place of the target language for a dictionary that explains a language in itself."
+  },
   "options_show_all": {
     "message": "Mostrar todos ($COUNT$)",
     "placeholders": { "count": { "content": "$1" } }
@@ -2014,13 +2041,13 @@
   },
   "options_dictionaries_heading": { "message": "Diccionarios" },
   "options_dictionaries_intro": {
-    "message": "Añade diccionarios para ver definiciones detalladas de las palabras en la burbuja de traducción. Puedes cambiar el orden en que aparecen usando las flechas."
+    "message": "Añade diccionarios para ver definiciones detalladas de las palabras en la burbuja de traducción."
   },
   "options_dictionaries_sources": {
-    "message": "Los diccionarios de la lista vienen de WikDict. Puedes añadir los tuyos desde un archivo o desde un enlace, también varios para un mismo idioma. Las fuentes, cada una con su licencia:"
+    "message": "Los diccionarios del catálogo vienen de WikDict. Puedes añadir los tuyos desde un archivo o desde un enlace, también varios para un mismo idioma. Las fuentes, cada una con su licencia:"
   },
   "options_dictionary_order_hint": {
-    "message": "La burbuja muestra las entradas en el orden de abajo. Solo se usan los diccionarios del idioma que lees."
+    "message": "La burbuja muestra las entradas en el orden de abajo, idioma por idioma. Las flechas lo cambian."
   },
   "options_dictionary_note_from": { "message": "Los diccionarios se descargan de" },
   "options_dictionary_note_rest": {
@@ -2146,10 +2173,7 @@
     "message": "Confirmar la eliminación: $NAME$",
     "placeholders": { "name": { "content": "$1" } }
   },
-  "options_size_here": {
-    "message": "$SIZE$ aquí",
-    "placeholders": { "size": { "content": "$1" } }
-  },
+
   "options_progress_of": {
     "message": "$RECEIVED$ de $TOTAL$",
     "placeholders": {
@@ -2212,8 +2236,14 @@
     }
   },
   "options_no_models": { "message": "No hay modelos aquí, y ninguno que descargar - esta versión no lista ninguno." },
-  "options_filter_no_match_models": { "message": "Ningún par coincide con eso. El filtro acepta un nombre de idioma o un código." },
-  "options_filter_no_match_dictionaries": { "message": "Ningún diccionario coincide con eso. El filtro acepta un nombre de idioma o un código." },
+  "options_filter_no_match_models": {
+    "message": "Ningún par coincide con «$QUERY$». El filtro acepta un nombre de idioma o un código.",
+    "placeholders": { "query": { "content": "$1", "example": "polish" } }
+  },
+  "options_filter_no_match_dictionaries": {
+    "message": "Ningún diccionario coincide con «$QUERY$». El filtro acepta un nombre de idioma o un código.",
+    "placeholders": { "query": { "content": "$1", "example": "polish" } }
+  },
   "options_no_disabled": { "message": "Ningún sitio está desactivado." },
   "options_turn_back_on": { "message": "Volver a activar" },
   "options_reading_model_files": {
@@ -2260,11 +2290,12 @@
     "placeholders": { "name": { "content": "$1", "example": "WikDict en-pl" } }
   },
   "options_dictionary_moved": {
-    "message": "$NAME$ es ahora $PLACE$ de $TOTAL$.",
+    "message": "$NAME$: posición $PLACE$ de $TOTAL$, $LANGUAGE$.",
     "placeholders": {
       "name": { "content": "$1", "example": "WikDict en-pl" },
       "place": { "content": "$2", "example": "1" },
-      "total": { "content": "$3", "example": "3" }
+      "total": { "content": "$3", "example": "3" },
+      "language": { "content": "$4", "example": "English" }
     }
   },
   "options_dictionary_file_name": {

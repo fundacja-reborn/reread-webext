@@ -90,8 +90,10 @@ describe("the first steps", () => {
 
   it("gives every step its own way in, and the card a way out and back", async () => {
     const markup = await source("options/options.html");
-    assert.match(markup, /<a class="step-door" href="#translation-models"/, "the model step does not lead to the models");
-    assert.match(markup, /<a class="step-door" href="#dictionaries"/, "the dictionary step does not lead to the dictionaries");
+    // A step is pressed to go and fetch one, so each lands on the block the
+    // fetching happens in (D263, K5), not on the subsection's heading.
+    assert.match(markup, /<a class="step-door" href="#translation-models-available"/, "the model step does not lead to the models catalogue");
+    assert.match(markup, /<a class="step-door" href="#dictionaries-available"/, "the dictionary step does not lead to the dictionaries catalogue");
     assert.match(markup, /id="first-steps-hide"/, "the card cannot be put away");
     assert.match(markup, /id="first-steps-show"/, "a card put away cannot be brought back");
     assert.ok(

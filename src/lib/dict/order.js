@@ -129,3 +129,43 @@ export function nextRank(dictionaries) {
   }
   return last + 1;
 }
+
+/**
+ * The list after one press of an arrow on a list drawn in groups (D263): the
+ * swap is with the nearest dictionary of the same source language, however
+ * many dictionaries of other languages stand between them.
+ *
+ * The order written down stays one list across every language - that is what
+ * `answerOrder` reads and what a lookup answers in - but the settings page
+ * draws it grouped by the language whose words a dictionary explains, because
+ * that is the only grouping a move can mean anything in: the bubble only ever
+ * asks the dictionaries of the language being read (`lookupEntries` matches on
+ * `langFrom` alone), so moving a Polish dictionary above an English one
+ * changes nothing anybody can see.
+ *
+ * Null when nothing moves - an unknown dictionary, or the one already at the
+ * end of its own group - so the caller writes nothing and redraws nothing.
+ *
+ * @param {{ id: string, lang: string }[]} entries in answering order, each with
+ *   the language of its headwords
+ * @param {string} id the one being moved
+ * @param {number} step -1 towards the top, 1 towards the bottom
+ * @returns {string[] | null}
+ */
+export function moveWithinSourceLanguage(entries, id, step) {
+  const at = entries.findIndex((entry) => entry.id === id);
+  if (at < 0) return null;
+
+  const lang = entries[at]?.lang;
+  // The nearest one of the same language in that direction - not the
+  // neighbour, which may belong to another group and must keep its place.
+  let to = at + step;
+  while (to >= 0 && to < entries.length && entries[to]?.lang !== lang) to += step;
+  const neighbour = entries[to]?.id;
+  if (neighbour === undefined) return null;
+
+  const moved = entries.map((entry) => entry.id);
+  moved[at] = neighbour;
+  moved[to] = id;
+  return moved;
+}

@@ -2657,6 +2657,33 @@
   "options_filter_placeholder": { "message": "Фільтруйте за мовою або кодом" },
   "options_filter_models_label": { "message": "Фільтрувати список моделей перекладу" },
   "options_filter_dictionaries_label": { "message": "Фільтрувати список словників" },
+  "options_list_installed": {
+    "message": "На цьому пристрої",
+    "description": "Heading of the block listing what is already on this device, in both the models and the dictionaries subsection."
+  },
+  "options_list_available": {
+    "message": "Для завантаження",
+    "description": "Heading of the block holding the catalogue: the filter, the list to download from and the by-hand doors."
+  },
+  "options_no_models_yet": {
+    "message": "На цьому пристрої ще немає жодної моделі перекладу. Виберіть пару в розділі",
+    "description": "Said in place of an empty list of installed models; the name of the catalogue block follows as a link, then the rest."
+  },
+  "options_no_models_yet_rest": { "message": "нижче." },
+  "options_no_dictionaries_yet": {
+    "message": "На цьому пристрої ще немає жодного словника. Виберіть словник у розділі",
+    "description": "Said in place of an empty list of installed dictionaries; the name of the catalogue block follows as a link, then the rest."
+  },
+  "options_no_dictionaries_yet_rest": { "message": "нижче або додайте власний." },
+  "options_dictionary_into": {
+    "message": "→ $LANGUAGE$",
+    "description": "The language a dictionary explains words in, in the small print of its row. Its own words' language is the heading the row stands under.",
+    "placeholders": { "language": { "content": "$1", "example": "Polish" } }
+  },
+  "options_dictionary_monolingual": {
+    "message": "одномовний",
+    "description": "Said in place of the target language for a dictionary that explains a language in itself."
+  },
   "options_show_all": {
     "message": "Показати всі ($COUNT$)",
     "placeholders": { "count": { "content": "$1" } }
@@ -2679,13 +2706,13 @@
   },
   "options_dictionaries_heading": { "message": "Словники" },
   "options_dictionaries_intro": {
-    "message": "Додайте словники, щоб бачити детальні визначення слів у бульбашці перекладу. Ви можете змінювати порядок їх відображення за допомогою стрілок."
+    "message": "Додайте словники, щоб бачити детальні визначення слів у бульбашці перекладу."
   },
   "options_dictionaries_sources": {
-    "message": "Словники зі списку походять із WikDict. Власні додаєте з файла або за посиланням, зокрема кілька для однієї мови. Джерела разом із ліцензіями:"
+    "message": "Словники з каталогу походять із WikDict. Власні додаєте з файла або за посиланням, зокрема кілька для однієї мови. Джерела разом із ліцензіями:"
   },
   "options_dictionary_order_hint": {
-    "message": "Бульбашка показує статті в порядку зі списку нижче. Використовуються лише словники мови, яку ви читаєте."
+    "message": "Бульбашка показує статті в порядку зі списку – окремо для кожної мови. Порядок змінюєш стрілками."
   },
   "options_dictionary_note_from": { "message": "Словники завантажуються з" },
   "options_dictionary_note_rest": {
@@ -2811,10 +2838,7 @@
     "message": "Підтвердити видалення: $NAME$",
     "placeholders": { "name": { "content": "$1" } }
   },
-  "options_size_here": {
-    "message": "$SIZE$ на пристрої",
-    "placeholders": { "size": { "content": "$1" } }
-  },
+
   "options_progress_of": {
     "message": "$RECEIVED$ з $TOTAL$",
     "placeholders": {
@@ -2877,8 +2901,14 @@
     }
   },
   "options_no_models": { "message": "Тут немає моделей і немає чого завантажувати - ця збірка не перелічує жодної." },
-  "options_filter_no_match_models": { "message": "Жодна пара не підходить. Фільтр приймає назву мови або код." },
-  "options_filter_no_match_dictionaries": { "message": "Жоден словник не підходить. Фільтр приймає назву мови або код." },
+  "options_filter_no_match_models": {
+    "message": "Жодна пара не збігається з «$QUERY$». Фільтр приймає назву мови або код.",
+    "placeholders": { "query": { "content": "$1", "example": "polish" } }
+  },
+  "options_filter_no_match_dictionaries": {
+    "message": "Жоден словник не збігається з «$QUERY$». Фільтр приймає назву мови або код.",
+    "placeholders": { "query": { "content": "$1", "example": "polish" } }
+  },
   "options_no_disabled": { "message": "Жоден сайт не вимкнено." },
   "options_turn_back_on": { "message": "Увімкнути назад" },
   "options_reading_model_files": {
@@ -2925,11 +2955,12 @@
     "placeholders": { "name": { "content": "$1", "example": "WikDict en-pl" } }
   },
   "options_dictionary_moved": {
-    "message": "$NAME$ тепер $PLACE$ з $TOTAL$.",
+    "message": "$NAME$: позиція $PLACE$ з $TOTAL$, $LANGUAGE$.",
     "placeholders": {
       "name": { "content": "$1", "example": "WikDict en-pl" },
       "place": { "content": "$2", "example": "1" },
-      "total": { "content": "$3", "example": "3" }
+      "total": { "content": "$3", "example": "3" },
+      "language": { "content": "$4", "example": "English" }
     }
   },
   "options_dictionary_file_name": {

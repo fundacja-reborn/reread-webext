@@ -2363,6 +2363,33 @@
   "options_filter_placeholder": { "message": "Filter by language or code" },
   "options_filter_models_label": { "message": "Filter the list of translation models" },
   "options_filter_dictionaries_label": { "message": "Filter the list of dictionaries" },
+  "options_list_installed": {
+    "message": "On this device",
+    "description": "Heading of the block listing what is already on this device, in both the models and the dictionaries subsection."
+  },
+  "options_list_available": {
+    "message": "To download",
+    "description": "Heading of the block holding the catalogue: the filter, the list to download from and the by-hand doors."
+  },
+  "options_no_models_yet": {
+    "message": "No translation model on this device yet. Pick a pair in",
+    "description": "Said in place of an empty list of installed models; the name of the catalogue block follows as a link, then the rest."
+  },
+  "options_no_models_yet_rest": { "message": "below." },
+  "options_no_dictionaries_yet": {
+    "message": "No dictionary on this device yet. Pick one in",
+    "description": "Said in place of an empty list of installed dictionaries; the name of the catalogue block follows as a link, then the rest."
+  },
+  "options_no_dictionaries_yet_rest": { "message": "below, or add your own." },
+  "options_dictionary_into": {
+    "message": "into $LANGUAGE$",
+    "description": "The language a dictionary explains words in, in the small print of its row. Its own words' language is the heading the row stands under.",
+    "placeholders": { "language": { "content": "$1", "example": "Polish" } }
+  },
+  "options_dictionary_monolingual": {
+    "message": "monolingual",
+    "description": "Said in place of the target language for a dictionary that explains a language in itself."
+  },
   "options_show_all": {
     "message": "Show all ($COUNT$)",
     "description": "Unfolds a catalogue past its installed rows; the count is every row the filter lets through - the whole list while nothing is typed.",
@@ -2393,14 +2420,14 @@
   },
   "options_dictionaries_heading": { "message": "Dictionaries" },
   "options_dictionaries_intro": {
-    "message": "Add dictionaries to see detailed word definitions in the translation bubble. You can change the order in which they appear using the arrows."
+    "message": "Add dictionaries to see detailed word definitions in the translation bubble."
   },
   "options_dictionaries_sources": {
-    "message": "The dictionaries in the list come from WikDict. You can add your own from a file or from a link, several for one language as well. The sources, each with its licence:",
+    "message": "The dictionaries in the catalogue come from WikDict. You can add your own from a file or from a link, several for one language as well. The sources, each with its licence:",
     "description": "The second paragraph of the dictionaries section's intro (D192). Ends just before the address, which stands in the page as a link; the sentence's closing full stop is part of the page. Must not end with whitespace."
   },
   "options_dictionary_order_hint": {
-    "message": "The bubble shows the entries in the order below. Only the dictionaries of the language you are reading are used.",
+    "message": "The bubble shows the entries in the order below, language by language. The arrows change it.",
     "description": "Above the list of dictionaries, shown only once a second one is stored."
   },
   "options_dictionary_note_from": {
@@ -2539,10 +2566,7 @@
     "description": "The same button, armed and asking; shared by models (the pair label) and dictionaries (the name).",
     "placeholders": { "name": { "content": "$1", "example": "English to Polish" } }
   },
-  "options_size_here": {
-    "message": "$SIZE$ here",
-    "placeholders": { "size": { "content": "$1", "example": "40.2 MB" } }
-  },
+
   "options_progress_of": {
     "message": "$RECEIVED$ of $TOTAL$",
     "placeholders": {
@@ -2609,8 +2633,14 @@
     }
   },
   "options_no_models": { "message": "No models here, and none to download - this build lists none." },
-  "options_filter_no_match_models": { "message": "No pair matches that. The filter takes a language name or a code." },
-  "options_filter_no_match_dictionaries": { "message": "No dictionary matches that. The filter takes a language name or a code." },
+  "options_filter_no_match_models": {
+    "message": "No pair matches “$QUERY$”. The filter takes a language name or a code.",
+    "placeholders": { "query": { "content": "$1", "example": "polish" } }
+  },
+  "options_filter_no_match_dictionaries": {
+    "message": "No dictionary matches “$QUERY$”. The filter takes a language name or a code.",
+    "placeholders": { "query": { "content": "$1", "example": "polish" } }
+  },
   "options_no_disabled": { "message": "No sites are switched off." },
   "options_turn_back_on": { "message": "Turn back on" },
   "options_reading_model_files": {
@@ -2660,12 +2690,13 @@
     "placeholders": { "name": { "content": "$1", "example": "WikDict en-pl" } }
   },
   "options_dictionary_moved": {
-    "message": "$NAME$ is now $PLACE$ of $TOTAL$.",
+    "message": "$NAME$ is now $PLACE$ of $TOTAL$, $LANGUAGE$.",
     "description": "Said after an arrow moves a dictionary; the row that moved may be out of sight, and a screen reader has nothing else to go on.",
     "placeholders": {
       "name": { "content": "$1", "example": "WikDict en-pl" },
       "place": { "content": "$2", "example": "1" },
-      "total": { "content": "$3", "example": "3" }
+      "total": { "content": "$3", "example": "3" },
+      "language": { "content": "$4", "example": "English" }
     }
   },
   "options_dictionary_file_name": {

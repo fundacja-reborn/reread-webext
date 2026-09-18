@@ -2657,6 +2657,33 @@
   "options_filter_placeholder": { "message": "Filtruj po języku lub kodzie" },
   "options_filter_models_label": { "message": "Filtruj listę modeli tłumaczeniowych" },
   "options_filter_dictionaries_label": { "message": "Filtruj listę słowników" },
+  "options_list_installed": {
+    "message": "Na tym urządzeniu",
+    "description": "Heading of the block listing what is already on this device, in both the models and the dictionaries subsection."
+  },
+  "options_list_available": {
+    "message": "Do pobrania",
+    "description": "Heading of the block holding the catalogue: the filter, the list to download from and the by-hand doors."
+  },
+  "options_no_models_yet": {
+    "message": "Nie ma jeszcze żadnego modelu tłumaczenia. Wybierz parę w sekcji",
+    "description": "Said in place of an empty list of installed models; the name of the catalogue block follows as a link, then the rest."
+  },
+  "options_no_models_yet_rest": { "message": "poniżej." },
+  "options_no_dictionaries_yet": {
+    "message": "Nie ma jeszcze żadnego słownika. Wybierz słownik w sekcji",
+    "description": "Said in place of an empty list of installed dictionaries; the name of the catalogue block follows as a link, then the rest."
+  },
+  "options_no_dictionaries_yet_rest": { "message": "poniżej albo dodaj własny." },
+  "options_dictionary_into": {
+    "message": "→ $LANGUAGE$",
+    "description": "The language a dictionary explains words in, in the small print of its row. Its own words' language is the heading the row stands under.",
+    "placeholders": { "language": { "content": "$1", "example": "Polish" } }
+  },
+  "options_dictionary_monolingual": {
+    "message": "jednojęzyczny",
+    "description": "Said in place of the target language for a dictionary that explains a language in itself."
+  },
   "options_show_all": {
     "message": "Pokaż wszystkie ($COUNT$)",
     "placeholders": { "count": { "content": "$1" } }
@@ -2679,13 +2706,13 @@
   },
   "options_dictionaries_heading": { "message": "Słowniki" },
   "options_dictionaries_intro": {
-    "message": "Dodaj słowniki, aby widzieć szczegółowe definicje słów w dymku tłumaczenia. Możesz zmienić kolejność ich wyświetlania za pomocą strzałek."
+    "message": "Dodaj słowniki, aby widzieć szczegółowe definicje słów w dymku tłumaczenia."
   },
   "options_dictionaries_sources": {
-    "message": "Słowniki z listy pochodzą z WikDict. Własne dodasz z pliku albo z linku, także kilka dla jednego języka. Źródła wraz z licencjami:"
+    "message": "Słowniki z katalogu pochodzą z WikDict. Własne dodasz z pliku albo z linku, także kilka dla jednego języka. Źródła wraz z licencjami:"
   },
   "options_dictionary_order_hint": {
-    "message": "Dymek pokazuje hasła w kolejności z listy poniżej. Używane są tylko słowniki języka, który czytasz."
+    "message": "Dymek pokazuje hasła w kolejności z listy – osobno dla każdego języka. Kolejność zmienisz strzałkami."
   },
   "options_dictionary_note_from": { "message": "Słowniki pobierane są z" },
   "options_dictionary_note_rest": {
@@ -2811,10 +2838,7 @@
     "message": "Potwierdź usunięcie: $NAME$",
     "placeholders": { "name": { "content": "$1" } }
   },
-  "options_size_here": {
-    "message": "$SIZE$ na urządzeniu",
-    "placeholders": { "size": { "content": "$1" } }
-  },
+
   "options_progress_of": {
     "message": "$RECEIVED$ z $TOTAL$",
     "placeholders": {
@@ -2877,8 +2901,14 @@
     }
   },
   "options_no_models": { "message": "Nie ma tu modeli ani niczego do pobrania – to wydanie nie wymienia żadnego." },
-  "options_filter_no_match_models": { "message": "Żadna para nie pasuje. Filtr przyjmuje nazwę języka lub kod." },
-  "options_filter_no_match_dictionaries": { "message": "Żaden słownik nie pasuje. Filtr przyjmuje nazwę języka lub kod." },
+  "options_filter_no_match_models": {
+    "message": "Żadna para nie pasuje do „$QUERY$”. Filtr przyjmuje nazwę języka lub kod.",
+    "placeholders": { "query": { "content": "$1", "example": "polish" } }
+  },
+  "options_filter_no_match_dictionaries": {
+    "message": "Żaden słownik nie pasuje do „$QUERY$”. Filtr przyjmuje nazwę języka lub kod.",
+    "placeholders": { "query": { "content": "$1", "example": "polish" } }
+  },
   "options_no_disabled": { "message": "Żadna witryna nie jest wyłączona." },
   "options_turn_back_on": { "message": "Włącz z powrotem" },
   "options_reading_model_files": {
@@ -2925,11 +2955,12 @@
     "placeholders": { "name": { "content": "$1", "example": "WikDict en-pl" } }
   },
   "options_dictionary_moved": {
-    "message": "$NAME$ jest teraz $PLACE$ z $TOTAL$.",
+    "message": "$NAME$: pozycja $PLACE$ z $TOTAL$, $LANGUAGE$.",
     "placeholders": {
       "name": { "content": "$1", "example": "WikDict en-pl" },
       "place": { "content": "$2", "example": "1" },
-      "total": { "content": "$3", "example": "3" }
+      "total": { "content": "$3", "example": "3" },
+      "language": { "content": "$4", "example": "English" }
     }
   },
   "options_dictionary_file_name": {

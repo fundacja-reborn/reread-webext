@@ -138,7 +138,10 @@ function readRow(row, inherited) {
  * @returns {Part}
  */
 function readSection(section, inherited) {
-  const heading = section.querySelector("h2, h3");
+  // h4 since D263: the lists split into "on this device" and "to download",
+  // and a query that names one of them has to find the block rather than the
+  // whole subsection.
+  const heading = section.querySelector("h2, h3, h4");
   const title = heading?.textContent ?? "";
   const keywords = section.dataset["keywords"] ?? "";
   const text = folded([inherited, title, keywords.length > 0 ? t(keywords) : ""].join(" "));

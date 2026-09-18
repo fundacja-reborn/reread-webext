@@ -217,10 +217,13 @@ describe("the settings page's type", () => {
     assert.match(rule(css, ".note-tail"), /white-space: nowrap/, "the space before a trigger is a break opportunity again");
     assert.match(css, /button\.note-more:hover,\nbutton\.note-more:focus-visible \{\n  color: var\(--page-fg\);\n  text-decoration: underline;/, "a trigger says nothing under the pointer");
     // The dictionary rows' own fold wears the page's triangle rather than the
-    // browser's larger marker.
-    assert.match(rule(css, ".dictionary-details summary"), /list-style: none/, "a dictionary's fold keeps the browser's own marker");
-    assert.match(css, /\.dictionary-details summary::before \{\n  content: "\\25B8\\00A0";/, "a dictionary's fold wears no triangle of the page's");
-    assert.match(css, /\.dictionary-details\[open\] summary::before \{\n  content: "\\25BE\\00A0";/, "an open dictionary fold keeps the closed triangle");
+    // browser's larger marker. Since D263 its trigger is the last word of the
+    // row's second line, so the triangle rides on that word and the summary
+    // around it is the whole line.
+    assert.match(rule(css, "summary.dictionary-meta"), /list-style: none/, "a dictionary's fold keeps the browser's own marker");
+    assert.match(css, /\.dictionary-more::before \{\n  content: "\\25B8\\00A0";/, "a dictionary's fold wears no triangle of the page's");
+    assert.match(css, /\.dictionary-details\[open\] \.dictionary-more::before \{\n  content: "\\25BE\\00A0";/, "an open dictionary fold keeps the closed triangle");
+    assert.match(css, /summary\.dictionary-meta:is\(:hover, :focus-visible\) \.dictionary-more \{\n  text-decoration: underline;/, "a dictionary's fold says nothing under the pointer");
   });
 
   it("keeps the heavier weight for headings and the section being read (D259, K3)", async () => {
@@ -234,7 +237,16 @@ describe("the settings page's type", () => {
     const heavy = [...css.matchAll(/\n([^\n{]+) \{[^}]*?font-weight: (600|700|bold)/g)].map((match) => String(match[1]));
     assert.deepEqual(
       heavy,
-      ["header h1", "main h2", "main h3", '.sections a[aria-current="location"]', ".bar-sections"],
+      [
+        "header h1",
+        "main h2",
+        "main h3",
+        // The two the lists brought (D263): a block's heading and a group's.
+        "main h4",
+        "main h5",
+        '.sections a[aria-current="location"]',
+        ".bar-sections",
+      ],
       "something other than a heading or the section being read is set at a heading's weight",
     );
   });

@@ -116,6 +116,9 @@ describe("the settings page's navigation", () => {
     // The names come from the rows' own keys, so renaming a setting renames
     // every reference to it.
     const pair = markup.slice(markup.indexOf('id="s-pair"'));
-    assert.match(pair.slice(0, 900), /<a href="#translation-models" data-i18n="options_models_heading">/, "the pair's way to the models is not a link");
+    // Since D263 it lands on the block a model is fetched from rather than on
+    // the subsection's heading: the sentence says "download them in", and the
+    // landing hands the focus to that block's filter.
+    assert.match(pair.slice(0, 900), /<a href="#translation-models-available" data-i18n="options_models_heading">/, "the pair's way to the models is not a link");
   });
 });

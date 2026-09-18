@@ -27,6 +27,14 @@
   --ui-h1: 1.5rem;
   --ui-h2: 1.25rem;
   --ui-h3: 1.0625rem;
+  /* The two voices the lists brought (D263): the heading of a block inside a
+     subsection - "On this device", "To download" - at the text's own size and
+     a heading's weight, and the heading of a group inside a list - a language
+     - at the small print's size. A dictionary's name is set at the text's
+     size and 500, so neither is larger nor heavier than the heading above it,
+     which is the one thing a list of five names must not be (§8). */
+  --ui-h4: 0.9375rem;
+  --ui-h5: 0.8125rem;
   --ui-text: 0.9375rem;
   --ui-label-weight: 400;
   --ui-small: 0.8125rem;
@@ -88,6 +96,14 @@
   --gap-intro-after: 0.75rem;
   --gap-block: 1rem;
   --gap-row: 0.75rem;
+  /* The blocks a list subsection is made of (D263, L4): a block stands from
+     the one above it as far as a subsection stands from its own heading's
+     content, and a group of one language from the next by the same amount -
+     they are the same level of grouping. Their headings hold their content as
+     close as an h3 holds its own. */
+  --gap-block-before: 1.5rem;
+  --gap-h4-after: 0.5rem;
+  --gap-h5-after: 0.5rem;
 
   /* Half the leading of each voice: what the browser puts between a line box's
      edge and the ink inside it. `text-box-trim` would say this exactly, and
@@ -100,6 +116,8 @@
   --ink-box: 1.17;
   --lead-h2: calc((1.3 - var(--ink-box)) * var(--ui-h2) / 2);
   --lead-h3: calc((1.35 - var(--ink-box)) * var(--ui-h3) / 2);
+  --lead-h4: calc((1.35 - var(--ink-box)) * var(--ui-h4) / 2);
+  --lead-h5: calc((1.4 - var(--ink-box)) * var(--ui-h5) / 2);
   --lead-text: calc((1.45 - var(--ink-box)) * var(--ui-text) / 2);
   --lead-small: calc((1.5 - var(--ink-box)) * var(--ui-small) / 2);
 
@@ -115,6 +133,15 @@
   --m-block: calc(var(--gap-block) - var(--lead-small) - var(--lead-text));
   --m-row-top: calc(var(--gap-row) - var(--lead-row));
   --m-row-bottom: calc(var(--gap-row) - var(--lead-small));
+  /* The blocks: what stands above an h4 is a list (its last row's ink) or a
+     paragraph, and what stands under an h4 or an h5 is a row of a list, which
+     carries the control floor's own extra - so the rows' gaps take
+     `--row-extra` off, exactly as `--m-h3-after` does for a group of
+     settings. */
+  --m-h4-before: calc(var(--gap-block-before) - var(--lead-small) - var(--lead-h4));
+  --m-h4-after: calc(var(--gap-h4-after) - var(--lead-h4) - var(--lead-text));
+  --m-h5-before: calc(var(--gap-block-before) - var(--lead-small) - var(--lead-h5));
+  --m-h5-after: calc(var(--gap-h5-after) - var(--lead-h5) - var(--lead-text));
 
   /* A row's first line is not where a paragraph's would be: it stands in a
      box as tall as the touch floor, centred, so its ink begins some seven
@@ -183,6 +210,18 @@ main h2 {
 main h3 {
   font-size: var(--ui-h3);
   line-height: 1.35;
+  font-weight: 600;
+}
+
+main h4 {
+  font-size: var(--ui-h4);
+  line-height: 1.35;
+  font-weight: 600;
+}
+
+main h5 {
+  font-size: var(--ui-h5);
+  line-height: 1.4;
   font-weight: 600;
 }
 
@@ -576,6 +615,30 @@ h3 {
   scroll-margin-top: 0.75rem;
 }
 
+/* A block's heading inside a subsection (D263): "On this device" and "To
+   download", the two halves every catalogue is read in. A block, not a part
+   of the section, so it opens on the same air as any block and carries no
+   rule and no size of its own beyond the text's.
+
+   A group's heading inside a list is a language: the small print's size and
+   the muted ink, because it names what the rows under it have in common
+   rather than adding a level to the page (L2, L5). */
+main h4 {
+  margin: var(--m-h4-before) 0 0;
+  scroll-margin-top: 0.75rem;
+}
+
+main h5 {
+  margin: var(--m-h5-before) 0 var(--m-h5-after);
+  color: var(--page-muted);
+}
+
+/* The first group of a list opens under the block's own heading, which has
+   already put its air there. */
+main h5:first-child {
+  margin-top: 0;
+}
+
 /* --- the heading and what belongs to it (D259, S2) ---
 
    A section's heading, its meta line and its opening paragraphs are one
@@ -598,12 +661,37 @@ section > header:has(> h3:last-child) {
   margin-bottom: var(--m-h3-after);
 }
 
+section > header:has(> h4:last-child) {
+  margin-bottom: var(--m-h4-after);
+}
+
+/* The line about the order hides itself while one dictionary stands alone
+   (`renderCatalog`), and a header whose only drawn child is its heading hands
+   on the heading's own gap rather than the intro's. */
+section > header:has(> h4 + [hidden]:last-child) {
+  margin-bottom: var(--m-h4-after);
+}
+
 section > header > h2 {
   margin-bottom: var(--m-h2-after);
 }
 
 section > header > h3 {
   margin-bottom: var(--m-h3-after);
+}
+
+section > header > h4 {
+  margin-bottom: var(--m-h4-after);
+}
+
+/* A block whose neighbour above ends in a list of control rows stands that
+   floor's slack closer: the last row's ink sits `--row-extra` above the foot
+   of its own box, exactly as the first row's sits that far below its top -
+   which is what `.models` hands back at both its own ends (D259). Written as
+   a question about the block above, so an empty list - a paragraph, no
+   control floor - keeps the plain gap. */
+section:has(> .models > .model) + section > header > h4 {
+  margin-top: calc(var(--m-h4-before) - var(--row-extra));
 }
 
 /* `:is()` carries the specificity of its heaviest arm, so these outrank the
@@ -911,26 +999,37 @@ p.explain.row-more {
   white-space: nowrap;
 }
 
-/* --- the refresh line: a quiet button and the list's date --- */
+/* --- the catalogue's own line: the filter, the press that refreshes the
+   list, and the day the list is from under them (D263, K1) ---
 
-/* The button keeps the shared secondary look on purpose: refreshing is the
+   One line, because they are one thing to do with a catalogue of a hundred
+   rows: narrow it, or fetch it again. The field takes the room that is left;
+   the button keeps the shared secondary look on purpose - refreshing is the
    rare act of this section, and the accent stays with what the section is
-   for. On a narrow screen the date wraps below the button. */
-.list-refresh {
+   for. Below 480px the field takes the whole width and the button drops under
+   it (the one media query at the foot of this sheet). */
+.list-tools {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: 0.35rem 0.9rem;
-  margin: 0 0 var(--m-block);
+  gap: 0.5rem;
+  margin: 0 0 0.35rem;
 }
 
-.list-refresh button {
+.list-tools .model-filter {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+}
+
+.list-update {
+  flex: none;
   min-height: var(--ui-control);
   padding: 0.35rem 1rem;
+  white-space: nowrap;
 }
 
 .list-dated {
-  margin: 0;
+  margin: 0 0 var(--m-block);
   color: var(--page-muted);
   font-size: var(--ui-small);
 }
@@ -1056,16 +1155,15 @@ ul.models {
   padding: var(--list-pad) 0;
 }
 
-/* The first line: the pair, the badge of the pair being read, and the
-   buttons at the right edge. The pair never breaks in the middle - "English
-   to" over "Polish" read as two things - while the badge may drop to the
-   next line; the buttons are one group that never wraps inside itself.
-   Only a pair wider than the whole row is cut, with an ellipsis, rather
-   than pushing the page into a sideways scroll. */
+/* The first line: the name of the book and the buttons at the right edge
+   (D263, L1). The buttons are one group that never wraps inside itself and
+   keep the line's start, so a long name wraps under them rather than pushing
+   them about. The catalogue's rows and the download-in-progress row use the
+   same line for the pair and their one button. */
 .dictionary-head {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.25rem 0.6rem;
 }
 
@@ -1075,6 +1173,11 @@ ul.models {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  /* The catalogue's rows are one line and a button: the pair sits on the
+     buttons' own centre line, which `flex-start` above would leave it off. */
+  min-height: var(--ui-control);
+  display: flex;
+  align-items: center;
 }
 
 .dictionary-head .badge {
@@ -1099,24 +1202,60 @@ ul.models {
 /* The row's title: the name the reader knows the book by, a half step over
    the small print under it - not a heading's weight (D259, K3): five bold
    dictionary names in a column outweighed the "Dictionaries" heading they
-   stand under. Wrapped when long, never cut. */
+   stand under. Wrapped when long, never cut.
+
+   Since D263 it opens the row, so it takes the room the buttons leave and
+   stands on their own centre line while it is one line long. */
 .dictionary-name {
-  margin: 0.15rem 0 0;
+  margin: 0;
+  flex: 1 1 10rem;
+  min-width: 0;
+  min-height: var(--ui-control);
+  display: flex;
+  align-items: center;
   font-weight: 500;
   overflow-wrap: anywhere;
 }
 
-/* The small print under the title: the file's name when it differs, the
-   counts, the size - one line that wraps between its items on a phone. A
-   count keeps its unit on one line; a file's name may break anywhere,
-   since a name written without spaces would otherwise be wider than the
-   screen. */
+/* The small print under the title: the language the book explains words in,
+   the count, the size - one line that wraps between its items on a phone. A
+   count keeps its unit on one line.
+
+   Since D263 this line is the fold's own summary: the door stands at its end
+   instead of opening a line of its own, and the whole line is what a press
+   or a keyboard reaches - which on a phone is a target the width of the row
+   rather than one word of small print. */
 .dictionary-meta {
-  margin: 0.15rem 0 0;
+  margin: 0;
   color: var(--page-muted);
   font-size: var(--ui-small);
   font-variant-numeric: tabular-nums;
   overflow-wrap: anywhere;
+}
+
+summary.dictionary-meta {
+  cursor: pointer;
+  list-style: none;
+}
+
+summary.dictionary-meta::-webkit-details-marker {
+  display: none;
+}
+
+/* The door at the end of the line, in the page's one fold dress (D258, K1):
+   the triangle, no underline at rest, underlined under the pointer and at
+   the keyboard. It travels with the dot before it in a box that does not
+   break (`.note-tail`), because a hard space alone never held it. */
+.dictionary-more::before {
+  content: "\25B8\00A0";
+}
+
+.dictionary-details[open] .dictionary-more::before {
+  content: "\25BE\00A0";
+}
+
+summary.dictionary-meta:is(:hover, :focus-visible) .dictionary-more {
+  text-decoration: underline;
 }
 
 .dictionary-count {
@@ -1131,35 +1270,13 @@ ul.models {
   gap: 0.25rem 0.75rem;
 }
 
-/* --- the fold every finished book ends with: "Details" --- */
+/* --- the fold every finished book ends with: "Details" ---
 
-/* A dictionary's own fold wears the page's one trigger (D259, K1): it used to
-   keep the browser's larger marker and no underline at all, so the same word
-   in the same grey was drawn two ways a screen apart. The block padding is
-   the touch target - the words alone stand short of it. */
-.dictionary-details summary {
-  padding: 0.7rem 0;
-  cursor: pointer;
-  color: var(--page-muted);
-  font-size: var(--ui-small);
-  list-style: none;
-}
-
-.dictionary-details summary::-webkit-details-marker {
-  display: none;
-}
-
-.dictionary-details summary::before {
-  content: "\25B8\00A0";
-}
-
-.dictionary-details[open] summary::before {
-  content: "\25BE\00A0";
-}
-
-.dictionary-details summary:is(:hover, :focus-visible) {
-  color: var(--page-fg);
-  text-decoration: underline;
+   Its trigger is the row's own second line since D263, dressed where that
+   line is styled above; what is left here is what the fold opens, and the
+   air it stands in. */
+.dictionary-details > :not(summary):first-of-type {
+  margin-top: 0.5rem;
 }
 
 /* The name a reader gives a dictionary (D199): the caption over the field,
@@ -1938,5 +2055,20 @@ summary::marker {
   .dictionary-actions {
     flex-basis: 100%;
     justify-content: flex-end;
+  }
+
+  /* The catalogue's line splits where a field and a button no longer share
+     one: the field takes the width, the button stands under it at the same
+     edge as every other button on the page. */
+  .list-tools {
+    flex-wrap: wrap;
+  }
+
+  .list-tools .model-filter {
+    flex-basis: 100%;
+  }
+
+  .list-update {
+    margin-left: auto;
   }
 }

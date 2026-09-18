@@ -166,6 +166,23 @@ export function land(id) {
     landed.dataset["landed"] = "";
     marked = landed;
   }
+  focusFilterOf(landed);
+}
+
+/**
+ * The one landing that hands the focus on (D263, K5): a jump to a catalogue
+ * block - from the first steps, from the pair row, from an empty list - is a
+ * jump made to look something up among a hundred rows, and the field that
+ * looks things up is the first thing under the heading. The heading keeps the
+ * scroll and the screen reader's announcement; only the caret moves on.
+ *
+ * @param {HTMLElement} landed
+ */
+function focusFilterOf(landed) {
+  const section = landed.tagName === "H4" ? landed.closest("section") : null;
+  if (section === null) return;
+  const filter = section.querySelector("input[type='search']");
+  if (filter instanceof HTMLInputElement) filter.focus({ preventScroll: true });
 }
 
 /**

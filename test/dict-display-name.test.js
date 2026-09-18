@@ -132,12 +132,14 @@ describe("the settings page's field", () => {
     // that stopped halfway is still being named by its files.
     assert.ok(row.indexOf("renderUnfinished(row, head, dictionary)") < row.indexOf("renameField(dictionary)"));
     const fold = row.slice(row.indexOf('element("details", "dictionary-details")'));
-    assert.match(fold, /options_details/);
+    // Its trigger is the row's own second line since D263 - the small print,
+    // built by `fillDictionaryMeta`, which ends in the word.
+    assert.match(fold, /element\("summary", "dictionary-meta"\)/);
     assert.match(fold, /renameField\(dictionary\)/);
     assert.match(fold, /options_dictionary_file_name", dictionary\.name/);
-    // Unconditional: a book without a credit has a fold with the field and
-    // the file's name in it.
-    assert.doesNotMatch(fold.slice(0, fold.indexOf("row.append(details)")), /if \(dictionary\.credit !== null\) \{/);
+    // The field's own placeholder is the file's name, so the line saying it
+    // again stands only where the reader gave the book another name (V10).
+    assert.match(fold, /if \(fileNameWorthSaying\(dictionary\)\) \{/);
   });
 
   it("says the new name on the row in place, with no redraw and no sentence", () => {

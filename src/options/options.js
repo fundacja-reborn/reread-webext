@@ -56,7 +56,7 @@ import {
 } from "../lib/dict/import.js";
 import { describeZipProblem, readZip } from "../lib/dict/zip.js";
 import { entriesReadFrom, rowBatches } from "../lib/dict/rows.js";
-import { afterMove } from "../lib/dict/order.js";
+import { moveWithinSourceLanguage } from "../lib/dict/order.js";
 import { DISPLAY_NAME_LIMIT, cleanDisplayName, fileNameWorthSaying, nameHolder, shownName } from "../lib/dict/display-name.js";
 import {
   beginImport,
@@ -196,14 +196,15 @@ let modelStored = null;
 let dictionaryStored = null;
 
 /**
- * The installed dictionaries as the last render found them, in the order they
- * answer in. An arrow moves one row within the whole list, so the press has to
- * know the list - and reading it back off the screen would mean trusting the
- * screen about what the database holds.
+ * The installed dictionaries as the last render found them: the order they
+ * answer in, each with the language whose words it explains. An arrow moves a
+ * row within its own language (D263), so the press has to know both - and
+ * reading them back off the screen would mean trusting the screen about what
+ * the database holds.
  *
- * @type {string[]}
+ * @type {{ id: string, lang: string }[]}
  */
-let dictionaryOrder = [];
+let dictionaryPlaces = [];
 
 /**
  * Whether the card stood open the last time it was drawn. The fold is only
@@ -1177,17 +1178,26 @@ function deleteButtonsIn(containerId) {
  * After a delete the redraw took the pressed button with it; focus must not
  * fall to the body. The place the button held, counted before the delete,
  * names the successor - the next row's Delete, the previous one's after the
- * last, the section's filter once none are left.
+ * last, and the block's own heading once none are left: since D263 the filter
+ * belongs to the catalogue below, and the heading is what the row that was
+ * deleted stood under. A heading is not focusable by itself, so it is made so
+ * for the one moment it has to receive the focus.
  *
  * @param {string} containerId
- * @param {string} filterId
+ * @param {string} emptyId what takes the focus when the list has emptied
  * @param {number} at
  */
-function focusDeleteIn(containerId, filterId, at) {
+function focusDeleteIn(containerId, emptyId, at) {
   const deletes = deleteButtonsIn(containerId);
   const successor = deletes[Math.min(at, deletes.length - 1)];
-  if (successor !== undefined) successor.focus();
-  else document.getElementById(filterId)?.focus();
+  if (successor !== undefined) {
+    successor.focus();
+    return;
+  }
+  const heading = document.getElementById(emptyId);
+  if (heading === null) return;
+  if (!heading.hasAttribute("tabindex")) heading.setAttribute("tabindex", "-1");
+  heading.focus();
 }
 
 /**
@@ -1210,7 +1220,7 @@ function renderRow(row) {
   container.append(name, meta, act);
 
   if (row.installed !== null) {
-    meta.append(element("span", "", t("options_size_here", megabytes(row.installed.bytes))));
+    meta.append(element("span", "", megabytes(row.installed.bytes)));
 
     // The list names a different training run than the one this device holds:
     // one press replaces the model in place. A model with no recorded source -
@@ -1336,7 +1346,7 @@ async function removeModel(row, button) {
   await deleteModel(row.pair);
   status(t("options_deleted_model", pairLabel(row.from, row.to)));
   await renderModels();
-  focusDeleteIn("models", "model-filter", at);
+  focusDeleteIn("models", "translation-models-installed", at);
 }
 
 /**
@@ -1507,8 +1517,10 @@ async function choosePair(pair) {
  * @param {string} noneId
  * @param {string} showAllId
  * @param {boolean} expanded
+ * @param {(query: string) => string} noMatch what the list says when the
+ *   filter lets nothing through, in the words of the list it stands over
  */
-function applyFilterIn(containerId, inputId, noneId, showAllId, expanded) {
+function applyFilterIn(containerId, inputId, noneId, showAllId, expanded, noMatch) {
   const container = document.getElementById(containerId);
   if (container === null) return;
 
@@ -1534,8 +1546,14 @@ function applyFilterIn(containerId, inputId, noneId, showAllId, expanded) {
 
   // "The filter matched nothing" is only true of a filter: a folded list
   // showing none of its rows is answered by "Show all" below, not by this.
+  // It quotes what was typed (D263, §7): on a page where two filters and a
+  // search box stand within a screen of each other, a bare "nothing matches"
+  // does not say which of them answered.
   const none = document.getElementById(noneId);
-  if (none !== null) none.hidden = !filterActive(query) || matching > 0;
+  if (none !== null) {
+    none.hidden = !filterActive(query) || matching > 0;
+    if (!none.hidden) none.textContent = noMatch(query.trim());
+  }
 
   const showAll = document.getElementById(showAllId);
   if (showAll instanceof HTMLButtonElement) {
@@ -1547,11 +1565,20 @@ function applyFilterIn(containerId, inputId, noneId, showAllId, expanded) {
 }
 
 function applyModelFilter() {
-  applyFilterIn("models", "model-filter", "model-none", "models-show-all", modelsExpanded);
+  applyFilterIn("models-catalog", "model-filter", "model-none", "models-show-all", modelsExpanded, (query) =>
+    t("options_filter_no_match_models", query),
+  );
 }
 
 function applyCatalogFilter() {
-  applyFilterIn("dictionary-catalog", "dictionary-filter", "dictionary-none", "dictionaries-show-all", dictionariesExpanded);
+  applyFilterIn(
+    "dictionary-catalog",
+    "dictionary-filter",
+    "dictionary-none",
+    "dictionaries-show-all",
+    dictionariesExpanded,
+    (query) => t("options_filter_no_match_dictionaries", query),
+  );
 }
 
 /**
@@ -1560,11 +1587,11 @@ function applyCatalogFilter() {
  * first row it revealed - the same place the eye went; folding leaves it on
  * the button, which stays where it is to be pressed again.
  *
- * @param {"models" | "dictionary-catalog"} containerId
+ * @param {"models-catalog" | "dictionary-catalog"} containerId
  */
 function toggleList(containerId) {
-  const opening = containerId === "models" ? !modelsExpanded : !dictionariesExpanded;
-  if (containerId === "models") {
+  const opening = containerId === "models-catalog" ? !modelsExpanded : !dictionariesExpanded;
+  if (containerId === "models-catalog") {
     modelsExpanded = opening;
     applyModelFilter();
   } else {
@@ -1596,23 +1623,42 @@ async function renderModels() {
 
   container.replaceChildren();
 
-  if (rows.length === 0) {
-    container.append(element("p", "empty", t("options_no_models")));
+  // What is here, in the block that opens the subsection (D263), and what can
+  // be fetched, in the catalogue below it. One render, two lists: the rows
+  // come from one read of the store and one display order.
+  const here = rows.filter((row) => row.installed !== null);
+  if (here.length === 0) {
+    container.append(emptyList(t("options_no_models_yet"), t("options_no_models_yet_rest"), "translation-models-available"));
   } else {
-    for (const row of rows) {
+    for (const row of here) {
+      const rendered = renderRow(row);
+      rendered.id = `model-${row.pair}`;
+      container.append(rendered);
+    }
+  }
+
+  const catalog = document.getElementById("models-catalog");
+  if (catalog === null) return;
+  catalog.replaceChildren();
+
+  const offered = rows.filter((row) => row.installed === null);
+  if (offered.length === 0) {
+    catalog.append(element("p", "empty", t("options_no_models")));
+  } else {
+    for (const row of offered) {
       const rendered = renderRow(row);
       rendered.id = `model-${row.pair}`;
       rendered.dataset["search"] = searchableText(row);
-      rendered.dataset["installed"] = String(row.installed !== null);
-      container.append(rendered);
+      rendered.dataset["installed"] = "false";
+      catalog.append(rendered);
     }
 
     // Lives inside the list so that "the filter matched nothing" is said
     // where the missing rows would have been, not somewhere below them.
-    const none = element("p", "empty", t("options_filter_no_match_models"));
+    const none = element("p", "empty", "");
     none.id = "model-none";
     none.hidden = true;
-    container.append(none);
+    catalog.append(none);
   }
 
   applyModelFilter();
@@ -2013,31 +2059,36 @@ function placeActions(head, buttons) {
 }
 
 /**
- * A row's line of small print, its items apart by a middle dot: the file's
- * name when the reader gave the book another (the title wears that one), the
- * counts, the size. One line that wraps between its items on a narrow
- * screen - the space before the dot is the no-break kind, so a line never
- * opens with a dot - and never inside a number: the digits are grouped by
- * the reader's locale with its own no-break space, and each count stands
- * with its unit in a span that does not wrap.
+ * A row's line of small print, its items apart by a middle dot: the language
+ * the book explains words in - or the one word for a book that explains a
+ * language in itself - the count of its words, its size, and the fold's own
+ * word at the end of the line.
  *
- * @param {HTMLElement} meta the `p` to fill, emptied first
+ * What the line used to carry besides: the file's name and the count of other
+ * spellings, both now behind the fold (D263, L1). Three items and a door is
+ * what fits one line on a phone, and the rest was never what anybody scans a
+ * list of dictionaries for.
+ *
+ * The space before each dot is the no-break kind, so a line never opens with
+ * a dot, and neither does the door: it travels in a box that does not break,
+ * because a hard space alone never held it (D259, K2 - measured).
+ *
+ * @param {HTMLElement} meta the `summary` to fill, emptied first
  * @param {import("../lib/dict/store.js").Dictionary} dictionary
  */
 function fillDictionaryMeta(meta, dictionary) {
   /** @type {(string | HTMLElement)[]} */
   const items = [];
-  // Only where the file's own name says something the title does not (V10):
-  // a .ifo that calls its book "dictionary" opened the small print with the
-  // one word the reader already knew it was.
-  if (fileNameWorthSaying(dictionary)) items.push(element("span", "dictionary-file", dictionary.name));
-
-  const counts = element("span", "");
-  counts.append(element("span", "dictionary-count", words(dictionary.entryCount)));
-  if (dictionary.aliasCount > 0) {
-    counts.append(", ", element("span", "dictionary-count", plural(dictionary.aliasCount, "spellings")));
-  }
-  items.push(counts);
+  items.push(
+    element(
+      "span",
+      "dictionary-count",
+      dictionary.langFrom === dictionary.langTo
+        ? t("options_dictionary_monolingual")
+        : t("options_dictionary_into", languageName(dictionary.langTo)),
+    ),
+  );
+  items.push(element("span", "dictionary-count", words(dictionary.entryCount)));
   items.push(element("span", "dictionary-count", megabytes(dictionary.bytes)));
 
   meta.replaceChildren();
@@ -2045,22 +2096,34 @@ function fillDictionaryMeta(meta, dictionary) {
     if (at > 0) meta.append("\u00a0· ");
     meta.append(item);
   });
+
+  const door = element("span", "note-tail");
+  door.append("\u00a0· ", element("span", "dictionary-more", t("options_details")));
+  meta.append(door);
 }
 
 /**
- * A stored dictionary's row: the pair and the buttons on the first line, the
- * name the reader knows the book by on the second - the one its groups stand
- * under on the shelf (D199), so the list and the bubble call it the same
- * thing - its small print on the third, and its fold on the last.
+ * A stored dictionary's row, in two lines (D263, L1): the name the reader
+ * knows the book by and the buttons on the first, its small print on the
+ * second - and the second line is the fold's own summary, so "Details" stands
+ * at the end of a line that is already there instead of opening a fourth.
+ *
+ * The pair used to open the row. It does not any more: the language a
+ * dictionary explains is the heading its group stands under, and the language
+ * it explains into is the first item of the small print - said once each,
+ * where five rows of "English to Polish" said it five times.
  *
  * @param {import("../lib/dict/store.js").Dictionary} dictionary
- * @param {{ at: number, total: number }} place among the stored dictionaries
+ * @param {{ at: number, total: number }} place among the dictionaries of its
+ *   own language, which is what the arrows move it within
  * @returns {HTMLElement}
  */
 function renderDictionary(dictionary, place) {
-  const { row, head } = dictionaryRow(dictionary.langFrom, dictionary.langTo);
+  const row = element("li", "dictionary-row");
+  const head = element("div", "dictionary-head");
   const shown = shownName(dictionary);
-  row.append(element("p", "dictionary-name", shown));
+  head.append(element("p", "dictionary-name", shown));
+  row.append(head);
 
   if (dictionary.id === deletingId) {
     // Going: the small print gives way to the one word that says so, and
@@ -2074,15 +2137,11 @@ function renderDictionary(dictionary, place) {
     return row;
   }
 
-  const meta = element("p", "dictionary-meta");
-  fillDictionaryMeta(meta, dictionary);
-  row.append(meta);
-
   /** @type {HTMLElement[]} */
   const buttons = [];
-  // Only where there is something to arrange: one dictionary answers first
-  // whatever the arrows say, and two dead buttons on its row would be a
-  // control that does nothing standing next to one that deletes.
+  // Only where there is something to arrange: one dictionary of a language
+  // answers first whatever the arrows say, and two dead buttons on its row
+  // would be a control that does nothing standing next to one that deletes.
   if (place.total > 1) {
     buttons.push(moveButton(dictionary, -1, place.at > 0));
     buttons.push(moveButton(dictionary, 1, place.at < place.total - 1));
@@ -2107,9 +2166,19 @@ function renderDictionary(dictionary, place) {
   // credit stays one press away, exactly as the dictionary wrote it. An
   // unfinished book gets none of this: it is still being named by its files.
   const details = element("details", "dictionary-details");
-  details.append(element("summary", "", t("options_details")));
+  const meta = element("summary", "dictionary-meta");
+  fillDictionaryMeta(meta, dictionary);
+  details.append(meta);
   details.append(renameField(dictionary));
-  details.append(element("p", "dictionary-file-name", t("options_dictionary_file_name", dictionary.name)));
+  // Only where the file's own name says something the title does not (V10,
+  // D263): under a field whose placeholder is that very name, "File name:
+  // dictionary" was the same word twice.
+  if (fileNameWorthSaying(dictionary)) {
+    details.append(element("p", "dictionary-file-name", t("options_dictionary_file_name", dictionary.name)));
+  }
+  if (dictionary.aliasCount > 0) {
+    details.append(element("p", "dictionary-file-name", plural(dictionary.aliasCount, "spellings")));
+  }
   if (dictionary.credit !== null) details.append(element("p", "dictionary-credit", dictionary.credit));
   row.append(details);
 
@@ -2220,7 +2289,7 @@ function renderUnfinished(row, head, dictionary) {
  * @returns {HTMLButtonElement | null}
  */
 function moveButtonFor(id, step) {
-  for (const button of document.querySelectorAll("#dictionary-catalog button.model-move")) {
+  for (const button of document.querySelectorAll("#dictionary-list button.model-move")) {
     if (!(button instanceof HTMLButtonElement)) continue;
     if (button.dataset["move"] === id && button.dataset["step"] === String(step)) return button;
   }
@@ -2266,7 +2335,7 @@ async function moveDictionary(dictionary, step) {
   // and its dictionary is the one whose place would be rewritten underneath it.
   if (importing) return;
 
-  const order = afterMove(dictionaryOrder, dictionary.id, step);
+  const order = moveWithinSourceLanguage(dictionaryPlaces, dictionary.id, step);
   if (order === null) return;
 
   try {
@@ -2279,14 +2348,18 @@ async function moveDictionary(dictionary, step) {
   await renderCatalog();
 
   // From the list the redraw just read, not from the list that was written: a
-  // second page importing at that moment is part of the order now.
-  const at = dictionaryOrder.indexOf(dictionary.id);
+  // second page importing at that moment is part of the order now. The place
+  // said out loud is the place in its own group (D263) - the list on screen
+  // is grouped, and "third of seven" would name a row nobody can see.
+  const group = dictionaryPlaces.filter((one) => one.lang === dictionary.langFrom);
+  const at = group.findIndex((one) => one.id === dictionary.id);
   if (at >= 0) {
     dictionaryStatus(
       t("options_dictionary_moved", [
         shownName(dictionary),
         (at + 1).toLocaleString(),
-        dictionaryOrder.length.toLocaleString(),
+        group.length.toLocaleString(),
+        languageName(dictionary.langFrom),
       ]),
     );
   }
@@ -2384,7 +2457,7 @@ async function renameFromField(dictionary, field) {
  */
 async function removeDictionary(dictionary, button) {
   if (importing) return;
-  const at = deleteButtonsIn("dictionary-catalog").indexOf(button);
+  const at = deleteButtonsIn("dictionary-list").indexOf(button);
 
   // Held like an import, because it is the same thing to the database: one
   // writer at a time, the other buttons wait, a reload asks first. Said in
@@ -2414,7 +2487,7 @@ async function removeDictionary(dictionary, button) {
   // The pair select lists the dictionaries' pairs too (D158), and one of
   // them may have just left with its last book.
   await renderPair(modelRows(await listModels(), availableModels()));
-  focusDeleteIn("dictionary-catalog", "dictionary-filter", at);
+  focusDeleteIn("dictionary-list", "dictionaries-installed", at);
 }
 
 /**
@@ -2442,24 +2515,123 @@ function renderCatalogRow(entry) {
 }
 
 /**
- * The one dictionary frame: what is stored first, each row with its delete
- * button, then every pair the catalogue offers - the same order the model
- * frame keeps. Redrawn at the edges of every download, import and delete, and
- * after a list refresh.
+ * The line a list shows in place of its rows when there is nothing on this
+ * device yet: a sentence, and the name of the block below it as the way
+ * there (D263, §4). A link rather than the block's name in quotes: the two
+ * blocks stand one above the other, and the eye that has just read "there is
+ * nothing here" is looking for where to go.
+ *
+ * @param {string} sentence the sentence up to the door
+ * @param {string} rest what follows it
+ * @param {string} anchor the id of the catalogue block's heading
+ * @returns {HTMLElement}
+ */
+function emptyList(sentence, rest, anchor) {
+  const line = element("p", "empty");
+  const door = document.createElement("a");
+  door.href = `#${anchor}`;
+  door.textContent = t("options_list_available");
+  line.append(`${sentence} `, door, ` ${rest}`);
+  return line;
+}
+
+/**
+ * The stored dictionaries in groups, by the language whose words they explain
+ * (D263, L2).
+ *
+ * That language is the only thing the order means anything within: a lookup
+ * asks the dictionaries of the language being read and no others
+ * (`lookupEntries` matches on `langFrom`), so the arrows arrange inside a
+ * group and the badge of the pair being read belongs to a whole group rather
+ * than to the rows whose target language happens to match the pair's.
+ *
+ * The group of the language being read stands first - those are the
+ * dictionaries answering today - and the rest by name in the page's own
+ * language, which is the order a reader looks a language up in.
+ *
+ * @param {import("../lib/dict/store.js").Dictionary[]} stored in answering order
+ * @returns {{ lang: string, name: string, dictionaries: import("../lib/dict/store.js").Dictionary[] }[]}
+ */
+function dictionaryGroups(stored) {
+  /** @type {Map<string, import("../lib/dict/store.js").Dictionary[]>} */
+  const byLanguage = new Map();
+  for (const dictionary of stored) {
+    const group = byLanguage.get(dictionary.langFrom) ?? [];
+    group.push(dictionary);
+    byLanguage.set(dictionary.langFrom, group);
+  }
+
+  const collator = new Intl.Collator(uiLocale());
+  return [...byLanguage.entries()]
+    .map(([lang, dictionaries]) => ({ lang, name: languageName(lang), dictionaries }))
+    .sort((one, two) => {
+      const reading = (/** @type {{ lang: string }} */ group) => (group.lang === config.sourceLang ? 0 : 1);
+      return reading(one) - reading(two) || collator.compare(one.name, two.name);
+    });
+}
+
+/**
+ * One group's heading: the language, and the badge when its dictionaries are
+ * the ones the bubble is asking.
+ *
+ * @param {{ lang: string, name: string }} group
+ * @returns {HTMLElement}
+ */
+function dictionaryGroupHeading(group) {
+  const heading = element("h5", "dictionary-group", group.name);
+  if (group.lang === config.sourceLang) heading.append(element("span", "badge", t("options_badge_reading")));
+  return heading;
+}
+
+/**
+ * The dictionaries on this device: the rows with their arrows and their
+ * delete buttons, under a heading per language where there is more than one
+ * (D263). With a single language there is no heading - one group is not a
+ * grouping, and the badge would then say of the whole list what the page
+ * already says above it.
+ *
+ * @param {import("../lib/dict/store.js").Dictionary[]} stored in answering order
+ */
+function renderDictionaryList(stored) {
+  const list = document.getElementById("dictionary-list");
+  if (list === null) return;
+  list.replaceChildren();
+
+  if (stored.length === 0) {
+    list.append(emptyList(t("options_no_dictionaries_yet"), t("options_no_dictionaries_yet_rest"), "dictionaries-available"));
+    return;
+  }
+
+  const groups = dictionaryGroups(stored);
+  for (const group of groups) {
+    if (groups.length > 1) list.append(dictionaryGroupHeading(group));
+    const rows = element("ul", "models");
+    group.dictionaries.forEach((dictionary, at) => {
+      const row = renderDictionary(dictionary, { at, total: group.dictionaries.length });
+      row.dataset["search"] = dictionarySearchText(dictionary);
+      rows.append(row);
+    });
+    list.append(rows);
+  }
+}
+
+/**
+ * Both dictionary lists, out of one read of the store: what is here, and what
+ * the catalogue offers that is not. Redrawn at the edges of every download,
+ * import and delete, and after a list refresh.
  */
 async function renderCatalog() {
   const container = document.getElementById("dictionary-catalog");
   if (container === null) return;
 
   const stored = await listDictionaries();
-  const rows = dictionaryRows(stored, availableDictionaries(), config);
   // Read once per redraw, for every unfinished row: whether its import is
   // running somewhere (then its buttons wait) or stopped (then it may go on).
   importElsewhere = !importing && (await importHeld());
 
   // What an arrow press moves within, and what the line above the list is
   // about - both read from the store, at the one moment the store was read.
-  dictionaryOrder = stored.map((one) => one.id);
+  dictionaryPlaces = stored.map((one) => ({ id: one.id, lang: one.langFrom }));
   const hint = document.getElementById("dictionary-order-hint");
   if (hint !== null) hint.hidden = stored.length < 2;
 
@@ -2469,33 +2641,28 @@ async function renderCatalog() {
   dictionaryStored = stored.some((one) => one.ready);
   renderFirstSteps();
 
+  renderDictionaryList(stored);
+
+  // The catalogue alone below: a pair already answered for is not offered
+  // again, and the rows that are here stand in the block above.
+  const rows = dictionaryRows(stored, availableDictionaries(), config).filter((row) => row.available !== null);
+
   container.replaceChildren();
 
   if (rows.length === 0) {
     container.append(element("li", "empty", t("options_no_catalog")));
   } else {
-    // Which place among the stored ones this row holds - the arrows need it,
-    // and the rows arrive with the stored ones first, in their own order.
-    let at = 0;
     for (const row of rows) {
-      /** @type {HTMLElement} */
-      let rendered;
-      if (row.installed !== null) {
-        rendered = renderDictionary(row.installed, { at, total: stored.length });
-        at += 1;
-        rendered.dataset["search"] = dictionarySearchText(row.installed);
-      } else if (row.available !== null) {
-        rendered = renderCatalogRow(row.available);
-        rendered.id = catalogRowId(row.available);
-        rendered.dataset["search"] = searchableText(row);
-      } else {
-        continue;
-      }
-      rendered.dataset["installed"] = String(row.installed !== null);
+      const available = row.available;
+      if (available === null) continue;
+      const rendered = renderCatalogRow(available);
+      rendered.id = catalogRowId(available);
+      rendered.dataset["search"] = searchableText(row);
+      rendered.dataset["installed"] = "false";
       container.append(rendered);
     }
 
-    const none = element("li", "empty", t("options_filter_no_match_dictionaries"));
+    const none = element("li", "empty", "");
     none.id = "dictionary-none";
     none.hidden = true;
     container.append(none);
@@ -3518,7 +3685,7 @@ document.getElementById("refresh-models")?.addEventListener("click", () => void 
 document.getElementById("refresh-dictionaries")?.addEventListener("click", () => void refreshDictionaryList());
 document.getElementById("model-filter")?.addEventListener("input", () => applyModelFilter());
 document.getElementById("dictionary-filter")?.addEventListener("input", () => applyCatalogFilter());
-document.getElementById("models-show-all")?.addEventListener("click", () => toggleList("models"));
+document.getElementById("models-show-all")?.addEventListener("click", () => toggleList("models-catalog"));
 document.getElementById("dictionaries-show-all")?.addEventListener("click", () => toggleList("dictionary-catalog"));
 document.getElementById("add-dictionary")?.addEventListener("click", () => void addSelectedDictionary());
 document.getElementById("download-link")?.addEventListener("click", () => void downloadFromLink());

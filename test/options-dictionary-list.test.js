@@ -4,11 +4,11 @@ import { describe, it } from "node:test";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-// The list of dictionaries on the settings page (the seventh brief): what
-// the smoke test cannot count and the eye cannot measure - the shape every
-// row is built in, the one narrow-screen move, the ink of a disabled arrow,
-// where the focus goes after a move. Read from the sources, since the page
-// only exists in a browser.
+// The list of dictionaries on the settings page (the seventh brief, rebuilt
+// in D263): what the smoke test cannot count and the eye cannot measure - the
+// shape every row is built in, the groups it stands in, the one narrow-screen
+// move, the ink of a disabled arrow, where the focus goes after a move. Read
+// from the sources, since the page only exists in a browser.
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const css = readFileSync(join(ROOT, "src/options/options.css"), "utf8");
@@ -45,34 +45,54 @@ function fn(name, next) {
 
 describe("the dictionary list's rows", () => {
   it("are items of a list, the browser's bullets and indent taken off", () => {
+    // What is here stands in one list per language, inside the block's own
+    // box; the catalogue below keeps its single list.
+    assert.match(page, /<div id="dictionary-list"><\/div>/);
     assert.match(page, /<ul id="dictionary-catalog" class="models"><\/ul>/);
+    assert.match(fn("renderDictionaryList", "renderCatalog"), /element\("ul", "models"\)/);
     assert.match(script, /element\("li", "dictionary-row"\)/);
     assert.match(rule(css, "ul.models"), /list-style: none/);
     assert.match(rule(css, "ul.models"), /padding: 0/);
     // The empty line and the "no match" line stand in the list as items too.
     assert.match(script, /element\("li", "empty", t\("options_no_catalog"\)\)/);
-    assert.match(script, /element\("li", "empty", t\("options_filter_no_match_dictionaries"\)\)/);
   });
 
-  it("stack the same four lines at every width: head, title, small print, fold", () => {
+  it("stack two lines at every width: the name with its buttons, then the small print (D263, L1)", () => {
     const row = fn("renderDictionary", "refreshRowName");
     const order = [
-      "dictionaryRow(",
-      'element("p", "dictionary-name"',
-      'element("p", "dictionary-meta")',
+      'element("div", "dictionary-head")',
+      'element("p", "dictionary-name", shown)',
       'element("details", "dictionary-details")',
+      'element("summary", "dictionary-meta")',
     ].map((mark) => row.indexOf(mark));
     assert.ok(order.every((at) => at >= 0), "every line is built");
     assert.deepEqual([...order].sort((a, b) => a - b), order);
+    // The pair is gone from the row: its own language is the heading above
+    // it, and the language it explains into opens the small print.
+    assert.doesNotMatch(row, /dictionaryRow\(/, "the row still opens on the pair");
     // No grid anywhere in the row: a wrapping flex line for the head, the
     // rest in the page's own flow.
     assert.doesNotMatch(rule(css, ".dictionary-row"), /grid/);
     assert.match(rule(css, ".dictionary-head"), /display: flex;\s+flex-wrap: wrap/);
-    // The catalogue's rows and the download-in-progress row are built the
-    // same way, from the same head.
-    assert.match(fn("renderCatalogRow", "renderCatalog"), /dictionaryRow\(entry\.from, entry\.to\)/);
+    // The catalogue's rows and the download-in-progress row keep the pair -
+    // there is no name yet to call them by.
+    assert.match(fn("renderCatalogRow", "emptyList"), /dictionaryRow\(entry\.from, entry\.to\)/);
     assert.match(fn("renderFetching", "downloadDictionary"), /element\("div", "dictionary-head"\)/);
     assert.match(page, /<div id="dictionary-link-row" class="dictionary-row" hidden><\/div>/);
+  });
+
+  it("hang the fold off the small print, with its word at the line's end and never alone on one", () => {
+    const meta = fn("fillDictionaryMeta", "renderDictionary");
+    // The door travels with the dot before it in a box that does not break:
+    // a hard space alone never held a trigger to its sentence (D259, K2).
+    assert.match(meta, /element\("span", "note-tail"\)/);
+    assert.match(meta, /door\.append\("\\u00a0· ", element\("span", "dictionary-more", t\("options_details"\)\)\)/);
+    assert.match(rule(css, ".note-tail"), /white-space: nowrap/);
+    // The whole line is what a press reaches, and it keeps the page's one
+    // fold dress rather than the browser's marker.
+    assert.match(rule(css, "summary.dictionary-meta"), /cursor: pointer/);
+    assert.match(rule(css, "summary.dictionary-meta"), /list-style: none/);
+    assert.match(css, /\.dictionary-more::before \{\n  content: "\\25B8\\00A0";/);
   });
 
   it("never break the pair in the middle, and let the badge wrap instead", () => {
@@ -82,7 +102,7 @@ describe("the dictionary list's rows", () => {
     assert.doesNotMatch(rule(css, ".dictionary-head .badge"), /nowrap/);
   });
 
-  it("keep the buttons in one group at the right edge, under the pair only on a narrow screen", () => {
+  it("keep the buttons in one group at the right edge, under the name only on a narrow screen", () => {
     const actions = rule(css, ".dictionary-actions");
     assert.match(actions, /flex: none/);
     assert.match(actions, /margin-left: auto/);
@@ -105,18 +125,53 @@ describe("the dictionary list's rows", () => {
     assert.doesNotMatch(title, /text-overflow|nowrap|line-clamp/);
   });
 
-  it("say the file's name in the small print only while it says something, and keep a count whole", () => {
+  it("open the small print with the language the book explains into, and keep a count whole", () => {
     const meta = fn("fillDictionaryMeta", "renderDictionary");
-    assert.match(meta, /if \(fileNameWorthSaying\(dictionary\)\) items\.push\(element\("span", "dictionary-file", dictionary\.name\)\)/);
+    assert.match(meta, /dictionary\.langFrom === dictionary\.langTo/);
+    assert.match(meta, /t\("options_dictionary_monolingual"\)/);
+    assert.match(meta, /t\("options_dictionary_into", languageName\(dictionary\.langTo\)\)/);
     // The items apart by a middle dot after a no-break space: a line may end
     // after the dot, never begin with it.
     assert.match(meta, /meta\.append\("\\u00a0· "\)/);
-    // Each count with its unit in a span that does not wrap; the file's
-    // name may break anywhere, since it can be wider than a phone.
     assert.match(meta, /element\("span", "dictionary-count", words\(dictionary\.entryCount\)\)/);
     assert.match(meta, /element\("span", "dictionary-count", megabytes\(dictionary\.bytes\)\)/);
     assert.match(rule(css, ".dictionary-count"), /white-space: nowrap/);
     assert.match(rule(css, ".dictionary-meta"), /overflow-wrap: anywhere/);
+    // What the line handed over to the fold (D263): the file's name and the
+    // count of other spellings.
+    assert.doesNotMatch(meta, /dictionary-file"|spellings/);
+    const row = fn("renderDictionary", "refreshRowName");
+    assert.match(row, /if \(dictionary\.aliasCount > 0\) \{/);
+  });
+});
+
+describe("the groups the list stands in (D263, L2)", () => {
+  it("are the language whose words a dictionary explains - the one the arrows can mean anything in", () => {
+    const groups = fn("dictionaryGroups", "dictionaryGroupHeading");
+    assert.match(groups, /byLanguage\.get\(dictionary\.langFrom\)/, "the grouping is not by the language of the headwords");
+    // The language being read first, the rest by name in the page's language.
+    assert.match(groups, /group\.lang === config\.sourceLang \? 0 : 1/);
+    assert.match(groups, /new Intl\.Collator\(uiLocale\(\)\)/);
+    assert.match(groups, /collator\.compare\(one\.name, two\.name\)/);
+  });
+
+  it("wear the badge of what is being read on the heading, not on the rows", () => {
+    const heading = fn("dictionaryGroupHeading", "renderDictionaryList");
+    assert.match(heading, /element\("h5", "dictionary-group", group\.name\)/);
+    assert.match(heading, /group\.lang === config\.sourceLang/);
+    assert.match(heading, /t\("options_badge_reading"\)/);
+    // A stored row carries none of its own any more: the pill said "what you
+    // are reading" of the rows whose target language matched the pair, and
+    // said nothing of a monolingual book of the very language being read.
+    assert.doesNotMatch(fn("renderDictionary", "refreshRowName"), /options_badge_reading/);
+  });
+
+  it("stand only where there is more than one language to tell apart", () => {
+    const list = fn("renderDictionaryList", "renderCatalog");
+    assert.match(list, /if \(groups\.length > 1\) list\.append\(dictionaryGroupHeading\(group\)\)/);
+    // And the first group's heading opens under the block's own, with no gap
+    // of its own on top of it.
+    assert.match(rule(css, "main h5:first-child"), /margin-top: 0/);
   });
 });
 
@@ -129,12 +184,23 @@ describe("the arrows", () => {
     assert.match(fn("moveButton", "moveLabel"), /if \(button\.disabled\) button\.setAttribute\("aria-disabled", "true"\)/);
   });
 
-  it("stay in place at the ends of the list rather than vanishing", () => {
+  it("move a dictionary within its own language, and count it within its own group", () => {
+    const move = fn("moveDictionary", "renameField");
+    assert.match(move, /moveWithinSourceLanguage\(dictionaryPlaces, dictionary\.id, step\)/);
+    // "Third of three, English" - the place in the group on screen, never in
+    // the one list the database keeps.
+    assert.match(move, /dictionaryPlaces\.filter\(\(one\) => one\.lang === dictionary\.langFrom\)/);
+    assert.match(move, /languageName\(dictionary\.langFrom\)/);
+  });
+
+  it("stay in place at the ends of a group rather than vanishing", () => {
     // Both arrows are built whenever there is anything to arrange; only
-    // their enabled state changes with the row's place.
+    // their enabled state changes with the row's place in its group.
     const row = fn("renderDictionary", "refreshRowName");
     assert.match(row, /moveButton\(dictionary, -1, place\.at > 0\)/);
     assert.match(row, /moveButton\(dictionary, 1, place\.at < place\.total - 1\)/);
+    const list = fn("renderDictionaryList", "renderCatalog");
+    assert.match(list, /\{ at, total: group\.dictionaries\.length \}/);
   });
 
   it("keep the focus on the arrow that moved with its row, or the opposite one at the end", () => {
@@ -142,6 +208,8 @@ describe("the arrows", () => {
     assert.match(focus, /moveButtonFor\(id, step\)/);
     assert.match(focus, /moveButtonFor\(id, -step\)/);
     assert.match(fn("moveDictionary", "renameField"), /focusMove\(dictionary\.id, step\)/);
+    // And it looks for it in the list of what is here, not in the catalogue.
+    assert.match(fn("moveButtonFor", "focusMove"), /#dictionary-list button\.model-move/);
   });
 });
 
@@ -158,10 +226,12 @@ describe("the list's fold", () => {
     assert.match(apply, /showAllState\(\{ total: matching, installedCount: installedMatching, expanded \}\)/);
     assert.match(apply, /state\.expanded \? t\("options_show_fewer"\) : t\("options_show_all", state\.count\.toLocaleString\(\)\)/);
     assert.match(apply, /setAttribute\("aria-expanded", String\(state\.expanded\)\)/);
-    // "Nothing matched" is about the filter alone, never about the fold.
+    // "Nothing matched" is about the filter alone, never about the fold - and
+    // it quotes what was typed (D263).
     assert.match(apply, /none\.hidden = !filterActive\(query\) \|\| matching > 0/);
+    assert.match(apply, /none\.textContent = noMatch\(query\.trim\(\)\)/);
     assert.match(page, /id="dictionaries-show-all" class="show-all" aria-controls="dictionary-catalog"/);
-    assert.match(page, /id="models-show-all" class="show-all" aria-controls="models"/);
+    assert.match(page, /id="models-show-all" class="show-all" aria-controls="models-catalog"/);
   });
 
   it("walks the focus into the list on unfolding and leaves it on the button on folding", () => {
@@ -169,5 +239,6 @@ describe("the list's fold", () => {
     assert.match(toggle, /if \(!opening\) return;/);
     assert.match(toggle, /\[data-installed="false"\]:not\(\[hidden\]\) button/);
     assert.match(script, /addEventListener\("click", \(\) => toggleList\("dictionary-catalog"\)\)/);
+    assert.match(script, /addEventListener\("click", \(\) => toggleList\("models-catalog"\)\)/);
   });
 });

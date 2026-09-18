@@ -1,7 +1,13 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { afterMove, answerOrder, inChosenOrder, nextRank } from "../src/lib/dict/order.js";
+import {
+  afterMove,
+  answerOrder,
+  inChosenOrder,
+  moveWithinSourceLanguage,
+  nextRank,
+} from "../src/lib/dict/order.js";
 
 /**
  * The order the installed dictionaries answer in: the rule the settings page
@@ -145,5 +151,50 @@ describe("nextRank", () => {
     // Only reachable if the upgrade never ran; the import must still get a
     // number rather than NaN.
     assert.equal(nextRank([dictionary("a"), dictionary("b")]), 0);
+  });
+});
+
+describe("moveWithinSourceLanguage", () => {
+  /**
+   * The list as the settings page draws it: one order across every language,
+   * grouped on screen by the language a dictionary explains.
+   *
+   * @param {string[]} ids `id:lang` pairs, in answering order
+   */
+  function entries(ids) {
+    return ids.map((one) => {
+      const [id, lang] = one.split(":");
+      return { id: String(id), lang: String(lang) };
+    });
+  }
+
+  it("swaps with the nearest dictionary of the same language, across the others", () => {
+    // Drawn as two groups - English (a, c) and Polish (b) - out of one list.
+    const list = entries(["a:en", "b:pl", "c:en"]);
+    assert.deepEqual(moveWithinSourceLanguage(list, "c", -1), ["c", "b", "a"]);
+    assert.deepEqual(moveWithinSourceLanguage(list, "a", 1), ["c", "b", "a"]);
+  });
+
+  it("leaves the dictionaries of every other language where they stand", () => {
+    const list = entries(["a:en", "b:pl", "c:pl", "d:en"]);
+    const moved = moveWithinSourceLanguage(list, "d", -1);
+    assert.deepEqual(moved, ["d", "b", "c", "a"]);
+    // The Polish pair kept both its places and its own order.
+    assert.deepEqual([moved?.[1], moved?.[2]], ["b", "c"]);
+  });
+
+  it("answers null at the ends of a group, whatever stands beyond them", () => {
+    const list = entries(["a:en", "b:pl", "c:en"]);
+    assert.equal(moveWithinSourceLanguage(list, "a", -1), null, "the first of its group moved up");
+    assert.equal(moveWithinSourceLanguage(list, "c", 1), null, "the last of its group moved down");
+    // Even though a row of another language stands after it.
+    assert.equal(moveWithinSourceLanguage(entries(["a:en", "b:pl"]), "a", 1), null);
+  });
+
+  it("answers null for a group of one and for a dictionary that is not there", () => {
+    const list = entries(["a:en", "b:pl"]);
+    assert.equal(moveWithinSourceLanguage(list, "b", -1), null);
+    assert.equal(moveWithinSourceLanguage(list, "b", 1), null);
+    assert.equal(moveWithinSourceLanguage(list, "z", -1), null);
   });
 });
