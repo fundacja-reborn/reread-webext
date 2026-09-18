@@ -3582,7 +3582,10 @@ async function onMarkInkPress(ink) {
 }
 
 markerButton?.addEventListener("click", () => setMarker(!markerOn));
-markCopyButton?.addEventListener("click", () => void onMarkCopyPress());
+markCopyButton?.addEventListener("click", (event) => {
+  releasePress(event);
+  void onMarkCopyPress();
+});
 markNoteButton?.addEventListener("click", () => onMarkNotePress());
 markDeleteButton?.addEventListener("click", () => void onMarkDeletePress());
 
@@ -3629,13 +3632,40 @@ noteText?.addEventListener("keydown", (event) => {
 // scrollbar before the dialog's cap says so.
 noteText?.addEventListener("input", () => sizeNoteBox());
 
+/**
+ * A press on a button that acts and holds nothing, made with a finger or a
+ * mouse: the focus stays on the button afterwards, and the bar's own rules
+ * dress a focused button in a frame and a wash - which on this bar is what
+ * the swatch beside it means by "chosen" (Michał's photo from the Boox,
+ * 2026-09-18: the page turn read as pressed for good after every turn). The
+ * button hands the focus back, so it goes straight back to its resting
+ * look. A press made with the keyboard keeps it - `detail` counts a
+ * pointer's clicks and is zero for Enter and Space - or the next Tab would
+ * start again from the top of the page.
+ *
+ * Only for the acts that leave the bar standing as it was: the note opens a
+ * dialog that wants the focus back when it closes, and the bin takes its own
+ * button away with the mark.
+ *
+ * @param {MouseEvent} event
+ */
+function releasePress(event) {
+  if (event.detail !== 0 && event.currentTarget instanceof HTMLElement) event.currentTarget.blur();
+}
+
 // The two page turns of the pen's toolbar (D242). The pen stays in the
 // hand and the active mark stays active - a press inside this bar is not a
 // press away (the rule below) - so a mark whose tail moved onto the next
 // page when the bar stood up is reached by turning to it, marked, reshaped
 // or deleted there, as it would be anywhere else on the page.
-markTurnPrev?.addEventListener("click", () => turnPage("up"));
-markTurnNext?.addEventListener("click", () => turnPage("down"));
+markTurnPrev?.addEventListener("click", (event) => {
+  releasePress(event);
+  turnPage("up");
+});
+markTurnNext?.addEventListener("click", (event) => {
+  releasePress(event);
+  turnPage("down");
+});
 
 markBar?.addEventListener("click", (event) => {
   const target = event.target;

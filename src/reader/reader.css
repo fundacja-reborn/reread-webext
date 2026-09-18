@@ -2678,15 +2678,22 @@ button[data-armed],
    specificity later wins - the first cut lost exactly that way (0.4.20:
    the tightening never applied). */
 .speech-bar.mark-bar {
-  gap: 0.25rem;
+  gap: 0.2rem;
   padding: 0.25rem 0.4rem;
 }
 
+/* Nine buttons on one line at a phone's width: the two page turns (D242)
+   joined the seven acts, and at Firefox for Android's 125% the row broke
+   into two - which on a paged document is two lines of the article gone
+   from every page, not only a ragged bar (Michał's photo from a Pixel,
+   2026-09-18). The glyphs keep the size they were given for being read at
+   all; the air around them is what gives way. Nine at 0.25rem of it come
+   to some 296px against the 329px that zoom leaves, and the row stands. */
 .speech-bar.mark-bar button {
   flex: 0 1 2.4rem;
   min-width: auto;
   min-height: 2.1rem;
-  padding: 0.15rem 0.4rem;
+  padding: 0.15rem 0.25rem;
 }
 
 /* The pins of the active mark: the platform selection-handle shape - a thin

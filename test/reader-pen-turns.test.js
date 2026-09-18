@@ -79,7 +79,8 @@ describe("the page turned with the pen in the hand (D242)", () => {
 
   it("turns a page on a press, and the press is not a press away", async () => {
     const reader = await source("reader/reader.js");
-    assert.match(reader, /markTurnPrev\?\.addEventListener\("click", \(\) => turnPage\("up"\)\);\s*markTurnNext\?\.addEventListener\("click", \(\) => turnPage\("down"\)\);/, "the turns answer no press");
+    assert.match(reader, /markTurnPrev\?\.addEventListener\("click", \(event\) => \{\s*releasePress\(event\);\s*turnPage\("up"\);/, "the turn back answers no press");
+    assert.match(reader, /markTurnNext\?\.addEventListener\("click", \(event\) => \{\s*releasePress\(event\);\s*turnPage\("down"\);/, "the turn on answers no press");
     // The press-away rule (D107) reads a press inside this bar as none of
     // its business, which is what keeps the pen in the hand and the active
     // mark active across a turn.
@@ -94,5 +95,33 @@ describe("the page turned with the pen in the hand (D242)", () => {
         assert.ok(typeof catalogue[key]?.message === "string" && catalogue[key].message.length > 0, `${locale} does not name ${key}`);
       }
     }
+  });
+});
+
+describe("a press that leaves the button as it found it (D244)", () => {
+  it("hands the focus back after a pointer's press, and keeps it after a key's", async () => {
+    const reader = await source("reader/reader.js");
+    const release = bodyOf(reader, "releasePress");
+    // `detail` counts a pointer's clicks and is zero for Enter and Space:
+    // a finger gets its button back to rest, a keyboard keeps its place.
+    assert.match(release, /if \(event\.detail !== 0 && event\.currentTarget instanceof HTMLElement\) event\.currentTarget\.blur\(\);/, "a tapped button keeps the frame and the wash a focused one wears");
+    // The acts that leave the bar standing as it was, and only those: the
+    // note's dialog wants the focus back when it closes, and the bin takes
+    // its own button away with the mark.
+    assert.match(reader, /markCopyButton\?\.addEventListener\("click", \(event\) => \{\s*releasePress\(event\);/, "the copy keeps its focus ring after a tap");
+    assert.doesNotMatch(reader, /markNoteButton\?\.addEventListener\("click", \(event\) => \{\s*releasePress/, "the note hands back the focus its dialog will want");
+    assert.doesNotMatch(reader, /markDeleteButton\?\.addEventListener\("click", \(event\) => \{\s*releasePress/, "the bin blurs a button it is about to hide");
+  });
+
+  it("stands nine buttons of the pen's bar on one line at a phone's width", async () => {
+    const styles = await source("reader/reader.css");
+    const dress = /\.speech-bar\.mark-bar button \{([^}]*)\}/.exec(styles);
+    assert.notEqual(dress, null, "the pen's bar lost its own dress");
+    // The air, not the glyphs: the icons hold the size they were given for
+    // being read at all (D107's smoke), and the padding is what gives way -
+    // two rows on a paged document cost two lines of every page.
+    assert.match(dress?.[1] ?? "", /padding: 0\.15rem 0\.25rem;/, "the pen's buttons wear air enough to break the row at 125%");
+    assert.match(styles, /\.speech-bar\.mark-bar \{\s*gap: 0\.2rem;/, "the pen's bar spreads its buttons enough to break the row at 125%");
+    assert.match(styles, /\.mark-bar \.reader-icon \{\s*width: 1\.5em;/, "the pen's glyphs gave way instead of the air around them");
   });
 });
