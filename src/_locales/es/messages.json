@@ -1686,7 +1686,17 @@
   },
   "options_disabled_heading": { "message": "Sitios desactivados" },
   "options_disabled_intro": {
-    "message": "Lista de sitios web donde la extensión está desactivada: sin traducción, sin burbuja, sin subrayados. Añade un sitio con el interruptor bajo el icono de la extensión en la barra de herramientas del navegador mientras estás en él, o escribe su dirección abajo. No hay interruptor cuando están activados a la vez \"Usar sin modelo de traducción\" y \"Sin burbuja al seleccionar texto\": en las páginas normales no pasa nada entonces, así que no hay nada que desactivar."
+    "message": "Lista de sitios web donde la extensión está desactivada: sin traducción, sin burbuja, sin subrayados. Añade un sitio con el interruptor bajo el icono de la extensión en la barra de herramientas del navegador mientras estás en él, o escribe su dirección abajo. No hay interruptor cuando están activados a la vez"
+  },
+
+  "options_disabled_intro_and": {
+    "message": "y",
+    "description": "Between the two setting names in the switched-off sites intro; each name is a link to its own row."
+  },
+
+  "options_disabled_intro_rest": {
+    "message": ": en las páginas normales no pasa nada entonces, así que no hay nada que desactivar.",
+    "description": "The end of the switched-off sites intro, glued to the second setting's link - it opens with the punctuation or the space the language needs there."
   },
   "options_add_host_label": { "message": "Dirección del sitio" },
   "options_add_host_button": { "message": "Añadir" },

@@ -2287,7 +2287,17 @@
   },
   "options_disabled_heading": { "message": "Вимкнені сайти" },
   "options_disabled_intro": {
-    "message": "Список вебсайтів, де розширення вимкнено: без перекладу, без бульбашки, без підкреслень. Додайте сайт перемикачем під іконкою розширення на панелі браузера, перебуваючи на ньому, або введіть його адресу нижче. Перемикача немає, коли водночас увімкнено „Використовувати без моделі перекладу\" і „Без бульбашки при виділенні тексту\": на звичайних сторінках тоді нічого не відбувається, тож немає чого вимикати."
+    "message": "Список вебсайтів, де розширення вимкнено: без перекладу, без бульбашки, без підкреслень. Додайте сайт перемикачем під іконкою розширення на панелі браузера, перебуваючи на ньому, або введіть його адресу нижче. Перемикача немає, коли водночас увімкнено"
+  },
+
+  "options_disabled_intro_and": {
+    "message": "і",
+    "description": "Between the two setting names in the switched-off sites intro; each name is a link to its own row."
+  },
+
+  "options_disabled_intro_rest": {
+    "message": ": на звичайних сторінках тоді нічого не відбувається, тож немає чого вимикати.",
+    "description": "The end of the switched-off sites intro, glued to the second setting's link - it opens with the punctuation or the space the language needs there."
   },
   "options_add_host_label": { "message": "Адреса сайту" },
   "options_add_host_button": { "message": "Додати" },

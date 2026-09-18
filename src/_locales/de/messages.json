@@ -1635,7 +1635,17 @@
   },
   "options_disabled_heading": { "message": "Abgeschaltete Websites" },
   "options_disabled_intro": {
-    "message": "Eine Liste von Websites, auf denen die Erweiterung abgeschaltet ist: keine Übersetzung, keine Sprechblase, keine Unterstreichungen. Fügen Sie eine Website mit dem Schalter unter dem Symbol der Erweiterung in der Symbolleiste des Browsers hinzu, während Sie sie geöffnet haben, oder tippen Sie ihre Adresse unten ein. Der Schalter fehlt, wenn sowohl „Ohne Übersetzungsmodell verwenden\" als auch „Keine Sprechblase beim Auswählen von Text\" eingeschaltet sind: auf gewöhnlichen Seiten passiert dann nichts, es gibt also nichts abzuschalten."
+    "message": "Eine Liste von Websites, auf denen die Erweiterung abgeschaltet ist: keine Übersetzung, keine Sprechblase, keine Unterstreichungen. Fügen Sie eine Website mit dem Schalter unter dem Symbol der Erweiterung in der Symbolleiste des Browsers hinzu, während Sie sie geöffnet haben, oder tippen Sie ihre Adresse unten ein. Der Schalter fehlt, wenn sowohl"
+  },
+
+  "options_disabled_intro_and": {
+    "message": "als auch",
+    "description": "Between the two setting names in the switched-off sites intro; each name is a link to its own row."
+  },
+
+  "options_disabled_intro_rest": {
+    "message": " eingeschaltet sind: auf gewöhnlichen Seiten passiert dann nichts, es gibt also nichts abzuschalten.",
+    "description": "The end of the switched-off sites intro, glued to the second setting's link - it opens with the punctuation or the space the language needs there."
   },
   "options_add_host_label": { "message": "Adresse der Website" },
   "options_add_host_button": { "message": "Hinzufügen" },

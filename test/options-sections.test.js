@@ -93,7 +93,8 @@ describe("the settings page's sections", () => {
 
   it("lists every section in the page's own table of contents, in the same order", async () => {
     const markup = await source("options/options.html");
-    const nav = markup.slice(markup.indexOf('<nav class="jump"'), markup.indexOf("</nav>", markup.indexOf('<nav class="jump"')));
+    const from = markup.indexOf('<nav id="sections"');
+    const nav = markup.slice(from, markup.indexOf("</nav>", from));
     const listed = [...nav.matchAll(/href="#([a-z-]+)"/g)].map((match) => String(match[1]));
     assert.deepEqual(
       listed,

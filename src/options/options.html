@@ -68,6 +68,19 @@
           </svg>
         </button>
         <p class="page-mark">re/read</p>
+        <!-- The narrow screen's table of contents (D254): under 60rem the
+             column beside the page has nowhere to stand, and the list moves
+             into the bar as the one control a phone and an e-ink panel are
+             both good at. Filled by `sections.js` from the very links the
+             column holds, so the two can never name different sections; it
+             follows the reading like the column's marker, and a choice in it
+             is the same landing an address makes. -->
+        <select
+          id="section-jump"
+          class="bar-sections"
+          aria-label="Sections of this page"
+          data-i18n-aria-label="options_sections_aria"
+        ></select>
         <span class="page-tools">
           <!-- The bar's full-screen tool (D195; every page since D220):
                where the browser has a full screen to give and the row has
@@ -140,6 +153,24 @@
         <button id="nav-vocabulary" type="button" data-i18n="saved_phrases">Saved phrases</button>
       </nav>
     </div>
+    <!-- The page and its table of contents, side by side from 60rem up and
+         one under the other below it - where the list hides and the bar's
+         select speaks for it. The title lives in the page's column, so the
+         list stands beside the settings rather than under the heading. -->
+    <div class="page-body">
+    <nav id="sections" class="sections" aria-label="Sections of this page" data-i18n-aria-label="options_sections_aria">
+      <a id="jump-first-steps" class="translation-only" href="#first-steps" data-i18n="options_first_steps_heading" hidden>First steps</a>
+      <a href="#languages" data-i18n="options_section_languages">Languages</a>
+      <a href="#where-it-works" data-i18n="options_section_where">Where it works</a>
+      <a href="#bubble-and-phrases" data-i18n="options_section_bubble">Bubble and phrases</a>
+      <a href="#reading-view" data-i18n="options_section_reading">Reading view</a>
+      <a href="#reading-aloud" data-i18n="options_section_aloud">Reading aloud</a>
+      <a href="#data" data-i18n="options_section_data">Data and copies</a>
+      <a href="#custom-css" data-i18n="options_custom_css_heading">Custom CSS</a>
+      <a href="#about" data-i18n="options_section_about">About re/read</a>
+    </nav>
+
+    <main>
     <header>
       <h1 data-i18n="settings">Settings</h1>
     </header>
@@ -161,25 +192,6 @@
       <a href="#about" data-i18n="options_intro_more">More about privacy</a>
     </p>
 
-    <!-- One link per section of the page below, in the page's own order - the
-         page is long, and this is how a phone reaches the far end of it. The
-         first-steps card comes and goes with what is stored, so its link is
-         hidden until the card shows itself (`renderFirstSteps`). PR B turns
-         this line into the stuck table of contents; it is a plain wrapping
-         line until then. -->
-    <nav class="jump" aria-label="Sections of this page" data-i18n-aria-label="options_sections_aria">
-      <a id="jump-first-steps" class="translation-only" href="#first-steps" data-i18n="options_first_steps_heading" hidden>First steps</a>
-      <a href="#languages" data-i18n="options_section_languages">Languages</a>
-      <a href="#where-it-works" data-i18n="options_section_where">Where it works</a>
-      <a href="#bubble-and-phrases" data-i18n="options_section_bubble">Bubble and phrases</a>
-      <a href="#reading-view" data-i18n="options_section_reading">Reading view</a>
-      <a href="#reading-aloud" data-i18n="options_section_aloud">Reading aloud</a>
-      <a href="#data" data-i18n="options_section_data">Data and copies</a>
-      <a href="#custom-css" data-i18n="options_custom_css_heading">Custom CSS</a>
-      <a href="#about" data-i18n="options_section_about">About re/read</a>
-    </nav>
-
-    <main>
     <!-- The signpost for a fresh install: this page is long, and the person
          who just arrived from "no model - open the settings" must not have to
          guess which of its sections was meant. Setting up means two downloads,
@@ -670,12 +682,27 @@
     <section aria-labelledby="switched-off-sites">
     <h3 id="switched-off-sites" data-i18n="options_disabled_heading">Switched-off sites</h3>
 
-    <p class="explain" data-i18n="options_disabled_intro">
-      A list of websites where the extension is switched off: no translation, no bubble, no
-      underlines. Add a site with the switch under the extension's icon in the browser's toolbar
-      while you are on it, or type its address below. There is no switch when both "Use without
-      a translation model" and "No bubble when selecting text" are on: nothing happens on ordinary
-      pages then, so there is nothing to switch off.
+    <!-- The two settings this paragraph names are links to their own rows
+         (D254, P9): a sentence that names a setting and leaves the reader to
+         find it is a sentence that sends them back to the top of the page.
+         The names come from the rows' own catalogue keys, so renaming a
+         setting renames the reference with it. The closing clause is glued to
+         the second link (no line break between them): where a language opens
+         it with a colon - Polish, Spanish, Ukrainian - a space before that
+         colon would be a typographic error, and the languages that want a
+         word there open theirs with a space instead. -->
+    <p class="explain">
+      <span data-i18n="options_disabled_intro"
+        >A list of websites where the extension is switched off: no translation, no bubble, no
+        underlines. Add a site with the switch under the extension's icon in the browser's toolbar
+        while you are on it, or type its address below. There is no switch when both</span
+      >
+      <a href="#s-translationOff" data-i18n="options_no_translation">Use without a translation model</a>
+      <span data-i18n="options_disabled_intro_and">and</span>
+      <a href="#s-bubbleOff" data-i18n="options_bubble_off">No bubble when selecting text</a
+      ><span data-i18n="options_disabled_intro_rest"
+        > are on: nothing happens on ordinary pages then, so there is nothing to switch off.</span
+      >
     </p>
 
     <div id="disabled-hosts" class="models"></div>
@@ -1256,6 +1283,7 @@
     </p>
     </section>
     </main>
+    </div>
 
     <!-- The colophon closes the page the way one closes a book: name and
          version, the licence, the maker, the maker's site and the source

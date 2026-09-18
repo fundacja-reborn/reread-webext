@@ -2083,7 +2083,17 @@
   },
   "options_disabled_heading": { "message": "Switched-off sites" },
   "options_disabled_intro": {
-    "message": "A list of websites where the extension is switched off: no translation, no bubble, no underlines. Add a site with the switch under the extension's icon in the browser's toolbar while you are on it, or type its address below. There is no switch when both \"Use without a translation model\" and \"No bubble when selecting text\" are on: nothing happens on ordinary pages then, so there is nothing to switch off."
+    "message": "A list of websites where the extension is switched off: no translation, no bubble, no underlines. Add a site with the switch under the extension's icon in the browser's toolbar while you are on it, or type its address below. There is no switch when both"
+  },
+
+  "options_disabled_intro_and": {
+    "message": "and",
+    "description": "Between the two setting names in the switched-off sites intro; each name is a link to its own row."
+  },
+
+  "options_disabled_intro_rest": {
+    "message": " are on: nothing happens on ordinary pages then, so there is nothing to switch off.",
+    "description": "The end of the switched-off sites intro, glued to the second setting's link - it opens with the punctuation or the space the language needs there."
   },
   "options_add_host_label": { "message": "Site address" },
   "options_add_host_button": { "message": "Add" },

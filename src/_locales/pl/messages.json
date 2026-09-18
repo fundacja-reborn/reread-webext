@@ -2287,7 +2287,17 @@
   },
   "options_disabled_heading": { "message": "Wyłączone witryny" },
   "options_disabled_intro": {
-    "message": "Lista stron internetowych, na których rozszerzenie jest wyłączone: bez tłumaczenia, dymka i podkreśleń. Stronę dodasz przełącznikiem pod ikoną rozszerzenia na pasku przeglądarki, będąc na niej, albo wpisując jej adres poniżej. Przełącznika nie ma, gdy włączone są jednocześnie „Używaj bez modelu tłumaczenia\" i „Bez dymka po zaznaczeniu tekstu\": na zwykłych stronach nic się wtedy nie dzieje, więc nie ma czego wyłączać."
+    "message": "Lista stron internetowych, na których rozszerzenie jest wyłączone: bez tłumaczenia, dymka i podkreśleń. Stronę dodasz przełącznikiem pod ikoną rozszerzenia na pasku przeglądarki, będąc na niej, albo wpisując jej adres poniżej. Przełącznika nie ma, gdy włączone są jednocześnie"
+  },
+
+  "options_disabled_intro_and": {
+    "message": "i",
+    "description": "Between the two setting names in the switched-off sites intro; each name is a link to its own row."
+  },
+
+  "options_disabled_intro_rest": {
+    "message": ": na zwykłych stronach nic się wtedy nie dzieje, więc nie ma czego wyłączać.",
+    "description": "The end of the switched-off sites intro, glued to the second setting's link - it opens with the punctuation or the space the language needs there."
   },
   "options_add_host_label": { "message": "Adres strony" },
   "options_add_host_button": { "message": "Dodaj" },

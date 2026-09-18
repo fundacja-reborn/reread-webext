@@ -118,6 +118,71 @@ header h1 {
   margin: 1.5rem 0 0.75rem;
 }
 
+/* --- the table of contents (D254) ---
+
+   One list, two shapes: a column beside the page from 60rem up, and the
+   bar's select below that. The column is the markup; the select is built
+   from it (`sections.js`), so neither can name a section the other does not.
+   The column is quiet - it is a map, not a row of actions - and the section
+   being read wears a marker on its leading edge rather than a fill: a tone
+   is one of the sixteen greys an e-ink panel rounds away, and a line is not.
+
+   Hidden below the breakpoint, where the select speaks for it. `display`
+   rather than the `hidden` attribute, because the first-steps link inside
+   it manages its own `hidden`. */
+.sections {
+  display: none;
+}
+
+.sections a {
+  display: block;
+  padding: 0.4rem 0.6rem;
+  border-inline-start: 3px solid transparent;
+  color: var(--page-muted);
+  text-decoration: none;
+  /* Long section names wrap rather than widen the column. */
+  overflow-wrap: break-word;
+}
+
+.sections a:hover,
+.sections a:focus-visible {
+  color: var(--page-fg);
+  text-decoration: underline;
+}
+
+/* The section being read: the marker on the leading edge and the page's full
+   ink, never a fill. No transition on either - the marker moves with the
+   scroll, and a fade would be one refresh of an e-ink panel per frame. */
+.sections a[aria-current="location"] {
+  border-inline-start-color: var(--page-accent);
+  color: var(--page-fg);
+  font-weight: 600;
+}
+
+/* The bar's own table of contents, under 60rem: the bar's floor, the bar's
+   voice, and no more width than it can spare - the tools keep theirs. */
+.bar-sections {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 2.1rem;
+  font-size: 0.85rem;
+}
+
+@media (min-width: 60rem) {
+  .bar-sections {
+    display: none;
+  }
+}
+
+/* At a phone's width the mark gives its room to the list: on this page the
+   mark is a plain line of text - the door it is elsewhere would open the room
+   it stands in - so it is the one thing in the bar with nothing to do. */
+@media (max-width: 30rem) {
+  .page-mark {
+    display: none;
+  }
+}
+
 /* Plain links in a wrapping line; the dot between them is drawn, not written,
    so a screen reader hears three links and no punctuation. Each link keeps
    the touch floor without growing its text. */
@@ -220,6 +285,18 @@ h2 + p + section > h3:first-child {
   align-items: center;
   padding: 0.55rem 0;
   border-bottom: 1px solid var(--page-line);
+  /* A row is an address of its own (`#s-<setting>`), so it lands the way a
+     heading does: a step under the stuck bar's line, never against it. */
+  scroll-margin-top: 0.75rem;
+}
+
+/* Where an address just landed (D254): the accent's frame around the heading
+   or the row it named, for as long as the focus stays on it. Not a fill and
+   not a flash - the ring leaves when the reading moves on, and nothing here
+   runs on a clock. */
+[data-landed] {
+  outline: 2px solid var(--page-accent);
+  outline-offset: 4px;
 }
 
 /* Labels speak at the page's full color; the notes below them are the quiet
@@ -976,6 +1053,52 @@ summary::marker {
   /* List rows on one line: name | size | action. */
   .model-name {
     grid-column: 1;
+  }
+}
+
+/* --- the second breakpoint: the table of contents takes a column (D254) ---
+
+   In rem rather than px, and at the width the two columns actually need:
+   13rem of list, a gutter, and the 44rem the page is set in. Measured in the
+   reader's own text size, so a browser told to render text larger gets the
+   one-column page at the moment the two would start crowding, rather than at
+   a pixel width that stopped meaning anything. */
+@media (min-width: 60rem) {
+  /* The column's room, on top of the page's own: 13rem of list, the gutter
+     and the 44rem the text is set in, plus the page's side padding. The bar
+     above spans it too - it is the page's width, not the text's. */
+  body {
+    max-width: 62.5rem;
+  }
+
+  .page-body {
+    display: grid;
+    grid-template-columns: 13rem minmax(0, 1fr);
+    gap: 0 2.5rem;
+    align-items: start;
+  }
+
+  /* The list stands under the stuck bar and stays there. Its own scrolling
+     for a short window: a table of contents that runs off the bottom of a
+     laptop screen is a table of contents with an unreachable end. */
+  .sections {
+    display: block;
+    position: sticky;
+    top: calc(var(--header-h) + 0.75rem);
+    max-height: calc(100vh - var(--header-h) - 2rem);
+    overflow-y: auto;
+    /* The markers stand on the list's leading edge, and the negative margin
+       hands their width back to the gutter - so the section names line up
+       with the page's own edge, marked or not. */
+    margin-inline-start: -0.6rem;
+    font-size: 0.95rem;
+  }
+
+  /* The text keeps its measure whatever the window does; the column beside
+     it takes the rest. */
+  main {
+    min-width: 0;
+    max-width: 44rem;
   }
 }
 

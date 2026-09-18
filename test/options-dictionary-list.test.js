@@ -89,8 +89,13 @@ describe("the dictionary list's rows", () => {
     assert.match(rule(css, ".dictionary-actions button"), /white-space: nowrap/);
     const narrow = css.slice(css.indexOf("@media (max-width: 480px)"));
     assert.match(narrow, /\.dictionary-actions \{\s+flex-basis: 100%;\s+justify-content: flex-end;/);
-    // And no other narrow-screen rule for the row: the stack is the same everywhere.
-    assert.equal(css.match(/@media \(max-width/g)?.length, 1);
+    // And no other narrow-screen rule for the row: the stack is the same
+    // everywhere. Other blocks may exist for other parts of the page (the
+    // bar's mark yields its room to the table of contents at a phone's
+    // width); none of them may reach the dictionary row.
+    const blocks = css.split("@media (max-width").slice(1);
+    const about = blocks.filter((block) => block.slice(0, block.indexOf("\n}\n")).includes(".dictionary"));
+    assert.equal(about.length, 1);
   });
 
   it("title the row with the shown name and wrap it rather than cut it", () => {

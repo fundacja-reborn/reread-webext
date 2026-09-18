@@ -100,6 +100,7 @@ import {
   voiceLanguage,
   voicesFor,
 } from "../lib/tts.js";
+import { armSections, fillSectionSelect } from "./sections.js";
 import {
   dictionaryRows,
   filterActive,
@@ -139,6 +140,11 @@ watchToolbarScheme();
 // content of its own to dress, but walking here from a sepia article must
 // not flash a white room.
 followTheme();
+// Then the page's own navigation (D254): the table of contents beside the
+// page, the same list in the bar's select, the marker that follows the
+// reading, and the landing every address makes. After `localizePage`,
+// because the select's lines are the column's links read back.
+armSections();
 
 /** @type {import("../lib/config.js").Config} */
 let config = withDefaults(undefined);
@@ -228,6 +234,9 @@ function renderFirstSteps() {
   // pointing at a section that is not on the page yet is a line that lies.
   const entry = document.getElementById("jump-first-steps");
   if (entry !== null) entry.hidden = false;
+  // The bar's select is a snapshot of the column - it has to be taken again
+  // whenever a line joins or leaves it.
+  fillSectionSelect();
 }
 
 /**
@@ -552,6 +561,9 @@ function renderNoTranslation() {
   const toggle = document.getElementById("no-translation");
   if (toggle instanceof HTMLInputElement) toggle.checked = config.translationOff;
   document.body.classList.toggle("no-translation", config.translationOff);
+  // The mode takes whole sections off the page, the first-steps card among
+  // them - so the bar's list of them is taken again (D254).
+  fillSectionSelect();
   renderBubbleOff();
 }
 
