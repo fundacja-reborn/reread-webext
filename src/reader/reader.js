@@ -1942,6 +1942,39 @@ function flowBlocks() {
 }
 
 /**
+ * The controls a page's edge must never cut through (D245): a button, a
+ * chooser, a field, the summary of a fold.
+ */
+const CONTROLS = new Set(["BUTTON", "SELECT", "TEXTAREA", "INPUT", "SUMMARY"]);
+
+/**
+ * Whether a node stands inside a control rather than in the text - a
+ * button's word, the glyph drawn beside it. The walk goes up to and
+ * including the block itself, because a block can BE a control: the way
+ * back to the reading list under the last paragraph is a button of its own.
+ *
+ * Nothing inside a control is a line, so a block whose whole content is
+ * controls has no lines at all, and the cutter moves it onto the next page
+ * whole (`pagesOn`, `pagesBack` - the rule a picture already lives by).
+ * Until D245 the words in those buttons were lines like any others, and the
+ * row of acts under an article came out halved: the frames on one page, the
+ * words on the next (Michał's photos, 2026-09-18).
+ *
+ * @param {Node} node
+ * @param {Element} block the block being measured
+ * @returns {boolean}
+ */
+function withinControl(node, block) {
+  let at = node instanceof Element ? node : node.parentElement;
+  while (at !== null) {
+    if (CONTROLS.has(at.tagName)) return true;
+    if (at === block) return false;
+    at = at.parentElement;
+  }
+  return false;
+}
+
+/**
  * The line boxes of one block, document coordinates, sorted, one box per
  * line: the rects of its text, and of the pictures set in its text, with
  * the boxes of one line - a line runs through several rects wherever an
@@ -1959,12 +1992,14 @@ function lineBoxes(block) {
   const walker = document.createTreeWalker(block, NodeFilter.SHOW_TEXT);
   for (let node = walker.nextNode(); node !== null; node = walker.nextNode()) {
     if (!(node instanceof Text) || node.data.trim().length === 0) continue;
+    if (withinControl(node, block)) continue;
     range.selectNodeContents(node);
     for (const rect of range.getClientRects()) {
       if (rect.height > 0) boxes.push({ top: rect.top + scrolled, bottom: rect.bottom + scrolled });
     }
   }
   for (const picture of block.querySelectorAll("img, svg, video, canvas")) {
+    if (withinControl(picture, block)) continue;
     const rect = picture.getBoundingClientRect();
     if (rect.height > 0) boxes.push({ top: rect.top + scrolled, bottom: rect.bottom + scrolled });
   }
