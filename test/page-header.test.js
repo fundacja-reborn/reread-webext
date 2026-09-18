@@ -64,7 +64,9 @@ describe("the bar stuck to the top of every page", () => {
     assert.match(markup, /<div class="reader-chrome page-chrome">/, "the reader's box does not wear the shared class");
     assert.match(markup, /<header class="reader-bar page-bar">/, "the reader's bar does not wear the shared class");
     const styles = await source("reader/reader.css");
-    assert.doesNotMatch(styles, /position: sticky/, "the reader sticks a box of its own beside the shared one");
+    // One `sticky` on this page, and it is not a box of chrome: the strip
+    // at the foot of a panel that scrolls within itself (D246).
+    assert.doesNotMatch(styles.replace(/\.panel-more \{[^}]*\}/, ""), /position: sticky/, "the reader sticks a box of its own beside the shared one");
     assert.doesNotMatch(styles, /\n\.reader-chrome \{/, "the reader dresses its box twice");
     assert.doesNotMatch(styles, /\n\.reader-bar \{/, "the reader dresses its bar twice");
     // The ribbon folds the bar only over an article: a list keeps its whole
@@ -188,8 +190,10 @@ describe("the bar stuck to the top of every page", () => {
     // layout's curtains, page count and edge line (D233, D239) are fixed
     // there too, over an article read by pages, never over a list. The
     // sixth is the room a settings or phrases visit stands in (D243),
-    // which is the window while it stands.
-    assert.equal((styles.match(/position: (?:sticky|fixed)/g) ?? []).length, 6, "a strip of chrome beyond the speech bar, the two curtains, the page count, the edge line and the room is stuck or fixed on the reader page");
+    // which is the window while it stands, and the seventh the strip at
+    // the foot of a panel that scrolls within itself (D246).
+    assert.equal((styles.match(/position: (?:sticky|fixed)/g) ?? []).length, 7, "a strip of chrome beyond the speech bar, the two curtains, the page count, the edge line, the room and the panel's foot is stuck or fixed on the reader page");
+    assert.match(ruleOf(styles, ".panel-more"), /position: sticky;\s*bottom: 0;/, "the panel's foot does not stand at the panel's foot");
     assert.match(ruleOf(styles, ".room"), /position: fixed;[\s\S]*?height: 100dvh;/, "the room does not fill the window as it stands - a fixed box runs under Android's toolbar");
     assert.match(ruleOf(styles, ".page-curtain"), /position: fixed;/, "the curtain is not fixed to the window");
     assert.match(ruleOf(styles, ".page-head"), /position: fixed;\s*inset-inline: 0;\s*top: 0;/, "the head's curtain is not fixed to the window's top");

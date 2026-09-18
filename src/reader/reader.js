@@ -7201,6 +7201,10 @@ function applyAppearance(reader) {
   // (D107), so a new ink - picked in Aa, on the bar itself, or in another
   // tab - has to reach them through the same road every setting takes.
   refreshMarkBar();
+  // The panel's own rows just changed height with the text size, and one of
+  // them may have come or gone (D246): what stands below its fold changed
+  // with them.
+  dressPanelMore();
   // A size or measure change reflows the article under the note badges;
   // reading fresh boxes here sees the layout the new variables made.
   showNoteBadges();
@@ -7557,7 +7561,36 @@ function setPanel(button, panel, open) {
   // The chrome needs no holding meanwhile: it is stuck to the window's top
   // in every view (D219, `.page-chrome` in page.css).
   if (panelScrim !== null) panelScrim.hidden = !anyPanelOpen();
+  // A panel just opened is measured before anything has scrolled it.
+  dressPanelMore();
 }
+
+/**
+ * Whether an open panel has anything below its fold (D246), said at its
+ * foot by the strip standing there (`.panel-more`, reader.css). The Aa
+ * panel's thirteen rows outgrow a phone's window at Firefox for Android's
+ * 125%, and the panel scrolled with nothing to say so: on Android the
+ * browser's scrollbar is an overlay that fades, and on an e-ink panel a
+ * fade is not there at all (Michał, 2026-09-18).
+ *
+ * Measured, never guessed: the rows' height moves with the text size, the
+ * window's with the browser's own bars, and a row can come and go (the Type
+ * row's Custom choice). So this is asked on every opening, every scroll of
+ * a panel, every resize and every settings change.
+ */
+function dressPanelMore() {
+  for (const panel of [displayPanel, menuPanel]) {
+    if (panel === null) continue;
+    const more = !panel.hidden && panel.scrollHeight - panel.scrollTop - panel.clientHeight > 1;
+    const said = more ? "true" : "false";
+    if (panel.dataset["more"] !== said) panel.dataset["more"] = said;
+  }
+}
+
+for (const panel of [displayPanel, menuPanel]) {
+  panel?.addEventListener("scroll", () => dressPanelMore(), { passive: true });
+}
+window.addEventListener("resize", () => dressPanelMore());
 
 /**
  * A panel opening is one more tool taken in hand (D123, Michał's report:
