@@ -28,7 +28,7 @@ import { applyReading } from "../lib/appearance.js";
 import { webext } from "../lib/browser.js";
 import { clearableField } from "../lib/clear-field.js";
 import { CONFIG_KEY, SIZE, TTS_RATE, chosenPair, isFont, isTheme, readConfig, writeConfig } from "../lib/config.js";
-import { fileSize, localizePage, plural, t, uiLocale } from "../lib/i18n.js";
+import { fileSize, localizePage, plural, speedFactor, t, uiLocale } from "../lib/i18n.js";
 import { privateNote } from "../lib/private-note.js";
 import { pairLabel } from "../lib/language.js";
 import { toMeanings } from "../lib/gloss.js";
@@ -314,7 +314,7 @@ function adoptConfig(fresh) {
   if (rateSetting !== null) rateSetting.hidden = !canSpeak();
   applyReading(document.documentElement, fresh.reader);
   if (sizeValue !== null) sizeValue.textContent = String(fresh.reader.fontSize);
-  if (rateValue !== null) rateValue.textContent = `${(fresh.ttsRate / 100).toFixed(1)}×`;
+  if (rateValue !== null) rateValue.textContent = speedFactor(fresh.ttsRate);
   for (const button of document.querySelectorAll("[data-theme], [data-font]")) {
     const wanted = button.getAttribute("data-theme") ?? button.getAttribute("data-font");
     const current = button.hasAttribute("data-theme") ? fresh.reader.theme : fresh.reader.font;

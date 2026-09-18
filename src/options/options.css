@@ -7,10 +7,11 @@
    Base styles lay the page out for a narrow screen; the one media query at
    the end spreads the same HTML out for a desktop. */
 
-/* The page's own tokens (D255, T2/T3): the type scale, the density and the two
-   numbers the two-column layout is made of. Only this page loads this sheet,
-   so `:root` here reaches nothing else - the popup, the reader and the bubble
-   keep the shared sizes in page.css.
+/* The page's own tokens (D255, T2/T3; the separators and the gaps, D258): the
+   type scale, the density, the two numbers the two-column layout is made of,
+   and the three boundaries a section, a subsection and a row are told apart
+   by. Only this page loads this sheet, so `:root` here reaches nothing else -
+   the popup, the reader and the bubble keep the shared sizes in page.css.
 
    The face is the system's (`system-ui`), which is what Chrome's and Brave's
    own settings use: on macOS that is SF, on Android Roboto, and re/read is
@@ -25,20 +26,61 @@
   --font-ui: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
   --ui-h1: 1.5rem;
   --ui-h2: 1.25rem;
-  --ui-h3: 1rem;
+  --ui-h3: 1.0625rem;
   --ui-text: 0.9375rem;
-  --ui-small: 0.875rem;
+  --ui-label-weight: 400;
+  --ui-small: 0.8125rem;
   --ui-control: 2.25rem;
   /* The column of sections, the gutter beside it, and the air that puts the
-     list's first line on the title's own line. */
+     list's first line on the title's own line. The top is arithmetic, not
+     taste: the title's text begins at its own margin plus its half-leading
+     (1.5rem + (1.5rem x 1.25 - 1.5rem) / 2 = 1.6875rem), a link's at this
+     padding plus 0.4rem plus its own (0.211rem) - so the two line up at
+     1.0625rem and the list no longer starts below the title (V-i). */
   --ui-side: 13rem;
   --ui-gutter: 2.5rem;
-  --ui-side-top: 1.75rem;
+  --ui-side-top: 1.0625rem;
+
+  /* --- the three levels of separation (D258, H1) ---
+
+     One page, three boundaries, three different signals, because a page where
+     the section rule, the subsection rule and the row rule are the same
+     hairline has no hierarchy at all - only sizes of type (V-a, V-b).
+
+     A section: a 2px rule in the controls' own ink, over a wide gap. A
+     subsection: air and weight, no rule whatsoever. A row: the separators'
+     hairline, and only ever between two rows that are both drawn.
+
+     The strong ink is `--page-border` (4.63:1 light, 4.27:1 dark, 3.87:1
+     sepia, 8.86:1 e-ink), well over the 3:1 a boundary is asked for and still
+     legible after a panel posterises it to sixteen greys; the subtle one is
+     the separators' own `--page-line`, which is what a hairline between two
+     rows has always been. */
+  --sep-section: 2px solid var(--page-border);
+  --sep-row: 1px solid var(--page-line);
+
+  /* The gaps, largest to smallest. Proximity rules the page: the air before a
+     heading is at least twice the air after it, so a heading belongs to what
+     stands under it and never to what stands above. */
+  --space-section: 3.5rem;
+  --space-divider-h2: 1.25rem;
+  --space-after-h2: 1rem;
+  --space-before-h3: 2.25rem;
+  --space-after-h3: 0.5rem;
+  --space-block: 1rem;
 }
 
+/* The density follows the pointer, not the window: where a device is read
+   with a finger the labels grow a step and take a little weight, and the
+   explaining text grows with them - a 13px line is a magnifying glass on a
+   phone. `any-pointer` rather than `pointer` on purpose: a Boox with a pen
+   answers `pointer: fine` and is still read with a finger. */
 @media (any-pointer: coarse) {
   :root {
     --ui-control: 2.75rem;
+    --ui-text: 1rem;
+    --ui-label-weight: 500;
+    --ui-small: 0.875rem;
   }
 }
 
@@ -83,11 +125,38 @@ main h3 {
   font-weight: 600;
 }
 
-/* Denser prose rhythm for the same reason - this page stacks many short
-   explaining paragraphs, and the default paragraph margins are what stood
-   between the fold and the first section. */
-p.explain {
-  margin: 0.75rem 0;
+/* --- one voice for every explanation (D258, V-g) ---
+
+   The page's full ink is for headings, labels, values and controls. Every
+   word that explains something - a section's opening paragraph, a row's
+   description, a meta line, a status, "Details" - is the quiet grey, a step
+   smaller and a little looser.
+
+   The step used to be 15px against 14px, which is no step at all: an
+   intro paragraph set like the label above it read as one more thing to
+   decide about. */
+p.explain,
+.hint {
+  margin: var(--space-block) 0;
+  color: var(--page-muted);
+  font-size: var(--ui-small);
+  line-height: 1.5;
+}
+
+/* Two explanations in a row are one explanation in two paragraphs: they keep
+   the reading rhythm between them, not the gap between blocks. */
+p.explain + p.explain {
+  margin-top: 0.5rem;
+}
+
+/* Code is code (D258, V5): a file's name, a CSS rule. In a fixed-width face,
+   a hair under the surrounding text - the browser's own default is 0.85em of
+   the parent, which inside a description was unreadable. In `em` on purpose:
+   it follows whatever it is set inside rather than stepping outside the
+   scale. */
+code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.95em;
 }
 
 /* Focus must be findable on every control here - the quiet row buttons erase
@@ -148,10 +217,17 @@ body:not(.no-translation) .no-translation-only {
    under its parent and joined to it by a line down its leading edge - the
    indent alone left the voice rows looking like two more settings of the page
    rather than two settings of the switch above them. The line is the page's
-   own separator, not the accent: it joins, it does not call attention. */
+   own separator, not the accent: it joins, it does not call attention.
+
+   One line down one edge and nothing else (D258, V3): with a rule over the
+   group and a rule under it the two voice rows read as a box inside a list,
+   heavier than anything else on the page - and a box is a thing, while these
+   are two settings of the switch above. They keep the rows' own hairline
+   between them. */
 .row-sub {
-  padding-inline-start: 1.5rem;
-  border-inline-start: 1px solid var(--page-line);
+  margin-inline-start: 0.75rem;
+  padding-inline-start: 1rem;
+  border-inline-start: 2px solid var(--page-line);
 }
 
 /* --- the header: the shared bar, title, the table of contents ---
@@ -399,29 +475,38 @@ mark.hit {
   min-height: var(--ui-control);
 }
 
-/* The anchors' landing pads: a heading flush with the stuck bar's line
-   (the root's scroll padding, page.css - D219) reads as cut off, so each
-   lands a step under it. The margin above sections is a step wider than the shared
-   default (Michał's request, 2026-08-17): the rows above end dense, and a
-   section heading needs air to read as a new chapter - worth more than the
-   fold arithmetic that once kept it tight. */
+/* --- where one section ends and the next begins (D258, H1) ---
+
+   The rule belongs to the section, not to the heading: it is the page's
+   strongest boundary, and a heading that carried it would take it along into
+   every fold and every card that borrows a heading's element. The nine
+   sections of this page are `main`'s own children - the subsections inside
+   them are nested deeper and get none of this. */
+main > section {
+  margin-top: var(--space-section);
+  padding-top: var(--space-divider-h2);
+  border-top: var(--sep-section);
+}
+
+/* The anchors' landing pads: a heading flush with the stuck bar's line (the
+   root's scroll padding, page.css - D219) reads as cut off, so each lands a
+   step under it. A section heading lands low enough to bring its own rule
+   into the window with it - an address that stops under the boundary it just
+   crossed says nothing about having crossed one. */
 h2 {
-  margin-top: 2.5rem;
-  scroll-margin-top: 0.75rem;
+  margin-top: 0;
+  margin-bottom: var(--space-after-h2);
+  scroll-margin-top: calc(0.75rem + var(--space-divider-h2) + 2px);
 }
 
-/* A subsection's heading (D254): the same landing pad, less air above it and
-   a smaller voice - it opens a part of the section it stands in, not a new
-   chapter. The first one under a section heading needs none of that margin:
-   nothing but the heading stands over it. */
+/* A subsection's heading (D254): the same landing pad and a smaller voice -
+   it opens a part of the section it stands in, not a new chapter. No rule of
+   its own, ever: the air above it and the weight of it are the whole signal
+   (V-b). */
 h3 {
-  margin-top: 1.5rem;
+  margin-top: var(--space-before-h3);
+  margin-bottom: var(--space-after-h3);
   scroll-margin-top: 0.75rem;
-}
-
-h2 + section > h3:first-child,
-h2 + p + section > h3:first-child {
-  margin-top: 1.25rem;
 }
 
 /* What does the translating, under the Translation models heading (P7): the
@@ -432,18 +517,24 @@ h2 + p + section > h3:first-child {
   font-size: var(--ui-small);
 }
 
-/* A section's last rows should not run into the next heading's air: the
-   heading brings its own margin, and the rule under the last row is the
-   section's floor. */
-.rows:last-child {
-  margin-bottom: 0;
-}
-
 /* --- the settings rows: label | control, wrapping where the control needs
    the width --- */
 
+/* A group of rows keeps a block's distance from what came before it, and a
+   step and a half from a block that closes with a frame - a note's border and
+   a row's hairline a block apart read as one box drawn twice. */
 .rows {
-  border-top: 1px solid var(--page-line);
+  margin-top: var(--space-block);
+}
+
+:is(.note, details, .status.report) + .rows {
+  margin-top: calc(var(--space-block) * 1.5);
+}
+
+/* The heading that follows brings its own air, and the last row of a group
+   closes on nothing - the group has no floor to draw. */
+.rows:last-child {
+  margin-bottom: 0;
 }
 
 .row {
@@ -454,10 +545,27 @@ h2 + p + section > h3:first-child {
   gap: 0.125rem 1rem;
   align-items: center;
   padding-block: 0.75rem;
-  border-bottom: 1px solid var(--page-line);
   /* A row is an address of its own (`#s-<setting>`), so it lands the way a
      heading does: a step under the stuck bar's line, never against it. */
   scroll-margin-top: 0.75rem;
+}
+
+/* The hairline belongs between two rows, and nowhere else (D258, H1): no line
+   over the first row of a group, none under the last, and none where the row
+   above it is not drawn at all. The three ways a row leaves the page - the
+   `hidden` attribute (a dependent row, a row the search filtered out), the
+   translation mode, and the mode's mirror - each hand the line back, or the
+   first row on screen would open on a stray rule. */
+.row + .row,
+.model + .model,
+.dictionary-row + .dictionary-row {
+  border-top: var(--sep-row);
+}
+
+[hidden] + :is(.row, .model, .dictionary-row),
+body.no-translation .translation-only + .row,
+body:not(.no-translation) .no-translation-only + .row {
+  border-top: none;
 }
 
 /* Where an address just landed on one row out of thirty (D254, F5): a bar at
@@ -480,7 +588,15 @@ h2 + p + section > h3:first-child {
 /* Labels speak at the page's full color; the notes below them are the quiet
    ones. The touch floor lives on each row's control (select, button, the
    toggle line) - a label beside a full-height control needs none of its own,
-   and the one all-text row may be denser. */
+   and the one all-text row may be denser.
+
+   The weight follows the pointer with the size (D258, §3.3): on a screen read
+   with a finger, at arm's length, 400 against a grey description is too fine
+   a line to scan by. */
+.row-name {
+  font-weight: var(--ui-label-weight);
+}
+
 .row-value {
   color: var(--page-muted);
 }
@@ -504,13 +620,21 @@ h2 + p + section > h3:first-child {
 
 /* An explanation under the row's own line, inside the same borders, so it can
    never drift away from what it explains - and outside the toggle's label, so
-   brushing against a paragraph on a phone never flips a switch. */
-.row .row-note {
-  grid-column: 1 / -1;
+   brushing against a paragraph on a phone never flips a switch.
+
+   The voice is not the row's (D258, V-g): the same class carries the note
+   under the copies block, which stands in no row at all and was therefore
+   drawn at the page's full size and full ink - the one paragraph on the page
+   speaking louder than the settings it explains. */
+.row-note {
   margin: 0;
   color: var(--page-muted);
   font-size: var(--ui-small);
-  line-height: 1.45;
+  line-height: 1.5;
+}
+
+.row > .row-note {
+  grid-column: 1 / -1;
 }
 
 /* The rows whose control wants the whole width on a phone: label above,
@@ -581,8 +705,10 @@ button.note-more:focus-visible {
 }
 
 /* The rest of the note, under the sentence it belongs to - the same voice,
-   a step of air between them. */
-.row .row-more {
+   a step of air between them, wherever the pair stands: in a row, under the
+   copies, or under a section's opening sentence. */
+.row-more,
+p.explain.row-more {
   margin-top: 0.35rem;
 }
 
@@ -605,7 +731,7 @@ button.note-more:focus-visible {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.35rem 0.9rem;
-  margin: 1rem 0 0;
+  margin: var(--space-block) 0 0;
 }
 
 .list-refresh button {
@@ -627,7 +753,7 @@ button.note-more:focus-visible {
 /* --- the filter boxes --- */
 
 .model-filter {
-  margin: 1rem 0 0;
+  margin: var(--space-block) 0 0;
 }
 
 .model-filter input {
@@ -646,8 +772,7 @@ button.note-more:focus-visible {
    first line and the rest right-aligns below it. --- */
 
 .models {
-  margin: 0.5rem 0 0;
-  border-top: 1px solid var(--page-line);
+  margin: var(--space-block) 0 0;
 }
 
 .model {
@@ -656,7 +781,6 @@ button.note-more:focus-visible {
   gap: 0.25rem 0.75rem;
   align-items: center;
   padding: 0.5rem 0;
-  border-bottom: 1px solid var(--page-line);
 }
 
 .model-name {
@@ -709,14 +833,13 @@ button.note-more:focus-visible {
    own bullets and indent come off; the rows keep the models' separator. --- */
 
 ul.models {
-  margin: 0.5rem 0 0;
+  margin: var(--space-block) 0 0;
   padding: 0;
   list-style: none;
 }
 
 .dictionary-row {
   padding: 0.5rem 0;
-  border-bottom: 1px solid var(--page-line);
 }
 
 /* The first line: the pair, the badge of the pair being read, and the
@@ -810,7 +933,7 @@ ul.models {
 .dictionary-rename {
   display: block;
   color: var(--page-muted);
-  font-size: 0.85rem;
+  font-size: var(--ui-small);
 }
 
 .dictionary-rename-label {
@@ -837,7 +960,7 @@ ul.models {
 .dictionary-file-name {
   margin: 0.5rem 0 0;
   color: var(--page-muted);
-  font-size: 0.85rem;
+  font-size: var(--ui-small);
   overflow-wrap: anywhere;
 }
 
@@ -898,7 +1021,7 @@ button.model-delete {
   padding: 0.35rem 0.8rem;
   border-color: transparent;
   color: var(--page-muted);
-  font-size: 0.85rem;
+  font-size: var(--ui-small);
   white-space: nowrap;
 }
 
@@ -945,6 +1068,9 @@ button.model-delete {
    shelf's own "Show all" under a long book: a text button in the list's
    axis, no box at rest, the underline on hover and focus - not a bar across
    the frame, since unfolding is a rare act. */
+/* Dressed as the folds above it (D258, V1): it unfolds a list the way they
+   unfold a form, and the two standing one under the other in two different
+   dresses read as two different kinds of thing. */
 .show-all {
   display: block;
   width: auto;
@@ -954,9 +1080,19 @@ button.model-delete {
   border: none;
   border-radius: 0;
   background: none;
-  color: var(--page-muted);
-  font-size: var(--ui-small);
+  color: var(--page-fg);
+  font-size: var(--ui-text);
+  font-weight: 500;
   text-align: start;
+}
+
+.show-all::before {
+  content: "\25B8\00A0";
+  color: var(--page-muted);
+}
+
+.show-all[aria-expanded="true"]::before {
+  content: "\25BE\00A0";
 }
 
 .show-all:hover,
@@ -970,27 +1106,68 @@ button.model-delete {
 .dictionary-credit {
   margin: 0.5rem 0 0.35rem;
   color: var(--page-muted);
-  font-size: 0.85rem;
+  font-size: var(--ui-small);
   line-height: 1.45;
   white-space: pre-line;
 }
 
-/* --- the folded by-hand sections --- */
+/* --- the folded by-hand sections (D258, V1) ---
 
+   A fold is an action, not a chapter: "Add a model from files" opens a form,
+   it does not head a part of the page. Set at a subsection's size and weight
+   it read as one (V-d), and a reader scanning the headings counted twice as
+   many sections as the page has.
+
+   So: the row's own size, a half step of weight, the page's full ink, and the
+   triangle every fold on this page wears (D254 §2.6 - the triangle, never a
+   chevron). Its element stays a heading, for whoever walks the page by
+   headings; only its dress changes. */
 .fold {
-  margin: 2rem 0;
+  margin: var(--space-block) 0;
 }
 
-.fold summary {
-  padding: 0.55rem 0;
+/* One fold after another is a list of doors, not a stack of blocks. */
+.fold + .fold {
+  margin-top: 0;
+}
+
+.fold > summary {
+  display: flex;
+  align-items: center;
+  min-height: var(--ui-control);
+  padding: 0.35rem 0;
   cursor: pointer;
+  /* The browser's own triangle goes, because the one below is the page's:
+     the same glyph the row notes' More wears, in the same grey. */
+  list-style: none;
 }
 
-/* The heading keeps its size but sits on the marker's line, and the page
-   rhythm it usually brings moves onto the fold itself. */
+.fold > summary::-webkit-details-marker {
+  display: none;
+}
+
+.fold > summary::before {
+  content: "\25B8\00A0";
+  color: var(--page-muted);
+}
+
+.fold[open] > summary::before {
+  content: "\25BE\00A0";
+}
+
+/* The heading sits on the marker's line, at the row labels' size - and the
+   page rhythm it usually brings moves onto the fold itself. */
 .fold summary h3 {
   display: inline;
   margin: 0;
+  font-size: var(--ui-text);
+  font-weight: 500;
+}
+
+/* What the fold opens is indented to the words after the triangle, so the
+   contents read as the door's own and not as the page continuing. */
+.fold > *:not(summary) {
+  margin-inline-start: 1.1rem;
 }
 
 .files {
@@ -1083,7 +1260,9 @@ button.model-delete {
   width: 100%;
   min-height: 9rem;
   padding: 0.5rem 0.6rem;
-  font: 0.9rem/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: var(--ui-text);
+  line-height: 1.45;
   color: var(--page-fg);
   background: transparent;
   border: 1px solid var(--page-border);
@@ -1129,15 +1308,55 @@ button.model-delete {
   min-width: 0;
 }
 
+/* --- one note, one dress (D258, H2/V2) ---
+
+   The page used to carry two: an accent-framed one for where a download comes
+   from and for the private-window sentence, and a neutral one for the
+   footnotes - two sizes, two washes, and no rule anybody could state about
+   which meant what. The accent was the worse half of it: it is the colour of
+   every link and of the section being read in the table of contents, and
+   spent on a paragraph that asks for nothing it stopped meaning "here".
+
+   So one component, neutral: the footnote's wash, a hairline all round, and
+   the strong ink down the leading edge - which is what survives a panel
+   posterised to sixteen greys, where the wash flattens into the paper. The
+   accent variant is kept for the one block on this page that asks to be acted
+   on: the first steps.
+
+   Scoped to this page's sheet; `.note` elsewhere (the reader, the lists) is
+   page.css's and unchanged. */
+.note {
+  margin-top: var(--space-block);
+  padding: calc(0.75rem - 1px) calc(1rem - 1px) calc(0.75rem - 1px) 1rem;
+  border: 1px solid var(--page-line);
+  border-inline-start: 3px solid var(--page-border);
+  background: color-mix(in srgb, var(--page-fg) 4%, transparent);
+  color: var(--page-muted);
+  font-size: var(--ui-small);
+  line-height: 1.5;
+}
+
+/* The footnote variant is now the note itself; the class stays on the markup
+   because page.css gives it a meaning on every other page, and its rule there
+   is the more specific one - so the edge has to be said again here. */
+.note.footnote {
+  border-left-color: var(--page-border);
+  font-size: var(--ui-small);
+}
+
 /* --- the fresh-install signpost --- */
 
-/* The note's frame, the page's full color - it is instructions to act on, not
-   an aside. Open while a model or a dictionary is missing; with both stored
-   it folds to its heading and stays, one line of the note's frame, there to
-   reread. */
+/* The one accented block left on the page (D258, H2): the note's frame in the
+   accent, the page's full color, the page's own text size - it is instructions
+   to act on, not an aside, and it is the only one. Open while a model or a
+   dictionary is missing; with both stored it folds to its heading and stays,
+   one line of the note's frame, there to reread. */
 .first-steps {
-  margin: 1rem 0 1.25rem;
+  margin: var(--space-block) 0 1.25rem;
+  border-left-color: var(--page-accent);
+  background: color-mix(in srgb, var(--page-accent) 10%, transparent);
   color: var(--page-fg);
+  font-size: var(--ui-text);
 }
 
 .first-steps summary {
@@ -1242,11 +1461,22 @@ button.step-done {
 }
 
 /* The three copies, each in three parts: what it is, what it holds and when
-   it was written. Three columns where there is room for them; under 30rem the
-   name keeps the date company on the first line and the contents drop to the
-   second, because three columns of that width are three ellipses. */
+   it was written.
+
+   One grid for the whole list, not a grid per line (D258, V4): every line
+   sizing its own columns is three lines whose middles and ends begin in three
+   different places, and a column of dates that does not line up is a column
+   nobody can compare down. The items step out of the way (`display: contents`)
+   and their three spans are the grid's own cells.
+
+   Under 30rem the name keeps the date company on the first line and the
+   contents drop to the second, because three columns of that width are three
+   ellipses - and there the lines go back to being boxes of their own. */
 .copies {
-  margin: 0.5rem 0 0;
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr) max-content;
+  gap: 0.35rem 1rem;
+  margin: var(--space-block) 0 0;
   padding: 0;
   list-style: none;
   color: var(--page-muted);
@@ -1255,10 +1485,7 @@ button.step-done {
 }
 
 .copies li {
-  display: grid;
-  grid-template-columns: max-content minmax(0, 1fr) max-content;
-  gap: 0.15rem 1rem;
-  margin: 0.25rem 0;
+  display: contents;
 }
 
 .copy-name {
@@ -1270,8 +1497,15 @@ button.step-done {
 }
 
 @media (max-width: 30rem) {
+  .copies {
+    display: block;
+  }
+
   .copies li {
+    display: grid;
     grid-template-columns: minmax(0, 1fr) max-content;
+    gap: 0.15rem 1rem;
+    margin: 0.35rem 0;
   }
 
   .copy-holds {
@@ -1280,10 +1514,27 @@ button.step-done {
   }
 }
 
-/* The two doors to the pages that hold the data, in the quiet dress of the
-   page's other in-text buttons. */
-.copies-file button {
-  margin-inline-end: 0.75rem;
+/* The two doors to the pages that hold the data (D258, V6): dressed as links,
+   because that is what they do - they open another page of this extension.
+   They wore the row notes' More, triangle and all, and after a sentence
+   ending in a colon that reads as two folds, not as the two doors the colon
+   promised: the sentence looked as though its links had gone missing. */
+.copies-file .doorway {
+  display: inline;
+  min-height: 0;
+  margin: 0 0.75rem 0 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--page-accent);
+  font: inherit;
+  text-decoration: underline;
+  transition: none;
+}
+
+.copies-file .doorway:hover,
+.copies-file .doorway:focus-visible {
+  color: var(--page-fg);
 }
 
 /* Every summary marker on this page speaks at the same volume. */

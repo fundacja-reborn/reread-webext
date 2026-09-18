@@ -148,7 +148,7 @@ describe("the bar stuck to the top of every page", () => {
     // The landing pads every anchor keeps add their air on top of the
     // padding; none of them may have grown into the bar's own measure.
     for (const [path, selector] of /** @type {[string, string][]} */ ([
-      ["options/options.css", "h2"],
+      ["options/options.css", "h3"],
       ["vocab/vocab.css", ".filter-status"],
       ["vocab/vocab.css", ".transfer-section"],
       ["reader/reader.css", ".marks-transfer"],
@@ -156,6 +156,14 @@ describe("the bar stuck to the top of every page", () => {
     ])) {
       assert.match(ruleOf(await source(path), selector), /scroll-margin-top: 0\.75rem;/, `${selector} in ${path} lost its landing pad`);
     }
+    // The settings page's section headings land a step lower still (D258):
+    // each carries a 2px rule above it, and an address that stopped under the
+    // boundary it had just crossed said nothing about having crossed one.
+    assert.match(
+      ruleOf(await source("options/options.css"), "h2"),
+      /scroll-margin-top: calc\(0\.75rem \+ var\(--space-divider-h2\) \+ 2px\);/,
+      "a section heading no longer brings its own rule into the window",
+    );
     // The pages' own scrolls aim at the top of what they show and let the
     // padding place it: no arithmetic of their own against the bar.
     const reader = await source("reader/reader.js");

@@ -13,6 +13,17 @@
     }
   },
 
+  "pair_label_monolingual": {
+    "message": "$LANGUAGE$ (monolingüe)",
+    "description": "A dictionary that explains a language in itself: not a direction, so not an arrow.",
+    "placeholders": {
+      "language": {
+        "content": "$1",
+        "example": "English"
+      }
+    }
+  },
+
   "settings": { "message": "Ajustes" },
   "support": { "message": "Apoyo" },
   "nav_menu": { "message": "Menú" },
@@ -1367,7 +1378,17 @@
   "options_title": { "message": "re/read - ajustes" },
   "back_to_reading": {"message": "Volver a la lectura"},
   "options_local_intro": {
-    "message": "Todo lo que hace re/read ocurre en este dispositivo (sin conexión): la traducción, el diccionario, la lista de lectura, tus frases guardadas. Nada de lo que lees o seleccionas se envía a ninguna parte. La conexión a Internet solo hace falta cuando quieres descargar un nuevo modelo de traducción o un diccionario - y solo desde las dos URL mostradas abiertamente en esas secciones."
+    "message": "Todo lo que hace re/read ocurre en este dispositivo (sin conexión): la traducción, el diccionario, la lista de lectura, tus frases guardadas. Nada de lo que lees o seleccionas se envía a ninguna parte. La conexión a Internet solo hace falta para descargar un nuevo modelo de traducción o un diccionario - y solo desde las dos direcciones indicadas en las secciones"
+  },
+
+  "options_local_intro_and": {
+    "message": "y",
+    "description": "Between the two section links in options_local_intro."
+  },
+
+  "options_local_intro_rest": {
+    "message": ".",
+    "description": "Closes options_local_intro after the second section link; glued to it in the markup, so a language that opens with punctuation gets no space before it."
   },
 
   "options_intro_short": {
@@ -1613,7 +1634,7 @@
   },
   "options_sections_aria": { "message": "Secciones de esta página" },
   "options_engine": { "message": "Motor" },
-  "options_engine_value": { "message": "Bergamot, dentro del paquete - traduce sin conexión" },
+  "options_engine_value": { "message": "Bergamot, integrado en la extensión; traducción sin conexión." },
   "options_storage": { "message": "Datos en este dispositivo" },
   "options_storage_how": { "message": "Espacio que ocupan los datos de re/read." },
 
@@ -1656,14 +1677,19 @@
     "message": "Lees en $FROM$ - la traducción automática está desactivada y las frases guardadas pertenecen a este par.",
     "placeholders": { "from": { "content": "$1", "example": "inglés" } }
   },
-  "options_reader_only": { "message": "Subrayar solo en la vista de lectura" },
+  "options_reader_only": { "message": "Mostrar los subrayados y la burbuja solo en la vista de lectura" },
   "options_reader_only_hint": {
-    "message": "Los subrayados de las frases y la burbuja de traducción solo en la vista de lectura; en una página normal, una selección muestra en su lugar una burbuja con botones: abrir la página en la vista de lectura e ir a la lista de lectura."
+    "message": "En una página normal, al seleccionar texto aparece una burbuja con dos botones: abrir la página en la vista de lectura e ir a la lista de lectura."
   },
 
   "options_reader_only_more": {
     "message": "Con la opción activada, ninguna página web puede saber cuáles de sus palabras has guardado. En Android e iOS la opción está activada de forma predeterminada.",
     "description": "The rest of the options_reader_only_hint description, behind the row's More button."
+  },
+
+  "popup_reader_only": {
+    "message": "Subrayar solo en la vista de lectura",
+    "description": "The same switch as options_reader_only, named short: the popup row carries no description under it, and the settings page's full label wraps to three lines at 320px."
   },
   "options_page_number": { "message": "Número de página" },
   "options_page_number_hint": {
@@ -1676,10 +1702,10 @@
   },
   "options_paged_heading": { "message": "Vista Páginas" },
   "options_paged_intro": {
-    "message": "Estos ajustes se aplican a la vista Páginas del lector, donde el texto avanza solo por páginas completas y cada una empieza y termina con una línea entera."
+    "message": "Funcionan en la vista de lectura con la vista Páginas: el texto avanza por páginas completas, cada una empieza y termina con una línea entera."
   },
   "options_touch_turn": { "message": "Pasar páginas con el dedo" },
-  "options_touch_turn_zones": { "message": "Tocar el tercio izquierdo o derecho" },
+  "options_touch_turn_zones": { "message": "Tocar el lado izquierdo o derecho de la pantalla" },
   "options_touch_turn_swipe": { "message": "Deslizar el dedo hacia el lado" },
   "options_touch_turn_off": { "message": "Desactivado" },
   "options_touch_turn_hint": {
@@ -1687,11 +1713,11 @@
   },
 
   "options_touch_turn_more": {
-    "message": "En una pantalla ancha lo predeterminado es el toque, en una estrecha el deslizamiento - allí la mano que sostiene el dispositivo descansa sobre la pantalla, y un gesto que tiene que moverse es el único que no hará por accidente. Las teclas de página, las flechas y la rueda del ratón pasan páginas sea cual sea este ajuste, y el lápiz nunca pasa ninguna.",
+    "message": "En una pantalla estrecha lo predeterminado es deslizar: la mano que sujeta el teléfono toca a menudo la pantalla, y un toque sin deslizamiento no cambia de página. En una pantalla ancha lo predeterminado es tocar. Las teclas de página, las flechas y la rueda del ratón pasan páginas sea cual sea este ajuste, y el lápiz nunca pasa ninguna.",
     "description": "The rest of the options_touch_turn_hint description, behind the row's More button."
   },
   "options_touch_turn_note_zones": {
-    "message": "Tocar el tercio izquierdo o derecho de la página la pasa: el derecho avanza, el izquierdo retrocede. Solo cuenta un toque breve, quieto y lejos de los bordes de la pantalla, para que un pulgar que sujeta el dispositivo no pase ninguna."
+    "message": "Tocar el tercio derecho de la pantalla pasa a la página siguiente; el tercio izquierdo, a la anterior. Solo cuenta un toque breve e inmóvil lejos de los bordes, para que un pulgar que sujeta el dispositivo no cambie de página."
   },
   "options_touch_turn_note_swipe": {
     "message": "Deslizar el dedo hacia la izquierda muestra la página siguiente; hacia la derecha, la anterior. En un teléfono no empieces justo en el borde de la pantalla: ahí empieza el gesto de volver del sistema; en un lector de tinta electrónica el borde suele funcionar."
@@ -1703,7 +1729,7 @@
   "options_turn_effect_auto": { "message": "Automático" },
   "options_turn_effect_off": { "message": "Desactivado" },
   "options_turn_effect_hint": {
-    "message": "Una señal de que la página ha pasado."
+    "message": "Una confirmación visible del cambio de página."
   },
 
   "options_turn_effect_more": {
@@ -1711,7 +1737,7 @@
     "description": "The rest of the options_turn_effect_hint description, behind the row's More button."
   },
   "options_turn_effect_note_auto": {
-    "message": "En el tema E-ink, la zona de texto se oscurece un momento, como en un lector de libros electrónicos; en otras pantallas, la nueva página se desliza."
+    "message": "En el tema E-ink, la zona de texto se oscurece un momento, como en un lector de libros electrónicos; en otras pantallas, la nueva página aparece con un desplazamiento suave."
   },
   "options_turn_effect_note_off": {
     "message": "La página simplemente cambia, como antes de este ajuste."
@@ -1727,7 +1753,7 @@
   },
   "options_font_custom": { "message": "Fuente propia" },
   "options_font_custom_hint": {
-    "message": "Una fuente instalada en este dispositivo, por ejemplo Noto Serif; aparecerá como Personalizada en la fila Tipografía del panel Aa."
+    "message": "Una fuente instalada en este dispositivo, por ejemplo Noto Serif. En el panel Aa aparece en la fila Tipografía como Personalizada."
   },
 
   "options_font_custom_more": {
@@ -1931,10 +1957,15 @@
   "options_tts_rate": { "message": "Velocidad de la voz" },
   "options_models_heading": { "message": "Modelos de traducción" },
   "options_models_intro": {
-    "message": "Descarga aquí un modelo de traducción para cada par de idiomas que quieras traducir. Son archivos oficiales de Mozilla que funcionan totalmente sin conexión en tu dispositivo."
+    "message": "El modelo de traducción se descarga por separado para cada par de idiomas. Son archivos oficiales de Mozilla; la traducción ocurre por completo en este dispositivo."
   },
   "options_models_single_word": {
-    "message": "Un modelo traduce bien las frases, pero una palabra suelta suele traducirse mal - el resultado sale cortado o es una palabra que no existe. Para palabras sueltas la mejor fuente es un diccionario:"
+    "message": "Un modelo traduce bien las frases, pero una palabra suelta suele traducirse mal - el resultado sale cortado o es una palabra que no existe. Para palabras sueltas la mejor fuente es un diccionario: la sección"
+  },
+
+  "options_models_single_word_rest": {
+    "message": "de abajo.",
+    "description": "Closes options_models_single_word after the link to the Dictionaries section."
   },
   "options_update_list": { "message": "Actualizar la lista" },
   "options_list_dated": { "message": "Lista del" },
@@ -1966,7 +1997,7 @@
     "message": "Añade diccionarios para ver definiciones detalladas de las palabras en la burbuja de traducción. Puedes cambiar el orden en que aparecen usando las flechas."
   },
   "options_dictionaries_sources": {
-    "message": "Los diccionarios de la lista de abajo vienen de WikDict. También puedes añadir los tuyos - desde archivos o desde un enlace, y varios para un mismo idioma - en las secciones bajo la lista. Dónde encontrarlos, cada uno con su licencia:"
+    "message": "Los diccionarios de la lista vienen de WikDict. Puedes añadir los tuyos desde un archivo o desde un enlace, también varios para un mismo idioma. Las fuentes, cada una con su licencia:"
   },
   "options_dictionary_order_hint": {
     "message": "La burbuja muestra las entradas en el orden de abajo. Solo se usan los diccionarios del idioma que lees."
@@ -2014,7 +2045,12 @@
   },
   "options_disabled_heading": { "message": "Sitios desactivados" },
   "options_disabled_intro": {
-    "message": "Lista de sitios web donde la extensión está desactivada: sin traducción, sin burbuja, sin subrayados. Añade un sitio con el interruptor bajo el icono de la extensión en la barra de herramientas del navegador mientras estás en él, o escribe su dirección abajo. No hay interruptor cuando están activados a la vez"
+    "message": "En estos sitios re/read no traduce ni muestra burbuja ni subrayados. Añade un sitio en la ventana de re/read de la barra de herramientas, o escribiendo su dirección abajo."
+  },
+
+  "options_disabled_intro_switch": {
+    "message": "En esa ventana no hay interruptor cuando están activados a la vez",
+    "description": "Behind the Details fold under options_disabled_intro: the case where the toolbar window has no switch to offer."
   },
 
   "options_disabled_intro_and": {
@@ -2043,7 +2079,7 @@
   },
   "options_custom_css_heading": { "message": "CSS personalizado" },
   "options_custom_css_intro": {
-    "message": "Para cambiar el aspecto de la burbuja, de la página de la vista de lectura y de la ventana del botón de la barra de herramientas con tus propias reglas CSS. Esta página queda fuera de su alcance, así que una regla equivocada siempre se puede deshacer aquí: vacía el campo y guarda."
+    "message": "Tus propias reglas CSS cambian el aspecto de la burbuja, de la vista de lectura y de la ventana de re/read. Esta página no está sujeta a esas reglas, así que una regla equivocada se deshace aquí: vacía el campo y guarda."
   },
   "options_custom_css_more": { "message": "Más sobre las reglas CSS y los nombres" },
   "options_custom_css_reach": {
@@ -2062,7 +2098,12 @@
     "message": "No se ha guardado: las reglas se han rechazado. No se permiten reglas que carguen algo desde la red (url(), @import, @font-face)."
   },
   "options_custom_css_example": {
-    "message": "Ejemplo: .bubble { outline: 3px solid darkorange; } dibuja un contorno naranja alrededor de cada burbuja."
+    "message": "Ejemplo:"
+  },
+
+  "options_custom_css_example_rest": {
+    "message": "dibuja un contorno naranja alrededor de cada burbuja.",
+    "description": "Closes options_custom_css_example after the rule itself, which stands in code and needs no translation."
   },
   "options_custom_css_cleared": { "message": "Guardado: sin reglas, así que el aspecto predeterminado." },
   "options_support_intro": {
@@ -2153,7 +2194,7 @@
   "options_no_models": { "message": "No hay modelos aquí, y ninguno que descargar - esta versión no lista ninguno." },
   "options_filter_no_match_models": { "message": "Ningún par coincide con eso. El filtro acepta un nombre de idioma o un código." },
   "options_filter_no_match_dictionaries": { "message": "Ningún diccionario coincide con eso. El filtro acepta un nombre de idioma o un código." },
-  "options_no_disabled": { "message": "Ningún sitio está desactivado. Donde se hace es en el popup de la barra de herramientas." },
+  "options_no_disabled": { "message": "Ningún sitio está desactivado." },
   "options_turn_back_on": { "message": "Volver a activar" },
   "options_reading_model_files": {
     "message": "Leyendo los archivos de $PAIR$...",

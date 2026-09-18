@@ -117,7 +117,11 @@ describe("the settings rows", () => {
       assert.match(markup.slice(markup.lastIndexOf("<div", at), at), /row-sub/, `${row} is not drawn as a child`);
     }
     const css = await source("options/options.css");
-    assert.match(rule(css, ".row-sub"), /border-inline-start: 1px solid var\(--page-line\)/, "no line joins a child to its parent");
+    // One line down the leading edge and no box around the group (D258, V3):
+    // with a rule over it and a rule under it the two voice rows read as a
+    // box inside a list, heavier than anything else on the page.
+    assert.match(rule(css, ".row-sub"), /border-inline-start: 2px solid var\(--page-line\)/, "no line joins a child to its parent");
+    assert.doesNotMatch(rule(css, ".row-sub"), /border-top|border-bottom/, "the group of children is drawn as a box");
 
     const script = await source("options/options.js");
     assert.match(script, /row\.hidden = !parent\.checked;/, "a child stays on the page with its parent switched off");
@@ -166,9 +170,9 @@ describe("the settings rows", () => {
     // The word is Details, not More: the bubble has a button called More, and
     // a sentence naming it stood beside a trigger with the same word.
     assert.doesNotMatch(markup, /data-i18n="options_note_more"/, "a fold is still called More");
-    assert.equal((markup.match(/data-i18n="options_details"/g) ?? []).length, 18, "not every fold is called Details");
+    assert.equal((markup.match(/data-i18n="options_details"/g) ?? []).length, 19, "not every fold is called Details");
     // Hard space, so the trigger goes over a wrapping line with the last word.
-    assert.equal((markup.match(/<\/span\s*>&nbsp;<button type="button" class="note-more"/g) ?? []).length, 18, "a trigger can be left alone at the start of a line");
+    assert.equal((markup.match(/<\/span\s*>&nbsp;<button type="button" class="note-more"/g) ?? []).length, 19, "a trigger can be left alone at the start of a line");
     const css = await source("options/options.css");
     assert.match(rule(css, "button.note-more"), /white-space: nowrap/, "the trigger's own words can be split");
     // And the one sentence that names the bubble's button says it in quotes.

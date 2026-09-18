@@ -13,6 +13,17 @@
     }
   },
 
+  "pair_label_monolingual": {
+    "message": "$LANGUAGE$ (monolingue)",
+    "description": "A dictionary that explains a language in itself: not a direction, so not an arrow.",
+    "placeholders": {
+      "language": {
+        "content": "$1",
+        "example": "English"
+      }
+    }
+  },
+
   "settings": { "message": "Paramètres" },
   "support": { "message": "Soutien" },
   "nav_menu": { "message": "Menu" },
@@ -1367,7 +1378,17 @@
   "options_title": { "message": "re/read - paramètres" },
   "back_to_reading": {"message": "Retour à la lecture"},
   "options_local_intro": {
-    "message": "Tout ce que fait re/read se passe sur cet appareil (hors ligne) : la traduction, le dictionnaire, la liste de lecture, les phrases enregistrées. Rien de ce que vous lisez ou sélectionnez n'est envoyé nulle part. Une connexion Internet n'est nécessaire que lorsque vous voulez télécharger un nouveau modèle de traduction ou un dictionnaire - et seulement depuis les deux URL affichées ouvertement dans ces sections."
+    "message": "Tout ce que fait re/read se passe sur cet appareil (hors ligne) : la traduction, le dictionnaire, la liste de lecture, les phrases enregistrées. Rien de ce que vous lisez ou sélectionnez n'est envoyé nulle part. Une connexion Internet n'est nécessaire que pour télécharger un nouveau modèle de traduction ou un dictionnaire - et seulement depuis les deux adresses indiquées dans les sections"
+  },
+
+  "options_local_intro_and": {
+    "message": "et",
+    "description": "Between the two section links in options_local_intro."
+  },
+
+  "options_local_intro_rest": {
+    "message": ".",
+    "description": "Closes options_local_intro after the second section link; glued to it in the markup, so a language that opens with punctuation gets no space before it."
   },
 
   "options_intro_short": {
@@ -1647,7 +1668,7 @@
   },
   "options_sections_aria": { "message": "Sections de cette page" },
   "options_engine": { "message": "Moteur" },
-  "options_engine_value": { "message": "Bergamot, dans le paquet - traduit hors ligne" },
+  "options_engine_value": { "message": "Bergamot, intégré à l'extension ; traduction hors ligne." },
   "options_storage": { "message": "Données sur cet appareil" },
   "options_storage_how": { "message": "Espace occupé par les données de re/read." },
 
@@ -1690,14 +1711,19 @@
     "message": "Vous lisez $FROM$ - la traduction automatique est désactivée, les phrases enregistrées appartiennent à cette paire.",
     "placeholders": { "from": { "content": "$1", "example": "anglais" } }
   },
-  "options_reader_only": { "message": "Souligner uniquement dans le lecteur" },
+  "options_reader_only": { "message": "Afficher les soulignements et la bulle uniquement dans le lecteur" },
   "options_reader_only_hint": {
-    "message": "Les soulignements des phrases et la bulle de traduction uniquement dans le lecteur ; sur une page ordinaire, une sélection affiche à la place une bulle avec des boutons : ouvrir la page dans le lecteur et aller à la liste de lecture."
+    "message": "Sur une page ordinaire, après une sélection de texte, une bulle apparaît avec deux boutons : ouvrir la page dans le lecteur et aller à la liste de lecture."
   },
 
   "options_reader_only_more": {
     "message": "Lorsqu'elle est activée, aucune page web ne peut savoir lesquels de ses mots vous avez enregistrés. Sur Android et iOS, l'option est activée par défaut.",
     "description": "The rest of the options_reader_only_hint description, behind the row's More button."
+  },
+
+  "popup_reader_only": {
+    "message": "Souligner uniquement dans le lecteur",
+    "description": "The same switch as options_reader_only, named short: the popup row carries no description under it, and the settings page's full label wraps to three lines at 320px."
   },
   "options_page_number": { "message": "Numéro de page" },
   "options_page_number_hint": {
@@ -1710,10 +1736,10 @@
   },
   "options_paged_heading": { "message": "Affichage Pages" },
   "options_paged_intro": {
-    "message": "Ces réglages s'appliquent à l'affichage Pages du lecteur, où le texte avance uniquement par pages entières, chacune commençant et finissant par une ligne entière."
+    "message": "Ils s'appliquent dans le lecteur, en affichage Pages : le texte avance par pages entières, chacune commençant et finissant par une ligne entière."
   },
   "options_touch_turn": { "message": "Tourner les pages au toucher" },
-  "options_touch_turn_zones": { "message": "Toucher le tiers gauche ou droit" },
+  "options_touch_turn_zones": { "message": "Toucher le côté gauche ou droit de l'écran" },
   "options_touch_turn_swipe": { "message": "Glisser le doigt sur le côté" },
   "options_touch_turn_off": { "message": "Désactivé" },
   "options_touch_turn_hint": {
@@ -1721,11 +1747,11 @@
   },
 
   "options_touch_turn_more": {
-    "message": "Sur un écran large, la valeur par défaut est l'appui, sur un écran étroit le glissement - là, la main qui tient l'appareil repose sur l'écran, et un geste qui doit se déplacer est le seul qu'elle ne fera pas par accident. Les touches de page, les flèches et la molette tournent les pages quel que soit ce réglage, et le stylet n'en tourne jamais.",
+    "message": "Sur un écran étroit, le glissement est le réglage par défaut : la main qui tient le téléphone touche souvent l'écran, et un toucher sans glissement ne change pas de page. Sur un écran large, c'est le toucher. Les touches de page, les flèches et la molette tournent les pages quel que soit ce réglage, et le stylet n'en tourne jamais.",
     "description": "The rest of the options_touch_turn_hint description, behind the row's More button."
   },
   "options_touch_turn_note_zones": {
-    "message": "Toucher le tiers gauche ou droit de la page la tourne : le tiers droit avance, le gauche recule. Seul compte un toucher bref, immobile et éloigné des bords de l'écran, pour qu'un pouce qui tient l'appareil n'en tourne aucune."
+    "message": "Un toucher sur le tiers droit de l'écran passe à la page suivante, sur le tiers gauche à la précédente. Seul compte un toucher bref et immobile, loin des bords, pour qu'un pouce qui tient l'appareil ne change pas de page."
   },
   "options_touch_turn_note_swipe": {
     "message": "Glisser le doigt vers la gauche montre la page suivante, vers la droite la précédente. Sur un téléphone, ne commencez pas tout au bord de l'écran : c'est là que commence le geste de retour du système ; sur une liseuse, le bord fonctionne en général."
@@ -1737,7 +1763,7 @@
   "options_turn_effect_auto": { "message": "Automatique" },
   "options_turn_effect_off": { "message": "Désactivé" },
   "options_turn_effect_hint": {
-    "message": "Un signe que la page a tourné."
+    "message": "Une confirmation visible du changement de page."
   },
 
   "options_turn_effect_more": {
@@ -1745,7 +1771,7 @@
     "description": "The rest of the options_turn_effect_hint description, behind the row's More button."
   },
   "options_turn_effect_note_auto": {
-    "message": "Dans le thème E-ink, la zone de texte s'assombrit un instant, comme sur une liseuse ; sur les autres écrans, la nouvelle page glisse."
+    "message": "Dans le thème E-ink, la zone de texte s'assombrit un instant, comme sur une liseuse ; sur les autres écrans, la nouvelle page apparaît avec un glissement doux."
   },
   "options_turn_effect_note_off": {
     "message": "La page change simplement, comme avant ce réglage."
@@ -1761,7 +1787,7 @@
   },
   "options_font_custom": { "message": "Police personnelle" },
   "options_font_custom_hint": {
-    "message": "Une police installée sur cet appareil, par exemple Noto Serif ; elle apparaît ensuite comme Personnalisée dans la ligne Police du panneau Aa."
+    "message": "Une police installée sur cet appareil, par exemple Noto Serif. Dans le panneau Aa, elle apparaît dans la ligne Police comme Personnalisée."
   },
 
   "options_font_custom_more": {
@@ -1975,10 +2001,15 @@
   "options_tts_rate": { "message": "Vitesse de la voix" },
   "options_models_heading": { "message": "Modèles de traduction" },
   "options_models_intro": {
-    "message": "Téléchargez ici un modèle de traduction pour chaque paire de langues que vous voulez traduire. Ce sont des fichiers officiels de Mozilla qui fonctionnent entièrement hors ligne sur votre appareil."
+    "message": "Un modèle de traduction se télécharge séparément pour chaque paire de langues. Ce sont des fichiers officiels de Mozilla ; la traduction se fait entièrement sur cet appareil."
   },
   "options_models_single_word": {
-    "message": "Un modèle traduit bien les phrases, mais un mot isolé est souvent mal traduit - le résultat est tronqué, ou n'existe pas dans la langue. Pour les mots isolés, la meilleure source est un dictionnaire :"
+    "message": "Un modèle traduit bien les phrases, mais un mot isolé est souvent mal traduit - le résultat est tronqué, ou n'existe pas dans la langue. Pour les mots isolés, la meilleure source est un dictionnaire : la section"
+  },
+
+  "options_models_single_word_rest": {
+    "message": "ci-dessous.",
+    "description": "Closes options_models_single_word after the link to the Dictionaries section."
   },
   "options_update_list": { "message": "Mettre à jour la liste" },
   "options_list_dated": { "message": "Liste du" },
@@ -2010,7 +2041,7 @@
     "message": "Ajoutez des dictionnaires pour voir des définitions détaillées des mots dans la bulle de traduction. Vous pouvez modifier leur ordre d'affichage à l'aide des flèches."
   },
   "options_dictionaries_sources": {
-    "message": "Les dictionnaires de la liste ci-dessous viennent de WikDict. Vous pouvez aussi ajouter les vôtres - depuis des fichiers ou depuis un lien, et plusieurs pour une même langue - dans les sections sous la liste. Où les trouver, chacun avec sa licence :"
+    "message": "Les dictionnaires de la liste viennent de WikDict. Vous pouvez ajouter les vôtres depuis un fichier ou depuis un lien, et plusieurs pour une même langue. Les sources, chacune avec sa licence :"
   },
   "options_dictionary_order_hint": {
     "message": "La bulle affiche les entrées dans l'ordre ci-dessous. Seuls les dictionnaires de la langue que vous lisez sont utilisés."
@@ -2058,7 +2089,12 @@
   },
   "options_disabled_heading": { "message": "Sites désactivés" },
   "options_disabled_intro": {
-    "message": "Liste des sites web où l'extension est désactivée : pas de traduction, pas de bulle, pas de soulignements. Ajoutez un site avec l'interrupteur sous l'icône de l'extension dans la barre d'outils du navigateur pendant que vous y êtes, ou tapez son adresse ci-dessous. Il n'y a pas d'interrupteur quand"
+    "message": "Sur ces sites, re/read ne traduit pas et n'affiche ni bulle ni soulignements. Ajoutez un site dans la fenêtre re/read de la barre d'outils, ou en saisissant son adresse ci-dessous."
+  },
+
+  "options_disabled_intro_switch": {
+    "message": "Il n'y a pas d'interrupteur dans cette fenêtre quand",
+    "description": "Behind the Details fold under options_disabled_intro: the case where the toolbar window has no switch to offer."
   },
 
   "options_disabled_intro_and": {
@@ -2087,7 +2123,7 @@
   },
   "options_custom_css_heading": { "message": "CSS personnalisé" },
   "options_custom_css_intro": {
-    "message": "Pour modifier l'apparence de la bulle, de la page du lecteur et de la fenêtre du bouton de la barre d'outils avec vos propres règles CSS. Cette page reste hors de leur portée, pour qu'une mauvaise règle puisse toujours être annulée ici : videz le champ et enregistrez."
+    "message": "Vos propres règles CSS changent l'apparence de la bulle, de la vue de lecture et de la fenêtre re/read. Cette page n'est pas soumise à ces règles : une mauvaise règle s'annule donc toujours ici, videz le champ et enregistrez."
   },
   "options_custom_css_more": { "message": "En savoir plus sur les règles CSS et les noms" },
   "options_custom_css_reach": {
@@ -2106,7 +2142,12 @@
     "message": "Non enregistré : les règles ont été refusées. Les règles qui chargent quoi que ce soit depuis le réseau (url(), @import, @font-face) ne sont pas autorisées."
   },
   "options_custom_css_example": {
-    "message": "Exemple : .bubble { outline: 3px solid darkorange; } trace un contour orange autour de chaque bulle."
+    "message": "Exemple :"
+  },
+
+  "options_custom_css_example_rest": {
+    "message": "trace un contour orange autour de chaque bulle.",
+    "description": "Closes options_custom_css_example after the rule itself, which stands in code and needs no translation."
   },
   "options_custom_css_cleared": { "message": "Enregistré : aucune règle, donc l'apparence par défaut." },
   "options_support_intro": {
@@ -2197,7 +2238,7 @@
   "options_no_models": { "message": "Aucun modèle ici, et aucun à télécharger - cette version n'en liste aucun." },
   "options_filter_no_match_models": { "message": "Aucune paire ne correspond. Le filtre prend un nom de langue ou un code." },
   "options_filter_no_match_dictionaries": { "message": "Aucun dictionnaire ne correspond. Le filtre prend un nom de langue ou un code." },
-  "options_no_disabled": { "message": "Aucun site n'est désactivé. C'est dans le popup de la barre d'outils que ça se fait." },
+  "options_no_disabled": { "message": "Aucun site n'est désactivé." },
   "options_turn_back_on": { "message": "Réactiver" },
   "options_reading_model_files": {
     "message": "Lecture des fichiers pour $PAIR$...",

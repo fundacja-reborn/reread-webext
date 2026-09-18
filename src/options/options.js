@@ -32,7 +32,7 @@ import {
   withDefaults,
   writeConfig,
 } from "../lib/config.js";
-import { aside, localizePage, megabytes, plural, t, uiLocale } from "../lib/i18n.js";
+import { aside, localizePage, megabytes, plural, speedFactor, t, uiLocale } from "../lib/i18n.js";
 import { compileUserCss } from "../lib/user-css.js";
 import { privateNote } from "../lib/private-note.js";
 import { armBackArrow } from "../lib/back-arrow.js";
@@ -57,7 +57,7 @@ import {
 import { describeZipProblem, readZip } from "../lib/dict/zip.js";
 import { entriesReadFrom, rowBatches } from "../lib/dict/rows.js";
 import { afterMove } from "../lib/dict/order.js";
-import { DISPLAY_NAME_LIMIT, cleanDisplayName, nameHolder, shownName } from "../lib/dict/display-name.js";
+import { DISPLAY_NAME_LIMIT, cleanDisplayName, fileNameWorthSaying, nameHolder, shownName } from "../lib/dict/display-name.js";
 import {
   beginImport,
   deleteDictionary,
@@ -306,10 +306,31 @@ function availableModels() {
 }
 
 /**
+ * A day the reader recognises, out of the `YYYY-MM-DD` both catalogue
+ * snapshots are stamped with (D258, V7): `18.09.2026` in Polish, `18/09/2026`
+ * in French - the shape the copies' dates already wear, so the page has one
+ * way of writing a day rather than two.
+ *
+ * Built from the parts rather than handed to `new Date(text)`, which reads a
+ * bare date as UTC midnight and shows the day before it west of Greenwich. A
+ * stamp of any other shape comes back as itself: a raw date is poorer than a
+ * written one, and honest.
+ *
+ * @param {string} stamp
+ * @returns {string}
+ */
+function day(stamp) {
+  const parts = /^(\d{4})-(\d{2})-(\d{2})$/.exec(stamp);
+  if (parts === null) return stamp;
+  const at = new Date(Number(parts[1]), Number(parts[2]) - 1, Number(parts[3]));
+  return at.toLocaleDateString(uiLocale(), { dateStyle: "short" });
+}
+
+/**
  * @returns {string} the day the list on screen is from
  */
 function listDate() {
-  return liveList?.fetchedAt ?? registrySource().checkedAt;
+  return day(liveList?.fetchedAt ?? registrySource().checkedAt);
 }
 
 /**
@@ -323,7 +344,7 @@ function availableDictionaries() {
  * @returns {string} the day the dictionary list on screen is from
  */
 function dictionaryListDate() {
-  return liveDictionaries?.fetchedAt ?? catalogSource().checkedAt;
+  return day(liveDictionaries?.fetchedAt ?? catalogSource().checkedAt);
 }
 
 /**
@@ -881,7 +902,7 @@ function tellSaved(id, saved) {
  */
 function renderRate() {
   const value = document.getElementById("tts-rate-value");
-  if (value !== null) value.textContent = `${(config.ttsRate / 100).toFixed(1)}×`;
+  if (value !== null) value.textContent = speedFactor(config.ttsRate);
 }
 
 /**
@@ -2001,7 +2022,10 @@ function placeActions(head, buttons) {
 function fillDictionaryMeta(meta, dictionary) {
   /** @type {(string | HTMLElement)[]} */
   const items = [];
-  if (shownName(dictionary) !== dictionary.name) items.push(element("span", "dictionary-file", dictionary.name));
+  // Only where the file's own name says something the title does not (V10):
+  // a .ifo that calls its book "dictionary" opened the small print with the
+  // one word the reader already knew it was.
+  if (fileNameWorthSaying(dictionary)) items.push(element("span", "dictionary-file", dictionary.name));
 
   const counts = element("span", "");
   counts.append(element("span", "dictionary-count", words(dictionary.entryCount)));

@@ -22,10 +22,25 @@ async function source(path) {
   return readFile(new URL(path, ROOT), "utf8");
 }
 
-/** The habit, in the two languages this project writes first. */
+/**
+ * The habit, in the two languages this project writes first.
+ *
+ * Polish is bounded by letters rather than by `\b`: JavaScript counts every
+ * accented letter as a non-word character, so `\btrzymają\b` finds the verb
+ * inside "trzymająca" - a participle about a reader's own hand - and the word
+ * list would have to buy its way out with an exception for a sentence that
+ * never broke the rule.
+ */
+const PL_HABIT = [
+  "stoi", "stoją", "leży", "leżą", "mówi", "mówią", "patrzy", "widzi", "pyta", "czeka", "czekają",
+  "pilnuje", "trzyma", "trzymają", "nosi", "siedzi", "żyje", "bierze", "waży", "ważą", "potrafi",
+  "umie", "myśli", "decyduje", "odpowiada", "odpowiadają", "trafia", "trafiają", "ląduje", "lądują",
+  "wjeżdża", "wjeżdżają", "wskakuje", "ucieka", "prosi", "proszą",
+];
+
 const HABITS = {
   en: /\b(stands?|lives?|sits?|lies|says?|asks?|waits?|watches|knows?|remembers|forgets|decides?|answers?|weighs?|holds?|wears?|walks?|sleeps?|listens?|promises?)\b/i,
-  pl: /\b(stoi|stoją|leży|leżą|mówi|mówią|patrzy|widzi|pyta|czeka|pilnuje|trzyma|trzymają|nosi|siedzi|żyje|bierze|waży|ważą|potrafi|umie|myśli|decyduje|odpowiada|odpowiadają)\b/i,
+  pl: new RegExp(`(?<!\\p{L})(?:${PL_HABIT.join("|")})(?!\\p{L})`, "iu"),
 };
 
 /**
@@ -34,12 +49,7 @@ const HABITS = {
  * be read before anything is added to it.
  */
 const ALLOWED = new Map([
-  // The reader's own hand and thumb, holding a device.
-  ["options_touch_turn_more", "the hand that holds the device"],
-  ["options_touch_turn_note_zones", "the thumb holding the phone"],
   // The reader, wanting something.
-  ["options_local_intro", "when you want to download"],
-  ["options_models_intro", "the pair you want to translate"],
   ["options_support_intro", "if you want to support"],
   // An instruction to the reader, not a description of a thing.
   ["options_import_elsewhere", "wait for it to finish"],
@@ -47,6 +57,23 @@ const ALLOWED = new Map([
   ["options_tts_voice_hint", "the voice that speaks"],
   ["options_tts_voice_more", "the voice reads phrases and articles"],
 ]);
+
+/**
+ * The Polish catalogue's own rules (D258, §6.1): one term per thing, the
+ * half-dash between clauses, and pronouns in lower case. These are not about
+ * the settings page alone - a reader meets the same words in the bubble, the
+ * popup and the reading view, and a term that changes between them is two
+ * things as far as they can tell.
+ */
+/** @type {[RegExp, string][]} */
+const PL_BANNED = [
+  [/dymk\w* tłumaczeń/i, "the bubble is \"dymek (tłumaczenia)\", singular"],
+  [/dymk\w* paska/i, "the toolbar's window is \"okienko re/read\", never a bubble"],
+  [/przełącznik\w* pod ikoną/i, "the toolbar's window is named, not pointed at"],
+  [/okienk\w* przycisku/i, "the toolbar's window is \"okienko re/read\""],
+  [/stron\w+ czytnika/i, "the reading view is \"widok czytania\""],
+  [/[Tt]apn|[Tt]apni/, "Polish Android says \"dotknięcie\" (H4)"],
+];
 
 describe("the settings page's language", () => {
   it("says nothing about a thing standing, lying, wanting or deciding", async () => {
@@ -64,6 +91,30 @@ describe("the settings page's language", () => {
           `${locale}/${key} says "${found[0]}" of something that is not a person: ${entry.message.slice(Math.max(0, found.index - 50), found.index + 60)}`,
         );
       }
+    }
+  });
+
+  it("keeps one Polish term for each thing, and never the dev's word for it (D258, §6.2)", async () => {
+    const catalogue = JSON.parse(await source("_locales/pl/messages.json"));
+    for (const [key, entry] of Object.entries(catalogue)) {
+      // The search keywords are the words a reader might type, synonyms and
+      // all - the one place a term outside the glossary belongs.
+      if (key.startsWith("options_keywords_")) continue;
+      for (const [pattern, why] of PL_BANNED) {
+        assert.ok(!pattern.test(entry.message), `pl/${key}: ${why} - ${entry.message.slice(0, 120)}`);
+      }
+    }
+  });
+
+  it("writes a Polish dash as a half-dash, and a pronoun in lower case (D258, §6.1)", async () => {
+    const catalogue = JSON.parse(await source("_locales/pl/messages.json"));
+    for (const [key, entry] of Object.entries(catalogue)) {
+      const message = entry.message;
+      assert.ok(!message.includes(" - "), `pl/${key} writes a dash as a spaced hyphen`);
+      assert.ok(!message.startsWith("- "), `pl/${key} opens on a spaced hyphen`);
+      // Mid-sentence only: a sentence may still begin with "Twoje".
+      const pronoun = /[^.!?:;\u201d"]\s+Tw(ój|oja|oje|oim|oimi|ojego|ojej|oich|oją|ojemu|oi|ojach)\b/.exec(message);
+      assert.equal(pronoun, null, `pl/${key} capitalises a pronoun: ${message.slice(0, 120)}`);
     }
   });
 

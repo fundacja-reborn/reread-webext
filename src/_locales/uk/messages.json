@@ -13,6 +13,17 @@
     }
   },
 
+  "pair_label_monolingual": {
+    "message": "$LANGUAGE$ (одномовний)",
+    "description": "A dictionary that explains a language in itself: not a direction, so not an arrow.",
+    "placeholders": {
+      "language": {
+        "content": "$1",
+        "example": "English"
+      }
+    }
+  },
+
   "settings": { "message": "Налаштування" },
   "support": { "message": "Підтримка" },
   "nav_menu": { "message": "Меню" },
@@ -1936,7 +1947,17 @@
   "options_title": { "message": "re/read - налаштування" },
   "back_to_reading": {"message": "Повернутися до читання"},
   "options_local_intro": {
-    "message": "Усе, що робить re/read, відбувається на цьому пристрої (офлайн): переклад, словник, список читання, збережені фрази. Нічого з того, що ви читаєте чи виділяєте, нікуди не надсилається. Інтернет-з'єднання потрібне, лише коли ви хочете завантажити нову модель перекладу чи словник - і лише з двох URL-адрес, відкрито наведених у цих розділах."
+    "message": "Усе, що робить re/read, відбувається на цьому пристрої (офлайн): переклад, словник, читальня, збережені фрази. Нічого з того, що ви читаєте чи виділяєте, нікуди не надсилається. Інтернет-з'єднання потрібне лише для завантаження нової моделі перекладу чи словника - і лише з двох адрес, наведених у розділах"
+  },
+
+  "options_local_intro_and": {
+    "message": "і",
+    "description": "Between the two section links in options_local_intro."
+  },
+
+  "options_local_intro_rest": {
+    "message": ".",
+    "description": "Closes options_local_intro after the second section link; glued to it in the markup, so a language that opens with punctuation gets no space before it."
   },
 
   "options_intro_short": {
@@ -2250,7 +2271,7 @@
   },
   "options_sections_aria": { "message": "Розділи цієї сторінки" },
   "options_engine": { "message": "Рушій" },
-  "options_engine_value": { "message": "Bergamot, усередині пакета - перекладає офлайн" },
+  "options_engine_value": { "message": "Bergamot, вбудований у розширення; переклад офлайн." },
   "options_storage": { "message": "Дані на цьому пристрої" },
   "options_storage_how": { "message": "Обсяг, який займають дані re/read." },
 
@@ -2301,14 +2322,19 @@
     "message": "Ви читаєте: $FROM$ - машинний переклад вимкнено, збережені фрази належать до цієї пари.",
     "placeholders": { "from": { "content": "$1", "example": "англійська" } }
   },
-  "options_reader_only": { "message": "Підкреслювати лише в режимі читання" },
+  "options_reader_only": { "message": "Показувати підкреслення та бульбашку лише в режимі читання" },
   "options_reader_only_hint": {
-    "message": "Підкреслення фраз і бульбашка перекладу лише в режимі читання; на звичайній сторінці виділення показує натомість бульбашку з кнопками: відкрити сторінку в режимі читання і перейти до списку читання."
+    "message": "На звичайній сторінці після виділення тексту з'являється бульбашка з двома кнопками: відкрити сторінку в режимі читання та перейти до списку читання."
   },
 
   "options_reader_only_more": {
     "message": "Коли опція ввімкнена, жодна вебсторінка не може дізнатися, які з її слів ви зберегли. На Android та iOS ця опція типово ввімкнена.",
     "description": "The rest of the options_reader_only_hint description, behind the row's More button."
+  },
+
+  "popup_reader_only": {
+    "message": "Підкреслювати лише в режимі читання",
+    "description": "The same switch as options_reader_only, named short: the popup row carries no description under it, and the settings page's full label wraps to three lines at 320px."
   },
   "options_page_number": { "message": "Номер сторінки" },
   "options_page_number_hint": {
@@ -2321,10 +2347,10 @@
   },
   "options_paged_heading": { "message": "Вигляд Сторінки" },
   "options_paged_intro": {
-    "message": "Ці налаштування діють у вигляді Сторінки в режимі читання, де текст рухається лише цілими сторінками, а кожна починається й закінчується цілим рядком."
+    "message": "Діють у режимі читання у вигляді Сторінки: текст рухається цілими сторінками, кожна починається й закінчується цілим рядком."
   },
   "options_touch_turn": { "message": "Гортання сторінок дотиком" },
-  "options_touch_turn_zones": { "message": "Дотик до лівої або правої третини" },
+  "options_touch_turn_zones": { "message": "Дотик до лівої або правої частини екрана" },
   "options_touch_turn_swipe": { "message": "Проведення пальцем убік" },
   "options_touch_turn_off": { "message": "Вимкнено" },
   "options_touch_turn_hint": {
@@ -2332,11 +2358,11 @@
   },
 
   "options_touch_turn_more": {
-    "message": "На широкому екрані типовим є дотик, на вузькому - проведення: там рука, що тримає пристрій, лежить на екрані, і жест, який мусить зрушити з місця, - єдиний, якого вона не зробить випадково. Клавіші зміни сторінки, стрілки та коліщатко миші гортають сторінки незалежно від цього налаштування, а перо не гортає ніколи.",
+    "message": "На вузькому екрані типовим є проведення пальцем: долоня, що тримає телефон, часто торкається екрана, а сам дотик без проведення сторінки не змінює. На широкому екрані типовим є дотик. Клавіші зміни сторінки, стрілки та коліщатко миші гортають сторінки незалежно від цього налаштування, а перо не гортає ніколи.",
     "description": "The rest of the options_touch_turn_hint description, behind the row's More button."
   },
   "options_touch_turn_note_zones": {
-    "message": "Дотик до лівої або правої третини сторінки гортає її: права - далі, ліва - назад. Зараховується лише короткий, нерухомий дотик подалі від країв екрана, щоб великий палець, який тримає пристрій, нічого не гортав."
+    "message": "Дотик до правої третини екрана - наступна сторінка, до лівої - попередня. Зараховується лише короткий нерухомий дотик подалі від країв, тож великий палець, який тримає пристрій, не змінює сторінок."
   },
   "options_touch_turn_note_swipe": {
     "message": "Проведення пальцем ліворуч показує наступну сторінку, праворуч - попередню. На телефоні не починайте від самого краю екрана: там починається системний жест повернення; на читалці з електронним чорнилом край зазвичай працює."
@@ -2348,7 +2374,7 @@
   "options_turn_effect_auto": { "message": "Автоматичний" },
   "options_turn_effect_off": { "message": "Вимкнено" },
   "options_turn_effect_hint": {
-    "message": "Знак, що сторінку перегорнуто."
+    "message": "Видиме підтвердження зміни сторінки."
   },
 
   "options_turn_effect_more": {
@@ -2356,7 +2382,7 @@
     "description": "The rest of the options_turn_effect_hint description, behind the row's More button."
   },
   "options_turn_effect_note_auto": {
-    "message": "У темі E-ink область тексту на мить темніє, як під час гортання в читалці електронних книжок; на інших екранах нова сторінка плавно з'їжджає."
+    "message": "У темі E-ink область тексту на мить темніє, як під час гортання в читалці електронних книжок; на інших екранах нова сторінка з'являється з плавним зсувом."
   },
   "options_turn_effect_note_off": {
     "message": "Сторінка просто змінюється, як було до цього налаштування."
@@ -2372,7 +2398,7 @@
   },
   "options_font_custom": { "message": "Власний шрифт" },
   "options_font_custom_hint": {
-    "message": "Шрифт, встановлений на цьому пристрої, наприклад Noto Serif; він з'явиться як Власний у рядку Шрифт панелі Aa."
+    "message": "Шрифт, встановлений на цьому пристрої, наприклад Noto Serif. У панелі Aa він з'явиться в рядку Шрифт як Власний."
   },
 
   "options_font_custom_more": {
@@ -2596,10 +2622,15 @@
   "options_tts_rate": { "message": "Швидкість мовлення" },
   "options_models_heading": { "message": "Моделі перекладу" },
   "options_models_intro": {
-    "message": "Завантажте тут модель перекладу для кожної мовної пари, яку хочете перекладати. Це офіційні файли Mozilla, які працюють повністю офлайн на вашому пристрої."
+    "message": "Модель перекладу завантажується окремо для кожної пари мов. Це офіційні файли Mozilla; переклад відбувається повністю на цьому пристрої."
   },
   "options_models_single_word": {
-    "message": "Модель добре перекладає речення, але окреме слово часто виходить неправильно - результат обрізаний або це слово, якого немає. Для окремих слів кращим джерелом є словник:"
+    "message": "Модель добре перекладає речення, але окреме слово часто виходить неправильно - результат обрізаний або це слово, якого немає. Для окремих слів кращим джерелом є словник - розділ"
+  },
+
+  "options_models_single_word_rest": {
+    "message": "нижче.",
+    "description": "Closes options_models_single_word after the link to the Dictionaries section."
   },
   "options_update_list": { "message": "Оновити список" },
   "options_list_dated": { "message": "Список станом на" },
@@ -2631,7 +2662,7 @@
     "message": "Додайте словники, щоб бачити детальні визначення слів у бульбашці перекладу. Ви можете змінювати порядок їх відображення за допомогою стрілок."
   },
   "options_dictionaries_sources": {
-    "message": "Словники у списку нижче походять із WikDict. Ви можете також додати власні - з файлів або за посиланням, зокрема кілька для однієї мови - у розділах під списком. Де їх шукати, кожен із зазначеною ліцензією:"
+    "message": "Словники зі списку походять із WikDict. Власні додаєте з файла або за посиланням, зокрема кілька для однієї мови. Джерела разом із ліцензіями:"
   },
   "options_dictionary_order_hint": {
     "message": "Бульбашка показує статті в порядку зі списку нижче. Використовуються лише словники мови, яку ви читаєте."
@@ -2679,7 +2710,12 @@
   },
   "options_disabled_heading": { "message": "Вимкнені сайти" },
   "options_disabled_intro": {
-    "message": "Список вебсайтів, де розширення вимкнено: без перекладу, без бульбашки, без підкреслень. Додайте сайт перемикачем під іконкою розширення на панелі браузера, перебуваючи на ньому, або введіть його адресу нижче. Перемикача немає, коли водночас увімкнено"
+    "message": "На цих сайтах re/read не перекладає і не показує ні бульбашки, ні підкреслень. Сайт додаєте у вікні re/read на панелі інструментів або вписавши адресу нижче."
+  },
+
+  "options_disabled_intro_switch": {
+    "message": "У цьому вікні перемикача немає, коли водночас увімкнено",
+    "description": "Behind the Details fold under options_disabled_intro: the case where the toolbar window has no switch to offer."
   },
 
   "options_disabled_intro_and": {
@@ -2708,7 +2744,7 @@
   },
   "options_custom_css_heading": { "message": "Власний CSS" },
   "options_custom_css_intro": {
-    "message": "Для тих, хто хоче змінити вигляд бульбашки, сторінки режиму читання та вікна кнопки на панелі інструментів власними правилами CSS. Ця сторінка лишається поза їхньою дією, тож хибне правило завжди можна скасувати тут: очистьте поле та збережіть."
+    "message": "Власні правила CSS змінюють вигляд бульбашки, режиму читання та вікна re/read. Ця сторінка цим правилам не підлягає, тож хибне правило можна скасувати тут: очистьте поле та збережіть."
   },
   "options_custom_css_more": { "message": "Більше про правила CSS та назви" },
   "options_custom_css_reach": {
@@ -2727,7 +2763,12 @@
     "message": "Не збережено: правила відхилено. Правила, які завантажують щось із мережі (url(), @import, @font-face), не дозволені."
   },
   "options_custom_css_example": {
-    "message": "Приклад: .bubble { outline: 3px solid darkorange; } малює помаранчеву рамку навколо кожної бульбашки."
+    "message": "Приклад:"
+  },
+
+  "options_custom_css_example_rest": {
+    "message": "малює помаранчеву рамку навколо кожної бульбашки.",
+    "description": "Closes options_custom_css_example after the rule itself, which stands in code and needs no translation."
   },
   "options_custom_css_cleared": { "message": "Збережено: без правил, отже стандартний вигляд." },
   "options_support_intro": {
@@ -2818,7 +2859,7 @@
   "options_no_models": { "message": "Тут немає моделей і немає чого завантажувати - ця збірка не перелічує жодної." },
   "options_filter_no_match_models": { "message": "Жодна пара не підходить. Фільтр приймає назву мови або код." },
   "options_filter_no_match_dictionaries": { "message": "Жоден словник не підходить. Фільтр приймає назву мови або код." },
-  "options_no_disabled": { "message": "Жоден сайт не вимкнено. Вимикають у спливному вікні панелі інструментів." },
+  "options_no_disabled": { "message": "Жоден сайт не вимкнено." },
   "options_turn_back_on": { "message": "Увімкнути назад" },
   "options_reading_model_files": {
     "message": "Читання файлів для пари $PAIR$...",

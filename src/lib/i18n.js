@@ -121,6 +121,26 @@ export function megabytes(bytes) {
 }
 
 /**
+ * How fast the voice reads, as the factor every player writes it - and in the
+ * reader's own decimal mark, like every other number this extension shows:
+ * `0,9×` where the browser writes commas (D258, V8). The percent it is stored
+ * as is an implementation detail nobody should meet.
+ *
+ * Said in three places at once - the settings row, the reader's Aa panel and
+ * the saved phrases' - which is exactly why it is said here.
+ *
+ * @param {number} percent
+ * @returns {string}
+ */
+export function speedFactor(percent) {
+  const amount = (percent / 100).toLocaleString(undefined, {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  });
+  return `${amount}×`;
+}
+
+/**
  * A file's size the way the line after an export says it (D153): whole
  * kilobytes under a megabyte, `megabytes` from there - "0.0 MB" for a
  * forty-kilobyte file would say nothing. Never under one kilobyte: a file

@@ -32,7 +32,7 @@ import { applyReading } from "../lib/appearance.js";
 import { ReadLedger } from "../lib/counting.js";
 import { dresser } from "../lib/user-css.js";
 import { webext } from "../lib/browser.js";
-import { fileSize, localizePage, megabytes, plural, t, uiLocale } from "../lib/i18n.js";
+import { fileSize, localizePage, megabytes, plural, speedFactor, t, uiLocale } from "../lib/i18n.js";
 import { whenIdle } from "../lib/idle.js";
 import { privateNote } from "../lib/private-note.js";
 import { languageName, pairLabel } from "../lib/language.js";
@@ -7749,7 +7749,7 @@ function applySpeech() {
   // empty voice select would be a promise nothing keeps.
   if (voiceSetting !== null) voiceSetting.hidden = !canSpeak();
   if (rateSetting !== null) rateSetting.hidden = !canSpeak();
-  if (rateValue !== null) rateValue.textContent = `${(settings.ttsRate / 100).toFixed(1)}×`;
+  if (rateValue !== null) rateValue.textContent = speedFactor(settings.ttsRate);
   renderVoiceChoice();
   readingVoice(speechVoice());
 }

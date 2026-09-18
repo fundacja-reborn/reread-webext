@@ -17,6 +17,17 @@
     }
   },
 
+  "pair_label_monolingual": {
+    "message": "$LANGUAGE$ (monolingual)",
+    "description": "A dictionary that explains a language in itself: not a direction, so not an arrow.",
+    "placeholders": {
+      "language": {
+        "content": "$1",
+        "example": "English"
+      }
+    }
+  },
+
   "settings": { "message": "Settings" },
   "support": {
     "message": "Support",
@@ -1675,7 +1686,17 @@
   "options_title": { "message": "re/read - settings" },
   "back_to_reading": {"message": "Back to reading"},
   "options_local_intro": {
-    "message": "Everything re/read does happens on this device (offline): translating, the dictionary, the reading list, your saved phrases. Nothing you read or select is ever sent anywhere. An internet connection is needed only when you want to download a new translation model or a dictionary - and only from the two URLs shown openly in those sections."
+    "message": "Everything re/read does happens on this device (offline): translating, the dictionary, the reading list, your saved phrases. Nothing you read or select is ever sent anywhere. An internet connection is needed only to download a new translation model or a dictionary - and only from the two addresses given in the"
+  },
+
+  "options_local_intro_and": {
+    "message": "and",
+    "description": "Between the two section links in options_local_intro."
+  },
+
+  "options_local_intro_rest": {
+    "message": " sections.",
+    "description": "Closes options_local_intro after the second section link; glued to it in the markup, so a language that opens with punctuation gets no space before it."
   },
 
   "options_intro_short": {
@@ -1927,7 +1948,7 @@
     "description": "Accessible name of the row of anchor links under the intro."
   },
   "options_engine": { "message": "Engine" },
-  "options_engine_value": { "message": "Bergamot, inside the package - translates offline" },
+  "options_engine_value": { "message": "Bergamot, built into the extension; translation offline." },
   "options_storage": { "message": "Data on this device" },
   "options_storage_how": { "message": "Space taken up by re/read's data." },
 
@@ -1992,14 +2013,19 @@
     "placeholders": { "from": { "content": "$1", "example": "English" } },
     "description": "Status line after choosing a pair while translation is switched off."
   },
-  "options_reader_only": { "message": "Underline only in the reader" },
+  "options_reader_only": { "message": "Show the underlines and the bubble only in the reader" },
   "options_reader_only_hint": {
-    "message": "Phrase underlines and the translation bubble only in the reader; on an ordinary page a selection shows a bubble with buttons instead: open the page in the reader, and go to the reading list."
+    "message": "On an ordinary page, selecting text brings up a bubble with two buttons instead: open the page in the reader, and go to the reading list."
   },
 
   "options_reader_only_more": {
     "message": "With it on, no web page can tell which of its words you have saved. On Android and iOS it is on by default.",
     "description": "The rest of the options_reader_only_hint description, behind the row's More button."
+  },
+
+  "popup_reader_only": {
+    "message": "Underline only in the reader",
+    "description": "The same switch as options_reader_only, named short: the popup row carries no description under it, and the settings page's full label wraps to three lines at 320px."
   },
   "options_page_number": { "message": "Page number" },
   "options_page_number_hint": {
@@ -2012,10 +2038,10 @@
   },
   "options_paged_heading": { "message": "Pages layout" },
   "options_paged_intro": {
-    "message": "These settings work in the reader's Pages layout, where the text moves only by whole pages, each beginning and ending with a whole line."
+    "message": "These work in the reader's Pages layout: the text moves by whole pages, each beginning and ending with a whole line."
   },
   "options_touch_turn": { "message": "Turning pages by touch" },
-  "options_touch_turn_zones": { "message": "Tap the left or right third" },
+  "options_touch_turn_zones": { "message": "Tap the left or right side of the screen" },
   "options_touch_turn_swipe": { "message": "Slide a finger sideways" },
   "options_touch_turn_off": { "message": "Off" },
   "options_touch_turn_hint": {
@@ -2023,11 +2049,11 @@
   },
 
   "options_touch_turn_more": {
-    "message": "On a wide screen the default is a tap, on a narrow one a slide - there the hand that holds the device rests on the screen, and a gesture that has to move is the one it cannot make by accident. The page keys, the arrow keys and the mouse wheel turn pages whatever this is set to, and the pen never turns one.",
+    "message": "On a narrow screen the default is a slide: the hand holding the phone often touches the screen, and a touch without a slide turns no page. On a wide screen the default is a tap. The page keys, the arrow keys and the mouse wheel turn pages whatever this is set to, and the pen never turns one.",
     "description": "The rest of the options_touch_turn_hint description, behind the row's More button."
   },
   "options_touch_turn_note_zones": {
-    "message": "A tap in the left or right third of the page turns it: the right third goes on, the left goes back. Only a short, still tap away from the edges of the screen counts, so that a thumb holding the device turns nothing."
+    "message": "A tap in the right third of the screen turns to the next page, in the left third to the previous one. Only a short, still tap away from the edges counts, so a thumb holding the device changes no pages."
   },
   "options_touch_turn_note_swipe": {
     "message": "Sliding a finger left shows the next page, right the previous one. On a phone, do not start at the very edge of the screen - that is where the system's own back gesture begins; on an e-ink reader the edge usually works."
@@ -2039,7 +2065,7 @@
   "options_turn_effect_auto": { "message": "Automatic" },
   "options_turn_effect_off": { "message": "Off" },
   "options_turn_effect_hint": {
-    "message": "A sign that the page has turned."
+    "message": "A visible confirmation that the page has changed."
   },
 
   "options_turn_effect_more": {
@@ -2047,7 +2073,7 @@
     "description": "The rest of the options_turn_effect_hint description, behind the row's More button."
   },
   "options_turn_effect_note_auto": {
-    "message": "In the E-ink theme the text area goes dark for a moment, the way an e-reader marks a page turn; on other screens the new page slides in."
+    "message": "In the E-ink theme the text area goes dark for a moment, the way an e-reader marks a page turn; on other screens the new page appears with a smooth slide."
   },
   "options_turn_effect_note_off": {
     "message": "The page simply changes, as it did before this setting existed."
@@ -2063,7 +2089,7 @@
   },
   "options_font_custom": { "message": "Own font" },
   "options_font_custom_hint": {
-    "message": "A typeface installed on this device, for example Noto Serif; it then appears as Custom in the Type row of the Aa panel."
+    "message": "A typeface installed on this device, for example Noto Serif. In the Aa panel it appears in the Type row as Custom."
   },
 
   "options_font_custom_more": {
@@ -2294,12 +2320,17 @@
   },
   "options_models_heading": { "message": "Translation models" },
   "options_models_intro": {
-    "message": "Download a translation model here for each language pair you want to translate. These are official Mozilla files that run entirely offline on your device.",
+    "message": "A translation model is downloaded separately for each pair of languages. These are official Mozilla files; the translating happens entirely on this device.",
     "description": "The first half of the models section's intro; options_models_single_word follows it in the same paragraph, highlighted. Each half must read on from the other across a plain space - no half starts or ends with whitespace."
   },
   "options_models_single_word": {
-    "message": "A model translates sentences well, but a single word on its own is often translated wrongly - the result is cut short, or is a word that does not exist. For single words the better source is a dictionary:",
+    "message": "A model translates sentences well, but a single word on its own is often translated wrongly - the result is cut short, or is a word that does not exist. For single words the better source is a dictionary - the",
     "description": "The highlighted half of the models section's intro (D192): the one fact about models that changes what a reader installs next."
+  },
+
+  "options_models_single_word_rest": {
+    "message": "section below.",
+    "description": "Closes options_models_single_word after the link to the Dictionaries section."
   },
   "options_update_list": {
     "message": "Update the list",
@@ -2345,7 +2376,7 @@
     "message": "Add dictionaries to see detailed word definitions in the translation bubble. You can change the order in which they appear using the arrows."
   },
   "options_dictionaries_sources": {
-    "message": "The dictionaries listed below come from WikDict. You can also add your own - from files or from a link, and several for one language - in the sections under the list. Where to find them, each with its licence:",
+    "message": "The dictionaries in the list come from WikDict. You can add your own from a file or from a link, several for one language as well. The sources, each with its licence:",
     "description": "The second paragraph of the dictionaries section's intro (D192). Ends just before the address, which stands in the page as a link; the sentence's closing full stop is part of the page. Must not end with whitespace."
   },
   "options_dictionary_order_hint": {
@@ -2402,7 +2433,12 @@
   },
   "options_disabled_heading": { "message": "Switched-off sites" },
   "options_disabled_intro": {
-    "message": "A list of websites where the extension is switched off: no translation, no bubble, no underlines. Add a site with the switch under the extension's icon in the browser's toolbar while you are on it, or type its address below. There is no switch when both"
+    "message": "On these sites re/read does not translate and shows no bubble and no underlines. Add a site in the re/read window in the toolbar, or by typing its address below."
+  },
+
+  "options_disabled_intro_switch": {
+    "message": "There is no switch in that window when both",
+    "description": "Behind the Details fold under options_disabled_intro: the case where the toolbar window has no switch to offer."
   },
 
   "options_disabled_intro_and": {
@@ -2431,7 +2467,7 @@
   },
   "options_custom_css_heading": { "message": "Custom CSS" },
   "options_custom_css_intro": {
-    "message": "For changing how the bubble, the reader page and the toolbar popup look with CSS rules of your own. This page stays out of their reach, so a wrong rule can always be undone here: clear the field and save."
+    "message": "Your own CSS rules change how the bubble, the reading view and the re/read window look. This page is not subject to those rules, so a wrong rule can always be undone here: clear the field and save."
   },
   "options_custom_css_more": { "message": "More about the CSS rules and the names" },
   "options_custom_css_reach": {
@@ -2450,7 +2486,12 @@
     "message": "Not saved: the rules were refused. Rules that load anything from the network (url(), @import, @font-face) are not allowed."
   },
   "options_custom_css_example": {
-    "message": "Example: .bubble { outline: 3px solid darkorange; } draws an orange line around every bubble."
+    "message": "Example:"
+  },
+
+  "options_custom_css_example_rest": {
+    "message": "draws an orange line around every bubble.",
+    "description": "Closes options_custom_css_example after the rule itself, which stands in code and needs no translation."
   },
   "options_custom_css_cleared": { "message": "Saved: no rules, so the default look." },
   "options_support_intro": {
@@ -2550,7 +2591,7 @@
   "options_no_models": { "message": "No models here, and none to download - this build lists none." },
   "options_filter_no_match_models": { "message": "No pair matches that. The filter takes a language name or a code." },
   "options_filter_no_match_dictionaries": { "message": "No dictionary matches that. The filter takes a language name or a code." },
-  "options_no_disabled": { "message": "No sites are switched off. The toolbar popup is where one is." },
+  "options_no_disabled": { "message": "No sites are switched off." },
   "options_turn_back_on": { "message": "Turn back on" },
   "options_reading_model_files": {
     "message": "Reading the files for $PAIR$...",

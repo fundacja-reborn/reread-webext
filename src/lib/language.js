@@ -40,10 +40,15 @@ export function languageName(code) {
  * same way. The joining word is the catalogue's: `"English to Polish"` in
  * English, an arrow where the language's grammar would bend the names.
  *
+ * A dictionary that explains a language in itself is not a direction at all,
+ * and "English to English" read as a mistake somebody had made picking the
+ * two selects (V10). It is named for what it is: `"English (monolingual)"`.
+ *
  * @param {string} from
  * @param {string} to
  * @returns {string}
  */
 export function pairLabel(from, to) {
+  if (from === to) return t("pair_label_monolingual", languageName(from));
   return t("pair_label", [languageName(from), languageName(to)]);
 }

@@ -105,9 +105,9 @@ describe("the dictionary list's rows", () => {
     assert.doesNotMatch(title, /text-overflow|nowrap|line-clamp/);
   });
 
-  it("say the file's name in the small print only while it differs, and keep a count whole", () => {
+  it("say the file's name in the small print only while it says something, and keep a count whole", () => {
     const meta = fn("fillDictionaryMeta", "renderDictionary");
-    assert.match(meta, /if \(shownName\(dictionary\) !== dictionary\.name\) items\.push\(element\("span", "dictionary-file", dictionary\.name\)\)/);
+    assert.match(meta, /if \(fileNameWorthSaying\(dictionary\)\) items\.push\(element\("span", "dictionary-file", dictionary\.name\)\)/);
     // The items apart by a middle dot after a no-break space: a line may end
     // after the dot, never begin with it.
     assert.match(meta, /meta\.append\("\\u00a0· "\)/);

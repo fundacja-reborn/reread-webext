@@ -19,6 +19,18 @@ async function source(path) {
   return readFile(new URL(path, ROOT), "utf8");
 }
 
+/**
+ * One rule's body, by its selector.
+ *
+ * @param {string} css
+ * @param {string} selector
+ */
+function rule(css, selector) {
+  const at = css.indexOf(`\n${selector} {`);
+  assert.notEqual(at, -1, `no rule for ${selector}`);
+  return css.slice(at, css.indexOf("\n}\n", at));
+}
+
 /** @param {Partial<Parameters<typeof stepsView>[0]>} state */
 function view(state) {
   return stepsView({ model: false, translationOff: false, dictionary: false, pinned: false, hidden: false, ...state });
@@ -149,7 +161,11 @@ describe("the data section", () => {
 
     const css = await source("options/options.css");
     assert.match(css, /\.copies \{[\s\S]*?font-variant-numeric: tabular-nums;/, "a column of dates and counts does not line up");
-    assert.match(css, /@media \(max-width: 30rem\) \{\s*\.copies li \{/, "three columns stay three columns on a phone");
+    // One grid for the whole list (D258, V4): three lines sizing their own
+    // columns are three lines whose dates begin in three different places.
+    assert.match(rule(css, ".copies"), /display: grid;\n  grid-template-columns: max-content minmax\(0, 1fr\) max-content;/, "every copy sizes its own columns");
+    assert.match(rule(css, ".copies li"), /display: contents/, "a copy's line stands between the grid and its cells");
+    assert.match(css, /@media \(max-width: 30rem\) \{\s*\.copies \{/, "three columns stay three columns on a phone");
   });
 
   it("points at the pages a copy to a file is made on, without inventing a message", async () => {

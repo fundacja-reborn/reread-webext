@@ -2,7 +2,7 @@
   "locale_code": { "message": "pl" },
 
   "extension_description": {
-    "message": "Czytaj artykuły ze stron i książki EPUB offline - i ucz się języka, w którym je czytasz. Nic z tego nie opuszcza urządzenia."
+    "message": "Czytaj artykuły ze stron i książki EPUB offline – i ucz się języka, w którym je czytasz. Nic z tego nie opuszcza urządzenia."
   },
 
   "pair_label": {
@@ -13,12 +13,23 @@
     }
   },
 
+  "pair_label_monolingual": {
+    "message": "$LANGUAGE$ (jednojęzyczny)",
+    "description": "A dictionary that explains a language in itself: not a direction, so not an arrow.",
+    "placeholders": {
+      "language": {
+        "content": "$1",
+        "example": "English"
+      }
+    }
+  },
+
   "settings": { "message": "Ustawienia" },
   "support": { "message": "Wsparcie" },
   "nav_menu": { "message": "Menu" },
   "language_pair": { "message": "Para językowa" },
   "reading_list": { "message": "Czytelnia offline" },
-  "private_browsing_note": { "message": "Jesteś w trybie prywatnym. Przeglądarka używa tu dla tej strony osobnej bazy danych i kasuje ją po zakończeniu sesji prywatnej: czytelnia i zakreślenia, które tu widzisz, pochodzą z ich kopii, a artykuł zapisany, książka zaimportowana, zakreślenie zrobione albo cokolwiek usuniętego w tym oknie przepada razem z sesją. Jedyny wyjątek to zapisane frazy - te są zachowywane. Na wszystko inne otwórz re/read w zwykłej karcie." },
+  "private_browsing_note": { "message": "Jesteś w trybie prywatnym. Przeglądarka używa tu dla tej strony osobnej bazy danych i kasuje ją po zakończeniu sesji prywatnej: czytelnia i zakreślenia, które tu widzisz, pochodzą z ich kopii, a artykuł zapisany, książka zaimportowana, zakreślenie zrobione albo cokolwiek usuniętego w tym oknie przepada razem z sesją. Jedyny wyjątek to zapisane frazy – te są zachowywane. Na wszystko inne otwórz re/read w zwykłej karcie." },
   "saved_phrases": { "message": "Zapisane frazy" },
   "open_reader": { "message": "Otwórz w widoku czytania" },
   "quiet_bubble": { "message": "Domyślnie ukrywaj akcje w dymku" },
@@ -28,11 +39,11 @@
   "action_save": { "message": "Zapisz" },
   "action_update": { "message": "Aktualizuj" },
 
-  "error_engine_missing": { "message": "Nie ma jeszcze silnika tłumaczeń - to wydanie nie tłumaczy." },
-  "error_model_missing": { "message": "Na tym urządzeniu nie ma modelu dla tej pary językowej - pobierz go lub dodaj w ustawieniach. A żeby czytać bez tłumaczenia maszynowego, włącz tam „Używaj bez modelu tłumaczenia” - słowniki nadal odpowiadają, a frazy zapisujesz z ich znaczeń." },
+  "error_engine_missing": { "message": "Nie ma jeszcze silnika tłumaczeń – to wydanie nie tłumaczy." },
+  "error_model_missing": { "message": "Na tym urządzeniu nie ma modelu dla tej pary językowej – pobierz go lub dodaj w ustawieniach. A żeby czytać bez tłumaczenia maszynowego, włącz tam „Używaj bez modelu tłumaczenia” – słowniki nadal odpowiadają, a frazy zapisujesz z ich znaczeń." },
   "error_unsupported_pair": { "message": "Dla tej pary językowej nie istnieje żaden model." },
   "error_too_long": { "message": "To zaznaczenie jest za długie do przetłumaczenia." },
-  "error_no_page": { "message": "Nie ma tu strony do czytania - otwórz artykuł i naciśnij przycisk jeszcze raz." },
+  "error_no_page": { "message": "Nie ma tu strony do czytania – otwórz artykuł i naciśnij przycisk jeszcze raz." },
   "error_unknown_message": { "message": "Rozszerzenie wysłało żądanie, którego samo nie rozumie." },
   "error_internal": { "message": "Coś poszło nie tak wewnątrz rozszerzenia." },
 
@@ -49,9 +60,9 @@
   "bubble_looking_up": { "message": "Szukam w słownikach..." },
   "bubble_nothing_more": { "message": "Nie ma ani zdania, ani wpisu ze słownika" },
   "bubble_whole_words": { "message": "Zaznacz całe słowa" },
-  "bubble_not_in_dictionary": { "message": "Nie ma tego w Twoich słownikach" },
+  "bubble_not_in_dictionary": { "message": "Nie ma tego w twoich słownikach" },
   "bubble_no_dictionary": {
-    "message": "Brak słownika dla języka: $LANGUAGE$ - dodaj go w $SETTINGS$",
+    "message": "Brak słownika dla języka: $LANGUAGE$ – dodaj go w $SETTINGS$",
     "placeholders": {
       "language": { "content": "$1", "example": "angielski" },
       "settings": { "content": "$2", "example": "ustawieniach" }
@@ -84,12 +95,12 @@
   "popup_site_toggle_title": { "message": "Czy re/read działa w tej witrynie" },
   "popup_no_page": { "message": "re/read nie działa na tej stronie." },
   "popup_no_model": {
-    "message": "Na tym urządzeniu nie ma jeszcze modelu tłumaczeniowego - naciśnij tutaj i wybierz go w ustawieniach."
+    "message": "Na tym urządzeniu nie ma jeszcze modelu tłumaczeniowego – naciśnij tutaj i wybierz go w ustawieniach."
   },
 
-  "vocab_title": { "message": "re/read - zapisane frazy" },
+  "vocab_title": { "message": "re/read – zapisane frazy" },
   "vocab_intro": {
-    "message": "Wszystkie frazy zachowane dla tej pary językowej, od najnowszych - zapisane podczas czytania i przechowywane tylko na tym urządzeniu. „$LEARNED$” przenosi frazę na listę „Nauczone” i zdejmuje jej podkreślenia; „$EDIT$” pozwala przepisać znaczenia, po jednym w linii. Kilka znaczeń naraz rozdziel średnikiem. Przy frazie dwie liczby - lupa i książka: ile razy ją sprawdzałeś (otwierałeś jej dymek) i ile razy wystąpiła w tekstach, które skończyłeś - w części książki, z której wyszedłeś przyciskiem „Następna” pod tekstem, albo w artykule oznaczonym jako przeczytany. Listę można uporządkować według każdej z nich.",
+    "message": "Wszystkie frazy zachowane dla tej pary językowej, od najnowszych – zapisane podczas czytania i przechowywane tylko na tym urządzeniu. „$LEARNED$” przenosi frazę na listę „Nauczone” i zdejmuje jej podkreślenia; „$EDIT$” pozwala przepisać znaczenia, po jednym w linii. Kilka znaczeń naraz rozdziel średnikiem. Przy frazie dwie liczby – lupa i książka: ile razy ją sprawdzałeś (otwierałeś jej dymek) i ile razy wystąpiła w tekstach, które skończyłeś – w części książki, z której wyszedłeś przyciskiem „Następna” pod tekstem, albo w artykule oznaczonym jako przeczytany. Listę można uporządkować według każdej z nich.",
     "placeholders": {
       "learned": { "content": "$1", "example": "Znam to" },
       "edit": { "content": "$2", "example": "Edytuj" }
@@ -101,7 +112,7 @@
   "vocab_filter_label": { "message": "Filtruj listę zapisanych fraz" },
   "vocab_filter_clear": { "message": "Wyczyść filtr" },
   "vocab_add_title": { "message": "Dodaj frazę" },
-  "vocab_add_note": { "message": "Wpisz słowo i zatwierdź - zaznacz znaczenia z Twoich słowników albo wpisz własne." },
+  "vocab_add_note": { "message": "Wpisz słowo i zatwierdź – zaznacz znaczenia z twoich słowników albo wpisz własne." },
   "lookup_label": { "message": "Sprawdź słowo" },
   "lookup_placeholder": { "message": "Wpisz słowo lub frazę" },
   "lookup_action": { "message": "Szukaj" },
@@ -173,7 +184,7 @@
     "placeholders": { "phrase": { "content": "$1", "example": "bank" } }
   },
   "vocab_empty": {
-    "message": "Dla tej pary nie ma jeszcze nic zapisanego. Zaznacz frazę podczas czytania i naciśnij „$BUTTON$” - będzie tu czekać.",
+    "message": "Dla tej pary nie ma jeszcze nic zapisanego. Zaznacz frazę podczas czytania i naciśnij „$BUTTON$” – będzie tu czekać.",
     "placeholders": { "button": { "content": "$1", "example": "Zapisz" } }
   },
   "vocab_segment_learning": { "message": "Do nauki" },
@@ -260,11 +271,11 @@
     "placeholders": { "count": {"content":"$1","example":"12"} }
   },
   "vocab_learned_empty": {
-    "message": "Nic nie jest jeszcze oznaczone jako nauczone. Naciśnij „$BUTTON$” przy frazie - w dymku albo na tej liście - a trafi tutaj.",
+    "message": "Nic nie jest jeszcze oznaczone jako nauczone. Naciśnij „$BUTTON$” przy frazie – w dymku albo na tej liście – a trafi tutaj.",
     "placeholders": { "button": {"content":"$1","example":"Learned"} }
   },
   "vocab_empty_all_learned": {
-    "message": "Wszystkie frazy zapisane dla tej pary są na liście „Nauczone”. Zaznacz frazę podczas czytania i naciśnij „$BUTTON$” - będzie tu czekać.",
+    "message": "Wszystkie frazy zapisane dla tej pary są na liście „Nauczone”. Zaznacz frazę podczas czytania i naciśnij „$BUTTON$” – będzie tu czekać.",
     "placeholders": { "button": { "content": "$1", "example": "Save" } }
   },
   "vocab_filter_status_one": {
@@ -355,25 +366,25 @@
   "vocab_legend_recalls": { "message": "sprawdzane – otwarcia dymka podczas czytania" },
   "vocab_legend_reads": { "message": "czytane – wystąpienia w przeczytanych tekstach" },
   "vocab_import_with_sentence_one": {
-    "message": "$COUNT$ wiersz niesie zdanie - zapisana już fraza dostanie je tylko wtedy, gdy nie ma własnego.",
+    "message": "$COUNT$ wiersz niesie zdanie – zapisana już fraza dostanie je tylko wtedy, gdy nie ma własnego.",
     "placeholders": {
       "count": { "content": "$1", "example": "1" }
     }
   },
   "vocab_import_with_sentence_few": {
-    "message": "$COUNT$ wiersze niosą zdanie - zapisana już fraza dostanie je tylko wtedy, gdy nie ma własnego.",
+    "message": "$COUNT$ wiersze niosą zdanie – zapisana już fraza dostanie je tylko wtedy, gdy nie ma własnego.",
     "placeholders": {
       "count": { "content": "$1", "example": "3" }
     }
   },
   "vocab_import_with_sentence_many": {
-    "message": "$COUNT$ wierszy niesie zdanie - zapisana już fraza dostanie je tylko wtedy, gdy nie ma własnego.",
+    "message": "$COUNT$ wierszy niesie zdanie – zapisana już fraza dostanie je tylko wtedy, gdy nie ma własnego.",
     "placeholders": {
       "count": { "content": "$1", "example": "20" }
     }
   },
   "vocab_import_with_sentence_other": {
-    "message": "$COUNT$ wiersza niesie zdanie - zapisana już fraza dostanie je tylko wtedy, gdy nie ma własnego.",
+    "message": "$COUNT$ wiersza niesie zdanie – zapisana już fraza dostanie je tylko wtedy, gdy nie ma własnego.",
     "placeholders": {
       "count": { "content": "$1", "example": "1,5" }
     }
@@ -416,7 +427,7 @@
   "action_import": { "message": "Importuj" },
   "transfer_heading": { "message": "Import i eksport" },
   "vocab_transfer_note": {
-    "message": "Plik .tsv z dwiema kolumnami - ten sam format zapisuje wtyczka KOReadera, a czyta Anki. Import dodaje tylko frazy, których w tej parze nie ma; zapisanych nie zmienia. W komórce znaczeń średnik ze spacją rozdziela znaczenia; średnik bez spacji zostaje wewnątrz znaczenia. „Eksportuj dla Anki” dopisuje trzecią kolumnę ze zdaniem, w którym fraza została zapisana - pustą, gdy zdania nie ma. Ten plik też można tu zaimportować: zdania wracają razem z frazami, a zapisana już fraza dostaje zdanie z pliku tylko wtedy, gdy nie ma własnego. Frazy oznaczone jako nauczone nie trafiają do żadnego z tych plików; przenosi je tylko kopia wszystkiego z czytelni."
+    "message": "Plik .tsv z dwiema kolumnami – ten sam format zapisuje wtyczka KOReadera, a czyta Anki. Import dodaje tylko frazy, których w tej parze nie ma; zapisanych nie zmienia. W komórce znaczeń średnik ze spacją rozdziela znaczenia; średnik bez spacji zostaje wewnątrz znaczenia. „Eksportuj dla Anki” dopisuje trzecią kolumnę ze zdaniem, w którym fraza została zapisana – pustą, gdy zdania nie ma. Ten plik też można tu zaimportować: zdania wracają razem z frazami, a zapisana już fraza dostaje zdanie z pliku tylko wtedy, gdy nie ma własnego. Frazy oznaczone jako nauczone nie są zapisywane w żadnym z tych plików; przenosi je tylko kopia wszystkiego z czytelni."
   },
   "vocab_import_into": { "message": "Importuj do" },
   "vocab_import_nothing": { "message": "W tym pliku nie ma fraz do zaimportowania." },
@@ -497,7 +508,7 @@
     "placeholders": { "count": { "content": "$1", "example": "1,5" } }
   },
 
-  "reader_title": { "message": "re/read - widok czytania" },
+  "reader_title": { "message": "re/read – widok czytania" },
   "reader_open_original": { "message": "Otwórz oryginał" },
   "reader_pictures_save": {
     "message": "Pobierz obrazki ($COUNT$)",
@@ -511,10 +522,10 @@
     "message": "Pobierane raz z serwerów artykułu, bez ciasteczek, i zapisywane razem z artykułem na tym urządzeniu. Po pobraniu są wyświetlane w artykule."
   },
   "reader_pictures_book_hint": {
-    "message": "Obrazki pochodzą z pliku książki i zostały zapisane razem z nią przy dodawaniu. Ten wiersz usuwa same obrazki - książka zostaje, a obrazki wrócą dopiero po ponownym dodaniu pliku."
+    "message": "Obrazki pochodzą z pliku książki i zostały zapisane razem z nią przy dodawaniu. Ten wiersz usuwa same obrazki – książka zostaje, a obrazki wrócą dopiero po ponownym dodaniu pliku."
   },
   "reader_pictures_progress": {
-    "message": "Obrazek $DONE$ z $OF$ - $SIZE$",
+    "message": "Obrazek $DONE$ z $OF$ – $SIZE$",
     "placeholders": {
       "done": { "content": "$1", "example": "3" },
       "of": { "content": "$2", "example": "12" },
@@ -713,10 +724,10 @@
   "reader_no_article": { "message": "Na tej stronie nie udało się znaleźć artykułu." },
   "reader_list_write_failed": { "message": "Nie udało się zapisać czytelni." },
   "reader_empty_none": {
-    "message": "Nic jeszcze nie zapisano - otwórz artykuł w widoku czytania i naciśnij „$BUTTON$”. Zapisana strona zostaje na tym urządzeniu i otworzy się także bez internetu.",
+    "message": "Nic jeszcze nie zapisano – otwórz artykuł w widoku czytania i naciśnij „$BUTTON$”. Zapisana strona zostaje na tym urządzeniu i otworzy się także bez internetu.",
     "placeholders": { "button": { "content": "$1", "example": "Zapisz w czytelni" } }
   },
-  "reader_empty_all_read": { "message": "Nie zostało nic do przeczytania - wszystko, co zapisane, jest oznaczone jako przeczytane." },
+  "reader_empty_all_read": { "message": "Nie zostało nic do przeczytania – wszystko, co zapisane, jest oznaczone jako przeczytane." },
   "reader_empty_none_read": { "message": "Nic nie jest jeszcze oznaczone jako przeczytane." },
   "reader_filter_placeholder": { "message": "Szukaj po tytule lub witrynie" },
   "reader_filter_label": { "message": "Szukaj w czytelni" },
@@ -734,7 +745,7 @@
   },
   "reader_how_title": { "message": "Jak to działa?" },
   "reader_library_note": {
-    "message": "Wszystko tutaj to tekstowe kopie artykułów ze stron www, które otworzyłeś w widoku czytania i świadomie zapisałeś w czytelni, oraz artykuły i pliki .epub, które zaimportowałeś opcją Importuj poniżej. Wszystkie te artykuły i książki otwierają się bez internetu i zostają na Twoim urządzeniu, nawet gdy oryginalna strona zniknie."
+    "message": "Wszystko tutaj to tekstowe kopie artykułów ze stron www, które otworzyłeś w widoku czytania i świadomie zapisałeś w czytelni, oraz artykuły i pliki .epub, które zaimportowałeś opcją Importuj poniżej. Wszystkie te artykuły i książki otwierają się bez internetu i zostają na twoim urządzeniu, nawet gdy oryginalna strona zniknie."
   },
   "reader_format_title": { "message": "Format pliku" },
   "reader_transfer_note": {
@@ -848,34 +859,34 @@
     "message": "Kopia zawiera artykuły z zakreśleniami i pozycją czytania, zapisane frazy wszystkich par językowych oraz ustawienia. Zakreślenia z książek też w niej są."
   },
   "reader_backup_books_note": {
-    "message": "Książki są w kopii tylko po zaznaczeniu pola „Eksport z książkami”; w przeciwnym razie zachowaj pliki .epub - po ponownym imporcie tej samej książki i kopii po niej jej zakreślenia wrócą."
+    "message": "Książki są w kopii tylko po zaznaczeniu pola „Eksport z książkami”; w przeciwnym razie zachowaj pliki .epub – po ponownym imporcie tej samej książki i kopii po niej jej zakreślenia wrócą."
   },
   "reader_export_marks": { "message": "Eksportuj zakreślenia" },
   "reader_marks_export_notes": { "message": "Eksportuj jako notatki (.md)" },
-  "reader_marks_notes_hint": { "message": "Plik .md to tekstowa lista cytatów i notatek pogrupowana według dokumentów - do czytania i do własnych notatek. Import wczyta go tylko jako tekst do czytania, nie jako zakreślenia." },
+  "reader_marks_notes_hint": { "message": "Plik .md to tekstowa lista cytatów i notatek pogrupowana według dokumentów – do czytania i do własnych notatek. Import wczyta go tylko jako tekst do czytania, nie jako zakreślenia." },
   "reader_marks_import_books_one": {
-    "message": "Zakreślenia z $COUNT$ książki czekają: $TITLES$. Zaimportuj tę książkę z jej pliku .epub, a potem jeszcze raz ten plik.",
+    "message": "Zakreślenia z $COUNT$ książki nie zostały jeszcze zaimportowane: $TITLES$. Zaimportuj tę książkę z jej pliku .epub, a potem jeszcze raz ten plik.",
     "placeholders": {
       "count": { "content": "$1", "example": "1" },
       "titles": { "content": "$2", "example": "A Novel" }
     }
   },
   "reader_marks_import_books_few": {
-    "message": "Zakreślenia z $COUNT$ książek czekają: $TITLES$. Zaimportuj te książki z ich plików .epub, a potem jeszcze raz ten plik.",
+    "message": "Zakreślenia z $COUNT$ książek nie zostały jeszcze zaimportowane: $TITLES$. Zaimportuj te książki z ich plików .epub, a potem jeszcze raz ten plik.",
     "placeholders": {
       "count": { "content": "$1", "example": "2" },
       "titles": { "content": "$2", "example": "A Novel, Another Novel" }
     }
   },
   "reader_marks_import_books_many": {
-    "message": "Zakreślenia z $COUNT$ książek czekają: $TITLES$. Zaimportuj te książki z ich plików .epub, a potem jeszcze raz ten plik.",
+    "message": "Zakreślenia z $COUNT$ książek nie zostały jeszcze zaimportowane: $TITLES$. Zaimportuj te książki z ich plików .epub, a potem jeszcze raz ten plik.",
     "placeholders": {
       "count": { "content": "$1", "example": "2" },
       "titles": { "content": "$2", "example": "A Novel, Another Novel" }
     }
   },
   "reader_marks_import_books_other": {
-    "message": "Zakreślenia z $COUNT$ książki czekają: $TITLES$. Zaimportuj te książki z ich plików .epub, a potem jeszcze raz ten plik.",
+    "message": "Zakreślenia z $COUNT$ książki nie zostały jeszcze zaimportowane: $TITLES$. Zaimportuj te książki z ich plików .epub, a potem jeszcze raz ten plik.",
     "placeholders": {
       "count": { "content": "$1", "example": "2" },
       "titles": { "content": "$2", "example": "A Novel, Another Novel" }
@@ -910,28 +921,28 @@
     }
   },
   "reader_marks_import_missing_one": {
-    "message": "$COUNT$ dokumentu nie ma w czytelni: $TITLES$. Najpierw zaimportuj go - książkę z jej pliku .epub, artykuł z kopii zapasowej czytelni - a potem jeszcze raz ten plik.",
+    "message": "$COUNT$ dokumentu nie ma w czytelni: $TITLES$. Najpierw zaimportuj go – książkę z jej pliku .epub, artykuł z kopii zapasowej czytelni – a potem jeszcze raz ten plik.",
     "placeholders": {
       "count": { "content": "$1", "example": "1" },
       "titles": { "content": "$2", "example": "Lalka" }
     }
   },
   "reader_marks_import_missing_few": {
-    "message": "$COUNT$ dokumentów nie ma w czytelni: $TITLES$. Najpierw zaimportuj je - książki z ich plików .epub, artykuły z kopii zapasowej czytelni - a potem jeszcze raz ten plik.",
+    "message": "$COUNT$ dokumentów nie ma w czytelni: $TITLES$. Najpierw zaimportuj je – książki z ich plików .epub, artykuły z kopii zapasowej czytelni – a potem jeszcze raz ten plik.",
     "placeholders": {
       "count": { "content": "$1", "example": "2" },
       "titles": { "content": "$2", "example": "Lalka, Pewien artykuł" }
     }
   },
   "reader_marks_import_missing_many": {
-    "message": "$COUNT$ dokumentów nie ma w czytelni: $TITLES$. Najpierw zaimportuj je - książki z ich plików .epub, artykuły z kopii zapasowej czytelni - a potem jeszcze raz ten plik.",
+    "message": "$COUNT$ dokumentów nie ma w czytelni: $TITLES$. Najpierw zaimportuj je – książki z ich plików .epub, artykuły z kopii zapasowej czytelni – a potem jeszcze raz ten plik.",
     "placeholders": {
       "count": { "content": "$1", "example": "12" },
       "titles": { "content": "$2", "example": "Lalka, Pewien artykuł, ..." }
     }
   },
   "reader_marks_import_missing_other": {
-    "message": "$COUNT$ dokumentów nie ma w czytelni: $TITLES$. Najpierw zaimportuj je - książki z ich plików .epub, artykuły z kopii zapasowej czytelni - a potem jeszcze raz ten plik.",
+    "message": "$COUNT$ dokumentów nie ma w czytelni: $TITLES$. Najpierw zaimportuj je – książki z ich plików .epub, artykuły z kopii zapasowej czytelni – a potem jeszcze raz ten plik.",
     "placeholders": {
       "count": { "content": "$1", "example": "1,5" },
       "titles": { "content": "$2", "example": "Lalka" }
@@ -986,7 +997,7 @@
     "placeholders": { "count": { "content": "$1", "example": "1,5" } }
   },
   "reader_transfer_marks": {
-    "message": "tekst Markdown - notatka z innej aplikacji albo dokument wyeksportowany z menu czytnika - który Import dodaje do listy tak jak książkę. Strona Zakreślenia też zapisuje w nim swoje cytaty; po imporcie to tekst do czytania, nie zakreślenia."
+    "message": "tekst Markdown – notatka z innej aplikacji albo dokument wyeksportowany z menu czytnika – który Import dodaje do listy tak jak książkę. Strona Zakreślenia też zapisuje w nim swoje cytaty; po imporcie to tekst do czytania, nie zakreślenia."
   },
   "reader_backup_done": {
     "message": "Kopia zapisana do $FILE$ ($SIZE$): $PARTS$.",
@@ -1029,7 +1040,7 @@
     "message": "W tym pliku nie ma nic do zaimportowania."
   },
   "reader_marks_backup_elsewhere": {
-    "message": "Zakreślenia jadą w kopii wszystkiego, którą zapisuje i wczytuje czytelnia - także zakreślenia książek."
+    "message": "Zakreślenia jadą w kopii wszystkiego, którą zapisuje i wczytuje czytelnia – także zakreślenia książek."
   },
   "reader_backup_articles_one": {
     "message": "$COUNT$ artykuł",
@@ -1180,25 +1191,25 @@
     }
   },
   "reader_backup_part_highlights_one": {
-    "message": "$COUNT$ zakreślenie - pominięte będzie to, które już tu jest albo nie ma tu swojego dokumentu",
+    "message": "$COUNT$ zakreślenie – pominięte będzie to, które już tu jest albo nie ma tu swojego dokumentu",
     "placeholders": {
       "count": { "content": "$1", "example": "12" }
     }
   },
   "reader_backup_part_highlights_few": {
-    "message": "$COUNT$ zakreślenia - pominięte będą te, które już tu są albo nie mają tu swojego dokumentu",
+    "message": "$COUNT$ zakreślenia – pominięte będą te, które już tu są albo nie mają tu swojego dokumentu",
     "placeholders": {
       "count": { "content": "$1", "example": "12" }
     }
   },
   "reader_backup_part_highlights_many": {
-    "message": "$COUNT$ zakreśleń - pominięte będą te, które już tu są albo nie mają tu swojego dokumentu",
+    "message": "$COUNT$ zakreśleń – pominięte będą te, które już tu są albo nie mają tu swojego dokumentu",
     "placeholders": {
       "count": { "content": "$1", "example": "12" }
     }
   },
   "reader_backup_part_highlights_other": {
-    "message": "$COUNT$ zakreślenia - pominięte będą te, które już tu są albo nie mają tu swojego dokumentu",
+    "message": "$COUNT$ zakreślenia – pominięte będą te, które już tu są albo nie mają tu swojego dokumentu",
     "placeholders": {
       "count": { "content": "$1", "example": "12" }
     }
@@ -1227,7 +1238,7 @@
       "count": { "content": "$1", "example": "12" }
     }
   },
-  "reader_transfer_pick": { "message": "Żeby wyeksportować tylko niektóre artykuły lub książki, naciśnij „Zaznacz” nad listą i zaznacz je - do pliku kopii albo do osobnych plików EPUB lub Markdown." },
+  "reader_transfer_pick": { "message": "Żeby wyeksportować tylko niektóre artykuły lub książki, naciśnij „Zaznacz” nad listą i zaznacz je – do pliku kopii albo do osobnych plików EPUB lub Markdown." },
   "reader_pick_start": { "message": "Zaznacz" },
   "reader_pick_close": { "message": "Zamknij zaznaczanie" },
   "reader_pick_all": { "message": "Zaznacz wszystkie" },
@@ -1261,7 +1272,7 @@
   },
   "reader_export_markdown": { "message": "Eksportuj jako Markdown (.md)" },
   "reader_export_markdown_hint": {
-    "message": "Plik tekstowy z nagłówkami i linkami - do notatek i innych aplikacji."
+    "message": "Plik tekstowy z nagłówkami i linkami – do notatek i innych aplikacji."
   },
   "reader_export_epub_selected": {
     "message": "Eksportuj jako EPUB ($COUNT$)",
@@ -1444,7 +1455,7 @@
   "reader_marks_filter_label": { "message": "Filtruj zakreślenia" },
   "reader_marks_filter_placeholder": { "message": "Filtruj po cytacie lub tytule" },
   "reader_marks_empty": {
-    "message": "Nie ma jeszcze żadnych zakreśleń - zakreśla się podczas czytania. Otwórz coś z czytelni offline, weź zakreślacz i zaznacz fragment; będzie czekał tutaj."
+    "message": "Nie ma jeszcze żadnych zakreśleń – zakreśla się podczas czytania. Otwórz coś z czytelni offline, weź zakreślacz i zaznacz fragment; będzie czekał tutaj."
   },
   "reader_marks_empty_doc": { "message": "W tym dokumencie nie ma jeszcze zakreśleń." },
   "reader_marks_no_match": {
@@ -1461,7 +1472,7 @@
     "placeholders": { "title": { "content": "$1", "example": "Old Chinese" } }
   },
   "reader_transfer_link": { "message": "Import i eksport (kopia lub EPUB)" },
-  "reader_transfer_accepts": { "message": "Import rozpoznaje podany plik: kopię re/read (.zip - albo starsze pliki .json listy i zakreśleń), książkę (.epub) albo tekst Markdown (.md)." },
+  "reader_transfer_accepts": { "message": "Import rozpoznaje podany plik: kopię re/read (.zip – albo starsze pliki .json listy i zakreśleń), książkę (.epub) albo tekst Markdown (.md)." },
   "reader_book_label": { "message": "Książka" },
   "reader_book_part_of": {
     "message": "Część $PART$ z $PARTS$",
@@ -1599,13 +1610,13 @@
   },
   "close": { "message": "Zamknij" },
   "reader_book_importing": {
-    "message": "Dodawanie książki - część $PART$",
+    "message": "Dodawanie książki – część $PART$",
     "placeholders": {
       "part": { "content": "$1", "example": "3" }
     }
   },
   "reader_book_importing_pictures": {
-    "message": "Dodawanie książki - część $PART$, obrazek $PICTURE$ ($SIZE$)",
+    "message": "Dodawanie książki – część $PART$, obrazek $PICTURE$ ($SIZE$)",
     "placeholders": {
       "part": { "content": "$1", "example": "3" },
       "picture": { "content": "$2", "example": "12" },
@@ -1621,7 +1632,7 @@
   "reader_book_drm": { "message": "Ta książka ma zabezpieczenie DRM i nie da się jej zaimportować." },
   "reader_book_unreadable": { "message": "Nie udało się odczytać tego pliku jako książki EPUB." },
   "reader_text_importing": {
-    "message": "Dodawanie tekstu - część $PART$",
+    "message": "Dodawanie tekstu – część $PART$",
     "placeholders": {
       "part": { "content": "$1", "example": "1" }
     }
@@ -1799,7 +1810,7 @@
     "placeholders": { "detail": { "content": "$1" } }
   },
   "model_download_checksum": {
-    "message": "To, co dotarło, nie jest modelem, którego oczekuje ta wersja$DETAIL$, więc zostało wyrzucone. Spróbuj jeszcze raz - jeśli będzie się powtarzać, plik po drugiej stronie się zmienił.",
+    "message": "To, co dotarło, nie jest modelem, którego oczekuje ta wersja$DETAIL$, więc zostało wyrzucone. Spróbuj jeszcze raz – jeśli będzie się powtarzać, plik po drugiej stronie się zmienił.",
     "placeholders": { "detail": { "content": "$1" } }
   },
   "model_download_unpack": {
@@ -1862,7 +1873,7 @@
     "message": "Pliki są skompresowane w sposób, którego nie dało się rozpakować$DETAIL$. Nic nie zapisano.",
     "placeholders": { "detail": { "content": "$1" } }
   },
-  "dict_import_no_entries": { "message": "Indeks jest pusty - w tym słowniku nie ma żadnych słów. Nic nie zapisano." },
+  "dict_import_no_entries": { "message": "Indeks jest pusty – w tym słowniku nie ma żadnych słów. Nic nie zapisano." },
   "dict_import_no_entries_detail": {
     "message": "Żadnego z $COUNT$ słów w indeksie nie dało się odczytać, więc te pliki do siebie nie pasują. Nic nie zapisano.",
     "placeholders": { "count": { "content": "$1" } }
@@ -1879,7 +1890,7 @@
     "placeholders": { "detail": { "content": "$1" } }
   },
   "zip_bad": {
-    "message": "Archiwum jest uszkodzone$DETAIL$. Nic nie zapisano - spróbuj pobrać jeszcze raz.",
+    "message": "Archiwum jest uszkodzone$DETAIL$. Nic nie zapisano – spróbuj pobrać jeszcze raz.",
     "placeholders": { "detail": { "content": "$1" } }
   },
   "zip_unreadable": { "message": "Nie dało się odczytać archiwum. Nic nie zapisano." },
@@ -1933,10 +1944,20 @@
     "placeholders": { "count": { "content": "$1", "example": "1,5" } }
   },
 
-  "options_title": { "message": "re/read - ustawienia" },
+  "options_title": { "message": "re/read – ustawienia" },
   "back_to_reading": {"message": "Wróć do czytania"},
   "options_local_intro": {
-    "message": "Wszystko, co robi re/read, dzieje się na tym urządzeniu (offline): tłumaczenie, słownik, czytelnia, zapisane frazy. Nic z tego, co czytasz ani zaznaczasz, nigdzie nie jest wysyłane. Połączenie internetowe jest potrzebne, tylko gdy chcesz pobrać nowy model tłumaczeń lub słownik - i tylko spod dwóch adresów URL podanych jawnie w tych sekcjach."
+    "message": "Wszystko, co robi re/read, dzieje się na tym urządzeniu (offline): tłumaczenie, słownik, czytelnia, zapisane frazy. Nic z tego, co czytasz ani zaznaczasz, nigdzie nie jest wysyłane. Połączenie internetowe jest potrzebne tylko do pobrania nowego modelu tłumaczenia albo słownika – i tylko z dwóch adresów podanych w sekcjach"
+  },
+
+  "options_local_intro_and": {
+    "message": "i",
+    "description": "Between the two section links in options_local_intro."
+  },
+
+  "options_local_intro_rest": {
+    "message": ".",
+    "description": "Closes options_local_intro after the second section link; glued to it in the markup, so a language that opens with punctuation gets no space before it."
   },
 
   "options_intro_short": {
@@ -2084,11 +2105,11 @@
   },
 
   "options_copies_safe": {
-    "message": "Kopie są zapisane w pamięci samego rozszerzenia, osobno od bazy danych - jedno i drugie znajduje się w profilu przeglądarki, a nie w plikach na komputerze."
+    "message": "Kopie są zapisane w pamięci samego rozszerzenia, osobno od bazy danych – jedno i drugie znajduje się w profilu przeglądarki, a nie w plikach na komputerze."
   },
 
   "options_copies_safe_more": {
-    "message": "Kopia powstaje na nowo przy następnej zapisanej frazie, zakreśleniu albo zachowanej stronie. Chroni dane, gdy przeglądarka czyści swoją pamięć albo gdy zepsuje się baza danych, ale nie chroni przed usunięciem rozszerzenia: odinstalowanie re/read kasuje wszystkie jego dane razem z kopiami. Baza danych to IndexedDB, a kopie są w pamięci rozszerzenia (storage.local). Zanim odinstalujesz re/read albo przeniesiesz dane na inne urządzenie, zapisz kopię do pliku: przycisk Eksportuj w czytelni offline tworzy jeden plik reread-backup.zip z czytelnią, zapisanymi frazami, zakreśleniami i ustawieniami. Modeli ani słowników w tym pliku nie ma - można je pobrać ponownie.",
+    "message": "Kopia powstaje na nowo przy następnej zapisanej frazie, zakreśleniu albo zachowanej stronie. Chroni dane, gdy przeglądarka czyści swoją pamięć albo gdy zepsuje się baza danych, ale nie chroni przed usunięciem rozszerzenia: odinstalowanie re/read kasuje wszystkie jego dane razem z kopiami. Baza danych to IndexedDB, a kopie są w pamięci rozszerzenia (storage.local). Zanim odinstalujesz re/read albo przeniesiesz dane na inne urządzenie, zapisz kopię do pliku: przycisk Eksportuj w czytelni offline tworzy jeden plik reread-backup.zip z czytelnią, zapisanymi frazami, zakreśleniami i ustawieniami. Modeli ani słowników w tym pliku nie ma – można je pobrać ponownie.",
     "description": "Behind the Details of the copies block: what a copy protects against, what it does not, where the data and the copies are, and how to save a copy as a file before uninstalling."
   },
 
@@ -2240,26 +2261,26 @@
     "message": "Kopię do pliku zapiszesz na stronach z danymi:"
   },
   "options_first_steps_intro": {
-    "message": "Nic się jeszcze nie tłumaczy - modelu, który by to robił, nie ma jeszcze na tym urządzeniu. Przygotowanie zajmuje minutę:"
+    "message": "Nic się jeszcze nie tłumaczy – modelu, który by to robił, nie ma jeszcze na tym urządzeniu. Przygotowanie zajmuje minutę:"
   },
   "options_first_steps_pin": {
     "message": "Na koniec przypnij re/read do paska narzędzi: ikona puzzla po prawej stronie paska, potem koło zębate przy re/read i „Przypnij do paska narzędzi”. Przycisk otwiera widok czytania, czytelnię, zapisane frazy i wyłącznik witryny, na której jesteś."
   },
   "options_first_steps_pin_android": {
-    "message": "Przycisk re/read znajdziesz w menu przeglądarki (⋮), w sekcji rozszerzeń - otwiera widok czytania, czytelnię, zapisane frazy i wyłącznik witryny, na której jesteś."
+    "message": "Przycisk re/read znajdziesz w menu przeglądarki (⋮), w sekcji rozszerzeń – otwiera widok czytania, czytelnię, zapisane frazy i wyłącznik witryny, na której jesteś."
   },
   "options_sections_aria": { "message": "Sekcje tej strony" },
   "options_engine": { "message": "Silnik" },
-  "options_engine_value": { "message": "Bergamot, wewnątrz paczki - tłumaczy offline" },
+  "options_engine_value": { "message": "Bergamot, wbudowany w rozszerzenie; tłumaczenie offline." },
   "options_storage": { "message": "Dane na tym urządzeniu" },
   "options_storage_how": { "message": "Miejsce zajmowane przez dane re/read." },
 
   "options_storage_how_more": {
-    "message": "Suma to szacunek przeglądarki dla wszystkich danych re/read. Obejmuje także indeksy baz danych i pamięć podręczną, dlatego jest większa niż pozycje pod nią razem. W pozycjach liczony jest sam tekst i obrazy, bez indeksów: jedno hasło słownika zajmuje w bazie kilka razy więcej miejsca niż sam jego tekst, więc „Inne” to głównie baza słowników. Wszystkie dane są w bazie danych przeglądarki (IndexedDB), w jej profilu - a nie w osobnych plikach na komputerze. Usunięcie artykułu albo książki bezpowrotnie kasuje jego tekst, obrazy, zakreślenia, notatki i postęp czytania.",
+    "message": "Suma to szacunek przeglądarki dla wszystkich danych re/read. Obejmuje także indeksy baz danych i pamięć podręczną, dlatego jest większa niż pozycje pod nią razem. W pozycjach liczony jest sam tekst i obrazy, bez indeksów: jedno hasło słownika zajmuje w bazie kilka razy więcej miejsca niż sam jego tekst, więc „Inne” to głównie baza słowników. Wszystkie dane są w bazie danych przeglądarki (IndexedDB), w jej profilu – a nie w osobnych plikach na komputerze. Usunięcie artykułu albo książki bezpowrotnie kasuje jego tekst, obrazy, zakreślenia, notatki i postęp czytania.",
     "description": "The rest of the options_storage_how description, behind the row's More button."
   },
   "options_storage_persistent": { "message": "Magazyn trwały: przyznany. Przeglądarka obiecała nie kasować tych danych, żeby zrobić miejsce." },
-  "options_storage_at_risk": { "message": "Magazyn trwały: nieprzyznany. Safari kasuje dane witryny po około miesiącu używania bez dotknięcia jej stron, a strony tego rozszerzenia liczą się jak jedna witryna. Frazy mają kopię, która to przetrwa (linijka niżej); modele, słowniki i czytelnia nie - otwieraj widok czytania albo te ustawienia od czasu do czasu." },
+  "options_storage_at_risk": { "message": "Magazyn trwały: nieprzyznany. Safari kasuje dane witryny po około miesiącu używania bez dotknięcia jej stron, a strony tego rozszerzenia liczą się jak jedna witryna. Frazy mają kopię, która to przetrwa (linijka niżej); modele, słowniki i czytelnia nie – otwieraj widok czytania albo te ustawienia od czasu do czasu." },
   "options_library_copy": { "message": "Kopia czytelni" },
   "options_library_copy_hint": {
     "message": "Druga kopia czytelni, odporna na czyszczenie danych przeglądarki; zajmuje dwa razy więcej miejsca."
@@ -2286,10 +2307,10 @@
     "placeholders": { "count": { "content": "$1", "example": "5" } }
   },
   "reader_mark_text_changed": { "message": "Tekst strony zmienił się od czasu zakreślenia, więc zakreślenia nie da się tu pokazać." },
-  "reader_marks_missing_doc": { "message": "Ten dokument nie jest już zapisany - cytat wrócił z kopii. Otwórz stronę ponownie, a zakreślenie będzie na miejscu." },
+  "reader_marks_missing_doc": { "message": "Ten dokument nie jest już zapisany – cytat wrócił z kopii. Otwórz stronę ponownie, a zakreślenie będzie na miejscu." },
   "options_pair_hint": { "message": "Pokazuje pary językowe pobrane na to urządzenie. Aby dodać nowe języki, pobierz je w sekcji" },
   "options_pair_hint_rest": { "message": "poniżej." },
-  "options_pair_none": { "message": "Nie ma jeszcze modelu ani słownika - dodaj któryś poniżej" },
+  "options_pair_none": { "message": "Nie ma jeszcze modelu ani słownika – dodaj któryś poniżej" },
   "options_pair_dictionary_only": {
     "message": "$PAIR$ (słownik)",
     "placeholders": { "pair": { "content": "$1", "example": "angielski → angielski" } }
@@ -2298,17 +2319,22 @@
     "message": "Bez modelu tłumaczenia para określa, w jakim języku czytasz i pod jaką parą zapisywane są frazy. Pary pochodzą z zainstalowanych modeli i słowników."
   },
   "options_reading_pair_quiet": {
-    "message": "Czytasz w języku: $FROM$ - tłumaczenie maszynowe jest wyłączone, a zapisane frazy trafiają do tej pary.",
+    "message": "Czytasz w języku: $FROM$ – tłumaczenie maszynowe jest wyłączone, a zapisane frazy są zapisywane w tej parze.",
     "placeholders": { "from": { "content": "$1", "example": "angielski" } }
   },
-  "options_reader_only": { "message": "Podkreślaj tylko w widoku czytania" },
+  "options_reader_only": { "message": "Pokazuj podkreślenia i dymek tylko w widoku czytania" },
   "options_reader_only_hint": {
-    "message": "Podkreślenia fraz i dymek tłumaczeń tylko w widoku czytania; na zwykłej stronie zaznaczenie pokaże zamiast tego dymek z przyciskami: otwarcia strony w widoku czytania i przejścia do czytelni."
+    "message": "Na zwykłej stronie po zaznaczeniu tekstu pojawi się dymek z przyciskami do otwarcia strony w widoku czytania i do czytelni."
   },
 
   "options_reader_only_more": {
     "message": "Przy włączonej opcji żadna strona nie może stwierdzić, które z jej słów masz zapisane. Na Androidzie i iOS opcja jest domyślnie włączona.",
     "description": "The rest of the options_reader_only_hint description, behind the row's More button."
+  },
+
+  "popup_reader_only": {
+    "message": "Podkreślaj tylko w widoku czytania",
+    "description": "The same switch as options_reader_only, named short: the popup row carries no description under it, and the settings page's full label wraps to three lines at 320px."
   },
   "options_page_number": { "message": "Numer strony" },
   "options_page_number_hint": {
@@ -2319,12 +2345,12 @@
     "message": "Bez niego tekst każdej strony sięga niżej; czytniki ekranu nadal odczytują licznik, a na szerokim ekranie widać go w pasku obok re/read.",
     "description": "The rest of the options_page_number_hint description, behind the row's More button."
   },
-  "options_paged_heading": { "message": "Układ Strony" },
+  "options_paged_heading": { "message": "Układ „Strony”" },
   "options_paged_intro": {
-    "message": "Te ustawienia działają w układzie Strony w widoku czytania, w którym tekst przesuwa się tylko o całe strony, a każda zaczyna się i kończy całym wierszem."
+    "message": "Działają w widoku czytania w układzie „Strony”: tekst przesuwa się o całe strony, każda zaczyna się i kończy pełnym wierszem."
   },
   "options_touch_turn": { "message": "Przewracanie stron dotykiem" },
-  "options_touch_turn_zones": { "message": "Tapnięcie w lewą lub prawą jedną trzecią" },
+  "options_touch_turn_zones": { "message": "Dotknięcie lewej lub prawej części ekranu" },
   "options_touch_turn_swipe": { "message": "Przesunięcie palcem" },
   "options_touch_turn_off": { "message": "Wyłączone" },
   "options_touch_turn_hint": {
@@ -2332,14 +2358,14 @@
   },
 
   "options_touch_turn_more": {
-    "message": "Na szerokim ekranie domyślne jest tapnięcie, na wąskim przesunięcie - tam ręka trzymająca urządzenie leży na ekranie, a gest, który musi się przemieścić, to jedyny gest, którego ta ręka nie zrobi przypadkiem. Klawisze zmiany strony, strzałki i kółko myszy przewracają strony niezależnie od tego ustawienia, a pióro nie przewraca nigdy.",
+    "message": "Na wąskim ekranie domyślne jest przesunięcie palcem: dłoń trzymająca telefon często dotyka ekranu, a samo dotknięcie bez przesunięcia nie zmienia strony. Na szerokim ekranie domyślne jest dotknięcie. Klawisze zmiany strony, strzałki i kółko myszy przewracają strony niezależnie od tego ustawienia, a pióro nie przewraca nigdy.",
     "description": "The rest of the options_touch_turn_hint description, behind the row's More button."
   },
   "options_touch_turn_note_zones": {
-    "message": "Tapnięcie w lewą lub prawą jedną trzecią strony przewraca ją: prawa dalej, lewa wstecz. Liczy się tylko tapnięcie krótkie, nieruchome i z dala od krawędzi ekranu, żeby kciuk trzymający urządzenie niczego nie przewracał."
+    "message": "Dotknięcie prawej jednej trzeciej ekranu – następna strona, lewej – poprzednia. Liczy się tylko krótkie, nieruchome dotknięcie z dala od krawędzi, więc kciuk trzymający urządzenie nie zmienia stron."
   },
   "options_touch_turn_note_swipe": {
-    "message": "Przesunięcie palcem w lewo pokazuje następną stronę, w prawo poprzednią. Na telefonie nie zaczynaj od samej krawędzi ekranu - tam zaczyna się systemowy gest cofania; na czytniku e-ink krawędź zwykle działa."
+    "message": "Przesunięcie palcem w lewo pokazuje następną stronę, w prawo poprzednią. Na telefonie nie zaczynaj od samej krawędzi ekranu – tam zaczyna się systemowy gest cofania; na czytniku e-ink krawędź zwykle działa."
   },
   "options_touch_turn_note_off": {
     "message": "Dotyk nie przewraca stron. Zostają klawisze zmiany strony, strzałki i kółko myszy."
@@ -2348,7 +2374,7 @@
   "options_turn_effect_auto": { "message": "Automatyczny" },
   "options_turn_effect_off": { "message": "Wyłączony" },
   "options_turn_effect_hint": {
-    "message": "Znak, że strona się przewróciła."
+    "message": "Wizualne potwierdzenie przejścia na kolejną stronę."
   },
 
   "options_turn_effect_more": {
@@ -2356,7 +2382,7 @@
     "description": "The rest of the options_turn_effect_hint description, behind the row's More button."
   },
   "options_turn_effect_note_auto": {
-    "message": "W motywie E-ink obszar tekstu na moment ciemnieje, tak jak przy przewracaniu strony w czytniku e-booków; na innych ekranach nowa strona wjeżdża płynnie."
+    "message": "W motywie E-ink obszar tekstu na moment ciemnieje, tak jak przy przewracaniu strony w czytniku e-booków; na innych ekranach nowa strona pojawia się z płynnym przesunięciem."
   },
   "options_turn_effect_note_off": {
     "message": "Strona po prostu się zmienia, tak jak przed pojawieniem się tego ustawienia."
@@ -2367,12 +2393,12 @@
   },
 
   "options_keep_articles_more": {
-    "message": "Twoje zapisane strony, zakreślenia i postęp czytania są bezpieczne, nawet jeśli oryginalna strona internetowa zmieni się lub zniknie.",
+    "message": "Zapisane strony, zakreślenia i postęp czytania są bezpieczne, nawet jeśli oryginalna strona internetowa zmieni się lub zniknie.",
     "description": "The rest of the options_keep_articles_hint description, behind the row's More button."
   },
-  "options_font_custom": { "message": "Własna czcionka" },
+  "options_font_custom": { "message": "Własny krój" },
   "options_font_custom_hint": {
-    "message": "Krój zainstalowany na tym urządzeniu, np. Noto Serif; pojawi się jako Własny w wierszu Krój panelu Aa."
+    "message": "Krój zainstalowany na tym urządzeniu, np. Noto Serif. W panelu Aa pojawi się w wierszu „Krój” jako „Własny”."
   },
 
   "options_font_custom_more": {
@@ -2394,7 +2420,7 @@
   },
 
   "options_quiet_bubble_more": {
-    "message": "Przyciski akcji to kopiowanie, zapis, czytanie na głos i pozostałe - wszystkie akcje dymka, jedno kliknięcie dalej.",
+    "message": "Przyciski akcji to kopiowanie, zapis, czytanie na głos i pozostałe – wszystkie akcje dymka, jedno kliknięcie dalej.",
     "description": "The rest of the options_quiet_bubble_hint description, behind the row's More button."
   },
   "options_bubble_more": { "message": "Od razu pokazuj zdanie i hasła ze słowników" },
@@ -2403,7 +2429,7 @@
   },
 
   "options_bubble_more_more": {
-    "message": "Warto zostawić włączone, gdy masz słownik: tłumaczenie pojedynczego słowa bywa błędne, a słownik pokazuje, co ono naprawdę znaczy. Dymek nad już zapisaną frazą wyświetla tylko zapisane tłumaczenie - zdanie i hasła ze słowników zobaczysz po kliknięciu „Więcej”.",
+    "message": "Warto zostawić włączone, gdy masz słownik: tłumaczenie pojedynczego słowa bywa błędne, a słownik pokazuje, co ono naprawdę znaczy. Dymek nad już zapisaną frazą wyświetla tylko zapisane tłumaczenie – zdanie i hasła ze słowników zobaczysz po kliknięciu „Więcej”.",
     "description": "The rest of the options_bubble_more_hint description, behind the row's More button."
   },
   "options_underline_forms": { "message": "Podkreślaj też inne formy zapisanych słów" },
@@ -2412,7 +2438,7 @@
   },
 
   "options_underline_forms_more": {
-    "message": "Dymek nad nimi pokazuje to, co masz zapisane dla „read”. To, które formy się liczą, wynika ze słownika dla czytanego języka - musi być zainstalowany. Na razie tylko wtedy, gdy czytasz po angielsku. Po wyłączeniu podkreślana jest tylko dokładnie ta forma, którą masz zapisaną.",
+    "message": "Dymek nad nimi pokazuje to, co masz zapisane dla „read”. To, które formy się liczą, wynika ze słownika dla czytanego języka – musi być zainstalowany. Na razie tylko wtedy, gdy czytasz po angielsku. Po wyłączeniu podkreślana jest tylko dokładnie ta forma, którą masz zapisaną.",
     "description": "The rest of the options_underline_forms_hint description, behind the row's More button."
   },
   "options_save_sentence": { "message": "Zapisuj zdanie razem z frazą" },
@@ -2435,11 +2461,11 @@
   },
   "options_bubble_off": { "message": "Bez dymka po zaznaczeniu tekstu" },
   "options_bubble_off_hint": {
-    "message": "Gdy to jest włączone, zaznaczenie tekstu na zwykłej stronie nie robi nic - stronę otwierasz w widoku czytania przyciskiem re/read albo skrótem Alt+Shift+R."
+    "message": "Gdy to jest włączone, zaznaczenie tekstu na zwykłej stronie nie robi nic – stronę otwierasz w widoku czytania przyciskiem re/read albo skrótem Alt+Shift+R."
   },
 
   "options_bubble_off_more": {
-    "message": "W widoku czytania zaznaczenie jest tylko chwilowym podświetleniem: dymek się nie otwiera, tapnięcie albo Escape je zdejmuje, a Ctrl+C lub Cmd+C je kopiuje (na ekranie dotykowym nie da się skopiować).",
+    "message": "W widoku czytania zaznaczenie jest tylko chwilowym podświetleniem: dymek się nie otwiera, dotknięcie albo Escape je zdejmuje, a Ctrl+C lub Cmd+C je kopiuje (na ekranie dotykowym nie da się skopiować).",
     "description": "The rest of the options_bubble_off_hint description, behind the row's More button."
   },
   "options_bubble_scale": { "message": "Rozmiar tekstu dymka" },
@@ -2596,10 +2622,15 @@
   "options_tts_rate": { "message": "Tempo mówienia" },
   "options_models_heading": { "message": "Modele tłumaczeniowe" },
   "options_models_intro": {
-    "message": "Pobierz tutaj model tłumaczenia dla każdej pary językowej, którą chcesz tłumaczyć. Są to oficjalne pliki Mozilli, które działają całkowicie offline na Twoim urządzeniu."
+    "message": "Model tłumaczenia pobierasz osobno dla każdej pary języków. To oficjalne pliki Mozilli; tłumaczenie odbywa się w całości na tym urządzeniu."
   },
   "options_models_single_word": {
-    "message": "Model dobrze tłumaczy zdania, ale pojedyncze słowo bez kontekstu jest często tłumaczone błędnie - wynik bywa ucięty albo jest wyrazem, którego nie ma w języku. Do pojedynczych słów lepszy jest słownik:"
+    "message": "Model dobrze tłumaczy zdania, ale pojedyncze słowo bez kontekstu jest często tłumaczone błędnie – wynik bywa ucięty albo jest wyrazem, którego nie ma w języku. Do pojedynczych słów lepszy jest słownik – sekcja"
+  },
+
+  "options_models_single_word_rest": {
+    "message": "poniżej.",
+    "description": "Closes options_models_single_word after the link to the Dictionaries section."
   },
   "options_update_list": { "message": "Zaktualizuj listę" },
   "options_list_dated": { "message": "Lista z dnia" },
@@ -2613,7 +2644,7 @@
   "options_show_fewer": { "message": "Pokaż mniej" },
   "options_model_note_from": { "message": "Modele pobierane są z" },
   "options_model_note_rest": {
-    "message": "- to tam publikuje je Mozilla. Rozszerzenie łączy się z tym publicznym serwerem tylko wtedy, gdy naciśniesz Zaktualizuj listę albo Pobierz. Żadne dane osobowe nie są wysyłane."
+    "message": "– to tam publikuje je Mozilla. Rozszerzenie łączy się z tym publicznym serwerem tylko wtedy, gdy naciśniesz Zaktualizuj listę albo Pobierz. Żadne dane osobowe nie są wysyłane."
   },
   "options_add_model_heading": { "message": "Dodaj model z plików" },
   "options_add_model_summary": {
@@ -2631,24 +2662,24 @@
     "message": "Dodaj słowniki, aby widzieć szczegółowe definicje słów w dymku tłumaczenia. Możesz zmienić kolejność ich wyświetlania za pomocą strzałek."
   },
   "options_dictionaries_sources": {
-    "message": "Słowniki na liście poniżej pochodzą z WikDict. Możesz też dodać własne - z plików albo z linku, także kilka dla jednego języka - w sekcjach pod listą. Gdzie ich szukać, każdy z podaną licencją:"
+    "message": "Słowniki z listy pochodzą z WikDict. Własne dodasz z pliku albo z linku, także kilka dla jednego języka. Źródła wraz z licencjami:"
   },
   "options_dictionary_order_hint": {
     "message": "Dymek pokazuje hasła w kolejności z listy poniżej. Używane są tylko słowniki języka, który czytasz."
   },
   "options_dictionary_note_from": { "message": "Słowniki pobierane są z" },
   "options_dictionary_note_rest": {
-    "message": "- to tam WikDict publikuje słowniki, które buduje z Wikisłownika (CC BY-SA). Rozszerzenie łączy się z tym publicznym serwerem tylko wtedy, gdy naciśniesz Zaktualizuj listę albo Pobierz. Żadne dane osobowe nie są wysyłane."
+    "message": "– to tam WikDict publikuje słowniki, które buduje z Wikisłownika (CC BY-SA). Rozszerzenie łączy się z tym publicznym serwerem tylko wtedy, gdy naciśniesz Zaktualizuj listę albo Pobierz. Żadne dane osobowe nie są wysyłane."
   },
   "options_add_dictionary_heading": { "message": "Dodaj słownik z plików" },
   "options_add_dictionary_summary": {
     "message": "Importuj własne słowniki w formacie StarDict. Rozpakuj archiwum, wybierz wymagane pliki (.ifo, .idx, .dict), określ języki i naciśnij Dodaj słownik."
   },
-  "options_file_ifo": { "message": "- jak słownik sam siebie nazywa" },
-  "options_file_idx": { "message": "- indeks słów" },
+  "options_file_ifo": { "message": "– jak słownik sam siebie nazywa" },
+  "options_file_idx": { "message": "– indeks słów" },
   "options_file_dict_or": { "message": "lub" },
-  "options_file_dict": { "message": "- hasła" },
-  "options_file_syn": { "message": "- inne pisownie, jeśli słownik je ma" },
+  "options_file_dict": { "message": "– hasła" },
+  "options_file_syn": { "message": "– inne pisownie, jeśli słownik je ma" },
   "options_words_in": { "message": "Język haseł:" },
   "options_explained_in": { "message": "język objaśnień:" },
   "options_add_dictionary_button": { "message": "Dodaj słownik" },
@@ -2660,11 +2691,11 @@
   },
   "options_add_link_heading": { "message": "Dodaj słownik z linku" },
   "options_add_link_summary": {
-    "message": "Wklej adres słownika StarDict spakowanego do pliku .zip, określ języki i naciśnij Pobierz. Rozszerzenie łączy się z tym adresem raz, po naciśnięciu przycisku, i z żadnym innym; nic Twojego nie jest wysyłane. Archiwum jest rozpakowywane i sprawdzane na tym urządzeniu, dokładnie tak jak pliki wybrane ręcznie."
+    "message": "Wklej adres słownika StarDict spakowanego do pliku .zip, określ języki i naciśnij Pobierz. Rozszerzenie łączy się z tym adresem raz, po naciśnięciu przycisku, i z żadnym innym; nic twojego nie jest wysyłane. Archiwum jest rozpakowywane i sprawdzane na tym urządzeniu, dokładnie tak jak pliki wybrane ręcznie."
   },
   "options_link_label": { "message": "Adres" },
   "options_link_sources": {
-    "message": "Gdzie szukać słowników, także jednojęzycznych - na przykład angielsko-angielskiego - każdy z podaną licencją:"
+    "message": "Gdzie szukać słowników, także jednojęzycznych – na przykład angielsko-angielskiego – każdy z podaną licencją:"
   },
   "options_link_note": {
     "message": "Przyjmowane są tylko adresy https. Archiwum inne niż plik .zip (.tar.xz, .tar.zst) trzeba rozpakować i dodać z plików."
@@ -2679,7 +2710,12 @@
   },
   "options_disabled_heading": { "message": "Wyłączone witryny" },
   "options_disabled_intro": {
-    "message": "Lista stron internetowych, na których rozszerzenie jest wyłączone: bez tłumaczenia, dymka i podkreśleń. Stronę dodasz przełącznikiem pod ikoną rozszerzenia na pasku przeglądarki, będąc na niej, albo wpisując jej adres poniżej. Przełącznika nie ma, gdy włączone są jednocześnie"
+    "message": "Na tych witrynach re/read nie tłumaczy i nie pokazuje dymka ani podkreśleń. Witrynę dodasz w okienku re/read na pasku narzędzi albo wpisując adres poniżej."
+  },
+
+  "options_disabled_intro_switch": {
+    "message": "Przełącznika w tym okienku nie ma, gdy włączone są jednocześnie",
+    "description": "Behind the Details fold under options_disabled_intro: the case where the toolbar window has no switch to offer."
   },
 
   "options_disabled_intro_and": {
@@ -2708,18 +2744,18 @@
   },
   "options_custom_css_heading": { "message": "Własny CSS" },
   "options_custom_css_intro": {
-    "message": "Dla osób, które chcą zmienić wygląd dymka, strony czytnika i okienka przycisku na pasku własnymi regułami CSS. Ta strona pozostaje poza ich zasięgiem, więc złą regułę zawsze da się tu cofnąć: wyczyść pole i zapisz."
+    "message": "Własne reguły CSS zmieniają wygląd dymka, widoku czytania i okienka re/read. Ta strona nie podlega tym regułom, więc błędną regułę cofniesz tutaj: wyczyść pole i zapisz."
   },
   "options_custom_css_more": { "message": "Więcej o regułach CSS i nazwach" },
   "options_custom_css_reach": {
-    "message": "Reguły działają w dymku tłumaczenia, na stronie czytnika - także w pasku i na listach - oraz w okienku przycisku na pasku narzędzi, nigdy na czytanych stronach. Zła reguła może zepsuć wygląd albo obsługę tych miejsc, dopóki pole nie zostanie wyczyszczone."
+    "message": "Reguły działają w dymku tłumaczenia, w widoku czytania – także w pasku i na listach – oraz w okienku re/read na pasku narzędzi, nigdy na czytanych stronach. Błędna reguła może zepsuć wygląd albo działanie tych miejsc, dopóki pole nie zostanie wyczyszczone."
   },
   "options_custom_css_rules": {
     "message": "Reguły, które pobierałyby cokolwiek z sieci (url(), @import, @font-face), są odrzucane. Nazwy elementów staramy się zachowywać między wersjami; gdy któraś musi się zmienić, jest to opisane w nocie wydania. Nazwy pochodzą z tych plików:"
   },
   "options_custom_css_source_bubble": { "message": "tooltip.js (dymek)" },
   "options_custom_css_source_reader": { "message": "reader.css (czytnik)" },
-  "options_custom_css_source_popup": { "message": "popup.css (okienko przycisku)" },
+  "options_custom_css_source_popup": { "message": "popup.css (okienko re/read)" },
   "options_custom_css_source_shared": { "message": "page.css (wspólne dla stron)" },
   "options_custom_css_save": { "message": "Zapisz" },
   "options_custom_css_saved": { "message": "Zapisano" },
@@ -2727,11 +2763,16 @@
     "message": "Nie zapisano: reguły zostały odrzucone. Reguły pobierające cokolwiek z sieci (url(), @import, @font-face) nie są dozwolone."
   },
   "options_custom_css_example": {
-    "message": "Przykład: .bubble { outline: 3px solid darkorange; } rysuje pomarańczową obwódkę wokół każdego dymka."
+    "message": "Przykład:"
+  },
+
+  "options_custom_css_example_rest": {
+    "message": "rysuje pomarańczową obwódkę wokół każdego dymka.",
+    "description": "Closes options_custom_css_example after the rule itself, which stands in code and needs no translation."
   },
   "options_custom_css_cleared": { "message": "Zapisano: bez reguł, czyli wygląd domyślny." },
   "options_support_intro": {
-    "message": "re/read tworzy fundacja non-profit - bez inwestorów, bez reklam, bez śledzenia. Jeśli rozszerzenie jest ci przydatne i chcesz wesprzeć jego dalszy rozwój, każda darowizna pomaga nam budować oprogramowanie wolne od komercyjnej presji."
+    "message": "re/read tworzy fundacja non-profit – bez inwestorów, bez reklam, bez śledzenia. Jeśli rozszerzenie jest ci przydatne i chcesz wesprzeć jego dalszy rozwój, każda darowizna pomaga nam budować oprogramowanie wolne od komercyjnej presji."
   },
   "options_support_donate": { "message": "Przekaż darowiznę przez Wise" },
   "options_support_more": { "message": "Więcej sposobów wsparcia" },
@@ -2784,7 +2825,7 @@
   },
   "options_version_unknown": { "message": "wersja nieznana" },
   "options_downloading_model": {
-    "message": "Pobieranie modelu $PAIR$ - $SIZE$.",
+    "message": "Pobieranie modelu $PAIR$ – $SIZE$.",
     "placeholders": {
       "pair": { "content": "$1" },
       "size": { "content": "$2" }
@@ -2809,16 +2850,16 @@
     }
   },
   "options_reading_pair_missing": {
-    "message": "Czytasz: $FROM$, tłumaczysz na: $TO$ - a modelu tego kierunku jeszcze tu nie ma.",
+    "message": "Czytasz: $FROM$, tłumaczysz na: $TO$ – a modelu tego kierunku jeszcze tu nie ma.",
     "placeholders": {
       "from": { "content": "$1" },
       "to": { "content": "$2" }
     }
   },
-  "options_no_models": { "message": "Nie ma tu modeli ani niczego do pobrania - to wydanie nie wymienia żadnego." },
+  "options_no_models": { "message": "Nie ma tu modeli ani niczego do pobrania – to wydanie nie wymienia żadnego." },
   "options_filter_no_match_models": { "message": "Żadna para nie pasuje. Filtr przyjmuje nazwę języka lub kod." },
   "options_filter_no_match_dictionaries": { "message": "Żaden słownik nie pasuje. Filtr przyjmuje nazwę języka lub kod." },
-  "options_no_disabled": { "message": "Żadna witryna nie jest wyłączona. Wyłącza się je w dymku paska narzędzi." },
+  "options_no_disabled": { "message": "Żadna witryna nie jest wyłączona." },
   "options_turn_back_on": { "message": "Włącz z powrotem" },
   "options_reading_model_files": {
     "message": "Czytanie plików dla pary $PAIR$...",
@@ -2844,7 +2885,7 @@
     "placeholders": { "name": { "content": "$1" } }
   },
   "options_deleting_dictionary": {
-    "message": "Usuwanie $NAME$ - duży słownik chwilę to zajmuje...",
+    "message": "Usuwanie $NAME$ – duży słownik chwilę to zajmuje...",
     "placeholders": { "name": { "content": "$1" } }
   },
   "options_deleting_row": { "message": "Usuwanie..." },
@@ -2881,7 +2922,7 @@
     "placeholders": { "name": { "content": "$1", "example": "English-Polish FreeDict+WikDict dictionary (en-pl)" } }
   },
   "options_dictionary_name_taken": {
-    "message": "Inny słownik jest już wyświetlany jako $NAME$ - wybierz inną nazwę.",
+    "message": "Inny słownik jest już wyświetlany jako $NAME$ – wybierz inną nazwę.",
     "placeholders": { "name": { "content": "$1", "example": "FreeDict en-pl" } }
   },
   "options_rename_failed": {
@@ -2892,13 +2933,13 @@
     "message": "Nie udało się zmienić kolejności: $DETAIL$",
     "placeholders": { "detail": { "content": "$1" } }
   },
-  "options_no_catalog": { "message": "Nie ma słowników do pobrania - to wydanie nie wymienia żadnego." },
+  "options_no_catalog": { "message": "Nie ma słowników do pobrania – to wydanie nie wymienia żadnego." },
   "options_downloading_dictionary": {
     "message": "Pobieranie słownika $PAIR$...",
     "placeholders": { "pair": { "content": "$1" } }
   },
   "options_storing_dictionary": {
-    "message": "Zapisywanie $NAME$ - $DONE$ z $TOTAL$...",
+    "message": "Zapisywanie $NAME$ – $DONE$ z $TOTAL$...",
     "placeholders": {
       "name": { "content": "$1" },
       "done": { "content": "$2" },
@@ -2914,19 +2955,19 @@
     }
   },
   "options_skipped_entries_one": {
-    "message": "Nie dało się odczytać $COUNT$ hasła - pominięto je.",
+    "message": "Nie dało się odczytać $COUNT$ hasła – pominięto je.",
     "placeholders": { "count": { "content": "$1" } }
   },
   "options_skipped_entries_few": {
-    "message": "Nie dało się odczytać $COUNT$ haseł - pominięto je.",
+    "message": "Nie dało się odczytać $COUNT$ haseł – pominięto je.",
     "placeholders": { "count": { "content": "$1" } }
   },
   "options_skipped_entries_many": {
-    "message": "Nie dało się odczytać $COUNT$ haseł - pominięto je.",
+    "message": "Nie dało się odczytać $COUNT$ haseł – pominięto je.",
     "placeholders": { "count": { "content": "$1" } }
   },
   "options_skipped_entries_other": {
-    "message": "Nie dało się odczytać $COUNT$ hasła - pominięto je.",
+    "message": "Nie dało się odczytać $COUNT$ hasła – pominięto je.",
     "placeholders": { "count": { "content": "$1" } }
   },
   "options_add_dictionary_failed": {
@@ -2942,14 +2983,14 @@
     "placeholders": { "names": { "content": "$1" } }
   },
   "options_import_interrupted": {
-    "message": "Przerwane przy $DONE$ z $TOTAL$ - Kontynuuj podejmie od tego miejsca.",
+    "message": "Przerwane przy $DONE$ z $TOTAL$ – Kontynuuj podejmie od tego miejsca.",
     "placeholders": {
       "done": { "content": "$1" },
       "total": { "content": "$2" }
     }
   },
-  "options_import_interrupted_early": { "message": "Przerwane przed zapisaniem pierwszego hasła - Kontynuuj zacznie od nowa." },
-  "options_import_elsewhere": { "message": "Inna karta właśnie dodaje słownik - poczekaj, aż skończy." },
+  "options_import_interrupted_early": { "message": "Przerwane przed zapisaniem pierwszego hasła – Kontynuuj zacznie od nowa." },
+  "options_import_elsewhere": { "message": "Inna karta właśnie dodaje słownik – poczekaj, aż skończy." },
   "options_continue_import": { "message": "Kontynuuj" },
   "options_continue_import_aria": {
     "message": "Kontynuuj dodawanie $NAME$",

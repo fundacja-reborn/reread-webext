@@ -338,12 +338,12 @@
          reads as a setting somebody has greyed out. -->
     <p class="section-meta">
       <span data-i18n="options_engine">Engine</span>:
-      <span data-i18n="options_engine_value">Bergamot, inside the package - translates offline</span>
+      <span data-i18n="options_engine_value">Bergamot, built into the extension; translation offline.</span>
     </p>
 
     <p class="explain" data-i18n="options_models_intro">
-      Download a translation model here for each language pair you want to translate. These
-      are official Mozilla files that run entirely offline on your device.
+      A translation model is downloaded separately for each pair of languages. These are official
+      Mozilla files; the translating happens entirely on this device.
     </p>
 
     <!-- The one fact about models that changes what somebody installs next -
@@ -357,10 +357,10 @@
       <span data-i18n="options_models_single_word"
         >A model translates sentences well, but a single word on its own is often translated
         wrongly - the result is cut short, or is a word that does not exist. For single words the
-        better source is a dictionary:</span
+        better source is a dictionary - the</span
       >
-      <a href="#dictionaries" data-i18n="options_dictionaries_heading">Dictionaries</a
-      >.
+      <a href="#dictionaries" data-i18n="options_dictionaries_heading">Dictionaries</a>
+      <span data-i18n="options_models_single_word_rest">section below.</span>
     </p>
 
     <!-- The one fetch this section can make, and the press that makes it: the
@@ -399,19 +399,6 @@
     <button type="button" id="models-show-all" class="show-all" aria-controls="models" hidden></button>
 
     <p id="model-status" class="status" role="status"></p>
-
-    <p class="note">
-      <!-- The host is also a door: the href becomes the address of the very
-           index the snapshot was taken from, so a reader can look at the
-           source with their own eyes. Their press, their navigation - the
-           extension itself still fetches nothing without a press. -->
-      <span data-i18n="options_model_note_from">Model downloads come from</span>
-      <a id="model-host" target="_blank" rel="noopener">-</a>
-      <span data-i18n="options_model_note_rest"
-        >- where Mozilla publishes them. The extension connects to this public server only when you
-        press Update the list or Download. No personal data is ever sent.</span
-      >
-    </p>
 
     <!-- Folded shut by default: the by-hand path is the escape hatch, not the
          road, and standing open right under the list it read as a second,
@@ -453,6 +440,24 @@
         the server the models come from stops working.
       </p>
     </details>
+
+    <!-- Where the downloads come from, at the foot of the subsection (D258,
+         V2): it used to stand between the list and the by-hand fold, which
+         are one group - the ways to get a model - and a framed paragraph
+         between them read as the end of the section. It belongs after them,
+         as the footnote to the whole subsection that it is. -->
+    <p class="note">
+      <!-- The host is also a door: the href becomes the address of the very
+           index the snapshot was taken from, so a reader can look at the
+           source with their own eyes. Their press, their navigation - the
+           extension itself still fetches nothing without a press. -->
+      <span data-i18n="options_model_note_from">Model downloads come from</span>
+      <a id="model-host" target="_blank" rel="noopener">-</a>
+      <span data-i18n="options_model_note_rest"
+        >- where Mozilla publishes them. The extension connects to this public server only when you
+        press Update the list or Download. No personal data is ever sent.</span
+      >
+    </p>
 
     <!-- The switch that decides whether this subsection exists at all (D120),
          at its foot rather than at the head of the page: it is the rare
@@ -522,9 +527,8 @@
          interface's language (see `linkDictionarySources`). -->
     <p class="explain">
       <span data-i18n="options_dictionaries_sources"
-        >The dictionaries listed below come from WikDict. You can also add your own - from files
-        or from a link, and several for one language - in the sections under the list. Where to
-        find them, each with its licence:</span
+        >The dictionaries in the list come from WikDict. You can add your own from a file or from
+        a link, several for one language as well. The sources, each with its licence:</span
       >
       <a id="dictionary-sources-intro" href="https://reapps.eu/read#faq-dictionary-sources" target="_blank" rel="noopener"
         >reapps.eu/read</a
@@ -578,16 +582,6 @@
     <button type="button" id="dictionaries-show-all" class="show-all" aria-controls="dictionary-catalog" hidden></button>
 
     <p id="dictionary-status" class="status" role="status"></p>
-
-    <p class="note">
-      <span data-i18n="options_dictionary_note_from">Dictionary downloads come from</span>
-      <a id="dictionary-host" target="_blank" rel="noopener">-</a>
-      <span data-i18n="options_dictionary_note_rest"
-        >- where WikDict publishes the dictionaries it builds from Wiktionary (CC BY-SA). The
-        extension connects to this public server only when you press Update the list or Download.
-        No personal data is ever sent.</span
-      >
-    </p>
 
     <!-- Folded for the same reason as the model files above: the catalogue is
          the road, this is the door beside it. -->
@@ -717,6 +711,20 @@
         to be unpacked and added from files.
       </p>
     </details>
+
+    <!-- The models' host note has moved for the same reason (D258, V2): the
+         catalogue and the two by-hand folds are one group - the ways to get a
+         dictionary - and this says where the first of them fetches from,
+         after all three. -->
+    <p class="note">
+      <span data-i18n="options_dictionary_note_from">Dictionary downloads come from</span>
+      <a id="dictionary-host" target="_blank" rel="noopener">-</a>
+      <span data-i18n="options_dictionary_note_rest"
+        >- where WikDict publishes the dictionaries it builds from Wiktionary (CC BY-SA). The
+        extension connects to this public server only when you press Update the list or Download.
+        No personal data is ever sent.</span
+      >
+    </p>
     </section>
     </section>
 
@@ -731,21 +739,29 @@
     <section aria-labelledby="switched-off-sites" data-keywords="options_keywords_sites">
     <h2 id="switched-off-sites" data-i18n="options_disabled_heading">Switched-off sites</h2>
 
-    <!-- The two settings this paragraph names are links to their own rows
-         (D254, P9): a sentence that names a setting and leaves the reader to
-         find it is a sentence that sends them back to the top of the page.
-         The names come from the rows' own catalogue keys, so renaming a
-         setting renames the reference with it. The closing clause is glued to
-         the second link (no line break between them): where a language opens
-         it with a colon - Polish, Spanish, Ukrainian - a space before that
-         colon would be a typographic error, and the languages that want a
-         word there open theirs with a space instead. -->
+    <!-- Two sentences that answer the question, and the edge case behind the
+         page's own More (D258, §6.3): what the section is and how to add a
+         site are what somebody came for; the one arrangement in which the
+         toolbar window has no switch to offer is worth saying, and worth not
+         saying first.
+
+         The two settings the fold names are links to their own rows (D254,
+         P9): a sentence that names a setting and leaves the reader to find it
+         is a sentence that sends them back to the top of the page. The names
+         come from the rows' own catalogue keys, so renaming a setting renames
+         the reference with it. The closing clause is glued to the second link
+         (no line break between them): where a language opens it with a
+         colon - Polish, Spanish, Ukrainian - a space before that colon would
+         be a typographic error, and the languages that want a word there open
+         theirs with a space instead. -->
     <p class="explain">
       <span data-i18n="options_disabled_intro"
-        >A list of websites where the extension is switched off: no translation, no bubble, no
-        underlines. Add a site with the switch under the extension's icon in the browser's toolbar
-        while you are on it, or type its address below. There is no switch when both</span
-      >
+        >On these sites re/read does not translate and shows no bubble and no underlines. Add a
+        site in the re/read window in the toolbar, or by typing its address below.</span
+      >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-disabled-sites" data-i18n="options_details">Details</button>
+    </p>
+    <p class="explain row-more" id="more-disabled-sites" hidden>
+      <span data-i18n="options_disabled_intro_switch">There is no switch in that window when both</span>
       <a href="#s-translationOff" data-i18n="options_no_translation">Use without a translation model</a>
       <span data-i18n="options_disabled_intro_and">and</span>
       <a href="#s-bubbleOff" data-i18n="options_bubble_off">No bubble when selecting text</a
@@ -803,16 +819,13 @@
            hiding it was what overrode it. -->
       <div class="row" id="s-readerOnly" data-setting="readerOnly" data-section="bubble-and-phrases">
         <label class="row-toggle">
-          <span class="row-name" data-i18n="options_reader_only">Underline only in the reader</span>
+          <span class="row-name" data-i18n="options_reader_only">Show the underlines and the bubble only in the reader</span>
           <input type="checkbox" id="reader-only" />
         </label>
         <p class="row-note">
           <span data-i18n="options_reader_only_hint"
-            >
-            Phrase underlines and the translation bubble only in the reader; on an ordinary page a
-            selection shows a bubble with buttons instead: open the page in the reader, and go to
-            the reading list.
-          </span
+            >On an ordinary page, selecting text brings up a bubble with two buttons instead: open
+            the page in the reader, and go to the reading list.</span
           >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-readerOnly" data-i18n="options_details">Details</button>
         </p>
         <p class="row-note row-more" id="more-readerOnly" data-i18n="options_reader_only_more" hidden>
@@ -1005,7 +1018,7 @@
         </p>
         <p class="row-note">
           <span data-i18n="options_font_custom_hint"
-            >A typeface installed on this device, for example Noto Serif; it then appears as Custom in the Type row of the Aa panel.</span
+            >A typeface installed on this device, for example Noto Serif. In the Aa panel it appears in the Type row as Custom.</span
           >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-fontFamily" data-i18n="options_details">Details</button>
         </p>
         <p class="row-note row-more" id="more-fontFamily" data-i18n="options_font_custom_more" hidden>
@@ -1051,8 +1064,8 @@
     <h3 id="paged-layout" data-i18n="options_paged_heading">Pages layout</h3>
 
     <p class="explain" data-i18n="options_paged_intro">
-      These settings work in the reader's Pages layout, where the text moves only by whole pages,
-      each beginning and ending with a whole line.
+      These work in the reader's Pages layout: the text moves by whole pages, each beginning and
+      ending with a whole line.
     </p>
 
     <div class="rows">
@@ -1084,7 +1097,7 @@
       <div class="row row-stack" id="s-touchTurn" data-setting="touchTurn" data-section="paged-layout">
         <label class="row-name" for="touch-turn" data-i18n="options_touch_turn">Turning pages by touch</label>
         <select id="touch-turn">
-          <option value="zones" data-i18n="options_touch_turn_zones">Tap the left or right third</option>
+          <option value="zones" data-i18n="options_touch_turn_zones">Tap the left or right side of the screen</option>
           <option value="swipe" data-i18n="options_touch_turn_swipe">Slide a finger sideways</option>
           <option value="off" data-i18n="options_touch_turn_off">Off</option>
         </select>
@@ -1100,10 +1113,10 @@
              like the voice row's line, and changed with the select. -->
         <p class="row-note" id="touch-turn-note"></p>
         <p class="row-note row-more" id="more-touchTurn" data-i18n="options_touch_turn_more" hidden>
-          On a wide screen the default is a tap, on a narrow one a slide - there the hand that holds
-          the device rests on the screen, and a gesture that has to move is the one it cannot make
-          by accident. The page keys, the arrow keys and the mouse wheel turn pages whatever this is
-          set to, and the pen never turns one.
+          On a narrow screen the default is a slide: the hand holding the phone often touches the
+          screen, and a touch without a slide turns no page. On a wide screen the default is a tap.
+          The page keys, the arrow keys and the mouse wheel turn pages whatever this is set to, and
+          the pen never turns one.
         </p>
       </div>
       <!-- The turn made visible (D251). Two values, not three: a signal
@@ -1116,7 +1129,7 @@
         </select>
         <p class="row-note">
           <span data-i18n="options_turn_effect_hint"
-            >A sign that the page has turned.</span
+            >A visible confirmation that the page has changed.</span
           >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-turnEffect" data-i18n="options_details">Details</button>
         </p>
         <p class="row-note" id="turn-effect-note"></p>
@@ -1365,8 +1378,8 @@
       <span data-i18n="options_storage_to_file">
         A copy as a file is saved on the pages with the data:
       </span>
-      <button type="button" class="note-more" id="copy-library" data-i18n="reading_list">Offline reading list</button>
-      <button type="button" class="note-more" id="copy-vocabulary" data-i18n="saved_phrases">Saved phrases</button>
+      <button type="button" class="doorway" id="copy-library" data-i18n="reading_list">Offline reading list</button>
+      <button type="button" class="doorway" id="copy-vocabulary" data-i18n="saved_phrases">Saved phrases</button>
     </p>
     </section>
 
@@ -1383,9 +1396,9 @@
     <h2 id="custom-css" data-i18n="options_custom_css_heading">Custom CSS</h2>
 
     <p class="explain" data-i18n="options_custom_css_intro">
-      For changing how the bubble, the reader page and the toolbar popup look with CSS rules of
-      your own. This page stays out of their reach, so a wrong rule can always be undone here:
-      clear the field and save.
+      Your own CSS rules change how the bubble, the reading view and the re/read window look. This
+      page is not subject to those rules, so a wrong rule can always be undone here: clear the
+      field and save.
     </p>
 
     <div class="custom-css">
@@ -1404,10 +1417,16 @@
       <!-- A hint and not a row note: the note's size lives under `.row`, and this
            paragraph stands outside one (it came out a size too big). The example
            is one every bubble shows at once - the label it first named appears
-           only where a dictionary's headword differs from the selection. -->
-      <p class="hint" data-i18n="options_custom_css_example">
-        Example: .bubble { outline: 3px solid darkorange; } draws an orange line around every
-        bubble.
+           only where a dictionary's headword differs from the selection.
+           The rule itself stands in `code` (D258, V5), outside the catalogue:
+           it is CSS, the same in every language, and set in the page's prose
+           face it read as a sentence somebody had mistyped. -->
+      <p class="hint">
+        <span data-i18n="options_custom_css_example">Example:</span>
+        <code>.bubble { outline: 3px solid darkorange; }</code>
+        <span data-i18n="options_custom_css_example_rest"
+          >draws an orange line around every bubble.</span
+        >
       </p>
     </div>
 
@@ -1483,11 +1502,22 @@
     <!-- The thesis of the whole extension, stated once, where a curious person
          goes looking for it. The notes further down say how each download is
          checked; this says what never happens at all. -->
-    <p class="explain" data-i18n="options_local_intro">
-      Everything re/read does happens on this device (offline): translating, the dictionary, the
-      reading list, your saved phrases. Nothing you read or select is ever sent anywhere. An
-      internet connection is needed only when you want to download a new translation model or a
-      dictionary - and only from the two URLs shown openly in those sections.
+    <!-- The two sections the promise rests on are links to themselves (D258,
+         §6.3): "those sections" made a reader scroll back looking for which.
+         The closing word is glued to the second link, the switched-off sites'
+         rule: a language that closes with a bare full stop must not get a
+         space before it. -->
+    <p class="explain">
+      <span data-i18n="options_local_intro"
+        >Everything re/read does happens on this device (offline): translating, the dictionary, the
+        reading list, your saved phrases. Nothing you read or select is ever sent anywhere. An
+        internet connection is needed only to download a new translation model or a dictionary -
+        and only from the two addresses given in the</span
+      >
+      <a href="#translation-models" data-i18n="options_models_heading">Translation models</a>
+      <span data-i18n="options_local_intro_and">and</span>
+      <a href="#dictionaries" data-i18n="options_dictionaries_heading">Dictionaries</a
+      ><span data-i18n="options_local_intro_rest"> sections.</span>
     </p>
 
     <!-- The way back to the signpost once it has been put away (D254, §7):

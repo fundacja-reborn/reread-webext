@@ -13,6 +13,17 @@
     }
   },
 
+  "pair_label_monolingual": {
+    "message": "$LANGUAGE$ (einsprachig)",
+    "description": "A dictionary that explains a language in itself: not a direction, so not an arrow.",
+    "placeholders": {
+      "language": {
+        "content": "$1",
+        "example": "English"
+      }
+    }
+  },
+
   "settings": { "message": "Einstellungen" },
   "support": { "message": "Unterstützung" },
   "nav_menu": { "message": "Menü" },
@@ -1316,7 +1327,17 @@
   "options_title": { "message": "re/read - Einstellungen" },
   "back_to_reading": {"message": "Zurück zum Lesen"},
   "options_local_intro": {
-    "message": "Alles, was re/read tut, geschieht auf diesem Gerät (offline): das Übersetzen, das Wörterbuch, die Leseliste, der gespeicherte Wortschatz. Nichts von dem, was Sie lesen oder auswählen, wird irgendwohin gesendet. Eine Internetverbindung ist nur nötig, wenn Sie ein neues Übersetzungsmodell oder ein Wörterbuch herunterladen möchten - und nur von den zwei URLs, die offen in diesen Abschnitten genannt sind."
+    "message": "Alles, was re/read tut, geschieht auf diesem Gerät (offline): das Übersetzen, das Wörterbuch, die Leseliste, der gespeicherte Wortschatz. Nichts von dem, was Sie lesen oder auswählen, wird irgendwohin gesendet. Eine Internetverbindung ist nur zum Herunterladen eines neuen Übersetzungsmodells oder Wörterbuchs nötig - und nur von den zwei Adressen, die in den Abschnitten"
+  },
+
+  "options_local_intro_and": {
+    "message": "und",
+    "description": "Between the two section links in options_local_intro."
+  },
+
+  "options_local_intro_rest": {
+    "message": " genannt sind.",
+    "description": "Closes options_local_intro after the second section link; glued to it in the markup, so a language that opens with punctuation gets no space before it."
   },
 
   "options_intro_short": {
@@ -1562,7 +1583,7 @@
   },
   "options_sections_aria": { "message": "Abschnitte dieser Seite" },
   "options_engine": { "message": "Engine" },
-  "options_engine_value": { "message": "Bergamot, im Paket enthalten - übersetzt offline" },
+  "options_engine_value": { "message": "Bergamot, in die Erweiterung eingebaut; Übersetzung offline." },
   "options_storage": { "message": "Daten auf diesem Gerät" },
   "options_storage_how": { "message": "Speicherplatz, den die Daten von re/read belegen." },
 
@@ -1605,14 +1626,19 @@
     "message": "Sie lesen $FROM$ - die maschinelle Übersetzung ist aus, gespeicherte Phrasen gehören zu diesem Paar.",
     "placeholders": { "from": { "content": "$1", "example": "Englisch" } }
   },
-  "options_reader_only": { "message": "Nur in der Leseansicht unterstreichen" },
+  "options_reader_only": { "message": "Unterstreichungen und Sprechblase nur in der Leseansicht zeigen" },
   "options_reader_only_hint": {
-    "message": "Unterstreichungen der Phrasen und die Übersetzungs-Sprechblase nur in der Leseansicht; auf einer gewöhnlichen Seite zeigt eine Auswahl stattdessen eine Sprechblase mit Schaltflächen: die Seite in der Leseansicht öffnen und zur Leseliste gehen."
+    "message": "Auf einer gewöhnlichen Seite erscheint nach dem Markieren von Text stattdessen eine Sprechblase mit zwei Schaltflächen: die Seite in der Leseansicht öffnen und zur Leseliste gehen."
   },
 
   "options_reader_only_more": {
     "message": "Ist die Option eingeschaltet, kann keine Webseite feststellen, welche ihrer Wörter Sie gespeichert haben. Auf Android und iOS ist die Option standardmäßig eingeschaltet.",
     "description": "The rest of the options_reader_only_hint description, behind the row's More button."
+  },
+
+  "popup_reader_only": {
+    "message": "Nur in der Leseansicht unterstreichen",
+    "description": "The same switch as options_reader_only, named short: the popup row carries no description under it, and the settings page's full label wraps to three lines at 320px."
   },
   "options_page_number": { "message": "Seitenzahl" },
   "options_page_number_hint": {
@@ -1625,10 +1651,10 @@
   },
   "options_paged_heading": { "message": "Ansicht Seiten" },
   "options_paged_intro": {
-    "message": "Diese Einstellungen gelten in der Ansicht Seiten der Leseansicht, in der sich der Text nur um ganze Seiten bewegt und jede Seite mit einer ganzen Zeile beginnt und endet."
+    "message": "Sie gelten in der Leseansicht in der Ansicht Seiten: Der Text bewegt sich um ganze Seiten, jede beginnt und endet mit einer ganzen Zeile."
   },
   "options_touch_turn": { "message": "Seiten per Berührung umblättern" },
-  "options_touch_turn_zones": { "message": "Tippen auf das linke oder rechte Drittel" },
+  "options_touch_turn_zones": { "message": "Tippen auf die linke oder rechte Seite des Bildschirms" },
   "options_touch_turn_swipe": { "message": "Finger zur Seite schieben" },
   "options_touch_turn_off": { "message": "Aus" },
   "options_touch_turn_hint": {
@@ -1636,11 +1662,11 @@
   },
 
   "options_touch_turn_more": {
-    "message": "Auf einem breiten Bildschirm ist das Tippen die Vorgabe, auf einem schmalen das Wischen - dort liegt die Hand, die das Gerät hält, auf dem Bildschirm, und eine Geste, die sich bewegen muss, ist die eine, die ihr nicht versehentlich gelingt. Die Bildtasten, die Pfeiltasten und das Mausrad blättern unabhängig von dieser Einstellung, und der Stift blättert nie.",
+    "message": "Auf einem schmalen Bildschirm ist Wischen die Vorgabe: Die Hand, die das Telefon hält, berührt oft den Bildschirm, und eine Berührung ohne Wischen blättert nicht. Auf einem breiten Bildschirm ist Tippen die Vorgabe. Die Bildtasten, die Pfeiltasten und das Mausrad blättern unabhängig von dieser Einstellung, und der Stift blättert nie.",
     "description": "The rest of the options_touch_turn_hint description, behind the row's More button."
   },
   "options_touch_turn_note_zones": {
-    "message": "Ein Tippen auf das linke oder rechte Drittel der Seite blättert um: rechts weiter, links zurück. Es zählt nur ein kurzes, ruhiges Tippen fern von den Rändern des Bildschirms, damit ein haltender Daumen nichts umblättert."
+    "message": "Ein Tippen auf das rechte Drittel des Bildschirms blättert zur nächsten Seite, auf das linke zur vorigen. Es zählt nur ein kurzes, ruhiges Tippen fern von den Rändern, damit ein haltender Daumen keine Seiten wechselt."
   },
   "options_touch_turn_note_swipe": {
     "message": "Den Finger nach links schieben zeigt die nächste Seite, nach rechts die vorige. Auf dem Telefon nicht am äußersten Bildschirmrand beginnen - dort liegt die Zurück-Geste des Systems; auf einem E-Ink-Reader klappt der Rand meist."
@@ -1652,7 +1678,7 @@
   "options_turn_effect_auto": { "message": "Automatisch" },
   "options_turn_effect_off": { "message": "Aus" },
   "options_turn_effect_hint": {
-    "message": "Ein Zeichen, dass die Seite umgeblättert wurde."
+    "message": "Eine sichtbare Bestätigung des Seitenwechsels."
   },
 
   "options_turn_effect_more": {
@@ -1660,7 +1686,7 @@
     "description": "The rest of the options_turn_effect_hint description, behind the row's More button."
   },
   "options_turn_effect_note_auto": {
-    "message": "Im Farbschema E-Ink wird der Textbereich einen Moment lang dunkel, so wie ein E-Book-Reader das Umblättern zeigt; auf anderen Bildschirmen gleitet die neue Seite herein."
+    "message": "Im Farbschema E-Ink wird der Textbereich einen Moment lang dunkel, so wie ein E-Book-Reader das Umblättern zeigt; auf anderen Bildschirmen erscheint die neue Seite mit einer sanften Bewegung."
   },
   "options_turn_effect_note_off": {
     "message": "Die Seite wechselt einfach, so wie vor dieser Einstellung."
@@ -1676,7 +1702,7 @@
   },
   "options_font_custom": { "message": "Eigene Schrift" },
   "options_font_custom_hint": {
-    "message": "Eine auf diesem Gerät installierte Schrift, zum Beispiel Noto Serif; sie erscheint dann als Eigene in der Zeile Schrift des Aa-Fensters."
+    "message": "Eine auf diesem Gerät installierte Schrift, zum Beispiel Noto Serif. Im Aa-Fenster erscheint sie in der Zeile Schrift als Eigene."
   },
 
   "options_font_custom_more": {
@@ -1880,10 +1906,15 @@
   "options_tts_rate": { "message": "Sprechgeschwindigkeit" },
   "options_models_heading": { "message": "Übersetzungsmodelle" },
   "options_models_intro": {
-    "message": "Laden Sie hier für jedes Sprachpaar, das Sie übersetzen möchten, ein Übersetzungsmodell herunter. Es handelt sich um offizielle Mozilla-Dateien, die vollständig offline auf Ihrem Gerät laufen."
+    "message": "Ein Übersetzungsmodell wird für jedes Sprachpaar einzeln heruntergeladen. Es sind offizielle Mozilla-Dateien; übersetzt wird vollständig auf diesem Gerät."
   },
   "options_models_single_word": {
-    "message": "Ein Modell übersetzt Sätze gut, ein einzelnes Wort für sich aber oft falsch - das Ergebnis ist abgeschnitten oder ein Wort, das es nicht gibt. Für einzelne Wörter ist ein Wörterbuch die bessere Quelle:"
+    "message": "Ein Modell übersetzt Sätze gut, ein einzelnes Wort für sich aber oft falsch - das Ergebnis ist abgeschnitten oder ein Wort, das es nicht gibt. Für einzelne Wörter ist ein Wörterbuch die bessere Quelle - der Abschnitt"
+  },
+
+  "options_models_single_word_rest": {
+    "message": "weiter unten.",
+    "description": "Closes options_models_single_word after the link to the Dictionaries section."
   },
   "options_update_list": { "message": "Liste aktualisieren" },
   "options_list_dated": { "message": "Liste vom" },
@@ -1915,7 +1946,7 @@
     "message": "Fügen Sie Wörterbücher hinzu, um detaillierte Wortdefinitionen in der Sprechblase zu sehen. Die Reihenfolge, in der sie erscheinen, können Sie mit den Pfeilen ändern."
   },
   "options_dictionaries_sources": {
-    "message": "Die Wörterbücher in der Liste unten stammen von WikDict. Sie können auch eigene hinzufügen - aus Dateien oder über einen Link, auch mehrere für eine Sprache - in den Abschnitten unter der Liste. Wo sie zu finden sind, jedes mit seiner Lizenz:"
+    "message": "Die Wörterbücher in der Liste stammen von WikDict. Eigene fügen Sie aus einer Datei oder über einen Link hinzu, auch mehrere für eine Sprache. Die Quellen, jede mit ihrer Lizenz:"
   },
   "options_dictionary_order_hint": {
     "message": "Die Sprechblase zeigt die Einträge in der Reihenfolge unten. Verwendet werden nur die Wörterbücher der Sprache, die Sie lesen."
@@ -1963,7 +1994,12 @@
   },
   "options_disabled_heading": { "message": "Abgeschaltete Websites" },
   "options_disabled_intro": {
-    "message": "Eine Liste von Websites, auf denen die Erweiterung abgeschaltet ist: keine Übersetzung, keine Sprechblase, keine Unterstreichungen. Fügen Sie eine Website mit dem Schalter unter dem Symbol der Erweiterung in der Symbolleiste des Browsers hinzu, während Sie sie geöffnet haben, oder tippen Sie ihre Adresse unten ein. Der Schalter fehlt, wenn sowohl"
+    "message": "Auf diesen Websites übersetzt re/read nicht und zeigt weder Sprechblase noch Unterstreichungen. Eine Website fügen Sie im re/read-Fenster in der Symbolleiste hinzu oder indem Sie unten ihre Adresse eintragen."
+  },
+
+  "options_disabled_intro_switch": {
+    "message": "In diesem Fenster gibt es keinen Schalter, wenn sowohl",
+    "description": "Behind the Details fold under options_disabled_intro: the case where the toolbar window has no switch to offer."
   },
 
   "options_disabled_intro_and": {
@@ -1992,7 +2028,7 @@
   },
   "options_custom_css_heading": { "message": "Eigenes CSS" },
   "options_custom_css_intro": {
-    "message": "Für alle, die das Aussehen der Sprechblase, der Leseansicht und des Fensters der Symbolleisten-Schaltfläche mit eigenen CSS-Regeln ändern möchten. Diese Seite bleibt außer Reichweite der Regeln, damit sich eine falsche Regel hier immer zurücknehmen lässt: Feld leeren und speichern."
+    "message": "Eigene CSS-Regeln ändern das Aussehen der Sprechblase, der Leseansicht und des re/read-Fensters. Diese Seite unterliegt diesen Regeln nicht, eine falsche Regel lässt sich hier also immer zurücknehmen: Feld leeren und speichern."
   },
   "options_custom_css_more": { "message": "Mehr zu den CSS-Regeln und den Namen" },
   "options_custom_css_reach": {
@@ -2011,7 +2047,12 @@
     "message": "Nicht gespeichert: die Regeln wurden abgelehnt. Regeln, die etwas aus dem Netz laden (url(), @import, @font-face), sind nicht erlaubt."
   },
   "options_custom_css_example": {
-    "message": "Beispiel: .bubble { outline: 3px solid darkorange; } zeichnet eine orange Linie um jede Sprechblase."
+    "message": "Beispiel:"
+  },
+
+  "options_custom_css_example_rest": {
+    "message": "zeichnet eine orange Linie um jede Sprechblase.",
+    "description": "Closes options_custom_css_example after the rule itself, which stands in code and needs no translation."
   },
   "options_custom_css_cleared": { "message": "Gespeichert: keine Regeln, also das Standardaussehen." },
   "options_support_intro": {
@@ -2102,7 +2143,7 @@
   "options_no_models": { "message": "Keine Modelle hier und keine zum Herunterladen - diese Version führt keines auf." },
   "options_filter_no_match_models": { "message": "Kein Paar passt darauf. Der Filter nimmt einen Sprachnamen oder einen Code." },
   "options_filter_no_match_dictionaries": { "message": "Kein Wörterbuch passt darauf. Der Filter nimmt einen Sprachnamen oder einen Code." },
-  "options_no_disabled": { "message": "Keine Website ist abgeschaltet. Abgeschaltet wird im Symbolleisten-Popup." },
+  "options_no_disabled": { "message": "Keine Website ist abgeschaltet." },
   "options_turn_back_on": { "message": "Wieder einschalten" },
   "options_reading_model_files": {
     "message": "Die Dateien für $PAIR$ werden gelesen...",

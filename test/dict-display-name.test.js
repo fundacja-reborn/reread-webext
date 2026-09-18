@@ -4,7 +4,7 @@ import { describe, it } from "node:test";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { DISPLAY_NAME_LIMIT, cleanDisplayName, nameHolder, shownName } from "../src/lib/dict/display-name.js";
+import { DISPLAY_NAME_LIMIT, cleanDisplayName, fileNameWorthSaying, nameHolder, shownName } from "../src/lib/dict/display-name.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -152,5 +152,28 @@ describe("the settings page's field", () => {
     assert.match(save, /dictionary\.displayName = wanted/);
     // And the row's title is the shown name from the first draw.
     assert.match(row, /element\("p", "dictionary-name", shown\)/);
+  });
+});
+
+describe("fileNameWorthSaying", () => {
+  // The dictionary row's small print opens with the file's own name, and a
+  // .ifo whose `bookname` is the bare word "dictionary" was telling the
+  // reader the one thing they already knew (D258, V10).
+  it("says a file's name when it says something the title does not", () => {
+    assert.equal(fileNameWorthSaying({ name: "FreeDict en-pl", displayName: "English-Polish" }), true);
+  });
+
+  it("stays quiet when the file's name is the title", () => {
+    // No name of the reader's own: the file's name is already the title.
+    assert.equal(fileNameWorthSaying({ name: "FreeDict en-pl" }), false);
+    // And the same name typed back, in another case or with stray spaces.
+    assert.equal(fileNameWorthSaying({ name: "FreeDict en-pl", displayName: "freedict EN-PL" }), false);
+    assert.equal(fileNameWorthSaying({ name: "FreeDict  en-pl ", displayName: "FreeDict en-pl" }), false);
+  });
+
+  it("stays quiet when the file names nothing at all", () => {
+    for (const name of ["dictionary", "Dictionary", "DICT", "stardict", "", "   "]) {
+      assert.equal(fileNameWorthSaying({ name, displayName: "English-Polish" }), false, `"${name}" is said out loud`);
+    }
   });
 });

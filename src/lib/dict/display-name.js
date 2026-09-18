@@ -54,6 +54,30 @@ export function shownName(dictionary) {
 }
 
 /**
+ * What a .ifo calls a book when it calls it nothing at all. A dictionary whose
+ * `bookname` is the bare word "dictionary" (WikDict writes a few that way) is
+ * a dictionary with no name of its own, and a settings row whose small print
+ * opened with "dictionary · 76,890 words" was telling the reader the one thing
+ * they already knew (V10).
+ */
+const UNNAMED = new Set(["dictionary", "dict", "stardict"]);
+
+/**
+ * Whether the file's own name is worth saying beside the name the book stands
+ * under. It is not when the reader gave no name (the file's name is the title
+ * already), when it repeats the title in different case or spacing, or when it
+ * is one of the words that name nothing.
+ *
+ * @param {{ name: string, displayName?: string }} dictionary
+ * @returns {boolean}
+ */
+export function fileNameWorthSaying(dictionary) {
+  const file = dictionary.name.replace(/\s+/g, " ").trim();
+  if (file.length === 0 || UNNAMED.has(file.toLocaleLowerCase())) return false;
+  return file.toLocaleLowerCase() !== shownName(dictionary).replace(/\s+/g, " ").trim().toLocaleLowerCase();
+}
+
+/**
  * The other book already shown under this name, if there is one - under a
  * name of its own or under its file's, since either is what stands on the
  * shelf. A book's own file name does not count against it: a book may be
