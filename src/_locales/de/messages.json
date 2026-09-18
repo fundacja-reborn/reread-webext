@@ -1374,14 +1374,73 @@
     "description": "Heading of the last settings section: what the extension promises about the network, who builds it, how to support it."
   },
   "options_first_steps_heading": { "message": "Erste Schritte" },
+
+  "options_first_steps_count": {
+    "message": "$DONE$ von $TOTAL$",
+    "description": "How many of the first steps are done, over the settings page's checklist.",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "2"
+      },
+      "total": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+
+  "options_step_model": {
+    "message": "Ein Übersetzungsmodell herunterladen"
+  },
+
+  "options_step_dictionary": {
+    "message": "Ein Wörterbuch herunterladen (optional)"
+  },
+
+  "options_step_pin": {
+    "message": "re/read an die Symbolleiste anheften"
+  },
+
+  "options_step_how": {
+    "message": "Wie"
+  },
+
+  "options_step_done": {
+    "message": "Erledigt"
+  },
+
+  "options_step_hide": {
+    "message": "Ausblenden"
+  },
+
+  "options_step_done_state": {
+    "message": "erledigt",
+    "description": "Heard by a screen reader in place of the tick or the circle beside a first step; never shown."
+  },
+
+  "options_step_todo_state": {
+    "message": "zu erledigen",
+    "description": "Heard by a screen reader in place of the tick or the circle beside a first step; never shown."
+  },
+
+  "options_first_steps_show": {
+    "message": "Erste Schritte anzeigen"
+  },
+
+  "options_storage_models": {
+    "message": "Übersetzungsmodelle"
+  },
+
+  "options_storage_copies": {
+    "message": "Letzte Kopien"
+  },
+
+  "options_storage_to_file": {
+    "message": "Eine Kopie als Datei entsteht auf den Seiten, die die Daten halten:"
+  },
   "options_first_steps_intro": {
     "message": "Noch übersetzt nichts - das Modell, das es täte, ist noch nicht auf diesem Gerät. Die Einrichtung dauert eine Minute:"
-  },
-  "options_first_steps_model": {
-    "message": "Suchen Sie unter „Übersetzungsmodelle“ das Sprachpaar, das Sie brauchen (am schnellsten über den Filter), und drücken Sie auf „Herunterladen“. Das Modell wird auf diesem Gerät gespeichert und übersetzt von da an offline - und das erste Modell stellt das Sprachpaar oben von selbst ein."
-  },
-  "options_first_steps_dictionary": {
-    "message": "Laden Sie unter „Wörterbücher“ ein Wörterbuch für dasselbe Paar herunter (optional, aber lohnend) - einzelne Wörter bekommen dann vollständigere Antworten als eine Übersetzung allein, sichtbar in der Übersetzungsblase unter der Übersetzung."
   },
   "options_first_steps_pin": {
     "message": "Heften Sie re/read zuletzt an die Symbolleiste: das Puzzleteil-Symbol rechts in der Leiste, dann neben re/read das Zahnrad und „An Symbolleiste anheften“. Der Knopf öffnet die Leseansicht, die Leseliste, den gespeicherten Wortschatz und den Schalter für die Website, auf der Sie sind."
@@ -1400,7 +1459,7 @@
   "options_storage_how": { "message": "Speicherplatz, der von der Erweiterung belegt wird." },
 
   "options_storage_how_more": {
-    "message": "Wörterbücher benötigen aufgrund der Datenbankstruktur mehr Platz als ihre Dateigröße. Das Löschen eines Artikels oder Buchs entfernt dessen Text, Bilder, Markierungen, Notizen und Lesefortschritt vollständig.",
+    "message": "Wörterbücher benötigen aufgrund der Datenbankstruktur mehr Platz als ihre Dateigröße. Das Löschen eines Artikels oder Buchs entfernt dessen Text, Bilder, Markierungen, Notizen und Lesefortschritt vollständig. Der Rest - die Wörterbücher, die Leseliste, der Wortschatz und die Markierungen - wird nicht aufgeschlüsselt: Ein Wörterbuch kostet ein Vielfaches dessen, was sein Text wiegt, und den Rest zu zählen hieße, bei jedem Öffnen dieser Seite jede Zeile der Datenbanken zu lesen.",
     "description": "The rest of the options_storage_how description, behind the row's More button."
   },
   "options_storage_persistent": { "message": "Dauerhafter Speicher: gewährt. Der Browser hat zugesagt, diese Daten nicht zu löschen, um Platz zu schaffen." },

@@ -100,12 +100,12 @@ import {
   voiceLanguage,
   voicesFor,
 } from "../lib/tts.js";
+import { pinnedByBrowser, readSteps, stepsView, writeSteps } from "./first-steps.js";
 import { armSearch } from "./search.js";
-import { armSections, fillSectionSelect } from "./sections.js";
+import { armSections, fillSectionSelect, land } from "./sections.js";
 import {
   dictionaryRows,
   filterActive,
-  firstStepsMove,
   matchesFilter,
   orderForDisplay,
   pairChoices,
@@ -204,8 +204,14 @@ let dictionaryStored = null;
  */
 let dictionaryOrder = [];
 
-/** The verdict the fold last moved on - see `firstStepsMove`. @type {boolean | null} */
-let setupDone = null;
+/**
+ * Whether the card stood open the last time it was drawn. The fold is only
+ * moved when that verdict changes, so a card folded or unfolded by hand keeps
+ * the reader's choice through every redraw in between.
+ *
+ * @type {boolean | null}
+ */
+let stepsOpen = null;
 
 /**
  * Whether each catalogue stands unfolded past its installed rows. A press on
@@ -218,26 +224,74 @@ let modelsExpanded = false;
 let dictionariesExpanded = false;
 
 /**
- * The fresh-install signpost, standing open while a model or a dictionary is
- * missing and folded to its heading once both are stored - never gone, so the
- * instructions can be reread at will. Both frame renders report here, because
- * every edge a model or a dictionary crosses already passes through one of
- * them. The fold only moves when the verdict changes, so a fold toggled by
- * hand keeps the reader's choice through every redraw in between.
+ * What the browser said about the toolbar button, and what the reader wrote
+ * down about the card. Read once at open and kept here: the card redraws on
+ * every model and every dictionary, and neither question changes with them.
+ *
+ * @type {import("./first-steps.js").StepsState}
+ */
+let stepsState = { hidden: false, pinned: false };
+
+/** @type {boolean | null} */
+let pinnedNow = null;
+
+/**
+ * The fresh install's three steps, counted from what is stored (D254, P6).
+ * Both frame renders report here, because every edge a model or a dictionary
+ * crosses already passes through one of them - so downloading a model ticks
+ * its step at once, with no reload.
+ *
+ * The fold is only moved when the first step's verdict changes, so a card
+ * folded or unfolded by hand keeps the reader's choice through every redraw
+ * in between.
  */
 function renderFirstSteps() {
   const fold = document.getElementById("first-steps");
   if (!(fold instanceof HTMLDetailsElement)) return;
   if (modelStored === null || dictionaryStored === null) return;
 
-  const move = firstStepsMove(setupDone, modelStored, dictionaryStored);
-  setupDone = move.done;
-  if (move.open !== null) fold.open = move.open;
-  fold.hidden = false;
-  // The table of contents' first entry comes and goes with the card: a line
-  // pointing at a section that is not on the page yet is a line that lies.
+  const view = stepsView({
+    model: modelStored,
+    translationOff: config.translationOff,
+    dictionary: dictionaryStored,
+    pinned: pinnedNow === null ? stepsState.pinned : pinnedNow,
+    hidden: stepsState.hidden,
+  });
+
+  fold.hidden = !view.show;
+  const back = document.getElementById("first-steps-back");
+  if (back !== null) back.hidden = view.show;
   const entry = document.getElementById("jump-first-steps");
-  if (entry !== null) entry.hidden = false;
+  if (entry !== null) entry.hidden = !view.show;
+
+  if (view.open !== stepsOpen) {
+    fold.open = view.open;
+    stepsOpen = view.open;
+  }
+
+  fill("first-steps-count", t("options_first_steps_count", [String(view.done), String(view.total)]));
+  const intro = document.getElementById("first-steps-intro");
+  if (intro !== null) intro.hidden = !view.intro;
+
+  const rows = ["step-model", "step-dictionary", "step-pin"];
+  rows.forEach((id, at) => {
+    const row = document.getElementById(id);
+    if (row === null) return;
+    const done = view.steps[at] === true;
+    row.classList.toggle("is-done", done);
+    const mark = row.querySelector(".step-mark");
+    // A tick and an empty circle, not a colour: the state has to survive the
+    // sixteen greys an e-ink panel keeps.
+    if (mark !== null) mark.textContent = done ? "\u2713" : "\u25CB";
+    const state = row.querySelector(".step-state");
+    if (state !== null) state.textContent = done ? t("options_step_done_state") : t("options_step_todo_state");
+    // The way to the section is offered only while there is something to do
+    // there; the pinning step's own two buttons follow the same rule.
+    for (const door of row.querySelectorAll(".step-door, .step-done")) {
+      if (door instanceof HTMLElement) door.hidden = done;
+    }
+  });
+
   // The bar's select is a snapshot of the column - it has to be taken again
   // whenever a line joins or leaves it.
   fillSectionSelect();
@@ -566,8 +620,11 @@ function renderNoTranslation() {
   if (toggle instanceof HTMLInputElement) toggle.checked = config.translationOff;
   document.body.classList.toggle("no-translation", config.translationOff);
   // The mode takes whole sections off the page, the first-steps card among
-  // them - so the bar's list of them is taken again (D254).
+  // them - so the bar's list of them is taken again (D254). The mode is also
+  // the first step's other answer: reading without a model is translation set
+  // up, and the card has to hear it.
   fillSectionSelect();
+  renderFirstSteps();
   renderBubbleOff();
 }
 
@@ -857,6 +914,15 @@ async function renderStorage() {
   await ensurePersistent();
   const report = await readStorage();
   fill("storage-usage", report.usage === null ? "" : t("options_storage_value", megabytes(report.usage)));
+  // The one share of the total this page can name honestly and cheaply
+  // (D254, §9): a model's metadata carries what it takes on disk. The
+  // dictionaries' own number is what their text weighs, which on disk is
+  // several times less than they cost - a line of it beside the total would
+  // be a lie told in figures - and the reading list has no cheap number at
+  // all. The folded note says what is left unbroken.
+  const models = await listModels().catch(() => []);
+  const onDisk = models.reduce((sum, model) => sum + model.bytes, 0);
+  fill("storage-models", t("options_storage_value", megabytes(onDisk)));
   const note = document.getElementById("storage-note");
   if (note === null) return;
   const kind = persistenceNote({ persisted: report.persisted, webkit: isWebKit() });
@@ -2893,6 +2959,11 @@ async function downloadFromLink() {
 async function render() {
   config = await readConfig();
   os = await platformOs();
+  // The card's own state and the browser's answer about the toolbar, both
+  // read once: neither changes with a model or a dictionary, and the card
+  // redraws on every one of those.
+  stepsState = await readSteps();
+  pinnedNow = await pinnedByBrowser();
   // The dated caches, and nothing asked of the network: each list stays as
   // it was until its update button is pressed, and the line above it says
   // how old that is.
@@ -3317,6 +3388,51 @@ document.getElementById("tts-rate-down")?.addEventListener("click", () => {
 document.getElementById("tts-rate-up")?.addEventListener("click", () => {
   void stepRate(TTS_RATE.step);
 });
+// The card's own three presses (D254, §7): the toolbar step ticked by hand
+// where the browser will not answer for it, the card put away for good, and
+// the way back to it from the About section at the foot of the page.
+document.getElementById("step-pin-done")?.addEventListener("click", () => {
+  void writeSteps({ pinned: true }).then((now) => {
+    stepsState = now;
+    renderFirstSteps();
+  });
+});
+document.getElementById("first-steps-hide")?.addEventListener("click", () => {
+  void writeSteps({ hidden: true }).then((now) => {
+    stepsState = now;
+    renderFirstSteps();
+    document.getElementById("first-steps-show")?.focus();
+  });
+});
+document.getElementById("first-steps-show")?.addEventListener("click", () => {
+  void writeSteps({ hidden: false }).then((now) => {
+    stepsState = now;
+    renderFirstSteps();
+    const fold = document.getElementById("first-steps");
+    if (fold instanceof HTMLDetailsElement) {
+      fold.open = true;
+      land("first-steps");
+    }
+  });
+});
+// How to pin it, under the step that asks for it - the page's own More
+// conduct, on a paragraph the card keeps rather than a row note.
+document.getElementById("step-pin-how")?.addEventListener("click", (event) => {
+  const button = event.currentTarget;
+  const help = document.getElementById("first-steps-pin");
+  if (!(button instanceof HTMLButtonElement) || help === null) return;
+  const opening = help.hidden;
+  help.hidden = !opening;
+  button.setAttribute("aria-expanded", String(opening));
+});
+// The two pages that hold the data, and with it the import and export of a
+// copy as a file (D254, §9) - the menu's own road.
+document.getElementById("copy-library")?.addEventListener("click", () => {
+  void webext().runtime.sendMessage({ kind: Message.OPEN_LIBRARY }).catch(() => {});
+});
+document.getElementById("copy-vocabulary")?.addEventListener("click", () => {
+  void webext().runtime.sendMessage({ kind: Message.OPEN_VOCABULARY }).catch(() => {});
+});
 document.getElementById("add-model")?.addEventListener("click", () => void addSelectedModel());
 document.getElementById("refresh-models")?.addEventListener("click", () => void refreshList());
 document.getElementById("refresh-dictionaries")?.addEventListener("click", () => void refreshDictionaryList());
@@ -3458,6 +3574,18 @@ document.addEventListener("keydown", (event) => {
   const focus = document.activeElement;
   if (focus instanceof Node && menuPanel.contains(focus)) menuButton?.focus();
   setMenu(false);
+});
+
+// The toolbar can be changed while this page stands open - in the browser's
+// own menu, a step away from here - so the card asks again whenever the page
+// is looked at, and never on a clock.
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState !== "visible") return;
+  void pinnedByBrowser().then((now) => {
+    if (now === pinnedNow) return;
+    pinnedNow = now;
+    renderFirstSteps();
+  });
 });
 
 // A download or an import in flight is the one thing on this page that a reload

@@ -1425,14 +1425,73 @@
     "description": "Heading of the last settings section: what the extension promises about the network, who builds it, how to support it."
   },
   "options_first_steps_heading": { "message": "Premiers pas" },
+
+  "options_first_steps_count": {
+    "message": "$DONE$ sur $TOTAL$",
+    "description": "How many of the first steps are done, over the settings page's checklist.",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "2"
+      },
+      "total": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+
+  "options_step_model": {
+    "message": "Télécharger un modèle de traduction"
+  },
+
+  "options_step_dictionary": {
+    "message": "Télécharger un dictionnaire (facultatif)"
+  },
+
+  "options_step_pin": {
+    "message": "Épingler re/read à la barre d'outils"
+  },
+
+  "options_step_how": {
+    "message": "Comment"
+  },
+
+  "options_step_done": {
+    "message": "Fait"
+  },
+
+  "options_step_hide": {
+    "message": "Masquer"
+  },
+
+  "options_step_done_state": {
+    "message": "fait",
+    "description": "Heard by a screen reader in place of the tick or the circle beside a first step; never shown."
+  },
+
+  "options_step_todo_state": {
+    "message": "à faire",
+    "description": "Heard by a screen reader in place of the tick or the circle beside a first step; never shown."
+  },
+
+  "options_first_steps_show": {
+    "message": "Afficher les premiers pas"
+  },
+
+  "options_storage_models": {
+    "message": "Modèles de traduction"
+  },
+
+  "options_storage_copies": {
+    "message": "Dernières copies"
+  },
+
+  "options_storage_to_file": {
+    "message": "Une copie sous forme de fichier se fait sur les pages qui contiennent les données :"
+  },
   "options_first_steps_intro": {
     "message": "Rien ne se traduit encore - le modèle qui s'en chargerait n'est pas encore sur cet appareil. La mise en place prend une minute :"
-  },
-  "options_first_steps_model": {
-    "message": "Sous « Modèles de traduction », trouvez la paire de langues qu'il vous faut (le filtre est le plus rapide) et appuyez sur « Télécharger ». Le modèle est enregistré sur cet appareil et traduit désormais hors ligne - et le premier modèle règle de lui-même la paire de langues ci-dessus."
-  },
-  "options_first_steps_dictionary": {
-    "message": "Sous « Dictionnaires », téléchargez un dictionnaire pour la même paire (facultatif, mais utile) - les mots isolés reçoivent alors des réponses plus complètes qu'une traduction seule, visibles dans la bulle de traduction sous la traduction."
   },
   "options_first_steps_pin": {
     "message": "Enfin, épinglez re/read à la barre d'outils : l'icône en forme de pièce de puzzle à droite de la barre, puis l'engrenage à côté de re/read et « Épingler à la barre d’outils ». Le bouton ouvre le lecteur, la liste de lecture, vos phrases enregistrées et l'interrupteur du site où vous êtes."
@@ -1451,7 +1510,7 @@
   "options_storage_how": { "message": "Espace disque utilisé par l'extension." },
 
   "options_storage_how_more": {
-    "message": "Les dictionnaires prennent plus de place que leur taille initiale en raison de la structure de la base de données. Supprimer un article ou un livre efface définitivement son texte, ses images, ses surlignages, ses notes et votre progression de lecture.",
+    "message": "Les dictionnaires prennent plus de place que leur taille initiale en raison de la structure de la base de données. Supprimer un article ou un livre efface définitivement son texte, ses images, ses surlignages, ses notes et votre progression de lecture. Le reste - les dictionnaires, la liste de lecture, vos phrases et les surlignages - n'est pas détaillé : un dictionnaire coûte plusieurs fois le poids de son texte, et compter le reste voudrait dire lire chaque ligne des bases à chaque ouverture de cette page.",
     "description": "The rest of the options_storage_how description, behind the row's More button."
   },
   "options_storage_persistent": { "message": "Stockage persistant : accordé. Le navigateur a promis de ne pas effacer ces données pour faire de la place." },

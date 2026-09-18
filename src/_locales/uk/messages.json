@@ -1994,14 +1994,73 @@
     "description": "Heading of the last settings section: what the extension promises about the network, who builds it, how to support it."
   },
   "options_first_steps_heading": { "message": "Перші кроки" },
+
+  "options_first_steps_count": {
+    "message": "$DONE$ з $TOTAL$",
+    "description": "How many of the first steps are done, over the settings page's checklist.",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "2"
+      },
+      "total": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+
+  "options_step_model": {
+    "message": "Завантажте модель перекладу"
+  },
+
+  "options_step_dictionary": {
+    "message": "Завантажте словник (необов'язково)"
+  },
+
+  "options_step_pin": {
+    "message": "Закріпіть re/read на панелі інструментів"
+  },
+
+  "options_step_how": {
+    "message": "Як"
+  },
+
+  "options_step_done": {
+    "message": "Готово"
+  },
+
+  "options_step_hide": {
+    "message": "Сховати"
+  },
+
+  "options_step_done_state": {
+    "message": "зроблено",
+    "description": "Heard by a screen reader in place of the tick or the circle beside a first step; never shown."
+  },
+
+  "options_step_todo_state": {
+    "message": "зробити",
+    "description": "Heard by a screen reader in place of the tick or the circle beside a first step; never shown."
+  },
+
+  "options_first_steps_show": {
+    "message": "Показати перші кроки"
+  },
+
+  "options_storage_models": {
+    "message": "Моделі перекладу"
+  },
+
+  "options_storage_copies": {
+    "message": "Останні копії"
+  },
+
+  "options_storage_to_file": {
+    "message": "Копію у файл робиться на сторінках, які тримають дані:"
+  },
   "options_first_steps_intro": {
     "message": "Поки що ніщо не перекладається - моделі, яка б це робила, ще немає на цьому пристрої. Підготовка займає хвилину:"
-  },
-  "options_first_steps_model": {
-    "message": "У розділі «Моделі перекладу» знайдіть потрібну мовну пару (найшвидше - через фільтр) і натисніть «Завантажити». Модель зберігається на цьому пристрої й відтоді перекладає офлайн - а перша модель сама задає мовну пару вище."
-  },
-  "options_first_steps_dictionary": {
-    "message": "У розділі «Словники» завантажте словник для тієї самої пари (це необов'язково, але варто) - окремі слова тоді отримують повніші відповіді, ніж сам переклад, і видно їх у бульбашці перекладу під перекладом."
   },
   "options_first_steps_pin": {
     "message": "Наостанок закріпіть re/read на панелі інструментів: значок-пазл праворуч на панелі, потім шестірня біля re/read і «Закріпити на панелі інструментів». Кнопка відкриває режим читання, список читання, збережені фрази та вимикач для сайту, на якому ви зараз."
@@ -2020,7 +2079,7 @@
   "options_storage_how": { "message": "Обсяг пам'яті, який займає розширення." },
 
   "options_storage_how_more": {
-    "message": "Словники займають більше місця, ніж їхні файли, через структуру бази даних. Видалення статті або книги повністю вилучає її текст, зображення, позначення, нотатки та прогрес читання.",
+    "message": "Словники займають більше місця, ніж їхні файли, через структуру бази даних. Видалення статті або книги повністю вилучає її текст, зображення, позначення, нотатки та прогрес читання. Решта - словники, список читання, фрази та позначення - не розбивається: словник коштує в кілька разів більше, ніж важить його текст, а порахувати решту означало б читати кожен рядок баз при кожному відкритті цієї сторінки.",
     "description": "The rest of the options_storage_how description, behind the row's More button."
   },
   "options_storage_persistent": { "message": "Постійне сховище: надано. Браузер пообіцяв не стирати ці дані, щоб звільнити місце." },

@@ -1049,13 +1049,106 @@ button.model-delete {
   margin: 0.35rem 0;
 }
 
-.first-steps ol {
-  margin: 0.35rem 0;
-  padding-left: 1.4rem;
+/* How many of the three are done, at the far end of the card's own line. */
+.steps-count {
+  margin-inline-start: auto;
+  color: var(--page-muted);
+  font-variant-numeric: tabular-nums;
 }
 
-.first-steps li {
-  margin: 0.3rem 0;
+.first-steps summary {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+/* The three steps: a tick or an empty circle, the step, and the way to it -
+   the way disappears when the step is done, so a finished card is three plain
+   lines. The mark is a glyph and never a colour: the state has to survive the
+   sixteen greys an e-ink panel keeps. */
+.steps {
+  margin: 0.5rem 0;
+  padding: 0;
+  list-style: none;
+}
+
+.steps li {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  min-height: 44px;
+  margin: 0;
+}
+
+.step-mark {
+  flex: none;
+  width: 1.1rem;
+  text-align: center;
+}
+
+.steps li.is-done .step-name {
+  color: var(--page-muted);
+}
+
+/* The way to the section the step asks for, at the far end of its line. */
+.step-door,
+.step-done {
+  margin-inline-start: auto;
+}
+
+button.step-done {
+  min-height: 44px;
+  padding: 0.35rem 1rem;
+}
+
+.steps-foot {
+  display: flex;
+  justify-content: flex-end;
+  margin: 0.35rem 0 0;
+}
+
+/* --- what the space is spent on, and the copies (D254, §9) --- */
+
+/* The one share of the total the page can name: indented under it, the
+   figures flush right on the digits' own width so a column of them lines up. */
+.storage-parts {
+  grid-column: 1 / -1;
+  margin: 0.25rem 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--page-muted);
+  font-size: 0.9rem;
+}
+
+.storage-parts li {
+  display: flex;
+  gap: 1rem;
+  padding-inline-start: 1.5rem;
+}
+
+.storage-part-value {
+  margin-inline-start: auto;
+  font-variant-numeric: tabular-nums;
+}
+
+.copies {
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.copies li {
+  margin: 0.25rem 0;
+  color: var(--page-muted);
+  font-size: 0.9rem;
+}
+
+/* The two doors to the pages that hold the data, in the quiet dress of the
+   page's other in-text buttons. */
+.copies-file button {
+  margin-inline-end: 0.75rem;
 }
 
 /* Every summary marker on this page speaks at the same volume. */

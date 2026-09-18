@@ -245,30 +245,67 @@
          both are stored it folds to its heading instead of leaving, so the
          instructions can be reread at will. Hidden until the page has looked
          at both stores, so the first paint is already the right shape. -->
+    <!-- The signpost for a fresh install, counted from what is actually
+         stored (D254, P6): it used to say "nothing translates yet" to
+         somebody with a model already downloaded, because it was a paragraph
+         and not a report. Three steps, each ticked by the page itself where
+         it can tell - a model or the no-model switch, a dictionary, and the
+         browser's own answer about the toolbar - and by hand where it cannot.
+         Open while the first step is undone, one line once it is, and gone
+         for good once every step is or the reader says so ("Hide"); the About
+         section at the foot brings it back. -->
     <details id="first-steps" class="note first-steps translation-only" hidden>
       <summary>
         <h2 data-i18n="options_first_steps_heading">First steps</h2>
+        <span class="steps-count" id="first-steps-count"></span>
       </summary>
-      <p data-i18n="options_first_steps_intro">
+      <!-- Said only while the first step is undone: with a model on the
+           device it was a sentence contradicting the page under it. -->
+      <p id="first-steps-intro" data-i18n="options_first_steps_intro" hidden>
         Nothing translates yet - the model that would do it is not yet on this device. Setting up
         takes a minute:
       </p>
-      <ol>
-        <li data-i18n="options_first_steps_model">
-          Under "Translation models", find the language pair you need (the filter finds it
-          fastest) and press "Download". The model is stored on this device and translates
-          offline from then on - and the first model sets the language pair above by itself.
+      <ul class="steps">
+        <li id="step-model">
+          <span class="step-mark" aria-hidden="true"></span>
+          <span class="visually-hidden step-state"></span>
+          <span class="step-name" data-i18n="options_step_model">Download a translation model</span>
+          <a class="step-door" href="#translation-models" data-i18n="options_models_heading">Translation models</a>
         </li>
-        <li data-i18n="options_first_steps_dictionary">
-          Under "Dictionaries", download a dictionary for the same pair (optional, but worth it)
-          - single words then get fuller answers than a translation alone, shown in the
-          translation bubble below the translation.
+        <li id="step-dictionary">
+          <span class="step-mark" aria-hidden="true"></span>
+          <span class="visually-hidden step-state"></span>
+          <span class="step-name" data-i18n="options_step_dictionary">Download a dictionary (optional)</span>
+          <a class="step-door" href="#dictionaries" data-i18n="options_dictionaries_heading">Dictionaries</a>
         </li>
-      </ol>
-      <p id="first-steps-pin" data-i18n="options_first_steps_pin">
+        <li id="step-pin">
+          <span class="step-mark" aria-hidden="true"></span>
+          <span class="visually-hidden step-state"></span>
+          <span class="step-name" data-i18n="options_step_pin">Pin re/read to the toolbar</span>
+          <button
+            type="button"
+            class="note-more"
+            id="step-pin-how"
+            aria-expanded="false"
+            aria-controls="first-steps-pin"
+            data-i18n="options_step_how"
+          >
+            How
+          </button>
+          <!-- The browser answers this one itself where it can
+               (`action.getUserSettings`, Firefox and Chromium alike); the
+               button is for the browsers and the platforms that cannot -
+               Android has no toolbar to pin anything to. -->
+          <button type="button" class="step-done" id="step-pin-done" data-i18n="options_step_done">Done</button>
+        </li>
+      </ul>
+      <p id="first-steps-pin" data-i18n="options_first_steps_pin" hidden>
         Last, pin re/read to the toolbar: the puzzle-piece icon at the right end of the bar, then
         the gear next to re/read and "Pin to Toolbar". The button opens the reader, the reading
         list, your saved phrases and the switch for the site you are on.
+      </p>
+      <p class="steps-foot">
+        <button type="button" class="note-more" id="first-steps-hide" data-i18n="options_step_hide">Hide</button>
       </p>
     </details>
 
@@ -1272,16 +1309,26 @@
         <p class="row-note row-more" id="more-storage" data-i18n="options_storage_how_more" hidden>
           Dictionaries take up more space than their file size because of the database structure.
           Deleting an article or book completely removes its text, images, highlights, notes and
-          reading progress.
+          reading progress. The rest - the dictionaries, the reading list, your phrases and the
+          highlights - is not broken down: a dictionary costs several times what its text weighs,
+          and counting the rest would mean reading every row of the databases each time this page
+          opens.
         </p>
         <p class="row-note" id="storage-note" hidden></p>
-        <!-- The copy of the vocabulary that outlives the database
-             (`lib/store/backup.js`): how many phrases it holds and since when,
-             or that there is none yet. Said everywhere, because it is true
-             everywhere; on WebKit it is also the answer to the note above. -->
-        <p class="row-note" id="storage-backup"></p>
-        <p class="row-note" id="storage-marks-backup"></p>
-        <p class="row-note" id="storage-library-copy"></p>
+        <!-- The one share of the total this page can name honestly and
+             cheaply (D254, §9): a model's metadata carries what it takes on
+             disk, so the sum of them is a true part of the number above. The
+             dictionaries' own number is what their text weighs, and on disk a
+             dictionary is one database row per word and per other spelling
+             (measured on a 145 MB dictionary: 705 MB of database) - a line
+             saying "8 MB" beside a total of 500 would be a lie told in
+             figures. The rest is left unbroken, and the note says so. -->
+        <ul class="storage-parts">
+          <li>
+            <span data-i18n="options_storage_models">Translation models</span>
+            <span class="storage-part-value" id="storage-models"></span>
+          </li>
+        </ul>
       </div>
       <!-- The copy of the reading list that outlives the database
            (`lib/store/library-backup.js`). On unasked only where the browser
@@ -1308,6 +1355,28 @@
         </p>
       </div>
     </div>
+
+    <!-- The copies that outlive the database, in one place (D254, §9): what
+         each of them holds and when it was written. A report, like the row
+         above it - not a preference, and never a promise made twice. -->
+    <h3 id="copies" data-i18n="options_storage_copies">Latest copies</h3>
+
+    <ul class="copies">
+      <li class="row-note" id="storage-backup"></li>
+      <li class="row-note" id="storage-marks-backup"></li>
+      <li class="row-note" id="storage-library-copy"></li>
+    </ul>
+
+    <!-- The other kind of copy: the one that leaves the device as a file,
+         which lives on the two pages that hold the data (D254, §9). The
+         buttons open those pages, the menu's own road - the address of the
+         transfer section inside them would be a new field in the message the
+         background answers, and this round changes no protocol. -->
+    <p class="explain copies-file">
+      <span data-i18n="options_storage_to_file">A copy as a file is made on the pages that hold the data:</span>
+      <button type="button" class="note-more" id="copy-library" data-i18n="reading_list">Offline reading list</button>
+      <button type="button" class="note-more" id="copy-vocabulary" data-i18n="saved_phrases">Saved phrases</button>
+    </p>
     </section>
 
     <!-- The tinkerer's door (D176): rules of the reader's own for the bubble
@@ -1428,6 +1497,15 @@
       reading list, your saved phrases. Nothing you read or select is ever sent anywhere. An
       internet connection is needed only when you want to download a new translation model or a
       dictionary - and only from the two URLs shown openly in those sections.
+    </p>
+
+    <!-- The way back to the signpost once it has been put away (D254, §7):
+         the card is gone for good otherwise, and the instructions in it are
+         worth rereading. Shown only while it is hidden. -->
+    <p class="explain" id="first-steps-back" hidden>
+      <button type="button" class="note-more" id="first-steps-show" data-i18n="options_first_steps_show">
+        Show the first steps
+      </button>
     </p>
 
     <!-- The one section that is not a setting: who builds this and how to

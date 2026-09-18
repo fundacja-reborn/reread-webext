@@ -265,26 +265,3 @@ export function pairChoices(rows, reading, dictionaries = []) {
   return sortByLabel(chosen !== null && !known ? [chosen, ...offered] : offered);
 }
 
-/**
- * Which way the first-steps fold should move after a look at the stores.
- *
- * Setting up means two downloads, so the fold stands open while a model or a
- * dictionary is missing, and closes once both are here - but it only moves
- * when that verdict changes. Between changes `open` is null, and a fold the
- * reader toggled by hand stays as they left it through every redraw. Losing
- * the last model or dictionary opens it again: translating truly stopped
- * working, and the instructions are the answer to that.
- *
- * Any model and any dictionary count, not just the reading pair's: the fold
- * teaches the two moves, and the catalogue has no dictionary for every pair a
- * model exists for - a demand it cannot meet would hold the fold open forever.
- *
- * @param {boolean | null} wasDone the last look's verdict, null before the first
- * @param {boolean} modelStored whether any model is stored
- * @param {boolean} dictionaryStored whether any dictionary is stored
- * @returns {{ done: boolean, open: boolean | null }} the verdict to remember, and the move to make
- */
-export function firstStepsMove(wasDone, modelStored, dictionaryStored) {
-  const done = modelStored && dictionaryStored;
-  return { done, open: done === wasDone ? null : !done };
-}

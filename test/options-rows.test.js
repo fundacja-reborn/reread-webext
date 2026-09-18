@@ -69,7 +69,9 @@ describe("the settings rows", () => {
     // sentence broken around a link to the models, and its halves are held
     // together by the markup rather than each ending in a full stop.
     const hints = [
-      ...markup.matchAll(/<span data-i18n="([a-z_]+)"\s*>[^<]*<\/span\s*>\s*<button type="button" class="note-more"/g),
+      ...markup.matchAll(
+        /<p class="row-note">\s*<span data-i18n="([a-z_]+)"\s*>[^<]*<\/span\s*>\s*<button type="button" class="note-more"/g,
+      ),
     ].map((match) => String(match[1]));
     assert.ok(hints.length >= 15, `only ${hints.length} rows open with a sentence of their own`);
     for (const locale of LOCALES) {

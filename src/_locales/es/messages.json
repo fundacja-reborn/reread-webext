@@ -1425,14 +1425,73 @@
     "description": "Heading of the last settings section: what the extension promises about the network, who builds it, how to support it."
   },
   "options_first_steps_heading": { "message": "Primeros pasos" },
+
+  "options_first_steps_count": {
+    "message": "$DONE$ de $TOTAL$",
+    "description": "How many of the first steps are done, over the settings page's checklist.",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "2"
+      },
+      "total": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+
+  "options_step_model": {
+    "message": "Descargar un modelo de traducción"
+  },
+
+  "options_step_dictionary": {
+    "message": "Descargar un diccionario (opcional)"
+  },
+
+  "options_step_pin": {
+    "message": "Anclar re/read a la barra de herramientas"
+  },
+
+  "options_step_how": {
+    "message": "Cómo"
+  },
+
+  "options_step_done": {
+    "message": "Hecho"
+  },
+
+  "options_step_hide": {
+    "message": "Ocultar"
+  },
+
+  "options_step_done_state": {
+    "message": "hecho",
+    "description": "Heard by a screen reader in place of the tick or the circle beside a first step; never shown."
+  },
+
+  "options_step_todo_state": {
+    "message": "por hacer",
+    "description": "Heard by a screen reader in place of the tick or the circle beside a first step; never shown."
+  },
+
+  "options_first_steps_show": {
+    "message": "Mostrar los primeros pasos"
+  },
+
+  "options_storage_models": {
+    "message": "Modelos de traducción"
+  },
+
+  "options_storage_copies": {
+    "message": "Últimas copias"
+  },
+
+  "options_storage_to_file": {
+    "message": "Una copia como archivo se hace en las páginas que guardan los datos:"
+  },
   "options_first_steps_intro": {
     "message": "Todavía no se traduce nada - el modelo que lo haría aún no está en este dispositivo. La puesta en marcha lleva un minuto:"
-  },
-  "options_first_steps_model": {
-    "message": "Bajo «Modelos de traducción», busca el par de idiomas que necesitas (el filtro es lo más rápido) y pulsa «Descargar». El modelo queda guardado en este dispositivo y desde entonces traduce sin conexión - y el primer modelo ajusta por sí solo el par de idiomas de arriba."
-  },
-  "options_first_steps_dictionary": {
-    "message": "Bajo «Diccionarios», descarga un diccionario para el mismo par (opcional, pero merece la pena) - las palabras sueltas reciben entonces respuestas más completas que una traducción sola, visibles en la burbuja de traducción bajo la traducción."
   },
   "options_first_steps_pin": {
     "message": "Por último, fija re/read a la barra de herramientas: el icono de la pieza de puzle a la derecha de la barra, luego el engranaje junto a re/read y «Fijar a la barra de herramientas». El botón abre la vista de lectura, la lista de lectura, tus frases guardadas y el interruptor del sitio en el que estás."
@@ -1451,7 +1510,7 @@
   "options_storage_how": { "message": "Espacio en disco utilizado por la extensión." },
 
   "options_storage_how_more": {
-    "message": "Los diccionarios ocupan más espacio que su tamaño original debido a la estructura de la base de datos. Eliminar un artículo o libro borra por completo su texto, imágenes, resaltados, notas y progreso de lectura.",
+    "message": "Los diccionarios ocupan más espacio que su tamaño original debido a la estructura de la base de datos. Eliminar un artículo o libro borra por completo su texto, imágenes, resaltados, notas y progreso de lectura. El resto - los diccionarios, la lista de lectura, tus frases y los resaltados - no se desglosa: un diccionario cuesta varias veces lo que pesa su texto, y contar el resto significaría leer cada fila de las bases cada vez que se abre esta página.",
     "description": "The rest of the options_storage_how description, behind the row's More button."
   },
   "options_storage_persistent": { "message": "Almacenamiento persistente: concedido. El navegador ha prometido no borrar estos datos para hacer sitio." },

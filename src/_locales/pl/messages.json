@@ -1994,14 +1994,73 @@
     "description": "Heading of the last settings section: what the extension promises about the network, who builds it, how to support it."
   },
   "options_first_steps_heading": { "message": "Pierwsze kroki" },
+
+  "options_first_steps_count": {
+    "message": "$DONE$ z $TOTAL$",
+    "description": "How many of the first steps are done, over the settings page's checklist.",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "2"
+      },
+      "total": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+
+  "options_step_model": {
+    "message": "Pobierz model tłumaczenia"
+  },
+
+  "options_step_dictionary": {
+    "message": "Pobierz słownik (opcjonalnie)"
+  },
+
+  "options_step_pin": {
+    "message": "Przypnij re/read do paska narzędzi"
+  },
+
+  "options_step_how": {
+    "message": "Jak"
+  },
+
+  "options_step_done": {
+    "message": "Zrobione"
+  },
+
+  "options_step_hide": {
+    "message": "Ukryj"
+  },
+
+  "options_step_done_state": {
+    "message": "zrobione",
+    "description": "Heard by a screen reader in place of the tick or the circle beside a first step; never shown."
+  },
+
+  "options_step_todo_state": {
+    "message": "do zrobienia",
+    "description": "Heard by a screen reader in place of the tick or the circle beside a first step; never shown."
+  },
+
+  "options_first_steps_show": {
+    "message": "Pokaż pierwsze kroki"
+  },
+
+  "options_storage_models": {
+    "message": "Modele tłumaczeniowe"
+  },
+
+  "options_storage_copies": {
+    "message": "Ostatnie kopie"
+  },
+
+  "options_storage_to_file": {
+    "message": "Kopię do pliku zrobisz na stronach, które trzymają dane:"
+  },
   "options_first_steps_intro": {
     "message": "Nic się jeszcze nie tłumaczy - modelu, który by to robił, nie ma jeszcze na tym urządzeniu. Przygotowanie zajmuje minutę:"
-  },
-  "options_first_steps_model": {
-    "message": "W sekcji „Modele tłumaczeniowe” znajdź parę językową, której potrzebujesz (najszybciej przez filtr), i naciśnij „Pobierz”. Model zostaje zapisany na tym urządzeniu i odtąd tłumaczy offline - a pierwszy model sam ustawia parę językową powyżej."
-  },
-  "options_first_steps_dictionary": {
-    "message": "W sekcji „Słowniki” pobierz słownik dla tej samej pary (to opcjonalne, ale warto) - pojedyncze słowa dostają wtedy pełniejsze odpowiedzi niż samo tłumaczenie, widoczne w dymku tłumaczenia pod tłumaczeniem."
   },
   "options_first_steps_pin": {
     "message": "Na koniec przypnij re/read do paska narzędzi: ikona puzzla po prawej stronie paska, potem koło zębate przy re/read i „Przypnij do paska narzędzi”. Przycisk otwiera widok czytania, czytelnię, zapisane frazy i wyłącznik witryny, na której jesteś."
@@ -2020,7 +2079,7 @@
   "options_storage_how": { "message": "Miejsce na dysku zajmowane przez rozszerzenie." },
 
   "options_storage_how_more": {
-    "message": "Słowniki zajmują więcej miejsca niż ich oryginalny rozmiar z powodu struktury bazy danych. Usunięcie artykułu lub książki bezpowrotnie kasuje tekst, obrazy, zakreślenia, notatki i postęp czytania.",
+    "message": "Słowniki zajmują więcej miejsca niż ich oryginalny rozmiar z powodu struktury bazy danych. Usunięcie artykułu lub książki bezpowrotnie kasuje tekst, obrazy, zakreślenia, notatki i postęp czytania. Reszta - słowniki, czytelnia, frazy i zakreślenia - nie jest rozbita: słownik kosztuje kilka razy więcej, niż waży jego tekst, a policzenie reszty znaczyłoby czytanie każdego wiersza baz przy każdym otwarciu tej strony.",
     "description": "The rest of the options_storage_how description, behind the row's More button."
   },
   "options_storage_persistent": { "message": "Magazyn trwały: przyznany. Przeglądarka obiecała nie kasować tych danych, żeby zrobić miejsce." },
