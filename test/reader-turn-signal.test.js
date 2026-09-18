@@ -107,7 +107,7 @@ describe("the signal that a page has turned (D251)", () => {
   it("offers the effect on the settings page, in every language", async () => {
     const markup = await source("options/options.html");
     assert.match(markup, /<select id="turn-effect">\s*<option value="auto"[\s\S]*?<option value="off"/, "the row does not offer the two values");
-    assert.match(markup, /data-fold data-i18n="options_turn_effect_hint"/, "the row has no folded note");
+    assert.match(markup, /data-i18n="options_turn_effect_hint"[\s\S]{0,400}?aria-controls="more-/, "the row's note has no sentence and no More behind it");
     const script = await source("options/options.js");
     assert.match(script, /if \(!\(select instanceof HTMLSelectElement\) \|\| !isTurnEffect\(select\.value\)\) return;/, "a value the guard does not know can be written");
     assert.match(script, /writeConfig\(\{ reader: \{ turnEffect: select\.value \} \}\)/, "the row does not write the reader's setting");

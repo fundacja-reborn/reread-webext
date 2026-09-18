@@ -1765,7 +1765,12 @@
     "description": "The size line of the storage row. $SIZE$ is the amount, already formatted with its unit.",
     "placeholders": { "size": { "content": "$1", "example": "143.2 MB" } }
   },
-  "options_storage_how": { "message": "Disk space used by the extension. Dictionaries take up more space than their file size because of the database structure. Deleting an article or book completely removes its text, images, highlights, notes and reading progress." },
+  "options_storage_how": { "message": "Disk space used by the extension." },
+
+  "options_storage_how_more": {
+    "message": "Dictionaries take up more space than their file size because of the database structure. Deleting an article or book completely removes its text, images, highlights, notes and reading progress.",
+    "description": "The rest of the options_storage_how description, behind the row's More button."
+  },
   "options_storage_persistent": { "message": "Persistent storage: granted. The browser has promised not to clear this data to make room." },
   "options_storage_at_risk": {
     "message": "Persistent storage: not granted. Safari clears a site's data after about a month of use without a tap on its pages, and this extension's pages count as one site. Your phrases have a copy that survives this (the line below); the models, the dictionaries and the reading list do not - open the reader or these settings now and then.",
@@ -1804,7 +1809,12 @@
   "options_storage_library_copy_off": { "message": "Copy of the reading list: off." },
   "options_library_copy": { "message": "Copy of the reading list" },
   "options_library_copy_hint": {
-    "message": "Creates a backup of your reading list to protect it against automatic browser cleanups and database errors. This doubles the disk space the list takes, but keeps your saved articles safe if the database is lost."
+    "message": "A second copy of the reading list, safe from the browser's own clean-ups; it takes twice the space."
+  },
+
+  "options_library_copy_more": {
+    "message": "It survives a database error too: your saved articles are kept even if the database is lost.",
+    "description": "The rest of the options_library_copy_hint description, behind the row's More button."
   },
   "reader_marks_delete_all_one": {
     "message": "Delete the $COUNT$ quote of this page",
@@ -1851,11 +1861,21 @@
   },
   "options_reader_only": { "message": "Only in the reader" },
   "options_reader_only_hint": {
-    "message": "Limits the underlining of saved phrases and the translation bubble to the reader. Selecting text on an ordinary web page will only show an option to open the page in the reader. With it on, no web page can tell which of its words you have saved. On Android and iOS it is on by default."
+    "message": "Underlines and the bubble only in the reader; on an ordinary page a selection shows a button that opens it there."
+  },
+
+  "options_reader_only_more": {
+    "message": "With it on, no web page can tell which of its words you have saved. On Android and iOS it is on by default.",
+    "description": "The rest of the options_reader_only_hint description, behind the row's More button."
   },
   "options_page_number": { "message": "Page number" },
   "options_page_number_hint": {
-    "message": "Shows a page count at the foot of the window. Off, the last line of each page stands lower; the count is still read by screen readers, and on a wide screen it stands in the bar next to re/read."
+    "message": "A page count at the foot of the window."
+  },
+
+  "options_page_number_more": {
+    "message": "Off, the last line of each page stands lower; the count is still read by screen readers, and on a wide screen it stands in the bar next to re/read.",
+    "description": "The rest of the options_page_number_hint description, behind the row's More button."
   },
   "options_paged_heading": { "message": "Pages layout" },
   "options_paged_intro": {
@@ -1866,7 +1886,12 @@
   "options_touch_turn_swipe": { "message": "Slide a finger sideways" },
   "options_touch_turn_off": { "message": "Off" },
   "options_touch_turn_hint": {
-    "message": "On a wide screen the default is a tap, on a narrow one a slide - there the hand that holds the device rests on the screen, and a gesture that has to move is the one it cannot make by accident. The page keys, the arrow keys and the mouse wheel turn pages whatever this is set to, and the pen never turns one."
+    "message": "How a finger turns the pages."
+  },
+
+  "options_touch_turn_more": {
+    "message": "On a wide screen the default is a tap, on a narrow one a slide - there the hand that holds the device rests on the screen, and a gesture that has to move is the one it cannot make by accident. The page keys, the arrow keys and the mouse wheel turn pages whatever this is set to, and the pen never turns one.",
+    "description": "The rest of the options_touch_turn_hint description, behind the row's More button."
   },
   "options_touch_turn_note_zones": {
     "message": "A tap in the left or right third of the page turns it: the right third goes on, the left goes back. Only a short, still tap away from the edges of the screen counts, so that a thumb holding the device turns nothing."
@@ -1881,7 +1906,12 @@
   "options_turn_effect_auto": { "message": "Automatic" },
   "options_turn_effect_off": { "message": "Off" },
   "options_turn_effect_hint": {
-    "message": "Shows that the page has turned, which is easy to miss when you are reading the middle of a page. Nothing happens if your system asks for less motion, and nothing when the page is turned by reading aloud or by dragging a selection to the edge of the page."
+    "message": "A sign that the page has turned."
+  },
+
+  "options_turn_effect_more": {
+    "message": "It is easy to miss when you are reading the middle of a page. Nothing happens if your system asks for less motion, and nothing when the page is turned by reading aloud or by dragging a selection to the edge of the page.",
+    "description": "The rest of the options_turn_effect_hint description, behind the row's More button."
   },
   "options_turn_effect_note_auto": {
     "message": "In the E-ink theme the text area goes dark for a moment, the way an e-reader marks a page turn; on other screens the new page slides in."
@@ -1891,11 +1921,21 @@
   },
   "options_keep_articles": { "message": "Save in the offline reading list by default" },
   "options_keep_articles_hint": {
-    "message": "Automatically saves every page you open in the reader for offline reading. Your saved pages, highlights and reading progress are kept safe even if the original website changes or disappears."
+    "message": "Every page you open in the reader goes into the offline reading list."
+  },
+
+  "options_keep_articles_more": {
+    "message": "Your saved pages, highlights and reading progress are kept safe even if the original website changes or disappears.",
+    "description": "The rest of the options_keep_articles_hint description, behind the row's More button."
   },
   "options_font_custom": { "message": "Own font" },
   "options_font_custom_hint": {
-    "message": "Type the name of a font installed on this device, for example Georgia or Noto Serif. The reading view's Type row will then offer it as Custom. Leave the field empty to use the built-in typefaces only."
+    "message": "A typeface installed on this device, for example Noto Serif; it then appears as Custom in the Type row of the Aa panel."
+  },
+
+  "options_font_custom_more": {
+    "message": "Type the name as the system spells it. Leave the field empty to use the built-in typefaces only.",
+    "description": "The rest of the options_font_custom_hint description, behind the row's More button."
   },
   "options_reading_pace": { "message": "Reading speed" },
   "options_reading_pace_unit": {
@@ -1903,56 +1943,101 @@
     "description": "After the number field of the reading pace row (D228). Lower case: it follows the number as a unit, the way 1.0× follows the voice's speed."
   },
   "options_reading_pace_hint": {
-    "message": "The number of words you read in a minute. It is used only to estimate the reading time shown in the reading list and under an article's title. 200 is an unhurried pace in your own language; in a language you are learning it is usually 100-150."
+    "message": "Used only to estimate the reading time shown in the reading list and under an article's title."
+  },
+
+  "options_reading_pace_more": {
+    "message": "The number of words you read in a minute. 200 is an unhurried pace in your own language; in a language you are learning it is usually 100-150.",
+    "description": "The rest of the options_reading_pace_hint description, behind the row's More button."
   },
   "options_quiet_bubble_hint": {
-    "message": "Shows only the translated text in the bubble. The action buttons (such as copy or save) appear only when you click or tap the bubble."
+    "message": "The bubble shows the translation alone; the buttons appear when you click or tap it."
+  },
+
+  "options_quiet_bubble_more": {
+    "message": "The action buttons are copy, save, read aloud and the rest - everything the bubble can do, one press away.",
+    "description": "The rest of the options_quiet_bubble_hint description, behind the row's More button."
   },
   "options_bubble_more": {
     "message": "Show the sentence and dictionary entries right away",
     "description": "Checkbox label on the settings page (D186): the bubble over a fresh selection opens with its second layer - the translated sentence and the dictionary entries - already out, where a press on More used to be the only way to them. On by default."
   },
   "options_bubble_more_hint": {
-    "message": "When you select text, the bubble shows right away what is otherwise shown only after a press on \"More\": the translated sentence and the dictionary entries. Worth keeping on with a dictionary installed - a translation model often gets a single word wrong, and the dictionary shows what it really means. The bubble over an already saved phrase shows only the saved translation - the sentence and the dictionary entries appear after you press \"More\".",
+    "message": "The bubble shows the translated sentence and the dictionary entries right away, with no press on More.",
     "description": "Quotes the bubble_more button - each language quotes its own wording of that key, so they must move together. The last sentence is the promise that the bubble over an underline (a saved phrase) is not changed by the switch."
+  },
+
+  "options_bubble_more_more": {
+    "message": "Worth keeping on with a dictionary installed - a translation model often gets a single word wrong, and the dictionary shows what it really means. The bubble over an already saved phrase shows only the saved translation - the sentence and the dictionary entries appear after you press \"More\".",
+    "description": "The rest of the options_bubble_more_hint description, behind the row's More button."
   },
   "options_underline_forms": {
     "message": "Underline other forms of saved words",
     "description": "Checkbox label on the settings page (D208): a saved word is underlined in its other forms as well - read in reads and reading - when an installed dictionary of the language confirms them. Off by default."
   },
   "options_underline_forms_hint": {
-    "message": "A saved word is underlined in its other forms too: save \"read\", and \"reads\" and \"reading\" are underlined as well - the bubble over them shows what you saved for \"read\". Which forms count is decided by your dictionary for the language you read, so one has to be installed. For now only when you read English. Switched off, only the exact form you saved is underlined.",
+    "message": "Save \"read\", and \"reads\" and \"reading\" are underlined too.",
     "description": "The example words read, reads and reading are English and stay English in every language: they are the forms the rules know. The last sentence is the promise the README makes - matching is literal unless this is on."
+  },
+
+  "options_underline_forms_more": {
+    "message": "The bubble over them shows what you saved for \"read\". Which forms count is decided by your dictionary for the language you read, so one has to be installed. For now only when you read English. Switched off, only the exact form you saved is underlined.",
+    "description": "The rest of the options_underline_forms_hint description, behind the row's More button."
   },
   "options_save_sentence": {
     "message": "Save the sentence with the phrase",
     "description": "Checkbox label on the settings page (D210): a phrase saved from the bubble keeps the sentence it stood in - the page's own sentence, never its translation. Off by default."
   },
   "options_save_sentence_hint": {
-    "message": "When you save a phrase from the bubble, the sentence around it is saved with it - the sentence as the page shows it, without its translation. It is shown under the phrase on the saved phrases page, folded to one line, and written into the third column of the export for Anki. For a phrase saved without a sentence, the sentence around it is saved the next time you open its bubble on a page. Like the phrase, the sentence is stored only on this device. Switched off, no new sentence is saved; the ones already saved are not deleted.",
+    "message": "Saving a phrase saves the sentence it stood in as well.",
     "description": "Under the checkbox. Names the two places the sentence is shown (the phrases page, the export for Anki), says that for a phrase saved without a sentence the sentence is saved the next time its bubble opens (D216), and makes two promises the README and PRIVACY.md make: the sentence never leaves the device, and switching off deletes nothing. Plain statements about what is saved and shown - no phrase 'takes', 'keeps' or 'stands in' anything (Michał, 2026-09-13)."
+  },
+
+  "options_save_sentence_more": {
+    "message": "The sentence as the page shows it, without its translation. It is shown under the phrase on the saved phrases page, folded to one line, and written into the third column of the export for Anki. For a phrase saved without a sentence, the sentence around it is saved the next time you open its bubble on a page. Like the phrase, the sentence is stored only on this device. Switched off, no new sentence is saved; the ones already saved are not deleted.",
+    "description": "The rest of the options_save_sentence_hint description, behind the row's More button."
   },
   "options_no_translation": { "message": "Use without a translation model" },
   "options_no_translation_hint": {
-    "message": "Turns off machine translation (the model). The reader, the offline reading list and the highlighter keep working. With a language pair chosen, the bubble still shows dictionary meanings, and you can save phrases and see their underlines. Ideal for reading with dictionaries or in your native language. Your saved data is not deleted and returns when you turn this off."
+    "message": "Dictionaries only, without machine translation; the reader, the offline reading list and the highlighter keep working."
+  },
+
+  "options_no_translation_more": {
+    "message": "With a language pair chosen, the bubble still shows dictionary meanings, and you can save phrases and see their underlines. Ideal for reading with dictionaries or in your native language. Your saved data is not deleted and returns when you turn this off.",
+    "description": "The rest of the options_no_translation_hint description, behind the row's More button."
   },
   "options_bubble_off": { "message": "No bubble when selecting text" },
   "options_bubble_off_hint": {
-    "message": "With this on, selecting text on an ordinary page does nothing at all - open a page in the reader from re/read's button or with Alt+Shift+R. In the reader a selection is only a highlight for the moment: no bubble opens, a tap or Escape clears it, and Ctrl+C or Cmd+C copies it (on a touch screen nothing can be copied).",
+    "message": "With this on, selecting text on an ordinary page does nothing at all - open a page in the reader from re/read's button or with Alt+Shift+R.",
     "description": "Under the sub-option of the translation-off switch on the settings page (D149); the row shows only while that switch is on. Alt+Shift+R is the extension's keyboard shortcut for opening the reader."
+  },
+
+  "options_bubble_off_more": {
+    "message": "In the reader a selection is only a highlight for the moment: no bubble opens, a tap or Escape clears it, and Ctrl+C or Cmd+C copies it (on a touch screen nothing can be copied).",
+    "description": "The rest of the options_bubble_off_hint description, behind the row's More button."
   },
   "options_bubble_scale": { "message": "Bubble text size" },
   "options_bubble_scale_hint": {
     "message": "Adjusts the text and button size inside the translation bubble across all pages."
   },
   "options_note_more": {
-    "message": "Show the full description",
+    "message": "More",
     "description": "The accessible name of the chevron that opens a folded description on the settings page (D155); `aria-expanded` carries the state."
+  },
+
+  "options_field_saved": {
+    "message": "Saved",
+    "description": "Beside a text field on the settings page once what was typed in it has been stored. Stays until the next edit - never taken away on a timer."
   },
   "options_tts": { "message": "Reading aloud" },
   "options_tts_hint": {
-    "message": "Enables the text-to-speech function. Turning this off hides all read-aloud buttons in the bubble, lists, and the reader.",
+    "message": "The read-aloud buttons in the bubble, in the lists and in the reader.",
     "description": "Under the reading-aloud switch on the settings page (D148). Off, the voice and speed rows below it hide as well."
+  },
+
+  "options_tts_more": {
+    "message": "Turning this off hides every one of them. The voice and the speed you chose stay stored and come back when you turn it on again.",
+    "description": "The rest of the options_tts_hint description, behind the row's More button."
   },
   "options_tts_voice": { "message": "Voice for reading aloud" },
   "options_tts_lang": {
@@ -1962,8 +2047,13 @@
   "options_tts_default": { "message": "Default voice" },
   "options_tts_listen": { "message": "Listen" },
   "options_tts_voice_hint": {
-    "message": "Select the voice used to read phrases and articles in each language. Only voices that speak offline are offered: speech is made on this device and nothing is sent to the internet.",
+    "message": "A separate voice for each language; only voices that speak offline are offered.",
     "description": "Under the voice select on the settings page. True by construction (D155): `voicesFor` in lib/tts.js keeps out every voice the engine marks as remote (localService false), and nothing speaks through one."
+  },
+
+  "options_tts_voice_more": {
+    "message": "The voice reads phrases and whole articles alike. Speech is made on this device and nothing is sent to the internet.",
+    "description": "The rest of the options_tts_voice_hint description, behind the row's More button."
   },
   "speech_no_offline_voice": {
     "message": "This device has no offline voice for this language.",

@@ -86,7 +86,7 @@ describe("the page's foot (D238)", () => {
     // one has turned, in the order a page is read in.
     assert.match(markup, /id="paged-layout"[\s\S]*?<input type="checkbox" id="page-number" \/>[\s\S]*?id="touch-turn"[\s\S]*?id="turn-effect"/, "the page-number row does not open the Pages layout's section");
     assert.match(markup, /data-i18n="options_page_number">Page number</, "the row's name is not the catalogue's");
-    assert.match(markup, /data-fold data-i18n="options_page_number_hint"/, "the row has no folded note");
+    assert.match(markup, /data-i18n="options_page_number_hint"[\s\S]{0,400}?aria-controls="more-/, "the row's note has no sentence and no More behind it");
     const script = await source("options/options.js");
     assert.match(script, /writeConfig\(\{ reader: \{ pageNumber: toggle\.checked \} \}\)/, "the switch does not write the reader's setting");
     assert.equal((script.match(/renderPageNumber\(\);/g) ?? []).length, 2, "the switch is not drawn on both renders");

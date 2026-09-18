@@ -129,10 +129,9 @@ localizePage();
 // empty list would otherwise say wrongly, said first and in the catalogue's
 // words (`private-note.js`).
 privateNote();
-// Then the descriptions fold (D155) - after the catalogue's text is in them,
-// because whether a note overflows its two lines is a question about the
-// text it has now.
-foldNotes();
+// Then the row notes' More (D254) - after the catalogue's text is in them,
+// because the button says the catalogue's word for "more".
+moreNotes();
 // The toolbar icon follows the browser's scheme where the manifest cannot
 // say so (Chromium, no theme_icons there) - a no-op on Firefox.
 watchToolbarScheme();
@@ -568,27 +567,29 @@ function renderNoTranslation() {
 }
 
 /**
- * The switch's sub-option (D149). Its row comes and goes with the body class
- * `renderNoTranslation` sets - which is why this rides in it - and the box
- * shows the stored value whenever the row is on the page.
+ * The switch's sub-option (D149). Its row comes and goes with the switch over
+ * it (`renderDependents`, D254) - which is why this rides in the switch's own
+ * render - and the box shows the stored value whenever the row is on the page.
  */
 function renderBubbleOff() {
   const toggle = document.getElementById("bubble-off");
   if (toggle instanceof HTMLInputElement) toggle.checked = config.bubbleOff;
+  renderDependents();
 }
 
 /**
- * The reading-aloud switch (D148): the head of the two voice rows, which the
- * body class folds away with it (`tts-only`). The switch is handed to
- * `lib/tts.js` here too, so the voice select and the Listen button answer
- * for it the way every other speaker does - and it lands before `renderVoice`
- * asks, on every road that redraws this page.
+ * The reading-aloud switch (D148): the head of the two voice rows, which
+ * leave the page with it (`renderDependents`, D254 - they used to go with a
+ * body class, which said nothing about which row they belonged to). The
+ * switch is handed to `lib/tts.js` here too, so the voice select and the
+ * Listen button answer for it the way every other speaker does - and it lands
+ * before `renderVoice` asks, on every road that redraws this page.
  */
 function renderTts() {
   const toggle = document.getElementById("tts");
   if (toggle instanceof HTMLInputElement) toggle.checked = !config.ttsOff;
-  document.body.classList.toggle("no-tts", config.ttsOff);
   setSpeechOff(config.ttsOff);
+  renderDependents();
 }
 
 /** The bubble-size stepper's value (D85), shown as the percent it is stored as. */
@@ -741,81 +742,71 @@ function renderVoice() {
 }
 
 /**
- * The descriptions under the rows fold to two lines (D155): a settings page
- * is a list to scan, and a whole paragraph under every switch made it a page
- * to read. Each note marked `data-fold` is boxed with a chevron cloned from
- * the page's template; the box opens and closes on a press anywhere in it
- * (a link inside keeps its own meaning), the chevron is the button a keyboard
- * and a screen reader get, and it stands only where the text really overflows
- * its two lines - measured, and measured again whenever the note's size moves
- * (a resize, a row shown by a switch, a font arriving), because a chevron over
- * a note that fits promises more where there is none. The verdict must not
- * move what it measures: the chevron's column stays whether the chevron is
- * drawn or not (`.note-toggle` in options.css), so the note is as wide after
- * the verdict as before it - a chevron that took its column only when needed
- * narrowed the note, which re-measured it in the same frame, and Chrome
- * reported the ResizeObserver loop as an error of the extension. Screen
- * readers hear the whole text either way: the fold is a clip, not a removal.
+ * The row notes' own More (D254, P5). Every note says one whole sentence,
+ * always: the page used to clip each of them to two lines and an ellipsis in
+ * mid-sentence, with a chevron beside it, which put grey noise in every row
+ * and left no sentence anybody could finish reading. What is left over stands
+ * in the paragraph under the note, hidden until the press - `hidden` and not a
+ * clip, so a screen reader hears the sentence and the rest exactly as the eye
+ * does, and so the search (D254) can open the one it matched.
+ *
+ * The button is markup, not something built here: which rows have more to say
+ * is a fact about the catalogue, not about how a paragraph happens to wrap on
+ * one screen, and the old measuring is what made a chevron promise more where
+ * there was none.
  */
-function foldNotes() {
-  const chevron = document.getElementById("note-chevron");
-  const observer =
-    typeof ResizeObserver === "function"
-      ? new ResizeObserver((entries) => {
-          for (const entry of entries) judgeFold(entry.target);
-        })
-      : null;
-
-  let count = 0;
-  for (const note of document.querySelectorAll("p.row-note[data-fold]")) {
-    if (!(note instanceof HTMLParagraphElement) || note.parentElement === null) continue;
-    count += 1;
-    // The chevron names what it opens; a note without an id gets one.
-    if (note.id === "") note.id = `note-${count}`;
-
-    const box = element("div", "note-fold");
-    box.dataset["folded"] = "";
-    note.parentElement.insertBefore(box, note);
-    box.append(note);
-
-    const toggle = element("button", "note-toggle");
-    toggle.setAttribute("type", "button");
-    toggle.setAttribute("aria-expanded", "false");
-    toggle.setAttribute("aria-controls", note.id);
-    toggle.setAttribute("aria-label", t("options_note_more"));
-    if (chevron instanceof HTMLTemplateElement) toggle.append(chevron.content.cloneNode(true));
-    box.append(toggle);
-
-    box.addEventListener("click", (event) => {
-      // A link inside the note is a door of its own, not a handle on the fold.
-      if (event.target instanceof Element && event.target.closest("a") !== null) return;
-      if (!("long" in box.dataset)) return;
-      const opening = "folded" in box.dataset;
-      if (opening) delete box.dataset["folded"];
-      else box.dataset["folded"] = "";
-      toggle.setAttribute("aria-expanded", String(opening));
-      judgeFold(note);
+function moreNotes() {
+  for (const button of document.querySelectorAll("button.note-more")) {
+    if (!(button instanceof HTMLButtonElement)) continue;
+    const rest = document.getElementById(button.getAttribute("aria-controls") ?? "");
+    if (rest === null) {
+      // A More with nothing behind it is a button that lies; there should be
+      // none, and if the markup ever drifts the page drops it rather than
+      // offering it.
+      button.remove();
+      continue;
+    }
+    button.addEventListener("click", () => {
+      const opening = rest.hidden;
+      rest.hidden = !opening;
+      button.setAttribute("aria-expanded", String(opening));
     });
-
-    observer?.observe(note);
-    judgeFold(note);
   }
 }
 
 /**
- * Whether a folded note holds more than its two lines show. The box's
- * `data-long` is the whole verdict - the stylesheet draws the chevron and
- * turns the pointer on it, and nothing here changes a size the observer
- * watches. An open note is left alone - it is judged again when it folds.
+ * The rows that only mean anything under another row (D254, §6.3): the voice
+ * and its speed under reading aloud, the bubble switch under the mode. A
+ * child is on the page exactly while its parent's box is ticked - `hidden`,
+ * so it leaves the accessibility tree with the screen rather than standing
+ * there as a control nobody can reach.
  *
- * @param {Element} note
+ * The parent is named on the row (`data-parent`, its setting's name) and the
+ * verdict is read off the parent's own box rather than the config: the box is
+ * what the page is showing, and the two must never disagree mid-write.
  */
-function judgeFold(note) {
-  const box = note.parentElement;
-  if (box === null || !("folded" in box.dataset)) return;
-  const long = note.scrollHeight > note.clientHeight + 1;
-  if (long) box.dataset["long"] = "";
-  else delete box.dataset["long"];
+function renderDependents() {
+  for (const row of document.querySelectorAll(".row[data-parent]")) {
+    if (!(row instanceof HTMLElement)) continue;
+    const parent = document.querySelector(`.row[data-setting="${row.dataset["parent"] ?? ""}"] input[type="checkbox"]`);
+    if (!(parent instanceof HTMLInputElement)) continue;
+    row.hidden = !parent.checked;
+  }
+}
+
+/**
+ * What was typed into a field is stored, said beside the field (D254, §6.5):
+ * a name typed into a field that keeps it looks exactly like a name typed into
+ * a field that lost it. The word stays until the next edit - never taken away
+ * on a clock, because every disappearance is one more refresh of an e-ink
+ * panel.
+ *
+ * @param {string} id the field's own id; its word is `<id>-saved`
+ * @param {boolean} saved
+ */
+function tellSaved(id, saved) {
+  const word = document.getElementById(`${id}-saved`);
+  if (word !== null) word.hidden = !saved;
 }
 
 /**
@@ -3131,6 +3122,7 @@ document.getElementById("font-custom")?.addEventListener("change", (event) => {
   }).then((written) => {
     config = written;
     renderFontCustom();
+    tellSaved("font-custom", true);
   });
 });
 // The preview follows every keystroke; only the stored value waits for the
@@ -3138,6 +3130,9 @@ document.getElementById("font-custom")?.addEventListener("change", (event) => {
 document.getElementById("font-custom")?.addEventListener("input", (event) => {
   const field = event.target;
   if (field instanceof HTMLInputElement) previewFontFamily(field);
+  // The word goes on the first keystroke after it: what stands in the field
+  // is no longer what was stored.
+  tellSaved("font-custom", false);
 });
 document.getElementById("font-custom")?.addEventListener("keydown", (event) => {
   if (event.key === "Enter" && event.target instanceof HTMLElement) event.target.blur();
@@ -3158,7 +3153,11 @@ document.getElementById("reading-pace")?.addEventListener("change", (event) => {
   void writeConfig({ readingPace: typed }).then((written) => {
     config = written;
     renderPace();
+    tellSaved("reading-pace", true);
   });
+});
+document.getElementById("reading-pace")?.addEventListener("input", () => {
+  tellSaved("reading-pace", false);
 });
 document.getElementById("reading-pace")?.addEventListener("keydown", (event) => {
   if (event.key === "Enter" && event.target instanceof HTMLElement) event.target.blur();

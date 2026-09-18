@@ -1448,7 +1448,12 @@
     "message": "$SIZE$ - modèles, dictionnaires, liste de lecture et vos expressions réunis",
     "placeholders": { "size": { "content": "$1", "example": "143,2 MB" } }
   },
-  "options_storage_how": { "message": "Espace disque utilisé par l'extension. Les dictionnaires prennent plus de place que leur taille initiale en raison de la structure de la base de données. Supprimer un article ou un livre efface définitivement son texte, ses images, ses surlignages, ses notes et votre progression de lecture." },
+  "options_storage_how": { "message": "Espace disque utilisé par l'extension." },
+
+  "options_storage_how_more": {
+    "message": "Les dictionnaires prennent plus de place que leur taille initiale en raison de la structure de la base de données. Supprimer un article ou un livre efface définitivement son texte, ses images, ses surlignages, ses notes et votre progression de lecture.",
+    "description": "The rest of the options_storage_how description, behind the row's More button."
+  },
   "options_storage_persistent": { "message": "Stockage persistant : accordé. Le navigateur a promis de ne pas effacer ces données pour faire de la place." },
   "options_storage_at_risk": { "message": "Stockage persistant : refusé. Safari efface les données d'un site après environ un mois d'utilisation sans un toucher sur ses pages, et les pages de cette extension comptent comme un site. Vos expressions ont une copie qui y survit (ligne ci-dessous) ; les modèles, les dictionnaires et la liste de lecture non - ouvrez le lecteur ou ces paramètres de temps en temps." },
   "options_storage_backup_one": {
@@ -1493,7 +1498,12 @@
   "options_storage_library_copy_off": { "message": "Copie de la liste de lecture : désactivée." },
   "options_library_copy": { "message": "Copie de la liste de lecture" },
   "options_library_copy_hint": {
-    "message": "Crée une sauvegarde de votre liste de lecture pour la protéger contre les nettoyages automatiques du navigateur et les erreurs de base de données. Cela double l'espace disque occupé par la liste, mais vos articles enregistrés sont conservés même si la base de données est perdue."
+    "message": "Une deuxième copie de la liste de lecture, à l'abri des nettoyages du navigateur ; elle occupe deux fois plus de place."
+  },
+
+  "options_library_copy_more": {
+    "message": "Elle survit aussi à une erreur de base de données : vos articles enregistrés sont conservés même si la base de données est perdue.",
+    "description": "The rest of the options_library_copy_hint description, behind the row's More button."
   },
   "reader_marks_delete_all_one": {
     "message": "Supprimer la $COUNT$ citation de cette page",
@@ -1521,11 +1531,21 @@
   },
   "options_reader_only": { "message": "Seulement dans le lecteur" },
   "options_reader_only_hint": {
-    "message": "Limite le soulignement des phrases enregistrées et la bulle de traduction au lecteur. Sélectionner du texte sur une page web ordinaire proposera uniquement de l'ouvrir dans le lecteur. Lorsqu'elle est activée, aucune page web ne peut savoir lesquels de ses mots vous avez enregistrés. Sur Android et iOS, l'option est activée par défaut."
+    "message": "Les soulignements et la bulle uniquement dans le lecteur ; sur une page ordinaire, une sélection n'affiche que le bouton qui l'y ouvre."
+  },
+
+  "options_reader_only_more": {
+    "message": "Lorsqu'elle est activée, aucune page web ne peut savoir lesquels de ses mots vous avez enregistrés. Sur Android et iOS, l'option est activée par défaut.",
+    "description": "The rest of the options_reader_only_hint description, behind the row's More button."
   },
   "options_page_number": { "message": "Numéro de page" },
   "options_page_number_hint": {
-    "message": "Affiche le compteur de pages en bas de la fenêtre. Désactivé, la dernière ligne de chaque page descend plus bas ; les lecteurs d'écran lisent toujours le compteur, et sur un écran large il se trouve dans la barre à côté de re/read."
+    "message": "Le compteur de pages en bas de la fenêtre."
+  },
+
+  "options_page_number_more": {
+    "message": "Désactivé, la dernière ligne de chaque page descend plus bas ; les lecteurs d'écran lisent toujours le compteur, et sur un écran large il se trouve dans la barre à côté de re/read.",
+    "description": "The rest of the options_page_number_hint description, behind the row's More button."
   },
   "options_paged_heading": { "message": "Affichage Pages" },
   "options_paged_intro": {
@@ -1536,7 +1556,12 @@
   "options_touch_turn_swipe": { "message": "Glisser le doigt sur le côté" },
   "options_touch_turn_off": { "message": "Désactivé" },
   "options_touch_turn_hint": {
-    "message": "Sur un écran large, le réglage par défaut est le toucher ; sur un écran étroit, le glissement - là, la main qui tient l'appareil repose sur l'écran, et un geste qui doit se déplacer est le seul qu'elle ne fasse pas par mégarde. Les touches de page, les flèches et la molette tournent les pages quel que soit ce réglage, et le stylet ne tourne jamais de page."
+    "message": "Comment un doigt tourne les pages."
+  },
+
+  "options_touch_turn_more": {
+    "message": "Sur un écran large, la valeur par défaut est l'appui, sur un écran étroit le glissement - là, la main qui tient l'appareil repose sur l'écran, et un geste qui doit se déplacer est le seul qu'elle ne fera pas par accident. Les touches de page, les flèches et la molette tournent les pages quel que soit ce réglage, et le stylet n'en tourne jamais.",
+    "description": "The rest of the options_touch_turn_hint description, behind the row's More button."
   },
   "options_touch_turn_note_zones": {
     "message": "Toucher le tiers gauche ou droit de la page la tourne : le tiers droit avance, le gauche recule. Seul compte un toucher bref, immobile et éloigné des bords de l'écran, pour qu'un pouce qui tient l'appareil n'en tourne aucune."
@@ -1551,7 +1576,12 @@
   "options_turn_effect_auto": { "message": "Automatique" },
   "options_turn_effect_off": { "message": "Désactivé" },
   "options_turn_effect_hint": {
-    "message": "Montre que la page a tourné, ce qui passe facilement inaperçu quand on lit le milieu d'une page. Rien ne se passe si le système demande moins d'animations, ni quand la page est tournée par la lecture à voix haute ou en faisant glisser une sélection jusqu'au bord de la page."
+    "message": "Un signe que la page a tourné."
+  },
+
+  "options_turn_effect_more": {
+    "message": "C'est facile à manquer quand on lit le milieu d'une page. Rien ne se passe si votre système demande moins d'animations, ni quand la page est tournée par la lecture à voix haute ou en faisant glisser une sélection jusqu'au bord de la page.",
+    "description": "The rest of the options_turn_effect_hint description, behind the row's More button."
   },
   "options_turn_effect_note_auto": {
     "message": "Dans le thème E-ink, la zone de texte s'assombrit un instant, comme sur une liseuse ; sur les autres écrans, la nouvelle page glisse."
@@ -1561,55 +1591,115 @@
   },
   "options_keep_articles": { "message": "Enregistrer par défaut dans la liste de lecture hors ligne" },
   "options_keep_articles_hint": {
-    "message": "Enregistre automatiquement chaque page ouverte dans le lecteur pour la lecture hors ligne. Vos pages enregistrées, vos surlignages et votre progression de lecture sont préservés même si le site d'origine change ou disparaît."
+    "message": "Chaque page ouverte dans le lecteur entre dans la liste de lecture hors ligne."
+  },
+
+  "options_keep_articles_more": {
+    "message": "Vos pages enregistrées, vos surlignages et votre progression de lecture sont préservés même si le site d'origine change ou disparaît.",
+    "description": "The rest of the options_keep_articles_hint description, behind the row's More button."
   },
   "options_font_custom": { "message": "Police personnelle" },
   "options_font_custom_hint": {
-    "message": "Saisissez le nom d'une police installée sur cet appareil, par exemple Georgia ou Noto Serif. La ligne Police du lecteur la proposera alors comme Personnalisée. Laissez le champ vide pour n'utiliser que les polices intégrées."
+    "message": "Une police installée sur cet appareil, par exemple Noto Serif ; elle apparaît ensuite comme Personnalisée dans la ligne Police du panneau Aa."
+  },
+
+  "options_font_custom_more": {
+    "message": "Saisissez le nom tel que le système l'écrit. Laissez le champ vide pour n'utiliser que les polices intégrées.",
+    "description": "The rest of the options_font_custom_hint description, behind the row's More button."
   },
   "options_reading_pace": { "message": "Vitesse de lecture" },
   "options_reading_pace_unit": { "message": "mots par minute" },
   "options_reading_pace_hint": {
-    "message": "Le nombre de mots que vous lisez en une minute. Il sert uniquement à estimer le temps de lecture affiché dans la liste de lecture et sous le titre d'un article. 200 est un rythme tranquille dans votre propre langue. Dans une langue que vous apprenez, c'est généralement 100-150."
+    "message": "Sert uniquement à estimer le temps de lecture affiché dans la liste de lecture et sous le titre d'un article."
+  },
+
+  "options_reading_pace_more": {
+    "message": "Le nombre de mots que vous lisez en une minute. 200 est un rythme tranquille dans votre propre langue ; dans une langue que vous apprenez, c'est généralement 100-150.",
+    "description": "The rest of the options_reading_pace_hint description, behind the row's More button."
   },
   "options_quiet_bubble_hint": {
-    "message": "Affiche uniquement le texte traduit dans la bulle. Les boutons d'action (copier, enregistrer) n'apparaissent que lorsque vous cliquez ou touchez la bulle."
+    "message": "La bulle n'affiche que la traduction ; les boutons apparaissent quand vous cliquez ou touchez la bulle."
+  },
+
+  "options_quiet_bubble_more": {
+    "message": "Les boutons d'action sont copier, enregistrer, lire à voix haute et les autres - tout ce que la bulle sait faire, à un appui près.",
+    "description": "The rest of the options_quiet_bubble_hint description, behind the row's More button."
   },
   "options_bubble_more": { "message": "Afficher tout de suite la phrase et les entrées du dictionnaire" },
   "options_bubble_more_hint": {
-    "message": "Après la sélection d'un texte, la bulle affiche tout de suite ce qui n'apparaît autrement qu'après un appui sur « Plus » : la phrase traduite et les entrées du dictionnaire. À garder activé avec un dictionnaire installé - un modèle de traduction se trompe souvent sur un mot isolé, et le dictionnaire montre ce qu'il veut vraiment dire. La bulle au-dessus d'une expression déjà enregistrée n'affiche que la traduction enregistrée - la phrase et les entrées du dictionnaire apparaissent après un appui sur « Plus »."
+    "message": "La bulle affiche tout de suite la phrase traduite et les entrées du dictionnaire, sans appui sur Plus."
+  },
+
+  "options_bubble_more_more": {
+    "message": "À garder activé avec un dictionnaire installé - un modèle de traduction se trompe souvent sur un mot isolé, et le dictionnaire montre ce qu'il veut vraiment dire. La bulle au-dessus d'une expression déjà enregistrée n'affiche que la traduction enregistrée - la phrase et les entrées du dictionnaire apparaissent après un appui sur « Plus ».",
+    "description": "The rest of the options_bubble_more_hint description, behind the row's More button."
   },
   "options_underline_forms": { "message": "Souligner aussi les autres formes des mots enregistrés" },
   "options_underline_forms_hint": {
-    "message": "Un mot enregistré est aussi souligné sous ses autres formes : après l'enregistrement de « read », « reads » et « reading » sont soulignés eux aussi, et la bulle au-dessus montre ce que vous avez enregistré pour « read ». Les formes qui comptent sont décidées par votre dictionnaire de la langue lue - il doit donc être installé. Pour l'instant, seulement quand vous lisez en anglais. Désactivé, seule la forme exacte que vous avez enregistrée est soulignée."
+    "message": "Après l'enregistrement de « read », « reads » et « reading » sont soulignés eux aussi."
+  },
+
+  "options_underline_forms_more": {
+    "message": "La bulle au-dessus montre ce que vous avez enregistré pour « read ». Les formes qui comptent sont décidées par votre dictionnaire de la langue lue - il doit donc être installé. Pour l'instant, seulement quand vous lisez en anglais. Désactivé, seule la forme exacte que vous avez enregistrée est soulignée.",
+    "description": "The rest of the options_underline_forms_hint description, behind the row's More button."
   },
   "options_save_sentence": { "message": "Enregistrer la phrase avec l'expression" },
   "options_save_sentence_hint": {
-    "message": "Quand vous enregistrez une expression depuis la bulle, la phrase qui l'entoure est enregistrée avec elle - la phrase telle que la page l'affiche, sans sa traduction. Elle est affichée sous l'expression dans la liste des expressions enregistrées, repliée sur une ligne, et écrite dans la troisième colonne de l'export pour Anki. Pour une expression enregistrée sans phrase, la phrase qui l'entoure est enregistrée la prochaine fois que vous ouvrez sa bulle sur une page. Comme l'expression, la phrase est conservée uniquement sur cet appareil. Désactivé, aucune nouvelle phrase n'est enregistrée ; celles déjà enregistrées ne sont pas supprimées."
+    "message": "Enregistrer une expression enregistre aussi la phrase dans laquelle elle se trouvait."
+  },
+
+  "options_save_sentence_more": {
+    "message": "La phrase telle que la page l'affiche, sans sa traduction. Elle est affichée sous l'expression dans la liste des expressions enregistrées, repliée sur une ligne, et écrite dans la troisième colonne de l'export pour Anki. Pour une expression enregistrée sans phrase, la phrase qui l'entoure est enregistrée la prochaine fois que vous ouvrez sa bulle sur une page. Comme l'expression, la phrase est conservée uniquement sur cet appareil. Désactivé, aucune nouvelle phrase n'est enregistrée ; celles déjà enregistrées ne sont pas supprimées.",
+    "description": "The rest of the options_save_sentence_hint description, behind the row's More button."
   },
   "options_no_translation": { "message": "Utiliser sans modèle de traduction" },
   "options_no_translation_hint": {
-    "message": "Désactive la traduction automatique (le modèle). Le lecteur, la liste de lecture hors ligne et le surligneur continuent de fonctionner. Avec une paire de langues choisie, la bulle affiche toujours les sens des dictionnaires, et vous pouvez enregistrer des phrases et voir leurs soulignements. Idéal pour lire avec des dictionnaires ou dans votre langue maternelle. Vos données enregistrées ne sont pas supprimées et reviennent quand vous désactivez cette option."
+    "message": "Les dictionnaires seuls, sans traduction automatique ; le lecteur, la liste de lecture hors ligne et le surligneur continuent de fonctionner."
+  },
+
+  "options_no_translation_more": {
+    "message": "Avec une paire de langues choisie, la bulle affiche toujours les sens des dictionnaires, et vous pouvez enregistrer des phrases et voir leurs soulignements. Idéal pour lire avec des dictionnaires ou dans votre langue maternelle. Vos données enregistrées ne sont pas supprimées et reviennent quand vous désactivez cette option.",
+    "description": "The rest of the options_no_translation_hint description, behind the row's More button."
   },
   "options_bubble_off": { "message": "Pas de bulle à la sélection de texte" },
   "options_bubble_off_hint": {
-    "message": "Quand c'est activé, sélectionner du texte sur une page ordinaire ne fait rien du tout - ouvrez une page dans le lecteur avec le bouton de re/read ou avec Alt+Maj+R. Dans le lecteur, une sélection n'est qu'un surlignage passager : aucune bulle ne s'ouvre, un appui ou Échap l'efface, et Ctrl+C ou Cmd+C la copie (sur un écran tactile, rien ne peut être copié)."
+    "message": "Quand c'est activé, sélectionner du texte sur une page ordinaire ne fait rien du tout - ouvrez une page dans le lecteur avec le bouton de re/read ou avec Alt+Maj+R."
+  },
+
+  "options_bubble_off_more": {
+    "message": "Dans le lecteur, une sélection n'est qu'un surlignage passager : aucune bulle ne s'ouvre, un appui ou Échap l'efface, et Ctrl+C ou Cmd+C la copie (sur un écran tactile, rien ne peut être copié).",
+    "description": "The rest of the options_bubble_off_hint description, behind the row's More button."
   },
   "options_bubble_scale": { "message": "Taille du texte de la bulle" },
   "options_bubble_scale_hint": {
     "message": "Ajuste la taille du texte et des boutons dans la bulle de traduction sur toutes les pages."
   },
-  "options_note_more": { "message": "Afficher la description complète" },
+  "options_note_more": { "message": "Plus" },
+
+  "options_field_saved": {
+    "message": "Enregistré",
+    "description": "Beside a text field on the settings page once what was typed in it has been stored. Stays until the next edit - never taken away on a timer."
+  },
   "options_tts": { "message": "Lecture à voix haute" },
   "options_tts_hint": {
-    "message": "Active la lecture à voix haute. Désactiver cette option masque tous les boutons de lecture dans la bulle, les listes et le lecteur."
+    "message": "Les boutons de lecture à voix haute dans la bulle, dans les listes et dans le lecteur."
+  },
+
+  "options_tts_more": {
+    "message": "Désactiver cette option les masque tous. La voix et la vitesse choisies restent enregistrées et reviennent quand vous la réactivez.",
+    "description": "The rest of the options_tts_hint description, behind the row's More button."
   },
   "options_tts_voice": { "message": "Voix de lecture" },
   "options_tts_lang": { "message": "Langue de la voix" },
   "options_tts_default": { "message": "Voix par défaut" },
   "options_tts_listen": { "message": "Écouter" },
   "options_tts_voice_hint": {
-    "message": "Choisissez, pour chaque langue, la voix utilisée pour lire les phrases et les articles. Seules les voix qui parlent hors ligne sont proposées : la parole est produite sur cet appareil et rien n'est envoyé sur Internet."
+    "message": "Une voix distincte pour chaque langue ; seules les voix qui parlent hors ligne sont proposées."
+  },
+
+  "options_tts_voice_more": {
+    "message": "La voix lit aussi bien les phrases que les articles entiers. La parole est produite sur cet appareil et rien n'est envoyé sur Internet.",
+    "description": "The rest of the options_tts_voice_hint description, behind the row's More button."
   },
   "speech_no_offline_voice": { "message": "Cet appareil n'a pas de voix hors ligne pour cette langue." },
   "options_tts_rate": { "message": "Vitesse de la voix" },

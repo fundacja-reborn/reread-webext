@@ -1397,7 +1397,12 @@
     "message": "$SIZE$ - Modelle, Wörterbücher, Leseliste und Ihre Phrasen zusammen",
     "placeholders": { "size": { "content": "$1", "example": "143,2 MB" } }
   },
-  "options_storage_how": { "message": "Speicherplatz, der von der Erweiterung belegt wird. Wörterbücher benötigen aufgrund der Datenbankstruktur mehr Platz als ihre Dateigröße. Das Löschen eines Artikels oder Buchs entfernt dessen Text, Bilder, Markierungen, Notizen und Lesefortschritt vollständig." },
+  "options_storage_how": { "message": "Speicherplatz, der von der Erweiterung belegt wird." },
+
+  "options_storage_how_more": {
+    "message": "Wörterbücher benötigen aufgrund der Datenbankstruktur mehr Platz als ihre Dateigröße. Das Löschen eines Artikels oder Buchs entfernt dessen Text, Bilder, Markierungen, Notizen und Lesefortschritt vollständig.",
+    "description": "The rest of the options_storage_how description, behind the row's More button."
+  },
   "options_storage_persistent": { "message": "Dauerhafter Speicher: gewährt. Der Browser hat zugesagt, diese Daten nicht zu löschen, um Platz zu schaffen." },
   "options_storage_at_risk": { "message": "Dauerhafter Speicher: nicht gewährt. Safari löscht die Daten einer Website nach etwa einem Monat Nutzung ohne ein Tippen auf ihre Seiten, und die Seiten dieser Erweiterung zählen als eine Website. Ihre Phrasen haben eine Kopie, die das übersteht (Zeile darunter); Modelle, Wörterbücher und Leseliste nicht - öffnen Sie ab und zu die Leseansicht oder diese Einstellungen." },
   "options_storage_backup_one": {
@@ -1430,7 +1435,12 @@
   "options_storage_library_copy_off": { "message": "Kopie der Leseliste: aus." },
   "options_library_copy": { "message": "Kopie der Leseliste" },
   "options_library_copy_hint": {
-    "message": "Erstellt ein Backup Ihrer Leseliste zum Schutz vor automatischen Browser-Bereinigungen und Datenbankfehlern. Das verdoppelt den Speicherplatz, den die Leseliste belegt, hält Ihre gespeicherten Artikel aber sicher, falls die Datenbank verloren geht."
+    "message": "Eine zweite Kopie der Leseliste, sicher vor den Aufräumaktionen des Browsers; sie belegt doppelt so viel Platz."
+  },
+
+  "options_library_copy_more": {
+    "message": "Sie übersteht auch einen Datenbankfehler: Ihre gespeicherten Artikel bleiben erhalten, falls die Datenbank verloren geht.",
+    "description": "The rest of the options_library_copy_hint description, behind the row's More button."
   },
   "reader_marks_delete_all_one": {
     "message": "Das $COUNT$ Zitat dieser Seite löschen",
@@ -1458,11 +1468,21 @@
   },
   "options_reader_only": { "message": "Nur in der Leseansicht" },
   "options_reader_only_hint": {
-    "message": "Beschränkt die Unterstreichung gespeicherter Phrasen und die Übersetzungs-Sprechblase auf die Leseansicht. Das Markieren von Text auf einer gewöhnlichen Webseite zeigt nur die Option, die Seite in der Leseansicht zu öffnen. Ist die Option eingeschaltet, kann keine Webseite feststellen, welche ihrer Wörter Sie gespeichert haben. Auf Android und iOS ist die Option standardmäßig eingeschaltet."
+    "message": "Unterstreichungen und Sprechblase nur in der Leseansicht; auf einer gewöhnlichen Seite zeigt eine Auswahl nur die Schaltfläche dorthin."
+  },
+
+  "options_reader_only_more": {
+    "message": "Ist die Option eingeschaltet, kann keine Webseite feststellen, welche ihrer Wörter Sie gespeichert haben. Auf Android und iOS ist die Option standardmäßig eingeschaltet.",
+    "description": "The rest of the options_reader_only_hint description, behind the row's More button."
   },
   "options_page_number": { "message": "Seitenzahl" },
   "options_page_number_hint": {
-    "message": "Zeigt die Seitenzahl am unteren Fensterrand. Ausgeschaltet steht die letzte Zeile jeder Seite tiefer; Screenreader lesen die Seitenzahl weiterhin vor, und auf einem breiten Bildschirm steht sie in der Leiste neben re/read."
+    "message": "Die Seitenzahl am unteren Fensterrand."
+  },
+
+  "options_page_number_more": {
+    "message": "Ausgeschaltet steht die letzte Zeile jeder Seite tiefer; Screenreader lesen die Seitenzahl weiterhin vor, und auf einem breiten Bildschirm steht sie in der Leiste neben re/read.",
+    "description": "The rest of the options_page_number_hint description, behind the row's More button."
   },
   "options_paged_heading": { "message": "Ansicht Seiten" },
   "options_paged_intro": {
@@ -1473,7 +1493,12 @@
   "options_touch_turn_swipe": { "message": "Finger zur Seite schieben" },
   "options_touch_turn_off": { "message": "Aus" },
   "options_touch_turn_hint": {
-    "message": "Auf einem breiten Bildschirm ist das Tippen voreingestellt, auf einem schmalen das Schieben - dort liegt die Hand, die das Gerät hält, auf dem Bildschirm, und eine Geste, die sich bewegen muss, ist die einzige, die diese Hand nicht versehentlich macht. Die Bild-Tasten, die Pfeiltasten und das Mausrad blättern unabhängig von dieser Einstellung um, und der Stift blättert nie um."
+    "message": "Wie ein Finger die Seiten umblättert."
+  },
+
+  "options_touch_turn_more": {
+    "message": "Auf einem breiten Bildschirm ist das Tippen die Vorgabe, auf einem schmalen das Wischen - dort liegt die Hand, die das Gerät hält, auf dem Bildschirm, und eine Geste, die sich bewegen muss, ist die eine, die ihr nicht versehentlich gelingt. Die Bildtasten, die Pfeiltasten und das Mausrad blättern unabhängig von dieser Einstellung, und der Stift blättert nie.",
+    "description": "The rest of the options_touch_turn_hint description, behind the row's More button."
   },
   "options_touch_turn_note_zones": {
     "message": "Ein Tippen auf das linke oder rechte Drittel der Seite blättert um: rechts weiter, links zurück. Es zählt nur ein kurzes, ruhiges Tippen fern von den Rändern des Bildschirms, damit ein haltender Daumen nichts umblättert."
@@ -1488,7 +1513,12 @@
   "options_turn_effect_auto": { "message": "Automatisch" },
   "options_turn_effect_off": { "message": "Aus" },
   "options_turn_effect_hint": {
-    "message": "Zeigt, dass die Seite umgeblättert wurde - beim Lesen in der Mitte einer Seite ist das leicht zu übersehen. Nichts geschieht, wenn das System weniger Bewegung verlangt, und nichts, wenn das Vorlesen oder das Ziehen einer Auswahl an den Seitenrand umblättert."
+    "message": "Ein Zeichen, dass die Seite umgeblättert wurde."
+  },
+
+  "options_turn_effect_more": {
+    "message": "Beim Lesen der Seitenmitte übersieht man das leicht. Nichts geschieht, wenn Ihr System weniger Bewegung verlangt, und nichts, wenn die Seite vom Vorlesen oder vom Ziehen einer Auswahl an den Seitenrand umgeblättert wird.",
+    "description": "The rest of the options_turn_effect_hint description, behind the row's More button."
   },
   "options_turn_effect_note_auto": {
     "message": "Im Farbschema E-Ink wird der Textbereich einen Moment lang dunkel, so wie ein E-Book-Reader das Umblättern zeigt; auf anderen Bildschirmen gleitet die neue Seite herein."
@@ -1498,55 +1528,115 @@
   },
   "options_keep_articles": { "message": "Standardmäßig in der Offline-Leseliste speichern" },
   "options_keep_articles_hint": {
-    "message": "Speichert jede in der Leseansicht geöffnete Seite automatisch zum Offline-Lesen. Ihre gespeicherten Seiten, Markierungen und der Lesefortschritt bleiben erhalten, auch wenn die ursprüngliche Website sich ändert oder verschwindet."
+    "message": "Jede in der Leseansicht geöffnete Seite kommt in die Offline-Leseliste."
+  },
+
+  "options_keep_articles_more": {
+    "message": "Ihre gespeicherten Seiten, Markierungen und der Lesefortschritt bleiben erhalten, auch wenn die ursprüngliche Website sich ändert oder verschwindet.",
+    "description": "The rest of the options_keep_articles_hint description, behind the row's More button."
   },
   "options_font_custom": { "message": "Eigene Schrift" },
   "options_font_custom_hint": {
-    "message": "Geben Sie den Namen einer auf diesem Gerät installierten Schrift ein, zum Beispiel Georgia oder Noto Serif. Die Zeile Schrift in der Leseansicht bietet sie dann als Eigene an. Lassen Sie das Feld leer, um nur die mitgelieferten Schriften zu verwenden."
+    "message": "Eine auf diesem Gerät installierte Schrift, zum Beispiel Noto Serif; sie erscheint dann als Eigene in der Zeile Schrift des Aa-Fensters."
+  },
+
+  "options_font_custom_more": {
+    "message": "Geben Sie den Namen so ein, wie das System ihn schreibt. Lassen Sie das Feld leer, um nur die mitgelieferten Schriften zu verwenden.",
+    "description": "The rest of the options_font_custom_hint description, behind the row's More button."
   },
   "options_reading_pace": { "message": "Lesegeschwindigkeit" },
   "options_reading_pace_unit": { "message": "Wörter pro Minute" },
   "options_reading_pace_hint": {
-    "message": "Die Zahl der Wörter, die Sie in einer Minute lesen. Sie dient nur zur Schätzung der Lesezeit, die in der Leseliste und unter dem Titel eines Artikels angezeigt wird. 200 ist ein ruhiges Tempo in der eigenen Sprache; in einer Sprache, die Sie lernen, sind es meist 100-150."
+    "message": "Dient nur zur Schätzung der Lesezeit, die in der Leseliste und unter dem Titel eines Artikels angezeigt wird."
+  },
+
+  "options_reading_pace_more": {
+    "message": "Die Zahl der Wörter, die Sie in einer Minute lesen. 200 ist ein ruhiges Tempo in der eigenen Sprache; in einer Sprache, die Sie lernen, sind es meist 100-150.",
+    "description": "The rest of the options_reading_pace_hint description, behind the row's More button."
   },
   "options_quiet_bubble_hint": {
-    "message": "Zeigt nur den übersetzten Text in der Sprechblase an. Die Aktionsschaltflächen (wie Kopieren oder Speichern) erscheinen erst, wenn Sie auf die Sprechblase klicken oder tippen."
+    "message": "Die Sprechblase zeigt nur die Übersetzung; die Schaltflächen erscheinen, wenn Sie sie anklicken oder antippen."
+  },
+
+  "options_quiet_bubble_more": {
+    "message": "Die Aktionsschaltflächen sind Kopieren, Speichern, Vorlesen und der Rest - alles, was die Sprechblase kann, einen Druck entfernt.",
+    "description": "The rest of the options_quiet_bubble_hint description, behind the row's More button."
   },
   "options_bubble_more": { "message": "Satz und Wörterbucheinträge sofort anzeigen" },
   "options_bubble_more_hint": {
-    "message": "Nach dem Markieren von Text zeigt die Sprechblase sofort, was sonst erst nach einem Druck auf „Mehr“ erscheint: den übersetzten Satz und die Wörterbucheinträge. Mit einem installierten Wörterbuch lohnt es sich, dies eingeschaltet zu lassen - ein Übersetzungsmodell übersetzt ein einzelnes Wort oft falsch, und das Wörterbuch zeigt, was es wirklich bedeutet. Die Sprechblase über einer bereits gespeicherten Wendung zeigt nur die gespeicherte Übersetzung - den Satz und die Wörterbucheinträge sehen Sie nach einem Druck auf „Mehr“."
+    "message": "Die Sprechblase zeigt den übersetzten Satz und die Wörterbucheinträge sofort, ohne einen Druck auf Mehr."
+  },
+
+  "options_bubble_more_more": {
+    "message": "Mit einem installierten Wörterbuch lohnt es sich, dies eingeschaltet zu lassen - ein Übersetzungsmodell übersetzt ein einzelnes Wort oft falsch, und das Wörterbuch zeigt, was es wirklich bedeutet. Die Sprechblase über einer bereits gespeicherten Wendung zeigt nur die gespeicherte Übersetzung - den Satz und die Wörterbucheinträge sehen Sie nach einem Druck auf „Mehr“.",
+    "description": "The rest of the options_bubble_more_hint description, behind the row's More button."
   },
   "options_underline_forms": { "message": "Auch andere Formen gespeicherter Wörter unterstreichen" },
   "options_underline_forms_hint": {
-    "message": "Ein gespeichertes Wort wird auch in seinen anderen Formen unterstrichen: Nach dem Speichern von „read“ sind auch „reads“ und „reading“ unterstrichen, und die Sprechblase darüber zeigt, was Sie für „read“ gespeichert haben. Welche Formen zählen, entscheidet Ihr Wörterbuch für die gelesene Sprache - eines muss installiert sein. Vorerst nur, wenn Sie Englisch lesen. Ausgeschaltet wird nur genau die Form unterstrichen, die Sie gespeichert haben."
+    "message": "Nach dem Speichern von „read“ sind auch „reads“ und „reading“ unterstrichen."
+  },
+
+  "options_underline_forms_more": {
+    "message": "Die Sprechblase darüber zeigt, was Sie für „read“ gespeichert haben. Welche Formen zählen, entscheidet Ihr Wörterbuch für die gelesene Sprache - eines muss installiert sein. Vorerst nur, wenn Sie Englisch lesen. Ausgeschaltet wird nur genau die Form unterstrichen, die Sie gespeichert haben.",
+    "description": "The rest of the options_underline_forms_hint description, behind the row's More button."
   },
   "options_save_sentence": { "message": "Den Satz zusammen mit der Phrase speichern" },
   "options_save_sentence_hint": {
-    "message": "Wenn Sie eine Phrase aus der Sprechblase speichern, wird der Satz um sie herum mit ihr gespeichert - der Satz so, wie die Seite ihn zeigt, ohne Übersetzung. Er wird auf der Seite der gespeicherten Phrasen unter der Phrase angezeigt, auf eine Zeile eingeklappt, und in die dritte Spalte des Exports für Anki geschrieben. Bei einer ohne Satz gespeicherten Phrase wird der Satz um sie herum gespeichert, wenn Sie ihre Sprechblase das nächste Mal auf einer Seite öffnen. Wie die Phrase wird der Satz nur auf diesem Gerät gespeichert. Ausgeschaltet wird kein neuer Satz gespeichert; die bereits gespeicherten werden nicht gelöscht."
+    "message": "Beim Speichern einer Phrase wird auch der Satz gespeichert, in dem sie stand."
+  },
+
+  "options_save_sentence_more": {
+    "message": "Der Satz so, wie die Seite ihn zeigt, ohne Übersetzung. Er wird auf der Seite der gespeicherten Phrasen unter der Phrase angezeigt, auf eine Zeile eingeklappt, und in die dritte Spalte des Exports für Anki geschrieben. Bei einer ohne Satz gespeicherten Phrase wird der Satz um sie herum gespeichert, wenn Sie ihre Sprechblase das nächste Mal auf einer Seite öffnen. Wie die Phrase wird der Satz nur auf diesem Gerät gespeichert. Ausgeschaltet wird kein neuer Satz gespeichert; die bereits gespeicherten werden nicht gelöscht.",
+    "description": "The rest of the options_save_sentence_hint description, behind the row's More button."
   },
   "options_no_translation": { "message": "Ohne Übersetzungsmodell verwenden" },
   "options_no_translation_hint": {
-    "message": "Schaltet die maschinelle Übersetzung (das Modell) aus. Leseansicht, Offline-Leseliste und Textmarker funktionieren weiter. Mit einem gewählten Sprachpaar zeigt die Sprechblase weiterhin Bedeutungen aus Wörterbüchern, und Phrasen lassen sich speichern und unterstreichen. Ideal zum Lesen mit Wörterbüchern oder in der Muttersprache. Gespeicherte Daten werden nicht gelöscht und kehren zurück, wenn Sie die Option ausschalten."
+    "message": "Nur Wörterbücher, ohne maschinelle Übersetzung; Leseansicht, Offline-Leseliste und Textmarker funktionieren weiter."
+  },
+
+  "options_no_translation_more": {
+    "message": "Mit einem gewählten Sprachpaar zeigt die Sprechblase weiterhin Bedeutungen aus Wörterbüchern, und Phrasen lassen sich speichern und unterstreichen. Ideal zum Lesen mit Wörterbüchern oder in der Muttersprache. Gespeicherte Daten werden nicht gelöscht und kehren zurück, wenn Sie die Option ausschalten.",
+    "description": "The rest of the options_no_translation_hint description, behind the row's More button."
   },
   "options_bubble_off": { "message": "Keine Sprechblase beim Auswählen von Text" },
   "options_bubble_off_hint": {
-    "message": "Ist dies an, tut das Auswählen von Text auf einer gewöhnlichen Seite gar nichts - eine Seite öffnen Sie in der Leseansicht über die Schaltfläche von re/read oder mit Alt+Umschalt+R. In der Leseansicht ist eine Auswahl nur eine Hervorhebung für den Moment: keine Sprechblase öffnet sich, ein Tippen oder Escape nimmt sie weg, und Strg+C oder Cmd+C kopiert sie (auf einem Touchscreen lässt sich nichts kopieren)."
+    "message": "Ist dies an, tut das Auswählen von Text auf einer gewöhnlichen Seite gar nichts - eine Seite öffnen Sie in der Leseansicht über die Schaltfläche von re/read oder mit Alt+Umschalt+R."
+  },
+
+  "options_bubble_off_more": {
+    "message": "In der Leseansicht ist eine Auswahl nur eine Hervorhebung für den Moment: keine Sprechblase öffnet sich, ein Tippen oder Escape nimmt sie weg, und Strg+C oder Cmd+C kopiert sie (auf einem Touchscreen lässt sich nichts kopieren).",
+    "description": "The rest of the options_bubble_off_hint description, behind the row's More button."
   },
   "options_bubble_scale": { "message": "Textgröße der Sprechblase" },
   "options_bubble_scale_hint": {
     "message": "Passt die Größe von Text und Schaltflächen in der Sprechblase auf allen Seiten an."
   },
-  "options_note_more": { "message": "Die ganze Beschreibung anzeigen" },
+  "options_note_more": { "message": "Mehr" },
+
+  "options_field_saved": {
+    "message": "Gespeichert",
+    "description": "Beside a text field on the settings page once what was typed in it has been stored. Stays until the next edit - never taken away on a timer."
+  },
   "options_tts": { "message": "Vorlesen" },
   "options_tts_hint": {
-    "message": "Aktiviert die Vorlesefunktion (Text-to-Speech). Ist sie ausgeschaltet, werden alle Vorlese-Schaltflächen in der Sprechblase, in den Listen und in der Leseansicht ausgeblendet."
+    "message": "Die Vorlese-Schaltflächen in der Sprechblase, in den Listen und in der Leseansicht."
+  },
+
+  "options_tts_more": {
+    "message": "Ausschalten blendet sie alle aus. Die gewählte Stimme und das Tempo bleiben gespeichert und kehren beim Wiedereinschalten zurück.",
+    "description": "The rest of the options_tts_hint description, behind the row's More button."
   },
   "options_tts_voice": { "message": "Vorlesestimme" },
   "options_tts_lang": { "message": "Sprache der Stimme" },
   "options_tts_default": { "message": "Standardstimme" },
   "options_tts_listen": { "message": "Anhören" },
   "options_tts_voice_hint": {
-    "message": "Wählen Sie für jede Sprache die Stimme zum Vorlesen von Phrasen und Artikeln. Angeboten werden nur Stimmen, die offline sprechen: Die Sprache entsteht auf diesem Gerät, und nichts wird ins Internet gesendet."
+    "message": "Eine eigene Stimme für jede Sprache; angeboten werden nur Stimmen, die offline sprechen."
+  },
+
+  "options_tts_voice_more": {
+    "message": "Die Stimme liest Phrasen und ganze Artikel gleichermaßen. Die Sprache entsteht auf diesem Gerät, und nichts wird ins Internet gesendet.",
+    "description": "The rest of the options_tts_voice_hint description, behind the row's More button."
   },
   "speech_no_offline_voice": { "message": "Dieses Gerät hat keine Offline-Stimme für diese Sprache." },
   "options_tts_rate": { "message": "Sprechgeschwindigkeit" },

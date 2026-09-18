@@ -2017,7 +2017,12 @@
     "message": "$SIZE$ - razem modele, słowniki, czytelnia i Twoje frazy",
     "placeholders": { "size": { "content": "$1", "example": "143,2 MB" } }
   },
-  "options_storage_how": { "message": "Miejsce na dysku zajmowane przez rozszerzenie. Słowniki zajmują więcej miejsca niż ich oryginalny rozmiar z powodu struktury bazy danych. Usunięcie artykułu lub książki bezpowrotnie kasuje tekst, obrazy, zakreślenia, notatki i postęp czytania." },
+  "options_storage_how": { "message": "Miejsce na dysku zajmowane przez rozszerzenie." },
+
+  "options_storage_how_more": {
+    "message": "Słowniki zajmują więcej miejsca niż ich oryginalny rozmiar z powodu struktury bazy danych. Usunięcie artykułu lub książki bezpowrotnie kasuje tekst, obrazy, zakreślenia, notatki i postęp czytania.",
+    "description": "The rest of the options_storage_how description, behind the row's More button."
+  },
   "options_storage_persistent": { "message": "Magazyn trwały: przyznany. Przeglądarka obiecała nie kasować tych danych, żeby zrobić miejsce." },
   "options_storage_at_risk": { "message": "Magazyn trwały: nieprzyznany. Safari kasuje dane witryny po około miesiącu używania bez dotknięcia jej stron, a strony tego rozszerzenia liczą się jak jedna witryna. Frazy mają kopię, która to przetrwa (linijka niżej); modele, słowniki i czytelnia nie - otwieraj widok czytania albo te ustawienia od czasu do czasu." },
   "options_storage_backup_one": {
@@ -2074,7 +2079,12 @@
   "options_storage_library_copy_off": { "message": "Kopia czytelni: wyłączona." },
   "options_library_copy": { "message": "Kopia czytelni" },
   "options_library_copy_hint": {
-    "message": "Tworzy kopię zapasową czytelni, chroniącą ją przed automatycznym czyszczeniem przeglądarki i błędami bazy danych. Zajmuje to dwa razy więcej miejsca na dysku, ale zapisane artykuły są bezpieczne, nawet jeśli baza danych zostanie utracona."
+    "message": "Druga kopia czytelni, odporna na czyszczenie danych przeglądarki; zajmuje dwa razy więcej miejsca."
+  },
+
+  "options_library_copy_more": {
+    "message": "Przetrwa też błąd bazy danych: zapisane artykuły zostają, nawet jeśli baza danych zostanie utracona.",
+    "description": "The rest of the options_library_copy_hint description, behind the row's More button."
   },
   "reader_marks_delete_all_one": {
     "message": "Usuń $COUNT$ cytat z tej strony",
@@ -2110,11 +2120,21 @@
   },
   "options_reader_only": { "message": "Tylko w widoku czytania" },
   "options_reader_only_hint": {
-    "message": "Ogranicza podkreślenia zapisanych fraz i dymek tłumaczenia do widoku czytania. Zaznaczenie tekstu na zwykłej stronie pokaże jedynie przycisk do otwarcia jej w widoku czytania. Przy włączonej opcji żadna strona nie może stwierdzić, które z jej słów masz zapisane. Na Androidzie i iOS opcja jest domyślnie włączona."
+    "message": "Podkreślenia i dymek tylko w widoku czytania; na zwykłej stronie zaznaczenie pokaże przycisk do niego."
+  },
+
+  "options_reader_only_more": {
+    "message": "Przy włączonej opcji żadna strona nie może stwierdzić, które z jej słów masz zapisane. Na Androidzie i iOS opcja jest domyślnie włączona.",
+    "description": "The rest of the options_reader_only_hint description, behind the row's More button."
   },
   "options_page_number": { "message": "Numer strony" },
   "options_page_number_hint": {
-    "message": "Pokazuje licznik stron u dołu okna. Bez niego ostatnia linia każdej strony stoi niżej; czytniki ekranu nadal odczytują licznik, a na szerokim ekranie widać go w pasku obok re/read."
+    "message": "Licznik stron u dołu okna."
+  },
+
+  "options_page_number_more": {
+    "message": "Bez niego ostatnia linia każdej strony stoi niżej; czytniki ekranu nadal odczytują licznik, a na szerokim ekranie widać go w pasku obok re/read.",
+    "description": "The rest of the options_page_number_hint description, behind the row's More button."
   },
   "options_paged_heading": { "message": "Układ Strony" },
   "options_paged_intro": {
@@ -2125,7 +2145,12 @@
   "options_touch_turn_swipe": { "message": "Przesunięcie palcem" },
   "options_touch_turn_off": { "message": "Wyłączone" },
   "options_touch_turn_hint": {
-    "message": "Na szerokim ekranie domyślne jest tapnięcie, na wąskim przesunięcie - tam ręka trzymająca urządzenie leży na ekranie, a gest, który musi się przemieścić, to jedyny gest, którego ta ręka nie zrobi przypadkiem. Klawisze zmiany strony, strzałki i kółko myszy przewracają strony niezależnie od tego ustawienia, a pióro nie przewraca nigdy."
+    "message": "Jak przewracać strony palcem."
+  },
+
+  "options_touch_turn_more": {
+    "message": "Na szerokim ekranie domyślne jest tapnięcie, na wąskim przesunięcie - tam ręka trzymająca urządzenie leży na ekranie, a gest, który musi się przemieścić, to jedyny gest, którego ta ręka nie zrobi przypadkiem. Klawisze zmiany strony, strzałki i kółko myszy przewracają strony niezależnie od tego ustawienia, a pióro nie przewraca nigdy.",
+    "description": "The rest of the options_touch_turn_hint description, behind the row's More button."
   },
   "options_touch_turn_note_zones": {
     "message": "Tapnięcie w lewą lub prawą jedną trzecią strony przewraca ją: prawa dalej, lewa wstecz. Liczy się tylko tapnięcie krótkie, nieruchome i z dala od krawędzi ekranu, żeby kciuk trzymający urządzenie niczego nie przewracał."
@@ -2140,7 +2165,12 @@
   "options_turn_effect_auto": { "message": "Automatyczny" },
   "options_turn_effect_off": { "message": "Wyłączony" },
   "options_turn_effect_hint": {
-    "message": "Pokazuje, że strona się przewróciła - czytając środek strony, łatwo to przeoczyć. Nic się nie dzieje, gdy system prosi o ograniczenie ruchu, ani gdy stronę przewraca czytanie na głos albo przeciągnięcie zaznaczenia do krawędzi strony."
+    "message": "Znak, że strona się przewróciła."
+  },
+
+  "options_turn_effect_more": {
+    "message": "Czytając środek strony, łatwo to przeoczyć. Nic się nie dzieje, gdy system prosi o ograniczenie ruchu, ani gdy stronę przewraca czytanie na głos albo przeciągnięcie zaznaczenia do krawędzi strony.",
+    "description": "The rest of the options_turn_effect_hint description, behind the row's More button."
   },
   "options_turn_effect_note_auto": {
     "message": "W motywie E-ink obszar tekstu na moment ciemnieje, tak jak przy przewracaniu strony w czytniku e-booków; na innych ekranach nowa strona wjeżdża płynnie."
@@ -2150,55 +2180,115 @@
   },
   "options_keep_articles": { "message": "Zapisuj domyślnie w czytelni offline" },
   "options_keep_articles_hint": {
-    "message": "Automatycznie zapisuje każdą stronę otwartą w widoku czytania do czytania offline. Twoje zapisane strony, zakreślenia i postęp czytania są bezpieczne, nawet jeśli oryginalna strona internetowa zmieni się lub zniknie."
+    "message": "Każda strona otwarta w widoku czytania trafia do czytelni offline."
+  },
+
+  "options_keep_articles_more": {
+    "message": "Twoje zapisane strony, zakreślenia i postęp czytania są bezpieczne, nawet jeśli oryginalna strona internetowa zmieni się lub zniknie.",
+    "description": "The rest of the options_keep_articles_hint description, behind the row's More button."
   },
   "options_font_custom": { "message": "Własna czcionka" },
   "options_font_custom_hint": {
-    "message": "Wpisz nazwę czcionki zainstalowanej na tym urządzeniu, np. Georgia albo Noto Serif. W widoku czytania, w wierszu Krój, pojawi się wybór Własny. Zostaw pole puste, aby używać tylko wbudowanych krojów."
+    "message": "Krój zainstalowany na tym urządzeniu, np. Noto Serif; pojawi się jako Własny w wierszu Krój panelu Aa."
+  },
+
+  "options_font_custom_more": {
+    "message": "Wpisz nazwę tak, jak zapisuje ją system. Zostaw pole puste, aby używać tylko wbudowanych krojów.",
+    "description": "The rest of the options_font_custom_hint description, behind the row's More button."
   },
   "options_reading_pace": { "message": "Tempo czytania" },
   "options_reading_pace_unit": { "message": "słów na minutę" },
   "options_reading_pace_hint": {
-    "message": "Liczba słów, które czytasz w ciągu minuty. Służy tylko do szacowania czasu czytania pokazywanego w czytelni i pod tytułem artykułu. 200 to spokojne tempo we własnym języku; w języku, którego się uczysz, zwykle 100-150."
+    "message": "Służy tylko do szacowania czasu czytania pokazywanego w czytelni i pod tytułem artykułu."
+  },
+
+  "options_reading_pace_more": {
+    "message": "Liczba słów, które czytasz w ciągu minuty. 200 to spokojne tempo we własnym języku; w języku, którego się uczysz, zwykle 100-150.",
+    "description": "The rest of the options_reading_pace_hint description, behind the row's More button."
   },
   "options_quiet_bubble_hint": {
-    "message": "Pokazuje w dymku tylko tekst tłumaczenia. Przyciski akcji (np. kopiowanie lub zapis) pojawią się dopiero po kliknięciu w dymek."
+    "message": "Dymek pokazuje samo tłumaczenie; przyciski pojawiają się po kliknięciu w dymek."
+  },
+
+  "options_quiet_bubble_more": {
+    "message": "Przyciski akcji to kopiowanie, zapis, czytanie na głos i reszta - wszystko, co potrafi dymek, jedno kliknięcie dalej.",
+    "description": "The rest of the options_quiet_bubble_hint description, behind the row's More button."
   },
   "options_bubble_more": { "message": "Od razu pokazuj zdanie i hasła ze słowników" },
   "options_bubble_more_hint": {
-    "message": "Po zaznaczeniu tekstu dymek od razu pokazuje to, co normalnie jest widoczne dopiero po kliknięciu „Więcej”: przetłumaczone zdanie i hasła ze słowników. Warto zostawić włączone, gdy masz słownik - model tłumaczenia często myli się na pojedynczym słowie, a słownik pokazuje, co ono naprawdę znaczy. Dymek nad już zapisaną frazą wyświetla tylko zapisane tłumaczenie - zdanie i definicje ze słowników możesz zobaczyć po kliknięciu na „Więcej”."
+    "message": "Dymek od razu pokazuje przetłumaczone zdanie i hasła ze słowników, bez klikania Więcej."
+  },
+
+  "options_bubble_more_more": {
+    "message": "Warto zostawić włączone, gdy masz słownik - model tłumaczenia często myli się na pojedynczym słowie, a słownik pokazuje, co ono naprawdę znaczy. Dymek nad już zapisaną frazą wyświetla tylko zapisane tłumaczenie - zdanie i definicje ze słowników możesz zobaczyć po kliknięciu na „Więcej”.",
+    "description": "The rest of the options_bubble_more_hint description, behind the row's More button."
   },
   "options_underline_forms": { "message": "Podkreślaj też inne formy zapisanych słów" },
   "options_underline_forms_hint": {
-    "message": "Zapisane słowo jest podkreślane także w innych formach: po zapisaniu „read” podkreślone są też „reads” i „reading”, a dymek nad nimi pokazuje to, co masz zapisane dla „read”. O tym, które formy się liczą, decyduje słownik dla czytanego języka - musi być zainstalowany. Na razie tylko wtedy, gdy czytasz po angielsku. Po wyłączeniu podkreślana jest tylko dokładnie ta forma, którą masz zapisaną."
+    "message": "Po zapisaniu „read” podkreślone są też „reads” i „reading”."
+  },
+
+  "options_underline_forms_more": {
+    "message": "Dymek nad nimi pokazuje to, co masz zapisane dla „read”. O tym, które formy się liczą, decyduje słownik dla czytanego języka - musi być zainstalowany. Na razie tylko wtedy, gdy czytasz po angielsku. Po wyłączeniu podkreślana jest tylko dokładnie ta forma, którą masz zapisaną.",
+    "description": "The rest of the options_underline_forms_hint description, behind the row's More button."
   },
   "options_save_sentence": { "message": "Zapisuj zdanie razem z frazą" },
   "options_save_sentence_hint": {
-    "message": "Gdy zapisujesz frazę z dymka, razem z nią zapisywane jest zdanie wokół niej - takie, jak na stronie, bez tłumaczenia. Jest pokazywane pod frazą na stronie zapisanych fraz, zwinięte do jednej linii, i zapisywane w trzeciej kolumnie eksportu dla Anki. Przy frazie zapisanej bez zdania zdanie wokół niej jest zapisywane przy następnym otwarciu jej dymka na stronie. Tak jak fraza, zdanie jest przechowywane tylko na tym urządzeniu. Po wyłączeniu nowe zdania nie są zapisywane; zapisane wcześniej nie są usuwane."
+    "message": "Przy zapisie frazy zapisuje też zdanie, w którym wystąpiła."
+  },
+
+  "options_save_sentence_more": {
+    "message": "Zdanie takie, jak na stronie, bez tłumaczenia. Jest pokazywane pod frazą na stronie zapisanych fraz, zwinięte do jednej linii, i zapisywane w trzeciej kolumnie eksportu dla Anki. Przy frazie zapisanej bez zdania zdanie wokół niej jest zapisywane przy następnym otwarciu jej dymka na stronie. Tak jak fraza, zdanie jest przechowywane tylko na tym urządzeniu. Po wyłączeniu nowe zdania nie są zapisywane; zapisane wcześniej nie są usuwane.",
+    "description": "The rest of the options_save_sentence_hint description, behind the row's More button."
   },
   "options_no_translation": { "message": "Używaj bez modelu tłumaczenia" },
   "options_no_translation_hint": {
-    "message": "Wyłącza tłumaczenie maszynowe (model). Widok czytania, czytelnia offline i zakreślacz działają dalej. Przy wybranej parze językowej dymek nadal pokazuje znaczenia ze słowników, a frazy można zapisywać i widzieć ich podkreślenia. Idealne do czytania ze słownikami albo w ojczystym języku. Zapisane dane nie są usuwane i wracają po wyłączeniu tej opcji."
+    "message": "Tylko słowniki, bez tłumaczenia maszynowego; widok czytania, czytelnia offline i zakreślacz działają dalej."
+  },
+
+  "options_no_translation_more": {
+    "message": "Przy wybranej parze językowej dymek nadal pokazuje znaczenia ze słowników, a frazy można zapisywać i widzieć ich podkreślenia. Idealne do czytania ze słownikami albo w ojczystym języku. Zapisane dane nie są usuwane i wracają po wyłączeniu tej opcji.",
+    "description": "The rest of the options_no_translation_hint description, behind the row's More button."
   },
   "options_bubble_off": { "message": "Bez dymka po zaznaczeniu tekstu" },
   "options_bubble_off_hint": {
-    "message": "Gdy to jest włączone, zaznaczenie tekstu na zwykłej stronie nie robi nic - stronę otwierasz w widoku czytania przyciskiem re/read albo skrótem Alt+Shift+R. W widoku czytania zaznaczenie jest tylko chwilowym podświetleniem: dymek się nie otwiera, tapnięcie albo Escape je zdejmuje, a Ctrl+C lub Cmd+C je kopiuje (na ekranie dotykowym nie da się skopiować)."
+    "message": "Gdy to jest włączone, zaznaczenie tekstu na zwykłej stronie nie robi nic - stronę otwierasz w widoku czytania przyciskiem re/read albo skrótem Alt+Shift+R."
+  },
+
+  "options_bubble_off_more": {
+    "message": "W widoku czytania zaznaczenie jest tylko chwilowym podświetleniem: dymek się nie otwiera, tapnięcie albo Escape je zdejmuje, a Ctrl+C lub Cmd+C je kopiuje (na ekranie dotykowym nie da się skopiować).",
+    "description": "The rest of the options_bubble_off_hint description, behind the row's More button."
   },
   "options_bubble_scale": { "message": "Rozmiar tekstu dymka" },
   "options_bubble_scale_hint": {
     "message": "Zmienia rozmiar tekstu i przycisków w dymku tłumaczenia na wszystkich stronach."
   },
-  "options_note_more": { "message": "Pokaż cały opis" },
+  "options_note_more": { "message": "Więcej" },
+
+  "options_field_saved": {
+    "message": "Zapisano",
+    "description": "Beside a text field on the settings page once what was typed in it has been stored. Stays until the next edit - never taken away on a timer."
+  },
   "options_tts": { "message": "Czytanie na głos" },
   "options_tts_hint": {
-    "message": "Włącza funkcję czytania na głos. Wyłączenie tej opcji ukrywa wszystkie przyciski czytania w dymku, na listach i w widoku czytania."
+    "message": "Przyciski odczytu w dymku, na listach i w widoku czytania."
+  },
+
+  "options_tts_more": {
+    "message": "Wyłączenie ukrywa je wszystkie. Wybrany głos i tempo zostają zapisane i wracają po ponownym włączeniu.",
+    "description": "The rest of the options_tts_hint description, behind the row's More button."
   },
   "options_tts_voice": { "message": "Głos lektora" },
   "options_tts_lang": { "message": "Język głosu" },
   "options_tts_default": { "message": "Głos domyślny" },
   "options_tts_listen": { "message": "Posłuchaj" },
   "options_tts_voice_hint": {
-    "message": "Wybierz głos do czytania fraz i artykułów w każdym z języków. Do wyboru są tylko głosy działające offline: mowa powstaje na tym urządzeniu i nic nie jest wysyłane do internetu."
+    "message": "Osobny głos dla każdego języka; do wyboru tylko głosy działające offline."
+  },
+
+  "options_tts_voice_more": {
+    "message": "Głos czyta zarówno frazy, jak i całe artykuły. Mowa powstaje na tym urządzeniu i nic nie jest wysyłane do internetu.",
+    "description": "The rest of the options_tts_voice_hint description, behind the row's More button."
   },
   "speech_no_offline_voice": { "message": "To urządzenie nie ma głosu offline dla tego języka." },
   "options_tts_rate": { "message": "Tempo mówienia" },

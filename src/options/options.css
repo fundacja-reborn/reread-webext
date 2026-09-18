@@ -24,20 +24,6 @@ p.explain {
   margin: 0.75rem 0;
 }
 
-/* A highlighter's stroke over the sentences worth a second look (D192): the
-   accent as a wash, on both papers, in the ink around it - the browser's own
-   mark is a yellow block with black text, which no theme of ours has. Cloned
-   at the line breaks, so a stroke that wraps starts and ends its padding on
-   every line it spans. */
-p.explain mark {
-  background: color-mix(in srgb, var(--page-accent) 20%, transparent);
-  color: inherit;
-  padding: 0.05em 0.2em;
-  border-radius: 3px;
-  box-decoration-break: clone;
-  -webkit-box-decoration-break: clone;
-}
-
 /* Focus must be findable on every control here - the quiet row buttons erase
    their resting border, so the browser default cannot be trusted to survive
    the styling. */
@@ -86,22 +72,20 @@ body.no-translation .jump .translation-only + a::before {
   content: none;
 }
 
-/* The reading-aloud switch (D148): the two voice rows wear this class and
-   fold away with it, the translation-off manner. */
-body.no-tts .tts-only {
-  display: none;
-}
-
 /* The translation-off switch's sub-option (D149): the mirror of
    `translation-only` - on the page only while the switch is on. */
 body:not(.no-translation) .no-translation-only {
   display: none;
 }
 
-/* A sub-option stands indented under the switch it belongs to: the indent is
-   the whole of what says "this one depends on the row above". */
+/* A row that only means anything under another row (D254, §6.3): indented
+   under its parent and joined to it by a line down its leading edge - the
+   indent alone left the voice rows looking like two more settings of the page
+   rather than two settings of the switch above them. The line is the page's
+   own separator, not the accent: it joins, it does not call attention. */
 .row-sub {
-  padding-left: 1.5rem;
+  padding-inline-start: 1.5rem;
+  border-inline-start: 1px solid var(--page-line);
 }
 
 /* --- the header: the shared bar, title, the table of contents ---
@@ -359,78 +343,54 @@ h2 + p + section > h3:first-child {
   height: 1.4rem;
 }
 
-/* --- the folded descriptions (D155) --- */
+/* --- the row notes (D254, P5) ---
 
-/* A note's box: the text, clipped to two lines while folded, and the chevron
-   beside it. The box takes the note's place in the row's grid; the note
-   itself keeps `.row-note`'s dress. A press anywhere in the box opens or
-   closes it - but only a box with something folded away is a handle, and
-   only that one says so with the pointer. */
-.note-fold {
-  grid-column: 1 / -1;
-  display: flex;
-  align-items: flex-start;
-  gap: 0.25rem;
-}
+   One whole sentence, always, with the rest of it behind the row's own More.
+   The button is a word in the note's own voice, with the fold marker this
+   page uses everywhere (the triangle, never a chevron - D254 §2.6) drawn
+   before it. No transition on the turn: an e-ink panel draws a turning glyph
+   as a smear. */
 
-.note-fold[data-long] {
-  cursor: pointer;
-}
-
-.note-fold > .row-note {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-/* The clip: the first two lines and an ellipsis. Visual only - the text is
-   all there for a screen reader, and `scrollHeight` still measures it, which
-   is how the page knows whether the chevron has anything to promise. */
-.note-fold[data-folded] > .row-note {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  overflow: hidden;
-}
-
-/* The chevron: the quiet dressing of the row buttons, a touch target as tall
-   as the two lines it stands beside, its glyph at the row's right edge the
-   way the checkboxes stand (the hit box reaches past it). Down while folded,
-   up while open - turned, not swapped, and without a transition: an e-ink
-   panel draws a turn as a smear. The element is in the selector so this
-   outranks `.row button` above. */
-button.note-toggle {
-  flex: none;
-  min-width: 44px;
-  min-height: 44px;
-  margin: 0 -0.85rem 0 0;
+button.note-more {
+  min-height: 0;
+  margin-inline-start: 0.35rem;
   padding: 0;
-  border-color: transparent;
+  border: none;
+  background: none;
   color: var(--page-muted);
+  font: inherit;
+  text-decoration: underline;
   transition: none;
 }
 
-/* A note that fits its two lines shows no chevron - but keeps the chevron's
-   column. The verdict is measured on the note, and a column that came and
-   went with the verdict moved the note's width, which re-measured the note
-   in the same frame: the "ResizeObserver loop" Chrome lists among the
-   extension's errors. So every note wraps at the same edge whatever the
-   verdict, and the button only stops being drawn - and, undrawn, stops
-   asking for its two lines of height, so a short note keeps its own. */
-.note-fold:not([data-long]) > .note-toggle {
-  visibility: hidden;
-  height: 0;
-  min-height: 0;
+button.note-more::before {
+  content: "\25B8\00A0";
+  text-decoration: none;
+  display: inline-block;
 }
 
-.note-toggle:hover,
-.note-toggle:focus-visible {
-  border-color: var(--page-border);
-  background: color-mix(in srgb, var(--page-fg) 6%, transparent);
+button.note-more[aria-expanded="true"]::before {
+  content: "\25BE\00A0";
+}
+
+button.note-more:hover,
+button.note-more:focus-visible {
   color: var(--page-fg);
 }
 
-.note-fold:not([data-folded]) .note-toggle .page-icon {
-  transform: rotate(180deg);
+/* The rest of the note, under the sentence it belongs to - the same voice,
+   a step of air between them. */
+.row .row-more {
+  margin-top: 0.35rem;
+}
+
+/* What was typed is stored, beside the field (D254, §6.5): the page's quiet
+   voice, no frame and no colour - it is an answer, not a warning, and it
+   stands until the next keystroke. */
+.field-saved {
+  color: var(--page-muted);
+  font-size: 0.9rem;
+  white-space: nowrap;
 }
 
 /* --- the refresh line: a quiet button and the list's date --- */

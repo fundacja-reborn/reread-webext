@@ -127,9 +127,9 @@ describe("the settings page's sections", () => {
 
   it("gives every row one name - the setting it writes - for the deep link and the index", async () => {
     const markup = await source("options/options.html");
-    const found = [...markup.matchAll(/id="s-([A-Za-z]+)" data-setting="([A-Za-z]+)" data-section="([a-z-]+)"/g)].map(
-      (match) => ({ id: String(match[1]), setting: String(match[2]), section: String(match[3]) }),
-    );
+    const found = [
+      ...markup.matchAll(/id="s-([A-Za-z]+)" data-setting="([A-Za-z]+)"(?: data-parent="[A-Za-z]+")? data-section="([a-z-]+)"/g),
+    ].map((match) => ({ id: String(match[1]), setting: String(match[2]), section: String(match[3]) }));
     assert.deepEqual(
       found.map((row) => ({ setting: row.setting, section: row.section })),
       ROWS.map((row) => ({ setting: row.setting, section: row.section })),
@@ -162,8 +162,8 @@ describe("the settings page's sections", () => {
     );
     assert.match(
       markup,
-      /<div class="row row-sub no-translation-only" id="s-bubbleOff"/,
-      "the sub-option lost its indent or its dependence on the switch",
+      /<div class="row row-sub" id="s-bubbleOff" data-setting="bubbleOff" data-parent="translationOff"/,
+      "the sub-option lost its indent or the switch it names as its parent",
     );
   });
 
