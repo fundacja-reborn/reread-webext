@@ -229,10 +229,24 @@ function markHits(element, wanted) {
  * @param {boolean} blocked
  */
 function block(row, blocked) {
+  // Only a dependent row is ever blocked, and only a blocked row is ever
+  // re-enabled: the page disables controls of its own (the Listen button with
+  // no offline voice, the copy switch mid-build), and a search clearing itself
+  // must not hand those back.
+  if (row.element.dataset["parent"] === undefined) return;
+  const was = row.element.classList.contains("row-blocked");
+  if (was === blocked) return;
   row.element.classList.toggle("row-blocked", blocked);
   for (const control of row.element.querySelectorAll("input, select, button:not(.note-more)")) {
-    if (control instanceof HTMLInputElement || control instanceof HTMLSelectElement || control instanceof HTMLButtonElement) {
-      control.disabled = blocked;
+    if (!(control instanceof HTMLInputElement || control instanceof HTMLSelectElement || control instanceof HTMLButtonElement)) {
+      continue;
+    }
+    if (blocked) {
+      if (control.disabled) control.dataset["wasOff"] = "";
+      control.disabled = true;
+    } else {
+      control.disabled = "wasOff" in control.dataset;
+      delete control.dataset["wasOff"];
     }
   }
   const existing = row.element.querySelector(".row-why");
@@ -280,9 +294,14 @@ function filterPart(part, wanted, inherited) {
       shown += 1;
       markHits(row.name, wanted);
       markHits(row.hint, wanted);
-      if (row.more !== null && !whole && holdsAll(folded(row.more.textContent ?? ""), wanted)) {
-        row.more.hidden = false;
-        row.more.previousElementSibling?.querySelector(".note-more")?.setAttribute("aria-expanded", "true");
+      if (row.more !== null) {
+        // Open where the rest of the note is what matched, and closed again
+        // when the next query no longer needs it - unless the reader had it
+        // open before the search began.
+        const inRest = !whole && holdsAll(folded(row.more.dataset["plain"] ?? row.more.textContent ?? ""), wanted);
+        const open = inRest || opened.has(row.more.id);
+        row.more.hidden = !open;
+        row.more.previousElementSibling?.querySelector(".note-more")?.setAttribute("aria-expanded", String(open));
       }
     }
   }
@@ -406,7 +425,9 @@ function run(query) {
   }
 
   if (!searching) {
-    clearFilter();
+    // Only undo what a search did: Escape on an empty field is not a reason
+    // to close the notes somebody opened by hand.
+    if (was) clearFilter();
     tell(0, "");
     dimSections();
     return;
@@ -435,7 +456,7 @@ function placeField() {
     side.prepend(search);
     search.hidden = false;
   } else {
-    bar.append(search);
+    bar.insertBefore(search, bar.querySelector(".page-tools"));
     // On the bar the field waits behind the magnifier: the bar has room for
     // one thing at a time, and a field always open would push the section
     // list out of it.

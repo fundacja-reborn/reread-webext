@@ -140,12 +140,18 @@ header h1 {
   font-size: 0.85rem;
 }
 
-/* The status has nowhere to stand inside a bar; on a narrow screen it goes
-   under the bar's line, where the page begins. */
+/* The status has nowhere to stand inside a bar of fixed height: on a narrow
+   screen it hangs just under the bar's line, on the stuck box's own paper and
+   inside its stacking context, so it reads as part of the bar and the page
+   scrolls under it. The bar's height does not move for it. */
 .page-bar > .settings-search #search-status {
   position: absolute;
+  top: 100%;
   inset-inline: 0;
-  margin-top: 0.35rem;
+  margin: 0;
+  padding: 0.35rem 0;
+  background: var(--page-bg);
+  border-bottom: 1px solid var(--page-line);
 }
 
 /* An open field is the bar's whole business: the section list waits. */

@@ -122,7 +122,7 @@ describe("searching the settings", () => {
 
     const script = await source("options/search.js");
     assert.match(script, /side\.prepend\(search\)/, "the field never stands in the column");
-    assert.match(script, /bar\.append\(search\)/, "the field never stands in the bar");
+    assert.match(script, /bar\.insertBefore\(search, bar\.querySelector\("\.page-tools"\)\)/, "the field never stands in the bar, or stands after its tools");
     assert.match(script, /window\.matchMedia\("\(min-width: 60rem\)"\)\.addEventListener\("change", placeField\)/, "a resized window leaves the field where it was");
   });
 
@@ -145,7 +145,8 @@ describe("searching the settings", () => {
     assert.match(script, /block\(row, hit && dependent && off\)/, "a row behind a switched-off parent is lost to the search");
     assert.match(script, /t\("options_blocked_by"\)/, "nothing says why the row cannot be used");
     assert.match(script, /door\.href = `#\$\{parent\?\.id \?\? ""\}`/, "the row does not lead to the switch that brings it");
-    assert.match(script, /control\.disabled = blocked/, "the row can be changed although its switch is off");
+    assert.match(script, /if \(control\.disabled\) control\.dataset\["wasOff"\] = "";/, "a control the page itself disabled is handed back when the query clears");
+    assert.match(script, /if \(row\.element\.dataset\["parent"\] === undefined\) return;/, "a row that depends on nothing is disabled and re-enabled all the same");
 
     const css = await source("options/options.css");
     assert.match(css, /\.row-blocked/, "a blocked row looks like any other");
