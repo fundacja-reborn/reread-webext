@@ -3688,6 +3688,33 @@ function releasePress(event) {
   if (event.detail !== 0 && event.currentTarget instanceof HTMLElement) event.currentTarget.blur();
 }
 
+/**
+ * Which kind of pointer is on this window, written on the root for the
+ * stylesheet to read (D248). A finger or a pen leaves the button it tapped
+ * standing under `:hover` until something else is tapped, and where a hover
+ * is a frame and a wash - the pen's toolbar - that is a page turn reading as
+ * pressed for good (Michał's photos from the Boox, 2026-09-18). Handing the
+ * focus back (`releasePress` above) was only half of the answer.
+ *
+ * Asked of the pointer, not of a media query: the Boox answers `pointer:
+ * fine` (Michał's metrics, 2026-09-14), and anything that answers `hover:
+ * hover` without a mouse behind it keeps the stuck hover. `pointerover`
+ * rather than `pointerdown`, so that a mouse crossing into a button says so
+ * before the hover it is about to draw - a window last touched by a finger
+ * dresses its hovers again as soon as a mouse moves over it. A pointer with
+ * no kind to it says nothing: the attribute holds what was last known.
+ */
+window.addEventListener(
+  "pointerover",
+  (event) => {
+    if (event.pointerType === "") return;
+    const kind = event.pointerType === "mouse" ? "mouse" : "touch";
+    const root = document.documentElement;
+    if (root.dataset["pointerKind"] !== kind) root.dataset["pointerKind"] = kind;
+  },
+  { capture: true, passive: true },
+);
+
 // The two page turns of the pen's toolbar (D242). The pen stays in the
 // hand and the active mark stays active - a press inside this bar is not a
 // press away (the rule below) - so a mark whose tail moved onto the next
