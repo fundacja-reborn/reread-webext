@@ -1808,16 +1808,31 @@
   },
   "options_touch_turn": { "message": "Turning pages by touch" },
   "options_touch_turn_zones": { "message": "Tap the left or right third" },
-  "options_touch_turn_swipe": { "message": "Swipe sideways" },
+  "options_touch_turn_swipe": { "message": "Slide a finger sideways" },
   "options_touch_turn_off": { "message": "Off" },
   "options_touch_turn_hint": {
-    "message": "On a wide screen, tapping the left or right third of the page is the default; on a narrow one it is swiping sideways, because there the hand that holds the device rests on the screen. Off leaves the page keys, the arrow keys and the mouse wheel, which turn pages whatever this is set to. A tap turns a page only when it is short, still and away from the edges of the screen, so that a thumb resting at the edge turns nothing; the pen never turns a page."
+    "message": "Sliding a finger is what re/read does by default: a gesture that has to move is the one a hand holding the device cannot make by accident. The page keys, the arrow keys and the mouse wheel turn pages whatever this is set to, and the pen never turns one."
+  },
+  "options_touch_turn_note_zones": {
+    "message": "A tap in the left or right third of the page turns it: the right third goes on, the left goes back. Only a short, still tap away from the edges of the screen counts, so that a thumb holding the device turns nothing."
+  },
+  "options_touch_turn_note_swipe": {
+    "message": "Sliding a finger left shows the next page, right the previous one. On a phone, do not start at the very edge of the screen - that is where the system's own back gesture begins; on an e-ink reader the edge usually works."
+  },
+  "options_touch_turn_note_off": {
+    "message": "Touch turns no pages at all. The page keys, the arrow keys and the mouse wheel still do."
   },
   "options_turn_effect": { "message": "Page turn effect" },
   "options_turn_effect_auto": { "message": "Automatic" },
   "options_turn_effect_off": { "message": "Off" },
   "options_turn_effect_hint": {
-    "message": "Shows that the page has turned, which is easy to miss when you are reading the middle of a page. In the E-ink theme the text area goes dark for a moment, the way an e-reader marks a page turn; on other screens the new page slides in. Nothing happens if your system asks for less motion, and nothing when the page is turned by reading aloud or by dragging a selection to the edge of the page."
+    "message": "Shows that the page has turned, which is easy to miss when you are reading the middle of a page. Nothing happens if your system asks for less motion, and nothing when the page is turned by reading aloud or by dragging a selection to the edge of the page."
+  },
+  "options_turn_effect_note_auto": {
+    "message": "In the E-ink theme the text area goes dark for a moment, the way an e-reader marks a page turn; on other screens the new page slides in."
+  },
+  "options_turn_effect_note_off": {
+    "message": "The page simply changes, as it did before this setting existed."
   },
   "options_keep_articles": { "message": "Save in the offline reading list by default" },
   "options_keep_articles_hint": {

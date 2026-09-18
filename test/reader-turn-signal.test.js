@@ -111,7 +111,12 @@ describe("the signal that a page has turned (D251)", () => {
     const script = await source("options/options.js");
     assert.match(script, /if \(!\(select instanceof HTMLSelectElement\) \|\| !isTurnEffect\(select\.value\)\) return;/, "a value the guard does not know can be written");
     assert.match(script, /writeConfig\(\{ reader: \{ turnEffect: select\.value \} \}\)/, "the row does not write the reader's setting");
-    assert.match(bodyOf(script, "renderTurning"), /effect\.value = config\.reader\.turnEffect;/, "the row does not show what is stored");
+    assert.match(bodyOf(script, "renderTurning"), /effect\.value = config\.reader\.turnEffect;\s*sayEffect\(effect\.value\);/, "the row does not show what is stored, or says nothing about it");
+    // The line under the select, one sentence per value, each key a literal.
+    assert.match(markup, /<p class="row-note" id="turn-effect-note"><\/p>/, "there is no line to say what the chosen effect looks like");
+    const said = bodyOf(script, "sayEffect");
+    assert.match(said, /t\("options_turn_effect_note_off"\) : t\("options_turn_effect_note_auto"\)/, "the two values are not told apart, or the key is built rather than written");
+    assert.match(script, /sayEffect\(select\.value\);/, "the line stands still when the effect is changed");
     for (const lang of ["en", "pl", "de", "fr", "es", "uk"]) {
       const catalogue = JSON.parse(await source(`_locales/${lang}/messages.json`));
       for (const key of [

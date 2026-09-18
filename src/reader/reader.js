@@ -2563,7 +2563,7 @@ function refreshCurtain() {
 function onBareTap(x, y, target) {
   if (!paged() || markerOn || pressHadWork || roomShown !== null) return;
   if (target instanceof Element && target.closest(TURN_STOPS) !== null) return;
-  if (effectiveTouchTurn(settings.reader, window.innerWidth) !== "zones") return;
+  if (effectiveTouchTurn(settings.reader) !== "zones") return;
   const tap = lastTap();
   if (tap === null) return;
   const turn = tapIntent(tap);
@@ -2725,7 +2725,7 @@ document.addEventListener(
     };
     // The swipe is answered here, where the gesture actually ends; the tap
     // waits for `reading.js` to say the press had nothing to put away.
-    if (effectiveTouchTurn(settings.reader, window.innerWidth) === "swipe") {
+    if (effectiveTouchTurn(settings.reader) === "swipe") {
       swipeTurn(liftedTap, down.target);
     }
   },

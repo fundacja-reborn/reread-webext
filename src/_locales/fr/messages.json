@@ -1478,16 +1478,31 @@
   },
   "options_touch_turn": { "message": "Tourner les pages au toucher" },
   "options_touch_turn_zones": { "message": "Toucher le tiers gauche ou droit" },
-  "options_touch_turn_swipe": { "message": "Balayer sur le côté" },
+  "options_touch_turn_swipe": { "message": "Glisser le doigt sur le côté" },
   "options_touch_turn_off": { "message": "Désactivé" },
   "options_touch_turn_hint": {
-    "message": "Sur un écran large, toucher le tiers gauche ou droit de la page est le réglage par défaut ; sur un écran étroit, c'est le balayage sur le côté, car la main qui tient l'appareil repose sur l'écran. Désactivé, il reste les touches de page, les flèches et la molette, qui tournent les pages quel que soit ce réglage. Un toucher ne tourne la page que s'il est bref, immobile et éloigné des bords de l'écran, pour qu'un pouce posé au bord n'en tourne aucune ; le stylet ne tourne jamais de page."
+    "message": "Le glissement du doigt est le réglage par défaut : un geste qui doit se déplacer est le seul que la main qui tient l'appareil ne fasse pas par mégarde. Les touches de page, les flèches et la molette tournent les pages quel que soit ce réglage, et le stylet ne tourne jamais de page."
+  },
+  "options_touch_turn_note_zones": {
+    "message": "Toucher le tiers gauche ou droit de la page la tourne : le tiers droit avance, le gauche recule. Seul compte un toucher bref, immobile et éloigné des bords de l'écran, pour qu'un pouce qui tient l'appareil n'en tourne aucune."
+  },
+  "options_touch_turn_note_swipe": {
+    "message": "Glisser le doigt vers la gauche montre la page suivante, vers la droite la précédente. Sur un téléphone, ne commencez pas tout au bord de l'écran : c'est là que commence le geste de retour du système ; sur une liseuse, le bord fonctionne en général."
+  },
+  "options_touch_turn_note_off": {
+    "message": "Le toucher ne tourne aucune page. Les touches de page, les flèches et la molette continuent de le faire."
   },
   "options_turn_effect": { "message": "Effet de changement de page" },
   "options_turn_effect_auto": { "message": "Automatique" },
   "options_turn_effect_off": { "message": "Désactivé" },
   "options_turn_effect_hint": {
-    "message": "Montre que la page a tourné, ce qui passe facilement inaperçu quand on lit le milieu d'une page. Dans le thème E-ink, la zone de texte s'assombrit un instant, comme sur une liseuse ; sur les autres écrans, la nouvelle page glisse. Rien ne se passe si le système demande moins d'animations, ni quand la page est tournée par la lecture à voix haute ou en faisant glisser une sélection jusqu'au bord de la page."
+    "message": "Montre que la page a tourné, ce qui passe facilement inaperçu quand on lit le milieu d'une page. Rien ne se passe si le système demande moins d'animations, ni quand la page est tournée par la lecture à voix haute ou en faisant glisser une sélection jusqu'au bord de la page."
+  },
+  "options_turn_effect_note_auto": {
+    "message": "Dans le thème E-ink, la zone de texte s'assombrit un instant, comme sur une liseuse ; sur les autres écrans, la nouvelle page glisse."
+  },
+  "options_turn_effect_note_off": {
+    "message": "La page change simplement, comme avant ce réglage."
   },
   "options_keep_articles": { "message": "Enregistrer par défaut dans la liste de lecture hors ligne" },
   "options_keep_articles_hint": {

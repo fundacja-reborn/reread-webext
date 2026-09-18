@@ -2067,16 +2067,31 @@
   },
   "options_touch_turn": { "message": "Przewracanie stron dotykiem" },
   "options_touch_turn_zones": { "message": "Tapnięcie w lewą lub prawą jedną trzecią" },
-  "options_touch_turn_swipe": { "message": "Machnięcie w bok" },
+  "options_touch_turn_swipe": { "message": "Przesunięcie palcem" },
   "options_touch_turn_off": { "message": "Wyłączone" },
   "options_touch_turn_hint": {
-    "message": "Na szerokim ekranie domyślne jest tapnięcie w lewą lub prawą jedną trzecią strony, na wąskim - machnięcie w bok, bo tam ręka trzymająca urządzenie leży na ekranie. Po wyłączeniu zostają klawisze zmiany strony, strzałki i kółko myszy, które przewracają strony niezależnie od tego ustawienia. Tapnięcie przewraca stronę tylko wtedy, gdy jest krótkie, nieruchome i z dala od krawędzi ekranu, żeby kciuk leżący przy krawędzi niczego nie przewracał; pióro nie przewraca stron nigdy."
+    "message": "Przesunięcie palcem jest domyślne: gest, który musi się przemieścić, to jedyny gest, którego ręka trzymająca urządzenie nie zrobi przypadkiem. Klawisze zmiany strony, strzałki i kółko myszy przewracają strony niezależnie od tego ustawienia, a pióro nie przewraca nigdy."
+  },
+  "options_touch_turn_note_zones": {
+    "message": "Tapnięcie w lewą lub prawą jedną trzecią strony przewraca ją: prawa dalej, lewa wstecz. Liczy się tylko tapnięcie krótkie, nieruchome i z dala od krawędzi ekranu, żeby kciuk trzymający urządzenie niczego nie przewracał."
+  },
+  "options_touch_turn_note_swipe": {
+    "message": "Przesunięcie palcem w lewo pokazuje następną stronę, w prawo poprzednią. Na telefonie nie zaczynaj od samej krawędzi ekranu - tam zaczyna się systemowy gest cofania; na czytniku e-ink krawędź zwykle działa."
+  },
+  "options_touch_turn_note_off": {
+    "message": "Dotyk nie przewraca stron. Zostają klawisze zmiany strony, strzałki i kółko myszy."
   },
   "options_turn_effect": { "message": "Efekt przewrócenia strony" },
   "options_turn_effect_auto": { "message": "Automatyczny" },
   "options_turn_effect_off": { "message": "Wyłączony" },
   "options_turn_effect_hint": {
-    "message": "Pokazuje, że strona się przewróciła - czytając środek strony, łatwo to przeoczyć. W motywie E-ink obszar tekstu na moment ciemnieje, tak jak przy przewracaniu strony w czytniku e-booków; na innych ekranach nowa strona wjeżdża płynnie. Nic się nie dzieje, gdy system prosi o ograniczenie ruchu, ani gdy stronę przewraca czytanie na głos albo przeciągnięcie zaznaczenia do krawędzi strony."
+    "message": "Pokazuje, że strona się przewróciła - czytając środek strony, łatwo to przeoczyć. Nic się nie dzieje, gdy system prosi o ograniczenie ruchu, ani gdy stronę przewraca czytanie na głos albo przeciągnięcie zaznaczenia do krawędzi strony."
+  },
+  "options_turn_effect_note_auto": {
+    "message": "W motywie E-ink obszar tekstu na moment ciemnieje, tak jak przy przewracaniu strony w czytniku e-booków; na innych ekranach nowa strona wjeżdża płynnie."
+  },
+  "options_turn_effect_note_off": {
+    "message": "Strona po prostu się zmienia, tak jak przed pojawieniem się tego ustawienia."
   },
   "options_keep_articles": { "message": "Zapisuj domyślnie w czytelni offline" },
   "options_keep_articles_hint": {
