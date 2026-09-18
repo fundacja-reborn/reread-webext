@@ -1811,7 +1811,7 @@
   "options_touch_turn_swipe": { "message": "Slide a finger sideways" },
   "options_touch_turn_off": { "message": "Off" },
   "options_touch_turn_hint": {
-    "message": "Sliding a finger is what re/read does by default: a gesture that has to move is the one a hand holding the device cannot make by accident. The page keys, the arrow keys and the mouse wheel turn pages whatever this is set to, and the pen never turns one."
+    "message": "On a wide screen the default is a tap, on a narrow one a slide - there the hand that holds the device rests on the screen, and a gesture that has to move is the one it cannot make by accident. The page keys, the arrow keys and the mouse wheel turn pages whatever this is set to, and the pen never turns one."
   },
   "options_touch_turn_note_zones": {
     "message": "A tap in the left or right third of the page turns it: the right third goes on, the left goes back. Only a short, still tap away from the edges of the screen counts, so that a thumb holding the device turns nothing."

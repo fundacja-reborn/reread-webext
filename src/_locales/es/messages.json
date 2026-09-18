@@ -1469,7 +1469,7 @@
   "options_touch_turn_swipe": { "message": "Deslizar el dedo hacia el lado" },
   "options_touch_turn_off": { "message": "Desactivado" },
   "options_touch_turn_hint": {
-    "message": "Deslizar el dedo es lo predeterminado: un gesto que tiene que moverse es el único que la mano que sujeta el dispositivo no hace sin querer. Las teclas de página, las flechas y la rueda del ratón pasan página con cualquier ajuste, y el lápiz nunca pasa página."
+    "message": "En una pantalla ancha lo predeterminado es el toque; en una estrecha, el deslizamiento - allí la mano que sujeta el dispositivo se apoya en la pantalla, y un gesto que tiene que moverse es el único que esa mano no hace sin querer. Las teclas de página, las flechas y la rueda del ratón pasan página con cualquier ajuste, y el lápiz nunca pasa página."
   },
   "options_touch_turn_note_zones": {
     "message": "Tocar el tercio izquierdo o derecho de la página la pasa: el derecho avanza, el izquierdo retrocede. Solo cuenta un toque breve, quieto y lejos de los bordes de la pantalla, para que un pulgar que sujeta el dispositivo no pase ninguna."

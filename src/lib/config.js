@@ -94,9 +94,9 @@ export const CONFIG_KEY = "config";
  *   small e-ink panel already fills the screen.
  * @property {"zones" | "swipe" | "off" | null} touchTurn What a finger does
  *   to a page read by pages (D250): the outer thirds turn it, a sideways
- *   slide turns it, or nothing does. `null` is nobody having chosen, and the
- *   slide is what that means (`effectiveTouchTurn`) - the way `readerOnly`
- *   keeps a null for "the default may still move". Off matters on an e-ink
+ *   slide turns it, or nothing does. `null` is nobody having chosen, and then
+ *   the window's width decides (`effectiveTouchTurn`) - the way `readerOnly`
+ *   lets the platform decide until a hand sets it. Off matters on an e-ink
  *   reader with hardware page keys, where the gesture is worth less than the
  *   certainty that no accidental touch turns anything. Keys, the wheel and
  *   the arrows never answer to this: it says what the glass does, nothing
@@ -400,20 +400,36 @@ export function isTurnEffect(value) {
 }
 
 /**
- * What a finger does on a page read by pages: the hand's choice, and with
- * none the slide (D250).
+ * The width from which the thirds are the better gesture: a device lying on
+ * a table rather than held in a hand. Under it the hand wraps around the
+ * screen and the thumb holding it rests on the glass - a phone, and an
+ * e-ink reader held one-handed - so a gesture that has to move is the one an
+ * idle hand cannot make; over it nothing rests on the screen, and a tap is
+ * both quicker and more precise.
  *
- * The slide everywhere, and not the thirds on a wide screen as the first cut
- * had it (Michał's smoke, 2026-09-18): a gesture that has to move is the one
- * an idle hand cannot make, and that is worth more than the thirds' speed on
- * every screen a page is read on. The thirds stay one press away in the
- * settings, and the keys never answered to this at all.
+ * Eight hundred rather than the six hundred of the first cut, and the number
+ * is about two real devices: an e-ink reader of this kind reports something
+ * like 720 CSS pixels across (1264 device pixels at the ratio Michał's Boox
+ * Page reports, less again at a text zoom), and the smallest tablet worth
+ * calling one - the iPad Pro this extension is tested on - reports 834 in
+ * portrait. The line falls between them, which is where the hand is: the
+ * reader is held, the tablet is put down.
+ */
+export const TOUCH_TURN_WIDE = 800;
+
+/**
+ * What a finger does on a page read by pages: the hand's choice, and with
+ * none the window's width (D250). Read at the gesture rather than frozen at
+ * the first paint, so a window resized or a device turned answers for what
+ * it is now - and so that the rule stays one line nobody has to keep in
+ * sync with a stored copy.
  *
  * @param {Pick<ReaderConfig, "touchTurn">} reader
+ * @param {number} width the window's width in CSS pixels
  * @returns {"zones" | "swipe" | "off"}
  */
-export function effectiveTouchTurn(reader) {
-  return reader.touchTurn ?? "swipe";
+export function effectiveTouchTurn(reader, width) {
+  return reader.touchTurn ?? (width < TOUCH_TURN_WIDE ? "swipe" : "zones");
 }
 
 /**

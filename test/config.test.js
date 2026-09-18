@@ -8,6 +8,7 @@ import {
   READER_DEFAULTS,
   READING_PACE,
   SIZE,
+  TOUCH_TURN_WIDE,
   TTS_RATE,
   chosenPair,
   effectiveLibraryCopy,
@@ -822,16 +823,22 @@ describe("the reader's appearance", () => {
     assert.equal(isTouchTurn(null), false);
   });
 
-  it("slides until a hand says otherwise, on every screen (D250)", () => {
-    // The first cut read the window's width - the thirds on a wide screen,
-    // the slide on a narrow one. Michał's smoke (2026-09-18): the slide
-    // everywhere, because a gesture that has to move is the one an idle hand
-    // cannot make, and that is worth more than the thirds' speed anywhere.
-    assert.equal(effectiveTouchTurn({ touchTurn: null }), "swipe");
-    // A stored choice wins, off included.
-    assert.equal(effectiveTouchTurn({ touchTurn: "zones" }), "zones");
-    assert.equal(effectiveTouchTurn({ touchTurn: "swipe" }), "swipe");
-    assert.equal(effectiveTouchTurn({ touchTurn: "off" }), "off");
+  it("slides where a hand holds the screen and taps thirds where it does not (D250)", () => {
+    assert.equal(effectiveTouchTurn({ touchTurn: null }, TOUCH_TURN_WIDE - 1), "swipe");
+    assert.equal(effectiveTouchTurn({ touchTurn: null }, TOUCH_TURN_WIDE), "zones");
+    // The devices the line was drawn between (Michał, 2026-09-18: a phone and
+    // an e-ink reader slide, a tablet taps): a phone, an e-ink reader of the
+    // kind this is read on, the smallest tablet in portrait, a desktop window.
+    assert.equal(effectiveTouchTurn({ touchTurn: null }, 360), "swipe");
+    assert.equal(effectiveTouchTurn({ touchTurn: null }, 722), "swipe");
+    assert.equal(effectiveTouchTurn({ touchTurn: null }, 834), "zones");
+    assert.equal(effectiveTouchTurn({ touchTurn: null }, 1200), "zones");
+    // A stored choice wins at every width, off included.
+    for (const width of [360, 1200]) {
+      assert.equal(effectiveTouchTurn({ touchTurn: "zones" }, width), "zones");
+      assert.equal(effectiveTouchTurn({ touchTurn: "swipe" }, width), "swipe");
+      assert.equal(effectiveTouchTurn({ touchTurn: "off" }, width), "off");
+    }
   });
 
   it("signals a turn unless a stored name says otherwise (D251)", () => {

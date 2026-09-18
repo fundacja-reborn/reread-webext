@@ -2070,7 +2070,7 @@
   "options_touch_turn_swipe": { "message": "Przesunięcie palcem" },
   "options_touch_turn_off": { "message": "Wyłączone" },
   "options_touch_turn_hint": {
-    "message": "Przesunięcie palcem jest domyślne: gest, który musi się przemieścić, to jedyny gest, którego ręka trzymająca urządzenie nie zrobi przypadkiem. Klawisze zmiany strony, strzałki i kółko myszy przewracają strony niezależnie od tego ustawienia, a pióro nie przewraca nigdy."
+    "message": "Na szerokim ekranie domyślne jest tapnięcie, na wąskim przesunięcie - tam ręka trzymająca urządzenie leży na ekranie, a gest, który musi się przemieścić, to jedyny gest, którego ta ręka nie zrobi przypadkiem. Klawisze zmiany strony, strzałki i kółko myszy przewracają strony niezależnie od tego ustawienia, a pióro nie przewraca nigdy."
   },
   "options_touch_turn_note_zones": {
     "message": "Tapnięcie w lewą lub prawą jedną trzecią strony przewraca ją: prawa dalej, lewa wstecz. Liczy się tylko tapnięcie krótkie, nieruchome i z dala od krawędzi ekranu, żeby kciuk trzymający urządzenie niczego nie przewracał."

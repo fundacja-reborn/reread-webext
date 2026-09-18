@@ -1418,7 +1418,7 @@
   "options_touch_turn_swipe": { "message": "Finger zur Seite schieben" },
   "options_touch_turn_off": { "message": "Aus" },
   "options_touch_turn_hint": {
-    "message": "Das Schieben mit dem Finger ist voreingestellt: eine Geste, die sich bewegen muss, ist die einzige, die eine haltende Hand nicht versehentlich macht. Die Bild-Tasten, die Pfeiltasten und das Mausrad blättern unabhängig von dieser Einstellung um, und der Stift blättert nie um."
+    "message": "Auf einem breiten Bildschirm ist das Tippen voreingestellt, auf einem schmalen das Schieben - dort liegt die Hand, die das Gerät hält, auf dem Bildschirm, und eine Geste, die sich bewegen muss, ist die einzige, die diese Hand nicht versehentlich macht. Die Bild-Tasten, die Pfeiltasten und das Mausrad blättern unabhängig von dieser Einstellung um, und der Stift blättert nie um."
   },
   "options_touch_turn_note_zones": {
     "message": "Ein Tippen auf das linke oder rechte Drittel der Seite blättert um: rechts weiter, links zurück. Es zählt nur ein kurzes, ruhiges Tippen fern von den Rändern des Bildschirms, damit ein haltender Daumen nichts umblättert."

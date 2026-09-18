@@ -1481,7 +1481,7 @@
   "options_touch_turn_swipe": { "message": "Glisser le doigt sur le côté" },
   "options_touch_turn_off": { "message": "Désactivé" },
   "options_touch_turn_hint": {
-    "message": "Le glissement du doigt est le réglage par défaut : un geste qui doit se déplacer est le seul que la main qui tient l'appareil ne fasse pas par mégarde. Les touches de page, les flèches et la molette tournent les pages quel que soit ce réglage, et le stylet ne tourne jamais de page."
+    "message": "Sur un écran large, le réglage par défaut est le toucher ; sur un écran étroit, le glissement - là, la main qui tient l'appareil repose sur l'écran, et un geste qui doit se déplacer est le seul qu'elle ne fasse pas par mégarde. Les touches de page, les flèches et la molette tournent les pages quel que soit ce réglage, et le stylet ne tourne jamais de page."
   },
   "options_touch_turn_note_zones": {
     "message": "Toucher le tiers gauche ou droit de la page la tourne : le tiers droit avance, le gauche recule. Seul compte un toucher bref, immobile et éloigné des bords de l'écran, pour qu'un pouce qui tient l'appareil n'en tourne aucune."

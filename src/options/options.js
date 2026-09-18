@@ -338,14 +338,15 @@ function renderPageNumber() {
 /**
  * The two rows about how a page turns (D250, D251). The touch row shows the
  * gesture as it acts, not as it is stored: with nothing chosen the select
- * stands on the default the reader would use, exactly as the reader-only
- * switch shows the mode the platform would pick. The first press stores a
- * real choice, and from then on the default has no say.
+ * stands on what the window's width decides - and this page is read at the
+ * width the reader is, whether it stands in a tab of its own or in a room
+ * over the reading. The first press stores a real choice, and from then on
+ * the width has no say, exactly as the reader-only switch works.
  */
 function renderTurning() {
   const touch = document.getElementById("touch-turn");
   if (touch instanceof HTMLSelectElement) {
-    touch.value = effectiveTouchTurn(config.reader);
+    touch.value = effectiveTouchTurn(config.reader, window.innerWidth);
     sayGesture(touch.value);
   }
   const effect = document.getElementById("turn-effect");
