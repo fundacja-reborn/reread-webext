@@ -37,19 +37,35 @@ function bodyOf(script, name) {
 }
 
 describe("the gesture that turns a page by touch (D250)", () => {
-  it("reads the setting at every gesture, and turns nothing at all with it off", async () => {
+  it("lets the setting decide which road a gesture takes, and turns nothing at all with it off", async () => {
     const reader = await source("reader/reader.js");
     const tap = bodyOf(reader, "onBareTap");
-    // The width has its say wherever nobody has chosen, and it is asked at
-    // the gesture: a window resized or a device turned answers for what it
-    // is now, and `off` leaves neither road open.
-    assert.match(tap, /if \(effectiveTouchTurn\(settings\.reader, window\.innerWidth\) !== "zones"\) return;/, "a tap turns the page under a setting that asks for a slide, or for nothing");
+    // One door for both roads, and `off` leaves neither open.
+    assert.match(tap, /if \(touchTurnNow\(\) !== "zones"\) return;/, "a tap turns the page under a setting that asks for a slide, or for nothing");
     assert.match(tap, /const turn = tapIntent\(tap\);/, "the tap is not read as a whole signature");
-    assert.match(reader, /if \(effectiveTouchTurn\(settings\.reader, window\.innerWidth\) === "swipe"\) \{\s*swipeTurn\(liftedTap, down\.target\);/, "the slide is not read at the lift, or is read under every setting");
+    assert.match(reader, /if \(touchTurnNow\(\) === "swipe"\) \{\s*swipeTurn\(liftedTap, down\.target\);/, "the slide is not read at the lift, or is read under every setting");
     // The guards that were there before the signature was: the pen's tap is
     // the marker's, a room owns the window, and a press that had something
     // to close has done its work.
     assert.match(tap, /if \(!paged\(\) \|\| markerOn \|\| pressHadWork \|\| roomShown !== null\) return;/, "the old guards left with the new rule");
+  });
+
+  it("asks the width once a reading, and stores nothing until a hand chooses", async () => {
+    const reader = await source("reader/reader.js");
+    const now = bodyOf(reader, "touchTurnNow");
+    // A hand's choice answers at once and always; the width only ever
+    // answers for the profile that has never chosen.
+    assert.match(now, /const chosen = settings\.reader\.touchTurn;\s*if \(chosen !== null\) return chosen;/, "a stored choice waits behind the width");
+    // Once a reading, not once a gesture: with nothing chosen, a phone
+    // turned on its side crosses the width the default is drawn at, and the
+    // gesture would change under the hand in the middle of a page.
+    assert.match(now, /gestureNow \?\?= effectiveTouchTurn\(settings\.reader, window\.innerWidth\);/, "the width is asked again at every gesture, or never");
+    assert.match(bodyOf(reader, "adoptConfig"), /gestureNow = null;/, "a setting written leaves the old gesture in force");
+    // Nothing is written at install: the null is what lets the default move
+    // in a later version, the way `readerOnly` and `libraryCopy` keep theirs.
+    const config = await source("lib/config.js");
+    assert.match(config, /touchTurn: null,/, "the default gesture is a stored value rather than an open question");
+    assert.doesNotMatch(config, /touchTurn: isTouchTurn\(raw\["touchTurn"\]\) \? raw\["touchTurn"\] : "(?:zones|swipe|off)"/, "an unchosen gesture is healed into a choice nobody made");
   });
 
   it("answers a swipe at the pointer's own lift, under the same guards as a tap", async () => {

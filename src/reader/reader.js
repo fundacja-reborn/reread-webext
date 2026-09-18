@@ -2563,7 +2563,7 @@ function refreshCurtain() {
 function onBareTap(x, y, target) {
   if (!paged() || markerOn || pressHadWork || roomShown !== null) return;
   if (target instanceof Element && target.closest(TURN_STOPS) !== null) return;
-  if (effectiveTouchTurn(settings.reader, window.innerWidth) !== "zones") return;
+  if (touchTurnNow() !== "zones") return;
   const tap = lastTap();
   if (tap === null) return;
   const turn = tapIntent(tap);
@@ -2602,6 +2602,36 @@ function swipeTurn(tap, target) {
   const turn = swipeIntent(tap);
   if (turn !== null) turnPage(turn);
 }
+
+/**
+ * What a finger does on this page right now (D250): the hand's choice the
+ * moment it exists, and while none does, the answer the window's width gave
+ * the first time this reading asked.
+ *
+ * Asked once rather than at every gesture, and this is the whole of the
+ * difference: with nothing chosen, a phone turned on its side crosses the
+ * width the default is drawn at, and the gesture would change under the hand
+ * in the middle of a page. The first turn of a reading settles it, and it
+ * stands until the reading is opened again - or until a setting is written,
+ * which is what `adoptConfig` clears this for: a choice answers at once, and
+ * a choice cleared lets the width speak again.
+ *
+ * Nothing is stored either way. A value written into the settings at install
+ * would be a choice nobody made - and would freeze the default for that
+ * profile, the way D249 found the page count frozen on the test devices.
+ *
+ * @returns {"zones" | "swipe" | "off"}
+ */
+function touchTurnNow() {
+  const chosen = settings.reader.touchTurn;
+  if (chosen !== null) return chosen;
+  gestureNow ??= effectiveTouchTurn(settings.reader, window.innerWidth);
+  return gestureNow;
+}
+
+/** The width's answer, kept for this reading. Null until the first gesture asks. */
+/** @type {"zones" | "swipe" | "off" | null} */
+let gestureNow = null;
 
 /**
  * Whether the pointer on the glass is stretching a range (D239): a hold's
@@ -2725,7 +2755,7 @@ document.addEventListener(
     };
     // The swipe is answered here, where the gesture actually ends; the tap
     // waits for `reading.js` to say the press had nothing to put away.
-    if (effectiveTouchTurn(settings.reader, window.innerWidth) === "swipe") {
+    if (touchTurnNow() === "swipe") {
       swipeTurn(liftedTap, down.target);
     }
   },
@@ -7727,6 +7757,10 @@ function adoptConfig(config) {
   // all read their answer from it. Off takes the article's voice and a
   // quote's with it - a voice mid-sentence when the switch lands is a voice
   // that was just asked to be quiet.
+  // The gesture is resolved again after a setting lands (D250): a choice
+  // written here answers at once, and a choice cleared hands the question
+  // back to the window's width.
+  gestureNow = null;
   setSpeechOff(config.ttsOff);
   if (config.ttsOff) {
     stopReading();

@@ -823,14 +823,15 @@ describe("the reader's appearance", () => {
     assert.equal(isTouchTurn(null), false);
   });
 
-  it("slides where a hand holds the screen and taps thirds where it does not (D250)", () => {
+  it("slides on a phone and taps thirds on everything wider (D250)", () => {
     assert.equal(effectiveTouchTurn({ touchTurn: null }, TOUCH_TURN_WIDE - 1), "swipe");
     assert.equal(effectiveTouchTurn({ touchTurn: null }, TOUCH_TURN_WIDE), "zones");
-    // The devices the line was drawn between (Michał, 2026-09-18: a phone and
-    // an e-ink reader slide, a tablet taps): a phone, an e-ink reader of the
-    // kind this is read on, the smallest tablet in portrait, a desktop window.
+    // The devices, and the sentence the line stands for: a phone slides -
+    // slim bezels, a thumb on the glass - and an e-ink reader, a tablet and
+    // a desktop window tap, because the hand there holds a frame, not the
+    // page (Michał's call, 2026-09-18).
     assert.equal(effectiveTouchTurn({ touchTurn: null }, 360), "swipe");
-    assert.equal(effectiveTouchTurn({ touchTurn: null }, 722), "swipe");
+    assert.equal(effectiveTouchTurn({ touchTurn: null }, 722), "zones");
     assert.equal(effectiveTouchTurn({ touchTurn: null }, 834), "zones");
     assert.equal(effectiveTouchTurn({ touchTurn: null }, 1200), "zones");
     // A stored choice wins at every width, off included.

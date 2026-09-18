@@ -400,22 +400,27 @@ export function isTurnEffect(value) {
 }
 
 /**
- * The width from which the thirds are the better gesture: a device lying on
- * a table rather than held in a hand. Under it the hand wraps around the
- * screen and the thumb holding it rests on the glass - a phone, and an
- * e-ink reader held one-handed - so a gesture that has to move is the one an
- * idle hand cannot make; over it nothing rests on the screen, and a tap is
- * both quicker and more precise.
+ * The width from which the thirds are the better gesture. Under it is a
+ * phone: slim bezels, a hand wrapped around the glass, and the thumb that
+ * holds it resting on the page - which is the whole reason the slide exists
+ * (D250 began with accidental turns from exactly that thumb). Over it the
+ * hand holds a frame rather than the screen, and a tap is quicker, needs no
+ * travel, and answers the moment it lands.
  *
- * Eight hundred rather than the six hundred of the first cut, and the number
- * is about two real devices: an e-ink reader of this kind reports something
- * like 720 CSS pixels across (1264 device pixels at the ratio Michał's Boox
- * Page reports, less again at a text zoom), and the smallest tablet worth
- * calling one - the iPad Pro this extension is tested on - reports 834 in
- * portrait. The line falls between them, which is where the hand is: the
- * reader is held, the tablet is put down.
+ * Six hundred, which puts an e-ink reader on the thirds' side, and that is
+ * the intended reading rather than an accident of the number (Michał's call
+ * after the smoke, 2026-09-18): a reader of that kind has a wide bezel and
+ * page keys, so no hand is on the glass to turn a page by accident - and on
+ * a panel that draws no motion a slide has nothing to show for itself while
+ * it travels, where a tap is one refresh and done. The tried alternative was
+ * 800, drawn between the reader's ~720 and a tablet's 834; it made the line
+ * a guess about two devices instead of a sentence anybody can hold: a phone
+ * slides, everything else taps.
+ *
+ * Whatever the number, the device settles it - and the setting is per device
+ * (`storage.local`), one press either way.
  */
-export const TOUCH_TURN_WIDE = 800;
+export const TOUCH_TURN_WIDE = 600;
 
 /**
  * What a finger does on a page read by pages: the hand's choice, and with
