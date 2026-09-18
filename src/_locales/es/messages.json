@@ -1369,6 +1369,61 @@
   "options_local_intro": {
     "message": "Todo lo que hace re/read ocurre en este dispositivo (sin conexión): la traducción, el diccionario, la lista de lectura, tus frases guardadas. Nada de lo que lees o seleccionas se envía a ninguna parte. La conexión a Internet solo hace falta cuando quieres descargar un nuevo modelo de traducción o un diccionario - y solo desde las dos URL mostradas abiertamente en esas secciones."
   },
+
+  "options_intro_short": {
+    "message": "Todo funciona en este dispositivo; Internet solo hace falta para descargar un modelo de traducción o un diccionario.",
+    "description": "The one-line thesis under the settings title; the whole of it stands in the About section at the foot of the page."
+  },
+
+  "options_intro_more": {
+    "message": "Más sobre la privacidad",
+    "description": "The link at the end of the short intro, leading to the About section."
+  },
+
+  "options_section_languages": {
+    "message": "Idiomas",
+    "description": "Heading of the settings section holding the language pair, the translation models and the dictionaries."
+  },
+
+  "options_section_where": {
+    "message": "Dónde funciona",
+    "description": "Heading of the settings section about which pages the extension touches."
+  },
+
+  "options_section_bubble": {
+    "message": "Burbuja y frases",
+    "description": "Heading of the settings section about the translation bubble and the phrases saved from it."
+  },
+
+  "options_sub_bubble": {
+    "message": "Burbuja",
+    "description": "Heading of the subsection about what the translation bubble shows."
+  },
+
+  "options_sub_phrases": {
+    "message": "Frases guardadas",
+    "description": "Heading of the subsection about phrases saved from the bubble."
+  },
+
+  "options_section_reading": {
+    "message": "Vista de lectura",
+    "description": "Heading of the settings section about the reading view."
+  },
+
+  "options_section_aloud": {
+    "message": "Lectura en voz alta",
+    "description": "Heading of the settings section about reading aloud."
+  },
+
+  "options_section_data": {
+    "message": "Datos y copias",
+    "description": "Heading of the settings section reporting the space used and the copies kept."
+  },
+
+  "options_section_about": {
+    "message": "Acerca de re/read",
+    "description": "Heading of the last settings section: what the extension promises about the network, who builds it, how to support it."
+  },
   "options_first_steps_heading": { "message": "Primeros pasos" },
   "options_first_steps_intro": {
     "message": "Todavía no se traduce nada - el modelo que lo haría aún no está en este dispositivo. La puesta en marcha lleva un minuto:"

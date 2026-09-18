@@ -135,6 +135,13 @@ header h1 {
   min-height: 44px;
 }
 
+/* A link the page has hidden - the first-steps entry before the card has
+   looked at both stores - hands no dot to the link after it. The
+   translation-off rule below is the same thought for the mode. */
+.jump a[hidden] + a::before {
+  content: none;
+}
+
 /* The dot rides the link it precedes, so a wrapped line never ends in a
    lone separator - it starts the next line with its link instead. */
 .jump a + a::before {
@@ -168,6 +175,35 @@ header h1 {
 h2 {
   margin-top: 3rem;
   scroll-margin-top: 0.75rem;
+}
+
+/* A subsection's heading (D254): the same landing pad, less air above it and
+   a smaller voice - it opens a part of the section it stands in, not a new
+   chapter. The first one under a section heading needs none of that margin:
+   nothing but the heading stands over it. */
+h3 {
+  margin-top: 2rem;
+  scroll-margin-top: 0.75rem;
+}
+
+h2 + section > h3:first-child,
+h2 + p + section > h3:first-child {
+  margin-top: 1.25rem;
+}
+
+/* What does the translating, under the Translation models heading (P7): the
+   quiet voice of a row's note, because it reports rather than asks. */
+.section-meta {
+  margin: 0.25rem 0 0;
+  color: var(--page-muted);
+  font-size: 0.9rem;
+}
+
+/* A section's last rows should not run into the next heading's air: the
+   heading brings its own margin, and the rule under the last row is the
+   section's floor. */
+.rows:last-child {
+  margin-bottom: 0;
 }
 
 /* --- the settings rows: label | control, wrapping where the control needs

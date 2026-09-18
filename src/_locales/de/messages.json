@@ -1318,6 +1318,61 @@
   "options_local_intro": {
     "message": "Alles, was re/read tut, geschieht auf diesem Gerät (offline): das Übersetzen, das Wörterbuch, die Leseliste, der gespeicherte Wortschatz. Nichts von dem, was Sie lesen oder auswählen, wird irgendwohin gesendet. Eine Internetverbindung ist nur nötig, wenn Sie ein neues Übersetzungsmodell oder ein Wörterbuch herunterladen möchten - und nur von den zwei URLs, die offen in diesen Abschnitten genannt sind."
   },
+
+  "options_intro_short": {
+    "message": "Alles läuft auf diesem Gerät; das Internet wird nur zum Herunterladen eines Übersetzungsmodells oder eines Wörterbuchs gebraucht.",
+    "description": "The one-line thesis under the settings title; the whole of it stands in the About section at the foot of the page."
+  },
+
+  "options_intro_more": {
+    "message": "Mehr über den Datenschutz",
+    "description": "The link at the end of the short intro, leading to the About section."
+  },
+
+  "options_section_languages": {
+    "message": "Sprachen",
+    "description": "Heading of the settings section holding the language pair, the translation models and the dictionaries."
+  },
+
+  "options_section_where": {
+    "message": "Wo es wirkt",
+    "description": "Heading of the settings section about which pages the extension touches."
+  },
+
+  "options_section_bubble": {
+    "message": "Sprechblase und Wortschatz",
+    "description": "Heading of the settings section about the translation bubble and the phrases saved from it."
+  },
+
+  "options_sub_bubble": {
+    "message": "Sprechblase",
+    "description": "Heading of the subsection about what the translation bubble shows."
+  },
+
+  "options_sub_phrases": {
+    "message": "Gespeicherter Wortschatz",
+    "description": "Heading of the subsection about phrases saved from the bubble."
+  },
+
+  "options_section_reading": {
+    "message": "Leseansicht",
+    "description": "Heading of the settings section about the reading view."
+  },
+
+  "options_section_aloud": {
+    "message": "Vorlesen",
+    "description": "Heading of the settings section about reading aloud."
+  },
+
+  "options_section_data": {
+    "message": "Daten und Kopien",
+    "description": "Heading of the settings section reporting the space used and the copies kept."
+  },
+
+  "options_section_about": {
+    "message": "Über re/read",
+    "description": "Heading of the last settings section: what the extension promises about the network, who builds it, how to support it."
+  },
   "options_first_steps_heading": { "message": "Erste Schritte" },
   "options_first_steps_intro": {
     "message": "Noch übersetzt nichts - das Modell, das es täte, ist noch nicht auf diesem Gerät. Die Einrichtung dauert eine Minute:"

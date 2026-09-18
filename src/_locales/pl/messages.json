@@ -1938,6 +1938,61 @@
   "options_local_intro": {
     "message": "Wszystko, co robi re/read, dzieje się na tym urządzeniu (offline): tłumaczenie, słownik, czytelnia, zapisane frazy. Nic z tego, co czytasz ani zaznaczasz, nigdzie nie jest wysyłane. Połączenie internetowe jest potrzebne, tylko gdy chcesz pobrać nowy model tłumaczeń lub słownik - i tylko spod dwóch adresów URL podanych jawnie w tych sekcjach."
   },
+
+  "options_intro_short": {
+    "message": "Wszystko działa na tym urządzeniu; internet jest potrzebny tylko do pobrania modelu tłumaczenia albo słownika.",
+    "description": "The one-line thesis under the settings title; the whole of it stands in the About section at the foot of the page."
+  },
+
+  "options_intro_more": {
+    "message": "Więcej o prywatności",
+    "description": "The link at the end of the short intro, leading to the About section."
+  },
+
+  "options_section_languages": {
+    "message": "Języki",
+    "description": "Heading of the settings section holding the language pair, the translation models and the dictionaries."
+  },
+
+  "options_section_where": {
+    "message": "Gdzie działa",
+    "description": "Heading of the settings section about which pages the extension touches."
+  },
+
+  "options_section_bubble": {
+    "message": "Dymek i frazy",
+    "description": "Heading of the settings section about the translation bubble and the phrases saved from it."
+  },
+
+  "options_sub_bubble": {
+    "message": "Dymek",
+    "description": "Heading of the subsection about what the translation bubble shows."
+  },
+
+  "options_sub_phrases": {
+    "message": "Zapisane frazy",
+    "description": "Heading of the subsection about phrases saved from the bubble."
+  },
+
+  "options_section_reading": {
+    "message": "Widok czytania",
+    "description": "Heading of the settings section about the reading view."
+  },
+
+  "options_section_aloud": {
+    "message": "Czytanie na głos",
+    "description": "Heading of the settings section about reading aloud."
+  },
+
+  "options_section_data": {
+    "message": "Dane i kopie",
+    "description": "Heading of the settings section reporting the space used and the copies kept."
+  },
+
+  "options_section_about": {
+    "message": "O re/read",
+    "description": "Heading of the last settings section: what the extension promises about the network, who builds it, how to support it."
+  },
   "options_first_steps_heading": { "message": "Pierwsze kroki" },
   "options_first_steps_intro": {
     "message": "Nic się jeszcze nie tłumaczy - modelu, który by to robił, nie ma jeszcze na tym urządzeniu. Przygotowanie zajmuje minutę:"

@@ -168,12 +168,22 @@ describe("the gesture that turns a page by touch (D250)", () => {
     // The section stands whatever layout is in force: this is where
     // somebody looking for the Pages layout comes, and a section that
     // appeared with the reader's own setting could not be found at all.
-    const section = markup.slice(markup.indexOf('<h2 id="paged-layout"'), markup.indexOf("<!-- The wrapper is the translation-off switch's"));
+    // A subsection of the reading view since D254, under its old anchor: the
+    // address the README and every old link name still lands on it.
+    const from = markup.indexOf('<h3 id="paged-layout"');
+    const section = markup.slice(from, markup.indexOf("</section>", from));
+    assert.ok(from > 0, "the Pages layout lost the anchor every old link names");
     assert.doesNotMatch(section, /translation-only|hidden/, "the section hides itself from somebody looking for it");
     assert.match(section, /data-i18n="options_paged_intro"/, "the section does not say what it is about");
     for (const id of ["page-number", "touch-turn", "turn-effect"]) {
       assert.ok(section.includes(`id="${id}"`), `the ${id} row is not in the section`);
     }
-    assert.match(markup, /<a href="#paged-layout" data-i18n="options_paged_heading">/, "the section is not in the page's own table of contents");
+    // The table of contents lists sections, not their parts - the Pages
+    // layout is reached through the reading view it belongs to.
+    assert.match(markup, /<a href="#reading-view" data-i18n="options_section_reading">/, "the reading view is not in the page's own table of contents");
+    assert.ok(
+      markup.indexOf('<h2 id="reading-view"') < from,
+      "the Pages layout does not stand inside the reading view",
+    );
   });
 });

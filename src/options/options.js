@@ -224,6 +224,10 @@ function renderFirstSteps() {
   setupDone = move.done;
   if (move.open !== null) fold.open = move.open;
   fold.hidden = false;
+  // The table of contents' first entry comes and goes with the card: a line
+  // pointing at a section that is not on the page yet is a line that lies.
+  const entry = document.getElementById("jump-first-steps");
+  if (entry !== null) entry.hidden = false;
 }
 
 /**

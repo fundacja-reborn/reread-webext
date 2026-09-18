@@ -1677,6 +1677,61 @@
   "options_local_intro": {
     "message": "Everything re/read does happens on this device (offline): translating, the dictionary, the reading list, your saved phrases. Nothing you read or select is ever sent anywhere. An internet connection is needed only when you want to download a new translation model or a dictionary - and only from the two URLs shown openly in those sections."
   },
+
+  "options_intro_short": {
+    "message": "Everything works on this device; the internet is needed only to download a translation model or a dictionary.",
+    "description": "The one-line thesis under the settings title; the whole of it stands in the About section at the foot of the page."
+  },
+
+  "options_intro_more": {
+    "message": "More about privacy",
+    "description": "The link at the end of the short intro, leading to the About section."
+  },
+
+  "options_section_languages": {
+    "message": "Languages",
+    "description": "Heading of the settings section holding the language pair, the translation models and the dictionaries."
+  },
+
+  "options_section_where": {
+    "message": "Where it works",
+    "description": "Heading of the settings section about which pages the extension touches."
+  },
+
+  "options_section_bubble": {
+    "message": "Bubble and phrases",
+    "description": "Heading of the settings section about the translation bubble and the phrases saved from it."
+  },
+
+  "options_sub_bubble": {
+    "message": "Bubble",
+    "description": "Heading of the subsection about what the translation bubble shows."
+  },
+
+  "options_sub_phrases": {
+    "message": "Saved phrases",
+    "description": "Heading of the subsection about phrases saved from the bubble."
+  },
+
+  "options_section_reading": {
+    "message": "Reading view",
+    "description": "Heading of the settings section about the reading view."
+  },
+
+  "options_section_aloud": {
+    "message": "Reading aloud",
+    "description": "Heading of the settings section about reading aloud."
+  },
+
+  "options_section_data": {
+    "message": "Data and copies",
+    "description": "Heading of the settings section reporting the space used and the copies kept."
+  },
+
+  "options_section_about": {
+    "message": "About re/read",
+    "description": "Heading of the last settings section: what the extension promises about the network, who builds it, how to support it."
+  },
   "options_first_steps_heading": { "message": "First steps" },
   "options_first_steps_intro": {
     "message": "Nothing translates yet - the model that would do it is not yet on this device. Setting up takes a minute:",
