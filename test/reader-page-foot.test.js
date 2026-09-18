@@ -79,10 +79,13 @@ describe("the page's foot (D238)", () => {
     assert.match(narrow, /\.page-count \{\s*display: none;/, "the bar's count crowds a phone's bar, where the full-screen tool would yield to it");
   });
 
-  it("is a setting on the settings page, beside the reader-only switch, in every language", async () => {
+  it("is a setting on the settings page, first of the Pages layout's own section, in every language", async () => {
     const markup = await source("options/options.html");
-    assert.match(markup, /id="reader-only" \/>[\s\S]*?<input type="checkbox" id="page-number" \/>[\s\S]*?id="keep-articles"/, "the page-number row does not stand between the reader-only and the keep rows");
-    assert.match(markup, /data-i18n="options_page_number">Page number in the Pages layout</, "the row's name is not the catalogue's");
+    // Moved into the section the Pages layout's three settings share
+    // (D250): the count, the gesture that turns a page and the signal that
+    // one has turned, in the order a page is read in.
+    assert.match(markup, /id="paged-layout"[\s\S]*?<input type="checkbox" id="page-number" \/>[\s\S]*?id="touch-turn"[\s\S]*?id="turn-effect"/, "the page-number row does not open the Pages layout's section");
+    assert.match(markup, /data-i18n="options_page_number">Page number</, "the row's name is not the catalogue's");
     assert.match(markup, /data-fold data-i18n="options_page_number_hint"/, "the row has no folded note");
     const script = await source("options/options.js");
     assert.match(script, /writeConfig\(\{ reader: \{ pageNumber: toggle\.checked \} \}\)/, "the switch does not write the reader's setting");
@@ -96,7 +99,7 @@ describe("the page's foot (D238)", () => {
 
   it("is promised in the README as a setting, on by default (D249)", async () => {
     const readme = await source("../README.md");
-    assert.match(readme, /\*\*Page number in the Pages layout\*\* in the settings, on by default/, "the README still promises a quiet foot the reader no longer has");
+    assert.match(readme, /\*\*Page number\*\* under \*\*Pages layout\*\* in the settings, on by default/, "the README still promises a quiet foot the reader no longer has");
     assert.match(readme, /the page being read keeps its first line and only its last lines go behind the bar/, "the README does not say what a bar does to the page");
   });
 });

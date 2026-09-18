@@ -2,20 +2,35 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import {
+  BLOB_SAMPLES,
   CURTAIN_OVERLAP,
   EDGE_TURN_FIRST_MS,
   EDGE_TURN_REPEAT_MS,
   EDGE_ZONE_MIN,
+  FLASH_GAP_MS,
+  SWIPE_MIN,
+  TAP_ALONE_MS,
+  TAP_BLOB,
+  TAP_DEAD_FOOT,
+  TAP_DEAD_SIDE,
+  TAP_DRIFT,
+  TAP_EDGE,
+  TAP_HOLD_MS,
   WHEEL_COOLDOWN_MS,
+  blobTrusted,
   curtainTop,
   edgeTurn,
   edgeZone,
+  flashAllowed,
   onPage,
   pageAt,
   pagePercent,
   pageTops,
   revealTarget,
+  swipeIntent,
+  tapIntent,
   tapZone,
+  turnMotion,
   turnTarget,
   wheelTurn,
 } from "../src/lib/reader/pages.js";
@@ -391,6 +406,204 @@ describe("tapZone", () => {
     assert.equal(tapZone(-1, 900), null);
     assert.equal(tapZone(901, 900), null);
     assert.equal(tapZone(10, 0), null);
+  });
+});
+
+/**
+ * A deliberate tap on the right third of a phone-sized window: brief, still,
+ * a fingertip's contact, well inside the page, alone. Every test below takes
+ * this one and spoils exactly one thing about it.
+ *
+ * @param {Partial<import("../src/lib/reader/pages.js").TapSignature>} [how]
+ * @returns {import("../src/lib/reader/pages.js").TapSignature}
+ */
+function tap(how = {}) {
+  return {
+    pointerType: "touch",
+    downAt: 1000,
+    upAt: 1080,
+    dx: 1,
+    dy: -2,
+    width: 18,
+    height: 20,
+    x: 330,
+    y: 400,
+    viewportW: 360,
+    viewportH: 740,
+    otherPointers: [],
+    ...how,
+  };
+}
+
+describe("tapIntent (D250)", () => {
+  it("turns on the right third and back on the left, and nothing in the middle", () => {
+    assert.equal(tapIntent(tap()), "down");
+    assert.equal(tapIntent(tap({ x: 30 })), "up");
+    assert.equal(tapIntent(tap({ x: 180 })), null);
+  });
+
+  it("refuses a contact that lasted longer than a tap", () => {
+    assert.equal(tapIntent(tap({ upAt: 1000 + TAP_HOLD_MS - 1 })), "down");
+    assert.equal(tapIntent(tap({ upAt: 1000 + TAP_HOLD_MS })), null);
+    // The thumb that holds the device: on the glass for the whole page.
+    assert.equal(tapIntent(tap({ upAt: 9000 })), null);
+  });
+
+  it("refuses a contact that travelled", () => {
+    assert.equal(tapIntent(tap({ dx: TAP_DRIFT - 1, dy: 0 })), "down");
+    assert.equal(tapIntent(tap({ dx: TAP_DRIFT, dy: 0 })), null);
+    assert.equal(tapIntent(tap({ dx: 0, dy: TAP_DRIFT })), null);
+  });
+
+  it("never lets the pen turn a page", () => {
+    assert.equal(tapIntent(tap({ pointerType: "pen" })), null);
+    // The mouse turns pages like a finger: a click is a tap.
+    assert.equal(tapIntent(tap({ pointerType: "mouse" })), "down");
+  });
+
+  it("refuses a contact wider than a fingertip, and only when the device measures one", () => {
+    assert.equal(tapIntent(tap({ width: TAP_BLOB - 1, height: TAP_BLOB - 1 })), "down");
+    assert.equal(tapIntent(tap({ width: 12, height: TAP_BLOB })), null);
+    assert.equal(tapIntent(tap({ width: TAP_BLOB, height: 12 })), null);
+    // A device whose numbers say nothing (`blobTrusted` dropped the test):
+    // the other tests still stand, and a large thumb still turns pages.
+    assert.equal(tapIntent(tap({ width: null, height: null })), "down");
+  });
+
+  it("keeps the dead strips down the sides and along the foot, and the edge at the head", () => {
+    assert.equal(tapIntent(tap({ x: TAP_DEAD_SIDE - 1 })), null);
+    assert.equal(tapIntent(tap({ x: TAP_DEAD_SIDE })), "up");
+    assert.equal(tapIntent(tap({ x: 360 - TAP_DEAD_SIDE + 1 })), null);
+    assert.equal(tapIntent(tap({ x: 360 - TAP_DEAD_SIDE })), "down");
+    assert.equal(tapIntent(tap({ y: 740 - TAP_DEAD_FOOT + 1 })), null);
+    assert.equal(tapIntent(tap({ y: 740 - TAP_DEAD_FOOT })), "down");
+    assert.equal(tapIntent(tap({ y: TAP_EDGE - 1 })), null);
+    assert.equal(tapIntent(tap({ y: TAP_EDGE })), "down");
+    // The corners are where a hand's own contact gathers: neither turns.
+    assert.equal(tapIntent(tap({ x: 8, y: 735 })), null);
+    assert.equal(tapIntent(tap({ x: 352, y: 735 })), null);
+  });
+
+  it("leaves the strips the same on a reader's wide window", () => {
+    const wide = { viewportW: 1200, viewportH: 900, x: 1100, y: 400 };
+    assert.equal(tapIntent(tap(wide)), "down");
+    assert.equal(tapIntent(tap({ ...wide, x: 1200 - TAP_DEAD_SIDE + 1 })), null);
+    assert.equal(tapIntent(tap({ ...wide, x: 30 })), "up");
+    assert.equal(tapIntent(tap({ ...wide, x: 600 })), null);
+  });
+
+  it("refuses a contact that landed beside another, and lets a long-resting one be", () => {
+    assert.equal(tapIntent(tap({ otherPointers: [1000 + TAP_ALONE_MS] })), null);
+    assert.equal(tapIntent(tap({ otherPointers: [1000 - TAP_ALONE_MS] })), null);
+    assert.equal(tapIntent(tap({ otherPointers: [1000 + TAP_ALONE_MS + 1] })), "down");
+    // The thumb that has been holding the device since the page opened is
+    // not a second point of a grip: it must not stop a deliberate tap.
+    assert.equal(tapIntent(tap({ otherPointers: [200] })), "down");
+  });
+});
+
+describe("swipeIntent (D250)", () => {
+  it("turns on to the left and back to the right, past the threshold", () => {
+    assert.equal(swipeIntent(tap({ dx: -SWIPE_MIN, dy: 0 })), "down");
+    assert.equal(swipeIntent(tap({ dx: SWIPE_MIN, dy: 0 })), "up");
+    assert.equal(swipeIntent(tap({ dx: -SWIPE_MIN + 1, dy: 0 })), null);
+    assert.equal(swipeIntent(tap({ dx: SWIPE_MIN - 1, dy: 0 })), null);
+  });
+
+  it("leaves a travel that was mostly up or down alone", () => {
+    assert.equal(swipeIntent(tap({ dx: -60, dy: 29 })), "down");
+    assert.equal(swipeIntent(tap({ dx: -60, dy: 30 })), null);
+    assert.equal(swipeIntent(tap({ dx: -60, dy: -100 })), null);
+  });
+
+  it("asks nothing about the time, the size or the place it began", () => {
+    // A slow swipe is a swipe; a swipe that began at the very edge is one
+    // too - what makes it deliberate is that it moved.
+    assert.equal(swipeIntent(tap({ dx: -80, dy: 0, upAt: 9000, width: 44, height: 44, x: 2, y: 738 })), "down");
+  });
+
+  it("never lets the pen turn a page, and refuses a second contact of the moment", () => {
+    assert.equal(swipeIntent(tap({ dx: -80, dy: 0, pointerType: "pen" })), null);
+    assert.equal(swipeIntent(tap({ dx: -80, dy: 0, otherPointers: [1050] })), null);
+  });
+
+  it("is not a tap, and a tap is not a swipe", () => {
+    assert.equal(swipeIntent(tap()), null);
+    assert.equal(tapIntent(tap({ dx: -80, dy: 0 })), null);
+  });
+});
+
+describe("blobTrusted (D250)", () => {
+  const spread = Array.from({ length: BLOB_SAMPLES }, (_, index) => 14 + index);
+
+  it("waits for its measurements before saying anything", () => {
+    assert.equal(blobTrusted([]), false);
+    assert.equal(blobTrusted(spread.slice(0, BLOB_SAMPLES - 1)), false);
+    assert.equal(blobTrusted(spread), true);
+  });
+
+  it("drops the test where the device answers a constant, or nothing", () => {
+    assert.equal(blobTrusted(Array.from({ length: BLOB_SAMPLES }, () => 23)), false);
+    assert.equal(blobTrusted(Array.from({ length: BLOB_SAMPLES }, () => 1)), false);
+    assert.equal(blobTrusted(Array.from({ length: BLOB_SAMPLES }, () => 0)), false);
+    // One real measurement among the ones and the test means something.
+    assert.equal(blobTrusted([1, 1, 1, 1, 1, 26]), true);
+  });
+});
+
+describe("flashAllowed and turnMotion (D251)", () => {
+  const now = 10_000;
+
+  it("flashes a turn from the hand, and nothing else", () => {
+    assert.equal(flashAllowed("turn", -Infinity, now), true);
+    assert.equal(flashAllowed("speech", -Infinity, now), false);
+    assert.equal(flashAllowed("drag", -Infinity, now), false);
+    assert.equal(flashAllowed("jump", -Infinity, now), false);
+  });
+
+  it("holds two flashes apart", () => {
+    assert.equal(flashAllowed("turn", now - FLASH_GAP_MS, now), true);
+    assert.equal(flashAllowed("turn", now - FLASH_GAP_MS + 1, now), false);
+    // A held hardware key repeats faster than that: the pages turn, the
+    // band does not strobe.
+    assert.equal(flashAllowed("turn", now - 120, now), false);
+  });
+
+  /**
+   * @param {Partial<Parameters<typeof turnMotion>[0]>} [how]
+   */
+  function motion(how = {}) {
+    return turnMotion({
+      effect: "auto",
+      eink: false,
+      reduced: false,
+      reason: "turn",
+      lastFlashAt: -Infinity,
+      now,
+      ...how,
+    });
+  }
+
+  it("flashes on e-ink paper and scrolls smoothly on every other", () => {
+    assert.equal(motion({ eink: true }), "flash");
+    assert.equal(motion(), "smooth");
+  });
+
+  it("moves instantly where the setting, the system or the reason says so", () => {
+    assert.equal(motion({ effect: "off" }), "instant");
+    assert.equal(motion({ effect: "off", eink: true }), "instant");
+    assert.equal(motion({ reduced: true }), "instant");
+    // Less motion takes the flash too: a band going black is motion.
+    assert.equal(motion({ reduced: true, eink: true }), "instant");
+    for (const reason of /** @type {const} */ (["jump", "speech", "drag"])) {
+      assert.equal(motion({ reason }), "instant", `${reason} is dressed as a turn`);
+      assert.equal(motion({ reason, eink: true }), "instant", `${reason} flashes the band`);
+    }
+  });
+
+  it("turns instantly rather than flashing within the gap", () => {
+    assert.equal(motion({ eink: true, lastFlashAt: now - 100 }), "instant");
+    assert.equal(motion({ eink: true, lastFlashAt: now - FLASH_GAP_MS }), "flash");
   });
 });
 

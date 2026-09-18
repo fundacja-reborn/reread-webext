@@ -75,7 +75,9 @@ describe("the page turned at the window's edge under a stretched range (D239)", 
     // goes on in the zone or ends at the part's end.
     const due = bodyOf(reader, "onEdgeDue");
     assert.match(due, /if \(!edgeTurn\(stay\.zone, stay\.enteredAt, stay\.turnedAt, now\)\) \{\s*scheduleEdgeTurn\(\);\s*return;/, "the clock rings a turn the rule refuses");
-    assert.match(due, /turnPage\(stay\.zone\);\s*stay\.turnedAt = now;\s*if \(edgeZoneAt\(stay\.y\) !== stay\.zone\) \{\s*disarmEdge\(\);/, "the stay goes on where the zone died");
+    // Turned as a drag, never as a turn from the hand (D251): the band does
+    // not go black under a finger in the middle of a selection.
+    assert.match(due, /turnPage\(stay\.zone, "drag"\);\s*stay\.turnedAt = now;\s*if \(edgeZoneAt\(stay\.y\) !== stay\.zone\) \{\s*disarmEdge\(\);/, "the stay goes on where the zone died, or the edge's turn is signalled");
     // The zones are dead at the part's ends: no page that way, no zone.
     assert.match(bodyOf(reader, "edgeZoneAt"), /up: turnTarget\(pages\.tops, page, "up"\) !== null,\s*down: turnTarget\(pages\.tops, page, "down"\) !== null,/, "the zone lives at the part's end, where the next page is another document");
     // The lift disarms whatever the gesture said.

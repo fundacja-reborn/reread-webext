@@ -1798,9 +1798,26 @@
   "options_reader_only_hint": {
     "message": "Limits the underlining of saved phrases and the translation bubble to the reader. Selecting text on an ordinary web page will only show an option to open the page in the reader. With it on, no web page can tell which of its words you have saved. On Android and iOS it is on by default."
   },
-  "options_page_number": { "message": "Page number in the Pages layout" },
+  "options_page_number": { "message": "Page number" },
   "options_page_number_hint": {
-    "message": "Shows a page count at the foot of the window when the reader's Layout is set to Pages. Off, the last line of each page stands lower; the count is still read by screen readers, and on a wide screen it stands in the bar next to re/read."
+    "message": "Shows a page count at the foot of the window. Off, the last line of each page stands lower; the count is still read by screen readers, and on a wide screen it stands in the bar next to re/read."
+  },
+  "options_paged_heading": { "message": "Pages layout" },
+  "options_paged_intro": {
+    "message": "These settings work in the reader's Pages layout, where the text moves only by whole pages, each beginning and ending with a whole line."
+  },
+  "options_touch_turn": { "message": "Turning pages by touch" },
+  "options_touch_turn_zones": { "message": "Tap the left or right third" },
+  "options_touch_turn_swipe": { "message": "Swipe sideways" },
+  "options_touch_turn_off": { "message": "Off" },
+  "options_touch_turn_hint": {
+    "message": "On a wide screen, tapping the left or right third of the page is the default; on a narrow one it is swiping sideways, because there the hand that holds the device rests on the screen. Off leaves the page keys, the arrow keys and the mouse wheel, which turn pages whatever this is set to. A tap turns a page only when it is short, still and away from the edges of the screen, so that a thumb resting at the edge turns nothing; the pen never turns a page."
+  },
+  "options_turn_effect": { "message": "Page turn effect" },
+  "options_turn_effect_auto": { "message": "Automatic" },
+  "options_turn_effect_off": { "message": "Off" },
+  "options_turn_effect_hint": {
+    "message": "Shows that the page has turned, which is easy to miss when you are reading the middle of a page. In the E-ink theme the text area goes dark for a moment, the way an e-reader marks a page turn; on other screens the new page slides in. Nothing happens if your system asks for less motion, and nothing when the page is turned by reading aloud or by dragging a selection to the edge of the page."
   },
   "options_keep_articles": { "message": "Save in the offline reading list by default" },
   "options_keep_articles_hint": {

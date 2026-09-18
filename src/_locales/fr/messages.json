@@ -1468,9 +1468,26 @@
   "options_reader_only_hint": {
     "message": "Limite le soulignement des phrases enregistrées et la bulle de traduction au lecteur. Sélectionner du texte sur une page web ordinaire proposera uniquement de l'ouvrir dans le lecteur. Lorsqu'elle est activée, aucune page web ne peut savoir lesquels de ses mots vous avez enregistrés. Sur Android et iOS, l'option est activée par défaut."
   },
-  "options_page_number": { "message": "Numéro de page dans l'affichage Pages" },
+  "options_page_number": { "message": "Numéro de page" },
   "options_page_number_hint": {
-    "message": "Affiche le compteur de pages en bas de la fenêtre lorsque l'affichage du lecteur est réglé sur Pages. Désactivé, la dernière ligne de chaque page descend plus bas ; les lecteurs d'écran lisent toujours le compteur, et sur un écran large il se trouve dans la barre à côté de re/read."
+    "message": "Affiche le compteur de pages en bas de la fenêtre. Désactivé, la dernière ligne de chaque page descend plus bas ; les lecteurs d'écran lisent toujours le compteur, et sur un écran large il se trouve dans la barre à côté de re/read."
+  },
+  "options_paged_heading": { "message": "Affichage Pages" },
+  "options_paged_intro": {
+    "message": "Ces réglages s'appliquent à l'affichage Pages du lecteur, où le texte avance uniquement par pages entières, chacune commençant et finissant par une ligne entière."
+  },
+  "options_touch_turn": { "message": "Tourner les pages au toucher" },
+  "options_touch_turn_zones": { "message": "Toucher le tiers gauche ou droit" },
+  "options_touch_turn_swipe": { "message": "Balayer sur le côté" },
+  "options_touch_turn_off": { "message": "Désactivé" },
+  "options_touch_turn_hint": {
+    "message": "Sur un écran large, toucher le tiers gauche ou droit de la page est le réglage par défaut ; sur un écran étroit, c'est le balayage sur le côté, car la main qui tient l'appareil repose sur l'écran. Désactivé, il reste les touches de page, les flèches et la molette, qui tournent les pages quel que soit ce réglage. Un toucher ne tourne la page que s'il est bref, immobile et éloigné des bords de l'écran, pour qu'un pouce posé au bord n'en tourne aucune ; le stylet ne tourne jamais de page."
+  },
+  "options_turn_effect": { "message": "Effet de changement de page" },
+  "options_turn_effect_auto": { "message": "Automatique" },
+  "options_turn_effect_off": { "message": "Désactivé" },
+  "options_turn_effect_hint": {
+    "message": "Montre que la page a tourné, ce qui passe facilement inaperçu quand on lit le milieu d'une page. Dans le thème E-ink, la zone de texte s'assombrit un instant, comme sur une liseuse ; sur les autres écrans, la nouvelle page glisse. Rien ne se passe si le système demande moins d'animations, ni quand la page est tournée par la lecture à voix haute ou en faisant glisser une sélection jusqu'au bord de la page."
   },
   "options_keep_articles": { "message": "Enregistrer par défaut dans la liste de lecture hors ligne" },
   "options_keep_articles_hint": {
