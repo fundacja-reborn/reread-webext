@@ -794,14 +794,15 @@ describe("the reader's appearance", () => {
     assert.equal(withDefaults({ reader: {} }).reader.layout, "scroll");
   });
 
-  it("shows the page count at the foot only on a stored true (D238)", () => {
-    // Off by default: a line under every page for the whole of a reading.
-    // A profile from before the field keeps the quiet foot.
-    assert.equal(READER_DEFAULTS.pageNumber, false);
-    assert.equal(withDefaults({ reader: { pageNumber: true } }).reader.pageNumber, true);
-    assert.equal(withDefaults({ reader: { pageNumber: "yes" } }).reader.pageNumber, false);
-    assert.equal(withDefaults({ reader: { pageNumber: 1 } }).reader.pageNumber, false);
-    assert.equal(withDefaults({ reader: {} }).reader.pageNumber, false);
+  it("hides the page count at the foot only on a stored false (D238, D249)", () => {
+    // On by default since D249: a text read by pages says which page it is
+    // on. A profile from before the field - and one that never touched the
+    // switch - gets the count, which is what a default flip means.
+    assert.equal(READER_DEFAULTS.pageNumber, true);
+    assert.equal(withDefaults({ reader: { pageNumber: false } }).reader.pageNumber, false);
+    assert.equal(withDefaults({ reader: { pageNumber: "no" } }).reader.pageNumber, true);
+    assert.equal(withDefaults({ reader: { pageNumber: 0 } }).reader.pageNumber, true);
+    assert.equal(withDefaults({ reader: {} }).reader.pageNumber, true);
   });
 
   it("clamps a size or a width out of range instead of forgetting it", () => {
