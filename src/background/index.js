@@ -20,7 +20,7 @@ import { asSchemeReport } from "../lib/translator/providers/bergamot/host-protoc
 import { bergamot } from "../lib/translator/providers/bergamot/index.js";
 import { bergamotViaHost, raiseEngineHost } from "../lib/translator/providers/bergamot/remote.js";
 import { detectLanguage, foreignLanguage, phraseLanguage } from "../lib/detect.js";
-import { lookUpAnswer } from "../lib/dict/lookup.js";
+import { everyWordKnown, lookUpAnswer } from "../lib/dict/lookup.js";
 import { readPage } from "./page.js";
 import { installMenus, menuDoor } from "./menus.js";
 import { openLibrary, openMarks, openReader, readInReader } from "./reader-tab.js";
@@ -98,12 +98,22 @@ async function handle(request, sender) {
         declared,
       });
       const looked = await lookUpAnswer(request.text, { detected: detected || null, pair: pair.from, declared });
-      const language = phraseLanguage({
+      let language = phraseLanguage({
         detected,
         answered: looked?.lang ?? null,
         entries: looked?.entries.length ?? 0,
         pairFrom: pair.from,
       });
+      // A term of several words that no dictionary holds whole (D252's second
+      // half): `end-to-end encryption` in a Polish paragraph had no witness at
+      // all, because the witness is an entry and no shelf has that entry. Its
+      // words do, and every one of them in the pair's language is the same
+      // proof one entry would be. Every word, never most: Polish inflects, so
+      // a Polish phrase fails this on its first word and keeps the engine away
+      // - Michał's condition since D193, and the reason this is an `and`.
+      if (language.length > 0 && (looked?.entries.length ?? 0) === 0 && (await everyWordKnown(request.text, pair.from))) {
+        language = "";
+      }
       if (language.length > 0) {
         return ok(
           looked === null

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { languagesToAsk, lookupKeys, shelfAfterSilence } from "../src/lib/dict/lookup.js";
+import { languagesToAsk, lookupKeys, shelfAfterSilence, termWords } from "../src/lib/dict/lookup.js";
 import { settle, shownSenses } from "../src/lib/dict/store.js";
 
 /**
@@ -81,6 +81,28 @@ describe("languagesToAsk", () => {
     assert.deepEqual(languagesToAsk({ pair: "en", declared: "" }), ["en"]);
     assert.deepEqual(languagesToAsk({ pair: null, declared: null }), []);
     assert.deepEqual(languagesToAsk({ pair: "  ", declared: "" }), []);
+  });
+});
+
+describe("termWords", () => {
+  it("takes a term of several words, each word once (D252)", () => {
+    // Michał's page, 2026-09-18: no dictionary holds these whole, and their
+    // words are what can vouch for them.
+    assert.deepEqual(termWords("end-to-end encryption"), ["end", "to", "encryption"]);
+    assert.deepEqual(termWords("zero knowledge"), ["zero", "knowledge"]);
+  });
+
+  it("takes nothing it could not learn a language from", () => {
+    // One word was asked in full already: asking again under the same key is
+    // the same silence.
+    assert.deepEqual(termWords("knowledge"), []);
+    // Past the lookup's own ceiling nothing is asked at all.
+    assert.deepEqual(termWords("a phrase of five whole words"), []);
+    // Short words collide across languages: "to ten pan" is three English
+    // headwords and an ordinary Polish sentence. Proof of nothing.
+    assert.deepEqual(termWords("to ten pan"), []);
+    assert.deepEqual(termWords("by the"), []);
+    assert.deepEqual(termWords(""), []);
   });
 });
 

@@ -157,6 +157,69 @@ export function shelfAfterSilence({ pair, asked, entries }) {
 }
 
 /**
+ * The shortest word that makes a phrase worth vouching for by its parts.
+ * Three letters and under are where Polish and English collide by accident -
+ * "to", "by", "pan", "ten" are all English headwords and all ordinary Polish
+ * words - so a phrase built of nothing but those proves nothing about its
+ * language.
+ */
+const SHORT_WORD = 3;
+
+/**
+ * The words a phrase would be vouched for by (D252's second half), or none
+ * when it is not that kind of phrase: a term of several words that no
+ * dictionary holds whole - "end-to-end encryption", "zero knowledge" - where
+ * the parts are in the dictionaries even though the whole is not.
+ *
+ * A single word is not here: it was asked in full already, and a second ask
+ * under the same key would be the same silence. Neither is a phrase longer
+ * than the lookup's own ceiling, nor one made of short words only
+ * (`SHORT_WORD`). Each word once, in order. Pure, so the rule can be tested
+ * without a database.
+ *
+ * @param {string} text as the page had it
+ * @returns {string[]}
+ */
+export function termWords(text) {
+  const words = keyTokens(normalize(text));
+  if (words.length < 2 || words.length > MAX_WORDS) return [];
+  if (!words.some((word) => word.length > SHORT_WORD)) return [];
+  return [...new Set(words)];
+}
+
+/**
+ * Whether one language's dictionaries know **every** word of a term - the
+ * witness that a phrase nobody holds whole is nevertheless that language's
+ * (D252's second half, Michał's report of 2026-09-18: `end-to-end
+ * encryption` in a Polish paragraph got no translation, because no shelf
+ * holds the term and no shelf could vouch for it).
+ *
+ * Every word and not most of them, on purpose. It is the condition that
+ * keeps a Polish phrase out of an English engine: Polish inflects, so its
+ * words are not English headwords, and one word missing is enough to leave
+ * the detector's verdict standing. The reader's own condition since D193,
+ * and the one that must not be traded for reach.
+ *
+ * Read only where everything cheaper has already said nothing, so it costs
+ * at most `MAX_WORDS` point reads on a phrase that was going to be answered
+ * with silence anyway.
+ *
+ * @param {string} text as the page had it
+ * @param {string} lang the language to vouch in - the pair's source
+ * @returns {Promise<boolean>}
+ */
+export async function everyWordKnown(text, lang) {
+  const language = lang.trim();
+  const words = termWords(text);
+  if (language.length === 0 || words.length === 0) return false;
+  for (const word of words) {
+    const answer = await askShelves(word, [language]);
+    if (answer === null || answer.entries.length === 0) return false;
+  }
+  return true;
+}
+
+/**
  * The dictionaries of some languages asked about a phrase, in order - the
  * database half of `lookUpAnswer`, split out because the pair's shelf may be
  * asked a second time. A dictionary that fails costs the entries and nothing
