@@ -654,6 +654,7 @@
   },
   "reader_page_prev": { "message": "Попередня сторінка" },
   "reader_page_next": { "message": "Наступна сторінка" },
+  "reader_panel_more": { "message": "Показати більше" },
   "reader_marker": { "message": "Маркер" },
   "reader_underline": { "message": "Підкреслення" },
   "underline_fine": { "message": "Тонке" },

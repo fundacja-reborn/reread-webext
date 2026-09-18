@@ -493,16 +493,31 @@
           </span>
         </div>
       <!--
-        The panel's own word for "there is more below" (D246): a strip of the
-        panel's paper at its foot with a chevron in it, shown by the script
-        while the panel has anything under its fold. A strip always in flow,
-        never coming and going: appearing, it would move the rows it sits
-        under by its own height at the very moment somebody reads them. The
-        browser's own scrollbar says nothing here - on Android it is an
-        overlay that fades, and on an e-ink panel a fade is nothing at all.
+        The panel's own word for "there is more below" (D246), and the press
+        that brings it up (D247): a strip of the panel's paper at its foot
+        with a chevron in it, shown by the script while the panel has
+        anything under its fold. A strip always in flow, never coming and
+        going: appearing, it would move the rows it sits under by its own
+        height at the very moment somebody reads them. The browser's own
+        scrollbar says nothing here - on Android it is an overlay that fades,
+        and on an e-ink panel a fade is nothing at all.
+
+        A button, because a chevron asks to be pressed: as a strip that
+        caught nothing it sent the press on to whatever stood under it, and
+        in the Aa panel that is the voice list, which opened (Michał's
+        photos from a Pixel, 2026-09-18). Disabled while there is nothing
+        below, so it is no stop on the way through the rows either.
       -->
-      <div class="panel-more" aria-hidden="true">
-        <svg class="reader-icon panel-more-glyph" viewBox="0 0 16 16" focusable="false">
+      <button
+        type="button"
+        class="panel-more"
+        title="Show more"
+        data-i18n-title="reader_panel_more"
+        aria-label="Show more"
+        data-i18n-aria-label="reader_panel_more"
+        disabled
+      >
+        <svg class="reader-icon panel-more-glyph" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
           <path
             d="M3.8 6.1 8 10.3l4.2-4.2"
             fill="none"
@@ -512,7 +527,7 @@
             stroke-linejoin="round"
           />
         </svg>
-      </div>
+      </button>
       </section>
 
       <!--
@@ -613,16 +628,31 @@
         <a id="original" data-i18n="reader_open_original" hidden>Open the original</a>
         <button id="nav-settings" type="button" data-i18n="settings">Settings</button>
       <!--
-        The panel's own word for "there is more below" (D246): a strip of the
-        panel's paper at its foot with a chevron in it, shown by the script
-        while the panel has anything under its fold. A strip always in flow,
-        never coming and going: appearing, it would move the rows it sits
-        under by its own height at the very moment somebody reads them. The
-        browser's own scrollbar says nothing here - on Android it is an
-        overlay that fades, and on an e-ink panel a fade is nothing at all.
+        The panel's own word for "there is more below" (D246), and the press
+        that brings it up (D247): a strip of the panel's paper at its foot
+        with a chevron in it, shown by the script while the panel has
+        anything under its fold. A strip always in flow, never coming and
+        going: appearing, it would move the rows it sits under by its own
+        height at the very moment somebody reads them. The browser's own
+        scrollbar says nothing here - on Android it is an overlay that fades,
+        and on an e-ink panel a fade is nothing at all.
+
+        A button, because a chevron asks to be pressed: as a strip that
+        caught nothing it sent the press on to whatever stood under it, and
+        in the Aa panel that is the voice list, which opened (Michał's
+        photos from a Pixel, 2026-09-18). Disabled while there is nothing
+        below, so it is no stop on the way through the rows either.
       -->
-      <div class="panel-more" aria-hidden="true">
-        <svg class="reader-icon panel-more-glyph" viewBox="0 0 16 16" focusable="false">
+      <button
+        type="button"
+        class="panel-more"
+        title="Show more"
+        data-i18n-title="reader_panel_more"
+        aria-label="Show more"
+        data-i18n-aria-label="reader_panel_more"
+        disabled
+      >
+        <svg class="reader-icon panel-more-glyph" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
           <path
             d="M3.8 6.1 8 10.3l4.2-4.2"
             fill="none"
@@ -632,7 +662,7 @@
             stroke-linejoin="round"
           />
         </svg>
-      </div>
+      </button>
       </nav>
 
       <!--

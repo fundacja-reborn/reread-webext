@@ -654,6 +654,7 @@
   },
   "reader_page_prev": { "message": "Poprzednia strona" },
   "reader_page_next": { "message": "Następna strona" },
+  "reader_panel_more": { "message": "Pokaż więcej" },
   "reader_marker": { "message": "Zakreślacz" },
   "reader_underline": { "message": "Podkreślenie" },
   "underline_fine": { "message": "Cienkie" },

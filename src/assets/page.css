@@ -704,7 +704,7 @@ button.page-mark:hover {
 }
 
 .nav-menu a,
-.nav-menu button {
+.nav-menu button:not(.panel-more) {
   display: flex;
   align-items: center;
   width: 100%;
@@ -719,6 +719,11 @@ button.page-mark:hover {
   text-decoration: none;
 }
 
+/* The reader's menu ends in a foot strip of its own (`.panel-more`,
+   reader.css): a button, because the chevron in it is pressed, but not a
+   row - it wears no separator, takes none of the row dress above, and the
+   row before it stays the last row for the rule below. */
+
 /* The row that closes the menu draws no line. The last row's line used to
    be the menu's bottom edge; since the panel stands on paper of its own
    with a shadow under it (the scrim, #255), a line on the paper's last
@@ -727,14 +732,14 @@ button.page-mark:hover {
    row hides by its attribute. (The settings' phrases row hid by the body's
    translation-off class until 2026-09-13; no menu row follows the switch
    now.) */
-.nav-menu > :is(a, button):not(:has(~ :is(a, button):not([hidden]))) {
+.nav-menu > :is(a, button):not(.panel-more, :has(~ :is(a, button):not([hidden], .panel-more))) {
   border-bottom: none;
 }
 
 /* The popup's hover, not the framed button's: the text answers, the line
    underneath stays a separator. */
 .nav-menu a:hover,
-.nav-menu button:hover {
+.nav-menu button:not(.panel-more):hover {
   border-color: var(--page-line);
   color: var(--page-accent);
 }
