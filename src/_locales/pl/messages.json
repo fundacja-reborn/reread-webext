@@ -2269,6 +2269,112 @@
     "message": "Zapisano",
     "description": "Beside a text field on the settings page once what was typed in it has been stored. Stays until the next edit - never taken away on a timer."
   },
+
+  "options_search_label": {
+    "message": "Szukaj w ustawieniach",
+    "description": "The settings page's own search field - its label and its placeholder alike."
+  },
+
+  "options_search_found_one": {
+    "message": "$COUNT$ ustawienie",
+    "description": "How many settings the search left on screen. $COUNT$ is the number.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+
+  "options_search_found_few": {
+    "message": "$COUNT$ ustawienia",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+
+  "options_search_found_many": {
+    "message": "$COUNT$ ustawień",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+
+  "options_search_found_other": {
+    "message": "$COUNT$ ustawienia",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+
+  "options_search_none": {
+    "message": "Brak ustawień pasujących do „$QUERY$”.",
+    "description": "Under the search field when nothing matched. $QUERY$ is what was typed.",
+    "placeholders": {
+      "query": {
+        "content": "$1",
+        "example": "voice"
+      }
+    }
+  },
+
+  "options_search_clear": {
+    "message": "Wyczyść"
+  },
+
+  "options_blocked_by": {
+    "message": "Dostępne po włączeniu",
+    "description": "On a row the search found although the switch that brings it is off; the switch's own name follows as a link, then options_blocked_by_rest."
+  },
+
+  "options_blocked_by_rest": {
+    "message": ".",
+    "description": "The end of options_blocked_by, glued to the link - it opens with the punctuation or the space the language needs there."
+  },
+
+  "options_keywords_tts": {
+    "message": "lektor, głos, mowa, odczyt, czytanie, TTS",
+    "description": "Words the settings search also finds this row by; never shown."
+  },
+
+  "options_keywords_font": {
+    "message": "krój, font, czcionka",
+    "description": "Words the settings search also finds this row by; never shown."
+  },
+
+  "options_keywords_pace": {
+    "message": "czas czytania, słowa na minutę, wpm, prędkość",
+    "description": "Words the settings search also finds this row by; never shown."
+  },
+
+  "options_keywords_scale": {
+    "message": "powiększenie, wielkość, rozmiar",
+    "description": "Words the settings search also finds this row by; never shown."
+  },
+
+  "options_keywords_storage": {
+    "message": "miejsce, dysk, pamięć",
+    "description": "Words the settings search also finds this row by; never shown."
+  },
+
+  "options_keywords_copy": {
+    "message": "backup, kopia zapasowa, przywracanie",
+    "description": "Words the settings search also finds this row by; never shown."
+  },
+
+  "options_keywords_sites": {
+    "message": "domena, wyjątki, blokada, host",
+    "description": "Words the settings search also finds this row by; never shown."
+  },
   "options_tts": { "message": "Czytanie na głos" },
   "options_tts_hint": {
     "message": "Przyciski odczytu w dymku, na listach i w widoku czytania."

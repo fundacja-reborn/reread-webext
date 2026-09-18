@@ -1680,6 +1680,102 @@
     "message": "Enregistré",
     "description": "Beside a text field on the settings page once what was typed in it has been stored. Stays until the next edit - never taken away on a timer."
   },
+
+  "options_search_label": {
+    "message": "Rechercher dans les paramètres",
+    "description": "The settings page's own search field - its label and its placeholder alike."
+  },
+
+  "options_search_found_one": {
+    "message": "$COUNT$ paramètre",
+    "description": "How many settings the search left on screen. $COUNT$ is the number.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+
+  "options_search_found_many": {
+    "message": "$COUNT$ paramètres",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+
+  "options_search_found_other": {
+    "message": "$COUNT$ paramètres",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+
+  "options_search_none": {
+    "message": "Aucun paramètre ne correspond à « $QUERY$ ».",
+    "description": "Under the search field when nothing matched. $QUERY$ is what was typed.",
+    "placeholders": {
+      "query": {
+        "content": "$1",
+        "example": "voice"
+      }
+    }
+  },
+
+  "options_search_clear": {
+    "message": "Effacer"
+  },
+
+  "options_blocked_by": {
+    "message": "Disponible une fois",
+    "description": "On a row the search found although the switch that brings it is off; the switch's own name follows as a link, then options_blocked_by_rest."
+  },
+
+  "options_blocked_by_rest": {
+    "message": " activé.",
+    "description": "The end of options_blocked_by, glued to the link - it opens with the punctuation or the space the language needs there."
+  },
+
+  "options_keywords_tts": {
+    "message": "lecteur, voix, parole, parler, TTS",
+    "description": "Words the settings search also finds this row by; never shown."
+  },
+
+  "options_keywords_font": {
+    "message": "police, fonte, caractère",
+    "description": "Words the settings search also finds this row by; never shown."
+  },
+
+  "options_keywords_pace": {
+    "message": "temps de lecture, mots par minute, wpm, vitesse",
+    "description": "Words the settings search also finds this row by; never shown."
+  },
+
+  "options_keywords_scale": {
+    "message": "agrandissement, taille, plus grand, plus petit",
+    "description": "Words the settings search also finds this row by; never shown."
+  },
+
+  "options_keywords_storage": {
+    "message": "espace, disque, mémoire",
+    "description": "Words the settings search also finds this row by; never shown."
+  },
+
+  "options_keywords_copy": {
+    "message": "sauvegarde, copie, restauration",
+    "description": "Words the settings search also finds this row by; never shown."
+  },
+
+  "options_keywords_sites": {
+    "message": "domaine, exceptions, blocage, hôte",
+    "description": "Words the settings search also finds this row by; never shown."
+  },
   "options_tts": { "message": "Lecture à voix haute" },
   "options_tts_hint": {
     "message": "Les boutons de lecture à voix haute dans la bulle, dans les listes et dans le lecteur."

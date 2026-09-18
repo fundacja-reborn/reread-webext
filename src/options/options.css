@@ -102,6 +102,100 @@ header h1 {
   margin: 1.5rem 0 0.75rem;
 }
 
+/* --- searching the settings (D254, P10) ---
+
+   The field stands over the table of contents where there is a column for it,
+   and inside the bar where there is not - one element, moved between the two
+   places by `search.js`. On the bar it takes the row's whole remaining width
+   while it is open, the section list stepping aside for it. */
+
+.settings-search {
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+.settings-search input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--page-border);
+  background: var(--page-bg);
+  color: var(--page-fg);
+  font: inherit;
+}
+
+#search-status {
+  margin: 0.35rem 0 0;
+}
+
+/* On the bar: the field takes the room, the list yields it. */
+.page-bar > .settings-search {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin-bottom: 0;
+}
+
+.page-bar > .settings-search input {
+  min-height: 2.1rem;
+  font-size: 0.85rem;
+}
+
+/* The status has nowhere to stand inside a bar; on a narrow screen it goes
+   under the bar's line, where the page begins. */
+.page-bar > .settings-search #search-status {
+  position: absolute;
+  inset-inline: 0;
+  margin-top: 0.35rem;
+}
+
+/* An open field is the bar's whole business: the section list waits. */
+.page-bar:has(> .settings-search:not([hidden])) > .bar-sections {
+  display: none;
+}
+
+.bar-search-open {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.1rem;
+  min-width: 2.6rem;
+  padding: 0.15rem 0.55rem;
+}
+
+@media (min-width: 60rem) {
+  .bar-search-open {
+    display: none;
+  }
+}
+
+/* What the query matched, inside a row's name or its sentence: an underline
+   and a frame, never a wash - the wash is the highlighter's, and the greys an
+   e-ink panel keeps would swallow it anyway. */
+mark.hit {
+  background: none;
+  color: inherit;
+  border: 1px solid var(--page-accent);
+  border-radius: 2px;
+  padding: 0 0.1em;
+  text-decoration: underline;
+}
+
+/* A section the query left with nothing: dimmed in the list rather than taken
+   out of it, so the map keeps its shape while the page is narrowed. */
+.sections a.is-empty {
+  color: var(--page-disabled);
+}
+
+/* A row the search found although the switch that brings it is off: its
+   controls are dead, and the line under it says which switch to press. */
+.row-blocked > :is(label, .row-name, .row-note):not(.row-why) {
+  color: var(--page-disabled);
+}
+
+.row-why {
+  color: var(--page-muted);
+}
+
 /* --- the table of contents (D254) ---
 
    One list, two shapes: a column beside the page from 60rem up, and the

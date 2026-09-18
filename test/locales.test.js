@@ -66,6 +66,12 @@ function usedKeys() {
     for (const match of source.matchAll(/data-i18n(?:-[a-z-]+)?="([a-z0-9_]+)"/g)) {
       literal.add(String(match[1]));
     }
+    // The settings search's own keywords (D254): a catalogue key the page
+    // names but never shows - `search.js` reads it to index the row by more
+    // words than the row says out loud.
+    for (const match of source.matchAll(/data-keywords="([a-z0-9_]+)"/g)) {
+      literal.add(String(match[1]));
+    }
   }
   const manifest = readFileSync(join(ROOT, "src", "manifest.json"), "utf8");
   for (const match of manifest.matchAll(/__MSG_([a-z0-9_]+)__/g)) literal.add(String(match[1]));

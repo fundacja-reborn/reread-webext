@@ -68,6 +68,27 @@
           </svg>
         </button>
         <p class="page-mark">re/read</p>
+        <!-- Searching the settings from the bar (D254, P10): under 60rem the
+             column beside the page is gone, and with it the field - so the bar
+             carries the way in, and the field itself unrolls across the bar on
+             a press. One field either way; `search.js` moves the one element
+             between the two places rather than writing it twice. -->
+        <button
+          id="search-open"
+          type="button"
+          class="bar-search-open"
+          aria-expanded="false"
+          aria-controls="settings-search"
+          title="Search the settings"
+          data-i18n-title="options_search_label"
+          aria-label="Search the settings"
+          data-i18n-aria-label="options_search_label"
+        >
+          <svg class="page-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+            <circle cx="7" cy="7" r="4.25" fill="none" stroke="currentColor" stroke-width="1.3" />
+            <path d="M10.2 10.2 13.5 13.5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+          </svg>
+        </button>
         <!-- The narrow screen's table of contents (D254): under 60rem the
              column beside the page has nowhere to stand, and the list moves
              into the bar as the one control a phone and an e-ink panel are
@@ -158,6 +179,30 @@
          select speaks for it. The title lives in the page's column, so the
          list stands beside the settings rather than under the heading. -->
     <div class="page-body">
+    <div class="side">
+    <!-- The field itself (D254, §8): it stands over the table of contents
+         where there is a column for it, and inside the bar where there is
+         not - the one element, moved by `search.js`. What it searches is the
+         page's own rows: their names, the sentence under each of them, the
+         rest behind their More, the section they stand in and whatever
+         keywords the catalogue offers. Never the catalogues of models and
+         dictionaries, never the list of sites, never the CSS field: those are
+         data, and a search over them would answer with the data. -->
+    <search id="settings-search" class="settings-search">
+      <label class="visually-hidden" for="settings-search-field" data-i18n="options_search_label"
+        >Search the settings</label
+      >
+      <input
+        type="search"
+        id="settings-search-field"
+        placeholder="Search the settings"
+        data-i18n-placeholder="options_search_label"
+        autocomplete="off"
+        autocapitalize="off"
+        spellcheck="false"
+      />
+      <p id="search-status" class="status" role="status" hidden></p>
+    </search>
     <nav id="sections" class="sections" aria-label="Sections of this page" data-i18n-aria-label="options_sections_aria">
       <a id="jump-first-steps" class="translation-only" href="#first-steps" data-i18n="options_first_steps_heading" hidden>First steps</a>
       <a href="#languages" data-i18n="options_section_languages">Languages</a>
@@ -169,6 +214,7 @@
       <a href="#custom-css" data-i18n="options_custom_css_heading">Custom CSS</a>
       <a href="#about" data-i18n="options_section_about">About re/read</a>
     </nav>
+    </div>
 
     <main>
     <header>
@@ -699,7 +745,7 @@
       </div>
     </div>
 
-    <section aria-labelledby="switched-off-sites">
+    <section aria-labelledby="switched-off-sites" data-keywords="options_keywords_sites">
     <h3 id="switched-off-sites" data-i18n="options_disabled_heading">Switched-off sites</h3>
 
     <!-- The two settings this paragraph names are links to their own rows
@@ -824,7 +870,7 @@
            every page it stands on, so no page setting can reach it - and
            built-in sizes land differently on different screens (an e-ink
            tablet renders a CSS pixel visibly smaller than a phone, D84). -->
-      <div class="row" id="s-bubbleScale" data-setting="bubbleScale" data-section="bubble">
+      <div class="row" id="s-bubbleScale" data-setting="bubbleScale" data-keywords="options_keywords_scale" data-section="bubble">
         <span class="row-name" data-i18n="options_bubble_scale">Bubble text size</span>
         <p class="inline stepper">
           <button type="button" id="bubble-scale-down" title="Smaller" data-i18n-title="reader_smaller">
@@ -938,7 +984,7 @@
            keyboard over the article). The field previews itself in the
            typed face - options.js sets its font-family from the cleaned
            name, never the raw value. -->
-      <div class="row row-stack" id="s-fontFamily" data-setting="fontFamily" data-section="reading-view">
+      <div class="row row-stack" id="s-fontFamily" data-setting="fontFamily" data-keywords="options_keywords_font" data-section="reading-view">
         <label class="row-name" for="font-custom" data-i18n="options_font_custom">Own font</label>
         <p class="inline">
           <input
@@ -976,7 +1022,7 @@
            panel for the font name's reason. The bounds are the config's
            (`READING_PACE`), put on the field by options.js, so the page and
            the healer cannot disagree. -->
-      <div class="row row-stack" id="s-readingPace" data-setting="readingPace" data-section="reading-view">
+      <div class="row row-stack" id="s-readingPace" data-setting="readingPace" data-keywords="options_keywords_pace" data-section="reading-view">
         <label class="row-name" for="reading-pace" data-i18n="options_reading_pace">Reading speed</label>
         <p class="inline">
           <input id="reading-pace" type="number" inputmode="numeric" autocomplete="off" />
@@ -1113,7 +1159,7 @@
            reader alike, and the reasons for wanting it gone (an engine with
            no voices, a speaker pressed by accident) have nothing to do with
            translating. Presentation only: the voice and the speed stay. -->
-      <div class="row" id="s-ttsOff" data-setting="ttsOff" data-section="reading-aloud">
+      <div class="row" id="s-ttsOff" data-setting="ttsOff" data-keywords="options_keywords_tts" data-section="reading-aloud">
         <label class="row-toggle">
           <span class="row-name" data-i18n="options_tts">Reading aloud</span>
           <input type="checkbox" id="tts" />
@@ -1207,7 +1253,7 @@
            says out loud that a browser may clear an origin's storage on its
            own: on WebKit a refused persistence is exactly that risk
            (`lib/storage-report.js`). -->
-      <div class="row row-stack row-storage" id="s-storage" data-setting="storage" data-section="data">
+      <div class="row row-stack row-storage" id="s-storage" data-setting="storage" data-keywords="options_keywords_storage" data-section="data">
         <span class="row-name" data-i18n="options_storage">Data on this device</span>
         <span class="row-value" id="storage-usage"></span>
         <!-- What the size measures, because the lists below it measure
@@ -1243,7 +1289,7 @@
            everywhere, because it doubles the space the reading list takes.
            Turning it on builds the copy from the whole list; turning it off
            removes it; the storage row under it says what it holds. -->
-      <div class="row" id="s-libraryCopy" data-setting="libraryCopy" data-section="data">
+      <div class="row" id="s-libraryCopy" data-setting="libraryCopy" data-keywords="options_keywords_copy" data-section="data">
         <label class="row-toggle">
           <span class="row-name" data-i18n="options_library_copy">Copy of the reading list</span>
           <input type="checkbox" id="library-copy" />

@@ -1668,6 +1668,92 @@
     "message": "Guardado",
     "description": "Beside a text field on the settings page once what was typed in it has been stored. Stays until the next edit - never taken away on a timer."
   },
+
+  "options_search_label": {
+    "message": "Buscar en los ajustes",
+    "description": "The settings page's own search field - its label and its placeholder alike."
+  },
+
+  "options_search_found_one": {
+    "message": "$COUNT$ ajuste",
+    "description": "How many settings the search left on screen. $COUNT$ is the number.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+
+  "options_search_found_other": {
+    "message": "$COUNT$ ajustes",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+
+  "options_search_none": {
+    "message": "Ningún ajuste coincide con «$QUERY$».",
+    "description": "Under the search field when nothing matched. $QUERY$ is what was typed.",
+    "placeholders": {
+      "query": {
+        "content": "$1",
+        "example": "voice"
+      }
+    }
+  },
+
+  "options_search_clear": {
+    "message": "Borrar"
+  },
+
+  "options_blocked_by": {
+    "message": "Disponible al activar",
+    "description": "On a row the search found although the switch that brings it is off; the switch's own name follows as a link, then options_blocked_by_rest."
+  },
+
+  "options_blocked_by_rest": {
+    "message": ".",
+    "description": "The end of options_blocked_by, glued to the link - it opens with the punctuation or the space the language needs there."
+  },
+
+  "options_keywords_tts": {
+    "message": "lector, voz, habla, hablar, TTS",
+    "description": "Words the settings search also finds this row by; never shown."
+  },
+
+  "options_keywords_font": {
+    "message": "tipografía, fuente, letra",
+    "description": "Words the settings search also finds this row by; never shown."
+  },
+
+  "options_keywords_pace": {
+    "message": "tiempo de lectura, palabras por minuto, wpm, velocidad",
+    "description": "Words the settings search also finds this row by; never shown."
+  },
+
+  "options_keywords_scale": {
+    "message": "ampliación, tamaño, más grande, más pequeño",
+    "description": "Words the settings search also finds this row by; never shown."
+  },
+
+  "options_keywords_storage": {
+    "message": "espacio, disco, memoria",
+    "description": "Words the settings search also finds this row by; never shown."
+  },
+
+  "options_keywords_copy": {
+    "message": "copia de seguridad, respaldo, restauración",
+    "description": "Words the settings search also finds this row by; never shown."
+  },
+
+  "options_keywords_sites": {
+    "message": "dominio, excepciones, bloqueo, host",
+    "description": "Words the settings search also finds this row by; never shown."
+  },
   "options_tts": { "message": "Lectura en voz alta" },
   "options_tts_hint": {
     "message": "Los botones de lectura en voz alta en la burbuja, en las listas y en la vista de lectura."

@@ -100,6 +100,7 @@ import {
   voiceLanguage,
   voicesFor,
 } from "../lib/tts.js";
+import { armSearch } from "./search.js";
 import { armSections, fillSectionSelect } from "./sections.js";
 import {
   dictionaryRows,
@@ -144,6 +145,10 @@ followTheme();
 // reading, and the landing every address makes. After `localizePage`,
 // because the select's lines are the column's links read back.
 armSections();
+// And the search over the settings (D254, P10), whose index is the page read
+// once - so it too waits for the catalogue's words to be in it, and for the
+// More paragraphs above, whose text it indexes.
+armSearch();
 
 /** @type {import("../lib/config.js").Config} */
 let config = withDefaults(undefined);
