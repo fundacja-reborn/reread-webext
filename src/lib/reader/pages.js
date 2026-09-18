@@ -339,6 +339,172 @@ export function tapZone(x, width) {
 }
 
 /**
+ * What a pointer did between landing and lifting, and where - everything the
+ * rules below need to tell a tap meant to turn the page from the hand that
+ * is holding the device (D250).
+ *
+ * The zones stay thirds: narrowing them does not help, because the thumb
+ * holding a phone with slim bezels touches the very edge rather than a third
+ * of the width, and a narrower zone only makes a deliberate tap harder to
+ * land. What tells the two apart is the signature: a resting thumb lies on
+ * the glass for seconds, slides, spreads a wide contact, lands within the
+ * bezel's reach and usually beside a second finger; a tap is brief, still,
+ * small and alone.
+ *
+ * @typedef {object} TapSignature
+ * @property {string} pointerType as `PointerEvent` names it
+ * @property {number} downAt when the pointer landed
+ * @property {number} upAt when it lifted
+ * @property {number} dx how far it travelled before lifting
+ * @property {number} dy
+ * @property {number | null} width the contact's size, or null when the
+ *   device's own numbers say nothing (`blobTrusted`)
+ * @property {number | null} height
+ * @property {number} x where it landed, window coordinates - what the zone
+ *   and the dead strips are read from, because that is the point the hand
+ *   chose
+ * @property {number} y
+ * @property {number} viewportW the window
+ * @property {number} viewportH
+ * @property {number[]} otherPointers when the other pointers of the moment
+ *   landed - a grip puts two contacts down together
+ */
+
+/**
+ * How long a contact may last and still be a tap. A thumb holding the device
+ * lies there for as long as the reading does, so this one test takes most of
+ * the accidents. Just under the hold that starts a selection (`HOLD_MS`, 400
+ * in `content/select.js`, which is Android's own long-press timing): a
+ * contact that nearly became a hold was not a tap either way. The cost,
+ * deliberately paid: no "tap and hold to fly through pages", which does not
+ * exist here anyway.
+ */
+export const TAP_HOLD_MS = 350;
+
+/**
+ * How far a tap may travel. A grip's contact slides; a tap barely moves. A
+ * shade under what the gesture module lets a tap roll as it lifts
+ * (`TAP_SLOP`, 10): turning the page is a bigger thing to do by mistake
+ * than selecting a word, so it asks for a little more certainty.
+ */
+export const TAP_DRIFT = 8;
+
+/**
+ * How wide a contact may be. A thumb laid on its side reports 35-50 CSS
+ * pixels, a fingertip 15-25. Never the only reason to refuse a turn - a
+ * large thumb tapping deliberately must still turn the page - which is why
+ * it stands beside the tests above rather than in front of them, and why it
+ * is skipped entirely on a device whose numbers mean nothing (`blobTrusted`).
+ */
+export const TAP_BLOB = 28;
+
+/**
+ * How close to the window's top edge a tap is taken for a finger that came
+ * in from behind the bezel rather than one aimed at the page. The other
+ * three edges stand further in (below).
+ */
+export const TAP_EDGE = 8;
+
+/**
+ * The dead strips: down each side, where the bezel is and where a hand
+ * wraps, and along the foot, where the thumb holding a phone rests. Nobody
+ * aims at the last two dozen pixels of the screen, so the strips cost a
+ * deliberate tap nothing - and the corners, where an accidental contact
+ * gathers, stop turning pages.
+ */
+export const TAP_DEAD_SIDE = 24;
+export const TAP_DEAD_FOOT = 40;
+
+/**
+ * How close together two contacts have to land to be one grip. A thumb that
+ * has been resting for seconds is not this - it must not block a deliberate
+ * tap - but a second contact arriving with this one is a hand shifting its
+ * hold, never a page being turned.
+ */
+export const TAP_ALONE_MS = 100;
+
+/**
+ * Whether a pointer could be asking for a turn at all: the pen never turns
+ * a page - it is the highlighter's, and every tap with it in hand is the
+ * marker's - and a contact that landed beside another is a grip.
+ *
+ * @param {TapSignature} tap
+ * @returns {boolean}
+ */
+function meansToTurn(tap) {
+  if (tap.pointerType === "pen") return false;
+  return !tap.otherPointers.some((at) => Math.abs(at - tap.downAt) <= TAP_ALONE_MS);
+}
+
+/**
+ * Which way a tap turns the page, or null - the whole signature, not the
+ * position alone (D250). Every test has to pass; the order is cheapest
+ * first, and each of them is one line of the table in `planning/
+ * reread-przewracanie-input-i-sygnal.md`.
+ *
+ * @param {TapSignature} tap
+ * @returns {import("./paging.js").PageTurn | null}
+ */
+export function tapIntent(tap) {
+  if (!meansToTurn(tap)) return null;
+  // The strips, and the window's own top edge with them.
+  if (tap.x < TAP_DEAD_SIDE || tap.x > tap.viewportW - TAP_DEAD_SIDE) return null;
+  if (tap.y < TAP_EDGE || tap.y > tap.viewportH - TAP_DEAD_FOOT) return null;
+  if (tap.upAt - tap.downAt >= TAP_HOLD_MS) return null;
+  if (Math.hypot(tap.dx, tap.dy) >= TAP_DRIFT) return null;
+  const blob = Math.max(tap.width ?? 0, tap.height ?? 0);
+  if (blob >= TAP_BLOB) return null;
+  return tapZone(tap.x, tap.viewportW);
+}
+
+/**
+ * How far sideways a swipe has to travel to turn the page, and how much
+ * more sideways than up or down it has to be. A gesture that has to move is
+ * the one input a resting hand cannot make by accident, which is why it is
+ * the default where a hand wraps around the screen (`effectiveTouchTurn`).
+ */
+export const SWIPE_MIN = 40;
+export const SWIPE_AXIS = 2;
+
+/**
+ * Which way a swipe turns the page, or null. Leftward turns on, the way the
+ * right-hand zone does and the way a page of paper goes; no hold, no time
+ * limit - a gesture that held first belongs to the selection, which claims
+ * it before this is ever asked.
+ *
+ * @param {TapSignature} tap
+ * @returns {import("./paging.js").PageTurn | null}
+ */
+export function swipeIntent(tap) {
+  if (!meansToTurn(tap)) return null;
+  if (Math.abs(tap.dx) < SWIPE_MIN) return null;
+  if (Math.abs(tap.dx) <= SWIPE_AXIS * Math.abs(tap.dy)) return null;
+  return tap.dx < 0 ? "down" : "up";
+}
+
+/** How many contacts are measured before the blob test is trusted or dropped. */
+export const BLOB_SAMPLES = 6;
+
+/**
+ * Whether a device's contact sizes say anything. `PointerEvent.width` and
+ * `height` are optional in practice: some devices answer 0, some answer 1,
+ * some answer the same constant to every touch there ever was. A test read
+ * off a constant refuses nothing or refuses everything, so it is measured
+ * first and dropped for the whole session if the numbers are flat.
+ *
+ * Only real touches are measured - a mouse reports a single pixel by
+ * definition, and counting it would drop the test on every device with both.
+ *
+ * @param {number[]} samples the larger of width and height, one per touch
+ * @returns {boolean}
+ */
+export function blobTrusted(samples) {
+  if (samples.length < BLOB_SAMPLES) return false;
+  if (samples.every((one) => one <= 1)) return false;
+  return new Set(samples).size > 1;
+}
+
+/**
  * How far a wheel's notches have to be apart to be two turns. A trackpad
  * sends a burst of small deltas for one flick, and a page a notch would be a
  * chapter a flick.
@@ -432,4 +598,75 @@ export function edgeZone(y, head, foot, bottom, turns) {
 export function edgeTurn(zone, enteredAt, turnedAt, now) {
   if (zone === null) return false;
   return turnedAt === null ? now - enteredAt >= EDGE_TURN_FIRST_MS : now - turnedAt >= EDGE_TURN_REPEAT_MS;
+}
+
+/**
+ * Why the window is being moved to another page (D251). A turn asked for by
+ * the hand - a key, the wheel, a tap, a swipe - is the one the reader has to
+ * notice; the rest are the reader's own machinery going somewhere, and a
+ * machine announcing itself is noise.
+ *
+ * @typedef {"turn" | "jump" | "speech" | "drag"} TurnReason
+ */
+
+/**
+ * How long the band stands in ink before the new page is uncovered, and how
+ * far apart two flashes have to be. The gap is a brake on the hardware keys
+ * of an e-reader, which repeat while they are held: a series of full-band
+ * inversions faster than three a second is flicker in the sense of WCAG
+ * 2.3.1, and half a second holds us well under it. It is also what keeps a
+ * reader flipping through pages from watching a strobe.
+ */
+export const FLASH_HOLD_MS = 150;
+export const FLASH_GAP_MS = 500;
+
+/**
+ * Whether a turn may flash the band (D251).
+ *
+ * Not while the voice reads - a flash at every turn of a page nobody is
+ * looking at is a refresh a minute for nothing; not while a range is being
+ * stretched across the page's edge (D239), where a black band under the
+ * finger in the middle of a selection says less than it costs; not for a
+ * jump, which is not a page being turned at all; and not within `minGap` of
+ * the last one.
+ *
+ * @param {TurnReason} reason
+ * @param {number} lastFlashAt
+ * @param {number} now
+ * @param {number} [minGap]
+ * @returns {boolean}
+ */
+export function flashAllowed(reason, lastFlashAt, now, minGap = FLASH_GAP_MS) {
+  if (reason !== "turn") return false;
+  return now - lastFlashAt >= minGap;
+}
+
+/**
+ * How a turn moves the window (D251): instantly, as every movement in the
+ * reader has been until now; smoothly, which shows the direction on a screen
+ * that can draw motion; or behind a flash of the band, which is the one
+ * extra frame an e-ink panel draws well - the signal Kindle and Kobo turn
+ * their pages with, and the reason a reader looking at the middle of a page
+ * knows it has changed at all.
+ *
+ * Only a turn from the hand is dressed either way. A jump - a search hit, a
+ * heading, the reading position restored - is a landing somewhere else, and
+ * a smooth scroll through half an article is slow and sickening; the voice
+ * and a stretched range have their own reasons above.
+ *
+ * @param {object} how
+ * @param {"auto" | "off"} how.effect the setting
+ * @param {boolean} how.eink whether the paper is the e-ink theme
+ * @param {boolean} how.reduced whether the system asked for less motion -
+ *   which takes the flash as well as the scroll: a band going black and
+ *   back is motion, whatever draws it
+ * @param {TurnReason} how.reason
+ * @param {number} how.lastFlashAt
+ * @param {number} how.now
+ * @returns {"instant" | "smooth" | "flash"}
+ */
+export function turnMotion(how) {
+  if (how.effect === "off" || how.reduced || how.reason !== "turn") return "instant";
+  if (how.eink) return flashAllowed(how.reason, how.lastFlashAt, how.now) ? "flash" : "instant";
+  return "smooth";
 }

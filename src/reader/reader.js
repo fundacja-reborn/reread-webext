@@ -43,6 +43,7 @@ import {
   SIZE,
   TTS_RATE,
   chosenPair,
+  effectiveTouchTurn,
   isAlign,
   isFont,
   isHyphens,
@@ -92,8 +93,11 @@ import {
   withoutMark,
 } from "../lib/reader/marks.js";
 import {
+  BLOB_SAMPLES,
   EDGE_TURN_FIRST_MS,
   EDGE_TURN_REPEAT_MS,
+  FLASH_HOLD_MS,
+  blobTrusted,
   curtainTop,
   edgeTurn,
   edgeZone,
@@ -102,7 +106,9 @@ import {
   pagePercent,
   pageTops,
   revealTarget,
-  tapZone,
+  swipeIntent,
+  tapIntent,
+  turnMotion,
   turnTarget,
   wheelTurn,
 } from "../lib/reader/pages.js";
@@ -369,6 +375,8 @@ const pageLive = document.getElementById("page-live");
 // The line of ink on the page's edge while a stretched range waits there
 // for the page to turn (D239).
 const pageEdge = document.getElementById("page-edge");
+// The band in ink for the beat a page turns on e-ink paper (D251).
+const pageFlash = document.getElementById("page-flash");
 const speechPlayButton = document.getElementById("speech-play");
 const speechPlayLabel = document.getElementById("speech-play-label");
 const library = document.getElementById("library");
@@ -2236,16 +2244,45 @@ function pageShown(pages) {
  * The page turned to is the one the table keeps (`anchor`), and its first
  * line the place the next cut is measured from.
  *
+ * How the window moves is the turn's own business (D251, `turnMotion`): a
+ * turn asked for by the hand is signalled - a flash of the band on e-ink
+ * paper, a smooth scroll where motion can be drawn - and everything else
+ * moves instantly, as every movement in the reader did until now.
+ *
  * @param {PageTable} pages
  * @param {number} page
+ * @param {import("../lib/reader/pages.js").TurnReason} [reason] why the
+ *   window is moving; a landing somewhere else by default, which is what
+ *   every caller but a turn is
  */
-function showPageOf(pages, page) {
+function showPageOf(pages, page, reason = "jump") {
   const top = pages.tops[page];
   if (top === undefined) return;
-  // Instantly, like every movement in the reader: a smooth scroll on an
-  // e-ink panel is a page of smeared refreshes. The scroll arms the
-  // position save like any other.
-  scrollTo(0, Math.max(0, top - pageBand().top));
+  const motion = turnMotion({
+    effect: settings.reader.turnEffect,
+    eink: settings.reader.theme === "eink",
+    reduced: lessMotion?.matches === true,
+    reason,
+    lastFlashAt,
+    now: performance.now(),
+  });
+  // The ink goes up before the turn and comes down after its hold: the band
+  // stands black for that beat whatever the compositor makes of the two
+  // paints, and nothing about the page's own state waits on a timer.
+  if (motion === "flash") flashBand();
+  const y = Math.max(0, top - pageBand().top);
+  if (motion === "smooth") {
+    // The document is the window's scroller (D233), so the engine animates
+    // exactly what a turn does anyway: the reading position, the marks, the
+    // pins and the bubble know nothing about it. The curtain is drawn only
+    // while the window stands on a page, so it goes out for the scroll and
+    // comes back when the window settles.
+    scrollTo({ top: y, left: 0, behavior: "smooth" });
+    settleAfterSmooth();
+  } else {
+    // The scroll arms the position save like any other.
+    scrollTo(0, y);
+  }
   pages.anchor = top;
   keepPageAnchor(pages, page);
   refreshCurtain();
@@ -2257,6 +2294,57 @@ function showPageOf(pages, page) {
 }
 
 /**
+ * Whether the system asked for less motion. Kept as the query itself rather
+ * than its answer: the switch is flipped mid-reading on a phone, and a
+ * boolean read at load would be the wrong one from then on.
+ */
+const lessMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)") ?? null;
+
+/** When the band last flashed - the clock `flashAllowed` keeps us honest by. */
+let lastFlashAt = -Infinity;
+
+/** The clock that takes the ink down. */
+let flashTimer = 0;
+
+/**
+ * The reading band in ink for a beat (D251): the one extra frame an e-ink
+ * panel draws well, and the signal Kindle and Kobo turn their pages with.
+ * The band alone - the bar, the foot's strip and the page count stay as
+ * they are: less surface to refresh, and less to tire an eye that is
+ * reading, not watching.
+ */
+function flashBand() {
+  if (pageFlash === null) return;
+  lastFlashAt = performance.now();
+  const band = pageBand();
+  pageFlash.style.top = `${Math.round(band.top)}px`;
+  pageFlash.style.height = `${Math.max(0, Math.round(band.bottom - band.top))}px`;
+  pageFlash.hidden = false;
+  window.clearTimeout(flashTimer);
+  flashTimer = window.setTimeout(() => {
+    if (pageFlash !== null) pageFlash.hidden = true;
+  }, FLASH_HOLD_MS);
+}
+
+/**
+ * How long after a smooth turn the window is squared with its page without
+ * `scrollend` having said so. The event is Gecko's and Blink's; WebKit
+ * sends none, and the curtain would then wait for the next turn to come
+ * back - which it could afford while every scroll was instant, and cannot
+ * now. Longer than any engine's own scroll (about 150-300ms), short enough
+ * that nobody reads a page without its curtain.
+ */
+const SMOOTH_SETTLE_MS = 600;
+
+/** The clock above. Restarted by each turn, so a flick through pages settles once. */
+let smoothSettleTimer = 0;
+
+function settleAfterSmooth() {
+  window.clearTimeout(smoothSettleTimer);
+  smoothSettleTimer = window.setTimeout(() => settlePage(), SMOOTH_SETTLE_MS);
+}
+
+/**
  * A turn: the next page, the one before, either end - and past a part's
  * last page the next part of the book, past its first page the last page
  * of the part before, the way a book's pages run on across its parts. The
@@ -2265,13 +2353,18 @@ function showPageOf(pages, page) {
  * last page is where an article ends.
  *
  * @param {import("../lib/reader/paging.js").PageTurn} turn
+ * @param {import("../lib/reader/pages.js").TurnReason} [reason] what asked
+ *   for it (D251); the hand by default, because that is who turns pages -
+ *   the edge of a stretched range says so itself. Either end of the text is
+ *   a landing however it was asked for: a signal saying "the page turned"
+ *   over a jump of forty pages would be a lie.
  */
-function turnPage(turn) {
+function turnPage(turn, reason = "turn") {
   const pages = pagesNow();
   if (pages === null) return;
   const target = turnTarget(pages.tops, pageShown(pages), turn);
   if (target !== null) {
-    showPageOf(pages, target);
+    showPageOf(pages, target, turn === "first" || turn === "last" ? "jump" : reason);
     return;
   }
   const book = shown;
@@ -2343,11 +2436,14 @@ function revealOnPage(range, kind) {
   // a word turns the page on, never back.
   if (!onPage(scrolled, top, pageBand().top)) {
     const first = lines[0];
-    if (first !== undefined && kind === "sentence") showPageOf(pages, pageAt(pages.tops, first));
+    if (first !== undefined && kind === "sentence") showPageOf(pages, pageAt(pages.tops, first), "speech");
     return true;
   }
   const target = revealTarget(pages.tops, shownPage, lines, kind === "word");
-  if (target !== null) showPageOf(pages, target);
+  // The voice turns its own pages (D251): no flash, because a page nobody
+  // is looking at flashing is a refresh a minute for nothing, and no smooth
+  // scroll, because the voice reads on while it runs.
+  if (target !== null) showPageOf(pages, target, "speech");
   return true;
 }
 
@@ -2451,23 +2547,207 @@ function refreshCurtain() {
  * and not from the press that closed a panel or a footnote: a press that
  * found something to close has done its work.
  *
- * @param {number} x
+ * Whether a tap turns the page at all is the setting's (D250), and the
+ * hand's signature decides whether this one was meant: a tap turns only
+ * when it was brief, still, a fingertip's contact, alone and away from the
+ * edges, all of which is read from the pointer the page kept itself
+ * (`lastTap`) rather than from the point below - that is where the finger
+ * lifted, and a zone is read from where it landed. The swipe has a road of
+ * its own (`swipeTurn`), because no mouse event is left behind by a touch
+ * that travels.
+ *
+ * @param {number} x where the press ended - unused here, and see above
  * @param {number} y
  * @param {EventTarget | null} target
  */
 function onBareTap(x, y, target) {
   if (!paged() || markerOn || pressHadWork || roomShown !== null) return;
-  if (
-    target instanceof Element &&
-    target.closest(
-      "button, a[href], input, select, textarea, summary, dialog, .reader-chrome, .panel-scrim, .speech-bar, .mark-bar, .pager, .article-actions, .note-popover, #mark-note-badges",
-    ) !== null
-  ) {
-    return;
-  }
-  const turn = tapZone(x, window.innerWidth);
+  if (target instanceof Element && target.closest(TURN_STOPS) !== null) return;
+  if (effectiveTouchTurn(settings.reader, window.innerWidth) !== "zones") return;
+  const tap = lastTap();
+  if (tap === null) return;
+  const turn = tapIntent(tap);
   if (turn !== null) turnPage(turn);
 }
+
+/**
+ * What a press on it is about itself, and never about turning the page: a
+ * button, a live link, a field, a pager, a bar, the chrome, the dimmed page
+ * under an open panel. Read by both roads into a turn - the bare tap's and
+ * the swipe's - so the two can never drift apart.
+ */
+const TURN_STOPS =
+  "button, a[href], input, select, textarea, summary, dialog, .reader-chrome, .panel-scrim, .speech-bar, .mark-bar, .pager, .article-actions, .note-popover, #mark-note-badges";
+
+/**
+ * A swipe, read at the pointer's own lift (D250) - which is the only place
+ * it can be read at all: a touch that travels is a pan as far as a browser
+ * is concerned, and neither Blink nor Gecko leaves the compatibility mouse
+ * events behind it that a bare tap is heard by. So the guards `reading.js`
+ * applies to a tap are applied here instead, and they are the same ones:
+ * not with the pen in hand, not under a room or an open panel, not on
+ * anything that answers presses itself, and not while a range is being
+ * stretched - a selection drawn along a line travels sideways exactly like
+ * a swipe. An open bubble stands over the text it was raised from, so the
+ * page waits: the tap that puts it away is the gesture that comes first,
+ * exactly as it does in the thirds.
+ *
+ * @param {import("../lib/reader/pages.js").TapSignature} tap
+ * @param {EventTarget | null} target what the pointer landed on
+ */
+function swipeTurn(tap, target) {
+  if (!paged() || markerOn || pressHadWork || roomShown !== null || stretching) return;
+  if (bubbleOpen()) return;
+  if (target instanceof Element && target.closest(TURN_STOPS) !== null) return;
+  const turn = swipeIntent(tap);
+  if (turn !== null) turnPage(turn);
+}
+
+/**
+ * Whether the pointer on the glass is stretching a range (D239): a hold's
+ * drag, a handle, the pen's stroke. Cleared when a pointer lands and set by
+ * the gesture's own `onStretch`, so the swipe read at the lift can tell a
+ * page being turned from a selection being drawn.
+ */
+let stretching = false;
+
+/**
+ * The pointers on the glass, by `pointerId`: when and where each landed,
+ * how wide its contact was, and what kind of pointer it is (D250).
+ *
+ * Read here rather than handed down from `reading.js`, which knows a tap
+ * only as the compatibility mouse event a touch leaves behind - one event,
+ * at the point the finger lifted, with no contact size, no pointer kind and
+ * no clock of its own. The page that turns pages is the one that has to
+ * know; every other page keeps the hook exactly as it was.
+ *
+ * @type {Map<number, { type: string, at: number, x: number, y: number, blob: number, target: EventTarget | null }>}
+ */
+const pointersDown = new Map();
+
+/**
+ * When each of the last pointers landed, the newest last - what answers
+ * "was this contact alone?" after the contact beside it has already lifted.
+ * Trimmed by time, so a finger resting through a chapter never grows it.
+ *
+ * @type {{ id: number, at: number }[]}
+ */
+let pointerDowns = [];
+
+/** The pointer that lifted last, and its signature. */
+/** @type {import("../lib/reader/pages.js").TapSignature | null} */
+let liftedTap = null;
+
+/** The blob sizes measured so far, until the test is trusted or dropped. */
+/** @type {number[]} */
+const blobSamples = [];
+/** Whether the device's contact sizes mean anything - decided once. */
+let blobReal = false;
+let blobSettled = false;
+
+/**
+ * How long a lifted pointer stands for the bare tap that follows it. The
+ * compatibility mouse events of a touch arrive in the same beat; anything
+ * older belongs to another gesture, or to a press this page never saw
+ * (a key that activated a control, a click a script made).
+ */
+const TAP_STALE_MS = 1000;
+
+/** How long a landing is remembered for the sake of the one beside it. */
+const DOWN_MEMORY_MS = 4000;
+
+/**
+ * The signature of the gesture the bare tap now being answered came from,
+ * or null when there is none fresh enough to answer for it.
+ *
+ * @returns {import("../lib/reader/pages.js").TapSignature | null}
+ */
+function lastTap() {
+  const tap = liftedTap;
+  if (tap === null || performance.now() - tap.upAt > TAP_STALE_MS) return null;
+  return tap;
+}
+
+document.addEventListener(
+  "pointerdown",
+  (event) => {
+    // Only real touches are measured (`blobTrusted`): a mouse reports a
+    // pixel by definition, and one desktop click would drop the test for
+    // the whole session on a device that has both.
+    if (!blobSettled && event.pointerType === "touch") {
+      blobSamples.push(Math.max(event.width, event.height));
+      if (blobSamples.length >= BLOB_SAMPLES) {
+        blobReal = blobTrusted(blobSamples);
+        blobSettled = true;
+      }
+    }
+    // A gesture begins as nobody's: the stretch says for itself when the
+    // hold takes and the range starts moving under the finger.
+    stretching = false;
+    const at = event.timeStamp;
+    pointersDown.set(event.pointerId, {
+      type: event.pointerType,
+      at,
+      x: event.clientX,
+      y: event.clientY,
+      blob: Math.max(event.width, event.height),
+      target: event.target,
+    });
+    pointerDowns = pointerDowns.filter((one) => at - one.at <= DOWN_MEMORY_MS);
+    pointerDowns.push({ id: event.pointerId, at });
+  },
+  { capture: true, passive: true },
+);
+
+document.addEventListener(
+  "pointerup",
+  (event) => {
+    const down = pointersDown.get(event.pointerId);
+    pointersDown.delete(event.pointerId);
+    if (down === undefined) return;
+    // The clock is the events' own (`timeStamp`), never the handler's: on a
+    // busy e-ink device a listener can run long after the finger lifted,
+    // and a contact time measured then would refuse good taps.
+    const size = blobReal ? down.blob : null;
+    liftedTap = {
+      pointerType: down.type,
+      downAt: down.at,
+      upAt: event.timeStamp,
+      dx: event.clientX - down.x,
+      dy: event.clientY - down.y,
+      width: size,
+      height: size,
+      x: down.x,
+      y: down.y,
+      viewportW: window.innerWidth,
+      viewportH: window.innerHeight,
+      otherPointers: pointerDowns.filter((one) => one.id !== event.pointerId).map((one) => one.at),
+    };
+    // The swipe is answered here, where the gesture actually ends; the tap
+    // waits for `reading.js` to say the press had nothing to put away.
+    if (effectiveTouchTurn(settings.reader, window.innerWidth) === "swipe") {
+      swipeTurn(liftedTap, down.target);
+    }
+  },
+  { capture: true, passive: true },
+);
+
+// A pointer the browser took away - a pan, a system gesture - ended no
+// gesture of ours, and must not stand for the next bare tap either.
+document.addEventListener(
+  "pointercancel",
+  (event) => {
+    pointersDown.delete(event.pointerId);
+    liftedTap = null;
+  },
+  { capture: true, passive: true },
+);
+
+// The window losing focus mid-gesture: the lift will land somewhere else.
+window.addEventListener("blur", () => {
+  pointersDown.clear();
+  liftedTap = null;
+});
 
 /**
  * Whether the press now ending had something to close when it began: a
@@ -2637,6 +2917,9 @@ function edgeZoneAt(y) {
  * @param {number} y
  */
 function onStretch(x, y) {
+  // Said before anything else, and in both layouts: this pointer belongs to
+  // a range being drawn, and its sideways travel is not a swipe (D250).
+  stretching = true;
   if (!paged()) return;
   const zone = edgeZoneAt(y);
   if (zone === null) {
@@ -2678,7 +2961,10 @@ function onEdgeDue() {
     scheduleEdgeTurn();
     return;
   }
-  turnPage(stay.zone);
+  // Under the finger, and never signalled (D251): a band going black in the
+  // middle of a selection says less than the place it costs, and the range
+  // growing onto the new page is the signal.
+  turnPage(stay.zone, "drag");
   stay.turnedAt = now;
   if (edgeZoneAt(stay.y) !== stay.zone) {
     disarmEdge();

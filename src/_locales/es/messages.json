@@ -1456,9 +1456,26 @@
   "options_reader_only_hint": {
     "message": "Limita el subrayado de las frases guardadas y la burbuja de traducción a la vista de lectura. Seleccionar texto en una página web normal solo mostrará la opción de abrirla en la vista de lectura. Con la opción activada, ninguna página web puede saber cuáles de sus palabras has guardado. En Android e iOS la opción está activada de forma predeterminada."
   },
-  "options_page_number": { "message": "Número de página en la vista Páginas" },
+  "options_page_number": { "message": "Número de página" },
   "options_page_number_hint": {
-    "message": "Muestra el contador de páginas en la parte inferior de la ventana cuando la vista de lectura está en Páginas. Desactivado, la última línea de cada página queda más abajo; los lectores de pantalla siguen leyendo el contador, y en una pantalla ancha aparece en la barra junto a re/read."
+    "message": "Muestra el contador de páginas en la parte inferior de la ventana. Desactivado, la última línea de cada página queda más abajo; los lectores de pantalla siguen leyendo el contador, y en una pantalla ancha aparece en la barra junto a re/read."
+  },
+  "options_paged_heading": { "message": "Vista Páginas" },
+  "options_paged_intro": {
+    "message": "Estos ajustes se aplican a la vista Páginas del lector, donde el texto avanza solo por páginas completas y cada una empieza y termina con una línea entera."
+  },
+  "options_touch_turn": { "message": "Pasar páginas con el dedo" },
+  "options_touch_turn_zones": { "message": "Tocar el tercio izquierdo o derecho" },
+  "options_touch_turn_swipe": { "message": "Deslizar hacia el lado" },
+  "options_touch_turn_off": { "message": "Desactivado" },
+  "options_touch_turn_hint": {
+    "message": "En una pantalla ancha, tocar el tercio izquierdo o derecho de la página es lo predeterminado; en una estrecha lo es deslizar hacia el lado, porque allí la mano que sujeta el dispositivo se apoya en la pantalla. Desactivado quedan las teclas de página, las flechas y la rueda del ratón, que pasan página con cualquier ajuste. Un toque solo pasa página si es breve, quieto y lejos de los bordes de la pantalla, para que un pulgar apoyado en el borde no pase ninguna; el lápiz nunca pasa página."
+  },
+  "options_turn_effect": { "message": "Efecto al pasar página" },
+  "options_turn_effect_auto": { "message": "Automático" },
+  "options_turn_effect_off": { "message": "Desactivado" },
+  "options_turn_effect_hint": {
+    "message": "Muestra que la página ha cambiado, algo fácil de pasar por alto cuando se lee el centro de una página. En el tema E-ink, la zona de texto se oscurece un momento, como en un lector de libros electrónicos; en otras pantallas, la nueva página se desliza. No ocurre nada si el sistema pide menos movimiento, ni cuando la página la pasa la lectura en voz alta o el arrastre de una selección hasta el borde de la página."
   },
   "options_keep_articles": { "message": "Guardar de forma predeterminada en la lista de lectura sin conexión" },
   "options_keep_articles_hint": {

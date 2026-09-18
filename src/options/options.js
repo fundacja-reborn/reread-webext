@@ -24,6 +24,9 @@ import {
   cleanFontFamily,
   effectiveLibraryCopy,
   effectiveReaderOnly,
+  effectiveTouchTurn,
+  isTouchTurn,
+  isTurnEffect,
   platformOs,
   readConfig,
   withDefaults,
@@ -330,6 +333,23 @@ function renderReaderOnly() {
 function renderPageNumber() {
   const toggle = document.getElementById("page-number");
   if (toggle instanceof HTMLInputElement) toggle.checked = config.reader.pageNumber;
+}
+
+/**
+ * The two rows about how a page turns (D250, D251). The touch row shows the
+ * gesture as it acts, not as it is stored: with nothing chosen the select
+ * stands on what the window's width decides - and this page is not the
+ * reader, so the width asked for is the one the reader would be read at,
+ * which is this window's. The first press stores a real choice, and from
+ * then on the width has no say, exactly as the reader-only switch works.
+ */
+function renderTurning() {
+  const touch = document.getElementById("touch-turn");
+  if (touch instanceof HTMLSelectElement) {
+    touch.value = effectiveTouchTurn(config.reader, window.innerWidth);
+  }
+  const effect = document.getElementById("turn-effect");
+  if (effect instanceof HTMLSelectElement) effect.value = config.reader.turnEffect;
 }
 
 /** The quiet-bubble switch (D81) - stored plainly, no platform in the picture. */
@@ -2838,6 +2858,7 @@ async function render() {
   linkSources(webext().runtime.getManifest().version);
   renderReaderOnly();
   renderPageNumber();
+  renderTurning();
   renderQuietBubble();
   renderBubbleMore();
   renderUnderlineForms();
@@ -2906,6 +2927,7 @@ async function refresh() {
   config = await readConfig();
   renderReaderOnly();
   renderPageNumber();
+  renderTurning();
   renderQuietBubble();
   renderBubbleMore();
   renderUnderlineForms();
@@ -2960,6 +2982,25 @@ document.getElementById("page-number")?.addEventListener("change", (event) => {
   // The same road (D238): a reader open by pages hears it through storage,
   // gives the foot its line or takes it back, and keeps the page it is on.
   void writeConfig({ reader: { pageNumber: toggle.checked } }).then((written) => {
+    config = written;
+  });
+});
+document.getElementById("touch-turn")?.addEventListener("change", (event) => {
+  const select = event.target;
+  if (!(select instanceof HTMLSelectElement) || !isTouchTurn(select.value)) return;
+  // The same road (D250): a reader open by pages hears it through storage,
+  // and the next touch is read the new way. What is stored is a name and
+  // never the null the width stands for - a press here is a choice made.
+  void writeConfig({ reader: { touchTurn: select.value } }).then((written) => {
+    config = written;
+  });
+});
+document.getElementById("turn-effect")?.addEventListener("change", (event) => {
+  const select = event.target;
+  if (!(select instanceof HTMLSelectElement) || !isTurnEffect(select.value)) return;
+  // The same road (D251): the next turn is dressed the way the select now
+  // says, in every open reader, with no reload.
+  void writeConfig({ reader: { turnEffect: select.value } }).then((written) => {
     config = written;
   });
 });

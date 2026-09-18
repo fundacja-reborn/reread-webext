@@ -164,6 +164,7 @@
          table of contents is how a phone reaches the far end of it. Not
          sticky on purpose: pinned elements smear on e-ink at every scroll. -->
     <nav class="jump" aria-label="Sections of this page" data-i18n-aria-label="options_sections_aria">
+      <a href="#paged-layout" data-i18n="options_paged_heading">Pages layout</a>
       <a class="translation-only" href="#translation-models" data-i18n="options_models_heading">Translation models</a>
       <a href="#dictionaries" data-i18n="options_dictionaries_heading">Dictionaries</a>
       <a href="#switched-off-sites" data-i18n="options_disabled_heading">Switched-off sites</a>
@@ -274,24 +275,6 @@
           Selecting text on an ordinary web page will only show an option to open the page in the
           reader. With it on, no web page can tell which of its words you have saved. On Android
           and iOS it is on by default.
-        </p>
-      </div>
-      <!-- The page count at the foot of a page read by pages (D238): a
-           setting rather than an Aa row, because it is set once and the Aa
-           panel on a small e-ink screen already fills it. Off by default -
-           a line under every page for the whole of a reading - and the
-           count is still in the bar on a wide screen, and read by a screen
-           reader always. Beside the reader-only switch: the two rows about
-           how the reading view stands on the screen. -->
-      <div class="row">
-        <label class="row-toggle">
-          <span class="row-name" data-i18n="options_page_number">Page number in the Pages layout</span>
-          <input type="checkbox" id="page-number" />
-        </label>
-        <p class="row-note" data-fold data-i18n="options_page_number_hint">
-          Shows a page count at the foot of the window when the reader's Layout is set to Pages.
-          Off, the last line of each page stands lower; the count is still read by screen readers,
-          and on a wide screen it stands in the bar next to re/read.
         </p>
       </div>
       <!-- The default keep (D124). Not `translation-only`: with translation
@@ -597,6 +580,76 @@
         <p class="row-note" id="storage-library-copy"></p>
       </div>
     </div>
+
+    <!-- The three settings of the Pages layout, gathered (D250): each of
+         them is a thing set once (D163), none of them belongs in the Aa
+         panel, which on a small e-ink screen already fills it - and read
+         one after another they say how a page stands and how it turns.
+         Always shown, whatever the layout in force: this is where somebody
+         looking for the Pages layout comes, and a section that appeared and
+         vanished with the reader's own setting could not be found at all. -->
+    <section>
+    <h2 id="paged-layout" data-i18n="options_paged_heading">Pages layout</h2>
+    <p class="explain" data-i18n="options_paged_intro">
+      These settings work in the reader's Pages layout, where the text moves only by whole pages,
+      each beginning and ending with a whole line.
+    </p>
+
+    <div class="rows">
+      <!-- The page count at the foot of a page read by pages (D238), on by
+           default since D249: somebody reading by pages is reading a book,
+           and a book says which page it is on. -->
+      <div class="row">
+        <label class="row-toggle">
+          <span class="row-name" data-i18n="options_page_number">Page number</span>
+          <input type="checkbox" id="page-number" />
+        </label>
+        <p class="row-note" data-fold data-i18n="options_page_number_hint">
+          Shows a page count at the foot of the window. Off, the last line of each page stands
+          lower; the count is still read by screen readers, and on a wide screen it stands in the
+          bar next to re/read.
+        </p>
+      </div>
+      <!-- What a finger does (D250). The thirds are what every e-reader
+           does and what this one has done since the Pages layout existed;
+           the swipe is for a hand wrapped around the device, whose thumb
+           rests on the glass; off is for a reader with hardware page keys,
+           where no gesture is worth an accidental turn. Chosen by name in a
+           select, like the language pair: three values, set once. -->
+      <div class="row row-stack">
+        <label class="row-name" for="touch-turn" data-i18n="options_touch_turn">Turning pages by touch</label>
+        <select id="touch-turn">
+          <option value="zones" data-i18n="options_touch_turn_zones">Tap the left or right third</option>
+          <option value="swipe" data-i18n="options_touch_turn_swipe">Swipe sideways</option>
+          <option value="off" data-i18n="options_touch_turn_off">Off</option>
+        </select>
+        <p class="row-note" data-fold data-i18n="options_touch_turn_hint">
+          On a wide screen, tapping the left or right third of the page is the default; on a narrow
+          one it is swiping sideways, because there the hand that holds the device rests on the
+          screen. Off leaves the page keys, the arrow keys and the mouse wheel, which turn pages
+          whatever this is set to. A tap turns a page only when it is short, still and away from
+          the edges of the screen, so that a thumb resting at the edge turns nothing; the pen never
+          turns a page.
+        </p>
+      </div>
+      <!-- The turn made visible (D251). Two values, not three: a signal
+           given every fifth page would not be a confirmation of anything. -->
+      <div class="row row-stack">
+        <label class="row-name" for="turn-effect" data-i18n="options_turn_effect">Page turn effect</label>
+        <select id="turn-effect">
+          <option value="auto" data-i18n="options_turn_effect_auto">Automatic</option>
+          <option value="off" data-i18n="options_turn_effect_off">Off</option>
+        </select>
+        <p class="row-note" data-fold data-i18n="options_turn_effect_hint">
+          Shows that the page has turned, which is easy to miss when you are reading the middle of
+          a page. In the E-ink theme the text area goes dark for a moment, the way an e-reader
+          marks a page turn; on other screens the new page slides in. Nothing happens if your
+          system asks for less motion, and nothing when the page is turned by reading aloud or by
+          dragging a selection to the edge of the page.
+        </p>
+      </div>
+    </div>
+    </section>
 
     <!-- The wrapper is the translation-off switch's handle on this whole
          section (D120); the jump anchor stays on the heading. Managing the

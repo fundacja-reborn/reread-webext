@@ -8,10 +8,14 @@ import {
   READER_DEFAULTS,
   READING_PACE,
   SIZE,
+  TOUCH_TURN_WIDE,
   TTS_RATE,
   chosenPair,
   effectiveLibraryCopy,
   effectiveReaderOnly,
+  effectiveTouchTurn,
+  isTouchTurn,
+  isTurnEffect,
   osFrom,
   pageMode,
   platformOs,
@@ -803,6 +807,44 @@ describe("the reader's appearance", () => {
     assert.equal(withDefaults({ reader: { pageNumber: "no" } }).reader.pageNumber, true);
     assert.equal(withDefaults({ reader: { pageNumber: 0 } }).reader.pageNumber, true);
     assert.equal(withDefaults({ reader: {} }).reader.pageNumber, true);
+  });
+
+  it("keeps a touch gesture it knows and leaves the width deciding for the rest (D250)", () => {
+    assert.equal(READER_DEFAULTS.touchTurn, null);
+    for (const touchTurn of ["zones", "swipe", "off"]) {
+      assert.equal(withDefaults({ reader: { touchTurn } }).reader.touchTurn, touchTurn);
+      assert.ok(isTouchTurn(touchTurn));
+    }
+    // Not a name is nobody having chosen, which is a state of its own: it is
+    // what lets the window's width keep deciding.
+    assert.equal(withDefaults({ reader: { touchTurn: "tilt" } }).reader.touchTurn, null);
+    assert.equal(withDefaults({ reader: { touchTurn: true } }).reader.touchTurn, null);
+    assert.equal(withDefaults({ reader: {} }).reader.touchTurn, null);
+    assert.equal(isTouchTurn(null), false);
+  });
+
+  it("swipes on a narrow window and taps thirds on a wide one until a hand says otherwise (D250)", () => {
+    assert.equal(effectiveTouchTurn({ touchTurn: null }, TOUCH_TURN_WIDE - 1), "swipe");
+    assert.equal(effectiveTouchTurn({ touchTurn: null }, TOUCH_TURN_WIDE), "zones");
+    // A phone, an e-ink reader held one-handed, a desktop window.
+    assert.equal(effectiveTouchTurn({ touchTurn: null }, 360), "swipe");
+    assert.equal(effectiveTouchTurn({ touchTurn: null }, 1200), "zones");
+    // A stored choice wins at every width, off included.
+    for (const width of [360, 1200]) {
+      assert.equal(effectiveTouchTurn({ touchTurn: "zones" }, width), "zones");
+      assert.equal(effectiveTouchTurn({ touchTurn: "swipe" }, width), "swipe");
+      assert.equal(effectiveTouchTurn({ touchTurn: "off" }, width), "off");
+    }
+  });
+
+  it("signals a turn unless a stored name says otherwise (D251)", () => {
+    assert.equal(READER_DEFAULTS.turnEffect, "auto");
+    assert.equal(withDefaults({ reader: { turnEffect: "off" } }).reader.turnEffect, "off");
+    assert.equal(withDefaults({ reader: { turnEffect: "curl" } }).reader.turnEffect, "auto");
+    assert.equal(withDefaults({ reader: { turnEffect: false } }).reader.turnEffect, "auto");
+    assert.equal(withDefaults({ reader: {} }).reader.turnEffect, "auto");
+    assert.ok(isTurnEffect("auto") && isTurnEffect("off"));
+    assert.equal(isTurnEffect("flash"), false);
   });
 
   it("clamps a size or a width out of range instead of forgetting it", () => {

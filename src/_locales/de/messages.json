@@ -1405,9 +1405,26 @@
   "options_reader_only_hint": {
     "message": "Beschränkt die Unterstreichung gespeicherter Phrasen und die Übersetzungs-Sprechblase auf die Leseansicht. Das Markieren von Text auf einer gewöhnlichen Webseite zeigt nur die Option, die Seite in der Leseansicht zu öffnen. Ist die Option eingeschaltet, kann keine Webseite feststellen, welche ihrer Wörter Sie gespeichert haben. Auf Android und iOS ist die Option standardmäßig eingeschaltet."
   },
-  "options_page_number": { "message": "Seitenzahl in der Ansicht Seiten" },
+  "options_page_number": { "message": "Seitenzahl" },
   "options_page_number_hint": {
-    "message": "Zeigt die Seitenzahl am unteren Fensterrand, wenn die Ansicht der Leseansicht auf Seiten steht. Ausgeschaltet steht die letzte Zeile jeder Seite tiefer; Screenreader lesen die Seitenzahl weiterhin vor, und auf einem breiten Bildschirm steht sie in der Leiste neben re/read."
+    "message": "Zeigt die Seitenzahl am unteren Fensterrand. Ausgeschaltet steht die letzte Zeile jeder Seite tiefer; Screenreader lesen die Seitenzahl weiterhin vor, und auf einem breiten Bildschirm steht sie in der Leiste neben re/read."
+  },
+  "options_paged_heading": { "message": "Ansicht Seiten" },
+  "options_paged_intro": {
+    "message": "Diese Einstellungen gelten in der Ansicht Seiten der Leseansicht, in der sich der Text nur um ganze Seiten bewegt und jede Seite mit einer ganzen Zeile beginnt und endet."
+  },
+  "options_touch_turn": { "message": "Seiten per Berührung umblättern" },
+  "options_touch_turn_zones": { "message": "Tippen auf das linke oder rechte Drittel" },
+  "options_touch_turn_swipe": { "message": "Zur Seite wischen" },
+  "options_touch_turn_off": { "message": "Aus" },
+  "options_touch_turn_hint": {
+    "message": "Auf einem breiten Bildschirm ist das Tippen auf das linke oder rechte Drittel der Seite voreingestellt, auf einem schmalen das Wischen zur Seite, weil dort die Hand, die das Gerät hält, auf dem Bildschirm liegt. Ausgeschaltet bleiben die Bild-Tasten, die Pfeiltasten und das Mausrad, die unabhängig von dieser Einstellung umblättern. Ein Tippen blättert nur um, wenn es kurz und ruhig ist und weit genug von den Rändern des Bildschirms entfernt liegt, damit ein am Rand liegender Daumen nichts umblättert; der Stift blättert nie um."
+  },
+  "options_turn_effect": { "message": "Effekt beim Umblättern" },
+  "options_turn_effect_auto": { "message": "Automatisch" },
+  "options_turn_effect_off": { "message": "Aus" },
+  "options_turn_effect_hint": {
+    "message": "Zeigt, dass die Seite umgeblättert wurde - beim Lesen in der Mitte einer Seite ist das leicht zu übersehen. Im Farbschema E-Ink wird der Textbereich einen Moment lang dunkel, so wie ein E-Book-Reader das Umblättern zeigt; auf anderen Bildschirmen gleitet die neue Seite herein. Nichts geschieht, wenn das System weniger Bewegung verlangt, und nichts, wenn das Vorlesen oder das Ziehen einer Auswahl an den Seitenrand umblättert."
   },
   "options_keep_articles": { "message": "Standardmäßig in der Offline-Leseliste speichern" },
   "options_keep_articles_hint": {

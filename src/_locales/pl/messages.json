@@ -2057,9 +2057,26 @@
   "options_reader_only_hint": {
     "message": "Ogranicza podkreślenia zapisanych fraz i dymek tłumaczenia do widoku czytania. Zaznaczenie tekstu na zwykłej stronie pokaże jedynie przycisk do otwarcia jej w widoku czytania. Przy włączonej opcji żadna strona nie może stwierdzić, które z jej słów masz zapisane. Na Androidzie i iOS opcja jest domyślnie włączona."
   },
-  "options_page_number": { "message": "Numer strony w układzie Strony" },
+  "options_page_number": { "message": "Numer strony" },
   "options_page_number_hint": {
-    "message": "Pokazuje licznik stron u dołu okna, gdy Układ w widoku czytania jest ustawiony na Strony. Bez niego ostatnia linia każdej strony stoi niżej; czytniki ekranu nadal odczytują licznik, a na szerokim ekranie widać go w pasku obok re/read."
+    "message": "Pokazuje licznik stron u dołu okna. Bez niego ostatnia linia każdej strony stoi niżej; czytniki ekranu nadal odczytują licznik, a na szerokim ekranie widać go w pasku obok re/read."
+  },
+  "options_paged_heading": { "message": "Układ Strony" },
+  "options_paged_intro": {
+    "message": "Te ustawienia działają w układzie Strony w widoku czytania, w którym tekst przesuwa się tylko o całe strony, a każda zaczyna się i kończy całym wierszem."
+  },
+  "options_touch_turn": { "message": "Przewracanie stron dotykiem" },
+  "options_touch_turn_zones": { "message": "Tapnięcie w lewą lub prawą jedną trzecią" },
+  "options_touch_turn_swipe": { "message": "Machnięcie w bok" },
+  "options_touch_turn_off": { "message": "Wyłączone" },
+  "options_touch_turn_hint": {
+    "message": "Na szerokim ekranie domyślne jest tapnięcie w lewą lub prawą jedną trzecią strony, na wąskim - machnięcie w bok, bo tam ręka trzymająca urządzenie leży na ekranie. Po wyłączeniu zostają klawisze zmiany strony, strzałki i kółko myszy, które przewracają strony niezależnie od tego ustawienia. Tapnięcie przewraca stronę tylko wtedy, gdy jest krótkie, nieruchome i z dala od krawędzi ekranu, żeby kciuk leżący przy krawędzi niczego nie przewracał; pióro nie przewraca stron nigdy."
+  },
+  "options_turn_effect": { "message": "Efekt przewrócenia strony" },
+  "options_turn_effect_auto": { "message": "Automatyczny" },
+  "options_turn_effect_off": { "message": "Wyłączony" },
+  "options_turn_effect_hint": {
+    "message": "Pokazuje, że strona się przewróciła - czytając środek strony, łatwo to przeoczyć. W motywie E-ink obszar tekstu na moment ciemnieje, tak jak przy przewracaniu strony w czytniku e-booków; na innych ekranach nowa strona wjeżdża płynnie. Nic się nie dzieje, gdy system prosi o ograniczenie ruchu, ani gdy stronę przewraca czytanie na głos albo przeciągnięcie zaznaczenia do krawędzi strony."
   },
   "options_keep_articles": { "message": "Zapisuj domyślnie w czytelni offline" },
   "options_keep_articles_hint": {

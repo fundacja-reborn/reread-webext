@@ -92,6 +92,23 @@ export const CONFIG_KEY = "config";
  *   by a screen reader always. A setting rather than an Aa row (D163): a
  *   thing set once, not a dial turned while reading, and the Aa panel on a
  *   small e-ink panel already fills the screen.
+ * @property {"zones" | "swipe" | "off" | null} touchTurn What a finger does
+ *   to a page read by pages (D250): the outer thirds turn it, a sideways
+ *   swipe turns it, or nothing does. `null` is nobody having chosen, and
+ *   then the window's width decides (`effectiveTouchTurn`) - the way
+ *   `readerOnly` lets the platform decide until a hand sets it. Off matters
+ *   on an e-ink reader with hardware page keys, where the gesture is worth
+ *   less than the certainty that no accidental touch turns anything. Keys,
+ *   the wheel and the arrows never answer to this: it says what the glass
+ *   does, nothing else. Stored where the whole config is (`storage.local`,
+ *   never `sync`), so a choice made on a reader does not follow onto a
+ *   phone whose hand holds it differently.
+ * @property {"auto" | "off"} turnEffect Whether a page turned by hand is
+ *   signalled (D251). `auto` is a flash of the band on e-ink paper and a
+ *   smooth scroll everywhere else, and nothing at all when the system asks
+ *   for less motion; `off` is the reader as it was, where a turn is a page
+ *   that is simply already there - and somebody reading the middle of a page
+ *   could not tell whether it had turned.
  * @property {"active" | "plain"} links Whether links in the article text answer
  *   a press (D95). The words stay either way - they are part of the sentence -
  *   but the reader's main gesture is selecting a phrase to translate, and a
@@ -285,6 +302,10 @@ const HYPHENS = ["none", "auto"];
 const PARAGRAPHS = ["spaced", "indented", "both"];
 /** @type {readonly string[]} */
 const LAYOUTS = ["scroll", "paged"];
+/** @type {readonly string[]} */
+const TOUCH_TURNS = ["zones", "swipe", "off"];
+/** @type {readonly string[]} */
+const TURN_EFFECTS = ["auto", "off"];
 
 /**
  * Type guards rather than casts, and exported because the reader needs the
@@ -359,6 +380,51 @@ export function isLayout(value) {
 }
 
 /**
+ * The gesture the glass turns pages with (D250). Null - nobody having
+ * chosen - is not a name and never comes back from here; the reader asks
+ * `effectiveTouchTurn` for what to do about that.
+ *
+ * @param {unknown} value
+ * @returns {value is "zones" | "swipe" | "off"}
+ */
+export function isTouchTurn(value) {
+  return typeof value === "string" && TOUCH_TURNS.includes(value);
+}
+
+/**
+ * @param {unknown} value
+ * @returns {value is ReaderConfig["turnEffect"]}
+ */
+export function isTurnEffect(value) {
+  return typeof value === "string" && TURN_EFFECTS.includes(value);
+}
+
+/**
+ * The width from which the thirds are the better gesture. Under it a hand
+ * wraps around the device and the thumb holding it rests on the glass - a
+ * phone, and an e-ink reader held one-handed - and a gesture that has to
+ * move is the one an idle hand cannot make. Over it - a tablet on a table,
+ * a desktop window - nothing rests on the screen and the zones are both
+ * quicker and more precise.
+ */
+export const TOUCH_TURN_WIDE = 600;
+
+/**
+ * What a finger does on a page read by pages: the hand's choice, and with
+ * none the window's width (D250). Read at the gesture rather than frozen at
+ * the first paint, so a window resized or a device turned answers for what
+ * it is now - and so that the rule stays one line nobody has to keep in
+ * sync with a stored copy.
+ *
+ * @param {Pick<ReaderConfig, "touchTurn">} reader
+ * @param {number} width the window's width in CSS pixels
+ * @returns {"zones" | "swipe" | "off"}
+ */
+export function effectiveTouchTurn(reader, width) {
+  return reader.touchTurn ?? (width < TOUCH_TURN_WIDE ? "swipe" : "zones");
+}
+
+/**
  * What the buttons in the reader can reach.
  *
  * The width is in `ch`, the width of a zero in whatever font is set - which is
@@ -410,6 +476,8 @@ export const READER_DEFAULTS = Object.freeze({
   paragraphs: "spaced",
   layout: "scroll",
   pageNumber: true,
+  touchTurn: null,
+  turnEffect: "auto",
   links: "plain",
   markerColor: DEFAULT_MARK_COLOR,
 });
@@ -539,6 +607,11 @@ function readerWithDefaults(stored) {
     // written this field - which is what a default is - and leaves the ones
     // that did alone.
     pageNumber: typeof raw["pageNumber"] === "boolean" ? raw["pageNumber"] : READER_DEFAULTS.pageNumber,
+    // Not a name means nobody has chosen, which is a state of its own and
+    // not a value: it is what lets the window's width keep deciding
+    // (`effectiveTouchTurn`), the way `readerOnly` leaves it to the platform.
+    touchTurn: isTouchTurn(raw["touchTurn"]) ? raw["touchTurn"] : null,
+    turnEffect: isTurnEffect(raw["turnEffect"]) ? raw["turnEffect"] : READER_DEFAULTS.turnEffect,
     links: isLinks(raw["links"]) ? raw["links"] : READER_DEFAULTS.links,
     markerColor: isMarkColor(raw["markerColor"]) ? raw["markerColor"] : READER_DEFAULTS.markerColor,
   };

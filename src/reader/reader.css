@@ -3000,6 +3000,20 @@ body.reader:has(#mark-bar:not([hidden])) {
   pointer-events: none;
 }
 
+/* The band in ink while a page turns on e-ink paper (D251): the reading
+   band alone - top and height set by script - so the bar, the foot's strip
+   and the page count are not refreshed with it. On the edge line's layer
+   (1): over the curtains (0) and the text, under the bars and the chrome
+   (2). No transition, ever: the ink is one frame up and one frame down,
+   which is the whole point - a fade would be the smear D59 keeps out. */
+.page-flash {
+  position: fixed;
+  inset-inline: 0;
+  z-index: 1;
+  background: var(--page-fg);
+  pointer-events: none;
+}
+
 /* A room of this extension over the reading (D243): the settings or the
    saved phrases in a frame that fills the window. Over everything this page
    draws - the scrim stands at 1, the bars and the panels at 2, the note
