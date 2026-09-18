@@ -1334,11 +1334,6 @@
     "description": "Heading of the settings section holding the language pair, the translation models and the dictionaries."
   },
 
-  "options_section_where": {
-    "message": "Wo es wirkt",
-    "description": "Heading of the settings section about which pages the extension touches."
-  },
-
   "options_section_bubble": {
     "message": "Sprechblase und Wortschatz",
     "description": "Heading of the settings section about the translation bubble and the phrases saved from it."
@@ -1610,9 +1605,9 @@
     "message": "Sie lesen $FROM$ - die maschinelle Übersetzung ist aus, gespeicherte Phrasen gehören zu diesem Paar.",
     "placeholders": { "from": { "content": "$1", "example": "Englisch" } }
   },
-  "options_reader_only": { "message": "Nur in der Leseansicht" },
+  "options_reader_only": { "message": "Nur in der Leseansicht unterstreichen" },
   "options_reader_only_hint": {
-    "message": "Unterstreichungen und Sprechblase nur in der Leseansicht; auf einer gewöhnlichen Seite zeigt eine Auswahl nur die Schaltfläche dorthin."
+    "message": "Unterstreichungen der Phrasen und die Übersetzungs-Sprechblase nur in der Leseansicht; auf einer gewöhnlichen Seite zeigt eine Auswahl stattdessen eine Sprechblase mit Schaltflächen: die Seite in der Leseansicht öffnen und zur Leseliste gehen."
   },
 
   "options_reader_only_more": {

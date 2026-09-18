@@ -1693,11 +1693,6 @@
     "description": "Heading of the settings section holding the language pair, the translation models and the dictionaries."
   },
 
-  "options_section_where": {
-    "message": "Where it works",
-    "description": "Heading of the settings section about which pages the extension touches."
-  },
-
   "options_section_bubble": {
     "message": "Bubble and phrases",
     "description": "Heading of the settings section about the translation bubble and the phrases saved from it."
@@ -1997,9 +1992,9 @@
     "placeholders": { "from": { "content": "$1", "example": "English" } },
     "description": "Status line after choosing a pair while translation is switched off."
   },
-  "options_reader_only": { "message": "Only in the reader" },
+  "options_reader_only": { "message": "Underline only in the reader" },
   "options_reader_only_hint": {
-    "message": "Underlines and the bubble only in the reader; on an ordinary page a selection shows a button that opens it there."
+    "message": "Phrase underlines and the translation bubble only in the reader; on an ordinary page a selection shows a bubble with buttons instead: open the page in the reader, and go to the reading list."
   },
 
   "options_reader_only_more": {

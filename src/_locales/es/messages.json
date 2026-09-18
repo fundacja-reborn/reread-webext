@@ -1385,11 +1385,6 @@
     "description": "Heading of the settings section holding the language pair, the translation models and the dictionaries."
   },
 
-  "options_section_where": {
-    "message": "Dónde funciona",
-    "description": "Heading of the settings section about which pages the extension touches."
-  },
-
   "options_section_bubble": {
     "message": "Burbuja y frases",
     "description": "Heading of the settings section about the translation bubble and the phrases saved from it."
@@ -1661,9 +1656,9 @@
     "message": "Lees en $FROM$ - la traducción automática está desactivada y las frases guardadas pertenecen a este par.",
     "placeholders": { "from": { "content": "$1", "example": "inglés" } }
   },
-  "options_reader_only": { "message": "Solo en la vista de lectura" },
+  "options_reader_only": { "message": "Subrayar solo en la vista de lectura" },
   "options_reader_only_hint": {
-    "message": "Los subrayados y la burbuja solo en la vista de lectura; en una página normal, una selección muestra el botón para abrirla allí."
+    "message": "Los subrayados de las frases y la burbuja de traducción solo en la vista de lectura; en una página normal, una selección muestra en su lugar una burbuja con botones: abrir la página en la vista de lectura e ir a la lista de lectura."
   },
 
   "options_reader_only_more": {

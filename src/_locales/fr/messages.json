@@ -1385,11 +1385,6 @@
     "description": "Heading of the settings section holding the language pair, the translation models and the dictionaries."
   },
 
-  "options_section_where": {
-    "message": "Où il agit",
-    "description": "Heading of the settings section about which pages the extension touches."
-  },
-
   "options_section_bubble": {
     "message": "Bulle et phrases",
     "description": "Heading of the settings section about the translation bubble and the phrases saved from it."
@@ -1695,9 +1690,9 @@
     "message": "Vous lisez $FROM$ - la traduction automatique est désactivée, les phrases enregistrées appartiennent à cette paire.",
     "placeholders": { "from": { "content": "$1", "example": "anglais" } }
   },
-  "options_reader_only": { "message": "Seulement dans le lecteur" },
+  "options_reader_only": { "message": "Souligner uniquement dans le lecteur" },
   "options_reader_only_hint": {
-    "message": "Les soulignements et la bulle uniquement dans le lecteur ; sur une page ordinaire, une sélection n'affiche que le bouton qui l'y ouvre."
+    "message": "Les soulignements des phrases et la bulle de traduction uniquement dans le lecteur ; sur une page ordinaire, une sélection affiche à la place une bulle avec des boutons : ouvrir la page dans le lecteur et aller à la liste de lecture."
   },
 
   "options_reader_only_more": {

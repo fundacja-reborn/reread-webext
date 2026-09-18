@@ -179,7 +179,7 @@
     <nav id="sections" class="sections" aria-label="Sections of this page" data-i18n-aria-label="options_sections_aria">
       <a id="jump-first-steps" class="translation-only" href="#first-steps" data-i18n="options_first_steps_heading" hidden>First steps</a>
       <a href="#languages" data-i18n="options_section_languages">Languages</a>
-      <a href="#where-it-works" data-i18n="options_section_where">Where it works</a>
+      <a href="#switched-off-sites" data-i18n="options_disabled_heading">Switched-off sites</a>
       <a href="#bubble-and-phrases" data-i18n="options_section_bubble">Bubble and phrases</a>
       <a href="#reading-view" data-i18n="options_section_reading">Reading view</a>
       <a href="#reading-aloud" data-i18n="options_section_aloud">Reading aloud</a>
@@ -720,38 +720,16 @@
     </section>
     </section>
 
-    <!-- Where it works: the two answers to "which pages does re/read touch"
-         - the reader-only switch and the list of sites it is off on. -->
-    <section aria-labelledby="where-it-works">
-    <h2 id="where-it-works" data-i18n="options_section_where">Where it works</h2>
-
-    <div class="rows">
-      <!-- The whole first line is the label, so a press anywhere on it flips
-           the switch; the note keeps its own, unclickable line below - a
-           paragraph is too easy to brush against on a phone. -->
-      <!-- Not `translation-only` any more (D162): with the model switched off
-           the bubble still works wherever a pair is chosen - the dictionaries
-           answer - so the question this row asks stands in both modes, and
-           hiding it was what overrode it. -->
-      <div class="row" id="s-readerOnly" data-setting="readerOnly" data-section="where-it-works">
-        <label class="row-toggle">
-          <span class="row-name" data-i18n="options_reader_only">Only in the reader</span>
-          <input type="checkbox" id="reader-only" />
-        </label>
-        <p class="row-note">
-          <span data-i18n="options_reader_only_hint"
-            >Underlines and the bubble only in the reader; on an ordinary page a selection shows a button that opens it there.</span
-          >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-readerOnly" data-i18n="options_details">Details</button>
-        </p>
-        <p class="row-note row-more" id="more-readerOnly" data-i18n="options_reader_only_more" hidden>
-          With it on, no web page can tell which of its words you have saved. On Android and iOS it
-          is on by default.
-        </p>
-      </div>
-    </div>
-
+    <!-- Where re/read is switched off altogether (D257): on a site in this
+         list nothing happens at all - no translation, no bubble, no
+         underlines - which is the one thing on this page that really is a
+         question of where the extension works. It stood under a heading
+         "Where it works" with the reader-only switch until Michał's smoke
+         (2026-09-18): that heading over that switch said the extension only
+         worked in the reader, when the reader-only switch limits the
+         underlines and the bubble and nothing else. -->
     <section aria-labelledby="switched-off-sites" data-keywords="options_keywords_sites">
-    <h3 id="switched-off-sites" data-i18n="options_disabled_heading">Switched-off sites</h3>
+    <h2 id="switched-off-sites" data-i18n="options_disabled_heading">Switched-off sites</h2>
 
     <!-- The two settings this paragraph names are links to their own rows
          (D254, P9): a sentence that names a setting and leaves the reader to
@@ -805,7 +783,6 @@
       pasted; only the site part is kept.
     </p>
     </section>
-    </section>
 
     <!-- The bubble and what it saves: what opens over a selection, and what
          is kept when the selection is saved. Two subsections, because the
@@ -813,6 +790,37 @@
          one while revising. -->
     <section aria-labelledby="bubble-and-phrases">
     <h2 id="bubble-and-phrases" data-i18n="options_section_bubble">Bubble and phrases</h2>
+
+    <!-- The switch that governs both halves of this section stands over both
+         of them (D257), the way the language pair stands over the models and
+         the dictionaries: it decides where the underlines and the bubble
+         appear at all, and the two subsections below only decide what they
+         then show. -->
+    <div class="rows">
+      <!-- Not `translation-only` any more (D162): with the model switched off
+           the bubble still works wherever a pair is chosen - the dictionaries
+           answer - so the question this row asks stands in both modes, and
+           hiding it was what overrode it. -->
+      <div class="row" id="s-readerOnly" data-setting="readerOnly" data-section="bubble-and-phrases">
+        <label class="row-toggle">
+          <span class="row-name" data-i18n="options_reader_only">Underline only in the reader</span>
+          <input type="checkbox" id="reader-only" />
+        </label>
+        <p class="row-note">
+          <span data-i18n="options_reader_only_hint"
+            >
+            Phrase underlines and the translation bubble only in the reader; on an ordinary page a
+            selection shows a bubble with buttons instead: open the page in the reader, and go to
+            the reading list.
+          </span
+          >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-readerOnly" data-i18n="options_details">Details</button>
+        </p>
+        <p class="row-note row-more" id="more-readerOnly" data-i18n="options_reader_only_more" hidden>
+          With it on, no web page can tell which of its words you have saved. On Android and iOS it
+          is on by default.
+        </p>
+      </div>
+    </div>
 
     <section aria-labelledby="bubble">
     <h3 id="bubble" data-i18n="options_sub_bubble">Bubble</h3>

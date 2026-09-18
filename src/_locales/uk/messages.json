@@ -1954,11 +1954,6 @@
     "description": "Heading of the settings section holding the language pair, the translation models and the dictionaries."
   },
 
-  "options_section_where": {
-    "message": "Де діє",
-    "description": "Heading of the settings section about which pages the extension touches."
-  },
-
   "options_section_bubble": {
     "message": "Бульбашка і фрази",
     "description": "Heading of the settings section about the translation bubble and the phrases saved from it."
@@ -2306,9 +2301,9 @@
     "message": "Ви читаєте: $FROM$ - машинний переклад вимкнено, збережені фрази належать до цієї пари.",
     "placeholders": { "from": { "content": "$1", "example": "англійська" } }
   },
-  "options_reader_only": { "message": "Лише в режимі читання" },
+  "options_reader_only": { "message": "Підкреслювати лише в режимі читання" },
   "options_reader_only_hint": {
-    "message": "Підкреслення і бульбашка лише в режимі читання; на звичайній сторінці виділення показує кнопку для переходу туди."
+    "message": "Підкреслення фраз і бульбашка перекладу лише в режимі читання; на звичайній сторінці виділення показує натомість бульбашку з кнопками: відкрити сторінку в режимі читання і перейти до списку читання."
   },
 
   "options_reader_only_more": {

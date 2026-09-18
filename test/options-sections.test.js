@@ -25,7 +25,11 @@ async function source(path) {
 /** The sections, in the order the page stands them in. */
 const SECTIONS = [
   { id: "languages", key: "options_section_languages", subs: ["translation-models", "dictionaries"] },
-  { id: "where-it-works", key: "options_section_where", subs: ["switched-off-sites"] },
+  // Switched-off sites is the one section that really is about where re/read
+  // works: on a site in the list nothing happens at all. The reader-only
+  // switch used to stand over it under a heading that said so of both, which
+  // was untrue of the switch (D257).
+  { id: "switched-off-sites", key: "options_disabled_heading", subs: [] },
   { id: "bubble-and-phrases", key: "options_section_bubble", subs: ["bubble", "saved-phrases"] },
   { id: "reading-view", key: "options_section_reading", subs: ["paged-layout"] },
   { id: "reading-aloud", key: "options_section_aloud", subs: [] },
@@ -43,7 +47,7 @@ const ROWS = [
   { setting: "pair", section: "languages", control: "pair" },
   { setting: "translationOff", section: "translation-models", control: "no-translation" },
   { setting: "bubbleOff", section: "translation-models", control: "bubble-off" },
-  { setting: "readerOnly", section: "where-it-works", control: "reader-only" },
+  { setting: "readerOnly", section: "bubble-and-phrases", control: "reader-only" },
   { setting: "showBubbleMore", section: "bubble", control: "bubble-more" },
   { setting: "hideBubbleActions", section: "bubble", control: "quiet-bubble" },
   { setting: "bubbleScale", section: "bubble", control: "bubble-scale-up" },
@@ -150,6 +154,22 @@ describe("the settings page's sections", () => {
       if (row.setting === "pair" || row.setting === "storage") continue;
       assert.ok(stored.has(row.setting), `no setting is stored under "${row.setting}"`);
     }
+  });
+
+  it("stands the reader-only switch over both halves of the section it governs (D257)", async () => {
+    const markup = await source("options/options.html");
+    // It decides where the underlines and the bubble appear at all; the two
+    // subsections below only decide what they then show. The language pair
+    // stands over its own two subsections the same way.
+    const section = markup.indexOf('<h2 id="bubble-and-phrases"');
+    const row = markup.indexOf('id="s-readerOnly"');
+    const first = markup.indexOf('<h3 id="bubble"');
+    assert.ok(section > 0 && row > section && row < first, "the switch does not stand over both subsections");
+    // And nothing claims the extension only works in the reader: the section
+    // that said so is gone, and the sites list - where nothing happens at all
+    // - carries its own name.
+    assert.doesNotMatch(markup, /where-it-works|options_section_where/, "the heading that over-claimed is still here");
+    assert.match(markup, /<h2 id="switched-off-sites"/, "the sites list is not a section of its own");
   });
 
   it("keeps the sub-option beside the switch that brings it (Michał's call, 2026-09-18)", async () => {

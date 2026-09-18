@@ -1954,11 +1954,6 @@
     "description": "Heading of the settings section holding the language pair, the translation models and the dictionaries."
   },
 
-  "options_section_where": {
-    "message": "Gdzie działa",
-    "description": "Heading of the settings section about which pages the extension touches."
-  },
-
   "options_section_bubble": {
     "message": "Dymek i frazy",
     "description": "Heading of the settings section about the translation bubble and the phrases saved from it."
@@ -2306,9 +2301,9 @@
     "message": "Czytasz w języku: $FROM$ - tłumaczenie maszynowe jest wyłączone, a zapisane frazy trafiają do tej pary.",
     "placeholders": { "from": { "content": "$1", "example": "angielski" } }
   },
-  "options_reader_only": { "message": "Tylko w widoku czytania" },
+  "options_reader_only": { "message": "Podkreślaj tylko w widoku czytania" },
   "options_reader_only_hint": {
-    "message": "Podkreślenia i dymek tylko w widoku czytania; na zwykłej stronie zaznaczenie pokaże przycisk do niego."
+    "message": "Podkreślenia fraz i dymek tłumaczeń tylko w widoku czytania; na zwykłej stronie zaznaczenie pokaże zamiast tego dymek z przyciskami: otwarcia strony w widoku czytania i przejścia do czytelni."
   },
 
   "options_reader_only_more": {
