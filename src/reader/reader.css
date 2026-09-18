@@ -593,6 +593,45 @@ html {
   overscroll-behavior: contain;
 }
 
+/* The foot of a panel that scrolls within itself (D246): at Firefox for
+   Android's 125% the Aa panel's thirteen rows outgrow the window, and
+   nothing said so - the browser's scrollbar there is an overlay that fades,
+   and a fade is nothing on an e-ink panel (Michał, 2026-09-18: "should the
+   scrollbar not stay visible? or some other way?"). A strip of the panel's
+   own paper stuck to its foot, with a chevron in it while there is anything
+   below: the paper cuts the rows off cleanly instead of letting half a row
+   read as the end of the list, and the chevron says where the rest is.
+
+   Always in flow, never shown and hidden: a strip that came and went would
+   move the rows under it by its own height at the moment somebody reads
+   them. Only the chevron's visibility follows the scroll, and the line over
+   the strip is a shadow, so neither costs a reflow. Nothing to press: the
+   panel scrolls under a finger, and a control here would be a second way to
+   do what the finger already does. */
+.panel-more {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 1.3rem;
+  background: var(--page-bg);
+  color: var(--page-muted);
+  pointer-events: none;
+}
+
+.panel-more-glyph {
+  visibility: hidden;
+}
+
+:is(.reader-panel, .nav-menu)[data-more="true"] .panel-more {
+  box-shadow: 0 -1px 0 var(--page-line);
+}
+
+:is(.reader-panel, .nav-menu)[data-more="true"] .panel-more-glyph {
+  visibility: visible;
+}
+
 /* No shadow on e-ink paper (D234): a panel dithers a gradient into noise -
    the bubble drops its shadow there for the same reason. A line in its
    place, the way the e-ink theme says every edge: the scrim under a sheet

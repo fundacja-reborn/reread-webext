@@ -492,6 +492,27 @@
             <button type="button" data-rate="10" title="Faster" data-i18n-title="reader_faster">+</button>
           </span>
         </div>
+      <!--
+        The panel's own word for "there is more below" (D246): a strip of the
+        panel's paper at its foot with a chevron in it, shown by the script
+        while the panel has anything under its fold. A strip always in flow,
+        never coming and going: appearing, it would move the rows it sits
+        under by its own height at the very moment somebody reads them. The
+        browser's own scrollbar says nothing here - on Android it is an
+        overlay that fades, and on an e-ink panel a fade is nothing at all.
+      -->
+      <div class="panel-more" aria-hidden="true">
+        <svg class="reader-icon panel-more-glyph" viewBox="0 0 16 16" focusable="false">
+          <path
+            d="M3.8 6.1 8 10.3l4.2-4.2"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.3"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </div>
       </section>
 
       <!--
@@ -591,6 +612,27 @@
         <button id="nav-library" type="button" data-i18n="reading_list" hidden>Offline reading list</button>
         <a id="original" data-i18n="reader_open_original" hidden>Open the original</a>
         <button id="nav-settings" type="button" data-i18n="settings">Settings</button>
+      <!--
+        The panel's own word for "there is more below" (D246): a strip of the
+        panel's paper at its foot with a chevron in it, shown by the script
+        while the panel has anything under its fold. A strip always in flow,
+        never coming and going: appearing, it would move the rows it sits
+        under by its own height at the very moment somebody reads them. The
+        browser's own scrollbar says nothing here - on Android it is an
+        overlay that fades, and on an e-ink panel a fade is nothing at all.
+      -->
+      <div class="panel-more" aria-hidden="true">
+        <svg class="reader-icon panel-more-glyph" viewBox="0 0 16 16" focusable="false">
+          <path
+            d="M3.8 6.1 8 10.3l4.2-4.2"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.3"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </div>
       </nav>
 
       <!--
