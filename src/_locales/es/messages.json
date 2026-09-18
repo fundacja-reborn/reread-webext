@@ -1621,7 +1621,17 @@
   },
 
   "options_storage_to_file": {
-    "message": "Una copia como archivo se guarda en las páginas con los datos:"
+    "message": "Una copia en archivo se guarda en las páginas con los datos: «"
+  },
+
+  "options_storage_to_file_and": {
+    "message": "» y «",
+    "description": "Between the two page names in options_storage_to_file: the closing quotation mark, the conjunction, and the opening one."
+  },
+
+  "options_storage_to_file_end": {
+    "message": "».",
+    "description": "Closes options_storage_to_file after the second page name."
   },
   "options_first_steps_intro": {
     "message": "Todavía no se traduce nada - el modelo que lo haría aún no está en este dispositivo. La puesta en marcha lleva un minuto:"
@@ -1677,9 +1687,9 @@
     "message": "Lees en $FROM$ - la traducción automática está desactivada y las frases guardadas pertenecen a este par.",
     "placeholders": { "from": { "content": "$1", "example": "inglés" } }
   },
-  "options_reader_only": { "message": "Mostrar los subrayados y la burbuja solo en la vista de lectura" },
+  "options_reader_only": { "message": "Solo en la vista de lectura" },
   "options_reader_only_hint": {
-    "message": "En una página normal, al seleccionar texto aparece una burbuja con dos botones: abrir la página en la vista de lectura e ir a la lista de lectura."
+    "message": "Los subrayados de las frases y la burbuja de traducción funcionan solo en la vista de lectura. En una página normal, al seleccionar texto aparece una burbuja con dos botones: abrir la página en la vista de lectura e ir a la lista de lectura."
   },
 
   "options_reader_only_more": {
@@ -1687,10 +1697,6 @@
     "description": "The rest of the options_reader_only_hint description, behind the row's More button."
   },
 
-  "popup_reader_only": {
-    "message": "Subrayar solo en la vista de lectura",
-    "description": "The same switch as options_reader_only, named short: the popup row carries no description under it, and the settings page's full label wraps to three lines at 320px."
-  },
   "options_page_number": { "message": "Número de página" },
   "options_page_number_hint": {
     "message": "El contador de páginas en la parte inferior de la ventana."

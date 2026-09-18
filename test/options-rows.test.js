@@ -70,7 +70,7 @@ describe("the settings rows", () => {
     // together by the markup rather than each ending in a full stop.
     const hints = [
       ...markup.matchAll(
-        /<p class="row-note">\s*<span data-i18n="([a-z_]+)"\s*>[^<]*<\/span\s*>&nbsp;<button type="button" class="note-more"/g,
+        /<p class="row-note">\s*<span data-i18n="([a-z_]+)"\s*>[^<]*<\/span\s*><span class="note-tail">&nbsp;<button type="button" class="note-more"/g,
       ),
     ].map((match) => String(match[1]));
     assert.ok(hints.length >= 15, `only ${hints.length} rows open with a sentence of their own`);
@@ -172,8 +172,12 @@ describe("the settings rows", () => {
     assert.doesNotMatch(markup, /data-i18n="options_note_more"/, "a fold is still called More");
     assert.equal((markup.match(/data-i18n="options_details"/g) ?? []).length, 19, "not every fold is called Details");
     // Hard space, so the trigger goes over a wrapping line with the last word.
-    assert.equal((markup.match(/<\/span\s*>&nbsp;<button type="button" class="note-more"/g) ?? []).length, 19, "a trigger can be left alone at the start of a line");
+    // The hard space and the trigger in one box that cannot break (D259, K2):
+    // measured in the browser, the hard space alone let the trigger open a
+    // line of its own at 49 widths out of 231.
+    assert.equal((markup.match(/<\/span\s*><span class="note-tail">&nbsp;<button type="button" class="note-more"/g) ?? []).length, 19, "a trigger can be left alone at the start of a line");
     const css = await source("options/options.css");
+    assert.match(rule(css, ".note-tail"), /white-space: nowrap/, "the space before a trigger is a break opportunity again");
     assert.match(rule(css, "button.note-more"), /white-space: nowrap/, "the trigger's own words can be split");
     // And the one sentence that names the bubble's button says it in quotes.
     for (const locale of LOCALES) {

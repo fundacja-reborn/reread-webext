@@ -2258,7 +2258,17 @@
   },
 
   "options_storage_to_file": {
-    "message": "Копію у файл можна зберегти на сторінках із даними:"
+    "message": "Копію у файл збережете на сторінках із даними: «"
+  },
+
+  "options_storage_to_file_and": {
+    "message": "» і «",
+    "description": "Between the two page names in options_storage_to_file: the closing quotation mark, the conjunction, and the opening one."
+  },
+
+  "options_storage_to_file_end": {
+    "message": "».",
+    "description": "Closes options_storage_to_file after the second page name."
   },
   "options_first_steps_intro": {
     "message": "Поки що ніщо не перекладається - моделі, яка б це робила, ще немає на цьому пристрої. Підготовка займає хвилину:"
@@ -2322,9 +2332,9 @@
     "message": "Ви читаєте: $FROM$ - машинний переклад вимкнено, збережені фрази належать до цієї пари.",
     "placeholders": { "from": { "content": "$1", "example": "англійська" } }
   },
-  "options_reader_only": { "message": "Показувати підкреслення та бульбашку лише в режимі читання" },
+  "options_reader_only": { "message": "Лише в режимі читання" },
   "options_reader_only_hint": {
-    "message": "На звичайній сторінці після виділення тексту з'являється бульбашка з двома кнопками: відкрити сторінку в режимі читання та перейти до списку читання."
+    "message": "Підкреслення фраз і бульбашка перекладу працюють лише в режимі читання. На звичайній сторінці після виділення тексту з'являється бульбашка з двома кнопками: відкрити сторінку в режимі читання та перейти до списку читання."
   },
 
   "options_reader_only_more": {
@@ -2332,10 +2342,6 @@
     "description": "The rest of the options_reader_only_hint description, behind the row's More button."
   },
 
-  "popup_reader_only": {
-    "message": "Підкреслювати лише в режимі читання",
-    "description": "The same switch as options_reader_only, named short: the popup row carries no description under it, and the settings page's full label wraps to three lines at 320px."
-  },
   "options_page_number": { "message": "Номер сторінки" },
   "options_page_number_hint": {
     "message": "Лічильник сторінок унизу вікна."

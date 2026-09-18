@@ -59,15 +59,76 @@
   --sep-section: 2px solid var(--page-border);
   --sep-row: 1px solid var(--page-line);
 
-  /* The gaps, largest to smallest. Proximity rules the page: the air before a
-     heading is at least twice the air after it, so a heading belongs to what
-     stands under it and never to what stands above. */
-  --space-section: 3.5rem;
-  --space-divider-h2: 1.25rem;
-  --space-after-h2: 1rem;
-  --space-before-h3: 2.25rem;
-  --space-after-h3: 0.5rem;
-  --space-block: 1rem;
+  /* --- the vertical rhythm (D259) ---
+
+     Every number here is a gap between **glyphs**: from the bottom of the ink
+     above to the top of the ink below, which is what a reader sees and what
+     `inkGap` in SMOKE-TESTS measures. It is not what a margin is - a margin
+     stands between line boxes, and a line box carries half the leading above
+     the first line and half below the last. So the gaps are declared once,
+     the half-leadings are declared once, and every margin in this sheet is
+     the one less the other two.
+
+     Why it mattered: a heading followed by a row was ~42px from the group
+     above and ~32px from its own first row, because the row's own padding and
+     the leading piled on top of the heading's margin - the same heading
+     followed by a paragraph read correctly. The distance depended on what
+     came next, which is the one thing it must not do.
+
+     Largest to smallest, and every level of grouping is wider than the level
+     under it: inside a row (0.125) < heading to its content (0.5-0.75) <
+     block to block (1) < row to row (1.5 plus the rule) < content to a
+     subsection (2.25) < content to a section (3 plus the rule and 1.25). */
+  --gap-section: 3rem;
+  --gap-divider-h2: 1.25rem;
+  --gap-h2-after: 0.75rem;
+  --gap-h3-before: 2.25rem;
+  --gap-h3-after: 0.5rem;
+  --gap-intro: 0.5rem;
+  --gap-intro-after: 0.75rem;
+  --gap-block: 1rem;
+  --gap-row: 0.75rem;
+
+  /* Half the leading of each voice: what the browser puts between a line box's
+     edge and the ink inside it. `text-box-trim` would say this exactly, and
+     Firefox 142 does not have it, so it is arithmetic: the glyph box of the
+     system face this page is set in stands 1.154 to 1.188em tall (ascent plus
+     descent), measured in the browser at each of this page's five sizes, and
+     the rest of the line-height is split above and below. At 1.17 every one
+     of the five is within 0.15px of its measured half-leading, so no gap on
+     the page is more than 0.3px off what §2 asks for. */
+  --ink-box: 1.17;
+  --lead-h2: calc((1.3 - var(--ink-box)) * var(--ui-h2) / 2);
+  --lead-h3: calc((1.35 - var(--ink-box)) * var(--ui-h3) / 2);
+  --lead-text: calc((1.45 - var(--ink-box)) * var(--ui-text) / 2);
+  --lead-small: calc((1.5 - var(--ink-box)) * var(--ui-small) / 2);
+
+  /* The margins themselves: a gap, less the leading that flanks it. Named for
+     the pair they stand between, so a rule never carries a number. */
+  --m-section: calc(var(--gap-section) - var(--lead-small));
+  --m-divider-h2: calc(var(--gap-divider-h2) - var(--lead-h2));
+  --m-h2-after: calc(var(--gap-h2-after) - var(--lead-h2) - var(--lead-text));
+  --m-h3-before: calc(var(--gap-h3-before) - var(--lead-small) - var(--lead-h3));
+  --m-h3-after: calc(var(--gap-h3-after) - var(--lead-h3) - var(--lead-small));
+  --m-intro: calc(var(--gap-intro) - var(--lead-small) * 2);
+  --m-intro-after: calc(var(--gap-intro-after) - var(--lead-small) - var(--lead-text));
+  --m-block: calc(var(--gap-block) - var(--lead-small) - var(--lead-text));
+  --m-row-top: calc(var(--gap-row) - var(--lead-row));
+  --m-row-bottom: calc(var(--gap-row) - var(--lead-small));
+
+  /* A row's first line is not where a paragraph's would be: it stands in a
+     box as tall as the touch floor, centred, so its ink begins some seven
+     pixels lower than the half-leading alone would put it. Measured in the
+     browser: a heading whose group followed was 19px from its first label
+     where §2 asks for 12. Every gap that lands on a row takes this off as
+     well - `--lead-row` for the row's own padding, and the group's own
+     negative top margin for the gap handed to it from above. */
+  --row-extra: calc((var(--ui-control) - var(--ui-text) * 1.45) / 2);
+  --lead-row: calc(var(--lead-text) + var(--row-extra));
+
+  /* A list row's own breathing, inside the list only: the first and the last
+     hand it back, so a list is as far from what surrounds it as any block. */
+  --list-pad: 0.5rem;
 }
 
 /* The density follows the pointer, not the window: where a device is read
@@ -137,16 +198,17 @@ main h3 {
    decide about. */
 p.explain,
 .hint {
-  margin: var(--space-block) 0;
+  margin: 0 0 var(--m-block);
   color: var(--page-muted);
   font-size: var(--ui-small);
   line-height: 1.5;
 }
 
 /* Two explanations in a row are one explanation in two paragraphs: they keep
-   the reading rhythm between them, not the gap between blocks. */
-p.explain + p.explain {
-  margin-top: 0.5rem;
+   the reading rhythm between them, not the gap between blocks. Inside a
+   header the same distance comes from the header's own rule. */
+p.explain:has(+ p.explain) {
+  margin-bottom: var(--m-intro);
 }
 
 /* Code is code (D258, V5): a file's name, a CSS rule. In a fixed-width face,
@@ -466,7 +528,7 @@ mark.hit {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  margin: 0.75rem 0 0;
+  margin: 0 0 var(--m-block);
 }
 
 .support-links a {
@@ -483,8 +545,8 @@ mark.hit {
    sections of this page are `main`'s own children - the subsections inside
    them are nested deeper and get none of this. */
 main > section {
-  margin-top: var(--space-section);
-  padding-top: var(--space-divider-h2);
+  margin-top: var(--m-section);
+  padding-top: var(--m-divider-h2);
   border-top: var(--sep-section);
 }
 
@@ -492,27 +554,86 @@ main > section {
    root's scroll padding, page.css - D219) reads as cut off, so each lands a
    step under it. A section heading lands low enough to bring its own rule
    into the window with it - an address that stops under the boundary it just
-   crossed says nothing about having crossed one. */
+   crossed says nothing about having crossed one.
+
+   The gap under a heading belongs to the header it stands in (D259): it is
+   the same distance whether a row, a paragraph or a list follows. */
 h2 {
-  margin-top: 0;
-  margin-bottom: var(--space-after-h2);
-  scroll-margin-top: calc(0.75rem + var(--space-divider-h2) + 2px);
+  margin: 0;
+  scroll-margin-top: calc(0.75rem + var(--gap-divider-h2) + 2px);
 }
 
 /* A subsection's heading (D254): the same landing pad and a smaller voice -
    it opens a part of the section it stands in, not a new chapter. No rule of
    its own, ever: the air above it and the weight of it are the whole signal
-   (V-b). */
+   (V-b).
+
+   Its own air above it, which collapses out through the header and the
+   subsection alike - so a subsection standing in a `<section>` of its own and
+   a bare h3 (Latest copies, Support) open on the same gap. */
 h3 {
-  margin-top: var(--space-before-h3);
-  margin-bottom: var(--space-after-h3);
+  margin: var(--m-h3-before) 0 0;
   scroll-margin-top: 0.75rem;
+}
+
+/* --- the heading and what belongs to it (D259, S2) ---
+
+   A section's heading, its meta line and its opening paragraphs are one
+   group, and the page says so: they stand in a `<header>`, and the gap under
+   the header is one number rather than a case per kind of element below it.
+   That is what makes a heading the same distance from its own first row as
+   from its own first paragraph - the complaint this round began with.
+
+   A header that ends in prose hands the intro's gap to what follows; one that
+   is only a heading hands the heading's own. */
+section > header {
+  margin-bottom: var(--m-intro-after);
+}
+
+section > header:has(> h2:last-child) {
+  margin-bottom: var(--m-h2-after);
+}
+
+section > header:has(> h3:last-child) {
+  margin-bottom: var(--m-h3-after);
+}
+
+section > header > h2 {
+  margin-bottom: var(--m-h2-after);
+}
+
+section > header > h3 {
+  margin-bottom: var(--m-h3-after);
+}
+
+/* `:is()` carries the specificity of its heaviest arm, so these outrank the
+   class rules of what stands inside a header (`p.explain`, `.section-meta`) -
+   without it the intro kept its own block gap and the meta line stood half
+   the distance it should. */
+section > header > :is(p, .section-meta) {
+  margin: 0;
+}
+
+section > header > :is(p, .section-meta) + :is(p, .section-meta) {
+  margin-top: var(--m-intro);
+}
+
+/* The last line of a header hands its own gap back: the header's bottom is
+   the one that counts, and two of them would add up. */
+section > header > :is(:last-child, p:last-child) {
+  margin-bottom: 0;
+}
+
+/* A header the search has emptied - every paragraph of it put away and its
+   heading not this section's - leaves no gap behind. */
+section > header:not(:has(> :not([hidden]))) {
+  display: none;
 }
 
 /* What does the translating, under the Translation models heading (P7): the
    quiet voice of a row's note, because it reports rather than asks. */
 .section-meta {
-  margin: 0.25rem 0 0;
+  margin: 0;
   color: var(--page-muted);
   font-size: var(--ui-small);
 }
@@ -520,15 +641,17 @@ h3 {
 /* --- the settings rows: label | control, wrapping where the control needs
    the width --- */
 
-/* A group of rows keeps a block's distance from what came before it, and a
-   step and a half from a block that closes with a frame - a note's border and
-   a row's hairline a block apart read as one box drawn twice. */
+/* A block keeps one gap under it, and the gap belongs to the block above -
+   so a heading, a note and a list all hand the same distance to whatever
+   follows, and nothing has to know what that is. */
 .rows {
-  margin-top: var(--space-block);
+  margin: calc(-1 * var(--row-extra)) 0 var(--m-block);
 }
 
+/* The one exception the last round left standing: a note's border and a row's
+   hairline a block apart read as one box drawn twice. */
 :is(.note, details, .status.report) + .rows {
-  margin-top: calc(var(--space-block) * 1.5);
+  margin-top: calc(var(--m-block) * 1.5 - var(--row-extra));
 }
 
 /* The heading that follows brings its own air, and the last row of a group
@@ -541,31 +664,60 @@ h3 {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   /* The description belongs to the label over it, not to the row's own air:
-     a hair between them, and the row's own breathing in the padding. */
+     a hair between them. */
   gap: 0.125rem 1rem;
   align-items: center;
-  padding-block: 0.75rem;
+  /* No air of its own (D259, S1): a row's padding stands only between it and
+     the row it is separated from, and is put on below by the two rules that
+     know whether there is one. The first and the last row of a group have
+     none, so a group's distance from the page comes from the headings and
+     the blocks around it and never from what happens to be inside it. */
+  padding-block: 0;
   /* A row is an address of its own (`#s-<setting>`), so it lands the way a
      heading does: a step under the stuck bar's line, never against it. */
   scroll-margin-top: 0.75rem;
 }
 
-/* The hairline belongs between two rows, and nowhere else (D258, H1): no line
-   over the first row of a group, none under the last, and none where the row
-   above it is not drawn at all. The three ways a row leaves the page - the
-   `hidden` attribute (a dependent row, a row the search filtered out), the
-   translation mode, and the mode's mirror - each hand the line back, or the
-   first row on screen would open on a stray rule. */
-.row + .row,
-.model + .model,
-.dictionary-row + .dictionary-row {
+/* The hairline and the air belong between two rows that are both drawn, and
+   nowhere else (D258 H1, D259 S1).
+
+   A row leaves the page two ways - the `hidden` attribute (a dependent row
+   with its switch off, a row the search filtered out) and the translation
+   mode - so "drawn" is spelled out once per mode. The general sibling
+   combinator is what makes this right rather than nearly right: it lets a row
+   look back **past** the rows that are not drawn, so two rows the search left
+   either side of a hidden one are still separated. The adjacent combinator
+   this started as could not, and left them touching.
+
+   `:has()` on the other side, because CSS has no way to look back: a row
+   carries the air under its own words only while some drawn row follows it. */
+:where(body:not(.no-translation)) .row:not([hidden]) ~ .row:not([hidden]),
+:where(body.no-translation) .row:not([hidden], .translation-only) ~ .row:not([hidden], .translation-only) {
   border-top: var(--sep-row);
+  padding-top: var(--m-row-top);
 }
 
-[hidden] + :is(.row, .model, .dictionary-row),
-body.no-translation .translation-only + .row,
-body:not(.no-translation) .no-translation-only + .row {
+:where(body:not(.no-translation)) .row:not([hidden]):has(~ .row:not([hidden])),
+:where(body.no-translation) .row:not([hidden], .translation-only):has(~ .row:not([hidden], .translation-only)) {
+  padding-bottom: var(--m-row-bottom);
+}
+
+/* A dependent group opens on air alone (D259, K4): the hairline over its first
+   child met the line down its leading edge and drew a corner, which reads as a
+   box rather than as two settings of the switch above. One gap, no rule; the
+   children keep the hairline between themselves. */
+.row:not([hidden], .row-sub) + .row-sub:not([hidden]) {
   border-top: none;
+  padding-top: 0;
+}
+
+/* The long lists keep their own breathing between rows and hand it back at
+   the ends, which is the same rule said the cheap way: `:has()` over five
+   hundred dictionary rows, re-run on every keystroke of the filter, is a cost
+   a settings page should not pay for a boundary nobody can see. */
+.model:not([hidden]) ~ .model:not([hidden]),
+.dictionary-row:not([hidden]) ~ .dictionary-row:not([hidden]) {
+  border-top: var(--sep-row);
 }
 
 /* Where an address just landed on one row out of thirty (D254, F5): a bar at
@@ -595,6 +747,21 @@ body:not(.no-translation) .no-translation-only + .row {
    a line to scan by. */
 .row-name {
   font-weight: var(--ui-label-weight);
+}
+
+/* A row whose first cell holds no control - the storage row, which is a name
+   and a figure - would begin its line seven pixels higher than every other
+   row, and the gap over it would read seven pixels wider. The label keeps the
+   touch floor itself, so one number covers every row (D259, S3).
+
+   Not where the row stacks on a narrow screen: there the label stands on a
+   line of its own above the control, and a floor under it would be air for
+   nothing. The breakpoint below puts the two side by side again, and the
+   floor comes back with them. */
+.row:not(.row-stack) > .row-name:first-child {
+  display: flex;
+  align-items: center;
+  min-height: var(--ui-control);
 }
 
 .row-value {
@@ -674,25 +841,26 @@ body:not(.no-translation) .no-translation-only + .row {
    before it. No transition on the turn: an e-ink panel draws a turning glyph
    as a smear. */
 
+/* One trigger for every fold on this page (D259, K1): the same triangle at
+   the same size relative to whatever text it stands in, and no underline at
+   rest - an underline is the promise of a link, and this one turns a view
+   rather than going anywhere. It takes the underline on hover and on focus,
+   where it is a pointer's answer rather than a standing claim. */
 button.note-more {
   min-height: 0;
   padding: 0;
-  /* The trigger is part of the sentence before it, tied to its last word by a
-     hard space (F6): on a wrapping line the two go over together, and the
-     trigger never opens a line of its own. */
   white-space: nowrap;
   border: none;
   background: none;
   color: var(--page-muted);
   font: inherit;
-  text-decoration: underline;
+  text-decoration: none;
   transition: none;
 }
 
 button.note-more::before {
   content: "\25B8\00A0";
   text-decoration: none;
-  display: inline-block;
 }
 
 button.note-more[aria-expanded="true"]::before {
@@ -702,6 +870,28 @@ button.note-more[aria-expanded="true"]::before {
 button.note-more:hover,
 button.note-more:focus-visible {
   color: var(--page-fg);
+  text-decoration: underline;
+}
+
+/* The trigger's glyph is never underlined with its word: a triangle with a
+   line under it reads as a character somebody typed. */
+button.note-more:is(:hover, :focus-visible)::before {
+  text-decoration: none;
+}
+
+/* The hard space and the trigger in one box that cannot break (D259, K2).
+   The hard space alone did not hold them together: measured across every
+   width from 240px to 700px, the trigger opened a line of its own at 49 of
+   them - a browser takes the break at the boundary between a text node and
+   an inline element whatever the character before it is, and moving the
+   space inside the button, or into the sentence, changed nothing. Inside a
+   `nowrap` box the boundary is no longer a break opportunity, so the break
+   goes where it belongs: before the sentence's last word, which then travels
+   down with the trigger. Zero failures over the same 231 widths.
+
+   The button keeps its own `nowrap` as well, so its two words never split. */
+.note-tail {
+  white-space: nowrap;
 }
 
 /* The rest of the note, under the sentence it belongs to - the same voice,
@@ -731,7 +921,7 @@ p.explain.row-more {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.35rem 0.9rem;
-  margin: var(--space-block) 0 0;
+  margin: 0 0 var(--m-block);
 }
 
 .list-refresh button {
@@ -745,15 +935,19 @@ p.explain.row-more {
   font-size: var(--ui-small);
 }
 
+/* The day the list is from: a value in the page's own ink, at the page's own
+   weight (D259, K3). Its element is `strong` because the date is the line's
+   one piece of information, not because it shouts. */
 .list-dated strong {
   color: var(--page-fg);
+  font-weight: 400;
   font-variant-numeric: tabular-nums;
 }
 
 /* --- the filter boxes --- */
 
 .model-filter {
-  margin: var(--space-block) 0 0;
+  margin: 0 0 var(--m-block);
 }
 
 .model-filter input {
@@ -771,8 +965,28 @@ p.explain.row-more {
    page. Name | size | action on a desktop; on a phone the name takes the
    first line and the rest right-aligns below it. --- */
 
+/* A list stands exactly as far from what surrounds it as any other block
+   (D259, S4). Both ends hand back the air a row's own controls put around
+   its words - the same `--row-extra` a group of settings rows hands back -
+   and the first and last rows hand back their padding, so what is left is
+   the block gap and nothing else. Measured: 12.3px over the first row where
+   §2 asks for 12, and 16.0 under the last where it asks for 16. */
 .models {
-  margin: var(--space-block) 0 0;
+  margin: calc(-1 * var(--row-extra)) 0 calc(var(--m-block) - var(--row-extra));
+}
+
+.models > :first-child {
+  padding-top: 0;
+}
+
+.models > :last-child {
+  padding-bottom: 0;
+}
+
+/* The one line a list shows when it holds nothing closes on no rule: a
+   boundary at the edge of a group is exactly what this round took away. */
+.models > .empty {
+  border-bottom: none;
 }
 
 .model {
@@ -780,7 +994,7 @@ p.explain.row-more {
   grid-template-columns: minmax(0, 1fr) auto auto;
   gap: 0.25rem 0.75rem;
   align-items: center;
-  padding: 0.5rem 0;
+  padding: var(--list-pad) 0;
 }
 
 .model-name {
@@ -833,13 +1047,13 @@ p.explain.row-more {
    own bullets and indent come off; the rows keep the models' separator. --- */
 
 ul.models {
-  margin: var(--space-block) 0 0;
+  margin: calc(-1 * var(--row-extra)) 0 calc(var(--m-block) - var(--row-extra));
   padding: 0;
   list-style: none;
 }
 
 .dictionary-row {
-  padding: 0.5rem 0;
+  padding: var(--list-pad) 0;
 }
 
 /* The first line: the pair, the badge of the pair being read, and the
@@ -882,11 +1096,13 @@ ul.models {
   white-space: nowrap;
 }
 
-/* The row's title: the name the reader knows the book by, at the weight of
-   the page's own headings. Wrapped when long, never cut. */
+/* The row's title: the name the reader knows the book by, a half step over
+   the small print under it - not a heading's weight (D259, K3): five bold
+   dictionary names in a column outweighed the "Dictionaries" heading they
+   stand under. Wrapped when long, never cut. */
 .dictionary-name {
   margin: 0.15rem 0 0;
-  font-weight: bold;
+  font-weight: 500;
   overflow-wrap: anywhere;
 }
 
@@ -917,13 +1133,33 @@ ul.models {
 
 /* --- the fold every finished book ends with: "Details" --- */
 
+/* A dictionary's own fold wears the page's one trigger (D259, K1): it used to
+   keep the browser's larger marker and no underline at all, so the same word
+   in the same grey was drawn two ways a screen apart. The block padding is
+   the touch target - the words alone stand short of it. */
 .dictionary-details summary {
-  /* The block padding is the touch target: the text alone stands short of it.
-     Default display, because summary loses its fold marker without it. */
   padding: 0.7rem 0;
   cursor: pointer;
   color: var(--page-muted);
   font-size: var(--ui-small);
+  list-style: none;
+}
+
+.dictionary-details summary::-webkit-details-marker {
+  display: none;
+}
+
+.dictionary-details summary::before {
+  content: "\25B8\00A0";
+}
+
+.dictionary-details[open] summary::before {
+  content: "\25BE\00A0";
+}
+
+.dictionary-details summary:is(:hover, :focus-visible) {
+  color: var(--page-fg);
+  text-decoration: underline;
 }
 
 /* The name a reader gives a dictionary (D199): the caption over the field,
@@ -1123,7 +1359,7 @@ button.model-delete {
    chevron). Its element stays a heading, for whoever walks the page by
    headings; only its dress changes. */
 .fold {
-  margin: var(--space-block) 0;
+  margin: 0 0 var(--m-block);
 }
 
 /* One fold after another is a list of doors, not a stack of blocks. */
@@ -1255,6 +1491,12 @@ button.model-delete {
    monospace, the width of the column and tall enough for a handful of rules.
    It grows by hand (resize) and never by itself - a stylesheet is typed, not
    read, and a field growing under the fingers would move the Save button. */
+/* The field and its buttons are one block of the section, and the fold under
+   them is the next. */
+.custom-css {
+  margin: 0 0 var(--m-block);
+}
+
 .custom-css textarea {
   display: block;
   width: 100%;
@@ -1286,7 +1528,7 @@ button.model-delete {
    The source files inside it share one wrapping line with the jump links'
    dots - four doors one under the other took a screen (Michał's smoke). */
 .fold-tight {
-  margin: 0.75rem 0 0;
+  margin: 0 0 var(--m-block);
 }
 
 .sources {
@@ -1326,7 +1568,7 @@ button.model-delete {
    Scoped to this page's sheet; `.note` elsewhere (the reader, the lists) is
    page.css's and unchanged. */
 .note {
-  margin-top: var(--space-block);
+  margin: 0 0 var(--m-block);
   padding: calc(0.75rem - 1px) calc(1rem - 1px) calc(0.75rem - 1px) 1rem;
   border: 1px solid var(--page-line);
   border-inline-start: 3px solid var(--page-border);
@@ -1352,7 +1594,7 @@ button.model-delete {
    dictionary is missing; with both stored it folds to its heading and stays,
    one line of the note's frame, there to reread. */
 .first-steps {
-  margin: var(--space-block) 0 1.25rem;
+  margin: 0 0 1.25rem;
   border-left-color: var(--page-accent);
   background: color-mix(in srgb, var(--page-accent) 10%, transparent);
   color: var(--page-fg);
@@ -1476,7 +1718,7 @@ button.step-done {
   display: grid;
   grid-template-columns: max-content minmax(0, 1fr) max-content;
   gap: 0.35rem 1rem;
-  margin: var(--space-block) 0 0;
+  margin: 0 0 var(--m-block);
   padding: 0;
   list-style: none;
   color: var(--page-muted);
@@ -1518,11 +1760,13 @@ button.step-done {
    because that is what they do - they open another page of this extension.
    They wore the row notes' More, triangle and all, and after a sentence
    ending in a colon that reads as two folds, not as the two doors the colon
-   promised: the sentence looked as though its links had gone missing. */
+   promised: the sentence looked as though its links had gone missing. Since
+   D259 the sentence carries its own quotation marks and its own "and", so
+   the button adds no space of its own. */
 .copies-file .doorway {
   display: inline;
   min-height: 0;
-  margin: 0 0.75rem 0 0;
+  margin: 0;
   padding: 0;
   border: none;
   background: none;
@@ -1551,6 +1795,15 @@ summary::marker {
   /* The stacked rows return to one line: label left, control right. */
   .row-stack {
     grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  /* And with the control back beside it, the label takes the touch floor
+     again, so every row on this page begins its first line at the same
+     height and the gaps over them are all the one number (D259, S3). */
+  .row-stack > .row-name:first-child {
+    display: flex;
+    align-items: center;
+    min-height: var(--ui-control);
   }
 
   .row-stack > :is(select, .row-value) {

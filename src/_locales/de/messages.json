@@ -1570,7 +1570,17 @@
   },
 
   "options_storage_to_file": {
-    "message": "Eine Kopie als Datei speichern Sie auf den Seiten mit den Daten:"
+    "message": "Eine Kopie als Datei speichern Sie auf den Seiten mit den Daten: „"
+  },
+
+  "options_storage_to_file_and": {
+    "message": "“ und „",
+    "description": "Between the two page names in options_storage_to_file: the closing quotation mark, the conjunction, and the opening one."
+  },
+
+  "options_storage_to_file_end": {
+    "message": "“.",
+    "description": "Closes options_storage_to_file after the second page name."
   },
   "options_first_steps_intro": {
     "message": "Noch übersetzt nichts - das Modell, das es täte, ist noch nicht auf diesem Gerät. Die Einrichtung dauert eine Minute:"
@@ -1626,9 +1636,9 @@
     "message": "Sie lesen $FROM$ - die maschinelle Übersetzung ist aus, gespeicherte Phrasen gehören zu diesem Paar.",
     "placeholders": { "from": { "content": "$1", "example": "Englisch" } }
   },
-  "options_reader_only": { "message": "Unterstreichungen und Sprechblase nur in der Leseansicht zeigen" },
+  "options_reader_only": { "message": "Nur in der Leseansicht" },
   "options_reader_only_hint": {
-    "message": "Auf einer gewöhnlichen Seite erscheint nach dem Markieren von Text stattdessen eine Sprechblase mit zwei Schaltflächen: die Seite in der Leseansicht öffnen und zur Leseliste gehen."
+    "message": "Unterstreichungen der Phrasen und die Übersetzungs-Sprechblase wirken nur in der Leseansicht. Auf einer gewöhnlichen Seite erscheint nach dem Markieren von Text stattdessen eine Sprechblase mit zwei Schaltflächen: die Seite in der Leseansicht öffnen und zur Leseliste gehen."
   },
 
   "options_reader_only_more": {
@@ -1636,10 +1646,6 @@
     "description": "The rest of the options_reader_only_hint description, behind the row's More button."
   },
 
-  "popup_reader_only": {
-    "message": "Nur in der Leseansicht unterstreichen",
-    "description": "The same switch as options_reader_only, named short: the popup row carries no description under it, and the settings page's full label wraps to three lines at 320px."
-  },
   "options_page_number": { "message": "Seitenzahl" },
   "options_page_number_hint": {
     "message": "Die Seitenzahl am unteren Fensterrand."

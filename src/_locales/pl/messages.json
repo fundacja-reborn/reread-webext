@@ -2258,7 +2258,17 @@
   },
 
   "options_storage_to_file": {
-    "message": "Kopię do pliku zapiszesz na stronach z danymi:"
+    "message": "Kopię do pliku zapiszesz na stronach z danymi: „"
+  },
+
+  "options_storage_to_file_and": {
+    "message": "” i „",
+    "description": "Between the two page names in options_storage_to_file: the closing quotation mark, the conjunction, and the opening one."
+  },
+
+  "options_storage_to_file_end": {
+    "message": "”.",
+    "description": "Closes options_storage_to_file after the second page name."
   },
   "options_first_steps_intro": {
     "message": "Nic się jeszcze nie tłumaczy – modelu, który by to robił, nie ma jeszcze na tym urządzeniu. Przygotowanie zajmuje minutę:"
@@ -2322,9 +2332,9 @@
     "message": "Czytasz w języku: $FROM$ – tłumaczenie maszynowe jest wyłączone, a zapisane frazy są zapisywane w tej parze.",
     "placeholders": { "from": { "content": "$1", "example": "angielski" } }
   },
-  "options_reader_only": { "message": "Pokazuj podkreślenia i dymek tylko w widoku czytania" },
+  "options_reader_only": { "message": "Tylko w widoku czytania" },
   "options_reader_only_hint": {
-    "message": "Na zwykłej stronie po zaznaczeniu tekstu pojawi się dymek z przyciskami do otwarcia strony w widoku czytania i do czytelni."
+    "message": "Podkreślenia fraz i dymek tłumaczenia działają tylko w widoku czytania. Na zwykłej stronie po zaznaczeniu tekstu pojawi się dymek z przyciskami do otwarcia strony w widoku czytania i do czytelni."
   },
 
   "options_reader_only_more": {
@@ -2332,10 +2342,6 @@
     "description": "The rest of the options_reader_only_hint description, behind the row's More button."
   },
 
-  "popup_reader_only": {
-    "message": "Podkreślaj tylko w widoku czytania",
-    "description": "The same switch as options_reader_only, named short: the popup row carries no description under it, and the settings page's full label wraps to three lines at 320px."
-  },
   "options_page_number": { "message": "Numer strony" },
   "options_page_number_hint": {
     "message": "Licznik stron u dołu okna."

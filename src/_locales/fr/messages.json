@@ -1655,7 +1655,17 @@
   },
 
   "options_storage_to_file": {
-    "message": "Une copie sous forme de fichier s'enregistre sur les pages avec les données :"
+    "message": "Une copie en fichier se fait sur les pages qui portent les données : «\u00a0"
+  },
+
+  "options_storage_to_file_and": {
+    "message": "\u00a0» et «\u00a0",
+    "description": "Between the two page names in options_storage_to_file: the closing quotation mark, the conjunction, and the opening one."
+  },
+
+  "options_storage_to_file_end": {
+    "message": "\u00a0».",
+    "description": "Closes options_storage_to_file after the second page name."
   },
   "options_first_steps_intro": {
     "message": "Rien ne se traduit encore - le modèle qui s'en chargerait n'est pas encore sur cet appareil. La mise en place prend une minute :"
@@ -1711,9 +1721,9 @@
     "message": "Vous lisez $FROM$ - la traduction automatique est désactivée, les phrases enregistrées appartiennent à cette paire.",
     "placeholders": { "from": { "content": "$1", "example": "anglais" } }
   },
-  "options_reader_only": { "message": "Afficher les soulignements et la bulle uniquement dans le lecteur" },
+  "options_reader_only": { "message": "Uniquement dans le lecteur" },
   "options_reader_only_hint": {
-    "message": "Sur une page ordinaire, après une sélection de texte, une bulle apparaît avec deux boutons : ouvrir la page dans le lecteur et aller à la liste de lecture."
+    "message": "Les soulignements des phrases et la bulle de traduction ne fonctionnent que dans le lecteur. Sur une page ordinaire, après une sélection de texte, une bulle apparaît avec deux boutons : ouvrir la page dans le lecteur et aller à la liste de lecture."
   },
 
   "options_reader_only_more": {
@@ -1721,10 +1731,6 @@
     "description": "The rest of the options_reader_only_hint description, behind the row's More button."
   },
 
-  "popup_reader_only": {
-    "message": "Souligner uniquement dans le lecteur",
-    "description": "The same switch as options_reader_only, named short: the popup row carries no description under it, and the settings page's full label wraps to three lines at 320px."
-  },
   "options_page_number": { "message": "Numéro de page" },
   "options_page_number_hint": {
     "message": "Le compteur de pages en bas de la fenêtre."

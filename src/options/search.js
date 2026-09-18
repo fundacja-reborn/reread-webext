@@ -152,6 +152,17 @@ function readSection(section, inherited) {
   for (const child of section.children) {
     if (!(child instanceof HTMLElement)) continue;
     if (child === heading) continue;
+    // The heading, its meta line and its opening paragraphs stand in one
+    // `<header>` (D259, S2). The wrapper itself is never put away - it holds
+    // the heading, which stays whatever the query says - but everything else
+    // inside it is the section's own prose and belongs with the blocks, so a
+    // query that only one row answers still takes the intro off the screen.
+    if (child.tagName === "HEADER") {
+      for (const inner of child.children) {
+        if (inner instanceof HTMLElement && inner !== heading) blocks.push(inner);
+      }
+      continue;
+    }
     if (child.tagName === "SECTION") {
       sections.push(readSection(child, text));
       continue;

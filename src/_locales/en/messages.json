@@ -1929,7 +1929,17 @@
   },
 
   "options_storage_to_file": {
-    "message": "A copy as a file is saved on the pages with the data:"
+    "message": "A copy as a file is saved on the pages with the data: “"
+  },
+
+  "options_storage_to_file_and": {
+    "message": "” and “",
+    "description": "Between the two page names in options_storage_to_file: the closing quotation mark, the conjunction, and the opening one."
+  },
+
+  "options_storage_to_file_end": {
+    "message": "”.",
+    "description": "Closes options_storage_to_file after the second page name."
   },
   "options_first_steps_intro": {
     "message": "Nothing translates yet - the model that would do it is not yet on this device. Setting up takes a minute:",
@@ -2013,9 +2023,9 @@
     "placeholders": { "from": { "content": "$1", "example": "English" } },
     "description": "Status line after choosing a pair while translation is switched off."
   },
-  "options_reader_only": { "message": "Show the underlines and the bubble only in the reader" },
+  "options_reader_only": { "message": "Only in the reader" },
   "options_reader_only_hint": {
-    "message": "On an ordinary page, selecting text brings up a bubble with two buttons instead: open the page in the reader, and go to the reading list."
+    "message": "Phrase underlines and the translation bubble work only in the reader. On an ordinary page, selecting text brings up a bubble with two buttons instead: open the page in the reader, and go to the reading list."
   },
 
   "options_reader_only_more": {
@@ -2023,10 +2033,6 @@
     "description": "The rest of the options_reader_only_hint description, behind the row's More button."
   },
 
-  "popup_reader_only": {
-    "message": "Underline only in the reader",
-    "description": "The same switch as options_reader_only, named short: the popup row carries no description under it, and the settings page's full label wraps to three lines at 320px."
-  },
   "options_page_number": { "message": "Page number" },
   "options_page_number_hint": {
     "message": "A page count at the foot of the window."

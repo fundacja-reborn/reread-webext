@@ -102,22 +102,63 @@ describe("the settings page's type", () => {
     const css = await source("options/options.css");
     const row = rule(css, ".row");
     assert.match(row, /gap: 0\.125rem 1rem/, "the description floats away from the label it belongs to");
-    assert.match(row, /padding-block: 0\.75rem/, "the row keeps its old height");
-    // The headings' air comes from the space tokens, and every gap before a
-    // heading is at least twice the gap after it (D258, §3.1): a heading
-    // belongs to what stands under it.
-    assert.match(rule(css, "h2"), /margin-bottom: var\(--space-after-h2\)/, "a section heading keeps its old air");
-    assert.match(rule(css, "h3"), /margin-top: var\(--space-before-h3\)/, "a subsection heading keeps its old air");
-    assert.match(rule(css, "h3"), /margin-bottom: var\(--space-after-h3\)/, "a subsection heading crowds what it opens");
+    // A row has no air of its own (D259, S1): what stands between two rows is
+    // put on below, by the rules that know whether there is a row to stand
+    // between. The first and the last row of a group keep none, so a group is
+    // as far from the page as its headings and blocks say and no further.
+    assert.match(row, /padding-block: 0;/, "a row still carries its own outer air");
+
+    // The headings' air comes from the header they stand in, so it is the same
+    // distance whatever kind of element follows - the complaint this round
+    // began with (S-a).
+    assert.match(rule(css, "h2"), /margin: 0;/, "a section heading keeps an air of its own");
+    assert.match(rule(css, "h3"), /margin: var\(--m-h3-before\) 0 0;/, "a subsection heading keeps an air of its own");
+    assert.match(rule(css, "section > header > h2"), /margin-bottom: var\(--m-h2-after\)/, "the header does not hold the gap under a section heading");
+    assert.match(rule(css, "section > header > h3"), /margin-bottom: var\(--m-h3-after\)/, "the header does not hold the gap under a subsection heading");
+    assert.match(rule(css, "section > header"), /margin-bottom: var\(--m-intro-after\)/, "a header that ends in prose hands on no gap");
+    assert.match(css, /section > header:has\(> h3:last-child\) \{\n  margin-bottom: var\(--m-h3-after\);/, "a heading-only header hands on the intro's gap instead of its own");
+  });
+
+  it("measures every gap between glyphs, not between line boxes (D259, S3)", async () => {
+    const css = await source("options/options.css");
     const tokens = rule(css, ":root");
-    for (const [before, after] of /** @type {[string, string][]} */ ([
-      ["--space-section", "--space-after-h2"],
-      ["--space-before-h3", "--space-after-h3"],
-    ])) {
-      /** @param {string} token */
-      const read = (token) => Number(new RegExp(`${token}: ([\\d.]+)rem;`).exec(tokens)?.[1] ?? "0");
-      assert.ok(read(before) >= 2 * read(after), `${before} is not twice ${after}`);
+    /** @param {string} token */
+    const gap = (token) => Number(new RegExp(`--gap-${token}: ([\\d.]+)rem;`).exec(tokens)?.[1] ?? "0");
+
+    // Every level of grouping stands wider than the level under it (§2).
+    assert.ok(gap("section") > gap("h3-before"), "a section is no further off than a subsection");
+    assert.ok(gap("h3-before") > gap("row") * 2, "a subsection is no further off than two rows");
+    assert.ok(gap("row") * 2 > gap("block"), "two rows stand closer than two blocks");
+    assert.ok(gap("block") > gap("intro-after"), "a block stands closer than a heading's own prose");
+    // A heading belongs to what stands under it: at least three times as far
+    // from what came before as from what comes after (§2).
+    assert.ok(gap("h3-before") >= 3 * gap("h3-after"), "a subsection heading is as far from its content as from the group above");
+    // And a section heading is nearer its own content than its own rule.
+    assert.ok(gap("h2-after") < gap("divider-h2"), "a section heading is nearer its rule than its content");
+
+    // The leading is taken off every gap rather than guessed at: no margin in
+    // this sheet may be a bare number of its own.
+    for (const token of ["--lead-h2", "--lead-h3", "--lead-text", "--lead-small"]) {
+      assert.match(tokens, new RegExp(`${token}: calc\\(\\(1\\.[0-9]+ - var\\(--ink-box\\)\\)`), `${token} is not measured off the line-height`);
     }
+    for (const token of ["--m-h2-after", "--m-h3-after", "--m-block", "--m-row-top"]) {
+      assert.match(tokens, new RegExp(`${token}: calc\\(var\\(--gap-`), `${token} is not a gap less its leading`);
+    }
+    // `text-box-trim` would say it exactly; Firefox 142 does not have it, so
+    // no rule may lean on it (the comment that says so may name it).
+    assert.doesNotMatch(css, /^\s*text-box-(trim|edge):/m, "the sheet leans on a property Firefox cannot read");
+
+    // A row's first line stands in a box as tall as the touch floor, so its
+    // ink begins seven pixels lower than a paragraph's would. Every gap that
+    // lands on a row takes that off as well, or a heading sits 19px from its
+    // own first label where §2 asks for 12 (measured in the browser).
+    assert.match(tokens, /--row-extra: calc\(\(var\(--ui-control\) - var\(--ui-text\) \* 1\.45\) \/ 2\);/, "the control floor's own air is not measured");
+    assert.match(tokens, /--lead-row: calc\(var\(--lead-text\) \+ var\(--row-extra\)\);/, "a row's first line is treated as a paragraph's");
+    assert.match(rule(css, ".rows"), /margin: calc\(-1 \* var\(--row-extra\)\)/, "a group of rows keeps the air its controls add");
+    assert.match(rule(css, ".models"), /margin: calc\(-1 \* var\(--row-extra\)\) 0 calc\(var\(--m-block\) - var\(--row-extra\)\)/, "a list keeps the air its controls add");
+    // And every row begins its line at the same height, so one number covers
+    // them all - including the one row that is a name and a figure.
+    assert.match(rule(css, ".row:not(.row-stack) > .row-name:first-child"), /min-height: var\(--ui-control\)/, "a row of plain text begins its line higher than every other row");
   });
 
   it("gives a section, a subsection and a row three different boundaries (D258, H1)", async () => {
@@ -130,17 +171,72 @@ describe("the settings page's type", () => {
     // The rule belongs to the section, so it never travels into a fold or a
     // card that borrows a heading's element.
     assert.match(rule(css, "main > section"), /border-top: var\(--sep-section\)/, "a section has no boundary of its own");
-    assert.match(rule(css, "main > section"), /margin-top: var\(--space-section\)/, "a section stands as close as a paragraph");
+    assert.match(rule(css, "main > section"), /margin-top: var\(--m-section\)/, "a section stands as close as a paragraph");
     // A subsection is air and weight, never a line.
     assert.doesNotMatch(rule(css, "h2"), /border/, "a section heading carries a line of its own");
     assert.doesNotMatch(rule(css, "h3"), /border/, "a subsection heading carries a line");
     assert.doesNotMatch(css, /\.rows \{\n  border-top/, "a group of rows still opens on a rule");
     assert.doesNotMatch(rule(css, ".row"), /border-bottom/, "a row still closes on a rule");
-    // The hairline stands between two drawn rows and nowhere else - a row
-    // whose predecessor left the page hands the line back.
-    assert.match(css, /\.row \+ \.row,\n\.model \+ \.model,\n\.dictionary-row \+ \.dictionary-row \{\n  border-top: var\(--sep-row\);/, "the hairline is not between two rows");
-    assert.match(css, /\[hidden\] \+ :is\(\.row, \.model, \.dictionary-row\)/, "a row after a hidden one opens on a stray rule");
-    assert.match(css, /body\.no-translation \.translation-only \+ \.row/, "the mode leaves a stray rule over its first row");
+    // The hairline stands between two drawn rows and nowhere else. The general
+    // sibling combinator rather than the adjacent one (D259): a row has to be
+    // able to look back past the rows the search or the mode took away, or two
+    // rows either side of a hidden one end up touching.
+    assert.match(
+      css,
+      /:where\(body:not\(\.no-translation\)\) \.row:not\(\[hidden\]\) ~ \.row:not\(\[hidden\]\),\n:where\(body\.no-translation\) \.row:not\(\[hidden\], \.translation-only\) ~ \.row:not\(\[hidden\], \.translation-only\) \{\n  border-top: var\(--sep-row\);\n  padding-top: var\(--m-row-top\);/,
+      "the hairline and the air are not between two drawn rows",
+    );
+    assert.doesNotMatch(css, /\.row \+ \.row \{/, "the hairline still leans on the adjacent combinator");
+    // And the air under a row's words stands only while a drawn row follows.
+    assert.match(css, /\.row:not\(\[hidden\]\):has\(~ \.row:not\(\[hidden\]\)\)/, "the last row of a group keeps air under it");
+    // A dependent group opens on air alone: a hairline over its first child
+    // met the line down its edge and drew a corner (K4).
+    assert.match(
+      css,
+      /\.row:not\(\[hidden\], \.row-sub\) \+ \.row-sub:not\(\[hidden\]\) \{\n  border-top: none;\n  padding-top: 0;/,
+      "a dependent group still opens on a rule",
+    );
+    // The long lists say the same thing without `:has()`: five hundred rows
+    // re-matched on every keystroke of the filter is a cost with nothing to
+    // show for it.
+    assert.match(css, /\.model:not\(\[hidden\]\) ~ \.model:not\(\[hidden\]\)/, "a filtered list leaves two rows touching");
+    assert.match(rule(css, ".models > :first-child"), /padding-top: 0/, "a list keeps air at its own top edge");
+    assert.match(rule(css, ".models > :last-child"), /padding-bottom: 0/, "a list keeps air at its own bottom edge");
+  });
+
+  it("dresses every fold's trigger the same way, and never as a link (D259, K1)", async () => {
+    const css = await source("options/options.css");
+    const trigger = rule(css, "button.note-more");
+    assert.match(trigger, /text-decoration: none/, "a trigger still promises a link it is not");
+    assert.match(trigger, /white-space: nowrap/, "the trigger's own words can be split");
+    // The hard space and the trigger stand in one box that cannot break (K2):
+    // measured in the browser, the space alone let the trigger open a line of
+    // its own at 49 widths out of 231, because the break opportunity a
+    // browser takes is the boundary between the text and the element, not
+    // the character before it.
+    assert.match(rule(css, ".note-tail"), /white-space: nowrap/, "the space before a trigger is a break opportunity again");
+    assert.match(css, /button\.note-more:hover,\nbutton\.note-more:focus-visible \{\n  color: var\(--page-fg\);\n  text-decoration: underline;/, "a trigger says nothing under the pointer");
+    // The dictionary rows' own fold wears the page's triangle rather than the
+    // browser's larger marker.
+    assert.match(rule(css, ".dictionary-details summary"), /list-style: none/, "a dictionary's fold keeps the browser's own marker");
+    assert.match(css, /\.dictionary-details summary::before \{\n  content: "\\25B8\\00A0";/, "a dictionary's fold wears no triangle of the page's");
+    assert.match(css, /\.dictionary-details\[open\] summary::before \{\n  content: "\\25BE\\00A0";/, "an open dictionary fold keeps the closed triangle");
+  });
+
+  it("keeps the heavier weight for headings and the section being read (D259, K3)", async () => {
+    const css = await source("options/options.css");
+    // Five bold dictionary names in a column outweighed the heading they
+    // stand under; a date is a value, not an emphasis.
+    assert.match(rule(css, ".dictionary-name"), /font-weight: 500/, "a dictionary's name is still set at a heading's weight");
+    assert.match(rule(css, ".list-dated strong"), /font-weight: 400/, "the list's date is still set bold");
+    // What may be 600 or more: the page's headings, the bar's own title (the
+    // heading a narrow screen has) and the section being read.
+    const heavy = [...css.matchAll(/\n([^\n{]+) \{[^}]*?font-weight: (600|700|bold)/g)].map((match) => String(match[1]));
+    assert.deepEqual(
+      heavy,
+      ["header h1", "main h2", "main h3", '.sections a[aria-current="location"]', ".bar-sections"],
+      "something other than a heading or the section being read is set at a heading's weight",
+    );
   });
 
   it("keeps one note on the page, and the accent for the one block that asks to be acted on (D258, H2)", async () => {

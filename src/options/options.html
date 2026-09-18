@@ -287,7 +287,9 @@
          I set up for" is one question, and its answer used to be split
          across half the page. -->
     <section aria-labelledby="languages">
-    <h2 id="languages" data-i18n="options_section_languages">Languages</h2>
+    <header>
+      <h2 id="languages" data-i18n="options_section_languages">Languages</h2>
+    </header>
 
     <div class="rows">
       <!-- Every row note says one whole sentence, always (D254, P5): the page
@@ -331,37 +333,39 @@
          - deliberately no side door. The anchor stays on the heading, so the
          address this section has always answered to still lands here. -->
     <section class="translation-only" aria-labelledby="translation-models">
-    <h3 id="translation-models" data-i18n="options_models_heading">Translation models</h3>
+    <header>
+      <h3 id="translation-models" data-i18n="options_models_heading">Translation models</h3>
 
-    <!-- What does the translating, said once under the heading (P7): it used
-         to be a settings row, and a row with a value and no control in it
-         reads as a setting somebody has greyed out. -->
-    <p class="section-meta">
-      <span data-i18n="options_engine">Engine</span>:
-      <span data-i18n="options_engine_value">Bergamot, built into the extension; translation offline.</span>
-    </p>
+      <!-- What does the translating, said once under the heading (P7): it used
+           to be a settings row, and a row with a value and no control in it
+           reads as a setting somebody has greyed out. -->
+      <p class="section-meta">
+        <span data-i18n="options_engine">Engine</span>:
+        <span data-i18n="options_engine_value">Bergamot, built into the extension; translation offline.</span>
+      </p>
 
-    <p class="explain" data-i18n="options_models_intro">
-      A translation model is downloaded separately for each pair of languages. These are official
-      Mozilla files; the translating happens entirely on this device.
-    </p>
+      <p class="explain" data-i18n="options_models_intro">
+        A translation model is downloaded separately for each pair of languages. These are official
+        Mozilla files; the translating happens entirely on this device.
+      </p>
 
-    <!-- The one fact about models that changes what somebody installs next -
-         a model guesses badly at a single word (D192, Michał's ask) - as a
-         paragraph of the section's own prose, ending in the way to the
-         dictionaries (F7). It wore a highlighter's stroke until D254 and the
-         page's framed note until this round: two framed notes one under the
-         other read as two warnings, and the frame belongs to the one note
-         that says where a download comes from. -->
-    <p class="explain">
-      <span data-i18n="options_models_single_word"
-        >A model translates sentences well, but a single word on its own is often translated
-        wrongly - the result is cut short, or is a word that does not exist. For single words the
-        better source is a dictionary - the</span
-      >
-      <a href="#dictionaries" data-i18n="options_dictionaries_heading">Dictionaries</a>
-      <span data-i18n="options_models_single_word_rest">section below.</span>
-    </p>
+      <!-- The one fact about models that changes what somebody installs next -
+           a model guesses badly at a single word (D192, Michał's ask) - as a
+           paragraph of the section's own prose, ending in the way to the
+           dictionaries (F7). It wore a highlighter's stroke until D254 and the
+           page's framed note until this round: two framed notes one under the
+           other read as two warnings, and the frame belongs to the one note
+           that says where a download comes from. -->
+      <p class="explain">
+        <span data-i18n="options_models_single_word"
+          >A model translates sentences well, but a single word on its own is often translated
+          wrongly - the result is cut short, or is a word that does not exist. For single words the
+          better source is a dictionary - the</span
+        >
+        <a href="#dictionaries" data-i18n="options_dictionaries_heading">Dictionaries</a>
+        <span data-i18n="options_models_single_word_rest">section below.</span>
+      </p>
+    </header>
 
     <!-- The one fetch this section can make, and the press that makes it: the
          list below refreshes only here, never by itself - the date says how
@@ -474,7 +478,7 @@
         <p class="row-note">
           <span data-i18n="options_no_translation_hint"
             >Dictionaries only, without machine translation; the reader, the offline reading list and the highlighter keep working.</span
-          >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-translationOff" data-i18n="options_details">Details</button>
+          ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-translationOff" data-i18n="options_details">Details</button></span>
         </p>
         <p class="row-note row-more" id="more-translationOff" data-i18n="options_no_translation_more" hidden>
           With a language pair chosen, the bubble still shows dictionary meanings, and you can save
@@ -498,7 +502,7 @@
         <p class="row-note">
           <span data-i18n="options_bubble_off_hint"
             >With this on, selecting text on an ordinary page does nothing at all - open a page in the reader from re/read's button or with Alt+Shift+R.</span
-          >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-bubbleOff" data-i18n="options_details">Details</button>
+          ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-bubbleOff" data-i18n="options_details">Details</button></span>
         </p>
         <p class="row-note row-more" id="more-bubbleOff" data-i18n="options_bubble_off_more" hidden>
           In the reader a selection is only a highlight for the moment: no bubble opens, a tap or
@@ -512,28 +516,30 @@
          translation too - a monolingual one answers selections in the reader -
          so this section stands in both modes, unlike the models above. -->
     <section aria-labelledby="dictionaries">
-    <h3 id="dictionaries" data-i18n="options_dictionaries_heading">Dictionaries</h3>
+    <header>
+      <h3 id="dictionaries" data-i18n="options_dictionaries_heading">Dictionaries</h3>
 
-    <p class="explain" data-i18n="options_dictionaries_intro">
-      Add dictionaries to see detailed word definitions in the translation bubble. You can change
-      the order in which they appear using the arrows.
-    </p>
+      <p class="explain" data-i18n="options_dictionaries_intro">
+        Add dictionaries to see detailed word definitions in the translation bubble. You can change
+        the order in which they appear using the arrows.
+      </p>
 
-    <!-- Where the list comes from and that it is not the only way in (D192,
-         Michał's ask): the by-hand folds stand under a list of four hundred
-         rows, and a reader who never unfolds them never learns that a
-         dictionary of their own, or a second one for the same language, is
-         possible. The link is the same page the link fold points at, in the
-         interface's language (see `linkDictionarySources`). -->
-    <p class="explain">
-      <span data-i18n="options_dictionaries_sources"
-        >The dictionaries in the list come from WikDict. You can add your own from a file or from
-        a link, several for one language as well. The sources, each with its licence:</span
-      >
-      <a id="dictionary-sources-intro" href="https://reapps.eu/read#faq-dictionary-sources" target="_blank" rel="noopener"
-        >reapps.eu/read</a
-      >.
-    </p>
+      <!-- Where the list comes from and that it is not the only way in (D192,
+           Michał's ask): the by-hand folds stand under a list of four hundred
+           rows, and a reader who never unfolds them never learns that a
+           dictionary of their own, or a second one for the same language, is
+           possible. The link is the same page the link fold points at, in the
+           interface's language (see `linkDictionarySources`). -->
+      <p class="explain">
+        <span data-i18n="options_dictionaries_sources"
+          >The dictionaries in the list come from WikDict. You can add your own from a file or from
+          a link, several for one language as well. The sources, each with its licence:</span
+        >
+        <a id="dictionary-sources-intro" href="https://reapps.eu/read#faq-dictionary-sources" target="_blank" rel="noopener"
+          >reapps.eu/read</a
+        >.
+      </p>
+    </header>
 
     <!-- The dictionary list's twin of the model refresh line: the one fetch
          this section can make besides a download, and the press that makes
@@ -737,38 +743,40 @@
          worked in the reader, when the reader-only switch limits the
          underlines and the bubble and nothing else. -->
     <section aria-labelledby="switched-off-sites" data-keywords="options_keywords_sites">
-    <h2 id="switched-off-sites" data-i18n="options_disabled_heading">Switched-off sites</h2>
+    <header>
+      <h2 id="switched-off-sites" data-i18n="options_disabled_heading">Switched-off sites</h2>
 
-    <!-- Two sentences that answer the question, and the edge case behind the
-         page's own More (D258, §6.3): what the section is and how to add a
-         site are what somebody came for; the one arrangement in which the
-         toolbar window has no switch to offer is worth saying, and worth not
-         saying first.
+      <!-- Two sentences that answer the question, and the edge case behind the
+           page's own More (D258, §6.3): what the section is and how to add a
+           site are what somebody came for; the one arrangement in which the
+           toolbar window has no switch to offer is worth saying, and worth not
+           saying first.
 
-         The two settings the fold names are links to their own rows (D254,
-         P9): a sentence that names a setting and leaves the reader to find it
-         is a sentence that sends them back to the top of the page. The names
-         come from the rows' own catalogue keys, so renaming a setting renames
-         the reference with it. The closing clause is glued to the second link
-         (no line break between them): where a language opens it with a
-         colon - Polish, Spanish, Ukrainian - a space before that colon would
-         be a typographic error, and the languages that want a word there open
-         theirs with a space instead. -->
-    <p class="explain">
-      <span data-i18n="options_disabled_intro"
-        >On these sites re/read does not translate and shows no bubble and no underlines. Add a
-        site in the re/read window in the toolbar, or by typing its address below.</span
-      >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-disabled-sites" data-i18n="options_details">Details</button>
-    </p>
-    <p class="explain row-more" id="more-disabled-sites" hidden>
-      <span data-i18n="options_disabled_intro_switch">There is no switch in that window when both</span>
-      <a href="#s-translationOff" data-i18n="options_no_translation">Use without a translation model</a>
-      <span data-i18n="options_disabled_intro_and">and</span>
-      <a href="#s-bubbleOff" data-i18n="options_bubble_off">No bubble when selecting text</a
-      ><span data-i18n="options_disabled_intro_rest"
-        > are on: nothing happens on ordinary pages then, so there is nothing to switch off.</span
-      >
-    </p>
+           The two settings the fold names are links to their own rows (D254,
+           P9): a sentence that names a setting and leaves the reader to find it
+           is a sentence that sends them back to the top of the page. The names
+           come from the rows' own catalogue keys, so renaming a setting renames
+           the reference with it. The closing clause is glued to the second link
+           (no line break between them): where a language opens it with a
+           colon - Polish, Spanish, Ukrainian - a space before that colon would
+           be a typographic error, and the languages that want a word there open
+           theirs with a space instead. -->
+      <p class="explain">
+        <span data-i18n="options_disabled_intro"
+          >On these sites re/read does not translate and shows no bubble and no underlines. Add a
+          site in the re/read window in the toolbar, or by typing its address below.</span
+        ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-disabled-sites" data-i18n="options_details">Details</button></span>
+      </p>
+      <p class="explain row-more" id="more-disabled-sites" hidden>
+        <span data-i18n="options_disabled_intro_switch">There is no switch in that window when both</span>
+        <a href="#s-translationOff" data-i18n="options_no_translation">Use without a translation model</a>
+        <span data-i18n="options_disabled_intro_and">and</span>
+        <a href="#s-bubbleOff" data-i18n="options_bubble_off">No bubble when selecting text</a
+        ><span data-i18n="options_disabled_intro_rest"
+          > are on: nothing happens on ordinary pages then, so there is nothing to switch off.</span
+        >
+      </p>
+    </header>
 
     <div id="disabled-hosts" class="models"></div>
 
@@ -805,7 +813,9 @@
          two questions are asked at different moments - one while reading,
          one while revising. -->
     <section aria-labelledby="bubble-and-phrases">
-    <h2 id="bubble-and-phrases" data-i18n="options_section_bubble">Bubble and phrases</h2>
+    <header>
+      <h2 id="bubble-and-phrases" data-i18n="options_section_bubble">Bubble and phrases</h2>
+    </header>
 
     <!-- The switch that governs both halves of this section stands over both
          of them (D257), the way the language pair stands over the models and
@@ -819,14 +829,15 @@
            hiding it was what overrode it. -->
       <div class="row" id="s-readerOnly" data-setting="readerOnly" data-section="bubble-and-phrases">
         <label class="row-toggle">
-          <span class="row-name" data-i18n="options_reader_only">Show the underlines and the bubble only in the reader</span>
+          <span class="row-name" data-i18n="options_reader_only">Only in the reader</span>
           <input type="checkbox" id="reader-only" />
         </label>
         <p class="row-note">
           <span data-i18n="options_reader_only_hint"
-            >On an ordinary page, selecting text brings up a bubble with two buttons instead: open
-            the page in the reader, and go to the reading list.</span
-          >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-readerOnly" data-i18n="options_details">Details</button>
+            >Phrase underlines and the translation bubble work only in the reader. On an ordinary
+            page, selecting text brings up a bubble with two buttons instead: open the page in the
+            reader, and go to the reading list.</span
+          ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-readerOnly" data-i18n="options_details">Details</button></span>
         </p>
         <p class="row-note row-more" id="more-readerOnly" data-i18n="options_reader_only_more" hidden>
           With it on, no web page can tell which of its words you have saved. On Android and iOS it
@@ -836,7 +847,9 @@
     </div>
 
     <section aria-labelledby="bubble">
-    <h3 id="bubble" data-i18n="options_sub_bubble">Bubble</h3>
+    <header>
+      <h3 id="bubble" data-i18n="options_sub_bubble">Bubble</h3>
+    </header>
 
     <div class="rows">
       <!-- The second layer's start (D186): the sentence and the dictionary
@@ -859,7 +872,7 @@
         <p class="row-note">
           <span data-i18n="options_bubble_more_hint"
             >The bubble shows the translated sentence and the dictionary entries right away, with no press on “More”.</span
-          >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-showBubbleMore" data-i18n="options_details">Details</button>
+          ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-showBubbleMore" data-i18n="options_details">Details</button></span>
         </p>
         <p class="row-note row-more" id="more-showBubbleMore" data-i18n="options_bubble_more_more" hidden>
           Worth keeping on with a dictionary installed: the translation of a single word is often
@@ -879,7 +892,7 @@
         <p class="row-note">
           <span data-i18n="options_quiet_bubble_hint"
             >The bubble shows the translation alone; the buttons appear when you click or tap it.</span
-          >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-hideBubbleActions" data-i18n="options_details">Details</button>
+          ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-hideBubbleActions" data-i18n="options_details">Details</button></span>
         </p>
         <p class="row-note row-more" id="more-hideBubbleActions" data-i18n="options_quiet_bubble_more" hidden>
           The action buttons are copy, save, read aloud and the rest - all of the bubble's actions,
@@ -907,7 +920,9 @@
     </section>
 
     <section aria-labelledby="saved-phrases">
-    <h3 id="saved-phrases" data-i18n="options_sub_phrases">Saved phrases</h3>
+    <header>
+      <h3 id="saved-phrases" data-i18n="options_sub_phrases">Saved phrases</h3>
+    </header>
 
     <div class="rows">
       <!-- The sentence kept with a phrase (D210): the one the bubble had
@@ -928,7 +943,7 @@
         <p class="row-note">
           <span data-i18n="options_save_sentence_hint"
             >Saving a phrase saves the sentence it stood in as well.</span
-          >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-saveSentence" data-i18n="options_details">Details</button>
+          ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-saveSentence" data-i18n="options_details">Details</button></span>
         </p>
         <p class="row-note row-more" id="more-saveSentence" data-i18n="options_save_sentence_more" hidden>
           The sentence as the page shows it, without its translation. It is shown under the phrase
@@ -954,7 +969,7 @@
         <p class="row-note">
           <span data-i18n="options_underline_forms_hint"
             >Save "read", and "reads" and "reading" are underlined too.</span
-          >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-underlineForms" data-i18n="options_details">Details</button>
+          ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-underlineForms" data-i18n="options_details">Details</button></span>
         </p>
         <p class="row-note row-more" id="more-underlineForms" data-i18n="options_underline_forms_more" hidden>
           The bubble over them shows what you saved for "read". Which forms count comes from your
@@ -969,7 +984,9 @@
     <!-- The reading view: what the reader keeps, what it is set in, and how
          fast it thinks you read - then the Pages layout's own three. -->
     <section aria-labelledby="reading-view">
-    <h2 id="reading-view" data-i18n="options_section_reading">Reading view</h2>
+    <header>
+      <h2 id="reading-view" data-i18n="options_section_reading">Reading view</h2>
+    </header>
 
     <div class="rows">
       <!-- The default keep (D124). Not `translation-only`: with translation
@@ -985,7 +1002,7 @@
             >
             Every page you open in the reader is saved in the offline reading list.
           </span
-          >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-keepArticles" data-i18n="options_details">Details</button>
+          ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-keepArticles" data-i18n="options_details">Details</button></span>
         </p>
         <p class="row-note row-more" id="more-keepArticles" data-i18n="options_keep_articles_more" hidden>
           Your saved pages, highlights and reading progress are kept safe even if the original
@@ -1019,7 +1036,7 @@
         <p class="row-note">
           <span data-i18n="options_font_custom_hint"
             >A typeface installed on this device, for example Noto Serif. In the Aa panel it appears in the Type row as Custom.</span
-          >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-fontFamily" data-i18n="options_details">Details</button>
+          ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-fontFamily" data-i18n="options_details">Details</button></span>
         </p>
         <p class="row-note row-more" id="more-fontFamily" data-i18n="options_font_custom_more" hidden>
           Type the name as the system spells it. Leave the field empty to use the built-in typefaces
@@ -1044,7 +1061,7 @@
         <p class="row-note">
           <span data-i18n="options_reading_pace_hint"
             >Used only to estimate the reading time shown in the reading list and under an article's title.</span
-          >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-readingPace" data-i18n="options_details">Details</button>
+          ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-readingPace" data-i18n="options_details">Details</button></span>
         </p>
         <p class="row-note row-more" id="more-readingPace" data-i18n="options_reading_pace_more" hidden>
           The number of words you read in a minute. 200 is an unhurried pace in your own language;
@@ -1061,12 +1078,14 @@
          looking for the Pages layout comes, and a section that appeared and
          vanished with the reader's own setting could not be found at all. -->
     <section aria-labelledby="paged-layout">
-    <h3 id="paged-layout" data-i18n="options_paged_heading">Pages layout</h3>
+    <header>
+      <h3 id="paged-layout" data-i18n="options_paged_heading">Pages layout</h3>
 
-    <p class="explain" data-i18n="options_paged_intro">
-      These work in the reader's Pages layout: the text moves by whole pages, each beginning and
-      ending with a whole line.
-    </p>
+      <p class="explain" data-i18n="options_paged_intro">
+        These work in the reader's Pages layout: the text moves by whole pages, each beginning and
+        ending with a whole line.
+      </p>
+    </header>
 
     <div class="rows">
       <!-- The page count at the foot of a page read by pages (D238), on by
@@ -1080,7 +1099,7 @@
         <p class="row-note">
           <span data-i18n="options_page_number_hint"
             >A page count at the foot of the window.</span
-          >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-pageNumber" data-i18n="options_details">Details</button>
+          ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-pageNumber" data-i18n="options_details">Details</button></span>
         </p>
         <p class="row-note row-more" id="more-pageNumber" data-i18n="options_page_number_more" hidden>
           Off, each page's text reaches lower; the count is still read by screen readers, and on a
@@ -1104,7 +1123,7 @@
         <p class="row-note">
           <span data-i18n="options_touch_turn_hint"
             >How a finger turns the pages.</span
-          >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-touchTurn" data-i18n="options_details">Details</button>
+          ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-touchTurn" data-i18n="options_details">Details</button></span>
         </p>
         <!-- What the chosen gesture does, in the reader's own words (Michał's
              smoke, 2026-09-18): three gestures named in three words each say
@@ -1130,7 +1149,7 @@
         <p class="row-note">
           <span data-i18n="options_turn_effect_hint"
             >A visible confirmation that the page has changed.</span
-          >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-turnEffect" data-i18n="options_details">Details</button>
+          ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-turnEffect" data-i18n="options_details">Details</button></span>
         </p>
         <p class="row-note" id="turn-effect-note"></p>
         <p class="row-note row-more" id="more-turnEffect" data-i18n="options_turn_effect_more" hidden>
@@ -1147,7 +1166,9 @@
          last - the voice and the speed used to stand between the font and
          the bubble's size, with nothing saying what turned them off. -->
     <section aria-labelledby="reading-aloud">
-    <h2 id="reading-aloud" data-i18n="options_section_aloud">Reading aloud</h2>
+    <header>
+      <h2 id="reading-aloud" data-i18n="options_section_aloud">Reading aloud</h2>
+    </header>
 
     <div class="rows">
       <!-- The reading-aloud switch (D148), the head of the two voice rows
@@ -1167,7 +1188,7 @@
         <p class="row-note">
           <span data-i18n="options_tts_hint"
             >The read-aloud buttons in the bubble, in the lists and in the reader.</span
-          >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-ttsOff" data-i18n="options_details">Details</button>
+          ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-ttsOff" data-i18n="options_details">Details</button></span>
         </p>
         <p class="row-note row-more" id="more-ttsOff" data-i18n="options_tts_more" hidden>
           Turning this off hides every one of them. The voice and the speed you chose are remembered
@@ -1200,7 +1221,7 @@
         <p class="row-note">
           <span data-i18n="options_tts_voice_hint"
             >A separate voice for each language; only voices that speak offline are offered.</span
-          >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-ttsVoices" data-i18n="options_details">Details</button>
+          ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-ttsVoices" data-i18n="options_details">Details</button></span>
         </p>
         <p class="row-note row-more" id="more-ttsVoices" data-i18n="options_tts_voice_more" hidden>
           The voice reads phrases and whole articles alike. Speech is made on this device and
@@ -1235,7 +1256,9 @@
          database - a report belongs beside a report, not between two
          preferences. -->
     <section aria-labelledby="data">
-    <h2 id="data" data-i18n="options_section_data">Data and copies</h2>
+    <header>
+      <h2 id="data" data-i18n="options_section_data">Data and copies</h2>
+    </header>
 
     <div class="rows">
       <!-- What the browser holds for this extension and whether it has
@@ -1260,7 +1283,7 @@
             >
             Space taken up by re/read's data.
           </span
-          >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-storage" data-i18n="options_details">Details</button>
+          ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-storage" data-i18n="options_details">Details</button></span>
         </p>
         <p class="row-note row-more" id="more-storage" data-i18n="options_storage_how_more" hidden>
           The total is the browser's own estimate for all of re/read's data. It counts the
@@ -1316,7 +1339,7 @@
         <p class="row-note">
           <span data-i18n="options_library_copy_hint"
             >A second copy of the reading list, safe from the browser's own clean-ups; it takes twice the space.</span
-          >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-libraryCopy" data-i18n="options_details">Details</button>
+          ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-libraryCopy" data-i18n="options_details">Details</button></span>
         </p>
         <p class="row-note row-more" id="more-libraryCopy" data-i18n="options_library_copy_more" hidden>
           It also protects against a database error: your saved articles remain even if the database
@@ -1328,7 +1351,9 @@
     <!-- The copies that outlive the database, in one place (D254, §9): what
          each of them holds and when it was written. A report, like the row
          above it - not a preference, and never a promise made twice. -->
-    <h3 id="copies" data-i18n="options_storage_copies">Latest copies</h3>
+    <header>
+      <h3 id="copies" data-i18n="options_storage_copies">Latest copies</h3>
+    </header>
 
     <ul class="copies">
       <li id="storage-backup">
@@ -1356,7 +1381,7 @@
     <p class="row-note">
       <span data-i18n="options_copies_safe"
         >The copies are kept in the extension's own storage, apart from the database - both are inside the browser's profile, not in files on your computer.</span
-      >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-copies" data-i18n="options_details">Details</button>
+      ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-copies" data-i18n="options_details">Details</button></span>
     </p>
     <p class="row-note row-more" id="more-copies" data-i18n="options_copies_safe_more" hidden>
       A copy is written again with the next phrase you save, highlight you make or page you keep. It
@@ -1375,11 +1400,17 @@
          transfer section inside them would be a new field in the message the
          background answers, and this round changes no protocol. -->
     <p class="explain copies-file">
-      <span data-i18n="options_storage_to_file">
-        A copy as a file is saved on the pages with the data:
-      </span>
-      <button type="button" class="doorway" id="copy-library" data-i18n="reading_list">Offline reading list</button>
-      <button type="button" class="doorway" id="copy-vocabulary" data-i18n="saved_phrases">Saved phrases</button>
+      <!-- The two doors are named the way the page names every button (D259,
+           K5): in the language's own quotation marks, joined by its own word
+           for "and" - a colon followed by two names with a space between them
+           read as one name, and a screen reader read it as one too. Each
+           fragment is glued to the button beside it, so no quotation mark
+           opens a line of its own. -->
+      <span data-i18n="options_storage_to_file">A copy as a file is saved on the pages with the data: “</span
+      ><button type="button" class="doorway" id="copy-library" data-i18n="reading_list">Offline reading list</button
+      ><span data-i18n="options_storage_to_file_and">” and “</span
+      ><button type="button" class="doorway" id="copy-vocabulary" data-i18n="saved_phrases">Saved phrases</button
+      ><span data-i18n="options_storage_to_file_end">”.</span>
     </p>
     </section>
 
@@ -1393,13 +1424,15 @@
          an example in a code face read as text already typed, and a Save
          pressed over it stored nothing (Michał's smoke, 2026-09-03). -->
     <section aria-labelledby="custom-css">
-    <h2 id="custom-css" data-i18n="options_custom_css_heading">Custom CSS</h2>
+    <header>
+      <h2 id="custom-css" data-i18n="options_custom_css_heading">Custom CSS</h2>
 
-    <p class="explain" data-i18n="options_custom_css_intro">
-      Your own CSS rules change how the bubble, the reading view and the re/read window look. This
-      page is not subject to those rules, so a wrong rule can always be undone here: clear the
-      field and save.
-    </p>
+      <p class="explain" data-i18n="options_custom_css_intro">
+        Your own CSS rules change how the bubble, the reading view and the re/read window look. This
+        page is not subject to those rules, so a wrong rule can always be undone here: clear the
+        field and save.
+      </p>
+    </header>
 
     <div class="custom-css">
       <textarea
@@ -1497,50 +1530,54 @@
          builds it and how to help. Last on purpose - it is the page's only
          section nobody comes here to change. -->
     <section aria-labelledby="about">
-    <h2 id="about" data-i18n="options_section_about">About re/read</h2>
+    <header>
+      <h2 id="about" data-i18n="options_section_about">About re/read</h2>
 
-    <!-- The thesis of the whole extension, stated once, where a curious person
-         goes looking for it. The notes further down say how each download is
-         checked; this says what never happens at all. -->
-    <!-- The two sections the promise rests on are links to themselves (D258,
-         §6.3): "those sections" made a reader scroll back looking for which.
-         The closing word is glued to the second link, the switched-off sites'
-         rule: a language that closes with a bare full stop must not get a
-         space before it. -->
-    <p class="explain">
-      <span data-i18n="options_local_intro"
-        >Everything re/read does happens on this device (offline): translating, the dictionary, the
-        reading list, your saved phrases. Nothing you read or select is ever sent anywhere. An
-        internet connection is needed only to download a new translation model or a dictionary -
-        and only from the two addresses given in the</span
-      >
-      <a href="#translation-models" data-i18n="options_models_heading">Translation models</a>
-      <span data-i18n="options_local_intro_and">and</span>
-      <a href="#dictionaries" data-i18n="options_dictionaries_heading">Dictionaries</a
-      ><span data-i18n="options_local_intro_rest"> sections.</span>
-    </p>
+      <!-- The thesis of the whole extension, stated once, where a curious person
+           goes looking for it. The notes further down say how each download is
+           checked; this says what never happens at all. -->
+      <!-- The two sections the promise rests on are links to themselves (D258,
+           §6.3): "those sections" made a reader scroll back looking for which.
+           The closing word is glued to the second link, the switched-off sites'
+           rule: a language that closes with a bare full stop must not get a
+           space before it. -->
+      <p class="explain">
+        <span data-i18n="options_local_intro"
+          >Everything re/read does happens on this device (offline): translating, the dictionary, the
+          reading list, your saved phrases. Nothing you read or select is ever sent anywhere. An
+          internet connection is needed only to download a new translation model or a dictionary -
+          and only from the two addresses given in the</span
+        >
+        <a href="#translation-models" data-i18n="options_models_heading">Translation models</a>
+        <span data-i18n="options_local_intro_and">and</span>
+        <a href="#dictionaries" data-i18n="options_dictionaries_heading">Dictionaries</a
+        ><span data-i18n="options_local_intro_rest"> sections.</span>
+      </p>
 
-    <!-- The way back to the signpost once it has been put away (D254, §7):
-         the card is gone for good otherwise, and the instructions in it are
-         worth rereading. Shown only while it is hidden. -->
-    <p class="explain" id="first-steps-back" hidden>
-      <button type="button" class="note-more" id="first-steps-show" data-i18n="options_first_steps_show">
-        Show the first steps
-      </button>
-    </p>
+      <!-- The way back to the signpost once it has been put away (D254, §7):
+           the card is gone for good otherwise, and the instructions in it are
+           worth rereading. Shown only while it is hidden. -->
+      <p class="explain" id="first-steps-back" hidden>
+        <button type="button" class="note-more" id="first-steps-show" data-i18n="options_first_steps_show">
+          Show the first steps
+        </button>
+      </p>
+    </header>
 
     <!-- The one section that is not a setting: who builds this and how to
          help them keep building it. The links are doors, not requests - the
          extension itself contacts nothing here; a press is the reader's own
          navigation, the model-host link's rule. The addresses live in the
          README's Support section too - keep the two in step. -->
-    <h3 id="support" data-i18n="support">Support</h3>
+    <header>
+      <h3 id="support" data-i18n="support">Support</h3>
 
-    <p class="explain" data-i18n="options_support_intro">
-      re/read is built by a non-profit foundation - no investors, no ads, no tracking. If you
-      find it useful and want to support its continued development, every donation helps us
-      build software free from commercial pressure.
-    </p>
+      <p class="explain" data-i18n="options_support_intro">
+        re/read is built by a non-profit foundation - no investors, no ads, no tracking. If you
+        find it useful and want to support its continued development, every donation helps us
+        build software free from commercial pressure.
+      </p>
+    </header>
 
     <p class="support-links">
       <a

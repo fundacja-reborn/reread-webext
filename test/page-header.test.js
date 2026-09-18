@@ -161,7 +161,7 @@ describe("the bar stuck to the top of every page", () => {
     // boundary it had just crossed said nothing about having crossed one.
     assert.match(
       ruleOf(await source("options/options.css"), "h2"),
-      /scroll-margin-top: calc\(0\.75rem \+ var\(--space-divider-h2\) \+ 2px\);/,
+      /scroll-margin-top: calc\(0\.75rem \+ var\(--gap-divider-h2\) \+ 2px\);/,
       "a section heading no longer brings its own rule into the window",
     );
     // The pages' own scrolls aim at the top of what they show and let the
