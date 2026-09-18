@@ -534,11 +534,11 @@ function readerWithDefaults(stored) {
     hyphens: isHyphens(raw["hyphens"]) ? raw["hyphens"] : READER_DEFAULTS.hyphens,
     paragraphs: isParagraphs(raw["paragraphs"]) ? raw["paragraphs"] : READER_DEFAULTS.paragraphs,
     layout: isLayout(raw["layout"]) ? raw["layout"] : READER_DEFAULTS.layout,
-    // Only a stored `false` takes the count away (D238, D249): anything
-    // else, the field missing most of all, is the default's counted foot -
-    // the flip reaches the profiles that never touched the switch, which is
-    // what a default is.
-    pageNumber: raw["pageNumber"] !== false,
+    // A stored switch wins either way (D238, D249), like the bubble's own
+    // second layer above: the flip reaches the profiles that have never
+    // written this field - which is what a default is - and leaves the ones
+    // that did alone.
+    pageNumber: typeof raw["pageNumber"] === "boolean" ? raw["pageNumber"] : READER_DEFAULTS.pageNumber,
     links: isLinks(raw["links"]) ? raw["links"] : READER_DEFAULTS.links,
     markerColor: isMarkColor(raw["markerColor"]) ? raw["markerColor"] : READER_DEFAULTS.markerColor,
   };
