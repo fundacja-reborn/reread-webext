@@ -613,7 +613,7 @@ html {
    them. Only the chevron's visibility follows the scroll, and the line over
    the strip is a shadow, so neither costs a reflow.
 
-   A button, and the panel's own air under the last row is its padding
+   A button, and the panel's own air under the last row is inside it
    (D247, after the first cut met a phone): a sticky foot is held inside its
    parent's content box, so air given to the panel was a band of the
    scrollport the rows went on showing through under the strip - half a row
@@ -628,16 +628,34 @@ html {
   align-items: center;
   justify-content: center;
   width: 100%;
-  /* The chevron's own line, and under it the air that was the panel's. */
-  min-height: 1.9rem;
-  padding: 0 0 0.6rem;
+  /* The chevron's line and the air that was the panel's, as one height
+     rather than a line with the air hung beneath it (D253, Michał's photo
+     2026-09-18: "is the gap under it worth keeping?"). The air is the
+     strip's either way - inside the button, where a press still brings up
+     what is below, which is the whole of D247 - but held as padding it all
+     stood under the chevron, and a glyph with a gap below it reads as a
+     strip cut short rather than a strip with room in it. The height is the
+     same 2.5rem as before, so nothing about the panel's fold moves; only
+     the chevron sits in the middle of it. */
+  min-height: 2.5rem;
+  padding: 0;
   border: 0;
   border-radius: 0;
   background: var(--page-bg);
   color: var(--page-muted);
 }
 
-.panel-more-glyph {
+/* The glyph IS the button here, so it takes the size the pager's chevrons
+   take when their words step aside under a phone's width (`.pager-icon`,
+   page.css: "icon-only means the icon is the button"). At the panel's own
+   voice the drawn stroke came to some 8 by 4 px - the smallest mark in the
+   reader, standing alone on an empty strip with no frame to hold it, and
+   the only word that anything waits below the fold (D253). In rem, not em,
+   for `.chrome-tab-icon`'s reason: the strip is chrome, and the chevron
+   must not step down with the quieter voice the panel speaks in. */
+.panel-more .panel-more-glyph {
+  width: 1.5rem;
+  height: 1.5rem;
   visibility: hidden;
 }
 
