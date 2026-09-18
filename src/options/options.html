@@ -319,8 +319,8 @@
           <span data-i18n="options_pair_hint_rest">section below.</span>
         </p>
         <p class="row-note no-translation-only" data-i18n="options_pair_hint_quiet">
-          Without a translation model, the pair says which language you are reading and where saved
-          phrases are kept. Pairs come from installed models and dictionaries.
+          Without a translation model the pair sets which language you are reading and which pair
+          your phrases are saved under. Pairs come from installed models and dictionaries.
         </p>
       </div>
     </div>
@@ -449,8 +449,8 @@
       <p id="file-status" class="status" role="status"></p>
 
       <p class="note footnote" data-i18n="options_files_note">
-        Adding a model by hand makes no network request, and this page stays the way in on the day
-        the place models are downloaded from stops answering.
+        Adding a model from files makes no network request, and this page is the way in on the day
+        the server the models come from stops working.
       </p>
     </details>
 
@@ -566,8 +566,8 @@
          it is about the list's own order. The arrows that change it are the
          intro's business, said once up there. -->
     <p id="dictionary-order-hint" class="explain" data-i18n="options_dictionary_order_hint" hidden>
-      The bubble answers in the order below. Only the dictionaries of the language you are reading
-      answer.
+      The bubble shows the entries in the order below. Only the dictionaries of the language you are
+      reading are used.
     </p>
 
     <!-- A list, not a frame of cells: every dictionary is one item that
@@ -841,10 +841,10 @@
           >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-showBubbleMore" data-i18n="options_details">Details</button>
         </p>
         <p class="row-note row-more" id="more-showBubbleMore" data-i18n="options_bubble_more_more" hidden>
-          Worth keeping on with a dictionary installed - a translation model often gets a single
-          word wrong, and the dictionary shows what it really means. The bubble over an already
-          saved phrase shows only the saved translation - the sentence and the dictionary entries
-          appear after you press "More".
+          Worth keeping on with a dictionary installed: the translation of a single word is often
+          wrong, and the dictionary shows what it really means. The bubble over an already saved
+          phrase shows only the saved translation - the sentence and the dictionary entries appear
+          after a press on “More”.
         </p>
       </div>
       <!-- `translation-only`: the trimmed bubble ignores the fold - its two
@@ -861,7 +861,7 @@
           >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-hideBubbleActions" data-i18n="options_details">Details</button>
         </p>
         <p class="row-note row-more" id="more-hideBubbleActions" data-i18n="options_quiet_bubble_more" hidden>
-          The action buttons are copy, save, read aloud and the rest - everything the bubble can do,
+          The action buttons are copy, save, read aloud and the rest - all of the bubble's actions,
           one press away.
         </p>
       </div>
@@ -936,7 +936,7 @@
           >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-underlineForms" data-i18n="options_details">Details</button>
         </p>
         <p class="row-note row-more" id="more-underlineForms" data-i18n="options_underline_forms_more" hidden>
-          The bubble over them shows what you saved for "read". Which forms count is decided by your
+          The bubble over them shows what you saved for "read". Which forms count comes from your
           dictionary for the language you read, so one has to be installed. For now only when you
           read English. Switched off, only the exact form you saved is underlined.
         </p>
@@ -961,7 +961,9 @@
         </label>
         <p class="row-note">
           <span data-i18n="options_keep_articles_hint"
-            >Every page you open in the reader goes into the offline reading list.</span
+            >
+            Every page you open in the reader is saved in the offline reading list.
+          </span
           >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-keepArticles" data-i18n="options_details">Details</button>
         </p>
         <p class="row-note row-more" id="more-keepArticles" data-i18n="options_keep_articles_more" hidden>
@@ -1060,8 +1062,8 @@
           >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-pageNumber" data-i18n="options_details">Details</button>
         </p>
         <p class="row-note row-more" id="more-pageNumber" data-i18n="options_page_number_more" hidden>
-          Off, the last line of each page stands lower; the count is still read by screen readers,
-          and on a wide screen it stands in the bar next to re/read.
+          Off, each page's text reaches lower; the count is still read by screen readers, and on a
+          wide screen it is shown in the bar next to re/read.
         </p>
       </div>
       <!-- What a finger does (D250). The default follows the screen: a slide
@@ -1111,8 +1113,8 @@
         </p>
         <p class="row-note" id="turn-effect-note"></p>
         <p class="row-note row-more" id="more-turnEffect" data-i18n="options_turn_effect_more" hidden>
-          It is easy to miss when you are reading the middle of a page. Nothing happens if your
-          system asks for less motion, and nothing when the page is turned by reading aloud or by
+          It is easy to miss when you are reading the middle of a page. Nothing happens when your
+          system is set to reduce motion, and nothing when the page is turned by reading aloud or by
           dragging a selection to the edge of the page.
         </p>
       </div>
@@ -1147,8 +1149,8 @@
           >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-ttsOff" data-i18n="options_details">Details</button>
         </p>
         <p class="row-note row-more" id="more-ttsOff" data-i18n="options_tts_more" hidden>
-          Turning this off hides every one of them. The voice and the speed you chose stay stored
-          and come back when you turn it on again.
+          Turning this off hides every one of them. The voice and the speed you chose are remembered
+          and apply again when you turn it back on.
         </p>
       </div>
       <!-- Which voice reads a selection aloud (D83). The first select names
@@ -1234,15 +1236,20 @@
              145 MB dictionary, 705 MB of database. -->
         <p class="row-note">
           <span data-i18n="options_storage_how"
-            >Disk space used by the extension.</span
+            >
+            Space taken up by re/read's data.
+          </span
           >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-storage" data-i18n="options_details">Details</button>
         </p>
         <p class="row-note row-more" id="more-storage" data-i18n="options_storage_how_more" hidden>
-          The total is the browser's own estimate of everything re/read stores: it counts the
-          databases' indexes and caches too, which is why it is larger than the parts under it. Each
-          part counts what it holds - and a dictionary costs several times what its text weighs, so
-          most of what stands under Other is the dictionaries' database. Deleting an article or book
-          completely removes its text, images, highlights, notes and reading progress.
+          The total is the browser's own estimate for all of re/read's data. It counts the
+          databases' indexes and caches as well, which is why it is larger than the parts below it
+          added up. The parts count the text and the pictures alone, without indexes: one dictionary
+          entry takes several times more room in the database than its text alone, so Other is
+          mostly the dictionaries' database. All of the data is in the browser's own database
+          (IndexedDB), inside the browser's profile - not in separate files on your computer.
+          Deleting an article or a book removes its text, pictures, highlights, notes and reading
+          position for good.
         </p>
         <p class="row-note" id="storage-note" hidden></p>
         <!-- Where the space went (F8), always on the page: this is what the
@@ -1291,8 +1298,8 @@
           >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-libraryCopy" data-i18n="options_details">Details</button>
         </p>
         <p class="row-note row-more" id="more-libraryCopy" data-i18n="options_library_copy_more" hidden>
-          It survives a database error too: your saved articles are kept even if the database is
-          lost.
+          It also protects against a database error: your saved articles remain even if the database
+          is lost.
         </p>
       </div>
     </div>
@@ -1320,13 +1327,25 @@
       </li>
     </ul>
 
-    <!-- Where each of them lives and when it is written again - said once,
-         for the three of them together (F8). -->
+    <!-- Where the copies are and what they are worth - said once, for the
+         three of them together (F8), with the rest behind the fold: what a
+         copy does not protect against (the extension being removed), where
+         the data and the copies actually are, and how to save a copy as a
+         file before uninstalling (Michał's ask, 2026-09-18). -->
     <p class="row-note">
       <span data-i18n="options_copies_safe"
-        >Each copy lives where the browser does not clear data on its own, and is written again
-        with the next phrase you save, highlight you make or page you keep.</span
-      >
+        >The copies are kept in the extension's own storage, apart from the database - both are inside the browser's profile, not in files on your computer.</span
+      >&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-copies" data-i18n="options_details">Details</button>
+    </p>
+    <p class="row-note row-more" id="more-copies" data-i18n="options_copies_safe_more" hidden>
+      A copy is written again with the next phrase you save, highlight you make or page you keep. It
+      protects the data when the browser clears its storage or a database goes wrong, but not when
+      the extension is removed: uninstalling re/read deletes all of its data, the copies with it.
+      The database is IndexedDB and the copies are in the extension's storage (storage.local).
+      Before you uninstall re/read, or before you move to another device, save a copy as a file:
+      Export in the offline reading list writes one reread-backup.zip with the reading list, the
+      saved phrases, the highlights and the settings. Models and dictionaries are not in that file -
+      they can be downloaded again.
     </p>
 
     <!-- The other kind of copy: the one that leaves the device as a file,
@@ -1335,7 +1354,9 @@
          transfer section inside them would be a new field in the message the
          background answers, and this round changes no protocol. -->
     <p class="explain copies-file">
-      <span data-i18n="options_storage_to_file">A copy as a file is made on the pages that hold the data:</span>
+      <span data-i18n="options_storage_to_file">
+        A copy as a file is saved on the pages with the data:
+      </span>
       <button type="button" class="note-more" id="copy-library" data-i18n="reading_list">Offline reading list</button>
       <button type="button" class="note-more" id="copy-vocabulary" data-i18n="saved_phrases">Saved phrases</button>
     </p>
@@ -1404,8 +1425,8 @@
 
       <p class="explain" data-i18n="options_custom_css_rules">
         Rules that would load anything from the network (url(), @import, @font-face) are refused.
-        The names of the elements are kept from version to version where possible; when one has
-        to change, the release notes say so. The names come from these files:
+        The names of the elements are kept from version to version where possible; when one has to
+        change, it is written in the release notes. The names come from these files:
       </p>
 
       <p class="jump sources">

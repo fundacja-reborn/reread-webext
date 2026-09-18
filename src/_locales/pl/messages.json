@@ -2089,7 +2089,12 @@
   },
 
   "options_copies_safe": {
-    "message": "Każda kopia leży tam, gdzie przeglądarka nie kasuje danych sama, i powstaje na nowo przy następnej zapisanej frazie, zakreśleniu albo zachowanej stronie."
+    "message": "Kopie są zapisane w pamięci samego rozszerzenia, osobno od bazy danych - jedno i drugie znajduje się w profilu przeglądarki, a nie w plikach na komputerze."
+  },
+
+  "options_copies_safe_more": {
+    "message": "Kopia powstaje na nowo przy następnej zapisanej frazie, zakreśleniu albo zachowanej stronie. Chroni dane, gdy przeglądarka czyści swoją pamięć albo gdy zepsuje się baza danych, ale nie chroni przed usunięciem rozszerzenia: odinstalowanie re/read kasuje wszystkie jego dane razem z kopiami. Baza danych to IndexedDB, a kopie są w pamięci rozszerzenia (storage.local). Zanim odinstalujesz re/read albo przeniesiesz dane na inne urządzenie, zapisz kopię do pliku: przycisk Eksportuj w czytelni offline tworzy jeden plik reread-backup.zip z czytelnią, zapisanymi frazami, zakreśleniami i ustawieniami. Modeli ani słowników w tym pliku nie ma - można je pobrać ponownie.",
+    "description": "Behind the Details of the copies block: what a copy protects against, what it does not, where the data and the copies are, and how to save a copy as a file before uninstalling."
   },
 
   "options_font_custom_placeholder": {
@@ -2237,7 +2242,7 @@
   },
 
   "options_storage_to_file": {
-    "message": "Kopię do pliku zrobisz na stronach, które trzymają dane:"
+    "message": "Kopię do pliku zapiszesz na stronach z danymi:"
   },
   "options_first_steps_intro": {
     "message": "Nic się jeszcze nie tłumaczy - modelu, który by to robił, nie ma jeszcze na tym urządzeniu. Przygotowanie zajmuje minutę:"
@@ -2252,10 +2257,10 @@
   "options_engine": { "message": "Silnik" },
   "options_engine_value": { "message": "Bergamot, wewnątrz paczki - tłumaczy offline" },
   "options_storage": { "message": "Dane na tym urządzeniu" },
-  "options_storage_how": { "message": "Miejsce na dysku zajmowane przez rozszerzenie." },
+  "options_storage_how": { "message": "Miejsce zajmowane przez dane re/read." },
 
   "options_storage_how_more": {
-    "message": "Suma to szacunek przeglądarki dla wszystkiego, co przechowuje re/read: liczy także indeksy baz i pamięć podręczną, dlatego jest większa niż pozycje pod nią. Każda pozycja liczy to, co trzyma - a słownik kosztuje kilka razy więcej, niż waży jego tekst, więc większość tego, co stoi pod „Inne”, to baza słowników. Usunięcie artykułu lub książki bezpowrotnie kasuje tekst, obrazy, zakreślenia, notatki i postęp czytania.",
+    "message": "Suma to szacunek przeglądarki dla wszystkich danych re/read. Obejmuje także indeksy baz danych i pamięć podręczną, dlatego jest większa niż pozycje pod nią razem. W pozycjach liczony jest sam tekst i obrazy, bez indeksów: jedno hasło słownika zajmuje w bazie kilka razy więcej miejsca niż sam jego tekst, więc „Inne” to głównie baza słowników. Wszystkie dane są w bazie danych przeglądarki (IndexedDB), w jej profilu - a nie w osobnych plikach na komputerze. Usunięcie artykułu albo książki bezpowrotnie kasuje jego tekst, obrazy, zakreślenia, notatki i postęp czytania.",
     "description": "The rest of the options_storage_how description, behind the row's More button."
   },
   "options_storage_persistent": { "message": "Magazyn trwały: przyznany. Przeglądarka obiecała nie kasować tych danych, żeby zrobić miejsce." },
@@ -2266,7 +2271,7 @@
   },
 
   "options_library_copy_more": {
-    "message": "Przetrwa też błąd bazy danych: zapisane artykuły zostają, nawet jeśli baza danych zostanie utracona.",
+    "message": "Chroni też przed błędem bazy danych: zapisane artykuły zostają, nawet jeśli baza danych zostanie utracona.",
     "description": "The rest of the options_library_copy_hint description, behind the row's More button."
   },
   "reader_marks_delete_all_one": {
@@ -2295,7 +2300,7 @@
     "placeholders": { "pair": { "content": "$1", "example": "angielski → angielski" } }
   },
   "options_pair_hint_quiet": {
-    "message": "Bez modelu tłumaczenia para mówi, w jakim języku czytasz i gdzie trzymane są zapisane frazy. Pary pochodzą z zainstalowanych modeli i słowników."
+    "message": "Bez modelu tłumaczenia para określa, w jakim języku czytasz i pod jaką parą zapisywane są frazy. Pary pochodzą z zainstalowanych modeli i słowników."
   },
   "options_reading_pair_quiet": {
     "message": "Czytasz w języku: $FROM$ - tłumaczenie maszynowe jest wyłączone, a zapisane frazy trafiają do tej pary.",
@@ -2316,7 +2321,7 @@
   },
 
   "options_page_number_more": {
-    "message": "Bez niego ostatnia linia każdej strony stoi niżej; czytniki ekranu nadal odczytują licznik, a na szerokim ekranie widać go w pasku obok re/read.",
+    "message": "Bez niego tekst każdej strony sięga niżej; czytniki ekranu nadal odczytują licznik, a na szerokim ekranie widać go w pasku obok re/read.",
     "description": "The rest of the options_page_number_hint description, behind the row's More button."
   },
   "options_paged_heading": { "message": "Układ Strony" },
@@ -2352,7 +2357,7 @@
   },
 
   "options_turn_effect_more": {
-    "message": "Czytając środek strony, łatwo to przeoczyć. Nic się nie dzieje, gdy system prosi o ograniczenie ruchu, ani gdy stronę przewraca czytanie na głos albo przeciągnięcie zaznaczenia do krawędzi strony.",
+    "message": "Czytając środek strony, łatwo to przeoczyć. Nic się nie dzieje, gdy w systemie włączone jest ograniczenie ruchu, ani gdy stronę przewraca czytanie na głos albo przeciągnięcie zaznaczenia do krawędzi strony.",
     "description": "The rest of the options_turn_effect_hint description, behind the row's More button."
   },
   "options_turn_effect_note_auto": {
@@ -2363,7 +2368,7 @@
   },
   "options_keep_articles": { "message": "Zapisuj domyślnie w czytelni offline" },
   "options_keep_articles_hint": {
-    "message": "Każda strona otwarta w widoku czytania trafia do czytelni offline."
+    "message": "Każda strona otwarta w widoku czytania jest zapisywana w czytelni offline."
   },
 
   "options_keep_articles_more": {
@@ -2394,7 +2399,7 @@
   },
 
   "options_quiet_bubble_more": {
-    "message": "Przyciski akcji to kopiowanie, zapis, czytanie na głos i reszta - wszystko, co potrafi dymek, jedno kliknięcie dalej.",
+    "message": "Przyciski akcji to kopiowanie, zapis, czytanie na głos i pozostałe - wszystkie akcje dymka, jedno kliknięcie dalej.",
     "description": "The rest of the options_quiet_bubble_hint description, behind the row's More button."
   },
   "options_bubble_more": { "message": "Od razu pokazuj zdanie i hasła ze słowników" },
@@ -2403,7 +2408,7 @@
   },
 
   "options_bubble_more_more": {
-    "message": "Warto zostawić włączone, gdy masz słownik - model tłumaczenia często myli się na pojedynczym słowie, a słownik pokazuje, co ono naprawdę znaczy. Dymek nad już zapisaną frazą wyświetla tylko zapisane tłumaczenie - zdanie i definicje ze słowników możesz zobaczyć po kliknięciu na „Więcej”.",
+    "message": "Warto zostawić włączone, gdy masz słownik: tłumaczenie pojedynczego słowa bywa błędne, a słownik pokazuje, co ono naprawdę znaczy. Dymek nad już zapisaną frazą wyświetla tylko zapisane tłumaczenie - zdanie i hasła ze słowników zobaczysz po kliknięciu „Więcej”.",
     "description": "The rest of the options_bubble_more_hint description, behind the row's More button."
   },
   "options_underline_forms": { "message": "Podkreślaj też inne formy zapisanych słów" },
@@ -2412,7 +2417,7 @@
   },
 
   "options_underline_forms_more": {
-    "message": "Dymek nad nimi pokazuje to, co masz zapisane dla „read”. O tym, które formy się liczą, decyduje słownik dla czytanego języka - musi być zainstalowany. Na razie tylko wtedy, gdy czytasz po angielsku. Po wyłączeniu podkreślana jest tylko dokładnie ta forma, którą masz zapisaną.",
+    "message": "Dymek nad nimi pokazuje to, co masz zapisane dla „read”. To, które formy się liczą, wynika ze słownika dla czytanego języka - musi być zainstalowany. Na razie tylko wtedy, gdy czytasz po angielsku. Po wyłączeniu podkreślana jest tylko dokładnie ta forma, którą masz zapisaną.",
     "description": "The rest of the options_underline_forms_hint description, behind the row's More button."
   },
   "options_save_sentence": { "message": "Zapisuj zdanie razem z frazą" },
@@ -2577,7 +2582,7 @@
   },
 
   "options_tts_more": {
-    "message": "Wyłączenie ukrywa je wszystkie. Wybrany głos i tempo zostają zapisane i wracają po ponownym włączeniu.",
+    "message": "Wyłączenie ukrywa je wszystkie. Wybrany głos i tempo są zapamiętane i obowiązują po ponownym włączeniu.",
     "description": "The rest of the options_tts_hint description, behind the row's More button."
   },
   "options_tts_voice": { "message": "Głos lektora" },
@@ -2624,7 +2629,7 @@
   },
   "options_add_model_button": { "message": "Dodaj model" },
   "options_files_note": {
-    "message": "Dodanie modelu z plików nie wykonuje żadnego zapytania sieciowego, a ta strona zostaje wyjściem awaryjnym na dzień, w którym miejsce pobierania modeli przestanie odpowiadać."
+    "message": "Dodanie modelu z plików nie wykonuje żadnego zapytania sieciowego, a ta strona zostaje wyjściem awaryjnym na dzień, w którym serwer z modelami przestanie działać."
   },
   "options_dictionaries_heading": { "message": "Słowniki" },
   "options_dictionaries_intro": {
@@ -2634,7 +2639,7 @@
     "message": "Słowniki na liście poniżej pochodzą z WikDict. Możesz też dodać własne - z plików albo z linku, także kilka dla jednego języka - w sekcjach pod listą. Gdzie ich szukać, każdy z podaną licencją:"
   },
   "options_dictionary_order_hint": {
-    "message": "Dymek odpowiada w kolejności z listy poniżej. Odpowiadają tylko słowniki języka, który czytasz."
+    "message": "Dymek pokazuje hasła w kolejności z listy poniżej. Używane są tylko słowniki języka, który czytasz."
   },
   "options_dictionary_note_from": { "message": "Słowniki pobierane są z" },
   "options_dictionary_note_rest": {
@@ -2715,7 +2720,7 @@
     "message": "Reguły działają w dymku tłumaczenia, na stronie czytnika - także w pasku i na listach - oraz w okienku przycisku na pasku narzędzi, nigdy na czytanych stronach. Zła reguła może zepsuć wygląd albo obsługę tych miejsc, dopóki pole nie zostanie wyczyszczone."
   },
   "options_custom_css_rules": {
-    "message": "Reguły, które pobierałyby cokolwiek z sieci (url(), @import, @font-face), są odrzucane. Nazwy elementów staramy się zachowywać między wersjami; gdy któraś musi się zmienić, mówi o tym nota wydania. Nazwy pochodzą z tych plików:"
+    "message": "Reguły, które pobierałyby cokolwiek z sieci (url(), @import, @font-face), są odrzucane. Nazwy elementów staramy się zachowywać między wersjami; gdy któraś musi się zmienić, jest to opisane w nocie wydania. Nazwy pochodzą z tych plików:"
   },
   "options_custom_css_source_bubble": { "message": "tooltip.js (dymek)" },
   "options_custom_css_source_reader": { "message": "reader.css (czytnik)" },
@@ -2864,7 +2869,7 @@
     "placeholders": { "name": { "content": "$1", "example": "WikDict en-pl" } }
   },
   "options_dictionary_moved": {
-    "message": "$NAME$ odpowiada teraz jako $PLACE$ z $TOTAL$.",
+    "message": "$NAME$ jest teraz $PLACE$ z $TOTAL$.",
     "placeholders": {
       "name": { "content": "$1", "example": "WikDict en-pl" },
       "place": { "content": "$2", "example": "1" },

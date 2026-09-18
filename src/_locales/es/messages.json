@@ -1520,7 +1520,12 @@
   },
 
   "options_copies_safe": {
-    "message": "Cada copia está donde el navegador no borra los datos por su cuenta, y se vuelve a escribir con la siguiente frase guardada, resaltado o página conservada."
+    "message": "Las copias se guardan en el almacenamiento de la propia extensión, aparte de la base de datos: ambos están en el perfil del navegador, no en archivos de tu ordenador."
+  },
+
+  "options_copies_safe_more": {
+    "message": "Una copia se vuelve a escribir con la siguiente frase guardada, resaltado o página conservada. Protege los datos cuando el navegador vacía su almacenamiento o cuando una base de datos falla, pero no cuando se elimina la extensión: desinstalar re/read borra todos sus datos, las copias incluidas. La base de datos es IndexedDB y las copias están en el almacenamiento de la extensión (storage.local). Antes de desinstalar re/read, o antes de pasar a otro dispositivo, guarda una copia como archivo: Exportar en la lista de lectura sin conexión escribe un reread-backup.zip con la lista de lectura, las frases guardadas, los resaltados y los ajustes. Los modelos y los diccionarios no están en ese archivo - se pueden descargar de nuevo.",
+    "description": "Behind the Details of the copies block: what a copy protects against, what it does not, where the data and the copies are, and how to save a copy as a file before uninstalling."
   },
 
   "options_font_custom_placeholder": {
@@ -1600,7 +1605,7 @@
   },
 
   "options_storage_to_file": {
-    "message": "Una copia como archivo se hace en las páginas que guardan los datos:"
+    "message": "Una copia como archivo se guarda en las páginas con los datos:"
   },
   "options_first_steps_intro": {
     "message": "Todavía no se traduce nada - el modelo que lo haría aún no está en este dispositivo. La puesta en marcha lleva un minuto:"
@@ -1615,10 +1620,10 @@
   "options_engine": { "message": "Motor" },
   "options_engine_value": { "message": "Bergamot, dentro del paquete - traduce sin conexión" },
   "options_storage": { "message": "Datos en este dispositivo" },
-  "options_storage_how": { "message": "Espacio en disco utilizado por la extensión." },
+  "options_storage_how": { "message": "Espacio que ocupan los datos de re/read." },
 
   "options_storage_how_more": {
-    "message": "El total es la estimación del propio navegador de todo lo que guarda re/read: cuenta también los índices de las bases y la caché, por eso es mayor que las partidas de abajo. Cada partida cuenta lo que contiene - y un diccionario cuesta varias veces lo que pesa su texto, así que la mayor parte de lo que aparece bajo Otros es la base de los diccionarios. Eliminar un artículo o libro borra por completo su texto, imágenes, resaltados, notas y progreso de lectura.",
+    "message": "El total es la estimación del navegador para todos los datos de re/read. Cuenta también los índices de las bases de datos y la caché, por eso es mayor que la suma de las partidas de abajo. En las partidas se cuenta solo el texto y las imágenes, sin los índices: una entrada de diccionario ocupa en la base varias veces el tamaño de su texto solo, así que Otros es sobre todo la base de los diccionarios. Todos los datos están en la base de datos del navegador (IndexedDB), en su perfil - y no en archivos sueltos de tu ordenador. Eliminar un artículo o un libro borra para siempre su texto, imágenes, resaltados, notas y posición de lectura.",
     "description": "The rest of the options_storage_how description, behind the row's More button."
   },
   "options_storage_persistent": { "message": "Almacenamiento persistente: concedido. El navegador ha prometido no borrar estos datos para hacer sitio." },
@@ -1629,7 +1634,7 @@
   },
 
   "options_library_copy_more": {
-    "message": "También sobrevive a un error de la base de datos: tus artículos guardados se conservan aunque la base de datos se pierda.",
+    "message": "También protege frente a un error de la base de datos: tus artículos guardados permanecen aunque la base de datos se pierda.",
     "description": "The rest of the options_library_copy_hint description, behind the row's More button."
   },
   "reader_marks_delete_all_one": {
@@ -1650,7 +1655,7 @@
     "placeholders": { "pair": { "content": "$1", "example": "inglés → inglés" } }
   },
   "options_pair_hint_quiet": {
-    "message": "Sin modelo de traducción, el par indica en qué idioma lees y dónde se guardan las frases. Los pares vienen de los modelos y diccionarios instalados."
+    "message": "Sin modelo de traducción, el par determina en qué idioma lees y bajo qué par se guardan las frases. Los pares vienen de los modelos y diccionarios instalados."
   },
   "options_reading_pair_quiet": {
     "message": "Lees en $FROM$ - la traducción automática está desactivada y las frases guardadas pertenecen a este par.",
@@ -1671,7 +1676,7 @@
   },
 
   "options_page_number_more": {
-    "message": "Desactivado, la última línea de cada página queda más abajo; los lectores de pantalla siguen leyendo el contador, y en una pantalla ancha aparece en la barra junto a re/read.",
+    "message": "Desactivado, el texto de cada página llega más abajo; los lectores de pantalla siguen leyendo el contador, y en una pantalla ancha se muestra en la barra junto a re/read.",
     "description": "The rest of the options_page_number_hint description, behind the row's More button."
   },
   "options_paged_heading": { "message": "Vista Páginas" },
@@ -1707,7 +1712,7 @@
   },
 
   "options_turn_effect_more": {
-    "message": "Es fácil pasarlo por alto cuando lees el centro de una página. No ocurre nada si tu sistema pide menos movimiento, ni cuando la página la pasa la lectura en voz alta o al arrastrar una selección hasta el borde de la página.",
+    "message": "Es fácil pasarlo por alto cuando lees el centro de una página. No ocurre nada cuando en tu sistema está activada la reducción de movimiento, ni cuando la página la pasa la lectura en voz alta o al arrastrar una selección hasta el borde de la página.",
     "description": "The rest of the options_turn_effect_hint description, behind the row's More button."
   },
   "options_turn_effect_note_auto": {
@@ -1718,7 +1723,7 @@
   },
   "options_keep_articles": { "message": "Guardar de forma predeterminada en la lista de lectura sin conexión" },
   "options_keep_articles_hint": {
-    "message": "Cada página que abres en la vista de lectura entra en la lista de lectura sin conexión."
+    "message": "Cada página que abres en la vista de lectura se guarda en la lista de lectura sin conexión."
   },
 
   "options_keep_articles_more": {
@@ -1749,7 +1754,7 @@
   },
 
   "options_quiet_bubble_more": {
-    "message": "Los botones de acción son copiar, guardar, leer en voz alta y los demás - todo lo que la burbuja puede hacer, a un toque.",
+    "message": "Los botones de acción son copiar, guardar, leer en voz alta y los demás - todas las acciones de la burbuja, a un toque.",
     "description": "The rest of the options_quiet_bubble_hint description, behind the row's More button."
   },
   "options_bubble_more": { "message": "Mostrar enseguida la frase y las entradas del diccionario" },
@@ -1758,7 +1763,7 @@
   },
 
   "options_bubble_more_more": {
-    "message": "Merece la pena dejarlo activado con un diccionario instalado - un modelo de traducción suele equivocarse con una palabra suelta, y el diccionario muestra lo que significa de verdad. La burbuja sobre una expresión ya guardada muestra solo la traducción guardada - la frase y las entradas del diccionario aparecen al pulsar «Más».",
+    "message": "Merece la pena dejarlo activado con un diccionario instalado: la traducción de una palabra suelta suele ser errónea, y el diccionario muestra lo que significa de verdad. La burbuja sobre una expresión ya guardada muestra solo la traducción guardada - la frase y las entradas del diccionario aparecen al pulsar «Más».",
     "description": "The rest of the options_bubble_more_hint description, behind the row's More button."
   },
   "options_underline_forms": { "message": "Subrayar también otras formas de las palabras guardadas" },
@@ -1767,7 +1772,7 @@
   },
 
   "options_underline_forms_more": {
-    "message": "La burbuja sobre ellas muestra lo que guardaste para «read». Qué formas cuentan lo decide tu diccionario del idioma que lees - tiene que estar instalado. Por ahora solo cuando lees en inglés. Desactivado, se subraya solo la forma exacta que guardaste.",
+    "message": "La burbuja sobre ellas muestra lo que guardaste para «read». Qué formas cuentan viene de tu diccionario del idioma que lees - tiene que estar instalado. Por ahora solo cuando lees en inglés. Desactivado, se subraya solo la forma exacta que guardaste.",
     "description": "The rest of the options_underline_forms_hint description, behind the row's More button."
   },
   "options_save_sentence": { "message": "Guardar la oración junto con la frase" },
@@ -1912,7 +1917,7 @@
   },
 
   "options_tts_more": {
-    "message": "Desactivarlo los oculta todos. La voz y la velocidad elegidas quedan guardadas y vuelven al activarlo de nuevo.",
+    "message": "Desactivarlo los oculta todos. La voz y la velocidad elegidas quedan memorizadas y se aplican de nuevo al reactivarlo.",
     "description": "The rest of the options_tts_hint description, behind the row's More button."
   },
   "options_tts_voice": { "message": "Voz de lectura" },
@@ -1959,7 +1964,7 @@
   },
   "options_add_model_button": { "message": "Añadir modelo" },
   "options_files_note": {
-    "message": "Añadir un modelo desde archivos no hace ninguna petición de red, y esta página se queda como salida para el día en que el lugar del que se descargan los modelos deje de responder."
+    "message": "Añadir un modelo desde archivos no hace ninguna petición de red, y esta página sigue siendo la vía el día en que el servidor de los modelos deje de funcionar."
   },
   "options_dictionaries_heading": { "message": "Diccionarios" },
   "options_dictionaries_intro": {
@@ -1969,7 +1974,7 @@
     "message": "Los diccionarios de la lista de abajo vienen de WikDict. También puedes añadir los tuyos - desde archivos o desde un enlace, y varios para un mismo idioma - en las secciones bajo la lista. Dónde encontrarlos, cada uno con su licencia:"
   },
   "options_dictionary_order_hint": {
-    "message": "La burbuja responde en el orden de abajo. Solo responden los diccionarios del idioma que estás leyendo."
+    "message": "La burbuja muestra las entradas en el orden de abajo. Solo se usan los diccionarios del idioma que lees."
   },
   "options_dictionary_note_from": { "message": "Los diccionarios se descargan de" },
   "options_dictionary_note_rest": {
@@ -2050,7 +2055,7 @@
     "message": "Las reglas se aplican dentro de la burbuja de traducción, en la página de la vista de lectura - barra y listas incluidas - y en la ventana del botón de la barra de herramientas, nunca en las páginas que lees. Una regla equivocada puede romper el aspecto o los controles de esos lugares hasta que se vacíe el campo."
   },
   "options_custom_css_rules": {
-    "message": "Las reglas que cargarían algo desde la red (url(), @import, @font-face) se rechazan. Los nombres de los elementos se mantienen de una versión a otra siempre que es posible; cuando alguno tiene que cambiar, las notas de la versión lo dicen. Los nombres vienen de estos archivos:"
+    "message": "Las reglas que cargarían algo de la red (url(), @import, @font-face) se rechazan. Los nombres de los elementos se mantienen de versión en versión siempre que es posible; cuando alguno tiene que cambiar, se indica en las notas de la versión. Los nombres vienen de estos archivos:"
   },
   "options_custom_css_source_bubble": { "message": "tooltip.js (la burbuja)" },
   "options_custom_css_source_reader": { "message": "reader.css (vista de lectura)" },
@@ -2199,7 +2204,7 @@
     "placeholders": { "name": { "content": "$1", "example": "WikDict en-pl" } }
   },
   "options_dictionary_moved": {
-    "message": "$NAME$ ahora responde en el puesto $PLACE$ de $TOTAL$.",
+    "message": "$NAME$ es ahora $PLACE$ de $TOTAL$.",
     "placeholders": {
       "name": { "content": "$1", "example": "WikDict en-pl" },
       "place": { "content": "$2", "example": "1" },

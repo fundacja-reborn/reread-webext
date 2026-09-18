@@ -1520,7 +1520,12 @@
   },
 
   "options_copies_safe": {
-    "message": "Chaque copie se trouve là où le navigateur n'efface pas les données de lui-même, et elle est réécrite à la prochaine phrase enregistrée, au prochain surlignage ou à la prochaine page conservée."
+    "message": "Les copies sont enregistrées dans le stockage propre de l'extension, à part de la base de données : les deux se trouvent dans le profil du navigateur, pas dans des fichiers sur votre ordinateur."
+  },
+
+  "options_copies_safe_more": {
+    "message": "Une copie est réécrite à la prochaine phrase enregistrée, au prochain surlignage ou à la prochaine page conservée. Elle protège les données quand le navigateur vide son stockage ou qu'une base de données se corrompt, mais pas quand l'extension est supprimée : désinstaller re/read efface toutes ses données, copies comprises. La base de données est IndexedDB et les copies sont dans le stockage de l'extension (storage.local). Avant de désinstaller re/read ou de passer à un autre appareil, enregistrez une copie sous forme de fichier : Exporter dans la liste de lecture hors ligne écrit un reread-backup.zip avec la liste de lecture, les phrases enregistrées, les surlignages et les paramètres. Les modèles et les dictionnaires ne sont pas dans ce fichier - ils peuvent être téléchargés à nouveau.",
+    "description": "Behind the Details of the copies block: what a copy protects against, what it does not, where the data and the copies are, and how to save a copy as a file before uninstalling."
   },
 
   "options_font_custom_placeholder": {
@@ -1634,7 +1639,7 @@
   },
 
   "options_storage_to_file": {
-    "message": "Une copie sous forme de fichier se fait sur les pages qui contiennent les données :"
+    "message": "Une copie sous forme de fichier s'enregistre sur les pages avec les données :"
   },
   "options_first_steps_intro": {
     "message": "Rien ne se traduit encore - le modèle qui s'en chargerait n'est pas encore sur cet appareil. La mise en place prend une minute :"
@@ -1649,10 +1654,10 @@
   "options_engine": { "message": "Moteur" },
   "options_engine_value": { "message": "Bergamot, dans le paquet - traduit hors ligne" },
   "options_storage": { "message": "Données sur cet appareil" },
-  "options_storage_how": { "message": "Espace disque utilisé par l'extension." },
+  "options_storage_how": { "message": "Espace occupé par les données de re/read." },
 
   "options_storage_how_more": {
-    "message": "Le total est l'estimation du navigateur pour tout ce que re/read conserve : il compte aussi les index des bases et les caches, ce qui explique qu'il dépasse les postes en dessous. Chaque poste compte ce qu'il contient - et un dictionnaire coûte plusieurs fois le poids de son texte, si bien que l'essentiel de ce qui figure sous Autres est la base des dictionnaires. Supprimer un article ou un livre efface définitivement son texte, ses images, ses surlignages, ses notes et votre progression de lecture.",
+    "message": "Le total est l'estimation du navigateur pour toutes les données de re/read. Il compte aussi les index des bases de données et les caches, ce qui explique qu'il dépasse la somme des postes en dessous. Les postes comptent uniquement le texte et les images, sans les index : une entrée de dictionnaire occupe dans la base plusieurs fois la taille de son seul texte, si bien qu'Autres est surtout la base des dictionnaires. Toutes les données sont dans la base de données du navigateur (IndexedDB), dans son profil - et non dans des fichiers séparés sur votre ordinateur. Supprimer un article ou un livre efface définitivement son texte, ses images, ses surlignages, ses notes et sa position de lecture.",
     "description": "The rest of the options_storage_how description, behind the row's More button."
   },
   "options_storage_persistent": { "message": "Stockage persistant : accordé. Le navigateur a promis de ne pas effacer ces données pour faire de la place." },
@@ -1663,7 +1668,7 @@
   },
 
   "options_library_copy_more": {
-    "message": "Elle survit aussi à une erreur de base de données : vos articles enregistrés sont conservés même si la base de données est perdue.",
+    "message": "Elle protège aussi d'une erreur de base de données : vos articles enregistrés restent même si la base de données est perdue.",
     "description": "The rest of the options_library_copy_hint description, behind the row's More button."
   },
   "reader_marks_delete_all_one": {
@@ -1684,7 +1689,7 @@
     "placeholders": { "pair": { "content": "$1", "example": "anglais → anglais" } }
   },
   "options_pair_hint_quiet": {
-    "message": "Sans modèle de traduction, la paire indique la langue que vous lisez et où sont rangées les phrases enregistrées. Les paires viennent des modèles et des dictionnaires installés."
+    "message": "Sans modèle de traduction, la paire détermine la langue que vous lisez et la paire sous laquelle les phrases sont enregistrées. Les paires viennent des modèles et des dictionnaires installés."
   },
   "options_reading_pair_quiet": {
     "message": "Vous lisez $FROM$ - la traduction automatique est désactivée, les phrases enregistrées appartiennent à cette paire.",
@@ -1705,7 +1710,7 @@
   },
 
   "options_page_number_more": {
-    "message": "Désactivé, la dernière ligne de chaque page descend plus bas ; les lecteurs d'écran lisent toujours le compteur, et sur un écran large il se trouve dans la barre à côté de re/read.",
+    "message": "Désactivé, le texte de chaque page descend plus bas ; les lecteurs d'écran lisent toujours le compteur, et sur un écran large il est affiché dans la barre à côté de re/read.",
     "description": "The rest of the options_page_number_hint description, behind the row's More button."
   },
   "options_paged_heading": { "message": "Affichage Pages" },
@@ -1741,7 +1746,7 @@
   },
 
   "options_turn_effect_more": {
-    "message": "C'est facile à manquer quand on lit le milieu d'une page. Rien ne se passe si votre système demande moins d'animations, ni quand la page est tournée par la lecture à voix haute ou en faisant glisser une sélection jusqu'au bord de la page.",
+    "message": "C'est facile à manquer quand on lit le milieu d'une page. Rien ne se passe quand la réduction des animations est activée dans votre système, ni quand la page est tournée par la lecture à voix haute ou en faisant glisser une sélection jusqu'au bord de la page.",
     "description": "The rest of the options_turn_effect_hint description, behind the row's More button."
   },
   "options_turn_effect_note_auto": {
@@ -1752,7 +1757,7 @@
   },
   "options_keep_articles": { "message": "Enregistrer par défaut dans la liste de lecture hors ligne" },
   "options_keep_articles_hint": {
-    "message": "Chaque page ouverte dans le lecteur entre dans la liste de lecture hors ligne."
+    "message": "Chaque page ouverte dans le lecteur est enregistrée dans la liste de lecture hors ligne."
   },
 
   "options_keep_articles_more": {
@@ -1783,7 +1788,7 @@
   },
 
   "options_quiet_bubble_more": {
-    "message": "Les boutons d'action sont copier, enregistrer, lire à voix haute et les autres - tout ce que la bulle sait faire, à un appui près.",
+    "message": "Les boutons d'action sont copier, enregistrer, lire à voix haute et les autres - toutes les actions de la bulle, à un appui près.",
     "description": "The rest of the options_quiet_bubble_hint description, behind the row's More button."
   },
   "options_bubble_more": { "message": "Afficher tout de suite la phrase et les entrées du dictionnaire" },
@@ -1792,7 +1797,7 @@
   },
 
   "options_bubble_more_more": {
-    "message": "À garder activé avec un dictionnaire installé - un modèle de traduction se trompe souvent sur un mot isolé, et le dictionnaire montre ce qu'il veut vraiment dire. La bulle au-dessus d'une expression déjà enregistrée n'affiche que la traduction enregistrée - la phrase et les entrées du dictionnaire apparaissent après un appui sur « Plus ».",
+    "message": "À garder activé avec un dictionnaire installé : la traduction d'un mot isolé est souvent fausse, et le dictionnaire montre ce qu'il veut vraiment dire. La bulle au-dessus d'une expression déjà enregistrée n'affiche que la traduction enregistrée - la phrase et les entrées du dictionnaire apparaissent après un appui sur « Plus ».",
     "description": "The rest of the options_bubble_more_hint description, behind the row's More button."
   },
   "options_underline_forms": { "message": "Souligner aussi les autres formes des mots enregistrés" },
@@ -1801,7 +1806,7 @@
   },
 
   "options_underline_forms_more": {
-    "message": "La bulle au-dessus montre ce que vous avez enregistré pour « read ». Les formes qui comptent sont décidées par votre dictionnaire de la langue lue - il doit donc être installé. Pour l'instant, seulement quand vous lisez en anglais. Désactivé, seule la forme exacte que vous avez enregistrée est soulignée.",
+    "message": "La bulle au-dessus montre ce que vous avez enregistré pour « read ». Les formes qui comptent viennent de votre dictionnaire de la langue lue - il doit donc être installé. Pour l'instant, seulement quand vous lisez en anglais. Désactivé, seule la forme exacte que vous avez enregistrée est soulignée.",
     "description": "The rest of the options_underline_forms_hint description, behind the row's More button."
   },
   "options_save_sentence": { "message": "Enregistrer la phrase avec l'expression" },
@@ -1956,7 +1961,7 @@
   },
 
   "options_tts_more": {
-    "message": "Désactiver cette option les masque tous. La voix et la vitesse choisies restent enregistrées et reviennent quand vous la réactivez.",
+    "message": "Désactiver cette option les masque tous. La voix et la vitesse choisies sont mémorisées et s'appliquent à nouveau à la réactivation.",
     "description": "The rest of the options_tts_hint description, behind the row's More button."
   },
   "options_tts_voice": { "message": "Voix de lecture" },
@@ -2003,7 +2008,7 @@
   },
   "options_add_model_button": { "message": "Ajouter le modèle" },
   "options_files_note": {
-    "message": "Ajouter un modèle depuis des fichiers ne fait aucune requête réseau, et cette page reste la sortie de secours pour le jour où l'endroit d'où viennent les modèles cesse de répondre."
+    "message": "Ajouter un modèle depuis des fichiers ne fait aucune requête réseau, et cette page reste la solution le jour où le serveur des modèles cesse de fonctionner."
   },
   "options_dictionaries_heading": { "message": "Dictionnaires" },
   "options_dictionaries_intro": {
@@ -2013,7 +2018,7 @@
     "message": "Les dictionnaires de la liste ci-dessous viennent de WikDict. Vous pouvez aussi ajouter les vôtres - depuis des fichiers ou depuis un lien, et plusieurs pour une même langue - dans les sections sous la liste. Où les trouver, chacun avec sa licence :"
   },
   "options_dictionary_order_hint": {
-    "message": "La bulle répond dans l'ordre ci-dessous. Seuls les dictionnaires de la langue que vous lisez répondent."
+    "message": "La bulle affiche les entrées dans l'ordre ci-dessous. Seuls les dictionnaires de la langue que vous lisez sont utilisés."
   },
   "options_dictionary_note_from": { "message": "Les dictionnaires sont téléchargés depuis" },
   "options_dictionary_note_rest": {
@@ -2094,7 +2099,7 @@
     "message": "Les règles s'appliquent dans la bulle de traduction, sur la page du lecteur - barre et listes comprises - et dans la fenêtre du bouton de la barre d'outils, jamais sur les pages que vous lisez. Une mauvaise règle peut casser l'apparence ou les commandes de ces endroits jusqu'à ce que le champ soit vidé."
   },
   "options_custom_css_rules": {
-    "message": "Les règles qui chargeraient quoi que ce soit depuis le réseau (url(), @import, @font-face) sont refusées. Les noms des éléments sont conservés d'une version à l'autre autant que possible ; quand l'un doit changer, les notes de version le disent. Les noms viennent de ces fichiers :"
+    "message": "Les règles qui chargeraient quoi que ce soit depuis le réseau (url(), @import, @font-face) sont refusées. Les noms des éléments sont conservés d'une version à l'autre dans la mesure du possible ; quand l'un doit changer, c'est indiqué dans les notes de version. Les noms viennent de ces fichiers :"
   },
   "options_custom_css_source_bubble": { "message": "tooltip.js (la bulle)" },
   "options_custom_css_source_reader": { "message": "reader.css (le lecteur)" },
@@ -2243,7 +2248,7 @@
     "placeholders": { "name": { "content": "$1", "example": "WikDict en-pl" } }
   },
   "options_dictionary_moved": {
-    "message": "$NAME$ répond désormais en position $PLACE$ sur $TOTAL$.",
+    "message": "$NAME$ est maintenant $PLACE$ sur $TOTAL$.",
     "placeholders": {
       "name": { "content": "$1", "example": "WikDict en-pl" },
       "place": { "content": "$2", "example": "1" },

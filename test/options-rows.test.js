@@ -166,9 +166,9 @@ describe("the settings rows", () => {
     // The word is Details, not More: the bubble has a button called More, and
     // a sentence naming it stood beside a trigger with the same word.
     assert.doesNotMatch(markup, /data-i18n="options_note_more"/, "a fold is still called More");
-    assert.equal((markup.match(/data-i18n="options_details"/g) ?? []).length, 17, "not every fold is called Details");
+    assert.equal((markup.match(/data-i18n="options_details"/g) ?? []).length, 18, "not every fold is called Details");
     // Hard space, so the trigger goes over a wrapping line with the last word.
-    assert.equal((markup.match(/<\/span\s*>&nbsp;<button type="button" class="note-more"/g) ?? []).length, 17, "a trigger can be left alone at the start of a line");
+    assert.equal((markup.match(/<\/span\s*>&nbsp;<button type="button" class="note-more"/g) ?? []).length, 18, "a trigger can be left alone at the start of a line");
     const css = await source("options/options.css");
     assert.match(rule(css, "button.note-more"), /white-space: nowrap/, "the trigger's own words can be split");
     // And the one sentence that names the bubble's button says it in quotes.

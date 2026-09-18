@@ -1469,7 +1469,12 @@
   },
 
   "options_copies_safe": {
-    "message": "Jede Kopie liegt dort, wo der Browser Daten nicht von selbst löscht, und wird bei der nächsten gespeicherten Phrase, Markierung oder Seite neu geschrieben."
+    "message": "Die Kopien werden im eigenen Speicher der Erweiterung abgelegt, getrennt von der Datenbank - beides befindet sich im Profil des Browsers, nicht in Dateien auf Ihrem Computer."
+  },
+
+  "options_copies_safe_more": {
+    "message": "Eine Kopie wird bei der nächsten gespeicherten Phrase, Markierung oder Seite neu geschrieben. Sie schützt die Daten, wenn der Browser seinen Speicher leert oder eine Datenbank fehlerhaft wird, aber nicht beim Entfernen der Erweiterung: Wird re/read deinstalliert, werden alle seine Daten samt den Kopien gelöscht. Die Datenbank ist IndexedDB, die Kopien sind im Speicher der Erweiterung (storage.local). Speichern Sie vor dem Deinstallieren oder vor einem Wechsel des Geräts eine Kopie als Datei: Exportieren in der Offline-Leseliste schreibt eine reread-backup.zip mit der Leseliste, den gespeicherten Phrasen, den Markierungen und den Einstellungen. Modelle und Wörterbücher sind nicht in dieser Datei - sie lassen sich erneut herunterladen.",
+    "description": "Behind the Details of the copies block: what a copy protects against, what it does not, where the data and the copies are, and how to save a copy as a file before uninstalling."
   },
 
   "options_font_custom_placeholder": {
@@ -1549,7 +1554,7 @@
   },
 
   "options_storage_to_file": {
-    "message": "Eine Kopie als Datei entsteht auf den Seiten, die die Daten halten:"
+    "message": "Eine Kopie als Datei speichern Sie auf den Seiten mit den Daten:"
   },
   "options_first_steps_intro": {
     "message": "Noch übersetzt nichts - das Modell, das es täte, ist noch nicht auf diesem Gerät. Die Einrichtung dauert eine Minute:"
@@ -1564,10 +1569,10 @@
   "options_engine": { "message": "Engine" },
   "options_engine_value": { "message": "Bergamot, im Paket enthalten - übersetzt offline" },
   "options_storage": { "message": "Daten auf diesem Gerät" },
-  "options_storage_how": { "message": "Speicherplatz, der von der Erweiterung belegt wird." },
+  "options_storage_how": { "message": "Speicherplatz, den die Daten von re/read belegen." },
 
   "options_storage_how_more": {
-    "message": "Die Summe ist die eigene Schätzung des Browsers für alles, was re/read speichert: sie zählt auch die Indizes der Datenbanken und den Cache mit, darum ist sie größer als die Posten darunter. Jeder Posten zählt, was er hält - und ein Wörterbuch kostet ein Vielfaches dessen, was sein Text wiegt, weshalb das meiste unter Sonstiges die Wörterbuch-Datenbank ist. Das Löschen eines Artikels oder Buchs entfernt dessen Text, Bilder, Markierungen, Notizen und Lesefortschritt vollständig.",
+    "message": "Die Summe ist die Schätzung des Browsers für alle Daten von re/read. Sie zählt auch die Indizes der Datenbanken und den Cache mit, darum ist sie größer als die Posten darunter zusammen. In den Posten werden nur Text und Bilder gezählt, ohne Indizes: ein Wörterbucheintrag belegt in der Datenbank ein Vielfaches seines reinen Textes, weshalb Sonstiges vor allem die Wörterbuch-Datenbank ist. Alle Daten befinden sich in der Datenbank des Browsers (IndexedDB), in dessen Profil - und nicht in einzelnen Dateien auf Ihrem Computer. Das Löschen eines Artikels oder Buchs entfernt dessen Text, Bilder, Markierungen, Notizen und Leseposition endgültig.",
     "description": "The rest of the options_storage_how description, behind the row's More button."
   },
   "options_storage_persistent": { "message": "Dauerhafter Speicher: gewährt. Der Browser hat zugesagt, diese Daten nicht zu löschen, um Platz zu schaffen." },
@@ -1578,7 +1583,7 @@
   },
 
   "options_library_copy_more": {
-    "message": "Sie übersteht auch einen Datenbankfehler: Ihre gespeicherten Artikel bleiben erhalten, falls die Datenbank verloren geht.",
+    "message": "Sie schützt auch vor einem Datenbankfehler: Ihre gespeicherten Artikel bleiben erhalten, falls die Datenbank verloren geht.",
     "description": "The rest of the options_library_copy_hint description, behind the row's More button."
   },
   "reader_marks_delete_all_one": {
@@ -1599,7 +1604,7 @@
     "placeholders": { "pair": { "content": "$1", "example": "Englisch → Englisch" } }
   },
   "options_pair_hint_quiet": {
-    "message": "Ohne Übersetzungsmodell sagt das Paar, in welcher Sprache Sie lesen und wo gespeicherte Phrasen abgelegt sind. Paare kommen aus installierten Modellen und Wörterbüchern."
+    "message": "Ohne Übersetzungsmodell legt das Paar fest, in welcher Sprache Sie lesen und unter welchem Paar Phrasen gespeichert werden. Paare kommen aus installierten Modellen und Wörterbüchern."
   },
   "options_reading_pair_quiet": {
     "message": "Sie lesen $FROM$ - die maschinelle Übersetzung ist aus, gespeicherte Phrasen gehören zu diesem Paar.",
@@ -1620,7 +1625,7 @@
   },
 
   "options_page_number_more": {
-    "message": "Ausgeschaltet steht die letzte Zeile jeder Seite tiefer; Screenreader lesen die Seitenzahl weiterhin vor, und auf einem breiten Bildschirm steht sie in der Leiste neben re/read.",
+    "message": "Ausgeschaltet reicht der Text jeder Seite tiefer; Screenreader lesen die Seitenzahl weiterhin vor, und auf einem breiten Bildschirm wird sie in der Leiste neben re/read angezeigt.",
     "description": "The rest of the options_page_number_hint description, behind the row's More button."
   },
   "options_paged_heading": { "message": "Ansicht Seiten" },
@@ -1656,7 +1661,7 @@
   },
 
   "options_turn_effect_more": {
-    "message": "Beim Lesen der Seitenmitte übersieht man das leicht. Nichts geschieht, wenn Ihr System weniger Bewegung verlangt, und nichts, wenn die Seite vom Vorlesen oder vom Ziehen einer Auswahl an den Seitenrand umgeblättert wird.",
+    "message": "Beim Lesen der Seitenmitte übersieht man das leicht. Nichts geschieht, wenn in Ihrem System reduzierte Bewegung eingestellt ist, und nichts, wenn die Seite vom Vorlesen oder vom Ziehen einer Auswahl an den Seitenrand umgeblättert wird.",
     "description": "The rest of the options_turn_effect_hint description, behind the row's More button."
   },
   "options_turn_effect_note_auto": {
@@ -1667,7 +1672,7 @@
   },
   "options_keep_articles": { "message": "Standardmäßig in der Offline-Leseliste speichern" },
   "options_keep_articles_hint": {
-    "message": "Jede in der Leseansicht geöffnete Seite kommt in die Offline-Leseliste."
+    "message": "Jede in der Leseansicht geöffnete Seite wird in der Offline-Leseliste gespeichert."
   },
 
   "options_keep_articles_more": {
@@ -1698,7 +1703,7 @@
   },
 
   "options_quiet_bubble_more": {
-    "message": "Die Aktionsschaltflächen sind Kopieren, Speichern, Vorlesen und der Rest - alles, was die Sprechblase kann, einen Druck entfernt.",
+    "message": "Die Aktionsschaltflächen sind Kopieren, Speichern, Vorlesen und die übrigen - alle Aktionen der Sprechblase, einen Druck entfernt.",
     "description": "The rest of the options_quiet_bubble_hint description, behind the row's More button."
   },
   "options_bubble_more": { "message": "Satz und Wörterbucheinträge sofort anzeigen" },
@@ -1707,7 +1712,7 @@
   },
 
   "options_bubble_more_more": {
-    "message": "Mit einem installierten Wörterbuch lohnt es sich, dies eingeschaltet zu lassen - ein Übersetzungsmodell übersetzt ein einzelnes Wort oft falsch, und das Wörterbuch zeigt, was es wirklich bedeutet. Die Sprechblase über einer bereits gespeicherten Wendung zeigt nur die gespeicherte Übersetzung - den Satz und die Wörterbucheinträge sehen Sie nach einem Druck auf „Mehr“.",
+    "message": "Mit einem installierten Wörterbuch lohnt es sich, dies eingeschaltet zu lassen: die Übersetzung eines einzelnen Wortes ist oft falsch, und das Wörterbuch zeigt, was es wirklich bedeutet. Die Sprechblase über einer bereits gespeicherten Wendung zeigt nur die gespeicherte Übersetzung - den Satz und die Wörterbucheinträge sehen Sie nach einem Druck auf „Mehr“.",
     "description": "The rest of the options_bubble_more_hint description, behind the row's More button."
   },
   "options_underline_forms": { "message": "Auch andere Formen gespeicherter Wörter unterstreichen" },
@@ -1716,7 +1721,7 @@
   },
 
   "options_underline_forms_more": {
-    "message": "Die Sprechblase darüber zeigt, was Sie für „read“ gespeichert haben. Welche Formen zählen, entscheidet Ihr Wörterbuch für die gelesene Sprache - eines muss installiert sein. Vorerst nur, wenn Sie Englisch lesen. Ausgeschaltet wird nur genau die Form unterstrichen, die Sie gespeichert haben.",
+    "message": "Die Sprechblase darüber zeigt, was Sie für „read“ gespeichert haben. Welche Formen zählen, ergibt sich aus Ihrem Wörterbuch für die gelesene Sprache - eines muss installiert sein. Vorerst nur, wenn Sie Englisch lesen. Ausgeschaltet wird nur genau die Form unterstrichen, die Sie gespeichert haben.",
     "description": "The rest of the options_underline_forms_hint description, behind the row's More button."
   },
   "options_save_sentence": { "message": "Den Satz zusammen mit der Phrase speichern" },
@@ -1861,7 +1866,7 @@
   },
 
   "options_tts_more": {
-    "message": "Ausschalten blendet sie alle aus. Die gewählte Stimme und das Tempo bleiben gespeichert und kehren beim Wiedereinschalten zurück.",
+    "message": "Ausschalten blendet sie alle aus. Die gewählte Stimme und das Tempo bleiben gespeichert und gelten nach dem Wiedereinschalten erneut.",
     "description": "The rest of the options_tts_hint description, behind the row's More button."
   },
   "options_tts_voice": { "message": "Vorlesestimme" },
@@ -1908,7 +1913,7 @@
   },
   "options_add_model_button": { "message": "Modell hinzufügen" },
   "options_files_note": {
-    "message": "Ein Modell aus Dateien hinzuzufügen stellt keinerlei Netzwerkanfrage, und diese Seite bleibt der Ausweg für den Tag, an dem der Ort, von dem Modelle kommen, nicht mehr antwortet."
+    "message": "Das Hinzufügen eines Modells aus Dateien stellt keine Netzwerkanfrage, und diese Seite bleibt der Weg hinein an dem Tag, an dem der Server mit den Modellen nicht mehr funktioniert."
   },
   "options_dictionaries_heading": { "message": "Wörterbücher" },
   "options_dictionaries_intro": {
@@ -1918,7 +1923,7 @@
     "message": "Die Wörterbücher in der Liste unten stammen von WikDict. Sie können auch eigene hinzufügen - aus Dateien oder über einen Link, auch mehrere für eine Sprache - in den Abschnitten unter der Liste. Wo sie zu finden sind, jedes mit seiner Lizenz:"
   },
   "options_dictionary_order_hint": {
-    "message": "Die Sprechblase antwortet in der Reihenfolge unten. Es antworten nur die Wörterbücher der Sprache, die Sie gerade lesen."
+    "message": "Die Sprechblase zeigt die Einträge in der Reihenfolge unten. Verwendet werden nur die Wörterbücher der Sprache, die Sie lesen."
   },
   "options_dictionary_note_from": { "message": "Wörterbücher kommen von" },
   "options_dictionary_note_rest": {
@@ -1999,7 +2004,7 @@
     "message": "Die Regeln gelten in der Übersetzungs-Sprechblase, auf der Seite der Leseansicht - Leiste und Listen eingeschlossen - und im Fenster der Schaltfläche in der Symbolleiste, nie auf den gelesenen Seiten. Eine falsche Regel kann das Aussehen oder die Bedienung dieser Orte stören, bis das Feld geleert wird."
   },
   "options_custom_css_rules": {
-    "message": "Regeln, die etwas aus dem Netz laden würden (url(), @import, @font-face), werden abgelehnt. Die Namen der Elemente bleiben von Version zu Version nach Möglichkeit gleich; muss sich einer ändern, steht es in den Versionshinweisen. Die Namen stammen aus diesen Dateien:"
+    "message": "Regeln, die etwas aus dem Netz laden würden (url(), @import, @font-face), werden abgelehnt. Die Namen der Elemente bleiben nach Möglichkeit von Version zu Version gleich; muss sich einer ändern, wird das in den Versionshinweisen genannt. Die Namen stammen aus diesen Dateien:"
   },
   "options_custom_css_source_bubble": { "message": "tooltip.js (Sprechblase)" },
   "options_custom_css_source_reader": { "message": "reader.css (Leseansicht)" },
@@ -2148,7 +2153,7 @@
     "placeholders": { "name": { "content": "$1", "example": "WikDict en-pl" } }
   },
   "options_dictionary_moved": {
-    "message": "$NAME$ antwortet jetzt an Stelle $PLACE$ von $TOTAL$.",
+    "message": "$NAME$ ist jetzt $PLACE$ von $TOTAL$.",
     "placeholders": {
       "name": { "content": "$1", "example": "WikDict en-pl" },
       "place": { "content": "$2", "example": "1" },
