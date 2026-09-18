@@ -20,7 +20,7 @@ import { asSchemeReport } from "../lib/translator/providers/bergamot/host-protoc
 import { bergamot } from "../lib/translator/providers/bergamot/index.js";
 import { bergamotViaHost, raiseEngineHost } from "../lib/translator/providers/bergamot/remote.js";
 import { detectLanguage, foreignLanguage, phraseLanguage } from "../lib/detect.js";
-import { lookUpAnswer } from "../lib/dict/lookup.js";
+import { everyWordKnown, lookUpAnswer } from "../lib/dict/lookup.js";
 import { readPage } from "./page.js";
 import { installMenus, menuDoor } from "./menus.js";
 import { openLibrary, openMarks, openReader, readInReader } from "./reader-tab.js";
@@ -85,6 +85,12 @@ async function handle(request, sender) {
       // language knowing the word is the second witness. Both reads are
       // milliseconds; the engine is the cost, and a foreign phrase never
       // pays it: it gets the entries, no gloss, and the name of its language.
+      // The witnesses can disagree, and since D252 the dictionary wins that
+      // argument where it is the one with something to show: the pair's own
+      // shelf holding the word (`lookUpAnswer` asks it last, `phraseLanguage`
+      // reads the answer) means the phrase is the pair's, whatever language
+      // the sentence around it is in - an English term in a Polish paragraph,
+      // which is most of a Polish technical text.
       const declared = request.lang ?? null;
       const detected = foreignLanguage(await detectLanguage(request.context ?? request.text), {
         from: pair.from,
@@ -92,12 +98,22 @@ async function handle(request, sender) {
         declared,
       });
       const looked = await lookUpAnswer(request.text, { detected: detected || null, pair: pair.from, declared });
-      const language = phraseLanguage({
+      let language = phraseLanguage({
         detected,
         answered: looked?.lang ?? null,
         entries: looked?.entries.length ?? 0,
         pairFrom: pair.from,
       });
+      // A term of several words that no dictionary holds whole (D252's second
+      // half): `end-to-end encryption` in a Polish paragraph had no witness at
+      // all, because the witness is an entry and no shelf has that entry. Its
+      // words do, and every one of them in the pair's language is the same
+      // proof one entry would be. Every word, never most: Polish inflects, so
+      // a Polish phrase fails this on its first word and keeps the engine away
+      // - Michał's condition since D193, and the reason this is an `and`.
+      if (language.length > 0 && (looked?.entries.length ?? 0) === 0 && (await everyWordKnown(request.text, pair.from))) {
+        language = "";
+      }
       if (language.length > 0) {
         return ok(
           looked === null
@@ -106,9 +122,17 @@ async function handle(request, sender) {
         );
       }
 
+      // Without the sentence where the detector read one in another language
+      // (D252): the phrase got here because the pair's dictionary knew it,
+      // and that says nothing about the sentence around it - which the
+      // detector did read, reliably, as the reader's own language. Feeding
+      // that sentence to an en → pl engine is the word salad D193 was opened
+      // over; the term itself is the pair's word and translates as one. A
+      // lone word still travels with a sentence of the engine's own
+      // (`padding.js`), so the gloss is a lone word's usual gloss.
       const translated = await translate({
         text: request.text,
-        context: request.context,
+        context: detected.length > 0 ? undefined : request.context,
         from: pair.from,
         to: pair.to,
       });

@@ -24,7 +24,10 @@
  * A dictionary of another language than the pair's knowing the word while
  * the pair's dictionaries do not (`answeredElsewhere`, D167's two signals):
  * the fallback for the word the detector was unsure about - a heading, a
- * single word with no sentence around it.
+ * single word with no sentence around it. Since D252 the dictionary is also
+ * the witness that can overrule the detector, and for the same reason it is
+ * trusted at all: what it answers about is the phrase itself, while the
+ * detector's reliable reading is of the sentence carrying it.
  *
  * Safari's WebKit does not promise the detector; the call is guarded and
  * its absence means "no verdict", never a fault.
@@ -128,6 +131,16 @@ export async function detectLanguage(text) {
  * dictionary that knew the word (`answeredElsewhere`). Empty for the pair's
  * own language, which is to say: the engine's answer stands.
  *
+ * A dictionary of the pair's own language knowing the word outranks the
+ * detector (D252): the detector is read on the sentence around the phrase,
+ * and a sentence is not a phrase - a Polish paragraph carrying the English
+ * term "knowledge" is Polish by every measure the detector has, while the
+ * term is the pair's word and the pair's shelf says so by holding it
+ * (Michał's screenshot, 2026-09-18). Each witness rules what it actually
+ * saw: the detector the sentence, the dictionary the word. It takes an
+ * entry, never a shelf's silence - an English dictionary that was merely
+ * asked proves nothing about a Polish word.
+ *
  * @param {{ detected: string, answered: string | null, entries: number, pairFrom: string }} of
  *   the detector's verdict (`foreignLanguage`, "" for none), the language the
  *   dictionaries answered in (null for no answer), how many entries they
@@ -135,7 +148,9 @@ export async function detectLanguage(text) {
  * @returns {string}
  */
 export function phraseLanguage({ detected, answered, entries, pairFrom }) {
-  if (detected.length > 0) return detected;
   const reading = primary(answered ?? "");
-  return answeredElsewhere({ entries, reading, pairFrom: primary(pairFrom) }) ? reading : "";
+  const pair = primary(pairFrom);
+  if (entries > 0 && reading.length > 0 && reading === pair) return "";
+  if (detected.length > 0) return detected;
+  return answeredElsewhere({ entries, reading, pairFrom: pair }) ? reading : "";
 }

@@ -105,6 +105,23 @@ export function languagesToAsk({ pair, declared, detected = null }) {
  * and neither do they get to send anybody to the settings for a dictionary
  * that is there.
  *
+ * Since D252 the pair's shelf gets a last word the list did not give it: a
+ * detector's verdict takes the pair out of `languagesToAsk` (D193), and the
+ * verdict is read on the sentence around the phrase, so an English term
+ * quoted in a Polish sentence was asked of Polish dictionaries alone and
+ * told it was in none of them - with the pair's English shelf holding it all
+ * along (Michał's screenshot, 2026-09-18). Asked only where the named shelves
+ * came back with nothing, and only where the pair was not among them, so the
+ * common answer costs exactly what it did.
+ *
+ * It is a second read rather than a third entry in the list on purpose: the
+ * silence has to stay the named shelves' own. `settle` describes whichever
+ * shelf it could ask, and a reader with no Polish dictionary must still hear
+ * "no dictionary for Polish yet" over a Polish word - not "not in your
+ * dictionaries", said of an English shelf they never asked about. So the
+ * first answer is kept whole, and the second one replaces it only by knowing
+ * the word.
+ *
  * @param {string} text as the page had it
  * @param {{ pair: string | null, declared: string | null, detected?: string | null }} languages the
  *   pair's source, the page's declaration and the detector's verdict, in
@@ -112,7 +129,108 @@ export function languagesToAsk({ pair, declared, detected = null }) {
  * @returns {Promise<import("../protocol.js").LookUp | null>}
  */
 export async function lookUpAnswer(text, languages) {
-  const asks = languagesToAsk(languages).map((lang) => ({ lang, keys: lookupKeys(text, lang) ?? [] }));
+  const asked = languagesToAsk(languages);
+  const answer = await askShelves(text, asked);
+  if (answer === null) return null;
+  const again = shelfAfterSilence({ pair: languages.pair ?? null, asked, entries: answer.entries.length });
+  if (again === null) return answer;
+  const second = await askShelves(text, [again]);
+  return second !== null && second.entries.length > 0 ? second : answer;
+}
+
+/**
+ * The shelf worth one more read after the named ones came back with nothing
+ * (D252), or null for none: the pair's own language, when a detector's
+ * verdict has taken it out of the list. Nothing to add where the word was
+ * found, where the pair was asked already, and where there is no pair. Pure,
+ * so the rule can be tested without a database.
+ *
+ * @param {{ pair: string | null, asked: string[], entries: number }} of the pair's
+ *   source language, the shelves read so far, and how many entries they
+ *   returned between them
+ * @returns {string | null}
+ */
+export function shelfAfterSilence({ pair, asked, entries }) {
+  if (entries > 0) return null;
+  const language = (pair ?? "").trim();
+  return language.length === 0 || asked.includes(language) ? null : language;
+}
+
+/**
+ * The shortest word that makes a phrase worth vouching for by its parts.
+ * Three letters and under are where Polish and English collide by accident -
+ * "to", "by", "pan", "ten" are all English headwords and all ordinary Polish
+ * words - so a phrase built of nothing but those proves nothing about its
+ * language.
+ */
+const SHORT_WORD = 3;
+
+/**
+ * The words a phrase would be vouched for by (D252's second half), or none
+ * when it is not that kind of phrase: a term of several words that no
+ * dictionary holds whole - "end-to-end encryption", "zero knowledge" - where
+ * the parts are in the dictionaries even though the whole is not.
+ *
+ * A single word is not here: it was asked in full already, and a second ask
+ * under the same key would be the same silence. Neither is a phrase longer
+ * than the lookup's own ceiling, nor one made of short words only
+ * (`SHORT_WORD`). Each word once, in order. Pure, so the rule can be tested
+ * without a database.
+ *
+ * @param {string} text as the page had it
+ * @returns {string[]}
+ */
+export function termWords(text) {
+  const words = keyTokens(normalize(text));
+  if (words.length < 2 || words.length > MAX_WORDS) return [];
+  if (!words.some((word) => word.length > SHORT_WORD)) return [];
+  return [...new Set(words)];
+}
+
+/**
+ * Whether one language's dictionaries know **every** word of a term - the
+ * witness that a phrase nobody holds whole is nevertheless that language's
+ * (D252's second half, Michał's report of 2026-09-18: `end-to-end
+ * encryption` in a Polish paragraph got no translation, because no shelf
+ * holds the term and no shelf could vouch for it).
+ *
+ * Every word and not most of them, on purpose. It is the condition that
+ * keeps a Polish phrase out of an English engine: Polish inflects, so its
+ * words are not English headwords, and one word missing is enough to leave
+ * the detector's verdict standing. The reader's own condition since D193,
+ * and the one that must not be traded for reach.
+ *
+ * Read only where everything cheaper has already said nothing, so it costs
+ * at most `MAX_WORDS` point reads on a phrase that was going to be answered
+ * with silence anyway.
+ *
+ * @param {string} text as the page had it
+ * @param {string} lang the language to vouch in - the pair's source
+ * @returns {Promise<boolean>}
+ */
+export async function everyWordKnown(text, lang) {
+  const language = lang.trim();
+  const words = termWords(text);
+  if (language.length === 0 || words.length === 0) return false;
+  for (const word of words) {
+    const answer = await askShelves(word, [language]);
+    if (answer === null || answer.entries.length === 0) return false;
+  }
+  return true;
+}
+
+/**
+ * The dictionaries of some languages asked about a phrase, in order - the
+ * database half of `lookUpAnswer`, split out because the pair's shelf may be
+ * asked a second time. A dictionary that fails costs the entries and nothing
+ * else (the header's rule).
+ *
+ * @param {string} text as the page had it
+ * @param {string[]} languages the shelves to read, in order
+ * @returns {Promise<import("../protocol.js").LookUp | null>}
+ */
+async function askShelves(text, languages) {
+  const asks = languages.map((lang) => ({ lang, keys: lookupKeys(text, lang) ?? [] }));
   if (asks.length === 0) return null;
   try {
     return await lookupEntries(asks);

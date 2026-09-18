@@ -60,7 +60,23 @@ describe("foreignLanguage", () => {
 
 describe("phraseLanguage", () => {
   it("is the detector's verdict where there is one", () => {
-    assert.equal(phraseLanguage({ detected: "pl", answered: "en", entries: 3, pairFrom: "en" }), "pl");
+    // The word nobody's dictionary knew, and the word the detected
+    // language's own dictionary knew: the detector stands either way.
+    assert.equal(phraseLanguage({ detected: "pl", answered: "pl", entries: 3, pairFrom: "en" }), "pl");
+    assert.equal(phraseLanguage({ detected: "pl", answered: "pl", entries: 0, pairFrom: "en" }), "pl");
+    assert.equal(phraseLanguage({ detected: "pl", answered: null, entries: 0, pairFrom: "en" }), "pl");
+  });
+
+  it("lets the pair's own dictionary overrule the detector (D252)", () => {
+    // "knowledge" in a Polish paragraph (Michał's screenshot, 2026-09-18):
+    // the detector reads the sentence and answers Polish, the pair's English
+    // shelf holds the word, and the word is what the bubble is about - so
+    // the phrase is the pair's and the engine translates it after all.
+    assert.equal(phraseLanguage({ detected: "pl", answered: "en", entries: 3, pairFrom: "en" }), "");
+    assert.equal(phraseLanguage({ detected: "pl", answered: "en-GB", entries: 1, pairFrom: "en-US" }), "");
+    // A shelf that was merely asked proves nothing about a Polish word: it
+    // takes an entry to overrule the detector, never a silence.
+    assert.equal(phraseLanguage({ detected: "pl", answered: "en", entries: 0, pairFrom: "en" }), "pl");
   });
 
   it("falls back to the dictionary that knew the word, when it is another language's", () => {

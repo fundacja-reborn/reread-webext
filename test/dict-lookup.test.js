@@ -1,14 +1,15 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { languagesToAsk, lookupKeys } from "../src/lib/dict/lookup.js";
+import { languagesToAsk, lookupKeys, shelfAfterSilence, termWords } from "../src/lib/dict/lookup.js";
 import { settle, shownSenses } from "../src/lib/dict/store.js";
 
 /**
  * The pure half of asking the dictionaries (D121): which keys a phrase is
  * asked under, and when it is not a dictionary question at all; since D191
  * also which languages it is asked in, in what order, and which language's
- * answer the bubble gets. The database half (`lookupEntries`) lives on
+ * answer the bubble gets, and since D252 which shelf is worth one more read
+ * once they have all said nothing. The database half (`lookupEntries`) lives on
  * IndexedDB and stays with the smoke tests; these are the rules its callers -
  * the background's translate ride, the quiet bubble on any page, the reader's
  * own hand - stand on.
@@ -80,6 +81,51 @@ describe("languagesToAsk", () => {
     assert.deepEqual(languagesToAsk({ pair: "en", declared: "" }), ["en"]);
     assert.deepEqual(languagesToAsk({ pair: null, declared: null }), []);
     assert.deepEqual(languagesToAsk({ pair: "  ", declared: "" }), []);
+  });
+});
+
+describe("termWords", () => {
+  it("takes a term of several words, each word once (D252)", () => {
+    // Michał's page, 2026-09-18: no dictionary holds these whole, and their
+    // words are what can vouch for them.
+    assert.deepEqual(termWords("end-to-end encryption"), ["end", "to", "encryption"]);
+    assert.deepEqual(termWords("zero knowledge"), ["zero", "knowledge"]);
+  });
+
+  it("takes nothing it could not learn a language from", () => {
+    // One word was asked in full already: asking again under the same key is
+    // the same silence.
+    assert.deepEqual(termWords("knowledge"), []);
+    // Past the lookup's own ceiling nothing is asked at all.
+    assert.deepEqual(termWords("a phrase of five whole words"), []);
+    // Short words collide across languages: "to ten pan" is three English
+    // headwords and an ordinary Polish sentence. Proof of nothing.
+    assert.deepEqual(termWords("to ten pan"), []);
+    assert.deepEqual(termWords("by the"), []);
+    assert.deepEqual(termWords(""), []);
+  });
+});
+
+describe("shelfAfterSilence", () => {
+  it("gives the pair's shelf a last word when the detector's took it out (D252)", () => {
+    // Michał's screenshot, 2026-09-18: "knowledge" in a Polish sentence
+    // under en → pl. The detector read the sentence, the Polish shelf was
+    // asked alone and knew nothing, and the English dictionary holding the
+    // word was never opened. It is opened now.
+    assert.equal(shelfAfterSilence({ pair: "en", asked: ["pl"], entries: 0 }), "en");
+  });
+
+  it("adds nothing where the word was found, or the pair was asked already", () => {
+    // A Polish word on a Polish page (D193's own case): the Polish shelf
+    // answered, and the pair's is left alone - a Polish "list" is not the
+    // English one.
+    assert.equal(shelfAfterSilence({ pair: "en", asked: ["pl"], entries: 2 }), null);
+    // No verdict: the pair led the list, and asking it twice reads the same
+    // rows for the same silence.
+    assert.equal(shelfAfterSilence({ pair: "en", asked: ["en", "pl"], entries: 0 }), null);
+    // Nothing to fall back on: the quiet bubble with no pair chosen.
+    assert.equal(shelfAfterSilence({ pair: null, asked: ["pl"], entries: 0 }), null);
+    assert.equal(shelfAfterSilence({ pair: "  ", asked: ["pl"], entries: 0 }), null);
   });
 });
 

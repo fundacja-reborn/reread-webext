@@ -15,6 +15,11 @@ import { bodyOf, openings } from "./openings.js";
  * saying nothing: a request that stops carrying the page's language, a
  * landing that shows the guess anyway or keeps it, a voice that ignores the
  * book that knew the word.
+ *
+ * Since D252 the verdict is not the last word: the pair's own dictionary
+ * knowing the phrase overrules it, because the detector reads the sentence
+ * and the dictionary reads the word. What that costs the handler - the
+ * sentence left out of the engine's ride - is read here too.
  */
 
 const ROOT = new URL("../src/content/", import.meta.url);
@@ -84,6 +89,26 @@ describe("a word the page's dictionary knew, with the engine on", () => {
     // The detector reads the sentence around the phrase, the phrase alone
     // when there is none - a lone word is what it is least sure about.
     assert.match(handler, /detectLanguage\(request\.context \?\? request\.text\)/, "the detector reads something other than the sentence around the phrase");
+  });
+
+  it("translates the term without the sentence the detector read as another language (D252)", async () => {
+    // The phrase got past the verdict because the pair's own dictionary knew
+    // it - an English term in a Polish paragraph. The term is the pair's
+    // word; the sentence around it is not, and the detector was right about
+    // that, so it is not handed to an en → pl engine. That sentence coming
+    // back as word salad is what D193 was opened over, and the way back to
+    // it is this one line.
+    const source = await readFile(new URL("../src/background/index.js", import.meta.url), "utf8");
+    const from = source.indexOf("case Message.TRANSLATE:");
+    const handler = source.slice(from, source.indexOf("case Message.LOOK_UP:", from));
+    assert.match(
+      handler,
+      /context: detected\.length > 0 \? undefined : request\.context/,
+      "the engine is handed the sentence of a language it does not read",
+    );
+    // And the pair's shelf gets its last word before any of this: the lookup
+    // is the witness that can overrule the detector at all.
+    assert.match(handler, /lookUpAnswer\(request\.text, \{ detected: detected \|\| null, pair: pair\.from, declared \}\)/, "the lookup stopped carrying the pair");
   });
 
   it("speaks in the dictionary's language then, with the engine on as well", async () => {
