@@ -1139,8 +1139,9 @@ function renderArticle(piece) {
   forgetReading();
   stopMarkSpeech();
   // The column breathes with the text size only under an article (see the
-  // measure rules in reader.css); the attribute is which rule applies.
-  document.body.dataset["view"] = "doc";
+  // measure rules in reader.css); the attribute is which rule applies, and
+  // the room changing takes an open panel down with it (D253).
+  enterView("doc");
   // A different document never inherits the pen (D106) or the other one's
   // search (D119): both survive only a book turning its own parts - a
   // search's hits are the whole book's. The active mark and the paint go
@@ -4886,6 +4887,28 @@ function turnSegment(step) {
 }
 
 /**
+ * The room on screen: stamped on the body, where the stylesheet reads which
+ * rules the column lives under - and the one place a sheet left hanging
+ * under the bar is taken down (D253).
+ *
+ * A press inside the chrome is the panels' own business (their toggles
+ * decide), so the press that closes a panel by landing outside it never
+ * reaches the way back standing in the bar: the arrow changed the room with
+ * the Aa panel open, and the whole change happened behind it (Michał's
+ * report, 2026-09-18). The menu's rows had been closing their panel by
+ * hand, one door at a time, and history's own steps - Back, a forward step,
+ * the system's edge gesture - had no press to close anything at all. The
+ * rule is about a room changing, so it is said where the room changes
+ * rather than on each of the doors.
+ *
+ * @param {"doc" | "list" | "marks"} room
+ */
+function enterView(room) {
+  document.body.dataset["view"] = room;
+  closePanels();
+}
+
+/**
  * The teardown the list and the highlights page share: whatever document
  * stood here leaves the screen whole - its pending position save taken, its
  * voice stopped, its pen put away, its dressing removed.
@@ -4952,7 +4975,7 @@ function leaveDocView() {
 
 async function showLibrary() {
   leaveDocView();
-  document.body.dataset["view"] = "list";
+  enterView("list");
   marksShown = null;
   if (marksSection !== null) marksSection.hidden = true;
   // The menu must not list the room it stands in: on the list view its list
@@ -4979,7 +5002,7 @@ async function showLibrary() {
  */
 async function showMarks(scope, { fresh = false } = {}) {
   leaveDocView();
-  document.body.dataset["view"] = "marks";
+  enterView("marks");
   marksShown = { scope };
   // A report of the last visit's export is that visit's; the lines start
   // clear, the transfer sections' way - and a file offered on the last

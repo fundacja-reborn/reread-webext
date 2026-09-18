@@ -75,7 +75,7 @@ describe("the foot of a panel that scrolls within itself (D246, D247)", () => {
     // No `hidden` on the strip anywhere: it is in flow at every moment, or
     // the rows under it would move by its height as it appeared.
     assert.doesNotMatch(await source("reader/reader.html"), /class="panel-more"[^>]*\shidden[\s>]/, "the strip comes and goes, moving the rows under it");
-    assert.match(styles, /\.panel-more-glyph \{\s*visibility: hidden;\s*\}/, "the chevron stands whether or not there is more below");
+    assert.match(styles, /\.panel-more \.panel-more-glyph \{[^}]*visibility: hidden;/, "the chevron stands whether or not there is more below");
     assert.match(styles, /\[data-more="true"\] \.panel-more-glyph \{\s*visibility: visible;/, "the chevron never comes out");
     // The line over the strip is a shadow: a border would cost a reflow.
     assert.match(styles, /\[data-more="true"\] \.panel-more \{\s*box-shadow: 0 -1px 0 var\(--page-line\);/, "the line over the strip is drawn in a way that moves the rows");
@@ -88,7 +88,11 @@ describe("the foot of a panel that scrolls within itself (D246, D247)", () => {
     const styles = await source("reader/reader.css");
     assert.match(styles, /\.reader-panel \{[^}]*padding: 0\.6rem 0 0;/, "the Aa panel keeps air under its last row that its foot cannot cover");
     assert.match(styles, /\.reader-chrome > \.nav-menu \{[^}]*padding-bottom: 0;/, "the menu keeps air under its last row that its foot cannot cover");
-    assert.match(styles, /\.panel-more \{[^}]*padding: 0 0 0\.6rem;/, "the air under the last row stands nowhere");
+    // The air is the strip's height rather than padding beneath its chevron
+    // (D253): held as padding it all stood under the glyph, which read as a
+    // strip cut short (Michał's photo, 2026-09-18). Same total height, so
+    // the panel's fold is where it was.
+    assert.match(styles, /\.panel-more \{[^}]*min-height: 2\.5rem;\s*padding: 0;/, "the air under the last row stands nowhere, or hangs under the chevron again");
     assert.doesNotMatch(styles, /\.panel-more \{[^}]*pointer-events: none;/, "the strip hands the press through to whatever stands under it");
     // The strip is a button inside a menu whose every button is a row: the
     // row dress, the separators and the rule that drops the last row's line
@@ -97,6 +101,19 @@ describe("the foot of a panel that scrolls within itself (D246, D247)", () => {
     assert.match(page, /\.nav-menu button:not\(\.panel-more\) \{/, "the reader's foot strip wears the menu's row dress");
     assert.match(page, /\.nav-menu button:not\(\.panel-more\):hover \{/, "the foot strip answers a hover like a menu row");
     assert.match(page, /:not\(\.panel-more, :has\(~ :is\(a, button\):not\(\[hidden\], \.panel-more\)\)\)/, "the foot strip makes the row before it draw a line again");
+  });
+
+  it("is drawn at the size of a glyph that is the whole of its button (D253)", async () => {
+    const styles = await source("reader/reader.css");
+    // The pager's rule, where the words step aside under a phone's width and
+    // the chevrons become the buttons (`.pager-icon`, page.css). At the
+    // panel's own quieter voice the stroke came to some 8 by 4 px - the
+    // smallest mark in the reader, alone on an empty strip with no frame
+    // around it, and the only word that anything waits below the fold
+    // (Michał's photo, 2026-09-18).
+    assert.match(styles, /\.panel-more \.panel-more-glyph \{[^}]*width: 1\.5rem;\s*height: 1\.5rem;/, "the chevron speaks in the panel's voice again, not as the button it is");
+    const page = await source("assets/page.css");
+    assert.match(page, /@media \(max-width: 30rem\) \{[^@]*?\.pager-icon \{\s*width: 1\.5em;/, "the size the strip's chevron follows is no longer the pager's");
   });
 
   it("brings up what stands below when it is pressed", async () => {
