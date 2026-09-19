@@ -156,13 +156,14 @@ describe("the bar stuck to the top of every page", () => {
     ])) {
       assert.match(ruleOf(await source(path), selector), /scroll-margin-top: 0\.75rem;/, `${selector} in ${path} lost its landing pad`);
     }
-    // The settings page's section headings land a step lower still (D258):
-    // each carries a 2px rule above it, and an address that stopped under the
-    // boundary it had just crossed said nothing about having crossed one.
+    // The settings page's section headings land on the same pad as every
+    // other anchor since D265: the 2px rule D258 stood over each of them is
+    // gone with the flat page, and what an address lands on is the heading
+    // and the cards under it.
     assert.match(
       ruleOf(await source("options/options.css"), "h2"),
-      /scroll-margin-top: calc\(0\.75rem \+ var\(--gap-divider-h2\) \+ 2px\);/,
-      "a section heading no longer brings its own rule into the window",
+      /scroll-margin-top: 0\.75rem;/,
+      "a section heading lands against the bar's own line",
     );
     // The pages' own scrolls aim at the top of what they show and let the
     // padding place it: no arithmetic of their own against the bar.

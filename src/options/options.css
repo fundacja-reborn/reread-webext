@@ -1,17 +1,18 @@
-/* The settings page: a compact header with a table of contents, settings rows
-   as a grid, and the two catalogues standing in the page's own flow - no box
-   scrolling inside the page. Typography, buttons, notes and statuses lean on
+/* The settings page: panels of white raised over a tinted page, the way a
+   browser's own settings stand (D265, brave://settings as the model). Rows of
+   one geometry with hairlines between them, the table of contents beside them
+   on the page's own paper. Typography, buttons, notes and statuses lean on
    assets/page.css, shared by every page this extension owns; everything below
    is this page's own layout.
 
-   Base styles lay the page out for a narrow screen; the one media query at
-   the end spreads the same HTML out for a desktop. */
+   Base styles lay the page out for a narrow screen; the media queries at the
+   end spread the same HTML out for a desktop. */
 
-/* The page's own tokens (D255, T2/T3; the separators and the gaps, D258): the
-   type scale, the density, the two numbers the two-column layout is made of,
-   and the three boundaries a section, a subsection and a row are told apart
-   by. Only this page loads this sheet, so `:root` here reaches nothing else -
-   the popup, the reader and the bubble keep the shared sizes in page.css.
+/* The page's own tokens (D255, T2/T3; the panels, D265): the type scale, the
+   density, the two numbers the two-column layout is made of, and the panel
+   the rows stand in. Only this page loads this sheet, so `:root` here reaches
+   nothing else - the popup, the reader and the bubble keep the shared sizes
+   in page.css.
 
    The face is the system's (`system-ui`), which is what Chrome's and Brave's
    own settings use: on macOS that is SF, on Android Roboto, and re/read is
@@ -49,113 +50,62 @@
   --ui-gutter: 2.5rem;
   --ui-side-top: 1.0625rem;
 
-  /* --- the three levels of separation (D258, H1) ---
+  /* --- the panel and the rows inside it (D265) ---
 
-     One page, three boundaries, three different signals, because a page where
-     the section rule, the subsection rule and the row rule are the same
-     hairline has no hierarchy at all - only sizes of type (V-a, V-b).
+     The page is a tinted sheet with white cards raised over it, and every
+     boundary on it is one of two: the card's own frame, and the hairline
+     between two rows of one card. The rules a section, a subsection and a
+     row were told apart by until D258 are gone with them - a card is a
+     stronger boundary than any line, and three kinds of line inside one are
+     noise.
 
-     A section: a 2px rule in the controls' own ink, over a wide gap. A
-     subsection: air and weight, no rule whatsoever. A row: the separators'
-     hairline, and only ever between two rows that are both drawn.
-
-     The strong ink is `--page-border` (4.63:1 light, 4.27:1 dark, 3.87:1
-     sepia, 8.86:1 e-ink), well over the 3:1 a boundary is asked for and still
-     legible after a panel posterises it to sixteen greys; the subtle one is
-     the separators' own `--page-line`, which is what a hairline between two
-     rows has always been. */
-  --sep-section: 2px solid var(--page-border);
+     Both are drawn in the separators' own ink (`--page-line`, about 2.6:1 to
+     the paper and a solid grey an e-ink panel keeps). The frame is what
+     carries the card, not the shadow: on a Boox the tinted page quantizes to
+     white, and a card without a frame would have no edge at all there (D3 of
+     the brief). The shadow is an addition for glass. */
+  --settings-surface: var(--page-bg);
+  --settings-page-bg: #f1f2f5;
+  --settings-card-bg: #ffffff;
+  --settings-card-border: var(--page-line);
   --sep-row: 1px solid var(--page-line);
+  --settings-card-shadow: 0 1px 2px rgb(0 0 0 / 0.06), 0 1px 3px 1px rgb(0 0 0 / 0.03);
+  --settings-row-hover: rgb(0 0 0 / 0.045);
+  --settings-card-radius: 0.5rem;
+  /* The one corner of the content area that is not the window's edge. */
+  --settings-panel-radius: 1rem;
+  --settings-column-width: 42.5rem;
+  /* The one gutter of the page: what the bar keeps from the window's edge and
+     the least a card keeps from the panel's. A phone gets the narrow one, so
+     a card is as wide as the screen allows; the two breakpoints below widen
+     it with the room they find. */
+  --settings-side: 0.75rem;
 
-  /* --- the vertical rhythm (D259) ---
+  /* One geometry for every row of every card: the padding, the floor, and the
+     indent a description and a dependent row both begin at - the checkbox's
+     own column and the gap after it, so nothing on the page is indented by a
+     number nobody can point at. In rem, like every size here, so a browser
+     told to render text larger grows the rows with it. */
+  --row-pad-x: 1.25rem;
+  --row-pad-y: 0.75rem;
+  --row-min-h: 3rem;
+  --row-box: 1.4rem;
+  --row-gap: 0.75rem;
+  --row-indent: calc(var(--row-box) + var(--row-gap));
 
-     Every number here is a gap between **glyphs**: from the bottom of the ink
-     above to the top of the ink below, which is what a reader sees and what
-     `inkGap` in SMOKE-TESTS measures. It is not what a margin is - a margin
-     stands between line boxes, and a line box carries half the leading above
-     the first line and half below the last. So the gaps are declared once,
-     the half-leadings are declared once, and every margin in this sheet is
-     the one less the other two.
+  /* --- the air around the cards (D265) ---
 
-     Why it mattered: a heading followed by a row was ~42px from the group
-     above and ~32px from its own first row, because the row's own padding and
-     the leading piled on top of the heading's margin - the same heading
-     followed by a paragraph read correctly. The distance depended on what
-     came next, which is the one thing it must not do.
-
-     Largest to smallest, and every level of grouping is wider than the level
-     under it: inside a row (0.125) < heading to its content (0.5-0.75) <
-     block to block (1) < row to row (1.5 plus the rule) < content to a
-     subsection (2.25) < content to a section (3 plus the rule and 1.25). */
-  --gap-section: 3rem;
-  --gap-divider-h2: 1.25rem;
+     Four numbers, and every one of them is a margin: inside a card the rows
+     have their own padding, so nothing here has to be measured against a
+     line box's leading the way the flat page's rhythm was (D259). A section
+     from the one above it, a subsection from what it follows, a heading from
+     its own first card, and one card from the next. */
+  --gap-section: 2.5rem;
   --gap-h2-after: 0.75rem;
-  --gap-h3-before: 2.25rem;
+  --gap-h3-before: 1.5rem;
   --gap-h3-after: 0.5rem;
-  --gap-intro: 0.5rem;
-  --gap-intro-after: 0.75rem;
-  --gap-block: 1rem;
-  --gap-row: 0.75rem;
-  /* The blocks a list subsection is made of (D263, L4): a block stands from
-     the one above it as far as a subsection stands from its own heading's
-     content, and a group of one language from the next by the same amount -
-     they are the same level of grouping. Their headings hold their content as
-     close as an h3 holds its own. */
-  --gap-block-before: 1.5rem;
-  --gap-h4-after: 0.5rem;
-  --gap-h5-after: 0.5rem;
-
-  /* Half the leading of each voice: what the browser puts between a line box's
-     edge and the ink inside it. `text-box-trim` would say this exactly, and
-     Firefox 142 does not have it, so it is arithmetic: the glyph box of the
-     system face this page is set in stands 1.154 to 1.188em tall (ascent plus
-     descent), measured in the browser at each of this page's five sizes, and
-     the rest of the line-height is split above and below. At 1.17 every one
-     of the five is within 0.15px of its measured half-leading, so no gap on
-     the page is more than 0.3px off what §2 asks for. */
-  --ink-box: 1.17;
-  --lead-h2: calc((1.3 - var(--ink-box)) * var(--ui-h2) / 2);
-  --lead-h3: calc((1.35 - var(--ink-box)) * var(--ui-h3) / 2);
-  --lead-h4: calc((1.35 - var(--ink-box)) * var(--ui-h4) / 2);
-  --lead-h5: calc((1.4 - var(--ink-box)) * var(--ui-h5) / 2);
-  --lead-text: calc((1.45 - var(--ink-box)) * var(--ui-text) / 2);
-  --lead-small: calc((1.5 - var(--ink-box)) * var(--ui-small) / 2);
-
-  /* The margins themselves: a gap, less the leading that flanks it. Named for
-     the pair they stand between, so a rule never carries a number. */
-  --m-section: calc(var(--gap-section) - var(--lead-small));
-  --m-divider-h2: calc(var(--gap-divider-h2) - var(--lead-h2));
-  --m-h2-after: calc(var(--gap-h2-after) - var(--lead-h2) - var(--lead-text));
-  --m-h3-before: calc(var(--gap-h3-before) - var(--lead-small) - var(--lead-h3));
-  --m-h3-after: calc(var(--gap-h3-after) - var(--lead-h3) - var(--lead-small));
-  --m-intro: calc(var(--gap-intro) - var(--lead-small) * 2);
-  --m-intro-after: calc(var(--gap-intro-after) - var(--lead-small) - var(--lead-text));
-  --m-block: calc(var(--gap-block) - var(--lead-small) - var(--lead-text));
-  --m-row-top: calc(var(--gap-row) - var(--lead-row));
-  --m-row-bottom: calc(var(--gap-row) - var(--lead-small));
-  /* The blocks: what stands above an h4 is a list (its last row's ink) or a
-     paragraph, and what stands under an h4 or an h5 is a row of a list, which
-     carries the control floor's own extra - so the rows' gaps take
-     `--row-extra` off, exactly as `--m-h3-after` does for a group of
-     settings. */
-  --m-h4-before: calc(var(--gap-block-before) - var(--lead-small) - var(--lead-h4));
-  --m-h4-after: calc(var(--gap-h4-after) - var(--lead-h4) - var(--lead-text));
-  --m-h5-before: calc(var(--gap-block-before) - var(--lead-small) - var(--lead-h5));
-  --m-h5-after: calc(var(--gap-h5-after) - var(--lead-h5) - var(--lead-text));
-
-  /* A row's first line is not where a paragraph's would be: it stands in a
-     box as tall as the touch floor, centred, so its ink begins some seven
-     pixels lower than the half-leading alone would put it. Measured in the
-     browser: a heading whose group followed was 19px from its first label
-     where §2 asks for 12. Every gap that lands on a row takes this off as
-     well - `--lead-row` for the row's own padding, and the group's own
-     negative top margin for the gap handed to it from above. */
-  --row-extra: calc((var(--ui-control) - var(--ui-text) * 1.45) / 2);
-  --lead-row: calc(var(--lead-text) + var(--row-extra));
-
-  /* A list row's own breathing, inside the list only: the first and the last
-     hand it back, so a list is as far from what surrounds it as any block. */
-  --list-pad: 0.5rem;
+  --gap-desc-after: 0.75rem;
+  --gap-card: 0.75rem;
 }
 
 /* The density follows the pointer, not the window: where a device is read
@@ -172,14 +122,86 @@
   }
 }
 
-/* A touch wider than the shared 44rem: the list rows hold three columns and
-   the extra room goes to the pair names. No top padding of its own: the
-   headroom is the stuck box's paper over the bar (`.page-chrome`,
-   page.css - D219), the same on every page - and tighter than the stock
-   padding anyway: with the table of contents and the first-steps card
-   above the rows, that one pushed the models section under a 768px fold. */
+/* --- the panel on every paper (D265) ---
+
+   The page's four palettes live in page.css and this page wears them like
+   every other; what it adds is the tone under the cards and the tone of the
+   cards themselves, which no other page has. The pattern is page.css's own: a
+   media query for the browser's dark, then the hand-set themes, each saying
+   the whole of it so a light theme chosen by hand beats a dark browser.
+
+   The card is the raised surface the popup already stands on - the paper
+   itself where the paper is white, one step lighter in the dark and in sepia
+   - and the page under it is one step the other way. On e-ink there is no
+   step at all: a Boox keeps sixteen greys and rounds a near-white tone back
+   into the paper, so the frame carries the card there and a tinted page would
+   only dither. The shadow is for glass alone (it greys an edge in sepia and
+   says nothing on a panel). */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --settings-page-bg: #101319;
+    --settings-card-bg: var(--surface-raised);
+    --settings-card-shadow: none;
+    --settings-row-hover: rgb(255 255 255 / 0.06);
+  }
+}
+
+:root[data-reader-theme="light"] {
+  --settings-page-bg: #f1f2f5;
+  --settings-card-bg: #ffffff;
+  --settings-card-shadow: 0 1px 2px rgb(0 0 0 / 0.06), 0 1px 3px 1px rgb(0 0 0 / 0.03);
+  --settings-row-hover: rgb(0 0 0 / 0.045);
+}
+
+:root[data-reader-theme="dark"] {
+  --settings-page-bg: #101319;
+  --settings-card-bg: var(--surface-raised);
+  --settings-card-shadow: none;
+  --settings-row-hover: rgb(255 255 255 / 0.06);
+}
+
+:root[data-reader-theme="sepia"] {
+  --settings-page-bg: #ece2cb;
+  --settings-card-bg: var(--surface-raised);
+  --settings-card-shadow: none;
+  --settings-row-hover: rgb(0 0 0 / 0.05);
+}
+
+:root[data-reader-theme="eink"] {
+  --settings-page-bg: #ffffff;
+  --settings-card-bg: #ffffff;
+  --settings-card-shadow: none;
+  /* The lightest grey a panel can still tell from paper, and well inside the
+     four the e-ink theme keeps for a fill under words (D237). */
+  --settings-row-hover: #eeeeee;
+}
+
+/* The window's own high-contrast mode: the system draws the text and the
+   paper, and a card whose frame came from a colour it replaced would have
+   none. Said in the system's own keywords, which is the only thing a forced
+   palette honours. */
+@media (forced-colors: active) {
+  .card,
+  :is(.card, .rows, .card-list, .models)
+    > :where(:not([hidden], .status:empty))
+    ~ :where(:not([hidden], .status:empty))::before {
+    border-color: CanvasText;
+  }
+}
+
+/* The page fills the window (D265): nothing on it is centred but the column
+   of cards, and that is centred inside the tinted panel rather than the page
+   inside the window - which is how a browser's own settings stand, and the
+   only way the panel can reach the window's edge and its foot. The side
+   padding is one number for the bar and the cards alike, so the search field
+   above begins on the same line as the cards below it. No top padding of its
+   own: the headroom is the stuck box's paper over the bar (`.page-chrome`,
+   page.css - D219), the same on every page. */
 body {
-  max-width: 46rem;
+  max-width: none;
+  padding-inline: 0;
+  padding-bottom: 0;
+  background: var(--settings-surface);
   /* The system's face, named once (T2): it is what Chrome's and Brave's own
      settings use - SF on macOS, Roboto on Android - so re/read is dressed
      like the browser it stands in. Nothing is shipped for it, and the shared
@@ -237,7 +259,7 @@ main h5 {
    decide about. */
 p.explain,
 .hint {
-  margin: 0 0 var(--m-block);
+  margin: 0 0 var(--gap-desc-after);
   color: var(--page-muted);
   font-size: var(--ui-small);
   line-height: 1.5;
@@ -247,7 +269,7 @@ p.explain,
    the reading rhythm between them, not the gap between blocks. Inside a
    header the same distance comes from the header's own rule. */
 p.explain:has(+ p.explain) {
-  margin-bottom: var(--m-intro);
+  margin-bottom: 0.35rem;
 }
 
 /* Code is code (D258, V5): a file's name, a CSS rule. In a fixed-width face,
@@ -331,18 +353,54 @@ body:not(.no-translation) .no-translation-only {
   border-inline-start: 2px solid var(--page-line);
 }
 
-/* --- the header: the shared bar, title, the table of contents ---
+/* --- the frame: the bar, the table of contents, the tinted panel (D265) ---
 
    The bar and its menu (`.page-bar`, `.page-mark`, `.nav-menu`) live in
    assets/page.css - the dress every header of this extension wears. The
    mark here is a plain line, not a button: the door it opens elsewhere is
-   this very room. */
+   this very room.
 
-/* The title stands clear under the bar's line; an opened menu panel pushes
-   it down from between the two, as on the other pages. A step tighter than
-   the saved phrases' 2rem, for this page's own fold arithmetic. */
+   What this page adds is what a browser's own settings look like: the bar and
+   the table of contents on the page's own paper, and the settings themselves
+   on a tinted panel that reaches the window's right edge and its foot, with
+   one rounded corner where it meets the two. */
+
+/* The bar spans the window now, so it keeps the page's gutter itself. */
+.page-bar {
+  padding-inline: var(--settings-side);
+}
+
+/* The menu panel hangs under the bar and keeps the same gutter. */
+.nav-menu {
+  padding-inline: var(--settings-side);
+}
+
+/* The settings themselves: the tinted panel, and the column of cards centred
+   in it. The column is a padding rather than a box of its own - one element
+   fewer between the search's index and the sections it reads - and it never
+   closes below the gutter the bar keeps.
+
+   The panel reaches the foot of the window even where the page is short: a
+   tint that stopped with the last card would read as a block on the page
+   rather than as the room the settings are in. */
+main {
+  min-width: 0;
+  min-height: calc(100dvh - var(--header-h));
+  padding-block: 1.5rem 3rem;
+  padding-inline: max(var(--settings-side), calc((100% - var(--settings-column-width)) / 2));
+  background: var(--settings-page-bg);
+}
+
+/* The title opens the panel, so the panel's own top padding is its air. */
 header h1 {
-  margin: 1.5rem 0 0.75rem;
+  margin: 0 0 0.25rem;
+}
+
+/* The colophon closes the panel rather than the page: it stands inside it,
+   on the cards' own column, a step quieter than the shared 4rem roof - a
+   panel that ends in three lines of small print needs no gap that size. */
+.page-end {
+  margin-top: 2rem;
 }
 
 /* --- searching the settings (D254, P10), in the bar at every width (F2) ---
@@ -474,10 +532,15 @@ mark.hit {
   overflow-wrap: break-word;
 }
 
-.sections a:hover,
-.sections a:focus-visible {
-  color: var(--page-fg);
-  text-decoration: underline;
+/* Under a pointer the whole line answers, the way a card's rows do (D265):
+   the list is a column of doors, and a door that only underlines a word says
+   less than one that lights up. Nothing depends on it - a finger and an e-ink
+   panel have no hover at all. */
+@media (hover: hover) and (pointer: fine) {
+  .sections a:hover {
+    background: var(--settings-row-hover);
+    color: var(--page-fg);
+  }
 }
 
 /* The section being read: the marker on the leading edge and the page's full
@@ -560,155 +623,107 @@ mark.hit {
   color: var(--page-muted);
 }
 
-/* The support section's two doors, one per line - the jump links' touch
-   floor without their separator: these are the section's whole content, not
-   a table of contents. */
-.support-links {
+/* --- a row that is a door (D265, type 4) ---
+
+   The support section's two links, and the pattern for any row whose whole
+   business is going somewhere else: the row is the link, set in the page's
+   own ink rather than a link's accent - a whole row of accent text would
+   shout where the rows around it speak - with the mark of a new window at its
+   far end. The element in the selector, because page.css paints every `a` the
+   accent by its attribute.
+
+   The mark is drawn in the markup (`row-link-mark`) and takes the text's own
+   colour; nothing is fetched for it. */
+a.row-link {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  margin: 0 0 var(--m-block);
-}
-
-.support-links a {
-  display: inline-flex;
   align-items: center;
-  min-height: var(--ui-control);
+  justify-content: space-between;
+  gap: 1rem;
+  color: var(--page-fg);
+  text-decoration: none;
 }
 
-/* --- where one section ends and the next begins (D258, H1) ---
+.row-link-mark {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+  color: var(--page-muted);
+}
 
-   The rule belongs to the section, not to the heading: it is the page's
-   strongest boundary, and a heading that carried it would take it along into
-   every fold and every card that borrows a heading's element. The nine
-   sections of this page are `main`'s own children - the subsections inside
-   them are nested deeper and get none of this. */
+/* A row of free text or of a field (D265, type 8): the paragraph about
+   re/read, the field the reader's own rules are typed into. A little more air
+   than a row of controls, because there is no control floor under it to
+   stand the words on. */
+.row-block {
+  padding-block: 1rem;
+}
+
+/* --- the headings and the air around them (D265) ---
+
+   The 2px rule that parted one section from the next is gone with the flat
+   page: a card is a stronger boundary than any line, and what says which
+   cards belong to which heading is the space around it. A section stands a
+   wide gap from the one above, a subsection a narrower one, and a heading
+   holds its own cards closer than either.
+
+   Every heading of the page stands outside the cards. A heading inside one is
+   a different thing - the card's own label (`.card-head`), in the quiet voice
+   a label speaks in. */
 main > section {
-  margin-top: var(--m-section);
-  padding-top: var(--m-divider-h2);
-  border-top: var(--sep-section);
+  margin-top: var(--gap-section);
+}
+
+/* The first section opens under the title, where the panel's top padding has
+   already put the air. */
+main > section:first-of-type {
+  margin-top: 1.5rem;
 }
 
 /* The anchors' landing pads: a heading flush with the stuck bar's line (the
    root's scroll padding, page.css - D219) reads as cut off, so each lands a
-   step under it. A section heading lands low enough to bring its own rule
-   into the window with it - an address that stops under the boundary it just
-   crossed says nothing about having crossed one.
-
-   The gap under a heading belongs to the header it stands in (D259): it is
-   the same distance whether a row, a paragraph or a list follows. */
+   step under it. No rule to bring into the window with it any more - what an
+   address lands on is the heading and the cards under it. */
 h2 {
   margin: 0;
-  scroll-margin-top: calc(0.75rem + var(--gap-divider-h2) + 2px);
+  scroll-margin-top: 0.75rem;
 }
 
-/* A subsection's heading (D254): the same landing pad and a smaller voice -
-   it opens a part of the section it stands in, not a new chapter. No rule of
-   its own, ever: the air above it and the weight of it are the whole signal
-   (V-b).
-
-   Its own air above it, which collapses out through the header and the
-   subsection alike - so a subsection standing in a `<section>` of its own and
-   a bare h3 (Latest copies, Support) open on the same gap. */
 h3 {
-  margin: var(--m-h3-before) 0 0;
-  scroll-margin-top: 0.75rem;
-}
-
-/* A block's heading inside a subsection (D263): "On this device" and "To
-   download", the two halves every catalogue is read in. A block, not a part
-   of the section, so it opens on the same air as any block and carries no
-   rule and no size of its own beyond the text's.
-
-   A group's heading inside a list is a language: the small print's size and
-   the muted ink, because it names what the rows under it have in common
-   rather than adding a level to the page (L2, L5). */
-main h4 {
-  margin: var(--m-h4-before) 0 0;
-  scroll-margin-top: 0.75rem;
-}
-
-main h5 {
-  margin: var(--m-h5-before) 0 var(--m-h5-after);
-  color: var(--page-muted);
-}
-
-/* The first group of a list opens under the block's own heading, which has
-   already put its air there. */
-main h5:first-child {
-  margin-top: 0;
-}
-
-/* --- the heading and what belongs to it (D259, S2) ---
-
-   A section's heading, its meta line and its opening paragraphs are one
-   group, and the page says so: they stand in a `<header>`, and the gap under
-   the header is one number rather than a case per kind of element below it.
-   That is what makes a heading the same distance from its own first row as
-   from its own first paragraph - the complaint this round began with.
-
-   A header that ends in prose hands the intro's gap to what follows; one that
-   is only a heading hands the heading's own. */
-section > header {
-  margin-bottom: var(--m-intro-after);
-}
-
-section > header:has(> h2:last-child) {
-  margin-bottom: var(--m-h2-after);
-}
-
-section > header:has(> h3:last-child) {
-  margin-bottom: var(--m-h3-after);
-}
-
-section > header:has(> h4:last-child) {
-  margin-bottom: var(--m-h4-after);
-}
-
-/* The line about the order hides itself while one dictionary stands alone
-   (`renderCatalog`), and a header whose only drawn child is its heading hands
-   on the heading's own gap rather than the intro's. */
-section > header:has(> h4 + [hidden]:last-child) {
-  margin-bottom: var(--m-h4-after);
-}
-
-section > header > h2 {
-  margin-bottom: var(--m-h2-after);
-}
-
-section > header > h3 {
-  margin-bottom: var(--m-h3-after);
-}
-
-section > header > h4 {
-  margin-bottom: var(--m-h4-after);
-}
-
-/* A block whose neighbour above ends in a list of control rows stands that
-   floor's slack closer: the last row's ink sits `--row-extra` above the foot
-   of its own box, exactly as the first row's sits that far below its top -
-   which is what `.models` hands back at both its own ends (D259). Written as
-   a question about the block above, so an empty list - a paragraph, no
-   control floor - keeps the plain gap. */
-section:has(> .models > .model) + section > header > h4 {
-  margin-top: calc(var(--m-h4-before) - var(--row-extra));
-}
-
-/* `:is()` carries the specificity of its heaviest arm, so these outrank the
-   class rules of what stands inside a header (`p.explain`, `.section-meta`) -
-   without it the intro kept its own block gap and the meta line stood half
-   the distance it should. */
-section > header > :is(p, .section-meta) {
   margin: 0;
+  scroll-margin-top: 0.75rem;
 }
 
-section > header > :is(p, .section-meta) + :is(p, .section-meta) {
-  margin-top: var(--m-intro);
+/* The block headings the lists brought (D263) stand inside the cards now, in
+   the card label's dress; nothing is left for them here but the landing pad
+   the addresses to them still need. */
+main :is(h4, h5) {
+  scroll-margin-top: 0.75rem;
 }
 
-/* The last line of a header hands its own gap back: the header's bottom is
-   the one that counts, and two of them would add up. */
-section > header > :is(:last-child, p:last-child) {
+/* --- the heading and what belongs to it ---
+
+   A heading and the prose under it are one group standing over the cards they
+   belong to: they live in a `<header>`, and that header's own bottom margin
+   is the one number that says how close the cards stand - whatever the header
+   ends in, a heading or a sentence. Inside it the lines stand a breath apart.
+
+   The air above a subsection is the header's too, and collapses out through
+   it, so a subsection in a `<section>` of its own and one written as a bare
+   header open on the same gap. */
+section > header {
+  margin: 0 0 var(--gap-h2-after);
+}
+
+section > header:has(> h3) {
+  margin-top: var(--gap-h3-before);
+  margin-bottom: var(--gap-h3-after);
+}
+
+section > header > * {
+  margin: 0 0 0.35rem;
+}
+
+section > header > :last-child {
   margin-bottom: 0;
 }
 
@@ -726,28 +741,125 @@ section > header:not(:has(> :not([hidden]))) {
   font-size: var(--ui-small);
 }
 
-/* --- the settings rows: label | control, wrapping where the control needs
-   the width --- */
+/* --- the cards (D265) ---
 
-/* A block keeps one gap under it, and the gap belongs to the block above -
-   so a heading, a note and a list all hand the same distance to whatever
-   follows, and nothing has to know what that is. */
-.rows {
-  margin: calc(-1 * var(--row-extra)) 0 var(--m-block);
+   A panel of white raised over the tinted page, holding rows. One card for a
+   group of settings, one for a list, one for the tools a catalogue is fetched
+   with: a card says "these belong together", and the heading above it says
+   what they are.
+
+   The frame is what carries the card, not the shadow (D3 of the brief): an
+   e-ink panel quantizes the tinted page to white and renders no shadow at
+   all, so a card resting on the tone alone would have no edge there. The
+   shadow is an addition for glass.
+
+   `overflow: hidden` clips the first and last rows' hover to the card's own
+   corners; `container-type` lets a row ask how wide its card is rather than
+   how wide the window is, which is the only question a row can answer - a
+   card is 680px on a desktop and a phone's width on a phone, and the same row
+   has to lay itself out in both (the container queries at the foot of this
+   sheet).
+
+   A card of settings rows keeps its old class as well (`.rows`): that is what
+   the search's index reads, and the index is not about looks. */
+.card {
+  position: relative;
+  margin: 0 0 var(--gap-card);
+  background: var(--settings-card-bg);
+  border: 1px solid var(--settings-card-border);
+  border-radius: var(--settings-card-radius);
+  box-shadow: var(--settings-card-shadow);
+  overflow: hidden;
+  container-type: inline-size;
 }
 
-/* The one exception the last round left standing: a note's border and a row's
-   hairline a block apart read as one box drawn twice. */
-:is(.note, details, .status.report) + .rows {
-  margin-top: calc(var(--m-block) * 1.5 - var(--row-extra));
-}
-
-/* The heading that follows brings its own air, and the last row of a group
-   closes on nothing - the group has no floor to draw. */
-.rows:last-child {
+/* The last card of a section hands the gap under it to the section below,
+   whose own margin is the wider one. */
+.card:last-child {
   margin-bottom: 0;
 }
 
+/* Every child of a card is a row of it: one padding, one floor, one place for
+   the line above. The wrappers - a group of settings rows, a list, a group of
+   a list, a fold, the copies' table - hold rows of their own and hand the box
+   straight back to them. */
+:is(.card, .rows, .card-list, .models) > * {
+  position: relative;
+  margin: 0;
+  min-height: var(--row-min-h);
+  padding: var(--row-pad-y) var(--row-pad-x);
+}
+
+:is(.card, .rows, .card-list) > :is(.rows, .models, .card-list, details, table) {
+  min-height: 0;
+  padding: 0;
+}
+
+/* A status is the answer to the row above it and not a row of its own: no
+   line over it, and it stands close to what it answers. Empty, it draws
+   nothing at all (`.status:empty`, page.css). */
+:is(.card, .rows, .card-list, .models) > .status {
+  min-height: 0;
+  padding-top: 0;
+}
+
+:is(.card, .rows, .card-list, .models) > .status::before {
+  content: none;
+}
+
+/* A card's own label - "On this device", "To download", a language in the
+   list of dictionaries: the quiet voice and a label's weight, never a
+   heading's size, and standing close to what it names. */
+.card-head {
+  padding: 1rem var(--row-pad-x) 0.25rem;
+  color: var(--page-muted);
+  font-size: var(--ui-small);
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.card > .card-head,
+.card-list > .card-head {
+  min-height: 0;
+  padding: 1rem var(--row-pad-x) 0.25rem;
+}
+
+/* --- the hairlines between the rows ---
+
+   Drawn on every row that has a drawn row before it, rather than under every
+   row but the last: the search hides rows, and a line belonging to the row
+   above would hang at the top of a card once that row went (and the last row
+   left would close on one). `~` rather than `+`, so a row can look back past
+   the rows that are not drawn - two rows either side of a hidden one are
+   still parted.
+
+   Inset from both edges by the row's own padding, the way a browser's own
+   settings draw it: a line that touches the frame cuts the card in two, and a
+   card is one thing.
+
+   Three levels, because a list stands in a card and its groups stand in the
+   list. An empty status draws no box (`.status:empty`, page.css), so it is no
+   row either - counted, it would open a card on a line with nothing over it. */
+:is(.card, .rows, .card-list, .models)
+  > :where(:not([hidden], .status:empty))
+  ~ :where(:not([hidden], .status:empty))::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  inset-inline: var(--row-pad-x);
+  border-top: var(--sep-row);
+}
+
+/* A label draws the line above itself and never one under it: what follows it
+   is what it names. */
+:is(.card, .rows, .card-list, .models) > .card-head + *::before {
+  content: none;
+}
+
+/* --- the rows ---
+
+   One box for every kind of row; what differs is only what stands inside it,
+   which the section after this one lays out. */
 .row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -755,57 +867,9 @@ section > header:not(:has(> :not([hidden]))) {
      a hair between them. */
   gap: 0.125rem 1rem;
   align-items: center;
-  /* No air of its own (D259, S1): a row's padding stands only between it and
-     the row it is separated from, and is put on below by the two rules that
-     know whether there is one. The first and the last row of a group have
-     none, so a group's distance from the page comes from the headings and
-     the blocks around it and never from what happens to be inside it. */
-  padding-block: 0;
   /* A row is an address of its own (`#s-<setting>`), so it lands the way a
      heading does: a step under the stuck bar's line, never against it. */
   scroll-margin-top: 0.75rem;
-}
-
-/* The hairline and the air belong between two rows that are both drawn, and
-   nowhere else (D258 H1, D259 S1).
-
-   A row leaves the page two ways - the `hidden` attribute (a dependent row
-   with its switch off, a row the search filtered out) and the translation
-   mode - so "drawn" is spelled out once per mode. The general sibling
-   combinator is what makes this right rather than nearly right: it lets a row
-   look back **past** the rows that are not drawn, so two rows the search left
-   either side of a hidden one are still separated. The adjacent combinator
-   this started as could not, and left them touching.
-
-   `:has()` on the other side, because CSS has no way to look back: a row
-   carries the air under its own words only while some drawn row follows it. */
-:where(body:not(.no-translation)) .row:not([hidden]) ~ .row:not([hidden]),
-:where(body.no-translation) .row:not([hidden], .translation-only) ~ .row:not([hidden], .translation-only) {
-  border-top: var(--sep-row);
-  padding-top: var(--m-row-top);
-}
-
-:where(body:not(.no-translation)) .row:not([hidden]):has(~ .row:not([hidden])),
-:where(body.no-translation) .row:not([hidden], .translation-only):has(~ .row:not([hidden], .translation-only)) {
-  padding-bottom: var(--m-row-bottom);
-}
-
-/* A dependent group opens on air alone (D259, K4): the hairline over its first
-   child met the line down its leading edge and drew a corner, which reads as a
-   box rather than as two settings of the switch above. One gap, no rule; the
-   children keep the hairline between themselves. */
-.row:not([hidden], .row-sub) + .row-sub:not([hidden]) {
-  border-top: none;
-  padding-top: 0;
-}
-
-/* The long lists keep their own breathing between rows and hand it back at
-   the ends, which is the same rule said the cheap way: `:has()` over five
-   hundred dictionary rows, re-run on every keystroke of the filter, is a cost
-   a settings page should not pay for a boundary nobody can see. */
-.model:not([hidden]) ~ .model:not([hidden]),
-.dictionary-row:not([hidden]) ~ .dictionary-row:not([hidden]) {
-  border-top: var(--sep-row);
 }
 
 /* Where an address just landed on one row out of thirty (D254, F5): a bar at
@@ -1012,7 +1076,18 @@ p.explain.row-more {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin: 0 0 0.35rem;
+  margin: 0;
+}
+
+/* The date the list is from belongs to the line that fetches it: the same
+   row, under the field, with no line between them. */
+:is(.card, .rows) > .list-dated {
+  min-height: 0;
+  padding-top: 0;
+}
+
+.list-tools + .list-dated::before {
+  content: none;
 }
 
 .list-tools .model-filter {
@@ -1029,7 +1104,7 @@ p.explain.row-more {
 }
 
 .list-dated {
-  margin: 0 0 var(--m-block);
+  margin: 0;
   color: var(--page-muted);
   font-size: var(--ui-small);
 }
@@ -1046,7 +1121,7 @@ p.explain.row-more {
 /* --- the filter boxes --- */
 
 .model-filter {
-  margin: 0 0 var(--m-block);
+  margin: 0;
 }
 
 .model-filter input {
@@ -1060,32 +1135,22 @@ p.explain.row-more {
   color: var(--page-fg);
 }
 
-/* --- the lists: rows in the page's own flow, no box scrolling inside the
-   page. Name | size | action on a desktop; on a phone the name takes the
-   first line and the rest right-aligns below it. --- */
+/* --- the lists inside the cards (D265) ---
 
-/* A list stands exactly as far from what surrounds it as any other block
-   (D259, S4). Both ends hand back the air a row's own controls put around
-   its words - the same `--row-extra` a group of settings rows hands back -
-   and the first and last rows hand back their padding, so what is left is
-   the block gap and nothing else. Measured: 12.3px over the first row where
-   §2 asks for 12, and 16.0 under the last where it asks for 16. */
+   A list is a wrapper, not a row: the card hands it the whole width and its
+   own children are the rows, each with the rows' padding and the hairline
+   between them. Name | size | action on a wide card; on a narrow one the
+   name takes the first line and the rest goes under it (the container
+   queries at the foot of this sheet). */
 .models {
-  margin: calc(-1 * var(--row-extra)) 0 calc(var(--m-block) - var(--row-extra));
+  margin: 0;
 }
 
-.models > :first-child {
-  padding-top: 0;
-}
-
-.models > :last-child {
-  padding-bottom: 0;
-}
-
-/* The one line a list shows when it holds nothing closes on no rule: a
-   boundary at the edge of a group is exactly what this round took away. */
+/* The one line a list shows when it holds nothing: a row like any other, and
+   never a rule of its own at the edge of a card. */
 .models > .empty {
   border-bottom: none;
+  color: var(--page-muted);
 }
 
 .model {
@@ -1093,7 +1158,6 @@ p.explain.row-more {
   grid-template-columns: minmax(0, 1fr) auto auto;
   gap: 0.25rem 0.75rem;
   align-items: center;
-  padding: var(--list-pad) 0;
 }
 
 .model-name {
@@ -1146,13 +1210,15 @@ p.explain.row-more {
    own bullets and indent come off; the rows keep the models' separator. --- */
 
 ul.models {
-  margin: calc(-1 * var(--row-extra)) 0 calc(var(--m-block) - var(--row-extra));
+  margin: 0;
   padding: 0;
   list-style: none;
 }
 
+/* The dictionaries' rows stack their lines at every width (the seventh
+   brief), so they take the card's padding and nothing else. */
 .dictionary-row {
-  padding: var(--list-pad) 0;
+  display: block;
 }
 
 /* The first line: the name of the book and the buttons at the right edge
@@ -1426,10 +1492,10 @@ button.model-delete {
    dresses read as two different kinds of thing. */
 .show-all {
   display: block;
-  width: auto;
-  min-height: var(--ui-control);
-  margin: 0.25rem 0 0;
-  padding: 0.35rem 0;
+  width: 100%;
+  min-height: var(--row-min-h);
+  margin: 0;
+  padding: var(--row-pad-y) var(--row-pad-x);
   border: none;
   border-radius: 0;
   background: none;
@@ -1476,7 +1542,7 @@ button.model-delete {
    chevron). Its element stays a heading, for whoever walks the page by
    headings; only its dress changes. */
 .fold {
-  margin: 0 0 var(--m-block);
+  margin: 0;
 }
 
 /* One fold after another is a list of doors, not a stack of blocks. */
@@ -1487,8 +1553,8 @@ button.model-delete {
 .fold > summary {
   display: flex;
   align-items: center;
-  min-height: var(--ui-control);
-  padding: 0.35rem 0;
+  min-height: var(--row-min-h);
+  padding: var(--row-pad-y) var(--row-pad-x);
   cursor: pointer;
   /* The browser's own triangle goes, because the one below is the page's:
      the same glyph the row notes' More wears, in the same grey. */
@@ -1517,10 +1583,17 @@ button.model-delete {
   font-weight: 500;
 }
 
-/* What the fold opens is indented to the words after the triangle, so the
-   contents read as the door's own and not as the page continuing. */
+/* What the fold opens stands in the same card under its summary, indented to
+   the words after the triangle so the contents read as the door's own and not
+   as the card continuing. No line between the two: a fold is one row that
+   grew, not two. */
 .fold > *:not(summary) {
-  margin-inline-start: 1.1rem;
+  margin-inline: 0;
+  padding-inline: calc(var(--row-pad-x) + 1.1rem) var(--row-pad-x);
+}
+
+.fold > :last-child {
+  padding-bottom: 1rem;
 }
 
 .files {
@@ -1611,7 +1684,7 @@ button.model-delete {
 /* The field and its buttons are one block of the section, and the fold under
    them is the next. */
 .custom-css {
-  margin: 0 0 var(--m-block);
+  margin: 0;
 }
 
 .custom-css textarea {
@@ -1645,7 +1718,7 @@ button.model-delete {
    The source files inside it share one wrapping line with the jump links'
    dots - four doors one under the other took a screen (Michał's smoke). */
 .fold-tight {
-  margin: 0 0 var(--m-block);
+  margin: 0;
 }
 
 .sources {
@@ -1667,40 +1740,57 @@ button.model-delete {
   min-width: 0;
 }
 
-/* --- one note, one dress (D258, H2/V2) ---
+/* --- a note is a row, not a box (D265, D4 of the brief) ---
 
-   The page used to carry two: an accent-framed one for where a download comes
-   from and for the private-window sentence, and a neutral one for the
-   footnotes - two sizes, two washes, and no rule anybody could state about
-   which meant what. The accent was the worse half of it: it is the colour of
-   every link and of the section being read in the table of contents, and
-   spent on a paragraph that asks for nothing it stopped meaning "here".
+   Where a download comes from, what an address field will accept, what the
+   order of a list means: quiet prose in a row of the card it belongs to, with
+   no wash, no frame and no bar down its edge. D258 gave every one of them a
+   box because the flat page had nothing else to group them with; a card does
+   that now, and a box inside a box is a box drawn twice.
 
-   So one component, neutral: the footnote's wash, a hairline all round, and
-   the strong ink down the leading edge - which is what survives a panel
-   posterised to sixteen greys, where the wash flattens into the paper. The
-   accent variant is kept for the one block on this page that asks to be acted
-   on: the first steps.
+   The frame is kept for the one paragraph on the page that is a warning -
+   what an uninstall takes with it (`note-warning`) - and for the sentence a
+   private window opens on, which stands on no card at all.
 
    Scoped to this page's sheet; `.note` elsewhere (the reader, the lists) is
-   page.css's and unchanged. */
-.note {
-  margin: 0 0 var(--m-block);
-  padding: calc(0.75rem - 1px) calc(1rem - 1px) calc(0.75rem - 1px) 1rem;
-  border: 1px solid var(--page-line);
-  border-inline-start: 3px solid var(--page-border);
-  background: color-mix(in srgb, var(--page-fg) 4%, transparent);
+   page.css's and unchanged. Both of page.css's own dresses have to be undone
+   here, hence the frame and the wash said back to nothing. */
+.note,
+.note.footnote {
+  margin: 0;
+  border: none;
+  background: none;
   color: var(--page-muted);
   font-size: var(--ui-small);
   line-height: 1.5;
 }
 
-/* The footnote variant is now the note itself; the class stays on the markup
-   because page.css gives it a meaning on every other page, and its rule there
-   is the more specific one - so the edge has to be said again here. */
-.note.footnote {
-  border-left-color: var(--page-border);
-  font-size: var(--ui-small);
+:is(.card, .rows, .card-list, .models) > .note {
+  padding: var(--row-pad-y) var(--row-pad-x);
+}
+
+/* The one framed note left on the page: a warning about data that does not
+   come back. Inside its card, so the card's own frame still closes it. */
+.note-warning {
+  margin: 0 var(--row-pad-x) 1rem;
+  padding: calc(0.75rem - 1px) calc(1rem - 1px);
+  border: 1px solid var(--page-line);
+  background: color-mix(in srgb, var(--page-accent) 10%, transparent);
+}
+
+:is(.card, .rows, .card-list, .models) > .note-warning {
+  padding: calc(0.75rem - 1px) calc(1rem - 1px);
+}
+
+/* The sentence a private window opens on (`private-note.js`) stands over the
+   first card, on the page's own paper: it wears the frame page.css gives it
+   and the air of a card under it. */
+.note.private-note {
+  margin: 0 0 var(--gap-card);
+  padding: calc(0.75rem - 1px) calc(1rem - 1px) calc(0.75rem - 1px) 1rem;
+  border: 1px solid var(--page-line);
+  border-inline-start: 3px solid var(--page-accent);
+  background: color-mix(in srgb, var(--page-accent) 10%, transparent);
 }
 
 /* --- the fresh-install signpost --- */
@@ -1830,7 +1920,7 @@ button.step-done {
    the first line and the contents drop to the second. */
 .copies {
   width: 100%;
-  margin: 0 0 var(--m-block);
+  margin: 0;
   border-collapse: collapse;
   color: var(--page-muted);
   font-size: var(--ui-small);
@@ -1928,9 +2018,19 @@ summary::marker {
 /* The colophon's dress lives in page.css now - the same line closes the
    reading list, the highlights and the saved phrases. */
 
-/* --- one breakpoint: the same HTML, spread out for a desktop --- */
+/* --- the breakpoints: the same HTML, spread out for a wider window ---
+
+   What the window decides is the frame: the gutter, the table of contents
+   beside the panel, the bar's own columns. What a row looks like is decided
+   by the card it stands in (`@container`, above) - a card is 680px wide on a
+   desktop whatever the window does. */
 
 @media (min-width: 600px) {
+  /* Room for the page to breathe at its edges. */
+  :root {
+    --settings-side: 1.5rem;
+  }
+
   /* The stacked rows return to one line: label left, control right. */
   .row-stack {
     grid-template-columns: minmax(0, 1fr) auto;
@@ -1984,22 +2084,17 @@ summary::marker {
 /* --- the second breakpoint: the table of contents takes a column (D254) ---
 
    In rem rather than px, and at the width the two columns actually need:
-   13rem of list, a gutter, and the 44rem the page is set in. Measured in the
-   reader's own text size, so a browser told to render text larger gets the
-   one-column page at the moment the two would start crowding, rather than at
-   a pixel width that stopped meaning anything. */
+   13rem of list and the 42.5rem a card is set in. Measured in the reader's
+   own text size, so a browser told to render text larger gets the one-column
+   page at the moment the two would start crowding, rather than at a pixel
+   width that stopped meaning anything. */
 @media (min-width: 60rem) {
-  /* The column's room, on top of the page's own: 13rem of list, the gutter
-     and the 44rem the text is set in, plus the page's side padding. The bar
-     above spans it too - it is the page's width, not the text's. */
-  body {
-    max-width: 62.5rem;
-  }
-
+  /* The list beside the panel, and no gutter between them: the panel's own
+     padding is the gutter, and its tinted paper has to reach the list's edge
+     for the corner between them to read as a corner (D265). */
   .page-body {
     display: grid;
     grid-template-columns: var(--ui-side) minmax(0, 1fr);
-    gap: 0 var(--ui-gutter);
     align-items: start;
   }
 
@@ -2022,29 +2117,55 @@ summary::marker {
        on its leading edge hand their width back to the gutter - so the names
        line up with the page's edge, marked or not. */
     padding-top: var(--ui-side-top);
-    margin-inline-start: -0.6rem;
+    /* The names begin where the wordmark above them does: the page's gutter,
+       less the padding a link keeps for its own marker. */
+    padding-inline: calc(var(--settings-side) - 0.6rem) 0.6rem;
   }
 
-  /* The text keeps its measure whatever the window does; the column beside
-     it takes the rest. */
+  /* The panel takes the rest of the window, down to its foot, and turns the
+     one corner that is neither the window's edge nor the list's. */
   main {
-    min-width: 0;
-    max-width: 44rem;
+    border-start-start-radius: var(--settings-panel-radius);
   }
 
-  /* The bar takes the page's own columns (F2): the arrow and the wordmark over
-     the table of contents, the search field over the text - its leading edge
-     on the text's own edge - and the menu at the far end of the row, where
-     every bar of this extension keeps its tools. */
+  /* The bar takes the page's own two columns (F2): the arrow and the wordmark
+     over the table of contents, the search over the panel. The search and the
+     tools share the second column - the search centred in it exactly as the
+     cards are centred in the panel under it, so the two line up; the tools at
+     the far end of the window, where every bar of this extension keeps them.
+     The search is capped short of the tools' own room, so the two can never
+     meet however narrow the column gets. */
   .page-bar {
     display: grid;
-    grid-template-columns: var(--ui-side) minmax(0, 1fr) auto;
-    column-gap: var(--ui-gutter);
+    grid-template-columns: var(--ui-side) minmax(0, 1fr);
     align-items: center;
+    /* The bar's own gutter moves onto its two ends, so its second column
+       begins exactly where the panel below it does - which is what makes the
+       search and the cards line up. The flex gap the shared sheet gives it
+       would have shifted the column by its own width. */
+    padding-inline: 0;
+    column-gap: 0;
+  }
+
+  .bar-head {
+    grid-area: 1 / 1;
+    padding-inline-start: var(--settings-side);
+  }
+
+  .settings-search {
+    grid-area: 1 / 2;
+    /* The width first, or auto margins would leave the field at the width of
+       an empty input and centre that instead. */
+    width: 100%;
+    margin-inline: auto;
+    max-width: min(var(--settings-column-width), calc(100% - 8rem));
   }
 
   .page-tools {
+    grid-area: 1 / 2;
+    justify-self: end;
     margin-inline-start: 0;
+    padding-inline-end: var(--settings-side);
   }
 }
 

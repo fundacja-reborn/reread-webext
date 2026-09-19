@@ -73,14 +73,17 @@ describe("the two blocks a catalogue is read in", () => {
   it("head each block with its own name, in both subsections", async () => {
     const markup = await source("options/options.html");
     for (const part of SUBSECTIONS) {
+      // The name stands inside the card it heads (D265), in the card label's
+      // own dress - a heading outside a card opens a section, and these open
+      // a block of one.
       assert.match(
         markup,
-        new RegExp(`<h4 id="${part.installed}" data-i18n="options_list_installed">`),
+        new RegExp(`<h4 id="${part.installed}" class="card-head" data-i18n="options_list_installed">`),
         `the ${part.what} do not say what is on this device`,
       );
       assert.match(
         markup,
-        new RegExp(`<h4 id="${part.available}" data-i18n="options_list_available">`),
+        new RegExp(`<h4 id="${part.available}" class="card-head" data-i18n="options_list_available">`),
         `the ${part.what} do not say what can be fetched`,
       );
       // In that order: what is here before what could be.

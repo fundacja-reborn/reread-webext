@@ -47,7 +47,9 @@ describe("the dictionary list's rows", () => {
   it("are items of a list, the browser's bullets and indent taken off", () => {
     // What is here stands in one list per language, inside the block's own
     // box; the catalogue below keeps its single list.
-    assert.match(page, /<div id="dictionary-list"><\/div>/);
+    // The wrapper carries the class the card's hairlines are drawn from
+    // (D265): its own children are the groups, and the groups' the rows.
+    assert.match(page, /<div id="dictionary-list" class="card-list"><\/div>/);
     assert.match(page, /<ul id="dictionary-catalog" class="models"><\/ul>/);
     assert.match(fn("renderDictionaryList", "renderCatalog"), /element\("ul", "models"\)/);
     assert.match(script, /element\("li", "dictionary-row"\)/);
@@ -169,9 +171,10 @@ describe("the groups the list stands in (D263, L2)", () => {
   it("stand only where there is more than one language to tell apart", () => {
     const list = fn("renderDictionaryList", "renderCatalog");
     assert.match(list, /if \(groups\.length > 1\) list\.append\(dictionaryGroupHeading\(group\)\)/);
-    // And the first group's heading opens under the block's own, with no gap
-    // of its own on top of it.
-    assert.match(rule(css, "main h5:first-child"), /margin-top: 0/);
+    // And a group's heading is the card's own label (D265): the quiet voice,
+    // a label's weight, and the hairline drawn over it rather than under.
+    assert.match(rule(css, ".card-head"), /font-size: var\(--ui-small\)/);
+    assert.match(css, /:is\(\.card, \.rows, \.card-list, \.models\) > \.card-head \+ \*::before \{\n  content: none;/);
   });
 });
 
@@ -214,11 +217,16 @@ describe("the arrows", () => {
 });
 
 describe("the list's fold", () => {
-  it("stands at the rows' left edge and reads like the shelf's own", () => {
+  it("is a row of its card, read from the rows' own left edge (D265)", () => {
     const fold = rule(css, ".show-all");
     assert.match(fold, /text-align: start/);
     assert.match(fold, /background: none/);
-    assert.doesNotMatch(fold, /width: 100%|text-align: center/);
+    // The whole row is the target, as it is for every door on the page - the
+    // press lights the row, not a word inside it. Never centred, and never a
+    // bar of its own: the card's frame is the only frame.
+    assert.match(fold, /width: 100%/);
+    assert.match(fold, /padding: var\(--row-pad-y\) var\(--row-pad-x\)/);
+    assert.doesNotMatch(fold, /text-align: center|border: 1px/);
   });
 
   it("reads Show all with the count the filter lets through, and Show fewer once unfolded", () => {

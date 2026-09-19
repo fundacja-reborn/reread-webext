@@ -291,7 +291,7 @@
       <h2 id="languages" data-i18n="options_section_languages">Languages</h2>
     </header>
 
-    <div class="rows">
+    <div class="rows card">
       <!-- Every row note says one whole sentence, always (D254, P5): the page
            used to clip each of them to two lines and an ellipsis in
            mid-sentence, with a chevron beside it - grey noise in every row,
@@ -374,19 +374,18 @@
          sentences and the two or three models somebody actually has, so the
          page opened on the machinery of a list rather than on the list. -->
     <section aria-labelledby="translation-models-installed">
-    <header>
-      <h4 id="translation-models-installed" data-i18n="options_list_installed">On this device</h4>
-    </header>
+    <div class="card">
+      <h4 id="translation-models-installed" class="card-head" data-i18n="options_list_installed">On this device</h4>
 
-    <div id="models" class="models"></div>
+      <div id="models" class="models"></div>
 
-    <p id="model-status" class="status" role="status"></p>
+      <p id="model-status" class="status" role="status"></p>
+    </div>
     </section>
 
     <section aria-labelledby="translation-models-available">
-    <header>
-      <h4 id="translation-models-available" data-i18n="options_list_available">To download</h4>
-    </header>
+    <div class="card">
+      <h4 id="translation-models-available" class="card-head" data-i18n="options_list_available">To download</h4>
 
     <!-- The filter and the one fetch this section can make, on one line: the
          list below refreshes only here, never by itself - the date under them
@@ -463,13 +462,11 @@
         the server the models come from stops working.
       </p>
     </details>
-    </section>
 
-    <!-- Where the downloads come from, at the foot of the subsection (D258,
-         V2): it used to stand between the list and the by-hand fold, which
-         are one group - the ways to get a model - and a framed paragraph
-         between them read as the end of the section. It belongs after them,
-         as the footnote to the whole subsection that it is. -->
+    <!-- Where the downloads come from, the last row of the card that fetches
+         them (D265; the place D258 gave it, now that the ways to get a model
+         are one card): a line of quiet prose, not a framed box - the frame is
+         kept for the one warning on the page that is a warning. -->
     <p class="note">
       <!-- The host is also a door: the href becomes the address of the very
            index the snapshot was taken from, so a reader can look at the
@@ -482,6 +479,8 @@
         press Update the list or Download. No personal data is ever sent.</span
       >
     </p>
+    </div>
+    </section>
 
     </section>
 
@@ -496,7 +495,7 @@
          pressed again. Its own sub-option travels with it (Michał's call,
          2026-09-18): a child two sections away from its parent is a row that
          appears out of nowhere. -->
-    <div class="rows">
+    <div class="rows card">
       <div class="row" id="s-translationOff" data-setting="translationOff" data-section="languages">
         <label class="row-toggle">
           <span class="row-name" data-i18n="options_no_translation">Use without a translation model</span>
@@ -555,29 +554,30 @@
          that is the only grouping the arrows can mean anything in - and the
          catalogue of four hundred to fetch from. -->
     <section aria-labelledby="dictionaries-installed">
-    <header>
-      <h4 id="dictionaries-installed" data-i18n="options_list_installed">On this device</h4>
+    <div class="card">
+      <h4 id="dictionaries-installed" class="card-head" data-i18n="options_list_installed">On this device</h4>
 
       <!-- Only worth saying with two dictionaries here, so the page hides it
            until there are (see renderDictionaryList); it stands above the list
            because it is about the list's own order. -->
-      <p id="dictionary-order-hint" class="explain" data-i18n="options_dictionary_order_hint" hidden>
+      <p id="dictionary-order-hint" class="note" data-i18n="options_dictionary_order_hint" hidden>
         The bubble shows the entries in the order below, language by language. The arrows change it.
       </p>
-    </header>
 
-    <!-- A list, not a frame of cells: every dictionary is one item that
-         stacks its two lines - name and buttons, then the small print the
-         fold hangs off - the same way at every width (the seventh brief).
-         Under a heading per language where there is more than one (D263). -->
-    <div id="dictionary-list"></div>
+      <!-- A list, not a frame of cells: every dictionary is one item that
+           stacks its two lines - name and buttons, then the small print the
+           fold hangs off - the same way at every width (the seventh brief).
+           Under a heading per language where there is more than one (D263),
+           which is the card's own label (`card-head`). -->
+      <div id="dictionary-list" class="card-list"></div>
 
-    <p id="dictionary-status" class="status" role="status"></p>
+      <p id="dictionary-status" class="status" role="status"></p>
+    </div>
     </section>
 
     <section aria-labelledby="dictionaries-available">
-    <header>
-      <h4 id="dictionaries-available" data-i18n="options_list_available">To download</h4>
+    <div class="card">
+      <h4 id="dictionaries-available" class="card-head" data-i18n="options_list_available">To download</h4>
 
       <!-- Where the catalogue comes from and that it is not the only way in
            (D192, Michał's ask): the by-hand folds stand under a list of four
@@ -585,7 +585,7 @@
            a dictionary of their own, or a second one for the same language, is
            possible. The link is the same page the link fold points at, in the
            interface's language (see `linkDictionarySources`). -->
-      <p class="explain">
+      <p class="note">
         <span data-i18n="options_dictionaries_sources"
           >The dictionaries in the catalogue come from WikDict. You can add your own from a file or
           from a link, several for one language as well. The sources, each with its licence:</span
@@ -594,7 +594,6 @@
           >reapps.eu/read</a
         >.
       </p>
-    </header>
 
     <!-- The models' twin of the same line: the filter and the one fetch this
          section can make besides a download, with the date under them. -->
@@ -757,12 +756,11 @@
         to be unpacked and added from files.
       </p>
     </details>
-    </section>
 
-    <!-- The models' host note has moved for the same reason (D258, V2): the
-         catalogue and the two by-hand folds are one group - the ways to get a
-         dictionary - and this says where the first of them fetches from,
-         after all three. -->
+    <!-- Where the downloads come from, the last row of the card that fetches
+         them (D265): the catalogue and the two by-hand doors are one card -
+         the ways to get a dictionary - and this says where the first of them
+         fetches from, after all three. -->
     <p class="note">
       <span data-i18n="options_dictionary_note_from">Dictionary downloads come from</span>
       <a id="dictionary-host" target="_blank" rel="noopener">-</a>
@@ -772,6 +770,8 @@
         No personal data is ever sent.</span
       >
     </p>
+    </div>
+    </section>
     </section>
     </section>
 
@@ -819,6 +819,7 @@
       </p>
     </header>
 
+    <div class="card">
     <div id="disabled-hosts" class="models"></div>
 
     <!-- Adding by hand (D189): the popup's switch reaches only the site
@@ -842,11 +843,12 @@
 
     <p id="host-status" class="status" role="status"></p>
 
-    <p class="note footnote" data-i18n="options_add_host_note">
+    <p class="note" data-i18n="options_add_host_note">
       The address as the browser shows it, for example example.org; www.example.org is the same
       site. A subdomain such as news.example.org is a separate site. A page's whole address can be
       pasted; only the site part is kept.
     </p>
+    </div>
     </section>
 
     <!-- The bubble and what it saves: what opens over a selection, and what
@@ -863,7 +865,7 @@
          the dictionaries: it decides where the underlines and the bubble
          appear at all, and the two subsections below only decide what they
          then show. -->
-    <div class="rows">
+    <div class="rows card">
       <!-- Not `translation-only` any more (D162): with the model switched off
            the bubble still works wherever a pair is chosen - the dictionaries
            answer - so the question this row asks stands in both modes, and
@@ -891,7 +893,7 @@
       <h3 id="bubble" data-i18n="options_sub_bubble">Bubble</h3>
     </header>
 
-    <div class="rows">
+    <div class="rows card">
       <!-- The second layer's start (D186): the sentence and the dictionary
            entries open with the bubble over a fresh selection, where a press
            on More used to be the only way to them. On by default, existing
@@ -964,7 +966,7 @@
       <h3 id="saved-phrases" data-i18n="options_sub_phrases">Saved phrases</h3>
     </header>
 
-    <div class="rows">
+    <div class="rows card">
       <!-- The sentence kept with a phrase (D210): the one the bubble had
            around the selection, as the page shows it - never its
            translation - written into the row and shown on the phrases page
@@ -1028,7 +1030,7 @@
       <h2 id="reading-view" data-i18n="options_section_reading">Reading view</h2>
     </header>
 
-    <div class="rows">
+    <div class="rows card">
       <!-- The default keep (D124). Not `translation-only`: with translation
            off the reader and its list are the whole extension, which is when
            this switch matters most. -->
@@ -1126,7 +1128,7 @@
       </p>
     </header>
 
-    <div class="rows">
+    <div class="rows card">
       <!-- The page count at the foot of a page read by pages (D238), on by
            default since D249: somebody reading by pages is reading a book,
            and a book says which page it is on. -->
@@ -1206,7 +1208,7 @@
       <h2 id="reading-aloud" data-i18n="options_section_aloud">Reading aloud</h2>
     </header>
 
-    <div class="rows">
+    <div class="rows card">
       <!-- The reading-aloud switch (D148), the head of the two voice rows
            under it: off, the speaker leaves the bubble and every list, the
            Read-aloud button leaves the reader, and the two rows fold away
@@ -1296,7 +1298,7 @@
       <h2 id="data" data-i18n="options_section_data">Data and copies</h2>
     </header>
 
-    <div class="rows">
+    <div class="rows card">
       <!-- What the browser holds for this extension and whether it has
            promised to keep it. The last row, because it is a report on the
            choices above it rather than a choice (Michał, 2026-08-30), with
@@ -1390,6 +1392,7 @@
          and a header row that names the columns instead of leaving a reader to
          infer them from the first line. The headings speak in the page's quiet
          voice - they label a report, they do not open a section. -->
+    <div class="card">
     <table class="copies">
       <thead>
         <tr>
@@ -1441,8 +1444,12 @@
          door to the page the export lives on - the page, not its Import and
          export section: the address of a section inside it would be a new
          field in the message the background answers, and this round changes no
-         protocol. -->
-    <p class="note">
+         protocol.
+
+         The one framed box left on the page (D265, D4 of the brief): every
+         other note is quiet prose in a row, and the frame is kept for the one
+         sentence that is a warning - what an uninstall takes with it. -->
+    <p class="note note-warning">
       <span data-i18n="options_copies_uninstall"
         >Uninstalling re/read deletes all of its data, the copies with it. Before you uninstall it,
         or before you move your data to another device, save a copy as a file: Export in</span
@@ -1455,6 +1462,7 @@
         KOReader plugin.</span
       >
     </p>
+    </div>
     </section>
     </section>
 
@@ -1478,6 +1486,7 @@
       </p>
     </header>
 
+    <div class="card">
     <div class="custom-css">
       <textarea
         id="custom-css-text"
@@ -1568,6 +1577,7 @@
         >
       </p>
     </details>
+    </div>
     </section>
 
     <!-- About re/read: what the extension promises about the network, who
@@ -1576,16 +1586,21 @@
     <section aria-labelledby="about">
     <header>
       <h2 id="about" data-i18n="options_section_about">About re/read</h2>
+    </header>
 
-      <!-- The thesis of the whole extension, stated once, where a curious person
-           goes looking for it. The notes further down say how each download is
-           checked; this says what never happens at all. -->
-      <!-- The two sections the promise rests on are links to themselves (D258,
-           §6.3): "those sections" made a reader scroll back looking for which.
-           The closing word is glued to the second link, the switched-off sites'
-           rule: a language that closes with a bare full stop must not get a
-           space before it. -->
-      <p class="explain">
+    <!-- The thesis of the whole extension, stated once, where a curious person
+         goes looking for it. The notes further down say how each download is
+         checked; this says what never happens at all. A card of its own since
+         D265: every other word of every other section stands in one, and a
+         paragraph left loose on the tinted page read as a caption for the
+         cards under it. -->
+    <!-- The two sections the promise rests on are links to themselves (D258,
+         §6.3): "those sections" made a reader scroll back looking for which.
+         The closing word is glued to the second link, the switched-off sites'
+         rule: a language that closes with a bare full stop must not get a
+         space before it. -->
+    <div class="card">
+      <p class="row-block">
         <span data-i18n="options_local_intro"
           >Everything re/read does happens on this device (offline): translating, the dictionary, the
           reading list, your saved phrases. Nothing you read or select is ever sent anywhere. An
@@ -1601,12 +1616,12 @@
       <!-- The way back to the signpost once it has been put away (D254, §7):
            the card is gone for good otherwise, and the instructions in it are
            worth rereading. Shown only while it is hidden. -->
-      <p class="explain" id="first-steps-back" hidden>
+      <p class="note" id="first-steps-back" hidden>
         <button type="button" class="note-more" id="first-steps-show" data-i18n="options_first_steps_show">
           Show the first steps
         </button>
       </p>
-    </header>
+    </div>
 
     <!-- The one section that is not a setting: who builds this and how to
          help them keep building it. The links are doors, not requests - the
@@ -1623,23 +1638,47 @@
       </p>
     </header>
 
-    <p class="support-links">
+    <!-- Each door is a row of the card, the way a browser's own settings
+         stand a link that leaves for somewhere else (D265, type 4): the whole
+         row is the link, and the mark at its far end says the press opens
+         another place. The glyph is drawn here rather than fetched - the
+         package ships no icon font - and it takes the text's own colour. -->
+    <div class="card support-links">
       <a
+        class="row-link"
         href="https://wise.com/pay/business/fundacjareborn?description=Donation+-+statutory+purposes"
         target="_blank"
         rel="noopener"
-        data-i18n="options_support_donate"
-        >Donate via Wise</a
       >
-      <a href="https://reapps.eu/#support" target="_blank" rel="noopener" data-i18n="options_support_more"
-        >More ways to support</a
-      >
-    </p>
-    </section>
-    </main>
+        <span data-i18n="options_support_donate">Donate via Wise</span>
+        <svg class="row-link-mark" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <path
+            d="M6.5 3.5H3.25v9.25h9.25V9.5M9.75 3.25h3v3M12.5 3.75 7.75 8.5"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.3"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </a>
+      <a class="row-link" href="https://reapps.eu/#support" target="_blank" rel="noopener">
+        <span data-i18n="options_support_more">More ways to support</span>
+        <svg class="row-link-mark" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <path
+            d="M6.5 3.5H3.25v9.25h9.25V9.5M9.75 3.25h3v3M12.5 3.75 7.75 8.5"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.3"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </a>
     </div>
+    </section>
 
-    <!-- The colophon closes the page the way one closes a book: name and
+    <!-- The colophon closes the panel the way one closes a book: name and
          version, the licence, the maker, the maker's site and the source
          (Michał's calls, 2026-08-17). Proper names and identifiers all -
          nothing here needs the catalogue, so the line stays the same in
@@ -1659,6 +1698,8 @@
         >
       </p>
     </footer>
+    </main>
+    </div>
 
     <script src="options.js" defer></script>
   </body>
