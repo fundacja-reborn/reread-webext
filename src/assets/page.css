@@ -347,8 +347,14 @@ select {
    look-up answer's boxes took it first (the sixth brief - `currentColor`
    inside the shelf, where the bubble has no page tokens), and a switch in
    the popup or the settings ticking in the accent beside them read as two
-   kinds of checkbox. One token here, no override per page. */
-input[type="checkbox"] {
+   kinds of checkbox. One token here, no override per page.
+
+   The circles of a group of choices are the same family (D268): a row of
+   radios stands in the column the checkboxes stand in, and a circle filled
+   with the browser's own blue beside a box ticked in the page's ink would
+   read as two kinds of control. */
+input[type="checkbox"],
+input[type="radio"] {
   margin: 0;
   accent-color: var(--page-fg);
 }

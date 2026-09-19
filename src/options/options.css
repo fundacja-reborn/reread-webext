@@ -1207,12 +1207,12 @@ a.row-link:focus-visible {
   cursor: pointer;
 }
 
+/* The circle is the checkbox's own size, and takes the page's ink from the
+   shared sheet (D202/D268) - the browser's blue beside a box ticked in the
+   text's colour would be two kinds of control in one card. */
 .choice > input[type="radio"] {
   width: var(--row-box);
   height: var(--row-box);
-  /* The shared sheet gives every control a margin; here the grid's own gap
-     is the space, and the circle has to line up with the checkboxes above. */
-  margin: 0;
 }
 
 /* The ring is the row's, drawn inside the card's edge like every other -
