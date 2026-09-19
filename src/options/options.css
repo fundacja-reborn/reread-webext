@@ -40,14 +40,14 @@
   --ui-label-weight: 400;
   --ui-small: 0.8125rem;
   --ui-control: 2.25rem;
-  /* The column of sections, the gutter beside it, and the air that puts the
-     list's first line on the title's own line. The top is arithmetic, not
-     taste: the title's text begins at its own margin plus its half-leading
-     (1.5rem + (1.5rem x 1.25 - 1.5rem) / 2 = 1.6875rem), a link's at this
-     padding plus 0.4rem plus its own (0.211rem) - so the two line up at
-     1.0625rem and the list no longer starts below the title (V-i). */
+  /* The column of sections, and the air that puts its first line on the
+     title's own line. The top is arithmetic, not taste: the title's text
+     begins at the panel's own top padding plus its half-leading (1.5rem +
+     (1.5rem x 1.25 - 1.5rem) / 2 = 1.6875rem), a link's at this padding plus
+     0.4rem plus its own (0.211rem) - so the two line up at 1.0625rem and the
+     list does not start below the title (V-i). The gutter between the column
+     and the settings is the panel's own padding now (D265). */
   --ui-side: 13rem;
-  --ui-gutter: 2.5rem;
   --ui-side-top: 1.0625rem;
 
   /* --- the panel and the rows inside it (D265) ---
@@ -1084,25 +1084,6 @@ a.row-link:focus-visible {
   margin-top: 0.5rem;
 }
 
-/* The whole first line is one label: text left, checkbox right, and every
-   point between them flips the switch too. */
-.row-toggle {
-  grid-column: 1 / -1;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  min-height: var(--ui-control);
-  cursor: pointer;
-}
-
-/* Large enough to read as the control it is (~22px); the whole line is the
-   touch target either way. */
-.row-toggle input {
-  width: 1.4rem;
-  height: 1.4rem;
-}
-
 /* --- the row notes (D254, P5) ---
 
    One whole sentence, always, with the rest of it behind the row's own More.
@@ -1920,27 +1901,41 @@ button.model-delete {
   padding: calc(0.75rem - 1px) calc(1rem - 1px) calc(0.75rem - 1px) 1rem;
   border: 1px solid var(--page-line);
   border-inline-start: 3px solid var(--page-accent);
+  border-radius: var(--settings-card-radius);
   background: color-mix(in srgb, var(--page-accent) 10%, transparent);
 }
 
 /* --- the fresh-install signpost --- */
 
-/* The one accented block left on the page (D258, H2): the note's frame in the
-   accent, the page's full color, the page's own text size - it is instructions
-   to act on, not an aside, and it is the only one. Open while a model or a
-   dictionary is missing; with both stored it folds to its heading and stays,
-   one line of the note's frame, there to reread. */
+/* The one accented card on the page (D258, H2; a card of its own since
+   D265): the cards' frame in the accent, the page's full colour, the page's
+   own text size - it is instructions to act on, not an aside, and it is the
+   only one. Open while a model or a dictionary is missing; with both stored
+   it folds to its heading and stays, one line, there to reread. */
 .first-steps {
-  margin: 0 0 1.25rem;
-  border-left-color: var(--page-accent);
+  margin: 0 0 var(--gap-card);
+  padding: 0;
+  border: 1px solid var(--page-accent);
+  border-radius: var(--settings-card-radius);
   background: color-mix(in srgb, var(--page-accent) 10%, transparent);
   color: var(--page-fg);
   font-size: var(--ui-text);
+  overflow: hidden;
 }
 
-.first-steps summary {
-  padding: 0.55rem 0;
+.first-steps > summary {
+  min-height: var(--row-min-h);
+  padding: var(--row-pad-y) var(--row-pad-x);
   cursor: pointer;
+}
+
+/* What the card opens keeps the rows' own column. */
+.first-steps > :not(summary) {
+  padding-inline: var(--row-pad-x);
+}
+
+.first-steps > :last-child {
+  padding-bottom: var(--row-pad-y);
 }
 
 .first-steps summary h2 {
@@ -1962,9 +1957,9 @@ button.model-delete {
   font-variant-numeric: tabular-nums;
 }
 
-.first-steps summary {
+.first-steps > summary {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 0.75rem;
 }
 

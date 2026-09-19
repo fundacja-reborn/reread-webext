@@ -84,7 +84,10 @@ describe("the settings page's type", () => {
     const css = await source("options/options.css");
     assert.match(rule(css, ".row select"), /min-height: var\(--ui-control\)/, "a select keeps a size of its own");
     assert.match(rule(css, ".row button"), /min-height: var\(--ui-control\)/, "a button keeps a size of its own");
-    assert.match(rule(css, ".row-toggle"), /min-height: var\(--ui-control\)/, "the clickable line of a checkbox keeps a size of its own");
+    // The checkbox row's floor is the row's own (D265): the box no longer
+    // stands on a line of its own, so the row is what has to be pressable.
+    assert.match(rule(css, ":is(.card, .rows, .card-list, .models) > *"), /min-height: var\(--row-min-h\)/, "a row keeps no floor of its own");
+    assert.match(rule(css, ".row-check > input[type=\"checkbox\"]"), /width: var\(--row-box\)/, "the box is not drawn at the size the indent is measured from");
     // `any-pointer`, not `pointer`: a Boox with a pen answers `pointer: fine`
     // and is still read with a finger.
     assert.match(
