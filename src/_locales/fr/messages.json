@@ -1987,13 +1987,9 @@
   "options_tts_default": { "message": "Voix par défaut" },
   "options_tts_listen": { "message": "Écouter" },
   "options_tts_voice_hint": {
-    "message": "Une voix distincte pour chaque langue ; seules les voix qui parlent hors ligne sont proposées."
+    "message": "Une voix distincte pour chaque langue ; seules les voix qui parlent hors ligne sont proposées. La parole est produite sur cet appareil et rien n'est envoyé sur Internet."
   },
 
-  "options_tts_voice_more": {
-    "message": "La voix lit aussi bien les phrases que les articles entiers. La parole est produite sur cet appareil et rien n'est envoyé sur Internet.",
-    "description": "The rest of the options_tts_voice_hint description, behind the row's More button."
-  },
   "speech_no_offline_voice": { "message": "Cet appareil n'a pas de voix hors ligne pour cette langue." },
   "options_tts_rate": { "message": "Vitesse de la voix" },
   "options_models_heading": { "message": "Modèles de traduction" },

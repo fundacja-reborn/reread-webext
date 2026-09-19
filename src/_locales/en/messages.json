@@ -2300,14 +2300,10 @@
   "options_tts_default": { "message": "Default voice" },
   "options_tts_listen": { "message": "Listen" },
   "options_tts_voice_hint": {
-    "message": "A separate voice for each language; only voices that speak offline are offered.",
+    "message": "A separate voice for each language; only voices that speak offline are offered. Speech is made on this device and nothing is sent to the internet.",
     "description": "Under the voice select on the settings page. True by construction (D155): `voicesFor` in lib/tts.js keeps out every voice the engine marks as remote (localService false), and nothing speaks through one."
   },
 
-  "options_tts_voice_more": {
-    "message": "The voice reads phrases and whole articles alike. Speech is made on this device and nothing is sent to the internet.",
-    "description": "The rest of the options_tts_voice_hint description, behind the row's More button."
-  },
   "speech_no_offline_voice": {
     "message": "This device has no offline voice for this language.",
     "description": "Where a speaker was refused for want of an offline voice (D155): the device lists voices, and none of them reads the language without the network. Under the voice select on the settings page, in the reader's notice line, in the saved phrases page's status line."

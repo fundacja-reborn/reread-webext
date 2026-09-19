@@ -1261,14 +1261,15 @@
           <select id="tts-voice"></select>
           <button type="button" id="tts-listen" data-i18n="options_tts_listen">Listen</button>
         </p>
-        <p class="row-note">
-          <span data-i18n="options_tts_voice_hint"
-            >A separate voice for each language; only voices that speak offline are offered.</span
-          ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-ttsVoices" data-i18n="options_details">Details</button></span>
-        </p>
-        <p class="row-note row-more" id="more-ttsVoices" data-i18n="options_tts_voice_more" hidden>
-          The voice reads phrases and whole articles alike. Speech is made on this device and
-          nothing is sent to the internet.
+        <!-- Whole, with no Details to press (Michał, 2026-09-19): where the
+             speech is made is the answer to the question this row raises, and
+             an answer behind a press is one nobody reads. What is gone with
+             the fold is the sentence about the voice reading phrases and
+             whole articles alike - the switch above already says where the
+             buttons are. -->
+        <p class="row-note" data-i18n="options_tts_voice_hint">
+          A separate voice for each language; only voices that speak offline are offered. Speech is
+          made on this device and nothing is sent to the internet.
         </p>
         <!-- Filled only where it is true (D155): the device lists voices and
              none of them reads the pair's language offline - the picker above

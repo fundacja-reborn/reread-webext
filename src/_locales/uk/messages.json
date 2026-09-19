@@ -2608,13 +2608,9 @@
   "options_tts_default": { "message": "Типовий голос" },
   "options_tts_listen": { "message": "Прослухати" },
   "options_tts_voice_hint": {
-    "message": "Окремий голос для кожної мови; пропонуються лише голоси, що працюють офлайн."
+    "message": "Окремий голос для кожної мови; пропонуються лише голоси, що працюють офлайн. Мовлення створюється на цьому пристрої, і нічого не надсилається в інтернет."
   },
 
-  "options_tts_voice_more": {
-    "message": "Голос читає і фрази, і цілі статті. Мовлення створюється на цьому пристрої, і нічого не надсилається в інтернет.",
-    "description": "The rest of the options_tts_voice_hint description, behind the row's More button."
-  },
   "speech_no_offline_voice": { "message": "На цьому пристрої немає офлайн-голосу для цієї мови." },
   "options_tts_rate": { "message": "Швидкість мовлення" },
   "options_models_heading": { "message": "Моделі перекладу" },

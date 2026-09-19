@@ -1943,13 +1943,9 @@
   "options_tts_default": { "message": "Voz predeterminada" },
   "options_tts_listen": { "message": "Escuchar" },
   "options_tts_voice_hint": {
-    "message": "Una voz distinta para cada idioma; solo se ofrecen voces que hablan sin conexión."
+    "message": "Una voz distinta para cada idioma; solo se ofrecen voces que hablan sin conexión. La voz se genera en este dispositivo y no se envía nada a internet."
   },
 
-  "options_tts_voice_more": {
-    "message": "La voz lee tanto frases como artículos enteros. La voz se genera en este dispositivo y no se envía nada a internet.",
-    "description": "The rest of the options_tts_voice_hint description, behind the row's More button."
-  },
   "speech_no_offline_voice": { "message": "Este dispositivo no tiene una voz sin conexión para este idioma." },
   "options_tts_rate": { "message": "Velocidad de la voz" },
   "options_models_heading": { "message": "Modelos de traducción" },

@@ -2608,13 +2608,9 @@
   "options_tts_default": { "message": "Głos domyślny" },
   "options_tts_listen": { "message": "Posłuchaj" },
   "options_tts_voice_hint": {
-    "message": "Osobny głos dla każdego języka; do wyboru tylko głosy działające offline."
+    "message": "Osobny głos dla każdego języka; do wyboru tylko głosy działające offline. Mowa powstaje na tym urządzeniu i nic nie jest wysyłane do internetu."
   },
 
-  "options_tts_voice_more": {
-    "message": "Głos czyta zarówno frazy, jak i całe artykuły. Mowa powstaje na tym urządzeniu i nic nie jest wysyłane do internetu.",
-    "description": "The rest of the options_tts_voice_hint description, behind the row's More button."
-  },
   "speech_no_offline_voice": { "message": "To urządzenie nie ma głosu offline dla tego języka." },
   "options_tts_rate": { "message": "Tempo mówienia" },
   "options_models_heading": { "message": "Modele tłumaczeniowe" },

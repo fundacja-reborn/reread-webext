@@ -1892,13 +1892,9 @@
   "options_tts_default": { "message": "Standardstimme" },
   "options_tts_listen": { "message": "Anhören" },
   "options_tts_voice_hint": {
-    "message": "Eine eigene Stimme für jede Sprache; angeboten werden nur Stimmen, die offline sprechen."
+    "message": "Eine eigene Stimme für jede Sprache; angeboten werden nur Stimmen, die offline sprechen. Die Sprache entsteht auf diesem Gerät, und nichts wird ins Internet gesendet."
   },
 
-  "options_tts_voice_more": {
-    "message": "Die Stimme liest Phrasen und ganze Artikel gleichermaßen. Die Sprache entsteht auf diesem Gerät, und nichts wird ins Internet gesendet.",
-    "description": "The rest of the options_tts_voice_hint description, behind the row's More button."
-  },
   "speech_no_offline_voice": { "message": "Dieses Gerät hat keine Offline-Stimme für diese Sprache." },
   "options_tts_rate": { "message": "Sprechgeschwindigkeit" },
   "options_models_heading": { "message": "Übersetzungsmodelle" },
