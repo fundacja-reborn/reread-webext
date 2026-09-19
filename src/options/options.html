@@ -1129,14 +1129,18 @@
           wide screen it is shown in the bar next to re/read.
         </p>
       </div>
-      <!-- What a finger does (D250). The default follows the screen: a slide
+      <!-- What a finger does (D250). Stacked at every width (D265): its three
+           choices are sentences rather than words - "Tap the left or right
+           side of the screen" - and beside a label they take two thirds of
+           the row, leaving the label two words a line (measured in German).
+           The default follows the screen: a slide
            where a hand wraps around the device - a phone, an e-ink reader -
            because a gesture that has to move is the one an idle thumb cannot
            make, and the thirds where the device is put down, because they are
            quicker and more precise. Off is for a reader with hardware page
            keys, where no gesture is worth an accidental turn. Chosen by name
            in a select, like the language pair: three values, set once. -->
-      <div class="row row-value" id="s-touchTurn" data-setting="touchTurn" data-keywords="options_keywords_turn" data-section="paged-layout">
+      <div class="row row-value row-stack" id="s-touchTurn" data-setting="touchTurn" data-keywords="options_keywords_turn" data-section="paged-layout">
         <label class="row-name" for="touch-turn" data-i18n="options_touch_turn">Turning pages by touch</label>
         <select id="touch-turn">
           <option value="zones" data-i18n="options_touch_turn_zones">Tap the left or right side of the screen</option>
