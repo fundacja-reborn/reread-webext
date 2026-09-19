@@ -1457,13 +1457,10 @@
     }
   },
 
-  "options_step_model": {
-    "message": "Télécharger un modèle de traduction"
+  "options_step_source": {
+    "message": "Télécharger un modèle de traduction ou un dictionnaire"
   },
 
-  "options_step_dictionary": {
-    "message": "Télécharger un dictionnaire (facultatif)"
-  },
 
   "options_step_pin": {
     "message": "Épingler re/read à la barre d'outils"
@@ -1686,7 +1683,7 @@
   },
 
   "options_first_steps_intro": {
-    "message": "Rien ne se traduit encore - le modèle qui s'en chargerait n'est pas encore sur cet appareil. La mise en place prend une minute :"
+    "message": "re/read a besoin de quelque chose pour expliquer les mots : un modèle de traduction ou un dictionnaire. L'un des deux suffit, l'autre peut venir plus tard."
   },
   "options_first_steps_pin": {
     "message": "Enfin, épinglez re/read à la barre d'outils : l'icône en forme de pièce de puzzle à droite de la barre, puis l'engrenage à côté de re/read et « Épingler à la barre d’outils ». Le bouton ouvre le lecteur, la liste de lecture, vos phrases enregistrées et l'interrupteur du site où vous êtes."
@@ -2020,7 +2017,10 @@
     "description": "Closes options_models_single_word after the link to the Dictionaries section."
   },
   "options_update_list": { "message": "Mettre à jour la liste" },
-  "options_list_dated": { "message": "Liste du" },
+  "options_list_dated_models": { "message": "La liste des modèles à télécharger date du" },
+  "options_list_dated_dictionaries": { "message": "La liste des dictionnaires à télécharger date du" },
+  "options_update_list_link": { "message": "cliquez pour la mettre à jour" },
+  "options_filter_search": { "message": "Rechercher" },
   "options_filter_placeholder": { "message": "Filtrer par langue ou par code" },
   "options_filter_models_label": { "message": "Filtrer la liste des modèles de traduction" },
   "options_filter_dictionaries_label": { "message": "Filtrer la liste des dictionnaires" },
@@ -2071,7 +2071,7 @@
   "options_show_fewer": { "message": "Afficher moins" },
   "options_model_note_from": { "message": "Les modèles sont téléchargés depuis" },
   "options_model_note_rest": {
-    "message": "- c'est là que Mozilla les publie. L'extension ne se connecte à ce serveur public que lorsque vous cliquez sur Mettre à jour la liste ou Télécharger. Aucune donnée personnelle n'est transmise."
+    "message": "- c'est là que Mozilla les publie. L'extension ne se connecte à ce serveur public que lorsque vous mettez la liste à jour ou cliquez sur Télécharger. Aucune donnée personnelle n'est transmise."
   },
   "options_add_model_heading": { "message": "Ajouter un modèle depuis des fichiers" },
   "options_add_model_summary": {
@@ -2093,7 +2093,7 @@
   },
   "options_dictionary_note_from": { "message": "Les dictionnaires sont téléchargés depuis" },
   "options_dictionary_note_rest": {
-    "message": "- c'est là que WikDict publie les dictionnaires qu'il construit à partir du Wiktionnaire (CC BY-SA). L'extension ne se connecte à ce serveur public que lorsque vous cliquez sur Mettre à jour la liste ou Télécharger. Aucune donnée personnelle n'est transmise."
+    "message": "- c'est là que WikDict publie les dictionnaires qu'il construit à partir du Wiktionnaire (CC BY-SA). L'extension ne se connecte à ce serveur public que lorsque vous mettez la liste à jour ou cliquez sur Télécharger. Aucune donnée personnelle n'est transmise."
   },
   "options_add_dictionary_heading": { "message": "Ajouter un dictionnaire depuis des fichiers" },
   "options_add_dictionary_summary": {

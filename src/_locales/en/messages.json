@@ -1765,13 +1765,11 @@
     }
   },
 
-  "options_step_model": {
-    "message": "Download a translation model"
+  "options_step_source": {
+    "message": "Download a translation model or a dictionary",
+    "description": "The first of the two steps on a fresh install: either download answers it, because either one alone makes the bubble answer."
   },
 
-  "options_step_dictionary": {
-    "message": "Download a dictionary (optional)"
-  },
 
   "options_step_pin": {
     "message": "Pin re/read to the toolbar"
@@ -1960,7 +1958,7 @@
   },
 
   "options_first_steps_intro": {
-    "message": "Nothing translates yet - the model that would do it is not yet on this device. Setting up takes a minute:",
+    "message": "re/read needs something to explain words with: a translation model or a dictionary. Either one is enough; the other can come later.",
     "description": "Opens the first-steps block, shown on the settings page only while no model is stored."
   },
   "options_first_steps_pin": {
@@ -2344,9 +2342,24 @@
     "message": "Update the list",
     "description": "The button that fetches today's list of models - the one network request no download makes."
   },
-  "options_list_dated": {
-    "message": "List from",
-    "description": "Beside the update button of both catalogues; the date stands after this as its own emphasized element. Must not start or end with whitespace."
+  "options_list_dated_models": {
+    "message": "The list of models to download is from",
+    "description": "The sentence that opens the models' catalogue block, ending in the date the snapshot was taken; the date and the link that refreshes it follow."
+  },
+
+  "options_list_dated_dictionaries": {
+    "message": "The list of dictionaries to download is from",
+    "description": "The dictionaries' half of the sentence above."
+  },
+
+  "options_update_list_link": {
+    "message": "click to update it",
+    "description": "The link at the end of that sentence, which fetches the index again. Lower case: it closes a sentence rather than standing alone as a button."
+  },
+
+  "options_filter_search": {
+    "message": "Search",
+    "description": "The button beside a catalogue's filter field: the list answers a press, not a keystroke."
   },
   "options_filter_placeholder": { "message": "Filter by language or code" },
   "options_filter_models_label": { "message": "Filter the list of translation models" },
@@ -2407,7 +2420,7 @@
     "description": "First half of the note around the host, which stands between the parts as a page element. Each part must read on from the last across a plain space - no part starts or ends with whitespace."
   },
   "options_model_note_rest": {
-    "message": "- where Mozilla publishes them. The extension connects to this public server only when you press Update the list or Download. No personal data is ever sent."
+    "message": "- where Mozilla publishes them. The extension connects to this public server only when you update the list or press Download. No personal data is ever sent."
   },
   "options_add_model_heading": { "message": "Add a model from files" },
   "options_add_model_summary": {
@@ -2434,7 +2447,7 @@
     "description": "First half of the note around the host, which stands between the parts as a page element. Each part must read on from the last across a plain space - no part starts or ends with whitespace."
   },
   "options_dictionary_note_rest": {
-    "message": "- where WikDict publishes the dictionaries it builds from Wiktionary (CC BY-SA). The extension connects to this public server only when you press Update the list or Download. No personal data is ever sent."
+    "message": "- where WikDict publishes the dictionaries it builds from Wiktionary (CC BY-SA). The extension connects to this public server only when you update the list or press Download. No personal data is ever sent."
   },
   "options_add_dictionary_heading": { "message": "Add a dictionary from files" },
   "options_add_dictionary_summary": {

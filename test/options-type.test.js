@@ -270,7 +270,7 @@ describe("the settings page's type", () => {
     // not even half a step heavier - a card holds one size and one weight.
     // A date is a value, not an emphasis, and was never bold either.
     assert.match(rule(css, ".dictionary-name"), /font-weight: var\(--ui-label-weight\)/, "a dictionary's name is set apart from the labels around it");
-    assert.match(rule(css, ".list-dated strong"), /font-weight: 400/, "the list's date is still set bold");
+    assert.match(rule(css, ".note strong"), /font-weight: 400/, "the list's date is still set bold");
     // What may be 600 or more: the page's headings, the bar's own title (the
     // heading a narrow screen has) and the section being read.
     const heavy = [...css.matchAll(/\n([^\n{]+) \{[^}]*?font-weight: (600|700|bold)/g)].map((match) => String(match[1]));

@@ -231,23 +231,24 @@
         <h2 data-i18n="options_first_steps_heading">First steps</h2>
         <span class="steps-count" id="first-steps-count"></span>
       </summary>
-      <!-- Said only while the first step is undone: with a model on the
+      <!-- Said only while the first step is undone: with something on the
            device it was a sentence contradicting the page under it. -->
       <p id="first-steps-intro" data-i18n="options_first_steps_intro" hidden>
-        Nothing translates yet - the model that would do it is not yet on this device. Setting up
-        takes a minute:
+        re/read needs something to explain words with: a translation model or a dictionary. Either
+        one is enough; the other can come later.
       </p>
       <ul class="steps">
-        <li id="step-model">
+        <!-- One step for the two downloads (Michał, 2026-09-19): neither is
+             required - a model translates sentences, a dictionary explains
+             words, and either one alone makes the bubble answer - so a card
+             that asked for them in turn said something untrue about the one
+             that is optional. Two doors on the one step, because the two
+             live in two sections. -->
+        <li id="step-source">
           <span class="step-mark" aria-hidden="true"></span>
           <span class="visually-hidden step-state"></span>
-          <span class="step-name" data-i18n="options_step_model">Download a translation model</span>
+          <span class="step-name" data-i18n="options_step_source">Download a translation model or a dictionary</span>
           <a class="step-door" href="#translation-models-available" data-i18n="options_models_heading">Translation models</a>
-        </li>
-        <li id="step-dictionary">
-          <span class="step-mark" aria-hidden="true"></span>
-          <span class="visually-hidden step-state"></span>
-          <span class="step-name" data-i18n="options_step_dictionary">Download a dictionary (optional)</span>
           <a class="step-door" href="#dictionaries-available" data-i18n="options_dictionaries_heading">Dictionaries</a>
         </li>
         <li id="step-pin">
@@ -387,10 +388,31 @@
     <div class="card">
       <h4 id="translation-models-available" class="card-head" data-i18n="options_list_available_models">Download models</h4>
 
-    <!-- The filter and the one fetch this section can make, on one line: the
-         list below refreshes only here, never by itself - the date under them
-         says how old what stands under the filter is. A quiet button on
-         purpose: the rare act must not outshine the downloads below. -->
+    <!-- How old the list is, and the one fetch this block can make, in one
+         sentence at the head of the card (Michał, 2026-09-19): the press that
+         refreshes stood beside the filter field, where a reader looks for
+         Search - and it works without typing anything, so it never belonged
+         there. It is a link inside the sentence about the date it changes. -->
+    <p class="note">
+      <span data-i18n="options_list_dated_models">The list of models to download is from</span>
+      <strong id="model-checked">-</strong> -
+      <button
+        type="button"
+        class="doorway"
+        id="refresh-models"
+        data-i18n="options_update_list_link"
+        aria-label="Update the list"
+        data-i18n-aria-label="options_update_list"
+      >
+        click to update it</button
+      >.
+    </p>
+
+    <p id="refresh-status" class="status" role="status"></p>
+
+    <!-- The field and the press that answers it: a hundred rows redrawn on
+         every letter is a list flickering under the fingers, so the list
+         answers Search and the field's own cross, never a keystroke. -->
     <div class="list-tools">
       <p class="model-filter">
         <label class="visually-hidden" for="model-filter" data-i18n="options_filter_models_label"
@@ -403,17 +425,10 @@
           data-i18n-placeholder="options_filter_placeholder"
         />
       </p>
-      <button type="button" class="list-update" id="refresh-models" data-i18n="options_update_list">
-        Update the list
+      <button type="button" class="list-search" id="model-search" data-i18n="options_filter_search">
+        Search
       </button>
     </div>
-
-    <p class="list-dated">
-      <span data-i18n="options_list_dated">List from</span>
-      <strong id="model-checked">-</strong>
-    </p>
-
-    <p id="refresh-status" class="status" role="status"></p>
 
     <div id="models-catalog" class="models"></div>
 
@@ -476,7 +491,7 @@
       <a id="model-host" target="_blank" rel="noopener">-</a>
       <span data-i18n="options_model_note_rest"
         >- where Mozilla publishes them. The extension connects to this public server only when you
-        press Update the list or Download. No personal data is ever sent.</span
+        update the list or press Download. No personal data is ever sent.</span
       >
     </p>
     </div>
@@ -585,10 +600,24 @@
         <a id="dictionary-sources-intro" href="https://reapps.eu/read#faq-dictionary-sources" target="_blank" rel="noopener"
           >reapps.eu/read</a
         >.
+        <span data-i18n="options_list_dated_dictionaries">The list of dictionaries to download is from</span>
+        <strong id="dictionary-checked">-</strong> -
+        <button
+          type="button"
+          class="doorway"
+          id="refresh-dictionaries"
+          data-i18n="options_update_list_link"
+          aria-label="Update the list"
+          data-i18n-aria-label="options_update_list"
+        >
+          click to update it</button
+        >.
       </p>
 
-    <!-- The models' twin of the same line: the filter and the one fetch this
-         section can make besides a download, with the date under them. -->
+    <p id="dictionary-refresh-status" class="status" role="status"></p>
+
+    <!-- The models' twin of the same line: the field and the press that
+         answers it. -->
     <div class="list-tools">
       <p class="model-filter">
         <label
@@ -604,17 +633,10 @@
           data-i18n-placeholder="options_filter_placeholder"
         />
       </p>
-      <button type="button" class="list-update" id="refresh-dictionaries" data-i18n="options_update_list">
-        Update the list
+      <button type="button" class="list-search" id="dictionary-search" data-i18n="options_filter_search">
+        Search
       </button>
     </div>
-
-    <p class="list-dated">
-      <span data-i18n="options_list_dated">List from</span>
-      <strong id="dictionary-checked">-</strong>
-    </p>
-
-    <p id="dictionary-refresh-status" class="status" role="status"></p>
 
     <ul id="dictionary-catalog" class="models"></ul>
 
@@ -758,7 +780,7 @@
       <a id="dictionary-host" target="_blank" rel="noopener">-</a>
       <span data-i18n="options_dictionary_note_rest"
         >- where WikDict publishes the dictionaries it builds from Wiktionary (CC BY-SA). The
-        extension connects to this public server only when you press Update the list or Download.
+        extension connects to this public server only when you update the list or press Download.
         No personal data is ever sent.</span
       >
     </p>

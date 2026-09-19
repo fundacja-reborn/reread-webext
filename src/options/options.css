@@ -801,15 +801,42 @@ section > header:not(:has(> :not([hidden]))) {
 }
 
 /* A status is the answer to the row above it and not a row of its own: no
-   line over it, and it stands close to what it answers. Empty, it draws
-   nothing at all (`.status:empty`, page.css). */
+   line over it. Empty, it draws nothing at all (`.status:empty`, page.css). */
 :is(.card, .rows, .card-list, .models) > .status {
   min-height: 0;
-  padding-top: 0;
 }
 
 :is(.card, .rows, .card-list, .models) > .status::after {
   content: none;
+}
+
+/* --- a message, once there is one (Michał's smoke, 2026-09-19) ---
+
+   "Saving 100 228 of 118 330", "Added X: 61 802 words, 8.4 MB", and every
+   refusal: an answer to something the reader has just done. It used to read
+   as one more row of the list it stands in - the shared sheet's size, the
+   same quiet ink as a description - and on a card of rows that is exactly
+   what it looked like. So it takes the small print's size with the page's
+   full ink, a wash of the accent and a bar of it down the leading edge: the
+   one thing on a card that is there because something happened. The bar is
+   what survives an e-ink panel, where the wash quantizes back into the paper.
+
+   An error keeps its own frame and its own colour (page.css), which is
+   louder still - and is written out of this rule rather than fought with. */
+:is(.card, .rows, .card-list, .models) > .status:not(:empty, [data-tone="error"]) {
+  padding: calc(var(--row-pad-y) - 1px) var(--row-pad-x);
+  border-inline-start: 3px solid var(--page-accent);
+  background: color-mix(in srgb, var(--page-accent) 8%, transparent);
+  color: var(--page-fg);
+  font-size: var(--ui-small);
+}
+
+/* The one line a list shows when it holds nothing is a row of the card, not a
+   line with a rule under it: the shared sheet draws that rule for the lists
+   of other pages, which have no card to close them. */
+:is(.card, .rows, .card-list, .models) > .empty {
+  border-bottom: none;
+  color: var(--page-muted);
 }
 
 /* A card's own label - "Downloaded by you:", "Download dictionaries", a
@@ -1187,31 +1214,21 @@ p.explain.row-more {
   white-space: nowrap;
 }
 
-/* --- the catalogue's own line: the filter, the press that refreshes the
-   list, and the day the list is from under them (D263, K1) ---
+/* --- the catalogue's own line: the field and the press that answers it
+   (D263, K1; Michał's smoke, 2026-09-19) ---
 
-   One line, because they are one thing to do with a catalogue of a hundred
-   rows: narrow it, or fetch it again. The field takes the room that is left;
-   the button keeps the shared secondary look on purpose - refreshing is the
-   rare act of this section, and the accent stays with what the section is
-   for. Below 480px the field takes the whole width and the button drops under
-   it (the one media query at the foot of this sheet). */
+   One line, because they are one thing: type what you are looking for and
+   ask for it. The field takes the room that is left. The press that fetches
+   the index again used to stand here, where a reader looks for Search - and
+   it works without typing anything, so it never belonged beside a field; it
+   is a link inside the sentence about the date it changes, at the head of
+   the card. In a narrow card the field takes the whole width and the button
+   drops under it (the container query at the foot of this sheet). */
 .list-tools {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   margin: 0;
-}
-
-/* The date the list is from belongs to the line that fetches it: the same
-   row, under the field, with no line between them. */
-:is(.card, .rows) > .list-dated {
-  min-height: 0;
-  padding-top: 0;
-}
-
-.list-tools + .list-dated::after {
-  content: none;
 }
 
 .list-tools .model-filter {
@@ -1220,24 +1237,18 @@ p.explain.row-more {
   margin: 0;
 }
 
-.list-update {
+.list-search {
   flex: none;
   min-height: var(--ui-control);
   padding: 0.35rem 1rem;
   white-space: nowrap;
 }
 
-.list-dated {
-  margin: 0;
-  color: var(--page-muted);
-  font-size: var(--ui-small);
-}
-
-/* The day the list is from: a value in the page's own ink, at the page's own
-   weight (D259, K3). Its element is `strong` because the date is the line's
-   one piece of information, not because it shouts. */
-.list-dated strong {
-  color: var(--page-fg);
+/* The day a list is from, inside the sentence that offers to fetch it again:
+   a value in the page's own ink, at the page's own weight (D259, K3). Its
+   element is `strong` because the date is the sentence's one piece of
+   information, not because it shouts. */
+.note strong {
   font-weight: 400;
   font-variant-numeric: tabular-nums;
 }
@@ -2313,7 +2324,7 @@ summary::marker {
     flex-basis: 100%;
   }
 
-  .list-update {
+  .list-search {
     margin-left: auto;
   }
 

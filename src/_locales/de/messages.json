@@ -1406,13 +1406,10 @@
     }
   },
 
-  "options_step_model": {
-    "message": "Ein Übersetzungsmodell herunterladen"
+  "options_step_source": {
+    "message": "Ein Übersetzungsmodell oder ein Wörterbuch herunterladen"
   },
 
-  "options_step_dictionary": {
-    "message": "Ein Wörterbuch herunterladen (optional)"
-  },
 
   "options_step_pin": {
     "message": "re/read an die Symbolleiste anheften"
@@ -1601,7 +1598,7 @@
   },
 
   "options_first_steps_intro": {
-    "message": "Noch übersetzt nichts - das Modell, das es täte, ist noch nicht auf diesem Gerät. Die Einrichtung dauert eine Minute:"
+    "message": "re/read braucht etwas, womit es Wörter erklärt: ein Übersetzungsmodell oder ein Wörterbuch. Eines von beiden genügt, das andere kann später dazukommen."
   },
   "options_first_steps_pin": {
     "message": "Heften Sie re/read zuletzt an die Symbolleiste: das Puzzleteil-Symbol rechts in der Leiste, dann neben re/read das Zahnrad und „An Symbolleiste anheften“. Der Knopf öffnet die Leseansicht, die Leseliste, den gespeicherten Wortschatz und den Schalter für die Website, auf der Sie sind."
@@ -1925,7 +1922,10 @@
     "description": "Closes options_models_single_word after the link to the Dictionaries section."
   },
   "options_update_list": { "message": "Liste aktualisieren" },
-  "options_list_dated": { "message": "Liste vom" },
+  "options_list_dated_models": { "message": "Die Liste der Modelle zum Herunterladen ist vom" },
+  "options_list_dated_dictionaries": { "message": "Die Liste der Wörterbücher zum Herunterladen ist vom" },
+  "options_update_list_link": { "message": "zum Aktualisieren klicken" },
+  "options_filter_search": { "message": "Suchen" },
   "options_filter_placeholder": { "message": "Nach Sprache oder Code filtern" },
   "options_filter_models_label": { "message": "Die Liste der Übersetzungsmodelle filtern" },
   "options_filter_dictionaries_label": { "message": "Die Liste der Wörterbücher filtern" },
@@ -1976,7 +1976,7 @@
   "options_show_fewer": { "message": "Weniger zeigen" },
   "options_model_note_from": { "message": "Modelle kommen von" },
   "options_model_note_rest": {
-    "message": "- dort veröffentlicht Mozilla sie. Die Erweiterung verbindet sich mit diesem öffentlichen Server nur, wenn Sie auf Liste aktualisieren oder Herunterladen klicken. Es werden keine persönlichen Daten gesendet."
+    "message": "- dort veröffentlicht Mozilla sie. Die Erweiterung verbindet sich mit diesem öffentlichen Server nur, wenn Sie die Liste aktualisieren oder auf Herunterladen klicken. Es werden keine persönlichen Daten gesendet."
   },
   "options_add_model_heading": { "message": "Modell aus Dateien hinzufügen" },
   "options_add_model_summary": {
@@ -1998,7 +1998,7 @@
   },
   "options_dictionary_note_from": { "message": "Wörterbücher kommen von" },
   "options_dictionary_note_rest": {
-    "message": "- dort veröffentlicht WikDict die Wörterbücher, die es aus dem Wiktionary (CC BY-SA) baut. Die Erweiterung verbindet sich mit diesem öffentlichen Server nur, wenn Sie auf Liste aktualisieren oder Herunterladen klicken. Es werden keine persönlichen Daten gesendet."
+    "message": "- dort veröffentlicht WikDict die Wörterbücher, die es aus dem Wiktionary (CC BY-SA) baut. Die Erweiterung verbindet sich mit diesem öffentlichen Server nur, wenn Sie die Liste aktualisieren oder auf Herunterladen klicken. Es werden keine persönlichen Daten gesendet."
   },
   "options_add_dictionary_heading": { "message": "Wörterbuch aus Dateien hinzufügen" },
   "options_add_dictionary_summary": {

@@ -253,12 +253,15 @@ describe("the list's fold", () => {
 
   it("reads Show all with the count the filter lets through, and Show fewer once unfolded", () => {
     const apply = fn("applyFilterIn", "applyModelFilter");
-    assert.match(apply, /showAllState\(\{ total: matching, installedCount: installedMatching, expanded \}\)/);
+    // A query standing shows everything it matches, so the fold has nothing
+    // to offer while one does (Michał, 2026-09-19).
+    assert.match(apply, /showAllState\(\{ total: matching, installedCount: installedMatching, expanded, filtering \}\)/);
+    assert.match(apply, /rowVisible\(\{ installed, matches, expanded, filtering \}\)/);
     assert.match(apply, /state\.expanded \? t\("options_show_fewer"\) : t\("options_show_all", state\.count\.toLocaleString\(\)\)/);
     assert.match(apply, /setAttribute\("aria-expanded", String\(state\.expanded\)\)/);
     // "Nothing matched" is about the filter alone, never about the fold - and
     // it quotes what was typed (D263).
-    assert.match(apply, /none\.hidden = !filterActive\(query\) \|\| matching > 0/);
+    assert.match(apply, /none\.hidden = !filtering \|\| matching > 0/);
     assert.match(apply, /none\.textContent = noMatch\(query\.trim\(\)\)/);
     assert.match(page, /id="dictionaries-show-all" class="show-all" aria-controls="dictionary-catalog"/);
     assert.match(page, /id="models-show-all" class="show-all" aria-controls="models-catalog"/);

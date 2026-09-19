@@ -173,9 +173,13 @@ describe("the settings rows", () => {
     assert.doesNotMatch(markup, /<mark data-i18n=/, "a paragraph still wears the highlighter's own wash");
     const at = markup.indexOf('data-i18n="options_models_single_word"');
     assert.match(markup.slice(at, at + 600), /<a href="#dictionaries"/, "the warning does not end at the dictionaries");
-    // And one framed note in the models subsection, not two.
+    // Two quiet notes in the models subsection since Michał's smoke: where
+    // the downloads come from, and how old the list of them is. Neither is
+    // framed any more (D265, D4) - the frame is kept for the one warning on
+    // the page - so what this counts is paragraphs in the page's small print,
+    // not boxes.
     const section = markup.slice(markup.indexOf('<h3 id="translation-models"'), markup.indexOf('<h3 id="dictionaries"'));
-    assert.equal((section.match(/<p class="note"/g) ?? []).length, 1, "the models subsection wears more than one framed note");
+    assert.equal((section.match(/<p class="note"/g) ?? []).length, 2, "the models subsection lost one of its two quiet notes");
     const css = await source("options/options.css");
     assert.doesNotMatch(css, /p\.explain mark/, "the highlighter's stroke is still dressed on this page");
   });

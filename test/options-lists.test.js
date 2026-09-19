@@ -55,6 +55,8 @@ const SUBSECTIONS = [
     door: "options_add_model_heading",
     host: 'id="model-host"',
     name: "options_list_available_models",
+    search: 'id="model-search"',
+    dated: 'data-i18n="options_list_dated_models"',
   },
   {
     what: "dictionaries",
@@ -68,6 +70,8 @@ const SUBSECTIONS = [
     door: "options_add_dictionary_heading",
     host: 'id="dictionary-host"',
     name: "options_list_available_dictionaries",
+    search: 'id="dictionary-search"',
+    dated: 'data-i18n="options_list_dated_dictionaries"',
   },
 ];
 
@@ -108,7 +112,7 @@ describe("the two blocks a catalogue is read in", () => {
       assert.ok(here.includes(part.list), `the ${part.what} on this device are not listed in their own block`);
       assert.ok(!here.includes(part.filter), `the ${part.what} filter still stands over what is installed`);
       assert.ok(!here.includes(part.update), `the ${part.what} refresh still stands over what is installed`);
-      assert.ok(!here.includes("options_list_dated"), `the ${part.what} block says how old the catalogue is`);
+      assert.ok(!here.includes(part.dated), `the ${part.what} block says how old the catalogue is`);
 
       assert.ok(there.includes(part.catalog), `the ${part.what} catalogue is not in the catalogue block`);
       assert.ok(there.includes(part.filter), `the ${part.what} filter left the catalogue`);
@@ -118,16 +122,24 @@ describe("the two blocks a catalogue is read in", () => {
     }
   });
 
-  it("stand the filter and the press on one line, with the date under them (K1)", async () => {
+  it("stands the field and the press that answers it on one line, and the date in prose (Michał, 2026-09-19)", async () => {
     const markup = await source("options/options.html");
     for (const part of SUBSECTIONS) {
-      const tools = markup.slice(markup.indexOf('<div class="list-tools">', markup.indexOf(`id="${part.available}"`)));
-      const line = tools.slice(0, tools.indexOf("</div>", tools.indexOf(part.update)));
+      const block = markup.slice(markup.indexOf(`id="${part.available}"`));
+      const tools = block.slice(block.indexOf('<div class="list-tools">'));
+      const line = tools.slice(0, tools.indexOf("</div>", tools.indexOf(part.search)));
       assert.ok(line.includes(part.filter), `the ${part.what} filter is not on the tools line`);
-      assert.ok(line.includes("list-update"), `the ${part.what} refresh is not on the tools line`);
-      // The date follows the line rather than standing in it.
-      const after = tools.slice(tools.indexOf(part.update));
-      assert.ok(after.indexOf("list-dated") > 0, `the ${part.what} list does not say the day it is from`);
+      assert.ok(line.includes("list-search"), `the ${part.what} field has no press to answer it`);
+      // The press that fetches the index again is not on that line: it works
+      // without a word typed, and it stands where a reader looks for Search.
+      // It is a link inside the sentence about the date it changes, and that
+      // sentence opens the card.
+      assert.ok(!line.includes(part.update), `the ${part.what} refresh still stands beside the field`);
+      const dated = block.indexOf(part.dated);
+      assert.ok(dated > 0 && dated < block.indexOf('<div class="list-tools">'), `the ${part.what} list does not open on the day it is from`);
+      const sentence = block.slice(dated, block.indexOf("</p>", dated));
+      assert.ok(sentence.includes(part.update), `the ${part.what} date does not offer to fetch the list again`);
+      assert.ok(sentence.includes('data-i18n="options_update_list_link"'), `the ${part.what} refresh is not a link in the sentence`);
     }
 
     const css = await source("options/options.css");

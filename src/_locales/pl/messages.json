@@ -2026,13 +2026,10 @@
     }
   },
 
-  "options_step_model": {
-    "message": "Pobierz model tłumaczenia"
+  "options_step_source": {
+    "message": "Pobierz model tłumaczenia albo słownik"
   },
 
-  "options_step_dictionary": {
-    "message": "Pobierz słownik (opcjonalnie)"
-  },
 
   "options_step_pin": {
     "message": "Przypnij re/read do paska narzędzi"
@@ -2289,7 +2286,7 @@
   },
 
   "options_first_steps_intro": {
-    "message": "Nic się jeszcze nie tłumaczy – modelu, który by to robił, nie ma jeszcze na tym urządzeniu. Przygotowanie zajmuje minutę:"
+    "message": "re/read potrzebuje czegoś, czym wyjaśni słowa: modelu tłumaczenia albo słownika. Wystarczy jedno z dwóch, drugie możesz dodać później."
   },
   "options_first_steps_pin": {
     "message": "Na koniec przypnij re/read do paska narzędzi: ikona puzzla po prawej stronie paska, potem koło zębate przy re/read i „Przypnij do paska narzędzi”. Przycisk otwiera widok czytania, czytelnię, zapisane frazy i wyłącznik witryny, na której jesteś."
@@ -2641,7 +2638,10 @@
     "description": "Closes options_models_single_word after the link to the Dictionaries section."
   },
   "options_update_list": { "message": "Zaktualizuj listę" },
-  "options_list_dated": { "message": "Lista z dnia" },
+  "options_list_dated_models": { "message": "Lista modeli do pobrania jest z dnia" },
+  "options_list_dated_dictionaries": { "message": "Lista słowników do pobrania jest z dnia" },
+  "options_update_list_link": { "message": "kliknij, aby ją zaktualizować" },
+  "options_filter_search": { "message": "Szukaj" },
   "options_filter_placeholder": { "message": "Filtruj po języku lub kodzie" },
   "options_filter_models_label": { "message": "Filtruj listę modeli tłumaczeniowych" },
   "options_filter_dictionaries_label": { "message": "Filtruj listę słowników" },
@@ -2692,7 +2692,7 @@
   "options_show_fewer": { "message": "Pokaż mniej" },
   "options_model_note_from": { "message": "Modele pobierane są z" },
   "options_model_note_rest": {
-    "message": "– to tam publikuje je Mozilla. Rozszerzenie łączy się z tym publicznym serwerem tylko wtedy, gdy naciśniesz Zaktualizuj listę albo Pobierz. Żadne dane osobowe nie są wysyłane."
+    "message": "– to tam publikuje je Mozilla. Rozszerzenie łączy się z tym publicznym serwerem tylko wtedy, gdy zaktualizujesz listę albo naciśniesz Pobierz. Żadne dane osobowe nie są wysyłane."
   },
   "options_add_model_heading": { "message": "Dodaj model z plików" },
   "options_add_model_summary": {
@@ -2714,7 +2714,7 @@
   },
   "options_dictionary_note_from": { "message": "Słowniki pobierane są z" },
   "options_dictionary_note_rest": {
-    "message": "– to tam WikDict publikuje słowniki, które buduje z Wikisłownika (CC BY-SA). Rozszerzenie łączy się z tym publicznym serwerem tylko wtedy, gdy naciśniesz Zaktualizuj listę albo Pobierz. Żadne dane osobowe nie są wysyłane."
+    "message": "– to tam WikDict publikuje słowniki, które buduje z Wikisłownika (CC BY-SA). Rozszerzenie łączy się z tym publicznym serwerem tylko wtedy, gdy zaktualizujesz listę albo naciśniesz Pobierz. Żadne dane osobowe nie są wysyłane."
   },
   "options_add_dictionary_heading": { "message": "Dodaj słownik z plików" },
   "options_add_dictionary_summary": {

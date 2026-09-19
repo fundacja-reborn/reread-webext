@@ -90,15 +90,17 @@ export async function pinnedByBrowser() {
 /**
  * What the card shows, from what is stored and what the browser said. Kept
  * apart from the DOM so the rule can be held to examples without a browser:
- * the first step counts the no-model switch as done, because somebody who has
- * chosen to read without translation has finished setting translation up.
+ * the first step is "something to explain words with", and a model or a
+ * dictionary answers it alone - neither is required, and a card that asked
+ * for both in turn said something untrue about the one that is optional
+ * (Michał, 2026-09-19).
  *
- * @param {{ model: boolean, translationOff: boolean, dictionary: boolean,
- *   pinned: boolean | null, hidden: boolean }} state
+ * @param {{ model: boolean, dictionary: boolean, pinned: boolean | null,
+ *   hidden: boolean }} state
  * @returns {{ steps: boolean[], done: number, total: number, show: boolean, open: boolean, intro: boolean }}
  */
 export function stepsView(state) {
-  const steps = [state.model || state.translationOff, state.dictionary, state.pinned === true];
+  const steps = [state.model || state.dictionary, state.pinned === true];
   const done = steps.filter(Boolean).length;
   return {
     steps,

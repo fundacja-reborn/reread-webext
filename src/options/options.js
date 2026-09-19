@@ -257,7 +257,6 @@ function renderFirstSteps() {
 
   const view = stepsView({
     model: modelStored,
-    translationOff: config.translationOff,
     dictionary: dictionaryStored,
     pinned: pinnedNow === null ? stepsState.pinned : pinnedNow,
     hidden: stepsState.hidden,
@@ -278,7 +277,7 @@ function renderFirstSteps() {
   const intro = document.getElementById("first-steps-intro");
   if (intro !== null) intro.hidden = !view.intro;
 
-  const rows = ["step-model", "step-dictionary", "step-pin"];
+  const rows = ["step-source", "step-pin"];
   rows.forEach((id, at) => {
     const row = document.getElementById(id);
     if (row === null) return;
@@ -291,9 +290,15 @@ function renderFirstSteps() {
     const state = row.querySelector(".step-state");
     if (state !== null) state.textContent = done ? t("options_step_done_state") : t("options_step_todo_state");
     // The way to the section is offered only while there is something to do
-    // there; the pinning step's own two buttons follow the same rule.
-    for (const door of row.querySelectorAll(".step-door, .step-done")) {
+    // there; the pinning step's own two buttons - "How" and "Done" - follow
+    // the same rule, and what "How" opened goes with them.
+    for (const door of row.querySelectorAll(".step-door, .step-done, .note-more")) {
       if (door instanceof HTMLElement) door.hidden = done;
+    }
+    if (id === "step-pin" && done) {
+      const help = document.getElementById("first-steps-pin");
+      if (help !== null) help.hidden = true;
+      document.getElementById("step-pin-how")?.setAttribute("aria-expanded", "false");
     }
   });
 
@@ -1549,6 +1554,11 @@ function applyFilterIn(containerId, inputId, noneId, showAllId, expanded, noMatc
   // what the fold stands over and counts. Every row of either list says
   // whether it is installed; the models' rows and the dictionaries' are
   // shaped differently, and that is the one mark they share.
+  // A query standing is a request to see what it matches (Michał,
+  // 2026-09-19): the rows come out from behind the fold for as long as it
+  // stands, and go back behind it when the field is cleared.
+  const filtering = filterActive(query);
+
   let matching = 0;
   let installedMatching = 0;
   for (const row of container.querySelectorAll("[data-installed]")) {
@@ -1559,7 +1569,7 @@ function applyFilterIn(containerId, inputId, noneId, showAllId, expanded, noMatc
       matching += 1;
       if (installed) installedMatching += 1;
     }
-    row.hidden = !rowVisible({ installed, matches, expanded });
+    row.hidden = !rowVisible({ installed, matches, expanded, filtering });
   }
 
   // "The filter matched nothing" is only true of a filter: a folded list
@@ -1569,13 +1579,13 @@ function applyFilterIn(containerId, inputId, noneId, showAllId, expanded, noMatc
   // does not say which of them answered.
   const none = document.getElementById(noneId);
   if (none !== null) {
-    none.hidden = !filterActive(query) || matching > 0;
+    none.hidden = !filtering || matching > 0;
     if (!none.hidden) none.textContent = noMatch(query.trim());
   }
 
   const showAll = document.getElementById(showAllId);
   if (showAll instanceof HTMLButtonElement) {
-    const state = showAllState({ total: matching, installedCount: installedMatching, expanded });
+    const state = showAllState({ total: matching, installedCount: installedMatching, expanded, filtering });
     showAll.hidden = !state.shown;
     showAll.textContent = state.expanded ? t("options_show_fewer") : t("options_show_all", state.count.toLocaleString());
     showAll.setAttribute("aria-expanded", String(state.expanded));
@@ -3744,16 +3754,12 @@ document.getElementById("first-steps-show")?.addEventListener("click", () => {
     }
   });
 });
-// How to pin it, under the step that asks for it - the page's own More
-// conduct, on a paragraph the card keeps rather than a row note.
-document.getElementById("step-pin-how")?.addEventListener("click", (event) => {
-  const button = event.currentTarget;
-  const help = document.getElementById("first-steps-pin");
-  if (!(button instanceof HTMLButtonElement) || help === null) return;
-  const opening = help.hidden;
-  help.hidden = !opening;
-  button.setAttribute("aria-expanded", String(opening));
-});
+// How to pin it, under the step that asks for it, is wired by `moreNotes`
+// with every other fold of the page: it is a `note-more` naming its paragraph
+// with `aria-controls`, which is the one pattern here. It had a second
+// listener of its own until Michał's smoke (2026-09-19) - two listeners on
+// one press opened the paragraph and shut it again, so the button did
+// nothing at all.
 // The page the file export lives on (D254 §9, D260) - the menu's own road.
 // The saved phrases' own export is a different file and a different format,
 // and the note beside this door says so in a sentence rather than in a second
@@ -3764,8 +3770,18 @@ document.getElementById("copy-library")?.addEventListener("click", () => {
 document.getElementById("add-model")?.addEventListener("click", () => void addSelectedModel());
 document.getElementById("refresh-models")?.addEventListener("click", () => void refreshList());
 document.getElementById("refresh-dictionaries")?.addEventListener("click", () => void refreshDictionaryList());
-document.getElementById("model-filter")?.addEventListener("input", () => applyModelFilter());
-document.getElementById("dictionary-filter")?.addEventListener("input", () => applyCatalogFilter());
+// The catalogues answer a press, not a keystroke (Michał, 2026-09-19): a
+// hundred rows redrawn on every letter of "en pl" is a list flickering under
+// the fingers, and on an e-ink panel it is a refresh per letter. The `search`
+// event is Enter in the field and the field's own cross, so clearing puts the
+// list back without a second listener.
+for (const [field, button, apply] of /** @type {[string, string, () => void][]} */ ([
+  ["model-filter", "model-search", applyModelFilter],
+  ["dictionary-filter", "dictionary-search", applyCatalogFilter],
+])) {
+  document.getElementById(field)?.addEventListener("search", () => apply());
+  document.getElementById(button)?.addEventListener("click", () => apply());
+}
 document.getElementById("models-show-all")?.addEventListener("click", () => toggleList("models-catalog"));
 document.getElementById("dictionaries-show-all")?.addEventListener("click", () => toggleList("dictionary-catalog"));
 document.getElementById("add-dictionary")?.addEventListener("click", () => void addSelectedDictionary());

@@ -33,34 +33,40 @@ function rule(css, selector) {
 
 /** @param {Partial<Parameters<typeof stepsView>[0]>} state */
 function view(state) {
-  return stepsView({ model: false, translationOff: false, dictionary: false, pinned: false, hidden: false, ...state });
+  return stepsView({ model: false, dictionary: false, pinned: false, hidden: false, ...state });
 }
 
 describe("the first steps", () => {
   it("counts what is actually stored", () => {
-    assert.deepEqual(view({}).steps, [false, false, false]);
+    assert.deepEqual(view({}).steps, [false, false]);
     assert.equal(view({}).done, 0);
-    assert.deepEqual(view({ model: true, dictionary: true, pinned: true }).steps, [true, true, true]);
-    assert.equal(view({ model: true, dictionary: true, pinned: true }).done, 3);
+    assert.deepEqual(view({ model: true, pinned: true }).steps, [true, true]);
+    assert.equal(view({ model: true, pinned: true }).done, 2);
   });
 
-  it("counts reading without a model as translation set up", () => {
-    // Somebody who switched translation off has finished setting translation
-    // up - the card must not ask them for a model they have refused.
-    assert.equal(view({ translationOff: true }).steps[0], true);
-    assert.equal(view({ translationOff: true }).open, false);
-    assert.equal(view({ translationOff: true }).intro, false, "the old sentence still contradicts the page");
+  it("asks for one of the two downloads, not for both (Michał, 2026-09-19)", () => {
+    // Neither is required: a model translates sentences, a dictionary
+    // explains words, and either one alone makes the bubble answer. A card
+    // that asked for them in turn said something untrue about the one that
+    // is optional.
+    assert.equal(view({ model: true }).steps[0], true, "a model does not answer the first step");
+    assert.equal(view({ dictionary: true }).steps[0], true, "a dictionary does not answer the first step");
+    assert.equal(view({ model: true, dictionary: true }).steps[0], true);
+    assert.equal(view({}).steps[0], false, "an empty device counts as set up");
+    // And the sentence that explains it goes with the step.
+    assert.equal(view({ dictionary: true }).intro, false, "the sentence stands over a step already done");
+    assert.equal(view({ dictionary: true }).open, false, "the card stays open with its first step done");
   });
 
   it("stands open while the first step is undone, and folds to one line after it", () => {
     assert.equal(view({}).open, true, "a fresh install does not open the card");
     assert.equal(view({}).intro, true, "a fresh install is not told what to do");
     assert.equal(view({ model: true }).open, false, "the card stays open with the first step done");
-    assert.equal(view({ model: true }).show, true, "the card leaves with two steps to go");
+    assert.equal(view({ model: true }).show, true, "the card leaves with a step to go");
   });
 
   it("leaves for good once every step is done, or once it is put away", () => {
-    assert.equal(view({ model: true, dictionary: true, pinned: true }).show, false, "a finished card still stands");
+    assert.equal(view({ model: true, pinned: true }).show, false, "a finished card still stands");
     assert.equal(view({ hidden: true }).show, false, "the card comes back after being put away");
     // Put away and then finished is still put away - and still countable, so
     // the way back in the About section shows the truth.
@@ -111,7 +117,7 @@ describe("the first steps", () => {
     const options = await source("options/options.js");
     assert.match(options, /t\("options_step_done_state"\) : t\("options_step_todo_state"\)/, "a screen reader hears only a tick");
     const markup = await source("options/options.html");
-    assert.equal((markup.match(/<span class="visually-hidden step-state"><\/span>/g) ?? []).length, 3, "not every step says its state");
+    assert.equal((markup.match(/<span class="visually-hidden step-state"><\/span>/g) ?? []).length, 2, "not every step says its state");
     const css = await source("options/options.css");
     assert.doesNotMatch(css, /\.steps li\.is-done \{\s*color/, "the state is told by colour alone");
   });
