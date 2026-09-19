@@ -2033,12 +2033,12 @@
     "description": "Heading of the block listing what is already on this device, in both the models and the dictionaries subsection. Ends in a colon: it labels the list under it."
   },
   "options_list_available_models": {
-    "message": "Télécharger d'autres modèles",
+    "message": "Télécharger des modèles",
     "description": "Heading of the models' catalogue block: the filter, the list to download from and the by-hand door. Named for what a press there does, not for what the block is."
   },
 
   "options_list_available_dictionaries": {
-    "message": "Télécharger d'autres dictionnaires",
+    "message": "Télécharger des dictionnaires",
     "description": "Heading of the dictionaries' catalogue block: the filter, the list to download from and the two by-hand doors."
   },
   "options_no_models_yet": {
