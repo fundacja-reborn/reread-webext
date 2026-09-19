@@ -2055,14 +2055,11 @@
   },
   "options_add_link_heading": { "message": "Añadir un diccionario desde un enlace" },
   "options_add_link_summary": {
-    "message": "Pega la dirección de un diccionario StarDict empaquetado en un archivo .zip, elige los idiomas y pulsa Descargar. La extensión se conecta a esa dirección una sola vez, cuando pulsas el botón, y a ninguna otra; no se envía nada tuyo. El archivo se descomprime y se comprueba en este dispositivo, exactamente igual que los archivos que eliges tú."
+    "message": "Pega la dirección de un diccionario StarDict comprimido en un archivo .zip, elige los idiomas y pulsa Descargar. La extensión descarga el archivo del enlace, lo descomprime y lo comprueba en este dispositivo, igual que los archivos que eliges tú. Solo se aceptan direcciones https. Un archivo que no sea .zip (.tar.xz, .tar.zst) hay que descomprimirlo y añadirlo desde archivos."
   },
   "options_link_label": { "message": "Dirección" },
   "options_link_sources": {
-    "message": "Dónde encontrar diccionarios, también monolingües - inglés-inglés, por ejemplo - cada uno con su licencia:"
-  },
-  "options_link_note": {
-    "message": "Solo se aceptan direcciones https. Un archivo que no sea .zip (.tar.xz, .tar.zst) hay que descomprimirlo y añadirlo desde archivos."
+    "message": "Encontrarás enlaces a diccionarios en"
   },
   "options_downloading_link": {
     "message": "Descargando de $HOST$...",

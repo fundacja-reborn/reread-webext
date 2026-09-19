@@ -2099,14 +2099,11 @@
   },
   "options_add_link_heading": { "message": "Ajouter un dictionnaire depuis un lien" },
   "options_add_link_summary": {
-    "message": "Collez l'adresse d'un dictionnaire StarDict compressé en fichier .zip, choisissez les langues et cliquez sur Télécharger. L'extension se connecte une seule fois à cette adresse, quand vous cliquez sur le bouton, et à aucune autre ; rien de vous n'est envoyé. L'archive est décompressée et vérifiée sur cet appareil, exactement comme des fichiers que vous choisissez vous-même."
+    "message": "Collez l'adresse d'un dictionnaire StarDict compressé en fichier .zip, choisissez les langues et appuyez sur Télécharger. L'extension récupère l'archive depuis le lien, la décompresse et la vérifie sur cet appareil, exactement comme les fichiers que vous choisissez vous-même. Seules les adresses https sont acceptées. Une archive qui n'est pas un fichier .zip (.tar.xz, .tar.zst) doit être décompressée et ajoutée depuis des fichiers."
   },
   "options_link_label": { "message": "Adresse" },
   "options_link_sources": {
-    "message": "Où trouver des dictionnaires, y compris unilingues - anglais-anglais, par exemple - chacun avec sa licence :"
-  },
-  "options_link_note": {
-    "message": "Seules les adresses https sont acceptées. Une archive qui n'est pas un fichier .zip (.tar.xz, .tar.zst) doit être décompressée et ajoutée depuis des fichiers."
+    "message": "Vous trouverez des liens vers des dictionnaires sur"
   },
   "options_downloading_link": {
     "message": "Téléchargement depuis $HOST$...",

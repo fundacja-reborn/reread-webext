@@ -2004,14 +2004,11 @@
   },
   "options_add_link_heading": { "message": "Wörterbuch über einen Link hinzufügen" },
   "options_add_link_summary": {
-    "message": "Fügen Sie die Adresse eines als .zip-Datei gepackten StarDict-Wörterbuchs ein, stellen Sie die Sprachen ein und klicken Sie auf Herunterladen. Die Erweiterung verbindet sich einmal mit dieser Adresse, wenn Sie die Schaltfläche drücken, und mit keiner anderen; nichts von Ihnen wird mitgeschickt. Das Archiv wird auf diesem Gerät entpackt und geprüft, genau wie selbst ausgewählte Dateien."
+    "message": "Fügen Sie die Adresse eines als .zip gepackten StarDict-Wörterbuchs ein, wählen Sie die Sprachen und drücken Sie Herunterladen. Die Erweiterung holt das Archiv von der Adresse, entpackt es und prüft es auf diesem Gerät, genau wie Dateien, die Sie selbst auswählen. Angenommen werden nur https-Adressen. Ein Archiv, das keine .zip-Datei ist (.tar.xz, .tar.zst), muss entpackt und aus Dateien hinzugefügt werden."
   },
   "options_link_label": { "message": "Adresse" },
   "options_link_sources": {
-    "message": "Wo Wörterbücher zu finden sind, auch einsprachige - zum Beispiel Englisch-Englisch - jedes mit seiner Lizenz:"
-  },
-  "options_link_note": {
-    "message": "Es werden nur https-Adressen angenommen. Ein Archiv, das keine .zip-Datei ist (.tar.xz, .tar.zst), muss entpackt und aus Dateien hinzugefügt werden."
+    "message": "Links zu Wörterbüchern finden Sie unter"
   },
   "options_downloading_link": {
     "message": "Herunterladen von $HOST$...",

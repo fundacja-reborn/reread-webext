@@ -2455,16 +2455,13 @@
   },
   "options_add_link_heading": { "message": "Add a dictionary from a link" },
   "options_add_link_summary": {
-    "message": "Paste the address of a StarDict dictionary packed as a .zip file, choose the languages and press Download. The extension connects to that address once, when you press the button, and to nowhere else; nothing of yours is sent along. The archive is unpacked and checked on this device, exactly like files you pick yourself.",
+    "message": "Paste the address of a StarDict dictionary packed as a .zip file, choose the languages and press Download. The extension fetches the archive from the link, unpacks it and checks it on this device, exactly like files you pick yourself. Only https addresses are accepted. An archive that is not a .zip file (.tar.xz, .tar.zst) has to be unpacked and added from files.",
     "description": "The whole instruction of the fold that adds a dictionary from a pasted address."
   },
   "options_link_label": { "message": "Address" },
   "options_link_sources": {
-    "message": "Where to find dictionaries, monolingual ones too - English-English, for example - each with its licence:",
+    "message": "You can find links to dictionaries at",
     "description": "Ends just before the address of the page of sources, which stands in the page as a link; the sentence's closing full stop is part of the page."
-  },
-  "options_link_note": {
-    "message": "Only https addresses are accepted. An archive that is not a .zip file (.tar.xz, .tar.zst) has to be unpacked and added from files."
   },
   "options_downloading_link": {
     "message": "Downloading from $HOST$...",

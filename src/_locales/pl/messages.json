@@ -2720,14 +2720,11 @@
   },
   "options_add_link_heading": { "message": "Dodaj słownik z linku" },
   "options_add_link_summary": {
-    "message": "Wklej adres słownika StarDict spakowanego do pliku .zip, określ języki i naciśnij Pobierz. Rozszerzenie łączy się z tym adresem raz, po naciśnięciu przycisku, i z żadnym innym; nic twojego nie jest wysyłane. Archiwum jest rozpakowywane i sprawdzane na tym urządzeniu, dokładnie tak jak pliki wybrane ręcznie."
+    "message": "Wklej adres słownika StarDict spakowanego do pliku .zip, określ języki i naciśnij Pobierz. Rozszerzenie pobierze archiwum z linku, rozpakuje je i sprawdzi na tym urządzeniu, dokładnie tak jak pliki wybrane ręcznie. Przyjmowane są tylko adresy https. Archiwum inne niż plik .zip (.tar.xz, .tar.zst) trzeba rozpakować i dodać z plików."
   },
   "options_link_label": { "message": "Adres" },
   "options_link_sources": {
-    "message": "Gdzie szukać słowników, także jednojęzycznych – na przykład angielsko-angielskiego – każdy z podaną licencją:"
-  },
-  "options_link_note": {
-    "message": "Przyjmowane są tylko adresy https. Archiwum inne niż plik .zip (.tar.xz, .tar.zst) trzeba rozpakować i dodać z plików."
+    "message": "Linki do słowników znajdziesz na"
   },
   "options_downloading_link": {
     "message": "Pobieranie z $HOST$...",

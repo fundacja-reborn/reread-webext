@@ -160,12 +160,16 @@ describe("the two blocks a catalogue is read in", () => {
     assert.doesNotMatch(narrow, /\.list-search \{\s*margin-left: auto/, "Search still stands away from the field it belongs to");
   });
 
-  it("put the note about the host after both blocks, as the subsection's own footnote", async () => {
+  it("puts the note about the host under the catalogue it speaks for, and nowhere near the by-hand doors", async () => {
     const markup = await source("options/options.html");
+    // It named one host and stood after every way of getting a dictionary,
+    // so it read as if it spoke for all of them (Michał's smoke,
+    // 2026-09-19) - and the by-hand doors go somewhere else entirely, or
+    // nowhere at all: a dictionary added from files fetches nothing.
     for (const part of SUBSECTIONS) {
       const host = markup.indexOf(part.host);
       assert.ok(host > markup.indexOf(part.showAll), `the ${part.what} host note stands inside the catalogue`);
-      assert.ok(host > markup.indexOf(part.door), `the ${part.what} host note stands before the by-hand door`);
+      assert.ok(host < markup.indexOf(part.door), `the ${part.what} host note speaks for the by-hand door as well`);
     }
   });
 

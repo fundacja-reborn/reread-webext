@@ -444,6 +444,24 @@
 
     <div id="models-catalog" class="models"></div>
 
+    <!-- Where the catalogue's downloads come from, directly under the
+         catalogue (Michał's smoke, 2026-09-19): standing after the by-hand
+         door as well, it read as if it spoke for that too - and a model added
+         from files fetches nothing at all. A line of quiet prose, not a framed
+         box; the frame is kept for the one warning on the page that is one. -->
+    <p class="note">
+      <!-- The host is also a door: the href becomes the address of the very
+           index the snapshot was taken from, so a reader can look at the
+           source with their own eyes. Their press, their navigation - the
+           extension itself still fetches nothing without a press. -->
+      <span data-i18n="options_model_note_from">Model downloads come from</span>
+      <a id="model-host" target="_blank" rel="noopener">-</a>
+      <span data-i18n="options_model_note_rest"
+        >- where Mozilla publishes them. The extension connects to this public server only when you
+        update the list or press Download. No personal data is ever sent.</span
+      >
+    </p>
+
     <!-- Folded shut by default: the by-hand path is the escape hatch, not the
          road, and standing open right under the list it read as a second,
          competing way to get a model. Everything it has to say, its one-line
@@ -485,22 +503,6 @@
       </p>
     </details>
 
-    <!-- Where the downloads come from, the last row of the card that fetches
-         them (D265; the place D258 gave it, now that the ways to get a model
-         are one card): a line of quiet prose, not a framed box - the frame is
-         kept for the one warning on the page that is a warning. -->
-    <p class="note">
-      <!-- The host is also a door: the href becomes the address of the very
-           index the snapshot was taken from, so a reader can look at the
-           source with their own eyes. Their press, their navigation - the
-           extension itself still fetches nothing without a press. -->
-      <span data-i18n="options_model_note_from">Model downloads come from</span>
-      <a id="model-host" target="_blank" rel="noopener">-</a>
-      <span data-i18n="options_model_note_rest"
-        >- where Mozilla publishes them. The extension connects to this public server only when you
-        update the list or press Download. No personal data is ever sent.</span
-      >
-    </p>
     </div>
     </section>
 
@@ -649,6 +651,20 @@
 
     <ul id="dictionary-catalog" class="models"></ul>
 
+    <!-- Where the catalogue's downloads come from, directly under the
+         catalogue (Michał's smoke, 2026-09-19): after the by-hand doors it
+         read as if it spoke for a dictionary added from files or from a link
+         as well, and those go somewhere else entirely - or nowhere. -->
+    <p class="note">
+      <span data-i18n="options_dictionary_note_from">Dictionary downloads come from</span>
+      <a id="dictionary-host" target="_blank" rel="noopener">-</a>
+      <span data-i18n="options_dictionary_note_rest"
+        >- where WikDict publishes the dictionaries it builds from Wiktionary (CC BY-SA). The
+        extension connects to this public server only when you update the list or press Download.
+        No personal data is ever sent.</span
+      >
+    </p>
+
     <!-- Folded for the same reason as the model files above: the catalogue is
          the road, this is the door beside it. -->
     <details class="fold">
@@ -725,11 +741,23 @@
         <h3 data-i18n="options_add_link_heading">Add a dictionary from a link</h3>
       </summary>
 
+      <!-- The whole of it before the form (Michał, 2026-09-19): what to paste,
+           what happens to it, and the two limits worth knowing before typing
+           an address rather than after - what was accepted and what has to be
+           unpacked first used to stand under the button, where it answered a
+           press that had already failed. -->
       <p class="explain" data-i18n="options_add_link_summary">
         Paste the address of a StarDict dictionary packed as a .zip file, choose the languages and
-        press Download. The extension connects to that address once, when you press the button, and
-        to nowhere else; nothing of yours is sent along. The archive is unpacked and checked on this
-        device, exactly like files you pick yourself.
+        press Download. The extension fetches the archive from the link, unpacks it and checks it
+        on this device, exactly like files you pick yourself. Only https addresses are accepted. An
+        archive that is not a .zip file (.tar.xz, .tar.zst) has to be unpacked and added from files.
+      </p>
+
+      <p class="explain">
+        <span data-i18n="options_link_sources">You can find links to dictionaries at</span>
+        <a id="dictionary-sources-link" href="https://reapps.eu/read#faq-dictionary-sources" target="_blank" rel="noopener"
+          >reapps.eu/read</a
+        >.
       </p>
 
       <p class="inline">
@@ -762,35 +790,8 @@
 
       <p id="dictionary-link-status" class="status" role="status"></p>
 
-      <p class="explain">
-        <span data-i18n="options_link_sources"
-          >Where to find dictionaries, monolingual ones too - English-English, for example - each
-          with its licence:</span
-        >
-        <a id="dictionary-sources-link" href="https://reapps.eu/read#faq-dictionary-sources" target="_blank" rel="noopener"
-          >reapps.eu/read</a
-        >.
-      </p>
-
-      <p class="note footnote" data-i18n="options_link_note">
-        Only https addresses are accepted. An archive that is not a .zip file (.tar.xz, .tar.zst) has
-        to be unpacked and added from files.
-      </p>
     </details>
 
-    <!-- Where the downloads come from, the last row of the card that fetches
-         them (D265): the catalogue and the two by-hand doors are one card -
-         the ways to get a dictionary - and this says where the first of them
-         fetches from, after all three. -->
-    <p class="note">
-      <span data-i18n="options_dictionary_note_from">Dictionary downloads come from</span>
-      <a id="dictionary-host" target="_blank" rel="noopener">-</a>
-      <span data-i18n="options_dictionary_note_rest"
-        >- where WikDict publishes the dictionaries it builds from Wiktionary (CC BY-SA). The
-        extension connects to this public server only when you update the list or press Download.
-        No personal data is ever sent.</span
-      >
-    </p>
     </div>
     </section>
     </section>
