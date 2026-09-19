@@ -179,18 +179,27 @@
     <nav id="sections" class="sections" aria-label="Sections of this page" data-i18n-aria-label="options_sections_aria">
       <a id="jump-first-steps" class="translation-only" href="#first-steps" data-i18n="options_first_steps_heading" hidden>First steps</a>
       <a href="#languages" data-i18n="options_section_languages">Languages</a>
-      <a href="#switched-off-sites" data-i18n="options_disabled_heading">Switched-off sites</a>
       <a href="#bubble-and-phrases" data-i18n="options_section_bubble">Bubble and phrases</a>
       <a href="#reading-view" data-i18n="options_section_reading">Reading view</a>
       <a href="#reading-aloud" data-i18n="options_section_aloud">Reading aloud</a>
       <a href="#data" data-i18n="options_section_data">Data and copies</a>
+      <a href="#switched-off-sites" data-i18n="options_disabled_heading">Switched-off sites</a>
       <a href="#custom-css" data-i18n="options_custom_css_heading">Custom CSS</a>
       <a href="#about" data-i18n="options_section_about">About re/read</a>
     </nav>
 
     <main>
     <header>
-      <h1 data-i18n="settings">Settings</h1>
+      <!-- Two spellings of one title (Michał, 2026-09-19): on a wide window
+           the bar shows the wordmark over the list, so the title is the plain
+           word; below 60rem the wordmark goes and the section being read
+           stands in its place, and then the title is the one thing on the
+           page that says whose settings these are. One key each, because the
+           word order is the catalogue's business, not a join. -->
+      <h1>
+        <span class="on-wide" data-i18n="settings">Settings</span>
+        <span class="on-narrow" data-i18n="options_heading_named">re/read settings</span>
+      </h1>
     </header>
     <!-- What a private window sees (`private-note.js`): its own, empty
          database, gone with the session. Filled and shown by script only
@@ -797,81 +806,6 @@
     </section>
     </section>
 
-    <!-- Where re/read is switched off altogether (D257): on a site in this
-         list nothing happens at all - no translation, no bubble, no
-         underlines - which is the one thing on this page that really is a
-         question of where the extension works. It stood under a heading
-         "Where it works" with the reader-only switch until Michał's smoke
-         (2026-09-18): that heading over that switch said the extension only
-         worked in the reader, when the reader-only switch limits the
-         underlines and the bubble and nothing else. -->
-    <section aria-labelledby="switched-off-sites" data-keywords="options_keywords_sites">
-    <header>
-      <h2 id="switched-off-sites" data-i18n="options_disabled_heading">Switched-off sites</h2>
-
-      <!-- Two sentences that answer the question, and the edge case behind the
-           page's own More (D258, §6.3): what the section is and how to add a
-           site are what somebody came for; the one arrangement in which the
-           toolbar window has no switch to offer is worth saying, and worth not
-           saying first.
-
-           The two settings the fold names are links to their own rows (D254,
-           P9): a sentence that names a setting and leaves the reader to find it
-           is a sentence that sends them back to the top of the page. The names
-           come from the rows' own catalogue keys, so renaming a setting renames
-           the reference with it. The closing clause is glued to the second link
-           (no line break between them): where a language opens it with a
-           colon - Polish, Spanish, Ukrainian - a space before that colon would
-           be a typographic error, and the languages that want a word there open
-           theirs with a space instead. -->
-      <p class="explain">
-        <span data-i18n="options_disabled_intro"
-          >On these sites re/read does not translate and shows no bubble and no underlines. Add a
-          site in the re/read window in the toolbar, or by typing its address below.</span
-        ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-disabled-sites" data-i18n="options_details">Details</button></span>
-      </p>
-      <p class="explain row-more" id="more-disabled-sites" hidden>
-        <span data-i18n="options_disabled_intro_switch">There is no switch in that window when both</span>
-        <a href="#s-translationOff" data-i18n="options_no_translation">Use without a translation model</a>
-        <span data-i18n="options_disabled_intro_and">and</span>
-        <a href="#s-bubbleOff" data-i18n="options_bubble_off">Do not show the bubble when selecting text</a
-        ><span data-i18n="options_disabled_intro_rest"
-          > are on: nothing happens on ordinary pages then, so there is nothing to switch off.</span
-        >
-      </p>
-    </header>
-
-    <div class="card">
-    <div id="disabled-hosts" class="models"></div>
-
-    <!-- Adding by hand (D189): the popup's switch reaches only the site
-         somebody is standing on, and only while the popup shows it; a site
-         typed here needs neither. Whatever is pasted - a page's whole address
-         included - is reduced to the site part by lib/host.js, in the shape
-         the popup stores. -->
-    <p class="inline">
-      <label for="disabled-host" data-i18n="options_add_host_label">Site address</label>
-      <input
-        type="text"
-        id="disabled-host"
-        inputmode="url"
-        autocomplete="off"
-        autocapitalize="off"
-        spellcheck="false"
-        placeholder="www.example.org"
-      />
-      <button type="button" id="add-disabled-host" data-i18n="options_add_host_button">Add</button>
-    </p>
-
-    <p id="host-status" class="status" role="status"></p>
-
-    <p class="note" data-i18n="options_add_host_note">
-      The address as the browser shows it, for example example.org; www.example.org is the same
-      site. A subdomain such as news.example.org is a separate site. A page's whole address can be
-      pasted; only the site part is kept.
-    </p>
-    </div>
-    </section>
 
     <!-- The bubble and what it saves: what opens over a selection, and what
          is kept when the selection is saved. Two subsections, because the
@@ -1453,6 +1387,82 @@
     </p>
     </div>
     </section>
+    </section>
+
+    <!-- Where re/read is switched off altogether (D257): on a site in this
+         list nothing happens at all - no translation, no bubble, no
+         underlines - which is the one thing on this page that really is a
+         question of where the extension works. It stood under a heading
+         "Where it works" with the reader-only switch until Michał's smoke
+         (2026-09-18): that heading over that switch said the extension only
+         worked in the reader, when the reader-only switch limits the
+         underlines and the bubble and nothing else. -->
+    <section aria-labelledby="switched-off-sites" data-keywords="options_keywords_sites">
+    <header>
+      <h2 id="switched-off-sites" data-i18n="options_disabled_heading">Switched-off sites</h2>
+
+      <!-- Two sentences that answer the question, and the edge case behind the
+           page's own More (D258, §6.3): what the section is and how to add a
+           site are what somebody came for; the one arrangement in which the
+           toolbar window has no switch to offer is worth saying, and worth not
+           saying first.
+
+           The two settings the fold names are links to their own rows (D254,
+           P9): a sentence that names a setting and leaves the reader to find it
+           is a sentence that sends them back to the top of the page. The names
+           come from the rows' own catalogue keys, so renaming a setting renames
+           the reference with it. The closing clause is glued to the second link
+           (no line break between them): where a language opens it with a
+           colon - Polish, Spanish, Ukrainian - a space before that colon would
+           be a typographic error, and the languages that want a word there open
+           theirs with a space instead. -->
+      <p class="explain">
+        <span data-i18n="options_disabled_intro"
+          >On these sites re/read does not translate and shows no bubble and no underlines. Add a
+          site in the re/read window in the toolbar, or by typing its address below.</span
+        ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-disabled-sites" data-i18n="options_details">Details</button></span>
+      </p>
+      <p class="explain row-more" id="more-disabled-sites" hidden>
+        <span data-i18n="options_disabled_intro_switch">There is no switch in that window when both</span>
+        <a href="#s-translationOff" data-i18n="options_no_translation">Use without a translation model</a>
+        <span data-i18n="options_disabled_intro_and">and</span>
+        <a href="#s-bubbleOff" data-i18n="options_bubble_off">Do not show the bubble when selecting text</a
+        ><span data-i18n="options_disabled_intro_rest"
+          > are on: nothing happens on ordinary pages then, so there is nothing to switch off.</span
+        >
+      </p>
+    </header>
+
+    <div class="card">
+    <div id="disabled-hosts" class="models"></div>
+
+    <!-- Adding by hand (D189): the popup's switch reaches only the site
+         somebody is standing on, and only while the popup shows it; a site
+         typed here needs neither. Whatever is pasted - a page's whole address
+         included - is reduced to the site part by lib/host.js, in the shape
+         the popup stores. -->
+    <p class="inline">
+      <label for="disabled-host" data-i18n="options_add_host_label">Site address</label>
+      <input
+        type="text"
+        id="disabled-host"
+        inputmode="url"
+        autocomplete="off"
+        autocapitalize="off"
+        spellcheck="false"
+        placeholder="www.example.org"
+      />
+      <button type="button" id="add-disabled-host" data-i18n="options_add_host_button">Add</button>
+    </p>
+
+    <p id="host-status" class="status" role="status"></p>
+
+    <p class="note" data-i18n="options_add_host_note">
+      The address as the browser shows it, for example example.org; www.example.org is the same
+      site. A subdomain such as news.example.org is a separate site. A page's whole address can be
+      pasted; only the site part is kept.
+    </p>
+    </div>
     </section>
 
     <!-- The tinkerer's door (D176): rules of the reader's own for the bubble

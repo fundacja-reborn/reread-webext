@@ -1376,6 +1376,7 @@
   },
 
   "options_title": { "message": "re/read - paramètres" },
+  "options_heading_named": { "message": "Paramètres de re/read" },
   "back_to_reading": {"message": "Retour à la lecture"},
   "options_local_intro": {
     "message": "Tout ce que fait re/read se passe sur cet appareil (hors ligne) : la traduction, le dictionnaire, la liste de lecture, les phrases enregistrées. Rien de ce que vous lisez ou sélectionnez n'est envoyé nulle part. Une connexion Internet n'est nécessaire que pour télécharger un nouveau modèle de traduction ou un dictionnaire - et seulement depuis les deux adresses indiquées dans les sections"

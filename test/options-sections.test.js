@@ -25,15 +25,18 @@ async function source(path) {
 /** The sections, in the order the page stands them in. */
 const SECTIONS = [
   { id: "languages", key: "options_section_languages", subs: ["translation-models", "dictionaries"] },
-  // Switched-off sites is the one section that really is about where re/read
-  // works: on a site in the list nothing happens at all. The reader-only
-  // switch used to stand over it under a heading that said so of both, which
-  // was untrue of the switch (D257).
-  { id: "switched-off-sites", key: "options_disabled_heading", subs: [] },
   { id: "bubble-and-phrases", key: "options_section_bubble", subs: ["bubble", "saved-phrases"] },
   { id: "reading-view", key: "options_section_reading", subs: ["paged-layout"] },
   { id: "reading-aloud", key: "options_section_aloud", subs: [] },
   { id: "data", key: "options_section_data", subs: ["copies"] },
+  // Switched-off sites is the one section that really is about where re/read
+  // works: on a site in the list nothing happens at all. The reader-only
+  // switch used to stand over it under a heading that said so of both, which
+  // was untrue of the switch (D257). It stood second until Michał moved it
+  // down to the housekeeping end of the page (2026-09-19), where the list of
+  // addresses, the reader's own rules and the colophon read as one errand -
+  // and the settings somebody came for open the page instead.
+  { id: "switched-off-sites", key: "options_disabled_heading", subs: [] },
   { id: "custom-css", key: "options_custom_css_heading", subs: [] },
   { id: "about", key: "options_section_about", subs: ["support"] },
 ];

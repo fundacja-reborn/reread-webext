@@ -407,6 +407,14 @@ header h1 {
   margin: 0 0 0.25rem;
 }
 
+/* Which of the title's two spellings is shown - the plain word beside a bar
+   that carries the wordmark, the named one where the bar does not (the
+   second breakpoint, at the foot of this sheet, swaps them). `display`,
+   so a screen reader is read the one that is shown and no other. */
+.on-wide {
+  display: none;
+}
+
 /* The colophon closes the panel rather than the page: it stands inside it,
    on the cards' own column, a step quieter than the shared 4rem roof - a
    panel that ends in three lines of small print needs no gap that size. */
@@ -2300,10 +2308,45 @@ summary::marker {
     padding-inline: calc(var(--settings-side) - 0.6rem) 0.6rem;
   }
 
-  /* The panel takes the rest of the window, down to its foot, and turns the
-     one corner that is neither the window's edge nor the list's. */
-  main {
+  /* The bar carries the wordmark from here up, so the title is the plain
+     word again. */
+  .on-wide {
+    display: inline;
+  }
+
+  .on-narrow {
+    display: none;
+  }
+
+  /* The panel's paper stands still while the page scrolls under the bar
+     (Michał, 2026-09-19). Painted on a layer of its own, fixed to the window
+     rather than carried by `main`: the corner it turns is a corner of the
+     room, and a room does not slide up out of sight with the first scroll.
+     Behind everything in the page (`z-index: -1`), so the cards, the list and
+     the stuck bar all keep painting over it, and the body's own paper - which
+     the canvas takes - still shows to the left of the list. */
+  .page-body::before {
+    content: "";
+    position: fixed;
+    inset-block: var(--header-h) 0;
+    inset-inline: var(--ui-side) 0;
+    z-index: -1;
+    background: var(--settings-page-bg);
     border-start-start-radius: var(--settings-panel-radius);
+  }
+
+  /* So `main` carries the room's measurements and none of its paint. */
+  main {
+    background: none;
+  }
+
+  /* No line under the bar here (Michał, 2026-09-19): the panel's own edge is
+     the line, and a rule above it cut the page in two. The colour goes, not
+     the border - `--bar-h` counts that pixel, and a bar one pixel shorter
+     than the number every stuck thing is placed by would show a sliver of
+     paper over the panel. */
+  .page-bar {
+    border-bottom-color: transparent;
   }
 
   /* The bar takes the page's own two columns (F2): the arrow and the wordmark
