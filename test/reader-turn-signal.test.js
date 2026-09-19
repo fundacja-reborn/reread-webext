@@ -107,13 +107,19 @@ describe("the signal that a page has turned (D251)", () => {
   it("offers the effect on the settings page, in every language", async () => {
     const markup = await source("options/options.html");
     assert.match(markup, /<select id="turn-effect">\s*<option value="auto"[\s\S]*?<option value="off"/, "the row does not offer the two values");
-    assert.match(markup, /data-i18n="options_turn_effect_hint"[\s\S]{0,400}?aria-controls="more-/, "the row's note has no sentence and no More behind it");
+    // One paragraph, always open (D264): what the row is for, then what the
+    // value in force looks like - no trigger, and no folded rest opening
+    // under the line that had already said it.
+    assert.match(markup, /<p class="row-note">\s*<span data-i18n="options_turn_effect_hint">[^<]*<\/span>\s*<span id="turn-effect-note"><\/span>\s*<\/p>/, "the row's two halves are not one paragraph");
+    assert.doesNotMatch(markup, /more-turnEffect|options_turn_effect_more/, "the row still folds a rest away");
+    assert.match(markup, /id="s-turnEffect" data-setting="turnEffect" data-keywords="options_keywords_turn"/, "the row cannot be found by the words its folded rest used to carry");
     const script = await source("options/options.js");
     assert.match(script, /if \(!\(select instanceof HTMLSelectElement\) \|\| !isTurnEffect\(select\.value\)\) return;/, "a value the guard does not know can be written");
     assert.match(script, /writeConfig\(\{ reader: \{ turnEffect: select\.value \} \}\)/, "the row does not write the reader's setting");
     assert.match(bodyOf(script, "renderTurning"), /effect\.value = config\.reader\.turnEffect;\s*sayEffect\(effect\.value\);/, "the row does not show what is stored, or says nothing about it");
-    // The line under the select, one sentence per value, each key a literal.
-    assert.match(markup, /<p class="row-note" id="turn-effect-note"><\/p>/, "there is no line to say what the chosen effect looks like");
+    // The second half of that paragraph, one sentence per value, each key a
+    // literal.
+    assert.match(markup, /<span id="turn-effect-note"><\/span>/, "there is nothing to say what the chosen effect looks like");
     const said = bodyOf(script, "sayEffect");
     assert.match(said, /t\("options_turn_effect_note_off"\) : t\("options_turn_effect_note_auto"\)/, "the two values are not told apart, or the key is built rather than written");
     assert.match(script, /sayEffect\(select\.value\);/, "the line stands still when the effect is changed");

@@ -1728,14 +1728,6 @@
   "options_touch_turn_zones": { "message": "Tocar el lado izquierdo o derecho de la pantalla" },
   "options_touch_turn_swipe": { "message": "Deslizar el dedo hacia el lado" },
   "options_touch_turn_off": { "message": "Desactivado" },
-  "options_touch_turn_hint": {
-    "message": "Cómo pasa las páginas un dedo."
-  },
-
-  "options_touch_turn_more": {
-    "message": "En una pantalla estrecha lo predeterminado es deslizar: la mano que sujeta el teléfono toca a menudo la pantalla, y un toque sin deslizamiento no cambia de página. En una pantalla ancha lo predeterminado es tocar. Las teclas de página, las flechas y la rueda del ratón pasan páginas sea cual sea este ajuste, y el lápiz nunca pasa ninguna.",
-    "description": "The rest of the options_touch_turn_hint description, behind the row's More button."
-  },
   "options_touch_turn_note_zones": {
     "message": "Tocar el tercio derecho de la pantalla pasa a la página siguiente; el tercio izquierdo, a la anterior. Solo cuenta un toque breve e inmóvil lejos de los bordes, para que un pulgar que sujeta el dispositivo no cambie de página."
   },
@@ -1750,11 +1742,6 @@
   "options_turn_effect_off": { "message": "Desactivado" },
   "options_turn_effect_hint": {
     "message": "Una confirmación visible del cambio de página."
-  },
-
-  "options_turn_effect_more": {
-    "message": "Es fácil pasarlo por alto cuando lees el centro de una página. No ocurre nada cuando en tu sistema está activada la reducción de movimiento, ni cuando la página la pasa la lectura en voz alta o al arrastrar una selección hasta el borde de la página.",
-    "description": "The rest of the options_turn_effect_hint description, behind the row's More button."
   },
   "options_turn_effect_note_auto": {
     "message": "En el tema E-ink, la zona de texto se oscurece un momento, como en un lector de libros electrónicos; en otras pantallas, la nueva página aparece con un desplazamiento suave."
@@ -1950,6 +1937,11 @@
 
   "options_keywords_sites": {
     "message": "dominio, excepciones, bloqueo, host",
+    "description": "Words the settings search also finds this row by; never shown."
+  },
+
+  "options_keywords_turn": {
+    "message": "deslizar, tocar, gesto, dedo, destello, animación, movimiento",
     "description": "Words the settings search also finds this row by; never shown."
   },
   "options_tts": { "message": "Mostrar los botones de lectura en voz alta" },

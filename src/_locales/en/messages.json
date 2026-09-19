@@ -2064,14 +2064,6 @@
   "options_touch_turn_zones": { "message": "Tap the left or right side of the screen" },
   "options_touch_turn_swipe": { "message": "Slide a finger sideways" },
   "options_touch_turn_off": { "message": "Off" },
-  "options_touch_turn_hint": {
-    "message": "How a finger turns the pages."
-  },
-
-  "options_touch_turn_more": {
-    "message": "On a narrow screen the default is a slide: the hand holding the phone often touches the screen, and a touch without a slide turns no page. On a wide screen the default is a tap. The page keys, the arrow keys and the mouse wheel turn pages whatever this is set to, and the pen never turns one.",
-    "description": "The rest of the options_touch_turn_hint description, behind the row's More button."
-  },
   "options_touch_turn_note_zones": {
     "message": "A tap in the right third of the screen turns to the next page, in the left third to the previous one. Only a short, still tap away from the edges counts, so a thumb holding the device changes no pages."
   },
@@ -2086,11 +2078,6 @@
   "options_turn_effect_off": { "message": "Off" },
   "options_turn_effect_hint": {
     "message": "A visible confirmation that the page has changed."
-  },
-
-  "options_turn_effect_more": {
-    "message": "It is easy to miss when you are reading the middle of a page. Nothing happens when your system is set to reduce motion, and nothing when the page is turned by reading aloud or by dragging a selection to the edge of the page.",
-    "description": "The rest of the options_turn_effect_hint description, behind the row's More button."
   },
   "options_turn_effect_note_auto": {
     "message": "In the E-ink theme the text area goes dark for a moment, the way an e-reader marks a page turn; on other screens the new page appears with a smooth slide."
@@ -2302,6 +2289,11 @@
 
   "options_keywords_sites": {
     "message": "domain, exceptions, block, host",
+    "description": "Words the settings search also finds this row by; never shown."
+  },
+
+  "options_keywords_turn": {
+    "message": "swipe, tap, gesture, finger, flash, animation, motion",
     "description": "Words the settings search also finds this row by; never shown."
   },
   "options_tts": { "message": "Show the read-aloud buttons" },

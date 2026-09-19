@@ -1677,14 +1677,6 @@
   "options_touch_turn_zones": { "message": "Tippen auf die linke oder rechte Seite des Bildschirms" },
   "options_touch_turn_swipe": { "message": "Finger zur Seite schieben" },
   "options_touch_turn_off": { "message": "Aus" },
-  "options_touch_turn_hint": {
-    "message": "Wie ein Finger die Seiten umblättert."
-  },
-
-  "options_touch_turn_more": {
-    "message": "Auf einem schmalen Bildschirm ist Wischen die Vorgabe: Die Hand, die das Telefon hält, berührt oft den Bildschirm, und eine Berührung ohne Wischen blättert nicht. Auf einem breiten Bildschirm ist Tippen die Vorgabe. Die Bildtasten, die Pfeiltasten und das Mausrad blättern unabhängig von dieser Einstellung, und der Stift blättert nie.",
-    "description": "The rest of the options_touch_turn_hint description, behind the row's More button."
-  },
   "options_touch_turn_note_zones": {
     "message": "Ein Tippen auf das rechte Drittel des Bildschirms blättert zur nächsten Seite, auf das linke zur vorigen. Es zählt nur ein kurzes, ruhiges Tippen fern von den Rändern, damit ein haltender Daumen keine Seiten wechselt."
   },
@@ -1699,11 +1691,6 @@
   "options_turn_effect_off": { "message": "Aus" },
   "options_turn_effect_hint": {
     "message": "Eine sichtbare Bestätigung des Seitenwechsels."
-  },
-
-  "options_turn_effect_more": {
-    "message": "Beim Lesen der Seitenmitte übersieht man das leicht. Nichts geschieht, wenn in Ihrem System reduzierte Bewegung eingestellt ist, und nichts, wenn die Seite vom Vorlesen oder vom Ziehen einer Auswahl an den Seitenrand umgeblättert wird.",
-    "description": "The rest of the options_turn_effect_hint description, behind the row's More button."
   },
   "options_turn_effect_note_auto": {
     "message": "Im Farbschema E-Ink wird der Textbereich einen Moment lang dunkel, so wie ein E-Book-Reader das Umblättern zeigt; auf anderen Bildschirmen erscheint die neue Seite mit einer sanften Bewegung."
@@ -1899,6 +1886,11 @@
 
   "options_keywords_sites": {
     "message": "Domain, Ausnahmen, Sperre, Host",
+    "description": "Words the settings search also finds this row by; never shown."
+  },
+
+  "options_keywords_turn": {
+    "message": "wischen, tippen, Geste, Finger, Blinken, Animation, Bewegung",
     "description": "Words the settings search also finds this row by; never shown."
   },
   "options_tts": { "message": "Vorlese-Schaltflächen zeigen" },

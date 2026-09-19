@@ -2373,14 +2373,6 @@
   "options_touch_turn_zones": { "message": "Дотик до лівої або правої частини екрана" },
   "options_touch_turn_swipe": { "message": "Проведення пальцем убік" },
   "options_touch_turn_off": { "message": "Вимкнено" },
-  "options_touch_turn_hint": {
-    "message": "Як палець гортає сторінки."
-  },
-
-  "options_touch_turn_more": {
-    "message": "На вузькому екрані типовим є проведення пальцем: долоня, що тримає телефон, часто торкається екрана, а сам дотик без проведення сторінки не змінює. На широкому екрані типовим є дотик. Клавіші зміни сторінки, стрілки та коліщатко миші гортають сторінки незалежно від цього налаштування, а перо не гортає ніколи.",
-    "description": "The rest of the options_touch_turn_hint description, behind the row's More button."
-  },
   "options_touch_turn_note_zones": {
     "message": "Дотик до правої третини екрана - наступна сторінка, до лівої - попередня. Зараховується лише короткий нерухомий дотик подалі від країв, тож великий палець, який тримає пристрій, не змінює сторінок."
   },
@@ -2395,11 +2387,6 @@
   "options_turn_effect_off": { "message": "Вимкнено" },
   "options_turn_effect_hint": {
     "message": "Видиме підтвердження зміни сторінки."
-  },
-
-  "options_turn_effect_more": {
-    "message": "Читаючи середину сторінки, це легко пропустити. Нічого не відбувається, коли в системі ввімкнено зменшення руху, ані коли сторінку гортає читання вголос або перетягування виділення до краю сторінки.",
-    "description": "The rest of the options_turn_effect_hint description, behind the row's More button."
   },
   "options_turn_effect_note_auto": {
     "message": "У темі E-ink область тексту на мить темніє, як під час гортання в читалці електронних книжок; на інших екранах нова сторінка з'являється з плавним зсувом."
@@ -2615,6 +2602,11 @@
 
   "options_keywords_sites": {
     "message": "домен, винятки, блокування, хост",
+    "description": "Words the settings search also finds this row by; never shown."
+  },
+
+  "options_keywords_turn": {
+    "message": "свайп, дотик, жест, палець, спалах, анімація, рух",
     "description": "Words the settings search also finds this row by; never shown."
   },
   "options_tts": { "message": "Показувати кнопки читання вголос" },

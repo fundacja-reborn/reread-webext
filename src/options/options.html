@@ -1152,49 +1152,46 @@
            quicker and more precise. Off is for a reader with hardware page
            keys, where no gesture is worth an accidental turn. Chosen by name
            in a select, like the language pair: three values, set once. -->
-      <div class="row row-stack" id="s-touchTurn" data-setting="touchTurn" data-section="paged-layout">
+      <div class="row row-stack" id="s-touchTurn" data-setting="touchTurn" data-keywords="options_keywords_turn" data-section="paged-layout">
         <label class="row-name" for="touch-turn" data-i18n="options_touch_turn">Turning pages by touch</label>
         <select id="touch-turn">
           <option value="zones" data-i18n="options_touch_turn_zones">Tap the left or right side of the screen</option>
           <option value="swipe" data-i18n="options_touch_turn_swipe">Slide a finger sideways</option>
           <option value="off" data-i18n="options_touch_turn_off">Off</option>
         </select>
-        <p class="row-note">
-          <span data-i18n="options_touch_turn_hint"
-            >How a finger turns the pages.</span
-          ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-touchTurn" data-i18n="options_details">Details</button></span>
-        </p>
         <!-- What the chosen gesture does, in the reader's own words (Michał's
              smoke, 2026-09-18): three gestures named in three words each say
              too little, and what a reader needs is the one they picked - where
              a slide may begin, how short a tap has to be. Filled by script
-             like the voice row's line, and changed with the select. -->
+             like the voice row's line, and changed with the select.
+
+             Since D264 it is the row's whole note. The line that stood above
+             it said only that a finger turns the pages, which is the row's
+             name again, and the fold behind that line opened *under* the
+             sentence that had already answered the reader's question - a
+             trigger paying for a paragraph nobody needed. The words a reader
+             might search for and no longer says out loud live in
+             `options_keywords_turn`. -->
         <p class="row-note" id="touch-turn-note"></p>
-        <p class="row-note row-more" id="more-touchTurn" data-i18n="options_touch_turn_more" hidden>
-          On a narrow screen the default is a slide: the hand holding the phone often touches the
-          screen, and a touch without a slide turns no page. On a wide screen the default is a tap.
-          The page keys, the arrow keys and the mouse wheel turn pages whatever this is set to, and
-          the pen never turns one.
-        </p>
       </div>
       <!-- The turn made visible (D251). Two values, not three: a signal
            given every fifth page would not be a confirmation of anything. -->
-      <div class="row row-stack" id="s-turnEffect" data-setting="turnEffect" data-section="paged-layout">
+      <div class="row row-stack" id="s-turnEffect" data-setting="turnEffect" data-keywords="options_keywords_turn" data-section="paged-layout">
         <label class="row-name" for="turn-effect" data-i18n="options_turn_effect">Page turn effect</label>
         <select id="turn-effect">
           <option value="auto" data-i18n="options_turn_effect_auto">Automatic</option>
           <option value="off" data-i18n="options_turn_effect_off">Off</option>
         </select>
+        <!-- One paragraph, always open (D264): what the row is for, then what
+             the value in force looks like on this screen - a sentence the
+             reader reads in one breath instead of a sentence, a trigger, and
+             a folded paragraph that opened below the line already answering
+             it. The second half is filled by script and changes with the
+             select, so the two halves are two elements in one paragraph
+             rather than two paragraphs. -->
         <p class="row-note">
-          <span data-i18n="options_turn_effect_hint"
-            >A visible confirmation that the page has changed.</span
-          ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-turnEffect" data-i18n="options_details">Details</button></span>
-        </p>
-        <p class="row-note" id="turn-effect-note"></p>
-        <p class="row-note row-more" id="more-turnEffect" data-i18n="options_turn_effect_more" hidden>
-          It is easy to miss when you are reading the middle of a page. Nothing happens when your
-          system is set to reduce motion, and nothing when the page is turned by reading aloud or by
-          dragging a selection to the edge of the page.
+          <span data-i18n="options_turn_effect_hint">A visible confirmation that the page has changed.</span>
+          <span id="turn-effect-note"></span>
         </p>
       </div>
     </div>

@@ -75,7 +75,10 @@ describe("the settings rows", () => {
         /<p class="row-note">\s*<span data-i18n="([a-z_]+)"\s*>[^<]*<\/span\s*><span class="note-tail">&nbsp;<button type="button" class="note-more"/g,
       ),
     ].map((match) => String(match[1]));
-    assert.ok(hints.length >= 15, `only ${hints.length} rows open with a sentence of their own`);
+    // A floor, not a count: it fails when the shape is abandoned wholesale,
+    // and moves down by hand when a row is deliberately left without a fold
+    // (D264 took the fold off both Pages-layout select rows, 16 -> 14).
+    assert.ok(hints.length >= 14, `only ${hints.length} rows open with a sentence of their own`);
     for (const locale of LOCALES) {
       const catalogue = JSON.parse(await source(`_locales/${locale}/messages.json`));
       for (const key of hints) {
@@ -172,12 +175,12 @@ describe("the settings rows", () => {
     // The word is Details, not More: the bubble has a button called More, and
     // a sentence naming it stood beside a trigger with the same word.
     assert.doesNotMatch(markup, /data-i18n="options_note_more"/, "a fold is still called More");
-    assert.equal((markup.match(/data-i18n="options_details"/g) ?? []).length, 18, "not every fold is called Details");
+    assert.equal((markup.match(/data-i18n="options_details"/g) ?? []).length, 16, "not every fold is called Details");
     // Hard space, so the trigger goes over a wrapping line with the last word.
     // The hard space and the trigger in one box that cannot break (D259, K2):
     // measured in the browser, the hard space alone let the trigger open a
     // line of its own at 49 widths out of 231.
-    assert.equal((markup.match(/<\/span\s*><span class="note-tail">&nbsp;<button type="button" class="note-more"/g) ?? []).length, 18, "a trigger can be left alone at the start of a line");
+    assert.equal((markup.match(/<\/span\s*><span class="note-tail">&nbsp;<button type="button" class="note-more"/g) ?? []).length, 16, "a trigger can be left alone at the start of a line");
     const css = await source("options/options.css");
     assert.match(rule(css, ".note-tail"), /white-space: nowrap/, "the space before a trigger is a break opportunity again");
     assert.match(rule(css, "button.note-more"), /white-space: nowrap/, "the trigger's own words can be split");
@@ -188,17 +191,30 @@ describe("the settings rows", () => {
     }
   });
 
-  it("says the option in force right under the sentence, before the folded rest (§6.4)", async () => {
+  it("says the option in force in the row's own note, with no fold over it (§6.4, D264)", async () => {
     const markup = await source("options/options.html");
+    // The two select rows of the Pages layout each say what the value in
+    // force does. What stood around that line is gone: a folded rest that
+    // opened *under* the line already answering the question, and - over the
+    // touch row - a general sentence saying the row's name a second time.
+    // The words a reader might type for either row went to the search's own
+    // keywords, which is where a word nobody has to read belongs.
     for (const [setting, line] of [
       ["touchTurn", "touch-turn-note"],
       ["turnEffect", "turn-effect-note"],
     ]) {
-      const sentence = markup.indexOf(`aria-controls="more-${setting}"`);
-      const chosen = markup.indexOf(`id="${line}"`);
-      const rest = markup.indexOf(`id="more-${setting}"`);
-      assert.ok(sentence > 0 && chosen > sentence, `${setting} says nothing about the option in force`);
-      assert.ok(rest > chosen, `${setting} buries the option in force under the folded rest`);
+      const at = markup.indexOf(`id="s-${setting}"`);
+      const row = markup.slice(at, markup.indexOf("</div>", at));
+      assert.ok(row.includes(`id="${line}"`), `${setting} says nothing about the option in force`);
+      assert.doesNotMatch(row, /note-more|row-more/, `${setting} still folds a rest away`);
+      assert.match(row, /data-keywords="options_keywords_turn"/, `${setting} cannot be found by the words it no longer says`);
     }
+    // The effect row keeps one general sentence, in the same paragraph as the
+    // line about the value in force - one paragraph, read in one breath.
+    assert.match(
+      markup,
+      /<span data-i18n="options_turn_effect_hint">[^<]*<\/span>\s*<span id="turn-effect-note">/,
+      "the effect row's two halves are two paragraphs again",
+    );
   });
 });

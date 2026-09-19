@@ -128,7 +128,12 @@ describe("the gesture that turns a page by touch (D250)", () => {
     assert.match(markup, /<select id="touch-turn">\s*<option value="zones"[\s\S]*?<option value="swipe"[\s\S]*?<option value="off"/, "the row does not offer the three gestures in order");
     assert.match(markup, /data-i18n="options_touch_turn_swipe">Slide a finger sideways</, "the gesture is named in the dialect of a phone's settings, not the reader's");
     assert.match(markup, /<p class="row-note" id="touch-turn-note"><\/p>/, "there is no line to say what the chosen gesture does");
-    assert.match(markup, /data-i18n="options_touch_turn_hint"[\s\S]{0,400}?aria-controls="more-/, "the row's note has no sentence and no More behind it");
+    // And that line is the whole note (D264): the general sentence above it
+    // said the row's name again, and the fold behind it opened under the
+    // line that had already answered the question. What a reader might type
+    // for this row is carried by the search's own keywords instead.
+    assert.doesNotMatch(markup, /options_touch_turn_hint|more-touchTurn|options_touch_turn_more/, "the row still carries a sentence or a fold of its own");
+    assert.match(markup, /id="s-touchTurn" data-setting="touchTurn" data-keywords="options_keywords_turn"/, "the row cannot be found by the words it no longer says");
     const script = await source("options/options.js");
     assert.match(script, /if \(!\(select instanceof HTMLSelectElement\) \|\| !isTouchTurn\(select\.value\)\) return;/, "a value the guard does not know can be written");
     assert.match(script, /writeConfig\(\{ reader: \{ touchTurn: select\.value \} \}\)/, "the row does not write the reader's setting");
@@ -148,7 +153,7 @@ describe("the gesture that turns a page by touch (D250)", () => {
         "options_touch_turn_zones",
         "options_touch_turn_swipe",
         "options_touch_turn_off",
-        "options_touch_turn_hint",
+        "options_keywords_turn",
       ]) {
         assert.ok(typeof catalogue[key]?.message === "string", `${lang} has no ${key}`);
       }

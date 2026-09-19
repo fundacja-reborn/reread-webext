@@ -456,8 +456,9 @@ function renderTurning() {
  * nothing about what happens: that a slide must not begin at the very edge
  * of a phone's screen, where the system's own back gesture lives, or that a
  * tap has to be brief and away from the edges to count. One sentence for
- * the choice in force rather than a paragraph about all three - the folded
- * note above stays the place for the whole picture.
+ * the choice in force rather than a paragraph about all three - and since
+ * D264 the row's only sentence, the general one above it and the fold
+ * behind that one both being what the select already says.
  *
  * Each key written out rather than built from the value, the way the error
  * sentences are (`lib/messages.js`): a key nothing names as a literal is a
@@ -476,7 +477,8 @@ function sayGesture(gesture) {
 
 /**
  * The same for the turn's effect: what a page turn will look like on this
- * screen, said where the choice is made.
+ * screen, said where the choice is made - here the second half of the row's
+ * one paragraph, after the sentence saying what the row is for (D264).
  *
  * @param {string} effect
  */

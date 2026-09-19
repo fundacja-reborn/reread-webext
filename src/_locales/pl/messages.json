@@ -2373,14 +2373,6 @@
   "options_touch_turn_zones": { "message": "Dotknięcie lewej lub prawej części ekranu" },
   "options_touch_turn_swipe": { "message": "Przesunięcie palcem" },
   "options_touch_turn_off": { "message": "Wyłączone" },
-  "options_touch_turn_hint": {
-    "message": "Jak przewracać strony palcem."
-  },
-
-  "options_touch_turn_more": {
-    "message": "Na wąskim ekranie domyślne jest przesunięcie palcem: dłoń trzymająca telefon często dotyka ekranu, a samo dotknięcie bez przesunięcia nie zmienia strony. Na szerokim ekranie domyślne jest dotknięcie. Klawisze zmiany strony, strzałki i kółko myszy przewracają strony niezależnie od tego ustawienia, a pióro nie przewraca nigdy.",
-    "description": "The rest of the options_touch_turn_hint description, behind the row's More button."
-  },
   "options_touch_turn_note_zones": {
     "message": "Dotknięcie prawej jednej trzeciej ekranu – następna strona, lewej – poprzednia. Liczy się tylko krótkie, nieruchome dotknięcie z dala od krawędzi, więc kciuk trzymający urządzenie nie zmienia stron."
   },
@@ -2395,11 +2387,6 @@
   "options_turn_effect_off": { "message": "Wyłączony" },
   "options_turn_effect_hint": {
     "message": "Wizualne potwierdzenie przejścia na kolejną stronę."
-  },
-
-  "options_turn_effect_more": {
-    "message": "Czytając środek strony, łatwo to przeoczyć. Nic się nie dzieje, gdy w systemie włączone jest ograniczenie ruchu, ani gdy stronę przewraca czytanie na głos albo przeciągnięcie zaznaczenia do krawędzi strony.",
-    "description": "The rest of the options_turn_effect_hint description, behind the row's More button."
   },
   "options_turn_effect_note_auto": {
     "message": "W motywie E-ink obszar tekstu na moment ciemnieje, tak jak przy przewracaniu strony w czytniku e-booków; na innych ekranach nowa strona pojawia się z płynnym przesunięciem."
@@ -2615,6 +2602,11 @@
 
   "options_keywords_sites": {
     "message": "domena, wyjątki, blokada, host",
+    "description": "Words the settings search also finds this row by; never shown."
+  },
+
+  "options_keywords_turn": {
+    "message": "przesunięcie, dotknięcie, gest, palec, błysk, animacja, ruch",
     "description": "Words the settings search also finds this row by; never shown."
   },
   "options_tts": { "message": "Pokazuj przyciski czytania na głos" },
