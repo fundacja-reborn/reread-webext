@@ -1002,6 +1002,7 @@ body.searching .card:not(:has(> :not([hidden]))) {
    a touch screen and a panel have none at all. */
 @media (hover: hover) and (pointer: fine) {
   .row-check:not(.row-blocked):hover,
+  .row-choice .choice:hover,
   .fold > summary:hover,
   .show-all:hover,
   a.row-link:hover {
@@ -1167,6 +1168,63 @@ a.row-link:focus-visible {
      placed before the items that have neither, so a control told only which
      rows to hold took the first column and sent the label into the second. */
   grid-column: 2;
+}
+
+/* --- 3. a row of choices (Michał's smoke on the Boox, 2026-09-19) ---
+
+   A short, fixed list - the three gestures, the three turn effects - stands
+   on the page instead of behind a select. A select's open list on Android is
+   the browser's own dialog (`ChoiceDialogFragment`, a Material alert Fenix
+   builds; read in the Gecko sources, 2026-09-19), which no rule here can
+   reach: on an e-ink panel it is a pale sheet carried by a shadow the screen
+   never draws, and it vanishes into the page under it. On the page the frame,
+   the ink and the touch floor are ours, nothing opens, and all three choices
+   can be read without a press.
+
+   The group's name stands on its own line and the choices under it, each with
+   its circle on the leading edge - the same column the checkboxes stand in,
+   so a card of settings keeps one edge for the controls and one for the
+   words. The whole line answers the press, because the `<label>` holds both. */
+.row-choice {
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+}
+
+.choice {
+  display: grid;
+  grid-template-columns: var(--row-box) minmax(0, 1fr);
+  column-gap: var(--row-gap);
+  /* The circle keeps the first line of a choice that wraps, and a choice of
+     one line sits in the middle of its own touch floor. */
+  align-items: start;
+  align-content: center;
+  min-height: var(--ui-control);
+  /* Out to the card's own edges and back in again, so a choice is as wide as
+     the rows above it: the press, and the wash under a pointer, land on the
+     whole line rather than on the column of words. */
+  margin-inline: calc(var(--row-pad-x) * -1);
+  padding-inline: var(--row-pad-x);
+  cursor: pointer;
+}
+
+.choice > input[type="radio"] {
+  width: var(--row-box);
+  height: var(--row-box);
+  /* The shared sheet gives every control a margin; here the grid's own gap
+     is the space, and the circle has to line up with the checkboxes above. */
+  margin: 0;
+}
+
+/* The ring is the row's, drawn inside the card's edge like every other -
+   the circle hands its own over, so the whole line shows where the keyboard
+   is. */
+.row-choice .choice:has(> input:focus-visible) {
+  outline: 2px solid var(--page-accent);
+  outline-offset: -2px;
+}
+
+.row-choice .choice > input[type="radio"]:focus-visible {
+  outline: none;
 }
 
 /* What the row reports rather than asks - the space this device holds. The

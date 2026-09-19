@@ -468,16 +468,28 @@ function renderPageNumber() {
  * the width has no say, exactly as the reader-only switch works.
  */
 function renderTurning() {
-  const touch = document.getElementById("touch-turn");
-  if (touch instanceof HTMLSelectElement) {
-    touch.value = effectiveTouchTurn(config.reader, window.innerWidth);
-    sayGesture(touch.value);
+  const gesture = effectiveTouchTurn(config.reader, window.innerWidth);
+  if (markChoice("touch-turn", gesture)) sayGesture(gesture);
+  if (markChoice("turn-effect", config.reader.turnEffect)) sayEffect(config.reader.turnEffect);
+}
+
+/**
+ * A row of choices shows the value in force (D268): the three gestures and
+ * the three turn effects stand on the page as radios rather than in a select,
+ * because a select's open list on Android is the browser's own dialog and no
+ * rule of ours reaches it.
+ *
+ * @param {string} name the radios' shared `name`
+ * @param {string} value
+ * @returns {boolean} whether the row is on the page at all
+ */
+function markChoice(name, value) {
+  const buttons = document.querySelectorAll(`input[type="radio"][name="${name}"]`);
+  if (buttons.length === 0) return false;
+  for (const button of buttons) {
+    if (button instanceof HTMLInputElement) button.checked = button.value === value;
   }
-  const effect = document.getElementById("turn-effect");
-  if (effect instanceof HTMLSelectElement) {
-    effect.value = config.reader.turnEffect;
-    sayEffect(effect.value);
-  }
+  return true;
 }
 
 /**
@@ -3667,27 +3679,29 @@ document.getElementById("page-number")?.addEventListener("change", (event) => {
     config = written;
   });
 });
-document.getElementById("touch-turn")?.addEventListener("change", (event) => {
-  const select = event.target;
-  if (!(select instanceof HTMLSelectElement) || !isTouchTurn(select.value)) return;
-  // The line under the select answers at once, before the write comes back
+// The two rows of choices (D268): the press lands on one radio of a group, so
+// the listener stands on the row rather than on each circle in it.
+document.getElementById("s-touchTurn")?.addEventListener("change", (event) => {
+  const chosen = event.target;
+  if (!(chosen instanceof HTMLInputElement) || !isTouchTurn(chosen.value)) return;
+  // The line under the choices answers at once, before the write comes back
   // through storage: the choice is made here, and what it means should not
   // arrive a beat later.
-  sayGesture(select.value);
+  sayGesture(chosen.value);
   // The same road (D250): a reader open by pages hears it through storage,
   // and the next touch is read the new way. What is stored is a name and
   // never the null the default stands for - a press here is a choice made.
-  void writeConfig({ reader: { touchTurn: select.value } }).then((written) => {
+  void writeConfig({ reader: { touchTurn: chosen.value } }).then((written) => {
     config = written;
   });
 });
-document.getElementById("turn-effect")?.addEventListener("change", (event) => {
-  const select = event.target;
-  if (!(select instanceof HTMLSelectElement) || !isTurnEffect(select.value)) return;
-  sayEffect(select.value);
-  // The same road (D251): the next turn is dressed the way the select now
-  // says, in every open reader, with no reload.
-  void writeConfig({ reader: { turnEffect: select.value } }).then((written) => {
+document.getElementById("s-turnEffect")?.addEventListener("change", (event) => {
+  const chosen = event.target;
+  if (!(chosen instanceof HTMLInputElement) || !isTurnEffect(chosen.value)) return;
+  sayEffect(chosen.value);
+  // The same road (D251): the next turn is dressed the way the row now says,
+  // in every open reader, with no reload.
+  void writeConfig({ reader: { turnEffect: chosen.value } }).then((written) => {
     config = written;
   });
 });

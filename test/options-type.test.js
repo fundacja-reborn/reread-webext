@@ -162,6 +162,26 @@ describe("the settings page's type", () => {
     assert.match(rule(css, "main > section"), /margin-top: var\(--gap-section\)/, "a section stands as close as a paragraph");
   });
 
+  it("stands a short list of choices on the page, in the checkboxes' own column (D268)", async () => {
+    const css = await source("options/options.css");
+    const choice = rule(css, ".choice");
+    // The circle stands where a checkbox does, so a card keeps one edge for
+    // the controls and one for the words.
+    assert.match(choice, /grid-template-columns: var\(--row-box\) minmax\(0, 1fr\)/, "a choice's circle is out of the controls' column");
+    assert.match(choice, /column-gap: var\(--row-gap\)/, "a choice's words stand at a gap of their own");
+    // Its own touch floor, and the whole line as the target: the label holds
+    // both the circle and the words, and reaches the card's own edges.
+    assert.match(choice, /min-height: var\(--ui-control\)/, "a choice is under the touch floor");
+    assert.match(choice, /margin-inline: calc\(var\(--row-pad-x\) \* -1\)/, "a choice is narrower than the rows above it");
+    assert.match(choice, /padding-inline: var\(--row-pad-x\)/, "a choice's words do not line up with the rows above it");
+    // And the ring is the line's, drawn inside the card's edge like the rest.
+    assert.match(
+      css,
+      /\.row-choice \.choice:has\(> input:focus-visible\) \{\n  outline: 2px solid var\(--page-accent\);\n  outline-offset: -2px;/,
+      "the keyboard's place in a group of choices is not shown, or is drawn outside the card",
+    );
+  });
+
   it("keeps the air around the cards in tokens, every level wider than the one under it (D265)", async () => {
     const css = await source("options/options.css");
     const tokens = rule(css, ":root");
