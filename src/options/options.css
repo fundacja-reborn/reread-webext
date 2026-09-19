@@ -59,16 +59,24 @@
      stronger boundary than any line, and three kinds of line inside one are
      noise.
 
-     Both are drawn in the separators' own ink (`--page-line`, about 2.6:1 to
-     the paper and a solid grey an e-ink panel keeps). The frame is what
-     carries the card, not the shadow: on a Boox the tinted page quantizes to
-     white, and a card without a frame would have no edge at all there (D3 of
-     the brief). The shadow is an addition for glass. */
+     On glass the tone carries the card and the frame only closes it, which is
+     what the browser's own settings look like: a hairline a shade darker than
+     the page, and a soft shadow under it. On an e-ink panel neither works -
+     the tinted page quantizes to white and no shadow is rendered at all - so
+     there the frame is the separators' own ink (`--page-line`, a solid grey
+     the panel keeps) and it is the only thing holding the card.
+
+     That is Michał's revision of D3 of the brief (2026-09-19): the e-ink
+     paper is a theme of its own in the Aa panel, so it can be told apart from
+     the rest instead of every screen paying for it. The cost, said out loud:
+     a Boox read under the light theme gets the faint frames and the page
+     reads flat there - the e-ink theme is the answer to that. */
   --settings-surface: var(--page-bg);
   --settings-page-bg: #f1f2f5;
   --settings-card-bg: #ffffff;
-  --settings-card-border: var(--page-line);
-  --sep-row: 1px solid var(--page-line);
+  --settings-card-border: #dfe1e6;
+  --settings-separator: #e4e6ea;
+  --sep-row: 1px solid var(--settings-separator);
   --settings-card-shadow: 0 1px 2px rgb(0 0 0 / 0.06), 0 1px 3px 1px rgb(0 0 0 / 0.03);
   --settings-row-hover: rgb(0 0 0 / 0.045);
   --settings-card-radius: 0.5rem;
@@ -122,25 +130,31 @@
   }
 }
 
-/* --- the panel on every paper (D265) ---
+/* --- the panel on every paper this page has (D265) ---
 
-   The page's four palettes live in page.css and this page wears them like
-   every other; what it adds is the tone under the cards and the tone of the
-   cards themselves, which no other page has. The pattern is page.css's own: a
-   media query for the browser's dark, then the hand-set themes, each saying
-   the whole of it so a light theme chosen by hand beats a dark browser.
+   The palettes live in page.css and this page wears them like every other;
+   what it adds is the tone under the cards and the tone of the cards
+   themselves, which no other page has. The pattern is page.css's own: a media
+   query for the browser's dark, then the hand-set themes, each saying the
+   whole of it so a light theme chosen by hand beats a dark browser.
+
+   Three papers, not four: sepia never reaches this sheet, because the page
+   does not have that paper (`followTheme({ without: "sepia" })` in
+   options.js, Michał's call) - sepia is for reading long text with less blue
+   light in it, and a page of controls is not that.
 
    The card is the raised surface the popup already stands on - the paper
-   itself where the paper is white, one step lighter in the dark and in sepia
-   - and the page under it is one step the other way. On e-ink there is no
-   step at all: a Boox keeps sixteen greys and rounds a near-white tone back
-   into the paper, so the frame carries the card there and a tinted page would
-   only dither. The shadow is for glass alone (it greys an edge in sepia and
-   says nothing on a panel). */
+   itself where the paper is white, one step lighter in the dark - and the
+   page under it is one step the other way. On e-ink there is no step at all:
+   a Boox keeps sixteen greys and rounds a near-white tone back into the
+   paper, so the frame carries the card there and a tinted page would only
+   dither. The shadow is for glass alone (it says nothing on a panel). */
 @media (prefers-color-scheme: dark) {
   :root {
     --settings-page-bg: #101319;
     --settings-card-bg: var(--surface-raised);
+    --settings-card-border: #343a45;
+    --settings-separator: #2f3540;
     --settings-card-shadow: none;
     --settings-row-hover: rgb(255 255 255 / 0.06);
   }
@@ -149,6 +163,8 @@
 :root[data-reader-theme="light"] {
   --settings-page-bg: #f1f2f5;
   --settings-card-bg: #ffffff;
+  --settings-card-border: #dfe1e6;
+  --settings-separator: #e4e6ea;
   --settings-card-shadow: 0 1px 2px rgb(0 0 0 / 0.06), 0 1px 3px 1px rgb(0 0 0 / 0.03);
   --settings-row-hover: rgb(0 0 0 / 0.045);
 }
@@ -156,20 +172,19 @@
 :root[data-reader-theme="dark"] {
   --settings-page-bg: #101319;
   --settings-card-bg: var(--surface-raised);
+  --settings-card-border: #343a45;
+  --settings-separator: #2f3540;
   --settings-card-shadow: none;
   --settings-row-hover: rgb(255 255 255 / 0.06);
 }
 
-:root[data-reader-theme="sepia"] {
-  --settings-page-bg: #ece2cb;
-  --settings-card-bg: var(--surface-raised);
-  --settings-card-shadow: none;
-  --settings-row-hover: rgb(0 0 0 / 0.05);
-}
-
+/* The one paper where the frame carries the card: no tone under it, no shadow
+   over it, and the separators' own solid grey doing all of the work. */
 :root[data-reader-theme="eink"] {
   --settings-page-bg: #ffffff;
   --settings-card-bg: #ffffff;
+  --settings-card-border: var(--page-line);
+  --settings-separator: var(--page-line);
   --settings-card-shadow: none;
   /* The lightest grey a panel can still tell from paper, and well inside the
      four the e-ink theme keeps for a fill under words (D237). */

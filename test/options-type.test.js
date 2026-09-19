@@ -176,11 +176,15 @@ describe("the settings page's type", () => {
     const css = await source("options/options.css");
     const tokens = rule(css, ":root");
     // The card's frame and the hairline between two rows are the page's two
-    // boundaries, both in the separators' own ink - the one grey an e-ink
-    // panel keeps. The 2px section rule D258 needed for a flat page is gone:
+    // boundaries. The 2px section rule D258 needed for a flat page is gone:
     // a card is a stronger boundary than any line.
-    assert.match(tokens, /--settings-card-border: var\(--page-line\);/, "the card's frame is not the separators' ink");
-    assert.match(tokens, /--sep-row: 1px solid var\(--page-line\);/, "a row's hairline is not the separators' own");
+    //
+    // On glass both are a shade of the page, which is what the browser's own
+    // settings look like (Michał's revision of D3, 2026-09-19); the e-ink
+    // paper, a theme of its own, takes the separators' solid grey instead -
+    // the block below holds both halves of that.
+    assert.match(tokens, /--settings-card-border: #dfe1e6;/, "the card's frame is not a shade of the page");
+    assert.match(tokens, /--sep-row: 1px solid var\(--settings-separator\);/, "a row's hairline is not the separator token");
     assert.doesNotMatch(css, /--sep-section/, "the flat page's section rule is still here");
     assert.doesNotMatch(rule(css, "main > section"), /border-top/, "a section still opens on a rule");
     assert.doesNotMatch(rule(css, "h2"), /border/, "a section heading carries a line of its own");
@@ -193,12 +197,22 @@ describe("the settings page's type", () => {
     assert.match(card, /background: var\(--settings-card-bg\)/, "a card is not raised over the page");
     assert.match(card, /overflow: hidden/, "the first and last rows' wash is not clipped to the card's corners");
     assert.match(card, /container-type: inline-size/, "a row cannot ask how wide its own card is");
-    // And on e-ink the shadow goes and the page's tone with it.
+    // And on e-ink the tone goes, the shadow goes, and the frame becomes the
+    // separators' own solid grey - the only thing left holding the card.
     assert.match(
       css,
-      /:root\[data-reader-theme="eink"\] \{\n  --settings-page-bg: #ffffff;\n  --settings-card-bg: #ffffff;\n  --settings-card-shadow: none;/,
-      "the e-ink paper keeps a tone it cannot draw",
+      /:root\[data-reader-theme="eink"\] \{\n  --settings-page-bg: #ffffff;\n  --settings-card-bg: #ffffff;\n  --settings-card-border: var\(--page-line\);\n  --settings-separator: var\(--page-line\);\n  --settings-card-shadow: none;/,
+      "the e-ink paper keeps a tone it cannot draw, or loses the frame that carries its cards",
     );
+    // Every paper this page has says both for itself, so a light theme chosen
+    // by hand on a dark browser cannot end up with the dark frame. Sepia is
+    // not one of them: the settings do not wear that paper at all (D265).
+    assert.doesNotMatch(css, /data-reader-theme="sepia"/, "the settings dress themselves in a paper they do not have");
+    for (const theme of ["light", "dark", "eink"]) {
+      const block = rule(css, `:root[data-reader-theme="${theme}"]`);
+      assert.match(block, /--settings-card-border:/, `${theme} inherits a frame from another paper`);
+      assert.match(block, /--settings-separator:/, `${theme} inherits a hairline from another paper`);
+    }
 
     // The hairline stands on a row that has a drawn row before it - never
     // under the row above, which the search would leave hanging - and it is

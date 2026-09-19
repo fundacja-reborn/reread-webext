@@ -71,15 +71,37 @@ export function applyReading(root, reader) {
 }
 
 /**
+ * The paper a page wears for a chosen theme. A page may say it does not have
+ * one of them, and then that one answers with the light paper: the settings
+ * say so of sepia (D265, Michał 2026-09-19). Sepia is a paper for reading
+ * long text with less blue light in it, and a page of controls is not one -
+ * the browser's own settings have no such paper either. Light rather than
+ * `auto`, because sepia is a light paper: somebody who chose it is reading in
+ * the light, and handing the page back to a dark browser would be the bigger
+ * jump of the two.
+ *
+ * @param {import("./config.js").ReaderConfig["theme"]} theme
+ * @param {import("./config.js").ReaderConfig["theme"]} [without] the one this
+ *   page does not have
+ * @returns {import("./config.js").ReaderConfig["theme"]}
+ */
+export function paperFor(theme, without) {
+  return without !== undefined && theme === without ? "light" : theme;
+}
+
+/**
  * Dresses a page in the theme and keeps it dressed: read once now, follow
  * `storage.onChanged` after - the road every page already rides for its
  * settings. For the pages that are all interface (settings, popup); pages
  * with content of their own adopt the whole config themselves and call
  * `applyReading` from it.
+ *
+ * @param {{ without?: import("./config.js").ReaderConfig["theme"] }} [papers]
+ *   a paper this page does not have (see `paperFor`)
  */
-export function followTheme() {
+export function followTheme({ without } = {}) {
   const root = document.documentElement;
-  const apply = () => void readConfig().then((config) => applyTheme(root, config.reader.theme));
+  const apply = () => void readConfig().then((config) => applyTheme(root, paperFor(config.reader.theme, without)));
   webext().storage.onChanged.addListener((changes, area) => {
     if (area !== "local" || changes[CONFIG_KEY] === undefined) return;
     apply();

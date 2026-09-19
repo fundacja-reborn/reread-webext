@@ -138,9 +138,12 @@ moreNotes();
 // say so (Chromium, no theme_icons there) - a no-op on Firefox.
 watchToolbarScheme();
 // The paper follows the theme the Aa panels write (D104): this page has no
-// content of its own to dress, but walking here from a sepia article must
-// not flash a white room.
-followTheme();
+// content of its own to dress, but walking here from a dark article must not
+// flash a white room. All but one paper: sepia is for reading long text with
+// less blue light in it, and a page of controls is not that (D265, Michał's
+// call) - it answers with the light paper, which is the same brightness a
+// reader who chose sepia is already in.
+followTheme({ without: "sepia" });
 // Then the page's own navigation (D254): the table of contents beside the
 // page, the same list in the bar's select, the marker that follows the
 // reading, and the landing every address makes. After `localizePage`,
