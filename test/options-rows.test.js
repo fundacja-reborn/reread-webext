@@ -60,8 +60,9 @@ describe("the settings rows", () => {
     // row (Michał, 2026-09-19: the font name and the reading pace say all
     // they have to say in the row, 15 -> 13; the voice too, 13 -> 12, and the
     // bubble's own switch, 12 -> 11; the quiet bubble lost its description
-    // altogether, 11 -> 10, and the reader-only switch its fold, 10 -> 9).
-    assert.ok(opens.length >= 9, `only ${opens.length} rows say more than their sentence`);
+    // altogether, 11 -> 10, the reader-only switch its fold, 10 -> 9, and the
+    // page number its own, 9 -> 8).
+    assert.ok(opens.length >= 8, `only ${opens.length} rows say more than their sentence`);
     // Each rest is hidden until the press - `hidden`, not a clip, so a screen
     // reader hears the sentence and the rest exactly as the eye does.
     for (const id of rests) {
@@ -99,8 +100,8 @@ describe("the settings rows", () => {
     // voice, whose folded half said where the speech is made, 11 -> 10, and
     // the bubble's switch, whose folded half held the reason to leave it on,
     // 10 -> 9; the quiet bubble, whose name says the whole of it, 9 -> 8; and
-    // the reader-only switch, 8 -> 7).
-    assert.ok(hints.length >= 7, `only ${hints.length} rows open with a sentence of their own`);
+    // the reader-only switch, 8 -> 7; the page number, 7 -> 6).
+    assert.ok(hints.length >= 6, `only ${hints.length} rows open with a sentence of their own`);
     for (const locale of LOCALES) {
       const catalogue = JSON.parse(await source(`_locales/${locale}/messages.json`));
       for (const key of hints) {
@@ -273,12 +274,12 @@ describe("the settings rows", () => {
     // The word is Details, not More: the bubble has a button called More, and
     // a sentence naming it stood beside a trigger with the same word.
     assert.doesNotMatch(markup, /data-i18n="options_note_more"/, "a fold is still called More");
-    assert.equal((markup.match(/data-i18n="options_details"/g) ?? []).length, 9, "not every fold is called Details");
+    assert.equal((markup.match(/data-i18n="options_details"/g) ?? []).length, 8, "not every fold is called Details");
     // Hard space, so the trigger goes over a wrapping line with the last word.
     // The hard space and the trigger in one box that cannot break (D259, K2):
     // measured in the browser, the hard space alone let the trigger open a
     // line of its own at 49 widths out of 231.
-    assert.equal((markup.match(/<\/span\s*><span class="note-tail">&nbsp;<button type="button" class="note-more"/g) ?? []).length, 9, "a trigger can be left alone at the start of a line");
+    assert.equal((markup.match(/<\/span\s*><span class="note-tail">&nbsp;<button type="button" class="note-more"/g) ?? []).length, 8, "a trigger can be left alone at the start of a line");
     const css = await source("options/options.css");
     assert.match(rule(css, ".note-tail"), /white-space: nowrap/, "the space before a trigger is a break opportunity again");
     assert.match(rule(css, "button.note-more"), /white-space: nowrap/, "the trigger's own words can be split");

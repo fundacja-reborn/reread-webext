@@ -1119,8 +1119,7 @@
       <h3 id="paged-layout" data-i18n="options_paged_heading">Pages layout</h3>
 
       <p class="explain" data-i18n="options_paged_intro">
-        These work in the reader's Pages layout: the text moves by whole pages, each beginning and
-        ending with a whole line.
+        These work in the reading view when the Aa panel's layout is set to Pages instead of Scroll.
       </p>
     </header>
 
@@ -1131,14 +1130,8 @@
       <div class="row row-check" id="s-pageNumber" data-setting="pageNumber" data-section="paged-layout">
         <input type="checkbox" id="page-number" aria-describedby="hint-pageNumber" />
         <label class="row-name" for="page-number" data-i18n="options_page_number">Show the page number</label>
-        <p class="row-note" id="hint-pageNumber">
-          <span data-i18n="options_page_number_hint"
-            >The current page and how many there are, for example 3 / 12, at the foot of the window.</span
-          ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-pageNumber" data-i18n="options_details">Details</button></span>
-        </p>
-        <p class="row-note row-more" id="more-pageNumber" data-i18n="options_page_number_more" hidden>
-          Off, each page's text reaches lower; the count is still read by screen readers, and on a
-          wide screen it is shown in the bar next to re/read.
+        <p class="row-note" id="hint-pageNumber" data-i18n="options_page_number_hint">
+          The current page and how many there are, for example 3 / 12, at the foot of the window.
         </p>
       </div>
       <!-- What a finger does (D250). Stacked at every width (D265): its three
@@ -1190,7 +1183,7 @@
              select, so the two halves are two elements in one paragraph
              rather than two paragraphs. -->
         <p class="row-note">
-          <span data-i18n="options_turn_effect_hint">A visible confirmation that the page has changed.</span>
+          <span data-i18n="options_turn_effect_hint">A visible confirmation that the page has changed. With the E-ink theme set in the Aa panel, it can help clear ghosting from the page on an e-ink screen.</span>
           <span id="turn-effect-note"></span>
         </p>
       </div>

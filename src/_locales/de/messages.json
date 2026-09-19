@@ -1658,13 +1658,9 @@
     "message": "Die aktuelle Seite und die Gesamtzahl, zum Beispiel 3 / 12, am unteren Fensterrand."
   },
 
-  "options_page_number_more": {
-    "message": "Ausgeschaltet reicht der Text jeder Seite tiefer; Screenreader lesen die Seitenzahl weiterhin vor, und auf einem breiten Bildschirm wird sie in der Leiste neben re/read angezeigt.",
-    "description": "The rest of the options_page_number_hint description, behind the row's More button."
-  },
   "options_paged_heading": { "message": "Ansicht Seiten" },
   "options_paged_intro": {
-    "message": "Sie gelten in der Leseansicht in der Ansicht Seiten: Der Text bewegt sich um ganze Seiten, jede beginnt und endet mit einer ganzen Zeile."
+    "message": "Diese Optionen wirken in der Leseansicht, wenn Sie im Aa-Fenster die Ansicht Seiten statt Scrollen einstellen."
   },
   "options_touch_turn": { "message": "Seiten per Berührung umblättern" },
   "options_touch_turn_zones": { "message": "Tippen auf die linke oder rechte Seite des Bildschirms" },
@@ -1683,10 +1679,10 @@
   "options_turn_effect_auto": { "message": "Automatisch" },
   "options_turn_effect_off": { "message": "Aus" },
   "options_turn_effect_hint": {
-    "message": "Eine sichtbare Bestätigung des Seitenwechsels."
+    "message": "Eine sichtbare Bestätigung, dass die Seite gewechselt hat. Mit dem Thema E-ink im Aa-Fenster kann es auf einem E-Ink-Bildschirm helfen, Geisterbilder von der Seite zu entfernen."
   },
   "options_turn_effect_note_auto": {
-    "message": "Im Farbschema E-Ink wird der Textbereich einen Moment lang dunkel, so wie ein E-Book-Reader das Umblättern zeigt; auf anderen Bildschirmen erscheint die neue Seite mit einer sanften Bewegung."
+    "message": "Auf anderen Bildschirmen erscheint die neue Seite mit einem sanften Übergang."
   },
   "options_turn_effect_note_off": {
     "message": "Die Seite wechselt einfach, so wie vor dieser Einstellung."

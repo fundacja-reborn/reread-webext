@@ -2046,13 +2046,9 @@
     "message": "The current page and how many there are, for example 3 / 12, at the foot of the window."
   },
 
-  "options_page_number_more": {
-    "message": "Off, each page's text reaches lower; the count is still read by screen readers, and on a wide screen it is shown in the bar next to re/read.",
-    "description": "The rest of the options_page_number_hint description, behind the row's More button."
-  },
   "options_paged_heading": { "message": "Pages layout" },
   "options_paged_intro": {
-    "message": "These work in the reader's Pages layout: the text moves by whole pages, each beginning and ending with a whole line."
+    "message": "These work in the reading view when the Aa panel's layout is set to Pages instead of Scroll."
   },
   "options_touch_turn": { "message": "Turning pages by touch" },
   "options_touch_turn_zones": { "message": "Tap the left or right side of the screen" },
@@ -2071,10 +2067,10 @@
   "options_turn_effect_auto": { "message": "Automatic" },
   "options_turn_effect_off": { "message": "Off" },
   "options_turn_effect_hint": {
-    "message": "A visible confirmation that the page has changed."
+    "message": "A visible confirmation that the page has changed. With the E-ink theme set in the Aa panel, it can help clear ghosting from the page on an e-ink screen."
   },
   "options_turn_effect_note_auto": {
-    "message": "In the E-ink theme the text area goes dark for a moment, the way an e-reader marks a page turn; on other screens the new page appears with a smooth slide."
+    "message": "On other screens the new page arrives with a smooth slide."
   },
   "options_turn_effect_note_off": {
     "message": "The page simply changes, as it did before this setting existed."

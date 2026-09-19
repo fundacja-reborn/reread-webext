@@ -1709,13 +1709,9 @@
     "message": "La página actual y el total, por ejemplo 3 / 12, en la parte inferior de la ventana."
   },
 
-  "options_page_number_more": {
-    "message": "Desactivado, el texto de cada página llega más abajo; los lectores de pantalla siguen leyendo el contador, y en una pantalla ancha se muestra en la barra junto a re/read.",
-    "description": "The rest of the options_page_number_hint description, behind the row's More button."
-  },
   "options_paged_heading": { "message": "Vista Páginas" },
   "options_paged_intro": {
-    "message": "Funcionan en la vista de lectura con la vista Páginas: el texto avanza por páginas completas, cada una empieza y termina con una línea entera."
+    "message": "Estas opciones funcionan en la vista de lectura cuando en el panel Aa eliges la vista Páginas en lugar de Desplazamiento."
   },
   "options_touch_turn": { "message": "Pasar páginas con el dedo" },
   "options_touch_turn_zones": { "message": "Tocar el lado izquierdo o derecho de la pantalla" },
@@ -1734,10 +1730,10 @@
   "options_turn_effect_auto": { "message": "Automático" },
   "options_turn_effect_off": { "message": "Desactivado" },
   "options_turn_effect_hint": {
-    "message": "Una confirmación visible del cambio de página."
+    "message": "Una confirmación visible de que la página ha cambiado. Con el tema E-ink elegido en el panel Aa, puede ayudar a limpiar las imágenes fantasma en una pantalla de tinta electrónica."
   },
   "options_turn_effect_note_auto": {
-    "message": "En el tema E-ink, la zona de texto se oscurece un momento, como en un lector de libros electrónicos; en otras pantallas, la nueva página aparece con un desplazamiento suave."
+    "message": "En otras pantallas la nueva página aparece con un desplazamiento suave."
   },
   "options_turn_effect_note_off": {
     "message": "La página simplemente cambia, como antes de este ajuste."

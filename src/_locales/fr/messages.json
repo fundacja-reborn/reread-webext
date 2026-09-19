@@ -1743,13 +1743,9 @@
     "message": "La page en cours et le nombre total, par exemple 3 / 12, en bas de la fenêtre."
   },
 
-  "options_page_number_more": {
-    "message": "Désactivé, le texte de chaque page descend plus bas ; les lecteurs d'écran lisent toujours le compteur, et sur un écran large il est affiché dans la barre à côté de re/read.",
-    "description": "The rest of the options_page_number_hint description, behind the row's More button."
-  },
   "options_paged_heading": { "message": "Affichage Pages" },
   "options_paged_intro": {
-    "message": "Ils s'appliquent dans le lecteur, en affichage Pages : le texte avance par pages entières, chacune commençant et finissant par une ligne entière."
+    "message": "Ces options agissent dans la vue lecture lorsque, dans le panneau Aa, l'affichage est réglé sur Pages au lieu de Défilement."
   },
   "options_touch_turn": { "message": "Tourner les pages au toucher" },
   "options_touch_turn_zones": { "message": "Toucher le côté gauche ou droit de l'écran" },
@@ -1768,10 +1764,10 @@
   "options_turn_effect_auto": { "message": "Automatique" },
   "options_turn_effect_off": { "message": "Désactivé" },
   "options_turn_effect_hint": {
-    "message": "Une confirmation visible du changement de page."
+    "message": "Une confirmation visible que la page a changé. Avec le thème E-ink réglé dans le panneau Aa, cela peut aider à effacer les images fantômes sur un écran e-ink."
   },
   "options_turn_effect_note_auto": {
-    "message": "Dans le thème E-ink, la zone de texte s'assombrit un instant, comme sur une liseuse ; sur les autres écrans, la nouvelle page apparaît avec un glissement doux."
+    "message": "Sur les autres écrans, la nouvelle page arrive avec un glissement fluide."
   },
   "options_turn_effect_note_off": {
     "message": "La page change simplement, comme avant ce réglage."

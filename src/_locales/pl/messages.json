@@ -2354,13 +2354,9 @@
     "message": "Numer bieżącej strony i liczba wszystkich, na przykład 3 / 12, u dołu okna."
   },
 
-  "options_page_number_more": {
-    "message": "Bez niego tekst każdej strony sięga niżej; czytniki ekranu nadal odczytują licznik, a na szerokim ekranie widać go w pasku obok re/read.",
-    "description": "The rest of the options_page_number_hint description, behind the row's More button."
-  },
   "options_paged_heading": { "message": "Układ „Strony”" },
   "options_paged_intro": {
-    "message": "Działają w widoku czytania w układzie „Strony”: tekst przesuwa się o całe strony, każda zaczyna się i kończy pełnym wierszem."
+    "message": "Poniższe opcje działają w widoku czytania, gdy w panelu Aa ustawisz układ „Strony” zamiast „Przewijania”."
   },
   "options_touch_turn": { "message": "Przewracanie stron dotykiem" },
   "options_touch_turn_zones": { "message": "Dotknięcie lewej lub prawej części ekranu" },
@@ -2379,10 +2375,10 @@
   "options_turn_effect_auto": { "message": "Automatyczny" },
   "options_turn_effect_off": { "message": "Wyłączony" },
   "options_turn_effect_hint": {
-    "message": "Wizualne potwierdzenie przejścia na kolejną stronę."
+    "message": "Wizualne potwierdzenie przejścia na kolejną stronę. Jeśli ustawisz w panelu Aa motyw E-ink, to na ekranie e-ink może pomóc oczyścić stronę z duchów."
   },
   "options_turn_effect_note_auto": {
-    "message": "W motywie E-ink obszar tekstu na moment ciemnieje, tak jak przy przewracaniu strony w czytniku e-booków; na innych ekranach nowa strona pojawia się z płynnym przesunięciem."
+    "message": "Na innych ekranach nowa strona pojawia się z płynnym przesunięciem."
   },
   "options_turn_effect_note_off": {
     "message": "Strona po prostu się zmienia, tak jak przed pojawieniem się tego ustawienia."
