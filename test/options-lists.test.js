@@ -149,10 +149,15 @@ describe("the two blocks a catalogue is read in", () => {
     // content - without `min-width: 0` a search box refuses to.
     const field = css.slice(css.indexOf(".list-tools .model-filter {"));
     assert.match(field.slice(0, field.indexOf("}")), /flex: 1 1 auto;\s+min-width: 0/);
-    // The card decides, not the window (D265): the field takes the width and
-    // the button stands under it wherever the card is too narrow for both.
+    // The field keeps its button company on every width (Michał, 2026-09-19):
+    // a narrow card used to give the field the whole line and push Search
+    // onto one of its own, at the far edge, where it read as a second control
+    // rather than as this field's own. Wrapping stays as the last resort, for
+    // a language whose word for Search is long.
     const narrow = css.slice(css.indexOf("@container (max-width: 30rem)"));
-    assert.match(narrow, /\.list-tools \{\n    flex-wrap: wrap;/, "the tools line never splits in a narrow card");
+    assert.match(narrow, /\.list-tools \{\n    flex-wrap: wrap;/, "the tools line can never split, whatever the word for Search");
+    assert.doesNotMatch(narrow, /\.list-tools \.model-filter \{\s*flex-basis: 100%/, "the filter still takes the whole line to itself");
+    assert.doesNotMatch(narrow, /\.list-search \{\s*margin-left: auto/, "Search still stands away from the field it belongs to");
   });
 
   it("put the note about the host after both blocks, as the subsection's own footnote", async () => {

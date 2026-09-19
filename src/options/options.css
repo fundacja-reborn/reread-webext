@@ -2412,16 +2412,14 @@ summary::marker {
   /* The catalogue's line splits where a field and a button no longer share
      one: the field takes the width, the button stands under it at the same
      edge as every other button on the page. */
+  /* The filter keeps its button company on one line here too (Michał,
+     2026-09-19): the field gave up the whole width and left Search on a line
+     of its own, pushed to the far edge, which read as a second control
+     rather than as this field's own. Wrapping stays as the last resort - a
+     long word for Search in some language - and then the button sits under
+     the field it belongs to rather than away from it. */
   .list-tools {
     flex-wrap: wrap;
-  }
-
-  .list-tools .model-filter {
-    flex-basis: 100%;
-  }
-
-  .list-search {
-    margin-left: auto;
   }
 
   /* A label, a field and a button no longer fit on one line, so the break
