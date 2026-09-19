@@ -1950,7 +1950,7 @@
   "options_show_fewer": { "message": "Weniger zeigen" },
   "options_model_note_from": { "message": "Modelle kommen von" },
   "options_model_note_rest": {
-    "message": "- dort veröffentlicht Mozilla sie. Die Erweiterung verbindet sich mit diesem öffentlichen Server nur, wenn Sie die Liste aktualisieren oder auf Herunterladen klicken. Es werden keine persönlichen Daten gesendet."
+    "message": "- dort veröffentlicht Mozilla sie. Die Erweiterung verbindet sich mit diesem öffentlichen Server nur bei zwei Klicks: dem Klick, der die Liste der Modelle aktualisiert, und Herunterladen bei einem ausgewählten Modell."
   },
   "options_add_model_heading": { "message": "Modell aus Dateien hinzufügen" },
   "options_add_model_summary": {
@@ -1972,7 +1972,7 @@
   },
   "options_dictionary_note_from": { "message": "Wörterbücher kommen von" },
   "options_dictionary_note_rest": {
-    "message": "- dort veröffentlicht WikDict die Wörterbücher, die es aus dem Wiktionary (CC BY-SA) baut. Die Erweiterung verbindet sich mit diesem öffentlichen Server nur, wenn Sie die Liste aktualisieren oder auf Herunterladen klicken. Es werden keine persönlichen Daten gesendet."
+    "message": "- dort veröffentlicht WikDict die Wörterbücher, die es aus dem Wiktionary (CC BY-SA) baut. Die Erweiterung verbindet sich mit diesem öffentlichen Server nur bei zwei Klicks: dem Klick, der die Liste der Wörterbücher aktualisiert, und Herunterladen bei einem ausgewählten Wörterbuch."
   },
   "options_add_dictionary_heading": { "message": "Wörterbuch aus Dateien hinzufügen" },
   "options_add_dictionary_summary": {

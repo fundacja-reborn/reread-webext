@@ -55,7 +55,6 @@ const ALLOWED = new Map([
   ["options_import_elsewhere", "wait for it to finish"],
   // A voice reads aloud; there is no other word for what a voice does.
   ["options_tts_voice_hint", "the voice that speaks"],
-  ["options_tts_voice_more", "the voice reads phrases and articles"],
 ]);
 
 /**

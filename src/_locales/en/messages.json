@@ -2394,7 +2394,7 @@
     "description": "First half of the note around the host, which stands between the parts as a page element. Each part must read on from the last across a plain space - no part starts or ends with whitespace."
   },
   "options_model_note_rest": {
-    "message": "- where Mozilla publishes them. The extension connects to this public server only when you update the list or press Download. No personal data is ever sent."
+    "message": "- where Mozilla publishes them. The extension connects to this public server on two presses and no others: the one that updates the list of models, and Download for a model you have chosen."
   },
   "options_add_model_heading": { "message": "Add a model from files" },
   "options_add_model_summary": {
@@ -2421,7 +2421,7 @@
     "description": "First half of the note around the host, which stands between the parts as a page element. Each part must read on from the last across a plain space - no part starts or ends with whitespace."
   },
   "options_dictionary_note_rest": {
-    "message": "- where WikDict publishes the dictionaries it builds from Wiktionary (CC BY-SA). The extension connects to this public server only when you update the list or press Download. No personal data is ever sent."
+    "message": "- where WikDict publishes the dictionaries it builds from Wiktionary (CC BY-SA). The extension connects to this public server on two presses and no others: the one that updates the list of dictionaries, and Download for a dictionary you have chosen."
   },
   "options_add_dictionary_heading": { "message": "Add a dictionary from files" },
   "options_add_dictionary_summary": {

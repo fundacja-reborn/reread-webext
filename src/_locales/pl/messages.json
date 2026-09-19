@@ -2666,7 +2666,7 @@
   "options_show_fewer": { "message": "Pokaż mniej" },
   "options_model_note_from": { "message": "Modele pobierane są z" },
   "options_model_note_rest": {
-    "message": "– to tam publikuje je Mozilla. Rozszerzenie łączy się z tym publicznym serwerem tylko wtedy, gdy zaktualizujesz listę albo naciśniesz Pobierz. Żadne dane osobowe nie są wysyłane."
+    "message": "– to tam publikuje je Mozilla. Rozszerzenie łączy się z tym publicznym serwerem tylko wtedy, gdy klikniesz opcję aktualizacji listy modeli albo naciśniesz Pobierz dla wybranego modelu."
   },
   "options_add_model_heading": { "message": "Dodaj model z plików" },
   "options_add_model_summary": {
@@ -2688,7 +2688,7 @@
   },
   "options_dictionary_note_from": { "message": "Słowniki pobierane są z" },
   "options_dictionary_note_rest": {
-    "message": "– to tam WikDict publikuje słowniki, które buduje z Wikisłownika (CC BY-SA). Rozszerzenie łączy się z tym publicznym serwerem tylko wtedy, gdy zaktualizujesz listę albo naciśniesz Pobierz. Żadne dane osobowe nie są wysyłane."
+    "message": "– to tam WikDict publikuje słowniki, które buduje z Wikisłownika (CC BY-SA). Rozszerzenie łączy się z tym publicznym serwerem tylko wtedy, gdy klikniesz opcję aktualizacji listy słowników albo naciśniesz Pobierz dla wybranego słownika."
   },
   "options_add_dictionary_heading": { "message": "Dodaj słownik z plików" },
   "options_add_dictionary_summary": {

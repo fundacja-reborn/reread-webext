@@ -2001,7 +2001,7 @@
   "options_show_fewer": { "message": "Mostrar menos" },
   "options_model_note_from": { "message": "Los modelos se descargan de" },
   "options_model_note_rest": {
-    "message": "- ahí los publica Mozilla. La extensión se conecta a este servidor público solo cuando actualizas la lista o pulsas Descargar. No se envía ningún dato personal."
+    "message": "- ahí los publica Mozilla. La extensión se conecta a este servidor público solo con dos pulsaciones: la que actualiza la lista de modelos y Descargar en un modelo que has elegido."
   },
   "options_add_model_heading": { "message": "Añadir un modelo desde archivos" },
   "options_add_model_summary": {
@@ -2023,7 +2023,7 @@
   },
   "options_dictionary_note_from": { "message": "Los diccionarios se descargan de" },
   "options_dictionary_note_rest": {
-    "message": "- ahí publica WikDict los diccionarios que construye a partir de Wiktionary (CC BY-SA). La extensión se conecta a este servidor público solo cuando actualizas la lista o pulsas Descargar. No se envía ningún dato personal."
+    "message": "- ahí publica WikDict los diccionarios que construye a partir de Wiktionary (CC BY-SA). La extensión se conecta a este servidor público solo con dos pulsaciones: la que actualiza la lista de diccionarios y Descargar en un diccionario que has elegido."
   },
   "options_add_dictionary_heading": { "message": "Añadir un diccionario desde archivos" },
   "options_add_dictionary_summary": {

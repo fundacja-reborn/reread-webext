@@ -2045,7 +2045,7 @@
   "options_show_fewer": { "message": "Afficher moins" },
   "options_model_note_from": { "message": "Les modèles sont téléchargés depuis" },
   "options_model_note_rest": {
-    "message": "- c'est là que Mozilla les publie. L'extension ne se connecte à ce serveur public que lorsque vous mettez la liste à jour ou cliquez sur Télécharger. Aucune donnée personnelle n'est transmise."
+    "message": "- c'est là que Mozilla les publie. L'extension ne se connecte à ce serveur public que sur deux appuis : celui qui met à jour la liste des modèles, et Télécharger pour un modèle choisi."
   },
   "options_add_model_heading": { "message": "Ajouter un modèle depuis des fichiers" },
   "options_add_model_summary": {
@@ -2067,7 +2067,7 @@
   },
   "options_dictionary_note_from": { "message": "Les dictionnaires sont téléchargés depuis" },
   "options_dictionary_note_rest": {
-    "message": "- c'est là que WikDict publie les dictionnaires qu'il construit à partir du Wiktionnaire (CC BY-SA). L'extension ne se connecte à ce serveur public que lorsque vous mettez la liste à jour ou cliquez sur Télécharger. Aucune donnée personnelle n'est transmise."
+    "message": "- c'est là que WikDict publie les dictionnaires qu'il construit à partir du Wiktionnaire (CC BY-SA). L'extension ne se connecte à ce serveur public que sur deux appuis : celui qui met à jour la liste des dictionnaires, et Télécharger pour un dictionnaire choisi."
   },
   "options_add_dictionary_heading": { "message": "Ajouter un dictionnaire depuis des fichiers" },
   "options_add_dictionary_summary": {
