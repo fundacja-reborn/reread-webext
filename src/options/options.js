@@ -1435,10 +1435,8 @@ function renderDownloading(container, model, controller) {
   const cancel = document.createElement("button");
   cancel.type = "button";
   cancel.textContent = t("action_cancel");
-  cancel.addEventListener("click", () => {
-    cancel.disabled = true;
-    controller.abort();
-  });
+  // Pressable while it is there, like the dictionary's (`renderFetching`).
+  cancel.addEventListener("click", () => controller.abort());
 
   const act = element("span", "model-act");
   act.append(cancel);
@@ -1547,11 +1545,24 @@ async function download(row, model) {
   running = null;
   letGo();
 
+  // The trial load is seconds of engine work with no way in; a press during
+  // it is answered the moment it comes back, before anything is kept.
+  if (controller.signal.aborted) {
+    say(t("download_cancelled"));
+    await settle(false);
+    return;
+  }
+
   if (!verdict.ok) {
     say(t("options_model_rejected", aside(verdict.detail)), "error");
     await settle(false);
     return;
   }
+
+  // From here the bytes are on their way to the database and there is
+  // nothing left to turn back; the way out goes rather than stand there
+  // offering what it can no longer do.
+  if (container !== null) for (const spent of container.querySelectorAll("button")) spent.remove();
 
   let stored = false;
   try {
@@ -2909,10 +2920,12 @@ function renderFetching(container, entry, controller) {
   const cancel = document.createElement("button");
   cancel.type = "button";
   cancel.textContent = t("action_cancel");
-  cancel.addEventListener("click", () => {
-    cancel.disabled = true;
-    controller.abort();
-  });
+  // Pressable for as long as it is there. The press is noticed at the end of
+  // whatever is in flight - a chunk, a batch of rows - and until then the
+  // only honest state of the button is the one it was in: a Cancel greyed
+  // out the moment it is pressed, over a download that goes on installing,
+  // is a button that lies twice (Michał, 2026-09-19).
+  cancel.addEventListener("click", () => controller.abort());
   placeActions(head, [cancel]);
 
   const bar = document.createElement("progress");
@@ -2970,6 +2983,15 @@ async function downloadDictionary(entry) {
       return;
     }
 
+    // Inflating an archive of a few hundred thousand entries is the one step
+    // of the journey that cannot be interrupted halfway. A press that landed
+    // during it is answered here, where it still costs nothing: no row has
+    // been made yet, so there is nothing to take back.
+    if (controller.signal.aborted) {
+      say(t("download_cancelled"));
+      return;
+    }
+
     // The language sides come from the catalogue row, not from a select: a
     // WikDict archive is one direction, and its name already said which.
     const ran = await withImportLock(async () => {
@@ -2978,6 +3000,7 @@ async function downloadDictionary(entry) {
         langFrom: entry.from,
         langTo: entry.to,
         say,
+        signal: controller.signal,
       });
     });
     if (!ran) say(t("options_import_elsewhere"), "error");
@@ -3106,10 +3129,10 @@ function blobOf(source) {
  * real one arrives with the first batch.
  *
  * @param {import("../lib/dict/import.js").DictionaryFiles} files
- * @param {{ base: string, langFrom: string, langTo: string, say: (text: string, tone?: "idle" | "busy" | "error") => void }} job
+ * @param {{ base: string, langFrom: string, langTo: string, say: (text: string, tone?: "idle" | "busy" | "error") => void, signal?: AbortSignal }} job
  * @returns {Promise<boolean>} whether a dictionary is now stored
  */
-async function storeDictionary(files, { base, langFrom, langTo, say }) {
+async function storeDictionary(files, { base, langFrom, langTo, say, signal }) {
   /** @type {import("../lib/dict/store.js").Dictionary | null} */
   let dictionary = null;
   try {
@@ -3122,6 +3145,15 @@ async function storeDictionary(files, { base, langFrom, langTo, say }) {
       ...(files.syn === undefined ? {} : { syn: blobOf(files.syn) }),
     });
 
+    // Staging the files is the slowest thing written before a single row is;
+    // a press during it takes everything staged away with it rather than
+    // waiting for the first batch to notice.
+    if (signal?.aborted) {
+      await deleteDictionary(dictionary.id);
+      say(t("download_cancelled"));
+      return false;
+    }
+
     const opened = await openDictionary(files, { fallbackName: base });
     if (!opened.ok) {
       await deleteDictionary(dictionary.id);
@@ -3129,7 +3161,7 @@ async function storeDictionary(files, { base, langFrom, langTo, say }) {
       return false;
     }
 
-    return await runImport(opened.value, dictionary, { say, progress: null });
+    return await runImport(opened.value, dictionary, { say, progress: null, signal });
   } catch (error) {
     // Whatever went wrong, the half-written dictionary is invisible and now
     // also gone, files and all: an import that failed with a sentence is not
@@ -3206,10 +3238,10 @@ async function resumeImport(dictionary) {
  *
  * @param {import("../lib/dict/import.js").OpenDictionary} opened
  * @param {import("../lib/dict/store.js").Dictionary} dictionary
- * @param {{ say: (text: string, tone?: "idle" | "busy" | "error") => void, progress: import("../lib/dict/store.js").ImportProgress | null }} job
+ * @param {{ say: (text: string, tone?: "idle" | "busy" | "error") => void, progress: import("../lib/dict/store.js").ImportProgress | null, signal?: AbortSignal }} job
  * @returns {Promise<boolean>} whether the dictionary is now stored
  */
-async function runImport(opened, dictionary, { say, progress }) {
+async function runImport(opened, dictionary, { say, progress, signal }) {
   const { name, credit } = opened;
   const total = opened.words + opened.synonyms;
   const batches = rowBatches(
@@ -3223,11 +3255,15 @@ async function runImport(opened, dictionary, { say, progress }) {
 
   const writer = await openWriter(dictionary.id);
   let appended = progress?.appended ?? 0;
-  /** @type {import("../lib/dict/rows.js").RowSummary} */
-  let summary;
+  /** @type {import("../lib/dict/rows.js").RowSummary | null} */
+  let summary = null;
   try {
     let step = batches.next();
     while (!step.done) {
+      // Where a cancel lands: the batch in flight is finished and written -
+      // an abandoned write is exactly what D137's resume was built to avoid
+      // - and nothing after it is read.
+      if (signal?.aborted) break;
       const batch = step.value;
       const writing = writer.put(batch.rows, batch.additions, {
         name,
@@ -3243,9 +3279,19 @@ async function runImport(opened, dictionary, { say, progress }) {
       // its timers are throttled to a second each.
       if (document.visibilityState === "visible") await breathe();
     }
-    summary = step.value;
+    if (step.done) summary = step.value;
   } finally {
     writer.close();
+  }
+
+  if (summary === null) {
+    // Cancelled. Nothing of it stays: the rows written so far, the files
+    // staged beside them and the unready row itself go together, because
+    // "Download cancelled. Nothing was saved." is a promise and a dictionary
+    // half in the database is not nothing.
+    await deleteDictionary(dictionary.id);
+    say(t("download_cancelled"));
+    return false;
   }
 
   if (summary.entryCount === 0) {
@@ -3407,6 +3453,10 @@ async function downloadFromLink() {
       dictionaryLinkStatus(fetched.text, fetched.tone);
       return;
     }
+    if (controller.signal.aborted) {
+      dictionaryLinkStatus(t("download_cancelled"));
+      return;
+    }
 
     // Where the bytes came from rides on the import's last line rather than
     // standing before it: the import's own lines would paint over it at once.
@@ -3417,7 +3467,13 @@ async function downloadFromLink() {
 
     let stored = false;
     const ran = await withImportLock(async () => {
-      stored = await storeDictionary(fetched.value.files, { base: fetched.value.base, langFrom, langTo, say });
+      stored = await storeDictionary(fetched.value.files, {
+        base: fetched.value.base,
+        langFrom,
+        langTo,
+        say,
+        signal: controller.signal,
+      });
     });
     if (!ran) dictionaryLinkStatus(t("options_import_elsewhere"), "error");
     if (stored && input !== null) input.value = "";

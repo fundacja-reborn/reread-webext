@@ -280,6 +280,84 @@ describe("the two blocks a catalogue is read in", () => {
     );
   });
 
+  it("stops the whole journey on Cancel, not just the bytes (Michał, 2026-09-19)", async () => {
+    const script = await source("options/options.js");
+    // A dictionary from the catalogue is a few megabytes over the wire and a
+    // few hundred thousand rows into the database: nearly all of the wait is
+    // the import, and the signal used to reach only the download. Every press
+    // landed in the part nothing was listening to, so the dictionary went on
+    // installing - and the button, greyed out by that first press, sat there
+    // unable to be asked again.
+    const store = script.slice(
+      script.indexOf("async function storeDictionary("),
+      script.indexOf("\n}\n", script.indexOf("async function storeDictionary(")),
+    );
+    assert.match(
+      store,
+      /async function storeDictionary\(files, \{ base, langFrom, langTo, say, signal \}\)/,
+      "the import cannot be told to stop",
+    );
+    assert.match(
+      store,
+      /if \(signal\?\.aborted\) \{\n      await deleteDictionary\(dictionary\.id\);/,
+      "a press during the staging leaves the staged files behind",
+    );
+    assert.match(
+      store,
+      /runImport\(opened\.value, dictionary, \{ say, progress: null, signal \}\)/,
+      "the batches never hear of the press",
+    );
+
+    const run = script.slice(
+      script.indexOf("async function runImport("),
+      script.indexOf("\n}\n", script.indexOf("async function runImport(")),
+    );
+    const loop = run.slice(run.indexOf("while (!step.done) {"), run.indexOf("const batch = step.value;"));
+    assert.match(loop, /if \(signal\?\.aborted\) break;/, "the batch loop runs to the end whatever is pressed");
+    // It stops between two batches, never inside one: the batch in flight is
+    // written, which is the whole point of D137's resume - and then what the
+    // sentence promises is kept. "Download cancelled. Nothing was saved." is
+    // untrue of a dictionary left half in the database, so the rows written
+    // so far, the files staged beside them and the unready row go together.
+    assert.match(
+      run,
+      /if \(summary === null\) \{[\s\S]*?await deleteDictionary\(dictionary\.id\);\n\s*say\(t\("download_cancelled"\)\);\n\s*return false;/,
+      "a cancelled import leaves half a dictionary behind",
+    );
+
+    // The two steps with no way into them - inflating an archive, the
+    // engine's trial load of a model - are answered the moment they come
+    // back, before anything of either is kept.
+    assert.match(
+      script,
+      /if \(controller\.signal\.aborted\) \{\n      say\(t\("download_cancelled"\)\);\n      return;\n    \}/,
+      "a press during the unpacking is forgotten",
+    );
+    assert.match(
+      script,
+      /if \(controller\.signal\.aborted\) \{\n    say\(t\("download_cancelled"\)\);\n    await settle\(false\);/,
+      "a press during a model's trial load is forgotten",
+    );
+
+    // And the button never claims what it can no longer do: pressable for as
+    // long as it is on screen, gone once the bytes are on their way to the
+    // database and there is nothing left to turn back.
+    for (const made of ["function renderFetching(", "function renderDownloading("]) {
+      const shape = script.slice(script.indexOf(made), script.indexOf("\n}\n", script.indexOf(made)));
+      assert.match(
+        shape,
+        /cancel\.addEventListener\("click", \(\) => controller\.abort\(\)\);/,
+        "the way out is not one press",
+      );
+      assert.doesNotMatch(shape, /cancel\.disabled = true/, "a press greys the button out before it has stopped anything");
+    }
+    assert.match(
+      script,
+      /if \(container !== null\) for \(const spent of container\.querySelectorAll\("button"\)\) spent\.remove\(\);/,
+      "the way out stands there after the last moment it could be taken",
+    );
+  });
+
   it("indexes the blocks for the search, and still none of their rows", async () => {
     const search = await source("options/search.js");
     assert.match(search, /section\.querySelector\("h2, h3, h4"\)/, "a block's heading is not indexed");
