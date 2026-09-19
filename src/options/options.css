@@ -822,13 +822,26 @@ section > header:not(:has(> :not([hidden]))) {
    what survives an e-ink panel, where the wash quantizes back into the paper.
 
    An error keeps its own frame and its own colour (page.css), which is
-   louder still - and is written out of this rule rather than fought with. */
-:is(.card, .rows, .card-list, .models) > .status:not(:empty, [data-tone="error"]) {
+   louder still - and is written out of this rule rather than fought with.
+
+   A row of a list says its own downloading in the same dress (`rowLine`,
+   options.js): the whole journey - how far it has got, what came of it - is
+   said in the row the press was in, where the eye already is. */
+:is(.card, .rows, .card-list, .models) > .status:not(:empty, [data-tone="error"]),
+:is(.model, .dictionary-row) > .status:not(:empty, [data-tone="error"]) {
   padding: calc(var(--row-pad-y) - 1px) var(--row-pad-x);
   border-inline-start: 3px solid var(--page-accent);
   background: color-mix(in srgb, var(--page-accent) 8%, transparent);
   color: var(--page-fg);
   font-size: var(--ui-small);
+}
+
+/* Inside a row the line stands under everything else the row holds, across
+   the whole of it: a model's row is three columns and the line belongs to
+   none of them. */
+:is(.model, .dictionary-row) > .status {
+  grid-column: 1 / -1;
+  margin-top: 0.5rem;
 }
 
 /* The one line a list shows when it holds nothing is a row of the card, not a

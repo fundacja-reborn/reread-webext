@@ -226,6 +226,53 @@ describe("the two blocks a catalogue is read in", () => {
     assert.match(script, /focusDeleteIn\("dictionary-list", "dictionaries-installed", at\)/);
   });
 
+  it("says a download in the row the press was in, and leaves it there (Michał, 2026-09-19)", async () => {
+    const script = await source("options/options.js");
+    // The whole journey - how far the download has got, what came of it - is
+    // said in the row, not at the top of the page: a catalogue of four
+    // hundred rows puts the top well outside the window, and the row itself
+    // used to vanish at the same moment, because the pair had stopped being
+    // on offer.
+    assert.match(script, /const say = saysIn\(container === null \? null : rowLine\(container\), dictionaryStatus\);/, "a dictionary download still says everything at the top of the page");
+    assert.match(script, /const say = saysIn\(container === null \? null : rowLine\(container\), status\);/, "a model download still says everything at the top of the page");
+    // The line is put in place empty, before there is anything to say: a live
+    // region that arrives with its text already in it announces nothing.
+    const line = script.slice(script.indexOf("function rowLine("), script.indexOf("\n}\n", script.indexOf("function rowLine(")));
+    assert.match(line, /element\("p", "status"\)/, "the row's line is not a status");
+    assert.match(line, /line\.setAttribute\("role", "status"\)/, "the row's line is not a live region");
+    assert.doesNotMatch(line, /textContent/, "the row's line arrives with its text already in it");
+    // With no row to say it in - a redraw came between - it falls back to the
+    // page's own line rather than saying nothing at all.
+    const says = script.slice(script.indexOf("function saysIn("), script.indexOf("\n}\n", script.indexOf("function saysIn(")));
+    assert.match(says, /if \(line === null\) \{\n      fallback\(text, tone\);/, "a journey with no row of its own says nothing");
+
+    // Once it is over the row stops being an offer: no bar, no buttons, and
+    // no id to collide with the installed row that now carries the pair.
+    const finished = script.slice(script.indexOf("function rowFinished("), script.indexOf("\n}\n", script.indexOf("function rowFinished(")));
+    assert.match(finished, /row\.removeAttribute\("id"\)/, "a finished row keeps the id the installed row now has too");
+    assert.match(finished, /delete row\.dataset\["installed"\]/, "the filter still counts a row that is no longer an offer");
+    assert.match(finished, /if \(retry === null\) return;/, "a finished row offers to do it again after it worked");
+    assert.match(finished, /t\("action_download"\)/, "a journey that failed leaves no way to try again");
+
+    // And the row survives the redraw that follows, in its own place: put
+    // back where it stood when the pair has left the offer, or in the rebuilt
+    // row's place when it failed and the pair is offered again.
+    const keep = script.slice(script.indexOf("function keepRow("), script.indexOf("\n}\n", script.indexOf("function keepRow(")));
+    assert.match(keep, /if \(row\.isConnected \|\| !parent\.isConnected\) return;/, "a row still on screen is put back twice");
+    assert.match(keep, /rebuilt\.replaceWith\(row\)/, "a failed download leaves the same pair standing twice");
+    assert.match(keep, /parent\.insertBefore\(row, parent\.children\[at\] \?\? null\)/, "the row comes back somewhere other than where it stood");
+    assert.match(script, /const putBack = keepRow\(container, catalogRowId\(entry\)\);/, "a dictionary's row is not kept through the redraw");
+    assert.match(script, /const putBack = keepRow\(container, `model-\$\{row\.pair\}`\);/, "a model's row is not kept through the redraw");
+
+    // The dress says it is a message and not another row of the list.
+    const css = await source("options/options.css");
+    assert.match(
+      css,
+      /:is\(\.model, \.dictionary-row\) > \.status:not\(:empty, \[data-tone="error"\]\) \{/,
+      "a row's own message is dressed like the row it stands in",
+    );
+  });
+
   it("indexes the blocks for the search, and still none of their rows", async () => {
     const search = await source("options/search.js");
     assert.match(search, /section\.querySelector\("h2, h3, h4"\)/, "a block's heading is not indexed");

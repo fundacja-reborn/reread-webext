@@ -1224,6 +1224,102 @@ function focusDeleteIn(containerId, emptyId, at) {
 }
 
 /**
+ * The line a downloading row says everything in: how far the download has
+ * got, and what came of it (Michał's smoke, 2026-09-19). Before this it was
+ * said at the top of the page, where a catalogue of four hundred rows puts it
+ * well outside the window - and the row the press was in disappeared at the
+ * same moment, because the pair had stopped being on offer. Somebody who
+ * pressed Download watched their row vanish and was told nothing they could
+ * see.
+ *
+ * Put in place empty, before there is anything to say: a live region that
+ * arrives with its text already in it announces nothing, and this line is
+ * what a screen reader hears as well as what the eye reads.
+ *
+ * @param {HTMLElement} row
+ * @returns {HTMLElement}
+ */
+function rowLine(row) {
+  const line = element("p", "status");
+  line.setAttribute("role", "status");
+  row.append(line);
+  return line;
+}
+
+/**
+ * Whatever the journey has to say, said in the row it belongs to - or at the
+ * top of the page when there is no row (a redraw that came between, an import
+ * started somewhere else).
+ *
+ * @param {HTMLElement | null} line
+ * @param {(text: string, tone?: "idle" | "busy" | "error") => void} fallback
+ * @returns {(text: string, tone?: "idle" | "busy" | "error") => void}
+ */
+function saysIn(line, fallback) {
+  return (text, tone = "idle") => {
+    if (line === null) {
+      fallback(text, tone);
+      return;
+    }
+    line.textContent = text;
+    line.dataset["tone"] = tone;
+  };
+}
+
+/**
+ * The row once its download is over: the bar and Cancel go, the line stays
+ * with what it has to say, and the row stops being the offer it was - no id
+ * to collide with the installed row that now carries the same pair, and no
+ * marks for the filter to count or hide it by. A journey that failed keeps a
+ * way to try again, in the place the first press was.
+ *
+ * @param {HTMLElement} row
+ * @param {(() => void) | null} retry
+ */
+function rowFinished(row, retry) {
+  for (const gone of row.querySelectorAll("progress, button")) gone.remove();
+  for (const empty of row.querySelectorAll(".dictionary-fetching, .model-meta")) empty.remove();
+  row.removeAttribute("id");
+  delete row.dataset["installed"];
+  delete row.dataset["search"];
+  if (retry === null) return;
+  const again = document.createElement("button");
+  again.type = "button";
+  again.textContent = t("action_download");
+  again.addEventListener("click", retry);
+  const head = row.querySelector(".dictionary-head");
+  if (head instanceof HTMLElement) placeActions(head, [again]);
+  else row.querySelector(".model-act")?.append(again);
+}
+
+/**
+ * The row a download has just finished in, kept through the redraw that
+ * follows. Answers with the press that puts it back exactly where it stood,
+ * so what it says stays where the press was.
+ *
+ * Two shapes of redraw to survive: one that no longer builds this row at all
+ * (the pair is on the device now), and one that builds it again as an offer
+ * (the journey failed, so the pair is still there to fetch). The first is put
+ * back at its old place; the second takes the rebuilt row's place, because
+ * the same pair must not stand twice.
+ *
+ * @param {HTMLElement | null} row
+ * @param {string} id the row's own id before it finished
+ * @returns {() => void}
+ */
+function keepRow(row, id) {
+  const parent = row?.parentElement ?? null;
+  if (row === null || parent === null) return () => {};
+  const at = [...parent.children].indexOf(row);
+  return () => {
+    if (row.isConnected || !parent.isConnected) return;
+    const rebuilt = document.getElementById(id);
+    if (rebuilt !== null && rebuilt.parentElement === parent) rebuilt.replaceWith(row);
+    else parent.insertBefore(row, parent.children[at] ?? null);
+  };
+}
+
+/**
  * One row of the model list, always the same three cells - name, sizes,
  * actions - so the stylesheet can lay a phone and a desktop out from the one
  * DOM: one line on a desktop, the name over a right-aligned second line on a
@@ -1403,36 +1499,51 @@ async function download(row, model) {
   const letGo = holdScreen();
 
   // Redrawn with the download already claimed, which is what greys out every
-  // other button on the page; then this one row becomes a progress bar.
+  // other button on the page; then this one row becomes a progress bar, and
+  // the line under it is where the whole journey is said (`rowLine`).
   await renderModels();
   const container = document.getElementById(`model-${row.pair}`);
   const onProgress = container === null ? undefined : renderDownloading(container, model, controller);
-  status(t("options_downloading_model", [pairLabel(model.from, model.to), megabytes(model.downloadBytes)]), "busy");
+  const say = saysIn(container === null ? null : rowLine(container), status);
+  say(t("options_downloading_model", [pairLabel(model.from, model.to), megabytes(model.downloadBytes)]), "busy");
+
+  /**
+   * The row stays where the press was, saying what came of it.
+   *
+   * @param {boolean} stored whether the model is on the device now
+   */
+  const settle = async (stored) => {
+    if (container !== null) rowFinished(container, stored ? null : () => void download(row, model));
+    const putBack = keepRow(container, `model-${row.pair}`);
+    await renderModels();
+    putBack();
+  };
 
   const result = await downloadModel(model, { signal: controller.signal, onProgress });
 
   if (!result.ok) {
     running = null;
     letGo();
-    status(describeDownloadProblem(result.problem, result.detail), result.problem === "cancelled" ? "idle" : "error");
-    await renderModels();
+    say(describeDownloadProblem(result.problem, result.detail), result.problem === "cancelled" ? "idle" : "error");
+    await settle(false);
     return;
   }
 
   // The last rung of the ladder: only the engine can say these bytes are a
   // model. Still holding the download claim, because the trial load is part
   // of the one expensive job - and nothing is stored until it says yes.
-  status(t("options_checking_model", pairLabel(model.from, model.to)), "busy");
+  say(t("options_checking_model", pairLabel(model.from, model.to)), "busy");
   const verdict = await testLoadModel({ from: model.from, to: model.to }, result.value);
   running = null;
   letGo();
 
   if (!verdict.ok) {
-    status(t("options_model_rejected", aside(verdict.detail)), "error");
-    await renderModels();
+    say(t("options_model_rejected", aside(verdict.detail)), "error");
+    await settle(false);
     return;
   }
 
+  let stored = false;
   try {
     const source = modelSourceUrl(model);
     const meta = await putModel(result.value, {
@@ -1440,16 +1551,17 @@ async function download(row, model) {
       to: model.to,
       ...(source === null ? {} : { sourceUrl: source }),
     });
-    status(t("options_downloaded_model", [pairLabel(model.from, model.to), megabytes(meta.bytes)]));
+    stored = true;
+    say(t("options_downloaded_model", [pairLabel(model.from, model.to), megabytes(meta.bytes)]));
     await adoptFirstPair(model.from, model.to);
   } catch (error) {
     // The download was fine; the browser would not keep it. Worth saying apart
     // from a failed download, because the answer is different - space, or a
     // second copy of this page holding the database open.
-    status(t("options_store_failed", message(error)), "error");
+    say(t("options_store_failed", message(error)), "error");
   }
 
-  await renderModels();
+  await settle(stored);
 }
 
 /**
@@ -2824,35 +2936,43 @@ async function downloadDictionary(entry) {
   const controller = new AbortController();
 
   // Redrawn with the import already claimed, which greys out the other
-  // buttons of the frame; then this one row becomes a progress bar.
+  // buttons of the frame; then this one row becomes a progress bar, and the
+  // line under it is where the whole journey is said (`rowLine`).
   await renderCatalog();
   const container = document.getElementById(catalogRowId(entry));
   const onProgress = container === null ? undefined : renderFetching(container, entry, controller);
+  const say = saysIn(container === null ? null : rowLine(container), dictionaryStatus);
   const label = pairLabel(entry.from, entry.to);
-  dictionaryStatus(t("options_downloading_dictionary", label), "busy");
+  say(t("options_downloading_dictionary", label), "busy");
 
+  let added = false;
   try {
     const fetched = await fetchDictionaryFiles(entry.url, controller.signal, onProgress);
     if (!fetched.ok) {
-      dictionaryStatus(fetched.text, fetched.tone);
+      say(fetched.text, fetched.tone);
       return;
     }
 
     // The language sides come from the catalogue row, not from a select: a
     // WikDict archive is one direction, and its name already said which.
     const ran = await withImportLock(async () => {
-      await storeDictionary(fetched.value.files, {
+      added = await storeDictionary(fetched.value.files, {
         base: fetched.value.base,
         langFrom: entry.from,
         langTo: entry.to,
-        say: dictionaryStatus,
+        say,
       });
     });
-    if (!ran) dictionaryStatus(t("options_import_elsewhere"), "error");
+    if (!ran) say(t("options_import_elsewhere"), "error");
   } finally {
     letGo();
     importing = false;
+    // The row stays where the press was, saying what came of it; a journey
+    // that failed keeps a way to try again in the same place.
+    if (container !== null) rowFinished(container, added ? null : () => void downloadDictionary(entry));
+    const putBack = keepRow(container, catalogRowId(entry));
     await renderCatalog();
+    putBack();
   }
 }
 
