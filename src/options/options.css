@@ -125,7 +125,12 @@
   --gap-h3-before: 1.5rem;
   --gap-h3-after: 0.5rem;
   --gap-desc-after: 0.75rem;
-  --gap-card: 0.75rem;
+  /* A card's gap from the next one. Two frames a hair apart read as one
+     double line - loudest on an e-ink panel, where the frame is the page's
+     full line and nothing else separates the cards (Michał's smoke,
+     2026-09-19) - so it is wider than the air inside a row and still well
+     under the one that opens a subsection. */
+  --gap-card: 1rem;
 }
 
 /* The density follows the pointer, not the window: where a device is read
@@ -586,9 +591,14 @@ mark.hit {
 
 /* The section being read, as the bar's own title under 60rem (F4): the place
    the wordmark has on every other page, in a native select so that the
-   keyboard, a finger and a screen reader all get the list for free - and
-   dressed down to a heading, because that is what it is. The mark rides
-   straight after the words rather than at the far edge of a box. */
+   keyboard, a finger and a screen reader all get the list for free. The mark
+   rides straight after the words rather than at the far edge of a box.
+
+   Dressed as a line of the bar, not as a heading (Michał, 2026-09-19): it was
+   set at a subsection heading's size and weight, which made the one thing
+   that is not a heading the heaviest text on the screen - and the page's own
+   title stands right under it saying the same kind of thing. It says where
+   the reading is; the heading it names says it again a line below. */
 .bar-sections {
   flex: 0 1 auto;
   min-width: 0;
@@ -599,8 +609,8 @@ mark.hit {
   background: none;
   color: var(--page-fg);
   font: inherit;
-  font-size: var(--ui-h3);
-  font-weight: 600;
+  font-size: var(--ui-h4);
+  font-weight: var(--ui-label-weight);
   line-height: 1.35;
   text-overflow: ellipsis;
 }
@@ -809,6 +819,20 @@ section > header:not(:has(> :not([hidden]))) {
    whose own margin is the wider one. */
 .card:last-child {
   margin-bottom: 0;
+}
+
+/* Except where there is no section below to hand it to. A block of a
+   subsection - "Downloaded by you:", "Download models" (D263) - is a
+   `<section>` holding one card, and a nested section has no margin of its
+   own: the card inside it gave its gap away as a last child, and nothing
+   gave it back, so two cards met frame to frame (Michał's smoke on the Boox,
+   2026-09-19; measured at 0px in Chrome). Whatever follows a nested section
+   stands a card's gap from it - another block, the card that comes after the
+   blocks, a note. A section that opens with a heading of its own brings the
+   wider air with it, and that margin collapses through this one rather than
+   adding to it. */
+section > section + * {
+  margin-top: var(--gap-card);
 }
 
 /* Every child of a card is a row of it: one padding, one floor, one place for

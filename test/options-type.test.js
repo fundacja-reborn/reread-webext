@@ -76,7 +76,7 @@ describe("the settings page's type", () => {
     assert.match(rule(css, ".row-note"), /font-size: var\(--ui-small\)/, "a row's description is off the scale");
     assert.match(rule(css, "p.explain,\n.hint"), /font-size: var\(--ui-small\)/, "a section's opening paragraph is off the scale");
     assert.match(rule(css, ".sections a"), /font-size: var\(--ui-text\)/, "the table of contents is off the scale");
-    assert.match(rule(css, ".bar-sections"), /font-size: var\(--ui-h3\)/, "the bar's title is off the scale");
+    assert.match(rule(css, ".bar-sections"), /font-size: var\(--ui-h4\)/, "the bar's title is off the scale");
     // No stray sizes left behind: every one of them went into a token. The
     // badge's 0.75rem is the one exception and says why beside itself; `code`
     // adjusts in `em`, which follows whatever it is set inside.
@@ -169,11 +169,15 @@ describe("the settings page's type", () => {
     const gap = (token) => Number(new RegExp(`--gap-${token}: ([\\d.]+)rem;`).exec(tokens)?.[1] ?? "0");
 
     // A section stands further off than a subsection, a subsection further
-    // than a heading holds its own cards, and one card from the next is the
-    // smallest gap of all.
+    // than two cards of one heading, and a heading holds its own first card
+    // closer than the cards hold each other - the gap says what belongs to
+    // what. The last of those was the other way round until Michał's smoke
+    // (2026-09-19): with the same 12px above the first card and between the
+    // cards, two frames a hair apart read as one double line, and a heading
+    // read no closer to its own card than to the next one.
     assert.ok(gap("section") > gap("h3-before"), "a section is no further off than a subsection");
-    assert.ok(gap("h3-before") > gap("h2-after"), "a subsection is no further off than a heading's own cards");
-    assert.ok(gap("h2-after") >= gap("card"), "two cards stand further apart than a heading from its first");
+    assert.ok(gap("h3-before") > gap("card"), "a subsection is no further off than two cards of one heading");
+    assert.ok(gap("card") > gap("h2-after"), "a heading stands as far from its own first card as two cards do from each other");
     // A heading belongs to what stands under it: at least twice as far from
     // what came before as from what comes after.
     assert.ok(gap("h3-before") >= 2 * gap("h3-after"), "a subsection heading is as far from its content as from the group above");
@@ -193,6 +197,16 @@ describe("the settings page's type", () => {
     // The indent a description and a dependent row begin at is the checkbox's
     // own column, not a number somebody picked.
     assert.match(tokens, /--row-indent: calc\(var\(--row-box\) \+ var\(--row-gap\)\);/, "the indent is not the checkbox's own column");
+    // A block of a subsection is a `<section>` with one card in it, and a
+    // nested section carries no margin of its own: the card inside gave its
+    // gap away as a last child, so two cards met frame to frame (measured at
+    // 0px in Chrome; Michał saw it on the Boox first). Whatever follows a
+    // nested section takes the cards' own gap back.
+    assert.match(
+      css,
+      /section > section \+ \* \{\n  margin-top: var\(--gap-card\);/,
+      "a block that follows a nested section stands on its frame",
+    );
     // The machinery D259 needed for a page with no cards is gone with it: no
     // margin on this page is a gap less two half-leadings any more.
     assert.doesNotMatch(css, /--lead-h2|--ink-box|--row-extra/, "the flat page's leading arithmetic is still here");
@@ -295,8 +309,10 @@ describe("the settings page's type", () => {
     // A date is a value, not an emphasis, and was never bold either.
     assert.match(rule(css, ".dictionary-name"), /font-weight: var\(--ui-label-weight\)/, "a dictionary's name is set apart from the labels around it");
     assert.match(rule(css, ".note strong"), /font-weight: 400/, "the list's date is still set bold");
-    // What may be 600 or more: the page's headings, the bar's own title (the
-    // heading a narrow screen has) and the section being read.
+    // What may be 600 or more: the page's headings and the section being read
+    // in the column. The bar's own title left this list (Michał, 2026-09-19):
+    // it is a line saying where the reading is, not a heading - and the
+    // heading it names stands a line under it.
     const heavy = [...css.matchAll(/\n([^\n{]+) \{[^}]*?font-weight: (600|700|bold)/g)].map((match) => String(match[1]));
     assert.deepEqual(
       heavy,
@@ -309,10 +325,13 @@ describe("the settings page's type", () => {
         "main h4",
         "main h5",
         '.sections a[aria-current="location"]',
-        ".bar-sections",
-
       ],
       "something other than a heading or the section being read is set at a heading's weight",
+    );
+    assert.match(
+      rule(css, ".bar-sections"),
+      /font-weight: var\(--ui-label-weight\)/,
+      "the bar's title is set apart from the lines around it",
     );
     // And inside a card there is one size and one weight for every row
     // (Michał's second round): the card's own label is the only thing that
