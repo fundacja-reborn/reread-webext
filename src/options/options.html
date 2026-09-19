@@ -430,12 +430,16 @@
       </button>
     </div>
 
-    <div id="models-catalog" class="models"></div>
-
     <!-- Folded length, not a scrolled box: the list stands in the page's own
-         flow and this button unfolds it. Typing in the filter above searches
-         the whole list either way. -->
+         flow and this button unfolds it. Over the list rather than under it
+         (Michał's smoke, 2026-09-19): a hundred rows unfolding under a button
+         that stands below them carry it a hundred rows away, and the way back
+         - "Show fewer" - could only be reached by scrolling to the end of
+         what had just been opened. Over the list, the press that opens it and
+         the press that closes it are the same place. -->
     <button type="button" id="models-show-all" class="show-all" aria-controls="models-catalog" hidden></button>
+
+    <div id="models-catalog" class="models"></div>
 
     <!-- Folded shut by default: the by-hand path is the escape hatch, not the
          road, and standing open right under the list it read as a second,
@@ -638,9 +642,9 @@
       </button>
     </div>
 
-    <ul id="dictionary-catalog" class="models"></ul>
-
     <button type="button" id="dictionaries-show-all" class="show-all" aria-controls="dictionary-catalog" hidden></button>
+
+    <ul id="dictionary-catalog" class="models"></ul>
 
     <!-- Folded for the same reason as the model files above: the catalogue is
          the road, this is the door beside it. -->
