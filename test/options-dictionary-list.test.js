@@ -59,13 +59,13 @@ describe("the dictionary list's rows", () => {
     assert.match(script, /element\("li", "empty", t\("options_no_catalog"\)\)/);
   });
 
-  it("stack two lines at every width: the name with its buttons, then the small print (D263, L1)", () => {
+  it("stand on one line at every width: the name, the door, the buttons (Michał, 2026-09-19)", () => {
     const row = fn("renderDictionary", "refreshRowName");
     const order = [
       'element("div", "dictionary-head")',
       'element("p", "dictionary-name", shown)',
-      'element("details", "dictionary-details")',
-      'element("summary", "dictionary-meta")',
+      'element("div", "dictionary-body")',
+      'element("p", "dictionary-meta")',
     ].map((mark) => row.indexOf(mark));
     assert.ok(order.every((at) => at >= 0), "every line is built");
     assert.deepEqual([...order].sort((a, b) => a - b), order);
@@ -83,18 +83,24 @@ describe("the dictionary list's rows", () => {
     assert.match(page, /<div id="dictionary-link-row" class="dictionary-row" hidden><\/div>/);
   });
 
-  it("hang the fold off the small print, with its word at the line's end and never alone on one", () => {
+  it("keep the door on the name's own line, in the page's one fold dress", () => {
+    const row = fn("renderDictionary", "refreshRowName");
+    // The page's own fold - a trigger and the paragraph it names - rather
+    // than a `<details>`: every other fold on this page is built that way,
+    // and the door has to stand on the row's first line, which a summary
+    // wrapping the whole row cannot do.
+    assert.match(row, /more\.className = "note-more dictionary-more"/);
+    assert.match(row, /more\.setAttribute\("aria-controls", body\.id\)/);
+    assert.match(row, /armMore\(more, body\)/);
+    assert.match(row, /head\.append\(more\)/);
+    // And it is named for the book it opens: a column of triggers all saying
+    // "Details" names none of them.
+    assert.match(row, /t\("options_dictionary_details_aria", shown\)/);
+    // The trigger never wraps away from the name it belongs to.
+    assert.match(rule(css, ".dictionary-more"), /flex: none/);
+    // The small print is what the fold opens, not what it hangs off.
     const meta = fn("fillDictionaryMeta", "renderDictionary");
-    // The door travels with the dot before it in a box that does not break:
-    // a hard space alone never held a trigger to its sentence (D259, K2).
-    assert.match(meta, /element\("span", "note-tail"\)/);
-    assert.match(meta, /door\.append\("\\u00a0· ", element\("span", "dictionary-more", t\("options_details"\)\)\)/);
-    assert.match(rule(css, ".note-tail"), /white-space: nowrap/);
-    // The whole line is what a press reaches, and it keeps the page's one
-    // fold dress rather than the browser's marker.
-    assert.match(rule(css, "summary.dictionary-meta"), /cursor: pointer/);
-    assert.match(rule(css, "summary.dictionary-meta"), /list-style: none/);
-    assert.match(css, /\.dictionary-more::before \{\n  content: "\\25B8\\00A0";/);
+    assert.doesNotMatch(meta, /note-tail|options_details/);
   });
 
   it("never break the pair in the middle, and let the badge wrap instead", () => {

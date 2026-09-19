@@ -2356,12 +2356,17 @@
   "options_filter_models_label": { "message": "Filter the list of translation models" },
   "options_filter_dictionaries_label": { "message": "Filter the list of dictionaries" },
   "options_list_installed": {
-    "message": "On this device",
-    "description": "Heading of the block listing what is already on this device, in both the models and the dictionaries subsection."
+    "message": "Downloaded by you:",
+    "description": "Heading of the block listing what is already on this device, in both the models and the dictionaries subsection. Ends in a colon: it labels the list under it."
   },
-  "options_list_available": {
-    "message": "To download",
-    "description": "Heading of the block holding the catalogue: the filter, the list to download from and the by-hand doors."
+  "options_list_available_models": {
+    "message": "Download more models",
+    "description": "Heading of the models' catalogue block: the filter, the list to download from and the by-hand door. Named for what a press there does, not for what the block is."
+  },
+
+  "options_list_available_dictionaries": {
+    "message": "Download more dictionaries",
+    "description": "Heading of the dictionaries' catalogue block: the filter, the list to download from and the two by-hand doors."
   },
   "options_no_models_yet": {
     "message": "No translation model on this device yet. Pick a pair in",
@@ -2552,6 +2557,17 @@
   "options_delete_dictionary_aria": {
     "message": "Delete the dictionary $NAME$",
     "placeholders": { "name": { "content": "$1", "example": "WikDict en-pl" } }
+  },
+
+  "options_dictionary_details_aria": {
+    "message": "Details of $NAME$",
+    "description": "The label a screen reader hears on a dictionary row's Details trigger: a list of them all saying only \"Details\" names none of the books.",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "WikDict English-Polish"
+      }
+    }
   },
   "options_delete_confirm_aria": {
     "message": "Confirm deletion: $NAME$",

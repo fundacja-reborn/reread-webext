@@ -805,14 +805,16 @@ section > header:not(:has(> :not([hidden]))) {
   content: none;
 }
 
-/* A card's own label - "On this device", "To download", a language in the
-   list of dictionaries: the quiet voice and a label's weight, never a
-   heading's size, and standing close to what it names. */
+/* A card's own label - "Downloaded by you:", "Download more dictionaries",
+   a language in the list of dictionaries: the quiet voice, one step smaller
+   than the rows, and half a step of weight rather than a heading's bold
+   (Michał's second round: one size inside a card, and no bolding that is not
+   doing work). It stands close to what it names. */
 .card-head {
   padding: 1rem var(--row-pad-x) 0.25rem;
   color: var(--page-muted);
   font-size: var(--ui-small);
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.4;
 }
 
@@ -1342,20 +1344,35 @@ ul.models {
 }
 
 /* The dictionaries' rows stack their lines at every width (the seventh
-   brief), so they take the card's padding and nothing else. */
+   brief), so they take the card's padding and nothing else.
+
+   Inside the list of what is on this device they stand under the language
+   that heads them, and they are indented to say so (Michał's second round):
+   one step, the same the list's own small print uses, so the names line up
+   under each other and the languages read as the headings they are. */
 .dictionary-row {
   display: block;
 }
 
-/* The first line: the name of the book and the buttons at the right edge
-   (D263, L1). The buttons are one group that never wraps inside itself and
-   keep the line's start, so a long name wraps under them rather than pushing
-   them about. The catalogue's rows and the download-in-progress row use the
-   same line for the pair and their one button. */
+.card-list .models > .dictionary-row {
+  padding-inline-start: calc(var(--row-pad-x) + 1rem);
+}
+
+.card-list .models > :not([hidden]) ~ :not([hidden])::after {
+  inset-inline-start: calc(var(--row-pad-x) + 1rem);
+}
+
+/* The row is one line: the name, the door to the details, and the buttons at
+   the right edge (Michał's second round - a list of books is scanned by their
+   names, so everything else waits behind the door). The buttons are one group
+   that never wraps inside itself and keep the line's end, so a long name
+   wraps under them rather than pushing them about. The catalogue's rows and
+   the download-in-progress row use the same line for the pair and their one
+   button. */
 .dictionary-head {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-start;
+  align-items: center;
   gap: 0.25rem 0.6rem;
 }
 
@@ -1391,32 +1408,22 @@ ul.models {
   white-space: nowrap;
 }
 
-/* The row's title: the name the reader knows the book by, a half step over
-   the small print under it - not a heading's weight (D259, K3): five bold
-   dictionary names in a column outweighed the "Dictionaries" heading they
-   stand under. Wrapped when long, never cut.
-
-   Since D263 it opens the row, so it takes the room the buttons leave and
-   stands on their own centre line while it is one line long. */
+/* The row's title: the name the reader knows the book by, at the same size
+   and the same weight as every other label on the page (Michał's second
+   round - a column of names set half a step heavier was one more size to
+   read). Wrapped when long, never cut. It opens the row and takes the room
+   the door and the buttons leave. */
 .dictionary-name {
   margin: 0;
-  flex: 1 1 10rem;
+  flex: 1 1 8rem;
   min-width: 0;
-  min-height: var(--ui-control);
-  display: flex;
-  align-items: center;
-  font-weight: 500;
+  font-weight: var(--ui-label-weight);
   overflow-wrap: anywhere;
 }
 
-/* The small print under the title: the language the book explains words in,
-   the count, the size - one line that wraps between its items on a phone. A
-   count keeps its unit on one line.
-
-   Since D263 this line is the fold's own summary: the door stands at its end
-   instead of opening a line of its own, and the whole line is what a press
-   or a keyboard reaches - which on a phone is a target the width of the row
-   rather than one word of small print. */
+/* The small print: the language the book explains words in, the count, the
+   size - the first line inside the fold since Michał's second round, where it
+   used to be the row's own second line. A count keeps its unit on one line. */
 .dictionary-meta {
   margin: 0;
   color: var(--page-muted);
@@ -1425,29 +1432,18 @@ ul.models {
   overflow-wrap: anywhere;
 }
 
-summary.dictionary-meta {
-  cursor: pointer;
-  list-style: none;
+/* The door to the details, on the name's own line and in the page's one fold
+   dress (it wears `note-more` too, so the triangle, the quiet ink and the
+   underline under a pointer all come from there). It never wraps away from
+   the name: a trigger alone on a line reads as a row of its own. */
+.dictionary-more {
+  flex: none;
 }
 
-summary.dictionary-meta::-webkit-details-marker {
-  display: none;
-}
-
-/* The door at the end of the line, in the page's one fold dress (D258, K1):
-   the triangle, no underline at rest, underlined under the pointer and at
-   the keyboard. It travels with the dot before it in a box that does not
-   break (`.note-tail`), because a hard space alone never held it. */
-.dictionary-more::before {
-  content: "\25B8\00A0";
-}
-
-.dictionary-details[open] .dictionary-more::before {
-  content: "\25BE\00A0";
-}
-
-summary.dictionary-meta:is(:hover, :focus-visible) .dictionary-more {
-  text-decoration: underline;
+/* What the door opens, under the row's own line: the small print, the name
+   the reader may give the book, and whatever the book says about itself. */
+.dictionary-body {
+  margin-top: 0.35rem;
 }
 
 .dictionary-count {
@@ -1464,10 +1460,9 @@ summary.dictionary-meta:is(:hover, :focus-visible) .dictionary-more {
 
 /* --- the fold every finished book ends with: "Details" ---
 
-   Its trigger is the row's own second line since D263, dressed where that
-   line is styled above; what is left here is what the fold opens, and the
-   air it stands in. */
-.dictionary-details > :not(summary):first-of-type {
+   Its trigger stands on the row's own line, dressed where that line is styled
+   above; what is left here is the air between what the fold opens. */
+.dictionary-body > * + * {
   margin-top: 0.5rem;
 }
 
@@ -1627,7 +1622,7 @@ button.model-delete {
   background: none;
   color: var(--page-fg);
   font-size: var(--ui-text);
-  font-weight: 500;
+  font-weight: var(--ui-label-weight);
   text-align: start;
 }
 
@@ -1706,7 +1701,7 @@ button.model-delete {
   display: inline;
   margin: 0;
   font-size: var(--ui-text);
-  font-weight: 500;
+  font-weight: var(--ui-label-weight);
 }
 
 /* What the fold opens stands in the same card under its summary, indented to

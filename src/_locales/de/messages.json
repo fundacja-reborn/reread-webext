@@ -1934,12 +1934,17 @@
   "options_filter_models_label": { "message": "Die Liste der Übersetzungsmodelle filtern" },
   "options_filter_dictionaries_label": { "message": "Die Liste der Wörterbücher filtern" },
   "options_list_installed": {
-    "message": "Auf diesem Gerät",
-    "description": "Heading of the block listing what is already on this device, in both the models and the dictionaries subsection."
+    "message": "Von dir heruntergeladen:",
+    "description": "Heading of the block listing what is already on this device, in both the models and the dictionaries subsection. Ends in a colon: it labels the list under it."
   },
-  "options_list_available": {
-    "message": "Zum Herunterladen",
-    "description": "Heading of the block holding the catalogue: the filter, the list to download from and the by-hand doors."
+  "options_list_available_models": {
+    "message": "Weitere Modelle herunterladen",
+    "description": "Heading of the models' catalogue block: the filter, the list to download from and the by-hand door. Named for what a press there does, not for what the block is."
+  },
+
+  "options_list_available_dictionaries": {
+    "message": "Weitere Wörterbücher herunterladen",
+    "description": "Heading of the dictionaries' catalogue block: the filter, the list to download from and the two by-hand doors."
   },
   "options_no_models_yet": {
     "message": "Noch kein Übersetzungsmodell auf diesem Gerät. Wählen Sie ein Paar im Abschnitt",
@@ -2109,6 +2114,16 @@
   "options_delete_dictionary_aria": {
     "message": "Das Wörterbuch $NAME$ löschen",
     "placeholders": { "name": { "content": "$1" } }
+  },
+
+  "options_dictionary_details_aria": {
+    "message": "Details zu $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "WikDict English-Polish"
+      }
+    }
   },
   "options_delete_confirm_aria": {
     "message": "Löschen bestätigen: $NAME$",

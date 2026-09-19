@@ -54,6 +54,7 @@ const SUBSECTIONS = [
     showAll: 'id="models-show-all"',
     door: "options_add_model_heading",
     host: 'id="model-host"',
+    name: "options_list_available_models",
   },
   {
     what: "dictionaries",
@@ -66,6 +67,7 @@ const SUBSECTIONS = [
     showAll: 'id="dictionaries-show-all"',
     door: "options_add_dictionary_heading",
     host: 'id="dictionary-host"',
+    name: "options_list_available_dictionaries",
   },
 ];
 
@@ -75,7 +77,9 @@ describe("the two blocks a catalogue is read in", () => {
     for (const part of SUBSECTIONS) {
       // The name stands inside the card it heads (D265), in the card label's
       // own dress - a heading outside a card opens a section, and these open
-      // a block of one.
+      // a block of one. Since Michał's second round the catalogue block is
+      // named for what a press there does ("Download more dictionaries"),
+      // which is a different sentence for each of the two lists.
       assert.match(
         markup,
         new RegExp(`<h4 id="${part.installed}" class="card-head" data-i18n="options_list_installed">`),
@@ -83,7 +87,7 @@ describe("the two blocks a catalogue is read in", () => {
       );
       assert.match(
         markup,
-        new RegExp(`<h4 id="${part.available}" class="card-head" data-i18n="options_list_available">`),
+        new RegExp(`<h4 id="${part.available}" class="card-head" data-i18n="${part.name}">`),
         `the ${part.what} do not say what can be fetched`,
       );
       // In that order: what is here before what could be.
@@ -162,14 +166,12 @@ describe("the two blocks a catalogue is read in", () => {
 
   it("answer an empty list with the way to the catalogue, not with a dead end", async () => {
     const script = await source("options/options.js");
-    assert.match(script, /emptyList\(t\("options_no_models_yet"\), t\("options_no_models_yet_rest"\), "translation-models-available"\)/);
-    assert.match(
-      script,
-      /emptyList\(t\("options_no_dictionaries_yet"\), t\("options_no_dictionaries_yet_rest"\), "dictionaries-available"\)/,
-    );
+    assert.match(script, /"translation-models-available",\n\s+"options_list_available_models",/);
+    assert.match(script, /"dictionaries-available",\n\s+"options_list_available_dictionaries",/);
     const helper = script.slice(script.indexOf("function emptyList("), script.indexOf("function dictionaryGroups("));
     assert.match(helper, /door\.href = `#\$\{anchor\}`/);
-    assert.match(helper, /door\.textContent = t\("options_list_available"\)/);
+    // The door says what the heading it lands on says - one name per list.
+    assert.match(helper, /door\.textContent = t\(name\)/);
     // And a delete that empties the list leaves the focus on the block's own
     // heading, since the filter it used to fall back to is now a block away.
     assert.match(script, /focusDeleteIn\("models", "translation-models-installed", at\)/);

@@ -856,12 +856,25 @@ function moreNotes() {
       button.remove();
       continue;
     }
-    button.addEventListener("click", () => {
-      const opening = rest.hidden;
-      rest.hidden = !opening;
-      button.setAttribute("aria-expanded", String(opening));
-    });
+    armMore(button, rest);
   }
+}
+
+/**
+ * One fold, wired: the trigger says whether it is open and the paragraph
+ * behind it answers. The page's own Mores are wired once at the start
+ * (`moreNotes`); a row the script draws - a dictionary's details - wires its
+ * own as it is built, because there is no markup for it to be found in.
+ *
+ * @param {HTMLButtonElement} button
+ * @param {HTMLElement} rest
+ */
+function armMore(button, rest) {
+  button.addEventListener("click", () => {
+    const opening = rest.hidden;
+    rest.hidden = !opening;
+    button.setAttribute("aria-expanded", String(opening));
+  });
 }
 
 /**
@@ -1633,7 +1646,14 @@ async function renderModels() {
   // come from one read of the store and one display order.
   const here = rows.filter((row) => row.installed !== null);
   if (here.length === 0) {
-    container.append(emptyList(t("options_no_models_yet"), t("options_no_models_yet_rest"), "translation-models-available"));
+    container.append(
+      emptyList(
+        t("options_no_models_yet"),
+        t("options_no_models_yet_rest"),
+        "translation-models-available",
+        "options_list_available_models",
+      ),
+    );
   } else {
     for (const row of here) {
       const rendered = renderRow(row);
@@ -2066,19 +2086,18 @@ function placeActions(head, buttons) {
 /**
  * A row's line of small print, its items apart by a middle dot: the language
  * the book explains words in - or the one word for a book that explains a
- * language in itself - the count of its words, its size, and the fold's own
- * word at the end of the line.
+ * language in itself - the count of its words and its size.
  *
- * What the line used to carry besides: the file's name and the count of other
- * spellings, both now behind the fold (D263, L1). Three items and a door is
- * what fits one line on a phone, and the rest was never what anybody scans a
- * list of dictionaries for.
+ * Since Michał's second round on the panels it stands **inside** the fold
+ * rather than on the row: a list of books is scanned by their names, and the
+ * row is one line - the name, the door and the buttons - with everything else
+ * a press away. Until then it was the row's second line and the fold's own
+ * summary (D263, L1).
  *
  * The space before each dot is the no-break kind, so a line never opens with
- * a dot, and neither does the door: it travels in a box that does not break,
- * because a hard space alone never held it (D259, K2 - measured).
+ * a dot.
  *
- * @param {HTMLElement} meta the `summary` to fill, emptied first
+ * @param {HTMLElement} meta the paragraph to fill, emptied first
  * @param {import("../lib/dict/store.js").Dictionary} dictionary
  */
 function fillDictionaryMeta(meta, dictionary) {
@@ -2101,10 +2120,6 @@ function fillDictionaryMeta(meta, dictionary) {
     if (at > 0) meta.append("\u00a0· ");
     meta.append(item);
   });
-
-  const door = element("span", "note-tail");
-  door.append("\u00a0· ", element("span", "dictionary-more", t("options_details")));
-  meta.append(door);
 }
 
 /**
@@ -2159,33 +2174,51 @@ function renderDictionary(dictionary, place) {
       onConfirm: (button) => void removeDictionary(dictionary, button),
     }),
   );
-  placeActions(head, buttons);
-
   // The fold every finished book ends with (block 2 of the seventh brief):
-  // the name the reader may give it instead of the file's (D199), the file's
-  // name said in full - here it is information, not a repeat - and, when
-  // the book wrote one, its attribution: the dictionaries worth having are
-  // Wiktionary-derived and CC BY-SA, and naming their source is the whole of
-  // what that asks for. Folded, not gone - the row stays scannable, the
-  // rarely-used field is not a field per row on a list of hundreds, and the
-  // credit stays one press away, exactly as the dictionary wrote it. An
-  // unfinished book gets none of this: it is still being named by its files.
-  const details = element("details", "dictionary-details");
-  const meta = element("summary", "dictionary-meta");
+  // the small print, the name the reader may give it instead of the file's
+  // (D199), the file's name said in full - here it is information, not a
+  // repeat - and, when the book wrote one, its attribution: the dictionaries
+  // worth having are Wiktionary-derived and CC BY-SA, and naming their source
+  // is the whole of what that asks for. Folded, not gone - the row stays one
+  // line to scan, the rarely-used field is not a field per row on a list of
+  // hundreds, and the credit stays one press away, exactly as the dictionary
+  // wrote it. An unfinished book gets none of this: it is still being named
+  // by its files.
+  //
+  // The page's own fold rather than a `<details>` (Michał's second round):
+  // every other fold on this page is a trigger and a paragraph it names with
+  // `aria-controls`, and the door has to stand on the row's first line, which
+  // a summary wrapping the whole thing cannot do.
+  const body = element("div", "dictionary-body");
+  body.id = `dictionary-more-${dictionary.id}`;
+  body.hidden = true;
+
+  const more = document.createElement("button");
+  more.type = "button";
+  more.className = "note-more dictionary-more";
+  more.textContent = t("options_details");
+  more.setAttribute("aria-expanded", "false");
+  more.setAttribute("aria-controls", body.id);
+  more.setAttribute("aria-label", t("options_dictionary_details_aria", shown));
+  armMore(more, body);
+  head.append(more);
+
+  const meta = element("p", "dictionary-meta");
   fillDictionaryMeta(meta, dictionary);
-  details.append(meta);
-  details.append(renameField(dictionary));
+  body.append(meta);
+  body.append(renameField(dictionary));
   // Only where the file's own name says something the title does not (V10,
   // D263): under a field whose placeholder is that very name, "File name:
   // dictionary" was the same word twice.
   if (fileNameWorthSaying(dictionary)) {
-    details.append(element("p", "dictionary-file-name", t("options_dictionary_file_name", dictionary.name)));
+    body.append(element("p", "dictionary-file-name", t("options_dictionary_file_name", dictionary.name)));
   }
   if (dictionary.aliasCount > 0) {
-    details.append(element("p", "dictionary-file-name", plural(dictionary.aliasCount, "spellings")));
+    body.append(element("p", "dictionary-file-name", plural(dictionary.aliasCount, "spellings")));
   }
-  if (dictionary.credit !== null) details.append(element("p", "dictionary-credit", dictionary.credit));
-  row.append(details);
+  if (dictionary.credit !== null) body.append(element("p", "dictionary-credit", dictionary.credit));
+  placeActions(head, buttons);
+  row.append(body);
 
   return row;
 }
@@ -2215,6 +2248,10 @@ function refreshRowName(row, dictionary) {
     arrow.setAttribute("aria-label", label);
     arrow.title = label;
   }
+
+  // The door to the details says which book's details it opens.
+  const more = row.querySelector("button.dictionary-more");
+  if (more instanceof HTMLButtonElement) more.setAttribute("aria-label", t("options_dictionary_details_aria", shown));
 
   const remove = row.querySelector("button.model-delete");
   if (remove instanceof HTMLButtonElement) {
@@ -2529,13 +2566,15 @@ function renderCatalogRow(entry) {
  * @param {string} sentence the sentence up to the door
  * @param {string} rest what follows it
  * @param {string} anchor the id of the catalogue block's heading
+ * @param {string} name the catalogue block's own name, so the door says what
+ *   the heading it lands on says
  * @returns {HTMLElement}
  */
-function emptyList(sentence, rest, anchor) {
+function emptyList(sentence, rest, anchor, name) {
   const line = element("p", "empty");
   const door = document.createElement("a");
   door.href = `#${anchor}`;
-  door.textContent = t("options_list_available");
+  door.textContent = t(name);
   line.append(`${sentence} `, door, ` ${rest}`);
   return line;
 }
@@ -2604,7 +2643,14 @@ function renderDictionaryList(stored) {
   list.replaceChildren();
 
   if (stored.length === 0) {
-    list.append(emptyList(t("options_no_dictionaries_yet"), t("options_no_dictionaries_yet_rest"), "dictionaries-available"));
+    list.append(
+      emptyList(
+        t("options_no_dictionaries_yet"),
+        t("options_no_dictionaries_yet_rest"),
+        "dictionaries-available",
+        "options_list_available_dictionaries",
+      ),
+    );
     return;
   }
 

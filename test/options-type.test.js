@@ -251,21 +251,22 @@ describe("the settings page's type", () => {
     // the character before it.
     assert.match(rule(css, ".note-tail"), /white-space: nowrap/, "the space before a trigger is a break opportunity again");
     assert.match(css, /button\.note-more:hover,\nbutton\.note-more:focus-visible \{\n  color: var\(--page-fg\);\n  text-decoration: underline;/, "a trigger says nothing under the pointer");
-    // The dictionary rows' own fold wears the page's triangle rather than the
-    // browser's larger marker. Since D263 its trigger is the last word of the
-    // row's second line, so the triangle rides on that word and the summary
-    // around it is the whole line.
-    assert.match(rule(css, "summary.dictionary-meta"), /list-style: none/, "a dictionary's fold keeps the browser's own marker");
-    assert.match(css, /\.dictionary-more::before \{\n  content: "\\25B8\\00A0";/, "a dictionary's fold wears no triangle of the page's");
-    assert.match(css, /\.dictionary-details\[open\] \.dictionary-more::before \{\n  content: "\\25BE\\00A0";/, "an open dictionary fold keeps the closed triangle");
-    assert.match(css, /summary\.dictionary-meta:is\(:hover, :focus-visible\) \.dictionary-more \{\n  text-decoration: underline;/, "a dictionary's fold says nothing under the pointer");
+    // The dictionary rows' own fold is the page's own, and says so by wearing
+    // its class: the triangle, the quiet ink, the underline under a pointer
+    // and the turn on opening all come from `button.note-more` (Michał's
+    // second round - one dress for every fold on the page).
+    const script = await source("options/options.js");
+    assert.match(script, /more\.className = "note-more dictionary-more"/, "a dictionary's fold is dressed on its own");
+    assert.doesNotMatch(css, /summary\.dictionary-meta/, "a dictionary's fold is still a summary of its own");
   });
 
   it("keeps the heavier weight for headings and the section being read (D259, K3)", async () => {
     const css = await source("options/options.css");
     // Five bold dictionary names in a column outweighed the heading they
-    // stand under; a date is a value, not an emphasis.
-    assert.match(rule(css, ".dictionary-name"), /font-weight: 500/, "a dictionary's name is still set at a heading's weight");
+    // stand under (D259); since Michał's second round on the panels they are
+    // not even half a step heavier - a card holds one size and one weight.
+    // A date is a value, not an emphasis, and was never bold either.
+    assert.match(rule(css, ".dictionary-name"), /font-weight: var\(--ui-label-weight\)/, "a dictionary's name is set apart from the labels around it");
     assert.match(rule(css, ".list-dated strong"), /font-weight: 400/, "the list's date is still set bold");
     // What may be 600 or more: the page's headings, the bar's own title (the
     // heading a narrow screen has) and the section being read.
@@ -282,12 +283,18 @@ describe("the settings page's type", () => {
         "main h5",
         '.sections a[aria-current="location"]',
         ".bar-sections",
-        // A card's own label: a label's weight at the small print's size, so
-        // it can never outweigh the heading standing over the card.
-        ".card-head",
+
       ],
       "something other than a heading or the section being read is set at a heading's weight",
     );
+    // And inside a card there is one size and one weight for every row
+    // (Michał's second round): the card's own label is the only thing that
+    // takes half a step, at the small print's size, so it can never outweigh
+    // the heading standing over the card.
+    assert.match(rule(css, ".card-head"), /font-size: var\(--ui-small\);\n  font-weight: 500;/, "a card's label is set at a heading's weight");
+    for (const selector of [".dictionary-name", ".show-all", ".fold summary h3"]) {
+      assert.match(rule(css, selector), /font-weight: var\(--ui-label-weight\)/, `${selector} is set heavier than the labels around it`);
+    }
   });
 
   it("says a note in a row and keeps the frame for the one warning (D265, D4)", async () => {
@@ -314,7 +321,7 @@ describe("the settings page's type", () => {
     const css = await source("options/options.css");
     const heading = rule(css, ".fold summary h3");
     assert.match(heading, /font-size: var\(--ui-text\)/, "a fold still reads at a subsection's size");
-    assert.match(heading, /font-weight: 500/, "a fold still reads at a subsection's weight");
+    assert.match(heading, /font-weight: var\(--ui-label-weight\)/, "a fold reads heavier than the rows around it");
     // The page's own triangle, the one the row notes' More wears - never a
     // chevron (D254 §2.6), and never a turn that an e-ink panel would smear.
     assert.match(css, /\.fold > summary::before \{\n  content: "\\25B8\\00A0";/, "a fold wears no marker of the page's own");
@@ -323,7 +330,7 @@ describe("the settings page's type", () => {
     assert.match(rule(css, ".fold > summary"), /min-height: var\(--row-min-h\)/, "a fold is under the touch floor");
     assert.match(rule(css, ".fold > summary"), /padding: var\(--row-pad-y\) var\(--row-pad-x\)/, "a fold's door is not a row of its card");
     // "Show all (N)" unfolds a list the way these unfold a form, so it is
-    // dressed the same.
+    // dressed the same - the rows' own size and the rows' own weight.
     assert.match(rule(css, ".show-all"), /font-size: var\(--ui-text\)/, "the list's fold is dressed unlike the others");
     assert.match(css, /\.show-all\[aria-expanded="true"\]::before/, "the list's fold never turns its triangle");
     // And nothing after the first fold opens a gap: they are a list of doors,

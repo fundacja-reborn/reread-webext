@@ -131,10 +131,12 @@ describe("the settings page's field", () => {
     // The fold is built after the unfinished row has returned: an import
     // that stopped halfway is still being named by its files.
     assert.ok(row.indexOf("renderUnfinished(row, head, dictionary)") < row.indexOf("renameField(dictionary)"));
-    const fold = row.slice(row.indexOf('element("details", "dictionary-details")'));
-    // Its trigger is the row's own second line since D263 - the small print,
-    // built by `fillDictionaryMeta`, which ends in the word.
-    assert.match(fold, /element\("summary", "dictionary-meta"\)/);
+    const fold = row.slice(row.indexOf('element("div", "dictionary-body")'));
+    // Its trigger stands on the row's own line since Michał's second round on
+    // the panels, and the small print built by `fillDictionaryMeta` is the
+    // first thing the fold opens.
+    assert.match(fold, /element\("p", "dictionary-meta"\)/);
+    assert.match(fold, /more\.className = "note-more dictionary-more"/);
     assert.match(fold, /renameField\(dictionary\)/);
     assert.match(fold, /options_dictionary_file_name", dictionary\.name/);
     // The field's own placeholder is the file's name, so the line saying it
