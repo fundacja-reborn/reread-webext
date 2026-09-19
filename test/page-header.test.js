@@ -59,6 +59,27 @@ describe("the bar stuck to the top of every page", () => {
     }
   });
 
+  it("wears the name drawn, in the bar's own ink, on the settings page (Michał, 2026-09-19)", async () => {
+    const markup = await source("options/options.html");
+    // The wordmark as the site draws it (reapps.eu/read), inlined rather than
+    // linked: an <img> keeps one colour, and this bar is read on four papers.
+    // Outlines only - a face the browser happens to have is not the name's
+    // form, and a font, a script or a style inside the mark would be a second
+    // thing shipped in the shape of a picture.
+    const at = markup.indexOf('<svg class="page-wordmark"');
+    assert.ok(at > 0, "the settings bar does not wear the drawn name");
+    const mark = markup.slice(at, markup.indexOf("</svg>", at));
+    assert.match(mark, /role="img" aria-label="re\/read"/, "the drawn name has no name of its own");
+    assert.match(mark, /fill="currentColor"/, "the mark keeps an ink of its own instead of the bar's");
+    assert.doesNotMatch(mark, /#000000|#ffffff/, "an ink from the site stayed in the mark");
+    assert.doesNotMatch(mark, /<(script|style|image|text)\b|font-/, "the mark carries more than outlines");
+    // Sized in `em`, so a browser told to render text larger grows the name
+    // with the bar around it; and only where the bar shows a mark at all -
+    // below 60rem the section being read stands in its place.
+    const css = await source("options/options.css");
+    assert.match(css.slice(css.indexOf("\n.page-wordmark {")), /height: 1\.15em/, "the drawn name does not grow with the text");
+  });
+
   it("is the reader's box on the reading list and the highlights too, the folding kept to the article view", async () => {
     const markup = await source("reader/reader.html");
     assert.match(markup, /<div class="reader-chrome page-chrome">/, "the reader's box does not wear the shared class");

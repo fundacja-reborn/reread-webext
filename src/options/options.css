@@ -381,6 +381,19 @@ body:not(.no-translation) .no-translation-only {
   padding-inline: var(--settings-side);
 }
 
+/* The name, drawn (Michał, 2026-09-19): the wordmark stands where the word
+   stood, at the height of the bar's own line and in the bar's own ink, so the
+   dark paper and the e-ink paper need no second file. `height` in `em` rather
+   than in px, so a browser told to render text larger grows the name with the
+   rest of the bar. Below 60rem the mark is hidden altogether (the section
+   being read takes its place), so this is the wide window's alone. */
+.page-wordmark {
+  display: block;
+  height: 1.15em;
+  width: auto;
+  color: var(--page-fg);
+}
+
 /* The menu panel hangs under the bar and keeps the same gutter. */
 .nav-menu {
   padding-inline: var(--settings-side);
