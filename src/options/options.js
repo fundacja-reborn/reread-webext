@@ -101,7 +101,7 @@ import {
   voiceLanguage,
   voicesFor,
 } from "../lib/tts.js";
-import { pinnedByBrowser, readSteps, stepsView, writeSteps } from "./first-steps.js";
+import { hasToolbar, pinnedByBrowser, readSteps, stepsView, writeSteps } from "./first-steps.js";
 import { armSearch } from "./search.js";
 import { armSections, fillSectionSelect, land } from "./sections.js";
 import {
@@ -260,6 +260,11 @@ function renderFirstSteps() {
     dictionary: dictionaryStored,
     pinned: pinnedNow === null ? stepsState.pinned : pinnedNow,
     hidden: stepsState.hidden,
+    // A phone has no toolbar to pin anything to, so the card there is one
+    // step long - and the sentence about where the button already stands is
+    // said outright rather than hidden behind a step's "How" (Michał's Boox,
+    // 2026-09-19).
+    toolbar: hasToolbar(os),
   });
 
   fold.hidden = !view.show;
@@ -278,10 +283,15 @@ function renderFirstSteps() {
   if (intro !== null) intro.hidden = !view.intro;
 
   const rows = ["step-source", "step-pin"];
-  rows.forEach((id, at) => {
+  rows.forEach((id) => {
     const row = document.getElementById(id);
     if (row === null) return;
-    const done = view.steps[at] === true;
+    // A step this platform does not have leaves the list altogether, rather
+    // than standing there unticked for ever.
+    const step = view.steps.find((one) => one.id === id) ?? null;
+    row.hidden = step === null;
+    if (step === null) return;
+    const done = step.done;
     row.classList.toggle("is-done", done);
     const mark = row.querySelector(".step-mark");
     // A tick and an empty circle, not a colour: the state has to survive the
@@ -301,6 +311,18 @@ function renderFirstSteps() {
       document.getElementById("step-pin-how")?.setAttribute("aria-expanded", "false");
     }
   });
+
+  // Where the step is gone, what it carried is worth saying anyway: the
+  // button already stands somewhere, and a fresh install has no idea where.
+  // So on Android the sentence is said outright, as a line of the card
+  // rather than behind a "How" - Android is the platform that has a wording
+  // of its own (`options_first_steps_pin_android`, swapped in at render).
+  // iOS and iPadOS have none yet, and a sentence about a menu Safari has not
+  // got would be worse than silence.
+  if (!hasToolbar(os)) {
+    const help = document.getElementById("first-steps-pin");
+    if (help !== null) help.hidden = os !== "android";
+  }
 
   // The bar's select is a snapshot of the column - it has to be taken again
   // whenever a line joins or leaves it.
@@ -3505,9 +3527,10 @@ async function render() {
   // how old that is.
   liveList = await readLiveModels();
   liveDictionaries = await readLiveDictionaries();
-  // Android has no toolbar to pin anything to: the last step says where the
-  // button already lives instead. Settled here, while the fold is still
-  // hidden, so neither platform ever sees the other platform's wording.
+  // Android has no toolbar to pin anything to: the step is not asked there
+  // at all (`hasToolbar`), and this sentence stands in the card as a plain
+  // line saying where the button already is. Settled here, while the fold is
+  // still hidden, so neither platform ever sees the other's wording.
   const pin = document.getElementById("first-steps-pin");
   if (pin !== null && os === "android") {
     pin.setAttribute("data-i18n", "options_first_steps_pin_android");
