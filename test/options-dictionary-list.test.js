@@ -104,20 +104,30 @@ describe("the dictionary list's rows", () => {
     assert.doesNotMatch(rule(css, ".dictionary-head .badge"), /nowrap/);
   });
 
-  it("keep the buttons in one group at the right edge, under the name only on a narrow screen", () => {
+  it("keep the buttons in one group at the right edge, under the name only in a narrow card", () => {
     const actions = rule(css, ".dictionary-actions");
     assert.match(actions, /flex: none/);
     assert.match(actions, /margin-left: auto/);
     assert.match(rule(css, ".dictionary-actions button"), /white-space: nowrap/);
-    const narrow = css.slice(css.indexOf("@media (max-width: 480px)"));
-    assert.match(narrow, /\.dictionary-actions \{\s+flex-basis: 100%;\s+justify-content: flex-end;/);
-    // And no other narrow-screen rule for the row: the stack is the same
-    // everywhere. Other blocks may exist for other parts of the page (the
-    // bar's mark yields its room to the table of contents at a phone's
-    // width); none of them may reach the dictionary row.
-    const blocks = css.split("@media (max-width").slice(1);
-    const about = blocks.filter((block) => block.slice(0, block.indexOf("\n}\n")).includes(".dictionary"));
-    assert.equal(about.length, 1);
+    // The card asks its own width, not the window's (D265): a card is 42.5rem
+    // on a desktop whatever the window does, and a phone's width on a phone.
+    const narrow = css.slice(css.indexOf("@container (max-width: 30rem)"));
+    assert.match(narrow, /\.dictionary-actions \{\n    flex-basis: 100%;\n    justify-content: flex-end;/);
+    // And no window-width rule reaches the dictionary row at all: the stack
+    // is the same everywhere, and what changes is the card's own width.
+    for (let at = css.indexOf("@media (max-width"); at >= 0; at = css.indexOf("@media (max-width", at + 1)) {
+      let depth = 0;
+      let end = css.indexOf("{", at);
+      for (let i = end; i < css.length; i += 1) {
+        if (css[i] === "{") depth += 1;
+        if (css[i] === "}") depth -= 1;
+        if (depth === 0) {
+          end = i;
+          break;
+        }
+      }
+      assert.doesNotMatch(css.slice(at, end), /\.dictionary/, "a window-width rule reaches the dictionary row");
+    }
   });
 
   it("title the row with the shown name and wrap it rather than cut it", () => {
@@ -159,7 +169,8 @@ describe("the groups the list stands in (D263, L2)", () => {
 
   it("wear the badge of what is being read on the heading, not on the rows", () => {
     const heading = fn("dictionaryGroupHeading", "renderDictionaryList");
-    assert.match(heading, /element\("h5", "dictionary-group", group\.name\)/);
+    // The heading is the card's own label (D265), so it wears that class too.
+    assert.match(heading, /element\("h5", "dictionary-group card-head", group\.name\)/);
     assert.match(heading, /group\.lang === config\.sourceLang/);
     assert.match(heading, /t\("options_badge_reading"\)/);
     // A stored row carries none of its own any more: the pill said "what you
@@ -174,7 +185,7 @@ describe("the groups the list stands in (D263, L2)", () => {
     // And a group's heading is the card's own label (D265): the quiet voice,
     // a label's weight, and the hairline drawn over it rather than under.
     assert.match(rule(css, ".card-head"), /font-size: var\(--ui-small\)/);
-    assert.match(css, /:is\(\.card, \.rows, \.card-list, \.models\) > \.card-head \+ \*::before \{\n  content: none;/);
+    assert.match(css, /:is\(\.card, \.rows, \.card-list, \.models\) > \.card-head \+ \*::after \{\n  content: none;/);
   });
 });
 

@@ -187,7 +187,10 @@ describe("the data section", () => {
     assert.match(rule(css, ".copies"), /border-collapse: collapse/, "the table is not drawn as one");
     assert.match(rule(css, ".copies thead th"), /border-bottom: var\(--sep-row\)/, "the column names are not parted from the rows");
     assert.match(rule(css, ".copies"), /font-variant-numeric: tabular-nums/, "a column of dates and counts does not line up");
-    assert.match(css, /@media \(max-width: 30rem\) \{\s*\.copies,/, "three columns stay three columns on a phone");
+    // The table stands inset in its card like a list, and a card too narrow
+    // for three columns takes it apart into blocks (D265).
+    assert.match(rule(css, ".copies"), /margin: 0 var\(--row-pad-x\)/, "the table's lines are not the card's own");
+    assert.match(css, /@container \(max-width: 30rem\) \{\n  \/\* A label and a control[\s\S]*?\.copies,\n  \.copies tbody,\n  \.copies tr \{\n    display: block;/, "three columns stay three columns in a narrow card");
   });
 
   it("promises of the export only what the export actually writes (D260)", async () => {

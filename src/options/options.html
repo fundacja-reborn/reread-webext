@@ -309,7 +309,7 @@
            pair is still where saved phrases are filed and what the
            dictionaries answer for, so the row stays - only its hint swaps
            for the quiet one below. -->
-      <div class="row row-value row-stack" id="s-pair" data-setting="pair" data-section="languages">
+      <div class="row row-value" id="s-pair" data-setting="pair" data-section="languages">
         <label class="row-name" for="pair" data-i18n="language_pair">Language pair</label>
         <select id="pair"></select>
         <p class="row-note translation-only">
@@ -1039,7 +1039,7 @@
            keyboard over the article). The field previews itself in the
            typed face - options.js sets its font-family from the cleaned
            name, never the raw value. -->
-      <div class="row row-value row-stack" id="s-fontFamily" data-setting="fontFamily" data-keywords="options_keywords_font" data-section="reading-view">
+      <div class="row row-value" id="s-fontFamily" data-setting="fontFamily" data-keywords="options_keywords_font" data-section="reading-view">
         <label class="row-name" for="font-custom" data-i18n="options_font_custom">Own font</label>
         <p class="inline">
           <input
@@ -1076,7 +1076,7 @@
            panel for the font name's reason. The bounds are the config's
            (`READING_PACE`), put on the field by options.js, so the page and
            the healer cannot disagree. -->
-      <div class="row row-value row-stack" id="s-readingPace" data-setting="readingPace" data-keywords="options_keywords_pace" data-section="reading-view">
+      <div class="row row-value" id="s-readingPace" data-setting="readingPace" data-keywords="options_keywords_pace" data-section="reading-view">
         <label class="row-name" for="reading-pace" data-i18n="options_reading_pace">Reading speed</label>
         <p class="inline">
           <input id="reading-pace" type="number" inputmode="numeric" autocomplete="off" />
@@ -1136,7 +1136,7 @@
            quicker and more precise. Off is for a reader with hardware page
            keys, where no gesture is worth an accidental turn. Chosen by name
            in a select, like the language pair: three values, set once. -->
-      <div class="row row-value row-stack" id="s-touchTurn" data-setting="touchTurn" data-keywords="options_keywords_turn" data-section="paged-layout">
+      <div class="row row-value" id="s-touchTurn" data-setting="touchTurn" data-keywords="options_keywords_turn" data-section="paged-layout">
         <label class="row-name" for="touch-turn" data-i18n="options_touch_turn">Turning pages by touch</label>
         <select id="touch-turn">
           <option value="zones" data-i18n="options_touch_turn_zones">Tap the left or right side of the screen</option>
@@ -1160,7 +1160,7 @@
       </div>
       <!-- The turn made visible (D251). Two values, not three: a signal
            given every fifth page would not be a confirmation of anything. -->
-      <div class="row row-value row-stack" id="s-turnEffect" data-setting="turnEffect" data-keywords="options_keywords_turn" data-section="paged-layout">
+      <div class="row row-value" id="s-turnEffect" data-setting="turnEffect" data-keywords="options_keywords_turn" data-section="paged-layout">
         <label class="row-name" for="turn-effect" data-i18n="options_turn_effect">Page turn effect</label>
         <select id="turn-effect">
           <option value="auto" data-i18n="options_turn_effect_auto">Automatic</option>
@@ -1225,7 +1225,7 @@
            `voicesFor` keeps the engine's network voices out of the list, and
            the status line under the note says when that leaves nothing for
            the language. -->
-      <div class="row row-value row-stack row-voice row-sub" id="s-ttsVoices" data-setting="ttsVoices" data-parent="ttsOff" data-section="reading-aloud">
+      <div class="row row-value row-stack row-sub" id="s-ttsVoices" data-setting="ttsVoices" data-parent="ttsOff" data-section="reading-aloud">
         <label class="row-name" for="tts-voice" data-i18n="options_tts_voice">Voice for reading aloud</label>
         <p class="inline">
           <select
@@ -1288,7 +1288,7 @@
            says out loud that a browser may clear an origin's storage on its
            own: on WebKit a refused persistence is exactly that risk
            (`lib/storage-report.js`). -->
-      <div class="row row-value row-stack row-storage" id="s-storage" data-setting="storage" data-keywords="options_keywords_storage" data-section="data">
+      <div class="row row-value row-storage" id="s-storage" data-setting="storage" data-keywords="options_keywords_storage" data-section="data">
         <span class="row-name" data-i18n="options_storage">Data on this device</span>
         <span class="row-figure" id="storage-usage"></span>
         <!-- What the size measures, because the lists below it measure

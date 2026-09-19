@@ -184,7 +184,7 @@
   .card,
   :is(.card, .rows, .card-list, .models)
     > :where(:not([hidden], .status:empty))
-    ~ :where(:not([hidden], .status:empty))::before {
+    ~ :where(:not([hidden], .status:empty))::after {
     border-color: CanvasText;
   }
 }
@@ -786,7 +786,7 @@ section > header:not(:has(> :not([hidden]))) {
   padding-top: 0;
 }
 
-:is(.card, .rows, .card-list, .models) > .status::before {
+:is(.card, .rows, .card-list, .models) > .status::after {
   content: none;
 }
 
@@ -822,10 +822,15 @@ section > header:not(:has(> :not([hidden]))) {
 
    Three levels, because a list stands in a card and its groups stand in the
    list. An empty status draws no box (`.status:empty`, page.css), so it is no
-   row either - counted, it would open a card on a line with nothing over it. */
+   row either - counted, it would open a card on a line with nothing over it.
+
+   Drawn on `::after` and never on `::before`: the page's fold markers are
+   `::before` content, and the list's own "Show all" is both a row of a card
+   and a door with a triangle (the two met, and the triangle came out
+   absolutely positioned on the line). */
 :is(.card, .rows, .card-list, .models)
   > :where(:not([hidden], .status:empty))
-  ~ :where(:not([hidden], .status:empty))::before {
+  ~ :where(:not([hidden], .status:empty))::after {
   content: "";
   position: absolute;
   top: 0;
@@ -835,8 +840,16 @@ section > header:not(:has(> :not([hidden]))) {
 
 /* A label draws the line above itself and never one under it: what follows it
    is what it names. */
-:is(.card, .rows, .card-list, .models) > .card-head + *::before {
+:is(.card, .rows, .card-list, .models) > .card-head + *::after {
   content: none;
+}
+
+/* A card the search emptied is a frame around nothing: it goes, and the
+   heading over it goes with the section when nothing under it answered
+   (`filterPart`, search.js). Only while a query is in force - outside one,
+   an empty card is a card with something to say. */
+body.searching .card:not(:has(> :not([hidden]))) {
+  display: none;
 }
 
 /* --- the rows ---
@@ -990,7 +1003,7 @@ a.row-link:focus-visible {
   padding-inline-start: calc(var(--row-pad-x) + var(--row-indent));
 }
 
-:is(.card, .rows) > :where(:not([hidden])) ~ .row-sub:not([hidden])::before {
+:is(.card, .rows) > :where(:not([hidden])) ~ .row-sub:not([hidden])::after {
   inset-inline-start: calc(var(--row-pad-x) + var(--row-indent));
 }
 
@@ -1008,12 +1021,21 @@ a.row-link:focus-visible {
   align-items: start;
 }
 
-/* What the row reports rather than asks - the space this device holds. */
+/* What the row reports rather than asks - the space this device holds. The
+   label keeps its own width and the figure takes the rest, flush right. */
 .row-figure {
   color: var(--page-muted);
 }
 
-.row > :is(select, button, .row-figure) {
+.row-storage {
+  grid-template-columns: max-content minmax(0, 1fr);
+}
+
+.row-storage > .row-figure {
+  text-align: end;
+}
+
+.row > :is(select, button, output, .inline, .stepper, .row-figure) {
   justify-self: end;
 }
 
@@ -1049,14 +1071,17 @@ a.row-link:focus-visible {
   grid-column: 1 / -1;
 }
 
-/* The rows whose control wants the whole width on a phone: label above,
-   control below. The media query at the end puts them back on one line. */
+/* The one row whose controls never fit beside its label: the voice, with a
+   language, a voice and Listen on one line (D265, the `stacked` variant).
+   Every other control row stacks only where its own card is too narrow, which
+   the container query at the foot of this sheet decides. */
 .row-stack {
   grid-template-columns: minmax(0, 1fr);
 }
 
-.row-stack > :is(select, .row-figure) {
+.row-stack > :is(select, .inline, .row-figure) {
   justify-self: stretch;
+  margin-top: 0.5rem;
 }
 
 /* The whole first line is one label: text left, checkbox right, and every
@@ -1179,7 +1204,7 @@ p.explain.row-more {
   padding-top: 0;
 }
 
-.list-tools + .list-dated::before {
+.list-tools + .list-dated::after {
   content: none;
 }
 
@@ -1253,10 +1278,22 @@ p.explain.row-more {
   align-items: center;
 }
 
+/* The name and its badge: a line that wraps between them rather than inside
+   the pair, so "English -> Polish" moves as the one thing it is when a narrow
+   card cannot hold the badge beside it. */
 .model-name {
-  grid-column: 1 / -1;
+  grid-column: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 0.6rem;
+  row-gap: 0.15rem;
   min-width: 0;
   overflow-wrap: anywhere;
+}
+
+.model-name > .badge {
+  margin-left: 0;
 }
 
 .model-meta {
@@ -1820,7 +1857,7 @@ button.model-delete {
 
 /* The voice names are the device's own and can run long; the select takes the
    line's spare width and may shrink below its content, so a long name never
-   pushes the Listen button off the page. */
+   pushes the Listen button off its line. */
 #tts-voice {
   flex: 1 1 12rem;
   min-width: 0;
@@ -2008,12 +2045,12 @@ button.step-done {
    the headings speak in the page's quiet voice: they label a report, they do
    not open a section.
 
-   Under 30rem the three columns are three ellipses, so the table gives up
-   being one: every row becomes a block, the name keeps the date company on
-   the first line and the contents drop to the second. */
+   It stands in its card the way a list does (D265): inset by the rows' own
+   padding, so its lines are the card's lines and start and end where they do.
+   A card too narrow for three columns takes it apart into blocks, below. */
 .copies {
-  width: 100%;
-  margin: 0;
+  width: calc(100% - 2 * var(--row-pad-x));
+  margin: 0 var(--row-pad-x);
   border-collapse: collapse;
   color: var(--page-muted);
   font-size: var(--ui-small);
@@ -2022,7 +2059,7 @@ button.step-done {
 }
 
 .copies :is(th, td) {
-  padding: 0.35rem 1rem 0.35rem 0;
+  padding: var(--row-pad-y) 1rem var(--row-pad-y) 0;
   font-weight: inherit;
   text-align: inherit;
   vertical-align: baseline;
@@ -2033,10 +2070,16 @@ button.step-done {
   text-align: end;
 }
 
-/* The column names: one hairline parts them from the rows - never a fill,
-   which an e-ink panel rounds away. */
+/* The column names, and the line under them: the rows' own hairline, never a
+   fill - a fill is one of the sixteen greys an e-ink panel rounds away. */
 .copies thead th {
+  padding-top: 0;
+  font-size: 0.8125rem;
   border-bottom: var(--sep-row);
+}
+
+.copies tbody tr + tr :is(th, td) {
+  border-top: var(--sep-row);
 }
 
 .copy-name {
@@ -2044,37 +2087,15 @@ button.step-done {
   white-space: nowrap;
 }
 
-@media (max-width: 30rem) {
-  .copies,
-  .copies tbody,
-  .copies tr {
-    display: block;
-  }
-
-  /* The clip pattern: the column names stay for a screen reader, which reads
-     the table as a table however it is laid out. */
+/* The clip pattern for the narrow card below: the column names stay for a
+   screen reader, which reads the table as a table however it is laid out. */
+@container (max-width: 30rem) {
   .copies thead {
     position: absolute;
     width: 1px;
     height: 1px;
     overflow: hidden;
     clip-path: inset(50%);
-  }
-
-  .copies tr {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) max-content;
-    gap: 0.15rem 1rem;
-    margin: 0.35rem 0;
-  }
-
-  .copies :is(th, td) {
-    padding: 0;
-  }
-
-  .copy-holds {
-    grid-row: 2;
-    grid-column: 1 / -1;
   }
 }
 
@@ -2122,46 +2143,6 @@ summary::marker {
   /* Room for the page to breathe at its edges. */
   :root {
     --settings-side: 1.5rem;
-  }
-
-  /* The stacked rows return to one line: label left, control right. */
-  .row-stack {
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
-
-  .row-stack > :is(select, .row-figure) {
-    justify-self: end;
-  }
-
-  /* The storage row's value is a sentence, and the `auto` track above would
-     take the label's room and wrap "Data on this device" word by word
-     (Michał's Firefox, 2026-08-26). Here the label keeps its width and the
-     sentence is what wraps - flush right, the way every value stands. */
-  .row-storage {
-    grid-template-columns: max-content minmax(0, 1fr);
-  }
-
-  .row-storage > .row-figure {
-    text-align: end;
-  }
-
-  /* The voice row's label keeps its width the storage row's way: its control
-     cell holds two selects and a button, whose content took the whole row
-     and left the label folded on itself under the first select (Michał's
-     smoke, 2026-08-29). The cell is the row's remainder; the voice select
-     grows into it, and what has to wrap wraps at the right edge, where every
-     control of this page stands. */
-  .row-voice {
-    grid-template-columns: max-content minmax(0, 1fr);
-  }
-
-  .row-voice > .inline {
-    justify-content: flex-end;
-  }
-
-  /* List rows on one line: name | size | action. */
-  .model-name {
-    grid-column: 1;
   }
 }
 
@@ -2253,10 +2234,50 @@ summary::marker {
   }
 }
 
-/* The one narrow-screen move of the dictionary list: the buttons leave the
-   pair's line for a line of their own under it, flush right, so a pair
-   and three buttons never fight for one 360px line (the seventh brief). */
-@media (max-width: 480px) {
+/* --- the narrow card (D265) ---
+
+   What a row looks like is its own card's business, not the window's: a card
+   is 42.5rem wide on a desktop whatever the window does, and a phone's width
+   on a phone, and the same row has to lay itself out in both. So the rows ask
+   their card (`container-type: inline-size` on `.card`), and the window is
+   left to decide the frame alone. In rem, so a browser told to render text
+   larger reaches the narrow dress at the width where it is needed. */
+@container (max-width: 30rem) {
+  /* A label and a control no longer fit on one line: the control goes under
+     the label, where a stacked row has always put it. The storage row keeps
+     its two tracks - a name and a figure fit anywhere. */
+  .row-value:not(.row-storage, .row-stack) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .row-value:not(.row-storage, .row-stack) > :is(select, .inline, .stepper, .row-figure) {
+    justify-self: stretch;
+    margin-top: 0.5rem;
+  }
+
+  /* A list row: the name and its action keep the first line - a Delete that
+     dropped under the name would have moved away from the name it deletes -
+     and the size goes under the name, as the meta line it is. Until D265 both
+     the size and the button left the name's line together, which is what a
+     narrow screen used to do to this row. */
+  .model {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .model-meta {
+    grid-column: 1;
+    grid-row: 2;
+    justify-self: start;
+    text-align: start;
+  }
+
+  .model-act {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  /* The dictionaries' buttons leave the name's line for one of their own,
+     flush right, so a name and three buttons never fight for one line. */
   .dictionary-actions {
     flex-basis: 100%;
     justify-content: flex-end;
@@ -2275,5 +2296,41 @@ summary::marker {
 
   .list-update {
     margin-left: auto;
+  }
+
+  /* Three columns of a table become three ellipses on a card this narrow, so
+     the table gives up being one: every row is a block, the name keeps the
+     date company on the first line and the contents drop to the second. */
+  .copies,
+  .copies tbody,
+  .copies tr {
+    display: block;
+  }
+
+  .copies tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) max-content;
+    gap: 0.15rem 1rem;
+    padding: var(--row-pad-y) 0;
+  }
+
+  /* The line belongs to the row now, not to its cells: cells laid out as grid
+     items each drew their own, and the line came out in pieces. */
+  .copies tbody tr + tr {
+    border-top: var(--sep-row);
+  }
+
+  .copies :is(th, td) {
+    padding: 0;
+  }
+
+  /* Said in the wide rule's own shape, or it would not outweigh it. */
+  .copies tbody tr + tr :is(th, td) {
+    border-top: none;
+  }
+
+  .copy-holds {
+    grid-row: 2;
+    grid-column: 1 / -1;
   }
 }

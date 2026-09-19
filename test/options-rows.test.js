@@ -132,7 +132,7 @@ describe("the settings rows", () => {
     assert.doesNotMatch(child, /border/, "a child is joined to its parent by a line again");
     assert.match(
       css,
-      /:is\(\.card, \.rows\) > :where\(:not\(\[hidden\]\)\) ~ \.row-sub:not\(\[hidden\]\)::before \{\n  inset-inline-start: calc\(var\(--row-pad-x\) \+ var\(--row-indent\)\);/,
+      /:is\(\.card, \.rows\) > :where\(:not\(\[hidden\]\)\) ~ \.row-sub:not\(\[hidden\]\)::after \{\n  inset-inline-start: calc\(var\(--row-pad-x\) \+ var\(--row-indent\)\);/,
       "a child's hairline is not inset to its own column",
     );
 

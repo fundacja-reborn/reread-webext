@@ -2574,13 +2574,14 @@ function dictionaryGroups(stored) {
 
 /**
  * One group's heading: the language, and the badge when its dictionaries are
- * the ones the bubble is asking.
+ * the ones the bubble is asking. It is a card's own label (D265), so it wears
+ * the label's class and the card draws the hairline over it.
  *
  * @param {{ lang: string, name: string }} group
  * @returns {HTMLElement}
  */
 function dictionaryGroupHeading(group) {
-  const heading = element("h5", "dictionary-group", group.name);
+  const heading = element("h5", "dictionary-group card-head", group.name);
   if (group.lang === config.sourceLang) heading.append(element("span", "badge", t("options_badge_reading")));
   return heading;
 }

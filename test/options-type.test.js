@@ -203,21 +203,21 @@ describe("the settings page's type", () => {
     // a row can look back past the rows a query took away.
     assert.match(
       css,
-      /:is\(\.card, \.rows, \.card-list, \.models\)\n  > :where\(:not\(\[hidden\], \.status:empty\)\)\n  ~ :where\(:not\(\[hidden\], \.status:empty\)\)::before \{\n  content: "";\n  position: absolute;\n  top: 0;\n  inset-inline: var\(--row-pad-x\);\n  border-top: var\(--sep-row\);/,
+      /:is\(\.card, \.rows, \.card-list, \.models\)\n  > :where\(:not\(\[hidden\], \.status:empty\)\)\n  ~ :where\(:not\(\[hidden\], \.status:empty\)\)::after \{\n  content: "";\n  position: absolute;\n  top: 0;\n  inset-inline: var\(--row-pad-x\);\n  border-top: var\(--sep-row\);/,
       "the hairline is not drawn between two drawn rows, inset from the card's edges",
     );
     assert.doesNotMatch(css, /\.row \+ \.row \{/, "the hairline leans on the adjacent combinator");
     // A card's label draws the line above itself and never one under it.
     assert.match(
       css,
-      /:is\(\.card, \.rows, \.card-list, \.models\) > \.card-head \+ \*::before \{\n  content: none;/,
+      /:is\(\.card, \.rows, \.card-list, \.models\) > \.card-head \+ \*::after \{\n  content: none;/,
       "a card's label parts itself from what it names",
     );
     // An empty status draws no box, so it is no row either - counted, it
     // would open a card on a line with nothing over it.
     assert.match(
       css,
-      /:is\(\.card, \.rows, \.card-list, \.models\) > \.status::before \{\n  content: none;/,
+      /:is\(\.card, \.rows, \.card-list, \.models\) > \.status::after \{\n  content: none;/,
       "a status is parted from the row it answers",
     );
   });
