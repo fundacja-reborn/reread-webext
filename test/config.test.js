@@ -843,13 +843,22 @@ describe("the reader's appearance", () => {
   });
 
   it("signals a turn unless a stored name says otherwise (D251)", () => {
-    assert.equal(READER_DEFAULTS.turnEffect, "auto");
+    // Three values since Michał's call (2026-09-19), with the smooth scroll
+    // the default: the flash is for an e-ink panel, and no theme is allowed
+    // to guess that somebody is holding one.
+    assert.equal(READER_DEFAULTS.turnEffect, "smooth");
     assert.equal(withDefaults({ reader: { turnEffect: "off" } }).reader.turnEffect, "off");
-    assert.equal(withDefaults({ reader: { turnEffect: "curl" } }).reader.turnEffect, "auto");
-    assert.equal(withDefaults({ reader: { turnEffect: false } }).reader.turnEffect, "auto");
-    assert.equal(withDefaults({ reader: {} }).reader.turnEffect, "auto");
-    assert.ok(isTurnEffect("auto") && isTurnEffect("off"));
-    assert.equal(isTurnEffect("flash"), false);
+    assert.equal(withDefaults({ reader: { turnEffect: "flash" } }).reader.turnEffect, "flash");
+    // "auto" is what profiles written before that round carry, and it means
+    // nothing now: the guard drops it and the default answers instead - the
+    // flip reaches existing profiles on purpose, with a sentence in the
+    // release note rather than a migration.
+    assert.equal(withDefaults({ reader: { turnEffect: "auto" } }).reader.turnEffect, "smooth");
+    assert.equal(withDefaults({ reader: { turnEffect: "curl" } }).reader.turnEffect, "smooth");
+    assert.equal(withDefaults({ reader: { turnEffect: false } }).reader.turnEffect, "smooth");
+    assert.equal(withDefaults({ reader: {} }).reader.turnEffect, "smooth");
+    assert.ok(isTurnEffect("smooth") && isTurnEffect("flash") && isTurnEffect("off"));
+    assert.equal(isTurnEffect("auto"), false);
   });
 
   it("clamps a size or a width out of range instead of forgetting it", () => {

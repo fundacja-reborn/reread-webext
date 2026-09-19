@@ -574,8 +574,7 @@ describe("flashAllowed and turnMotion (D251)", () => {
    */
   function motion(how = {}) {
     return turnMotion({
-      effect: "auto",
-      eink: false,
+      effect: "smooth",
       reduced: false,
       reason: "turn",
       lastFlashAt: -Infinity,
@@ -584,26 +583,29 @@ describe("flashAllowed and turnMotion (D251)", () => {
     });
   }
 
-  it("flashes on e-ink paper and scrolls smoothly on every other", () => {
-    assert.equal(motion({ eink: true }), "flash");
-    assert.equal(motion(), "smooth");
+  // What the reader asked for, and nothing inferred from the paper it is
+  // read on: the theme decided this until Michał's call (2026-09-19), so
+  // the E-ink theme on glass flashed and a real panel could get the flash
+  // only by wearing that theme.
+  it("does what the setting says, whatever the theme", () => {
+    assert.equal(motion({ effect: "flash" }), "flash");
+    assert.equal(motion({ effect: "smooth" }), "smooth");
   });
 
   it("moves instantly where the setting, the system or the reason says so", () => {
     assert.equal(motion({ effect: "off" }), "instant");
-    assert.equal(motion({ effect: "off", eink: true }), "instant");
     assert.equal(motion({ reduced: true }), "instant");
     // Less motion takes the flash too: a band going black is motion.
-    assert.equal(motion({ reduced: true, eink: true }), "instant");
+    assert.equal(motion({ reduced: true, effect: "flash" }), "instant");
     for (const reason of /** @type {const} */ (["jump", "speech", "drag"])) {
       assert.equal(motion({ reason }), "instant", `${reason} is dressed as a turn`);
-      assert.equal(motion({ reason, eink: true }), "instant", `${reason} flashes the band`);
+      assert.equal(motion({ reason, effect: "flash" }), "instant", `${reason} flashes the band`);
     }
   });
 
   it("turns instantly rather than flashing within the gap", () => {
-    assert.equal(motion({ eink: true, lastFlashAt: now - 100 }), "instant");
-    assert.equal(motion({ eink: true, lastFlashAt: now - FLASH_GAP_MS }), "flash");
+    assert.equal(motion({ effect: "flash", lastFlashAt: now - 100 }), "instant");
+    assert.equal(motion({ effect: "flash", lastFlashAt: now - FLASH_GAP_MS }), "flash");
   });
 });
 

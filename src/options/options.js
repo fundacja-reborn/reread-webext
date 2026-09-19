@@ -493,7 +493,11 @@ function sayGesture(gesture) {
 function sayEffect(effect) {
   const note = document.getElementById("turn-effect-note");
   if (note === null) return;
-  note.textContent = effect === "off" ? t("options_turn_effect_note_off") : t("options_turn_effect_note_auto");
+  // Every key written out: one built from the value is a key the catalogue
+  // tests cannot see (`lib/messages.js`).
+  if (effect === "off") note.textContent = t("options_turn_effect_note_off");
+  else if (effect === "flash") note.textContent = t("options_turn_effect_note_flash");
+  else note.textContent = t("options_turn_effect_note_smooth");
 }
 
 /** The quiet-bubble switch (D81) - stored plainly, no platform in the picture. */

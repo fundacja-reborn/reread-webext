@@ -1727,13 +1727,17 @@
     "message": "El dedo no pasa páginas. Las teclas de página, las flechas y la rueda del ratón siguen haciéndolo."
   },
   "options_turn_effect": { "message": "Efecto al pasar página" },
-  "options_turn_effect_auto": { "message": "Automático" },
+  "options_turn_effect_smooth": { "message": "Desplazamiento suave" },
+  "options_turn_effect_flash": { "message": "Destello oscuro (E-ink)" },
   "options_turn_effect_off": { "message": "Desactivado" },
   "options_turn_effect_hint": {
-    "message": "Una confirmación visible de que la página ha cambiado. Con el tema E-ink elegido en el panel Aa, puede ayudar a limpiar las imágenes fantasma en una pantalla de tinta electrónica."
+    "message": "Una confirmación visible de que la página ha cambiado."
   },
-  "options_turn_effect_note_auto": {
-    "message": "Con el tema E-ink el área de texto se oscurece un momento: en una pantalla de tinta electrónica apenas se nota, en una pantalla normal es un destello oscuro. Con los demás temas la nueva página aparece con un desplazamiento suave."
+  "options_turn_effect_note_smooth": {
+    "message": "La nueva página aparece con un desplazamiento suave."
+  },
+  "options_turn_effect_note_flash": {
+    "message": "El área de texto se oscurece un momento. En una pantalla e-ink apenas se nota y ayuda a limpiar las imágenes fantasma; en una pantalla normal es un destello oscuro bien visible."
   },
   "options_turn_effect_note_off": {
     "message": "La página simplemente cambia, como antes de este ajuste."

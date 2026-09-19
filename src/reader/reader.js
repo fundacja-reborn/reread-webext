@@ -2246,9 +2246,11 @@ function pageShown(pages) {
  * line the place the next cut is measured from.
  *
  * How the window moves is the turn's own business (D251, `turnMotion`): a
- * turn asked for by the hand is signalled - a flash of the band on e-ink
- * paper, a smooth scroll where motion can be drawn - and everything else
- * moves instantly, as every movement in the reader did until now.
+ * turn asked for by the hand is signalled the way the reader chose - a flash
+ * of the band, a smooth scroll - and everything else moves instantly, as
+ * every movement in the reader did until now. The theme has no say in it
+ * since Michał's call (2026-09-19): it is a look, and the flash is for a
+ * panel.
  *
  * @param {PageTable} pages
  * @param {number} page
@@ -2261,7 +2263,6 @@ function showPageOf(pages, page, reason = "jump") {
   if (top === undefined) return;
   const motion = turnMotion({
     effect: settings.reader.turnEffect,
-    eink: settings.reader.theme === "eink",
     reduced: lessMotion?.matches === true,
     reason,
     lastFlashAt,

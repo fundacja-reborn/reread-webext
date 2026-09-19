@@ -2064,13 +2064,17 @@
     "message": "Touch turns no pages at all. The page keys, the arrow keys and the mouse wheel still do."
   },
   "options_turn_effect": { "message": "Page turn effect" },
-  "options_turn_effect_auto": { "message": "Automatic" },
+  "options_turn_effect_smooth": { "message": "Smooth slide" },
+  "options_turn_effect_flash": { "message": "Dark flash (e-ink)" },
   "options_turn_effect_off": { "message": "Off" },
   "options_turn_effect_hint": {
-    "message": "A visible confirmation that the page has changed. With the E-ink theme set in the Aa panel, it can help clear ghosting from the page on an e-ink screen."
+    "message": "A visible confirmation that the page has changed."
   },
-  "options_turn_effect_note_auto": {
-    "message": "With the E-ink theme the text area darkens for a moment: on an e-ink panel that is barely visible, on an ordinary screen it is a dark flash. With the other themes the new page arrives with a smooth slide."
+  "options_turn_effect_note_smooth": {
+    "message": "The new page arrives with a smooth slide."
+  },
+  "options_turn_effect_note_flash": {
+    "message": "The text area goes dark for a moment. On an e-ink panel that is barely visible and helps clear ghosting; on an ordinary screen it is a distinct dark flash."
   },
   "options_turn_effect_note_off": {
     "message": "The page simply changes, as it did before this setting existed."

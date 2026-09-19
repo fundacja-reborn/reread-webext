@@ -1676,13 +1676,17 @@
     "message": "Berührung blättert keine Seiten um. Die Bild-Tasten, die Pfeiltasten und das Mausrad tun es weiterhin."
   },
   "options_turn_effect": { "message": "Effekt beim Umblättern" },
-  "options_turn_effect_auto": { "message": "Automatisch" },
+  "options_turn_effect_smooth": { "message": "Sanfter Übergang" },
+  "options_turn_effect_flash": { "message": "Dunkles Blitzen (E-Ink)" },
   "options_turn_effect_off": { "message": "Aus" },
   "options_turn_effect_hint": {
-    "message": "Eine sichtbare Bestätigung, dass die Seite gewechselt hat. Mit dem Thema E-ink im Aa-Fenster kann es auf einem E-Ink-Bildschirm helfen, Geisterbilder von der Seite zu entfernen."
+    "message": "Eine sichtbare Bestätigung, dass die Seite gewechselt hat."
   },
-  "options_turn_effect_note_auto": {
-    "message": "Mit dem Thema E-ink verdunkelt sich der Textbereich für einen Moment: auf einem E-Ink-Display ist das kaum zu sehen, auf einem gewöhnlichen Bildschirm ist es ein dunkles Blitzen. Mit den anderen Themen erscheint die neue Seite mit einem sanften Übergang."
+  "options_turn_effect_note_smooth": {
+    "message": "Die neue Seite erscheint mit einem sanften Übergang."
+  },
+  "options_turn_effect_note_flash": {
+    "message": "Der Textbereich wird für einen Moment dunkel. Auf einem E-Ink-Display ist das kaum zu sehen und hilft, Geisterbilder zu entfernen; auf einem gewöhnlichen Bildschirm ist es ein deutliches dunkles Blitzen."
   },
   "options_turn_effect_note_off": {
     "message": "Die Seite wechselt einfach, so wie vor dieser Einstellung."
