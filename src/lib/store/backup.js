@@ -223,12 +223,17 @@ export async function ensureBackup(deps = defaults()) {
 }
 
 /**
- * What the settings page says about the copy: how many phrases, written when.
+ * What the settings page says about the copy: how many phrases, written when,
+ * and what it weighs. The size is the copy's own JSON, measured here because
+ * the whole of it is already parsed - the settings page counts the vocabulary
+ * into its breakdown of the space, and a second read of the same key to weigh
+ * it would be a read for nothing.
  *
  * @param {BackupDeps} [deps]
- * @returns {Promise<{ count: number, writtenAt: number } | null>}
+ * @returns {Promise<{ count: number, writtenAt: number, bytes: number } | null>}
  */
 export async function readBackupSummary(deps = defaults()) {
   const backup = asBackup(await deps.read());
-  return backup === null ? null : { count: backup.phrases.length, writtenAt: backup.writtenAt };
+  if (backup === null) return null;
+  return { count: backup.phrases.length, writtenAt: backup.writtenAt, bytes: JSON.stringify(backup).length };
 }

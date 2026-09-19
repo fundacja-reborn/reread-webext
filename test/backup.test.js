@@ -192,11 +192,15 @@ describe("the copy of the vocabulary", () => {
     assert.equal(nothing.written(), undefined);
   });
 
-  it("tells the settings page how many phrases the copy holds and since when", async () => {
+  it("tells the settings page how many phrases the copy holds, since when and what it weighs", async () => {
     assert.equal(await readBackupSummary(standIn({ stored: undefined }).deps), null);
-    assert.deepEqual(await readBackupSummary(standIn({ stored: backupOf([phrase("1"), phrase("2")], 9) }).deps), {
-      count: 2,
-      writtenAt: 9,
-    });
+    const summary = await readBackupSummary(standIn({ stored: backupOf([phrase("1"), phrase("2")], 9) }).deps);
+    assert.equal(summary?.count, 2);
+    assert.equal(summary?.writtenAt, 9);
+    // The size is the copy's own JSON, measured while it is already parsed:
+    // the settings page counts the vocabulary into its breakdown of the
+    // space, and a second read of the same key to weigh it would be a read
+    // for nothing.
+    assert.ok((summary?.bytes ?? 0) > 0, "the copy weighs nothing");
   });
 });

@@ -13,6 +13,17 @@
     }
   },
 
+  "pair_label_monolingual": {
+    "message": "$LANGUAGE$ (одномовний)",
+    "description": "A dictionary that explains a language in itself: not a direction, so not an arrow.",
+    "placeholders": {
+      "language": {
+        "content": "$1",
+        "example": "English"
+      }
+    }
+  },
+
   "settings": { "message": "Налаштування" },
   "support": { "message": "Підтримка" },
   "nav_menu": { "message": "Меню" },
@@ -21,7 +32,7 @@
   "private_browsing_note": { "message": "Ви в приватному режимі. Браузер використовує для цієї сторінки окрему базу даних і видаляє її після завершення приватного сеансу: список читання й позначення, які ви тут бачите, походять з їхніх копій, а збережена тут стаття, імпортована книжка, зроблене позначення чи будь-що видалене зникне разом із сеансом. Єдиний виняток - збережені фрази: вони зберігаються. Для всього іншого відкрийте re/read у звичайній вкладці." },
   "saved_phrases": { "message": "Збережені фрази" },
   "open_reader": { "message": "Відкрити в режимі читання" },
-  "quiet_bubble": { "message": "Типово приховувати дії в бульбашці" },
+  "quiet_bubble": { "message": "Показувати кнопки в бульбашці лише після кліку" },
   "action_delete": { "message": "Видалити" },
   "action_download": { "message": "Завантажити" },
   "action_cancel": { "message": "Скасувати" },
@@ -1936,17 +1947,349 @@
   "options_title": { "message": "re/read - налаштування" },
   "back_to_reading": {"message": "Повернутися до читання"},
   "options_local_intro": {
-    "message": "Усе, що робить re/read, відбувається на цьому пристрої (офлайн): переклад, словник, список читання, збережені фрази. Нічого з того, що ви читаєте чи виділяєте, нікуди не надсилається. Інтернет-з'єднання потрібне, лише коли ви хочете завантажити нову модель перекладу чи словник - і лише з двох URL-адрес, відкрито наведених у цих розділах."
+    "message": "Усе, що робить re/read, відбувається на цьому пристрої (офлайн): переклад, словник, читальня, збережені фрази. Нічого з того, що ви читаєте чи виділяєте, нікуди не надсилається. Інтернет-з'єднання потрібне лише для завантаження нової моделі перекладу чи словника - і лише з двох адрес, наведених у розділах"
+  },
+
+  "options_local_intro_and": {
+    "message": "і",
+    "description": "Between the two section links in options_local_intro."
+  },
+
+  "options_local_intro_rest": {
+    "message": ".",
+    "description": "Closes options_local_intro after the second section link; glued to it in the markup, so a language that opens with punctuation gets no space before it."
+  },
+
+  "options_intro_short": {
+    "message": "Усе працює на цьому пристрої; інтернет потрібен лише для завантаження моделі перекладу або словника.",
+    "description": "The one-line thesis under the settings title; the whole of it stands in the About section at the foot of the page."
+  },
+
+  "options_intro_more": {
+    "message": "Більше про приватність",
+    "description": "The link at the end of the short intro, leading to the About section."
+  },
+
+  "options_section_languages": {
+    "message": "Мови",
+    "description": "Heading of the settings section holding the language pair, the translation models and the dictionaries."
+  },
+
+  "options_section_bubble": {
+    "message": "Бульбашка і фрази",
+    "description": "Heading of the settings section about the translation bubble and the phrases saved from it."
+  },
+
+  "options_sub_bubble": {
+    "message": "Бульбашка",
+    "description": "Heading of the subsection about what the translation bubble shows."
+  },
+
+  "options_sub_phrases": {
+    "message": "Збережені фрази",
+    "description": "Heading of the subsection about phrases saved from the bubble."
+  },
+
+  "options_section_reading": {
+    "message": "Режим читання",
+    "description": "Heading of the settings section about the reading view."
+  },
+
+  "options_section_aloud": {
+    "message": "Читання вголос",
+    "description": "Heading of the settings section about reading aloud."
+  },
+
+  "options_section_data": {
+    "message": "Дані та копії",
+    "description": "Heading of the settings section reporting the space used and the copies kept."
+  },
+
+  "options_section_about": {
+    "message": "Про re/read",
+    "description": "Heading of the last settings section: what the extension promises about the network, who builds it, how to support it."
   },
   "options_first_steps_heading": { "message": "Перші кроки" },
+
+  "options_first_steps_count": {
+    "message": "$DONE$ з $TOTAL$",
+    "description": "How many of the first steps are done, over the settings page's checklist.",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "2"
+      },
+      "total": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+
+  "options_step_model": {
+    "message": "Завантажте модель перекладу"
+  },
+
+  "options_step_dictionary": {
+    "message": "Завантажте словник (необов'язково)"
+  },
+
+  "options_step_pin": {
+    "message": "Закріпіть re/read на панелі інструментів"
+  },
+
+  "options_step_how": {
+    "message": "Як"
+  },
+
+  "options_step_done": {
+    "message": "Готово"
+  },
+
+  "options_step_hide": {
+    "message": "Сховати"
+  },
+
+  "options_step_done_state": {
+    "message": "зроблено",
+    "description": "Heard by a screen reader in place of the tick or the circle beside a first step; never shown."
+  },
+
+  "options_step_todo_state": {
+    "message": "зробити",
+    "description": "Heard by a screen reader in place of the tick or the circle beside a first step; never shown."
+  },
+
+  "options_first_steps_show": {
+    "message": "Показати перші кроки"
+  },
+
+  "options_storage_models": {
+    "message": "Моделі перекладу"
+  },
+
+  "options_storage_dictionaries": {
+    "message": "Словники"
+  },
+
+  "options_storage_library": {
+    "message": "Список читання (з копією)"
+  },
+
+  "options_storage_phrases": {
+    "message": "Фрази та позначення"
+  },
+
+  "options_storage_other": {
+    "message": "Інше"
+  },
+
+  "options_copies_vocabulary": {
+    "message": "Словниковий запас"
+  },
+
+  "options_copies_marks": {
+    "message": "Позначення"
+  },
+
+  "options_copies_library": {
+    "message": "Список читання"
+  },
+
+  "options_copies_none": {
+    "message": "ще немає"
+  },
+
+  "options_copies_off": {
+    "message": "вимкнена"
+  },
+
+  "options_font_custom_placeholder": {
+    "message": "наприклад Noto Serif"
+  },
+
+  "options_copies_phrases_one": {
+    "message": "$COUNT$ фраза",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "918"
+      }
+    }
+  },
+
+  "options_copies_phrases_few": {
+    "message": "$COUNT$ фрази",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "918"
+      }
+    }
+  },
+
+  "options_copies_phrases_many": {
+    "message": "$COUNT$ фраз",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "918"
+      }
+    }
+  },
+
+  "options_copies_phrases_other": {
+    "message": "$COUNT$ фрази",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "918"
+      }
+    }
+  },
+
+  "options_copies_notes_one": {
+    "message": "$COUNT$ з нотатками",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "918"
+      }
+    }
+  },
+
+  "options_copies_notes_few": {
+    "message": "$COUNT$ з нотатками",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "918"
+      }
+    }
+  },
+
+  "options_copies_notes_many": {
+    "message": "$COUNT$ з нотатками",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "918"
+      }
+    }
+  },
+
+  "options_copies_notes_other": {
+    "message": "$COUNT$ з нотатками",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "918"
+      }
+    }
+  },
+
+  "options_copies_docs_one": {
+    "message": "$COUNT$ документ, $SIZE$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "61"
+      },
+      "size": {
+        "content": "$2",
+        "example": "13.5 MB"
+      }
+    }
+  },
+
+  "options_copies_docs_few": {
+    "message": "$COUNT$ документи, $SIZE$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "61"
+      },
+      "size": {
+        "content": "$2",
+        "example": "13.5 MB"
+      }
+    }
+  },
+
+  "options_copies_docs_many": {
+    "message": "$COUNT$ документів, $SIZE$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "61"
+      },
+      "size": {
+        "content": "$2",
+        "example": "13.5 MB"
+      }
+    }
+  },
+
+  "options_copies_docs_other": {
+    "message": "$COUNT$ документа, $SIZE$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "61"
+      },
+      "size": {
+        "content": "$2",
+        "example": "13.5 MB"
+      }
+    }
+  },
+
+  "options_storage_copies": {
+    "message": "Резервні копії"
+  },
+
+  "options_copies_intro": {
+    "message": "re/read зберігає копії ваших фраз, позначень і списку читання у сховищі розширення, окремо від бази даних.",
+    "description": "Opens the Backups subsection: what the copies are, in one sentence."
+  },
+
+  "options_copies_intro_more": {
+    "message": "Копії оновлюються за кожної зміни: коли ви зберігаєте або видаляєте фразу, позначення чи сторінку зі списку читання. Вони захищають дані, коли браузер очищає своє сховище або коли псується база даних. База даних - це IndexedDB, а копії - у сховищі розширення (storage.local); і те, і те в профілі браузера, не у файлах на вашому комп'ютері.",
+    "description": "Behind the Details fold of the Backups subsection: when the copies are written, what they protect against, and where they and the database actually are."
+  },
+
+  "options_copies_head_name": {
+    "message": "Копія",
+    "description": "The Backups table's first column: which copy the row is about."
+  },
+
+  "options_copies_head_holds": {
+    "message": "Вміст",
+    "description": "The Backups table's second column: what the copy holds."
+  },
+
+  "options_copies_head_when": {
+    "message": "Останнє оновлення",
+    "description": "The Backups table's third column: when the copy last changed."
+  },
+
+  "options_copies_uninstall": {
+    "message": "Видалення re/read стирає всі його дані разом із копіями. Перш ніж видалити його або перенести дані на інший пристрій, збережіть копію у файл: кнопка Експортувати в",
+    "description": "The note under the Backups table, up to the door that opens the reading list."
+  },
+
+  "options_copies_reading_list": {
+    "message": "офлайн-списку читання",
+    "description": "The door inside options_copies_uninstall: the offline reading list, named as the sentence around it needs it."
+  },
+
+  "options_copies_uninstall_rest": {
+    "message": " створює один файл reread-backup.zip зі списком читання, вашими фразами, позначеннями та налаштуваннями. Моделей і словників у ньому немає - їх можна завантажити ще раз. Експорт на сторінці збережених фраз - це інший файл: самі фрази у форматі TSV, для Anki або плагіна KOReader.",
+    "description": "Closes options_copies_uninstall after the door, and says how the saved phrases' own export differs."
+  },
+
   "options_first_steps_intro": {
     "message": "Поки що ніщо не перекладається - моделі, яка б це робила, ще немає на цьому пристрої. Підготовка займає хвилину:"
-  },
-  "options_first_steps_model": {
-    "message": "У розділі «Моделі перекладу» знайдіть потрібну мовну пару (найшвидше - через фільтр) і натисніть «Завантажити». Модель зберігається на цьому пристрої й відтоді перекладає офлайн - а перша модель сама задає мовну пару вище."
-  },
-  "options_first_steps_dictionary": {
-    "message": "У розділі «Словники» завантажте словник для тієї самої пари (це необов'язково, але варто) - окремі слова тоді отримують повніші відповіді, ніж сам переклад, і видно їх у бульбашці перекладу під перекладом."
   },
   "options_first_steps_pin": {
     "message": "Наостанок закріпіть re/read на панелі інструментів: значок-пазл праворуч на панелі, потім шестірня біля re/read і «Закріпити на панелі інструментів». Кнопка відкриває режим читання, список читання, збережені фрази та вимикач для сайту, на якому ви зараз."
@@ -1956,71 +2299,21 @@
   },
   "options_sections_aria": { "message": "Розділи цієї сторінки" },
   "options_engine": { "message": "Рушій" },
-  "options_engine_value": { "message": "Bergamot, усередині пакета - перекладає офлайн" },
+  "options_engine_value": { "message": "Bergamot, вбудований у розширення; переклад офлайн." },
   "options_storage": { "message": "Дані на цьому пристрої" },
-  "options_storage_value": {
-    "message": "$SIZE$ - моделі, словники, список читання і ваші фрази разом",
-    "placeholders": { "size": { "content": "$1", "example": "143,2 MB" } }
+  "options_storage_how": { "message": "Обсяг, який займають дані re/read." },
+
+  "options_storage_how_more": {
+    "message": "Сума - це оцінка браузера для всіх даних re/read. Вона враховує також індекси баз даних і кеш, тому більша за позиції під нею разом. У позиціях враховано лише текст і зображення, без індексів: одна словникова стаття займає в базі в кілька разів більше місця, ніж сам її текст, тож „Інше” - це передусім база словників. Усі дані містяться в базі даних браузера (IndexedDB), у його профілі - а не в окремих файлах на комп'ютері. Видалення статті або книги назавжди вилучає її текст, зображення, позначення, нотатки та позицію читання.",
+    "description": "The rest of the options_storage_how description, behind the row's More button."
   },
-  "options_storage_how": { "message": "Обсяг пам'яті, який займає розширення. Словники займають більше місця, ніж їхні файли, через структуру бази даних. Видалення статті або книги повністю вилучає її текст, зображення, позначення, нотатки та прогрес читання." },
   "options_storage_persistent": { "message": "Постійне сховище: надано. Браузер пообіцяв не стирати ці дані, щоб звільнити місце." },
   "options_storage_at_risk": { "message": "Постійне сховище: не надано. Safari стирає дані сайту приблизно після місяця користування без жодного дотику до його сторінок, а сторінки цього розширення рахуються як один сайт. Ваші фрази мають копію, яка це переживе (рядок нижче); моделі, словники і список читання - ні, тож час від часу відкривайте режим читання або ці налаштування." },
-  "options_storage_backup_one": {
-    "message": "Копія словника: $COUNT$ фраза, записана $WHEN$ - там, де браузер не стирає дані сам.",
-    "placeholders": { "count": { "content": "$1", "example": "1" }, "when": { "content": "$2", "example": "26.08.26, 12:41" } }
-  },
-  "options_storage_backup_few": {
-    "message": "Копія словника: $COUNT$ фрази, записана $WHEN$ - там, де браузер не стирає дані сам.",
-    "placeholders": { "count": { "content": "$1", "example": "3" }, "when": { "content": "$2", "example": "26.08.26, 12:41" } }
-  },
-  "options_storage_backup_many": {
-    "message": "Копія словника: $COUNT$ фраз, записана $WHEN$ - там, де браузер не стирає дані сам.",
-    "placeholders": { "count": { "content": "$1", "example": "1234" }, "when": { "content": "$2", "example": "26.08.26, 12:41" } }
-  },
-  "options_storage_backup_other": {
-    "message": "Копія словника: $COUNT$ фрази, записана $WHEN$ - там, де браузер не стирає дані сам.",
-    "placeholders": { "count": { "content": "$1", "example": "1,5" }, "when": { "content": "$2", "example": "26.08.26, 12:41" } }
-  },
-  "options_storage_backup_none": { "message": "Копія словника: ще немає - з'явиться з наступною збереженою фразою." },
-  "options_storage_marks_backup_one": {
-    "message": "Копія позначень: $COUNT$ позначення з нотатками, записана $WHEN$.",
-    "placeholders": { "count": { "content": "$1", "example": "1" }, "when": { "content": "$2", "example": "26.08.26, 12:41" } }
-  },
-  "options_storage_marks_backup_few": {
-    "message": "Копія позначень: $COUNT$ позначення з нотатками, записана $WHEN$.",
-    "placeholders": { "count": { "content": "$1", "example": "3" }, "when": { "content": "$2", "example": "26.08.26, 12:41" } }
-  },
-  "options_storage_marks_backup_many": {
-    "message": "Копія позначень: $COUNT$ позначень з нотатками, записана $WHEN$.",
-    "placeholders": { "count": { "content": "$1", "example": "37" }, "when": { "content": "$2", "example": "26.08.26, 12:41" } }
-  },
-  "options_storage_marks_backup_other": {
-    "message": "Копія позначень: $COUNT$ позначення з нотатками, записана $WHEN$.",
-    "placeholders": { "count": { "content": "$1", "example": "1,5" }, "when": { "content": "$2", "example": "26.08.26, 12:41" } }
-  },
-  "options_storage_marks_backup_none": { "message": "Копія позначень: ще немає - з'явиться з наступним позначенням." },
-  "options_storage_library_copy_one": {
-    "message": "Копія списку читання: $COUNT$ документ, $SIZE$.",
-    "placeholders": { "count": { "content": "$1", "example": "1" }, "size": { "content": "$2", "example": "12,4 МБ" } }
-  },
-  "options_storage_library_copy_few": {
-    "message": "Копія списку читання: $COUNT$ документи, $SIZE$.",
-    "placeholders": { "count": { "content": "$1", "example": "3" }, "size": { "content": "$2", "example": "12,4 МБ" } }
-  },
-  "options_storage_library_copy_many": {
-    "message": "Копія списку читання: $COUNT$ документів, $SIZE$.",
-    "placeholders": { "count": { "content": "$1", "example": "37" }, "size": { "content": "$2", "example": "12,4 МБ" } }
-  },
-  "options_storage_library_copy_other": {
-    "message": "Копія списку читання: $COUNT$ документа, $SIZE$.",
-    "placeholders": { "count": { "content": "$1", "example": "1,5" }, "size": { "content": "$2", "example": "12,4 МБ" } }
-  },
-  "options_storage_library_copy_none": { "message": "Копія списку читання: ще немає - з'явиться з наступною збереженою сторінкою або імпортованою книгою." },
-  "options_storage_library_copy_off": { "message": "Копія списку читання: вимкнена." },
-  "options_library_copy": { "message": "Копія списку читання" },
+  "options_library_copy": { "message": "Створювати резервну копію списку читання" },
   "options_library_copy_hint": {
-    "message": "Створює резервну копію списку читання для захисту від автоматичного очищення браузера та помилок бази даних. Це подвоює обсяг пам'яті, який займає список, але збережені статті залишаються в безпеці, навіть якщо базу даних буде втрачено."
+    "message": "Список читання займає тоді вдвічі більше місця. Копії фраз і позначень створюються завжди."
   },
+
   "reader_marks_delete_all_one": {
     "message": "Видалити $COUNT$ цитату з цієї сторінки",
     "placeholders": { "count": { "content": "$1", "example": "1" } }
@@ -2047,33 +2340,41 @@
     "placeholders": { "pair": { "content": "$1", "example": "англійська → англійська" } }
   },
   "options_pair_hint_quiet": {
-    "message": "Без моделі перекладу пара означає, якою мовою ви читаєте і де зберігаються збережені фрази. Пари походять з установлених моделей і словників."
+    "message": "Без моделі перекладу пара визначає, якою мовою ви читаєте і під якою парою зберігаються фрази. Пари походять з установлених моделей і словників."
   },
   "options_reading_pair_quiet": {
     "message": "Ви читаєте: $FROM$ - машинний переклад вимкнено, збережені фрази належать до цієї пари.",
     "placeholders": { "from": { "content": "$1", "example": "англійська" } }
   },
-  "options_reader_only": { "message": "Лише в режимі читання" },
+  "options_reader_only": { "message": "Показувати підкреслення та бульбашку лише в режимі читання" },
   "options_reader_only_hint": {
-    "message": "Обмежує підкреслення збережених фраз і бульбашку перекладу режимом читання. Виділення тексту на звичайній вебсторінці показуватиме лише кнопку для відкриття сторінки в режимі читання. Коли опція ввімкнена, жодна вебсторінка не може дізнатися, які з її слів ви зберегли. На Android та iOS ця опція типово ввімкнена."
+    "message": "На звичайній сторінці після виділення тексту з'являється бульбашка з двома кнопками: відкрити сторінку в режимі читання та перейти до списку читання."
   },
-  "options_page_number": { "message": "Номер сторінки" },
+
+  "options_reader_only_more": {
+    "message": "Коли опція ввімкнена, жодна вебсторінка не може дізнатися, які з її слів ви зберегли. На Android та iOS ця опція типово ввімкнена.",
+    "description": "The rest of the options_reader_only_hint description, behind the row's More button."
+  },
+
+  "options_page_number": { "message": "Показувати номер сторінки" },
   "options_page_number_hint": {
-    "message": "Показує лічильник сторінок унизу вікна. Якщо вимкнено, останній рядок кожної сторінки стоїть нижче; програми читання з екрана й далі озвучують лічильник, а на широкому екрані він стоїть у панелі поруч із re/read."
+    "message": "Поточна сторінка та загальна кількість, наприклад 3 / 12, унизу вікна."
+  },
+
+  "options_page_number_more": {
+    "message": "Якщо вимкнено, текст кожної сторінки сягає нижче; програми читання з екрана й далі озвучують лічильник, а на широкому екрані його показано в панелі поруч із re/read.",
+    "description": "The rest of the options_page_number_hint description, behind the row's More button."
   },
   "options_paged_heading": { "message": "Вигляд Сторінки" },
   "options_paged_intro": {
-    "message": "Ці налаштування діють у вигляді Сторінки в режимі читання, де текст рухається лише цілими сторінками, а кожна починається й закінчується цілим рядком."
+    "message": "Діють у режимі читання у вигляді Сторінки: текст рухається цілими сторінками, кожна починається й закінчується цілим рядком."
   },
   "options_touch_turn": { "message": "Гортання сторінок дотиком" },
-  "options_touch_turn_zones": { "message": "Дотик до лівої або правої третини" },
+  "options_touch_turn_zones": { "message": "Дотик до лівої або правої частини екрана" },
   "options_touch_turn_swipe": { "message": "Проведення пальцем убік" },
   "options_touch_turn_off": { "message": "Вимкнено" },
-  "options_touch_turn_hint": {
-    "message": "На широкому екрані типовим є дотик, на вузькому - проведення пальцем: там рука, яка тримає пристрій, лежить на екрані, а жест, який мусить рухатися, - єдиний, якого ця рука не зробить випадково. Клавіші сторінок, стрілки та коліщатко миші гортають за будь-якого налаштування, а перо не гортає ніколи."
-  },
   "options_touch_turn_note_zones": {
-    "message": "Дотик до лівої або правої третини сторінки гортає її: права - далі, ліва - назад. Зараховується лише короткий, нерухомий дотик подалі від країв екрана, щоб великий палець, який тримає пристрій, нічого не гортав."
+    "message": "Дотик до правої третини екрана - наступна сторінка, до лівої - попередня. Зараховується лише короткий нерухомий дотик подалі від країв, тож великий палець, який тримає пристрій, не змінює сторінок."
   },
   "options_touch_turn_note_swipe": {
     "message": "Проведення пальцем ліворуч показує наступну сторінку, праворуч - попередню. На телефоні не починайте від самого краю екрана: там починається системний жест повернення; на читалці з електронним чорнилом край зазвичай працює."
@@ -2085,80 +2386,296 @@
   "options_turn_effect_auto": { "message": "Автоматичний" },
   "options_turn_effect_off": { "message": "Вимкнено" },
   "options_turn_effect_hint": {
-    "message": "Показує, що сторінка перегорнулася - читаючи середину сторінки, це легко не помітити. Нічого не відбувається, якщо система просить менше руху, а також коли сторінку гортає читання вголос або перетягування позначення до краю сторінки."
+    "message": "Видиме підтвердження зміни сторінки."
   },
   "options_turn_effect_note_auto": {
-    "message": "У темі E-ink область тексту на мить темніє, як під час гортання в читалці електронних книжок; на інших екранах нова сторінка плавно з'їжджає."
+    "message": "У темі E-ink область тексту на мить темніє, як під час гортання в читалці електронних книжок; на інших екранах нова сторінка з'являється з плавним зсувом."
   },
   "options_turn_effect_note_off": {
     "message": "Сторінка просто змінюється, як було до цього налаштування."
   },
-  "options_keep_articles": { "message": "Типово зберігати в офлайн-списку читання" },
+  "options_keep_articles": { "message": "Зберігати відкриті сторінки в офлайн-списку читання" },
   "options_keep_articles_hint": {
-    "message": "Автоматично зберігає кожну сторінку, відкриту в режимі читання, для читання офлайн. Збережені сторінки, позначення та прогрес читання залишаються в безпеці, навіть якщо оригінальний сайт зміниться або зникне."
+    "message": "Окрему сторінку збережеш у режимі читання кнопкою Зберегти до списку читання, а видалиш кнопкою Видалити."
+  },
+
+  "options_keep_articles_more": {
+    "message": "Збережені сторінки, позначення та прогрес читання залишаються в безпеці, навіть якщо оригінальний сайт зміниться або зникне.",
+    "description": "The rest of the options_keep_articles_hint description, behind the row's More button."
   },
   "options_font_custom": { "message": "Власний шрифт" },
   "options_font_custom_hint": {
-    "message": "Введіть назву шрифту, встановленого на цьому пристрої, наприклад Georgia або Noto Serif. Рядок Шрифт у режимі читання запропонує його як Власний. Залиште поле порожнім, щоб використовувати лише вбудовані шрифти."
+    "message": "Шрифт, встановлений на цьому пристрої, наприклад Noto Serif. У панелі Aa він з'явиться в рядку Шрифт як Власний."
+  },
+
+  "options_font_custom_more": {
+    "message": "Введіть назву так, як її записує система. Залиште поле порожнім, щоб використовувати лише вбудовані шрифти.",
+    "description": "The rest of the options_font_custom_hint description, behind the row's More button."
   },
   "options_reading_pace": { "message": "Швидкість читання" },
   "options_reading_pace_unit": { "message": "слів за хвилину" },
   "options_reading_pace_hint": {
-    "message": "Кількість слів, які ви читаєте за хвилину. Використовується лише для оцінки часу читання, який показано у списку читання та під заголовком статті. 200 - це спокійний темп рідною мовою; мовою, яку ви вивчаєте, зазвичай 100-150."
+    "message": "Використовується лише для оцінки часу читання у списку читання та під заголовком статті."
+  },
+
+  "options_reading_pace_more": {
+    "message": "Кількість слів, які ви читаєте за хвилину. 200 - це спокійний темп рідною мовою; мовою, яку ви вивчаєте, зазвичай 100-150.",
+    "description": "The rest of the options_reading_pace_hint description, behind the row's More button."
   },
   "options_quiet_bubble_hint": {
-    "message": "Показує в бульбашці лише текст перекладу. Кнопки дій (копіювання, збереження) з'являються лише після кліку або дотику по бульбашці."
+    "message": "У бульбашці залишається лише переклад; на сенсорному екрані кнопки з'являються після дотику до неї."
+  },
+
+  "options_quiet_bubble_more": {
+    "message": "Кнопки дій - це копіювання, збереження, читання вголос і решта: усі дії бульбашки, на відстані одного натискання.",
+    "description": "The rest of the options_quiet_bubble_hint description, behind the row's More button."
   },
   "options_bubble_more": { "message": "Одразу показувати речення та словникові статті" },
   "options_bubble_more_hint": {
-    "message": "Після виділення тексту бульбашка одразу показує те, що інакше з'являється лише після натискання «Більше»: перекладене речення та словникові статті. Варто залишити ввімкненим, якщо встановлено словник - модель перекладу часто помиляється на окремому слові, а словник показує, що воно означає насправді. Бульбашка над уже збереженою фразою показує лише збережений переклад - речення та словникові статті з'являться після натискання «Більше»."
+    "message": "Бульбашка одразу показує перекладене речення та словникові статті, без натискання «Більше»."
+  },
+
+  "options_bubble_more_more": {
+    "message": "Варто залишити ввімкненим, якщо встановлено словник: переклад окремого слова часто буває хибним, а словник показує, що воно означає насправді. Бульбашка над уже збереженою фразою показує лише збережений переклад - речення та словникові статті з'являться після натискання «Більше».",
+    "description": "The rest of the options_bubble_more_hint description, behind the row's More button."
   },
   "options_underline_forms": { "message": "Підкреслювати також інші форми збережених слів" },
   "options_underline_forms_hint": {
-    "message": "Збережене слово підкреслюється також в інших формах: після збереження «read» підкреслюються й «reads» та «reading», а бульбашка над ними показує те, що ви зберегли для «read». Які форми враховуються, вирішує ваш словник мови, яку ви читаєте - він має бути встановлений. Поки що лише тоді, коли ви читаєте англійською. Якщо вимкнено, підкреслюється лише та форма, яку ви зберегли."
+    "message": "Після збереження «read» підкреслюються й «reads», і «reading»."
+  },
+
+  "options_underline_forms_more": {
+    "message": "Бульбашка над ними показує те, що ви зберегли для «read». Які форми враховуються, випливає зі словника мови, яку ви читаєте - він має бути встановлений. Поки що лише тоді, коли ви читаєте англійською. Якщо вимкнено, підкреслюється лише та форма, яку ви зберегли.",
+    "description": "The rest of the options_underline_forms_hint description, behind the row's More button."
   },
   "options_save_sentence": { "message": "Зберігати речення разом із фразою" },
   "options_save_sentence_hint": {
-    "message": "Коли ви зберігаєте фразу з бульбашки, разом із нею зберігається речення навколо неї - таке, як на сторінці, без перекладу. Воно показується під фразою на сторінці збережених фраз, згорнуте в один рядок, і записується до третьої колонки експорту для Anki. Для фрази, збереженої без речення, речення навколо неї зберігається, коли ви наступного разу відкриєте її бульбашку на сторінці. Як і фраза, речення зберігається лише на цьому пристрої. Якщо вимкнено, нові речення не зберігаються; збережені раніше не видаляються."
+    "message": "Збереження фрази зберігає і речення, у якому вона стояла."
+  },
+
+  "options_save_sentence_more": {
+    "message": "Речення таке, як на сторінці, без перекладу. Воно показується під фразою на сторінці збережених фраз, згорнуте в один рядок, і записується до третьої колонки експорту для Anki. Для фрази, збереженої без речення, речення навколо неї зберігається, коли ви наступного разу відкриєте її бульбашку на сторінці. Як і фраза, речення зберігається лише на цьому пристрої. Якщо вимкнено, нові речення не зберігаються; збережені раніше не видаляються.",
+    "description": "The rest of the options_save_sentence_hint description, behind the row's More button."
   },
   "options_no_translation": { "message": "Використовувати без моделі перекладу" },
   "options_no_translation_hint": {
-    "message": "Вимикає машинний переклад (модель). Режим читання, офлайн-список читання і маркер працюють далі. З вибраною парою мов бульбашка й далі показує значення зі словників, а фрази можна зберігати та бачити їх підкреслення. Ідеально для читання зі словниками або рідною мовою. Збережені дані не видаляються і повертаються після вимкнення цієї опції."
+    "message": "Лише словники, без машинного перекладу; режим читання, офлайн-список читання і маркер працюють далі."
   },
-  "options_bubble_off": { "message": "Без бульбашки при виділенні тексту" },
+
+  "options_no_translation_more": {
+    "message": "З вибраною парою мов бульбашка й далі показує значення зі словників, а фрази можна зберігати та бачити їх підкреслення. Ідеально для читання зі словниками або рідною мовою. Збережені дані не видаляються і повертаються після вимкнення цієї опції.",
+    "description": "The rest of the options_no_translation_hint description, behind the row's More button."
+  },
+  "options_bubble_off": { "message": "Не показувати бульбашку при виділенні тексту" },
   "options_bubble_off_hint": {
-    "message": "Коли це ввімкнено, виділення тексту на звичайній сторінці не робить нічого - сторінку відкривайте в режимі читання кнопкою re/read або сполученням Alt+Shift+R. У режимі читання виділення - лише миттєве підсвічування: бульбашка не відкривається, дотик або Escape знімає його, а Ctrl+C чи Cmd+C копіює (на сенсорному екрані скопіювати нічого не можна)."
+    "message": "На звичайній сторінці виділення тексту не робить нічого - сторінку відкривайте в режимі читання кнопкою re/read або сполученням Alt+Shift+R."
+  },
+
+  "options_bubble_off_more": {
+    "message": "У режимі читання виділення - лише миттєве підсвічування: бульбашка не відкривається, дотик або Escape знімає його, а Ctrl+C чи Cmd+C копіює (на сенсорному екрані скопіювати нічого не можна).",
+    "description": "The rest of the options_bubble_off_hint description, behind the row's More button."
   },
   "options_bubble_scale": { "message": "Розмір тексту бульбашки" },
   "options_bubble_scale_hint": {
     "message": "Змінює розмір тексту та кнопок у бульбашці перекладу на всіх сторінках."
   },
-  "options_note_more": { "message": "Показати повний опис" },
-  "options_tts": { "message": "Читання вголос" },
+
+  "options_details": {
+    "message": "Подробиці",
+    "description": "The word every fold on the settings page opens under - the row notes' and the dictionary rows' alike."
+  },
+
+  "options_field_saved": {
+    "message": "Збережено",
+    "description": "Beside a text field on the settings page once what was typed in it has been stored. Stays until the next edit - never taken away on a timer."
+  },
+
+  "options_search_label": {
+    "message": "Пошук у налаштуваннях",
+    "description": "The settings page's own search field - its label and its placeholder alike."
+  },
+
+  "options_section_jump": {
+    "message": "Перейти до розділу",
+    "description": "The accessible name of the bar's section list on a narrow screen, where it stands as the page's title."
+  },
+
+  "options_search_close": {
+    "message": "Закрити пошук"
+  },
+
+  "options_search_found_one": {
+    "message": "$COUNT$ налаштування",
+    "description": "How many settings the search left on screen. $COUNT$ is the number.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+
+  "options_search_found_few": {
+    "message": "$COUNT$ налаштування",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+
+  "options_search_found_many": {
+    "message": "$COUNT$ налаштувань",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+
+  "options_search_found_other": {
+    "message": "$COUNT$ налаштування",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+
+  "options_search_none": {
+    "message": "Немає налаштувань, що відповідають «$QUERY$».",
+    "description": "Under the search field when nothing matched. $QUERY$ is what was typed.",
+    "placeholders": {
+      "query": {
+        "content": "$1",
+        "example": "voice"
+      }
+    }
+  },
+
+  "options_search_clear": {
+    "message": "Очистити"
+  },
+
+  "options_blocked_by": {
+    "message": "Доступно після ввімкнення",
+    "description": "On a row the search found although the switch that brings it is off; the switch's own name follows as a link, then options_blocked_by_rest."
+  },
+
+  "options_blocked_by_rest": {
+    "message": ".",
+    "description": "The end of options_blocked_by, glued to the link - it opens with the punctuation or the space the language needs there."
+  },
+
+  "options_keywords_tts": {
+    "message": "диктор, голос, мовлення, озвучення, TTS",
+    "description": "Words the settings search also finds this row by; never shown."
+  },
+
+  "options_keywords_font": {
+    "message": "шрифт, гарнітура",
+    "description": "Words the settings search also finds this row by; never shown."
+  },
+
+  "options_keywords_pace": {
+    "message": "час читання, слів за хвилину, wpm, швидкість",
+    "description": "Words the settings search also finds this row by; never shown."
+  },
+
+  "options_keywords_scale": {
+    "message": "збільшення, розмір, більший, менший",
+    "description": "Words the settings search also finds this row by; never shown."
+  },
+
+  "options_keywords_storage": {
+    "message": "місце, диск, пам'ять",
+    "description": "Words the settings search also finds this row by; never shown."
+  },
+
+  "options_keywords_copy": {
+    "message": "резервна копія, бекап, відновлення",
+    "description": "Words the settings search also finds this row by; never shown."
+  },
+
+  "options_keywords_sites": {
+    "message": "домен, винятки, блокування, хост",
+    "description": "Words the settings search also finds this row by; never shown."
+  },
+
+  "options_keywords_turn": {
+    "message": "свайп, дотик, жест, палець, спалах, анімація, рух",
+    "description": "Words the settings search also finds this row by; never shown."
+  },
+  "options_tts": { "message": "Показувати кнопки читання вголос" },
   "options_tts_hint": {
-    "message": "Вмикає функцію читання вголос. Вимкнення цієї опції приховує всі кнопки читання в бульбашці, списках і режимі читання."
+    "message": "У бульбашці, у списках збережених фраз і позначень та в режимі читання."
+  },
+
+  "options_tts_more": {
+    "message": "Вимкнення приховує їх усі. Вибраний голос і темп запам'ятовуються й діють знову після повторного ввімкнення.",
+    "description": "The rest of the options_tts_hint description, behind the row's More button."
   },
   "options_tts_voice": { "message": "Голос для читання вголос" },
   "options_tts_lang": { "message": "Мова голосу" },
   "options_tts_default": { "message": "Типовий голос" },
   "options_tts_listen": { "message": "Прослухати" },
   "options_tts_voice_hint": {
-    "message": "Оберіть для кожної мови голос для читання фраз і статей. Пропонуються лише голоси, що працюють офлайн: мовлення створюється на цьому пристрої, і нічого не надсилається в інтернет."
+    "message": "Окремий голос для кожної мови; пропонуються лише голоси, що працюють офлайн."
+  },
+
+  "options_tts_voice_more": {
+    "message": "Голос читає і фрази, і цілі статті. Мовлення створюється на цьому пристрої, і нічого не надсилається в інтернет.",
+    "description": "The rest of the options_tts_voice_hint description, behind the row's More button."
   },
   "speech_no_offline_voice": { "message": "На цьому пристрої немає офлайн-голосу для цієї мови." },
   "options_tts_rate": { "message": "Швидкість мовлення" },
   "options_models_heading": { "message": "Моделі перекладу" },
   "options_models_intro": {
-    "message": "Завантажте тут модель перекладу для кожної мовної пари, яку хочете перекладати. Це офіційні файли Mozilla, які працюють повністю офлайн на вашому пристрої."
+    "message": "Модель перекладу завантажується окремо для кожної пари мов. Це офіційні файли Mozilla; переклад відбувається повністю на цьому пристрої."
   },
   "options_models_single_word": {
-    "message": "Модель добре перекладає речення, але окреме слово без контексту часто перекладається неправильно - результат буває обрізаним або є словом, якого не існує. Для окремих слів кращим джерелом є словник із розділу нижче."
+    "message": "Модель добре перекладає речення, але окреме слово часто виходить неправильно - результат обрізаний або це слово, якого немає. Для окремих слів кращим джерелом є словник - розділ"
+  },
+
+  "options_models_single_word_rest": {
+    "message": "нижче.",
+    "description": "Closes options_models_single_word after the link to the Dictionaries section."
   },
   "options_update_list": { "message": "Оновити список" },
   "options_list_dated": { "message": "Список станом на" },
   "options_filter_placeholder": { "message": "Фільтруйте за мовою або кодом" },
   "options_filter_models_label": { "message": "Фільтрувати список моделей перекладу" },
   "options_filter_dictionaries_label": { "message": "Фільтрувати список словників" },
+  "options_list_installed": {
+    "message": "На цьому пристрої",
+    "description": "Heading of the block listing what is already on this device, in both the models and the dictionaries subsection."
+  },
+  "options_list_available": {
+    "message": "Для завантаження",
+    "description": "Heading of the block holding the catalogue: the filter, the list to download from and the by-hand doors."
+  },
+  "options_no_models_yet": {
+    "message": "На цьому пристрої ще немає жодної моделі перекладу. Виберіть пару в розділі",
+    "description": "Said in place of an empty list of installed models; the name of the catalogue block follows as a link, then the rest."
+  },
+  "options_no_models_yet_rest": { "message": "нижче." },
+  "options_no_dictionaries_yet": {
+    "message": "На цьому пристрої ще немає жодного словника. Виберіть словник у розділі",
+    "description": "Said in place of an empty list of installed dictionaries; the name of the catalogue block follows as a link, then the rest."
+  },
+  "options_no_dictionaries_yet_rest": { "message": "нижче або додайте власний." },
+  "options_dictionary_into": {
+    "message": "→ $LANGUAGE$",
+    "description": "The language a dictionary explains words in, in the small print of its row. Its own words' language is the heading the row stands under.",
+    "placeholders": { "language": { "content": "$1", "example": "Polish" } }
+  },
+  "options_dictionary_monolingual": {
+    "message": "одномовний",
+    "description": "Said in place of the target language for a dictionary that explains a language in itself."
+  },
   "options_show_all": {
     "message": "Показати всі ($COUNT$)",
     "placeholders": { "count": { "content": "$1" } }
@@ -2177,17 +2694,17 @@
   },
   "options_add_model_button": { "message": "Додати модель" },
   "options_files_note": {
-    "message": "Додавання моделі з файлів не робить жодного мережевого запиту, а ця сторінка лишається запасним виходом на день, коли місце, звідки беруться моделі, перестане відповідати."
+    "message": "Додавання моделі з файлів не робить жодного мережевого запиту, а ця сторінка залишається виходом на день, коли сервер із моделями перестане працювати."
   },
   "options_dictionaries_heading": { "message": "Словники" },
   "options_dictionaries_intro": {
-    "message": "Додайте словники, щоб бачити детальні визначення слів у бульбашці перекладу. Ви можете змінювати порядок їх відображення за допомогою стрілок."
+    "message": "Додайте словники, щоб бачити детальні визначення слів у бульбашці перекладу."
   },
   "options_dictionaries_sources": {
-    "message": "Словники у списку нижче походять із WikDict. Ви можете також додати власні - з файлів або за посиланням, зокрема кілька для однієї мови - у розділах під списком. Де їх шукати, кожен із зазначеною ліцензією:"
+    "message": "Словники з каталогу походять із WikDict. Власні додаєте з файла або за посиланням, зокрема кілька для однієї мови. Джерела разом із ліцензіями:"
   },
   "options_dictionary_order_hint": {
-    "message": "Бульбашка відповідає в порядку, поданому нижче. Відповідають лише словники мови, яку ви читаєте."
+    "message": "Бульбашка показує статті в порядку зі списку – окремо для кожної мови. Порядок змінюєш стрілками."
   },
   "options_dictionary_note_from": { "message": "Словники завантажуються з" },
   "options_dictionary_note_rest": {
@@ -2232,7 +2749,22 @@
   },
   "options_disabled_heading": { "message": "Вимкнені сайти" },
   "options_disabled_intro": {
-    "message": "Список вебсайтів, де розширення вимкнено: без перекладу, без бульбашки, без підкреслень. Додайте сайт перемикачем під іконкою розширення на панелі браузера, перебуваючи на ньому, або введіть його адресу нижче. Перемикача немає, коли водночас увімкнено „Використовувати без моделі перекладу\" і „Без бульбашки при виділенні тексту\": на звичайних сторінках тоді нічого не відбувається, тож немає чого вимикати."
+    "message": "На цих сайтах re/read не перекладає і не показує ні бульбашки, ні підкреслень. Сайт додаєте у вікні re/read на панелі інструментів або вписавши адресу нижче."
+  },
+
+  "options_disabled_intro_switch": {
+    "message": "У цьому вікні перемикача немає, коли водночас увімкнено",
+    "description": "Behind the Details fold under options_disabled_intro: the case where the toolbar window has no switch to offer."
+  },
+
+  "options_disabled_intro_and": {
+    "message": "і",
+    "description": "Between the two setting names in the switched-off sites intro; each name is a link to its own row."
+  },
+
+  "options_disabled_intro_rest": {
+    "message": ": на звичайних сторінках тоді нічого не відбувається, тож немає чого вимикати.",
+    "description": "The end of the switched-off sites intro, glued to the second setting's link - it opens with the punctuation or the space the language needs there."
   },
   "options_add_host_label": { "message": "Адреса сайту" },
   "options_add_host_button": { "message": "Додати" },
@@ -2251,14 +2783,14 @@
   },
   "options_custom_css_heading": { "message": "Власний CSS" },
   "options_custom_css_intro": {
-    "message": "Для тих, хто хоче змінити вигляд бульбашки, сторінки режиму читання та вікна кнопки на панелі інструментів власними правилами CSS. Ця сторінка лишається поза їхньою дією, тож хибне правило завжди можна скасувати тут: очистьте поле та збережіть."
+    "message": "Власні правила CSS змінюють вигляд бульбашки, режиму читання та вікна re/read. Ця сторінка цим правилам не підлягає, тож хибне правило можна скасувати тут: очистьте поле та збережіть."
   },
   "options_custom_css_more": { "message": "Більше про правила CSS та назви" },
   "options_custom_css_reach": {
     "message": "Правила діють у бульбашці перекладу, на сторінці режиму читання - разом із панеллю та списками - та у вікні кнопки на панелі інструментів, ніколи на сторінках, які ви читаєте. Хибне правило може зіпсувати вигляд або керування в тих місцях, доки поле не буде очищене."
   },
   "options_custom_css_rules": {
-    "message": "Правила, які завантажували б щось із мережі (url(), @import, @font-face), відхиляються. Назви елементів ми намагаємося зберігати від версії до версії; коли якусь доводиться змінити, про це кажуть примітки до випуску. Назви походять із цих файлів:"
+    "message": "Правила, які завантажували б щось із мережі (url(), @import, @font-face), відхиляються. Назви елементів за можливості зберігаються від версії до версії; коли якась має змінитися, про це написано в нотатках до випуску. Назви походять із цих файлів:"
   },
   "options_custom_css_source_bubble": { "message": "tooltip.js (бульбашка)" },
   "options_custom_css_source_reader": { "message": "reader.css (режим читання)" },
@@ -2270,7 +2802,12 @@
     "message": "Не збережено: правила відхилено. Правила, які завантажують щось із мережі (url(), @import, @font-face), не дозволені."
   },
   "options_custom_css_example": {
-    "message": "Приклад: .bubble { outline: 3px solid darkorange; } малює помаранчеву рамку навколо кожної бульбашки."
+    "message": "Приклад:"
+  },
+
+  "options_custom_css_example_rest": {
+    "message": "малює помаранчеву рамку навколо кожної бульбашки.",
+    "description": "Closes options_custom_css_example after the rule itself, which stands in code and needs no translation."
   },
   "options_custom_css_cleared": { "message": "Збережено: без правил, отже стандартний вигляд." },
   "options_support_intro": {
@@ -2293,10 +2830,7 @@
     "message": "Підтвердити видалення: $NAME$",
     "placeholders": { "name": { "content": "$1" } }
   },
-  "options_size_here": {
-    "message": "$SIZE$ на пристрої",
-    "placeholders": { "size": { "content": "$1" } }
-  },
+
   "options_progress_of": {
     "message": "$RECEIVED$ з $TOTAL$",
     "placeholders": {
@@ -2359,9 +2893,15 @@
     }
   },
   "options_no_models": { "message": "Тут немає моделей і немає чого завантажувати - ця збірка не перелічує жодної." },
-  "options_filter_no_match_models": { "message": "Жодна пара не підходить. Фільтр приймає назву мови або код." },
-  "options_filter_no_match_dictionaries": { "message": "Жоден словник не підходить. Фільтр приймає назву мови або код." },
-  "options_no_disabled": { "message": "Жоден сайт не вимкнено. Вимикають у спливному вікні панелі інструментів." },
+  "options_filter_no_match_models": {
+    "message": "Жодна пара не збігається з «$QUERY$». Фільтр приймає назву мови або код.",
+    "placeholders": { "query": { "content": "$1", "example": "polish" } }
+  },
+  "options_filter_no_match_dictionaries": {
+    "message": "Жоден словник не збігається з «$QUERY$». Фільтр приймає назву мови або код.",
+    "placeholders": { "query": { "content": "$1", "example": "polish" } }
+  },
+  "options_no_disabled": { "message": "Жоден сайт не вимкнено." },
   "options_turn_back_on": { "message": "Увімкнути назад" },
   "options_reading_model_files": {
     "message": "Читання файлів для пари $PAIR$...",
@@ -2407,14 +2947,14 @@
     "placeholders": { "name": { "content": "$1", "example": "WikDict en-pl" } }
   },
   "options_dictionary_moved": {
-    "message": "$NAME$ тепер відповідає як $PLACE$ з $TOTAL$.",
+    "message": "$NAME$: позиція $PLACE$ з $TOTAL$, $LANGUAGE$.",
     "placeholders": {
       "name": { "content": "$1", "example": "WikDict en-pl" },
       "place": { "content": "$2", "example": "1" },
-      "total": { "content": "$3", "example": "3" }
+      "total": { "content": "$3", "example": "3" },
+      "language": { "content": "$4", "example": "English" }
     }
   },
-  "options_dictionary_details": { "message": "Подробиці" },
   "options_dictionary_file_name": {
     "message": "Назва з файлу: $NAME$",
     "placeholders": { "name": { "content": "$1", "example": "English-Polish FreeDict+WikDict dictionary (en-pl)" } }

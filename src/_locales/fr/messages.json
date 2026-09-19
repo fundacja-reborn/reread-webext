@@ -13,6 +13,17 @@
     }
   },
 
+  "pair_label_monolingual": {
+    "message": "$LANGUAGE$ (monolingue)",
+    "description": "A dictionary that explains a language in itself: not a direction, so not an arrow.",
+    "placeholders": {
+      "language": {
+        "content": "$1",
+        "example": "English"
+      }
+    }
+  },
+
   "settings": { "message": "Paramètres" },
   "support": { "message": "Soutien" },
   "nav_menu": { "message": "Menu" },
@@ -21,7 +32,7 @@
   "private_browsing_note": { "message": "Vous êtes en navigation privée. Le navigateur utilise pour cette page une base de données séparée, qu'il supprime à la fin de la session privée : la liste de lecture et les surlignages que vous voyez ici proviennent de leurs copies, et un article enregistré, un livre importé, un surlignage fait ou tout ce qui est supprimé ici disparaît avec la session. Seule exception : les phrases enregistrées, qui sont conservées. Pour tout le reste, ouvrez re/read dans un onglet normal." },
   "saved_phrases": { "message": "Phrases enregistrées" },
   "open_reader": { "message": "Ouvrir en mode lecture" },
-  "quiet_bubble": { "message": "Masquer par défaut les actions de la bulle" },
+  "quiet_bubble": { "message": "N'afficher les boutons de la bulle qu'après un clic" },
   "action_delete": { "message": "Supprimer" },
   "action_download": { "message": "Télécharger" },
   "action_cancel": { "message": "Annuler" },
@@ -1367,17 +1378,315 @@
   "options_title": { "message": "re/read - paramètres" },
   "back_to_reading": {"message": "Retour à la lecture"},
   "options_local_intro": {
-    "message": "Tout ce que fait re/read se passe sur cet appareil (hors ligne) : la traduction, le dictionnaire, la liste de lecture, les phrases enregistrées. Rien de ce que vous lisez ou sélectionnez n'est envoyé nulle part. Une connexion Internet n'est nécessaire que lorsque vous voulez télécharger un nouveau modèle de traduction ou un dictionnaire - et seulement depuis les deux URL affichées ouvertement dans ces sections."
+    "message": "Tout ce que fait re/read se passe sur cet appareil (hors ligne) : la traduction, le dictionnaire, la liste de lecture, les phrases enregistrées. Rien de ce que vous lisez ou sélectionnez n'est envoyé nulle part. Une connexion Internet n'est nécessaire que pour télécharger un nouveau modèle de traduction ou un dictionnaire - et seulement depuis les deux adresses indiquées dans les sections"
+  },
+
+  "options_local_intro_and": {
+    "message": "et",
+    "description": "Between the two section links in options_local_intro."
+  },
+
+  "options_local_intro_rest": {
+    "message": ".",
+    "description": "Closes options_local_intro after the second section link; glued to it in the markup, so a language that opens with punctuation gets no space before it."
+  },
+
+  "options_intro_short": {
+    "message": "Tout fonctionne sur cet appareil ; Internet ne sert qu'à télécharger un modèle de traduction ou un dictionnaire.",
+    "description": "The one-line thesis under the settings title; the whole of it stands in the About section at the foot of the page."
+  },
+
+  "options_intro_more": {
+    "message": "En savoir plus sur la confidentialité",
+    "description": "The link at the end of the short intro, leading to the About section."
+  },
+
+  "options_section_languages": {
+    "message": "Langues",
+    "description": "Heading of the settings section holding the language pair, the translation models and the dictionaries."
+  },
+
+  "options_section_bubble": {
+    "message": "Bulle et phrases",
+    "description": "Heading of the settings section about the translation bubble and the phrases saved from it."
+  },
+
+  "options_sub_bubble": {
+    "message": "Bulle",
+    "description": "Heading of the subsection about what the translation bubble shows."
+  },
+
+  "options_sub_phrases": {
+    "message": "Phrases enregistrées",
+    "description": "Heading of the subsection about phrases saved from the bubble."
+  },
+
+  "options_section_reading": {
+    "message": "Vue de lecture",
+    "description": "Heading of the settings section about the reading view."
+  },
+
+  "options_section_aloud": {
+    "message": "Lecture à voix haute",
+    "description": "Heading of the settings section about reading aloud."
+  },
+
+  "options_section_data": {
+    "message": "Données et copies",
+    "description": "Heading of the settings section reporting the space used and the copies kept."
+  },
+
+  "options_section_about": {
+    "message": "À propos de re/read",
+    "description": "Heading of the last settings section: what the extension promises about the network, who builds it, how to support it."
   },
   "options_first_steps_heading": { "message": "Premiers pas" },
+
+  "options_first_steps_count": {
+    "message": "$DONE$ sur $TOTAL$",
+    "description": "How many of the first steps are done, over the settings page's checklist.",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "2"
+      },
+      "total": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+
+  "options_step_model": {
+    "message": "Télécharger un modèle de traduction"
+  },
+
+  "options_step_dictionary": {
+    "message": "Télécharger un dictionnaire (facultatif)"
+  },
+
+  "options_step_pin": {
+    "message": "Épingler re/read à la barre d'outils"
+  },
+
+  "options_step_how": {
+    "message": "Comment"
+  },
+
+  "options_step_done": {
+    "message": "Fait"
+  },
+
+  "options_step_hide": {
+    "message": "Masquer"
+  },
+
+  "options_step_done_state": {
+    "message": "fait",
+    "description": "Heard by a screen reader in place of the tick or the circle beside a first step; never shown."
+  },
+
+  "options_step_todo_state": {
+    "message": "à faire",
+    "description": "Heard by a screen reader in place of the tick or the circle beside a first step; never shown."
+  },
+
+  "options_first_steps_show": {
+    "message": "Afficher les premiers pas"
+  },
+
+  "options_storage_models": {
+    "message": "Modèles de traduction"
+  },
+
+  "options_storage_dictionaries": {
+    "message": "Dictionnaires"
+  },
+
+  "options_storage_library": {
+    "message": "Liste de lecture (avec sa copie)"
+  },
+
+  "options_storage_phrases": {
+    "message": "Phrases et surlignages"
+  },
+
+  "options_storage_other": {
+    "message": "Autres"
+  },
+
+  "options_copies_vocabulary": {
+    "message": "Vocabulaire"
+  },
+
+  "options_copies_marks": {
+    "message": "Surlignages"
+  },
+
+  "options_copies_library": {
+    "message": "Liste de lecture"
+  },
+
+  "options_copies_none": {
+    "message": "pas encore"
+  },
+
+  "options_copies_off": {
+    "message": "désactivée"
+  },
+
+  "options_font_custom_placeholder": {
+    "message": "par exemple Noto Serif"
+  },
+
+  "options_copies_phrases_one": {
+    "message": "$COUNT$ phrase",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "918"
+      }
+    }
+  },
+
+  "options_copies_phrases_many": {
+    "message": "$COUNT$ phrases",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "918"
+      }
+    }
+  },
+
+  "options_copies_phrases_other": {
+    "message": "$COUNT$ phrases",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "918"
+      }
+    }
+  },
+
+  "options_copies_notes_one": {
+    "message": "$COUNT$ avec ses notes",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "918"
+      }
+    }
+  },
+
+  "options_copies_notes_many": {
+    "message": "$COUNT$ avec leurs notes",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "918"
+      }
+    }
+  },
+
+  "options_copies_notes_other": {
+    "message": "$COUNT$ avec leurs notes",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "918"
+      }
+    }
+  },
+
+  "options_copies_docs_one": {
+    "message": "$COUNT$ document, $SIZE$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "61"
+      },
+      "size": {
+        "content": "$2",
+        "example": "13.5 MB"
+      }
+    }
+  },
+
+  "options_copies_docs_many": {
+    "message": "$COUNT$ documents, $SIZE$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "61"
+      },
+      "size": {
+        "content": "$2",
+        "example": "13.5 MB"
+      }
+    }
+  },
+
+  "options_copies_docs_other": {
+    "message": "$COUNT$ documents, $SIZE$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "61"
+      },
+      "size": {
+        "content": "$2",
+        "example": "13.5 MB"
+      }
+    }
+  },
+
+  "options_storage_copies": {
+    "message": "Copies de sauvegarde"
+  },
+
+  "options_copies_intro": {
+    "message": "re/read enregistre des copies de vos phrases, de vos surlignages et de votre liste de lecture dans le stockage de l'extension, à part de la base de données.",
+    "description": "Opens the Backups subsection: what the copies are, in one sentence."
+  },
+
+  "options_copies_intro_more": {
+    "message": "Les copies sont réécrites à chaque changement : quand vous enregistrez ou supprimez une phrase, un surlignage ou une page de la liste de lecture. Elles protègent les données quand le navigateur vide son stockage ou qu'une base de données se corrompt. La base de données est IndexedDB et les copies sont dans le stockage de l'extension (storage.local) - l'un et l'autre dans le profil du navigateur, pas dans des fichiers sur votre ordinateur.",
+    "description": "Behind the Details fold of the Backups subsection: when the copies are written, what they protect against, and where they and the database actually are."
+  },
+
+  "options_copies_head_name": {
+    "message": "Copie",
+    "description": "The Backups table's first column: which copy the row is about."
+  },
+
+  "options_copies_head_holds": {
+    "message": "Contenu",
+    "description": "The Backups table's second column: what the copy holds."
+  },
+
+  "options_copies_head_when": {
+    "message": "Dernière mise à jour",
+    "description": "The Backups table's third column: when the copy last changed."
+  },
+
+  "options_copies_uninstall": {
+    "message": "Désinstaller re/read efface toutes ses données, copies comprises. Avant de le désinstaller ou de passer à un autre appareil, enregistrez une copie sous forme de fichier : Exporter dans",
+    "description": "The note under the Backups table, up to the door that opens the reading list."
+  },
+
+  "options_copies_reading_list": {
+    "message": "la liste de lecture hors ligne",
+    "description": "The door inside options_copies_uninstall: the offline reading list, named as the sentence around it needs it."
+  },
+
+  "options_copies_uninstall_rest": {
+    "message": " écrit un reread-backup.zip avec la liste de lecture, vos phrases, vos surlignages et les paramètres. Les modèles et les dictionnaires n'y sont pas - ils peuvent être téléchargés à nouveau. L'export de la page des phrases enregistrées est un autre fichier : les phrases seules, au format TSV, pour Anki ou le module KOReader.",
+    "description": "Closes options_copies_uninstall after the door, and says how the saved phrases' own export differs."
+  },
+
   "options_first_steps_intro": {
     "message": "Rien ne se traduit encore - le modèle qui s'en chargerait n'est pas encore sur cet appareil. La mise en place prend une minute :"
-  },
-  "options_first_steps_model": {
-    "message": "Sous « Modèles de traduction », trouvez la paire de langues qu'il vous faut (le filtre est le plus rapide) et appuyez sur « Télécharger ». Le modèle est enregistré sur cet appareil et traduit désormais hors ligne - et le premier modèle règle de lui-même la paire de langues ci-dessus."
-  },
-  "options_first_steps_dictionary": {
-    "message": "Sous « Dictionnaires », téléchargez un dictionnaire pour la même paire (facultatif, mais utile) - les mots isolés reçoivent alors des réponses plus complètes qu'une traduction seule, visibles dans la bulle de traduction sous la traduction."
   },
   "options_first_steps_pin": {
     "message": "Enfin, épinglez re/read à la barre d'outils : l'icône en forme de pièce de puzzle à droite de la barre, puis l'engrenage à côté de re/read et « Épingler à la barre d’outils ». Le bouton ouvre le lecteur, la liste de lecture, vos phrases enregistrées et l'interrupteur du site où vous êtes."
@@ -1387,59 +1696,21 @@
   },
   "options_sections_aria": { "message": "Sections de cette page" },
   "options_engine": { "message": "Moteur" },
-  "options_engine_value": { "message": "Bergamot, dans le paquet - traduit hors ligne" },
+  "options_engine_value": { "message": "Bergamot, intégré à l'extension ; traduction hors ligne." },
   "options_storage": { "message": "Données sur cet appareil" },
-  "options_storage_value": {
-    "message": "$SIZE$ - modèles, dictionnaires, liste de lecture et vos expressions réunis",
-    "placeholders": { "size": { "content": "$1", "example": "143,2 MB" } }
+  "options_storage_how": { "message": "Espace occupé par les données de re/read." },
+
+  "options_storage_how_more": {
+    "message": "Le total est l'estimation du navigateur pour toutes les données de re/read. Il compte aussi les index des bases de données et les caches, ce qui explique qu'il dépasse la somme des postes en dessous. Les postes comptent uniquement le texte et les images, sans les index : une entrée de dictionnaire occupe dans la base plusieurs fois la taille de son seul texte, si bien qu'Autres est surtout la base des dictionnaires. Toutes les données sont dans la base de données du navigateur (IndexedDB), dans son profil - et non dans des fichiers séparés sur votre ordinateur. Supprimer un article ou un livre efface définitivement son texte, ses images, ses surlignages, ses notes et sa position de lecture.",
+    "description": "The rest of the options_storage_how description, behind the row's More button."
   },
-  "options_storage_how": { "message": "Espace disque utilisé par l'extension. Les dictionnaires prennent plus de place que leur taille initiale en raison de la structure de la base de données. Supprimer un article ou un livre efface définitivement son texte, ses images, ses surlignages, ses notes et votre progression de lecture." },
   "options_storage_persistent": { "message": "Stockage persistant : accordé. Le navigateur a promis de ne pas effacer ces données pour faire de la place." },
   "options_storage_at_risk": { "message": "Stockage persistant : refusé. Safari efface les données d'un site après environ un mois d'utilisation sans un toucher sur ses pages, et les pages de cette extension comptent comme un site. Vos expressions ont une copie qui y survit (ligne ci-dessous) ; les modèles, les dictionnaires et la liste de lecture non - ouvrez le lecteur ou ces paramètres de temps en temps." },
-  "options_storage_backup_one": {
-    "message": "Copie du vocabulaire : $COUNT$ expression, écrite $WHEN$ - là où le navigateur n'efface pas les données de lui-même.",
-    "placeholders": { "count": { "content": "$1", "example": "1" }, "when": { "content": "$2", "example": "26/08/2026 12:41" } }
-  },
-  "options_storage_backup_many": {
-    "message": "Copie du vocabulaire : $COUNT$ expressions, écrite $WHEN$ - là où le navigateur n'efface pas les données de lui-même.",
-    "placeholders": { "count": { "content": "$1", "example": "1 000 000" }, "when": { "content": "$2", "example": "26/08/2026 12:41" } }
-  },
-  "options_storage_backup_other": {
-    "message": "Copie du vocabulaire : $COUNT$ expressions, écrite $WHEN$ - là où le navigateur n'efface pas les données de lui-même.",
-    "placeholders": { "count": { "content": "$1", "example": "1234" }, "when": { "content": "$2", "example": "26/08/2026 12:41" } }
-  },
-  "options_storage_backup_none": { "message": "Copie du vocabulaire : aucune pour l'instant - elle sera écrite avec la prochaine expression enregistrée." },
-  "options_storage_marks_backup_one": {
-    "message": "Copie des surlignages : $COUNT$ surlignage avec ses notes, écrite $WHEN$.",
-    "placeholders": { "count": { "content": "$1", "example": "1" }, "when": { "content": "$2", "example": "26/08/2026 12:41" } }
-  },
-  "options_storage_marks_backup_many": {
-    "message": "Copie des surlignages : $COUNT$ surlignages avec leurs notes, écrite $WHEN$.",
-    "placeholders": { "count": { "content": "$1", "example": "1 000 000" }, "when": { "content": "$2", "example": "26/08/2026 12:41" } }
-  },
-  "options_storage_marks_backup_other": {
-    "message": "Copie des surlignages : $COUNT$ surlignages avec leurs notes, écrite $WHEN$.",
-    "placeholders": { "count": { "content": "$1", "example": "37" }, "when": { "content": "$2", "example": "26/08/2026 12:41" } }
-  },
-  "options_storage_marks_backup_none": { "message": "Copie des surlignages : aucune pour l'instant - elle sera écrite avec le prochain surlignage." },
-  "options_storage_library_copy_one": {
-    "message": "Copie de la liste de lecture : $COUNT$ document, $SIZE$.",
-    "placeholders": { "count": { "content": "$1", "example": "1" }, "size": { "content": "$2", "example": "12,4 Mo" } }
-  },
-  "options_storage_library_copy_many": {
-    "message": "Copie de la liste de lecture : $COUNT$ documents, $SIZE$.",
-    "placeholders": { "count": { "content": "$1", "example": "1 000 000" }, "size": { "content": "$2", "example": "12,4 Mo" } }
-  },
-  "options_storage_library_copy_other": {
-    "message": "Copie de la liste de lecture : $COUNT$ documents, $SIZE$.",
-    "placeholders": { "count": { "content": "$1", "example": "37" }, "size": { "content": "$2", "example": "12,4 Mo" } }
-  },
-  "options_storage_library_copy_none": { "message": "Copie de la liste de lecture : aucune pour l'instant - elle sera écrite avec la prochaine page enregistrée ou le prochain livre importé." },
-  "options_storage_library_copy_off": { "message": "Copie de la liste de lecture : désactivée." },
-  "options_library_copy": { "message": "Copie de la liste de lecture" },
+  "options_library_copy": { "message": "Sauvegarder la liste de lecture" },
   "options_library_copy_hint": {
-    "message": "Crée une sauvegarde de votre liste de lecture pour la protéger contre les nettoyages automatiques du navigateur et les erreurs de base de données. Cela double l'espace disque occupé par la liste, mais vos articles enregistrés sont conservés même si la base de données est perdue."
+    "message": "La liste de lecture occupe alors deux fois plus de place. Les copies des phrases et des surlignages sont toujours faites."
   },
+
   "reader_marks_delete_all_one": {
     "message": "Supprimer la $COUNT$ citation de cette page",
     "placeholders": { "count": { "content": "$1", "example": "1" } }
@@ -1458,33 +1729,41 @@
     "placeholders": { "pair": { "content": "$1", "example": "anglais → anglais" } }
   },
   "options_pair_hint_quiet": {
-    "message": "Sans modèle de traduction, la paire indique la langue que vous lisez et où sont rangées les phrases enregistrées. Les paires viennent des modèles et des dictionnaires installés."
+    "message": "Sans modèle de traduction, la paire détermine la langue que vous lisez et la paire sous laquelle les phrases sont enregistrées. Les paires viennent des modèles et des dictionnaires installés."
   },
   "options_reading_pair_quiet": {
     "message": "Vous lisez $FROM$ - la traduction automatique est désactivée, les phrases enregistrées appartiennent à cette paire.",
     "placeholders": { "from": { "content": "$1", "example": "anglais" } }
   },
-  "options_reader_only": { "message": "Seulement dans le lecteur" },
+  "options_reader_only": { "message": "Afficher les soulignements et la bulle uniquement dans le lecteur" },
   "options_reader_only_hint": {
-    "message": "Limite le soulignement des phrases enregistrées et la bulle de traduction au lecteur. Sélectionner du texte sur une page web ordinaire proposera uniquement de l'ouvrir dans le lecteur. Lorsqu'elle est activée, aucune page web ne peut savoir lesquels de ses mots vous avez enregistrés. Sur Android et iOS, l'option est activée par défaut."
+    "message": "Sur une page ordinaire, après une sélection de texte, une bulle apparaît avec deux boutons : ouvrir la page dans le lecteur et aller à la liste de lecture."
   },
-  "options_page_number": { "message": "Numéro de page" },
+
+  "options_reader_only_more": {
+    "message": "Lorsqu'elle est activée, aucune page web ne peut savoir lesquels de ses mots vous avez enregistrés. Sur Android et iOS, l'option est activée par défaut.",
+    "description": "The rest of the options_reader_only_hint description, behind the row's More button."
+  },
+
+  "options_page_number": { "message": "Afficher le numéro de page" },
   "options_page_number_hint": {
-    "message": "Affiche le compteur de pages en bas de la fenêtre. Désactivé, la dernière ligne de chaque page descend plus bas ; les lecteurs d'écran lisent toujours le compteur, et sur un écran large il se trouve dans la barre à côté de re/read."
+    "message": "La page en cours et le nombre total, par exemple 3 / 12, en bas de la fenêtre."
+  },
+
+  "options_page_number_more": {
+    "message": "Désactivé, le texte de chaque page descend plus bas ; les lecteurs d'écran lisent toujours le compteur, et sur un écran large il est affiché dans la barre à côté de re/read.",
+    "description": "The rest of the options_page_number_hint description, behind the row's More button."
   },
   "options_paged_heading": { "message": "Affichage Pages" },
   "options_paged_intro": {
-    "message": "Ces réglages s'appliquent à l'affichage Pages du lecteur, où le texte avance uniquement par pages entières, chacune commençant et finissant par une ligne entière."
+    "message": "Ils s'appliquent dans le lecteur, en affichage Pages : le texte avance par pages entières, chacune commençant et finissant par une ligne entière."
   },
   "options_touch_turn": { "message": "Tourner les pages au toucher" },
-  "options_touch_turn_zones": { "message": "Toucher le tiers gauche ou droit" },
+  "options_touch_turn_zones": { "message": "Toucher le côté gauche ou droit de l'écran" },
   "options_touch_turn_swipe": { "message": "Glisser le doigt sur le côté" },
   "options_touch_turn_off": { "message": "Désactivé" },
-  "options_touch_turn_hint": {
-    "message": "Sur un écran large, le réglage par défaut est le toucher ; sur un écran étroit, le glissement - là, la main qui tient l'appareil repose sur l'écran, et un geste qui doit se déplacer est le seul qu'elle ne fasse pas par mégarde. Les touches de page, les flèches et la molette tournent les pages quel que soit ce réglage, et le stylet ne tourne jamais de page."
-  },
   "options_touch_turn_note_zones": {
-    "message": "Toucher le tiers gauche ou droit de la page la tourne : le tiers droit avance, le gauche recule. Seul compte un toucher bref, immobile et éloigné des bords de l'écran, pour qu'un pouce qui tient l'appareil n'en tourne aucune."
+    "message": "Un toucher sur le tiers droit de l'écran passe à la page suivante, sur le tiers gauche à la précédente. Seul compte un toucher bref et immobile, loin des bords, pour qu'un pouce qui tient l'appareil ne change pas de page."
   },
   "options_touch_turn_note_swipe": {
     "message": "Glisser le doigt vers la gauche montre la page suivante, vers la droite la précédente. Sur un téléphone, ne commencez pas tout au bord de l'écran : c'est là que commence le geste de retour du système ; sur une liseuse, le bord fonctionne en général."
@@ -1496,80 +1775,286 @@
   "options_turn_effect_auto": { "message": "Automatique" },
   "options_turn_effect_off": { "message": "Désactivé" },
   "options_turn_effect_hint": {
-    "message": "Montre que la page a tourné, ce qui passe facilement inaperçu quand on lit le milieu d'une page. Rien ne se passe si le système demande moins d'animations, ni quand la page est tournée par la lecture à voix haute ou en faisant glisser une sélection jusqu'au bord de la page."
+    "message": "Une confirmation visible du changement de page."
   },
   "options_turn_effect_note_auto": {
-    "message": "Dans le thème E-ink, la zone de texte s'assombrit un instant, comme sur une liseuse ; sur les autres écrans, la nouvelle page glisse."
+    "message": "Dans le thème E-ink, la zone de texte s'assombrit un instant, comme sur une liseuse ; sur les autres écrans, la nouvelle page apparaît avec un glissement doux."
   },
   "options_turn_effect_note_off": {
     "message": "La page change simplement, comme avant ce réglage."
   },
-  "options_keep_articles": { "message": "Enregistrer par défaut dans la liste de lecture hors ligne" },
+  "options_keep_articles": { "message": "Enregistrer les pages ouvertes dans la liste de lecture hors ligne" },
   "options_keep_articles_hint": {
-    "message": "Enregistre automatiquement chaque page ouverte dans le lecteur pour la lecture hors ligne. Vos pages enregistrées, vos surlignages et votre progression de lecture sont préservés même si le site d'origine change ou disparaît."
+    "message": "Une page peut toujours être enregistrée dans le lecteur avec Enregistrer dans la liste de lecture, ou retirée de la liste avec Supprimer."
+  },
+
+  "options_keep_articles_more": {
+    "message": "Vos pages enregistrées, vos surlignages et votre progression de lecture sont préservés même si le site d'origine change ou disparaît.",
+    "description": "The rest of the options_keep_articles_hint description, behind the row's More button."
   },
   "options_font_custom": { "message": "Police personnelle" },
   "options_font_custom_hint": {
-    "message": "Saisissez le nom d'une police installée sur cet appareil, par exemple Georgia ou Noto Serif. La ligne Police du lecteur la proposera alors comme Personnalisée. Laissez le champ vide pour n'utiliser que les polices intégrées."
+    "message": "Une police installée sur cet appareil, par exemple Noto Serif. Dans le panneau Aa, elle apparaît dans la ligne Police comme Personnalisée."
+  },
+
+  "options_font_custom_more": {
+    "message": "Saisissez le nom tel que le système l'écrit. Laissez le champ vide pour n'utiliser que les polices intégrées.",
+    "description": "The rest of the options_font_custom_hint description, behind the row's More button."
   },
   "options_reading_pace": { "message": "Vitesse de lecture" },
   "options_reading_pace_unit": { "message": "mots par minute" },
   "options_reading_pace_hint": {
-    "message": "Le nombre de mots que vous lisez en une minute. Il sert uniquement à estimer le temps de lecture affiché dans la liste de lecture et sous le titre d'un article. 200 est un rythme tranquille dans votre propre langue. Dans une langue que vous apprenez, c'est généralement 100-150."
+    "message": "Sert uniquement à estimer le temps de lecture affiché dans la liste de lecture et sous le titre d'un article."
+  },
+
+  "options_reading_pace_more": {
+    "message": "Le nombre de mots que vous lisez en une minute. 200 est un rythme tranquille dans votre propre langue ; dans une langue que vous apprenez, c'est généralement 100-150.",
+    "description": "The rest of the options_reading_pace_hint description, behind the row's More button."
   },
   "options_quiet_bubble_hint": {
-    "message": "Affiche uniquement le texte traduit dans la bulle. Les boutons d'action (copier, enregistrer) n'apparaissent que lorsque vous cliquez ou touchez la bulle."
+    "message": "La bulle n'affiche alors que la traduction ; sur un écran tactile, les boutons apparaissent après avoir touché la bulle."
+  },
+
+  "options_quiet_bubble_more": {
+    "message": "Les boutons d'action sont copier, enregistrer, lire à voix haute et les autres - toutes les actions de la bulle, à un appui près.",
+    "description": "The rest of the options_quiet_bubble_hint description, behind the row's More button."
   },
   "options_bubble_more": { "message": "Afficher tout de suite la phrase et les entrées du dictionnaire" },
   "options_bubble_more_hint": {
-    "message": "Après la sélection d'un texte, la bulle affiche tout de suite ce qui n'apparaît autrement qu'après un appui sur « Plus » : la phrase traduite et les entrées du dictionnaire. À garder activé avec un dictionnaire installé - un modèle de traduction se trompe souvent sur un mot isolé, et le dictionnaire montre ce qu'il veut vraiment dire. La bulle au-dessus d'une expression déjà enregistrée n'affiche que la traduction enregistrée - la phrase et les entrées du dictionnaire apparaissent après un appui sur « Plus »."
+    "message": "La bulle affiche tout de suite la phrase traduite et les entrées du dictionnaire, sans appui sur « Plus »."
+  },
+
+  "options_bubble_more_more": {
+    "message": "À garder activé avec un dictionnaire installé : la traduction d'un mot isolé est souvent fausse, et le dictionnaire montre ce qu'il veut vraiment dire. La bulle au-dessus d'une expression déjà enregistrée n'affiche que la traduction enregistrée - la phrase et les entrées du dictionnaire apparaissent après un appui sur « Plus ».",
+    "description": "The rest of the options_bubble_more_hint description, behind the row's More button."
   },
   "options_underline_forms": { "message": "Souligner aussi les autres formes des mots enregistrés" },
   "options_underline_forms_hint": {
-    "message": "Un mot enregistré est aussi souligné sous ses autres formes : après l'enregistrement de « read », « reads » et « reading » sont soulignés eux aussi, et la bulle au-dessus montre ce que vous avez enregistré pour « read ». Les formes qui comptent sont décidées par votre dictionnaire de la langue lue - il doit donc être installé. Pour l'instant, seulement quand vous lisez en anglais. Désactivé, seule la forme exacte que vous avez enregistrée est soulignée."
+    "message": "Après l'enregistrement de « read », « reads » et « reading » sont soulignés eux aussi."
+  },
+
+  "options_underline_forms_more": {
+    "message": "La bulle au-dessus montre ce que vous avez enregistré pour « read ». Les formes qui comptent viennent de votre dictionnaire de la langue lue - il doit donc être installé. Pour l'instant, seulement quand vous lisez en anglais. Désactivé, seule la forme exacte que vous avez enregistrée est soulignée.",
+    "description": "The rest of the options_underline_forms_hint description, behind the row's More button."
   },
   "options_save_sentence": { "message": "Enregistrer la phrase avec l'expression" },
   "options_save_sentence_hint": {
-    "message": "Quand vous enregistrez une expression depuis la bulle, la phrase qui l'entoure est enregistrée avec elle - la phrase telle que la page l'affiche, sans sa traduction. Elle est affichée sous l'expression dans la liste des expressions enregistrées, repliée sur une ligne, et écrite dans la troisième colonne de l'export pour Anki. Pour une expression enregistrée sans phrase, la phrase qui l'entoure est enregistrée la prochaine fois que vous ouvrez sa bulle sur une page. Comme l'expression, la phrase est conservée uniquement sur cet appareil. Désactivé, aucune nouvelle phrase n'est enregistrée ; celles déjà enregistrées ne sont pas supprimées."
+    "message": "Enregistrer une expression enregistre aussi la phrase dans laquelle elle se trouvait."
+  },
+
+  "options_save_sentence_more": {
+    "message": "La phrase telle que la page l'affiche, sans sa traduction. Elle est affichée sous l'expression dans la liste des expressions enregistrées, repliée sur une ligne, et écrite dans la troisième colonne de l'export pour Anki. Pour une expression enregistrée sans phrase, la phrase qui l'entoure est enregistrée la prochaine fois que vous ouvrez sa bulle sur une page. Comme l'expression, la phrase est conservée uniquement sur cet appareil. Désactivé, aucune nouvelle phrase n'est enregistrée ; celles déjà enregistrées ne sont pas supprimées.",
+    "description": "The rest of the options_save_sentence_hint description, behind the row's More button."
   },
   "options_no_translation": { "message": "Utiliser sans modèle de traduction" },
   "options_no_translation_hint": {
-    "message": "Désactive la traduction automatique (le modèle). Le lecteur, la liste de lecture hors ligne et le surligneur continuent de fonctionner. Avec une paire de langues choisie, la bulle affiche toujours les sens des dictionnaires, et vous pouvez enregistrer des phrases et voir leurs soulignements. Idéal pour lire avec des dictionnaires ou dans votre langue maternelle. Vos données enregistrées ne sont pas supprimées et reviennent quand vous désactivez cette option."
+    "message": "Les dictionnaires seuls, sans traduction automatique ; le lecteur, la liste de lecture hors ligne et le surligneur continuent de fonctionner."
   },
-  "options_bubble_off": { "message": "Pas de bulle à la sélection de texte" },
+
+  "options_no_translation_more": {
+    "message": "Avec une paire de langues choisie, la bulle affiche toujours les sens des dictionnaires, et vous pouvez enregistrer des phrases et voir leurs soulignements. Idéal pour lire avec des dictionnaires ou dans votre langue maternelle. Vos données enregistrées ne sont pas supprimées et reviennent quand vous désactivez cette option.",
+    "description": "The rest of the options_no_translation_hint description, behind the row's More button."
+  },
+  "options_bubble_off": { "message": "Ne pas afficher la bulle à la sélection de texte" },
   "options_bubble_off_hint": {
-    "message": "Quand c'est activé, sélectionner du texte sur une page ordinaire ne fait rien du tout - ouvrez une page dans le lecteur avec le bouton de re/read ou avec Alt+Maj+R. Dans le lecteur, une sélection n'est qu'un surlignage passager : aucune bulle ne s'ouvre, un appui ou Échap l'efface, et Ctrl+C ou Cmd+C la copie (sur un écran tactile, rien ne peut être copié)."
+    "message": "Sur une page ordinaire, sélectionner du texte ne fait rien du tout - ouvrez une page dans le lecteur avec le bouton de re/read ou avec Alt+Maj+R."
+  },
+
+  "options_bubble_off_more": {
+    "message": "Dans le lecteur, une sélection n'est qu'un surlignage passager : aucune bulle ne s'ouvre, un appui ou Échap l'efface, et Ctrl+C ou Cmd+C la copie (sur un écran tactile, rien ne peut être copié).",
+    "description": "The rest of the options_bubble_off_hint description, behind the row's More button."
   },
   "options_bubble_scale": { "message": "Taille du texte de la bulle" },
   "options_bubble_scale_hint": {
     "message": "Ajuste la taille du texte et des boutons dans la bulle de traduction sur toutes les pages."
   },
-  "options_note_more": { "message": "Afficher la description complète" },
-  "options_tts": { "message": "Lecture à voix haute" },
+
+  "options_details": {
+    "message": "Détails",
+    "description": "The word every fold on the settings page opens under - the row notes' and the dictionary rows' alike."
+  },
+
+  "options_field_saved": {
+    "message": "Enregistré",
+    "description": "Beside a text field on the settings page once what was typed in it has been stored. Stays until the next edit - never taken away on a timer."
+  },
+
+  "options_search_label": {
+    "message": "Rechercher dans les paramètres",
+    "description": "The settings page's own search field - its label and its placeholder alike."
+  },
+
+  "options_section_jump": {
+    "message": "Aller à une section",
+    "description": "The accessible name of the bar's section list on a narrow screen, where it stands as the page's title."
+  },
+
+  "options_search_close": {
+    "message": "Fermer la recherche"
+  },
+
+  "options_search_found_one": {
+    "message": "$COUNT$ paramètre",
+    "description": "How many settings the search left on screen. $COUNT$ is the number.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+
+  "options_search_found_many": {
+    "message": "$COUNT$ paramètres",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+
+  "options_search_found_other": {
+    "message": "$COUNT$ paramètres",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+
+  "options_search_none": {
+    "message": "Aucun paramètre ne correspond à « $QUERY$ ».",
+    "description": "Under the search field when nothing matched. $QUERY$ is what was typed.",
+    "placeholders": {
+      "query": {
+        "content": "$1",
+        "example": "voice"
+      }
+    }
+  },
+
+  "options_search_clear": {
+    "message": "Effacer"
+  },
+
+  "options_blocked_by": {
+    "message": "Disponible une fois",
+    "description": "On a row the search found although the switch that brings it is off; the switch's own name follows as a link, then options_blocked_by_rest."
+  },
+
+  "options_blocked_by_rest": {
+    "message": " activé.",
+    "description": "The end of options_blocked_by, glued to the link - it opens with the punctuation or the space the language needs there."
+  },
+
+  "options_keywords_tts": {
+    "message": "lecteur, voix, parole, parler, TTS",
+    "description": "Words the settings search also finds this row by; never shown."
+  },
+
+  "options_keywords_font": {
+    "message": "police, fonte, caractère",
+    "description": "Words the settings search also finds this row by; never shown."
+  },
+
+  "options_keywords_pace": {
+    "message": "temps de lecture, mots par minute, wpm, vitesse",
+    "description": "Words the settings search also finds this row by; never shown."
+  },
+
+  "options_keywords_scale": {
+    "message": "agrandissement, taille, plus grand, plus petit",
+    "description": "Words the settings search also finds this row by; never shown."
+  },
+
+  "options_keywords_storage": {
+    "message": "espace, disque, mémoire",
+    "description": "Words the settings search also finds this row by; never shown."
+  },
+
+  "options_keywords_copy": {
+    "message": "sauvegarde, copie, restauration",
+    "description": "Words the settings search also finds this row by; never shown."
+  },
+
+  "options_keywords_sites": {
+    "message": "domaine, exceptions, blocage, hôte",
+    "description": "Words the settings search also finds this row by; never shown."
+  },
+
+  "options_keywords_turn": {
+    "message": "glisser, appuyer, geste, doigt, flash, animation, mouvement",
+    "description": "Words the settings search also finds this row by; never shown."
+  },
+  "options_tts": { "message": "Afficher les boutons de lecture à voix haute" },
   "options_tts_hint": {
-    "message": "Active la lecture à voix haute. Désactiver cette option masque tous les boutons de lecture dans la bulle, les listes et le lecteur."
+    "message": "Dans la bulle, dans les listes des phrases enregistrées et des surlignages, et dans le lecteur."
+  },
+
+  "options_tts_more": {
+    "message": "Désactiver cette option les masque tous. La voix et la vitesse choisies sont mémorisées et s'appliquent à nouveau à la réactivation.",
+    "description": "The rest of the options_tts_hint description, behind the row's More button."
   },
   "options_tts_voice": { "message": "Voix de lecture" },
   "options_tts_lang": { "message": "Langue de la voix" },
   "options_tts_default": { "message": "Voix par défaut" },
   "options_tts_listen": { "message": "Écouter" },
   "options_tts_voice_hint": {
-    "message": "Choisissez, pour chaque langue, la voix utilisée pour lire les phrases et les articles. Seules les voix qui parlent hors ligne sont proposées : la parole est produite sur cet appareil et rien n'est envoyé sur Internet."
+    "message": "Une voix distincte pour chaque langue ; seules les voix qui parlent hors ligne sont proposées."
+  },
+
+  "options_tts_voice_more": {
+    "message": "La voix lit aussi bien les phrases que les articles entiers. La parole est produite sur cet appareil et rien n'est envoyé sur Internet.",
+    "description": "The rest of the options_tts_voice_hint description, behind the row's More button."
   },
   "speech_no_offline_voice": { "message": "Cet appareil n'a pas de voix hors ligne pour cette langue." },
   "options_tts_rate": { "message": "Vitesse de la voix" },
   "options_models_heading": { "message": "Modèles de traduction" },
   "options_models_intro": {
-    "message": "Téléchargez ici un modèle de traduction pour chaque paire de langues que vous voulez traduire. Ce sont des fichiers officiels de Mozilla qui fonctionnent entièrement hors ligne sur votre appareil."
+    "message": "Un modèle de traduction se télécharge séparément pour chaque paire de langues. Ce sont des fichiers officiels de Mozilla ; la traduction se fait entièrement sur cet appareil."
   },
   "options_models_single_word": {
-    "message": "Un modèle traduit bien les phrases, mais un mot isolé, sans contexte, est souvent mal traduit - le résultat est tronqué, ou c'est un mot qui n'existe pas. Pour les mots isolés, un dictionnaire de la section ci-dessous est la meilleure source."
+    "message": "Un modèle traduit bien les phrases, mais un mot isolé est souvent mal traduit - le résultat est tronqué, ou n'existe pas dans la langue. Pour les mots isolés, la meilleure source est un dictionnaire : la section"
+  },
+
+  "options_models_single_word_rest": {
+    "message": "ci-dessous.",
+    "description": "Closes options_models_single_word after the link to the Dictionaries section."
   },
   "options_update_list": { "message": "Mettre à jour la liste" },
   "options_list_dated": { "message": "Liste du" },
   "options_filter_placeholder": { "message": "Filtrer par langue ou par code" },
   "options_filter_models_label": { "message": "Filtrer la liste des modèles de traduction" },
   "options_filter_dictionaries_label": { "message": "Filtrer la liste des dictionnaires" },
+  "options_list_installed": {
+    "message": "Sur cet appareil",
+    "description": "Heading of the block listing what is already on this device, in both the models and the dictionaries subsection."
+  },
+  "options_list_available": {
+    "message": "À télécharger",
+    "description": "Heading of the block holding the catalogue: the filter, the list to download from and the by-hand doors."
+  },
+  "options_no_models_yet": {
+    "message": "Aucun modèle de traduction sur cet appareil. Choisissez une paire dans la section",
+    "description": "Said in place of an empty list of installed models; the name of the catalogue block follows as a link, then the rest."
+  },
+  "options_no_models_yet_rest": { "message": "ci-dessous." },
+  "options_no_dictionaries_yet": {
+    "message": "Aucun dictionnaire sur cet appareil. Choisissez-en un dans la section",
+    "description": "Said in place of an empty list of installed dictionaries; the name of the catalogue block follows as a link, then the rest."
+  },
+  "options_no_dictionaries_yet_rest": { "message": "ci-dessous, ou ajoutez le vôtre." },
+  "options_dictionary_into": {
+    "message": "→ $LANGUAGE$",
+    "description": "The language a dictionary explains words in, in the small print of its row. Its own words' language is the heading the row stands under.",
+    "placeholders": { "language": { "content": "$1", "example": "Polish" } }
+  },
+  "options_dictionary_monolingual": {
+    "message": "monolingue",
+    "description": "Said in place of the target language for a dictionary that explains a language in itself."
+  },
   "options_show_all": {
     "message": "Tout afficher ($COUNT$)",
     "placeholders": { "count": { "content": "$1" } }
@@ -1588,17 +2073,17 @@
   },
   "options_add_model_button": { "message": "Ajouter le modèle" },
   "options_files_note": {
-    "message": "Ajouter un modèle depuis des fichiers ne fait aucune requête réseau, et cette page reste la sortie de secours pour le jour où l'endroit d'où viennent les modèles cesse de répondre."
+    "message": "Ajouter un modèle depuis des fichiers ne fait aucune requête réseau, et cette page reste la solution le jour où le serveur des modèles cesse de fonctionner."
   },
   "options_dictionaries_heading": { "message": "Dictionnaires" },
   "options_dictionaries_intro": {
-    "message": "Ajoutez des dictionnaires pour voir des définitions détaillées des mots dans la bulle de traduction. Vous pouvez modifier leur ordre d'affichage à l'aide des flèches."
+    "message": "Ajoutez des dictionnaires pour voir des définitions détaillées des mots dans la bulle de traduction."
   },
   "options_dictionaries_sources": {
-    "message": "Les dictionnaires de la liste ci-dessous viennent de WikDict. Vous pouvez aussi ajouter les vôtres - depuis des fichiers ou depuis un lien, et plusieurs pour une même langue - dans les sections sous la liste. Où les trouver, chacun avec sa licence :"
+    "message": "Les dictionnaires du catalogue viennent de WikDict. Vous pouvez ajouter les vôtres depuis un fichier ou depuis un lien, et plusieurs pour une même langue. Les sources, chacune avec sa licence :"
   },
   "options_dictionary_order_hint": {
-    "message": "La bulle répond dans l'ordre ci-dessous. Seuls les dictionnaires de la langue que vous lisez répondent."
+    "message": "La bulle affiche les entrées dans l'ordre ci-dessous, langue par langue. Les flèches le modifient."
   },
   "options_dictionary_note_from": { "message": "Les dictionnaires sont téléchargés depuis" },
   "options_dictionary_note_rest": {
@@ -1643,7 +2128,22 @@
   },
   "options_disabled_heading": { "message": "Sites désactivés" },
   "options_disabled_intro": {
-    "message": "Liste des sites web où l'extension est désactivée : pas de traduction, pas de bulle, pas de soulignements. Ajoutez un site avec l'interrupteur sous l'icône de l'extension dans la barre d'outils du navigateur pendant que vous y êtes, ou tapez son adresse ci-dessous. Il n'y a pas d'interrupteur quand « Utiliser sans modèle de traduction » et « Pas de bulle à la sélection de texte » sont tous deux activés : il ne se passe alors rien sur les pages ordinaires, il n'y a donc rien à désactiver."
+    "message": "Sur ces sites, re/read ne traduit pas et n'affiche ni bulle ni soulignements. Ajoutez un site dans la fenêtre re/read de la barre d'outils, ou en saisissant son adresse ci-dessous."
+  },
+
+  "options_disabled_intro_switch": {
+    "message": "Il n'y a pas d'interrupteur dans cette fenêtre quand",
+    "description": "Behind the Details fold under options_disabled_intro: the case where the toolbar window has no switch to offer."
+  },
+
+  "options_disabled_intro_and": {
+    "message": "et",
+    "description": "Between the two setting names in the switched-off sites intro; each name is a link to its own row."
+  },
+
+  "options_disabled_intro_rest": {
+    "message": " sont tous deux activés : il ne se passe alors rien sur les pages ordinaires, il n'y a donc rien à désactiver.",
+    "description": "The end of the switched-off sites intro, glued to the second setting's link - it opens with the punctuation or the space the language needs there."
   },
   "options_add_host_label": { "message": "Adresse du site" },
   "options_add_host_button": { "message": "Ajouter" },
@@ -1662,14 +2162,14 @@
   },
   "options_custom_css_heading": { "message": "CSS personnalisé" },
   "options_custom_css_intro": {
-    "message": "Pour modifier l'apparence de la bulle, de la page du lecteur et de la fenêtre du bouton de la barre d'outils avec vos propres règles CSS. Cette page reste hors de leur portée, pour qu'une mauvaise règle puisse toujours être annulée ici : videz le champ et enregistrez."
+    "message": "Vos propres règles CSS changent l'apparence de la bulle, de la vue de lecture et de la fenêtre re/read. Cette page n'est pas soumise à ces règles : une mauvaise règle s'annule donc toujours ici, videz le champ et enregistrez."
   },
   "options_custom_css_more": { "message": "En savoir plus sur les règles CSS et les noms" },
   "options_custom_css_reach": {
     "message": "Les règles s'appliquent dans la bulle de traduction, sur la page du lecteur - barre et listes comprises - et dans la fenêtre du bouton de la barre d'outils, jamais sur les pages que vous lisez. Une mauvaise règle peut casser l'apparence ou les commandes de ces endroits jusqu'à ce que le champ soit vidé."
   },
   "options_custom_css_rules": {
-    "message": "Les règles qui chargeraient quoi que ce soit depuis le réseau (url(), @import, @font-face) sont refusées. Les noms des éléments sont conservés d'une version à l'autre autant que possible ; quand l'un doit changer, les notes de version le disent. Les noms viennent de ces fichiers :"
+    "message": "Les règles qui chargeraient quoi que ce soit depuis le réseau (url(), @import, @font-face) sont refusées. Les noms des éléments sont conservés d'une version à l'autre dans la mesure du possible ; quand l'un doit changer, c'est indiqué dans les notes de version. Les noms viennent de ces fichiers :"
   },
   "options_custom_css_source_bubble": { "message": "tooltip.js (la bulle)" },
   "options_custom_css_source_reader": { "message": "reader.css (le lecteur)" },
@@ -1681,7 +2181,12 @@
     "message": "Non enregistré : les règles ont été refusées. Les règles qui chargent quoi que ce soit depuis le réseau (url(), @import, @font-face) ne sont pas autorisées."
   },
   "options_custom_css_example": {
-    "message": "Exemple : .bubble { outline: 3px solid darkorange; } trace un contour orange autour de chaque bulle."
+    "message": "Exemple :"
+  },
+
+  "options_custom_css_example_rest": {
+    "message": "trace un contour orange autour de chaque bulle.",
+    "description": "Closes options_custom_css_example after the rule itself, which stands in code and needs no translation."
   },
   "options_custom_css_cleared": { "message": "Enregistré : aucune règle, donc l'apparence par défaut." },
   "options_support_intro": {
@@ -1704,10 +2209,7 @@
     "message": "Confirmer la suppression : $NAME$",
     "placeholders": { "name": { "content": "$1" } }
   },
-  "options_size_here": {
-    "message": "$SIZE$ ici",
-    "placeholders": { "size": { "content": "$1" } }
-  },
+
   "options_progress_of": {
     "message": "$RECEIVED$ sur $TOTAL$",
     "placeholders": {
@@ -1770,9 +2272,15 @@
     }
   },
   "options_no_models": { "message": "Aucun modèle ici, et aucun à télécharger - cette version n'en liste aucun." },
-  "options_filter_no_match_models": { "message": "Aucune paire ne correspond. Le filtre prend un nom de langue ou un code." },
-  "options_filter_no_match_dictionaries": { "message": "Aucun dictionnaire ne correspond. Le filtre prend un nom de langue ou un code." },
-  "options_no_disabled": { "message": "Aucun site n'est désactivé. C'est dans le popup de la barre d'outils que ça se fait." },
+  "options_filter_no_match_models": {
+    "message": "Aucune paire ne correspond à « $QUERY$ ». Le filtre accepte un nom de langue ou un code.",
+    "placeholders": { "query": { "content": "$1", "example": "polish" } }
+  },
+  "options_filter_no_match_dictionaries": {
+    "message": "Aucun dictionnaire ne correspond à « $QUERY$ ». Le filtre accepte un nom de langue ou un code.",
+    "placeholders": { "query": { "content": "$1", "example": "polish" } }
+  },
+  "options_no_disabled": { "message": "Aucun site n'est désactivé." },
   "options_turn_back_on": { "message": "Réactiver" },
   "options_reading_model_files": {
     "message": "Lecture des fichiers pour $PAIR$...",
@@ -1818,14 +2326,14 @@
     "placeholders": { "name": { "content": "$1", "example": "WikDict en-pl" } }
   },
   "options_dictionary_moved": {
-    "message": "$NAME$ répond désormais en position $PLACE$ sur $TOTAL$.",
+    "message": "$NAME$ : position $PLACE$ sur $TOTAL$, $LANGUAGE$.",
     "placeholders": {
       "name": { "content": "$1", "example": "WikDict en-pl" },
       "place": { "content": "$2", "example": "1" },
-      "total": { "content": "$3", "example": "3" }
+      "total": { "content": "$3", "example": "3" },
+      "language": { "content": "$4", "example": "English" }
     }
   },
-  "options_dictionary_details": { "message": "Détails" },
   "options_dictionary_file_name": {
     "message": "Nom du fichier : $NAME$",
     "placeholders": { "name": { "content": "$1", "example": "English-Polish FreeDict+WikDict dictionary (en-pl)" } }

@@ -4,7 +4,7 @@ import { describe, it } from "node:test";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { DISPLAY_NAME_LIMIT, cleanDisplayName, nameHolder, shownName } from "../src/lib/dict/display-name.js";
+import { DISPLAY_NAME_LIMIT, cleanDisplayName, fileNameWorthSaying, nameHolder, shownName } from "../src/lib/dict/display-name.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -132,12 +132,14 @@ describe("the settings page's field", () => {
     // that stopped halfway is still being named by its files.
     assert.ok(row.indexOf("renderUnfinished(row, head, dictionary)") < row.indexOf("renameField(dictionary)"));
     const fold = row.slice(row.indexOf('element("details", "dictionary-details")'));
-    assert.match(fold, /options_dictionary_details/);
+    // Its trigger is the row's own second line since D263 - the small print,
+    // built by `fillDictionaryMeta`, which ends in the word.
+    assert.match(fold, /element\("summary", "dictionary-meta"\)/);
     assert.match(fold, /renameField\(dictionary\)/);
     assert.match(fold, /options_dictionary_file_name", dictionary\.name/);
-    // Unconditional: a book without a credit has a fold with the field and
-    // the file's name in it.
-    assert.doesNotMatch(fold.slice(0, fold.indexOf("row.append(details)")), /if \(dictionary\.credit !== null\) \{/);
+    // The field's own placeholder is the file's name, so the line saying it
+    // again stands only where the reader gave the book another name (V10).
+    assert.match(fold, /if \(fileNameWorthSaying\(dictionary\)\) \{/);
   });
 
   it("says the new name on the row in place, with no redraw and no sentence", () => {
@@ -152,5 +154,28 @@ describe("the settings page's field", () => {
     assert.match(save, /dictionary\.displayName = wanted/);
     // And the row's title is the shown name from the first draw.
     assert.match(row, /element\("p", "dictionary-name", shown\)/);
+  });
+});
+
+describe("fileNameWorthSaying", () => {
+  // The dictionary row's small print opens with the file's own name, and a
+  // .ifo whose `bookname` is the bare word "dictionary" was telling the
+  // reader the one thing they already knew (D258, V10).
+  it("says a file's name when it says something the title does not", () => {
+    assert.equal(fileNameWorthSaying({ name: "FreeDict en-pl", displayName: "English-Polish" }), true);
+  });
+
+  it("stays quiet when the file's name is the title", () => {
+    // No name of the reader's own: the file's name is already the title.
+    assert.equal(fileNameWorthSaying({ name: "FreeDict en-pl" }), false);
+    // And the same name typed back, in another case or with stray spaces.
+    assert.equal(fileNameWorthSaying({ name: "FreeDict en-pl", displayName: "freedict EN-PL" }), false);
+    assert.equal(fileNameWorthSaying({ name: "FreeDict  en-pl ", displayName: "FreeDict en-pl" }), false);
+  });
+
+  it("stays quiet when the file names nothing at all", () => {
+    for (const name of ["dictionary", "Dictionary", "DICT", "stardict", "", "   "]) {
+      assert.equal(fileNameWorthSaying({ name, displayName: "English-Polish" }), false, `"${name}" is said out loud`);
+    }
   });
 });

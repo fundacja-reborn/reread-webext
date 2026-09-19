@@ -128,7 +128,12 @@ describe("the gesture that turns a page by touch (D250)", () => {
     assert.match(markup, /<select id="touch-turn">\s*<option value="zones"[\s\S]*?<option value="swipe"[\s\S]*?<option value="off"/, "the row does not offer the three gestures in order");
     assert.match(markup, /data-i18n="options_touch_turn_swipe">Slide a finger sideways</, "the gesture is named in the dialect of a phone's settings, not the reader's");
     assert.match(markup, /<p class="row-note" id="touch-turn-note"><\/p>/, "there is no line to say what the chosen gesture does");
-    assert.match(markup, /data-fold data-i18n="options_touch_turn_hint"/, "the row has no folded note");
+    // And that line is the whole note (D264): the general sentence above it
+    // said the row's name again, and the fold behind it opened under the
+    // line that had already answered the question. What a reader might type
+    // for this row is carried by the search's own keywords instead.
+    assert.doesNotMatch(markup, /options_touch_turn_hint|more-touchTurn|options_touch_turn_more/, "the row still carries a sentence or a fold of its own");
+    assert.match(markup, /id="s-touchTurn" data-setting="touchTurn" data-keywords="options_keywords_turn"/, "the row cannot be found by the words it no longer says");
     const script = await source("options/options.js");
     assert.match(script, /if \(!\(select instanceof HTMLSelectElement\) \|\| !isTouchTurn\(select\.value\)\) return;/, "a value the guard does not know can be written");
     assert.match(script, /writeConfig\(\{ reader: \{ touchTurn: select\.value \} \}\)/, "the row does not write the reader's setting");
@@ -148,7 +153,7 @@ describe("the gesture that turns a page by touch (D250)", () => {
         "options_touch_turn_zones",
         "options_touch_turn_swipe",
         "options_touch_turn_off",
-        "options_touch_turn_hint",
+        "options_keywords_turn",
       ]) {
         assert.ok(typeof catalogue[key]?.message === "string", `${lang} has no ${key}`);
       }
@@ -168,12 +173,25 @@ describe("the gesture that turns a page by touch (D250)", () => {
     // The section stands whatever layout is in force: this is where
     // somebody looking for the Pages layout comes, and a section that
     // appeared with the reader's own setting could not be found at all.
-    const section = markup.slice(markup.indexOf('<h2 id="paged-layout"'), markup.indexOf("<!-- The wrapper is the translation-off switch's"));
-    assert.doesNotMatch(section, /translation-only|hidden/, "the section hides itself from somebody looking for it");
+    // A subsection of the reading view since D254, under its old anchor: the
+    // address the README and every old link name still lands on it.
+    const from = markup.indexOf('<h3 id="paged-layout"');
+    const section = markup.slice(from, markup.indexOf("</section>", from));
+    assert.ok(from > 0, "the Pages layout lost the anchor every old link names");
+    // The section itself is never hidden - only the folded halves of its
+    // notes carry `hidden`, which is what the More opens.
+    const opening = markup.slice(markup.lastIndexOf("<section", from), markup.indexOf(">", from));
+    assert.doesNotMatch(opening, /translation-only|hidden/, "the section hides itself from somebody looking for it");
     assert.match(section, /data-i18n="options_paged_intro"/, "the section does not say what it is about");
     for (const id of ["page-number", "touch-turn", "turn-effect"]) {
       assert.ok(section.includes(`id="${id}"`), `the ${id} row is not in the section`);
     }
-    assert.match(markup, /<a href="#paged-layout" data-i18n="options_paged_heading">/, "the section is not in the page's own table of contents");
+    // The table of contents lists sections, not their parts - the Pages
+    // layout is reached through the reading view it belongs to.
+    assert.match(markup, /<a href="#reading-view" data-i18n="options_section_reading">/, "the reading view is not in the page's own table of contents");
+    assert.ok(
+      markup.indexOf('<h2 id="reading-view"') < from,
+      "the Pages layout does not stand inside the reading view",
+    );
   });
 });

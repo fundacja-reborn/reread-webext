@@ -39,6 +39,10 @@
            leaves its parent's box, and inside the short header it slid away
            with it (Michał's smoke, 2026-08-29). -->
       <div class="page-bar">
+        <!-- The arrow and the mark travel together (F2): on a wide screen the
+             bar takes the page's own two columns, and these two stand in the
+             first of them, over the table of contents. -->
+        <span class="bar-head">
         <!-- The way back to the reading (D139/D142), drawn where every app
              puts it (the reader bar's own arrow). Walked into in this tab,
              the arrow pops the entry the system's back gesture pops; raised
@@ -68,42 +72,69 @@
           </svg>
         </button>
         <p class="page-mark">re/read</p>
+        </span>
+        <!-- The narrow screen's own heading (F4): under 60rem the wordmark
+             goes and the section being read stands in its place, as a title
+             with a mark after it - a native select, so the keyboard, the
+             touch screen and the screen reader all get the list for free.
+             Filled by `sections.js` from the very links the column holds. -->
+        <select
+          id="section-jump"
+          class="bar-sections"
+          aria-label="Go to a section"
+          data-i18n-aria-label="options_section_jump"
+        ></select>
+        <!-- The search, in the bar at every width (F2/T1): over the column of
+             text on a wide screen, the way a browser's own settings stand it,
+             and behind the magnifier below 60rem, where the bar has room for
+             one thing at a time. One field, one value, one piece of state. -->
+        <search id="settings-search" class="settings-search">
+          <label class="visually-hidden" for="settings-search-field" data-i18n="options_search_label"
+            >Search the settings</label
+          >
+          <input
+            type="search"
+            id="settings-search-field"
+            placeholder="Search the settings"
+            data-i18n-placeholder="options_search_label"
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck="false"
+          />
+          <p id="search-status" class="status" role="status" hidden></p>
+        </search>
         <span class="page-tools">
-          <!-- The bar's full-screen tool (D195; every page since D220):
-               where the browser has a full screen to give and the row has
-               room, one press asks for the whole screen and the same press
-               gives it back; hidden until the row is measured
-               (`lib/fullscreen-tool.js`). Before the menu, the reader bar's
-               own place for it; the two glyphs are page.css's, and the
-               glyph is the tool's whole state - it wears no lit frame. -->
+          <!-- The way into the search below 60rem, and the way out of it: one
+               press opens the field over the title, the cross puts the title
+               back. Neither is drawn where the field stands open anyway. -->
           <button
-            id="fullscreen"
+            id="search-open"
             type="button"
-            title="Full screen"
-            data-i18n-title="reader_fullscreen"
-            aria-label="Full screen"
-            data-i18n-aria-label="reader_fullscreen"
+            class="bar-search-open"
+            aria-expanded="false"
+            aria-controls="settings-search"
+            title="Search the settings"
+            data-i18n-title="options_search_label"
+            aria-label="Search the settings"
+            data-i18n-aria-label="options_search_label"
+          >
+            <svg class="page-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+              <circle cx="7" cy="7" r="4.25" fill="none" stroke="currentColor" stroke-width="1.3" />
+              <path d="M10.2 10.2 13.5 13.5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+            </svg>
+          </button>
+          <button
+            id="search-close"
+            type="button"
+            class="bar-search-close"
+            title="Close the search"
+            data-i18n-title="options_search_close"
+            aria-label="Close the search"
+            data-i18n-aria-label="options_search_close"
             hidden
           >
-            <svg class="page-icon fullscreen-enter" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-              <path
-                d="M2.5 6V2.5H6M10 2.5h3.5V6M13.5 10v3.5H10M6 13.5H2.5V10"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.3"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
-            <svg class="page-icon fullscreen-exit" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-              <path
-                d="M6 2.5V6H2.5M10 2.5V6h3.5M13.5 10H10v3.5M2.5 10H6v3.5"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.3"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
+            <svg class="page-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+              <path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
             </svg>
           </button>
           <button
@@ -140,6 +171,24 @@
         <button id="nav-vocabulary" type="button" data-i18n="saved_phrases">Saved phrases</button>
       </nav>
     </div>
+    <!-- The page and its table of contents, side by side from 60rem up and
+         one under the other below it - where the list hides and the bar's
+         select speaks for it. The title lives in the page's column, so the
+         list stands beside the settings rather than under the heading. -->
+    <div class="page-body">
+    <nav id="sections" class="sections" aria-label="Sections of this page" data-i18n-aria-label="options_sections_aria">
+      <a id="jump-first-steps" class="translation-only" href="#first-steps" data-i18n="options_first_steps_heading" hidden>First steps</a>
+      <a href="#languages" data-i18n="options_section_languages">Languages</a>
+      <a href="#switched-off-sites" data-i18n="options_disabled_heading">Switched-off sites</a>
+      <a href="#bubble-and-phrases" data-i18n="options_section_bubble">Bubble and phrases</a>
+      <a href="#reading-view" data-i18n="options_section_reading">Reading view</a>
+      <a href="#reading-aloud" data-i18n="options_section_aloud">Reading aloud</a>
+      <a href="#data" data-i18n="options_section_data">Data and copies</a>
+      <a href="#custom-css" data-i18n="options_custom_css_heading">Custom CSS</a>
+      <a href="#about" data-i18n="options_section_about">About re/read</a>
+    </nav>
+
+    <main>
     <header>
       <h1 data-i18n="settings">Settings</h1>
     </header>
@@ -149,28 +198,17 @@
          list explains itself before it is read wrongly. -->
     <p id="private-note" class="note private-note" hidden></p>
 
-
-    <!-- The thesis of the whole extension, stated once, where a curious person
-         goes looking for it. The notes further down say how each download is
-         checked; this says what never happens at all. -->
-    <p class="explain" data-i18n="options_local_intro">
-      Everything re/read does happens on this device (offline): translating, the dictionary, the
-      reading list, your saved phrases. Nothing you read or select is ever sent anywhere. An
-      internet connection is needed only when you want to download a new translation model or a
-      dictionary - and only from the two URLs shown openly in those sections.
+    <!-- The page's thesis in one line, with the whole of it a press away at
+         the foot (the About section): the paragraph that used to stand here
+         was six lines between the title and the first setting, and somebody
+         opening the settings is usually after a setting. -->
+    <p class="explain">
+      <span data-i18n="options_intro_short"
+        >Everything works on this device; the internet is needed only to download a translation
+        model or a dictionary.</span
+      >
+      <a href="#about" data-i18n="options_intro_more">More about privacy</a>
     </p>
-
-    <!-- Plain anchor links, one per section below - the page is long and the
-         table of contents is how a phone reaches the far end of it. Not
-         sticky on purpose: pinned elements smear on e-ink at every scroll. -->
-    <nav class="jump" aria-label="Sections of this page" data-i18n-aria-label="options_sections_aria">
-      <a href="#paged-layout" data-i18n="options_paged_heading">Pages layout</a>
-      <a class="translation-only" href="#translation-models" data-i18n="options_models_heading">Translation models</a>
-      <a href="#dictionaries" data-i18n="options_dictionaries_heading">Dictionaries</a>
-      <a href="#switched-off-sites" data-i18n="options_disabled_heading">Switched-off sites</a>
-      <a href="#custom-css" data-i18n="options_custom_css_heading">Custom CSS</a>
-      <a href="#support" data-i18n="support">Support</a>
-    </nav>
 
     <!-- The signpost for a fresh install: this page is long, and the person
          who just arrived from "no model - open the settings" must not have to
@@ -179,118 +217,89 @@
          both are stored it folds to its heading instead of leaving, so the
          instructions can be reread at will. Hidden until the page has looked
          at both stores, so the first paint is already the right shape. -->
+    <!-- The signpost for a fresh install, counted from what is actually
+         stored (D254, P6): it used to say "nothing translates yet" to
+         somebody with a model already downloaded, because it was a paragraph
+         and not a report. Three steps, each ticked by the page itself where
+         it can tell - a model or the no-model switch, a dictionary, and the
+         browser's own answer about the toolbar - and by hand where it cannot.
+         Open while the first step is undone, one line once it is, and gone
+         for good once every step is or the reader says so ("Hide"); the About
+         section at the foot brings it back. -->
     <details id="first-steps" class="note first-steps translation-only" hidden>
       <summary>
         <h2 data-i18n="options_first_steps_heading">First steps</h2>
+        <span class="steps-count" id="first-steps-count"></span>
       </summary>
-      <p data-i18n="options_first_steps_intro">
+      <!-- Said only while the first step is undone: with a model on the
+           device it was a sentence contradicting the page under it. -->
+      <p id="first-steps-intro" data-i18n="options_first_steps_intro" hidden>
         Nothing translates yet - the model that would do it is not yet on this device. Setting up
         takes a minute:
       </p>
-      <ol>
-        <li data-i18n="options_first_steps_model">
-          Under "Translation models", find the language pair you need (the filter finds it
-          fastest) and press "Download". The model is stored on this device and translates
-          offline from then on - and the first model sets the language pair above by itself.
+      <ul class="steps">
+        <li id="step-model">
+          <span class="step-mark" aria-hidden="true"></span>
+          <span class="visually-hidden step-state"></span>
+          <span class="step-name" data-i18n="options_step_model">Download a translation model</span>
+          <a class="step-door" href="#translation-models-available" data-i18n="options_models_heading">Translation models</a>
         </li>
-        <li data-i18n="options_first_steps_dictionary">
-          Under "Dictionaries", download a dictionary for the same pair (optional, but worth it)
-          - single words then get fuller answers than a translation alone, shown in the
-          translation bubble below the translation.
+        <li id="step-dictionary">
+          <span class="step-mark" aria-hidden="true"></span>
+          <span class="visually-hidden step-state"></span>
+          <span class="step-name" data-i18n="options_step_dictionary">Download a dictionary (optional)</span>
+          <a class="step-door" href="#dictionaries-available" data-i18n="options_dictionaries_heading">Dictionaries</a>
         </li>
-      </ol>
-      <p id="first-steps-pin" data-i18n="options_first_steps_pin">
+        <li id="step-pin">
+          <span class="step-mark" aria-hidden="true"></span>
+          <span class="visually-hidden step-state"></span>
+          <span class="step-name" data-i18n="options_step_pin">Pin re/read to the toolbar</span>
+          <button
+            type="button"
+            class="note-more"
+            id="step-pin-how"
+            aria-expanded="false"
+            aria-controls="first-steps-pin"
+            data-i18n="options_step_how"
+          >
+            How
+          </button>
+          <!-- The browser answers this one itself where it can
+               (`action.getUserSettings`, Firefox and Chromium alike); the
+               button is for the browsers and the platforms that cannot -
+               Android has no toolbar to pin anything to. -->
+          <button type="button" class="step-done" id="step-pin-done" data-i18n="options_step_done">Done</button>
+        </li>
+      </ul>
+      <p id="first-steps-pin" data-i18n="options_first_steps_pin" hidden>
         Last, pin re/read to the toolbar: the puzzle-piece icon at the right end of the bar, then
         the gear next to re/read and "Pin to Toolbar". The button opens the reader, the reading
         list, your saved phrases and the switch for the site you are on.
       </p>
+      <p class="steps-foot">
+        <button type="button" class="note-more" id="first-steps-hide" data-i18n="options_step_hide">Hide</button>
+      </p>
     </details>
 
+    <!-- Languages: the pair everything is filed under, and the two stores
+         that answer for it - the engine's models and the dictionaries. One
+         section rather than two top-level ones, because "which languages am
+         I set up for" is one question, and its answer used to be split
+         across half the page. -->
+    <section aria-labelledby="languages">
+    <header>
+      <h2 id="languages" data-i18n="options_section_languages">Languages</h2>
+    </header>
+
     <div class="rows">
-      <!-- The translation-off switch (D120), first because it decides what
-           the rest of this page is: checked, re/read is a pure reader, and
-           everything that only serves translation - marked `translation-only`
-           throughout this file - steps out of the way. The note under it is
-           the promise the switch stands on: presentation only, nothing
-           deleted, everything back on the next press. -->
-      <!-- `data-fold` on this note and on every row note below it (D155):
-           the page shows two lines of each with a chevron, and the whole
-           text one press away - `foldNotes` in options.js boxes them, with
-           the glyph from the template at the end of this file. The status
-           lines the page fills itself are not marked: they are short, and
+      <!-- Every row note says one whole sentence, always (D254, P5): the page
+           used to clip each of them to two lines and an ellipsis in
+           mid-sentence, with a chevron beside it - grey noise in every row,
+           and never a sentence anybody could finish reading. What is left
+           over stands behind the row's own More, in the paragraph under it
+           (`moreNotes` in options.js). A row with nothing more to say wears
+           no More; the status lines the page fills itself wear none either -
            they are answers, not descriptions. -->
-      <div class="row">
-        <label class="row-toggle">
-          <span class="row-name" data-i18n="options_no_translation">Use without a translation model</span>
-          <input type="checkbox" id="no-translation" />
-        </label>
-        <p class="row-note" data-fold data-i18n="options_no_translation_hint">
-          Turns off machine translation (the model). The reader, the offline reading list and the
-          highlighter keep working. With a language pair chosen, the bubble still shows dictionary
-          meanings, and you can save phrases and see their underlines. Ideal for reading with
-          dictionaries or in your native language. Your saved data is not deleted and returns when
-          you turn this off.
-        </p>
-      </div>
-      <!-- The switch's one sub-option (D149), shown only while it is on
-           (`no-translation-only`, the mirror of `translation-only`): with
-           translation on the bubble is the product, so "no bubble" is only a
-           choice under the trim - and a stored value under a hidden row never
-           acts (`pageMode`, `reading.js`). Ordinary pages then get nothing at
-           all, not even the launcher; the reader keeps its gesture, because the
-           highlighter's pen rides on it, and a selection there is a highlight
-           for the moment. -->
-      <div class="row row-sub no-translation-only">
-        <label class="row-toggle">
-          <span class="row-name" data-i18n="options_bubble_off">No bubble when selecting text</span>
-          <input type="checkbox" id="bubble-off" />
-        </label>
-        <p class="row-note" data-fold data-i18n="options_bubble_off_hint">
-          With this on, selecting text on an ordinary page does nothing at all - open a page in the
-          reader from re/read's button or with Alt+Shift+R. In the reader a selection is only a
-          highlight for the moment: no bubble opens, a tap or Escape clears it, and Ctrl+C or Cmd+C
-          copies it (on a touch screen nothing can be copied).
-        </p>
-      </div>
-      <!-- The two daily switches ahead of the machinery (Michał's call,
-           2026-09-01): where the bubble lives and whether pages are kept
-           are the choices a reader actually revisits, and the second one
-           also pairs this row with the bubble-off sub-option above - the
-           two controls of the bubble's whereabouts (D162) side by side.
-           The pair, the engine and the voices below are set once. -->
-      <!-- The whole first line is the label, so a press anywhere on it flips
-           the switch; the note keeps its own, unclickable line below - a
-           paragraph is too easy to brush against on a phone. -->
-      <!-- Not `translation-only` any more (D162): with the model switched off
-           the bubble still works wherever a pair is chosen - the dictionaries
-           answer - so the question this row asks stands in both modes, and
-           hiding it was what overrode it. -->
-      <div class="row">
-        <label class="row-toggle">
-          <span class="row-name" data-i18n="options_reader_only">Only in the reader</span>
-          <input type="checkbox" id="reader-only" />
-        </label>
-        <p class="row-note" data-fold data-i18n="options_reader_only_hint">
-          Limits the underlining of saved phrases and the translation bubble to the reader.
-          Selecting text on an ordinary web page will only show an option to open the page in the
-          reader. With it on, no web page can tell which of its words you have saved. On Android
-          and iOS it is on by default.
-        </p>
-      </div>
-      <!-- The default keep (D124). Not `translation-only`: with translation
-           off the reader and its list are the whole extension, which is when
-           this switch matters most. -->
-      <div class="row">
-        <label class="row-toggle">
-          <span class="row-name" data-i18n="options_keep_articles">Save in the offline reading list by default</span>
-          <input type="checkbox" id="keep-articles" />
-        </label>
-        <p class="row-note" data-fold data-i18n="options_keep_articles_hint">
-          Automatically saves every page you open in the reader for offline reading. Your saved
-          pages, highlights and reading progress are kept safe even if the original website changes
-          or disappears.
-        </p>
-      </div>
       <!-- The pair select offers only the pairs whose model is on this device:
            a pair without one translates nothing, and the full catalogue of a
            hundred pairs made the select unusable. The line below is the way
@@ -300,434 +309,119 @@
            pair is still where saved phrases are filed and what the
            dictionaries answer for, so the row stays - only its hint swaps
            for the quiet one below. -->
-      <div class="row row-stack">
+      <div class="row row-stack" id="s-pair" data-setting="pair" data-section="languages">
         <label class="row-name" for="pair" data-i18n="language_pair">Language pair</label>
         <select id="pair"></select>
-        <p class="row-note translation-only" data-fold>
+        <p class="row-note translation-only">
           <span data-i18n="options_pair_hint"
             >Shows the language pairs downloaded to this device. To add new languages, download
             them in the</span
           >
-          <a href="#translation-models" data-i18n="options_models_heading">Translation models</a>
+          <a href="#translation-models-available" data-i18n="options_models_heading">Translation models</a>
           <span data-i18n="options_pair_hint_rest">section below.</span>
         </p>
         <p class="row-note no-translation-only" data-i18n="options_pair_hint_quiet">
-          Without a translation model, the pair says which language you are reading and where saved
-          phrases are kept. Pairs come from installed models and dictionaries.
+          Without a translation model the pair sets which language you are reading and which pair
+          your phrases are saved under. Pairs come from installed models and dictionaries.
         </p>
-      </div>
-      <div class="row row-stack translation-only">
-        <span class="row-name" data-i18n="options_engine">Engine</span>
-        <span class="row-value" data-i18n="options_engine_value">Bergamot, inside the package - translates offline</span>
-      </div>
-      <!-- The reading-aloud switch (D148), the head of the two voice rows
-           under it: off, the speaker leaves the bubble and every list, the
-           Read-aloud button leaves the reader, and the two rows fold away
-           (`tts-only`) - a voice for a speaker that is gone would be a setting
-           with no other side. Its own row rather than a corner of the
-           translation-off switch: the voice serves the trimmed bubble and the
-           reader alike, and the reasons for wanting it gone (an engine with
-           no voices, a speaker pressed by accident) have nothing to do with
-           translating. Presentation only: the voice and the speed stay. -->
-      <div class="row">
-        <label class="row-toggle">
-          <span class="row-name" data-i18n="options_tts">Reading aloud</span>
-          <input type="checkbox" id="tts" />
-        </label>
-        <p class="row-note" data-fold data-i18n="options_tts_hint">
-          Enables the text-to-speech function. Turning this off hides all read-aloud buttons in the
-          bubble, lists, and the reader.
-        </p>
-      </div>
-      <!-- Which voice reads a selection aloud (D83). The first select names
-           the language - the pair's source by default, without a pair the
-           browser's own or else English, any language the device reads
-           offline by hand (D155: a fresh install without a pair reads
-           articles aloud all the same, and had nothing to list here) -
-           the second the device's offline voices for it, and the choice is
-           stored per language, so switching pairs keeps it. The sample the
-           Listen button speaks is digits, because digits exist in every
-           language the engine could offer. Offline voices only (D155):
-           `voicesFor` keeps the engine's network voices out of the list, and
-           the status line under the note says when that leaves nothing for
-           the language. -->
-      <div class="row row-stack row-voice tts-only">
-        <label class="row-name" for="tts-voice" data-i18n="options_tts_voice">Voice for reading aloud</label>
-        <p class="inline">
-          <select
-            id="tts-lang"
-            aria-label="Language of the voice"
-            data-i18n-aria-label="options_tts_lang"
-          ></select>
-          <select id="tts-voice"></select>
-          <button type="button" id="tts-listen" data-i18n="options_tts_listen">Listen</button>
-        </p>
-        <p class="row-note" data-fold data-i18n="options_tts_voice_hint">
-          Select the voice used to read phrases and articles in each language. Only voices that
-          speak offline are offered: speech is made on this device and nothing is sent to the
-          internet.
-        </p>
-        <!-- Filled only where it is true (D155): the device lists voices and
-             none of them reads the pair's language offline - the picker above
-             has its default line alone, and Listen is disabled. -->
-        <p class="row-note" id="tts-voice-status" hidden></p>
-      </div>
-      <!-- How fast that voice reads (D87), for the phrase in the bubble and for
-           a whole article in the reader alike - one setting, because what is
-           slow is the language being learned, not the surface it is read on.
-           The reader's own panel has the same two buttons over it. Named for
-           the voice since D228, when the reader's own pace below took the
-           name "reading speed" for the thing it measures. -->
-      <div class="row tts-only">
-        <span class="row-name" data-i18n="options_tts_rate">Voice speed</span>
-        <p class="inline stepper">
-          <button type="button" id="tts-rate-down" title="Slower" data-i18n-title="reader_slower">
-            &minus;
-          </button>
-          <output id="tts-rate-value">1.0&times;</output>
-          <button type="button" id="tts-rate-up" title="Faster" data-i18n-title="reader_faster">+</button>
-        </p>
-      </div>
-      <!-- The reading font's name (D163, moved out of the Aa panel: a name
-           is typed once, and on a phone the panel's field summoned the
-           keyboard over the article). The field previews itself in the
-           typed face - options.js sets its font-family from the cleaned
-           name, never the raw value. -->
-      <div class="row row-stack">
-        <label class="row-name" for="font-custom" data-i18n="options_font_custom">Own font</label>
-        <p class="inline">
-          <input
-            id="font-custom"
-            type="text"
-            autocomplete="off"
-            autocapitalize="off"
-            spellcheck="false"
-          />
-        </p>
-        <p class="row-note" data-fold data-i18n="options_font_custom_hint">
-          Type the name of a font installed on this device, for example Georgia or Noto Serif.
-          The reading view's Type row will then offer it as Custom. Leave the field empty to use
-          the built-in typefaces only.
-        </p>
-      </div>
-      <!-- The reader's own pace (D228): words a minute, typed once - the one
-           number every reading time in the list and under a title is made
-           at. A typed field rather than a stepper, because a pace is a
-           measured number and the way from the default to a learner's
-           honest one would be eight presses; here rather than in the Aa
-           panel for the font name's reason. The bounds are the config's
-           (`READING_PACE`), put on the field by options.js, so the page and
-           the healer cannot disagree. -->
-      <div class="row row-stack">
-        <label class="row-name" for="reading-pace" data-i18n="options_reading_pace">Reading speed</label>
-        <p class="inline">
-          <input id="reading-pace" type="number" inputmode="numeric" autocomplete="off" />
-          <span class="unit" data-i18n="options_reading_pace_unit">words a minute</span>
-        </p>
-        <p class="row-note" data-fold data-i18n="options_reading_pace_hint">
-          The number of words you read in a minute. It is used only to estimate the reading time
-          shown in the reading list and under an article's title. 200 is an unhurried pace in
-          your own language; in a language you are learning it is usually 100-150.
-        </p>
-      </div>
-      <!-- `translation-only`: the trimmed bubble ignores the fold - its two
-           buttons are its whole content - so with translation off this switch
-           would move nothing (D120). -->
-      <div class="row translation-only">
-        <label class="row-toggle">
-          <span class="row-name" data-i18n="quiet_bubble">Hide bubble actions by default</span>
-          <input type="checkbox" id="quiet-bubble" />
-        </label>
-        <p class="row-note" data-fold data-i18n="options_quiet_bubble_hint">
-          Shows only the translated text in the bubble. The action buttons (such as copy or save)
-          appear only when you click or tap the bubble.
-        </p>
-      </div>
-      <!-- The second layer's start (D186): the sentence and the dictionary
-           entries open with the bubble over a fresh selection, where a press
-           on More used to be the only way to them. On by default, existing
-           profiles included (Michał's call): a model is at its weakest on a
-           single word, and the dictionary's answer stood one press away from
-           a reader who never went looking. Right under the fold switch: the
-           two are the bubble's two "what shows first" questions, and both on
-           is the bubble for reading - text only, buttons on a press.
-           `translation-only` for the quiet bubble's reason above: without
-           the model the entries are the answer itself and never fold (D121).
-           The bubble over an underline keeps More - its body is the reader's
-           own meaning (D27) - and the hint says so. -->
-      <div class="row translation-only">
-        <label class="row-toggle">
-          <span class="row-name" data-i18n="options_bubble_more">Show the sentence and dictionary entries right away</span>
-          <input type="checkbox" id="bubble-more" />
-        </label>
-        <p class="row-note" data-fold data-i18n="options_bubble_more_hint">
-          When you select text, the bubble shows right away what is otherwise shown only after a
-          press on "More": the translated sentence and the dictionary entries. Worth keeping on
-          with a dictionary installed - a translation model often gets a single word wrong, and the
-          dictionary shows what it really means. The bubble over an already saved phrase shows only
-          the saved translation - the sentence and the dictionary entries appear after you press
-          "More".
-        </p>
-      </div>
-      <!-- The other forms of a saved word (D208): `read` underlined in
-           `reads` and `reading` too, with the bubble over them `read`'s. Off
-           by default - the README's "matching is literal" holds until it is
-           turned on - and not `translation-only`: the underlines are the
-           quiet vocabulary's as much as the model's (D162). Which forms count
-           is the installed dictionary's word, never the rules' alone, and for
-           now only English has rules; the hint says both. -->
-      <div class="row">
-        <label class="row-toggle">
-          <span class="row-name" data-i18n="options_underline_forms">Underline other forms of saved words</span>
-          <input type="checkbox" id="underline-forms" />
-        </label>
-        <p class="row-note" data-fold data-i18n="options_underline_forms_hint">
-          A saved word is underlined in its other forms too: save "read", and "reads" and "reading"
-          are underlined as well - the bubble over them shows what you saved for "read". Which forms
-          count is decided by your dictionary for the language you read, so one has to be installed.
-          For now only when you read English. Switched off, only the exact form you saved is
-          underlined.
-        </p>
-      </div>
-      <!-- The sentence kept with a phrase (D210): the one the bubble had
-           around the selection, as the page shows it - never its
-           translation - written into the row and shown on the phrases page
-           under the phrase, and the third column of the export for Anki.
-           Off by default and meant to stay off until pressed: a sentence is
-           a piece of the page kept for good, which is the reader's call and
-           not a default's. Since D216 the bubble over a saved phrase fills
-           the row's sentence too, when it has none. Not `translation-only`:
-           the quiet vocabulary's bubble saves phrases too (D158), from the
-           same sentence. -->
-      <div class="row">
-        <label class="row-toggle">
-          <span class="row-name" data-i18n="options_save_sentence">Save the sentence with the phrase</span>
-          <input type="checkbox" id="save-sentence" />
-        </label>
-        <p class="row-note" data-fold data-i18n="options_save_sentence_hint">
-          When you save a phrase from the bubble, the sentence around it is saved with it - the
-          sentence as the page shows it, without its translation. It is shown under the phrase on
-          the saved phrases page, folded to one line, and written into the third column of the
-          export for Anki. For a phrase saved without a sentence, the sentence around it is saved
-          the next time you open its bubble on a page. Like the phrase, the sentence is stored only
-          on this device. Switched off, no new sentence is saved; the ones already saved are not
-          deleted.
-        </p>
-      </div>
-      <!-- The bubble's one size knob (D85): the bubble deliberately ignores
-           every page it stands on, so no page setting can reach it - and
-           built-in sizes land differently on different screens (an e-ink
-           tablet renders a CSS pixel visibly smaller than a phone, D84). -->
-      <div class="row">
-        <span class="row-name" data-i18n="options_bubble_scale">Bubble text size</span>
-        <p class="inline stepper">
-          <button type="button" id="bubble-scale-down" title="Smaller" data-i18n-title="reader_smaller">
-            &minus;
-          </button>
-          <output id="bubble-scale-value">100%</output>
-          <button type="button" id="bubble-scale-up" title="Larger" data-i18n-title="reader_larger">+</button>
-        </p>
-        <p class="row-note" data-fold data-i18n="options_bubble_scale_hint">
-          Adjusts the text and button size inside the translation bubble across all pages.
-        </p>
-      </div>
-      <!-- The copy of the reading list that outlives the database
-           (`lib/store/library-backup.js`). On unasked only where the browser
-           may delete the database on its own - iOS and iPadOS - and a choice
-           everywhere, because it doubles the space the reading list takes.
-           Turning it on builds the copy from the whole list; turning it off
-           removes it; the storage row under it says what it holds. -->
-      <div class="row">
-        <label class="row-toggle">
-          <span class="row-name" data-i18n="options_library_copy">Copy of the reading list</span>
-          <input type="checkbox" id="library-copy" />
-        </label>
-        <p class="row-note" data-fold data-i18n="options_library_copy_hint">
-          Creates a backup of your reading list to protect it against automatic browser cleanups
-          and database errors. This doubles the disk space the list takes, but keeps your saved
-          articles safe if the database is lost.
-        </p>
-      </div>
-      <!-- What the browser holds for this extension and whether it has
-           promised to keep it. The last row, because it is a report on the
-           choices above it rather than a choice (Michał, 2026-08-30), with
-           the copy switch right over the line that answers for it. The size
-           is everything at once - models, dictionaries, the reading list,
-           the phrases - and the note under it is the one place the extension
-           says out loud that a browser may clear an origin's storage on its
-           own: on WebKit a refused persistence is exactly that risk
-           (`lib/storage-report.js`). -->
-      <div class="row row-stack row-storage">
-        <span class="row-name" data-i18n="options_storage">Data on this device</span>
-        <span class="row-value" id="storage-usage"></span>
-        <!-- What the size measures, because the lists below it measure
-             something else: the dictionaries' list says what their text
-             weighs, and on disk a dictionary is one database row per word
-             and per other spelling (`lib/dict/store.js`) - measured on a
-             145 MB dictionary, 705 MB of database. -->
-        <p class="row-note" data-fold data-i18n="options_storage_how">
-          Disk space used by the extension. Dictionaries take up more space than their file size
-          because of the database structure. Deleting an article or book completely removes its
-          text, images, highlights, notes and reading progress.
-        </p>
-        <p class="row-note" id="storage-note" hidden></p>
-        <!-- The copy of the vocabulary that outlives the database
-             (`lib/store/backup.js`): how many phrases it holds and since when,
-             or that there is none yet. Said everywhere, because it is true
-             everywhere; on WebKit it is also the answer to the note above. -->
-        <p class="row-note" id="storage-backup"></p>
-        <p class="row-note" id="storage-marks-backup"></p>
-        <p class="row-note" id="storage-library-copy"></p>
       </div>
     </div>
 
-    <!-- The three settings of the Pages layout, gathered (D250): each of
-         them is a thing set once (D163), none of them belongs in the Aa
-         panel, which on a small e-ink screen already fills it - and read
-         one after another they say how a page stands and how it turns.
-         Always shown, whatever the layout in force: this is where somebody
-         looking for the Pages layout comes, and a section that appeared and
-         vanished with the reader's own setting could not be found at all. -->
-    <section>
-    <h2 id="paged-layout" data-i18n="options_paged_heading">Pages layout</h2>
-    <p class="explain" data-i18n="options_paged_intro">
-      These settings work in the reader's Pages layout, where the text moves only by whole pages,
-      each beginning and ending with a whole line.
-    </p>
+    <!-- The translation-off switch's handle on this whole subsection (D120):
+         with the switch on, the models and everything about them step out of
+         the way. Managing the stored models then means switching it off first
+         - deliberately no side door. The anchor stays on the heading, so the
+         address this section has always answered to still lands here. -->
+    <section class="translation-only" aria-labelledby="translation-models">
+    <header>
+      <h3 id="translation-models" data-i18n="options_models_heading">Translation models</h3>
 
-    <div class="rows">
-      <!-- The page count at the foot of a page read by pages (D238), on by
-           default since D249: somebody reading by pages is reading a book,
-           and a book says which page it is on. -->
-      <div class="row">
-        <label class="row-toggle">
-          <span class="row-name" data-i18n="options_page_number">Page number</span>
-          <input type="checkbox" id="page-number" />
-        </label>
-        <p class="row-note" data-fold data-i18n="options_page_number_hint">
-          Shows a page count at the foot of the window. Off, the last line of each page stands
-          lower; the count is still read by screen readers, and on a wide screen it stands in the
-          bar next to re/read.
-        </p>
-      </div>
-      <!-- What a finger does (D250). The default follows the screen: a slide
-           where a hand wraps around the device - a phone, an e-ink reader -
-           because a gesture that has to move is the one an idle thumb cannot
-           make, and the thirds where the device is put down, because they are
-           quicker and more precise. Off is for a reader with hardware page
-           keys, where no gesture is worth an accidental turn. Chosen by name
-           in a select, like the language pair: three values, set once. -->
-      <div class="row row-stack">
-        <label class="row-name" for="touch-turn" data-i18n="options_touch_turn">Turning pages by touch</label>
-        <select id="touch-turn">
-          <option value="zones" data-i18n="options_touch_turn_zones">Tap the left or right third</option>
-          <option value="swipe" data-i18n="options_touch_turn_swipe">Slide a finger sideways</option>
-          <option value="off" data-i18n="options_touch_turn_off">Off</option>
-        </select>
-        <p class="row-note" data-fold data-i18n="options_touch_turn_hint">
-          On a wide screen the default is a tap, on a narrow one a slide - there the hand that
-          holds the device rests on the screen, and a gesture that has to move is the one it
-          cannot make by accident. The page keys, the arrow keys and the mouse wheel turn pages
-          whatever this is set to, and the pen never turns one.
-        </p>
-        <!-- What the chosen gesture does, in the reader's own words (Michał's
-             smoke, 2026-09-18): three gestures named in three words each say
-             too little, and what a reader needs is the one they picked - where
-             a slide may begin, how short a tap has to be. Filled by script
-             like the voice row's line, and changed with the select. -->
-        <p class="row-note" id="touch-turn-note"></p>
-      </div>
-      <!-- The turn made visible (D251). Two values, not three: a signal
-           given every fifth page would not be a confirmation of anything. -->
-      <div class="row row-stack">
-        <label class="row-name" for="turn-effect" data-i18n="options_turn_effect">Page turn effect</label>
-        <select id="turn-effect">
-          <option value="auto" data-i18n="options_turn_effect_auto">Automatic</option>
-          <option value="off" data-i18n="options_turn_effect_off">Off</option>
-        </select>
-        <p class="row-note" data-fold data-i18n="options_turn_effect_hint">
-          Shows that the page has turned, which is easy to miss when you are reading the middle of
-          a page. Nothing happens if your system asks for less motion, and nothing when the page is
-          turned by reading aloud or by dragging a selection to the edge of the page.
-        </p>
-        <p class="row-note" id="turn-effect-note"></p>
-      </div>
-    </div>
-    </section>
-
-    <!-- The wrapper is the translation-off switch's handle on this whole
-         section (D120); the jump anchor stays on the heading. Managing the
-         stored models while the switch is on means switching it off first -
-         deliberately no side door. -->
-    <section class="translation-only">
-    <h2 id="translation-models" data-i18n="options_models_heading">Translation models</h2>
-
-    <!-- Two sentences of the intro wear a highlighter's stroke (D192,
-         Michał's ask): the one fact about models that changes what a reader
-         installs next - a model guesses badly at a single word - stood in
-         the middle of a paragraph nobody reads twice. Two elements, because
-         a marked element holds text alone (test/locales.test.js). -->
-    <p class="explain">
-      <span data-i18n="options_models_intro"
-        >Download a translation model here for each language pair you want to translate. These
-        are official Mozilla files that run entirely offline on your device.</span
-      >
-      <mark data-i18n="options_models_single_word"
-        >A model translates sentences well, but a single word on its own is often translated
-        wrongly - the result is cut short, or is a word that does not exist. For single words, a
-        dictionary from the section below is the better source.</mark
-      >
-    </p>
-
-    <!-- The one fetch this section can make, and the press that makes it: the
-         list below refreshes only here, never by itself - the date says how
-         old what stands under the filter is. A quiet button on purpose: the
-         rare act must not outshine the downloads below. -->
-    <div class="list-refresh">
-      <button type="button" id="refresh-models" data-i18n="options_update_list">
-        Update the list
-      </button>
-      <p class="list-dated">
-        <span data-i18n="options_list_dated">List from</span>
-        <strong id="model-checked">-</strong>
+      <!-- What does the translating, said once under the heading (P7): it used
+           to be a settings row, and a row with a value and no control in it
+           reads as a setting somebody has greyed out. -->
+      <p class="section-meta">
+        <span data-i18n="options_engine">Engine</span>:
+        <span data-i18n="options_engine_value">Bergamot, built into the extension; translation offline.</span>
       </p>
-    </div>
 
-    <p id="refresh-status" class="status" role="status"></p>
+      <p class="explain" data-i18n="options_models_intro">
+        A translation model is downloaded separately for each pair of languages. These are official
+        Mozilla files; the translating happens entirely on this device.
+      </p>
 
-    <p class="model-filter">
-      <label class="visually-hidden" for="model-filter" data-i18n="options_filter_models_label"
-        >Filter the list of translation models</label
-      >
-      <input
-        type="search"
-        id="model-filter"
-        placeholder="Filter by language or code"
-        data-i18n-placeholder="options_filter_placeholder"
-      />
-    </p>
+      <!-- The one fact about models that changes what somebody installs next -
+           a model guesses badly at a single word (D192, Michał's ask) - as a
+           paragraph of the section's own prose, ending in the way to the
+           dictionaries (F7). It wore a highlighter's stroke until D254 and the
+           page's framed note until this round: two framed notes one under the
+           other read as two warnings, and the frame belongs to the one note
+           that says where a download comes from. -->
+      <p class="explain">
+        <span data-i18n="options_models_single_word"
+          >A model translates sentences well, but a single word on its own is often translated
+          wrongly - the result is cut short, or is a word that does not exist. For single words the
+          better source is a dictionary - the</span
+        >
+        <a href="#dictionaries" data-i18n="options_dictionaries_heading">Dictionaries</a>
+        <span data-i18n="options_models_single_word_rest">section below.</span>
+      </p>
+    </header>
+
+    <!-- Two blocks, not one list (D263, Michał's plan): what is on this
+         device, and what can be fetched. The catalogue's own tools - the
+         filter over a hundred pairs, the press that refreshes the index, the
+         date it is from - used to stand between the section's opening
+         sentences and the two or three models somebody actually has, so the
+         page opened on the machinery of a list rather than on the list. -->
+    <section aria-labelledby="translation-models-installed">
+    <header>
+      <h4 id="translation-models-installed" data-i18n="options_list_installed">On this device</h4>
+    </header>
 
     <div id="models" class="models"></div>
 
-    <!-- Folded length, not a scrolled box: the list stands in the page's own
-         flow, installed rows first, and this button unfolds the rest. Typing
-         in the filter above searches the whole list either way. -->
-    <button type="button" id="models-show-all" class="show-all" aria-controls="models" hidden></button>
-
     <p id="model-status" class="status" role="status"></p>
+    </section>
 
-    <p class="note">
-      <!-- The host is also a door: the href becomes the address of the very
-           index the snapshot was taken from, so a reader can look at the
-           source with their own eyes. Their press, their navigation - the
-           extension itself still fetches nothing without a press. -->
-      <span data-i18n="options_model_note_from">Model downloads come from</span>
-      <a id="model-host" target="_blank" rel="noopener">-</a>
-      <span data-i18n="options_model_note_rest"
-        >- where Mozilla publishes them. The extension connects to this public server only when you
-        press Update the list or Download. No personal data is ever sent.</span
-      >
+    <section aria-labelledby="translation-models-available">
+    <header>
+      <h4 id="translation-models-available" data-i18n="options_list_available">To download</h4>
+    </header>
+
+    <!-- The filter and the one fetch this section can make, on one line: the
+         list below refreshes only here, never by itself - the date under them
+         says how old what stands under the filter is. A quiet button on
+         purpose: the rare act must not outshine the downloads below. -->
+    <div class="list-tools">
+      <p class="model-filter">
+        <label class="visually-hidden" for="model-filter" data-i18n="options_filter_models_label"
+          >Filter the list of translation models</label
+        >
+        <input
+          type="search"
+          id="model-filter"
+          placeholder="Filter by language or code"
+          data-i18n-placeholder="options_filter_placeholder"
+        />
+      </p>
+      <button type="button" class="list-update" id="refresh-models" data-i18n="options_update_list">
+        Update the list
+      </button>
+    </div>
+
+    <p class="list-dated">
+      <span data-i18n="options_list_dated">List from</span>
+      <strong id="model-checked">-</strong>
     </p>
+
+    <p id="refresh-status" class="status" role="status"></p>
+
+    <div id="models-catalog" class="models"></div>
+
+    <!-- Folded length, not a scrolled box: the list stands in the page's own
+         flow and this button unfolds it. Typing in the filter above searches
+         the whole list either way. -->
+    <button type="button" id="models-show-all" class="show-all" aria-controls="models-catalog" hidden></button>
 
     <!-- Folded shut by default: the by-hand path is the escape hatch, not the
          road, and standing open right under the list it read as a second,
@@ -765,96 +459,175 @@
       <p id="file-status" class="status" role="status"></p>
 
       <p class="note footnote" data-i18n="options_files_note">
-        Adding a model by hand makes no network request, and this page stays the way in on the day
-        the place models are downloaded from stops answering.
+        Adding a model from files makes no network request, and this page is the way in on the day
+        the server the models come from stops working.
       </p>
     </details>
     </section>
 
+    <!-- Where the downloads come from, at the foot of the subsection (D258,
+         V2): it used to stand between the list and the by-hand fold, which
+         are one group - the ways to get a model - and a framed paragraph
+         between them read as the end of the section. It belongs after them,
+         as the footnote to the whole subsection that it is. -->
+    <p class="note">
+      <!-- The host is also a door: the href becomes the address of the very
+           index the snapshot was taken from, so a reader can look at the
+           source with their own eyes. Their press, their navigation - the
+           extension itself still fetches nothing without a press. -->
+      <span data-i18n="options_model_note_from">Model downloads come from</span>
+      <a id="model-host" target="_blank" rel="noopener">-</a>
+      <span data-i18n="options_model_note_rest"
+        >- where Mozilla publishes them. The extension connects to this public server only when you
+        press Update the list or Download. No personal data is ever sent.</span
+      >
+    </p>
+
+    </section>
+
+    <!-- The switch that decides whether the models subsection exists at all
+         (D120), standing after it rather than inside it (D261, Michał's
+         report): inside it, ticking the switch took the switch off the page
+         with the subsection it hides - and its sub-option, which shows only
+         while the switch is on, could never be reached at all. Outside, it
+         keeps the place it had at the foot of the models - it is the rare
+         choice, and at the head of the page it was the first thing anybody
+         read about a page mostly not about it - and it stays there to be
+         pressed again. Its own sub-option travels with it (Michał's call,
+         2026-09-18): a child two sections away from its parent is a row that
+         appears out of nowhere. -->
+    <div class="rows">
+      <div class="row" id="s-translationOff" data-setting="translationOff" data-section="languages">
+        <label class="row-toggle">
+          <span class="row-name" data-i18n="options_no_translation">Use without a translation model</span>
+          <input type="checkbox" id="no-translation" />
+        </label>
+        <p class="row-note">
+          <span data-i18n="options_no_translation_hint"
+            >Dictionaries only, without machine translation; the reader, the offline reading list and the highlighter keep working.</span
+          ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-translationOff" data-i18n="options_details">Details</button></span>
+        </p>
+        <p class="row-note row-more" id="more-translationOff" data-i18n="options_no_translation_more" hidden>
+          With a language pair chosen, the bubble still shows dictionary meanings, and you can save
+          phrases and see their underlines. Ideal for reading with dictionaries or in your native
+          language. Your saved data is not deleted and returns when you turn this off.
+        </p>
+      </div>
+      <!-- The switch's one sub-option (D149), shown only while it is on
+           (`no-translation-only`, the mirror of `translation-only`): with
+           translation on the bubble is the product, so "no bubble" is only a
+           choice under the trim - and a stored value under a hidden row never
+           acts (`pageMode`, `reading.js`). Ordinary pages then get nothing at
+           all, not even the launcher; the reader keeps its gesture, because the
+           highlighter's pen rides on it, and a selection there is a highlight
+           for the moment. -->
+      <div class="row row-sub" id="s-bubbleOff" data-setting="bubbleOff" data-parent="translationOff" data-section="languages">
+        <label class="row-toggle">
+          <span class="row-name" data-i18n="options_bubble_off">Do not show the bubble when selecting text</span>
+          <input type="checkbox" id="bubble-off" />
+        </label>
+        <p class="row-note">
+          <span data-i18n="options_bubble_off_hint"
+            >On an ordinary page nothing happens when you select text - open a page in the reader from re/read's button or with Alt+Shift+R.</span
+          ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-bubbleOff" data-i18n="options_details">Details</button></span>
+        </p>
+        <p class="row-note row-more" id="more-bubbleOff" data-i18n="options_bubble_off_more" hidden>
+          In the reader a selection is only a highlight for the moment: no bubble opens, a tap or
+          Escape clears it, and Ctrl+C or Cmd+C copies it (on a touch screen nothing can be copied).
+        </p>
+      </div>
+    </div>
+
     <!-- No wrapper here on purpose (D121): dictionaries serve reading without
          translation too - a monolingual one answers selections in the reader -
          so this section stands in both modes, unlike the models above. -->
-    <h2 id="dictionaries" data-i18n="options_dictionaries_heading">Dictionaries</h2>
+    <section aria-labelledby="dictionaries">
+    <header>
+      <h3 id="dictionaries" data-i18n="options_dictionaries_heading">Dictionaries</h3>
 
-    <p class="explain" data-i18n="options_dictionaries_intro">
-      Add dictionaries to see detailed word definitions in the translation bubble. You can change
-      the order in which they appear using the arrows.
-    </p>
+      <p class="explain" data-i18n="options_dictionaries_intro">
+        Add dictionaries to see detailed word definitions in the translation bubble.
+      </p>
+    </header>
 
-    <!-- Where the list comes from and that it is not the only way in (D192,
-         Michał's ask): the by-hand folds stand under a list of four hundred
-         rows, and a reader who never unfolds them never learns that a
-         dictionary of their own, or a second one for the same language, is
-         possible. The link is the same page the link fold points at, in the
-         interface's language (see `linkDictionarySources`). -->
-    <p class="explain">
-      <span data-i18n="options_dictionaries_sources"
-        >The dictionaries listed below come from WikDict. You can also add your own - from files
-        or from a link, and several for one language - in the sections under the list. Where to
-        find them, each with its licence:</span
-      >
-      <a id="dictionary-sources-intro" href="https://reapps.eu/read#faq-dictionary-sources" target="_blank" rel="noopener"
-        >reapps.eu/read</a
-      >.
-    </p>
+    <!-- The same two blocks as the models above (D263): what is on this
+         device - grouped by the language each dictionary explains, because
+         that is the only grouping the arrows can mean anything in - and the
+         catalogue of four hundred to fetch from. -->
+    <section aria-labelledby="dictionaries-installed">
+    <header>
+      <h4 id="dictionaries-installed" data-i18n="options_list_installed">On this device</h4>
 
-    <!-- The dictionary list's twin of the model refresh line: the one fetch
-         this section can make besides a download, and the press that makes
-         it. The date says how old what stands under the filter is. -->
-    <div class="list-refresh">
-      <button type="button" id="refresh-dictionaries" data-i18n="options_update_list">
+      <!-- Only worth saying with two dictionaries here, so the page hides it
+           until there are (see renderDictionaryList); it stands above the list
+           because it is about the list's own order. -->
+      <p id="dictionary-order-hint" class="explain" data-i18n="options_dictionary_order_hint" hidden>
+        The bubble shows the entries in the order below, language by language. The arrows change it.
+      </p>
+    </header>
+
+    <!-- A list, not a frame of cells: every dictionary is one item that
+         stacks its two lines - name and buttons, then the small print the
+         fold hangs off - the same way at every width (the seventh brief).
+         Under a heading per language where there is more than one (D263). -->
+    <div id="dictionary-list"></div>
+
+    <p id="dictionary-status" class="status" role="status"></p>
+    </section>
+
+    <section aria-labelledby="dictionaries-available">
+    <header>
+      <h4 id="dictionaries-available" data-i18n="options_list_available">To download</h4>
+
+      <!-- Where the catalogue comes from and that it is not the only way in
+           (D192, Michał's ask): the by-hand folds stand under a list of four
+           hundred rows, and a reader who never unfolds them never learns that
+           a dictionary of their own, or a second one for the same language, is
+           possible. The link is the same page the link fold points at, in the
+           interface's language (see `linkDictionarySources`). -->
+      <p class="explain">
+        <span data-i18n="options_dictionaries_sources"
+          >The dictionaries in the catalogue come from WikDict. You can add your own from a file or
+          from a link, several for one language as well. The sources, each with its licence:</span
+        >
+        <a id="dictionary-sources-intro" href="https://reapps.eu/read#faq-dictionary-sources" target="_blank" rel="noopener"
+          >reapps.eu/read</a
+        >.
+      </p>
+    </header>
+
+    <!-- The models' twin of the same line: the filter and the one fetch this
+         section can make besides a download, with the date under them. -->
+    <div class="list-tools">
+      <p class="model-filter">
+        <label
+          class="visually-hidden"
+          for="dictionary-filter"
+          data-i18n="options_filter_dictionaries_label"
+          >Filter the list of dictionaries</label
+        >
+        <input
+          type="search"
+          id="dictionary-filter"
+          placeholder="Filter by language or code"
+          data-i18n-placeholder="options_filter_placeholder"
+        />
+      </p>
+      <button type="button" class="list-update" id="refresh-dictionaries" data-i18n="options_update_list">
         Update the list
       </button>
-      <p class="list-dated">
-        <span data-i18n="options_list_dated">List from</span>
-        <strong id="dictionary-checked">-</strong>
-      </p>
     </div>
+
+    <p class="list-dated">
+      <span data-i18n="options_list_dated">List from</span>
+      <strong id="dictionary-checked">-</strong>
+    </p>
 
     <p id="dictionary-refresh-status" class="status" role="status"></p>
 
-    <p class="model-filter">
-      <label
-        class="visually-hidden"
-        for="dictionary-filter"
-        data-i18n="options_filter_dictionaries_label"
-        >Filter the list of dictionaries</label
-      >
-      <input
-        type="search"
-        id="dictionary-filter"
-        placeholder="Filter by language or code"
-        data-i18n-placeholder="options_filter_placeholder"
-      />
-    </p>
-
-    <!-- Only worth saying with two dictionaries here, so the page hides it
-         until there are (see renderCatalog); it stands above the list because
-         it is about the list's own order. The arrows that change it are the
-         intro's business, said once up there. -->
-    <p id="dictionary-order-hint" class="explain" data-i18n="options_dictionary_order_hint" hidden>
-      The bubble answers in the order below. Only the dictionaries of the language you are reading
-      answer.
-    </p>
-
-    <!-- A list, not a frame of cells: every dictionary is one item that
-         stacks its lines - pair and buttons, name, small print, fold - the
-         same way at every width (the seventh brief). -->
     <ul id="dictionary-catalog" class="models"></ul>
 
     <button type="button" id="dictionaries-show-all" class="show-all" aria-controls="dictionary-catalog" hidden></button>
-
-    <p id="dictionary-status" class="status" role="status"></p>
-
-    <p class="note">
-      <span data-i18n="options_dictionary_note_from">Dictionary downloads come from</span>
-      <a id="dictionary-host" target="_blank" rel="noopener">-</a>
-      <span data-i18n="options_dictionary_note_rest"
-        >- where WikDict publishes the dictionaries it builds from Wiktionary (CC BY-SA). The
-        extension connects to this public server only when you press Update the list or Download.
-        No personal data is ever sent.</span
-      >
-    </p>
 
     <!-- Folded for the same reason as the model files above: the catalogue is
          the road, this is the door beside it. -->
@@ -984,16 +757,67 @@
         to be unpacked and added from files.
       </p>
     </details>
+    </section>
 
-    <h2 id="switched-off-sites" data-i18n="options_disabled_heading">Switched-off sites</h2>
-
-    <p class="explain" data-i18n="options_disabled_intro">
-      A list of websites where the extension is switched off: no translation, no bubble, no
-      underlines. Add a site with the switch under the extension's icon in the browser's toolbar
-      while you are on it, or type its address below. There is no switch when both "Use without
-      a translation model" and "No bubble when selecting text" are on: nothing happens on ordinary
-      pages then, so there is nothing to switch off.
+    <!-- The models' host note has moved for the same reason (D258, V2): the
+         catalogue and the two by-hand folds are one group - the ways to get a
+         dictionary - and this says where the first of them fetches from,
+         after all three. -->
+    <p class="note">
+      <span data-i18n="options_dictionary_note_from">Dictionary downloads come from</span>
+      <a id="dictionary-host" target="_blank" rel="noopener">-</a>
+      <span data-i18n="options_dictionary_note_rest"
+        >- where WikDict publishes the dictionaries it builds from Wiktionary (CC BY-SA). The
+        extension connects to this public server only when you press Update the list or Download.
+        No personal data is ever sent.</span
+      >
     </p>
+    </section>
+    </section>
+
+    <!-- Where re/read is switched off altogether (D257): on a site in this
+         list nothing happens at all - no translation, no bubble, no
+         underlines - which is the one thing on this page that really is a
+         question of where the extension works. It stood under a heading
+         "Where it works" with the reader-only switch until Michał's smoke
+         (2026-09-18): that heading over that switch said the extension only
+         worked in the reader, when the reader-only switch limits the
+         underlines and the bubble and nothing else. -->
+    <section aria-labelledby="switched-off-sites" data-keywords="options_keywords_sites">
+    <header>
+      <h2 id="switched-off-sites" data-i18n="options_disabled_heading">Switched-off sites</h2>
+
+      <!-- Two sentences that answer the question, and the edge case behind the
+           page's own More (D258, §6.3): what the section is and how to add a
+           site are what somebody came for; the one arrangement in which the
+           toolbar window has no switch to offer is worth saying, and worth not
+           saying first.
+
+           The two settings the fold names are links to their own rows (D254,
+           P9): a sentence that names a setting and leaves the reader to find it
+           is a sentence that sends them back to the top of the page. The names
+           come from the rows' own catalogue keys, so renaming a setting renames
+           the reference with it. The closing clause is glued to the second link
+           (no line break between them): where a language opens it with a
+           colon - Polish, Spanish, Ukrainian - a space before that colon would
+           be a typographic error, and the languages that want a word there open
+           theirs with a space instead. -->
+      <p class="explain">
+        <span data-i18n="options_disabled_intro"
+          >On these sites re/read does not translate and shows no bubble and no underlines. Add a
+          site in the re/read window in the toolbar, or by typing its address below.</span
+        ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-disabled-sites" data-i18n="options_details">Details</button></span>
+      </p>
+      <p class="explain row-more" id="more-disabled-sites" hidden>
+        <span data-i18n="options_disabled_intro_switch">There is no switch in that window when both</span>
+        <a href="#s-translationOff" data-i18n="options_no_translation">Use without a translation model</a>
+        <span data-i18n="options_disabled_intro_and">and</span>
+        <a href="#s-bubbleOff" data-i18n="options_bubble_off">Do not show the bubble when selecting text</a
+        ><span data-i18n="options_disabled_intro_rest"
+          > are on: nothing happens on ordinary pages then, so there is nothing to switch off.</span
+        >
+      </p>
+    </header>
 
     <div id="disabled-hosts" class="models"></div>
 
@@ -1023,6 +847,616 @@
       site. A subdomain such as news.example.org is a separate site. A page's whole address can be
       pasted; only the site part is kept.
     </p>
+    </section>
+
+    <!-- The bubble and what it saves: what opens over a selection, and what
+         is kept when the selection is saved. Two subsections, because the
+         two questions are asked at different moments - one while reading,
+         one while revising. -->
+    <section aria-labelledby="bubble-and-phrases">
+    <header>
+      <h2 id="bubble-and-phrases" data-i18n="options_section_bubble">Bubble and phrases</h2>
+    </header>
+
+    <!-- The switch that governs both halves of this section stands over both
+         of them (D257), the way the language pair stands over the models and
+         the dictionaries: it decides where the underlines and the bubble
+         appear at all, and the two subsections below only decide what they
+         then show. -->
+    <div class="rows">
+      <!-- Not `translation-only` any more (D162): with the model switched off
+           the bubble still works wherever a pair is chosen - the dictionaries
+           answer - so the question this row asks stands in both modes, and
+           hiding it was what overrode it. -->
+      <div class="row" id="s-readerOnly" data-setting="readerOnly" data-section="bubble-and-phrases">
+        <label class="row-toggle">
+          <span class="row-name" data-i18n="options_reader_only">Show the underlines and the bubble only in the reader</span>
+          <input type="checkbox" id="reader-only" />
+        </label>
+        <p class="row-note">
+          <span data-i18n="options_reader_only_hint"
+            >On an ordinary page, selecting text brings up a bubble with two buttons instead: open
+            the page in the reader, and go to the reading list.</span
+          ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-readerOnly" data-i18n="options_details">Details</button></span>
+        </p>
+        <p class="row-note row-more" id="more-readerOnly" data-i18n="options_reader_only_more" hidden>
+          With it on, no web page can tell which of its words you have saved. On Android and iOS it
+          is on by default.
+        </p>
+      </div>
+    </div>
+
+    <section aria-labelledby="bubble">
+    <header>
+      <h3 id="bubble" data-i18n="options_sub_bubble">Bubble</h3>
+    </header>
+
+    <div class="rows">
+      <!-- The second layer's start (D186): the sentence and the dictionary
+           entries open with the bubble over a fresh selection, where a press
+           on More used to be the only way to them. On by default, existing
+           profiles included (Michał's call): a model is at its weakest on a
+           single word, and the dictionary's answer stood one press away from
+           a reader who never went looking. Right under the fold switch: the
+           two are the bubble's two "what shows first" questions, and both on
+           is the bubble for reading - text only, buttons on a press.
+           `translation-only` for the quiet bubble's reason above: without
+           the model the entries are the answer itself and never fold (D121).
+           The bubble over an underline keeps More - its body is the reader's
+           own meaning (D27) - and the hint says so. -->
+      <div class="row translation-only" id="s-showBubbleMore" data-setting="showBubbleMore" data-section="bubble">
+        <label class="row-toggle">
+          <span class="row-name" data-i18n="options_bubble_more">Show the sentence and dictionary entries right away</span>
+          <input type="checkbox" id="bubble-more" />
+        </label>
+        <p class="row-note">
+          <span data-i18n="options_bubble_more_hint"
+            >The bubble shows the translated sentence and the dictionary entries right away, with no press on “More”.</span
+          ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-showBubbleMore" data-i18n="options_details">Details</button></span>
+        </p>
+        <p class="row-note row-more" id="more-showBubbleMore" data-i18n="options_bubble_more_more" hidden>
+          Worth keeping on with a dictionary installed: the translation of a single word is often
+          wrong, and the dictionary shows what it really means. The bubble over an already saved
+          phrase shows only the saved translation - the sentence and the dictionary entries appear
+          after a press on “More”.
+        </p>
+      </div>
+      <!-- `translation-only`: the trimmed bubble ignores the fold - its two
+           buttons are its whole content - so with translation off this switch
+           would move nothing (D120). -->
+      <div class="row translation-only" id="s-hideBubbleActions" data-setting="hideBubbleActions" data-section="bubble">
+        <label class="row-toggle">
+          <span class="row-name" data-i18n="quiet_bubble">Show the bubble's buttons only after a click</span>
+          <input type="checkbox" id="quiet-bubble" />
+        </label>
+        <p class="row-note">
+          <span data-i18n="options_quiet_bubble_hint"
+            >The bubble then shows the translation alone; on a touch screen the buttons appear after a tap on it.</span
+          ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-hideBubbleActions" data-i18n="options_details">Details</button></span>
+        </p>
+        <p class="row-note row-more" id="more-hideBubbleActions" data-i18n="options_quiet_bubble_more" hidden>
+          The action buttons are copy, save, read aloud and the rest - all of the bubble's actions,
+          one press away.
+        </p>
+      </div>
+      <!-- The bubble's one size knob (D85): the bubble deliberately ignores
+           every page it stands on, so no page setting can reach it - and
+           built-in sizes land differently on different screens (an e-ink
+           tablet renders a CSS pixel visibly smaller than a phone, D84). -->
+      <div class="row" id="s-bubbleScale" data-setting="bubbleScale" data-keywords="options_keywords_scale" data-section="bubble">
+        <span class="row-name" data-i18n="options_bubble_scale">Bubble text size</span>
+        <p class="inline stepper">
+          <button type="button" id="bubble-scale-down" title="Smaller" data-i18n-title="reader_smaller">
+            &minus;
+          </button>
+          <output id="bubble-scale-value">100%</output>
+          <button type="button" id="bubble-scale-up" title="Larger" data-i18n-title="reader_larger">+</button>
+        </p>
+        <p class="row-note" data-i18n="options_bubble_scale_hint">
+          Adjusts the text and button size inside the translation bubble across all pages.
+        </p>
+      </div>
+    </div>
+    </section>
+
+    <section aria-labelledby="saved-phrases">
+    <header>
+      <h3 id="saved-phrases" data-i18n="options_sub_phrases">Saved phrases</h3>
+    </header>
+
+    <div class="rows">
+      <!-- The sentence kept with a phrase (D210): the one the bubble had
+           around the selection, as the page shows it - never its
+           translation - written into the row and shown on the phrases page
+           under the phrase, and the third column of the export for Anki.
+           Off by default and meant to stay off until pressed: a sentence is
+           a piece of the page kept for good, which is the reader's call and
+           not a default's. Since D216 the bubble over a saved phrase fills
+           the row's sentence too, when it has none. Not `translation-only`:
+           the quiet vocabulary's bubble saves phrases too (D158), from the
+           same sentence. -->
+      <div class="row" id="s-saveSentence" data-setting="saveSentence" data-section="saved-phrases">
+        <label class="row-toggle">
+          <span class="row-name" data-i18n="options_save_sentence">Save the sentence with the phrase</span>
+          <input type="checkbox" id="save-sentence" />
+        </label>
+        <p class="row-note">
+          <span data-i18n="options_save_sentence_hint"
+            >Saving a phrase saves the sentence it stood in as well.</span
+          ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-saveSentence" data-i18n="options_details">Details</button></span>
+        </p>
+        <p class="row-note row-more" id="more-saveSentence" data-i18n="options_save_sentence_more" hidden>
+          The sentence as the page shows it, without its translation. It is shown under the phrase
+          on the saved phrases page, folded to one line, and written into the third column of the
+          export for Anki. For a phrase saved without a sentence, the sentence around it is saved
+          the next time you open its bubble on a page. Like the phrase, the sentence is stored only
+          on this device. Switched off, no new sentence is saved; the ones already saved are not
+          deleted.
+        </p>
+      </div>
+      <!-- The other forms of a saved word (D208): `read` underlined in
+           `reads` and `reading` too, with the bubble over them `read`'s. Off
+           by default - the README's "matching is literal" holds until it is
+           turned on - and not `translation-only`: the underlines are the
+           quiet vocabulary's as much as the model's (D162). Which forms count
+           is the installed dictionary's word, never the rules' alone, and for
+           now only English has rules; the hint says both. -->
+      <div class="row" id="s-underlineForms" data-setting="underlineForms" data-section="saved-phrases">
+        <label class="row-toggle">
+          <span class="row-name" data-i18n="options_underline_forms">Underline other forms of saved words</span>
+          <input type="checkbox" id="underline-forms" />
+        </label>
+        <p class="row-note">
+          <span data-i18n="options_underline_forms_hint"
+            >Save "read", and "reads" and "reading" are underlined too.</span
+          ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-underlineForms" data-i18n="options_details">Details</button></span>
+        </p>
+        <p class="row-note row-more" id="more-underlineForms" data-i18n="options_underline_forms_more" hidden>
+          The bubble over them shows what you saved for "read". Which forms count comes from your
+          dictionary for the language you read, so one has to be installed. For now only when you
+          read English. Switched off, only the exact form you saved is underlined.
+        </p>
+      </div>
+    </div>
+    </section>
+    </section>
+
+    <!-- The reading view: what the reader keeps, what it is set in, and how
+         fast it thinks you read - then the Pages layout's own three. -->
+    <section aria-labelledby="reading-view">
+    <header>
+      <h2 id="reading-view" data-i18n="options_section_reading">Reading view</h2>
+    </header>
+
+    <div class="rows">
+      <!-- The default keep (D124). Not `translation-only`: with translation
+           off the reader and its list are the whole extension, which is when
+           this switch matters most. -->
+      <div class="row" id="s-keepArticles" data-setting="keepArticles" data-section="reading-view">
+        <label class="row-toggle">
+          <span class="row-name" data-i18n="options_keep_articles">Save pages you open to the offline reading list</span>
+          <input type="checkbox" id="keep-articles" />
+        </label>
+        <p class="row-note">
+          <span data-i18n="options_keep_articles_hint"
+            >A single page can still be saved in the reader with “Save to reading list”, or taken
+            out of the list with “Delete”.</span
+          ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-keepArticles" data-i18n="options_details">Details</button></span>
+        </p>
+        <p class="row-note row-more" id="more-keepArticles" data-i18n="options_keep_articles_more" hidden>
+          Your saved pages, highlights and reading progress are kept safe even if the original
+          website changes or disappears.
+        </p>
+      </div>
+      <!-- The reading font's name (D163, moved out of the Aa panel: a name
+           is typed once, and on a phone the panel's field summoned the
+           keyboard over the article). The field previews itself in the
+           typed face - options.js sets its font-family from the cleaned
+           name, never the raw value. -->
+      <div class="row row-stack" id="s-fontFamily" data-setting="fontFamily" data-keywords="options_keywords_font" data-section="reading-view">
+        <label class="row-name" for="font-custom" data-i18n="options_font_custom">Own font</label>
+        <p class="inline">
+          <input
+            id="font-custom"
+            type="text"
+            placeholder="for example Noto Serif"
+            data-i18n-placeholder="options_font_custom_placeholder"
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck="false"
+          />
+          <!-- What was typed is stored on leaving the field, and nothing said
+               so (D254): a name typed into a field that keeps it looks exactly
+               like a name typed into a field that lost it. The word stays
+               until the next edit - never taken away on a clock, because every
+               disappearance is one more refresh of an e-ink panel. -->
+          <output class="field-saved" id="font-custom-saved" data-i18n="options_field_saved" hidden>Saved</output>
+        </p>
+        <p class="row-note">
+          <span data-i18n="options_font_custom_hint"
+            >A typeface installed on this device, for example Noto Serif. In the Aa panel it appears in the Type row as Custom.</span
+          ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-fontFamily" data-i18n="options_details">Details</button></span>
+        </p>
+        <p class="row-note row-more" id="more-fontFamily" data-i18n="options_font_custom_more" hidden>
+          Type the name as the system spells it. Leave the field empty to use the built-in typefaces
+          only.
+        </p>
+      </div>
+      <!-- The reader's own pace (D228): words a minute, typed once - the one
+           number every reading time in the list and under a title is made
+           at. A typed field rather than a stepper, because a pace is a
+           measured number and the way from the default to a learner's
+           honest one would be eight presses; here rather than in the Aa
+           panel for the font name's reason. The bounds are the config's
+           (`READING_PACE`), put on the field by options.js, so the page and
+           the healer cannot disagree. -->
+      <div class="row row-stack" id="s-readingPace" data-setting="readingPace" data-keywords="options_keywords_pace" data-section="reading-view">
+        <label class="row-name" for="reading-pace" data-i18n="options_reading_pace">Reading speed</label>
+        <p class="inline">
+          <input id="reading-pace" type="number" inputmode="numeric" autocomplete="off" />
+          <span class="unit" data-i18n="options_reading_pace_unit">words a minute</span>
+          <output class="field-saved" id="reading-pace-saved" data-i18n="options_field_saved" hidden>Saved</output>
+        </p>
+        <p class="row-note">
+          <span data-i18n="options_reading_pace_hint"
+            >Used only to estimate the reading time shown in the reading list and under an article's title.</span
+          ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-readingPace" data-i18n="options_details">Details</button></span>
+        </p>
+        <p class="row-note row-more" id="more-readingPace" data-i18n="options_reading_pace_more" hidden>
+          The number of words you read in a minute. 200 is an unhurried pace in your own language;
+          in a language you are learning it is usually 100-150.
+        </p>
+      </div>
+    </div>
+
+    <!-- The three settings of the Pages layout, gathered (D250): each of
+         them is a thing set once (D163), none of them belongs in the Aa
+         panel, which on a small e-ink screen already fills it - and read
+         one after another they say how a page stands and how it turns.
+         Always shown, whatever the layout in force: this is where somebody
+         looking for the Pages layout comes, and a section that appeared and
+         vanished with the reader's own setting could not be found at all. -->
+    <section aria-labelledby="paged-layout">
+    <header>
+      <h3 id="paged-layout" data-i18n="options_paged_heading">Pages layout</h3>
+
+      <p class="explain" data-i18n="options_paged_intro">
+        These work in the reader's Pages layout: the text moves by whole pages, each beginning and
+        ending with a whole line.
+      </p>
+    </header>
+
+    <div class="rows">
+      <!-- The page count at the foot of a page read by pages (D238), on by
+           default since D249: somebody reading by pages is reading a book,
+           and a book says which page it is on. -->
+      <div class="row" id="s-pageNumber" data-setting="pageNumber" data-section="paged-layout">
+        <label class="row-toggle">
+          <span class="row-name" data-i18n="options_page_number">Show the page number</span>
+          <input type="checkbox" id="page-number" />
+        </label>
+        <p class="row-note">
+          <span data-i18n="options_page_number_hint"
+            >The current page and how many there are, for example 3 / 12, at the foot of the window.</span
+          ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-pageNumber" data-i18n="options_details">Details</button></span>
+        </p>
+        <p class="row-note row-more" id="more-pageNumber" data-i18n="options_page_number_more" hidden>
+          Off, each page's text reaches lower; the count is still read by screen readers, and on a
+          wide screen it is shown in the bar next to re/read.
+        </p>
+      </div>
+      <!-- What a finger does (D250). The default follows the screen: a slide
+           where a hand wraps around the device - a phone, an e-ink reader -
+           because a gesture that has to move is the one an idle thumb cannot
+           make, and the thirds where the device is put down, because they are
+           quicker and more precise. Off is for a reader with hardware page
+           keys, where no gesture is worth an accidental turn. Chosen by name
+           in a select, like the language pair: three values, set once. -->
+      <div class="row row-stack" id="s-touchTurn" data-setting="touchTurn" data-keywords="options_keywords_turn" data-section="paged-layout">
+        <label class="row-name" for="touch-turn" data-i18n="options_touch_turn">Turning pages by touch</label>
+        <select id="touch-turn">
+          <option value="zones" data-i18n="options_touch_turn_zones">Tap the left or right side of the screen</option>
+          <option value="swipe" data-i18n="options_touch_turn_swipe">Slide a finger sideways</option>
+          <option value="off" data-i18n="options_touch_turn_off">Off</option>
+        </select>
+        <!-- What the chosen gesture does, in the reader's own words (Michał's
+             smoke, 2026-09-18): three gestures named in three words each say
+             too little, and what a reader needs is the one they picked - where
+             a slide may begin, how short a tap has to be. Filled by script
+             like the voice row's line, and changed with the select.
+
+             Since D264 it is the row's whole note. The line that stood above
+             it said only that a finger turns the pages, which is the row's
+             name again, and the fold behind that line opened *under* the
+             sentence that had already answered the reader's question - a
+             trigger paying for a paragraph nobody needed. The words a reader
+             might search for and no longer says out loud live in
+             `options_keywords_turn`. -->
+        <p class="row-note" id="touch-turn-note"></p>
+      </div>
+      <!-- The turn made visible (D251). Two values, not three: a signal
+           given every fifth page would not be a confirmation of anything. -->
+      <div class="row row-stack" id="s-turnEffect" data-setting="turnEffect" data-keywords="options_keywords_turn" data-section="paged-layout">
+        <label class="row-name" for="turn-effect" data-i18n="options_turn_effect">Page turn effect</label>
+        <select id="turn-effect">
+          <option value="auto" data-i18n="options_turn_effect_auto">Automatic</option>
+          <option value="off" data-i18n="options_turn_effect_off">Off</option>
+        </select>
+        <!-- One paragraph, always open (D264): what the row is for, then what
+             the value in force looks like on this screen - a sentence the
+             reader reads in one breath instead of a sentence, a trigger, and
+             a folded paragraph that opened below the line already answering
+             it. The second half is filled by script and changes with the
+             select, so the two halves are two elements in one paragraph
+             rather than two paragraphs. -->
+        <p class="row-note">
+          <span data-i18n="options_turn_effect_hint">A visible confirmation that the page has changed.</span>
+          <span id="turn-effect-note"></span>
+        </p>
+      </div>
+    </div>
+    </section>
+    </section>
+
+    <!-- Reading aloud: the switch and the two rows it governs, together at
+         last - the voice and the speed used to stand between the font and
+         the bubble's size, with nothing saying what turned them off. -->
+    <section aria-labelledby="reading-aloud">
+    <header>
+      <h2 id="reading-aloud" data-i18n="options_section_aloud">Reading aloud</h2>
+    </header>
+
+    <div class="rows">
+      <!-- The reading-aloud switch (D148), the head of the two voice rows
+           under it: off, the speaker leaves the bubble and every list, the
+           Read-aloud button leaves the reader, and the two rows fold away
+           (`tts-only`) - a voice for a speaker that is gone would be a setting
+           with no other side. Its own row rather than a corner of the
+           translation-off switch: the voice serves the trimmed bubble and the
+           reader alike, and the reasons for wanting it gone (an engine with
+           no voices, a speaker pressed by accident) have nothing to do with
+           translating. Presentation only: the voice and the speed stay. -->
+      <div class="row" id="s-ttsOff" data-setting="ttsOff" data-keywords="options_keywords_tts" data-section="reading-aloud">
+        <label class="row-toggle">
+          <span class="row-name" data-i18n="options_tts">Show the read-aloud buttons</span>
+          <input type="checkbox" id="tts" />
+        </label>
+        <p class="row-note">
+          <span data-i18n="options_tts_hint"
+            >In the bubble, in the lists of saved phrases and highlights, and in the reader.</span
+          ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-ttsOff" data-i18n="options_details">Details</button></span>
+        </p>
+        <p class="row-note row-more" id="more-ttsOff" data-i18n="options_tts_more" hidden>
+          Turning this off hides every one of them. The voice and the speed you chose are remembered
+          and apply again when you turn it back on.
+        </p>
+      </div>
+      <!-- Which voice reads a selection aloud (D83). The first select names
+           the language - the pair's source by default, without a pair the
+           browser's own or else English, any language the device reads
+           offline by hand (D155: a fresh install without a pair reads
+           articles aloud all the same, and had nothing to list here) -
+           the second the device's offline voices for it, and the choice is
+           stored per language, so switching pairs keeps it. The sample the
+           Listen button speaks is digits, because digits exist in every
+           language the engine could offer. Offline voices only (D155):
+           `voicesFor` keeps the engine's network voices out of the list, and
+           the status line under the note says when that leaves nothing for
+           the language. -->
+      <div class="row row-stack row-voice row-sub" id="s-ttsVoices" data-setting="ttsVoices" data-parent="ttsOff" data-section="reading-aloud">
+        <label class="row-name" for="tts-voice" data-i18n="options_tts_voice">Voice for reading aloud</label>
+        <p class="inline">
+          <select
+            id="tts-lang"
+            aria-label="Language of the voice"
+            data-i18n-aria-label="options_tts_lang"
+          ></select>
+          <select id="tts-voice"></select>
+          <button type="button" id="tts-listen" data-i18n="options_tts_listen">Listen</button>
+        </p>
+        <p class="row-note">
+          <span data-i18n="options_tts_voice_hint"
+            >A separate voice for each language; only voices that speak offline are offered.</span
+          ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-ttsVoices" data-i18n="options_details">Details</button></span>
+        </p>
+        <p class="row-note row-more" id="more-ttsVoices" data-i18n="options_tts_voice_more" hidden>
+          The voice reads phrases and whole articles alike. Speech is made on this device and
+          nothing is sent to the internet.
+        </p>
+        <!-- Filled only where it is true (D155): the device lists voices and
+             none of them reads the pair's language offline - the picker above
+             has its default line alone, and Listen is disabled. -->
+        <p class="row-note" id="tts-voice-status" hidden></p>
+      </div>
+      <!-- How fast that voice reads (D87), for the phrase in the bubble and for
+           a whole article in the reader alike - one setting, because what is
+           slow is the language being learned, not the surface it is read on.
+           The reader's own panel has the same two buttons over it. Named for
+           the voice since D228, when the reader's own pace below took the
+           name "reading speed" for the thing it measures. -->
+      <div class="row row-sub" id="s-ttsRate" data-setting="ttsRate" data-parent="ttsOff" data-section="reading-aloud">
+        <span class="row-name" data-i18n="options_tts_rate">Voice speed</span>
+        <p class="inline stepper">
+          <button type="button" id="tts-rate-down" title="Slower" data-i18n-title="reader_slower">
+            &minus;
+          </button>
+          <output id="tts-rate-value">1.0&times;</output>
+          <button type="button" id="tts-rate-up" title="Faster" data-i18n-title="reader_faster">+</button>
+        </p>
+      </div>
+    </div>
+    </section>
+
+    <!-- Data and copies: the one section that reports rather than asks
+         (P7). What the browser holds, and the copies that outlive its
+         database - a report belongs beside a report, not between two
+         preferences. -->
+    <section aria-labelledby="data">
+    <header>
+      <h2 id="data" data-i18n="options_section_data">Data and copies</h2>
+    </header>
+
+    <div class="rows">
+      <!-- What the browser holds for this extension and whether it has
+           promised to keep it. The last row, because it is a report on the
+           choices above it rather than a choice (Michał, 2026-08-30), with
+           the copy switch right over the line that answers for it. The size
+           is everything at once - models, dictionaries, the reading list,
+           the phrases - and the note under it is the one place the extension
+           says out loud that a browser may clear an origin's storage on its
+           own: on WebKit a refused persistence is exactly that risk
+           (`lib/storage-report.js`). -->
+      <div class="row row-stack row-storage" id="s-storage" data-setting="storage" data-keywords="options_keywords_storage" data-section="data">
+        <span class="row-name" data-i18n="options_storage">Data on this device</span>
+        <span class="row-value" id="storage-usage"></span>
+        <!-- What the size measures, because the lists below it measure
+             something else: the dictionaries' list says what their text
+             weighs, and on disk a dictionary is one database row per word
+             and per other spelling (`lib/dict/store.js`) - measured on a
+             145 MB dictionary, 705 MB of database. -->
+        <p class="row-note">
+          <span data-i18n="options_storage_how"
+            >
+            Space taken up by re/read's data.
+          </span
+          ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-storage" data-i18n="options_details">Details</button></span>
+        </p>
+        <p class="row-note row-more" id="more-storage" data-i18n="options_storage_how_more" hidden>
+          The total is the browser's own estimate for all of re/read's data. It counts the
+          databases' indexes and caches as well, which is why it is larger than the parts below it
+          added up. The parts count the text and the pictures alone, without indexes: one dictionary
+          entry takes several times more room in the database than its text alone, so Other is
+          mostly the dictionaries' database. All of the data is in the browser's own database
+          (IndexedDB), inside the browser's profile - not in separate files on your computer.
+          Deleting an article or a book removes its text, pictures, highlights, notes and reading
+          position for good.
+        </p>
+        <p class="row-note" id="storage-note" hidden></p>
+        <!-- Where the space went (F8), always on the page: this is what the
+             section is for, not a detail to fold away. Each line counts what
+             its part holds, its copies included; what the browser's estimate
+             has over the four of them - the databases' indexes, the caches,
+             and a dictionary's several-fold cost over the weight of its text -
+             stands under Other, and the fold above says so. -->
+        <ul class="storage-parts">
+          <li>
+            <span data-i18n="options_storage_models">Translation models</span>
+            <span class="storage-part-value" id="storage-models"></span>
+          </li>
+          <li>
+            <span data-i18n="options_storage_dictionaries">Dictionaries</span>
+            <span class="storage-part-value" id="storage-dictionaries"></span>
+          </li>
+          <li>
+            <span data-i18n="options_storage_library">Reading list (with its copy)</span>
+            <span class="storage-part-value" id="storage-library"></span>
+          </li>
+          <li>
+            <span data-i18n="options_storage_phrases">Phrases and highlights</span>
+            <span class="storage-part-value" id="storage-phrases"></span>
+          </li>
+          <li>
+            <span data-i18n="options_storage_other">Other</span>
+            <span class="storage-part-value" id="storage-other"></span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Everything about the copies in one place (D260): what they are, the
+         table of what each holds, the one of them that is a choice, and what
+         a copy does not protect against. It used to be three explanations a
+         screen apart - a paragraph under the table, a fold on the switch, and
+         the switch's own hint - each saying a piece of the same thing. -->
+    <section aria-labelledby="copies" data-keywords="options_keywords_copy">
+    <header>
+      <h3 id="copies" data-i18n="options_storage_copies">Backups</h3>
+
+      <p class="explain">
+        <span data-i18n="options_copies_intro"
+          >re/read keeps copies of your phrases, your highlights and your reading list in the
+          extension's own storage, apart from the database.</span
+        ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-copies" data-i18n="options_details">Details</button></span>
+      </p>
+      <p class="explain row-more" id="more-copies" data-i18n="options_copies_intro_more" hidden>
+        The copies are written again at every change: when you save or delete a phrase, a highlight
+        or a page in the reading list. They protect the data when the browser clears its storage or
+        when a database goes wrong. The database is IndexedDB and the copies are in the extension's
+        storage (storage.local) - both inside the browser's profile, not in files on your computer.
+      </p>
+    </header>
+
+    <!-- A table because it is one: three copies, three things said about each,
+         and a header row that names the columns instead of leaving a reader to
+         infer them from the first line. The headings speak in the page's quiet
+         voice - they label a report, they do not open a section. -->
+    <table class="copies">
+      <thead>
+        <tr>
+          <th scope="col" data-i18n="options_copies_head_name">Copy</th>
+          <th scope="col" data-i18n="options_copies_head_holds">Contents</th>
+          <th scope="col" data-i18n="options_copies_head_when">Last updated</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr id="storage-backup">
+          <th scope="row" class="copy-name" data-i18n="options_copies_vocabulary">Vocabulary</th>
+          <td class="copy-holds"></td>
+          <td class="copy-when"></td>
+        </tr>
+        <tr id="storage-marks-backup">
+          <th scope="row" class="copy-name" data-i18n="options_copies_marks">Highlights</th>
+          <td class="copy-holds"></td>
+          <td class="copy-when"></td>
+        </tr>
+        <tr id="storage-library-copy">
+          <th scope="row" class="copy-name" data-i18n="options_copies_library">Reading list</th>
+          <td class="copy-holds"></td>
+          <td class="copy-when"></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- The one copy that is a choice (`lib/store/library-copy.js`). On
+         unasked only where the browser may delete the database on its own -
+         iOS and iPadOS - and a choice everywhere, because it doubles the space
+         the reading list takes. Turning it on builds the copy from the whole
+         list; turning it off removes it. No fold under it any more: what a
+         copy is for is said once, over the table. -->
+    <div class="rows">
+      <div class="row" id="s-libraryCopy" data-setting="libraryCopy" data-keywords="options_keywords_copy" data-section="copies">
+        <label class="row-toggle">
+          <span class="row-name" data-i18n="options_library_copy">Back up the reading list</span>
+          <input type="checkbox" id="library-copy" />
+        </label>
+        <p class="row-note" data-i18n="options_library_copy_hint">
+          The reading list then takes twice the space. Copies of your phrases and highlights are
+          always made.
+        </p>
+      </div>
+    </div>
+
+    <!-- The one thing a copy inside the browser cannot survive, and the file
+         that does (Michał's ask, 2026-09-18). The reading list's own name is a
+         door to the page the export lives on - the page, not its Import and
+         export section: the address of a section inside it would be a new
+         field in the message the background answers, and this round changes no
+         protocol. -->
+    <p class="note">
+      <span data-i18n="options_copies_uninstall"
+        >Uninstalling re/read deletes all of its data, the copies with it. Before you uninstall it,
+        or before you move your data to another device, save a copy as a file: Export in</span
+      >
+      <button type="button" class="doorway" id="copy-library" data-i18n="options_copies_reading_list">the offline reading list</button
+      ><span data-i18n="options_copies_uninstall_rest"
+        > writes one reread-backup.zip with the reading list, your phrases, your highlights and the
+        settings. Models and dictionaries are not in it - they can be downloaded again. The export
+        on the saved phrases page is a different file: the phrases alone, as TSV, for Anki or the
+        KOReader plugin.</span
+      >
+    </p>
+    </section>
+    </section>
 
     <!-- The tinkerer's door (D176): rules of the reader's own for the bubble
          and the reader page, and for nothing else - never the page being
@@ -1033,13 +1467,16 @@
          example stands under the field as a sentence and not as a placeholder:
          an example in a code face read as text already typed, and a Save
          pressed over it stored nothing (Michał's smoke, 2026-09-03). -->
-    <h2 id="custom-css" data-i18n="options_custom_css_heading">Custom CSS</h2>
+    <section aria-labelledby="custom-css">
+    <header>
+      <h2 id="custom-css" data-i18n="options_custom_css_heading">Custom CSS</h2>
 
-    <p class="explain" data-i18n="options_custom_css_intro">
-      For changing how the bubble, the reader page and the toolbar popup look with CSS rules of
-      your own. This page stays out of their reach, so a wrong rule can always be undone here:
-      clear the field and save.
-    </p>
+      <p class="explain" data-i18n="options_custom_css_intro">
+        Your own CSS rules change how the bubble, the reading view and the re/read window look. This
+        page is not subject to those rules, so a wrong rule can always be undone here: clear the
+        field and save.
+      </p>
+    </header>
 
     <div class="custom-css">
       <textarea
@@ -1057,10 +1494,16 @@
       <!-- A hint and not a row note: the note's size lives under `.row`, and this
            paragraph stands outside one (it came out a size too big). The example
            is one every bubble shows at once - the label it first named appears
-           only where a dictionary's headword differs from the selection. -->
-      <p class="hint" data-i18n="options_custom_css_example">
-        Example: .bubble { outline: 3px solid darkorange; } draws an orange line around every
-        bubble.
+           only where a dictionary's headword differs from the selection.
+           The rule itself stands in `code` (D258, V5), outside the catalogue:
+           it is CSS, the same in every language, and set in the page's prose
+           face it read as a sentence somebody had mistyped. -->
+      <p class="hint">
+        <span data-i18n="options_custom_css_example">Example:</span>
+        <code>.bubble { outline: 3px solid darkorange; }</code>
+        <span data-i18n="options_custom_css_example_rest"
+          >draws an orange line around every bubble.</span
+        >
       </p>
     </div>
 
@@ -1086,8 +1529,8 @@
 
       <p class="explain" data-i18n="options_custom_css_rules">
         Rules that would load anything from the network (url(), @import, @font-face) are refused.
-        The names of the elements are kept from version to version where possible; when one has
-        to change, the release notes say so. The names come from these files:
+        The names of the elements are kept from version to version where possible; when one has to
+        change, it is written in the release notes. The names come from these files:
       </p>
 
       <p class="jump sources">
@@ -1125,19 +1568,60 @@
         >
       </p>
     </details>
+    </section>
+
+    <!-- About re/read: what the extension promises about the network, who
+         builds it and how to help. Last on purpose - it is the page's only
+         section nobody comes here to change. -->
+    <section aria-labelledby="about">
+    <header>
+      <h2 id="about" data-i18n="options_section_about">About re/read</h2>
+
+      <!-- The thesis of the whole extension, stated once, where a curious person
+           goes looking for it. The notes further down say how each download is
+           checked; this says what never happens at all. -->
+      <!-- The two sections the promise rests on are links to themselves (D258,
+           §6.3): "those sections" made a reader scroll back looking for which.
+           The closing word is glued to the second link, the switched-off sites'
+           rule: a language that closes with a bare full stop must not get a
+           space before it. -->
+      <p class="explain">
+        <span data-i18n="options_local_intro"
+          >Everything re/read does happens on this device (offline): translating, the dictionary, the
+          reading list, your saved phrases. Nothing you read or select is ever sent anywhere. An
+          internet connection is needed only to download a new translation model or a dictionary -
+          and only from the two addresses given in the</span
+        >
+        <a href="#translation-models" data-i18n="options_models_heading">Translation models</a>
+        <span data-i18n="options_local_intro_and">and</span>
+        <a href="#dictionaries" data-i18n="options_dictionaries_heading">Dictionaries</a
+        ><span data-i18n="options_local_intro_rest"> sections.</span>
+      </p>
+
+      <!-- The way back to the signpost once it has been put away (D254, §7):
+           the card is gone for good otherwise, and the instructions in it are
+           worth rereading. Shown only while it is hidden. -->
+      <p class="explain" id="first-steps-back" hidden>
+        <button type="button" class="note-more" id="first-steps-show" data-i18n="options_first_steps_show">
+          Show the first steps
+        </button>
+      </p>
+    </header>
 
     <!-- The one section that is not a setting: who builds this and how to
          help them keep building it. The links are doors, not requests - the
          extension itself contacts nothing here; a press is the reader's own
          navigation, the model-host link's rule. The addresses live in the
          README's Support section too - keep the two in step. -->
-    <h2 id="support" data-i18n="support">Support</h2>
+    <header>
+      <h3 id="support" data-i18n="support">Support</h3>
 
-    <p class="explain" data-i18n="options_support_intro">
-      re/read is built by a non-profit foundation - no investors, no ads, no tracking. If you
-      find it useful and want to support its continued development, every donation helps us
-      build software free from commercial pressure.
-    </p>
+      <p class="explain" data-i18n="options_support_intro">
+        re/read is built by a non-profit foundation - no investors, no ads, no tracking. If you
+        find it useful and want to support its continued development, every donation helps us
+        build software free from commercial pressure.
+      </p>
+    </header>
 
     <p class="support-links">
       <a
@@ -1151,6 +1635,9 @@
         >More ways to support</a
       >
     </p>
+    </section>
+    </main>
+    </div>
 
     <!-- The colophon closes the page the way one closes a book: name and
          version, the licence, the maker, the maker's site and the source
@@ -1172,23 +1659,6 @@
         >
       </p>
     </footer>
-
-    <!-- The chevron every folded description wears (D155), cloned into its
-         button by `foldNotes` in options.js - drawn once here so the markup
-         says what the buttons look like. Points down while the note is
-         folded; the stylesheet turns it up while the note is open. -->
-    <template id="note-chevron">
-      <svg class="page-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-        <path
-          d="M3.5 6 8 10.5 12.5 6"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.3"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        />
-      </svg>
-    </template>
 
     <script src="options.js" defer></script>
   </body>

@@ -34,4 +34,11 @@ describe("pairLabel", () => {
   it("degrades one side at a time", () => {
     assert.equal(pairLabel("xx", "pl"), "xx to Polish");
   });
+
+  it("names a language explained in itself rather than pointing it at itself (D258, V9)", () => {
+    // "English to English" read as a mistake somebody had made picking the
+    // two selects; a monolingual dictionary is not a direction at all.
+    assert.equal(pairLabel("en", "en"), "English (monolingual)");
+    assert.equal(pairLabel("xx", "xx"), "xx (monolingual)");
+  });
 });

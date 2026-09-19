@@ -182,7 +182,14 @@
          could only point at the settings. The hint stays on the settings
          page, where there is room to say it. -->
     <label class="popup-row popup-reader-only" id="reader-only-row">
-      <span data-i18n="options_reader_only">Only in the reader</span>
+      <!-- One name on both surfaces (D259), and since D262 that name says
+           what the switch does rather than where it applies: a checkbox is
+           read as an instruction to carry out, so it is named with a verb.
+           The name is longer than the panel's line and takes two of them
+           (measured: 248 px of the 248 the label has at 19rem, the row 52 px
+           instead of 44); the switch beside it keeps its place, as it does
+           for the site row's hostname. -->
+      <span data-i18n="options_reader_only">Show the underlines and the bubble only in the reader</span>
       <input type="checkbox" id="reader-only" />
     </label>
 

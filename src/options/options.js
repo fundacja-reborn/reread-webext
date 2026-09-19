@@ -32,12 +32,11 @@ import {
   withDefaults,
   writeConfig,
 } from "../lib/config.js";
-import { aside, localizePage, megabytes, plural, t, uiLocale } from "../lib/i18n.js";
+import { aside, localizePage, megabytes, plural, speedFactor, t, uiLocale } from "../lib/i18n.js";
 import { compileUserCss } from "../lib/user-css.js";
 import { privateNote } from "../lib/private-note.js";
 import { armBackArrow } from "../lib/back-arrow.js";
 import { askReader, framedInReader } from "../lib/room-frame.js";
-import { armFullscreenTool } from "../lib/fullscreen-tool.js";
 import { languageName, pairLabel } from "../lib/language.js";
 import { catalogDictionaries, catalogSource } from "../lib/dict/catalog.js";
 import { describeDictDownloadProblem, downloadArchive } from "../lib/dict/download.js";
@@ -57,8 +56,8 @@ import {
 } from "../lib/dict/import.js";
 import { describeZipProblem, readZip } from "../lib/dict/zip.js";
 import { entriesReadFrom, rowBatches } from "../lib/dict/rows.js";
-import { afterMove } from "../lib/dict/order.js";
-import { DISPLAY_NAME_LIMIT, cleanDisplayName, nameHolder, shownName } from "../lib/dict/display-name.js";
+import { moveWithinSourceLanguage } from "../lib/dict/order.js";
+import { DISPLAY_NAME_LIMIT, cleanDisplayName, fileNameWorthSaying, nameHolder, shownName } from "../lib/dict/display-name.js";
 import {
   beginImport,
   deleteDictionary,
@@ -81,6 +80,8 @@ import { testLoadModel } from "../lib/models/validate.js";
 import { Message } from "../lib/protocol.js";
 import { ensurePersistent, isWebKit, persistenceNote, readStorage } from "../lib/storage-report.js";
 import { readBackupSummary } from "../lib/store/backup.js";
+import { listArticles } from "../lib/store/articles.js";
+import { listBooks } from "../lib/store/books.js";
 import {
   buildLibraryCopy,
   clearLibraryCopy,
@@ -100,10 +101,12 @@ import {
   voiceLanguage,
   voicesFor,
 } from "../lib/tts.js";
+import { pinnedByBrowser, readSteps, stepsView, writeSteps } from "./first-steps.js";
+import { armSearch } from "./search.js";
+import { armSections, fillSectionSelect, land } from "./sections.js";
 import {
   dictionaryRows,
   filterActive,
-  firstStepsMove,
   matchesFilter,
   orderForDisplay,
   pairChoices,
@@ -128,10 +131,9 @@ localizePage();
 // empty list would otherwise say wrongly, said first and in the catalogue's
 // words (`private-note.js`).
 privateNote();
-// Then the descriptions fold (D155) - after the catalogue's text is in them,
-// because whether a note overflows its two lines is a question about the
-// text it has now.
-foldNotes();
+// Then the row notes' More (D254) - after the catalogue's text is in them,
+// because the button says the catalogue's word for "more".
+moreNotes();
 // The toolbar icon follows the browser's scheme where the manifest cannot
 // say so (Chromium, no theme_icons there) - a no-op on Firefox.
 watchToolbarScheme();
@@ -139,6 +141,15 @@ watchToolbarScheme();
 // content of its own to dress, but walking here from a sepia article must
 // not flash a white room.
 followTheme();
+// Then the page's own navigation (D254): the table of contents beside the
+// page, the same list in the bar's select, the marker that follows the
+// reading, and the landing every address makes. After `localizePage`,
+// because the select's lines are the column's links read back.
+armSections();
+// And the search over the settings (D254, P10), whose index is the page read
+// once - so it too waits for the catalogue's words to be in it, and for the
+// More paragraphs above, whose text it indexes.
+armSearch();
 
 /** @type {import("../lib/config.js").Config} */
 let config = withDefaults(undefined);
@@ -185,17 +196,24 @@ let modelStored = null;
 let dictionaryStored = null;
 
 /**
- * The installed dictionaries as the last render found them, in the order they
- * answer in. An arrow moves one row within the whole list, so the press has to
- * know the list - and reading it back off the screen would mean trusting the
- * screen about what the database holds.
+ * The installed dictionaries as the last render found them: the order they
+ * answer in, each with the language whose words it explains. An arrow moves a
+ * row within its own language (D263), so the press has to know both - and
+ * reading them back off the screen would mean trusting the screen about what
+ * the database holds.
  *
- * @type {string[]}
+ * @type {{ id: string, lang: string }[]}
  */
-let dictionaryOrder = [];
+let dictionaryPlaces = [];
 
-/** The verdict the fold last moved on - see `firstStepsMove`. @type {boolean | null} */
-let setupDone = null;
+/**
+ * Whether the card stood open the last time it was drawn. The fold is only
+ * moved when that verdict changes, so a card folded or unfolded by hand keeps
+ * the reader's choice through every redraw in between.
+ *
+ * @type {boolean | null}
+ */
+let stepsOpen = null;
 
 /**
  * Whether each catalogue stands unfolded past its installed rows. A press on
@@ -208,22 +226,77 @@ let modelsExpanded = false;
 let dictionariesExpanded = false;
 
 /**
- * The fresh-install signpost, standing open while a model or a dictionary is
- * missing and folded to its heading once both are stored - never gone, so the
- * instructions can be reread at will. Both frame renders report here, because
- * every edge a model or a dictionary crosses already passes through one of
- * them. The fold only moves when the verdict changes, so a fold toggled by
- * hand keeps the reader's choice through every redraw in between.
+ * What the browser said about the toolbar button, and what the reader wrote
+ * down about the card. Read once at open and kept here: the card redraws on
+ * every model and every dictionary, and neither question changes with them.
+ *
+ * @type {import("./first-steps.js").StepsState}
+ */
+let stepsState = { hidden: false, pinned: false };
+
+/** @type {boolean | null} */
+let pinnedNow = null;
+
+/**
+ * The fresh install's three steps, counted from what is stored (D254, P6).
+ * Both frame renders report here, because every edge a model or a dictionary
+ * crosses already passes through one of them - so downloading a model ticks
+ * its step at once, with no reload.
+ *
+ * The fold is only moved when the first step's verdict changes, so a card
+ * folded or unfolded by hand keeps the reader's choice through every redraw
+ * in between.
  */
 function renderFirstSteps() {
   const fold = document.getElementById("first-steps");
   if (!(fold instanceof HTMLDetailsElement)) return;
   if (modelStored === null || dictionaryStored === null) return;
 
-  const move = firstStepsMove(setupDone, modelStored, dictionaryStored);
-  setupDone = move.done;
-  if (move.open !== null) fold.open = move.open;
-  fold.hidden = false;
+  const view = stepsView({
+    model: modelStored,
+    translationOff: config.translationOff,
+    dictionary: dictionaryStored,
+    pinned: pinnedNow === null ? stepsState.pinned : pinnedNow,
+    hidden: stepsState.hidden,
+  });
+
+  fold.hidden = !view.show;
+  const back = document.getElementById("first-steps-back");
+  if (back !== null) back.hidden = view.show;
+  const entry = document.getElementById("jump-first-steps");
+  if (entry !== null) entry.hidden = !view.show;
+
+  if (view.open !== stepsOpen) {
+    fold.open = view.open;
+    stepsOpen = view.open;
+  }
+
+  fill("first-steps-count", t("options_first_steps_count", [String(view.done), String(view.total)]));
+  const intro = document.getElementById("first-steps-intro");
+  if (intro !== null) intro.hidden = !view.intro;
+
+  const rows = ["step-model", "step-dictionary", "step-pin"];
+  rows.forEach((id, at) => {
+    const row = document.getElementById(id);
+    if (row === null) return;
+    const done = view.steps[at] === true;
+    row.classList.toggle("is-done", done);
+    const mark = row.querySelector(".step-mark");
+    // A tick and an empty circle, not a colour: the state has to survive the
+    // sixteen greys an e-ink panel keeps.
+    if (mark !== null) mark.textContent = done ? "\u2713" : "\u25CB";
+    const state = row.querySelector(".step-state");
+    if (state !== null) state.textContent = done ? t("options_step_done_state") : t("options_step_todo_state");
+    // The way to the section is offered only while there is something to do
+    // there; the pinning step's own two buttons follow the same rule.
+    for (const door of row.querySelectorAll(".step-door, .step-done")) {
+      if (door instanceof HTMLElement) door.hidden = done;
+    }
+  });
+
+  // The bar's select is a snapshot of the column - it has to be taken again
+  // whenever a line joins or leaves it.
+  fillSectionSelect();
 }
 
 /**
@@ -234,10 +307,31 @@ function availableModels() {
 }
 
 /**
+ * A day the reader recognises, out of the `YYYY-MM-DD` both catalogue
+ * snapshots are stamped with (D258, V7): `18.09.2026` in Polish, `18/09/2026`
+ * in French - the shape the copies' dates already wear, so the page has one
+ * way of writing a day rather than two.
+ *
+ * Built from the parts rather than handed to `new Date(text)`, which reads a
+ * bare date as UTC midnight and shows the day before it west of Greenwich. A
+ * stamp of any other shape comes back as itself: a raw date is poorer than a
+ * written one, and honest.
+ *
+ * @param {string} stamp
+ * @returns {string}
+ */
+function day(stamp) {
+  const parts = /^(\d{4})-(\d{2})-(\d{2})$/.exec(stamp);
+  if (parts === null) return stamp;
+  const at = new Date(Number(parts[1]), Number(parts[2]) - 1, Number(parts[3]));
+  return at.toLocaleDateString(uiLocale(), { dateStyle: "short" });
+}
+
+/**
  * @returns {string} the day the list on screen is from
  */
 function listDate() {
-  return liveList?.fetchedAt ?? registrySource().checkedAt;
+  return day(liveList?.fetchedAt ?? registrySource().checkedAt);
 }
 
 /**
@@ -251,7 +345,7 @@ function availableDictionaries() {
  * @returns {string} the day the dictionary list on screen is from
  */
 function dictionaryListDate() {
-  return liveDictionaries?.fetchedAt ?? catalogSource().checkedAt;
+  return day(liveDictionaries?.fetchedAt ?? catalogSource().checkedAt);
 }
 
 /**
@@ -362,8 +456,9 @@ function renderTurning() {
  * nothing about what happens: that a slide must not begin at the very edge
  * of a phone's screen, where the system's own back gesture lives, or that a
  * tap has to be brief and away from the edges to count. One sentence for
- * the choice in force rather than a paragraph about all three - the folded
- * note above stays the place for the whole picture.
+ * the choice in force rather than a paragraph about all three - and since
+ * D264 the row's only sentence, the general one above it and the fold
+ * behind that one both being what the select already says.
  *
  * Each key written out rather than built from the value, the way the error
  * sentences are (`lib/messages.js`): a key nothing names as a literal is a
@@ -382,7 +477,8 @@ function sayGesture(gesture) {
 
 /**
  * The same for the turn's effect: what a page turn will look like on this
- * screen, said where the choice is made.
+ * screen, said where the choice is made - here the second half of the row's
+ * one paragraph, after the sentence saying what the row is for (D264).
  *
  * @param {string} effect
  */
@@ -548,31 +644,39 @@ function renderNoTranslation() {
   const toggle = document.getElementById("no-translation");
   if (toggle instanceof HTMLInputElement) toggle.checked = config.translationOff;
   document.body.classList.toggle("no-translation", config.translationOff);
+  // The mode takes whole sections off the page, the first-steps card among
+  // them - so the bar's list of them is taken again (D254). The mode is also
+  // the first step's other answer: reading without a model is translation set
+  // up, and the card has to hear it.
+  fillSectionSelect();
+  renderFirstSteps();
   renderBubbleOff();
 }
 
 /**
- * The switch's sub-option (D149). Its row comes and goes with the body class
- * `renderNoTranslation` sets - which is why this rides in it - and the box
- * shows the stored value whenever the row is on the page.
+ * The switch's sub-option (D149). Its row comes and goes with the switch over
+ * it (`renderDependents`, D254) - which is why this rides in the switch's own
+ * render - and the box shows the stored value whenever the row is on the page.
  */
 function renderBubbleOff() {
   const toggle = document.getElementById("bubble-off");
   if (toggle instanceof HTMLInputElement) toggle.checked = config.bubbleOff;
+  renderDependents();
 }
 
 /**
- * The reading-aloud switch (D148): the head of the two voice rows, which the
- * body class folds away with it (`tts-only`). The switch is handed to
- * `lib/tts.js` here too, so the voice select and the Listen button answer
- * for it the way every other speaker does - and it lands before `renderVoice`
- * asks, on every road that redraws this page.
+ * The reading-aloud switch (D148): the head of the two voice rows, which
+ * leave the page with it (`renderDependents`, D254 - they used to go with a
+ * body class, which said nothing about which row they belonged to). The
+ * switch is handed to `lib/tts.js` here too, so the voice select and the
+ * Listen button answer for it the way every other speaker does - and it lands
+ * before `renderVoice` asks, on every road that redraws this page.
  */
 function renderTts() {
   const toggle = document.getElementById("tts");
   if (toggle instanceof HTMLInputElement) toggle.checked = !config.ttsOff;
-  document.body.classList.toggle("no-tts", config.ttsOff);
   setSpeechOff(config.ttsOff);
+  renderDependents();
 }
 
 /** The bubble-size stepper's value (D85), shown as the percent it is stored as. */
@@ -725,81 +829,71 @@ function renderVoice() {
 }
 
 /**
- * The descriptions under the rows fold to two lines (D155): a settings page
- * is a list to scan, and a whole paragraph under every switch made it a page
- * to read. Each note marked `data-fold` is boxed with a chevron cloned from
- * the page's template; the box opens and closes on a press anywhere in it
- * (a link inside keeps its own meaning), the chevron is the button a keyboard
- * and a screen reader get, and it stands only where the text really overflows
- * its two lines - measured, and measured again whenever the note's size moves
- * (a resize, a row shown by a switch, a font arriving), because a chevron over
- * a note that fits promises more where there is none. The verdict must not
- * move what it measures: the chevron's column stays whether the chevron is
- * drawn or not (`.note-toggle` in options.css), so the note is as wide after
- * the verdict as before it - a chevron that took its column only when needed
- * narrowed the note, which re-measured it in the same frame, and Chrome
- * reported the ResizeObserver loop as an error of the extension. Screen
- * readers hear the whole text either way: the fold is a clip, not a removal.
+ * The row notes' own More (D254, P5). Every note says one whole sentence,
+ * always: the page used to clip each of them to two lines and an ellipsis in
+ * mid-sentence, with a chevron beside it, which put grey noise in every row
+ * and left no sentence anybody could finish reading. What is left over stands
+ * in the paragraph under the note, hidden until the press - `hidden` and not a
+ * clip, so a screen reader hears the sentence and the rest exactly as the eye
+ * does, and so the search (D254) can open the one it matched.
+ *
+ * The button is markup, not something built here: which rows have more to say
+ * is a fact about the catalogue, not about how a paragraph happens to wrap on
+ * one screen, and the old measuring is what made a chevron promise more where
+ * there was none.
  */
-function foldNotes() {
-  const chevron = document.getElementById("note-chevron");
-  const observer =
-    typeof ResizeObserver === "function"
-      ? new ResizeObserver((entries) => {
-          for (const entry of entries) judgeFold(entry.target);
-        })
-      : null;
-
-  let count = 0;
-  for (const note of document.querySelectorAll("p.row-note[data-fold]")) {
-    if (!(note instanceof HTMLParagraphElement) || note.parentElement === null) continue;
-    count += 1;
-    // The chevron names what it opens; a note without an id gets one.
-    if (note.id === "") note.id = `note-${count}`;
-
-    const box = element("div", "note-fold");
-    box.dataset["folded"] = "";
-    note.parentElement.insertBefore(box, note);
-    box.append(note);
-
-    const toggle = element("button", "note-toggle");
-    toggle.setAttribute("type", "button");
-    toggle.setAttribute("aria-expanded", "false");
-    toggle.setAttribute("aria-controls", note.id);
-    toggle.setAttribute("aria-label", t("options_note_more"));
-    if (chevron instanceof HTMLTemplateElement) toggle.append(chevron.content.cloneNode(true));
-    box.append(toggle);
-
-    box.addEventListener("click", (event) => {
-      // A link inside the note is a door of its own, not a handle on the fold.
-      if (event.target instanceof Element && event.target.closest("a") !== null) return;
-      if (!("long" in box.dataset)) return;
-      const opening = "folded" in box.dataset;
-      if (opening) delete box.dataset["folded"];
-      else box.dataset["folded"] = "";
-      toggle.setAttribute("aria-expanded", String(opening));
-      judgeFold(note);
+function moreNotes() {
+  for (const button of document.querySelectorAll("button.note-more")) {
+    if (!(button instanceof HTMLButtonElement)) continue;
+    const rest = document.getElementById(button.getAttribute("aria-controls") ?? "");
+    if (rest === null) {
+      // A More with nothing behind it is a button that lies; there should be
+      // none, and if the markup ever drifts the page drops it rather than
+      // offering it.
+      button.remove();
+      continue;
+    }
+    button.addEventListener("click", () => {
+      const opening = rest.hidden;
+      rest.hidden = !opening;
+      button.setAttribute("aria-expanded", String(opening));
     });
-
-    observer?.observe(note);
-    judgeFold(note);
   }
 }
 
 /**
- * Whether a folded note holds more than its two lines show. The box's
- * `data-long` is the whole verdict - the stylesheet draws the chevron and
- * turns the pointer on it, and nothing here changes a size the observer
- * watches. An open note is left alone - it is judged again when it folds.
+ * The rows that only mean anything under another row (D254, §6.3): the voice
+ * and its speed under reading aloud, the bubble switch under the mode. A
+ * child is on the page exactly while its parent's box is ticked - `hidden`,
+ * so it leaves the accessibility tree with the screen rather than standing
+ * there as a control nobody can reach.
  *
- * @param {Element} note
+ * The parent is named on the row (`data-parent`, its setting's name) and the
+ * verdict is read off the parent's own box rather than the config: the box is
+ * what the page is showing, and the two must never disagree mid-write.
  */
-function judgeFold(note) {
-  const box = note.parentElement;
-  if (box === null || !("folded" in box.dataset)) return;
-  const long = note.scrollHeight > note.clientHeight + 1;
-  if (long) box.dataset["long"] = "";
-  else delete box.dataset["long"];
+function renderDependents() {
+  for (const row of document.querySelectorAll(".row[data-parent]")) {
+    if (!(row instanceof HTMLElement)) continue;
+    const parent = document.querySelector(`.row[data-setting="${row.dataset["parent"] ?? ""}"] input[type="checkbox"]`);
+    if (!(parent instanceof HTMLInputElement)) continue;
+    row.hidden = !parent.checked;
+  }
+}
+
+/**
+ * What was typed into a field is stored, said beside the field (D254, §6.5):
+ * a name typed into a field that keeps it looks exactly like a name typed into
+ * a field that lost it. The word stays until the next edit - never taken away
+ * on a clock, because every disappearance is one more refresh of an e-ink
+ * panel.
+ *
+ * @param {string} id the field's own id; its word is `<id>-saved`
+ * @param {boolean} saved
+ */
+function tellSaved(id, saved) {
+  const word = document.getElementById(`${id}-saved`);
+  if (word !== null) word.hidden = !saved;
 }
 
 /**
@@ -811,7 +905,7 @@ function judgeFold(note) {
  */
 function renderRate() {
   const value = document.getElementById("tts-rate-value");
-  if (value !== null) value.textContent = `${(config.ttsRate / 100).toFixed(1)}×`;
+  if (value !== null) value.textContent = speedFactor(config.ttsRate);
 }
 
 /**
@@ -844,7 +938,40 @@ function fill(id, value) {
 async function renderStorage() {
   await ensurePersistent();
   const report = await readStorage();
-  fill("storage-usage", report.usage === null ? "" : t("options_storage_value", megabytes(report.usage)));
+  fill("storage-usage", report.usage === null ? "" : megabytes(report.usage));
+
+  // Where the space went (F8). Each part counts what it holds, its copies
+  // included; what the browser's estimate has over the four of them - the
+  // databases' indexes, the caches, and a dictionary's several-fold cost over
+  // the weight of its text - falls to Other, and the fold above says so. All
+  // four come off metadata the page already reads: nothing here opens a
+  // document or a dictionary row.
+  const models = await listModels().catch(() => []);
+  const dictionaries = await listDictionaries().catch(() => []);
+  await completeLibraryCopy();
+  const copy = effectiveLibraryCopy(config) ? await readLibraryCopy() : null;
+  const vocabulary = await readBackupSummary();
+  const marks = await readMarksBackup();
+
+  const parts = {
+    "storage-models": models.reduce((sum, model) => sum + model.bytes, 0),
+    "storage-dictionaries": dictionaries.reduce((sum, one) => sum + one.bytes, 0),
+    "storage-library": (await libraryBytes()) + (copy === null ? 0 : copy.bytes),
+    // Measured on the copies, which hold the same phrases and the same
+    // highlights as the live rows do - the live rows have no size written
+    // down anywhere, and counting them would mean reading every one. Counted
+    // once: whether the browser's estimate even sees the copies depends on
+    // the engine (`storage.local` is its own store in Chromium), so doubling
+    // would over-count there rather than under-count everywhere.
+    "storage-phrases": (vocabulary?.bytes ?? 0) + (marks === null ? 0 : JSON.stringify(marks).length),
+  };
+  let known = 0;
+  for (const [id, bytes] of Object.entries(parts)) {
+    known += bytes;
+    fill(id, megabytes(bytes));
+  }
+  fill("storage-other", megabytes(report.usage === null ? 0 : Math.max(0, report.usage - known)));
+
   const note = document.getElementById("storage-note");
   if (note === null) return;
   const kind = persistenceNote({ persisted: report.persisted, webkit: isWebKit() });
@@ -852,40 +979,72 @@ async function renderStorage() {
   note.textContent =
     kind === "granted" ? t("options_storage_persistent") : kind === "at-risk" ? t("options_storage_at_risk") : "";
 
-  // The copy of the vocabulary that outlives the database: its size and its
-  // date, in the reader's own calendar - or that there is none yet.
+  // The three copies that outlive the database, each in three parts: what it
+  // is, what it holds, and when it was last written (F8). A copy that does
+  // not exist says so where its contents would stand, and the dash stands
+  // where its date would.
   /** @param {number} at */
   const when = (at) => new Date(at).toLocaleString(uiLocale(), { dateStyle: "short", timeStyle: "short" });
-  const copy = await readBackupSummary();
-  fill(
-    "storage-backup",
-    copy === null
-      ? t("options_storage_backup_none")
-      : plural(copy.count, "options_storage_backup", [when(copy.writtenAt)]),
-  );
-  // The highlights' copy beside it (`marks-backup.js`) - the other thing
-  // nobody could type in again.
-  const marks = await readMarksBackup();
-  fill(
-    "storage-marks-backup",
-    marks === null
-      ? t("options_storage_marks_backup_none")
-      : plural(marksInBackup(marks), "options_storage_marks_backup", [when(marks.writtenAt)]),
-  );
-  // The reading list's copy (`library-copy.js`): off by the switch, none
-  // yet, or how many documents it holds and what they take - completed
-  // first, so a reading list saved before the copy was on by default (D146)
-  // is counted here rather than promised for the next save.
-  await completeLibraryCopy();
-  const library = effectiveLibraryCopy(config) ? await readLibraryCopy() : "off";
-  fill(
+  tellCopy("storage-backup", vocabulary === null ? null : plural(vocabulary.count, "options_copies_phrases"), vocabulary === null ? null : when(vocabulary.writtenAt));
+  tellCopy("storage-marks-backup", marks === null ? null : plural(marksInBackup(marks), "options_copies_notes"), marks === null ? null : when(marks.writtenAt));
+  // The reading list's copy says when it last changed, like the other two
+  // (D260): the index it is accounted by is stamped at every write - a
+  // document copied, a document deleted, a picture added - so this is the
+  // last time the copy itself changed. An index written before the stamp
+  // existed has none, and the line says so with a dash until the next change.
+  tellCopy(
     "storage-library-copy",
-    library === "off"
-      ? t("options_storage_library_copy_off")
-      : library === null
-        ? t("options_storage_library_copy_none")
-        : plural(library.docs, "options_storage_library_copy", [megabytes(library.bytes)]),
+    effectiveLibraryCopy(config)
+      ? copy === null
+        ? null
+        : plural(copy.docs, "options_copies_docs", [megabytes(copy.bytes)])
+      : t("options_copies_off"),
+    copy === null || copy.writtenAt === null ? null : when(copy.writtenAt),
   );
+}
+
+/** Bytes a word of stored text costs, on the average of the languages re/read reads. */
+const AVERAGE_WORD = 6;
+
+/**
+ * What the reading list holds, off the documents' own rows (F8): the pictures
+ * are counted in bytes because their rows say so, and the text from what each
+ * row knows of its length - a book its characters, an article its words. An
+ * estimate, and the fold over the breakdown says the whole thing is one; what
+ * it must not be is a read of every document each time this page opens.
+ *
+ * @returns {Promise<number>}
+ */
+async function libraryBytes() {
+  const articles = await listArticles().catch(() => []);
+  const books = await listBooks().catch(() => []);
+  let bytes = 0;
+  for (const article of articles) {
+    bytes += article.pictures?.bytes ?? 0;
+    bytes += (article.words ?? 0) * AVERAGE_WORD;
+  }
+  for (const book of books) {
+    bytes += book.pictures?.bytes ?? 0;
+    bytes += book.totalChars;
+  }
+  return bytes;
+}
+
+/**
+ * One line of the copies block: what it holds and when it was written, or a
+ * dash where there is no date to give.
+ *
+ * @param {string} id
+ * @param {string | null} holds
+ * @param {string | null} at
+ */
+function tellCopy(id, holds, at) {
+  const row = document.getElementById(id);
+  if (row === null) return;
+  const what = row.querySelector(".copy-holds");
+  const date = row.querySelector(".copy-when");
+  if (what !== null) what.textContent = holds ?? t("options_copies_none");
+  if (date !== null) date.textContent = at ?? "\u2014";
 }
 
 /**
@@ -1021,17 +1180,26 @@ function deleteButtonsIn(containerId) {
  * After a delete the redraw took the pressed button with it; focus must not
  * fall to the body. The place the button held, counted before the delete,
  * names the successor - the next row's Delete, the previous one's after the
- * last, the section's filter once none are left.
+ * last, and the block's own heading once none are left: since D263 the filter
+ * belongs to the catalogue below, and the heading is what the row that was
+ * deleted stood under. A heading is not focusable by itself, so it is made so
+ * for the one moment it has to receive the focus.
  *
  * @param {string} containerId
- * @param {string} filterId
+ * @param {string} emptyId what takes the focus when the list has emptied
  * @param {number} at
  */
-function focusDeleteIn(containerId, filterId, at) {
+function focusDeleteIn(containerId, emptyId, at) {
   const deletes = deleteButtonsIn(containerId);
   const successor = deletes[Math.min(at, deletes.length - 1)];
-  if (successor !== undefined) successor.focus();
-  else document.getElementById(filterId)?.focus();
+  if (successor !== undefined) {
+    successor.focus();
+    return;
+  }
+  const heading = document.getElementById(emptyId);
+  if (heading === null) return;
+  if (!heading.hasAttribute("tabindex")) heading.setAttribute("tabindex", "-1");
+  heading.focus();
 }
 
 /**
@@ -1054,7 +1222,7 @@ function renderRow(row) {
   container.append(name, meta, act);
 
   if (row.installed !== null) {
-    meta.append(element("span", "", t("options_size_here", megabytes(row.installed.bytes))));
+    meta.append(element("span", "", megabytes(row.installed.bytes)));
 
     // The list names a different training run than the one this device holds:
     // one press replaces the model in place. A model with no recorded source -
@@ -1180,7 +1348,7 @@ async function removeModel(row, button) {
   await deleteModel(row.pair);
   status(t("options_deleted_model", pairLabel(row.from, row.to)));
   await renderModels();
-  focusDeleteIn("models", "model-filter", at);
+  focusDeleteIn("models", "translation-models-installed", at);
 }
 
 /**
@@ -1351,8 +1519,10 @@ async function choosePair(pair) {
  * @param {string} noneId
  * @param {string} showAllId
  * @param {boolean} expanded
+ * @param {(query: string) => string} noMatch what the list says when the
+ *   filter lets nothing through, in the words of the list it stands over
  */
-function applyFilterIn(containerId, inputId, noneId, showAllId, expanded) {
+function applyFilterIn(containerId, inputId, noneId, showAllId, expanded, noMatch) {
   const container = document.getElementById(containerId);
   if (container === null) return;
 
@@ -1378,8 +1548,14 @@ function applyFilterIn(containerId, inputId, noneId, showAllId, expanded) {
 
   // "The filter matched nothing" is only true of a filter: a folded list
   // showing none of its rows is answered by "Show all" below, not by this.
+  // It quotes what was typed (D263, §7): on a page where two filters and a
+  // search box stand within a screen of each other, a bare "nothing matches"
+  // does not say which of them answered.
   const none = document.getElementById(noneId);
-  if (none !== null) none.hidden = !filterActive(query) || matching > 0;
+  if (none !== null) {
+    none.hidden = !filterActive(query) || matching > 0;
+    if (!none.hidden) none.textContent = noMatch(query.trim());
+  }
 
   const showAll = document.getElementById(showAllId);
   if (showAll instanceof HTMLButtonElement) {
@@ -1391,11 +1567,20 @@ function applyFilterIn(containerId, inputId, noneId, showAllId, expanded) {
 }
 
 function applyModelFilter() {
-  applyFilterIn("models", "model-filter", "model-none", "models-show-all", modelsExpanded);
+  applyFilterIn("models-catalog", "model-filter", "model-none", "models-show-all", modelsExpanded, (query) =>
+    t("options_filter_no_match_models", query),
+  );
 }
 
 function applyCatalogFilter() {
-  applyFilterIn("dictionary-catalog", "dictionary-filter", "dictionary-none", "dictionaries-show-all", dictionariesExpanded);
+  applyFilterIn(
+    "dictionary-catalog",
+    "dictionary-filter",
+    "dictionary-none",
+    "dictionaries-show-all",
+    dictionariesExpanded,
+    (query) => t("options_filter_no_match_dictionaries", query),
+  );
 }
 
 /**
@@ -1404,11 +1589,11 @@ function applyCatalogFilter() {
  * first row it revealed - the same place the eye went; folding leaves it on
  * the button, which stays where it is to be pressed again.
  *
- * @param {"models" | "dictionary-catalog"} containerId
+ * @param {"models-catalog" | "dictionary-catalog"} containerId
  */
 function toggleList(containerId) {
-  const opening = containerId === "models" ? !modelsExpanded : !dictionariesExpanded;
-  if (containerId === "models") {
+  const opening = containerId === "models-catalog" ? !modelsExpanded : !dictionariesExpanded;
+  if (containerId === "models-catalog") {
     modelsExpanded = opening;
     applyModelFilter();
   } else {
@@ -1440,23 +1625,42 @@ async function renderModels() {
 
   container.replaceChildren();
 
-  if (rows.length === 0) {
-    container.append(element("p", "empty", t("options_no_models")));
+  // What is here, in the block that opens the subsection (D263), and what can
+  // be fetched, in the catalogue below it. One render, two lists: the rows
+  // come from one read of the store and one display order.
+  const here = rows.filter((row) => row.installed !== null);
+  if (here.length === 0) {
+    container.append(emptyList(t("options_no_models_yet"), t("options_no_models_yet_rest"), "translation-models-available"));
   } else {
-    for (const row of rows) {
+    for (const row of here) {
+      const rendered = renderRow(row);
+      rendered.id = `model-${row.pair}`;
+      container.append(rendered);
+    }
+  }
+
+  const catalog = document.getElementById("models-catalog");
+  if (catalog === null) return;
+  catalog.replaceChildren();
+
+  const offered = rows.filter((row) => row.installed === null);
+  if (offered.length === 0) {
+    catalog.append(element("p", "empty", t("options_no_models")));
+  } else {
+    for (const row of offered) {
       const rendered = renderRow(row);
       rendered.id = `model-${row.pair}`;
       rendered.dataset["search"] = searchableText(row);
-      rendered.dataset["installed"] = String(row.installed !== null);
-      container.append(rendered);
+      rendered.dataset["installed"] = "false";
+      catalog.append(rendered);
     }
 
     // Lives inside the list so that "the filter matched nothing" is said
     // where the missing rows would have been, not somewhere below them.
-    const none = element("p", "empty", t("options_filter_no_match_models"));
+    const none = element("p", "empty", "");
     none.id = "model-none";
     none.hidden = true;
-    container.append(none);
+    catalog.append(none);
   }
 
   applyModelFilter();
@@ -1857,28 +2061,36 @@ function placeActions(head, buttons) {
 }
 
 /**
- * A row's line of small print, its items apart by a middle dot: the file's
- * name when the reader gave the book another (the title wears that one), the
- * counts, the size. One line that wraps between its items on a narrow
- * screen - the space before the dot is the no-break kind, so a line never
- * opens with a dot - and never inside a number: the digits are grouped by
- * the reader's locale with its own no-break space, and each count stands
- * with its unit in a span that does not wrap.
+ * A row's line of small print, its items apart by a middle dot: the language
+ * the book explains words in - or the one word for a book that explains a
+ * language in itself - the count of its words, its size, and the fold's own
+ * word at the end of the line.
  *
- * @param {HTMLElement} meta the `p` to fill, emptied first
+ * What the line used to carry besides: the file's name and the count of other
+ * spellings, both now behind the fold (D263, L1). Three items and a door is
+ * what fits one line on a phone, and the rest was never what anybody scans a
+ * list of dictionaries for.
+ *
+ * The space before each dot is the no-break kind, so a line never opens with
+ * a dot, and neither does the door: it travels in a box that does not break,
+ * because a hard space alone never held it (D259, K2 - measured).
+ *
+ * @param {HTMLElement} meta the `summary` to fill, emptied first
  * @param {import("../lib/dict/store.js").Dictionary} dictionary
  */
 function fillDictionaryMeta(meta, dictionary) {
   /** @type {(string | HTMLElement)[]} */
   const items = [];
-  if (shownName(dictionary) !== dictionary.name) items.push(element("span", "dictionary-file", dictionary.name));
-
-  const counts = element("span", "");
-  counts.append(element("span", "dictionary-count", words(dictionary.entryCount)));
-  if (dictionary.aliasCount > 0) {
-    counts.append(", ", element("span", "dictionary-count", plural(dictionary.aliasCount, "spellings")));
-  }
-  items.push(counts);
+  items.push(
+    element(
+      "span",
+      "dictionary-count",
+      dictionary.langFrom === dictionary.langTo
+        ? t("options_dictionary_monolingual")
+        : t("options_dictionary_into", languageName(dictionary.langTo)),
+    ),
+  );
+  items.push(element("span", "dictionary-count", words(dictionary.entryCount)));
   items.push(element("span", "dictionary-count", megabytes(dictionary.bytes)));
 
   meta.replaceChildren();
@@ -1886,22 +2098,34 @@ function fillDictionaryMeta(meta, dictionary) {
     if (at > 0) meta.append("\u00a0· ");
     meta.append(item);
   });
+
+  const door = element("span", "note-tail");
+  door.append("\u00a0· ", element("span", "dictionary-more", t("options_details")));
+  meta.append(door);
 }
 
 /**
- * A stored dictionary's row: the pair and the buttons on the first line, the
- * name the reader knows the book by on the second - the one its groups stand
- * under on the shelf (D199), so the list and the bubble call it the same
- * thing - its small print on the third, and its fold on the last.
+ * A stored dictionary's row, in two lines (D263, L1): the name the reader
+ * knows the book by and the buttons on the first, its small print on the
+ * second - and the second line is the fold's own summary, so "Details" stands
+ * at the end of a line that is already there instead of opening a fourth.
+ *
+ * The pair used to open the row. It does not any more: the language a
+ * dictionary explains is the heading its group stands under, and the language
+ * it explains into is the first item of the small print - said once each,
+ * where five rows of "English to Polish" said it five times.
  *
  * @param {import("../lib/dict/store.js").Dictionary} dictionary
- * @param {{ at: number, total: number }} place among the stored dictionaries
+ * @param {{ at: number, total: number }} place among the dictionaries of its
+ *   own language, which is what the arrows move it within
  * @returns {HTMLElement}
  */
 function renderDictionary(dictionary, place) {
-  const { row, head } = dictionaryRow(dictionary.langFrom, dictionary.langTo);
+  const row = element("li", "dictionary-row");
+  const head = element("div", "dictionary-head");
   const shown = shownName(dictionary);
-  row.append(element("p", "dictionary-name", shown));
+  head.append(element("p", "dictionary-name", shown));
+  row.append(head);
 
   if (dictionary.id === deletingId) {
     // Going: the small print gives way to the one word that says so, and
@@ -1915,15 +2139,11 @@ function renderDictionary(dictionary, place) {
     return row;
   }
 
-  const meta = element("p", "dictionary-meta");
-  fillDictionaryMeta(meta, dictionary);
-  row.append(meta);
-
   /** @type {HTMLElement[]} */
   const buttons = [];
-  // Only where there is something to arrange: one dictionary answers first
-  // whatever the arrows say, and two dead buttons on its row would be a
-  // control that does nothing standing next to one that deletes.
+  // Only where there is something to arrange: one dictionary of a language
+  // answers first whatever the arrows say, and two dead buttons on its row
+  // would be a control that does nothing standing next to one that deletes.
   if (place.total > 1) {
     buttons.push(moveButton(dictionary, -1, place.at > 0));
     buttons.push(moveButton(dictionary, 1, place.at < place.total - 1));
@@ -1948,9 +2168,19 @@ function renderDictionary(dictionary, place) {
   // credit stays one press away, exactly as the dictionary wrote it. An
   // unfinished book gets none of this: it is still being named by its files.
   const details = element("details", "dictionary-details");
-  details.append(element("summary", "", t("options_dictionary_details")));
+  const meta = element("summary", "dictionary-meta");
+  fillDictionaryMeta(meta, dictionary);
+  details.append(meta);
   details.append(renameField(dictionary));
-  details.append(element("p", "dictionary-file-name", t("options_dictionary_file_name", dictionary.name)));
+  // Only where the file's own name says something the title does not (V10,
+  // D263): under a field whose placeholder is that very name, "File name:
+  // dictionary" was the same word twice.
+  if (fileNameWorthSaying(dictionary)) {
+    details.append(element("p", "dictionary-file-name", t("options_dictionary_file_name", dictionary.name)));
+  }
+  if (dictionary.aliasCount > 0) {
+    details.append(element("p", "dictionary-file-name", plural(dictionary.aliasCount, "spellings")));
+  }
   if (dictionary.credit !== null) details.append(element("p", "dictionary-credit", dictionary.credit));
   row.append(details);
 
@@ -2061,7 +2291,7 @@ function renderUnfinished(row, head, dictionary) {
  * @returns {HTMLButtonElement | null}
  */
 function moveButtonFor(id, step) {
-  for (const button of document.querySelectorAll("#dictionary-catalog button.model-move")) {
+  for (const button of document.querySelectorAll("#dictionary-list button.model-move")) {
     if (!(button instanceof HTMLButtonElement)) continue;
     if (button.dataset["move"] === id && button.dataset["step"] === String(step)) return button;
   }
@@ -2107,7 +2337,7 @@ async function moveDictionary(dictionary, step) {
   // and its dictionary is the one whose place would be rewritten underneath it.
   if (importing) return;
 
-  const order = afterMove(dictionaryOrder, dictionary.id, step);
+  const order = moveWithinSourceLanguage(dictionaryPlaces, dictionary.id, step);
   if (order === null) return;
 
   try {
@@ -2120,14 +2350,18 @@ async function moveDictionary(dictionary, step) {
   await renderCatalog();
 
   // From the list the redraw just read, not from the list that was written: a
-  // second page importing at that moment is part of the order now.
-  const at = dictionaryOrder.indexOf(dictionary.id);
+  // second page importing at that moment is part of the order now. The place
+  // said out loud is the place in its own group (D263) - the list on screen
+  // is grouped, and "third of seven" would name a row nobody can see.
+  const group = dictionaryPlaces.filter((one) => one.lang === dictionary.langFrom);
+  const at = group.findIndex((one) => one.id === dictionary.id);
   if (at >= 0) {
     dictionaryStatus(
       t("options_dictionary_moved", [
         shownName(dictionary),
         (at + 1).toLocaleString(),
-        dictionaryOrder.length.toLocaleString(),
+        group.length.toLocaleString(),
+        languageName(dictionary.langFrom),
       ]),
     );
   }
@@ -2225,7 +2459,7 @@ async function renameFromField(dictionary, field) {
  */
 async function removeDictionary(dictionary, button) {
   if (importing) return;
-  const at = deleteButtonsIn("dictionary-catalog").indexOf(button);
+  const at = deleteButtonsIn("dictionary-list").indexOf(button);
 
   // Held like an import, because it is the same thing to the database: one
   // writer at a time, the other buttons wait, a reload asks first. Said in
@@ -2255,7 +2489,7 @@ async function removeDictionary(dictionary, button) {
   // The pair select lists the dictionaries' pairs too (D158), and one of
   // them may have just left with its last book.
   await renderPair(modelRows(await listModels(), availableModels()));
-  focusDeleteIn("dictionary-catalog", "dictionary-filter", at);
+  focusDeleteIn("dictionary-list", "dictionaries-installed", at);
 }
 
 /**
@@ -2283,24 +2517,123 @@ function renderCatalogRow(entry) {
 }
 
 /**
- * The one dictionary frame: what is stored first, each row with its delete
- * button, then every pair the catalogue offers - the same order the model
- * frame keeps. Redrawn at the edges of every download, import and delete, and
- * after a list refresh.
+ * The line a list shows in place of its rows when there is nothing on this
+ * device yet: a sentence, and the name of the block below it as the way
+ * there (D263, §4). A link rather than the block's name in quotes: the two
+ * blocks stand one above the other, and the eye that has just read "there is
+ * nothing here" is looking for where to go.
+ *
+ * @param {string} sentence the sentence up to the door
+ * @param {string} rest what follows it
+ * @param {string} anchor the id of the catalogue block's heading
+ * @returns {HTMLElement}
+ */
+function emptyList(sentence, rest, anchor) {
+  const line = element("p", "empty");
+  const door = document.createElement("a");
+  door.href = `#${anchor}`;
+  door.textContent = t("options_list_available");
+  line.append(`${sentence} `, door, ` ${rest}`);
+  return line;
+}
+
+/**
+ * The stored dictionaries in groups, by the language whose words they explain
+ * (D263, L2).
+ *
+ * That language is the only thing the order means anything within: a lookup
+ * asks the dictionaries of the language being read and no others
+ * (`lookupEntries` matches on `langFrom`), so the arrows arrange inside a
+ * group and the badge of the pair being read belongs to a whole group rather
+ * than to the rows whose target language happens to match the pair's.
+ *
+ * The group of the language being read stands first - those are the
+ * dictionaries answering today - and the rest by name in the page's own
+ * language, which is the order a reader looks a language up in.
+ *
+ * @param {import("../lib/dict/store.js").Dictionary[]} stored in answering order
+ * @returns {{ lang: string, name: string, dictionaries: import("../lib/dict/store.js").Dictionary[] }[]}
+ */
+function dictionaryGroups(stored) {
+  /** @type {Map<string, import("../lib/dict/store.js").Dictionary[]>} */
+  const byLanguage = new Map();
+  for (const dictionary of stored) {
+    const group = byLanguage.get(dictionary.langFrom) ?? [];
+    group.push(dictionary);
+    byLanguage.set(dictionary.langFrom, group);
+  }
+
+  const collator = new Intl.Collator(uiLocale());
+  return [...byLanguage.entries()]
+    .map(([lang, dictionaries]) => ({ lang, name: languageName(lang), dictionaries }))
+    .sort((one, two) => {
+      const reading = (/** @type {{ lang: string }} */ group) => (group.lang === config.sourceLang ? 0 : 1);
+      return reading(one) - reading(two) || collator.compare(one.name, two.name);
+    });
+}
+
+/**
+ * One group's heading: the language, and the badge when its dictionaries are
+ * the ones the bubble is asking.
+ *
+ * @param {{ lang: string, name: string }} group
+ * @returns {HTMLElement}
+ */
+function dictionaryGroupHeading(group) {
+  const heading = element("h5", "dictionary-group", group.name);
+  if (group.lang === config.sourceLang) heading.append(element("span", "badge", t("options_badge_reading")));
+  return heading;
+}
+
+/**
+ * The dictionaries on this device: the rows with their arrows and their
+ * delete buttons, under a heading per language where there is more than one
+ * (D263). With a single language there is no heading - one group is not a
+ * grouping, and the badge would then say of the whole list what the page
+ * already says above it.
+ *
+ * @param {import("../lib/dict/store.js").Dictionary[]} stored in answering order
+ */
+function renderDictionaryList(stored) {
+  const list = document.getElementById("dictionary-list");
+  if (list === null) return;
+  list.replaceChildren();
+
+  if (stored.length === 0) {
+    list.append(emptyList(t("options_no_dictionaries_yet"), t("options_no_dictionaries_yet_rest"), "dictionaries-available"));
+    return;
+  }
+
+  const groups = dictionaryGroups(stored);
+  for (const group of groups) {
+    if (groups.length > 1) list.append(dictionaryGroupHeading(group));
+    const rows = element("ul", "models");
+    group.dictionaries.forEach((dictionary, at) => {
+      const row = renderDictionary(dictionary, { at, total: group.dictionaries.length });
+      row.dataset["search"] = dictionarySearchText(dictionary);
+      rows.append(row);
+    });
+    list.append(rows);
+  }
+}
+
+/**
+ * Both dictionary lists, out of one read of the store: what is here, and what
+ * the catalogue offers that is not. Redrawn at the edges of every download,
+ * import and delete, and after a list refresh.
  */
 async function renderCatalog() {
   const container = document.getElementById("dictionary-catalog");
   if (container === null) return;
 
   const stored = await listDictionaries();
-  const rows = dictionaryRows(stored, availableDictionaries(), config);
   // Read once per redraw, for every unfinished row: whether its import is
   // running somewhere (then its buttons wait) or stopped (then it may go on).
   importElsewhere = !importing && (await importHeld());
 
   // What an arrow press moves within, and what the line above the list is
   // about - both read from the store, at the one moment the store was read.
-  dictionaryOrder = stored.map((one) => one.id);
+  dictionaryPlaces = stored.map((one) => ({ id: one.id, lang: one.langFrom }));
   const hint = document.getElementById("dictionary-order-hint");
   if (hint !== null) hint.hidden = stored.length < 2;
 
@@ -2310,33 +2643,28 @@ async function renderCatalog() {
   dictionaryStored = stored.some((one) => one.ready);
   renderFirstSteps();
 
+  renderDictionaryList(stored);
+
+  // The catalogue alone below: a pair already answered for is not offered
+  // again, and the rows that are here stand in the block above.
+  const rows = dictionaryRows(stored, availableDictionaries(), config).filter((row) => row.available !== null);
+
   container.replaceChildren();
 
   if (rows.length === 0) {
     container.append(element("li", "empty", t("options_no_catalog")));
   } else {
-    // Which place among the stored ones this row holds - the arrows need it,
-    // and the rows arrive with the stored ones first, in their own order.
-    let at = 0;
     for (const row of rows) {
-      /** @type {HTMLElement} */
-      let rendered;
-      if (row.installed !== null) {
-        rendered = renderDictionary(row.installed, { at, total: stored.length });
-        at += 1;
-        rendered.dataset["search"] = dictionarySearchText(row.installed);
-      } else if (row.available !== null) {
-        rendered = renderCatalogRow(row.available);
-        rendered.id = catalogRowId(row.available);
-        rendered.dataset["search"] = searchableText(row);
-      } else {
-        continue;
-      }
-      rendered.dataset["installed"] = String(row.installed !== null);
+      const available = row.available;
+      if (available === null) continue;
+      const rendered = renderCatalogRow(available);
+      rendered.id = catalogRowId(available);
+      rendered.dataset["search"] = searchableText(row);
+      rendered.dataset["installed"] = "false";
       container.append(rendered);
     }
 
-    const none = element("li", "empty", t("options_filter_no_match_dictionaries"));
+    const none = element("li", "empty", "");
     none.id = "dictionary-none";
     none.hidden = true;
     container.append(none);
@@ -2881,6 +3209,11 @@ async function downloadFromLink() {
 async function render() {
   config = await readConfig();
   os = await platformOs();
+  // The card's own state and the browser's answer about the toolbar, both
+  // read once: neither changes with a model or a dictionary, and the card
+  // redraws on every one of those.
+  stepsState = await readSteps();
+  pinnedNow = await pinnedByBrowser();
   // The dated caches, and nothing asked of the network: each list stays as
   // it was until its update button is pressed, and the line above it says
   // how old that is.
@@ -3115,6 +3448,7 @@ document.getElementById("font-custom")?.addEventListener("change", (event) => {
   }).then((written) => {
     config = written;
     renderFontCustom();
+    tellSaved("font-custom", true);
   });
 });
 // The preview follows every keystroke; only the stored value waits for the
@@ -3122,6 +3456,9 @@ document.getElementById("font-custom")?.addEventListener("change", (event) => {
 document.getElementById("font-custom")?.addEventListener("input", (event) => {
   const field = event.target;
   if (field instanceof HTMLInputElement) previewFontFamily(field);
+  // The word goes on the first keystroke after it: what stands in the field
+  // is no longer what was stored.
+  tellSaved("font-custom", false);
 });
 document.getElementById("font-custom")?.addEventListener("keydown", (event) => {
   if (event.key === "Enter" && event.target instanceof HTMLElement) event.target.blur();
@@ -3142,7 +3479,11 @@ document.getElementById("reading-pace")?.addEventListener("change", (event) => {
   void writeConfig({ readingPace: typed }).then((written) => {
     config = written;
     renderPace();
+    tellSaved("reading-pace", true);
   });
+});
+document.getElementById("reading-pace")?.addEventListener("input", () => {
+  tellSaved("reading-pace", false);
 });
 document.getElementById("reading-pace")?.addEventListener("keydown", (event) => {
   if (event.key === "Enter" && event.target instanceof HTMLElement) event.target.blur();
@@ -3297,12 +3638,56 @@ document.getElementById("tts-rate-down")?.addEventListener("click", () => {
 document.getElementById("tts-rate-up")?.addEventListener("click", () => {
   void stepRate(TTS_RATE.step);
 });
+// The card's own three presses (D254, §7): the toolbar step ticked by hand
+// where the browser will not answer for it, the card put away for good, and
+// the way back to it from the About section at the foot of the page.
+document.getElementById("step-pin-done")?.addEventListener("click", () => {
+  void writeSteps({ pinned: true }).then((now) => {
+    stepsState = now;
+    renderFirstSteps();
+  });
+});
+document.getElementById("first-steps-hide")?.addEventListener("click", () => {
+  void writeSteps({ hidden: true }).then((now) => {
+    stepsState = now;
+    renderFirstSteps();
+    document.getElementById("first-steps-show")?.focus();
+  });
+});
+document.getElementById("first-steps-show")?.addEventListener("click", () => {
+  void writeSteps({ hidden: false }).then((now) => {
+    stepsState = now;
+    renderFirstSteps();
+    const fold = document.getElementById("first-steps");
+    if (fold instanceof HTMLDetailsElement) {
+      fold.open = true;
+      land("first-steps");
+    }
+  });
+});
+// How to pin it, under the step that asks for it - the page's own More
+// conduct, on a paragraph the card keeps rather than a row note.
+document.getElementById("step-pin-how")?.addEventListener("click", (event) => {
+  const button = event.currentTarget;
+  const help = document.getElementById("first-steps-pin");
+  if (!(button instanceof HTMLButtonElement) || help === null) return;
+  const opening = help.hidden;
+  help.hidden = !opening;
+  button.setAttribute("aria-expanded", String(opening));
+});
+// The page the file export lives on (D254 §9, D260) - the menu's own road.
+// The saved phrases' own export is a different file and a different format,
+// and the note beside this door says so in a sentence rather than in a second
+// door that promised the same thing.
+document.getElementById("copy-library")?.addEventListener("click", () => {
+  void webext().runtime.sendMessage({ kind: Message.OPEN_LIBRARY }).catch(() => {});
+});
 document.getElementById("add-model")?.addEventListener("click", () => void addSelectedModel());
 document.getElementById("refresh-models")?.addEventListener("click", () => void refreshList());
 document.getElementById("refresh-dictionaries")?.addEventListener("click", () => void refreshDictionaryList());
 document.getElementById("model-filter")?.addEventListener("input", () => applyModelFilter());
 document.getElementById("dictionary-filter")?.addEventListener("input", () => applyCatalogFilter());
-document.getElementById("models-show-all")?.addEventListener("click", () => toggleList("models"));
+document.getElementById("models-show-all")?.addEventListener("click", () => toggleList("models-catalog"));
 document.getElementById("dictionaries-show-all")?.addEventListener("click", () => toggleList("dictionary-catalog"));
 document.getElementById("add-dictionary")?.addEventListener("click", () => void addSelectedDictionary());
 document.getElementById("download-link")?.addEventListener("click", () => void downloadFromLink());
@@ -3368,15 +3753,9 @@ const inReader = framedInReader();
 
 armBackArrow();
 
-// The bar's full-screen tool (D195; every page since D220): the reader
-// bar's own, in `lib/fullscreen-tool.js` - where the browser has a full
-// screen to give and the row has room, with the menu put away before the
-// screen changes.
-// Standing inside the reader (D243), the screen is the reader's: it holds
-// the full screen for this visit, and a second tool asking for it from in
-// here would be a button with two answers. The reader's own bar carries it.
-if (!inReader) armFullscreenTool(document.getElementById("fullscreen"), () => setMenu(false));
-
+// No full-screen tool on this page (F3): the settings are read in short
+// visits, mostly beside the page they are about, and the row is busy with the
+// search and the section list. The reader keeps its own.
 /** @param {boolean} open */
 function setMenu(open) {
   if (menuButton === null || menuPanel === null) return;
@@ -3438,6 +3817,18 @@ document.addEventListener("keydown", (event) => {
   const focus = document.activeElement;
   if (focus instanceof Node && menuPanel.contains(focus)) menuButton?.focus();
   setMenu(false);
+});
+
+// The toolbar can be changed while this page stands open - in the browser's
+// own menu, a step away from here - so the card asks again whenever the page
+// is looked at, and never on a clock.
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState !== "visible") return;
+  void pinnedByBrowser().then((now) => {
+    if (now === pinnedNow) return;
+    pinnedNow = now;
+    renderFirstSteps();
+  });
 });
 
 // A download or an import in flight is the one thing on this page that a reload

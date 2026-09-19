@@ -171,6 +171,13 @@ interface WebExtBrowser {
     // manifest icons. Firefox has the API too, but its `theme_icons` makes
     // calling it unnecessary, and the gating in theme-icon.js never does.
     setIcon(details: { path: Record<number | string, string> }): Promise<void>;
+    // Whether the reader has pinned the toolbar button - the third of the
+    // settings page's first steps (D254). Firefox has it
+    // (toolkit/components/extensions/schemas/browser_action.json, verified
+    // 2026-09-18) and Chromium since 91; optional all the same, because
+    // Android has no toolbar to answer about, and the card asks by hand
+    // wherever the answer does not come.
+    getUserSettings?(): Promise<{ isOnToolbar?: boolean }>;
   };
   // Chromium only, under the `offscreen` permission its manifest carries, and
   // absent on Firefox - which is exactly how the background picks an engine
