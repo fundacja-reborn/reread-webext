@@ -32,7 +32,7 @@
   "private_browsing_note": { "message": "Estás en navegación privada. El navegador usa para esta página una base de datos aparte y la borra al terminar la sesión privada: la lista de lectura y los resaltados que ves aquí vienen de sus copias, y un artículo guardado, un libro importado, un resaltado hecho o cualquier cosa borrada aquí se pierde con la sesión. La única excepción son las frases guardadas: esas se conservan. Para todo lo demás, abre re/read en una pestaña normal." },
   "saved_phrases": { "message": "Frases guardadas" },
   "open_reader": { "message": "Abrir en vista de lectura" },
-  "quiet_bubble": { "message": "Mostrar los botones de la burbuja solo después de un clic" },
+  "quiet_bubble": { "message": "Mostrar los botones de acción de la burbuja de traducción solo después de un clic" },
   "action_delete": { "message": "Eliminar" },
   "action_download": { "message": "Descargar" },
   "action_cancel": { "message": "Cancelar" },
@@ -1766,14 +1766,7 @@
     "message": "Solo se usa para estimar el tiempo de lectura que se muestra en la lista de lectura y bajo el título de un artículo. Es el número de palabras que lees en un minuto. 200 es un ritmo tranquilo en tu propio idioma; en un idioma que estás aprendiendo suele ser 100-150."
   },
 
-  "options_quiet_bubble_hint": {
-    "message": "La burbuja muestra entonces solo la traducción; en una pantalla táctil los botones aparecen al tocarla."
-  },
 
-  "options_quiet_bubble_more": {
-    "message": "Los botones de acción son copiar, guardar, leer en voz alta y los demás - todas las acciones de la burbuja, a un toque.",
-    "description": "The rest of the options_quiet_bubble_hint description, behind the row's More button."
-  },
   "options_bubble_more": { "message": "Mostrar enseguida la frase y las entradas del diccionario" },
   "options_bubble_more_hint": {
     "message": "Muestra las entradas del diccionario y la frase traducida, sin pulsar «Más». Merece la pena dejarlo activado cuando tienes un diccionario: la traducción de una palabra suelta por el modelo suele ser errónea, mientras que el diccionario da las definiciones exactas. La burbuja sobre una expresión guardada antes muestra solo la traducción guardada - la frase y las entradas del diccionario aparecen al pulsar «Más»."

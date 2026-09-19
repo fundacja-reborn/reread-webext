@@ -946,17 +946,14 @@
            buttons are its whole content - so with translation off this switch
            would move nothing (D120). -->
       <div class="row row-check translation-only" id="s-hideBubbleActions" data-setting="hideBubbleActions" data-section="bubble">
-        <input type="checkbox" id="quiet-bubble" aria-describedby="hint-hideBubbleActions" />
-        <label class="row-name" for="quiet-bubble" data-i18n="quiet_bubble">Show the bubble's buttons only after a click</label>
-        <p class="row-note" id="hint-hideBubbleActions">
-          <span data-i18n="options_quiet_bubble_hint"
-            >The bubble then shows the translation alone; on a touch screen the buttons appear after a tap on it.</span
-          ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-hideBubbleActions" data-i18n="options_details">Details</button></span>
-        </p>
-        <p class="row-note row-more" id="more-hideBubbleActions" data-i18n="options_quiet_bubble_more" hidden>
-          The action buttons are copy, save, read aloud and the rest - all of the bubble's actions,
-          one press away.
-        </p>
+        <!-- The one row on the page with no description under it (Michał,
+             2026-09-19): its name says the whole of what it does, and what
+             stood under it - that the translation stays, that a tap brings
+             the buttons back - is what anybody finds out by pressing it once.
+             No `aria-describedby` either: it would name a paragraph that is
+             no longer there. -->
+        <input type="checkbox" id="quiet-bubble" />
+        <label class="row-name" for="quiet-bubble" data-i18n="quiet_bubble">Show the action buttons in the translation bubble only after a click</label>
       </div>
       <!-- The bubble's one size knob (D85): the bubble deliberately ignores
            every page it stands on, so no page setting can reach it - and

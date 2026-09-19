@@ -32,7 +32,7 @@
   "private_browsing_note": { "message": "Vous êtes en navigation privée. Le navigateur utilise pour cette page une base de données séparée, qu'il supprime à la fin de la session privée : la liste de lecture et les surlignages que vous voyez ici proviennent de leurs copies, et un article enregistré, un livre importé, un surlignage fait ou tout ce qui est supprimé ici disparaît avec la session. Seule exception : les phrases enregistrées, qui sont conservées. Pour tout le reste, ouvrez re/read dans un onglet normal." },
   "saved_phrases": { "message": "Phrases enregistrées" },
   "open_reader": { "message": "Ouvrir en mode lecture" },
-  "quiet_bubble": { "message": "N'afficher les boutons de la bulle qu'après un clic" },
+  "quiet_bubble": { "message": "N'afficher les boutons d'action de la bulle de traduction qu'après un clic" },
   "action_delete": { "message": "Supprimer" },
   "action_download": { "message": "Télécharger" },
   "action_cancel": { "message": "Annuler" },
@@ -1800,14 +1800,7 @@
     "message": "Sert uniquement à estimer le temps de lecture affiché dans la liste de lecture et sous le titre d'un article. C'est le nombre de mots que vous lisez en une minute. 200 est un rythme tranquille dans votre propre langue ; dans une langue que vous apprenez, c'est généralement 100-150."
   },
 
-  "options_quiet_bubble_hint": {
-    "message": "La bulle n'affiche alors que la traduction ; sur un écran tactile, les boutons apparaissent après avoir touché la bulle."
-  },
 
-  "options_quiet_bubble_more": {
-    "message": "Les boutons d'action sont copier, enregistrer, lire à voix haute et les autres - toutes les actions de la bulle, à un appui près.",
-    "description": "The rest of the options_quiet_bubble_hint description, behind the row's More button."
-  },
   "options_bubble_more": { "message": "Afficher tout de suite la phrase et les entrées du dictionnaire" },
   "options_bubble_more_hint": {
     "message": "Affiche les entrées du dictionnaire et la phrase traduite, sans appui sur « Plus ». À garder activé lorsque vous avez un dictionnaire : la traduction d'un mot isolé par le modèle est souvent fausse, tandis que le dictionnaire donne les définitions exactes. La bulle au-dessus d'une expression enregistrée auparavant n'affiche que la traduction enregistrée - la phrase et les entrées du dictionnaire apparaissent après un appui sur « Plus »."

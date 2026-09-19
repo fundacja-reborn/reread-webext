@@ -32,7 +32,7 @@
   "private_browsing_note": { "message": "Sie sind im privaten Modus. Der Browser verwendet für diese Seite eine eigene Datenbank und löscht sie am Ende der privaten Sitzung: Die Leseliste und die Markierungen, die Sie hier sehen, stammen aus ihren Kopien, und ein hier gespeicherter Artikel, ein importiertes Buch, eine gesetzte Markierung oder alles hier Gelöschte geht mit der Sitzung verloren. Die einzige Ausnahme sind gespeicherte Phrasen - sie bleiben erhalten. Für alles andere öffnen Sie re/read in einem normalen Tab." },
   "saved_phrases": { "message": "Gespeicherter Wortschatz" },
   "open_reader": { "message": "In der Leseansicht öffnen" },
-  "quiet_bubble": { "message": "Schaltflächen der Sprechblase erst nach einem Klick zeigen" },
+  "quiet_bubble": { "message": "Aktionsschaltflächen in der Übersetzungs-Sprechblase erst nach einem Klick zeigen" },
   "action_delete": { "message": "Löschen" },
   "action_download": { "message": "Herunterladen" },
   "action_cancel": { "message": "Abbrechen" },
@@ -1715,14 +1715,7 @@
     "message": "Dient nur zur Schätzung der Lesezeit, die in der Leseliste und unter dem Titel eines Artikels angezeigt wird. Es ist die Zahl der Wörter, die Sie in einer Minute lesen. 200 ist ein ruhiges Tempo in der eigenen Sprache; in einer Sprache, die Sie lernen, sind es meist 100-150."
   },
 
-  "options_quiet_bubble_hint": {
-    "message": "Die Sprechblase zeigt dann nur die Übersetzung; auf einem Touchscreen erscheinen die Schaltflächen nach einem Tippen darauf."
-  },
 
-  "options_quiet_bubble_more": {
-    "message": "Die Aktionsschaltflächen sind Kopieren, Speichern, Vorlesen und die übrigen - alle Aktionen der Sprechblase, einen Druck entfernt.",
-    "description": "The rest of the options_quiet_bubble_hint description, behind the row's More button."
-  },
   "options_bubble_more": { "message": "Satz und Wörterbucheinträge sofort anzeigen" },
   "options_bubble_more_hint": {
     "message": "Zeigt die Wörterbucheinträge und den übersetzten Satz, ohne einen Druck auf „Mehr“. Mit einem Wörterbuch lohnt es sich, dies eingeschaltet zu lassen: die Übersetzung eines einzelnen Wortes durch das Modell ist oft falsch, während das Wörterbuch die genauen Definitionen zeigt. Die Sprechblase über einer früher gespeicherten Wendung zeigt nur die gespeicherte Übersetzung - den Satz und die Wörterbucheinträge sehen Sie nach einem Druck auf „Mehr“."

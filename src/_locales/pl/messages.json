@@ -32,7 +32,7 @@
   "private_browsing_note": { "message": "Jesteś w trybie prywatnym. Przeglądarka używa tu dla tej strony osobnej bazy danych i kasuje ją po zakończeniu sesji prywatnej: czytelnia i zakreślenia, które tu widzisz, pochodzą z ich kopii, a artykuł zapisany, książka zaimportowana, zakreślenie zrobione albo cokolwiek usuniętego w tym oknie przepada razem z sesją. Jedyny wyjątek to zapisane frazy – te są zachowywane. Na wszystko inne otwórz re/read w zwykłej karcie." },
   "saved_phrases": { "message": "Zapisane frazy" },
   "open_reader": { "message": "Otwórz w widoku czytania" },
-  "quiet_bubble": { "message": "Pokazuj przyciski w dymku dopiero po kliknięciu" },
+  "quiet_bubble": { "message": "Pokazuj przyciski akcji w dymku tłumaczenia dopiero po kliknięciu" },
   "action_delete": { "message": "Usuń" },
   "action_download": { "message": "Pobierz" },
   "action_cancel": { "message": "Anuluj" },
@@ -2411,14 +2411,7 @@
     "message": "Służy tylko do szacowania czasu czytania pokazywanego w czytelni i pod tytułem artykułu. To liczba słów, które czytasz w ciągu minuty. 200 to spokojne tempo we własnym języku; w języku, którego się uczysz, zwykle 100-150."
   },
 
-  "options_quiet_bubble_hint": {
-    "message": "W dymku zostaje samo tłumaczenie; na ekranie dotykowym przyciski pojawiają się po dotknięciu dymka."
-  },
 
-  "options_quiet_bubble_more": {
-    "message": "Przyciski akcji to kopiowanie, zapis, czytanie na głos i pozostałe – wszystkie akcje dymka, jedno kliknięcie dalej.",
-    "description": "The rest of the options_quiet_bubble_hint description, behind the row's More button."
-  },
   "options_bubble_more": { "message": "Pokazuj od razu zdanie i hasła ze słowników" },
   "options_bubble_more_hint": {
     "message": "Pokazuje hasła ze słowników i tłumaczenie zdania, bez klikania „Więcej”. Warto zostawić włączone, gdy masz słownik: tłumaczenie pojedynczego słowa przez model bywa błędne, a słownik pokazuje dokładne definicje. Dymek nad już zapisaną wcześniej frazą wyświetla tylko zapisane tłumaczenie – zdanie i hasła ze słowników zobaczysz po kliknięciu „Więcej”."

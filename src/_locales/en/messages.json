@@ -43,7 +43,7 @@
   "saved_phrases": { "message": "Saved phrases" },
   "open_reader": { "message": "Open in reading view" },
   "quiet_bubble": {
-    "message": "Show the bubble's buttons only after a click",
+    "message": "Show the action buttons in the translation bubble only after a click",
     "description": "Checkbox label in the popup and on the settings page: the translation bubble opens with its buttons folded away (D81)."
   },
   "action_delete": { "message": "Delete" },
@@ -2106,14 +2106,7 @@
     "message": "Used only to estimate the reading time shown in the reading list and under an article's title. It is the number of words you read in a minute. 200 is an unhurried pace in your own language; in a language you are learning it is usually 100-150."
   },
 
-  "options_quiet_bubble_hint": {
-    "message": "The bubble then shows the translation alone; on a touch screen the buttons appear after a tap on it."
-  },
 
-  "options_quiet_bubble_more": {
-    "message": "The action buttons are copy, save, read aloud and the rest - all of the bubble's actions, one press away.",
-    "description": "The rest of the options_quiet_bubble_hint description, behind the row's More button."
-  },
   "options_bubble_more": {
     "message": "Show the sentence and dictionary entries right away",
     "description": "Checkbox label on the settings page (D186): the bubble over a fresh selection opens with its second layer - the translated sentence and the dictionary entries - already out, where a press on More used to be the only way to them. On by default."

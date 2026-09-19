@@ -172,10 +172,13 @@ describe("the name of a checkbox", () => {
     const named = [];
     // Since D265 the box opens the row and the label stands beside it, tied
     // to it by `for` - the whole row is the target, and the description it
-    // points at with `aria-describedby` is not part of the name.
+    // points at with `aria-describedby` is not part of the name. A row whose
+    // name says the whole of it carries no description, and then no
+    // `aria-describedby` either (Michał, 2026-09-19): that the pointer and
+    // the paragraph always come as a pair is held in `options-rows`.
     for (const found of markup.matchAll(/<div class="row row-check[^"]*"[\s\S]*?<\/label>/g)) {
       const block = found[0] ?? "";
-      assert.match(block, /<input type="checkbox" id="([a-z-]+)" aria-describedby="hint-/, `a toggle row without a checkbox: ${block.slice(0, 80)}`);
+      assert.match(block, /<input type="checkbox" id="([a-z-]+)"/, `a toggle row without a checkbox: ${block.slice(0, 80)}`);
       const key = /<label class="row-name" for="([a-z-]+)" data-i18n="([a-z_]+)"/.exec(block);
       assert.notEqual(key, null, `a checkbox without a name: ${block.slice(0, 80)}`);
       assert.match(block, new RegExp(`<input type="checkbox" id="${key?.[1]}"`), "the label names a box that is not the row's");

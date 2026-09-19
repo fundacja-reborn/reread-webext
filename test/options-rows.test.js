@@ -59,14 +59,24 @@ describe("the settings rows", () => {
     // A floor, moved down by hand when a fold is deliberately taken off a
     // row (Michał, 2026-09-19: the font name and the reading pace say all
     // they have to say in the row, 15 -> 13; the voice too, 13 -> 12, and the
-    // bubble's own switch, 12 -> 11).
-    assert.ok(opens.length >= 11, `only ${opens.length} rows say more than their sentence`);
+    // bubble's own switch, 12 -> 11; the quiet bubble lost its description
+    // altogether, 11 -> 10).
+    assert.ok(opens.length >= 10, `only ${opens.length} rows say more than their sentence`);
     // Each rest is hidden until the press - `hidden`, not a clip, so a screen
     // reader hears the sentence and the rest exactly as the eye does.
     for (const id of rests) {
       const at = markup.indexOf(`id="${id}"`);
       assert.match(markup.slice(at, markup.indexOf(">", at)), /hidden/, `${id} stands open`);
     }
+
+    // The same pairing for what a checkbox points at: a box naming a
+    // description that is not there tells a screen reader about nothing, and
+    // a description nobody points at is never read out with the switch it
+    // explains. Both directions, because this round took a description away
+    // from a row whose name says the whole of it (Michał, 2026-09-19).
+    const pointed = [...markup.matchAll(/aria-describedby="(hint-[A-Za-z]+)"/g)].map((match) => String(match[1]));
+    const hints = [...markup.matchAll(/<p class="row-note" id="(hint-[A-Za-z]+)"/g)].map((match) => String(match[1]));
+    assert.deepEqual([...pointed].sort(), [...hints].sort(), "a box names a description that is not there, or one goes unnamed");
   });
 
   it("says one whole sentence in every language, with the rest behind the More", async () => {
@@ -88,8 +98,8 @@ describe("the settings rows", () => {
     // the answer behind a press is half a setting, 13 -> 11, and off the
     // voice, whose folded half said where the speech is made, 11 -> 10, and
     // the bubble's switch, whose folded half held the reason to leave it on,
-    // 10 -> 9).
-    assert.ok(hints.length >= 9, `only ${hints.length} rows open with a sentence of their own`);
+    // 10 -> 9; and the quiet bubble, whose name says the whole of it, 9 -> 8).
+    assert.ok(hints.length >= 8, `only ${hints.length} rows open with a sentence of their own`);
     for (const locale of LOCALES) {
       const catalogue = JSON.parse(await source(`_locales/${locale}/messages.json`));
       for (const key of hints) {
@@ -262,12 +272,12 @@ describe("the settings rows", () => {
     // The word is Details, not More: the bubble has a button called More, and
     // a sentence naming it stood beside a trigger with the same word.
     assert.doesNotMatch(markup, /data-i18n="options_note_more"/, "a fold is still called More");
-    assert.equal((markup.match(/data-i18n="options_details"/g) ?? []).length, 11, "not every fold is called Details");
+    assert.equal((markup.match(/data-i18n="options_details"/g) ?? []).length, 10, "not every fold is called Details");
     // Hard space, so the trigger goes over a wrapping line with the last word.
     // The hard space and the trigger in one box that cannot break (D259, K2):
     // measured in the browser, the hard space alone let the trigger open a
     // line of its own at 49 widths out of 231.
-    assert.equal((markup.match(/<\/span\s*><span class="note-tail">&nbsp;<button type="button" class="note-more"/g) ?? []).length, 11, "a trigger can be left alone at the start of a line");
+    assert.equal((markup.match(/<\/span\s*><span class="note-tail">&nbsp;<button type="button" class="note-more"/g) ?? []).length, 10, "a trigger can be left alone at the start of a line");
     const css = await source("options/options.css");
     assert.match(rule(css, ".note-tail"), /white-space: nowrap/, "the space before a trigger is a break opportunity again");
     assert.match(rule(css, "button.note-more"), /white-space: nowrap/, "the trigger's own words can be split");
