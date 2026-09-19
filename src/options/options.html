@@ -928,15 +928,16 @@
       <div class="row row-check translation-only" id="s-showBubbleMore" data-setting="showBubbleMore" data-section="bubble">
         <input type="checkbox" id="bubble-more" aria-describedby="hint-showBubbleMore" />
         <label class="row-name" for="bubble-more" data-i18n="options_bubble_more">Show the sentence and dictionary entries right away</label>
-        <p class="row-note" id="hint-showBubbleMore">
-          <span data-i18n="options_bubble_more_hint"
-            >The bubble shows the translated sentence and the dictionary entries right away, with no press on “More”.</span
-          ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-showBubbleMore" data-i18n="options_details">Details</button></span>
-        </p>
-        <p class="row-note row-more" id="more-showBubbleMore" data-i18n="options_bubble_more_more" hidden>
-          Worth keeping on with a dictionary installed: the translation of a single word is often
-          wrong, and the dictionary shows what it really means. The bubble over an already saved
-          phrase shows only the saved translation - the sentence and the dictionary entries appear
+        <!-- Whole, with no Details to press (Michał, 2026-09-19): the reason
+             to leave it on is the switch's whole point, and the one case it
+             does not cover - a phrase saved earlier, whose bubble shows the
+             saved meaning alone - is what somebody would otherwise take for
+             the switch not working. -->
+        <p class="row-note" id="hint-showBubbleMore" data-i18n="options_bubble_more_hint">
+          Shows the dictionary entries and the translated sentence, with no press on “More”. Worth
+          keeping on when you have a dictionary: a model's translation of a single word is often
+          wrong, while a dictionary gives the exact definitions. The bubble over a phrase you saved
+          earlier shows only the saved translation - the sentence and the dictionary entries appear
           after a press on “More”.
         </p>
       </div>

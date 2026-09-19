@@ -1810,13 +1810,9 @@
   },
   "options_bubble_more": { "message": "Afficher tout de suite la phrase et les entrées du dictionnaire" },
   "options_bubble_more_hint": {
-    "message": "La bulle affiche tout de suite la phrase traduite et les entrées du dictionnaire, sans appui sur « Plus »."
+    "message": "Affiche les entrées du dictionnaire et la phrase traduite, sans appui sur « Plus ». À garder activé lorsque vous avez un dictionnaire : la traduction d'un mot isolé par le modèle est souvent fausse, tandis que le dictionnaire donne les définitions exactes. La bulle au-dessus d'une expression enregistrée auparavant n'affiche que la traduction enregistrée - la phrase et les entrées du dictionnaire apparaissent après un appui sur « Plus »."
   },
 
-  "options_bubble_more_more": {
-    "message": "À garder activé avec un dictionnaire installé : la traduction d'un mot isolé est souvent fausse, et le dictionnaire montre ce qu'il veut vraiment dire. La bulle au-dessus d'une expression déjà enregistrée n'affiche que la traduction enregistrée - la phrase et les entrées du dictionnaire apparaissent après un appui sur « Plus ».",
-    "description": "The rest of the options_bubble_more_hint description, behind the row's More button."
-  },
   "options_underline_forms": { "message": "Souligner aussi les autres formes des mots enregistrés" },
   "options_underline_forms_hint": {
     "message": "Après l'enregistrement de « read », « reads » et « reading » sont soulignés eux aussi."

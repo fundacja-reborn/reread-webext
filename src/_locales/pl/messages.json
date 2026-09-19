@@ -2421,13 +2421,9 @@
   },
   "options_bubble_more": { "message": "Pokazuj od razu zdanie i hasła ze słowników" },
   "options_bubble_more_hint": {
-    "message": "Dymek od razu pokazuje przetłumaczone zdanie i hasła ze słowników, bez klikania „Więcej”."
+    "message": "Pokazuje hasła ze słowników i tłumaczenie zdania, bez klikania „Więcej”. Warto zostawić włączone, gdy masz słownik: tłumaczenie pojedynczego słowa przez model bywa błędne, a słownik pokazuje dokładne definicje. Dymek nad już zapisaną wcześniej frazą wyświetla tylko zapisane tłumaczenie – zdanie i hasła ze słowników zobaczysz po kliknięciu „Więcej”."
   },
 
-  "options_bubble_more_more": {
-    "message": "Warto zostawić włączone, gdy masz słownik: tłumaczenie pojedynczego słowa bywa błędne, a słownik pokazuje, co ono naprawdę znaczy. Dymek nad już zapisaną frazą wyświetla tylko zapisane tłumaczenie – zdanie i hasła ze słowników zobaczysz po kliknięciu „Więcej”.",
-    "description": "The rest of the options_bubble_more_hint description, behind the row's More button."
-  },
   "options_underline_forms": { "message": "Podkreślaj też inne formy zapisanych słów" },
   "options_underline_forms_hint": {
     "message": "Po zapisaniu „read” podkreślone są też „reads” i „reading”."

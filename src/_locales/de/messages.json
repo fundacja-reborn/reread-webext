@@ -1725,13 +1725,9 @@
   },
   "options_bubble_more": { "message": "Satz und Wörterbucheinträge sofort anzeigen" },
   "options_bubble_more_hint": {
-    "message": "Die Sprechblase zeigt den übersetzten Satz und die Wörterbucheinträge sofort, ohne einen Druck auf „Mehr“."
+    "message": "Zeigt die Wörterbucheinträge und den übersetzten Satz, ohne einen Druck auf „Mehr“. Mit einem Wörterbuch lohnt es sich, dies eingeschaltet zu lassen: die Übersetzung eines einzelnen Wortes durch das Modell ist oft falsch, während das Wörterbuch die genauen Definitionen zeigt. Die Sprechblase über einer früher gespeicherten Wendung zeigt nur die gespeicherte Übersetzung - den Satz und die Wörterbucheinträge sehen Sie nach einem Druck auf „Mehr“."
   },
 
-  "options_bubble_more_more": {
-    "message": "Mit einem installierten Wörterbuch lohnt es sich, dies eingeschaltet zu lassen: die Übersetzung eines einzelnen Wortes ist oft falsch, und das Wörterbuch zeigt, was es wirklich bedeutet. Die Sprechblase über einer bereits gespeicherten Wendung zeigt nur die gespeicherte Übersetzung - den Satz und die Wörterbucheinträge sehen Sie nach einem Druck auf „Mehr“.",
-    "description": "The rest of the options_bubble_more_hint description, behind the row's More button."
-  },
   "options_underline_forms": { "message": "Auch andere Formen gespeicherter Wörter unterstreichen" },
   "options_underline_forms_hint": {
     "message": "Nach dem Speichern von „read“ sind auch „reads“ und „reading“ unterstrichen."

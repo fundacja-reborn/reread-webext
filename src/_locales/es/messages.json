@@ -1776,13 +1776,9 @@
   },
   "options_bubble_more": { "message": "Mostrar enseguida la frase y las entradas del diccionario" },
   "options_bubble_more_hint": {
-    "message": "La burbuja muestra enseguida la frase traducida y las entradas del diccionario, sin pulsar «Más»."
+    "message": "Muestra las entradas del diccionario y la frase traducida, sin pulsar «Más». Merece la pena dejarlo activado cuando tienes un diccionario: la traducción de una palabra suelta por el modelo suele ser errónea, mientras que el diccionario da las definiciones exactas. La burbuja sobre una expresión guardada antes muestra solo la traducción guardada - la frase y las entradas del diccionario aparecen al pulsar «Más»."
   },
 
-  "options_bubble_more_more": {
-    "message": "Merece la pena dejarlo activado con un diccionario instalado: la traducción de una palabra suelta suele ser errónea, y el diccionario muestra lo que significa de verdad. La burbuja sobre una expresión ya guardada muestra solo la traducción guardada - la frase y las entradas del diccionario aparecen al pulsar «Más».",
-    "description": "The rest of the options_bubble_more_hint description, behind the row's More button."
-  },
   "options_underline_forms": { "message": "Subrayar también otras formas de las palabras guardadas" },
   "options_underline_forms_hint": {
     "message": "Al guardar «read», «reads» y «reading» quedan subrayadas también."
