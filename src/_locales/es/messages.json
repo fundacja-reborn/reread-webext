@@ -1965,7 +1965,7 @@
     "message": "El modelo de traducción se descarga por separado para cada par de idiomas. Son archivos oficiales de Mozilla; la traducción ocurre por completo en este dispositivo."
   },
   "options_models_single_word": {
-    "message": "Un modelo traduce bien las frases, pero una palabra suelta suele traducirse mal - el resultado sale cortado o es una palabra que no existe. Para palabras sueltas la mejor fuente es un diccionario: la sección"
+    "message": "¡Atención! Un modelo traduce bien las frases, pero una palabra suelta suele traducirse mal - el resultado sale cortado o es una palabra que no existe. Para palabras sueltas la mejor fuente es un diccionario: la sección"
   },
 
   "options_models_single_word_rest": {

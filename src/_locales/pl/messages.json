@@ -2630,7 +2630,7 @@
     "message": "Model tłumaczenia pobierasz osobno dla każdej pary języków. To oficjalne pliki Mozilli; tłumaczenie odbywa się w całości na tym urządzeniu."
   },
   "options_models_single_word": {
-    "message": "Model dobrze tłumaczy zdania, ale pojedyncze słowo bez kontekstu jest często tłumaczone błędnie – wynik bywa ucięty albo jest wyrazem, którego nie ma w języku. Do pojedynczych słów lepszy jest słownik – sekcja"
+    "message": "Uwaga! Model dobrze tłumaczy zdania, ale pojedyncze słowo bez kontekstu jest często tłumaczone błędnie – wynik bywa ucięty albo jest wyrazem, którego nie ma w języku. Do pojedynczych słów lepszy jest słownik – sekcja"
   },
 
   "options_models_single_word_rest": {

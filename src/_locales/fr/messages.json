@@ -2009,7 +2009,7 @@
     "message": "Un modèle de traduction se télécharge séparément pour chaque paire de langues. Ce sont des fichiers officiels de Mozilla ; la traduction se fait entièrement sur cet appareil."
   },
   "options_models_single_word": {
-    "message": "Un modèle traduit bien les phrases, mais un mot isolé est souvent mal traduit - le résultat est tronqué, ou n'existe pas dans la langue. Pour les mots isolés, la meilleure source est un dictionnaire : la section"
+    "message": "Attention ! Un modèle traduit bien les phrases, mais un mot isolé est souvent mal traduit - le résultat est tronqué, ou n'existe pas dans la langue. Pour les mots isolés, la meilleure source est un dictionnaire : la section"
   },
 
   "options_models_single_word_rest": {

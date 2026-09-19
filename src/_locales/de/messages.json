@@ -1914,7 +1914,7 @@
     "message": "Ein Übersetzungsmodell wird für jedes Sprachpaar einzeln heruntergeladen. Es sind offizielle Mozilla-Dateien; übersetzt wird vollständig auf diesem Gerät."
   },
   "options_models_single_word": {
-    "message": "Ein Modell übersetzt Sätze gut, ein einzelnes Wort für sich aber oft falsch - das Ergebnis ist abgeschnitten oder ein Wort, das es nicht gibt. Für einzelne Wörter ist ein Wörterbuch die bessere Quelle - der Abschnitt"
+    "message": "Achtung! Ein Modell übersetzt Sätze gut, ein einzelnes Wort für sich aber oft falsch - das Ergebnis ist abgeschnitten oder ein Wort, das es nicht gibt. Für einzelne Wörter ist ein Wörterbuch die bessere Quelle - der Abschnitt"
   },
 
   "options_models_single_word_rest": {

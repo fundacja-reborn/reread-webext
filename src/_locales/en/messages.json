@@ -2330,7 +2330,7 @@
     "description": "The first half of the models section's intro; options_models_single_word follows it in the same paragraph, highlighted. Each half must read on from the other across a plain space - no half starts or ends with whitespace."
   },
   "options_models_single_word": {
-    "message": "A model translates sentences well, but a single word on its own is often translated wrongly - the result is cut short, or is a word that does not exist. For single words the better source is a dictionary - the",
+    "message": "Note! A model translates sentences well, but a single word on its own is often translated wrongly - the result is cut short, or is a word that does not exist. For single words the better source is a dictionary - the",
     "description": "The highlighted half of the models section's intro (D192): the one fact about models that changes what a reader installs next."
   },
 

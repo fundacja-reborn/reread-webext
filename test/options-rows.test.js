@@ -173,6 +173,15 @@ describe("the settings rows", () => {
     assert.doesNotMatch(markup, /<mark data-i18n=/, "a paragraph still wears the highlighter's own wash");
     const at = markup.indexOf('data-i18n="options_models_single_word"');
     assert.match(markup.slice(at, at + 600), /<a href="#dictionaries"/, "the warning does not end at the dictionaries");
+    // In this order (Michał, 2026-09-19): what does the translating, the
+    // warning, and only then how a model is fetched. Somebody reading this
+    // section is deciding whether to download anything at all, and the
+    // sentence that can send them to the dictionaries instead is no use
+    // standing after the one about downloading.
+    const engine = markup.indexOf('data-i18n="options_engine_value"');
+    const intro = markup.indexOf('data-i18n="options_models_intro"');
+    assert.ok(engine > 0 && at > engine, "the warning no longer follows the line about the engine");
+    assert.ok(intro > at, "the prose about fetching a model stands before the warning again");
     // Two quiet notes in the models subsection since Michał's smoke: where
     // the downloads come from, and how old the list of them is. Neither is
     // framed any more (D265, D4) - the frame is kept for the one warning on
