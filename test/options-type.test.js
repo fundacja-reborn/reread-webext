@@ -83,6 +83,25 @@ describe("the settings page's type", () => {
     assert.doesNotMatch(css, /font-size: 0\.9rem;|font-size: 0\.95rem;|font-size: 0\.85rem;/, "a size stands outside the scale");
   });
 
+  it("reads a figure the same way in both blocks of the data section (Michał, 2026-09-19)", async () => {
+    const css = await source("options/options.css");
+    // What the space is spent on, and what each copy holds, are the same kind
+    // of reading - a name and a figure - and the page did them two ways: five
+    // lines of small print at 17px in one card, three rows at 44px in the
+    // next. The parts are lines of the card's own rhythm now, parted by the
+    // rows' own hairline, at the rows' own size.
+    assert.match(rule(css, ".storage-parts"), /font-size: var\(--ui-text\)/, "the parts are still set in the small print");
+    assert.match(rule(css, ".storage-parts li"), /padding-block: var\(--row-pad-y\)/, "a part is not a line of the card's rhythm");
+    assert.match(rule(css, ".storage-parts li"), /padding-inline-start: var\(--row-indent\)/, "a part no longer stands in its total's text column");
+    assert.match(rule(css, ".storage-parts li \+ li"), /border-top: var\(--sep-row\)/, "the parts are not parted the way rows are");
+    // The last one gives its own bottom air back to the row it stands in, or
+    // the foot of that card would have twice the air of every line above it.
+    assert.match(rule(css, ".storage-parts li:last-child"), /padding-bottom: 0/, "the last part doubles the air at the foot of the card");
+    // And nothing in a card begins against its border: the table's column
+    // names stand off it by the rows' own padding, like everything else.
+    assert.match(rule(css, ".copies thead th"), /padding-top: var\(--row-pad-y\)/, "the table's head is glued to the card's edge");
+  });
+
   it("floors every control on the pointer, and never under the convention on a finger", async () => {
     const css = await source("options/options.css");
     assert.match(rule(css, ".row select"), /min-height: var\(--ui-control\)/, "a select keeps a size of its own");

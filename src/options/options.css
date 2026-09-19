@@ -2098,26 +2098,46 @@ button.step-done {
 
 /* --- what the space is spent on, and the copies (D254, §9) --- */
 
-/* Where the space went (F8): indented under the total, the figures flush
-   right on the digits' own width so the column of them lines up. Always on
-   the page - this is what the section is for. */
+/* Where the space went (F8): the parts of the total, under it and indented
+   to its text column, the figures flush right on the digits' own width so the
+   column of them lines up. Always on the page - this is what the section is
+   for.
+
+   Lines of the card's own rhythm, not a list of its own (Michał's smoke,
+   2026-09-19): five figures set at 17px in the small print, beside a table of
+   three figures set at 44px, were the same kind of reading done two ways.
+   Each part is now a line the height of a row, parted by the rows' hairline,
+   and the last one gives its own bottom air back to the row it stands in, so
+   the spacing never doubles at the foot of the card. */
 .storage-parts {
   grid-column: 1 / -1;
-  margin: 0.35rem 0 0;
+  margin: var(--row-pad-y) 0 0;
   padding: 0;
   list-style: none;
-  color: var(--page-muted);
-  font-size: var(--ui-small);
+  border-top: var(--sep-row);
+  font-size: var(--ui-text);
 }
 
 .storage-parts li {
   display: flex;
   gap: 1rem;
-  padding-inline-start: 1.5rem;
+  /* The text column of the row above, the way a dependent row is indented to
+     its parent's (D265, type 4). */
+  padding-inline-start: var(--row-indent);
+  padding-block: var(--row-pad-y);
+}
+
+.storage-parts li + li {
+  border-top: var(--sep-row);
+}
+
+.storage-parts li:last-child {
+  padding-bottom: 0;
 }
 
 .storage-part-value {
   margin-inline-start: auto;
+  color: var(--page-muted);
   font-variant-numeric: tabular-nums;
 }
 
@@ -2153,9 +2173,12 @@ button.step-done {
 }
 
 /* The column names, and the line under them: the rows' own hairline, never a
-   fill - a fill is one of the sixteen greys an e-ink panel rounds away. */
+   fill - a fill is one of the sixteen greys an e-ink panel rounds away. They
+   stand off the card's edge by the rows' own padding, like everything else in
+   a card: with none, the first thing in the section was a line of small print
+   against the card's own border (Michał's smoke, 2026-09-19). */
 .copies thead th {
-  padding-top: 0;
+  padding-top: var(--row-pad-y);
   font-size: var(--ui-small);
   border-bottom: var(--sep-row);
 }
