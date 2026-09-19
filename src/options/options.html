@@ -537,8 +537,14 @@
     <header>
       <h3 id="dictionaries" data-i18n="options_dictionaries_heading">Dictionaries</h3>
 
+      <!-- What the dictionaries are for and how the bubble reads them, in one
+           paragraph under the heading (Michał, 2026-09-19): the two sentences
+           about the order used to stand inside the card of what is installed,
+           where they read as a note about that card rather than as the rule
+           of the whole section. -->
       <p class="explain" data-i18n="options_dictionaries_intro">
-        Add dictionaries to see detailed word definitions in the translation bubble.
+        Add dictionaries to see detailed word definitions in the translation bubble. The bubble
+        shows the entries in the order below, language by language. The arrows change it.
       </p>
     </header>
 
@@ -549,13 +555,6 @@
     <section aria-labelledby="dictionaries-installed">
     <div class="card">
       <h4 id="dictionaries-installed" class="card-head" data-i18n="options_list_installed">Downloaded by you:</h4>
-
-      <!-- Only worth saying with two dictionaries here, so the page hides it
-           until there are (see renderDictionaryList); it stands above the list
-           because it is about the list's own order. -->
-      <p id="dictionary-order-hint" class="note" data-i18n="options_dictionary_order_hint" hidden>
-        The bubble shows the entries in the order below, language by language. The arrows change it.
-      </p>
 
       <!-- A list, not a frame of cells: every dictionary is one item that
            stacks its two lines - name and buttons, then the small print the

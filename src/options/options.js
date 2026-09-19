@@ -1645,6 +1645,12 @@ async function renderModels() {
   // be fetched, in the catalogue below it. One render, two lists: the rows
   // come from one read of the store and one display order.
   const here = rows.filter((row) => row.installed !== null);
+  sayCatalogHeading(
+    "translation-models-available",
+    t("options_list_available_models"),
+    t("options_list_available_models_more"),
+    here.length > 0,
+  );
   if (here.length === 0) {
     container.append(
       emptyList(
@@ -1687,6 +1693,26 @@ async function renderModels() {
   }
 
   applyModelFilter();
+}
+
+/**
+ * The heading of a catalogue block, which says what a press there does - and
+ * that depends on what is already here (Michał, 2026-09-19): "Download
+ * dictionaries" while the device holds none, "Download more dictionaries"
+ * once it holds one. The empty list's own door says the first of the two,
+ * because an empty list is exactly when it is true.
+ *
+ * Both names arrive said, never glued from a key: a key built out of a value
+ * is a key the catalogue tests cannot see (the rule `lib/messages.js` keeps).
+ *
+ * @param {string} id the heading's own id
+ * @param {string} name what it says while nothing is here yet
+ * @param {string} more what it says once something is
+ * @param {boolean} anyHere
+ */
+function sayCatalogHeading(id, name, more, anyHere) {
+  const heading = document.getElementById(id);
+  if (heading !== null) heading.textContent = anyHere ? more : name;
 }
 
 /**
@@ -2681,11 +2707,14 @@ async function renderCatalog() {
   // running somewhere (then its buttons wait) or stopped (then it may go on).
   importElsewhere = !importing && (await importHeld());
 
-  // What an arrow press moves within, and what the line above the list is
-  // about - both read from the store, at the one moment the store was read.
+  // What an arrow press moves within, read at the one moment the store was.
   dictionaryPlaces = stored.map((one) => ({ id: one.id, lang: one.langFrom }));
-  const hint = document.getElementById("dictionary-order-hint");
-  if (hint !== null) hint.hidden = stored.length < 2;
+  sayCatalogHeading(
+    "dictionaries-available",
+    t("options_list_available_dictionaries"),
+    t("options_list_available_dictionaries_more"),
+    stored.length > 0,
+  );
 
   // The dictionary half of the first-steps verdict. Ready ones only: a
   // half-imported dictionary answers no lookup, and must not fold the

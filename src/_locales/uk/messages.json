@@ -2654,9 +2654,17 @@
     "description": "Heading of the models' catalogue block: the filter, the list to download from and the by-hand door. Named for what a press there does, not for what the block is."
   },
 
+  "options_list_available_models_more": {
+    "message": "Завантажити більше моделей"
+  },
+
   "options_list_available_dictionaries": {
     "message": "Завантажити словники",
     "description": "Heading of the dictionaries' catalogue block: the filter, the list to download from and the two by-hand doors."
+  },
+
+  "options_list_available_dictionaries_more": {
+    "message": "Завантажити більше словників"
   },
   "options_no_models_yet": {
     "message": "На цьому пристрої ще немає жодної моделі перекладу. Виберіть пару в розділі",
@@ -2699,13 +2707,10 @@
   },
   "options_dictionaries_heading": { "message": "Словники" },
   "options_dictionaries_intro": {
-    "message": "Додайте словники, щоб бачити детальні визначення слів у бульбашці перекладу."
+    "message": "Додайте словники, щоб бачити детальні визначення слів у бульбашці перекладу. Бульбашка показує статті в порядку зі списку – окремо для кожної мови. Порядок змінюєш стрілками."
   },
   "options_dictionaries_sources": {
     "message": "Словники з каталогу походять із WikDict. Власні додаєте з файла або за посиланням, зокрема кілька для однієї мови. Джерела разом із ліцензіями:"
-  },
-  "options_dictionary_order_hint": {
-    "message": "Бульбашка показує статті в порядку зі списку – окремо для кожної мови. Порядок змінюєш стрілками."
   },
   "options_dictionary_note_from": { "message": "Словники завантажуються з" },
   "options_dictionary_note_rest": {

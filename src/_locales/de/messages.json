@@ -1938,9 +1938,17 @@
     "description": "Heading of the models' catalogue block: the filter, the list to download from and the by-hand door. Named for what a press there does, not for what the block is."
   },
 
+  "options_list_available_models_more": {
+    "message": "Weitere Modelle herunterladen"
+  },
+
   "options_list_available_dictionaries": {
     "message": "Wörterbücher herunterladen",
     "description": "Heading of the dictionaries' catalogue block: the filter, the list to download from and the two by-hand doors."
+  },
+
+  "options_list_available_dictionaries_more": {
+    "message": "Weitere Wörterbücher herunterladen"
   },
   "options_no_models_yet": {
     "message": "Noch kein Übersetzungsmodell auf diesem Gerät. Wählen Sie ein Paar im Abschnitt",
@@ -1983,13 +1991,10 @@
   },
   "options_dictionaries_heading": { "message": "Wörterbücher" },
   "options_dictionaries_intro": {
-    "message": "Fügen Sie Wörterbücher hinzu, um detaillierte Wortdefinitionen in der Sprechblase zu sehen."
+    "message": "Fügen Sie Wörterbücher hinzu, um detaillierte Wortdefinitionen in der Sprechblase zu sehen. Die Sprechblase zeigt die Einträge in der Reihenfolge unten, für jede Sprache einzeln. Die Pfeile ändern sie."
   },
   "options_dictionaries_sources": {
     "message": "Die Wörterbücher im Katalog stammen von WikDict. Eigene fügen Sie aus einer Datei oder über einen Link hinzu, auch mehrere für eine Sprache. Die Quellen, jede mit ihrer Lizenz:"
-  },
-  "options_dictionary_order_hint": {
-    "message": "Die Sprechblase zeigt die Einträge in der Reihenfolge unten, für jede Sprache einzeln. Die Pfeile ändern sie."
   },
   "options_dictionary_note_from": { "message": "Wörterbücher kommen von" },
   "options_dictionary_note_rest": {

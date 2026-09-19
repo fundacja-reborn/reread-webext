@@ -1989,9 +1989,17 @@
     "description": "Heading of the models' catalogue block: the filter, the list to download from and the by-hand door. Named for what a press there does, not for what the block is."
   },
 
+  "options_list_available_models_more": {
+    "message": "Descargar más modelos"
+  },
+
   "options_list_available_dictionaries": {
     "message": "Descargar diccionarios",
     "description": "Heading of the dictionaries' catalogue block: the filter, the list to download from and the two by-hand doors."
+  },
+
+  "options_list_available_dictionaries_more": {
+    "message": "Descargar más diccionarios"
   },
   "options_no_models_yet": {
     "message": "Todavía no hay ningún modelo de traducción en este dispositivo. Elige un par en la sección",
@@ -2034,13 +2042,10 @@
   },
   "options_dictionaries_heading": { "message": "Diccionarios" },
   "options_dictionaries_intro": {
-    "message": "Añade diccionarios para ver definiciones detalladas de las palabras en la burbuja de traducción."
+    "message": "Añade diccionarios para ver definiciones detalladas de las palabras en la burbuja de traducción. La burbuja muestra las entradas en el orden de abajo, idioma por idioma. Las flechas lo cambian."
   },
   "options_dictionaries_sources": {
     "message": "Los diccionarios del catálogo vienen de WikDict. Puedes añadir los tuyos desde un archivo o desde un enlace, también varios para un mismo idioma. Las fuentes, cada una con su licencia:"
-  },
-  "options_dictionary_order_hint": {
-    "message": "La burbuja muestra las entradas en el orden de abajo, idioma por idioma. Las flechas lo cambian."
   },
   "options_dictionary_note_from": { "message": "Los diccionarios se descargan de" },
   "options_dictionary_note_rest": {

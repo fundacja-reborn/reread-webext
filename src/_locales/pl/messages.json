@@ -2654,9 +2654,17 @@
     "description": "Heading of the models' catalogue block: the filter, the list to download from and the by-hand door. Named for what a press there does, not for what the block is."
   },
 
+  "options_list_available_models_more": {
+    "message": "Pobierz dodatkowe modele"
+  },
+
   "options_list_available_dictionaries": {
     "message": "Pobierz słowniki",
     "description": "Heading of the dictionaries' catalogue block: the filter, the list to download from and the two by-hand doors."
+  },
+
+  "options_list_available_dictionaries_more": {
+    "message": "Pobierz dodatkowe słowniki"
   },
   "options_no_models_yet": {
     "message": "Nie ma jeszcze żadnego modelu tłumaczenia. Wybierz parę w sekcji",
@@ -2699,13 +2707,10 @@
   },
   "options_dictionaries_heading": { "message": "Słowniki" },
   "options_dictionaries_intro": {
-    "message": "Dodaj słowniki, aby widzieć szczegółowe definicje słów w dymku tłumaczenia."
+    "message": "Dodaj słowniki, aby widzieć szczegółowe definicje słów w dymku tłumaczenia. Dymek pokazuje hasła w kolejności z listy – osobno dla każdego języka. Kolejność zmienisz strzałkami."
   },
   "options_dictionaries_sources": {
     "message": "Słowniki z katalogu pochodzą z WikDict. Własne dodasz z pliku albo z linku, także kilka dla jednego języka. Źródła wraz z licencjami:"
-  },
-  "options_dictionary_order_hint": {
-    "message": "Dymek pokazuje hasła w kolejności z listy – osobno dla każdego języka. Kolejność zmienisz strzałkami."
   },
   "options_dictionary_note_from": { "message": "Słowniki pobierane są z" },
   "options_dictionary_note_rest": {

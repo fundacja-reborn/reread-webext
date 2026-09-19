@@ -78,8 +78,9 @@ describe("the two blocks a catalogue is read in", () => {
       // The name stands inside the card it heads (D265), in the card label's
       // own dress - a heading outside a card opens a section, and these open
       // a block of one. Since Michał's second round the catalogue block is
-      // named for what a press there does ("Download more dictionaries"),
-      // which is a different sentence for each of the two lists.
+      // named for what a press there does ("Download dictionaries"), which is
+      // a different sentence for each of the two lists - and a different one
+      // again once something is on the device (the test below).
       assert.match(
         markup,
         new RegExp(`<h4 id="${part.installed}" class="card-head" data-i18n="options_list_installed">`),
@@ -162,6 +163,41 @@ describe("the two blocks a catalogue is read in", () => {
     assert.match(sections, /focusFilterOf\(landed\);/);
     assert.match(sections, /landed\.tagName === "H4"/);
     assert.match(sections, /section\.querySelector\("input\[type='search'\]"\)/);
+  });
+
+  it("names the catalogue for the act, and for the act on a device that has one already", async () => {
+    const script = await source("options/options.js");
+    // "Download dictionaries" while nothing is here, "Download more
+    // dictionaries" once something is (Michał, 2026-09-19): the second is a
+    // lie on a fresh install, and the first sells the block short on a device
+    // that already reads two languages.
+    assert.match(
+      script,
+      /sayCatalogHeading\(\n\s+"translation-models-available",\n\s+t\("options_list_available_models"\),\n\s+t\("options_list_available_models_more"\),\n\s+here\.length > 0,/,
+      "the models' catalogue is named the same whatever is on the device",
+    );
+    assert.match(
+      script,
+      /sayCatalogHeading\(\n\s+"dictionaries-available",\n\s+t\("options_list_available_dictionaries"\),\n\s+t\("options_list_available_dictionaries_more"\),\n\s+stored\.length > 0,/,
+      "the dictionaries' catalogue is named the same whatever is on the device",
+    );
+    // Both names are said, never glued from a key: a key built out of a value
+    // is a key the catalogue tests cannot see.
+    const helper = script.slice(script.indexOf("function sayCatalogHeading("), script.indexOf("\n}\n", script.indexOf("function sayCatalogHeading(")));
+    assert.doesNotMatch(helper, /t\(`/, "the heading's key is glued together at the call");
+    // And the empty list's own door says the first of the two, which is what
+    // an empty list makes true.
+    for (const locale of ["en", "pl", "de", "fr", "es", "uk"]) {
+      const catalogue = JSON.parse(await source(`_locales/${locale}/messages.json`));
+      for (const key of [
+        "options_list_available_models",
+        "options_list_available_models_more",
+        "options_list_available_dictionaries",
+        "options_list_available_dictionaries_more",
+      ]) {
+        assert.equal(typeof catalogue[key]?.message, "string", `${locale} has no ${key}`);
+      }
+    }
   });
 
   it("answer an empty list with the way to the catalogue, not with a dead end", async () => {

@@ -2360,9 +2360,19 @@
     "description": "Heading of the models' catalogue block: the filter, the list to download from and the by-hand door. Named for what a press there does, not for what the block is."
   },
 
+  "options_list_available_models_more": {
+    "message": "Download more models",
+    "description": "The same heading where something is already on this device: the act is then fetching another one. The page picks between the two from the store."
+  },
+
   "options_list_available_dictionaries": {
     "message": "Download dictionaries",
     "description": "Heading of the dictionaries' catalogue block: the filter, the list to download from and the two by-hand doors."
+  },
+
+  "options_list_available_dictionaries_more": {
+    "message": "Download more dictionaries",
+    "description": "The dictionaries' half of the heading above, for a device that already holds one."
   },
   "options_no_models_yet": {
     "message": "No translation model on this device yet. Pick a pair in",
@@ -2413,15 +2423,11 @@
   },
   "options_dictionaries_heading": { "message": "Dictionaries" },
   "options_dictionaries_intro": {
-    "message": "Add dictionaries to see detailed word definitions in the translation bubble."
+    "message": "Add dictionaries to see detailed word definitions in the translation bubble. The bubble shows the entries in the order below, language by language. The arrows change it."
   },
   "options_dictionaries_sources": {
     "message": "The dictionaries in the catalogue come from WikDict. You can add your own from a file or from a link, several for one language as well. The sources, each with its licence:",
     "description": "The second paragraph of the dictionaries section's intro (D192). Ends just before the address, which stands in the page as a link; the sentence's closing full stop is part of the page. Must not end with whitespace."
-  },
-  "options_dictionary_order_hint": {
-    "message": "The bubble shows the entries in the order below, language by language. The arrows change it.",
-    "description": "Above the list of dictionaries, shown only once a second one is stored."
   },
   "options_dictionary_note_from": {
     "message": "Dictionary downloads come from",
