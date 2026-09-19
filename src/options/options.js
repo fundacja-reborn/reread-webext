@@ -1267,11 +1267,18 @@ function saysIn(line, fallback) {
 }
 
 /**
- * The row once its download is over: the bar and Cancel go, the line stays
- * with what it has to say, and the row stops being the offer it was - no id
- * to collide with the installed row that now carries the same pair, and no
- * marks for the filter to count or hide it by. A journey that failed keeps a
- * way to try again, in the place the first press was.
+ * The row once its download is over: the bar and Cancel go and the line stays
+ * with what it has to say. What the row is afterwards depends on how it went.
+ *
+ * It worked: the pair is on the device now, so the row is no longer an offer.
+ * It loses its id - the installed row carries that pair now - and the marks
+ * the filter counts and hides rows by, and it is marked as having said its
+ * piece: the next question asked of the list takes it away (`applyFilterIn`),
+ * so folding the list folds it too (Michał's smoke, 2026-09-19).
+ *
+ * It failed: the pair is still there to fetch, so the row goes on being the
+ * offer it was, marks and all, with the message inside it and the way to try
+ * again in the place the first press was.
  *
  * @param {HTMLElement} row
  * @param {(() => void) | null} retry
@@ -1279,10 +1286,13 @@ function saysIn(line, fallback) {
 function rowFinished(row, retry) {
   for (const gone of row.querySelectorAll("progress, button")) gone.remove();
   for (const empty of row.querySelectorAll(".dictionary-fetching, .model-meta")) empty.remove();
-  row.removeAttribute("id");
-  delete row.dataset["installed"];
-  delete row.dataset["search"];
-  if (retry === null) return;
+  if (retry === null) {
+    row.removeAttribute("id");
+    delete row.dataset["installed"];
+    delete row.dataset["search"];
+    row.dataset["done"] = "";
+    return;
+  }
   const again = document.createElement("button");
   again.type = "button";
   again.textContent = t("action_download");
@@ -1658,6 +1668,13 @@ async function choosePair(pair) {
 function applyFilterIn(containerId, inputId, noneId, showAllId, expanded, noMatch) {
   const container = document.getElementById(containerId);
   if (container === null) return;
+
+  // A row that has already said its piece - a download that finished in it -
+  // stands until the next question is asked of the list, and goes with it:
+  // folding the list, searching it or redrawing it all take it away. It is
+  // not an offer any more, so it is neither counted nor matched while it
+  // stands (Michał's smoke, 2026-09-19).
+  for (const done of container.querySelectorAll("[data-done]")) done.remove();
 
   const input = document.getElementById(inputId);
   const query = input instanceof HTMLInputElement ? input.value : "";

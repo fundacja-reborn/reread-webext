@@ -246,13 +246,20 @@ describe("the two blocks a catalogue is read in", () => {
     const says = script.slice(script.indexOf("function saysIn("), script.indexOf("\n}\n", script.indexOf("function saysIn(")));
     assert.match(says, /if \(line === null\) \{\n      fallback\(text, tone\);/, "a journey with no row of its own says nothing");
 
-    // Once it is over the row stops being an offer: no bar, no buttons, and
-    // no id to collide with the installed row that now carries the pair.
+    // It worked: the row stops being an offer - no bar, no buttons, no id to
+    // collide with the installed row that now carries the pair, and none of
+    // the marks the filter counts rows by. It is marked as having said its
+    // piece instead, and the next question asked of the list takes it away,
+    // so folding the list folds it too.
     const finished = script.slice(script.indexOf("function rowFinished("), script.indexOf("\n}\n", script.indexOf("function rowFinished(")));
     assert.match(finished, /row\.removeAttribute\("id"\)/, "a finished row keeps the id the installed row now has too");
     assert.match(finished, /delete row\.dataset\["installed"\]/, "the filter still counts a row that is no longer an offer");
-    assert.match(finished, /if \(retry === null\) return;/, "a finished row offers to do it again after it worked");
+    assert.match(finished, /row\.dataset\["done"\] = "";/, "a row that said its piece is never taken away");
+    // It failed: the pair is still there to fetch, so the row goes on being
+    // the offer it was - marks and all - with the way to try again in it.
     assert.match(finished, /t\("action_download"\)/, "a journey that failed leaves no way to try again");
+    const apply = script.slice(script.indexOf("function applyFilterIn("), script.indexOf("\n}\n", script.indexOf("function applyFilterIn(")));
+    assert.match(apply, /for \(const done of container\.querySelectorAll\("\[data-done\]"\)\) done\.remove\(\);/, "a finished row outstays the next question asked of the list");
 
     // And the row survives the redraw that follows, in its own place: put
     // back where it stood when the pair has left the offer, or in the rebuilt
