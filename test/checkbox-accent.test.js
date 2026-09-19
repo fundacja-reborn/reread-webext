@@ -34,9 +34,13 @@ function accentRules(css) {
 describe("the checkboxes' accent", () => {
   it("is the text's ink, set once for every page", () => {
     const rules = accentRules(sheet("src/assets/page.css"));
-    const boxes = rules.find(([selector]) => selector === 'input[type="checkbox"]');
+    const boxes = rules.find(([selector]) => selector.includes('input[type="checkbox"]'));
     assert.ok(boxes !== undefined, "the pages' checkbox rule");
     assert.match(boxes[1], /accent-color: var\(--page-fg\)/);
+    // And the circles of a row of choices are the same family (D268): the
+    // browser's own blue beside a box ticked in the page's ink would read as
+    // two kinds of control.
+    assert.match(boxes[0], /input\[type="radio"\]/, "a radio ticks in the browser's own colour");
     // The look-up answer's box says the same in the bubble's words - the
     // current colour, which is the text's - since a shadow root has no
     // page tokens; on the pages the two agree.

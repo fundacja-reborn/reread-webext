@@ -101,7 +101,7 @@ import {
   voiceLanguage,
   voicesFor,
 } from "../lib/tts.js";
-import { pinnedByBrowser, readSteps, stepsView, writeSteps } from "./first-steps.js";
+import { hasToolbar, pinnedByBrowser, readSteps, stepsView, writeSteps } from "./first-steps.js";
 import { armSearch } from "./search.js";
 import { armSections, fillSectionSelect, land } from "./sections.js";
 import {
@@ -260,6 +260,11 @@ function renderFirstSteps() {
     dictionary: dictionaryStored,
     pinned: pinnedNow === null ? stepsState.pinned : pinnedNow,
     hidden: stepsState.hidden,
+    // A phone has no toolbar to pin anything to, so the card there is one
+    // step long - and the sentence about where the button already stands is
+    // said outright rather than hidden behind a step's "How" (Michał's Boox,
+    // 2026-09-19).
+    toolbar: hasToolbar(os),
   });
 
   fold.hidden = !view.show;
@@ -278,10 +283,15 @@ function renderFirstSteps() {
   if (intro !== null) intro.hidden = !view.intro;
 
   const rows = ["step-source", "step-pin"];
-  rows.forEach((id, at) => {
+  rows.forEach((id) => {
     const row = document.getElementById(id);
     if (row === null) return;
-    const done = view.steps[at] === true;
+    // A step this platform does not have leaves the list altogether, rather
+    // than standing there unticked for ever.
+    const step = view.steps.find((one) => one.id === id) ?? null;
+    row.hidden = step === null;
+    if (step === null) return;
+    const done = step.done;
     row.classList.toggle("is-done", done);
     const mark = row.querySelector(".step-mark");
     // A tick and an empty circle, not a colour: the state has to survive the
@@ -301,6 +311,18 @@ function renderFirstSteps() {
       document.getElementById("step-pin-how")?.setAttribute("aria-expanded", "false");
     }
   });
+
+  // Where the step is gone, what it carried is worth saying anyway: the
+  // button already stands somewhere, and a fresh install has no idea where.
+  // So on Android the sentence is said outright, as a line of the card
+  // rather than behind a "How" - Android is the platform that has a wording
+  // of its own (`options_first_steps_pin_android`, swapped in at render).
+  // iOS and iPadOS have none yet, and a sentence about a menu Safari has not
+  // got would be worse than silence.
+  if (!hasToolbar(os)) {
+    const help = document.getElementById("first-steps-pin");
+    if (help !== null) help.hidden = os !== "android";
+  }
 
   // The bar's select is a snapshot of the column - it has to be taken again
   // whenever a line joins or leaves it.
@@ -446,16 +468,28 @@ function renderPageNumber() {
  * the width has no say, exactly as the reader-only switch works.
  */
 function renderTurning() {
-  const touch = document.getElementById("touch-turn");
-  if (touch instanceof HTMLSelectElement) {
-    touch.value = effectiveTouchTurn(config.reader, window.innerWidth);
-    sayGesture(touch.value);
+  const gesture = effectiveTouchTurn(config.reader, window.innerWidth);
+  if (markChoice("touch-turn", gesture)) sayGesture(gesture);
+  if (markChoice("turn-effect", config.reader.turnEffect)) sayEffect(config.reader.turnEffect);
+}
+
+/**
+ * A row of choices shows the value in force (D268): the three gestures and
+ * the three turn effects stand on the page as radios rather than in a select,
+ * because a select's open list on Android is the browser's own dialog and no
+ * rule of ours reaches it.
+ *
+ * @param {string} name the radios' shared `name`
+ * @param {string} value
+ * @returns {boolean} whether the row is on the page at all
+ */
+function markChoice(name, value) {
+  const buttons = document.querySelectorAll(`input[type="radio"][name="${name}"]`);
+  if (buttons.length === 0) return false;
+  for (const button of buttons) {
+    if (button instanceof HTMLInputElement) button.checked = button.value === value;
   }
-  const effect = document.getElementById("turn-effect");
-  if (effect instanceof HTMLSelectElement) {
-    effect.value = config.reader.turnEffect;
-    sayEffect(effect.value);
-  }
+  return true;
 }
 
 /**
@@ -3505,9 +3539,10 @@ async function render() {
   // how old that is.
   liveList = await readLiveModels();
   liveDictionaries = await readLiveDictionaries();
-  // Android has no toolbar to pin anything to: the last step says where the
-  // button already lives instead. Settled here, while the fold is still
-  // hidden, so neither platform ever sees the other platform's wording.
+  // Android has no toolbar to pin anything to: the step is not asked there
+  // at all (`hasToolbar`), and this sentence stands in the card as a plain
+  // line saying where the button already is. Settled here, while the fold is
+  // still hidden, so neither platform ever sees the other's wording.
   const pin = document.getElementById("first-steps-pin");
   if (pin !== null && os === "android") {
     pin.setAttribute("data-i18n", "options_first_steps_pin_android");
@@ -3644,27 +3679,29 @@ document.getElementById("page-number")?.addEventListener("change", (event) => {
     config = written;
   });
 });
-document.getElementById("touch-turn")?.addEventListener("change", (event) => {
-  const select = event.target;
-  if (!(select instanceof HTMLSelectElement) || !isTouchTurn(select.value)) return;
-  // The line under the select answers at once, before the write comes back
+// The two rows of choices (D268): the press lands on one radio of a group, so
+// the listener stands on the row rather than on each circle in it.
+document.getElementById("s-touchTurn")?.addEventListener("change", (event) => {
+  const chosen = event.target;
+  if (!(chosen instanceof HTMLInputElement) || !isTouchTurn(chosen.value)) return;
+  // The line under the choices answers at once, before the write comes back
   // through storage: the choice is made here, and what it means should not
   // arrive a beat later.
-  sayGesture(select.value);
+  sayGesture(chosen.value);
   // The same road (D250): a reader open by pages hears it through storage,
   // and the next touch is read the new way. What is stored is a name and
   // never the null the default stands for - a press here is a choice made.
-  void writeConfig({ reader: { touchTurn: select.value } }).then((written) => {
+  void writeConfig({ reader: { touchTurn: chosen.value } }).then((written) => {
     config = written;
   });
 });
-document.getElementById("turn-effect")?.addEventListener("change", (event) => {
-  const select = event.target;
-  if (!(select instanceof HTMLSelectElement) || !isTurnEffect(select.value)) return;
-  sayEffect(select.value);
-  // The same road (D251): the next turn is dressed the way the select now
-  // says, in every open reader, with no reload.
-  void writeConfig({ reader: { turnEffect: select.value } }).then((written) => {
+document.getElementById("s-turnEffect")?.addEventListener("change", (event) => {
+  const chosen = event.target;
+  if (!(chosen instanceof HTMLInputElement) || !isTurnEffect(chosen.value)) return;
+  sayEffect(chosen.value);
+  // The same road (D251): the next turn is dressed the way the row now says,
+  // in every open reader, with no reload.
+  void writeConfig({ reader: { turnEffect: chosen.value } }).then((written) => {
     config = written;
   });
 });

@@ -125,7 +125,16 @@ describe("the gesture that turns a page by touch (D250)", () => {
 
   it("offers the three gestures on the settings page, in every language", async () => {
     const markup = await source("options/options.html");
-    assert.match(markup, /<select id="touch-turn">\s*<option value="zones"[\s\S]*?<option value="swipe"[\s\S]*?<option value="off"/, "the row does not offer the three gestures in order");
+    // Three radios on the page rather than a select (D268): a select's open
+    // list on Android is the browser's own dialog, which no rule of ours can
+    // dress - and on an e-ink panel it vanishes into the page under it.
+    assert.match(
+      markup,
+      /name="touch-turn" value="zones"[\s\S]*?name="touch-turn" value="swipe"[\s\S]*?name="touch-turn" value="off"/,
+      "the row does not offer the three gestures in order",
+    );
+    assert.doesNotMatch(markup, /<select id="touch-turn"/, "the gestures are behind the browser's own dialog again");
+    assert.match(markup, /id="s-touchTurn"[^>]*role="radiogroup"[^>]*aria-labelledby="touch-turn-name"/, "the group of choices has no name for a screen reader");
     assert.match(markup, /data-i18n="options_touch_turn_swipe">Slide a finger sideways</, "the gesture is named in the dialect of a phone's settings, not the reader's");
     assert.match(markup, /<p class="row-note" id="touch-turn-note"><\/p>/, "there is no line to say what the chosen gesture does");
     // And that line is the whole note (D264): the general sentence above it
@@ -135,16 +144,16 @@ describe("the gesture that turns a page by touch (D250)", () => {
     assert.doesNotMatch(markup, /options_touch_turn_hint|more-touchTurn|options_touch_turn_more/, "the row still carries a sentence or a fold of its own");
     assert.match(markup, /id="s-touchTurn" data-setting="touchTurn" data-keywords="options_keywords_turn"/, "the row cannot be found by the words it no longer says");
     const script = await source("options/options.js");
-    assert.match(script, /if \(!\(select instanceof HTMLSelectElement\) \|\| !isTouchTurn\(select\.value\)\) return;/, "a value the guard does not know can be written");
-    assert.match(script, /writeConfig\(\{ reader: \{ touchTurn: select\.value \} \}\)/, "the row does not write the reader's setting");
-    assert.match(bodyOf(script, "renderTurning"), /touch\.value = effectiveTouchTurn\(config\.reader, window\.innerWidth\);\s*sayGesture\(touch\.value\);/, "the row shows the stored null rather than the gesture in force, or says nothing about it");
+    assert.match(script, /if \(!\(chosen instanceof HTMLInputElement\) \|\| !isTouchTurn\(chosen\.value\)\) return;/, "a value the guard does not know can be written");
+    assert.match(script, /writeConfig\(\{ reader: \{ touchTurn: chosen\.value \} \}\)/, "the row does not write the reader's setting");
+    assert.match(bodyOf(script, "renderTurning"), /const gesture = effectiveTouchTurn\(config\.reader, window\.innerWidth\);\s*if \(markChoice\("touch-turn", gesture\)\) sayGesture\(gesture\);/, "the row shows the stored null rather than the gesture in force, or says nothing about it");
     // One line per value, each key written out: a key built from the value
     // is a key the catalogue tests cannot see (`lib/messages.js`'s rule).
     const said = bodyOf(script, "sayGesture");
     for (const gesture of ["zones", "swipe", "off"]) {
       assert.match(said, new RegExp(`t\\("options_touch_turn_note_${gesture}"\\)`), `nothing is said about ${gesture}`);
     }
-    assert.match(script, /sayGesture\(select\.value\);/, "the line stands still when the gesture is changed");
+    assert.match(script, /sayGesture\(chosen\.value\);/, "the line stands still when the gesture is changed");
     assert.equal((script.match(/renderTurning\(\);/g) ?? []).length, 2, "the row is not drawn on both renders");
     for (const lang of ["en", "pl", "de", "fr", "es", "uk"]) {
       const catalogue = JSON.parse(await source(`_locales/${lang}/messages.json`));
@@ -183,7 +192,7 @@ describe("the gesture that turns a page by touch (D250)", () => {
     const opening = markup.slice(markup.lastIndexOf("<section", from), markup.indexOf(">", from));
     assert.doesNotMatch(opening, /translation-only|hidden/, "the section hides itself from somebody looking for it");
     assert.match(section, /data-i18n="options_paged_intro"/, "the section does not say what it is about");
-    for (const id of ["page-number", "touch-turn", "turn-effect"]) {
+    for (const id of ["page-number", "s-touchTurn", "s-turnEffect"]) {
       assert.ok(section.includes(`id="${id}"`), `the ${id} row is not in the section`);
     }
     // The table of contents lists sections, not their parts - the Pages
