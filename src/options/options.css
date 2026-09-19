@@ -1161,6 +1161,18 @@ a.row-link:focus-visible {
   grid-column: 1 / -1;
 }
 
+/* Except under a checkbox, where it begins in the label's own column - the
+   hanging indent every settings page of every desktop uses, and what the
+   plan asked for (D265, type 1: "aligned to the label, not to the box").
+   The row's own rule (`.row-check > *`) says the same and is written above,
+   but it weighs exactly as much as the line over this comment, and a tie is
+   settled by which comes last - so the exception is stated here, where it
+   can win. A sentence wrapping under the box broke the one column the eye
+   runs down a card of switches (Michał's smoke, 2026-09-19). */
+.row-check > .row-note {
+  grid-column: 2;
+}
+
 /* The one row whose controls never fit beside its label: the voice, with a
    language, a voice and Listen on one line (D265, the `stacked` variant).
    Every other control row stacks only where its own card is too narrow, which

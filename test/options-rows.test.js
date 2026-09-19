@@ -231,6 +231,18 @@ describe("the settings rows", () => {
       /grid-row: 1 \/ span 2;[\s\S]*grid-column: 2/,
       "the control still makes the first line its own height",
     );
+
+    // Under a checkbox the description begins in the label's column rather
+    // than under the box: the hanging indent leaves a card of switches one
+    // edge for the boxes and one for the words - the column the eye runs
+    // down. The plan asked for it at D265 ("aligned to the label, not to the
+    // box") and a later rule of equal weight had been overriding the row's
+    // own ever since (Michał's smoke, 2026-09-19).
+    assert.match(rule(css, ".row-check > .row-note"), /grid-column: 2/, "a description still wraps under the checkbox");
+    assert.ok(
+      css.indexOf(".row-check > .row-note {") > css.indexOf(".row > .row-note {"),
+      "the exception stands before the rule it has to beat - a tie in weight is settled by order",
+    );
   });
 
   it("ties every fold's trigger to the sentence it follows (F6)", async () => {
