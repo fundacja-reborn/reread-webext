@@ -117,8 +117,12 @@ describe("the dictionary list's rows", () => {
     assert.match(rule(css, ".dictionary-actions button"), /white-space: nowrap/);
     // The card asks its own width, not the window's (D265): a card is 42.5rem
     // on a desktop whatever the window does, and a phone's width on a phone.
+    // There the name takes the line to itself and everything that acts on it
+    // - the door to the details included - stands on the next one, flush
+    // right: a name and four controls never fit on one line of a phone.
     const narrow = css.slice(css.indexOf("@container (max-width: 30rem)"));
-    assert.match(narrow, /\.dictionary-actions \{\n    flex-basis: 100%;\n    justify-content: flex-end;/);
+    assert.match(narrow, /\.dictionary-name \{\n    flex-basis: 100%;\n  \}/);
+    assert.match(narrow, /\.dictionary-actions \{\n    justify-content: flex-end;\n    margin-left: auto;/);
     // And no window-width rule reaches the dictionary row at all: the stack
     // is the same everywhere, and what changes is the card's own width.
     for (let at = css.indexOf("@media (max-width"); at >= 0; at = css.indexOf("@media (max-width", at + 1)) {

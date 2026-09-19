@@ -2289,11 +2289,17 @@ summary::marker {
     grid-row: 1;
   }
 
-  /* The dictionaries' buttons leave the name's line for one of their own,
-     flush right, so a name and three buttons never fight for one line. */
-  .dictionary-actions {
+  /* The name takes the line to itself and everything that acts on it stands
+     on the next one, flush right: a name and four controls never fit on one
+     line of a phone, and the door left up beside the name read as a piece of
+     the name rather than as one of the controls. */
+  .dictionary-name {
     flex-basis: 100%;
+  }
+
+  .dictionary-actions {
     justify-content: flex-end;
+    margin-left: auto;
   }
 
   /* The catalogue's line splits where a field and a button no longer share
