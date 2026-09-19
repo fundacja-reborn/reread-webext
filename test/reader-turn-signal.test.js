@@ -123,18 +123,21 @@ describe("the signal that a page has turned (D251)", () => {
     const said = bodyOf(script, "sayEffect");
     assert.match(said, /t\("options_turn_effect_note_off"\) : t\("options_turn_effect_note_auto"\)/, "the two values are not told apart, or the key is built rather than written");
     // What decides between the flash and the slide is the theme, not the
-    // screen (`turnMotion`: `eink: settings.reader.theme === "eink"`), so the
-    // line says "theme" - it said "on other screens" until Michał pointed out
-    // what that promises somebody who reads on glass under the E-ink theme
-    // (2026-09-19): a dark flash, not a smooth slide.
-    for (const lang of ["en", "pl", "de", "fr", "es", "uk"]) {
+    // screen (`turnMotion`: `eink: settings.reader.theme === "eink"`), so
+    // both halves of the line are told by theme - it said "on other screens"
+    // until Michał pointed out what that promises somebody reading on glass
+    // under the E-ink theme (2026-09-19): a dark flash, not a smooth slide.
+    // Screens are named inside the first half, for what the same flash looks
+    // like where it belongs and where it does not, which is the other thing
+    // he found: on an e-ink panel it is hardly visible, on glass it is not.
+    const THEME = { en: /theme/gi, pl: /motyw/gi, de: /Them/g, fr: /th\u00e8me/gi, es: /tema/gi, uk: /\u0442\u0435\u043c/gi };
+    for (const lang of /** @type {(keyof typeof THEME)[]} */ (["en", "pl", "de", "fr", "es", "uk"])) {
       const catalogue = JSON.parse(await source(`_locales/${lang}/messages.json`));
       const auto = String(catalogue["options_turn_effect_note_auto"]?.message ?? "");
       assert.match(auto, /E-ink/, `${lang} does not name the theme the flash belongs to`);
-      assert.doesNotMatch(
-        auto,
-        /screens|ekranach|Bildschirmen|\u00e9crans|pantallas|\u0435\u043a\u0440\u0430\u043d\u0430\u0445/,
-        `${lang} still promises the effect by the screen rather than by the theme`,
+      assert.ok(
+        (auto.match(THEME[lang]) ?? []).length >= 2,
+        `${lang} tells only one of the two cases by theme: ${auto}`,
       );
     }
     assert.match(script, /sayEffect\(select\.value\);/, "the line stands still when the effect is changed");

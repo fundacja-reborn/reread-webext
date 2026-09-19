@@ -1682,7 +1682,7 @@
     "message": "Eine sichtbare Bestätigung, dass die Seite gewechselt hat. Mit dem Thema E-ink im Aa-Fenster kann es auf einem E-Ink-Bildschirm helfen, Geisterbilder von der Seite zu entfernen."
   },
   "options_turn_effect_note_auto": {
-    "message": "Mit dem Thema E-ink verdunkelt sich der Textbereich für einen Moment; mit den anderen Themen erscheint die neue Seite mit einem sanften Übergang."
+    "message": "Mit dem Thema E-ink verdunkelt sich der Textbereich für einen Moment: auf einem E-Ink-Display ist das kaum zu sehen, auf einem gewöhnlichen Bildschirm ist es ein dunkles Blitzen. Mit den anderen Themen erscheint die neue Seite mit einem sanften Übergang."
   },
   "options_turn_effect_note_off": {
     "message": "Die Seite wechselt einfach, so wie vor dieser Einstellung."
