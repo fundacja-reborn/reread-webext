@@ -43,7 +43,7 @@
   "saved_phrases": { "message": "Saved phrases" },
   "open_reader": { "message": "Open in reading view" },
   "quiet_bubble": {
-    "message": "Show the bubble's buttons only after a click",
+    "message": "Show the action buttons in the translation bubble only after a click",
     "description": "Checkbox label in the popup and on the settings page: the translation bubble opens with its buttons folded away (D81)."
   },
   "action_delete": { "message": "Delete" },
@@ -1684,6 +1684,7 @@
   },
 
   "options_title": { "message": "re/read - settings" },
+  "options_heading_named": { "message": "re/read settings" },
   "back_to_reading": {"message": "Back to reading"},
   "options_local_intro": {
     "message": "Everything re/read does happens on this device (offline): translating, the dictionary, the reading list, your saved phrases. Nothing you read or select is ever sent anywhere. An internet connection is needed only to download a new translation model or a dictionary - and only from the two addresses given in the"
@@ -1765,13 +1766,11 @@
     }
   },
 
-  "options_step_model": {
-    "message": "Download a translation model"
+  "options_step_source": {
+    "message": "Download a translation model or a dictionary",
+    "description": "The first of the two steps on a fresh install: either download answers it, because either one alone makes the bubble answer."
   },
 
-  "options_step_dictionary": {
-    "message": "Download a dictionary (optional)"
-  },
 
   "options_step_pin": {
     "message": "Pin re/read to the toolbar"
@@ -1960,7 +1959,7 @@
   },
 
   "options_first_steps_intro": {
-    "message": "Nothing translates yet - the model that would do it is not yet on this device. Setting up takes a minute:",
+    "message": "re/read needs something to explain words with: a translation model or a dictionary. Either one is enough; the other can come later.",
     "description": "Opens the first-steps block, shown on the settings page only while no model is stored."
   },
   "options_first_steps_pin": {
@@ -2039,26 +2038,18 @@
   },
   "options_reader_only": { "message": "Show the underlines and the bubble only in the reader" },
   "options_reader_only_hint": {
-    "message": "On an ordinary page, selecting text brings up a bubble with two buttons instead: open the page in the reader, and go to the reading list."
+    "message": "On an ordinary page, selecting text brings up a bubble with two buttons instead of the translation bubble: open the page in the reader, and go to the reading list."
   },
 
-  "options_reader_only_more": {
-    "message": "With it on, no web page can tell which of its words you have saved. On Android and iOS it is on by default.",
-    "description": "The rest of the options_reader_only_hint description, behind the row's More button."
-  },
 
   "options_page_number": { "message": "Show the page number" },
   "options_page_number_hint": {
     "message": "The current page and how many there are, for example 3 / 12, at the foot of the window."
   },
 
-  "options_page_number_more": {
-    "message": "Off, each page's text reaches lower; the count is still read by screen readers, and on a wide screen it is shown in the bar next to re/read.",
-    "description": "The rest of the options_page_number_hint description, behind the row's More button."
-  },
   "options_paged_heading": { "message": "Pages layout" },
   "options_paged_intro": {
-    "message": "These work in the reader's Pages layout: the text moves by whole pages, each beginning and ending with a whole line."
+    "message": "These work in the reading view when the Aa panel's layout is set to Pages instead of Scroll."
   },
   "options_touch_turn": { "message": "Turning pages by touch" },
   "options_touch_turn_zones": { "message": "Tap the left or right side of the screen" },
@@ -2074,13 +2065,17 @@
     "message": "Touch turns no pages at all. The page keys, the arrow keys and the mouse wheel still do."
   },
   "options_turn_effect": { "message": "Page turn effect" },
-  "options_turn_effect_auto": { "message": "Automatic" },
+  "options_turn_effect_smooth": { "message": "Smooth slide" },
+  "options_turn_effect_flash": { "message": "Dark flash (e-ink)" },
   "options_turn_effect_off": { "message": "Off" },
   "options_turn_effect_hint": {
     "message": "A visible confirmation that the page has changed."
   },
-  "options_turn_effect_note_auto": {
-    "message": "In the E-ink theme the text area goes dark for a moment, the way an e-reader marks a page turn; on other screens the new page appears with a smooth slide."
+  "options_turn_effect_note_smooth": {
+    "message": "The new page arrives with a smooth slide."
+  },
+  "options_turn_effect_note_flash": {
+    "message": "The text area goes dark for a moment. On an e-ink panel that is barely visible and helps clear ghosting; on an ordinary screen it is a distinct dark flash."
   },
   "options_turn_effect_note_off": {
     "message": "The page simply changes, as it did before this setting existed."
@@ -2094,49 +2089,30 @@
     "message": "Your saved pages, highlights and reading progress are kept safe even if the original website changes or disappears.",
     "description": "The rest of the options_keep_articles_hint description, behind the row's More button."
   },
-  "options_font_custom": { "message": "Own font" },
+  "options_font_custom": { "message": "Custom font" },
   "options_font_custom_hint": {
-    "message": "A typeface installed on this device, for example Noto Serif. In the Aa panel it appears in the Type row as Custom."
+    "message": "Give the name of a font installed on this device, for example Noto Serif. For re/read to use it, open the Aa panel and choose Custom in the Type row. Leave the field empty to use the default fonts."
   },
 
-  "options_font_custom_more": {
-    "message": "Type the name as the system spells it. Leave the field empty to use the built-in typefaces only.",
-    "description": "The rest of the options_font_custom_hint description, behind the row's More button."
-  },
   "options_reading_pace": { "message": "Reading speed" },
   "options_reading_pace_unit": {
     "message": "words a minute",
     "description": "After the number field of the reading pace row (D228). Lower case: it follows the number as a unit, the way 1.0× follows the voice's speed."
   },
   "options_reading_pace_hint": {
-    "message": "Used only to estimate the reading time shown in the reading list and under an article's title."
+    "message": "Used only to estimate the reading time shown in the reading list and under an article's title. It is the number of words you read in a minute. 200 is an unhurried pace in your own language; in a language you are learning it is usually 100-150."
   },
 
-  "options_reading_pace_more": {
-    "message": "The number of words you read in a minute. 200 is an unhurried pace in your own language; in a language you are learning it is usually 100-150.",
-    "description": "The rest of the options_reading_pace_hint description, behind the row's More button."
-  },
-  "options_quiet_bubble_hint": {
-    "message": "The bubble then shows the translation alone; on a touch screen the buttons appear after a tap on it."
-  },
 
-  "options_quiet_bubble_more": {
-    "message": "The action buttons are copy, save, read aloud and the rest - all of the bubble's actions, one press away.",
-    "description": "The rest of the options_quiet_bubble_hint description, behind the row's More button."
-  },
   "options_bubble_more": {
     "message": "Show the sentence and dictionary entries right away",
     "description": "Checkbox label on the settings page (D186): the bubble over a fresh selection opens with its second layer - the translated sentence and the dictionary entries - already out, where a press on More used to be the only way to them. On by default."
   },
   "options_bubble_more_hint": {
-    "message": "The bubble shows the translated sentence and the dictionary entries right away, with no press on “More”.",
+    "message": "Shows the dictionary entries and the translated sentence, with no press on “More”. Worth keeping on when you have a dictionary: a model's translation of a single word is often wrong, while a dictionary gives the exact definitions. The bubble over a phrase you saved earlier shows only the saved translation - the sentence and the dictionary entries appear after a press on “More”.",
     "description": "Quotes the bubble_more button - each language quotes its own wording of that key, so they must move together. The last sentence is the promise that the bubble over an underline (a saved phrase) is not changed by the switch."
   },
 
-  "options_bubble_more_more": {
-    "message": "Worth keeping on with a dictionary installed: the translation of a single word is often wrong, and the dictionary shows what it really means. The bubble over an already saved phrase shows only the saved translation - the sentence and the dictionary entries appear after a press on “More”.",
-    "description": "The rest of the options_bubble_more_hint description, behind the row's More button."
-  },
   "options_underline_forms": {
     "message": "Underline other forms of saved words",
     "description": "Checkbox label on the settings page (D208): a saved word is underlined in its other forms as well - read in reads and reading - when an installed dictionary of the language confirms them. Off by default."
@@ -2160,18 +2136,14 @@
   },
 
   "options_save_sentence_more": {
-    "message": "The sentence as the page shows it, without its translation. It is shown under the phrase on the saved phrases page, folded to one line, and written into the third column of the export for Anki. For a phrase saved without a sentence, the sentence around it is saved the next time you open its bubble on a page. Like the phrase, the sentence is stored only on this device. Switched off, no new sentence is saved; the ones already saved are not deleted.",
+    "message": "The sentence is then shown under the phrase on the saved phrases page. If a phrase was saved earlier without a sentence, the sentence around it is saved the next time you open its bubble on a page. Like the phrase, the sentence is kept only on this device. Switched off, no new sentence is saved, but the ones saved earlier are not deleted.",
     "description": "The rest of the options_save_sentence_hint description, behind the row's More button."
   },
   "options_no_translation": { "message": "Use without a translation model" },
   "options_no_translation_hint": {
-    "message": "Dictionaries only, without machine translation; the reader, the offline reading list and the highlighter keep working."
+    "message": "With this on, the bubble still shows dictionary meanings, and you can save phrases and see their underlines. Ideal for reading with dictionaries or in your native language."
   },
 
-  "options_no_translation_more": {
-    "message": "With a language pair chosen, the bubble still shows dictionary meanings, and you can save phrases and see their underlines. Ideal for reading with dictionaries or in your native language. Your saved data is not deleted and returns when you turn this off.",
-    "description": "The rest of the options_no_translation_hint description, behind the row's More button."
-  },
   "options_bubble_off": { "message": "Do not show the bubble when selecting text" },
   "options_bubble_off_hint": {
     "message": "On an ordinary page nothing happens when you select text - open a page in the reader from re/read's button or with Alt+Shift+R.",
@@ -2314,14 +2286,10 @@
   "options_tts_default": { "message": "Default voice" },
   "options_tts_listen": { "message": "Listen" },
   "options_tts_voice_hint": {
-    "message": "A separate voice for each language; only voices that speak offline are offered.",
+    "message": "A separate voice for each language; only voices that speak offline are offered. Speech is made on this device and nothing is sent to the internet.",
     "description": "Under the voice select on the settings page. True by construction (D155): `voicesFor` in lib/tts.js keeps out every voice the engine marks as remote (localService false), and nothing speaks through one."
   },
 
-  "options_tts_voice_more": {
-    "message": "The voice reads phrases and whole articles alike. Speech is made on this device and nothing is sent to the internet.",
-    "description": "The rest of the options_tts_voice_hint description, behind the row's More button."
-  },
   "speech_no_offline_voice": {
     "message": "This device has no offline voice for this language.",
     "description": "Where a speaker was refused for want of an offline voice (D155): the device lists voices, and none of them reads the language without the network. Under the voice select on the settings page, in the reader's notice line, in the saved phrases page's status line."
@@ -2336,7 +2304,7 @@
     "description": "The first half of the models section's intro; options_models_single_word follows it in the same paragraph, highlighted. Each half must read on from the other across a plain space - no half starts or ends with whitespace."
   },
   "options_models_single_word": {
-    "message": "A model translates sentences well, but a single word on its own is often translated wrongly - the result is cut short, or is a word that does not exist. For single words the better source is a dictionary - the",
+    "message": "Note! A model translates sentences well, but a single word on its own is often translated wrongly - the result is cut short, or is a word that does not exist. For single words the better source is a dictionary - the",
     "description": "The highlighted half of the models section's intro (D192): the one fact about models that changes what a reader installs next."
   },
 
@@ -2348,20 +2316,50 @@
     "message": "Update the list",
     "description": "The button that fetches today's list of models - the one network request no download makes."
   },
-  "options_list_dated": {
-    "message": "List from",
-    "description": "Beside the update button of both catalogues; the date stands after this as its own emphasized element. Must not start or end with whitespace."
+  "options_list_dated_models": {
+    "message": "The list of models to download is from",
+    "description": "The sentence that opens the models' catalogue block, ending in the date the snapshot was taken; the date and the link that refreshes it follow."
+  },
+
+  "options_list_dated_dictionaries": {
+    "message": "The list of dictionaries to download is from",
+    "description": "The dictionaries' half of the sentence above."
+  },
+
+  "options_update_list_link": {
+    "message": "click to update it",
+    "description": "The link at the end of that sentence, which fetches the index again. Lower case: it closes a sentence rather than standing alone as a button."
+  },
+
+  "options_filter_search": {
+    "message": "Search",
+    "description": "The button beside a catalogue's filter field: the list answers a press, not a keystroke."
   },
   "options_filter_placeholder": { "message": "Filter by language or code" },
   "options_filter_models_label": { "message": "Filter the list of translation models" },
   "options_filter_dictionaries_label": { "message": "Filter the list of dictionaries" },
   "options_list_installed": {
-    "message": "On this device",
-    "description": "Heading of the block listing what is already on this device, in both the models and the dictionaries subsection."
+    "message": "Downloaded by you:",
+    "description": "Heading of the block listing what is already on this device, in both the models and the dictionaries subsection. Ends in a colon: it labels the list under it."
   },
-  "options_list_available": {
-    "message": "To download",
-    "description": "Heading of the block holding the catalogue: the filter, the list to download from and the by-hand doors."
+  "options_list_available_models": {
+    "message": "Download models",
+    "description": "Heading of the models' catalogue block: the filter, the list to download from and the by-hand door. Named for what a press there does, not for what the block is."
+  },
+
+  "options_list_available_models_more": {
+    "message": "Download more models",
+    "description": "The same heading where something is already on this device: the act is then fetching another one. The page picks between the two from the store."
+  },
+
+  "options_list_available_dictionaries": {
+    "message": "Download dictionaries",
+    "description": "Heading of the dictionaries' catalogue block: the filter, the list to download from and the two by-hand doors."
+  },
+
+  "options_list_available_dictionaries_more": {
+    "message": "Download more dictionaries",
+    "description": "The dictionaries' half of the heading above, for a device that already holds one."
   },
   "options_no_models_yet": {
     "message": "No translation model on this device yet. Pick a pair in",
@@ -2396,7 +2394,7 @@
     "description": "First half of the note around the host, which stands between the parts as a page element. Each part must read on from the last across a plain space - no part starts or ends with whitespace."
   },
   "options_model_note_rest": {
-    "message": "- where Mozilla publishes them. The extension connects to this public server only when you press Update the list or Download. No personal data is ever sent."
+    "message": "- where Mozilla publishes them. The extension connects to this public server on two presses and no others: the one that updates the list of models, and Download for a model you have chosen."
   },
   "options_add_model_heading": { "message": "Add a model from files" },
   "options_add_model_summary": {
@@ -2412,22 +2410,18 @@
   },
   "options_dictionaries_heading": { "message": "Dictionaries" },
   "options_dictionaries_intro": {
-    "message": "Add dictionaries to see detailed word definitions in the translation bubble."
+    "message": "Add dictionaries to see detailed word definitions in the translation bubble. The bubble shows the entries in the order below, language by language. The arrows change it."
   },
   "options_dictionaries_sources": {
     "message": "The dictionaries in the catalogue come from WikDict. You can add your own from a file or from a link, several for one language as well. The sources, each with its licence:",
     "description": "The second paragraph of the dictionaries section's intro (D192). Ends just before the address, which stands in the page as a link; the sentence's closing full stop is part of the page. Must not end with whitespace."
-  },
-  "options_dictionary_order_hint": {
-    "message": "The bubble shows the entries in the order below, language by language. The arrows change it.",
-    "description": "Above the list of dictionaries, shown only once a second one is stored."
   },
   "options_dictionary_note_from": {
     "message": "Dictionary downloads come from",
     "description": "First half of the note around the host, which stands between the parts as a page element. Each part must read on from the last across a plain space - no part starts or ends with whitespace."
   },
   "options_dictionary_note_rest": {
-    "message": "- where WikDict publishes the dictionaries it builds from Wiktionary (CC BY-SA). The extension connects to this public server only when you press Update the list or Download. No personal data is ever sent."
+    "message": "- where WikDict publishes the dictionaries it builds from Wiktionary (CC BY-SA). The extension connects to this public server on two presses and no others: the one that updates the list of dictionaries, and Download for a dictionary you have chosen."
   },
   "options_add_dictionary_heading": { "message": "Add a dictionary from files" },
   "options_add_dictionary_summary": {
@@ -2451,16 +2445,13 @@
   },
   "options_add_link_heading": { "message": "Add a dictionary from a link" },
   "options_add_link_summary": {
-    "message": "Paste the address of a StarDict dictionary packed as a .zip file, choose the languages and press Download. The extension connects to that address once, when you press the button, and to nowhere else; nothing of yours is sent along. The archive is unpacked and checked on this device, exactly like files you pick yourself.",
+    "message": "Paste the address of a StarDict dictionary packed as a .zip file, choose the languages and press Download. The extension fetches the archive from the link, unpacks it and checks it on this device, exactly like files you pick yourself. Only https addresses are accepted. An archive that is not a .zip file (.tar.xz, .tar.zst) has to be unpacked and added from files.",
     "description": "The whole instruction of the fold that adds a dictionary from a pasted address."
   },
   "options_link_label": { "message": "Address" },
   "options_link_sources": {
-    "message": "Where to find dictionaries, monolingual ones too - English-English, for example - each with its licence:",
+    "message": "You can find links to dictionaries at",
     "description": "Ends just before the address of the page of sources, which stands in the page as a link; the sentence's closing full stop is part of the page."
-  },
-  "options_link_note": {
-    "message": "Only https addresses are accepted. An archive that is not a .zip file (.tar.xz, .tar.zst) has to be unpacked and added from files."
   },
   "options_downloading_link": {
     "message": "Downloading from $HOST$...",
@@ -2552,6 +2543,17 @@
   "options_delete_dictionary_aria": {
     "message": "Delete the dictionary $NAME$",
     "placeholders": { "name": { "content": "$1", "example": "WikDict en-pl" } }
+  },
+
+  "options_dictionary_details_aria": {
+    "message": "Details of $NAME$",
+    "description": "The label a screen reader hears on a dictionary row's Details trigger: a list of them all saying only \"Details\" names none of the books.",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "WikDict English-Polish"
+      }
+    }
   },
   "options_delete_confirm_aria": {
     "message": "Confirm deletion: $NAME$",

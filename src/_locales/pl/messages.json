@@ -32,7 +32,7 @@
   "private_browsing_note": { "message": "Jesteś w trybie prywatnym. Przeglądarka używa tu dla tej strony osobnej bazy danych i kasuje ją po zakończeniu sesji prywatnej: czytelnia i zakreślenia, które tu widzisz, pochodzą z ich kopii, a artykuł zapisany, książka zaimportowana, zakreślenie zrobione albo cokolwiek usuniętego w tym oknie przepada razem z sesją. Jedyny wyjątek to zapisane frazy – te są zachowywane. Na wszystko inne otwórz re/read w zwykłej karcie." },
   "saved_phrases": { "message": "Zapisane frazy" },
   "open_reader": { "message": "Otwórz w widoku czytania" },
-  "quiet_bubble": { "message": "Pokazuj przyciski w dymku dopiero po kliknięciu" },
+  "quiet_bubble": { "message": "Pokazuj przyciski akcji w dymku tłumaczenia dopiero po kliknięciu" },
   "action_delete": { "message": "Usuń" },
   "action_download": { "message": "Pobierz" },
   "action_cancel": { "message": "Anuluj" },
@@ -1945,6 +1945,7 @@
   },
 
   "options_title": { "message": "re/read – ustawienia" },
+  "options_heading_named": { "message": "Ustawienia re/read" },
   "back_to_reading": {"message": "Wróć do czytania"},
   "options_local_intro": {
     "message": "Wszystko, co robi re/read, dzieje się na tym urządzeniu (offline): tłumaczenie, słownik, czytelnia, zapisane frazy. Nic z tego, co czytasz ani zaznaczasz, nigdzie nie jest wysyłane. Połączenie internetowe jest potrzebne tylko do pobrania nowego modelu tłumaczenia albo słownika – i tylko z dwóch adresów podanych w sekcjach"
@@ -2026,13 +2027,10 @@
     }
   },
 
-  "options_step_model": {
-    "message": "Pobierz model tłumaczenia"
+  "options_step_source": {
+    "message": "Pobierz model tłumaczenia albo słownik"
   },
 
-  "options_step_dictionary": {
-    "message": "Pobierz słownik (opcjonalnie)"
-  },
 
   "options_step_pin": {
     "message": "Przypnij re/read do paska narzędzi"
@@ -2289,7 +2287,7 @@
   },
 
   "options_first_steps_intro": {
-    "message": "Nic się jeszcze nie tłumaczy – modelu, który by to robił, nie ma jeszcze na tym urządzeniu. Przygotowanie zajmuje minutę:"
+    "message": "re/read potrzebuje czegoś, czym wyjaśni słowa: modelu tłumaczenia albo słownika. Wystarczy jedno z dwóch, drugie możesz dodać później."
   },
   "options_first_steps_pin": {
     "message": "Na koniec przypnij re/read do paska narzędzi: ikona puzzla po prawej stronie paska, potem koło zębate przy re/read i „Przypnij do paska narzędzi”. Przycisk otwiera widok czytania, czytelnię, zapisane frazy i wyłącznik witryny, na której jesteś."
@@ -2348,26 +2346,18 @@
   },
   "options_reader_only": { "message": "Pokazuj podkreślenia i dymek tylko w widoku czytania" },
   "options_reader_only_hint": {
-    "message": "Na zwykłej stronie po zaznaczeniu tekstu pojawi się dymek z przyciskami do otwarcia strony w widoku czytania i do czytelni."
+    "message": "Na zwykłej stronie po zaznaczeniu tekstu zamiast dymka tłumaczenia pojawi się dymek z przyciskami do otwarcia strony w widoku czytania i do czytelni."
   },
 
-  "options_reader_only_more": {
-    "message": "Przy włączonej opcji żadna strona nie może stwierdzić, które z jej słów masz zapisane. Na Androidzie i iOS opcja jest domyślnie włączona.",
-    "description": "The rest of the options_reader_only_hint description, behind the row's More button."
-  },
 
   "options_page_number": { "message": "Pokazuj numer strony" },
   "options_page_number_hint": {
     "message": "Numer bieżącej strony i liczba wszystkich, na przykład 3 / 12, u dołu okna."
   },
 
-  "options_page_number_more": {
-    "message": "Bez niego tekst każdej strony sięga niżej; czytniki ekranu nadal odczytują licznik, a na szerokim ekranie widać go w pasku obok re/read.",
-    "description": "The rest of the options_page_number_hint description, behind the row's More button."
-  },
   "options_paged_heading": { "message": "Układ „Strony”" },
   "options_paged_intro": {
-    "message": "Działają w widoku czytania w układzie „Strony”: tekst przesuwa się o całe strony, każda zaczyna się i kończy pełnym wierszem."
+    "message": "Poniższe opcje działają w widoku czytania, gdy w panelu Aa ustawisz układ „Strony” zamiast „Przewijania”."
   },
   "options_touch_turn": { "message": "Przewracanie stron dotykiem" },
   "options_touch_turn_zones": { "message": "Dotknięcie lewej lub prawej części ekranu" },
@@ -2383,13 +2373,17 @@
     "message": "Dotyk nie przewraca stron. Zostają klawisze zmiany strony, strzałki i kółko myszy."
   },
   "options_turn_effect": { "message": "Efekt przewrócenia strony" },
-  "options_turn_effect_auto": { "message": "Automatyczny" },
+  "options_turn_effect_smooth": { "message": "Płynne przewinięcie" },
+  "options_turn_effect_flash": { "message": "Ciemny błysk (e-ink)" },
   "options_turn_effect_off": { "message": "Wyłączony" },
   "options_turn_effect_hint": {
     "message": "Wizualne potwierdzenie przejścia na kolejną stronę."
   },
-  "options_turn_effect_note_auto": {
-    "message": "W motywie E-ink obszar tekstu na moment ciemnieje, tak jak przy przewracaniu strony w czytniku e-booków; na innych ekranach nowa strona pojawia się z płynnym przesunięciem."
+  "options_turn_effect_note_smooth": {
+    "message": "Nowa strona pojawia się z płynnym przesunięciem."
+  },
+  "options_turn_effect_note_flash": {
+    "message": "Obszar tekstu na moment ciemnieje. Na ekranie e-ink prawie tego nie widać i pomaga to oczyścić stronę z duchów; na zwykłym ekranie jest to wyraźny ciemny błysk."
   },
   "options_turn_effect_note_off": {
     "message": "Strona po prostu się zmienia, tak jak przed pojawieniem się tego ustawienia."
@@ -2403,42 +2397,23 @@
     "message": "Zapisane strony, zakreślenia i postęp czytania są bezpieczne, nawet jeśli oryginalna strona internetowa zmieni się lub zniknie.",
     "description": "The rest of the options_keep_articles_hint description, behind the row's More button."
   },
-  "options_font_custom": { "message": "Własny krój" },
+  "options_font_custom": { "message": "Własna czcionka" },
   "options_font_custom_hint": {
-    "message": "Krój zainstalowany na tym urządzeniu, np. Noto Serif. W panelu Aa pojawi się w wierszu „Krój” jako „Własny”."
+    "message": "Podaj nazwę czcionki zainstalowanej na tym urządzeniu, np. Noto Serif. Aby re/read używał podanej przez Ciebie czcionki w panelu Aa, w wierszu „Krój” wybierz „Własny”. Zostaw pole puste, aby używać domyślnych czcionek."
   },
 
-  "options_font_custom_more": {
-    "message": "Wpisz nazwę tak, jak zapisuje ją system. Zostaw pole puste, aby używać tylko wbudowanych krojów.",
-    "description": "The rest of the options_font_custom_hint description, behind the row's More button."
-  },
   "options_reading_pace": { "message": "Tempo czytania" },
   "options_reading_pace_unit": { "message": "słów na minutę" },
   "options_reading_pace_hint": {
-    "message": "Służy tylko do szacowania czasu czytania pokazywanego w czytelni i pod tytułem artykułu."
+    "message": "Służy tylko do szacowania czasu czytania pokazywanego w czytelni i pod tytułem artykułu. To liczba słów, które czytasz w ciągu minuty. 200 to spokojne tempo we własnym języku; w języku, którego się uczysz, zwykle 100-150."
   },
 
-  "options_reading_pace_more": {
-    "message": "Liczba słów, które czytasz w ciągu minuty. 200 to spokojne tempo we własnym języku; w języku, którego się uczysz, zwykle 100-150.",
-    "description": "The rest of the options_reading_pace_hint description, behind the row's More button."
-  },
-  "options_quiet_bubble_hint": {
-    "message": "W dymku zostaje samo tłumaczenie; na ekranie dotykowym przyciski pojawiają się po dotknięciu dymka."
-  },
 
-  "options_quiet_bubble_more": {
-    "message": "Przyciski akcji to kopiowanie, zapis, czytanie na głos i pozostałe – wszystkie akcje dymka, jedno kliknięcie dalej.",
-    "description": "The rest of the options_quiet_bubble_hint description, behind the row's More button."
-  },
   "options_bubble_more": { "message": "Pokazuj od razu zdanie i hasła ze słowników" },
   "options_bubble_more_hint": {
-    "message": "Dymek od razu pokazuje przetłumaczone zdanie i hasła ze słowników, bez klikania „Więcej”."
+    "message": "Pokazuje hasła ze słowników i tłumaczenie zdania, bez klikania „Więcej”. Warto zostawić włączone, gdy masz słownik: tłumaczenie pojedynczego słowa przez model bywa błędne, a słownik pokazuje dokładne definicje. Dymek nad już zapisaną wcześniej frazą wyświetla tylko zapisane tłumaczenie – zdanie i hasła ze słowników zobaczysz po kliknięciu „Więcej”."
   },
 
-  "options_bubble_more_more": {
-    "message": "Warto zostawić włączone, gdy masz słownik: tłumaczenie pojedynczego słowa bywa błędne, a słownik pokazuje, co ono naprawdę znaczy. Dymek nad już zapisaną frazą wyświetla tylko zapisane tłumaczenie – zdanie i hasła ze słowników zobaczysz po kliknięciu „Więcej”.",
-    "description": "The rest of the options_bubble_more_hint description, behind the row's More button."
-  },
   "options_underline_forms": { "message": "Podkreślaj też inne formy zapisanych słów" },
   "options_underline_forms_hint": {
     "message": "Po zapisaniu „read” podkreślone są też „reads” i „reading”."
@@ -2454,18 +2429,14 @@
   },
 
   "options_save_sentence_more": {
-    "message": "Zdanie takie, jak na stronie, bez tłumaczenia. Jest pokazywane pod frazą na stronie zapisanych fraz, zwinięte do jednej linii, i zapisywane w trzeciej kolumnie eksportu dla Anki. Przy frazie zapisanej bez zdania zdanie wokół niej jest zapisywane przy następnym otwarciu jej dymka na stronie. Tak jak fraza, zdanie jest przechowywane tylko na tym urządzeniu. Po wyłączeniu nowe zdania nie są zapisywane; zapisane wcześniej nie są usuwane.",
+    "message": "Zdanie jest wyświetlane potem pod frazą na stronie zapisanych fraz. Jeśli fraza była zapisana wcześniej bez zdania, zdanie wokół niej jest zapisywane przy następnym otwarciu jej dymka na stronie. Tak jak fraza, zdanie jest przechowywane tylko na tym urządzeniu. Po wyłączeniu tej opcji nowe zdania nie są zapisywane, ale te zapisane wcześniej nie są usuwane.",
     "description": "The rest of the options_save_sentence_hint description, behind the row's More button."
   },
   "options_no_translation": { "message": "Używaj bez modelu tłumaczenia" },
   "options_no_translation_hint": {
-    "message": "Tylko słowniki, bez tłumaczenia maszynowego; widok czytania, czytelnia offline i zakreślacz działają dalej."
+    "message": "Gdy ta opcja jest zaznaczona, dymek nadal pokazuje znaczenia ze słowników, a frazy można zapisywać i widzieć ich podkreślenia. Idealne do czytania ze słownikami albo w ojczystym języku."
   },
 
-  "options_no_translation_more": {
-    "message": "Przy wybranej parze językowej dymek nadal pokazuje znaczenia ze słowników, a frazy można zapisywać i widzieć ich podkreślenia. Idealne do czytania ze słownikami albo w ojczystym języku. Zapisane dane nie są usuwane i wracają po wyłączeniu tej opcji.",
-    "description": "The rest of the options_no_translation_hint description, behind the row's More button."
-  },
   "options_bubble_off": { "message": "Nie pokazuj dymka po zaznaczeniu tekstu" },
   "options_bubble_off_hint": {
     "message": "Na zwykłej stronie po zaznaczeniu tekstu nie dzieje się nic – stronę otwierasz w widoku czytania przyciskiem re/read albo skrótem Alt+Shift+R."
@@ -2623,13 +2594,9 @@
   "options_tts_default": { "message": "Głos domyślny" },
   "options_tts_listen": { "message": "Posłuchaj" },
   "options_tts_voice_hint": {
-    "message": "Osobny głos dla każdego języka; do wyboru tylko głosy działające offline."
+    "message": "Osobny głos dla każdego języka; do wyboru tylko głosy działające offline. Mowa powstaje na tym urządzeniu i nic nie jest wysyłane do internetu."
   },
 
-  "options_tts_voice_more": {
-    "message": "Głos czyta zarówno frazy, jak i całe artykuły. Mowa powstaje na tym urządzeniu i nic nie jest wysyłane do internetu.",
-    "description": "The rest of the options_tts_voice_hint description, behind the row's More button."
-  },
   "speech_no_offline_voice": { "message": "To urządzenie nie ma głosu offline dla tego języka." },
   "options_tts_rate": { "message": "Tempo mówienia" },
   "options_models_heading": { "message": "Modele tłumaczeniowe" },
@@ -2637,7 +2604,7 @@
     "message": "Model tłumaczenia pobierasz osobno dla każdej pary języków. To oficjalne pliki Mozilli; tłumaczenie odbywa się w całości na tym urządzeniu."
   },
   "options_models_single_word": {
-    "message": "Model dobrze tłumaczy zdania, ale pojedyncze słowo bez kontekstu jest często tłumaczone błędnie – wynik bywa ucięty albo jest wyrazem, którego nie ma w języku. Do pojedynczych słów lepszy jest słownik – sekcja"
+    "message": "Uwaga! Model dobrze tłumaczy zdania, ale pojedyncze słowo bez kontekstu jest często tłumaczone błędnie – wynik bywa ucięty albo jest wyrazem, którego nie ma w języku. Do pojedynczych słów lepszy jest słownik – sekcja"
   },
 
   "options_models_single_word_rest": {
@@ -2645,17 +2612,33 @@
     "description": "Closes options_models_single_word after the link to the Dictionaries section."
   },
   "options_update_list": { "message": "Zaktualizuj listę" },
-  "options_list_dated": { "message": "Lista z dnia" },
+  "options_list_dated_models": { "message": "Lista modeli do pobrania jest z dnia" },
+  "options_list_dated_dictionaries": { "message": "Lista słowników do pobrania jest z dnia" },
+  "options_update_list_link": { "message": "kliknij, aby ją zaktualizować" },
+  "options_filter_search": { "message": "Szukaj" },
   "options_filter_placeholder": { "message": "Filtruj po języku lub kodzie" },
   "options_filter_models_label": { "message": "Filtruj listę modeli tłumaczeniowych" },
   "options_filter_dictionaries_label": { "message": "Filtruj listę słowników" },
   "options_list_installed": {
-    "message": "Na tym urządzeniu",
-    "description": "Heading of the block listing what is already on this device, in both the models and the dictionaries subsection."
+    "message": "Pobrane przez Ciebie:",
+    "description": "Heading of the block listing what is already on this device, in both the models and the dictionaries subsection. Ends in a colon: it labels the list under it."
   },
-  "options_list_available": {
-    "message": "Do pobrania",
-    "description": "Heading of the block holding the catalogue: the filter, the list to download from and the by-hand doors."
+  "options_list_available_models": {
+    "message": "Pobierz modele",
+    "description": "Heading of the models' catalogue block: the filter, the list to download from and the by-hand door. Named for what a press there does, not for what the block is."
+  },
+
+  "options_list_available_models_more": {
+    "message": "Pobierz dodatkowe modele"
+  },
+
+  "options_list_available_dictionaries": {
+    "message": "Pobierz słowniki",
+    "description": "Heading of the dictionaries' catalogue block: the filter, the list to download from and the two by-hand doors."
+  },
+
+  "options_list_available_dictionaries_more": {
+    "message": "Pobierz dodatkowe słowniki"
   },
   "options_no_models_yet": {
     "message": "Nie ma jeszcze żadnego modelu tłumaczenia. Wybierz parę w sekcji",
@@ -2683,7 +2666,7 @@
   "options_show_fewer": { "message": "Pokaż mniej" },
   "options_model_note_from": { "message": "Modele pobierane są z" },
   "options_model_note_rest": {
-    "message": "– to tam publikuje je Mozilla. Rozszerzenie łączy się z tym publicznym serwerem tylko wtedy, gdy naciśniesz Zaktualizuj listę albo Pobierz. Żadne dane osobowe nie są wysyłane."
+    "message": "– to tam publikuje je Mozilla. Rozszerzenie łączy się z tym publicznym serwerem tylko wtedy, gdy klikniesz opcję aktualizacji listy modeli albo naciśniesz Pobierz dla wybranego modelu."
   },
   "options_add_model_heading": { "message": "Dodaj model z plików" },
   "options_add_model_summary": {
@@ -2698,17 +2681,14 @@
   },
   "options_dictionaries_heading": { "message": "Słowniki" },
   "options_dictionaries_intro": {
-    "message": "Dodaj słowniki, aby widzieć szczegółowe definicje słów w dymku tłumaczenia."
+    "message": "Dodaj słowniki, aby widzieć szczegółowe definicje słów w dymku tłumaczenia. Dymek pokazuje hasła w kolejności z listy – osobno dla każdego języka. Kolejność zmienisz strzałkami."
   },
   "options_dictionaries_sources": {
     "message": "Słowniki z katalogu pochodzą z WikDict. Własne dodasz z pliku albo z linku, także kilka dla jednego języka. Źródła wraz z licencjami:"
   },
-  "options_dictionary_order_hint": {
-    "message": "Dymek pokazuje hasła w kolejności z listy – osobno dla każdego języka. Kolejność zmienisz strzałkami."
-  },
   "options_dictionary_note_from": { "message": "Słowniki pobierane są z" },
   "options_dictionary_note_rest": {
-    "message": "– to tam WikDict publikuje słowniki, które buduje z Wikisłownika (CC BY-SA). Rozszerzenie łączy się z tym publicznym serwerem tylko wtedy, gdy naciśniesz Zaktualizuj listę albo Pobierz. Żadne dane osobowe nie są wysyłane."
+    "message": "– to tam WikDict publikuje słowniki, które buduje z Wikisłownika (CC BY-SA). Rozszerzenie łączy się z tym publicznym serwerem tylko wtedy, gdy klikniesz opcję aktualizacji listy słowników albo naciśniesz Pobierz dla wybranego słownika."
   },
   "options_add_dictionary_heading": { "message": "Dodaj słownik z plików" },
   "options_add_dictionary_summary": {
@@ -2730,14 +2710,11 @@
   },
   "options_add_link_heading": { "message": "Dodaj słownik z linku" },
   "options_add_link_summary": {
-    "message": "Wklej adres słownika StarDict spakowanego do pliku .zip, określ języki i naciśnij Pobierz. Rozszerzenie łączy się z tym adresem raz, po naciśnięciu przycisku, i z żadnym innym; nic twojego nie jest wysyłane. Archiwum jest rozpakowywane i sprawdzane na tym urządzeniu, dokładnie tak jak pliki wybrane ręcznie."
+    "message": "Wklej adres słownika StarDict spakowanego do pliku .zip, określ języki i naciśnij Pobierz. Rozszerzenie pobierze archiwum z linku, rozpakuje je i sprawdzi na tym urządzeniu, dokładnie tak jak pliki wybrane ręcznie. Przyjmowane są tylko adresy https. Archiwum inne niż plik .zip (.tar.xz, .tar.zst) trzeba rozpakować i dodać z plików."
   },
   "options_link_label": { "message": "Adres" },
   "options_link_sources": {
-    "message": "Gdzie szukać słowników, także jednojęzycznych – na przykład angielsko-angielskiego – każdy z podaną licencją:"
-  },
-  "options_link_note": {
-    "message": "Przyjmowane są tylko adresy https. Archiwum inne niż plik .zip (.tar.xz, .tar.zst) trzeba rozpakować i dodać z plików."
+    "message": "Linki do słowników znajdziesz na"
   },
   "options_downloading_link": {
     "message": "Pobieranie z $HOST$...",
@@ -2825,6 +2802,16 @@
   "options_delete_dictionary_aria": {
     "message": "Usuń słownik $NAME$",
     "placeholders": { "name": { "content": "$1" } }
+  },
+
+  "options_dictionary_details_aria": {
+    "message": "Szczegóły: $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "WikDict English-Polish"
+      }
+    }
   },
   "options_delete_confirm_aria": {
     "message": "Potwierdź usunięcie: $NAME$",

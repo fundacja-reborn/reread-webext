@@ -54,6 +54,9 @@ const SUBSECTIONS = [
     showAll: 'id="models-show-all"',
     door: "options_add_model_heading",
     host: 'id="model-host"',
+    name: "options_list_available_models",
+    search: 'id="model-search"',
+    dated: 'data-i18n="options_list_dated_models"',
   },
   {
     what: "dictionaries",
@@ -66,6 +69,9 @@ const SUBSECTIONS = [
     showAll: 'id="dictionaries-show-all"',
     door: "options_add_dictionary_heading",
     host: 'id="dictionary-host"',
+    name: "options_list_available_dictionaries",
+    search: 'id="dictionary-search"',
+    dated: 'data-i18n="options_list_dated_dictionaries"',
   },
 ];
 
@@ -73,14 +79,20 @@ describe("the two blocks a catalogue is read in", () => {
   it("head each block with its own name, in both subsections", async () => {
     const markup = await source("options/options.html");
     for (const part of SUBSECTIONS) {
+      // The name stands inside the card it heads (D265), in the card label's
+      // own dress - a heading outside a card opens a section, and these open
+      // a block of one. Since Michał's second round the catalogue block is
+      // named for what a press there does ("Download dictionaries"), which is
+      // a different sentence for each of the two lists - and a different one
+      // again once something is on the device (the test below).
       assert.match(
         markup,
-        new RegExp(`<h4 id="${part.installed}" data-i18n="options_list_installed">`),
+        new RegExp(`<h4 id="${part.installed}" class="card-head" data-i18n="options_list_installed">`),
         `the ${part.what} do not say what is on this device`,
       );
       assert.match(
         markup,
-        new RegExp(`<h4 id="${part.available}" data-i18n="options_list_available">`),
+        new RegExp(`<h4 id="${part.available}" class="card-head" data-i18n="${part.name}">`),
         `the ${part.what} do not say what can be fetched`,
       );
       // In that order: what is here before what could be.
@@ -100,7 +112,7 @@ describe("the two blocks a catalogue is read in", () => {
       assert.ok(here.includes(part.list), `the ${part.what} on this device are not listed in their own block`);
       assert.ok(!here.includes(part.filter), `the ${part.what} filter still stands over what is installed`);
       assert.ok(!here.includes(part.update), `the ${part.what} refresh still stands over what is installed`);
-      assert.ok(!here.includes("options_list_dated"), `the ${part.what} block says how old the catalogue is`);
+      assert.ok(!here.includes(part.dated), `the ${part.what} block says how old the catalogue is`);
 
       assert.ok(there.includes(part.catalog), `the ${part.what} catalogue is not in the catalogue block`);
       assert.ok(there.includes(part.filter), `the ${part.what} filter left the catalogue`);
@@ -110,16 +122,24 @@ describe("the two blocks a catalogue is read in", () => {
     }
   });
 
-  it("stand the filter and the press on one line, with the date under them (K1)", async () => {
+  it("stands the field and the press that answers it on one line, and the date in prose (Michał, 2026-09-19)", async () => {
     const markup = await source("options/options.html");
     for (const part of SUBSECTIONS) {
-      const tools = markup.slice(markup.indexOf('<div class="list-tools">', markup.indexOf(`id="${part.available}"`)));
-      const line = tools.slice(0, tools.indexOf("</div>", tools.indexOf(part.update)));
+      const block = markup.slice(markup.indexOf(`id="${part.available}"`));
+      const tools = block.slice(block.indexOf('<div class="list-tools">'));
+      const line = tools.slice(0, tools.indexOf("</div>", tools.indexOf(part.search)));
       assert.ok(line.includes(part.filter), `the ${part.what} filter is not on the tools line`);
-      assert.ok(line.includes("list-update"), `the ${part.what} refresh is not on the tools line`);
-      // The date follows the line rather than standing in it.
-      const after = tools.slice(tools.indexOf(part.update));
-      assert.ok(after.indexOf("list-dated") > 0, `the ${part.what} list does not say the day it is from`);
+      assert.ok(line.includes("list-search"), `the ${part.what} field has no press to answer it`);
+      // The press that fetches the index again is not on that line: it works
+      // without a word typed, and it stands where a reader looks for Search.
+      // It is a link inside the sentence about the date it changes, and that
+      // sentence opens the card.
+      assert.ok(!line.includes(part.update), `the ${part.what} refresh still stands beside the field`);
+      const dated = block.indexOf(part.dated);
+      assert.ok(dated > 0 && dated < block.indexOf('<div class="list-tools">'), `the ${part.what} list does not open on the day it is from`);
+      const sentence = block.slice(dated, block.indexOf("</p>", dated));
+      assert.ok(sentence.includes(part.update), `the ${part.what} date does not offer to fetch the list again`);
+      assert.ok(sentence.includes('data-i18n="options_update_list_link"'), `the ${part.what} refresh is not a link in the sentence`);
     }
 
     const css = await source("options/options.css");
@@ -129,16 +149,27 @@ describe("the two blocks a catalogue is read in", () => {
     // content - without `min-width: 0` a search box refuses to.
     const field = css.slice(css.indexOf(".list-tools .model-filter {"));
     assert.match(field.slice(0, field.indexOf("}")), /flex: 1 1 auto;\s+min-width: 0/);
-    const narrow = css.slice(css.indexOf("@media (max-width: 480px)"));
-    assert.match(narrow, /\.list-tools \{\s+flex-wrap: wrap;/, "the tools line never splits on a phone");
+    // The field keeps its button company on every width (Michał, 2026-09-19):
+    // a narrow card used to give the field the whole line and push Search
+    // onto one of its own, at the far edge, where it read as a second control
+    // rather than as this field's own. Wrapping stays as the last resort, for
+    // a language whose word for Search is long.
+    const narrow = css.slice(css.indexOf("@container (max-width: 30rem)"));
+    assert.match(narrow, /\.list-tools \{\n    flex-wrap: wrap;/, "the tools line can never split, whatever the word for Search");
+    assert.doesNotMatch(narrow, /\.list-tools \.model-filter \{\s*flex-basis: 100%/, "the filter still takes the whole line to itself");
+    assert.doesNotMatch(narrow, /\.list-search \{\s*margin-left: auto/, "Search still stands away from the field it belongs to");
   });
 
-  it("put the note about the host after both blocks, as the subsection's own footnote", async () => {
+  it("puts the note about the host under the catalogue it speaks for, and nowhere near the by-hand doors", async () => {
     const markup = await source("options/options.html");
+    // It named one host and stood after every way of getting a dictionary,
+    // so it read as if it spoke for all of them (Michał's smoke,
+    // 2026-09-19) - and the by-hand doors go somewhere else entirely, or
+    // nowhere at all: a dictionary added from files fetches nothing.
     for (const part of SUBSECTIONS) {
       const host = markup.indexOf(part.host);
       assert.ok(host > markup.indexOf(part.showAll), `the ${part.what} host note stands inside the catalogue`);
-      assert.ok(host > markup.indexOf(part.door), `the ${part.what} host note stands before the by-hand door`);
+      assert.ok(host < markup.indexOf(part.door), `the ${part.what} host note speaks for the by-hand door as well`);
     }
   });
 
@@ -155,20 +186,185 @@ describe("the two blocks a catalogue is read in", () => {
     assert.match(sections, /section\.querySelector\("input\[type='search'\]"\)/);
   });
 
-  it("answer an empty list with the way to the catalogue, not with a dead end", async () => {
+  it("names the catalogue for the act, and for the act on a device that has one already", async () => {
     const script = await source("options/options.js");
-    assert.match(script, /emptyList\(t\("options_no_models_yet"\), t\("options_no_models_yet_rest"\), "translation-models-available"\)/);
+    // "Download dictionaries" while nothing is here, "Download more
+    // dictionaries" once something is (Michał, 2026-09-19): the second is a
+    // lie on a fresh install, and the first sells the block short on a device
+    // that already reads two languages.
     assert.match(
       script,
-      /emptyList\(t\("options_no_dictionaries_yet"\), t\("options_no_dictionaries_yet_rest"\), "dictionaries-available"\)/,
+      /sayCatalogHeading\(\n\s+"translation-models-available",\n\s+t\("options_list_available_models"\),\n\s+t\("options_list_available_models_more"\),\n\s+here\.length > 0,/,
+      "the models' catalogue is named the same whatever is on the device",
     );
+    assert.match(
+      script,
+      /sayCatalogHeading\(\n\s+"dictionaries-available",\n\s+t\("options_list_available_dictionaries"\),\n\s+t\("options_list_available_dictionaries_more"\),\n\s+stored\.length > 0,/,
+      "the dictionaries' catalogue is named the same whatever is on the device",
+    );
+    // Both names are said, never glued from a key: a key built out of a value
+    // is a key the catalogue tests cannot see.
+    const helper = script.slice(script.indexOf("function sayCatalogHeading("), script.indexOf("\n}\n", script.indexOf("function sayCatalogHeading(")));
+    assert.doesNotMatch(helper, /t\(`/, "the heading's key is glued together at the call");
+    // And the empty list's own door says the first of the two, which is what
+    // an empty list makes true.
+    for (const locale of ["en", "pl", "de", "fr", "es", "uk"]) {
+      const catalogue = JSON.parse(await source(`_locales/${locale}/messages.json`));
+      for (const key of [
+        "options_list_available_models",
+        "options_list_available_models_more",
+        "options_list_available_dictionaries",
+        "options_list_available_dictionaries_more",
+      ]) {
+        assert.equal(typeof catalogue[key]?.message, "string", `${locale} has no ${key}`);
+      }
+    }
+  });
+
+  it("answer an empty list with the way to the catalogue, not with a dead end", async () => {
+    const script = await source("options/options.js");
+    assert.match(script, /"translation-models-available",\n\s+"options_list_available_models",/);
+    assert.match(script, /"dictionaries-available",\n\s+"options_list_available_dictionaries",/);
     const helper = script.slice(script.indexOf("function emptyList("), script.indexOf("function dictionaryGroups("));
     assert.match(helper, /door\.href = `#\$\{anchor\}`/);
-    assert.match(helper, /door\.textContent = t\("options_list_available"\)/);
+    // The door says what the heading it lands on says - one name per list.
+    assert.match(helper, /door\.textContent = t\(name\)/);
     // And a delete that empties the list leaves the focus on the block's own
     // heading, since the filter it used to fall back to is now a block away.
     assert.match(script, /focusDeleteIn\("models", "translation-models-installed", at\)/);
     assert.match(script, /focusDeleteIn\("dictionary-list", "dictionaries-installed", at\)/);
+  });
+
+  it("says a download in the row the press was in, and leaves it there (Michał, 2026-09-19)", async () => {
+    const script = await source("options/options.js");
+    // The whole journey - how far the download has got, what came of it - is
+    // said in the row, not at the top of the page: a catalogue of four
+    // hundred rows puts the top well outside the window, and the row itself
+    // used to vanish at the same moment, because the pair had stopped being
+    // on offer.
+    assert.match(script, /const say = saysIn\(container === null \? null : rowLine\(container\), dictionaryStatus\);/, "a dictionary download still says everything at the top of the page");
+    assert.match(script, /const say = saysIn\(container === null \? null : rowLine\(container\), status\);/, "a model download still says everything at the top of the page");
+    // The line is put in place empty, before there is anything to say: a live
+    // region that arrives with its text already in it announces nothing.
+    const line = script.slice(script.indexOf("function rowLine("), script.indexOf("\n}\n", script.indexOf("function rowLine(")));
+    assert.match(line, /element\("p", "status"\)/, "the row's line is not a status");
+    assert.match(line, /line\.setAttribute\("role", "status"\)/, "the row's line is not a live region");
+    assert.doesNotMatch(line, /textContent/, "the row's line arrives with its text already in it");
+    // With no row to say it in - a redraw came between - it falls back to the
+    // page's own line rather than saying nothing at all.
+    const says = script.slice(script.indexOf("function saysIn("), script.indexOf("\n}\n", script.indexOf("function saysIn(")));
+    assert.match(says, /if \(line === null\) \{\n      fallback\(text, tone\);/, "a journey with no row of its own says nothing");
+
+    // It worked: the row stops being an offer - no bar, no buttons, no id to
+    // collide with the installed row that now carries the pair, and none of
+    // the marks the filter counts rows by. It is marked as having said its
+    // piece instead, and the next question asked of the list takes it away,
+    // so folding the list folds it too.
+    const finished = script.slice(script.indexOf("function rowFinished("), script.indexOf("\n}\n", script.indexOf("function rowFinished(")));
+    assert.match(finished, /row\.removeAttribute\("id"\)/, "a finished row keeps the id the installed row now has too");
+    assert.match(finished, /delete row\.dataset\["installed"\]/, "the filter still counts a row that is no longer an offer");
+    assert.match(finished, /row\.dataset\["done"\] = "";/, "a row that said its piece is never taken away");
+    // It failed: the pair is still there to fetch, so the row goes on being
+    // the offer it was - marks and all - with the way to try again in it.
+    assert.match(finished, /t\("action_download"\)/, "a journey that failed leaves no way to try again");
+    const apply = script.slice(script.indexOf("function applyFilterIn("), script.indexOf("\n}\n", script.indexOf("function applyFilterIn(")));
+    assert.match(apply, /for \(const done of container\.querySelectorAll\("\[data-done\]"\)\) done\.remove\(\);/, "a finished row outstays the next question asked of the list");
+
+    // And the row survives the redraw that follows, in its own place: put
+    // back where it stood when the pair has left the offer, or in the rebuilt
+    // row's place when it failed and the pair is offered again.
+    const keep = script.slice(script.indexOf("function keepRow("), script.indexOf("\n}\n", script.indexOf("function keepRow(")));
+    assert.match(keep, /if \(row\.isConnected \|\| !parent\.isConnected\) return;/, "a row still on screen is put back twice");
+    assert.match(keep, /rebuilt\.replaceWith\(row\)/, "a failed download leaves the same pair standing twice");
+    assert.match(keep, /parent\.insertBefore\(row, parent\.children\[at\] \?\? null\)/, "the row comes back somewhere other than where it stood");
+    assert.match(script, /const putBack = keepRow\(container, catalogRowId\(entry\)\);/, "a dictionary's row is not kept through the redraw");
+    assert.match(script, /const putBack = keepRow\(container, `model-\$\{row\.pair\}`\);/, "a model's row is not kept through the redraw");
+
+    // The dress says it is a message and not another row of the list.
+    const css = await source("options/options.css");
+    assert.match(
+      css,
+      /:is\(\.model, \.dictionary-row\) > \.status:not\(:empty, \[data-tone="error"\]\) \{/,
+      "a row's own message is dressed like the row it stands in",
+    );
+  });
+
+  it("stops the whole journey on Cancel, not just the bytes (Michał, 2026-09-19)", async () => {
+    const script = await source("options/options.js");
+    // A dictionary from the catalogue is a few megabytes over the wire and a
+    // few hundred thousand rows into the database: nearly all of the wait is
+    // the import, and the signal used to reach only the download. Every press
+    // landed in the part nothing was listening to, so the dictionary went on
+    // installing - and the button, greyed out by that first press, sat there
+    // unable to be asked again.
+    const store = script.slice(
+      script.indexOf("async function storeDictionary("),
+      script.indexOf("\n}\n", script.indexOf("async function storeDictionary(")),
+    );
+    assert.match(
+      store,
+      /async function storeDictionary\(files, \{ base, langFrom, langTo, say, signal \}\)/,
+      "the import cannot be told to stop",
+    );
+    assert.match(
+      store,
+      /if \(signal\?\.aborted\) \{\n      await deleteDictionary\(dictionary\.id\);/,
+      "a press during the staging leaves the staged files behind",
+    );
+    assert.match(
+      store,
+      /runImport\(opened\.value, dictionary, \{ say, progress: null, signal \}\)/,
+      "the batches never hear of the press",
+    );
+
+    const run = script.slice(
+      script.indexOf("async function runImport("),
+      script.indexOf("\n}\n", script.indexOf("async function runImport(")),
+    );
+    const loop = run.slice(run.indexOf("while (!step.done) {"), run.indexOf("const batch = step.value;"));
+    assert.match(loop, /if \(signal\?\.aborted\) break;/, "the batch loop runs to the end whatever is pressed");
+    // It stops between two batches, never inside one: the batch in flight is
+    // written, which is the whole point of D137's resume - and then what the
+    // sentence promises is kept. "Download cancelled. Nothing was saved." is
+    // untrue of a dictionary left half in the database, so the rows written
+    // so far, the files staged beside them and the unready row go together.
+    assert.match(
+      run,
+      /if \(summary === null\) \{[\s\S]*?await deleteDictionary\(dictionary\.id\);\n\s*say\(t\("download_cancelled"\)\);\n\s*return false;/,
+      "a cancelled import leaves half a dictionary behind",
+    );
+
+    // The two steps with no way into them - inflating an archive, the
+    // engine's trial load of a model - are answered the moment they come
+    // back, before anything of either is kept.
+    assert.match(
+      script,
+      /if \(controller\.signal\.aborted\) \{\n      say\(t\("download_cancelled"\)\);\n      return;\n    \}/,
+      "a press during the unpacking is forgotten",
+    );
+    assert.match(
+      script,
+      /if \(controller\.signal\.aborted\) \{\n    say\(t\("download_cancelled"\)\);\n    await settle\(false\);/,
+      "a press during a model's trial load is forgotten",
+    );
+
+    // And the button never claims what it can no longer do: pressable for as
+    // long as it is on screen, gone once the bytes are on their way to the
+    // database and there is nothing left to turn back.
+    for (const made of ["function renderFetching(", "function renderDownloading("]) {
+      const shape = script.slice(script.indexOf(made), script.indexOf("\n}\n", script.indexOf(made)));
+      assert.match(
+        shape,
+        /cancel\.addEventListener\("click", \(\) => controller\.abort\(\)\);/,
+        "the way out is not one press",
+      );
+      assert.doesNotMatch(shape, /cancel\.disabled = true/, "a press greys the button out before it has stopped anything");
+    }
+    assert.match(
+      script,
+      /if \(container !== null\) for \(const spent of container\.querySelectorAll\("button"\)\) spent\.remove\(\);/,
+      "the way out stands there after the last moment it could be taken",
+    );
   });
 
   it("indexes the blocks for the search, and still none of their rows", async () => {

@@ -32,7 +32,7 @@
   "private_browsing_note": { "message": "Estás en navegación privada. El navegador usa para esta página una base de datos aparte y la borra al terminar la sesión privada: la lista de lectura y los resaltados que ves aquí vienen de sus copias, y un artículo guardado, un libro importado, un resaltado hecho o cualquier cosa borrada aquí se pierde con la sesión. La única excepción son las frases guardadas: esas se conservan. Para todo lo demás, abre re/read en una pestaña normal." },
   "saved_phrases": { "message": "Frases guardadas" },
   "open_reader": { "message": "Abrir en vista de lectura" },
-  "quiet_bubble": { "message": "Mostrar los botones de la burbuja solo después de un clic" },
+  "quiet_bubble": { "message": "Mostrar los botones de acción de la burbuja de traducción solo después de un clic" },
   "action_delete": { "message": "Eliminar" },
   "action_download": { "message": "Descargar" },
   "action_cancel": { "message": "Cancelar" },
@@ -1376,6 +1376,7 @@
   },
 
   "options_title": { "message": "re/read - ajustes" },
+  "options_heading_named": { "message": "Ajustes de re/read" },
   "back_to_reading": {"message": "Volver a la lectura"},
   "options_local_intro": {
     "message": "Todo lo que hace re/read ocurre en este dispositivo (sin conexión): la traducción, el diccionario, la lista de lectura, tus frases guardadas. Nada de lo que lees o seleccionas se envía a ninguna parte. La conexión a Internet solo hace falta para descargar un nuevo modelo de traducción o un diccionario - y solo desde las dos direcciones indicadas en las secciones"
@@ -1457,13 +1458,10 @@
     }
   },
 
-  "options_step_model": {
-    "message": "Descargar un modelo de traducción"
+  "options_step_source": {
+    "message": "Descarga un modelo de traducción o un diccionario"
   },
 
-  "options_step_dictionary": {
-    "message": "Descargar un diccionario (opcional)"
-  },
 
   "options_step_pin": {
     "message": "Anclar re/read a la barra de herramientas"
@@ -1652,7 +1650,7 @@
   },
 
   "options_first_steps_intro": {
-    "message": "Todavía no se traduce nada - el modelo que lo haría aún no está en este dispositivo. La puesta en marcha lleva un minuto:"
+    "message": "re/read necesita algo con lo que explicar las palabras: un modelo de traducción o un diccionario. Con uno basta; el otro puede venir después."
   },
   "options_first_steps_pin": {
     "message": "Por último, fija re/read a la barra de herramientas: el icono de la pieza de puzle a la derecha de la barra, luego el engranaje junto a re/read y «Fijar a la barra de herramientas». El botón abre la vista de lectura, la lista de lectura, tus frases guardadas y el interruptor del sitio en el que estás."
@@ -1703,26 +1701,18 @@
   },
   "options_reader_only": { "message": "Mostrar los subrayados y la burbuja solo en la vista de lectura" },
   "options_reader_only_hint": {
-    "message": "En una página normal, al seleccionar texto aparece una burbuja con dos botones: abrir la página en la vista de lectura e ir a la lista de lectura."
+    "message": "En una página normal, al seleccionar texto aparece, en lugar de la burbuja de traducción, una burbuja con dos botones: abrir la página en la vista de lectura e ir a la lista de lectura."
   },
 
-  "options_reader_only_more": {
-    "message": "Con la opción activada, ninguna página web puede saber cuáles de sus palabras has guardado. En Android e iOS la opción está activada de forma predeterminada.",
-    "description": "The rest of the options_reader_only_hint description, behind the row's More button."
-  },
 
   "options_page_number": { "message": "Mostrar el número de página" },
   "options_page_number_hint": {
     "message": "La página actual y el total, por ejemplo 3 / 12, en la parte inferior de la ventana."
   },
 
-  "options_page_number_more": {
-    "message": "Desactivado, el texto de cada página llega más abajo; los lectores de pantalla siguen leyendo el contador, y en una pantalla ancha se muestra en la barra junto a re/read.",
-    "description": "The rest of the options_page_number_hint description, behind the row's More button."
-  },
   "options_paged_heading": { "message": "Vista Páginas" },
   "options_paged_intro": {
-    "message": "Funcionan en la vista de lectura con la vista Páginas: el texto avanza por páginas completas, cada una empieza y termina con una línea entera."
+    "message": "Estas opciones funcionan en la vista de lectura cuando en el panel Aa eliges la vista Páginas en lugar de Desplazamiento."
   },
   "options_touch_turn": { "message": "Pasar páginas con el dedo" },
   "options_touch_turn_zones": { "message": "Tocar el lado izquierdo o derecho de la pantalla" },
@@ -1738,13 +1728,17 @@
     "message": "El dedo no pasa páginas. Las teclas de página, las flechas y la rueda del ratón siguen haciéndolo."
   },
   "options_turn_effect": { "message": "Efecto al pasar página" },
-  "options_turn_effect_auto": { "message": "Automático" },
+  "options_turn_effect_smooth": { "message": "Desplazamiento suave" },
+  "options_turn_effect_flash": { "message": "Destello oscuro (E-ink)" },
   "options_turn_effect_off": { "message": "Desactivado" },
   "options_turn_effect_hint": {
-    "message": "Una confirmación visible del cambio de página."
+    "message": "Una confirmación visible de que la página ha cambiado."
   },
-  "options_turn_effect_note_auto": {
-    "message": "En el tema E-ink, la zona de texto se oscurece un momento, como en un lector de libros electrónicos; en otras pantallas, la nueva página aparece con un desplazamiento suave."
+  "options_turn_effect_note_smooth": {
+    "message": "La nueva página aparece con un desplazamiento suave."
+  },
+  "options_turn_effect_note_flash": {
+    "message": "El área de texto se oscurece un momento. En una pantalla e-ink apenas se nota y ayuda a limpiar las imágenes fantasma; en una pantalla normal es un destello oscuro bien visible."
   },
   "options_turn_effect_note_off": {
     "message": "La página simplemente cambia, como antes de este ajuste."
@@ -1758,42 +1752,23 @@
     "message": "Tus páginas guardadas, resaltados y progreso de lectura se conservan aunque el sitio web original cambie o desaparezca.",
     "description": "The rest of the options_keep_articles_hint description, behind the row's More button."
   },
-  "options_font_custom": { "message": "Fuente propia" },
+  "options_font_custom": { "message": "Fuente personalizada" },
   "options_font_custom_hint": {
-    "message": "Una fuente instalada en este dispositivo, por ejemplo Noto Serif. En el panel Aa aparece en la fila Tipografía como Personalizada."
+    "message": "Escribe el nombre de una fuente instalada en este dispositivo, por ejemplo Noto Serif. Para que re/read la use, abre el panel Aa y elige Personalizada en la fila Tipografía. Deja el campo vacío para usar las fuentes predeterminadas."
   },
 
-  "options_font_custom_more": {
-    "message": "Escribe el nombre tal como lo escribe el sistema. Deja el campo vacío para usar solo las fuentes integradas.",
-    "description": "The rest of the options_font_custom_hint description, behind the row's More button."
-  },
   "options_reading_pace": { "message": "Velocidad de lectura" },
   "options_reading_pace_unit": { "message": "palabras por minuto" },
   "options_reading_pace_hint": {
-    "message": "Solo se usa para estimar el tiempo de lectura que se muestra en la lista de lectura y bajo el título de un artículo."
+    "message": "Solo se usa para estimar el tiempo de lectura que se muestra en la lista de lectura y bajo el título de un artículo. Es el número de palabras que lees en un minuto. 200 es un ritmo tranquilo en tu propio idioma; en un idioma que estás aprendiendo suele ser 100-150."
   },
 
-  "options_reading_pace_more": {
-    "message": "El número de palabras que lees en un minuto. 200 es un ritmo tranquilo en tu propio idioma; en un idioma que estás aprendiendo suele ser 100-150.",
-    "description": "The rest of the options_reading_pace_hint description, behind the row's More button."
-  },
-  "options_quiet_bubble_hint": {
-    "message": "La burbuja muestra entonces solo la traducción; en una pantalla táctil los botones aparecen al tocarla."
-  },
 
-  "options_quiet_bubble_more": {
-    "message": "Los botones de acción son copiar, guardar, leer en voz alta y los demás - todas las acciones de la burbuja, a un toque.",
-    "description": "The rest of the options_quiet_bubble_hint description, behind the row's More button."
-  },
   "options_bubble_more": { "message": "Mostrar enseguida la frase y las entradas del diccionario" },
   "options_bubble_more_hint": {
-    "message": "La burbuja muestra enseguida la frase traducida y las entradas del diccionario, sin pulsar «Más»."
+    "message": "Muestra las entradas del diccionario y la frase traducida, sin pulsar «Más». Merece la pena dejarlo activado cuando tienes un diccionario: la traducción de una palabra suelta por el modelo suele ser errónea, mientras que el diccionario da las definiciones exactas. La burbuja sobre una expresión guardada antes muestra solo la traducción guardada - la frase y las entradas del diccionario aparecen al pulsar «Más»."
   },
 
-  "options_bubble_more_more": {
-    "message": "Merece la pena dejarlo activado con un diccionario instalado: la traducción de una palabra suelta suele ser errónea, y el diccionario muestra lo que significa de verdad. La burbuja sobre una expresión ya guardada muestra solo la traducción guardada - la frase y las entradas del diccionario aparecen al pulsar «Más».",
-    "description": "The rest of the options_bubble_more_hint description, behind the row's More button."
-  },
   "options_underline_forms": { "message": "Subrayar también otras formas de las palabras guardadas" },
   "options_underline_forms_hint": {
     "message": "Al guardar «read», «reads» y «reading» quedan subrayadas también."
@@ -1809,18 +1784,14 @@
   },
 
   "options_save_sentence_more": {
-    "message": "La oración tal como la muestra la página, sin su traducción. Se muestra bajo la frase en la página de frases guardadas, plegada en una línea, y se escribe en la tercera columna de la exportación para Anki. Para una frase guardada sin oración, la oración que la rodea se guarda la próxima vez que abre su burbuja en una página. Como la frase, la oración se guarda solo en este dispositivo. Desactivado, no se guarda ninguna oración nueva; las ya guardadas no se eliminan.",
+    "message": "La oración se muestra después bajo la frase en la página de frases guardadas. Si una frase se guardó antes sin oración, la oración que la rodea se guarda la próxima vez que abres su burbuja en una página. Como la frase, la oración se guarda solo en este dispositivo. Desactivado, no se guarda ninguna oración nueva, pero las guardadas antes no se eliminan.",
     "description": "The rest of the options_save_sentence_hint description, behind the row's More button."
   },
   "options_no_translation": { "message": "Usar sin modelo de traducción" },
   "options_no_translation_hint": {
-    "message": "Solo diccionarios, sin traducción automática; la vista de lectura, la lista de lectura sin conexión y el marcador siguen funcionando."
+    "message": "Con esta opción activada, la burbuja sigue mostrando significados de los diccionarios, y puedes guardar frases y ver sus subrayados. Ideal para leer con diccionarios o en tu idioma materno."
   },
 
-  "options_no_translation_more": {
-    "message": "Con un par de idiomas elegido, la burbuja sigue mostrando significados de los diccionarios, y puedes guardar frases y ver sus subrayados. Ideal para leer con diccionarios o en tu idioma materno. Tus datos guardados no se borran y vuelven al desactivar esta opción.",
-    "description": "The rest of the options_no_translation_hint description, behind the row's More button."
-  },
   "options_bubble_off": { "message": "No mostrar la burbuja al seleccionar texto" },
   "options_bubble_off_hint": {
     "message": "En una página normal, seleccionar texto no hace nada - abre una página en la vista de lectura con el botón de re/read o con Alt+Mayús+R."
@@ -1958,13 +1929,9 @@
   "options_tts_default": { "message": "Voz predeterminada" },
   "options_tts_listen": { "message": "Escuchar" },
   "options_tts_voice_hint": {
-    "message": "Una voz distinta para cada idioma; solo se ofrecen voces que hablan sin conexión."
+    "message": "Una voz distinta para cada idioma; solo se ofrecen voces que hablan sin conexión. La voz se genera en este dispositivo y no se envía nada a internet."
   },
 
-  "options_tts_voice_more": {
-    "message": "La voz lee tanto frases como artículos enteros. La voz se genera en este dispositivo y no se envía nada a internet.",
-    "description": "The rest of the options_tts_voice_hint description, behind the row's More button."
-  },
   "speech_no_offline_voice": { "message": "Este dispositivo no tiene una voz sin conexión para este idioma." },
   "options_tts_rate": { "message": "Velocidad de la voz" },
   "options_models_heading": { "message": "Modelos de traducción" },
@@ -1972,7 +1939,7 @@
     "message": "El modelo de traducción se descarga por separado para cada par de idiomas. Son archivos oficiales de Mozilla; la traducción ocurre por completo en este dispositivo."
   },
   "options_models_single_word": {
-    "message": "Un modelo traduce bien las frases, pero una palabra suelta suele traducirse mal - el resultado sale cortado o es una palabra que no existe. Para palabras sueltas la mejor fuente es un diccionario: la sección"
+    "message": "¡Atención! Un modelo traduce bien las frases, pero una palabra suelta suele traducirse mal - el resultado sale cortado o es una palabra que no existe. Para palabras sueltas la mejor fuente es un diccionario: la sección"
   },
 
   "options_models_single_word_rest": {
@@ -1980,17 +1947,33 @@
     "description": "Closes options_models_single_word after the link to the Dictionaries section."
   },
   "options_update_list": { "message": "Actualizar la lista" },
-  "options_list_dated": { "message": "Lista del" },
+  "options_list_dated_models": { "message": "La lista de modelos para descargar es del" },
+  "options_list_dated_dictionaries": { "message": "La lista de diccionarios para descargar es del" },
+  "options_update_list_link": { "message": "haz clic para actualizarla" },
+  "options_filter_search": { "message": "Buscar" },
   "options_filter_placeholder": { "message": "Filtra por idioma o código" },
   "options_filter_models_label": { "message": "Filtrar la lista de modelos de traducción" },
   "options_filter_dictionaries_label": { "message": "Filtrar la lista de diccionarios" },
   "options_list_installed": {
-    "message": "En este dispositivo",
-    "description": "Heading of the block listing what is already on this device, in both the models and the dictionaries subsection."
+    "message": "Descargados por ti:",
+    "description": "Heading of the block listing what is already on this device, in both the models and the dictionaries subsection. Ends in a colon: it labels the list under it."
   },
-  "options_list_available": {
-    "message": "Para descargar",
-    "description": "Heading of the block holding the catalogue: the filter, the list to download from and the by-hand doors."
+  "options_list_available_models": {
+    "message": "Descargar modelos",
+    "description": "Heading of the models' catalogue block: the filter, the list to download from and the by-hand door. Named for what a press there does, not for what the block is."
+  },
+
+  "options_list_available_models_more": {
+    "message": "Descargar más modelos"
+  },
+
+  "options_list_available_dictionaries": {
+    "message": "Descargar diccionarios",
+    "description": "Heading of the dictionaries' catalogue block: the filter, the list to download from and the two by-hand doors."
+  },
+
+  "options_list_available_dictionaries_more": {
+    "message": "Descargar más diccionarios"
   },
   "options_no_models_yet": {
     "message": "Todavía no hay ningún modelo de traducción en este dispositivo. Elige un par en la sección",
@@ -2018,7 +2001,7 @@
   "options_show_fewer": { "message": "Mostrar menos" },
   "options_model_note_from": { "message": "Los modelos se descargan de" },
   "options_model_note_rest": {
-    "message": "- ahí los publica Mozilla. La extensión se conecta a este servidor público solo cuando pulsas Actualizar la lista o Descargar. No se envía ningún dato personal."
+    "message": "- ahí los publica Mozilla. La extensión se conecta a este servidor público solo con dos pulsaciones: la que actualiza la lista de modelos y Descargar en un modelo que has elegido."
   },
   "options_add_model_heading": { "message": "Añadir un modelo desde archivos" },
   "options_add_model_summary": {
@@ -2033,17 +2016,14 @@
   },
   "options_dictionaries_heading": { "message": "Diccionarios" },
   "options_dictionaries_intro": {
-    "message": "Añade diccionarios para ver definiciones detalladas de las palabras en la burbuja de traducción."
+    "message": "Añade diccionarios para ver definiciones detalladas de las palabras en la burbuja de traducción. La burbuja muestra las entradas en el orden de abajo, idioma por idioma. Las flechas lo cambian."
   },
   "options_dictionaries_sources": {
     "message": "Los diccionarios del catálogo vienen de WikDict. Puedes añadir los tuyos desde un archivo o desde un enlace, también varios para un mismo idioma. Las fuentes, cada una con su licencia:"
   },
-  "options_dictionary_order_hint": {
-    "message": "La burbuja muestra las entradas en el orden de abajo, idioma por idioma. Las flechas lo cambian."
-  },
   "options_dictionary_note_from": { "message": "Los diccionarios se descargan de" },
   "options_dictionary_note_rest": {
-    "message": "- ahí publica WikDict los diccionarios que construye a partir de Wiktionary (CC BY-SA). La extensión se conecta a este servidor público solo cuando pulsas Actualizar la lista o Descargar. No se envía ningún dato personal."
+    "message": "- ahí publica WikDict los diccionarios que construye a partir de Wiktionary (CC BY-SA). La extensión se conecta a este servidor público solo con dos pulsaciones: la que actualiza la lista de diccionarios y Descargar en un diccionario que has elegido."
   },
   "options_add_dictionary_heading": { "message": "Añadir un diccionario desde archivos" },
   "options_add_dictionary_summary": {
@@ -2065,14 +2045,11 @@
   },
   "options_add_link_heading": { "message": "Añadir un diccionario desde un enlace" },
   "options_add_link_summary": {
-    "message": "Pega la dirección de un diccionario StarDict empaquetado en un archivo .zip, elige los idiomas y pulsa Descargar. La extensión se conecta a esa dirección una sola vez, cuando pulsas el botón, y a ninguna otra; no se envía nada tuyo. El archivo se descomprime y se comprueba en este dispositivo, exactamente igual que los archivos que eliges tú."
+    "message": "Pega la dirección de un diccionario StarDict comprimido en un archivo .zip, elige los idiomas y pulsa Descargar. La extensión descarga el archivo del enlace, lo descomprime y lo comprueba en este dispositivo, igual que los archivos que eliges tú. Solo se aceptan direcciones https. Un archivo que no sea .zip (.tar.xz, .tar.zst) hay que descomprimirlo y añadirlo desde archivos."
   },
   "options_link_label": { "message": "Dirección" },
   "options_link_sources": {
-    "message": "Dónde encontrar diccionarios, también monolingües - inglés-inglés, por ejemplo - cada uno con su licencia:"
-  },
-  "options_link_note": {
-    "message": "Solo se aceptan direcciones https. Un archivo que no sea .zip (.tar.xz, .tar.zst) hay que descomprimirlo y añadirlo desde archivos."
+    "message": "Encontrarás enlaces a diccionarios en"
   },
   "options_downloading_link": {
     "message": "Descargando de $HOST$...",
@@ -2160,6 +2137,16 @@
   "options_delete_dictionary_aria": {
     "message": "Eliminar el diccionario $NAME$",
     "placeholders": { "name": { "content": "$1" } }
+  },
+
+  "options_dictionary_details_aria": {
+    "message": "Detalles de $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "WikDict English-Polish"
+      }
+    }
   },
   "options_delete_confirm_aria": {
     "message": "Confirmar la eliminación: $NAME$",

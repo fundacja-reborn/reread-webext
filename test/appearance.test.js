@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { applyReading, applyTheme } from "../src/lib/appearance.js";
+import { applyReading, applyTheme, paperFor } from "../src/lib/appearance.js";
 import { READER_DEFAULTS } from "../src/lib/config.js";
 
 /**
@@ -40,6 +40,26 @@ describe("applyTheme", () => {
     applyTheme(root, "dark");
     applyTheme(root, "auto");
     assert.equal(root.dataset["readerTheme"], "auto");
+  });
+});
+
+describe("paperFor", () => {
+  it("hands back the theme it was given", () => {
+    for (const theme of /** @type {const} */ (["auto", "light", "dark", "sepia", "eink"])) {
+      assert.equal(paperFor(theme, undefined), theme);
+    }
+  });
+
+  it("answers the one paper a page does not have with the light one (D265)", () => {
+    // The settings say this of sepia: it is a paper for reading long text
+    // with less blue light in it, and a page of controls is not that. Light
+    // rather than `auto`, because sepia is a light paper - handing the page
+    // back to a dark browser would be the bigger jump of the two.
+    assert.equal(paperFor("sepia", "sepia"), "light");
+    // And every other choice is untouched by it.
+    for (const theme of /** @type {const} */ (["auto", "light", "dark", "eink"])) {
+      assert.equal(paperFor(theme, "sepia"), theme);
+    }
   });
 });
 

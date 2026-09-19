@@ -32,7 +32,7 @@
   "private_browsing_note": { "message": "Vous êtes en navigation privée. Le navigateur utilise pour cette page une base de données séparée, qu'il supprime à la fin de la session privée : la liste de lecture et les surlignages que vous voyez ici proviennent de leurs copies, et un article enregistré, un livre importé, un surlignage fait ou tout ce qui est supprimé ici disparaît avec la session. Seule exception : les phrases enregistrées, qui sont conservées. Pour tout le reste, ouvrez re/read dans un onglet normal." },
   "saved_phrases": { "message": "Phrases enregistrées" },
   "open_reader": { "message": "Ouvrir en mode lecture" },
-  "quiet_bubble": { "message": "N'afficher les boutons de la bulle qu'après un clic" },
+  "quiet_bubble": { "message": "N'afficher les boutons d'action de la bulle de traduction qu'après un clic" },
   "action_delete": { "message": "Supprimer" },
   "action_download": { "message": "Télécharger" },
   "action_cancel": { "message": "Annuler" },
@@ -1376,6 +1376,7 @@
   },
 
   "options_title": { "message": "re/read - paramètres" },
+  "options_heading_named": { "message": "Paramètres de re/read" },
   "back_to_reading": {"message": "Retour à la lecture"},
   "options_local_intro": {
     "message": "Tout ce que fait re/read se passe sur cet appareil (hors ligne) : la traduction, le dictionnaire, la liste de lecture, les phrases enregistrées. Rien de ce que vous lisez ou sélectionnez n'est envoyé nulle part. Une connexion Internet n'est nécessaire que pour télécharger un nouveau modèle de traduction ou un dictionnaire - et seulement depuis les deux adresses indiquées dans les sections"
@@ -1457,13 +1458,10 @@
     }
   },
 
-  "options_step_model": {
-    "message": "Télécharger un modèle de traduction"
+  "options_step_source": {
+    "message": "Télécharger un modèle de traduction ou un dictionnaire"
   },
 
-  "options_step_dictionary": {
-    "message": "Télécharger un dictionnaire (facultatif)"
-  },
 
   "options_step_pin": {
     "message": "Épingler re/read à la barre d'outils"
@@ -1686,7 +1684,7 @@
   },
 
   "options_first_steps_intro": {
-    "message": "Rien ne se traduit encore - le modèle qui s'en chargerait n'est pas encore sur cet appareil. La mise en place prend une minute :"
+    "message": "re/read a besoin de quelque chose pour expliquer les mots : un modèle de traduction ou un dictionnaire. L'un des deux suffit, l'autre peut venir plus tard."
   },
   "options_first_steps_pin": {
     "message": "Enfin, épinglez re/read à la barre d'outils : l'icône en forme de pièce de puzzle à droite de la barre, puis l'engrenage à côté de re/read et « Épingler à la barre d’outils ». Le bouton ouvre le lecteur, la liste de lecture, vos phrases enregistrées et l'interrupteur du site où vous êtes."
@@ -1737,26 +1735,18 @@
   },
   "options_reader_only": { "message": "Afficher les soulignements et la bulle uniquement dans le lecteur" },
   "options_reader_only_hint": {
-    "message": "Sur une page ordinaire, après une sélection de texte, une bulle apparaît avec deux boutons : ouvrir la page dans le lecteur et aller à la liste de lecture."
+    "message": "Sur une page ordinaire, après une sélection de texte, une bulle avec deux boutons apparaît à la place de la bulle de traduction : ouvrir la page dans le lecteur et aller à la liste de lecture."
   },
 
-  "options_reader_only_more": {
-    "message": "Lorsqu'elle est activée, aucune page web ne peut savoir lesquels de ses mots vous avez enregistrés. Sur Android et iOS, l'option est activée par défaut.",
-    "description": "The rest of the options_reader_only_hint description, behind the row's More button."
-  },
 
   "options_page_number": { "message": "Afficher le numéro de page" },
   "options_page_number_hint": {
     "message": "La page en cours et le nombre total, par exemple 3 / 12, en bas de la fenêtre."
   },
 
-  "options_page_number_more": {
-    "message": "Désactivé, le texte de chaque page descend plus bas ; les lecteurs d'écran lisent toujours le compteur, et sur un écran large il est affiché dans la barre à côté de re/read.",
-    "description": "The rest of the options_page_number_hint description, behind the row's More button."
-  },
   "options_paged_heading": { "message": "Affichage Pages" },
   "options_paged_intro": {
-    "message": "Ils s'appliquent dans le lecteur, en affichage Pages : le texte avance par pages entières, chacune commençant et finissant par une ligne entière."
+    "message": "Ces options agissent dans la vue lecture lorsque, dans le panneau Aa, l'affichage est réglé sur Pages au lieu de Défilement."
   },
   "options_touch_turn": { "message": "Tourner les pages au toucher" },
   "options_touch_turn_zones": { "message": "Toucher le côté gauche ou droit de l'écran" },
@@ -1772,13 +1762,17 @@
     "message": "Le toucher ne tourne aucune page. Les touches de page, les flèches et la molette continuent de le faire."
   },
   "options_turn_effect": { "message": "Effet de changement de page" },
-  "options_turn_effect_auto": { "message": "Automatique" },
+  "options_turn_effect_smooth": { "message": "Glissement fluide" },
+  "options_turn_effect_flash": { "message": "Flash sombre (e-ink)" },
   "options_turn_effect_off": { "message": "Désactivé" },
   "options_turn_effect_hint": {
-    "message": "Une confirmation visible du changement de page."
+    "message": "Une confirmation visible que la page a changé."
   },
-  "options_turn_effect_note_auto": {
-    "message": "Dans le thème E-ink, la zone de texte s'assombrit un instant, comme sur une liseuse ; sur les autres écrans, la nouvelle page apparaît avec un glissement doux."
+  "options_turn_effect_note_smooth": {
+    "message": "La nouvelle page arrive avec un glissement fluide."
+  },
+  "options_turn_effect_note_flash": {
+    "message": "La zone de texte s'assombrit un instant. Sur un écran e-ink cela se voit à peine et aide à effacer les images fantômes ; sur un écran ordinaire, c'est un flash sombre bien visible."
   },
   "options_turn_effect_note_off": {
     "message": "La page change simplement, comme avant ce réglage."
@@ -1792,42 +1786,23 @@
     "message": "Vos pages enregistrées, vos surlignages et votre progression de lecture sont préservés même si le site d'origine change ou disparaît.",
     "description": "The rest of the options_keep_articles_hint description, behind the row's More button."
   },
-  "options_font_custom": { "message": "Police personnelle" },
+  "options_font_custom": { "message": "Police personnalisée" },
   "options_font_custom_hint": {
-    "message": "Une police installée sur cet appareil, par exemple Noto Serif. Dans le panneau Aa, elle apparaît dans la ligne Police comme Personnalisée."
+    "message": "Indiquez le nom d'une police installée sur cet appareil, par exemple Noto Serif. Pour que re/read l'utilise, ouvrez le panneau Aa et choisissez Personnalisée dans la ligne Police. Laissez le champ vide pour utiliser les polices par défaut."
   },
 
-  "options_font_custom_more": {
-    "message": "Saisissez le nom tel que le système l'écrit. Laissez le champ vide pour n'utiliser que les polices intégrées.",
-    "description": "The rest of the options_font_custom_hint description, behind the row's More button."
-  },
   "options_reading_pace": { "message": "Vitesse de lecture" },
   "options_reading_pace_unit": { "message": "mots par minute" },
   "options_reading_pace_hint": {
-    "message": "Sert uniquement à estimer le temps de lecture affiché dans la liste de lecture et sous le titre d'un article."
+    "message": "Sert uniquement à estimer le temps de lecture affiché dans la liste de lecture et sous le titre d'un article. C'est le nombre de mots que vous lisez en une minute. 200 est un rythme tranquille dans votre propre langue ; dans une langue que vous apprenez, c'est généralement 100-150."
   },
 
-  "options_reading_pace_more": {
-    "message": "Le nombre de mots que vous lisez en une minute. 200 est un rythme tranquille dans votre propre langue ; dans une langue que vous apprenez, c'est généralement 100-150.",
-    "description": "The rest of the options_reading_pace_hint description, behind the row's More button."
-  },
-  "options_quiet_bubble_hint": {
-    "message": "La bulle n'affiche alors que la traduction ; sur un écran tactile, les boutons apparaissent après avoir touché la bulle."
-  },
 
-  "options_quiet_bubble_more": {
-    "message": "Les boutons d'action sont copier, enregistrer, lire à voix haute et les autres - toutes les actions de la bulle, à un appui près.",
-    "description": "The rest of the options_quiet_bubble_hint description, behind the row's More button."
-  },
   "options_bubble_more": { "message": "Afficher tout de suite la phrase et les entrées du dictionnaire" },
   "options_bubble_more_hint": {
-    "message": "La bulle affiche tout de suite la phrase traduite et les entrées du dictionnaire, sans appui sur « Plus »."
+    "message": "Affiche les entrées du dictionnaire et la phrase traduite, sans appui sur « Plus ». À garder activé lorsque vous avez un dictionnaire : la traduction d'un mot isolé par le modèle est souvent fausse, tandis que le dictionnaire donne les définitions exactes. La bulle au-dessus d'une expression enregistrée auparavant n'affiche que la traduction enregistrée - la phrase et les entrées du dictionnaire apparaissent après un appui sur « Plus »."
   },
 
-  "options_bubble_more_more": {
-    "message": "À garder activé avec un dictionnaire installé : la traduction d'un mot isolé est souvent fausse, et le dictionnaire montre ce qu'il veut vraiment dire. La bulle au-dessus d'une expression déjà enregistrée n'affiche que la traduction enregistrée - la phrase et les entrées du dictionnaire apparaissent après un appui sur « Plus ».",
-    "description": "The rest of the options_bubble_more_hint description, behind the row's More button."
-  },
   "options_underline_forms": { "message": "Souligner aussi les autres formes des mots enregistrés" },
   "options_underline_forms_hint": {
     "message": "Après l'enregistrement de « read », « reads » et « reading » sont soulignés eux aussi."
@@ -1843,18 +1818,14 @@
   },
 
   "options_save_sentence_more": {
-    "message": "La phrase telle que la page l'affiche, sans sa traduction. Elle est affichée sous l'expression dans la liste des expressions enregistrées, repliée sur une ligne, et écrite dans la troisième colonne de l'export pour Anki. Pour une expression enregistrée sans phrase, la phrase qui l'entoure est enregistrée la prochaine fois que vous ouvrez sa bulle sur une page. Comme l'expression, la phrase est conservée uniquement sur cet appareil. Désactivé, aucune nouvelle phrase n'est enregistrée ; celles déjà enregistrées ne sont pas supprimées.",
+    "message": "La phrase est ensuite affichée sous l'expression dans la liste des expressions enregistrées. Si une expression a été enregistrée auparavant sans phrase, la phrase qui l'entoure est enregistrée la prochaine fois que vous ouvrez sa bulle sur une page. Comme l'expression, la phrase est conservée uniquement sur cet appareil. Désactivé, aucune nouvelle phrase n'est enregistrée, mais celles enregistrées auparavant ne sont pas supprimées.",
     "description": "The rest of the options_save_sentence_hint description, behind the row's More button."
   },
   "options_no_translation": { "message": "Utiliser sans modèle de traduction" },
   "options_no_translation_hint": {
-    "message": "Les dictionnaires seuls, sans traduction automatique ; le lecteur, la liste de lecture hors ligne et le surligneur continuent de fonctionner."
+    "message": "Quand cette option est activée, la bulle affiche toujours les sens des dictionnaires, et vous pouvez enregistrer des phrases et voir leurs soulignements. Idéal pour lire avec des dictionnaires ou dans votre langue maternelle."
   },
 
-  "options_no_translation_more": {
-    "message": "Avec une paire de langues choisie, la bulle affiche toujours les sens des dictionnaires, et vous pouvez enregistrer des phrases et voir leurs soulignements. Idéal pour lire avec des dictionnaires ou dans votre langue maternelle. Vos données enregistrées ne sont pas supprimées et reviennent quand vous désactivez cette option.",
-    "description": "The rest of the options_no_translation_hint description, behind the row's More button."
-  },
   "options_bubble_off": { "message": "Ne pas afficher la bulle à la sélection de texte" },
   "options_bubble_off_hint": {
     "message": "Sur une page ordinaire, sélectionner du texte ne fait rien du tout - ouvrez une page dans le lecteur avec le bouton de re/read ou avec Alt+Maj+R."
@@ -2002,13 +1973,9 @@
   "options_tts_default": { "message": "Voix par défaut" },
   "options_tts_listen": { "message": "Écouter" },
   "options_tts_voice_hint": {
-    "message": "Une voix distincte pour chaque langue ; seules les voix qui parlent hors ligne sont proposées."
+    "message": "Une voix distincte pour chaque langue ; seules les voix qui parlent hors ligne sont proposées. La parole est produite sur cet appareil et rien n'est envoyé sur Internet."
   },
 
-  "options_tts_voice_more": {
-    "message": "La voix lit aussi bien les phrases que les articles entiers. La parole est produite sur cet appareil et rien n'est envoyé sur Internet.",
-    "description": "The rest of the options_tts_voice_hint description, behind the row's More button."
-  },
   "speech_no_offline_voice": { "message": "Cet appareil n'a pas de voix hors ligne pour cette langue." },
   "options_tts_rate": { "message": "Vitesse de la voix" },
   "options_models_heading": { "message": "Modèles de traduction" },
@@ -2016,7 +1983,7 @@
     "message": "Un modèle de traduction se télécharge séparément pour chaque paire de langues. Ce sont des fichiers officiels de Mozilla ; la traduction se fait entièrement sur cet appareil."
   },
   "options_models_single_word": {
-    "message": "Un modèle traduit bien les phrases, mais un mot isolé est souvent mal traduit - le résultat est tronqué, ou n'existe pas dans la langue. Pour les mots isolés, la meilleure source est un dictionnaire : la section"
+    "message": "Attention ! Un modèle traduit bien les phrases, mais un mot isolé est souvent mal traduit - le résultat est tronqué, ou n'existe pas dans la langue. Pour les mots isolés, la meilleure source est un dictionnaire : la section"
   },
 
   "options_models_single_word_rest": {
@@ -2024,17 +1991,33 @@
     "description": "Closes options_models_single_word after the link to the Dictionaries section."
   },
   "options_update_list": { "message": "Mettre à jour la liste" },
-  "options_list_dated": { "message": "Liste du" },
+  "options_list_dated_models": { "message": "La liste des modèles à télécharger date du" },
+  "options_list_dated_dictionaries": { "message": "La liste des dictionnaires à télécharger date du" },
+  "options_update_list_link": { "message": "cliquez pour la mettre à jour" },
+  "options_filter_search": { "message": "Rechercher" },
   "options_filter_placeholder": { "message": "Filtrer par langue ou par code" },
   "options_filter_models_label": { "message": "Filtrer la liste des modèles de traduction" },
   "options_filter_dictionaries_label": { "message": "Filtrer la liste des dictionnaires" },
   "options_list_installed": {
-    "message": "Sur cet appareil",
-    "description": "Heading of the block listing what is already on this device, in both the models and the dictionaries subsection."
+    "message": "Téléchargés par vous :",
+    "description": "Heading of the block listing what is already on this device, in both the models and the dictionaries subsection. Ends in a colon: it labels the list under it."
   },
-  "options_list_available": {
-    "message": "À télécharger",
-    "description": "Heading of the block holding the catalogue: the filter, the list to download from and the by-hand doors."
+  "options_list_available_models": {
+    "message": "Télécharger des modèles",
+    "description": "Heading of the models' catalogue block: the filter, the list to download from and the by-hand door. Named for what a press there does, not for what the block is."
+  },
+
+  "options_list_available_models_more": {
+    "message": "Télécharger d'autres modèles"
+  },
+
+  "options_list_available_dictionaries": {
+    "message": "Télécharger des dictionnaires",
+    "description": "Heading of the dictionaries' catalogue block: the filter, the list to download from and the two by-hand doors."
+  },
+
+  "options_list_available_dictionaries_more": {
+    "message": "Télécharger d'autres dictionnaires"
   },
   "options_no_models_yet": {
     "message": "Aucun modèle de traduction sur cet appareil. Choisissez une paire dans la section",
@@ -2062,7 +2045,7 @@
   "options_show_fewer": { "message": "Afficher moins" },
   "options_model_note_from": { "message": "Les modèles sont téléchargés depuis" },
   "options_model_note_rest": {
-    "message": "- c'est là que Mozilla les publie. L'extension ne se connecte à ce serveur public que lorsque vous cliquez sur Mettre à jour la liste ou Télécharger. Aucune donnée personnelle n'est transmise."
+    "message": "- c'est là que Mozilla les publie. L'extension ne se connecte à ce serveur public que sur deux appuis : celui qui met à jour la liste des modèles, et Télécharger pour un modèle choisi."
   },
   "options_add_model_heading": { "message": "Ajouter un modèle depuis des fichiers" },
   "options_add_model_summary": {
@@ -2077,17 +2060,14 @@
   },
   "options_dictionaries_heading": { "message": "Dictionnaires" },
   "options_dictionaries_intro": {
-    "message": "Ajoutez des dictionnaires pour voir des définitions détaillées des mots dans la bulle de traduction."
+    "message": "Ajoutez des dictionnaires pour voir des définitions détaillées des mots dans la bulle de traduction. La bulle affiche les entrées dans l'ordre ci-dessous, langue par langue. Les flèches le modifient."
   },
   "options_dictionaries_sources": {
     "message": "Les dictionnaires du catalogue viennent de WikDict. Vous pouvez ajouter les vôtres depuis un fichier ou depuis un lien, et plusieurs pour une même langue. Les sources, chacune avec sa licence :"
   },
-  "options_dictionary_order_hint": {
-    "message": "La bulle affiche les entrées dans l'ordre ci-dessous, langue par langue. Les flèches le modifient."
-  },
   "options_dictionary_note_from": { "message": "Les dictionnaires sont téléchargés depuis" },
   "options_dictionary_note_rest": {
-    "message": "- c'est là que WikDict publie les dictionnaires qu'il construit à partir du Wiktionnaire (CC BY-SA). L'extension ne se connecte à ce serveur public que lorsque vous cliquez sur Mettre à jour la liste ou Télécharger. Aucune donnée personnelle n'est transmise."
+    "message": "- c'est là que WikDict publie les dictionnaires qu'il construit à partir du Wiktionnaire (CC BY-SA). L'extension ne se connecte à ce serveur public que sur deux appuis : celui qui met à jour la liste des dictionnaires, et Télécharger pour un dictionnaire choisi."
   },
   "options_add_dictionary_heading": { "message": "Ajouter un dictionnaire depuis des fichiers" },
   "options_add_dictionary_summary": {
@@ -2109,14 +2089,11 @@
   },
   "options_add_link_heading": { "message": "Ajouter un dictionnaire depuis un lien" },
   "options_add_link_summary": {
-    "message": "Collez l'adresse d'un dictionnaire StarDict compressé en fichier .zip, choisissez les langues et cliquez sur Télécharger. L'extension se connecte une seule fois à cette adresse, quand vous cliquez sur le bouton, et à aucune autre ; rien de vous n'est envoyé. L'archive est décompressée et vérifiée sur cet appareil, exactement comme des fichiers que vous choisissez vous-même."
+    "message": "Collez l'adresse d'un dictionnaire StarDict compressé en fichier .zip, choisissez les langues et appuyez sur Télécharger. L'extension récupère l'archive depuis le lien, la décompresse et la vérifie sur cet appareil, exactement comme les fichiers que vous choisissez vous-même. Seules les adresses https sont acceptées. Une archive qui n'est pas un fichier .zip (.tar.xz, .tar.zst) doit être décompressée et ajoutée depuis des fichiers."
   },
   "options_link_label": { "message": "Adresse" },
   "options_link_sources": {
-    "message": "Où trouver des dictionnaires, y compris unilingues - anglais-anglais, par exemple - chacun avec sa licence :"
-  },
-  "options_link_note": {
-    "message": "Seules les adresses https sont acceptées. Une archive qui n'est pas un fichier .zip (.tar.xz, .tar.zst) doit être décompressée et ajoutée depuis des fichiers."
+    "message": "Vous trouverez des liens vers des dictionnaires sur"
   },
   "options_downloading_link": {
     "message": "Téléchargement depuis $HOST$...",
@@ -2204,6 +2181,16 @@
   "options_delete_dictionary_aria": {
     "message": "Supprimer le dictionnaire $NAME$",
     "placeholders": { "name": { "content": "$1" } }
+  },
+
+  "options_dictionary_details_aria": {
+    "message": "Détails de $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "WikDict English-Polish"
+      }
+    }
   },
   "options_delete_confirm_aria": {
     "message": "Confirmer la suppression : $NAME$",

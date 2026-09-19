@@ -138,9 +138,12 @@ moreNotes();
 // say so (Chromium, no theme_icons there) - a no-op on Firefox.
 watchToolbarScheme();
 // The paper follows the theme the Aa panels write (D104): this page has no
-// content of its own to dress, but walking here from a sepia article must
-// not flash a white room.
-followTheme();
+// content of its own to dress, but walking here from a dark article must not
+// flash a white room. All but one paper: sepia is for reading long text with
+// less blue light in it, and a page of controls is not that (D265, Michał's
+// call) - it answers with the light paper, which is the same brightness a
+// reader who chose sepia is already in.
+followTheme({ without: "sepia" });
 // Then the page's own navigation (D254): the table of contents beside the
 // page, the same list in the bar's select, the marker that follows the
 // reading, and the landing every address makes. After `localizePage`,
@@ -254,7 +257,6 @@ function renderFirstSteps() {
 
   const view = stepsView({
     model: modelStored,
-    translationOff: config.translationOff,
     dictionary: dictionaryStored,
     pinned: pinnedNow === null ? stepsState.pinned : pinnedNow,
     hidden: stepsState.hidden,
@@ -275,7 +277,7 @@ function renderFirstSteps() {
   const intro = document.getElementById("first-steps-intro");
   if (intro !== null) intro.hidden = !view.intro;
 
-  const rows = ["step-model", "step-dictionary", "step-pin"];
+  const rows = ["step-source", "step-pin"];
   rows.forEach((id, at) => {
     const row = document.getElementById(id);
     if (row === null) return;
@@ -288,9 +290,15 @@ function renderFirstSteps() {
     const state = row.querySelector(".step-state");
     if (state !== null) state.textContent = done ? t("options_step_done_state") : t("options_step_todo_state");
     // The way to the section is offered only while there is something to do
-    // there; the pinning step's own two buttons follow the same rule.
-    for (const door of row.querySelectorAll(".step-door, .step-done")) {
+    // there; the pinning step's own two buttons - "How" and "Done" - follow
+    // the same rule, and what "How" opened goes with them.
+    for (const door of row.querySelectorAll(".step-door, .step-done, .note-more")) {
       if (door instanceof HTMLElement) door.hidden = done;
+    }
+    if (id === "step-pin" && done) {
+      const help = document.getElementById("first-steps-pin");
+      if (help !== null) help.hidden = true;
+      document.getElementById("step-pin-how")?.setAttribute("aria-expanded", "false");
     }
   });
 
@@ -485,7 +493,11 @@ function sayGesture(gesture) {
 function sayEffect(effect) {
   const note = document.getElementById("turn-effect-note");
   if (note === null) return;
-  note.textContent = effect === "off" ? t("options_turn_effect_note_off") : t("options_turn_effect_note_auto");
+  // Every key written out: one built from the value is a key the catalogue
+  // tests cannot see (`lib/messages.js`).
+  if (effect === "off") note.textContent = t("options_turn_effect_note_off");
+  else if (effect === "flash") note.textContent = t("options_turn_effect_note_flash");
+  else note.textContent = t("options_turn_effect_note_smooth");
 }
 
 /** The quiet-bubble switch (D81) - stored plainly, no platform in the picture. */
@@ -853,12 +865,25 @@ function moreNotes() {
       button.remove();
       continue;
     }
-    button.addEventListener("click", () => {
-      const opening = rest.hidden;
-      rest.hidden = !opening;
-      button.setAttribute("aria-expanded", String(opening));
-    });
+    armMore(button, rest);
   }
+}
+
+/**
+ * One fold, wired: the trigger says whether it is open and the paragraph
+ * behind it answers. The page's own Mores are wired once at the start
+ * (`moreNotes`); a row the script draws - a dictionary's details - wires its
+ * own as it is built, because there is no markup for it to be found in.
+ *
+ * @param {HTMLButtonElement} button
+ * @param {HTMLElement} rest
+ */
+function armMore(button, rest) {
+  button.addEventListener("click", () => {
+    const opening = rest.hidden;
+    rest.hidden = !opening;
+    button.setAttribute("aria-expanded", String(opening));
+  });
 }
 
 /**
@@ -1203,6 +1228,112 @@ function focusDeleteIn(containerId, emptyId, at) {
 }
 
 /**
+ * The line a downloading row says everything in: how far the download has
+ * got, and what came of it (Michał's smoke, 2026-09-19). Before this it was
+ * said at the top of the page, where a catalogue of four hundred rows puts it
+ * well outside the window - and the row the press was in disappeared at the
+ * same moment, because the pair had stopped being on offer. Somebody who
+ * pressed Download watched their row vanish and was told nothing they could
+ * see.
+ *
+ * Put in place empty, before there is anything to say: a live region that
+ * arrives with its text already in it announces nothing, and this line is
+ * what a screen reader hears as well as what the eye reads.
+ *
+ * @param {HTMLElement} row
+ * @returns {HTMLElement}
+ */
+function rowLine(row) {
+  const line = element("p", "status");
+  line.setAttribute("role", "status");
+  row.append(line);
+  return line;
+}
+
+/**
+ * Whatever the journey has to say, said in the row it belongs to - or at the
+ * top of the page when there is no row (a redraw that came between, an import
+ * started somewhere else).
+ *
+ * @param {HTMLElement | null} line
+ * @param {(text: string, tone?: "idle" | "busy" | "error") => void} fallback
+ * @returns {(text: string, tone?: "idle" | "busy" | "error") => void}
+ */
+function saysIn(line, fallback) {
+  return (text, tone = "idle") => {
+    if (line === null) {
+      fallback(text, tone);
+      return;
+    }
+    line.textContent = text;
+    line.dataset["tone"] = tone;
+  };
+}
+
+/**
+ * The row once its download is over: the bar and Cancel go and the line stays
+ * with what it has to say. What the row is afterwards depends on how it went.
+ *
+ * It worked: the pair is on the device now, so the row is no longer an offer.
+ * It loses its id - the installed row carries that pair now - and the marks
+ * the filter counts and hides rows by, and it is marked as having said its
+ * piece: the next question asked of the list takes it away (`applyFilterIn`),
+ * so folding the list folds it too (Michał's smoke, 2026-09-19).
+ *
+ * It failed: the pair is still there to fetch, so the row goes on being the
+ * offer it was, marks and all, with the message inside it and the way to try
+ * again in the place the first press was.
+ *
+ * @param {HTMLElement} row
+ * @param {(() => void) | null} retry
+ */
+function rowFinished(row, retry) {
+  for (const gone of row.querySelectorAll("progress, button")) gone.remove();
+  for (const empty of row.querySelectorAll(".dictionary-fetching, .model-meta")) empty.remove();
+  if (retry === null) {
+    row.removeAttribute("id");
+    delete row.dataset["installed"];
+    delete row.dataset["search"];
+    row.dataset["done"] = "";
+    return;
+  }
+  const again = document.createElement("button");
+  again.type = "button";
+  again.textContent = t("action_download");
+  again.addEventListener("click", retry);
+  const head = row.querySelector(".dictionary-head");
+  if (head instanceof HTMLElement) placeActions(head, [again]);
+  else row.querySelector(".model-act")?.append(again);
+}
+
+/**
+ * The row a download has just finished in, kept through the redraw that
+ * follows. Answers with the press that puts it back exactly where it stood,
+ * so what it says stays where the press was.
+ *
+ * Two shapes of redraw to survive: one that no longer builds this row at all
+ * (the pair is on the device now), and one that builds it again as an offer
+ * (the journey failed, so the pair is still there to fetch). The first is put
+ * back at its old place; the second takes the rebuilt row's place, because
+ * the same pair must not stand twice.
+ *
+ * @param {HTMLElement | null} row
+ * @param {string} id the row's own id before it finished
+ * @returns {() => void}
+ */
+function keepRow(row, id) {
+  const parent = row?.parentElement ?? null;
+  if (row === null || parent === null) return () => {};
+  const at = [...parent.children].indexOf(row);
+  return () => {
+    if (row.isConnected || !parent.isConnected) return;
+    const rebuilt = document.getElementById(id);
+    if (rebuilt !== null && rebuilt.parentElement === parent) rebuilt.replaceWith(row);
+    else parent.insertBefore(row, parent.children[at] ?? null);
+  };
+}
+
+/**
  * One row of the model list, always the same three cells - name, sizes,
  * actions - so the stylesheet can lay a phone and a desktop out from the one
  * DOM: one line on a desktop, the name over a right-aligned second line on a
@@ -1308,10 +1439,8 @@ function renderDownloading(container, model, controller) {
   const cancel = document.createElement("button");
   cancel.type = "button";
   cancel.textContent = t("action_cancel");
-  cancel.addEventListener("click", () => {
-    cancel.disabled = true;
-    controller.abort();
-  });
+  // Pressable while it is there, like the dictionary's (`renderFetching`).
+  cancel.addEventListener("click", () => controller.abort());
 
   const act = element("span", "model-act");
   act.append(cancel);
@@ -1382,36 +1511,64 @@ async function download(row, model) {
   const letGo = holdScreen();
 
   // Redrawn with the download already claimed, which is what greys out every
-  // other button on the page; then this one row becomes a progress bar.
+  // other button on the page; then this one row becomes a progress bar, and
+  // the line under it is where the whole journey is said (`rowLine`).
   await renderModels();
   const container = document.getElementById(`model-${row.pair}`);
   const onProgress = container === null ? undefined : renderDownloading(container, model, controller);
-  status(t("options_downloading_model", [pairLabel(model.from, model.to), megabytes(model.downloadBytes)]), "busy");
+  const say = saysIn(container === null ? null : rowLine(container), status);
+  say(t("options_downloading_model", [pairLabel(model.from, model.to), megabytes(model.downloadBytes)]), "busy");
+
+  /**
+   * The row stays where the press was, saying what came of it.
+   *
+   * @param {boolean} stored whether the model is on the device now
+   */
+  const settle = async (stored) => {
+    if (container !== null) rowFinished(container, stored ? null : () => void download(row, model));
+    const putBack = keepRow(container, `model-${row.pair}`);
+    await renderModels();
+    putBack();
+  };
 
   const result = await downloadModel(model, { signal: controller.signal, onProgress });
 
   if (!result.ok) {
     running = null;
     letGo();
-    status(describeDownloadProblem(result.problem, result.detail), result.problem === "cancelled" ? "idle" : "error");
-    await renderModels();
+    say(describeDownloadProblem(result.problem, result.detail), result.problem === "cancelled" ? "idle" : "error");
+    await settle(false);
     return;
   }
 
   // The last rung of the ladder: only the engine can say these bytes are a
   // model. Still holding the download claim, because the trial load is part
   // of the one expensive job - and nothing is stored until it says yes.
-  status(t("options_checking_model", pairLabel(model.from, model.to)), "busy");
+  say(t("options_checking_model", pairLabel(model.from, model.to)), "busy");
   const verdict = await testLoadModel({ from: model.from, to: model.to }, result.value);
   running = null;
   letGo();
 
-  if (!verdict.ok) {
-    status(t("options_model_rejected", aside(verdict.detail)), "error");
-    await renderModels();
+  // The trial load is seconds of engine work with no way in; a press during
+  // it is answered the moment it comes back, before anything is kept.
+  if (controller.signal.aborted) {
+    say(t("download_cancelled"));
+    await settle(false);
     return;
   }
 
+  if (!verdict.ok) {
+    say(t("options_model_rejected", aside(verdict.detail)), "error");
+    await settle(false);
+    return;
+  }
+
+  // From here the bytes are on their way to the database and there is
+  // nothing left to turn back; the way out goes rather than stand there
+  // offering what it can no longer do.
+  if (container !== null) for (const spent of container.querySelectorAll("button")) spent.remove();
+
+  let stored = false;
   try {
     const source = modelSourceUrl(model);
     const meta = await putModel(result.value, {
@@ -1419,16 +1576,17 @@ async function download(row, model) {
       to: model.to,
       ...(source === null ? {} : { sourceUrl: source }),
     });
-    status(t("options_downloaded_model", [pairLabel(model.from, model.to), megabytes(meta.bytes)]));
+    stored = true;
+    say(t("options_downloaded_model", [pairLabel(model.from, model.to), megabytes(meta.bytes)]));
     await adoptFirstPair(model.from, model.to);
   } catch (error) {
     // The download was fine; the browser would not keep it. Worth saying apart
     // from a failed download, because the answer is different - space, or a
     // second copy of this page holding the database open.
-    status(t("options_store_failed", message(error)), "error");
+    say(t("options_store_failed", message(error)), "error");
   }
 
-  await renderModels();
+  await settle(stored);
 }
 
 /**
@@ -1526,6 +1684,13 @@ function applyFilterIn(containerId, inputId, noneId, showAllId, expanded, noMatc
   const container = document.getElementById(containerId);
   if (container === null) return;
 
+  // A row that has already said its piece - a download that finished in it -
+  // stands until the next question is asked of the list, and goes with it:
+  // folding the list, searching it or redrawing it all take it away. It is
+  // not an offer any more, so it is neither counted nor matched while it
+  // stands (Michał's smoke, 2026-09-19).
+  for (const done of container.querySelectorAll("[data-done]")) done.remove();
+
   const input = document.getElementById(inputId);
   const query = input instanceof HTMLInputElement ? input.value : "";
 
@@ -1533,6 +1698,11 @@ function applyFilterIn(containerId, inputId, noneId, showAllId, expanded, noMatc
   // what the fold stands over and counts. Every row of either list says
   // whether it is installed; the models' rows and the dictionaries' are
   // shaped differently, and that is the one mark they share.
+  // A query standing is a request to see what it matches (Michał,
+  // 2026-09-19): the rows come out from behind the fold for as long as it
+  // stands, and go back behind it when the field is cleared.
+  const filtering = filterActive(query);
+
   let matching = 0;
   let installedMatching = 0;
   for (const row of container.querySelectorAll("[data-installed]")) {
@@ -1543,7 +1713,7 @@ function applyFilterIn(containerId, inputId, noneId, showAllId, expanded, noMatc
       matching += 1;
       if (installed) installedMatching += 1;
     }
-    row.hidden = !rowVisible({ installed, matches, expanded });
+    row.hidden = !rowVisible({ installed, matches, expanded, filtering });
   }
 
   // "The filter matched nothing" is only true of a filter: a folded list
@@ -1553,13 +1723,13 @@ function applyFilterIn(containerId, inputId, noneId, showAllId, expanded, noMatc
   // does not say which of them answered.
   const none = document.getElementById(noneId);
   if (none !== null) {
-    none.hidden = !filterActive(query) || matching > 0;
+    none.hidden = !filtering || matching > 0;
     if (!none.hidden) none.textContent = noMatch(query.trim());
   }
 
   const showAll = document.getElementById(showAllId);
   if (showAll instanceof HTMLButtonElement) {
-    const state = showAllState({ total: matching, installedCount: installedMatching, expanded });
+    const state = showAllState({ total: matching, installedCount: installedMatching, expanded, filtering });
     showAll.hidden = !state.shown;
     showAll.textContent = state.expanded ? t("options_show_fewer") : t("options_show_all", state.count.toLocaleString());
     showAll.setAttribute("aria-expanded", String(state.expanded));
@@ -1629,8 +1799,21 @@ async function renderModels() {
   // be fetched, in the catalogue below it. One render, two lists: the rows
   // come from one read of the store and one display order.
   const here = rows.filter((row) => row.installed !== null);
+  sayCatalogHeading(
+    "translation-models-available",
+    t("options_list_available_models"),
+    t("options_list_available_models_more"),
+    here.length > 0,
+  );
   if (here.length === 0) {
-    container.append(emptyList(t("options_no_models_yet"), t("options_no_models_yet_rest"), "translation-models-available"));
+    container.append(
+      emptyList(
+        t("options_no_models_yet"),
+        t("options_no_models_yet_rest"),
+        "translation-models-available",
+        "options_list_available_models",
+      ),
+    );
   } else {
     for (const row of here) {
       const rendered = renderRow(row);
@@ -1664,6 +1847,26 @@ async function renderModels() {
   }
 
   applyModelFilter();
+}
+
+/**
+ * The heading of a catalogue block, which says what a press there does - and
+ * that depends on what is already here (Michał, 2026-09-19): "Download
+ * dictionaries" while the device holds none, "Download more dictionaries"
+ * once it holds one. The empty list's own door says the first of the two,
+ * because an empty list is exactly when it is true.
+ *
+ * Both names arrive said, never glued from a key: a key built out of a value
+ * is a key the catalogue tests cannot see (the rule `lib/messages.js` keeps).
+ *
+ * @param {string} id the heading's own id
+ * @param {string} name what it says while nothing is here yet
+ * @param {string} more what it says once something is
+ * @param {boolean} anyHere
+ */
+function sayCatalogHeading(id, name, more, anyHere) {
+  const heading = document.getElementById(id);
+  if (heading !== null) heading.textContent = anyHere ? more : name;
 }
 
 /**
@@ -2063,19 +2266,18 @@ function placeActions(head, buttons) {
 /**
  * A row's line of small print, its items apart by a middle dot: the language
  * the book explains words in - or the one word for a book that explains a
- * language in itself - the count of its words, its size, and the fold's own
- * word at the end of the line.
+ * language in itself - the count of its words and its size.
  *
- * What the line used to carry besides: the file's name and the count of other
- * spellings, both now behind the fold (D263, L1). Three items and a door is
- * what fits one line on a phone, and the rest was never what anybody scans a
- * list of dictionaries for.
+ * Since Michał's second round on the panels it stands **inside** the fold
+ * rather than on the row: a list of books is scanned by their names, and the
+ * row is one line - the name, the door and the buttons - with everything else
+ * a press away. Until then it was the row's second line and the fold's own
+ * summary (D263, L1).
  *
  * The space before each dot is the no-break kind, so a line never opens with
- * a dot, and neither does the door: it travels in a box that does not break,
- * because a hard space alone never held it (D259, K2 - measured).
+ * a dot.
  *
- * @param {HTMLElement} meta the `summary` to fill, emptied first
+ * @param {HTMLElement} meta the paragraph to fill, emptied first
  * @param {import("../lib/dict/store.js").Dictionary} dictionary
  */
 function fillDictionaryMeta(meta, dictionary) {
@@ -2098,10 +2300,6 @@ function fillDictionaryMeta(meta, dictionary) {
     if (at > 0) meta.append("\u00a0· ");
     meta.append(item);
   });
-
-  const door = element("span", "note-tail");
-  door.append("\u00a0· ", element("span", "dictionary-more", t("options_details")));
-  meta.append(door);
 }
 
 /**
@@ -2156,33 +2354,51 @@ function renderDictionary(dictionary, place) {
       onConfirm: (button) => void removeDictionary(dictionary, button),
     }),
   );
-  placeActions(head, buttons);
-
   // The fold every finished book ends with (block 2 of the seventh brief):
-  // the name the reader may give it instead of the file's (D199), the file's
-  // name said in full - here it is information, not a repeat - and, when
-  // the book wrote one, its attribution: the dictionaries worth having are
-  // Wiktionary-derived and CC BY-SA, and naming their source is the whole of
-  // what that asks for. Folded, not gone - the row stays scannable, the
-  // rarely-used field is not a field per row on a list of hundreds, and the
-  // credit stays one press away, exactly as the dictionary wrote it. An
-  // unfinished book gets none of this: it is still being named by its files.
-  const details = element("details", "dictionary-details");
-  const meta = element("summary", "dictionary-meta");
+  // the small print, the name the reader may give it instead of the file's
+  // (D199), the file's name said in full - here it is information, not a
+  // repeat - and, when the book wrote one, its attribution: the dictionaries
+  // worth having are Wiktionary-derived and CC BY-SA, and naming their source
+  // is the whole of what that asks for. Folded, not gone - the row stays one
+  // line to scan, the rarely-used field is not a field per row on a list of
+  // hundreds, and the credit stays one press away, exactly as the dictionary
+  // wrote it. An unfinished book gets none of this: it is still being named
+  // by its files.
+  //
+  // The page's own fold rather than a `<details>` (Michał's second round):
+  // every other fold on this page is a trigger and a paragraph it names with
+  // `aria-controls`, and the door has to stand on the row's first line, which
+  // a summary wrapping the whole thing cannot do.
+  const body = element("div", "dictionary-body");
+  body.id = `dictionary-more-${dictionary.id}`;
+  body.hidden = true;
+
+  const more = document.createElement("button");
+  more.type = "button";
+  more.className = "note-more dictionary-more";
+  more.textContent = t("options_details");
+  more.setAttribute("aria-expanded", "false");
+  more.setAttribute("aria-controls", body.id);
+  more.setAttribute("aria-label", t("options_dictionary_details_aria", shown));
+  armMore(more, body);
+  head.append(more);
+
+  const meta = element("p", "dictionary-meta");
   fillDictionaryMeta(meta, dictionary);
-  details.append(meta);
-  details.append(renameField(dictionary));
+  body.append(meta);
+  body.append(renameField(dictionary));
   // Only where the file's own name says something the title does not (V10,
   // D263): under a field whose placeholder is that very name, "File name:
   // dictionary" was the same word twice.
   if (fileNameWorthSaying(dictionary)) {
-    details.append(element("p", "dictionary-file-name", t("options_dictionary_file_name", dictionary.name)));
+    body.append(element("p", "dictionary-file-name", t("options_dictionary_file_name", dictionary.name)));
   }
   if (dictionary.aliasCount > 0) {
-    details.append(element("p", "dictionary-file-name", plural(dictionary.aliasCount, "spellings")));
+    body.append(element("p", "dictionary-file-name", plural(dictionary.aliasCount, "spellings")));
   }
-  if (dictionary.credit !== null) details.append(element("p", "dictionary-credit", dictionary.credit));
-  row.append(details);
+  if (dictionary.credit !== null) body.append(element("p", "dictionary-credit", dictionary.credit));
+  placeActions(head, buttons);
+  row.append(body);
 
   return row;
 }
@@ -2212,6 +2428,10 @@ function refreshRowName(row, dictionary) {
     arrow.setAttribute("aria-label", label);
     arrow.title = label;
   }
+
+  // The door to the details says which book's details it opens.
+  const more = row.querySelector("button.dictionary-more");
+  if (more instanceof HTMLButtonElement) more.setAttribute("aria-label", t("options_dictionary_details_aria", shown));
 
   const remove = row.querySelector("button.model-delete");
   if (remove instanceof HTMLButtonElement) {
@@ -2526,13 +2746,15 @@ function renderCatalogRow(entry) {
  * @param {string} sentence the sentence up to the door
  * @param {string} rest what follows it
  * @param {string} anchor the id of the catalogue block's heading
+ * @param {string} name the catalogue block's own name, so the door says what
+ *   the heading it lands on says
  * @returns {HTMLElement}
  */
-function emptyList(sentence, rest, anchor) {
+function emptyList(sentence, rest, anchor, name) {
   const line = element("p", "empty");
   const door = document.createElement("a");
   door.href = `#${anchor}`;
-  door.textContent = t("options_list_available");
+  door.textContent = t(name);
   line.append(`${sentence} `, door, ` ${rest}`);
   return line;
 }
@@ -2574,13 +2796,14 @@ function dictionaryGroups(stored) {
 
 /**
  * One group's heading: the language, and the badge when its dictionaries are
- * the ones the bubble is asking.
+ * the ones the bubble is asking. It is a card's own label (D265), so it wears
+ * the label's class and the card draws the hairline over it.
  *
  * @param {{ lang: string, name: string }} group
  * @returns {HTMLElement}
  */
 function dictionaryGroupHeading(group) {
-  const heading = element("h5", "dictionary-group", group.name);
+  const heading = element("h5", "dictionary-group card-head", group.name);
   if (group.lang === config.sourceLang) heading.append(element("span", "badge", t("options_badge_reading")));
   return heading;
 }
@@ -2600,7 +2823,14 @@ function renderDictionaryList(stored) {
   list.replaceChildren();
 
   if (stored.length === 0) {
-    list.append(emptyList(t("options_no_dictionaries_yet"), t("options_no_dictionaries_yet_rest"), "dictionaries-available"));
+    list.append(
+      emptyList(
+        t("options_no_dictionaries_yet"),
+        t("options_no_dictionaries_yet_rest"),
+        "dictionaries-available",
+        "options_list_available_dictionaries",
+      ),
+    );
     return;
   }
 
@@ -2631,11 +2861,14 @@ async function renderCatalog() {
   // running somewhere (then its buttons wait) or stopped (then it may go on).
   importElsewhere = !importing && (await importHeld());
 
-  // What an arrow press moves within, and what the line above the list is
-  // about - both read from the store, at the one moment the store was read.
+  // What an arrow press moves within, read at the one moment the store was.
   dictionaryPlaces = stored.map((one) => ({ id: one.id, lang: one.langFrom }));
-  const hint = document.getElementById("dictionary-order-hint");
-  if (hint !== null) hint.hidden = stored.length < 2;
+  sayCatalogHeading(
+    "dictionaries-available",
+    t("options_list_available_dictionaries"),
+    t("options_list_available_dictionaries_more"),
+    stored.length > 0,
+  );
 
   // The dictionary half of the first-steps verdict. Ready ones only: a
   // half-imported dictionary answers no lookup, and must not fold the
@@ -2691,10 +2924,12 @@ function renderFetching(container, entry, controller) {
   const cancel = document.createElement("button");
   cancel.type = "button";
   cancel.textContent = t("action_cancel");
-  cancel.addEventListener("click", () => {
-    cancel.disabled = true;
-    controller.abort();
-  });
+  // Pressable for as long as it is there. The press is noticed at the end of
+  // whatever is in flight - a chunk, a batch of rows - and until then the
+  // only honest state of the button is the one it was in: a Cancel greyed
+  // out the moment it is pressed, over a download that goes on installing,
+  // is a button that lies twice (Michał, 2026-09-19).
+  cancel.addEventListener("click", () => controller.abort());
   placeActions(head, [cancel]);
 
   const bar = document.createElement("progress");
@@ -2735,35 +2970,53 @@ async function downloadDictionary(entry) {
   const controller = new AbortController();
 
   // Redrawn with the import already claimed, which greys out the other
-  // buttons of the frame; then this one row becomes a progress bar.
+  // buttons of the frame; then this one row becomes a progress bar, and the
+  // line under it is where the whole journey is said (`rowLine`).
   await renderCatalog();
   const container = document.getElementById(catalogRowId(entry));
   const onProgress = container === null ? undefined : renderFetching(container, entry, controller);
+  const say = saysIn(container === null ? null : rowLine(container), dictionaryStatus);
   const label = pairLabel(entry.from, entry.to);
-  dictionaryStatus(t("options_downloading_dictionary", label), "busy");
+  say(t("options_downloading_dictionary", label), "busy");
 
+  let added = false;
   try {
     const fetched = await fetchDictionaryFiles(entry.url, controller.signal, onProgress);
     if (!fetched.ok) {
-      dictionaryStatus(fetched.text, fetched.tone);
+      say(fetched.text, fetched.tone);
+      return;
+    }
+
+    // Inflating an archive of a few hundred thousand entries is the one step
+    // of the journey that cannot be interrupted halfway. A press that landed
+    // during it is answered here, where it still costs nothing: no row has
+    // been made yet, so there is nothing to take back.
+    if (controller.signal.aborted) {
+      say(t("download_cancelled"));
       return;
     }
 
     // The language sides come from the catalogue row, not from a select: a
     // WikDict archive is one direction, and its name already said which.
     const ran = await withImportLock(async () => {
-      await storeDictionary(fetched.value.files, {
+      added = await storeDictionary(fetched.value.files, {
         base: fetched.value.base,
         langFrom: entry.from,
         langTo: entry.to,
-        say: dictionaryStatus,
+        say,
+        signal: controller.signal,
       });
     });
-    if (!ran) dictionaryStatus(t("options_import_elsewhere"), "error");
+    if (!ran) say(t("options_import_elsewhere"), "error");
   } finally {
     letGo();
     importing = false;
+    // The row stays where the press was, saying what came of it; a journey
+    // that failed keeps a way to try again in the same place.
+    if (container !== null) rowFinished(container, added ? null : () => void downloadDictionary(entry));
+    const putBack = keepRow(container, catalogRowId(entry));
     await renderCatalog();
+    putBack();
   }
 }
 
@@ -2880,10 +3133,10 @@ function blobOf(source) {
  * real one arrives with the first batch.
  *
  * @param {import("../lib/dict/import.js").DictionaryFiles} files
- * @param {{ base: string, langFrom: string, langTo: string, say: (text: string, tone?: "idle" | "busy" | "error") => void }} job
+ * @param {{ base: string, langFrom: string, langTo: string, say: (text: string, tone?: "idle" | "busy" | "error") => void, signal?: AbortSignal }} job
  * @returns {Promise<boolean>} whether a dictionary is now stored
  */
-async function storeDictionary(files, { base, langFrom, langTo, say }) {
+async function storeDictionary(files, { base, langFrom, langTo, say, signal }) {
   /** @type {import("../lib/dict/store.js").Dictionary | null} */
   let dictionary = null;
   try {
@@ -2896,6 +3149,15 @@ async function storeDictionary(files, { base, langFrom, langTo, say }) {
       ...(files.syn === undefined ? {} : { syn: blobOf(files.syn) }),
     });
 
+    // Staging the files is the slowest thing written before a single row is;
+    // a press during it takes everything staged away with it rather than
+    // waiting for the first batch to notice.
+    if (signal?.aborted) {
+      await deleteDictionary(dictionary.id);
+      say(t("download_cancelled"));
+      return false;
+    }
+
     const opened = await openDictionary(files, { fallbackName: base });
     if (!opened.ok) {
       await deleteDictionary(dictionary.id);
@@ -2903,7 +3165,7 @@ async function storeDictionary(files, { base, langFrom, langTo, say }) {
       return false;
     }
 
-    return await runImport(opened.value, dictionary, { say, progress: null });
+    return await runImport(opened.value, dictionary, { say, progress: null, signal });
   } catch (error) {
     // Whatever went wrong, the half-written dictionary is invisible and now
     // also gone, files and all: an import that failed with a sentence is not
@@ -2980,10 +3242,10 @@ async function resumeImport(dictionary) {
  *
  * @param {import("../lib/dict/import.js").OpenDictionary} opened
  * @param {import("../lib/dict/store.js").Dictionary} dictionary
- * @param {{ say: (text: string, tone?: "idle" | "busy" | "error") => void, progress: import("../lib/dict/store.js").ImportProgress | null }} job
+ * @param {{ say: (text: string, tone?: "idle" | "busy" | "error") => void, progress: import("../lib/dict/store.js").ImportProgress | null, signal?: AbortSignal }} job
  * @returns {Promise<boolean>} whether the dictionary is now stored
  */
-async function runImport(opened, dictionary, { say, progress }) {
+async function runImport(opened, dictionary, { say, progress, signal }) {
   const { name, credit } = opened;
   const total = opened.words + opened.synonyms;
   const batches = rowBatches(
@@ -2997,11 +3259,15 @@ async function runImport(opened, dictionary, { say, progress }) {
 
   const writer = await openWriter(dictionary.id);
   let appended = progress?.appended ?? 0;
-  /** @type {import("../lib/dict/rows.js").RowSummary} */
-  let summary;
+  /** @type {import("../lib/dict/rows.js").RowSummary | null} */
+  let summary = null;
   try {
     let step = batches.next();
     while (!step.done) {
+      // Where a cancel lands: the batch in flight is finished and written -
+      // an abandoned write is exactly what D137's resume was built to avoid
+      // - and nothing after it is read.
+      if (signal?.aborted) break;
       const batch = step.value;
       const writing = writer.put(batch.rows, batch.additions, {
         name,
@@ -3017,9 +3283,19 @@ async function runImport(opened, dictionary, { say, progress }) {
       // its timers are throttled to a second each.
       if (document.visibilityState === "visible") await breathe();
     }
-    summary = step.value;
+    if (step.done) summary = step.value;
   } finally {
     writer.close();
+  }
+
+  if (summary === null) {
+    // Cancelled. Nothing of it stays: the rows written so far, the files
+    // staged beside them and the unready row itself go together, because
+    // "Download cancelled. Nothing was saved." is a promise and a dictionary
+    // half in the database is not nothing.
+    await deleteDictionary(dictionary.id);
+    say(t("download_cancelled"));
+    return false;
   }
 
   if (summary.entryCount === 0) {
@@ -3181,6 +3457,10 @@ async function downloadFromLink() {
       dictionaryLinkStatus(fetched.text, fetched.tone);
       return;
     }
+    if (controller.signal.aborted) {
+      dictionaryLinkStatus(t("download_cancelled"));
+      return;
+    }
 
     // Where the bytes came from rides on the import's last line rather than
     // standing before it: the import's own lines would paint over it at once.
@@ -3191,7 +3471,13 @@ async function downloadFromLink() {
 
     let stored = false;
     const ran = await withImportLock(async () => {
-      stored = await storeDictionary(fetched.value.files, { base: fetched.value.base, langFrom, langTo, say });
+      stored = await storeDictionary(fetched.value.files, {
+        base: fetched.value.base,
+        langFrom,
+        langTo,
+        say,
+        signal: controller.signal,
+      });
     });
     if (!ran) dictionaryLinkStatus(t("options_import_elsewhere"), "error");
     if (stored && input !== null) input.value = "";
@@ -3665,16 +3951,12 @@ document.getElementById("first-steps-show")?.addEventListener("click", () => {
     }
   });
 });
-// How to pin it, under the step that asks for it - the page's own More
-// conduct, on a paragraph the card keeps rather than a row note.
-document.getElementById("step-pin-how")?.addEventListener("click", (event) => {
-  const button = event.currentTarget;
-  const help = document.getElementById("first-steps-pin");
-  if (!(button instanceof HTMLButtonElement) || help === null) return;
-  const opening = help.hidden;
-  help.hidden = !opening;
-  button.setAttribute("aria-expanded", String(opening));
-});
+// How to pin it, under the step that asks for it, is wired by `moreNotes`
+// with every other fold of the page: it is a `note-more` naming its paragraph
+// with `aria-controls`, which is the one pattern here. It had a second
+// listener of its own until Michał's smoke (2026-09-19) - two listeners on
+// one press opened the paragraph and shut it again, so the button did
+// nothing at all.
 // The page the file export lives on (D254 §9, D260) - the menu's own road.
 // The saved phrases' own export is a different file and a different format,
 // and the note beside this door says so in a sentence rather than in a second
@@ -3685,8 +3967,18 @@ document.getElementById("copy-library")?.addEventListener("click", () => {
 document.getElementById("add-model")?.addEventListener("click", () => void addSelectedModel());
 document.getElementById("refresh-models")?.addEventListener("click", () => void refreshList());
 document.getElementById("refresh-dictionaries")?.addEventListener("click", () => void refreshDictionaryList());
-document.getElementById("model-filter")?.addEventListener("input", () => applyModelFilter());
-document.getElementById("dictionary-filter")?.addEventListener("input", () => applyCatalogFilter());
+// The catalogues answer a press, not a keystroke (Michał, 2026-09-19): a
+// hundred rows redrawn on every letter of "en pl" is a list flickering under
+// the fingers, and on an e-ink panel it is a refresh per letter. The `search`
+// event is Enter in the field and the field's own cross, so clearing puts the
+// list back without a second listener.
+for (const [field, button, apply] of /** @type {[string, string, () => void][]} */ ([
+  ["model-filter", "model-search", applyModelFilter],
+  ["dictionary-filter", "dictionary-search", applyCatalogFilter],
+])) {
+  document.getElementById(field)?.addEventListener("search", () => apply());
+  document.getElementById(button)?.addEventListener("click", () => apply());
+}
 document.getElementById("models-show-all")?.addEventListener("click", () => toggleList("models-catalog"));
 document.getElementById("dictionaries-show-all")?.addEventListener("click", () => toggleList("dictionary-catalog"));
 document.getElementById("add-dictionary")?.addEventListener("click", () => void addSelectedDictionary());

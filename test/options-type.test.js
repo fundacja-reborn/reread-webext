@@ -41,8 +41,11 @@ describe("the settings page's type", () => {
       ["--ui-h1", "1.5rem"],
       ["--ui-h2", "1.25rem"],
       ["--ui-h3", "1.0625rem"],
-      ["--ui-text", "0.9375rem"],
-      ["--ui-small", "0.8125rem"],
+      // Two sizes on the page and no third (Michał, 2026-09-19), at the
+      // size a browser's own settings are set in: the rows' own, and the
+      // small print that explains them.
+      ["--ui-text", "0.8125rem"],
+      ["--ui-small", "0.75rem"],
       ["--ui-control", "2.25rem"],
     ])) {
       assert.match(tokens, new RegExp(`${token}: ${value.replace(".", "\\.")};`), `${token} is not ${value}`);
@@ -80,11 +83,33 @@ describe("the settings page's type", () => {
     assert.doesNotMatch(css, /font-size: 0\.9rem;|font-size: 0\.95rem;|font-size: 0\.85rem;/, "a size stands outside the scale");
   });
 
+  it("reads a figure the same way in both blocks of the data section (Michał, 2026-09-19)", async () => {
+    const css = await source("options/options.css");
+    // What the space is spent on, and what each copy holds, are the same kind
+    // of reading - a name and a figure - and the page did them two ways: five
+    // lines of small print at 17px in one card, three rows at 44px in the
+    // next. The parts are lines of the card's own rhythm now, parted by the
+    // rows' own hairline, at the rows' own size.
+    assert.match(rule(css, ".storage-parts"), /font-size: var\(--ui-text\)/, "the parts are still set in the small print");
+    assert.match(rule(css, ".storage-parts li"), /padding-block: var\(--row-pad-y\)/, "a part is not a line of the card's rhythm");
+    assert.match(rule(css, ".storage-parts li"), /padding-inline-start: var\(--row-indent\)/, "a part no longer stands in its total's text column");
+    assert.match(rule(css, ".storage-parts li \+ li"), /border-top: var\(--sep-row\)/, "the parts are not parted the way rows are");
+    // The last one gives its own bottom air back to the row it stands in, or
+    // the foot of that card would have twice the air of every line above it.
+    assert.match(rule(css, ".storage-parts li:last-child"), /padding-bottom: 0/, "the last part doubles the air at the foot of the card");
+    // And nothing in a card begins against its border: the table's column
+    // names stand off it by the rows' own padding, like everything else.
+    assert.match(rule(css, ".copies thead th"), /padding-top: var\(--row-pad-y\)/, "the table's head is glued to the card's edge");
+  });
+
   it("floors every control on the pointer, and never under the convention on a finger", async () => {
     const css = await source("options/options.css");
     assert.match(rule(css, ".row select"), /min-height: var\(--ui-control\)/, "a select keeps a size of its own");
     assert.match(rule(css, ".row button"), /min-height: var\(--ui-control\)/, "a button keeps a size of its own");
-    assert.match(rule(css, ".row-toggle"), /min-height: var\(--ui-control\)/, "the clickable line of a checkbox keeps a size of its own");
+    // The checkbox row's floor is the row's own (D265): the box no longer
+    // stands on a line of its own, so the row is what has to be pressable.
+    assert.match(rule(css, ":is(.card, .rows, .card-list, .models) > *"), /min-height: var\(--row-min-h\)/, "a row keeps no floor of its own");
+    assert.match(rule(css, ".row-check > input[type=\"checkbox\"]"), /width: var\(--row-box\)/, "the box is not drawn at the size the indent is measured from");
     // `any-pointer`, not `pointer`: a Boox with a pen answers `pointer: fine`
     // and is still read with a finger.
     assert.match(
@@ -93,115 +118,152 @@ describe("the settings page's type", () => {
       "the 44px floor does not come back on a device read with a finger",
     );
     assert.doesNotMatch(css, /@media \(pointer: coarse\)/, "the floor is decided by a query a Boox answers wrongly");
+    // The size follows the pointer; the weight does not (Michał, 2026-09-19).
+    // A label half a step heavier on a touch screen is a second kind of label
+    // on the same page, and the phone is where most of this page is read.
+    assert.match(rule(css, ":root"), /--ui-label-weight: 400;/, "the labels' weight is not written once");
+    assert.doesNotMatch(css, /--ui-label-weight: (?!400)/, "a label takes a different weight somewhere");
     // The bar is the one exception, and says why beside itself.
     const field = rule(css, ".settings-search input");
     assert.match(field, /min-height: 2\.1rem/, "the bar's field does not keep the bar's own floor");
   });
 
-  it("puts a row's description under its label rather than in the row's air", async () => {
+  it("gives every row of every card one box, and the heading over it its own air", async () => {
     const css = await source("options/options.css");
     const row = rule(css, ".row");
     assert.match(row, /gap: 0\.125rem 1rem/, "the description floats away from the label it belongs to");
-    // A row has no air of its own (D259, S1): what stands between two rows is
-    // put on below, by the rules that know whether there is a row to stand
-    // between. The first and the last row of a group keep none, so a group is
-    // as far from the page as its headings and blocks say and no further.
-    assert.match(row, /padding-block: 0;/, "a row still carries its own outer air");
 
-    // The headings' air comes from the header they stand in, so it is the same
-    // distance whatever kind of element follows - the complaint this round
-    // began with (S-a).
+    // One geometry for every kind of row, whatever stands in it (D265): the
+    // card's own children take the padding and the floor, and the wrappers
+    // inside a card - a list, a group, a fold, the copies' table - hand the
+    // box straight back to the rows they hold.
+    assert.match(
+      css,
+      /:is\(\.card, \.rows, \.card-list, \.models\) > \* \{\n  position: relative;\n  margin: 0;\n  min-height: var\(--row-min-h\);\n  padding: var\(--row-pad-y\) var\(--row-pad-x\);/,
+      "a row of a card keeps a box of its own",
+    );
+    assert.match(
+      css,
+      /:is\(\.card, \.rows, \.card-list\) > :is\(\.rows, \.models, \.card-list, details, table\) \{\n  min-height: 0;\n  padding: 0;/,
+      "a wrapper inside a card is drawn as a row",
+    );
+
+    // The headings' air comes from the header they stand in, so it is the
+    // same distance whatever kind of element follows - the rule D259 found
+    // and D265 keeps, said in margins now that the rows have padding.
     assert.match(rule(css, "h2"), /margin: 0;/, "a section heading keeps an air of its own");
-    assert.match(rule(css, "h3"), /margin: var\(--m-h3-before\) 0 0;/, "a subsection heading keeps an air of its own");
-    assert.match(rule(css, "section > header > h2"), /margin-bottom: var\(--m-h2-after\)/, "the header does not hold the gap under a section heading");
-    assert.match(rule(css, "section > header > h3"), /margin-bottom: var\(--m-h3-after\)/, "the header does not hold the gap under a subsection heading");
-    assert.match(rule(css, "section > header"), /margin-bottom: var\(--m-intro-after\)/, "a header that ends in prose hands on no gap");
-    assert.match(css, /section > header:has\(> h3:last-child\) \{\n  margin-bottom: var\(--m-h3-after\);/, "a heading-only header hands on the intro's gap instead of its own");
+    assert.match(rule(css, "h3"), /margin: 0;/, "a subsection heading keeps an air of its own");
+    assert.match(rule(css, "section > header"), /margin: 0 0 var\(--gap-h2-after\)/, "the header does not hold the gap under a heading");
+    assert.match(
+      css,
+      /section > header:has\(> h3\) \{\n  margin-top: var\(--gap-h3-before\);\n  margin-bottom: var\(--gap-h3-after\);/,
+      "a subsection stands as close to what it follows as a section does",
+    );
+    assert.match(rule(css, "main > section"), /margin-top: var\(--gap-section\)/, "a section stands as close as a paragraph");
   });
 
-  it("measures every gap between glyphs, not between line boxes (D259, S3)", async () => {
+  it("keeps the air around the cards in tokens, every level wider than the one under it (D265)", async () => {
     const css = await source("options/options.css");
     const tokens = rule(css, ":root");
     /** @param {string} token */
     const gap = (token) => Number(new RegExp(`--gap-${token}: ([\\d.]+)rem;`).exec(tokens)?.[1] ?? "0");
 
-    // Every level of grouping stands wider than the level under it (§2).
+    // A section stands further off than a subsection, a subsection further
+    // than a heading holds its own cards, and one card from the next is the
+    // smallest gap of all.
     assert.ok(gap("section") > gap("h3-before"), "a section is no further off than a subsection");
-    assert.ok(gap("h3-before") > gap("row") * 2, "a subsection is no further off than two rows");
-    assert.ok(gap("row") * 2 > gap("block"), "two rows stand closer than two blocks");
-    assert.ok(gap("block") > gap("intro-after"), "a block stands closer than a heading's own prose");
-    // A heading belongs to what stands under it: at least three times as far
-    // from what came before as from what comes after (§2).
-    assert.ok(gap("h3-before") >= 3 * gap("h3-after"), "a subsection heading is as far from its content as from the group above");
-    // And a section heading is nearer its own content than its own rule.
-    assert.ok(gap("h2-after") < gap("divider-h2"), "a section heading is nearer its rule than its content");
+    assert.ok(gap("h3-before") > gap("h2-after"), "a subsection is no further off than a heading's own cards");
+    assert.ok(gap("h2-after") >= gap("card"), "two cards stand further apart than a heading from its first");
+    // A heading belongs to what stands under it: at least twice as far from
+    // what came before as from what comes after.
+    assert.ok(gap("h3-before") >= 2 * gap("h3-after"), "a subsection heading is as far from its content as from the group above");
 
-    // The leading is taken off every gap rather than guessed at: no margin in
-    // this sheet may be a bare number of its own.
-    for (const token of ["--lead-h2", "--lead-h3", "--lead-text", "--lead-small"]) {
-      assert.match(tokens, new RegExp(`${token}: calc\\(\\(1\\.[0-9]+ - var\\(--ink-box\\)\\)`), `${token} is not measured off the line-height`);
+    // The geometry of a row is tokens too, and in rem: a browser told to
+    // render text larger grows the rows with it.
+    for (const [token, value] of /** @type {[string, string][]} */ ([
+      ["--row-pad-x", "1.25rem"],
+      ["--row-pad-y", "0.75rem"],
+      ["--row-min-h", "3rem"],
+      ["--settings-column-width", "42.5rem"],
+    ])) {
+      assert.match(tokens, new RegExp(`${token}: ${value.replace(".", "\\.")};`), `${token} is not ${value}`);
     }
-    for (const token of ["--m-h2-after", "--m-h3-after", "--m-block", "--m-row-top"]) {
-      assert.match(tokens, new RegExp(`${token}: calc\\(var\\(--gap-`), `${token} is not a gap less its leading`);
-    }
-    // `text-box-trim` would say it exactly; Firefox 142 does not have it, so
-    // no rule may lean on it (the comment that says so may name it).
+    // The touch floor the convention asks for, kept by the rows themselves.
+    assert.ok(Number(/--row-min-h: ([\d.]+)rem;/.exec(tokens)?.[1] ?? "0") * 16 >= 44, "a row is under the 44px floor");
+    // The indent a description and a dependent row begin at is the checkbox's
+    // own column, not a number somebody picked.
+    assert.match(tokens, /--row-indent: calc\(var\(--row-box\) \+ var\(--row-gap\)\);/, "the indent is not the checkbox's own column");
+    // The machinery D259 needed for a page with no cards is gone with it: no
+    // margin on this page is a gap less two half-leadings any more.
+    assert.doesNotMatch(css, /--lead-h2|--ink-box|--row-extra/, "the flat page's leading arithmetic is still here");
     assert.doesNotMatch(css, /^\s*text-box-(trim|edge):/m, "the sheet leans on a property Firefox cannot read");
-
-    // A row's first line stands in a box as tall as the touch floor, so its
-    // ink begins seven pixels lower than a paragraph's would. Every gap that
-    // lands on a row takes that off as well, or a heading sits 19px from its
-    // own first label where §2 asks for 12 (measured in the browser).
-    assert.match(tokens, /--row-extra: calc\(\(var\(--ui-control\) - var\(--ui-text\) \* 1\.45\) \/ 2\);/, "the control floor's own air is not measured");
-    assert.match(tokens, /--lead-row: calc\(var\(--lead-text\) \+ var\(--row-extra\)\);/, "a row's first line is treated as a paragraph's");
-    assert.match(rule(css, ".rows"), /margin: calc\(-1 \* var\(--row-extra\)\)/, "a group of rows keeps the air its controls add");
-    assert.match(rule(css, ".models"), /margin: calc\(-1 \* var\(--row-extra\)\) 0 calc\(var\(--m-block\) - var\(--row-extra\)\)/, "a list keeps the air its controls add");
-    // And every row begins its line at the same height, so one number covers
-    // them all - including the one row that is a name and a figure.
-    assert.match(rule(css, ".row:not(.row-stack) > .row-name:first-child"), /min-height: var\(--ui-control\)/, "a row of plain text begins its line higher than every other row");
   });
 
-  it("gives a section, a subsection and a row three different boundaries (D258, H1)", async () => {
+  it("draws one boundary for a group and one for a row, and nothing else (D265)", async () => {
     const css = await source("options/options.css");
     const tokens = rule(css, ":root");
-    // The strong ink is the controls' border token, over 3:1 against the
-    // paper in every theme; the subtle one is the separators' own.
-    assert.match(tokens, /--sep-section: 2px solid var\(--page-border\);/, "a section's rule is not the strong one");
-    assert.match(tokens, /--sep-row: 1px solid var\(--page-line\);/, "a row's hairline is not the separators' own");
-    // The rule belongs to the section, so it never travels into a fold or a
-    // card that borrows a heading's element.
-    assert.match(rule(css, "main > section"), /border-top: var\(--sep-section\)/, "a section has no boundary of its own");
-    assert.match(rule(css, "main > section"), /margin-top: var\(--m-section\)/, "a section stands as close as a paragraph");
-    // A subsection is air and weight, never a line.
+    // The card's frame and the hairline between two rows are the page's two
+    // boundaries. The 2px section rule D258 needed for a flat page is gone:
+    // a card is a stronger boundary than any line.
+    //
+    // On glass both are a shade of the page, which is what the browser's own
+    // settings look like (Michał's revision of D3, 2026-09-19); the e-ink
+    // paper, a theme of its own, takes the separators' solid grey instead -
+    // the block below holds both halves of that.
+    assert.match(tokens, /--settings-card-border: #dfe1e6;/, "the card's frame is not a shade of the page");
+    assert.match(tokens, /--sep-row: 1px solid var\(--settings-separator\);/, "a row's hairline is not the separator token");
+    assert.doesNotMatch(css, /--sep-section/, "the flat page's section rule is still here");
+    assert.doesNotMatch(rule(css, "main > section"), /border-top/, "a section still opens on a rule");
     assert.doesNotMatch(rule(css, "h2"), /border/, "a section heading carries a line of its own");
     assert.doesNotMatch(rule(css, "h3"), /border/, "a subsection heading carries a line");
-    assert.doesNotMatch(css, /\.rows \{\n  border-top/, "a group of rows still opens on a rule");
-    assert.doesNotMatch(rule(css, ".row"), /border-bottom/, "a row still closes on a rule");
-    // The hairline stands between two drawn rows and nowhere else. The general
-    // sibling combinator rather than the adjacent one (D259): a row has to be
-    // able to look back past the rows the search or the mode took away, or two
-    // rows either side of a hidden one end up touching.
+
+    // The frame carries the card, not the shadow: on a Boox the tinted page
+    // quantizes to white and no shadow is rendered at all.
+    const card = rule(css, ".card");
+    assert.match(card, /border: 1px solid var\(--settings-card-border\)/, "a card has no frame of its own");
+    assert.match(card, /background: var\(--settings-card-bg\)/, "a card is not raised over the page");
+    assert.match(card, /overflow: hidden/, "the first and last rows' wash is not clipped to the card's corners");
+    assert.match(card, /container-type: inline-size/, "a row cannot ask how wide its own card is");
+    // And on e-ink the tone goes, the shadow goes, and the frame becomes the
+    // separators' own solid grey - the only thing left holding the card.
     assert.match(
       css,
-      /:where\(body:not\(\.no-translation\)\) \.row:not\(\[hidden\]\) ~ \.row:not\(\[hidden\]\),\n:where\(body\.no-translation\) \.row:not\(\[hidden\], \.translation-only\) ~ \.row:not\(\[hidden\], \.translation-only\) \{\n  border-top: var\(--sep-row\);\n  padding-top: var\(--m-row-top\);/,
-      "the hairline and the air are not between two drawn rows",
+      /:root\[data-reader-theme="eink"\] \{\n  --settings-page-bg: #ffffff;\n  --settings-card-bg: #ffffff;\n  --settings-card-border: var\(--page-line\);\n  --settings-separator: var\(--page-line\);\n  --settings-card-shadow: none;/,
+      "the e-ink paper keeps a tone it cannot draw, or loses the frame that carries its cards",
     );
-    assert.doesNotMatch(css, /\.row \+ \.row \{/, "the hairline still leans on the adjacent combinator");
-    // And the air under a row's words stands only while a drawn row follows.
-    assert.match(css, /\.row:not\(\[hidden\]\):has\(~ \.row:not\(\[hidden\]\)\)/, "the last row of a group keeps air under it");
-    // A dependent group opens on air alone: a hairline over its first child
-    // met the line down its edge and drew a corner (K4).
+    // Every paper this page has says both for itself, so a light theme chosen
+    // by hand on a dark browser cannot end up with the dark frame. Sepia is
+    // not one of them: the settings do not wear that paper at all (D265).
+    assert.doesNotMatch(css, /data-reader-theme="sepia"/, "the settings dress themselves in a paper they do not have");
+    for (const theme of ["light", "dark", "eink"]) {
+      const block = rule(css, `:root[data-reader-theme="${theme}"]`);
+      assert.match(block, /--settings-card-border:/, `${theme} inherits a frame from another paper`);
+      assert.match(block, /--settings-separator:/, `${theme} inherits a hairline from another paper`);
+    }
+
+    // The hairline stands on a row that has a drawn row before it - never
+    // under the row above, which the search would leave hanging - and it is
+    // inset from both edges by the row's own padding. `~` rather than `+`, so
+    // a row can look back past the rows a query took away.
     assert.match(
       css,
-      /\.row:not\(\[hidden\], \.row-sub\) \+ \.row-sub:not\(\[hidden\]\) \{\n  border-top: none;\n  padding-top: 0;/,
-      "a dependent group still opens on a rule",
+      /:is\(\.card, \.rows, \.card-list, \.models\)\n  > :where\(:not\(\[hidden\], \.status:empty\)\)\n  ~ :where\(:not\(\[hidden\], \.status:empty\)\)::after \{\n  content: "";\n  position: absolute;\n  top: 0;\n  inset-inline: var\(--row-pad-x\);\n  border-top: var\(--sep-row\);/,
+      "the hairline is not drawn between two drawn rows, inset from the card's edges",
     );
-    // The long lists say the same thing without `:has()`: five hundred rows
-    // re-matched on every keystroke of the filter is a cost with nothing to
-    // show for it.
-    assert.match(css, /\.model:not\(\[hidden\]\) ~ \.model:not\(\[hidden\]\)/, "a filtered list leaves two rows touching");
-    assert.match(rule(css, ".models > :first-child"), /padding-top: 0/, "a list keeps air at its own top edge");
-    assert.match(rule(css, ".models > :last-child"), /padding-bottom: 0/, "a list keeps air at its own bottom edge");
+    assert.doesNotMatch(css, /\.row \+ \.row \{/, "the hairline leans on the adjacent combinator");
+    // A card's label draws the line above itself and never one under it.
+    assert.match(
+      css,
+      /:is\(\.card, \.rows, \.card-list, \.models\) > \.card-head \+ \*::after \{\n  content: none;/,
+      "a card's label parts itself from what it names",
+    );
+    // An empty status draws no box, so it is no row either - counted, it
+    // would open a card on a line with nothing over it.
+    assert.match(
+      css,
+      /:is\(\.card, \.rows, \.card-list, \.models\) > \.status::after \{\n  content: none;/,
+      "a status is parted from the row it answers",
+    );
   });
 
   it("dresses every fold's trigger the same way, and never as a link (D259, K1)", async () => {
@@ -216,22 +278,23 @@ describe("the settings page's type", () => {
     // the character before it.
     assert.match(rule(css, ".note-tail"), /white-space: nowrap/, "the space before a trigger is a break opportunity again");
     assert.match(css, /button\.note-more:hover,\nbutton\.note-more:focus-visible \{\n  color: var\(--page-fg\);\n  text-decoration: underline;/, "a trigger says nothing under the pointer");
-    // The dictionary rows' own fold wears the page's triangle rather than the
-    // browser's larger marker. Since D263 its trigger is the last word of the
-    // row's second line, so the triangle rides on that word and the summary
-    // around it is the whole line.
-    assert.match(rule(css, "summary.dictionary-meta"), /list-style: none/, "a dictionary's fold keeps the browser's own marker");
-    assert.match(css, /\.dictionary-more::before \{\n  content: "\\25B8\\00A0";/, "a dictionary's fold wears no triangle of the page's");
-    assert.match(css, /\.dictionary-details\[open\] \.dictionary-more::before \{\n  content: "\\25BE\\00A0";/, "an open dictionary fold keeps the closed triangle");
-    assert.match(css, /summary\.dictionary-meta:is\(:hover, :focus-visible\) \.dictionary-more \{\n  text-decoration: underline;/, "a dictionary's fold says nothing under the pointer");
+    // The dictionary rows' own fold is the page's own, and says so by wearing
+    // its class: the triangle, the quiet ink, the underline under a pointer
+    // and the turn on opening all come from `button.note-more` (Michał's
+    // second round - one dress for every fold on the page).
+    const script = await source("options/options.js");
+    assert.match(script, /more\.className = "note-more dictionary-more"/, "a dictionary's fold is dressed on its own");
+    assert.doesNotMatch(css, /summary\.dictionary-meta/, "a dictionary's fold is still a summary of its own");
   });
 
   it("keeps the heavier weight for headings and the section being read (D259, K3)", async () => {
     const css = await source("options/options.css");
     // Five bold dictionary names in a column outweighed the heading they
-    // stand under; a date is a value, not an emphasis.
-    assert.match(rule(css, ".dictionary-name"), /font-weight: 500/, "a dictionary's name is still set at a heading's weight");
-    assert.match(rule(css, ".list-dated strong"), /font-weight: 400/, "the list's date is still set bold");
+    // stand under (D259); since Michał's second round on the panels they are
+    // not even half a step heavier - a card holds one size and one weight.
+    // A date is a value, not an emphasis, and was never bold either.
+    assert.match(rule(css, ".dictionary-name"), /font-weight: var\(--ui-label-weight\)/, "a dictionary's name is set apart from the labels around it");
+    assert.match(rule(css, ".note strong"), /font-weight: 400/, "the list's date is still set bold");
     // What may be 600 or more: the page's headings, the bar's own title (the
     // heading a narrow screen has) and the section being read.
     const heavy = [...css.matchAll(/\n([^\n{]+) \{[^}]*?font-weight: (600|700|bold)/g)].map((match) => String(match[1]));
@@ -241,44 +304,69 @@ describe("the settings page's type", () => {
         "header h1",
         "main h2",
         "main h3",
-        // The two the lists brought (D263): a block's heading and a group's.
+        // The two the lists brought (D263), which since D265 stand inside the
+        // cards as their labels.
         "main h4",
         "main h5",
         '.sections a[aria-current="location"]',
         ".bar-sections",
+
       ],
       "something other than a heading or the section being read is set at a heading's weight",
     );
+    // And inside a card there is one size and one weight for every row
+    // (Michał's second round): the card's own label is the only thing that
+    // takes half a step, at the small print's size, so it can never outweigh
+    // the heading standing over the card.
+    assert.match(rule(css, ".card-head"), /font-size: var\(--ui-text\);\n  font-weight: 500;/, "a card's label is set apart from the rows it labels");
+    // What a row holds is one size, whatever kind of thing it is: a name, a
+    // figure, the quiet Delete beside them.
+    for (const selector of [".model-meta", "button.model-delete", ".copies"]) {
+      assert.match(rule(css, selector), /font-size: var\(--ui-text\)/, `${selector} is set apart from the rows it stands in`);
+    }
+    for (const selector of [".dictionary-name", ".show-all", ".fold summary h3"]) {
+      assert.match(rule(css, selector), /font-weight: var\(--ui-label-weight\)/, `${selector} is set heavier than the labels around it`);
+    }
   });
 
-  it("keeps one note on the page, and the accent for the one block that asks to be acted on (D258, H2)", async () => {
+  it("says a note in a row and keeps the frame for the one warning (D265, D4)", async () => {
     const css = await source("options/options.css");
-    const note = rule(css, ".note");
-    assert.match(note, /border-inline-start: 3px solid var\(--page-border\)/, "the note's edge is not the strong ink");
-    assert.doesNotMatch(note, /var\(--page-accent\)/, "a note nobody has to act on wears the accent");
+    // Where a download comes from, what an address field takes, what the
+    // order of a list means: quiet prose in a row of its card, with no wash,
+    // no frame and no bar down its edge. Both of page.css's own dresses have
+    // to be said back to nothing here.
+    const note = rule(css, ".note,\n.note.footnote");
+    assert.match(note, /border: none/, "a note still wears a frame inside a card");
+    assert.match(note, /background: none/, "a note still wears a wash inside a card");
     assert.match(note, /font-size: var\(--ui-small\)/, "the note speaks at its own size");
-    // The footnote's own rule in page.css is the more specific one, so the
-    // edge has to be said again here or it falls back to the hairline.
-    assert.match(rule(css, ".note.footnote"), /border-left-color: var\(--page-border\)/, "a footnote's edge falls back to the hairline");
-    // The one exception, and it is the card with three things to do in it.
-    assert.match(rule(css, ".first-steps"), /border-left-color: var\(--page-accent\)/, "the first steps lost the accent that marks them");
+    // One framed box on the page: the warning about what an uninstall takes.
+    const warning = rule(css, ".note-warning");
+    assert.match(warning, /border: 1px solid var\(--page-line\)/, "the one warning lost its frame");
+    // And the sentence a private window opens on, which stands on no card.
+    assert.match(rule(css, ".note.private-note"), /border-inline-start: 3px solid var\(--page-accent\)/, "the private-window note lost its edge");
+    // The first steps keep the accent: the one block on the page that asks to
+    // be acted on.
+    assert.match(rule(css, ".first-steps"), /var\(--page-accent\)/, "the first steps lost the accent that marks them");
   });
 
   it("dresses a fold as an action rather than as a heading (D258, V1)", async () => {
     const css = await source("options/options.css");
     const heading = rule(css, ".fold summary h3");
     assert.match(heading, /font-size: var\(--ui-text\)/, "a fold still reads at a subsection's size");
-    assert.match(heading, /font-weight: 500/, "a fold still reads at a subsection's weight");
+    assert.match(heading, /font-weight: var\(--ui-label-weight\)/, "a fold reads heavier than the rows around it");
     // The page's own triangle, the one the row notes' More wears - never a
     // chevron (D254 §2.6), and never a turn that an e-ink panel would smear.
     assert.match(css, /\.fold > summary::before \{\n  content: "\\25B8\\00A0";/, "a fold wears no marker of the page's own");
     assert.match(css, /\.fold\[open\] > summary::before \{\n  content: "\\25BE\\00A0";/, "an open fold keeps the closed marker");
-    assert.match(rule(css, ".fold > summary"), /min-height: var\(--ui-control\)/, "a fold is under the touch floor");
+    // A fold is a row of its card since D265, so its floor is the rows'.
+    assert.match(rule(css, ".fold > summary"), /min-height: var\(--row-min-h\)/, "a fold is under the touch floor");
+    assert.match(rule(css, ".fold > summary"), /padding: var\(--row-pad-y\) var\(--row-pad-x\)/, "a fold's door is not a row of its card");
     // "Show all (N)" unfolds a list the way these unfold a form, so it is
-    // dressed the same.
+    // dressed the same - the rows' own size and the rows' own weight.
     assert.match(rule(css, ".show-all"), /font-size: var\(--ui-text\)/, "the list's fold is dressed unlike the others");
     assert.match(css, /\.show-all\[aria-expanded="true"\]::before/, "the list's fold never turns its triangle");
-    // And nothing after the first fold opens a gap: they are a list of doors.
-    assert.match(rule(css, ".fold + .fold"), /margin-top: 0/, "two folds stand a block apart");
+    // And nothing after the first fold opens a gap: they are a list of doors,
+    // which since D265 means a list of rows in one card.
+    assert.match(rule(css, ".fold"), /margin: 0;/, "a fold keeps an air of its own inside its card");
   });
 });

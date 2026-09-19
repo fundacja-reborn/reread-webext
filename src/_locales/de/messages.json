@@ -32,7 +32,7 @@
   "private_browsing_note": { "message": "Sie sind im privaten Modus. Der Browser verwendet für diese Seite eine eigene Datenbank und löscht sie am Ende der privaten Sitzung: Die Leseliste und die Markierungen, die Sie hier sehen, stammen aus ihren Kopien, und ein hier gespeicherter Artikel, ein importiertes Buch, eine gesetzte Markierung oder alles hier Gelöschte geht mit der Sitzung verloren. Die einzige Ausnahme sind gespeicherte Phrasen - sie bleiben erhalten. Für alles andere öffnen Sie re/read in einem normalen Tab." },
   "saved_phrases": { "message": "Gespeicherter Wortschatz" },
   "open_reader": { "message": "In der Leseansicht öffnen" },
-  "quiet_bubble": { "message": "Schaltflächen der Sprechblase erst nach einem Klick zeigen" },
+  "quiet_bubble": { "message": "Aktionsschaltflächen in der Übersetzungs-Sprechblase erst nach einem Klick zeigen" },
   "action_delete": { "message": "Löschen" },
   "action_download": { "message": "Herunterladen" },
   "action_cancel": { "message": "Abbrechen" },
@@ -1325,6 +1325,7 @@
   },
 
   "options_title": { "message": "re/read - Einstellungen" },
+  "options_heading_named": { "message": "re/read-Einstellungen" },
   "back_to_reading": {"message": "Zurück zum Lesen"},
   "options_local_intro": {
     "message": "Alles, was re/read tut, geschieht auf diesem Gerät (offline): das Übersetzen, das Wörterbuch, die Leseliste, der gespeicherte Wortschatz. Nichts von dem, was Sie lesen oder auswählen, wird irgendwohin gesendet. Eine Internetverbindung ist nur zum Herunterladen eines neuen Übersetzungsmodells oder Wörterbuchs nötig - und nur von den zwei Adressen, die in den Abschnitten"
@@ -1406,13 +1407,10 @@
     }
   },
 
-  "options_step_model": {
-    "message": "Ein Übersetzungsmodell herunterladen"
+  "options_step_source": {
+    "message": "Ein Übersetzungsmodell oder ein Wörterbuch herunterladen"
   },
 
-  "options_step_dictionary": {
-    "message": "Ein Wörterbuch herunterladen (optional)"
-  },
 
   "options_step_pin": {
     "message": "re/read an die Symbolleiste anheften"
@@ -1601,7 +1599,7 @@
   },
 
   "options_first_steps_intro": {
-    "message": "Noch übersetzt nichts - das Modell, das es täte, ist noch nicht auf diesem Gerät. Die Einrichtung dauert eine Minute:"
+    "message": "re/read braucht etwas, womit es Wörter erklärt: ein Übersetzungsmodell oder ein Wörterbuch. Eines von beiden genügt, das andere kann später dazukommen."
   },
   "options_first_steps_pin": {
     "message": "Heften Sie re/read zuletzt an die Symbolleiste: das Puzzleteil-Symbol rechts in der Leiste, dann neben re/read das Zahnrad und „An Symbolleiste anheften“. Der Knopf öffnet die Leseansicht, die Leseliste, den gespeicherten Wortschatz und den Schalter für die Website, auf der Sie sind."
@@ -1652,26 +1650,18 @@
   },
   "options_reader_only": { "message": "Unterstreichungen und Sprechblase nur in der Leseansicht zeigen" },
   "options_reader_only_hint": {
-    "message": "Auf einer gewöhnlichen Seite erscheint nach dem Markieren von Text stattdessen eine Sprechblase mit zwei Schaltflächen: die Seite in der Leseansicht öffnen und zur Leseliste gehen."
+    "message": "Auf einer gewöhnlichen Seite erscheint nach dem Markieren von Text statt der Übersetzungs-Sprechblase eine Sprechblase mit zwei Schaltflächen: die Seite in der Leseansicht öffnen und zur Leseliste gehen."
   },
 
-  "options_reader_only_more": {
-    "message": "Ist die Option eingeschaltet, kann keine Webseite feststellen, welche ihrer Wörter Sie gespeichert haben. Auf Android und iOS ist die Option standardmäßig eingeschaltet.",
-    "description": "The rest of the options_reader_only_hint description, behind the row's More button."
-  },
 
   "options_page_number": { "message": "Seitenzahl zeigen" },
   "options_page_number_hint": {
     "message": "Die aktuelle Seite und die Gesamtzahl, zum Beispiel 3 / 12, am unteren Fensterrand."
   },
 
-  "options_page_number_more": {
-    "message": "Ausgeschaltet reicht der Text jeder Seite tiefer; Screenreader lesen die Seitenzahl weiterhin vor, und auf einem breiten Bildschirm wird sie in der Leiste neben re/read angezeigt.",
-    "description": "The rest of the options_page_number_hint description, behind the row's More button."
-  },
   "options_paged_heading": { "message": "Ansicht Seiten" },
   "options_paged_intro": {
-    "message": "Sie gelten in der Leseansicht in der Ansicht Seiten: Der Text bewegt sich um ganze Seiten, jede beginnt und endet mit einer ganzen Zeile."
+    "message": "Diese Optionen wirken in der Leseansicht, wenn Sie im Aa-Fenster die Ansicht Seiten statt Scrollen einstellen."
   },
   "options_touch_turn": { "message": "Seiten per Berührung umblättern" },
   "options_touch_turn_zones": { "message": "Tippen auf die linke oder rechte Seite des Bildschirms" },
@@ -1687,13 +1677,17 @@
     "message": "Berührung blättert keine Seiten um. Die Bild-Tasten, die Pfeiltasten und das Mausrad tun es weiterhin."
   },
   "options_turn_effect": { "message": "Effekt beim Umblättern" },
-  "options_turn_effect_auto": { "message": "Automatisch" },
+  "options_turn_effect_smooth": { "message": "Sanfter Übergang" },
+  "options_turn_effect_flash": { "message": "Dunkles Blitzen (E-Ink)" },
   "options_turn_effect_off": { "message": "Aus" },
   "options_turn_effect_hint": {
-    "message": "Eine sichtbare Bestätigung des Seitenwechsels."
+    "message": "Eine sichtbare Bestätigung, dass die Seite gewechselt hat."
   },
-  "options_turn_effect_note_auto": {
-    "message": "Im Farbschema E-Ink wird der Textbereich einen Moment lang dunkel, so wie ein E-Book-Reader das Umblättern zeigt; auf anderen Bildschirmen erscheint die neue Seite mit einer sanften Bewegung."
+  "options_turn_effect_note_smooth": {
+    "message": "Die neue Seite erscheint mit einem sanften Übergang."
+  },
+  "options_turn_effect_note_flash": {
+    "message": "Der Textbereich wird für einen Moment dunkel. Auf einem E-Ink-Display ist das kaum zu sehen und hilft, Geisterbilder zu entfernen; auf einem gewöhnlichen Bildschirm ist es ein deutliches dunkles Blitzen."
   },
   "options_turn_effect_note_off": {
     "message": "Die Seite wechselt einfach, so wie vor dieser Einstellung."
@@ -1709,40 +1703,21 @@
   },
   "options_font_custom": { "message": "Eigene Schrift" },
   "options_font_custom_hint": {
-    "message": "Eine auf diesem Gerät installierte Schrift, zum Beispiel Noto Serif. Im Aa-Fenster erscheint sie in der Zeile Schrift als Eigene."
+    "message": "Geben Sie den Namen einer auf diesem Gerät installierten Schrift an, zum Beispiel Noto Serif. Damit re/read sie verwendet, wählen Sie im Aa-Fenster in der Zeile Schrift den Eintrag Eigene. Lassen Sie das Feld leer, um die Standardschriften zu verwenden."
   },
 
-  "options_font_custom_more": {
-    "message": "Geben Sie den Namen so ein, wie das System ihn schreibt. Lassen Sie das Feld leer, um nur die mitgelieferten Schriften zu verwenden.",
-    "description": "The rest of the options_font_custom_hint description, behind the row's More button."
-  },
   "options_reading_pace": { "message": "Lesegeschwindigkeit" },
   "options_reading_pace_unit": { "message": "Wörter pro Minute" },
   "options_reading_pace_hint": {
-    "message": "Dient nur zur Schätzung der Lesezeit, die in der Leseliste und unter dem Titel eines Artikels angezeigt wird."
+    "message": "Dient nur zur Schätzung der Lesezeit, die in der Leseliste und unter dem Titel eines Artikels angezeigt wird. Es ist die Zahl der Wörter, die Sie in einer Minute lesen. 200 ist ein ruhiges Tempo in der eigenen Sprache; in einer Sprache, die Sie lernen, sind es meist 100-150."
   },
 
-  "options_reading_pace_more": {
-    "message": "Die Zahl der Wörter, die Sie in einer Minute lesen. 200 ist ein ruhiges Tempo in der eigenen Sprache; in einer Sprache, die Sie lernen, sind es meist 100-150.",
-    "description": "The rest of the options_reading_pace_hint description, behind the row's More button."
-  },
-  "options_quiet_bubble_hint": {
-    "message": "Die Sprechblase zeigt dann nur die Übersetzung; auf einem Touchscreen erscheinen die Schaltflächen nach einem Tippen darauf."
-  },
 
-  "options_quiet_bubble_more": {
-    "message": "Die Aktionsschaltflächen sind Kopieren, Speichern, Vorlesen und die übrigen - alle Aktionen der Sprechblase, einen Druck entfernt.",
-    "description": "The rest of the options_quiet_bubble_hint description, behind the row's More button."
-  },
   "options_bubble_more": { "message": "Satz und Wörterbucheinträge sofort anzeigen" },
   "options_bubble_more_hint": {
-    "message": "Die Sprechblase zeigt den übersetzten Satz und die Wörterbucheinträge sofort, ohne einen Druck auf „Mehr“."
+    "message": "Zeigt die Wörterbucheinträge und den übersetzten Satz, ohne einen Druck auf „Mehr“. Mit einem Wörterbuch lohnt es sich, dies eingeschaltet zu lassen: die Übersetzung eines einzelnen Wortes durch das Modell ist oft falsch, während das Wörterbuch die genauen Definitionen zeigt. Die Sprechblase über einer früher gespeicherten Wendung zeigt nur die gespeicherte Übersetzung - den Satz und die Wörterbucheinträge sehen Sie nach einem Druck auf „Mehr“."
   },
 
-  "options_bubble_more_more": {
-    "message": "Mit einem installierten Wörterbuch lohnt es sich, dies eingeschaltet zu lassen: die Übersetzung eines einzelnen Wortes ist oft falsch, und das Wörterbuch zeigt, was es wirklich bedeutet. Die Sprechblase über einer bereits gespeicherten Wendung zeigt nur die gespeicherte Übersetzung - den Satz und die Wörterbucheinträge sehen Sie nach einem Druck auf „Mehr“.",
-    "description": "The rest of the options_bubble_more_hint description, behind the row's More button."
-  },
   "options_underline_forms": { "message": "Auch andere Formen gespeicherter Wörter unterstreichen" },
   "options_underline_forms_hint": {
     "message": "Nach dem Speichern von „read“ sind auch „reads“ und „reading“ unterstrichen."
@@ -1758,18 +1733,14 @@
   },
 
   "options_save_sentence_more": {
-    "message": "Der Satz so, wie die Seite ihn zeigt, ohne Übersetzung. Er wird auf der Seite der gespeicherten Phrasen unter der Phrase angezeigt, auf eine Zeile eingeklappt, und in die dritte Spalte des Exports für Anki geschrieben. Bei einer ohne Satz gespeicherten Phrase wird der Satz um sie herum gespeichert, wenn Sie ihre Sprechblase das nächste Mal auf einer Seite öffnen. Wie die Phrase wird der Satz nur auf diesem Gerät gespeichert. Ausgeschaltet wird kein neuer Satz gespeichert; die bereits gespeicherten werden nicht gelöscht.",
+    "message": "Der Satz wird danach auf der Seite der gespeicherten Phrasen unter der Phrase angezeigt. Wurde eine Phrase früher ohne Satz gespeichert, wird der Satz um sie herum gespeichert, wenn Sie ihre Sprechblase das nächste Mal auf einer Seite öffnen. Wie die Phrase wird der Satz nur auf diesem Gerät aufbewahrt. Ausgeschaltet wird kein neuer Satz gespeichert, die früher gespeicherten werden aber nicht gelöscht.",
     "description": "The rest of the options_save_sentence_hint description, behind the row's More button."
   },
   "options_no_translation": { "message": "Ohne Übersetzungsmodell verwenden" },
   "options_no_translation_hint": {
-    "message": "Nur Wörterbücher, ohne maschinelle Übersetzung; Leseansicht, Offline-Leseliste und Textmarker funktionieren weiter."
+    "message": "Wenn diese Option aktiviert ist, zeigt die Sprechblase weiterhin Bedeutungen aus Wörterbüchern, und Phrasen lassen sich speichern und unterstreichen. Ideal zum Lesen mit Wörterbüchern oder in der Muttersprache."
   },
 
-  "options_no_translation_more": {
-    "message": "Mit einem gewählten Sprachpaar zeigt die Sprechblase weiterhin Bedeutungen aus Wörterbüchern, und Phrasen lassen sich speichern und unterstreichen. Ideal zum Lesen mit Wörterbüchern oder in der Muttersprache. Gespeicherte Daten werden nicht gelöscht und kehren zurück, wenn Sie die Option ausschalten.",
-    "description": "The rest of the options_no_translation_hint description, behind the row's More button."
-  },
   "options_bubble_off": { "message": "Keine Sprechblase beim Auswählen von Text zeigen" },
   "options_bubble_off_hint": {
     "message": "Auf einer gewöhnlichen Seite tut das Auswählen von Text gar nichts - eine Seite öffnen Sie in der Leseansicht über die Schaltfläche von re/read oder mit Alt+Umschalt+R."
@@ -1907,13 +1878,9 @@
   "options_tts_default": { "message": "Standardstimme" },
   "options_tts_listen": { "message": "Anhören" },
   "options_tts_voice_hint": {
-    "message": "Eine eigene Stimme für jede Sprache; angeboten werden nur Stimmen, die offline sprechen."
+    "message": "Eine eigene Stimme für jede Sprache; angeboten werden nur Stimmen, die offline sprechen. Die Sprache entsteht auf diesem Gerät, und nichts wird ins Internet gesendet."
   },
 
-  "options_tts_voice_more": {
-    "message": "Die Stimme liest Phrasen und ganze Artikel gleichermaßen. Die Sprache entsteht auf diesem Gerät, und nichts wird ins Internet gesendet.",
-    "description": "The rest of the options_tts_voice_hint description, behind the row's More button."
-  },
   "speech_no_offline_voice": { "message": "Dieses Gerät hat keine Offline-Stimme für diese Sprache." },
   "options_tts_rate": { "message": "Sprechgeschwindigkeit" },
   "options_models_heading": { "message": "Übersetzungsmodelle" },
@@ -1921,7 +1888,7 @@
     "message": "Ein Übersetzungsmodell wird für jedes Sprachpaar einzeln heruntergeladen. Es sind offizielle Mozilla-Dateien; übersetzt wird vollständig auf diesem Gerät."
   },
   "options_models_single_word": {
-    "message": "Ein Modell übersetzt Sätze gut, ein einzelnes Wort für sich aber oft falsch - das Ergebnis ist abgeschnitten oder ein Wort, das es nicht gibt. Für einzelne Wörter ist ein Wörterbuch die bessere Quelle - der Abschnitt"
+    "message": "Achtung! Ein Modell übersetzt Sätze gut, ein einzelnes Wort für sich aber oft falsch - das Ergebnis ist abgeschnitten oder ein Wort, das es nicht gibt. Für einzelne Wörter ist ein Wörterbuch die bessere Quelle - der Abschnitt"
   },
 
   "options_models_single_word_rest": {
@@ -1929,17 +1896,33 @@
     "description": "Closes options_models_single_word after the link to the Dictionaries section."
   },
   "options_update_list": { "message": "Liste aktualisieren" },
-  "options_list_dated": { "message": "Liste vom" },
+  "options_list_dated_models": { "message": "Die Liste der Modelle zum Herunterladen ist vom" },
+  "options_list_dated_dictionaries": { "message": "Die Liste der Wörterbücher zum Herunterladen ist vom" },
+  "options_update_list_link": { "message": "zum Aktualisieren klicken" },
+  "options_filter_search": { "message": "Suchen" },
   "options_filter_placeholder": { "message": "Nach Sprache oder Code filtern" },
   "options_filter_models_label": { "message": "Die Liste der Übersetzungsmodelle filtern" },
   "options_filter_dictionaries_label": { "message": "Die Liste der Wörterbücher filtern" },
   "options_list_installed": {
-    "message": "Auf diesem Gerät",
-    "description": "Heading of the block listing what is already on this device, in both the models and the dictionaries subsection."
+    "message": "Von dir heruntergeladen:",
+    "description": "Heading of the block listing what is already on this device, in both the models and the dictionaries subsection. Ends in a colon: it labels the list under it."
   },
-  "options_list_available": {
-    "message": "Zum Herunterladen",
-    "description": "Heading of the block holding the catalogue: the filter, the list to download from and the by-hand doors."
+  "options_list_available_models": {
+    "message": "Modelle herunterladen",
+    "description": "Heading of the models' catalogue block: the filter, the list to download from and the by-hand door. Named for what a press there does, not for what the block is."
+  },
+
+  "options_list_available_models_more": {
+    "message": "Weitere Modelle herunterladen"
+  },
+
+  "options_list_available_dictionaries": {
+    "message": "Wörterbücher herunterladen",
+    "description": "Heading of the dictionaries' catalogue block: the filter, the list to download from and the two by-hand doors."
+  },
+
+  "options_list_available_dictionaries_more": {
+    "message": "Weitere Wörterbücher herunterladen"
   },
   "options_no_models_yet": {
     "message": "Noch kein Übersetzungsmodell auf diesem Gerät. Wählen Sie ein Paar im Abschnitt",
@@ -1967,7 +1950,7 @@
   "options_show_fewer": { "message": "Weniger zeigen" },
   "options_model_note_from": { "message": "Modelle kommen von" },
   "options_model_note_rest": {
-    "message": "- dort veröffentlicht Mozilla sie. Die Erweiterung verbindet sich mit diesem öffentlichen Server nur, wenn Sie auf Liste aktualisieren oder Herunterladen klicken. Es werden keine persönlichen Daten gesendet."
+    "message": "- dort veröffentlicht Mozilla sie. Die Erweiterung verbindet sich mit diesem öffentlichen Server nur bei zwei Klicks: dem Klick, der die Liste der Modelle aktualisiert, und Herunterladen bei einem ausgewählten Modell."
   },
   "options_add_model_heading": { "message": "Modell aus Dateien hinzufügen" },
   "options_add_model_summary": {
@@ -1982,17 +1965,14 @@
   },
   "options_dictionaries_heading": { "message": "Wörterbücher" },
   "options_dictionaries_intro": {
-    "message": "Fügen Sie Wörterbücher hinzu, um detaillierte Wortdefinitionen in der Sprechblase zu sehen."
+    "message": "Fügen Sie Wörterbücher hinzu, um detaillierte Wortdefinitionen in der Sprechblase zu sehen. Die Sprechblase zeigt die Einträge in der Reihenfolge unten, für jede Sprache einzeln. Die Pfeile ändern sie."
   },
   "options_dictionaries_sources": {
     "message": "Die Wörterbücher im Katalog stammen von WikDict. Eigene fügen Sie aus einer Datei oder über einen Link hinzu, auch mehrere für eine Sprache. Die Quellen, jede mit ihrer Lizenz:"
   },
-  "options_dictionary_order_hint": {
-    "message": "Die Sprechblase zeigt die Einträge in der Reihenfolge unten, für jede Sprache einzeln. Die Pfeile ändern sie."
-  },
   "options_dictionary_note_from": { "message": "Wörterbücher kommen von" },
   "options_dictionary_note_rest": {
-    "message": "- dort veröffentlicht WikDict die Wörterbücher, die es aus dem Wiktionary (CC BY-SA) baut. Die Erweiterung verbindet sich mit diesem öffentlichen Server nur, wenn Sie auf Liste aktualisieren oder Herunterladen klicken. Es werden keine persönlichen Daten gesendet."
+    "message": "- dort veröffentlicht WikDict die Wörterbücher, die es aus dem Wiktionary (CC BY-SA) baut. Die Erweiterung verbindet sich mit diesem öffentlichen Server nur bei zwei Klicks: dem Klick, der die Liste der Wörterbücher aktualisiert, und Herunterladen bei einem ausgewählten Wörterbuch."
   },
   "options_add_dictionary_heading": { "message": "Wörterbuch aus Dateien hinzufügen" },
   "options_add_dictionary_summary": {
@@ -2014,14 +1994,11 @@
   },
   "options_add_link_heading": { "message": "Wörterbuch über einen Link hinzufügen" },
   "options_add_link_summary": {
-    "message": "Fügen Sie die Adresse eines als .zip-Datei gepackten StarDict-Wörterbuchs ein, stellen Sie die Sprachen ein und klicken Sie auf Herunterladen. Die Erweiterung verbindet sich einmal mit dieser Adresse, wenn Sie die Schaltfläche drücken, und mit keiner anderen; nichts von Ihnen wird mitgeschickt. Das Archiv wird auf diesem Gerät entpackt und geprüft, genau wie selbst ausgewählte Dateien."
+    "message": "Fügen Sie die Adresse eines als .zip gepackten StarDict-Wörterbuchs ein, wählen Sie die Sprachen und drücken Sie Herunterladen. Die Erweiterung holt das Archiv von der Adresse, entpackt es und prüft es auf diesem Gerät, genau wie Dateien, die Sie selbst auswählen. Angenommen werden nur https-Adressen. Ein Archiv, das keine .zip-Datei ist (.tar.xz, .tar.zst), muss entpackt und aus Dateien hinzugefügt werden."
   },
   "options_link_label": { "message": "Adresse" },
   "options_link_sources": {
-    "message": "Wo Wörterbücher zu finden sind, auch einsprachige - zum Beispiel Englisch-Englisch - jedes mit seiner Lizenz:"
-  },
-  "options_link_note": {
-    "message": "Es werden nur https-Adressen angenommen. Ein Archiv, das keine .zip-Datei ist (.tar.xz, .tar.zst), muss entpackt und aus Dateien hinzugefügt werden."
+    "message": "Links zu Wörterbüchern finden Sie unter"
   },
   "options_downloading_link": {
     "message": "Herunterladen von $HOST$...",
@@ -2109,6 +2086,16 @@
   "options_delete_dictionary_aria": {
     "message": "Das Wörterbuch $NAME$ löschen",
     "placeholders": { "name": { "content": "$1" } }
+  },
+
+  "options_dictionary_details_aria": {
+    "message": "Details zu $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "WikDict English-Polish"
+      }
+    }
   },
   "options_delete_confirm_aria": {
     "message": "Löschen bestätigen: $NAME$",

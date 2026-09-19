@@ -15,6 +15,7 @@
   --page-bg: #ffffff;
   --page-fg: #1f2430;
   --page-muted: #5c6478;
+  --page-placeholder: #6e7587;
   --page-line: #99a1b0;
   --page-border: #6e7583;
   /* A control that cannot be pressed (D201): a neutral grey, the convention
@@ -60,6 +61,7 @@
     --page-bg: #171a21;
     --page-fg: #ccd3df;
     --page-muted: #98a1b5;
+    --page-placeholder: #7c8394;
     --page-line: #565d6c;
     --page-border: #767e8f;
     --page-disabled: #5f636a;
@@ -83,6 +85,7 @@
   --page-bg: #ffffff;
   --page-fg: #1f2430;
   --page-muted: #5c6478;
+  --page-placeholder: #6e7587;
   --page-line: #99a1b0;
   --page-border: #6e7583;
   --page-disabled: #9ca0a8;
@@ -96,6 +99,7 @@
   --page-bg: #171a21;
   --page-fg: #ccd3df;
   --page-muted: #98a1b5;
+  --page-placeholder: #7c8394;
   --page-line: #565d6c;
   --page-border: #767e8f;
   --page-disabled: #5f636a;
@@ -112,6 +116,7 @@
   --page-bg: #f4ecd8;
   --page-fg: #322a21;
   --page-muted: #6b5f4d;
+  --page-placeholder: #756957;
   --page-line: #a3937a;
   --page-border: #83745a;
   --page-disabled: #969696;
@@ -148,6 +153,7 @@
   --page-bg: #ffffff;
   --page-fg: #000000;
   --page-muted: #3d3d3d;
+  --page-placeholder: #757575;
   --page-line: #8c8c8c;
   --page-border: #4a4a4a;
   --page-disabled: #8c8c8c;
@@ -298,12 +304,16 @@ select {
   color: var(--page-fg);
 }
 
-/* Placeholders say what a field wants, and the browser's translucent default
-   sits under the 4.5:1 floor - so they speak in the page's own muted voice.
-   Explicit opacity, because Firefox dims placeholders with opacity, not
-   color, and would dim this one too. */
+/* Placeholders say what a field wants, and they must not be read as what the
+   field already holds - which is how the muted ink of a note read, being the
+   same ink (Michał's smoke, 2026-09-19). Its own ink now, a step paler than
+   a note in every theme and standing on the 4.5:1 floor the browser's own
+   translucent default falls through: measured on the paper of each theme,
+   4.6:1 against 5.9:1 for the muted ink on white and 10.9:1 on the e-ink
+   panel, where the step is the widest. Explicit opacity, because Firefox
+   dims placeholders with opacity, not color, and would dim this one too. */
 ::placeholder {
-  color: var(--page-muted);
+  color: var(--page-placeholder);
   opacity: 1;
 }
 

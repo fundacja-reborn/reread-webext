@@ -46,10 +46,14 @@ function ruleOf(styles, selector) {
 }
 
 describe("the signal that a page has turned (D251)", () => {
-  it("asks the rule what a turn wears, with the paper, the system and the reason", async () => {
+  it("asks the rule what a turn wears, with the setting, the system and the reason", async () => {
     const reader = await source("reader/reader.js");
     const show = bodyOf(reader, "showPageOf");
-    assert.match(show, /const motion = turnMotion\(\{\s*effect: settings\.reader\.turnEffect,\s*eink: settings\.reader\.theme === "eink",\s*reduced: lessMotion\?\.matches === true,\s*reason,\s*lastFlashAt,\s*now: performance\.now\(\),/, "the turn is dressed without asking the setting, the paper, the system or the reason");
+    assert.match(show, /const motion = turnMotion\(\{\s*effect: settings\.reader\.turnEffect,\s*reduced: lessMotion\?\.matches === true,\s*reason,\s*lastFlashAt,\s*now: performance\.now\(\),/, "the turn is dressed without asking the setting, the system or the reason");
+    // And never the paper: the theme decided between the flash and the
+    // scroll until Michał's call (2026-09-19), which gave a dark flash to
+    // anybody wearing the E-ink theme on glass.
+    assert.doesNotMatch(show, /theme === "eink"/, "the theme still decides how a turn moves");
     // The query itself, not its answer: the switch is flipped mid-reading.
     assert.match(reader, /const lessMotion = window\.matchMedia\?\.\("\(prefers-reduced-motion: reduce\)"\) \?\? null;/, "less motion is read once at load, and wrong from then on");
   });
@@ -100,13 +104,18 @@ describe("the signal that a page has turned (D251)", () => {
   it("is promised in the README, with what it does not touch", async () => {
     const readme = await readFile(new URL("../README.md", ROOT), "utf8");
     assert.match(readme, /\*\*Page turn effect\*\*, in the same section of the settings, shows that the page has turned/, "the README does not offer the effect");
-    assert.match(readme, /in the e-ink theme the text area goes dark for a moment[\s\S]*?on other screens the new page slides in/, "the README does not say what the effect is on each screen");
+    assert.match(readme, /Three values, and the reader picks: a smooth slide, which is the default/, "the README does not say the effect is chosen rather than inferred");
+    assert.match(readme, /a dark flash of the text area, for e-ink screens[\s\S]*?a distinct dark flash on an ordinary one/, "the README does not say what the flash looks like on each screen");
     assert.match(readme, /Nothing happens when your system asks for less motion, and nothing when the page is turned by reading aloud or by dragging a selection/, "the README promises a signal where there is none");
   });
 
   it("offers the effect on the settings page, in every language", async () => {
     const markup = await source("options/options.html");
-    assert.match(markup, /<select id="turn-effect">\s*<option value="auto"[\s\S]*?<option value="off"/, "the row does not offer the two values");
+    assert.match(
+      markup,
+      /<select id="turn-effect">\s*<option value="smooth"[\s\S]*?<option value="flash"[\s\S]*?<option value="off"/,
+      "the row does not offer the three values, smoothest first",
+    );
     // One paragraph, always open (D264): what the row is for, then what the
     // value in force looks like - no trigger, and no folded rest opening
     // under the line that had already said it.
@@ -121,13 +130,40 @@ describe("the signal that a page has turned (D251)", () => {
     // literal.
     assert.match(markup, /<span id="turn-effect-note"><\/span>/, "there is nothing to say what the chosen effect looks like");
     const said = bodyOf(script, "sayEffect");
-    assert.match(said, /t\("options_turn_effect_note_off"\) : t\("options_turn_effect_note_auto"\)/, "the two values are not told apart, or the key is built rather than written");
+    for (const key of ["options_turn_effect_note_off", "options_turn_effect_note_flash", "options_turn_effect_note_smooth"]) {
+      assert.match(said, new RegExp(`t\\("${key}"\\)`), `${key} is built from the value rather than written`);
+    }
+    // What decides between the flash and the slide is the theme, not the
+    // screen (`turnMotion`: `eink: settings.reader.theme === "eink"`), so
+    // both halves of the line are told by theme - it said "on other screens"
+    // until Michał pointed out what that promises somebody reading on glass
+    // under the E-ink theme (2026-09-19): a dark flash, not a smooth slide.
+    // Screens are named inside the first half, for what the same flash looks
+    // like where it belongs and where it does not, which is the other thing
+    // he found: on an e-ink panel it is hardly visible, on glass it is not.
+    for (const lang of ["en", "pl", "de", "fr", "es", "uk"]) {
+      const catalogue = JSON.parse(await source(`_locales/${lang}/messages.json`));
+      // The flash is the one value worth a sentence after it is chosen
+      // (Michał, 2026-09-19): what it is for, and what it looks like where
+      // it is not for - the dark flash somebody on glass would otherwise
+      // take for a fault.
+      const flash = String(catalogue["options_turn_effect_note_flash"]?.message ?? "");
+      assert.match(flash, /e-ink|E-ink|E-Ink/, `${lang} does not say which screen the flash is for`);
+      assert.ok(flash.length > 40, `${lang} says nothing about what the flash looks like`);
+      assert.match(String(catalogue["options_turn_effect_flash"]?.message ?? ""), /e-ink|E-ink|E-Ink/i, `${lang} does not mark the value as the e-ink one`);
+      // And no value is described by the theme any more.
+      for (const key of ["options_turn_effect_hint", "options_turn_effect_note_smooth"]) {
+        const message = String(catalogue[key]?.message ?? "");
+        assert.doesNotMatch(message, /E-ink/, `${lang}/${key} still ties the effect to the theme`);
+      }
+    }
     assert.match(script, /sayEffect\(select\.value\);/, "the line stands still when the effect is changed");
     for (const lang of ["en", "pl", "de", "fr", "es", "uk"]) {
       const catalogue = JSON.parse(await source(`_locales/${lang}/messages.json`));
       for (const key of [
         "options_turn_effect",
-        "options_turn_effect_auto",
+        "options_turn_effect_smooth",
+        "options_turn_effect_flash",
         "options_turn_effect_off",
         "options_turn_effect_hint",
       ]) {

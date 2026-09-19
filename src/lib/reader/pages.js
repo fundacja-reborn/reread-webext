@@ -655,8 +655,10 @@ export function flashAllowed(reason, lastFlashAt, now, minGap = FLASH_GAP_MS) {
  * and a stretched range have their own reasons above.
  *
  * @param {object} how
- * @param {"auto" | "off"} how.effect the setting
- * @param {boolean} how.eink whether the paper is the e-ink theme
+ * @param {"smooth" | "flash" | "off"} how.effect the setting - what to do is
+ *   the reader's own choice now, not the theme's (D251, Michał's call
+ *   2026-09-19): the flash is for the panel it is drawn well on, and the
+ *   theme is only a look, which somebody may wear on glass
  * @param {boolean} how.reduced whether the system asked for less motion -
  *   which takes the flash as well as the scroll: a band going black and
  *   back is motion, whatever draws it
@@ -667,6 +669,6 @@ export function flashAllowed(reason, lastFlashAt, now, minGap = FLASH_GAP_MS) {
  */
 export function turnMotion(how) {
   if (how.effect === "off" || how.reduced || how.reason !== "turn") return "instant";
-  if (how.eink) return flashAllowed(how.reason, how.lastFlashAt, how.now) ? "flash" : "instant";
+  if (how.effect === "flash") return flashAllowed(how.reason, how.lastFlashAt, how.now) ? "flash" : "instant";
   return "smooth";
 }

@@ -47,7 +47,9 @@ describe("the dictionary list's rows", () => {
   it("are items of a list, the browser's bullets and indent taken off", () => {
     // What is here stands in one list per language, inside the block's own
     // box; the catalogue below keeps its single list.
-    assert.match(page, /<div id="dictionary-list"><\/div>/);
+    // The wrapper carries the class the card's hairlines are drawn from
+    // (D265): its own children are the groups, and the groups' the rows.
+    assert.match(page, /<div id="dictionary-list" class="card-list"><\/div>/);
     assert.match(page, /<ul id="dictionary-catalog" class="models"><\/ul>/);
     assert.match(fn("renderDictionaryList", "renderCatalog"), /element\("ul", "models"\)/);
     assert.match(script, /element\("li", "dictionary-row"\)/);
@@ -57,13 +59,13 @@ describe("the dictionary list's rows", () => {
     assert.match(script, /element\("li", "empty", t\("options_no_catalog"\)\)/);
   });
 
-  it("stack two lines at every width: the name with its buttons, then the small print (D263, L1)", () => {
+  it("stand on one line at every width: the name, the door, the buttons (Michał, 2026-09-19)", () => {
     const row = fn("renderDictionary", "refreshRowName");
     const order = [
       'element("div", "dictionary-head")',
       'element("p", "dictionary-name", shown)',
-      'element("details", "dictionary-details")',
-      'element("summary", "dictionary-meta")',
+      'element("div", "dictionary-body")',
+      'element("p", "dictionary-meta")',
     ].map((mark) => row.indexOf(mark));
     assert.ok(order.every((at) => at >= 0), "every line is built");
     assert.deepEqual([...order].sort((a, b) => a - b), order);
@@ -81,18 +83,24 @@ describe("the dictionary list's rows", () => {
     assert.match(page, /<div id="dictionary-link-row" class="dictionary-row" hidden><\/div>/);
   });
 
-  it("hang the fold off the small print, with its word at the line's end and never alone on one", () => {
+  it("keep the door on the name's own line, in the page's one fold dress", () => {
+    const row = fn("renderDictionary", "refreshRowName");
+    // The page's own fold - a trigger and the paragraph it names - rather
+    // than a `<details>`: every other fold on this page is built that way,
+    // and the door has to stand on the row's first line, which a summary
+    // wrapping the whole row cannot do.
+    assert.match(row, /more\.className = "note-more dictionary-more"/);
+    assert.match(row, /more\.setAttribute\("aria-controls", body\.id\)/);
+    assert.match(row, /armMore\(more, body\)/);
+    assert.match(row, /head\.append\(more\)/);
+    // And it is named for the book it opens: a column of triggers all saying
+    // "Details" names none of them.
+    assert.match(row, /t\("options_dictionary_details_aria", shown\)/);
+    // The trigger never wraps away from the name it belongs to.
+    assert.match(rule(css, ".dictionary-more"), /flex: none/);
+    // The small print is what the fold opens, not what it hangs off.
     const meta = fn("fillDictionaryMeta", "renderDictionary");
-    // The door travels with the dot before it in a box that does not break:
-    // a hard space alone never held a trigger to its sentence (D259, K2).
-    assert.match(meta, /element\("span", "note-tail"\)/);
-    assert.match(meta, /door\.append\("\\u00a0· ", element\("span", "dictionary-more", t\("options_details"\)\)\)/);
-    assert.match(rule(css, ".note-tail"), /white-space: nowrap/);
-    // The whole line is what a press reaches, and it keeps the page's one
-    // fold dress rather than the browser's marker.
-    assert.match(rule(css, "summary.dictionary-meta"), /cursor: pointer/);
-    assert.match(rule(css, "summary.dictionary-meta"), /list-style: none/);
-    assert.match(css, /\.dictionary-more::before \{\n  content: "\\25B8\\00A0";/);
+    assert.doesNotMatch(meta, /note-tail|options_details/);
   });
 
   it("never break the pair in the middle, and let the badge wrap instead", () => {
@@ -102,20 +110,34 @@ describe("the dictionary list's rows", () => {
     assert.doesNotMatch(rule(css, ".dictionary-head .badge"), /nowrap/);
   });
 
-  it("keep the buttons in one group at the right edge, under the name only on a narrow screen", () => {
+  it("keep the buttons in one group at the right edge, under the name only in a narrow card", () => {
     const actions = rule(css, ".dictionary-actions");
     assert.match(actions, /flex: none/);
     assert.match(actions, /margin-left: auto/);
     assert.match(rule(css, ".dictionary-actions button"), /white-space: nowrap/);
-    const narrow = css.slice(css.indexOf("@media (max-width: 480px)"));
-    assert.match(narrow, /\.dictionary-actions \{\s+flex-basis: 100%;\s+justify-content: flex-end;/);
-    // And no other narrow-screen rule for the row: the stack is the same
-    // everywhere. Other blocks may exist for other parts of the page (the
-    // bar's mark yields its room to the table of contents at a phone's
-    // width); none of them may reach the dictionary row.
-    const blocks = css.split("@media (max-width").slice(1);
-    const about = blocks.filter((block) => block.slice(0, block.indexOf("\n}\n")).includes(".dictionary"));
-    assert.equal(about.length, 1);
+    // The card asks its own width, not the window's (D265): a card is 42.5rem
+    // on a desktop whatever the window does, and a phone's width on a phone.
+    // There the name takes the line to itself and everything that acts on it
+    // - the door to the details included - stands on the next one, flush
+    // right: a name and four controls never fit on one line of a phone.
+    const narrow = css.slice(css.indexOf("@container (max-width: 30rem)"));
+    assert.match(narrow, /\.dictionary-name \{\n    flex-basis: 100%;\n  \}/);
+    assert.match(narrow, /\.dictionary-actions \{\n    justify-content: flex-end;\n    margin-left: auto;/);
+    // And no window-width rule reaches the dictionary row at all: the stack
+    // is the same everywhere, and what changes is the card's own width.
+    for (let at = css.indexOf("@media (max-width"); at >= 0; at = css.indexOf("@media (max-width", at + 1)) {
+      let depth = 0;
+      let end = css.indexOf("{", at);
+      for (let i = end; i < css.length; i += 1) {
+        if (css[i] === "{") depth += 1;
+        if (css[i] === "}") depth -= 1;
+        if (depth === 0) {
+          end = i;
+          break;
+        }
+      }
+      assert.doesNotMatch(css.slice(at, end), /\.dictionary/, "a window-width rule reaches the dictionary row");
+    }
   });
 
   it("title the row with the shown name and wrap it rather than cut it", () => {
@@ -157,7 +179,8 @@ describe("the groups the list stands in (D263, L2)", () => {
 
   it("wear the badge of what is being read on the heading, not on the rows", () => {
     const heading = fn("dictionaryGroupHeading", "renderDictionaryList");
-    assert.match(heading, /element\("h5", "dictionary-group", group\.name\)/);
+    // The heading is the card's own label (D265), so it wears that class too.
+    assert.match(heading, /element\("h5", "dictionary-group card-head", group\.name\)/);
     assert.match(heading, /group\.lang === config\.sourceLang/);
     assert.match(heading, /t\("options_badge_reading"\)/);
     // A stored row carries none of its own any more: the pill said "what you
@@ -169,9 +192,11 @@ describe("the groups the list stands in (D263, L2)", () => {
   it("stand only where there is more than one language to tell apart", () => {
     const list = fn("renderDictionaryList", "renderCatalog");
     assert.match(list, /if \(groups\.length > 1\) list\.append\(dictionaryGroupHeading\(group\)\)/);
-    // And the first group's heading opens under the block's own, with no gap
-    // of its own on top of it.
-    assert.match(rule(css, "main h5:first-child"), /margin-top: 0/);
+    // And a group's heading is the card's own label (D265): the rows' own
+    // size in the quiet ink, a label's weight, and the hairline drawn over it
+    // rather than under.
+    assert.match(rule(css, ".card-head"), /font-size: var\(--ui-text\)/);
+    assert.match(css, /:is\(\.card, \.rows, \.card-list, \.models\) > \.card-head \+ \*::after \{\n  content: none;/);
   });
 });
 
@@ -214,21 +239,29 @@ describe("the arrows", () => {
 });
 
 describe("the list's fold", () => {
-  it("stands at the rows' left edge and reads like the shelf's own", () => {
+  it("is a row of its card, read from the rows' own left edge (D265)", () => {
     const fold = rule(css, ".show-all");
     assert.match(fold, /text-align: start/);
     assert.match(fold, /background: none/);
-    assert.doesNotMatch(fold, /width: 100%|text-align: center/);
+    // The whole row is the target, as it is for every door on the page - the
+    // press lights the row, not a word inside it. Never centred, and never a
+    // bar of its own: the card's frame is the only frame.
+    assert.match(fold, /width: 100%/);
+    assert.match(fold, /padding: var\(--row-pad-y\) var\(--row-pad-x\)/);
+    assert.doesNotMatch(fold, /text-align: center|border: 1px/);
   });
 
   it("reads Show all with the count the filter lets through, and Show fewer once unfolded", () => {
     const apply = fn("applyFilterIn", "applyModelFilter");
-    assert.match(apply, /showAllState\(\{ total: matching, installedCount: installedMatching, expanded \}\)/);
+    // A query standing shows everything it matches, so the fold has nothing
+    // to offer while one does (Michał, 2026-09-19).
+    assert.match(apply, /showAllState\(\{ total: matching, installedCount: installedMatching, expanded, filtering \}\)/);
+    assert.match(apply, /rowVisible\(\{ installed, matches, expanded, filtering \}\)/);
     assert.match(apply, /state\.expanded \? t\("options_show_fewer"\) : t\("options_show_all", state\.count\.toLocaleString\(\)\)/);
     assert.match(apply, /setAttribute\("aria-expanded", String\(state\.expanded\)\)/);
     // "Nothing matched" is about the filter alone, never about the fold - and
     // it quotes what was typed (D263).
-    assert.match(apply, /none\.hidden = !filterActive\(query\) \|\| matching > 0/);
+    assert.match(apply, /none\.hidden = !filtering \|\| matching > 0/);
     assert.match(apply, /none\.textContent = noMatch\(query\.trim\(\)\)/);
     assert.match(page, /id="dictionaries-show-all" class="show-all" aria-controls="dictionary-catalog"/);
     assert.match(page, /id="models-show-all" class="show-all" aria-controls="models-catalog"/);

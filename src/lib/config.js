@@ -103,12 +103,19 @@ export const CONFIG_KEY = "config";
  *   else. Stored where the whole config is (`storage.local`, never `sync`),
  *   so a choice made on a reader does not follow onto a phone whose hand
  *   holds it differently.
- * @property {"auto" | "off"} turnEffect Whether a page turned by hand is
- *   signalled (D251). `auto` is a flash of the band on e-ink paper and a
- *   smooth scroll everywhere else, and nothing at all when the system asks
- *   for less motion; `off` is the reader as it was, where a turn is a page
- *   that is simply already there - and somebody reading the middle of a page
- *   could not tell whether it had turned.
+ * @property {"smooth" | "flash" | "off"} turnEffect How a page turned by hand
+ *   is signalled (D251; chosen rather than inferred since Michał's call,
+ *   2026-09-19). `smooth` scrolls the new page in, which shows the direction
+ *   on a screen that can draw motion; `flash` takes the reading band to ink
+ *   for a beat - the one extra frame an e-ink panel draws well, barely
+ *   visible on the panel it is meant for and a dark flash on glass; `off` is
+ *   the reader as it was, where a turn is a page that is simply already there
+ *   and somebody reading the middle of one could not tell it had turned.
+ *   Nothing at all, whichever is set, when the system asks for less motion.
+ *   Until this round the value was `auto` and the *theme* decided between the
+ *   flash and the scroll, so the E-ink theme on an ordinary screen gave a
+ *   dark flash nobody had asked for - and a device whose panel the flash is
+ *   for could only have it by wearing that theme.
  * @property {"active" | "plain"} links Whether links in the article text answer
  *   a press (D95). The words stay either way - they are part of the sentence -
  *   but the reader's main gesture is selecting a phrase to translate, and a
@@ -305,7 +312,7 @@ const LAYOUTS = ["scroll", "paged"];
 /** @type {readonly string[]} */
 const TOUCH_TURNS = ["zones", "swipe", "off"];
 /** @type {readonly string[]} */
-const TURN_EFFECTS = ["auto", "off"];
+const TURN_EFFECTS = ["smooth", "flash", "off"];
 
 /**
  * Type guards rather than casts, and exported because the reader needs the
@@ -490,7 +497,7 @@ export const READER_DEFAULTS = Object.freeze({
   layout: "scroll",
   pageNumber: true,
   touchTurn: null,
-  turnEffect: "auto",
+  turnEffect: "smooth",
   links: "plain",
   markerColor: DEFAULT_MARK_COLOR,
 });
