@@ -207,6 +207,11 @@ describe("the settings page's type", () => {
       /section > section \+ \* \{\n  margin-top: var\(--gap-card\);/,
       "a block that follows a nested section stands on its frame",
     );
+    // And the card says nothing about the gap over it: a `margin` shorthand
+    // here writes `margin-top: 0` as a class, which outranks the rule above
+    // and kept one join at 0px after the others were fixed.
+    assert.match(rule(css, ".card"), /margin-bottom: var\(--gap-card\);/, "the card sets its gaps with a shorthand again");
+    assert.doesNotMatch(rule(css, ".card"), /\n  margin: /, "the card zeroes the gap over it and cannot be given one");
     // The machinery D259 needed for a page with no cards is gone with it: no
     // margin on this page is a gap less two half-leadings any more.
     assert.doesNotMatch(css, /--lead-h2|--ink-box|--row-extra/, "the flat page's leading arithmetic is still here");

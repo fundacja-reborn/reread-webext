@@ -806,7 +806,12 @@ section > header:not(:has(> :not([hidden]))) {
    the search's index reads, and the index is not about looks. */
 .card {
   position: relative;
-  margin: 0 0 var(--gap-card);
+  /* The gap under it, and nothing said about the gap over it: the shorthand
+     that used to stand here set `margin-top: 0` as well, and that zero - a
+     class, beating the rule below that gives a card standing after a nested
+     section its air back - was why one of the joins stayed at 0px after the
+     rest were fixed (measured in Chrome, 2026-09-19). */
+  margin-bottom: var(--gap-card);
   background: var(--settings-card-bg);
   border: 1px solid var(--settings-card-border);
   border-radius: var(--settings-card-radius);
