@@ -1794,7 +1794,7 @@
   },
 
   "options_save_sentence_more": {
-    "message": "La oración tal como la muestra la página, sin su traducción. Se muestra bajo la frase en la página de frases guardadas, plegada en una línea, y se escribe en la tercera columna de la exportación para Anki. Para una frase guardada sin oración, la oración que la rodea se guarda la próxima vez que abre su burbuja en una página. Como la frase, la oración se guarda solo en este dispositivo. Desactivado, no se guarda ninguna oración nueva; las ya guardadas no se eliminan.",
+    "message": "La oración se muestra después bajo la frase en la página de frases guardadas. Si una frase se guardó antes sin oración, la oración que la rodea se guarda la próxima vez que abres su burbuja en una página. Como la frase, la oración se guarda solo en este dispositivo. Desactivado, no se guarda ninguna oración nueva, pero las guardadas antes no se eliminan.",
     "description": "The rest of the options_save_sentence_hint description, behind the row's More button."
   },
   "options_no_translation": { "message": "Usar sin modelo de traducción" },

@@ -1743,7 +1743,7 @@
   },
 
   "options_save_sentence_more": {
-    "message": "Der Satz so, wie die Seite ihn zeigt, ohne Übersetzung. Er wird auf der Seite der gespeicherten Phrasen unter der Phrase angezeigt, auf eine Zeile eingeklappt, und in die dritte Spalte des Exports für Anki geschrieben. Bei einer ohne Satz gespeicherten Phrase wird der Satz um sie herum gespeichert, wenn Sie ihre Sprechblase das nächste Mal auf einer Seite öffnen. Wie die Phrase wird der Satz nur auf diesem Gerät gespeichert. Ausgeschaltet wird kein neuer Satz gespeichert; die bereits gespeicherten werden nicht gelöscht.",
+    "message": "Der Satz wird danach auf der Seite der gespeicherten Phrasen unter der Phrase angezeigt. Wurde eine Phrase früher ohne Satz gespeichert, wird der Satz um sie herum gespeichert, wenn Sie ihre Sprechblase das nächste Mal auf einer Seite öffnen. Wie die Phrase wird der Satz nur auf diesem Gerät aufbewahrt. Ausgeschaltet wird kein neuer Satz gespeichert, die früher gespeicherten werden aber nicht gelöscht.",
     "description": "The rest of the options_save_sentence_hint description, behind the row's More button."
   },
   "options_no_translation": { "message": "Ohne Übersetzungsmodell verwenden" },

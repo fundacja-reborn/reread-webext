@@ -2146,7 +2146,7 @@
   },
 
   "options_save_sentence_more": {
-    "message": "The sentence as the page shows it, without its translation. It is shown under the phrase on the saved phrases page, folded to one line, and written into the third column of the export for Anki. For a phrase saved without a sentence, the sentence around it is saved the next time you open its bubble on a page. Like the phrase, the sentence is stored only on this device. Switched off, no new sentence is saved; the ones already saved are not deleted.",
+    "message": "The sentence is then shown under the phrase on the saved phrases page. If a phrase was saved earlier without a sentence, the sentence around it is saved the next time you open its bubble on a page. Like the phrase, the sentence is kept only on this device. Switched off, no new sentence is saved, but the ones saved earlier are not deleted.",
     "description": "The rest of the options_save_sentence_hint description, behind the row's More button."
   },
   "options_no_translation": { "message": "Use without a translation model" },

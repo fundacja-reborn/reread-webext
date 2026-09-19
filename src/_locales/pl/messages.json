@@ -2439,7 +2439,7 @@
   },
 
   "options_save_sentence_more": {
-    "message": "Zdanie takie, jak na stronie, bez tłumaczenia. Jest pokazywane pod frazą na stronie zapisanych fraz, zwinięte do jednej linii, i zapisywane w trzeciej kolumnie eksportu dla Anki. Przy frazie zapisanej bez zdania zdanie wokół niej jest zapisywane przy następnym otwarciu jej dymka na stronie. Tak jak fraza, zdanie jest przechowywane tylko na tym urządzeniu. Po wyłączeniu nowe zdania nie są zapisywane; zapisane wcześniej nie są usuwane.",
+    "message": "Zdanie jest wyświetlane potem pod frazą na stronie zapisanych fraz. Jeśli fraza była zapisana wcześniej bez zdania, zdanie wokół niej jest zapisywane przy następnym otwarciu jej dymka na stronie. Tak jak fraza, zdanie jest przechowywane tylko na tym urządzeniu. Po wyłączeniu tej opcji nowe zdania nie są zapisywane, ale te zapisane wcześniej nie są usuwane.",
     "description": "The rest of the options_save_sentence_hint description, behind the row's More button."
   },
   "options_no_translation": { "message": "Używaj bez modelu tłumaczenia" },
