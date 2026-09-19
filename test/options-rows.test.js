@@ -72,7 +72,7 @@ describe("the settings rows", () => {
     // together by the markup rather than each ending in a full stop.
     const hints = [
       ...markup.matchAll(
-        /<p class="row-note">\s*<span data-i18n="([a-z_]+)"\s*>[^<]*<\/span\s*><span class="note-tail">&nbsp;<button type="button" class="note-more"/g,
+        /<p class="row-note"(?: id="hint-[A-Za-z]+")?>\s*<span data-i18n="([a-z_]+)"\s*>[^<]*<\/span\s*><span class="note-tail">&nbsp;<button type="button" class="note-more"/g,
       ),
     ].map((match) => String(match[1]));
     // A floor, not a count: it fails when the shape is abandoned wholesale,
@@ -122,11 +122,19 @@ describe("the settings rows", () => {
       assert.match(markup.slice(markup.lastIndexOf("<div", at), at), /row-sub/, `${row} is not drawn as a child`);
     }
     const css = await source("options/options.css");
-    // One line down the leading edge and no box around the group (D258, V3):
-    // with a rule over it and a rule under it the two voice rows read as a
-    // box inside a list, heavier than anything else on the page.
-    assert.match(rule(css, ".row-sub"), /border-inline-start: 2px solid var\(--page-line\)/, "no line joins a child to its parent");
-    assert.doesNotMatch(rule(css, ".row-sub"), /border-top|border-bottom/, "the group of children is drawn as a box");
+    // Since D265 the indent is the whole of it: a child's words begin where
+    // its parent's words do - the checkbox's own column - and its hairline is
+    // inset the same. The line down the leading edge was the flat page's way
+    // of saying "these belong to the row above"; inside a card, standing
+    // under it and indented to it says the same with no second boundary.
+    const child = rule(css, ".row.row-sub");
+    assert.match(child, /padding-inline-start: calc\(var\(--row-pad-x\) \+ var\(--row-indent\)\)/, "a child is not indented to its parent's own column");
+    assert.doesNotMatch(child, /border/, "a child is joined to its parent by a line again");
+    assert.match(
+      css,
+      /:is\(\.card, \.rows\) > :where\(:not\(\[hidden\]\)\) ~ \.row-sub:not\(\[hidden\]\)::before \{\n  inset-inline-start: calc\(var\(--row-pad-x\) \+ var\(--row-indent\)\);/,
+      "a child's hairline is not inset to its own column",
+    );
 
     const script = await source("options/options.js");
     assert.match(script, /row\.hidden = !parent\.checked;/, "a child stays on the page with its parent switched off");

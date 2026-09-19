@@ -219,7 +219,7 @@ describe("the settings page's sections", () => {
     );
     assert.match(
       markup,
-      /<div class="row row-sub" id="s-bubbleOff" data-setting="bubbleOff" data-parent="translationOff"/,
+      /<div class="row row-check row-sub" id="s-bubbleOff" data-setting="bubbleOff" data-parent="translationOff"/,
       "the sub-option lost its indent or the switch it names as its parent",
     );
   });

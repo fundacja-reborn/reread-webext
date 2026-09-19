@@ -170,12 +170,16 @@ describe("the name of a checkbox", () => {
     const markup = await source("options/options.html");
     /** @type {string[]} */
     const named = [];
-    for (const found of markup.matchAll(/<label class="row-toggle">([\s\S]*?)<\/label>/g)) {
-      const block = found[1] ?? "";
-      assert.match(block, /<input type="checkbox"/, `a toggle row without a checkbox: ${block.slice(0, 80)}`);
-      const key = /<span class="row-name" data-i18n="([a-z_]+)"/.exec(block);
+    // Since D265 the box opens the row and the label stands beside it, tied
+    // to it by `for` - the whole row is the target, and the description it
+    // points at with `aria-describedby` is not part of the name.
+    for (const found of markup.matchAll(/<div class="row row-check[^"]*"[\s\S]*?<\/label>/g)) {
+      const block = found[0] ?? "";
+      assert.match(block, /<input type="checkbox" id="([a-z-]+)" aria-describedby="hint-/, `a toggle row without a checkbox: ${block.slice(0, 80)}`);
+      const key = /<label class="row-name" for="([a-z-]+)" data-i18n="([a-z_]+)"/.exec(block);
       assert.notEqual(key, null, `a checkbox without a name: ${block.slice(0, 80)}`);
-      named.push(String(key?.[1]));
+      assert.match(block, new RegExp(`<input type="checkbox" id="${key?.[1]}"`), "the label names a box that is not the row's");
+      named.push(String(key?.[2]));
     }
     // A regex that stopped matching would pass every assertion above by
     // finding nothing at all.

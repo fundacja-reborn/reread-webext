@@ -309,7 +309,7 @@
            pair is still where saved phrases are filed and what the
            dictionaries answer for, so the row stays - only its hint swaps
            for the quiet one below. -->
-      <div class="row row-stack" id="s-pair" data-setting="pair" data-section="languages">
+      <div class="row row-value row-stack" id="s-pair" data-setting="pair" data-section="languages">
         <label class="row-name" for="pair" data-i18n="language_pair">Language pair</label>
         <select id="pair"></select>
         <p class="row-note translation-only">
@@ -496,12 +496,10 @@
          2026-09-18): a child two sections away from its parent is a row that
          appears out of nowhere. -->
     <div class="rows card">
-      <div class="row" id="s-translationOff" data-setting="translationOff" data-section="languages">
-        <label class="row-toggle">
-          <span class="row-name" data-i18n="options_no_translation">Use without a translation model</span>
-          <input type="checkbox" id="no-translation" />
-        </label>
-        <p class="row-note">
+      <div class="row row-check" id="s-translationOff" data-setting="translationOff" data-section="languages">
+        <input type="checkbox" id="no-translation" aria-describedby="hint-translationOff" />
+        <label class="row-name" for="no-translation" data-i18n="options_no_translation">Use without a translation model</label>
+        <p class="row-note" id="hint-translationOff">
           <span data-i18n="options_no_translation_hint"
             >Dictionaries only, without machine translation; the reader, the offline reading list and the highlighter keep working.</span
           ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-translationOff" data-i18n="options_details">Details</button></span>
@@ -520,12 +518,10 @@
            all, not even the launcher; the reader keeps its gesture, because the
            highlighter's pen rides on it, and a selection there is a highlight
            for the moment. -->
-      <div class="row row-sub" id="s-bubbleOff" data-setting="bubbleOff" data-parent="translationOff" data-section="languages">
-        <label class="row-toggle">
-          <span class="row-name" data-i18n="options_bubble_off">Do not show the bubble when selecting text</span>
-          <input type="checkbox" id="bubble-off" />
-        </label>
-        <p class="row-note">
+      <div class="row row-check row-sub" id="s-bubbleOff" data-setting="bubbleOff" data-parent="translationOff" data-section="languages">
+        <input type="checkbox" id="bubble-off" aria-describedby="hint-bubbleOff" />
+        <label class="row-name" for="bubble-off" data-i18n="options_bubble_off">Do not show the bubble when selecting text</label>
+        <p class="row-note" id="hint-bubbleOff">
           <span data-i18n="options_bubble_off_hint"
             >On an ordinary page nothing happens when you select text - open a page in the reader from re/read's button or with Alt+Shift+R.</span
           ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-bubbleOff" data-i18n="options_details">Details</button></span>
@@ -870,12 +866,10 @@
            the bubble still works wherever a pair is chosen - the dictionaries
            answer - so the question this row asks stands in both modes, and
            hiding it was what overrode it. -->
-      <div class="row" id="s-readerOnly" data-setting="readerOnly" data-section="bubble-and-phrases">
-        <label class="row-toggle">
-          <span class="row-name" data-i18n="options_reader_only">Show the underlines and the bubble only in the reader</span>
-          <input type="checkbox" id="reader-only" />
-        </label>
-        <p class="row-note">
+      <div class="row row-check" id="s-readerOnly" data-setting="readerOnly" data-section="bubble-and-phrases">
+        <input type="checkbox" id="reader-only" aria-describedby="hint-readerOnly" />
+        <label class="row-name" for="reader-only" data-i18n="options_reader_only">Show the underlines and the bubble only in the reader</label>
+        <p class="row-note" id="hint-readerOnly">
           <span data-i18n="options_reader_only_hint"
             >On an ordinary page, selecting text brings up a bubble with two buttons instead: open
             the page in the reader, and go to the reading list.</span
@@ -906,12 +900,10 @@
            the model the entries are the answer itself and never fold (D121).
            The bubble over an underline keeps More - its body is the reader's
            own meaning (D27) - and the hint says so. -->
-      <div class="row translation-only" id="s-showBubbleMore" data-setting="showBubbleMore" data-section="bubble">
-        <label class="row-toggle">
-          <span class="row-name" data-i18n="options_bubble_more">Show the sentence and dictionary entries right away</span>
-          <input type="checkbox" id="bubble-more" />
-        </label>
-        <p class="row-note">
+      <div class="row row-check translation-only" id="s-showBubbleMore" data-setting="showBubbleMore" data-section="bubble">
+        <input type="checkbox" id="bubble-more" aria-describedby="hint-showBubbleMore" />
+        <label class="row-name" for="bubble-more" data-i18n="options_bubble_more">Show the sentence and dictionary entries right away</label>
+        <p class="row-note" id="hint-showBubbleMore">
           <span data-i18n="options_bubble_more_hint"
             >The bubble shows the translated sentence and the dictionary entries right away, with no press on “More”.</span
           ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-showBubbleMore" data-i18n="options_details">Details</button></span>
@@ -926,12 +918,10 @@
       <!-- `translation-only`: the trimmed bubble ignores the fold - its two
            buttons are its whole content - so with translation off this switch
            would move nothing (D120). -->
-      <div class="row translation-only" id="s-hideBubbleActions" data-setting="hideBubbleActions" data-section="bubble">
-        <label class="row-toggle">
-          <span class="row-name" data-i18n="quiet_bubble">Show the bubble's buttons only after a click</span>
-          <input type="checkbox" id="quiet-bubble" />
-        </label>
-        <p class="row-note">
+      <div class="row row-check translation-only" id="s-hideBubbleActions" data-setting="hideBubbleActions" data-section="bubble">
+        <input type="checkbox" id="quiet-bubble" aria-describedby="hint-hideBubbleActions" />
+        <label class="row-name" for="quiet-bubble" data-i18n="quiet_bubble">Show the bubble's buttons only after a click</label>
+        <p class="row-note" id="hint-hideBubbleActions">
           <span data-i18n="options_quiet_bubble_hint"
             >The bubble then shows the translation alone; on a touch screen the buttons appear after a tap on it.</span
           ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-hideBubbleActions" data-i18n="options_details">Details</button></span>
@@ -945,7 +935,7 @@
            every page it stands on, so no page setting can reach it - and
            built-in sizes land differently on different screens (an e-ink
            tablet renders a CSS pixel visibly smaller than a phone, D84). -->
-      <div class="row" id="s-bubbleScale" data-setting="bubbleScale" data-keywords="options_keywords_scale" data-section="bubble">
+      <div class="row row-value" id="s-bubbleScale" data-setting="bubbleScale" data-keywords="options_keywords_scale" data-section="bubble">
         <span class="row-name" data-i18n="options_bubble_scale">Bubble text size</span>
         <p class="inline stepper">
           <button type="button" id="bubble-scale-down" title="Smaller" data-i18n-title="reader_smaller">
@@ -977,12 +967,10 @@
            the row's sentence too, when it has none. Not `translation-only`:
            the quiet vocabulary's bubble saves phrases too (D158), from the
            same sentence. -->
-      <div class="row" id="s-saveSentence" data-setting="saveSentence" data-section="saved-phrases">
-        <label class="row-toggle">
-          <span class="row-name" data-i18n="options_save_sentence">Save the sentence with the phrase</span>
-          <input type="checkbox" id="save-sentence" />
-        </label>
-        <p class="row-note">
+      <div class="row row-check" id="s-saveSentence" data-setting="saveSentence" data-section="saved-phrases">
+        <input type="checkbox" id="save-sentence" aria-describedby="hint-saveSentence" />
+        <label class="row-name" for="save-sentence" data-i18n="options_save_sentence">Save the sentence with the phrase</label>
+        <p class="row-note" id="hint-saveSentence">
           <span data-i18n="options_save_sentence_hint"
             >Saving a phrase saves the sentence it stood in as well.</span
           ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-saveSentence" data-i18n="options_details">Details</button></span>
@@ -1003,12 +991,10 @@
            quiet vocabulary's as much as the model's (D162). Which forms count
            is the installed dictionary's word, never the rules' alone, and for
            now only English has rules; the hint says both. -->
-      <div class="row" id="s-underlineForms" data-setting="underlineForms" data-section="saved-phrases">
-        <label class="row-toggle">
-          <span class="row-name" data-i18n="options_underline_forms">Underline other forms of saved words</span>
-          <input type="checkbox" id="underline-forms" />
-        </label>
-        <p class="row-note">
+      <div class="row row-check" id="s-underlineForms" data-setting="underlineForms" data-section="saved-phrases">
+        <input type="checkbox" id="underline-forms" aria-describedby="hint-underlineForms" />
+        <label class="row-name" for="underline-forms" data-i18n="options_underline_forms">Underline other forms of saved words</label>
+        <p class="row-note" id="hint-underlineForms">
           <span data-i18n="options_underline_forms_hint"
             >Save "read", and "reads" and "reading" are underlined too.</span
           ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-underlineForms" data-i18n="options_details">Details</button></span>
@@ -1034,12 +1020,10 @@
       <!-- The default keep (D124). Not `translation-only`: with translation
            off the reader and its list are the whole extension, which is when
            this switch matters most. -->
-      <div class="row" id="s-keepArticles" data-setting="keepArticles" data-section="reading-view">
-        <label class="row-toggle">
-          <span class="row-name" data-i18n="options_keep_articles">Save pages you open to the offline reading list</span>
-          <input type="checkbox" id="keep-articles" />
-        </label>
-        <p class="row-note">
+      <div class="row row-check" id="s-keepArticles" data-setting="keepArticles" data-section="reading-view">
+        <input type="checkbox" id="keep-articles" aria-describedby="hint-keepArticles" />
+        <label class="row-name" for="keep-articles" data-i18n="options_keep_articles">Save pages you open to the offline reading list</label>
+        <p class="row-note" id="hint-keepArticles">
           <span data-i18n="options_keep_articles_hint"
             >A single page can still be saved in the reader with “Save to reading list”, or taken
             out of the list with “Delete”.</span
@@ -1055,7 +1039,7 @@
            keyboard over the article). The field previews itself in the
            typed face - options.js sets its font-family from the cleaned
            name, never the raw value. -->
-      <div class="row row-stack" id="s-fontFamily" data-setting="fontFamily" data-keywords="options_keywords_font" data-section="reading-view">
+      <div class="row row-value row-stack" id="s-fontFamily" data-setting="fontFamily" data-keywords="options_keywords_font" data-section="reading-view">
         <label class="row-name" for="font-custom" data-i18n="options_font_custom">Own font</label>
         <p class="inline">
           <input
@@ -1092,7 +1076,7 @@
            panel for the font name's reason. The bounds are the config's
            (`READING_PACE`), put on the field by options.js, so the page and
            the healer cannot disagree. -->
-      <div class="row row-stack" id="s-readingPace" data-setting="readingPace" data-keywords="options_keywords_pace" data-section="reading-view">
+      <div class="row row-value row-stack" id="s-readingPace" data-setting="readingPace" data-keywords="options_keywords_pace" data-section="reading-view">
         <label class="row-name" for="reading-pace" data-i18n="options_reading_pace">Reading speed</label>
         <p class="inline">
           <input id="reading-pace" type="number" inputmode="numeric" autocomplete="off" />
@@ -1132,12 +1116,10 @@
       <!-- The page count at the foot of a page read by pages (D238), on by
            default since D249: somebody reading by pages is reading a book,
            and a book says which page it is on. -->
-      <div class="row" id="s-pageNumber" data-setting="pageNumber" data-section="paged-layout">
-        <label class="row-toggle">
-          <span class="row-name" data-i18n="options_page_number">Show the page number</span>
-          <input type="checkbox" id="page-number" />
-        </label>
-        <p class="row-note">
+      <div class="row row-check" id="s-pageNumber" data-setting="pageNumber" data-section="paged-layout">
+        <input type="checkbox" id="page-number" aria-describedby="hint-pageNumber" />
+        <label class="row-name" for="page-number" data-i18n="options_page_number">Show the page number</label>
+        <p class="row-note" id="hint-pageNumber">
           <span data-i18n="options_page_number_hint"
             >The current page and how many there are, for example 3 / 12, at the foot of the window.</span
           ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-pageNumber" data-i18n="options_details">Details</button></span>
@@ -1154,7 +1136,7 @@
            quicker and more precise. Off is for a reader with hardware page
            keys, where no gesture is worth an accidental turn. Chosen by name
            in a select, like the language pair: three values, set once. -->
-      <div class="row row-stack" id="s-touchTurn" data-setting="touchTurn" data-keywords="options_keywords_turn" data-section="paged-layout">
+      <div class="row row-value row-stack" id="s-touchTurn" data-setting="touchTurn" data-keywords="options_keywords_turn" data-section="paged-layout">
         <label class="row-name" for="touch-turn" data-i18n="options_touch_turn">Turning pages by touch</label>
         <select id="touch-turn">
           <option value="zones" data-i18n="options_touch_turn_zones">Tap the left or right side of the screen</option>
@@ -1178,7 +1160,7 @@
       </div>
       <!-- The turn made visible (D251). Two values, not three: a signal
            given every fifth page would not be a confirmation of anything. -->
-      <div class="row row-stack" id="s-turnEffect" data-setting="turnEffect" data-keywords="options_keywords_turn" data-section="paged-layout">
+      <div class="row row-value row-stack" id="s-turnEffect" data-setting="turnEffect" data-keywords="options_keywords_turn" data-section="paged-layout">
         <label class="row-name" for="turn-effect" data-i18n="options_turn_effect">Page turn effect</label>
         <select id="turn-effect">
           <option value="auto" data-i18n="options_turn_effect_auto">Automatic</option>
@@ -1218,12 +1200,10 @@
            reader alike, and the reasons for wanting it gone (an engine with
            no voices, a speaker pressed by accident) have nothing to do with
            translating. Presentation only: the voice and the speed stay. -->
-      <div class="row" id="s-ttsOff" data-setting="ttsOff" data-keywords="options_keywords_tts" data-section="reading-aloud">
-        <label class="row-toggle">
-          <span class="row-name" data-i18n="options_tts">Show the read-aloud buttons</span>
-          <input type="checkbox" id="tts" />
-        </label>
-        <p class="row-note">
+      <div class="row row-check" id="s-ttsOff" data-setting="ttsOff" data-keywords="options_keywords_tts" data-section="reading-aloud">
+        <input type="checkbox" id="tts" aria-describedby="hint-ttsOff" />
+        <label class="row-name" for="tts" data-i18n="options_tts">Show the read-aloud buttons</label>
+        <p class="row-note" id="hint-ttsOff">
           <span data-i18n="options_tts_hint"
             >In the bubble, in the lists of saved phrases and highlights, and in the reader.</span
           ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-ttsOff" data-i18n="options_details">Details</button></span>
@@ -1245,7 +1225,7 @@
            `voicesFor` keeps the engine's network voices out of the list, and
            the status line under the note says when that leaves nothing for
            the language. -->
-      <div class="row row-stack row-voice row-sub" id="s-ttsVoices" data-setting="ttsVoices" data-parent="ttsOff" data-section="reading-aloud">
+      <div class="row row-value row-stack row-voice row-sub" id="s-ttsVoices" data-setting="ttsVoices" data-parent="ttsOff" data-section="reading-aloud">
         <label class="row-name" for="tts-voice" data-i18n="options_tts_voice">Voice for reading aloud</label>
         <p class="inline">
           <select
@@ -1276,7 +1256,7 @@
            The reader's own panel has the same two buttons over it. Named for
            the voice since D228, when the reader's own pace below took the
            name "reading speed" for the thing it measures. -->
-      <div class="row row-sub" id="s-ttsRate" data-setting="ttsRate" data-parent="ttsOff" data-section="reading-aloud">
+      <div class="row row-value row-sub" id="s-ttsRate" data-setting="ttsRate" data-parent="ttsOff" data-section="reading-aloud">
         <span class="row-name" data-i18n="options_tts_rate">Voice speed</span>
         <p class="inline stepper">
           <button type="button" id="tts-rate-down" title="Slower" data-i18n-title="reader_slower">
@@ -1308,9 +1288,9 @@
            says out loud that a browser may clear an origin's storage on its
            own: on WebKit a refused persistence is exactly that risk
            (`lib/storage-report.js`). -->
-      <div class="row row-stack row-storage" id="s-storage" data-setting="storage" data-keywords="options_keywords_storage" data-section="data">
+      <div class="row row-value row-stack row-storage" id="s-storage" data-setting="storage" data-keywords="options_keywords_storage" data-section="data">
         <span class="row-name" data-i18n="options_storage">Data on this device</span>
-        <span class="row-value" id="storage-usage"></span>
+        <span class="row-figure" id="storage-usage"></span>
         <!-- What the size measures, because the lists below it measure
              something else: the dictionaries' list says what their text
              weighs, and on disk a dictionary is one database row per word
@@ -1427,12 +1407,10 @@
          list; turning it off removes it. No fold under it any more: what a
          copy is for is said once, over the table. -->
     <div class="rows">
-      <div class="row" id="s-libraryCopy" data-setting="libraryCopy" data-keywords="options_keywords_copy" data-section="copies">
-        <label class="row-toggle">
-          <span class="row-name" data-i18n="options_library_copy">Back up the reading list</span>
-          <input type="checkbox" id="library-copy" />
-        </label>
-        <p class="row-note" data-i18n="options_library_copy_hint">
+      <div class="row row-check" id="s-libraryCopy" data-setting="libraryCopy" data-keywords="options_keywords_copy" data-section="copies">
+        <input type="checkbox" id="library-copy" aria-describedby="hint-libraryCopy" />
+        <label class="row-name" for="library-copy" data-i18n="options_library_copy">Back up the reading list</label>
+        <p class="row-note" id="hint-libraryCopy" data-i18n="options_library_copy_hint">
           The reading list then takes twice the space. Copies of your phrases and highlights are
           always made.
         </p>

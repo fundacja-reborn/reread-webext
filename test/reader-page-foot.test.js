@@ -84,7 +84,7 @@ describe("the page's foot (D238)", () => {
     // Moved into the section the Pages layout's three settings share
     // (D250): the count, the gesture that turns a page and the signal that
     // one has turned, in the order a page is read in.
-    assert.match(markup, /id="paged-layout"[\s\S]*?<input type="checkbox" id="page-number" \/>[\s\S]*?id="touch-turn"[\s\S]*?id="turn-effect"/, "the page-number row does not open the Pages layout's section");
+    assert.match(markup, /id="paged-layout"[\s\S]*?<input type="checkbox" id="page-number"[\s\S]*?id="touch-turn"[\s\S]*?id="turn-effect"/, "the page-number row does not open the Pages layout's section");
     assert.match(markup, /data-i18n="options_page_number">Show the page number</, "the row's name is not the catalogue's");
     assert.match(markup, /data-i18n="options_page_number_hint"[\s\S]{0,400}?aria-controls="more-/, "the row's note has no sentence and no More behind it");
     const script = await source("options/options.js");

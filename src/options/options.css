@@ -336,23 +336,6 @@ body:not(.no-translation) .no-translation-only {
   display: none;
 }
 
-/* A row that only means anything under another row (D254, §6.3): indented
-   under its parent and joined to it by a line down its leading edge - the
-   indent alone left the voice rows looking like two more settings of the page
-   rather than two settings of the switch above them. The line is the page's
-   own separator, not the accent: it joins, it does not call attention.
-
-   One line down one edge and nothing else (D258, V3): with a rule over the
-   group and a rule under it the two voice rows read as a box inside a list,
-   heavier than anything else on the page - and a box is a thing, while these
-   are two settings of the switch above. They keep the rows' own hairline
-   between them. */
-.row-sub {
-  margin-inline-start: 0.75rem;
-  padding-inline-start: 1rem;
-  border-inline-start: 2px solid var(--page-line);
-}
-
 /* --- the frame: the bar, the table of contents, the tinted panel (D265) ---
 
    The bar and its menu (`.page-bar`, `.page-mark`, `.nav-menu`) live in
@@ -872,6 +855,41 @@ section > header:not(:has(> :not([hidden]))) {
   scroll-margin-top: 0.75rem;
 }
 
+/* --- what a pointer and a keyboard answer (D265) ---
+
+   Only the rows a press acts on light up: a checkbox row, a fold's door, a
+   list's own fold, a row that is a link. A row with a select or a field in it
+   does not - a press on its words does nothing, and a wash that promised
+   otherwise would be a lie told at every scroll. The buttons and fields
+   inside those rows keep their own answers.
+
+   No transition on any of it: an e-ink panel draws a fade as a smear, and the
+   wash has to be there the moment a finger is. Nothing depends on the hover -
+   a touch screen and a panel have none at all. */
+@media (hover: hover) and (pointer: fine) {
+  .row-check:not(.row-blocked):hover,
+  .fold > summary:hover,
+  .show-all:hover,
+  a.row-link:hover {
+    background: var(--settings-row-hover);
+  }
+}
+
+/* The ring is drawn inside the row, because the card clips what stands over
+   its own edge (`overflow: hidden`). The checkbox hands its own ring to the
+   row it is the target of; every other control keeps the page's. */
+.row-check:has(> input:focus-visible),
+.fold > summary:focus-visible,
+.show-all:focus-visible,
+a.row-link:focus-visible {
+  outline: 2px solid var(--page-accent);
+  outline-offset: -2px;
+}
+
+.row-check > input[type="checkbox"]:focus-visible {
+  outline: none;
+}
+
 /* Where an address just landed on one row out of thirty (D254, F5): a bar at
    the row's leading edge, drawn inside the row's own box so nothing shifts
    under it. It goes at the next press or key - not on a clock, and not when
@@ -890,9 +908,9 @@ section > header:not(:has(> :not([hidden]))) {
 }
 
 /* Labels speak at the page's full color; the notes below them are the quiet
-   ones. The touch floor lives on each row's control (select, button, the
-   toggle line) - a label beside a full-height control needs none of its own,
-   and the one all-text row may be denser.
+   ones. The touch floor is the row's own now (D265): a label that carried one
+   of its own would stand a row of plain text as tall as a row with a select
+   in it.
 
    The weight follows the pointer with the size (D258, §3.3): on a screen read
    with a finger, at arm's length, 400 against a grey description is too fine
@@ -901,26 +919,101 @@ section > header:not(:has(> :not([hidden]))) {
   font-weight: var(--ui-label-weight);
 }
 
-/* A row whose first cell holds no control - the storage row, which is a name
-   and a figure - would begin its line seven pixels higher than every other
-   row, and the gap over it would read seven pixels wider. The label keeps the
-   touch floor itself, so one number covers every row (D259, S3).
+/* --- 1. a row with a checkbox (D265, type 1) ---
 
-   Not where the row stacks on a narrow screen: there the label stands on a
-   line of its own above the control, and a floor under it would be air for
-   nothing. The breakpoint below puts the two side by side again, and the
-   floor comes back with them. */
-.row:not(.row-stack) > .row-name:first-child {
-  display: flex;
-  align-items: center;
-  min-height: var(--ui-control);
+   The box on the leading edge and the label beside it, the way every settings
+   page of every browser has stood one - the switch on the far edge was this
+   page's own invention, and on a wide card it left the box a hand's width
+   from the words it belongs to.
+
+   The whole row is the target: the label's own `::after` is stretched over
+   the row, which keeps the accessible name to the label's words while the
+   press lands anywhere. Everything in the row that can be pressed or read on
+   its own - a link in the description, the fold and what it opens - is lifted
+   over that sheet, or the fold would flip the switch and the rest of the note
+   could not be selected. */
+.row-check {
+  grid-template-columns: var(--row-box) minmax(0, 1fr);
+  column-gap: var(--row-gap);
+  /* The box stands on the label's first line, not in the middle of a
+     description: the two boxes are a hair apart in height, so the start of
+     the row is the start of that line. */
+  align-items: start;
+  cursor: pointer;
 }
 
+.row-check > * {
+  grid-column: 2;
+}
+
+.row-check > input[type="checkbox"] {
+  grid-area: 1 / 1;
+  align-self: start;
+  width: var(--row-box);
+  height: var(--row-box);
+}
+
+.row-check > .row-name {
+  cursor: pointer;
+}
+
+.row-check > .row-name::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.row-check :is(a, button, .row-more) {
+  position: relative;
+  z-index: 1;
+}
+
+/* A row the search found with its switch off: the controls are dead, so the
+   row is not a target either. */
+.row-check.row-blocked,
+.row-check.row-blocked > .row-name {
+  cursor: default;
+}
+
+.row-check.row-blocked > .row-name::after {
+  content: none;
+}
+
+/* A row that only means anything under another row (D254, §6.3): its words
+   begin where its parent's words do - the checkbox's own column - and its
+   hairline is inset the same, which is what a browser's own settings do with
+   a sub-option and what D265 replaced the line down the edge with. That line
+   was the flat page's way of saying "these belong to the row above"; inside a
+   card, standing under it and indented to it says the same thing without a
+   second kind of boundary. */
+.row.row-sub {
+  padding-inline-start: calc(var(--row-pad-x) + var(--row-indent));
+}
+
+:is(.card, .rows) > :where(:not([hidden])) ~ .row-sub:not([hidden])::before {
+  inset-inline-start: calc(var(--row-pad-x) + var(--row-indent));
+}
+
+/* --- 2. a row with a control at its far edge (D265, type 2) ---
+
+   A select, a stepper, a field: the label and its description in the first
+   column, the control in the second, on the label's own line. Centred while
+   the row is one line, and aligned to the top once a description stands under
+   it - a control floating in the middle of two lines belongs to neither. */
 .row-value {
+  align-items: center;
+}
+
+.row-value:has(> .row-note) {
+  align-items: start;
+}
+
+/* What the row reports rather than asks - the space this device holds. */
+.row-figure {
   color: var(--page-muted);
 }
 
-.row > :is(select, button, .row-value) {
+.row > :is(select, button, .row-figure) {
   justify-self: end;
 }
 
@@ -962,7 +1055,7 @@ section > header:not(:has(> :not([hidden]))) {
   grid-template-columns: minmax(0, 1fr);
 }
 
-.row-stack > :is(select, .row-value) {
+.row-stack > :is(select, .row-figure) {
   justify-self: stretch;
 }
 
@@ -2036,16 +2129,7 @@ summary::marker {
     grid-template-columns: minmax(0, 1fr) auto;
   }
 
-  /* And with the control back beside it, the label takes the touch floor
-     again, so every row on this page begins its first line at the same
-     height and the gaps over them are all the one number (D259, S3). */
-  .row-stack > .row-name:first-child {
-    display: flex;
-    align-items: center;
-    min-height: var(--ui-control);
-  }
-
-  .row-stack > :is(select, .row-value) {
+  .row-stack > :is(select, .row-figure) {
     justify-self: end;
   }
 
@@ -2057,7 +2141,7 @@ summary::marker {
     grid-template-columns: max-content minmax(0, 1fr);
   }
 
-  .row-storage > .row-value {
+  .row-storage > .row-figure {
     text-align: end;
   }
 
