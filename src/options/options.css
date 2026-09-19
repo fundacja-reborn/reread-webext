@@ -44,6 +44,11 @@
      Brave's, and inside a card the name of a model stood a step over the
      "Delete" beside it. A finger gets both a step up (below). */
   --ui-text: 0.8125rem;
+  /* One weight for every label, on every screen (Michał, 2026-09-19, and the
+     plan's own table): the size follows the pointer, the weight does not.
+     A label set half a step heavier where a device is read with a finger is
+     a second kind of label on the same page - and the phone is where most of
+     this page is read, so it would be the common one. */
   --ui-label-weight: 400;
   --ui-small: 0.75rem;
   --ui-control: 2.25rem;
@@ -124,15 +129,16 @@
 }
 
 /* The density follows the pointer, not the window: where a device is read
-   with a finger the labels grow a step and take a little weight, and the
-   explaining text grows with them - a 13px line is a magnifying glass on a
-   phone. `any-pointer` rather than `pointer` on purpose: a Boox with a pen
-   answers `pointer: fine` and is still read with a finger. */
+   with a finger the labels grow a step and the explaining text grows with
+   them - a 13px line is a magnifying glass on a phone - and every control
+   takes the 44px floor. The weight is not in this list: a label reads at 400
+   wherever it stands (see the token above). `any-pointer` rather than
+   `pointer` on purpose: a Boox with a pen answers `pointer: fine` and is
+   still read with a finger. */
 @media (any-pointer: coarse) {
   :root {
     --ui-control: 2.75rem;
     --ui-text: 1rem;
-    --ui-label-weight: 500;
     --ui-small: 0.875rem;
   }
 }
@@ -990,9 +996,11 @@ a.row-link:focus-visible {
    of its own would stand a row of plain text as tall as a row with a select
    in it.
 
-   The weight follows the pointer with the size (D258, §3.3): on a screen read
-   with a finger, at arm's length, 400 against a grey description is too fine
-   a line to scan by. */
+   One weight, 400, on every screen. It followed the pointer with the size
+   until D258 §3.3 ("at arm's length, 400 against a grey description is too
+   fine a line to scan by"), which made the same label two different labels
+   depending on the device it was read on; the full ink against the grey of
+   the description is what sets it apart, and that is the same everywhere. */
 .row-name {
   font-weight: var(--ui-label-weight);
 }

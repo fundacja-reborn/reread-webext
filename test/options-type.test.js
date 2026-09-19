@@ -118,6 +118,11 @@ describe("the settings page's type", () => {
       "the 44px floor does not come back on a device read with a finger",
     );
     assert.doesNotMatch(css, /@media \(pointer: coarse\)/, "the floor is decided by a query a Boox answers wrongly");
+    // The size follows the pointer; the weight does not (Michał, 2026-09-19).
+    // A label half a step heavier on a touch screen is a second kind of label
+    // on the same page, and the phone is where most of this page is read.
+    assert.match(rule(css, ":root"), /--ui-label-weight: 400;/, "the labels' weight is not written once");
+    assert.doesNotMatch(css, /--ui-label-weight: (?!400)/, "a label takes a different weight somewhere");
     // The bar is the one exception, and says why beside itself.
     const field = rule(css, ".settings-search input");
     assert.match(field, /min-height: 2\.1rem/, "the bar's field does not keep the bar's own floor");
