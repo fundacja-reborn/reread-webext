@@ -2424,6 +2424,17 @@ summary::marker {
     margin-left: auto;
   }
 
+  /* A label, a field and a button no longer fit on one line, so the break
+     goes where a reader expects it: the label takes the first line and the
+     field keeps the button company on the second (Michał, 2026-09-19 - it
+     used to break after the field, leaving the button alone underneath).
+     Only where the label is the one label of its line: the rows that read as
+     a sentence ("Words in ... explained in ...") would come apart into four
+     lines instead of two. */
+  .inline > label:only-of-type {
+    flex: 1 0 100%;
+  }
+
   /* Three columns of a table become three ellipses on a card this narrow, so
      the table gives up being one: every row is a block, the name keeps the
      date company on the first line and the contents drop to the second. */

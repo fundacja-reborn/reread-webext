@@ -244,6 +244,14 @@ describe("the settings rows", () => {
       css.indexOf(".row-check > .row-note {") > css.indexOf(".row > .row-note {"),
       "the exception stands before the rule it has to beat - a tie in weight is settled by order",
     );
+
+    // On a card too narrow for a label, a field and a button on one line, the
+    // break goes after the label - not after the field, which left the button
+    // alone on a line of its own (Michał, 2026-09-19). Only where the label
+    // is the one label of its line: a row that reads as a sentence ("Words in
+    // ... explained in ...") would come apart into four lines instead of two.
+    const narrow = css.slice(css.indexOf("@container (max-width: 30rem)"));
+    assert.match(narrow, /\.inline > label:only-of-type \{\s*flex: 1 0 100%;/, "the button is still left alone under the field");
   });
 
   it("ties every fold's trigger to the sentence it follows (F6)", async () => {
